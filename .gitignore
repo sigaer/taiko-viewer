@@ -1,0 +1,36 @@
+# macOS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Node / Nuxt
+node_modules/
+.nuxt/
+.output/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+# Coverage / logs
+coverage/
+logs/
+*.log
+
+# Local env / caches
+.env
+.env.*
+.cache/
+.data/
+
+# Local reference exports copied from legacy workspace
+taiko_frontend_back/称号.htm
+taiko_frontend_back/称号_files/
+taiko_frontend_back/首页Viewer.htm
+taiko_frontend_back/首页Viewer_files/

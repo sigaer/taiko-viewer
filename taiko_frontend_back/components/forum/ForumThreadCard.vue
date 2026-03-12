@@ -1,0 +1,297 @@
+<script setup lang="ts">
+import type { ForumThreadCard } from "~/types/forum";
+
+const props = defineProps<{
+  thread: ForumThreadCard;
+  compact?: boolean;
+}>();
+
+const threadTypeLabelMap: Record<ForumThreadCard["threadType"], string> = {
+  discussion: "讨论",
+  guide: "攻略",
+  achievement: "战报",
+  official: "公告",
+};
+
+const statList = computed(() => [
+  { label: "回复", value: props.thread.replyCount },
+  { label: "点赞", value: props.thread.likeCount },
+  { label: "浏览", value: props.thread.viewCount },
+]);
+</script>
+
+<template>
+  <article class="forum-thread-card" :class="{ compact }">
+    <div class="forum-thread-card__main">
+      <div class="forum-thread-card__badges">
+        <NuxtLink
+          :to="`/forum/section/${thread.section.slug}`"
+          class="section-pill"
+          :style="{ '--accent': thread.section.accentColor }"
+        >
+          {{ thread.section.name }}
+        </NuxtLink>
+        <span class="type-pill" :class="`type-${thread.threadType}`">{{
+          threadTypeLabelMap[thread.threadType]
+        }}</span>
+        <span v-if="thread.isPinned" class="state-pill">置顶</span>
+        <span v-if="thread.isFeatured" class="state-pill state-pill--gold"
+          >加精</span
+        >
+        <span v-if="thread.isLocked" class="state-pill state-pill--muted"
+          >锁帖</span
+        >
+      </div>
+      <NuxtLink
+        :to="`/forum/thread/${thread.id}`"
+        class="forum-thread-card__title"
+      >
+        {{ thread.title }}
+      </NuxtLink>
+      <p class="forum-thread-card__summary">{{ thread.summary }}</p>
+
+      <div v-if="thread.tags.length" class="forum-thread-card__tags">
+        <span v-for="tag in thread.tags" :key="tag">#{{ tag }}</span>
+      </div>
+
+      <div v-if="thread.song" class="forum-thread-card__song">
+        <ForumSafeImage :src="thread.song.coverUrl" :alt="thread.song.title" />
+        <div>
+          <strong>{{ thread.song.title }}</strong>
+          <span
+            >{{ thread.song.difficultyLabel }} ·
+            {{ thread.song.level || "?" }}星</span
+          >
+        </div>
+      </div>
+
+      <div class="forum-thread-card__footer">
+        <ForumUserBadge :user="thread.author" compact />
+        <div class="forum-thread-card__stats">
+          <span v-for="item in statList" :key="item.label"
+            >{{ item.label }} {{ item.value }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <NuxtLink
+      v-if="thread.coverImageUrl"
+      :to="`/forum/thread/${thread.id}`"
+      class="forum-thread-card__cover"
+    >
+      <ForumSafeImage :src="thread.coverImageUrl" :alt="thread.title" />
+    </NuxtLink>
+  </article>
+</template>
+
+<style scoped>
+.forum-thread-card {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 180px);
+  gap: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(255, 248, 239, 0.9)
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 187, 120, 0.14),
+      transparent 36%
+    );
+  border: 1px solid rgba(218, 163, 104, 0.14);
+  box-shadow: 0 18px 28px rgba(173, 132, 86, 0.12);
+}
+
+.forum-thread-card.compact {
+  grid-template-columns: 1fr;
+  padding: 16px;
+}
+
+.forum-thread-card__main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.forum-thread-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-pill,
+.type-pill,
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.section-pill {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, white);
+}
+
+.type-pill {
+  color: #fff;
+}
+
+.type-discussion {
+  background: linear-gradient(135deg, #de6d42, #efab55);
+}
+
+.type-guide {
+  background: linear-gradient(135deg, #d84a34, #f08b26);
+}
+
+.type-achievement {
+  background: linear-gradient(135deg, #c86e23, #e4b74a);
+}
+
+.type-official {
+  background: linear-gradient(135deg, #356f9b, #4aa1d8);
+}
+
+.state-pill {
+  color: #7f5a2e;
+  background: rgba(241, 223, 174, 0.56);
+}
+
+.state-pill--gold {
+  background: linear-gradient(135deg, #f8e7b4, #ffd970);
+}
+
+.state-pill--muted {
+  color: #6d6357;
+  background: rgba(171, 163, 151, 0.18);
+}
+
+.forum-thread-card__title {
+  font-size: 24px;
+  line-height: 1.24;
+  color: #2f261f;
+  text-decoration: none;
+}
+
+.forum-thread-card__summary {
+  margin: 0;
+  color: #6f5b4a;
+  line-height: 1.8;
+}
+
+.forum-thread-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #b45239;
+  font-size: 12px;
+}
+
+.forum-thread-card__song {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: rgba(252, 236, 216, 0.72);
+}
+
+.forum-thread-card__song img {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.forum-thread-card__song div {
+  display: grid;
+  gap: 3px;
+}
+
+.forum-thread-card__song strong {
+  font-size: 14px;
+}
+
+.forum-thread-card__song span,
+.forum-thread-card__stats {
+  color: #7a6552;
+  font-size: 12px;
+}
+
+.forum-thread-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.forum-thread-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.forum-thread-card__cover {
+  display: block;
+  min-height: 160px;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.forum-thread-card__cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+body.theme-dark .forum-thread-card {
+  background:
+    linear-gradient(180deg, rgba(31, 26, 23, 0.95), rgba(25, 21, 18, 0.92)),
+    radial-gradient(
+      circle at top right,
+      rgba(216, 112, 64, 0.18),
+      transparent 36%
+    );
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .forum-thread-card__title {
+  color: #f3e5d8;
+}
+
+body.theme-dark .forum-thread-card__summary,
+body.theme-dark .forum-thread-card__song span,
+body.theme-dark .forum-thread-card__stats {
+  color: #cab7a9;
+}
+
+body.theme-dark .forum-thread-card__song {
+  background: rgba(70, 47, 34, 0.56);
+}
+
+@media (max-width: 900px) {
+  .forum-thread-card {
+    grid-template-columns: 1fr;
+  }
+
+  .forum-thread-card__title {
+    font-size: 21px;
+  }
+
+  .forum-thread-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>

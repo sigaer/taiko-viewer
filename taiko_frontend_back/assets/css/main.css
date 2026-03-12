@@ -1,0 +1,218 @@
+@font-face {
+  font-family: "DDFont";
+  src: url("../font/DDFont.ttf") format("truetype");
+  font-display: swap;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #fff4de 0%, #f4efe7 45%, #f6f1ea 100%);
+  color: #2f2620;
+  font-family: "DDFont", "Noto Serif SC", "Source Han Serif SC", "STZhongsong", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.theme-dark {
+  background: radial-gradient(circle at top, #1f1c19 0%, #141210 60%, #0d0b0a 100%);
+  color: #f2e7dc;
+}
+
+body.theme-dark .panel-card,
+body.theme-dark .nav-group,
+body.theme-dark .song-card,
+body.theme-dark .cover-card,
+body.theme-dark .summary-card,
+body.theme-dark .grade-card,
+body.theme-dark .team-card,
+body.theme-dark .cache-card {
+  background: rgba(27, 24, 22, 0.9);
+  color: #f2e7dc;
+}
+
+.app-sidebar .el-menu {
+  background: transparent;
+}
+
+.app-sidebar .el-sub-menu__title,
+.app-sidebar .el-menu-item {
+  color: #5a4a3b;
+}
+
+.app-sidebar .el-menu-item.is-active {
+  background: rgba(255, 214, 182, 0.35);
+  color: #5a4a3b;
+}
+
+body.theme-dark .app-sidebar .el-sub-menu__title,
+body.theme-dark .app-sidebar .el-menu-item {
+  color: #e6d6c8;
+}
+
+body.theme-dark .app-sidebar .el-menu-item.is-active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2e7dc;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100%;
+}
+
+.app-sidebar {
+  padding: 24px 18px;
+  background: linear-gradient(180deg, rgba(255, 245, 229, 0.85) 0%, rgba(255, 250, 242, 0.9) 100%);
+  border-right: 1px solid rgba(120, 92, 67, 0.15);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
+}
+
+body.theme-dark .app-sidebar {
+  background: linear-gradient(180deg, rgba(28, 24, 21, 0.92) 0%, rgba(20, 18, 16, 0.95) 100%);
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+.logo-space {
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.logo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffb37c, #ff8f6b);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.app-content {
+  padding: 28px 32px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.page-header {
+  margin-bottom: 16px;
+}
+
+.page-header__info h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.page-header__info p {
+  margin: 0;
+  color: #6c5a4b;
+}
+
+body.theme-dark .page-header__info p {
+  color: #cbbbae;
+}
+
+.page-body {
+  display: grid;
+  gap: 20px;
+}
+
+.panel-card {
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 32px rgba(165, 138, 110, 0.14);
+}
+
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  min-height: 140px;
+  background: #f5efe6;
+}
+
+.shimmer-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.6) 45%, transparent 80%);
+  transform: translateX(-100%);
+  animation: shimmer 1.8s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+canvas#dynamic-line {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 20;
+    width: min(82vw, 300px);
+    padding: 16px 12px;
+    overflow-y: auto;
+    transform: translateX(-108%);
+    transition: transform 0.24s ease;
+    box-shadow: 12px 0 28px rgba(46, 35, 26, 0.22);
+  }
+
+  .app-shell.mobile-nav-open .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .logo-space {
+    height: 74px;
+    margin-bottom: 10px;
+  }
+
+  .logo-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    font-size: 13px;
+  }
+
+  .app-content {
+    width: 100%;
+    min-width: 0;
+    padding: 16px 14px 20px;
+  }
+
+  .page-header__info h1 {
+    font-size: 22px;
+  }
+}
