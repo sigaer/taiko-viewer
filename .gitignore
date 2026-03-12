@@ -2,6 +2,9 @@
 .DS_Store
 .idea/
 .vscode/
+*.iml
+__pycache__/
+*.pyc
 
 # Node / Nuxt
 node_modules/
