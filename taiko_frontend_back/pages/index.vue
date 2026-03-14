@@ -11,7 +11,7 @@ type SongItem = {
 
 const runtimeConfig = useRuntimeConfig();
 const apiBase = runtimeConfig.public.apiBase || "https://static.sakura-bot.cn";
-const appVersion = "0.9.1";
+const appVersion = "0.9.2";
 
 const pageMeta = {
   title: "首页",

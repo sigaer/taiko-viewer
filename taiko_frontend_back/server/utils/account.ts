@@ -23,6 +23,7 @@ const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
 const DEFAULT_AVATAR = "https://forum.sakura-bot.cn/miku.png";
 
 let songCatalogCache: { mtimeMs: number; list: SongMeta[]; map: Map<number, SongMeta> } | null = null;
+let chartComboCache: { mtimeMs: number; map: Map<string, number> } | null = null;
 
 type AccountRow = {
   id: number;
@@ -157,9 +158,12 @@ const getRuntimePaths = () => {
   const repoRoot = String(runtimeConfig.repoRoot || process.env.TAIKO_REPO_ROOT || resolve(process.cwd(), ".."));
   const userdataDir = String(runtimeConfig.userdataDir || process.env.TAIKO_USERDATA_DIR || resolve(repoRoot, "userdata"));
   const songDataPath = String(runtimeConfig.songDataPath || process.env.TAIKO_SONG_DATA_PATH || resolve(repoRoot, "songs", "song_data.json"));
+  const ratingStructPath = String(
+    runtimeConfig.ratingStructPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(repoRoot, "songs", "rating_structured_with_ids.json")
+  );
   const configPath = String(runtimeConfig.taikoConfigPath || process.env.TAIKO_CONFIG_PATH || resolve(repoRoot, "config.json"));
   const cacheDir = String(runtimeConfig.accountCacheDir || process.env.TAIKO_ACCOUNT_CACHE_DIR || resolve(process.cwd(), ".data", "account-cache"));
-  return { repoRoot, userdataDir, songDataPath, configPath, cacheDir };
+  return { repoRoot, userdataDir, songDataPath, ratingStructPath, configPath, cacheDir };
 };
 
 const getIniValue = (content: string, key: string) => {
@@ -898,6 +902,30 @@ const getSongCatalog = async () => {
   return songCatalogCache;
 };
 
+const getChartComboMap = async () => {
+  const { ratingStructPath } = getRuntimePaths();
+  const fileStat = await stat(ratingStructPath);
+  if (chartComboCache && chartComboCache.mtimeMs === fileStat.mtimeMs) {
+    return chartComboCache.map;
+  }
+
+  const payload = await loadJsonFile<{ songs?: Record<string, Record<string, unknown>> | Array<Record<string, unknown>> }>(ratingStructPath);
+  const rawSongs = payload?.songs;
+  const rows = Array.isArray(rawSongs) ? rawSongs : Object.values(rawSongs || {});
+  const map = new Map<string, number>();
+  for (const item of rows) {
+    const songNo = Number(item?.id || 0);
+    const level = Number(item?.level || 0);
+    const combo = Number(item?.combo || 0);
+    if (!Number.isInteger(songNo) || songNo <= 0 || !Number.isInteger(level) || level <= 0) continue;
+    if (!Number.isFinite(combo) || combo <= 0) continue;
+    map.set(`${songNo}:${level}`, Math.floor(combo));
+  }
+
+  chartComboCache = { mtimeMs: fileStat.mtimeMs, map };
+  return map;
+};
+
 const getUserdataPath = (taikoId: string) => {
   const { userdataDir } = getRuntimePaths();
   return resolve(userdataDir, `${taikoId}data.json`);
@@ -1175,6 +1203,29 @@ export const updateAccountSong = async (
   const target = songs.find((item) => Number(item.song_no) === songNo && Number(item.level) === level);
   if (!target) {
     throw createError({ statusCode: 404, statusMessage: "未找到该谱面记录" });
+  }
+
+  const merged: UserdataSong = { ...target, ...sanitized };
+  try {
+    const chartComboMap = await getChartComboMap();
+    const totalNotes = Number(chartComboMap.get(`${songNo}:${level}`) || 0);
+    if (totalNotes > 0) {
+      const goodCnt = parsePositiveInt(merged.good_cnt);
+      const okCnt = parsePositiveInt(merged.ok_cnt);
+      const dondafulComboCnt = parsePositiveInt(merged.dondaful_combo_cnt);
+      const accuracy = dondafulComboCnt > 0 ? 1 : (goodCnt + okCnt * 0.5) / totalNotes;
+      if (accuracy > 1) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `良率不能超过100%（当前 ${(accuracy * 100).toFixed(2)}%，谱面物量 ${totalNotes}）`
+        });
+      }
+    }
+  } catch (error) {
+    if (error && typeof error === "object" && "statusCode" in error) {
+      throw error;
+    }
+    console.error("[web-account] 校验谱面良率失败", { songNo, level, error });
   }
 
   Object.assign(target, sanitized);
