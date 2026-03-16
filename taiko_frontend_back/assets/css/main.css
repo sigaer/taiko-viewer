@@ -7,10 +7,11 @@
 html,
 body,
 #__nuxt {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
+  min-height: 100vh;
   margin: 0;
   background: radial-gradient(circle at top, #fff4de 0%, #f4efe7 45%, #f6f1ea 100%);
   color: #2f2620;
@@ -65,7 +66,8 @@ body.theme-dark .app-sidebar .el-menu-item.is-active {
 .app-shell {
   display: grid;
   grid-template-columns: 280px 1fr;
-  height: 100%;
+  min-height: 100vh;
+  align-items: start;
 }
 
 .app-sidebar {
@@ -73,7 +75,11 @@ body.theme-dark .app-sidebar .el-menu-item.is-active {
   background: linear-gradient(180deg, rgba(255, 245, 229, 0.85) 0%, rgba(255, 250, 242, 0.9) 100%);
   border-right: 1px solid rgba(120, 92, 67, 0.15);
   backdrop-filter: blur(12px);
-  position: relative;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
   z-index: 1;
 }
 
@@ -105,7 +111,7 @@ body.theme-dark .app-sidebar {
 
 .app-content {
   padding: 28px 32px;
-  overflow-y: auto;
+  min-height: 100vh;
   position: relative;
   z-index: 1;
 }
