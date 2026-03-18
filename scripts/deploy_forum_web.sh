@@ -71,7 +71,16 @@ else
 fi
 
 echo "[3/5] 构建 Nuxt..."
-(cd "$WEB_DIR" && npm run build)
+echo "  - 开始构建，这可能需要 2-5 分钟，请耐心等待..."
+pushd "$WEB_DIR" > /dev/null
+export NODE_OPTIONS="--max-old-space-size=4096"
+npm run build
+BUILD_EXIT=$?
+popd > /dev/null
+if [ $BUILD_EXIT -ne 0 ]; then
+  echo "  - 构建失败 (exit code: $BUILD_EXIT)"
+  exit 1
+fi
 
 echo "[4/5] 重载服务..."
 run_privileged systemctl daemon-reload
