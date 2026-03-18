@@ -2,7 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { resolve } from "node:path";
 
-const ALLOWED_DATA_NAMES = new Set(["title_wikitable", "title_song_relations"]);
+const ALLOWED_DATA_NAMES = new Set(["title_wikitable", "title_wikitable_cn", "title_song_relations"]);
 
 const resolveDataDirs = (configuredDir) => {
   const cwd = typeof process !== "undefined" ? process.cwd() : "";

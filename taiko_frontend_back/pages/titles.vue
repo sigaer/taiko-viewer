@@ -20,8 +20,8 @@ type WikiTablePayload = {
 };
 
 const { data: titleTableData, pending, error } = await useAsyncData(
-  "title-wikitable",
-  () => $fetch<WikiTablePayload>("/api/data/title_wikitable"),
+  "title-wikitable-cn",
+  () => $fetch<WikiTablePayload>("/api/data/title_wikitable_cn"),
   {
     default: () => ({
       table: { attrs: {} },
@@ -30,7 +30,10 @@ const { data: titleTableData, pending, error } = await useAsyncData(
   }
 );
 
-const tableRows = computed<TableRow[]>(() => (titleTableData.value?.rows || []) as TableRow[]);
+const tableRows = computed<TableRow[]>(() => {
+  return (titleTableData.value?.rows || []) as TableRow[];
+});
+
 const tableStyle = computed(() => titleTableData.value?.table?.attrs?.style || "");
 
 const pageMeta = {
@@ -56,6 +59,28 @@ useSeoMeta({
 <template>
   <div class="titles-page">
     <el-card class="panel-card">
+      <template #header>
+        <div class="card-header">
+          <div class="header-title">
+            <span class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3l3 2 3.5-.5.5 3.5 2.5 2.5-2.5 2.5-.5 3.5L15 18l-3 2-3-2-3.5.5-.5-3.5L2 10.5 4.5 8 .5 4.5 4 5l3-2z"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <h3 class="title-text">称号一览</h3>
+              <p class="subtitle-text">所有可获得的称号及获取条件（已翻译为中文）</p>
+            </div>
+          </div>
+        </div>
+      </template>
+      
       <el-skeleton v-if="pending" :rows="10" animated />
       <el-alert
         v-else-if="error"
@@ -88,6 +113,52 @@ useSeoMeta({
   display: grid;
 }
 
+.panel-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(160, 120, 86, 0.12);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(248, 224, 193, 0.85), rgba(255, 244, 230, 0.95));
+  color: #a36b39;
+}
+
+.header-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.title-text {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #73573d;
+}
+
+.subtitle-text {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9b7a5c;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -109,12 +180,20 @@ useSeoMeta({
 .wikitable > tbody > tr > th,
 .wikitable > tbody > tr > td {
   border: 1px solid #a2a9b1;
-  padding: 0.2em 0.4em;
+  padding: 0.6em 0.8em;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .wikitable > tbody > tr > th {
   background-color: #eaecf0;
   text-align: center;
+  font-weight: 600;
+  color: #73573d;
+}
+
+.wikitable > tbody > tr > td {
+  vertical-align: top;
 }
 
 .wikitable a {
@@ -125,5 +204,19 @@ useSeoMeta({
 .wikitable a:hover,
 .wikitable a:focus-visible {
   text-decoration: underline;
+}
+
+/* 优化表格行hover效果 */
+.wikitable > tbody > tr:hover {
+  background-color: #fff8f0;
+}
+
+:deep(.el-card__header) {
+  border-bottom: 1px solid #f0e6dc;
+  padding: 16px 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
 }
 </style>
