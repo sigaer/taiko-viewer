@@ -55,6 +55,8 @@ export default defineNuxtConfig({
       "/songs/**": { prerender: false },
       "/forum/**": { prerender: false },
       "/account/**": { prerender: false },
+      "/grade/2025": { prerender: false, redirect: "/grade/2025/%E4%BA%94%E7%B4%9A" },
+      "/grade/2025/**": { prerender: false },
       "/titles": { prerender: false },
       "/api/data/**": { prerender: false },
       "/api/account/**": { prerender: false },
@@ -66,7 +68,6 @@ export default defineNuxtConfig({
         "/grade",
         "/grade/2023",
         "/grade/2024",
-        "/grade/2025",
         "/settings",
         "/about"
       ]
