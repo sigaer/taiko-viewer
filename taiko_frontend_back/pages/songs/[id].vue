@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
 
 type SongItem = {
   id: number;
@@ -38,10 +39,10 @@ const apiBase = runtimeConfig.public.apiBase || "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverError = ref(false);
 const selectedTrack = ref("ONI");
-const drumAudioRef = ref<HTMLAudioElement | null>(null);
 const drumVolume = ref(1);
 const drumMuted = ref(false);
 const audioErrors = ref<Record<string, boolean>>({});
+const drumAudioRefs = ref<Record<string, HTMLAudioElement | null>>({});
 
 const songId = computed(() => Number(route.params.id));
 
@@ -159,91 +160,24 @@ const getFumenComboLabel = (key: string) => {
   return String(comboList[index]);
 };
 
-const mixVariantOptions = ["普通", "玄人", "达人"];
-const mixVariantMap: Record<number, string[]> = {
-  27: ["HARD"],
-  33: ["ONI"],
-  60: ["HARD"],
-  61: ["HARD"],
-  64: ["ONI"],
-  65: ["ONI"],
-  66: ["ONI"],
-  67: ["ONI"],
-  79: ["ONI"],
-  90: ["HARD"],
-  99: ["HARD"],
-  109: ["ONI"],
-  135: ["EDIT", "ONI"],
-  153: ["EDIT"],
-  156: ["EDIT"],
-  173: ["ONI"],
-  182: ["ONI"],
-  223: ["ONI"],
-  231: ["EDIT"],
-  248: ["HARD"],
-  269: ["HARD", "ONI"],
-  281: ["ONI"],
-  283: ["HARD"],
-  288: ["HARD"],
-  314: ["HARD"],
-  343: ["ONI"],
-  354: ["ONI"],
-  362: ["ONI"],
-  383: ["ONI"],
-  386: ["ONI"],
-  392: ["EASY", "NORMAL", "HARD", "ONI"],
-  412: ["EASY", "NORMAL", "HARD", "ONI"],
-  425: ["HARD", "ONI"],
-  453: ["HARD"],
-  462: ["HARD"],
-  478: ["EDIT", "ONI"],
-  514: ["ONI"],
-  547: ["ONI"],
-  554: ["ONI"],
-  579: ["EDIT", "ONI"],
-  617: ["ONI"],
-  627: ["EASY", "NORMAL", "HARD", "ONI"],
-  644: ["EASY", "NORMAL", "HARD", "ONI"],
-  650: ["EASY", "NORMAL", "HARD", "ONI"],
-  653: ["ONI"],
-  664: ["EDIT"],
-  689: ["HARD"],
-  775: ["EDIT", "ONI"],
-  869: ["ONI"],
-  880: ["EASY", "NORMAL", "HARD", "ONI"],
-  955: ["HARD"],
-  1027: ["EASY", "NORMAL", "HARD", "ONI"],
-  1032: ["EDIT"],
-  1037: ["ONI"],
-  1045: ["ONI"],
-  1070: ["ONI"],
-  1081: ["EDIT", "ONI"],
-  1131: ["HARD"],
-  1140: ["EDIT"],
-  1144: ["EDIT"],
-  1265: ["EDIT"],
-  1270: ["HARD"],
-  1272: ["ONI"],
-  1289: ["HARD"],
-  1321: ["ONI"],
-  1352: ["ONI"],
-  1356: ["ONI"]
-};
+const { activeBranchVariants, hasBranchVariants, getBaseAudioUrl, getVariantAudioUrl } = useSongBranchAudio({
+  apiBase,
+  songId,
+  selectedTrack
+});
 
 const currentDrumAudio = computed(() => {
   if (!song.value) return "";
-  return `${apiBase}/drum/${song.value.id}_${selectedTrack.value}.mp3`;
+  return getBaseAudioUrl("drum");
 });
 
 const currentMixAudio = computed(() => {
   if (!song.value) return "";
-  return `${apiBase}/mix/${song.value.id}_${selectedTrack.value}.mp3`;
+  return getBaseAudioUrl("mix");
 });
 
-const getMixAudioUrl = (variant: string) => {
-  if (!song.value) return "";
-  return `${apiBase}/mix/${song.value.id}_${selectedTrack.value}_${variant}.mp3`;
-};
+const getDrumVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("drum", variant);
+const getMixVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("mix", variant);
 
 const fumenDefs = computed(() => {
   const base = [
@@ -257,11 +191,20 @@ const fumenDefs = computed(() => {
 
 const getFumenUrl = (folder: string) => `${apiBase}/fumen/${folder}/${songId.value}.png`;
 
+const setDrumAudioRef = (key: string, el: Element | null) => {
+  drumAudioRefs.value = {
+    ...drumAudioRefs.value,
+    [key]: el instanceof HTMLAudioElement ? el : null
+  };
+  syncDrumState();
+};
+
 const syncDrumState = () => {
-  const audio = drumAudioRef.value;
-  if (!audio) return;
-  audio.volume = drumVolume.value;
-  audio.muted = drumMuted.value;
+  Object.values(drumAudioRefs.value).forEach((audio) => {
+    if (!audio) return;
+    audio.volume = drumVolume.value;
+    audio.muted = drumMuted.value;
+  });
 };
 
 const markAudioError = (key: string) => {
@@ -269,12 +212,10 @@ const markAudioError = (key: string) => {
 };
 
 const hasAudioError = (key: string) => !!audioErrors.value[key];
-
-const showMixVariants = computed(() => {
-  const diffs = mixVariantMap[songId.value];
-  if (!diffs || !diffs.length) return false;
-  return diffs.includes(selectedTrack.value);
-});
+const getAudioErrorKey = (mode: "drum" | "mix", variant?: BranchVariant) =>
+  variant
+    ? `${mode}-${songId.value}-${selectedTrack.value}-${variant}`
+    : `${mode}-base-${songId.value}-${selectedTrack.value}`;
 
 const radarLabels = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
 
@@ -403,6 +344,9 @@ const formatRadarValue = (value: number) => {
 };
 
 watch([drumVolume, drumMuted], () => syncDrumState());
+watch([songId, selectedTrack], () => {
+  drumAudioRefs.value = {};
+});
 watch(hasEditDifficulty, (value) => {
   if (!value && selectedTrack.value === "EDIT") {
     selectedTrack.value = "ONI";
@@ -586,17 +530,37 @@ useSeoMeta(() => ({
                 <div class="audio-head">
                   <strong>DRUM · 纯鼓点音效试听</strong>
                 </div>
-                <audio
-                  ref="drumAudioRef"
-                  :key="currentDrumAudio"
-                  :src="currentDrumAudio"
-                  class="audio-player"
-                  controls
-                  preload="none"
-                  @loadedmetadata="syncDrumState"
-                  @error="markAudioError(`drum-base-${selectedTrack}`)"
-                />
-                <p v-if="hasAudioError(`drum-base-${selectedTrack}`)" class="audio-error">基础音源不存在</p>
+                <template v-if="hasBranchVariants">
+                  <div class="variant-audios">
+                    <div v-for="variant in activeBranchVariants" :key="`drum-${selectedTrack}-${variant}`" class="variant-item">
+                      <span class="variant-label">{{ variant }}</span>
+                      <audio
+                        :ref="(el) => setDrumAudioRef(`drum-${selectedTrack}-${variant}`, el)"
+                        :key="`drum-${songId}-${selectedTrack}-${variant}`"
+                        :src="getDrumVariantAudioUrl(variant)"
+                        class="audio-player"
+                        controls
+                        preload="none"
+                        @loadedmetadata="syncDrumState"
+                        @error="markAudioError(getAudioErrorKey('drum', variant))"
+                      />
+                      <p v-if="hasAudioError(getAudioErrorKey('drum', variant))" class="audio-error">音源不存在</p>
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  <audio
+                    :ref="(el) => setDrumAudioRef(getAudioErrorKey('drum'), el)"
+                    :key="currentDrumAudio"
+                    :src="currentDrumAudio"
+                    class="audio-player"
+                    controls
+                    preload="none"
+                    @loadedmetadata="syncDrumState"
+                    @error="markAudioError(getAudioErrorKey('drum'))"
+                  />
+                  <p v-if="hasAudioError(getAudioErrorKey('drum'))" class="audio-error">基础音源不存在</p>
+                </template>
                 <div class="volume-row">
                   <button class="volume-btn" type="button" @click="drumMuted = !drumMuted">
                     {{ drumMuted ? "取消静音" : "静音" }}
@@ -610,29 +574,33 @@ useSeoMeta(() => ({
                 <div class="audio-head">
                   <strong>MIX · 完整混音试听</strong>
                 </div>
-                <audio
-                  :key="`mix-base-${songId}-${selectedTrack}`"
-                  :src="currentMixAudio"
-                  class="audio-player"
-                  controls
-                  preload="none"
-                  @error="markAudioError(`mix-base-${selectedTrack}`)"
-                />
-                <p v-if="hasAudioError(`mix-base-${selectedTrack}`)" class="audio-error">基础音源不存在</p>
-                <div v-if="showMixVariants" class="variant-audios">
-                  <div v-for="variant in mixVariantOptions" :key="variant" class="variant-item">
-                    <span class="variant-label">{{ variant }}</span>
-                    <audio
-                      :key="`${songId}-${selectedTrack}-${variant}`"
-                      :src="getMixAudioUrl(variant)"
-                      class="audio-player"
-                      controls
-                      preload="none"
-                      @error="markAudioError(`mix-${selectedTrack}-${variant}`)"
-                    />
-                    <p v-if="hasAudioError(`mix-${selectedTrack}-${variant}`)" class="audio-error">音源不存在</p>
+                <template v-if="hasBranchVariants">
+                  <div class="variant-audios">
+                    <div v-for="variant in activeBranchVariants" :key="`mix-${selectedTrack}-${variant}`" class="variant-item">
+                      <span class="variant-label">{{ variant }}</span>
+                      <audio
+                        :key="`mix-${songId}-${selectedTrack}-${variant}`"
+                        :src="getMixVariantAudioUrl(variant)"
+                        class="audio-player"
+                        controls
+                        preload="none"
+                        @error="markAudioError(getAudioErrorKey('mix', variant))"
+                      />
+                      <p v-if="hasAudioError(getAudioErrorKey('mix', variant))" class="audio-error">音源不存在</p>
+                    </div>
                   </div>
-                </div>
+                </template>
+                <template v-else>
+                  <audio
+                    :key="`mix-base-${songId}-${selectedTrack}`"
+                    :src="currentMixAudio"
+                    class="audio-player"
+                    controls
+                    preload="none"
+                    @error="markAudioError(getAudioErrorKey('mix'))"
+                  />
+                  <p v-if="hasAudioError(getAudioErrorKey('mix'))" class="audio-error">基础音源不存在</p>
+                </template>
               </div>
             </div>
           </div>
