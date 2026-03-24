@@ -26,6 +26,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WEB_DIR="$ROOT_DIR/taiko_frontend_back"
 REMOTE="${REMOTE:-origin}"
 BRANCH="${BRANCH:-main}"
+BUILD_TIMEOUT="${BUILD_TIMEOUT:-900}"
+HEALTHCHECK_TIMEOUT="${HEALTHCHECK_TIMEOUT:-20}"
 
 run_privileged() {
   if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
@@ -33,6 +35,105 @@ run_privileged() {
   else
     sudo "$@"
   fi
+}
+
+cleanup_process_group() {
+  local group_pid="${1:-}"
+  if [[ -z "$group_pid" ]]; then
+    return 0
+  fi
+
+  if kill -0 "$group_pid" 2>/dev/null; then
+    kill -TERM -- "-$group_pid" 2>/dev/null || true
+    sleep 2
+  fi
+
+  if kill -0 "$group_pid" 2>/dev/null; then
+    kill -KILL -- "-$group_pid" 2>/dev/null || true
+  fi
+}
+
+build_artifact_is_fresh() {
+  local artifact_path="$1"
+  local start_epoch="$2"
+
+  if [[ ! -f "$artifact_path" ]]; then
+    return 1
+  fi
+
+  local artifact_epoch
+  artifact_epoch="$(stat -c %Y "$artifact_path" 2>/dev/null || echo 0)"
+  [[ "$artifact_epoch" -ge "$start_epoch" ]]
+}
+
+run_nuxt_build() {
+  local build_log
+  local build_pid
+  local tail_pid
+  local build_start_epoch
+  local build_deadline
+  local build_exit=0
+  local build_artifact="$WEB_DIR/.output/server/index.mjs"
+
+  build_log="$(mktemp)"
+  build_start_epoch="$(date +%s)"
+  build_deadline=$((SECONDS + BUILD_TIMEOUT))
+
+  pushd "$WEB_DIR" > /dev/null
+  export NODE_OPTIONS="--max-old-space-size=4096"
+
+  WEB_DIR="$WEB_DIR" setsid bash -lc 'cd "$WEB_DIR" && npm run build' >"$build_log" 2>&1 &
+  build_pid=$!
+
+  tail --pid="$build_pid" -n +1 -f "$build_log" &
+  tail_pid=$!
+
+  while kill -0 "$build_pid" 2>/dev/null; do
+    if grep -q "Build complete!" "$build_log" && build_artifact_is_fresh "$build_artifact" "$build_start_epoch"; then
+      sleep 3
+      if kill -0 "$build_pid" 2>/dev/null; then
+        echo "  - 构建日志已显示完成，但 nuxt 进程未退出，清理残留构建进程后继续部署。"
+        cleanup_process_group "$build_pid"
+      fi
+      break
+    fi
+
+    if (( SECONDS >= build_deadline )); then
+      echo "  - 构建超时（>${BUILD_TIMEOUT}s），终止构建进程。"
+      cleanup_process_group "$build_pid"
+      build_exit=124
+      break
+    fi
+
+    sleep 2
+  done
+
+  if [[ "$build_exit" -eq 0 ]]; then
+    if wait "$build_pid"; then
+      build_exit=0
+    else
+      build_exit=$?
+      if grep -q "Build complete!" "$build_log" && build_artifact_is_fresh "$build_artifact" "$build_start_epoch"; then
+        echo "  - 构建产物已生成，忽略挂起后清理导致的非零退出码。"
+        build_exit=0
+      fi
+    fi
+  else
+    wait "$build_pid" 2>/dev/null || true
+  fi
+
+  wait "$tail_pid" 2>/dev/null || true
+  popd > /dev/null
+
+  if [[ "$build_exit" -ne 0 ]]; then
+    echo "  - 构建失败，最后日志如下："
+    tail -n 120 "$build_log"
+    rm -f "$build_log"
+    return "$build_exit"
+  fi
+
+  rm -f "$build_log"
+  return 0
 }
 
 cd "$ROOT_DIR"
@@ -72,12 +173,8 @@ fi
 
 echo "[3/5] 构建 Nuxt..."
 echo "  - 开始构建，这可能需要 2-5 分钟，请耐心等待..."
-pushd "$WEB_DIR" > /dev/null
-export NODE_OPTIONS="--max-old-space-size=4096"
-npm run build
-BUILD_EXIT=$?
-popd > /dev/null
-if [ $BUILD_EXIT -ne 0 ]; then
+if ! run_nuxt_build; then
+  BUILD_EXIT=$?
   echo "  - 构建失败 (exit code: $BUILD_EXIT)"
   exit 1
 fi
@@ -91,8 +188,8 @@ run_privileged systemctl is-active taiko-forum taiko-viewer
 
 echo "[5/5] 健康检查..."
 env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-  curl --noproxy '*' -fsS "http://127.0.0.1:3101/titles" >/dev/null
+  curl --noproxy '*' --max-time "$HEALTHCHECK_TIMEOUT" -fsS "http://127.0.0.1:3101/titles" >/dev/null
 env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-  curl --noproxy '*' -fsS "https://forum.sakura-bot.cn/titles" >/dev/null
+  curl --noproxy '*' --max-time "$HEALTHCHECK_TIMEOUT" -fsS "https://forum.sakura-bot.cn/titles" >/dev/null
 
 echo "部署完成: 代码已推送并发布到 forum.sakura-bot.cn"
