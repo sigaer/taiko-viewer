@@ -60,12 +60,14 @@ wait_for_url() {
 
   while true; do
     if env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-      curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null; then
+      curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null 2>&1; then
       return 0
     fi
 
     if (( SECONDS >= deadline )); then
       echo "  - ${label} 健康检查超时（>${HEALTHCHECK_TIMEOUT}s）: ${url}"
+      env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
+        curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null
       return 1
     fi
 
