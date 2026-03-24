@@ -1,4 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
+import packageJson from "./package.json" with { type: "json" };
+
+const appVersion = process.env.npm_package_version || packageJson.version;
 
 export default defineNuxtConfig({
   ssr: true,
@@ -45,6 +48,7 @@ export default defineNuxtConfig({
     ossPublicBaseUrl: process.env.OSS_PUBLIC_BASE_URL || "",
     ossAvatarPrefix: process.env.OSS_AVATAR_PREFIX || "",
     public: {
+      appVersion,
       apiBase: "https://static.sakura-bot.cn",
       guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide"
     }

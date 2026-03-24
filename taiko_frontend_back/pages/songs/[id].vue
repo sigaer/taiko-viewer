@@ -42,7 +42,7 @@ const selectedTrack = ref("ONI");
 const drumVolume = ref(1);
 const drumMuted = ref(false);
 const audioErrors = ref<Record<string, boolean>>({});
-const drumAudioRefs = ref<Record<string, HTMLAudioElement | null>>({});
+const drumAudioRefs = new Map<string, HTMLAudioElement>();
 
 const songId = computed(() => Number(route.params.id));
 
@@ -192,16 +192,16 @@ const fumenDefs = computed(() => {
 const getFumenUrl = (folder: string) => `${apiBase}/fumen/${folder}/${songId.value}.png`;
 
 const setDrumAudioRef = (key: string, el: Element | null) => {
-  drumAudioRefs.value = {
-    ...drumAudioRefs.value,
-    [key]: el instanceof HTMLAudioElement ? el : null
-  };
+  if (el instanceof HTMLAudioElement) {
+    drumAudioRefs.set(key, el);
+  } else {
+    drumAudioRefs.delete(key);
+  }
   syncDrumState();
 };
 
 const syncDrumState = () => {
-  Object.values(drumAudioRefs.value).forEach((audio) => {
-    if (!audio) return;
+  drumAudioRefs.forEach((audio) => {
     audio.volume = drumVolume.value;
     audio.muted = drumMuted.value;
   });
@@ -345,7 +345,7 @@ const formatRadarValue = (value: number) => {
 
 watch([drumVolume, drumMuted], () => syncDrumState());
 watch([songId, selectedTrack], () => {
-  drumAudioRefs.value = {};
+  drumAudioRefs.clear();
 });
 watch(hasEditDifficulty, (value) => {
   if (!value && selectedTrack.value === "EDIT") {
