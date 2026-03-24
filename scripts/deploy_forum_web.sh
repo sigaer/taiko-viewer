@@ -53,6 +53,26 @@ cleanup_process_group() {
   fi
 }
 
+wait_for_url() {
+  local url="$1"
+  local label="$2"
+  local deadline=$((SECONDS + HEALTHCHECK_TIMEOUT))
+
+  while true; do
+    if env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
+      curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null; then
+      return 0
+    fi
+
+    if (( SECONDS >= deadline )); then
+      echo "  - ${label} 健康检查超时（>${HEALTHCHECK_TIMEOUT}s）: ${url}"
+      return 1
+    fi
+
+    sleep 1
+  done
+}
+
 build_artifact_is_fresh() {
   local artifact_path="$1"
   local start_epoch="$2"
@@ -187,9 +207,7 @@ run_privileged systemctl restart taiko-forum taiko-viewer
 run_privileged systemctl is-active taiko-forum taiko-viewer
 
 echo "[5/5] 健康检查..."
-env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-  curl --noproxy '*' --max-time "$HEALTHCHECK_TIMEOUT" -fsS "http://127.0.0.1:3101/titles" >/dev/null
-env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-  curl --noproxy '*' --max-time "$HEALTHCHECK_TIMEOUT" -fsS "https://forum.sakura-bot.cn/titles" >/dev/null
+wait_for_url "http://127.0.0.1:3101/titles" "本地 SSR"
+wait_for_url "https://forum.sakura-bot.cn/titles" "线上站点"
 
 echo "部署完成: 代码已推送并发布到 forum.sakura-bot.cn"
