@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatViewerTitle } from "~/composables/useViewerSeo";
+
 interface AliasLogEntry {
   time: string;
   action: string;
@@ -30,9 +32,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
+  ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc
 });
 

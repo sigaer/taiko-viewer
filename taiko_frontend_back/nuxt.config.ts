@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: "zh-CN" },
       title: appTitle,
-      titleTemplate: (titleChunk) => (titleChunk ? `${appTitle} · ${titleChunk}` : appTitle),
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },

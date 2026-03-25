@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import GradeDojoShell from "~/components/GradeDojoShell.vue";
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 import gradeDojoData from "~/assets/data/grade_dojo_nijiiro_2025.json";
 
 const pageMeta = {
@@ -36,11 +37,15 @@ const selectedPage = computed(() => {
 });
 
 useSeoMeta(() => ({
-  title: selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title,
+  title: formatViewerTitle(
+    selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title
+  ),
   description: selectedPage.value
     ? `${selectedPage.value.displayTitle} 的课题曲、合格条件与攻略摘录。`
     : pageMeta.desc,
-  ogTitle: selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title,
+  ogTitle: formatViewerTitle(
+    selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title
+  ),
   ogDescription: selectedPage.value
     ? `${selectedPage.value.displayTitle} 的课题曲、合格条件与攻略摘录。`
     : pageMeta.desc

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatViewerTitle } from "~/composables/useViewerSeo";
+
 const pageMeta = {
   title: "虹段位道场 2023",
   desc: "虹段位道场 2023 入口页面。"
@@ -14,9 +16,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
+  ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc
 });
 </script>

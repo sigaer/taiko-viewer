@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 
 const { fetchCurrentUser } = useAccountState();
 const {
@@ -32,9 +33,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
+  ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc,
 });
 

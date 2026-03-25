@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumThreadDetail } from "~/types/forum";
 
 const route = useRoute();
@@ -35,7 +36,7 @@ const { data, pending, refresh } = await useAsyncData<ForumThreadDetail>(
 );
 
 useSeoMeta({
-  title: () => data.value?.title || pageMeta.title,
+  title: () => formatViewerTitle(data.value?.title || pageMeta.title),
   description: () => data.value?.summary || pageMeta.desc,
 });
 

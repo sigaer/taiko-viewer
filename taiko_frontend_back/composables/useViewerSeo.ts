@@ -1,5 +1,6 @@
 import { computed } from "vue";
 
+const SITE_TITLE = "taiko viewer";
 const CANONICAL_BASE_URL = "https://viewer.sakura-bot.cn";
 const DEFAULT_OG_IMAGE = "https://static.sakura-bot.cn/banner.png";
 
@@ -27,6 +28,14 @@ const normalizeCanonicalPath = (path: string) => {
 
 const buildCanonicalUrl = (path: string) => `${CANONICAL_BASE_URL}${normalizeCanonicalPath(path)}`;
 
+export const formatViewerTitle = (title?: string) => {
+  const normalized = String(title || "").trim();
+  if (!normalized || normalized === SITE_TITLE || normalized === "首页") {
+    return SITE_TITLE;
+  }
+  return `${SITE_TITLE} · ${normalized}`;
+};
+
 const buildBreadcrumbJsonLd = (items: BreadcrumbJsonLdItem[]) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -43,9 +52,9 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
   const canonicalUrl = computed(() => buildCanonicalUrl(payload.value.path));
   const imageUrl = computed(() => payload.value.image || DEFAULT_OG_IMAGE);
   useSeoMeta(() => ({
-    title: payload.value.title,
+    title: formatViewerTitle(payload.value.title),
     description: payload.value.description,
-    ogTitle: payload.value.title,
+    ogTitle: formatViewerTitle(payload.value.title),
     ogDescription: payload.value.description,
     ogImage: imageUrl.value,
     ogUrl: canonicalUrl.value

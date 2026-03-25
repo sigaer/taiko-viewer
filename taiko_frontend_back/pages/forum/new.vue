@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumSection } from "~/types/forum";
 
 type UploadedImage = {
@@ -27,7 +28,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc
 });
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumSection, ForumThreadCard, ForumThreadType } from "~/types/forum";
 
 type ThreadListPayload = {
@@ -36,7 +37,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: () => `${pageMeta.title} - ${String(route.params.slug || "")}`,
+  title: () => formatViewerTitle(`${pageMeta.title} - ${String(route.params.slug || "")}`),
   description: pageMeta.desc
 });
 

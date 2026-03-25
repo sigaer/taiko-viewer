@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumHomePayload } from "~/types/forum";
 
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
@@ -16,9 +17,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
+  ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc
 });
 

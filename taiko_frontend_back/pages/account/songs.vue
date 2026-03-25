@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
+import { formatViewerTitle } from "~/composables/useViewerSeo";
 
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 const page = ref(1);
@@ -46,9 +47,9 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: pageMeta.title,
+  title: formatViewerTitle(pageMeta.title),
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
+  ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc
 });
 
