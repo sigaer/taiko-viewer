@@ -1,19 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-
-type SongItem = {
-  id: number;
-  song_name: string;
-  song_name_jp?: string;
-  type: string;
-  bpm?: string;
-  level_1?: number | string;
-  level_2?: number | string;
-  level_3?: number | string;
-  level_4?: number | string;
-  level_5?: number | string;
-  shelf_status?: number | string;
-};
+import type { SongCatalogItem } from "~/types/content";
 
 const props = withDefaults(
   defineProps<{
@@ -28,34 +15,16 @@ const props = withDefaults(
   }
 );
 
-const runtimeConfig = useRuntimeConfig();
 const query = ref("");
 const scrollContainer = ".app-content";
-const apiBase = runtimeConfig.public.apiBase || "https://static.sakura-bot.cn";
+const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverErrors = ref<Record<number, boolean>>({});
-const errorMessage = ref("");
+const { data: songsPayload, pending, error, reload } = useSongCatalog(() => props.shelfStatus);
 
-const { data: songsData, pending } = await useAsyncData(
-  "songs",
-  async () => {
-    try {
-      return await $fetch<SongItem[]>("/json/song_data.json", {
-        baseURL: apiBase
-      });
-    } catch (error) {
-      errorMessage.value = "服务器连接失败，请稍后重试。";
-      return [];
-    }
-  },
-  {
-    default: () => []
-  }
-);
+const songs = computed(() => songsPayload.value.songs ?? []);
 
-const songs = computed(() => songsData.value ?? []);
-
-const normalizedShelfStatus = (value: SongItem["shelf_status"]) => {
+const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
   if (value === undefined || value === null || value === "") return 0;
   const parsed = Number(value);
   return Number.isNaN(parsed) ? 0 : parsed;
@@ -89,7 +58,7 @@ const handleCoverError = (id: number) => {
   coverErrors.value = { ...coverErrors.value, [id]: true };
 };
 
-const getLevels = (song: SongItem) =>
+const getLevels = (song: SongCatalogItem) =>
   difficultyDefs
     .map((def) => ({
       ...def,
@@ -97,7 +66,7 @@ const getLevels = (song: SongItem) =>
     }))
     .filter((item) => item.value !== undefined && item.value !== null && item.value !== "-");
 
-const getLevelCount = (song: SongItem) => Math.max(getLevels(song).length, 1);
+const getLevelCount = (song: SongCatalogItem) => Math.max(getLevels(song).length, 1);
 
 const filteredSongs = computed(() => {
   const scopedSongs = songs.value.filter((song) => normalizedShelfStatus(song.shelf_status) === props.shelfStatus);
@@ -155,8 +124,11 @@ const filteredSongs = computed(() => {
         <template v-if="pending">
           <div v-for="n in 8" :key="n" class="song-card shimmer-card"></div>
         </template>
-        <template v-else-if="errorMessage">
-          <el-alert :title="errorMessage" type="error" show-icon class="song-alert" />
+        <template v-else-if="error">
+          <div class="song-alert">
+            <el-alert title="歌曲列表加载失败，请稍后重试" type="error" show-icon :closable="false" />
+            <el-button type="primary" plain size="small" @click="reload">重试</el-button>
+          </div>
         </template>
         <template v-else>
           <NuxtLink

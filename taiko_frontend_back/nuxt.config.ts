@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     repoRoot: process.env.TAIKO_REPO_ROOT || "",
     userdataDir: process.env.TAIKO_USERDATA_DIR || "",
     songDataPath: process.env.TAIKO_SONG_DATA_PATH || "",
+    ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
     dbHost: process.env.TAIKO_DB_HOST || "",
@@ -56,13 +57,18 @@ export default defineNuxtConfig({
   nitro: {
     routeRules: {
       "/": { prerender: false },
+      "/guide": { prerender: false },
+      "/guide/**": { prerender: false },
       "/songs/**": { prerender: false },
       "/forum/**": { prerender: false },
       "/account/**": { prerender: false },
       "/grade/2025": { prerender: false, redirect: "/grade/2025/%E4%BA%94%E7%B4%9A" },
       "/grade/2025/**": { prerender: false },
       "/titles": { prerender: false },
+      "/sitemap.xml": { prerender: false },
+      "/robots.txt": { prerender: false },
       "/api/data/**": { prerender: false },
+      "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
       "/api/forum/**": { prerender: false }
     },

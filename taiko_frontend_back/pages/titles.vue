@@ -19,16 +19,7 @@ type WikiTablePayload = {
   rows?: TableRow[];
 };
 
-const { data: titleTableData, pending, error } = await useAsyncData(
-  "title-wikitable-cn",
-  () => $fetch<WikiTablePayload>("/api/data/title_wikitable_cn"),
-  {
-    default: () => ({
-      table: { attrs: {} },
-      rows: []
-    })
-  }
-);
+const { data: titleTableData, pending, error } = await useTitlesContent();
 
 const tableRows = computed<TableRow[]>(() => {
   return (titleTableData.value?.rows || []) as TableRow[];
@@ -48,11 +39,14 @@ definePageMeta({
   breadcrumbs: [{ label: "称号一览", to: "/titles" }]
 });
 
-useSeoMeta({
+useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
-  ogDescription: pageMeta.desc
+  path: "/titles",
+  breadcrumbs: [
+    { name: "首页", path: "/" },
+    { name: "称号一览", path: "/titles" }
+  ]
 });
 </script>
 

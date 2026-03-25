@@ -1,41 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
-
-type SongItem = {
-  id: number;
-  song_name: string;
-  song_name_jp?: string;
-  subtitle?: string;
-  open_day?: string;
-  type: string;
-  bpm?: string;
-  version?: string[];
-  artists?: string[];
-  max_combo?: Array<number | string>;
-  shelf_status?: number | string;
-  level_1?: number | string;
-  level_2?: number | string;
-  level_3?: number | string;
-  level_4?: number | string;
-  level_5?: number | string;
-};
-
-type RatingDataItem = {
-  id?: number | string;
-  level?: number | string;
-  曲名?: string;
-  复合处理?: number | string;
-  平均密度?: number | string;
-  瞬间密度?: number | string;
-  叩き分け?: number | string;
-  BPM变化?: number | string;
-  hs变化?: number | string;
-};
+import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 
 const route = useRoute();
-const runtimeConfig = useRuntimeConfig();
-const apiBase = runtimeConfig.public.apiBase || "https://static.sakura-bot.cn";
+const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverError = ref(false);
 const selectedTrack = ref("ONI");
@@ -61,37 +30,8 @@ definePageMeta({
   ]
 });
 
-const { data: songData, pending, error } = await useAsyncData(
-  () => `song-${songId.value}`,
-  async () => {
-    const list = await $fetch<SongItem[]>("/json/song_data.json", {
-      baseURL: apiBase
-    });
-    return list.find((item) => item.id === songId.value) || null;
-  },
-  {
-    watch: [songId],
-    default: () => null
-  }
-);
-
-const { data: ratingSource } = await useAsyncData(
-  "rating-structured-with-ids",
-  async () => {
-    try {
-      return await $fetch<{ songs?: Record<string, RatingDataItem> }>("/json/rating_structured_with_ids.json", {
-        baseURL: apiBase
-      });
-    } catch {
-      return null;
-    }
-  },
-  {
-    default: () => null
-  }
-);
-
-const song = computed(() => songData.value);
+const { data: songDetail, pending, error } = await useSongDetail(songId);
+const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
@@ -232,11 +172,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const ratingEntries = computed(() => {
-  const songs = ratingSource.value?.songs;
-  if (!songs || typeof songs !== "object") return [];
-  return Object.values(songs).filter((item): item is RatingDataItem => !!item && typeof item === "object");
-});
+const ratingEntries = computed<RatingContentItem[]>(() => songDetail.value.ratingEntries || []);
 
 const selectedRating = computed(() => {
   const entries = ratingEntries.value.filter((item) => Number(item.id) === songId.value);
@@ -353,11 +289,24 @@ watch(hasEditDifficulty, (value) => {
   }
 });
 
-useSeoMeta(() => ({
+const pageDescription = computed(() => {
+  if (!song.value) return pageMeta.desc;
+  const subtitle = song.value.subtitle?.trim();
+  if (subtitle) return subtitle;
+  const parts = [song.value.type, song.value.bpm ? `BPM ${song.value.bpm}` : ""].filter(Boolean);
+  return parts.length ? `${song.value.song_name}，${parts.join("，")}。` : pageMeta.desc;
+});
+
+useViewerSeo(() => ({
   title: song.value ? `${song.value.song_name} - 歌曲详情` : pageMeta.title,
-  description: song.value?.subtitle || pageMeta.desc,
-  ogTitle: song.value ? `${song.value.song_name} - 歌曲详情` : pageMeta.title,
-  ogDescription: song.value?.subtitle || pageMeta.desc
+  description: pageDescription.value,
+  path: `/songs/${songId.value}`,
+  image: coverUrl.value,
+  breadcrumbs: [
+    { name: "首页", path: "/" },
+    { name: "现有歌曲", path: "/songs/available" },
+    { name: song.value?.song_name || "歌曲详情", path: `/songs/${songId.value}` }
+  ]
 }));
 </script>
 

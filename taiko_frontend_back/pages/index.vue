@@ -1,17 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-type SongItem = {
-  id: number;
-  song_name: string;
-  song_name_jp?: string;
-  open_day?: string;
-  shelf_status?: number | string;
-};
-
+const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const apiBase = runtimeConfig.public.apiBase || "https://static.sakura-bot.cn";
-const appVersion = runtimeConfig.public.appVersion || "0.10.5";
+const appVersion = runtimeConfig.public.appVersion || "0.11.0";
 
 const pageMeta = {
   title: "首页",
@@ -25,11 +17,10 @@ definePageMeta({
   breadcrumbs: [{ label: "首页", to: "/" }]
 });
 
-useSeoMeta({
+useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
-  ogDescription: pageMeta.desc
+  path: "/"
 });
 
 const eventSlides = [
@@ -43,36 +34,8 @@ const eventSlides = [
   }
 ];
 
-const parseOpenDay = (input: string | undefined) => {
-  if (!input) return 0;
-  const match = input.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!match) return 0;
-  const month = Number(match[1]);
-  const day = Number(match[2]);
-  const year = Number(match[3]);
-  return new Date(year, month - 1, day).getTime();
-};
-
-const { data: songsData, pending, error } = await useAsyncData(
-  "home-latest-songs",
-  () =>
-    $fetch<SongItem[]>("/json/song_data.json", {
-      baseURL: apiBase
-    }),
-  {
-    default: () => []
-  }
-);
-
-const latestSongs = computed(() => {
-  const list = [...(songsData.value ?? [])].filter((song) => Number(song.shelf_status ?? 0) === 0);
-  list.sort((a, b) => {
-    const dateDiff = parseOpenDay(b.open_day) - parseOpenDay(a.open_day);
-    if (dateDiff !== 0) return dateDiff;
-    return (b.id || 0) - (a.id || 0);
-  });
-  return list.slice(0, 6);
-});
+const { data: homeContent, pending, error } = useHomeContent();
+const latestSongs = computed(() => homeContent.value.latestSongs || []);
 
 const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
 </script>

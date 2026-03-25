@@ -11,11 +11,10 @@ definePageMeta({
   breadcrumbs: [{ label: "现有歌曲", to: "/songs/available" }]
 });
 
-useSeoMeta({
+useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
-  ogDescription: pageMeta.desc
+  path: "/songs/available"
 });
 </script>
 

@@ -11,11 +11,10 @@ definePageMeta({
   breadcrumbs: [{ label: "已下架歌曲", to: "/songs/removed" }]
 });
 
-useSeoMeta({
+useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: pageMeta.title,
-  ogDescription: pageMeta.desc
+  path: "/songs/removed"
 });
 </script>
 

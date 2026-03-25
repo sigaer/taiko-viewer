@@ -1,25 +1,20 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
 
 const route = useRoute();
 const { accountUser, fetchCurrentUser, clearAccountUser } = useAccountState();
 await fetchCurrentUser();
 
 const buildGuideChildren = () => {
-  const difficultyGroups = [
-    { key: 1, label: "简单", max: 5, iconImage: "/kantan.png" },
-    { key: 2, label: "普通", max: 7, iconImage: "/futsuu.png" },
-    { key: 3, label: "困难", max: 8, iconImage: "/muzukashii.png" },
-    { key: 4, label: "魔王", max: 10, iconImage: "/oni.png" }
-  ];
-  return difficultyGroups.map((group) => ({
-    key: `/guide/d${group.key}`,
+  return GUIDE_DIFFICULTY_OPTIONS.map((group) => ({
+    key: `/guide/d${group.value}`,
     label: group.label,
     iconImage: group.iconImage,
     children: Array.from({ length: group.max }, (_, index) => {
       const level = index + 1;
       return {
-        key: `/guide?difficulty=${group.key}&level=${level}`,
+        key: `/guide/${group.value}/${level}`,
         label: `${level}星`
       };
     })
@@ -128,8 +123,11 @@ const activePath = computed(() => {
   if (route.path.startsWith("/account/songs")) return "/account/songs";
   if (route.path.startsWith("/account/login")) return "/account/login";
   if (route.path.startsWith("/account/register")) return "/account/register";
-  if (route.path === "/guide" && route.query.difficulty && route.query.level) {
-    return `/guide?difficulty=${route.query.difficulty}&level=${route.query.level}`;
+  if (route.path.startsWith("/guide/")) {
+    const segments = route.path.split("/").filter(Boolean);
+    if (segments.length >= 3) {
+      return `/guide/${segments[1]}/${segments[2]}`;
+    }
   }
   return route.path;
 });
@@ -139,8 +137,8 @@ const openedGroups = computed(() => {
   if (activePath.value.startsWith("/grade")) return ["/grade"];
   if (activePath.value.startsWith("/account")) return [];
   if (activePath.value.startsWith("/guide")) {
-    const diff = route.query.difficulty;
-    if (diff) return ["/guide", `/guide/d${diff}`];
+    const segments = route.path.split("/").filter(Boolean);
+    if (segments.length >= 2) return ["/guide", `/guide/d${segments[1]}`];
     return ["/guide"];
   }
   return [];
