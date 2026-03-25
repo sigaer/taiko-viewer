@@ -47,7 +47,9 @@ export default defineNuxtConfig({
       "favicon-32x32.png",
       "apple-touch-icon.png",
       "pwa-192x192.png",
-      "pwa-512x512.png"
+      "pwa-512x512.png",
+      "pwa-192x192-maskable.png",
+      "pwa-512x512-maskable.png"
     ],
     manifest: {
       id: "/",
@@ -72,6 +74,18 @@ export default defineNuxtConfig({
           sizes: "512x512",
           type: "image/png",
           purpose: "any"
+        },
+        {
+          src: "/pwa-192x192-maskable.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "maskable"
+        },
+        {
+          src: "/pwa-512x512-maskable.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable"
         }
       ]
     },
