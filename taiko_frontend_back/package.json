@@ -1,13 +1,14 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.11.0",
+  "version": "0.12.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "pwa:icons": "node ./scripts/generate_pwa_icons.mjs",
     "seed:forum-mock": "node ./scripts/seed_forum_mock.mjs",
     "postinstall": "nuxt prepare"
   },
@@ -21,6 +22,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@vite-pwa/nuxt": "^1.1.1",
     "typescript": "~5.6.2"
   }
 }

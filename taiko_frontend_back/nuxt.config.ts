@@ -1,7 +1,10 @@
 import { defineNuxtConfig } from "nuxt/config";
 import packageJson from "./package.json" with { type: "json" };
 
+const appTitle = "taiko viewer";
 const appVersion = process.env.npm_package_version || packageJson.version;
+const themeColor = "#ffb37c";
+const backgroundColor = "#f4efe7";
 
 export default defineNuxtConfig({
   ssr: true,
@@ -9,19 +12,80 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: "zh-CN" },
-      titleTemplate: (titleChunk) => (titleChunk ? `Taiko · ${titleChunk}` : "Taiko"),
+      title: appTitle,
+      titleTemplate: (titleChunk) => (titleChunk ? `${appTitle} · ${titleChunk}` : appTitle),
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "application-name", content: appTitle },
         {
           name: "description",
-          content: "Taiko 太鼓达人数据看板，提供歌曲列表、谱面攻略、段位查询与主题设置。"
-        }
+          content: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略、段位查询与主题设置。"
+        },
+        { name: "theme-color", content: themeColor },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+        { name: "apple-mobile-web-app-title", content: appTitle }
+      ],
+      link: [
+        { rel: "manifest", href: "/manifest.webmanifest" },
+        { rel: "icon", type: "image/png", href: "/icon.png" },
+        { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+        { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+        { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" }
       ]
     }
   },
   css: ["~/assets/css/main.css"],
-  modules: ["@element-plus/nuxt"],
+  modules: ["@element-plus/nuxt", "@vite-pwa/nuxt"],
+  pwa: {
+    registerType: "autoUpdate",
+    manifestFilename: "manifest.webmanifest",
+    includeAssets: [
+      "icon.png",
+      "favicon-16x16.png",
+      "favicon-32x32.png",
+      "apple-touch-icon.png",
+      "pwa-192x192.png",
+      "pwa-512x512.png"
+    ],
+    manifest: {
+      id: "/",
+      name: appTitle,
+      short_name: appTitle,
+      description: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略、段位查询与主题设置。",
+      start_url: "/",
+      scope: "/",
+      display: "standalone",
+      theme_color: themeColor,
+      background_color: backgroundColor,
+      lang: "zh-CN",
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any"
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any"
+        }
+      ]
+    },
+    workbox: {
+      cleanupOutdatedCaches: true,
+      manifestTransforms: [],
+      globIgnores: ["**/*_payload.json", "**/*.html"],
+      navigateFallbackDenylist: [/./]
+    },
+    devOptions: {
+      enabled: false
+    }
+  },
   runtimeConfig: {
     dataDir: process.env.TAIKO_FRONTEND_DATA_DIR || "",
     repoRoot: process.env.TAIKO_REPO_ROOT || "",

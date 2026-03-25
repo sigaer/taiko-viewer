@@ -8,8 +8,8 @@ const isMobileNavOpen = ref(false);
 const nuxtApp = useNuxtApp();
 
 const fallbackMeta = {
-  title: "Taiko",
-  desc: "Taiko 太鼓达人数据看板，提供歌曲列表、谱面攻略与段位查询。"
+  title: "taiko viewer",
+  desc: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略与段位查询。"
 };
 
 type BreadcrumbItem = {

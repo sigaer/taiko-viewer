@@ -17,7 +17,7 @@ const rememberCredentials = ref(false);
 
 const pageMeta = {
   title: "账号登录",
-  desc: "登录 Sakura Taiko Viewer 账号，查看个人档案与歌曲数据。",
+  desc: "登录 taiko viewer 账号，查看个人档案与歌曲数据。",
 };
 
 definePageMeta({

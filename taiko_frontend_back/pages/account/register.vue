@@ -19,7 +19,7 @@ const form = reactive({
 
 const pageMeta = {
   title: "注册账号",
-  desc: "注册 Sakura Taiko Viewer 账号并绑定邮箱验证码。",
+  desc: "注册 taiko viewer 账号并绑定邮箱验证码。",
 };
 
 definePageMeta({

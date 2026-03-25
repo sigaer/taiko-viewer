@@ -16,7 +16,7 @@ const form = reactive({
 
 const pageMeta = {
   title: "找回密码",
-  desc: "通过邮箱验证码重置 Sakura Taiko Viewer 的登录密码。"
+  desc: "通过邮箱验证码重置 taiko viewer 的登录密码。"
 };
 
 definePageMeta({

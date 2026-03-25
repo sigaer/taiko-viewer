@@ -3,11 +3,11 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.11.0";
+const appVersion = runtimeConfig.public.appVersion || "0.12.0";
 
 const pageMeta = {
   title: "首页",
-  desc: "Sakura Taiko Viewer 首页，提供最新活动与最新歌曲入口。"
+  desc: "taiko viewer 首页，提供最新活动与最新歌曲入口。"
 };
 
 definePageMeta({
@@ -53,7 +53,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
     <el-card class="panel-card home-hero">
       <div class="hero-content">
         <div class="hero-title-group">
-          <h2>Sakura Taiko Viewer</h2>
+          <h2>taiko viewer</h2>
           <p>v{{ appVersion }}</p>
         </div>
         <NuxtLink to="/songs/available" class="hero-link hero-link-btn">
@@ -139,7 +139,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
     </section>
 
     <footer class="home-footer">
-      Sakura Taiko Viewer © 2026 - Created by sigaer
+      taiko viewer © 2026 - Created by sigaer
     </footer>
   </div>
 </template>
