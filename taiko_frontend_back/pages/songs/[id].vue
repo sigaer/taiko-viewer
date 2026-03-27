@@ -100,7 +100,7 @@ const getFumenComboLabel = (key: string) => {
   return String(comboList[index]);
 };
 
-const { activeBranchVariants, hasBranchVariants, getBaseAudioUrl, getVariantAudioUrl } = useSongBranchAudio({
+const { activeBranchVariants, hasBranchVariants, getBaseAudioUrl, getVariantAudioUrl, getPureAudioUrl } = useSongBranchAudio({
   apiBase,
   songId,
   selectedTrack
@@ -114,6 +114,11 @@ const currentDrumAudio = computed(() => {
 const currentMixAudio = computed(() => {
   if (!song.value) return "";
   return getBaseAudioUrl("mix");
+});
+
+const currentPureAudio = computed(() => {
+  if (!song.value) return "";
+  return getPureAudioUrl();
 });
 
 const getDrumVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("drum", variant);
@@ -152,10 +157,14 @@ const markAudioError = (key: string) => {
 };
 
 const hasAudioError = (key: string) => !!audioErrors.value[key];
-const getAudioErrorKey = (mode: "drum" | "mix", variant?: BranchVariant) =>
-  variant
+const getAudioErrorKey = (mode: "drum" | "mix" | "pure", variant?: BranchVariant) => {
+  if (mode === "pure") {
+    return `pure-base-${songId.value}`;
+  }
+  return variant
     ? `${mode}-${songId.value}-${selectedTrack.value}-${variant}`
     : `${mode}-base-${songId.value}-${selectedTrack.value}`;
+};
 
 const radarLabels = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
 
@@ -550,6 +559,21 @@ useViewerSeo(() => ({
                   />
                   <p v-if="hasAudioError(getAudioErrorKey('mix'))" class="audio-error">基础音源不存在</p>
                 </template>
+              </div>
+
+              <div class="audio-block">
+                <div class="audio-head">
+                  <strong>PURE · 纯音乐试听</strong>
+                </div>
+                <audio
+                  :key="`pure-base-${songId}`"
+                  :src="currentPureAudio"
+                  class="audio-player"
+                  controls
+                  preload="none"
+                  @error="markAudioError(getAudioErrorKey('pure'))"
+                />
+                <p v-if="hasAudioError(getAudioErrorKey('pure'))" class="audio-error">纯音乐音源不存在</p>
               </div>
             </div>
           </div>

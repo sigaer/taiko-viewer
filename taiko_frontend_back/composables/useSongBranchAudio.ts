@@ -118,10 +118,18 @@ export const useSongBranchAudio = ({ apiBase, songId, selectedTrack }: UseSongBr
     return `${apiBase}/${mode}/${context.id}_${context.track}_${variant}.mp3`;
   };
 
+  const getPureAudioUrl = () => {
+    const context = resolveTrackContext(songId, selectedTrack);
+    if (!context) return "";
+
+    return `${apiBase}/pure/${context.id}.mp3`;
+  };
+
   return {
     activeBranchVariants,
     hasBranchVariants,
     getBaseAudioUrl,
-    getVariantAudioUrl
+    getVariantAudioUrl,
+    getPureAudioUrl
   };
 };
