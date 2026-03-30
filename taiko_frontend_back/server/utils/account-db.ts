@@ -119,8 +119,91 @@ const CREATE_TABLES = [
     KEY idx_web_song_locks_taiko_song (taiko_id, song_no, level),
     CONSTRAINT fk_web_song_locks_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_data_sync_logs (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    taiko_id VARCHAR(25) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'success',
+    target_ids_json LONGTEXT NOT NULL,
+    result_json LONGTEXT NOT NULL,
+    original_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+    compressed_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_data_sync_logs_user_id_created_at (user_id, created_at),
+    CONSTRAINT fk_web_data_sync_logs_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_developer_applications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    reply_email VARCHAR(255) NOT NULL,
+    reason TEXT NOT NULL,
+    image_urls_json LONGTEXT DEFAULT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'pending',
+    review_note TEXT DEFAULT NULL,
+    reviewed_by_user_id BIGINT UNSIGNED DEFAULT NULL,
+    reviewed_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_developer_applications_user_id_created_at (user_id, created_at),
+    KEY idx_web_developer_applications_status_created_at (status, created_at),
+    CONSTRAINT fk_web_developer_applications_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_developer_applications_reviewed_by_user_id FOREIGN KEY (reviewed_by_user_id)
+      REFERENCES web_user_accounts(id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_developer_tokens (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    application_id BIGINT UNSIGNED DEFAULT NULL,
+    token_hash CHAR(64) NOT NULL,
+    token_mask VARCHAR(32) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'active',
+    issued_by_user_id BIGINT UNSIGNED DEFAULT NULL,
+    issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME DEFAULT NULL,
+    revoked_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_developer_tokens_token_hash (token_hash),
+    KEY idx_web_developer_tokens_user_id_status (user_id, status, issued_at),
+    KEY idx_web_developer_tokens_application_id (application_id),
+    CONSTRAINT fk_web_developer_tokens_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_developer_tokens_application_id FOREIGN KEY (application_id)
+      REFERENCES web_developer_applications(id) ON DELETE SET NULL,
+    CONSTRAINT fk_web_developer_tokens_issued_by_user_id FOREIGN KEY (issued_by_user_id)
+      REFERENCES web_user_accounts(id) ON DELETE SET NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
+
+const MIGRATIONS = [
+  "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
+  "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at"
+];
+
+const runMigration = async (statement: string) => {
+  const db = getAccountDb();
+  try {
+    await db.execute(statement);
+  } catch (error: any) {
+    const code = String(error?.code || "");
+    const errno = Number(error?.errno || 0);
+    if (
+      code === "ER_DUP_FIELDNAME" ||
+      code === "ER_DUP_KEYNAME" ||
+      code === "ER_TABLE_EXISTS_ERROR" ||
+      errno === 1060 ||
+      errno === 1061 ||
+      errno === 1050
+    ) {
+      return;
+    }
+    throw error;
+  }
+};
 
 export const ensureAccountSchema = async () => {
   if (!schemaReady) {
@@ -128,6 +211,9 @@ export const ensureAccountSchema = async () => {
       const db = getAccountDb();
       for (const statement of CREATE_TABLES) {
         await db.execute(statement);
+      }
+      for (const statement of MIGRATIONS) {
+        await runMigration(statement);
       }
     })();
   }

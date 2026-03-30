@@ -55,6 +55,10 @@ const handleLogout = async () => {
   }
 };
 
+const isDeveloperReviewer = computed(
+  () => accountUser.value?.username === "sigaer" && accountUser.value?.email === "1106865024@qq.com"
+);
+
 const groups = computed(() => [
   {
     title: "功能导航",
@@ -96,7 +100,12 @@ const groups = computed(() => [
     items: accountUser.value
       ? [
           { key: "/account/profile", label: "个人档案", icon: "user" },
-          { key: "/account/songs", label: "歌曲数据", icon: "music" }
+          { key: "/account/songs", label: "歌曲数据", icon: "music" },
+          { key: "/account/sync", label: "多端同步", icon: "history" },
+          { key: "/account/developer", label: "开发者权限", icon: "badge" },
+          ...(isDeveloperReviewer.value
+            ? [{ key: "/account/developer/review", label: "开发者审批", icon: "key" }]
+            : [])
         ]
       : [
           { key: "/account/login", label: "登录", icon: "key" },
@@ -121,6 +130,9 @@ const activePath = computed(() => {
   if (route.path.startsWith("/songs/")) return "/songs/available";
   if (route.path.startsWith("/account/profile")) return "/account/profile";
   if (route.path.startsWith("/account/songs")) return "/account/songs";
+  if (route.path.startsWith("/account/sync")) return "/account/sync";
+  if (route.path.startsWith("/account/developer/review")) return "/account/developer/review";
+  if (route.path.startsWith("/account/developer")) return "/account/developer";
   if (route.path.startsWith("/account/login")) return "/account/login";
   if (route.path.startsWith("/account/register")) return "/account/register";
   if (route.path.startsWith("/guide/")) {

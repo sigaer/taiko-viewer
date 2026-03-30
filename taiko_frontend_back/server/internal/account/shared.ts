@@ -19,8 +19,11 @@ export const SESSION_COOKIE_NAME = "stv_session";
 export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 export const EMAIL_CODE_TTL_MS = 1000 * 60 * 10;
 export const BIND_VERIFY_TTL_MS = 1000 * 60 * 30;
+export const SYNC_COOLDOWN_MS = 1000 * 60 * 30;
 export const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
 export const DEFAULT_AVATAR = "https://forum.sakura-bot.cn/miku.png";
+export const DEVELOPER_REVIEWER_USERNAME = "sigaer";
+export const DEVELOPER_REVIEWER_EMAIL = "1106865024@qq.com";
 
 export type AccountRow = {
   id: number;
@@ -65,6 +68,48 @@ export type LockRow = {
   song_no: number;
   level: number;
   is_locked: number;
+};
+
+export type SyncLogRow = {
+  id: number;
+  user_id: number;
+  taiko_id: string;
+  status: string;
+  target_ids_json: string;
+  result_json: string;
+  original_bytes: number;
+  compressed_bytes: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DeveloperApplicationRow = {
+  id: number;
+  user_id: number;
+  reply_email: string;
+  reason: string;
+  image_urls_json: string | null;
+  status: string;
+  review_note: string | null;
+  reviewed_by_user_id: number | null;
+  reviewed_at: Date | string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DeveloperTokenRow = {
+  id: number;
+  user_id: number;
+  application_id: number | null;
+  token_hash: string;
+  token_mask: string;
+  status: string;
+  issued_by_user_id: number | null;
+  issued_at: Date | string;
+  last_used_at: Date | string | null;
+  revoked_at: Date | string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type SongMeta = {
@@ -220,7 +265,12 @@ export const formatLocalTimestamp = (date = now()) => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
-export const sha256 = (input: string) => createHash("sha256").update(input).digest("hex");
+export const sha256 = (input: string | Buffer) => createHash("sha256").update(input).digest("hex");
+export const clipText = (value: string, limit: number) => {
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (normalized.length <= limit) return normalized;
+  return `${normalized.slice(0, limit - 1)}…`;
+};
 
 export const normalizeUsername = (value: unknown) => String(value || "").trim();
 export const normalizeEmail = (value: unknown) => String(value || "").trim().toLowerCase();
@@ -295,6 +345,15 @@ export const readSessionTokenFromEvent = (event: H3Event) => {
   return getCookie(event, SESSION_COOKIE_NAME) || "";
 };
 
+export const readBearerTokenFromEvent = (event: H3Event) => {
+  const authHeader = String(getHeader(event, "authorization") || "").trim();
+  if (authHeader.toLowerCase().startsWith("bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token) return token;
+  }
+  return "";
+};
+
 const getMailConfig = () => {
   const config = getSmtpConfig();
   return {
@@ -329,6 +388,22 @@ const getMailer = () => {
   };
 };
 
+export const sendAccountMail = async (payload: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}) => {
+  const { from, transporter } = getMailer();
+  await transporter.sendMail({
+    from,
+    to: payload.to,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html
+  });
+};
+
 export const requireConfiguredOss = () => {
   const config = getAvatarConfig();
   if (!config.endpoint || !config.bucket || !config.accessKeyId || !config.accessKeySecret) {
@@ -350,11 +425,9 @@ export const getOssClient = () => {
 };
 
 export const sendMailCode = async (email: string, code: string, purpose: "register" | "reset") => {
-  const { from, transporter } = getMailer();
   const subject = purpose === "register" ? "Sakura Taiko Viewer 注册验证码" : "Sakura Taiko Viewer 找回密码验证码";
   const label = purpose === "register" ? "注册" : "重置密码";
-  await transporter.sendMail({
-    from,
+  await sendAccountMail({
     to: email,
     subject,
     text: `你的${label}验证码是 ${code}，10 分钟内有效。`,
@@ -515,6 +588,16 @@ export const readUserdata = async (taikoId: string) => {
   const payload = await loadJsonFile<UserdataPayload>(filePath);
   if (!Array.isArray(payload.songs)) payload.songs = [];
   return payload;
+};
+
+export const readRawUserdataText = async (taikoId: string) => {
+  const filePath = getUserdataPath(taikoId);
+  try {
+    await access(filePath, fsConstants.R_OK);
+  } catch {
+    throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
+  }
+  return readFile(filePath, "utf-8");
 };
 
 export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => {

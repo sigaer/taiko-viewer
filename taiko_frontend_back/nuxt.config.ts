@@ -107,6 +107,7 @@ export default defineNuxtConfig({
     ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
+    syncTargetsJson: process.env.TAIKO_SYNC_TARGETS_JSON || "",
     dbHost: process.env.TAIKO_DB_HOST || "",
     dbPort: process.env.TAIKO_DB_PORT || "",
     dbUser: process.env.TAIKO_DB_USER || "",
@@ -117,6 +118,7 @@ export default defineNuxtConfig({
     smtpUser: process.env.SMTP_USER || "",
     smtpPass: process.env.SMTP_PASS || "",
     smtpFrom: process.env.SMTP_FROM || "",
+    developerReviewInbox: process.env.TAIKO_DEVELOPER_REVIEW_INBOX || "",
     wahlapCookie: process.env.TAIKO_WAHLAP_COOKIE || "",
     ossEndpoint: process.env.OSS_ENDPOINT || "",
     ossRegion: process.env.OSS_REGION || "",
@@ -147,6 +149,7 @@ export default defineNuxtConfig({
       "/api/data/**": { prerender: false },
       "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
+      "/api/developer/**": { prerender: false },
       "/api/forum/**": { prerender: false }
     },
     prerender: {
