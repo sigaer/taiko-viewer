@@ -234,6 +234,9 @@ const submitSync = async () => {
                 </el-tag>
               </div>
               <p>HTTP {{ result.statusCode }} · {{ result.message }}</p>
+              <p v-if="result.songCount !== null || result.decompressedBytes > 0">
+                解压 {{ result.decompressedBytes || "-" }} bytes · 曲目 {{ result.songCount ?? "-" }}
+              </p>
             </div>
           </div>
         </template>

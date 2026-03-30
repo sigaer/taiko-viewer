@@ -236,18 +236,33 @@ export const readSyncUserdataPayload = async (taikoId: string) => {
   };
 };
 
-const readResponseMessage = async (response: Response) => {
+const readResponsePayload = async (response: Response) => {
   const contentType = String(response.headers.get("content-type") || "").toLowerCase();
   if (contentType.includes("application/json")) {
     try {
       const payload = (await response.json()) as Record<string, unknown>;
-      return String(payload.message || payload.statusMessage || "").trim() || `HTTP ${response.status}`;
+      return {
+        message: String(payload.message || payload.statusMessage || "").trim() || `HTTP ${response.status}`,
+        receivedBytes: Number(payload.receivedBytes || 0) || 0,
+        decompressedBytes: Number(payload.decompressedBytes || 0) || 0,
+        songCount: payload.songCount === null || payload.songCount === undefined ? null : Number(payload.songCount || 0)
+      };
     } catch {
-      return `HTTP ${response.status}`;
+      return {
+        message: `HTTP ${response.status}`,
+        receivedBytes: 0,
+        decompressedBytes: 0,
+        songCount: null
+      };
     }
   }
   const text = await response.text();
-  return text.trim() || `HTTP ${response.status}`;
+  return {
+    message: text.trim() || `HTTP ${response.status}`,
+    receivedBytes: 0,
+    decompressedBytes: 0,
+    songCount: null
+  };
 };
 
 export const dispatchSyncPayloadToTarget = async (
@@ -265,16 +280,16 @@ export const dispatchSyncPayloadToTarget = async (
     },
     body: compressedPayload
   });
-  const message = await readResponseMessage(response);
+  const payload = await readResponsePayload(response);
   return {
     targetId: target.id,
     label: target.label,
     ok: response.ok,
     statusCode: response.status,
-    message,
-    receivedBytes: compressedPayload.byteLength,
-    decompressedBytes: 0,
-    songCount: null
+    message: payload.message,
+    receivedBytes: payload.receivedBytes || compressedPayload.byteLength,
+    decompressedBytes: payload.decompressedBytes,
+    songCount: payload.songCount
   } satisfies SyncDispatchResult;
 };
 
