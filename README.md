@@ -14,6 +14,7 @@ Private dual-project repository for the Taiko forum service.
 - Web domain: `https://forum.sakura-bot.cn`
 - Forum service: `taiko-forum.service`
 - Viewer service: `taiko-viewer.service`
+- Local sync receiver: `taiko-sync-receiver.service`，写入 `/home/sigaer/taiko/userdata`
 
 ## Common Commands
 
@@ -23,7 +24,8 @@ Private dual-project repository for the Taiko forum service.
 cd taiko_frontend_back
 npm install
 npm run build
-sudo systemctl restart taiko-viewer taiko-forum
+sudo systemctl restart taiko-viewer taiko-forum taiko-sync-receiver
+curl http://127.0.0.1:3102/health
 ```
 
 ### App

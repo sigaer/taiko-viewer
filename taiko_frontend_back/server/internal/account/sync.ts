@@ -41,16 +41,16 @@ export type PublicSyncLog = {
 
 const DEFAULT_SYNC_TARGETS: SyncTargetConfig[] = [
   {
-    id: "mock-service-a",
-    label: "占位服务 A",
-    description: "站内 mock 接收器，用于验证 zstd 压缩后的完整 JSON 分发。",
+    id: "sakura-bot",
+    label: "Sakura bot",
+    description: "本地接收服务，接收 zstd 标准压缩后的完整成绩 JSON 并直接写入 userdata。",
     endpoint: "",
-    kind: "mock"
+    kind: "http"
   },
   {
     id: "mock-service-b",
-    label: "占位服务 B",
-    description: "第二个站内 mock 接收器，用于测试多目标并发分发。",
+    label: "站内 mock 接收器",
+    description: "站内 mock 接收器，用于测试多目标并发分发。",
     endpoint: "",
     kind: "mock"
   }
@@ -83,6 +83,14 @@ const getInternalNitroOrigin = () => {
   return `http://${host}:${port}`;
 };
 
+const getLocalSyncReceiverEndpoint = () => {
+  const runtimeConfig = useRuntimeConfig();
+  return (
+    String(runtimeConfig.localSyncReceiverEndpoint || process.env.TAIKO_LOCAL_SYNC_RECEIVER_ENDPOINT || "").trim() ||
+    "http://127.0.0.1:3102/receive"
+  );
+};
+
 const resolveMockEndpoint = (event: H3Event | undefined, targetId: string) => {
   if (!event) {
     return `${getInternalNitroOrigin()}/api/account/sync/mock/${encodeURIComponent(targetId)}`;
@@ -94,13 +102,16 @@ const resolveMockEndpoint = (event: H3Event | undefined, targetId: string) => {
   return `${baseUrl}/api/account/sync/mock/${encodeURIComponent(targetId)}`;
 };
 
+const resolveSyncTargetEndpoint = (event: H3Event | undefined, target: SyncTargetConfig) =>
+  target.kind === "mock" ? resolveMockEndpoint(event, target.id) : target.endpoint || getLocalSyncReceiverEndpoint();
+
 export const loadSyncTargets = (event?: H3Event): SyncTargetConfig[] => {
   const runtimeConfig = useRuntimeConfig();
   const raw = String(runtimeConfig.syncTargetsJson || process.env.TAIKO_SYNC_TARGETS_JSON || "").trim();
   if (!raw) {
     return DEFAULT_SYNC_TARGETS.map((target) => ({
       ...target,
-      endpoint: resolveMockEndpoint(event, target.id)
+      endpoint: resolveSyncTargetEndpoint(event, target)
     }));
   }
   try {
@@ -113,18 +124,16 @@ export const loadSyncTargets = (event?: H3Event): SyncTargetConfig[] => {
       throw new Error("sync target config is empty");
     }
     return targets.map((target) =>
-      target.kind === "mock"
-        ? {
-            ...target,
-            endpoint: resolveMockEndpoint(event, target.id)
-          }
-        : target
+      ({
+        ...target,
+        endpoint: resolveSyncTargetEndpoint(event, target)
+      })
     );
   } catch (error) {
     console.error("[account-sync] 解析同步目标失败，已回退到 mock 目标", error);
     return DEFAULT_SYNC_TARGETS.map((target) => ({
       ...target,
-      endpoint: resolveMockEndpoint(event, target.id)
+      endpoint: resolveSyncTargetEndpoint(event, target)
     }));
   }
 };

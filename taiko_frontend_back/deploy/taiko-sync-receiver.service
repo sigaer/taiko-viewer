@@ -1,0 +1,20 @@
+[Unit]
+Description=Taiko Sync Receiver (Sakura bot)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sigaer/taiko/taiko-forum
+Environment=NODE_ENV=production
+Environment=TAIKO_SYNC_RECEIVER_HOST=127.0.0.1
+Environment=TAIKO_SYNC_RECEIVER_PORT=3102
+Environment="TAIKO_SYNC_RECEIVER_NAME=Sakura bot"
+Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
+ExecStart=/www/server/nvm/versions/node/v24.13.0/bin/node /home/sigaer/taiko/taiko-forum/scripts/taiko_sync_receiver.mjs
+Restart=always
+RestartSec=5
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

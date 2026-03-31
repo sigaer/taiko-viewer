@@ -205,11 +205,13 @@ echo "[4/5] 重载服务..."
 run_privileged systemctl daemon-reload
 run_privileged nginx -t
 run_privileged systemctl reload nginx
-run_privileged systemctl restart taiko-forum taiko-viewer
-run_privileged systemctl is-active taiko-forum taiko-viewer
+run_privileged systemctl restart taiko-forum taiko-viewer taiko-sync-receiver
+run_privileged systemctl is-active taiko-forum taiko-viewer taiko-sync-receiver
 
 echo "[5/5] 健康检查..."
 wait_for_url "http://127.0.0.1:3101/titles" "本地 SSR"
+wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
 wait_for_url "https://forum.sakura-bot.cn/titles" "线上站点"
+wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
 
 echo "部署完成: 代码已推送并发布到 forum.sakura-bot.cn"
