@@ -33,6 +33,7 @@ logs/
 .data/
 
 # Local reference exports copied from legacy workspace
+taiko.zip
 taiko_frontend_back/称号.htm
 taiko_frontend_back/称号_files/
 taiko_frontend_back/首页Viewer.htm
