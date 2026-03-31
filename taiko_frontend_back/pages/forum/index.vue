@@ -23,7 +23,7 @@ useSeoMeta({
   ogDescription: pageMeta.desc
 });
 
-const { data, pending, refresh } = await useAsyncData<ForumHomePayload>(
+const { data, pending, refresh } = useLazyAsyncData<ForumHomePayload>(
   "forum-home",
   () => $fetch("/api/forum/home", { headers }),
   {
@@ -105,6 +105,8 @@ const home = computed(() => data.value);
             <NuxtLink to="/forum/section/dojo">段位道场</NuxtLink>
             <NuxtLink to="/forum/section/achievements">晒分战报</NuxtLink>
             <NuxtLink to="/forum/me">我的社区</NuxtLink>
+            <NuxtLink to="/account/sync">多端同步</NuxtLink>
+            <NuxtLink to="/account/developer">开发者权限</NuxtLink>
           </div>
         </section>
       </aside>

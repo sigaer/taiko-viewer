@@ -3,9 +3,11 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 const route = useRoute();
 const isPageLoading = ref(false);
+const isPageLoadingVisible = ref(false);
 const isMobile = ref(false);
 const isMobileNavOpen = ref(false);
 const nuxtApp = useNuxtApp();
+let loadingTimer: ReturnType<typeof setTimeout> | null = null;
 
 const fallbackMeta = {
   title: "taiko viewer",
@@ -47,6 +49,27 @@ const closeMobileNav = () => {
   isMobileNavOpen.value = false;
 };
 
+const stopPageLoading = () => {
+  isPageLoading.value = false;
+  isPageLoadingVisible.value = false;
+  if (loadingTimer) {
+    clearTimeout(loadingTimer);
+    loadingTimer = null;
+  }
+};
+
+const startPageLoading = () => {
+  isPageLoading.value = true;
+  if (loadingTimer) {
+    clearTimeout(loadingTimer);
+  }
+  loadingTimer = setTimeout(() => {
+    if (isPageLoading.value) {
+      isPageLoadingVisible.value = true;
+    }
+  }, 120);
+};
+
 const buildBreadcrumbs = () => {
   const items = (route.meta.breadcrumbs as BreadcrumbItem[]) || [];
   if (items.length) {
@@ -73,17 +96,17 @@ watch(
 );
 
 nuxtApp.hook("page:start", () => {
-  isPageLoading.value = true;
+  startPageLoading();
 });
 nuxtApp.hook("page:finish", () => {
-  isPageLoading.value = false;
+  stopPageLoading();
 });
 
 watch(
   () => route.fullPath,
   async () => {
     await nextTick();
-    isPageLoading.value = false;
+    stopPageLoading();
     if (isMobile.value) {
       closeMobileNav();
     }
@@ -91,12 +114,13 @@ watch(
 );
 
 onMounted(() => {
-  isPageLoading.value = false;
+  stopPageLoading();
   syncViewport();
   window.addEventListener("resize", syncViewport);
 });
 
 onBeforeUnmount(() => {
+  stopPageLoading();
   if (!process.client) return;
   window.removeEventListener("resize", syncViewport);
 });
@@ -259,7 +283,7 @@ onBeforeUnmount(() => {
         </div>
       </header>
       <section class="page-body">
-        <div v-if="isPageLoading" class="page-loading">
+        <div v-if="isPageLoadingVisible" class="page-loading">
           <div class="spinner"></div>
           <span>加载中...</span>
         </div>
@@ -272,18 +296,21 @@ onBeforeUnmount(() => {
 <style scoped>
 .page-loading {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  gap: 10px;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(2px);
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 28px rgba(160, 130, 100, 0.16);
   z-index: 3;
   color: #6c5a4b;
   font-size: 13px;
   font-weight: 600;
+  pointer-events: none;
 }
 
 .mobile-nav-mask {
@@ -397,13 +424,14 @@ onBeforeUnmount(() => {
 
 .page-body {
   position: relative;
+  min-height: 120px;
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 3px solid rgba(108, 90, 75, 0.25);
+  border: 2px solid rgba(108, 90, 75, 0.2);
   border-top-color: #c47f4f;
   animation: spin 0.9s linear infinite;
 }

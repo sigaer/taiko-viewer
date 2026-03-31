@@ -2,6 +2,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { formatViewerTitle } from "~/composables/useViewerSeo";
 
+const { accountUser, fetchCurrentUser } = useAccountState();
+await fetchCurrentUser();
+
 const pageMeta = {
   title: "设置",
   desc: "主题切换与缓存管理。"
@@ -20,6 +23,10 @@ useSeoMeta({
   ogTitle: formatViewerTitle(pageMeta.title),
   ogDescription: pageMeta.desc
 });
+
+const isDeveloperReviewer = computed(
+  () => accountUser.value?.username === "sigaer" && accountUser.value?.email === "1106865024@qq.com"
+);
 
 const theme = ref("light");
 
@@ -60,6 +67,46 @@ const clearCache = () => {
 
 <template>
   <div class="page-stack">
+    <el-card class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            站内快捷入口
+          </h3>
+          <p>这里可以直接进入社区、多端同步和开发者相关功能。</p>
+        </div>
+      </div>
+      <div class="tool-links">
+        <NuxtLink to="/forum" class="tool-link">
+          <strong>论坛社区</strong>
+          <span>查看版块、通知和帖子动态</span>
+        </NuxtLink>
+        <NuxtLink to="/account/sync" class="tool-link">
+          <strong>多端同步</strong>
+          <span>同步当前绑定 ID 的完整成绩 JSON</span>
+        </NuxtLink>
+        <NuxtLink to="/account/developer" class="tool-link">
+          <strong>开发者权限</strong>
+          <span>提交申请、查看审批状态和 Token</span>
+        </NuxtLink>
+        <NuxtLink v-if="isDeveloperReviewer" to="/account/developer/review" class="tool-link">
+          <strong>开发者审批</strong>
+          <span>处理待审批申请并签发开发者 Token</span>
+        </NuxtLink>
+      </div>
+    </el-card>
+
     <el-card class="panel-card">
       <div class="panel-header">
         <div>
@@ -225,6 +272,32 @@ const clearCache = () => {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
+}
+
+.tool-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.tool-link {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: #3d2f25;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 18px rgba(165, 138, 110, 0.12);
+}
+
+.tool-link strong {
+  font-size: 15px;
+}
+
+.tool-link span {
+  color: #6c5a4b;
+  line-height: 1.7;
 }
 
 .cache-card {
