@@ -10,6 +10,9 @@
 - Production forum domain: `https://forum.sakura-bot.cn`
 - Source project: `taiko_frontend_back`
 - Shared backend APIs live under `/api/forum/*` and `/api/account/*`
+- Any user-visible web change must bump `taiko_frontend_back/package.json` version in the same change.
+- After changing web code or web version, deploy with `scripts/deploy_forum_web.sh "<commit_message>"` instead of only restarting a single service.
+- If the homepage/version badge reads from fallback strings, update those fallbacks together with the package version.
 
 ## App
 

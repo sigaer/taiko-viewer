@@ -122,6 +122,39 @@ onBeforeUnmount(() => {
   if (cooldownTimer) clearInterval(cooldownTimer);
 });
 
+const buildSyncFeedback = (log: SyncLog | null | undefined) => {
+  if (!log) {
+    return {
+      level: "success" as const,
+      message: "同步已完成"
+    };
+  }
+  const successCount = log.results.filter((item) => item.ok).length;
+  const totalCount = log.results.length;
+  const failedResults = log.results.filter((item) => !item.ok);
+  if (log.status === "success") {
+    return {
+      level: "success" as const,
+      message: `同步成功，${successCount}/${totalCount} 个目标已完成`
+    };
+  }
+  if (log.status === "partial") {
+    const failedLabels = failedResults.map((item) => item.label).filter(Boolean).join("、");
+    return {
+      level: "warning" as const,
+      message: `部分同步成功，${successCount}/${totalCount} 个目标完成${failedLabels ? `，失败目标：${failedLabels}` : ""}`
+    };
+  }
+  const failedMessage = failedResults
+    .map((item) => `${item.label}：${item.message}`)
+    .filter(Boolean)
+    .join("；");
+  return {
+    level: "error" as const,
+    message: failedMessage || "同步失败，请查看最近一次同步结果"
+  };
+};
+
 const submitSync = async () => {
   if (submitting.value) return;
   if (!selectedTargetIds.value.length) {
@@ -130,13 +163,20 @@ const submitSync = async () => {
   }
   submitting.value = true;
   try {
-    await $fetch("/api/account/sync", {
+    const response = await $fetch<{ log: SyncLog | null }>("/api/account/sync", {
       method: "POST",
       body: {
         targetIds: selectedTargetIds.value
       }
     });
-    ElMessage.success("同步请求已提交");
+    const feedback = buildSyncFeedback(response?.log);
+    if (feedback.level === "success") {
+      ElMessage.success(feedback.message);
+    } else if (feedback.level === "warning") {
+      ElMessage.warning(feedback.message);
+    } else {
+      ElMessage.error(feedback.message);
+    }
     await refresh();
   } catch (error: any) {
     ElMessage.error(error?.data?.statusMessage || error?.message || "同步失败");
