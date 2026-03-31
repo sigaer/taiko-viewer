@@ -14,7 +14,7 @@ Private dual-project repository for the Taiko forum service.
 - Web domain: `https://forum.sakura-bot.cn`
 - Forum service: `taiko-forum.service`
 - Viewer service: `taiko-viewer.service`
-- Local sync receiver: `taiko-sync-receiver.service`，写入 `/home/sigaer/taiko/userdata`
+- Local sync dispatcher: `taiko-sync-receiver.service`，实际实现位于 `/home/sigaer/taiko/scripts/sync_dispatch_server.py`
 
 ## Common Commands
 
@@ -34,7 +34,7 @@ curl http://127.0.0.1:3102/health
 - 网页只向论坛后端提交同步请求，论坛后端再调用 `http://127.0.0.1:3102/dispatch`。
 - `Sakura bot` 网关会在本地读取 `userdata/{userid}data.json`，按需刷新 `userdata/{userid}/data_*.json` 历史快照，并将 zstd 数据转发到配置的目标接口。
 - 目标列表由网关自身提供：`http://127.0.0.1:3102/targets`
-- 如需覆盖默认分发目标，可为 `taiko-sync-receiver.service` 设置环境变量 `TAIKO_SYNC_FORWARD_TARGETS_JSON`
+- 如需新增或调整同步目标，直接修改 `/home/sigaer/taiko/scripts/sync_dispatch_targets.py`
 
 ### App
 

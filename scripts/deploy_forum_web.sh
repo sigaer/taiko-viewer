@@ -202,6 +202,7 @@ if ! run_nuxt_build; then
 fi
 
 echo "[4/5] 重载服务..."
+run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-sync-receiver.service" /etc/systemd/system/taiko-sync-receiver.service
 run_privileged systemctl daemon-reload
 run_privileged nginx -t
 run_privileged systemctl reload nginx
