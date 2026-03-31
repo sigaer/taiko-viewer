@@ -108,7 +108,7 @@ export default defineNuxtConfig({
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
     syncTargetsJson: process.env.TAIKO_SYNC_TARGETS_JSON || "",
-    localSyncReceiverEndpoint: process.env.TAIKO_LOCAL_SYNC_RECEIVER_ENDPOINT || "",
+    localSyncReceiverBaseUrl: process.env.TAIKO_LOCAL_SYNC_RECEIVER_BASE_URL || "",
     dbHost: process.env.TAIKO_DB_HOST || "",
     dbPort: process.env.TAIKO_DB_PORT || "",
     dbUser: process.env.TAIKO_DB_USER || "",

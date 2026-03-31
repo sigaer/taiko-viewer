@@ -28,6 +28,14 @@ sudo systemctl restart taiko-viewer taiko-forum taiko-sync-receiver
 curl http://127.0.0.1:3102/health
 ```
 
+### Sakura Bot Sync Gateway
+
+- `taiko-sync-receiver.service` 现在是服务端同步网关，不再接收网页直接上传的 zstd 成绩包。
+- 网页只向论坛后端提交同步请求，论坛后端再调用 `http://127.0.0.1:3102/dispatch`。
+- `Sakura bot` 网关会在本地读取 `userdata/{userid}data.json`，按需刷新 `userdata/{userid}/data_*.json` 历史快照，并将 zstd 数据转发到配置的目标接口。
+- 目标列表由网关自身提供：`http://127.0.0.1:3102/targets`
+- 如需覆盖默认分发目标，可为 `taiko-sync-receiver.service` 设置环境变量 `TAIKO_SYNC_FORWARD_TARGETS_JSON`
+
 ### App
 
 ```bash

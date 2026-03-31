@@ -52,7 +52,7 @@ const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 
 const pageMeta = {
   title: "多端同步",
-  desc: "将当前绑定 ID 的完整成绩 JSON 压缩后分发到选中的服务目标。"
+  desc: "提交同步请求后，由服务端读取当前绑定 ID 的 userdata 并压缩分发到选中的服务目标。"
 };
 
 definePageMeta({
@@ -157,7 +157,7 @@ const submitSync = async () => {
       <el-card class="panel-card">
         <div class="section-title">
           <h2>多端同步</h2>
-          <p>当前只同步“当前绑定 ID”的完整 `userdata` JSON，提交后会进入 30 分钟冷却。</p>
+          <p>当前只同步“当前绑定 ID”的完整 `userdata` JSON。网页仅发起请求，实际读取与分发由服务端执行，提交后会进入 30 分钟冷却。</p>
         </div>
         <div v-if="overview.currentBinding" class="binding-meta">
           <div>
@@ -179,7 +179,7 @@ const submitSync = async () => {
       <el-card class="panel-card">
         <div class="section-title">
           <h3>同步目标</h3>
-          <p>勾选后会将完整成绩数据压缩并分发到对应服务。</p>
+          <p>勾选后会由 Sakura bot 在服务端读取 userdata、压缩为 zstd，并分发到对应服务。</p>
         </div>
         <el-empty v-if="!overview.targets.length" description="当前没有可用的同步目标" />
         <el-checkbox-group v-else v-model="selectedTargetIds" class="target-list">

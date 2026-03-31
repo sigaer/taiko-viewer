@@ -1,7 +1,31 @@
 @font-face {
-  font-family: "DDFont";
-  src: url("../font/DDFont.ttf") format("truetype");
+  font-family: "TaikoUI";
+  src: url("../font/NotoSansCJKsc-Regular.otf") format("opentype");
   font-display: swap;
+}
+
+@font-face {
+  font-family: "TaikoSymbols";
+  src: url("../font/NotoSansSymbols2-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --viewer-font-family:
+    "TaikoUI",
+    "TaikoSymbols",
+    "Noto Sans Symbols 2",
+    "Noto Sans CJK SC",
+    "Source Han Sans SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei UI",
+    "Microsoft YaHei",
+    "PingFang SC",
+    "Yu Gothic",
+    "Meiryo",
+    "Segoe UI Symbol",
+    "Apple Color Emoji",
+    sans-serif;
 }
 
 html,
@@ -15,7 +39,25 @@ body {
   margin: 0;
   background: radial-gradient(circle at top, #fff4de 0%, #f4efe7 45%, #f6f1ea 100%);
   color: #2f2620;
-  font-family: "DDFont", "Noto Serif SC", "Source Han Serif SC", "STZhongsong", serif;
+  font-family: var(--viewer-font-family);
+  text-rendering: optimizeLegibility;
+}
+
+body,
+button,
+input,
+textarea,
+select,
+.el-button,
+.el-input__inner,
+.el-textarea__inner,
+.el-select__placeholder,
+.el-form-item__label,
+.el-dialog__title,
+.el-message-box__title,
+.el-message,
+.el-tag {
+  font-family: var(--viewer-font-family);
 }
 
 * {

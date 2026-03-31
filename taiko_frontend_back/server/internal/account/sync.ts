@@ -1,17 +1,14 @@
-import { readFile } from "node:fs/promises";
-import { zstdCompressSync, zstdDecompressSync } from "node:zlib";
+import { zstdDecompressSync } from "node:zlib";
 import type { H3Event } from "h3";
-import { createError, getHeader, getRequestURL, readRawBody } from "h3";
+import { createError, getHeader, readRawBody } from "h3";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
-import { type SyncLogRow, SYNC_COOLDOWN_MS, ensureNonEmpty, getUserdataPath, sha256, toIso } from "./shared";
+import { type SyncLogRow, SYNC_COOLDOWN_MS, ensureNonEmpty, toIso } from "./shared";
 
 export type SyncTargetConfig = {
   id: string;
   label: string;
   description: string;
-  endpoint: string;
-  kind: "http" | "mock";
 };
 
 export type PublicSyncTarget = Pick<SyncTargetConfig, "id" | "label" | "description">;
@@ -39,20 +36,25 @@ export type PublicSyncLog = {
   updatedAt: string;
 };
 
+type SyncGatewayDispatchPayload = {
+  ok: boolean;
+  userid: string;
+  originalBytes: number;
+  compressedBytes: number;
+  results: SyncDispatchResult[];
+  message: string;
+};
+
 const DEFAULT_SYNC_TARGETS: SyncTargetConfig[] = [
   {
     id: "sakura-bot",
     label: "Sakura bot",
-    description: "本地接收服务，接收 zstd 标准压缩后的完整成绩 JSON 并直接写入 userdata。",
-    endpoint: "",
-    kind: "http"
+    description: "由 Sakura bot 在服务端读取 userdata 并刷新本地快照。"
   },
   {
     id: "mock-service-b",
     label: "站内 mock 接收器",
-    description: "站内 mock 接收器，用于测试多目标并发分发。",
-    endpoint: "",
-    kind: "mock"
+    description: "由 Sakura bot 在服务端转发 zstd 到论坛 mock 接口，验证分发链路。"
   }
 ];
 
@@ -62,80 +64,108 @@ const parseSyncTarget = (input: unknown): SyncTargetConfig | null => {
   const id = String(payload.id || "").trim();
   const label = String(payload.label || "").trim();
   const description = String(payload.description || "").trim();
-  const endpoint = String(payload.endpoint || payload.url || "").trim();
-  const rawKind = String(payload.kind || (endpoint ? "http" : "mock"))
-    .trim()
-    .toLowerCase();
   if (!id || !label) return null;
-  if (rawKind === "http" && !endpoint) return null;
   return {
     id,
     label,
-    description,
-    endpoint,
-    kind: rawKind === "mock" ? "mock" : "http"
+    description
   };
 };
 
-const getInternalNitroOrigin = () => {
-  const host = String(process.env.NITRO_HOST || "127.0.0.1").trim() || "127.0.0.1";
-  const port = Number(process.env.NITRO_PORT || 3000) || 3000;
-  return `http://${host}:${port}`;
-};
-
-const getLocalSyncReceiverEndpoint = () => {
+const getLocalSyncReceiverBaseUrl = () => {
   const runtimeConfig = useRuntimeConfig();
   return (
-    String(runtimeConfig.localSyncReceiverEndpoint || process.env.TAIKO_LOCAL_SYNC_RECEIVER_ENDPOINT || "").trim() ||
-    "http://127.0.0.1:3102/receive"
-  );
+    String(runtimeConfig.localSyncReceiverBaseUrl || process.env.TAIKO_LOCAL_SYNC_RECEIVER_BASE_URL || "").trim() ||
+    "http://127.0.0.1:3102"
+  ).replace(/\/+$/, "");
 };
 
-const resolveMockEndpoint = (event: H3Event | undefined, targetId: string) => {
-  if (!event) {
-    return `${getInternalNitroOrigin()}/api/account/sync/mock/${encodeURIComponent(targetId)}`;
-  }
-  const requestUrl = getRequestURL(event);
-  const baseUrl = requestUrl.protocol && requestUrl.host
-    ? `${requestUrl.protocol}//${requestUrl.host}`
-    : getInternalNitroOrigin();
-  return `${baseUrl}/api/account/sync/mock/${encodeURIComponent(targetId)}`;
-};
-
-const resolveSyncTargetEndpoint = (event: H3Event | undefined, target: SyncTargetConfig) =>
-  target.kind === "mock" ? resolveMockEndpoint(event, target.id) : target.endpoint || getLocalSyncReceiverEndpoint();
-
-export const loadSyncTargets = (event?: H3Event): SyncTargetConfig[] => {
-  const runtimeConfig = useRuntimeConfig();
-  const raw = String(runtimeConfig.syncTargetsJson || process.env.TAIKO_SYNC_TARGETS_JSON || "").trim();
-  if (!raw) {
-    return DEFAULT_SYNC_TARGETS.map((target) => ({
-      ...target,
-      endpoint: resolveSyncTargetEndpoint(event, target)
-    }));
-  }
+const readResponseText = async (response: Response) => {
   try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error("sync target config must be an array");
-    }
-    const targets = parsed.map(parseSyncTarget).filter(Boolean) as SyncTargetConfig[];
-    if (!targets.length) {
-      throw new Error("sync target config is empty");
-    }
-    return targets.map((target) =>
-      ({
-        ...target,
-        endpoint: resolveSyncTargetEndpoint(event, target)
-      })
-    );
-  } catch (error) {
-    console.error("[account-sync] 解析同步目标失败，已回退到 mock 目标", error);
-    return DEFAULT_SYNC_TARGETS.map((target) => ({
-      ...target,
-      endpoint: resolveSyncTargetEndpoint(event, target)
-    }));
+    return (await response.text()).trim();
+  } catch {
+    return "";
   }
+};
+
+const readResponseJson = async (response: Response) => {
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+export const loadSyncTargets = async () => {
+  const endpoint = `${getLocalSyncReceiverBaseUrl()}/targets`;
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        Accept: "application/json"
+      }
+    });
+    const payload = await readResponseJson(response);
+    if (!response.ok) {
+      throw new Error(String(payload?.message || payload?.statusMessage || (await readResponseText(response)) || `HTTP ${response.status}`));
+    }
+    const targets = Array.isArray(payload?.targets)
+      ? payload!.targets.map(parseSyncTarget).filter(Boolean) as SyncTargetConfig[]
+      : [];
+    if (!targets.length) {
+      throw new Error("同步网关未返回可用目标");
+    }
+    return targets;
+  } catch (error) {
+    console.error("[account-sync] 读取 Sakura bot 同步目标失败，已回退到默认目标", error);
+    return DEFAULT_SYNC_TARGETS;
+  }
+};
+
+export const requestSyncDispatch = async (taikoId: string, targetIds: string[]) => {
+  const endpoint = `${getLocalSyncReceiverBaseUrl()}/dispatch`;
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({
+        userid: taikoId,
+        targetIds
+      })
+    });
+  } catch (error) {
+    console.error("[account-sync] 调用 Sakura bot 同步网关失败", error);
+    throw createError({ statusCode: 502, statusMessage: "无法连接 Sakura bot 同步网关" });
+  }
+
+  const payload = await readResponseJson(response);
+  if (!response.ok) {
+    const message =
+      String(payload?.message || payload?.statusMessage || "").trim() ||
+      (await readResponseText(response)) ||
+      `HTTP ${response.status}`;
+    throw createError({
+      statusCode: response.status || 502,
+      statusMessage: message
+    });
+  }
+
+  const results = serializeSyncResults(payload?.results);
+  if (!results.length) {
+    throw createError({ statusCode: 502, statusMessage: "Sakura bot 同步网关未返回分发结果" });
+  }
+
+  return {
+    ok: Boolean(payload?.ok),
+    userid: String(payload?.userid || taikoId).trim(),
+    originalBytes: Number(payload?.originalBytes || 0) || 0,
+    compressedBytes: Number(payload?.compressedBytes || 0) || 0,
+    results,
+    message: String(payload?.message || "").trim()
+  } satisfies SyncGatewayDispatchPayload;
 };
 
 export const toPublicSyncTargets = (targets: SyncTargetConfig[]): PublicSyncTarget[] =>
@@ -221,85 +251,6 @@ export const getSyncCooldownState = async (userId: number) => {
     remainingSeconds: Math.ceil(remainingMs / 1000),
     availableAt: toIso(lastCreatedAt + SYNC_COOLDOWN_MS)
   };
-};
-
-export const readSyncUserdataPayload = async (taikoId: string) => {
-  const filePath = getUserdataPath(taikoId);
-  let rawBuffer: Buffer;
-  try {
-    rawBuffer = await readFile(filePath);
-  } catch {
-    throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
-  }
-  const text = rawBuffer.toString("utf-8");
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    throw createError({ statusCode: 500, statusMessage: "当前绑定 ID 的本地成绩 JSON 已损坏" });
-  }
-  return {
-    rawBuffer,
-    compressedBuffer: zstdCompressSync(rawBuffer),
-    parsed
-  };
-};
-
-const readResponsePayload = async (response: Response) => {
-  const contentType = String(response.headers.get("content-type") || "").toLowerCase();
-  if (contentType.includes("application/json")) {
-    try {
-      const payload = (await response.json()) as Record<string, unknown>;
-      return {
-        message: String(payload.message || payload.statusMessage || "").trim() || `HTTP ${response.status}`,
-        receivedBytes: Number(payload.receivedBytes || 0) || 0,
-        decompressedBytes: Number(payload.decompressedBytes || 0) || 0,
-        songCount: payload.songCount === null || payload.songCount === undefined ? null : Number(payload.songCount || 0)
-      };
-    } catch {
-      return {
-        message: `HTTP ${response.status}`,
-        receivedBytes: 0,
-        decompressedBytes: 0,
-        songCount: null
-      };
-    }
-  }
-  const text = await response.text();
-  return {
-    message: text.trim() || `HTTP ${response.status}`,
-    receivedBytes: 0,
-    decompressedBytes: 0,
-    songCount: null
-  };
-};
-
-export const dispatchSyncPayloadToTarget = async (
-  target: SyncTargetConfig,
-  taikoId: string,
-  compressedPayload: Buffer
-) => {
-  const response = await fetch(target.endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/zstd",
-      "X-Taiko-Userid": taikoId,
-      "X-Taiko-Compression": "zstd",
-      "X-Taiko-Payload-Sha256": sha256(compressedPayload)
-    },
-    body: compressedPayload
-  });
-  const payload = await readResponsePayload(response);
-  return {
-    targetId: target.id,
-    label: target.label,
-    ok: response.ok,
-    statusCode: response.status,
-    message: payload.message,
-    receivedBytes: payload.receivedBytes || compressedPayload.byteLength,
-    decompressedBytes: payload.decompressedBytes,
-    songCount: payload.songCount
-  } satisfies SyncDispatchResult;
 };
 
 export const insertSyncLog = async (payload: {
