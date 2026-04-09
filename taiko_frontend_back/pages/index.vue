@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.15.1";
+const appVersion = runtimeConfig.public.appVersion || "0.15.2";
 
 const pageMeta = {
   title: "首页",

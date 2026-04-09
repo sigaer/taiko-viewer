@@ -19,5 +19,10 @@ useViewerSeo({
 </script>
 
 <template>
-  <SongListContent :shelf-status="0" title="现有歌曲" desc="展示当前可用歌曲，支持按名称与分类搜索。" />
+  <SongListContent
+    :shelf-status="0"
+    default-sort="open-day-desc"
+    title="现有歌曲"
+    desc="展示当前可用歌曲，默认按实装日期倒序排列，支持按名称与分类搜索。"
+  />
 </template>

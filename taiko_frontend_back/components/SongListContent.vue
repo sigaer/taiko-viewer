@@ -7,11 +7,13 @@ const props = withDefaults(
     shelfStatus?: number;
     title?: string;
     desc?: string;
+    defaultSort?: "catalog" | "open-day-desc";
   }>(),
   {
     shelfStatus: 0,
     title: "歌曲列表",
-    desc: "展示歌曲曲绘、标题与分类信息。"
+    desc: "展示歌曲曲绘、标题与分类信息。",
+    defaultSort: "catalog"
   }
 );
 
@@ -68,15 +70,33 @@ const getLevels = (song: SongCatalogItem) =>
 
 const getLevelCount = (song: SongCatalogItem) => Math.max(getLevels(song).length, 1);
 
+const parseOpenDay = (input?: string) => {
+  if (!input) return 0;
+  const match = input.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!match) return 0;
+  return new Date(Number(match[3]), Number(match[1]) - 1, Number(match[2])).getTime();
+};
+
+const sortSongs = (items: SongCatalogItem[]) => {
+  if (props.defaultSort !== "open-day-desc") return items;
+  return [...items].sort((a, b) => {
+    const dateDiff = parseOpenDay(b.open_day) - parseOpenDay(a.open_day);
+    if (dateDiff !== 0) return dateDiff;
+    return Number(b.id || 0) - Number(a.id || 0);
+  });
+};
+
 const filteredSongs = computed(() => {
   const scopedSongs = songs.value.filter((song) => normalizedShelfStatus(song.shelf_status) === props.shelfStatus);
-  if (!query.value) return scopedSongs;
+  if (!query.value) return sortSongs(scopedSongs);
   const keyword = query.value.trim().toLowerCase();
-  return scopedSongs.filter(
-    (song) =>
-      song.song_name.toLowerCase().includes(keyword) ||
-      song.song_name_jp?.toLowerCase().includes(keyword) ||
-      song.type.toLowerCase().includes(keyword)
+  return sortSongs(
+    scopedSongs.filter(
+      (song) =>
+        song.song_name.toLowerCase().includes(keyword) ||
+        song.song_name_jp?.toLowerCase().includes(keyword) ||
+        song.type.toLowerCase().includes(keyword)
+    )
   );
 });
 
