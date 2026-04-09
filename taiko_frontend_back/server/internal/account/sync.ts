@@ -1,9 +1,7 @@
-import { zstdDecompressSync } from "node:zlib";
-import type { H3Event } from "h3";
-import { createError, getHeader, readRawBody } from "h3";
+import { createError } from "h3";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
-import { type SyncLogRow, SYNC_COOLDOWN_MS, ensureNonEmpty, toIso } from "./shared";
+import { type SyncLogRow, SYNC_COOLDOWN_MS, toIso } from "./shared";
 
 export type SyncTargetConfig = {
   id: string;
@@ -50,11 +48,6 @@ const DEFAULT_SYNC_TARGETS: SyncTargetConfig[] = [
     id: "sakura-bot",
     label: "Sakura bot",
     description: "由 Sakura bot 在服务端读取 userdata 并刷新本地快照。"
-  },
-  {
-    id: "mock-service-b",
-    label: "站内 mock 接收器",
-    description: "由 Sakura bot 在服务端转发 zstd 到论坛 mock 接口，验证分发链路。"
   }
 ];
 
@@ -283,36 +276,4 @@ export const insertSyncLog = async (payload: {
     [result.insertId]
   );
   return rows[0] || null;
-};
-
-export const receiveMockSyncPayload = async (event: H3Event, targetIdInput: unknown) => {
-  const targetId = String(targetIdInput || "").trim();
-  ensureNonEmpty(targetId, "同步目标无效");
-  const rawBody = await readRawBody(event, false);
-  const receivedBuffer = rawBody instanceof Buffer ? rawBody : Buffer.from(rawBody || "");
-  if (!receivedBuffer.byteLength) {
-    throw createError({ statusCode: 400, statusMessage: "未收到同步数据" });
-  }
-  const contentType = String(getHeader(event, "content-type") || "").toLowerCase();
-  if (!contentType.includes("application/zstd")) {
-    throw createError({ statusCode: 415, statusMessage: "mock 接收器仅接受 application/zstd" });
-  }
-  const userid = String(getHeader(event, "x-taiko-userid") || "").trim();
-  const decompressed = zstdDecompressSync(receivedBuffer);
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(decompressed.toString("utf-8")) as Record<string, unknown>;
-  } catch {
-    throw createError({ statusCode: 400, statusMessage: "mock 接收器解压后 JSON 无法解析" });
-  }
-  const songs = Array.isArray(parsed.songs) ? parsed.songs : [];
-  return {
-    ok: true,
-    targetId,
-    userid,
-    receivedBytes: receivedBuffer.byteLength,
-    decompressedBytes: decompressed.byteLength,
-    songCount: songs.length,
-    message: `mock 目标 ${targetId} 已收到 ${songs.length} 条成绩记录`
-  };
 };

@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.15.0",
+  "version": "0.15.1",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -9,7 +9,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "pwa:icons": "node ./scripts/generate_pwa_icons.mjs",
-    "seed:forum-mock": "node ./scripts/seed_forum_mock.mjs",
+    "cleanup:forum-mock": "node ./scripts/cleanup_forum_mock.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
