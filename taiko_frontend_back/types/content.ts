@@ -30,9 +30,12 @@ export type RatingContentItem = {
   hs变化?: number | string;
 };
 
+export type SongTrackKey = "EASY" | "NORMAL" | "HARD" | "ONI" | "EDIT";
+
 export type SongDetailPayload = {
   song: SongCatalogItem | null;
   ratingEntries: RatingContentItem[];
+  branchAudioTracks: SongTrackKey[];
 };
 
 export type HomeContentPayload = {

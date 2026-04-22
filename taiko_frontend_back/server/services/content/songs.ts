@@ -10,6 +10,7 @@ import {
   getContentRuntimePaths,
   readCachedJsonFile
 } from "./runtime";
+import { getSongBranchAudioTracks } from "./songBranchAudio";
 
 let songCatalogCache: { mtimeMs: number; data: SongCatalogItem[] } | null = null;
 let ratingEntriesCache: { mtimeMs: number; data: RatingContentItem[] } | null = null;
@@ -60,10 +61,15 @@ export const getSongCatalogPayload = async (shelfStatus?: number): Promise<SongC
 };
 
 export const getSongDetailPayload = async (songId: number): Promise<SongDetailPayload> => {
-  const [songs, ratingEntries] = await Promise.all([getSongCatalog(), getRatingEntries()]);
+  const [songs, ratingEntries, branchAudioTracks] = await Promise.all([
+    getSongCatalog(),
+    getRatingEntries(),
+    getSongBranchAudioTracks(songId)
+  ]);
   return {
     song: songs.find((item) => Number(item.id) === songId) || null,
-    ratingEntries: ratingEntries.filter((item) => Number(item.id) === songId)
+    ratingEntries: ratingEntries.filter((item) => Number(item.id) === songId),
+    branchAudioTracks
   };
 };
 

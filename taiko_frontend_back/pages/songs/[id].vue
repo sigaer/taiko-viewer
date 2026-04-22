@@ -32,6 +32,7 @@ definePageMeta({
 
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
+const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
@@ -103,7 +104,8 @@ const getFumenComboLabel = (key: string) => {
 const { activeBranchVariants, hasBranchVariants, getBaseAudioUrl, getVariantAudioUrl, getPureAudioUrl } = useSongBranchAudio({
   apiBase,
   songId,
-  selectedTrack
+  selectedTrack,
+  branchTracks: branchAudioTracks
 });
 
 const currentDrumAudio = computed(() => {

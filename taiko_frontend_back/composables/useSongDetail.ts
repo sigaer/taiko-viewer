@@ -2,7 +2,8 @@ import type { SongDetailPayload } from "~/types/content";
 
 const createDefaultPayload = (): SongDetailPayload => ({
   song: null,
-  ratingEntries: []
+  ratingEntries: [],
+  branchAudioTracks: []
 });
 
 export const useSongDetail = (songId: MaybeRefOrGetter<number>) =>
