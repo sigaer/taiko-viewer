@@ -4,6 +4,8 @@
 
 - This repository only contains the Taiko forum web/backend project and the Flutter app.
 - Do not add unrelated bot code, user data, cached assets, or deployment outputs.
+- This path is a standalone Git repository.
+- Work inside `/home/sigaer/taiko/taiko-forum` does not need `/home/sigaer/git/Sakura_bot/taiko` status checks, sync, commits, or pushes.
 
 ## Web
 
