@@ -10,7 +10,8 @@ import sharp from "sharp";
 import type { H3Event, MultiPartData } from "h3";
 import { createError, getCookie, getHeader, readMultipartFormData } from "h3";
 import { getRatingEntries, getSongCatalog as loadSongCatalog } from "~/server/services/content";
-import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import type { DbRow } from "~/server/utils/account-db";
 
 const scryptAsync = promisify(nodeScrypt);
 export const execFileAsync = promisify(execFile);
@@ -119,9 +120,10 @@ export type SongMeta = {
   category?: string;
   subtitle?: string;
   bpm?: string;
-  max_combo?: number | string;
-  version?: string;
-  artists?: string;
+  max_combo?: Array<number | string> | number | string;
+  version?: string[] | string;
+  artists?: string[] | string;
+  shelf_status?: number | string;
   level_1?: number | string;
   level_2?: number | string;
   level_3?: number | string;
@@ -132,6 +134,8 @@ export type SongMeta = {
 export type UserdataSong = {
   song_no: number;
   level: number;
+  song_name?: string;
+  song_name_jp?: string;
   high_score?: number;
   best_score_rank?: number;
   good_cnt?: number;
@@ -188,6 +192,7 @@ export type EditableSongFields = {
   good_cnt?: number;
   ok_cnt?: number;
   ng_cnt?: number;
+  pound_cnt?: number;
   stage_cnt?: number;
   clear_cnt?: number;
   full_combo_cnt?: number;
@@ -647,25 +652,44 @@ export const getSongLevelLabel = (level: number) => {
   }
 };
 
+const stringifySongMetaValue = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || "").trim()).filter(Boolean).join(" / ");
+  }
+  return String(value || "").trim();
+};
+
+const resolveSongTitle = (song: UserdataSong, meta: SongMeta | undefined) => {
+  const customTitle = String(song.song_name || "").trim();
+  if (meta?.song_name) return meta.song_name;
+  if (customTitle) return customTitle;
+  return `ID ${song.song_no}`;
+};
+
 export const toSongRow = (song: UserdataSong, meta: SongMeta | undefined, lockedKeys: Set<string>) => ({
   songNo: Number(song.song_no),
   level: Number(song.level),
   levelLabel: getSongLevelLabel(Number(song.level)),
-  title: meta?.song_name || `ID ${song.song_no}`,
-  titleJp: meta?.song_name_jp || "",
+  title: resolveSongTitle(song, meta),
+  titleJp: meta?.song_name_jp || String(song.song_name_jp || "").trim(),
   subtitle: meta?.subtitle || "",
-  category: meta?.category || "",
-  bpm: meta?.bpm || "",
-  version: meta?.version || "",
-  artists: meta?.artists || "",
-  maxCombo: meta?.max_combo || "",
+  category: stringifySongMetaValue(meta?.category),
+  bpm: stringifySongMetaValue(meta?.bpm),
+  version: stringifySongMetaValue(meta?.version),
+  artists: stringifySongMetaValue(meta?.artists),
+  maxCombo: Array.isArray(meta?.max_combo) ? meta?.max_combo?.[Number(song.level) - 1] || "" : meta?.max_combo || "",
   starLevel: meta ? meta[`level_${Number(song.level)}` as keyof SongMeta] || "" : "",
+  shelfStatus: meta?.shelf_status === undefined || meta?.shelf_status === null || meta?.shelf_status === ""
+    ? null
+    : Number(meta.shelf_status),
+  isCustom: !meta && Boolean(String(song.song_name || "").trim()),
   isLocked: lockedKeys.has(`${song.song_no}:${song.level}`),
   highScore: parsePositiveInt(song.high_score),
   bestScoreRank: parsePositiveInt(song.best_score_rank),
   goodCnt: parsePositiveInt(song.good_cnt),
   okCnt: parsePositiveInt(song.ok_cnt),
   ngCnt: parsePositiveInt(song.ng_cnt),
+  poundCnt: parsePositiveInt(song.pound_cnt),
   stageCnt: parsePositiveInt(song.stage_cnt),
   clearCnt: parsePositiveInt(song.clear_cnt),
   fullComboCnt: parsePositiveInt(song.full_combo_cnt),

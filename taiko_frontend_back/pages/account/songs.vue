@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { formatViewerTitle } from "~/composables/useViewerSeo";
+import type { SongCatalogPayload } from "~/types/content";
 
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 const page = ref(1);
@@ -12,23 +13,9 @@ const levelFilter = ref(0);
 const tableLoading = ref(false);
 const lockingKey = ref("");
 const switchingBinding = ref(false);
-const dialogVisible = ref(false);
-const saving = ref(false);
-const editForm = reactive({
-  songNo: 0,
-  level: 0,
-  title: "",
-  high_score: 0,
-  best_score_rank: 0,
-  good_cnt: 0,
-  ok_cnt: 0,
-  ng_cnt: 0,
-  stage_cnt: 0,
-  clear_cnt: 0,
-  full_combo_cnt: 0,
-  dondaful_combo_cnt: 0,
-  combo_cnt: 0
-});
+const editorVisible = ref(false);
+const editorMode = ref<"edit" | "create">("edit");
+const editingSong = ref<SongRow | null>(null);
 
 const pageMeta = {
   title: "歌曲数据",
@@ -73,12 +60,15 @@ type SongRow = {
   artists: string;
   maxCombo: string | number;
   starLevel: string | number;
+  shelfStatus: number | null;
+  isCustom: boolean;
   isLocked: boolean;
   highScore: number;
   bestScoreRank: number;
   goodCnt: number;
   okCnt: number;
   ngCnt: number;
+  poundCnt: number;
   stageCnt: number;
   clearCnt: number;
   fullComboCnt: number;
@@ -106,6 +96,12 @@ const { data: profileData, refresh: refreshProfile } = await useAsyncData<Profil
   { default: () => ({ bindings: [], currentBinding: null }) }
 );
 
+const { data: songCatalogData } = await useAsyncData<SongCatalogPayload>(
+  "account-song-catalog",
+  () => $fetch("/api/content/songs"),
+  { default: () => ({ songs: [] }) }
+);
+
 const loadSongs = async () => {
   tableLoading.value = true;
   try {
@@ -131,6 +127,7 @@ const { data: songsData, refresh: refreshSongs } = await useAsyncData<SongsPaylo
 const total = computed(() => songsData.value?.total || 0);
 const rows = computed(() => songsData.value?.items || []);
 const currentBinding = computed(() => songsData.value?.currentBinding || profileData.value?.currentBinding || null);
+const songCatalog = computed(() => songCatalogData.value?.songs || []);
 
 const applyFilters = async () => {
   page.value = 1;
@@ -156,54 +153,20 @@ const changeBinding = async (bindingId: number) => {
   }
 };
 
-const openEditor = (row: SongRow) => {
-  editForm.songNo = row.songNo;
-  editForm.level = row.level;
-  editForm.title = row.title;
-  editForm.high_score = row.highScore;
-  editForm.best_score_rank = row.bestScoreRank;
-  editForm.good_cnt = row.goodCnt;
-  editForm.ok_cnt = row.okCnt;
-  editForm.ng_cnt = row.ngCnt;
-  editForm.stage_cnt = row.stageCnt;
-  editForm.clear_cnt = row.clearCnt;
-  editForm.full_combo_cnt = row.fullComboCnt;
-  editForm.dondaful_combo_cnt = row.dondafulComboCnt;
-  editForm.combo_cnt = row.comboCnt;
-  dialogVisible.value = true;
+const openCreator = () => {
+  editorMode.value = "create";
+  editingSong.value = null;
+  editorVisible.value = true;
 };
 
-const saveSong = async () => {
-  if (saving.value) return;
-  saving.value = true;
-  try {
-    await $fetch("/api/account/songs/update", {
-      method: "POST",
-      body: {
-        songNo: editForm.songNo,
-        level: editForm.level,
-        values: {
-          high_score: editForm.high_score,
-          best_score_rank: editForm.best_score_rank,
-          good_cnt: editForm.good_cnt,
-          ok_cnt: editForm.ok_cnt,
-          ng_cnt: editForm.ng_cnt,
-          stage_cnt: editForm.stage_cnt,
-          clear_cnt: editForm.clear_cnt,
-          full_combo_cnt: editForm.full_combo_cnt,
-          dondaful_combo_cnt: editForm.dondaful_combo_cnt,
-          combo_cnt: editForm.combo_cnt
-        }
-      }
-    });
-    ElMessage.success("谱面记录已保存");
-    dialogVisible.value = false;
-    await refreshSongs();
-  } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "保存失败");
-  } finally {
-    saving.value = false;
-  }
+const openEditor = (row: SongRow) => {
+  editorMode.value = "edit";
+  editingSong.value = { ...row };
+  editorVisible.value = true;
+};
+
+const handleEditorSaved = async () => {
+  await refreshSongs();
 };
 
 const toggleLock = async (row: SongRow, value: boolean) => {
@@ -270,6 +233,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
                 <el-option :value="5" label="里谱" />
               </el-select>
               <el-button type="primary" @click="applyFilters">搜索</el-button>
+              <el-button type="success" plain @click="openCreator">新增成绩</el-button>
             </div>
           </div>
           <div class="toolbar-meta">
@@ -284,14 +248,21 @@ const toggleLock = async (row: SongRow, value: boolean) => {
               <div class="song-title-cell">
                 <strong>{{ row.title }}</strong>
                 <span>{{ row.titleJp || row.songNo }}</span>
+                <div class="song-tags">
+                  <el-tag v-if="row.shelfStatus === 1" size="small" type="warning" effect="light">已下架</el-tag>
+                  <el-tag v-if="row.isCustom" size="small" type="info" effect="light">手动收录</el-tag>
+                </div>
               </div>
             </template>
           </el-table-column>
           <el-table-column prop="levelLabel" label="难度" width="90" />
           <el-table-column prop="highScore" label="分数" width="110" />
-          <el-table-column label="判定" width="168">
+          <el-table-column label="判定 / 连打" width="180">
             <template #default="{ row }">
-              <div class="judge-cell">良 {{ row.goodCnt }} / 可 {{ row.okCnt }} / 不可 {{ row.ngCnt }}</div>
+              <div class="judge-cell">
+                <span>良 {{ row.goodCnt }} / 可 {{ row.okCnt }} / 不可 {{ row.ngCnt }}</span>
+                <span>连打 {{ row.poundCnt }} / 连击 {{ row.comboCnt }}</span>
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="bestScoreRank" label="评价" width="80" />
@@ -302,7 +273,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
               <el-switch
                 :model-value="row.isLocked"
                 :loading="lockingKey === `${row.songNo}:${row.level}`"
-                @update:model-value="toggleLock(row, $event)"
+                @update:model-value="toggleLock(row, Boolean($event))"
               />
             </template>
           </el-table-column>
@@ -325,50 +296,15 @@ const toggleLock = async (row: SongRow, value: boolean) => {
         </div>
       </template>
     </el-card>
-
-    <el-dialog v-model="dialogVisible" width="min(720px, 100%)" title="编辑谱面记录">
-      <div class="dialog-head">
-        <strong>{{ editForm.title }}</strong>
-        <span>ID {{ editForm.songNo }} / {{ editForm.level }}</span>
-      </div>
-      <div class="edit-grid">
-        <el-form-item label="分数">
-          <el-input-number v-model="editForm.high_score" :min="0" :step="100" />
-        </el-form-item>
-        <el-form-item label="评价">
-          <el-input-number v-model="editForm.best_score_rank" :min="0" :max="9" />
-        </el-form-item>
-        <el-form-item label="良">
-          <el-input-number v-model="editForm.good_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="可">
-          <el-input-number v-model="editForm.ok_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="不可">
-          <el-input-number v-model="editForm.ng_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="游玩次数">
-          <el-input-number v-model="editForm.stage_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="过关次数">
-          <el-input-number v-model="editForm.clear_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="全连次数">
-          <el-input-number v-model="editForm.full_combo_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="全良次数">
-          <el-input-number v-model="editForm.dondaful_combo_cnt" :min="0" />
-        </el-form-item>
-        <el-form-item label="最大连击">
-          <el-input-number v-model="editForm.combo_cnt" :min="0" />
-        </el-form-item>
-      </div>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="saveSong">保存</el-button>
-      </template>
-    </el-dialog>
   </div>
+
+  <AccountSongEditorDialog
+    v-model="editorVisible"
+    :mode="editorMode"
+    :initial-song="editingSong"
+    :song-catalog="songCatalog"
+    @saved="handleEditorSaved"
+  />
 </template>
 
 <style scoped>
@@ -418,7 +354,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
 
 .filter-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px auto;
+  grid-template-columns: minmax(0, 1fr) 140px auto auto;
   gap: 12px;
 }
 
@@ -441,32 +377,29 @@ const toggleLock = async (row: SongRow, value: boolean) => {
   gap: 4px;
 }
 
-.song-title-cell span,
-.judge-cell {
+.song-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.song-title-cell span {
   color: #7d6a5a;
   font-size: 13px;
+}
+
+.judge-cell {
+  display: grid;
+  gap: 4px;
+  color: #7d6a5a;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .pagination-row {
   margin-top: 16px;
   display: flex;
   justify-content: flex-end;
-}
-
-.dialog-head {
-  margin-bottom: 14px;
-  display: grid;
-  gap: 4px;
-}
-
-.dialog-head span {
-  color: #7d6a5a;
-}
-
-.edit-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
 }
 
 .empty-wrap {
@@ -489,10 +422,6 @@ const toggleLock = async (row: SongRow, value: boolean) => {
 
   .binding-select {
     width: 100%;
-  }
-
-  .edit-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>
