@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import GradeDojoShell from "~/components/GradeDojoShell.vue";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 import gradeDojoData from "~/assets/data/grade_dojo_nijiiro_2025.json";
 
 const pageMeta = {
   title: "虹段位道场 2025",
-  desc: "虹段位道场 2025 全部段位页面，按级位、段位与达人位查看课题曲与条件。"
+  desc: buildPageDescription("太鼓达人虹段位道场 2025，按级位、段位与达人位查看课题曲、合格条件与攻略。")
 };
 
 definePageMeta({
@@ -36,19 +36,13 @@ const selectedPage = computed(() => {
   return pages.find((page) => page.slug === selectedSlug.value) ?? pages[0];
 });
 
-useSeoMeta(() => ({
-  title: formatViewerTitle(
-    selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title
-  ),
+useViewerSeo(() => ({
+  title: selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title,
   description: selectedPage.value
-    ? `${selectedPage.value.displayTitle} 的课题曲、合格条件与攻略摘录。`
+    ? buildPageDescription(`${selectedPage.value.displayTitle} 段位课题曲、合格条件与攻略摘录。`)
     : pageMeta.desc,
-  ogTitle: formatViewerTitle(
-    selectedPage.value ? `${selectedPage.value.displayTitle} - ${pageMeta.title}` : pageMeta.title
-  ),
-  ogDescription: selectedPage.value
-    ? `${selectedPage.value.displayTitle} 的课题曲、合格条件与攻略摘录。`
-    : pageMeta.desc
+  path: `/grade/2025/${selectedSlug.value}`,
+  keywords: ["段位查询", "虹段位道场", selectedPage.value?.displayTitle || "2025"]
 }));
 </script>
 

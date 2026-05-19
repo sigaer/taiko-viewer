@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const pageMeta = {
   title: "虹段位道场 2024",
-  desc: "虹段位道场 2024 入口页面。"
+  desc: buildPageDescription("太鼓达人虹段位道场 2024 入口，查看各级段位课题曲与合格条件。")
 };
 
 const dojoTitle = "虹段位道场 2024";
@@ -15,11 +15,11 @@ definePageMeta({
   breadcrumbs: [{ label: "段位查询", to: "/grade/2025" }, { label: "虹 2024", to: "/grade/2024" }]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/grade/2024",
+  keywords: ["段位查询", "虹段位道场", "2024"]
 });
 </script>
 

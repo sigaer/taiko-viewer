@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const { fetchCurrentUser } = useAccountState();
 const { saveRememberedCredentials } = useRememberedAccountCredentials();
@@ -20,7 +20,7 @@ const form = reactive({
 
 const pageMeta = {
   title: "注册账号",
-  desc: "注册 taiko viewer 账号并绑定邮箱验证码。",
+  desc: buildPageDescription("注册 Sakura Taiko Viewer 账号并绑定邮箱验证码。"),
 };
 
 definePageMeta({
@@ -34,11 +34,10 @@ definePageMeta({
   ],
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc,
+  path: "/account/register"
 });
 
 onBeforeUnmount(() => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumSection, ForumThreadCard, ForumThreadType } from "~/types/forum";
+import { buildPageDescription } from "~/utils/seo";
 
 type ThreadListPayload = {
   total: number;
@@ -23,7 +23,7 @@ const filterState = reactive({
 
 const pageMeta = {
   title: "论坛版块",
-  desc: "按版块查看太鼓之达人论坛的主题与最新讨论。"
+  desc: buildPageDescription("按版块浏览太鼓达人论坛主题与最新讨论。")
 };
 
 definePageMeta({
@@ -36,11 +36,6 @@ definePageMeta({
   ]
 });
 
-useSeoMeta({
-  title: () => formatViewerTitle(`${pageMeta.title} - ${String(route.params.slug || "")}`),
-  description: pageMeta.desc
-});
-
 const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
   "forum-sections",
   () => $fetch("/api/forum/sections", { headers }),
@@ -48,6 +43,17 @@ const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
     default: () => ({ items: [] })
   }
 );
+
+const currentSection = computed(
+  () => sectionsData.value?.items.find((item) => item.slug === String(route.params.slug || "")) || null
+);
+
+useViewerSeo(() => ({
+  title: currentSection.value?.name || `${pageMeta.title} - ${String(route.params.slug || "")}`,
+  description: buildPageDescription(currentSection.value?.description || pageMeta.desc),
+  path: `/forum/section/${route.params.slug}`,
+  keywords: ["论坛版块", currentSection.value?.name || ""].filter(Boolean)
+}));
 
 const requestQuery = computed(() => ({
   sectionSlug: route.params.slug,

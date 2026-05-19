@@ -27,9 +27,11 @@ const tableRows = computed<TableRow[]>(() => {
 
 const tableStyle = computed(() => titleTableData.value?.table?.attrs?.style || "");
 
+import { buildPageDescription } from "~/utils/seo";
+
 const pageMeta = {
   title: "称号一览",
-  desc: "称号列表与获取条件。"
+  desc: buildPageDescription("太鼓达人国行称号列表与获取条件查询。")
 };
 
 definePageMeta({
@@ -43,6 +45,7 @@ useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
   path: "/titles",
+  keywords: ["称号一览", "太鼓达人称号"],
   breadcrumbs: [
     { name: "首页", path: "/" },
     { name: "称号一览", path: "/titles" }

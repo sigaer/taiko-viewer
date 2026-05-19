@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
+import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
 const apiBase = "https://static.sakura-bot.cn";
@@ -17,7 +18,7 @@ const songId = computed(() => Number(route.params.id));
 
 const pageMeta = {
   title: "歌曲详情",
-  desc: "查看歌曲信息、试听音源和谱面预览。"
+  desc: buildPageDescription("查看太鼓达人国行歌曲详情、试听音源与谱面预览。")
 };
 
 definePageMeta({
@@ -303,9 +304,16 @@ watch(hasEditDifficulty, (value) => {
 const pageDescription = computed(() => {
   if (!song.value) return pageMeta.desc;
   const subtitle = song.value.subtitle?.trim();
-  if (subtitle) return subtitle;
-  const parts = [song.value.type, song.value.bpm ? `BPM ${song.value.bpm}` : ""].filter(Boolean);
-  return parts.length ? `${song.value.song_name}，${parts.join("，")}。` : pageMeta.desc;
+  const detailParts = [song.value.type, song.value.bpm ? `BPM ${song.value.bpm}` : ""].filter(Boolean);
+  const detailText = detailParts.length ? detailParts.join("，") : "";
+  if (subtitle) {
+    return buildPageDescription(`${song.value.song_name} 太鼓达人国行歌曲详情：${subtitle}${detailText ? `，${detailText}` : ""}。`);
+  }
+  return buildPageDescription(
+    detailText
+      ? `${song.value.song_name} 太鼓达人国行歌曲详情，${detailText}。`
+      : `${song.value.song_name} 太鼓达人国行歌曲详情。`
+  );
 });
 
 useViewerSeo(() => ({
@@ -313,6 +321,7 @@ useViewerSeo(() => ({
   description: pageDescription.value,
   path: `/songs/${songId.value}`,
   image: coverUrl.value,
+  keywords: song.value ? [song.value.song_name, "太鼓达人歌曲", "国行歌曲"] : ["歌曲详情"],
   breadcrumbs: [
     { name: "首页", path: "/" },
     { name: "现有歌曲", path: "/songs/available" },

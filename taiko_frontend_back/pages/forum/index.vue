@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumHomePayload } from "~/types/forum";
+import { buildPageDescription } from "~/utils/seo";
 
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 
 const pageMeta = {
   title: "论坛社区",
-  desc: "太鼓之达人玩家交流区，聚合公告、谱面攻略、段位道场与晒分战报。"
+  desc: buildPageDescription("太鼓达人玩家交流社区，聚合公告、谱面攻略、段位道场与晒分战报。")
 };
 
 definePageMeta({
@@ -16,11 +16,11 @@ definePageMeta({
   breadcrumbs: [{ label: "论坛社区", to: "/forum" }]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/forum",
+  keywords: ["论坛", "玩家社区", "晒分战报"]
 });
 
 const { data, pending, refresh } = useLazyAsyncData<ForumHomePayload>(

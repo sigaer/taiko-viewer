@@ -9,9 +9,11 @@ const isMobileNavOpen = ref(false);
 const nuxtApp = useNuxtApp();
 let loadingTimer: ReturnType<typeof setTimeout> | null = null;
 
+import { DEFAULT_DESCRIPTION, SITE_TITLE } from "~/utils/seo";
+
 const fallbackMeta = {
-  title: "taiko viewer",
-  desc: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略与段位查询。"
+  title: SITE_TITLE,
+  desc: DEFAULT_DESCRIPTION
 };
 
 type BreadcrumbItem = {
@@ -139,7 +141,7 @@ onBeforeUnmount(() => {
     </transition>
     <aside class="app-sidebar">
       <div class="logo-space">
-        <NuxtLink to="/" class="logo-link" aria-label="回到首页">
+        <NuxtLink to="/" class="logo-link" :aria-label="`${SITE_TITLE} 首页`">
           <div class="logo-placeholder">TAIKO</div>
         </NuxtLink>
       </div>

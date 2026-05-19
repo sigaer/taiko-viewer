@@ -4,6 +4,7 @@ import { ElMessage } from "element-plus";
 import type { GuideTagItemsPayload } from "~/types/content";
 import { loadGuideTagItems, useGuideContent } from "~/composables/useGuideContent";
 import { getGuideDifficultyOption } from "~/utils/guide";
+import { buildPageDescription } from "~/utils/seo";
 
 type TreeRow = {
   id: number;
@@ -21,8 +22,10 @@ const fallbackDifficultyLabel = computed(() => fallbackDifficulty.value?.label |
 const pageMeta = computed(() => ({
   title: fallbackDifficulty.value ? `${fallbackDifficultyLabel.value} ${level.value}星攻略` : "谱面攻略",
   desc: fallbackDifficulty.value
-    ? `查看国行收录曲 ${fallbackDifficultyLabel.value} ${level.value} 星的谱面攻略与分类统计。`
-    : "按难度与星级查看谱面攻略。"
+    ? buildPageDescription(
+        `查看太鼓达人国行 ${fallbackDifficultyLabel.value} ${level.value} 星谱面攻略与分类统计。`
+      )
+    : buildPageDescription("按难度与星级查看太鼓达人国行谱面攻略。")
 }));
 
 definePageMeta({
@@ -108,6 +111,7 @@ useViewerSeo(() => ({
   title: pageMeta.value.title,
   description: pageMeta.value.desc,
   path: `/guide/${difficulty.value}/${level.value}`,
+  keywords: [difficultyLabel.value, "谱面攻略", `${level.value}星`],
   breadcrumbs: [
     { name: "首页", path: "/" },
     { name: "谱面攻略", path: "/guide" },

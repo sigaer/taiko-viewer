@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const { fetchCurrentUser } = useAccountState();
 const {
@@ -18,7 +18,7 @@ const rememberCredentials = ref(false);
 
 const pageMeta = {
   title: "账号登录",
-  desc: "登录 taiko viewer 账号，查看个人档案与歌曲数据。",
+  desc: buildPageDescription("登录 Sakura Taiko Viewer 账号，查看个人档案与歌曲数据。"),
 };
 
 definePageMeta({
@@ -32,11 +32,10 @@ definePageMeta({
   ],
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc,
+  path: "/account/login"
 });
 
 onMounted(() => {

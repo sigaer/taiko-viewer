@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { buildPageDescription } from "~/utils/seo";
+
 const pageMeta = {
   title: "现有歌曲",
-  desc: "展示当前可用歌曲，支持按名称与分类搜索。"
+  desc: buildPageDescription("国行太鼓现有歌曲列表，支持按曲名、分类与难度搜索。")
 };
 
 definePageMeta({
@@ -14,7 +16,12 @@ definePageMeta({
 useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
-  path: "/songs/available"
+  path: "/songs/available",
+  keywords: ["现有歌曲", "国行歌曲列表"],
+  breadcrumbs: [
+    { name: "首页", path: "/" },
+    { name: "现有歌曲", path: "/songs/available" }
+  ]
 });
 </script>
 

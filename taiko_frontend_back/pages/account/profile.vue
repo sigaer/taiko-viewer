@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const { accountUser, fetchCurrentUser } = useAccountState();
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
@@ -23,11 +23,10 @@ definePageMeta({
   ]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/account/profile"
 });
 
 type ProfilePayload = {

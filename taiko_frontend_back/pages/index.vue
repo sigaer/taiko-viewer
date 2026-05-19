@@ -5,9 +5,11 @@ const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
 const appVersion = runtimeConfig.public.appVersion || "0.16.1";
 
+import { buildPageDescription, SITE_TITLE } from "~/utils/seo";
+
 const pageMeta = {
   title: "首页",
-  desc: "taiko viewer 首页，提供最新活动与最新歌曲入口。"
+  desc: buildPageDescription("太鼓达人国行数据看板首页，提供最新活动、歌曲列表、谱面攻略与段位查询入口。")
 };
 
 definePageMeta({
@@ -19,18 +21,20 @@ definePageMeta({
 
 useViewerSeo({
   title: pageMeta.title,
-  description: pageMeta.desc,
-  path: "/"
+  description: buildPageDescription(pageMeta.desc),
+  path: "/",
+  siteSchema: true,
+  keywords: ["首页", "太鼓达人国行", "最新歌曲"]
 });
 
 const eventSlides = [
   {
     image: "/banner.png",
-    title: "<奖励满满2026春季>"
+    title: "<初音未来 X 太鼓达人联动>"
   },
   {
-    image: "/banner2.jpg",
-    title: "<明日方舟课题曲活动>"
+    image: "/banner2.png",
+    title: "<奖励满满2026夏季>"
   }
 ];
 
@@ -53,8 +57,9 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
     <el-card class="panel-card home-hero">
       <div class="hero-content">
         <div class="hero-title-group">
-          <h2>taiko viewer</h2>
-          <p>v{{ appVersion }}</p>
+          <h2>{{ SITE_TITLE }}</h2>
+          <p class="hero-tagline">太鼓达人国行数据看板 · 歌曲列表 · 谱面攻略 · 段位查询</p>
+          <p class="hero-version">v{{ appVersion }}</p>
         </div>
         <NuxtLink to="/songs/available" class="hero-link hero-link-btn">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -139,7 +144,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
     </section>
 
     <footer class="home-footer">
-      taiko viewer © 2026 - Created by sigaer
+      Sakura Taiko Viewer © 2026 - Created by sigaer
     </footer>
   </div>
 </template>
@@ -176,9 +181,16 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
   background-clip: text;
 }
 
-.hero-title-group p {
-  margin: 6px 0 0;
-  font-size: 13px;
+.hero-tagline {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5f4d3d;
+}
+
+.hero-version {
+  margin: 4px 0 0;
+  font-size: 12px;
   color: #7a6552;
 }
 

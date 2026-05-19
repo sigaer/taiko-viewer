@@ -8,6 +8,7 @@ WorkingDirectory=/home/sigaer/taiko/taiko-forum/taiko_frontend_back
 Environment=NODE_ENV=production
 Environment=NITRO_PORT=3100
 Environment=NITRO_HOST=127.0.0.1
+Environment=NUXT_PUBLIC_BAIDU_SITE_VERIFICATION=codeva-IokhumYAJv
 ExecStart=/www/server/nvm/versions/node/v24.13.0/bin/node /home/sigaer/taiko/taiko-forum/taiko_frontend_back/.output/server/index.mjs
 Restart=always
 RestartSec=5

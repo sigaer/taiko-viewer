@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 interface AliasLogEntry {
   time: string;
@@ -21,7 +21,7 @@ interface AliasLogResponse {
 
 const pageMeta = {
   title: "别名修改日志",
-  desc: "记录歌曲别名更新历史。"
+  desc: buildPageDescription("记录太鼓达人国行歌曲别名更新历史。")
 };
 
 definePageMeta({
@@ -31,11 +31,11 @@ definePageMeta({
   breadcrumbs: [{ label: "别名修改日志", to: "/alias-log" }]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/alias-log",
+  keywords: ["别名日志", "歌曲别名"]
 });
 
 // 获取数据

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
 import type { ForumThreadDetail } from "~/types/forum";
+import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
 const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 
 const pageMeta = {
   title: "帖子详情",
-  desc: "查看太鼓论坛主题、楼层回复和相关互动。",
+  desc: buildPageDescription("查看太鼓达人论坛主题、楼层回复与相关互动。")
 };
 
 definePageMeta({
@@ -35,10 +35,12 @@ const { data, pending, refresh } = await useAsyncData<ForumThreadDetail>(
   () => $fetch(`/api/forum/threads/${route.params.id}`, { headers }),
 );
 
-useSeoMeta({
-  title: () => formatViewerTitle(data.value?.title || pageMeta.title),
-  description: () => data.value?.summary || pageMeta.desc,
-});
+useViewerSeo(() => ({
+  title: data.value?.title || pageMeta.title,
+  description: buildPageDescription(data.value?.summary || pageMeta.desc),
+  path: `/forum/thread/${route.params.id}`,
+  keywords: ["论坛帖子", "太鼓达人社区"]
+}));
 
 const detail = computed(() => data.value);
 

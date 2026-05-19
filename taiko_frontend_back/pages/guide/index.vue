@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
+import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
 const difficulty = Number(route.query.difficulty || 0);
@@ -11,7 +12,7 @@ if (Number.isInteger(difficulty) && difficulty > 0 && Number.isInteger(level) &&
 
 const pageMeta = {
   title: "谱面攻略",
-  desc: "按难度与星级浏览国行谱面攻略入口。"
+  desc: buildPageDescription("按难度与星级浏览太鼓达人国行谱面攻略入口。")
 };
 
 definePageMeta({
@@ -25,6 +26,7 @@ useViewerSeo({
   title: pageMeta.title,
   description: pageMeta.desc,
   path: "/guide",
+  keywords: ["谱面攻略", "国行谱面"],
   breadcrumbs: [
     { name: "首页", path: "/" },
     { name: "谱面攻略", path: "/guide" }

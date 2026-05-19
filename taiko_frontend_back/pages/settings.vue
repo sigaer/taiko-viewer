@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
 const pageMeta = {
   title: "设置",
-  desc: "主题切换与缓存管理。"
+  desc: buildPageDescription("Sakura Taiko Viewer 主题切换与缓存管理。")
 };
 
 definePageMeta({
@@ -17,11 +17,10 @@ definePageMeta({
   breadcrumbs: [{ label: "设置", to: "/settings" }]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/settings"
 });
 
 const isDeveloperReviewer = computed(

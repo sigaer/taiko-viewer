@@ -1,10 +1,11 @@
 import { defineNuxtConfig } from "nuxt/config";
 import packageJson from "./package.json" with { type: "json" };
+import { DEFAULT_DESCRIPTION, SITE_TITLE } from "./utils/seo";
 
-const appTitle = "taiko viewer";
 const appVersion = process.env.npm_package_version || packageJson.version;
 const themeColor = "#ffb37c";
 const backgroundColor = "#f4efe7";
+const baiduSiteVerification = process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "";
 
 export default defineNuxtConfig({
   ssr: true,
@@ -12,20 +13,25 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: "zh-CN" },
-      title: appTitle,
+      title: SITE_TITLE,
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { name: "application-name", content: appTitle },
+        { name: "application-name", content: SITE_TITLE },
+        { name: "description", content: DEFAULT_DESCRIPTION },
         {
-          name: "description",
-          content: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略、段位查询与主题设置。"
+          name: "keywords",
+          content:
+            "Sakura Taiko Viewer, taiko viewer, 太鼓达人, 太鼓之达人, 国行太鼓, 谱面攻略, 段位查询, 歌曲列表, 称号一览"
         },
+        ...(baiduSiteVerification
+          ? [{ name: "baidu-site-verification", content: baiduSiteVerification }]
+          : []),
         { name: "theme-color", content: themeColor },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-        { name: "apple-mobile-web-app-title", content: appTitle }
+        { name: "apple-mobile-web-app-title", content: SITE_TITLE }
       ],
       link: [
         { rel: "manifest", href: "/manifest.webmanifest" },
@@ -53,9 +59,9 @@ export default defineNuxtConfig({
     ],
     manifest: {
       id: "/",
-      name: appTitle,
-      short_name: appTitle,
-      description: "taiko viewer 太鼓达人数据看板，提供歌曲列表、谱面攻略、段位查询与主题设置。",
+      name: SITE_TITLE,
+      short_name: "Taiko Viewer",
+      description: DEFAULT_DESCRIPTION,
       start_url: "/",
       scope: "/",
       display: "standalone",
@@ -131,7 +137,8 @@ export default defineNuxtConfig({
     public: {
       appVersion,
       apiBase: "https://static.sakura-bot.cn",
-      guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide"
+      guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide",
+      baiduSiteVerification
     }
   },
   nitro: {
@@ -155,13 +162,7 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: false,
-      routes: [
-        "/grade",
-        "/grade/2023",
-        "/grade/2024",
-        "/settings",
-        "/about"
-      ]
+      routes: ["/grade", "/grade/2023", "/grade/2024", "/settings", "/about"]
     }
   },
   elementPlus: {

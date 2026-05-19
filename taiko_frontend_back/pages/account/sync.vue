@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { ElMessage } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 type BindingSummary = {
   id: number;
@@ -66,11 +66,10 @@ definePageMeta({
   ]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/account/sync"
 });
 
 const selectedTargetIds = ref<string[]>([]);

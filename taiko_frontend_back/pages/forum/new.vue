@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
 
 type UploadedImage = {
@@ -13,7 +13,7 @@ const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 
 const pageMeta = {
   title: "发布新帖",
-  desc: "发布图文攻略、晒分战报或一般讨论。"
+  desc: buildPageDescription("在太鼓达人论坛发布图文攻略、晒分战报或讨论。")
 };
 
 definePageMeta({
@@ -27,9 +27,10 @@ definePageMeta({
   ]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
-  description: pageMeta.desc
+useViewerSeo({
+  title: pageMeta.title,
+  description: pageMeta.desc,
+  path: "/forum/new"
 });
 
 const form = reactive({

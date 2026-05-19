@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { formatViewerTitle } from "~/composables/useViewerSeo";
+import { buildPageDescription } from "~/utils/seo";
 
 const pageMeta = {
   title: "关于",
-  desc: "开发团队与技术栈信息。"
+  desc: buildPageDescription("了解 Sakura Taiko Viewer 开发团队、产品定位与技术栈。")
 };
 
 definePageMeta({
@@ -13,11 +13,11 @@ definePageMeta({
   breadcrumbs: [{ label: "关于", to: "/about" }]
 });
 
-useSeoMeta({
-  title: formatViewerTitle(pageMeta.title),
+useViewerSeo({
+  title: pageMeta.title,
   description: pageMeta.desc,
-  ogTitle: formatViewerTitle(pageMeta.title),
-  ogDescription: pageMeta.desc
+  path: "/about",
+  keywords: ["关于", "开发团队"]
 });
 
 const team = [

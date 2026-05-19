@@ -1,8 +1,13 @@
 import { computed } from "vue";
-
-const SITE_TITLE = "taiko viewer";
-const CANONICAL_BASE_URL = "https://viewer.sakura-bot.cn";
-const DEFAULT_OG_IMAGE = "https://static.sakura-bot.cn/banner.png";
+import {
+  SITE_TITLE,
+  CANONICAL_BASE_URL,
+  DEFAULT_OG_IMAGE,
+  buildPageKeywords,
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+  formatViewerTitle
+} from "~/utils/seo";
 
 type BreadcrumbJsonLdItem = {
   name: string;
@@ -14,7 +19,9 @@ type ViewerSeoInput = {
   description: string;
   path: string;
   image?: string;
+  keywords?: string[];
   breadcrumbs?: BreadcrumbJsonLdItem[];
+  siteSchema?: boolean;
 };
 
 const normalizeCanonicalPath = (path: string) => {
@@ -27,14 +34,6 @@ const normalizeCanonicalPath = (path: string) => {
 };
 
 const buildCanonicalUrl = (path: string) => `${CANONICAL_BASE_URL}${normalizeCanonicalPath(path)}`;
-
-export const formatViewerTitle = (title?: string) => {
-  const normalized = String(title || "").trim();
-  if (!normalized || normalized === SITE_TITLE || normalized === "首页") {
-    return SITE_TITLE;
-  }
-  return `${SITE_TITLE} · ${normalized}`;
-};
 
 const buildBreadcrumbJsonLd = (items: BreadcrumbJsonLdItem[]) => ({
   "@context": "https://schema.org",
@@ -51,53 +50,37 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
   const payload = computed(() => toValue(input));
   const canonicalUrl = computed(() => buildCanonicalUrl(payload.value.path));
   const imageUrl = computed(() => payload.value.image || DEFAULT_OG_IMAGE);
+  const pageTitle = computed(() => formatViewerTitle(payload.value.title));
+  const keywordsContent = computed(() => buildPageKeywords(payload.value.keywords || []));
+
   useSeoMeta(() => ({
-    title: formatViewerTitle(payload.value.title),
+    title: pageTitle.value,
     description: payload.value.description,
-    ogTitle: formatViewerTitle(payload.value.title),
+    keywords: keywordsContent.value,
+    ogTitle: pageTitle.value,
     ogDescription: payload.value.description,
     ogImage: imageUrl.value,
-    ogUrl: canonicalUrl.value
+    ogUrl: canonicalUrl.value,
+    ogSiteName: SITE_TITLE
   }));
+
   useHead(() => {
-    const scripts =
-      payload.value.breadcrumbs && payload.value.breadcrumbs.length
-        ? [
-            {
-              type: "application/ld+json",
-              children: JSON.stringify(buildBreadcrumbJsonLd(payload.value.breadcrumbs))
-            }
-          ]
-        : [];
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (payload.value.siteSchema) {
+      scripts.push(
+        { type: "application/ld+json", children: JSON.stringify(buildWebSiteJsonLd()) },
+        { type: "application/ld+json", children: JSON.stringify(buildOrganizationJsonLd()) }
+      );
+    }
+    if (payload.value.breadcrumbs?.length) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify(buildBreadcrumbJsonLd(payload.value.breadcrumbs))
+      });
+    }
     return {
-      link: [
-        {
-          rel: "canonical",
-          href: canonicalUrl.value
-        }
-      ],
-      meta: [
-        {
-          property: "og:title",
-          content: payload.value.title
-        },
-        {
-          property: "og:description",
-          content: payload.value.description
-        },
-        {
-          property: "og:image",
-          content: imageUrl.value
-        },
-        {
-          property: "og:url",
-          content: canonicalUrl.value
-        },
-        {
-          property: "og:type",
-          content: "website"
-        }
-      ],
+      link: [{ rel: "canonical", href: canonicalUrl.value }],
+      meta: [{ property: "og:type", content: "website" }],
       script: scripts
     };
   });
