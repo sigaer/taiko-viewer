@@ -5,7 +5,8 @@ import { DEFAULT_DESCRIPTION, SITE_TITLE } from "./utils/seo";
 const appVersion = process.env.npm_package_version || packageJson.version;
 const themeColor = "#ffb37c";
 const backgroundColor = "#f4efe7";
-const baiduSiteVerification = process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "";
+const baiduSiteVerification =
+  process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "codeva-IokhumYAJv";
 
 export default defineNuxtConfig({
   ssr: true,
