@@ -29,6 +29,7 @@ logs/
 # Local env / caches
 .env
 .env.*
+deploy/baidu-push.env
 .cache/
 .data/
 

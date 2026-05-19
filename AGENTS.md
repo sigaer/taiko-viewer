@@ -14,6 +14,7 @@
 - Shared backend APIs live under `/api/forum/*` and `/api/account/*`
 - Any user-visible web change must bump `taiko_frontend_back/package.json` version in the same change.
 - After changing web code or web version, deploy with `scripts/deploy_forum_web.sh "<commit_message>"` instead of only restarting a single service.
+- Baidu URL push: copy `deploy/baidu-push.env.example` to `deploy/baidu-push.env`, set `BAIDU_PUSH_TOKEN`, then run `scripts/baidu_push_urls.sh` (deploy script runs it automatically when configured).
 - If the homepage/version badge reads from fallback strings, update those fallbacks together with the package version.
 
 ## App

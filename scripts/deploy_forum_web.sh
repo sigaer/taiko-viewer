@@ -215,4 +215,11 @@ wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
 wait_for_url "https://forum.sakura-bot.cn/titles" "线上站点"
 wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
 
+echo "[可选] 百度普通收录主动推送..."
+if [[ -x "$ROOT_DIR/scripts/baidu_push_urls.sh" ]]; then
+  "$ROOT_DIR/scripts/baidu_push_urls.sh" || echo "  - 百度推送失败或未配置，不影响站点部署。"
+else
+  echo "  - 未找到 scripts/baidu_push_urls.sh，跳过。"
+fi
+
 echo "部署完成: 代码已推送并发布到 forum.sakura-bot.cn"
