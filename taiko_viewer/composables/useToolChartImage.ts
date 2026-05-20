@@ -1,4 +1,5 @@
 import { onBeforeUnmount, ref } from "vue";
+import { resolveViewerError } from "~/utils/viewerError";
 
 export const useToolChartImage = () => {
   const imageUrl = ref("");
@@ -32,9 +33,7 @@ export const useToolChartImage = () => {
       });
       imageUrl.value = URL.createObjectURL(blob);
     } catch (error: unknown) {
-      const err = error as { data?: { statusMessage?: string }; statusMessage?: string; message?: string };
-      errorMessage.value =
-        err?.data?.statusMessage || err?.statusMessage || err?.message || "生成失败，请稍后重试";
+      errorMessage.value = await resolveViewerError(error, "图表生成失败，请稍后重试");
     } finally {
       loading.value = false;
     }

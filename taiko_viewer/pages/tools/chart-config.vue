@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
+import { resolveViewerError, viewerErrorAlertType } from "~/utils/viewerError";
 
 const pageMeta = {
   title: "查配置",
@@ -38,8 +39,7 @@ const submit = async () => {
     });
     lines.value = result.lines || [];
   } catch (error: unknown) {
-    const err = error as { data?: { statusMessage?: string }; statusMessage?: string };
-    errorMessage.value = err?.data?.statusMessage || err?.statusMessage || "查询失败，请稍后重试";
+    errorMessage.value = await resolveViewerError(error, "查询失败，请稍后重试");
   } finally {
     loading.value = false;
   }
@@ -58,7 +58,14 @@ const submit = async () => {
         </el-form-item>
         <el-button type="primary" :loading="loading" native-type="submit">查询</el-button>
       </el-form>
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon :closable="false" class="result-alert" />
+      <el-alert
+        v-if="errorMessage"
+        :title="errorMessage"
+        :type="viewerErrorAlertType(errorMessage)"
+        show-icon
+        :closable="false"
+        class="result-alert viewer-friendly-alert"
+      />
       <pre v-else-if="lines.length" class="result-box">{{ lines.join("\n") }}</pre>
     </el-card>
   </div>

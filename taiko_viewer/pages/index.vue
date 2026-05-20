@@ -384,9 +384,9 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
 .home-tools {
   padding: 18px 20px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(196, 127, 79, 0.18);
-  box-shadow: 0 12px 28px rgba(165, 138, 110, 0.1);
+  background: var(--viewer-surface, rgba(255, 252, 248, 0.92));
+  border: 1px solid var(--viewer-border, rgba(160, 140, 120, 0.14));
+  box-shadow: 0 12px 28px var(--viewer-shadow, rgba(150, 132, 115, 0.1));
 }
 
 .home-tools .section-head {
@@ -403,7 +403,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
 
 .tools-more {
   font-size: 13px;
-  color: #9a6d47;
+  color: #a89580;
   text-decoration: none;
 }
 
@@ -420,9 +420,9 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
   min-height: 52px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.95);
-  border: 1px solid rgba(196, 127, 79, 0.22);
-  color: #5c4636;
+  background: rgba(252, 248, 243, 0.98);
+  border: 1px solid rgba(196, 164, 132, 0.2);
+  color: #5f564e;
   font-weight: 600;
   font-size: 14px;
   text-decoration: none;
@@ -431,7 +431,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
 
 .home-tool-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(165, 138, 110, 0.14);
+  box-shadow: 0 8px 18px rgba(150, 132, 115, 0.12);
 }
 
 .home-tool-card--muted {

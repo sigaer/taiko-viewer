@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { buildPageDescription } from "~/utils/seo";
+import { viewerErrorAlertType } from "~/utils/viewerError";
 
 const pageMeta = {
   title: "太鼓词云",
@@ -35,7 +36,14 @@ const submit = async () => {
       <el-card class="panel-card">
         <p class="hint">根据当前绑定账号的游玩记录生成词云，需先完成多端同步。</p>
         <el-button type="primary" :loading="loading" @click="submit">生成词云</el-button>
-        <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon :closable="false" class="result-alert" />
+        <el-alert
+          v-if="errorMessage"
+          :title="errorMessage"
+          :type="viewerErrorAlertType(errorMessage)"
+          show-icon
+          :closable="false"
+          class="result-alert viewer-friendly-alert"
+        />
         <div v-if="imageUrl" class="chart-wrap">
           <img :src="imageUrl" alt="太鼓词云" class="chart-image" />
         </div>

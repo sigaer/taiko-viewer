@@ -26,6 +26,23 @@
     "Segoe UI Symbol",
     "Apple Color Emoji",
     sans-serif;
+  --viewer-bg-top: #fdf9f4;
+  --viewer-bg-mid: #f7f3ee;
+  --viewer-bg-bottom: #f3efe9;
+  --viewer-text: #3a322c;
+  --viewer-text-muted: #7a6f66;
+  --viewer-accent: #c4a484;
+  --viewer-accent-strong: #b89272;
+  --viewer-surface: rgba(255, 252, 248, 0.92);
+  --viewer-shadow: rgba(150, 132, 115, 0.1);
+  --viewer-border: rgba(160, 140, 120, 0.14);
+  --el-color-primary: #c4a484;
+  --el-color-primary-light-3: #d4bca2;
+  --el-color-primary-light-5: #e2d2c0;
+  --el-color-primary-light-7: #efe6db;
+  --el-color-primary-light-8: #f5efe6;
+  --el-color-primary-light-9: #faf6f1;
+  --el-color-primary-dark-2: #a8896c;
 }
 
 html,
@@ -37,8 +54,13 @@ body,
 body {
   min-height: 100vh;
   margin: 0;
-  background: radial-gradient(circle at top, #fff4de 0%, #f4efe7 45%, #f6f1ea 100%);
-  color: #2f2620;
+  background: radial-gradient(
+    circle at top,
+    var(--viewer-bg-top) 0%,
+    var(--viewer-bg-mid) 48%,
+    var(--viewer-bg-bottom) 100%
+  );
+  color: var(--viewer-text);
   font-family: var(--viewer-font-family);
   text-rendering: optimizeLegibility;
 }
@@ -87,12 +109,12 @@ body.theme-dark .cache-card {
 
 .app-sidebar .el-sub-menu__title,
 .app-sidebar .el-menu-item {
-  color: #5a4a3b;
+  color: #6b5f55;
 }
 
 .app-sidebar .el-menu-item.is-active {
-  background: rgba(255, 214, 182, 0.35);
-  color: #5a4a3b;
+  background: rgba(228, 210, 190, 0.45);
+  color: #5f5349;
 }
 
 body.theme-dark .app-sidebar .el-sub-menu__title,
@@ -114,8 +136,8 @@ body.theme-dark .app-sidebar .el-menu-item.is-active {
 
 .app-sidebar {
   padding: 24px 18px;
-  background: linear-gradient(180deg, rgba(255, 245, 229, 0.85) 0%, rgba(255, 250, 242, 0.9) 100%);
-  border-right: 1px solid rgba(120, 92, 67, 0.15);
+  background: linear-gradient(180deg, rgba(253, 249, 244, 0.92) 0%, rgba(248, 244, 238, 0.95) 100%);
+  border-right: 1px solid var(--viewer-border);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
@@ -131,7 +153,7 @@ body.theme-dark .app-sidebar {
 }
 
 .logo-space {
-  height: 96px;
+  height: 108px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,9 +174,9 @@ body.theme-dark .app-sidebar {
 }
 
 .logo-image {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
   object-fit: contain;
   display: block;
 }
@@ -190,7 +212,7 @@ body.theme-dark .app-sidebar {
 
 .page-header__info p {
   margin: 0;
-  color: #6c5a4b;
+  color: var(--viewer-text-muted);
 }
 
 body.theme-dark .page-header__info p {
@@ -204,9 +226,21 @@ body.theme-dark .page-header__info p {
 
 .panel-card {
   border-radius: 20px;
-  border: none;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 32px rgba(165, 138, 110, 0.14);
+  border: 1px solid var(--viewer-border);
+  background: var(--viewer-surface);
+  box-shadow: 0 14px 28px var(--viewer-shadow);
+}
+
+.viewer-friendly-alert.el-alert--error {
+  --el-alert-bg-color: #faf3ee;
+  --el-alert-border-color: rgba(196, 164, 132, 0.35);
+  --el-alert-title-color: #6f5a48;
+}
+
+.viewer-friendly-alert.el-alert--warning {
+  --el-alert-bg-color: #faf6ef;
+  --el-alert-border-color: rgba(196, 164, 132, 0.3);
+  --el-alert-title-color: #6f5f52;
 }
 
 .shimmer-card {
@@ -264,7 +298,7 @@ canvas#dynamic-line {
   }
 
   .logo-space {
-    height: 74px;
+    height: 86px;
     margin-bottom: 10px;
   }
 
@@ -276,9 +310,9 @@ canvas#dynamic-line {
   }
 
   .logo-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
   }
 
   .app-content {

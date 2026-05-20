@@ -424,8 +424,8 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(196, 127, 79, 0.15);
-  color: #9a6d47;
+  background: rgba(210, 185, 160, 0.22);
+  color: #9a846f;
 }
 
 .page-title-icon svg {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
+import { viewerErrorAlertType } from "~/utils/viewerError";
 
 const pageMeta = {
   title: "Rating 走势",
@@ -72,7 +73,14 @@ const submit = async () => {
           </el-form-item>
           <el-button type="primary" :loading="loading" native-type="submit">生成图表</el-button>
         </el-form>
-        <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon :closable="false" class="result-alert" />
+        <el-alert
+          v-if="errorMessage"
+          :title="errorMessage"
+          :type="viewerErrorAlertType(errorMessage)"
+          show-icon
+          :closable="false"
+          class="result-alert viewer-friendly-alert"
+        />
         <div v-if="imageUrl" class="chart-wrap">
           <img :src="imageUrl" alt="Rating 走势图" class="chart-image" />
         </div>

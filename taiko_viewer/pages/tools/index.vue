@@ -95,8 +95,8 @@ const tools = [
   display: block;
   padding: 16px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(196, 127, 79, 0.2);
+  background: var(--viewer-surface, rgba(255, 252, 248, 0.92));
+  border: 1px solid var(--viewer-border, rgba(160, 140, 120, 0.14));
   text-decoration: none;
   color: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -104,7 +104,7 @@ const tools = [
 
 .tool-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(165, 138, 110, 0.16);
+  box-shadow: 0 12px 24px var(--viewer-shadow, rgba(150, 132, 115, 0.12));
 }
 
 .tool-card__head {
