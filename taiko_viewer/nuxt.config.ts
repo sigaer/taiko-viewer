@@ -135,6 +135,9 @@ export default defineNuxtConfig({
     ossAccessKeySecret: process.env.OSS_ACCESS_KEY_SECRET || "",
     ossPublicBaseUrl: process.env.OSS_PUBLIC_BASE_URL || "",
     ossAvatarPrefix: process.env.OSS_AVATAR_PREFIX || "",
+    bilibiliSessData: process.env.BILIBILI_SESSDATA || "",
+    bilibiliCookie: process.env.BILIBILI_COOKIE || "",
+    bilibiliHttpProxy: process.env.BILIBILI_HTTP_PROXY || "",
     public: {
       appVersion,
       apiBase: "https://static.sakura-bot.cn",
@@ -159,7 +162,8 @@ export default defineNuxtConfig({
       "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
       "/api/developer/**": { prerender: false },
-      "/api/forum/**": { prerender: false }
+      "/api/forum/**": { prerender: false },
+      "/api/bilibili/**": { prerender: false }
     },
     prerender: {
       crawlLinks: false,

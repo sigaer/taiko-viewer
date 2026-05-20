@@ -91,6 +91,10 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
       </div>
     </section>
 
+    <section class="home-dynamics panel-card">
+      <HomeBilibiliDynamicFeed />
+    </section>
+
     <section class="home-grid">
       <el-card class="panel-card events-panel">
         <div class="section-head">
@@ -379,6 +383,10 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
 .song-arrow svg {
   width: 100%;
   height: 100%;
+}
+
+.home-dynamics {
+  padding: 18px 20px;
 }
 
 .home-tools {
