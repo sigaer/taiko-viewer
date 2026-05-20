@@ -23,7 +23,7 @@ fi
 
 COMMIT_MESSAGE="$1"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WEB_DIR="$ROOT_DIR/taiko_frontend_back"
+WEB_DIR="$ROOT_DIR/taiko_viewer"
 REMOTE="${REMOTE:-origin}"
 BRANCH="${BRANCH:-main}"
 BUILD_TIMEOUT="${BUILD_TIMEOUT:-900}"
@@ -183,7 +183,7 @@ NEED_NPM_INSTALL=0
 if [[ ! -d "$WEB_DIR/node_modules" ]]; then
   NEED_NPM_INSTALL=1
 fi
-if git show --name-only --pretty='' HEAD | grep -Eq '^taiko_frontend_back/(package\.json|package-lock\.json)$'; then
+if git show --name-only --pretty='' HEAD | grep -Eq '^taiko_viewer/(package\.json|package-lock\.json)$'; then
   NEED_NPM_INSTALL=1
 fi
 

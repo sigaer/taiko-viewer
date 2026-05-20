@@ -4,7 +4,7 @@ Private dual-project repository for the Taiko forum service.
 
 ## Layout
 
-- `taiko_frontend_back/`
+- `taiko_viewer/`
   - Nuxt 3 web app and shared forum backend APIs
 - `taiko_forum_app/`
   - Flutter Android client

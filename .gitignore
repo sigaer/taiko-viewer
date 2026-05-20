@@ -35,7 +35,7 @@ deploy/baidu-push.env
 
 # Local reference exports copied from legacy workspace
 taiko.zip
-taiko_frontend_back/称号.htm
-taiko_frontend_back/称号_files/
-taiko_frontend_back/首页Viewer.htm
-taiko_frontend_back/首页Viewer_files/
+taiko_viewer/称号.htm
+taiko_viewer/称号_files/
+taiko_viewer/首页Viewer.htm
+taiko_viewer/首页Viewer_files/

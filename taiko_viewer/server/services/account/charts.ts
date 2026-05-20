@@ -1,0 +1,190 @@
+import { access } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
+import {
+  execFileAsync,
+  getCurrentBindingRow,
+  getRuntimePaths,
+  getUserdataPath
+} from "~/server/internal/account/shared";
+
+const DIM_ALIASES: Record<string, string> = {
+  大歌: "big_song",
+  大歌力: "big_song",
+  节奏: "rhythm",
+  节奏处理: "rhythm",
+  复合: "complex_proc",
+  复合处理: "complex_proc",
+  精度: "accuracy_power",
+  精度力: "accuracy_power",
+  体力: "stamina",
+  高速: "speed",
+  高速处理: "speed"
+};
+
+const TREND_DIM_ALIASES: Record<string, string> = {
+  rating: "综合Rating",
+  综合: "综合Rating",
+  总合: "综合Rating",
+  综合rating: "综合Rating",
+  ra: "综合Rating",
+  大歌: "大歌力",
+  大歌力: "大歌力",
+  big_song: "大歌力",
+  体力: "体力",
+  stamina: "体力",
+  高速: "高速处理",
+  高速处理: "高速处理",
+  speed: "高速处理",
+  精度: "精度力",
+  准度: "精度力",
+  良率: "精度力",
+  精度力: "精度力",
+  accuracy: "精度力",
+  节奏: "节奏处理",
+  节奏处理: "节奏处理",
+  rhythm: "节奏处理",
+  复合: "复合处理",
+  复合处理: "复合处理",
+  complex: "复合处理"
+};
+
+const normalizeTrendDim = (token: string) => token.replace(/\s+/g, "").trim().toLowerCase();
+
+const resolveTrendDim = (token: string) => TREND_DIM_ALIASES[normalizeTrendDim(token)];
+
+const resolveB30Dim = (token: string) => DIM_ALIASES[token.trim()];
+
+const ensureBindingWithUserdata = async (userId: number) => {
+  const binding = await getCurrentBindingRow(userId);
+  if (!binding) {
+    throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+  }
+  const userdataPath = getUserdataPath(binding.taiko_id);
+  try {
+    await access(userdataPath, fsConstants.R_OK);
+  } catch {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据"
+    });
+  }
+  return binding;
+};
+
+const runPythonImage = async (pythonCode: string, args: string[] = []) => {
+  const { repoRoot } = getRuntimePaths();
+  const result = await execFileAsync("python3", ["-c", pythonCode, ...args], {
+    cwd: repoRoot,
+    encoding: "buffer",
+    maxBuffer: 30 * 1024 * 1024
+  });
+  return result.stdout as Buffer;
+};
+
+const toJpeg = async (pngBuffer: Buffer) => {
+  const sharp = (await import("sharp")).default;
+  return sharp(pngBuffer).jpeg({ quality: 85 }).toBuffer();
+};
+
+export const getB30ImageBuffer = async (
+  userId: number,
+  options: { n?: number; dim?: string; dynamicOrigin?: boolean }
+) => {
+  const binding = await ensureBindingWithUserdata(userId);
+  const N = Math.min(50, Math.max(1, Number(options.n) || 30));
+  const dimKey = options.dim ? resolveB30Dim(options.dim) : undefined;
+  if (options.dim && !dimKey) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "维度不支持，可用：大歌、节奏、复合、精度、体力、高速"
+    });
+  }
+  const dynamicOrigin = Boolean(options.dynamicOrigin);
+  const taikoId = binding.taiko_id;
+
+  if (!options.dim && !dynamicOrigin) {
+    const code = [
+      "from plugins.utils.b30_render import render_b30_image",
+      "import sys",
+      "buf = render_b30_image(int(sys.argv[1]), N=int(sys.argv[2]))",
+      "sys.stdout.buffer.write(buf)"
+    ].join("; ");
+    const png = await runPythonImage(code, [taikoId, String(N)]);
+    return toJpeg(png);
+  }
+
+  const code = [
+    "from plugins.utils.score_calculator import compute_all_from_userdata, generate_dim_top_image, generate_top_N_image",
+    "import sys",
+    "taiko_id = int(sys.argv[1])",
+    "N = int(sys.argv[2])",
+    "mode = sys.argv[3]",
+    "result = compute_all_from_userdata(taiko_id)",
+    "if not result:",
+    "    raise SystemExit('empty')",
+    "font_path = 'assets/fonts/DDFont.ttf'",
+    "if mode == 'dim':",
+    "    buf = generate_dim_top_image(result, N=N, dim=sys.argv[4], user_id=taiko_id, font_path=font_path)",
+    "else:",
+    "    dynamic_origin = sys.argv[4] == '1'",
+    "    buf = generate_top_N_image(result, N, user_id=taiko_id, dynamic_origin=dynamic_origin, font_path=font_path)",
+    "sys.stdout.buffer.write(buf.getvalue() if hasattr(buf, 'getvalue') else buf)"
+  ].join("\n");
+
+  if (dimKey) {
+    const png = await runPythonImage(code, [taikoId, String(N), "dim", dimKey]);
+    return toJpeg(png);
+  }
+
+  const png = await runPythonImage(code, [taikoId, String(N), "top", dynamicOrigin ? "1" : "0"]);
+  return toJpeg(png);
+};
+
+export const getTrendImageBuffer = async (
+  userId: number,
+  options: {
+    n?: number;
+    maxDays?: number;
+    dim?: string;
+    barMode?: boolean;
+    showAll?: boolean;
+  }
+) => {
+  const binding = await ensureBindingWithUserdata(userId);
+  const N = Math.min(50, Math.max(1, Number(options.n) || 20));
+  const maxDays = Math.min(365, Math.max(1, Number(options.maxDays) || 30));
+  const selectedDim = options.dim ? resolveTrendDim(options.dim) : "";
+  const barMode = Boolean(options.barMode);
+  const showAll = Boolean(options.showAll);
+
+  const code = [
+    "from plugins.utils.score_calculator import generate_rating_trend_image",
+    "import sys, json",
+    "kwargs = json.loads(sys.argv[2])",
+    "buf = generate_rating_trend_image(int(sys.argv[1]), **kwargs)",
+    "if not buf:",
+    "    raise SystemExit('empty')",
+    "sys.stdout.buffer.write(buf)"
+  ].join("\n");
+
+  const kwargs = JSON.stringify({
+    N,
+    max_days: maxDays,
+    bar_mode: barMode,
+    show_all: showAll,
+    selected_dim: selectedDim || null
+  });
+
+  const png = await runPythonImage(code, [binding.taiko_id, kwargs]);
+  return toJpeg(png);
+};
+
+export const getWordCloudImageBuffer = async (userId: number) => {
+  const binding = await ensureBindingWithUserdata(userId);
+  const code = [
+    "from plugins.utils.tcloud import render_tcloud_image",
+    "import sys",
+    "sys.stdout.buffer.write(render_tcloud_image(int(sys.argv[1])))"
+  ].join("; ");
+  return runPythonImage(code, [binding.taiko_id]);
+};
