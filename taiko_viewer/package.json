@@ -19,7 +19,8 @@
     "mysql2": "^3.19.0",
     "nodemailer": "^8.0.1",
     "nuxt": "^3.13.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "undici": "^7.25.0"
   },
   "devDependencies": {
     "@vite-pwa/nuxt": "^1.1.1",

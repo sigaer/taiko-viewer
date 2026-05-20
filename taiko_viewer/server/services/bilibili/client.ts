@@ -53,6 +53,7 @@ export const fetchSpaceDynamics = async (uid: string) => {
   const signedParams = await signWbiParams(params);
   const targetUrl = `https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?${signedParams.toString()}`;
 
+  const authHeaders = await getBilibiliAuthHeaders();
   const response = await bilibiliFetch(targetUrl, {
     headers: {
       "User-Agent": BILIBILI_USER_AGENT,
@@ -60,7 +61,13 @@ export const fetchSpaceDynamics = async (uid: string) => {
       "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
       Referer: `https://space.bilibili.com/${uid}/dynamic`,
       Origin: "https://space.bilibili.com",
-      ...(await getBilibiliAuthHeaders())
+      "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"Windows"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-site",
+      ...authHeaders
     }
   });
 
