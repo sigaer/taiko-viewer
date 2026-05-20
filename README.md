@@ -21,7 +21,7 @@ Private dual-project repository for the Taiko forum service.
 ### Web
 
 ```bash
-cd taiko_frontend_back
+cd taiko_viewer
 npm install
 npm run build
 sudo systemctl restart taiko-viewer taiko-forum taiko-sync-receiver

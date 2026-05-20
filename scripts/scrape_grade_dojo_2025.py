@@ -214,7 +214,7 @@ def parse_page(slug: str) -> dict[str, object]:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    output_path = repo_root / "taiko_frontend_back" / "assets" / "data" / "grade_dojo_nijiiro_2025.json"
+    output_path = repo_root / "taiko_viewer" / "assets" / "data" / "grade_dojo_nijiiro_2025.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     payload = {
