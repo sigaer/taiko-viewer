@@ -136,8 +136,10 @@ export default defineNuxtConfig({
     ossPublicBaseUrl: process.env.OSS_PUBLIC_BASE_URL || "",
     ossAvatarPrefix: process.env.OSS_AVATAR_PREFIX || "",
     bilibiliSessData: process.env.BILIBILI_SESSDATA || "",
+    bilibiliSessDataFile: process.env.BILIBILI_SESSDATA_FILE || "/home/sigaer/bilisess.txt",
+    bilibiliLoginMid: process.env.BILIBILI_LOGIN_MID || "",
     bilibiliCookie: process.env.BILIBILI_COOKIE || "",
-    bilibiliHttpProxy: process.env.BILIBILI_HTTP_PROXY || "",
+    bilibiliHttpProxy: process.env.BILIBILI_HTTP_PROXY || "http://127.0.0.1:18888",
     public: {
       appVersion,
       apiBase: "https://static.sakura-bot.cn",

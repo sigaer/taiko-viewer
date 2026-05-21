@@ -4,39 +4,17 @@ import {
   DYNAMIC_FEATURES
 } from "./constants";
 import { getCachedDynamic, setCachedDynamic } from "./cache";
-import { getBilibiliCookieHeader } from "./cookies";
+import { getBilibiliAuthCookieHeader, hasBilibiliLoginSession } from "./session";
 import { bilibiliFetch } from "./fetch";
 import { signWbiParams } from "./wbi";
 
-const getBilibiliAuthHeaders = async () => {
-  const runtimeConfig = useRuntimeConfig();
-  const sessData = String(runtimeConfig.bilibiliSessData || "");
-  const cookieString = String(runtimeConfig.bilibiliCookie || "");
-  const cookieParts: string[] = [];
-
-  if (cookieString) {
-    cookieParts.push(cookieString);
-  } else if (sessData) {
-    cookieParts.push(`SESSDATA=${sessData}`);
-  } else {
-    const guestCookie = await getBilibiliCookieHeader();
-    if (guestCookie) {
-      cookieParts.push(guestCookie);
-    }
-  }
-
-  if (!cookieParts.length) {
-    return {};
-  }
-
-  return { Cookie: cookieParts.join("; ") };
-};
-
-export const fetchSpaceDynamics = async (uid: string) => {
-  const cacheKey = `dynamic:${uid}`;
-  const cached = getCachedDynamic<unknown>(cacheKey);
-  if (cached) {
-    return cached;
+const buildFeedUrl = async (uid: string, useLoginApi: boolean) => {
+  if (useLoginApi) {
+    const params = new URLSearchParams({
+      offset: "",
+      host_mid: uid
+    });
+    return `https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?${params.toString()}`;
   }
 
   const params = new URLSearchParams({
@@ -51,15 +29,26 @@ export const fetchSpaceDynamics = async (uid: string) => {
   });
 
   const signedParams = await signWbiParams(params);
-  const targetUrl = `https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?${signedParams.toString()}`;
+  return `https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?${signedParams.toString()}`;
+};
 
-  const authHeaders = await getBilibiliAuthHeaders();
+export const fetchSpaceDynamics = async (uid: string) => {
+  const useLoginApi = await hasBilibiliLoginSession();
+  const cacheKey = `dynamic:${uid}:${useLoginApi ? "login" : "guest"}`;
+  const cached = getCachedDynamic<unknown>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const targetUrl = await buildFeedUrl(uid, useLoginApi);
+  const cookieHeader = await getBilibiliAuthCookieHeader();
+
   const response = await bilibiliFetch(targetUrl, {
     headers: {
       "User-Agent": BILIBILI_USER_AGENT,
       Accept: "application/json, text/plain, */*",
       "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-      Referer: `https://space.bilibili.com/${uid}/dynamic`,
+      Referer: `https://space.bilibili.com/${uid}/dynamic?spm_id_from=333.1007.0.0`,
       Origin: "https://space.bilibili.com",
       "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
       "sec-ch-ua-mobile": "?0",
@@ -67,7 +56,7 @@ export const fetchSpaceDynamics = async (uid: string) => {
       "sec-fetch-dest": "empty",
       "sec-fetch-mode": "cors",
       "sec-fetch-site": "same-site",
-      ...authHeaders
+      ...(cookieHeader ? { Cookie: cookieHeader } : {})
     }
   });
 
@@ -79,6 +68,7 @@ export const fetchSpaceDynamics = async (uid: string) => {
       statusMessage: `Bilibili API Error: ${response.status}`
     });
   }
+
   if (body.code === 0) {
     setCachedDynamic(cacheKey, body, DYNAMIC_CACHE_TTL_MS);
   }
