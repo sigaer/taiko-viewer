@@ -54,6 +54,14 @@ const resolveTrendDim = (token: string) => TREND_DIM_ALIASES[normalizeTrendDim(t
 
 const resolveB30Dim = (token: string) => DIM_ALIASES[token.trim()];
 
+const PYTHON_CHART_HELPERS = [
+  "from contextlib import redirect_stdout",
+  "from io import StringIO",
+  "_chart_log = StringIO()",
+  "def _chart_image_bytes(image):",
+  "    return image.getvalue() if hasattr(image, 'getvalue') else image"
+].join("\n");
+
 const ensureBindingWithUserdata = async (userId: number) => {
   const binding = await getCurrentBindingRow(userId);
   if (!binding) {
@@ -104,31 +112,35 @@ export const getB30ImageBuffer = async (
 
   if (!options.dim && !dynamicOrigin) {
     const code = [
+      PYTHON_CHART_HELPERS,
       "from plugins.utils.b30_render import render_b30_image",
       "import sys",
-      "buf = render_b30_image(int(sys.argv[1]), N=int(sys.argv[2]))",
-      "sys.stdout.buffer.write(buf)"
-    ].join("; ");
+      "with redirect_stdout(_chart_log):",
+      "    buf = render_b30_image(int(sys.argv[1]), N=int(sys.argv[2]))",
+      "sys.stdout.buffer.write(_chart_image_bytes(buf))"
+    ].join("\n");
     const png = await runPythonImage(code, [taikoId, String(N)]);
     return toJpeg(png);
   }
 
   const code = [
+    PYTHON_CHART_HELPERS,
     "from plugins.utils.score_calculator import compute_all_from_userdata, generate_dim_top_image, generate_top_N_image",
     "import sys",
     "taiko_id = int(sys.argv[1])",
     "N = int(sys.argv[2])",
     "mode = sys.argv[3]",
-    "result = compute_all_from_userdata(taiko_id)",
-    "if not result:",
-    "    raise SystemExit('empty')",
-    "font_path = 'assets/fonts/DDFont.ttf'",
-    "if mode == 'dim':",
-    "    buf = generate_dim_top_image(result, N=N, dim=sys.argv[4], user_id=taiko_id, font_path=font_path)",
-    "else:",
-    "    dynamic_origin = sys.argv[4] == '1'",
-    "    buf = generate_top_N_image(result, N, user_id=taiko_id, dynamic_origin=dynamic_origin, font_path=font_path)",
-    "sys.stdout.buffer.write(buf.getvalue() if hasattr(buf, 'getvalue') else buf)"
+    "with redirect_stdout(_chart_log):",
+    "    result = compute_all_from_userdata(taiko_id)",
+    "    if not result:",
+    "        raise SystemExit('empty')",
+    "    font_path = 'assets/fonts/DDFont.ttf'",
+    "    if mode == 'dim':",
+    "        buf = generate_dim_top_image(result, N=N, dim=sys.argv[4], user_id=taiko_id, font_path=font_path)",
+    "    else:",
+    "        dynamic_origin = sys.argv[4] == '1'",
+    "        buf = generate_top_N_image(result, N, user_id=taiko_id, dynamic_origin=dynamic_origin, font_path=font_path)",
+    "sys.stdout.buffer.write(_chart_image_bytes(buf))"
   ].join("\n");
 
   if (dimKey) {
@@ -158,13 +170,15 @@ export const getTrendImageBuffer = async (
   const showAll = Boolean(options.showAll);
 
   const code = [
+    PYTHON_CHART_HELPERS,
     "from plugins.utils.score_calculator import generate_rating_trend_image",
     "import sys, json",
     "kwargs = json.loads(sys.argv[2])",
-    "buf = generate_rating_trend_image(int(sys.argv[1]), **kwargs)",
+    "with redirect_stdout(_chart_log):",
+    "    buf = generate_rating_trend_image(int(sys.argv[1]), **kwargs)",
     "if not buf:",
     "    raise SystemExit('empty')",
-    "sys.stdout.buffer.write(buf)"
+    "sys.stdout.buffer.write(_chart_image_bytes(buf))"
   ].join("\n");
 
   const kwargs = JSON.stringify({

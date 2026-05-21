@@ -53,6 +53,7 @@ type ProfilePayload = {
     isCurrent: boolean;
     verifiedTitle: string | null;
     verifiedTitleplateId: number | null;
+    currentTitle?: string | null;
     createdAt: string;
     updatedAt: string;
   } | null;
@@ -293,7 +294,7 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
                 </div>
                 <div>
                   <span>当前称号</span>
-                  <strong>{{ profile.currentBinding?.verifiedTitle || "-" }}</strong>
+                  <strong>{{ profile.currentBinding?.currentTitle || "-" }}</strong>
                 </div>
                 <div>
                   <span>注册时间</span>
@@ -357,7 +358,6 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
       <el-card class="panel-card mydon-card">
         <div class="section-title">
           <h3>我的小咚</h3>
-          <p>当前展示内容来自本地 `userdata` 数据；切换当前绑定 ID 后会同步刷新。</p>
         </div>
         <div v-if="!profile.currentBinding" class="mydon-empty">
           <el-empty description="请先绑定鼓众广场 ID" />

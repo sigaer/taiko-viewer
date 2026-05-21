@@ -175,6 +175,7 @@ export type BindingSummary = {
   isCurrent: boolean;
   verifiedTitle: string | null;
   verifiedTitleplateId: number | null;
+  currentTitle?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -515,6 +516,27 @@ export const extractBindTitleInfo = (profile: Record<string, unknown>) => {
     title: String(costume.title || "").trim(),
     titleplateId: Number(costume.titleplate_id || -1)
   };
+};
+
+export const extractUserdataCurrentTitle = (payload: UserdataPayload) => {
+  const profile = (payload.profile || {}) as Record<string, unknown>;
+  return extractBindTitleInfo(profile).title;
+};
+
+export const enrichBindingWithCurrentTitle = async (binding: BindingSummary) => {
+  try {
+    const payload = await readUserdata(binding.taikoId);
+    const currentTitle = extractUserdataCurrentTitle(payload);
+    return {
+      ...binding,
+      currentTitle: currentTitle || binding.verifiedTitle
+    };
+  } catch {
+    return {
+      ...binding,
+      currentTitle: binding.verifiedTitle
+    };
+  }
 };
 
 export const getPendingBinding = async (userId: number) => {

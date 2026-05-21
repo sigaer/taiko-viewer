@@ -5,7 +5,7 @@ import { viewerErrorAlertType } from "~/utils/viewerError";
 
 const pageMeta = {
   title: "Rating 走势",
-  desc: buildPageDescription("查看 Rating 各维度历史走势，对应 bot 指令 taikotrend。")
+  desc: buildPageDescription("查看 Rating 六维与综合历史走势，对应 bot 指令 taikotrend。")
 };
 
 definePageMeta({
@@ -55,7 +55,7 @@ const submit = async () => {
             <el-input-number v-model="maxDays" :min="1" :max="365" controls-position="right" />
           </el-form-item>
           <el-form-item label="维度（可选）">
-            <el-select v-model="dim" clearable placeholder="默认综合 Rating">
+            <el-select v-model="dim" clearable placeholder="默认显示全部维度">
               <el-option label="综合" value="综合" />
               <el-option label="大歌力" value="大歌力" />
               <el-option label="体力" value="体力" />

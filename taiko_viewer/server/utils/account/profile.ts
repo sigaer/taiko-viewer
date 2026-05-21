@@ -11,6 +11,7 @@ import {
   AVATAR_MAX_BYTES,
   DEFAULT_AVATAR,
   execFileAsync,
+  enrichBindingWithCurrentTitle,
   getCurrentBindingRow,
   getOssClient,
   getPendingBinding,
@@ -35,7 +36,10 @@ export const getAccountProfile = async (userId: number) => {
     throw createError({ statusCode: 404, statusMessage: "用户不存在" });
   }
   const bindings = await listBindings(userId);
-  const currentBinding = bindings.find((item) => item.isCurrent) || bindings[0] || null;
+  const baseCurrentBinding = bindings.find((item) => item.isCurrent) || bindings[0] || null;
+  const currentBinding = baseCurrentBinding
+    ? await enrichBindingWithCurrentTitle(baseCurrentBinding)
+    : null;
   const pendingBinding = await getPendingBinding(userId);
   return {
     user: sanitizePublicUser(user),
