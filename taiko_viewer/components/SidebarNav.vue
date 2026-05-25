@@ -39,6 +39,8 @@ const iconPaths: Record<string, string> = {
   info: "M12 10v6 M12 7h.01 M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0",
   forum:
     "M5 6.5h14A1.5 1.5 0 0 1 20.5 8v8A1.5 1.5 0 0 1 19 17.5H10l-4.5 3V8A1.5 1.5 0 0 1 7 6.5z M9 10.25h6 M9 13.75h4",
+  support:
+    "M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5z M5 8l7 5 7-5",
   grid: "M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z",
   user:
     "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20a7.5 7.5 0 0 1 15 0",
@@ -142,6 +144,7 @@ const groups = computed(() => [
     items: [
       { key: "/forum/new", label: t("forum.newThread"), icon: "forum" },
       { key: "/forum/me", label: t("forum.myCommunity"), icon: "user" },
+      { key: "/support", label: t("nav.support"), icon: "support" },
       { key: "/settings", label: t("nav.settings"), icon: "settings" },
       { key: "/about", label: t("nav.about"), icon: "info" }
     ]

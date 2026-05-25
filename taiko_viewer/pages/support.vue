@@ -1,0 +1,521 @@
+<script setup lang="ts">
+import { computed, reactive, ref, watch } from "vue";
+import { ElMessage } from "element-plus";
+import { buildPageDescription } from "~/utils/seo";
+import type {
+  SupportTicket,
+  SupportTicketCategory,
+  SupportTicketCreateResponse,
+  SupportTicketListResponse
+} from "~/types/support";
+
+const { t, locale } = useI18n();
+const apiFetch = useViewerApiFetch();
+const { accountUser, fetchCurrentUser } = useAccountState();
+await fetchCurrentUser();
+
+definePageMeta({
+  middleware: "account-auth",
+  pageTitleKey: "nav.support",
+  pageDescKey: "page.support.desc",
+  navKey: "/support",
+  breadcrumbs: [{ labelKey: "nav.support", to: "/support" }]
+});
+
+useViewerSeo(() => ({
+  title: t("nav.support"),
+  description: buildPageDescription(t("page.support.desc")),
+  path: "/support"
+}));
+
+const form = reactive<{
+  category: SupportTicketCategory;
+  title: string;
+  contact: string;
+  content: string;
+}>({
+  category: "bug",
+  title: "",
+  contact: accountUser.value?.email || "",
+  content: ""
+});
+
+watch(
+  () => accountUser.value?.email,
+  (email) => {
+    if (!form.contact && email) {
+      form.contact = email;
+    }
+  },
+  { immediate: true }
+);
+
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        introTitle: "サポートチケット",
+        introDesc: "問題報告や機能要望を送信すると、運営メールへ直接通知され、同時にマイ履歴にも保存されます。",
+        formTitle: "新しいチケットを送信",
+        formDesc: "タイトルと内容を整理して送ると、確認と返信が速くなります。",
+        historyTitle: "自分のチケット",
+        historyDesc: "最近の送信履歴とメール送信状態を確認できます。",
+        category: "分類",
+        title: "タイトル",
+        titlePlaceholder: "例：同期後にプロフィールが更新されない",
+        contact: "連絡先",
+        contactPlaceholder: "未入力時はアカウントのメールを使用",
+        content: "内容",
+        contentPlaceholder: "再現手順、発生時間、期待していた結果などをできるだけ具体的に記入してください。",
+        submit: "チケット送信",
+        needTitle: "チケットタイトルを入力してください",
+        needContent: "チケット内容を入力してください",
+        submitSuccess: "チケット #{id} を送信しました",
+        submitQueued: "チケット #{id} は記録されましたが、メール送信に失敗しました",
+        submitFailed: "チケット送信に失敗しました",
+        empty: "まだチケットはありません",
+        loading: "読み込み中...",
+        statusOpen: "受付中",
+        statusClosed: "対応完了",
+        mailPending: "メール待機中",
+        mailSent: "メール送信済み",
+        mailFailed: "メール送信失敗",
+        submittedAt: "送信日時",
+        ticketId: "チケット番号",
+        noContact: "未入力"
+      }
+    : {
+        introTitle: "工单支持",
+        introDesc: "提交问题反馈或功能建议后，内容会直接通知到站务邮箱，同时保留在你的个人工单记录里。",
+        formTitle: "提交新工单",
+        formDesc: "把标题、现象和复现步骤写清楚，后续定位会更快。",
+        historyTitle: "我的工单",
+        historyDesc: "这里会保留最近提交记录，以及邮件投递状态。",
+        category: "工单分类",
+        title: "工单标题",
+        titlePlaceholder: "例如：同步完成后个人资料没有刷新",
+        contact: "联系方式",
+        contactPlaceholder: "留空则默认使用账号邮箱",
+        content: "工单内容",
+        contentPlaceholder: "请尽量写明复现步骤、出现时间、当前现象和预期结果。",
+        submit: "提交工单",
+        needTitle: "请输入工单标题",
+        needContent: "请输入工单内容",
+        submitSuccess: "工单 #{id} 已提交",
+        submitQueued: "工单 #{id} 已记录，但邮件投递失败",
+        submitFailed: "提交工单失败",
+        empty: "你还没有提交过工单",
+        loading: "加载中...",
+        statusOpen: "处理中",
+        statusClosed: "已关闭",
+        mailPending: "待投递",
+        mailSent: "已投递",
+        mailFailed: "投递失败",
+        submittedAt: "提交时间",
+        ticketId: "工单编号",
+        noContact: "未填写"
+      }
+);
+
+const categoryOptions = computed<Array<{ value: SupportTicketCategory; label: string }>>(() => {
+  if (locale.value === "ja") {
+    return [
+      { value: "account", label: "アカウント" },
+      { value: "sync", label: "同期" },
+      { value: "forum", label: "フォーラム" },
+      { value: "data", label: "データ内容" },
+      { value: "bug", label: "不具合" },
+      { value: "feature", label: "機能要望" },
+      { value: "other", label: "その他" }
+    ];
+  }
+  return [
+    { value: "account", label: "账号问题" },
+    { value: "sync", label: "同步问题" },
+    { value: "forum", label: "论坛社区" },
+    { value: "data", label: "数据内容" },
+    { value: "bug", label: "站点异常" },
+    { value: "feature", label: "功能建议" },
+    { value: "other", label: "其他" }
+  ];
+});
+
+const findCategoryLabel = (category: SupportTicketCategory) =>
+  categoryOptions.value.find((item) => item.value === category)?.label || category;
+
+const getStatusLabel = (status: SupportTicket["status"]) =>
+  status === "closed" ? copy.value.statusClosed : copy.value.statusOpen;
+
+const getStatusType = (status: SupportTicket["status"]) => (status === "closed" ? "success" : "warning");
+
+const getMailStatusLabel = (status: SupportTicket["mailStatus"]) => {
+  if (status === "sent") return copy.value.mailSent;
+  if (status === "failed") return copy.value.mailFailed;
+  return copy.value.mailPending;
+};
+
+const getMailStatusType = (status: SupportTicket["mailStatus"]) => {
+  if (status === "sent") return "success";
+  if (status === "failed") return "danger";
+  return "info";
+};
+
+const formatTicketTime = (value: string) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+};
+
+const submitting = ref(false);
+
+const { data: ticketsData, refresh: refreshTickets, status: ticketsStatus } = await useAsyncData<SupportTicketListResponse>(
+  "support-ticket-list",
+  () => apiFetch("/api/support/tickets"),
+  {
+    default: () => ({ items: [] })
+  }
+);
+
+const tickets = computed(() => ticketsData.value?.items || []);
+const loadingTickets = computed(() => ticketsStatus.value === "pending");
+
+const submit = async () => {
+  if (submitting.value) return;
+  if (!form.title.trim()) {
+    ElMessage.warning(copy.value.needTitle);
+    return;
+  }
+  if (!form.content.trim()) {
+    ElMessage.warning(copy.value.needContent);
+    return;
+  }
+
+  submitting.value = true;
+  try {
+    const response = await apiFetch<SupportTicketCreateResponse>("/api/support/tickets", {
+      method: "POST",
+      body: {
+        category: form.category,
+        title: form.title,
+        contact: form.contact,
+        content: form.content
+      }
+    });
+
+    if (response.mailDelivered) {
+      ElMessage.success(copy.value.submitSuccess.replace("{id}", String(response.ticket.id)).replace("#{id}", `#${response.ticket.id}`));
+    } else {
+      ElMessage.warning(copy.value.submitQueued.replace("{id}", String(response.ticket.id)).replace("#{id}", `#${response.ticket.id}`));
+    }
+
+    form.title = "";
+    form.content = "";
+    await refreshTickets();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.submitFailed);
+  } finally {
+    submitting.value = false;
+  }
+};
+</script>
+
+<template>
+  <div class="page-stack">
+    <el-card class="hero-card">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">
+            <span class="section-icon warm" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5z M5 8l7 5 7-5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            {{ copy.introTitle }}
+          </h2>
+          <p>{{ copy.introDesc }}</p>
+        </div>
+      </div>
+    </el-card>
+
+    <div class="support-grid">
+      <el-card class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">
+              <span class="section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 5v14 M5 12h14"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+              {{ copy.formTitle }}
+            </h3>
+            <p>{{ copy.formDesc }}</p>
+          </div>
+        </div>
+
+        <el-form label-position="top" class="support-form">
+          <el-form-item :label="copy.category">
+            <el-select v-model="form.category" class="full-width">
+              <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item :label="copy.title">
+            <el-input v-model="form.title" :placeholder="copy.titlePlaceholder" maxlength="120" show-word-limit />
+          </el-form-item>
+
+          <el-form-item :label="copy.contact">
+            <el-input v-model="form.contact" :placeholder="copy.contactPlaceholder" maxlength="255" />
+          </el-form-item>
+
+          <el-form-item :label="copy.content">
+            <el-input
+              v-model="form.content"
+              type="textarea"
+              :rows="8"
+              resize="vertical"
+              :maxlength="8000"
+              show-word-limit
+              :placeholder="copy.contentPlaceholder"
+            />
+          </el-form-item>
+
+          <div class="form-actions">
+            <el-button type="primary" :loading="submitting" @click="submit">
+              {{ copy.submit }}
+            </el-button>
+          </div>
+        </el-form>
+      </el-card>
+
+      <el-card class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">
+              <span class="section-icon alt" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 7h12M6 12h12M6 17h8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+              {{ copy.historyTitle }}
+            </h3>
+            <p>{{ copy.historyDesc }}</p>
+          </div>
+        </div>
+
+        <div v-if="!tickets.length" class="empty-state">
+          {{ loadingTickets ? copy.loading : copy.empty }}
+        </div>
+
+        <div v-else class="ticket-list">
+          <article v-for="ticket in tickets" :key="ticket.id" class="ticket-card">
+            <div class="ticket-card__top">
+              <div class="ticket-card__title-wrap">
+                <div class="ticket-card__meta">
+                  <span class="ticket-id">{{ copy.ticketId }} #{{ ticket.id }}</span>
+                  <span>{{ findCategoryLabel(ticket.category) }}</span>
+                </div>
+                <h4>{{ ticket.title }}</h4>
+              </div>
+              <div class="ticket-tags">
+                <el-tag size="small" :type="getStatusType(ticket.status)">{{ getStatusLabel(ticket.status) }}</el-tag>
+                <el-tag size="small" :type="getMailStatusType(ticket.mailStatus)">{{ getMailStatusLabel(ticket.mailStatus) }}</el-tag>
+              </div>
+            </div>
+
+            <p class="ticket-content">{{ ticket.content }}</p>
+
+            <div class="ticket-card__footer">
+              <span>{{ copy.submittedAt }}：{{ formatTicketTime(ticket.createdAt) }}</span>
+              <span>{{ copy.contact }}：{{ ticket.contact || copy.noContact }}</span>
+            </div>
+          </article>
+        </div>
+      </el-card>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.page-stack {
+  display: grid;
+  gap: 20px;
+}
+
+.support-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+}
+
+.panel-header h2,
+.panel-header h3 {
+  margin: 0 0 6px;
+}
+
+.panel-header p {
+  margin: 0;
+  color: #6c5a4b;
+}
+
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9a6d47;
+  background: rgba(196, 127, 79, 0.2);
+  border-radius: 6px;
+}
+
+.section-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.section-icon.alt {
+  background: rgba(88, 136, 197, 0.2);
+  color: #3c6aa6;
+}
+
+.section-icon.warm {
+  background: rgba(255, 190, 126, 0.22);
+  color: #c77432;
+}
+
+.hero-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 214, 168, 0.26), transparent 38%),
+    linear-gradient(135deg, rgba(255, 249, 240, 0.96), rgba(255, 255, 255, 0.98));
+}
+
+.support-form {
+  margin-top: 10px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ticket-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.ticket-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 245, 239, 0.92));
+  box-shadow: 0 10px 24px rgba(165, 138, 110, 0.12);
+  display: grid;
+  gap: 12px;
+}
+
+.ticket-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ticket-card__title-wrap {
+  min-width: 0;
+}
+
+.ticket-card__title-wrap h4 {
+  margin: 6px 0 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.ticket-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: #7a6552;
+}
+
+.ticket-id {
+  font-weight: 600;
+  color: #a56535;
+}
+
+.ticket-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ticket-content {
+  margin: 0;
+  color: #3f2f23;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ticket-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font-size: 12px;
+  color: #7a6552;
+}
+
+.empty-state {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 1px dashed rgba(171, 141, 110, 0.36);
+  color: #846b57;
+  background: rgba(255, 252, 248, 0.7);
+}
+
+@media (max-width: 960px) {
+  .support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-card__top {
+    flex-direction: column;
+  }
+}
+</style>

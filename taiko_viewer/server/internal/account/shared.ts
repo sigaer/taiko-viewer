@@ -399,11 +399,13 @@ export const sendAccountMail = async (payload: {
   subject: string;
   text: string;
   html: string;
+  replyTo?: string;
 }) => {
   const { from, transporter } = getMailer();
   await transporter.sendMail({
     from,
     to: payload.to,
+    replyTo: payload.replyTo,
     subject: payload.subject,
     text: payload.text,
     html: payload.html

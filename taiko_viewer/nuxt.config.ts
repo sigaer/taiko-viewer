@@ -147,6 +147,7 @@ export default defineNuxtConfig({
     smtpPass: process.env.SMTP_PASS || "",
     smtpFrom: process.env.SMTP_FROM || "",
     developerReviewInbox: process.env.TAIKO_DEVELOPER_REVIEW_INBOX || "",
+    supportInbox: process.env.TAIKO_SUPPORT_INBOX || "",
     wahlapCookie: process.env.TAIKO_WAHLAP_COOKIE || "",
     ossEndpoint: process.env.OSS_ENDPOINT || "",
     ossRegion: process.env.OSS_REGION || "",
@@ -177,6 +178,7 @@ export default defineNuxtConfig({
       "/songs/**": { prerender: false },
       "/forum/**": { prerender: false },
       "/account/**": { prerender: false },
+      "/support": { prerender: false },
       "/grade/2025": { prerender: false, redirect: "/grade/2025/%E4%BA%94%E7%B4%9A" },
       "/grade/2025/**": { prerender: false },
       "/titles": { prerender: false },
@@ -187,6 +189,7 @@ export default defineNuxtConfig({
       "/api/account/**": { prerender: false },
       "/api/developer/**": { prerender: false },
       "/api/forum/**": { prerender: false },
+      "/api/support/**": { prerender: false },
       "/api/bilibili/**": { prerender: false }
     },
     prerender: {

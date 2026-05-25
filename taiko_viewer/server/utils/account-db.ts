@@ -176,6 +176,24 @@ const CREATE_TABLES = [
       REFERENCES web_developer_applications(id) ON DELETE SET NULL,
     CONSTRAINT fk_web_developer_tokens_issued_by_user_id FOREIGN KEY (issued_by_user_id)
       REFERENCES web_user_accounts(id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_support_tickets (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(120) NOT NULL,
+    category VARCHAR(32) NOT NULL,
+    content TEXT NOT NULL,
+    contact VARCHAR(255) DEFAULT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'open',
+    mail_status VARCHAR(16) NOT NULL DEFAULT 'pending',
+    mail_error VARCHAR(255) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_support_tickets_user_id_created_at (user_id, created_at),
+    KEY idx_web_support_tickets_status_created_at (status, created_at),
+    KEY idx_web_support_tickets_mail_status_created_at (mail_status, created_at),
+    CONSTRAINT fk_web_support_tickets_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 

@@ -27,6 +27,8 @@ const copy = computed(() =>
         shortcutsDesc: "コミュニティ、同期、開発者向け機能へすぐ移動できます。",
         forum: "フォーラム",
         forumDesc: "セクション、通知、スレッドの動きを確認します",
+        support: "サポートチケット",
+        supportDesc: "不具合報告や機能要望を運営メールへ直接送信します",
         sync: "同期",
         syncDesc: "現在の連携 ID の成績 JSON を同期します",
         developer: "開発者権限",
@@ -51,6 +53,8 @@ const copy = computed(() =>
         shortcutsDesc: "这里可以直接进入社区、多端同步和开发者相关功能。",
         forum: "论坛社区",
         forumDesc: "查看版块、通知和帖子动态",
+        support: "工单支持",
+        supportDesc: "把问题反馈或功能建议直接发送到站务邮箱",
         sync: "多端同步",
         syncDesc: "同步当前绑定 ID 的完整成绩 JSON",
         developer: "开发者权限",
@@ -139,6 +143,10 @@ const clearCache = () => {
         <NuxtLink :to="localePath('/forum')" class="tool-link">
           <strong>{{ copy.forum }}</strong>
           <span>{{ copy.forumDesc }}</span>
+        </NuxtLink>
+        <NuxtLink :to="localePath('/support')" class="tool-link">
+          <strong>{{ copy.support }}</strong>
+          <span>{{ copy.supportDesc }}</span>
         </NuxtLink>
         <NuxtLink :to="localePath('/account/sync')" class="tool-link">
           <strong>{{ copy.sync }}</strong>
