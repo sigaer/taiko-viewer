@@ -90,6 +90,34 @@ const copy = computed(() =>
         editTitle: "譜面記録を編集",
         removed: "削除済み",
         available: "現行曲",
+        lockNotice: "追加した記録は既定でロックされ、今後の同期や再取得で自動上書き・削除されません。",
+        fromCatalog: "楽曲一覧から選択",
+        customSong: "未収録曲を手動入力",
+        findSong: "楽曲を探す",
+        searchPlaceholder: "曲名、日本語名、楽曲 ID で検索",
+        availableSong: "現行曲",
+        removedSong: "削除済み",
+        catalogHint: "削除済み楽曲も検索できます。未収録曲は「未収録曲を手動入力」に切り替えてください。",
+        songId: "楽曲 ID",
+        title: "曲名",
+        titlePlaceholder: "例：新曲テスト版",
+        jpName: "日本語名",
+        jpNamePlaceholder: "空欄可",
+        difficulty: "難易度",
+        score: "スコア",
+        rating: "評価",
+        good: "良",
+        ok: "可",
+        bad: "不可",
+        drumroll: "連打数",
+        maxCombo: "最大コンボ",
+        playCount: "プレイ回数",
+        clearCount: "クリア回数",
+        fullComboCount: "フルコン回数",
+        dondafulCount: "全良回数",
+        cancel: "キャンセル",
+        createAndLock: "追加してロック",
+        save: "保存",
         invalidSongId: "有効な楽曲 ID を入力してください",
         needTitle: "未収録曲は曲名を 1 つ以上入力してください",
         chooseSong: "先に収録曲から 1 曲選択してください",
@@ -102,6 +130,34 @@ const copy = computed(() =>
         editTitle: "编辑谱面记录",
         removed: "已下架",
         available: "现有",
+        lockNotice: "新增记录会默认写入锁定表，后续同步和抓取不会自动覆盖或删除该谱面。",
+        fromCatalog: "从歌曲目录选择",
+        customSong: "手动录入未收录曲目",
+        findSong: "查找歌曲",
+        searchPlaceholder: "搜索曲名、日文名或歌曲 ID",
+        availableSong: "现有曲目",
+        removedSong: "已下架",
+        catalogHint: "已下架歌曲也能直接搜索；未上线或未收录曲目请切换到“手动录入未收录曲目”。",
+        songId: "歌曲 ID",
+        title: "曲名",
+        titlePlaceholder: "例如：新曲测试版",
+        jpName: "日文名",
+        jpNamePlaceholder: "可留空",
+        difficulty: "难度",
+        score: "分数",
+        rating: "评价",
+        good: "良",
+        ok: "可",
+        bad: "不可",
+        drumroll: "连打数",
+        maxCombo: "最大连击",
+        playCount: "游玩次数",
+        clearCount: "过关次数",
+        fullComboCount: "全连次数",
+        dondafulCount: "全良次数",
+        cancel: "取消",
+        createAndLock: "新增并锁定",
+        save: "保存",
         invalidSongId: "请填写有效的歌曲 ID",
         needTitle: "未收录曲目至少要填写一个曲名",
         chooseSong: "请先从目录中选择一首歌",
@@ -313,24 +369,24 @@ const submit = async () => {
   <el-dialog v-model="visible" width="min(760px, 100%)" :title="dialogTitle">
     <div v-if="isCreateMode" class="create-head">
       <el-alert
-        title="新增记录会默认写入锁定表，后续同步和抓取不会自动覆盖或删除该谱面。"
+        :title="copy.lockNotice"
         type="info"
         :closable="false"
         show-icon
       />
       <el-radio-group v-model="form.sourceType" class="source-toggle">
-        <el-radio-button label="catalog">从歌曲目录选择</el-radio-button>
-        <el-radio-button label="custom">手动录入未收录曲目</el-radio-button>
+        <el-radio-button label="catalog">{{ copy.fromCatalog }}</el-radio-button>
+        <el-radio-button label="custom">{{ copy.customSong }}</el-radio-button>
       </el-radio-group>
     </div>
 
     <div v-if="isCreateMode && !isCustomMode" class="catalog-picker">
-      <el-form-item label="查找歌曲">
+      <el-form-item :label="copy.findSong">
         <el-autocomplete
           v-model="catalogKeyword"
           class="catalog-autocomplete"
           clearable
-          placeholder="搜索曲名、日文名或歌曲 ID"
+          :placeholder="copy.searchPlaceholder"
           :fetch-suggestions="queryCatalogSongs"
           @select="handleCatalogSelect"
         />
@@ -339,21 +395,21 @@ const submit = async () => {
         <strong>{{ selectedCatalogSong.song_name }}</strong>
         <span>{{ selectedCatalogSong.song_name_jp || `ID ${selectedCatalogSong.id}` }}</span>
         <el-tag size="small" :type="Number(selectedCatalogSong.shelf_status || 0) === 1 ? 'warning' : 'success'" effect="light">
-          {{ Number(selectedCatalogSong.shelf_status || 0) === 1 ? "已下架" : "现有曲目" }}
+          {{ Number(selectedCatalogSong.shelf_status || 0) === 1 ? copy.removedSong : copy.availableSong }}
         </el-tag>
       </div>
-      <p class="catalog-hint">已下架歌曲也能直接搜索；未上线或未收录曲目请切换到“手动录入未收录曲目”。</p>
+      <p class="catalog-hint">{{ copy.catalogHint }}</p>
     </div>
 
     <div v-if="isCreateMode && isCustomMode" class="custom-grid">
-      <el-form-item label="歌曲 ID">
+      <el-form-item :label="copy.songId">
         <el-input-number v-model="form.songNo" :min="1" :step="1" />
       </el-form-item>
-      <el-form-item label="曲名">
-        <el-input v-model="form.title" placeholder="例如：新曲测试版" />
+      <el-form-item :label="copy.title">
+        <el-input v-model="form.title" :placeholder="copy.titlePlaceholder" />
       </el-form-item>
-      <el-form-item label="日文名">
-        <el-input v-model="form.titleJp" placeholder="可留空" />
+      <el-form-item :label="copy.jpName">
+        <el-input v-model="form.titleJp" :placeholder="copy.jpNamePlaceholder" />
       </el-form-item>
     </div>
 
@@ -363,50 +419,50 @@ const submit = async () => {
     </div>
 
     <div class="edit-grid">
-      <el-form-item label="难度">
+      <el-form-item :label="copy.difficulty">
         <el-select v-model="form.level" :disabled="!isCreateMode || !availableLevelOptions.length">
           <el-option v-for="option in availableLevelOptions" :key="option.value" :label="option.label" :value="option.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="分数">
+      <el-form-item :label="copy.score">
         <el-input-number v-model="form.high_score" :min="0" :step="100" />
       </el-form-item>
-      <el-form-item label="评价">
+      <el-form-item :label="copy.rating">
         <el-input-number v-model="form.best_score_rank" :min="0" :max="9" />
       </el-form-item>
-      <el-form-item label="良">
+      <el-form-item :label="copy.good">
         <el-input-number v-model="form.good_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="可">
+      <el-form-item :label="copy.ok">
         <el-input-number v-model="form.ok_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="不可">
+      <el-form-item :label="copy.bad">
         <el-input-number v-model="form.ng_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="连打数">
+      <el-form-item :label="copy.drumroll">
         <el-input-number v-model="form.pound_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="最大连击">
+      <el-form-item :label="copy.maxCombo">
         <el-input-number v-model="form.combo_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="游玩次数">
+      <el-form-item :label="copy.playCount">
         <el-input-number v-model="form.stage_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="过关次数">
+      <el-form-item :label="copy.clearCount">
         <el-input-number v-model="form.clear_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="全连次数">
+      <el-form-item :label="copy.fullComboCount">
         <el-input-number v-model="form.full_combo_cnt" :min="0" />
       </el-form-item>
-      <el-form-item label="全良次数">
+      <el-form-item :label="copy.dondafulCount">
         <el-input-number v-model="form.dondaful_combo_cnt" :min="0" />
       </el-form-item>
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
+      <el-button @click="visible = false">{{ copy.cancel }}</el-button>
       <el-button type="primary" :loading="saving" @click="submit">
-        {{ isCreateMode ? "新增并锁定" : "保存" }}
+        {{ isCreateMode ? copy.createAndLock : copy.save }}
       </el-button>
     </template>
   </el-dialog>

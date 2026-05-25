@@ -112,7 +112,7 @@ const getSectionDescription = (slug: string, fallback: string) => t(`forum.secti
         <section class="forum-stream panel-card">
           <div class="panel-head">
             <div>
-              <h3>精选推荐</h3>
+              <h3>{{ t("page.forum.index.featuredTitle") }}</h3>
               <p>{{ t("page.forum.index.featuredDesc") }}</p>
             </div>
             <span class="panel-head__meta">{{ t("page.forum.index.featuredMeta") }}</span>
@@ -134,7 +134,7 @@ const getSectionDescription = (slug: string, fallback: string) => t(`forum.secti
         <section class="forum-stream panel-card">
           <div class="panel-head">
             <div>
-              <h3>热帖榜</h3>
+              <h3>{{ t("page.forum.index.hotTitle") }}</h3>
               <p>{{ t("page.forum.index.hotDesc") }}</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ const getSectionDescription = (slug: string, fallback: string) => t(`forum.secti
         <section class="forum-stream panel-card">
           <div class="panel-head">
             <div>
-              <h3>最新攻略</h3>
+              <h3>{{ t("page.forum.index.latestGuideTitle") }}</h3>
               <p>{{ t("page.forum.index.latestGuideDesc") }}</p>
             </div>
             <NuxtLink :to="localePath('/forum/section/score-guides')">{{ t("page.forum.index.enterGuide") }}</NuxtLink>
