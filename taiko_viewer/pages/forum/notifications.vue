@@ -10,27 +10,25 @@ type NotificationPayload = {
   items: ForumNotification[];
 };
 
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-
-const pageMeta = {
-  title: "站内通知",
-  desc: "查看回复、提及、点赞和系统通知。"
-};
+const { t } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
+const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
   middleware: "account-auth",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "forum.notifications",
+  pageDescKey: "page.forum.notifications.desc",
   navKey: "/forum",
   breadcrumbs: [
-    { label: "论坛社区", to: "/forum" },
-    { label: "站内通知", to: "/forum/notifications" }
+    { labelKey: "forum.title", to: "/forum" },
+    { labelKey: "forum.notifications", to: "/forum/notifications" }
   ]
 });
 
 const { data, pending, refresh } = await useAsyncData<NotificationPayload>(
   "forum-notifications",
-  () => $fetch("/api/forum/notifications", { headers }),
+  () => apiFetch("/api/forum/notifications"),
   {
     default: () => ({
       total: 0,
@@ -44,37 +42,37 @@ const { data, pending, refresh } = await useAsyncData<NotificationPayload>(
 
 const markAllRead = async () => {
   try {
-    await $fetch("/api/forum/notifications/read", {
+    await apiFetch("/api/forum/notifications/read", {
       method: "POST",
       body: {}
     });
-    ElMessage.success("通知已全部标记为已读");
+    ElMessage.success(t("forum.allMarkedRead"));
     await refresh();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "操作失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || t("errors.actionFailed"));
   }
 };
 
-const typeLabelMap: Record<string, string> = {
-  reply: "回复",
-  mention: "提及",
-  like: "点赞",
-  system: "系统"
-};
+const typeLabelMap = computed<Record<string, string>>(() => ({
+  reply: t("forum.notificationsType.reply"),
+  mention: t("forum.notificationsType.mention"),
+  like: t("forum.notificationsType.like"),
+  system: t("forum.notificationsType.system")
+}));
 </script>
 
 <template>
   <div class="forum-notifications-page">
     <section class="panel-card notification-head">
       <div>
-        <h2>站内通知</h2>
-        <p>未读 {{ data?.unreadCount || 0 }} 条，共 {{ data?.total || 0 }} 条。</p>
+        <h2>{{ t("forum.notifications") }}</h2>
+        <p>{{ t("page.forum.notifications.summary", { unread: data?.unreadCount || 0, total: data?.total || 0 }) }}</p>
       </div>
-      <el-button type="primary" plain @click="markAllRead">全部标记已读</el-button>
+      <el-button type="primary" plain @click="markAllRead">{{ t("forum.markAllRead") }}</el-button>
     </section>
 
     <section class="notification-list">
-      <el-empty v-if="!pending && !data?.items.length" description="通知中心还是空的" />
+      <el-empty v-if="!pending && !data?.items.length" :description="t('forum.emptyNotifications')" />
       <article
         v-for="item in data?.items"
         :key="item.id"
@@ -84,7 +82,7 @@ const typeLabelMap: Record<string, string> = {
         <div class="notification-card__main">
           <div class="notification-card__meta">
             <span class="notification-type">{{ typeLabelMap[item.type] || item.type }}</span>
-            <span>{{ new Date(item.createdAt).toLocaleString("zh-CN") }}</span>
+            <span>{{ formatDateTime(item.createdAt) }}</span>
           </div>
           <h3>{{ item.title }}</h3>
           <p>{{ item.body }}</p>
@@ -92,8 +90,8 @@ const typeLabelMap: Record<string, string> = {
             <ForumUserBadge :user="item.actor" compact />
           </div>
         </div>
-        <NuxtLink v-if="item.threadId" :to="`/forum/thread/${item.threadId}`" class="notification-card__link">
-          查看主题
+        <NuxtLink v-if="item.threadId" :to="localePath(`/forum/thread/${item.threadId}`)" class="notification-card__link">
+          {{ t("forum.viewThread") }}
         </NuxtLink>
       </article>
     </section>

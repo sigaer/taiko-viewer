@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { buildPageDescription } from "~/utils/seo";
 
 type TableCell = {
   tag: "th" | "td";
@@ -26,31 +27,25 @@ const tableRows = computed<TableRow[]>(() => {
 });
 
 const tableStyle = computed(() => titleTableData.value?.table?.attrs?.style || "");
-
-import { buildPageDescription } from "~/utils/seo";
-
-const pageMeta = {
-  title: "称号一览",
-  desc: buildPageDescription("太鼓达人国行称号列表与获取条件查询。")
-};
+const { t } = useI18n();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "page.titles.title",
+  pageDescKey: "page.titles.desc",
   navKey: "/titles",
-  breadcrumbs: [{ label: "称号一览", to: "/titles" }]
+  breadcrumbs: [{ labelKey: "nav.titles", to: "/titles" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("page.titles.title"),
+  description: buildPageDescription(t("page.titles.desc")),
   path: "/titles",
-  keywords: ["称号一览", "太鼓达人称号"],
+  keywords: [t("page.titles.title"), t("page.titles.keyword")],
   breadcrumbs: [
-    { name: "首页", path: "/" },
-    { name: "称号一览", path: "/titles" }
+    { name: t("nav.home"), path: "/" },
+    { name: t("nav.titles"), path: "/titles" }
   ]
-});
+}));
 </script>
 
 <template>
@@ -71,8 +66,8 @@ useViewerSeo({
               </svg>
             </span>
             <div>
-              <h3 class="title-text">称号一览</h3>
-              <p class="subtitle-text">所有可获得的称号及获取条件（已翻译为中文）</p>
+              <h3 class="title-text">{{ t("page.titles.title") }}</h3>
+              <p class="subtitle-text">{{ t("page.titles.subtitle") }}</p>
             </div>
           </div>
         </div>
@@ -81,7 +76,7 @@ useViewerSeo({
       <el-skeleton v-if="pending" :rows="10" animated />
       <el-alert
         v-else-if="error"
-        title="称号数据加载失败，请稍后重试"
+        :title="t('page.titles.loadFailed')"
         type="error"
         :closable="false"
         show-icon

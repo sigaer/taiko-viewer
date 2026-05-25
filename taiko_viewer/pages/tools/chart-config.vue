@@ -2,27 +2,24 @@
 import { ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError, viewerErrorAlertType } from "~/utils/viewerError";
-
-const pageMeta = {
-  title: "查配置",
-  desc: buildPageDescription("按 BPM、难度或谱面配置字符串查询太鼓达人国行谱面。")
-};
+const { t } = useI18n();
+const apiFetch = useViewerApiFetch();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "tools.chartConfig",
+  pageDescKey: "page.tools.chartConfig.desc",
   navKey: "/tools/chart-config",
   breadcrumbs: [
-    { label: "查谱工具", to: "/tools" },
-    { label: "查配置", to: "/tools/chart-config" }
+    { labelKey: "nav.tools", to: "/tools" },
+    { labelKey: "tools.chartConfig", to: "/tools/chart-config" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("tools.chartConfig"),
+  description: buildPageDescription(t("page.tools.chartConfig.desc", "按 BPM、难度或谱面配置字符串查询太鼓达人国行谱面。")),
   path: "/tools/chart-config"
-});
+}));
 
 const query = ref("16 oxxo");
 const loading = ref(false);
@@ -34,12 +31,12 @@ const submit = async () => {
   errorMessage.value = "";
   lines.value = [];
   try {
-    const result = await $fetch<{ lines: string[] }>("/api/tools/chart-config", {
+    const result = await apiFetch<{ lines: string[] }>("/api/tools/chart-config", {
       query: { q: query.value.trim() }
     });
     lines.value = result.lines || [];
   } catch (error: unknown) {
-    errorMessage.value = await resolveViewerError(error, "查询失败，请稍后重试");
+    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"));
   } finally {
     loading.value = false;
   }
@@ -53,10 +50,10 @@ const submit = async () => {
         示例：<code>180</code>、<code>180 鬼10</code>、<code>16 oxxo</code>、<code>16 oxxo 180 鬼10</code>（省略分音符时默认 16 分）
       </p>
       <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item label="查询内容">
-          <el-input v-model="query" placeholder="例如：16 oxxo 180 鬼10" clearable />
+        <el-form-item :label="t('page.tools.chartConfig.queryLabel', '查询内容')">
+          <el-input v-model="query" :placeholder="t('page.tools.chartConfig.placeholder', '例如：16 oxxo 180 鬼10')" clearable />
         </el-form-item>
-        <el-button type="primary" :loading="loading" native-type="submit">查询</el-button>
+        <el-button type="primary" :loading="loading" native-type="submit">{{ t("common.search") }}</el-button>
       </el-form>
       <el-alert
         v-if="errorMessage"

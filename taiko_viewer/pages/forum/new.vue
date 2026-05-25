@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
@@ -9,29 +10,26 @@ type UploadedImage = {
 };
 
 const router = useRouter();
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-
-const pageMeta = {
-  title: "发布新帖",
-  desc: buildPageDescription("在太鼓达人论坛发布图文攻略、晒分战报或讨论。")
-};
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 
 definePageMeta({
   middleware: "account-auth",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "forum.newThread",
+  pageDescKey: "page.forum.new.desc",
   navKey: "/forum",
   breadcrumbs: [
-    { label: "论坛社区", to: "/forum" },
-    { label: "发布新帖", to: "/forum/new" }
+    { labelKey: "forum.title", to: "/forum" },
+    { labelKey: "forum.newThread", to: "/forum/new" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("forum.newThread"),
+  description: buildPageDescription(t("page.forum.new.desc")),
   path: "/forum/new"
-});
+}));
 
 const form = reactive({
   sectionSlug: "score-guides",
@@ -50,20 +48,117 @@ const imageBlocks = ref<UploadedImage[]>([]);
 const uploading = ref(false);
 const submitting = ref(false);
 
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        discussionTip: "通常の交流、質問、体験共有に向いています。",
+        guideTip: "譜面攻略、運手分解、練習ルート共有に向いています。",
+        achievementTip: "戦績共有、全良報告、高得点の振り返りに向いています。",
+        officialTip: "管理・モデレーター向けです。",
+        heading: "新規投稿",
+        back: "フォーラムへ戻る",
+        section: "セクション",
+        threadType: "投稿タイプ",
+        discussion: "雑談",
+        guide: "攻略",
+        achievement: "戦績",
+        official: "告知",
+        title: "タイトル",
+        titlePlaceholder: "例：虹2025 三曲段の攻略メモ",
+        summary: "概要",
+        summaryPlaceholder: "未入力の場合は本文1段目から自動抽出します",
+        tags: "タグ",
+        tagsPlaceholder: "空白またはカンマ区切り。例：段位 全良 配速",
+        songId: "関連曲 ID",
+        songIdPlaceholder: "任意。攻略や戦績投稿向け",
+        difficulty: "関連難易度",
+        level: "星数",
+        levelPlaceholder: "例：10",
+        paragraphs: "本文段落",
+        paragraphDraftPlaceholder: "本文を入力して「本文に追加」を押すと内容リストに入ります",
+        paragraphCount: "{count} 段",
+        addParagraph: "本文に追加",
+        images: "画像",
+        imageCount: "{count} 枚",
+        uploadImage: "画像をアップロード",
+        imageCaptionPlaceholder: "画像説明（任意）",
+        submit: "投稿する",
+        remove: "削除",
+        contentRequired: "本文または画像を 1 つ以上追加してください",
+        uploadSuccess: "画像をアップロードしました",
+        uploadFailed: "画像アップロードに失敗しました",
+        publishSuccess: "投稿を公開しました",
+        publishFailed: "投稿に失敗しました"
+      }
+    : {
+        discussionTip: "适合普通交流、提问和经验分享。",
+        guideTip: "适合写谱面思路、手法拆解和练习路线。",
+        achievementTip: "适合晒分、全良战报和冲分复盘。",
+        officialTip: "仅供站务/版主用途。",
+        heading: "发布新帖",
+        back: "返回论坛",
+        section: "版块",
+        threadType: "帖子类型",
+        discussion: "讨论",
+        guide: "攻略",
+        achievement: "战报",
+        official: "公告",
+        title: "标题",
+        titlePlaceholder: "例如：虹2025 三曲段过段思路整理",
+        summary: "摘要",
+        summaryPlaceholder: "不填则自动从首段正文提取",
+        tags: "标签",
+        tagsPlaceholder: "用空格或逗号分隔，如：段位 全良 配速",
+        songId: "关联曲目 ID",
+        songIdPlaceholder: "可选，用于攻略或战报贴",
+        difficulty: "关联难度",
+        level: "星级",
+        levelPlaceholder: "例如 10",
+        paragraphs: "正文段落",
+        paragraphDraftPlaceholder: "输入一段正文，点击加入正文后进入内容序列",
+        paragraphCount: "{count} 段",
+        addParagraph: "加入正文",
+        images: "插图",
+        imageCount: "{count} 张",
+        uploadImage: "上传图片",
+        imageCaptionPlaceholder: "图片说明（可选）",
+        submit: "发布主题",
+        remove: "移除",
+        contentRequired: "至少需要一段正文或一张图片",
+        uploadSuccess: "图片上传完成",
+        uploadFailed: "图片上传失败",
+        publishSuccess: "帖子已发布",
+        publishFailed: "发帖失败"
+      }
+);
+
 const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
   "forum-new-sections",
-  () => $fetch("/api/forum/sections", { headers }),
+  () => apiFetch("/api/forum/sections"),
   {
     default: () => ({ items: [] })
   }
 );
 
-const threadTypeTips: Record<string, string> = {
-  discussion: "适合普通交流、提问和经验分享。",
-  guide: "适合写谱面思路、手法拆解和练习路线。",
-  achievement: "适合晒分、全良战报和冲分复盘。",
-  official: "仅供站务/版主用途。"
-};
+const threadTypeTips = computed<Record<string, string>>(() => ({
+  discussion: copy.value.discussionTip,
+  guide: copy.value.guideTip,
+  achievement: copy.value.achievementTip,
+  official: copy.value.officialTip
+}));
+const threadTypeOptions = computed(() => [
+  { label: copy.value.discussion, value: "discussion" },
+  { label: copy.value.guide, value: "guide" },
+  { label: copy.value.achievement, value: "achievement" },
+  { label: copy.value.official, value: "official" }
+]);
+const difficultyOptions = computed(() =>
+  [1, 2, 3, 4, 5].map((value) => ({
+    value: String(value),
+    label: t(`difficulty.${value}`)
+  }))
+);
+const getSectionLabel = (section: ForumSection) => t(`forum.sections.${section.slug}.name`);
 
 const addParagraph = () => {
   if (!form.paragraphDraft.trim()) return;
@@ -84,7 +179,7 @@ const uploadImage = async (options: any) => {
   try {
     const body = new FormData();
     body.append("image", options.file);
-    const result = await $fetch<{ imageUrl: string }>("/api/forum/media/images", {
+    const result = await apiFetch<{ imageUrl: string }>("/api/forum/media/images", {
       method: "POST",
       body
     });
@@ -92,10 +187,10 @@ const uploadImage = async (options: any) => {
       imageUrl: result.imageUrl,
       caption: ""
     });
-    ElMessage.success("图片上传完成");
+    ElMessage.success(copy.value.uploadSuccess);
     options.onSuccess?.(result, options.file);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "图片上传失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.uploadFailed);
     options.onError?.(error);
   } finally {
     uploading.value = false;
@@ -116,12 +211,12 @@ const submit = async () => {
     }))
   ];
   if (!contentBlocks.length) {
-    ElMessage.error("至少需要一段正文或一张图片");
+    ElMessage.error(copy.value.contentRequired);
     return;
   }
   submitting.value = true;
   try {
-    const thread = await $fetch<{ id: number }>("/api/forum/threads", {
+    const thread = await apiFetch<{ id: number }>("/api/forum/threads", {
       method: "POST",
       body: {
         sectionSlug: form.sectionSlug,
@@ -138,10 +233,10 @@ const submit = async () => {
         contentBlocks
       }
     });
-    ElMessage.success("帖子已发布");
-    await router.push(`/forum/thread/${thread.id}`);
+    ElMessage.success(copy.value.publishSuccess);
+    await router.push(localePath(`/forum/thread/${thread.id}`));
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "发帖失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.publishFailed);
   } finally {
     submitting.value = false;
   }
@@ -153,63 +248,56 @@ const submit = async () => {
     <section class="panel-card composer-panel">
       <div class="composer-panel__head">
         <div>
-          <h2>发布新帖</h2>
+          <h2>{{ copy.heading }}</h2>
           <p>{{ threadTypeTips[form.threadType] }}</p>
         </div>
-        <NuxtLink to="/forum" class="composer-back-link">返回论坛</NuxtLink>
+        <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
       </div>
 
       <el-form label-position="top">
         <div class="composer-grid">
-          <el-form-item label="版块">
+          <el-form-item :label="copy.section">
             <el-select v-model="form.sectionSlug">
-              <el-option v-for="section in sectionsData.items" :key="section.id" :label="section.name" :value="section.slug" />
+              <el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" />
             </el-select>
           </el-form-item>
-          <el-form-item label="帖子类型">
+          <el-form-item :label="copy.threadType">
             <el-select v-model="form.threadType">
-              <el-option label="讨论" value="discussion" />
-              <el-option label="攻略" value="guide" />
-              <el-option label="战报" value="achievement" />
-              <el-option label="公告" value="official" />
+              <el-option v-for="option in threadTypeOptions" :key="option.value" :label="option.label" :value="option.value" />
             </el-select>
           </el-form-item>
         </div>
 
-        <el-form-item label="标题">
-          <el-input v-model="form.title" maxlength="120" show-word-limit placeholder="例如：虹2025 三曲段过段思路整理" />
+        <el-form-item :label="copy.title">
+          <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
         </el-form-item>
 
-        <el-form-item label="摘要">
-          <el-input v-model="form.summary" maxlength="280" show-word-limit placeholder="不填则自动从首段正文提取" />
+        <el-form-item :label="copy.summary">
+          <el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" />
         </el-form-item>
 
-        <el-form-item label="标签">
-          <el-input v-model="form.tagsInput" placeholder="用空格或逗号分隔，如：段位 全良 配速" />
+        <el-form-item :label="copy.tags">
+          <el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" />
         </el-form-item>
 
         <div class="composer-grid composer-grid--song">
-          <el-form-item label="关联曲目 ID">
-            <el-input v-model="form.songId" placeholder="可选，用于攻略或战报贴" />
+          <el-form-item :label="copy.songId">
+            <el-input v-model="form.songId" :placeholder="copy.songIdPlaceholder" />
           </el-form-item>
-          <el-form-item label="关联难度">
+          <el-form-item :label="copy.difficulty">
             <el-select v-model="form.difficultyType" clearable>
-              <el-option label="简单" value="1" />
-              <el-option label="普通" value="2" />
-              <el-option label="困难" value="3" />
-              <el-option label="魔王" value="4" />
-              <el-option label="里谱" value="5" />
+              <el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="星级">
-            <el-input v-model="form.level" placeholder="例如 10" />
+          <el-form-item :label="copy.level">
+            <el-input v-model="form.level" :placeholder="copy.levelPlaceholder" />
           </el-form-item>
         </div>
 
         <section class="block-editor">
           <div class="block-editor__head">
-            <h3>正文段落</h3>
-            <span>{{ paragraphBlocks.length }} 段</span>
+            <h3>{{ copy.paragraphs }}</h3>
+            <span>{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span>
           </div>
           <el-input
             v-model="form.paragraphDraft"
@@ -217,38 +305,38 @@ const submit = async () => {
             :rows="5"
             maxlength="4000"
             show-word-limit
-            placeholder="输入一段正文，点击加入正文后进入内容序列"
+            :placeholder="copy.paragraphDraftPlaceholder"
           />
           <div class="block-editor__actions">
-            <el-button type="primary" plain @click="addParagraph">加入正文</el-button>
+            <el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button>
           </div>
           <div class="block-list">
             <div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item">
               <p>{{ text }}</p>
-              <el-button text @click="removeParagraph(index)">移除</el-button>
+              <el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button>
             </div>
           </div>
         </section>
 
         <section class="block-editor">
           <div class="block-editor__head">
-            <h3>插图</h3>
-            <span>{{ imageBlocks.length }} 张</span>
+            <h3>{{ copy.images }}</h3>
+            <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
           </div>
           <el-upload :show-file-list="false" :http-request="uploadImage" accept="image/*">
-            <el-button :loading="uploading">上传图片</el-button>
+            <el-button :loading="uploading">{{ copy.uploadImage }}</el-button>
           </el-upload>
           <div class="image-grid">
             <div v-for="(image, index) in imageBlocks" :key="image.imageUrl" class="image-card">
-              <img :src="image.imageUrl" alt="论坛插图" />
-              <el-input v-model="image.caption" maxlength="120" placeholder="图片说明（可选）" />
-              <el-button text @click="removeImage(index)">移除图片</el-button>
+              <img :src="image.imageUrl" alt="forum illustration" />
+              <el-input v-model="image.caption" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" />
+              <el-button text @click="removeImage(index)">{{ copy.remove }}</el-button>
             </div>
           </div>
         </section>
 
         <div class="composer-submit">
-          <el-button type="primary" :loading="submitting" @click="submit">发布主题</el-button>
+          <el-button type="primary" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
         </div>
       </el-form>
     </section>

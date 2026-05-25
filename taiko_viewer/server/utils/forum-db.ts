@@ -113,6 +113,8 @@ const CREATE_FORUM_TABLES = [
     type VARCHAR(16) NOT NULL,
     title VARCHAR(120) NOT NULL,
     body VARCHAR(255) NOT NULL,
+    message_key VARCHAR(64) DEFAULT NULL,
+    message_params_json LONGTEXT DEFAULT NULL,
     thread_id BIGINT UNSIGNED DEFAULT NULL,
     post_id BIGINT UNSIGNED DEFAULT NULL,
     is_read TINYINT(1) NOT NULL DEFAULT 0,
@@ -206,6 +208,8 @@ const MIGRATIONS = [
   "ALTER TABLE forum_user_profiles ADD COLUMN record_history_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER reputation",
   "ALTER TABLE forum_posts ADD COLUMN content_blocks_json LONGTEXT DEFAULT NULL AFTER body_text",
   "ALTER TABLE forum_posts ADD KEY idx_forum_posts_root_post_id (root_post_id, created_at)",
+  "ALTER TABLE forum_notifications ADD COLUMN message_key VARCHAR(64) DEFAULT NULL AFTER body",
+  "ALTER TABLE forum_notifications ADD COLUMN message_params_json LONGTEXT DEFAULT NULL AFTER message_key"
 ];
 
 const runMigration = async (statement: string) => {

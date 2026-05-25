@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
 interface AliasLogEntry {
@@ -19,42 +20,66 @@ interface AliasLogResponse {
   total: number;
 }
 
-const pageMeta = {
-  title: "别名修改日志",
-  desc: buildPageDescription("记录太鼓达人国行歌曲别名更新历史。")
-};
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
+const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "nav.aliasLog",
+  pageDescKey: "page.aliasLog.desc",
   navKey: "/alias-log",
-  breadcrumbs: [{ label: "别名修改日志", to: "/alias-log" }]
+  breadcrumbs: [{ labelKey: "nav.aliasLog", to: "/alias-log" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("nav.aliasLog"),
+  description: buildPageDescription(t("page.aliasLog.desc")),
   path: "/alias-log",
-  keywords: ["别名日志", "歌曲别名"]
-});
+  keywords: [t("nav.aliasLog"), locale.value === "ja" ? "楽曲別名" : "歌曲别名"]
+}));
 
-// 获取数据
-const { data: response, pending, error } = await useFetch<AliasLogResponse>("/api/alias-log");
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        subtitle: "全 {total} 件",
+        loadFailed: "読み込みに失敗しました。しばらくしてから再試行してください。",
+        reload: "再読み込み",
+        empty: "別名変更記録はまだありません",
+        time: "時刻",
+        song: "楽曲",
+        alias: "別名",
+        user: "操作ユーザー",
+        source: "来源",
+        action: "操作",
+        view: "見る",
+        privateChat: "個別チャット"
+      }
+    : {
+        subtitle: "共 {total} 条记录",
+        loadFailed: "加载失败，请稍后重试",
+        reload: "重新加载",
+        empty: "暂无别名记录",
+        time: "时间",
+        song: "歌曲",
+        alias: "别名",
+        user: "操作人",
+        source: "来源",
+        action: "操作",
+        view: "查看",
+        privateChat: "私聊"
+      }
+);
+
+const { data: response, pending, error, refresh } = await useAsyncData<AliasLogResponse>(
+  "alias-log",
+  () => apiFetch("/api/alias-log")
+);
 
 const logs = computed(() => response.value?.data || []);
 const total = computed(() => response.value?.total || 0);
 
-// 格式化时间
-const formatTime = (timeStr: string): string => {
-  const date = new Date(timeStr);
-  return date.toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-};
+const formatTime = (timeStr: string): string => formatDateTime(timeStr);
 
 // 获取用户显示名称
 const getUserDisplay = (log: AliasLogEntry): string => {
@@ -66,7 +91,7 @@ const getUserDisplay = (log: AliasLogEntry): string => {
 
 // 获取群组显示
 const getGroupDisplay = (log: AliasLogEntry): string => {
-  if (!log.group_id) return "私聊";
+  if (!log.group_id) return copy.value.privateChat;
   if (log.group_name) {
     return `${log.group_name} (${log.group_id})`;
   }
@@ -75,7 +100,7 @@ const getGroupDisplay = (log: AliasLogEntry): string => {
 
 // 跳转到歌曲详情
 const navigateToSong = (songId: string) => {
-  navigateTo(`/songs/${songId}`);
+  navigateTo(localePath(`/songs/${songId}`));
 };
 </script>
 
@@ -97,8 +122,8 @@ const navigateToSong = (songId: string) => {
               </svg>
             </span>
             <div>
-              <h3 class="title-text">别名修改日志</h3>
-              <p class="subtitle-text">共 {{ total }} 条记录</p>
+              <h3 class="title-text">{{ t("nav.aliasLog") }}</h3>
+              <p class="subtitle-text">{{ copy.subtitle.replace("{total}", String(total)) }}</p>
             </div>
           </div>
         </div>
@@ -111,16 +136,14 @@ const navigateToSong = (songId: string) => {
 
       <!-- 错误状态 -->
       <div v-else-if="error" class="error-state">
-        <el-empty description="加载失败，请稍后重试">
-          <el-button type="primary" @click="refreshNuxtData('alias-log')">
-            重新加载
-          </el-button>
+        <el-empty :description="copy.loadFailed">
+          <el-button type="primary" @click="refresh">{{ copy.reload }}</el-button>
         </el-empty>
       </div>
 
       <!-- 空数据 -->
       <div v-else-if="logs.length === 0" class="empty-state">
-        <el-empty description="暂无别名记录" />
+        <el-empty :description="copy.empty" />
       </div>
 
       <!-- 数据表格 -->
@@ -135,13 +158,13 @@ const navigateToSong = (songId: string) => {
             fontWeight: 600
           }"
         >
-          <el-table-column label="时间" width="150" fixed>
+          <el-table-column :label="copy.time" width="150" fixed>
             <template #default="{ row }">
               <span class="time-cell">{{ formatTime(row.time) }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column label="歌曲" min-width="200">
+          <el-table-column :label="copy.song" min-width="200">
             <template #default="{ row }">
               <div class="song-cell" @click="navigateToSong(row.song_id)">
                 <span class="song-title">{{ row.song_title }}</span>
@@ -150,7 +173,7 @@ const navigateToSong = (songId: string) => {
             </template>
           </el-table-column>
 
-          <el-table-column label="别名" width="150">
+          <el-table-column :label="copy.alias" width="150">
             <template #default="{ row }">
               <el-tag type="warning" effect="light" class="alias-tag">
                 {{ row.alias }}
@@ -158,7 +181,7 @@ const navigateToSong = (songId: string) => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作人" min-width="180">
+          <el-table-column :label="copy.user" min-width="180">
             <template #default="{ row }">
               <div class="user-cell">
                 <el-icon class="user-icon"><User /></el-icon>
@@ -167,7 +190,7 @@ const navigateToSong = (songId: string) => {
             </template>
           </el-table-column>
 
-          <el-table-column label="来源" min-width="180">
+          <el-table-column :label="copy.source" min-width="180">
             <template #default="{ row }">
               <div class="group-cell">
                 <el-icon class="group-icon"><ChatDotRound /></el-icon>
@@ -178,7 +201,7 @@ const navigateToSong = (songId: string) => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="80" fixed="right">
+          <el-table-column :label="copy.action" width="80" fixed="right">
             <template #default="{ row }">
               <el-button
                 link
@@ -186,7 +209,7 @@ const navigateToSong = (songId: string) => {
                 size="small"
                 @click="navigateToSong(row.song_id)"
               >
-                查看
+                {{ copy.view }}
               </el-button>
             </template>
           </el-table-column>

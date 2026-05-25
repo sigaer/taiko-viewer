@@ -9,6 +9,7 @@ import type {
 } from "~/types/forum";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { getAccountProfile, requireAccountUser } from "~/server/utils/account";
+import { createServerMessageTranslator, translateServerMessage } from "~/server/utils/server-messages";
 import {
   type NotificationRow,
   clipText,
@@ -26,6 +27,28 @@ import {
   toIso,
   type ThreadRow
 } from "../../internal/forum/shared";
+
+const renderNotificationText = (
+  row: Pick<NotificationRow, "title" | "body" | "message_key" | "message_params_json">,
+  locale: string
+) => {
+  if (!row.message_key) {
+    return {
+      title: row.title,
+      body: row.body
+    };
+  }
+  let params: Record<string, unknown> | undefined;
+  try {
+    params = row.message_params_json ? (JSON.parse(row.message_params_json) as Record<string, unknown>) : undefined;
+  } catch {
+    params = undefined;
+  }
+  return {
+    title: translateServerMessage(locale, `${row.message_key}.title`, params, row.title),
+    body: translateServerMessage(locale, `${row.message_key}.body`, params, row.body)
+  };
+};
 
 export const getForumPreferences = async (event: H3Event): Promise<ForumPreferences> => {
   await ensureForumSchema();
@@ -362,6 +385,7 @@ export const getForumNotifications = async (
   query: { page?: unknown; pageSize?: unknown }
 ) => {
   await ensureForumSchema();
+  const { locale } = createServerMessageTranslator(event);
   const user = await requireAccountUser(event);
   await ensureForumProfile(user.id);
   const page = Math.max(1, sanitizeInt(query.page, 1));
@@ -397,18 +421,20 @@ export const getForumNotifications = async (
     page,
     pageSize,
     items: rows.map(
-      (row) =>
-        ({
+      (row) => {
+        const rendered = renderNotificationText(row, locale);
+        return {
           id: row.id,
           type: row.type,
-          title: row.title,
-          body: row.body,
+          title: rendered.title,
+          body: rendered.body,
           isRead: Boolean(row.is_read),
           createdAt: toIso(row.created_at),
           threadId: row.thread_id,
           postId: row.post_id,
           actor: row.actor_user_id ? badgeMap.get(row.actor_user_id) || null : null
-        }) satisfies ForumNotification
+        } satisfies ForumNotification;
+      }
     )
   };
 };

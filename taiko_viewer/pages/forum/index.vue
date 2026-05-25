@@ -2,30 +2,27 @@
 import type { ForumHomePayload } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
 
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-
-const pageMeta = {
-  title: "论坛社区",
-  desc: buildPageDescription("太鼓达人玩家交流社区，聚合公告、谱面攻略、段位道场与晒分战报。")
-};
+const { t } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "forum.title",
+  pageDescKey: "page.forum.index.desc",
   navKey: "/forum",
-  breadcrumbs: [{ label: "论坛社区", to: "/forum" }]
+  breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("forum.title"),
+  description: buildPageDescription(t("page.forum.index.desc")),
   path: "/forum",
-  keywords: ["论坛", "玩家社区", "晒分战报"]
-});
+  keywords: [t("forum.title"), t("page.forum.index.keyword"), t("forum.types.achievement")]
+}));
 
 const { data, pending, refresh } = useLazyAsyncData<ForumHomePayload>(
   "forum-home",
-  () => $fetch("/api/forum/home", { headers }),
+  () => apiFetch("/api/forum/home"),
   {
     default: () => ({
       sections: [],
@@ -42,6 +39,8 @@ const { data, pending, refresh } = useLazyAsyncData<ForumHomePayload>(
 );
 
 const home = computed(() => data.value);
+const getSectionName = (slug: string, fallback: string) => t(`forum.sections.${slug}.name`, fallback);
+const getSectionDescription = (slug: string, fallback: string) => t(`forum.sections.${slug}.description`, fallback);
 </script>
 
 <template>
@@ -49,14 +48,12 @@ const home = computed(() => data.value);
     <section class="forum-home-hero panel-card">
       <div class="forum-home-hero__copy">
         <span class="forum-home-hero__eyebrow">Taiko Festival Forum</span>
-        <h2>把攻略、晒分、段位和鼓众交流放进同一个鼓面里。</h2>
-        <p>
-          这里面向国服与鼓众广场玩家，既保留传统论坛的版块秩序，也保留游戏官方社区的活动氛围。
-        </p>
+        <h2>{{ t("page.forum.index.heroTitle") }}</h2>
+        <p>{{ t("page.forum.index.heroDesc") }}</p>
         <div class="forum-home-hero__actions">
-          <NuxtLink to="/forum/new" class="hero-action hero-action--primary">发布新帖</NuxtLink>
-          <NuxtLink to="/forum/notifications" class="hero-action">
-            站内通知
+          <NuxtLink :to="localePath('/forum/new')" class="hero-action hero-action--primary">{{ t("forum.newThread") }}</NuxtLink>
+          <NuxtLink :to="localePath('/forum/notifications')" class="hero-action">
+            {{ t("forum.notifications") }}
             <span v-if="home?.unreadNotificationCount" class="hero-action__count">
               {{ home.unreadNotificationCount }}
             </span>
@@ -67,9 +64,9 @@ const home = computed(() => data.value);
         <div class="poster-disc poster-disc--outer"></div>
         <div class="poster-disc poster-disc--inner"></div>
         <div class="poster-score">
-          <span>鼓友频道</span>
+          <span>{{ t("page.forum.index.posterLabel") }}</span>
           <strong>{{ home?.sections.length || 0 }}</strong>
-          <small>个固定版块</small>
+          <small>{{ t("page.forum.index.posterSuffix") }}</small>
         </div>
       </div>
     </section>
@@ -78,35 +75,35 @@ const home = computed(() => data.value);
       <aside class="forum-home-side">
         <section class="panel-card side-panel">
           <div class="side-panel__head">
-            <h3>版块索引</h3>
-            <NuxtLink to="/forum/section/score-guides">看攻略</NuxtLink>
+            <h3>{{ t("page.forum.index.sectionsTitle") }}</h3>
+            <NuxtLink :to="localePath('/forum/section/score-guides')">{{ t("page.forum.index.viewGuides") }}</NuxtLink>
           </div>
           <div class="section-list">
             <NuxtLink
               v-for="section in home?.sections"
               :key="section.id"
-              :to="`/forum/section/${section.slug}`"
+              :to="localePath(`/forum/section/${section.slug}`)"
               class="section-item"
               :style="{ '--section-accent': section.accentColor }"
             >
-              <strong>{{ section.name }}</strong>
-              <span>{{ section.description }}</span>
-              <em>{{ section.threadCount }} 主题</em>
+              <strong>{{ getSectionName(section.slug, section.name) }}</strong>
+              <span>{{ getSectionDescription(section.slug, section.description) }}</span>
+              <em>{{ t("page.forum.index.threadCount", { count: section.threadCount }) }}</em>
             </NuxtLink>
           </div>
         </section>
 
         <section class="panel-card side-panel">
           <div class="side-panel__head">
-            <h3>快捷入口</h3>
+            <h3>{{ t("page.forum.index.quickLinks") }}</h3>
           </div>
           <div class="quick-links">
-            <NuxtLink to="/forum/section/official">公告区</NuxtLink>
-            <NuxtLink to="/forum/section/dojo">段位道场</NuxtLink>
-            <NuxtLink to="/forum/section/achievements">晒分战报</NuxtLink>
-            <NuxtLink to="/forum/me">我的社区</NuxtLink>
-            <NuxtLink to="/account/sync">多端同步</NuxtLink>
-            <NuxtLink to="/account/developer">开发者权限</NuxtLink>
+            <NuxtLink :to="localePath('/forum/section/official')">{{ getSectionName("official", "") }}</NuxtLink>
+            <NuxtLink :to="localePath('/forum/section/dojo')">{{ getSectionName("dojo", "") }}</NuxtLink>
+            <NuxtLink :to="localePath('/forum/section/achievements')">{{ getSectionName("achievements", "") }}</NuxtLink>
+            <NuxtLink :to="localePath('/forum/me')">{{ t("forum.myCommunity") }}</NuxtLink>
+            <NuxtLink :to="localePath('/account/sync')">{{ t("account.sync") }}</NuxtLink>
+            <NuxtLink :to="localePath('/account/developer')">{{ t("account.developer") }}</NuxtLink>
           </div>
         </section>
       </aside>
@@ -116,14 +113,14 @@ const home = computed(() => data.value);
           <div class="panel-head">
             <div>
               <h3>精选推荐</h3>
-              <p>置顶、加精和核心讨论优先展示。</p>
+              <p>{{ t("page.forum.index.featuredDesc") }}</p>
             </div>
-            <span class="panel-head__meta">精选聚合</span>
+            <span class="panel-head__meta">{{ t("page.forum.index.featuredMeta") }}</span>
           </div>
           <div v-if="pending" class="forum-skeleton-grid">
             <div class="shimmer-card" v-for="index in 2" :key="index"></div>
           </div>
-          <el-empty v-else-if="!home?.featuredThreads.length" description="暂时还没有精选主题" />
+          <el-empty v-else-if="!home?.featuredThreads.length" :description="t('page.forum.index.noFeatured')" />
           <div v-else class="thread-stack">
             <ForumThreadCard
               v-for="thread in home.featuredThreads"
@@ -138,10 +135,10 @@ const home = computed(() => data.value);
           <div class="panel-head">
             <div>
               <h3>热帖榜</h3>
-              <p>近 7 天综合回复、点赞与浏览热度。</p>
+              <p>{{ t("page.forum.index.hotDesc") }}</p>
             </div>
           </div>
-          <el-empty v-if="!pending && !home?.hotThreads.length" description="最近 7 天暂无热帖" />
+          <el-empty v-if="!pending && !home?.hotThreads.length" :description="t('page.forum.index.noHot')" />
           <div v-else class="thread-stack thread-stack--compact">
             <ForumThreadCard v-for="thread in home?.hotThreads" :key="thread.id" :thread="thread" compact />
           </div>
@@ -151,11 +148,11 @@ const home = computed(() => data.value);
           <div class="panel-head">
             <div>
               <h3>最新攻略</h3>
-              <p>谱面分析、配速拆解和段位练习路线。</p>
+              <p>{{ t("page.forum.index.latestGuideDesc") }}</p>
             </div>
-            <NuxtLink to="/forum/section/score-guides">进入攻略区</NuxtLink>
+            <NuxtLink :to="localePath('/forum/section/score-guides')">{{ t("page.forum.index.enterGuide") }}</NuxtLink>
           </div>
-          <el-empty v-if="!pending && !home?.latestGuides.length" description="攻略区还没有新内容" />
+          <el-empty v-if="!pending && !home?.latestGuides.length" :description="t('page.forum.index.noGuides')" />
           <div v-else class="thread-stack thread-stack--compact">
             <ForumThreadCard v-for="thread in home?.latestGuides" :key="thread.id" :thread="thread" compact />
           </div>
@@ -165,32 +162,32 @@ const home = computed(() => data.value);
       <aside class="forum-home-side forum-home-side--right">
         <section class="panel-card side-panel user-panel">
           <div class="side-panel__head">
-            <h3>{{ home?.currentUser ? "当前鼓友" : "加入社区" }}</h3>
-            <button type="button" class="link-button" @click="refresh">刷新</button>
+            <h3>{{ home?.currentUser ? t("page.forum.index.currentUser") : t("page.forum.index.joinCommunity") }}</h3>
+            <button type="button" class="link-button" @click="refresh">{{ t("common.retry") }}</button>
           </div>
           <template v-if="home?.currentUser">
             <ForumUserBadge :user="home.currentUser" />
             <div class="user-panel__actions">
-              <NuxtLink to="/forum/me">我的帖子</NuxtLink>
-              <NuxtLink to="/forum/notifications">通知 {{ home.unreadNotificationCount }}</NuxtLink>
+              <NuxtLink :to="localePath('/forum/me')">{{ t("page.forum.index.myThreads") }}</NuxtLink>
+              <NuxtLink :to="localePath('/forum/notifications')">{{ t("forum.notifications") }} {{ home.unreadNotificationCount }}</NuxtLink>
             </div>
           </template>
           <div v-else class="guest-card">
-            <p>登录后可以发帖、回复、点赞，并把鼓众广场称号展示在社区名片上。</p>
+            <p>{{ t("page.forum.index.guestDesc") }}</p>
             <div class="user-panel__actions">
-              <NuxtLink to="/account/login">登录</NuxtLink>
-              <NuxtLink to="/account/register">注册</NuxtLink>
+              <NuxtLink :to="localePath('/account/login')">{{ t("account.login") }}</NuxtLink>
+              <NuxtLink :to="localePath('/account/register')">{{ t("account.register") }}</NuxtLink>
             </div>
           </div>
         </section>
 
         <section class="panel-card side-panel">
           <div class="side-panel__head">
-            <h3>公告看板</h3>
+            <h3>{{ t("page.forum.index.announcements") }}</h3>
           </div>
-          <el-empty v-if="!pending && !home?.announcements.length" description="暂时没有公告" />
+          <el-empty v-if="!pending && !home?.announcements.length" :description="t('page.forum.index.noAnnouncements')" />
           <div v-else class="announcement-list">
-            <NuxtLink v-for="thread in home?.announcements" :key="thread.id" :to="`/forum/thread/${thread.id}`">
+            <NuxtLink v-for="thread in home?.announcements" :key="thread.id" :to="localePath(`/forum/thread/${thread.id}`)">
               <strong>{{ thread.title }}</strong>
               <span>{{ thread.summary }}</span>
             </NuxtLink>
@@ -199,7 +196,7 @@ const home = computed(() => data.value);
 
         <section class="panel-card side-panel">
           <div class="side-panel__head">
-            <h3>热门标签</h3>
+            <h3>{{ t("page.forum.index.tags") }}</h3>
           </div>
           <div class="tag-cloud">
             <span v-for="tag in home?.highlightedTags" :key="tag">#{{ tag }}</span>
@@ -208,16 +205,16 @@ const home = computed(() => data.value);
 
         <section class="panel-card side-panel">
           <div class="side-panel__head">
-            <h3>达人榜</h3>
+            <h3>{{ t("page.forum.index.leaderboard") }}</h3>
           </div>
-          <el-empty v-if="!pending && !home?.leaderboard.length" description="还没有榜单数据" />
+          <el-empty v-if="!pending && !home?.leaderboard.length" :description="t('page.forum.index.noLeaderboard')" />
           <div v-else class="leaderboard-list">
             <div v-for="(entry, index) in home?.leaderboard" :key="entry.author.id" class="leaderboard-item">
               <span class="leaderboard-item__rank">{{ index + 1 }}</span>
               <ForumUserBadge :user="entry.author" compact />
               <div class="leaderboard-item__stats">
-                <span>{{ entry.threadCount }} 帖</span>
-                <span>{{ entry.likeCount }} 赞</span>
+                <span>{{ t("page.forum.index.postStat", { count: entry.threadCount }) }}</span>
+                <span>{{ t("page.forum.index.likeStat", { count: entry.likeCount }) }}</span>
               </div>
             </div>
           </div>

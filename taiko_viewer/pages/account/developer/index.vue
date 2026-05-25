@@ -31,31 +31,29 @@ type DeveloperPayload = {
   token: DeveloperToken | null;
 };
 
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
+const { formatDateTime } = useViewerDateTime();
 const { accountUser, fetchCurrentUser } = useAccountState();
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 await fetchCurrentUser();
-
-const pageMeta = {
-  title: "开发者权限",
-  desc: "提交开发者权限申请，查看审批结果和你的开发者 Token。"
-};
 
 definePageMeta({
   middleware: "account-auth",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "account.developer",
+  pageDescKey: "page.account.developer.desc",
   navKey: "/account/developer",
   breadcrumbs: [
-    { label: "账号系统", to: "/account/profile" },
-    { label: "开发者权限", to: "/account/developer" }
+    { labelKey: "account.title", to: "/account/profile" },
+    { labelKey: "account.developer", to: "/account/developer" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("account.developer"),
+  description: buildPageDescription(t("page.account.developer.desc")),
   path: "/account/developer"
-});
+}));
 
 const form = ref({
   reason: "",
@@ -65,9 +63,81 @@ const imageFiles = ref<File[]>([]);
 const fileInput = ref<HTMLInputElement | null>(null);
 const submitting = ref(false);
 
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "開発者権限",
+        intro: "承認後、24 桁の開発者 Token がメールで送信され、userid 単位で完全な JSON を取得できます。",
+        currentStatus: "現在の状態",
+        notApplied: "未申請",
+        tokenMask: "Token マスク",
+        notIssued: "未発行",
+        lastUsed: "最終利用",
+        reviewLink: "開発者審査画面へ",
+        submitTitle: "申請を送信",
+        submitDesc: "同一アカウントでは審査中の申請を 1 件だけ保持できます。承認後は再申請できません。",
+        replyEmail: "連絡先メール",
+        replyEmailPlaceholder: "審査結果と Token の受信用",
+        reason: "申請理由",
+        reasonPlaceholder: "利用用途、必要なデータ、接続予定を記載してください。",
+        images: "スクリーンショット（任意、最大 4 枚）",
+        chooseImages: "画像を選択",
+        selectedImages: "{count} 枚選択済み",
+        noImages: "画像未選択",
+        submit: "開発者申請を送信",
+        disabledSubmit: "現在の状態では再申請できません",
+        stateTitle: "申請状態",
+        stateDesc: "直近の申請結果と開発者 Token の情報を表示します。",
+        noApplication: "まだ開発者申請を送信していません",
+        submittedAt: "申請日時",
+        reviewFeedback: "審査フィードバック",
+        history: "履歴",
+        historyDesc: "最近の開発者申請履歴を保持します。",
+        noHistory: "履歴はありません",
+        needReason: "申請理由を入力してください",
+        needEmail: "連絡先メールを入力してください",
+        submitSuccess: "申請を送信しました。審査をお待ちください。",
+        submitFailed: "申請送信に失敗しました"
+      }
+    : {
+        title: "开发者权限",
+        intro: "申请通过后会向你填写的邮箱发送 24 位开发者 Token，可用于按 userid 读取完整 JSON。",
+        currentStatus: "当前状态",
+        notApplied: "未申请",
+        tokenMask: "Token 掩码",
+        notIssued: "未签发",
+        lastUsed: "最近使用",
+        reviewLink: "进入开发者审批台",
+        submitTitle: "提交申请",
+        submitDesc: "同一账号只能保留一个待审批申请；已通过后将不再开放重复申请。",
+        replyEmail: "反馈邮箱",
+        replyEmailPlaceholder: "用于接收审批结果和开发者 Token",
+        reason: "申请理由",
+        reasonPlaceholder: "说明你的使用场景、需要查询哪些数据、计划如何接入。",
+        images: "截图（可选，最多 4 张）",
+        chooseImages: "选择图片",
+        selectedImages: "已选择 {count} 张",
+        noImages: "未选择图片",
+        submit: "提交开发者申请",
+        disabledSubmit: "当前状态不可重复申请",
+        stateTitle: "申请状态",
+        stateDesc: "这里会显示最近一次申请的审批反馈，以及开发者 Token 的掩码信息。",
+        noApplication: "你还没有提交过开发者申请",
+        submittedAt: "提交时间",
+        reviewFeedback: "审批反馈",
+        history: "历史记录",
+        historyDesc: "保留最近几次开发者申请的状态变化。",
+        noHistory: "暂无历史记录",
+        needReason: "请先填写开发者权限申请理由",
+        needEmail: "请先填写接收反馈邮箱",
+        submitSuccess: "开发者申请已提交，请等待审批",
+        submitFailed: "提交申请失败"
+      }
+);
+
 const { data, pending, refresh } = await useAsyncData<DeveloperPayload>(
   "account-developer",
-  () => $fetch("/api/account/developer", { headers }),
+  () => apiFetch("/api/account/developer"),
   {
     default: () => ({
       canReview: false,
@@ -95,11 +165,11 @@ const handleImageChange = (event: Event) => {
 const submitApplication = async () => {
   if (submitting.value || !canSubmitApplication.value) return;
   if (!form.value.reason.trim()) {
-    ElMessage.warning("请先填写开发者权限申请理由");
+    ElMessage.warning(copy.value.needReason);
     return;
   }
   if (!form.value.replyEmail.trim()) {
-    ElMessage.warning("请先填写接收反馈邮箱");
+    ElMessage.warning(copy.value.needEmail);
     return;
   }
   submitting.value = true;
@@ -110,16 +180,16 @@ const submitApplication = async () => {
     for (const file of imageFiles.value) {
       body.append("images", file);
     }
-    await $fetch("/api/account/developer/apply", {
+    await apiFetch("/api/account/developer/apply", {
       method: "POST",
       body
     });
-    ElMessage.success("开发者申请已提交，请等待审批");
+    ElMessage.success(copy.value.submitSuccess);
     imageFiles.value = [];
     if (fileInput.value) fileInput.value.value = "";
     await refresh();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "提交申请失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.submitFailed);
   } finally {
     submitting.value = false;
   }
@@ -135,75 +205,75 @@ const submitApplication = async () => {
     <template v-else>
       <el-card class="panel-card">
         <div class="section-title">
-          <h2>开发者权限</h2>
-          <p>申请通过后会向你填写的邮箱发送 24 位开发者 Token，可用于按 userid 读取完整 JSON。</p>
+          <h2>{{ copy.title }}</h2>
+          <p>{{ copy.intro }}</p>
         </div>
         <div class="status-grid">
           <div>
-            <span>当前状态</span>
-            <strong>{{ developerState.currentApplication?.status || "未申请" }}</strong>
+            <span>{{ copy.currentStatus }}</span>
+            <strong>{{ developerState.currentApplication?.status || copy.notApplied }}</strong>
           </div>
           <div>
-            <span>Token 掩码</span>
-            <strong>{{ developerState.token?.tokenMask || "未签发" }}</strong>
+            <span>{{ copy.tokenMask }}</span>
+            <strong>{{ developerState.token?.tokenMask || copy.notIssued }}</strong>
           </div>
           <div>
-            <span>最近使用</span>
-            <strong>{{ developerState.token?.lastUsedAt ? new Date(developerState.token.lastUsedAt).toLocaleString() : "-" }}</strong>
+            <span>{{ copy.lastUsed }}</span>
+            <strong>{{ developerState.token?.lastUsedAt ? formatDateTime(developerState.token.lastUsedAt) : "-" }}</strong>
           </div>
         </div>
         <div v-if="developerState.canReview" class="review-link">
-          <NuxtLink to="/account/developer/review">进入开发者审批台</NuxtLink>
+          <NuxtLink :to="localePath('/account/developer/review')">{{ copy.reviewLink }}</NuxtLink>
         </div>
       </el-card>
 
       <el-card class="panel-card">
         <div class="section-title">
-          <h3>提交申请</h3>
-          <p>同一账号只能保留一个待审批申请；已通过后将不再开放重复申请。</p>
+          <h3>{{ copy.submitTitle }}</h3>
+          <p>{{ copy.submitDesc }}</p>
         </div>
         <el-form label-position="top" @submit.prevent="submitApplication">
-          <el-form-item label="反馈邮箱">
-            <el-input v-model="form.replyEmail" placeholder="用于接收审批结果和开发者 Token" :disabled="!canSubmitApplication" />
+          <el-form-item :label="copy.replyEmail">
+            <el-input v-model="form.replyEmail" :placeholder="copy.replyEmailPlaceholder" :disabled="!canSubmitApplication" />
           </el-form-item>
-          <el-form-item label="申请理由">
+          <el-form-item :label="copy.reason">
             <el-input
               v-model="form.reason"
               type="textarea"
               :rows="6"
               maxlength="4000"
               show-word-limit
-              placeholder="说明你的使用场景、需要查询哪些数据、计划如何接入。"
+              :placeholder="copy.reasonPlaceholder"
               :disabled="!canSubmitApplication"
             />
           </el-form-item>
-          <el-form-item label="截图（可选，最多 4 张）">
+          <el-form-item :label="copy.images">
             <input ref="fileInput" class="hidden-input" type="file" accept="image/*" multiple @change="handleImageChange" />
             <div class="image-picker">
-              <el-button plain :disabled="!canSubmitApplication" @click="triggerImageInput">选择图片</el-button>
-              <span>{{ imageFiles.length ? `已选择 ${imageFiles.length} 张` : "未选择图片" }}</span>
+              <el-button plain :disabled="!canSubmitApplication" @click="triggerImageInput">{{ copy.chooseImages }}</el-button>
+              <span>{{ imageFiles.length ? copy.selectedImages.replace("{count}", String(imageFiles.length)) : copy.noImages }}</span>
             </div>
             <div v-if="imageFiles.length" class="image-name-list">
               <span v-for="file in imageFiles" :key="file.name">{{ file.name }}</span>
             </div>
           </el-form-item>
           <el-button type="primary" :loading="submitting" :disabled="!canSubmitApplication" @click="submitApplication">
-            {{ canSubmitApplication ? "提交开发者申请" : "当前状态不可重复申请" }}
+            {{ canSubmitApplication ? copy.submit : copy.disabledSubmit }}
           </el-button>
         </el-form>
       </el-card>
 
       <el-card class="panel-card">
         <div class="section-title">
-          <h3>申请状态</h3>
-          <p>这里会显示最近一次申请的审批反馈，以及开发者 Token 的掩码信息。</p>
+          <h3>{{ copy.stateTitle }}</h3>
+          <p>{{ copy.stateDesc }}</p>
         </div>
-        <el-empty v-if="!developerState.currentApplication" description="你还没有提交过开发者申请" />
+        <el-empty v-if="!developerState.currentApplication" :description="copy.noApplication" />
         <template v-else>
           <div class="application-card">
             <div class="application-card__meta">
-              <span>提交时间：{{ new Date(developerState.currentApplication.createdAt).toLocaleString() }}</span>
-              <span>反馈邮箱：{{ developerState.currentApplication.replyEmail }}</span>
+              <span>{{ copy.submittedAt }}：{{ formatDateTime(developerState.currentApplication.createdAt) }}</span>
+              <span>{{ copy.replyEmail }}：{{ developerState.currentApplication.replyEmail }}</span>
             </div>
             <p class="application-reason">{{ developerState.currentApplication.reason }}</p>
             <div v-if="developerState.currentApplication.imageUrls.length" class="image-preview-grid">
@@ -218,7 +288,7 @@ const submitApplication = async () => {
               </a>
             </div>
             <div v-if="developerState.currentApplication.reviewNote" class="review-note">
-              <strong>审批反馈</strong>
+              <strong>{{ copy.reviewFeedback }}</strong>
               <p>{{ developerState.currentApplication.reviewNote }}</p>
             </div>
           </div>
@@ -227,15 +297,15 @@ const submitApplication = async () => {
 
       <el-card class="panel-card">
         <div class="section-title">
-          <h3>历史记录</h3>
-          <p>保留最近几次开发者申请的状态变化。</p>
+          <h3>{{ copy.history }}</h3>
+          <p>{{ copy.historyDesc }}</p>
         </div>
-        <el-empty v-if="!developerState.history.length" description="暂无历史记录" />
+        <el-empty v-if="!developerState.history.length" :description="copy.noHistory" />
         <div v-else class="history-list">
           <div v-for="item in developerState.history" :key="item.id" class="history-item">
             <div class="history-item__head">
               <strong>{{ item.status }}</strong>
-              <span>{{ new Date(item.createdAt).toLocaleString() }}</span>
+              <span>{{ formatDateTime(item.createdAt) }}</span>
             </div>
             <p>{{ item.replyEmail }}</p>
           </div>

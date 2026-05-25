@@ -3,51 +3,52 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.16.1";
+const appVersion = runtimeConfig.public.appVersion || "0.19.0";
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 
 import { buildPageDescription, SITE_TITLE } from "~/utils/seo";
 
-const pageMeta = {
-  title: "首页",
-  desc: buildPageDescription("太鼓达人国行数据看板首页，提供最新活动、歌曲列表、谱面攻略与段位查询入口。")
-};
-
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "site.homeTitle",
+  pageDescKey: "page.home.desc",
   navKey: "/",
-  breadcrumbs: [{ label: "首页", to: "/" }]
+  breadcrumbs: [{ labelKey: "nav.home", to: "/" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: buildPageDescription(pageMeta.desc),
+useViewerSeo(() => ({
+  title: t("site.homeTitle"),
+  description: buildPageDescription(t("page.home.desc")),
   path: "/",
   siteSchema: true,
-  keywords: ["首页", "太鼓达人国行", "最新歌曲"]
-});
+  keywords: [t("site.homeTitle"), "Taiko Viewer", t("home.latestSongs")]
+}));
 
-const eventSlides = [
+const eventSlides = computed(() => [
   {
     image: "/banner.png",
-    title: "<初音未来 X 太鼓达人联动>"
+    title: t("page.home.eventMiku")
   },
   {
     image: "/banner2.png",
-    title: "<奖励满满2026夏季>"
+    title: t("page.home.eventSummer")
   }
-];
+]);
 
 const { data: homeContent, pending, error } = useHomeContent();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 
 const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
+const getSongTitle = (song: (typeof latestSongs.value)[number]) =>
+  locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
+const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
+  locale.value === "ja" ? song.song_name || "—" : song.song_name_jp || "—";
 </script>
 
 <template>
   <div class="home-page">
     <el-alert
-      title="内测中：当前页面与功能仍在持续迭代，数据与样式可能随版本更新。"
+      :title="t('home.betaNotice')"
       type="warning"
       :closable="false"
       show-icon
@@ -58,10 +59,10 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
       <div class="hero-content">
         <div class="hero-title-group">
           <h2>{{ SITE_TITLE }}</h2>
-          <p class="hero-tagline">太鼓达人国行数据看板 · 歌曲列表 · 谱面攻略 · 查谱工具</p>
+          <p class="hero-tagline">{{ t("home.tagline") }}</p>
           <p class="hero-version">v{{ appVersion }}</p>
         </div>
-        <NuxtLink to="/songs/available" class="hero-link hero-link-btn">
+        <NuxtLink :to="localePath('/songs/available')" class="hero-link hero-link-btn">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M9 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm8-2.5V6l-9 2.5v9.5"
@@ -71,23 +72,23 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
               stroke-linejoin="round"
             />
           </svg>
-          <span>歌曲列表</span>
+          <span>{{ t("nav.songs") }}</span>
         </NuxtLink>
       </div>
     </el-card>
 
     <section class="home-tools panel-card">
       <div class="section-head">
-        <h3>查谱工具</h3>
-        <NuxtLink to="/tools" class="tools-more">查看全部</NuxtLink>
+        <h3>{{ t("nav.tools") }}</h3>
+        <NuxtLink :to="localePath('/tools')" class="tools-more">{{ t("common.viewAll") }}</NuxtLink>
       </div>
       <div class="home-tools-grid">
-        <NuxtLink to="/tools/chart-config" class="home-tool-card">查配置</NuxtLink>
-        <NuxtLink to="/tools/note-count" class="home-tool-card">查物量</NuxtLink>
-        <NuxtLink to="/tools/b30" class="home-tool-card">B30 表</NuxtLink>
-        <NuxtLink to="/tools/trend" class="home-tool-card">Rating 走势</NuxtLink>
-        <NuxtLink to="/tools/word-cloud" class="home-tool-card">太鼓词云</NuxtLink>
-        <NuxtLink to="/tools" class="home-tool-card home-tool-card--muted">工具箱</NuxtLink>
+        <NuxtLink :to="localePath('/tools/chart-config')" class="home-tool-card">{{ t("tools.chartConfig") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools/note-count')" class="home-tool-card">{{ t("tools.noteCount") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools/b30')" class="home-tool-card">{{ t("tools.b30") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools/trend')" class="home-tool-card">{{ t("tools.trend") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools/word-cloud')" class="home-tool-card">{{ t("tools.wordCloud") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools')" class="home-tool-card home-tool-card--muted">{{ t("nav.tools") }}</NuxtLink>
       </div>
     </section>
 
@@ -107,7 +108,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
                 stroke-linejoin="round"
               />
             </svg>
-            <span>最新活动</span>
+            <span>{{ t("home.latestActivities") }}</span>
           </h3>
         </div>
         <el-carousel class="event-carousel" :interval="4500" trigger="click" indicator-position="outside">
@@ -134,13 +135,18 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
                 stroke-linejoin="round"
               />
             </svg>
-            <span>最新歌曲</span>
+            <span>{{ t("home.latestSongs") }}</span>
           </h3>
         </div>
         <div v-if="pending" class="songs-placeholder shimmer-card"></div>
-        <el-empty v-else-if="error || !latestSongs.length" description="最新歌曲暂不可用" />
+        <el-empty v-else-if="error || !latestSongs.length" :description="t('home.latestSongsUnavailable')" />
         <div v-else class="songs-list">
-          <NuxtLink v-for="song in latestSongs" :key="song.id" :to="`/songs/${song.id}`" class="song-item">
+          <NuxtLink
+            v-for="song in latestSongs"
+            :key="song.id"
+            :to="localePath(`/songs/${song.id}`)"
+            class="song-item"
+          >
             <div class="song-cover">
               <el-image :src="getCoverUrl(song.id)" fit="cover" class="song-cover-img">
                 <template #error>
@@ -149,8 +155,8 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
               </el-image>
             </div>
             <div class="song-main">
-              <h4>{{ song.song_name }}</h4>
-              <p>{{ song.song_name_jp || "—" }}</p>
+              <h4>{{ getSongTitle(song) }}</h4>
+              <p>{{ getSongSubtitle(song) }}</p>
             </div>
             <span class="song-arrow" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
@@ -163,7 +169,7 @@ const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
     </section>
 
     <footer class="home-footer">
-      Sakura Taiko Viewer © 2026 - Created by sigaer
+      {{ t("site.copyright") }}
     </footer>
   </div>
 </template>

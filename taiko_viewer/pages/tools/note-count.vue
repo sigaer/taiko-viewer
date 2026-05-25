@@ -2,27 +2,24 @@
 import { ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError, viewerErrorAlertType } from "~/utils/viewerError";
-
-const pageMeta = {
-  title: "查物量",
-  desc: buildPageDescription("按音符物量精确查找太鼓达人国行谱面。")
-};
+const { t } = useI18n();
+const apiFetch = useViewerApiFetch();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "tools.noteCount",
+  pageDescKey: "page.tools.noteCount.desc",
   navKey: "/tools/note-count",
   breadcrumbs: [
-    { label: "查谱工具", to: "/tools" },
-    { label: "查物量", to: "/tools/note-count" }
+    { labelKey: "nav.tools", to: "/tools" },
+    { labelKey: "tools.noteCount", to: "/tools/note-count" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("tools.noteCount"),
+  description: buildPageDescription(t("page.tools.noteCount.desc", "按音符物量精确查找太鼓达人国行谱面。")),
   path: "/tools/note-count"
-});
+}));
 
 const count = ref(500);
 const loading = ref(false);
@@ -38,7 +35,7 @@ const submit = async () => {
   total.value = 0;
   truncated.value = false;
   try {
-    const result = await $fetch<{
+    const result = await apiFetch<{
       total: number;
       items: Array<{ title: string; course: string }>;
       truncated: boolean;
@@ -49,7 +46,7 @@ const submit = async () => {
     items.value = result.items;
     truncated.value = result.truncated;
   } catch (error: unknown) {
-    errorMessage.value = await resolveViewerError(error, "查询失败，请稍后重试");
+    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"));
   } finally {
     loading.value = false;
   }
@@ -59,12 +56,12 @@ const submit = async () => {
 <template>
   <div class="page-stack">
     <el-card class="panel-card">
-      <p class="hint">输入目标物量（total），将返回匹配的谱面列表，最多显示 20 条。</p>
+      <p class="hint">{{ t("page.tools.noteCount.hint", "输入目标物量（total），将返回匹配的谱面列表，最多显示 20 条。") }}</p>
       <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item label="物量">
+        <el-form-item :label="t('tools.noteCount')">
           <el-input-number v-model="count" :min="0" :max="99999" controls-position="right" />
         </el-form-item>
-        <el-button type="primary" :loading="loading" native-type="submit">查询</el-button>
+        <el-button type="primary" :loading="loading" native-type="submit">{{ t("common.search") }}</el-button>
       </el-form>
       <el-alert
         v-if="errorMessage"
@@ -75,7 +72,7 @@ const submit = async () => {
         class="result-alert viewer-friendly-alert"
       />
       <div v-else-if="total > 0" class="result-box">
-        <p>共 {{ total }} 条{{ truncated ? "（仅显示前 20 条）" : "" }}</p>
+        <p>{{ t("page.tools.noteCount.summary", { total, suffix: truncated ? t('page.tools.noteCount.truncated', '（仅显示前 20 条）') : '' }) }}</p>
         <ul>
           <li v-for="(item, index) in items" :key="`${item.title}-${item.course}-${index}`">
             {{ item.title }} {{ item.course }}
@@ -84,7 +81,7 @@ const submit = async () => {
       </div>
       <el-alert
         v-else-if="!loading && total === 0 && items.length === 0 && !errorMessage"
-        title="没有找到对应物量的谱面"
+        :title="t('page.tools.noteCount.empty', '没有找到对应物量的谱面')"
         type="info"
         :closable="false"
         show-icon

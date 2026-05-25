@@ -4,7 +4,9 @@ import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { SongCatalogPayload } from "~/types/content";
 
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 const page = ref(1);
 const pageSize = ref(25);
 const keywordInput = ref("");
@@ -17,27 +19,22 @@ const editorVisible = ref(false);
 const editorMode = ref<"edit" | "create">("edit");
 const editingSong = ref<SongRow | null>(null);
 
-const pageMeta = {
-  title: "歌曲数据",
-  desc: "直接查看并维护当前绑定 ID 的本地歌曲成绩数据。"
-};
-
 definePageMeta({
   middleware: "account-auth",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "account.songs",
+  pageDescKey: "page.account.songs.desc",
   navKey: "/account/songs",
   breadcrumbs: [
-    { label: "账号系统", to: "/account/profile" },
-    { label: "歌曲数据", to: "/account/songs" }
+    { labelKey: "account.title", to: "/account/profile" },
+    { labelKey: "account.songs", to: "/account/songs" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("account.songs"),
+  description: buildPageDescription(t("page.account.songs.desc")),
   path: "/account/songs"
-});
+}));
 
 type BindingSummary = {
   id: number;
@@ -89,23 +86,99 @@ type SongsPayload = {
   items: SongRow[];
 };
 
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "ローカル楽曲データ",
+        intro: "現在連携中の ID の `userdata` 成績データを閲覧・編集します。ロックした譜面は今後の更新で上書きされません。",
+        needBinding: "先にプロフィールでドンダーひろば ID を連携してください",
+        goProfile: "プロフィールへ",
+        currentBinding: "現在の連携",
+        chooseBinding: "連携 ID を選択",
+        searchPlaceholder: "曲名または ID を検索",
+        filterDifficulty: "難易度で絞り込み",
+        search: "検索",
+        create: "記録を追加",
+        total: "総件数",
+        switched: "現在の連携 ID を切り替えました",
+        switchFailed: "連携切り替えに失敗しました",
+        lockOn: "この譜面をロックしました",
+        lockOff: "この譜面のロックを解除しました",
+        lockFailed: "ロック状態の更新に失敗しました",
+        titleCol: "曲名",
+        removed: "削除済み",
+        custom: "手動追加",
+        difficulty: "難易度",
+        score: "スコア",
+        judge: "判定 / 連打",
+        rating: "評価",
+        maxNotes: "最大ノーツ",
+        updatedAt: "更新日時",
+        lock: "ロック",
+        actions: "操作",
+        edit: "編集",
+        good: "良",
+        ok: "可",
+        bad: "不可",
+        drumroll: "連打",
+        combo: "コンボ"
+      }
+    : {
+        title: "本地歌曲数据",
+        intro: "读取并编辑当前绑定 ID 的 `userdata` 成绩文件；锁定后，后续本地抓取更新不会覆盖该谱面记录。",
+        needBinding: "请先在个人档案页绑定鼓众广场 ID",
+        goProfile: "前往个人档案",
+        currentBinding: "当前绑定",
+        chooseBinding: "选择绑定 ID",
+        searchPlaceholder: "搜索曲名或 ID",
+        filterDifficulty: "按难度筛选",
+        search: "搜索",
+        create: "新增成绩",
+        total: "总记录数",
+        switched: "当前绑定 ID 已切换",
+        switchFailed: "切换绑定失败",
+        lockOn: "该谱面已锁定",
+        lockOff: "该谱面已解锁",
+        lockFailed: "锁定状态更新失败",
+        titleCol: "曲名",
+        removed: "已下架",
+        custom: "手动收录",
+        difficulty: "难度",
+        score: "分数",
+        judge: "判定 / 连打",
+        rating: "评价",
+        maxNotes: "最大物量",
+        updatedAt: "更新时间",
+        lock: "锁定",
+        actions: "操作",
+        edit: "编辑",
+        good: "良",
+        ok: "可",
+        bad: "不可",
+        drumroll: "连打",
+        combo: "连击"
+      }
+);
+const levelOptions = computed(() =>
+  [1, 2, 3, 4, 5].map((value) => ({ value, label: t(`difficulty.${value}`) }))
+);
+
 const { data: profileData, refresh: refreshProfile } = await useAsyncData<ProfilePayload>(
   "account-song-profile",
-  () => $fetch("/api/account/bindings", { headers }),
+  () => apiFetch("/api/account/bindings"),
   { default: () => ({ bindings: [], currentBinding: null }) }
 );
 
 const { data: songCatalogData } = await useAsyncData<SongCatalogPayload>(
   "account-song-catalog",
-  () => $fetch("/api/content/songs"),
+  () => apiFetch("/api/content/songs"),
   { default: () => ({ songs: [] }) }
 );
 
 const loadSongs = async () => {
   tableLoading.value = true;
   try {
-    return await $fetch<SongsPayload>("/api/account/songs", {
-      headers,
+    return await apiFetch<SongsPayload>("/api/account/songs", {
       query: {
         page: page.value,
         pageSize: pageSize.value,
@@ -138,15 +211,15 @@ const changeBinding = async (bindingId: number) => {
   if (!bindingId || switchingBinding.value) return;
   switchingBinding.value = true;
   try {
-    await $fetch("/api/account/bindings/current", {
+    await apiFetch("/api/account/bindings/current", {
       method: "POST",
       body: { bindingId }
     });
-    ElMessage.success("当前绑定 ID 已切换");
+    ElMessage.success(copy.value.switched);
     page.value = 1;
     await Promise.all([refreshProfile(), refreshSongs()]);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "切换绑定失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.switchFailed);
   } finally {
     switchingBinding.value = false;
   }
@@ -172,7 +245,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
   const key = `${row.songNo}:${row.level}`;
   lockingKey.value = key;
   try {
-    await $fetch("/api/account/songs/lock", {
+    await apiFetch("/api/account/songs/lock", {
       method: "POST",
       body: {
         songNo: row.songNo,
@@ -181,10 +254,10 @@ const toggleLock = async (row: SongRow, value: boolean) => {
       }
     });
     row.isLocked = value;
-    ElMessage.success(value ? "该谱面已锁定" : "该谱面已解锁");
+    ElMessage.success(value ? copy.value.lockOn : copy.value.lockOff);
   } catch (error: any) {
     row.isLocked = !value;
-    ElMessage.error(error?.data?.statusMessage || error?.message || "锁定状态更新失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.lockFailed);
   } finally {
     lockingKey.value = "";
   }
@@ -195,14 +268,14 @@ const toggleLock = async (row: SongRow, value: boolean) => {
   <div class="songs-page">
     <el-card class="panel-card control-card">
       <div class="section-title">
-        <h3>本地歌曲数据</h3>
-        <p>读取并编辑当前绑定 ID 的 `userdata` 成绩文件；锁定后，后续本地抓取更新不会覆盖该谱面记录。</p>
+        <h3>{{ copy.title }}</h3>
+        <p>{{ copy.intro }}</p>
       </div>
       <div v-if="!profileData.bindings.length" class="empty-wrap">
-        <el-empty description="请先在个人档案页绑定鼓众广场 ID">
+        <el-empty :description="copy.needBinding">
           <template #extra>
-            <NuxtLink to="/account/profile">
-              <el-button type="primary">前往个人档案</el-button>
+            <NuxtLink :to="localePath('/account/profile')">
+              <el-button type="primary">{{ copy.goProfile }}</el-button>
             </NuxtLink>
           </template>
         </el-empty>
@@ -211,10 +284,10 @@ const toggleLock = async (row: SongRow, value: boolean) => {
         <div class="toolbar-row">
           <div class="toolbar-left">
             <div class="binding-switcher">
-              <span>当前绑定</span>
+              <span>{{ copy.currentBinding }}</span>
               <el-select
                 :model-value="currentBinding?.id"
-                placeholder="选择绑定 ID"
+                :placeholder="copy.chooseBinding"
                 class="binding-select"
                 :loading="switchingBinding"
                 @change="changeBinding"
@@ -223,51 +296,47 @@ const toggleLock = async (row: SongRow, value: boolean) => {
               </el-select>
             </div>
             <div class="filter-row">
-              <el-input v-model="keywordInput" placeholder="搜索曲名或 ID" clearable @keyup.enter="applyFilters" />
-              <el-select v-model="levelFilter" clearable placeholder="按难度筛选" @change="applyFilters">
-                <el-option :value="1" label="简单" />
-                <el-option :value="2" label="一般" />
-                <el-option :value="3" label="困难" />
-                <el-option :value="4" label="魔王" />
-                <el-option :value="5" label="里谱" />
+              <el-input v-model="keywordInput" :placeholder="copy.searchPlaceholder" clearable @keyup.enter="applyFilters" />
+              <el-select v-model="levelFilter" clearable :placeholder="copy.filterDifficulty" @change="applyFilters">
+                <el-option v-for="option in levelOptions" :key="option.value" :value="option.value" :label="option.label" />
               </el-select>
-              <el-button type="primary" @click="applyFilters">搜索</el-button>
-              <el-button type="success" plain @click="openCreator">新增成绩</el-button>
+              <el-button type="primary" @click="applyFilters">{{ copy.search }}</el-button>
+              <el-button type="success" plain @click="openCreator">{{ copy.create }}</el-button>
             </div>
           </div>
           <div class="toolbar-meta">
-            <span>总记录数</span>
+            <span>{{ copy.total }}</span>
             <strong>{{ total }}</strong>
           </div>
         </div>
 
         <el-table v-loading="tableLoading" :data="rows" class="song-table">
-          <el-table-column prop="title" label="曲名" min-width="260">
+          <el-table-column prop="title" :label="copy.titleCol" min-width="260">
             <template #default="{ row }">
               <div class="song-title-cell">
                 <strong>{{ row.title }}</strong>
                 <span>{{ row.titleJp || row.songNo }}</span>
                 <div class="song-tags">
-                  <el-tag v-if="row.shelfStatus === 1" size="small" type="warning" effect="light">已下架</el-tag>
-                  <el-tag v-if="row.isCustom" size="small" type="info" effect="light">手动收录</el-tag>
+                  <el-tag v-if="row.shelfStatus === 1" size="small" type="warning" effect="light">{{ copy.removed }}</el-tag>
+                  <el-tag v-if="row.isCustom" size="small" type="info" effect="light">{{ copy.custom }}</el-tag>
                 </div>
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="levelLabel" label="难度" width="90" />
-          <el-table-column prop="highScore" label="分数" width="110" />
-          <el-table-column label="判定 / 连打" width="180">
+          <el-table-column prop="levelLabel" :label="copy.difficulty" width="90" />
+          <el-table-column prop="highScore" :label="copy.score" width="110" />
+          <el-table-column :label="copy.judge" width="180">
             <template #default="{ row }">
               <div class="judge-cell">
-                <span>良 {{ row.goodCnt }} / 可 {{ row.okCnt }} / 不可 {{ row.ngCnt }}</span>
-                <span>连打 {{ row.poundCnt }} / 连击 {{ row.comboCnt }}</span>
+                <span>{{ copy.good }} {{ row.goodCnt }} / {{ copy.ok }} {{ row.okCnt }} / {{ copy.bad }} {{ row.ngCnt }}</span>
+                <span>{{ copy.drumroll }} {{ row.poundCnt }} / {{ copy.combo }} {{ row.comboCnt }}</span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="bestScoreRank" label="评价" width="80" />
-          <el-table-column prop="maxCombo" label="最大物量" width="94" />
-          <el-table-column prop="updateDatetime" label="更新时间" min-width="160" />
-          <el-table-column label="锁定" width="90">
+          <el-table-column prop="bestScoreRank" :label="copy.rating" width="80" />
+          <el-table-column prop="maxCombo" :label="copy.maxNotes" width="94" />
+          <el-table-column prop="updateDatetime" :label="copy.updatedAt" min-width="160" />
+          <el-table-column :label="copy.lock" width="90">
             <template #default="{ row }">
               <el-switch
                 :model-value="row.isLocked"
@@ -276,9 +345,9 @@ const toggleLock = async (row: SongRow, value: boolean) => {
               />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="90" fixed="right">
+          <el-table-column :label="copy.actions" width="90" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="openEditor(row)">编辑</el-button>
+              <el-button link type="primary" @click="openEditor(row)">{{ copy.edit }}</el-button>
             </template>
           </el-table-column>
         </el-table>

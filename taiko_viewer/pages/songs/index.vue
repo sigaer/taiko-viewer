@@ -1,5 +1,6 @@
 <script setup lang="ts">
-definePageMeta({
-  redirect: "/songs/available"
+const localePath = useLocalePath();
+await navigateTo(localePath("/songs/available"), {
+  redirectCode: 302
 });
 </script>

@@ -1,21 +1,20 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumThreadDetail } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-
-const pageMeta = {
-  title: "帖子详情",
-  desc: buildPageDescription("查看太鼓达人论坛主题、楼层回复与相关互动。")
-};
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
+const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "forum.threadDetail",
+  pageDescKey: "page.forum.thread.desc",
   navKey: "/forum",
-  breadcrumbs: [{ label: "论坛社区", to: "/forum" }, { label: "帖子详情" }],
+  breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }, { labelKey: "forum.threadDetail" }],
 });
 
 const replyBody = ref("");
@@ -30,14 +29,95 @@ const likingThread = ref(false);
 const activePostLikeId = ref<number | null>(null);
 const revealedBlockedPostIds = ref<number[]>([]);
 
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        publishReply: "返信を書く",
+        replyTarget: "現在の返信先：{label}",
+        replyHint: "このテーマへの感想や攻略の補足を書いてください。",
+        cancelTarget: "指定返信を解除",
+        replyPlaceholder: "@ユーザー名 で他のプレイヤーにメンションできます",
+        uploading: "アップロード中...",
+        addImage: "画像を追加（{count}/4）",
+        imageHint: "画像のみの返信にも対応。最大 4 枚",
+        remove: "削除",
+        locked: "このスレッドはロックされています",
+        submit: "返信を投稿",
+        blockedFloor: "この投稿はブロックしたユーザーのため折りたたまれています。",
+        blockedReply: "この返信はブロックしたユーザーのため折りたたまれています。",
+        expand: "表示する",
+        likeThread: "スレッドにいいね",
+        likedThread: "いいね済み",
+        replyThread: "テーマに返信",
+        floorReply: "{username} さんの投稿に返信",
+        replyToFloor: "投稿に返信",
+        replyToUser: "@{username} へ返信",
+        reply: "返信",
+        liked: "いいね済み",
+        like: "いいね",
+        empty: "まだ返信がありません。最初の返信を書いてみましょう。",
+        uploadLimit: "1 件の返信に添付できる画像は最大 4 枚です",
+        uploadDone: "返信画像をアップロードしました",
+        uploadFailed: "画像アップロードに失敗しました",
+        loginForUpload: "ログイン後に画像をアップロードしてください",
+        replySuccess: "返信を投稿しました",
+        replyFailed: "返信投稿に失敗しました",
+        loginForReply: "ログイン後に返信してください",
+        likeRemoved: "いいねを取り消しました",
+        likeSuccess: "いいねしました",
+        likeFailed: "いいねに失敗しました",
+        loginForLike: "ログイン後にいいねしてください"
+      }
+    : {
+        publishReply: "发表回复",
+        replyTarget: "当前回复给：{label}",
+        replyHint: "对主题发表你的观点或继续补充攻略。",
+        cancelTarget: "取消定向回复",
+        replyPlaceholder: "输入回复内容，可使用 @用户名 提及其他鼓友",
+        uploading: "上传中...",
+        addImage: "添加图片（{count}/4）",
+        imageHint: "支持纯图片回复，最多 4 张",
+        remove: "移除",
+        locked: "当前帖子已锁定",
+        submit: "发布回复",
+        blockedFloor: "该楼层来自已屏蔽用户，默认已折叠。",
+        blockedReply: "该回复来自已屏蔽用户，默认已折叠。",
+        expand: "展开查看",
+        likeThread: "点赞主题",
+        likedThread: "已点赞",
+        replyThread: "回复主题",
+        floorReply: "{username} 的楼层",
+        replyToFloor: "回复楼层",
+        replyToUser: "回复 @{username}",
+        reply: "回复",
+        liked: "已赞",
+        like: "点赞",
+        empty: "还没有回复，抢个沙发吧",
+        uploadLimit: "单条回复最多上传 4 张图片",
+        uploadDone: "回复图片上传完成",
+        uploadFailed: "图片上传失败",
+        loginForUpload: "请先登录后再上传图片",
+        replySuccess: "回复成功",
+        replyFailed: "回复发布失败",
+        loginForReply: "请先登录后再回复",
+        likeRemoved: "已取消点赞",
+        likeSuccess: "点赞成功",
+        likeFailed: "点赞失败",
+        loginForLike: "请先登录后再点赞"
+      }
+);
+const getSectionName = (slug: string) => t(`forum.sections.${slug}.name`);
+const getSongDifficultyLabel = (difficultyType: number | null, fallback: string) =>
+  difficultyType ? t(`difficulty.${difficultyType}`) : fallback;
+
 const { data, pending, refresh } = await useAsyncData<ForumThreadDetail>(
   () => `forum-thread-${route.params.id}`,
-  () => $fetch(`/api/forum/threads/${route.params.id}`, { headers }),
+  () => apiFetch(`/api/forum/threads/${route.params.id}`),
 );
 
 useViewerSeo(() => ({
-  title: data.value?.title || pageMeta.title,
-  description: buildPageDescription(data.value?.summary || pageMeta.desc),
+  title: data.value?.title || t("forum.threadDetail"),
+  description: buildPageDescription(data.value?.summary || t("page.forum.thread.desc")),
   path: `/forum/thread/${route.params.id}`,
   keywords: ["论坛帖子", "太鼓达人社区"]
 }));
@@ -80,7 +160,7 @@ const uploadReplyImages = async (event: Event) => {
   const files = Array.from(input?.files || []);
   if (!files.length || uploadingImages.value) return;
   if (replyImages.value.length >= 4) {
-    ElMessage.warning("单条回复最多上传 4 张图片");
+    ElMessage.warning(copy.value.uploadLimit);
     if (input) input.value = "";
     return;
   }
@@ -92,7 +172,7 @@ const uploadReplyImages = async (event: Event) => {
     )) {
       const formData = new FormData();
       formData.append("image", file);
-      const result = await $fetch<{ imageUrl: string }>(
+      const result = await apiFetch<{ imageUrl: string }>(
         "/api/forum/media/images",
         {
           method: "POST",
@@ -103,9 +183,9 @@ const uploadReplyImages = async (event: Event) => {
         replyImages.value.push(result.imageUrl);
       }
     }
-    ElMessage.success("回复图片上传完成");
+    ElMessage.success(copy.value.uploadDone);
   } catch (error: any) {
-    showActionError(error, "图片上传失败", "请先登录后再上传图片");
+    showActionError(error, copy.value.uploadFailed, copy.value.loginForUpload);
   } finally {
     uploadingImages.value = false;
     if (input) input.value = "";
@@ -151,7 +231,7 @@ const submitReply = async () => {
         imageUrl,
       })),
     ];
-    await $fetch(`/api/forum/threads/${route.params.id}/replies`, {
+    await apiFetch(`/api/forum/threads/${route.params.id}/replies`, {
       method: "POST",
       body: {
         bodyText: replyBody.value,
@@ -162,10 +242,10 @@ const submitReply = async () => {
     replyBody.value = "";
     replyImages.value = [];
     replyTarget.value = { id: null, label: "" };
-    ElMessage.success("回复成功");
+    ElMessage.success(copy.value.replySuccess);
     await refresh();
   } catch (error: any) {
-    showActionError(error, "回复发布失败", "请先登录后再回复");
+    showActionError(error, copy.value.replyFailed, copy.value.loginForReply);
   } finally {
     submitting.value = false;
   }
@@ -176,13 +256,13 @@ const toggleThreadLike = async () => {
   likingThread.value = true;
   try {
     const wasLiked = Boolean(detail.value?.viewerHasLiked);
-    await $fetch(`/api/forum/threads/${route.params.id}/like`, {
+    await apiFetch(`/api/forum/threads/${route.params.id}/like`, {
       method: "POST",
     });
-    ElMessage.success(wasLiked ? "已取消点赞" : "点赞成功");
+    ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
     await refresh();
   } catch (error: any) {
-    showActionError(error, "点赞失败", "请先登录后再点赞");
+    showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
     likingThread.value = false;
   }
@@ -199,13 +279,13 @@ const togglePostLike = async (postId: number) => {
         .flatMap((post) => post.replies)
         .find((reply) => reply.id === postId);
     const wasLiked = Boolean(currentPost?.viewerHasLiked);
-    await $fetch(`/api/forum/posts/${postId}/like`, {
+    await apiFetch(`/api/forum/posts/${postId}/like`, {
       method: "POST",
     });
-    ElMessage.success(wasLiked ? "已取消点赞" : "点赞成功");
+    ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
     await refresh();
   } catch (error: any) {
-    showActionError(error, "点赞失败", "请先登录后再点赞");
+    showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
     activePostLikeId.value = null;
   }
@@ -238,22 +318,22 @@ const renderReplyBlocks = (
         <div class="thread-header__top">
           <div class="thread-header__badges">
             <NuxtLink
-              :to="`/forum/section/${detail.section.slug}`"
+              :to="localePath(`/forum/section/${detail.section.slug}`)"
               class="thread-section-pill"
               :style="{ '--accent': detail.section.accentColor }"
             >
-              {{ detail.section.name }}
+              {{ getSectionName(detail.section.slug) }}
             </NuxtLink>
-            <span v-if="detail.isPinned" class="thread-state">置顶</span>
+            <span v-if="detail.isPinned" class="thread-state">{{ t("forum.states.pinned") }}</span>
             <span
               v-if="detail.isFeatured"
               class="thread-state thread-state--gold"
-              >加精</span
+              >{{ t("forum.states.featured") }}</span
             >
             <span
               v-if="detail.isLocked"
               class="thread-state thread-state--muted"
-              >锁帖</span
+              >{{ t("forum.states.locked") }}</span
             >
           </div>
           <h2>{{ detail.title }}</h2>
@@ -263,12 +343,10 @@ const renderReplyBlocks = (
         <div class="thread-header__meta">
           <ForumUserBadge :user="detail.author" />
           <div class="thread-header__stats">
-            <span>{{ detail.replyCount }} 回复</span>
-            <span>{{ detail.likeCount }} 点赞</span>
-            <span>{{ detail.viewCount }} 浏览</span>
-            <span>{{
-              new Date(detail.createdAt).toLocaleString("zh-CN")
-            }}</span>
+            <span>{{ detail.replyCount }} {{ t("forum.stats.reply") }}</span>
+            <span>{{ detail.likeCount }} {{ t("forum.stats.like") }}</span>
+            <span>{{ detail.viewCount }} {{ t("forum.stats.view") }}</span>
+            <span>{{ formatDateTime(detail.createdAt) }}</span>
           </div>
         </div>
 
@@ -280,8 +358,8 @@ const renderReplyBlocks = (
           <div>
             <strong>{{ detail.song.title }}</strong>
             <span
-              >{{ detail.song.difficultyLabel }} ·
-              {{ detail.song.level || "?" }}星</span
+              >{{ getSongDifficultyLabel(detail.song.difficultyType, detail.song.difficultyLabel) }} ·
+              {{ detail.song.level || "?" }}{{ t("guide.starSuffix") }}</span
             >
           </div>
         </div>
@@ -296,10 +374,10 @@ const renderReplyBlocks = (
             :loading="likingThread"
             @click="toggleThreadLike"
           >
-            {{ detail.viewerHasLiked ? "已点赞" : "点赞主题" }}
+            {{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}
           </el-button>
           <el-button type="primary" plain @click="setReplyTarget(null)"
-            >回复主题</el-button
+            >{{ copy.replyThread }}</el-button
           >
         </div>
       </section>
@@ -324,12 +402,12 @@ const renderReplyBlocks = (
       <section class="panel-card reply-box">
         <div class="reply-box__head">
           <div>
-            <h3>发表回复</h3>
-            <p v-if="replyTarget.label">当前回复给：{{ replyTarget.label }}</p>
-            <p v-else>对主题发表你的观点或继续补充攻略。</p>
+            <h3>{{ copy.publishReply }}</h3>
+            <p v-if="replyTarget.label">{{ copy.replyTarget.replace("{label}", replyTarget.label) }}</p>
+            <p v-else>{{ copy.replyHint }}</p>
           </div>
           <el-button v-if="replyTarget.id" text @click="setReplyTarget(null)"
-            >取消定向回复</el-button
+            >{{ copy.cancelTarget }}</el-button
           >
         </div>
         <el-input
@@ -339,7 +417,7 @@ const renderReplyBlocks = (
           maxlength="1000"
           show-word-limit
           :disabled="detail.isLocked"
-          placeholder="输入回复内容，可使用 @用户名 提及其他鼓友"
+          :placeholder="copy.replyPlaceholder"
         />
         <div class="reply-box__upload">
           <label class="reply-upload-trigger">
@@ -354,11 +432,11 @@ const renderReplyBlocks = (
             />
             {{
               uploadingImages
-                ? "上传中..."
-                : `添加图片（${replyImages.length}/4）`
+                ? copy.uploading
+                : copy.addImage.replace("{count}", String(replyImages.length))
             }}
           </label>
-          <span>支持纯图片回复，最多 4 张</span>
+          <span>{{ copy.imageHint }}</span>
         </div>
         <div v-if="replyImages.length" class="reply-image-grid">
           <div
@@ -368,7 +446,7 @@ const renderReplyBlocks = (
           >
             <ForumSafeImage :src="imageUrl" alt="reply image" />
             <el-button text size="small" @click="removeReplyImage(index)"
-              >移除</el-button
+              >{{ copy.remove }}</el-button
             >
           </div>
         </div>
@@ -378,7 +456,7 @@ const renderReplyBlocks = (
           :loading="submitting"
           @click="submitReply"
         >
-          {{ detail.isLocked ? "当前帖子已锁定" : "发布回复" }}
+          {{ detail.isLocked ? copy.locked : copy.submit }}
         </el-button>
       </section>
 
@@ -394,16 +472,16 @@ const renderReplyBlocks = (
               <span class="floor-badge">#{{ post.floorNo }}</span>
             </div>
             <div class="floor-card__meta">
-              {{ new Date(post.createdAt).toLocaleString("zh-CN") }}
+              {{ formatDateTime(post.createdAt) }}
             </div>
           </div>
           <div
             v-if="post.isBlockedAuthor && !isBlockedContentVisible(post.id)"
             class="blocked-content-card"
           >
-            <p>该楼层来自已屏蔽用户，默认已折叠。</p>
+            <p>{{ copy.blockedFloor }}</p>
             <el-button text size="small" @click="toggleBlockedContent(post.id)"
-              >展开查看</el-button
+              >{{ copy.expand }}</el-button
             >
           </div>
           <template v-else>
@@ -430,13 +508,13 @@ const renderReplyBlocks = (
               :loading="activePostLikeId === post.id"
               @click="togglePostLike(post.id)"
             >
-              {{ post.viewerHasLiked ? "已赞" : "点赞" }} {{ post.likeCount }}
+              {{ post.viewerHasLiked ? copy.liked : copy.like }} {{ post.likeCount }}
             </el-button>
             <el-button
               size="small"
               text
-              @click="setReplyTarget(post.id, `${post.author.username} 的楼层`)"
-              >回复楼层</el-button
+              @click="setReplyTarget(post.id, copy.floorReply.replace('{username}', post.author.username))"
+              >{{ copy.replyToFloor }}</el-button
             >
           </div>
 
@@ -448,15 +526,13 @@ const renderReplyBlocks = (
             >
               <div class="sub-reply-item__head">
                 <ForumUserBadge :user="reply.author" compact />
-                <span>{{
-                  new Date(reply.createdAt).toLocaleString("zh-CN")
-                }}</span>
+                <span>{{ formatDateTime(reply.createdAt) }}</span>
               </div>
               <p
                 v-if="getReplyTargetUsername(reply, post)"
                 class="sub-reply-item__target"
               >
-                回复 @{{ getReplyTargetUsername(reply, post) }}
+                {{ copy.replyToUser.replace("{username}", getReplyTargetUsername(reply, post)) }}
               </p>
               <div
                 v-if="
@@ -464,12 +540,12 @@ const renderReplyBlocks = (
                 "
                 class="blocked-content-card blocked-content-card--sub"
               >
-                <p>该回复来自已屏蔽用户，默认已折叠。</p>
+                <p>{{ copy.blockedReply }}</p>
                 <el-button
                   text
                   size="small"
                   @click="toggleBlockedContent(reply.id)"
-                  >展开查看</el-button
+                  >{{ copy.expand }}</el-button
                 >
               </div>
               <template v-else>
@@ -496,16 +572,16 @@ const renderReplyBlocks = (
                   :loading="activePostLikeId === reply.id"
                   @click="togglePostLike(reply.id)"
                 >
-                  {{ reply.viewerHasLiked ? "已赞" : "点赞" }}
+                  {{ reply.viewerHasLiked ? copy.liked : copy.like }}
                   {{ reply.likeCount }}
                 </el-button>
                 <el-button
                   size="small"
                   text
                   @click="
-                    setReplyTarget(reply.id, `${reply.author.username} 的回复`)
+                    setReplyTarget(reply.id, copy.replyToUser.replace('{username}', reply.author.username))
                   "
-                  >回复</el-button
+                  >{{ copy.reply }}</el-button
                 >
               </div>
             </div>
@@ -514,7 +590,7 @@ const renderReplyBlocks = (
 
         <el-empty
           v-if="!detail.posts.length"
-          description="还没有回复，抢个沙发吧"
+          :description="copy.empty"
         />
       </section>
     </template>

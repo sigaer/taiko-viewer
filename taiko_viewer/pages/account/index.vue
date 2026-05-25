@@ -1,6 +1,7 @@
 <script setup lang="ts">
-definePageMeta({
-  redirect: "/account/profile"
+const localePath = useLocalePath();
+await navigateTo(localePath("/account/profile"), {
+  redirectCode: 302
 });
 </script>
 

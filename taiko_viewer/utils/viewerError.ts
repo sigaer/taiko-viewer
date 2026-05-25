@@ -8,6 +8,12 @@ type FetchLikeError = {
 
 const FETCH_NOISE_RE = /^\[(?:GET|POST|PUT|PATCH|DELETE)\]/i;
 const HTTP_STATUS_TAIL_RE = /:\s*\d{3}\s*$/;
+const RAW_MESSAGE_KEY_MAP: Record<string, string> = {
+  "操作失败": "errors.actionFailed",
+  "请先登录": "errors.pleaseLogin",
+  "获取谱面失败，请稍后重试": "guide.loadFailed",
+  "暂无谱面数据": "guide.empty"
+};
 
 const isTechnicalMessage = (text: string) => {
   const value = text.trim();
@@ -35,27 +41,35 @@ const messageFromPayload = (payload: { statusMessage?: string; message?: string 
 };
 
 const messageFromStatus = (status: number | undefined, fallback: string) => {
+  const { t } = useI18n();
   if (status === 401) {
-    return "登录状态已失效或未登录，请先登录后再试";
+    return t("errors.pleaseLogin");
   }
   if (status === 403) {
-    return "暂无权限查看该数据";
+    return t("page.common.noPermission", "暂无权限查看该数据");
   }
   if (status === 404) {
-    return "未找到相关成绩数据，请先在个人档案绑定鼓众 ID，并通过「多端同步」更新数据";
+    return t("page.common.notFoundFallback", "未找到相关成绩数据，请先在个人档案绑定鼓众 ID，并通过「多端同步」更新数据");
   }
   if (status === 400) {
-    return "请求参数有误，请检查后重试";
+    return t("page.common.badRequest", "请求参数有误，请检查后重试");
   }
   if (status && status >= 500) {
-    return "服务暂时不可用，请稍后再试";
+    return t("page.common.serviceUnavailable", "服务暂时不可用，请稍后再试");
   }
   return fallback;
 };
 
 export const resolveViewerError = async (error: unknown, fallback: string) => {
+  const { t } = useI18n();
   const err = error as FetchLikeError;
   const status = err.statusCode ?? err.status;
+
+  const translateKnownMessage = (message: string) => {
+    const normalized = message.trim();
+    const key = RAW_MESSAGE_KEY_MAP[normalized];
+    return key ? t(key) : normalized;
+  };
 
   if (err.data instanceof Blob) {
     try {
@@ -63,7 +77,7 @@ export const resolveViewerError = async (error: unknown, fallback: string) => {
       const parsed = JSON.parse(text) as { statusMessage?: string; message?: string };
       const fromPayload = messageFromPayload(parsed);
       if (fromPayload) {
-        return fromPayload;
+        return translateKnownMessage(fromPayload);
       }
     } catch {
       // Ignore parse failures and fall back to status mapping.
@@ -73,35 +87,35 @@ export const resolveViewerError = async (error: unknown, fallback: string) => {
       const parsed = JSON.parse(err.data) as { statusMessage?: string; message?: string };
       const fromPayload = messageFromPayload(parsed);
       if (fromPayload) {
-        return fromPayload;
+        return translateKnownMessage(fromPayload);
       }
     } catch {
       if (!isTechnicalMessage(err.data)) {
-        return err.data.trim();
+        return translateKnownMessage(err.data);
       }
     }
   } else {
     const fromPayload = messageFromPayload(err.data);
     if (fromPayload) {
-      return fromPayload;
+      return translateKnownMessage(fromPayload);
     }
   }
 
   const statusMessage = String(err.statusMessage || "").trim();
   if (statusMessage && !isTechnicalMessage(statusMessage)) {
-    return statusMessage;
+    return translateKnownMessage(statusMessage);
   }
 
   const message = String(err.message || "").trim();
   if (message && !isTechnicalMessage(message)) {
-    return message;
+    return translateKnownMessage(message);
   }
 
   return messageFromStatus(status, fallback);
 };
 
 export const viewerErrorAlertType = (message: string): "warning" | "error" => {
-  if (/登录|权限|绑定|同步/.test(message)) {
+  if (/登录|权限|绑定|同步|ログイン|権限|連携|同期/.test(message)) {
     return "warning";
   }
   return "error";

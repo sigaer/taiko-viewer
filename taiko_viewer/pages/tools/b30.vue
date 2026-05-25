@@ -1,33 +1,70 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { viewerErrorAlertType } from "~/utils/viewerError";
 
-const pageMeta = {
-  title: "B30 表",
-  desc: buildPageDescription("生成太鼓达人 Rating Top N 汇总图，对应 bot 指令 taikob。")
-};
+const { t, locale } = useI18n();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "tools.b30",
+  pageDescKey: "page.tools.b30.desc",
   navKey: "/tools/b30",
   breadcrumbs: [
-    { label: "查谱工具", to: "/tools" },
-    { label: "B30 表", to: "/tools/b30" }
+    { labelKey: "tools.title", to: "/tools" },
+    { labelKey: "tools.b30", to: "/tools/b30" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("tools.b30"),
+  description: buildPageDescription(t("page.tools.b30.desc")),
   path: "/tools/b30"
-});
+}));
 
 const n = ref(30);
 const dim = ref("");
 const dynamicOrigin = ref(false);
 const { imageUrl, loading, errorMessage, loadChart } = useToolChartImage();
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        hint: "対応コマンド: taikob 30 / taikob 30 精度 / taikob30 -r",
+        topN: "Top N（1-50）",
+        dim: "単一指標（任意）",
+        placeholder: "空欄なら通常の B30 集計画像",
+        dynamicOrigin: "動的原点 (-r)",
+        submit: "画像を生成",
+        imageAlt: "B30 チャート"
+      }
+    : {
+        hint: "对应 taikob 30 / taikob 30 精度 / taikob30 -r",
+        topN: "Top N（1-50）",
+        dim: "单维模式（可选）",
+        placeholder: "留空为默认 B30 汇总图",
+        dynamicOrigin: "动态原点 (-r)",
+        submit: "生成图表",
+        imageAlt: "B30 图表"
+      }
+);
+const dimOptions = computed(() =>
+  locale.value === "ja"
+    ? [
+        { label: "大歌力", value: "大歌" },
+        { label: "リズム処理", value: "节奏" },
+        { label: "複合処理", value: "复合" },
+        { label: "精度力", value: "精度" },
+        { label: "体力", value: "体力" },
+        { label: "高速処理", value: "高速" }
+      ]
+    : [
+        { label: "大歌力", value: "大歌" },
+        { label: "节奏处理", value: "节奏" },
+        { label: "复合处理", value: "复合" },
+        { label: "精度力", value: "精度" },
+        { label: "体力", value: "体力" },
+        { label: "高速处理", value: "高速" }
+      ]
+);
 
 const submit = async () => {
   await loadChart("/api/account/charts/b30", {
@@ -42,25 +79,20 @@ const submit = async () => {
   <div class="page-stack">
     <AccountToolGate>
       <el-card class="panel-card">
-        <p class="hint">对应 <code>taikob 30</code> / <code>taikob 30 精度</code> / <code>taikob30 -r</code></p>
+        <p class="hint">{{ copy.hint }}</p>
         <el-form label-position="top" @submit.prevent="submit">
-          <el-form-item label="Top N（1-50）">
+          <el-form-item :label="copy.topN">
             <el-input-number v-model="n" :min="1" :max="50" controls-position="right" />
           </el-form-item>
-          <el-form-item label="单维模式（可选）">
-            <el-select v-model="dim" clearable placeholder="留空为默认 B30 汇总图">
-              <el-option label="大歌力" value="大歌" />
-              <el-option label="节奏处理" value="节奏" />
-              <el-option label="复合处理" value="复合" />
-              <el-option label="精度力" value="精度" />
-              <el-option label="体力" value="体力" />
-              <el-option label="高速处理" value="高速" />
+          <el-form-item :label="copy.dim">
+            <el-select v-model="dim" clearable :placeholder="copy.placeholder">
+              <el-option v-for="option in dimOptions" :key="option.value" :label="option.label" :value="option.value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="动态原点 (-r)">
+          <el-form-item :label="copy.dynamicOrigin">
             <el-switch v-model="dynamicOrigin" />
           </el-form-item>
-          <el-button type="primary" :loading="loading" native-type="submit">生成图表</el-button>
+          <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
         </el-form>
         <el-alert
           v-if="errorMessage"
@@ -71,7 +103,7 @@ const submit = async () => {
           class="result-alert viewer-friendly-alert"
         />
         <div v-if="imageUrl" class="chart-wrap">
-          <img :src="imageUrl" alt="B30 图表" class="chart-image" />
+          <img :src="imageUrl" :alt="copy.imageAlt" class="chart-image" />
         </div>
       </el-card>
     </AccountToolGate>

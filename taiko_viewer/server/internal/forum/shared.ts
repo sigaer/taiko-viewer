@@ -125,6 +125,8 @@ export type NotificationRow = {
   type: ForumNotificationType;
   title: string;
   body: string;
+  message_key: string | null;
+  message_params_json: string | null;
   thread_id: number | null;
   post_id: number | null;
   is_read: number;
@@ -803,6 +805,8 @@ export const createNotification = async (payload: {
   type: ForumNotificationType;
   title: string;
   body: string;
+  messageKey?: string | null;
+  messageParams?: Record<string, unknown> | null;
   threadId?: number | null;
   postId?: number | null;
 }) => {
@@ -829,14 +833,16 @@ export const createNotification = async (payload: {
   }
   await db.execute(
     `INSERT INTO forum_notifications
-      (user_id, actor_user_id, type, title, body, thread_id, post_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      (user_id, actor_user_id, type, title, body, message_key, message_params_json, thread_id, post_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       payload.userId,
       payload.actorUserId || null,
       payload.type,
       payload.title,
       clipText(payload.body, 255),
+      payload.messageKey || null,
+      payload.messageParams ? JSON.stringify(payload.messageParams) : null,
       payload.threadId || null,
       payload.postId || null
     ]
@@ -848,6 +854,8 @@ export const createMentionNotifications = async (payload: {
   usernames: string[];
   title: string;
   bodyPrefix: string;
+  messageKey?: string | null;
+  messageParams?: Record<string, unknown> | null;
   threadId: number;
   postId?: number | null;
 }) => {
@@ -866,6 +874,11 @@ export const createMentionNotifications = async (payload: {
       type: "mention",
       title: payload.title,
       body: `${payload.bodyPrefix} @${row.username}`,
+      messageKey: payload.messageKey || null,
+      messageParams: {
+        ...(payload.messageParams || {}),
+        mentionedUsername: row.username
+      },
       threadId: payload.threadId,
       postId: payload.postId || null
     });

@@ -1,0 +1,462 @@
+{
+  "site": {
+    "title": "Sakura Taiko Viewer",
+    "shortTitle": "Taiko Viewer",
+    "homeTitle": "ホーム",
+    "defaultDescription": "Sakura Taiko Viewer は中国版太鼓の達人向けデータビューアーです。楽曲一覧、譜面攻略、段位情報、称号一覧、フォーラムを提供します。",
+    "keywordsBase": [
+      "Sakura Taiko Viewer",
+      "taiko viewer",
+      "太鼓の達人",
+      "中国版太鼓",
+      "譜面攻略",
+      "段位情報",
+      "楽曲一覧",
+      "称号一覧",
+      "フォーラム"
+    ],
+    "alternateNames": ["taiko viewer", "太鼓の達人データビューアー"],
+    "copyright": "Sakura Taiko Viewer © 2026 - Created by sigaer",
+    "manifestDescription": "Taiko data viewer, song list, guides, forum and tools."
+  },
+  "locale": {
+    "zh": "简体中文",
+    "ja": "日本語"
+  },
+  "layout": {
+    "menu": "メニュー",
+    "closeNav": "ナビを閉じる",
+    "loading": "読み込み中...",
+    "language": "言語",
+    "switchLanguage": "言語を切り替え"
+  },
+  "nav": {
+    "home": "ホーム",
+    "titles": "称号一覧",
+    "forum": "フォーラム",
+    "aliasLog": "別名変更ログ",
+    "songs": "楽曲一覧",
+    "songsAvailable": "実装曲",
+    "songsRemoved": "未実装・削除曲",
+    "grade": "段位情報",
+    "guide": "譜面攻略",
+    "tools": "譜面ツール",
+    "settings": "設定",
+    "about": "このサイトについて",
+    "account": "アカウント",
+    "sync": "同期",
+    "functional": "機能ナビ",
+    "toolbox": "譜面ツール",
+    "accountGroup": "アカウント",
+    "community": "コミュニティ",
+    "logout": "ログアウト"
+  },
+  "common": {
+    "retry": "再試行",
+    "submit": "送信",
+    "search": "検索",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "remove": "削除",
+    "back": "戻る",
+    "viewAll": "すべて見る",
+    "loadingFailed": "読み込みに失敗しました。しばらくしてから再試行してください。",
+    "unknown": "不明",
+    "yes": "はい",
+    "no": "いいえ",
+    "none": "なし",
+    "public": "公開",
+    "loginRequired": "ログイン必須",
+    "optional": "任意",
+    "comingSoon": "準備中"
+  },
+  "home": {
+    "betaNotice": "ベータ公開中：現在も画面と機能を継続的に改善しているため、データや表示が更新で変わる場合があります。",
+    "tagline": "中国版太鼓の達人データビューアー · 楽曲一覧 · 譜面攻略 · 譜面ツール",
+    "latestActivities": "最新イベント",
+    "latestSongs": "最新楽曲",
+    "latestSongsUnavailable": "最新楽曲は現在利用できません"
+  },
+  "songs": {
+    "title": "楽曲一覧",
+    "detail": "楽曲詳細",
+    "searchPlaceholder": "楽曲名・分類で検索",
+    "catalogDesc": "ジャケット、タイトル、分類情報を表示します。",
+    "availableTitle": "実装曲",
+    "removedTitle": "削除曲",
+    "version": "実装バージョン",
+    "subtitle": "サブタイトル",
+    "jpName": "日本語名",
+    "openDay": "公開日",
+    "type": "分類",
+    "difficulty": "難易度",
+    "bpm": "BPM",
+    "levels": {
+      "easy": "かんたん",
+      "normal": "ふつう",
+      "hard": "むずかしい",
+      "oni": "おに",
+      "edit": "裏譜面"
+    }
+  },
+  "guide": {
+    "title": "譜面攻略",
+    "detail": "攻略詳細",
+    "summary": "難易度と星数ごとに攻略情報を確認します。",
+    "starSuffix": "星",
+    "difficultyDistribution": "難易度分布",
+    "detailTable": "譜面詳細",
+    "empty": "譜面データがありません",
+    "loadFailed": "譜面データの取得に失敗しました。しばらくしてから再試行してください。",
+    "pageLoadFailed": "攻略ページの読み込みに失敗しました",
+    "backToGuide": "攻略一覧へ戻る",
+    "invalidDifficulty": "攻略難易度が不正です",
+    "invalidLevel": "攻略星数が不正です",
+    "invalidTag": "攻略タグが不正です",
+    "summaryColumns": {
+      "overPlus": "詐称+",
+      "over": "詐称",
+      "strong": "強",
+      "middle": "中",
+      "weak": "弱",
+      "under": "逆詐称",
+      "underMinus": "逆詐称-",
+      "total": "合計"
+    }
+  },
+  "difficulty": {
+    "1": "かんたん",
+    "2": "ふつう",
+    "3": "むずかしい",
+    "4": "おに",
+    "5": "裏譜面",
+    "unknown": "譜面未紐付け"
+  },
+  "forum": {
+    "title": "フォーラム",
+    "section": "セクション",
+    "threadDetail": "スレッド詳細",
+    "notifications": "通知",
+    "newThread": "新規投稿",
+    "myCommunity": "マイコミュニティ",
+    "writeThread": "投稿する",
+    "viewThread": "スレッドを見る",
+    "markAllRead": "すべて既読にする",
+    "emptyNotifications": "通知はまだありません",
+    "allMarkedRead": "すべての通知を既読にしました",
+    "types": {
+      "discussion": "雑談",
+      "guide": "攻略",
+      "achievement": "戦績",
+      "official": "お知らせ"
+    },
+    "states": {
+      "pinned": "固定",
+      "featured": "注目",
+      "locked": "ロック"
+    },
+    "stats": {
+      "reply": "返信",
+      "like": "いいね",
+      "view": "閲覧"
+    },
+    "roles": {
+      "user": "プレイヤー",
+      "moderator": "モデレーター",
+      "admin": "管理"
+    },
+    "notificationsType": {
+      "reply": "返信",
+      "mention": "メンション",
+      "like": "いいね",
+      "system": "システム"
+    },
+    "unboundTaikoId": "未連携",
+    "notificationMessages": {
+      "threadMention": {
+        "title": "投稿でメンションされました：{threadTitle}",
+        "body": "{actorUsername} さんが新規投稿であなたに言及しました：@{mentionedUsername}"
+      },
+      "replyMention": {
+        "title": "返信でメンションされました：{threadTitle}",
+        "body": "{actorUsername} さんが返信であなたに言及しました：@{mentionedUsername}"
+      },
+      "replyToReply": {
+        "title": "返信が届きました：{threadTitle}",
+        "body": "{actorUsername} さんが「{threadTitle}」であなたに返信しました：{replySnippet}"
+      },
+      "replyToThread": {
+        "title": "あなたのスレッドに新着返信：{threadTitle}",
+        "body": "{actorUsername} さんがあなたの投稿「{threadTitle}」に返信しました：{replySnippet}"
+      },
+      "likeThread": {
+        "title": "あなたのスレッドにいいね：{threadTitle}",
+        "body": "{actorUsername} さんがあなたの投稿「{threadTitle}」にいいねしました"
+      },
+      "likeReply": {
+        "title": "あなたの返信にいいね：{threadTitle}",
+        "body": "{actorUsername} さんが「{threadTitle}」内のあなたの返信にいいねしました"
+      },
+      "moderation": {
+        "title": "あなたのスレッド状態が変更されました：{threadTitle}",
+        "body": "投稿「{threadTitle}」は{actionLabel}に設定されました"
+      }
+    },
+    "sections": {
+      "official": {
+        "name": "公式告知",
+        "description": "更新情報、運営告知、フォーラムイベント通知。"
+      },
+      "events": {
+        "name": "イベント・大会",
+        "description": "オフライン大会、公式イベント、限定曲、企画の話題。"
+      },
+      "beginner-help": {
+        "name": "初心者Q&A",
+        "description": "筐体、バチ、遊び方の基礎、よくある質問。"
+      },
+      "score-guides": {
+        "name": "譜面攻略",
+        "description": "難所解説、運手、練習方法、譜面分析。"
+      },
+      "dojo": {
+        "name": "段位道場",
+        "description": "課題曲、練習ルート、安定率、合格記録。"
+      },
+      "achievements": {
+        "name": "戦績共有",
+        "description": "全良、金冠、高得点、個人の節目を共有。"
+      },
+      "general": {
+        "name": "総合雑談",
+        "description": "雑談、感想、バージョン観察、コミュニティ話題。"
+      }
+    }
+  },
+  "tools": {
+    "title": "譜面ツール",
+    "chartConfig": "配置検索",
+    "noteCount": "ノーツ数検索",
+    "b30": "B30 表",
+    "trend": "Rating 推移",
+    "wordCloud": "太鼓ワードクラウド"
+  },
+  "account": {
+    "title": "アカウント",
+    "profile": "プロフィール",
+    "login": "ログイン",
+    "register": "登録",
+    "forgotPassword": "パスワード再設定",
+    "sync": "同期",
+    "songs": "楽曲データ",
+    "developer": "開発者権限",
+    "developerReview": "開発者審査"
+  },
+  "page": {
+    "home": {
+      "desc": "中国版太鼓の達人データビューアーのホーム。最新イベント、楽曲一覧、譜面攻略、段位情報への入口を提供します。",
+      "eventMiku": "<初音ミク × 太鼓の達人 コラボ>",
+      "eventSummer": "<2026 夏の豪華報酬イベント>"
+    },
+    "titles": {
+      "title": "称号一覧",
+      "desc": "中国版太鼓の達人の称号一覧と獲得条件を確認できます。",
+      "keyword": "太鼓の達人称号",
+      "subtitle": "獲得可能な称号と入手条件の一覧",
+      "loadFailed": "称号データの読み込みに失敗しました。しばらくしてから再試行してください。"
+    },
+    "songs": {
+      "available": {
+        "title": "実装曲",
+        "desc": "中国版太鼓の達人の実装曲一覧。曲名、分類、難易度で検索できます。",
+        "keyword": "楽曲一覧",
+        "panelDesc": "現在利用可能な楽曲を表示します。デフォルトでは実装日の新しい順です。"
+      },
+      "removed": {
+        "title": "削除曲",
+        "desc": "中国版太鼓の達人から削除された楽曲のアーカイブです。",
+        "keyword": "削除曲",
+        "panelDesc": "削除済みの楽曲を表示します。曲名と分類で検索できます。"
+      },
+      "detail": {
+        "desc": "中国版太鼓の達人の楽曲詳細、試聴音源、譜面プレビューを確認します。"
+      }
+    },
+    "guide": {
+      "index": {
+        "desc": "難易度と星数ごとに中国版太鼓の達人の譜面攻略入口を確認します。",
+        "keyword": "譜面攻略入口",
+        "heroTitle": "譜面攻略ハブ",
+        "heroDesc": "難易度と定数から対応する攻略ページへ移動できます。各ページには独立 URL、canonical、構造化 breadcrumb を出力します。",
+        "levelCount": "{count} 個の星数入口"
+      },
+      "detail": {
+        "desc": "難易度と星数ごとの中国版太鼓の達人譜面攻略を確認します。",
+        "descWithLevel": "{difficulty} {level}星の譜面攻略と分類統計を確認します。",
+        "loadFailedSubtitle": "しばらくしてから再試行するか、攻略一覧へ戻ってください。",
+        "header": "中国版収録曲 / {difficulty} / {level}星",
+        "summaryLabel": "難易度別曲数",
+        "columns": {
+          "tag": "タグ",
+          "count": "数",
+          "category": "分類",
+          "attribute": "属性",
+          "feature": "譜面特徴",
+          "noteCount": "ノーツ数"
+        }
+      }
+    },
+    "forum": {
+      "index": {
+        "desc": "太鼓の達人プレイヤー向け交流フォーラム。告知、攻略、段位、戦績共有を集約します。",
+        "keyword": "プレイヤーコミュニティ",
+        "heroTitle": "攻略、戦績、段位、交流をひとつの鼓面へ。",
+        "heroDesc": "中国版プレイヤーとドンダーひろば利用者向けに、従来型フォーラムの秩序と公式コミュニティの雰囲気を両立します。",
+        "posterLabel": "ドンだー频道",
+        "posterSuffix": "個の固定セクション",
+        "sectionsTitle": "セクション一覧",
+        "viewGuides": "攻略を見る",
+        "threadCount": "{count} スレッド",
+        "quickLinks": "クイックリンク",
+        "featuredDesc": "固定、注目、重要な議論を優先表示します。",
+        "featuredMeta": "注目まとめ",
+        "noFeatured": "まだ注目スレッドはありません",
+        "hotDesc": "直近 7 日間の返信、いいね、閲覧数を集計した人気スレッドです。",
+        "noHot": "直近 7 日間の人気スレッドはありません",
+        "latestGuideDesc": "譜面分析、配速分解、段位練習ルート。",
+        "enterGuide": "攻略セクションへ",
+        "noGuides": "攻略セクションに新着はありません",
+        "currentUser": "現在のユーザー",
+        "joinCommunity": "コミュニティに参加",
+        "myThreads": "自分の投稿",
+        "guestDesc": "ログインすると投稿、返信、いいねができ、ドンダーひろば称号をコミュニティカードに表示できます。",
+        "announcements": "お知らせ",
+        "noAnnouncements": "現在お知らせはありません",
+        "tags": "人気タグ",
+        "leaderboard": "ランキング",
+        "noLeaderboard": "ランキングデータはまだありません",
+        "postStat": "{count} 件",
+        "likeStat": "{count} いいね"
+      },
+      "notifications": {
+        "desc": "返信、メンション、いいね、システム通知を確認します。",
+        "summary": "未読 {unread} 件、合計 {total} 件。"
+      },
+      "new": {
+        "desc": "太鼓フォーラムに攻略、戦績、雑談を投稿します。"
+      },
+      "me": {
+        "desc": "自分のフォーラム情報、投稿一覧、管理入口を確認します。"
+      },
+      "thread": {
+        "desc": "太鼓フォーラムのスレッド、各階返信、関連インタラクションを確認します。"
+      },
+      "section": {
+        "title": "フォーラムセクション",
+        "desc": "セクションごとに太鼓フォーラムのスレッドと最新議論を閲覧します。",
+        "heroDesc": "条件で絞り込み、見たい攻略・雑談・戦績をすばやく見つけられます。",
+        "threads": "スレッド",
+        "keywordPlaceholder": "タイトルで検索",
+        "sortLatest": "最新",
+        "sortHot": "人気",
+        "sortFeatured": "注目",
+        "allTypes": "すべての種類",
+        "applyFilters": "絞り込み適用",
+        "empty": "この条件ではスレッドがありません",
+        "pagination": "{page} / {totalPages} ページ、合計 {total} スレッド",
+        "prevPage": "前へ",
+        "nextPage": "次へ"
+      }
+    },
+    "about": {
+      "desc": "Sakura Taiko Viewer の開発チーム、プロダクト方針、技術スタックを紹介します。"
+    },
+    "settings": {
+      "desc": "テーマ切り替え、キャッシュ管理、コミュニティと開発者機能の入口をまとめています。"
+    },
+    "aliasLog": {
+      "desc": "中国版太鼓の達人の楽曲別名変更履歴を記録します。"
+    },
+    "tools": {
+      "index": {
+        "desc": "中国版太鼓の達人向け譜面ツール集。配置検索、ノーツ数検索、B30、Rating 推移、ワードクラウドを提供します。"
+      },
+      "chartConfig": {
+        "desc": "BPM、難易度、譜面パターン文字列から中国版太鼓の達人譜面を検索します。",
+        "queryLabel": "検索内容",
+        "placeholder": "例：16 oxxo 180 鬼10"
+      },
+      "noteCount": {
+        "desc": "ノーツ数から中国版太鼓の達人譜面を正確に検索します。",
+        "hint": "対象ノーツ数（total）を入力すると、一致する譜面を最大 20 件まで表示します。",
+        "summary": "合計 {total} 件見つかりました{suffix}",
+        "truncated": "（先頭 20 件のみ表示）",
+        "empty": "一致する譜面は見つかりませんでした"
+      },
+      "b30": {
+        "desc": "太鼓の達人 Rating Top N 集計画像を生成します。bot コマンド taikob に対応します。"
+      },
+      "trend": {
+        "desc": "Rating の六次元と総合推移を確認します。bot コマンド taikotrend に対応します。"
+      },
+      "wordCloud": {
+        "desc": "プレイ履歴から太鼓ワードクラウドを生成します。bot コマンド tcloud / 太鼓词云 に対応します。"
+      }
+    },
+    "account": {
+      "profile": {
+        "desc": "アカウント情報、認証状態、連携中のドンダーひろば ID とマイドンを確認します。"
+      },
+      "login": {
+        "desc": "Sakura Taiko Viewer にログインして、プロフィールと楽曲データを確認します。"
+      },
+      "register": {
+        "desc": "Sakura Taiko Viewer アカウントを登録し、メール認証コードで有効化します。"
+      },
+      "forgotPassword": {
+        "desc": "メール認証コードで Sakura Taiko Viewer のログインパスワードを再設定します。"
+      },
+      "sync": {
+        "desc": "同期リクエスト送信後、サーバーが現在連携中の ID の userdata を読み込み、選択した送信先へ圧縮配信します。"
+      },
+      "songs": {
+        "desc": "現在連携中の ID のローカル楽曲成績データを閲覧・編集します。"
+      },
+      "developer": {
+        "desc": "開発者権限の申請、審査結果、開発者 Token を確認します。"
+      },
+      "developerReview": {
+        "desc": "開発者権限申請を審査し、完全な JSON を読める開発者 Token を発行します。"
+      }
+    }
+  },
+  "toolsApi": {
+    "chartConfig": {
+      "required": "検索内容を入力してください。例：16 oxxo 180 鬼10",
+      "invalidFormat": "形式が正しくありません。書式：查配置 [分音符] 配置 [BPM] [難度]。分音符省略時は 16 分扱いです。",
+      "noBpmMatch": "この BPM 条件に一致する楽曲は見つかりませんでした。",
+      "songMatches": "一致した楽曲：",
+      "bpmMatchCount": "【BPM一致】{count} 曲",
+      "randomTen": "（ランダムに 10 件表示）",
+      "noBpmLevelMatch": "この BPM と難度条件に一致する譜面は見つかりませんでした。",
+      "chartMatches": "一致した譜面：",
+      "bpmLevelMatchCount": "【BPM+難度一致】{count} 件",
+      "noPatternMatch": "一致する譜面は見つかりませんでした",
+      "noFilteredMatch": "この条件に一致する譜面は見つかりませんでした。",
+      "exactMatchCount": "【完全一致】{count} 件",
+      "containsMatchCount": "【部分一致】{count} 件"
+    },
+    "noteCount": {
+      "required": "ノーツ数を入力してください",
+      "invalidCount": "ノーツ数は 0 以上の整数である必要があります"
+    }
+  },
+  "errors": {
+    "actionFailed": "操作に失敗しました",
+    "queryFailed": "検索に失敗しました。しばらくしてから再試行してください。",
+    "contentLoadFailed": "コンテンツの読み込みに失敗しました",
+    "imageUploadFailed": "画像のアップロードに失敗しました",
+    "pleaseLogin": "先にログインしてください"
+  }
+}

@@ -12,9 +12,20 @@ import {
   getGuideDifficultyOption
 } from "~/utils/guide";
 import { getContentRuntimePaths, getGuideCacheTtlMs } from "./runtime";
+import { normalizeViewerLocale } from "~/server/utils/locale";
+import { translateServerMessage } from "~/server/utils/server-messages";
 
 const guideSummaryCache = new Map<string, { expiresAt: number; data: GuidePagePayload }>();
 const guideTagItemsCache = new Map<string, { expiresAt: number; data: GuideTagItemsPayload }>();
+const GUIDE_TAG_TRANSLATION_KEYS: Record<number, string> = {
+  1: "guide.summaryColumns.overPlus",
+  2: "guide.summaryColumns.over",
+  3: "guide.summaryColumns.strong",
+  4: "guide.summaryColumns.middle",
+  5: "guide.summaryColumns.weak",
+  6: "guide.summaryColumns.under",
+  7: "guide.summaryColumns.underMinus"
+};
 
 const toGuideTagItem = (input: Record<string, unknown>): GuideTagItem => ({
   id: Number(input.id || 0),
@@ -26,24 +37,40 @@ const toGuideTagItem = (input: Record<string, unknown>): GuideTagItem => ({
   noteCount: String(input.noteCount || "")
 });
 
-const ensureGuideRouteParams = (difficulty: number, level: number) => {
+const getGuideTagLabel = (locale: string, tagId: number, fallback: string) =>
+  translateServerMessage(locale, GUIDE_TAG_TRANSLATION_KEYS[tagId], undefined, fallback);
+
+const getDifficultyLabel = (locale: string, difficulty: number, fallback: string) =>
+  translateServerMessage(locale, `difficulty.${difficulty}`, undefined, fallback);
+
+const ensureGuideRouteParams = (difficulty: number, level: number, locale: string) => {
   const option = getGuideDifficultyOption(difficulty);
   if (!option) {
-    throw createError({ statusCode: 400, statusMessage: "攻略难度无效" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: translateServerMessage(locale, "guide.invalidDifficulty", undefined, "攻略难度无效")
+    });
   }
   if (!Number.isInteger(level) || level <= 0 || level > option.max) {
-    throw createError({ statusCode: 400, statusMessage: "攻略星级无效" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: translateServerMessage(locale, "guide.invalidLevel", undefined, "攻略星级无效")
+    });
   }
   return option;
 };
 
-const fetchGuideTagItems = async (difficulty: number, level: number, tagId: number) => {
+const fetchGuideTagItems = async (difficulty: number, level: number, tagId: number, locale = "zh") => {
+  const normalizedLocale = normalizeViewerLocale(locale);
   const tag = GUIDE_TAGS.find((item) => item.id === tagId);
   if (!tag) {
-    throw createError({ statusCode: 400, statusMessage: "攻略标签无效" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: translateServerMessage(normalizedLocale, "guide.invalidTag", undefined, "攻略标签无效")
+    });
   }
 
-  const cacheKey = `${difficulty}:${level}:${tagId}`;
+  const cacheKey = `${normalizedLocale}:${difficulty}:${level}:${tagId}`;
   const now = Date.now();
   const cached = guideTagItemsCache.get(cacheKey);
   if (cached && cached.expiresAt > now) {
@@ -67,7 +94,7 @@ const fetchGuideTagItems = async (difficulty: number, level: number, tagId: numb
     difficulty,
     level,
     tagId,
-    tagLabel: tag.label,
+    tagLabel: getGuideTagLabel(normalizedLocale, tagId, tag.label),
     items: rows.map(toGuideTagItem)
   };
   guideTagItemsCache.set(cacheKey, {
@@ -77,9 +104,10 @@ const fetchGuideTagItems = async (difficulty: number, level: number, tagId: numb
   return payload;
 };
 
-export const getGuidePageContent = async (difficulty: number, level: number): Promise<GuidePagePayload> => {
-  const option = ensureGuideRouteParams(difficulty, level);
-  const cacheKey = `${difficulty}:${level}`;
+export const getGuidePageContent = async (difficulty: number, level: number, locale = "zh"): Promise<GuidePagePayload> => {
+  const normalizedLocale = normalizeViewerLocale(locale);
+  const option = ensureGuideRouteParams(difficulty, level, normalizedLocale);
+  const cacheKey = `${normalizedLocale}:${difficulty}:${level}`;
   const now = Date.now();
   const cached = guideSummaryCache.get(cacheKey);
   if (cached && cached.expiresAt > now) {
@@ -87,23 +115,32 @@ export const getGuidePageContent = async (difficulty: number, level: number): Pr
   }
 
   const tagPayloads = await Promise.all(
-    GUIDE_TAGS.map((tag) => fetchGuideTagItems(difficulty, level, tag.id))
+    GUIDE_TAGS.map((tag) => fetchGuideTagItems(difficulty, level, tag.id, normalizedLocale))
   );
   const summary = tagPayloads.reduce<GuideSummaryTable>(
     (acc, item) => {
       acc[item.tagLabel] = item.items.length;
-      acc["合计"] += item.items.length;
+      const totalLabel = translateServerMessage(normalizedLocale, "guide.summaryColumns.total", undefined, "合计");
+      acc[totalLabel] = (acc[totalLabel] || 0) + item.items.length;
       return acc;
     },
     GUIDE_SUMMARY_KEYS.reduce<GuideSummaryTable>((acc, key) => {
-      acc[key] = 0;
+      const translatedKey =
+        key === "合计"
+          ? translateServerMessage(normalizedLocale, "guide.summaryColumns.total", undefined, key)
+          : getGuideTagLabel(
+              normalizedLocale,
+              GUIDE_TAGS.find((item) => item.label === key)?.id || 0,
+              key
+            );
+      acc[translatedKey] = 0;
       return acc;
     }, {} as GuideSummaryTable)
   );
 
   const payload: GuidePagePayload = {
     difficulty,
-    difficultyLabel: option.label,
+    difficultyLabel: getDifficultyLabel(normalizedLocale, difficulty, option.label),
     level,
     summary,
     tags: tagPayloads.map((item) => ({

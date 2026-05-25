@@ -33,7 +33,7 @@ const normalizeCanonicalPath = (path: string) => {
   return normalized === "//" ? "/" : normalized;
 };
 
-const buildCanonicalUrl = (path: string) => `${CANONICAL_BASE_URL}${normalizeCanonicalPath(path)}`;
+export const buildCanonicalUrl = (path: string) => `${CANONICAL_BASE_URL}${normalizeCanonicalPath(path)}`;
 
 const buildBreadcrumbJsonLd = (items: BreadcrumbJsonLdItem[]) => ({
   "@context": "https://schema.org",
@@ -47,11 +47,25 @@ const buildBreadcrumbJsonLd = (items: BreadcrumbJsonLdItem[]) => ({
 });
 
 export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
+  const { locale, t, tm } = useI18n();
+  const localePath = useLocalePath();
   const payload = computed(() => toValue(input));
-  const canonicalUrl = computed(() => buildCanonicalUrl(payload.value.path));
+  const canonicalUrl = computed(() => buildCanonicalUrl(localePath(payload.value.path)));
   const imageUrl = computed(() => payload.value.image || DEFAULT_OG_IMAGE);
-  const pageTitle = computed(() => formatViewerTitle(payload.value.title));
-  const keywordsContent = computed(() => buildPageKeywords(payload.value.keywords || []));
+  const pageTitle = computed(() =>
+    formatViewerTitle(payload.value.title, {
+      siteTitle: SITE_TITLE,
+      homeTitle: t("site.homeTitle")
+    })
+  );
+  const keywordsContent = computed(() => {
+    const baseKeywords = tm("site.keywordsBase");
+    return buildPageKeywords(
+      Array.isArray(baseKeywords) ? baseKeywords.map((item) => String(item)) : [],
+      payload.value.keywords || []
+    );
+  });
+  const languageTag = computed(() => (locale.value === "ja" ? "ja-JP" : "zh-CN"));
 
   useSeoMeta(() => ({
     title: pageTitle.value,
@@ -61,21 +75,40 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
     ogDescription: payload.value.description,
     ogImage: imageUrl.value,
     ogUrl: canonicalUrl.value,
-    ogSiteName: SITE_TITLE
+    ogSiteName: SITE_TITLE,
+    ogLocale: locale.value === "ja" ? "ja_JP" : "zh_CN"
   }));
 
   useHead(() => {
     const scripts: Array<{ type: string; children: string }> = [];
     if (payload.value.siteSchema) {
       scripts.push(
-        { type: "application/ld+json", children: JSON.stringify(buildWebSiteJsonLd()) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildWebSiteJsonLd({
+              description: payload.value.description,
+              language: languageTag.value,
+              alternateName: Array.isArray(tm("site.alternateNames"))
+                ? (tm("site.alternateNames") as string[])
+                : undefined
+            })
+          )
+        },
         { type: "application/ld+json", children: JSON.stringify(buildOrganizationJsonLd()) }
       );
     }
     if (payload.value.breadcrumbs?.length) {
       scripts.push({
         type: "application/ld+json",
-        children: JSON.stringify(buildBreadcrumbJsonLd(payload.value.breadcrumbs))
+        children: JSON.stringify(
+          buildBreadcrumbJsonLd(
+            payload.value.breadcrumbs.map((item) => ({
+              ...item,
+              path: localePath(item.path)
+            }))
+          )
+        )
       });
     }
     return {

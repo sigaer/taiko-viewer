@@ -1,29 +1,40 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { viewerErrorAlertType } from "~/utils/viewerError";
 
-const pageMeta = {
-  title: "太鼓词云",
-  desc: buildPageDescription("根据游玩记录生成太鼓词云，对应 bot 指令 tcloud / 太鼓词云。")
-};
+const { t, locale } = useI18n();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "tools.wordCloud",
+  pageDescKey: "page.tools.wordCloud.desc",
   navKey: "/tools/word-cloud",
   breadcrumbs: [
-    { label: "查谱工具", to: "/tools" },
-    { label: "太鼓词云", to: "/tools/word-cloud" }
+    { labelKey: "tools.title", to: "/tools" },
+    { labelKey: "tools.wordCloud", to: "/tools/word-cloud" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("tools.wordCloud"),
+  description: buildPageDescription(t("page.tools.wordCloud.desc")),
   path: "/tools/word-cloud"
-});
+}));
 
 const { imageUrl, loading, errorMessage, loadChart } = useToolChartImage();
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        hint: "現在連携中のアカウントのプレイ記録からワードクラウドを生成します。先に同期を完了してください。",
+        submit: "ワードクラウドを生成",
+        imageAlt: "太鼓ワードクラウド"
+      }
+    : {
+        hint: "根据当前绑定账号的游玩记录生成词云，需先完成多端同步。",
+        submit: "生成词云",
+        imageAlt: "太鼓词云"
+      }
+);
 
 const submit = async () => {
   await loadChart("/api/account/charts/word-cloud");
@@ -34,8 +45,8 @@ const submit = async () => {
   <div class="page-stack">
     <AccountToolGate>
       <el-card class="panel-card">
-        <p class="hint">根据当前绑定账号的游玩记录生成词云，需先完成多端同步。</p>
-        <el-button type="primary" :loading="loading" @click="submit">生成词云</el-button>
+        <p class="hint">{{ copy.hint }}</p>
+        <el-button type="primary" :loading="loading" @click="submit">{{ copy.submit }}</el-button>
         <el-alert
           v-if="errorMessage"
           :title="errorMessage"
@@ -45,7 +56,7 @@ const submit = async () => {
           class="result-alert viewer-friendly-alert"
         />
         <div v-if="imageUrl" class="chart-wrap">
-          <img :src="imageUrl" alt="太鼓词云" class="chart-image" />
+          <img :src="imageUrl" :alt="copy.imageAlt" class="chart-image" />
         </div>
       </el-card>
     </AccountToolGate>

@@ -10,16 +10,14 @@ export type AccountSummary = {
 export const useAccountState = () => {
   const accountUser = useState<AccountSummary | null>("account-user", () => null);
   const accountLoaded = useState<boolean>("account-user-loaded", () => false);
+  const apiFetch = useViewerApiFetch();
 
   const fetchCurrentUser = async (force = false) => {
     if (accountLoaded.value && !force) {
       return accountUser.value;
     }
     try {
-      const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-      const data = await $fetch<{ authenticated: boolean; user: AccountSummary | null }>("/api/account/auth/me", {
-        headers
-      });
+      const data = await apiFetch<{ authenticated: boolean; user: AccountSummary | null }>("/api/account/auth/me");
       accountUser.value = data.user;
     } catch {
       accountUser.value = null;

@@ -2,26 +2,75 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
-const pageMeta = {
-  title: "设置",
-  desc: buildPageDescription("Sakura Taiko Viewer 主题切换与缓存管理。")
-};
-
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "nav.settings",
+  pageDescKey: "page.settings.desc",
   navKey: "/settings",
-  breadcrumbs: [{ label: "设置", to: "/settings" }]
+  breadcrumbs: [{ labelKey: "nav.settings", to: "/settings" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("nav.settings"),
+  description: buildPageDescription(t("page.settings.desc")),
   path: "/settings"
-});
+}));
+
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        shortcuts: "ショートカット",
+        shortcutsDesc: "コミュニティ、同期、開発者向け機能へすぐ移動できます。",
+        forum: "フォーラム",
+        forumDesc: "セクション、通知、スレッドの動きを確認します",
+        sync: "同期",
+        syncDesc: "現在の連携 ID の成績 JSON を同期します",
+        developer: "開発者権限",
+        developerDesc: "申請、審査状態、Token を確認します",
+        review: "開発者審査",
+        reviewDesc: "審査待ち申請を処理し、開発者 Token を発行します",
+        theme: "テーマ設定",
+        themeDesc: "ライト / ダークテーマを切り替えます。",
+        themeMode: "テーマ",
+        dark: "ダーク",
+        light: "ライト",
+        cache: "キャッシュ",
+        cacheDesc: "ローカルキャッシュの内容を確認します。",
+        clearCache: "キャッシュを削除",
+        cacheItems: "キャッシュ件数",
+        cacheSize: "推定サイズ",
+        empty: "キャッシュはありません",
+        cacheKey: "キャッシュキー"
+      }
+    : {
+        shortcuts: "站内快捷入口",
+        shortcutsDesc: "这里可以直接进入社区、多端同步和开发者相关功能。",
+        forum: "论坛社区",
+        forumDesc: "查看版块、通知和帖子动态",
+        sync: "多端同步",
+        syncDesc: "同步当前绑定 ID 的完整成绩 JSON",
+        developer: "开发者权限",
+        developerDesc: "提交申请、查看审批状态和 Token",
+        review: "开发者审批",
+        reviewDesc: "处理待审批申请并签发开发者 Token",
+        theme: "主题设置",
+        themeDesc: "切换浅色/深色主题。",
+        themeMode: "主题模式",
+        dark: "深色",
+        light: "浅色",
+        cache: "缓存文件",
+        cacheDesc: "查看本地缓存信息。",
+        clearCache: "清空缓存",
+        cacheItems: "缓存条目",
+        cacheSize: "估算大小",
+        empty: "暂无缓存",
+        cacheKey: "缓存键"
+      }
+);
 
 const isDeveloperReviewer = computed(
   () => accountUser.value?.username === "sigaer" && accountUser.value?.email === "1106865024@qq.com"
@@ -81,27 +130,27 @@ const clearCache = () => {
                 />
               </svg>
             </span>
-            站内快捷入口
+            {{ copy.shortcuts }}
           </h3>
-          <p>这里可以直接进入社区、多端同步和开发者相关功能。</p>
+          <p>{{ copy.shortcutsDesc }}</p>
         </div>
       </div>
       <div class="tool-links">
-        <NuxtLink to="/forum" class="tool-link">
-          <strong>论坛社区</strong>
-          <span>查看版块、通知和帖子动态</span>
+        <NuxtLink :to="localePath('/forum')" class="tool-link">
+          <strong>{{ copy.forum }}</strong>
+          <span>{{ copy.forumDesc }}</span>
         </NuxtLink>
-        <NuxtLink to="/account/sync" class="tool-link">
-          <strong>多端同步</strong>
-          <span>同步当前绑定 ID 的完整成绩 JSON</span>
+        <NuxtLink :to="localePath('/account/sync')" class="tool-link">
+          <strong>{{ copy.sync }}</strong>
+          <span>{{ copy.syncDesc }}</span>
         </NuxtLink>
-        <NuxtLink to="/account/developer" class="tool-link">
-          <strong>开发者权限</strong>
-          <span>提交申请、查看审批状态和 Token</span>
+        <NuxtLink :to="localePath('/account/developer')" class="tool-link">
+          <strong>{{ copy.developer }}</strong>
+          <span>{{ copy.developerDesc }}</span>
         </NuxtLink>
-        <NuxtLink v-if="isDeveloperReviewer" to="/account/developer/review" class="tool-link">
-          <strong>开发者审批</strong>
-          <span>处理待审批申请并签发开发者 Token</span>
+        <NuxtLink v-if="isDeveloperReviewer" :to="localePath('/account/developer/review')" class="tool-link">
+          <strong>{{ copy.review }}</strong>
+          <span>{{ copy.reviewDesc }}</span>
         </NuxtLink>
       </div>
     </el-card>
@@ -121,19 +170,19 @@ const clearCache = () => {
                 />
               </svg>
             </span>
-            主题设置
+            {{ copy.theme }}
           </h3>
-          <p>切换浅色/深色主题。</p>
+          <p>{{ copy.themeDesc }}</p>
         </div>
       </div>
       <div class="setting-row">
-        <span>主题模式</span>
+        <span>{{ copy.themeMode }}</span>
         <el-switch
           v-model="theme"
           active-value="dark"
           inactive-value="light"
-          active-text="深色"
-          inactive-text="浅色"
+          :active-text="copy.dark"
+          :inactive-text="copy.light"
         />
       </div>
     </el-card>
@@ -152,9 +201,9 @@ const clearCache = () => {
                 />
               </svg>
             </span>
-            缓存文件
+            {{ copy.cache }}
           </h3>
-          <p>查看本地缓存信息。</p>
+          <p>{{ copy.cacheDesc }}</p>
         </div>
         <el-button type="danger" plain @click="clearCache">
           <span class="btn-icon" aria-hidden="true">
@@ -168,7 +217,7 @@ const clearCache = () => {
               />
             </svg>
           </span>
-          清空缓存
+          {{ copy.clearCache }}
         </el-button>
       </div>
       <div class="cache-info">
@@ -179,7 +228,7 @@ const clearCache = () => {
                 <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
             </span>
-            缓存条目
+            {{ copy.cacheItems }}
           </div>
           <div class="cache-value">{{ cacheItems.length }}</div>
         </div>
@@ -195,13 +244,13 @@ const clearCache = () => {
                 />
               </svg>
             </span>
-            估算大小
+            {{ copy.cacheSize }}
           </div>
           <div class="cache-value">{{ cacheSize }} KB</div>
         </div>
       </div>
-      <el-table :data="cacheItems.map((key) => ({ key }))" border height="240" empty-text="暂无缓存">
-        <el-table-column prop="key" label="缓存键" />
+      <el-table :data="cacheItems.map((key) => ({ key }))" border height="240" :empty-text="copy.empty">
+        <el-table-column prop="key" :label="copy.cacheKey" />
       </el-table>
     </el-card>
   </div>

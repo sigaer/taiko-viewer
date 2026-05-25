@@ -1,0 +1,463 @@
+{
+  "site": {
+    "title": "Sakura Taiko Viewer",
+    "shortTitle": "Taiko Viewer",
+    "homeTitle": "首页",
+    "defaultDescription": "Sakura Taiko Viewer 是太鼓达人国行数据看板，提供歌曲列表、谱面攻略、段位查询、称号一览与玩家论坛社区。",
+    "keywordsBase": [
+      "Sakura Taiko Viewer",
+      "taiko viewer",
+      "太鼓达人",
+      "太鼓之达人",
+      "国行太鼓",
+      "谱面攻略",
+      "段位查询",
+      "段位道场",
+      "歌曲列表",
+      "称号一览"
+    ],
+    "alternateNames": ["taiko viewer", "太鼓达人数据看板"],
+    "copyright": "Sakura Taiko Viewer © 2026 - Created by sigaer",
+    "manifestDescription": "Taiko data viewer, song list, guides, forum and tools."
+  },
+  "locale": {
+    "zh": "简体中文",
+    "ja": "日本語"
+  },
+  "layout": {
+    "menu": "菜单",
+    "closeNav": "关闭导航",
+    "loading": "加载中...",
+    "language": "语言",
+    "switchLanguage": "切换语言"
+  },
+  "nav": {
+    "home": "首页",
+    "titles": "称号一览",
+    "forum": "论坛社区",
+    "aliasLog": "别名修改日志",
+    "songs": "歌曲列表",
+    "songsAvailable": "实装歌曲",
+    "songsRemoved": "未实装/已下架歌曲",
+    "grade": "段位查询",
+    "guide": "谱面攻略",
+    "tools": "查谱工具",
+    "settings": "设置",
+    "about": "关于",
+    "account": "账号系统",
+    "sync": "多端同步",
+    "functional": "功能导航",
+    "toolbox": "查谱工具",
+    "accountGroup": "账号系统",
+    "community": "社区服务",
+    "logout": "退出登录"
+  },
+  "common": {
+    "retry": "重试",
+    "submit": "提交",
+    "search": "搜索",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "remove": "移除",
+    "back": "返回",
+    "viewAll": "查看全部",
+    "loadingFailed": "加载失败，请稍后重试",
+    "unknown": "未知",
+    "yes": "是",
+    "no": "否",
+    "none": "暂无",
+    "public": "公开",
+    "loginRequired": "需登录",
+    "optional": "可选",
+    "comingSoon": "敬请期待"
+  },
+  "home": {
+    "betaNotice": "内测中：当前页面与功能仍在持续迭代，数据与样式可能随版本更新。",
+    "tagline": "太鼓达人国行数据看板 · 歌曲列表 · 谱面攻略 · 查谱工具",
+    "latestActivities": "最新活动",
+    "latestSongs": "最新歌曲",
+    "latestSongsUnavailable": "最新歌曲暂不可用"
+  },
+  "songs": {
+    "title": "歌曲列表",
+    "detail": "歌曲详情",
+    "searchPlaceholder": "搜索歌曲/分类",
+    "catalogDesc": "展示歌曲曲绘、标题与分类信息。",
+    "availableTitle": "现有歌曲",
+    "removedTitle": "已下架歌曲",
+    "version": "实装版本",
+    "subtitle": "副标题",
+    "jpName": "日文名",
+    "openDay": "开放日期",
+    "type": "分类",
+    "difficulty": "难度",
+    "bpm": "BPM",
+    "levels": {
+      "easy": "简单",
+      "normal": "一般",
+      "hard": "困难",
+      "oni": "魔王",
+      "edit": "里谱"
+    }
+  },
+  "guide": {
+    "title": "谱面攻略",
+    "detail": "攻略详情",
+    "summary": "按难度与星级查看谱面攻略。",
+    "starSuffix": "星",
+    "difficultyDistribution": "难度分布",
+    "detailTable": "谱面详情",
+    "empty": "暂无谱面数据",
+    "loadFailed": "获取谱面失败，请稍后重试",
+    "pageLoadFailed": "攻略页面加载失败",
+    "backToGuide": "返回攻略入口",
+    "invalidDifficulty": "攻略难度无效",
+    "invalidLevel": "攻略星级无效",
+    "invalidTag": "攻略标签无效",
+    "summaryColumns": {
+      "overPlus": "诈称+",
+      "over": "诈称",
+      "strong": "强",
+      "middle": "中",
+      "weak": "弱",
+      "under": "逆诈称",
+      "underMinus": "逆诈称-",
+      "total": "合计"
+    }
+  },
+  "difficulty": {
+    "1": "简单",
+    "2": "普通",
+    "3": "困难",
+    "4": "魔王",
+    "5": "里谱",
+    "unknown": "未绑定谱面"
+  },
+  "forum": {
+    "title": "论坛社区",
+    "section": "版块",
+    "threadDetail": "帖子详情",
+    "notifications": "站内通知",
+    "newThread": "发布新帖",
+    "myCommunity": "我的社区",
+    "writeThread": "写新帖",
+    "viewThread": "查看主题",
+    "markAllRead": "全部标记已读",
+    "emptyNotifications": "通知中心还是空的",
+    "allMarkedRead": "通知已全部标记为已读",
+    "types": {
+      "discussion": "讨论",
+      "guide": "攻略",
+      "achievement": "战报",
+      "official": "公告"
+    },
+    "states": {
+      "pinned": "置顶",
+      "featured": "加精",
+      "locked": "锁帖"
+    },
+    "stats": {
+      "reply": "回复",
+      "like": "点赞",
+      "view": "浏览"
+    },
+    "roles": {
+      "user": "鼓友",
+      "moderator": "版主",
+      "admin": "站务"
+    },
+    "notificationsType": {
+      "reply": "回复",
+      "mention": "提及",
+      "like": "点赞",
+      "system": "系统"
+    },
+    "unboundTaikoId": "未绑定",
+    "notificationMessages": {
+      "threadMention": {
+        "title": "你在帖子中被提及：{threadTitle}",
+        "body": "{actorUsername} 在新帖中提到了你：@{mentionedUsername}"
+      },
+      "replyMention": {
+        "title": "你在回复中被提及：{threadTitle}",
+        "body": "{actorUsername} 在回复中提到了你：@{mentionedUsername}"
+      },
+      "replyToReply": {
+        "title": "你收到一条楼中楼回复：{threadTitle}",
+        "body": "{actorUsername} 在《{threadTitle}》中回复了你：{replySnippet}"
+      },
+      "replyToThread": {
+        "title": "你的主题收到新回复：{threadTitle}",
+        "body": "{actorUsername} 回复了你的帖子《{threadTitle}》：{replySnippet}"
+      },
+      "likeThread": {
+        "title": "你的帖子收到赞：{threadTitle}",
+        "body": "{actorUsername} 赞了你的帖子《{threadTitle}》"
+      },
+      "likeReply": {
+        "title": "你的回复收到赞：{threadTitle}",
+        "body": "{actorUsername} 赞了你在《{threadTitle}》中的回复"
+      },
+      "moderation": {
+        "title": "你的帖子状态已变更：{threadTitle}",
+        "body": "帖子《{threadTitle}》已被{actionLabel}"
+      }
+    },
+    "sections": {
+      "official": {
+        "name": "官方公告",
+        "description": "版本更新、站务公告与论坛活动通知。"
+      },
+      "events": {
+        "name": "活动赛事",
+        "description": "线下比赛、官方活动、限定曲与企划讨论。"
+      },
+      "beginner-help": {
+        "name": "新手问答",
+        "description": "设备、鼓棒、玩法入门与常见问题集中区。"
+      },
+      "score-guides": {
+        "name": "谱面攻略",
+        "description": "难点拆解、手法讨论、配速练习和谱面分析。"
+      },
+      "dojo": {
+        "name": "段位道场",
+        "description": "段位配曲、练习路线、稳定率与过段记录。"
+      },
+      "achievements": {
+        "name": "晒分战报",
+        "description": "全良、金冠、高分与个人里程碑展示。"
+      },
+      "general": {
+        "name": "综合讨论",
+        "description": "闲聊、曲目感想、版本观察与社区杂谈。"
+      }
+    }
+  },
+  "tools": {
+    "title": "查谱工具",
+    "chartConfig": "查配置",
+    "noteCount": "查物量",
+    "b30": "B30 表",
+    "trend": "Rating 走势",
+    "wordCloud": "太鼓词云"
+  },
+  "account": {
+    "title": "账号系统",
+    "profile": "个人档案",
+    "login": "登录",
+    "register": "注册",
+    "forgotPassword": "找回密码",
+    "sync": "多端同步",
+    "songs": "歌曲数据",
+    "developer": "开发者权限",
+    "developerReview": "开发者审批"
+  },
+  "page": {
+    "home": {
+      "desc": "太鼓达人国行数据看板首页，提供最新活动、歌曲列表、谱面攻略与段位查询入口。",
+      "eventMiku": "<初音未来 X 太鼓达人联动>",
+      "eventSummer": "<奖励满满2026夏季>"
+    },
+    "titles": {
+      "title": "称号一览",
+      "desc": "太鼓达人国行称号列表与获取条件查询。",
+      "keyword": "太鼓达人称号",
+      "subtitle": "所有可获得的称号及获取条件",
+      "loadFailed": "称号数据加载失败，请稍后重试"
+    },
+    "songs": {
+      "available": {
+        "title": "现有歌曲",
+        "desc": "国行太鼓现有歌曲列表，支持按曲名、分类与难度搜索。",
+        "keyword": "国行歌曲列表",
+        "panelDesc": "展示当前可用歌曲，默认按实装日期倒序排列，支持按名称与分类搜索。"
+      },
+      "removed": {
+        "title": "已下架歌曲",
+        "desc": "国行太鼓已下架歌曲归档，支持按曲名与分类搜索。",
+        "keyword": "国行歌曲",
+        "panelDesc": "展示已下架歌曲，支持按名称与分类搜索。"
+      },
+      "detail": {
+        "desc": "查看太鼓达人国行歌曲详情、试听音源与谱面预览。"
+      }
+    },
+    "guide": {
+      "index": {
+        "desc": "按难度与星级浏览太鼓达人国行谱面攻略入口。",
+        "keyword": "国行谱面",
+        "heroTitle": "谱面攻略入口",
+        "heroDesc": "按难度和定数进入对应攻略页，页面会输出独立 URL、canonical 与结构化 breadcrumb。",
+        "levelCount": "{count} 个星级入口"
+      },
+      "detail": {
+        "desc": "按难度与星级查看太鼓达人国行谱面攻略。",
+        "descWithLevel": "查看太鼓达人国行 {difficulty} {level} 星谱面攻略与分类统计。",
+        "loadFailedSubtitle": "请稍后重试或返回攻略入口。",
+        "header": "国行收录曲/{difficulty}/{level}星",
+        "summaryLabel": "各难易度曲数",
+        "columns": {
+          "tag": "标签",
+          "count": "数量",
+          "category": "分类",
+          "attribute": "属性",
+          "feature": "谱面特征",
+          "noteCount": "物量"
+        }
+      }
+    },
+    "forum": {
+      "index": {
+        "desc": "太鼓达人玩家交流社区，聚合公告、谱面攻略、段位道场与晒分战报。",
+        "keyword": "玩家社区",
+        "heroTitle": "把攻略、晒分、段位和鼓众交流放进同一个鼓面里。",
+        "heroDesc": "这里面向国服与鼓众广场玩家，既保留传统论坛的版块秩序，也保留游戏官方社区的活动氛围。",
+        "posterLabel": "鼓友频道",
+        "posterSuffix": "个固定版块",
+        "sectionsTitle": "版块索引",
+        "viewGuides": "看攻略",
+        "threadCount": "{count} 主题",
+        "quickLinks": "快捷入口",
+        "featuredDesc": "置顶、加精和核心讨论优先展示。",
+        "featuredMeta": "精选聚合",
+        "noFeatured": "暂时还没有精选主题",
+        "hotDesc": "近 7 天综合回复、点赞与浏览热度。",
+        "noHot": "最近 7 天暂无热帖",
+        "latestGuideDesc": "谱面分析、配速拆解和段位练习路线。",
+        "enterGuide": "进入攻略区",
+        "noGuides": "攻略区还没有新内容",
+        "currentUser": "当前鼓友",
+        "joinCommunity": "加入社区",
+        "myThreads": "我的帖子",
+        "guestDesc": "登录后可以发帖、回复、点赞，并把鼓众广场称号展示在社区名片上。",
+        "announcements": "公告看板",
+        "noAnnouncements": "暂时没有公告",
+        "tags": "热门标签",
+        "leaderboard": "达人榜",
+        "noLeaderboard": "还没有榜单数据",
+        "postStat": "{count} 帖",
+        "likeStat": "{count} 赞"
+      },
+      "notifications": {
+        "desc": "查看回复、提及、点赞和系统通知。",
+        "summary": "未读 {unread} 条，共 {total} 条。"
+      },
+      "new": {
+        "desc": "在太鼓达人论坛发布图文攻略、晒分战报或讨论。"
+      },
+      "me": {
+        "desc": "查看个人论坛资料、我的帖子和站务管理入口。"
+      },
+      "thread": {
+        "desc": "查看太鼓达人论坛主题、楼层回复与相关互动。"
+      },
+      "section": {
+        "title": "论坛版块",
+        "desc": "按版块浏览太鼓达人论坛主题与最新讨论。",
+        "heroDesc": "按条件筛选帖子，快速找到你要看的攻略、讨论或战报。",
+        "threads": "主题",
+        "keywordPlaceholder": "搜索标题关键词",
+        "sortLatest": "最新",
+        "sortHot": "热帖",
+        "sortFeatured": "精选",
+        "allTypes": "全部类型",
+        "applyFilters": "应用筛选",
+        "empty": "当前筛选下还没有帖子",
+        "pagination": "第 {page} / {totalPages} 页，共 {total} 条主题",
+        "prevPage": "上一页",
+        "nextPage": "下一页"
+      }
+    },
+    "about": {
+      "desc": "了解 Sakura Taiko Viewer 开发团队、产品定位与技术栈。"
+    },
+    "settings": {
+      "desc": "切换主题、管理缓存，并进入社区与开发者相关入口。"
+    },
+    "aliasLog": {
+      "desc": "记录太鼓达人国行歌曲别名更新历史。"
+    },
+    "tools": {
+      "index": {
+        "desc": "太鼓达人查谱工具箱：查配置、查物量、B30、Rating 走势与词云。"
+      },
+      "chartConfig": {
+        "desc": "按 BPM、难度或谱面配置字符串查询太鼓达人国行谱面。",
+        "queryLabel": "查询内容",
+        "placeholder": "例如：16 oxxo 180 鬼10"
+      },
+      "noteCount": {
+        "desc": "按音符物量精确查找太鼓达人国行谱面。",
+        "hint": "输入目标物量（total），将返回匹配的谱面列表，最多显示 20 条。",
+        "summary": "共找到 {total} 条结果{suffix}",
+        "truncated": "（仅显示前 20 条）",
+        "empty": "没有找到对应物量的谱面"
+      },
+      "b30": {
+        "desc": "生成太鼓达人 Rating Top N 汇总图，对应 bot 指令 taikob。"
+      },
+      "trend": {
+        "desc": "查看 Rating 六维与综合历史走势，对应 bot 指令 taikotrend。"
+      },
+      "wordCloud": {
+        "desc": "根据游玩记录生成太鼓词云，对应 bot 指令 tcloud / 太鼓词云。"
+      }
+    },
+    "account": {
+      "profile": {
+        "desc": "查看账号信息、认证状态、绑定的鼓众广场 ID 与我的小咚。"
+      },
+      "login": {
+        "desc": "登录 Sakura Taiko Viewer 账号，查看个人档案与歌曲数据。"
+      },
+      "register": {
+        "desc": "注册 Sakura Taiko Viewer 账号并绑定邮箱验证码。"
+      },
+      "forgotPassword": {
+        "desc": "通过邮箱验证码重置 Sakura Taiko Viewer 的登录密码。"
+      },
+      "sync": {
+        "desc": "提交同步请求后，由服务端读取当前绑定 ID 的 userdata 并压缩分发到选中的服务目标。"
+      },
+      "songs": {
+        "desc": "直接查看并维护当前绑定 ID 的本地歌曲成绩数据。"
+      },
+      "developer": {
+        "desc": "提交开发者权限申请，查看审批结果和你的开发者 Token。"
+      },
+      "developerReview": {
+        "desc": "审批开发者权限申请，并签发可读取完整 JSON 的开发者 Token。"
+      }
+    }
+  },
+  "toolsApi": {
+    "chartConfig": {
+      "required": "请提供查询内容，例如：16 oxxo 180 鬼10",
+      "invalidFormat": "格式不正确，应为：查配置 [分音符] 配置 [BPM] [难度]；省略分音符时默认按16分，也可仅输入 BPM 或 BPM+难度。",
+      "noBpmMatch": "未找到满足该 BPM 条件的歌曲。",
+      "songMatches": "为您找到以下歌曲：",
+      "bpmMatchCount": "【BPM匹配】{count} 首",
+      "randomTen": "（随机返回10条）",
+      "noBpmLevelMatch": "未找到满足该 BPM 和难度条件的谱面。",
+      "chartMatches": "为您找到以下谱面：",
+      "bpmLevelMatchCount": "【BPM+难度匹配】{count} 条",
+      "noPatternMatch": "未找到匹配的谱面",
+      "noFilteredMatch": "未找到满足该条件的谱面。",
+      "exactMatchCount": "【精确匹配】{count} 条",
+      "containsMatchCount": "【子串匹配】{count} 条"
+    },
+    "noteCount": {
+      "required": "请提供物量数值",
+      "invalidCount": "物量必须为非负整数"
+    }
+  },
+  "errors": {
+    "actionFailed": "操作失败",
+    "queryFailed": "查询失败，请稍后重试",
+    "contentLoadFailed": "内容加载失败",
+    "imageUploadFailed": "图片上传失败",
+    "pleaseLogin": "请先登录"
+  }
+}

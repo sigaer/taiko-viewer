@@ -1,31 +1,54 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
-const pageMeta = {
-  title: "关于",
-  desc: buildPageDescription("了解 Sakura Taiko Viewer 开发团队、产品定位与技术栈。")
-};
+const { t, locale } = useI18n();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "nav.about",
+  pageDescKey: "page.about.desc",
   navKey: "/about",
-  breadcrumbs: [{ label: "关于", to: "/about" }]
+  breadcrumbs: [{ labelKey: "nav.about", to: "/about" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("nav.about"),
+  description: buildPageDescription(t("page.about.desc")),
   path: "/about",
-  keywords: ["关于", "开发团队"]
-});
+  keywords: [t("nav.about"), locale.value === "ja" ? "開発チーム" : "开发团队"]
+}));
 
-const team = [
-  { name: "马路", role: "产品与策划" },
-  { name: "sigaer", role: "前端开发/UI设计" },
-  { name: "Sparklizm/星川sutari", role: "翻译" },
-  { name: "Hyperionml/百里莫凌", role: "后端" }
-];
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        teamTitle: "開発チーム",
+        teamDesc: "Taiko プロジェクトに参加したすべてのメンバーに感謝します。",
+        stackTitle: "技術スタック",
+        stackDesc: "フロントエンドとバックエンドの主要技術です。"
+      }
+    : {
+        teamTitle: "开发团队",
+        teamDesc: "感谢所有参与 Taiko 项目的成员。",
+        stackTitle: "技术栈",
+        stackDesc: "前端与后端主要技术。"
+      }
+);
+
+const team = computed(() =>
+  locale.value === "ja"
+    ? [
+        { name: "马路", role: "プロダクト・企画" },
+        { name: "sigaer", role: "フロントエンド / UI デザイン" },
+        { name: "Sparklizm/星川sutari", role: "翻訳" },
+        { name: "Hyperionml/百里莫凌", role: "バックエンド" }
+      ]
+    : [
+        { name: "马路", role: "产品与策划" },
+        { name: "sigaer", role: "前端开发/UI设计" },
+        { name: "Sparklizm/星川sutari", role: "翻译" },
+        { name: "Hyperionml/百里莫凌", role: "后端" }
+      ]
+);
 
 const stacks = [
   "Nuxt 3",
@@ -61,9 +84,9 @@ const stacks = [
                 />
               </svg>
             </span>
-            开发团队
+            {{ copy.teamTitle }}
           </h3>
-          <p>感谢所有参与 Taiko 项目的成员。</p>
+          <p>{{ copy.teamDesc }}</p>
         </div>
       </div>
       <div class="team-grid">
@@ -101,9 +124,9 @@ const stacks = [
                 />
               </svg>
             </span>
-            技术栈
+            {{ copy.stackTitle }}
           </h3>
-          <p>前端与后端主要技术。</p>
+          <p>{{ copy.stackDesc }}</p>
         </div>
       </div>
       <div class="stack-tags">

@@ -9,7 +9,7 @@ const createDefaultPayload = (): SongDetailPayload => ({
 export const useSongDetail = (songId: MaybeRefOrGetter<number>) =>
   useAsyncData(
     () => `content-song-detail-${toValue(songId)}`,
-    () => $fetch<SongDetailPayload>(`/api/content/songs/${toValue(songId)}`),
+    () => useViewerApiFetch()<SongDetailPayload>(`/api/content/songs/${toValue(songId)}`),
     {
       default: createDefaultPayload,
       watch: [() => toValue(songId)]

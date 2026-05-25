@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 const { fetchCurrentUser } = useAccountState();
 const {
   loadRememberedCredentials,
@@ -16,27 +19,54 @@ const form = reactive({
 });
 const rememberCredentials = ref(false);
 
-const pageMeta = {
-  title: "账号登录",
-  desc: buildPageDescription("登录 Sakura Taiko Viewer 账号，查看个人档案与歌曲数据。"),
-};
-
 definePageMeta({
   middleware: "account-guest",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "account.login",
+  pageDescKey: "page.account.login.desc",
   navKey: "/account/login",
   breadcrumbs: [
-    { label: "账号系统", to: "/account/profile" },
-    { label: "登录", to: "/account/login" },
+    { labelKey: "account.title", to: "/account/profile" },
+    { labelKey: "account.login", to: "/account/login" },
   ],
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("account.login"),
+  description: buildPageDescription(t("page.account.login.desc")),
   path: "/account/login"
-});
+}));
+
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        heading: "ログイン",
+        intro: "ログインするとプロフィール確認、連携 ID の切り替え、ローカル成績データの管理ができます。",
+        identifier: "ユーザー名またはメールアドレス",
+        identifierPlaceholder: "ユーザー名またはメールアドレスを入力",
+        password: "パスワード",
+        passwordPlaceholder: "パスワードを入力",
+        remember: "ユーザー名とパスワードを保存",
+        submit: "ログイン",
+        register: "新規登録",
+        forgot: "パスワードを忘れた場合",
+        success: "ログインしました",
+        failed: "ログインに失敗しました"
+      }
+    : {
+        heading: "登录账号",
+        intro: "登录后可查看个人档案、切换绑定的鼓众 ID，并直接维护本地成绩数据。",
+        identifier: "用户名或邮箱",
+        identifierPlaceholder: "输入用户名或邮箱",
+        password: "密码",
+        passwordPlaceholder: "输入密码",
+        remember: "记住用户名和密码",
+        submit: "登录",
+        register: "注册账号",
+        forgot: "找回密码",
+        success: "登录成功",
+        failed: "登录失败"
+      }
+);
 
 onMounted(() => {
   const remembered = loadRememberedCredentials();
@@ -53,7 +83,7 @@ const submit = async () => {
   if (submitting.value) return;
   submitting.value = true;
   try {
-    await $fetch("/api/account/auth/login", {
+    await apiFetch("/api/account/auth/login", {
       method: "POST",
       body: form,
     });
@@ -63,10 +93,10 @@ const submit = async () => {
       clearRememberedCredentials();
     }
     await fetchCurrentUser(true);
-    ElMessage.success("登录成功");
-    await navigateTo("/account/profile");
+    ElMessage.success(copy.value.success);
+    await navigateTo(localePath("/account/profile"));
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "登录失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
   } finally {
     submitting.value = false;
   }
@@ -77,37 +107,35 @@ const submit = async () => {
   <div class="auth-page">
     <el-card class="panel-card auth-card">
       <div class="auth-head">
-        <h2>登录账号</h2>
-        <p>登录后可查看个人档案、切换绑定的鼓众 ID，并直接维护本地成绩数据。</p>
+        <h2>{{ copy.heading }}</h2>
+        <p>{{ copy.intro }}</p>
       </div>
       <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item label="用户名或邮箱">
-          <el-input v-model="form.identifier" placeholder="输入用户名或邮箱" />
+        <el-form-item :label="copy.identifier">
+          <el-input v-model="form.identifier" :placeholder="copy.identifierPlaceholder" />
         </el-form-item>
-        <el-form-item label="密码">
+        <el-form-item :label="copy.password">
           <el-input
             v-model="form.password"
             type="password"
             show-password
-            placeholder="输入密码"
+            :placeholder="copy.passwordPlaceholder"
           />
         </el-form-item>
         <div class="remember-row">
-          <el-checkbox v-model="rememberCredentials"
-            >记住用户名和密码</el-checkbox
-          >
+          <el-checkbox v-model="rememberCredentials">{{ copy.remember }}</el-checkbox>
         </div>
         <el-button
           type="primary"
           class="submit-btn"
           :loading="submitting"
           @click="submit"
-          >登录</el-button
+          >{{ copy.submit }}</el-button
         >
       </el-form>
       <div class="auth-links">
-        <NuxtLink to="/account/register">注册账号</NuxtLink>
-        <NuxtLink to="/account/forgot-password">找回密码</NuxtLink>
+        <NuxtLink :to="localePath('/account/register')">{{ copy.register }}</NuxtLink>
+        <NuxtLink :to="localePath('/account/forgot-password')">{{ copy.forgot }}</NuxtLink>
       </div>
     </el-card>
   </div>

@@ -1,67 +1,57 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
-const pageMeta = {
-  title: "查谱工具",
-  desc: buildPageDescription("太鼓达人查谱工具箱：查配置、查物量、B30、Rating 走势与词云。")
-};
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "tools.title",
+  pageDescKey: "page.tools.index.desc",
   navKey: "/tools",
-  breadcrumbs: [{ label: "查谱工具", to: "/tools" }]
+  breadcrumbs: [{ labelKey: "tools.title", to: "/tools" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("tools.title"),
+  description: buildPageDescription(t("page.tools.index.desc")),
   path: "/tools",
-  keywords: ["查谱工具", "查配置", "查物量", "taikob", "taikotrend"]
-});
+  keywords: [t("tools.title"), t("tools.chartConfig"), t("tools.noteCount"), "taikob", "taikotrend"]
+}));
 
-const tools = [
-  {
-    title: "查配置",
-    desc: "按 BPM、难度或谱面配置检索歌曲",
-    to: "/tools/chart-config",
-    tag: "公开"
-  },
-  {
-    title: "查物量",
-    desc: "按音符总数查找对应谱面",
-    to: "/tools/note-count",
-    tag: "公开"
-  },
-  {
-    title: "B30 表",
-    desc: "生成 Rating Top N 汇总图（taikob）",
-    to: "/tools/b30",
-    tag: "需登录"
-  },
-  {
-    title: "Rating 走势",
-    desc: "查看各维度 Rating 历史曲线（taikotrend）",
-    to: "/tools/trend",
-    tag: "需登录"
-  },
-  {
-    title: "太鼓词云",
-    desc: "根据游玩记录生成词云（taikocloud）",
-    to: "/tools/word-cloud",
-    tag: "需登录"
-  }
-];
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        intro:
+          "以下のツールは QQ Bot コマンドと同等の機能を Web から個別に使えます。公開ツールはログイン不要、グラフ系ツールは ID 連携と同期が必要です。",
+        tools: [
+          { title: "配置検索", desc: "BPM、難易度、譜面パターンから楽曲を検索", to: "/tools/chart-config", tag: "公開" },
+          { title: "ノーツ数検索", desc: "指定ノーツ数に一致する譜面を探す", to: "/tools/note-count", tag: "公開" },
+          { title: "B30 表", desc: "Rating Top N の集計画像を生成（taikob）", to: "/tools/b30", tag: "ログイン必須" },
+          { title: "Rating 推移", desc: "各次元の Rating 履歴を表示（taikotrend）", to: "/tools/trend", tag: "ログイン必須" },
+          { title: "太鼓ワードクラウド", desc: "プレイ履歴からワードクラウドを生成（taikocloud）", to: "/tools/word-cloud", tag: "ログイン必須" }
+        ]
+      }
+    : {
+        intro:
+          "以下工具与 QQ 机器人指令能力一致，可在网页端独立使用。公开工具无需登录；图表类工具需绑定鼓众 ID 并完成数据同步。",
+        tools: [
+          { title: "查配置", desc: "按 BPM、难度或谱面配置检索歌曲", to: "/tools/chart-config", tag: "公开" },
+          { title: "查物量", desc: "按音符总数查找对应谱面", to: "/tools/note-count", tag: "公开" },
+          { title: "B30 表", desc: "生成 Rating Top N 汇总图（taikob）", to: "/tools/b30", tag: "需登录" },
+          { title: "Rating 走势", desc: "查看各维度 Rating 历史曲线（taikotrend）", to: "/tools/trend", tag: "需登录" },
+          { title: "太鼓词云", desc: "根据游玩记录生成词云（taikocloud）", to: "/tools/word-cloud", tag: "需登录" }
+        ]
+      }
+);
 </script>
 
 <template>
   <div class="page-stack">
     <el-card class="panel-card">
-      <p class="intro">
-        以下工具与 QQ 机器人指令能力一致，可在网页端独立使用。公开工具无需登录；图表类工具需绑定鼓众 ID 并完成数据同步。
-      </p>
+      <p class="intro">{{ copy.intro }}</p>
       <div class="tool-grid">
-        <NuxtLink v-for="tool in tools" :key="tool.to" :to="tool.to" class="tool-card">
+        <NuxtLink v-for="tool in copy.tools" :key="tool.to" :to="localePath(tool.to)" class="tool-card">
           <div class="tool-card__head">
             <h3>{{ tool.title }}</h3>
             <el-tag size="small" effect="plain">{{ tool.tag }}</el-tag>

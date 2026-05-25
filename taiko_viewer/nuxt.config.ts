@@ -1,29 +1,49 @@
 import { defineNuxtConfig } from "nuxt/config";
 import packageJson from "./package.json" with { type: "json" };
-import { DEFAULT_DESCRIPTION, SITE_TITLE } from "./utils/seo";
+import { CANONICAL_BASE_URL, SITE_TITLE } from "./utils/seo";
 
 const appVersion = process.env.npm_package_version || packageJson.version;
 const themeColor = "#ffb37c";
 const backgroundColor = "#f4efe7";
+const pwaDescription = "Taiko data viewer, song list, guides, forum and tools.";
 const baiduSiteVerification =
   process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "codeva-IokhumYAJv";
 
 export default defineNuxtConfig({
   ssr: true,
   components: true,
+  i18n: {
+    strategy: "prefix_except_default",
+    defaultLocale: "zh",
+    lazy: true,
+    langDir: "locales",
+    locales: [
+      { code: "zh", language: "zh-CN", file: "zh.ts", name: "简体中文" },
+      { code: "ja", language: "ja-JP", file: "ja.ts", name: "日本語" }
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "viewer_locale",
+      redirectOn: "root",
+      alwaysRedirect: false
+    },
+    bundle: {
+      optimizeTranslationDirective: false
+    },
+    baseUrl: CANONICAL_BASE_URL,
+    vueI18n: "./i18n.config.ts"
+  },
   app: {
     head: {
-      htmlAttrs: { lang: "zh-CN" },
       title: SITE_TITLE,
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "application-name", content: SITE_TITLE },
-        { name: "description", content: DEFAULT_DESCRIPTION },
+        { name: "description", content: pwaDescription },
         {
           name: "keywords",
-          content:
-            "Sakura Taiko Viewer, taiko viewer, 太鼓达人, 太鼓之达人, 国行太鼓, 谱面攻略, 段位查询, 歌曲列表, 称号一览"
+          content: "Sakura Taiko Viewer, taiko viewer, taiko data viewer, songs, guides, forum"
         },
         ...(baiduSiteVerification
           ? [{ name: "baidu-site-verification", content: baiduSiteVerification }]
@@ -44,7 +64,7 @@ export default defineNuxtConfig({
     }
   },
   css: ["~/assets/css/main.css"],
-  modules: ["@element-plus/nuxt", "@vite-pwa/nuxt"],
+  modules: ["@nuxtjs/i18n", "@element-plus/nuxt", "@vite-pwa/nuxt"],
   pwa: {
     registerType: "autoUpdate",
     manifestFilename: "manifest.webmanifest",
@@ -62,13 +82,13 @@ export default defineNuxtConfig({
       id: "/",
       name: SITE_TITLE,
       short_name: "Taiko Viewer",
-      description: DEFAULT_DESCRIPTION,
+      description: pwaDescription,
       start_url: "/",
       scope: "/",
       display: "standalone",
       theme_color: themeColor,
       background_color: backgroundColor,
-      lang: "zh-CN",
+      lang: "en",
       icons: [
         {
           src: "/pwa-192x192.png",
@@ -150,6 +170,8 @@ export default defineNuxtConfig({
   nitro: {
     routeRules: {
       "/": { prerender: false },
+      "/ja": { prerender: false },
+      "/ja/**": { prerender: false },
       "/guide": { prerender: false },
       "/guide/**": { prerender: false },
       "/songs/**": { prerender: false },
@@ -169,7 +191,7 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: false,
-      routes: ["/grade", "/grade/2023", "/grade/2024", "/settings", "/about"]
+      routes: ["/grade", "/grade/2023", "/grade/2024", "/settings", "/about", "/ja", "/ja/settings", "/ja/about"]
     }
   },
   elementPlus: {

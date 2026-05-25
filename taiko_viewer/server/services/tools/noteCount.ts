@@ -1,13 +1,24 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { getContentRuntimePaths } from "~/server/services/content/runtime";
+import { normalizeViewerLocale } from "~/server/utils/locale";
+import { translateServerMessage } from "~/server/utils/server-messages";
 
-const COURSE_MAP: Record<string, string> = {
-  Edit: "里谱",
-  Oni: "魔王",
-  Hard: "困难",
-  Normal: "一般",
-  Easy: "简单"
+const COURSE_MAP: Record<string, Record<string, string>> = {
+  zh: {
+    Edit: "里谱",
+    Oni: "魔王",
+    Hard: "困难",
+    Normal: "一般",
+    Easy: "简单"
+  },
+  ja: {
+    Edit: "裏譜面",
+    Oni: "おに",
+    Hard: "むずかしい",
+    Normal: "ふつう",
+    Easy: "かんたん"
+  }
 };
 
 type NoteCountData = Record<string, Record<string, Record<string, number>>>;
@@ -31,9 +42,13 @@ export type NoteCountResult = {
   truncated: boolean;
 };
 
-export const queryNoteCount = async (count: number): Promise<NoteCountResult> => {
+export const queryNoteCount = async (count: number, locale = "zh"): Promise<NoteCountResult> => {
+  const normalizedLocale = normalizeViewerLocale(locale);
   if (!Number.isFinite(count) || count < 0) {
-    throw createError({ statusCode: 400, statusMessage: "物量必须为非负整数" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: translateServerMessage(normalizedLocale, "toolsApi.noteCount.invalidCount", undefined, "物量必须为非负整数")
+    });
   }
 
   const data = await loadNoteCountData();
@@ -42,7 +57,7 @@ export const queryNoteCount = async (count: number): Promise<NoteCountResult> =>
   for (const [title, courses] of Object.entries(data)) {
     for (const [courseLevel, counts] of Object.entries(courses)) {
       const courseKey = courseLevel.split("|")[0];
-      const course = COURSE_MAP[courseKey] || courseKey;
+      const course = COURSE_MAP[normalizedLocale]?.[courseKey] || COURSE_MAP.zh[courseKey] || courseKey;
       const value = counts.total;
       if (value === undefined || value === null) {
         continue;

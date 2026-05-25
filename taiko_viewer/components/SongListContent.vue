@@ -17,6 +17,8 @@ const props = withDefaults(
   }
 );
 
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 const query = ref("");
 const scrollContainer = ".app-content";
 const apiBase = "https://static.sakura-bot.cn";
@@ -41,6 +43,17 @@ const categoryColors: Record<string, string> = {
   游戏音乐: "rgb(155, 89, 182)",
   博歌乐音乐: "rgb(128, 128, 128)",
   动漫音乐: "rgb(255, 105, 180)"
+};
+
+const categoryLabelMap: Record<string, { zh: string; ja: string }> = {
+  南梦宫原创音乐: { zh: "南梦宫原创音乐", ja: "ナムコオリジナル" },
+  流行音乐: { zh: "流行音乐", ja: "ポップス" },
+  儿童音乐: { zh: "儿童音乐", ja: "キッズ" },
+  古典音乐: { zh: "古典音乐", ja: "クラシック" },
+  综合音乐: { zh: "综合音乐", ja: "バラエティ" },
+  游戏音乐: { zh: "游戏音乐", ja: "ゲームミュージック" },
+  博歌乐音乐: { zh: "博歌乐音乐", ja: "ボーカロイド" },
+  动漫音乐: { zh: "动漫音乐", ja: "アニメ" }
 };
 
 const difficultyDefs = [
@@ -69,6 +82,11 @@ const getLevels = (song: SongCatalogItem) =>
     .filter((item) => item.value !== undefined && item.value !== null && item.value !== "-");
 
 const getLevelCount = (song: SongCatalogItem) => Math.max(getLevels(song).length, 1);
+const getSongTitle = (song: SongCatalogItem) =>
+  locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
+const getSongSubtitle = (song: SongCatalogItem) =>
+  locale.value === "ja" ? song.song_name || "—" : song.song_name_jp || "—";
+const getCategoryLabel = (category: string) => categoryLabelMap[category]?.[locale.value === "ja" ? "ja" : "zh"] || category;
 
 const parseOpenDay = (input?: string) => {
   if (!input) return 0;
@@ -95,7 +113,8 @@ const filteredSongs = computed(() => {
       (song) =>
         song.song_name.toLowerCase().includes(keyword) ||
         song.song_name_jp?.toLowerCase().includes(keyword) ||
-        song.type.toLowerCase().includes(keyword)
+        song.type.toLowerCase().includes(keyword) ||
+        getCategoryLabel(song.type).toLowerCase().includes(keyword)
     )
   );
 });
@@ -123,7 +142,7 @@ const filteredSongs = computed(() => {
           </h3>
           <p>{{ props.desc }}</p>
         </div>
-        <el-input v-model="query" placeholder="搜索歌曲/分类" clearable class="search-input">
+        <el-input v-model="query" :placeholder="t('songs.searchPlaceholder')" clearable class="search-input">
           <template #prefix>
             <span class="input-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
@@ -146,8 +165,8 @@ const filteredSongs = computed(() => {
         </template>
         <template v-else-if="error">
           <div class="song-alert">
-            <el-alert title="歌曲列表加载失败，请稍后重试" type="error" show-icon :closable="false" />
-            <el-button type="primary" plain size="small" @click="reload">重试</el-button>
+            <el-alert :title="t('common.loadingFailed')" type="error" show-icon :closable="false" />
+            <el-button type="primary" plain size="small" @click="reload">{{ t("common.retry") }}</el-button>
           </div>
         </template>
         <template v-else>
@@ -155,7 +174,7 @@ const filteredSongs = computed(() => {
             v-for="song in filteredSongs"
             :key="song.id"
             class="song-card-link"
-            :to="`/songs/${song.id}`"
+            :to="localePath(`/songs/${song.id}`)"
           >
             <div class="song-card">
               <div class="song-cover">
@@ -170,11 +189,11 @@ const filteredSongs = computed(() => {
                 />
               </div>
               <div class="song-body">
-                <h4>{{ song.song_name }}</h4>
-                <p class="song-sub">{{ song.song_name_jp || "—" }}</p>
+                <h4>{{ getSongTitle(song) }}</h4>
+                <p class="song-sub">{{ getSongSubtitle(song) }}</p>
                 <div class="song-meta">
                   <span class="category-tag" :style="{ backgroundColor: categoryColors[song.type] || '#9a8b7b' }">
-                    {{ song.type }}
+                    {{ getCategoryLabel(song.type) }}
                   </span>
                   <span class="bpm-text">BPM {{ song.bpm || "-" }}</span>
                   <span class="song-id">#{{ song.id }}</span>

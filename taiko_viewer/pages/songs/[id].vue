@@ -5,6 +5,8 @@ import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverError = ref(false);
@@ -16,24 +18,84 @@ const drumAudioRefs = new Map<string, HTMLAudioElement>();
 
 const songId = computed(() => Number(route.params.id));
 
-const pageMeta = {
-  title: "歌曲详情",
-  desc: buildPageDescription("查看太鼓达人国行歌曲详情、试听音源与谱面预览。")
-};
-
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "songs.detail",
+  pageDescKey: "page.songs.detail.desc",
   navKey: "/songs/available",
   breadcrumbs: [
-    { label: "现有歌曲", to: "/songs/available" },
-    { label: "歌曲详情" }
+    { labelKey: "nav.songsAvailable", to: "/songs/available" },
+    { labelKey: "songs.detail" }
   ]
 });
 
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
+const getSongPrimaryTitle = (target: SongCatalogItem | null) =>
+  target ? (locale.value === "ja" && target.song_name_jp ? target.song_name_jp : target.song_name) : "";
+const getSongSecondaryTitle = (target: SongCatalogItem | null) =>
+  target ? (locale.value === "ja" ? target.song_name || "-" : target.song_name_jp || "-") : "-";
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        detailTitle: "楽曲詳細",
+        errorTitle: "楽曲が存在しないか、読み込みに失敗しました",
+        errorSubtitle: "楽曲一覧へ戻って再試行してください。",
+        backToList: "楽曲一覧へ戻る",
+        back: "← 一覧へ戻る",
+        releaseDate: "公開日",
+        subtitle: "サブタイトル",
+        jpName: "日本語名",
+        version: "実装バージョン",
+        artists: "作曲 / 歌唱",
+        radar: "六次元レーダー",
+        radarAria: "六次元レーダーチャート",
+        radarRange: "座標範囲",
+        radarLevel: "レベル",
+        radarEmpty: "この楽曲 ID に対応する六次元データはありません",
+        preview: "試聴",
+        drum: "DRUM · 純ドラム音声",
+        mix: "MIX · フルミックス音声",
+        pure: "PURE · インスト音声",
+        audioMissing: "音源が見つかりません",
+        baseAudioMissing: "基本音源が見つかりません",
+        pureAudioMissing: "インスト音源が見つかりません",
+        unmute: "ミュート解除",
+        mute: "ミュート",
+        charts: "譜面プレビュー",
+        maxNotes: "最大ノーツ",
+        openChart: "新しいタブで開く"
+      }
+    : {
+        detailTitle: "歌曲详情",
+        errorTitle: "歌曲不存在或加载失败",
+        errorSubtitle: "请返回歌曲列表后重试。",
+        backToList: "返回歌曲列表",
+        back: "← 返回列表",
+        releaseDate: "发布日期",
+        subtitle: "副标题",
+        jpName: "日文名",
+        version: "实装版本",
+        artists: "作曲/演唱",
+        radar: "六维雷达",
+        radarAria: "六维雷达图",
+        radarRange: "坐标范围",
+        radarLevel: "层级",
+        radarEmpty: "暂无该歌曲 ID 对应的六维数据",
+        preview: "试听",
+        drum: "DRUM · 纯鼓点音效试听",
+        mix: "MIX · 完整混音试听",
+        pure: "PURE · 纯音乐试听",
+        audioMissing: "音源不存在",
+        baseAudioMissing: "基础音源不存在",
+        pureAudioMissing: "纯音乐音源不存在",
+        unmute: "取消静音",
+        mute: "静音",
+        charts: "谱面预览",
+        maxNotes: "最大物量",
+        openChart: "打开新页面预览"
+      }
+);
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
@@ -47,12 +109,12 @@ const hasEditDifficulty = computed(() => {
 
 const trackDefs = computed(() => {
   const base = [
-    { key: "EASY", label: "简单" },
-    { key: "NORMAL", label: "一般" },
-    { key: "HARD", label: "困难" },
-    { key: "ONI", label: "魔王" }
+    { key: "EASY", label: t("songs.levels.easy") },
+    { key: "NORMAL", label: t("songs.levels.normal") },
+    { key: "HARD", label: t("songs.levels.hard") },
+    { key: "ONI", label: t("songs.levels.oni") }
   ];
-  return hasEditDifficulty.value ? [...base, { key: "EDIT", label: "里谱" }] : base;
+  return hasEditDifficulty.value ? [...base, { key: "EDIT", label: t("songs.levels.edit") }] : base;
 });
 
 const levelMap = computed(() => ({
@@ -129,12 +191,12 @@ const getMixVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("mi
 
 const fumenDefs = computed(() => {
   const base = [
-    { key: "easy", label: "简单", folder: "Kantan" },
-    { key: "normal", label: "一般", folder: "Futsuu" },
-    { key: "hard", label: "困难", folder: "Muzukashii" },
-    { key: "oni", label: "魔王", folder: "Oni" }
+    { key: "easy", label: t("songs.levels.easy"), folder: "Kantan" },
+    { key: "normal", label: t("songs.levels.normal"), folder: "Futsuu" },
+    { key: "hard", label: t("songs.levels.hard"), folder: "Muzukashii" },
+    { key: "oni", label: t("songs.levels.oni"), folder: "Oni" }
   ];
-  return hasEditDifficulty.value ? [...base, { key: "inner", label: "里谱", folder: "InnerOni" }] : base;
+  return hasEditDifficulty.value ? [...base, { key: "inner", label: t("songs.levels.edit"), folder: "InnerOni" }] : base;
 });
 
 const getFumenUrl = (folder: string) => `${apiBase}/fumen/${folder}/${songId.value}.png`;
@@ -169,7 +231,12 @@ const getAudioErrorKey = (mode: "drum" | "mix" | "pure", variant?: BranchVariant
     : `${mode}-base-${songId.value}-${selectedTrack.value}`;
 };
 
-const radarLabels = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
+const radarDataKeys = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
+const radarLabels = computed(() =>
+  locale.value === "ja"
+    ? ["複合処理", "平均密度", "瞬間密度", "叩き分け", "BPM変化", "HS変化"]
+    : ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"]
+);
 
 const trackLevelMap: Record<string, number> = {
   EASY: 1,
@@ -197,12 +264,12 @@ const selectedRating = computed(() => {
 
 const hasRadarData = computed(() => {
   if (!selectedRating.value) return false;
-  return radarLabels.some((label) => toNumber(selectedRating.value?.[label]) !== null);
+  return radarDataKeys.some((label) => toNumber(selectedRating.value?.[label]) !== null);
 });
 
 const radarValues = computed(() => {
-  if (!selectedRating.value) return radarLabels.map(() => 0);
-  return radarLabels.map((label) => toNumber(selectedRating.value?.[label]) ?? 0);
+  if (!selectedRating.value) return radarLabels.value.map(() => 0);
+  return radarDataKeys.map((label) => toNumber(selectedRating.value?.[label]) ?? 0);
 });
 
 const radarMax = computed(() => {
@@ -218,7 +285,7 @@ const radarAngleOffset = -Math.PI / 2;
 const radarLevels = [0.25, 0.5, 0.75, 1];
 
 const getRadarPoint = (ratio: number, index: number, extra = 0) => {
-  const angle = (Math.PI * 2 * index) / radarLabels.length + radarAngleOffset;
+  const angle = (Math.PI * 2 * index) / radarLabels.value.length + radarAngleOffset;
   const radius = radarRadius * ratio + extra;
   return {
     x: radarCenter + radius * Math.cos(angle),
@@ -228,7 +295,7 @@ const getRadarPoint = (ratio: number, index: number, extra = 0) => {
 
 const radarGridPolygons = computed(() =>
   radarLevels.map((level) =>
-    radarLabels
+    radarLabels.value
       .map((_, index) => {
         const point = getRadarPoint(level, index);
         return `${point.x},${point.y}`;
@@ -238,7 +305,7 @@ const radarGridPolygons = computed(() =>
 );
 
 const radarAxisLines = computed(() =>
-  radarLabels.map((_, index) => {
+  radarLabels.value.map((_, index) => {
     const start = getRadarPoint(0, index);
     const end = getRadarPoint(1, index);
     return {
@@ -251,7 +318,7 @@ const radarAxisLines = computed(() =>
 );
 
 const radarDataPoints = computed(() =>
-  radarLabels.map((_, index) => {
+  radarLabels.value.map((_, index) => {
     const value = radarValues.value[index];
     const ratio = Math.min(1, value / radarMax.value);
     const point = getRadarPoint(ratio, index);
@@ -266,7 +333,7 @@ const radarDataPoints = computed(() =>
 const radarDataPolygon = computed(() => radarDataPoints.value.map((point) => `${point.x},${point.y}`).join(" "));
 
 const radarLabelPoints = computed(() =>
-  radarLabels.map((label, index) => {
+  radarLabels.value.map((label, index) => {
     const point = getRadarPoint(1, index, 22);
     const deltaX = point.x - radarCenter;
     const anchor = deltaX > 10 ? "start" : deltaX < -10 ? "end" : "middle";
@@ -280,7 +347,7 @@ const radarLabelPoints = computed(() =>
 );
 
 const radarSummary = computed(() =>
-  radarLabels.map((label, index) => ({
+  radarLabels.value.map((label, index) => ({
     label,
     value: radarValues.value[index]
   }))
@@ -302,30 +369,39 @@ watch(hasEditDifficulty, (value) => {
 });
 
 const pageDescription = computed(() => {
-  if (!song.value) return pageMeta.desc;
+  if (!song.value) return buildPageDescription(t("page.songs.detail.desc"));
   const subtitle = song.value.subtitle?.trim();
   const detailParts = [song.value.type, song.value.bpm ? `BPM ${song.value.bpm}` : ""].filter(Boolean);
-  const detailText = detailParts.length ? detailParts.join("，") : "";
+  const detailText = detailParts.length ? detailParts.join(locale.value === "ja" ? "、" : "，") : "";
+  const songName = getSongPrimaryTitle(song.value);
   if (subtitle) {
-    return buildPageDescription(`${song.value.song_name} 太鼓达人国行歌曲详情：${subtitle}${detailText ? `，${detailText}` : ""}。`);
+    return buildPageDescription(
+      locale.value === "ja"
+        ? `${songName} の中国版太鼓の達人楽曲詳細です。${subtitle}${detailText ? `、${detailText}` : ""}。`
+        : `${songName} 太鼓达人国行歌曲详情：${subtitle}${detailText ? `，${detailText}` : ""}。`
+    );
   }
   return buildPageDescription(
-    detailText
-      ? `${song.value.song_name} 太鼓达人国行歌曲详情，${detailText}。`
-      : `${song.value.song_name} 太鼓达人国行歌曲详情。`
+    locale.value === "ja"
+      ? detailText
+        ? `${songName} の中国版太鼓の達人楽曲詳細です。${detailText}。`
+        : `${songName} の中国版太鼓の達人楽曲詳細です。`
+      : detailText
+        ? `${songName} 太鼓达人国行歌曲详情，${detailText}。`
+        : `${songName} 太鼓达人国行歌曲详情。`
   );
 });
 
 useViewerSeo(() => ({
-  title: song.value ? `${song.value.song_name} - 歌曲详情` : pageMeta.title,
+  title: song.value ? `${getSongPrimaryTitle(song.value)} - ${copy.value.detailTitle}` : copy.value.detailTitle,
   description: pageDescription.value,
   path: `/songs/${songId.value}`,
   image: coverUrl.value,
-  keywords: song.value ? [song.value.song_name, "太鼓达人歌曲", "国行歌曲"] : ["歌曲详情"],
+  keywords: song.value ? [getSongPrimaryTitle(song.value), locale.value === "ja" ? "太鼓の達人楽曲" : "太鼓达人歌曲"] : [copy.value.detailTitle],
   breadcrumbs: [
-    { name: "首页", path: "/" },
-    { name: "现有歌曲", path: "/songs/available" },
-    { name: song.value?.song_name || "歌曲详情", path: `/songs/${songId.value}` }
+    { name: t("nav.home"), path: "/" },
+    { name: t("nav.songsAvailable"), path: "/songs/available" },
+    { name: getSongPrimaryTitle(song.value) || copy.value.detailTitle, path: `/songs/${songId.value}` }
   ]
 }));
 </script>
@@ -337,10 +413,10 @@ useViewerSeo(() => ({
     </el-card>
 
     <el-card v-else-if="error || !song" class="panel-card">
-      <el-result icon="error" title="歌曲不存在或加载失败" sub-title="请返回歌曲列表后重试。">
+      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle">
         <template #extra>
-          <NuxtLink to="/songs/available">
-            <el-button type="primary">返回歌曲列表</el-button>
+          <NuxtLink :to="localePath('/songs/available')">
+            <el-button type="primary">{{ copy.backToList }}</el-button>
           </NuxtLink>
         </template>
       </el-result>
@@ -348,7 +424,7 @@ useViewerSeo(() => ({
 
     <el-card v-else class="panel-card detail-shell">
       <div class="back-row">
-        <NuxtLink class="back-link" to="/songs/available">← 返回列表</NuxtLink>
+        <NuxtLink class="back-link" :to="localePath('/songs/available')">{{ copy.back }}</NuxtLink>
       </div>
 
       <main class="detail-main">
@@ -356,12 +432,12 @@ useViewerSeo(() => ({
           <div class="cover-wrap">
             <el-image :src="coverUrl" fit="cover" class="cover-image" @error="coverError = true" />
           </div>
-          <h2>{{ song.song_name }}</h2>
-          <p class="jp-name">{{ song.song_name_jp || "-" }}</p>
+          <h2>{{ getSongPrimaryTitle(song) }}</h2>
+          <p class="jp-name">{{ getSongSecondaryTitle(song) }}</p>
 
           <div class="meta-list">
             <div class="meta-row">
-              <span>发布日期</span>
+              <span>{{ copy.releaseDate }}</span>
               <strong>{{ song.open_day || "-" }}</strong>
             </div>
             <div class="meta-row">
@@ -369,11 +445,11 @@ useViewerSeo(() => ({
               <strong>#{{ song.id }}</strong>
             </div>
             <div class="meta-row">
-              <span>副标题</span>
+              <span>{{ copy.subtitle }}</span>
               <strong>{{ song.subtitle || "-" }}</strong>
             </div>
             <div class="meta-row">
-              <span>日文名</span>
+              <span>{{ copy.jpName }}</span>
               <strong>{{ song.song_name_jp || "-" }}</strong>
             </div>
             <div class="meta-row">
@@ -381,11 +457,11 @@ useViewerSeo(() => ({
               <strong>{{ song.bpm || "-" }}</strong>
             </div>
             <div class="meta-row">
-              <span>实装版本</span>
+              <span>{{ copy.version }}</span>
               <strong>{{ formatList(song.version) }}</strong>
             </div>
             <div class="meta-row">
-              <span>作曲/演唱</span>
+              <span>{{ copy.artists }}</span>
               <strong>{{ formatList(song.artists) }}</strong>
             </div>
           </div>
@@ -405,10 +481,10 @@ useViewerSeo(() => ({
                   />
                 </svg>
               </span>
-              <span>六维雷达</span>
+              <span>{{ copy.radar }}</span>
             </div>
             <template v-if="hasRadarData">
-              <svg class="radar-chart" viewBox="0 0 260 260" role="img" aria-label="六维雷达图">
+              <svg class="radar-chart" viewBox="0 0 260 260" role="img" :aria-label="copy.radarAria">
                 <polygon
                   v-for="(polygon, index) in radarGridPolygons"
                   :key="`grid-${index}`"
@@ -445,8 +521,8 @@ useViewerSeo(() => ({
                 </text>
               </svg>
               <div class="radar-meta">
-                <span>坐标范围：0 - {{ radarMax }}</span>
-                <span v-if="selectedRating?.level">层级：{{ selectedRating.level }}</span>
+                <span>{{ copy.radarRange }}: 0 - {{ radarMax }}</span>
+                <span v-if="selectedRating?.level">{{ copy.radarLevel }}: {{ selectedRating.level }}</span>
               </div>
               <ul class="radar-values">
                 <li v-for="item in radarSummary" :key="item.label">
@@ -456,8 +532,8 @@ useViewerSeo(() => ({
               </ul>
             </template>
             <div v-else class="radar-empty">
-              <img src="/radar-empty.svg" alt="暂无六维数据" class="radar-empty-image" />
-              <p>暂无该歌曲 ID 对应的六维数据</p>
+              <img src="/radar-empty.svg" :alt="copy.radarEmpty" class="radar-empty-image" />
+              <p>{{ copy.radarEmpty }}</p>
             </div>
           </div>
         </section>
@@ -476,7 +552,7 @@ useViewerSeo(() => ({
                   />
                 </svg>
               </span>
-              <span>试听</span>
+              <span>{{ copy.preview }}</span>
             </div>
             <div class="track-tabs">
               <button
@@ -497,7 +573,7 @@ useViewerSeo(() => ({
             <div class="audio-grid">
               <div class="audio-block">
                 <div class="audio-head">
-                  <strong>DRUM · 纯鼓点音效试听</strong>
+                  <strong>{{ copy.drum }}</strong>
                 </div>
                 <template v-if="hasBranchVariants">
                   <div class="variant-audios">
@@ -513,7 +589,7 @@ useViewerSeo(() => ({
                         @loadedmetadata="syncDrumState"
                         @error="markAudioError(getAudioErrorKey('drum', variant))"
                       />
-                      <p v-if="hasAudioError(getAudioErrorKey('drum', variant))" class="audio-error">音源不存在</p>
+                      <p v-if="hasAudioError(getAudioErrorKey('drum', variant))" class="audio-error">{{ copy.audioMissing }}</p>
                     </div>
                   </div>
                 </template>
@@ -528,11 +604,11 @@ useViewerSeo(() => ({
                     @loadedmetadata="syncDrumState"
                     @error="markAudioError(getAudioErrorKey('drum'))"
                   />
-                  <p v-if="hasAudioError(getAudioErrorKey('drum'))" class="audio-error">基础音源不存在</p>
+                  <p v-if="hasAudioError(getAudioErrorKey('drum'))" class="audio-error">{{ copy.baseAudioMissing }}</p>
                 </template>
                 <div class="volume-row">
                   <button class="volume-btn" type="button" @click="drumMuted = !drumMuted">
-                    {{ drumMuted ? "取消静音" : "静音" }}
+                    {{ drumMuted ? copy.unmute : copy.mute }}
                   </button>
                   <input v-model.number="drumVolume" class="volume-slider" type="range" min="0" max="1" step="0.01" />
                   <span>{{ Math.round(drumVolume * 100) }}%</span>
@@ -541,7 +617,7 @@ useViewerSeo(() => ({
 
               <div class="audio-block">
                 <div class="audio-head">
-                  <strong>MIX · 完整混音试听</strong>
+                  <strong>{{ copy.mix }}</strong>
                 </div>
                 <template v-if="hasBranchVariants">
                   <div class="variant-audios">
@@ -555,7 +631,7 @@ useViewerSeo(() => ({
                         preload="none"
                         @error="markAudioError(getAudioErrorKey('mix', variant))"
                       />
-                      <p v-if="hasAudioError(getAudioErrorKey('mix', variant))" class="audio-error">音源不存在</p>
+                      <p v-if="hasAudioError(getAudioErrorKey('mix', variant))" class="audio-error">{{ copy.audioMissing }}</p>
                     </div>
                   </div>
                 </template>
@@ -568,13 +644,13 @@ useViewerSeo(() => ({
                     preload="none"
                     @error="markAudioError(getAudioErrorKey('mix'))"
                   />
-                  <p v-if="hasAudioError(getAudioErrorKey('mix'))" class="audio-error">基础音源不存在</p>
+                  <p v-if="hasAudioError(getAudioErrorKey('mix'))" class="audio-error">{{ copy.baseAudioMissing }}</p>
                 </template>
               </div>
 
               <div class="audio-block">
                 <div class="audio-head">
-                  <strong>PURE · 纯音乐试听</strong>
+                  <strong>{{ copy.pure }}</strong>
                 </div>
                 <audio
                   :key="`pure-base-${songId}`"
@@ -584,7 +660,7 @@ useViewerSeo(() => ({
                   preload="none"
                   @error="markAudioError(getAudioErrorKey('pure'))"
                 />
-                <p v-if="hasAudioError(getAudioErrorKey('pure'))" class="audio-error">纯音乐音源不存在</p>
+                <p v-if="hasAudioError(getAudioErrorKey('pure'))" class="audio-error">{{ copy.pureAudioMissing }}</p>
               </div>
             </div>
           </div>
@@ -601,7 +677,7 @@ useViewerSeo(() => ({
                   />
                 </svg>
               </span>
-              <span>谱面预览</span>
+              <span>{{ copy.charts }}</span>
             </div>
             <div class="fumen-grid">
               <div
@@ -611,14 +687,14 @@ useViewerSeo(() => ({
               >
                 <span class="fumen-label">{{ item.label }}</span>
                 <span class="fumen-star">{{ getFumenStarLabel(item.key) }}</span>
-                <span class="fumen-combo">最大物量 {{ getFumenComboLabel(item.key) }}</span>
+                <span class="fumen-combo">{{ copy.maxNotes }} {{ getFumenComboLabel(item.key) }}</span>
                 <a
                   class="fumen-link-btn"
                   :href="getFumenUrl(item.folder)"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  打开新页面预览
+                  {{ copy.openChart }}
                 </a>
               </div>
             </div>

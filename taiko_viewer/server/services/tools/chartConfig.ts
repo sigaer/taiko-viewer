@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { getContentRuntimePaths } from "~/server/services/content/runtime";
+import { normalizeViewerLocale } from "~/server/utils/locale";
+import { translateServerMessage } from "~/server/utils/server-messages";
 
 const BPM_RE = /^\d+(?:-\d+)?$/;
 const PATTERN_RE = /^[ox]+$/i;
@@ -12,12 +14,21 @@ const LEVEL_MAP: Record<string, string> = {
   梅: "asy"
 };
 
-const LETTER_MAP: Record<string, string> = {
-  Edit: "里谱",
-  Oni: "魔王",
-  Hard: "困难",
-  Normal: "一般",
-  Easy: "简单"
+const LETTER_MAP: Record<string, Record<string, string>> = {
+  zh: {
+    Edit: "里谱",
+    Oni: "魔王",
+    Hard: "困难",
+    Normal: "一般",
+    Easy: "简单"
+  },
+  ja: {
+    Edit: "裏譜面",
+    Oni: "おに",
+    Hard: "むずかしい",
+    Normal: "ふつう",
+    Easy: "かんたん"
+  }
 };
 
 type ParsedQuery =
@@ -174,19 +185,24 @@ const sampleItems = <T>(items: T[], limit = 10) => {
   return copy.slice(0, limit);
 };
 
-const formatItems = (ids: string[], songMeta: PatternData["song_meta"]) =>
+const formatItems = (ids: string[], songMeta: PatternData["song_meta"], locale: string) =>
   ids.map((songId) => {
     const [title, course] = songId.split("||", 2);
-    return `${resolveSongName(songMeta, title)} ${LETTER_MAP[course] || course}`;
+    return `${resolveSongName(songMeta, title)} ${LETTER_MAP[locale]?.[course] || LETTER_MAP.zh[course] || course}`;
   });
 
-export const queryChartConfig = async (queryText: string): Promise<ChartConfigResult> => {
+export const queryChartConfig = async (queryText: string, locale = "zh"): Promise<ChartConfigResult> => {
+  const normalizedLocale = normalizeViewerLocale(locale);
   const parsed = parseChartConfigQuery(queryText.trim());
   if (!parsed) {
     throw createError({
       statusCode: 400,
-      statusMessage:
+      statusMessage: translateServerMessage(
+        normalizedLocale,
+        "toolsApi.chartConfig.invalidFormat",
+        undefined,
         "格式不正确，应为：查配置 [分音符] 配置 [BPM] [难度]；省略分音符时默认按16分，也可仅输入 BPM 或 BPM+难度。"
+      )
     });
   }
 
@@ -199,13 +215,18 @@ export const queryChartConfig = async (queryText: string): Promise<ChartConfigRe
   if (parsed.mode === "bpm_only") {
     const bpmIds = collectBpmIds(byBpm, bpmRange);
     if (!bpmIds.size) {
-      return { lines: ["未找到满足该 BPM 条件的歌曲。"] };
+      return {
+        lines: [translateServerMessage(normalizedLocale, "toolsApi.chartConfig.noBpmMatch", undefined, "未找到满足该 BPM 条件的歌曲。")]
+      };
     }
     const songNames = [...new Set([...bpmIds].map((id) => resolveSongName(songMeta, id.split("||", 1)[0])))].sort();
     const songShow = sampleItems(songNames, 10);
-    const lines = ["为您找到以下歌曲：", `【BPM匹配】${songNames.length} 首`];
+    const lines = [
+      translateServerMessage(normalizedLocale, "toolsApi.chartConfig.songMatches", undefined, "为您找到以下歌曲："),
+      translateServerMessage(normalizedLocale, "toolsApi.chartConfig.bpmMatchCount", { count: songNames.length }, `【BPM匹配】${songNames.length} 首`)
+    ];
     if (songNames.length > 10) {
-      lines.push("（随机返回10条）");
+      lines.push(translateServerMessage(normalizedLocale, "toolsApi.chartConfig.randomTen", undefined, "（随机返回10条）"));
     }
     lines.push(...songShow);
     return { lines };
@@ -214,14 +235,31 @@ export const queryChartConfig = async (queryText: string): Promise<ChartConfigRe
   if (parsed.mode === "bpm_level_only") {
     const matchedIds = [...collectBpmIds(byBpm, bpmRange)].filter((id) => collectLevelIds(byLevel, parsed.level).has(id));
     if (!matchedIds.length) {
-      return { lines: ["未找到满足该 BPM 和难度条件的谱面。"] };
+      return {
+        lines: [
+          translateServerMessage(
+            normalizedLocale,
+            "toolsApi.chartConfig.noBpmLevelMatch",
+            undefined,
+            "未找到满足该 BPM 和难度条件的谱面。"
+          )
+        ]
+      };
     }
     const matchShow = sampleItems(matchedIds, 10);
-    const lines = ["为您找到以下谱面：", `【BPM+难度匹配】${matchedIds.length} 条`];
+    const lines = [
+      translateServerMessage(normalizedLocale, "toolsApi.chartConfig.chartMatches", undefined, "为您找到以下谱面："),
+      translateServerMessage(
+        normalizedLocale,
+        "toolsApi.chartConfig.bpmLevelMatchCount",
+        { count: matchedIds.length },
+        `【BPM+难度匹配】${matchedIds.length} 条`
+      )
+    ];
     if (matchedIds.length > 10) {
-      lines.push("（随机返回10条）");
+      lines.push(translateServerMessage(normalizedLocale, "toolsApi.chartConfig.randomTen", undefined, "（随机返回10条）"));
     }
-    lines.push(...formatItems(matchShow, songMeta));
+    lines.push(...formatItems(matchShow, songMeta, normalizedLocale));
     return { lines };
   }
 
@@ -249,7 +287,7 @@ export const queryChartConfig = async (queryText: string): Promise<ChartConfigRe
   }
 
   if (!exactSet.size && !substrSet.size) {
-    return { lines: ["未找到匹配的谱面"] };
+    return { lines: [translateServerMessage(normalizedLocale, "toolsApi.chartConfig.noPatternMatch", undefined, "未找到匹配的谱面")] };
   }
 
   const applyFilters = (songIds: Set<string>) => {
@@ -268,23 +306,29 @@ export const queryChartConfig = async (queryText: string): Promise<ChartConfigRe
   const exactRes = applyFilters(exactSet);
   const substrRes = applyFilters(substrSet);
   if (!exactRes.length && !substrRes.length) {
-    return { lines: ["未找到满足该条件的谱面。"] };
+    return {
+      lines: [translateServerMessage(normalizedLocale, "toolsApi.chartConfig.noFilteredMatch", undefined, "未找到满足该条件的谱面。")]
+    };
   }
 
-  const lines = ["为您找到以下谱面："];
+  const lines = [translateServerMessage(normalizedLocale, "toolsApi.chartConfig.chartMatches", undefined, "为您找到以下谱面：")];
   if (exactRes.length) {
-    lines.push(`\n【精确匹配】${exactRes.length} 条`);
+    lines.push(
+      translateServerMessage(normalizedLocale, "toolsApi.chartConfig.exactMatchCount", { count: exactRes.length }, `【精确匹配】${exactRes.length} 条`)
+    );
     if (exactRes.length > 10) {
-      lines.push("（随机返回10条）");
+      lines.push(translateServerMessage(normalizedLocale, "toolsApi.chartConfig.randomTen", undefined, "（随机返回10条）"));
     }
-    lines.push(...formatItems(sampleItems(exactRes, 10), songMeta));
+    lines.push(...formatItems(sampleItems(exactRes, 10), songMeta, normalizedLocale));
   }
   if (parsed.patternName.length >= 6 && substrRes.length) {
-    lines.push(`\n【子串匹配】${substrRes.length} 条`);
+    lines.push(
+      translateServerMessage(normalizedLocale, "toolsApi.chartConfig.containsMatchCount", { count: substrRes.length }, `【子串匹配】${substrRes.length} 条`)
+    );
     if (substrRes.length > 10) {
-      lines.push("（随机返回10条）");
+      lines.push(translateServerMessage(normalizedLocale, "toolsApi.chartConfig.randomTen", undefined, "（随机返回10条）"));
     }
-    lines.push(...formatItems(sampleItems(substrRes, 10), songMeta));
+    lines.push(...formatItems(sampleItems(substrRes, 10), songMeta, normalizedLocale));
   }
   return { lines };
 };

@@ -40,6 +40,8 @@ const emit = defineEmits<{
   saved: [];
 }>();
 
+const { t, locale } = useI18n();
+const apiFetch = useViewerApiFetch();
 const DEFAULT_LEVEL_OPTIONS = [
   { value: 1, label: "简单" },
   { value: 2, label: "一般" },
@@ -81,10 +83,38 @@ const selectedCatalogSong = computed(() =>
   props.songCatalog.find((item) => Number(item.id) === Number(form.catalogSongNo)) || null
 );
 
-const dialogTitle = computed(() => (isCreateMode.value ? "新增谱面记录" : "编辑谱面记录"));
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        createTitle: "譜面記録を追加",
+        editTitle: "譜面記録を編集",
+        removed: "削除済み",
+        available: "現行曲",
+        invalidSongId: "有効な楽曲 ID を入力してください",
+        needTitle: "未収録曲は曲名を 1 つ以上入力してください",
+        chooseSong: "先に収録曲から 1 曲選択してください",
+        createSuccess: "譜面記録を追加し、既定でロックしました",
+        updateSuccess: "譜面記録を保存しました",
+        saveFailed: "保存に失敗しました"
+      }
+    : {
+        createTitle: "新增谱面记录",
+        editTitle: "编辑谱面记录",
+        removed: "已下架",
+        available: "现有",
+        invalidSongId: "请填写有效的歌曲 ID",
+        needTitle: "未收录曲目至少要填写一个曲名",
+        chooseSong: "请先从目录中选择一首歌",
+        createSuccess: "谱面记录已新增并默认锁定",
+        updateSuccess: "谱面记录已保存",
+        saveFailed: "保存失败"
+      }
+);
+
+const dialogTitle = computed(() => (isCreateMode.value ? copy.value.createTitle : copy.value.editTitle));
 
 const buildCatalogLabel = (song: SongCatalogItem) => {
-  const status = Number(song.shelf_status || 0) === 1 ? "已下架" : "现有";
+  const status = Number(song.shelf_status || 0) === 1 ? copy.value.removed : copy.value.available;
   const jp = song.song_name_jp ? ` / ${song.song_name_jp}` : "";
   return `${song.song_name}${jp} · ID ${song.id} · ${status}`;
 };
@@ -249,30 +279,30 @@ const submit = async () => {
   if (isCreateMode.value) {
     if (isCustomMode.value) {
       if (!Number.isInteger(form.songNo) || form.songNo <= 0) {
-        ElMessage.error("请填写有效的歌曲 ID");
+        ElMessage.error(copy.value.invalidSongId);
         return;
       }
       if (!form.title.trim()) {
-        ElMessage.error("未收录曲目至少要填写一个曲名");
+        ElMessage.error(copy.value.needTitle);
         return;
       }
     } else if (!selectedCatalogSong.value) {
-      ElMessage.error("请先从目录中选择一首歌");
+      ElMessage.error(copy.value.chooseSong);
       return;
     }
   }
 
   saving.value = true;
   try {
-    await $fetch(isCreateMode.value ? "/api/account/songs/create" : "/api/account/songs/update", {
+    await apiFetch(isCreateMode.value ? "/api/account/songs/create" : "/api/account/songs/update", {
       method: "POST",
       body: buildRequestBody()
     });
-    ElMessage.success(isCreateMode.value ? "谱面记录已新增并默认锁定" : "谱面记录已保存");
+    ElMessage.success(isCreateMode.value ? copy.value.createSuccess : copy.value.updateSuccess);
     visible.value = false;
     emit("saved");
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "保存失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.saveFailed);
   } finally {
     saving.value = false;
   }

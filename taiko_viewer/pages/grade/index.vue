@@ -1,6 +1,7 @@
 <script setup lang="ts">
-definePageMeta({
-  redirect: "/grade/2025"
+const localePath = useLocalePath();
+await navigateTo(localePath("/grade/2025"), {
+  redirectCode: 302
 });
 </script>
 

@@ -8,7 +8,7 @@ const createDefaultPayload = (): SongCatalogPayload => ({
 export const useSongCatalog = (shelfStatus?: MaybeRefOrGetter<number | undefined>) =>
   useClientContentState<SongCatalogPayload>(
     () =>
-      $fetch<SongCatalogPayload>("/api/content/songs", {
+      useViewerApiFetch()<SongCatalogPayload>("/api/content/songs", {
         query: {
           shelfStatus: toValue(shelfStatus)
         }

@@ -1,6 +1,26 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
+const { locale } = useI18n();
+const localePath = useLocalePath();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
+
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "この機能を使うにはログインとドンダーひろば ID 連携が必要です",
+        desc: "先に Web でログインし、プロフィールでドンダーひろば ID を連携したうえで、「多端同步」から成績データを同期してください。",
+        login: "ログインへ",
+        register: "新規登録"
+      }
+    : {
+        title: "此功能需要登录并绑定鼓众 ID",
+        desc: "请先在网页端登录账号，并在个人档案中绑定鼓众广场 ID，再通过「多端同步」拉取成绩数据。",
+        login: "去登录",
+        register: "注册账号"
+      }
+);
 </script>
 
 <template>
@@ -9,16 +29,16 @@ await fetchCurrentUser();
     type="warning"
     :closable="false"
     show-icon
-    title="此功能需要登录并绑定鼓众 ID"
+    :title="copy.title"
     class="tool-gate-alert"
   >
-    <p>请先在网页端登录账号，并在个人档案中绑定鼓众广场 ID，再通过「多端同步」拉取成绩数据。</p>
+    <p>{{ copy.desc }}</p>
     <div class="tool-gate-actions">
-      <NuxtLink to="/account/login">
-        <el-button type="primary">去登录</el-button>
+      <NuxtLink :to="localePath('/account/login')">
+        <el-button type="primary">{{ copy.login }}</el-button>
       </NuxtLink>
-      <NuxtLink to="/account/register">
-        <el-button>注册账号</el-button>
+      <NuxtLink :to="localePath('/account/register')">
+        <el-button>{{ copy.register }}</el-button>
       </NuxtLink>
     </div>
   </el-alert>

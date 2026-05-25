@@ -12,7 +12,9 @@ type ThreadListPayload = {
 
 const route = useRoute();
 const router = useRouter();
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
+const { t } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 
 const filterState = reactive({
   keyword: String(route.query.keyword || ""),
@@ -21,24 +23,19 @@ const filterState = reactive({
   page: Number(route.query.page || 1)
 });
 
-const pageMeta = {
-  title: "论坛版块",
-  desc: buildPageDescription("按版块浏览太鼓达人论坛主题与最新讨论。")
-};
-
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "page.forum.section.title",
+  pageDescKey: "page.forum.section.desc",
   navKey: "/forum",
   breadcrumbs: [
-    { label: "论坛社区", to: "/forum" },
-    { label: "版块" }
+    { labelKey: "forum.title", to: "/forum" },
+    { labelKey: "page.forum.section.title" }
   ]
 });
 
 const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
   "forum-sections",
-  () => $fetch("/api/forum/sections", { headers }),
+  () => apiFetch("/api/forum/sections"),
   {
     default: () => ({ items: [] })
   }
@@ -48,11 +45,18 @@ const currentSection = computed(
   () => sectionsData.value?.items.find((item) => item.slug === String(route.params.slug || "")) || null
 );
 
+const localizedSectionName = computed(() =>
+  currentSection.value ? t(`forum.sections.${currentSection.value.slug}.name`, currentSection.value.name) : ""
+);
+const localizedSectionDescription = computed(() =>
+  currentSection.value ? t(`forum.sections.${currentSection.value.slug}.description`, currentSection.value.description) : ""
+);
+
 useViewerSeo(() => ({
-  title: currentSection.value?.name || `${pageMeta.title} - ${String(route.params.slug || "")}`,
-  description: buildPageDescription(currentSection.value?.description || pageMeta.desc),
+  title: localizedSectionName.value || `${t("page.forum.section.title")} - ${String(route.params.slug || "")}`,
+  description: buildPageDescription(localizedSectionDescription.value || t("page.forum.section.desc")),
   path: `/forum/section/${route.params.slug}`,
-  keywords: ["论坛版块", currentSection.value?.name || ""].filter(Boolean)
+  keywords: [t("page.forum.section.title"), localizedSectionName.value || ""].filter(Boolean)
 }));
 
 const requestQuery = computed(() => ({
@@ -67,8 +71,7 @@ const requestQuery = computed(() => ({
 const { data, pending, refresh } = await useAsyncData<ThreadListPayload>(
   () => `forum-section-${route.params.slug}-${JSON.stringify(requestQuery.value)}`,
   () =>
-    $fetch("/api/forum/threads", {
-      headers,
+    apiFetch("/api/forum/threads", {
       query: requestQuery.value
     }),
   {
@@ -85,19 +88,19 @@ const { data, pending, refresh } = await useAsyncData<ThreadListPayload>(
 
 const section = computed(() => sectionsData.value.items.find((item) => item.slug === route.params.slug));
 
-const sortOptions = [
-  { label: "最新", value: "latest" },
-  { label: "热帖", value: "hot" },
-  { label: "精选", value: "featured" }
-];
+const sortOptions = computed(() => [
+  { label: t("page.forum.section.sortLatest"), value: "latest" },
+  { label: t("page.forum.section.sortHot"), value: "hot" },
+  { label: t("page.forum.section.sortFeatured"), value: "featured" }
+]);
 
-const typeOptions: Array<{ label: string; value: "" | ForumThreadType }> = [
-  { label: "全部类型", value: "" },
-  { label: "讨论", value: "discussion" },
-  { label: "攻略", value: "guide" },
-  { label: "战报", value: "achievement" },
-  { label: "公告", value: "official" }
-];
+const typeOptions = computed<Array<{ label: string; value: "" | ForumThreadType }>>(() => [
+  { label: t("page.forum.section.allTypes"), value: "" },
+  { label: t("forum.types.discussion"), value: "discussion" },
+  { label: t("forum.types.guide"), value: "guide" },
+  { label: t("forum.types.achievement"), value: "achievement" },
+  { label: t("forum.types.official"), value: "official" }
+]);
 
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value?.total || 0) / (data.value?.pageSize || 12))));
 
@@ -130,26 +133,26 @@ watch(
     <section class="panel-card section-hero" :style="{ '--section-accent': section?.accentColor || '#d84a34' }">
       <div>
         <span class="section-hero__eyebrow">Forum Section</span>
-        <h2>{{ section?.name || "论坛版块" }}</h2>
-        <p>{{ section?.description || "按条件筛选帖子，快速找到你要看的攻略、讨论或战报。" }}</p>
+        <h2>{{ localizedSectionName || t("page.forum.section.title") }}</h2>
+        <p>{{ localizedSectionDescription || t("page.forum.section.heroDesc") }}</p>
       </div>
       <div class="section-hero__stats">
         <div>
           <strong>{{ section?.threadCount || 0 }}</strong>
-          <span>主题</span>
+          <span>{{ t("page.forum.section.threads") }}</span>
         </div>
         <div>
           <strong>{{ section?.postCount || 0 }}</strong>
-          <span>回复</span>
+          <span>{{ t("forum.stats.reply") }}</span>
         </div>
-        <NuxtLink to="/forum/new">写新帖</NuxtLink>
+        <NuxtLink :to="localePath('/forum/new')">{{ t("forum.writeThread") }}</NuxtLink>
       </div>
     </section>
 
     <section class="panel-card filter-panel">
       <el-input
         v-model="filterState.keyword"
-        placeholder="搜索标题关键词"
+        :placeholder="t('page.forum.section.keywordPlaceholder')"
         clearable
         class="filter-panel__keyword"
         @keyup.enter="pushFilters()"
@@ -160,21 +163,21 @@ watch(
       <el-select v-model="filterState.threadType" class="filter-panel__select" @change="pushFilters()">
         <el-option v-for="option in typeOptions" :key="option.value || 'all'" :label="option.label" :value="option.value" />
       </el-select>
-      <el-button type="primary" @click="pushFilters()">应用筛选</el-button>
+      <el-button type="primary" @click="pushFilters()">{{ t("page.forum.section.applyFilters") }}</el-button>
     </section>
 
     <section class="thread-list-panel">
-      <el-empty v-if="!pending && !data?.items.length" description="当前筛选下还没有帖子" />
+      <el-empty v-if="!pending && !data?.items.length" :description="t('page.forum.section.empty')" />
       <div v-else class="thread-list">
         <ForumThreadCard v-for="thread in data?.items" :key="thread.id" :thread="thread" />
       </div>
     </section>
 
     <section class="panel-card pager-panel">
-      <div>第 {{ data?.page || 1 }} / {{ totalPages }} 页，共 {{ data?.total || 0 }} 条主题</div>
+      <div>{{ t("page.forum.section.pagination", { page: data?.page || 1, totalPages, total: data?.total || 0 }) }}</div>
       <div class="pager-panel__actions">
-        <el-button :disabled="filterState.page <= 1" @click="pushFilters(filterState.page - 1)">上一页</el-button>
-        <el-button :disabled="filterState.page >= totalPages" @click="pushFilters(filterState.page + 1)">下一页</el-button>
+        <el-button :disabled="filterState.page <= 1" @click="pushFilters(filterState.page - 1)">{{ t("page.forum.section.prevPage") }}</el-button>
+        <el-button :disabled="filterState.page >= totalPages" @click="pushFilters(filterState.page + 1)">{{ t("page.forum.section.nextPage") }}</el-button>
       </div>
     </section>
   </div>

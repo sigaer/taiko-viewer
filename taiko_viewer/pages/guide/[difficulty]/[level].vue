@@ -14,27 +14,29 @@ type TreeRow = {
 };
 
 const route = useRoute();
+const { t } = useI18n();
+const localePath = useLocalePath();
 const difficulty = computed(() => Number(route.params.difficulty || 0));
 const level = computed(() => Number(route.params.level || 0));
 const fallbackDifficulty = computed(() => getGuideDifficultyOption(difficulty.value));
-const fallbackDifficultyLabel = computed(() => fallbackDifficulty.value?.label || "未知难度");
+const fallbackDifficultyLabel = computed(
+  () => (fallbackDifficulty.value ? t(`difficulty.${fallbackDifficulty.value.value}`) : t("difficulty.unknown"))
+);
 
 const pageMeta = computed(() => ({
-  title: fallbackDifficulty.value ? `${fallbackDifficultyLabel.value} ${level.value}星攻略` : "谱面攻略",
+  title: fallbackDifficulty.value ? `${fallbackDifficultyLabel.value} ${level.value}${t("guide.starSuffix", "星")}攻略` : t("guide.title"),
   desc: fallbackDifficulty.value
-    ? buildPageDescription(
-        `查看太鼓达人国行 ${fallbackDifficultyLabel.value} ${level.value} 星谱面攻略与分类统计。`
-      )
-    : buildPageDescription("按难度与星级查看太鼓达人国行谱面攻略。")
+    ? buildPageDescription(t("page.guide.detail.descWithLevel", { difficulty: fallbackDifficultyLabel.value, level: level.value }))
+    : buildPageDescription(t("page.guide.detail.desc"))
 }));
 
 definePageMeta({
-  pageTitle: "谱面攻略",
-  pageDesc: "按难度与星级查看谱面攻略。",
+  pageTitleKey: "guide.title",
+  pageDescKey: "guide.summary",
   navKey: "/guide",
   breadcrumbs: [
-    { label: "谱面攻略", to: "/guide" },
-    { label: "攻略详情" }
+    { labelKey: "guide.title", to: "/guide" },
+    { labelKey: "guide.detail" }
   ]
 });
 
@@ -44,6 +46,16 @@ const difficultyLabel = computed(
   () => guideContent.value.difficultyLabel || fallbackDifficultyLabel.value
 );
 const summaryRows = computed(() => [guideContent.value.summary]);
+const summaryColumns = computed(() => [
+  t("guide.summaryColumns.overPlus"),
+  t("guide.summaryColumns.over"),
+  t("guide.summaryColumns.strong"),
+  t("guide.summaryColumns.middle"),
+  t("guide.summaryColumns.weak"),
+  t("guide.summaryColumns.under"),
+  t("guide.summaryColumns.underMinus"),
+  t("guide.summaryColumns.total")
+]);
 const tableKey = computed(() => `${difficulty.value}-${level.value}`);
 const tagRows = computed<TreeRow[]>(() =>
   guideContent.value.tags.map((item) => ({
@@ -97,11 +109,11 @@ const loadChildren = async (
     detailCache[row.id] = payload;
     resolve(payload.items);
     if (!payload.items.length) {
-      ElMessage.warning("暂无谱面数据");
+      ElMessage.warning(t("guide.empty"));
     }
   } catch {
     resolve([]);
-    ElMessage.error("获取谱面失败，请稍后重试");
+    ElMessage.error(t("guide.loadFailed"));
   } finally {
     loadingTagId.value = 0;
   }
@@ -111,11 +123,11 @@ useViewerSeo(() => ({
   title: pageMeta.value.title,
   description: pageMeta.value.desc,
   path: `/guide/${difficulty.value}/${level.value}`,
-  keywords: [difficultyLabel.value, "谱面攻略", `${level.value}星`],
+  keywords: [difficultyLabel.value, t("guide.title"), `${level.value}${t("guide.starSuffix", "星")}`],
   breadcrumbs: [
-    { name: "首页", path: "/" },
-    { name: "谱面攻略", path: "/guide" },
-    { name: `${difficultyLabel.value} ${level.value}星`, path: `/guide/${difficulty.value}/${level.value}` }
+    { name: t("nav.home"), path: "/" },
+    { name: t("guide.title"), path: "/guide" },
+    { name: `${difficultyLabel.value} ${level.value}${t("guide.starSuffix", "星")}`, path: `/guide/${difficulty.value}/${level.value}` }
   ]
 }));
 </script>
@@ -127,10 +139,10 @@ useViewerSeo(() => ({
     </el-card>
 
     <el-card v-else-if="error" class="panel-card">
-      <el-result icon="error" title="攻略页面加载失败" sub-title="请稍后重试或返回攻略入口。">
+      <el-result :icon="'error'" :title="t('guide.pageLoadFailed')" :sub-title="t('page.guide.detail.loadFailedSubtitle')">
         <template #extra>
-          <NuxtLink to="/guide">
-            <el-button type="primary">返回攻略入口</el-button>
+          <NuxtLink :to="localePath('/guide')">
+            <el-button type="primary">{{ t("guide.backToGuide") }}</el-button>
           </NuxtLink>
         </template>
       </el-result>
@@ -150,7 +162,7 @@ useViewerSeo(() => ({
               />
             </svg>
           </span>
-          国行收录曲/{{ difficultyLabel }}/{{ level }}星
+          {{ t("page.guide.detail.header", { difficulty: difficultyLabel, level }) }}
         </h3>
         <el-image src="/miku.png" class="guide-avatar right" />
       </div>
@@ -166,22 +178,15 @@ useViewerSeo(() => ({
             />
           </svg>
         </span>
-        <span>难度分布</span>
+        <span>{{ t("guide.difficultyDistribution") }}</span>
       </div>
       <el-table
         :data="summaryRows"
         class="summary-table"
         :header-cell-class-name="headerCellClassName"
       >
-        <el-table-column label="各难易度曲数" align="center">
-          <el-table-column prop="诈称+" label="诈称+" align="center" />
-          <el-table-column prop="诈称" label="诈称" align="center" />
-          <el-table-column prop="强" label="强" align="center" />
-          <el-table-column prop="中" label="中" align="center" />
-          <el-table-column prop="弱" label="弱" align="center" />
-          <el-table-column prop="逆诈称" label="逆诈称" align="center" />
-          <el-table-column prop="逆诈称-" label="逆诈称-" align="center" />
-          <el-table-column prop="合计" label="合计" align="center" />
+        <el-table-column :label="t('page.guide.detail.summaryLabel')" align="center">
+          <el-table-column v-for="column in summaryColumns" :key="column" :prop="column" :label="column" align="center" />
         </el-table-column>
       </el-table>
 
@@ -198,7 +203,7 @@ useViewerSeo(() => ({
             />
           </svg>
         </span>
-        <span>谱面详情</span>
+        <span>{{ t("guide.detailTable") }}</span>
       </div>
       <el-table
         :key="tableKey"
@@ -214,12 +219,12 @@ useViewerSeo(() => ({
         v-loading="loadingTagId > 0"
         class="detail-table"
       >
-        <el-table-column prop="title" label="标签" align="center" width="220" />
-        <el-table-column prop="count" label="数量" align="center" width="100" />
-        <el-table-column prop="category" label="分类" align="center" width="120" />
-        <el-table-column prop="tag" label="属性" align="center" width="120" />
-        <el-table-column prop="feature" label="谱面特征" align="center" />
-        <el-table-column prop="noteCount" label="物量" align="center" width="100" />
+        <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" align="center" width="220" />
+        <el-table-column prop="count" :label="t('page.guide.detail.columns.count')" align="center" width="100" />
+        <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="120" />
+        <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="120" />
+        <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" align="center" />
+        <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
       </el-table>
     </el-card>
   </div>

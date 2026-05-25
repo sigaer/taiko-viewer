@@ -358,6 +358,11 @@ export const createForumThread = async (event: H3Event, payload: Record<string, 
     usernames: extractMentions(paragraphTexts),
     title: `你在帖子中被提及：${title}`,
     bodyPrefix: `${user.username} 在新帖《${clipText(title, 24)}》中提到了你`,
+    messageKey: "forum.notificationMessages.threadMention",
+    messageParams: {
+      threadTitle: title,
+      actorUsername: user.username
+    },
     threadId
   });
   return await getForumThreadDetail(event, threadId);
@@ -430,6 +435,12 @@ export const createForumReply = async (event: H3Event, threadIdInput: unknown, p
         type: "reply",
         title: `你收到一条楼中楼回复：${thread.title}`,
         body: `${user.username} 在《${clipText(thread.title, 20)}》中回复了你：${replySnippet}`,
+        messageKey: "forum.notificationMessages.replyToReply",
+        messageParams: {
+          threadTitle: thread.title,
+          actorUsername: user.username,
+          replySnippet
+        },
         threadId,
         postId: createdPostId
       });
@@ -441,6 +452,12 @@ export const createForumReply = async (event: H3Event, threadIdInput: unknown, p
       type: "reply",
       title: `你的主题收到新回复：${thread.title}`,
       body: `${user.username} 回复了你的帖子《${clipText(thread.title, 20)}》：${replySnippet}`,
+      messageKey: "forum.notificationMessages.replyToThread",
+      messageParams: {
+        threadTitle: thread.title,
+        actorUsername: user.username,
+        replySnippet
+      },
       threadId,
       postId: createdPostId
     });
@@ -451,6 +468,11 @@ export const createForumReply = async (event: H3Event, threadIdInput: unknown, p
     usernames: extractMentions(bodyText ? [bodyText] : []),
     title: `你在回复中被提及：${thread.title}`,
     bodyPrefix: `${user.username} 在《${clipText(thread.title, 20)}》的回复中提到了你`,
+    messageKey: "forum.notificationMessages.replyMention",
+    messageParams: {
+      threadTitle: thread.title,
+      actorUsername: user.username
+    },
     threadId,
     postId: createdPostId
   });
@@ -487,6 +509,11 @@ export const toggleForumThreadLike = async (event: H3Event, threadIdInput: unkno
         type: "like",
         title: `你的帖子收到赞：${thread.title}`,
         body: `${user.username} 赞了你的帖子《${clipText(thread.title, 20)}》`,
+        messageKey: "forum.notificationMessages.likeThread",
+        messageParams: {
+          threadTitle: thread.title,
+          actorUsername: user.username
+        },
         threadId
       });
     }
@@ -538,6 +565,11 @@ export const toggleForumPostLike = async (event: H3Event, postIdInput: unknown) 
         type: "like",
         title: `你的回复收到赞：${post.thread_title}`,
         body: `${user.username} 赞了你在《${clipText(post.thread_title, 20)}》中的回复`,
+        messageKey: "forum.notificationMessages.likeReply",
+        messageParams: {
+          threadTitle: post.thread_title,
+          actorUsername: user.username
+        },
         threadId: post.thread_id,
         postId
       });
@@ -627,6 +659,12 @@ export const moderateForumThread = async (event: H3Event, payload: Record<string
       type: "system",
       title: `你的帖子状态已变更：${thread.title}`,
       body: `帖子《${clipText(thread.title, 20)}》已被${target.label}${reason ? `，原因：${reason}` : ""}`,
+      messageKey: "forum.notificationMessages.moderation",
+      messageParams: {
+        threadTitle: thread.title,
+        actionLabel: target.label,
+        reason
+      },
       threadId
     });
   }

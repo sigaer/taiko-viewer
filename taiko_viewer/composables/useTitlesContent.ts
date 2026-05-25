@@ -6,6 +6,6 @@ const createDefaultPayload = (): TitlesPagePayload => ({
 });
 
 export const useTitlesContent = () =>
-  useAsyncData("content-titles-page", () => $fetch<TitlesPagePayload>("/api/content/titles"), {
+  useAsyncData("content-titles-page", () => useViewerApiFetch()<TitlesPagePayload>("/api/content/titles"), {
     default: createDefaultPayload
   });

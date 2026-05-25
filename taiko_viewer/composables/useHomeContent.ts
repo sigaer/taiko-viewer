@@ -7,6 +7,6 @@ const createDefaultPayload = (): HomeContentPayload => ({
 
 export const useHomeContent = () =>
   useClientContentState<HomeContentPayload>(
-    () => $fetch<HomeContentPayload>("/api/content/home"),
+    () => useViewerApiFetch()<HomeContentPayload>("/api/content/home"),
     createDefaultPayload
   );

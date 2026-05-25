@@ -23,7 +23,7 @@ export const useGuideContent = (
 ) =>
   useAsyncData(
     () => `content-guide-${toValue(difficulty)}-${toValue(level)}`,
-    () => $fetch<GuidePagePayload>(`/api/content/guide/${toValue(difficulty)}/${toValue(level)}`),
+    () => useViewerApiFetch()<GuidePagePayload>(`/api/content/guide/${toValue(difficulty)}/${toValue(level)}`),
     {
       default: createGuidePageDefault,
       watch: [() => toValue(difficulty), () => toValue(level)]
@@ -39,6 +39,6 @@ const createGuideTagDefault = (difficulty: number, level: number, tagId: number)
 });
 
 export const loadGuideTagItems = async (difficulty: number, level: number, tagId: number) =>
-  $fetch<GuideTagItemsPayload>(`/api/content/guide/${difficulty}/${level}/tag/${tagId}`);
+  useViewerApiFetch()<GuideTagItemsPayload>(`/api/content/guide/${difficulty}/${level}/tag/${tagId}`);
 
 export const createEmptyGuideTagItems = createGuideTagDefault;

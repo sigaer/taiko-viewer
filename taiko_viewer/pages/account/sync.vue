@@ -48,38 +48,101 @@ type SyncOverviewPayload = {
   lastSync: SyncLog | null;
 };
 
-const headers = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
-
-const pageMeta = {
-  title: "多端同步",
-  desc: "提交同步请求后，由服务端读取当前绑定 ID 的 userdata 并压缩分发到选中的服务目标。"
-};
+const { t, locale } = useI18n();
+const apiFetch = useViewerApiFetch();
+const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
   middleware: "account-auth",
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "account.sync",
+  pageDescKey: "page.account.sync.desc",
   navKey: "/account/sync",
   breadcrumbs: [
-    { label: "账号系统", to: "/account/profile" },
-    { label: "多端同步", to: "/account/sync" }
+    { labelKey: "account.title", to: "/account/profile" },
+    { labelKey: "account.sync", to: "/account/sync" }
   ]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("account.sync"),
+  description: buildPageDescription(t("page.account.sync.desc")),
   path: "/account/sync"
-});
+}));
 
 const selectedTargetIds = ref<string[]>([]);
 const submitting = ref(false);
 const cooldown = ref(0);
 let cooldownTimer: ReturnType<typeof setInterval> | null = null;
 
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "多端同期",
+        intro: "現在は「現在連携中の ID」の完全な `userdata` JSON のみを同期します。Web 側はリクエスト送信のみ行い、実際の取得と配信はサーバー側で処理されます。送信後は 30 分のクールダウンに入ります。",
+        currentBinding: "現在の連携 ID",
+        currentTitle: "現在の称号",
+        cooldownStatus: "クールダウン",
+        ready: "すぐ同期可能",
+        remaining: "残り {seconds}s",
+        needBinding: "先にドンダーひろば ID を連携してください",
+        targets: "同期先",
+        targetsDesc: "選択した送信先に対して、Sakura bot がサーバー側で userdata を読み込み、zstd 圧縮して配信します。",
+        noTargets: "利用可能な同期先はありません",
+        start: "同期開始",
+        coolingDown: "クールダウン中 {seconds}s",
+        lastSync: "前回の同期",
+        lastSyncDesc: "前回リクエストの圧縮サイズと各送信先の結果を表示します。",
+        noHistory: "同期履歴はまだありません",
+        syncTime: "同期時刻",
+        overallStatus: "全体状態",
+        compressedSize: "圧縮サイズ",
+        compressedRate: "圧縮率",
+        success: "成功",
+        failed: "失敗",
+        decompressed: "展開後",
+        songs: "曲数",
+        selectTarget: "少なくとも 1 つの同期先を選択してください",
+        syncDone: "同期が完了しました",
+        syncSuccess: "同期成功、{success}/{total} 件の送信先が完了しました",
+        syncPartial: "一部のみ成功、{success}/{total} 件完了{failed}",
+        syncFailed: "同期に失敗しました。前回結果を確認してください。"
+      }
+    : {
+        title: "多端同步",
+        intro: "当前只同步“当前绑定 ID”的完整 `userdata` JSON。网页仅发起请求，实际读取与分发由服务端执行，提交后会进入 30 分钟冷却。",
+        currentBinding: "当前绑定 ID",
+        currentTitle: "当前称号",
+        cooldownStatus: "冷却状态",
+        ready: "可立即同步",
+        remaining: "剩余 {seconds}s",
+        needBinding: "请先绑定鼓众 ID 后再使用多端同步",
+        targets: "同步目标",
+        targetsDesc: "勾选后会由 Sakura bot 在服务端读取 userdata、压缩为 zstd，并分发到对应服务。",
+        noTargets: "当前没有可用的同步目标",
+        start: "开始同步",
+        coolingDown: "冷却中 {seconds}s",
+        lastSync: "最近一次同步",
+        lastSyncDesc: "展示最近一次同步请求的压缩体积和逐目标返回结果。",
+        noHistory: "还没有同步记录",
+        syncTime: "同步时间",
+        overallStatus: "整体状态",
+        compressedSize: "压缩体积",
+        compressedRate: "压缩比例",
+        success: "成功",
+        failed: "失败",
+        decompressed: "解压",
+        songs: "曲目",
+        selectTarget: "请先勾选至少一个同步目标",
+        syncDone: "同步已完成",
+        syncSuccess: "同步成功，{success}/{total} 个目标已完成",
+        syncPartial: "部分同步成功，{success}/{total} 个目标完成{failed}",
+        syncFailed: "同步失败，请查看最近一次同步结果"
+      }
+);
+
 const { data, pending, refresh } = await useAsyncData<SyncOverviewPayload>(
   "account-sync-overview",
-  () => $fetch("/api/account/sync/targets", { headers }),
+  () => apiFetch("/api/account/sync/targets"),
   {
     default: () => ({
       currentBinding: null,
@@ -125,7 +188,7 @@ const buildSyncFeedback = (log: SyncLog | null | undefined) => {
   if (!log) {
     return {
       level: "success" as const,
-      message: "同步已完成"
+      message: copy.value.syncDone
     };
   }
   const successCount = log.results.filter((item) => item.ok).length;
@@ -134,14 +197,17 @@ const buildSyncFeedback = (log: SyncLog | null | undefined) => {
   if (log.status === "success") {
     return {
       level: "success" as const,
-      message: `同步成功，${successCount}/${totalCount} 个目标已完成`
+      message: copy.value.syncSuccess.replace("{success}", String(successCount)).replace("{total}", String(totalCount))
     };
   }
   if (log.status === "partial") {
     const failedLabels = failedResults.map((item) => item.label).filter(Boolean).join("、");
     return {
       level: "warning" as const,
-      message: `部分同步成功，${successCount}/${totalCount} 个目标完成${failedLabels ? `，失败目标：${failedLabels}` : ""}`
+      message: copy.value.syncPartial
+        .replace("{success}", String(successCount))
+        .replace("{total}", String(totalCount))
+        .replace("{failed}", failedLabels ? `，${failedLabels}` : "")
     };
   }
   const failedMessage = failedResults
@@ -150,19 +216,19 @@ const buildSyncFeedback = (log: SyncLog | null | undefined) => {
     .join("；");
   return {
     level: "error" as const,
-    message: failedMessage || "同步失败，请查看最近一次同步结果"
+    message: failedMessage || copy.value.syncFailed
   };
 };
 
 const submitSync = async () => {
   if (submitting.value) return;
   if (!selectedTargetIds.value.length) {
-    ElMessage.warning("请先勾选至少一个同步目标");
+    ElMessage.warning(copy.value.selectTarget);
     return;
   }
   submitting.value = true;
   try {
-    const response = await $fetch<{ log: SyncLog | null }>("/api/account/sync", {
+    const response = await apiFetch<{ log: SyncLog | null }>("/api/account/sync", {
       method: "POST",
       body: {
         targetIds: selectedTargetIds.value
@@ -178,7 +244,7 @@ const submitSync = async () => {
     }
     await refresh();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || "同步失败");
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
     submitting.value = false;
@@ -195,32 +261,32 @@ const submitSync = async () => {
     <template v-else>
       <el-card class="panel-card">
         <div class="section-title">
-          <h2>多端同步</h2>
-          <p>当前只同步“当前绑定 ID”的完整 `userdata` JSON。网页仅发起请求，实际读取与分发由服务端执行，提交后会进入 30 分钟冷却。</p>
+          <h2>{{ copy.title }}</h2>
+          <p>{{ copy.intro }}</p>
         </div>
         <div v-if="overview.currentBinding" class="binding-meta">
           <div>
-            <span>当前绑定 ID</span>
+            <span>{{ copy.currentBinding }}</span>
             <strong>{{ overview.currentBinding.taikoId }}</strong>
           </div>
           <div>
-            <span>当前称号</span>
+            <span>{{ copy.currentTitle }}</span>
             <strong>{{ overview.currentBinding.verifiedTitle || "-" }}</strong>
           </div>
           <div>
-            <span>冷却状态</span>
-            <strong>{{ cooldown > 0 ? `剩余 ${cooldown}s` : "可立即同步" }}</strong>
+            <span>{{ copy.cooldownStatus }}</span>
+            <strong>{{ cooldown > 0 ? copy.remaining.replace("{seconds}", String(cooldown)) : copy.ready }}</strong>
           </div>
         </div>
-        <el-empty v-else description="请先绑定鼓众 ID 后再使用多端同步" />
+        <el-empty v-else :description="copy.needBinding" />
       </el-card>
 
       <el-card class="panel-card">
         <div class="section-title">
-          <h3>同步目标</h3>
-          <p>勾选后会由 Sakura bot 在服务端读取 userdata、压缩为 zstd，并分发到对应服务。</p>
+          <h3>{{ copy.targets }}</h3>
+          <p>{{ copy.targetsDesc }}</p>
         </div>
-        <el-empty v-if="!overview.targets.length" description="当前没有可用的同步目标" />
+        <el-empty v-if="!overview.targets.length" :description="copy.noTargets" />
         <el-checkbox-group v-else v-model="selectedTargetIds" class="target-list">
           <label v-for="target in overview.targets" :key="target.id" class="target-item">
             <el-checkbox :label="target.id">
@@ -235,32 +301,32 @@ const submitSync = async () => {
           :disabled="!overview.currentBinding || cooldown > 0 || !overview.targets.length"
           @click="submitSync"
         >
-          {{ cooldown > 0 ? `冷却中 ${cooldown}s` : "开始同步" }}
+          {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.start }}
         </el-button>
       </el-card>
 
       <el-card class="panel-card">
         <div class="section-title">
-          <h3>最近一次同步</h3>
-          <p>展示最近一次同步请求的压缩体积和逐目标返回结果。</p>
+          <h3>{{ copy.lastSync }}</h3>
+          <p>{{ copy.lastSyncDesc }}</p>
         </div>
-        <el-empty v-if="!overview.lastSync" description="还没有同步记录" />
+        <el-empty v-if="!overview.lastSync" :description="copy.noHistory" />
         <template v-else>
           <div class="last-sync-meta">
             <div>
-              <span>同步时间</span>
-              <strong>{{ new Date(overview.lastSync.createdAt).toLocaleString() }}</strong>
+              <span>{{ copy.syncTime }}</span>
+              <strong>{{ formatDateTime(overview.lastSync.createdAt) }}</strong>
             </div>
             <div>
-              <span>整体状态</span>
+              <span>{{ copy.overallStatus }}</span>
               <strong>{{ overview.lastSync.status }}</strong>
             </div>
             <div>
-              <span>压缩体积</span>
+              <span>{{ copy.compressedSize }}</span>
               <strong>{{ overview.lastSync.compressedBytes }} / {{ overview.lastSync.originalBytes }} bytes</strong>
             </div>
             <div>
-              <span>压缩比例</span>
+              <span>{{ copy.compressedRate }}</span>
               <strong>{{ compressionRatio || "-" }}</strong>
             </div>
           </div>
@@ -269,12 +335,12 @@ const submitSync = async () => {
               <div class="result-item__head">
                 <strong>{{ result.label }}</strong>
                 <el-tag :type="result.ok ? 'success' : 'danger'" effect="light">
-                  {{ result.ok ? "成功" : "失败" }}
+                  {{ result.ok ? copy.success : copy.failed }}
                 </el-tag>
               </div>
               <p>HTTP {{ result.statusCode }} · {{ result.message }}</p>
               <p v-if="result.songCount !== null || result.decompressedBytes > 0">
-                解压 {{ result.decompressedBytes || "-" }} bytes · 曲目 {{ result.songCount ?? "-" }}
+                {{ copy.decompressed }} {{ result.decompressedBytes || "-" }} bytes · {{ copy.songs }} {{ result.songCount ?? "-" }}
               </p>
             </div>
           </div>

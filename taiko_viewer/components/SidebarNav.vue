@@ -3,19 +3,22 @@ import { computed } from "vue";
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
 
 const route = useRoute();
+const { t } = useI18n();
+const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 const { accountUser, fetchCurrentUser, clearAccountUser } = useAccountState();
 await fetchCurrentUser();
 
 const buildGuideChildren = () => {
   return GUIDE_DIFFICULTY_OPTIONS.map((group) => ({
     key: `/guide/d${group.value}`,
-    label: group.label,
+    label: t(`difficulty.${group.value}`),
     iconImage: group.iconImage,
     children: Array.from({ length: group.max }, (_, index) => {
       const level = index + 1;
       return {
         key: `/guide/${group.value}/${level}`,
-        label: `${level}星`
+        label: `${level}${t("guide.starSuffix", "星")}`
       };
     })
   }));
@@ -47,12 +50,17 @@ const iconPaths: Record<string, string> = {
 
 const handleLogout = async () => {
   try {
-    await $fetch("/api/account/auth/logout", { method: "POST" });
+    await apiFetch("/api/account/auth/logout", { method: "POST" });
     clearAccountUser();
-    await navigateTo("/account/login");
+    await navigateTo(localePath("/account/login"));
   } catch {
     // Ignore logout errors in sidebar shortcut.
   }
+};
+
+const handleSelect = async (index: string) => {
+  if (!index) return;
+  await navigateTo(localePath(index));
 };
 
 const isDeveloperReviewer = computed(
@@ -61,24 +69,24 @@ const isDeveloperReviewer = computed(
 
 const groups = computed(() => [
   {
-    title: "功能导航",
+    title: t("nav.functional"),
     icon: "grid",
     items: [
-      { key: "/titles", label: "称号一览", icon: "badge" },
-      { key: "/forum", label: "论坛社区", icon: "forum" },
-      { key: "/alias-log", label: "别名修改日志", icon: "history" },
+      { key: "/titles", label: t("nav.titles"), icon: "badge" },
+      { key: "/forum", label: t("nav.forum"), icon: "forum" },
+      { key: "/alias-log", label: t("nav.aliasLog"), icon: "history" },
       {
         key: "/songs",
-        label: "歌曲列表",
+        label: t("nav.songs"),
         icon: "music",
         children: [
-          { key: "/songs/available", label: "实装歌曲" },
-          { key: "/songs/removed", label: "未实装/已下架歌曲" }
+          { key: "/songs/available", label: t("nav.songsAvailable") },
+          { key: "/songs/removed", label: t("nav.songsRemoved") }
         ]
       },
       {
         key: "/grade",
-        label: "段位查询",
+        label: t("nav.grade"),
         icon: "trophy",
         children: [
           { key: "/grade/2023", label: "虹 2023" },
@@ -88,73 +96,81 @@ const groups = computed(() => [
       },
       {
         key: "/guide",
-        label: "谱面攻略",
+        label: t("nav.guide"),
         icon: "book",
         children: buildGuideChildren()
       }
     ]
   },
   {
-    title: "查谱工具",
+    title: t("nav.toolbox"),
     icon: "grid",
     items: [
-      { key: "/tools", label: "工具箱", icon: "grid" },
-      { key: "/tools/chart-config", label: "查配置", icon: "book" },
-      { key: "/tools/note-count", label: "查物量", icon: "music" },
-      { key: "/tools/b30", label: "B30 表", icon: "trophy" },
-      { key: "/tools/trend", label: "Rating 走势", icon: "history" },
-      { key: "/tools/word-cloud", label: "太鼓词云", icon: "badge" }
+      { key: "/tools", label: t("nav.tools"), icon: "grid" },
+      { key: "/tools/chart-config", label: t("tools.chartConfig"), icon: "book" },
+      { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" },
+      { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
+      { key: "/tools/trend", label: t("tools.trend"), icon: "history" },
+      { key: "/tools/word-cloud", label: t("tools.wordCloud"), icon: "badge" }
     ]
   },
   {
-    title: "账号系统",
+    title: t("nav.accountGroup"),
     icon: "user",
     items: accountUser.value
       ? [
-          { key: "/account/profile", label: "个人档案", icon: "user" },
-          { key: "/account/songs", label: "歌曲数据", icon: "music" },
-          { key: "/account/sync", label: "多端同步", icon: "history" },
-          { key: "/account/developer", label: "开发者权限", icon: "badge" },
+          { key: "/account/profile", label: t("account.profile"), icon: "user" },
+          { key: "/account/songs", label: t("account.songs"), icon: "music" },
+          { key: "/account/sync", label: t("account.sync"), icon: "history" },
+          { key: "/account/developer", label: t("account.developer"), icon: "badge" },
           ...(isDeveloperReviewer.value
-            ? [{ key: "/account/developer/review", label: "开发者审批", icon: "key" }]
+            ? [{ key: "/account/developer/review", label: t("account.developerReview"), icon: "key" }]
             : [])
         ]
       : [
-          { key: "/account/login", label: "登录", icon: "key" },
-          { key: "/account/register", label: "注册", icon: "user" }
+          { key: "/account/login", label: t("account.login"), icon: "key" },
+          { key: "/account/register", label: t("account.register"), icon: "user" }
         ]
   },
   {
-    title: "设置与关于",
+    title: t("nav.community"),
     icon: "settings",
     items: [
-      { key: "/settings", label: "设置", icon: "settings" },
-      { key: "/about", label: "关于", icon: "info" }
+      { key: "/forum/new", label: t("forum.newThread"), icon: "forum" },
+      { key: "/forum/me", label: t("forum.myCommunity"), icon: "user" },
+      { key: "/settings", label: t("nav.settings"), icon: "settings" },
+      { key: "/about", label: t("nav.about"), icon: "info" }
     ]
   }
 ]);
 
 const activePath = computed(() => {
-  if (route.path === "/") return "/";
-  if (route.path.startsWith("/tools")) return route.path === "/tools" ? "/tools" : route.path;
-  if (route.path.startsWith("/forum")) return "/forum";
-  if (route.path === "/songs") return "/songs/available";
-  if (route.path === "/songs/removed") return "/songs/removed";
-  if (route.path.startsWith("/songs/")) return "/songs/available";
-  if (route.path.startsWith("/account/profile")) return "/account/profile";
-  if (route.path.startsWith("/account/songs")) return "/account/songs";
-  if (route.path.startsWith("/account/sync")) return "/account/sync";
-  if (route.path.startsWith("/account/developer/review")) return "/account/developer/review";
-  if (route.path.startsWith("/account/developer")) return "/account/developer";
-  if (route.path.startsWith("/account/login")) return "/account/login";
-  if (route.path.startsWith("/account/register")) return "/account/register";
-  if (route.path.startsWith("/guide/")) {
-    const segments = route.path.split("/").filter(Boolean);
+  const normalizedPath =
+    route.path === "/ja"
+      ? "/"
+      : route.path.startsWith("/ja/")
+        ? route.path.slice(3) || "/"
+        : route.path;
+  if (normalizedPath === "/") return "/";
+  if (normalizedPath.startsWith("/tools")) return normalizedPath === "/tools" ? "/tools" : normalizedPath;
+  if (normalizedPath.startsWith("/forum")) return normalizedPath === "/forum/new" || normalizedPath === "/forum/me" ? normalizedPath : "/forum";
+  if (normalizedPath === "/songs") return "/songs/available";
+  if (normalizedPath === "/songs/removed") return "/songs/removed";
+  if (normalizedPath.startsWith("/songs/")) return "/songs/available";
+  if (normalizedPath.startsWith("/account/profile")) return "/account/profile";
+  if (normalizedPath.startsWith("/account/songs")) return "/account/songs";
+  if (normalizedPath.startsWith("/account/sync")) return "/account/sync";
+  if (normalizedPath.startsWith("/account/developer/review")) return "/account/developer/review";
+  if (normalizedPath.startsWith("/account/developer")) return "/account/developer";
+  if (normalizedPath.startsWith("/account/login")) return "/account/login";
+  if (normalizedPath.startsWith("/account/register")) return "/account/register";
+  if (normalizedPath.startsWith("/guide/")) {
+    const segments = normalizedPath.split("/").filter(Boolean);
     if (segments.length >= 3) {
       return `/guide/${segments[1]}/${segments[2]}`;
     }
   }
-  return route.path;
+  return normalizedPath;
 });
 
 const openedGroups = computed(() => {
@@ -162,7 +178,13 @@ const openedGroups = computed(() => {
   if (activePath.value.startsWith("/grade")) return ["/grade"];
   if (activePath.value.startsWith("/account")) return [];
   if (activePath.value.startsWith("/guide")) {
-    const segments = route.path.split("/").filter(Boolean);
+    const normalizedPath =
+      route.path === "/ja"
+        ? "/"
+        : route.path.startsWith("/ja/")
+          ? route.path.slice(3) || "/"
+          : route.path;
+    const segments = normalizedPath.split("/").filter(Boolean);
     if (segments.length >= 2) return ["/guide", `/guide/d${segments[1]}`];
     return ["/guide"];
   }
@@ -189,7 +211,7 @@ const openedGroups = computed(() => {
             />
           </svg>
         </span>
-        <span>退出登录</span>
+        <span>{{ t("nav.logout") }}</span>
       </el-button>
     </div>
     <div v-for="group in groups" :key="group.title" class="nav-group">
@@ -207,7 +229,7 @@ const openedGroups = computed(() => {
         </span>
         <span>{{ group.title }}</span>
       </div>
-      <el-menu :default-active="activePath" :default-openeds="openedGroups" class="nav-menu" router>
+      <el-menu :default-active="activePath" :default-openeds="openedGroups" class="nav-menu" @select="handleSelect">
         <template v-for="item in group.items" :key="item.key">
           <el-sub-menu v-if="item.children" :index="item.key">
             <template #title>

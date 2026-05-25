@@ -1,13 +1,47 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { BilibiliDynamicItem } from "~/types/bilibili";
 import { useBilibiliDynamics } from "~/composables/useBilibiliDynamics";
 import { BILIBILI_DYNAMIC_UID, BILIBILI_SPACE_URL } from "~/utils/bilibili";
 
+const { locale } = useI18n();
 const { items, pending, error, reload } = useBilibiliDynamics(BILIBILI_DYNAMIC_UID);
 
 const previewVisible = ref(false);
 const previewImage = ref<string | null>(null);
 const expandedMap = ref<Record<string, boolean>>({});
+
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "投稿",
+        profile: "Bilibili ホームを見る",
+        previewAlt: "プレビュー",
+        loadFailed: "投稿の取得に失敗しました：",
+        retry: "再試行",
+        empty: "投稿はまだありません",
+        collapse: "折りたたむ",
+        expand: "全文を見る",
+        forward: "転送",
+        comment: "コメント",
+        like: "いいね",
+        disclaimer: "内容は Bilibili 提供の公開情報を表示しています"
+      }
+    : {
+        title: "动态",
+        profile: "查看 B 站主页",
+        previewAlt: "预览",
+        loadFailed: "获取动态失败：",
+        retry: "重试",
+        empty: "暂无动态",
+        collapse: "收起全文",
+        expand: "查看全文",
+        forward: "转发",
+        comment: "评论",
+        like: "点赞",
+        disclaimer: "内容来源于 Bilibili，仅供展示"
+      }
+);
 
 const formatNumber = (num: number) => {
   if (num >= 10000) {
@@ -78,25 +112,25 @@ const openPreview = (url: string, event: Event) => {
 <template>
   <div class="bili-dynamic-feed">
     <div class="section-head">
-      <h3>动态</h3>
+      <h3>{{ copy.title }}</h3>
       <a :href="BILIBILI_SPACE_URL" target="_blank" rel="noopener noreferrer" class="space-link">
-        查看 B 站主页
+        {{ copy.profile }}
       </a>
     </div>
 
     <el-dialog v-model="previewVisible" width="90%" class="bili-preview-dialog" @close="previewImage = null">
-      <img v-if="previewImage" :src="previewImage" alt="预览" class="bili-preview-image" />
+      <img v-if="previewImage" :src="previewImage" :alt="copy.previewAlt" class="bili-preview-image" />
     </el-dialog>
 
     <div v-if="pending" class="dynamic-list">
       <article v-for="index in 3" :key="index" class="dynamic-card dynamic-card--skeleton shimmer-card" />
     </div>
 
-    <el-empty v-else-if="error" :description="`获取动态失败：${error}`">
-      <el-button type="primary" @click="reload">重试</el-button>
+    <el-empty v-else-if="error" :description="`${copy.loadFailed}${error}`">
+      <el-button type="primary" @click="reload">{{ copy.retry }}</el-button>
     </el-empty>
 
-    <el-empty v-else-if="!items.length" description="暂无动态" />
+    <el-empty v-else-if="!items.length" :description="copy.empty" />
 
     <div v-else class="dynamic-list">
       <a
@@ -137,7 +171,7 @@ const openPreview = (url: string, event: Event) => {
             class="dynamic-expand"
             @click="toggleExpanded(item.id_str, $event)"
           >
-            {{ expandedMap[item.id_str] ? "收起全文" : "查看全文" }}
+            {{ expandedMap[item.id_str] ? copy.collapse : copy.expand }}
           </button>
 
           <div
@@ -195,14 +229,14 @@ const openPreview = (url: string, event: Event) => {
         </div>
 
         <footer class="dynamic-stats">
-          <span>转发 {{ formatNumber(item.modules.module_stat.forward.count) }}</span>
-          <span>评论 {{ formatNumber(item.modules.module_stat.comment.count) }}</span>
-          <span>点赞 {{ formatNumber(item.modules.module_stat.like.count) }}</span>
+          <span>{{ copy.forward }} {{ formatNumber(item.modules.module_stat.forward.count) }}</span>
+          <span>{{ copy.comment }} {{ formatNumber(item.modules.module_stat.comment.count) }}</span>
+          <span>{{ copy.like }} {{ formatNumber(item.modules.module_stat.like.count) }}</span>
         </footer>
       </a>
     </div>
 
-    <p class="dynamic-disclaimer">内容来源于 Bilibili，仅供展示</p>
+    <p class="dynamic-disclaimer">{{ copy.disclaimer }}</p>
   </div>
 </template>
 

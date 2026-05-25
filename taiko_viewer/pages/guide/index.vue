@@ -3,35 +3,32 @@ import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
 import { buildPageDescription } from "~/utils/seo";
 
 const route = useRoute();
+const { t } = useI18n();
+const localePath = useLocalePath();
 const difficulty = Number(route.query.difficulty || 0);
 const level = Number(route.query.level || 0);
 
 if (Number.isInteger(difficulty) && difficulty > 0 && Number.isInteger(level) && level > 0) {
-  await navigateTo(`/guide/${difficulty}/${level}`, { redirectCode: 301 });
+  await navigateTo(localePath(`/guide/${difficulty}/${level}`), { redirectCode: 301 });
 }
 
-const pageMeta = {
-  title: "谱面攻略",
-  desc: buildPageDescription("按难度与星级浏览太鼓达人国行谱面攻略入口。")
-};
-
 definePageMeta({
-  pageTitle: pageMeta.title,
-  pageDesc: pageMeta.desc,
+  pageTitleKey: "guide.title",
+  pageDescKey: "page.guide.index.desc",
   navKey: "/guide",
-  breadcrumbs: [{ label: "谱面攻略", to: "/guide" }]
+  breadcrumbs: [{ labelKey: "guide.title", to: "/guide" }]
 });
 
-useViewerSeo({
-  title: pageMeta.title,
-  description: pageMeta.desc,
+useViewerSeo(() => ({
+  title: t("guide.title"),
+  description: buildPageDescription(t("page.guide.index.desc")),
   path: "/guide",
-  keywords: ["谱面攻略", "国行谱面"],
+  keywords: [t("guide.title"), t("page.guide.index.keyword")],
   breadcrumbs: [
-    { name: "首页", path: "/" },
-    { name: "谱面攻略", path: "/guide" }
+    { name: t("nav.home"), path: "/" },
+    { name: t("guide.title"), path: "/guide" }
   ]
-});
+}));
 </script>
 
 <template>
@@ -39,8 +36,8 @@ useViewerSeo({
     <el-card class="panel-card guide-entry-hero">
       <div class="guide-entry-hero__copy">
         <span class="guide-entry-hero__eyebrow">Guide Hub</span>
-        <h2>谱面攻略入口</h2>
-        <p>按难度和定数进入对应攻略页，页面会输出独立 URL、canonical 与结构化 breadcrumb。</p>
+        <h2>{{ t("page.guide.index.heroTitle") }}</h2>
+        <p>{{ t("page.guide.index.heroDesc") }}</p>
       </div>
       <el-image src="/Makina.png" fit="contain" class="guide-entry-hero__image" />
     </el-card>
@@ -51,8 +48,8 @@ useViewerSeo({
           <div class="guide-entry-card__title">
             <img :src="group.iconImage" :alt="group.label" class="guide-entry-card__icon" />
             <div>
-              <h3>{{ group.label }}</h3>
-              <p>{{ group.max }} 个星级入口</p>
+              <h3>{{ t(`difficulty.${group.value}`) }}</h3>
+              <p>{{ t("page.guide.index.levelCount", { count: group.max }) }}</p>
             </div>
           </div>
         </div>
@@ -61,9 +58,9 @@ useViewerSeo({
             v-for="level in group.max"
             :key="`${group.value}-${level}`"
             class="guide-entry-link"
-            :to="`/guide/${group.value}/${level}`"
+            :to="localePath(`/guide/${group.value}/${level}`)"
           >
-            {{ level }}星
+            {{ level }}{{ t("guide.starSuffix", "星") }}
           </NuxtLink>
         </div>
       </el-card>

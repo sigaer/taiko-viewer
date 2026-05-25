@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import type { ForumUserBadge } from "~/types/forum";
 
-defineProps<{
+const props = defineProps<{
   user: ForumUserBadge;
   compact?: boolean;
 }>();
+
+const { t } = useI18n();
+
+const localizedRoleLabel = computed(() => t(`forum.roles.${props.user.role}`));
+const localizedTaikoId = computed(() =>
+  props.user.taikoIdMasked === "未绑定" ? t("forum.unboundTaikoId", "未绑定") : props.user.taikoIdMasked
+);
 </script>
 
 <template>
@@ -18,11 +25,11 @@ defineProps<{
       <div class="forum-user__name-row">
         <strong>{{ user.username }}</strong>
         <span class="forum-user__role" :class="`role-${user.role}`">{{
-          user.roleLabel
+          localizedRoleLabel
         }}</span>
       </div>
       <div class="forum-user__detail">
-        <span>{{ user.taikoIdMasked }}</span>
+        <span>{{ localizedTaikoId }}</span>
         <span v-if="user.verifiedTitle">{{ user.verifiedTitle }}</span>
       </div>
     </div>

@@ -6,18 +6,31 @@ const props = defineProps<{
   compact?: boolean;
 }>();
 
+const { t, locale } = useI18n();
+
 const threadTypeLabelMap: Record<ForumThreadCard["threadType"], string> = {
-  discussion: "讨论",
-  guide: "攻略",
-  achievement: "战报",
-  official: "公告",
+  discussion: t("forum.types.discussion"),
+  guide: t("forum.types.guide"),
+  achievement: t("forum.types.achievement"),
+  official: t("forum.types.official")
 };
 
 const statList = computed(() => [
-  { label: "回复", value: props.thread.replyCount },
-  { label: "点赞", value: props.thread.likeCount },
-  { label: "浏览", value: props.thread.viewCount },
+  { label: t("forum.stats.reply"), value: props.thread.replyCount },
+  { label: t("forum.stats.like"), value: props.thread.likeCount },
+  { label: t("forum.stats.view"), value: props.thread.viewCount }
 ]);
+
+const localizedSectionName = computed(
+  () => t(`forum.sections.${props.thread.section.slug}.name`, props.thread.section.name)
+);
+const localizedDifficultyLabel = computed(() =>
+  props.thread.song?.difficultyType ? t(`difficulty.${props.thread.song.difficultyType}`) : t("difficulty.unknown")
+);
+const localizedSongTitle = computed(() => {
+  if (!props.thread.song) return "";
+  return locale.value === "ja" && props.thread.song.titleJp ? props.thread.song.titleJp : props.thread.song.title;
+});
 </script>
 
 <template>
@@ -29,18 +42,14 @@ const statList = computed(() => [
           class="section-pill"
           :style="{ '--accent': thread.section.accentColor }"
         >
-          {{ thread.section.name }}
+          {{ localizedSectionName }}
         </NuxtLink>
         <span class="type-pill" :class="`type-${thread.threadType}`">{{
           threadTypeLabelMap[thread.threadType]
         }}</span>
-        <span v-if="thread.isPinned" class="state-pill">置顶</span>
-        <span v-if="thread.isFeatured" class="state-pill state-pill--gold"
-          >加精</span
-        >
-        <span v-if="thread.isLocked" class="state-pill state-pill--muted"
-          >锁帖</span
-        >
+        <span v-if="thread.isPinned" class="state-pill">{{ t("forum.states.pinned") }}</span>
+        <span v-if="thread.isFeatured" class="state-pill state-pill--gold">{{ t("forum.states.featured") }}</span>
+        <span v-if="thread.isLocked" class="state-pill state-pill--muted">{{ t("forum.states.locked") }}</span>
       </div>
       <NuxtLink
         :to="`/forum/thread/${thread.id}`"
@@ -55,12 +64,12 @@ const statList = computed(() => [
       </div>
 
       <div v-if="thread.song" class="forum-thread-card__song">
-        <ForumSafeImage :src="thread.song.coverUrl" :alt="thread.song.title" />
+        <ForumSafeImage :src="thread.song.coverUrl" :alt="localizedSongTitle" />
         <div>
-          <strong>{{ thread.song.title }}</strong>
+          <strong>{{ localizedSongTitle }}</strong>
           <span
-            >{{ thread.song.difficultyLabel }} ·
-            {{ thread.song.level || "?" }}星</span
+            >{{ localizedDifficultyLabel }} ·
+            {{ thread.song.level || "?" }}{{ t("guide.starSuffix", "星") }}</span
           >
         </div>
       </div>

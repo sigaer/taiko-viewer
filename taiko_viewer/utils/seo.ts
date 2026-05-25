@@ -3,49 +3,50 @@ export const CANONICAL_BASE_URL = "https://viewer.sakura-bot.cn";
 export const DEFAULT_OG_IMAGE = "https://static.sakura-bot.cn/banner.png";
 
 export const DEFAULT_DESCRIPTION =
-  "Sakura Taiko Viewer 是太鼓达人国行数据看板，提供歌曲列表、谱面攻略、段位查询、称号一览与玩家论坛社区。";
+  "Sakura Taiko Viewer is a Taiko data viewer with songs, guides, grades, titles, forum and tools.";
 
-export const DEFAULT_KEYWORDS = [
-  "Sakura Taiko Viewer",
-  "taiko viewer",
-  "太鼓达人",
-  "太鼓之达人",
-  "国行太鼓",
-  "谱面攻略",
-  "段位查询",
-  "段位道场",
-  "歌曲列表",
-  "称号一览"
-] as const;
+export const DEFAULT_KEYWORDS = ["Sakura Taiko Viewer", "taiko viewer", "taiko data viewer"] as const;
 
-export const formatViewerTitle = (title?: string) => {
+export const formatViewerTitle = (
+  title?: string,
+  options: {
+    siteTitle?: string;
+    homeTitle?: string;
+  } = {}
+) => {
   const normalized = String(title || "").trim();
-  if (!normalized || normalized === SITE_TITLE || normalized === "首页") {
-    return SITE_TITLE;
+  const siteTitle = options.siteTitle || SITE_TITLE;
+  const homeTitle = options.homeTitle || "";
+  if (!normalized || normalized === siteTitle || normalized === homeTitle) {
+    return siteTitle;
   }
-  return `${SITE_TITLE} · ${normalized}`;
+  return `${siteTitle} · ${normalized}`;
 };
 
-export const buildPageDescription = (pageDesc: string) => {
+export const buildPageDescription = (pageDesc: string, siteTitle = SITE_TITLE) => {
   const text = String(pageDesc || "").trim();
   if (!text) return DEFAULT_DESCRIPTION;
-  if (text.includes(SITE_TITLE)) return text;
-  return `${SITE_TITLE}：${text}`;
+  if (text.includes(siteTitle)) return text;
+  return `${siteTitle}：${text}`;
 };
 
-export const buildPageKeywords = (extra: string[] = []) => {
-  const merged = [...DEFAULT_KEYWORDS, ...extra.map((item) => String(item).trim()).filter(Boolean)];
+export const buildPageKeywords = (base: string[] = [], extra: string[] = []) => {
+  const merged = [...base, ...DEFAULT_KEYWORDS, ...extra.map((item) => String(item).trim()).filter(Boolean)];
   return Array.from(new Set(merged)).join(", ");
 };
 
-export const buildWebSiteJsonLd = () => ({
+export const buildWebSiteJsonLd = (payload: {
+  description: string;
+  language: string;
+  alternateName?: string[];
+}) => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: SITE_TITLE,
-  alternateName: ["taiko viewer", "太鼓达人数据看板"],
+  alternateName: payload.alternateName || ["taiko viewer"],
   url: CANONICAL_BASE_URL,
-  description: DEFAULT_DESCRIPTION,
-  inLanguage: "zh-CN"
+  description: payload.description,
+  inLanguage: payload.language
 });
 
 export const buildOrganizationJsonLd = () => ({
