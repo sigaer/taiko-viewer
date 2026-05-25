@@ -1,8 +1,8 @@
 export default defineNuxtRouteMiddleware(async () => {
-  const { fetchCurrentUser } = useAccountState();
+  const { isAuthenticated } = useAccountAuthStatus();
   const localePath = useLocalePath();
-  const user = await fetchCurrentUser();
-  if (user) {
+  const authenticated = await isAuthenticated();
+  if (authenticated) {
     return navigateTo(localePath("/account/profile"));
   }
 });

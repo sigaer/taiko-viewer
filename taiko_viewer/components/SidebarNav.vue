@@ -58,9 +58,13 @@ const handleLogout = async () => {
   }
 };
 
-const handleSelect = async (index: string) => {
-  if (!index) return;
-  await navigateTo(localePath(index));
+const goTo = async (path: string) => {
+  if (!path) return;
+  const target = localePath(path);
+  if (!target || target === route.fullPath || target === route.path) {
+    return;
+  }
+  await navigateTo(target);
 };
 
 const isDeveloperReviewer = computed(
@@ -229,7 +233,7 @@ const openedGroups = computed(() => {
         </span>
         <span>{{ group.title }}</span>
       </div>
-      <el-menu :default-active="activePath" :default-openeds="openedGroups" class="nav-menu" @select="handleSelect">
+      <el-menu :default-active="activePath" :default-openeds="openedGroups" class="nav-menu">
         <template v-for="item in group.items" :key="item.key">
           <el-sub-menu v-if="item.children" :index="item.key">
             <template #title>
@@ -262,16 +266,16 @@ const openedGroups = computed(() => {
                     <span>{{ child.label }}</span>
                   </span>
                 </template>
-                <el-menu-item v-for="sub in child.children" :key="sub.key" :index="sub.key">
+                <el-menu-item v-for="sub in child.children" :key="sub.key" :index="sub.key" @click="goTo(sub.key)">
                   <span>{{ sub.label }}</span>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item v-else :index="child.key">
+              <el-menu-item v-else :index="child.key" @click="goTo(child.key)">
                 <span>{{ child.label }}</span>
               </el-menu-item>
             </template>
           </el-sub-menu>
-          <el-menu-item v-else :index="item.key">
+          <el-menu-item v-else :index="item.key" @click="goTo(item.key)">
             <span class="nav-item-label">
               <span class="nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
