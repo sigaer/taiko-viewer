@@ -33,7 +33,7 @@ import { ensureForumSchema } from "~/server/utils/forum-db";
 export { ensureForumSchema };
 
 export const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
-export const DEFAULT_AVATAR = "https://forum.sakura-bot.cn/miku.png";
+export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
 export const DEFAULT_TAGS = ["全良", "段位", "攻略", "金冠", "活动"];
 export const ALLOWED_IMAGE_MIME_TYPES = [
   "image/jpeg",

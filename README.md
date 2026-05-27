@@ -11,9 +11,9 @@ Private dual-project repository for the Taiko forum service.
 
 ## Production
 
-- Web domain: `https://forum.sakura-bot.cn`
-- Forum service: `taiko-forum.service`
+- Web domain: `https://viewer.sakura-bot.cn`
 - Viewer service: `taiko-viewer.service`
+- Legacy redirect domain: `https://forum.sakura-bot.cn`
 - Local sync dispatcher: `taiko-sync-receiver.service`，实际实现位于 `/home/sigaer/taiko/scripts/sync_dispatch_server.py`
 
 ## Common Commands
@@ -24,7 +24,7 @@ Private dual-project repository for the Taiko forum service.
 cd taiko_viewer
 npm install
 npm run build
-sudo systemctl restart taiko-viewer taiko-forum taiko-sync-receiver
+sudo systemctl restart taiko-viewer taiko-sync-receiver
 curl http://127.0.0.1:3102/health
 ```
 
@@ -42,5 +42,5 @@ curl http://127.0.0.1:3102/health
 cd taiko_forum_app
 flutter pub get
 flutter analyze
-python3 scripts/release_build.py --summary "修复体验问题并优化论坛交互" --target-platform android-arm64 --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://forum.sakura-bot.cn
+python3 scripts/release_build.py --summary "修复体验问题并优化论坛交互" --target-platform android-arm64 --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://viewer.sakura-bot.cn
 ```

@@ -35,7 +35,7 @@ class ApiClient {
       : _client = http.Client(),
         baseUrl = const String.fromEnvironment(
           "TAIKO_FORUM_BASE_URL",
-          defaultValue: "https://forum.sakura-bot.cn",
+          defaultValue: "https://viewer.sakura-bot.cn",
         );
 
   final http.Client _client;

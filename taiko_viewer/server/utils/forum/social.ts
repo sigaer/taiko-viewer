@@ -213,7 +213,7 @@ export const getForumRelationshipList = async (
           user: badgeMap.get(row.user_id) || {
             id: row.user_id,
             username: "未知鼓友",
-            avatarUrl: "https://forum.sakura-bot.cn/miku.png",
+            avatarUrl: "https://viewer.sakura-bot.cn/miku.png",
             role: "user",
             roleLabel: "鼓友",
             taikoIdMasked: "未绑定",
@@ -363,7 +363,7 @@ export const getForumUserProfile = async (event: H3Event, targetUserIdInput: unk
     user: badgeMap.get(targetUserId) || {
       id: targetUserId,
       username: "未知鼓友",
-      avatarUrl: "https://forum.sakura-bot.cn/miku.png",
+      avatarUrl: "https://viewer.sakura-bot.cn/miku.png",
       role: "user",
       roleLabel: "鼓友",
       taikoIdMasked: "未绑定",

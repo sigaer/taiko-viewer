@@ -45,7 +45,7 @@ class _VersionInfoScreenState extends State<VersionInfoScreen> {
           Card(
             child: const ListTile(
               title: Text("论坛域名"),
-              subtitle: Text("https://forum.sakura-bot.cn"),
+              subtitle: Text("https://viewer.sakura-bot.cn"),
             ),
           ),
           Card(

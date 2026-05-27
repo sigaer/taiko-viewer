@@ -12,8 +12,8 @@ Flutter source for the Taiko forum mobile app. This server now includes a local 
 
 ## API
 
-- Default base URL: `https://forum.sakura-bot.cn`
-- Override with `--dart-define=TAIKO_FORUM_BASE_URL=https://forum.sakura-bot.cn`
+- Default base URL: `https://viewer.sakura-bot.cn`
+- Override with `--dart-define=TAIKO_FORUM_BASE_URL=https://viewer.sakura-bot.cn`
 - For local debugging, point `TAIKO_FORUM_BASE_URL` to your own backend or emulator bridge URL.
 
 ## Notes
@@ -24,10 +24,10 @@ Flutter source for the Taiko forum mobile app. This server now includes a local 
 - Android app label: `太鼓论坛`
 - Android external version format: `major.minor.patch.build`
 - Debug build command:
-  `flutter build apk --debug --dart-define=TAIKO_FORUM_BASE_URL=https://forum.sakura-bot.cn`
+  `flutter build apk --debug --dart-define=TAIKO_FORUM_BASE_URL=https://viewer.sakura-bot.cn`
 - Release build command with automatic bump inference:
-  `python3 scripts/release_build.py --summary "新增设置页和关注拉黑功能" --split-per-abi --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://forum.sakura-bot.cn`
+  `python3 scripts/release_build.py --summary "新增设置页和关注拉黑功能" --split-per-abi --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://viewer.sakura-bot.cn`
 - Explicit override example:
-  `python3 scripts/release_build.py --bump patch --summary "修复安装降级提示" --split-per-abi --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://forum.sakura-bot.cn`
+  `python3 scripts/release_build.py --bump patch --summary "修复安装降级提示" --split-per-abi --no-pub --dart-define=TAIKO_FORUM_BASE_URL=https://viewer.sakura-bot.cn`
 - Dry-run release preview:
   `python3 scripts/release_build.py --dry-run --summary "新增设置页和个人资料管理" --split-per-abi`

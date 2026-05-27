@@ -226,7 +226,7 @@ export const getForumThreadDetail = async (event: H3Event, threadIdInput: unknow
     const author = badgeMap.get(post.author_user_id) || {
       id: post.author_user_id,
       username: "未知鼓友",
-      avatarUrl: "https://forum.sakura-bot.cn/miku.png",
+      avatarUrl: "https://viewer.sakura-bot.cn/miku.png",
       role: "user",
       roleLabel: "鼓友",
       taikoIdMasked: "未绑定",

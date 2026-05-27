@@ -203,19 +203,19 @@ fi
 
 echo "[4/5] 重载服务..."
 run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-sync-receiver.service" /etc/systemd/system/taiko-sync-receiver.service
-run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-forum.service" /etc/systemd/system/taiko-forum.service
 run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-viewer.service" /etc/systemd/system/taiko-viewer.service
 run_privileged systemctl daemon-reload
 run_privileged nginx -t
 run_privileged systemctl reload nginx
-run_privileged systemctl restart taiko-forum taiko-viewer taiko-sync-receiver
-run_privileged systemctl is-active taiko-forum taiko-viewer taiko-sync-receiver
+run_privileged systemctl restart taiko-viewer taiko-sync-receiver
+run_privileged systemctl disable --now taiko-forum || true
+run_privileged systemctl is-active taiko-viewer taiko-sync-receiver
 
 echo "[5/5] 健康检查..."
-wait_for_url "http://127.0.0.1:3101/titles" "本地 SSR"
+wait_for_url "http://127.0.0.1:3100/titles" "本地 SSR"
 wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
-wait_for_url "https://forum.sakura-bot.cn/titles" "线上站点"
 wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
+wait_for_url "https://forum.sakura-bot.cn/titles" "forum 旧域名跳转"
 
 echo "[可选] 百度普通收录主动推送..."
 if [[ -x "$ROOT_DIR/scripts/baidu_push_urls.sh" ]]; then
@@ -224,4 +224,4 @@ else
   echo "  - 未找到 scripts/baidu_push_urls.sh，跳过。"
 fi
 
-echo "部署完成: 代码已推送并发布到 forum.sakura-bot.cn"
+echo "部署完成: 代码已推送并发布到 viewer.sakura-bot.cn"

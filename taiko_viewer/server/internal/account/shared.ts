@@ -22,7 +22,7 @@ export const EMAIL_CODE_TTL_MS = 1000 * 60 * 10;
 export const BIND_VERIFY_TTL_MS = 1000 * 60 * 30;
 export const SYNC_COOLDOWN_MS = 1000 * 60 * 30;
 export const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
-export const DEFAULT_AVATAR = "https://forum.sakura-bot.cn/miku.png";
+export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
 export const DEVELOPER_REVIEWER_USERNAME = "sigaer";
 export const DEVELOPER_REVIEWER_EMAIL = "1106865024@qq.com";
 
