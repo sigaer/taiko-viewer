@@ -119,6 +119,14 @@ const filteredSongs = computed(() => {
   );
 });
 
+const buildSongDetailLink = (songId: number) => {
+  const path = `/songs/${songId}`;
+  if (props.shelfStatus === 1) {
+    return localePath({ path, query: { list: "removed" } });
+  }
+  return localePath(path);
+};
+
 </script>
 
 <template>
@@ -174,7 +182,7 @@ const filteredSongs = computed(() => {
             v-for="song in filteredSongs"
             :key="song.id"
             class="song-card-link"
-            :to="localePath(`/songs/${song.id}`)"
+            :to="buildSongDetailLink(song.id)"
           >
             <div class="song-card">
               <div class="song-cover">

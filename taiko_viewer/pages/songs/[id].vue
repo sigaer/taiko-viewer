@@ -21,16 +21,41 @@ const songId = computed(() => Number(route.params.id));
 definePageMeta({
   pageTitleKey: "songs.detail",
   pageDescKey: "page.songs.detail.desc",
-  navKey: "/songs/available",
-  breadcrumbs: [
-    { labelKey: "nav.songsAvailable", to: "/songs/available" },
-    { labelKey: "songs.detail" }
-  ]
+  navKey: "/songs/available"
 });
 
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
+const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
+  if (value === undefined || value === null || value === "") return 0;
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+const songListPath = computed(() => {
+  if (route.query.list === "removed") return "/songs/removed";
+  if (route.query.list === "available") return "/songs/available";
+  return normalizedShelfStatus(song.value?.shelf_status) === 1 ? "/songs/removed" : "/songs/available";
+});
+const songListLabelKey = computed(() =>
+  songListPath.value === "/songs/removed" ? "nav.songsRemoved" : "nav.songsAvailable"
+);
+
+watch(
+  () => [song.value?.shelf_status, route.query.list] as const,
+  async ([shelfStatus, listQuery]) => {
+    if (!song.value || listQuery === "removed" || listQuery === "available") return;
+    if (normalizedShelfStatus(shelfStatus) !== 1) return;
+    await navigateTo(
+      {
+        path: route.path,
+        query: { ...route.query, list: "removed" }
+      },
+      { replace: true }
+    );
+  },
+  { immediate: true }
+);
 const getSongPrimaryTitle = (target: SongCatalogItem | null) =>
   target ? (locale.value === "ja" && target.song_name_jp ? target.song_name_jp : target.song_name) : "";
 const getSongSecondaryTitle = (target: SongCatalogItem | null) =>
@@ -400,7 +425,7 @@ useViewerSeo(() => ({
   keywords: song.value ? [getSongPrimaryTitle(song.value), locale.value === "ja" ? "太鼓の達人楽曲" : "太鼓达人歌曲"] : [copy.value.detailTitle],
   breadcrumbs: [
     { name: t("nav.home"), path: "/" },
-    { name: t("nav.songsAvailable"), path: "/songs/available" },
+    { name: t(songListLabelKey.value), path: songListPath.value },
     { name: getSongPrimaryTitle(song.value) || copy.value.detailTitle, path: `/songs/${songId.value}` }
   ]
 }));
@@ -415,7 +440,7 @@ useViewerSeo(() => ({
     <el-card v-else-if="error || !song" class="panel-card">
       <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle">
         <template #extra>
-          <NuxtLink :to="localePath('/songs/available')">
+          <NuxtLink :to="localePath(songListPath)">
             <el-button type="primary">{{ copy.backToList }}</el-button>
           </NuxtLink>
         </template>
@@ -424,7 +449,7 @@ useViewerSeo(() => ({
 
     <el-card v-else class="panel-card detail-shell">
       <div class="back-row">
-        <NuxtLink class="back-link" :to="localePath('/songs/available')">{{ copy.back }}</NuxtLink>
+        <NuxtLink class="back-link" :to="localePath(songListPath)">{{ copy.back }}</NuxtLink>
       </div>
 
       <main class="detail-main">

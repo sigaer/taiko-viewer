@@ -163,7 +163,9 @@ const activePath = computed(() => {
   if (normalizedPath.startsWith("/forum")) return normalizedPath === "/forum/new" || normalizedPath === "/forum/me" ? normalizedPath : "/forum";
   if (normalizedPath === "/songs") return "/songs/available";
   if (normalizedPath === "/songs/removed") return "/songs/removed";
-  if (normalizedPath.startsWith("/songs/")) return "/songs/available";
+  if (normalizedPath.startsWith("/songs/")) {
+    return route.query.list === "removed" ? "/songs/removed" : "/songs/available";
+  }
   if (normalizedPath.startsWith("/account/profile")) return "/account/profile";
   if (normalizedPath.startsWith("/account/songs")) return "/account/songs";
   if (normalizedPath.startsWith("/account/sync")) return "/account/sync";

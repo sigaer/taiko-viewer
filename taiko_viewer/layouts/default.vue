@@ -104,6 +104,17 @@ const startPageLoading = () => {
 };
 
 const buildBreadcrumbs = () => {
+  if (/^\/(?:ja\/)?songs\/[^/]+$/.test(route.path)) {
+    const isRemovedList = route.query.list === "removed";
+    return [
+      { labelKey: "nav.home", to: "/" },
+      {
+        labelKey: isRemovedList ? "nav.songsRemoved" : "nav.songsAvailable",
+        to: isRemovedList ? "/songs/removed" : "/songs/available"
+      },
+      { labelKey: "songs.detail" }
+    ];
+  }
   const items = (route.meta.breadcrumbs as BreadcrumbItem[]) || [];
   if (items.length) {
     const firstLabel = items[0].labelKey ? t(items[0].labelKey) : items[0].label;
