@@ -1,4 +1,4 @@
-# Taiko Forum
+# Taiko Viewer
 
 Private dual-project repository for the Taiko forum service.
 
