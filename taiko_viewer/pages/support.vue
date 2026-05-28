@@ -6,7 +6,9 @@ import type {
   SupportTicket,
   SupportTicketCategory,
   SupportTicketCreateResponse,
-  SupportTicketListResponse
+  SupportTicketDetail,
+  SupportTicketListResponse,
+  SupportTicketMessage
 } from "~/types/support";
 
 const { t, locale } = useI18n();
@@ -54,11 +56,11 @@ const copy = computed(() =>
   locale.value === "ja"
     ? {
         introTitle: "サポートチケット",
-        introDesc: "問題報告や機能要望を送信すると、運営メールへ直接通知され、同時にマイ履歴にも保存されます。",
+        introDesc: "問題報告や機能要望を送信すると、運営へ通知されます。返信は登録メールとこのページの両方で確認でき、ここから追加メッセージも送れます。",
         formTitle: "新しいチケットを送信",
         formDesc: "タイトルと内容を整理して送ると、確認と返信が速くなります。",
         historyTitle: "自分のチケット",
-        historyDesc: "最近の送信履歴とメール送信状態を確認できます。",
+        historyDesc: "対応状況、スレッド履歴、未読返信を確認できます。",
         category: "分類",
         title: "タイトル",
         titlePlaceholder: "例：同期後にプロフィールが更新されない",
@@ -81,15 +83,29 @@ const copy = computed(() =>
         mailFailed: "メール送信失敗",
         submittedAt: "送信日時",
         ticketId: "チケット番号",
-        noContact: "未入力"
+        noContact: "未入力",
+        unread: "未読返信",
+        expand: "詳細を見る",
+        collapse: "閉じる",
+        threadTitle: "やり取り",
+        staffLabel: "運営",
+        userLabel: "自分",
+        followUp: "追加メッセージ",
+        followUpPlaceholder: "追加情報や質問を入力してください",
+        followUpSubmit: "メッセージ送信",
+        followUpSuccess: "メッセージを送信しました",
+        followUpQueued: "メッセージは保存されましたが、運営通知メールの送信に失敗しました",
+        followUpFailed: "メッセージ送信に失敗しました",
+        closedHint: "このチケットは完了済みです。新しい問題は新規チケットを作成してください。",
+        needFollowUp: "メッセージ内容を入力してください"
       }
     : {
         introTitle: "工单支持",
-        introDesc: "提交问题反馈或功能建议后，内容会直接通知到站务邮箱，同时保留在你的个人工单记录里。",
+        introDesc: "提交问题反馈或功能建议后，站务会收到通知。回复会同步发到你的注册邮箱，你也可以在这里查看线程并继续沟通。",
         formTitle: "提交新工单",
         formDesc: "把标题、现象和复现步骤写清楚，后续定位会更快。",
         historyTitle: "我的工单",
-        historyDesc: "这里会保留最近提交记录，以及邮件投递状态。",
+        historyDesc: "这里会保留最近提交记录、对话线程和未读回复。",
         category: "工单分类",
         title: "工单标题",
         titlePlaceholder: "例如：同步完成后个人资料没有刷新",
@@ -112,7 +128,21 @@ const copy = computed(() =>
         mailFailed: "投递失败",
         submittedAt: "提交时间",
         ticketId: "工单编号",
-        noContact: "未填写"
+        noContact: "未填写",
+        unread: "未读回复",
+        expand: "查看详情",
+        collapse: "收起",
+        threadTitle: "对话记录",
+        staffLabel: "站务",
+        userLabel: "我",
+        followUp: "追加留言",
+        followUpPlaceholder: "补充信息或继续提问",
+        followUpSubmit: "发送留言",
+        followUpSuccess: "留言已发送",
+        followUpQueued: "留言已保存，但站务通知邮件发送失败",
+        followUpFailed: "发送留言失败",
+        closedHint: "此工单已关闭，如有新问题请提交新工单。",
+        needFollowUp: "请输入留言内容"
       }
 );
 
@@ -173,6 +203,11 @@ const formatTicketTime = (value: string) => {
 };
 
 const submitting = ref(false);
+const expandedTicketId = ref<number | null>(null);
+const loadingDetailId = ref<number | null>(null);
+const followUpSubmittingId = ref<number | null>(null);
+const ticketDetails = ref<Record<number, SupportTicketDetail>>({});
+const followUpDrafts = reactive<Record<number, string>>({});
 
 const { data: ticketsData, refresh: refreshTickets, status: ticketsStatus } = await useAsyncData<SupportTicketListResponse>(
   "support-ticket-list",
@@ -184,6 +219,67 @@ const { data: ticketsData, refresh: refreshTickets, status: ticketsStatus } = aw
 
 const tickets = computed(() => ticketsData.value?.items || []);
 const loadingTickets = computed(() => ticketsStatus.value === "pending");
+
+const getMessageLabel = (message: SupportTicketMessage) =>
+  message.authorRole === "staff" ? copy.value.staffLabel : copy.value.userLabel;
+
+const loadTicketDetail = async (ticketId: number) => {
+  loadingDetailId.value = ticketId;
+  try {
+    const detail = await apiFetch<SupportTicketDetail>(`/api/support/tickets/${ticketId}`);
+    ticketDetails.value[ticketId] = detail;
+    await refreshTickets();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.followUpFailed);
+  } finally {
+    loadingDetailId.value = null;
+  }
+};
+
+const toggleTicket = async (ticketId: number) => {
+  if (expandedTicketId.value === ticketId) {
+    expandedTicketId.value = null;
+    return;
+  }
+  expandedTicketId.value = ticketId;
+  if (!ticketDetails.value[ticketId]) {
+    await loadTicketDetail(ticketId);
+  } else {
+    await loadTicketDetail(ticketId);
+  }
+};
+
+const submitFollowUp = async (ticketId: number) => {
+  if (followUpSubmittingId.value) return;
+  const content = String(followUpDrafts[ticketId] || "").trim();
+  if (!content) {
+    ElMessage.warning(copy.value.needFollowUp);
+    return;
+  }
+
+  followUpSubmittingId.value = ticketId;
+  try {
+    const response = await apiFetch<{ ok: true; ticket: SupportTicketDetail; mailDelivered: boolean }>(
+      `/api/support/tickets/${ticketId}/messages`,
+      {
+        method: "POST",
+        body: { content }
+      }
+    );
+    ticketDetails.value[ticketId] = response.ticket;
+    followUpDrafts[ticketId] = "";
+    if (response.mailDelivered) {
+      ElMessage.success(copy.value.followUpSuccess);
+    } else {
+      ElMessage.warning(copy.value.followUpQueued);
+    }
+    await refreshTickets();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.followUpFailed);
+  } finally {
+    followUpSubmittingId.value = null;
+  }
+};
 
 const submit = async () => {
   if (submitting.value) return;
@@ -336,6 +432,7 @@ const submit = async () => {
                 <div class="ticket-card__meta">
                   <span class="ticket-id">{{ copy.ticketId }} #{{ ticket.id }}</span>
                   <span>{{ findCategoryLabel(ticket.category) }}</span>
+                  <el-tag v-if="ticket.hasUnread" size="small" type="danger">{{ copy.unread }}</el-tag>
                 </div>
                 <h4>{{ ticket.title }}</h4>
               </div>
@@ -350,6 +447,57 @@ const submit = async () => {
             <div class="ticket-card__footer">
               <span>{{ copy.submittedAt }}：{{ formatTicketTime(ticket.createdAt) }}</span>
               <span>{{ copy.contact }}：{{ ticket.contact || copy.noContact }}</span>
+              <el-button
+                link
+                type="primary"
+                :loading="loadingDetailId === ticket.id"
+                @click="toggleTicket(ticket.id)"
+              >
+                {{ expandedTicketId === ticket.id ? copy.collapse : copy.expand }}
+              </el-button>
+            </div>
+
+            <div v-if="expandedTicketId === ticket.id" class="ticket-thread">
+              <h5>{{ copy.threadTitle }}</h5>
+              <div v-if="loadingDetailId === ticket.id && !ticketDetails[ticket.id]" class="thread-loading">
+                {{ copy.loading }}
+              </div>
+              <div v-else class="thread-list">
+                <div
+                  v-for="message in ticketDetails[ticket.id]?.messages || []"
+                  :key="`${message.id}-${message.createdAt}`"
+                  class="thread-item"
+                  :class="message.authorRole === 'staff' ? 'thread-item--staff' : 'thread-item--user'"
+                >
+                  <div class="thread-item__head">
+                    <strong>{{ getMessageLabel(message) }}</strong>
+                    <span>{{ formatTicketTime(message.createdAt) }}</span>
+                  </div>
+                  <p>{{ message.content }}</p>
+                </div>
+              </div>
+
+              <div v-if="ticket.status === 'open'" class="follow-up-box">
+                <el-input
+                  v-model="followUpDrafts[ticket.id]"
+                  type="textarea"
+                  :rows="4"
+                  resize="vertical"
+                  :maxlength="8000"
+                  show-word-limit
+                  :placeholder="copy.followUpPlaceholder"
+                />
+                <div class="form-actions">
+                  <el-button
+                    type="primary"
+                    :loading="followUpSubmittingId === ticket.id"
+                    @click="submitFollowUp(ticket.id)"
+                  >
+                    {{ copy.followUpSubmit }}
+                  </el-button>
+                </div>
+              </div>
+              <p v-else class="closed-hint">{{ copy.closedHint }}</p>
             </div>
           </article>
         </div>
@@ -507,6 +655,70 @@ const submit = async () => {
   border: 1px dashed rgba(171, 141, 110, 0.36);
   color: #846b57;
   background: rgba(255, 252, 248, 0.7);
+}
+
+.ticket-thread {
+  padding-top: 8px;
+  border-top: 1px solid rgba(171, 141, 110, 0.18);
+  display: grid;
+  gap: 12px;
+}
+
+.ticket-thread h5 {
+  margin: 0;
+  font-size: 14px;
+  color: #7a6552;
+}
+
+.thread-loading {
+  color: #846b57;
+  font-size: 13px;
+}
+
+.thread-list {
+  display: grid;
+  gap: 10px;
+}
+
+.thread-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.thread-item--staff {
+  background: rgba(232, 244, 255, 0.92);
+}
+
+.thread-item--user {
+  background: rgba(255, 248, 240, 0.92);
+}
+
+.thread-item__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #7a6552;
+  margin-bottom: 8px;
+}
+
+.thread-item p {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.follow-up-box {
+  display: grid;
+  gap: 12px;
+}
+
+.closed-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #846b57;
 }
 
 @media (max-width: 960px) {

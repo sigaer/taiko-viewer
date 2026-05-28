@@ -130,7 +130,10 @@ const groups = computed(() => [
           { key: "/account/sync", label: t("account.sync"), icon: "history" },
           { key: "/account/developer", label: t("account.developer"), icon: "badge" },
           ...(isDeveloperReviewer.value
-            ? [{ key: "/account/developer/review", label: t("account.developerReview"), icon: "key" }]
+            ? [
+                { key: "/account/developer/review", label: t("account.developerReview"), icon: "key" },
+                { key: "/account/support/review", label: t("account.supportReview"), icon: "support" }
+              ]
             : [])
         ]
       : [
@@ -170,6 +173,7 @@ const activePath = computed(() => {
   if (normalizedPath.startsWith("/account/songs")) return "/account/songs";
   if (normalizedPath.startsWith("/account/sync")) return "/account/sync";
   if (normalizedPath.startsWith("/account/developer/review")) return "/account/developer/review";
+  if (normalizedPath.startsWith("/account/support/review")) return "/account/support/review";
   if (normalizedPath.startsWith("/account/developer")) return "/account/developer";
   if (normalizedPath.startsWith("/account/login")) return "/account/login";
   if (normalizedPath.startsWith("/account/register")) return "/account/register";

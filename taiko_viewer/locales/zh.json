@@ -253,7 +253,8 @@
     "sync": "多端同步",
     "songs": "歌曲数据",
     "developer": "开发者权限",
-    "developerReview": "开发者审批"
+    "developerReview": "开发者审批",
+    "supportReview": "工单审批"
   },
   "page": {
     "home": {
@@ -381,7 +382,7 @@
       "desc": "切换主题、管理缓存，并进入社区与开发者相关入口。"
     },
     "support": {
-      "desc": "提交 viewer 工单、问题反馈和功能建议，并查看自己的处理记录。"
+      "desc": "提交 viewer 工单、问题反馈和功能建议，查看处理进度并与站务双向沟通。"
     },
     "aliasLog": {
       "desc": "记录太鼓达人国行歌曲别名更新历史。"
@@ -436,6 +437,9 @@
       },
       "developerReview": {
         "desc": "审批开发者权限申请，并签发可读取完整 JSON 的开发者 Token。"
+      },
+      "supportReview": {
+        "desc": "处理用户工单、回复问题并关闭已完成的工单。"
       }
     }
   },

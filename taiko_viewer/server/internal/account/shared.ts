@@ -26,6 +26,13 @@ export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
 export const DEVELOPER_REVIEWER_USERNAME = "sigaer";
 export const DEVELOPER_REVIEWER_EMAIL = "1106865024@qq.com";
 
+export const isSiteOperator = (user: Pick<AccountRow, "username" | "email"> | null | undefined) =>
+  Boolean(
+    user &&
+      String(user.username || "").trim() === DEVELOPER_REVIEWER_USERNAME &&
+      normalizeEmail(user.email) === DEVELOPER_REVIEWER_EMAIL
+  );
+
 export type AccountRow = {
   id: number;
   username: string;

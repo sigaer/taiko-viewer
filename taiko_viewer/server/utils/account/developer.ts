@@ -5,10 +5,8 @@ import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account
 import {
   type AccountRow,
   type DeveloperApplicationRow,
-  DEVELOPER_REVIEWER_EMAIL,
-  DEVELOPER_REVIEWER_USERNAME,
   ensureNonEmpty,
-  normalizeEmail,
+  isSiteOperator,
   readRawUserdataText,
   sha256
 } from "~/server/internal/account/shared";
@@ -90,12 +88,7 @@ const getDeveloperApplicationHistory = async (userId: number) => {
   return rows.map((row) => toDeveloperApplicationPublic(row)).filter(Boolean) as DeveloperApplicationPublic[];
 };
 
-export const isDeveloperReviewer = (user: Pick<AccountRow, "username" | "email"> | null | undefined) =>
-  Boolean(
-    user &&
-      String(user.username || "").trim() === DEVELOPER_REVIEWER_USERNAME &&
-      normalizeEmail(user.email) === DEVELOPER_REVIEWER_EMAIL
-  );
+export const isDeveloperReviewer = isSiteOperator;
 
 export const requireDeveloperReviewer = async (event: H3Event) => {
   const user = await requireAccountUser(event);

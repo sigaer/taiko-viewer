@@ -194,12 +194,29 @@ const CREATE_TABLES = [
     KEY idx_web_support_tickets_mail_status_created_at (mail_status, created_at),
     CONSTRAINT fk_web_support_tickets_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_support_ticket_messages (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ticket_id BIGINT UNSIGNED NOT NULL,
+    author_role VARCHAR(16) NOT NULL,
+    author_user_id BIGINT UNSIGNED NOT NULL,
+    content TEXT NOT NULL,
+    mail_status VARCHAR(16) NOT NULL DEFAULT 'skipped',
+    mail_error VARCHAR(255) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_web_support_ticket_messages_ticket_id_created_at (ticket_id, created_at),
+    CONSTRAINT fk_web_support_ticket_messages_ticket_id FOREIGN KEY (ticket_id)
+      REFERENCES web_support_tickets(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_support_ticket_messages_author_user_id FOREIGN KEY (author_user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 
 const MIGRATIONS = [
   "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
-  "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at"
+  "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
+  "ALTER TABLE web_support_tickets ADD COLUMN staff_last_read_at DATETIME NULL DEFAULT NULL AFTER mail_error",
+  "ALTER TABLE web_support_tickets ADD COLUMN user_last_read_at DATETIME NULL DEFAULT NULL AFTER staff_last_read_at"
 ];
 
 const runMigration = async (statement: string) => {

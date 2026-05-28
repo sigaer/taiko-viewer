@@ -35,6 +35,8 @@ const copy = computed(() =>
         developerDesc: "申請、審査状態、Token を確認します",
         review: "開発者審査",
         reviewDesc: "審査待ち申請を処理し、開発者 Token を発行します",
+        supportReview: "サポート審査",
+        supportReviewDesc: "ユーザーのサポートチケットを処理し、返信して完了します",
         theme: "テーマ設定",
         themeDesc: "ライト / ダークテーマを切り替えます。",
         themeMode: "テーマ",
@@ -54,13 +56,15 @@ const copy = computed(() =>
         forum: "论坛社区",
         forumDesc: "查看版块、通知和帖子动态",
         support: "工单支持",
-        supportDesc: "把问题反馈或功能建议直接发送到站务邮箱",
+        supportDesc: "把问题反馈或功能建议提交给站务，并查看对话进度",
         sync: "多端同步",
         syncDesc: "同步当前绑定 ID 的完整成绩 JSON",
         developer: "开发者权限",
         developerDesc: "提交申请、查看审批状态和 Token",
         review: "开发者审批",
         reviewDesc: "处理待审批申请并签发开发者 Token",
+        supportReview: "工单审批",
+        supportReviewDesc: "处理用户工单、回复问题并关闭已完成工单",
         theme: "主题设置",
         themeDesc: "切换浅色/深色主题。",
         themeMode: "主题模式",
@@ -159,6 +163,10 @@ const clearCache = () => {
         <NuxtLink v-if="isDeveloperReviewer" :to="localePath('/account/developer/review')" class="tool-link">
           <strong>{{ copy.review }}</strong>
           <span>{{ copy.reviewDesc }}</span>
+        </NuxtLink>
+        <NuxtLink v-if="isDeveloperReviewer" :to="localePath('/account/support/review')" class="tool-link">
+          <strong>{{ copy.supportReview }}</strong>
+          <span>{{ copy.supportReviewDesc }}</span>
         </NuxtLink>
       </div>
     </el-card>
