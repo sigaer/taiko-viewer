@@ -32,7 +32,7 @@ curl http://127.0.0.1:3102/health
 
 - `taiko-sync-receiver.service` 现在是服务端同步网关，不再接收网页直接上传的 zstd 成绩包。
 - 网页只向论坛后端提交同步请求，论坛后端再调用 `http://127.0.0.1:3102/dispatch`。
-- `Sakura bot` 网关会在本地读取 `userdata/{userid}data.json`，按需刷新 `userdata/{userid}/data_*.json` 历史快照，并将 zstd 数据转发到配置的目标接口。
+- `Sakura bot` 网关会先从鼓众广场（Wahlap CN API）拉取网页绑定 ID 的 `userdata/{userid}data.json`，刷新历史快照，再将 zstd 数据转发到配置的目标接口。用户只需在网页端完成鼓众 ID 绑定，无需额外配置账号密码。
 - 目标列表由网关自身提供：`http://127.0.0.1:3102/targets`
 - 如需新增或调整同步目标，直接修改 `/home/sigaer/taiko/scripts/sync_dispatch_targets.py`
 

@@ -602,6 +602,16 @@ export const getUserdataPath = (taikoId: string) => {
   return resolve(userdataDir, `${taikoId}data.json`);
 };
 
+export const userdataFileExists = async (taikoId: string) => {
+  const filePath = getUserdataPath(taikoId);
+  try {
+    await access(filePath, fsConstants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const getUserdataHistoryDir = (taikoId: string) => {
   const { userdataDir } = getRuntimePaths();
   return resolve(userdataDir, taikoId);

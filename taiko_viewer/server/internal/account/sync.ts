@@ -47,7 +47,7 @@ const DEFAULT_SYNC_TARGETS: SyncTargetConfig[] = [
   {
     id: "sakura-bot",
     label: "Sakura bot",
-    description: "由 Sakura bot 在服务端读取 userdata 并刷新本地快照。"
+    description: "由 Sakura bot 从鼓众广场拉取 userdata 并刷新本地快照后分发。"
   }
 ];
 
@@ -135,6 +135,27 @@ export const requestSyncDispatch = async (taikoId: string, targetIds: string[]) 
   }
 
   const payload = await readResponseJson(response);
+  // #region agent log
+  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
+    body: JSON.stringify({
+      sessionId: "b6e9de",
+      runId: "pre-fix",
+      hypothesisId: "H4",
+      location: "server/internal/account/sync.ts:requestSyncDispatch",
+      message: "sync_dispatch_response",
+      data: {
+        taikoId,
+        targetIds,
+        httpStatus: response.status,
+        ok: Boolean(payload?.ok),
+        gatewayMessage: String(payload?.message || "").trim()
+      },
+      timestamp: Date.now()
+    })
+  }).catch(() => {});
+  // #endregion
   if (!response.ok) {
     const message =
       String(payload?.message || payload?.statusMessage || "").trim() ||

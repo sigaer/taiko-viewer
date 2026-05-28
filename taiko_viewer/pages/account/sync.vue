@@ -38,6 +38,8 @@ type SyncLog = {
 
 type SyncOverviewPayload = {
   currentBinding: BindingSummary | null;
+  hasUserdata: boolean;
+  canSyncFromWahlap: boolean;
   targets: Array<{
     id: string;
     label: string;
@@ -78,7 +80,8 @@ const copy = computed(() =>
   locale.value === "ja"
     ? {
         title: "多端同期",
-        intro: "現在は「現在連携中の ID」の完全な `userdata` JSON のみを同期します。Web 側はリクエスト送信のみ行い、実際の取得と配信はサーバー側で処理されます。送信後は 30 分のクールダウンに入ります。",
+        intro: "ドンダーひろば ID を連携した後、「同期開始」でサーバーが鼓衆広場から最新の `userdata` を取得し、選択した送信先へ圧縮配信します。追加のログイン設定は不要です。送信後は 30 分のクールダウンに入ります。",
+        serviceUnavailable: "サーバー側の鼓衆広場アクセス設定が未構成のため、現在同期できません。",
         currentBinding: "現在の連携 ID",
         currentTitle: "現在の称号",
         cooldownStatus: "クールダウン",
@@ -86,7 +89,7 @@ const copy = computed(() =>
         remaining: "残り {seconds}s",
         needBinding: "先にドンダーひろば ID を連携してください",
         targets: "同期先",
-        targetsDesc: "選択した送信先に対して、Sakura bot がサーバー側で userdata を読み込み、zstd 圧縮して配信します。",
+        targetsDesc: "選択した送信先に対して、サーバーが鼓衆広場から userdata を取得し、zstd 圧縮して配信します。",
         noTargets: "利用可能な同期先はありません",
         start: "同期開始",
         coolingDown: "クールダウン中 {seconds}s",
@@ -109,7 +112,8 @@ const copy = computed(() =>
       }
     : {
         title: "多端同步",
-        intro: "当前只同步“当前绑定 ID”的完整 `userdata` JSON。网页仅发起请求，实际读取与分发由服务端执行，提交后会进入 30 分钟冷却。",
+        intro: "绑定鼓众 ID 后，点击「开始同步」会由服务端从鼓众广场拉取最新 userdata，并压缩分发到所选目标；无需额外配置账号密码。提交后进入 30 分钟冷却。",
+        serviceUnavailable: "服务端暂未配置鼓众广场访问凭据，暂时无法同步，请联系管理员。",
         currentBinding: "当前绑定 ID",
         currentTitle: "当前称号",
         cooldownStatus: "冷却状态",
@@ -117,7 +121,7 @@ const copy = computed(() =>
         remaining: "剩余 {seconds}s",
         needBinding: "请先绑定鼓众 ID 后再使用多端同步",
         targets: "同步目标",
-        targetsDesc: "勾选后会由 Sakura bot 在服务端读取 userdata、压缩为 zstd，并分发到对应服务。",
+        targetsDesc: "勾选后，服务端会从鼓众广场拉取 userdata、压缩为 zstd，并分发到对应服务。",
         noTargets: "当前没有可用的同步目标",
         start: "开始同步",
         coolingDown: "冷却中 {seconds}s",
@@ -146,6 +150,8 @@ const { data, pending, refresh } = await useAsyncData<SyncOverviewPayload>(
   {
     default: () => ({
       currentBinding: null,
+      hasUserdata: false,
+      canSyncFromWahlap: true,
       targets: [],
       cooldownRemainingSeconds: 0,
       cooldownUntil: "",
@@ -279,6 +285,14 @@ const submitSync = async () => {
           </div>
         </div>
         <el-empty v-else :description="copy.needBinding" />
+        <el-alert
+          v-if="overview.currentBinding && overview.canSyncFromWahlap === false"
+          type="warning"
+          :closable="false"
+          show-icon
+          :title="copy.serviceUnavailable"
+          class="userdata-alert"
+        />
       </el-card>
 
       <el-card class="panel-card">
@@ -298,7 +312,7 @@ const submitSync = async () => {
         <el-button
           type="primary"
           :loading="submitting"
-          :disabled="!overview.currentBinding || cooldown > 0 || !overview.targets.length"
+          :disabled="!overview.currentBinding || overview.canSyncFromWahlap === false || cooldown > 0 || !overview.targets.length"
           @click="submitSync"
         >
           {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.start }}
@@ -388,6 +402,10 @@ const submitSync = async () => {
 .last-sync-meta span {
   color: #7d6a5a;
   font-size: 13px;
+}
+
+.userdata-alert {
+  margin-top: 16px;
 }
 
 .target-list {
