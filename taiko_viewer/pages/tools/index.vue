@@ -16,7 +16,7 @@ useViewerSeo(() => ({
   title: t("tools.title"),
   description: buildPageDescription(t("page.tools.index.desc")),
   path: "/tools",
-  keywords: [t("tools.title"), t("tools.chartConfig"), t("tools.noteCount"), "taikob", "taikotrend"]
+  keywords: [t("tools.title"), t("tools.chartConfig"), t("tools.noteCount"), "taikob", "taikorec", "taikotrend"]
 }));
 
 const copy = computed(() =>
@@ -28,6 +28,7 @@ const copy = computed(() =>
           { title: "配置検索", desc: "BPM、難易度、譜面パターンから楽曲を検索", to: "/tools/chart-config", tag: "公開" },
           { title: "ノーツ数検索", desc: "指定ノーツ数に一致する譜面を探す", to: "/tools/note-count", tag: "公開" },
           { title: "B30 表", desc: "Rating Top N の集計画像を生成（taikob）", to: "/tools/b30", tag: "ログイン必須" },
+          { title: "おすすめ楽曲", desc: "プレイデータからおすすめ譜面を生成（taikorec）", to: "/tools/recommend", tag: "ログイン必須" },
           { title: "Rating 推移", desc: "各次元の Rating 履歴を表示（taikotrend）", to: "/tools/trend", tag: "ログイン必須" },
           { title: "太鼓ワードクラウド", desc: "プレイ履歴からワードクラウドを生成（taikocloud）", to: "/tools/word-cloud", tag: "ログイン必須" }
         ]
@@ -39,6 +40,7 @@ const copy = computed(() =>
           { title: "查配置", desc: "按 BPM、难度或谱面配置检索歌曲", to: "/tools/chart-config", tag: "公开" },
           { title: "查物量", desc: "按音符总数查找对应谱面", to: "/tools/note-count", tag: "公开" },
           { title: "B30 表", desc: "生成 Rating Top N 汇总图（taikob）", to: "/tools/b30", tag: "需登录" },
+          { title: "推荐歌曲", desc: "根据游玩数据生成推荐曲目（taikorec）", to: "/tools/recommend", tag: "需登录" },
           { title: "Rating 走势", desc: "查看各维度 Rating 历史曲线（taikotrend）", to: "/tools/trend", tag: "需登录" },
           { title: "太鼓词云", desc: "根据游玩记录生成词云（taikocloud）", to: "/tools/word-cloud", tag: "需登录" }
         ]

@@ -241,6 +241,7 @@
     "chartConfig": "查配置",
     "noteCount": "查物量",
     "b30": "B30 表",
+    "recommend": "推荐歌曲",
     "trend": "Rating 走势",
     "wordCloud": "太鼓词云"
   },
@@ -389,7 +390,7 @@
     },
     "tools": {
       "index": {
-        "desc": "太鼓达人查谱工具箱：查配置、查物量、B30、Rating 走势与词云。"
+        "desc": "太鼓达人查谱工具箱：查配置、查物量、B30、推荐歌曲、Rating 走势与词云。"
       },
       "chartConfig": {
         "desc": "按 BPM、难度或谱面配置字符串查询太鼓达人国行谱面。",
@@ -405,6 +406,9 @@
       },
       "b30": {
         "desc": "生成太鼓达人 Rating Top N 汇总图，对应 bot 指令 taikob。"
+      },
+      "recommend": {
+        "desc": "根据游玩数据生成推荐曲目列表，对应 bot 指令 taikorec / 推荐歌曲。"
       },
       "trend": {
         "desc": "查看 Rating 六维与综合历史走势，对应 bot 指令 taikotrend。"

@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.21.0";
+const appVersion = runtimeConfig.public.appVersion || "0.22.0";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
@@ -86,6 +86,7 @@ const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
         <NuxtLink :to="localePath('/tools/chart-config')" class="home-tool-card">{{ t("tools.chartConfig") }}</NuxtLink>
         <NuxtLink :to="localePath('/tools/note-count')" class="home-tool-card">{{ t("tools.noteCount") }}</NuxtLink>
         <NuxtLink :to="localePath('/tools/b30')" class="home-tool-card">{{ t("tools.b30") }}</NuxtLink>
+        <NuxtLink :to="localePath('/tools/recommend')" class="home-tool-card">{{ t("tools.recommend") }}</NuxtLink>
         <NuxtLink :to="localePath('/tools/trend')" class="home-tool-card">{{ t("tools.trend") }}</NuxtLink>
         <NuxtLink :to="localePath('/tools/word-cloud')" class="home-tool-card">{{ t("tools.wordCloud") }}</NuxtLink>
         <NuxtLink :to="localePath('/tools')" class="home-tool-card home-tool-card--muted">{{ t("nav.tools") }}</NuxtLink>

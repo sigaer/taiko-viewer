@@ -6,6 +6,7 @@
 - Do not add unrelated bot code, user data, cached assets, or deployment outputs.
 - This path is a standalone Git repository.
 - Work inside `/home/sigaer/taiko/taiko-forum` does not need `/home/sigaer/git/Sakura_bot/taiko` status checks, sync, commits, or pushes.
+- Use /home/sigaer/taiko/taiko-forum/scripts/deploy_forum_web.sh to build and commit viewer
 
 ## Web
 

@@ -193,6 +193,91 @@ export const getTrendImageBuffer = async (
   return toJpeg(png);
 };
 
+const RECOMMEND_DIM_ALIASES: Record<string, string> = {
+  rating: "rating",
+  综合: "rating",
+  总合: "rating",
+  daigouryoku: "daigouryoku",
+  大歌力: "daigouryoku",
+  大歌: "daigouryoku",
+  stamina: "stamina",
+  体力: "stamina",
+  speed: "speed",
+  高速: "speed",
+  高速处理: "speed",
+  accuracy_power: "accuracy_power",
+  精度: "accuracy_power",
+  准度: "accuracy_power",
+  良率: "accuracy_power",
+  精度力: "accuracy_power",
+  rhythm: "rhythm",
+  节奏: "rhythm",
+  节奏处理: "rhythm",
+  complex: "complex",
+  复合: "complex",
+  复合处理: "complex"
+};
+
+const normalizeRecommendDim = (token: string) => token.replace(/\s+/g, "").trim().toLowerCase();
+
+const resolveRecommendDim = (token: string) => {
+  const trimmed = token.trim();
+  if (!trimmed) {
+    return { dimKey: "rating", dimLabel: "rating" };
+  }
+  const dimKey = RECOMMEND_DIM_ALIASES[trimmed] || RECOMMEND_DIM_ALIASES[normalizeRecommendDim(trimmed)];
+  return dimKey ? { dimKey, dimLabel: trimmed } : null;
+};
+
+export const getRecommendImageBuffer = async (
+  userId: number,
+  options: { n?: number; dim?: string }
+) => {
+  const binding = await ensureBindingWithUserdata(userId);
+  const limit = Math.min(50, Math.max(1, Number(options.n) || 20));
+  const resolved = options.dim ? resolveRecommendDim(options.dim) : { dimKey: "rating", dimLabel: "rating" };
+  if (!resolved) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "维度不支持。可用：rating/综合、大歌力、体力、高速处理、精度力、节奏处理、复合处理"
+    });
+  }
+
+  const { repoRoot } = getRuntimePaths();
+  const jsonPath = `${repoRoot}/songs/rating_structured_with_ids.json`;
+  const subtitle = `维度：${resolved.dimLabel}  数量：${limit}`;
+  const code = [
+    PYTHON_CHART_HELPERS,
+    "from plugins.utils.score_calculator import compute_recommendations_for_user, generate_recommend_image",
+    "import sys, json",
+    "payload = json.loads(sys.argv[2])",
+    "with redirect_stdout(_chart_log):",
+    "    recs = compute_recommendations_for_user(",
+    "        int(sys.argv[1]),",
+    "        best_key=payload['best_key'],",
+    "        limit=payload['limit'],",
+    "        json_path=payload['json_path'],",
+    "    )",
+    "    buf = generate_recommend_image(",
+    "        recs,",
+    "        title='以下是可供参考的推荐歌曲',",
+    "        subtitle=payload['subtitle'],",
+    "        font_path='assets/fonts/DDFont.ttf',",
+    "    )",
+    "sys.stdout.buffer.write(_chart_image_bytes(buf))"
+  ].join("\n");
+
+  const payload = JSON.stringify({
+    best_key: resolved.dimKey,
+    limit,
+    json_path: jsonPath,
+    subtitle
+  });
+
+  const png = await runPythonImage(code, [binding.taiko_id, payload]);
+  return toJpeg(png);
+};
+
 export const getWordCloudImageBuffer = async (userId: number) => {
   const binding = await ensureBindingWithUserdata(userId);
   const code = [
