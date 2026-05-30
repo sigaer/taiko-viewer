@@ -10,6 +10,9 @@ Environment=NITRO_PORT=3100
 Environment=NITRO_HOST=127.0.0.1
 Environment=TAIKO_REPO_ROOT=/home/sigaer/taiko
 Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
+Environment=TAIKO_OPEN_RESOURCE_DIR=/home/sigaer/taiko-open-resources
+Environment=TAIKO_OPEN_DAILY_LIMIT=200
+Environment=TAIKO_OPEN_DEVELOPER_DAILY_LIMIT=2000
 Environment=SMTP_HOST=smtp.qq.com
 Environment=SMTP_PORT=465
 Environment=SMTP_USER=1106865024@qq.com

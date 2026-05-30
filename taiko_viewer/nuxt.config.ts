@@ -134,6 +134,9 @@ export default defineNuxtConfig({
     ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
+    taikoOpenResourceDir: process.env.TAIKO_OPEN_RESOURCE_DIR || "",
+    taikoOpenDailyLimit: process.env.TAIKO_OPEN_DAILY_LIMIT || "",
+    taikoOpenDeveloperDailyLimit: process.env.TAIKO_OPEN_DEVELOPER_DAILY_LIMIT || "",
     syncTargetsJson: process.env.TAIKO_SYNC_TARGETS_JSON || "",
     localSyncReceiverBaseUrl: process.env.TAIKO_LOCAL_SYNC_RECEIVER_BASE_URL || "",
     dbHost: process.env.TAIKO_DB_HOST || "",
@@ -188,6 +191,7 @@ export default defineNuxtConfig({
       "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
       "/api/developer/**": { prerender: false },
+      "/api/taiko/**": { prerender: false },
       "/api/forum/**": { prerender: false },
       "/api/support/**": { prerender: false },
       "/api/bilibili/**": { prerender: false }

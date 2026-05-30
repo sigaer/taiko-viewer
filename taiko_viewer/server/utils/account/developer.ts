@@ -28,6 +28,7 @@ import {
   touchDeveloperToken,
   uploadDeveloperApplicationImages
 } from "~/server/internal/account/developer";
+import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
 import { requireAccountUser } from "./auth";
 
 type DeveloperApplicationJoinedRow = DeveloperApplicationRow & {
@@ -284,7 +285,7 @@ export const requireDeveloperToken = async (event: H3Event) => {
 };
 
 export const getDeveloperUserdataByUserid = async (event: H3Event, useridInput: unknown) => {
-  await requireDeveloperToken(event);
+  await enforceTaikoOpenQuota(event, "developer_userdata", { requireDeveloperToken: true });
   const userid = String(useridInput || "").trim();
   ensureNonEmpty(userid, "缺少 userid");
   const text = await readRawUserdataText(userid);

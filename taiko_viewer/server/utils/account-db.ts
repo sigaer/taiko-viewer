@@ -177,6 +177,17 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_developer_tokens_issued_by_user_id FOREIGN KEY (issued_by_user_id)
       REFERENCES web_user_accounts(id) ON DELETE SET NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_taiko_open_api_daily_usage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(64) NOT NULL,
+    api_name VARCHAR(128) NOT NULL,
+    day_key DATE NOT NULL,
+    request_count INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_taiko_open_api_daily_usage_ip_api_day (ip_address, api_name, day_key),
+    KEY idx_web_taiko_open_api_daily_usage_day_key (day_key)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_support_tickets (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
