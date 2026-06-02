@@ -32,6 +32,7 @@ const RESOURCE_FILES = {
   "nameplate-assets": "taiko-bot-nameplate-assets.zip",
   "fumens-renamed": "taiko-bot-fumens-renamed.zip"
 } as const;
+const ASSET_BUNDLE_FILE = "taiko-bot-assets.zip";
 
 const DATASET_PATH_RESOLVERS = {
   song_data: () => getContentRuntimePaths().songDataPath,
@@ -196,6 +197,17 @@ export const resolveTaikoResourceFile = async (name: string) => {
   const filePath = resolve(getTaikoOpenConfig().resourceDir, resourceFile);
   await ensureReadableFile(filePath);
   return { filePath, name: name as TaikoResourceName, filename: resourceFile };
+};
+
+export const resolveTaikoAssetBundleFile = async () => {
+  const filePath = resolve(getTaikoOpenConfig().resourceDir, ASSET_BUNDLE_FILE);
+  await ensureReadableFile(filePath);
+  const info = await getFileInfo(filePath);
+  return {
+    filePath,
+    filename: ASSET_BUNDLE_FILE,
+    info
+  };
 };
 
 export const buildTaikoOpenManifest = async (event: H3Event) => {
