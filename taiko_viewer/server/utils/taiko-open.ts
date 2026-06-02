@@ -30,6 +30,7 @@ const RESOURCE_FILES = {
   "cover-assets": "taiko-bot-cover-assets.zip",
   "dress-assets": "taiko-bot-dress-assets.zip",
   "nameplate-assets": "taiko-bot-nameplate-assets.zip",
+  "fumens-assets": "taiko-bot-fumens-assets.zip",
   "fumens-renamed": "taiko-bot-fumens-renamed.zip"
 } as const;
 const ASSET_BUNDLE_FILE = "taiko-bot-assets.zip";
