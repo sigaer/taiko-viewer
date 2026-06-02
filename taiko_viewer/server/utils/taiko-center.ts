@@ -11,6 +11,7 @@ import {
   readRawUserdataText
 } from "~/server/internal/account/shared";
 import { requestSyncDispatch } from "~/server/internal/account/sync";
+import { getAccountDb } from "~/server/utils/account-db";
 
 type JsonObject = Record<string, unknown>;
 
@@ -315,6 +316,40 @@ export const proxyTaikoCenterHirobaCredentialStatus = async (taikoIdInput: unkno
     taikoId,
     hasCredentials: Boolean(payload.hasCredentials)
   };
+};
+
+export const proxyTaikoCenterBindLookup = async (identityKeyInput: unknown) => {
+  const identityKey = String(identityKeyInput || "").trim();
+  if (!identityKey) {
+    throw createError({ statusCode: 400, statusMessage: "缺少身份标识" });
+  }
+  const db = getAccountDb();
+  try {
+    const [rows] = await db.execute<Array<{ id: string; visible: number | null }>>(
+      "SELECT id, COALESCE(visible, 0) AS visible FROM bind WHERE qq = ? LIMIT 1",
+      [identityKey]
+    );
+    const row = rows[0];
+    if (!row) {
+      return {
+        ok: true,
+        found: false,
+        identityKey
+      };
+    }
+    return {
+      ok: true,
+      found: true,
+      identityKey,
+      taikoId: String(row.id || "").trim(),
+      visible: Number(row.visible || 0) || 0
+    };
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: `查询中心绑定失败：${error instanceof Error ? error.message : String(error)}`
+    });
+  }
 };
 
 export const proxyTaikoWahlapPlayer = async (taikoIdInput: unknown) => fetchBindPlayerProfile(taikoIdInput);
