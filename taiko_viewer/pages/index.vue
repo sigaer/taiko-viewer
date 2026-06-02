@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.25.2";
+const appVersion = runtimeConfig.public.appVersion || "0.25.3";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 

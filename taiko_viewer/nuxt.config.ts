@@ -135,6 +135,8 @@ export default defineNuxtConfig({
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
     taikoOpenResourceDir: process.env.TAIKO_OPEN_RESOURCE_DIR || "",
+    taikoOpenAnonymousDailyLimit:
+      process.env.TAIKO_OPEN_ANONYMOUS_DAILY_LIMIT || "",
     taikoOpenDailyLimit: process.env.TAIKO_OPEN_DAILY_LIMIT || "",
     taikoOpenDeveloperDailyLimit: process.env.TAIKO_OPEN_DEVELOPER_DAILY_LIMIT || "",
     syncTargetsJson: process.env.TAIKO_SYNC_TARGETS_JSON || "",
