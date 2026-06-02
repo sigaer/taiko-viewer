@@ -3,7 +3,7 @@ import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
 import { proxyTaikoCenterHirobaSync } from "~/server/utils/taiko-center";
 
 export default defineEventHandler(async (event) => {
-  await enforceTaikoOpenQuota(event, "taiko_proxy_userdata_sync_hiroba", { requireDeveloperToken: true });
+  await enforceTaikoOpenQuota(event, "taiko_proxy_userdata_sync_hiroba");
   const body = ((await readBody(event)) || {}) as Record<string, unknown>;
   return proxyTaikoCenterHirobaSync(event.context.params?.taikoId, {
     email: body.email,

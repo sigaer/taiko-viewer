@@ -66,10 +66,23 @@ const getTaikoOpenConfig = () => {
     resourceDir: String(
       runtimeConfig.taikoOpenResourceDir || process.env.TAIKO_OPEN_RESOURCE_DIR || "/home/sigaer/taiko-open-resources"
     ),
-    dailyLimit: Math.max(1, Number(runtimeConfig.taikoOpenDailyLimit || process.env.TAIKO_OPEN_DAILY_LIMIT || 200)),
+    dailyLimit: Math.max(
+      1,
+      Number(
+        runtimeConfig.taikoOpenAnonymousDailyLimit ||
+          runtimeConfig.taikoOpenDailyLimit ||
+          process.env.TAIKO_OPEN_ANONYMOUS_DAILY_LIMIT ||
+          process.env.TAIKO_OPEN_DAILY_LIMIT ||
+          100
+      )
+    ),
     developerDailyLimit: Math.max(
       1,
-      Number(runtimeConfig.taikoOpenDeveloperDailyLimit || process.env.TAIKO_OPEN_DEVELOPER_DAILY_LIMIT || 2000)
+      Number(
+        runtimeConfig.taikoOpenDeveloperDailyLimit ||
+          process.env.TAIKO_OPEN_DEVELOPER_DAILY_LIMIT ||
+          2500
+      )
     )
   };
 };
@@ -150,13 +163,14 @@ export const enforceTaikoOpenQuota = async (
   const requestIp = normalizeIpAddress(
     getRequestIP(event, { xForwardedFor: true }) || event.node.req.socket.remoteAddress || "unknown"
   );
+  const quotaSubject = developerToken ? `token:${developerToken.id}` : `ip:${requestIp}`;
   const config = getTaikoOpenConfig();
   const limit = developerToken ? config.developerDailyLimit : config.dailyLimit;
   const dayKey = getUsageDayKey();
   const db = getAccountDb();
   const [rows] = await db.execute<UsageRow[]>(
     "SELECT request_count FROM web_taiko_open_api_daily_usage WHERE ip_address = ? AND api_name = ? AND day_key = ? LIMIT 1",
-    [requestIp, apiName, dayKey]
+    [quotaSubject, apiName, dayKey]
   );
   const currentCount = Number(rows[0]?.request_count || 0);
   if (currentCount >= limit) {
@@ -165,12 +179,12 @@ export const enforceTaikoOpenQuota = async (
   if (rows.length) {
     await db.execute(
       "UPDATE web_taiko_open_api_daily_usage SET request_count = request_count + 1 WHERE ip_address = ? AND api_name = ? AND day_key = ?",
-      [requestIp, apiName, dayKey]
+      [quotaSubject, apiName, dayKey]
     );
   } else {
     await db.execute(
       "INSERT INTO web_taiko_open_api_daily_usage (ip_address, api_name, day_key, request_count) VALUES (?, ?, ?, 1)",
-      [requestIp, apiName, dayKey]
+      [quotaSubject, apiName, dayKey]
     );
   }
   const nextCount = currentCount + 1;

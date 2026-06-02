@@ -285,7 +285,7 @@ export const requireDeveloperToken = async (event: H3Event) => {
 };
 
 export const getDeveloperUserdataByUserid = async (event: H3Event, useridInput: unknown) => {
-  await enforceTaikoOpenQuota(event, "developer_userdata", { requireDeveloperToken: true });
+  await enforceTaikoOpenQuota(event, "developer_userdata");
   const userid = String(useridInput || "").trim();
   ensureNonEmpty(userid, "缺少 userid");
   const text = await readRawUserdataText(userid);
