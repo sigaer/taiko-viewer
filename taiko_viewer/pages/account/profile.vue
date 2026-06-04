@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import type { UploadFile, UploadInstance, UploadRawFile } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
@@ -75,6 +76,10 @@ const switchingId = ref<number | null>(null);
 const deletingId = ref<number | null>(null);
 const uploading = ref(false);
 const removingAvatar = ref(false);
+const avatarUploadRef = ref<UploadInstance>();
+const avatarCropVisible = ref(false);
+const avatarCropSourceUrl = ref("");
+const avatarCropFileName = ref("");
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -109,6 +114,13 @@ const copy = computed(() =>
         avatarUploadFailed: "アバター更新に失敗しました",
         avatarReset: "アバターをデフォルトに戻しました",
         avatarDeleteFailed: "アバター削除に失敗しました",
+        avatarCropTitle: "アバターを調整",
+        avatarCropHint: "画像をドラッグして表示位置を調整できます。",
+        avatarCropWheelHint: "スライダーまたはマウスホイールで拡大率を変更できます。",
+        avatarCropZoom: "拡大率",
+        avatarCropConfirm: "この内容で保存",
+        avatarCropLoadFailed: "画像の読み込みに失敗しました。別の画像を選択してください。",
+        avatarCropFailed: "アバターの切り抜きに失敗しました",
         prepareFailed: "連携認証の開始に失敗しました",
         confirmSuccess: "連携完了。現在の ID を切り替えました",
         confirmFailed: "連携確認に失敗しました",
@@ -154,6 +166,13 @@ const copy = computed(() =>
         avatarUploadFailed: "头像上传失败",
         avatarReset: "头像已恢复默认",
         avatarDeleteFailed: "头像删除失败",
+        avatarCropTitle: "调整头像",
+        avatarCropHint: "拖动图片可以调整圆形头像中的显示区域。",
+        avatarCropWheelHint: "可用滑块或鼠标滚轮缩放图片。",
+        avatarCropZoom: "缩放",
+        avatarCropConfirm: "按当前裁剪保存",
+        avatarCropLoadFailed: "图片加载失败，请重新选择",
+        avatarCropFailed: "头像裁剪失败",
         prepareFailed: "绑定验证启动失败",
         confirmSuccess: "绑定成功，当前已切换到该 ID",
         confirmFailed: "绑定确认失败",
@@ -207,24 +226,63 @@ const refreshProfile = async () => {
   myDonErrored.value = false;
 };
 
-const handleAvatarUpload = async (options: any) => {
+const clearAvatarSelection = () => {
+  if (avatarCropSourceUrl.value) {
+    URL.revokeObjectURL(avatarCropSourceUrl.value);
+  }
+  avatarCropSourceUrl.value = "";
+  avatarCropFileName.value = "";
+  avatarUploadRef.value?.clearFiles();
+};
+
+const uploadAvatarFile = async (file: File) => {
   uploading.value = true;
   try {
     const formData = new FormData();
-    formData.append("avatar", options.file);
+    formData.append("avatar", file);
     await apiFetch("/api/account/avatar", {
       method: "POST",
       body: formData
     });
     ElMessage.success(copy.value.avatarUpdated);
     await refreshProfile();
-    options.onSuccess?.({}, options.file);
+    return true;
   } catch (error: any) {
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.avatarUploadFailed);
-    options.onError?.(error);
+    return false;
   } finally {
     uploading.value = false;
   }
+};
+
+const handleAvatarSelect = (file: UploadFile) => {
+  const raw = file.raw as UploadRawFile | undefined;
+  if (!raw) {
+    avatarUploadRef.value?.clearFiles();
+    return;
+  }
+  clearAvatarSelection();
+  avatarCropSourceUrl.value = URL.createObjectURL(raw);
+  avatarCropFileName.value = raw.name || "avatar";
+  avatarCropVisible.value = true;
+};
+
+const handleAvatarCropConfirm = async (payload: { blob: Blob; fileName: string }) => {
+  const croppedFile = new File([payload.blob], payload.fileName, {
+    type: payload.blob.type || "image/webp"
+  });
+  const uploaded = await uploadAvatarFile(croppedFile);
+  if (!uploaded) return;
+  avatarCropVisible.value = false;
+};
+
+const handleAvatarCropError = (message: string) => {
+  ElMessage.error(message || copy.value.avatarCropFailed);
+  avatarCropVisible.value = false;
+};
+
+const handleAvatarCropClosed = () => {
+  clearAvatarSelection();
 };
 
 const removeAvatar = async () => {
@@ -359,9 +417,11 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
               </el-avatar>
               <div class="avatar-actions">
                 <el-upload
+                  ref="avatarUploadRef"
                   :show-file-list="false"
+                  :auto-upload="false"
                   accept="image/png,image/jpeg,image/webp,image/gif"
-                  :http-request="handleAvatarUpload"
+                  :on-change="handleAvatarSelect"
                 >
                   <el-button :loading="uploading">{{ copy.uploadAvatar }}</el-button>
                 </el-upload>
@@ -463,6 +523,26 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
           <el-empty :description="copy.myDonFailed" />
         </div>
       </el-card>
+
+      <AccountAvatarCropperDialog
+        v-model="avatarCropVisible"
+        :source-url="avatarCropSourceUrl"
+        :file-name="avatarCropFileName"
+        :loading="uploading"
+        :copy="{
+          title: copy.avatarCropTitle,
+          hint: copy.avatarCropHint,
+          wheelHint: copy.avatarCropWheelHint,
+          zoom: copy.avatarCropZoom,
+          cancel: t('common.cancel'),
+          confirm: copy.avatarCropConfirm,
+          imageLoadFailed: copy.avatarCropLoadFailed,
+          cropFailed: copy.avatarCropFailed
+        }"
+        @confirm="handleAvatarCropConfirm"
+        @error="handleAvatarCropError"
+        @closed="handleAvatarCropClosed"
+      />
     </template>
   </div>
 </template>
