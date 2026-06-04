@@ -1,6 +1,6 @@
 import { access, readFile, readdir } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { createError } from "h3";
 import {
   execFileAsync,
@@ -11,9 +11,26 @@ import {
   readRawUserdataText
 } from "~/server/internal/account/shared";
 import { requestSyncDispatch } from "~/server/internal/account/sync";
-import { getAccountDb } from "~/server/utils/account-db";
+import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 
 type JsonObject = Record<string, unknown>;
+type BotBindSource = "wahlap" | "hiroba";
+type BotBindRow = {
+  row_id: number;
+  qq: string;
+  id: string;
+  visible: number | null;
+  slot_index: number | null;
+  is_current: number | null;
+  source: string | null;
+};
+type BotBindSummary = {
+  slot: number;
+  taikoId: string;
+  visible: number;
+  isCurrent: boolean;
+  source: BotBindSource;
+};
 
 export type TaikoCenterSyncResponse = {
   ok: boolean;
@@ -68,6 +85,191 @@ const parseJsonText = (rawText: string, fallbackMessage: string) => {
 };
 
 const readCenterUserdata = async (taikoId: string) => parseJsonText(await readRawUserdataText(taikoId), "权威成绩 JSON 已损坏");
+
+const getCenterUserdataHistoryDir = (taikoId: string) => {
+  const { userdataDir } = getRuntimePaths();
+  return resolve(userdataDir, taikoId);
+};
+
+const normalizeBotBindSource = (rawSource: unknown): BotBindSource => {
+  return String(rawSource || "").trim().toLowerCase() === "hiroba" ? "hiroba" : "wahlap";
+};
+
+const normalizeBotBindVisible = (rawVisible: unknown) => {
+  return Number(rawVisible || 0) ? 1 : 0;
+};
+
+const listBotBindRows = async (identityKey: string) => {
+  await ensureAccountSchema();
+  const db = getAccountDb();
+  const [rows] = await db.execute<BotBindRow[]>(
+    `SELECT row_id, qq, id, COALESCE(visible, 0) AS visible,
+            COALESCE(slot_index, 1) AS slot_index,
+            COALESCE(is_current, 0) AS is_current,
+            COALESCE(source, 'wahlap') AS source
+       FROM bind
+      WHERE qq = ?
+      ORDER BY slot_index ASC, row_id ASC`,
+    [identityKey]
+  );
+  return rows.map((row) => ({
+    row_id: Number(row.row_id || 0) || 0,
+    qq: String(row.qq || "").trim(),
+    id: String(row.id || "").trim(),
+    visible: Number(row.visible || 0) || 0,
+    slot_index: Number(row.slot_index || 1) || 1,
+    is_current: Number(row.is_current || 0) || 0,
+    source: String(row.source || "wahlap").trim() || "wahlap"
+  }));
+};
+
+const ensureSingleCurrentBotBind = async (identityKey: string) => {
+  const db = getAccountDb();
+  const rows = await listBotBindRows(identityKey);
+  if (!rows.length) return rows;
+
+  const currentRow = rows.find((row) => Number(row.is_current || 0) === 1) || rows[0];
+  await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
+  await db.execute("UPDATE bind SET is_current = 1 WHERE row_id = ?", [currentRow.row_id]);
+  return listBotBindRows(identityKey);
+};
+
+const toBotBindSummaries = (rows: BotBindRow[]): BotBindSummary[] =>
+  rows.map((row) => ({
+    slot: Math.max(1, Number(row.slot_index || 1) || 1),
+    taikoId: String(row.id || "").trim(),
+    visible: normalizeBotBindVisible(row.visible),
+    isCurrent: Number(row.is_current || 0) === 1,
+    source: normalizeBotBindSource(row.source)
+  }));
+
+const buildBotBindLookupPayload = async (identityKey: string) => {
+  const rows = await ensureSingleCurrentBotBind(identityKey);
+  const bindings = toBotBindSummaries(rows);
+  const current = bindings.find((item) => item.isCurrent) || bindings[0] || null;
+  if (!current) {
+    return {
+      ok: true,
+      found: false,
+      identityKey,
+      bindings: []
+    };
+  }
+  return {
+    ok: true,
+    found: true,
+    identityKey,
+    taikoId: current.taikoId,
+    visible: current.visible,
+    currentTaikoId: current.taikoId,
+    currentSlot: current.slot,
+    currentSource: current.source,
+    bindings
+  };
+};
+
+const upsertBotBindRecord = async (
+  identityKeyInput: unknown,
+  taikoIdInput: unknown,
+  options: { visible?: unknown; source?: unknown; makeCurrent?: boolean } = {}
+) => {
+  await ensureAccountSchema();
+  const identityKey = String(identityKeyInput || "").trim();
+  const taikoId = normalizeTaikoId(taikoIdInput);
+  if (!identityKey) {
+    throw createError({ statusCode: 400, statusMessage: "缺少身份标识" });
+  }
+  if (!taikoId) {
+    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
+  }
+
+  const visible = normalizeBotBindVisible(options.visible);
+  const source = normalizeBotBindSource(options.source);
+  const makeCurrent = options.makeCurrent !== false;
+  const db = getAccountDb();
+  const rows = await listBotBindRows(identityKey);
+  const existing = rows.find((row) => row.id === taikoId) || null;
+
+  let slotIndex = existing ? Math.max(1, Number(existing.slot_index || 1) || 1) : 1;
+  if (!existing) {
+    const usedSlots = new Set(
+      rows.map((row) => Math.max(1, Number(row.slot_index || 1) || 1))
+    );
+    while (usedSlots.has(slotIndex)) {
+      slotIndex += 1;
+    }
+    await db.execute(
+      `INSERT INTO bind (qq, id, visible, slot_index, is_current, source)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [identityKey, taikoId, visible, slotIndex, makeCurrent ? 1 : 0, source]
+    );
+  } else {
+    await db.execute(
+      "UPDATE bind SET visible = ?, source = ? WHERE row_id = ?",
+      [visible, source, existing.row_id]
+    );
+  }
+
+  if (makeCurrent) {
+    await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
+    await db.execute("UPDATE bind SET is_current = 1 WHERE qq = ? AND id = ?", [identityKey, taikoId]);
+  }
+
+  return buildBotBindLookupPayload(identityKey);
+};
+
+const switchCurrentBotBindSlot = async (identityKeyInput: unknown, slotInput: unknown) => {
+  await ensureAccountSchema();
+  const identityKey = String(identityKeyInput || "").trim();
+  const slot = Number(slotInput || 0);
+  if (!identityKey) {
+    throw createError({ statusCode: 400, statusMessage: "缺少身份标识" });
+  }
+  if (!Number.isInteger(slot) || slot <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "槽位无效" });
+  }
+  const rows = await listBotBindRows(identityKey);
+  const target = rows.find((row) => Math.max(1, Number(row.slot_index || 1) || 1) === slot);
+  if (!target) {
+    throw createError({ statusCode: 404, statusMessage: "未找到该槽位" });
+  }
+  const db = getAccountDb();
+  await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
+  await db.execute("UPDATE bind SET is_current = 1 WHERE row_id = ?", [target.row_id]);
+  return buildBotBindLookupPayload(identityKey);
+};
+
+const readCenterUserdataHistory = async (taikoIdInput: unknown) => {
+  const taikoId = normalizeTaikoId(taikoIdInput);
+  if (!taikoId) {
+    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
+  }
+  const historyDir = getCenterUserdataHistoryDir(taikoId);
+  let fileNames: string[] = [];
+  try {
+    fileNames = await readdir(historyDir);
+  } catch {
+    return { ok: true, taikoId, snapshots: [] };
+  }
+
+  const snapshotNames = fileNames
+    .filter((name) => name.startsWith("data_") && name.endsWith(".json"))
+    .sort();
+  const snapshots: Array<{ capturedAt: string; payload: JsonObject }> = [];
+  for (const fileName of snapshotNames) {
+    const filePath = join(historyDir, fileName);
+    try {
+      const rawText = await readFile(filePath, "utf-8");
+      const payload = parseJsonText(rawText, "中心历史快照 JSON 已损坏");
+      const meta = (payload._meta || {}) as JsonObject;
+      const capturedAt = String(meta.ts || fileName).trim();
+      snapshots.push({ capturedAt, payload });
+    } catch {
+      continue;
+    }
+  }
+  return { ok: true, taikoId, snapshots };
+};
 
 const runPythonBuffer = async (pythonCode: string, args: string[] = []) => {
   const { repoRoot } = getRuntimePaths();
@@ -291,9 +493,28 @@ export const proxyTaikoCenterHirobaBind = async (
   const payload = (await runPythonJson(code, [email, password, targetTaikoNo, configuredByQq])) as {
     taikoIds?: string[];
   };
+  const taikoIds = Array.isArray(payload.taikoIds)
+    ? payload.taikoIds.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+  let bindInfo: JsonObject | null = null;
+  if (configuredByQq && taikoIds.length) {
+    for (const taikoId of taikoIds) {
+      await upsertBotBindRecord(configuredByQq, taikoId, {
+        source: "hiroba",
+        makeCurrent: false
+      });
+    }
+    const preferredTaikoId =
+      (targetTaikoNo && taikoIds.includes(targetTaikoNo) ? targetTaikoNo : taikoIds[0]) || taikoIds[0];
+    bindInfo = await upsertBotBindRecord(configuredByQq, preferredTaikoId, {
+      source: "hiroba",
+      makeCurrent: true
+    });
+  }
   return {
     ok: true,
-    taikoIds: Array.isArray(payload.taikoIds) ? payload.taikoIds : []
+    taikoIds,
+    bind: bindInfo
   };
 };
 
@@ -323,27 +544,8 @@ export const proxyTaikoCenterBindLookup = async (identityKeyInput: unknown) => {
   if (!identityKey) {
     throw createError({ statusCode: 400, statusMessage: "缺少身份标识" });
   }
-  const db = getAccountDb();
   try {
-    const [rows] = await db.execute<Array<{ id: string; visible: number | null }>>(
-      "SELECT id, COALESCE(visible, 0) AS visible FROM bind WHERE qq = ? LIMIT 1",
-      [identityKey]
-    );
-    const row = rows[0];
-    if (!row) {
-      return {
-        ok: true,
-        found: false,
-        identityKey
-      };
-    }
-    return {
-      ok: true,
-      found: true,
-      identityKey,
-      taikoId: String(row.id || "").trim(),
-      visible: Number(row.visible || 0) || 0
-    };
+    return await buildBotBindLookupPayload(identityKey);
   } catch (error) {
     throw createError({
       statusCode: 500,
@@ -351,6 +553,20 @@ export const proxyTaikoCenterBindLookup = async (identityKeyInput: unknown) => {
     });
   }
 };
+
+export const proxyTaikoCenterBindUpsert = async (
+  identityKeyInput: unknown,
+  taikoIdInput: unknown,
+  options: { visible?: unknown; source?: unknown } = {}
+) => upsertBotBindRecord(identityKeyInput, taikoIdInput, { ...options, makeCurrent: true });
+
+export const proxyTaikoCenterBindSwitchCurrent = async (
+  identityKeyInput: unknown,
+  slotInput: unknown
+) => switchCurrentBotBindSlot(identityKeyInput, slotInput);
+
+export const proxyTaikoCenterUserdataHistory = async (taikoIdInput: unknown) =>
+  readCenterUserdataHistory(taikoIdInput);
 
 export const proxyTaikoWahlapPlayer = async (taikoIdInput: unknown) => fetchBindPlayerProfile(taikoIdInput);
 

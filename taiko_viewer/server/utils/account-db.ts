@@ -230,6 +230,12 @@ const MIGRATIONS = [
   "ALTER TABLE web_support_tickets ADD COLUMN user_last_read_at DATETIME NULL DEFAULT NULL AFTER staff_last_read_at"
 ];
 
+const BIND_TABLE_CREATE_SQL = `CREATE TABLE IF NOT EXISTS bind (
+  qq VARCHAR(191) NOT NULL,
+  id VARCHAR(25) NOT NULL,
+  visible TINYINT(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 const runMigration = async (statement: string) => {
   const db = getAccountDb();
   try {
@@ -251,6 +257,82 @@ const runMigration = async (statement: string) => {
   }
 };
 
+type ColumnRow = {
+  Field: string;
+  Type: string;
+  Null: "YES" | "NO";
+  Key: string;
+  Default: string | null;
+  Extra: string;
+} & RowDataPacket;
+
+type IndexRow = {
+  Key_name: string;
+  Column_name: string;
+  Non_unique: number;
+  Seq_in_index: number;
+} & RowDataPacket;
+
+const ensureBindTableSchema = async () => {
+  const db = getAccountDb();
+  await db.execute(BIND_TABLE_CREATE_SQL);
+
+  const [columnRows] = await db.query<ColumnRow[]>("SHOW COLUMNS FROM bind");
+  const columnNames = new Set(columnRows.map((row) => String(row.Field || "").trim()));
+
+  const primaryColumns = columnRows
+    .filter((row) => row.Key === "PRI")
+    .sort((a, b) => String(a.Field).localeCompare(String(b.Field)))
+    .map((row) => String(row.Field || "").trim());
+  const hasPrimaryKeyOnRowId = primaryColumns.length === 1 && primaryColumns[0] === "row_id";
+
+  if (!hasPrimaryKeyOnRowId && primaryColumns.length > 0) {
+    await db.execute("ALTER TABLE bind DROP PRIMARY KEY");
+  }
+
+  if (!columnNames.has("row_id")) {
+    await db.execute(
+      "ALTER TABLE bind ADD COLUMN row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST"
+    );
+  } else if (!hasPrimaryKeyOnRowId) {
+    await db.execute("ALTER TABLE bind ADD PRIMARY KEY (row_id)");
+  }
+
+  if (!columnNames.has("slot_index")) {
+    await db.execute("ALTER TABLE bind ADD COLUMN slot_index INT NOT NULL DEFAULT 1 AFTER visible");
+  }
+  if (!columnNames.has("is_current")) {
+    await db.execute("ALTER TABLE bind ADD COLUMN is_current TINYINT(1) NOT NULL DEFAULT 1 AFTER slot_index");
+  }
+  if (!columnNames.has("source")) {
+    await db.execute(
+      "ALTER TABLE bind ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER is_current"
+    );
+  }
+
+  await db.execute(
+    "UPDATE bind SET slot_index = 1 WHERE slot_index IS NULL OR slot_index <= 0"
+  );
+  await db.execute(
+    "UPDATE bind SET is_current = 1 WHERE is_current IS NULL"
+  );
+  await db.execute(
+    "UPDATE bind SET source = 'wahlap' WHERE source IS NULL OR TRIM(source) = ''"
+  );
+
+  const [indexRows] = await db.query<IndexRow[]>("SHOW INDEX FROM bind");
+  const indexNames = new Set(indexRows.map((row) => String(row.Key_name || "").trim()));
+  if (!indexNames.has("uniq_bind_identity_slot")) {
+    await db.execute("ALTER TABLE bind ADD UNIQUE KEY uniq_bind_identity_slot (qq, slot_index)");
+  }
+  if (!indexNames.has("uniq_bind_identity_taiko")) {
+    await db.execute("ALTER TABLE bind ADD UNIQUE KEY uniq_bind_identity_taiko (qq, id)");
+  }
+  if (!indexNames.has("idx_bind_identity_current")) {
+    await db.execute("ALTER TABLE bind ADD KEY idx_bind_identity_current (qq, is_current)");
+  }
+};
+
 export const ensureAccountSchema = async () => {
   if (!schemaReady) {
     schemaReady = (async () => {
@@ -261,6 +343,7 @@ export const ensureAccountSchema = async () => {
       for (const statement of MIGRATIONS) {
         await runMigration(statement);
       }
+      await ensureBindTableSchema();
     })();
   }
   await schemaReady;
