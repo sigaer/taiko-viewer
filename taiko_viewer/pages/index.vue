@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.25.6";
+const appVersion = runtimeConfig.public.appVersion || "0.25.7";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -54,7 +54,7 @@ const gradeSpotlightCopy = computed(() =>
       }
     : {
         title: "虹2026 段位道场总览",
-        description: "把 2026 虹版段位配置放到首页入口，方便直接查看。图片较长，点击后可打开原图。",
+        description: "图片较长，点击后可打开原图。",
         open: "查看原图",
         imageAlt: "虹2026 段位道场总览"
       }
