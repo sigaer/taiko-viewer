@@ -3,7 +3,8 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.25.5";
+const appVersion = runtimeConfig.public.appVersion || "0.25.6";
+const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
@@ -43,6 +44,21 @@ const getSongTitle = (song: (typeof latestSongs.value)[number]) =>
   locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
 const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
   locale.value === "ja" ? song.song_name || "—" : song.song_name_jp || "—";
+const gradeSpotlightCopy = computed(() =>
+  locale.value === "ja"
+    ? {
+        title: "ニジイロ 2026 段位道場総覧",
+        description: "2026 年の虹版段位構成をホームからすぐ確認できます。縦長画像なので、タップして原寸表示がおすすめです。",
+        open: "原寸画像を開く",
+        imageAlt: "ニジイロ 2026 段位道場総覧"
+      }
+    : {
+        title: "虹2026 段位道场总览",
+        description: "把 2026 虹版段位配置放到首页入口，方便直接查看。图片较长，点击后可打开原图。",
+        open: "查看原图",
+        imageAlt: "虹2026 段位道场总览"
+      }
+);
 </script>
 
 <template>
@@ -76,6 +92,20 @@ const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
         </NuxtLink>
       </div>
     </el-card>
+
+    <section class="home-grade-spotlight panel-card">
+      <div class="grade-spotlight-copy">
+        <span class="grade-spotlight-tag">2026</span>
+        <h3>{{ gradeSpotlightCopy.title }}</h3>
+        <p>{{ gradeSpotlightCopy.description }}</p>
+        <a :href="featuredGradeImage" target="_blank" rel="noopener noreferrer" class="grade-spotlight-link">
+          {{ gradeSpotlightCopy.open }}
+        </a>
+      </div>
+      <a :href="featuredGradeImage" target="_blank" rel="noopener noreferrer" class="grade-spotlight-media">
+        <img :src="featuredGradeImage" :alt="gradeSpotlightCopy.imageAlt" loading="lazy" />
+      </a>
+    </section>
 
     <section class="home-tools panel-card">
       <div class="section-head">
@@ -247,6 +277,83 @@ const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
 .hero-link-btn svg {
   width: 16px;
   height: 16px;
+}
+
+.home-grade-spotlight {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(247, 201, 92, 0.28), transparent 34%),
+    linear-gradient(135deg, rgba(255, 250, 241, 0.96), rgba(255, 244, 226, 0.92));
+}
+
+.grade-spotlight-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.grade-spotlight-tag {
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(194, 78, 47, 0.12);
+  color: #b4512e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.grade-spotlight-copy h3 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  color: #3e2d23;
+}
+
+.grade-spotlight-copy p {
+  margin: 0;
+  color: #6e5a47;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.grade-spotlight-link {
+  width: fit-content;
+  color: #fffaf3;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  background: linear-gradient(135deg, #c24e2f, #dd8b35);
+  box-shadow: 0 10px 20px rgba(194, 78, 47, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grade-spotlight-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(194, 78, 47, 0.22);
+}
+
+.grade-spotlight-media {
+  display: block;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(194, 132, 82, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(251, 244, 232, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.grade-spotlight-media img {
+  display: block;
+  width: 100%;
+  max-height: 680px;
+  object-fit: contain;
 }
 
 .home-grid {
@@ -480,6 +587,10 @@ const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .home-grade-spotlight {
+    grid-template-columns: 1fr;
+  }
+
   .hero-content {
     flex-direction: column;
     align-items: flex-start;
@@ -495,6 +606,14 @@ const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
 
   .event-overlay h4 {
     font-size: 18px;
+  }
+
+  .grade-spotlight-copy h3 {
+    font-size: 22px;
+  }
+
+  .grade-spotlight-media img {
+    max-height: none;
   }
 }
 </style>
