@@ -95,9 +95,10 @@ const groups = computed(() => [
         label: t("nav.grade"),
         icon: "trophy",
         children: [
-          { key: "/grade/2023", label: "虹 2023" },
+          { key: "/grade/2026", label: "虹 2026" },
+          { key: "/grade/2025", label: "虹 2025" },
           { key: "/grade/2024", label: "虹 2024" },
-          { key: "/grade/2025", label: "虹 2025" }
+          { key: "/grade/2023", label: "虹 2023" }
         ]
       },
       {

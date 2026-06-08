@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.25.7";
+const appVersion = runtimeConfig.public.appVersion || "0.26.0";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -48,13 +48,13 @@ const gradeSpotlightCopy = computed(() =>
   locale.value === "ja"
     ? {
         title: "ニジイロ 2026 段位道場総覧",
-        description: "2026 年の虹版段位構成をホームからすぐ確認できます。縦長画像なので、タップして原寸表示がおすすめです。",
+        description: "五級から十段までの課題曲と赤・金合格条件をホームからすぐ確認できます。縦長画像なので、タップして原寸表示がおすすめです。",
         open: "原寸画像を開く",
         imageAlt: "ニジイロ 2026 段位道場総覧"
       }
     : {
         title: "虹2026 段位道场总览",
-        description: "图片较长，点击后可打开原图。",
+        description: "五級到十段的课题曲与赤金条件都汇总在这张图里，点击可查看原图。",
         open: "查看原图",
         imageAlt: "虹2026 段位道场总览"
       }
