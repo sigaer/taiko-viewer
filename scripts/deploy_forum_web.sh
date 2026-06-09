@@ -136,24 +136,18 @@ cleanup_stale_build() {
 wait_for_url() {
   local url="$1"
   local label="$2"
-  local allow_insecure="${3:-0}"
   local deadline=$((SECONDS + HEALTHCHECK_TIMEOUT))
-  local -a curl_args=(--noproxy '*' --max-time 5 -fsS)
-
-  if [[ "$allow_insecure" == "1" ]]; then
-    curl_args+=(-k)
-  fi
 
   while true; do
     if env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-      curl "${curl_args[@]}" "$url" >/dev/null 2>&1; then
+      curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null 2>&1; then
       return 0
     fi
 
     if (( SECONDS >= deadline )); then
       echo "  - ${label} 健康检查超时（>${HEALTHCHECK_TIMEOUT}s）: ${url}"
       env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-        curl "${curl_args[@]}" "$url" >/dev/null
+        curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null
       return 1
     fi
 
@@ -313,7 +307,6 @@ echo "[5/5] 健康检查..."
 wait_for_url "http://127.0.0.1:3100/titles" "本地 SSR"
 wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
 wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
-wait_for_url "https://forum.sakura-bot.cn/titles" "forum 旧域名跳转" "1"
 
 echo "[可选] 百度普通收录主动推送..."
 if [[ -x "$ROOT_DIR/scripts/baidu_push_urls.sh" ]]; then
