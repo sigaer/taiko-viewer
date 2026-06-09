@@ -36,6 +36,7 @@ export type SongDetailPayload = {
   song: SongCatalogItem | null;
   ratingEntries: RatingContentItem[];
   branchAudioTracks: SongTrackKey[];
+  tjaBundleUrl: string | null;
 };
 
 export type HomeContentPayload = {

@@ -27,6 +27,7 @@ definePageMeta({
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
+const tjaBundleUrl = computed(() => songDetail.value.tjaBundleUrl || "");
 const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
   if (value === undefined || value === null || value === "") return 0;
   const parsed = Number(value);
@@ -89,7 +90,8 @@ const copy = computed(() =>
         mute: "ミュート",
         charts: "譜面プレビュー",
         maxNotes: "最大ノーツ",
-        openChart: "新しいタブで開く"
+        openChart: "新しいタブで開く",
+        downloadTjaBundle: "TJA+OGG をダウンロード"
       }
     : {
         detailTitle: "歌曲详情",
@@ -118,7 +120,8 @@ const copy = computed(() =>
         mute: "静音",
         charts: "谱面预览",
         maxNotes: "最大物量",
-        openChart: "打开新页面预览"
+        openChart: "打开新页面预览",
+        downloadTjaBundle: "下载 TJA+OGG"
       }
 );
 
@@ -691,18 +694,23 @@ useViewerSeo(() => ({
           </div>
 
           <div class="fumen-block">
-            <div class="section-title">
-              <span class="title-icon chart-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </span>
-              <span>{{ copy.charts }}</span>
+            <div class="fumen-head">
+              <div class="section-title">
+                <span class="title-icon chart-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span>{{ copy.charts }}</span>
+              </div>
+              <a v-if="tjaBundleUrl" class="tja-bundle-btn" :href="tjaBundleUrl">
+                {{ copy.downloadTjaBundle }}
+              </a>
             </div>
             <div class="fumen-grid">
               <div
@@ -1091,6 +1099,31 @@ useViewerSeo(() => ({
 .fumen-block h3 {
   margin: 0 0 12px;
   font-size: 18px;
+}
+
+.fumen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.fumen-head .section-title {
+  margin-bottom: 0;
+}
+
+.tja-bundle-btn {
+  text-decoration: none;
+  border-radius: 999px;
+  border: 1px solid rgba(83, 123, 186, 0.35);
+  background: linear-gradient(135deg, rgba(79, 140, 214, 0.12), rgba(255, 255, 255, 0.95));
+  color: #345f96;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  white-space: nowrap;
 }
 
 .fumen-grid {

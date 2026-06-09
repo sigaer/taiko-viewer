@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+
+def load_merge_index_module(module_path: Path):
+    spec = importlib.util.spec_from_file_location("viewer_merge_index", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"failed to load merge_index module from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def build_song_tja_index(song_data_path: Path, tja_root: Path, merge_index_path: Path):
+    merge_index = load_merge_index_module(merge_index_path)
+
+    with song_data_path.open("r", encoding="utf-8") as handle:
+        song_data = json.load(handle)
+
+    tja_files = merge_index.find_tja_files(str(tja_root))
+    candidates = [merge_index.build_candidate_summary(path, tja_root) for path in tja_files]
+    exact_map, normalized_map, base_map = merge_index.build_candidate_indexes(candidates)
+
+    matches = {}
+    unresolved = []
+
+    for song in song_data:
+        song_id = int(song.get("id", 0) or 0)
+        if song_id <= 0:
+            continue
+
+        candidate, debug = merge_index.select_candidate(
+            song,
+            candidates,
+            exact_map,
+            normalized_map,
+            base_map,
+            tja_root,
+        )
+        if candidate is None:
+            unresolved.append(
+                {
+                    "id": song_id,
+                    "song_name_jp": song.get("song_name_jp"),
+                    "song_name": song.get("song_name"),
+                    "reason": debug,
+                }
+            )
+            continue
+
+        song_records, record_error = merge_index.build_song_records(song, candidate.path)
+        if song_records is None:
+            unresolved.append(
+                {
+                    "id": song_id,
+                    "song_name_jp": song.get("song_name_jp"),
+                    "song_name": song.get("song_name"),
+                    "reason": record_error,
+                    "selected_path": candidate.rel_path,
+                    "selected_debug": debug,
+                }
+            )
+            continue
+
+        matches[str(song_id)] = {
+            "tja_path": candidate.path,
+            "rel_path": candidate.rel_path,
+        }
+
+    return {
+        "tja_root": str(tja_root),
+        "song_count": len(song_data),
+        "matched_count": len(matches),
+        "unresolved_count": len(unresolved),
+        "matches": matches,
+        "unresolved": unresolved,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Build song ID to TJA path index for viewer downloads")
+    parser.add_argument("--song-data", required=True, help="Path to song_data.json")
+    parser.add_argument("--tja-root", required=True, help="Path to the ESE TJA root")
+    parser.add_argument("--merge-index", required=True, help="Path to merge_index.py")
+    args = parser.parse_args()
+
+    payload = build_song_tja_index(
+        song_data_path=Path(args.song_data),
+        tja_root=Path(args.tja_root),
+        merge_index_path=Path(args.merge_index),
+    )
+    json.dump(payload, sys.stdout, ensure_ascii=False)
+
+
+if __name__ == "__main__":
+    main()
