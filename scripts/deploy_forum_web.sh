@@ -28,6 +28,9 @@ REMOTE="${REMOTE:-origin}"
 BRANCH="${BRANCH:-main}"
 BUILD_TIMEOUT="${BUILD_TIMEOUT:-900}"
 HEALTHCHECK_TIMEOUT="${HEALTHCHECK_TIMEOUT:-20}"
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-/tmp/taiko-viewer-deploy.lock}"
+BUILD_PID_FILE="${BUILD_PID_FILE:-/tmp/taiko-viewer-nuxt-build.pid}"
+CURRENT_BUILD_PID=""
 
 run_privileged() {
   if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
@@ -53,21 +56,104 @@ cleanup_process_group() {
   fi
 }
 
+require_singleton() {
+  exec 9>"$DEPLOY_LOCK_FILE"
+  if ! flock -n 9; then
+    echo "另一个 taiko_viewer 部署或构建仍在进行，请稍后再试。"
+    if [[ -f "$BUILD_PID_FILE" ]]; then
+      echo "  - 当前记录的构建 PID: $(cat "$BUILD_PID_FILE" 2>/dev/null || echo unknown)"
+    fi
+    exit 1
+  fi
+}
+
+clear_build_pidfile() {
+  local expected_pid="${1:-}"
+  if [[ ! -f "$BUILD_PID_FILE" ]]; then
+    return 0
+  fi
+
+  if [[ -z "$expected_pid" ]]; then
+    rm -f "$BUILD_PID_FILE"
+    return 0
+  fi
+
+  local recorded_pid
+  recorded_pid="$(cat "$BUILD_PID_FILE" 2>/dev/null || true)"
+  if [[ "$recorded_pid" == "$expected_pid" ]]; then
+    rm -f "$BUILD_PID_FILE"
+  fi
+}
+
+cleanup_current_build() {
+  if [[ -z "$CURRENT_BUILD_PID" ]]; then
+    return 0
+  fi
+
+  cleanup_process_group "$CURRENT_BUILD_PID"
+  clear_build_pidfile "$CURRENT_BUILD_PID"
+  CURRENT_BUILD_PID=""
+}
+
+handle_signal_exit() {
+  cleanup_current_build
+  exit 1
+}
+
+cleanup_stale_build() {
+  if [[ ! -f "$BUILD_PID_FILE" ]]; then
+    return 0
+  fi
+
+  local stale_pid
+  stale_pid="$(cat "$BUILD_PID_FILE" 2>/dev/null || true)"
+
+  if [[ -z "$stale_pid" ]]; then
+    rm -f "$BUILD_PID_FILE"
+    return 0
+  fi
+
+  if ! kill -0 "$stale_pid" 2>/dev/null; then
+    clear_build_pidfile "$stale_pid"
+    return 0
+  fi
+
+  local stale_cmd
+  stale_cmd="$(ps -p "$stale_pid" -o args= 2>/dev/null || true)"
+
+  if [[ "$stale_cmd" != *"$WEB_DIR"* ]] || [[ "$stale_cmd" != *"npm run build"* && "$stale_cmd" != *"nuxt build"* ]]; then
+    echo "  - 发现构建 PID 文件指向非预期进程，已仅清理 PID 文件: $stale_pid"
+    clear_build_pidfile
+    return 0
+  fi
+
+  echo "  - 检测到遗留 Nuxt 构建进程，先清理后再继续: PID $stale_pid"
+  echo "    $stale_cmd"
+  cleanup_process_group "$stale_pid"
+  clear_build_pidfile "$stale_pid"
+}
+
 wait_for_url() {
   local url="$1"
   local label="$2"
+  local allow_insecure="${3:-0}"
   local deadline=$((SECONDS + HEALTHCHECK_TIMEOUT))
+  local -a curl_args=(--noproxy '*' --max-time 5 -fsS)
+
+  if [[ "$allow_insecure" == "1" ]]; then
+    curl_args+=(-k)
+  fi
 
   while true; do
     if env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-      curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null 2>&1; then
+      curl "${curl_args[@]}" "$url" >/dev/null 2>&1; then
       return 0
     fi
 
     if (( SECONDS >= deadline )); then
       echo "  - ${label} 健康检查超时（>${HEALTHCHECK_TIMEOUT}s）: ${url}"
       env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
-        curl --noproxy '*' --max-time 5 -fsS "$url" >/dev/null
+        curl "${curl_args[@]}" "$url" >/dev/null
       return 1
     fi
 
@@ -106,6 +192,8 @@ run_nuxt_build() {
 
   WEB_DIR="$WEB_DIR" setsid bash -lc 'cd "$WEB_DIR" && npm run build' >"$build_log" 2>&1 &
   build_pid=$!
+  CURRENT_BUILD_PID="$build_pid"
+  printf '%s\n' "$build_pid" > "$BUILD_PID_FILE"
 
   tail --pid="$build_pid" -n +1 -f "$build_log" &
   tail_pid=$!
@@ -151,12 +239,22 @@ run_nuxt_build() {
     echo "  - 构建失败，最后日志如下："
     tail -n 120 "$build_log"
     rm -f "$build_log"
+    clear_build_pidfile "$build_pid"
+    CURRENT_BUILD_PID=""
     return "$build_exit"
   fi
 
   rm -f "$build_log"
+  clear_build_pidfile "$build_pid"
+  CURRENT_BUILD_PID=""
   return 0
 }
+
+trap cleanup_current_build EXIT
+trap handle_signal_exit HUP INT TERM
+
+require_singleton
+cleanup_stale_build
 
 cd "$ROOT_DIR"
 
@@ -215,7 +313,7 @@ echo "[5/5] 健康检查..."
 wait_for_url "http://127.0.0.1:3100/titles" "本地 SSR"
 wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
 wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
-wait_for_url "https://forum.sakura-bot.cn/titles" "forum 旧域名跳转"
+wait_for_url "https://forum.sakura-bot.cn/titles" "forum 旧域名跳转" "1"
 
 echo "[可选] 百度普通收录主动推送..."
 if [[ -x "$ROOT_DIR/scripts/baidu_push_urls.sh" ]]; then

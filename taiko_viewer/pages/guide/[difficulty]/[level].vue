@@ -2,7 +2,8 @@
 import { computed, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import type { GuideTagItemsPayload } from "~/types/content";
-import { loadGuideTagItems, useGuideContent } from "~/composables/useGuideContent";
+import { useGuideContent } from "~/composables/useGuideContent";
+import { useViewerApiFetch } from "~/composables/useViewerApiFetch";
 import { getGuideDifficultyOption } from "~/utils/guide";
 import { buildPageDescription } from "~/utils/seo";
 
@@ -41,6 +42,7 @@ definePageMeta({
 });
 
 const { data: guideContent, pending, error } = await useGuideContent(difficulty, level);
+const viewerApiFetch = useViewerApiFetch();
 
 const difficultyLabel = computed(
   () => guideContent.value.difficultyLabel || fallbackDifficultyLabel.value
@@ -56,7 +58,6 @@ const summaryColumns = computed(() => [
   { prop: "underMinus", label: t("guide.summaryColumns.underMinus") },
   { prop: "total", label: t("guide.summaryColumns.total") }
 ]);
-const tableKey = computed(() => `${difficulty.value}-${level.value}`);
 const tagRows = computed<TreeRow[]>(() =>
   guideContent.value.tags.map((item) => ({
     rowKey: `tag-${item.id}`,
@@ -68,6 +69,8 @@ const tagRows = computed<TreeRow[]>(() =>
 
 const detailCache = reactive<Record<number, GuideTagItemsPayload>>({});
 const loadingTagIds = ref<number[]>([]);
+const expandedTagIds = ref<number[]>([]);
+const detailErrors = reactive<Record<number, boolean>>({});
 const colorMap = ["hardest", "harder", "hard", "normal", "easy", "easier", "easiest"];
 
 const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => {
@@ -77,8 +80,7 @@ const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => 
   return "";
 };
 
-const rowClassName = (row: { row?: TreeRow }) => {
-  const rowId = row.row?.id || 0;
+const getRowToneClass = (rowId: number) => {
   if (rowId < 1 || rowId > colorMap.length) {
     return "";
   }
@@ -86,31 +88,43 @@ const rowClassName = (row: { row?: TreeRow }) => {
 };
 
 const isTagLoading = (tagId: number) => loadingTagIds.value.includes(tagId);
+const isTagExpanded = (tagId: number) => expandedTagIds.value.includes(tagId);
+const hasTagLoadError = (tagId: number) => Boolean(detailErrors[tagId]);
 
 const getTagItems = (tagId: number) => detailCache[tagId]?.items || [];
 
-const ensureTagItemsLoaded = async (row: TreeRow) => {
-  if (detailCache[row.id] || isTagLoading(row.id)) {
+const ensureTagItemsLoaded = async (row: TreeRow, force = false) => {
+  if (!force && (detailCache[row.id] || isTagLoading(row.id))) {
     return;
   }
+  if (force) {
+    delete detailCache[row.id];
+  }
+  delete detailErrors[row.id];
   loadingTagIds.value = [...loadingTagIds.value, row.id];
   try {
-    const payload = await loadGuideTagItems(difficulty.value, level.value, row.id);
+    const payload = await viewerApiFetch<GuideTagItemsPayload>(
+      `/api/content/guide/${difficulty.value}/${level.value}/tag/${row.id}`
+    );
     detailCache[row.id] = payload;
     if (!payload.items.length) {
       ElMessage.warning(t("guide.empty"));
     }
   } catch {
+    detailErrors[row.id] = true;
     ElMessage.error(t("guide.loadFailed"));
   } finally {
     loadingTagIds.value = loadingTagIds.value.filter((tagId) => tagId !== row.id);
   }
 };
 
-const handleExpandChange = async (row: TreeRow, expandedRows: TreeRow[]) => {
-  if (expandedRows.some((item) => item.rowKey === row.rowKey)) {
-    await ensureTagItemsLoaded(row);
+const toggleTagRow = async (row: TreeRow) => {
+  if (isTagExpanded(row.id)) {
+    expandedTagIds.value = expandedTagIds.value.filter((tagId) => tagId !== row.id);
+    return;
   }
+  expandedTagIds.value = [...expandedTagIds.value, row.id];
+  await ensureTagItemsLoaded(row);
 };
 
 useViewerSeo(() => ({
@@ -205,39 +219,65 @@ useViewerSeo(() => ({
         </span>
         <span>{{ t("guide.detailTable") }}</span>
       </div>
-      <el-table
-        :key="tableKey"
-        border
-        :row-class-name="rowClassName"
-        :data="tagRows"
-        row-key="rowKey"
-        @expand-change="handleExpandChange"
-        class="detail-table"
-      >
-        <el-table-column type="expand" width="56" align="center">
-          <template #default="{ row }">
-            <div class="tag-detail-wrap">
-              <el-skeleton v-if="isTagLoading(row.id)" :rows="6" animated />
-              <el-empty v-else-if="!getTagItems(row.id).length" :description="t('guide.empty')" />
-              <el-table
-                v-else
-                :data="getTagItems(row.id)"
-                border
-                class="tag-detail-table"
-              >
-                <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" min-width="220" />
-                <el-table-column prop="bpm" label="BPM" align="center" width="120" />
-                <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="140" />
-                <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="150" />
-                <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" min-width="320" />
-                <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
-              </el-table>
+      <div class="detail-table">
+        <div class="guide-detail-head">
+          <span class="guide-detail-head__toggle" aria-hidden="true"></span>
+          <span class="guide-detail-head__label">{{ t("page.guide.detail.columns.tag") }}</span>
+          <span class="guide-detail-head__count">{{ t("page.guide.detail.columns.count") }}</span>
+        </div>
+
+        <div
+          v-for="row in tagRows"
+          :key="row.rowKey"
+          class="guide-detail-item"
+        >
+          <button
+            type="button"
+            class="guide-detail-row"
+            :class="[getRowToneClass(row.id), { 'is-expanded': isTagExpanded(row.id) }]"
+            :aria-expanded="isTagExpanded(row.id)"
+            @click="toggleTagRow(row)"
+          >
+            <span class="guide-expand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span class="guide-detail-cell guide-detail-cell--title">{{ row.title }}</span>
+            <span class="guide-detail-cell guide-detail-cell--count">{{ row.count }}</span>
+          </button>
+
+          <div v-if="isTagExpanded(row.id)" class="tag-detail-wrap">
+            <el-skeleton v-if="isTagLoading(row.id)" :rows="6" animated />
+            <div v-else-if="hasTagLoadError(row.id)" class="tag-detail-error">
+              <span>{{ t("guide.loadFailed") }}</span>
+              <el-button link type="primary" @click.stop="ensureTagItemsLoaded(row, true)">
+                {{ t("common.retry") }}
+              </el-button>
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" align="center" width="220" />
-        <el-table-column prop="count" :label="t('page.guide.detail.columns.count')" align="center" width="100" />
-      </el-table>
+            <el-empty v-else-if="!getTagItems(row.id).length" :description="t('guide.empty')" />
+            <el-table
+              v-else
+              :data="getTagItems(row.id)"
+              border
+              class="tag-detail-table"
+            >
+              <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" min-width="220" />
+              <el-table-column prop="bpm" label="BPM" align="center" width="120" />
+              <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="140" />
+              <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="150" />
+              <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" min-width="320" />
+              <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
+            </el-table>
+          </div>
+        </div>
+      </div>
     </el-card>
   </div>
 </template>
@@ -320,7 +360,6 @@ useViewerSeo(() => ({
 }
 
 .summary-table,
-.detail-table,
 .tag-detail-table {
   width: 100%;
 }
@@ -331,47 +370,134 @@ useViewerSeo(() => ({
   margin: 20px 0;
 }
 
-:deep(.detail-table .cell),
 :deep(.tag-detail-table .cell) {
   white-space: pre-line;
 }
 
-:deep(.guide-tag-row td.el-table__cell) {
+.detail-table {
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 252, 248, 0.72);
+}
+
+.guide-detail-head,
+.guide-detail-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 100px;
+  align-items: center;
+}
+
+.guide-detail-head {
+  min-height: 46px;
+  padding: 0 12px;
+  background: rgba(245, 236, 227, 0.92);
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
   font-weight: 600;
 }
 
-:deep(.guide-tag-row.hardest td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(196, 79, 45, 0.16) !important;
+.guide-detail-head__toggle,
+.guide-detail-head__count {
+  text-align: center;
 }
 
-:deep(.guide-tag-row.harder td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(220, 116, 58, 0.16) !important;
+.guide-detail-item + .guide-detail-item {
+  border-top: 1px solid rgba(181, 146, 113, 0.16);
 }
 
-:deep(.guide-tag-row.hard td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(232, 148, 51, 0.16) !important;
+.guide-detail-row {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 12px;
+  border: 0;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-weight: 600;
 }
 
-:deep(.guide-tag-row.normal td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(241, 183, 80, 0.16) !important;
+.guide-detail-row:hover {
+  filter: brightness(0.985);
 }
 
-:deep(.guide-tag-row.easy td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(171, 197, 117, 0.16) !important;
+.guide-detail-row:focus-visible {
+  outline: 2px solid rgba(211, 109, 55, 0.45);
+  outline-offset: -2px;
 }
 
-:deep(.guide-tag-row.easier td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(107, 182, 132, 0.16) !important;
+.guide-expand-icon {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(87, 66, 49, 0.78);
+  transition: transform 0.2s ease;
 }
 
-:deep(.guide-tag-row.easiest td.el-table__cell:not(.el-table__expanded-cell)) {
-  background: rgba(76, 160, 180, 0.16) !important;
+.guide-expand-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.guide-detail-row.is-expanded .guide-expand-icon {
+  transform: rotate(90deg);
+}
+
+.guide-detail-cell--title {
+  min-width: 0;
+}
+
+.guide-detail-cell--count {
+  text-align: center;
+}
+
+.guide-tag-row.hardest {
+  background: rgba(196, 79, 45, 0.16);
+}
+
+.guide-tag-row.harder {
+  background: rgba(220, 116, 58, 0.16);
+}
+
+.guide-tag-row.hard {
+  background: rgba(232, 148, 51, 0.16);
+}
+
+.guide-tag-row.normal {
+  background: rgba(241, 183, 80, 0.16);
+}
+
+.guide-tag-row.easy {
+  background: rgba(171, 197, 117, 0.16);
+}
+
+.guide-tag-row.easier {
+  background: rgba(107, 182, 132, 0.16);
+}
+
+.guide-tag-row.easiest {
+  background: rgba(76, 160, 180, 0.16);
 }
 
 .tag-detail-wrap {
   padding: 8px 12px;
   background: rgba(255, 252, 248, 0.92);
   border-radius: 12px;
+  border-top: 1px solid rgba(181, 146, 113, 0.16);
+}
+
+.tag-detail-error {
+  min-height: 88px;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  color: var(--el-text-color-secondary);
 }
 
 @media (max-width: 840px) {
@@ -389,6 +515,16 @@ useViewerSeo(() => ({
 
   .guide-header h3 {
     padding-top: 0;
+  }
+
+  .guide-detail-head,
+  .guide-detail-row {
+    grid-template-columns: 44px minmax(0, 1fr) 72px;
+    padding: 0 8px;
+  }
+
+  .tag-detail-wrap {
+    padding: 8px;
   }
 }
 </style>
