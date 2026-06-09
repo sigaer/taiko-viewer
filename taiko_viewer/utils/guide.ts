@@ -1,4 +1,4 @@
-import type { GuideDifficultyOption } from "~/types/content";
+import type { GuideDifficultyOption, GuideSummaryKey } from "~/types/content";
 
 export const GUIDE_DIFFICULTY_OPTIONS: GuideDifficultyOption[] = [
   { value: 1, label: "简单", max: 5, iconImage: "/kantan.png" },
@@ -17,16 +17,26 @@ export const GUIDE_TAGS = [
   { id: 7, label: "逆诈称-" }
 ] as const;
 
-export const GUIDE_SUMMARY_KEYS = [
-  "诈称+",
-  "诈称",
-  "强",
-  "中",
-  "弱",
-  "逆诈称",
-  "逆诈称-",
-  "合计"
-] as const;
+export const GUIDE_SUMMARY_KEY_BY_TAG_ID: Record<number, Exclude<GuideSummaryKey, "total">> = {
+  1: "overPlus",
+  2: "over",
+  3: "strong",
+  4: "middle",
+  5: "weak",
+  6: "under",
+  7: "underMinus"
+};
+
+export const GUIDE_SUMMARY_KEYS: GuideSummaryKey[] = [
+  "overPlus",
+  "over",
+  "strong",
+  "middle",
+  "weak",
+  "under",
+  "underMinus",
+  "total"
+];
 
 export const getGuideDifficultyOption = (difficulty: number) =>
   GUIDE_DIFFICULTY_OPTIONS.find((item) => item.value === difficulty) || null;

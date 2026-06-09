@@ -78,7 +78,17 @@ export type GuideTagSummary = {
   count: number;
 };
 
-export type GuideSummaryTable = Record<string, number>;
+export type GuideSummaryKey =
+  | "overPlus"
+  | "over"
+  | "strong"
+  | "middle"
+  | "weak"
+  | "under"
+  | "underMinus"
+  | "total";
+
+export type GuideSummaryTable = Record<GuideSummaryKey, number>;
 
 export type GuidePagePayload = {
   difficulty: number;
@@ -90,6 +100,7 @@ export type GuidePagePayload = {
 
 export type GuideTagItem = {
   id: number;
+  rowKey: string;
   title: string;
   bpm: string;
   category: string;

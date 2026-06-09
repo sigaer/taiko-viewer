@@ -7,6 +7,7 @@ import { getGuideDifficultyOption } from "~/utils/guide";
 import { buildPageDescription } from "~/utils/seo";
 
 type TreeRow = {
+  rowKey: string;
   id: number;
   title: string;
   count: number;
@@ -47,18 +48,19 @@ const difficultyLabel = computed(
 );
 const summaryRows = computed(() => [guideContent.value.summary]);
 const summaryColumns = computed(() => [
-  t("guide.summaryColumns.overPlus"),
-  t("guide.summaryColumns.over"),
-  t("guide.summaryColumns.strong"),
-  t("guide.summaryColumns.middle"),
-  t("guide.summaryColumns.weak"),
-  t("guide.summaryColumns.under"),
-  t("guide.summaryColumns.underMinus"),
-  t("guide.summaryColumns.total")
+  { prop: "overPlus", label: t("guide.summaryColumns.overPlus") },
+  { prop: "over", label: t("guide.summaryColumns.over") },
+  { prop: "strong", label: t("guide.summaryColumns.strong") },
+  { prop: "middle", label: t("guide.summaryColumns.middle") },
+  { prop: "weak", label: t("guide.summaryColumns.weak") },
+  { prop: "under", label: t("guide.summaryColumns.under") },
+  { prop: "underMinus", label: t("guide.summaryColumns.underMinus") },
+  { prop: "total", label: t("guide.summaryColumns.total") }
 ]);
 const tableKey = computed(() => `${difficulty.value}-${level.value}`);
 const tagRows = computed<TreeRow[]>(() =>
   guideContent.value.tags.map((item) => ({
+    rowKey: `tag-${item.id}`,
     id: item.id,
     title: item.label,
     count: item.count,
@@ -77,7 +79,7 @@ const mainSpanMethod = (row: { row?: TreeRow }) => {
 };
 
 const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => {
-  if (row.rowIndex === 1) {
+  if (row.rowIndex === 1 && row.columnIndex < colorMap.length) {
     return colorMap[row.columnIndex];
   }
   return "";
@@ -186,7 +188,13 @@ useViewerSeo(() => ({
         :header-cell-class-name="headerCellClassName"
       >
         <el-table-column :label="t('page.guide.detail.summaryLabel')" align="center">
-          <el-table-column v-for="column in summaryColumns" :key="column" :prop="column" :label="column" align="center" />
+          <el-table-column
+            v-for="column in summaryColumns"
+            :key="column.prop"
+            :prop="column.prop"
+            :label="column.label"
+            align="center"
+          />
         </el-table-column>
       </el-table>
 
@@ -211,7 +219,7 @@ useViewerSeo(() => ({
         row-class-name="main-table"
         :data="tagRows"
         :span-method="mainSpanMethod"
-        row-key="id"
+        row-key="rowKey"
         lazy
         :load="loadChildren"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"

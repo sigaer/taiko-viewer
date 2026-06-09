@@ -1,12 +1,11 @@
 import type {
-  GuideDifficultyOption,
   GuidePagePayload,
   GuideSummaryTable,
   GuideTagItem,
   GuideTagItemsPayload
 } from "~/types/content";
 import {
-  GUIDE_DIFFICULTY_OPTIONS,
+  GUIDE_SUMMARY_KEY_BY_TAG_ID,
   GUIDE_SUMMARY_KEYS,
   GUIDE_TAGS,
   getGuideDifficultyOption
@@ -27,14 +26,21 @@ const GUIDE_TAG_TRANSLATION_KEYS: Record<number, string> = {
   7: "guide.summaryColumns.underMinus"
 };
 
-const toGuideTagItem = (input: Record<string, unknown>): GuideTagItem => ({
+const toGuideTagItem = (
+  input: Record<string, unknown>,
+  difficulty: number,
+  level: number,
+  tagId: number,
+  index: number
+): GuideTagItem => ({
   id: Number(input.id || 0),
+  rowKey: `guide-${difficulty}-${level}-${tagId}-${Number(input.id || 0)}-${index}`,
   title: String(input.title || ""),
   bpm: String(input.bpm || ""),
   category: String(input.category || ""),
   tag: String(input.tag || ""),
   feature: String(input.feature || ""),
-  noteCount: String(input.noteCount || "")
+  noteCount: String(input.noteCount ?? input.note_count ?? "")
 });
 
 const getGuideTagLabel = (locale: string, tagId: number, fallback: string) =>
@@ -95,7 +101,7 @@ const fetchGuideTagItems = async (difficulty: number, level: number, tagId: numb
     level,
     tagId,
     tagLabel: getGuideTagLabel(normalizedLocale, tagId, tag.label),
-    items: rows.map(toGuideTagItem)
+    items: rows.map((row, index) => toGuideTagItem(row, difficulty, level, tagId, index))
   };
   guideTagItemsCache.set(cacheKey, {
     expiresAt: now + getGuideCacheTtlMs(),
@@ -117,26 +123,19 @@ export const getGuidePageContent = async (difficulty: number, level: number, loc
   const tagPayloads = await Promise.all(
     GUIDE_TAGS.map((tag) => fetchGuideTagItems(difficulty, level, tag.id, normalizedLocale))
   );
-  const summary = tagPayloads.reduce<GuideSummaryTable>(
-    (acc, item) => {
-      acc[item.tagLabel] = item.items.length;
-      const totalLabel = translateServerMessage(normalizedLocale, "guide.summaryColumns.total", undefined, "合计");
-      acc[totalLabel] = (acc[totalLabel] || 0) + item.items.length;
-      return acc;
-    },
-    GUIDE_SUMMARY_KEYS.reduce<GuideSummaryTable>((acc, key) => {
-      const translatedKey =
-        key === "合计"
-          ? translateServerMessage(normalizedLocale, "guide.summaryColumns.total", undefined, key)
-          : getGuideTagLabel(
-              normalizedLocale,
-              GUIDE_TAGS.find((item) => item.label === key)?.id || 0,
-              key
-            );
-      acc[translatedKey] = 0;
-      return acc;
-    }, {} as GuideSummaryTable)
-  );
+  const summary = GUIDE_SUMMARY_KEYS.reduce<GuideSummaryTable>((acc, key) => {
+    acc[key] = 0;
+    return acc;
+  }, {} as GuideSummaryTable);
+
+  for (const item of tagPayloads) {
+    const summaryKey = GUIDE_SUMMARY_KEY_BY_TAG_ID[item.tagId];
+    if (!summaryKey) {
+      continue;
+    }
+    summary[summaryKey] = item.items.length;
+    summary.total += item.items.length;
+  }
 
   const payload: GuidePagePayload = {
     difficulty,

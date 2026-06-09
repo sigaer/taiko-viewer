@@ -6,14 +6,14 @@ const createGuidePageDefault = (): GuidePagePayload => ({
   level: 0,
   tags: [],
   summary: {
-    "诈称+": 0,
-    诈称: 0,
-    强: 0,
-    中: 0,
-    弱: 0,
-    "逆诈称": 0,
-    "逆诈称-": 0,
-    合计: 0
+    overPlus: 0,
+    over: 0,
+    strong: 0,
+    middle: 0,
+    weak: 0,
+    under: 0,
+    underMinus: 0,
+    total: 0
   }
 });
 
