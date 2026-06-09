@@ -11,7 +11,6 @@ type TreeRow = {
   id: number;
   title: string;
   count: number;
-  hasChildren: boolean;
 };
 
 const route = useRoute();
@@ -63,20 +62,13 @@ const tagRows = computed<TreeRow[]>(() =>
     rowKey: `tag-${item.id}`,
     id: item.id,
     title: item.label,
-    count: item.count,
-    hasChildren: item.count > 0
+    count: item.count
   }))
 );
 
 const detailCache = reactive<Record<number, GuideTagItemsPayload>>({});
-const loadingTagId = ref(0);
+const loadingTagIds = ref<number[]>([]);
 const colorMap = ["hardest", "harder", "hard", "normal", "easy", "easier", "easiest"];
-
-const mainSpanMethod = (row: { row?: TreeRow }) => {
-  if ((row.row?.id || 0) < 8) {
-    return [1, 6];
-  }
-};
 
 const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => {
   if (row.rowIndex === 1 && row.columnIndex < colorMap.length) {
@@ -85,39 +77,39 @@ const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => 
   return "";
 };
 
-const cellClassName = (row: { row?: TreeRow }) => {
-  if ((row.row?.id || 0) < 8) {
-    return colorMap[(row.row?.id || 1) - 1];
+const rowClassName = (row: { row?: TreeRow }) => {
+  const rowId = row.row?.id || 0;
+  if (rowId < 1 || rowId > colorMap.length) {
+    return "";
   }
-  return "common";
+  return `guide-tag-row ${colorMap[rowId - 1]}`;
 };
 
-const loadChildren = async (
-  row: TreeRow,
-  _treeNode: unknown,
-  resolve: (data: unknown[]) => void
-) => {
-  if (!row.hasChildren) {
-    resolve([]);
+const isTagLoading = (tagId: number) => loadingTagIds.value.includes(tagId);
+
+const getTagItems = (tagId: number) => detailCache[tagId]?.items || [];
+
+const ensureTagItemsLoaded = async (row: TreeRow) => {
+  if (detailCache[row.id] || isTagLoading(row.id)) {
     return;
   }
-  if (detailCache[row.id]) {
-    resolve(detailCache[row.id].items);
-    return;
-  }
-  loadingTagId.value = row.id;
+  loadingTagIds.value = [...loadingTagIds.value, row.id];
   try {
     const payload = await loadGuideTagItems(difficulty.value, level.value, row.id);
     detailCache[row.id] = payload;
-    resolve(payload.items);
     if (!payload.items.length) {
       ElMessage.warning(t("guide.empty"));
     }
   } catch {
-    resolve([]);
     ElMessage.error(t("guide.loadFailed"));
   } finally {
-    loadingTagId.value = 0;
+    loadingTagIds.value = loadingTagIds.value.filter((tagId) => tagId !== row.id);
+  }
+};
+
+const handleExpandChange = async (row: TreeRow, expandedRows: TreeRow[]) => {
+  if (expandedRows.some((item) => item.rowKey === row.rowKey)) {
+    await ensureTagItemsLoaded(row);
   }
 };
 
@@ -216,23 +208,35 @@ useViewerSeo(() => ({
       <el-table
         :key="tableKey"
         border
-        row-class-name="main-table"
+        :row-class-name="rowClassName"
         :data="tagRows"
-        :span-method="mainSpanMethod"
         row-key="rowKey"
-        lazy
-        :load="loadChildren"
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-        :cell-class-name="cellClassName"
-        v-loading="loadingTagId > 0"
+        @expand-change="handleExpandChange"
         class="detail-table"
       >
+        <el-table-column type="expand" width="56" align="center">
+          <template #default="{ row }">
+            <div class="tag-detail-wrap">
+              <el-skeleton v-if="isTagLoading(row.id)" :rows="6" animated />
+              <el-empty v-else-if="!getTagItems(row.id).length" :description="t('guide.empty')" />
+              <el-table
+                v-else
+                :data="getTagItems(row.id)"
+                border
+                class="tag-detail-table"
+              >
+                <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" min-width="220" />
+                <el-table-column prop="bpm" label="BPM" align="center" width="120" />
+                <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="140" />
+                <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="150" />
+                <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" min-width="320" />
+                <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
+              </el-table>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" align="center" width="220" />
         <el-table-column prop="count" :label="t('page.guide.detail.columns.count')" align="center" width="100" />
-        <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="120" />
-        <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="120" />
-        <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" align="center" />
-        <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
       </el-table>
     </el-card>
   </div>
@@ -316,7 +320,8 @@ useViewerSeo(() => ({
 }
 
 .summary-table,
-.detail-table {
+.detail-table,
+.tag-detail-table {
   width: 100%;
 }
 
@@ -326,32 +331,47 @@ useViewerSeo(() => ({
   margin: 20px 0;
 }
 
-:deep(.hardest) {
+:deep(.detail-table .cell),
+:deep(.tag-detail-table .cell) {
+  white-space: pre-line;
+}
+
+:deep(.guide-tag-row td.el-table__cell) {
+  font-weight: 600;
+}
+
+:deep(.guide-tag-row.hardest td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(196, 79, 45, 0.16) !important;
 }
 
-:deep(.harder) {
+:deep(.guide-tag-row.harder td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(220, 116, 58, 0.16) !important;
 }
 
-:deep(.hard) {
+:deep(.guide-tag-row.hard td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(232, 148, 51, 0.16) !important;
 }
 
-:deep(.normal) {
+:deep(.guide-tag-row.normal td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(241, 183, 80, 0.16) !important;
 }
 
-:deep(.easy) {
+:deep(.guide-tag-row.easy td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(171, 197, 117, 0.16) !important;
 }
 
-:deep(.easier) {
+:deep(.guide-tag-row.easier td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(107, 182, 132, 0.16) !important;
 }
 
-:deep(.easiest) {
+:deep(.guide-tag-row.easiest td.el-table__cell:not(.el-table__expanded-cell)) {
   background: rgba(76, 160, 180, 0.16) !important;
+}
+
+.tag-detail-wrap {
+  padding: 8px 12px;
+  background: rgba(255, 252, 248, 0.92);
+  border-radius: 12px;
 }
 
 @media (max-width: 840px) {

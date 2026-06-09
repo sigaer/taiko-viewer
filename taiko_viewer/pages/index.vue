@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
-const appVersion = runtimeConfig.public.appVersion || "0.26.2";
+const appVersion = runtimeConfig.public.appVersion || "0.26.3";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
