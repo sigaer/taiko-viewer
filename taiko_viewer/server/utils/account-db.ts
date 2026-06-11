@@ -220,6 +220,44 @@ const CREATE_TABLES = [
       REFERENCES web_support_tickets(id) ON DELETE CASCADE,
     CONSTRAINT fk_web_support_ticket_messages_author_user_id FOREIGN KEY (author_user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_admin_action_logs (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    actor_type VARCHAR(32) NOT NULL,
+    actor_id VARCHAR(255) DEFAULT NULL,
+    actor_name VARCHAR(255) DEFAULT NULL,
+    source VARCHAR(32) NOT NULL,
+    target_type VARCHAR(64) NOT NULL,
+    target_key VARCHAR(255) NOT NULL,
+    action VARCHAR(16) NOT NULL,
+    before_json LONGTEXT DEFAULT NULL,
+    after_json LONGTEXT DEFAULT NULL,
+    extra_json LONGTEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_web_admin_action_logs_created_at (created_at),
+    KEY idx_web_admin_action_logs_target (target_type, target_key, created_at),
+    KEY idx_web_admin_action_logs_source_action (source, action, created_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_admin_access_rollups (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    source_key VARCHAR(64) NOT NULL,
+    granularity VARCHAR(16) NOT NULL,
+    bucket_start DATETIME NOT NULL,
+    metric_count INT UNSIGNED NOT NULL DEFAULT 0,
+    pv_count INT UNSIGNED NOT NULL DEFAULT 0,
+    uv_count INT UNSIGNED NOT NULL DEFAULT 0,
+    home_pv_count INT UNSIGNED NOT NULL DEFAULT 0,
+    extra_json LONGTEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_admin_access_rollups_bucket (source_key, granularity, bucket_start),
+    KEY idx_web_admin_access_rollups_bucket_start (granularity, bucket_start)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_admin_ingest_state (
+    source_key VARCHAR(64) NOT NULL PRIMARY KEY,
+    state_json LONGTEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 

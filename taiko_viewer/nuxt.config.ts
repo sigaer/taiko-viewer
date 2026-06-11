@@ -131,9 +131,15 @@ export default defineNuxtConfig({
     repoRoot: process.env.TAIKO_REPO_ROOT || "",
     userdataDir: process.env.TAIKO_USERDATA_DIR || "",
     songDataPath: process.env.TAIKO_SONG_DATA_PATH || "",
+    songDatabasePath: process.env.TAIKO_SONG_DATABASE_PATH || "",
     ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
+    taikoAdminApiBase: process.env.TAIKO_ADMIN_API_BASE || "http://8.138.33.103:4290",
+    viewerAccessLogPath:
+      process.env.VIEWER_ACCESS_LOG_PATH || "/www/wwwlogs/viewer.sakura-bot.cn.log",
+    taikoAdminBackupDir:
+      process.env.TAIKO_ADMIN_BACKUP_DIR || "/home/sigaer/taiko/data/admin_backups",
     taikoOpenResourceDir: process.env.TAIKO_OPEN_RESOURCE_DIR || "",
     taikoOpenAnonymousDailyLimit:
       process.env.TAIKO_OPEN_ANONYMOUS_DAILY_LIMIT || "",
@@ -146,6 +152,11 @@ export default defineNuxtConfig({
     dbUser: process.env.TAIKO_DB_USER || "",
     dbPassword: process.env.TAIKO_DB_PASSWORD || "",
     dbName: process.env.TAIKO_DB_NAME || "",
+    botDbHost: process.env.METHOD_CALLS_DB_HOST || process.env.TAIKO_DB_HOST || "",
+    botDbPort: process.env.METHOD_CALLS_DB_PORT || process.env.TAIKO_DB_PORT || "",
+    botDbUser: process.env.METHOD_CALLS_DB_USER || process.env.TAIKO_DB_USER || "",
+    botDbPassword: process.env.METHOD_CALLS_DB_PASSWORD || process.env.TAIKO_DB_PASSWORD || "",
+    botDbName: process.env.METHOD_CALLS_DB_NAME || "bot",
     smtpHost: process.env.SMTP_HOST || "",
     smtpPort: process.env.SMTP_PORT || "",
     smtpUser: process.env.SMTP_USER || "",
@@ -192,11 +203,13 @@ export default defineNuxtConfig({
       "/api/data/**": { prerender: false },
       "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
+      "/api/admin/**": { prerender: false },
       "/api/developer/**": { prerender: false },
       "/api/taiko/**": { prerender: false },
       "/api/forum/**": { prerender: false },
       "/api/support/**": { prerender: false },
-      "/api/bilibili/**": { prerender: false }
+      "/api/bilibili/**": { prerender: false },
+      "/admin/**": { prerender: false }
     },
     prerender: {
       crawlLinks: false,
