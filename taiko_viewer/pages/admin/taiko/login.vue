@@ -18,17 +18,17 @@ const apiFetch = useAdminApiFetch();
 const { fetchCurrentAdmin } = useAdminState();
 const submitting = ref(false);
 const form = reactive({
-  username: "maru",
-  password: "JCPsHfPW3qIKdCD"
+  username: "",
+  password: ""
 });
 
 const copy = computed(() => ({
   heading: "Taiko 管理后台",
-  intro: "使用远端 taiko 管理端账号登录。当前后台仅对授权人员开放，所有敏感操作都会写入审计日志。",
+  intro: "使用已授权的 taiko 管理账号登录后台。",
   username: "管理员账号",
   password: "密码",
   submit: "登录后台",
-  hint: "当前表单已预填测试账号，可直接验证登录链路。"
+  hint: "仅授权人员可访问。"
 }));
 
 const submit = async () => {
@@ -56,16 +56,6 @@ const submit = async () => {
       <span class="admin-login-hero__eyebrow">KOI-inspired Admin Console</span>
       <h1>{{ copy.heading }}</h1>
       <p>{{ copy.intro }}</p>
-      <div class="admin-login-hero__panels">
-        <div class="admin-login-hero__panel">
-          <strong>鉴权</strong>
-          <span>通过 Nuxt server 代理远端 `/taiko/login`，JWT 只保存在 `httpOnly` Cookie。</span>
-        </div>
-        <div class="admin-login-hero__panel">
-          <strong>审计</strong>
-          <span>后台 CRUD、bot 来源写入和备份动作统一落到 `web_admin_action_logs`。</span>
-        </div>
-      </div>
     </section>
 
     <el-card class="admin-login-card">
@@ -128,26 +118,10 @@ const submit = async () => {
 
 .admin-login-hero p {
   margin: 0;
-  max-width: 720px;
+  max-width: 560px;
   color: #5d5244;
   font-size: 16px;
   line-height: 1.8;
-}
-
-.admin-login-hero__panels {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.admin-login-hero__panel {
-  padding: 20px;
-  border-radius: 22px;
-  background: rgba(255, 252, 247, 0.82);
-  box-shadow: 0 18px 40px rgba(139, 119, 82, 0.11);
-  display: grid;
-  gap: 8px;
 }
 
 .admin-login-card {
@@ -180,10 +154,6 @@ const submit = async () => {
   .admin-login-page {
     grid-template-columns: 1fr;
     padding: 20px;
-  }
-
-  .admin-login-hero__panels {
-    grid-template-columns: 1fr;
   }
 }
 </style>

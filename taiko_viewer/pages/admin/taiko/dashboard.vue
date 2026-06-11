@@ -151,7 +151,7 @@ const botOption = computed<EChartsOption>(() => ({
       <AdminMetricCard label="24h 上传总量" :value="dashboard.summary.uploads24h" hint="最近 24h 快照文件" />
       <AdminMetricCard label="24h 页面 PV / UV" :value="`${dashboard.summary.pagePv24h} / ${dashboard.summary.pageUv24h}`" hint="排除静态资源、API 与 bot UA" />
       <AdminMetricCard label="24h 首页点击量" :value="dashboard.summary.homePv24h" hint="/ 与 /ja 页面请求量" />
-      <AdminMetricCard label="24h Bot 指令调用" :value="dashboard.summary.botCommands24h" hint="method_calls 小时趋势累计" />
+      <AdminMetricCard label="24h 太鼓指令调用" :value="dashboard.summary.botCommands24h" hint="仅统计 taiko.py 命令" />
     </div>
 
     <el-skeleton v-if="pending && !dashboard" :rows="10" animated />
@@ -171,7 +171,7 @@ const botOption = computed<EChartsOption>(() => ({
       />
       <AdminChartCard
         title="30 天 Top 指令"
-        subtitle="method_calls 当前保留窗口内的热点指令分布。"
+        subtitle="仅统计 taiko.py 当前保留窗口内的热点指令分布。"
         :option="botOption"
         :height="320"
       />

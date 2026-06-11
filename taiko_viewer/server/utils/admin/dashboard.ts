@@ -7,6 +7,7 @@ import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account
 import { listAdminActionLogs } from "./audit";
 import { listAdminBackups } from "./backup";
 import { getBotDb, getAdminManagedPaths, getAdminRuntimeConfig, sha1 } from "./shared";
+import { isTaikoMethodDisplay } from "./taiko-method-calls";
 
 type RollupRow = {
   id: number;
@@ -42,9 +43,9 @@ type UploadStatsCache = {
 };
 
 const VIEWER_ACCESS_SOURCE = "viewer_access";
-const BOT_METHOD_CALL_SOURCE = "bot_method_calls";
+const BOT_METHOD_CALL_SOURCE = "bot_method_calls_taiko";
 const VIEWER_ACCESS_STATE_KEY = "viewer_access_log";
-const BOT_METHOD_CALL_STATE_KEY = "bot_method_calls";
+const BOT_METHOD_CALL_STATE_KEY = "bot_method_calls_taiko";
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const UPLOAD_SCAN_CACHE_TTL_MS = 5 * 60 * 1000;
 const MONTH_INDEX: Record<string, number> = {
@@ -159,6 +160,8 @@ const decodeMethodName = (methodName: string) => {
   }
   return trimmed;
 };
+
+const isTaikoMethodCall = (methodName: string) => isTaikoMethodDisplay(decodeMethodName(methodName));
 
 const getIngestState = async (sourceKey: string) => {
   await ensureAccountSchema();
@@ -340,6 +343,10 @@ const ingestMethodCalls = async () => {
     >();
 
     for (const row of rows) {
+      lastId = Math.max(lastId, Number(row.id || 0));
+      if (!isTaikoMethodCall(row.method_name)) {
+        continue;
+      }
       const timestamp = new Date(row.timestamp);
       if (Number.isNaN(timestamp.getTime())) continue;
       for (const granularity of ["hour", "day"] as const) {
@@ -353,7 +360,6 @@ const ingestMethodCalls = async () => {
         existing.metricCount += 1;
         buckets.set(key, existing);
       }
-      lastId = Math.max(lastId, Number(row.id || 0));
     }
 
     for (const bucket of buckets.values()) {
@@ -451,13 +457,15 @@ const getTopCommandRows = async (limit = 10) => {
      FROM method_calls
      WHERE timestamp >= NOW() - INTERVAL 30 DAY
      GROUP BY method_name
-     ORDER BY total DESC
-     LIMIT ${safeLimit}`
+     ORDER BY total DESC`
   );
-  return rows.map((row) => ({
-    name: decodeMethodName(row.method_name),
-    count: Number(row.total || 0)
-  }));
+  return rows
+    .filter((row) => isTaikoMethodCall(row.method_name))
+    .slice(0, safeLimit)
+    .map((row) => ({
+      name: decodeMethodName(row.method_name),
+      count: Number(row.total || 0)
+    }));
 };
 
 const buildDashboardPayload = async () => {

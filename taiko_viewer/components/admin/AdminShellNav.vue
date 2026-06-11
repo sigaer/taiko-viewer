@@ -28,18 +28,26 @@ const navItems = [
 
 <style scoped>
 .admin-shell-nav {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+  align-self: start;
 }
 
 .admin-shell-nav__item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 12px;
   color: rgba(247, 246, 240, 0.78);
   text-decoration: none;
+  font-size: 14px;
+  line-height: 1.35;
   transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
 
@@ -59,12 +67,13 @@ const navItems = [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .admin-shell-nav__item.active .admin-shell-nav__badge {
