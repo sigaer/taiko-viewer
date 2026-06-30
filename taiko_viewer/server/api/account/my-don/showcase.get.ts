@@ -2,5 +2,7 @@ import { getMyDonShowcaseSettings, requireAccountUser } from "~/server/utils/acc
 
 export default defineEventHandler(async (event) => {
   const user = await requireAccountUser(event);
-  return getMyDonShowcaseSettings(user.id);
+  const result = await getMyDonShowcaseSettings(user.id);
+  console.log("[showcase-debug] userId:", user.id, "taikoId:", result.taikoId, "hasUserdata:", result.hasUserdata, "availableTitles:", result.availableTitles.length);
+  return result;
 });
