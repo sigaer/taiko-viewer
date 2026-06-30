@@ -719,24 +719,8 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
             </div>
           </div>
         </el-card>
-      </section>
 
-      <el-card class="panel-card mydon-card">
-        <div class="section-title">
-          <h3>{{ copy.myDon }}</h3>
-        </div>
-        <div v-if="!profile.currentBinding" class="mydon-empty">
-          <el-empty :description="copy.myDonNeedBinding" />
-        </div>
-        <div v-else-if="!myDonErrored" class="mydon-frame">
-          <img :src="myDonUrl" alt="我的小咚" class="mydon-image" @error="myDonErrored = true" />
-        </div>
-        <div v-else class="mydon-empty">
-          <el-empty :description="copy.myDonFailed" />
-        </div>
-      </el-card>
-
-      <el-card class="panel-card mydon-config-card">
+        <el-card class="panel-card mydon-config-card">
         <div class="section-title">
           <h3>{{ copy.showcaseTitle }}</h3>
           <p>{{ copy.showcaseDesc }}</p>
@@ -803,6 +787,22 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
           </div>
         </div>
       </el-card>
+      </section>
+
+      <el-card class="panel-card mydon-card">
+        <div class="section-title">
+          <h3>{{ copy.myDon }}</h3>
+        </div>
+        <div v-if="!profile.currentBinding" class="mydon-empty">
+          <el-empty :description="copy.myDonNeedBinding" />
+        </div>
+        <div v-else-if="!myDonErrored" class="mydon-frame">
+          <img :src="myDonUrl" alt="我的小咚" class="mydon-image" @error="myDonErrored = true" />
+        </div>
+        <div v-else class="mydon-empty">
+          <el-empty :description="copy.myDonFailed" />
+        </div>
+      </el-card>
 
       <AccountAvatarCropperDialog
         v-model="avatarCropVisible"
@@ -837,6 +837,10 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
   gap: 18px;
+}
+
+.mydon-config-card {
+  grid-column: 1 / -1;
 }
 
 .profile-main {
