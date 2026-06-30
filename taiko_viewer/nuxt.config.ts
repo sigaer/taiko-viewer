@@ -8,6 +8,8 @@ const backgroundColor = "#f4efe7";
 const pwaDescription = "Taiko data viewer, song list, guides, forum and tools.";
 const baiduSiteVerification =
   process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "codeva-IokhumYAJv";
+const googleAnalyticsId =
+  process.env.NUXT_PUBLIC_GOOGLE_ANALYTICS_ID || process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || "";
 
 export default defineNuxtConfig({
   ssr: true,
@@ -181,7 +183,8 @@ export default defineNuxtConfig({
       appVersion,
       apiBase: "https://static.sakura-bot.cn",
       guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide",
-      baiduSiteVerification
+      baiduSiteVerification,
+      googleAnalyticsId
     }
   },
   nitro: {

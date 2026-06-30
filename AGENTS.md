@@ -10,7 +10,8 @@
 
 ## Web
 
-- Production forum domain: `https://forum.sakura-bot.cn`
+- Production viewer domain: `https://viewer.sakura-bot.cn`
+- Legacy forum domain: `https://forum.sakura-bot.cn` redirects to the viewer domain.
 - Source project: `taiko_viewer`
 - Shared backend APIs live under `/api/forum/*` and `/api/account/*`
 - Any user-visible web change must bump `taiko_viewer/package.json` version in the same change.

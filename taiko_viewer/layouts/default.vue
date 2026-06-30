@@ -4,6 +4,13 @@ import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
 import { SITE_TITLE } from "~/utils/seo";
 
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 type BreadcrumbItem = {
   label?: string;
   labelKey?: string;
@@ -11,6 +18,7 @@ type BreadcrumbItem = {
 };
 
 const route = useRoute();
+const runtimeConfig = useRuntimeConfig();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const switchLocalePath = useSwitchLocalePath();
@@ -20,14 +28,40 @@ const isPageLoadingVisible = ref(false);
 const isMobile = ref(false);
 const isMobileNavOpen = ref(false);
 const breadcrumbItems = ref<BreadcrumbItem[]>([]);
+const lastTrackedPath = ref("");
 const nuxtApp = useNuxtApp();
 let loadingTimer: ReturnType<typeof setTimeout> | null = null;
+const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
 
 useHead(() => ({
   htmlAttrs: localeHead.value.htmlAttrs,
   meta: localeHead.value.meta,
   link: localeHead.value.link.filter((item) => item.rel !== "canonical")
 }));
+
+useHead(() => {
+  const measurementId = googleAnalyticsId.value;
+  if (!measurementId) return {};
+  return {
+    script: [
+      {
+        key: "google-analytics-loader",
+        async: true,
+        src: `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`
+      },
+      {
+        key: "google-analytics-bootstrap",
+        children: [
+          "window.dataLayer = window.dataLayer || [];",
+          "function gtag(){dataLayer.push(arguments);}",
+          "window.gtag = window.gtag || gtag;",
+          "gtag('js', new Date());",
+          `gtag('config', ${JSON.stringify(measurementId)}, { send_page_view: false });`
+        ].join("")
+      }
+    ]
+  };
+});
 
 const translateMetaText = (key?: string, fallback?: string) => {
   if (key) return t(key);
@@ -89,6 +123,19 @@ const stopPageLoading = () => {
     clearTimeout(loadingTimer);
     loadingTimer = null;
   }
+};
+
+const trackGooglePageView = async (path: string) => {
+  if (!process.client || !googleAnalyticsId.value) return;
+  if (!path || lastTrackedPath.value === path) return;
+  await nextTick();
+  if (typeof window.gtag !== "function") return;
+  window.gtag("event", "page_view", {
+    page_title: document.title,
+    page_location: window.location.href,
+    page_path: path
+  });
+  lastTrackedPath.value = path;
 };
 
 const startPageLoading = () => {
@@ -155,12 +202,14 @@ watch(
     if (isMobile.value) {
       closeMobileNav();
     }
+    await trackGooglePageView(route.fullPath);
   }
 );
 
 onMounted(() => {
   stopPageLoading();
   syncViewport();
+  trackGooglePageView(route.fullPath);
   window.addEventListener("resize", syncViewport);
 });
 
