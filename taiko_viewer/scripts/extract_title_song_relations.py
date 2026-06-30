@@ -17,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+ROOT_DIR = Path(__file__).resolve().parents[3]
+TITLE_CATALOG_DEFAULT = ROOT_DIR / "data" / "title_catalog_cache.json"
 
 ANCHOR_RE = re.compile(r"<a\s+([^>]*?)>(.*?)</a>", re.IGNORECASE | re.DOTALL)
 TAG_RE = re.compile(r"<[^>]+>")
@@ -26,7 +28,9 @@ ATTR_RE = re.compile(
 
 GENERIC_PHRASES = (
     "一局内",
+    "1プレイ内",
     "所有曲子",
+    "曲を全て",
     "全部选择",
     "系列",
     "专辑",
@@ -34,6 +38,7 @@ GENERIC_PHRASES = (
     "双人模式",
     "同时",
     "歌曲",
+    "特定の曲",
 )
 
 
@@ -60,6 +65,10 @@ def html_to_text(value: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def plain_text(value: str) -> str:
+    return re.sub(r"\s+", " ", html.unescape(str(value or ""))).strip()
+
+
 def extract_anchors(value: str) -> list[Anchor]:
     anchors: list[Anchor] = []
     for match in ANCHOR_RE.finditer(value):
@@ -78,7 +87,14 @@ def is_song_anchor(anchor: Anchor) -> bool:
     href = anchor.href
     if not href.startswith("http"):
         return False
-    if "/taiko/" not in href:
+    if "/taiko/" not in href and "/taiko-fumen/" not in href:
+        return False
+    if "/taiko-fumen/" in href and (
+        "/作品/" in href
+        or "%E4%BD%9C%E5%93%81/" in href
+        or "/新AC/" in href
+        or "%E6%96%B0AC/" in href
+    ):
         return False
     if "index.php?title=" in href:
         return False
@@ -89,15 +105,22 @@ def is_song_anchor(anchor: Anchor) -> bool:
 
 
 def detect_requirement_type(condition_text: str) -> str | None:
+    if "全良" in condition_text or "ドンダフルコンボ" in condition_text:
+        return "all_perfect"
     if "全连" in condition_text or "フルコンボ" in condition_text:
         return "full_combo"
-    if "过关" in condition_text or "クリア" in condition_text:
+    if "过关" in condition_text or "通关" in condition_text or "クリア" in condition_text:
         return "clear"
     return None
 
 
 def detect_difficulty(condition_text: str) -> str:
-    if "（里）" in condition_text or "里谱" in condition_text:
+    has_inner_oni = bool(
+        re.search(r"魔王[（(]隐藏[)）]|魔王[（(]裏[)）]|[（(]裏[)）]|裏譜面|里谱", condition_text)
+    )
+    if "魔王" in condition_text and "或" in condition_text and has_inner_oni:
+        return "oni_or_inner_oni"
+    if has_inner_oni:
         return "inner_oni"
     if "魔王" in condition_text:
         return "oni"
@@ -113,8 +136,15 @@ def detect_difficulty(condition_text: str) -> str:
 def cleanup_song_name(name: str) -> str:
     value = html.unescape(name).strip()
     value = re.sub(r"\s+", " ", value)
-    value = value.strip(" \t\r\n.,，。:：;；\"'()（）[]【】")
+    value = value.strip(" \t\r\n.,，。:：;；\"'[]《》")
     return value
+
+
+def cleanup_condition_song_name(name: str) -> str:
+    value = html.unescape(name).strip()
+    value = re.sub(r"\s+", " ", value)
+    value = value.replace("》《", "|")
+    return value.strip(" \t\r\n.,，。:：;；\"'")
 
 
 def split_song_blob(blob: str) -> list[str]:
@@ -162,6 +192,16 @@ def extract_plain_song_names(condition_text: str, requirement_type: str) -> list
     return cleaned
 
 
+def extract_api_song_names(condition_text: str) -> list[str]:
+    names: list[str] = []
+    for match in re.findall(r"《([^》]+)》", condition_text):
+        song_name = cleanup_condition_song_name(match)
+        if not song_name or is_generic_candidate(song_name):
+            continue
+        names.append(song_name)
+    return unique_keep_order(names)
+
+
 def unique_keep_order(values: list[str]) -> list[str]:
     seen: set[str] = set()
     result: list[str] = []
@@ -173,7 +213,76 @@ def unique_keep_order(values: list[str]) -> list[str]:
     return result
 
 
-def build_relations(payload: dict[str, Any]) -> dict[str, Any]:
+def build_api_relations(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    titles = payload.get("titles") or payload.get("list") or []
+    if not isinstance(titles, list):
+        return []
+
+    relations: list[dict[str, Any]] = []
+    for item in titles:
+        if not isinstance(item, dict):
+            continue
+        title_name = plain_text(item.get("name") or "")
+        condition_text = plain_text(item.get("subtitle") or "")
+        if not title_name or not condition_text or condition_text in {"", "???", "？？？"}:
+            continue
+        requirement_type = detect_requirement_type(condition_text)
+        if requirement_type is None:
+            continue
+        song_names = extract_api_song_names(condition_text)
+        if not song_names:
+            continue
+        difficulty = detect_difficulty(condition_text)
+        try:
+            source_row_index = int(item.get("sort_no"))
+        except Exception:
+            source_row_index = -1
+        for song_name in song_names:
+            relations.append(
+                {
+                    "song_name": song_name,
+                    "title_name": title_name,
+                    "requirement_type": requirement_type,
+                    "difficulty_scope": difficulty,
+                    "condition_text": condition_text,
+                    "source_row_index": source_row_index,
+                }
+            )
+    return relations
+
+
+def merge_relation_rows(
+    base_rows: list[dict[str, Any]],
+    api_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    api_group_keys = {
+        (
+            str(item.get("title_name") or "").strip(),
+            str(item.get("requirement_type") or "").strip(),
+            str(item.get("difficulty_scope") or "unspecified").strip() or "unspecified",
+        )
+        for item in api_rows
+        if isinstance(item, dict)
+    }
+
+    merged_rows = [
+        item
+        for item in base_rows
+        if (
+            str(item.get("title_name") or "").strip(),
+            str(item.get("requirement_type") or "").strip(),
+            str(item.get("difficulty_scope") or "unspecified").strip() or "unspecified",
+        )
+        not in api_group_keys
+    ]
+    merged_rows.extend(api_rows)
+    return merged_rows
+
+
+def build_relations(
+    payload: dict[str, Any],
+    api_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     rows = payload.get("rows", [])
     relations: list[dict[str, Any]] = []
 
@@ -220,9 +329,13 @@ def build_relations(payload: dict[str, Any]) -> dict[str, Any]:
                 }
             )
 
+    merged_rows = relations
+    if isinstance(api_payload, dict):
+        merged_rows = merge_relation_rows(merged_rows, build_api_relations(api_payload))
+
     deduped: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str, str, str]] = set()
-    for item in relations:
+    for item in merged_rows:
         key = (
             item["song_name"],
             item["title_name"],
@@ -260,11 +373,19 @@ def build_relations(payload: dict[str, Any]) -> dict[str, Any]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "stats": {
             "rows_total": len(rows),
+            "api_relations_total": len(build_api_relations(api_payload)) if isinstance(api_payload, dict) else 0,
             "relations_total": len(deduped),
             "songs_total": len(by_song),
             "titles_total": len(by_title),
         },
-        "relations": deduped,
+        "relations": sorted(
+            deduped,
+            key=lambda item: (
+                int(item.get("source_row_index", -1) or -1),
+                str(item.get("title_name") or "").casefold(),
+                str(item.get("song_name") or "").casefold(),
+            ),
+        ),
         "by_song": dict(sorted(by_song.items(), key=lambda item: item[0].lower())),
         "by_title": dict(sorted(by_title.items(), key=lambda item: item[0].lower())),
     }
@@ -282,23 +403,32 @@ def main() -> None:
         default="assets/data/title_song_relations.json",
         help="Path to output relation JSON.",
     )
+    parser.add_argument(
+        "--title-catalog",
+        default=str(TITLE_CATALOG_DEFAULT),
+        help="Path to cached title catalog JSON from all/title.",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input)
     output_path = Path(args.output)
+    title_catalog_path = Path(args.title_catalog)
 
     payload = json.loads(input_path.read_text(encoding="utf-8"))
-    result = build_relations(payload)
+    api_payload: dict[str, Any] | None = None
+    if title_catalog_path.exists():
+        api_payload = json.loads(title_catalog_path.read_text(encoding="utf-8"))
+    result = build_relations(payload, api_payload=api_payload)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(
-        f"done: rows={result['stats']['rows_total']} relations={result['stats']['relations_total']} "
-        f"songs={result['stats']['songs_total']} titles={result['stats']['titles_total']}"
+        f"done: rows={result['stats']['rows_total']} api={result['stats'].get('api_relations_total', 0)} "
+        f"relations={result['stats']['relations_total']} songs={result['stats']['songs_total']} "
+        f"titles={result['stats']['titles_total']}"
     )
     print(f"output: {output_path}")
 
 
 if __name__ == "__main__":
     main()
-
