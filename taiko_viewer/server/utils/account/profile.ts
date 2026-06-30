@@ -1,7 +1,4 @@
 import { createError } from "h3";
-import { access, mkdir, readFile, readdir, stat, unlink, writeFile } from "node:fs/promises";
-import { constants as fsConstants } from "node:fs";
-import { join } from "node:path";
 import type { H3Event, MultiPartData } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "./auth";
@@ -10,13 +7,9 @@ import {
   type AccountRow,
   AVATAR_MAX_BYTES,
   DEFAULT_AVATAR,
-  execFileAsync,
   enrichBindingWithCurrentTitle,
-  getCurrentBindingRow,
   getOssClient,
   getPendingBinding,
-  getRuntimePaths,
-  getUserdataPath,
   readAvatarMultipart,
   requireConfiguredOss,
   sanitizePublicUser,
@@ -128,47 +121,4 @@ export { readAvatarMultipart };
 export const getProfileResponse = async (event: H3Event) => {
   const user = await requireAccountUser(event);
   return getAccountProfile(user.id);
-};
-
-export const getMyDonImageBuffer = async (userId: number) => {
-  const binding = await getCurrentBindingRow(userId);
-  if (!binding) {
-    throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
-  }
-
-  const { repoRoot, cacheDir } = getRuntimePaths();
-  const userdataPath = getUserdataPath(binding.taiko_id);
-  const fileStat = await stat(userdataPath);
-  const targetDir = join(cacheDir, "my-don");
-  await mkdir(targetDir, { recursive: true });
-  const cacheName = `${binding.taiko_id}-${fileStat.mtimeMs}.png`;
-  const cachePath = join(targetDir, cacheName);
-
-  try {
-    await access(cachePath, fsConstants.R_OK);
-    return await readFile(cachePath);
-  } catch {
-    // continue
-  }
-
-  const pythonCode = [
-    "from plugins.utils.draw_dress import render_my_don_image",
-    "import sys",
-    "sys.stdout.buffer.write(render_my_don_image(int(sys.argv[1])))"
-  ].join("; ");
-  const result = await execFileAsync("python3", ["-c", pythonCode, binding.taiko_id], {
-    cwd: repoRoot,
-    encoding: "buffer",
-    maxBuffer: 20 * 1024 * 1024
-  });
-  const buffer = result.stdout as Buffer;
-  await writeFile(cachePath, buffer);
-
-  const files = await readdir(targetDir);
-  await Promise.all(
-    files
-      .filter((name) => name.startsWith(`${binding.taiko_id}-`) && name !== cacheName)
-      .map((name) => unlink(join(targetDir, name)).catch(() => undefined))
-  );
-  return buffer;
 };

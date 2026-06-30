@@ -92,6 +92,19 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_taiko_bindings_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_taiko_binding_mydon_showcase_titles (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    binding_id BIGINT UNSIGNED NOT NULL,
+    slot_index INT NOT NULL,
+    title_name VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_taiko_binding_mydon_showcase_titles_binding_slot (binding_id, slot_index),
+    UNIQUE KEY uniq_web_taiko_binding_mydon_showcase_titles_binding_title (binding_id, title_name),
+    KEY idx_web_taiko_binding_mydon_showcase_titles_binding_id (binding_id),
+    CONSTRAINT fk_web_taiko_binding_mydon_showcase_titles_binding_id FOREIGN KEY (binding_id)
+      REFERENCES web_taiko_bindings(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_verifications (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { UploadFile, UploadInstance, UploadRawFile } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
@@ -67,6 +67,27 @@ type ProfilePayload = {
   };
 };
 
+type MyDonShowcaseTitleOption = {
+  titleName: string;
+  plateId: number;
+  requirementType: string;
+  difficultyScope: string;
+  conditionText: string;
+  songNames: string[];
+  songIds: number[];
+  constValue: number;
+  isMultiSong: boolean;
+};
+
+type MyDonShowcasePayload = {
+  bindingId: number | null;
+  taikoId: string | null;
+  hasUserdata: boolean;
+  isCustom: boolean;
+  selectedTitles: string[];
+  availableTitles: MyDonShowcaseTitleOption[];
+};
+
 const myDonTick = ref(0);
 const myDonErrored = ref(false);
 const bindingInput = ref("");
@@ -80,6 +101,8 @@ const avatarUploadRef = ref<UploadInstance>();
 const avatarCropVisible = ref(false);
 const avatarCropSourceUrl = ref("");
 const avatarCropFileName = ref("");
+const showcaseSaving = ref(false);
+const myDonShowcaseSlots = ref<string[]>(Array.from({ length: 5 }, () => ""));
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -110,6 +133,26 @@ const copy = computed(() =>
         myDon: "マイドン",
         myDonNeedBinding: "先にドンダーひろば ID を連携してください",
         myDonFailed: "マイドンの生成に失敗しました。しばらくしてから再試行してください。",
+        showcaseTitle: "マイドン称号展示",
+        showcaseDesc:
+          "現在の成績から推定できる楽曲称号の範囲内で、表示する 5 枠の並びを手動指定できます。保存後は既定の優先度順ではなく、ここで選んだ順序を優先して表示します。",
+        showcaseNeedBinding: "先にドンダーひろば ID を連携してください",
+        showcaseNeedUserdata: "現在の連携 ID にローカル成績データがありません。先に同期または更新してください。",
+        showcaseEmpty: "現在の成績から選べる楽曲称号がありません",
+        showcaseSave: "自定义を保存",
+        showcaseReset: "既定の表示に戻す",
+        showcaseSaveSuccess: "マイドン称号表示を更新しました",
+        showcaseResetSuccess: "マイドン称号表示を既定に戻しました",
+        showcaseSaveFailed: "マイドン称号表示の保存に失敗しました",
+        showcaseMode: "現在の表示モード",
+        showcaseModeDefault: "既定の自動表示",
+        showcaseModeCustom: "自定义順を使用中",
+        showcaseSelection: "現在の自定义順",
+        showcaseSelectionEmpty: "未設定",
+        showcaseOrderHint: "上から順に表示されます。未選択の枠はスキップされます。",
+        showcaseSlot: "枠 {index}",
+        showcasePlaceholder: "称号を選択",
+        showcaseClearHint: "すべて解除すると既定の並びに戻ります。",
         avatarUpdated: "アバターを更新しました",
         avatarUploadFailed: "アバター更新に失敗しました",
         avatarReset: "アバターをデフォルトに戻しました",
@@ -162,6 +205,26 @@ const copy = computed(() =>
         myDon: "我的小咚",
         myDonNeedBinding: "请先绑定鼓众广场 ID",
         myDonFailed: "我的小咚生成失败，请稍后重试",
+        showcaseTitle: "我的小咚称号展示",
+        showcaseDesc:
+          "你可以在当前成绩可推断出的歌曲称号范围内，手动指定展示的 5 个称号顺序。保存后，我的小咚会优先按这里的顺序展示，不再使用默认的优先级和定数排序逻辑。",
+        showcaseNeedBinding: "请先绑定鼓众广场 ID",
+        showcaseNeedUserdata: "当前绑定还没有本地成绩数据，请先同步或更新成绩后再自定义。",
+        showcaseEmpty: "当前成绩还没有可供自定义的歌曲称号",
+        showcaseSave: "保存自定义",
+        showcaseReset: "恢复默认展示",
+        showcaseSaveSuccess: "我的小咚称号展示已更新",
+        showcaseResetSuccess: "我的小咚称号展示已恢复默认",
+        showcaseSaveFailed: "我的小咚称号展示保存失败",
+        showcaseMode: "当前展示模式",
+        showcaseModeDefault: "默认自动展示",
+        showcaseModeCustom: "使用自定义顺序",
+        showcaseSelection: "当前自定义顺序",
+        showcaseSelectionEmpty: "未设置",
+        showcaseOrderHint: "从上到下就是展示顺序。未选择的槽位会被跳过。",
+        showcaseSlot: "位置 {index}",
+        showcasePlaceholder: "选择称号",
+        showcaseClearHint: "如果全部清空，就会恢复成默认排列。",
         avatarUpdated: "头像已更新",
         avatarUploadFailed: "头像上传失败",
         avatarReset: "头像已恢复默认",
@@ -214,16 +277,165 @@ const { data, pending, refresh } = await useAsyncData<ProfilePayload>(
 );
 
 const profile = computed(() => data.value);
+const {
+  data: myDonShowcaseData,
+  pending: myDonShowcasePending,
+  refresh: refreshMyDonShowcase
+} = await useAsyncData<MyDonShowcasePayload>(
+  "account-mydon-showcase",
+  () => apiFetch("/api/account/my-don/showcase"),
+  {
+    default: () => ({
+      bindingId: null,
+      taikoId: null,
+      hasUserdata: false,
+      isCustom: false,
+      selectedTitles: [],
+      availableTitles: []
+    })
+  }
+);
 const myDonUrl = computed(() => {
   if (!profile.value?.currentBinding) return "";
   return `/api/account/my-don?t=${myDonTick.value}`;
 });
 
+const normalizeShowcaseTitleNames = (values: Array<string | null | undefined>) => {
+  const result: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values) {
+    const titleName = String(value || "").trim();
+    if (!titleName || seen.has(titleName)) continue;
+    seen.add(titleName);
+    result.push(titleName);
+  }
+  return result;
+};
+
+const applyShowcaseSelection = (values: string[] | null | undefined) => {
+  const next = Array.from({ length: 5 }, () => "");
+  normalizeShowcaseTitleNames(values || [])
+    .slice(0, 5)
+    .forEach((titleName, index) => {
+      next[index] = titleName;
+    });
+  myDonShowcaseSlots.value = next;
+};
+
+watch(
+  () => myDonShowcaseData.value?.selectedTitles,
+  (value) => {
+    applyShowcaseSelection(value);
+  },
+  { immediate: true, deep: true }
+);
+
+const availableShowcaseTitles = computed(() => myDonShowcaseData.value?.availableTitles || []);
+const currentShowcaseSelection = computed(() => normalizeShowcaseTitleNames(myDonShowcaseSlots.value));
+const savedShowcaseSelection = computed(() => normalizeShowcaseTitleNames(myDonShowcaseData.value?.selectedTitles || []));
+const showcaseDirty = computed(
+  () => JSON.stringify(currentShowcaseSelection.value) !== JSON.stringify(savedShowcaseSelection.value)
+);
+const showcaseCanReset = computed(
+  () => Boolean(myDonShowcaseData.value?.isCustom) || currentShowcaseSelection.value.length > 0
+);
+
+const formatShowcaseRequirement = (option: MyDonShowcaseTitleOption) => {
+  const requirementLabel =
+    locale.value === "ja"
+      ? option.requirementType === "all_perfect"
+        ? "ドンダフル"
+        : option.requirementType === "full_combo"
+          ? "フルコンボ"
+          : "クリア"
+      : option.requirementType === "all_perfect"
+        ? "全良"
+        : option.requirementType === "full_combo"
+          ? "全连"
+          : "通关";
+  const difficultyLabel =
+    locale.value === "ja"
+      ? option.difficultyScope === "inner_oni"
+        ? "裏"
+        : option.difficultyScope === "oni_or_inner_oni"
+          ? "おに/裏"
+          : option.difficultyScope === "oni"
+            ? "おに"
+            : option.difficultyScope === "hard"
+              ? "むずかしい"
+              : option.difficultyScope === "normal"
+                ? "ふつう"
+                : option.difficultyScope === "easy"
+                  ? "かんたん"
+                  : "任意"
+      : option.difficultyScope === "inner_oni"
+        ? "里谱"
+        : option.difficultyScope === "oni_or_inner_oni"
+          ? "魔王/里谱"
+          : option.difficultyScope === "oni"
+            ? "魔王"
+            : option.difficultyScope === "hard"
+              ? "困难"
+              : option.difficultyScope === "normal"
+                ? "一般"
+                : option.difficultyScope === "easy"
+                  ? "简单"
+                  : "任意";
+  return `${requirementLabel} · ${difficultyLabel}`;
+};
+
+const formatShowcaseOptionLabel = (option: MyDonShowcaseTitleOption) => {
+  const constLabel = option.constValue > 0 ? ` · ${option.constValue.toFixed(1)}` : "";
+  return `${option.titleName} · ${formatShowcaseRequirement(option)}${constLabel}`;
+};
+
+const getShowcaseSlotOptions = (slotIndex: number) => {
+  const currentValue = myDonShowcaseSlots.value[slotIndex];
+  const blocked = new Set(
+    myDonShowcaseSlots.value
+      .filter((value, index) => index !== slotIndex)
+      .map((value) => String(value || "").trim())
+      .filter(Boolean)
+  );
+  return availableShowcaseTitles.value.filter(
+    (option) => option.titleName === currentValue || !blocked.has(option.titleName)
+  );
+};
+
 const refreshProfile = async () => {
-  await refresh();
+  await Promise.all([refresh(), refreshMyDonShowcase()]);
   await fetchCurrentUser(true);
   myDonTick.value += 1;
   myDonErrored.value = false;
+};
+
+const persistMyDonShowcase = async (titleNames: string[], successMessage: string) => {
+  showcaseSaving.value = true;
+  try {
+    const payload = await apiFetch<MyDonShowcasePayload>("/api/account/my-don/showcase", {
+      method: "POST",
+      body: { titleNames }
+    });
+    myDonShowcaseData.value = payload;
+    applyShowcaseSelection(payload.selectedTitles);
+    ElMessage.success(successMessage);
+    myDonTick.value += 1;
+    myDonErrored.value = false;
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.showcaseSaveFailed);
+  } finally {
+    showcaseSaving.value = false;
+  }
+};
+
+const saveMyDonShowcase = async () => {
+  if (showcaseSaving.value) return;
+  await persistMyDonShowcase(currentShowcaseSelection.value, copy.value.showcaseSaveSuccess);
+};
+
+const resetMyDonShowcase = async () => {
+  if (showcaseSaving.value) return;
+  await persistMyDonShowcase([], copy.value.showcaseResetSuccess);
 };
 
 const clearAvatarSelection = () => {
@@ -524,6 +736,74 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
         </div>
       </el-card>
 
+      <el-card class="panel-card mydon-config-card">
+        <div class="section-title">
+          <h3>{{ copy.showcaseTitle }}</h3>
+          <p>{{ copy.showcaseDesc }}</p>
+        </div>
+
+        <div v-if="myDonShowcasePending" class="showcase-skeleton">
+          <el-skeleton :rows="6" animated />
+        </div>
+        <div v-else-if="!profile.currentBinding" class="mydon-empty">
+          <el-empty :description="copy.showcaseNeedBinding" />
+        </div>
+        <div v-else-if="!myDonShowcaseData.hasUserdata" class="mydon-empty">
+          <el-empty :description="copy.showcaseNeedUserdata" />
+        </div>
+        <div v-else-if="!availableShowcaseTitles.length" class="mydon-empty">
+          <el-empty :description="copy.showcaseEmpty" />
+        </div>
+        <div v-else class="showcase-config">
+          <div class="showcase-status">
+            <div class="showcase-status__item">
+              <span>{{ copy.showcaseMode }}</span>
+              <strong>{{ myDonShowcaseData.isCustom ? copy.showcaseModeCustom : copy.showcaseModeDefault }}</strong>
+            </div>
+            <div class="showcase-status__item">
+              <span>{{ copy.showcaseSelection }}</span>
+              <strong v-if="currentShowcaseSelection.length">{{ currentShowcaseSelection.join(" / ") }}</strong>
+              <strong v-else>{{ copy.showcaseSelectionEmpty }}</strong>
+            </div>
+          </div>
+
+          <p class="showcase-hint">{{ copy.showcaseOrderHint }}</p>
+
+          <div class="showcase-slot-list">
+            <div v-for="slotIndex in 5" :key="slotIndex" class="showcase-slot-item">
+              <span class="showcase-slot-item__label">
+                {{ copy.showcaseSlot.replace("{index}", String(slotIndex)) }}
+              </span>
+              <el-select
+                v-model="myDonShowcaseSlots[slotIndex - 1]"
+                filterable
+                clearable
+                class="showcase-slot-item__select"
+                :placeholder="copy.showcasePlaceholder"
+              >
+                <el-option
+                  v-for="option in getShowcaseSlotOptions(slotIndex - 1)"
+                  :key="option.titleName"
+                  :label="formatShowcaseOptionLabel(option)"
+                  :value="option.titleName"
+                />
+              </el-select>
+            </div>
+          </div>
+
+          <p class="showcase-clear-hint">{{ copy.showcaseClearHint }}</p>
+
+          <div class="showcase-actions">
+            <el-button type="primary" :loading="showcaseSaving" :disabled="!showcaseDirty" @click="saveMyDonShowcase">
+              {{ copy.showcaseSave }}
+            </el-button>
+            <el-button plain :loading="showcaseSaving" :disabled="!showcaseCanReset" @click="resetMyDonShowcase">
+              {{ copy.showcaseReset }}
+            </el-button>
+          </div>
+        </div>
+      </el-card>
+
       <AccountAvatarCropperDialog
         v-model="avatarCropVisible"
         :source-url="avatarCropSourceUrl"
@@ -697,6 +977,63 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   border-radius: 14px;
 }
 
+.showcase-config {
+  display: grid;
+  gap: 16px;
+}
+
+.showcase-status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.showcase-status__item,
+.showcase-slot-item {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 248, 240, 0.78);
+}
+
+.showcase-status__item {
+  display: grid;
+  gap: 6px;
+}
+
+.showcase-status__item span,
+.showcase-slot-item__label,
+.showcase-hint,
+.showcase-clear-hint {
+  color: #7d6a5a;
+}
+
+.showcase-slot-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.showcase-slot-item {
+  display: grid;
+  gap: 10px;
+}
+
+.showcase-slot-item__select {
+  width: 100%;
+}
+
+.showcase-hint,
+.showcase-clear-hint {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.showcase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 @media (max-width: 1100px) {
   .profile-grid {
     grid-template-columns: 1fr;
@@ -719,6 +1056,11 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   .binding-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .showcase-status,
+  .showcase-slot-list {
+    grid-template-columns: 1fr;
   }
 
   .binding-actions {
