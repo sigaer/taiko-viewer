@@ -95,18 +95,17 @@ const replaceBindingMyDonShowcaseTitles = async (bindingId: number, titleNames: 
   }
 };
 
-const runMyDonPythonJson = async (repoRoot: string, taikoId: string) => {
+const runMyDonPythonJson = async (repoRoot: string, userdataPath: string) => {
   const pythonCode = [
     "from pathlib import Path",
     "from plugins.utils.song_title_showcase import list_song_title_showcase_candidates, serialize_showcase_titles",
     "import json, sys",
-    "repo_root = Path(sys.argv[1])",
-    "taiko_id = sys.argv[2]",
-    "with (repo_root / 'userdata' / f'{taiko_id}data.json').open('r', encoding='utf-8') as fp: userdata = json.load(fp)",
+    "userdata_path = Path(sys.argv[1])",
+    "userdata = json.loads(userdata_path.read_text(encoding='utf-8'))",
     "payload = serialize_showcase_titles(list_song_title_showcase_candidates(userdata.get('songs') or []))",
     "sys.stdout.write(json.dumps(payload, ensure_ascii=False))",
-  ].join("; ");
-  const result = await execFileAsync("python3", ["-c", pythonCode, repoRoot, taikoId], {
+  ].join("\n");
+  const result = await execFileAsync("python3", ["-c", pythonCode, userdataPath], {
     cwd: repoRoot,
     encoding: "utf-8",
     maxBuffer: 8 * 1024 * 1024,
@@ -122,7 +121,7 @@ const getBindingMyDonShowcaseCandidates = async (taikoId: string) => {
     return [] as MyDonShowcaseTitleOption[];
   }
   const { repoRoot } = getRuntimePaths();
-  return runMyDonPythonJson(repoRoot, taikoId);
+  return runMyDonPythonJson(repoRoot, getUserdataPath(taikoId));
 };
 
 export const getMyDonShowcaseSettings = async (userId: number): Promise<MyDonShowcaseSettings> => {

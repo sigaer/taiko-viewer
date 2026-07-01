@@ -139,6 +139,7 @@ const copy = computed(() =>
         showcaseNeedBinding: "先にドンダーひろば ID を連携してください",
         showcaseNeedUserdata: "現在の連携 ID にローカル成績データがありません。先に同期または更新してください。",
         showcaseEmpty: "現在の成績から選べる楽曲称号がありません",
+        showcaseLoadFailed: "マイドン称号候補の読み込みに失敗しました。しばらくしてから再試行してください。",
         showcaseSave: "自定义を保存",
         showcaseReset: "既定の表示に戻す",
         showcaseSaveSuccess: "マイドン称号表示を更新しました",
@@ -211,6 +212,7 @@ const copy = computed(() =>
         showcaseNeedBinding: "请先绑定鼓众广场 ID",
         showcaseNeedUserdata: "当前绑定还没有本地成绩数据，请先同步或更新成绩后再自定义。",
         showcaseEmpty: "当前成绩还没有可供自定义的歌曲称号",
+        showcaseLoadFailed: "我的小咚称号候选加载失败，请稍后重试。",
         showcaseSave: "保存自定义",
         showcaseReset: "恢复默认展示",
         showcaseSaveSuccess: "我的小咚称号展示已更新",
@@ -279,6 +281,7 @@ const { data, pending, refresh } = await useAsyncData<ProfilePayload>(
 const profile = computed(() => data.value);
 const {
   data: myDonShowcaseData,
+  error: myDonShowcaseError,
   pending: myDonShowcasePending,
   refresh: refreshMyDonShowcase
 } = await useAsyncData<MyDonShowcasePayload>(
@@ -732,6 +735,9 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
         <div v-else-if="!profile.currentBinding" class="mydon-empty">
           <el-empty :description="copy.showcaseNeedBinding" />
         </div>
+        <div v-else-if="myDonShowcaseError" class="showcase-error">
+          <el-alert :title="copy.showcaseLoadFailed" type="error" :closable="false" show-icon />
+        </div>
         <div v-else-if="!myDonShowcaseData.hasUserdata" class="mydon-empty">
           <el-empty :description="copy.showcaseNeedUserdata" />
         </div>
@@ -984,6 +990,11 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
 .showcase-config {
   display: grid;
   gap: 16px;
+}
+
+.showcase-error {
+  display: grid;
+  gap: 10px;
 }
 
 .showcase-status {
