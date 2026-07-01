@@ -40,6 +40,16 @@ GENERIC_PHRASES = (
     "歌曲",
     "特定の曲",
 )
+MANUAL_RELATION_OVERRIDES = (
+    {
+        "song_name": "Purple Rose Fusion",
+        "title_name": "紫薔薇の融合",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "手动补充：Purple Rose Fusion 魔王全连",
+        "source_row_index": 2666,
+    },
+)
 
 
 @dataclass
@@ -115,20 +125,21 @@ def detect_requirement_type(condition_text: str) -> str | None:
 
 
 def detect_difficulty(condition_text: str) -> str:
+    has_oni = bool(re.search(r"魔王|難易度おに|おにで|おに譜面", condition_text))
     has_inner_oni = bool(
-        re.search(r"魔王[（(]隐藏[)）]|魔王[（(]裏[)）]|[（(]裏[)）]|裏譜面|里谱", condition_text)
+        re.search(r"魔王[（(]隐藏[)）]|魔王[（(]裏[)）]|[（(]裏[)）]|裏譜面|里谱|隠し譜面", condition_text)
     )
-    if "魔王" in condition_text and "或" in condition_text and has_inner_oni:
+    if has_oni and has_inner_oni and re.search(r"或|/|／|または|おに.*裏|裏.*おに", condition_text):
         return "oni_or_inner_oni"
     if has_inner_oni:
         return "inner_oni"
-    if "魔王" in condition_text:
+    if has_oni:
         return "oni"
-    if "困难" in condition_text:
+    if "困难" in condition_text or "むずかしい" in condition_text:
         return "hard"
-    if "普通" in condition_text:
+    if "普通" in condition_text or "一般" in condition_text or "ふつう" in condition_text:
         return "normal"
-    if "简单" in condition_text:
+    if "简单" in condition_text or "かんたん" in condition_text:
         return "easy"
     return "unspecified"
 
@@ -176,9 +187,17 @@ def extract_plain_song_names(condition_text: str, requirement_type: str) -> list
         if match:
             names.extend(split_song_blob(match.group(1)))
 
+        # Patterns like: "天狗囃子を難易度おにでフルコンボ"
+        for match in re.finditer(r"([^，。,；;()（）]+?)を[^，。,；;]{0,24}フルコンボ", condition_text):
+            names.extend(split_song_blob(match.group(1)))
+
     if requirement_type == "clear":
         # Patterns like: "DIMENSIONS过关"
         for match in re.finditer(r"([^，。,；;]+?)过关", condition_text):
+            names.extend(split_song_blob(match.group(1)))
+
+        # Patterns like: "ダーク・エクス・マキナ♡を難易度おにでクリア"
+        for match in re.finditer(r"([^，。,；;()（）]+?)を[^，。,；;]{0,24}クリア", condition_text):
             names.extend(split_song_blob(match.group(1)))
 
     cleaned = []
@@ -231,6 +250,8 @@ def build_api_relations(payload: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         song_names = extract_api_song_names(condition_text)
         if not song_names:
+            song_names = extract_plain_song_names(condition_text, requirement_type)
+        if not song_names:
             continue
         difficulty = detect_difficulty(condition_text)
         try:
@@ -277,6 +298,26 @@ def merge_relation_rows(
     ]
     merged_rows.extend(api_rows)
     return merged_rows
+
+
+def apply_manual_relation_overrides(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    result = list(rows)
+    for override in MANUAL_RELATION_OVERRIDES:
+        has_matching_title = any(
+            str(item.get("title_name") or "").strip() == override["title_name"] for item in result
+        )
+        if not has_matching_title:
+            continue
+        result = [
+            item
+            for item in result
+            if not (
+                str(item.get("title_name") or "").strip() == override["title_name"]
+                and str(item.get("requirement_type") or "").strip() == override["requirement_type"]
+            )
+        ]
+        result.append(dict(override))
+    return result
 
 
 def build_relations(
@@ -332,6 +373,7 @@ def build_relations(
     merged_rows = relations
     if isinstance(api_payload, dict):
         merged_rows = merge_relation_rows(merged_rows, build_api_relations(api_payload))
+    merged_rows = apply_manual_relation_overrides(merged_rows)
 
     deduped: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str, str, str]] = set()
