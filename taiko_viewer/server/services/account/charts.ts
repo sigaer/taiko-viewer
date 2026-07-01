@@ -262,6 +262,7 @@ export const getRecommendImageBuffer = async (
     "        recs,",
     "        title='以下是可供参考的推荐歌曲',",
     "        subtitle=payload['subtitle'],",
+    "        user_id=int(sys.argv[1]),",
     "        font_path='assets/fonts/DDFont.ttf',",
     "    )",
     "sys.stdout.buffer.write(_chart_image_bytes(buf))"
