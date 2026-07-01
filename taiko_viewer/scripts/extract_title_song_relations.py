@@ -272,6 +272,22 @@ def build_api_relations(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return relations
 
 
+def build_available_title_names(api_payload: dict[str, Any] | None) -> set[str]:
+    if not isinstance(api_payload, dict):
+        return set()
+    titles = api_payload.get("titles") or api_payload.get("list") or []
+    if not isinstance(titles, list):
+        return set()
+    names = set()
+    for item in titles:
+        if not isinstance(item, dict):
+            continue
+        title_name = plain_text(item.get("name") or "")
+        if title_name:
+            names.add(title_name)
+    return names
+
+
 def merge_relation_rows(
     base_rows: list[dict[str, Any]],
     api_rows: list[dict[str, Any]],
@@ -374,6 +390,13 @@ def build_relations(
     if isinstance(api_payload, dict):
         merged_rows = merge_relation_rows(merged_rows, build_api_relations(api_payload))
     merged_rows = apply_manual_relation_overrides(merged_rows)
+    available_title_names = build_available_title_names(api_payload)
+    if available_title_names:
+        merged_rows = [
+            item
+            for item in merged_rows
+            if str(item.get("title_name") or "").strip() in available_title_names
+        ]
 
     deduped: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str, str, str]] = set()
