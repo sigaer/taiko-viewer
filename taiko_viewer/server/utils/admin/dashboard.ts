@@ -3,11 +3,11 @@ import { readdir, stat } from "node:fs/promises";
 import { createInterface } from "node:readline";
 import { join } from "node:path";
 import type { RowDataPacket } from "mysql2/promise";
-import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import type { DbRow } from "~/server/utils/account-db";
 import { listAdminActionLogs } from "./audit";
 import { listAdminBackups } from "./backup";
-import { getBotDb, getAdminManagedPaths, getAdminRuntimeConfig, sha1 } from "./shared";
-import { isTaikoMethodDisplay } from "./taiko-method-calls";
+import { getAdminManagedPaths, getAdminRuntimeConfig, sha1 } from "./shared";
 
 type RollupRow = {
   id: number;
@@ -43,11 +43,14 @@ type UploadStatsCache = {
 };
 
 const VIEWER_ACCESS_SOURCE = "viewer_access";
-const BOT_METHOD_CALL_SOURCE = "bot_method_calls_taiko";
 const VIEWER_ACCESS_STATE_KEY = "viewer_access_log";
-const BOT_METHOD_CALL_STATE_KEY = "bot_method_calls_taiko";
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const UPLOAD_SCAN_CACHE_TTL_MS = 5 * 60 * 1000;
+const TAIKO_COMMAND_TOTAL_SOURCE = "taiko_commands_v2:total";
+const TAIKO_COMMAND_PLATFORM_SOURCE_QQ = "taiko_commands_v2:platform:qq_official";
+const TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT = "taiko_commands_v2:platform:onebot_v11";
+const TAIKO_COMMAND_COMMAND_SOURCE_PREFIX = "taiko_commands_v2:command:";
+const TAIKO_COMMAND_META_STATE_KEY = "taiko_commands_v2_meta";
 const MONTH_INDEX: Record<string, number> = {
   Jan: 0,
   Feb: 1,
@@ -151,17 +154,6 @@ const isTrackableViewerPageRequest = (path: string, userAgent: string, method: s
 };
 
 const isHomeRoute = (path: string) => ["/", "/ja", "/ja/"].includes(path);
-
-const decodeMethodName = (methodName: string) => {
-  const trimmed = String(methodName || "").trim();
-  if (!trimmed) return "未知指令";
-  if (trimmed.startsWith("cmd::")) {
-    return trimmed.slice(5) || "未知指令";
-  }
-  return trimmed;
-};
-
-const isTaikoMethodCall = (methodName: string) => isTaikoMethodDisplay(decodeMethodName(methodName));
 
 const getIngestState = async (sourceKey: string) => {
   await ensureAccountSchema();
@@ -315,64 +307,6 @@ const ingestViewerAccessLog = async () => {
   });
 };
 
-const ingestMethodCalls = async () => {
-  const state = await getIngestState(BOT_METHOD_CALL_STATE_KEY);
-  let lastId = Math.max(0, Number(state.lastId || 0));
-  const botDb = getBotDb();
-
-  while (true) {
-    const [rows] = await botDb.execute<
-      Array<{
-        id: number;
-        method_name: string;
-        timestamp: string;
-      } & RowDataPacket>
-    >(
-      `SELECT id, method_name, timestamp
-       FROM method_calls
-       WHERE id > ?
-       ORDER BY id ASC
-       LIMIT 2000`,
-      [lastId]
-    );
-    if (!rows.length) break;
-
-    const buckets = new Map<
-      string,
-      { sourceKey: string; granularity: "hour" | "day"; bucketStart: Date; metricCount: number }
-    >();
-
-    for (const row of rows) {
-      lastId = Math.max(lastId, Number(row.id || 0));
-      if (!isTaikoMethodCall(row.method_name)) {
-        continue;
-      }
-      const timestamp = new Date(row.timestamp);
-      if (Number.isNaN(timestamp.getTime())) continue;
-      for (const granularity of ["hour", "day"] as const) {
-        const key = formatBucketKey(timestamp, granularity);
-        const existing = buckets.get(key) || {
-          sourceKey: BOT_METHOD_CALL_SOURCE,
-          granularity,
-          bucketStart: getBucketStart(timestamp, granularity),
-          metricCount: 0
-        };
-        existing.metricCount += 1;
-        buckets.set(key, existing);
-      }
-    }
-
-    for (const bucket of buckets.values()) {
-      await upsertRollupRow(bucket);
-    }
-  }
-
-  await setIngestState(BOT_METHOD_CALL_STATE_KEY, {
-    lastId,
-    updatedAt: new Date().toISOString()
-  });
-};
-
 const scanUserdataUploadStats = async () => {
   if (uploadStatsCache && uploadStatsCache.expiresAt > Date.now()) {
     return uploadStatsCache;
@@ -444,34 +378,66 @@ const getRollupSeries = async (sourceKey: string, granularity: "hour" | "day", l
   return [...rows].reverse();
 };
 
+const getRollupMetricTotal = async (sourceKey: string, granularity: "hour" | "day", days: number) => {
+  await ensureAccountSchema();
+  const db = getAccountDb();
+  const [rows] = await db.execute<DbRow<{ total: number }>[]>(
+    `SELECT COALESCE(SUM(metric_count), 0) AS total
+     FROM web_admin_access_rollups
+     WHERE source_key = ? AND granularity = ? AND bucket_start >= NOW() - INTERVAL ? DAY`,
+    [sourceKey, granularity, days]
+  );
+  return Number(rows[0]?.total || 0);
+};
+
 const getTopCommandRows = async (limit = 10) => {
-  const botDb = getBotDb();
+  await ensureAccountSchema();
+  const db = getAccountDb();
   const safeLimit = Math.min(100, Math.max(1, Math.floor(Number(limit) || 10)));
-  const [rows] = await botDb.execute<
+  const [rows] = await db.execute<
     Array<{
-      method_name: string;
+      source_key: string;
       total: number;
     } & RowDataPacket>
   >(
-    `SELECT method_name, COUNT(*) AS total
-     FROM method_calls
-     WHERE timestamp >= NOW() - INTERVAL 30 DAY
-     GROUP BY method_name
-     ORDER BY total DESC`
+    `SELECT source_key, COALESCE(SUM(metric_count), 0) AS total
+     FROM web_admin_access_rollups
+     WHERE source_key LIKE ? AND granularity = 'day' AND bucket_start >= NOW() - INTERVAL 30 DAY
+     GROUP BY source_key
+     ORDER BY total DESC
+     LIMIT ${safeLimit}`,
+    [`${TAIKO_COMMAND_COMMAND_SOURCE_PREFIX}%`]
   );
-  return rows
-    .filter((row) => isTaikoMethodCall(row.method_name))
-    .slice(0, safeLimit)
-    .map((row) => ({
-      name: decodeMethodName(row.method_name),
-      count: Number(row.total || 0)
-    }));
+  return rows.map((row) => ({
+    name: String(row.source_key || "").replace(TAIKO_COMMAND_COMMAND_SOURCE_PREFIX, "") || "unknown",
+    count: Number(row.total || 0)
+  }));
+};
+
+const getTaikoCommandMeta = async () => {
+  const state = await getIngestState(TAIKO_COMMAND_META_STATE_KEY);
+  const raw = state.statsStartedAt;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
+};
+
+const sumRecentHours = (
+  items: Array<{ bucket: string; [key: string]: unknown }>,
+  field: string,
+  hours = 24
+) => {
+  const cutoff = Date.now() - hours * 60 * 60 * 1000;
+  return items.reduce((sum, item) => {
+    const bucketTime = new Date(String(item.bucket || "")).getTime();
+    if (Number.isNaN(bucketTime) || bucketTime < cutoff) {
+      return sum;
+    }
+    return sum + Number(item[field] || 0);
+  }, 0);
 };
 
 const buildDashboardPayload = async () => {
   await ensureAccountSchema();
   await ingestViewerAccessLog();
-  await ingestMethodCalls();
 
   const db = getAccountDb();
   const [
@@ -485,10 +451,13 @@ const buildDashboardPayload = async () => {
     accessHourly,
     accessDaily,
     botHourly,
+    botHourlyQq,
+    botHourlyOnebot,
     backupRows,
     recentAuditRows,
     topCommands,
-    uploadStats
+    uploadStats,
+    taikoCommandStatsSince
   ] = await Promise.all([
     db.execute<DbRow<{ total: number }>[]>("SELECT COUNT(*) AS total FROM web_user_accounts"),
     db.execute<DbRow<{ id: string }>[]>("SELECT DISTINCT id FROM bind WHERE is_current = 1"),
@@ -516,17 +485,25 @@ const buildDashboardPayload = async () => {
     ),
     getRollupSeries(VIEWER_ACCESS_SOURCE, "hour", 48),
     getRollupSeries(VIEWER_ACCESS_SOURCE, "day", 30),
-    getRollupSeries(BOT_METHOD_CALL_SOURCE, "hour", 48),
+    getRollupSeries(TAIKO_COMMAND_TOTAL_SOURCE, "hour", 48),
+    getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_QQ, "hour", 48),
+    getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT, "hour", 48),
     listAdminBackups(10),
     listAdminActionLogs({ page: 1, pageSize: 8 }),
     getTopCommandRows(10),
-    scanUserdataUploadStats()
+    scanUserdataUploadStats(),
+    getTaikoCommandMeta()
   ]);
 
   const viewerUsers = Number(viewerCountRows[0][0]?.total || 0);
-  const bindingSet = new Set<string>();
-  for (const row of bindRows[0]) bindingSet.add(String(row.id || "").trim());
-  for (const row of hirobaRows[0]) bindingSet.add(String(row.taiko_no || "").trim());
+  const wahlapSet = new Set<string>();
+  for (const row of bindRows[0]) wahlapSet.add(String(row.id || "").trim());
+  const hirobaSet = new Set<string>();
+  for (const row of hirobaRows[0]) hirobaSet.add(String(row.taiko_no || "").trim());
+  const bindingSet = new Set<string>(wahlapSet);
+  for (const value of hirobaSet) bindingSet.add(value);
+  wahlapSet.delete("");
+  hirobaSet.delete("");
   bindingSet.delete("");
 
   const totalUserSet = new Set<string>(bindingSet);
@@ -562,6 +539,14 @@ const buildDashboardPayload = async () => {
     label: toDateTimeText(row.bucket_start).slice(5, 16),
     count: Number(row.metric_count || 0)
   }));
+  const botHourlyQqSeries = botHourlyQq.map((row) => ({
+    bucket: toDateTimeText(row.bucket_start),
+    count: Number(row.metric_count || 0)
+  }));
+  const botHourlyOnebotSeries = botHourlyOnebot.map((row) => ({
+    bucket: toDateTimeText(row.bucket_start),
+    count: Number(row.metric_count || 0)
+  }));
   const dailySeries = dailyKeyList.map((day) => ({
     day,
     newUsers: Number(newUsersMap.get(day) || 0),
@@ -572,15 +557,21 @@ const buildDashboardPayload = async () => {
     homePv: Number(accessDailyMap.get(day)?.home_pv_count || 0)
   }));
 
-  const pagePv24h = accessHourlySeries.reduce((sum, item) => sum + item.pv, 0);
-  const pageUv24h = accessHourlySeries.reduce((sum, item) => sum + item.uv, 0);
-  const homePv24h = accessHourlySeries.reduce((sum, item) => sum + item.homePv, 0);
-  const botCommands24h = botHourlySeries.reduce((sum, item) => sum + item.count, 0);
+  const pagePv24h = sumRecentHours(accessHourlySeries, "pv", 24);
+  const pageUv24h = sumRecentHours(accessHourlySeries, "uv", 24);
+  const homePv24h = sumRecentHours(accessHourlySeries, "homePv", 24);
+  const botCommands24h = sumRecentHours(botHourlySeries, "count", 24);
+  const botCommands24hByPlatform = {
+    qqOfficial: sumRecentHours(botHourlyQqSeries, "count", 24),
+    onebotV11: sumRecentHours(botHourlyOnebotSeries, "count", 24)
+  };
 
   return {
     summary: {
       viewerUsers,
       taikoBindings: bindingSet.size,
+      wahlapBindings: wahlapSet.size,
+      hirobaBindings: hirobaSet.size,
       totalUsers,
       totalUploads: uploadStats.totalUploads,
       uploads24h: uploadStats.uploads24h,
@@ -588,6 +579,7 @@ const buildDashboardPayload = async () => {
       pageUv24h,
       homePv24h,
       botCommands24h,
+      botCommands24hByPlatform,
       recentNewUsers: dailySeries.slice(-7).reduce((sum, item) => sum + item.newUsers, 0)
     },
     trends: {
@@ -596,6 +588,7 @@ const buildDashboardPayload = async () => {
       daily: dailySeries
     },
     topCommands,
+    taikoCommandStatsSince,
     backups: backupRows,
     recentAudits: recentAuditRows.items
   };

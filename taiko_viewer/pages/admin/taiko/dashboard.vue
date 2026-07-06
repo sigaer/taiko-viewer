@@ -23,6 +23,11 @@ const { data, pending, refresh } = await useAsyncData<AdminDashboardPayload>(
 );
 
 const dashboard = computed(() => data.value);
+const taikoCommandSinceText = computed(() => {
+  const value = dashboard.value?.taikoCommandStatsSince;
+  if (!value) return "新口径已启用，30 天窗口会逐步补满。";
+  return `新口径自 ${formatAdminDateTime(value)} 开始累计，30 天窗口会逐步补满。`;
+});
 
 const accessOption = computed<EChartsOption>(() => ({
   tooltip: { trigger: "axis" },
@@ -146,12 +151,18 @@ const botOption = computed<EChartsOption>(() => ({
     <div class="admin-metric-grid" v-if="dashboard">
       <AdminMetricCard label="Viewer 用户数" :value="dashboard.summary.viewerUsers" hint="web_user_accounts" accent="gold" />
       <AdminMetricCard label="Taiko 绑定数" :value="dashboard.summary.taikoBindings" hint="bind ∪ hiroba" accent="teal" />
+      <AdminMetricCard label="Wahlap 用户" :value="dashboard.summary.wahlapBindings" hint="国服绑定" accent="indigo" />
+      <AdminMetricCard label="海外用户" :value="dashboard.summary.hirobaBindings" hint="hiroba 绑定" accent="gold" />
       <AdminMetricCard label="总用户数" :value="dashboard.summary.totalUsers" hint="绑定实体 + 未绑定 viewer" accent="rose" />
       <AdminMetricCard label="总上传次数" :value="dashboard.summary.totalUploads" hint="userdata 历史快照" accent="indigo" />
       <AdminMetricCard label="24h 上传总量" :value="dashboard.summary.uploads24h" hint="最近 24h 快照文件" />
       <AdminMetricCard label="24h 页面 PV / UV" :value="`${dashboard.summary.pagePv24h} / ${dashboard.summary.pageUv24h}`" hint="排除静态资源、API 与 bot UA" />
       <AdminMetricCard label="24h 首页点击量" :value="dashboard.summary.homePv24h" hint="/ 与 /ja 页面请求量" />
-      <AdminMetricCard label="24h 太鼓指令调用" :value="dashboard.summary.botCommands24h" hint="仅统计 taiko.py 命令" />
+      <AdminMetricCard
+        label="24h 太鼓指令调用"
+        :value="dashboard.summary.botCommands24h"
+        :hint="`QQ 官方 ${dashboard.summary.botCommands24hByPlatform.qqOfficial} / OneBot ${dashboard.summary.botCommands24hByPlatform.onebotV11}`"
+      />
     </div>
 
     <el-skeleton v-if="pending && !dashboard" :rows="10" animated />
@@ -171,7 +182,7 @@ const botOption = computed<EChartsOption>(() => ({
       />
       <AdminChartCard
         title="30 天 Top 指令"
-        subtitle="仅统计 taiko.py 当前保留窗口内的热点指令分布。"
+        :subtitle="taikoCommandSinceText"
         :option="botOption"
         :height="320"
       />

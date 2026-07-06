@@ -13,6 +13,8 @@ export type AdminAuthPayload = {
 export type AdminMetricSummary = {
   viewerUsers: number;
   taikoBindings: number;
+  wahlapBindings: number;
+  hirobaBindings: number;
   totalUsers: number;
   totalUploads: number;
   uploads24h: number;
@@ -20,6 +22,10 @@ export type AdminMetricSummary = {
   pageUv24h: number;
   homePv24h: number;
   botCommands24h: number;
+  botCommands24hByPlatform: {
+    qqOfficial: number;
+    onebotV11: number;
+  };
   recentNewUsers: number;
 };
 
@@ -50,6 +56,7 @@ export type AdminDashboardPayload = {
     daily: AdminDailyTrendItem[];
   };
   topCommands: Array<{ name: string; count: number }>;
+  taikoCommandStatsSince: string | null;
   backups: Array<{
     name: string;
     path: string;
