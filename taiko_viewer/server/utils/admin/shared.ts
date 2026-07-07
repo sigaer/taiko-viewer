@@ -42,7 +42,10 @@ export const getAdminManagedPaths = () => {
     songDataPath,
     songAliasPath: resolve(repoRoot, "songs", "song_alias.json"),
     coverDir: resolve(repoRoot, "assets", "cover"),
-    aliasLogPath: resolve(repoRoot, "logs", "alias_action_log.json")
+    aliasLogPath: resolve(repoRoot, "logs", "alias_action_log.json"),
+    drawGuessDataDir: resolve(repoRoot, "data", "draw_guess"),
+    drawGuessDbPath: resolve(repoRoot, "data", "draw_guess", "records.json"),
+    drawGuessImageDir: resolve(repoRoot, "data", "draw_guess", "images")
   };
 };
 
