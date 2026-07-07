@@ -45,6 +45,7 @@ const DATASET_PATH_RESOLVERS = {
   song_score: () => resolve(getContentRuntimePaths().repoRoot, "songs", "song_score.json"),
   song_data_with_roll: () => getContentRuntimePaths().songDataPath,
   taiko_goku_onis: () => resolve(getContentRuntimePaths().repoRoot, "songs", "taiko_goku_onis.json"),
+  constants_id_v2: () => resolve(getContentRuntimePaths().repoRoot, "songs", "constants_id_v2.csv"),
   grade_dojo_nijiiro_2025_simple: () =>
     resolve(getContentRuntimePaths().repoRoot, "songs", "grade_dojo_nijiiro_2025_simple.json"),
   grade_dojo_nijiiro_history_simple: () =>
