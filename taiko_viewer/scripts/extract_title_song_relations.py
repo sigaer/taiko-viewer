@@ -40,6 +40,14 @@ GENERIC_PHRASES = (
     "歌曲",
     "特定の曲",
 )
+EXCLUDED_TITLE_NAMES = {
+    "765の達人",
+    "876の達人",
+    "ガッガッガッ",
+    "あふれるパッション",
+    "Seafood Seeker",
+    "セッションマスター",
+}
 MANUAL_RELATION_OVERRIDES = (
     {
         "song_name": "Purple Rose Fusion",
@@ -48,6 +56,14 @@ MANUAL_RELATION_OVERRIDES = (
         "difficulty_scope": "oni",
         "condition_text": "手动补充：Purple Rose Fusion 魔王全连",
         "source_row_index": 2666,
+    },
+    {
+        "song_name": "4+1のそれぞれの未来(裏)",
+        "title_name": "出会った仲間と共に乗り越えて行ける",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "手动修正：4+1のそれぞれの未来(裏) 里谱全连",
+        "source_row_index": 523,
     },
 )
 
@@ -243,6 +259,8 @@ def build_api_relations(payload: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         title_name = plain_text(item.get("name") or "")
         condition_text = plain_text(item.get("subtitle") or "")
+        if title_name in EXCLUDED_TITLE_NAMES:
+            continue
         if not title_name or not condition_text or condition_text in {"", "???", "？？？"}:
             continue
         requirement_type = detect_requirement_type(condition_text)
@@ -350,6 +368,8 @@ def build_relations(
         title_name = html_to_text(cells[1].get("html", ""))
         condition_html = cells[2].get("html", "")
         condition_text = html_to_text(condition_html)
+        if title_name in EXCLUDED_TITLE_NAMES:
+            continue
         if not title_name or not condition_text:
             continue
 
@@ -397,6 +417,11 @@ def build_relations(
             for item in merged_rows
             if str(item.get("title_name") or "").strip() in available_title_names
         ]
+    merged_rows = [
+        item
+        for item in merged_rows
+        if str(item.get("title_name") or "").strip() not in EXCLUDED_TITLE_NAMES
+    ]
 
     deduped: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str, str, str]] = set()

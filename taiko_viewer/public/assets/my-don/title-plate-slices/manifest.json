@@ -1,0 +1,117 @@
+{
+  "cropRule": {
+    "mode": "top_slice",
+    "removeBottomPx": 45,
+    "description": "Matches the upper-part crop used by My Don title showcase rendering."
+  },
+  "items": [
+    {
+      "plateId": 0,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "unspecified"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_0.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_0_slice.png",
+      "width": 556,
+      "height": 45
+    },
+    {
+      "plateId": 1,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "unspecified"
+      },
+      "usedByCurrentRelations": false,
+      "sourceFile": "assets/name_plate/name_plate_1.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_1_slice.png",
+      "width": 556,
+      "height": 45
+    },
+    {
+      "plateId": 2,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "unspecified"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_2.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_2_slice.png",
+      "width": 556,
+      "height": 45
+    },
+    {
+      "plateId": 41,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_41.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_41_slice.png",
+      "width": 556,
+      "height": 71
+    },
+    {
+      "plateId": 42,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_42.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_42_slice.png",
+      "width": 556,
+      "height": 71
+    },
+    {
+      "plateId": 43,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_43.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_43_slice.png",
+      "width": 556,
+      "height": 71
+    },
+    {
+      "plateId": 59,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "inner_oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_59.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_59_slice.png",
+      "width": 556,
+      "height": 71
+    },
+    {
+      "plateId": 60,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "inner_oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_60.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_60_slice.png",
+      "width": 556,
+      "height": 71
+    },
+    {
+      "plateId": 61,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "inner_oni"
+      },
+      "usedByCurrentRelations": true,
+      "sourceFile": "assets/name_plate/name_plate_61.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_61_slice.png",
+      "width": 556,
+      "height": 71
+    }
+  ]
+}
