@@ -203,18 +203,22 @@ onBeforeUnmount(() => {
 }
 
 .story-player.is-live {
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
 }
 
 .story-player__viewport {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  touch-action: pan-y;
 }
 
 .story-player__viewport::-webkit-scrollbar {
@@ -251,7 +255,7 @@ onBeforeUnmount(() => {
 @media (max-width: 960px) {
   .story-player__drawer-trigger {
     top: auto;
-    bottom: 86px;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     right: 18px;
   }
 }

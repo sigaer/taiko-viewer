@@ -118,10 +118,12 @@ onMounted(() => {
 
 <style scoped>
 .story-shell {
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   position: relative;
   color: #fff6e8;
+  overflow: hidden;
 }
 
 .story-shell::before,
@@ -247,8 +249,8 @@ onMounted(() => {
 .story-shell__viewport {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100%;
+  overflow: hidden;
 }
 
 @media (max-width: 720px) {

@@ -99,10 +99,12 @@ onBeforeUnmount(() => {
 <style scoped>
 .story-slide-shell {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   padding: 7.4rem 2rem 2.2rem;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   overflow: hidden;
 }
 
@@ -169,7 +171,9 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 1.8rem;
-  min-height: calc(100svh - 9.6rem);
+  height: calc(100vh - 9.6rem);
+  height: calc(100svh - 9.6rem);
+  height: calc(100dvh - 9.6rem);
   width: min(1180px, 100%);
   margin: 0 auto;
 }
@@ -247,6 +251,8 @@ onBeforeUnmount(() => {
 .story-slide-shell__body {
   display: grid;
   align-items: end;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .tone-ember {
@@ -315,12 +321,14 @@ onBeforeUnmount(() => {
 
 @media (max-width: 720px) {
   .story-slide-shell {
-    padding: 6.5rem 1rem 1.4rem;
+    padding: 5.6rem 1rem calc(6rem + env(safe-area-inset-bottom, 0px));
   }
 
   .story-slide-shell__frame {
-    gap: 1.2rem;
-    min-height: calc(100svh - 7.9rem);
+    gap: 0.95rem;
+    height: calc(100vh - 11.6rem - env(safe-area-inset-bottom, 0px));
+    height: calc(100svh - 11.6rem - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 11.6rem - env(safe-area-inset-bottom, 0px));
   }
 
   .story-slide-shell__meta {
@@ -330,6 +338,24 @@ onBeforeUnmount(() => {
 
   .story-slide-shell__meta i {
     width: 1.7rem;
+  }
+
+  .story-slide-shell__header {
+    gap: 0.65rem;
+  }
+
+  .story-slide-shell__title {
+    font-size: clamp(1.9rem, 10vw, 3.1rem);
+  }
+
+  .story-slide-shell__lead {
+    font-size: 0.94rem;
+    line-height: 1.66;
+  }
+
+  .story-slide-shell__accent {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
 </style>

@@ -78,6 +78,18 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+body.story-layout-body {
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body.story-layout-body #__nuxt {
+  height: 100%;
+  overflow: hidden;
+}
+
 body,
 button,
 input,
