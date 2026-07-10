@@ -162,4 +162,22 @@ const keywordLabel = computed(() => (locale.value === "ja" ? "キーワード" :
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 720px) {
+  .final-title-slide__seal,
+  .final-title-slide__panel {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .final-title-slide__seal {
+    width: min(100%, 15.5rem);
+    margin: 0 auto;
+  }
+
+  .final-title-slide__seal strong {
+    font-size: clamp(2rem, 9vw, 3rem);
+    max-width: 10rem;
+  }
+}
 </style>

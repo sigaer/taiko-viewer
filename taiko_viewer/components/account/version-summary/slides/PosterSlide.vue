@@ -14,8 +14,8 @@ const props = defineProps<{
 const { locale } = useI18n();
 const uiText = computed(() =>
   locale.value === "ja"
-    ? { finalTitle: "今期の称号", favorite: "よく戻った曲", keyword: "キーワード" }
-    : { finalTitle: "这一版的称号", favorite: "反复回去的歌", keyword: "关键词" }
+    ? { finalTitle: "今期の称号", favorite: "よく戻った曲", keyword: "キーワード", coverFallback: "虹2025" }
+    : { finalTitle: "这一版的称号", favorite: "反复回去的歌", keyword: "关键词", coverFallback: "虹2025" }
 );
 </script>
 
@@ -33,10 +33,20 @@ const uiText = computed(() =>
   >
     <div class="poster-slide">
       <div class="poster-slide__board" data-animate>
-        <div class="poster-slide__board-head">
-          <span>{{ summary.version.name }}</span>
-          <h3>{{ summary.poster.title }}</h3>
-          <p>{{ summary.poster.subtitle }}</p>
+        <div class="poster-slide__hero">
+          <div class="poster-slide__board-head">
+            <span>{{ summary.version.name }}</span>
+            <h3>{{ summary.poster.title }}</h3>
+            <p>{{ summary.poster.subtitle }}</p>
+          </div>
+
+          <div v-if="summary.favoriteSong" class="poster-slide__cover-card">
+            <el-image :src="summary.favoriteSong.coverUrl" fit="cover" class="poster-slide__cover">
+              <template #error>
+                <div class="poster-slide__cover poster-slide__cover--fallback">{{ uiText.coverFallback }}</div>
+              </template>
+            </el-image>
+          </div>
         </div>
 
         <div class="poster-slide__facts">
@@ -93,6 +103,13 @@ const uiText = computed(() =>
   box-shadow: 0 30px 64px rgba(5, 10, 27, 0.38);
 }
 
+.poster-slide__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
 .poster-slide__board-head span,
 .poster-slide__facts span,
 .poster-slide__footer span,
@@ -121,6 +138,29 @@ const uiText = computed(() =>
   margin: 0;
   color: rgba(85, 38, 23, 0.74);
   line-height: 1.82;
+}
+
+.poster-slide__cover-card {
+  width: 116px;
+  flex-shrink: 0;
+}
+
+.poster-slide__cover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(140deg, rgba(255, 199, 114, 0.38), rgba(255, 134, 87, 0.34));
+  box-shadow: 0 18px 38px rgba(85, 38, 23, 0.16);
+}
+
+.poster-slide__cover--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(85, 38, 23, 0.8);
+  font-family: var(--viewer-display-font);
+  font-size: 1.8rem;
 }
 
 .poster-slide__facts {
@@ -177,13 +217,42 @@ const uiText = computed(() =>
 }
 
 @media (max-width: 720px) {
+  .poster-slide__hero {
+    grid-template-columns: minmax(0, 1fr) 86px;
+    gap: 14px;
+  }
+
+  .poster-slide__cover-card {
+    width: 86px;
+  }
+
   .poster-slide__facts,
   .poster-slide__footer {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .poster-slide__board {
     padding: 20px;
+  }
+
+  .poster-slide__board,
+  .poster-slide__closing {
+    border-radius: 26px;
+  }
+
+  .poster-slide__facts article,
+  .poster-slide__footer div {
+    padding: 14px;
+  }
+
+  .poster-slide__footer div:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .poster-slide__facts {
+    grid-template-columns: 1fr;
   }
 }
 </style>

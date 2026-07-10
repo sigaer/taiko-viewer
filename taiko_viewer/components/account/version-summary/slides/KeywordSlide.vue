@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import StoryRadarChart from "../StoryRadarChart.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
 const props = defineProps<{
@@ -12,6 +13,7 @@ const props = defineProps<{
 }>();
 
 const { locale } = useI18n();
+const profileKeyword = computed(() => props.summary.keywordProfile || props.summary.keyword);
 const dimensionLabels = computed(() =>
   locale.value === "ja"
     ? {
@@ -29,21 +31,46 @@ const dimensionLabels = computed(() =>
         accuracy: "精度力",
         rhythm: "节奏处理",
         complex: "复合处理"
+    }
+);
+
+const dimensionOrder = ["big_song", "stamina", "speed", "accuracy", "rhythm", "complex"] as const;
+const radarEntries = computed(() =>
+  dimensionOrder.map((key) => ({
+    key,
+    label: dimensionLabels.value[key as keyof typeof dimensionLabels.value] || key,
+    value: Number(profileKeyword.value?.radarValues?.[key] || 0)
+  }))
+);
+const rankedEntries = computed(() => [...radarEntries.value].sort((a, b) => b.value - a.value));
+const radarLabels = computed(() => radarEntries.value.map((entry) => entry.label));
+const radarValues = computed(() => radarEntries.value.map((entry) => entry.value));
+const radarMax = computed(() => {
+  const maxValue = Math.max(...radarValues.value, 0);
+  if (maxValue <= 0) return 10;
+  return Math.max(10, Math.ceil(maxValue * 2) / 2);
+});
+const uiText = computed(() =>
+  locale.value === "ja"
+    ? {
+        source: "現在の taikob20 六次元",
+        lead: "主軸",
+        score: "Top20",
+        axis: "輪郭"
+      }
+    : {
+        source: "当前 taikob20 六维",
+        lead: "主轴",
+        score: "Top20",
+        axis: "轮廓"
       }
 );
 
-const entries = computed(() =>
-  Object.entries(props.summary.keyword?.radarValues || {})
-    .map(([key, value]) => ({
-      key,
-      label: dimensionLabels.value[key as keyof typeof dimensionLabels.value] || key,
-      value: Number(value || 0)
-    }))
-    .sort((a, b) => b.value - a.value)
-);
-
-const formatWidth = (value: number) => `${Math.max(10, Math.min(100, value <= 1 ? value * 100 : value))}%`;
-const formatValue = (value: number) => (value <= 1 ? `${(value * 100).toFixed(1)}%` : value.toFixed(1));
+const formatWidth = (value: number) => {
+  if (value <= 0) return "0%";
+  return `${Math.max(12, Math.min(100, (value / radarMax.value) * 100))}%`;
+};
+const formatValue = (value: number) => value.toFixed(1);
 </script>
 
 <template>
@@ -53,22 +80,42 @@ const formatValue = (value: number) => (value <= 1 ? `${(value * 100).toFixed(1)
     :eyebrow="summary.copy.keyword.eyebrow"
     :title="summary.copy.keyword.title"
     :lead="summary.copy.keyword.body"
-    :accent="summary.keyword?.dimensionLabel || summary.finalTitle.title"
+    :accent="profileKeyword?.dimensionLabel || summary.keyword?.dimensionLabel || summary.finalTitle.title"
     tone="aurora"
     :active="active"
     :reduced-motion="reducedMotion"
   >
     <div class="keyword-slide">
-      <div class="keyword-slide__hero" data-animate>
-        <img src="/radar-empty.svg" alt="" class="keyword-slide__radar" />
-        <div class="keyword-slide__center">
-          <span>{{ summary.keyword?.dimensionLabel || summary.finalTitle.eyebrow }}</span>
-          <strong>{{ summary.keyword?.title || summary.finalTitle.title }}</strong>
+      <article class="keyword-slide__hero" data-animate>
+        <div class="keyword-slide__hero-copy">
+          <span>{{ uiText.source }}</span>
+          <strong>{{ profileKeyword?.title || summary.keyword?.title || summary.finalTitle.title }}</strong>
+          <small>{{ profileKeyword?.dimensionLabel || summary.keyword?.dimensionLabel || summary.finalTitle.eyebrow }}</small>
         </div>
-      </div>
+
+        <div class="keyword-slide__hero-radar">
+          <StoryRadarChart :labels="radarLabels" :values="radarValues" :max-value="radarMax" :aria-label="uiText.axis" />
+        </div>
+
+        <div class="keyword-slide__hero-meta">
+          <div class="keyword-slide__metric">
+            <span>{{ uiText.lead }}</span>
+            <strong>{{ profileKeyword?.dimensionLabel || summary.keyword?.dimensionLabel || summary.finalTitle.eyebrow }}</strong>
+          </div>
+          <div class="keyword-slide__metric">
+            <span>{{ uiText.score }}</span>
+            <strong>{{ formatValue(profileKeyword?.score || summary.keyword?.score || 0) }}</strong>
+          </div>
+          <div class="keyword-slide__chips">
+            <span v-for="entry in rankedEntries.slice(0, 3)" :key="entry.key">
+              {{ entry.label }} · {{ formatValue(entry.value) }}
+            </span>
+          </div>
+        </div>
+      </article>
 
       <div class="keyword-slide__bars">
-        <article v-for="entry in entries" :key="entry.key" class="keyword-slide__bar" data-animate>
+        <article v-for="entry in rankedEntries" :key="entry.key" class="keyword-slide__bar" data-animate>
           <div class="keyword-slide__bar-head">
             <span>{{ entry.label }}</span>
             <strong>{{ formatValue(entry.value) }}</strong>
@@ -100,40 +147,80 @@ const formatValue = (value: number) => (value <= 1 ? `${(value * 100).toFixed(1)
 }
 
 .keyword-slide__hero {
-  position: relative;
   display: grid;
-  place-items: center;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
   overflow: hidden;
 }
 
-.keyword-slide__radar {
-  width: min(24rem, 78%);
-  opacity: 0.74;
-  filter: drop-shadow(0 18px 34px rgba(8, 14, 28, 0.26));
-}
-
-.keyword-slide__center {
-  position: absolute;
-  inset: 0;
+.keyword-slide__hero-copy {
   display: grid;
-  place-items: center;
-  text-align: center;
   gap: 8px;
 }
 
-.keyword-slide__center span {
+.keyword-slide__hero-radar {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.keyword-slide__hero-copy span,
+.keyword-slide__bar-head span,
+.keyword-slide__metric span {
   color: rgba(255, 230, 196, 0.72);
   font-size: 13px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.keyword-slide__center strong {
+.keyword-slide__hero-copy strong {
   color: #fff8ed;
   font-family: var(--viewer-display-font);
-  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
   line-height: 1.04;
-  max-width: 12rem;
+}
+
+.keyword-slide__hero-copy small {
+  color: rgba(255, 238, 214, 0.84);
+  line-height: 1.7;
+}
+
+.keyword-slide__hero-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.keyword-slide__metric {
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(5, 14, 32, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.keyword-slide__metric strong {
+  display: block;
+  margin-top: 8px;
+  color: #fff8ed;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.keyword-slide__chips {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.keyword-slide__chips span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 243, 224, 0.84);
+  font-size: 12px;
+  letter-spacing: 0.06em;
 }
 
 .keyword-slide__bars {
@@ -147,12 +234,6 @@ const formatValue = (value: number) => (value <= 1 ? `${(value * 100).toFixed(1)
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.keyword-slide__bar-head span {
-  color: rgba(255, 230, 196, 0.72);
-  letter-spacing: 0.12em;
-  font-size: 12px;
 }
 
 .keyword-slide__bar-head strong {
@@ -176,6 +257,31 @@ const formatValue = (value: number) => (value <= 1 ? `${(value * 100).toFixed(1)
 @media (max-width: 960px) {
   .keyword-slide {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .keyword-slide__hero,
+  .keyword-slide__bar {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .keyword-slide__hero-copy strong {
+    font-size: clamp(1.7rem, 8vw, 2.6rem);
+  }
+
+  .keyword-slide__hero-copy small {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .keyword-slide__hero-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .keyword-slide__metric {
+    padding: 14px 16px;
   }
 }
 </style>

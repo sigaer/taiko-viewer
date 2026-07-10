@@ -19,6 +19,7 @@ const localePath = useLocalePath();
 const switchLocalePath = useSwitchLocalePath();
 const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
 const lastTrackedPath = ref("");
+const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 
 useHead(() => ({
   htmlAttrs: localeHead.value.htmlAttrs,
@@ -87,7 +88,7 @@ onMounted(() => {
 <template>
   <el-config-provider :locale="elementLocale">
     <div class="story-shell">
-      <header class="story-shell__chrome">
+      <header class="story-shell__chrome" :class="{ 'is-hidden': immersiveStory }">
         <NuxtLink :to="localePath('/')" class="story-shell__brand" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
           <img src="/logo.png" alt="" class="story-shell__logo" />
           <div class="story-shell__brand-copy">
@@ -170,6 +171,16 @@ onMounted(() => {
   justify-content: space-between;
   padding: 18px 22px;
   pointer-events: none;
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    visibility 0.28s ease;
+}
+
+.story-shell__chrome.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-16px);
 }
 
 .story-shell__brand,

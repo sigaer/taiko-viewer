@@ -16,14 +16,18 @@ const { locale } = useI18n();
 const uiText = computed(() =>
   locale.value === "ja"
     ? {
+        playCount: "プレイ回数",
         uniqueSongs: "触れた曲数",
         activeDays: "活動日数",
-        estimatedTime: "推定時間"
+        estimatedTime: "推定時間",
+        heat: "今期の熱量"
       }
     : {
+        playCount: "游玩次数",
         uniqueSongs: "涉及歌曲",
         activeDays: "活跃天数",
-        estimatedTime: "估算时长"
+        estimatedTime: "估算时长",
+        heat: "这一版的热量"
       }
 );
 </script>
@@ -41,11 +45,17 @@ const uiText = computed(() =>
   >
     <div class="overview-slide">
       <article class="overview-slide__hero" data-animate>
-        <span>{{ summary.copy.overview.eyebrow }}</span>
-        <strong>
-          <StoryCounter :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" />
-        </strong>
-        <p>{{ summary.overview.estimatedTimeText }}</p>
+        <div class="overview-slide__hero-head">
+          <span>{{ uiText.playCount }}</span>
+          <strong>
+            <StoryCounter :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" />
+          </strong>
+        </div>
+        <p>{{ summary.copy.overview.body }}</p>
+        <div class="overview-slide__hero-pills">
+          <span>{{ summary.overview.estimatedTimeText }}</span>
+          <span>{{ summary.poster.shareCopy }}</span>
+        </div>
       </article>
 
       <div class="overview-slide__grid">
@@ -60,7 +70,7 @@ const uiText = computed(() =>
         <article class="overview-slide__tile overview-slide__tile--wide" data-animate>
           <span>{{ uiText.estimatedTime }}</span>
           <strong>{{ summary.overview.estimatedTimeText }}</strong>
-          <small>{{ summary.poster.shareCopy }}</small>
+          <small>{{ uiText.heat }} · {{ summary.poster.shareCopy }}</small>
         </article>
       </div>
     </div>
@@ -72,6 +82,7 @@ const uiText = computed(() =>
   display: grid;
   grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.05fr);
   gap: 18px;
+  align-items: stretch;
 }
 
 .overview-slide__hero,
@@ -84,10 +95,9 @@ const uiText = computed(() =>
 }
 
 .overview-slide__hero {
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-  min-height: 26rem;
+  display: grid;
+  align-content: start;
+  gap: 18px;
   background:
     radial-gradient(circle at top left, rgba(255, 201, 116, 0.18), transparent 38%),
     rgba(255, 255, 255, 0.08);
@@ -100,18 +110,39 @@ const uiText = computed(() =>
   font-size: 12px;
 }
 
+.overview-slide__hero-head {
+  display: grid;
+  gap: 10px;
+}
+
 .overview-slide__hero strong {
-  margin-top: 12px;
   font-family: var(--viewer-display-font);
-  font-size: clamp(5rem, 9vw, 7rem);
+  font-size: clamp(4rem, 8vw, 6.3rem);
   line-height: 0.9;
   color: #fff8ed;
 }
 
 .overview-slide__hero p {
-  margin: 16px 0 0;
+  margin: 0;
   color: rgba(255, 240, 218, 0.88);
-  font-size: 18px;
+  font-size: 1rem;
+  line-height: 1.78;
+}
+
+.overview-slide__hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.overview-slide__hero-pills span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 243, 224, 0.82);
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 .overview-slide__grid {
@@ -121,12 +152,13 @@ const uiText = computed(() =>
 }
 
 .overview-slide__tile {
-  min-height: 12rem;
+  display: grid;
+  align-content: start;
+  gap: 8px;
 }
 
 .overview-slide__tile strong {
   display: block;
-  margin-top: 10px;
   color: #fff8ed;
   font-size: clamp(2rem, 3.8vw, 3rem);
   line-height: 1.05;
@@ -134,14 +166,12 @@ const uiText = computed(() =>
 
 .overview-slide__tile small {
   display: block;
-  margin-top: 14px;
   color: rgba(255, 237, 214, 0.76);
   line-height: 1.8;
 }
 
 .overview-slide__tile--wide {
   grid-column: span 2;
-  min-height: 14rem;
 }
 
 @media (max-width: 960px) {
@@ -151,6 +181,30 @@ const uiText = computed(() =>
 }
 
 @media (max-width: 720px) {
+  .overview-slide__hero,
+  .overview-slide__tile {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .overview-slide__hero {
+    gap: 14px;
+  }
+
+  .overview-slide__hero strong {
+    font-size: clamp(3.1rem, 15vw, 4.8rem);
+  }
+
+  .overview-slide__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .overview-slide__tile--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
   .overview-slide__grid {
     grid-template-columns: 1fr;
   }

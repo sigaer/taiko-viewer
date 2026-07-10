@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import StoryDrawer from "~/components/account/version-summary/StoryDrawer.vue";
 import StoryPlayer from "~/components/account/version-summary/StoryPlayer.vue";
@@ -43,7 +43,7 @@ const switchingBindingId = ref<number | null>(null);
 const selectedBindingId = ref<number | null>(null);
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
-const clientReady = ref(false);
+const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 
 const uiText = computed(() =>
   locale.value === "ja"
@@ -157,12 +157,19 @@ const bindings = computed(() =>
       : []
 );
 const pageError = computed(() => summaryState.value?.error || bindingState.value?.error || "");
-const showStory = computed(() => storyStarted.value || !clientReady.value);
 
 const resetStoryState = () => {
   storyStarted.value = false;
   drawerOpen.value = false;
 };
+
+watch(
+  storyStarted,
+  (value) => {
+    immersiveStory.value = value;
+  },
+  { immediate: true }
+);
 
 watch(
   currentBinding,
@@ -260,8 +267,8 @@ const bindingPreviewText = computed(() => {
   return title ? `${currentBinding.value.taikoId} · ${title}` : currentBinding.value.taikoId;
 });
 
-onMounted(() => {
-  clientReady.value = true;
+onBeforeUnmount(() => {
+  immersiveStory.value = false;
 });
 </script>
 
@@ -299,7 +306,7 @@ onMounted(() => {
         @exit="resetStoryState"
       />
 
-      <section class="story-entry" :class="{ 'is-hidden': storyStarted && clientReady }">
+      <section class="story-entry" :class="{ 'is-hidden': storyStarted }">
         <div class="story-entry__main">
           <p class="story-entry__eyebrow">虹2025 / {{ t("account.versionSummary") }}</p>
           <h1>{{ summary.copy.opening.title }}</h1>
@@ -362,12 +369,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <StoryPlayer
-        v-show="showStory"
-        :summary="summary"
-        :started="storyStarted"
-        @open-drawer="drawerOpen = true"
-      />
+      <StoryPlayer v-if="storyStarted" :summary="summary" :started="storyStarted" @open-drawer="drawerOpen = true" />
     </template>
   </div>
 </template>

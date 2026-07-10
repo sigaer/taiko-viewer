@@ -44,6 +44,10 @@ const uiText = computed(() => ({
         <article class="song-slide__panel" data-animate>
           <span>{{ song?.subtitle || summary.version.name }}</span>
           <strong>{{ song?.name || summary.copy.favoriteSong.title }}</strong>
+          <div class="song-slide__chips">
+            <span>{{ summary.version.name }}</span>
+            <span v-if="song?.songNo">#{{ song.songNo }}</span>
+          </div>
           <small>{{ summary.copy.favoriteSong.body }}</small>
         </article>
 
@@ -113,6 +117,23 @@ const uiText = computed(() => ({
   backdrop-filter: blur(16px);
 }
 
+.song-slide__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.song-slide__chips span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 243, 224, 0.78);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
 .song-slide__panel span,
 .song-slide__metric span {
   display: block;
@@ -138,6 +159,43 @@ const uiText = computed(() => ({
 }
 
 @media (max-width: 900px) {
+  .song-slide {
+    grid-template-columns: 124px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .song-slide__cover::after {
+    inset: auto 10% -14px;
+    height: 28px;
+  }
+
+  .song-slide__image {
+    border-radius: 24px;
+  }
+
+  .song-slide__panel,
+  .song-slide__metric {
+    padding: 16px 18px;
+    border-radius: 22px;
+  }
+
+  .song-slide__panel strong,
+  .song-slide__metric strong {
+    font-size: clamp(1.5rem, 4.6vw, 2.4rem);
+  }
+
+  .song-slide__panel small {
+    margin-top: 12px;
+    line-height: 1.72;
+  }
+
+  .song-slide__chips {
+    margin-top: 12px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
   .song-slide {
     grid-template-columns: 1fr;
   }

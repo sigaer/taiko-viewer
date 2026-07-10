@@ -22,11 +22,19 @@ import { buildVersionSummaryPresentation, getVersionSummaryDimensionLabel, getVe
 import type { RawVersionSummary, RawVersionSummarySong, VersionSummaryLocale } from "./types";
 import { listVersionSummaryWindows, resolveVersionSummaryWindow, type VersionSummaryWindow } from "./versionWindows";
 
-const VERSION_SUMMARY_CACHE_SCHEMA = 1;
+const VERSION_SUMMARY_CACHE_SCHEMA = 2;
 const COVER_FALLBACK_ID = 1384;
 const PYTHON_FALLBACK_MESSAGES = {
   missingHistory: "当前绑定还没有覆盖该版本范围的历史快照，请先同步更多历史数据后再查看版本总结。",
   executionFailed: "版本总结生成失败，请稍后重试。"
+};
+const KEYWORD_TITLE_KEYS_BY_DIMENSION: Record<string, string> = {
+  big_song: "wall_breaker",
+  stamina: "endless_drummer",
+  speed: "speed_runner",
+  accuracy: "precision_tuner",
+  rhythm: "rhythm_resonator",
+  complex: "complex_hunter"
 };
 
 type VersionSummaryCacheEnvelope = {
@@ -147,6 +155,70 @@ const runVersionSummaryPython = async (taikoId: string, version: VersionSummaryW
       throw error;
     }
     mapPythonError(extractExecErrorMessage(error));
+  }
+};
+
+const runTaikob20KeywordPython = async (taikoId: string) => {
+  const { repoRoot, configPath } = getRuntimePaths();
+  const runtimeConfig = useRuntimeConfig();
+  const ratingPath = String(
+    runtimeConfig.ratingStructPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(repoRoot, "songs", "rating_structured_with_ids.json")
+  );
+
+  const pythonCode = [
+    "from contextlib import redirect_stdout",
+    "from io import StringIO",
+    "from pathlib import Path",
+    "from plugins.utils.score_calculator import compute_all_from_userdata_records, compute_dim_topN_means",
+    "import json, sys",
+    "userdata_path = Path(sys.argv[1])",
+    "payload = json.loads(userdata_path.read_text(encoding='utf-8'))",
+    "records = payload.get('songs', []) if isinstance(payload, dict) else payload",
+    "mapping = {",
+    "    '大歌力': 'big_song',",
+    "    '体力': 'stamina',",
+    "    '高速处理': 'speed',",
+    "    '精度力': 'accuracy',",
+    "    '节奏处理': 'rhythm',",
+    "    '复合处理': 'complex',",
+    "}",
+    "with redirect_stdout(StringIO()):",
+    "    results = compute_all_from_userdata_records(records or [], json_path=sys.argv[2])",
+    "    dim_means = compute_dim_topN_means(results, 20) if results else {}",
+    "radar = {mapping[key]: round(float(value), 4) for key, value in dim_means.items() if key in mapping}",
+    "if not radar:",
+    "    sys.stdout.write('{}')",
+    "else:",
+    "    dimension_key = max(radar, key=radar.get)",
+    "    sys.stdout.write(json.dumps({",
+    "        'dimensionKey': dimension_key,",
+    "        'score': radar[dimension_key],",
+    "        'radarValues': radar,",
+    "    }, ensure_ascii=False))"
+  ].join("\n");
+
+  try {
+    const result = await execFileAsync("python3", ["-c", pythonCode, getUserdataFilePath(taikoId), ratingPath], {
+      cwd: repoRoot,
+      env: {
+        ...process.env,
+        TAIKO_CONFIG_PATH: configPath
+      },
+      encoding: "utf-8",
+      maxBuffer: 8 * 1024 * 1024
+    });
+    const stdout = String(result.stdout || "").trim();
+    if (!stdout || stdout === "{}") {
+      return null;
+    }
+    return JSON.parse(stdout) as {
+      dimensionKey: string;
+      score: number;
+      radarValues: Record<string, number>;
+    };
+  } catch (error) {
+    console.warn("[version-summary] failed to compute taikob20 keyword profile", extractExecErrorMessage(error));
+    return null;
   }
 };
 
@@ -289,13 +361,39 @@ const buildKeyword = (locale: VersionSummaryLocale, raw: RawVersionSummary["keyw
   };
 };
 
-const buildViewModel = async (locale: VersionSummaryLocale, raw: RawVersionSummary): Promise<VersionSummaryViewModel> => {
+const buildTaikob20Keyword = async (locale: VersionSummaryLocale, taikoId: string): Promise<VersionSummaryKeyword | null> => {
+  const raw = await runTaikob20KeywordPython(taikoId);
+  if (!raw || !raw.dimensionKey) return null;
+  const dimensionLabel = getVersionSummaryDimensionLabel(locale, raw.dimensionKey);
+  const titleKey = KEYWORD_TITLE_KEYS_BY_DIMENSION[raw.dimensionKey] || "encouragement";
+  const title = getVersionSummaryKeywordTitle(locale, titleKey);
+  const body =
+    locale === "ja"
+      ? `現在の taikob20 を見ると、いちばん前に出ている軸は ${dimensionLabel} です。`
+      : `按当前 taikob20 的轮廓来看，最先站出来的轴是 ${dimensionLabel}。`;
+  return {
+    dimensionKey: raw.dimensionKey,
+    dimensionLabel,
+    titleKey,
+    title,
+    score: Number(raw.score || 0),
+    radarValues: raw.radarValues || {},
+    body
+  };
+};
+
+const buildViewModel = async (
+  locale: VersionSummaryLocale,
+  raw: RawVersionSummary,
+  taikoId: string
+): Promise<VersionSummaryViewModel> => {
   const catalog = await getSongCatalog();
   const songMap = new Map<number, SongCatalogItem>(catalog.map((item) => [Number(item.id), item]));
 
   const favoriteSong = buildSongCard(locale, raw.favoriteSong, songMap);
   const obsessionSong = buildSongCard(locale, raw.obsessionSong, songMap);
   const keyword = buildKeyword(locale, raw.keyword);
+  const keywordProfile = await buildTaikob20Keyword(locale, taikoId);
   const breakthroughSong =
     raw.breakthrough.songNo && raw.breakthrough.songNo > 0
       ? buildSongCard(
@@ -333,6 +431,7 @@ const buildViewModel = async (locale: VersionSummaryLocale, raw: RawVersionSumma
     favoriteSong,
     obsessionSong,
     keyword,
+    keywordProfile,
     breakthrough: presentation.breakthrough,
     finalTitle: presentation.finalTitle,
     poster: presentation.poster,
@@ -355,7 +454,7 @@ export const getAccountVersionSummaryPayload = async (
   const bindingRow = await ensureBindingWithUserdata(userId);
   const binding = await enrichBindingWithCurrentTitle(sanitizeBinding(bindingRow));
   const raw = await getOrBuildRawSummary(binding.taikoId, version, Boolean(options.refresh));
-  const summary = await buildViewModel(locale, raw);
+  const summary = await buildViewModel(locale, raw, binding.taikoId);
 
   return {
     availableVersions: listVersionSummaryWindows(),

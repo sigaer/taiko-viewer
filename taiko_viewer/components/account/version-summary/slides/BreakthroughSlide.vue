@@ -167,4 +167,26 @@ const uiText = computed(() =>
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 720px) {
+  .breakthrough-slide__banner,
+  .breakthrough-slide__metric,
+  .breakthrough-slide__song {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .breakthrough-slide__cover {
+    aspect-ratio: 1.14;
+    border-radius: 22px;
+  }
+
+  .breakthrough-slide__banner strong {
+    font-size: clamp(1.7rem, 7vw, 2.7rem);
+  }
+
+  .breakthrough-slide__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 </style>

@@ -115,6 +115,7 @@ export type VersionSummaryViewModel = {
   favoriteSong: VersionSummarySongCard | null;
   obsessionSong: VersionSummarySongCard | null;
   keyword: VersionSummaryKeyword | null;
+  keywordProfile: VersionSummaryKeyword | null;
   breakthrough: VersionSummaryBreakthrough;
   finalTitle: VersionSummaryFinalTitle;
   poster: VersionSummaryPoster;

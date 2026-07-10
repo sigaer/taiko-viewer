@@ -200,12 +200,16 @@ onBeforeUnmount(() => {
 <style scoped>
 .story-player {
   position: relative;
+  --story-slide-top-padding: 7.4rem;
+  --story-slide-bottom-padding: 2.2rem;
 }
 
 .story-player.is-live {
   height: 100vh;
   height: 100svh;
   height: 100dvh;
+  --story-slide-top-padding: 2.75rem;
+  --story-slide-bottom-padding: 2rem;
 }
 
 .story-player__viewport {
@@ -227,7 +231,7 @@ onBeforeUnmount(() => {
 
 .story-player__drawer-trigger {
   position: fixed;
-  top: 92px;
+  top: 24px;
   right: 22px;
   z-index: 16;
   width: 48px;
@@ -257,6 +261,13 @@ onBeforeUnmount(() => {
     top: auto;
     bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     right: 18px;
+  }
+}
+
+@media (max-width: 720px) {
+  .story-player.is-live {
+    --story-slide-top-padding: 1.2rem;
+    --story-slide-bottom-padding: calc(6.2rem + env(safe-area-inset-bottom, 0px));
   }
 }
 </style>

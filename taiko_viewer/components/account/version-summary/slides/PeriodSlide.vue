@@ -141,6 +141,12 @@ const uiText = computed(() =>
 }
 
 @media (max-width: 720px) {
+  .period-slide__card {
+    min-height: auto;
+    padding: 16px 18px;
+    border-radius: 22px;
+  }
+
   .period-slide__timeline,
   .period-slide__grid {
     grid-template-columns: 1fr;
@@ -148,6 +154,8 @@ const uiText = computed(() =>
 
   .period-slide__timeline {
     gap: 14px;
+    padding: 18px;
+    border-radius: 22px;
   }
 
   .period-slide__timeline i {

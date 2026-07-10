@@ -156,6 +156,54 @@ const uiText = computed(() =>
 }
 
 @media (max-width: 720px) {
+  .obsession-slide {
+    grid-template-columns: 118px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .obsession-slide__memory,
+  .obsession-slide__metric {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .obsession-slide__cover {
+    border-radius: 22px;
+  }
+
+  .obsession-slide__echoes {
+    gap: 8px;
+  }
+
+  .obsession-slide__echoes span {
+    width: 14px;
+    height: 14px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+  }
+
+  .obsession-slide__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .obsession-slide__metric--wide {
+    grid-column: 1 / -1;
+  }
+
+  .obsession-slide__metric strong {
+    font-size: clamp(1.4rem, 5vw, 2.1rem);
+  }
+
+  .obsession-slide__metric small {
+    margin-top: 12px;
+    line-height: 1.72;
+  }
+}
+
+@media (max-width: 420px) {
+  .obsession-slide {
+    grid-template-columns: 1fr;
+  }
+
   .obsession-slide__metrics {
     grid-template-columns: 1fr;
   }

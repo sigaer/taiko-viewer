@@ -102,7 +102,10 @@ onBeforeUnmount(() => {
   height: 100vh;
   height: 100svh;
   height: 100dvh;
-  padding: 7.4rem 2rem 2.2rem;
+  padding:
+    var(--story-slide-top-padding, 7.4rem)
+    2rem
+    var(--story-slide-bottom-padding, 2.2rem);
   scroll-snap-align: start;
   scroll-snap-stop: always;
   overflow: hidden;
@@ -171,9 +174,9 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 1.8rem;
-  height: calc(100vh - 9.6rem);
-  height: calc(100svh - 9.6rem);
-  height: calc(100dvh - 9.6rem);
+  height: calc(100vh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
+  height: calc(100svh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
+  height: calc(100dvh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
   width: min(1180px, 100%);
   margin: 0 auto;
 }
@@ -321,14 +324,11 @@ onBeforeUnmount(() => {
 
 @media (max-width: 720px) {
   .story-slide-shell {
-    padding: 5.6rem 1rem calc(6rem + env(safe-area-inset-bottom, 0px));
+    padding-inline: 1rem;
   }
 
   .story-slide-shell__frame {
     gap: 0.95rem;
-    height: calc(100vh - 11.6rem - env(safe-area-inset-bottom, 0px));
-    height: calc(100svh - 11.6rem - env(safe-area-inset-bottom, 0px));
-    height: calc(100dvh - 11.6rem - env(safe-area-inset-bottom, 0px));
   }
 
   .story-slide-shell__meta {
@@ -356,6 +356,10 @@ onBeforeUnmount(() => {
   .story-slide-shell__accent {
     padding: 8px 12px;
     font-size: 12px;
+  }
+
+  .story-slide-shell__body {
+    align-items: start;
   }
 }
 </style>
