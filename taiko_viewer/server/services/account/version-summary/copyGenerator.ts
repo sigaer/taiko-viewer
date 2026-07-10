@@ -178,11 +178,91 @@ const getBreakthroughBody = (
     : `${song.name}${levelLabel} 的单次分数提升最多，一次抬高了 ${breakthrough.scoreDelta.toLocaleString()} 分。`;
 };
 
+const buildFinalTitle = (
+  locale: VersionSummaryLocale,
+  summary: RawVersionSummary,
+  keyword: VersionSummaryKeyword | null,
+  breakthrough: RawVersionSummary["breakthrough"]
+) => {
+  const title = keyword?.title || KEYWORD_TITLES[locale].encouragement;
+  const eyebrow = locale === "ja" ? "今期の呼び名" : "这一版的称号";
+  const themeKey = keyword?.dimensionKey || breakthrough.type || "encouragement";
+
+  if (summary.flags.newcomer || summary.flags.insufficientData) {
+    return {
+      title,
+      eyebrow,
+      themeKey: "encouragement",
+      body:
+        locale === "ja"
+          ? "まだ記録は短めですが、鼓面に向かう癖はもう始まっています。次に見返すとき、この呼び名はもっとあなたらしくなります。"
+          : "这一版的记录还不算长，但属于你的手感已经开始成形。等下一次再回来看，这个称号会更像你。"
+    };
+  }
+
+  switch (breakthrough.type) {
+    case "dondaful":
+      return {
+        title,
+        eyebrow,
+        themeKey,
+        body:
+          locale === "ja"
+            ? "この版でいちばん眩しかった瞬間は、叩き方の精度と意志がぴたりと重なったことでした。"
+            : "这一版最耀眼的那一下，是稳定、准度和不肯放手的劲同时落在了同一个点上。"
+      };
+    case "full_combo":
+      return {
+        title,
+        eyebrow,
+        themeKey,
+        body:
+          locale === "ja"
+            ? "積み重ねてきた感触が、ついに一本の流れになって抜けていきました。"
+            : "这段时间攒下来的手感，终于被你连成了一次完整穿过的鼓点。"
+      };
+    case "clear":
+      return {
+        title,
+        eyebrow,
+        themeKey,
+        body:
+          locale === "ja"
+            ? "新しい地面を踏めた版でした。越えたあとに残る静けさまで、ちゃんとあなたの記録です。"
+            : "这一版你确实踩过了新的门槛，跨过去之后留下的那口气，也属于这段故事。"
+      };
+    case "score_gain":
+      return {
+        title,
+        eyebrow,
+        themeKey,
+        body:
+          locale === "ja"
+            ? "大きな成長はいつも派手とは限りません。数字が上がった一撃が、それを静かに証明しています。"
+            : "不是每次成长都会被高声宣告，但分数抬起的那一下，已经替你把变化记了下来。"
+      };
+    default:
+      return {
+        title,
+        eyebrow,
+        themeKey,
+        body: keyword
+          ? locale === "ja"
+            ? `${keyword.dimensionLabel} を軸にしながら、この版の叩き方が少しずつ輪郭を持ちました。`
+            : `这一版的手感，最后收成了 ${keyword.dimensionLabel} 这条最清晰的线。`
+          : locale === "ja"
+            ? "まだ名前はやわらかいままですが、鼓面に向かうリズムはもう始まっています。"
+            : "称号还很柔软，但这段时间的鼓点已经慢慢有了自己的模样。"
+      };
+  }
+};
+
 const buildPoster = (
   locale: VersionSummaryLocale,
   summary: RawVersionSummary,
   favoriteSong: VersionSummarySongCard | null,
-  keyword: VersionSummaryKeyword | null
+  keyword: VersionSummaryKeyword | null,
+  finalTitle: ReturnType<typeof buildFinalTitle>
 ): VersionSummaryPoster => {
   const title =
     locale === "ja"
@@ -190,17 +270,34 @@ const buildPoster = (
       : `${summary.user.nickname} 的 ${summary.version.name}`;
   const subtitle = summary.flags.insufficientData
     ? locale === "ja"
-      ? "まだ記録は少なめ。次の更新でもう一度見に来てください。"
-      : "当前样本还不够多，等下一次同步后再回来看看。"
+      ? "まだ短いけれど、ここまでの鼓面の光だけを一枚にまとめました。"
+      : "这段故事还不算长，但已经足够拼出一张属于这一版的海报。"
     : locale === "ja"
-      ? `${summary.version.startDate} から ${summary.version.effectiveEndDate} までの鼓面ログ。`
-      : `${summary.version.startDate} 到 ${summary.version.effectiveEndDate} 的鼓面记录。`;
+      ? "今期の熱量、手触り、何度も戻った曲を一枚にまとめた記念ポスターです。"
+      : "把这一版的热度、手感和反复回去的歌，收成了一张可以留下来的海报。";
+
+  const periodLabel = summary.version.isOngoing
+    ? locale === "ja"
+      ? `${formatDate(locale, summary.version.startDate)} から現在まで`
+      : `${formatDate(locale, summary.version.startDate)} 到当前`
+    : `${formatDate(locale, summary.version.startDate)} - ${formatDate(locale, summary.version.effectiveEndDate)}`;
+
+  const closingLine = summary.flags.insufficientData
+    ? locale === "ja"
+      ? "次の鼓点が増えたら、この景色はもっと濃くなります。"
+      : "等下一次鼓点再多一些，这张海报会变得更像你。"
+    : locale === "ja"
+      ? "すべては載せきれなくても、この一枚には今期の癖と熱量がちゃんと残っています。"
+      : "不是每一次敲击都要被逐条写下，但这一页已经足够留下你这一版的节奏。";
 
   return {
     title,
     subtitle,
+    finalTitle: finalTitle.title,
+    periodLabel,
     favoriteSong: favoriteSong?.name || (locale === "ja" ? "まだ未確定" : "暂未定格"),
     keyword: keyword?.title || KEYWORD_TITLES[locale].encouragement,
+    closingLine,
     shareCopy: locale === "ja"
       ? `${summary.version.name} では ${summary.overview.playCount} 回叩いて、${summary.period.activeDays} 日動いていました。`
       : `${summary.version.name} 里一共打了 ${summary.overview.playCount} 次，活跃了 ${summary.period.activeDays} 天。`,
@@ -239,7 +336,8 @@ export const buildVersionSummaryPresentation = (
   const keywordTitle = keyword?.title || KEYWORD_TITLES[locale].encouragement;
   const breakthroughTitle = getBreakthroughTitle(locale, summary.breakthrough, keywordTitle);
   const breakthroughBody = getBreakthroughBody(locale, summary.breakthrough, breakthroughSong);
-  const poster = buildPoster(locale, summary, favoriteSong, keyword);
+  const finalTitle = buildFinalTitle(locale, summary, keyword, summary.breakthrough);
+  const poster = buildPoster(locale, summary, favoriteSong, keyword, finalTitle);
 
   const breakthrough: VersionSummaryBreakthrough = {
     type: summary.breakthrough.type,
@@ -261,96 +359,106 @@ export const buildVersionSummaryPresentation = (
           : `${summary.user.nickname} 的鼓面记录`,
       subtitle: summary.flags.insufficientData
         ? locale === "ja"
-          ? "まだイベントは少なめです。今ある記録だけで、まず 8 ページにまとめました。"
-          : "当前事件记录还比较少，先把现有内容整理成这一版的 8 页。"
+          ? "まだ短い版ですが、ここまでの鼓点にもちゃんと色があります。"
+          : "这一版的故事还不算长，但已经能听见属于你的鼓点回声。"
         : locale === "ja"
-          ? `${summary.version.startDate} から ${summary.version.effectiveEndDate} まで、${summary.overview.playCount} 回の記録をまとめました。`
-          : `${summary.version.startDate} 到 ${summary.version.effectiveEndDate}，一共留下了 ${summary.overview.playCount} 次鼓面记录。`
+          ? `${summary.version.startDate} から ${summary.version.effectiveEndDate} までの鼓面を、物語としてめくれる形にまとめました。`
+          : `${summary.version.startDate} 到 ${summary.version.effectiveEndDate} 的鼓面，被整理成了一段可以翻开的故事。`
     },
     period: {
       eyebrow: locale === "ja" ? "期間" : "版本时间",
       title: summary.version.isOngoing
         ? locale === "ja"
-          ? `${formatDate(locale, summary.version.startDate)} から現在まで`
-          : `${formatDate(locale, summary.version.startDate)} 到当前`
+          ? `${formatDate(locale, summary.version.startDate)} から、この瞬間まで`
+          : `从 ${formatDate(locale, summary.version.startDate)}，一直到现在`
         : `${formatDate(locale, summary.version.startDate)} - ${formatDate(locale, summary.version.endDate)}`,
       body: summary.period.firstRecordAt
         ? summary.coverage.partialStart
           ? locale === "ja"
-            ? `最初の記録は ${formatDateTime(locale, summary.period.firstRecordAt)}。期間前の基準スナップショットがないため、最初に取れた記録から集計しています。`
-            : `第一条记录出现在 ${formatDateTime(locale, summary.period.firstRecordAt)}。由于窗口前没有更早基线快照，这次从首个可用快照开始统计。`
+            ? `${formatDateTime(locale, summary.period.firstRecordAt)} に追いつけたところから、この版の物語が始まります。`
+            : `能追到的第一段鼓点，落在 ${formatDateTime(locale, summary.period.firstRecordAt)}。这段故事，就从这里开始。`
           : locale === "ja"
-            ? `最初の記録は ${formatDateTime(locale, summary.period.firstRecordAt)}、最後は ${formatDateTime(locale, summary.period.lastRecordAt)}。`
-            : `你的第一条记录出现在 ${formatDateTime(locale, summary.period.firstRecordAt)}，最后一条记录落在 ${formatDateTime(locale, summary.period.lastRecordAt)}。`
+            ? `最初の記録は ${formatDateTime(locale, summary.period.firstRecordAt)}、最後の余韻は ${formatDateTime(locale, summary.period.lastRecordAt)} に残っています。`
+            : `第一条记录出现在 ${formatDateTime(locale, summary.period.firstRecordAt)}，最近一次回响停在 ${formatDateTime(locale, summary.period.lastRecordAt)}。`
         : locale === "ja"
-          ? "この期間にイベントとして認識できる記録はまだありません。"
-          : "当前窗口内还没有识别到可计入事件的游玩记录。"
+          ? "この期間はまだ、静かな助走の途中です。"
+          : "这一段时间还很安静，但节奏已经在起步。"
     },
     overview: {
       eyebrow: locale === "ja" ? "総覧" : "总览",
       title:
         locale === "ja"
-          ? `${summary.overview.playCount} 回叩いて、${summary.overview.uniqueSongs} 曲を触りました`
+          ? `${summary.overview.playCount} 回叩いて、${summary.overview.uniqueSongs} 曲に手を伸ばしました`
           : `${summary.overview.playCount} 次游玩，打到了 ${summary.overview.uniqueSongs} 首歌`,
       body:
         locale === "ja"
-          ? `${summary.period.activeDays} 日動いていて、推定プレイ時間は ${estimatedTimeText}。`
-          : `共活跃 ${summary.period.activeDays} 天，按 180 秒一局估算，大约打了 ${estimatedTimeText}。`
+          ? `${summary.period.activeDays} 日にわたって動いていて、推定プレイ時間は ${estimatedTimeText} です。`
+          : `共活跃 ${summary.period.activeDays} 天，按 180 秒一局估算，这一版大约打了 ${estimatedTimeText}。`
     },
     favoriteSong: {
       eyebrow: locale === "ja" ? "よく叩いた曲" : "最爱歌曲",
       title: favoriteSong?.name || (locale === "ja" ? "まだ定番は未決定" : "最爱歌曲还没定型"),
       body: favoriteSong
         ? locale === "ja"
-          ? `${favoriteSong.playCount || 0} 回でトップ。今期いちばん素直に手が伸びた曲です。`
-          : `这首歌在窗口内一共打了 ${favoriteSong.playCount || 0} 次，是你这一版最常回去敲的歌。`
+          ? `${favoriteSong.playCount || 0} 回でトップ。今期、いちばん自然に手が伸びた一曲です。`
+          : `这首歌在窗口内一共打了 ${favoriteSong.playCount || 0} 次，是你这一版最自然会回去敲的歌。`
         : locale === "ja"
-          ? "十分な增量がまだなく、よく叩いた曲は次回以降に確定します。"
-          : "当前还没有足够的正向增量，最爱歌曲会在后续记录里慢慢定型。"
+          ? "まだ一曲に定まるほどの偏りはありません。"
+          : "当前还没有偏到足够明显的一首，但它会慢慢浮出来。"
     },
     obsessionSong: {
       eyebrow: locale === "ja" ? "念に残る曲" : "念念不忘",
       title: obsessionSong?.name || (locale === "ja" ? "まだ追いかけ中" : "还在追歌中"),
       body: obsessionSong
         ? locale === "ja"
-          ? `${obsessionSong.activeDays || 0} 日に分けて叩いていました。思い出すたびに戻ってきた曲です。`
-          : `你在 ${obsessionSong.activeDays || 0} 个不同日期都回去打过它，这首歌明显一直挂在心里。`
+          ? `${obsessionSong.activeDays || 0} 日に分けて叩いていました。一度では足りず、何度も戻ってきた曲です。`
+          : `你在 ${obsessionSong.activeDays || 0} 个不同日期都回去打过它。不是一时上头，是一直放在心里。`
         : locale === "ja"
-          ? "まだ同じ曲に通い続けた痕迹は薄めです。"
-          : "当前还看不出反复惦记同一首歌的痕迹。"
+          ? "まだ、何度も帰りたくなる一曲は固まっていません。"
+          : "当前还看不出反复惦记同一首歌的轨迹。"
     },
     keyword: {
       eyebrow: locale === "ja" ? "太鼓キーワード" : "太鼓关键词",
       title: keyword?.title || KEYWORD_TITLES[locale].encouragement,
       body: keyword
         ? locale === "ja"
-          ? `${keyword.dimensionLabel} がいちばん前に出ています。加重スコアは ${formatScore(keyword.score)}。`
-          : `${keyword.dimensionLabel} 是你这一版最突出的维度，加权分值来到 ${formatScore(keyword.score)}。`
+          ? `もし今期の叩き方を一言にまとめるなら、いちばん前に出ていたのは ${keyword.dimensionLabel} です。`
+          : `如果把这一版的手感收成一个词，最先站出来的是 ${keyword.dimensionLabel}。`
         : locale === "ja"
-          ? "六维关键词を出すには、もう少し正向增量が必要です。"
-          : "六维关键词需要更多正向增量，当前样本还不够。"
+          ? "まだ名前を付けるには少し早いですが、輪郭はでき始めています。"
+          : "现在给它下定义还早一点，但轮廓已经开始出现。"
     },
     breakthrough: {
       eyebrow: locale === "ja" ? "ブレイクスルー" : "年度突破",
       title: breakthroughTitle,
       body: breakthroughBody
     },
+    finalTitle: {
+      eyebrow: finalTitle.eyebrow,
+      title: finalTitle.title,
+      body: finalTitle.body
+    },
     poster: {
-      eyebrow: locale === "ja" ? "ポスター" : "海报页",
+      eyebrow: locale === "ja" ? "記念ポスター" : "收尾海报",
       title: poster.title,
       subtitle: poster.subtitle
     },
     controls: {
       versionLabel: locale === "ja" ? "対象バージョン" : "统计版本",
       bindingLabel: locale === "ja" ? "連携 ID" : "当前绑定",
-      refresh: locale === "ja" ? "重新生成" : "重新生成"
+      refresh: locale === "ja" ? "再生成" : "重新生成"
     }
   };
 
   return {
     estimatedTimeText,
     breakthrough,
+    finalTitle,
     poster,
+    story: {
+      pageCount: 9,
+      pageKeys: ["opening", "period", "overview", "favorite", "obsession", "keyword", "breakthrough", "final", "poster"]
+    },
     copy
   };
 };

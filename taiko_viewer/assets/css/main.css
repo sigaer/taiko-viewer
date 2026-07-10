@@ -5,6 +5,12 @@
 }
 
 @font-face {
+  font-family: "TaikoDisplay";
+  src: url("../font/DDFont.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
   font-family: "TaikoSymbols";
   src: url("../font/NotoSansSymbols2-Regular.ttf") format("truetype");
   font-display: swap;
@@ -25,6 +31,13 @@
     "Meiryo",
     "Segoe UI Symbol",
     "Apple Color Emoji",
+    sans-serif;
+  --viewer-display-font:
+    "TaikoDisplay",
+    "TaikoUI",
+    "TaikoSymbols",
+    "Noto Sans CJK SC",
+    "Source Han Sans SC",
     sans-serif;
   --viewer-bg-top: #fdf9f4;
   --viewer-bg-mid: #f7f3ee;

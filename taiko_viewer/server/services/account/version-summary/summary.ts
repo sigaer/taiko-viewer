@@ -334,7 +334,9 @@ const buildViewModel = async (locale: VersionSummaryLocale, raw: RawVersionSumma
     obsessionSong,
     keyword,
     breakthrough: presentation.breakthrough,
+    finalTitle: presentation.finalTitle,
     poster: presentation.poster,
+    story: presentation.story,
     copy: presentation.copy,
     flags: raw.flags
   };

@@ -47,16 +47,31 @@ export type VersionSummaryBreakthrough = {
   happenedLabel: string;
 };
 
+export type VersionSummaryFinalTitle = {
+  title: string;
+  eyebrow: string;
+  body: string;
+  themeKey: string;
+};
+
 export type VersionSummaryPoster = {
   title: string;
   subtitle: string;
+  finalTitle: string;
+  periodLabel: string;
   favoriteSong: string;
   keyword: string;
+  closingLine: string;
   shareCopy: string;
   stats: Array<{
     label: string;
     value: string;
   }>;
+};
+
+export type VersionSummaryStory = {
+  pageCount: number;
+  pageKeys: string[];
 };
 
 export type VersionSummaryCopyBlock = {
@@ -101,7 +116,9 @@ export type VersionSummaryViewModel = {
   obsessionSong: VersionSummarySongCard | null;
   keyword: VersionSummaryKeyword | null;
   breakthrough: VersionSummaryBreakthrough;
+  finalTitle: VersionSummaryFinalTitle;
   poster: VersionSummaryPoster;
+  story: VersionSummaryStory;
   copy: {
     opening: {
       eyebrow: string;
@@ -114,6 +131,7 @@ export type VersionSummaryViewModel = {
     obsessionSong: VersionSummaryCopyBlock;
     keyword: VersionSummaryCopyBlock;
     breakthrough: VersionSummaryCopyBlock;
+    finalTitle: VersionSummaryCopyBlock;
     poster: {
       eyebrow: string;
       title: string;
