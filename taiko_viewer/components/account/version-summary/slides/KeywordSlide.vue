@@ -135,6 +135,23 @@ const formatValue = (value: number) => value.toFixed(1);
   grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
   gap: 18px;
   align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .keyword-slide { gap: 10px; }
+  .keyword-slide__hero, .keyword-slide__bar { padding: 12px 14px; border-radius: 20px; }
+  .keyword-slide__hero-radar { max-height: min(30vh, 230px); }
+  .keyword-slide__bars { gap: 7px; }
+  .keyword-slide__bar:nth-child(n + 5) { display: none; }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .keyword-slide { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); }
+  .keyword-slide__hero-meta { grid-template-columns: 1fr; }
+  .keyword-slide__chips { display: none; }
+  .keyword-slide__bar:nth-child(n + 4) { display: none; }
 }
 
 .keyword-slide__hero,

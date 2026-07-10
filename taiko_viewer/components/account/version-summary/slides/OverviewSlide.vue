@@ -83,6 +83,23 @@ const uiText = computed(() =>
   grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.05fr);
   gap: 18px;
   align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .overview-slide { gap: 10px; }
+  .overview-slide__hero, .overview-slide__tile { padding: 14px; border-radius: 22px; }
+  .overview-slide__hero { gap: 10px; }
+  .overview-slide__hero strong { font-size: clamp(3rem, 7vw, 4.6rem); }
+  .overview-slide__grid { gap: 8px; }
+  .overview-slide__hero-pills { display: none; }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .overview-slide { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+  .overview-slide__hero p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .overview-slide__tile small { display: none; }
 }
 
 .overview-slide__hero,

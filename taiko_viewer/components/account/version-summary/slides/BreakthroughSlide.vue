@@ -71,6 +71,22 @@ const uiText = computed(() =>
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
   gap: 18px;
   align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .breakthrough-slide { grid-template-columns: minmax(0, 1fr) minmax(100px, 26vh); gap: 10px; }
+  .breakthrough-slide__banner { grid-column: 1 / 2; }
+  .breakthrough-slide__banner, .breakthrough-slide__metric, .breakthrough-slide__song { padding: 12px 14px; border-radius: 20px; }
+  .breakthrough-slide__banner small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .breakthrough-slide__song { grid-column: 2; grid-row: 1 / span 2; }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .breakthrough-slide { grid-template-columns: minmax(0, 1fr) minmax(86px, 26vw); }
+  .breakthrough-slide__cover { border-radius: 16px; }
+  .breakthrough-slide__song-meta span { display: none; }
 }
 
 .breakthrough-slide__banner,

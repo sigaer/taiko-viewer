@@ -69,6 +69,20 @@ const uiText = computed(() =>
   grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
   gap: 18px;
   align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .obsession-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 10px; }
+  .obsession-slide__metric { padding: 12px 14px; border-radius: 20px; }
+  .obsession-slide__metric small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .obsession-slide { grid-template-columns: minmax(94px, 28vw) minmax(0, 1fr); }
+  .obsession-slide__memory { grid-template-columns: 1fr; }
+  .obsession-slide__echoes { display: none; }
 }
 
 .obsession-slide__memory,

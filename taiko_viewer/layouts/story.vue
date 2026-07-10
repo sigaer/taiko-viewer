@@ -169,7 +169,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 22px;
+  padding: 12px 16px;
   pointer-events: none;
   transition:
     opacity 0.28s ease,
@@ -194,7 +194,7 @@ onMounted(() => {
   gap: 12px;
   text-decoration: none;
   color: inherit;
-  padding: 10px 14px;
+  padding: 7px 11px;
   border-radius: 999px;
   background: rgba(8, 17, 40, 0.48);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -203,9 +203,9 @@ onMounted(() => {
 }
 
 .story-shell__logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
   object-fit: contain;
 }
 

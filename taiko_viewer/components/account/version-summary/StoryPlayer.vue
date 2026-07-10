@@ -266,8 +266,16 @@ onBeforeUnmount(() => {
 
 @media (max-width: 720px) {
   .story-player.is-live {
-    --story-slide-top-padding: 1.2rem;
-    --story-slide-bottom-padding: calc(6.2rem + env(safe-area-inset-bottom, 0px));
+    --story-slide-top-padding: 0.8rem;
+    --story-slide-bottom-padding: calc(5.4rem + env(safe-area-inset-bottom, 0px));
   }
+}
+
+@media (max-width: 720px) and (max-height: 780px) {
+  .story-player.is-live {
+    --story-slide-top-padding: 0.45rem;
+    --story-slide-bottom-padding: calc(4.7rem + env(safe-area-inset-bottom, 0px));
+  }
+  .story-player__drawer-trigger { width: 42px; height: 42px; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
 }
 </style>

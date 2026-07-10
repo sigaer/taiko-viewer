@@ -56,6 +56,21 @@ const keywordLabel = computed(() => (locale.value === "ja" ? "キーワード" :
   grid-template-columns: minmax(260px, 0.88fr) minmax(0, 1.12fr);
   gap: 18px;
   align-items: center;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .final-title-slide { grid-template-columns: minmax(160px, 32vh) minmax(0, 1fr); gap: 10px; }
+  .final-title-slide__seal, .final-title-slide__panel { padding: 14px; border-radius: 22px; }
+  .final-title-slide__panel small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .final-title-slide { grid-template-columns: minmax(130px, 30vw) minmax(0, 1fr); }
+  .final-title-slide__seal { width: 100%; }
+  .final-title-slide__panel--mini { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .final-title-slide__panel--mini strong { margin-top: 0; }
 }
 
 .final-title-slide__seal,

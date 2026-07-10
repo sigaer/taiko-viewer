@@ -68,6 +68,19 @@ const uiText = computed(() => ({
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
   gap: 20px;
   align-items: end;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-height: 900px) {
+  .song-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 12px; }
+  .song-slide__panel, .song-slide__metric { padding: 12px 14px; border-radius: 20px; }
+  .song-slide__panel small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+@media (max-width: 520px) and (max-height: 900px) {
+  .song-slide { grid-template-columns: minmax(92px, 26vw) minmax(0, 1fr); }
+  .song-slide__chips { display: none; }
 }
 
 .song-slide__cover {

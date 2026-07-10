@@ -87,7 +87,24 @@ const uiText = computed(() =>
 <style scoped>
 .period-slide {
   display: grid;
+  height: 100%;
+  min-height: 0;
+  align-content: end;
   gap: 18px;
+}
+
+@media (max-height: 900px) {
+  .period-slide { gap: 10px; }
+  .period-slide__timeline { padding: 14px 16px; }
+  .period-slide__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .period-slide__card { min-height: 0; padding: 12px; }
+  .period-slide__timeline article strong, .period-slide__card strong { font-size: clamp(1.15rem, 2.2vw, 1.8rem); }
+}
+
+@media (max-width: 720px) and (max-height: 900px) {
+  .period-slide__timeline { grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr); gap: 8px; }
+  .period-slide__timeline i { width: 100%; }
+  .period-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .period-slide__timeline,

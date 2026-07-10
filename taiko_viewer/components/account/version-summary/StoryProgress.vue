@@ -100,7 +100,7 @@ const emit = defineEmits<{
 @media (max-width: 960px) {
   .story-progress {
     top: auto;
-    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -113,5 +113,10 @@ const emit = defineEmits<{
   .story-progress__label {
     display: none;
   }
+}
+
+@media (max-width: 720px) and (max-height: 780px) {
+  .story-progress { padding: 8px 10px; gap: 7px; }
+  .story-progress__dot { width: 10px; height: 10px; }
 }
 </style>

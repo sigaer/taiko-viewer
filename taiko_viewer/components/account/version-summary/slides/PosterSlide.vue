@@ -57,7 +57,7 @@ const uiText = computed(() =>
         </div>
 
         <div class="poster-slide__footer">
-              <div>
+          <div>
             <span>{{ uiText.finalTitle }}</span>
             <strong>{{ summary.poster.finalTitle }}</strong>
           </div>
@@ -70,13 +70,13 @@ const uiText = computed(() =>
             <strong>{{ summary.poster.keyword }}</strong>
           </div>
         </div>
-      </div>
 
-      <article class="poster-slide__closing" data-animate>
-        <span>{{ summary.poster.periodLabel }}</span>
-        <strong>{{ summary.poster.shareCopy }}</strong>
-        <small>{{ summary.poster.closingLine }}</small>
-      </article>
+        <article class="poster-slide__closing">
+          <span>{{ summary.poster.periodLabel }}</span>
+          <strong>{{ summary.poster.shareCopy }}</strong>
+          <small>{{ summary.poster.closingLine }}</small>
+        </article>
+      </div>
     </div>
   </StorySlideShell>
 </template>
@@ -84,7 +84,8 @@ const uiText = computed(() =>
 <style scoped>
 .poster-slide {
   display: grid;
-  gap: 18px;
+  height: 100%;
+  min-height: 0;
 }
 
 .poster-slide__board,
@@ -95,6 +96,10 @@ const uiText = computed(() =>
 }
 
 .poster-slide__board {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   padding: 26px;
   background:
     radial-gradient(circle at top right, rgba(255, 190, 96, 0.28), transparent 34%),
@@ -194,19 +199,23 @@ const uiText = computed(() =>
 }
 
 .poster-slide__closing {
-  padding: 22px 24px;
-  background: rgba(255, 255, 255, 0.08);
+  margin-top: auto;
+  padding: 14px 16px 0;
+  border: 0;
+  border-top: 1px solid rgba(85, 38, 23, 0.12);
+  border-radius: 0;
+  backdrop-filter: none;
 }
 
 .poster-slide__closing span {
-  color: rgba(255, 230, 196, 0.68);
+  color: rgba(85, 38, 23, 0.64);
 }
 
 .poster-slide__closing strong {
   display: block;
   margin-top: 10px;
-  color: #fff8ed;
-  font-size: clamp(1.8rem, 3.8vw, 3rem);
+  color: #552617;
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
   line-height: 1.12;
 }
 
@@ -214,6 +223,7 @@ const uiText = computed(() =>
   display: block;
   margin-top: 14px;
   color: rgba(255, 237, 214, 0.78);
+  color: rgba(85, 38, 23, 0.7);
 }
 
 @media (max-width: 720px) {
@@ -232,7 +242,7 @@ const uiText = computed(() =>
   }
 
   .poster-slide__board {
-    padding: 20px;
+    padding: 16px;
   }
 
   .poster-slide__board,
@@ -248,11 +258,32 @@ const uiText = computed(() =>
   .poster-slide__footer div:last-child {
     grid-column: 1 / -1;
   }
+
+  .poster-slide__board-head p,
+  .poster-slide__closing small { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 420px) and (min-height: 901px) {
   .poster-slide__facts {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-height: 900px) {
+  .poster-slide__board { padding: 16px; }
+  .poster-slide__board-head h3 { margin: 6px 0; font-size: clamp(1.8rem, 3.6vw, 3rem); }
+  .poster-slide__facts, .poster-slide__footer { gap: 8px; margin-top: 8px; }
+  .poster-slide__facts article, .poster-slide__footer div { padding: 10px; border-radius: 16px; }
+  .poster-slide__closing { margin-top: 8px; padding: 8px 10px 0; }
+  .poster-slide__closing small { margin-top: 6px; line-height: 1.4; }
+}
+
+@media (max-width: 720px) and (max-height: 780px) {
+  .poster-slide__cover-card { width: 62px; }
+  .poster-slide__hero { grid-template-columns: minmax(0, 1fr) 62px; }
+  .poster-slide__facts, .poster-slide__footer { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .poster-slide__footer div:last-child { grid-column: auto; }
+  .poster-slide__facts strong, .poster-slide__footer strong { font-size: 1rem; }
+  .poster-slide__closing small { display: none; }
 }
 </style>

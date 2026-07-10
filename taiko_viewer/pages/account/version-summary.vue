@@ -307,65 +307,44 @@ onBeforeUnmount(() => {
       />
 
       <section class="story-entry" :class="{ 'is-hidden': storyStarted }">
-        <div class="story-entry__main">
+        <div class="story-entry__board">
+          <button type="button" class="story-entry__settings" @click="drawerOpen = true">
+            {{ uiText.settings }}
+          </button>
           <p class="story-entry__eyebrow">虹2025 / {{ t("account.versionSummary") }}</p>
           <h1>{{ summary.copy.opening.title }}</h1>
           <p class="story-entry__lead">{{ summary.copy.opening.subtitle }}</p>
 
-          <div class="story-entry__actions">
-            <el-button type="primary" size="large" round @click="openStory">
-              {{ uiText.startStory }}
-            </el-button>
-            <el-button size="large" round @click="drawerOpen = true">
-              {{ uiText.settings }}
-            </el-button>
-          </div>
-
-          <div class="story-entry__chips">
-            <div class="story-entry__chip">
+          <div class="story-entry__identity">
+            <div>
               <span>{{ uiText.bindingLabel }}</span>
               <strong>{{ bindingPreviewText }}</strong>
             </div>
-            <div class="story-entry__chip">
+            <div>
               <span>{{ uiText.keywordLabel }}</span>
               <strong>{{ summary.finalTitle.title }}</strong>
             </div>
           </div>
-        </div>
 
-        <div class="story-entry__preview">
-          <article class="story-entry__poster">
-            <span>{{ uiText.summaryLabel }}</span>
-            <strong>{{ summary.version.name }}</strong>
-            <p>{{ summary.poster.periodLabel }}</p>
-            <div class="story-entry__poster-stats">
-              <div>
-                <span>{{ uiText.playCount }}</span>
-                <strong>{{ summary.overview.playCount }}</strong>
-              </div>
-              <div>
-                <span>{{ uiText.activeDays }}</span>
-                <strong>{{ summary.period.activeDays }}</strong>
-              </div>
-              <div>
-                <span>{{ uiText.uniqueSongs }}</span>
-                <strong>{{ summary.overview.uniqueSongs }}</strong>
-              </div>
+          <div class="story-entry__stats">
+            <div>
+              <span>{{ uiText.playCount }}</span>
+              <strong>{{ summary.overview.playCount }}</strong>
             </div>
-          </article>
+            <div>
+              <span>{{ uiText.activeDays }}</span>
+              <strong>{{ summary.period.activeDays }}</strong>
+            </div>
+            <div>
+              <span>{{ uiText.uniqueSongs }}</span>
+              <strong>{{ summary.overview.uniqueSongs }}</strong>
+            </div>
+          </div>
 
-          <article class="story-entry__favorite">
-            <el-image v-if="summary.favoriteSong" :src="summary.favoriteSong.coverUrl" fit="cover" class="story-entry__favorite-cover">
-              <template #error>
-                <div class="story-entry__favorite-cover story-entry__favorite-cover--fallback">{{ uiText.coverFallback }}</div>
-              </template>
-            </el-image>
-            <div class="story-entry__favorite-meta">
-              <span>{{ uiText.favoriteLabel }}</span>
-              <strong>{{ summary.favoriteSong?.name || summary.poster.favoriteSong }}</strong>
-              <small>{{ summary.copy.favoriteSong.body }}</small>
-            </div>
-          </article>
+          <button type="button" class="story-entry__drum-cta" @click="openStory">
+            <span>{{ summary.version.name }}</span>
+            <strong>{{ uiText.startStory }}</strong>
+          </button>
         </div>
       </section>
 
@@ -425,15 +404,14 @@ onBeforeUnmount(() => {
 }
 
 .story-entry {
-  width: min(1180px, calc(100vw - 24px));
-  min-height: 100vh;
-  min-height: 100svh;
+  width: min(980px, calc(100vw - 24px));
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   margin: 0 auto;
-  padding: 8.6rem 0 2rem;
+  padding: 7.4rem 0 1.4rem;
   display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(300px, 0.96fr);
-  gap: 22px;
-  align-items: center;
+  place-items: center;
   transition:
     opacity 0.35s ease,
     visibility 0.35s ease;
@@ -447,18 +425,19 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
-.story-entry__main,
-.story-entry__poster,
-.story-entry__favorite {
+.story-entry__board {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+  padding: clamp(22px, 4vw, 38px);
   border-radius: 34px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(18px);
   box-shadow: 0 28px 64px rgba(5, 10, 27, 0.36);
-}
-
-.story-entry__main {
-  padding: 32px 28px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(255, 190, 96, 0.16), transparent 32%),
+    rgba(255, 255, 255, 0.08);
 }
 
 .story-entry__eyebrow {
@@ -486,35 +465,24 @@ onBeforeUnmount(() => {
   font-size: 1.04rem;
 }
 
-.story-entry__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 26px;
-}
-
-.story-entry__actions :deep(.el-button) {
-  min-width: 180px;
-  min-height: 50px;
-}
-
-.story-entry__chips {
+.story-entry__identity {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  margin-top: 26px;
+  margin-top: 20px;
 }
 
-.story-entry__chip,
-.story-entry__poster,
-.story-entry__favorite {
-  padding: 20px 22px;
+.story-entry__identity > div,
+.story-entry__stats > div {
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.story-entry__chip span,
-.story-entry__poster span,
-.story-entry__favorite-meta span,
-.story-entry__poster-stats span {
+.story-entry__identity span,
+.story-entry__stats span {
   display: block;
   color: rgba(255, 230, 196, 0.68);
   letter-spacing: 0.14em;
@@ -522,118 +490,99 @@ onBeforeUnmount(() => {
   text-transform: uppercase;
 }
 
-.story-entry__chip strong,
-.story-entry__poster strong,
-.story-entry__favorite-meta strong,
-.story-entry__poster-stats strong {
+.story-entry__identity strong,
+.story-entry__stats strong {
   display: block;
   margin-top: 8px;
   color: #fff8ed;
   line-height: 1.12;
 }
 
-.story-entry__chip strong {
-  font-size: clamp(1.2rem, 2vw, 1.7rem);
+.story-entry__identity strong {
+  font-size: clamp(1rem, 2vw, 1.45rem);
+  overflow-wrap: anywhere;
 }
 
-.story-entry__preview {
-  display: grid;
-  gap: 16px;
-}
-
-.story-entry__poster {
-  background:
-    radial-gradient(circle at top right, rgba(255, 183, 98, 0.18), transparent 38%),
-    rgba(255, 255, 255, 0.08);
-}
-
-.story-entry__poster strong {
-  font-family: var(--viewer-display-font);
-  font-size: clamp(2rem, 4vw, 3.6rem);
-}
-
-.story-entry__poster p {
-  margin: 12px 0 0;
-  color: rgba(255, 237, 214, 0.78);
-}
-
-.story-entry__poster-stats {
+.story-entry__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.story-entry__poster-stats div {
-  padding: 14px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.story-entry__favorite {
-  display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-}
-
-.story-entry__favorite-cover {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 190, 104, 0.24), rgba(255, 116, 78, 0.28));
-}
-
-.story-entry__favorite-cover--fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 248, 237, 0.86);
-  font-family: var(--viewer-display-font);
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
-  letter-spacing: 0.08em;
-}
-
-.story-entry__favorite-meta strong {
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
-}
-
-.story-entry__favorite-meta small {
-  display: block;
+  gap: 10px;
   margin-top: 12px;
-  color: rgba(255, 237, 214, 0.76);
-  line-height: 1.82;
 }
 
-@media (max-width: 960px) {
-  .story-entry {
-    grid-template-columns: 1fr;
-  }
+.story-entry__stats strong {
+  font-size: clamp(1.3rem, 3vw, 2rem);
+}
+
+.story-entry__settings {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 9px 14px;
+  color: rgba(255, 243, 224, 0.82);
+  background: rgba(9, 17, 40, 0.32);
+  cursor: pointer;
+}
+
+.story-entry__drum-cta {
+  width: min(15.5rem, 46vw);
+  aspect-ratio: 1;
+  margin: 18px auto 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #6a1f15;
+  background: radial-gradient(circle at 50% 42%, #fff2ce 0 37%, #ffc574 62%, #ef6947 82%, #9f291e 100%);
+  box-shadow: inset 0 0 0 10px rgba(122, 28, 21, 0.38), 0 22px 50px rgba(4, 10, 28, 0.38);
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.story-entry__drum-cta span { font-size: 11px; letter-spacing: 0.18em; }
+.story-entry__drum-cta strong { font-family: var(--viewer-display-font); font-size: clamp(1.15rem, 2.8vw, 1.65rem); line-height: 1.18; }
+.story-entry__drum-cta:hover { transform: translateY(-3px) scale(1.015); filter: brightness(1.04); }
+.story-entry__drum-cta:active { transform: scale(0.98); }
+.story-entry__drum-cta:focus-visible,
+.story-entry__settings:focus-visible { outline: 3px solid #ffd083; outline-offset: 4px; }
+
+@media (max-height: 900px) {
+  .story-entry { padding-top: 6.7rem; }
+  .story-entry__lead { margin-top: 12px; line-height: 1.65; }
+  .story-entry__identity { margin-top: 14px; }
+  .story-entry__drum-cta { width: min(12.5rem, 40vw); margin-top: 12px; }
 }
 
 @media (max-width: 720px) {
   .story-entry {
     width: min(100vw - 16px, 100%);
-    padding-top: 7.6rem;
+    padding: 6.3rem 0 calc(12px + env(safe-area-inset-bottom, 0px));
   }
 
-  .story-entry__main,
-  .story-entry__poster,
-  .story-entry__favorite {
-    padding: 18px;
-    border-radius: 28px;
-  }
+  .story-entry__board { padding: 20px 16px 16px; border-radius: 28px; }
+  .story-entry h1 { font-size: clamp(2.35rem, 12vw, 4rem); padding-right: 4rem; }
+  .story-entry__lead { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .story-entry__identity { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .story-entry__identity > div, .story-entry__stats > div { padding: 10px; border-radius: 16px; }
+  .story-entry__identity span, .story-entry__stats span { font-size: 10px; }
+  .story-entry__drum-cta { width: min(11.5rem, 45vw); }
+}
 
-  .story-entry__chips,
-  .story-entry__poster-stats,
-  .story-entry__favorite {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 720px) and (max-height: 780px) {
+  .story-entry { padding-top: 5.5rem; }
+  .story-entry__eyebrow { margin-bottom: 7px; }
+  .story-entry__lead { margin-top: 8px; -webkit-line-clamp: 1; }
+  .story-entry__identity { margin-top: 9px; }
+  .story-entry__stats { margin-top: 7px; }
+  .story-entry__drum-cta { width: min(9.5rem, 38vw); margin-top: 8px; padding: 18px; }
+}
 
-  .story-entry__actions :deep(.el-button) {
-    width: 100%;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .story-entry__drum-cta { transition: none; }
 }
 </style>
