@@ -252,6 +252,7 @@
     "register": "注册",
     "forgotPassword": "找回密码",
     "sync": "多端同步",
+    "versionSummary": "虹2025 / 版本总结",
     "songs": "歌曲数据",
     "developer": "开发者权限",
     "developerReview": "开发者审批",
@@ -432,6 +433,9 @@
       },
       "sync": {
         "desc": "绑定鼓众 ID 后提交同步请求，服务端会从鼓众广场拉取当前绑定 ID 的 userdata，并压缩分发到选中的服务目标。"
+      },
+      "versionSummary": {
+        "desc": "登录后查看当前绑定鼓众 ID 的私有 8 页版虹2025版本总结，按事件时间汇总本版本游玩记录。"
       },
       "songs": {
         "desc": "直接查看并维护当前绑定 ID 的本地歌曲成绩数据。"
