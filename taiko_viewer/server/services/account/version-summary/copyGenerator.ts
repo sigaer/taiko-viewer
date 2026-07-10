@@ -330,7 +330,8 @@ export const buildVersionSummaryPresentation = (
   favoriteSong: VersionSummarySongCard | null,
   obsessionSong: VersionSummarySongCard | null,
   keyword: VersionSummaryKeyword | null,
-  breakthroughSong: VersionSummarySongCard | null
+  breakthroughSong: VersionSummarySongCard | null,
+  hasRatingRank = false
 ) => {
   const estimatedTimeText = formatDuration(locale, summary.overview.estimatedSeconds);
   const keywordTitle = keyword?.title || KEYWORD_TITLES[locale].encouragement;
@@ -417,6 +418,41 @@ export const buildVersionSummaryPresentation = (
           ? "まだ、何度も帰りたくなる一曲は固まっていません。"
           : "当前还看不出反复惦记同一首歌的轨迹。"
     },
+    favoriteShift: {
+      eyebrow: locale === "ja" ? "新旧の旋律" : "新欢与旧爱",
+      title: locale === "ja" ? "好きな曲にも、季節がある" : "喜欢的旋律，也会换季",
+      body: locale === "ja" ? "版の始まりと終わりで、手が伸びる曲が変わりました。" : "从版本初期到最近，你最常回去的旋律已经悄悄改变。"
+    },
+    monthlyFavorites: {
+      eyebrow: locale === "ja" ? "月ごとの BGM" : "月度最爱",
+      title: locale === "ja" ? "毎月に、一曲ずつ残った" : "每个月，都留下了一首 BGM",
+      body: locale === "ja" ? "よく叩いた曲を並べると、この版の時間軸が見えてきます。" : "把每个月最常打的歌排在一起，就是这一版最真实的时间轴。"
+    },
+    weekdayActivity: {
+      eyebrow: locale === "ja" ? "一週間のリズム" : "每周太鼓",
+      title: locale === "ja" ? "曜日にも、叩き方の癖がある" : "你把时间，更多留给了某一天",
+      body: locale === "ja" ? "七日分の鼓点を、ひとつの拍子に並べました。" : "七天的鼓点排在一起，生活里的节奏也有了形状。"
+    },
+    calendarActivity: {
+      eyebrow: locale === "ja" ? "太鼓カレンダー" : "太鼓日历",
+      title: locale === "ja" ? "叩いた日が、鼓面を灯す" : "你敲过的日子，正在鼓面上发光",
+      body: locale === "ja" ? "濃い光ほど、その日のプレイ回数が多かった印です。" : "光越亮，代表那一天留在鼓面上的次数越多。"
+    },
+    timeOfDay: {
+      eyebrow: locale === "ja" ? "一日の拍子" : "活跃时段",
+      title: locale === "ja" ? "あなたの鼓点が鳴る時間" : "属于你的鼓点，常在这个时刻响起",
+      body: locale === "ja" ? "一日を四つに分けると、いつ太鼓に戻るかが見えてきます。" : "把一天切成四段，就能看见你最常回到太鼓前的时刻。"
+    },
+    lateNight: {
+      eyebrow: locale === "ja" ? "午前零時のあと" : "深夜记录",
+      title: locale === "ja" ? "街が静まっても、鼓点は残った" : "城市睡着以后，你还留过一段鼓声",
+      body: locale === "ja" ? "午前 0 時から 5 時までに残った、夜更けの記録です。" : "这是凌晨零点到五点之间，只有夜色听见的记录。"
+    },
+    ratingRank: {
+      eyebrow: locale === "ja" ? "サイト内プレイヤー標本" : "站内玩家样本",
+      title: locale === "ja" ? "今の実力がいる場所" : "你的当前实力，在这里留下坐标",
+      body: locale === "ja" ? "これは公式順位ではなく、サイト内データを使った taikob20 の標本順位です。" : "这不是官方全服排名，而是基于站内玩家数据计算的 taikob20 样本位置。"
+    },
     keyword: {
       eyebrow: locale === "ja" ? "太鼓キーワード" : "太鼓关键词",
       title: keyword?.title || KEYWORD_TITLES[locale].encouragement,
@@ -450,14 +486,26 @@ export const buildVersionSummaryPresentation = (
     }
   };
 
+  const pageKeys = ["opening", "period", "overview", "favorite"];
+  if (summary.obsessionSong) pageKeys.push("obsession");
+  if (summary.favoriteShift) pageKeys.push("favoriteShift");
+  if (summary.monthlyFavorites?.length) pageKeys.push("monthly");
+  if (summary.weekdayActivity?.totalPlays) pageKeys.push("weekday");
+  if (summary.calendarActivity?.days?.length) pageKeys.push("calendar");
+  if (summary.timeOfDay?.totalPlays) pageKeys.push("timeOfDay");
+  if (summary.lateNight) pageKeys.push("lateNight");
+  if (summary.keyword) pageKeys.push("keyword");
+  if (hasRatingRank) pageKeys.push("ratingRank");
+  pageKeys.push("breakthrough", "final", "poster");
+
   return {
     estimatedTimeText,
     breakthrough,
     finalTitle,
     poster,
     story: {
-      pageCount: 9,
-      pageKeys: ["opening", "period", "overview", "favorite", "obsession", "keyword", "breakthrough", "final", "poster"]
+      pageCount: pageKeys.length,
+      pageKeys
     },
     copy
   };

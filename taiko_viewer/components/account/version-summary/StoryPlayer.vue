@@ -10,6 +10,7 @@ import KeywordSlide from "./slides/KeywordSlide.vue";
 import BreakthroughSlide from "./slides/BreakthroughSlide.vue";
 import FinalTitleSlide from "./slides/FinalTitleSlide.vue";
 import PosterSlide from "./slides/PosterSlide.vue";
+import ActivitySlide from "./slides/ActivitySlide.vue";
 import StoryProgress from "./StoryProgress.vue";
 
 const props = defineProps<{
@@ -30,17 +31,53 @@ let motionMedia: MediaQueryList | null = null;
 let updateMotionHandler: ((event: MediaQueryListEvent) => void) | null = null;
 let scrollFrame = 0;
 
-const slides = [
-  { key: "opening", component: OpeningSlide },
-  { key: "period", component: PeriodSlide },
-  { key: "overview", component: OverviewSlide },
-  { key: "favorite", component: FavoriteSongSlide },
-  { key: "obsession", component: ObsessionSongSlide },
-  { key: "keyword", component: KeywordSlide },
-  { key: "breakthrough", component: BreakthroughSlide },
-  { key: "final", component: FinalTitleSlide },
-  { key: "poster", component: PosterSlide }
-] as const;
+const slideRegistry: Record<string, { component: typeof OpeningSlide | typeof ActivitySlide; kind?: string }> = {
+  opening: { component: OpeningSlide }, period: { component: PeriodSlide }, overview: { component: OverviewSlide },
+  favorite: { component: FavoriteSongSlide }, obsession: { component: ObsessionSongSlide },
+  favoriteShift: { component: ActivitySlide, kind: "favoriteShift" }, monthly: { component: ActivitySlide, kind: "monthly" },
+  weekday: { component: ActivitySlide, kind: "weekday" }, calendar: { component: ActivitySlide, kind: "calendar" },
+  timeOfDay: { component: ActivitySlide, kind: "timeOfDay" }, lateNight: { component: ActivitySlide, kind: "lateNight" },
+  ratingRank: { component: ActivitySlide, kind: "ratingRank" }, keyword: { component: KeywordSlide },
+  breakthrough: { component: BreakthroughSlide }, final: { component: FinalTitleSlide }, poster: { component: PosterSlide }
+};
+const slides = computed(() => props.summary.story.pageKeys.flatMap((key) => slideRegistry[key] ? [{ key, ...slideRegistry[key] }] : []));
+
+const soundEnabled = ref(false);
+let audioContext: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let ambienceTimer: ReturnType<typeof setInterval> | null = null;
+const ensureAudio = () => {
+  if (audioContext) return;
+  const AudioCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtor) return;
+  audioContext = new AudioCtor();
+  masterGain = audioContext.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(audioContext.destination);
+};
+const playTone = (frequency: number, duration: number, volume: number, type: OscillatorType = "sine") => {
+  if (!audioContext || !masterGain || !soundEnabled.value) return;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = type; oscillator.frequency.value = frequency;
+  gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(volume, audioContext.currentTime + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+  oscillator.connect(gain); gain.connect(masterGain); oscillator.start(); oscillator.stop(audioContext.currentTime + duration + 0.02);
+};
+const startAmbience = () => {
+  if (ambienceTimer) clearInterval(ambienceTimer);
+  const notes = [220, 261.63, 293.66, 392]; let index = 0;
+  playTone(notes[index], 2.8, 0.025);
+  ambienceTimer = setInterval(() => { index = (index + 1) % notes.length; playTone(notes[index], 2.8, 0.025); }, 2400);
+};
+const toggleSound = async () => {
+  ensureAudio(); if (!audioContext || !masterGain) return;
+  await audioContext.resume(); soundEnabled.value = !soundEnabled.value;
+  localStorage.setItem("version-summary-sound", soundEnabled.value ? "1" : "0");
+  masterGain.gain.setTargetAtTime(soundEnabled.value ? 0.32 : 0, audioContext.currentTime, 0.08);
+  if (soundEnabled.value) startAmbience(); else if (ambienceTimer) { clearInterval(ambienceTimer); ambienceTimer = null; }
+};
 
 const progressItems = computed(() => {
   const labels =
@@ -51,6 +88,7 @@ const progressItems = computed(() => {
           overview: "総覧",
           favorite: "最愛",
           obsession: "余韻",
+          favoriteShift: "新旧", monthly: "月別", weekday: "週間", calendar: "暦", timeOfDay: "時間", lateNight: "深夜", ratingRank: "RT",
           keyword: "キーワード",
           breakthrough: "突破",
           final: "称号",
@@ -62,6 +100,7 @@ const progressItems = computed(() => {
           overview: "总览",
           favorite: "最爱",
           obsession: "回响",
+          favoriteShift: "新旧", monthly: "月度", weekday: "星期", calendar: "日历", timeOfDay: "时段", lateNight: "深夜", ratingRank: "RT",
           keyword: "关键词",
           breakthrough: "突破",
           final: "称号",
@@ -85,7 +124,7 @@ const syncActiveIndex = () => {
     const container = containerRef.value;
     if (!container) return;
     const index = Math.round(container.scrollTop / Math.max(container.clientHeight, 1));
-    activeIndex.value = Math.max(0, Math.min(slides.length - 1, index));
+    activeIndex.value = Math.max(0, Math.min(slides.value.length - 1, index));
   });
 };
 
@@ -114,7 +153,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   if (event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ") {
     event.preventDefault();
-    goToPage(Math.min(activeIndex.value + 1, slides.length - 1));
+    goToPage(Math.min(activeIndex.value + 1, slides.value.length - 1));
   }
   if (event.key === "ArrowUp" || event.key === "PageUp") {
     event.preventDefault();
@@ -126,7 +165,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
   if (event.key === "End") {
     event.preventDefault();
-    goToPage(slides.length - 1);
+    goToPage(slides.value.length - 1);
   }
 };
 
@@ -134,6 +173,12 @@ watch(
   () => props.started,
   async (started) => {
     if (!started) return;
+    ensureAudio();
+    if (soundEnabled.value && audioContext && masterGain) {
+      await audioContext.resume();
+      masterGain.gain.setValueAtTime(0.32, audioContext.currentTime);
+      startAmbience();
+    }
     activeIndex.value = 0;
     await nextTick();
     containerRef.value?.focus();
@@ -150,6 +195,10 @@ watch(
   }
 );
 
+watch(activeIndex, (value, oldValue) => {
+  if (value !== oldValue && soundEnabled.value) playTone(92, 0.18, 0.16, "triangle");
+});
+
 onMounted(() => {
   motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
   reducedMotion.value = motionMedia.matches;
@@ -158,6 +207,7 @@ onMounted(() => {
   };
   motionMedia.addEventListener("change", updateMotionHandler);
   window.addEventListener("keydown", handleKeydown);
+  soundEnabled.value = localStorage.getItem("version-summary-sound") === "1";
 });
 
 onBeforeUnmount(() => {
@@ -168,6 +218,8 @@ onBeforeUnmount(() => {
     motionMedia.removeEventListener("change", updateMotionHandler);
   }
   window.removeEventListener("keydown", handleKeydown);
+  if (ambienceTimer) clearInterval(ambienceTimer);
+  audioContext?.close();
 });
 </script>
 
@@ -177,6 +229,9 @@ onBeforeUnmount(() => {
       <span></span>
       <span></span>
       <span></span>
+    </button>
+    <button v-if="started" type="button" class="story-player__sound-trigger" :aria-pressed="soundEnabled" :aria-label="soundEnabled ? '关闭声音' : '开启声音'" @click="toggleSound">
+      {{ soundEnabled ? "♪" : "♩̸" }}
     </button>
 
     <StoryProgress v-if="started" :items="progressItems" :active-index="activeIndex" :aria-label="progressAriaLabel" @select="goToPage" />
@@ -188,6 +243,7 @@ onBeforeUnmount(() => {
         :key="slide.key"
         :ref="(element: Element | null) => setSlideRef(index, element)"
         :summary="summary"
+        v-bind="slide.kind ? { kind: slide.kind } : {}"
         :page-index="index"
         :page-total="slides.length"
         :active="activeIndex === index"
@@ -248,6 +304,8 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
+.story-player__sound-trigger{position:fixed;top:24px;right:82px;z-index:16;width:48px;height:48px;border-radius:50%;border:1px solid #ffffff1a;background:#09112870;color:#fff4df;backdrop-filter:blur(16px);font-size:20px;cursor:pointer}.story-player__sound-trigger:focus-visible,.story-player__drawer-trigger:focus-visible{outline:2px solid #f6c86e;outline-offset:3px}
+
 .story-player__drawer-trigger span {
   display: block;
   width: 18px;
@@ -262,6 +320,7 @@ onBeforeUnmount(() => {
     bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     right: 18px;
   }
+  .story-player__sound-trigger{top:auto;bottom:calc(86px + env(safe-area-inset-bottom, 0px));right:76px}
 }
 
 @media (max-width: 720px) {

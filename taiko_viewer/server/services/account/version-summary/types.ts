@@ -7,6 +7,15 @@ export type RawVersionSummarySong = {
   activeDays?: number;
 };
 
+export type RawVersionSummaryActivity = {
+  favoriteShift: { oldFavorite: RawVersionSummarySong; newFavorite: RawVersionSummarySong } | null;
+  monthlyFavorites: Array<{ month: string; playCount: number; song: RawVersionSummarySong }>;
+  weekdayActivity: { counts: number[]; topWeekday: number; totalPlays: number } | null;
+  calendarActivity: { days: Array<{ date: string; playCount: number }>; maxPlayCount: number } | null;
+  timeOfDay: { periods: Record<string, number>; topPeriod: string; totalPlays: number } | null;
+  lateNight: { playCount: number; latestAt: string; song: RawVersionSummarySong } | null;
+};
+
 export type RawVersionSummaryKeyword = {
   dimensionKey: string;
   titleKey: string;
@@ -24,7 +33,7 @@ export type RawVersionSummaryBreakthrough = {
   playDelta: number;
 };
 
-export type RawVersionSummary = {
+export type RawVersionSummary = RawVersionSummaryActivity & {
   schemaVersion: number;
   summaryId: string;
   generatedAt: string;

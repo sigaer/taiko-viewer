@@ -1,5 +1,5 @@
 import { constants as fsConstants } from "node:fs";
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { createError } from "h3";
 import type {
@@ -22,7 +22,7 @@ import { buildVersionSummaryPresentation, getVersionSummaryDimensionLabel, getVe
 import type { RawVersionSummary, RawVersionSummarySong, VersionSummaryLocale } from "./types";
 import { listVersionSummaryWindows, resolveVersionSummaryWindow, type VersionSummaryWindow } from "./versionWindows";
 
-const VERSION_SUMMARY_CACHE_SCHEMA = 2;
+const VERSION_SUMMARY_CACHE_SCHEMA = 3;
 const COVER_FALLBACK_ID = 1384;
 const PYTHON_FALLBACK_MESSAGES = {
   missingHistory: "当前绑定还没有覆盖该版本范围的历史快照，请先同步更多历史数据后再查看版本总结。",
@@ -100,7 +100,7 @@ const extractExecErrorMessage = (error: unknown) => {
   return stderr.trim() || stdout.trim() || String(payload.message || "").trim();
 };
 
-const mapPythonError = (message: string) => {
+const mapPythonError = (message: string): never => {
   if (/no snapshots available|no snapshots in version window/i.test(message)) {
     throw createError({
       statusCode: 404,
@@ -113,8 +113,9 @@ const mapPythonError = (message: string) => {
   });
 };
 
-const runVersionSummaryPython = async (taikoId: string, version: VersionSummaryWindow) => {
-  const { repoRoot, userdataDir, songDataPath, configPath } = getRuntimePaths();
+const runVersionSummaryPython = async (taikoId: string, version: VersionSummaryWindow): Promise<RawVersionSummary> => {
+  const { repoRoot, userdataDir, configPath } = getRuntimePaths();
+  const songDataPath = resolve(repoRoot, "songs", "song_data.json");
   const runtimeConfig = useRuntimeConfig();
   const ratingPath = String(
     runtimeConfig.ratingStructPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(repoRoot, "songs", "rating_structured_with_ids.json")
@@ -154,7 +155,7 @@ const runVersionSummaryPython = async (taikoId: string, version: VersionSummaryW
     if (error && typeof error === "object" && "statusCode" in error) {
       throw error;
     }
-    mapPythonError(extractExecErrorMessage(error));
+    return mapPythonError(extractExecErrorMessage(error));
   }
 };
 
@@ -169,7 +170,7 @@ const runTaikob20KeywordPython = async (taikoId: string) => {
     "from contextlib import redirect_stdout",
     "from io import StringIO",
     "from pathlib import Path",
-    "from plugins.utils.score_calculator import compute_all_from_userdata_records, compute_dim_topN_means",
+    "from plugins.utils.score_calculator import compute_all_from_userdata_records, compute_dim_topN_means, aggregate_topn_value_fn",
     "import json, sys",
     "userdata_path = Path(sys.argv[1])",
     "payload = json.loads(userdata_path.read_text(encoding='utf-8'))",
@@ -194,6 +195,7 @@ const runTaikob20KeywordPython = async (taikoId: string) => {
     "        'dimensionKey': dimension_key,",
     "        'score': radar[dimension_key],",
     "        'radarValues': radar,",
+    "        'rating': round(float(aggregate_topn_value_fn(results, 'AI_rating', 20)), 4),",
     "    }, ensure_ascii=False))"
   ].join("\n");
 
@@ -215,11 +217,91 @@ const runTaikob20KeywordPython = async (taikoId: string) => {
       dimensionKey: string;
       score: number;
       radarValues: Record<string, number>;
+      rating: number;
     };
   } catch (error) {
     console.warn("[version-summary] failed to compute taikob20 keyword profile", extractExecErrorMessage(error));
     return null;
   }
+};
+
+type RatingDistributionCache = {
+  fingerprint: string;
+  generatedAt: string;
+  ratings: Array<{ taikoId: string; rating: number }>;
+};
+
+const getRatingDistribution = async (): Promise<RatingDistributionCache | null> => {
+  const { repoRoot, userdataDir, cacheDir, configPath } = getRuntimePaths();
+  const names = (await readdir(userdataDir)).filter((name) => /^\d+data\.json$/.test(name)).sort();
+  if (names.length < 20) return null;
+  const latestStats = await Promise.all(names.map((name) => stat(resolve(userdataDir, name))));
+  const fingerprint = `${names.length}:${Math.max(...latestStats.map((item) => item.mtimeMs), 0)}`;
+  const cachePath = join(cacheDir, "version-summary", "rating-distribution.json");
+  try {
+    const cached = JSON.parse(await readFile(cachePath, "utf-8")) as RatingDistributionCache;
+    if (cached.fingerprint === fingerprint && cached.ratings?.length >= 20) return cached;
+  } catch {}
+
+  const runtimeConfig = useRuntimeConfig();
+  const ratingPath = String(runtimeConfig.ratingStructPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(repoRoot, "songs", "rating_structured_with_ids.json"));
+  const pythonCode = [
+    "from contextlib import redirect_stdout",
+    "from io import StringIO",
+    "from pathlib import Path",
+    "from plugins.utils.score_calculator import compute_all_from_userdata_records, aggregate_topn_value_fn",
+    "import json, sys",
+    "root = Path(sys.argv[1])",
+    "rows = []",
+    "for path in sorted(root.glob('*data.json')):",
+    "    try:",
+    "        payload = json.loads(path.read_text(encoding='utf-8'))",
+    "        records = payload.get('songs', []) if isinstance(payload, dict) else payload",
+    "        with redirect_stdout(StringIO()):",
+    "            results = compute_all_from_userdata_records(records or [], json_path=sys.argv[2])",
+    "            value = float(aggregate_topn_value_fn(results, 'AI_rating', 20)) if results else 0",
+    "        if value > 0: rows.append({'taikoId': path.name[:-9], 'rating': round(value, 4)})",
+    "    except Exception:",
+    "        continue",
+    "sys.stdout.write(json.dumps(rows, ensure_ascii=False))"
+  ].join("\n");
+  try {
+    const result = await execFileAsync("python3", ["-c", pythonCode, userdataDir, ratingPath], {
+      cwd: repoRoot,
+      env: { ...process.env, TAIKO_CONFIG_PATH: configPath },
+      encoding: "utf-8",
+      timeout: 180_000,
+      maxBuffer: 32 * 1024 * 1024
+    });
+    const ratings = JSON.parse(String(result.stdout || "[]")) as RatingDistributionCache["ratings"];
+    if (ratings.length < 20) return null;
+    const payload = { fingerprint, generatedAt: new Date().toISOString(), ratings };
+    await mkdir(dirname(cachePath), { recursive: true });
+    await writeFile(cachePath, JSON.stringify(payload), "utf-8");
+    return payload;
+  } catch (error) {
+    console.warn("[version-summary] failed to build rating distribution", extractExecErrorMessage(error));
+    return null;
+  }
+};
+
+const buildRatingRank = async (taikoId: string, rating: number | undefined) => {
+  if (!rating || rating <= 0) return null;
+  const distribution = await getRatingDistribution();
+  if (!distribution) return null;
+  const sorted = [...distribution.ratings].sort((a, b) => b.rating - a.rating);
+  const exact = sorted.findIndex((item) => item.taikoId === taikoId);
+  const rank = exact >= 0 ? exact + 1 : sorted.filter((item) => item.rating > rating).length + 1;
+  const percentile = Math.max(0, Math.min(100, ((sorted.length - rank + 1) / sorted.length) * 100));
+  const top = 100 - percentile;
+  return {
+    rating,
+    rank,
+    sampleSize: sorted.length,
+    percentile: Number(percentile.toFixed(1)),
+    tier: top <= 1 ? "top1" : top <= 5 ? "top5" : top <= 20 ? "top20" : top <= 50 ? "top50" : "growing",
+    generatedAt: distribution.generatedAt
+  };
 };
 
 const ensureBindingWithUserdata = async (userId: number) => {
@@ -378,7 +460,8 @@ const buildTaikob20Keyword = async (locale: VersionSummaryLocale, taikoId: strin
     title,
     score: Number(raw.score || 0),
     radarValues: raw.radarValues || {},
-    body
+    body,
+    rating: Number(raw.rating || 0)
   };
 };
 
@@ -394,6 +477,7 @@ const buildViewModel = async (
   const obsessionSong = buildSongCard(locale, raw.obsessionSong, songMap);
   const keyword = buildKeyword(locale, raw.keyword);
   const keywordProfile = await buildTaikob20Keyword(locale, taikoId);
+  const ratingRank = await buildRatingRank(taikoId, Number((keywordProfile as (VersionSummaryKeyword & { rating?: number }) | null)?.rating));
   const breakthroughSong =
     raw.breakthrough.songNo && raw.breakthrough.songNo > 0
       ? buildSongCard(
@@ -414,8 +498,43 @@ const buildViewModel = async (
     favoriteSong,
     obsessionSong,
     keyword,
-    breakthroughSong
+    breakthroughSong,
+    Boolean(ratingRank)
   );
+  const favoriteShift = raw.favoriteShift
+    ? {
+        oldFavorite: buildSongCard(locale, raw.favoriteShift.oldFavorite, songMap)!,
+        newFavorite: buildSongCard(locale, raw.favoriteShift.newFavorite, songMap)!
+      }
+    : null;
+  const monthlyFavorites = (raw.monthlyFavorites || []).flatMap((item) => {
+    const song = buildSongCard(locale, item.song, songMap);
+    if (!song) return [];
+    const [year, month] = item.month.split("-");
+    return [{ ...item, monthLabel: locale === "ja" ? `${year}年${Number(month)}月` : `${year} 年 ${Number(month)} 月`, song }];
+  });
+  const weekdayLabels = locale === "ja" ? ["月", "火", "水", "木", "金", "土", "日"] : ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+  const weekdayActivity = raw.weekdayActivity
+    ? { ...raw.weekdayActivity, labels: weekdayLabels, topLabel: weekdayLabels[raw.weekdayActivity.topWeekday] || weekdayLabels[0] }
+    : null;
+  const calendarActivity = raw.calendarActivity
+    ? { ...raw.calendarActivity, days: raw.calendarActivity.days.map((day) => ({ ...day, intensity: raw.calendarActivity!.maxPlayCount ? day.playCount / raw.calendarActivity!.maxPlayCount : 0 })) }
+    : null;
+  const periodLabels = locale === "ja"
+    ? { dawn: "深夜", morning: "午前", afternoon: "午後", night: "夜" }
+    : { dawn: "凌晨", morning: "上午", afternoon: "下午", night: "晚间" };
+  const timeOfDay = raw.timeOfDay
+    ? {
+        topPeriod: raw.timeOfDay.topPeriod,
+        topLabel: periodLabels[raw.timeOfDay.topPeriod as keyof typeof periodLabels] || raw.timeOfDay.topPeriod,
+        totalPlays: raw.timeOfDay.totalPlays,
+        periods: Object.entries(raw.timeOfDay.periods).map(([key, playCount]) => ({ key, label: periodLabels[key as keyof typeof periodLabels] || key, playCount }))
+      }
+    : null;
+  const lateNightSong = raw.lateNight ? buildSongCard(locale, raw.lateNight.song, songMap) : null;
+  const lateNight = raw.lateNight && lateNightSong
+    ? { ...raw.lateNight, latestLabel: new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "zh-CN", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Shanghai" }).format(new Date(raw.lateNight.latestAt)), song: lateNightSong }
+    : null;
 
   return {
     summaryId: raw.summaryId,
@@ -430,6 +549,13 @@ const buildViewModel = async (
     },
     favoriteSong,
     obsessionSong,
+    favoriteShift,
+    monthlyFavorites,
+    weekdayActivity,
+    calendarActivity,
+    timeOfDay,
+    lateNight,
+    ratingRank,
     keyword,
     keywordProfile,
     breakthrough: presentation.breakthrough,

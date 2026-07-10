@@ -34,6 +34,7 @@ export type VersionSummaryKeyword = {
   score: number;
   radarValues: Record<string, number>;
   body: string;
+  rating?: number;
 };
 
 export type VersionSummaryBreakthrough = {
@@ -72,6 +73,27 @@ export type VersionSummaryPoster = {
 export type VersionSummaryStory = {
   pageCount: number;
   pageKeys: string[];
+};
+
+export type VersionSummaryFavoriteShift = {
+  oldFavorite: VersionSummarySongCard;
+  newFavorite: VersionSummarySongCard;
+};
+
+export type VersionSummaryMonthlyFavorite = {
+  month: string;
+  monthLabel: string;
+  playCount: number;
+  song: VersionSummarySongCard;
+};
+
+export type VersionSummaryRatingRank = {
+  rating: number;
+  rank: number;
+  sampleSize: number;
+  percentile: number;
+  tier: string;
+  generatedAt: string;
 };
 
 export type VersionSummaryCopyBlock = {
@@ -114,6 +136,13 @@ export type VersionSummaryViewModel = {
   };
   favoriteSong: VersionSummarySongCard | null;
   obsessionSong: VersionSummarySongCard | null;
+  favoriteShift: VersionSummaryFavoriteShift | null;
+  monthlyFavorites: VersionSummaryMonthlyFavorite[];
+  weekdayActivity: { counts: number[]; labels: string[]; topWeekday: number; topLabel: string; totalPlays: number } | null;
+  calendarActivity: { days: Array<{ date: string; playCount: number; intensity: number }>; maxPlayCount: number } | null;
+  timeOfDay: { periods: Array<{ key: string; label: string; playCount: number }>; topPeriod: string; topLabel: string; totalPlays: number } | null;
+  lateNight: { playCount: number; latestAt: string; latestLabel: string; song: VersionSummarySongCard } | null;
+  ratingRank: VersionSummaryRatingRank | null;
   keyword: VersionSummaryKeyword | null;
   keywordProfile: VersionSummaryKeyword | null;
   breakthrough: VersionSummaryBreakthrough;
@@ -130,6 +159,13 @@ export type VersionSummaryViewModel = {
     overview: VersionSummaryCopyBlock;
     favoriteSong: VersionSummaryCopyBlock;
     obsessionSong: VersionSummaryCopyBlock;
+    favoriteShift: VersionSummaryCopyBlock;
+    monthlyFavorites: VersionSummaryCopyBlock;
+    weekdayActivity: VersionSummaryCopyBlock;
+    calendarActivity: VersionSummaryCopyBlock;
+    timeOfDay: VersionSummaryCopyBlock;
+    lateNight: VersionSummaryCopyBlock;
+    ratingRank: VersionSummaryCopyBlock;
     keyword: VersionSummaryCopyBlock;
     breakthrough: VersionSummaryCopyBlock;
     finalTitle: VersionSummaryCopyBlock;
