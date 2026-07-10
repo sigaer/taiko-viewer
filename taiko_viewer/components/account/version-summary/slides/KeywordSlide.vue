@@ -144,14 +144,11 @@ const formatValue = (value: number) => value.toFixed(1);
   .keyword-slide__hero, .keyword-slide__bar { padding: 12px 14px; border-radius: 20px; }
   .keyword-slide__hero-radar { max-height: min(30vh, 230px); }
   .keyword-slide__bars { gap: 7px; }
-  .keyword-slide__bar:nth-child(n + 5) { display: none; }
 }
 
 @media (max-width: 720px) and (max-height: 900px) {
   .keyword-slide { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); }
   .keyword-slide__hero-meta { grid-template-columns: 1fr; }
-  .keyword-slide__chips { display: none; }
-  .keyword-slide__bar:nth-child(n + 4) { display: none; }
 }
 
 .keyword-slide__hero,
@@ -167,7 +164,7 @@ const formatValue = (value: number) => value.toFixed(1);
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .keyword-slide__hero-copy {
@@ -300,5 +297,26 @@ const formatValue = (value: number) => value.toFixed(1);
   .keyword-slide__metric {
     padding: 14px 16px;
   }
+}
+
+@media (max-width: 720px) {
+  .keyword-slide { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 6px; align-content: start; }
+  .keyword-slide__hero { grid-template-columns: minmax(118px, 0.9fr) minmax(0, 1.1fr); grid-template-rows: auto auto; gap: 5px 8px; padding: 8px 10px; border-radius: 16px; overflow: visible; }
+  .keyword-slide__hero-copy { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+  .keyword-slide__hero-copy span { font-size: 8px; }
+  .keyword-slide__hero-copy strong { font-size: 1rem; }
+  .keyword-slide__hero-copy small { font-size: 0.68rem; }
+  .keyword-slide__hero-radar { max-height: none; min-height: 0; overflow: visible; }
+  .keyword-slide__hero-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; gap: 5px; }
+  .keyword-slide__metric { padding: 6px 7px; border-radius: 12px; }
+  .keyword-slide__metric span { font-size: 8px; }
+  .keyword-slide__metric strong { margin-top: 3px; font-size: 0.9rem; overflow-wrap: anywhere; }
+  .keyword-slide__chips { grid-column: 1 / -1; display: flex; gap: 3px; }
+  .keyword-slide__chips span { padding: 3px 5px; font-size: 7px; }
+  .keyword-slide__bars { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+  .keyword-slide__bar { display: block; padding: 7px 8px; border-radius: 13px; }
+  .keyword-slide__bar-head { margin-bottom: 5px; }
+  .keyword-slide__bar-head span, .keyword-slide__bar-head strong { font-size: 9px; }
+  .keyword-slide__track { height: 5px; }
 }
 </style>

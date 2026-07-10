@@ -215,4 +215,17 @@ const uiText = computed(() =>
     grid-column: 1 / -1;
   }
 }
+
+@media (max-width: 720px) {
+  .opening-slide { grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px; align-content: start; }
+  .opening-slide__drum { min-height: 0; align-items: start; }
+  .opening-slide__drum-core { width: 88px; padding: 8px; box-shadow: inset 0 0 0 7px rgba(132, 26, 22, 0.42), 0 12px 24px rgba(5, 10, 27, 0.3); }
+  .opening-slide__drum-core span { font-size: 8px; }
+  .opening-slide__drum-core strong { font-size: 1.15rem; }
+  .opening-slide__stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .opening-slide__stat, .opening-slide__note { padding: 9px; border-radius: 16px; }
+  .opening-slide__stat small, .opening-slide__note span { font-size: 9px; letter-spacing: 0.08em; }
+  .opening-slide__stat strong, .opening-slide__note strong { margin-top: 4px; font-size: 1.05rem; }
+  .opening-slide__note { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+}
 </style>

@@ -127,6 +127,9 @@ const labelPoints = computed(() =>
 <style scoped>
 .story-radar-chart {
   width: min(100%, 20rem);
+  height: auto;
+  aspect-ratio: 1;
+  display: block;
   overflow: visible;
 }
 
@@ -161,11 +164,11 @@ const labelPoints = computed(() =>
 
 @media (max-width: 720px) {
   .story-radar-chart {
-    width: min(100%, 16.5rem);
+    width: min(100%, 10.5rem);
   }
 
   .story-radar-chart__label {
-    font-size: 11px;
+    font-size: 10px;
   }
 }
 </style>

@@ -76,13 +76,11 @@ const uiText = computed(() =>
 @media (max-height: 900px) {
   .obsession-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 10px; }
   .obsession-slide__metric { padding: 12px 14px; border-radius: 20px; }
-  .obsession-slide__metric small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
 @media (max-width: 720px) and (max-height: 900px) {
   .obsession-slide { grid-template-columns: minmax(94px, 28vw) minmax(0, 1fr); }
   .obsession-slide__memory { grid-template-columns: 1fr; }
-  .obsession-slide__echoes { display: none; }
 }
 
 .obsession-slide__memory,
@@ -225,5 +223,19 @@ const uiText = computed(() =>
   .obsession-slide__metric--wide {
     grid-column: span 1;
   }
+}
+
+@media (max-width: 720px) {
+  .obsession-slide { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; align-items: start; }
+  .obsession-slide__memory { display: grid; padding: 8px; border-radius: 16px; gap: 7px; }
+  .obsession-slide__cover { border-radius: 13px; }
+  .obsession-slide__echoes { display: flex; gap: 4px; }
+  .obsession-slide__echoes span { width: 8px; height: 8px; box-shadow: none; }
+  .obsession-slide__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .obsession-slide__metric { padding: 9px 10px; border-radius: 16px; }
+  .obsession-slide__metric--wide { grid-column: 1 / -1; }
+  .obsession-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
+  .obsession-slide__metric strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.4rem); overflow-wrap: anywhere; }
+  .obsession-slide__metric small { display: block; margin-top: 6px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
 }
 </style>

@@ -179,4 +179,14 @@ const uiText = computed(() =>
     width: 100%;
   }
 }
+
+@media (max-width: 720px) {
+  .period-slide { align-content: start; gap: 8px; }
+  .period-slide__timeline { grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); gap: 6px; padding: 10px 12px; border-radius: 16px; }
+  .period-slide__timeline i { width: 100%; }
+  .period-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .period-slide__card { min-height: 0; padding: 10px 12px; border-radius: 16px; }
+  .period-slide__timeline article span, .period-slide__card span { font-size: 9px; letter-spacing: 0.08em; }
+  .period-slide__timeline article strong, .period-slide__card strong { margin-top: 5px; font-size: clamp(0.9rem, 4vw, 1.2rem); overflow-wrap: anywhere; }
+}
 </style>

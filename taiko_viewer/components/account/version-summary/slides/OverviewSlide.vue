@@ -93,13 +93,10 @@ const uiText = computed(() =>
   .overview-slide__hero { gap: 10px; }
   .overview-slide__hero strong { font-size: clamp(3rem, 7vw, 4.6rem); }
   .overview-slide__grid { gap: 8px; }
-  .overview-slide__hero-pills { display: none; }
 }
 
 @media (max-width: 720px) and (max-height: 900px) {
   .overview-slide { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
-  .overview-slide__hero p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .overview-slide__tile small { display: none; }
 }
 
 .overview-slide__hero,
@@ -229,5 +226,20 @@ const uiText = computed(() =>
   .overview-slide__tile--wide {
     grid-column: span 1;
   }
+}
+
+@media (max-width: 720px) {
+  .overview-slide { grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr); gap: 7px; align-items: stretch; }
+  .overview-slide__hero, .overview-slide__tile { padding: 10px 11px; border-radius: 16px; }
+  .overview-slide__hero { gap: 7px; }
+  .overview-slide__hero strong { font-size: clamp(2.2rem, 12vw, 3.2rem); }
+  .overview-slide__hero p { font-size: 0.72rem; line-height: 1.32; display: block; overflow: visible; }
+  .overview-slide__hero-pills { display: flex; gap: 5px; }
+  .overview-slide__hero-pills span { padding: 4px 6px; font-size: 8px; }
+  .overview-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .overview-slide__tile--wide { grid-column: 1 / -1; }
+  .overview-slide__hero span, .overview-slide__tile span { font-size: 9px; letter-spacing: 0.08em; }
+  .overview-slide__tile strong { font-size: clamp(1.15rem, 5vw, 1.55rem); overflow-wrap: anywhere; }
+  .overview-slide__tile small { display: block; font-size: 0.68rem; line-height: 1.3; }
 }
 </style>

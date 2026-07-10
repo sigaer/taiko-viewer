@@ -75,12 +75,10 @@ const uiText = computed(() => ({
 @media (max-height: 900px) {
   .song-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 12px; }
   .song-slide__panel, .song-slide__metric { padding: 12px 14px; border-radius: 20px; }
-  .song-slide__panel small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
 @media (max-width: 520px) and (max-height: 900px) {
   .song-slide { grid-template-columns: minmax(92px, 26vw) minmax(0, 1fr); }
-  .song-slide__chips { display: none; }
 }
 
 .song-slide__cover {
@@ -212,5 +210,17 @@ const uiText = computed(() => ({
   .song-slide {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 720px) {
+  .song-slide { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; align-items: start; }
+  .song-slide__image { border-radius: 16px; }
+  .song-slide__info { gap: 6px; }
+  .song-slide__panel, .song-slide__metric { padding: 10px 11px; border-radius: 16px; }
+  .song-slide__panel span, .song-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
+  .song-slide__panel strong, .song-slide__metric strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.45rem); overflow-wrap: anywhere; }
+  .song-slide__panel small { display: block; margin-top: 7px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .song-slide__chips { display: flex; margin-top: 7px; gap: 4px; }
+  .song-slide__chips span { padding: 3px 5px; font-size: 8px; }
 }
 </style>

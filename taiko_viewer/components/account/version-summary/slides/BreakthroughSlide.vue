@@ -79,14 +79,12 @@ const uiText = computed(() =>
   .breakthrough-slide { grid-template-columns: minmax(0, 1fr) minmax(100px, 26vh); gap: 10px; }
   .breakthrough-slide__banner { grid-column: 1 / 2; }
   .breakthrough-slide__banner, .breakthrough-slide__metric, .breakthrough-slide__song { padding: 12px 14px; border-radius: 20px; }
-  .breakthrough-slide__banner small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .breakthrough-slide__song { grid-column: 2; grid-row: 1 / span 2; }
 }
 
 @media (max-width: 720px) and (max-height: 900px) {
   .breakthrough-slide { grid-template-columns: minmax(0, 1fr) minmax(86px, 26vw); }
   .breakthrough-slide__cover { border-radius: 16px; }
-  .breakthrough-slide__song-meta span { display: none; }
 }
 
 .breakthrough-slide__banner,
@@ -204,5 +202,20 @@ const uiText = computed(() =>
   .breakthrough-slide__metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+@media (max-width: 720px) {
+  .breakthrough-slide { grid-template-columns: minmax(0, 1fr) 92px; grid-template-rows: auto auto; gap: 7px; align-content: start; }
+  .breakthrough-slide__banner { grid-column: 1; grid-row: 1; padding: 10px 11px; border-radius: 16px; }
+  .breakthrough-slide__banner strong { margin-top: 5px; font-size: clamp(1.1rem, 5vw, 1.5rem); max-width: none; overflow-wrap: anywhere; }
+  .breakthrough-slide__banner small { display: block; margin-top: 6px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .breakthrough-slide__metrics { grid-column: 1; grid-row: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .breakthrough-slide__metric { padding: 9px 10px; border-radius: 15px; }
+  .breakthrough-slide__metric strong { margin-top: 4px; font-size: 1.2rem; }
+  .breakthrough-slide__song { grid-column: 2; grid-row: 1 / span 2; align-content: start; padding: 7px; border-radius: 16px; gap: 6px; }
+  .breakthrough-slide__cover { aspect-ratio: 1; border-radius: 12px; }
+  .breakthrough-slide__song-meta span { display: block; font-size: 8px; }
+  .breakthrough-slide__song-meta strong { margin-top: 4px; font-size: 0.76rem; overflow-wrap: anywhere; }
+  .breakthrough-slide__banner span, .breakthrough-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
 }
 </style>

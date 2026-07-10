@@ -63,7 +63,6 @@ const keywordLabel = computed(() => (locale.value === "ja" ? "キーワード" :
 @media (max-height: 900px) {
   .final-title-slide { grid-template-columns: minmax(160px, 32vh) minmax(0, 1fr); gap: 10px; }
   .final-title-slide__seal, .final-title-slide__panel { padding: 14px; border-radius: 22px; }
-  .final-title-slide__panel small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
 @media (max-width: 720px) and (max-height: 900px) {
@@ -194,5 +193,19 @@ const keywordLabel = computed(() => (locale.value === "ja" ? "キーワード" :
     font-size: clamp(2rem, 9vw, 3rem);
     max-width: 10rem;
   }
+}
+
+@media (max-width: 720px) {
+  .final-title-slide { grid-template-columns: 96px minmax(0, 1fr); gap: 8px; align-items: start; }
+  .final-title-slide__seal { width: 92px; padding: 8px; border-radius: 50%; }
+  .final-title-slide__seal span { font-size: 8px; }
+  .final-title-slide__seal strong { margin-top: 4px; max-width: 72px; font-size: 1.05rem; overflow-wrap: anywhere; }
+  .final-title-slide__body { gap: 6px; }
+  .final-title-slide__panel { padding: 9px 10px; border-radius: 16px; }
+  .final-title-slide__panel span { font-size: 9px; letter-spacing: 0.08em; }
+  .final-title-slide__panel strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.4rem); overflow-wrap: anywhere; }
+  .final-title-slide__panel small { display: block; margin-top: 6px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .final-title-slide__panel--mini { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+  .final-title-slide__panel--mini strong { margin-top: 0; font-size: 0.95rem; }
 }
 </style>

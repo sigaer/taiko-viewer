@@ -76,17 +76,18 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="story-slide-shell__frame">
-      <div class="story-slide-shell__meta" data-animate>
-        <span>{{ String(pageIndex + 1).padStart(2, "0") }}</span>
-        <i></i>
-        <small>{{ String(pageTotal).padStart(2, "0") }}</small>
-      </div>
-
       <div class="story-slide-shell__header">
-        <p class="story-slide-shell__eyebrow" data-animate>{{ eyebrow }}</p>
+        <div class="story-slide-shell__heading" data-animate>
+          <div class="story-slide-shell__meta">
+            <span>{{ String(pageIndex + 1).padStart(2, "0") }}</span>
+            <i></i>
+            <small>{{ String(pageTotal).padStart(2, "0") }}</small>
+          </div>
+          <p class="story-slide-shell__eyebrow">{{ eyebrow }}</p>
+          <div v-if="accent" class="story-slide-shell__accent">{{ accent }}</div>
+        </div>
         <h2 class="story-slide-shell__title" data-animate>{{ title }}</h2>
         <p v-if="lead" class="story-slide-shell__lead" data-animate>{{ lead }}</p>
-        <div v-if="accent" class="story-slide-shell__accent" data-animate>{{ accent }}</div>
       </div>
 
       <div class="story-slide-shell__body">
@@ -172,8 +173,8 @@ onBeforeUnmount(() => {
 
 .story-slide-shell__frame {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 1.8rem;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
   height: calc(100vh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
   height: calc(100svh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
   height: calc(100dvh - var(--story-slide-top-padding, 7.4rem) - var(--story-slide-bottom-padding, 2.2rem));
@@ -209,8 +210,20 @@ onBeforeUnmount(() => {
 
 .story-slide-shell__header {
   display: grid;
-  gap: 0.85rem;
-  max-width: 52rem;
+  grid-template-columns: minmax(0, auto) minmax(14rem, 1fr);
+  grid-template-areas:
+    "heading lead"
+    "title lead";
+  gap: 0.35rem 1.5rem;
+  align-items: end;
+}
+
+.story-slide-shell__heading {
+  grid-area: heading;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .story-slide-shell__eyebrow {
@@ -223,10 +236,11 @@ onBeforeUnmount(() => {
 }
 
 .story-slide-shell__title {
+  grid-area: title;
   margin: 0;
   color: #fff7eb;
   font-family: var(--viewer-display-font);
-  font-size: clamp(2.7rem, 6vw, 5.8rem);
+  font-size: clamp(2.15rem, 4.8vw, 4.5rem);
   line-height: 1.02;
   letter-spacing: 0.02em;
   text-wrap: balance;
@@ -234,11 +248,12 @@ onBeforeUnmount(() => {
 }
 
 .story-slide-shell__lead {
+  grid-area: lead;
   margin: 0;
   color: rgba(255, 237, 214, 0.88);
   font-size: clamp(1rem, 1.3vw, 1.12rem);
-  line-height: 1.9;
-  max-width: 44rem;
+  line-height: 1.55;
+  max-width: 38rem;
 }
 
 .story-slide-shell__accent {
@@ -255,7 +270,7 @@ onBeforeUnmount(() => {
   display: grid;
   align-items: end;
   min-height: 0;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .story-slide-shell__body :deep(> *) {
@@ -269,15 +284,16 @@ onBeforeUnmount(() => {
   .story-slide-shell__meta { padding: 7px 11px; }
   .story-slide-shell__header { gap: 0.55rem; }
   .story-slide-shell__title { font-size: clamp(2.2rem, 5.2vw, 4.6rem); }
-  .story-slide-shell__lead { line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .story-slide-shell__lead { line-height: 1.42; }
 }
 
 @media (max-width: 720px) {
   .story-slide-shell { padding-inline: 12px; }
-  .story-slide-shell__frame { gap: 0.75rem; }
+  .story-slide-shell__frame { gap: 0.55rem; }
+  .story-slide-shell__header { grid-template-columns: minmax(0, 1fr); grid-template-areas: "heading" "title" "lead"; gap: 0.22rem; }
   .story-slide-shell__meta { padding: 5px 9px; }
-  .story-slide-shell__title { font-size: clamp(1.9rem, 9vw, 3.3rem); }
-  .story-slide-shell__lead { font-size: 0.9rem; line-height: 1.45; -webkit-line-clamp: 1; }
+  .story-slide-shell__title { font-size: clamp(1.55rem, 7vw, 2.5rem); }
+  .story-slide-shell__lead { font-size: 0.78rem; line-height: 1.35; }
   .story-slide-shell__accent { padding: 6px 9px; font-size: 11px; }
 }
 
@@ -285,7 +301,7 @@ onBeforeUnmount(() => {
   .story-slide-shell__frame { gap: 0.5rem; }
   .story-slide-shell__eyebrow { font-size: 10px; }
   .story-slide-shell__title { font-size: clamp(1.65rem, 7.5vw, 2.6rem); }
-  .story-slide-shell__lead { display: none; }
+  .story-slide-shell__lead { font-size: 0.72rem; line-height: 1.25; }
 }
 
 .tone-ember {
@@ -353,43 +369,22 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 720px) {
-  .story-slide-shell {
-    padding-inline: 1rem;
-  }
+  .story-slide-shell { padding-inline: 10px; }
+  .story-slide-shell__frame { gap: 0.5rem; }
+  .story-slide-shell__header { gap: 0.2rem; }
+  .story-slide-shell__heading { gap: 7px; }
+  .story-slide-shell__meta { padding: 4px 7px; gap: 6px; }
+  .story-slide-shell__meta i { width: 1rem; }
+  .story-slide-shell__eyebrow { font-size: 9px; letter-spacing: 0.12em; }
+  .story-slide-shell__title { font-size: clamp(1.45rem, 6.5vw, 2.2rem); line-height: 1; }
+  .story-slide-shell__lead { font-size: 0.76rem; line-height: 1.3; }
+  .story-slide-shell__accent { margin-left: auto; padding: 4px 7px; font-size: 9px; }
+  .story-slide-shell__body { align-items: stretch; }
+}
 
-  .story-slide-shell__frame {
-    gap: 0.95rem;
-  }
-
-  .story-slide-shell__meta {
-    padding: 9px 12px;
-    gap: 10px;
-  }
-
-  .story-slide-shell__meta i {
-    width: 1.7rem;
-  }
-
-  .story-slide-shell__header {
-    gap: 0.65rem;
-  }
-
-  .story-slide-shell__title {
-    font-size: clamp(1.9rem, 10vw, 3.1rem);
-  }
-
-  .story-slide-shell__lead {
-    font-size: 0.94rem;
-    line-height: 1.66;
-  }
-
-  .story-slide-shell__accent {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .story-slide-shell__body {
-    align-items: start;
-  }
+@media (max-width: 720px) and (max-height: 820px) {
+  .story-slide-shell__frame { gap: 0.35rem; }
+  .story-slide-shell__title { font-size: clamp(1.3rem, 5.8vw, 1.9rem); }
+  .story-slide-shell__lead { font-size: 0.7rem; line-height: 1.22; }
 }
 </style>
