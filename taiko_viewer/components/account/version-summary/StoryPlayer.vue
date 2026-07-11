@@ -237,18 +237,23 @@ onBeforeUnmount(() => {
     <StoryProgress v-if="started" :items="progressItems" :active-index="activeIndex" :aria-label="progressAriaLabel" @select="goToPage" />
 
     <div ref="containerRef" class="story-player__viewport" tabindex="0" @scroll="syncActiveIndex">
-      <component
-        :is="slide.component"
+      <div
         v-for="(slide, index) in slides"
         :key="slide.key"
         :ref="(element: Element | null) => setSlideRef(index, element)"
-        :summary="summary"
-        v-bind="slide.kind ? { kind: slide.kind } : {}"
-        :page-index="index"
-        :page-total="slides.length"
-        :active="activeIndex === index"
-        :reduced-motion="reducedMotion"
-      />
+        class="story-player__slide"
+        :data-page-key="slide.key"
+      >
+        <component
+          :is="slide.component"
+          :summary="summary"
+          v-bind="slide.kind ? { kind: slide.kind } : {}"
+          :page-index="index"
+          :page-total="slides.length"
+          :active="activeIndex === index"
+          :reduced-motion="reducedMotion"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -283,6 +288,18 @@ onBeforeUnmount(() => {
 
 .story-player__viewport::-webkit-scrollbar {
   display: none;
+}
+
+.story-player__slide {
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
 }
 
 .story-player__drawer-trigger {
