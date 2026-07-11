@@ -9,11 +9,12 @@ export type RawVersionSummarySong = {
 
 export type RawVersionSummaryActivity = {
   favoriteShift: { oldFavorite: RawVersionSummarySong; newFavorite: RawVersionSummarySong } | null;
-  monthlyFavorites: Array<{ month: string; playCount: number; song: RawVersionSummarySong }>;
-  weekdayActivity: { counts: number[]; topWeekday: number; totalPlays: number } | null;
-  calendarActivity: { days: Array<{ date: string; playCount: number }>; maxPlayCount: number } | null;
-  timeOfDay: { periods: Record<string, number>; topPeriod: string; totalPlays: number } | null;
-  lateNight: { playCount: number; latestAt: string; song: RawVersionSummarySong } | null;
+  monthlyFavorites: Array<{ month: string; playCount: number; estimatedSeconds: number; song: RawVersionSummarySong }>;
+  weekdayActivity: { counts: number[]; topWeekday: number; bottomWeekday: number; totalPlays: number } | null;
+  calendarActivity: { days: Array<{ date: string; playCount: number }>; maxPlayCount: number; activeDays: number; longestStreak: number; streakStart: string | null; streakEnd: string | null } | null;
+  timeOfDay: { periods: Record<string, number>; hourlyCounts: number[]; topPeriod: string; favoriteHour: number; favoriteSong: RawVersionSummarySong | null; totalPlays: number } | null;
+  lateNight: { playCount: number; activeDays: number; latestAt: string; song: RawVersionSummarySong } | null;
+  milestones: Array<{ type: string; occurredAt: string; level: number | null; song: RawVersionSummarySong }>;
 };
 
 export type RawVersionSummaryKeyword = {

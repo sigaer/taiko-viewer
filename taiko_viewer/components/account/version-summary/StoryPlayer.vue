@@ -10,7 +10,14 @@ import KeywordSlide from "./slides/KeywordSlide.vue";
 import BreakthroughSlide from "./slides/BreakthroughSlide.vue";
 import FinalTitleSlide from "./slides/FinalTitleSlide.vue";
 import PosterSlide from "./slides/PosterSlide.vue";
-import ActivitySlide from "./slides/ActivitySlide.vue";
+import FavoriteShiftSlide from "./slides/FavoriteShiftSlide.vue";
+import MonthlyFavoritesSlide from "./slides/MonthlyFavoritesSlide.vue";
+import WeekdayActivitySlide from "./slides/WeekdayActivitySlide.vue";
+import CalendarActivitySlide from "./slides/CalendarActivitySlide.vue";
+import TimeOfDaySlide from "./slides/TimeOfDaySlide.vue";
+import LateNightSlide from "./slides/LateNightSlide.vue";
+import RatingRankSlide from "./slides/RatingRankSlide.vue";
+import MilestonesSlide from "./slides/MilestonesSlide.vue";
 import StoryProgress from "./StoryProgress.vue";
 
 const props = defineProps<{
@@ -31,13 +38,13 @@ let motionMedia: MediaQueryList | null = null;
 let updateMotionHandler: ((event: MediaQueryListEvent) => void) | null = null;
 let scrollFrame = 0;
 
-const slideRegistry: Record<string, { component: typeof OpeningSlide | typeof ActivitySlide; kind?: string }> = {
+const slideRegistry: Record<string, { component: typeof OpeningSlide | typeof FavoriteShiftSlide }> = {
   opening: { component: OpeningSlide }, period: { component: PeriodSlide }, overview: { component: OverviewSlide },
   favorite: { component: FavoriteSongSlide }, obsession: { component: ObsessionSongSlide },
-  favoriteShift: { component: ActivitySlide, kind: "favoriteShift" }, monthly: { component: ActivitySlide, kind: "monthly" },
-  weekday: { component: ActivitySlide, kind: "weekday" }, calendar: { component: ActivitySlide, kind: "calendar" },
-  timeOfDay: { component: ActivitySlide, kind: "timeOfDay" }, lateNight: { component: ActivitySlide, kind: "lateNight" },
-  ratingRank: { component: ActivitySlide, kind: "ratingRank" }, keyword: { component: KeywordSlide },
+  favoriteShift: { component: FavoriteShiftSlide }, monthly: { component: MonthlyFavoritesSlide },
+  weekday: { component: WeekdayActivitySlide }, calendar: { component: CalendarActivitySlide },
+  timeOfDay: { component: TimeOfDaySlide }, lateNight: { component: LateNightSlide },
+  ratingRank: { component: RatingRankSlide }, milestones: { component: MilestonesSlide }, keyword: { component: KeywordSlide },
   breakthrough: { component: BreakthroughSlide }, final: { component: FinalTitleSlide }, poster: { component: PosterSlide }
 };
 const slides = computed(() => props.summary.story.pageKeys.flatMap((key) => slideRegistry[key] ? [{ key, ...slideRegistry[key] }] : []));
@@ -88,7 +95,7 @@ const progressItems = computed(() => {
           overview: "総覧",
           favorite: "最愛",
           obsession: "余韻",
-          favoriteShift: "新旧", monthly: "月別", weekday: "週間", calendar: "暦", timeOfDay: "時間", lateNight: "深夜", ratingRank: "RT",
+          favoriteShift: "新旧", monthly: "月別", weekday: "週間", calendar: "暦", timeOfDay: "時間", lateNight: "深夜", ratingRank: "RT", milestones: "記録",
           keyword: "キーワード",
           breakthrough: "突破",
           final: "称号",
@@ -100,7 +107,7 @@ const progressItems = computed(() => {
           overview: "总览",
           favorite: "最爱",
           obsession: "回响",
-          favoriteShift: "新旧", monthly: "月度", weekday: "星期", calendar: "日历", timeOfDay: "时段", lateNight: "深夜", ratingRank: "RT",
+          favoriteShift: "新旧", monthly: "月度", weekday: "星期", calendar: "日历", timeOfDay: "时段", lateNight: "深夜", ratingRank: "RT", milestones: "时刻",
           keyword: "关键词",
           breakthrough: "突破",
           final: "称号",
@@ -247,7 +254,6 @@ onBeforeUnmount(() => {
         <component
           :is="slide.component"
           :summary="summary"
-          v-bind="slide.kind ? { kind: slide.kind } : {}"
           :page-index="index"
           :page-total="slides.length"
           :active="activeIndex === index"

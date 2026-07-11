@@ -2,6 +2,7 @@ import type {
   VersionSummaryBreakthrough,
   VersionSummaryKeyword,
   VersionSummaryPoster,
+  VersionSummaryRatingRank,
   VersionSummarySongCard,
   VersionSummaryViewModel
 } from "~/types/account-version-summary";
@@ -161,21 +162,21 @@ const getBreakthroughBody = (
   if (breakthrough.type === "dondaful") {
     return locale === "ja"
       ? `${song.name}${levelLabel} で全良を確認。今回の虹2025でいちばん目立つ到達点です。`
-      : `${song.name}${levelLabel} 在虹2025里迎来了全良，这是这段时间最醒目的一次突破。`;
+      : `${song.name}${levelLabel} 在虹2025里迎来了全良。那一刻，谱面没有变简单，是你变强了。`;
   }
   if (breakthrough.type === "full_combo") {
     return locale === "ja"
       ? `${song.name}${levelLabel} でフルコンボを確認。積み上げてきた手応えが、はっきり数字に出ました。`
-      : `${song.name}${levelLabel} 在窗口内完成了全接，这次提升已经清楚地写进了记录里。`;
+      : `${song.name}${levelLabel} 在窗口内完成了全连。那一刻，谱面没有变简单，是你变强了。`;
   }
   if (breakthrough.type === "clear") {
     return locale === "ja"
       ? `${song.name}${levelLabel} を初クリア。このバージョンで新しい地面を踏みました。`
-      : `${song.name}${levelLabel} 完成首次通关，这一版里你确实跨过了一道新的门槛。`;
+      : `${song.name}${levelLabel} 完成首次通关。那一刻，谱面没有变简单，是你变强了。`;
   }
   return locale === "ja"
     ? `${song.name}${levelLabel} の単次スコア上昇が最大で、+${breakthrough.scoreDelta.toLocaleString()} 点でした。`
-    : `${song.name}${levelLabel} 的单次分数提升最多，一次抬高了 ${breakthrough.scoreDelta.toLocaleString()} 分。`;
+    : `${song.name}${levelLabel} 的单次分数提升最多，一次抬高了 ${breakthrough.scoreDelta.toLocaleString()} 分。谱面没有变简单，是你变强了。`;
 };
 
 const buildFinalTitle = (
@@ -313,6 +314,10 @@ const buildPoster = (
       {
         label: locale === "ja" ? "触れた曲数" : "涉及歌曲",
         value: String(summary.overview.uniqueSongs)
+      },
+      {
+        label: locale === "ja" ? "最長連続" : "最长连续",
+        value: locale === "ja" ? `${summary.calendarActivity?.longestStreak || 0}日` : `${summary.calendarActivity?.longestStreak || 0} 天`
       }
     ]
   };
@@ -331,7 +336,7 @@ export const buildVersionSummaryPresentation = (
   obsessionSong: VersionSummarySongCard | null,
   keyword: VersionSummaryKeyword | null,
   breakthroughSong: VersionSummarySongCard | null,
-  hasRatingRank = false
+  ratingRank: VersionSummaryRatingRank | null = null
 ) => {
   const estimatedTimeText = formatDuration(locale, summary.overview.estimatedSeconds);
   const keywordTitle = keyword?.title || KEYWORD_TITLES[locale].encouragement;
@@ -350,6 +355,17 @@ export const buildVersionSummaryPresentation = (
     body: breakthroughBody,
     happenedLabel: formatDateTime(locale, summary.breakthrough.occurredAt)
   };
+  const weekdayLabels = locale === "ja" ? ["月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日", "日曜日"] : ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+  const periodLabels: Record<string, string> = locale === "ja"
+    ? { early_morning: "早朝", morning: "午前", noon: "昼", afternoon: "午後", evening: "夜", late_night: "深夜" }
+    : { early_morning: "早上", morning: "上午", noon: "中午", afternoon: "下午", evening: "晚上", late_night: "深夜" };
+  const topWeekday = summary.weekdayActivity ? weekdayLabels[summary.weekdayActivity.topWeekday] : "";
+  const bottomWeekday = summary.weekdayActivity ? weekdayLabels[summary.weekdayActivity.bottomWeekday] : "";
+  const topPeriod = summary.timeOfDay ? periodLabels[summary.timeOfDay.topPeriod] : "";
+  const topHour = summary.timeOfDay ? `${String(summary.timeOfDay.favoriteHour).padStart(2, "0")}:00–${String((summary.timeOfDay.favoriteHour + 1) % 24).padStart(2, "0")}:00` : "";
+  const ratingBodies: Record<string, string> = locale === "ja"
+    ? { top1: "譜面に覚えられるほどの位置です。", top5: "ここまで来た鼓棒には、もう鋭さがあります。", top20: "多くの仲間を越えてきました。", top50: "安定して強くなっています。", growing: "一打ごとに、次の成長の伏線が残ります。" }
+    : { top1: "你已经不是普通玩家，是谱面会记住的人。", top5: "能走到这里的人，鼓棒都带着锋芒。", top20: "你已经超过了大多数同行者。", top50: "你正在稳定变强。", growing: "每一次敲下去，都是下一次进步的伏笔。" };
 
   const copy: VersionSummaryViewModel["copy"] = {
     opening: {
@@ -420,38 +436,43 @@ export const buildVersionSummaryPresentation = (
     },
     favoriteShift: {
       eyebrow: locale === "ja" ? "新旧の旋律" : "新欢与旧爱",
-      title: locale === "ja" ? "好きな曲にも、季節がある" : "喜欢的旋律，也会换季",
-      body: locale === "ja" ? "版の始まりと終わりで、手が伸びる曲が変わりました。" : "从版本初期到最近，你最常回去的旋律已经悄悄改变。"
+      title: locale === "ja" ? "新しい旋律と出会い、最初の一曲も忘れなかった" : "你结识了新的旋律，也没有忘记最初让你停留的那一首",
+      body: summary.favoriteShift ? (locale === "ja" ? `最初は「${summary.favoriteShift.oldFavorite.songName}」、今は「${summary.favoriteShift.newFavorite.songName}」。` : `旧爱：《${summary.favoriteShift.oldFavorite.songName}》\n新欢：《${summary.favoriteShift.newFavorite.songName}》`) : ""
     },
     monthlyFavorites: {
       eyebrow: locale === "ja" ? "月ごとの BGM" : "月度最爱",
       title: locale === "ja" ? "毎月に、一曲ずつ残った" : "每个月，都留下了一首 BGM",
-      body: locale === "ja" ? "よく叩いた曲を並べると、この版の時間軸が見えてきます。" : "把每个月最常打的歌排在一起，就是这一版最真实的时间轴。"
+      body: locale === "ja" ? "太鼓と過ごした日々には、毎月それぞれの BGM がありました。" : "有太鼓陪伴的日子，每个月都有自己的 BGM。"
     },
     weekdayActivity: {
       eyebrow: locale === "ja" ? "一週間のリズム" : "每周太鼓",
-      title: locale === "ja" ? "曜日にも、叩き方の癖がある" : "你把时间，更多留给了某一天",
-      body: locale === "ja" ? "七日分の鼓点を、ひとつの拍子に並べました。" : "七天的鼓点排在一起，生活里的节奏也有了形状。"
+      title: locale === "ja" ? `${topWeekday} にいちばん太鼓を叩きました` : `你最爱在${topWeekday}打鼓`,
+      body: locale === "ja" ? `いちばん静かだったのは ${bottomWeekday}。自分のために時間を残す曜日が見えてきます。` : `也许那一天，你终于把时间留给了自己。最少游玩的日子是${bottomWeekday}。`
     },
     calendarActivity: {
       eyebrow: locale === "ja" ? "太鼓カレンダー" : "太鼓日历",
-      title: locale === "ja" ? "叩いた日が、鼓面を灯す" : "你敲过的日子，正在鼓面上发光",
-      body: locale === "ja" ? "濃い光ほど、その日のプレイ回数が多かった印です。" : "光越亮，代表那一天留在鼓面上的次数越多。"
+      title: locale === "ja" ? `${summary.calendarActivity?.activeDays || 0} 日、太鼓を叩きました` : `这一版，有 ${summary.calendarActivity?.activeDays || 0} 天你都在打鼓`,
+      body: locale === "ja" ? `最長連続記録は ${summary.calendarActivity?.longestStreak || 0} 日。太鼓のない日も、楽しく。` : `最长连续记录是 ${summary.calendarActivity?.longestStreak || 0} 天。没有太鼓的日子，也要愉快。`
     },
     timeOfDay: {
       eyebrow: locale === "ja" ? "一日の拍子" : "活跃时段",
-      title: locale === "ja" ? "あなたの鼓点が鳴る時間" : "属于你的鼓点，常在这个时刻响起",
-      body: locale === "ja" ? "一日を四つに分けると、いつ太鼓に戻るかが見えてきます。" : "把一天切成四段，就能看见你最常回到太鼓前的时刻。"
+      title: locale === "ja" ? `${topPeriod} にいちばん太鼓を叩きました` : `你最爱在${topPeriod}打鼓`,
+      body: locale === "ja" ? `${topHour} が最も活発な時間帯でした。ひとつひとつの 3 分間を太鼓に残しました。` : `${topHour}，是你最活跃的时段。人来人往，但这一小时里，你把一个又一个 3 分钟留给了太鼓。`
     },
     lateNight: {
       eyebrow: locale === "ja" ? "午前零時のあと" : "深夜记录",
-      title: locale === "ja" ? "街が静まっても、鼓点は残った" : "城市睡着以后，你还留过一段鼓声",
-      body: locale === "ja" ? "午前 0 時から 5 時までに残った、夜更けの記録です。" : "这是凌晨零点到五点之间，只有夜色听见的记录。"
+      title: summary.lateNight ? (locale === "ja" ? `${summary.lateNight.latestAt}、まだ太鼓を叩いていました` : `${formatDateTime(locale, summary.lateNight.latestAt)}，你还在打《${summary.lateNight.song.songName}》`) : "",
+      body: locale === "ja" ? `この版では ${summary.lateNight?.activeDays || 0} 夜、鼓点が夜更かしに付き合いました。` : `这一版，有 ${summary.lateNight?.activeDays || 0} 个夜晚，鼓点陪你晚睡。`
     },
     ratingRank: {
       eyebrow: locale === "ja" ? "サイト内プレイヤー標本" : "站内玩家样本",
       title: locale === "ja" ? "今の実力がいる場所" : "你的当前实力，在这里留下坐标",
-      body: locale === "ja" ? "これは公式順位ではなく、サイト内データを使った taikob20 の標本順位です。" : "这不是官方全服排名，而是基于站内玩家数据计算的 taikob20 样本位置。"
+      body: ratingRank ? `${ratingBodies[ratingRank.tier] || ratingBodies.growing}${locale === "ja" ? " サイト内標本であり、公式順位ではありません。" : " 这是站内玩家样本，不是官方全服排名。"}` : ""
+    },
+    milestones: {
+      eyebrow: locale === "ja" ? "大切な瞬間" : "重要时刻存档",
+      title: locale === "ja" ? "たくさんの大切な瞬間が、鼓点に残った" : "你的很多重要时刻，都被鼓点悄悄存档",
+      body: locale === "ja" ? "初クリア、初フルコンボ、初全良。残せた瞬間だけを、ここに並べます。" : "第一次过关。第一次全连。第一次全良。能被可靠确认的时刻，都留在这里。"
     },
     keyword: {
       eyebrow: locale === "ja" ? "太鼓キーワード" : "太鼓关键词",
@@ -495,7 +516,8 @@ export const buildVersionSummaryPresentation = (
   if (summary.timeOfDay?.totalPlays) pageKeys.push("timeOfDay");
   if (summary.lateNight) pageKeys.push("lateNight");
   if (summary.keyword) pageKeys.push("keyword");
-  if (hasRatingRank) pageKeys.push("ratingRank");
+  if (ratingRank) pageKeys.push("ratingRank");
+  if (summary.milestones?.length) pageKeys.push("milestones");
   pageKeys.push("breakthrough", "final", "poster");
 
   return {

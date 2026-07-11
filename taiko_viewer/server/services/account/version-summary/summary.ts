@@ -22,7 +22,7 @@ import { buildVersionSummaryPresentation, getVersionSummaryDimensionLabel, getVe
 import type { RawVersionSummary, RawVersionSummarySong, VersionSummaryLocale } from "./types";
 import { listVersionSummaryWindows, resolveVersionSummaryWindow, type VersionSummaryWindow } from "./versionWindows";
 
-const VERSION_SUMMARY_CACHE_SCHEMA = 3;
+const VERSION_SUMMARY_CACHE_SCHEMA = 4;
 const COVER_FALLBACK_ID = 1384;
 const PYTHON_FALLBACK_MESSAGES = {
   missingHistory: "当前绑定还没有覆盖该版本范围的历史快照，请先同步更多历史数据后再查看版本总结。",
@@ -50,6 +50,14 @@ const parsePositiveInt = (value: unknown) => {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) return 0;
   return Math.floor(parsed);
+};
+
+const formatEstimatedTime = (locale: VersionSummaryLocale, seconds: number) => {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (!hours) return locale === "ja" ? `${minutes}分` : `${minutes} 分钟`;
+  return locale === "ja" ? `${hours}時間${remainder}分` : `${hours} 小时 ${remainder} 分钟`;
 };
 
 const toLocale = (input?: string | null): VersionSummaryLocale =>
@@ -499,7 +507,7 @@ const buildViewModel = async (
     obsessionSong,
     keyword,
     breakthroughSong,
-    Boolean(ratingRank)
+    ratingRank
   );
   const favoriteShift = raw.favoriteShift
     ? {
@@ -511,30 +519,41 @@ const buildViewModel = async (
     const song = buildSongCard(locale, item.song, songMap);
     if (!song) return [];
     const [year, month] = item.month.split("-");
-    return [{ ...item, monthLabel: locale === "ja" ? `${year}年${Number(month)}月` : `${year} 年 ${Number(month)} 月`, song }];
+    return [{ ...item, monthLabel: locale === "ja" ? `${year}年${Number(month)}月` : `${Number(month)} 月`, estimatedTimeText: formatEstimatedTime(locale, item.estimatedSeconds), song }];
   });
   const weekdayLabels = locale === "ja" ? ["月", "火", "水", "木", "金", "土", "日"] : ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
   const weekdayActivity = raw.weekdayActivity
-    ? { ...raw.weekdayActivity, labels: weekdayLabels, topLabel: weekdayLabels[raw.weekdayActivity.topWeekday] || weekdayLabels[0] }
+    ? { ...raw.weekdayActivity, labels: weekdayLabels, topLabel: weekdayLabels[raw.weekdayActivity.topWeekday] || weekdayLabels[0], bottomLabel: weekdayLabels[raw.weekdayActivity.bottomWeekday] || weekdayLabels[0] }
     : null;
   const calendarActivity = raw.calendarActivity
-    ? { ...raw.calendarActivity, days: raw.calendarActivity.days.map((day) => ({ ...day, intensity: raw.calendarActivity!.maxPlayCount ? day.playCount / raw.calendarActivity!.maxPlayCount : 0 })) }
+    ? { ...raw.calendarActivity, streakLabel: raw.calendarActivity.streakStart && raw.calendarActivity.streakEnd ? `${raw.calendarActivity.streakStart} — ${raw.calendarActivity.streakEnd}` : "", days: raw.calendarActivity.days.map((day) => ({ ...day, intensity: raw.calendarActivity!.maxPlayCount ? day.playCount / raw.calendarActivity!.maxPlayCount : 0 })) }
     : null;
   const periodLabels = locale === "ja"
-    ? { dawn: "深夜", morning: "午前", afternoon: "午後", night: "夜" }
-    : { dawn: "凌晨", morning: "上午", afternoon: "下午", night: "晚间" };
+    ? { early_morning: ["早朝", "05:00–08:59"], morning: ["午前", "09:00–11:59"], noon: ["昼", "12:00–13:59"], afternoon: ["午後", "14:00–17:59"], evening: ["夜", "18:00–21:59"], late_night: ["深夜", "22:00–04:59"] }
+    : { early_morning: ["早上", "05:00–08:59"], morning: ["上午", "09:00–11:59"], noon: ["中午", "12:00–13:59"], afternoon: ["下午", "14:00–17:59"], evening: ["晚上", "18:00–21:59"], late_night: ["深夜", "22:00–04:59"] };
+  const favoriteTimeSong = raw.timeOfDay?.favoriteSong ? buildSongCard(locale, raw.timeOfDay.favoriteSong, songMap) : null;
   const timeOfDay = raw.timeOfDay
     ? {
         topPeriod: raw.timeOfDay.topPeriod,
-        topLabel: periodLabels[raw.timeOfDay.topPeriod as keyof typeof periodLabels] || raw.timeOfDay.topPeriod,
+        topLabel: periodLabels[raw.timeOfDay.topPeriod as keyof typeof periodLabels]?.[0] || raw.timeOfDay.topPeriod,
+        hourlyCounts: raw.timeOfDay.hourlyCounts,
+        favoriteHour: raw.timeOfDay.favoriteHour,
+        favoriteHourLabel: `${String(raw.timeOfDay.favoriteHour).padStart(2, "0")}:00–${String((raw.timeOfDay.favoriteHour + 1) % 24).padStart(2, "0")}:00`,
+        favoriteSong: favoriteTimeSong,
         totalPlays: raw.timeOfDay.totalPlays,
-        periods: Object.entries(raw.timeOfDay.periods).map(([key, playCount]) => ({ key, label: periodLabels[key as keyof typeof periodLabels] || key, playCount }))
+        periods: Object.entries(raw.timeOfDay.periods).map(([key, playCount]) => ({ key, label: periodLabels[key as keyof typeof periodLabels]?.[0] || key, range: periodLabels[key as keyof typeof periodLabels]?.[1] || "", playCount }))
       }
     : null;
   const lateNightSong = raw.lateNight ? buildSongCard(locale, raw.lateNight.song, songMap) : null;
   const lateNight = raw.lateNight && lateNightSong
     ? { ...raw.lateNight, latestLabel: new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "zh-CN", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Shanghai" }).format(new Date(raw.lateNight.latestAt)), song: lateNightSong }
     : null;
+  const milestoneTitles = locale === "ja" ? { clear: "初クリア", full_combo: "初フルコンボ", dondaful: "初全良" } : { clear: "第一次过关", full_combo: "第一次全连", dondaful: "第一次全良" };
+  const milestones = (raw.milestones || []).flatMap((item) => {
+    const song = buildSongCard(locale, item.song, songMap, { level: item.level });
+    if (!song) return [];
+    return [{ ...item, title: milestoneTitles[item.type as keyof typeof milestoneTitles] || item.type, happenedLabel: new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "zh-CN", { month: "long", day: "numeric", timeZone: "Asia/Shanghai" }).format(new Date(item.occurredAt)), song }];
+  });
 
   return {
     summaryId: raw.summaryId,
@@ -555,6 +574,7 @@ const buildViewModel = async (
     calendarActivity,
     timeOfDay,
     lateNight,
+    milestones,
     ratingRank,
     keyword,
     keywordProfile,

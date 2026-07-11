@@ -84,6 +84,17 @@ export type VersionSummaryMonthlyFavorite = {
   month: string;
   monthLabel: string;
   playCount: number;
+  estimatedSeconds: number;
+  estimatedTimeText: string;
+  song: VersionSummarySongCard;
+};
+
+export type VersionSummaryMilestone = {
+  type: string;
+  title: string;
+  occurredAt: string;
+  happenedLabel: string;
+  level: number | null;
   song: VersionSummarySongCard;
 };
 
@@ -138,10 +149,11 @@ export type VersionSummaryViewModel = {
   obsessionSong: VersionSummarySongCard | null;
   favoriteShift: VersionSummaryFavoriteShift | null;
   monthlyFavorites: VersionSummaryMonthlyFavorite[];
-  weekdayActivity: { counts: number[]; labels: string[]; topWeekday: number; topLabel: string; totalPlays: number } | null;
-  calendarActivity: { days: Array<{ date: string; playCount: number; intensity: number }>; maxPlayCount: number } | null;
-  timeOfDay: { periods: Array<{ key: string; label: string; playCount: number }>; topPeriod: string; topLabel: string; totalPlays: number } | null;
-  lateNight: { playCount: number; latestAt: string; latestLabel: string; song: VersionSummarySongCard } | null;
+  weekdayActivity: { counts: number[]; labels: string[]; topWeekday: number; bottomWeekday: number; topLabel: string; bottomLabel: string; totalPlays: number } | null;
+  calendarActivity: { days: Array<{ date: string; playCount: number; intensity: number }>; maxPlayCount: number; activeDays: number; longestStreak: number; streakStart: string | null; streakEnd: string | null; streakLabel: string } | null;
+  timeOfDay: { periods: Array<{ key: string; label: string; range: string; playCount: number }>; hourlyCounts: number[]; topPeriod: string; topLabel: string; favoriteHour: number; favoriteHourLabel: string; favoriteSong: VersionSummarySongCard | null; totalPlays: number } | null;
+  lateNight: { playCount: number; activeDays: number; latestAt: string; latestLabel: string; song: VersionSummarySongCard } | null;
+  milestones: VersionSummaryMilestone[];
   ratingRank: VersionSummaryRatingRank | null;
   keyword: VersionSummaryKeyword | null;
   keywordProfile: VersionSummaryKeyword | null;
@@ -166,6 +178,7 @@ export type VersionSummaryViewModel = {
     timeOfDay: VersionSummaryCopyBlock;
     lateNight: VersionSummaryCopyBlock;
     ratingRank: VersionSummaryCopyBlock;
+    milestones: VersionSummaryCopyBlock;
     keyword: VersionSummaryCopyBlock;
     breakthrough: VersionSummaryCopyBlock;
     finalTitle: VersionSummaryCopyBlock;
