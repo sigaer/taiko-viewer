@@ -252,7 +252,7 @@
     "register": "注册",
     "forgotPassword": "找回密码",
     "sync": "多端同步",
-    "versionSummary": "虹2025 / 版本总结",
+    "versionSummary": "2026 太鼓回顾",
     "songs": "歌曲数据",
     "developer": "开发者权限",
     "developerReview": "开发者审批",
@@ -435,7 +435,7 @@
         "desc": "绑定鼓众 ID 后提交同步请求，服务端会从鼓众广场拉取当前绑定 ID 的 userdata，并压缩分发到选中的服务目标。"
       },
       "versionSummary": {
-        "desc": "登录后查看当前绑定鼓众 ID 的私有虹2025版本总结，以全屏故事页方式回顾本版本游玩记录。"
+        "desc": "登录后翻开专属于当前鼓众 ID 的 2026 太鼓故事，看见装扮、偏爱与一路成长。"
       },
       "songs": {
         "desc": "直接查看并维护当前绑定 ID 的本地歌曲成绩数据。"
@@ -449,6 +449,149 @@
       "supportReview": {
         "desc": "处理用户工单、回复问题并关闭已完成的工单。"
       }
+    }
+  },
+  "annualSummary": {
+    "name": "2026 太鼓回顾（持续更新）",
+    "common": {
+      "coverFallback": "咚",
+      "observed": "这段被记录的旅程",
+      "archive": "截至此刻的你",
+      "observedQualifier": "这些，是记录为你留住的鼓点。",
+      "archiveQualifier": "这些，是你截至此刻积攒的成绩。",
+      "lowerBound": "已经留下的足迹",
+      "proxy": "记录里的时光",
+      "unavailable": "暂无足够记录",
+      "defaultDon": "默认小咚",
+      "defaultCover": "默认曲绘",
+      "songWaiting": "下一首喜欢，正在路上"
+    },
+    "controls": {
+      "settings": "故事设置",
+      "soundOn": "开启鼓点声音",
+      "soundOff": "关闭鼓点声音",
+      "progress": "年度故事进度",
+      "pageNavigation": "故事翻页",
+      "previous": "上一页",
+      "next": "下一页",
+      "start": "开启我的年度回顾",
+      "refresh": "重新生成",
+      "share": "创建 30 天分享",
+      "generatePoster": "生成当前语言海报",
+      "download": "下载海报",
+      "webShare": "分享海报",
+      "renewShare": "续期 30 天",
+      "revokeShare": "撤销分享",
+      "back": "返回年度回顾",
+      "settingsShort": "设置"
+    },
+    "chapters": { "debut": "初见", "habits": "习惯", "preference": "偏爱", "growth": "成长", "keepsake": "留念" },
+    "pages": {
+      "opening": "开场", "profile": "身份", "period": "时间", "overview": "总览", "favorite": "最爱", "obsession": "回响", "favoriteShift": "新旧", "keyword": "关键词", "ratingRank": "RT", "monthly": "月度", "weekday": "星期", "calendar": "日历", "timeOfDay": "时段", "lateNight": "深夜", "speedProfile": "倍速", "nearDondaful": "近全良", "challenge": "挑战", "pound": "连打", "highScore": "高分", "milestones": "时刻", "breakthrough": "突破", "final": "称号", "poster": "海报"
+    },
+    "state": {
+      "loading": "正在整理你的 2026 太鼓记录…",
+      "missing": "还没有可以整理的太鼓记录。请先同步当前绑定，再回来生成年度回顾。",
+      "loadFailed": "年度回顾加载失败，请稍后重试。",
+      "buildQueued": "年度回顾正在后台生成。",
+      "buildReady": "你的年度回顾已经整理好了。",
+      "buildFailed": "年度回顾生成失败，请稍后重试。",
+      "schemaMismatch": "记录格式已经更新，请重新生成年度回顾。",
+      "openProfile": "前往个人档案",
+      "openSync": "前往多端同步",
+      "retry": "重新加载",
+      "jobQueued": "正在排队整理你的年度回顾…",
+      "jobRunning": "正在把你的鼓声整理成故事…",
+      "jobCompleted": "年度回顾已经整理完成。",
+      "jobFailed": "这次整理没有完成，请稍后再试。"
+    },
+    "share": { "generating": "正在生成海报…", "created": "30 天分享已经创建，接下来可以生成海报。", "ready": "分享页和海报已生成", "downloadFallback": "系统分享没有打开，已改为下载海报。", "posterFirst": "请先生成海报，再把这一页分享出去。", "renewed": "分享有效期已续期 30 天", "revoked": "公开分享已撤销", "expires": "有效期至 {date}", "failed": "分享或海报生成失败，请稍后重试", "privacy": "创建后将生成一个不可枚举的公开链接，默认 30 天后失效；你可以在这里续期或提前撤销。", "expired": "这份年度回顾已到期或被撤销。", "publicLead": "这是一份由玩家主动公开的 2026 太鼓回顾。" },
+    "milestoneTypes": { "clear": "新的通关亮起", "full_combo": "新的全连亮起", "dondaful": "新的全良亮起" },
+    "entry": {
+      "eyebrow": "2026 / 持续更新",
+      "title": "你的鼓声，都留在这里",
+      "lead": "小咚、段位、称号和每一次留下痕迹的挑战，都在等你翻开。",
+      "binding": "当前绑定",
+      "titleLabel": "年度称号",
+      "playCount": "留下的挑战",
+      "activeDays": "点亮的日期",
+      "uniqueSongs": "相遇的歌曲"
+    },
+    "drawer": {
+      "title": "故事设置", "version": "统计周期", "binding": "当前绑定", "currentTitle": "当前称号", "summary": "这段记录", "exit": "回到入口", "generated": "生成于 {time}"
+    },
+    "copy": {
+      "opening": { "eyebrow": "2026 · 你的太鼓故事", "title": "{nickname}，来听听你的 2026", "body": "{playCount} 次留下痕迹的挑战、{uniqueSongs} 首相遇过的歌，都在这面鼓里等你。" },
+      "profile": { "eyebrow": "PLAYER CARD", "title": "这一年的主角，是 {nickname}", "body": "这张小咚装扮，就是你的专属开场。", "bodyWithTitle": "戴着“{playerTitle}”的称号登场，小咚也替你换好了这一年的装扮。", "bodyWithDan": "以“{dan}”的段位站上鼓面，小咚也替你换好了这一年的装扮。", "bodyWithTitleAndDan": "戴着“{playerTitle}”的称号、以“{dan}”的段位登场——这就是只属于你的玩家卡。" },
+      "period": { "eyebrow": "从元旦到此刻", "title": "{totalDays} 天，故事还在继续", "body": "日期向前走，记录也一页页变厚。你的 2026，还没有落下最后一槌。" },
+      "overview": { "eyebrow": "你的鼓手轮廓", "title": "一锤一锤，敲成现在的你", "observedBody": "在被记录下来的旅程里，{playCount} 次挑战落在 {uniqueSongs} 首歌上。每个数字，都有你的鼓点。", "archiveBody": "截至此刻，{uniqueSongs} 首歌与 {uniqueCharts} 张谱面组成了你的太鼓档案。它们都是你走到这里的痕迹。" },
+      "favorite": { "eyebrow": "最爱", "title": "你把《{favoriteSong}》一次次叫回鼓面", "observedBody": "它在这段记录里与你相遇了 {favoriteCount} 次。熟悉的前奏一响，你还是会回到它面前。", "archiveBody": "截至此刻，《{favoriteSong}》是成绩档案里留下挑战最多的歌。反复相遇，本身就是偏爱。" },
+      "obsession": { "eyebrow": "念念不忘", "title": "{obsessionDays} 个不同日子里，你都想起《{obsessionSong}》", "body": "有些歌不是打过就结束。你一次次回来，把喜欢敲成了长长的回响。" },
+      "favoriteShift": { "eyebrow": "新欢旧爱", "title": "从《{oldFavorite}》到《{newFavorite}》", "body": "旧爱没有退场，新欢已经响起。喜欢的轮廓，也在你的鼓槌下悄悄长大。" },
+      "monthly": { "eyebrow": "月度主打歌", "title": "{monthlyMonth}，主角是《{monthlySong}》", "body": "月份一页页翻过，每一页都有一首歌替你站在最中央。" },
+      "weekday": { "eyebrow": "星期默契", "title": "{topWeekday}，像是你和鼓面约好的日子", "body": "在留下的记录里，这一天总比别的日子更容易响起你的鼓声。" },
+      "calendar": { "eyebrow": "鼓点日历", "title": "{calendarDays} 个被记录的日期，被你敲成蓝色", "body": "最长连续 {longestStreak} 天。那些一格格亮起的蓝，是你没有停下的回声。" },
+      "timeOfDay": { "eyebrow": "你的鼓声时刻", "title": "{favoriteHour}，最容易听见你的鼓声", "body": "记录把最多鼓点留在这个时刻，《{timeSong}》也在时间旁边留下了名字。" },
+      "lateNight": { "eyebrow": "夜鼓未央", "title": "{lateTime}，夜色还没有替你收鼓", "body": "{lateNights} 个被记录的夜晚里，《{lateSong}》陪你的鼓声走得最深。" },
+      "rating": { "eyebrow": "TAIKOB20", "title": "{rating}，是你此刻的坐标", "body": "和 {ratingSample} 位站内鼓手站在同一张图上，你走到了 {ratingPosition}。数字不是终点，只是把这一刻的你认真标下。" },
+      "milestones": { "eyebrow": "高光时刻", "title": "{milestoneCount} 个瞬间，把成长点亮", "body": "新的通关、全连与全良在这段记录里接连亮起。成长不需要旁白，成绩已经替你说了。" },
+      "keyword": { "eyebrow": "鼓面关键词", "title": "你的鼓面关键词：{keywordTitle}", "body": "{keywordDimension} 是轮廓里最亮的一角，像是你落槌时最自然的语言。" },
+      "speed": { "eyebrow": "SPEED SIGNATURE", "title": "{speed}×，是你刻进成绩里的速度", "body": "{speedCharts} 张谱面的成绩页留着这份节奏。鼓面快一点，气势也跟着向前一点。" },
+      "near": { "eyebrow": "ALMOST DONDAFUL", "title": "《{nearSong}》，离全良只差 {nearOk} 个可", "body": "鼓面已经亮到最后一小步。下一次落槌，也许就是满屏金光。" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "你向《{challengeSong}》敲了 {challengeCount} 次门", "body": "它还没有把答案全部交出来，而你也没有转身。每一次重来，都让下一槌更靠近。" },
+      "pound": { "eyebrow": "DRUMROLL", "title": "{poundTotal} 连打，藏在你的成绩册里", "body": "一张张谱面替你留住连打，最高的一段来自《{poundSong}》——足足 {poundTop} 下。" },
+      "highScore": { "eyebrow": "HIGH SCORE", "title": "{highScoreTime}，分数在《{highScoreSong}》上刷新", "body": "{highScoreValue} 分被记录定格。那一刻，成绩页替你记住了一次向上。" },
+      "breakthrough": { "eyebrow": "年度突破", "title": "这一年，你把边界又推远了一点", "body": "“{breakthroughTitle}”为这一段成长写下注脚。向前的这一槌已经响起，下一页还会继续写。" },
+      "final": { "eyebrow": "你的年度称号", "title": "{nickname}，这枚称号属于你", "body": "这一年的记录把“{finalTitle}”送给你。它不是句号，而是下一次握住鼓棒时的开场。" },
+      "poster": { "eyebrow": "把回忆带走", "title": "把 {nickname} 的 2026 收进一张海报", "body": "小咚、段位、最爱的歌和“{finalTitle}”都在这里。你走过的路，值得被好好留住。" }
+    },
+    "slides": {
+      "profile": { "eyebrow": "PLAYER CARD", "title": "这一年的主角，是你", "lead": "称号、段位和小咚装扮，都在说同一件事：这份故事只属于你。", "currentTitle": "此刻佩戴的称号", "dan": "站上鼓面的段位", "noTitle": "称号席位等待点亮", "noDan": "段位之路正在起步" },
+      "period": { "start": "开始", "now": "当前", "end": "结束", "first": "故事第一次亮起", "latest": "故事写到这里", "totalDays": "展开的日子", "activeDays": "点亮的日期", "archiveTitle": "这一页已经为你收好", "archiveBody": "时间没有被勉强猜测，但一路积攒的成绩都在这里。" },
+      "overview": { "plays": "留下的挑战", "activeDays": "点亮的日期", "songs": "相遇的歌曲", "charts": "走过的谱面", "estimated": "鼓声时长", "clear": "已经通关", "fullCombo": "已经全连", "dondaful": "已经全良", "kiwami": "已经极" },
+      "favorite": { "plays": "被记录的相遇" },
+      "shift": { "old": "故事前段 · 放不下的旧爱", "new": "故事后段 · 悄悄登场的新欢", "times": "相遇 {count} 次" },
+      "monthly": { "estimated": "约 {time}", "plays": "{count} 次 · 约 {time}" },
+      "weekday": { "top": "最有默契的一天", "bottom": "相对安静的一天" },
+      "calendar": { "active": "点亮的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
+      "time": { "favorite": "鼓声最集中的时刻", "periods": { "early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜" } },
+      "late": { "latest": "记录最深的一夜", "company": "夜色里的陪伴", "nights": "{count} 个夜晚", "plays": "留下 {count} 次鼓点" },
+      "rating": { "sample": "与 {count} 位站内鼓手并肩", "rank": "这一刻的坐标", "percentile": "已经走在 {value}% 的同行鼓手前面", "tier": "此刻所在的队列", "tiers": { "top1": "站在最前方的 Top 1%", "top5": "走进耀眼的 Top 5%", "top20": "稳稳站进 Top 20%", "top50": "已经越过半程的 Top 50%", "growing": "正在向前生长" } },
+      "keyword": { "signature": "你的鼓面性格", "brightest": "最亮的一角", "shape": "你的六维鼓面", "story": "这不是一串冷冰冰的分数，而是你面对鼓面时，最像自己的样子。" },
+      "speed": { "eyebrow": "SPEED SIGNATURE", "title": "快一点，正好装下你的节奏", "lead": "{speed}× 的速度，已经成为成绩页上的个人签名。", "story": "最常留下的是 {speed}×", "chartCount": "刻着这份速度的谱面", "detail": "鼓面向前追，你的气势也没有落后。" },
+      "near": { "eyebrow": "ALMOST DONDAFUL", "title": "离满屏金光，只剩最后几槌", "lead": "《{song}》只剩 {count} 个可，鼓面已经在等你收尾。", "okCount": "只差 {count} 个可", "score": "已经写下的最高分" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "这扇门，你还在敲", "lead": "你向《{song}》敲了 {count} 次门，每一次都比转身更勇敢。", "observed": "你敲过的门", "story": "它还没有完全打开，而你也没有转身。" },
+      "pound": { "eyebrow": "DRUMROLL", "title": "密密麻麻的连打，是你的签名", "lead": "{count} 连打散落在一张张谱面里，如今一起响了起来。", "unit": "连打", "story": "哇，你一定是搓鼓高手吧！", "topSong": "最密集的一段留在", "ending": "鼓槌落下去，连打就替你把气势写满。" },
+      "highScore": { "eyebrow": "HIGH SCORE", "title": "成绩页记住了这次向上", "lead": "{time}，《{song}》的分数被你推到 {score}。", "celebration": "这一格新高，已经替那一刻发出欢呼。" },
+      "milestones": { "song": "《{name}》" },
+      "breakthrough": { "dan": "段位向上", "ratingGain": "RT 向上", "ratingJourney": "从这里走到这里", "songAttempts": "为这首歌留下的挑战", "times": "{count} 次", "difficulty": "这道墙的高度" },
+      "final": { "firstSteps": "故事的第一声", "fromBreakthrough": "称号因这一刻亮起", "fromSpeed": "留在成绩里的速度", "fromKeyword": "最像你的关键词", "fromJourney": "一路走来的名字", "times": "{count} 次挑战" },
+      "poster": { "finalTitle": "年度称号", "favorite": "最爱歌曲", "keyword": "关键词", "scan": "扫码查看这份回顾", "expires": "分享有效期至 {date}" }
+    },
+    "keywords": {
+      "dimensions": { "big_song": "大歌力", "stamina": "体力", "speed": "高速处理", "accuracy": "精度力", "rhythm": "节奏处理", "complex": "复合处理" },
+      "titles": { "wall_breaker": "巨壁破阵者", "endless_drummer": "不息鼓手", "speed_runner": "疾速行者", "precision_tuner": "精度调律师", "rhythm_resonator": "节奏共鸣者", "complex_hunter": "复合猎手" },
+      "body": "{dimension} 是你的鼓面轮廓里最亮的一角，也成了这一年的个人签名。"
+    },
+    "titles": {
+      "newcomer": { "title": "初响之鼓", "body": "故事才刚刚开始，第一声鼓点已经让这一年有了名字。" },
+      "archive_keeper": { "title": "记录收藏家", "body": "一路累积的成绩被你收进这一页，安静，却很有分量。" },
+      "encouragement": { "title": "向鼓面而行", "body": "鼓点还在变多，方向已经很清楚：下一槌，继续向前。" },
+      "speed_profile": { "title": "疾风鼓手", "body": "快一点的鼓面，正好装得下你向前追的节奏。" },
+      "wall_breaker": { "title": "巨壁破阵者", "body": "大歌处理成为你最鲜明的鼓面倾向。" },
+      "endless_drummer": { "title": "不息鼓手", "body": "体力维度构成了你的年度关键词。" },
+      "speed_runner": { "title": "疾速行者", "body": "高速处理是你最清晰的鼓面轮廓。" },
+      "precision_tuner": { "title": "精度调律师", "body": "精度成为这段记录里的主旋律。" },
+      "rhythm_resonator": { "title": "节奏共鸣者", "body": "节奏处理写下了你的鼓面性格。" },
+      "complex_hunter": { "title": "复合猎手", "body": "复杂复合是你最常面对的语言。" },
+      "breakthrough_dan": { "title": "段位攀登者", "body": "段位向上攀了一阶，你也站到了更高的鼓面前。" },
+      "breakthrough_dondaful": { "title": "全良点灯人", "body": "一枚新的全良亮起，整张鼓面都替你闪了一下。" },
+      "breakthrough_extreme": { "title": "极境追光者", "body": "一枚新的极被点亮，这一年的高光也有了形状。" },
+      "breakthrough_ten_star_full_combo": { "title": "十星连击者", "body": "十星全连落下最后一槌，最难的墙也留下了你的回声。" },
+      "breakthrough_full_combo": { "title": "连击拓路人", "body": "新的全连把路往前铺了一段，连击没有在终点前松手。" },
+      "breakthrough_ten_star_clear": { "title": "十星破壁者", "body": "十星通关亮起，曾经挡在面前的墙终于有了裂缝。" },
+      "breakthrough_clear": { "title": "通关开拓者", "body": "新的通关把边界向前推了一步，下一首也已经在等你。" },
+      "breakthrough_rating_gain": { "title": "RT 上升者", "body": "TAIKOB20 向上跳了一格，日复一日的积累终于有了刻度。" }
     }
   },
   "toolsApi": {

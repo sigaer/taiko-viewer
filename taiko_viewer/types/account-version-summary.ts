@@ -5,6 +5,16 @@ export type VersionSummaryAvailableVersion = {
   endDate: string | null;
 };
 
+export type AnnualMetricStatus = AnnualMetricStatusV4;
+export type AnnualDataMode = AnnualDataModeV4;
+export type AnnualTimePrecision = AnnualTimePrecisionV4;
+
+export type AnnualSection<T> = {
+  status: AnnualMetricStatus;
+  data: T | null;
+  note?: string | null;
+};
+
 export type VersionSummaryBinding = {
   id: number;
   taikoId: string;
@@ -24,6 +34,51 @@ export type VersionSummarySongCard = {
   playCount?: number;
   activeDays?: number;
   level?: number | null;
+  stars?: number | null;
+  difficulty?: string | null;
+  score?: number | null;
+  okCount?: number | null;
+  poundCount?: number | null;
+};
+
+export type VersionSummaryProfileCard = {
+  nickname: string;
+  title: string | null;
+  titleplateId: number | null;
+  danName: string | null;
+  danLevel: number | null;
+  myDonUrl: string | null;
+};
+
+export type VersionSummarySpeedProfile = {
+  speed: number;
+  chartCount: number;
+  eligibleChartCount: number;
+};
+
+export type VersionSummaryNearDondaful = {
+  song: VersionSummarySongCard;
+  okCount: number;
+  score: number;
+};
+
+export type VersionSummaryChallenge = {
+  song: VersionSummarySongCard;
+  playCount: number;
+  level: number | null;
+};
+
+export type VersionSummaryPound = {
+  totalPoundCount: number;
+  topSong: VersionSummarySongCard | null;
+  topPoundCount: number;
+};
+
+export type VersionSummaryHighScore = {
+  song: VersionSummarySongCard;
+  score: number;
+  occurredAt: string | null;
+  happenedLabel: string;
 };
 
 export type VersionSummaryKeyword = {
@@ -46,6 +101,11 @@ export type VersionSummaryBreakthrough = {
   title: string;
   body: string;
   happenedLabel: string;
+  evidence: Array<{
+    key: string;
+    label: string;
+    value: string;
+  }>;
 };
 
 export type VersionSummaryFinalTitle = {
@@ -53,6 +113,10 @@ export type VersionSummaryFinalTitle = {
   eyebrow: string;
   body: string;
   themeKey: string;
+  evidenceKey: string;
+  evidenceValue: unknown;
+  evidenceLabel: string;
+  evidenceText: string;
 };
 
 export type VersionSummaryPoster = {
@@ -101,6 +165,8 @@ export type VersionSummaryMilestone = {
 export type VersionSummaryRatingRank = {
   rating: number;
   rank: number;
+  rankMin?: number | null;
+  rankMax?: number | null;
   sampleSize: number;
   percentile: number;
   tier: string;
@@ -114,11 +180,14 @@ export type VersionSummaryCopyBlock = {
 };
 
 export type VersionSummaryViewModel = {
+  schemaVersion?: 4;
   summaryId: string;
   generatedAt: string;
+  mode?: AnnualDataMode;
   user: {
     nickname: string;
   };
+  profileCard?: VersionSummaryProfileCard;
   version: {
     key: string;
     name: string;
@@ -142,8 +211,13 @@ export type VersionSummaryViewModel = {
   overview: {
     playCount: number;
     uniqueSongs: number;
+    uniqueCharts?: number;
     estimatedSeconds: number;
     estimatedTimeText: string;
+    currentClearCharts?: number;
+    currentFullComboCharts?: number;
+    currentDondafulCharts?: number;
+    currentKiwamiCharts?: number;
   };
   favoriteSong: VersionSummarySongCard | null;
   obsessionSong: VersionSummarySongCard | null;
@@ -155,18 +229,64 @@ export type VersionSummaryViewModel = {
   lateNight: { playCount: number; activeDays: number; latestAt: string; latestLabel: string; song: VersionSummarySongCard } | null;
   milestones: VersionSummaryMilestone[];
   ratingRank: VersionSummaryRatingRank | null;
+  speedProfile?: VersionSummarySpeedProfile | null;
+  nearDondaful?: VersionSummaryNearDondaful | null;
+  challenge?: VersionSummaryChallenge | null;
+  pound?: VersionSummaryPound | null;
+  highScore?: VersionSummaryHighScore | null;
   keyword: VersionSummaryKeyword | null;
   keywordProfile: VersionSummaryKeyword | null;
   breakthrough: VersionSummaryBreakthrough;
   finalTitle: VersionSummaryFinalTitle;
   poster: VersionSummaryPoster;
+  activeShare?: {
+    id: string;
+    url: string;
+    expiresAt: string;
+    locale: "zh" | "ja";
+    posterUrl?: string | null;
+  } | null;
   story: VersionSummaryStory;
+  sectionStatus?: Partial<Record<
+    | "profile"
+    | "period"
+    | "overview"
+    | "favoriteSong"
+    | "obsessionSong"
+    | "favoriteShift"
+    | "keyword"
+    | "ratingRank"
+    | "monthlyFavorites"
+    | "weekdayActivity"
+    | "calendarActivity"
+    | "timeOfDay"
+    | "lateNight"
+    | "speedProfile"
+    | "nearDondaful"
+    | "challenge"
+    | "pound"
+    | "highScore"
+    | "milestones"
+    | "breakthrough"
+    | "finalTitle"
+    | "poster",
+    AnnualMetricStatus
+  >>;
+  timeCoverage?: {
+    status?: AnnualMetricStatus;
+    ratio?: number;
+    trustedPlayCount?: number;
+    totalPlayCount?: number;
+    precision?: AnnualTimePrecision;
+    note?: string | null;
+  };
   copy: {
     opening: {
       eyebrow: string;
       title: string;
       subtitle: string;
     };
+    profile: VersionSummaryCopyBlock;
     period: VersionSummaryCopyBlock;
     overview: VersionSummaryCopyBlock;
     favoriteSong: VersionSummaryCopyBlock;
@@ -180,6 +300,11 @@ export type VersionSummaryViewModel = {
     ratingRank: VersionSummaryCopyBlock;
     milestones: VersionSummaryCopyBlock;
     keyword: VersionSummaryCopyBlock;
+    speedProfile: VersionSummaryCopyBlock;
+    nearDondaful: VersionSummaryCopyBlock;
+    challenge: VersionSummaryCopyBlock;
+    pound: VersionSummaryCopyBlock;
+    highScore: VersionSummaryCopyBlock;
     breakthrough: VersionSummaryCopyBlock;
     finalTitle: VersionSummaryCopyBlock;
     poster: {
@@ -199,9 +324,28 @@ export type VersionSummaryViewModel = {
   };
 };
 
+export type AnnualSummaryV4 = AnnualSummaryV4Generated & {
+  copy?: Partial<VersionSummaryViewModel["copy"]>;
+  [key: string]: unknown;
+};
+
 export type VersionSummaryPayload = {
   availableVersions: VersionSummaryAvailableVersion[];
   selectedVersion: VersionSummaryAvailableVersion;
   currentBinding: VersionSummaryBinding;
-  summary: VersionSummaryViewModel;
+  summary: VersionSummaryViewModel | AnnualSummaryV4;
+  share?: {
+    id: string;
+    token?: string;
+    url?: string;
+    expiresAt: string;
+    locale: "zh" | "ja";
+    posterUrl?: string | null;
+  } | null;
 };
+import type {
+  AnnualDataModeV4,
+  AnnualMetricStatusV4,
+  AnnualSummaryV4Generated,
+  AnnualTimePrecisionV4
+} from "./annual-summary-v4.generated";

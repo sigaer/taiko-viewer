@@ -15,8 +15,8 @@ const props = defineProps<{
 const { locale } = useI18n();
 const uiText = computed(() =>
   locale.value === "ja"
-    ? { play: "プレイ回数", days: "活動日数", songs: "触れた曲数", ongoing: "進行中" }
-    : { play: "游玩次数", days: "活跃天数", songs: "涉及歌曲", ongoing: "进行中" }
+    ? { play: "記録に残った挑戦", days: "灯った日", songs: "出会った曲", ongoing: "物語は続く" }
+    : { play: "留下的挑战", days: "点亮的日期", songs: "相遇的歌", ongoing: "故事仍在继续" }
 );
 </script>
 
@@ -36,7 +36,7 @@ const uiText = computed(() =>
       <div class="opening-slide__drum" data-animate>
         <div class="opening-slide__drum-core">
           <span>{{ summary.finalTitle.title }}</span>
-          <strong>{{ summary.version.name }}</strong>
+          <strong>{{ summary.user.nickname }}</strong>
         </div>
       </div>
 
@@ -45,7 +45,7 @@ const uiText = computed(() =>
           <small>{{ uiText.play }}</small>
           <strong><StoryCounter :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>
-        <article class="opening-slide__stat" data-animate>
+        <article v-if="summary.timeCoverage?.status !== 'unavailable'" class="opening-slide__stat" data-animate>
           <small>{{ uiText.days }}</small>
           <strong><StoryCounter :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>
@@ -88,10 +88,10 @@ const uiText = computed(() =>
   place-items: center;
   text-align: center;
   background:
-    radial-gradient(circle at 50% 45%, rgba(255, 246, 224, 0.94) 0%, rgba(255, 222, 162, 0.95) 46%, rgba(253, 120, 76, 0.96) 78%, rgba(182, 43, 27, 0.98) 100%);
+    radial-gradient(circle at 50% 45%, #ffffff 0%, #f7fbff 48%, #e5f1ff 49% 64%, #3978c8 65% 82%, #17365d 83% 100%);
   box-shadow:
-    inset 0 0 0 16px rgba(132, 26, 22, 0.42),
-    0 36px 70px rgba(5, 10, 27, 0.42);
+    inset 0 0 0 16px rgba(247, 251, 255, 0.5),
+    0 36px 70px rgba(23, 54, 93, 0.22);
 }
 
 @media (max-height: 900px) {
@@ -110,17 +110,20 @@ const uiText = computed(() =>
 }
 
 .opening-slide__drum-core span {
-  color: rgba(104, 36, 20, 0.8);
+  max-width: 78%;
+  color: #3978c8;
   font-size: 14px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .opening-slide__drum-core strong {
-  color: #6a1f15;
+  max-width: 78%;
+  color: #17365d;
   font-family: var(--viewer-display-font);
   font-size: clamp(2.3rem, 4vw, 4rem);
   line-height: 1.02;
+  overflow-wrap: anywhere;
 }
 
 .opening-slide__stats {
@@ -182,8 +185,8 @@ const uiText = computed(() =>
     width: min(13.5rem, 48vw);
     padding: 1rem;
     box-shadow:
-      inset 0 0 0 11px rgba(132, 26, 22, 0.42),
-      0 20px 44px rgba(5, 10, 27, 0.34);
+      inset 0 0 0 11px rgba(247, 251, 255, 0.5),
+      0 20px 44px rgba(23, 54, 93, 0.2);
   }
 
   .opening-slide__drum-core span {
@@ -219,13 +222,74 @@ const uiText = computed(() =>
 @media (max-width: 720px) {
   .opening-slide { grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px; align-content: start; }
   .opening-slide__drum { min-height: 0; align-items: start; }
-  .opening-slide__drum-core { width: 88px; padding: 8px; box-shadow: inset 0 0 0 7px rgba(132, 26, 22, 0.42), 0 12px 24px rgba(5, 10, 27, 0.3); }
-  .opening-slide__drum-core span { font-size: 8px; }
+  .opening-slide__drum-core { width: 88px; padding: 8px; box-shadow: inset 0 0 0 7px rgba(247, 251, 255, 0.5), 0 12px 24px rgba(23, 54, 93, 0.2); }
+  .opening-slide__drum-core span { font-size: 10px; }
   .opening-slide__drum-core strong { font-size: 1.15rem; }
   .opening-slide__stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .opening-slide__stat, .opening-slide__note { padding: 9px; border-radius: 16px; }
-  .opening-slide__stat small, .opening-slide__note span { font-size: 9px; letter-spacing: 0.08em; }
+  .opening-slide__stat small, .opening-slide__note span { font-size: 10px; letter-spacing: 0.08em; }
   .opening-slide__stat strong, .opening-slide__note strong { margin-top: 4px; font-size: 1.05rem; }
   .opening-slide__note { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+}
+
+@media (max-width: 720px) and (min-height: 700px) {
+  .opening-slide {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    justify-items: center;
+    gap: 12px;
+  }
+
+  .opening-slide__drum {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .opening-slide__drum-core {
+    width: min(11.5rem, 46vw, 24vh);
+    padding: 1rem;
+    box-shadow:
+      inset 0 0 0 10px rgba(247, 251, 255, 0.5),
+      0 20px 44px rgba(23, 54, 93, 0.2);
+  }
+
+  .opening-slide__drum-core span { font-size: 11px; }
+  .opening-slide__drum-core strong { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+  .opening-slide__stats,
+  .opening-slide__note { width: min(100%, 32rem); }
+  .opening-slide__stat,
+  .opening-slide__note { padding: 11px 12px; }
+  .opening-slide__stat small,
+  .opening-slide__note span { font-size: 12px; }
+  .opening-slide__note {
+    grid-column: auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
+  .opening-slide {
+    grid-template-columns: minmax(140px, 0.56fr) minmax(280px, 1.35fr) minmax(155px, 0.72fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+  }
+  .opening-slide__drum { min-height: 0; }
+  .opening-slide__drum-core {
+    width: min(38vh, 150px);
+    padding: 0.75rem;
+    box-shadow: inset 0 0 0 9px rgba(247, 251, 255, 0.5), 0 16px 34px rgba(23, 54, 93, 0.18);
+  }
+  .opening-slide__drum-core span { font-size: 12px; }
+  .opening-slide__drum-core strong { font-size: clamp(1.6rem, 3.4vw, 2.25rem); }
+  .opening-slide__stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .opening-slide__stat,
+  .opening-slide__note { padding: 10px 11px; border-radius: 17px; }
+  .opening-slide__stat strong,
+  .opening-slide__note strong { margin-top: 5px; font-size: clamp(1.2rem, 2.7vw, 1.7rem); }
+  .opening-slide__note { grid-column: auto; align-self: center; }
 }
 </style>

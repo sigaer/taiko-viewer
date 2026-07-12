@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StoryCounter from "../StoryCounter.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
@@ -16,8 +17,8 @@ const song = computed(() => props.summary.obsessionSong);
 const { locale } = useI18n();
 const uiText = computed(() =>
   locale.value === "ja"
-    ? { activeDays: "活動日数", playCount: "プレイ回数", memory: "余韻", coverFallback: "虹2025" }
-    : { activeDays: "活跃天数", playCount: "游玩次数", memory: "回响", coverFallback: "虹2025" }
+    ? { activeDays: "思い出した日", playCount: "重ねた出会い", memory: "余韻", coverFallback: "2026" }
+    : { activeDays: "想起它的日子", playCount: "重逢的次数", memory: "回响", coverFallback: "2026" }
 );
 </script>
 
@@ -36,7 +37,7 @@ const uiText = computed(() =>
       <div class="obsession-slide__memory" data-animate>
         <el-image v-if="song" :src="song.coverUrl" fit="cover" class="obsession-slide__cover">
           <template #error>
-            <div class="obsession-slide__cover obsession-slide__cover--fallback">{{ uiText.coverFallback }}</div>
+            <AnnualArtworkFallback :label="uiText.coverFallback" />
           </template>
         </el-image>
         <div class="obsession-slide__echoes">
@@ -102,7 +103,7 @@ const uiText = computed(() =>
   aspect-ratio: 1;
   border-radius: 30px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(111, 175, 255, 0.22), rgba(255, 147, 101, 0.24));
+  background: linear-gradient(135deg, rgba(155, 201, 255, 0.28), rgba(57, 120, 200, 0.22));
 }
 
 .obsession-slide__cover--fallback {
@@ -125,7 +126,7 @@ const uiText = computed(() =>
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 196, 110, 0.9), rgba(255, 118, 78, 0.9));
+  background: linear-gradient(135deg, rgba(155, 201, 255, 0.92), rgba(57, 120, 200, 0.92));
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
 }
 
@@ -234,8 +235,8 @@ const uiText = computed(() =>
   .obsession-slide__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
   .obsession-slide__metric { padding: 9px 10px; border-radius: 16px; }
   .obsession-slide__metric--wide { grid-column: 1 / -1; }
-  .obsession-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
+  .obsession-slide__metric span { font-size: 10px; letter-spacing: 0.08em; }
   .obsession-slide__metric strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.4rem); overflow-wrap: anywhere; }
-  .obsession-slide__metric small { display: block; margin-top: 6px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .obsession-slide__metric small { display: block; margin-top: 6px; font-size: 0.75rem; line-height: 1.32; overflow: visible; }
 }
 </style>

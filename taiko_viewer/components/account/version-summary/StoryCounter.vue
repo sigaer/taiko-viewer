@@ -22,10 +22,11 @@ const props = withDefaults(
 
 const displayValue = ref(0);
 let tween: gsap.core.Tween | null = null;
+const { locale } = useI18n();
 
 const numberFormatter = computed(
   () =>
-    new Intl.NumberFormat("zh-CN", {
+    new Intl.NumberFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", {
       minimumFractionDigits: props.decimals,
       maximumFractionDigits: props.decimals
     })

@@ -25,10 +25,8 @@ export const getAdminRuntimeConfig = () => {
     ),
     botDbHost: String(runtimeConfig.botDbHost || process.env.METHOD_CALLS_DB_HOST || "127.0.0.1"),
     botDbPort: Number(runtimeConfig.botDbPort || process.env.METHOD_CALLS_DB_PORT || 3306),
-    botDbUser: String(runtimeConfig.botDbUser || process.env.METHOD_CALLS_DB_USER || "root"),
-    botDbPassword: String(
-      runtimeConfig.botDbPassword || process.env.METHOD_CALLS_DB_PASSWORD || "wtf025366"
-    ),
+    botDbUser: String(runtimeConfig.botDbUser || process.env.METHOD_CALLS_DB_USER || ""),
+    botDbPassword: String(runtimeConfig.botDbPassword || process.env.METHOD_CALLS_DB_PASSWORD || ""),
     botDbName: String(runtimeConfig.botDbName || process.env.METHOD_CALLS_DB_NAME || "bot")
   };
 };
@@ -52,6 +50,12 @@ export const getAdminManagedPaths = () => {
 export const getBotDb = () => {
   if (!botPool) {
     const config = getAdminRuntimeConfig();
+    if (!config.botDbUser || !config.botDbPassword) {
+      throw new Error("Bot database credentials are not configured");
+    }
+    if (process.env.NODE_ENV === "production" && config.botDbUser.toLowerCase() === "root") {
+      throw new Error("Bot database must use a dedicated non-root user");
+    }
     botPool = mysql.createPool({
       host: config.botDbHost,
       port: config.botDbPort,

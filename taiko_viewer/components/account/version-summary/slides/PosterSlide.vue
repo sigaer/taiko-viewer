@@ -1,304 +1,188 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, watch } from "vue";
+import QRCode from "qrcode";
+import { ElMessage } from "element-plus";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import AnnualPoster from "../AnnualPoster.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
-const props = defineProps<{
-  summary: VersionSummaryViewModel;
-  pageIndex: number;
-  pageTotal: number;
-  active: boolean;
-  reducedMotion: boolean;
-}>();
+const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
+const { t, locale } = useI18n();
+const apiFetch = useViewerApiFetch();
+const busy = ref(false);
+type ActiveShare = { id: string; url: string; expiresAt: string; locale?: "zh" | "ja"; posterUrl?: string | null };
+const share = ref<ActiveShare | null>(null);
+const qrCodeUrl = ref("");
+const posterUrl = ref("");
+const currentLocale = () => locale.value === "ja" ? "ja" as const : "zh" as const;
+const persistShare = (value: ActiveShare | null) => {
+  props.summary.activeShare = value ? {
+    id: value.id,
+    url: value.url,
+    expiresAt: value.expiresAt,
+    locale: value.locale || currentLocale(),
+    posterUrl: value.posterUrl || null
+  } : null;
+};
 
-const { locale } = useI18n();
-const uiText = computed(() =>
-  locale.value === "ja"
-    ? { finalTitle: "今期の称号", favorite: "よく戻った曲", keyword: "キーワード", coverFallback: "虹2025" }
-    : { finalTitle: "这一版的称号", favorite: "反复回去的歌", keyword: "关键词", coverFallback: "虹2025" }
-);
+const absoluteUrl = (value: string) => process.client ? new URL(value, window.location.origin).toString() : value;
+const wait = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
+watch(() => props.summary.activeShare, async (value) => {
+  share.value = value ? { ...value } : null;
+  posterUrl.value = value?.posterUrl || "";
+  qrCodeUrl.value = value?.url
+    ? await QRCode.toDataURL(absoluteUrl(value.url), { width: 320, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" })
+    : "";
+}, { immediate: true });
+
+const pollPoster = async (jobId: string) => {
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    const payload = await apiFetch<{ job: { status: string; error?: { message?: string } | null }; poster?: { url: string } }>(`/api/account/annual-poster-jobs/${encodeURIComponent(jobId)}`);
+    if (payload.job.status === "completed" && payload.poster?.url) return payload.poster.url;
+    if (payload.job.status === "failed") throw new Error(payload.job.error?.message || "POSTER_FAILED");
+    await wait(900);
+  }
+  throw new Error("POSTER_TIMEOUT");
+};
+
+const renewShare = async () => {
+  if (!share.value || busy.value) return;
+  busy.value = true;
+  try {
+    const result = await apiFetch<{ share: ActiveShare }>(`/api/account/annual-shares/${encodeURIComponent(share.value.id)}`, { method: "PATCH" });
+    share.value = { ...share.value, expiresAt: result.share.expiresAt };
+    persistShare(share.value);
+    ElMessage.success(t("annualSummary.share.renewed"));
+  } catch {
+    ElMessage.error(t("annualSummary.share.failed"));
+  } finally {
+    busy.value = false;
+  }
+};
+
+const revokeShare = async () => {
+  if (!share.value || busy.value) return;
+  busy.value = true;
+  try {
+    await apiFetch(`/api/account/annual-shares/${encodeURIComponent(share.value.id)}`, { method: "DELETE" });
+    share.value = null;
+    persistShare(null);
+    posterUrl.value = "";
+    qrCodeUrl.value = "";
+    ElMessage.success(t("annualSummary.share.revoked"));
+  } catch {
+    ElMessage.error(t("annualSummary.share.failed"));
+  } finally {
+    busy.value = false;
+  }
+};
+
+const createShare = async () => {
+  if (busy.value) return;
+  busy.value = true;
+  try {
+    const shared = await apiFetch<{ share: ActiveShare }>(`/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/shares`, {
+      method: "POST", body: { locale: currentLocale() }
+    });
+    const activeShare = { ...shared.share, locale: currentLocale() };
+    share.value = activeShare;
+    persistShare(activeShare);
+    qrCodeUrl.value = await QRCode.toDataURL(absoluteUrl(activeShare.url), { width: 320, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" }).catch(() => "");
+    posterUrl.value = activeShare.posterUrl || "";
+    ElMessage.success(t("annualSummary.share.created"));
+  } catch {
+    ElMessage.error(t("annualSummary.share.failed"));
+  } finally {
+    busy.value = false;
+  }
+};
+
+const generatePoster = async () => {
+  if (busy.value) return;
+  if (!share.value) {
+    ElMessage.info(t("annualSummary.share.posterFirst"));
+    return;
+  }
+  busy.value = true;
+  try {
+    const queued = await apiFetch<{ job: { id: string; status: string }; poster?: { url: string } }>(`/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/posters`, {
+      method: "POST", body: { shareId: share.value.id, locale: currentLocale() }
+    });
+    posterUrl.value = queued.poster?.url || (queued.job.status === "completed" ? "" : await pollPoster(queued.job.id));
+    share.value.posterUrl = posterUrl.value || null;
+    share.value.locale = currentLocale();
+    persistShare(share.value);
+    ElMessage.success(t("annualSummary.share.ready"));
+  } catch {
+    ElMessage.error(t("annualSummary.share.failed"));
+  } finally {
+    busy.value = false;
+  }
+};
+
+const downloadPoster = () => {
+  if (!posterUrl.value || !process.client) return false;
+  const anchor = document.createElement("a");
+  anchor.href = posterUrl.value;
+  anchor.download = `taiko-annual-2026-${locale.value}.png`;
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  return true;
+};
+
+const sharePoster = async () => {
+  if (!process.client || !share.value) return;
+  if (!posterUrl.value) {
+    ElMessage.info(t("annualSummary.share.posterFirst"));
+    return;
+  }
+  const url = absoluteUrl(share.value.url);
+  try {
+    if (posterUrl.value && navigator.share && navigator.canShare) {
+      const response = await fetch(posterUrl.value);
+      const file = new File([await response.blob()], "taiko-annual-2026.png", { type: "image/png" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: props.summary.poster.title, text: props.summary.finalTitle.title, url, files: [file] });
+        return;
+      }
+    }
+    if (navigator.share) await navigator.share({ title: props.summary.poster.title, text: props.summary.finalTitle.title, url });
+    else if (downloadPoster()) ElMessage.success(t("annualSummary.share.downloadFallback"));
+  } catch (error) {
+    if ((error as Error)?.name !== "AbortError") {
+      if (downloadPoster()) ElMessage.success(t("annualSummary.share.downloadFallback"));
+      else ElMessage.error(t("annualSummary.share.failed"));
+    }
+  }
+};
 </script>
 
 <template>
-  <StorySlideShell
-    :page-index="pageIndex"
-    :page-total="pageTotal"
-    :eyebrow="summary.copy.poster.eyebrow"
-    :title="summary.copy.poster.title"
-    :lead="summary.copy.poster.subtitle"
-    :accent="summary.poster.periodLabel"
-    tone="gold"
-    :active="active"
-    :reduced-motion="reducedMotion"
-  >
+  <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" :eyebrow="summary.copy.poster.eyebrow" :title="summary.copy.poster.title" :lead="summary.copy.poster.subtitle" :accent="summary.poster.periodLabel" tone="gold" :active="active" :reduced-motion="reducedMotion">
     <div class="poster-slide">
-      <div class="poster-slide__board" data-animate>
-        <div class="poster-slide__hero">
-          <div class="poster-slide__board-head">
-            <span>{{ summary.version.name }}</span>
-            <h3>{{ summary.poster.title }}</h3>
-            <p>{{ summary.poster.subtitle }}</p>
-          </div>
-
-          <div v-if="summary.favoriteSong" class="poster-slide__cover-card">
-            <el-image :src="summary.favoriteSong.coverUrl" fit="cover" class="poster-slide__cover">
-              <template #error>
-                <div class="poster-slide__cover poster-slide__cover--fallback">{{ uiText.coverFallback }}</div>
-              </template>
-            </el-image>
-          </div>
+      <div class="poster-slide__preview" data-animate>
+        <AnnualPoster :summary="summary" :share-url="share ? absoluteUrl(share.url) : ''" :qr-code-url="qrCodeUrl" :expires-at="share?.expiresAt" compact />
+      </div>
+      <div class="poster-slide__actions" data-animate>
+        <button v-if="!share" type="button" :disabled="busy" @click="createShare">{{ t("annualSummary.controls.share") }}</button>
+        <button v-else-if="!posterUrl" type="button" :disabled="busy" @click="generatePoster">{{ busy ? t("annualSummary.share.generating") : t("annualSummary.controls.generatePoster") }}</button>
+        <button v-if="posterUrl" type="button" @click="downloadPoster">{{ t("annualSummary.controls.download") }}</button>
+        <button v-if="share" type="button" @click="sharePoster">{{ t("annualSummary.controls.webShare") }}</button>
+        <div v-if="share" class="poster-slide__management">
+          <button type="button" :disabled="busy" @click="renewShare">{{ t("annualSummary.controls.renewShare") }}</button>
+          <button type="button" :disabled="busy" class="poster-slide__revoke" @click="revokeShare">{{ t("annualSummary.controls.revokeShare") }}</button>
         </div>
-
-        <div class="poster-slide__facts">
-          <article v-for="item in summary.poster.stats" :key="item.label">
-            <span>{{ item.label }}</span>
-            <strong>{{ item.value }}</strong>
-          </article>
-        </div>
-
-        <div class="poster-slide__footer">
-          <div>
-            <span>{{ uiText.finalTitle }}</span>
-            <strong>{{ summary.poster.finalTitle }}</strong>
-          </div>
-          <div>
-            <span>{{ uiText.favorite }}</span>
-            <strong>{{ summary.poster.favoriteSong }}</strong>
-          </div>
-          <div>
-            <span>{{ uiText.keyword }}</span>
-            <strong>{{ summary.poster.keyword }}</strong>
-          </div>
-        </div>
-
-        <article class="poster-slide__closing">
-          <span>{{ summary.poster.periodLabel }}</span>
-          <strong>{{ summary.poster.shareCopy }}</strong>
-          <small>{{ summary.poster.closingLine }}</small>
-        </article>
+        <small v-if="share">{{ t("annualSummary.share.expires", { date: new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'zh-CN', { dateStyle: 'medium' }).format(new Date(share.expiresAt)) }) }}</small>
+        <p>{{ t("annualSummary.share.privacy") }}</p>
       </div>
     </div>
   </StorySlideShell>
 </template>
 
 <style scoped>
-.poster-slide {
-  display: grid;
-  height: 100%;
-  min-height: 0;
-}
-
-.poster-slide__board,
-.poster-slide__closing {
-  border-radius: 34px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(18px);
-}
-
-.poster-slide__board {
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 26px;
-  background:
-    radial-gradient(circle at top right, rgba(255, 190, 96, 0.28), transparent 34%),
-    linear-gradient(160deg, rgba(255, 248, 236, 0.96), rgba(255, 234, 208, 0.88));
-  color: #552617;
-  box-shadow: 0 30px 64px rgba(5, 10, 27, 0.38);
-}
-
-.poster-slide__hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: start;
-}
-
-.poster-slide__board-head span,
-.poster-slide__facts span,
-.poster-slide__footer span,
-.poster-slide__closing span {
-  display: block;
-  letter-spacing: 0.14em;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.poster-slide__board-head span,
-.poster-slide__facts span,
-.poster-slide__footer span {
-  color: rgba(85, 38, 23, 0.64);
-}
-
-.poster-slide__board-head h3 {
-  margin: 10px 0 12px;
-  font-family: var(--viewer-display-font);
-  font-size: clamp(2.2rem, 4.4vw, 4rem);
-  line-height: 1.04;
-}
-
-.poster-slide__board-head p,
-.poster-slide__closing small {
-  margin: 0;
-  color: rgba(85, 38, 23, 0.74);
-  line-height: 1.82;
-}
-
-.poster-slide__cover-card {
-  width: 116px;
-  flex-shrink: 0;
-}
-
-.poster-slide__cover {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(140deg, rgba(255, 199, 114, 0.38), rgba(255, 134, 87, 0.34));
-  box-shadow: 0 18px 38px rgba(85, 38, 23, 0.16);
-}
-
-.poster-slide__cover--fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(85, 38, 23, 0.8);
-  font-family: var(--viewer-display-font);
-  font-size: 1.8rem;
-}
-
-.poster-slide__facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.poster-slide__facts article,
-.poster-slide__footer div {
-  padding: 16px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.56);
-  border: 1px solid rgba(85, 38, 23, 0.1);
-}
-
-.poster-slide__facts strong,
-.poster-slide__footer strong {
-  display: block;
-  margin-top: 8px;
-  font-size: clamp(1.3rem, 2.8vw, 2rem);
-  line-height: 1.15;
-}
-
-.poster-slide__footer {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.poster-slide__closing {
-  margin-top: auto;
-  padding: 14px 16px 0;
-  border: 0;
-  border-top: 1px solid rgba(85, 38, 23, 0.12);
-  border-radius: 0;
-  backdrop-filter: none;
-}
-
-.poster-slide__closing span {
-  color: rgba(85, 38, 23, 0.64);
-}
-
-.poster-slide__closing strong {
-  display: block;
-  margin-top: 10px;
-  color: #552617;
-  font-size: clamp(1.2rem, 2.5vw, 2rem);
-  line-height: 1.12;
-}
-
-.poster-slide__closing small {
-  display: block;
-  margin-top: 14px;
-  color: rgba(255, 237, 214, 0.78);
-  color: rgba(85, 38, 23, 0.7);
-}
-
-@media (max-width: 720px) {
-  .poster-slide__hero {
-    grid-template-columns: minmax(0, 1fr) 86px;
-    gap: 14px;
-  }
-
-  .poster-slide__cover-card {
-    width: 86px;
-  }
-
-  .poster-slide__facts,
-  .poster-slide__footer {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .poster-slide__board {
-    padding: 16px;
-  }
-
-  .poster-slide__board,
-  .poster-slide__closing {
-    border-radius: 26px;
-  }
-
-  .poster-slide__facts article,
-  .poster-slide__footer div {
-    padding: 14px;
-  }
-
-  .poster-slide__footer div:last-child {
-    grid-column: 1 / -1;
-  }
-
-}
-
-@media (max-width: 420px) and (min-height: 901px) {
-  .poster-slide__facts {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-height: 900px) {
-  .poster-slide__board { padding: 16px; }
-  .poster-slide__board-head h3 { margin: 6px 0; font-size: clamp(1.8rem, 3.6vw, 3rem); }
-  .poster-slide__facts, .poster-slide__footer { gap: 8px; margin-top: 8px; }
-  .poster-slide__facts article, .poster-slide__footer div { padding: 10px; border-radius: 16px; }
-  .poster-slide__closing { margin-top: 8px; padding: 8px 10px 0; }
-  .poster-slide__closing small { margin-top: 6px; line-height: 1.4; }
-}
-
-@media (max-width: 720px) and (max-height: 780px) {
-  .poster-slide__cover-card { width: 62px; }
-  .poster-slide__hero { grid-template-columns: minmax(0, 1fr) 62px; }
-  .poster-slide__facts, .poster-slide__footer { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .poster-slide__footer div:last-child { grid-column: auto; }
-  .poster-slide__facts strong, .poster-slide__footer strong { font-size: 1rem; }
-  .poster-slide__closing small { display: block; }
-}
-
-@media (max-width: 720px) {
-  .poster-slide__board { padding: 10px; border-radius: 18px; }
-  .poster-slide__hero { grid-template-columns: minmax(0, 1fr) 64px; gap: 7px; }
-  .poster-slide__cover-card { width: 64px; }
-  .poster-slide__cover { border-radius: 12px; }
-  .poster-slide__board-head h3 { margin: 4px 0; font-size: clamp(1.25rem, 6vw, 1.7rem); }
-  .poster-slide__board-head p, .poster-slide__closing small { display: block; font-size: 0.68rem; line-height: 1.25; overflow: visible; }
-  .poster-slide__facts, .poster-slide__footer { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 6px; }
-  .poster-slide__footer div:last-child { grid-column: auto; }
-  .poster-slide__facts article, .poster-slide__footer div { padding: 7px; border-radius: 12px; }
-  .poster-slide__board-head span, .poster-slide__facts span, .poster-slide__footer span, .poster-slide__closing span { font-size: 8px; letter-spacing: 0.07em; }
-  .poster-slide__facts strong, .poster-slide__footer strong { margin-top: 3px; font-size: 0.82rem; overflow-wrap: anywhere; }
-  .poster-slide__closing { margin-top: 6px; padding: 6px 7px 0; }
-  .poster-slide__closing strong { margin-top: 3px; font-size: 0.95rem; }
-  .poster-slide__closing small { margin-top: 4px; color: rgba(85, 38, 23, 0.7); }
-}
+.poster-slide{height:100%;min-height:0;display:grid;grid-template-columns:minmax(260px,.74fr) minmax(220px,.46fr);gap:clamp(12px,3vw,32px);align-items:center;justify-content:center}.poster-slide__preview{min-height:0;max-height:100%;display:grid;place-items:center}.poster-slide__preview :deep(.annual-poster){width:auto;height:min(100%,62vh);max-width:100%}.poster-slide__actions{display:grid;gap:9px}.poster-slide__actions button{min-height:48px;padding:10px 18px;border-radius:99px;border:1px solid rgba(57,120,200,.2);color:#17365d;background:#f7fbff;font-size:12px;font-weight:700;cursor:pointer}.poster-slide__actions>button:first-child{color:#fff;background:#3978c8;border-color:#3978c8}.poster-slide__actions button:disabled{opacity:.55;cursor:wait}.poster-slide__actions button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.poster-slide__management{display:grid;grid-template-columns:1fr 1fr;gap:7px}.poster-slide__management button{min-height:44px;padding:7px 10px}.poster-slide__management .poster-slide__revoke{color:#17365d;border-color:#3978c855;background:#f7fbff}.poster-slide__actions small{color:#5c7697;font-size:10px;line-height:1.45}.poster-slide__actions p{margin:4px 0 0;color:#7890ab;font-size:12px;line-height:1.55}@media(max-width:720px){.poster-slide{grid-template-columns:minmax(0,1fr) minmax(130px,38vw);gap:8px;align-items:start}.poster-slide__preview :deep(.annual-poster){height:auto;width:100%}.poster-slide__actions{gap:6px}.poster-slide__actions button{min-height:44px;padding:7px 9px;font-size:10px}.poster-slide__management{grid-template-columns:1fr}.poster-slide__actions p{font-size:12px;line-height:1.35}}@media (orientation:landscape) and (min-width:721px) and (max-height:460px){.poster-slide{grid-template-columns:minmax(320px,1fr) minmax(260px,.65fr);gap:18px}.poster-slide__preview :deep(.annual-poster){height:min(100%,55vh)}.poster-slide__actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.poster-slide__actions button{min-height:44px;padding:6px 10px}.poster-slide__management{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.poster-slide__management button{min-height:44px}.poster-slide__actions small,.poster-slide__actions p{grid-column:1/-1}.poster-slide__actions p{margin-top:0;line-height:1.35}}
 </style>

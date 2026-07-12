@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StoryCounter from "../StoryCounter.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
@@ -15,8 +16,8 @@ const props = defineProps<{
 const song = computed(() => props.summary.favoriteSong);
 const { locale } = useI18n();
 const uiText = computed(() => ({
-  playLabel: locale.value === "ja" ? "プレイ回数" : "游玩次数",
-  coverFallback: "虹2025"
+  playLabel: locale.value === "ja" ? "記録に残った出会い" : "被记录的相遇",
+  coverFallback: "2026"
 }));
 </script>
 
@@ -35,7 +36,7 @@ const uiText = computed(() => ({
       <div v-if="song" class="song-slide__cover" data-animate>
         <el-image :src="song.coverUrl" fit="cover" class="song-slide__image">
           <template #error>
-            <div class="song-slide__image song-slide__image--fallback">{{ uiText.coverFallback }}</div>
+            <AnnualArtworkFallback :label="uiText.coverFallback" />
           </template>
         </el-image>
       </div>
@@ -91,7 +92,7 @@ const uiText = computed(() => ({
   inset: auto 10% -20px;
   height: 44px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 166, 81, 0.28), rgba(255, 166, 81, 0));
+  background: radial-gradient(circle, rgba(57, 120, 200, 0.24), rgba(57, 120, 200, 0));
   filter: blur(12px);
 }
 
@@ -100,7 +101,7 @@ const uiText = computed(() => ({
   aspect-ratio: 1;
   border-radius: 34px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 205, 127, 0.28), rgba(255, 121, 84, 0.3));
+  background: linear-gradient(135deg, rgba(229, 241, 255, 0.92), rgba(57, 120, 200, 0.24));
   box-shadow: 0 26px 56px rgba(5, 10, 27, 0.34);
 }
 
@@ -217,10 +218,24 @@ const uiText = computed(() => ({
   .song-slide__image { border-radius: 16px; }
   .song-slide__info { gap: 6px; }
   .song-slide__panel, .song-slide__metric { padding: 10px 11px; border-radius: 16px; }
-  .song-slide__panel span, .song-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
+  .song-slide__panel span, .song-slide__metric span { font-size: 10px; letter-spacing: 0.08em; }
   .song-slide__panel strong, .song-slide__metric strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.45rem); overflow-wrap: anywhere; }
-  .song-slide__panel small { display: block; margin-top: 7px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .song-slide__panel small { display: block; margin-top: 7px; font-size: 0.75rem; line-height: 1.32; overflow: visible; }
   .song-slide__chips { display: flex; margin-top: 7px; gap: 4px; }
-  .song-slide__chips span { padding: 3px 5px; font-size: 8px; }
+  .song-slide__chips span { padding: 3px 5px; font-size: 10px; }
+}
+
+@media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
+  .song-slide { grid-template-columns: minmax(130px, 36vh) minmax(0, 1fr); gap: 14px; align-items: center; }
+  .song-slide__image { border-radius: 20px; }
+  .song-slide__info { grid-template-columns: minmax(0, 1fr) minmax(125px, 0.34fr); gap: 8px; align-items: stretch; }
+  .song-slide__panel,
+  .song-slide__metric { padding: 10px 12px; border-radius: 18px; }
+  .song-slide__panel strong,
+  .song-slide__metric strong { margin-top: 5px; font-size: clamp(1.35rem, 3vw, 1.9rem); }
+  .song-slide__panel small { margin-top: 7px; line-height: 1.4; }
+  .song-slide__chips { margin-top: 7px; gap: 5px; }
+  .song-slide__chips span { padding: 4px 7px; }
+  .song-slide__metric { display: grid; align-content: center; }
 }
 </style>

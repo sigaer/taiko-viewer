@@ -1,0 +1,145 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import { access, readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+
+const root = process.cwd();
+const read = (path) => readFile(resolve(root, path), "utf8");
+const exists = (path) => access(resolve(root, path)).then(() => true, () => false);
+const generatedTypeCheck = spawnSync(process.execPath, ["scripts/generate_annual_types.mjs", "--check"], { cwd: root, encoding: "utf8" });
+assert.equal(generatedTypeCheck.status, 0, generatedTypeCheck.stderr || "generated annual types are stale");
+
+const expectedPages = [
+  "opening", "profile", "period", "overview",
+  "favorite", "obsession", "favoriteShift", "keyword", "ratingRank",
+  "monthly", "weekday", "calendar", "timeOfDay", "lateNight",
+  "speedProfile", "nearDondaful", "challenge", "pound", "highScore", "milestones", "breakthrough",
+  "final", "poster"
+];
+
+const requiredRoutes = [
+  "server/api/account/annual-summaries/[key].get.ts",
+  "server/api/account/annual-summaries/[key]/build.post.ts",
+  "server/api/account/annual-summary-jobs/[jobId].get.ts",
+  "server/api/account/annual-summaries/[key]/posters.post.ts",
+  "server/api/account/annual-poster-jobs/[jobId].get.ts",
+  "server/api/account/annual-summaries/[key]/shares.post.ts",
+  "server/api/account/annual-shares/[shareId].patch.ts",
+  "server/api/account/annual-shares/[shareId].delete.ts",
+  "server/api/annual/shares/[token].get.ts",
+  "server/api/admin/annual-summaries/[summaryId]/events.get.ts"
+];
+
+for (const route of requiredRoutes) assert.equal(await exists(route), true, `missing route: ${route}`);
+assert.equal(await exists("server/api/account/version-summary.get.ts"), false, "legacy schema 3 route still exists");
+
+const registry = await read("composables/useAnnualPages.ts");
+const actualPages = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map((match) => match[1]);
+assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 23-page contract");
+
+const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
+assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
+assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
+
+const zhSource = await read("locales/zh.json");
+const jaSource = await read("locales/ja.json");
+assert.equal(/虹2025|2025 \/ 版本总结/.test(`${zhSource}\n${jaSource}`), false, "legacy 2025 annual copy remains");
+const zh = JSON.parse(zhSource).annualSummary;
+const ja = JSON.parse(jaSource).annualSummary;
+const annualCopySource = JSON.stringify({ zh, ja });
+const implementationCopyPattern = /尚未全良|无不可且良数|读取当前最佳记录|最佳记[录錄]选项画像|站内样本中的参考位置|信赖? Wahlap|可信 Wahlap|固定优先级选择|当前ベスト記録|ベスト記録オプション|サイト内サンプルでの参考位置|信頼できる Wahlap|stage_delta|option_flg|record_updated_at|observed_at|highscore_datetime|MetricStatus|current_archive|version_observed|batch_last_play_proxy|source_highscore_time|schema\s*v?4|快照|排序规则|スナップショット/;
+assert.equal(
+  implementationCopyPattern.test(annualCopySource),
+  false,
+  "implementation-oriented copy is exposed in the annual story"
+);
+for (const [key, placeholder] of [
+  ["opening", "{nickname}"], ["favorite", "{favoriteSong}"], ["obsession", "{obsessionDays}"],
+  ["weekday", "{topWeekday}"], ["near", "{nearSong}"], ["challenge", "{challengeCount}"],
+  ["timeOfDay", "{favoriteHour}"], ["rating", "{ratingSample}"], ["final", "{finalTitle}"]
+]) {
+  assert.equal(JSON.stringify(zh.copy[key]).includes(placeholder), true, `zh annual copy is not personalized: ${key}`);
+  assert.equal(JSON.stringify(ja.copy[key]).includes(placeholder), true, `ja annual copy is not personalized: ${key}`);
+}
+for (const locale of [zh, ja]) {
+  for (const page of expectedPages) assert.equal(typeof locale.pages[page], "string", `missing page locale: ${page}`);
+  for (const key of ["renewShare", "revokeShare"]) assert.equal(typeof locale.controls[key], "string", `missing control locale: ${key}`);
+  for (const key of ["ready", "renewed", "revoked", "expires", "privacy"]) assert.equal(typeof locale.share[key], "string", `missing share locale: ${key}`);
+}
+
+const componentNames = {
+  opening: "OpeningSlide", profile: "ProfileSlide", period: "PeriodSlide", overview: "OverviewSlide",
+  favorite: "FavoriteSongSlide", obsession: "ObsessionSongSlide", favoriteShift: "FavoriteShiftSlide",
+  keyword: "KeywordSlide", ratingRank: "RatingRankSlide", monthly: "MonthlyFavoritesSlide",
+  weekday: "WeekdayActivitySlide", calendar: "CalendarActivitySlide", timeOfDay: "TimeOfDaySlide",
+  lateNight: "LateNightSlide", speedProfile: "SpeedProfileSlide", nearDondaful: "NearDondafulSlide",
+  challenge: "ChallengeSlide", pound: "PoundSlide", highScore: "HighScoreSlide", milestones: "MilestonesSlide",
+  breakthrough: "BreakthroughSlide", final: "FinalTitleSlide", poster: "PosterSlide"
+};
+const annualSources = await Promise.all([
+  read("components/account/version-summary/StorySlideShell.vue"),
+  ...expectedPages.map((page) => read(`components/account/version-summary/slides/${componentNames[page]}.vue`))
+]);
+for (const source of annualSources) {
+  assert.equal(source.includes("虹2025"), false, "legacy 2025 annual component copy remains");
+  assert.equal(/#ee7062|rgba\(238,\s*112,\s*98/i.test(source), false, "coral is used outside drum accents");
+  for (const match of source.matchAll(/font-size:\s*([0-9.]+)px/gi)) {
+    assert.ok(Number(match[1]) >= 10, `annual UI contains sub-10px text: ${match[0]}`);
+  }
+  for (const match of source.matchAll(/font-size:\s*0\.([0-9]+)rem/gi)) {
+    assert.ok(Number(`0.${match[1]}`) * 16 >= 10, `annual UI contains sub-10px text: ${match[0]}`);
+  }
+}
+
+const breakthroughSource = await read("components/account/version-summary/slides/BreakthroughSlide.vue");
+assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");
+assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
+
+const periodSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
+assert.equal(periodSource.includes('v-if="summary.period.firstRecordAt"'), true, "period page exposes an empty first-record placeholder");
+assert.equal(periodSource.includes('v-if="summary.period.lastRecordAt"'), true, "period page exposes an empty last-record placeholder");
+assert.equal(periodSource.includes("annualSummary.slides.period.archiveBody"), true, "period page lacks an archive narrative when time is unavailable");
+
+const finalTitleSource = await read("components/account/version-summary/slides/FinalTitleSlide.vue");
+assert.equal(finalTitleSource.includes("AnnualDrumWindow"), true, "final title page does not carry the player's MyDon");
+assert.equal(finalTitleSource.includes("summary.finalTitle.evidenceText"), true, "final title evidence is not shown");
+assert.equal(finalTitleSource.includes("summary.poster.keyword"), false, "final title page still exposes an unavailable keyword placeholder");
+
+const drumWindowSource = await read("components/account/version-summary/AnnualDrumWindow.vue");
+assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "drum artwork has no failed-image fallback");
+assert.equal(drumWindowSource.includes("AnnualArtworkFallback"), true, "drum artwork fallback is not visual");
+for (const component of ["MonthlyFavoritesSlide", "FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
+  const source = await read(`components/account/version-summary/slides/${component}.vue`);
+  assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);
+}
+
+const posterSlideSource = await read("components/account/version-summary/slides/PosterSlide.vue");
+assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");
+assert.equal(posterSlideSource.includes("const createShare ="), true, "share creation action is missing");
+assert.equal(posterSlideSource.includes("const generatePoster ="), true, "poster generation action is missing");
+assert.equal(/downloadPoster\(\).*downloadFallback|downloadPoster\(\)\) ElMessage\.success\(t\("annualSummary\.share\.downloadFallback"\)\)/s.test(posterSlideSource), true, "Web Share has no PNG download fallback");
+for (const match of posterSlideSource.matchAll(/min-height:\s*([0-9.]+)px/gi)) {
+  assert.ok(Number(match[1]) >= 44, `poster action is shorter than 44px: ${match[0]}`);
+}
+
+const annualPageSource = await read("pages/account/version-summary.vue");
+assert.equal(annualPageSource.includes("jobStatus.status"), false, "raw annual job status is exposed to users");
+assert.equal(annualPageSource.includes("jobStatusLabel"), true, "localized annual job status is missing");
+assert.equal(/个良/.test(JSON.stringify(zh.annualSummary || zh)), false, "near-dondaful copy uses the wrong Chinese judgment");
+assert.equal(/鼓点|鼓槌|あと可/.test(JSON.stringify(ja)), false, "Japanese annual copy contains mixed-language judgment or instrument terms");
+
+const schema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
+assert.equal(schema.properties.schemaVersion.const, 4);
+assert.ok(schema.required.includes("provenance"));
+assert.ok(schema.$defs.annualObservationEvent.required.includes("timePrecision"));
+
+const deprecatedSources = [
+  await read("server/services/account/annual-summary/index.ts"),
+  await read("utils/annualSummary.ts"),
+  registry
+].join("\n");
+assert.equal(/schemaVersion\s*[:=]\s*3\b/.test(deprecatedSources), false, "schema 3 compatibility remains");
+
+process.stdout.write(JSON.stringify({ ok: true, pageCount: actualPages.length, locales: ["zh", "ja"], schemaVersion: 4 }) + "\n");

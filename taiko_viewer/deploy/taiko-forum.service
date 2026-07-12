@@ -8,16 +8,12 @@ WorkingDirectory=/home/sigaer/taiko/taiko-forum/taiko_viewer
 Environment=NODE_ENV=production
 Environment=NITRO_PORT=3101
 Environment=NITRO_HOST=127.0.0.1
+EnvironmentFile=-/etc/taiko-viewer.env
 Environment=TAIKO_REPO_ROOT=/home/sigaer/taiko
 Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
 Environment=TAIKO_OPEN_RESOURCE_DIR=/home/sigaer/taiko-open-resources
 Environment=TAIKO_OPEN_DAILY_LIMIT=100
 Environment=TAIKO_OPEN_DEVELOPER_DAILY_LIMIT=2500
-Environment=SMTP_HOST=smtp.qq.com
-Environment=SMTP_PORT=465
-Environment=SMTP_USER=1106865024@qq.com
-Environment=SMTP_PASS=oeyodsmacstehbeg
-Environment="SMTP_FROM=Sakura Taiko Viewer <1106865024@qq.com>"
 Environment=TAIKO_SUPPORT_INBOX=1106865024@qq.com
 Environment=BILIBILI_HTTP_PROXY=http://127.0.0.1:18888
 Environment=BILIBILI_SESSDATA_FILE=/home/sigaer/bilisess.txt

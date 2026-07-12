@@ -5,13 +5,26 @@ let schemaReady: Promise<void> | null = null;
 
 const getDbConfig = () => {
   const runtimeConfig = useRuntimeConfig();
-  return {
+  const config = {
     host: String(runtimeConfig.dbHost || process.env.TAIKO_DB_HOST || "127.0.0.1"),
     port: Number(runtimeConfig.dbPort || process.env.TAIKO_DB_PORT || 3306),
-    user: String(runtimeConfig.dbUser || process.env.TAIKO_DB_USER || "root"),
-    password: String(runtimeConfig.dbPassword || process.env.TAIKO_DB_PASSWORD || "wtf025366"),
+    user: String(runtimeConfig.dbUser || process.env.TAIKO_DB_USER || ""),
+    password: String(runtimeConfig.dbPassword || process.env.TAIKO_DB_PASSWORD || ""),
     database: String(runtimeConfig.dbName || process.env.TAIKO_DB_NAME || "taiko")
   };
+  if (process.env.NODE_ENV === "production") {
+    if (!config.user || !config.password) {
+      throw new Error("Account database credentials are not configured");
+    }
+    if (config.user.toLowerCase() === "root") {
+      throw new Error("Account database must use a dedicated non-root user");
+    }
+  }
+  return config;
+};
+
+export const assertAccountDbConfiguration = () => {
+  getDbConfig();
 };
 
 export const getAccountDb = () => {
@@ -29,6 +42,13 @@ export const getAccountDb = () => {
     });
   }
   return pool;
+};
+
+export const closeAccountDb = async () => {
+  const currentPool = pool;
+  pool = null;
+  schemaReady = null;
+  if (currentPool) await currentPool.end();
 };
 
 const CREATE_TABLES = [
@@ -271,6 +291,95 @@ const CREATE_TABLES = [
     state_json LONGTEXT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_summaries (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    binding_id BIGINT UNSIGNED NOT NULL,
+    version_key VARCHAR(64) NOT NULL,
+    schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 4,
+    data_mode VARCHAR(32) NOT NULL,
+    input_fingerprint CHAR(64) NOT NULL,
+    summary_path VARCHAR(1024) NOT NULL,
+    events_path VARCHAR(1024) NOT NULL,
+    event_count INT UNSIGNED NOT NULL DEFAULT 0,
+    generated_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_annual_summaries_owner_version (user_id, binding_id, version_key, created_at),
+    KEY idx_web_annual_summaries_fingerprint (input_fingerprint),
+    CONSTRAINT fk_web_annual_summaries_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_summaries_binding_id FOREIGN KEY (binding_id)
+      REFERENCES web_taiko_bindings(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_summary_jobs (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    binding_id BIGINT UNSIGNED NOT NULL,
+    version_key VARCHAR(64) NOT NULL,
+    job_type VARCHAR(16) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'queued',
+    summary_id CHAR(36) DEFAULT NULL,
+    poster_id CHAR(36) DEFAULT NULL,
+    parameters_json LONGTEXT DEFAULT NULL,
+    error_code VARCHAR(64) DEFAULT NULL,
+    error_message VARCHAR(255) DEFAULT NULL,
+    started_at DATETIME DEFAULT NULL,
+    completed_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_annual_summary_jobs_owner_created (user_id, created_at),
+    KEY idx_web_annual_summary_jobs_status (status, job_type, created_at),
+    KEY idx_web_annual_summary_jobs_summary (summary_id),
+    CONSTRAINT fk_web_annual_summary_jobs_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_summary_jobs_binding_id FOREIGN KEY (binding_id)
+      REFERENCES web_taiko_bindings(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_summary_jobs_summary_id FOREIGN KEY (summary_id)
+      REFERENCES web_annual_summaries(id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_shares (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    summary_id CHAR(36) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    locale VARCHAR(8) NOT NULL DEFAULT 'zh',
+    token_hash CHAR(64) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'active',
+    expires_at DATETIME NOT NULL,
+    revoked_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_annual_shares_token_hash (token_hash),
+    KEY idx_web_annual_shares_owner_status (user_id, status, created_at),
+    KEY idx_web_annual_shares_summary_status (summary_id, status),
+    KEY idx_web_annual_shares_expires_at (expires_at),
+    CONSTRAINT fk_web_annual_shares_summary_id FOREIGN KEY (summary_id)
+      REFERENCES web_annual_summaries(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_shares_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_posters (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    summary_id CHAR(36) NOT NULL,
+    share_id CHAR(36) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    locale VARCHAR(8) NOT NULL DEFAULT 'zh',
+    fingerprint CHAR(64) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    width INT UNSIGNED NOT NULL DEFAULT 1080,
+    height INT UNSIGNED NOT NULL DEFAULT 1440,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_annual_posters_share_locale (share_id, locale),
+    KEY idx_web_annual_posters_owner_created (user_id, created_at),
+    KEY idx_web_annual_posters_summary (summary_id),
+    CONSTRAINT fk_web_annual_posters_summary_id FOREIGN KEY (summary_id)
+      REFERENCES web_annual_summaries(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_posters_share_id FOREIGN KEY (share_id)
+      REFERENCES web_annual_shares(id) ON DELETE CASCADE,
+    CONSTRAINT fk_web_annual_posters_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 

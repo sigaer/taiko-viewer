@@ -134,30 +134,30 @@ const labelPoints = computed(() =>
 }
 
 .story-radar-chart__grid {
-  fill: rgba(255, 255, 255, 0.02);
-  stroke: rgba(255, 247, 230, 0.18);
+  fill: rgba(247, 251, 255, 0.42);
+  stroke: rgba(57, 120, 200, 0.18);
   stroke-width: 1;
 }
 
 .story-radar-chart__axis {
-  stroke: rgba(255, 247, 230, 0.22);
+  stroke: rgba(57, 120, 200, 0.22);
   stroke-width: 1;
 }
 
 .story-radar-chart__area {
-  fill: rgba(255, 176, 84, 0.22);
-  stroke: rgba(255, 214, 123, 0.92);
+  fill: rgba(57, 120, 200, 0.2);
+  stroke: rgba(57, 120, 200, 0.92);
   stroke-width: 2;
 }
 
 .story-radar-chart__point {
-  fill: #fff6e8;
-  stroke: rgba(255, 130, 72, 0.9);
+  fill: #f7fbff;
+  stroke: rgba(23, 54, 93, 0.9);
   stroke-width: 1.4;
 }
 
 .story-radar-chart__label {
-  fill: rgba(255, 243, 224, 0.8);
+  fill: #5c7697;
   font-size: 12px;
   letter-spacing: 0.04em;
 }

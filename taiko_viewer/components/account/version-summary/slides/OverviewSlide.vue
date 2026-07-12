@@ -4,242 +4,40 @@ import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StoryCounter from "../StoryCounter.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
-const props = defineProps<{
-  summary: VersionSummaryViewModel;
-  pageIndex: number;
-  pageTotal: number;
-  active: boolean;
-  reducedMotion: boolean;
-}>();
-
-const { locale } = useI18n();
-const uiText = computed(() =>
-  locale.value === "ja"
-    ? {
-        playCount: "プレイ回数",
-        uniqueSongs: "触れた曲数",
-        activeDays: "活動日数",
-        estimatedTime: "推定時間",
-        heat: "今期の熱量"
-      }
-    : {
-        playCount: "游玩次数",
-        uniqueSongs: "涉及歌曲",
-        activeDays: "活跃天数",
-        estimatedTime: "估算时长",
-        heat: "这一版的热量"
-      }
-);
+const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
+const { t, locale } = useI18n();
+const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "ja-JP" : "zh-CN"));
+const showActiveDays = computed(() => props.summary.timeCoverage?.status !== "unavailable");
+const metrics = computed(() => [
+  { key: "songs", label: t("annualSummary.slides.overview.songs"), value: props.summary.overview.uniqueSongs },
+  { key: "charts", label: t("annualSummary.slides.overview.charts"), value: props.summary.overview.uniqueCharts || 0 },
+  { key: "clear", label: t("annualSummary.slides.overview.clear"), value: props.summary.overview.currentClearCharts || 0 },
+  { key: "fullCombo", label: t("annualSummary.slides.overview.fullCombo"), value: props.summary.overview.currentFullComboCharts || 0 },
+  { key: "dondaful", label: t("annualSummary.slides.overview.dondaful"), value: props.summary.overview.currentDondafulCharts || 0 },
+  { key: "kiwami", label: t("annualSummary.slides.overview.kiwami"), value: props.summary.overview.currentKiwamiCharts || 0 }
+]);
 </script>
 
 <template>
-  <StorySlideShell
-    :page-index="pageIndex"
-    :page-total="pageTotal"
-    :eyebrow="summary.copy.overview.eyebrow"
-    :title="summary.copy.overview.title"
-    :lead="summary.copy.overview.body"
-    tone="aurora"
-    :active="active"
-    :reduced-motion="reducedMotion"
-  >
+  <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" :eyebrow="summary.copy.overview.eyebrow" :title="summary.copy.overview.title" :lead="summary.copy.overview.body" tone="aurora" :active="active" :reduced-motion="reducedMotion">
     <div class="overview-slide">
       <article class="overview-slide__hero" data-animate>
-        <div class="overview-slide__hero-head">
-          <span>{{ uiText.playCount }}</span>
-          <strong>
-            <StoryCounter :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" />
-          </strong>
-        </div>
-        <p>{{ summary.copy.overview.body }}</p>
+        <span>{{ t("annualSummary.slides.overview.plays") }}</span>
+        <strong><StoryCounter :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" /></strong>
+        <p>{{ summary.mode === "version_observed" ? t("annualSummary.common.observedQualifier") : t("annualSummary.common.archiveQualifier") }}</p>
         <div class="overview-slide__hero-pills">
-          <span>{{ summary.overview.estimatedTimeText }}</span>
-          <span>{{ summary.poster.shareCopy }}</span>
+          <span v-if="showActiveDays">{{ t("annualSummary.slides.overview.activeDays") }} · <b>{{ formatter.format(summary.period.activeDays) }}</b></span>
+          <span>{{ t("annualSummary.slides.overview.estimated") }} · <b>{{ summary.overview.estimatedTimeText }}</b></span>
         </div>
       </article>
-
       <div class="overview-slide__grid">
-        <article class="overview-slide__tile" data-animate>
-          <span>{{ uiText.uniqueSongs }}</span>
-          <strong><StoryCounter :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article class="overview-slide__tile" data-animate>
-          <span>{{ uiText.activeDays }}</span>
-          <strong><StoryCounter :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article class="overview-slide__tile overview-slide__tile--wide" data-animate>
-          <span>{{ uiText.estimatedTime }}</span>
-          <strong>{{ summary.overview.estimatedTimeText }}</strong>
-          <small>{{ uiText.heat }} · {{ summary.poster.shareCopy }}</small>
-        </article>
+        <article v-for="item in metrics" :key="item.key" class="overview-slide__tile" data-animate><span>{{ item.label }}</span><strong><StoryCounter :value="item.value" :active="active" :reduced-motion="reducedMotion" /></strong></article>
       </div>
     </div>
   </StorySlideShell>
 </template>
 
 <style scoped>
-.overview-slide {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.05fr);
-  gap: 18px;
-  align-items: stretch;
-  height: 100%;
-  min-height: 0;
-}
-
-@media (max-height: 900px) {
-  .overview-slide { gap: 10px; }
-  .overview-slide__hero, .overview-slide__tile { padding: 14px; border-radius: 22px; }
-  .overview-slide__hero { gap: 10px; }
-  .overview-slide__hero strong { font-size: clamp(3rem, 7vw, 4.6rem); }
-  .overview-slide__grid { gap: 8px; }
-}
-
-@media (max-width: 720px) and (max-height: 900px) {
-  .overview-slide { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
-}
-
-.overview-slide__hero,
-.overview-slide__tile {
-  padding: 22px;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(16px);
-}
-
-.overview-slide__hero {
-  display: grid;
-  align-content: start;
-  gap: 18px;
-  background:
-    radial-gradient(circle at top left, rgba(255, 201, 116, 0.18), transparent 38%),
-    rgba(255, 255, 255, 0.08);
-}
-
-.overview-slide__hero span,
-.overview-slide__tile span {
-  color: rgba(255, 230, 196, 0.68);
-  letter-spacing: 0.14em;
-  font-size: 12px;
-}
-
-.overview-slide__hero-head {
-  display: grid;
-  gap: 10px;
-}
-
-.overview-slide__hero strong {
-  font-family: var(--viewer-display-font);
-  font-size: clamp(4rem, 8vw, 6.3rem);
-  line-height: 0.9;
-  color: #fff8ed;
-}
-
-.overview-slide__hero p {
-  margin: 0;
-  color: rgba(255, 240, 218, 0.88);
-  font-size: 1rem;
-  line-height: 1.78;
-}
-
-.overview-slide__hero-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.overview-slide__hero-pills span {
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 243, 224, 0.82);
-  letter-spacing: 0.04em;
-  text-transform: none;
-}
-
-.overview-slide__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.overview-slide__tile {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.overview-slide__tile strong {
-  display: block;
-  color: #fff8ed;
-  font-size: clamp(2rem, 3.8vw, 3rem);
-  line-height: 1.05;
-}
-
-.overview-slide__tile small {
-  display: block;
-  color: rgba(255, 237, 214, 0.76);
-  line-height: 1.8;
-}
-
-.overview-slide__tile--wide {
-  grid-column: span 2;
-}
-
-@media (max-width: 960px) {
-  .overview-slide {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 720px) {
-  .overview-slide__hero,
-  .overview-slide__tile {
-    padding: 18px;
-    border-radius: 24px;
-  }
-
-  .overview-slide__hero {
-    gap: 14px;
-  }
-
-  .overview-slide__hero strong {
-    font-size: clamp(3.1rem, 15vw, 4.8rem);
-  }
-
-  .overview-slide__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .overview-slide__tile--wide {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 420px) {
-  .overview-slide__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .overview-slide__tile--wide {
-    grid-column: span 1;
-  }
-}
-
-@media (max-width: 720px) {
-  .overview-slide { grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr); gap: 7px; align-items: stretch; }
-  .overview-slide__hero, .overview-slide__tile { padding: 10px 11px; border-radius: 16px; }
-  .overview-slide__hero { gap: 7px; }
-  .overview-slide__hero strong { font-size: clamp(2.2rem, 12vw, 3.2rem); }
-  .overview-slide__hero p { font-size: 0.72rem; line-height: 1.32; display: block; overflow: visible; }
-  .overview-slide__hero-pills { display: flex; gap: 5px; }
-  .overview-slide__hero-pills span { padding: 4px 6px; font-size: 8px; }
-  .overview-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .overview-slide__tile--wide { grid-column: 1 / -1; }
-  .overview-slide__hero span, .overview-slide__tile span { font-size: 9px; letter-spacing: 0.08em; }
-  .overview-slide__tile strong { font-size: clamp(1.15rem, 5vw, 1.55rem); overflow-wrap: anywhere; }
-  .overview-slide__tile small { display: block; font-size: 0.68rem; line-height: 1.3; }
-}
+.overview-slide{height:100%;min-height:0;display:grid;grid-template-columns:minmax(260px,.82fr) minmax(0,1.18fr);gap:14px}.overview-slide__hero,.overview-slide__tile{min-width:0;border:1px solid rgba(57,120,200,.18);border-radius:26px;background:rgba(247,251,255,.86);box-shadow:0 14px 34px rgba(23,54,93,.08)}.overview-slide__hero{display:grid;align-content:center;padding:clamp(16px,3vw,30px);background:radial-gradient(circle at 20% 12%,rgba(155,201,255,.35),transparent 45%),rgba(247,251,255,.9)}.overview-slide__hero>span,.overview-slide__tile span{color:#5c7697;font-size:12px;letter-spacing:.04em}.overview-slide__hero>strong{color:#3978c8;font:700 clamp(3.4rem,9vw,7rem)/.9 var(--viewer-display-font)}.overview-slide__hero p{margin:16px 0;color:#5c7697;font-size:12px;line-height:1.55}.overview-slide__hero-pills{display:flex;flex-wrap:wrap;gap:6px}.overview-slide__hero-pills span{padding:6px 8px;border-radius:99px;color:#3978c8;background:#e5f1ff;font-size:10px}.overview-slide__hero-pills b{color:#17365d}.overview-slide__grid{min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.overview-slide__tile{display:grid;align-content:center;padding:14px}.overview-slide__tile strong{margin-top:7px;color:#17365d;font:700 clamp(1.45rem,4vw,2.7rem)/1 var(--viewer-display-font)}
+@media(max-width:720px){.overview-slide{grid-template-columns:minmax(120px,.72fr) minmax(0,1.28fr);gap:6px}.overview-slide__hero,.overview-slide__tile{border-radius:16px}.overview-slide__hero{padding:10px}.overview-slide__hero>span,.overview-slide__tile span{font-size:10px}.overview-slide__hero>strong{font-size:2.4rem}.overview-slide__hero p{margin:8px 0;font-size:12px;line-height:1.35}.overview-slide__hero-pills{display:grid}.overview-slide__hero-pills span{font-size:10px}.overview-slide__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.overview-slide__tile{padding:8px}.overview-slide__tile strong{font-size:1.15rem}}
 </style>

@@ -20,6 +20,9 @@ const switchLocalePath = useSwitchLocalePath();
 const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
 const lastTrackedPath = ref("");
 const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
+const isPrivateAnnualCanvas = computed(() =>
+  /\/(?:account\/version-summary|account\/annual-poster\/)/.test(route.path)
+);
 
 useHead(() => ({
   htmlAttrs: localeHead.value.htmlAttrs,
@@ -88,7 +91,7 @@ onMounted(() => {
 <template>
   <el-config-provider :locale="elementLocale">
     <div class="story-shell">
-      <header class="story-shell__chrome" :class="{ 'is-hidden': immersiveStory }">
+      <header class="story-shell__chrome" :class="{ 'is-hidden': immersiveStory || isPrivateAnnualCanvas }">
         <NuxtLink :to="localePath('/')" class="story-shell__brand" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
           <img src="/logo.png" alt="" class="story-shell__logo" />
           <div class="story-shell__brand-copy">
@@ -123,7 +126,8 @@ onMounted(() => {
   height: 100svh;
   height: 100dvh;
   position: relative;
-  color: #fff6e8;
+  color: #17365d;
+  background: linear-gradient(145deg, #f7fbff 0%, #e5f1ff 100%);
   overflow: hidden;
 }
 
@@ -143,8 +147,8 @@ onMounted(() => {
   top: -10rem;
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgba(253, 94, 61, 0.26) 0%, rgba(253, 94, 61, 0) 70%),
-    radial-gradient(circle at 62% 38%, rgba(255, 208, 96, 0.16) 0%, rgba(255, 208, 96, 0) 58%);
+    radial-gradient(circle, rgba(57, 120, 200, 0.16) 0%, rgba(57, 120, 200, 0) 70%),
+    radial-gradient(circle at 62% 38%, rgba(57, 120, 200, 0.08) 0%, rgba(57, 120, 200, 0) 58%);
   filter: blur(10px);
 }
 
@@ -155,8 +159,8 @@ onMounted(() => {
   bottom: -16rem;
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgba(80, 160, 255, 0.18) 0%, rgba(80, 160, 255, 0) 68%),
-    radial-gradient(circle at 38% 42%, rgba(255, 129, 80, 0.18) 0%, rgba(255, 129, 80, 0) 54%);
+    radial-gradient(circle, rgba(57, 120, 200, 0.12) 0%, rgba(57, 120, 200, 0) 68%),
+    radial-gradient(circle at 38% 42%, rgba(23, 54, 93, 0.08) 0%, rgba(23, 54, 93, 0) 54%);
   filter: blur(24px);
 }
 
@@ -183,6 +187,11 @@ onMounted(() => {
   transform: translateY(-16px);
 }
 
+.story-shell__chrome.is-hidden .story-shell__brand,
+.story-shell__chrome.is-hidden .story-shell__locale {
+  pointer-events: none;
+}
+
 .story-shell__brand,
 .story-shell__locale {
   pointer-events: auto;
@@ -196,10 +205,10 @@ onMounted(() => {
   color: inherit;
   padding: 7px 11px;
   border-radius: 999px;
-  background: rgba(8, 17, 40, 0.48);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(247, 251, 255, 0.9);
+  border: 1px solid rgba(57, 120, 200, 0.16);
   backdrop-filter: blur(18px);
-  box-shadow: 0 16px 40px rgba(4, 10, 28, 0.28);
+  box-shadow: 0 16px 40px rgba(23, 54, 93, 0.14);
 }
 
 .story-shell__logo {
@@ -222,7 +231,7 @@ onMounted(() => {
 
 .story-shell__brand-copy span {
   font-size: 12px;
-  color: rgba(255, 240, 218, 0.72);
+  color: #7890ab;
 }
 
 .story-shell__locale {
@@ -231,10 +240,10 @@ onMounted(() => {
   gap: 8px;
   padding: 8px;
   border-radius: 999px;
-  background: rgba(8, 17, 40, 0.48);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(247, 251, 255, 0.9);
+  border: 1px solid rgba(57, 120, 200, 0.16);
   backdrop-filter: blur(18px);
-  box-shadow: 0 16px 40px rgba(4, 10, 28, 0.28);
+  box-shadow: 0 16px 40px rgba(23, 54, 93, 0.14);
 }
 
 .story-shell__locale-chip {
@@ -243,7 +252,7 @@ onMounted(() => {
   border-radius: 999px;
   text-align: center;
   text-decoration: none;
-  color: rgba(255, 240, 218, 0.7);
+  color: #7890ab;
   font-size: 12px;
   transition:
     background-color 0.25s ease,
@@ -252,8 +261,8 @@ onMounted(() => {
 }
 
 .story-shell__locale-chip.active {
-  background: linear-gradient(135deg, rgba(255, 109, 70, 0.88), rgba(255, 184, 92, 0.88));
-  color: #fff9f0;
+  background: #3978c8;
+  color: #f7fbff;
   transform: translateY(-1px);
 }
 

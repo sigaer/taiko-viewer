@@ -22,29 +22,17 @@ const emit = defineEmits<{
   exit: [];
 }>();
 
-const uiText = computed(() =>
-  props.localeCode === "ja"
-    ? {
-        title: "ストーリー設定",
-        versionLabel: "対象バージョン",
-        bindingLabel: "連携 ID",
-        titleLabel: "現在の称号",
-        refresh: "再生成",
-        exit: "入口へ戻る",
-        summaryLabel: "この版のメモ",
-        summaryText: `${props.summary.overview.playCount} 回 / ${props.summary.period.activeDays} 日 / ${props.summary.overview.uniqueSongs} 曲`
-      }
-    : {
-        title: "故事设置",
-        versionLabel: "统计版本",
-        bindingLabel: "当前绑定",
-        titleLabel: "当前称号",
-        refresh: "重新生成",
-        exit: "回到入口",
-        summaryLabel: "这一版的记忆",
-        summaryText: `${props.summary.overview.playCount} 次 / ${props.summary.period.activeDays} 天 / ${props.summary.overview.uniqueSongs} 首歌`
-      }
-);
+const { t, n } = useI18n();
+const uiText = computed(() => ({
+  title: t("annualSummary.drawer.title"),
+  versionLabel: t("annualSummary.drawer.version"),
+  bindingLabel: t("annualSummary.drawer.binding"),
+  titleLabel: t("annualSummary.drawer.currentTitle"),
+  refresh: t("annualSummary.controls.refresh"),
+  exit: t("annualSummary.drawer.exit"),
+  summaryLabel: t("annualSummary.drawer.summary"),
+  summaryText: `${n(props.summary.overview.playCount)} · ${n(props.summary.overview.uniqueSongs)} · ${n(props.summary.overview.uniqueCharts || 0)}`
+}));
 
 const versionRangeText = computed(() =>
   props.summary.version.isOngoing
@@ -122,8 +110,8 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
 
 <style scoped>
 :deep(.story-drawer) {
-  background: linear-gradient(180deg, rgba(9, 19, 44, 0.98) 0%, rgba(18, 15, 37, 0.98) 100%);
-  color: #fff4df;
+  background: linear-gradient(180deg, #f7fbff 0%, #e5f1ff 100%);
+  color: #17365d;
 }
 
 :deep(.story-drawer .el-drawer__body) {
@@ -136,8 +124,8 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
   display: grid;
   gap: 16px;
   background:
-    radial-gradient(circle at top right, rgba(255, 174, 95, 0.18), transparent 34%),
-    linear-gradient(180deg, rgba(9, 19, 44, 0.96) 0%, rgba(20, 14, 40, 0.98) 100%);
+    radial-gradient(circle at top right, rgba(57, 120, 200, 0.16), transparent 34%),
+    linear-gradient(180deg, #f7fbff 0%, #e5f1ff 100%);
 }
 
 .story-drawer__head {
@@ -150,7 +138,7 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
 .story-drawer__head p,
 .story-drawer__panel span {
   margin: 0 0 8px;
-  color: rgba(255, 230, 196, 0.68);
+  color: #7890ab;
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -164,37 +152,37 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
 }
 
 .story-drawer__head > span {
-  color: rgba(255, 240, 218, 0.7);
+  color: #7890ab;
   font-size: 12px;
 }
 
 .story-drawer__panel {
   padding: 16px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(247, 251, 255, 0.78);
+  border: 1px solid rgba(57, 120, 200, 0.16);
 }
 
 .story-drawer__panel strong {
   display: block;
-  color: #fff8ed;
+  color: #17365d;
   font-size: 18px;
   line-height: 1.5;
 }
 
 .story-drawer__panel--soft {
-  background: linear-gradient(135deg, rgba(255, 117, 76, 0.12), rgba(255, 193, 94, 0.12));
+  background: linear-gradient(135deg, rgba(57, 120, 200, 0.1), rgba(229, 241, 255, 0.82));
 }
 
 .story-drawer__select :deep(.el-input__wrapper) {
   min-height: 44px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: #f7fbff;
+  box-shadow: inset 0 0 0 1px rgba(57, 120, 200, 0.16);
 }
 
 .story-drawer__select :deep(.el-input__inner) {
-  color: #fff7eb;
+  color: #17365d;
 }
 
 .story-drawer__actions {

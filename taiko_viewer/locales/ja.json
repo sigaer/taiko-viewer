@@ -251,7 +251,7 @@
     "register": "登録",
     "forgotPassword": "パスワード再設定",
     "sync": "同期",
-    "versionSummary": "虹2025 / バージョンサマリー",
+    "versionSummary": "2026 太鼓振り返り",
     "songs": "楽曲データ",
     "developer": "開発者権限",
     "developerReview": "開発者審査",
@@ -434,7 +434,7 @@
         "desc": "同期リクエスト送信後、サーバーが鼓衆広場から現在連携中の ID の userdata を取得し、選択した送信先へ圧縮配信します。"
       },
       "versionSummary": {
-        "desc": "ログイン後、現在連携中のドンダーひろば ID に対する非公開の虹2025ストーリーサマリーを確認できます。"
+        "desc": "ログインすると、現在連携中の ID だけの 2026 太鼓物語を開き、きせかえ、好み、成長を振り返れます。"
       },
       "songs": {
         "desc": "現在連携中の ID のローカル楽曲成績データを閲覧・編集します。"
@@ -448,6 +448,107 @@
       "supportReview": {
         "desc": "ユーザーのサポートチケットを処理し、返信して完了処理を行います。"
       }
+    }
+  },
+  "annualSummary": {
+    "name": "2026 太鼓の振り返り（更新中）",
+    "common": {
+      "coverFallback": "ドン",
+      "observed": "記録に残った旅",
+      "archive": "今ここにいるあなた",
+      "observedQualifier": "記録が、あなたの音をここまで残してくれました。",
+      "archiveQualifier": "今まで積み重ねた成績が、ここに並んでいます。",
+      "lowerBound": "ここに残った足あと",
+      "proxy": "記録の中の時間",
+      "unavailable": "十分な記録がありません",
+      "defaultDon": "いつものどんちゃん",
+      "defaultCover": "曲のイメージ",
+      "songWaiting": "次の好きな曲を待っています"
+    },
+    "controls": {
+      "settings": "ストーリー設定", "soundOn": "太鼓音をオン", "soundOff": "太鼓音をオフ", "progress": "年間ストーリーの進行", "pageNavigation": "ページ移動", "previous": "前のページ", "next": "次のページ", "start": "年間の振り返りを開く", "refresh": "再生成", "share": "30 日間の共有を作成", "generatePoster": "現在の言語でポスターを生成", "download": "ポスターを保存", "webShare": "ポスターを共有", "renewShare": "30 日延長", "revokeShare": "共有を取り消す", "back": "年間の振り返りへ戻る", "settingsShort": "設定"
+    },
+    "chapters": { "debut": "はじまり", "habits": "習慣", "preference": "好み", "growth": "成長", "keepsake": "記念" },
+    "pages": { "opening": "導入", "profile": "プロフィール", "period": "期間", "overview": "全体像", "favorite": "最愛", "obsession": "余韻", "favoriteShift": "変化", "keyword": "キーワード", "ratingRank": "RT", "monthly": "月別", "weekday": "曜日", "calendar": "暦", "timeOfDay": "時間", "lateNight": "深夜", "speedProfile": "速度", "nearDondaful": "あと一歩", "challenge": "挑戦", "pound": "連打", "highScore": "ハイスコア", "milestones": "瞬間", "breakthrough": "突破", "final": "称号", "poster": "ポスター" },
+    "state": {
+      "loading": "2026 年の太鼓記録を整理しています…", "missing": "整理できる太鼓記録がありません。現在の連携 ID を同期してから、もう一度生成してください。", "loadFailed": "年間の振り返りを読み込めませんでした。しばらくしてから再試行してください。", "buildQueued": "年間の振り返りをバックグラウンドで生成しています。", "buildReady": "年間の振り返りができあがりました。", "buildFailed": "年間の振り返りを生成できませんでした。しばらくしてから再試行してください。", "schemaMismatch": "記録形式が更新されました。年間の振り返りを再生成してください。", "openProfile": "プロフィールへ", "openSync": "同期ページへ", "retry": "再読み込み", "jobQueued": "振り返りを整理する順番を待っています…", "jobRunning": "あなたの音を物語にまとめています…", "jobCompleted": "年間の振り返りができあがりました。", "jobFailed": "今回は整理を終えられませんでした。しばらくしてから再試行してください。"
+    },
+    "share": { "generating": "ポスターを生成しています…", "created": "30 日間の共有を作成しました。次にポスターを生成できます。", "ready": "共有ページとポスターを生成しました", "downloadFallback": "共有画面を開けなかったため、ポスターを保存しました。", "posterFirst": "先にポスターを生成してから共有してください。", "renewed": "共有期限を 30 日延長しました", "revoked": "公開共有を取り消しました", "expires": "有効期限 {date}", "failed": "共有またはポスターを生成できませんでした。しばらくしてから再試行してください。", "privacy": "推測できない公開リンクを作成し、30 日後に失効します。ここから延長または早期取り消しができます。", "expired": "この年間の振り返りは期限切れ、または取り消されました。", "publicLead": "プレイヤーが自分で公開した 2026 年の太鼓の振り返りです。" },
+    "milestoneTypes": { "clear": "新しいクリアが灯る", "full_combo": "新しいフルコンボが灯る", "dondaful": "新しいドンダフルが灯る" },
+    "entry": { "eyebrow": "2026 / 更新中", "title": "あなたの音が、ここに残っています", "lead": "きせかえ、段位、称号、そして足あとを残した挑戦が、開かれるのを待っています。", "binding": "現在の連携", "titleLabel": "年間称号", "playCount": "記録に残った挑戦", "activeDays": "灯った日", "uniqueSongs": "出会った曲" },
+    "drawer": { "title": "ストーリー設定", "version": "対象期間", "binding": "連携 ID", "currentTitle": "現在の称号", "summary": "この記録", "exit": "入口へ戻る", "generated": "{time} に生成" },
+    "copy": {
+      "opening": { "eyebrow": "2026 · あなたの太鼓物語", "title": "{nickname}、2026 年の音を聴こう", "body": "記録に残った {playCount} 回の挑戦と、出会った {uniqueSongs} 曲が、この鼓面で待っています。" },
+      "profile": { "eyebrow": "PLAYER CARD", "title": "この一年の主役は、{nickname}", "body": "このきせかえから、あなただけの物語が始まります。", "bodyWithTitle": "「{playerTitle}」を掲げ、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithDan": "「{dan}」として鼓面に立ち、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithTitleAndDan": "「{playerTitle}」を掲げ、「{dan}」として登場——あなただけのプレイヤーカードです。" },
+      "period": { "eyebrow": "元日から今まで", "title": "{totalDays} 日、物語はまだ続く", "body": "日付が進むたび、記録も一ページずつ厚くなる。2026 年の最後の一打は、まだ先です。" },
+      "overview": { "eyebrow": "太鼓を叩くあなた", "title": "一打ずつ、今のあなたになった", "observedBody": "記録に残った旅では、{playCount} 回の挑戦が {uniqueSongs} 曲に響きました。どの数字にも、あなたの音があります。", "archiveBody": "今までの {uniqueSongs} 曲と {uniqueCharts} 譜面が、あなたの太鼓アーカイブを形づくっています。ここまで来た足あとです。" },
+      "favorite": { "eyebrow": "最愛", "title": "『{favoriteSong}』を何度も鼓面へ呼び戻した", "observedBody": "この記録の中で {favoriteCount} 回出会いました。聴き慣れたイントロが鳴れば、やっぱり戻りたくなる一曲です。", "archiveBody": "今の成績アーカイブで、最も多く挑戦が残ったのは『{favoriteSong}』。何度も会うこと、それ自体が好きの証です。" },
+      "obsession": { "eyebrow": "忘れられない一曲", "title": "{obsessionDays} 日のそれぞれで、『{obsessionSong}』を思い出した", "body": "一度叩いて終わる曲ばかりではありません。戻るたび、好きが長い余韻になりました。" },
+      "favoriteShift": { "eyebrow": "新しい好き、変わらない好き", "title": "『{oldFavorite}』から『{newFavorite}』へ", "body": "前の好きは消えず、新しい好きも鳴り始める。好みの輪郭は、バチの下で少しずつ育ちます。" },
+      "monthly": { "eyebrow": "月の主役", "title": "{monthlyMonth} の主役は『{monthlySong}』", "body": "月をめくるたび、そのページの真ん中に立つ一曲がありました。" },
+      "weekday": { "eyebrow": "曜日の約束", "title": "{topWeekday} は、鼓面と約束した曜日みたい", "body": "残った記録では、この曜日にあなたの太鼓がいちばんよく響きます。" },
+      "calendar": { "eyebrow": "太鼓カレンダー", "title": "記録に残った {calendarDays} 日を、青く灯した", "body": "最長は {longestStreak} 日連続。一つずつ灯る青が、止まらなかった音を伝えます。" },
+      "timeOfDay": { "eyebrow": "あなたの響く時間", "title": "{favoriteHour}、あなたの音がいちばん聞こえる", "body": "この時刻に最も多くの太鼓の音が残り、『{timeSong}』の名前も時間のそばに刻まれました。" },
+      "lateNight": { "eyebrow": "夜鼓は続く", "title": "{lateTime}、夜はまだ太鼓を止めない", "body": "記録に残った {lateNights} 夜では、『{lateSong}』がいちばん深い時間まで音を連れていきました。" },
+      "rating": { "eyebrow": "TAIKOB20", "title": "{rating}、今のあなたの座標", "body": "サイト内の {ratingSample} 人のプレイヤーと同じ図に立つと、今いる場所は {ratingPosition}。数字はゴールではなく、今を丁寧に刻む目印です。" },
+      "milestones": { "eyebrow": "光った瞬間", "title": "{milestoneCount} の瞬間が、成長を灯した", "body": "新しいクリア、フルコンボ、ドンダフルが記録の中で次々に灯りました。成績そのものが、成長を語っています。" },
+      "keyword": { "eyebrow": "鼓面キーワード", "title": "あなたのキーワードは「{keywordTitle}」", "body": "{keywordDimension} が輪郭の中でいちばん明るい。打ち始めたとき、自然に現れるあなたの言葉です。" },
+      "speed": { "eyebrow": "SPEED SIGNATURE", "title": "{speed}×、成績に刻んだスピード", "body": "{speedCharts} 譜面の成績欄に、このテンポが残っています。鼓面が速くなれば、勢いも一歩前へ。" },
+      "near": { "eyebrow": "ALMOST DONDAFUL", "title": "『{nearSong}』、全良まであと{nearOk}可", "body": "金色の鼓面まで、ほんのあと一歩。次の一打で、すべてが光るかもしれません。" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "『{challengeSong}』の扉を {challengeCount} 回叩いた", "body": "まだ答えを全部はくれない曲。それでも背を向けず、もう一度を重ねました。" },
+      "pound": { "eyebrow": "DRUMROLL", "title": "{poundTotal} 連打が、成績の中に隠れていた", "body": "一つずつの譜面が連打を残し、最も長い {poundTop} 打は『{poundSong}』から届きました。" },
+      "highScore": { "eyebrow": "HIGH SCORE", "title": "{highScoreTime}、『{highScoreSong}』の得点が伸びた", "body": "{highScoreValue} 点で記録が止まりました。成績画面が、上へ進んだ瞬間を覚えています。" },
+      "breakthrough": { "eyebrow": "年間の突破", "title": "今年、境界をもう少し先へ動かした", "body": "「{breakthroughTitle}」が、この成長に名前をつけました。前へ進む一打は、もう響いています。" },
+      "final": { "eyebrow": "あなたの年間称号", "title": "{nickname}、この称号はあなたのもの", "body": "今年の記録から贈る言葉は「{finalTitle}」。終止符ではなく、次にバチを握るときの始まりです。" },
+      "poster": { "eyebrow": "思い出を持ち帰る", "title": "{nickname} の 2026 年を、一枚のポスターへ", "body": "きせかえ、段位、好きな曲、そして「{finalTitle}」。歩いてきた道を、きれいに残しておきましょう。" }
+    },
+    "slides": {
+      "profile": { "eyebrow": "PLAYER CARD", "title": "今年の主役は、あなた", "lead": "称号も段位もきせかえも、同じことを伝えています。この物語はあなただけのもの。", "currentTitle": "今掲げる称号", "dan": "鼓面に立つ段位", "noTitle": "称号の場所はこれから灯る", "noDan": "段位への道は始まったばかり" },
+      "period": { "start": "開始", "now": "現在", "end": "終了", "first": "物語が最初に灯った日", "latest": "物語の今", "totalDays": "広がった日々", "activeDays": "灯った日", "archiveTitle": "この一枚に大切にしまいました", "archiveBody": "時刻を無理に推測せず、積み重ねた成績だけをここに残しています。" },
+      "overview": { "plays": "記録に残った挑戦", "activeDays": "灯った日", "songs": "出会った曲", "charts": "歩いた譜面", "estimated": "響いた時間", "clear": "クリア", "fullCombo": "フルコンボ", "dondaful": "ドンダフル", "kiwami": "極" },
+      "favorite": { "plays": "記録に残った出会い" },
+      "shift": { "old": "物語の前半 · 忘れない好き", "new": "物語の後半 · 新しく響いた好き", "times": "{count} 回の出会い" },
+      "monthly": { "estimated": "約 {time}", "plays": "{count} 回 · 約 {time}" },
+      "weekday": { "top": "いちばん気が合う曜日", "bottom": "少し静かな曜日" },
+      "calendar": { "active": "灯った日", "streak": "止まらなかった最長記録", "days": "{count} 日" },
+      "time": { "favorite": "太鼓の音が最も集まる時刻", "periods": { "early_morning": "早朝", "morning": "午前", "noon": "昼", "afternoon": "午後", "evening": "夜", "late_night": "深夜" } },
+      "late": { "latest": "最も深い夜の記録", "company": "夜の相棒", "nights": "{count} 夜", "plays": "{count} 打を残した" },
+      "rating": { "sample": "サイト内の {count} 人のプレイヤーと一緒に", "rank": "今いる場所", "percentile": "仲間の {value}% より先まで来た", "tier": "今いる隊列", "tiers": { "top1": "先頭を走る Top 1%", "top5": "まぶしい Top 5%", "top20": "しっかり届いた Top 20%", "top50": "半分を越えた Top 50%", "growing": "ここから伸びていく場所" } },
+      "keyword": { "signature": "あなたの鼓面らしさ", "brightest": "いちばん明るい角", "shape": "あなたの六角形", "story": "冷たい数字の並びではなく、鼓面と向き合うときに、いちばんあなたらしくなる形です。" },
+      "speed": { "eyebrow": "SPEED SIGNATURE", "title": "少し速いくらいが、あなたのテンポ", "lead": "{speed}× が、成績に残るあなたのサインになりました。", "story": "最も多く残ったのは {speed}×", "chartCount": "この速さを刻んだ譜面", "detail": "鼓面を追う勢いは、少しも遅れていません。" },
+      "near": { "eyebrow": "ALMOST DONDAFUL", "title": "金色まで、あと数打", "lead": "『{song}』は全良まであと{count}可。鼓面は最後の仕上げを待っています。", "okCount": "あと {count} 可", "score": "ここまで伸ばした最高得点" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "この扉を、まだ叩いている", "lead": "『{song}』の扉を {count} 回叩いた。その一回一回が、背を向けない強さです。", "observed": "扉を叩いた回数", "story": "まだ開ききらない。それでも、あなたは背を向けませんでした。" },
+      "pound": { "eyebrow": "DRUMROLL", "title": "びっしり並ぶ連打は、あなたのサイン", "lead": "一つずつの譜面に散らばる {count} 連打が、今ここで一緒に響きます。", "unit": "連打", "story": "きっと連打の達人ですね！", "topSong": "いちばん密な連打は", "ending": "バチが落ちるたび、勢いまで成績に刻まれます。" },
+      "highScore": { "eyebrow": "HIGH SCORE", "title": "成績画面が、この前進を覚えている", "lead": "{time}、『{song}』を {score} 点まで押し上げました。", "celebration": "この新記録が、あの瞬間の代わりに歓声を上げています。" },
+      "milestones": { "song": "『{name}』" },
+      "breakthrough": { "dan": "段位の一歩", "ratingGain": "RT の伸び", "ratingJourney": "ここから、ここまで", "songAttempts": "この曲に重ねた挑戦", "times": "{count} 回", "difficulty": "越えた壁の高さ" },
+      "final": { "firstSteps": "物語の最初の音", "fromBreakthrough": "この瞬間から生まれた称号", "fromSpeed": "成績に残った速さ", "fromKeyword": "いちばんあなたらしい言葉", "fromJourney": "歩いてきた道の名前", "times": "{count} 回の挑戦" },
+      "poster": { "finalTitle": "年間称号", "favorite": "最愛曲", "keyword": "キーワード", "scan": "スキャンして振り返りを見る", "expires": "共有期限 {date}" }
+    },
+    "keywords": {
+      "dimensions": { "big_song": "大音符力", "stamina": "体力", "speed": "高速処理", "accuracy": "精度力", "rhythm": "リズム処理", "complex": "複合処理" },
+      "titles": { "wall_breaker": "巨壁の突破者", "endless_drummer": "不休の太鼓打ち", "speed_runner": "疾風の走者", "precision_tuner": "精度の調律師", "rhythm_resonator": "リズムの共鳴者", "complex_hunter": "複合ハンター" },
+      "body": "{dimension} が鼓面の輪郭でいちばん明るく、今年のサインになりました。"
+    },
+    "titles": {
+      "newcomer": { "title": "初響の鼓", "body": "物語は始まったばかり。最初の一打が、もう今年に名前をつけました。" },
+      "archive_keeper": { "title": "記録の守り手", "body": "積み上げた成績をこの一枚へ。静かでも、ずっしりと重い足あとです。" },
+      "encouragement": { "title": "鼓面へ進む人", "body": "太鼓の音はこれから増えていく。向かう先は、もうはっきり見えています。" },
+      "speed_profile": { "title": "疾風の太鼓打ち", "body": "少し速い鼓面が、前へ追いかけるあなたのテンポにぴったりです。" },
+      "wall_breaker": { "title": "巨壁の突破者", "body": "大音符処理が最も鮮明な傾向になりました。" },
+      "endless_drummer": { "title": "不休の太鼓打ち", "body": "体力がこの記録のキーワードです。" },
+      "speed_runner": { "title": "疾風の走者", "body": "高速処理が最もくっきりした輪郭です。" },
+      "precision_tuner": { "title": "精度の調律師", "body": "精度がこの記録の主旋律になりました。" },
+      "rhythm_resonator": { "title": "リズムの共鳴者", "body": "リズム処理があなたらしさを描きました。" },
+      "complex_hunter": { "title": "複合ハンター", "body": "複雑な複合が、よく向き合った言葉です。" },
+      "breakthrough_dan": { "title": "段位を登る人", "body": "段位が一段上がり、あなたも少し高い鼓面の前に立ちました。" },
+      "breakthrough_dondaful": { "title": "ドンダフルの灯し手", "body": "新しいドンダフルが灯り、鼓面全体が一瞬きらめきました。" },
+      "breakthrough_extreme": { "title": "極を追う人", "body": "新しい極が灯り、今年のハイライトにも形が生まれました。" },
+      "breakthrough_ten_star_full_combo": { "title": "十星の連撃者", "body": "十星フルコンボの最後の一打。高い壁にも、あなたの余韻が残りました。" },
+      "breakthrough_full_combo": { "title": "連撃の開拓者", "body": "新しいフルコンボが道を先へ延ばし、連撃は最後まで手を離しませんでした。" },
+      "breakthrough_ten_star_clear": { "title": "十星の突破者", "body": "十星クリアが灯り、目の前にあった壁へついに亀裂が入りました。" },
+      "breakthrough_clear": { "title": "クリアの開拓者", "body": "新しいクリアが境界を一歩動かし、次の一曲もあなたを待っています。" },
+      "breakthrough_rating_gain": { "title": "RT を伸ばす人", "body": "TAIKOB20 が一目盛り上がり、毎日の積み重ねに数字がつきました。" }
     }
   },
   "toolsApi": {

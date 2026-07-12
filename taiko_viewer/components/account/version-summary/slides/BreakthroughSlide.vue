@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import StoryCounter from "../StoryCounter.vue";
+import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
 const props = defineProps<{
@@ -15,8 +15,8 @@ const props = defineProps<{
 const { locale } = useI18n();
 const uiText = computed(() =>
   locale.value === "ja"
-    ? { scoreUp: "スコア上昇", playDelta: "今回の増加", level: "難度", coverFallback: "虹2025" }
-    : { scoreUp: "分数提升", playDelta: "本次增量", level: "难度", coverFallback: "虹2025" }
+    ? { level: "難度", coverFallback: "2026" }
+    : { level: "难度", coverFallback: "2026" }
 );
 </script>
 
@@ -39,21 +39,17 @@ const uiText = computed(() =>
         <small>{{ summary.breakthrough.song?.subtitle || summary.copy.breakthrough.body }}</small>
       </div>
 
-      <div class="breakthrough-slide__metrics">
-        <article class="breakthrough-slide__metric" data-animate>
-          <span>{{ uiText.scoreUp }}</span>
-          <strong>+<StoryCounter :value="summary.breakthrough.scoreDelta" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article class="breakthrough-slide__metric" data-animate>
-          <span>{{ uiText.playDelta }}</span>
-          <strong>+<StoryCounter :value="summary.breakthrough.playDelta" :active="active" :reduced-motion="reducedMotion" /></strong>
+      <div v-if="summary.breakthrough.evidence.length" class="breakthrough-slide__metrics">
+        <article v-for="item in summary.breakthrough.evidence" :key="item.key" class="breakthrough-slide__metric" data-animate>
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value }}</strong>
         </article>
       </div>
 
       <div v-if="summary.breakthrough.song" class="breakthrough-slide__song" data-animate>
         <el-image :src="summary.breakthrough.song.coverUrl" fit="cover" class="breakthrough-slide__cover">
           <template #error>
-            <div class="breakthrough-slide__cover breakthrough-slide__cover--fallback">{{ uiText.coverFallback }}</div>
+            <AnnualArtworkFallback :label="uiText.coverFallback" />
           </template>
         </el-image>
         <div class="breakthrough-slide__song-meta">
@@ -110,7 +106,7 @@ const uiText = computed(() =>
   width: 16rem;
   height: 16rem;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 205, 122, 0.18), rgba(255, 205, 122, 0));
+  background: radial-gradient(circle, rgba(240, 190, 88, 0.2), rgba(240, 190, 88, 0));
 }
 
 .breakthrough-slide__banner span,
@@ -163,7 +159,7 @@ const uiText = computed(() =>
   aspect-ratio: 1;
   border-radius: 28px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 214, 126, 0.28), rgba(255, 129, 80, 0.3));
+  background: linear-gradient(135deg, rgba(240, 190, 88, 0.3), rgba(240, 190, 88, 0.12));
 }
 
 .breakthrough-slide__cover--fallback {
@@ -208,14 +204,31 @@ const uiText = computed(() =>
   .breakthrough-slide { grid-template-columns: minmax(0, 1fr) 92px; grid-template-rows: auto auto; gap: 7px; align-content: start; }
   .breakthrough-slide__banner { grid-column: 1; grid-row: 1; padding: 10px 11px; border-radius: 16px; }
   .breakthrough-slide__banner strong { margin-top: 5px; font-size: clamp(1.1rem, 5vw, 1.5rem); max-width: none; overflow-wrap: anywhere; }
-  .breakthrough-slide__banner small { display: block; margin-top: 6px; font-size: 0.72rem; line-height: 1.32; overflow: visible; }
+  .breakthrough-slide__banner small { display: block; margin-top: 6px; font-size: 0.75rem; line-height: 1.32; overflow: visible; }
   .breakthrough-slide__metrics { grid-column: 1; grid-row: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
   .breakthrough-slide__metric { padding: 9px 10px; border-radius: 15px; }
   .breakthrough-slide__metric strong { margin-top: 4px; font-size: 1.2rem; }
   .breakthrough-slide__song { grid-column: 2; grid-row: 1 / span 2; align-content: start; padding: 7px; border-radius: 16px; gap: 6px; }
   .breakthrough-slide__cover { aspect-ratio: 1; border-radius: 12px; }
-  .breakthrough-slide__song-meta span { display: block; font-size: 8px; }
+  .breakthrough-slide__song-meta span { display: block; font-size: 10px; }
   .breakthrough-slide__song-meta strong { margin-top: 4px; font-size: 0.76rem; overflow-wrap: anywhere; }
-  .breakthrough-slide__banner span, .breakthrough-slide__metric span { font-size: 9px; letter-spacing: 0.08em; }
+  .breakthrough-slide__banner span, .breakthrough-slide__metric span { font-size: 10px; letter-spacing: 0.08em; }
+}
+
+@media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
+  .breakthrough-slide { grid-template-columns: minmax(0, 1.2fr) minmax(150px, 0.52fr) minmax(125px, 0.42fr); grid-template-rows: minmax(0, 1fr); gap: 8px; }
+  .breakthrough-slide__banner { grid-column: 1; grid-row: 1; }
+  .breakthrough-slide__metrics { grid-column: 2; grid-row: 1; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .breakthrough-slide__song { grid-column: 3; grid-row: 1; align-content: start; gap: 7px; }
+  .breakthrough-slide__banner,
+  .breakthrough-slide__metric,
+  .breakthrough-slide__song { padding: 10px 12px; border-radius: 18px; }
+  .breakthrough-slide__banner { display: grid; align-content: center; }
+  .breakthrough-slide__banner strong { margin-top: 6px; font-size: clamp(1.55rem, 3.4vw, 2.15rem); max-width: none; }
+  .breakthrough-slide__banner small { margin-top: 8px; line-height: 1.4; }
+  .breakthrough-slide__metric { display: grid; align-content: center; }
+  .breakthrough-slide__metric strong { margin-top: 5px; font-size: clamp(1.45rem, 3vw, 1.9rem); }
+  .breakthrough-slide__cover { border-radius: 14px; }
+  .breakthrough-slide__song-meta strong { margin-top: 4px; font-size: 12px; overflow-wrap: anywhere; }
 }
 </style>

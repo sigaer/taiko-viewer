@@ -96,16 +96,13 @@ const replaceBindingMyDonShowcaseTitles = async (bindingId: number, titleNames: 
 };
 
 const runMyDonPythonJson = async (repoRoot: string, userdataPath: string) => {
-  const pythonCode = [
-    "from pathlib import Path",
-    "from plugins.utils.song_title_showcase import list_song_title_showcase_candidates, serialize_showcase_titles",
-    "import json, sys",
-    "userdata_path = Path(sys.argv[1])",
-    "userdata = json.loads(userdata_path.read_text(encoding='utf-8'))",
-    "payload = serialize_showcase_titles(list_song_title_showcase_candidates(userdata.get('songs') or []))",
-    "sys.stdout.write(json.dumps(payload, ensure_ascii=False))",
-  ].join("\n");
-  const result = await execFileAsync("python3", ["-c", pythonCode, userdataPath], {
+  const result = await execFileAsync("python3", [
+    "-m",
+    "plugins.utils.my_don_cli",
+    "candidates",
+    "--userdata",
+    userdataPath,
+  ], {
     cwd: repoRoot,
     encoding: "utf-8",
     maxBuffer: 8 * 1024 * 1024,
@@ -229,15 +226,15 @@ export const getMyDonImageBuffer = async (userId: number) => {
     // continue
   }
 
-  const pythonCode = [
-    "from plugins.utils.draw_dress import render_my_don_image",
-    "import json, sys",
-    "title_overrides = json.loads(sys.argv[2]) if len(sys.argv) > 2 else None",
-    "sys.stdout.buffer.write(render_my_don_image(int(sys.argv[1]), title_overrides=title_overrides))",
-  ].join("; ");
-  const args = ["-c", pythonCode, binding.taiko_id];
+  const args = [
+    "-m",
+    "plugins.utils.my_don_cli",
+    "render",
+    "--taiko-id",
+    binding.taiko_id,
+  ];
   if (titleNames.length > 0) {
-    args.push(JSON.stringify(titleNames));
+    args.push("--title-overrides-json", JSON.stringify(titleNames));
   }
   const result = await execFileAsync("python3", args, {
     cwd: repoRoot,

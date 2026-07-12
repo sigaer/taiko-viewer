@@ -6,11 +6,15 @@ const MOCK_SYNC_TARGET_ID = "mock-service-b";
 const dbConfig = {
   host: process.env.TAIKO_DB_HOST || "127.0.0.1",
   port: Number(process.env.TAIKO_DB_PORT || 3306),
-  user: process.env.TAIKO_DB_USER || "root",
-  password: process.env.TAIKO_DB_PASSWORD || "wtf025366",
+  user: process.env.TAIKO_DB_USER || "",
+  password: process.env.TAIKO_DB_PASSWORD || "",
   database: process.env.TAIKO_DB_NAME || "taiko",
   charset: "utf8mb4"
 };
+
+if (!dbConfig.user || !dbConfig.password) {
+  throw new Error("TAIKO_DB_USER and TAIKO_DB_PASSWORD are required");
+}
 
 const getConnection = async () => mysql.createConnection(dbConfig);
 

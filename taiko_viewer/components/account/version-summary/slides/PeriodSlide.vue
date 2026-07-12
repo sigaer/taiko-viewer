@@ -13,26 +13,27 @@ const props = defineProps<{
 }>();
 
 const { formatDate, formatDateTime } = useViewerDateTime();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
+const hasRecordTimes = computed(() => Boolean(props.summary.period.firstRecordAt || props.summary.period.lastRecordAt));
 const uiText = computed(() =>
   locale.value === "ja"
     ? {
         start: "開始",
         now: "現在",
         end: "終了",
-        first: "最初の記録",
-        latest: "最後の記録",
-        totalDays: "総日数",
-        activeDays: "活動日数"
+        first: "物語が最初に灯った日",
+        latest: "物語の今",
+        totalDays: "広がった日々",
+        activeDays: "灯った日"
       }
     : {
         start: "开始",
         now: "当前",
         end: "结束",
-        first: "第一条记录",
-        latest: "最后一条记录",
-        totalDays: "总天数",
-        activeDays: "活跃天数"
+        first: "故事第一次亮起",
+        latest: "故事写到这里",
+        totalDays: "展开的日子",
+        activeDays: "点亮的日期"
       }
 );
 </script>
@@ -63,19 +64,23 @@ const uiText = computed(() =>
       </div>
 
       <div class="period-slide__grid">
-        <article class="period-slide__card" data-animate>
+        <article v-if="summary.period.firstRecordAt" class="period-slide__card" data-animate>
           <span>{{ uiText.first }}</span>
           <strong>{{ formatDateTime(summary.period.firstRecordAt) }}</strong>
         </article>
-        <article class="period-slide__card" data-animate>
+        <article v-if="summary.period.lastRecordAt" class="period-slide__card" data-animate>
           <span>{{ uiText.latest }}</span>
           <strong>{{ formatDateTime(summary.period.lastRecordAt) }}</strong>
+        </article>
+        <article v-if="!hasRecordTimes" class="period-slide__card period-slide__card--archive" data-animate>
+          <span>{{ t('annualSummary.slides.period.archiveTitle') }}</span>
+          <p>{{ t('annualSummary.slides.period.archiveBody') }}</p>
         </article>
         <article class="period-slide__card" data-animate>
           <span>{{ uiText.totalDays }}</span>
           <strong><StoryCounter :value="summary.period.totalDays" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>
-        <article class="period-slide__card" data-animate>
+        <article v-if="summary.timeCoverage?.status !== 'unavailable'" class="period-slide__card" data-animate>
           <span>{{ uiText.activeDays }}</span>
           <strong><StoryCounter :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>
@@ -143,7 +148,7 @@ const uiText = computed(() =>
 .period-slide__timeline i {
   width: 10rem;
   height: 2px;
-  background: linear-gradient(90deg, rgba(255, 141, 78, 0.2), rgba(255, 215, 125, 0.9), rgba(97, 191, 255, 0.4));
+  background: linear-gradient(90deg, rgba(57, 120, 200, 0.18), rgba(57, 120, 200, 0.9), rgba(23, 54, 93, 0.42));
 }
 
 .period-slide__grid {
@@ -151,6 +156,9 @@ const uiText = computed(() =>
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+
+.period-slide__card--archive { grid-column: span 2; }
+.period-slide__card--archive p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; }
 
 .period-slide__card {
   min-height: 10.5rem;
@@ -186,7 +194,17 @@ const uiText = computed(() =>
   .period-slide__timeline i { width: 100%; }
   .period-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
   .period-slide__card { min-height: 0; padding: 10px 12px; border-radius: 16px; }
-  .period-slide__timeline article span, .period-slide__card span { font-size: 9px; letter-spacing: 0.08em; }
+  .period-slide__timeline article span, .period-slide__card span { font-size: 10px; letter-spacing: 0.08em; }
   .period-slide__timeline article strong, .period-slide__card strong { margin-top: 5px; font-size: clamp(0.9rem, 4vw, 1.2rem); overflow-wrap: anywhere; }
+}
+
+@media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
+  .period-slide { align-content: center; gap: 7px; }
+  .period-slide__timeline { padding: 10px 13px; border-radius: 18px; }
+  .period-slide__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+  .period-slide__card { min-height: 0; padding: 10px 11px; border-radius: 17px; }
+  .period-slide__timeline article strong,
+  .period-slide__card strong { margin-top: 5px; font-size: clamp(1rem, 2vw, 1.3rem); }
+  .period-slide__timeline i { width: 7rem; }
 }
 </style>

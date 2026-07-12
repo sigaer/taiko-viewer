@@ -1,20 +1,25 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.30.2",
+  "version": "0.31.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
-    "build": "nuxt build",
+    "build": "node ./scripts/generate_annual_types.mjs --check && nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "pwa:icons": "node ./scripts/generate_pwa_icons.mjs",
     "cleanup:forum-mock": "node ./scripts/cleanup_forum_mock.mjs",
+    "generate:annual-types": "node ./scripts/generate_annual_types.mjs",
+    "test:annual": "node ./scripts/verify_annual_contract.mjs",
+    "test:annual:e2e": "node ./scripts/verify_annual_e2e.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@element-plus/nuxt": "^1.0.5",
     "@nuxtjs/i18n": "^9.5.6",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "ali-oss": "^6.23.0",
     "archiver": "^7.0.1",
     "echarts": "^6.1.0",
@@ -23,10 +28,13 @@
     "mysql2": "^3.19.0",
     "nodemailer": "^8.0.1",
     "nuxt": "^3.13.0",
+    "playwright-core": "^1.61.1",
+    "qrcode": "^1.5.4",
     "sharp": "^0.34.5",
     "undici": "^7.25.0"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "@vite-pwa/nuxt": "^1.1.1",
     "typescript": "~5.6.2"
   }
