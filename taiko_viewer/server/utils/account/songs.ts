@@ -146,6 +146,28 @@ export const listAccountSongs = async (
   };
 };
 
+export const getAccountSongScores = async (userId: number, songNoInput: unknown) => {
+  const songNo = Number(songNoInput || 0);
+  if (!Number.isInteger(songNo) || songNo <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "歌曲 ID 无效" });
+  }
+
+  const binding = await getCurrentBindingRow(userId);
+  if (!binding) {
+    throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+  }
+
+  const userdata = await readUserdata(binding.taiko_id);
+  const catalog = await getSongCatalog();
+  const meta = catalog.map.get(songNo);
+  const items = (userdata.songs || [])
+    .filter((song) => Number(song.song_no) === songNo)
+    .map((song) => toSongRow(song, meta, new Set<string>()))
+    .sort((a, b) => a.level - b.level);
+
+  return { items };
+};
+
 export const updateAccountSong = async (
   userId: number,
   payload: { songNo: unknown; level: unknown; values: EditableSongFields }

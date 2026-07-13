@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
+import type { AccountSongScoresPayload } from "~/types/account-song";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import { buildPageDescription } from "~/utils/seo";
 
@@ -17,6 +18,8 @@ const audioErrors = ref<Record<string, boolean>>({});
 const drumAudioRefs = new Map<string, HTMLAudioElement>();
 
 const songId = computed(() => Number(route.params.id));
+const apiFetch = useViewerApiFetch();
+const { accountUser, resolveAccountUser } = useAccountAuthStatus();
 
 definePageMeta({
   pageTitleKey: "songs.detail",
@@ -26,6 +29,24 @@ definePageMeta({
 
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
+await resolveAccountUser();
+const { data: accountScores, pending: accountScoresPending } = await useAsyncData<
+  AccountSongScoresPayload & { unavailable?: boolean }
+>(
+  () => `account-song-scores-${songId.value}`,
+  async () => {
+    if (!accountUser.value) return { items: [] };
+    try {
+      return await apiFetch<AccountSongScoresPayload>(`/api/account/songs/${songId.value}`);
+    } catch {
+      return { items: [], unavailable: true };
+    }
+  },
+  {
+    default: () => ({ items: [] }),
+    watch: [songId]
+  }
+);
 const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
 const tjaBundleUrl = computed(() => songDetail.value.tjaBundleUrl || "");
 const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
@@ -734,6 +755,13 @@ useViewerSeo(() => ({
           </div>
         </section>
       </main>
+
+      <AccountSongScores
+        v-if="accountUser"
+        :items="accountScores.items"
+        :pending="accountScoresPending"
+        :unavailable="accountScores.unavailable"
+      />
     </el-card>
   </div>
 </template>
