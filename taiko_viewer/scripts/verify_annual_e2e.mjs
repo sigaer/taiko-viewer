@@ -133,6 +133,29 @@ const assertPngHasNoPrivateIdentifiers = (png, values) => {
   }
 };
 
+const openAnnualPage = async (page, path, timeout = 60_000) => {
+  const response = await page.goto(`${baseUrl}${path}`, {
+    waitUntil: "domcontentloaded",
+    timeout
+  });
+  assert.ok(response, `navigation returned no response: ${path}`);
+  assert.ok(response.ok(), `navigation failed (${response.status()}): ${path}`);
+  await page.waitForFunction(
+    () => Boolean(document.querySelector("#__nuxt")?.__vue_app__),
+    undefined,
+    { timeout: 30_000 }
+  );
+};
+
+const waitForStoryPlayerReady = async (page) => {
+  await page.locator(".story-player__viewport").waitFor({ state: "visible", timeout: 30_000 });
+  await page.waitForFunction(
+    () => document.activeElement?.classList.contains("story-player__viewport"),
+    undefined,
+    { timeout: 30_000 }
+  );
+};
+
 const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => {
   const context = await browser.newContext({
     viewport,
@@ -142,10 +165,10 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   });
   await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
   const page = await context.newPage();
-  await page.goto(`${baseUrl}${locale === "ja" ? "/ja" : ""}/account/version-summary`, { waitUntil: "networkidle", timeout: 90_000 });
+  await openAnnualPage(page, `${locale === "ja" ? "/ja" : ""}/account/version-summary`, 90_000);
   const entry = page.locator(".annual-entry__drum");
   if (await entry.count()) await entry.click();
-  await page.locator(".story-player__viewport").waitFor({ state: "visible", timeout: 30_000 });
+  await waitForStoryPlayerReady(page);
   assert.equal(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches), true);
   const slideCount = await page.locator(".story-player__slide").count();
   assert.ok(slideCount >= 4 && slideCount <= 23, `unexpected slide count: ${slideCount}`);
@@ -386,8 +409,8 @@ try {
     const archiveContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai", reducedMotion: "reduce" });
     await archiveContext.addCookies([{ name: "stv_session", value: thirdSession, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
     const archivePage = await archiveContext.newPage();
-    await archivePage.goto(`${baseUrl}/account/version-summary`, { waitUntil: "networkidle", timeout: 60_000 });
-    await archivePage.locator(".story-player__viewport").waitFor({ state: "visible", timeout: 30_000 });
+    await openAnnualPage(archivePage, "/account/version-summary");
+    await waitForStoryPlayerReady(archivePage);
     const archivePageKeys = await archivePage.locator(".story-player__slide").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-page-key")));
     for (const key of ["obsession", "favoriteShift", "monthly", "weekday", "calendar", "timeOfDay", "lateNight"]) {
       assert.equal(archivePageKeys.includes(key), false, `archive story exposed timed page: ${key}`);
@@ -410,7 +433,7 @@ try {
     const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai" });
     await emptyContext.addCookies([{ name: "stv_session", value: secondSession, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
     const emptyPage = await emptyContext.newPage();
-    await emptyPage.goto(`${baseUrl}/account/version-summary`, { waitUntil: "networkidle", timeout: 60_000 });
+    await openAnnualPage(emptyPage, "/account/version-summary");
     await emptyPage.locator(".annual-state").waitFor({ state: "visible", timeout: 30_000 });
     assert.equal(await emptyPage.locator(".story-player").count(), 0);
     assert.ok(await emptyPage.locator('a[href*="/account/sync"], button').count());
@@ -419,7 +442,7 @@ try {
 
     const publicContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai" });
     const publicPage = await publicContext.newPage();
-    await publicPage.goto(`${baseUrl}/annual/share/${encodeURIComponent(publicToken)}`, { waitUntil: "networkidle", timeout: 60_000 });
+    await openAnnualPage(publicPage, `/annual/share/${encodeURIComponent(publicToken)}`);
     assert.ok((await publicPage.locator('meta[name="robots"]').getAttribute("content"))?.includes("noindex"));
     await wait(120);
     const publicBrokenImages = await publicPage.locator("img").evaluateAll((images) => images
