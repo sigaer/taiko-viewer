@@ -58,6 +58,7 @@ export type BindingRow = {
   is_current: number;
   verified_title: string | null;
   verified_titleplate_id: number | null;
+  mydon_showcase_layout: string;
   created_at: string;
   updated_at: string;
 };

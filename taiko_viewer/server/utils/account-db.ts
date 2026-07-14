@@ -104,6 +104,7 @@ const CREATE_TABLES = [
     is_current TINYINT(1) NOT NULL DEFAULT 0,
     verified_title VARCHAR(255) DEFAULT NULL,
     verified_titleplate_id INT DEFAULT NULL,
+    mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_web_taiko_bindings_user_id_taiko_id (user_id, taiko_id),
@@ -384,6 +385,7 @@ const CREATE_TABLES = [
 ];
 
 const MIGRATIONS = [
+  "ALTER TABLE web_taiko_bindings ADD COLUMN mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname' AFTER verified_titleplate_id",
   "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_support_tickets ADD COLUMN staff_last_read_at DATETIME NULL DEFAULT NULL AFTER mail_error",

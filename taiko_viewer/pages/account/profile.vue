@@ -79,11 +79,14 @@ type MyDonShowcaseTitleOption = {
   isMultiSong: boolean;
 };
 
+type MyDonShowcaseLayout = "nickname" | "full" | "full_gold";
+
 type MyDonShowcasePayload = {
   bindingId: number | null;
   taikoId: string | null;
   hasUserdata: boolean;
   isCustom: boolean;
+  layoutMode: MyDonShowcaseLayout;
   selectedTitles: string[];
   availableTitles: MyDonShowcaseTitleOption[];
 };
@@ -103,6 +106,7 @@ const avatarCropSourceUrl = ref("");
 const avatarCropFileName = ref("");
 const showcaseSaving = ref(false);
 const myDonShowcaseSlots = ref<string[]>(Array.from({ length: 5 }, () => ""));
+const myDonShowcaseLayout = ref<MyDonShowcaseLayout>("nickname");
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -154,6 +158,10 @@ const copy = computed(() =>
         showcaseSlot: "枠 {index}",
         showcasePlaceholder: "称号を選択",
         showcaseClearHint: "すべて解除すると既定の並びに戻ります。",
+        showcaseLayout: "称号の表示構成",
+        showcaseLayoutNickname: "ニックネーム表示版",
+        showcaseLayoutFull: "FULL称号版",
+        showcaseLayoutFullGold: "FULL燦然ゴールド版",
         avatarUpdated: "アバターを更新しました",
         avatarUploadFailed: "アバター更新に失敗しました",
         avatarReset: "アバターをデフォルトに戻しました",
@@ -227,6 +235,10 @@ const copy = computed(() =>
         showcaseSlot: "位置 {index}",
         showcasePlaceholder: "选择称号",
         showcaseClearHint: "如果全部清空，就会恢复成默认排列。",
+        showcaseLayout: "称号构图方式",
+        showcaseLayoutNickname: "展示昵称版",
+        showcaseLayoutFull: "FULL称号版",
+        showcaseLayoutFullGold: "FULL璀璨金版",
         avatarUpdated: "头像已更新",
         avatarUploadFailed: "头像上传失败",
         avatarReset: "头像已恢复默认",
@@ -293,6 +305,7 @@ const {
       taikoId: null,
       hasUserdata: false,
       isCustom: false,
+      layoutMode: "nickname",
       selectedTitles: [],
       availableTitles: []
     })
@@ -326,9 +339,10 @@ const applyShowcaseSelection = (values: string[] | null | undefined) => {
 };
 
 watch(
-  () => myDonShowcaseData.value?.selectedTitles,
-  (value) => {
-    applyShowcaseSelection(value);
+  () => [myDonShowcaseData.value?.selectedTitles, myDonShowcaseData.value?.layoutMode] as const,
+  ([titles, layoutMode]) => {
+    applyShowcaseSelection(titles);
+    myDonShowcaseLayout.value = layoutMode || "nickname";
   },
   { immediate: true, deep: true }
 );
@@ -336,11 +350,19 @@ watch(
 const availableShowcaseTitles = computed(() => myDonShowcaseData.value?.availableTitles || []);
 const currentShowcaseSelection = computed(() => normalizeShowcaseTitleNames(myDonShowcaseSlots.value));
 const savedShowcaseSelection = computed(() => normalizeShowcaseTitleNames(myDonShowcaseData.value?.selectedTitles || []));
-const showcaseDirty = computed(
+const showcaseTitlesDirty = computed(
   () => JSON.stringify(currentShowcaseSelection.value) !== JSON.stringify(savedShowcaseSelection.value)
 );
+const showcaseDirty = computed(
+  () =>
+    showcaseTitlesDirty.value ||
+    myDonShowcaseLayout.value !== (myDonShowcaseData.value?.layoutMode || "nickname")
+);
 const showcaseCanReset = computed(
-  () => Boolean(myDonShowcaseData.value?.isCustom) || currentShowcaseSelection.value.length > 0
+  () =>
+    Boolean(myDonShowcaseData.value?.isCustom) ||
+    currentShowcaseSelection.value.length > 0 ||
+    myDonShowcaseLayout.value !== "nickname"
 );
 
 const formatShowcaseRequirement = (option: MyDonShowcaseTitleOption) => {
@@ -412,15 +434,22 @@ const refreshProfile = async () => {
   myDonErrored.value = false;
 };
 
-const persistMyDonShowcase = async (titleNames: string[], successMessage: string) => {
+const persistMyDonShowcase = async (
+  titleNames: string[] | undefined,
+  layoutMode: MyDonShowcaseLayout,
+  successMessage: string
+) => {
   showcaseSaving.value = true;
   try {
+    const body: { titleNames?: string[]; layoutMode: MyDonShowcaseLayout } = { layoutMode };
+    if (titleNames !== undefined) body.titleNames = titleNames;
     const payload = await apiFetch<MyDonShowcasePayload>("/api/account/my-don/showcase", {
       method: "POST",
-      body: { titleNames }
+      body
     });
     myDonShowcaseData.value = payload;
     applyShowcaseSelection(payload.selectedTitles);
+    myDonShowcaseLayout.value = payload.layoutMode;
     ElMessage.success(successMessage);
     myDonTick.value += 1;
     myDonErrored.value = false;
@@ -433,12 +462,16 @@ const persistMyDonShowcase = async (titleNames: string[], successMessage: string
 
 const saveMyDonShowcase = async () => {
   if (showcaseSaving.value) return;
-  await persistMyDonShowcase(currentShowcaseSelection.value, copy.value.showcaseSaveSuccess);
+  await persistMyDonShowcase(
+    showcaseTitlesDirty.value ? currentShowcaseSelection.value : undefined,
+    myDonShowcaseLayout.value,
+    copy.value.showcaseSaveSuccess
+  );
 };
 
 const resetMyDonShowcase = async () => {
   if (showcaseSaving.value) return;
-  await persistMyDonShowcase([], copy.value.showcaseResetSuccess);
+  await persistMyDonShowcase([], "nickname", copy.value.showcaseResetSuccess);
 };
 
 const clearAvatarSelection = () => {
@@ -757,6 +790,15 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
             </div>
           </div>
 
+          <div class="showcase-layout-picker">
+            <span class="showcase-layout-picker__label">{{ copy.showcaseLayout }}</span>
+            <el-radio-group v-model="myDonShowcaseLayout" class="showcase-layout-picker__options">
+              <el-radio-button value="nickname">{{ copy.showcaseLayoutNickname }}</el-radio-button>
+              <el-radio-button value="full">{{ copy.showcaseLayoutFull }}</el-radio-button>
+              <el-radio-button value="full_gold">{{ copy.showcaseLayoutFullGold }}</el-radio-button>
+            </el-radio-group>
+          </div>
+
           <p class="showcase-hint">{{ copy.showcaseOrderHint }}</p>
 
           <div class="showcase-slot-list">
@@ -1004,7 +1046,8 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
 }
 
 .showcase-status__item,
-.showcase-slot-item {
+.showcase-slot-item,
+.showcase-layout-picker {
   padding: 14px;
   border-radius: 14px;
   background: rgba(255, 248, 240, 0.78);
@@ -1017,6 +1060,7 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
 
 .showcase-status__item span,
 .showcase-slot-item__label,
+.showcase-layout-picker__label,
 .showcase-hint,
 .showcase-clear-hint {
   color: #7d6a5a;
@@ -1035,6 +1079,16 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
 
 .showcase-slot-item__select {
   width: 100%;
+}
+
+.showcase-layout-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.showcase-layout-picker__options {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .showcase-hint,

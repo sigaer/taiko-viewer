@@ -3,6 +3,6 @@ import { requireAccountUser, updateMyDonShowcaseSettings } from "~/server/utils/
 
 export default defineEventHandler(async (event) => {
   const user = await requireAccountUser(event);
-  const body = await readBody<{ titleNames?: unknown }>(event);
-  return updateMyDonShowcaseSettings(user.id, body?.titleNames);
+  const body = await readBody<{ titleNames?: unknown; layoutMode?: unknown }>(event);
+  return updateMyDonShowcaseSettings(user.id, body?.titleNames, body?.layoutMode);
 });

@@ -14,6 +14,9 @@ import {
 } from "../../internal/account/shared";
 
 const MAX_MY_DON_SHOWCASE_TITLES = 5;
+const DEFAULT_MY_DON_SHOWCASE_LAYOUT = "nickname";
+const MY_DON_SHOWCASE_LAYOUTS = new Set(["nickname", "full", "full_gold"]);
+export type MyDonShowcaseLayout = "nickname" | "full" | "full_gold";
 
 type MyDonShowcaseRow = RowDataPacket & {
   id: number;
@@ -41,8 +44,17 @@ export type MyDonShowcaseSettings = {
   taikoId: string | null;
   hasUserdata: boolean;
   isCustom: boolean;
+  layoutMode: MyDonShowcaseLayout;
   selectedTitles: string[];
   availableTitles: MyDonShowcaseTitleOption[];
+};
+
+const normalizeShowcaseLayout = (value: unknown): MyDonShowcaseLayout => {
+  const layout = String(value || DEFAULT_MY_DON_SHOWCASE_LAYOUT).trim().toLowerCase();
+  if (!MY_DON_SHOWCASE_LAYOUTS.has(layout)) {
+    throw createError({ statusCode: 400, statusMessage: "不支持的称号构图方式" });
+  }
+  return layout as MyDonShowcaseLayout;
 };
 
 const normalizeShowcaseTitleName = (value: unknown) => String(value || "").replace(/\s+/g, " ").trim();
@@ -72,19 +84,29 @@ const getBindingMyDonShowcaseTitles = async (bindingId: number) => {
   return dedupeTitleNames(rows.map((row) => row.title_name)).slice(0, MAX_MY_DON_SHOWCASE_TITLES);
 };
 
-const replaceBindingMyDonShowcaseTitles = async (bindingId: number, titleNames: string[]) => {
+const replaceBindingMyDonShowcaseSettings = async (
+  bindingId: number,
+  titleNames: string[] | null,
+  layoutMode: MyDonShowcaseLayout
+) => {
   await ensureAccountSchema();
   const db = getAccountDb();
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.execute("DELETE FROM web_taiko_binding_mydon_showcase_titles WHERE binding_id = ?", [bindingId]);
-    for (const [index, titleName] of titleNames.entries()) {
-      await connection.execute(
-        `INSERT INTO web_taiko_binding_mydon_showcase_titles (binding_id, slot_index, title_name)
-         VALUES (?, ?, ?)`,
-        [bindingId, index + 1, titleName]
-      );
+    await connection.execute(
+      "UPDATE web_taiko_bindings SET mydon_showcase_layout = ? WHERE id = ?",
+      [layoutMode, bindingId]
+    );
+    if (titleNames !== null) {
+      await connection.execute("DELETE FROM web_taiko_binding_mydon_showcase_titles WHERE binding_id = ?", [bindingId]);
+      for (const [index, titleName] of titleNames.entries()) {
+        await connection.execute(
+          `INSERT INTO web_taiko_binding_mydon_showcase_titles (binding_id, slot_index, title_name)
+           VALUES (?, ?, ?)`,
+          [bindingId, index + 1, titleName]
+        );
+      }
     }
     await connection.commit();
   } catch (error) {
@@ -129,6 +151,7 @@ export const getMyDonShowcaseSettings = async (userId: number): Promise<MyDonSho
       taikoId: null,
       hasUserdata: false,
       isCustom: false,
+      layoutMode: DEFAULT_MY_DON_SHOWCASE_LAYOUT,
       selectedTitles: [],
       availableTitles: [],
     };
@@ -150,6 +173,7 @@ export const getMyDonShowcaseSettings = async (userId: number): Promise<MyDonSho
     taikoId: binding.taiko_id,
     hasUserdata,
     isCustom: validSelectedTitles.length > 0,
+    layoutMode: normalizeShowcaseLayout(binding.mydon_showcase_layout),
     selectedTitles: validSelectedTitles,
     availableTitles,
   };
@@ -157,7 +181,8 @@ export const getMyDonShowcaseSettings = async (userId: number): Promise<MyDonSho
 
 export const updateMyDonShowcaseSettings = async (
   userId: number,
-  titleNamesInput: unknown
+  titleNamesInput: unknown,
+  layoutModeInput: unknown
 ): Promise<MyDonShowcaseSettings> => {
   const binding = await getCurrentBindingRow(userId);
   if (!binding) {
@@ -167,7 +192,15 @@ export const updateMyDonShowcaseSettings = async (
     throw createError({ statusCode: 400, statusMessage: "当前绑定还没有可用成绩数据，暂时无法自定义称号展示" });
   }
 
-  const titleNames = dedupeTitleNames(Array.isArray(titleNamesInput) ? titleNamesInput : []);
+  const shouldUpdateTitles = titleNamesInput !== undefined;
+  const titleNames = dedupeTitleNames(
+    shouldUpdateTitles
+      ? Array.isArray(titleNamesInput) ? titleNamesInput : []
+      : await getBindingMyDonShowcaseTitles(binding.id)
+  );
+  const layoutMode = normalizeShowcaseLayout(
+    layoutModeInput === undefined ? binding.mydon_showcase_layout : layoutModeInput
+  );
   if (titleNames.length > MAX_MY_DON_SHOWCASE_TITLES) {
     throw createError({
       statusCode: 400,
@@ -183,17 +216,25 @@ export const updateMyDonShowcaseSettings = async (
   for (const rawTitleName of titleNames) {
     const resolvedTitleName = availableMap.get(normalizeShowcaseTitleName(rawTitleName));
     if (!resolvedTitleName) {
-      throw createError({ statusCode: 400, statusMessage: `称号「${rawTitleName}」不在可自定义范围内` });
+      if (shouldUpdateTitles) {
+        throw createError({ statusCode: 400, statusMessage: `称号「${rawTitleName}」不在可自定义范围内` });
+      }
+      continue;
     }
     normalizedSelectedTitles.push(resolvedTitleName);
   }
 
-  await replaceBindingMyDonShowcaseTitles(binding.id, normalizedSelectedTitles);
+  await replaceBindingMyDonShowcaseSettings(
+    binding.id,
+    shouldUpdateTitles ? normalizedSelectedTitles : null,
+    layoutMode
+  );
   return {
     bindingId: binding.id,
     taikoId: binding.taiko_id,
     hasUserdata: true,
     isCustom: normalizedSelectedTitles.length > 0,
+    layoutMode,
     selectedTitles: normalizedSelectedTitles,
     availableTitles,
   };
@@ -209,10 +250,11 @@ export const getMyDonImageBuffer = async (userId: number) => {
   const userdataPath = getUserdataPath(binding.taiko_id);
   const fileStat = await stat(userdataPath);
   const titleNames = await getBindingMyDonShowcaseTitles(binding.id);
-  const showcaseCacheKey =
-    titleNames.length > 0
-      ? createHash("sha1").update(JSON.stringify(titleNames)).digest("hex").slice(0, 12)
-      : "default";
+  const layoutMode = normalizeShowcaseLayout(binding.mydon_showcase_layout);
+  const showcaseCacheKey = createHash("sha1")
+    .update(JSON.stringify({ titleNames, layoutMode }))
+    .digest("hex")
+    .slice(0, 12);
 
   const targetDir = join(cacheDir, "my-don");
   await mkdir(targetDir, { recursive: true });
@@ -232,6 +274,8 @@ export const getMyDonImageBuffer = async (userId: number) => {
     "render",
     "--taiko-id",
     binding.taiko_id,
+    "--showcase-layout",
+    layoutMode,
   ];
   if (titleNames.length > 0) {
     args.push("--title-overrides-json", JSON.stringify(titleNames));
