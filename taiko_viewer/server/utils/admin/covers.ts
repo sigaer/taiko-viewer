@@ -3,9 +3,10 @@ import { constants as fsConstants } from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
 import { createError } from "h3";
-import { getOssClient } from "~/server/internal/account/shared";
+import { buildSongCoverPath } from "~/utils/songCover";
 import { createAdminBackupSnapshot } from "./backup";
 import { recordAdminAction } from "./audit";
+import { coverObjectExists, deleteCoverObject, uploadCoverObject } from "./cover-storage";
 import { getAdminManagedPaths, writeFileAtomic } from "./shared";
 import { exportAdminSongs } from "./songs";
 
@@ -22,9 +23,7 @@ const toSongId = (value: unknown) => {
 const getCoverFilePath = (songId: number) => join(getAdminManagedPaths().coverDir, `${songId}.png`);
 
 const getCoverPublicUrl = (songId: number) => {
-  const runtimeConfig = useRuntimeConfig();
-  const apiBase = String(runtimeConfig.public.apiBase || "https://static.sakura-bot.cn").replace(/\/$/, "");
-  return `${apiBase}/cover/${songId}.png`;
+  return buildSongCoverPath(songId);
 };
 
 const ensureSongExists = async (songId: number) => {
@@ -43,18 +42,6 @@ const coverFileExists = async (songId: number) => {
   } catch {
     return false;
   }
-};
-
-const uploadCoverToOss = async (songId: number, filePath: string) => {
-  const client = getOssClient();
-  const objectKey = `cover/${songId}.png`;
-  await client.put(objectKey, filePath);
-  return objectKey;
-};
-
-const deleteCoverFromOss = async (songId: number) => {
-  const client = getOssClient();
-  await client.delete(`cover/${songId}.png`);
 };
 
 export const listAdminCovers = async (query: {
@@ -140,8 +127,8 @@ export const uploadAdminCover = async (input: {
     })
     .png()
     .toBuffer();
+  const { objectKey, cacheTaskId } = await uploadCoverObject(input.songId, nextBuffer);
   await writeFileAtomic(filePath, nextBuffer);
-  const objectKey = await uploadCoverToOss(input.songId, filePath);
   await recordAdminAction({
     actorType: "admin",
     actorId: String(input.actor.id),
@@ -155,7 +142,8 @@ export const uploadAdminCover = async (input: {
       songTitle: song.song_name,
       fileName: input.fileName,
       contentType: input.contentType || "",
-      objectKey
+      objectKey,
+      cacheTaskId
     }
   });
   return {
@@ -169,8 +157,11 @@ export const deleteAdminCover = async (actor: { id: number; username: string }, 
   const songId = toSongId(songIdInput);
   const song = await ensureSongExists(songId);
   const filePath = getCoverFilePath(songId);
-  const existed = await coverFileExists(songId);
-  if (!existed) {
+  const [existed, remoteExisted] = await Promise.all([
+    coverFileExists(songId),
+    coverObjectExists(songId)
+  ]);
+  if (!existed && !remoteExisted) {
     throw createError({ statusCode: 404, statusMessage: "封面不存在" });
   }
 
@@ -182,12 +173,13 @@ export const deleteAdminCover = async (actor: { id: number; username: string }, 
     actorName: actor.username,
     sources: [
       {
-        path: filePath
+        path: filePath,
+        optional: true
       }
     ]
   });
-  await unlink(filePath);
-  await deleteCoverFromOss(songId);
+  const { cacheTaskId } = await deleteCoverObject(songId);
+  if (existed) await unlink(filePath);
   await recordAdminAction({
     actorType: "admin",
     actorId: String(actor.id),
@@ -198,7 +190,9 @@ export const deleteAdminCover = async (actor: { id: number; username: string }, 
     action: "delete",
     extra: {
       songId,
-      songTitle: song.song_name
+      songTitle: song.song_name,
+      remoteExisted,
+      cacheTaskId
     }
   });
   return { ok: true };

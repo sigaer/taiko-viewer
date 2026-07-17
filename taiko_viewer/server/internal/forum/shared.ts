@@ -15,7 +15,10 @@ import type {
   ForumThreadType,
   ForumUserBadge
 } from "~/types/forum";
-import { getSongCatalog as loadSongCatalog } from "~/server/services/content";
+import {
+  getSongCatalog as loadSongCatalog,
+  getSongCoverUrl
+} from "~/server/services/content";
 import {
   FORUM_NOTIFICATION_TYPES,
   FORUM_ROLES,
@@ -235,12 +238,6 @@ export const getOssClient = () => {
     accessKeySecret: config.accessKeySecret,
     secure: true
   });
-};
-
-export const getCoverUrl = (songId: number) => {
-  const runtimeConfig = useRuntimeConfig();
-  const apiBase = String(runtimeConfig.public.apiBase || "https://static.sakura-bot.cn").replace(/\/$/, "");
-  return `${apiBase}/cover/${songId}.png`;
 };
 
 export const getDifficultyLabel = (difficultyType: number | null | undefined) => {
@@ -559,7 +556,7 @@ export const toSongSummary = async (row: { songId: number | null; difficultyType
     id: Number(song.id),
     title: song.song_name || `ID ${song.id}`,
     titleJp: song.song_name_jp || "",
-    coverUrl: getCoverUrl(Number(song.id)),
+    coverUrl: getSongCoverUrl(Number(song.id)),
     category: song.category || "",
     difficultyType: row.difficultyType ?? null,
     difficultyLabel: getDifficultyLabel(row.difficultyType),

@@ -240,7 +240,7 @@ const loadOssutilFallback = () => {
   }
 };
 
-const getAvatarConfig = () => {
+export const getOssRuntimeConfig = () => {
   const runtimeConfig = useRuntimeConfig();
   const fallback = loadOssutilFallback();
   return {
@@ -253,6 +253,8 @@ const getAvatarConfig = () => {
     avatarPrefix: String(runtimeConfig.ossAvatarPrefix || process.env.OSS_AVATAR_PREFIX || "viewer/account-avatars")
   };
 };
+
+const getAvatarConfig = getOssRuntimeConfig;
 
 const getSmtpConfig = () => {
   const runtimeConfig = useRuntimeConfig();

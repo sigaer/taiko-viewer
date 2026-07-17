@@ -94,5 +94,5 @@ export const buildCanonicalUrl = (path: string) => {
   return `${CONTENT_CANONICAL_BASE_URL}${normalized === "//" ? "/" : normalized}`;
 };
 
-export const buildStaticCoverUrl = (songId: number) =>
+export const buildStaticCoverAssetUrl = (songId: number) =>
   `${CONTENT_STATIC_BASE_URL}/cover/${songId}.png`;

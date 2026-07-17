@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.33.0",
+  "version": "0.33.1",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -16,6 +16,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@alicloud/esa20240910": "^3.7.0",
+    "@alicloud/openapi-core": "^1.0.8",
     "@element-plus/nuxt": "^1.0.5",
     "@nuxtjs/i18n": "^9.5.6",
     "ajv": "^8.20.0",

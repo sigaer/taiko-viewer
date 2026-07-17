@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { buildSongCoverPath } from "~/utils/songCover";
 
-const apiBase = "https://static.sakura-bot.cn";
 const runtimeConfig = useRuntimeConfig();
 const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
@@ -39,7 +39,7 @@ const eventSlides = computed(() => [
 const { data: homeContent, pending, error } = useHomeContent();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 
-const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
+const getCoverUrl = buildSongCoverPath;
 const getSongTitle = (song: (typeof latestSongs.value)[number]) =>
   locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
 const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>

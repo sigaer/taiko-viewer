@@ -5,11 +5,7 @@ import type {
   SongCatalogPayload,
   SongDetailPayload
 } from "~/types/content";
-import {
-  buildStaticCoverUrl,
-  getContentRuntimePaths,
-  readCachedJsonFile
-} from "./runtime";
+import { getContentRuntimePaths, readCachedJsonFile } from "./runtime";
 import { getSongBranchAudioTracks } from "./songBranchAudio";
 import { getSongTjaBundleUrl } from "./songTjaBundle";
 
@@ -88,5 +84,3 @@ export const getHomeContent = async (): Promise<HomeContentPayload> => {
     .slice(0, 6);
   return { latestSongs };
 };
-
-export const getSongCoverUrl = buildStaticCoverUrl;

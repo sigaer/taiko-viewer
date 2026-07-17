@@ -1,3 +1,4 @@
+export * from "./covers";
 export * from "./guide";
 export * from "./runtime";
 export * from "./songs";

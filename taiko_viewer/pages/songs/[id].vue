@@ -4,6 +4,7 @@ import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBra
 import type { AccountSongScoresPayload } from "~/types/account-song";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import { buildPageDescription } from "~/utils/seo";
+import { buildSongCoverPath } from "~/utils/songCover";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -148,7 +149,7 @@ const copy = computed(() =>
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
-  return `${apiBase}/cover/${id}.png`;
+  return buildSongCoverPath(id);
 });
 
 const hasEditDifficulty = computed(() => {

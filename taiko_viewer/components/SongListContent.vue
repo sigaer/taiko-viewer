@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import type { SongCatalogItem } from "~/types/content";
+import { buildSongCoverPath } from "~/utils/songCover";
 
 const props = withDefaults(
   defineProps<{
@@ -21,7 +22,6 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const query = ref("");
 const scrollContainer = ".app-content";
-const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverErrors = ref<Record<number, boolean>>({});
 const { data: songsPayload, pending, error, reload } = useSongCatalog(() => props.shelfStatus);
@@ -64,7 +64,7 @@ const difficultyDefs = [
   { key: "level_5", color: "#8e44ad" }
 ];
 
-const getCoverUrl = (id: number) => `${apiBase}/cover/${id}.png`;
+const getCoverUrl = buildSongCoverPath;
 const resolveCoverUrl = (id: number) =>
   coverErrors.value[id] ? getCoverUrl(coverFallbackId) : getCoverUrl(id);
 
