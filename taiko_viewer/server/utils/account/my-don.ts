@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { createError } from "h3";
 import type { RowDataPacket } from "mysql2/promise";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { getCustomTitleCatalogFingerprint } from "~/server/utils/custom-titles";
 import {
   execFileAsync,
   getCurrentBindingRow,
@@ -37,6 +38,10 @@ export type MyDonShowcaseTitleOption = {
   songIds: number[];
   constValue: number;
   isMultiSong: boolean;
+  source: "official" | "custom";
+  customTitleId: number | null;
+  difficultyLevel: number | null;
+  plateStyle: "silver" | "gold" | "rainbow" | null;
 };
 
 export type MyDonShowcaseSettings = {
@@ -252,7 +257,11 @@ export const getMyDonImageBuffer = async (userId: number) => {
   const titleNames = await getBindingMyDonShowcaseTitles(binding.id);
   const layoutMode = normalizeShowcaseLayout(binding.mydon_showcase_layout);
   const showcaseCacheKey = createHash("sha1")
-    .update(JSON.stringify({ titleNames, layoutMode }))
+    .update(JSON.stringify({
+      titleNames,
+      layoutMode,
+      customTitles: await getCustomTitleCatalogFingerprint().catch(() => "unavailable")
+    }))
     .digest("hex")
     .slice(0, 12);
 

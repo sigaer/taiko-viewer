@@ -126,6 +126,25 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_taiko_binding_mydon_showcase_titles_binding_id FOREIGN KEY (binding_id)
       REFERENCES web_taiko_bindings(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS taiko_custom_titles (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title_name VARCHAR(255) NOT NULL,
+    title_key VARCHAR(255) NOT NULL,
+    song_id INT NOT NULL,
+    difficulty_level TINYINT UNSIGNED NOT NULL,
+    creator_type VARCHAR(32) NOT NULL,
+    creator_id VARCHAR(255) NOT NULL,
+    creator_name VARCHAR(255) NOT NULL,
+    source VARCHAR(32) NOT NULL,
+    group_id VARCHAR(255) DEFAULT NULL,
+    group_name VARCHAR(255) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_taiko_custom_titles_title_key (title_key),
+    KEY idx_taiko_custom_titles_song_level (song_id, difficulty_level),
+    KEY idx_taiko_custom_titles_creator (creator_id, created_at),
+    CONSTRAINT chk_taiko_custom_titles_level CHECK (difficulty_level BETWEEN 1 AND 5)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_verifications (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,

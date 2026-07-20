@@ -77,6 +77,10 @@ type MyDonShowcaseTitleOption = {
   songIds: number[];
   constValue: number;
   isMultiSong: boolean;
+  source: "official" | "custom";
+  customTitleId: number | null;
+  difficultyLevel: number | null;
+  plateStyle: "silver" | "gold" | "rainbow" | null;
 };
 
 type MyDonShowcaseLayout = "nickname" | "full" | "full_gold";
@@ -411,7 +415,8 @@ const formatShowcaseRequirement = (option: MyDonShowcaseTitleOption) => {
 
 const formatShowcaseOptionLabel = (option: MyDonShowcaseTitleOption) => {
   const constLabel = option.constValue > 0 ? ` · ${option.constValue.toFixed(1)}` : "";
-  return `${option.titleName} · ${formatShowcaseRequirement(option)}${constLabel}`;
+  const sourceLabel = option.source === "custom" ? (locale.value === "ja" ? "カスタム · " : "自定义 · ") : "";
+  return `${sourceLabel}${option.titleName} · ${formatShowcaseRequirement(option)}${constLabel}`;
 };
 
 const getShowcaseSlotOptions = (slotIndex: number) => {

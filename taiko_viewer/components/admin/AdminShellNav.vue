@@ -6,6 +6,7 @@ const navItems = [
   { to: "/admin/taiko/songs", label: "歌曲数据", short: "曲" },
   { to: "/admin/taiko/guides", label: "谱面攻略", short: "谱" },
   { to: "/admin/taiko/aliases", label: "别名管理", short: "别" },
+  { to: "/admin/taiko/custom-titles", label: "自定义称号", short: "称" },
   { to: "/admin/taiko/covers", label: "封面管理", short: "封" },
   { to: "/admin/taiko/draw-guess", label: "你画我猜", short: "猜" },
   { to: "/admin/taiko/audit", label: "审计日志", short: "审" }

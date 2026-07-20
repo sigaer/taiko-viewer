@@ -72,6 +72,7 @@ const openDetail = (row: Record<string, any>) => {
           <el-option label="admin-web" value="admin-web" />
           <el-option label="bot-tset" value="bot-tset" />
           <el-option label="bot-cover" value="bot-cover" />
+          <el-option label="bot-custom-title" value="bot-custom-title" />
           <el-option label="system-backup" value="system-backup" />
         </el-select>
         <el-select v-model="filters.action" clearable placeholder="动作">
@@ -81,7 +82,12 @@ const openDetail = (row: Record<string, any>) => {
           <el-option label="delete" value="delete" />
           <el-option label="login" value="login" />
         </el-select>
-        <el-input v-model="filters.targetType" placeholder="targetType" />
+        <el-select v-model="filters.targetType" clearable filterable allow-create placeholder="目标类型">
+          <el-option label="custom-title" value="custom-title" />
+          <el-option label="song" value="song" />
+          <el-option label="alias" value="alias" />
+          <el-option label="cover" value="cover" />
+        </el-select>
         <div class="admin-filter-actions">
           <el-button @click="refresh()">筛选</el-button>
         </div>
