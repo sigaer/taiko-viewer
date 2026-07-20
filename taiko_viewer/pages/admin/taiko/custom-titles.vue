@@ -13,6 +13,9 @@ type CustomTitleItem = {
   songId: number;
   difficultyLevel: number;
   difficultyLabel: string;
+  achievementType: "clear" | "full_combo" | "all_perfect";
+  achievementLabel: string;
+  plateStyle: "silver" | "gold" | "rainbow";
   creatorName: string;
   creatorId: string;
   source: string;
@@ -32,8 +35,8 @@ const dialogVisible = ref(false);
 const editingId = ref<number | null>(null);
 const songLoading = ref(false);
 const songOptions = ref<SongOption[]>([]);
-const filters = reactive({ keyword: "", level: "", page: 1, pageSize: 20 });
-const form = reactive({ titleName: "", songId: "", level: 4 });
+const filters = reactive({ keyword: "", level: "", achievement: "", page: 1, pageSize: 20 });
+const form = reactive({ titleName: "", songId: "", level: 4, achievement: "full_combo" });
 const levelOptions = [
   { value: 5, label: "里谱 · level 5" },
   { value: 4, label: "表谱 · level 4" },
@@ -42,10 +45,11 @@ const levelOptions = [
   { value: 1, label: "梅谱 · level 1" }
 ];
 const plateLegend = [
-  { key: "silver", label: "过关", src: "/assets/my-don/custom-title/name_plate_custom_sliver.png" },
-  { key: "gold", label: "全连", src: "/assets/my-don/custom-title/name_plate_custom_gold.png" },
-  { key: "rainbow", label: "全良", src: "/assets/my-don/custom-title/name_plate_custom_rainbow.png" }
+  { key: "clear", style: "silver", label: "过关", src: "/assets/my-don/custom-title/name_plate_custom_sliver.png" },
+  { key: "full_combo", style: "gold", label: "全连", src: "/assets/my-don/custom-title/name_plate_custom_gold.png" },
+  { key: "all_perfect", style: "rainbow", label: "全良", src: "/assets/my-don/custom-title/name_plate_custom_rainbow.png" }
 ];
+const achievementOptions = plateLegend.map(({ key, label }) => ({ value: key, label }));
 
 const { data, refresh } = await useAsyncData<ListPayload>(
   "admin-custom-title-list",
@@ -67,7 +71,7 @@ const searchSongs = async (keyword: string) => {
 
 const openCreate = async () => {
   editingId.value = null;
-  Object.assign(form, { titleName: "", songId: "", level: 4 });
+  Object.assign(form, { titleName: "", songId: "", level: 4, achievement: "full_combo" });
   dialogVisible.value = true;
   await searchSongs("");
 };
@@ -77,7 +81,8 @@ const openUpdate = async (item: CustomTitleItem) => {
   Object.assign(form, {
     titleName: item.titleName,
     songId: String(item.songId),
-    level: item.difficultyLevel
+    level: item.difficultyLevel,
+    achievement: item.achievementType
   });
   songOptions.value = item.song
     ? [{ id: item.song.id, song_name: item.song.songName, song_name_jp: item.song.songNameJp }]
@@ -99,7 +104,8 @@ const saveTitle = async () => {
         ...(isUpdate ? { id: editingId.value } : {}),
         titleName: form.titleName,
         songId: Number(form.songId),
-        level: form.level
+        level: form.level,
+        achievement: form.achievement
       }
     });
     ElMessage.success(isUpdate ? "称号已更新" : "称号已创建");
@@ -137,7 +143,7 @@ const sourceLabel = (source: string) => source === "bot-custom-title" ? "用户�
       <div class="workshop-copy">
         <span class="workshop-eyebrow">TITLE WORKSHOP</span>
         <h2>自定义称号</h2>
-        <p>每个称号绑定一个谱面。玩家成绩提升时，称号会沿着过关、全连、全良自动升级材质。</p>
+        <p>每个称号绑定一个谱面和固定成就。达到更高成绩仍使用创建时选择的材质，不会自动升级。</p>
       </div>
       <div class="plate-legend" aria-label="称号成绩样式">
         <figure v-for="plate in plateLegend" :key="plate.key">
@@ -157,6 +163,9 @@ const sourceLabel = (source: string) => source === "bot-custom-title" ? "用户�
         />
         <el-select v-model="filters.level" clearable placeholder="全部难度">
           <el-option v-for="item in levelOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <el-select v-model="filters.achievement" clearable placeholder="全部成就">
+          <el-option v-for="item in achievementOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
         <div class="admin-filter-actions">
           <el-button @click="filters.page = 1; refresh()">筛选</el-button>
@@ -190,6 +199,13 @@ const sourceLabel = (source: string) => source === "bot-custom-title" ? "用户�
               <strong>{{ row.creatorName || row.creatorId }}</strong>
               <span>{{ sourceLabel(row.source) }}<template v-if="row.groupName"> · {{ row.groupName }}</template></span>
             </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="固定成就" width="108">
+          <template #default="{ row }">
+            <el-tag :type="row.plateStyle === 'rainbow' ? 'danger' : row.plateStyle === 'gold' ? 'warning' : 'info'">
+              {{ row.achievementLabel }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="更新时间" width="178">
@@ -244,6 +260,12 @@ const sourceLabel = (source: string) => source === "bot-custom-title" ? "用户�
             <el-option v-for="item in levelOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
+        <el-form-item label="成就与固定材质">
+          <el-select v-model="form.achievement" style="width: 100%">
+            <el-option v-for="item in achievementOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+          <span class="form-hint">过关为银色、全连为金色、全良为彩虹；创建后不会按更高成绩自动换材质。</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -278,10 +300,11 @@ const sourceLabel = (source: string) => source === "bot-custom-title" ? "用户�
   font-size: 12px;
   font-weight: 800;
 }
-.admin-filter-grid { display: grid; grid-template-columns: minmax(260px, 1fr) 190px auto; gap: 12px; }
+.admin-filter-grid { display: grid; grid-template-columns: minmax(240px, 1fr) 180px 150px auto; gap: 12px; }
 .admin-filter-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .admin-title-pair { display: grid; gap: 4px; }
 .admin-title-pair span { color: #7c6f5f; font-size: 12px; }
+.form-hint { display: block; margin-top: 7px; color: #8a7d6c; font-size: 12px; line-height: 1.6; }
 .admin-pagination { display: flex; justify-content: flex-end; margin-top: 18px; }
 @media (max-width: 900px) {
   .title-workshop :deep(.el-card__body), .admin-filter-grid { grid-template-columns: 1fr; }

@@ -13,6 +13,17 @@ import { safeJsonStringify } from "./shared";
 import { exportAdminSongs } from "./songs";
 
 const LEVEL_LABELS: Record<number, string> = { 1: "梅", 2: "竹", 3: "松", 4: "表", 5: "里" };
+const ACHIEVEMENT_LABELS = {
+  clear: "过关",
+  full_combo: "全连",
+  all_perfect: "全良"
+} as const;
+const ACHIEVEMENT_STYLES = {
+  clear: "silver",
+  full_combo: "gold",
+  all_perfect: "rainbow"
+} as const;
+type AchievementType = keyof typeof ACHIEVEMENT_LABELS;
 
 const normalizeLevel = (value: unknown) => {
   const level = Number(value);
@@ -28,6 +39,14 @@ const normalizeSongId = (value: unknown) => {
     throw createError({ statusCode: 400, statusMessage: "歌曲 ID 无效" });
   }
   return songId;
+};
+
+const normalizeAchievement = (value: unknown): AchievementType => {
+  const achievement = String(value || "full_combo").trim() as AchievementType;
+  if (!Object.hasOwn(ACHIEVEMENT_LABELS, achievement)) {
+    throw createError({ statusCode: 400, statusMessage: "成就必须是过关、全连或全良" });
+  }
+  return achievement;
 };
 
 const validateTitleName = async (value: unknown, currentId?: number) => {
@@ -71,6 +90,9 @@ const publicRecord = (row: CustomTitleRow, song: Record<string, any> | null, off
   songId: Number(row.song_id),
   difficultyLevel: Number(row.difficulty_level),
   difficultyLabel: LEVEL_LABELS[Number(row.difficulty_level)] || String(row.difficulty_level),
+  achievementType: normalizeAchievement(row.achievement_type),
+  achievementLabel: ACHIEVEMENT_LABELS[normalizeAchievement(row.achievement_type)],
+  plateStyle: ACHIEVEMENT_STYLES[normalizeAchievement(row.achievement_type)],
   creatorType: row.creator_type,
   creatorId: row.creator_id,
   creatorName: row.creator_name,
@@ -92,7 +114,7 @@ const publicRecord = (row: CustomTitleRow, song: Record<string, any> | null, off
 
 const fetchRow = async (connection: PoolConnection, id: number) => {
   const [rows] = await connection.execute<CustomTitleRow[]>(
-    `SELECT id, title_name, title_key, song_id, difficulty_level,
+    `SELECT id, title_name, title_key, song_id, difficulty_level, achievement_type,
             creator_type, creator_id, creator_name, source, group_id, group_name,
             created_at, updated_at
        FROM taiko_custom_titles WHERE id = ? LIMIT 1`,
@@ -134,6 +156,7 @@ const translateDbError = (error: any): never => {
 export const listAdminCustomTitles = async (query: {
   keyword?: unknown;
   level?: unknown;
+  achievement?: unknown;
   page?: unknown;
   pageSize?: unknown;
 }) => {
@@ -141,6 +164,9 @@ export const listAdminCustomTitles = async (query: {
   const pageSize = Math.min(100, Math.max(10, Number(query.pageSize || 20)));
   const keyword = String(query.keyword || "").trim().toLocaleLowerCase();
   const level = query.level === undefined || query.level === null || query.level === "" ? null : normalizeLevel(query.level);
+  const achievement = query.achievement === undefined || query.achievement === null || query.achievement === ""
+    ? null
+    : normalizeAchievement(query.achievement);
   const [rows, songs, officialKeys] = await Promise.all([
     readAllCustomTitleRows(),
     exportAdminSongs(),
@@ -151,6 +177,7 @@ export const listAdminCustomTitles = async (query: {
     .map((row) => publicRecord(row, songMap.get(Number(row.song_id)) || null, officialKeys.has(row.title_key)))
     .filter((item) => {
       if (level !== null && item.difficultyLevel !== level) return false;
+      if (achievement !== null && item.achievementType !== achievement) return false;
       if (!keyword) return true;
       return [
         item.titleName,
@@ -175,6 +202,7 @@ export const createAdminCustomTitle = async (
 ) => {
   const songId = normalizeSongId(payload.songId);
   const level = normalizeLevel(payload.level);
+  const achievement = normalizeAchievement(payload.achievement);
   const [{ titleName, titleKey }, song] = await Promise.all([
     validateTitleName(payload.titleName),
     resolveSong(songId, level)
@@ -185,9 +213,10 @@ export const createAdminCustomTitle = async (
     await connection.beginTransaction();
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO taiko_custom_titles
-        (title_name, title_key, song_id, difficulty_level, creator_type, creator_id, creator_name, source)
-       VALUES (?, ?, ?, ?, 'admin', ?, ?, 'admin-web')`,
-      [titleName, titleKey, songId, level, String(actor.id), actor.username]
+        (title_name, title_key, song_id, difficulty_level, achievement_type,
+         creator_type, creator_id, creator_name, source)
+       VALUES (?, ?, ?, ?, ?, 'admin', ?, ?, 'admin-web')`,
+      [titleName, titleKey, songId, level, achievement, String(actor.id), actor.username]
     );
     const row = await fetchRow(connection, Number(result.insertId));
     if (!row) throw new Error("created custom title not found");
@@ -213,6 +242,7 @@ export const updateAdminCustomTitle = async (
   }
   const songId = normalizeSongId(payload.songId);
   const level = normalizeLevel(payload.level);
+  const achievement = normalizeAchievement(payload.achievement);
   const [{ titleName, titleKey }, song, songs] = await Promise.all([
     validateTitleName(payload.titleName, id),
     resolveSong(songId, level),
@@ -228,9 +258,10 @@ export const updateAdminCustomTitle = async (
     const before = publicRecord(current, songMap.get(Number(current.song_id)) || null);
     await connection.execute(
       `UPDATE taiko_custom_titles
-          SET title_name = ?, title_key = ?, song_id = ?, difficulty_level = ?
+          SET title_name = ?, title_key = ?, song_id = ?, difficulty_level = ?,
+              achievement_type = ?
         WHERE id = ?`,
-      [titleName, titleKey, songId, level, id]
+      [titleName, titleKey, songId, level, achievement, id]
     );
     if (current.title_name !== titleName) {
       await connection.execute(

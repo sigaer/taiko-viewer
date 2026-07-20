@@ -132,6 +132,7 @@ const CREATE_TABLES = [
     title_key VARCHAR(255) NOT NULL,
     song_id INT NOT NULL,
     difficulty_level TINYINT UNSIGNED NOT NULL,
+    achievement_type VARCHAR(32) NOT NULL DEFAULT 'full_combo',
     creator_type VARCHAR(32) NOT NULL,
     creator_id VARCHAR(255) NOT NULL,
     creator_name VARCHAR(255) NOT NULL,
@@ -405,6 +406,7 @@ const CREATE_TABLES = [
 
 const MIGRATIONS = [
   "ALTER TABLE web_taiko_bindings ADD COLUMN mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname' AFTER verified_titleplate_id",
+  "ALTER TABLE taiko_custom_titles ADD COLUMN achievement_type VARCHAR(32) NOT NULL DEFAULT 'full_combo' AFTER difficulty_level",
   "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_support_tickets ADD COLUMN staff_last_read_at DATETIME NULL DEFAULT NULL AFTER mail_error",

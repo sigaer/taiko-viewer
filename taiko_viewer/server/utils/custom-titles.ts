@@ -13,6 +13,7 @@ export type CustomTitleRow = RowDataPacket & {
   title_key: string;
   song_id: number;
   difficulty_level: number;
+  achievement_type: "clear" | "full_combo" | "all_perfect";
   creator_type: string;
   creator_id: string;
   creator_name: string;
@@ -36,7 +37,7 @@ export const readAllCustomTitleRows = async () => {
   await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<CustomTitleRow[]>(
-    `SELECT id, title_name, title_key, song_id, difficulty_level,
+    `SELECT id, title_name, title_key, song_id, difficulty_level, achievement_type,
             creator_type, creator_id, creator_name, source, group_id, group_name,
             created_at, updated_at
        FROM taiko_custom_titles
@@ -73,6 +74,7 @@ export const getCustomTitleCatalogFingerprint = async () => {
             row.title_name,
             Number(row.song_id),
             Number(row.difficulty_level),
+            row.achievement_type,
             String(row.updated_at || "")
           ]),
           plates: plateHashes
