@@ -4,11 +4,11 @@ import {
   getAccountAnnualSummaryEnvelope
 } from "~/server/services/account/annual-summary";
 import { ANNUAL_VERSION_KEY } from "~/server/services/account/annual-summary/constants";
-import { requireAccountUser } from "~/server/utils/account";
+import { requireAccountAnnualSummaryUser } from "~/server/services/account/annual-summary/access";
 import { resolveViewerLocale } from "~/server/utils/locale";
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAccountUser(event);
+  const user = await requireAccountAnnualSummaryUser(event);
   const key = String(getRouterParam(event, "key") || "").trim();
   const locale = resolveViewerLocale(event);
   return key === ANNUAL_VERSION_KEY

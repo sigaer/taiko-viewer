@@ -1,10 +1,10 @@
 import { getRouterParam, readBody, setResponseStatus } from "h3";
 import { queueAccountAnnualPoster } from "~/server/services/account/annual-summary";
-import { requireAccountUser } from "~/server/utils/account";
+import { requireAccountAnnualSummaryUser } from "~/server/services/account/annual-summary/access";
 import { resolveViewerLocale } from "~/server/utils/locale";
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAccountUser(event);
+  const user = await requireAccountAnnualSummaryUser(event);
   const body = ((await readBody<{ shareId?: unknown; locale?: unknown }>(event).catch(() => ({}))) || {}) as {
     shareId?: unknown;
     locale?: unknown;

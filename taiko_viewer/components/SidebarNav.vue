@@ -130,7 +130,9 @@ const groups = computed(() => [
           { key: "/account/profile", label: t("account.profile"), icon: "user" },
           { key: "/account/songs", label: t("account.songs"), icon: "music" },
           { key: "/account/sync", label: t("account.sync"), icon: "history" },
-          { key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" },
+          ...(accountUser.value.annualSummaryAccess
+            ? [{ key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" }]
+            : []),
           { key: "/account/developer", label: t("account.developer"), icon: "badge" },
           ...(isDeveloperReviewer.value
             ? [

@@ -5,6 +5,7 @@ export type AccountAuthUser = {
   emailVerified: boolean;
   avatarUrl: string;
   createdAt: string;
+  annualSummaryAccess: boolean;
 };
 
 type AccountAuthPayload = {

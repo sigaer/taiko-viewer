@@ -1,9 +1,9 @@
 import { getRouterParam, setHeader } from "h3";
 import { getOwnerAnnualPosterPath, readAnnualImage } from "~/server/services/account/annual-summary";
-import { requireAccountUser } from "~/server/utils/account";
+import { requireAccountAnnualSummaryUser } from "~/server/services/account/annual-summary/access";
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAccountUser(event);
+  const user = await requireAccountAnnualSummaryUser(event);
   const posterId = String(getRouterParam(event, "posterId") || "");
   const path = await getOwnerAnnualPosterPath(user.id, posterId);
   setHeader(event, "Content-Type", "image/png");

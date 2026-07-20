@@ -23,7 +23,7 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 
-definePageMeta({ layout: "story", middleware: "account-auth", keepalive: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
+definePageMeta({ layout: "story", middleware: ["account-auth", "annual-summary-access"], keepalive: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
 useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPageDescription(t("page.account.versionSummary.desc")), path: "/account/version-summary" }));
 
 const storyStarted = ref(true);
