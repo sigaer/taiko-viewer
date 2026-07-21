@@ -416,7 +416,11 @@ const formatShowcaseRequirement = (option: MyDonShowcaseTitleOption) => {
 const formatShowcaseOptionLabel = (option: MyDonShowcaseTitleOption) => {
   const constLabel = option.constValue > 0 ? ` · ${option.constValue.toFixed(1)}` : "";
   const sourceLabel = option.source === "custom" ? (locale.value === "ja" ? "カスタム · " : "自定义 · ") : "";
-  return `${sourceLabel}${option.titleName} · ${formatShowcaseRequirement(option)}${constLabel}`;
+  const songLabel =
+    option.source === "custom" && option.songNames.length > 0
+      ? ` · ${locale.value === "ja" ? "曲" : "曲名"}：${option.songNames.join(" / ")}`
+      : "";
+  return `${sourceLabel}${option.titleName}${songLabel} · ${formatShowcaseRequirement(option)}${constLabel}`;
 };
 
 const getShowcaseSlotOptions = (slotIndex: number) => {
