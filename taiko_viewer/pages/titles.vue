@@ -1,32 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import type { TitleCatalogItem } from "~/types/content";
 import { buildPageDescription } from "~/utils/seo";
-
-type TableCell = {
-  tag: "th" | "td";
-  attrs: Record<string, string>;
-  html: string;
-};
-
-type TableRow = {
-  attrs: Record<string, string>;
-  cells: TableCell[];
-};
-
-type WikiTablePayload = {
-  table?: {
-    attrs?: Record<string, string> & { style?: string };
-  };
-  rows?: TableRow[];
-};
 
 const { data: titleTableData, pending, error } = await useTitlesContent();
 
-const tableRows = computed<TableRow[]>(() => {
-  return (titleTableData.value?.rows || []) as TableRow[];
-});
-
-const tableStyle = computed(() => titleTableData.value?.table?.attrs?.style || "");
+const titles = computed<TitleCatalogItem[]>(() => titleTableData.value?.titles || []);
 const { t } = useI18n();
 
 definePageMeta({
@@ -82,16 +61,33 @@ useViewerSeo(() => ({
         show-icon
       />
       <div v-else class="table-wrap">
-        <table class="wikitable" :style="tableStyle">
+        <table class="wikitable">
+          <thead>
+            <tr>
+              <th>{{ t("page.titles.columns.rarity") }}</th>
+              <th>{{ t("page.titles.columns.name") }}</th>
+              <th>{{ t("page.titles.columns.condition") }}</th>
+              <th>{{ t("page.titles.columns.songs") }}</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex" v-bind="row.attrs">
-              <component
-                :is="cell.tag"
-                v-for="(cell, cellIndex) in row.cells"
-                :key="`${rowIndex}-${cellIndex}`"
-                v-bind="cell.attrs"
-                v-html="cell.html"
-              />
+            <tr v-for="title in titles" :key="title.id || `${title.name}-${title.rarity}-${title.condition}`">
+              <td class="rarity-cell">
+                <span class="rarity-badge">{{ title.rarity }}</span>
+              </td>
+              <td class="title-name">{{ title.name }}</td>
+              <td>{{ title.condition || "—" }}</td>
+              <td class="song-links">
+                <template v-if="title.songIds.length">
+                  <NuxtLink v-for="songId in title.songIds" :key="songId" :to="`/songs/${songId}`">
+                    #{{ songId }}
+                  </NuxtLink>
+                </template>
+                <span v-else>—</span>
+              </td>
+            </tr>
+            <tr v-if="titles.length === 0">
+              <td colspan="4" class="empty-cell">{{ t("page.titles.empty") }}</td>
             </tr>
           </tbody>
         </table>
@@ -157,7 +153,7 @@ useViewerSeo(() => ({
 
 .wikitable {
   width: 100%;
-  min-width: 980px;
+  min-width: 760px;
   background-color: #f8f9fa;
   color: #202122;
   margin: 0;
@@ -169,7 +165,7 @@ useViewerSeo(() => ({
   font-weight: 700;
 }
 
-.wikitable > tbody > tr > th,
+.wikitable > thead > tr > th,
 .wikitable > tbody > tr > td {
   border: 1px solid #a2a9b1;
   padding: 0.6em 0.8em;
@@ -177,7 +173,7 @@ useViewerSeo(() => ({
   line-height: 1.5;
 }
 
-.wikitable > tbody > tr > th {
+.wikitable > thead > tr > th {
   background-color: #eaecf0;
   text-align: center;
   font-weight: 600;
@@ -186,6 +182,45 @@ useViewerSeo(() => ({
 
 .wikitable > tbody > tr > td {
   vertical-align: top;
+}
+
+.rarity-cell {
+  width: 72px;
+  text-align: center;
+}
+
+.rarity-badge {
+  display: inline-flex;
+  min-width: 32px;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #fff0df;
+  color: #9a5b25;
+  font-weight: 700;
+}
+
+.title-name {
+  min-width: 180px;
+  font-weight: 600;
+  color: #5f4632;
+}
+
+.song-links {
+  min-width: 130px;
+}
+
+.song-links a {
+  display: inline-block;
+  margin: 0 10px 4px 0;
+}
+
+.empty-cell {
+  padding: 32px !important;
+  text-align: center;
+  color: #8d7968;
 }
 
 .wikitable a {

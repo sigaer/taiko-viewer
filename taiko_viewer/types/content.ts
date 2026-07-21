@@ -47,22 +47,17 @@ export type SongCatalogPayload = {
   songs: SongCatalogItem[];
 };
 
-export type TableCell = {
-  tag: "th" | "td";
-  attrs: Record<string, string>;
-  html: string;
-};
-
-export type TableRow = {
-  attrs: Record<string, string>;
-  cells: TableCell[];
+export type TitleCatalogItem = {
+  id: number;
+  name: string;
+  rarity: number;
+  condition: string;
+  songIds: number[];
 };
 
 export type TitlesPagePayload = {
-  table: {
-    attrs: Record<string, string> & { style?: string };
-  };
-  rows: TableRow[];
+  titles: TitleCatalogItem[];
+  total: number;
 };
 
 export type GuideDifficultyOption = {

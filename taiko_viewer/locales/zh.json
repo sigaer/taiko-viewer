@@ -269,7 +269,14 @@
       "desc": "太鼓达人国行称号列表与获取条件查询。",
       "keyword": "太鼓达人称号",
       "subtitle": "所有可获得的称号及获取条件",
-      "loadFailed": "称号数据加载失败，请稍后重试"
+      "loadFailed": "称号数据加载失败，请稍后重试",
+      "empty": "暂无称号数据",
+      "columns": {
+        "rarity": "稀有度",
+        "name": "称号",
+        "condition": "获取条件",
+        "songs": "关联歌曲"
+      }
     },
     "songs": {
       "available": {

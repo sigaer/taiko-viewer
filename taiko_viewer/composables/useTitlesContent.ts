@@ -1,8 +1,8 @@
 import type { TitlesPagePayload } from "~/types/content";
 
 const createDefaultPayload = (): TitlesPagePayload => ({
-  table: { attrs: {} },
-  rows: []
+  titles: [],
+  total: 0
 });
 
 export const useTitlesContent = () =>

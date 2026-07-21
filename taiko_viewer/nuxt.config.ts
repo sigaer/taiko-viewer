@@ -143,6 +143,8 @@ export default defineNuxtConfig({
     annualChromiumPath: process.env.TAIKO_ANNUAL_CHROMIUM_PATH || "/usr/bin/chromium",
     annualInternalBaseUrl: process.env.TAIKO_ANNUAL_INTERNAL_BASE_URL || "http://127.0.0.1:3100",
     annualPublicBaseUrl: process.env.TAIKO_ANNUAL_PUBLIC_BASE_URL || "https://viewer.sakura-bot.cn",
+    taikoApiBase:
+      process.env.TAIKO_API_BASE || process.env.TAIKO_ADMIN_API_BASE || "http://8.138.33.103:4290",
     taikoAdminApiBase: process.env.TAIKO_ADMIN_API_BASE || "http://8.138.33.103:4290",
     viewerAccessLogPath:
       process.env.VIEWER_ACCESS_LOG_PATH || "/www/wwwlogs/viewer.sakura-bot.cn.log",
