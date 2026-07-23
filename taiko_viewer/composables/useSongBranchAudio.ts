@@ -1,16 +1,19 @@
 import { computed, type MaybeRefOrGetter, toValue } from "vue";
-import type { SongTrackKey } from "~/types/content";
+import type {
+  SongBranchAudioVariant,
+  SongBranchAudioVariants,
+  SongTrackKey
+} from "~/types/content";
 
 type AudioMode = "drum" | "mix";
 
-const branchVariantOptions = ["普通", "玄人", "达人"] as const;
-export type BranchVariant = (typeof branchVariantOptions)[number];
+export type BranchVariant = SongBranchAudioVariant;
 
 type UseSongBranchAudioOptions = {
   apiBase: string;
   songId: MaybeRefOrGetter<number>;
   selectedTrack: MaybeRefOrGetter<string>;
-  branchTracks: MaybeRefOrGetter<readonly SongTrackKey[]>;
+  branchVariants: MaybeRefOrGetter<SongBranchAudioVariants>;
 };
 
 const resolveTrackContext = (songId: MaybeRefOrGetter<number>, selectedTrack: MaybeRefOrGetter<string>) => {
@@ -24,15 +27,12 @@ const resolveTrackContext = (songId: MaybeRefOrGetter<number>, selectedTrack: Ma
   return { id, track };
 };
 
-export const useSongBranchAudio = ({ apiBase, songId, selectedTrack, branchTracks }: UseSongBranchAudioOptions) => {
+export const useSongBranchAudio = ({ apiBase, songId, selectedTrack, branchVariants }: UseSongBranchAudioOptions) => {
   const activeBranchVariants = computed(() => {
     const context = resolveTrackContext(songId, selectedTrack);
     if (!context) return [];
 
-    const supportedTracks = toValue(branchTracks);
-    if (!supportedTracks?.includes(context.track)) return [];
-
-    return [...branchVariantOptions];
+    return toValue(branchVariants)?.[context.track as SongTrackKey] || [];
   });
 
   const hasBranchVariants = computed(() => activeBranchVariants.value.length > 0);
@@ -48,8 +48,11 @@ export const useSongBranchAudio = ({ apiBase, songId, selectedTrack, branchTrack
     const context = resolveTrackContext(songId, selectedTrack);
     if (!context) return "";
 
-    return `${apiBase}/${mode}/${context.id}_${context.track}_${variant}.mp3`;
+    return `${apiBase}/${mode}/${context.id}_${context.track}_${variant.label}.mp3`;
   };
+
+  const getVariantDisplayLabel = (variant: BranchVariant) =>
+    [variant.label, ...variant.aliases].join("／");
 
   const getPureAudioUrl = () => {
     const context = resolveTrackContext(songId, selectedTrack);
@@ -63,6 +66,7 @@ export const useSongBranchAudio = ({ apiBase, songId, selectedTrack, branchTrack
     hasBranchVariants,
     getBaseAudioUrl,
     getVariantAudioUrl,
+    getVariantDisplayLabel,
     getPureAudioUrl
   };
 };

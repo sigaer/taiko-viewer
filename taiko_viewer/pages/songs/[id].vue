@@ -48,7 +48,7 @@ const { data: accountScores, pending: accountScoresPending } = await useAsyncDat
     watch: [songId]
   }
 );
-const branchAudioTracks = computed(() => songDetail.value.branchAudioTracks || []);
+const branchAudioVariants = computed(() => songDetail.value.branchAudioVariants || {});
 const tjaBundleUrl = computed(() => songDetail.value.tjaBundleUrl || "");
 const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
   if (value === undefined || value === null || value === "") return 0;
@@ -214,11 +214,18 @@ const getFumenComboLabel = (key: string) => {
   return String(comboList[index]);
 };
 
-const { activeBranchVariants, hasBranchVariants, getBaseAudioUrl, getVariantAudioUrl, getPureAudioUrl } = useSongBranchAudio({
+const {
+  activeBranchVariants,
+  hasBranchVariants,
+  getBaseAudioUrl,
+  getVariantAudioUrl,
+  getVariantDisplayLabel,
+  getPureAudioUrl
+} = useSongBranchAudio({
   apiBase,
   songId,
   selectedTrack,
-  branchTracks: branchAudioTracks
+  branchVariants: branchAudioVariants
 });
 
 const currentDrumAudio = computed(() => {
@@ -277,7 +284,7 @@ const getAudioErrorKey = (mode: "drum" | "mix" | "pure", variant?: BranchVariant
     return `pure-base-${songId.value}`;
   }
   return variant
-    ? `${mode}-${songId.value}-${selectedTrack.value}-${variant}`
+    ? `${mode}-${songId.value}-${selectedTrack.value}-${variant.label}`
     : `${mode}-base-${songId.value}-${selectedTrack.value}`;
 };
 
@@ -627,11 +634,17 @@ useViewerSeo(() => ({
                 </div>
                 <template v-if="hasBranchVariants">
                   <div class="variant-audios">
-                    <div v-for="variant in activeBranchVariants" :key="`drum-${selectedTrack}-${variant}`" class="variant-item">
-                      <span class="variant-label">{{ variant }}</span>
+                    <div
+                      v-for="variant in activeBranchVariants"
+                      :key="`drum-${selectedTrack}-${variant.label}`"
+                      class="variant-item"
+                    >
+                      <span class="variant-label" :class="{ merged: variant.aliases.length }">
+                        {{ getVariantDisplayLabel(variant) }}
+                      </span>
                       <audio
-                        :ref="(el) => setDrumAudioRef(`drum-${selectedTrack}-${variant}`, el)"
-                        :key="`drum-${songId}-${selectedTrack}-${variant}`"
+                        :ref="(el) => setDrumAudioRef(`drum-${selectedTrack}-${variant.label}`, el)"
+                        :key="`drum-${songId}-${selectedTrack}-${variant.label}`"
                         :src="getDrumVariantAudioUrl(variant)"
                         class="audio-player"
                         controls
@@ -671,10 +684,16 @@ useViewerSeo(() => ({
                 </div>
                 <template v-if="hasBranchVariants">
                   <div class="variant-audios">
-                    <div v-for="variant in activeBranchVariants" :key="`mix-${selectedTrack}-${variant}`" class="variant-item">
-                      <span class="variant-label">{{ variant }}</span>
+                    <div
+                      v-for="variant in activeBranchVariants"
+                      :key="`mix-${selectedTrack}-${variant.label}`"
+                      class="variant-item"
+                    >
+                      <span class="variant-label" :class="{ merged: variant.aliases.length }">
+                        {{ getVariantDisplayLabel(variant) }}
+                      </span>
                       <audio
-                        :key="`mix-${songId}-${selectedTrack}-${variant}`"
+                        :key="`mix-${songId}-${selectedTrack}-${variant.label}`"
                         :src="getMixVariantAudioUrl(variant)"
                         class="audio-player"
                         controls
@@ -1114,9 +1133,26 @@ useViewerSeo(() => ({
 }
 
 .variant-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-size: 12px;
   font-weight: 600;
   color: #6f5d4c;
+}
+
+.variant-label::before {
+  content: "";
+  width: 14px;
+  height: 7px;
+  border-left: 2px solid #c47f4f;
+  border-bottom: 2px solid #c47f4f;
+  border-radius: 0 0 0 5px;
+}
+
+.variant-label.merged::before {
+  border-top: 2px solid #c47f4f;
+  border-radius: 5px 0 0 5px;
 }
 
 .audio-error {

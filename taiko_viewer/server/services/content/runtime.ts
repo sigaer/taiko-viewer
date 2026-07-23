@@ -21,10 +21,10 @@ export const getContentRuntimePaths = () => {
       process.env.TAIKO_RATING_STRUCT_PATH ||
       resolve(repoRoot, "songs", "rating_structured_with_ids.json")
   );
-  const songDatabasePath = String(
-    runtimeConfig.songDatabasePath ||
-      process.env.TAIKO_SONG_DATABASE_PATH ||
-      resolve(repoRoot, "songs", "taiko_song_database.json")
+  const branchAudioManifestPath = String(
+    runtimeConfig.branchAudioManifestPath ||
+      process.env.TAIKO_BRANCH_AUDIO_MANIFEST_PATH ||
+      resolve(repoRoot, "songs", "branch_audio_manifest.json")
   );
   const dataDir = String(runtimeConfig.dataDir || process.env.TAIKO_FRONTEND_DATA_DIR || "");
   const guideApiBase = String(runtimeConfig.public.guideApiBase || runtimeConfig.public.apiBase || CONTENT_STATIC_BASE_URL);
@@ -32,7 +32,7 @@ export const getContentRuntimePaths = () => {
     repoRoot,
     songDataPath,
     ratingStructPath,
-    songDatabasePath,
+    branchAudioManifestPath,
     dataDirs: resolveDataDirs(dataDir),
     guideApiBase
   };

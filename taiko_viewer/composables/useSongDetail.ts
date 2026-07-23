@@ -3,7 +3,7 @@ import type { SongDetailPayload } from "~/types/content";
 const createDefaultPayload = (): SongDetailPayload => ({
   song: null,
   ratingEntries: [],
-  branchAudioTracks: [],
+  branchAudioVariants: {},
   tjaBundleUrl: null
 });
 

@@ -1,127 +1,71 @@
-import { stat } from "node:fs/promises";
-import type { SongTrackKey } from "~/types/content";
-import { CONTENT_STATIC_BASE_URL, getContentRuntimePaths, readJsonFile } from "./runtime";
+import type {
+  SongBranchAudioLabel,
+  SongBranchAudioVariant,
+  SongBranchAudioVariants,
+  SongTrackKey
+} from "~/types/content";
+import { getContentRuntimePaths, readCachedJsonFile } from "./runtime";
 
-type SongDatabaseCourse = {
-  isBranched?: number;
+type ManifestVariant = {
+  label?: unknown;
+  aliases?: unknown;
+  available?: unknown;
 };
 
-type SongDatabaseEntry = {
-  songNo?: number | string;
-  courses?: Partial<Record<"easy" | "normal" | "hard" | "oni" | "ura", SongDatabaseCourse | null>>;
+type BranchAudioManifest = {
+  songs?: Record<string, Partial<Record<SongTrackKey, ManifestVariant[]>>>;
 };
 
-const courseTrackMap: Record<keyof NonNullable<SongDatabaseEntry["courses"]>, SongTrackKey> = {
-  easy: "EASY",
-  normal: "NORMAL",
-  hard: "HARD",
-  oni: "ONI",
-  ura: "EDIT"
+const TRACKS = new Set<SongTrackKey>(["EASY", "NORMAL", "HARD", "ONI", "EDIT"]);
+const LABELS = new Set<SongBranchAudioLabel>(["普通", "玄人", "达人"]);
+
+let manifestCache: { mtimeMs: number; data: BranchAudioManifest } | null = null;
+
+const toLabel = (value: unknown): SongBranchAudioLabel | null => {
+  const label = String(value || "") as SongBranchAudioLabel;
+  return LABELS.has(label) ? label : null;
 };
 
-type BranchTrackRecord = {
-  branchTracks: SongTrackKey[];
-  candidateTracks: SongTrackKey[];
+const normalizeVariant = (value: ManifestVariant): SongBranchAudioVariant | null => {
+  if (!value || value.available === false) return null;
+  const label = toLabel(value.label);
+  if (!label) return null;
+  const aliases = Array.isArray(value.aliases)
+    ? value.aliases
+        .map(toLabel)
+        .filter((item): item is SongBranchAudioLabel => !!item && item !== label)
+    : [];
+  return {
+    label,
+    aliases: Array.from(new Set(aliases))
+  };
 };
 
-const branchVariantLabels = ["普通", "玄人", "达人"] as const;
-
-let branchTrackCache: { mtimeMs: number; data: Record<number, BranchTrackRecord> } | null = null;
-let branchTrackProbeCache = new Map<string, boolean>();
-
-const extractBranchTracks = (entry: SongDatabaseEntry): SongTrackKey[] => {
-  const courses = entry.courses;
-  if (!courses) return [];
-
-  return (Object.entries(courseTrackMap) as Array<[keyof typeof courseTrackMap, SongTrackKey]>)
-    .filter(([courseKey]) => Number(courses[courseKey]?.isBranched) === 1)
-    .map(([, trackKey]) => trackKey);
+const loadManifest = async () => {
+  const { branchAudioManifestPath } = getContentRuntimePaths();
+  const result = await readCachedJsonFile<BranchAudioManifest>(manifestCache, branchAudioManifestPath);
+  manifestCache = result.cache;
+  return result.data;
 };
 
-const extractCandidateTracks = (entry: SongDatabaseEntry): SongTrackKey[] => {
-  const courses = entry.courses;
-  if (!courses) return [];
-
-  return (Object.entries(courseTrackMap) as Array<[keyof typeof courseTrackMap, SongTrackKey]>)
-    .filter(([courseKey]) => !!courses[courseKey])
-    .map(([, trackKey]) => trackKey);
-};
-
-const checkUrlExists = async (url: string) => {
+export const getSongBranchAudioVariants = async (songId: number): Promise<SongBranchAudioVariants> => {
   try {
-    const response = await fetch(url, {
-      method: "HEAD",
-      signal: AbortSignal.timeout(5000)
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
-};
+    const manifest = await loadManifest();
+    const rawTracks = manifest.songs?.[String(songId)] || {};
+    const variants: SongBranchAudioVariants = {};
 
-const probeTrackBranchAudio = async (songId: number, track: SongTrackKey) => {
-  const cacheKey = `${songId}:${track}`;
-  const cached = branchTrackProbeCache.get(cacheKey);
-  if (cached !== undefined) return cached;
-
-  const urls = branchVariantLabels.map(
-    (label) => `${CONTENT_STATIC_BASE_URL}/drum/${songId}_${track}_${encodeURIComponent(label)}.mp3`
-  );
-  const exists = (await Promise.all(urls.map(checkUrlExists))).every(Boolean);
-  branchTrackProbeCache.set(cacheKey, exists);
-  return exists;
-};
-
-const getBranchTrackIndex = async () => {
-  const { songDatabasePath } = getContentRuntimePaths();
-
-  try {
-    const fileStat = await stat(songDatabasePath);
-    if (branchTrackCache && branchTrackCache.mtimeMs === fileStat.mtimeMs) {
-      return branchTrackCache.data;
+    for (const [trackValue, rawVariants] of Object.entries(rawTracks)) {
+      const track = trackValue as SongTrackKey;
+      if (!TRACKS.has(track) || !Array.isArray(rawVariants)) continue;
+      const normalized = rawVariants
+        .map(normalizeVariant)
+        .filter((item): item is SongBranchAudioVariant => !!item);
+      if (normalized.length) {
+        variants[track] = normalized;
+      }
     }
-
-    const rows = await readJsonFile<SongDatabaseEntry[]>(songDatabasePath);
-    const index: Record<number, BranchTrackRecord> = {};
-
-    rows.forEach((entry) => {
-      const songId = Number(entry.songNo);
-      if (!Number.isInteger(songId) || songId <= 0) return;
-
-      index[songId] = {
-        branchTracks: extractBranchTracks(entry),
-        candidateTracks: extractCandidateTracks(entry)
-      };
-    });
-
-    branchTrackProbeCache = new Map();
-    branchTrackCache = {
-      mtimeMs: fileStat.mtimeMs,
-      data: index
-    };
-
-    return index;
+    return variants;
   } catch {
-    return branchTrackCache?.data || {};
+    return {};
   }
-};
-
-export const getSongBranchAudioTracks = async (songId: number): Promise<SongTrackKey[]> => {
-  const index = await getBranchTrackIndex();
-  const record = index[songId];
-  if (!record) return [];
-  if (record.branchTracks.length) return record.branchTracks;
-  if (!record.candidateTracks.length) return [];
-
-  const probedTracks = (
-    await Promise.all(
-      record.candidateTracks.map(async (track) => ((await probeTrackBranchAudio(songId, track)) ? track : null))
-    )
-  ).filter((track): track is SongTrackKey => !!track);
-
-  if (probedTracks.length) {
-    record.branchTracks = probedTracks;
-  }
-
-  return probedTracks;
 };

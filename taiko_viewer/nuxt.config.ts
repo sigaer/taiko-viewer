@@ -133,7 +133,7 @@ export default defineNuxtConfig({
     repoRoot: process.env.TAIKO_REPO_ROOT || "",
     userdataDir: process.env.TAIKO_USERDATA_DIR || "",
     songDataPath: process.env.TAIKO_SONG_DATA_PATH || "",
-    songDatabasePath: process.env.TAIKO_SONG_DATABASE_PATH || "",
+    branchAudioManifestPath: process.env.TAIKO_BRANCH_AUDIO_MANIFEST_PATH || "",
     ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",

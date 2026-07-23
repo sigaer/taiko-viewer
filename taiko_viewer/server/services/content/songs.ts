@@ -6,7 +6,7 @@ import type {
   SongDetailPayload
 } from "~/types/content";
 import { getContentRuntimePaths, readCachedJsonFile } from "./runtime";
-import { getSongBranchAudioTracks } from "./songBranchAudio";
+import { getSongBranchAudioVariants } from "./songBranchAudio";
 import { getSongTjaBundleUrl } from "./songTjaBundle";
 
 let songCatalogCache: { mtimeMs: number; data: SongCatalogItem[] } | null = null;
@@ -58,16 +58,16 @@ export const getSongCatalogPayload = async (shelfStatus?: number): Promise<SongC
 };
 
 export const getSongDetailPayload = async (songId: number): Promise<SongDetailPayload> => {
-  const [songs, ratingEntries, branchAudioTracks, tjaBundleUrl] = await Promise.all([
+  const [songs, ratingEntries, branchAudioVariants, tjaBundleUrl] = await Promise.all([
     getSongCatalog(),
     getRatingEntries(),
-    getSongBranchAudioTracks(songId),
+    getSongBranchAudioVariants(songId),
     getSongTjaBundleUrl(songId)
   ]);
   return {
     song: songs.find((item) => Number(item.id) === songId) || null,
     ratingEntries: ratingEntries.filter((item) => Number(item.id) === songId),
-    branchAudioTracks,
+    branchAudioVariants,
     tjaBundleUrl
   };
 };

@@ -32,10 +32,19 @@ export type RatingContentItem = {
 
 export type SongTrackKey = "EASY" | "NORMAL" | "HARD" | "ONI" | "EDIT";
 
+export type SongBranchAudioLabel = "普通" | "玄人" | "达人";
+
+export type SongBranchAudioVariant = {
+  label: SongBranchAudioLabel;
+  aliases: SongBranchAudioLabel[];
+};
+
+export type SongBranchAudioVariants = Partial<Record<SongTrackKey, SongBranchAudioVariant[]>>;
+
 export type SongDetailPayload = {
   song: SongCatalogItem | null;
   ratingEntries: RatingContentItem[];
-  branchAudioTracks: SongTrackKey[];
+  branchAudioVariants: SongBranchAudioVariants;
   tjaBundleUrl: string | null;
 };
 
