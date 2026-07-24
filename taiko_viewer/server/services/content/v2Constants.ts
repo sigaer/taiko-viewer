@@ -64,9 +64,9 @@ const ALLOWED_BRANCH_TYPES = new Set(["master", "unbranched"]);
 const DIFFICULTY_ORDER: V2ConstantsDifficulty[] = ["hard", "oni", "edit"];
 const DIFFICULTY_RANK = new Map(DIFFICULTY_ORDER.map((difficulty, index) => [difficulty, index]));
 const COURSE_PRIORITY: Record<V2ConstantsDifficulty, string[]> = {
-  hard: ["hard", "hard_single"],
-  oni: ["oni", "oni_single"],
-  edit: ["edit", "edit_single"]
+  hard: ["hard", "hard_single", "hard_p1"],
+  oni: ["oni", "oni_single", "oni_p1"],
+  edit: ["edit", "edit_single", "edit_p1"]
 };
 const SORT_KEYS = new Set<V2ConstantsSortKey>([
   "id",
@@ -164,6 +164,10 @@ export const buildV2ConstantsRows = (
     if (!id || !localSong || !isRecord(rawSong)) {
       continue;
     }
+    const songName = String(localSong.song_name || "").trim();
+    if (songName.startsWith("【双打】")) {
+      continue;
+    }
     const charts = Array.isArray((rawSong as RemoteSong).charts)
       ? ((rawSong as RemoteSong).charts as unknown[])
           .filter(isRecord)
@@ -178,7 +182,7 @@ export const buildV2ConstantsRows = (
       if (!chart) {
         continue;
       }
-      const row = normalizeChart(id, String(localSong.song_name || "").trim(), difficulty, chart);
+      const row = normalizeChart(id, songName, difficulty, chart);
       if (row) {
         rows.push(row);
       }
