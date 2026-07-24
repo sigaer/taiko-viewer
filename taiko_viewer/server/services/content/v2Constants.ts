@@ -64,9 +64,9 @@ const ALLOWED_BRANCH_TYPES = new Set(["master", "unbranched"]);
 const DIFFICULTY_ORDER: V2ConstantsDifficulty[] = ["hard", "oni", "edit"];
 const DIFFICULTY_RANK = new Map(DIFFICULTY_ORDER.map((difficulty, index) => [difficulty, index]));
 const COURSE_PRIORITY: Record<V2ConstantsDifficulty, string[]> = {
-  hard: ["hard", "hard_single", "hard_p1"],
-  oni: ["oni", "oni_single", "oni_p1"],
-  edit: ["edit", "edit_single", "edit_p1"]
+  hard: ["hard", "hard_single"],
+  oni: ["oni", "oni_single"],
+  edit: ["edit", "edit_single"]
 };
 const SORT_KEYS = new Set<V2ConstantsSortKey>([
   "id",
