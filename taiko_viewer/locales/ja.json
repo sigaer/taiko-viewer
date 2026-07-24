@@ -38,6 +38,7 @@
     "songs": "楽曲一覧",
     "songsAvailable": "実装曲",
     "songsRemoved": "未実装・削除曲",
+    "v2Constants": "V2 定数",
     "grade": "段位情報",
     "guide": "譜面攻略",
     "tools": "譜面ツール",
@@ -289,6 +290,37 @@
         "desc": "中国版太鼓の達人から削除された楽曲のアーカイブです。",
         "keyword": "削除曲",
         "panelDesc": "削除済みの楽曲を表示します。曲名と分類で検索できます。"
+      },
+      "v2Constants": {
+        "title": "V2 定数",
+        "desc": "太鼓の達人の譜面ごとの V2 定数、ノーツ数、能力値を確認できます。",
+        "keyword": "太鼓の達人 V2 定数表",
+        "panelDesc": "ローカル楽曲データと照合した譜面分析から、むずかしい・おに・裏譜面を表示します。",
+        "searchPlaceholder": "楽曲名または ID を検索",
+        "allDifficulties": "すべての難易度",
+        "summary": "全 {total} 譜面",
+        "generatedAt": "データ生成日時",
+        "stale": "リモートデータを更新できないため、前回取得したデータを表示しています。",
+        "loadFailed": "V2 定数を読み込めませんでした。しばらくしてから再試行してください。",
+        "empty": "条件に一致する V2 定数がありません",
+        "groups": {
+          "constants": "定数",
+          "dimensions": "能力値"
+        },
+        "columns": {
+          "id": "ID",
+          "songName": "楽曲名",
+          "difficulty": "難易度",
+          "totalNotes": "ノーツ数",
+          "subConstant1": "90% 定数",
+          "mainConstant": "95% 定数",
+          "subConstant2": "100% 定数",
+          "stamina": "体力",
+          "handspeed": "手速",
+          "burst": "瞬発",
+          "complex": "複合",
+          "rhythm": "リズム"
+        }
       },
       "detail": {
         "desc": "中国版太鼓の達人の楽曲詳細、試聴音源、譜面プレビューを確認します。"

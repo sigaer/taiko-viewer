@@ -8,6 +8,7 @@ const STATIC_ROUTES = [
   "/",
   "/songs/available",
   "/songs/removed",
+  "/songs/v2-constants",
   "/titles",
   "/guide",
   "/grade",
@@ -37,6 +38,7 @@ type SitemapEntry = {
 const STATIC_ROUTE_META: Record<string, Pick<SitemapEntry, "changefreq" | "priority">> = {
   "/": { priority: "1.0", changefreq: "daily" },
   "/songs/available": { priority: "0.9", changefreq: "daily" },
+  "/songs/v2-constants": { priority: "0.8", changefreq: "daily" },
   "/guide": { priority: "0.9", changefreq: "weekly" },
   "/forum": { priority: "0.8", changefreq: "daily" },
   "/grade": { priority: "0.8", changefreq: "weekly" },

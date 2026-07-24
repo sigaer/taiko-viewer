@@ -151,6 +151,12 @@ const startPageLoading = () => {
 };
 
 const buildBreadcrumbs = () => {
+  const items = (route.meta.breadcrumbs as BreadcrumbItem[]) || [];
+  if (items.length) {
+    const firstLabel = items[0].labelKey ? t(items[0].labelKey) : items[0].label;
+    if (firstLabel === t("nav.home")) return items;
+    return [{ labelKey: "nav.home", to: "/" }, ...items];
+  }
   if (/^\/(?:ja\/)?songs\/[^/]+$/.test(route.path)) {
     const isRemovedList = route.query.list === "removed";
     return [
@@ -161,12 +167,6 @@ const buildBreadcrumbs = () => {
       },
       { labelKey: "songs.detail" }
     ];
-  }
-  const items = (route.meta.breadcrumbs as BreadcrumbItem[]) || [];
-  if (items.length) {
-    const firstLabel = items[0].labelKey ? t(items[0].labelKey) : items[0].label;
-    if (firstLabel === t("nav.home")) return items;
-    return [{ labelKey: "nav.home", to: "/" }, ...items];
   }
   if (route.path.startsWith("/grade/")) {
     const year = route.path.split("/").pop();

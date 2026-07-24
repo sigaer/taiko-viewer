@@ -87,7 +87,8 @@ const groups = computed(() => [
         icon: "music",
         children: [
           { key: "/songs/available", label: t("nav.songsAvailable") },
-          { key: "/songs/removed", label: t("nav.songsRemoved") }
+          { key: "/songs/removed", label: t("nav.songsRemoved") },
+          { key: "/songs/v2-constants", label: t("nav.v2Constants") }
         ]
       },
       {
@@ -171,6 +172,7 @@ const activePath = computed(() => {
   if (normalizedPath.startsWith("/forum")) return normalizedPath === "/forum/new" || normalizedPath === "/forum/me" ? normalizedPath : "/forum";
   if (normalizedPath === "/songs") return "/songs/available";
   if (normalizedPath === "/songs/removed") return "/songs/removed";
+  if (normalizedPath === "/songs/v2-constants") return "/songs/v2-constants";
   if (normalizedPath.startsWith("/songs/")) {
     return route.query.list === "removed" ? "/songs/removed" : "/songs/available";
   }

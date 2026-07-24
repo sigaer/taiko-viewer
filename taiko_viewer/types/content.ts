@@ -56,6 +56,47 @@ export type SongCatalogPayload = {
   songs: SongCatalogItem[];
 };
 
+export type V2ConstantsDifficulty = "hard" | "oni" | "edit";
+
+export type V2ConstantsSortKey =
+  | "id"
+  | "songName"
+  | "difficulty"
+  | "totalNotes"
+  | "subConstant1"
+  | "mainConstant"
+  | "subConstant2"
+  | "stamina"
+  | "handspeed"
+  | "burst"
+  | "complex"
+  | "rhythm";
+
+export type V2ConstantsItem = {
+  id: number;
+  songName: string;
+  difficulty: V2ConstantsDifficulty;
+  totalNotes: number;
+  subConstant1: number;
+  mainConstant: number;
+  subConstant2: number;
+  stamina: number;
+  handspeed: number;
+  burst: number;
+  complex: number;
+  rhythm: number;
+};
+
+export type V2ConstantsPayload = {
+  total: number;
+  page: number;
+  pageSize: number;
+  generatedAt: string;
+  fetchedAt: string;
+  stale: boolean;
+  items: V2ConstantsItem[];
+};
+
 export type TitleCatalogItem = {
   id: number;
   name: string;

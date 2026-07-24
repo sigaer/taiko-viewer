@@ -39,6 +39,7 @@
     "songs": "歌曲列表",
     "songsAvailable": "实装歌曲",
     "songsRemoved": "未实装/已下架歌曲",
+    "v2Constants": "V2 定数",
     "grade": "段位查询",
     "guide": "谱面攻略",
     "tools": "查谱工具",
@@ -290,6 +291,37 @@
         "desc": "国行太鼓已下架歌曲归档，支持按曲名与分类搜索。",
         "keyword": "国行歌曲",
         "panelDesc": "展示已下架歌曲，支持按名称与分类搜索。"
+      },
+      "v2Constants": {
+        "title": "V2 定数",
+        "desc": "查看太鼓达人谱面的 V2 定数、物量与五项能力值。",
+        "keyword": "太鼓达人 V2 定数表",
+        "panelDesc": "按本地曲库匹配远端谱面分析数据，仅展示困难、魔王与里谱。",
+        "searchPlaceholder": "搜索歌曲名或 ID",
+        "allDifficulties": "全部难度",
+        "summary": "共 {total} 条谱面",
+        "generatedAt": "数据生成时间",
+        "stale": "远端数据暂时无法刷新，当前展示上一次成功获取的结果。",
+        "loadFailed": "V2 定数加载失败，请稍后重试",
+        "empty": "没有符合条件的 V2 定数",
+        "groups": {
+          "constants": "定数",
+          "dimensions": "能力值"
+        },
+        "columns": {
+          "id": "ID",
+          "songName": "歌曲名",
+          "difficulty": "难度",
+          "totalNotes": "物量",
+          "subConstant1": "90% 定数",
+          "mainConstant": "95% 定数",
+          "subConstant2": "100% 定数",
+          "stamina": "体力",
+          "handspeed": "手速",
+          "burst": "爆发",
+          "complex": "复合",
+          "rhythm": "节奏"
+        }
       },
       "detail": {
         "desc": "查看太鼓达人国行歌曲详情、试听音源与谱面预览。"
