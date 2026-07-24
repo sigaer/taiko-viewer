@@ -38,6 +38,14 @@ type SourceSnapshot = {
   expiresAt: number;
 };
 
+export type V2ConstantsCsvDataset = {
+  body: string;
+  filename: string;
+  generatedAt: string;
+  fetchedAt: string;
+  stale: boolean;
+};
+
 export type V2ConstantsQuery = {
   keyword?: unknown;
   difficulty?: unknown;
@@ -235,6 +243,77 @@ const parsePositiveInteger = (value: unknown, fallback: number) => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+const getV2ConstantsRowsSnapshot = async () => {
+  const [{ snapshot, stale }, localSongs] = await Promise.all([
+    getSourceSnapshot(),
+    getSongCatalog()
+  ]);
+  return {
+    rows: buildV2ConstantsRows(snapshot.payload, localSongs),
+    generatedAt: String(snapshot.payload.metadata?.generated_at || ""),
+    fetchedAt: snapshot.fetchedAt,
+    stale
+  };
+};
+
+const escapeCsvCell = (value: unknown) => {
+  const text = String(value ?? "");
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+};
+
+export const getV2ConstantsCsvDataset = async (): Promise<V2ConstantsCsvDataset> => {
+  const snapshot = await getV2ConstantsRowsSnapshot();
+  const rows = [...snapshot.rows].sort((left, right) => {
+    const idDiff = left.id - right.id;
+    if (idDiff !== 0) {
+      return idDiff;
+    }
+    return (
+      Number(DIFFICULTY_RANK.get(left.difficulty) || 0) -
+      Number(DIFFICULTY_RANK.get(right.difficulty) || 0)
+    );
+  });
+  const header = [
+    "id",
+    "title",
+    "difficulty",
+    "totalNotes",
+    "sub_constant_1",
+    "main_constant",
+    "sub_constant_2",
+    "stamina",
+    "handspeed",
+    "burst",
+    "complex",
+    "rhythm"
+  ];
+  const lines = rows.map((row) =>
+    [
+      row.id,
+      row.songName,
+      row.difficulty,
+      row.totalNotes,
+      row.subConstant1,
+      row.mainConstant,
+      row.subConstant2,
+      row.stamina,
+      row.handspeed,
+      row.burst,
+      row.complex,
+      row.rhythm
+    ]
+      .map(escapeCsvCell)
+      .join(",")
+  );
+  return {
+    body: [header.join(","), ...lines].join("\n") + "\n",
+    filename: "constants_id_v2.csv",
+    generatedAt: snapshot.generatedAt,
+    fetchedAt: snapshot.fetchedAt,
+    stale: snapshot.stale
+  };
+};
+
 const compareRows = (
   left: V2ConstantsItem,
   right: V2ConstantsItem,
@@ -280,11 +359,8 @@ export const getV2ConstantsPayload = async (
   const sortOrder = String(query.sortOrder || "asc").toLowerCase() === "desc" ? "desc" : "asc";
   const direction = sortOrder === "desc" ? -1 : 1;
 
-  const [{ snapshot, stale }, localSongs] = await Promise.all([
-    getSourceSnapshot(),
-    getSongCatalog()
-  ]);
-  const rows = buildV2ConstantsRows(snapshot.payload, localSongs);
+  const snapshot = await getV2ConstantsRowsSnapshot();
+  const rows = snapshot.rows;
   const filtered = rows.filter((row) => {
     if (difficulty && row.difficulty !== difficulty) {
       return false;
@@ -301,9 +377,9 @@ export const getV2ConstantsPayload = async (
     total: filtered.length,
     page,
     pageSize,
-    generatedAt: String(snapshot.payload.metadata?.generated_at || ""),
+    generatedAt: snapshot.generatedAt,
     fetchedAt: snapshot.fetchedAt,
-    stale,
+    stale: snapshot.stale,
     items: filtered.slice(start, start + pageSize)
   };
 };

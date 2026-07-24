@@ -1,12 +1,13 @@
 import { createHash } from "node:crypto";
 import { createReadStream, constants as fsConstants } from "node:fs";
-import { access, readdir, stat } from "node:fs/promises";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { createError, getHeader, getRequestIP, setHeader, type H3Event } from "h3";
 import type { RowDataPacket } from "mysql2/promise";
 import { getContentRuntimePaths } from "~/server/services/content/runtime";
 import { getDeveloperTokenRowByHash, readDeveloperBearerToken, touchDeveloperToken } from "~/server/internal/account/developer";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { getV2ConstantsCsvDataset } from "~/server/services/content/v2Constants";
 
 type FileInfo = {
   filename: string;
@@ -132,6 +133,34 @@ const getFileInfo = async (filePath: string): Promise<FileInfo> => {
   return info;
 };
 
+export const resolveTaikoV2ConstantsDataset = async () => {
+  try {
+    const dataset = await getV2ConstantsCsvDataset();
+    const body = Buffer.from(dataset.body, "utf-8");
+    const generatedAt = new Date(dataset.generatedAt);
+    return {
+      body,
+      info: {
+        filename: dataset.filename,
+        size: body.byteLength,
+        sha256: createHash("sha256").update(body).digest("hex"),
+        updatedAt: Number.isNaN(generatedAt.getTime())
+          ? dataset.fetchedAt
+          : generatedAt.toISOString()
+      } satisfies FileInfo,
+      stale: dataset.stale
+    };
+  } catch {
+    const filePath = DATASET_PATH_RESOLVERS.constants_id_v2();
+    await ensureReadableFile(filePath);
+    return {
+      body: await readFile(filePath),
+      info: await getFileInfo(filePath),
+      stale: true
+    };
+  }
+};
+
 const getUsageDayKey = () => new Date().toISOString().slice(0, 10);
 
 const resolveDeveloperQuotaToken = async (event: H3Event, requireToken: boolean) => {
@@ -230,6 +259,18 @@ export const buildTaikoOpenManifest = async (event: H3Event) => {
   const origin = buildViewerOrigin(event);
   const datasets: Record<string, Record<string, string | number>> = {};
   for (const [name, resolver] of Object.entries(DATASET_PATH_RESOLVERS)) {
+    if (name === "constants_id_v2") {
+      const { info, stale } = await resolveTaikoV2ConstantsDataset();
+      datasets[name] = {
+        filename: info.filename,
+        size: info.size,
+        sha256: info.sha256,
+        updatedAt: info.updatedAt,
+        url: `${origin}/api/taiko/data/${name}`,
+        stale: stale ? 1 : 0
+      };
+      continue;
+    }
     const filePath = resolver();
     try {
       await ensureReadableFile(filePath);
