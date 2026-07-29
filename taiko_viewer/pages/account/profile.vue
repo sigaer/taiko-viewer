@@ -1092,6 +1092,18 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   gap: 18px;
 }
 
+.profile-grid > *,
+.profile-main > *,
+.bind-input-row > *,
+.manual-account-panel > *,
+.manual-account-controls > * {
+  min-width: 0;
+}
+
+.binding-card {
+  container-type: inline-size;
+}
+
 .mydon-config-card {
   grid-column: 1 / -1;
 }
@@ -1185,6 +1197,12 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   margin-bottom: 14px;
 }
 
+.bind-input-row .el-input,
+.manual-account-controls .el-input {
+  width: 100%;
+  min-width: 0;
+}
+
 .pending-box {
   display: grid;
   gap: 8px;
@@ -1241,6 +1259,7 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
+  width: 100%;
 }
 
 .binding-list {
@@ -1389,6 +1408,33 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+@container (max-width: 620px) {
+  .manual-account-panel {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .manual-account-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+@container (max-width: 390px) {
+  .manual-account-panel,
+  .manual-account-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .manual-account-controls {
+    grid-column: auto;
+  }
+
+  .manual-account-controls .el-button {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 1100px) {
