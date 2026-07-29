@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
+import { formatScoreRank } from "~/utils/scoreRank";
 import type { SongCatalogPayload } from "~/types/content";
 
 const { t, locale } = useI18n();
@@ -176,6 +177,7 @@ const copy = computed(() =>
 const levelOptions = computed(() =>
   [1, 2, 3, 4, 5].map((value) => ({ value, label: t(`difficulty.${value}`) }))
 );
+const scoreRankLabel = (value: unknown) => formatScoreRank(value, locale.value);
 
 const { data: profileData, refresh: refreshProfile } = await useAsyncData<ProfilePayload>(
   "account-song-profile",
@@ -376,7 +378,9 @@ const deleteScore = async (row: SongRow) => {
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="bestScoreRank" :label="copy.rating" width="80" />
+          <el-table-column :label="copy.rating" width="80">
+            <template #default="{ row }">{{ scoreRankLabel(row.bestScoreRank) }}</template>
+          </el-table-column>
           <el-table-column prop="maxCombo" :label="copy.maxNotes" width="94" />
           <el-table-column prop="updateDatetime" :label="copy.updatedAt" min-width="160" />
           <el-table-column v-if="!currentBinding?.isManual" :label="copy.lock" width="90">

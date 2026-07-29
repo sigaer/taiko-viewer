@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import type { SongCatalogItem } from "~/types/content";
+import { getScoreRankOptions } from "~/utils/scoreRank";
 
 type SongEditorMode = "edit" | "create";
 
@@ -50,18 +51,6 @@ const DEFAULT_LEVEL_OPTIONS = [
   { value: 4, label: "魔王" },
   { value: 5, label: "里谱" }
 ] as const;
-const SCORE_RANK_OPTIONS = [
-  { value: 0, zh: "未设置评价", ja: "評価未設定" },
-  { value: 1, zh: "未取得评价", ja: "評価未取得" },
-  { value: 2, zh: "白粹（50万分以上）", ja: "白粋（50万点以上）" },
-  { value: 3, zh: "铜粹（60万分以上）", ja: "銅粋（60万点以上）" },
-  { value: 4, zh: "银粹（70万分以上）", ja: "銀粋（70万点以上）" },
-  { value: 5, zh: "金雅（80万分以上）", ja: "金雅（80万点以上）" },
-  { value: 6, zh: "粉雅（90万分以上）", ja: "桃雅（90万点以上）" },
-  { value: 7, zh: "紫雅（95万分以上）", ja: "紫雅（95万点以上）" },
-  { value: 8, zh: "极（100万分）", ja: "極（100万点）" }
-] as const;
-
 const saving = ref(false);
 const catalogKeyword = ref("");
 const form = reactive({
@@ -91,12 +80,7 @@ const visible = computed({
 
 const isCreateMode = computed(() => props.mode === "create");
 const isCustomMode = computed(() => isCreateMode.value && form.sourceType === "custom");
-const scoreRankOptions = computed(() =>
-  SCORE_RANK_OPTIONS.map((item) => ({
-    value: item.value,
-    label: locale.value === "ja" ? item.ja : item.zh
-  }))
-);
+const scoreRankOptions = computed(() => getScoreRankOptions(locale.value));
 const selectedCatalogSong = computed(() =>
   props.songCatalog.find((item) => Number(item.id) === Number(form.catalogSongNo)) || null
 );
