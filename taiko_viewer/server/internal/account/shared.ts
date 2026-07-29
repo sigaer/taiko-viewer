@@ -595,7 +595,8 @@ export const getCurrentBindingRow = async (userId: number) => {
   const [rows] = await db.execute<DbRow<BindingRow>[]>(
     `SELECT b.*, m.nickname AS display_name
        FROM web_taiko_bindings b
-       LEFT JOIN taiko_manual_accounts m ON m.taiko_id = b.manual_account_id
+       LEFT JOIN taiko_manual_accounts m
+         ON CAST(m.taiko_id AS BINARY) = CAST(b.manual_account_id AS BINARY)
       WHERE b.user_id = ?
       ORDER BY b.is_current DESC, b.id ASC LIMIT 1`,
     [userId]

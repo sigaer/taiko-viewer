@@ -114,7 +114,9 @@ const listBotBindRows = async (identityKey: string) => {
             COALESCE(source, 'wahlap') AS source,
             m.nickname AS display_name
        FROM bind b
-       LEFT JOIN taiko_manual_accounts m ON m.taiko_id = b.id AND b.source = 'manual'
+       LEFT JOIN taiko_manual_accounts m
+         ON CAST(m.taiko_id AS BINARY) = CAST(b.id AS BINARY)
+        AND b.source = 'manual'
       WHERE b.qq = ?
       ORDER BY slot_index ASC, row_id ASC`,
     [identityKey]
