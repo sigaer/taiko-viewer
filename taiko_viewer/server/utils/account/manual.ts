@@ -420,6 +420,10 @@ export const permanentlyDeleteManualAccount = async (
   const account = await getManualAccount(taikoId);
   const db = getAccountDb();
   const botIdentity = account.bot_identity_key;
+  const [viewerOwners] = await db.execute<DbRow<{ user_id: number }>[]>(
+    "SELECT DISTINCT user_id FROM web_taiko_bindings WHERE taiko_id = ? AND source = 'manual'",
+    [taikoId]
+  );
   const { userdataDir } = getRuntimePaths();
   const backupRoot = join(userdataDir, ".manual_deleted");
   const backupDir = join(backupRoot, `${taikoId}-${Date.now()}`);
@@ -430,6 +434,16 @@ export const permanentlyDeleteManualAccount = async (
   await db.execute("DELETE FROM web_taiko_bindings WHERE taiko_id = ?", [taikoId]);
   await db.execute("DELETE FROM bind WHERE id = ? AND source = 'manual'", [taikoId]);
   await db.execute("DELETE FROM taiko_manual_accounts WHERE taiko_id = ?", [taikoId]);
+  for (const { user_id: userId } of viewerOwners) {
+    await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
+    const [remaining] = await db.execute<DbRow<{ id: number }>[]>(
+      "SELECT id FROM web_taiko_bindings WHERE user_id = ? ORDER BY id LIMIT 1",
+      [userId]
+    );
+    if (remaining[0]) {
+      await db.execute("UPDATE web_taiko_bindings SET is_current = 1 WHERE id = ?", [remaining[0].id]);
+    }
+  }
   if (botIdentity) await compactBotSlots(botIdentity);
   return { ok: true, backup: backupDir };
 };
