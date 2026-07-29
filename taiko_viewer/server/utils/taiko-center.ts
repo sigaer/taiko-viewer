@@ -11,7 +11,7 @@ import {
   readRawUserdataText
 } from "~/server/internal/account/shared";
 import { requestSyncDispatch } from "~/server/internal/account/sync";
-import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
 
 type JsonObject = Record<string, unknown>;
 type BotBindSource = "wahlap" | "hiroba" | "manual";
@@ -170,6 +170,14 @@ const buildBotBindLookupPayload = async (identityKey: string) => {
       bindings: []
     };
   }
+  const db = getAccountDb();
+  const [stateRows] = await db.execute<DbRow<{ current_virtual: number }>[]>(
+    "SELECT current_virtual FROM taiko_bind_identity_state WHERE identity_key = ? LIMIT 1",
+    [identityKey]
+  );
+  const officialCount = bindings.filter((item) => !item.isManual).length;
+  const currentVirtual =
+    Number(stateRows[0]?.current_virtual || 0) === 1 && officialCount >= 2;
   return {
     ok: true,
     found: true,
@@ -177,7 +185,8 @@ const buildBotBindLookupPayload = async (identityKey: string) => {
     taikoId: current.taikoId,
     visible: current.visible,
     currentTaikoId: current.taikoId,
-    currentSlot: current.slot,
+    currentSlot: currentVirtual ? 0 : current.slot,
+    currentVirtual,
     currentSource: current.source,
     bindings
   };
@@ -231,6 +240,11 @@ const upsertBotBindRecord = async (
   if (makeCurrent) {
     await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
     await db.execute("UPDATE bind SET is_current = 1 WHERE qq = ? AND id = ?", [identityKey, taikoId]);
+    await db.execute(
+      `INSERT INTO taiko_bind_identity_state (identity_key, current_virtual)
+       VALUES (?, 0) ON DUPLICATE KEY UPDATE current_virtual = 0`,
+      [identityKey]
+    );
   }
 
   return buildBotBindLookupPayload(identityKey);
@@ -243,17 +257,36 @@ const switchCurrentBotBindSlot = async (identityKeyInput: unknown, slotInput: un
   if (!identityKey) {
     throw createError({ statusCode: 400, statusMessage: "缺少身份标识" });
   }
-  if (!Number.isInteger(slot) || slot <= 0) {
+  if (!Number.isInteger(slot) || slot < 0) {
     throw createError({ statusCode: 400, statusMessage: "槽位无效" });
   }
   const rows = await listBotBindRows(identityKey);
+  const db = getAccountDb();
+  if (slot === 0) {
+    const officialCount = rows.filter(
+      (row) => normalizeBotBindSource(row.source) !== "manual"
+    ).length;
+    if (officialCount < 2) {
+      throw createError({ statusCode: 409, statusMessage: "至少需要 2 个 CN/JP 账号才能使用 u0" });
+    }
+    await db.execute(
+      `INSERT INTO taiko_bind_identity_state (identity_key, current_virtual)
+       VALUES (?, 1) ON DUPLICATE KEY UPDATE current_virtual = 1`,
+      [identityKey]
+    );
+    return buildBotBindLookupPayload(identityKey);
+  }
   const target = rows.find((row) => Math.max(1, Number(row.slot_index || 1) || 1) === slot);
   if (!target) {
     throw createError({ statusCode: 404, statusMessage: "未找到该槽位" });
   }
-  const db = getAccountDb();
   await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
   await db.execute("UPDATE bind SET is_current = 1 WHERE row_id = ?", [target.row_id]);
+  await db.execute(
+    `INSERT INTO taiko_bind_identity_state (identity_key, current_virtual)
+     VALUES (?, 0) ON DUPLICATE KEY UPDATE current_virtual = 0`,
+    [identityKey]
+  );
   return buildBotBindLookupPayload(identityKey);
 };
 
