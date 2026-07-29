@@ -39,6 +39,10 @@ type ProfilePayload = {
   bindings: Array<{
     id: number;
     taikoId: string;
+    source: "wahlap" | "hiroba" | "manual";
+    displayName: string;
+    isManual: boolean;
+    canExternalSync: boolean;
     isCurrent: boolean;
     verifiedTitle: string | null;
     verifiedTitleplateId: number | null;
@@ -48,6 +52,10 @@ type ProfilePayload = {
   currentBinding: {
     id: number;
     taikoId: string;
+    source: "wahlap" | "hiroba" | "manual";
+    displayName: string;
+    isManual: boolean;
+    canExternalSync: boolean;
     isCurrent: boolean;
     verifiedTitle: string | null;
     verifiedTitleplateId: number | null;
@@ -102,6 +110,9 @@ const preparing = ref(false);
 const confirming = ref(false);
 const switchingId = ref<number | null>(null);
 const deletingId = ref<number | null>(null);
+const manualLoading = ref(false);
+const manualNickname = ref("");
+const manualClaimCode = ref("");
 const uploading = ref(false);
 const removingAvatar = ref(false);
 const avatarUploadRef = ref<UploadInstance>();
@@ -128,6 +139,23 @@ const copy = computed(() =>
         bindTitle: "ドンダーひろば ID を連携",
         bindDesc: "新しい ID を入力すると現在の称号を記録します。称号変更後に確認すると連携が完了します。",
         bindPlaceholder: "ドンダーひろば ID を入力",
+        manualTitle: "手動スコアアカウント",
+        manualDesc: "外部サービスと連携せず、Viewer と Bot から成績を手入力できます。",
+        manualNickname: "ニックネーム",
+        manualCreate: "空アカウントを作成",
+        manualClaimPlaceholder: "8 桁の引き継ぎコード",
+        manualClaim: "手動アカウントを引き継ぐ",
+        manualStamp: "手動",
+        cnStamp: "CN",
+        jpStamp: "JP",
+        manualRename: "名前変更",
+        manualClaimCode: "引き継ぎコード",
+        manualDetach: "この端末から解除",
+        manualDelete: "完全に削除",
+        manualCreated: "手動アカウントを作成しました",
+        manualClaimed: "手動アカウントを引き継ぎました",
+        manualCodeReady: "引き継ぎコード（10 分・1 回のみ）",
+        manualActionFailed: "手動アカウントの操作に失敗しました",
         startVerify: "認証開始",
         pendingId: "確認待ち ID",
         pendingTitle: "記録した称号",
@@ -205,6 +233,23 @@ const copy = computed(() =>
         bindTitle: "绑定鼓众广场 ID",
         bindDesc: "输入新的鼓众 ID 后，系统会记录你当前的称号，修改称号后再确认即可完成绑定。",
         bindPlaceholder: "输入鼓众广场 ID",
+        manualTitle: "手动成绩账号",
+        manualDesc: "不关联鼓众广场或 Hiroba，可在 viewer 与 bot 中自行录入成绩。",
+        manualNickname: "账号昵称",
+        manualCreate: "新建空白账号",
+        manualClaimPlaceholder: "输入 8 位一次性认领码",
+        manualClaim: "认领手动账号",
+        manualStamp: "手动",
+        cnStamp: "CN",
+        jpStamp: "JP",
+        manualRename: "改名",
+        manualClaimCode: "生成认领码",
+        manualDetach: "从 viewer 解绑",
+        manualDelete: "永久删除",
+        manualCreated: "手动账号已创建",
+        manualClaimed: "手动账号已认领",
+        manualCodeReady: "认领码（10 分钟内一次有效）",
+        manualActionFailed: "手动账号操作失败",
         startVerify: "开始验证",
         pendingId: "待确认 ID",
         pendingTitle: "记录称号",
@@ -557,6 +602,103 @@ const removeAvatar = async () => {
   }
 };
 
+const runManualAction = async (body: Record<string, unknown>) => {
+  manualLoading.value = true;
+  try {
+    return await apiFetch<Record<string, any>>("/api/account/manual", {
+      method: "POST",
+      body
+    });
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.manualActionFailed);
+    return null;
+  } finally {
+    manualLoading.value = false;
+  }
+};
+
+const createManual = async () => {
+  if (!manualNickname.value.trim()) return;
+  const result = await runManualAction({ action: "create", nickname: manualNickname.value.trim() });
+  if (!result) return;
+  manualNickname.value = "";
+  ElMessage.success(copy.value.manualCreated);
+  await refreshProfile();
+};
+
+const claimManual = async () => {
+  if (!manualClaimCode.value.trim()) return;
+  const result = await runManualAction({ action: "claim", code: manualClaimCode.value.trim() });
+  if (!result) return;
+  manualClaimCode.value = "";
+  ElMessage.success(copy.value.manualClaimed);
+  await refreshProfile();
+};
+
+const renameManual = async (binding: ProfilePayload["bindings"][number]) => {
+  try {
+    const { value } = await ElMessageBox.prompt(copy.value.manualNickname, copy.value.manualRename, {
+      inputValue: binding.displayName,
+      inputValidator: (input) => Boolean(String(input || "").trim())
+    });
+    const result = await runManualAction({
+      action: "rename",
+      taikoId: binding.taikoId,
+      nickname: value
+    });
+    if (result) await refreshProfile();
+  } catch {
+    // User cancelled.
+  }
+};
+
+const showManualClaimCode = async (binding: ProfilePayload["bindings"][number]) => {
+  const result = await runManualAction({ action: "claim-code", taikoId: binding.taikoId });
+  if (!result?.code) return;
+  await ElMessageBox.alert(String(result.code), copy.value.manualCodeReady, {
+    confirmButtonText: t("common.confirm")
+  });
+};
+
+const detachManual = async (binding: ProfilePayload["bindings"][number]) => {
+  try {
+    await ElMessageBox.confirm(
+      locale.value === "ja"
+        ? "Viewer からのみ解除します。Bot 側と成績は保持されます。"
+        : "只解除 viewer 端绑定，bot 端和成绩会保留。",
+      copy.value.manualDetach,
+      { type: "warning" }
+    );
+  } catch {
+    return;
+  }
+  const result = await runManualAction({ action: "detach", taikoId: binding.taikoId });
+  if (result) await refreshProfile();
+};
+
+const permanentlyDeleteManual = async (binding: ProfilePayload["bindings"][number]) => {
+  try {
+    await ElMessageBox.confirm(
+      locale.value === "ja"
+        ? "両端の連携と全スコア履歴を削除します。この操作は通常の画面から元に戻せません。"
+        : "将删除两端绑定和全部成绩历史，此操作无法在页面中撤销。",
+      copy.value.manualDelete,
+      {
+        type: "error",
+        confirmButtonText: copy.value.manualDelete
+      }
+    );
+  } catch {
+    return;
+  }
+  const result = await runManualAction({
+    action: "delete-account",
+    taikoId: binding.taikoId,
+    confirmed: true
+  });
+  if (result) await refreshProfile();
+};
+
 const prepareBinding = async () => {
   if (!bindingInput.value.trim() || preparing.value) return;
   preparing.value = true;
@@ -701,7 +843,7 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
               <div class="meta-grid">
                 <div>
                   <span>{{ copy.currentBinding }}</span>
-                  <strong>{{ profile.currentBinding?.taikoId || copy.unbound }}</strong>
+                  <strong>{{ profile.currentBinding?.displayName || profile.currentBinding?.taikoId || copy.unbound }}</strong>
                 </div>
                 <div>
                   <span>{{ copy.currentTitle }}</span>
@@ -725,6 +867,43 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
             <el-input v-model="bindingInput" :placeholder="copy.bindPlaceholder" />
             <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
           </div>
+          <div class="manual-account-panel">
+            <div class="manual-drum" aria-hidden="true"><span /></div>
+            <div class="manual-account-copy">
+              <strong>{{ copy.manualTitle }}</strong>
+              <p>{{ copy.manualDesc }}</p>
+            </div>
+            <div class="manual-account-controls">
+              <el-input
+                v-model="manualNickname"
+                :placeholder="copy.manualNickname"
+                maxlength="24"
+                @keyup.enter="createManual"
+              />
+              <el-button
+                type="success"
+                plain
+                :loading="manualLoading"
+                :disabled="!manualNickname.trim()"
+                @click="createManual"
+              >
+                {{ copy.manualCreate }}
+              </el-button>
+              <el-input
+                v-model="manualClaimCode"
+                :placeholder="copy.manualClaimPlaceholder"
+                maxlength="12"
+                @keyup.enter="claimManual"
+              />
+              <el-button
+                :loading="manualLoading"
+                :disabled="!manualClaimCode.trim()"
+                @click="claimManual"
+              >
+                {{ copy.manualClaim }}
+              </el-button>
+            </div>
+          </div>
           <div v-if="profile.pendingBinding" class="pending-box">
             <div>
               <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
@@ -739,9 +918,19 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
           </div>
           <el-empty v-if="!profile.bindings.length" :description="copy.noBindings" />
           <div v-else class="binding-list">
-            <div v-for="binding in profile.bindings" :key="binding.id" class="binding-item">
+            <div
+              v-for="binding in profile.bindings"
+              :key="binding.id"
+              class="binding-item"
+              :class="{ 'binding-item--manual': binding.isManual }"
+            >
               <div>
-                <strong>{{ binding.taikoId }}</strong>
+                <div class="binding-heading">
+                  <strong>{{ binding.displayName || binding.taikoId }}</strong>
+                  <span class="source-stamp" :class="`source-stamp--${binding.source}`">
+                    {{ binding.source === "manual" ? copy.manualStamp : binding.source === "hiroba" ? copy.jpStamp : copy.cnStamp }}
+                  </span>
+                </div>
                 <p>{{ binding.verifiedTitle || "-" }}</p>
               </div>
               <div class="binding-actions">
@@ -752,7 +941,14 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
                 >
                   {{ binding.isCurrent ? copy.currentUsing : copy.switchCurrent }}
                 </el-button>
+                <template v-if="binding.isManual">
+                  <el-button plain @click="renameManual(binding)">{{ copy.manualRename }}</el-button>
+                  <el-button plain @click="showManualClaimCode(binding)">{{ copy.manualClaimCode }}</el-button>
+                  <el-button type="warning" plain @click="detachManual(binding)">{{ copy.manualDetach }}</el-button>
+                  <el-button type="danger" plain @click="permanentlyDeleteManual(binding)">{{ copy.manualDelete }}</el-button>
+                </template>
                 <el-button
+                  v-else
                   type="danger"
                   plain
                   :loading="deletingId === binding.id"
@@ -998,6 +1194,55 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   margin-bottom: 14px;
 }
 
+.manual-account-panel {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  margin: 4px 0 16px;
+  border: 1px solid rgba(213, 112, 73, 0.22);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 246, 235, 0.92), rgba(255, 255, 255, 0.88));
+}
+
+.manual-drum {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 4px solid #d76545;
+  border-radius: 50%;
+  background: #fffdf9;
+  box-shadow: inset 0 0 0 4px #ffd1a8;
+}
+
+.manual-drum span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d76545;
+  opacity: 0.32;
+}
+
+.manual-account-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.manual-account-copy p {
+  margin: 0;
+  color: #7d6a5a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.manual-account-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
 .binding-list {
   display: grid;
   gap: 12px;
@@ -1016,6 +1261,40 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
 .binding-item p {
   margin: 6px 0 0;
   color: #7d6a5a;
+}
+
+.binding-item--manual {
+  box-shadow: inset 4px 0 0 #d76545;
+}
+
+.binding-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.source-stamp {
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.source-stamp--wahlap {
+  color: #b65337;
+}
+
+.source-stamp--hiroba {
+  color: #386da8;
+}
+
+.source-stamp--manual {
+  color: #8b604c;
+  border-style: dashed;
 }
 
 .binding-actions {
@@ -1128,6 +1407,11 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   }
 
   .bind-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-account-panel,
+  .manual-account-controls {
     grid-template-columns: 1fr;
   }
 

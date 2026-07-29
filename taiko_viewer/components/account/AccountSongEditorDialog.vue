@@ -33,6 +33,7 @@ const props = defineProps<{
   mode: SongEditorMode;
   songCatalog: SongCatalogItem[];
   initialSong?: SongEditorRow | null;
+  isManual?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -91,6 +92,7 @@ const copy = computed(() =>
         removed: "削除済み",
         available: "現行曲",
         lockNotice: "追加した記録は既定でロックされ、今後の同期や再取得で自動上書き・削除されません。",
+        manualNotice: "この記録は中央の手動アカウントに保存され、Viewer と Bot の両方ですぐ確認できます。",
         fromCatalog: "楽曲一覧から選択",
         customSong: "未収録曲を手動入力",
         findSong: "楽曲を探す",
@@ -117,6 +119,7 @@ const copy = computed(() =>
         dondafulCount: "全良回数",
         cancel: "キャンセル",
         createAndLock: "追加してロック",
+        createManual: "手動スコアを追加",
         save: "保存",
         invalidSongId: "有効な楽曲 ID を入力してください",
         needTitle: "未収録曲は曲名を 1 つ以上入力してください",
@@ -131,6 +134,7 @@ const copy = computed(() =>
         removed: "已下架",
         available: "现有",
         lockNotice: "新增记录会默认写入锁定表，后续同步和抓取不会自动覆盖或删除该谱面。",
+        manualNotice: "成绩会保存到中心手动账号，viewer 与 bot 两端可立即互相查看。",
         fromCatalog: "从歌曲目录选择",
         customSong: "手动录入未收录曲目",
         findSong: "查找歌曲",
@@ -157,6 +161,7 @@ const copy = computed(() =>
         dondafulCount: "全良次数",
         cancel: "取消",
         createAndLock: "新增并锁定",
+        createManual: "新增手动成绩",
         save: "保存",
         invalidSongId: "请填写有效的歌曲 ID",
         needTitle: "未收录曲目至少要填写一个曲名",
@@ -350,10 +355,18 @@ const submit = async () => {
 
   saving.value = true;
   try {
-    await apiFetch(isCreateMode.value ? "/api/account/songs/create" : "/api/account/songs/update", {
+    const body = buildRequestBody();
+    await apiFetch(
+      props.isManual
+        ? "/api/account/manual"
+        : isCreateMode.value
+          ? "/api/account/songs/create"
+          : "/api/account/songs/update",
+      {
       method: "POST",
-      body: buildRequestBody()
-    });
+      body: props.isManual ? { action: "score-upsert", ...body } : body
+      }
+    );
     ElMessage.success(isCreateMode.value ? copy.value.createSuccess : copy.value.updateSuccess);
     visible.value = false;
     emit("saved");
@@ -369,7 +382,7 @@ const submit = async () => {
   <el-dialog v-model="visible" width="min(760px, 100%)" :title="dialogTitle">
     <div v-if="isCreateMode" class="create-head">
       <el-alert
-        :title="copy.lockNotice"
+        :title="props.isManual ? copy.manualNotice : copy.lockNotice"
         type="info"
         :closable="false"
         show-icon
@@ -462,7 +475,7 @@ const submit = async () => {
     <template #footer>
       <el-button @click="visible = false">{{ copy.cancel }}</el-button>
       <el-button type="primary" :loading="saving" @click="submit">
-        {{ isCreateMode ? copy.createAndLock : copy.save }}
+        {{ isCreateMode ? (props.isManual ? copy.createManual : copy.createAndLock) : copy.save }}
       </el-button>
     </template>
   </el-dialog>

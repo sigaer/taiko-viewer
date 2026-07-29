@@ -12,6 +12,7 @@ import {
   getSongCatalog,
   parsePositiveInt,
   readUserdata,
+  rebuildUserdataAchievement,
   sanitizeBinding,
   toSongRow,
   writeUserdataWithHistory
@@ -113,7 +114,8 @@ export const listAccountSongs = async (
 
   const userdata = await readUserdata(binding.taiko_id);
   const catalog = await getSongCatalog();
-  const lockedKeys = await getLockMap(userId, binding.taiko_id);
+  const lockedKeys =
+    binding.source === "manual" ? new Set<string>() : await getLockMap(userId, binding.taiko_id);
   const keyword = String(query.keyword || "").trim().toLowerCase();
   const levelFilter = Number(query.level || 0);
   const page = Math.max(1, Number(query.page || 1));
@@ -196,7 +198,12 @@ export const updateAccountSong = async (
   if (sanitized.high_score !== undefined) {
     target.highscore_datetime = stamp;
   }
-  await writeUserdataWithHistory(binding.taiko_id, userdata, "web-account");
+  if (binding.source === "manual") rebuildUserdataAchievement(userdata);
+  await writeUserdataWithHistory(
+    binding.taiko_id,
+    userdata,
+    binding.source === "manual" ? "manual-score" : "web-account"
+  );
 
   const catalog = await getSongCatalog();
   const lockedKeys = await getLockMap(userId, binding.taiko_id);
@@ -256,14 +263,23 @@ export const createAccountSong = async (
 
   await validateSongAccuracy(songNo, level, newSong);
 
-  await ensureSongLocked(userId, binding.taiko_id, songNo, level);
+  if (binding.source !== "manual") {
+    await ensureSongLocked(userId, binding.taiko_id, songNo, level);
+  }
   try {
     songs.push(newSong);
-    await writeUserdataWithHistory(binding.taiko_id, userdata, "web-account");
+    if (binding.source === "manual") rebuildUserdataAchievement(userdata);
+    await writeUserdataWithHistory(
+      binding.taiko_id,
+      userdata,
+      binding.source === "manual" ? "manual-score" : "web-account"
+    );
   } catch (error) {
-    await removeSongLock(userId, binding.taiko_id, songNo, level).catch((cleanupError) => {
-      console.error("[web-account] 回滚新建谱面锁定失败", { songNo, level, cleanupError });
-    });
+    if (binding.source !== "manual") {
+      await removeSongLock(userId, binding.taiko_id, songNo, level).catch((cleanupError) => {
+        console.error("[web-account] 回滚新建谱面锁定失败", { songNo, level, cleanupError });
+      });
+    }
     throw error;
   }
 
@@ -281,6 +297,9 @@ export const setAccountSongLock = async (
     throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   }
   const { songNo, level } = assertSongIdentity(payload.songNo, payload.level);
+  if (binding.source === "manual") {
+    throw createError({ statusCode: 400, statusMessage: "手动账号不会被外部同步覆盖，无需设置谱面锁" });
+  }
   const locked = Boolean(payload.locked);
 
   const db = getAccountDb();

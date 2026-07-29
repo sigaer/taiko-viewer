@@ -177,6 +177,9 @@ export default defineNuxtConfig({
     developerReviewInbox: process.env.TAIKO_DEVELOPER_REVIEW_INBOX || "",
     supportInbox: process.env.TAIKO_SUPPORT_INBOX || "",
     wahlapCookie: process.env.TAIKO_WAHLAP_COOKIE || "",
+    botServiceToken: process.env.TAIKO_BOT_SERVICE_TOKEN || "",
+    manualClaimSecret:
+      process.env.TAIKO_MANUAL_CLAIM_SECRET || process.env.TAIKO_BOT_SERVICE_TOKEN || "",
     ossEndpoint: process.env.OSS_ENDPOINT || "",
     ossRegion: process.env.OSS_REGION || "",
     ossBucket: process.env.OSS_BUCKET || "",

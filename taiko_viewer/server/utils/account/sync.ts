@@ -30,7 +30,8 @@ export const getAccountSyncOverview = async (event: H3Event) => {
   const targets = await loadSyncTargets();
   const taikoId = currentBinding?.taiko_id || "";
   const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
-  const canSyncFromWahlap = Boolean(String(wahlapCookie || "").trim());
+  const canSyncFromWahlap =
+    currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
   const userdataPath = taikoId ? getUserdataPath(taikoId) : "";
   const { userdataDir } = getRuntimePaths();
   // #region agent log
@@ -71,6 +72,12 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   const currentBinding = await getCurrentBindingRow(user.id);
   if (!currentBinding) {
     throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID 后再同步" });
+  }
+  if (currentBinding.source === "manual") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "手动账号不关联外部平台，手录内容已经保存在中心，无需拉取同步"
+    });
   }
   const wahlapCookie = await loadWahlapCookie().catch(() => "");
   if (!String(wahlapCookie || "").trim()) {

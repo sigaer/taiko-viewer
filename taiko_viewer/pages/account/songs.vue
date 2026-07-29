@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { SongCatalogPayload } from "~/types/content";
 
@@ -41,6 +41,10 @@ type BindingSummary = {
   taikoId: string;
   isCurrent: boolean;
   verifiedTitle: string | null;
+  source: "wahlap" | "hiroba" | "manual";
+  displayName: string;
+  isManual: boolean;
+  canExternalSync: boolean;
 };
 
 type SongRow = {
@@ -117,6 +121,11 @@ const copy = computed(() =>
         lock: "ロック",
         actions: "操作",
         edit: "編集",
+        delete: "削除",
+        deleteConfirm: "この手動スコアを削除しますか？",
+        deleteSuccess: "手動スコアを削除しました",
+        deleteFailed: "スコアの削除に失敗しました",
+        manualSource: "手動入力",
         good: "良",
         ok: "可",
         bad: "不可",
@@ -152,6 +161,11 @@ const copy = computed(() =>
         lock: "锁定",
         actions: "操作",
         edit: "编辑",
+        delete: "删除",
+        deleteConfirm: "确定删除这条手动成绩吗？",
+        deleteSuccess: "手动成绩已删除",
+        deleteFailed: "删除成绩失败",
+        manualSource: "手动录入",
         good: "良",
         ok: "可",
         bad: "不可",
@@ -262,6 +276,29 @@ const toggleLock = async (row: SongRow, value: boolean) => {
     lockingKey.value = "";
   }
 };
+
+const deleteScore = async (row: SongRow) => {
+  try {
+    await ElMessageBox.confirm(copy.value.deleteConfirm, copy.value.delete, { type: "warning" });
+  } catch {
+    return;
+  }
+  try {
+    await apiFetch("/api/account/songs/delete", {
+      method: "POST",
+      body: {
+        taikoId: currentBinding.value?.taikoId,
+        songNo: row.songNo,
+        level: row.level,
+        confirmed: true
+      }
+    });
+    ElMessage.success(copy.value.deleteSuccess);
+    await refreshSongs();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.deleteFailed);
+  }
+};
 </script>
 
 <template>
@@ -292,7 +329,12 @@ const toggleLock = async (row: SongRow, value: boolean) => {
                 :loading="switchingBinding"
                 @change="changeBinding"
               >
-                <el-option v-for="binding in profileData.bindings" :key="binding.id" :label="binding.taikoId" :value="binding.id" />
+                <el-option
+                  v-for="binding in profileData.bindings"
+                  :key="binding.id"
+                  :label="binding.isManual ? `${binding.displayName}（${copy.manualSource}）` : binding.taikoId"
+                  :value="binding.id"
+                />
               </el-select>
             </div>
             <div class="filter-row">
@@ -319,6 +361,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
                 <div class="song-tags">
                   <el-tag v-if="row.shelfStatus === 1" size="small" type="warning" effect="light">{{ copy.removed }}</el-tag>
                   <el-tag v-if="row.isCustom" size="small" type="info" effect="light">{{ copy.custom }}</el-tag>
+                  <el-tag v-if="currentBinding?.isManual" size="small" type="danger" effect="plain">{{ copy.manualSource }}</el-tag>
                 </div>
               </div>
             </template>
@@ -336,7 +379,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
           <el-table-column prop="bestScoreRank" :label="copy.rating" width="80" />
           <el-table-column prop="maxCombo" :label="copy.maxNotes" width="94" />
           <el-table-column prop="updateDatetime" :label="copy.updatedAt" min-width="160" />
-          <el-table-column :label="copy.lock" width="90">
+          <el-table-column v-if="!currentBinding?.isManual" :label="copy.lock" width="90">
             <template #default="{ row }">
               <el-switch
                 :model-value="row.isLocked"
@@ -345,9 +388,10 @@ const toggleLock = async (row: SongRow, value: boolean) => {
               />
             </template>
           </el-table-column>
-          <el-table-column :label="copy.actions" width="90" fixed="right">
+          <el-table-column :label="copy.actions" :width="currentBinding?.isManual ? 130 : 90" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="openEditor(row)">{{ copy.edit }}</el-button>
+              <el-button v-if="currentBinding?.isManual" link type="danger" @click="deleteScore(row)">{{ copy.delete }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -371,6 +415,7 @@ const toggleLock = async (row: SongRow, value: boolean) => {
     :mode="editorMode"
     :initial-song="editingSong"
     :song-catalog="songCatalog"
+    :is-manual="currentBinding?.isManual"
     @saved="handleEditorSaved"
   />
 </template>

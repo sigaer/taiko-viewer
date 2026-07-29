@@ -14,7 +14,7 @@ import { requestSyncDispatch } from "~/server/internal/account/sync";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 
 type JsonObject = Record<string, unknown>;
-type BotBindSource = "wahlap" | "hiroba";
+type BotBindSource = "wahlap" | "hiroba" | "manual";
 type BotBindRow = {
   row_id: number;
   qq: string;
@@ -23,6 +23,7 @@ type BotBindRow = {
   slot_index: number | null;
   is_current: number | null;
   source: string | null;
+  display_name?: string | null;
 };
 type BotBindSummary = {
   slot: number;
@@ -30,6 +31,9 @@ type BotBindSummary = {
   visible: number;
   isCurrent: boolean;
   source: BotBindSource;
+  displayName: string;
+  isManual: boolean;
+  canExternalSync: boolean;
 };
 
 export type TaikoCenterSyncResponse = {
@@ -92,7 +96,8 @@ const getCenterUserdataHistoryDir = (taikoId: string) => {
 };
 
 const normalizeBotBindSource = (rawSource: unknown): BotBindSource => {
-  return String(rawSource || "").trim().toLowerCase() === "hiroba" ? "hiroba" : "wahlap";
+  const source = String(rawSource || "").trim().toLowerCase();
+  return source === "hiroba" || source === "manual" ? source : "wahlap";
 };
 
 const normalizeBotBindVisible = (rawVisible: unknown) => {
@@ -103,12 +108,14 @@ const listBotBindRows = async (identityKey: string) => {
   await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<BotBindRow[]>(
-    `SELECT row_id, qq, id, COALESCE(visible, 0) AS visible,
+    `SELECT b.row_id, b.qq, b.id, COALESCE(b.visible, 0) AS visible,
             COALESCE(slot_index, 1) AS slot_index,
             COALESCE(is_current, 0) AS is_current,
-            COALESCE(source, 'wahlap') AS source
-       FROM bind
-      WHERE qq = ?
+            COALESCE(source, 'wahlap') AS source,
+            m.nickname AS display_name
+       FROM bind b
+       LEFT JOIN taiko_manual_accounts m ON m.taiko_id = b.id AND b.source = 'manual'
+      WHERE b.qq = ?
       ORDER BY slot_index ASC, row_id ASC`,
     [identityKey]
   );
@@ -120,6 +127,8 @@ const listBotBindRows = async (identityKey: string) => {
     slot_index: Number(row.slot_index || 1) || 1,
     is_current: Number(row.is_current || 0) || 0,
     source: String(row.source || "wahlap").trim() || "wahlap"
+    ,
+    display_name: row.display_name
   }));
 };
 
@@ -135,13 +144,19 @@ const ensureSingleCurrentBotBind = async (identityKey: string) => {
 };
 
 const toBotBindSummaries = (rows: BotBindRow[]): BotBindSummary[] =>
-  rows.map((row) => ({
+  rows.map((row) => {
+    const source = normalizeBotBindSource(row.source);
+    return ({
     slot: Math.max(1, Number(row.slot_index || 1) || 1),
     taikoId: String(row.id || "").trim(),
     visible: normalizeBotBindVisible(row.visible),
     isCurrent: Number(row.is_current || 0) === 1,
-    source: normalizeBotBindSource(row.source)
-  }));
+    source,
+    displayName: source === "manual" ? String(row.display_name || "手动账号") : String(row.id || ""),
+    isManual: source === "manual",
+    canExternalSync: source !== "manual"
+    });
+  });
 
 const buildBotBindLookupPayload = async (identityKey: string) => {
   const rows = await ensureSingleCurrentBotBind(identityKey);
@@ -185,6 +200,9 @@ const upsertBotBindRecord = async (
 
   const visible = normalizeBotBindVisible(options.visible);
   const source = normalizeBotBindSource(options.source);
+  if (source === "manual") {
+    throw createError({ statusCode: 403, statusMessage: "手动账号必须通过创建或认领接口绑定" });
+  }
   const makeCurrent = options.makeCurrent !== false;
   const db = getAccountDb();
   const rows = await listBotBindRows(identityKey);

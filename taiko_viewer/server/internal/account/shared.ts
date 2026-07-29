@@ -55,6 +55,9 @@ export type BindingRow = {
   id: number;
   user_id: number;
   taiko_id: string;
+  source: "wahlap" | "hiroba" | "manual";
+  manual_account_id: string | null;
+  display_name?: string | null;
   is_current: number;
   verified_title: string | null;
   verified_titleplate_id: number | null;
@@ -163,6 +166,7 @@ export type UserdataSong = {
 };
 
 export type UserdataPayload = {
+  _meta?: Record<string, unknown>;
   profile?: Record<string, unknown>;
   songs?: UserdataSong[];
   achievement?: Record<string, unknown>;
@@ -180,6 +184,10 @@ export type AccountPublicUser = {
 export type BindingSummary = {
   id: number;
   taikoId: string;
+  source: "wahlap" | "hiroba" | "manual";
+  displayName: string;
+  isManual: boolean;
+  canExternalSync: boolean;
   isCurrent: boolean;
   verifiedTitle: string | null;
   verifiedTitleplateId: number | null;
@@ -345,6 +353,13 @@ export const sanitizePublicUser = (row: AccountRow): AccountPublicUser => ({
 export const sanitizeBinding = (row: BindingRow): BindingSummary => ({
   id: row.id,
   taikoId: row.taiko_id,
+  source: row.source || "wahlap",
+  displayName:
+    row.source === "manual"
+      ? String(row.display_name || row.verified_title || "手动账号")
+      : row.taiko_id,
+  isManual: row.source === "manual",
+  canExternalSync: row.source !== "manual",
   isCurrent: Boolean(row.is_current),
   verifiedTitle: row.verified_title,
   verifiedTitleplateId: row.verified_titleplate_id,
@@ -578,7 +593,11 @@ export const getCurrentBindingRow = async (userId: number) => {
   await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    "SELECT * FROM web_taiko_bindings WHERE user_id = ? ORDER BY is_current DESC, id ASC LIMIT 1",
+    `SELECT b.*, m.nickname AS display_name
+       FROM web_taiko_bindings b
+       LEFT JOIN taiko_manual_accounts m ON m.taiko_id = b.manual_account_id
+      WHERE b.user_id = ?
+      ORDER BY b.is_current DESC, b.id ASC LIMIT 1`,
     [userId]
   );
   return rows[0] || null;
@@ -647,6 +666,46 @@ export const readRawUserdataText = async (taikoId: string) => {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
   return readFile(filePath, "utf-8");
+};
+
+const userdataWriteQueues = new Map<string, Promise<unknown>>();
+
+export const withUserdataWriteLock = async <T>(taikoId: string, task: () => Promise<T>): Promise<T> => {
+  const previous = userdataWriteQueues.get(taikoId) || Promise.resolve();
+  let release!: () => void;
+  const current = new Promise<void>((resolveLock) => {
+    release = resolveLock;
+  });
+  const chained = previous.catch(() => undefined).then(() => current);
+  userdataWriteQueues.set(taikoId, chained);
+  await previous.catch(() => undefined);
+  try {
+    return await task();
+  } finally {
+    release();
+    if (userdataWriteQueues.get(taikoId) === chained) userdataWriteQueues.delete(taikoId);
+  }
+};
+
+export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
+  const rankCounts = Array.from({ length: 7 }, () => 0);
+  const crownCounts = Array.from({ length: 3 }, () => 0);
+  for (const song of payload.songs || []) {
+    const rank = parsePositiveInt(song.best_score_rank);
+    if (rank >= 2 && rank <= 8) rankCounts[rank - 2] += 1;
+    const clear = parsePositiveInt(song.clear_cnt) > 0;
+    const full = parsePositiveInt(song.full_combo_cnt) > 0;
+    const dondaful = parsePositiveInt(song.dondaful_combo_cnt) > 0;
+    if (clear || full || dondaful) crownCounts[0] += 1;
+    if (full || dondaful) crownCounts[1] += 1;
+    if (dondaful) crownCounts[2] += 1;
+  }
+  payload.achievement = {
+    count_level: rankCounts[6] ? 5 : rankCounts[5] ? 4 : rankCounts[4] ? 3 : rankCounts[3] ? 2 : 1,
+    ary_crown_count: crownCounts,
+    ary_score_rank_count: rankCounts
+  };
+  return payload;
 };
 
 export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => {

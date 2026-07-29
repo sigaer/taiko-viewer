@@ -113,6 +113,34 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_taiko_bindings_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS taiko_manual_accounts (
+    taiko_id CHAR(18) NOT NULL PRIMARY KEY,
+    nickname VARCHAR(64) NOT NULL,
+    bot_identity_key VARCHAR(191) DEFAULT NULL,
+    created_by VARCHAR(16) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_taiko_manual_accounts_bot_identity (bot_identity_key),
+    CONSTRAINT chk_taiko_manual_accounts_id CHECK (taiko_id REGEXP '^98[0-9]{16}$')
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS taiko_manual_claim_codes (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    taiko_id CHAR(18) NOT NULL,
+    code_hash CHAR(64) NOT NULL,
+    issued_by VARCHAR(16) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    consumed_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_taiko_manual_claim_codes_hash (code_hash),
+    KEY idx_taiko_manual_claim_codes_account (taiko_id, expires_at),
+    CONSTRAINT fk_taiko_manual_claim_codes_account FOREIGN KEY (taiko_id)
+      REFERENCES taiko_manual_accounts(taiko_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS taiko_bind_identity_state (
+    identity_key VARCHAR(191) NOT NULL PRIMARY KEY,
+    current_virtual TINYINT(1) NOT NULL DEFAULT 0,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_mydon_showcase_titles (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     binding_id BIGINT UNSIGNED NOT NULL,
@@ -405,6 +433,8 @@ const CREATE_TABLES = [
 ];
 
 const MIGRATIONS = [
+  "ALTER TABLE web_taiko_bindings ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER taiko_id",
+  "ALTER TABLE web_taiko_bindings ADD COLUMN manual_account_id CHAR(18) DEFAULT NULL AFTER source",
   "ALTER TABLE web_taiko_bindings ADD COLUMN mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname' AFTER verified_titleplate_id",
   "ALTER TABLE taiko_custom_titles ADD COLUMN achievement_type VARCHAR(32) NOT NULL DEFAULT 'full_combo' AFTER difficulty_level",
   "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",

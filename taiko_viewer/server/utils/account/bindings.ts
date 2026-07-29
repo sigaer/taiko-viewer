@@ -18,7 +18,10 @@ export const listBindings = async (userId: number) => {
   await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    "SELECT * FROM web_taiko_bindings WHERE user_id = ? ORDER BY is_current DESC, id ASC",
+    `SELECT b.*, m.nickname AS display_name
+       FROM web_taiko_bindings b
+       LEFT JOIN taiko_manual_accounts m ON m.taiko_id = b.manual_account_id
+      WHERE b.user_id = ? ORDER BY b.is_current DESC, b.id ASC`,
     [userId]
   );
   return rows.map(sanitizeBinding);
@@ -137,6 +140,12 @@ export const removeBinding = async (userId: number, bindingIdInput: unknown, for
   const binding = rows[0];
   if (!binding) {
     throw createError({ statusCode: 404, statusMessage: "未找到该绑定记录" });
+  }
+  if (binding.source === "manual") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "手动账号请使用“从 viewer 解绑”或“永久删除”"
+    });
   }
 
   const [countRows] = await db.execute<Array<{ total: number }>>(
