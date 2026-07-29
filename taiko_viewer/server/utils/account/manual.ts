@@ -292,6 +292,23 @@ export const renameManualAccount = async (
   return { ok: true, nickname };
 };
 
+export const setManualAccountVisibility = async (
+  owner: ManualOwner,
+  taikoId: string,
+  visibleInput: unknown
+) => {
+  await assertOwner(owner, taikoId);
+  const visible = Number(visibleInput || 0) ? 1 : 0;
+  if (owner.kind !== "bot") {
+    throw createError({ statusCode: 400, statusMessage: "viewer 账号公开状态由个人档案隐私设置管理" });
+  }
+  await getAccountDb().execute(
+    "UPDATE bind SET visible = ? WHERE qq = ? AND id = ? AND source = 'manual'",
+    [visible, normalizeIdentityKey(owner.identityKey), taikoId]
+  );
+  return { ok: true, visible };
+};
+
 export const issueManualClaimCode = async (owner: ManualOwner, taikoId: string) => {
   await assertOwner(owner, taikoId);
   const code = generateClaimCode();

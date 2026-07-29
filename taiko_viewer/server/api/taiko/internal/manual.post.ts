@@ -10,6 +10,7 @@ import {
   renameManualAccount,
   requireBotService,
   resolveManualTaikoIdForOwner,
+  setManualAccountVisibility,
   upsertManualScore
 } from "~/server/utils/account";
 
@@ -26,6 +27,10 @@ export default defineEventHandler(async (event) => {
   if (action === "rename") {
     const taikoId = await resolveManualTaikoIdForOwner(owner, body?.taikoId);
     return renameManualAccount(owner, taikoId, body?.nickname);
+  }
+  if (action === "visibility") {
+    const taikoId = await resolveManualTaikoIdForOwner(owner, body?.taikoId);
+    return setManualAccountVisibility(owner, taikoId, body?.visible);
   }
   if (action === "claim-code") {
     const taikoId = await resolveManualTaikoIdForOwner(owner, body?.taikoId);
