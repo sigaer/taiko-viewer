@@ -122,7 +122,7 @@ const CREATE_TABLES = [
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_taiko_manual_accounts_bot_identity (bot_identity_key),
     CONSTRAINT chk_taiko_manual_accounts_id CHECK (taiko_id REGEXP '^98[0-9]{16}$')
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
   `CREATE TABLE IF NOT EXISTS taiko_manual_claim_codes (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     taiko_id CHAR(18) NOT NULL,
@@ -135,12 +135,12 @@ const CREATE_TABLES = [
     KEY idx_taiko_manual_claim_codes_account (taiko_id, expires_at),
     CONSTRAINT fk_taiko_manual_claim_codes_account FOREIGN KEY (taiko_id)
       REFERENCES taiko_manual_accounts(taiko_id) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
   `CREATE TABLE IF NOT EXISTS taiko_bind_identity_state (
     identity_key VARCHAR(191) NOT NULL PRIMARY KEY,
     current_virtual TINYINT(1) NOT NULL DEFAULT 0,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_mydon_showcase_titles (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     binding_id BIGINT UNSIGNED NOT NULL,
