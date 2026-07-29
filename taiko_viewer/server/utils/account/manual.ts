@@ -70,7 +70,12 @@ const normalizeClaimCode = (value: unknown) =>
 
 const claimSecret = () => {
   const config = useRuntimeConfig();
-  const secret = String(config.manualClaimSecret || "").trim();
+  const secret = String(
+    config.manualClaimSecret ||
+      process.env.TAIKO_MANUAL_CLAIM_SECRET ||
+      process.env.TAIKO_BOT_SERVICE_TOKEN ||
+      ""
+  ).trim();
   if (!secret) throw createError({ statusCode: 500, statusMessage: "手动账号认领密钥未配置" });
   return secret;
 };
@@ -536,7 +541,9 @@ export const deleteManualScore = async (
 };
 
 export const requireBotService = (event: H3Event) => {
-  const expected = String(useRuntimeConfig().botServiceToken || "").trim();
+  const expected = String(
+    useRuntimeConfig().botServiceToken || process.env.TAIKO_BOT_SERVICE_TOKEN || ""
+  ).trim();
   const actual = String(getHeader(event, "x-taiko-bot-token") || "").trim();
   if (!expected || !actual) throw createError({ statusCode: 401, statusMessage: "bot 服务认证失败" });
   const left = Buffer.from(expected);
