@@ -27,12 +27,12 @@ useViewerSeo(() => ({
 
 const eventSlides = computed(() => [
   {
-    image: "/banner.png",
-    title: t("page.home.eventMiku")
+    image: "/2026_autumn.png",
+    title: t("page.home.eventAutumn")
   },
   {
-    image: "/banner2.png",
-    title: t("page.home.eventSummer")
+    image: "/banner_16_9.png",
+    title: t("page.home.eventHualiEsports")
   }
 ]);
 
