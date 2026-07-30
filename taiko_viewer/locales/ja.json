@@ -515,6 +515,16 @@
     "share": { "generating": "ポスターを生成しています…", "created": "30 日間の共有を作成しました。次にポスターを生成できます。", "ready": "共有ページとポスターを生成しました", "downloadFallback": "共有画面を開けなかったため、ポスターを保存しました。", "posterFirst": "先にポスターを生成してから共有してください。", "renewed": "共有期限を 30 日延長しました", "revoked": "公開共有を取り消しました", "expires": "有効期限 {date}", "failed": "共有またはポスターを生成できませんでした。しばらくしてから再試行してください。", "privacy": "推測できない公開リンクを作成し、30 日後に失効します。ここから延長または早期取り消しができます。", "expired": "この年間の振り返りは期限切れ、または取り消されました。", "publicLead": "プレイヤーが自分で公開した 2026 年の太鼓の振り返りです。" },
     "milestoneTypes": { "clear": "新しいクリアが灯る", "full_combo": "新しいフルコンボが灯る", "dondaful": "新しいドンダフルが灯る" },
     "entry": { "eyebrow": "2026 / 更新中", "title": "あなたの音が、ここに残っています", "lead": "きせかえ、段位、称号、そして足あとを残した挑戦が、開かれるのを待っています。", "binding": "現在の連携", "titleLabel": "年間称号", "playCount": "記録に残った挑戦", "activeDays": "灯った日", "uniqueSongs": "出会った曲" },
+    "openingCover": {
+      "kicker": "花火のあいだに、あなたの音が残る",
+      "headline": "響かせた 2026",
+      "subhead": "まだ余韻の中",
+      "reportTitle": "太鼓の達人\nバージョンレポート",
+      "startTop": "スーパー太鼓",
+      "startBottom": "はじめる",
+      "generatedAt": "集計期間 · {time} に生成",
+      "disclaimer": "同期済みの観測記録をもとに、同意された範囲の振り返りとして生成しています"
+    },
     "drawer": { "title": "ストーリー設定", "version": "対象期間", "binding": "連携 ID", "currentTitle": "現在の称号", "summary": "この記録", "exit": "入口へ戻る", "generated": "{time} に生成" },
     "copy": {
       "opening": { "eyebrow": "2026 · あなたの太鼓物語", "title": "{nickname}、2026 年の音を聴こう", "body": "記録に残った {playCount} 回の挑戦と、出会った {uniqueSongs} 曲が、この鼓面で待っています。" },

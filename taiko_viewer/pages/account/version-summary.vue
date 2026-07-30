@@ -26,7 +26,7 @@ const apiFetch = useViewerApiFetch();
 definePageMeta({ layout: "story", middleware: ["account-auth", "annual-summary-access"], keepalive: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
 useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPageDescription(t("page.account.versionSummary.desc")), path: "/account/version-summary" }));
 
-const storyStarted = ref(true);
+const storyStarted = ref(false);
 const drawerOpen = ref(false);
 const manualRefreshing = ref(false);
 const switchingBindingId = ref<number | null>(null);
@@ -118,7 +118,7 @@ const buildSummary = async (force: boolean) => {
     jobStatus.value = payload.job;
     if (payload.summary || payload.job.status === "completed") await reloadAnnual();
     else await pollJob(payload.job.id, generation);
-    storyStarted.value = true;
+    storyStarted.value = false;
     drawerOpen.value = false;
     ElMessage.success(t("annualSummary.state.buildReady"));
   } catch (error) {
@@ -134,7 +134,7 @@ const handleBindingChange = async (bindingId: number | null) => {
   try {
     await apiFetch("/api/account/bindings/current", { method: "POST", body: { bindingId } });
     await Promise.all([reloadBindings(), reloadAnnual()]);
-    storyStarted.value = true;
+    storyStarted.value = false;
   } catch (error) {
     selectedBindingId.value = currentBinding.value?.id ?? null;
     ElMessage.error(await resolveViewerError(error, t("annualSummary.state.loadFailed")));
@@ -145,8 +145,8 @@ const handleBindingChange = async (bindingId: number | null) => {
 
 watch(storyStarted, (value) => { immersiveStory.value = value; }, { immediate: true });
 watch(currentBinding, (value) => { selectedBindingId.value = value?.id ?? null; }, { immediate: true });
-watch(locale, async () => { storyStarted.value = true; drawerOpen.value = false; await reloadAnnual(); });
-watch(() => summary.value?.summaryId, (value, oldValue) => { if (value && value !== oldValue) storyStarted.value = true; });
+watch(locale, async () => { storyStarted.value = false; drawerOpen.value = false; await reloadAnnual(); });
+watch(() => summary.value?.summaryId, (value, oldValue) => { if (value && value !== oldValue) storyStarted.value = false; });
 
 onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
 </script>
@@ -177,7 +177,12 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
         :manual-refreshing="manualRefreshing" :story-started="storyStarted" :locale-code="locale === 'ja' ? 'ja' : 'zh'"
         @change-binding="handleBindingChange" @refresh="buildSummary(true)" @exit="navigateTo(localePath('/account/profile'))"
       />
-      <StoryPlayer :summary="summary" :started="true" @open-drawer="drawerOpen = true" />
+      <StoryPlayer
+        :summary="summary"
+        :started="storyStarted"
+        @start="storyStarted = true"
+        @open-drawer="drawerOpen = true"
+      />
     </template>
   </div>
 </template>

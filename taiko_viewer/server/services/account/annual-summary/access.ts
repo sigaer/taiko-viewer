@@ -13,11 +13,14 @@ export const hasAccountAnnualSummaryAccess = async (userId: number) => {
   const [rows] = await db.execute<DbRow<{ username: string; taiko_id: string }>[]>(
     `SELECT a.username, b.taiko_id
      FROM web_user_accounts a
-     INNER JOIN web_taiko_bindings b ON b.user_id = a.id
+     LEFT JOIN web_taiko_bindings b ON b.user_id = a.id
      WHERE a.id = ?`,
     [userId]
   );
-  return rows.some((row) => ANNUAL_SUMMARY_ALLOWED_STAFF.some(
+  const e2eMode = process.env.TAIKO_ANNUAL_E2E_MODE === "1";
+  return rows.some((row) => (
+    e2eMode && /^annual_e2e_[0-9a-z_]+$/i.test(row.username)
+  ) || ANNUAL_SUMMARY_ALLOWED_STAFF.some(
     (staff) => row.username === staff.username && String(row.taiko_id || "").trim() === staff.taikoId
   ));
 };

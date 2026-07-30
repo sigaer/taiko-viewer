@@ -484,12 +484,46 @@ export const runAnnualSummaryCli = async (taikoId: string): Promise<AnnualCliEnv
 export const readAnnualSummary = async (filePath: string) => validateAnnualSummaryV4(await readAnnualJson<unknown>(filePath));
 export const readAnnualEvents = async (filePath: string) => validateAnnualEvents(await readAnnualJson<unknown>(filePath));
 
+const collectReferencedSnapshotHashes = async (root: string) => {
+  const referenced = new Set<string>();
+  const files = await listDirectoryFiles(
+    resolve(root, "summaries"),
+    (path) => path.endsWith(`${sep}summary.json`) || path.endsWith(`${sep}events.json`)
+  );
+  const visit = (value: unknown, key = ""): void => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item, key));
+      return;
+    }
+    if (!value || typeof value !== "object") {
+      if (
+        typeof value === "string"
+        && /^(?:sha256|contentHash)$/i.test(key)
+        && /^[0-9a-f]{64}$/i.test(value)
+      ) {
+        referenced.add(value.toLowerCase());
+      }
+      return;
+    }
+    for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
+      visit(childValue, childKey);
+    }
+  };
+  for (const path of files) {
+    const payload = await readAnnualJson<unknown>(path).catch(() => null);
+    if (payload) visit(payload);
+  }
+  return referenced;
+};
+
 export const cleanupAnnualCache = async () => {
   const root = getAnnualCacheRoot();
   await ensurePrivateDir(root);
   const normalizedRoot = resolve(root, "normalized");
+  const referencedSnapshotHashes = await collectReferencedSnapshotHashes(root);
   const normalizedCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
   const removeOldTemps = async (dir: string) => {
+    await chmod(dir, 0o700).catch(() => undefined);
     const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
     for (const entry of entries) {
       const path = join(dir, entry.name);
@@ -503,7 +537,11 @@ export const cleanupAnnualCache = async () => {
       } else if (path.startsWith(`${normalizedRoot}${sep}`) && entry.name.endsWith(".json")) {
         const itemStat = await stat(path).catch(() => null);
         if (itemStat && itemStat.mtimeMs < normalizedCutoff) {
-          await unlink(path).catch(() => undefined);
+          const cached = await readAnnualJson<{ contentHash?: string }>(path).catch(() => null);
+          const contentHash = String(cached?.contentHash || "").toLowerCase();
+          if (!contentHash || !referencedSnapshotHashes.has(contentHash)) {
+            await unlink(path).catch(() => undefined);
+          }
         }
       }
     }

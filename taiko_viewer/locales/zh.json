@@ -556,6 +556,16 @@
       "activeDays": "点亮的日期",
       "uniqueSongs": "相遇的歌曲"
     },
+    "openingCover": {
+      "kicker": "你的鼓声，落在烟花之间",
+      "headline": "敲响的 2026",
+      "subhead": "仍在回声之中",
+      "reportTitle": "太鼓达人\n版本报告",
+      "startTop": "超级太鼓",
+      "startBottom": "开始游戏",
+      "generatedAt": "数据统计周期 · 生成于 {time}",
+      "disclaimer": "依据已同步的观察记录生成，仅用于同意范围内的玩家回顾"
+    },
     "drawer": {
       "title": "故事设置", "version": "统计周期", "binding": "当前绑定", "currentTitle": "当前称号", "summary": "这段记录", "exit": "回到入口", "generated": "生成于 {time}"
     },

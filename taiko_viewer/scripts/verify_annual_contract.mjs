@@ -42,6 +42,23 @@ assert.deepEqual(actualPages, expectedPages, "annual page registry order differs
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
+assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are visible before the opening start action");
+assert.equal(storyPlayer.includes('@start="startStory"'), true, "opening start action is not connected to story navigation");
+
+const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
+const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");
+const openingFireworksSource = await read("components/account/version-summary/AnnualOpeningFireworks.vue");
+const openingBeatLaneSource = await read("components/account/version-summary/AnnualOpeningBeatLane.vue");
+assert.equal(openingSource.includes("AnnualOpeningCarousel"), true, "opening cover carousel is missing");
+assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fireworks are missing");
+assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
+assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
+assert.equal(openingCarouselSource.includes("setInterval"), true, "opening cover carousel does not auto-advance");
+assert.equal(openingFireworksSource.includes("@keyframes annual-firework-draw"), true, "opening fireworks are not animated");
+assert.equal(openingBeatLaneSource.includes("@keyframes annual-beat-scroll"), true, "opening beat lane is not animated");
+assert.equal(openingCarouselSource.includes("reducedMotion"), true, "opening carousel ignores reduced motion");
+assert.equal(openingFireworksSource.includes("is-still"), true, "opening fireworks ignore reduced motion");
+assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lane ignores reduced motion");
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
@@ -129,6 +146,7 @@ assert.equal(annualPageSource.includes("jobStatus.status"), false, "raw annual j
 assert.equal(annualPageSource.includes("jobStatusLabel"), true, "localized annual job status is missing");
 assert.equal(/个良/.test(JSON.stringify(zh.annualSummary || zh)), false, "near-dondaful copy uses the wrong Chinese judgment");
 assert.equal(/鼓点|鼓槌|あと可/.test(JSON.stringify(ja)), false, "Japanese annual copy contains mixed-language judgment or instrument terms");
+assert.equal(annualPageSource.includes("const storyStarted = ref(false)"), true, "opening is bypassed before the user starts");
 
 const schema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
 assert.equal(schema.properties.schemaVersion.const, 4);

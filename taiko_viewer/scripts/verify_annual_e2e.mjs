@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { readFile, readdir, rm } from "node:fs/promises";
+import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 import mysql from "mysql2/promise";
@@ -26,9 +28,57 @@ const environment = {
   ...(await parseEnvironmentFile(process.env.TAIKO_VIEWER_ENV_FILE || "/etc/taiko-viewer.env")),
   ...process.env
 };
-const baseUrl = String(environment.ANNUAL_E2E_BASE_URL || "http://127.0.0.1:3100").replace(/\/$/, "");
 const userdataDir = String(environment.TAIKO_USERDATA_DIR || "/home/sigaer/taiko/userdata");
+const repoRoot = String(environment.TAIKO_REPO_ROOT || "/home/sigaer/taiko");
 const wait = (milliseconds) => new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
+const reservePort = () => new Promise((resolvePort, rejectPort) => {
+  const server = createServer();
+  server.once("error", rejectPort);
+  server.listen(0, "127.0.0.1", () => {
+    const address = server.address();
+    const port = typeof address === "object" && address ? address.port : 0;
+    server.close((error) => error ? rejectPort(error) : resolvePort(port));
+  });
+});
+
+let e2eServer = null;
+let e2eServerOutput = "";
+let baseUrl = String(environment.ANNUAL_E2E_BASE_URL || "").replace(/\/$/, "");
+if (!baseUrl) {
+  const port = await reservePort();
+  baseUrl = `http://127.0.0.1:${port}`;
+  e2eServer = spawn(process.execPath, [resolve(".output/server/index.mjs")], {
+    cwd: process.cwd(),
+    env: {
+      ...environment,
+      HOST: "127.0.0.1",
+      NITRO_HOST: "127.0.0.1",
+      PORT: String(port),
+      NITRO_PORT: String(port),
+      TAIKO_REPO_ROOT: repoRoot,
+      TAIKO_USERDATA_DIR: userdataDir,
+      TAIKO_ANNUAL_INTERNAL_BASE_URL: baseUrl,
+      NUXT_ANNUAL_INTERNAL_BASE_URL: baseUrl,
+      TAIKO_ANNUAL_E2E_MODE: "1"
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  const capture = (chunk) => {
+    e2eServerOutput = `${e2eServerOutput}${String(chunk)}`.slice(-8000);
+  };
+  e2eServer.stdout.on("data", capture);
+  e2eServer.stderr.on("data", capture);
+  const deadline = Date.now() + 30_000;
+  let ready = false;
+  while (!ready && Date.now() < deadline) {
+    if (e2eServer.exitCode !== null) break;
+    ready = await fetch(`${baseUrl}/api/account/auth/me`, { redirect: "manual" })
+      .then((response) => response.status > 0)
+      .catch(() => false);
+    if (!ready) await wait(200);
+  }
+  assert.ok(ready, `annual E2E server did not start:\n${e2eServerOutput}`);
+}
 const nonce = randomBytes(7).toString("hex");
 const implementationCopyPattern = /尚未全良|无不可且良数|读取当前最佳记录|最佳记[录錄]选项画像|站内样本中的参考位置|信赖? Wahlap|可信 Wahlap|固定优先级选择|現在のベスト記録|ベスト記録オプション|サイト内サンプルでの参考位置|信頼できる Wahlap|stage_delta|option_flg|record_updated_at|observed_at|highscore_datetime|MetricStatus|current_archive|version_observed|batch_last_play_proxy|source_highscore_time|schema\s*v?4|快照|排序规则|スナップショット/;
 
@@ -170,6 +220,17 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   if (await entry.count()) await entry.click();
   await waitForStoryPlayerReady(page);
   assert.equal(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches), true);
+  const opening = page.locator(".annual-opening");
+  await opening.waitFor({ state: "visible", timeout: 30_000 });
+  assert.equal(await page.locator(".story-player__drawer-trigger, .story-player__sound-trigger, .story-player__nav").count(), 0);
+  assert.equal(await page.locator(".annual-cover-carousel__card:visible").count(), 3);
+  assert.ok(await page.locator(".annual-fireworks path").count() >= 20);
+  assert.ok(await page.locator(".annual-beat-lane__track i").count() >= 4);
+  if (viewport.width === 390 && viewport.height === 844) {
+    await page.screenshot({ path: `/tmp/annual-e2e-${locale}-opening.png`, fullPage: false });
+  }
+  await page.locator(".annual-opening__start").click();
+  await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
   const slideCount = await page.locator(".story-player__slide").count();
   assert.ok(slideCount >= 4 && slideCount <= 23, `unexpected slide count: ${slideCount}`);
   const sound = page.locator(".story-player__sound-trigger");
@@ -185,7 +246,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
     }, index);
     await page.waitForFunction((target) => {
       const slide = document.querySelectorAll(".story-player__slide")[target];
-      if (!slide?.querySelector(".story-slide-shell")) return false;
+      if (!slide?.querySelector(".story-slide-shell, .annual-opening")) return false;
       return Math.abs(slide.getBoundingClientRect().top) <= 1;
     }, index, { timeout: 5_000 });
     await wait(80);
@@ -257,6 +318,30 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   await page.screenshot({ path: screenshotPath });
   await context.close();
   return slideCount;
+};
+
+const auditOpeningMotion = async (browser, cookie) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "no-preference"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
+  const before = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
+  await wait(4_100);
+  const after = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
+  assert.notEqual(after, before, "opening cover carousel did not advance");
+  const animationStates = await page.locator(".annual-fireworks path, .annual-beat-lane__track").evaluateAll(
+    (nodes) => nodes.map((node) => getComputedStyle(node).animationName)
+  );
+  assert.ok(animationStates.some((name) => name && name !== "none"), "opening motion effects are not active");
+  await context.close();
 };
 
 let firstUserId = null;
@@ -398,6 +483,7 @@ try {
 
   const browser = await chromium.launch({ executablePath: environment.TAIKO_ANNUAL_CHROMIUM_PATH || "/usr/bin/chromium", headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] });
   try {
+    await auditOpeningMotion(browser, firstSession);
     const viewports = [
       { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
       { width: 390, height: 844 }, { width: 844, height: 390 }
@@ -411,6 +497,7 @@ try {
     const archivePage = await archiveContext.newPage();
     await openAnnualPage(archivePage, "/account/version-summary");
     await waitForStoryPlayerReady(archivePage);
+    await archivePage.locator(".annual-opening__start").click();
     const archivePageKeys = await archivePage.locator(".story-player__slide").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-page-key")));
     for (const key of ["obsession", "favoriteShift", "monthly", "weekday", "calendar", "timeOfDay", "lateNight"]) {
       assert.equal(archivePageKeys.includes(key), false, `archive story exposed timed page: ${key}`);
@@ -483,4 +570,12 @@ try {
     if (path.includes("annual-summary-v4")) await rm(path, { recursive: true, force: true }).catch(() => undefined);
   }
   await db.end();
+  if (e2eServer) {
+    e2eServer.kill("SIGTERM");
+    await Promise.race([
+      new Promise((resolveExit) => e2eServer.once("exit", resolveExit)),
+      wait(5_000)
+    ]);
+    if (e2eServer.exitCode === null) e2eServer.kill("SIGKILL");
+  }
 }
