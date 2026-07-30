@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ start: [] }>();
 const { t } = useI18n();
+const donIconUrl = "/api/content/assets/don";
 
 const generatedAt = computed(() =>
   new Intl.DateTimeFormat(undefined, {
@@ -63,9 +64,12 @@ const generatedAt = computed(() =>
           :aria-label="t('annualSummary.controls.start')"
           @click="emit('start')"
         >
-          <span class="annual-opening__drum-face" aria-hidden="true">
-            <i></i><i></i><b></b>
-          </span>
+          <img
+            class="annual-opening__drum-face"
+            :src="donIconUrl"
+            alt=""
+            aria-hidden="true"
+          />
           <strong>{{ t("annualSummary.openingCover.startTop") }}</strong>
           <em>{{ t("annualSummary.openingCover.startBottom") }}</em>
         </button>
@@ -273,67 +277,18 @@ const generatedAt = computed(() =>
 }
 
 .annual-opening__drum-face {
-  position: relative;
   display: block;
   width: 76%;
+  height: auto;
   aspect-ratio: 1;
   margin: 0 auto 6px;
-  border-radius: 50%;
-  background: var(--opening-coral);
-  border: 7px solid #f7edd7;
-  box-shadow:
-    0 0 0 2px #17365d,
-    0 10px 20px rgba(23, 54, 93, 0.2);
+  object-fit: contain;
+  filter: drop-shadow(0 10px 10px rgba(23, 54, 93, 0.22));
   transition: transform 240ms ease;
 }
 
 .annual-opening__start:hover .annual-opening__drum-face {
   transform: translateY(-3px) rotate(-3deg);
-}
-
-.annual-opening__drum-face i,
-.annual-opening__drum-face b {
-  position: absolute;
-  display: block;
-  background: #1c263a;
-}
-
-.annual-opening__drum-face i {
-  top: 36%;
-  width: 8%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-
-.annual-opening__drum-face i:first-child { left: 28%; }
-.annual-opening__drum-face i:nth-child(2) { right: 28%; }
-
-.annual-opening__drum-face b {
-  left: 36%;
-  bottom: 23%;
-  width: 28%;
-  height: 18%;
-  border-radius: 0 0 50% 50%;
-}
-
-.annual-opening__drum-face b::before,
-.annual-opening__drum-face b::after {
-  content: "";
-  position: absolute;
-  top: -5px;
-  width: 9px;
-  height: 7px;
-  border-top: 2px solid #1c263a;
-}
-
-.annual-opening__drum-face b::before {
-  right: 92%;
-  transform: rotate(28deg);
-}
-
-.annual-opening__drum-face b::after {
-  left: 92%;
-  transform: rotate(-28deg);
 }
 
 .annual-opening__start > strong,

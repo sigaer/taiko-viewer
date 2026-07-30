@@ -348,6 +348,61 @@ const auditOpeningMotion = async (browser, cookie) => {
   reportProgress("opening motion: entry opened");
   await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
   reportProgress("opening motion: opening visible");
+  await page.waitForFunction(
+    () => [".annual-opening__drum-face", ".annual-beat-lane__don img"].every((selector) => {
+      const image = document.querySelector(selector);
+      return image instanceof HTMLImageElement && image.complete && image.naturalWidth >= 256;
+    }),
+    undefined,
+    { timeout: 15_000 }
+  );
+  const beatLaneAudit = await page.evaluate(() => {
+    const track = document.querySelector(".annual-beat-lane__track");
+    const viewport = document.querySelector(".annual-beat-lane__viewport");
+    const sequences = [...document.querySelectorAll(".annual-beat-lane__sequence")];
+    if (!(track instanceof HTMLElement) || !(viewport instanceof HTMLElement) || sequences.length !== 2) return null;
+    const encode = (sequence) => [...sequence.children].map((beat) => {
+      if (beat.querySelector(".is-don")) return "1";
+      if (beat.querySelector(".is-ka")) return "2";
+      return "0";
+    }).join("");
+    const animation = track.getAnimations()[0];
+    if (!animation?.effect) return null;
+    const duration = Number(animation.effect.getComputedTiming().duration);
+    animation.pause();
+    const visibleNotes = (sequence) => {
+      const viewportRect = viewport.getBoundingClientRect();
+      return [...sequence.querySelectorAll("i")]
+        .map((note) => {
+          const rect = note.getBoundingClientRect();
+          return {
+            kind: note.className,
+            x: Math.round((rect.left - viewportRect.left) * 10) / 10
+          };
+        })
+        .filter((note) => note.x >= 5 && note.x <= viewportRect.width - 5);
+    };
+    animation.currentTime = 0;
+    const atStart = visibleNotes(sequences[0]);
+    animation.currentTime = duration - 0.1;
+    const atBoundary = visibleNotes(sequences[1]);
+    animation.currentTime = 0;
+    animation.play();
+    return {
+      patterns: sequences.map(encode),
+      sequenceWidths: sequences.map((sequence) => sequence.getBoundingClientRect().width),
+      trackWidth: track.scrollWidth,
+      duration,
+      atStart,
+      atBoundary
+    };
+  });
+  const expectedBeatPattern = "1110111011102220".repeat(3);
+  assert.ok(beatLaneAudit, "opening beat lane is incomplete");
+  assert.deepEqual(beatLaneAudit.patterns, [expectedBeatPattern, expectedBeatPattern], "opening beat lane does not match song 303 Oni measures 14–16");
+  assert.equal(beatLaneAudit.sequenceWidths[0], beatLaneAudit.sequenceWidths[1]);
+  assert.equal(beatLaneAudit.trackWidth, beatLaneAudit.sequenceWidths[0] * 2);
+  assert.deepEqual(beatLaneAudit.atBoundary, beatLaneAudit.atStart, "opening beat lane jumps at the loop boundary");
   const before = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
   await wait(4_100);
   const after = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
