@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from "vue";
 import type { VersionSummarySongCard, VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 
@@ -79,11 +79,24 @@ const showCard = (index: number) => {
 };
 
 const markFailed = (key: string) => {
+  if (failedCovers.value.has(key)) return;
   failedCovers.value = new Set(failedCovers.value).add(key);
 };
 
 const markLoaded = (key: string) => {
+  if (loadedCovers.value.has(key)) return;
   loadedCovers.value = new Set(loadedCovers.value).add(key);
+};
+
+const registerCoverImage = (
+  element: Element | ComponentPublicInstance | null,
+  key: string
+) => {
+  if (!(element instanceof HTMLImageElement) || !element.complete) return;
+  queueMicrotask(() => {
+    if (element.naturalWidth > 0) markLoaded(key);
+    else markFailed(key);
+  });
 };
 
 watch(() => [props.active, props.reducedMotion, candidates.value.length], startTimer);
@@ -121,6 +134,7 @@ onBeforeUnmount(stopTimer);
         <img
           v-if="song.coverUrl && !failedCovers.has(song.carouselKey)"
           v-show="loadedCovers.has(song.carouselKey)"
+          :ref="(element) => registerCoverImage(element, song.carouselKey)"
           :src="song.coverUrl"
           :alt="song.name"
           @load="markLoaded(song.carouselKey)"

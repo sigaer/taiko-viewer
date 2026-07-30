@@ -31,6 +31,7 @@ const environment = {
 const userdataDir = String(environment.TAIKO_USERDATA_DIR || "/home/sigaer/taiko/userdata");
 const repoRoot = String(environment.TAIKO_REPO_ROOT || "/home/sigaer/taiko");
 const wait = (milliseconds) => new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
+const reportProgress = (message) => process.stderr.write(`[annual-e2e] ${message}\n`);
 const reservePort = () => new Promise((resolvePort, rejectPort) => {
   const server = createServer();
   server.once("error", rejectPort);
@@ -207,6 +208,7 @@ const waitForStoryPlayerReady = async (page) => {
 };
 
 const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => {
+  reportProgress(`story ${locale} ${viewport.width}x${viewport.height}: start`);
   const context = await browser.newContext({
     viewport,
     locale: locale === "ja" ? "ja-JP" : "zh-CN",
@@ -222,6 +224,13 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   assert.equal(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches), true);
   const opening = page.locator(".annual-opening");
   await opening.waitFor({ state: "visible", timeout: 30_000 });
+  await page.waitForFunction(
+    () => [...document.querySelectorAll(".annual-cover-carousel img")].some(
+      (image) => image.complete && image.naturalWidth > 0 && getComputedStyle(image).display !== "none"
+    ),
+    undefined,
+    { timeout: 15_000 }
+  );
   assert.equal(await page.locator(".story-player__drawer-trigger, .story-player__sound-trigger, .story-player__nav").count(), 0);
   assert.equal(await page.locator(".annual-cover-carousel__card:visible").count(), 3);
   assert.ok(await page.locator(".annual-fireworks path").count() >= 20);
@@ -317,10 +326,12 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   await wait(80);
   await page.screenshot({ path: screenshotPath });
   await context.close();
+  reportProgress(`story ${locale} ${viewport.width}x${viewport.height}: passed`);
   return slideCount;
 };
 
 const auditOpeningMotion = async (browser, cookie) => {
+  reportProgress("opening motion: start");
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     locale: "zh-CN",
@@ -329,19 +340,26 @@ const auditOpeningMotion = async (browser, cookie) => {
   });
   await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
   const page = await context.newPage();
+  reportProgress("opening motion: navigating");
   await openAnnualPage(page, "/account/version-summary", 90_000);
+  reportProgress("opening motion: hydrated");
   const entry = page.locator(".annual-entry__drum");
-  if (await entry.count()) await entry.click();
+  if (await entry.count()) await entry.click({ force: true });
+  reportProgress("opening motion: entry opened");
   await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
+  reportProgress("opening motion: opening visible");
   const before = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
   await wait(4_100);
   const after = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
   assert.notEqual(after, before, "opening cover carousel did not advance");
+  reportProgress("opening motion: carousel advanced");
   const animationStates = await page.locator(".annual-fireworks path, .annual-beat-lane__track").evaluateAll(
     (nodes) => nodes.map((node) => getComputedStyle(node).animationName)
   );
   assert.ok(animationStates.some((name) => name && name !== "none"), "opening motion effects are not active");
+  reportProgress("opening motion: closing");
   await context.close();
+  reportProgress("opening motion: passed");
 };
 
 let firstUserId = null;
@@ -353,6 +371,10 @@ let publicToken = "";
 const summaryDirs = new Set();
 
 try {
+  const [staleFixtureResult] = await db.execute(
+    "DELETE FROM web_user_accounts WHERE password_hash = 'annual-e2e' AND LEFT(username, 11) = 'annual_e2e_'"
+  );
+  if (staleFixtureResult.affectedRows) reportProgress(`removed ${staleFixtureResult.affectedRows} stale fixture accounts`);
   await request("/api/account/auth/me", { expected: 200 });
   const [boundRows] = await db.query("SELECT taiko_id FROM web_taiko_bindings");
   const bound = new Set(boundRows.map((row) => String(row.taiko_id)));
@@ -481,7 +503,14 @@ try {
   const jaPublicPng = await request(`/api/annual/shares/${encodeURIComponent(publicToken)}/poster?locale=ja`);
   assert.equal(jaPublicPng.body.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
 
-  const browser = await chromium.launch({ executablePath: environment.TAIKO_ANNUAL_CHROMIUM_PATH || "/usr/bin/chromium", headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] });
+  reportProgress("browser matrix: launching");
+  const browser = await chromium.launch({
+    executablePath: environment.TAIKO_ANNUAL_CHROMIUM_PATH || "/usr/bin/chromium",
+    headless: true,
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--no-proxy-server"],
+    timeout: 30_000
+  });
+  reportProgress("browser matrix: launched");
   try {
     await auditOpeningMotion(browser, firstSession);
     const viewports = [
