@@ -477,9 +477,18 @@ const buildDashboardPayload = async () => {
        ORDER BY day_key ASC`
     ),
     db.execute<DbRow<{ day_key: string; total: number }>[]>(
-      `SELECT DATE(created_at) AS day_key, COUNT(*) AS total
-       FROM web_taiko_bindings
-       WHERE is_current = 1 AND created_at >= NOW() - INTERVAL 30 DAY
+      `SELECT day_key, SUM(total) AS total
+       FROM (
+         SELECT DATE(created_at) AS day_key, COUNT(*) AS total
+         FROM web_taiko_bindings
+         WHERE created_at >= NOW() - INTERVAL 30 DAY
+         GROUP BY DATE(created_at)
+         UNION ALL
+         SELECT DATE(created_at) AS day_key, COUNT(*) AS total
+         FROM bind
+         WHERE created_at >= NOW() - INTERVAL 30 DAY
+         GROUP BY DATE(created_at)
+       ) AS binding_growth
        GROUP BY day_key
        ORDER BY day_key ASC`
     ),

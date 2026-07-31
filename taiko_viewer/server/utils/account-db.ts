@@ -446,7 +446,8 @@ const MIGRATIONS = [
 const BIND_TABLE_CREATE_SQL = `CREATE TABLE IF NOT EXISTS bind (
   qq VARCHAR(191) NOT NULL,
   id VARCHAR(25) NOT NULL,
-  visible TINYINT(1) NOT NULL DEFAULT 0
+  visible TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
 const runMigration = async (statement: string) => {
@@ -522,6 +523,16 @@ const ensureBindTableSchema = async () => {
       "ALTER TABLE bind ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER is_current"
     );
   }
+  if (!columnNames.has("created_at")) {
+    // Keep legacy rows un-timestamped so a schema rollout does not count every
+    // historical bot binding as a binding created today.
+    await db.execute(
+      "ALTER TABLE bind ADD COLUMN created_at DATETIME NULL DEFAULT NULL AFTER source"
+    );
+  }
+  await db.execute(
+    "ALTER TABLE bind MODIFY COLUMN created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER source"
+  );
 
   await db.execute(
     "UPDATE bind SET slot_index = 1 WHERE slot_index IS NULL OR slot_index <= 0"
@@ -543,6 +554,9 @@ const ensureBindTableSchema = async () => {
   }
   if (!indexNames.has("idx_bind_identity_current")) {
     await db.execute("ALTER TABLE bind ADD KEY idx_bind_identity_current (qq, is_current)");
+  }
+  if (!indexNames.has("idx_bind_created_at")) {
+    await db.execute("ALTER TABLE bind ADD KEY idx_bind_created_at (created_at)");
   }
 };
 
