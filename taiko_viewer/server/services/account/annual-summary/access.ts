@@ -3,26 +3,20 @@ import { createError } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "~/server/utils/account";
 
-const ANNUAL_SUMMARY_ALLOWED_STAFF = [
-  { username: "sigaer", taikoId: "2258735" }
-];
-
 export const hasAccountAnnualSummaryAccess = async (userId: number) => {
   await ensureAccountSchema();
   const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<{ username: string; taiko_id: string }>[]>(
-    `SELECT a.username, b.taiko_id
+  const [rows] = await db.execute<DbRow<{ username: string; annual_summary_access: number }>[]>(
+    `SELECT a.username, (w.user_id IS NOT NULL) AS annual_summary_access
      FROM web_user_accounts a
-     LEFT JOIN web_taiko_bindings b ON b.user_id = a.id
+     LEFT JOIN web_annual_summary_access w ON w.user_id = a.id
      WHERE a.id = ?`,
     [userId]
   );
   const e2eMode = process.env.TAIKO_ANNUAL_E2E_MODE === "1";
   return rows.some((row) => (
     e2eMode && /^annual_e2e_[0-9a-z_]+$/i.test(row.username)
-  ) || ANNUAL_SUMMARY_ALLOWED_STAFF.some(
-    (staff) => row.username === staff.username && String(row.taiko_id || "").trim() === staff.taikoId
-  ));
+  ) || Boolean(row.annual_summary_access));
 };
 
 export const requireAccountAnnualSummaryUser = async (event: H3Event) => {

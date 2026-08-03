@@ -113,6 +113,13 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_taiko_bindings_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_summary_access (
+    user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+    note VARCHAR(255) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_web_annual_summary_access_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS taiko_manual_accounts (
     taiko_id CHAR(18) NOT NULL PRIMARY KEY,
     nickname VARCHAR(64) NOT NULL,
