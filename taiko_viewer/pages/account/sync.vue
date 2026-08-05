@@ -77,6 +77,9 @@ useViewerSeo(() => ({
 
 const selectedTargetIds = ref<string[]>([]);
 const submitting = ref(false);
+const importingKinoko = ref(false);
+const kinokoApiKey = ref("");
+const kinokoPlayerId = ref("");
 const cooldown = ref(0);
 let cooldownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -113,7 +116,17 @@ const copy = computed(() =>
         syncDone: "同期が完了しました",
         syncSuccess: "同期成功、{success}/{total} 件の送信先が完了しました",
         syncPartial: "一部のみ成功、{success}/{total} 件完了{failed}",
-        syncFailed: "同期に失敗しました。前回結果を確認してください。"
+        syncFailed: "同期に失敗しました。前回結果を確認してください。",
+        kinokoTitle: "菌菌コンソールからインポート",
+        kinokoDesc: "菌菌コンソールの API キーで指定プレイヤーの全成績を取得し、現在の連携先へ安全に統合します。キーは保存されません。",
+        kinokoKey: "API キー",
+        kinokoKeyPlaceholder: "tk_ で始まる API キー",
+        kinokoPlayer: "取得元プレイヤー ID",
+        kinokoPlayerPlaceholder: "菌菌コンソールに連携したプレイヤー ID",
+        kinokoTarget: "インポート先：{target}",
+        kinokoStart: "ワンクリックインポート",
+        kinokoNeedFields: "API キーと取得元プレイヤー ID を入力してください",
+        kinokoDone: "インポート完了：追加 {added} 件、更新 {updated} 件、変更なし {unchanged} 件"
       }
     : {
         title: "多端同步",
@@ -146,7 +159,17 @@ const copy = computed(() =>
         syncDone: "同步已完成",
         syncSuccess: "同步成功，{success}/{total} 个目标已完成",
         syncPartial: "部分同步成功，{success}/{total} 个目标完成{failed}",
-        syncFailed: "同步失败，请查看最近一次同步结果"
+        syncFailed: "同步失败，请查看最近一次同步结果",
+        kinokoTitle: "从菌菌控制台导入",
+        kinokoDesc: "使用菌菌控制台 API 密钥拉取指定玩家的全部成绩，安全合并到当前绑定的 Sakura bot 账号。密钥仅用于本次请求，不会保存。",
+        kinokoKey: "API 密钥",
+        kinokoKeyPlaceholder: "以 tk_ 开头的 API 密钥",
+        kinokoPlayer: "来源玩家 ID",
+        kinokoPlayerPlaceholder: "菌菌控制台中已绑定的玩家 ID",
+        kinokoTarget: "导入目标：{target}",
+        kinokoStart: "一键导入成绩",
+        kinokoNeedFields: "请填写 API 密钥和来源玩家 ID",
+        kinokoDone: "导入完成：新增 {added} 条，更新 {updated} 条，{unchanged} 条无需变更"
       }
 );
 
@@ -167,6 +190,13 @@ const { data, pending, refresh } = await useAsyncData<SyncOverviewPayload>(
 );
 
 const overview = computed(() => data.value);
+watch(
+  () => overview.value?.currentBinding?.taikoId || "",
+  (value, previousValue) => {
+    if (!kinokoPlayerId.value || kinokoPlayerId.value === previousValue) kinokoPlayerId.value = value;
+  },
+  { immediate: true }
+);
 const compressionRatio = computed(() => {
   const log = overview.value?.lastSync;
   if (!log?.originalBytes) return "";
@@ -262,6 +292,39 @@ const submitSync = async () => {
     submitting.value = false;
   }
 };
+
+const importFromKinoko = async () => {
+  if (importingKinoko.value) return;
+  if (!kinokoApiKey.value.trim() || !kinokoPlayerId.value.trim()) {
+    ElMessage.warning(copy.value.kinokoNeedFields);
+    return;
+  }
+  importingKinoko.value = true;
+  try {
+    const response = await apiFetch<{
+      summary: { added: number; updated: number; unchanged: number; total: number };
+    }>("/api/account/sync/kinoko-import", {
+      method: "POST",
+      body: {
+        apiKey: kinokoApiKey.value.trim(),
+        playerId: kinokoPlayerId.value.trim()
+      }
+    });
+    kinokoApiKey.value = "";
+    ElMessage.success(
+      copy.value.kinokoDone
+        .replace("{added}", String(response.summary.added))
+        .replace("{updated}", String(response.summary.updated))
+        .replace("{unchanged}", String(response.summary.unchanged))
+    );
+    await refresh();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
+    await refresh();
+  } finally {
+    importingKinoko.value = false;
+  }
+};
 </script>
 
 <template>
@@ -299,6 +362,42 @@ const submitSync = async () => {
           :title="overview.currentBinding.isManual ? copy.manualSaved : copy.serviceUnavailable"
           class="userdata-alert"
         />
+      </el-card>
+
+      <el-card class="panel-card">
+        <div class="section-title">
+          <h3>{{ copy.kinokoTitle }}</h3>
+          <p>{{ copy.kinokoDesc }}</p>
+        </div>
+        <el-alert
+          v-if="overview.currentBinding"
+          type="info"
+          :closable="false"
+          :title="copy.kinokoTarget.replace('{target}', overview.currentBinding.displayName || overview.currentBinding.taikoId)"
+          class="userdata-alert"
+        />
+        <el-form class="kinoko-form" label-position="top" @submit.prevent="importFromKinoko">
+          <el-form-item :label="copy.kinokoKey">
+            <el-input
+              v-model="kinokoApiKey"
+              type="password"
+              show-password
+              autocomplete="off"
+              :placeholder="copy.kinokoKeyPlaceholder"
+            />
+          </el-form-item>
+          <el-form-item :label="copy.kinokoPlayer">
+            <el-input v-model="kinokoPlayerId" inputmode="numeric" :placeholder="copy.kinokoPlayerPlaceholder" />
+          </el-form-item>
+          <el-button
+            type="primary"
+            native-type="submit"
+            :loading="importingKinoko"
+            :disabled="!overview.currentBinding || cooldown > 0"
+          >
+            {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.kinokoStart }}
+          </el-button>
+        </el-form>
       </el-card>
 
       <el-card v-if="!overview.currentBinding?.isManual" class="panel-card">
@@ -418,6 +517,25 @@ const submitSync = async () => {
   display: grid;
   gap: 12px;
   margin: 18px 0;
+}
+
+.kinoko-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) minmax(180px, 0.8fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.kinoko-form :deep(.el-form-item) {
+  margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .kinoko-form {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
 }
 
 .target-item {

@@ -14,9 +14,14 @@ import {
   getRuntimePaths,
   getUserdataPath,
   loadWahlapCookie,
+  readUserdata,
+  rebuildUserdataAchievement,
   sanitizeBinding,
-  userdataFileExists
+  userdataFileExists,
+  withUserdataWriteLock,
+  writeUserdataWithHistory
 } from "~/server/internal/account/shared";
+import { fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
 import { requireAccountUser } from "./auth";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
@@ -153,6 +158,69 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   return {
     ok: true,
     currentBinding: sanitizeBinding(currentBinding),
+    log: toPublicSyncLog(logRow)
+  };
+};
+
+export const importKinokoScores = async (event: H3Event, payload: Record<string, unknown>) => {
+  const user = await requireAccountUser(event);
+  const currentBinding = await getCurrentBindingRow(user.id);
+  if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定导入目标账号" });
+
+  const apiKey = String(payload.apiKey || "").trim();
+  const playerId = String(payload.playerId || "").trim();
+  if (!/^tk_[A-Za-z0-9_-]{20,200}$/.test(apiKey)) {
+    throw createError({ statusCode: 400, statusMessage: "请输入有效的菌菌控制台 API 密钥" });
+  }
+  if (!/^\d{1,20}$/.test(playerId)) {
+    throw createError({ statusCode: 400, statusMessage: "请输入有效的来源玩家 ID" });
+  }
+  const cooldown = await getSyncCooldownState(user.id);
+  if (cooldown.remainingSeconds > 0) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: `同步冷却中，请在 ${cooldown.remainingSeconds} 秒后重试`,
+      data: cooldown
+    });
+  }
+
+  const fetched = await fetchKinokoScores(apiKey, playerId);
+  const taikoId = currentBinding.taiko_id;
+  const summary = await withUserdataWriteLock(taikoId, async () => {
+    const userdata = (await userdataFileExists(taikoId))
+      ? await readUserdata(taikoId)
+      : { profile: { userid: taikoId }, songs: [] };
+    const result = mergeKinokoScores(userdata, fetched.songs);
+    rebuildUserdataAchievement(userdata);
+    await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
+    return result;
+  });
+
+  const message = `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
+  const result = {
+    targetId: "kinoko-import",
+    label: "菌菌控制台导入",
+    ok: true,
+    statusCode: 200,
+    message,
+    receivedBytes: fetched.receivedBytes,
+    decompressedBytes: fetched.receivedBytes,
+    songCount: summary.total
+  };
+  const logRow = await insertSyncLog({
+    userId: user.id,
+    taikoId,
+    status: "success",
+    targetIds: ["kinoko-import"],
+    results: [result],
+    originalBytes: fetched.receivedBytes,
+    compressedBytes: fetched.receivedBytes
+  });
+  return {
+    ok: true,
+    sourcePlayerId: fetched.playerId,
+    targetTaikoId: taikoId,
+    summary,
     log: toPublicSyncLog(logRow)
   };
 };
