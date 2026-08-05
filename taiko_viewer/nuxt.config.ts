@@ -136,7 +136,7 @@ export default defineNuxtConfig({
     branchAudioManifestPath: process.env.TAIKO_BRANCH_AUDIO_MANIFEST_PATH || "",
     ratingStructPath: process.env.TAIKO_RATING_STRUCT_PATH || "",
     v2ConstantsUrl:
-      process.env.TAIKO_V2_CONSTANTS_URL || "https://cdn.ourtaiko.org/api/constants",
+      process.env.TAIKO_V2_CONSTANTS_URL || "https://cdn.ourtaiko.org/api/gugu_constants",
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
     annualCacheDir: process.env.TAIKO_ANNUAL_CACHE_DIR || "",
