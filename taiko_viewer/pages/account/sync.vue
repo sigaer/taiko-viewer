@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
 type BindingSummary = {
@@ -44,6 +44,15 @@ type SyncOverviewPayload = {
   currentBinding: BindingSummary | null;
   hasUserdata: boolean;
   canSyncFromWahlap: boolean;
+  scoreTokenAvailable: boolean;
+  scoreToken: {
+    taikoId: string;
+    exists: boolean;
+    tokenMask: string | null;
+    lastUsedAt: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+  } | null;
   targets: Array<{
     id: string;
     label: string;
@@ -80,6 +89,8 @@ const submitting = ref(false);
 const importingKinoko = ref(false);
 const importingKinokoHistory = ref(false);
 const kinokoApiKey = ref("");
+const scoreTokenBusy = ref(false);
+const issuedScoreToken = ref("");
 const cooldown = ref(0);
 let cooldownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -127,7 +138,30 @@ const copy = computed(() =>
         kinokoHistoryHint: "完全履歴には現在の成績も含まれます。初回移行におすすめで、再実行時は既存記録を自動的に除外します。",
         kinokoNeedKey: "API キーを入力してください",
         kinokoDone: "移行完了：追加 {added} 件、更新 {updated} 件、変更なし {unchanged} 件",
-        kinokoHistoryDone: "履歴移行完了：新規 {imported} 件、既存 {skipped} 件、スナップショット {files} 個"
+        kinokoHistoryDone: "履歴移行完了：新規 {imported} 件、既存 {skipped} 件、スナップショット {files} 個",
+        scoreTokenTitle: "Web スコア token",
+        scoreTokenDesc: "外部サイトやツールが現在の連携 ID の最新スコア JSON を読み取るための秘密キーです。",
+        scoreTokenReady: "発行済み",
+        scoreTokenEmpty: "未発行",
+        scoreTokenUnavailable: "token サービスに接続できません。しばらくしてからお試しください。",
+        scoreTokenManual: "手動アカウントでは Web スコア token を利用できません。",
+        scoreTokenMask: "現在の token",
+        scoreTokenLastUsed: "最終使用",
+        scoreTokenNeverUsed: "未使用",
+        scoreTokenCreated: "発行日時",
+        scoreTokenIssue: "token を発行",
+        scoreTokenRotate: "token を更新",
+        scoreTokenRevoke: "token を無効化",
+        scoreTokenIssued: "新しい token を発行しました。今すぐ保存してください。",
+        scoreTokenRevoked: "token を無効化しました",
+        scoreTokenReveal: "この token は今回だけ表示されます。更新または再発行すると確認できません。",
+        scoreTokenCopied: "token をコピーしました",
+        scoreTokenCopy: "コピー",
+        scoreTokenDocs: "利用ガイドと API ドキュメント",
+        scoreTokenConfirmTitle: "token を無効化しますか？",
+        scoreTokenConfirm: "この token を使用中のすべてのサイトやツールから直ちにアクセスできなくなります。",
+        confirm: "無効化",
+        cancel: "キャンセル"
       }
     : {
         title: "多端同步",
@@ -171,7 +205,30 @@ const copy = computed(() =>
         kinokoHistoryHint: "完整历史包含当前成绩，适合首次迁移；重复执行会自动跳过已有记录。",
         kinokoNeedKey: "请填写 API 密钥",
         kinokoDone: "迁移完成：新增 {added} 条，更新 {updated} 条，{unchanged} 条无需变更",
-        kinokoHistoryDone: "历史迁移完成：新增 {imported} 条、跳过已有 {skipped} 条，写入 {files} 个快照"
+        kinokoHistoryDone: "历史迁移完成：新增 {imported} 条、跳过已有 {skipped} 条，写入 {files} 个快照",
+        scoreTokenTitle: "网页成绩 token",
+        scoreTokenDesc: "供第三方网页、工具或服务读取当前绑定 ID 的最新完整成绩 JSON。它等同于成绩读取密码。",
+        scoreTokenReady: "已签发",
+        scoreTokenEmpty: "未生成",
+        scoreTokenUnavailable: "暂时无法连接 token 服务，请稍后重试。",
+        scoreTokenManual: "手动账号不支持网页成绩 token。",
+        scoreTokenMask: "当前 token",
+        scoreTokenLastUsed: "最近使用",
+        scoreTokenNeverUsed: "从未使用",
+        scoreTokenCreated: "生成时间",
+        scoreTokenIssue: "生成 token",
+        scoreTokenRotate: "轮换 token",
+        scoreTokenRevoke: "撤销 token",
+        scoreTokenIssued: "新 token 已生成，请立即保存。",
+        scoreTokenRevoked: "token 已撤销",
+        scoreTokenReveal: "明文只在本次生成后展示。刷新页面或再次生成后，无法找回当前明文。",
+        scoreTokenCopied: "token 已复制",
+        scoreTokenCopy: "复制",
+        scoreTokenDocs: "用户指南与开发者 API 文档",
+        scoreTokenConfirmTitle: "确认撤销 token？",
+        scoreTokenConfirm: "所有正在使用此 token 的网页和工具会立即失去访问权限。",
+        confirm: "撤销",
+        cancel: "取消"
       }
 );
 
@@ -183,6 +240,8 @@ const { data, pending, refresh } = await useAsyncData<SyncOverviewPayload>(
       currentBinding: null,
       hasUserdata: false,
       canSyncFromWahlap: true,
+      scoreTokenAvailable: false,
+      scoreToken: null,
       targets: [],
       cooldownRemainingSeconds: 0,
       cooldownUntil: "",
@@ -353,6 +412,49 @@ const importHistoryFromKinoko = async () => {
     importingKinokoHistory.value = false;
   }
 };
+
+const manageScoreToken = async (action: "issue" | "revoke") => {
+  if (scoreTokenBusy.value) return;
+  if (action === "revoke") {
+    try {
+      await ElMessageBox.confirm(copy.value.scoreTokenConfirm, copy.value.scoreTokenConfirmTitle, {
+        confirmButtonText: copy.value.confirm,
+        cancelButtonText: copy.value.cancel,
+        type: "warning"
+      });
+    } catch {
+      return;
+    }
+  }
+
+  scoreTokenBusy.value = true;
+  try {
+    const response = await apiFetch<{
+      token: string | null;
+      status: SyncOverviewPayload["scoreToken"];
+    }>("/api/account/score-token", {
+      method: "POST",
+      body: { action }
+    });
+    issuedScoreToken.value = action === "issue" ? String(response.token || "") : "";
+    ElMessage.success(action === "issue" ? copy.value.scoreTokenIssued : copy.value.scoreTokenRevoked);
+    await refresh();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.scoreTokenUnavailable);
+  } finally {
+    scoreTokenBusy.value = false;
+  }
+};
+
+const copyIssuedScoreToken = async () => {
+  if (!issuedScoreToken.value) return;
+  try {
+    await navigator.clipboard.writeText(issuedScoreToken.value);
+    ElMessage.success(copy.value.scoreTokenCopied);
+  } catch {
+    ElMessage.error(copy.value.scoreTokenUnavailable);
+  }
+};
 </script>
 
 <template>
@@ -390,6 +492,80 @@ const importHistoryFromKinoko = async () => {
           :title="overview.currentBinding.isManual ? copy.manualSaved : copy.serviceUnavailable"
           class="userdata-alert"
         />
+      </el-card>
+
+      <el-card class="panel-card score-token-panel">
+        <div class="score-token-heading">
+          <div class="section-title">
+            <h3>{{ copy.scoreTokenTitle }}</h3>
+            <p>{{ copy.scoreTokenDesc }}</p>
+          </div>
+          <NuxtLink class="score-token-docs" to="/docs/score-token">{{ copy.scoreTokenDocs }}</NuxtLink>
+        </div>
+
+        <el-alert
+          v-if="overview.currentBinding?.isManual"
+          type="info"
+          :closable="false"
+          :title="copy.scoreTokenManual"
+          show-icon
+          class="userdata-alert"
+        />
+        <el-alert
+          v-else-if="overview.currentBinding && !overview.scoreTokenAvailable"
+          type="warning"
+          :closable="false"
+          :title="copy.scoreTokenUnavailable"
+          show-icon
+          class="userdata-alert"
+        />
+        <template v-else>
+          <div class="token-status-strip">
+            <div>
+              <span>{{ copy.scoreTokenMask }}</span>
+              <strong class="token-mask">{{ overview.scoreToken?.tokenMask || copy.scoreTokenEmpty }}</strong>
+            </div>
+            <div>
+              <span>{{ copy.scoreTokenCreated }}</span>
+              <strong>{{ overview.scoreToken?.createdAt ? formatDateTime(overview.scoreToken.createdAt) : "-" }}</strong>
+            </div>
+            <div>
+              <span>{{ copy.scoreTokenLastUsed }}</span>
+              <strong>{{ overview.scoreToken?.lastUsedAt ? formatDateTime(overview.scoreToken.lastUsedAt) : copy.scoreTokenNeverUsed }}</strong>
+            </div>
+            <el-tag :type="overview.scoreToken?.exists ? 'success' : 'info'" effect="plain">
+              {{ overview.scoreToken?.exists ? copy.scoreTokenReady : copy.scoreTokenEmpty }}
+            </el-tag>
+          </div>
+
+          <div v-if="issuedScoreToken" class="token-reveal" role="status">
+            <p>{{ copy.scoreTokenReveal }}</p>
+            <div class="token-value-row">
+              <code>{{ issuedScoreToken }}</code>
+              <el-button type="primary" @click="copyIssuedScoreToken">{{ copy.scoreTokenCopy }}</el-button>
+            </div>
+          </div>
+
+          <div class="score-token-actions">
+            <el-button
+              type="primary"
+              :loading="scoreTokenBusy"
+              :disabled="!overview.currentBinding || !overview.scoreTokenAvailable"
+              @click="manageScoreToken('issue')"
+            >
+              {{ overview.scoreToken?.exists ? copy.scoreTokenRotate : copy.scoreTokenIssue }}
+            </el-button>
+            <el-button
+              v-if="overview.scoreToken?.exists"
+              type="danger"
+              plain
+              :disabled="scoreTokenBusy"
+              @click="manageScoreToken('revoke')"
+            >
+              {{ copy.scoreTokenRevoke }}
+            </el-button>
+          </div>
+        </template>
       </el-card>
 
       <el-card class="panel-card">
@@ -549,6 +725,97 @@ const importHistoryFromKinoko = async () => {
   margin-top: 16px;
 }
 
+.score-token-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.score-token-docs {
+  flex: 0 0 auto;
+  color: var(--el-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.score-token-docs:hover {
+  text-decoration: underline;
+}
+
+.token-status-strip {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.2fr) repeat(2, minmax(150px, 1fr)) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(151, 119, 91, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 248, 240, 0.82);
+}
+
+.token-status-strip > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.token-status-strip span {
+  color: #7d6a5a;
+  font-size: 13px;
+}
+
+.token-status-strip strong {
+  overflow-wrap: anywhere;
+}
+
+.token-mask,
+.token-reveal code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0;
+}
+
+.token-reveal {
+  margin-top: 14px;
+  padding: 14px;
+  border-left: 4px solid var(--el-color-warning);
+  border-radius: 4px;
+  background: rgba(253, 246, 236, 0.9);
+}
+
+.token-reveal p {
+  margin: 0 0 10px;
+  color: #7d6a5a;
+  line-height: 1.6;
+}
+
+.token-value-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.token-value-row code {
+  overflow-x: auto;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff;
+  color: #3f332b;
+  white-space: nowrap;
+}
+
+.score-token-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.score-token-actions .el-button {
+  margin-left: 0;
+}
+
 .target-list {
   display: grid;
   gap: 12px;
@@ -590,6 +857,25 @@ const importHistoryFromKinoko = async () => {
   }
 
   .kinoko-actions {
+    display: grid;
+  }
+
+  .score-token-heading {
+    display: grid;
+  }
+
+  .token-status-strip {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .token-status-strip .el-tag {
+    justify-self: start;
+  }
+
+  .token-value-row,
+  .score-token-actions {
+    grid-template-columns: 1fr;
     display: grid;
   }
 }

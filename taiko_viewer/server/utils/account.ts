@@ -4,5 +4,6 @@ export * from "./account/developer";
 export * from "./account/my-don";
 export * from "./account/manual";
 export * from "./account/profile";
+export * from "./account/score-token";
 export * from "./account/songs";
 export * from "./account/sync";

@@ -23,6 +23,7 @@ import {
 } from "~/server/internal/account/shared";
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
 import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
+import { requestScoreTokenManagement } from "~/server/internal/account/score-token";
 import { requireAccountUser } from "./auth";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
@@ -39,6 +40,12 @@ export const getAccountSyncOverview = async (event: H3Event) => {
   const canSyncFromWahlap =
     currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
   const userdataPath = taikoId ? getUserdataPath(taikoId) : "";
+  const scoreTokenResult = currentBinding && currentBinding.source !== "manual"
+    ? await requestScoreTokenManagement(taikoId, "status").catch((error) => {
+        console.error("[account-sync] 读取网页成绩 token 状态失败", error);
+        return null;
+      })
+    : null;
   const { userdataDir } = getRuntimePaths();
   // #region agent log
   fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
@@ -66,6 +73,8 @@ export const getAccountSyncOverview = async (event: H3Event) => {
     currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
     hasUserdata,
     canSyncFromWahlap,
+    scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
+    scoreToken: scoreTokenResult?.status || null,
     targets: toPublicSyncTargets(targets),
     cooldownRemainingSeconds: cooldown.remainingSeconds,
     cooldownUntil: cooldown.availableAt,
