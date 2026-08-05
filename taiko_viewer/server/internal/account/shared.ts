@@ -170,6 +170,7 @@ export type UserdataPayload = {
   profile?: Record<string, unknown>;
   songs?: UserdataSong[];
   achievement?: Record<string, unknown>;
+  dojo?: Record<string, unknown>;
 };
 
 export type AccountPublicUser = {

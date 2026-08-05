@@ -78,6 +78,7 @@ useViewerSeo(() => ({
 const selectedTargetIds = ref<string[]>([]);
 const submitting = ref(false);
 const importingKinoko = ref(false);
+const importingKinokoHistory = ref(false);
 const kinokoApiKey = ref("");
 const cooldown = ref(0);
 let cooldownTimer: ReturnType<typeof setInterval> | null = null;
@@ -117,13 +118,16 @@ const copy = computed(() =>
         syncPartial: "一部のみ成功、{success}/{total} 件完了{failed}",
         syncFailed: "同期に失敗しました。前回結果を確認してください。",
         kinokoTitle: "菌菌コンソールから移行",
-        kinokoDesc: "API キーの既定プレイヤーの全成績を取得し、同じ ID の現在の連携先へ安全に移行します。キーは保存されません。",
+        kinokoDesc: "API キーの既定プレイヤーから、現在の最高成績または完全な成績履歴を同じ ID の連携先へ移行します。キーは保存されません。",
         kinokoKey: "API キー",
         kinokoKeyPlaceholder: "tk_ で始まる API キー",
         kinokoTarget: "移行先：{target}",
         kinokoStart: "成績をワンクリック移行",
+        kinokoHistoryStart: "完全な履歴を移行",
+        kinokoHistoryHint: "完全履歴には現在の成績も含まれます。初回移行におすすめで、再実行時は既存記録を自動的に除外します。",
         kinokoNeedKey: "API キーを入力してください",
-        kinokoDone: "移行完了：追加 {added} 件、更新 {updated} 件、変更なし {unchanged} 件"
+        kinokoDone: "移行完了：追加 {added} 件、更新 {updated} 件、変更なし {unchanged} 件",
+        kinokoHistoryDone: "履歴移行完了：新規 {imported} 件、既存 {skipped} 件、スナップショット {files} 個"
       }
     : {
         title: "多端同步",
@@ -158,13 +162,16 @@ const copy = computed(() =>
         syncPartial: "部分同步成功，{success}/{total} 个目标完成{failed}",
         syncFailed: "同步失败，请查看最近一次同步结果",
         kinokoTitle: "从菌菌控制台迁移",
-        kinokoDesc: "使用 API 密钥拉取其默认账号的全部成绩，并迁移到 ID 相同的当前绑定账号。密钥仅用于本次请求，不会保存。",
+        kinokoDesc: "使用 API 密钥从默认账号迁移当前最佳成绩或完整成绩历史，只允许写入 ID 相同的当前绑定账号。密钥不会保存。",
         kinokoKey: "API 密钥",
         kinokoKeyPlaceholder: "以 tk_ 开头的 API 密钥",
         kinokoTarget: "迁移目标：{target}",
         kinokoStart: "一键迁移成绩",
+        kinokoHistoryStart: "迁移完整历史",
+        kinokoHistoryHint: "完整历史包含当前成绩，适合首次迁移；重复执行会自动跳过已有记录。",
         kinokoNeedKey: "请填写 API 密钥",
-        kinokoDone: "迁移完成：新增 {added} 条，更新 {updated} 条，{unchanged} 条无需变更"
+        kinokoDone: "迁移完成：新增 {added} 条，更新 {updated} 条，{unchanged} 条无需变更",
+        kinokoHistoryDone: "历史迁移完成：新增 {imported} 条、跳过已有 {skipped} 条，写入 {files} 个快照"
       }
 );
 
@@ -282,7 +289,7 @@ const submitSync = async () => {
 };
 
 const importFromKinoko = async () => {
-  if (importingKinoko.value) return;
+  if (importingKinoko.value || importingKinokoHistory.value) return;
   if (!kinokoApiKey.value.trim()) {
     ElMessage.warning(copy.value.kinokoNeedKey);
     return;
@@ -310,6 +317,40 @@ const importFromKinoko = async () => {
     await refresh();
   } finally {
     importingKinoko.value = false;
+  }
+};
+
+const importHistoryFromKinoko = async () => {
+  if (importingKinoko.value || importingKinokoHistory.value) return;
+  if (!kinokoApiKey.value.trim()) {
+    ElMessage.warning(copy.value.kinokoNeedKey);
+    return;
+  }
+  importingKinokoHistory.value = true;
+  try {
+    const response = await apiFetch<{
+      summary: {
+        history: { importedRecords: number; skippedRecords: number; snapshotFiles: number };
+      };
+    }>("/api/account/sync/kinoko-history-import", {
+      method: "POST",
+      body: {
+        apiKey: kinokoApiKey.value.trim()
+      }
+    });
+    kinokoApiKey.value = "";
+    ElMessage.success(
+      copy.value.kinokoHistoryDone
+        .replace("{imported}", String(response.summary.history.importedRecords))
+        .replace("{skipped}", String(response.summary.history.skippedRecords))
+        .replace("{files}", String(response.summary.history.snapshotFiles))
+    );
+    await refresh();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
+    await refresh();
+  } finally {
+    importingKinokoHistory.value = false;
   }
 };
 </script>
@@ -373,15 +414,26 @@ const importFromKinoko = async () => {
               :placeholder="copy.kinokoKeyPlaceholder"
             />
           </el-form-item>
-          <el-button
-            type="primary"
-            native-type="submit"
-            :loading="importingKinoko"
-            :disabled="!overview.currentBinding || cooldown > 0"
-          >
-            {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.kinokoStart }}
-          </el-button>
+          <div class="kinoko-actions">
+            <el-button
+              type="primary"
+              native-type="submit"
+              :loading="importingKinoko"
+              :disabled="!overview.currentBinding || cooldown > 0 || importingKinokoHistory"
+            >
+              {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.kinokoStart }}
+            </el-button>
+            <el-button
+              type="success"
+              :loading="importingKinokoHistory"
+              :disabled="!overview.currentBinding || cooldown > 0 || importingKinoko"
+              @click="importHistoryFromKinoko"
+            >
+              {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.kinokoHistoryStart }}
+            </el-button>
+          </div>
         </el-form>
+        <p class="kinoko-history-hint">{{ copy.kinokoHistoryHint }}</p>
       </el-card>
 
       <el-card v-if="!overview.currentBinding?.isManual" class="panel-card">
@@ -515,10 +567,30 @@ const importFromKinoko = async () => {
   margin-bottom: 0;
 }
 
+.kinoko-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.kinoko-actions .el-button {
+  margin-left: 0;
+}
+
+.kinoko-history-hint {
+  margin: 10px 0 0;
+  color: #7d6a5a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 @media (max-width: 760px) {
   .kinoko-form {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .kinoko-actions {
+    display: grid;
   }
 }
 

@@ -2,7 +2,9 @@ import { createError } from "h3";
 import type { UserdataPayload, UserdataSong } from "./shared";
 
 const KINOKO_SCORE_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/hiroba";
+const KINOKO_HISTORY_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/kinoko";
 const MAX_RESPONSE_BYTES = 16 * 1024 * 1024;
+const MAX_HISTORY_RECORDS = 100_000;
 const SCORE_NUMBER_FIELDS = [
   "high_score",
   "best_score_rank",
@@ -43,12 +45,19 @@ type KinokoFetchResult = {
   receivedBytes: number;
 };
 
+export type KinokoHistoryFetchResult = {
+  playerId: string;
+  records: UserdataSong[];
+  latestSongs: UserdataSong[];
+  receivedBytes: number;
+};
+
 const toNonNegativeInteger = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0;
 };
 
-const sanitizeSong = (value: unknown): UserdataSong | null => {
+export const sanitizeKinokoSong = (value: unknown): UserdataSong | null => {
   if (!value || typeof value !== "object") return null;
   const input = value as Record<string, unknown>;
   const songNo = toNonNegativeInteger(input.song_no);
@@ -67,6 +76,15 @@ const sanitizeSong = (value: unknown): UserdataSong | null => {
   if (Array.isArray(input.tone_flg)) song.tone_flg = input.tone_flg.slice(0, 8);
   return song;
 };
+
+export const getKinokoScoreFingerprint = (song: UserdataSong) =>
+  JSON.stringify([
+    song.song_no,
+    song.level,
+    ...SCORE_NUMBER_FIELDS.map((field) => toNonNegativeInteger(song[field])),
+    String(song.highscore_datetime || ""),
+    String(song.update_datetime || "")
+  ]);
 
 const readLimitedResponse = async (response: Response) => {
   if (!response.body) return "";
@@ -99,8 +117,7 @@ const mapKinokoError = (status: number, detail: string) => {
   return createError({ statusCode: 502, statusMessage: detail || `菌菌控制台请求失败（HTTP ${status}）` });
 };
 
-export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResult> => {
-  const endpoint = new URL(KINOKO_SCORE_ENDPOINT);
+const fetchKinokoPayload = async (apiKey: string, endpoint: string) => {
   let response: Response;
   try {
     response = await fetch(endpoint, {
@@ -122,6 +139,11 @@ export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResu
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无法解析的数据" });
   }
   if (!response.ok) throw mapKinokoError(response.status, String(payload.detail || "").trim());
+  return { payload, receivedBytes: Buffer.byteLength(text) };
+};
+
+export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResult> => {
+  const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_SCORE_ENDPOINT);
 
   const playedRecords = payload?.data?.playedRecords;
   const returnedPlayerId = String(playedRecords?.userid || "").trim();
@@ -130,11 +152,54 @@ export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResu
   }
   const rawSongs = Array.isArray(playedRecords?.scoreInfo) ? playedRecords.scoreInfo : null;
   if (!rawSongs) throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的成绩结构不正确" });
-  const songs = rawSongs.map(sanitizeSong).filter(Boolean) as UserdataSong[];
+  const songs = rawSongs.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
   if (songs.length !== rawSongs.length) {
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的成绩记录" });
   }
-  return { playerId: returnedPlayerId, songs, receivedBytes: Buffer.byteLength(text) };
+  return { playerId: returnedPlayerId, songs, receivedBytes };
+};
+
+export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryFetchResult> => {
+  const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_HISTORY_ENDPOINT);
+  const playedRecords = payload?.data?.playedRecords;
+  const returnedPlayerId = String(playedRecords?.player_id || "").trim();
+  if (!/^\d{1,20}$/.test(returnedPlayerId)) {
+    throw createError({ statusCode: 502, statusMessage: "菌菌控制台未返回有效的默认玩家 ID" });
+  }
+  const rawGroups = Array.isArray(playedRecords?.scoreInfo) ? playedRecords.scoreInfo : null;
+  if (!rawGroups) throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的历史成绩结构不正确" });
+
+  const records: UserdataSong[] = [];
+  const latestSongs: UserdataSong[] = [];
+  for (const rawGroup of rawGroups) {
+    if (!rawGroup || typeof rawGroup !== "object") {
+      throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史分组" });
+    }
+    const group = rawGroup as Record<string, unknown>;
+    const songNo = toNonNegativeInteger(group.song_no);
+    const level = toNonNegativeInteger(group.level);
+    const rawRecords = Array.isArray(group.scoreInfo) ? group.scoreInfo : null;
+    if (songNo <= 0 || level < 1 || level > 5 || !rawRecords?.length) {
+      throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史分组" });
+    }
+    const songs = rawRecords.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
+    if (
+      songs.length !== rawRecords.length ||
+      songs.some((song) => song.song_no !== songNo || song.level !== level)
+    ) {
+      throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史成绩记录" });
+    }
+    records.push(...songs);
+    latestSongs.push(
+      [...songs].sort((left, right) =>
+        String(left.update_datetime || "").localeCompare(String(right.update_datetime || ""))
+      ).at(-1) as UserdataSong
+    );
+    if (records.length > MAX_HISTORY_RECORDS) {
+      throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的历史记录过多，已停止迁移" });
+    }
+  }
+  return { playerId: returnedPlayerId, records, latestSongs, receivedBytes };
 };
 
 const maxField = (local: UserdataSong, remote: UserdataSong, field: (typeof CUMULATIVE_FIELDS)[number]) => {

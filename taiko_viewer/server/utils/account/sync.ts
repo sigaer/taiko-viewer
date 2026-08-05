@@ -21,7 +21,8 @@ import {
   withUserdataWriteLock,
   writeUserdataWithHistory
 } from "~/server/internal/account/shared";
-import { fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
+import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
+import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
 import { requireAccountUser } from "./auth";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
@@ -214,6 +215,76 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     taikoId,
     status: "success",
     targetIds: ["kinoko-import"],
+    results: [result],
+    originalBytes: fetched.receivedBytes,
+    compressedBytes: fetched.receivedBytes
+  });
+  return {
+    ok: true,
+    sourcePlayerId: fetched.playerId,
+    targetTaikoId: taikoId,
+    summary,
+    log: toPublicSyncLog(logRow)
+  };
+};
+
+export const importKinokoScoreHistory = async (event: H3Event, payload: Record<string, unknown>) => {
+  const user = await requireAccountUser(event);
+  const currentBinding = await getCurrentBindingRow(user.id);
+  if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定迁移目标账号" });
+
+  const apiKey = String(payload.apiKey || "").trim();
+  if (!/^tk_[A-Za-z0-9_-]{20,200}$/.test(apiKey)) {
+    throw createError({ statusCode: 400, statusMessage: "请输入有效的菌菌控制台 API 密钥" });
+  }
+  const cooldown = await getSyncCooldownState(user.id);
+  if (cooldown.remainingSeconds > 0) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: `同步冷却中，请在 ${cooldown.remainingSeconds} 秒后重试`,
+      data: cooldown
+    });
+  }
+
+  const taikoId = currentBinding.taiko_id;
+  const fetched = await fetchKinokoHistory(apiKey);
+  if (fetched.playerId !== taikoId) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `密钥默认账号（${fetched.playerId}）与当前绑定账号（${taikoId}）不一致，已停止迁移`
+    });
+  }
+
+  const summary = await withUserdataWriteLock(taikoId, async () => {
+    const existed = await userdataFileExists(taikoId);
+    const userdata = existed
+      ? await readUserdata(taikoId)
+      : { _meta: { full: true, source: "wahlap", source_account: taikoId }, profile: { userid: taikoId }, songs: [] };
+    const history = await writeKinokoHistorySnapshots(taikoId, fetched.records, userdata);
+    const current = mergeKinokoScores(userdata, fetched.latestSongs);
+    if (!existed || current.added > 0 || current.updated > 0) {
+      rebuildUserdataAchievement(userdata);
+      await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current");
+    }
+    return { history, current };
+  });
+
+  const message = `历史 ${summary.history.importedRecords} 条新增、${summary.history.skippedRecords} 条已存在，写入 ${summary.history.snapshotFiles} 个兼容快照`;
+  const result = {
+    targetId: "kinoko-history-import",
+    label: "菌菌控制台完整历史迁移",
+    ok: true,
+    statusCode: 200,
+    message,
+    receivedBytes: fetched.receivedBytes,
+    decompressedBytes: fetched.receivedBytes,
+    songCount: summary.history.uniqueRecords
+  };
+  const logRow = await insertSyncLog({
+    userId: user.id,
+    taikoId,
+    status: "success",
+    targetIds: ["kinoko-history-import"],
     results: [result],
     originalBytes: fetched.receivedBytes,
     compressedBytes: fetched.receivedBytes
