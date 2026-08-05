@@ -8,8 +8,6 @@ import type {
 import { getSongCatalog } from "./songs";
 
 type RemoteChart = {
-  course?: unknown;
-  branchType?: unknown;
   totalNotes?: unknown;
   sub_constant_1?: unknown;
   main_constant?: unknown;
@@ -21,16 +19,9 @@ type RemoteChart = {
   rhythm?: unknown;
 };
 
-type RemoteSong = {
-  charts?: unknown;
-};
+type RemoteDifficultyMap = Record<string, RemoteChart>;
 
-type RemoteConstantsPayload = {
-  metadata?: {
-    generated_at?: unknown;
-  };
-  songs?: unknown;
-};
+type RemoteConstantsPayload = Record<string, RemoteDifficultyMap>;
 
 type SourceSnapshot = {
   payload: RemoteConstantsPayload;
@@ -148,8 +139,8 @@ export const buildV2ConstantsRows = (
   payload: RemoteConstantsPayload,
   localSongs: SongCatalogItem[]
 ): V2ConstantsItem[] => {
-  if (!isRecord(payload.songs)) {
-    throw new Error("V2 constants payload does not contain a songs object");
+  if (!isRecord(payload)) {
+    throw new Error("V2 constants payload is not a valid object");
   }
   const songMap = new Map(
     localSongs
@@ -158,28 +149,20 @@ export const buildV2ConstantsRows = (
   );
   const rows: V2ConstantsItem[] = [];
 
-  for (const [rawId, rawSong] of Object.entries(payload.songs)) {
+  for (const [rawId, difficultyMap] of Object.entries(payload)) {
     const id = toPositiveInteger(rawId);
     const localSong = id === null ? null : songMap.get(id);
-    if (!id || !localSong || !isRecord(rawSong)) {
+    if (!id || !localSong || !isRecord(difficultyMap)) {
       continue;
     }
     const songName = String(localSong.song_name || "").trim();
     if (songName.startsWith("【双打】")) {
       continue;
     }
-    const charts = Array.isArray((rawSong as RemoteSong).charts)
-      ? ((rawSong as RemoteSong).charts as unknown[])
-          .filter(isRecord)
-          .map((chart) => chart as RemoteChart)
-          .filter((chart) => ALLOWED_BRANCH_TYPES.has(String(chart.branchType || "")))
-      : [];
 
     for (const difficulty of DIFFICULTY_ORDER) {
-      const chart = COURSE_PRIORITY[difficulty]
-        .map((course) => charts.find((item) => item.course === course))
-        .find(Boolean);
-      if (!chart) {
+      const chart = (difficultyMap[difficulty] ?? difficultyMap[`${difficulty}_single`] ?? difficultyMap[`${difficulty}_p1`]) as RemoteChart | undefined;
+      if (!chart || !isRecord(chart)) {
         continue;
       }
       const row = normalizeChart(id, songName, difficulty, chart);
@@ -202,7 +185,7 @@ const fetchSourceSnapshot = async (): Promise<SourceSnapshot> => {
     timeout: SOURCE_TIMEOUT_MS,
     retry: 0
   });
-  if (!isRecord(payload) || !isRecord(payload.songs)) {
+  if (!isRecord(payload) || !isRecord(payload[Object.keys(payload)[0]])) {
     throw new Error("V2 constants source returned an invalid payload");
   }
   return {
@@ -254,7 +237,7 @@ const getV2ConstantsRowsSnapshot = async () => {
   ]);
   return {
     rows: buildV2ConstantsRows(snapshot.payload, localSongs),
-    generatedAt: String(snapshot.payload.metadata?.generated_at || ""),
+    generatedAt: snapshot.fetchedAt,
     fetchedAt: snapshot.fetchedAt,
     stale
   };
