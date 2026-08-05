@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import type { SongCatalogItem } from "~/types/content";
-import { buildSongCoverPath } from "~/utils/songCover";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
 
 const props = withDefaults(
   defineProps<{
@@ -20,19 +19,67 @@ const props = withDefaults(
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const apiFetch = useViewerApiFetch();
 const query = ref("");
-const scrollContainer = ".app-content";
+const pageSize = 12;
 const coverFallbackId = 1384;
 const coverErrors = ref<Record<number, boolean>>({});
-const { data: songsPayload, pending, error, reload } = useSongCatalog(() => props.shelfStatus);
+const loadingMore = ref(false);
+const refreshing = ref(false);
+const loadError = ref<unknown>(null);
+const failedAction = ref<"reload" | "more">("reload");
+const loadSentinel = ref<HTMLElement | null>(null);
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
+let requestSequence = 0;
+let loadObserver: IntersectionObserver | undefined;
+
+const createDefaultPayload = (): SongCatalogPagePayload => ({
+  songs: [],
+  total: 0,
+  page: 1,
+  pageSize
+});
+
+const fetchSongPage = (page: number, keyword = query.value.trim()) =>
+  apiFetch<SongCatalogPagePayload>("/api/content/songs", {
+    query: {
+      view: "list",
+      shelfStatus: props.shelfStatus,
+      page,
+      pageSize,
+      keyword: keyword || undefined,
+      sort: props.defaultSort
+    }
+  });
+
+const {
+  data: songsPayload,
+  pending,
+  error: initialError
+} = await useAsyncData<SongCatalogPagePayload>(
+  `song-list-${props.shelfStatus}-${props.defaultSort}`,
+  () => fetchSongPage(1, ""),
+  { default: createDefaultPayload }
+);
 
 const songs = computed(() => songsPayload.value.songs ?? []);
-
-const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
-  if (value === undefined || value === null || value === "") return 0;
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
-};
+const total = computed(() => Number(songsPayload.value.total || 0));
+const hasMore = computed(() => songs.value.length < total.value);
+const error = computed(() => loadError.value || initialError.value);
+const loadingInitial = computed(() => (pending.value || refreshing.value) && !songs.value.length);
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        progress: `${songs.value.length} / ${total.value} 件を表示中`,
+        loadMore: "続きを読み込む",
+        loadingMore: "読み込み中"
+      }
+    : {
+        progress: `已显示 ${songs.value.length} / ${total.value} 首`,
+        loadMore: "继续加载",
+        loadingMore: "正在加载"
+      }
+);
 
 const categoryColors: Record<string, string> = {
   南梦宫原创音乐: "rgb(255, 153, 0)",
@@ -64,7 +111,7 @@ const difficultyDefs = [
   { key: "level_5", color: "#8e44ad" }
 ];
 
-const getCoverUrl = buildSongCoverPath;
+const getCoverUrl = (id: number) => `https://static.sakura-bot.cn/cover/${id}.png`;
 const resolveCoverUrl = (id: number) =>
   coverErrors.value[id] ? getCoverUrl(coverFallbackId) : getCoverUrl(id);
 
@@ -77,7 +124,7 @@ const getLevels = (song: SongCatalogItem) =>
   difficultyDefs
     .map((def) => ({
       ...def,
-      value: song[def.key as keyof SongItem]
+      value: song[def.key as keyof SongCatalogItem]
     }))
     .filter((item) => item.value !== undefined && item.value !== null && item.value !== "-");
 
@@ -88,37 +135,6 @@ const getSongSubtitle = (song: SongCatalogItem) =>
   locale.value === "ja" ? song.song_name || "—" : song.song_name_jp || "—";
 const getCategoryLabel = (category: string) => categoryLabelMap[category]?.[locale.value === "ja" ? "ja" : "zh"] || category;
 
-const parseOpenDay = (input?: string) => {
-  if (!input) return 0;
-  const match = input.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!match) return 0;
-  return new Date(Number(match[3]), Number(match[1]) - 1, Number(match[2])).getTime();
-};
-
-const sortSongs = (items: SongCatalogItem[]) => {
-  if (props.defaultSort !== "open-day-desc") return items;
-  return [...items].sort((a, b) => {
-    const dateDiff = parseOpenDay(b.open_day) - parseOpenDay(a.open_day);
-    if (dateDiff !== 0) return dateDiff;
-    return Number(b.id || 0) - Number(a.id || 0);
-  });
-};
-
-const filteredSongs = computed(() => {
-  const scopedSongs = songs.value.filter((song) => normalizedShelfStatus(song.shelf_status) === props.shelfStatus);
-  if (!query.value) return sortSongs(scopedSongs);
-  const keyword = query.value.trim().toLowerCase();
-  return sortSongs(
-    scopedSongs.filter(
-      (song) =>
-        song.song_name.toLowerCase().includes(keyword) ||
-        song.song_name_jp?.toLowerCase().includes(keyword) ||
-        song.type.toLowerCase().includes(keyword) ||
-        getCategoryLabel(song.type).toLowerCase().includes(keyword)
-    )
-  );
-});
-
 const buildSongDetailLink = (songId: number) => {
   const path = `/songs/${songId}`;
   if (props.shelfStatus === 1) {
@@ -126,6 +142,75 @@ const buildSongDetailLink = (songId: number) => {
   }
   return localePath(path);
 };
+
+const reload = async () => {
+  const sequence = ++requestSequence;
+  refreshing.value = true;
+  loadError.value = null;
+  try {
+    const payload = await fetchSongPage(1);
+    if (sequence === requestSequence) {
+      initialError.value = null;
+      songsPayload.value = payload;
+    }
+  } catch (value) {
+    if (sequence === requestSequence) {
+      failedAction.value = "reload";
+      loadError.value = value;
+    }
+  } finally {
+    if (sequence === requestSequence) refreshing.value = false;
+  }
+};
+
+const loadMore = async () => {
+  if (!hasMore.value || loadingMore.value || refreshing.value) return;
+  const sequence = requestSequence;
+  const keyword = query.value.trim();
+  loadingMore.value = true;
+  loadError.value = null;
+  try {
+    const payload = await fetchSongPage(songsPayload.value.page + 1, keyword);
+    if (sequence !== requestSequence || keyword !== query.value.trim()) return;
+    songsPayload.value = {
+      ...payload,
+      songs: [...songs.value, ...payload.songs]
+    };
+  } catch (value) {
+    if (sequence === requestSequence) {
+      failedAction.value = "more";
+      loadError.value = value;
+    }
+  } finally {
+    loadingMore.value = false;
+  }
+};
+
+watch(query, () => {
+  requestSequence += 1;
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => void reload(), 300);
+});
+
+onMounted(() => {
+  loadObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (entry?.isIntersecting) void loadMore();
+    },
+    { root: null, rootMargin: "700px 0px" }
+  );
+  if (loadSentinel.value) loadObserver.observe(loadSentinel.value);
+});
+
+watch(loadSentinel, (current, previous) => {
+  if (previous) loadObserver?.unobserve(previous);
+  if (current) loadObserver?.observe(current);
+});
+
+onBeforeUnmount(() => {
+  if (searchTimer) clearTimeout(searchTimer);
+  loadObserver?.disconnect();
+});
 
 </script>
 
@@ -167,11 +252,11 @@ const buildSongDetailLink = (songId: number) => {
         </el-input>
       </div>
 
-      <div class="song-grid">
-        <template v-if="pending">
+      <div class="song-grid" :aria-busy="loadingInitial || refreshing || loadingMore">
+        <template v-if="loadingInitial">
           <div v-for="n in 8" :key="n" class="song-card shimmer-card"></div>
         </template>
-        <template v-else-if="error">
+        <template v-else-if="error && !songs.length">
           <div class="song-alert">
             <el-alert :title="t('common.loadingFailed')" type="error" show-icon :closable="false" />
             <el-button type="primary" plain size="small" @click="reload">{{ t("common.retry") }}</el-button>
@@ -179,7 +264,7 @@ const buildSongDetailLink = (songId: number) => {
         </template>
         <template v-else>
           <NuxtLink
-            v-for="song in filteredSongs"
+            v-for="song in songs"
             :key="song.id"
             class="song-card-link"
             :to="buildSongDetailLink(song.id)"
@@ -192,7 +277,6 @@ const buildSongDetailLink = (songId: number) => {
                   class="cover-img"
                   lazy
                   loading="lazy"
-                  :scroll-container="scrollContainer"
                   @error="handleCoverError(song.id)"
                 />
               </div>
@@ -220,6 +304,24 @@ const buildSongDetailLink = (songId: number) => {
             </div>
           </NuxtLink>
         </template>
+        <div v-if="error && songs.length" class="song-alert">
+          <el-alert :title="t('common.loadingFailed')" type="error" show-icon :closable="false" />
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="failedAction === 'more' ? loadMore() : reload()"
+          >
+            {{ t("common.retry") }}
+          </el-button>
+        </div>
+        <div v-if="hasMore && !loadingInitial" ref="loadSentinel" class="load-more-row">
+          <span>{{ copy.progress }}</span>
+          <el-button :loading="loadingMore" plain @click="loadMore">
+            {{ loadingMore ? copy.loadingMore : copy.loadMore }}
+          </el-button>
+        </div>
+        <p v-else-if="songs.length" class="load-progress">{{ copy.progress }}</p>
       </div>
     </el-card>
   </div>
@@ -394,5 +496,18 @@ const buildSongDetailLink = (songId: number) => {
 
 .song-alert {
   grid-column: 1 / -1;
+}
+
+.load-more-row,
+.load-progress {
+  grid-column: 1 / -1;
+  min-height: 52px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #7a6552;
+  font-size: 12px;
 }
 </style>

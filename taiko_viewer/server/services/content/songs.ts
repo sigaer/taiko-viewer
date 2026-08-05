@@ -57,6 +57,73 @@ export const getSongCatalogPayload = async (shelfStatus?: number): Promise<SongC
   return { songs: filtered };
 };
 
+type SongCatalogPageOptions = {
+  shelfStatus?: number;
+  keyword?: string;
+  page?: number;
+  pageSize?: number;
+  sort?: "catalog" | "open-day-desc";
+};
+
+const categorySearchAliases: Record<string, string> = {
+  南梦宫原创音乐: "ナムコオリジナル",
+  流行音乐: "ポップス",
+  儿童音乐: "キッズ",
+  古典音乐: "クラシック",
+  综合音乐: "バラエティ",
+  游戏音乐: "ゲームミュージック",
+  博歌乐音乐: "ボーカロイド",
+  动漫音乐: "アニメ"
+};
+
+const toSongListItem = (song: SongCatalogItem): SongCatalogItem => ({
+  id: Number(song.id),
+  song_name: String(song.song_name || ""),
+  song_name_jp: song.song_name_jp ? String(song.song_name_jp) : undefined,
+  open_day: song.open_day ? String(song.open_day) : undefined,
+  type: String(song.type || ""),
+  bpm: song.bpm === undefined || song.bpm === null ? undefined : String(song.bpm),
+  shelf_status: song.shelf_status,
+  level_1: song.level_1,
+  level_2: song.level_2,
+  level_3: song.level_3,
+  level_4: song.level_4,
+  level_5: song.level_5
+});
+
+export const getSongCatalogPagePayload = async (options: SongCatalogPageOptions) => {
+  const songs = await getSongCatalog();
+  const page = Math.max(1, Math.floor(Number(options.page) || 1));
+  const pageSize = Math.min(60, Math.max(12, Math.floor(Number(options.pageSize) || 24)));
+  const keyword = String(options.keyword || "").trim().toLocaleLowerCase();
+
+  let filtered = songs.filter(
+    (song) => options.shelfStatus === undefined || normalizeShelfStatus(song.shelf_status) === options.shelfStatus
+  );
+
+  if (keyword) {
+    filtered = filtered.filter((song) =>
+      [song.song_name, song.song_name_jp, song.type, categorySearchAliases[String(song.type || "")], song.id]
+        .some((value) => String(value ?? "").toLocaleLowerCase().includes(keyword))
+    );
+  }
+
+  if (options.sort === "open-day-desc") {
+    filtered = [...filtered].sort((a, b) => {
+      const dateDiff = parseOpenDay(b.open_day) - parseOpenDay(a.open_day);
+      return dateDiff || Number(b.id || 0) - Number(a.id || 0);
+    });
+  }
+
+  const start = (page - 1) * pageSize;
+  return {
+    total: filtered.length,
+    page,
+    pageSize,
+    songs: filtered.slice(start, start + pageSize).map(toSongListItem)
+  };
+};
+
 export const getSongDetailPayload = async (songId: number): Promise<SongDetailPayload> => {
   const [songs, ratingEntries, branchAudioVariants, tjaBundleUrl] = await Promise.all([
     getSongCatalog(),

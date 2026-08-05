@@ -56,6 +56,12 @@ export type SongCatalogPayload = {
   songs: SongCatalogItem[];
 };
 
+export type SongCatalogPagePayload = SongCatalogPayload & {
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 export type V2ConstantsDifficulty = "hard" | "oni" | "edit";
 
 export type V2ConstantsSortKey =
