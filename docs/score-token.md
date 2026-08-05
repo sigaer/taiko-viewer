@@ -34,12 +34,43 @@ curl -X POST "https://sakura-bot.cn/api/public-score/by-token" \
   "taikoId": "2258735",
   "fetchedAt": "2026-08-05T12:30:20Z",
   "data": {
-    "profile": {},
-    "songs": [],
-    "achievement": {}
+    "profile": {
+      "mydon_name": "SakuraDon",
+      "userid": "2258735",
+      "is_disp_dan_on": true,
+      "province": "北京市",
+      "gameCostume": {
+        "title": "太鼓达人",
+        "got_dan_max": 6,
+        "dan_name": { "grade": "06", "level": 1 }
+      }
+    },
+    "songs": [
+      {
+        "song_no": 187,
+        "level": 4,
+        "high_score": 1000000,
+        "best_score_rank": 7,
+        "good_cnt": 160,
+        "ok_cnt": 0,
+        "ng_cnt": 0,
+        "combo_cnt": 160,
+        "clear_cnt": 1,
+        "full_combo_cnt": 1,
+        "dondaful_combo_cnt": 1,
+        "highscore_datetime": "2026-08-05 20:30:20"
+      }
+    ],
+    "achievement": {
+      "count_level": 5,
+      "ary_crown_count": [250, 3, 0],
+      "ary_score_rank_count": [19, 56, 136, 142, 29, 1, 0]
+    }
   }
 }
 ```
+
+示例仅展示一条曲目记录；实际响应中的 `songs` 是该用户的完整成绩数组。
 
 常见状态码：
 
