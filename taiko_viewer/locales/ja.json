@@ -240,6 +240,7 @@
     "title": "譜面ツール",
     "chartConfig": "配置検索",
     "noteCount": "ノーツ数検索",
+    "progress": "楽曲進捗",
     "b30": "B30 表",
     "recommend": "おすすめ楽曲",
     "trend": "Rating 推移",
@@ -442,6 +443,9 @@
         "summary": "合計 {total} 件見つかりました{suffix}",
         "truncated": "（先頭 20 件のみ表示）",
         "empty": "一致する譜面は見つかりませんでした"
+      },
+      "progress": {
+        "desc": "Bot と同じ段位、定数、星、全良難易度の楽曲進捗画像を表示します。"
       },
       "b30": {
         "desc": "太鼓の達人 Rating Top N 集計画像を生成します。bot コマンド taikob に対応します。"

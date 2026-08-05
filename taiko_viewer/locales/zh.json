@@ -241,6 +241,7 @@
     "title": "查谱工具",
     "chartConfig": "查配置",
     "noteCount": "查物量",
+    "progress": "歌曲进度",
     "b30": "B30 表",
     "recommend": "推荐歌曲",
     "trend": "Rating 走势",
@@ -443,6 +444,9 @@
         "summary": "共找到 {total} 条结果{suffix}",
         "truncated": "（仅显示前 20 条）",
         "empty": "没有找到对应物量的谱面"
+      },
+      "progress": {
+        "desc": "查看与 bot 段位、定数、星级和全良难度指令完全相同的歌曲进度图片。"
       },
       "b30": {
         "desc": "生成太鼓达人 Rating Top N 汇总图，对应 bot 指令 taikob。"
