@@ -99,9 +99,8 @@ const mapKinokoError = (status: number, detail: string) => {
   return createError({ statusCode: 502, statusMessage: detail || `菌菌控制台请求失败（HTTP ${status}）` });
 };
 
-export const fetchKinokoScores = async (apiKey: string, playerId: string): Promise<KinokoFetchResult> => {
+export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResult> => {
   const endpoint = new URL(KINOKO_SCORE_ENDPOINT);
-  endpoint.searchParams.set("player_id", playerId);
   let response: Response;
   try {
     response = await fetch(endpoint, {
@@ -126,8 +125,8 @@ export const fetchKinokoScores = async (apiKey: string, playerId: string): Promi
 
   const playedRecords = payload?.data?.playedRecords;
   const returnedPlayerId = String(playedRecords?.userid || "").trim();
-  if (!returnedPlayerId || returnedPlayerId !== playerId) {
-    throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的玩家 ID 与请求不一致" });
+  if (!/^\d{1,20}$/.test(returnedPlayerId)) {
+    throw createError({ statusCode: 502, statusMessage: "菌菌控制台未返回有效的默认玩家 ID" });
   }
   const rawSongs = Array.isArray(playedRecords?.scoreInfo) ? playedRecords.scoreInfo : null;
   if (!rawSongs) throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的成绩结构不正确" });

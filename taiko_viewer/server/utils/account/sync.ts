@@ -168,12 +168,8 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定导入目标账号" });
 
   const apiKey = String(payload.apiKey || "").trim();
-  const playerId = String(payload.playerId || "").trim();
   if (!/^tk_[A-Za-z0-9_-]{20,200}$/.test(apiKey)) {
     throw createError({ statusCode: 400, statusMessage: "请输入有效的菌菌控制台 API 密钥" });
-  }
-  if (!/^\d{1,20}$/.test(playerId)) {
-    throw createError({ statusCode: 400, statusMessage: "请输入有效的来源玩家 ID" });
   }
   const cooldown = await getSyncCooldownState(user.id);
   if (cooldown.remainingSeconds > 0) {
@@ -184,8 +180,14 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     });
   }
 
-  const fetched = await fetchKinokoScores(apiKey, playerId);
   const taikoId = currentBinding.taiko_id;
+  const fetched = await fetchKinokoScores(apiKey);
+  if (fetched.playerId !== taikoId) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `密钥默认账号（${fetched.playerId}）与当前绑定账号（${taikoId}）不一致，已停止迁移`
+    });
+  }
   const summary = await withUserdataWriteLock(taikoId, async () => {
     const userdata = (await userdataFileExists(taikoId))
       ? await readUserdata(taikoId)
@@ -199,7 +201,7 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   const message = `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
   const result = {
     targetId: "kinoko-import",
-    label: "菌菌控制台导入",
+    label: "菌菌控制台迁移",
     ok: true,
     statusCode: 200,
     message,
