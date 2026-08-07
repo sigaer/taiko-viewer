@@ -27,6 +27,13 @@ useViewerSeo(() => ({
   path: "/account/profile"
 }));
 
+type QqBindingPayload = {
+  qqNumber: string;
+  status: "pending" | "active" | "removed";
+  verifiedAt: string | null;
+  createdAt: string;
+} | null;
+
 type ProfilePayload = {
   user: {
     id: number;
@@ -69,6 +76,7 @@ type ProfilePayload = {
     originalTitleplateId: number;
     expiresAt: string;
   } | null;
+  qqBinding: QqBindingPayload;
   verificationStatus: {
     emailVerified: boolean;
     taikoVerified: boolean;
@@ -122,6 +130,12 @@ const avatarCropFileName = ref("");
 const showcaseSaving = ref(false);
 const myDonShowcaseSlots = ref<string[]>(Array.from({ length: 5 }, () => ""));
 const myDonShowcaseLayout = ref<MyDonShowcaseLayout>("nickname");
+const qqInput = ref("");
+const qqPreparing = ref(false);
+const qqConfirming = ref(false);
+const qqRemoving = ref(false);
+const qqVerifyCode = ref("");
+const qqVerifyCodeResult = ref<{ expiresAt: string } | null>(null);
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -217,7 +231,26 @@ const copy = computed(() =>
         deleteConfirmButton: "削除",
         lastBindingTitle: "再確認",
         lastBindingConfirm: "これは最後のドンダーひろば ID です。削除すると現在の連携、マイドン、楽曲データ入口が未連携になります。削除しますか？",
-        lastBindingButton: "最後の連携を削除"
+        lastBindingButton: "最後の連携を削除",
+        qqTitle: "QQ 連携",
+        qqDesc: "QQ メールで本人確認します。過去の Bot 連携がある場合はドンダー ID を移行します。",
+        qqPlaceholder: "QQ 番号を入力",
+        qqStartVerify: "認証コードを取得",
+        qqCodeReady: "認証コードを QQ メールに送信しました（10 分間有効）。",
+        qqCodeHint: "QQ メールを確認し、6 桁の認証コードを入力してください。",
+        qqConfirmVerify: "認証コードを入力して確認",
+        qqConfirmPlaceholder: "6 桁の認証コード",
+        qqConfirmButton: "確認",
+        qqBound: "連携済み",
+        qqPending: "確認待ち",
+        qqUnbound: "未連携",
+        qqUnbind: "連携解除",
+        qqUnbindConfirm: "QQ {qq} の連携を解除しますか？",
+        qqPrepareFailed: "QQ 連携の開始に失敗しました",
+        qqConfirmFailed: "QQ 連携の確認に失敗しました",
+        qqConfirmSuccess: "QQ 連携が完了しました",
+        qqUnbindSuccess: "QQ 連携を解除しました",
+        qqUnbindFailed: "QQ 連携の解除に失敗しました"
       }
     : {
         uploadAvatar: "上传头像",
@@ -311,7 +344,26 @@ const copy = computed(() =>
         deleteConfirmButton: "删除",
         lastBindingTitle: "二次确认",
         lastBindingConfirm: "这是你最后一个鼓众 ID。删除后，网页中的当前绑定、我的小咚和歌曲数据入口都会失去关联，请再次确认。",
-        lastBindingButton: "确认删除最后一个绑定"
+        lastBindingButton: "确认删除最后一个绑定",
+        qqTitle: "QQ 绑定",
+        qqDesc: "通过 QQ 对应邮箱验证 QQ 所有权；若存在该 QQ 的 Bot 绑定记录，将快速迁移鼓众 ID。",
+        qqPlaceholder: "输入 QQ 号",
+        qqStartVerify: "获取验证码",
+        qqCodeReady: "验证码已发送至 QQ 邮箱（10 分钟内有效）。",
+        qqCodeHint: "请查看 QQ 邮箱并输入 6 位验证码。",
+        qqConfirmVerify: "输入验证码确认",
+        qqConfirmPlaceholder: "6 位验证码",
+        qqConfirmButton: "确认绑定",
+        qqBound: "已绑定",
+        qqPending: "待验证",
+        qqUnbound: "未绑定",
+        qqUnbind: "解绑",
+        qqUnbindConfirm: "确定解除 QQ {qq} 的绑定吗？",
+        qqPrepareFailed: "QQ 绑定启动失败",
+        qqConfirmFailed: "QQ 绑定确认失败",
+        qqConfirmSuccess: "QQ 绑定成功",
+        qqUnbindSuccess: "QQ 已解绑",
+        qqUnbindFailed: "QQ 解绑失败"
       }
 );
 
@@ -331,6 +383,7 @@ const { data, pending, refresh } = await useAsyncData<ProfilePayload>(
       bindings: [],
       currentBinding: null,
       pendingBinding: null,
+      qqBinding: null,
       verificationStatus: {
         emailVerified: false,
         taikoVerified: false
@@ -798,6 +851,71 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
     deletingId.value = null;
   }
 };
+
+const prepareQqBinding = async () => {
+  if (!qqInput.value.trim() || qqPreparing.value) return;
+  qqPreparing.value = true;
+  try {
+    const result = await apiFetch<{ expiresAt: string; message: string }>("/api/account/qq/prepare", {
+      method: "POST",
+      body: { qqNumber: qqInput.value.trim() }
+    });
+    qqVerifyCodeResult.value = { expiresAt: result.expiresAt };
+    qqVerifyCode.value = "";
+    ElMessage.success(result.message);
+    await refreshProfile();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.qqPrepareFailed);
+  } finally {
+    qqPreparing.value = false;
+  }
+};
+
+const confirmQqBinding = async () => {
+  if (!qqVerifyCode.value.trim() || qqConfirming.value) return;
+  qqConfirming.value = true;
+  try {
+    const result = await apiFetch<{ message: string }>("/api/account/qq/confirm", {
+      method: "POST",
+      body: { code: qqVerifyCode.value.trim() }
+    });
+    ElMessage.success(result.message);
+    qqVerifyCode.value = "";
+    qqVerifyCodeResult.value = null;
+    await refreshProfile();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.qqConfirmFailed);
+  } finally {
+    qqConfirming.value = false;
+  }
+};
+
+const removeQqBinding = async () => {
+  if (qqRemoving.value) return;
+  const qqNumber = profile.value?.qqBinding?.qqNumber;
+  try {
+    await ElMessageBox.confirm(
+      copy.value.qqUnbindConfirm.replace("{qq}", qqNumber || ""),
+      copy.value.qqUnbind,
+      { type: "warning", confirmButtonText: copy.value.qqUnbind, cancelButtonText: t("common.cancel") }
+    );
+  } catch {
+    return;
+  }
+  qqRemoving.value = true;
+  try {
+    const result = await apiFetch<{ message: string }>("/api/account/qq/remove", {
+      method: "POST"
+    });
+    ElMessage.success(result.message);
+    qqVerifyCodeResult.value = null;
+    await refreshProfile();
+  } catch (error: any) {
+    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.qqUnbindFailed);
+  } finally {
+    qqRemoving.value = false;
+  }
+};
 </script>
 
 <template>
@@ -959,6 +1077,56 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
               </div>
             </div>
           </div>
+        </el-card>
+
+        <el-card class="panel-card qq-card">
+          <div class="section-title">
+            <h3>{{ copy.qqTitle }}</h3>
+            <p>{{ copy.qqDesc }}</p>
+          </div>
+          <template v-if="profile.qqBinding && profile.qqBinding.status === 'active'">
+            <div class="qq-bound-row">
+              <div>
+                <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
+                <p>{{ copy.qqBound }} · {{ formatDateTime(profile.qqBinding.verifiedAt || profile.qqBinding.createdAt) }}</p>
+              </div>
+              <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
+            </div>
+          </template>
+          <template v-else-if="profile.qqBinding && profile.qqBinding.status === 'pending'">
+            <div class="qq-pending-row">
+              <div>
+                <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
+                <span class="source-stamp source-stamp--manual">{{ copy.qqPending }}</span>
+              </div>
+              <p class="qq-pending-hint">{{ copy.qqCodeHint }}</p>
+              <div class="qq-verify-row">
+                <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
+                <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
+                  {{ copy.qqConfirmButton }}
+                </el-button>
+              </div>
+              <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
+            </div>
+          </template>
+          <template v-else>
+            <div v-if="qqVerifyCodeResult" class="qq-code-result">
+              <p>{{ copy.qqCodeReady }}</p>
+              <p class="qq-code-hint">{{ copy.qqCodeHint }}</p>
+              <div class="qq-verify-row">
+                <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
+                <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
+                  {{ copy.qqConfirmButton }}
+                </el-button>
+              </div>
+            </div>
+            <div v-else class="bind-input-row">
+              <el-input v-model="qqInput" :placeholder="copy.qqPlaceholder" @keyup.enter="prepareQqBinding" />
+              <el-button type="primary" :loading="qqPreparing" :disabled="!qqInput.trim()" @click="prepareQqBinding">
+                {{ copy.qqStartVerify }}
+              </el-button>
+            </div>
+          </template>
         </el-card>
 
         <el-card class="panel-card mydon-config-card">
@@ -1408,6 +1576,66 @@ const deleteBinding = async (binding: NonNullable<ProfilePayload["bindings"]>[nu
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.qq-card {
+  container-type: inline-size;
+}
+
+.qq-bound-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 248, 240, 0.78);
+}
+
+.qq-bound-row p {
+  margin: 6px 0 0;
+  color: #7d6a5a;
+}
+
+.qq-pending-row {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 247, 218, 0.8);
+}
+
+.qq-pending-hint {
+  margin: 0;
+  color: #7d6a5a;
+  line-height: 1.6;
+}
+
+.qq-verify-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.qq-code-result {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 247, 218, 0.8);
+  margin-bottom: 14px;
+}
+
+.qq-code-result p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.qq-code-hint {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #7d6a5a;
 }
 
 @container (max-width: 620px) {

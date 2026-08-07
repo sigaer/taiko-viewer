@@ -3,6 +3,7 @@ import type { H3Event, MultiPartData } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "./auth";
 import { listBindings } from "./bindings";
+import { getQqBinding } from "./qq";
 import {
   type AccountRow,
   AVATAR_MAX_BYTES,
@@ -34,11 +35,13 @@ export const getAccountProfile = async (userId: number) => {
     ? await enrichBindingWithCurrentTitle(baseCurrentBinding)
     : null;
   const pendingBinding = await getPendingBinding(userId);
+  const qqBinding = await getQqBinding(userId);
   return {
     user: sanitizePublicUser(user),
     bindings,
     currentBinding,
     pendingBinding,
+    qqBinding,
     verificationStatus: {
       emailVerified: Boolean(user.email_verified),
       taikoVerified: Boolean(currentBinding)

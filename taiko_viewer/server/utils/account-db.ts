@@ -436,6 +436,24 @@ const CREATE_TABLES = [
       REFERENCES web_annual_shares(id) ON DELETE CASCADE,
     CONSTRAINT fk_web_annual_posters_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_user_qq_bindings (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    qq_number VARCHAR(15) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'pending',
+    verify_code_hash CHAR(64) DEFAULT NULL,
+    verify_code_expires_at DATETIME DEFAULT NULL,
+    verify_attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    verified_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_user_qq_bindings_user (user_id),
+    UNIQUE KEY uniq_web_user_qq_bindings_qq (qq_number),
+    KEY idx_web_user_qq_bindings_status (status),
+    KEY idx_web_user_qq_bindings_qq (qq_number),
+    CONSTRAINT fk_web_user_qq_bindings_user_id FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 
@@ -447,7 +465,10 @@ const MIGRATIONS = [
   "ALTER TABLE web_data_sync_logs ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_developer_tokens ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
   "ALTER TABLE web_support_tickets ADD COLUMN staff_last_read_at DATETIME NULL DEFAULT NULL AFTER mail_error",
-  "ALTER TABLE web_support_tickets ADD COLUMN user_last_read_at DATETIME NULL DEFAULT NULL AFTER staff_last_read_at"
+  "ALTER TABLE web_support_tickets ADD COLUMN user_last_read_at DATETIME NULL DEFAULT NULL AFTER staff_last_read_at",
+  "ALTER TABLE web_user_qq_bindings ADD COLUMN verify_attempts TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER verify_code_expires_at",
+  "ALTER TABLE web_user_qq_bindings ADD UNIQUE KEY uniq_web_user_qq_bindings_user (user_id)",
+  "ALTER TABLE web_user_qq_bindings ADD UNIQUE KEY uniq_web_user_qq_bindings_qq (qq_number)"
 ];
 
 const BIND_TABLE_CREATE_SQL = `CREATE TABLE IF NOT EXISTS bind (

@@ -458,7 +458,16 @@ export const getOssClient = () => {
   });
 };
 
-export const sendMailCode = async (email: string, code: string, purpose: "register" | "reset") => {
+export const sendMailCode = async (email: string, code: string, purpose: "register" | "reset" | "qq_bind") => {
+  if (purpose === "qq_bind") {
+    await sendAccountMail({
+      to: email,
+      subject: "Sakura Taiko Viewer QQ 绑定验证码",
+      text: `你的 QQ 绑定验证码是 ${code}，10 分钟内有效。如非本人操作，请忽略此邮件。`,
+      html: `<div style="font-family: sans-serif; line-height: 1.6;"><p>你的 QQ 绑定验证码是：</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 0.2em;">${code}</p><p>验证码 10 分钟内有效。如非本人操作，请忽略此邮件。</p></div>`
+    });
+    return;
+  }
   const subject = purpose === "register" ? "Sakura Taiko Viewer 注册验证码" : "Sakura Taiko Viewer 找回密码验证码";
   const label = purpose === "register" ? "注册" : "重置密码";
   await sendAccountMail({
