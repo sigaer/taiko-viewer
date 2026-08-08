@@ -243,6 +243,8 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   const slideCount = await page.locator(".story-player__slide").count();
   assert.ok(slideCount >= 4 && slideCount <= 23, `unexpected slide count: ${slideCount}`);
   const sound = page.locator(".story-player__sound-trigger");
+  assert.equal(await sound.getAttribute("aria-pressed"), "true");
+  await sound.click();
   assert.equal(await sound.getAttribute("aria-pressed"), "false");
   await sound.click();
   assert.equal(await sound.getAttribute("aria-pressed"), "true");

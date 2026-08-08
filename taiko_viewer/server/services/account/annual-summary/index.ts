@@ -189,7 +189,7 @@ export const getAccountAnnualSummaryById = async (userId: number, summaryId: str
   const row = await findOwnerAnnualSummary(summaryId, userId);
   if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
   const payload = await getOwnerSummaryPayload(row, normalizeAnnualLocale(localeInput));
-  if (!payload) throw createError({ statusCode: 410, statusMessage: "年度总结缓存已失效，请重新生成" });
+  if (!payload) throw createError({ statusCode: 410, statusMessage: "年度回顾文件暂不可用，请联系管理员" });
   return payload;
 };
 
@@ -462,7 +462,7 @@ export const createAccountAnnualShare = async (userId: number, summaryId: string
   const summary = await findOwnerAnnualSummary(summaryId, userId);
   if (!summary) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
   if (!(await safeReadSummary(summary))) {
-    throw createError({ statusCode: 410, statusMessage: "年度总结缓存已失效，请重新生成" });
+    throw createError({ statusCode: 410, statusMessage: "年度回顾文件暂不可用，请联系管理员" });
   }
   return withAnnualFileLock(`share:${userId}:${summaryId}`, async () => {
     const locale = normalizeAnnualLocale(localeInput);

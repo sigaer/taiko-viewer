@@ -255,13 +255,11 @@ export const countRecentAnnualJobs = async (input: {
   userId: number;
   type: AnnualJobType;
   since: Date;
-  onlyForced?: boolean;
 }) => {
   await ensureAccountSchema();
-  const forcedClause = input.onlyForced ? " AND JSON_EXTRACT(parameters_json, '$.force') = TRUE" : "";
   const [rows] = await getAccountDb().execute<DbRow<{ count: number }>[]>(
     `SELECT COUNT(*) AS count FROM web_annual_summary_jobs
-     WHERE user_id = ? AND job_type = ? AND created_at >= ?${forcedClause}`,
+     WHERE user_id = ? AND job_type = ? AND created_at >= ?`,
     [input.userId, input.type, input.since]
   );
   return Number(rows[0]?.count || 0);
