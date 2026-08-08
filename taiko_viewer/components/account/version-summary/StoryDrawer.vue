@@ -10,7 +10,6 @@ const props = defineProps<{
   bindings: VersionSummaryBinding[];
   selectedBindingId: number | null;
   switchingBindingId: number | null;
-  manualRefreshing: boolean;
   storyStarted: boolean;
   localeCode: "zh" | "ja";
 }>();
@@ -18,7 +17,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
   "change-binding": [bindingId: number | null];
-  refresh: [];
   exit: [];
 }>();
 
@@ -28,7 +26,6 @@ const uiText = computed(() => ({
   versionLabel: t("annualSummary.drawer.version"),
   bindingLabel: t("annualSummary.drawer.binding"),
   titleLabel: t("annualSummary.drawer.currentTitle"),
-  refresh: t("annualSummary.controls.refresh"),
   exit: t("annualSummary.drawer.exit"),
   summaryLabel: t("annualSummary.drawer.summary"),
   summaryText: `${n(props.summary.overview.playCount)} · ${n(props.summary.overview.uniqueSongs)} · ${n(props.summary.overview.uniqueCharts || 0)}`
@@ -97,9 +94,6 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
       </div>
 
       <div class="story-drawer__actions">
-        <el-button type="primary" :loading="manualRefreshing" @click="emit('refresh')">
-          {{ uiText.refresh }}
-        </el-button>
         <el-button v-if="storyStarted" @click="emit('exit')">
           {{ uiText.exit }}
         </el-button>

@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import StoryDrawer from "~/components/account/version-summary/StoryDrawer.vue";
 import StoryPlayer from "~/components/account/version-summary/StoryPlayer.vue";
+import AnnualBuildPrelude from "~/components/account/version-summary/AnnualBuildPrelude.vue";
 import type { AnnualSummaryV4, VersionSummaryBinding, VersionSummaryPayload } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 import { buildPageDescription } from "~/utils/seo";
@@ -12,10 +13,13 @@ type AnnualJob = {
   id: string;
   status: "queued" | "running" | "completed" | "failed";
   error?: { code: string; message: string } | null;
+  progressStage?: string | null;
+  progressPercent?: number;
+  progressDetail?: string | null;
 };
 type AnnualEnvelope = Omit<VersionSummaryPayload, "summary"> & {
   summary: AnnualSummaryV4 | null;
-  state: "ready" | "stale" | "missing";
+  state: "ready" | "missing";
   buildJob: AnnualJob | null;
 };
 
@@ -28,12 +32,13 @@ useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPage
 
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
-const manualRefreshing = ref(false);
+const building = ref(false);
 const switchingBindingId = ref<number | null>(null);
 const selectedBindingId = ref<number | null>(null);
 const jobStatus = ref<AnnualJob | null>(null);
 const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 let pollGeneration = 0;
+let pollingJobId = "";
 
 const fetchAnnual = async () => {
   try {
@@ -78,7 +83,7 @@ const summary = computed(() => {
 const currentBinding = computed(() => envelope.value?.currentBinding || bindingState.value?.currentBinding || null);
 const bindings = computed(() => bindingState.value?.bindings?.length ? bindingState.value.bindings : currentBinding.value ? [currentBinding.value] : []);
 const selectedVersion = computed(() => envelope.value?.selectedVersion || {
-  key: "annual_2026", name: t("annualSummary.name"), startDate: "2026-01-01", endDate: null
+  key: "annual_2026", name: t("annualSummary.name"), startDate: "2026-01-01", endDate: "2026-10-01"
 });
 const pageError = computed(() => schemaMismatch.value ? t("annualSummary.state.schemaMismatch") : annualState.value?.error || bindingState.value?.error || "");
 const jobStatusLabel = computed(() => {
@@ -108,12 +113,30 @@ const pollJob = async (jobId: string, generation: number) => {
   throw new Error("ANNUAL_BUILD_TIMEOUT");
 };
 
-const buildSummary = async (force: boolean) => {
+const resumeJob = async (job: AnnualJob) => {
+  if (pollingJobId === job.id) return;
   const generation = ++pollGeneration;
-  manualRefreshing.value = true;
+  pollingJobId = job.id;
+  building.value = true;
+  try {
+    await pollJob(job.id, generation);
+  } catch (error) {
+    if (generation === pollGeneration && jobStatus.value?.status !== "failed") {
+      ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
+    }
+  } finally {
+    if (pollingJobId === job.id) pollingJobId = "";
+    if (generation === pollGeneration) building.value = false;
+  }
+};
+
+const buildSummary = async () => {
+  if (building.value) return;
+  const generation = ++pollGeneration;
+  building.value = true;
   try {
     const payload = await apiFetch<{ job: AnnualJob; summary?: AnnualSummaryV4 }>("/api/account/annual-summaries/annual_2026/build", {
-      method: "POST", body: { force, locale: locale.value === "ja" ? "ja" : "zh" }
+      method: "POST", body: { locale: locale.value === "ja" ? "ja" : "zh" }
     });
     jobStatus.value = payload.job;
     if (payload.summary || payload.job.status === "completed") await reloadAnnual();
@@ -124,7 +147,8 @@ const buildSummary = async (force: boolean) => {
   } catch (error) {
     ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
   } finally {
-    if (generation === pollGeneration) manualRefreshing.value = false;
+    pollingJobId = "";
+    if (generation === pollGeneration) building.value = false;
   }
 };
 
@@ -133,6 +157,7 @@ const handleBindingChange = async (bindingId: number | null) => {
   switchingBindingId.value = bindingId;
   try {
     await apiFetch("/api/account/bindings/current", { method: "POST", body: { bindingId } });
+    jobStatus.value = null;
     await Promise.all([reloadBindings(), reloadAnnual()]);
     storyStarted.value = false;
   } catch (error) {
@@ -145,6 +170,16 @@ const handleBindingChange = async (bindingId: number | null) => {
 
 watch(storyStarted, (value) => { immersiveStory.value = value; }, { immediate: true });
 watch(currentBinding, (value) => { selectedBindingId.value = value?.id ?? null; }, { immediate: true });
+watch(envelope, (value) => {
+  if (value?.buildJob && !summary.value && !building.value) {
+    jobStatus.value = value.buildJob;
+    if (value.buildJob.status === "queued" || value.buildJob.status === "running") {
+      void resumeJob(value.buildJob);
+    }
+  } else if (value?.state === "missing" && !summary.value && !pageError.value && !building.value) {
+    void buildSummary();
+  }
+}, { immediate: true });
 watch(locale, async () => { storyStarted.value = false; drawerOpen.value = false; await reloadAnnual(); });
 watch(() => summary.value?.summaryId, (value, oldValue) => { if (value && value !== oldValue) storyStarted.value = false; });
 
@@ -158,6 +193,17 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
       <p>{{ t("annualSummary.state.loading") }}</p>
     </div>
 
+    <AnnualBuildPrelude
+      v-else-if="!summary && (building || jobStatus)"
+      :status="jobStatus?.status || 'queued'"
+      :stage="jobStatus?.progressStage"
+      :percent="jobStatus?.progressPercent"
+      :detail="jobStatus?.progressDetail"
+      :error="jobStatus?.error?.message || ''"
+      @retry="buildSummary"
+      @sync="navigateTo(localePath('/account/sync'))"
+    />
+
     <div v-else-if="!summary" class="annual-state">
       <p class="annual-state__eyebrow">{{ t("annualSummary.entry.eyebrow") }}</p>
       <h1>{{ t("account.versionSummary") }}</h1>
@@ -165,7 +211,6 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
       <div class="annual-state__actions">
         <el-button @click="navigateTo(localePath('/account/profile'))">{{ t("annualSummary.state.openProfile") }}</el-button>
         <el-button @click="navigateTo(localePath('/account/sync'))">{{ t("annualSummary.state.openSync") }}</el-button>
-        <el-button type="primary" :loading="manualRefreshing" @click="buildSummary(Boolean(schemaMismatch))">{{ t("annualSummary.controls.refresh") }}</el-button>
       </div>
       <small v-if="jobStatusLabel">{{ jobStatusLabel }}</small>
     </div>
@@ -174,8 +219,8 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
       <StoryDrawer
         v-model="drawerOpen" :summary="summary" :selected-version="selectedVersion" :current-binding="currentBinding"
         :bindings="bindings" :selected-binding-id="selectedBindingId" :switching-binding-id="switchingBindingId"
-        :manual-refreshing="manualRefreshing" :story-started="storyStarted" :locale-code="locale === 'ja' ? 'ja' : 'zh'"
-        @change-binding="handleBindingChange" @refresh="buildSummary(true)" @exit="navigateTo(localePath('/account/profile'))"
+        :story-started="storyStarted" :locale-code="locale === 'ja' ? 'ja' : 'zh'"
+        @change-binding="handleBindingChange" @exit="navigateTo(localePath('/account/profile'))"
       />
       <StoryPlayer
         :summary="summary"

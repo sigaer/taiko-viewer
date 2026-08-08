@@ -509,7 +509,7 @@
       "songWaiting": "次の好きな曲を待っています"
     },
     "controls": {
-      "settings": "ストーリー設定", "soundOn": "太鼓音をオン", "soundOff": "太鼓音をオフ", "progress": "年間ストーリーの進行", "pageNavigation": "ページ移動", "previous": "前のページ", "next": "次のページ", "start": "年間の振り返りを開く", "refresh": "再生成", "share": "30 日間の共有を作成", "generatePoster": "現在の言語でポスターを生成", "download": "ポスターを保存", "webShare": "ポスターを共有", "renewShare": "30 日延長", "revokeShare": "共有を取り消す", "back": "年間の振り返りへ戻る", "settingsShort": "設定"
+      "settings": "ストーリー設定", "soundOn": "BGMと太鼓音をオン", "soundOff": "BGMと太鼓音をオフ", "progress": "年間ストーリーの進行", "pageNavigation": "ページ移動", "previous": "前のページ", "next": "次のページ", "start": "年間の振り返りを開く", "refresh": "もう一度整理", "share": "30 日間の共有を作成", "generatePoster": "現在の言語でポスターを生成", "download": "ポスターを保存", "webShare": "ポスターを共有", "renewShare": "30 日延長", "revokeShare": "共有を取り消す", "back": "年間の振り返りへ戻る", "settingsShort": "設定"
     },
     "chapters": { "debut": "はじまり", "habits": "習慣", "preference": "好み", "growth": "成長", "keepsake": "記念" },
     "pages": { "opening": "導入", "profile": "プロフィール", "period": "期間", "overview": "全体像", "favorite": "最愛", "obsession": "余韻", "favoriteShift": "変化", "keyword": "キーワード", "ratingRank": "RT", "monthly": "月別", "weekday": "曜日", "calendar": "暦", "timeOfDay": "時間", "lateNight": "深夜", "speedProfile": "速度", "nearDondaful": "あと一歩", "challenge": "挑戦", "pound": "連打", "highScore": "ハイスコア", "milestones": "瞬間", "breakthrough": "突破", "final": "称号", "poster": "ポスター" },
@@ -517,6 +517,8 @@
       "loading": "2026 年の太鼓記録を整理しています…", "missing": "整理できる太鼓記録がありません。現在の連携 ID を同期してから、もう一度生成してください。", "loadFailed": "年間の振り返りを読み込めませんでした。しばらくしてから再試行してください。", "buildQueued": "年間の振り返りをバックグラウンドで生成しています。", "buildReady": "年間の振り返りができあがりました。", "buildFailed": "年間の振り返りを生成できませんでした。しばらくしてから再試行してください。", "schemaMismatch": "記録形式が更新されました。年間の振り返りを再生成してください。", "openProfile": "プロフィールへ", "openSync": "同期ページへ", "retry": "再読み込み", "jobQueued": "振り返りを整理する順番を待っています…", "jobRunning": "あなたの音を物語にまとめています…", "jobCompleted": "年間の振り返りができあがりました。", "jobFailed": "今回は整理を終えられませんでした。しばらくしてから再試行してください。"
     },
     "share": { "generating": "ポスターを生成しています…", "created": "30 日間の共有を作成しました。次にポスターを生成できます。", "ready": "共有ページとポスターを生成しました", "downloadFallback": "共有画面を開けなかったため、ポスターを保存しました。", "posterFirst": "先にポスターを生成してから共有してください。", "renewed": "共有期限を 30 日延長しました", "revoked": "公開共有を取り消しました", "expires": "有効期限 {date}", "failed": "共有またはポスターを生成できませんでした。しばらくしてから再試行してください。", "privacy": "推測できない公開リンクを作成し、30 日後に失効します。ここから延長または早期取り消しができます。", "expired": "この年間の振り返りは期限切れ、または取り消されました。", "publicLead": "プレイヤーが自分で公開した 2026 年の太鼓の振り返りです。" },
+    "buildPrelude": { "eyebrow": "振り返りの序章 · 製本中", "title": "あなたの太鼓が、物語になっています", "failedTitle": "製本が途中で止まりました", "lead": "今年の記録をたどりながら、好きな曲、成長、響きを集めています。", "waiting": "前の物語が完成するのを待っています", "background": "ページを離れても処理は続きます。戻ると現在の進捗から表示します。", "retry": "もう一度整理" },
+    "buildStages": { "queued": "整理キューを待っています", "preparing": "年間記録を準備しています", "history": "成績の軌跡を復元しています", "events": "一つひとつの変化を探しています", "summaries": "好みと成長をまとめています", "personal_complete": "個人ストーリーが形になりました", "rating": "サイト内の位置を追加しています", "assets": "物語とどんちゃんを製本しています", "completed": "年間の振り返りが完成しました", "failed": "年間の振り返りを整理できませんでした", "running": "年間の振り返りを整理しています" },
     "milestoneTypes": { "clear": "新しいクリアが灯る", "full_combo": "新しいフルコンボが灯る", "dondaful": "新しいドンダフルが灯る" },
     "entry": { "eyebrow": "2026 / 更新中", "title": "あなたの音が、ここに残っています", "lead": "きせかえ、段位、称号、そして足あとを残した挑戦が、開かれるのを待っています。", "binding": "現在の連携", "titleLabel": "年間称号", "playCount": "記録に残った挑戦", "activeDays": "灯った日", "uniqueSongs": "出会った曲" },
     "openingCover": {

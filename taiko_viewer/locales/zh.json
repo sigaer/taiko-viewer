@@ -511,14 +511,14 @@
     },
     "controls": {
       "settings": "故事设置",
-      "soundOn": "开启鼓点声音",
-      "soundOff": "关闭鼓点声音",
+      "soundOn": "开启背景音乐与鼓点",
+      "soundOff": "关闭背景音乐与鼓点",
       "progress": "年度故事进度",
       "pageNavigation": "故事翻页",
       "previous": "上一页",
       "next": "下一页",
       "start": "开启我的年度回顾",
-      "refresh": "重新生成",
+      "refresh": "重试整理",
       "share": "创建 30 天分享",
       "generatePoster": "生成当前语言海报",
       "download": "下载海报",
@@ -547,6 +547,18 @@
       "jobRunning": "正在把你的鼓声整理成故事…",
       "jobCompleted": "年度回顾已经整理完成。",
       "jobFailed": "这次整理没有完成，请稍后再试。"
+    },
+    "buildPrelude": {
+      "eyebrow": "回顾序章 · 正在装订",
+      "title": "你的鼓点，正在变成故事",
+      "failedTitle": "这次装订停在了半路",
+      "lead": "我们正在沿着今年留下的记录，找回那些喜欢、突破与回响。",
+      "waiting": "等待前一份故事完成",
+      "background": "离开页面也没关系，任务会在后台继续；回来后会接着显示当前进度。",
+      "retry": "重试整理"
+    },
+    "buildStages": {
+      "queued": "等待进入整理队列", "preparing": "正在准备你的年度记录", "history": "正在重建今年的成绩轨迹", "events": "正在寻找每一次变化", "summaries": "正在整理偏爱与突破", "personal_complete": "个人故事已经成形", "rating": "正在补上全站位置", "assets": "正在装订故事与小咚形象", "completed": "年度回顾已经完成", "failed": "年度回顾整理失败", "running": "正在整理你的年度回顾"
     },
     "share": { "generating": "正在生成海报…", "created": "30 天分享已经创建，接下来可以生成海报。", "ready": "分享页和海报已生成", "downloadFallback": "系统分享没有打开，已改为下载海报。", "posterFirst": "请先生成海报，再把这一页分享出去。", "renewed": "分享有效期已续期 30 天", "revoked": "公开分享已撤销", "expires": "有效期至 {date}", "failed": "分享或海报生成失败，请稍后重试", "privacy": "创建后将生成一个不可枚举的公开链接，默认 30 天后失效；你可以在这里续期或提前撤销。", "expired": "这份年度回顾已到期或被撤销。", "publicLead": "这是一份由玩家主动公开的 2026 太鼓回顾。" },
     "milestoneTypes": { "clear": "新的通关亮起", "full_combo": "新的全连亮起", "dondaful": "新的全良亮起" },

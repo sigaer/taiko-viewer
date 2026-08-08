@@ -483,7 +483,7 @@ try {
 
   await request("/api/account/annual-summaries/annual_2026", { expected: 401 });
   await request("/api/account/annual-summaries/annual_2026", { cookie: firstSession });
-  const queued = await request("/api/account/annual-summaries/annual_2026/build", { method: "POST", cookie: firstSession, body: { force: false, locale: "zh" } });
+  const queued = await request("/api/account/annual-summaries/annual_2026/build", { method: "POST", cookie: firstSession, body: { locale: "zh" } });
   const buildResult = queued.body.job.status === "completed"
     ? queued.body
     : await pollJob("/api/account/annual-summary-jobs", firstSession, queued.body.job, 8 * 60 * 1000);
@@ -498,7 +498,7 @@ try {
   await request(`/api/admin/annual-summaries/${encodeURIComponent(summaryId)}/events`, { expected: 401 });
 
   await request("/api/account/annual-summaries/annual_2026", { cookie: thirdSession });
-  const archiveQueued = await request("/api/account/annual-summaries/annual_2026/build", { method: "POST", cookie: thirdSession, body: { force: false, locale: "zh" } });
+  const archiveQueued = await request("/api/account/annual-summaries/annual_2026/build", { method: "POST", cookie: thirdSession, body: { locale: "zh" } });
   const archiveBuildResult = archiveQueued.body.job.status === "completed"
     ? archiveQueued.body
     : await pollJob("/api/account/annual-summary-jobs", thirdSession, archiveQueued.body.job, 8 * 60 * 1000);

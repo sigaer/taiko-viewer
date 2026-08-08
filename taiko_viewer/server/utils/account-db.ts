@@ -364,6 +364,7 @@ const CREATE_TABLES = [
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_web_annual_summaries_owner_version (user_id, binding_id, version_key, created_at),
     KEY idx_web_annual_summaries_fingerprint (input_fingerprint),
+    UNIQUE KEY uniq_web_annual_summaries_owner_version (user_id, binding_id, version_key),
     CONSTRAINT fk_web_annual_summaries_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE,
     CONSTRAINT fk_web_annual_summaries_binding_id FOREIGN KEY (binding_id)
@@ -381,6 +382,9 @@ const CREATE_TABLES = [
     parameters_json LONGTEXT DEFAULT NULL,
     error_code VARCHAR(64) DEFAULT NULL,
     error_message VARCHAR(255) DEFAULT NULL,
+    progress_stage VARCHAR(32) NOT NULL DEFAULT 'queued',
+    progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    progress_detail VARCHAR(255) DEFAULT NULL,
     started_at DATETIME DEFAULT NULL,
     completed_at DATETIME DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -468,7 +472,11 @@ const MIGRATIONS = [
   "ALTER TABLE web_support_tickets ADD COLUMN user_last_read_at DATETIME NULL DEFAULT NULL AFTER staff_last_read_at",
   "ALTER TABLE web_user_qq_bindings ADD COLUMN verify_attempts TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER verify_code_expires_at",
   "ALTER TABLE web_user_qq_bindings ADD UNIQUE KEY uniq_web_user_qq_bindings_user (user_id)",
-  "ALTER TABLE web_user_qq_bindings ADD UNIQUE KEY uniq_web_user_qq_bindings_qq (qq_number)"
+  "ALTER TABLE web_user_qq_bindings ADD UNIQUE KEY uniq_web_user_qq_bindings_qq (qq_number)",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_stage VARCHAR(32) NOT NULL DEFAULT 'queued' AFTER error_message",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER progress_stage",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_detail VARCHAR(255) DEFAULT NULL AFTER progress_percent",
+  "ALTER TABLE web_annual_summaries ADD UNIQUE KEY uniq_web_annual_summaries_owner_version (user_id, binding_id, version_key)"
 ];
 
 const BIND_TABLE_CREATE_SQL = `CREATE TABLE IF NOT EXISTS bind (

@@ -10,7 +10,6 @@ import {
 } from "~/server/internal/account/shared";
 import { getMyDonImageBuffer } from "~/server/utils/account/my-don";
 import {
-  ANNUAL_FORCE_BUILD_COOLDOWN_MS,
   ANNUAL_MAX_EVENT_PAGE_SIZE,
   ANNUAL_POSTER_COOLDOWN_MS,
   ANNUAL_POSTER_HEIGHT,
@@ -57,12 +56,12 @@ import {
   renewAnnualShare,
   revokeAnnualShare,
   serializeAnnualJob,
+  updateAnnualJobProgress,
   upsertAnnualPoster
 } from "./repository";
 import {
   atomicWriteFile,
   atomicWriteJson,
-  getAnnualInputFingerprint,
   getAnnualPosterPath,
   getAnnualSummaryPaths,
   readAnnualEvents,
@@ -165,9 +164,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
   const version = resolveAnnualVersion(versionInput);
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
   const binding = await requireCurrentAnnualBinding(userId);
-  const fingerprint = await getAnnualInputFingerprint(binding.taiko_id);
-  const currentRow = await findLatestAnnualSummary(userId, binding.id, version.key, fingerprint);
-  const latestRow = currentRow || (await findLatestAnnualSummary(userId, binding.id, version.key));
+  const latestRow = await findLatestAnnualSummary(userId, binding.id, version.key);
   const locale = normalizeAnnualLocale(localeInput);
   const payload = latestRow ? await getOwnerSummaryPayload(latestRow, locale) : null;
   const activeJob = await findActiveAnnualJob({
@@ -180,8 +177,8 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     availableVersions: [version],
     selectedVersion: version,
     currentBinding: await enrichBindingWithCurrentTitle(sanitizeBinding(binding)),
-    state: currentRow && payload ? "ready" : payload ? "stale" : "missing",
-    inputFingerprint: fingerprint,
+    state: payload ? "ready" : "missing",
+    inputFingerprint: latestRow?.input_fingerprint || "",
     summary: payload?.summary || null,
     share: payload?.share || null,
     buildJob: activeJob ? serializeAnnualJob(activeJob) : null
@@ -208,20 +205,25 @@ const normalizeJobError = (type: AnnualJobType, error: unknown) => {
   };
 };
 
-const buildAnnualSummaryJob = async (job: AnnualJobRow, parameters: AnnualJobParameters) => {
+const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
   const binding = await findAnnualBinding(job.binding_id, job.user_id);
   if (!binding) throw createError({ statusCode: 404, statusMessage: "当前绑定已不存在" });
   if (Number(binding.is_current) !== 1) {
     throw createError({ statusCode: 409, statusMessage: "当前绑定已切换，请重新创建年度总结任务" });
   }
   return withAnnualFileLock(`build:${job.user_id}:${job.binding_id}:${job.version_key}`, async () => {
-    const fingerprint = await getAnnualInputFingerprint(binding.taiko_id);
-    if (!parameters.force) {
-      const existing = await findLatestAnnualSummary(job.user_id, job.binding_id, job.version_key, fingerprint);
-      if (existing && (await safeReadSummary(existing))) return existing;
-    }
+    const existing = await findLatestAnnualSummary(job.user_id, job.binding_id, job.version_key);
+    if (existing && (await safeReadSummary(existing))) return existing;
 
-    const envelope = await runAnnualSummaryCli(binding.taiko_id);
+    const envelope = await runAnnualSummaryCli(binding.taiko_id, async ({ stage, percent, detail }) => {
+      const parts = [
+        detail?.snapshotCount ? `${detail.snapshotCount} 份历史记录` : "",
+        detail?.eventCount ? `${detail.eventCount} 条变化` : ""
+      ].filter(Boolean);
+      await updateAnnualJobProgress(job.id, stage, percent, parts.join(" · ") || null);
+    });
+    await updateAnnualJobProgress(job.id, "rating", 84, "读取全站排名缓存");
+    const fingerprint = String(envelope.summary.provenance?.inputFingerprint || "");
     const summaryId = String(envelope.summary.summaryId);
     const existingById = await findAnnualSummaryById(summaryId);
     if (existingById) {
@@ -247,6 +249,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow, parameters: AnnualJobPar
       profileCard: { ...(envelope.summary.profileCard || {}) }
     };
     const summary = await enrichAnnualRatingRank(rawSummary);
+    await updateAnnualJobProgress(job.id, "assets", 90, "保存年度故事与小咚形象");
 
     try {
       const myDon = await getMyDonImageBuffer(job.user_id).catch((error) => {
@@ -336,7 +339,7 @@ const executeAnnualJob = async (jobId: string) => {
   } catch {}
   try {
     if (job.job_type === "build") {
-      const summary = await buildAnnualSummaryJob(job, parameters);
+      const summary = await buildAnnualSummaryJob(job);
       await markAnnualJobCompleted(job.id, { summaryId: summary.id });
     } else {
       const poster = await buildAnnualPosterJob(job, parameters);
@@ -392,7 +395,7 @@ export const recoverAnnualJobs = async () => {
 export const queueAccountAnnualSummaryBuild = async (
   userId: number,
   versionInput: unknown,
-  options: { force?: boolean; locale?: unknown } = {}
+  options: { locale?: unknown } = {}
 ) => {
   const version = resolveAnnualVersion(versionInput);
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
@@ -401,17 +404,7 @@ export const queueAccountAnnualSummaryBuild = async (
     const active = await findActiveAnnualJob({ userId, bindingId: binding.id, versionKey: version.key, type: "build" });
     if (active) return { job: serializeAnnualJob(active), summary: null };
 
-  if (options.force) {
-    const recent = await countRecentAnnualJobs({
-      userId,
-      type: "build",
-      since: new Date(Date.now() - ANNUAL_FORCE_BUILD_COOLDOWN_MS),
-      onlyForced: true
-    });
-    if (recent > 0) throw createError({ statusCode: 429, statusMessage: "强制重建每 10 分钟仅可执行一次" });
-  } else {
-    const fingerprint = await getAnnualInputFingerprint(binding.taiko_id);
-    const existing = await findLatestAnnualSummary(userId, binding.id, version.key, fingerprint);
+    const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) {
       const cached = await safeReadSummary(existing);
       if (cached) {
@@ -422,25 +415,24 @@ export const queueAccountAnnualSummaryBuild = async (
           versionKey: version.key,
           type: "build",
           summaryId: existing.id,
-          parameters: { force: false },
+          parameters: {},
           completed: true
         });
         return { job: serializeAnnualJob(completed!), summary: await withOwnerAssets(cached, normalizeAnnualLocale(options.locale)) };
       }
     }
-  }
 
-  const job = await insertAnnualJob({
-    id: randomUUID(),
-    userId,
-    bindingId: binding.id,
-    versionKey: version.key,
-    type: "build",
-    parameters: { force: Boolean(options.force) }
-  });
-  if (!job) throw createError({ statusCode: 500, statusMessage: "无法创建年度总结任务" });
-  enqueueAnnualJob(job);
-  return { job: serializeAnnualJob(job), summary: null };
+    const job = await insertAnnualJob({
+      id: randomUUID(),
+      userId,
+      bindingId: binding.id,
+      versionKey: version.key,
+      type: "build",
+      parameters: {}
+    });
+    if (!job) throw createError({ statusCode: 500, statusMessage: "无法创建年度总结任务" });
+    enqueueAnnualJob(job);
+    return { job: serializeAnnualJob(job), summary: null };
   });
 };
 

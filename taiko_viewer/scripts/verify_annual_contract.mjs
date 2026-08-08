@@ -44,6 +44,8 @@ assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
 assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are visible before the opening start action");
 assert.equal(storyPlayer.includes('@start="startStory"'), true, "opening start action is not connected to story navigation");
+assert.equal(storyPlayer.includes('/audio/annual/natsumatsuri-303-old.ogg'), true, "annual BGM is missing");
+assert.equal(await exists("public/audio/annual/natsumatsuri-303-old.ogg"), true, "annual BGM asset is missing");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
 const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");
@@ -147,6 +149,17 @@ assert.equal(annualPageSource.includes("jobStatusLabel"), true, "localized annua
 assert.equal(/个良/.test(JSON.stringify(zh.annualSummary || zh)), false, "near-dondaful copy uses the wrong Chinese judgment");
 assert.equal(/鼓点|鼓槌|あと可/.test(JSON.stringify(ja)), false, "Japanese annual copy contains mixed-language judgment or instrument terms");
 assert.equal(annualPageSource.includes("const storyStarted = ref(false)"), true, "opening is bypassed before the user starts");
+assert.equal(annualPageSource.includes("AnnualBuildPrelude"), true, "annual build prelude is missing");
+assert.equal(annualPageSource.includes("void buildSummary()"), true, "missing annual summary is not built automatically");
+assert.equal(annualPageSource.includes("重新生成"), false, "successful annual summary still exposes rebuild copy");
+
+const annualConstantsSource = await read("server/services/account/annual-summary/constants.ts");
+assert.equal(annualConstantsSource.includes('ANNUAL_END_DATE = "2026-10-01"'), true, "annual end date is not fixed");
+assert.equal(annualConstantsSource.includes('ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00"'), true, "annual public opening is not configured");
+const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
+const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
+assert.equal(annualRatingsSource.includes("getAnnualRatingDistribution"), true, "annual rating enrichment does not use the cache reader");
+assert.equal(annualRuntimeSource.includes("export const getAnnualRatingDistribution = readCachedAnnualRatingDistribution"), true, "user rating lookup can rebuild the distribution");
 
 const schema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
 assert.equal(schema.properties.schemaVersion.const, 4);

@@ -29,6 +29,9 @@ export const serializeAnnualJob = (row: AnnualJobRow) => ({
   posterId: row.poster_id,
   parameters: parseJobParameters(row.parameters_json),
   error: row.status === "failed" ? { code: row.error_code || "BUILD_FAILED", message: row.error_message || "处理失败" } : null,
+  progressStage: row.progress_stage || row.status,
+  progressPercent: Number(row.progress_percent || 0),
+  progressDetail: row.progress_detail || null,
   startedAt: row.started_at ? new Date(row.started_at).toISOString() : null,
   completedAt: row.completed_at ? new Date(row.completed_at).toISOString() : null,
   createdAt: new Date(row.created_at).toISOString(),
@@ -192,7 +195,7 @@ export const insertAnnualJob = async (input: {
 export const markAnnualJobRunning = async (jobId: string) => {
   await ensureAccountSchema();
   const [result] = await getAccountDb().execute<ResultSetHeader>(
-    "UPDATE web_annual_summary_jobs SET status = 'running', started_at = NOW(), error_code = NULL, error_message = NULL WHERE id = ? AND status = 'queued'",
+    "UPDATE web_annual_summary_jobs SET status = 'running', started_at = NOW(), error_code = NULL, error_message = NULL, progress_stage = 'preparing', progress_percent = 5 WHERE id = ? AND status = 'queued'",
     [jobId]
   );
   return result.affectedRows > 0;
@@ -203,7 +206,8 @@ export const markAnnualJobCompleted = async (jobId: string, result: { summaryId?
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'completed', summary_id = COALESCE(?, summary_id), poster_id = COALESCE(?, poster_id),
-         completed_at = NOW(), error_code = NULL, error_message = NULL
+         completed_at = NOW(), error_code = NULL, error_message = NULL,
+         progress_stage = 'completed', progress_percent = 100, progress_detail = NULL
      WHERE id = ?`,
     [result.summaryId || null, result.posterId || null, jobId]
   );
@@ -213,9 +217,24 @@ export const markAnnualJobFailed = async (jobId: string, code: string, message: 
   await ensureAccountSchema();
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
-     SET status = 'failed', error_code = ?, error_message = ?, completed_at = NOW()
+     SET status = 'failed', error_code = ?, error_message = ?, completed_at = NOW(), progress_stage = 'failed'
      WHERE id = ?`,
     [code.slice(0, 64), message.slice(0, 255), jobId]
+  );
+};
+
+export const updateAnnualJobProgress = async (
+  jobId: string,
+  stage: string,
+  percent: number,
+  detail?: string | null
+) => {
+  await ensureAccountSchema();
+  await getAccountDb().execute(
+    `UPDATE web_annual_summary_jobs
+     SET progress_stage = ?, progress_percent = ?, progress_detail = ?
+     WHERE id = ? AND status = 'running'`,
+    [stage.slice(0, 32), Math.max(0, Math.min(99, Math.floor(percent))), detail?.slice(0, 255) || null, jobId]
   );
 };
 

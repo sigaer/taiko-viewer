@@ -15,6 +15,7 @@ import {
 } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { createError } from "h3";
+import { spawn } from "node:child_process";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import type { ValidateFunction } from "ajv";
@@ -24,7 +25,8 @@ import {
   ANNUAL_BUILD_TIMEOUT_MS,
   ANNUAL_RATING_TIMEOUT_MS,
   ANNUAL_SCHEMA_VERSION,
-  ANNUAL_VERSION_KEY
+  ANNUAL_VERSION_KEY,
+  getAnnualVersion
 } from "./constants";
 import type { AnnualCliEnvelope, AnnualObservationEvent, AnnualSummaryV4 } from "./types";
 
@@ -341,13 +343,17 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
   };
 };
 
-export const getAnnualRatingDistribution = async (): Promise<AnnualRatingDistribution | null> => {
+export const readCachedAnnualRatingDistribution = async (): Promise<AnnualRatingDistribution | null> => {
+  const cachePath = resolve(getAnnualCacheRoot(), "ratings", "distribution.json");
+  const cached = await readAnnualJson<AnnualRatingDistribution>(cachePath).catch(() => null);
+  return cached && Array.isArray(cached.ratings) ? cached : null;
+};
+
+export const refreshAnnualRatingDistribution = async (): Promise<AnnualRatingDistribution | null> => {
   try {
-    const fingerprint = await getAnnualRatingInputFingerprint();
     const cachePath = resolve(getAnnualCacheRoot(), "ratings", "distribution.json");
     return await withAnnualFileLock("rating-distribution", async () => {
-      const cached = await readAnnualJson<AnnualRatingDistribution>(cachePath).catch(() => null);
-      if (cached?.fingerprint === fingerprint && Array.isArray(cached.ratings)) return cached;
+      const fingerprint = await getAnnualRatingInputFingerprint();
       const built = await runAnnualRatingsCli();
       const payload = { ...built, fingerprint };
       await atomicWriteJson(cachePath, payload);
@@ -358,6 +364,8 @@ export const getAnnualRatingDistribution = async (): Promise<AnnualRatingDistrib
     return null;
   }
 };
+
+export const getAnnualRatingDistribution = readCachedAnnualRatingDistribution;
 
 let schemaValidatorPromise: Promise<{ summary: ValidateFunction; events: ValidateFunction }> | null = null;
 
@@ -436,7 +444,12 @@ const validateCliEnvelope = async (input: unknown): Promise<AnnualCliEnvelope> =
   return envelope as AnnualCliEnvelope;
 };
 
-export const runAnnualSummaryCli = async (taikoId: string): Promise<AnnualCliEnvelope> => {
+export type AnnualProgressUpdate = { stage: string; percent: number; detail?: Record<string, unknown> };
+
+export const runAnnualSummaryCli = async (
+  taikoId: string,
+  onProgress?: (update: AnnualProgressUpdate) => void | Promise<void>
+): Promise<AnnualCliEnvelope> => {
   const { repoRoot, userdataDir, configPath } = getRuntimePaths();
   const runtimeConfig = useRuntimeConfig();
   const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, "songs", "song_data.json")));
@@ -451,6 +464,8 @@ export const runAnnualSummaryCli = async (taikoId: string): Promise<AnnualCliEnv
     taikoId,
     "--version",
     ANNUAL_VERSION_KEY,
+    "--version-json",
+    JSON.stringify(getAnnualVersion()),
     "--userdata-dir",
     userdataDir,
     "--song-data",
@@ -461,16 +476,57 @@ export const runAnnualSummaryCli = async (taikoId: string): Promise<AnnualCliEnv
     "-"
   ];
   try {
-    const result = await execFileAsync("python3", args, {
-      cwd: repoRoot,
-      env: { ...process.env, TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() },
-      encoding: "utf-8",
-      timeout: ANNUAL_BUILD_TIMEOUT_MS,
-      maxBuffer: 64 * 1024 * 1024
+    const stdout = await new Promise<string>((resolveRun, rejectRun) => {
+      const child = spawn("python3", args, {
+        cwd: repoRoot,
+        env: { ...process.env, TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() },
+        stdio: ["ignore", "pipe", "pipe"]
+      });
+      let output = "";
+      let stderr = "";
+      let pending = "";
+      let progressWrites = Promise.resolve();
+      const timer = setTimeout(() => child.kill("SIGKILL"), ANNUAL_BUILD_TIMEOUT_MS);
+      child.stdout.setEncoding("utf-8");
+      child.stderr.setEncoding("utf-8");
+      child.stdout.on("data", (chunk) => {
+        output += chunk;
+        if (Buffer.byteLength(output) > 64 * 1024 * 1024) child.kill("SIGKILL");
+      });
+      child.stderr.on("data", (chunk) => {
+        stderr = `${stderr}${chunk}`.slice(-4000);
+        pending += chunk;
+        const lines = pending.split("\n");
+        pending = lines.pop() || "";
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line) as Record<string, unknown>;
+            if (parsed.annualProgress === true && onProgress) {
+              const update = {
+                stage: String(parsed.stage || "running"),
+                percent: Number(parsed.percent || 0),
+                detail: parsed.detail && typeof parsed.detail === "object" ? parsed.detail as Record<string, unknown> : undefined
+              };
+              progressWrites = progressWrites.then(() => onProgress(update)).then(() => undefined);
+            }
+          } catch {}
+        }
+      });
+      child.on("error", rejectRun);
+      child.on("close", async (code) => {
+        clearTimeout(timer);
+        try {
+          await progressWrites;
+          if (code === 0) resolveRun(output);
+          else rejectRun(Object.assign(new Error(stderr || `annual CLI exited with ${code}`), { stderr }));
+        } catch (error) {
+          rejectRun(error);
+        }
+      });
     });
-    const stdout = String(result.stdout || "").trim();
-    if (!stdout) throw new Error("CLI returned empty output");
-    return await validateCliEnvelope(JSON.parse(stdout));
+    const trimmed = stdout.trim();
+    if (!trimmed) throw new Error("CLI returned empty output");
+    return await validateCliEnvelope(JSON.parse(trimmed));
   } catch (error) {
     const message = safeMessage(error);
     console.error("[annual-summary] CLI build failed", message || "unknown error");

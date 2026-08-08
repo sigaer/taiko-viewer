@@ -15,9 +15,9 @@ export type AnnualVersion = {
   key: "annual_2026";
   name: string;
   startDate: string;
-  endDate: null;
+  endDate: string;
   effectiveEndDate: string;
-  isOngoing: true;
+  isOngoing: false;
   timezone: "Asia/Shanghai";
 };
 
@@ -67,6 +67,9 @@ export type AnnualJobRow = {
   parameters_json: string | null;
   error_code: string | null;
   error_message: string | null;
+  progress_stage: string;
+  progress_percent: number;
+  progress_detail: string | null;
   started_at: Date | string | null;
   completed_at: Date | string | null;
   created_at: Date | string;
@@ -101,7 +104,6 @@ export type AnnualPosterRow = {
 };
 
 export type AnnualJobParameters = {
-  force?: boolean;
   locale?: AnnualLocale;
   shareId?: string;
 };

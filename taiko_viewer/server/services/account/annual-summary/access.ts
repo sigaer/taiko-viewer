@@ -2,8 +2,10 @@ import type { H3Event } from "h3";
 import { createError } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "~/server/utils/account";
+import { ANNUAL_PUBLIC_OPEN_AT } from "./constants";
 
 export const hasAccountAnnualSummaryAccess = async (userId: number) => {
+  if (Date.now() >= new Date(ANNUAL_PUBLIC_OPEN_AT).getTime()) return true;
   await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<DbRow<{ username: string; annual_summary_access: number }>[]>(
