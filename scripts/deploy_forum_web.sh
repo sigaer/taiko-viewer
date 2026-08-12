@@ -187,10 +187,14 @@ run_nuxt_build() {
   local build_deadline
   local build_exit=0
   local build_web_dir
+  local build_workspace
 
   BUILD_ROOT="$(mktemp -d /tmp/taiko-viewer-release.XXXXXX)"
-  git archive --format=tar HEAD | tar -xf - -C "$BUILD_ROOT"
-  build_web_dir="$BUILD_ROOT/taiko_viewer"
+  build_workspace="$BUILD_ROOT/workspace"
+  mkdir -p "$build_workspace/taiko-forum"
+  git archive --format=tar HEAD | tar -xf - -C "$build_workspace/taiko-forum"
+  cp -a "$ROOT_DIR/../schemas" "$build_workspace/schemas"
+  build_web_dir="$build_workspace/taiko-forum/taiko_viewer"
   ln -s "$WEB_DIR/node_modules" "$build_web_dir/node_modules"
   local build_artifact="$build_web_dir/.output/server/index.mjs"
 
@@ -348,8 +352,7 @@ fi
 echo "[3/5] 构建 Nuxt..."
 echo "  - 开始构建，这可能需要 2-5 分钟，请耐心等待..."
 if ! run_nuxt_build; then
-  BUILD_EXIT=$?
-  echo "  - 构建失败 (exit code: $BUILD_EXIT)"
+  echo "  - 构建失败，未切换线上产物。"
   exit 1
 fi
 
