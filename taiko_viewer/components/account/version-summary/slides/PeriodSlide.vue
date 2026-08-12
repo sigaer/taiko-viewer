@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import StoryCounter from "../StoryCounter.vue";
-import StorySlideShell from "../StorySlideShell.vue";
+import AnnualVerticalCoverStream from "../AnnualVerticalCoverStream.vue";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -12,199 +11,131 @@ const props = defineProps<{
   reducedMotion: boolean;
 }>();
 
-const { formatDate, formatDateTime } = useViewerDateTime();
-const { locale, t } = useI18n();
-const hasRecordTimes = computed(() => Boolean(props.summary.period.firstRecordAt || props.summary.period.lastRecordAt));
-const uiText = computed(() =>
-  locale.value === "ja"
-    ? {
-        start: "開始",
-        now: "現在",
-        end: "終了",
-        first: "物語が最初に灯った日",
-        latest: "物語の今",
-        totalDays: "広がった日々",
-        activeDays: "灯った日"
-      }
-    : {
-        start: "开始",
-        now: "当前",
-        end: "结束",
-        first: "故事第一次亮起",
-        latest: "故事写到这里",
-        totalDays: "展开的日子",
-        activeDays: "点亮的日期"
-      }
+const { formatDate } = useViewerDateTime();
+const { locale, n, t } = useI18n();
+const donIconUrl = "/api/content/assets/don";
+const anchorDate = computed(() => props.summary.period.firstRecordAt || props.summary.version.startDate);
+const latestDate = computed(() => props.summary.period.lastRecordAt || props.summary.version.effectiveEndDate);
+const centerText = computed(() => locale.value === "ja"
+  ? {
+      first: props.summary.period.firstRecordAt ? "最初の一打が記録された日" : "この物語が始まった日",
+      latest: "ここまで記録された日",
+      elapsed: "物語が続いた日",
+      active: "音が灯った日"
+    }
+  : {
+      first: props.summary.period.firstRecordAt ? "第一次留下鼓点" : "这一版故事开始",
+      latest: "故事写到这里",
+      elapsed: "故事走过的日子",
+      active: "点亮的日期"
+    }
 );
 </script>
 
 <template>
-  <StorySlideShell
-    :page-index="pageIndex"
-    :page-total="pageTotal"
-    :eyebrow="summary.copy.period.eyebrow"
-    :title="summary.copy.period.title"
-    :lead="summary.copy.period.body"
-    :accent="summary.poster.periodLabel"
-    tone="sunrise"
-    :active="active"
-    :reduced-motion="reducedMotion"
-  >
-    <div class="period-slide">
-      <div class="period-slide__timeline" data-animate>
-        <article>
-          <span>{{ uiText.start }}</span>
-          <strong>{{ formatDate(summary.version.startDate) }}</strong>
-        </article>
-        <i></i>
-        <article>
-          <span>{{ summary.version.isOngoing ? uiText.now : uiText.end }}</span>
-          <strong>{{ formatDate(summary.version.effectiveEndDate) }}</strong>
-        </article>
-      </div>
+  <section class="period-story" :class="{ 'is-active': active, 'is-reduced': reducedMotion }">
+    <AnnualVerticalCoverStream
+      :summary="summary"
+      :active="active"
+      :reduced-motion="reducedMotion"
+    />
 
-      <div class="period-slide__grid">
-        <article v-if="summary.period.firstRecordAt" class="period-slide__card" data-animate>
-          <span>{{ uiText.first }}</span>
-          <strong>{{ formatDateTime(summary.period.firstRecordAt) }}</strong>
-        </article>
-        <article v-if="summary.period.lastRecordAt" class="period-slide__card" data-animate>
-          <span>{{ uiText.latest }}</span>
-          <strong>{{ formatDateTime(summary.period.lastRecordAt) }}</strong>
-        </article>
-        <article v-if="!hasRecordTimes" class="period-slide__card period-slide__card--archive" data-animate>
-          <span>{{ t('annualSummary.slides.period.archiveTitle') }}</span>
-          <p>{{ t('annualSummary.slides.period.archiveBody') }}</p>
-        </article>
-        <article class="period-slide__card" data-animate>
-          <span>{{ uiText.totalDays }}</span>
-          <strong><StoryCounter :value="summary.period.totalDays" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article v-if="summary.timeCoverage?.status !== 'unavailable'" class="period-slide__card" data-animate>
-          <span>{{ uiText.activeDays }}</span>
-          <strong><StoryCounter :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
+    <span class="period-story__page">{{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}</span>
+
+    <div class="period-story__center">
+      <p>{{ centerText.first }}</p>
+      <time :datetime="anchorDate">{{ formatDate(anchorDate) }}</time>
+      <img :src="donIconUrl" alt="" aria-hidden="true" />
+      <h2>{{ summary.copy.period.title }}</h2>
+      <p class="period-story__lead">{{ summary.copy.period.body }}</p>
+
+      <div class="period-story__facts">
+        <span><b>{{ n(summary.period.totalDays) }}</b>{{ centerText.elapsed }}</span>
+        <span v-if="summary.timeCoverage?.status !== 'unavailable'"><b>{{ n(summary.period.activeDays) }}</b>{{ centerText.active }}</span>
       </div>
+      <small>{{ centerText.latest }} · {{ formatDate(latestDate) }}</small>
     </div>
-  </StorySlideShell>
+  </section>
 </template>
 
 <style scoped>
-.period-slide {
-  display: grid;
-  height: 100%;
-  min-height: 0;
-  align-content: end;
-  gap: 18px;
+.period-story {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: #17365d;
+  background:
+    radial-gradient(circle at 74% 48%, rgba(255, 255, 255, 0.94), transparent 27%),
+    linear-gradient(155deg, #d9ecff 0%, #f7fbff 44%, #b9dbfb 100%);
 }
 
-@media (max-height: 900px) {
-  .period-slide { gap: 10px; }
-  .period-slide__timeline { padding: 14px 16px; }
-  .period-slide__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  .period-slide__card { min-height: 0; padding: 12px; }
-  .period-slide__timeline article strong, .period-slide__card strong { font-size: clamp(1.15rem, 2.2vw, 1.8rem); }
+.period-story::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 31% 0;
+  background: linear-gradient(90deg, rgba(247, 251, 255, 0.72), #f7fbff 18% 82%, rgba(247, 251, 255, 0.72));
+  box-shadow: 0 -18px 32px rgba(247, 251, 255, 0.72), 0 18px 32px rgba(247, 251, 255, 0.72);
 }
 
-@media (max-width: 720px) and (max-height: 900px) {
-  .period-slide__timeline { grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr); gap: 8px; }
-  .period-slide__timeline i { width: 100%; }
-  .period-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.period-story__page {
+  position: absolute;
+  z-index: 4;
+  top: max(18px, env(safe-area-inset-top));
+  left: 18px;
+  padding: 6px 9px;
+  border: 1px solid rgba(57, 120, 200, 0.2);
+  border-radius: 99px;
+  color: #3978c8;
+  background: rgba(247, 251, 255, 0.82);
+  font: 700 10px/1 var(--viewer-font-family);
 }
 
-.period-slide__timeline,
-.period-slide__card {
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(16px);
+.period-story__center {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: min(88%, 610px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
 }
 
-.period-slide__timeline {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 18px;
-  align-items: center;
-  padding: 22px 24px;
+.period-story.is-active .period-story__center { animation: period-copy-arrive 760ms 120ms both cubic-bezier(0.2, 0.82, 0.2, 1); }
+.period-story__center > p:first-child { margin: 0; color: #3978c8; font-size: 12px; font-weight: 800; letter-spacing: 0.16em; }
+.period-story__center time { display: block; margin-top: 6px; color: #486bb3; font: 700 clamp(1.7rem, 5.8vw, 3.3rem)/1 var(--viewer-display-font); }
+.period-story__center img { display: block; width: clamp(46px, 9vh, 72px); margin: 11px auto 7px; filter: drop-shadow(0 8px 10px rgba(57, 120, 200, 0.18)); }
+.period-story__center h2 { margin: 0; color: #17365d; font: 700 clamp(1.65rem, 5vw, 3.25rem)/1.08 var(--viewer-display-font); text-wrap: balance; }
+.period-story__lead { max-width: 520px; margin: 8px auto 0; color: #5c7697; font-size: clamp(11px, 1.5vw, 14px); line-height: 1.55; text-wrap: balance; }
+.period-story__facts { display: flex; justify-content: center; gap: clamp(22px, 8vw, 64px); margin-top: 12px; }
+.period-story__facts span { display: grid; gap: 2px; color: #5c7697; font-size: 11px; }
+.period-story__facts b { color: #3978c8; font: 700 clamp(1.35rem, 4vw, 2.25rem)/1 var(--viewer-display-font); }
+.period-story__center small { display: block; margin-top: 8px; color: #7991ad; font-size: 10px; }
+
+@keyframes period-copy-arrive {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
-.period-slide__timeline article span,
-.period-slide__card span {
-  display: block;
-  color: rgba(255, 230, 196, 0.66);
-  letter-spacing: 0.14em;
-  font-size: 12px;
+@media (max-height: 700px) and (orientation: portrait) {
+  .period-story__center img { margin-block: 5px 3px; }
+  .period-story__lead { margin-top: 4px; line-height: 1.35; }
+  .period-story__facts { margin-top: 7px; }
 }
 
-.period-slide__timeline article strong,
-.period-slide__card strong {
-  display: block;
-  margin-top: 10px;
-  color: #fff8ed;
-  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
-  line-height: 1.1;
+@media (orientation: landscape) and (max-height: 460px) {
+  .period-story::after { inset: 0 31%; background: linear-gradient(rgba(247,251,255,.76), #f7fbff 16% 84%, rgba(247,251,255,.76)); box-shadow: -18px 0 32px rgba(247,251,255,.72), 18px 0 32px rgba(247,251,255,.72); }
+  .period-story__center { width: min(38%, 520px); }
+  .period-story__center time { font-size: clamp(1.35rem, 3.5vw, 2rem); }
+  .period-story__center img { width: 38px; margin-block: 4px 2px; }
+  .period-story__center h2 { font-size: clamp(1.25rem, 3vw, 1.8rem); }
+  .period-story__lead { display: none; }
+  .period-story__facts { margin-top: 6px; }
+  .period-story__facts b { font-size: 1.3rem; }
 }
 
-.period-slide__timeline i {
-  width: 10rem;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(57, 120, 200, 0.18), rgba(57, 120, 200, 0.9), rgba(23, 54, 93, 0.42));
-}
-
-.period-slide__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.period-slide__card--archive { grid-column: span 2; }
-.period-slide__card--archive p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; }
-
-.period-slide__card {
-  min-height: 10.5rem;
-  padding: 18px 20px;
-}
-
-@media (max-width: 720px) {
-  .period-slide__card {
-    min-height: auto;
-    padding: 16px 18px;
-    border-radius: 22px;
-  }
-
-  .period-slide__timeline,
-  .period-slide__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .period-slide__timeline {
-    gap: 14px;
-    padding: 18px;
-    border-radius: 22px;
-  }
-
-  .period-slide__timeline i {
-    width: 100%;
-  }
-}
-
-@media (max-width: 720px) {
-  .period-slide { align-content: start; gap: 8px; }
-  .period-slide__timeline { grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); gap: 6px; padding: 10px 12px; border-radius: 16px; }
-  .period-slide__timeline i { width: 100%; }
-  .period-slide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .period-slide__card { min-height: 0; padding: 10px 12px; border-radius: 16px; }
-  .period-slide__timeline article span, .period-slide__card span { font-size: 10px; letter-spacing: 0.08em; }
-  .period-slide__timeline article strong, .period-slide__card strong { margin-top: 5px; font-size: clamp(0.9rem, 4vw, 1.2rem); overflow-wrap: anywhere; }
-}
-
-@media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
-  .period-slide { align-content: center; gap: 7px; }
-  .period-slide__timeline { padding: 10px 13px; border-radius: 18px; }
-  .period-slide__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
-  .period-slide__card { min-height: 0; padding: 10px 11px; border-radius: 17px; }
-  .period-slide__timeline article strong,
-  .period-slide__card strong { margin-top: 5px; font-size: clamp(1rem, 2vw, 1.3rem); }
-  .period-slide__timeline i { width: 7rem; }
-}
+.period-story.is-reduced .period-story__center { opacity: 1; animation: none; }
+@media (prefers-reduced-motion: reduce) { .period-story__center { opacity: 1; animation: none !important; } }
 </style>

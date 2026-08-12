@@ -580,7 +580,8 @@
       "startTop": "超级太鼓",
       "startBottom": "开始游戏",
       "generatedAt": "数据统计周期 · 生成于 {time}",
-      "disclaimer": "依据已同步的观察记录生成，仅用于同意范围内的玩家回顾"
+      "disclaimer": "依据已同步的观察记录生成，仅用于同意范围内的玩家回顾",
+      "coverFlow": "匀速流动的游玩歌曲封面"
     },
     "drawer": {
       "title": "故事设置", "version": "统计周期", "binding": "当前绑定", "currentTitle": "当前称号", "summary": "这段记录", "exit": "回到入口", "generated": "生成于 {time}"
@@ -625,10 +626,10 @@
       "keyword": { "signature": "你的鼓面性格", "brightest": "最亮的一角", "shape": "你的六维鼓面", "story": "这不是一串冷冰冰的分数，而是你面对鼓面时，最像自己的样子。" },
       "speed": { "eyebrow": "SPEED SIGNATURE", "title": "快一点，正好装下你的节奏", "lead": "{speed}× 的速度，已经成为成绩页上的个人签名。", "story": "最常留下的是 {speed}×", "chartCount": "刻着这份速度的谱面", "detail": "鼓面向前追，你的气势也没有落后。" },
       "near": { "eyebrow": "ALMOST DONDAFUL", "title": "离满屏金光，只剩最后几槌", "lead": "《{song}》只剩 {count} 个可，鼓面已经在等你收尾。", "okCount": "只差 {count} 个可", "score": "已经写下的最高分" },
-      "challenge": { "eyebrow": "KEEP TRYING", "title": "这扇门，你还在敲", "lead": "你向《{song}》敲了 {count} 次门，每一次都比转身更勇敢。", "observed": "你敲过的门", "story": "它还没有完全打开，而你也没有转身。" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "这扇门，你还在敲", "lead": "你向《{song}》敲了 {count} 次门，每一次都比转身更勇敢。", "total": "成绩表里的累计挑战", "observedInPeriod": "其中 {count} 次被这一版记录下来", "story": "它还没有完全打开，而你也没有转身。" },
       "pound": { "eyebrow": "DRUMROLL", "title": "密密麻麻的连打，是你的签名", "lead": "{count} 连打散落在一张张谱面里，如今一起响了起来。", "unit": "连打", "story": "哇，你一定是搓鼓高手吧！", "topSong": "最密集的一段留在", "ending": "鼓槌落下去，连打就替你把气势写满。" },
       "highScore": { "eyebrow": "HIGH SCORE", "title": "成绩页记住了这次向上", "lead": "{time}，《{song}》的分数被你推到 {score}。", "celebration": "这一格新高，已经替那一刻发出欢呼。" },
-      "milestones": { "song": "《{name}》" },
+      "milestones": { "song": "《{name}》", "effort": "★{stars} · 累计尝试 {plays} 次", "onlyOnce": "这一次，来得很不容易" },
       "breakthrough": { "dan": "段位向上", "ratingGain": "RT 向上", "ratingJourney": "从这里走到这里", "songAttempts": "为这首歌留下的挑战", "times": "{count} 次", "difficulty": "这道墙的高度" },
       "final": { "firstSteps": "故事的第一声", "fromBreakthrough": "称号因这一刻亮起", "fromSpeed": "留在成绩里的速度", "fromKeyword": "最像你的关键词", "fromJourney": "一路走来的名字", "times": "{count} 次挑战" },
       "poster": { "finalTitle": "年度称号", "favorite": "最爱歌曲", "keyword": "关键词", "scan": "扫码查看这份回顾", "expires": "分享有效期至 {date}" }

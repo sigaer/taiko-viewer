@@ -18,6 +18,17 @@ const stringValue = (value: unknown, fallback = "") => typeof value === "string"
 const numberValue = (value: unknown, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 const nullableNumber = (value: unknown) => value === null || value === undefined || value === "" ? null : numberValue(value);
 
+const formatDanGrade = (value: unknown, locale: "zh" | "ja") => {
+  const raw = stringValue(value).trim();
+  if (!raw) return "";
+  const names = locale === "ja"
+    ? ["", "五級", "四級", "三級", "二級", "一級", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "達人"]
+    : ["", "五级", "四级", "三级", "二级", "一级", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "达人"];
+  const code = Number(raw);
+  if (Number.isInteger(code) && code > 0 && code < names.length) return names[code] || raw;
+  return locale === "ja" ? raw.replaceAll("级", "級").replaceAll("达人", "達人") : raw.replaceAll("級", "级").replaceAll("達人", "达人");
+};
+
 const unwrapMetric = (value: unknown) => {
   const metric = record(value);
   return {
@@ -126,6 +137,10 @@ export const normalizeAnnualSummary = (
   const period = record(raw.period);
   const overviewMetric = unwrapMetric(raw.overview);
   const overview = record(overviewMetric.data);
+  const coverSongs = (Array.isArray(overview.coverSongs) ? overview.coverSongs : []).flatMap((item) => {
+    const song = mapSong(item);
+    return song ? [song] : [];
+  });
   const sections = record(raw.sections);
   const getSection = (key: string) => unwrapMetric(sections[key]);
   const favoriteMetric = getSection("favoriteSong");
@@ -248,7 +263,12 @@ export const normalizeAnnualSummary = (
   const nearRaw = record(nearMetric.data); const nearSong = mapSong(nearRaw);
   const nearDondaful = nearSong ? { song: nearSong, okCount: numberValue(nearRaw.okCount), score: numberValue(nearRaw.highScore) } : null;
   const challengeRaw = record(challengeMetric.data); const challengeSong = mapSong(challengeRaw);
-  const challenge = challengeSong ? { song: challengeSong, playCount: numberValue(challengeRaw.playCount), level: nullableNumber(challengeRaw.stars) } : null;
+  const challenge = challengeSong ? {
+    song: challengeSong,
+    playCount: numberValue(challengeRaw.playCount),
+    observedPlayCount: numberValue(challengeRaw.observedPlayCount, numberValue(challengeRaw.playCount)),
+    level: nullableNumber(challengeRaw.stars)
+  } : null;
   const poundRaw = record(poundMetric.data); const poundTopSong = mapSong(poundRaw.topSong);
   const pound = poundMetric.status !== "unavailable" ? { totalPoundCount: numberValue(poundRaw.totalPoundCount), topSong: poundTopSong, topPoundCount: numberValue(poundRaw.topPoundCount) } : null;
   const highRaw = record(highScoreMetric.data); const highSong = mapSong(highRaw);
@@ -257,7 +277,17 @@ export const normalizeAnnualSummary = (
   const milestones = (Array.isArray(milestonesMetric.data) ? milestonesMetric.data : []).flatMap((item) => {
     const row = record(item); const song = mapSong(row.song); if (!song) return [];
     const type = stringValue(row.type); const observed = record(row.observedBetween);
-    return [{ type, title: t(`annualSummary.milestoneTypes.${type}`), occurredAt: stringValue(row.observedAt) || stringValue(observed.to), happenedLabel: formatDateTime(row.observedAt || observed.to, locale), level: song.level ?? null, song }];
+    return [{
+      type,
+      title: t(`annualSummary.milestoneTypes.${type}`),
+      occurredAt: stringValue(row.observedAt) || stringValue(observed.to),
+      happenedLabel: formatDateTime(row.observedAt || observed.to, locale),
+      level: song.level ?? null,
+      song,
+      playCount: numberValue(row.playCount, song.playCount || 0),
+      observedPlayCount: numberValue(row.observedPlayCount),
+      achievementCount: numberValue(row.achievementCount)
+    }];
   });
 
   const breakthroughRaw = record(breakthroughMetric.data);
@@ -271,7 +301,7 @@ export const normalizeAnnualSummary = (
     breakthroughEvidence.push({
       key: "dan",
       label: t("annualSummary.slides.breakthrough.dan"),
-      value: `${localizedInteger.format(numberValue(breakthroughRaw.danBefore))} → ${localizedInteger.format(numberValue(breakthroughRaw.danAfter))}`
+      value: `${formatDanGrade(String(numberValue(breakthroughRaw.danBefore)), locale)} → ${formatDanGrade(String(numberValue(breakthroughRaw.danAfter)), locale)}`
     });
   } else if (breakthroughType === "rating_gain") {
     breakthroughEvidence.push({
@@ -339,7 +369,7 @@ export const normalizeAnnualSummary = (
   const uniqueCharts = numberValue(overview.uniqueCharts);
   const formatNumber = localizedInteger.format;
   const profileTitle = stringValue(profile.title);
-  const profileDan = stringValue(profile.danName);
+  const profileDan = formatDanGrade(profile.danName, locale);
   const profileBodyKey = profileTitle && profileDan
     ? "bodyWithTitleAndDan"
     : profileTitle
@@ -415,7 +445,7 @@ export const normalizeAnnualSummary = (
 
   return {
     schemaVersion: 4, summaryId: raw.summaryId, generatedAt: raw.generatedAt, mode, user: { nickname },
-    profileCard: { nickname, title: stringValue(profile.title) || null, titleplateId: nullableNumber(profile.titleplateId), danName: stringValue(profile.danName) || null, danLevel: nullableNumber(profile.danLevel), myDonUrl: stringValue(profile.myDonUrl) || null },
+    profileCard: { nickname, title: stringValue(profile.title) || null, titleplateId: nullableNumber(profile.titleplateId), danName: profileDan || null, danLevel: nullableNumber(profile.danLevel), myDonUrl: stringValue(profile.myDonUrl) || null },
     version: {
       key: stringValue(version.key, "annual_2026"),
       name: t("annualSummary.name"),
@@ -428,6 +458,7 @@ export const normalizeAnnualSummary = (
     timeCoverage: { status: stringValue(timeCoverage.status, "unavailable") as AnnualMetricStatus, ratio: numberValue(timeCoverage.ratio), trustedPlayCount: numberValue(timeCoverage.trustedProxyPlayCount), totalPlayCount: numberValue(timeCoverage.totalObservedPlayCount), precision: timeCoverage.eligible ? "batch_last_play_proxy" : "none", note: null },
     period: { firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: numberValue(period.totalDays), activeDays },
     overview: { playCount, uniqueSongs, uniqueCharts: numberValue(overview.uniqueCharts), estimatedSeconds: numberValue(overview.estimatedSeconds), estimatedTimeText: stringValue(overview.estimatedTimeText) || (numberValue(overview.estimatedSeconds) >= 3600 ? `${(numberValue(overview.estimatedSeconds) / 3600).toFixed(1)} h` : `${Math.round(numberValue(overview.estimatedSeconds) / 60)} min`), currentClearCharts: numberValue(overview.currentClearCharts), currentFullComboCharts: numberValue(overview.currentFullComboCharts), currentDondafulCharts: numberValue(overview.currentDondafulCharts), currentKiwamiCharts: numberValue(overview.currentKiwamiCharts) },
+    coverSongs,
     favoriteSong, obsessionSong, favoriteShift, monthlyFavorites, weekdayActivity, calendarActivity, timeOfDay, lateNight,
     milestones, ratingRank, speedProfile, nearDondaful, challenge, pound, highScore, keyword, keywordProfile: keyword,
     breakthrough, finalTitle,

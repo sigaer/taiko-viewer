@@ -529,7 +529,8 @@
       "startTop": "スーパー太鼓",
       "startBottom": "はじめる",
       "generatedAt": "集計期間 · {time} に生成",
-      "disclaimer": "同期済みの観測記録をもとに、同意された範囲の振り返りとして生成しています"
+      "disclaimer": "同期済みの観測記録をもとに、同意された範囲の振り返りとして生成しています",
+      "coverFlow": "一定速度で流れるプレイ済み楽曲のジャケット"
     },
     "drawer": { "title": "ストーリー設定", "version": "対象期間", "binding": "連携 ID", "currentTitle": "現在の称号", "summary": "この記録", "exit": "入口へ戻る", "generated": "{time} に生成" },
     "copy": {
@@ -572,10 +573,10 @@
       "keyword": { "signature": "あなたの鼓面らしさ", "brightest": "いちばん明るい角", "shape": "あなたの六角形", "story": "冷たい数字の並びではなく、鼓面と向き合うときに、いちばんあなたらしくなる形です。" },
       "speed": { "eyebrow": "SPEED SIGNATURE", "title": "少し速いくらいが、あなたのテンポ", "lead": "{speed}× が、成績に残るあなたのサインになりました。", "story": "最も多く残ったのは {speed}×", "chartCount": "この速さを刻んだ譜面", "detail": "鼓面を追う勢いは、少しも遅れていません。" },
       "near": { "eyebrow": "ALMOST DONDAFUL", "title": "金色まで、あと数打", "lead": "『{song}』は全良まであと{count}可。鼓面は最後の仕上げを待っています。", "okCount": "あと {count} 可", "score": "ここまで伸ばした最高得点" },
-      "challenge": { "eyebrow": "KEEP TRYING", "title": "この扉を、まだ叩いている", "lead": "『{song}』の扉を {count} 回叩いた。その一回一回が、背を向けない強さです。", "observed": "扉を叩いた回数", "story": "まだ開ききらない。それでも、あなたは背を向けませんでした。" },
+      "challenge": { "eyebrow": "KEEP TRYING", "title": "この扉を、まだ叩いている", "lead": "『{song}』の扉を {count} 回叩いた。その一回一回が、背を向けない強さです。", "total": "成績に残る累計挑戦", "observedInPeriod": "うち {count} 回をこの期間に記録", "story": "まだ開ききらない。それでも、あなたは背を向けませんでした。" },
       "pound": { "eyebrow": "DRUMROLL", "title": "びっしり並ぶ連打は、あなたのサイン", "lead": "一つずつの譜面に散らばる {count} 連打が、今ここで一緒に響きます。", "unit": "連打", "story": "きっと連打の達人ですね！", "topSong": "いちばん密な連打は", "ending": "バチが落ちるたび、勢いまで成績に刻まれます。" },
       "highScore": { "eyebrow": "HIGH SCORE", "title": "成績画面が、この前進を覚えている", "lead": "{time}、『{song}』を {score} 点まで押し上げました。", "celebration": "この新記録が、あの瞬間の代わりに歓声を上げています。" },
-      "milestones": { "song": "『{name}』" },
+      "milestones": { "song": "『{name}』", "effort": "★{stars} · 累計 {plays} 回挑戦", "onlyOnce": "この一度は、簡単には届かなかった" },
       "breakthrough": { "dan": "段位の一歩", "ratingGain": "RT の伸び", "ratingJourney": "ここから、ここまで", "songAttempts": "この曲に重ねた挑戦", "times": "{count} 回", "difficulty": "越えた壁の高さ" },
       "final": { "firstSteps": "物語の最初の音", "fromBreakthrough": "この瞬間から生まれた称号", "fromSpeed": "成績に残った速さ", "fromKeyword": "いちばんあなたらしい言葉", "fromJourney": "歩いてきた道の名前", "times": "{count} 回の挑戦" },
       "poster": { "finalTitle": "年間称号", "favorite": "最愛曲", "keyword": "キーワード", "scan": "スキャンして振り返りを見る", "expires": "共有期限 {date}" }

@@ -225,14 +225,12 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   const opening = page.locator(".annual-opening");
   await opening.waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForFunction(
-    () => [...document.querySelectorAll(".annual-cover-carousel img")].some(
-      (image) => image.complete && image.naturalWidth > 0 && getComputedStyle(image).display !== "none"
-    ),
+    () => document.querySelectorAll(".annual-cover-flow__card").length > 0,
     undefined,
     { timeout: 15_000 }
   );
   assert.equal(await page.locator(".story-player__drawer-trigger, .story-player__sound-trigger, .story-player__nav").count(), 0);
-  assert.equal(await page.locator(".annual-cover-carousel__card:visible").count(), 3);
+  assert.ok(await page.locator(".annual-cover-flow__card:visible").count() >= 1);
   assert.ok(await page.locator(".annual-fireworks path").count() >= 20);
   assert.ok(await page.locator(".annual-beat-lane__track i").count() >= 4);
   if (viewport.width === 390 && viewport.height === 844) {
@@ -257,7 +255,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
     }, index);
     await page.waitForFunction((target) => {
       const slide = document.querySelectorAll(".story-player__slide")[target];
-      if (!slide?.querySelector(".story-slide-shell, .annual-opening")) return false;
+      if (!slide?.querySelector(".story-slide-shell, .annual-opening, .period-story")) return false;
       return Math.abs(slide.getBoundingClientRect().top) <= 1;
     }, index, { timeout: 5_000 });
     await wait(80);
@@ -405,11 +403,22 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.equal(beatLaneAudit.sequenceWidths[0], beatLaneAudit.sequenceWidths[1]);
   assert.equal(beatLaneAudit.trackWidth, beatLaneAudit.sequenceWidths[0] * 2);
   assert.deepEqual(beatLaneAudit.atBoundary, beatLaneAudit.atStart, "opening beat lane jumps at the loop boundary");
-  const before = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
-  await wait(4_100);
-  const after = await page.locator('.annual-cover-carousel__card[aria-current="true"]').getAttribute("aria-label");
-  assert.notEqual(after, before, "opening cover carousel did not advance");
-  reportProgress("opening motion: carousel advanced");
+  const coverTrack = page.locator(".annual-cover-flow__track");
+  const coverAnimation = await coverTrack.evaluate((track) => {
+    const animation = track.getAnimations()[0];
+    const timing = animation?.effect?.getTiming();
+    return {
+      easing: timing?.easing,
+      iterations: timing?.iterations,
+      transform: getComputedStyle(track).transform
+    };
+  });
+  await wait(600);
+  const coverTransformAfter = await coverTrack.evaluate((track) => getComputedStyle(track).transform);
+  assert.equal(coverAnimation.easing, "linear", "opening cover flow is not linear");
+  assert.equal(coverAnimation.iterations, Infinity, "opening cover flow does not loop continuously");
+  assert.notEqual(coverTransformAfter, coverAnimation.transform, "opening cover flow did not move continuously");
+  reportProgress("opening motion: continuous cover flow advanced");
   const animationStates = await page.locator(".annual-fireworks path, .annual-beat-lane__track").evaluateAll(
     (nodes) => nodes.map((node) => getComputedStyle(node).animationName)
   );
@@ -594,7 +603,7 @@ try {
       node.scrollTop = node.clientHeight * target;
       node.dispatchEvent(new Event("scroll"));
     }, archivePeriodIndex);
-    await archivePage.waitForFunction((target) => Boolean(document.querySelectorAll(".story-player__slide")[target]?.querySelector(".story-slide-shell")), archivePeriodIndex);
+    await archivePage.waitForFunction((target) => Boolean(document.querySelectorAll(".story-player__slide")[target]?.querySelector(".period-story")), archivePeriodIndex);
     const archivePeriodLines = (await archivePage.locator(".story-player__slide").nth(archivePeriodIndex).innerText()).split(/\n/).map((line) => line.trim());
     assert.equal(archivePeriodLines.includes("-"), false, "archive period page exposed a raw missing-time placeholder");
     await archivePage.screenshot({ path: "/tmp/annual-e2e-archive-period.png" });

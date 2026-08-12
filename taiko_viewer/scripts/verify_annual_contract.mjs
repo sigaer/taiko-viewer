@@ -55,12 +55,17 @@ assert.equal(openingSource.includes("AnnualOpeningCarousel"), true, "opening cov
 assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fireworks are missing");
 assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
 assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
-assert.equal(openingCarouselSource.includes("setInterval"), true, "opening cover carousel does not auto-advance");
+assert.equal(openingCarouselSource.includes("linear infinite"), true, "opening cover flow is not continuous and linear");
+assert.equal(openingCarouselSource.includes("setInterval"), false, "opening cover flow still advances in timed steps");
 assert.equal(openingFireworksSource.includes("@keyframes annual-firework-draw"), true, "opening fireworks are not animated");
 assert.equal(openingBeatLaneSource.includes("@keyframes annual-beat-scroll"), true, "opening beat lane is not animated");
 assert.equal(openingCarouselSource.includes("reducedMotion"), true, "opening carousel ignores reduced motion");
 assert.equal(openingFireworksSource.includes("is-still"), true, "opening fireworks ignore reduced motion");
 assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lane ignores reduced motion");
+const periodMotionSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
+const verticalCoverSource = await read("components/account/version-summary/AnnualVerticalCoverStream.vue");
+assert.equal(periodMotionSource.includes("AnnualVerticalCoverStream"), true, "period page cover stream is missing");
+assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
@@ -117,9 +122,9 @@ assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true,
 assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
 
 const periodSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
-assert.equal(periodSource.includes('v-if="summary.period.firstRecordAt"'), true, "period page exposes an empty first-record placeholder");
-assert.equal(periodSource.includes('v-if="summary.period.lastRecordAt"'), true, "period page exposes an empty last-record placeholder");
-assert.equal(periodSource.includes("annualSummary.slides.period.archiveBody"), true, "period page lacks an archive narrative when time is unavailable");
+assert.equal(periodSource.includes("summary.period.firstRecordAt || props.summary.version.startDate"), true, "period page exposes an empty first-record placeholder");
+assert.equal(periodSource.includes("summary.period.lastRecordAt || props.summary.version.effectiveEndDate"), true, "period page exposes an empty last-record placeholder");
+assert.equal(periodSource.includes("summary.copy.period.body"), true, "period page lacks its period narrative");
 
 const finalTitleSource = await read("components/account/version-summary/slides/FinalTitleSlide.vue");
 assert.equal(finalTitleSource.includes("AnnualDrumWindow"), true, "final title page does not carry the player's MyDon");

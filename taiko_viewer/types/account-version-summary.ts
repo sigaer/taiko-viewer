@@ -65,6 +65,7 @@ export type VersionSummaryNearDondaful = {
 export type VersionSummaryChallenge = {
   song: VersionSummarySongCard;
   playCount: number;
+  observedPlayCount: number;
   level: number | null;
 };
 
@@ -160,6 +161,9 @@ export type VersionSummaryMilestone = {
   happenedLabel: string;
   level: number | null;
   song: VersionSummarySongCard;
+  playCount: number;
+  observedPlayCount: number;
+  achievementCount: number;
 };
 
 export type VersionSummaryRatingRank = {
@@ -219,6 +223,7 @@ export type VersionSummaryViewModel = {
     currentDondafulCharts?: number;
     currentKiwamiCharts?: number;
   };
+  coverSongs: VersionSummarySongCard[];
   favoriteSong: VersionSummarySongCard | null;
   obsessionSong: VersionSummarySongCard | null;
   favoriteShift: VersionSummaryFavoriteShift | null;
