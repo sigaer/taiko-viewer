@@ -18,6 +18,8 @@ interface AliasLogResponse {
   success: boolean;
   data: AliasLogEntry[];
   total: number;
+  page?: number;
+  pageSize?: number;
 }
 
 const { t, locale } = useI18n();
@@ -53,7 +55,9 @@ const copy = computed(() =>
         source: "来源",
         action: "操作",
         view: "見る",
-        privateChat: "個別チャット"
+        privateChat: "個別チャット",
+        searchPlaceholder: "曲名、ID、別名、ユーザーを検索",
+        search: "検索"
       }
     : {
         subtitle: "共 {total} 条记录",
@@ -67,17 +71,30 @@ const copy = computed(() =>
         source: "来源",
         action: "操作",
         view: "查看",
-        privateChat: "私聊"
+        privateChat: "私聊",
+        searchPlaceholder: "搜索曲名、ID、别名或用户",
+        search: "搜索"
       }
 );
 
+const page = ref(1);
+const pageSize = 20;
+const keyword = ref("");
+const submittedKeyword = ref("");
 const { data: response, pending, error, refresh } = await useAsyncData<AliasLogResponse>(
-  "alias-log",
-  () => apiFetch("/api/alias-log")
+  () => `alias-log-${page.value}-${submittedKeyword.value}`,
+  () => apiFetch("/api/alias-log", {
+    query: { page: page.value, pageSize, keyword: submittedKeyword.value || undefined }
+  }),
+  { watch: [page, submittedKeyword] }
 );
 
 const logs = computed(() => response.value?.data || []);
 const total = computed(() => response.value?.total || 0);
+const submitSearch = () => {
+  page.value = 1;
+  submittedKeyword.value = keyword.value.trim();
+};
 
 const formatTime = (timeStr: string): string => formatDateTime(timeStr);
 
@@ -126,6 +143,10 @@ const navigateToSong = (songId: string) => {
               <p class="subtitle-text">{{ copy.subtitle.replace("{total}", String(total)) }}</p>
             </div>
           </div>
+          <form class="alias-search" @submit.prevent="submitSearch">
+            <el-input v-model="keyword" clearable :placeholder="copy.searchPlaceholder" @clear="submitSearch" />
+            <el-button native-type="submit" type="primary">{{ copy.search }}</el-button>
+          </form>
         </div>
       </template>
 
@@ -137,7 +158,7 @@ const navigateToSong = (songId: string) => {
       <!-- 错误状态 -->
       <div v-else-if="error" class="error-state">
         <el-empty :description="copy.loadFailed">
-          <el-button type="primary" @click="refresh">{{ copy.reload }}</el-button>
+          <el-button type="primary" @click="() => refresh()">{{ copy.reload }}</el-button>
         </el-empty>
       </div>
 
@@ -148,72 +169,36 @@ const navigateToSong = (songId: string) => {
 
       <!-- 数据表格 -->
       <div v-else class="table-container">
-        <el-table
-          :data="logs"
-          stripe
-          style="width: 100%"
-          :header-cell-style="{
-            background: '#faf5ef',
-            color: '#73573d',
-            fontWeight: 600
-          }"
-        >
-          <el-table-column :label="copy.time" width="150" fixed>
-            <template #default="{ row }">
-              <span class="time-cell">{{ formatTime(row.time) }}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column :label="copy.song" min-width="200">
-            <template #default="{ row }">
-              <div class="song-cell" @click="navigateToSong(row.song_id)">
-                <span class="song-title">{{ row.song_title }}</span>
-                <span class="song-id">ID: {{ row.song_id }}</span>
-              </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column :label="copy.alias" width="150">
-            <template #default="{ row }">
-              <el-tag type="warning" effect="light" class="alias-tag">
-                {{ row.alias }}
-              </el-tag>
-            </template>
-          </el-table-column>
-
-          <el-table-column :label="copy.user" min-width="180">
-            <template #default="{ row }">
-              <div class="user-cell">
-                <el-icon class="user-icon"><User /></el-icon>
-                <span class="user-text">{{ getUserDisplay(row) }}</span>
-              </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column :label="copy.source" min-width="180">
-            <template #default="{ row }">
-              <div class="group-cell">
-                <el-icon class="group-icon"><ChatDotRound /></el-icon>
-                <span class="group-text" :class="{ 'private': !row.group_id }">
-                  {{ getGroupDisplay(row) }}
-                </span>
-              </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column :label="copy.action" width="80" fixed="right">
-            <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                size="small"
-                @click="navigateToSong(row.song_id)"
-              >
-                {{ copy.view }}
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <table class="alias-table">
+          <thead><tr>
+            <th>{{ copy.time }}</th><th>{{ copy.song }}</th><th>{{ copy.alias }}</th>
+            <th>{{ copy.user }}</th><th>{{ copy.source }}</th><th>{{ copy.action }}</th>
+          </tr></thead>
+          <tbody>
+            <tr v-for="row in logs" :key="`${row.time}-${row.song_id}-${row.alias}`">
+              <td><span class="time-cell">{{ formatTime(row.time) }}</span></td>
+              <td>
+                <button type="button" class="song-cell" @click="navigateToSong(row.song_id)">
+                  <span class="song-title">{{ row.song_title }}</span>
+                  <span class="song-id">ID: {{ row.song_id }}</span>
+                </button>
+              </td>
+              <td><span class="alias-tag">{{ row.alias }}</span></td>
+              <td><span class="user-text">{{ getUserDisplay(row) }}</span></td>
+              <td><span class="group-text" :class="{ private: !row.group_id }">{{ getGroupDisplay(row) }}</span></td>
+              <td><button type="button" class="view-button" @click="navigateToSong(row.song_id)">{{ copy.view }}</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <el-pagination
+          v-if="total > pageSize"
+          v-model:current-page="page"
+          class="alias-pagination"
+          background
+          layout="prev, pager, next"
+          :page-size="pageSize"
+          :total="total"
+        />
       </div>
     </el-card>
   </div>
@@ -233,6 +218,29 @@ const navigateToSong = (songId: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.alias-search {
+  display: flex;
+  gap: 8px;
+  width: min(420px, 48vw);
+}
+
+.alias-pagination {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .card-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .alias-search {
+    width: 100%;
+  }
 }
 
 .header-title {
@@ -278,7 +286,36 @@ const navigateToSong = (songId: string) => {
 
 .table-container {
   padding: 8px 0;
+  overflow-x: auto;
 }
+
+.alias-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #f0e6dc;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.alias-table th,
+.alias-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0e6dc;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.alias-table th {
+  background: #faf5ef;
+  color: #73573d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.alias-table tbody tr:nth-child(even) { background: #fffdfb; }
+.alias-table tbody tr:last-child td { border-bottom: 0; }
 
 .time-cell {
   font-size: 13px;
@@ -292,6 +329,10 @@ const navigateToSong = (songId: string) => {
   gap: 4px;
   cursor: pointer;
   transition: opacity 0.2s;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .song-cell:hover {
@@ -310,8 +351,21 @@ const navigateToSong = (songId: string) => {
 }
 
 .alias-tag {
+  display: inline-flex;
+  padding: 4px 9px;
+  border: 1px solid #e9bd72;
+  background: #fff7e6;
+  color: #a76819;
   font-size: 13px;
   border-radius: 8px;
+}
+
+.view-button {
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--el-color-primary, #409eff);
+  cursor: pointer;
 }
 
 .user-cell,
@@ -336,17 +390,6 @@ const navigateToSong = (songId: string) => {
 .group-text.private {
   color: #9b7a5c;
   font-style: italic;
-}
-
-:deep(.el-table) {
-  --el-table-border-color: #f0e6dc;
-  --el-table-row-hover-bg-color: #faf5ef;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-:deep(.el-table__row) {
-  transition: background-color 0.2s;
 }
 
 :deep(.el-card__header) {

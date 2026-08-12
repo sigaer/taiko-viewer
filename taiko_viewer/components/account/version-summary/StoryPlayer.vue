@@ -16,6 +16,7 @@ const containerRef = ref<HTMLElement | null>(null);
 const slideRefs = ref<Array<HTMLElement | null>>([]);
 const activeIndex = ref(0);
 const reducedMotion = ref(false);
+const reducedData = ref(false);
 const soundEnabled = ref(false);
 let motionMedia: MediaQueryList | null = null;
 let updateMotionHandler: ((event: MediaQueryListEvent) => void) | null = null;
@@ -139,7 +140,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 const preloadNextArtwork = () => {
-  if (!process.client) return;
+  if (!process.client || reducedData.value || document.hidden) return;
   const urls = [
     props.summary.favoriteSong?.coverUrl,
     props.summary.obsessionSong?.coverUrl,
@@ -170,8 +171,9 @@ watch(slides, () => {
 
 onMounted(async () => {
   motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
-  reducedMotion.value = motionMedia.matches;
-  updateMotionHandler = (event) => { reducedMotion.value = event.matches; };
+  reducedData.value = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+  reducedMotion.value = motionMedia.matches || reducedData.value;
+  updateMotionHandler = (event) => { reducedMotion.value = event.matches || reducedData.value; };
   motionMedia.addEventListener("change", updateMotionHandler);
   window.addEventListener("keydown", handleKeydown);
   soundEnabled.value = false;

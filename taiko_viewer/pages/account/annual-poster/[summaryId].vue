@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
-import QRCode from "qrcode";
 import AnnualPoster from "~/components/account/version-summary/AnnualPoster.vue";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
@@ -26,11 +25,15 @@ const { data, error } = await useAsyncData(`annual-poster-${summaryId}-${desired
 const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data.value.summary, desiredLocale, translate) : null);
 const shareUrl = computed(() => data.value?.share.url ? new URL(data.value.share.url, useRequestURL().origin).toString() : "");
 const qrCodeUrl = ref("");
+const createQrCode = async (value: string) => {
+  const { default: QRCode } = await import("qrcode");
+  return QRCode.toDataURL(value, { width: 360, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" });
+};
 
 const markReady = async () => {
   if (!process.client || !summary.value) return;
   const serverQr = String((data.value?.summary.poster as Record<string, unknown> | undefined)?.qrCodeDataUrl || "");
-  qrCodeUrl.value = serverQr || await QRCode.toDataURL(shareUrl.value, { width: 360, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" });
+  qrCodeUrl.value = serverQr || await createQrCode(shareUrl.value);
   await nextTick();
   await document.fonts.ready;
   await Promise.all(Array.from(document.images).map((image) => image.complete ? Promise.resolve() : new Promise<void>((resolve) => {

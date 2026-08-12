@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import QRCode from "qrcode";
 import { ElMessage } from "element-plus";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualPoster from "../AnnualPoster.vue";
@@ -26,13 +25,17 @@ const persistShare = (value: ActiveShare | null) => {
 };
 
 const absoluteUrl = (value: string) => process.client ? new URL(value, window.location.origin).toString() : value;
+const createQrCode = async (value: string) => {
+  const { default: QRCode } = await import("qrcode");
+  return QRCode.toDataURL(value, { width: 320, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" });
+};
 const wait = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 watch(() => props.summary.activeShare, async (value) => {
   share.value = value ? { ...value } : null;
   posterUrl.value = value?.posterUrl || "";
   qrCodeUrl.value = value?.url
-    ? await QRCode.toDataURL(absoluteUrl(value.url), { width: 320, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" })
+    ? await createQrCode(absoluteUrl(value.url))
     : "";
 }, { immediate: true });
 
@@ -89,7 +92,7 @@ const createShare = async () => {
     const activeShare = { ...shared.share, locale: currentLocale() };
     share.value = activeShare;
     persistShare(activeShare);
-    qrCodeUrl.value = await QRCode.toDataURL(absoluteUrl(activeShare.url), { width: 320, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" }).catch(() => "");
+    qrCodeUrl.value = await createQrCode(absoluteUrl(activeShare.url)).catch(() => "");
     posterUrl.value = activeShare.posterUrl || "";
     ElMessage.success(t("annualSummary.share.created"));
   } catch {

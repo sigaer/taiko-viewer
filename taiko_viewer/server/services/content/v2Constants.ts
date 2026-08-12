@@ -6,6 +6,7 @@ import type {
   V2ConstantsSortKey
 } from "~/types/content";
 import { getSongCatalog } from "./songs";
+import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
 type RemoteChart = {
   totalNotes?: unknown;
@@ -49,6 +50,8 @@ export type V2ConstantsQuery = {
 const SOURCE_CACHE_TTL_MS = 60 * 60 * 1000;
 const SOURCE_RETRY_DELAY_MS = 5 * 60 * 1000;
 const SOURCE_TIMEOUT_MS = 10 * 1000;
+const SOURCE_MAX_STALE_MS = 7 * 24 * 60 * 60 * 1000;
+const SOURCE_CACHE_KEY = "v2-constants";
 const DEFAULT_PAGE_SIZE = 50;
 const PAGE_SIZE_OPTIONS = new Set([25, 50, 100]);
 const ALLOWED_BRANCH_TYPES = new Set(["master", "unbranched"]);
@@ -76,6 +79,7 @@ const SORT_KEYS = new Set<V2ConstantsSortKey>([
 
 let sourceCache: SourceSnapshot | null = null;
 let sourceRefreshPromise: Promise<SourceSnapshot> | null = null;
+let sourceCacheLoadPromise: Promise<void> | null = null;
 let sourceRetryAt = 0;
 
 const toPositiveInteger = (value: unknown) => {
@@ -188,40 +192,69 @@ const fetchSourceSnapshot = async (): Promise<SourceSnapshot> => {
   if (!isRecord(payload) || !isRecord(payload[Object.keys(payload)[0]])) {
     throw new Error("V2 constants source returned an invalid payload");
   }
-  return {
+  const snapshot = {
     payload,
     fetchedAt: new Date().toISOString(),
     expiresAt: Date.now() + SOURCE_CACHE_TTL_MS
   };
+  await writePersistentCache(SOURCE_CACHE_KEY, snapshot, snapshot.fetchedAt);
+  return snapshot;
+};
+
+const loadSourceCache = async () => {
+  if (sourceCache || sourceCacheLoadPromise) return sourceCacheLoadPromise;
+  sourceCacheLoadPromise = (async () => {
+    const cached = await readPersistentCache<SourceSnapshot>(SOURCE_CACHE_KEY);
+    if (!cached || !isRecord(cached.data?.payload)) return;
+    const fetchedAt = Date.parse(cached.data.fetchedAt || cached.savedAt);
+    if (!Number.isFinite(fetchedAt) || Date.now() - fetchedAt > SOURCE_MAX_STALE_MS) return;
+    sourceCache = {
+      payload: cached.data.payload,
+      fetchedAt: new Date(fetchedAt).toISOString(),
+      expiresAt: fetchedAt + SOURCE_CACHE_TTL_MS
+    };
+  })();
+  await sourceCacheLoadPromise;
+};
+
+const refreshSourceSnapshot = () => {
+  sourceRefreshPromise ||= fetchSourceSnapshot()
+    .then((snapshot) => {
+      sourceCache = snapshot;
+      sourceRetryAt = 0;
+      return snapshot;
+    })
+    .finally(() => {
+      sourceRefreshPromise = null;
+    });
+  return sourceRefreshPromise;
 };
 
 const getSourceSnapshot = async () => {
+  await loadSourceCache();
   const now = Date.now();
   if (sourceCache && sourceCache.expiresAt > now) {
     return { snapshot: sourceCache, stale: false };
   }
-  if (sourceCache && sourceRetryAt > now) {
+  if (sourceCache) {
+    if (sourceRetryAt <= now) {
+      void refreshSourceSnapshot().catch(() => {
+        sourceRetryAt = Date.now() + SOURCE_RETRY_DELAY_MS;
+      });
+    }
     return { snapshot: sourceCache, stale: true };
   }
 
   try {
-    sourceRefreshPromise ||= fetchSourceSnapshot();
-    const snapshot = await sourceRefreshPromise;
-    sourceCache = snapshot;
-    sourceRetryAt = 0;
+    const snapshot = await refreshSourceSnapshot();
     return { snapshot, stale: false };
   } catch (error) {
-    if (sourceCache) {
-      sourceRetryAt = now + SOURCE_RETRY_DELAY_MS;
-      return { snapshot: sourceCache, stale: true };
-    }
+    sourceRetryAt = now + SOURCE_RETRY_DELAY_MS;
     throw createError({
       statusCode: 502,
       statusMessage: "V2 定数数据源暂不可用",
       cause: error
     });
-  } finally {
-    sourceRefreshPromise = null;
   }
 };
 

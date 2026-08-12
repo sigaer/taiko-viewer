@@ -253,7 +253,7 @@ onBeforeUnmount(() => {
         </template>
         <template v-else>
           <NuxtLink
-            v-for="song in songs"
+            v-for="(song, songIndex) in songs"
             :key="song.id"
             class="song-card-link"
             :to="buildSongDetailLink(song.id)"
@@ -264,6 +264,7 @@ onBeforeUnmount(() => {
                   :song-id="song.id"
                   :alt="getSongTitle(song)"
                   sizes="(max-width: 640px) 45vw, (max-width: 1100px) 30vw, 220px"
+                  :priority="songIndex === 0"
                   fit="contain"
                   class="cover-img"
                 />

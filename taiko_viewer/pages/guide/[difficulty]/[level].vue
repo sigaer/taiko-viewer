@@ -158,7 +158,7 @@ useViewerSeo(() => ({
 
     <el-card v-else class="panel-card">
       <div class="guide-header">
-        <el-image src="/Makina.png" class="guide-avatar left" />
+        <img src="/optimized/guide-makina-160.webp" alt="" class="guide-avatar left" width="108" height="108" decoding="async" />
         <h3>
           <span class="guide-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
@@ -172,7 +172,7 @@ useViewerSeo(() => ({
           </span>
           {{ t("page.guide.detail.header", { difficulty: difficultyLabel, level }) }}
         </h3>
-        <el-image src="/miku.png" class="guide-avatar right" />
+        <img src="/optimized/guide-miku-160.webp" alt="" class="guide-avatar right" width="108" height="108" decoding="async" />
       </div>
 
       <div class="guide-section-title">
@@ -322,6 +322,7 @@ useViewerSeo(() => ({
   bottom: 0;
   width: 108px;
   height: 108px;
+  object-fit: contain;
 }
 
 .guide-avatar.left {

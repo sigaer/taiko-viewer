@@ -205,7 +205,14 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
         </el-empty>
       </div>
 
-      <div v-else class="v2-table-wrap">
+      <div
+        v-else
+        class="v2-table-wrap"
+        :style="{
+          minHeight: `${Math.max(360, payload.items.length * 42 + 96)}px`,
+          '--v2-body-height': `${Math.max(264, payload.items.length * 42)}px`
+        }"
+      >
         <el-table
           v-loading="pending"
           :data="payload.items"
@@ -398,6 +405,10 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
 .v2-table-wrap :deep(.el-table) {
   font-variant-numeric: tabular-nums;
+}
+
+.v2-table-wrap :deep(.el-table__body-wrapper) {
+  min-height: var(--v2-body-height);
 }
 
 .difficulty-tag {

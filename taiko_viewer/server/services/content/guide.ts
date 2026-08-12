@@ -13,9 +13,16 @@ import {
 import { getContentRuntimePaths, getGuideCacheTtlMs } from "./runtime";
 import { normalizeViewerLocale } from "~/server/utils/locale";
 import { translateServerMessage } from "~/server/utils/server-messages";
+import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
-const guideSummaryCache = new Map<string, { expiresAt: number; data: GuidePagePayload }>();
-const guideTagItemsCache = new Map<string, { expiresAt: number; data: GuideTagItemsPayload }>();
+type GuideCacheEntry<T> = { fetchedAt: number; expiresAt: number; data: T };
+
+const guideSummaryCache = new Map<string, GuideCacheEntry<GuidePagePayload>>();
+const guideTagItemsCache = new Map<string, GuideCacheEntry<GuideTagItemsPayload>>();
+const guideTagLoadPromises = new Map<string, Promise<void>>();
+const guideTagRefreshPromises = new Map<string, Promise<GuideTagItemsPayload>>();
+const GUIDE_MAX_STALE_MS = 24 * 60 * 60 * 1000;
+const GUIDE_TIMEOUT_MS = 8 * 1000;
 const GUIDE_TAG_TRANSLATION_KEYS: Record<number, string> = {
   1: "guide.summaryColumns.overPlus",
   2: "guide.summaryColumns.over",
@@ -66,6 +73,68 @@ const ensureGuideRouteParams = (difficulty: number, level: number, locale: strin
   return option;
 };
 
+const loadGuideTagCache = async (cacheKey: string) => {
+  if (guideTagItemsCache.has(cacheKey)) return;
+  let pending = guideTagLoadPromises.get(cacheKey);
+  if (!pending) {
+    pending = (async () => {
+      const cached = await readPersistentCache<GuideTagItemsPayload>(`guide-tag-${cacheKey}`);
+      if (!cached) return;
+      const fetchedAt = Date.parse(cached.savedAt);
+      if (!Number.isFinite(fetchedAt) || Date.now() - fetchedAt > GUIDE_MAX_STALE_MS) return;
+      guideTagItemsCache.set(cacheKey, {
+        fetchedAt,
+        expiresAt: fetchedAt + getGuideCacheTtlMs(),
+        data: cached.data
+      });
+    })().finally(() => guideTagLoadPromises.delete(cacheKey));
+    guideTagLoadPromises.set(cacheKey, pending);
+  }
+  await pending;
+};
+
+const refreshGuideTagItems = (
+  cacheKey: string,
+  difficulty: number,
+  level: number,
+  tagId: number,
+  normalizedLocale: string,
+  fallbackLabel: string
+) => {
+  let pending = guideTagRefreshPromises.get(cacheKey);
+  if (pending) return pending;
+  pending = (async () => {
+    const { guideApiBase } = getContentRuntimePaths();
+    const response = await $fetch<{ data?: Array<Record<string, unknown>> } | Array<Record<string, unknown>>>(
+      "/music/musicDetailList",
+      {
+        baseURL: guideApiBase,
+        params: { difficultyType: difficulty, level, levelTag: tagId },
+        timeout: GUIDE_TIMEOUT_MS,
+        retry: 0
+      }
+    );
+    const rows = Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : [];
+    const payload: GuideTagItemsPayload = {
+      difficulty,
+      level,
+      tagId,
+      tagLabel: getGuideTagLabel(normalizedLocale, tagId, fallbackLabel),
+      items: rows.map((row, index) => toGuideTagItem(row, difficulty, level, tagId, index))
+    };
+    const fetchedAt = Date.now();
+    guideTagItemsCache.set(cacheKey, {
+      fetchedAt,
+      expiresAt: fetchedAt + getGuideCacheTtlMs(),
+      data: payload
+    });
+    await writePersistentCache(`guide-tag-${cacheKey}`, payload, new Date(fetchedAt).toISOString());
+    return payload;
+  })().finally(() => guideTagRefreshPromises.delete(cacheKey));
+  guideTagRefreshPromises.set(cacheKey, pending);
+  return pending;
+};
+
 const fetchGuideTagItems = async (difficulty: number, level: number, tagId: number, locale = "zh") => {
   const normalizedLocale = normalizeViewerLocale(locale);
   const tag = GUIDE_TAGS.find((item) => item.id === tagId);
@@ -77,37 +146,17 @@ const fetchGuideTagItems = async (difficulty: number, level: number, tagId: numb
   }
 
   const cacheKey = `${normalizedLocale}:${difficulty}:${level}:${tagId}`;
+  await loadGuideTagCache(cacheKey);
   const now = Date.now();
   const cached = guideTagItemsCache.get(cacheKey);
   if (cached && cached.expiresAt > now) {
     return cached.data;
   }
-
-  const { guideApiBase } = getContentRuntimePaths();
-  const response = await $fetch<{ data?: Array<Record<string, unknown>> } | Array<Record<string, unknown>>>(
-    "/music/musicDetailList",
-    {
-      baseURL: guideApiBase,
-      params: {
-        difficultyType: difficulty,
-        level,
-        levelTag: tagId
-      }
-    }
-  );
-  const rows = Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : [];
-  const payload: GuideTagItemsPayload = {
-    difficulty,
-    level,
-    tagId,
-    tagLabel: getGuideTagLabel(normalizedLocale, tagId, tag.label),
-    items: rows.map((row, index) => toGuideTagItem(row, difficulty, level, tagId, index))
-  };
-  guideTagItemsCache.set(cacheKey, {
-    expiresAt: now + getGuideCacheTtlMs(),
-    data: payload
-  });
-  return payload;
+  if (cached && now - cached.fetchedAt <= GUIDE_MAX_STALE_MS) {
+    void refreshGuideTagItems(cacheKey, difficulty, level, tagId, normalizedLocale, tag.label).catch(() => {});
+    return cached.data;
+  }
+  return refreshGuideTagItems(cacheKey, difficulty, level, tagId, normalizedLocale, tag.label);
 };
 
 export const getGuidePageContent = async (difficulty: number, level: number, locale = "zh"): Promise<GuidePagePayload> => {
@@ -149,6 +198,7 @@ export const getGuidePageContent = async (difficulty: number, level: number, loc
     }))
   };
   guideSummaryCache.set(cacheKey, {
+    fetchedAt: now,
     expiresAt: now + getGuideCacheTtlMs(),
     data: payload
   });

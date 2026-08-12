@@ -144,6 +144,7 @@ export default defineNuxtConfig({
     taikoConfigPath: process.env.TAIKO_CONFIG_PATH || "",
     accountCacheDir: process.env.TAIKO_ACCOUNT_CACHE_DIR || "",
     annualCacheDir: process.env.TAIKO_ANNUAL_CACHE_DIR || "",
+    viewerCacheDir: process.env.TAIKO_VIEWER_CACHE_DIR || "",
     annualShareSecret: process.env.TAIKO_ANNUAL_SHARE_SECRET || "",
     annualRenderSecret: process.env.TAIKO_ANNUAL_RENDER_SECRET || "",
     annualChromiumPath: process.env.TAIKO_ANNUAL_CHROMIUM_PATH || "/usr/bin/chromium",

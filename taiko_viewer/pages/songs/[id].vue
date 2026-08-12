@@ -30,13 +30,13 @@ definePageMeta({
 
 const { data: songDetail, pending, error } = await useSongDetail(songId);
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
-await resolveAccountUser();
-const { data: accountScores, pending: accountScoresPending } = await useAsyncData<
+const { data: accountScores, pending: accountScoresPending } = useLazyAsyncData<
   AccountSongScoresPayload & { unavailable?: boolean }
 >(
   () => `account-song-scores-${songId.value}`,
   async () => {
-    if (!accountUser.value) return { items: [] };
+    const user = await resolveAccountUser();
+    if (!user || !accountUser.value) return { items: [] };
     try {
       return await apiFetch<AccountSongScoresPayload>(`/api/account/songs/${songId.value}`);
     } catch {
@@ -45,7 +45,8 @@ const { data: accountScores, pending: accountScoresPending } = await useAsyncDat
   },
   {
     default: () => ({ items: [] }),
-    watch: [songId]
+    watch: [songId],
+    server: false
   }
 );
 const branchAudioVariants = computed(() => songDetail.value.branchAudioVariants || {});

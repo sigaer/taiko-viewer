@@ -4,7 +4,7 @@ import { computed } from "vue";
 const runtimeConfig = useRuntimeConfig();
 const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
-const featuredGradePreview = "/optimized/nijiiro-2026-960.webp";
+const featuredGradePreview = "/optimized/nijiiro-2026-640.webp";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
@@ -38,6 +38,24 @@ const eventSlides = computed(() => [
 
 const { data: homeContent, pending, error } = await useHomeContent();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
+const dynamicsSection = ref<HTMLElement | null>(null);
+const showDynamics = ref(false);
+let dynamicsObserver: IntersectionObserver | null = null;
+
+onMounted(() => {
+  if (!("IntersectionObserver" in window)) {
+    showDynamics.value = true;
+    return;
+  }
+  dynamicsObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    showDynamics.value = true;
+    dynamicsObserver?.disconnect();
+    dynamicsObserver = null;
+  }, { rootMargin: "160px 0px" });
+  if (dynamicsSection.value) dynamicsObserver.observe(dynamicsSection.value);
+});
+onBeforeUnmount(() => dynamicsObserver?.disconnect());
 
 const getSongTitle = (song: (typeof latestSongs.value)[number]) =>
   locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
@@ -129,8 +147,9 @@ const gradeSpotlightCopy = computed(() =>
       </div>
     </section>
 
-    <section class="home-dynamics panel-card">
-      <HomeBilibiliDynamicFeed />
+    <section ref="dynamicsSection" class="home-dynamics panel-card">
+      <LazyHomeBilibiliDynamicFeed v-if="showDynamics" />
+      <div v-else class="home-dynamics-placeholder shimmer-card" aria-hidden="true"></div>
     </section>
 
     <section class="home-grid">
@@ -509,6 +528,11 @@ const gradeSpotlightCopy = computed(() =>
 .home-dynamics {
   padding: 18px 20px;
   min-height: 280px;
+}
+
+.home-dynamics-placeholder {
+  min-height: 244px;
+  border-radius: 16px;
 }
 
 .home-tools {

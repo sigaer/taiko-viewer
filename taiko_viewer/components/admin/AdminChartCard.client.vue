@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import * as echarts from "echarts";
-import type { EChartsOption } from "echarts";
+import type { ECharts, EChartsOption } from "echarts";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 const props = withDefaults(
@@ -17,12 +16,14 @@ const props = withDefaults(
 );
 
 const chartEl = ref<HTMLElement | null>(null);
-let chart: echarts.ECharts | null = null;
+let chart: ECharts | null = null;
+let echartsModule: typeof import("echarts") | null = null;
 
-const renderChart = () => {
+const renderChart = async () => {
   if (!chartEl.value) return;
+  echartsModule ||= await import("echarts");
   if (!chart) {
-    chart = echarts.init(chartEl.value);
+    chart = echartsModule.init(chartEl.value);
   }
   chart.setOption(props.option, true);
   chart.resize();
@@ -39,7 +40,7 @@ watch(
 );
 
 onMounted(() => {
-  renderChart();
+  void renderChart();
   window.addEventListener("resize", handleResize);
 });
 

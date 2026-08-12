@@ -39,7 +39,7 @@ useViewerSeo(() => ({
         <h2>{{ t("page.guide.index.heroTitle") }}</h2>
         <p>{{ t("page.guide.index.heroDesc") }}</p>
       </div>
-      <el-image src="/Makina.png" fit="contain" class="guide-entry-hero__image" />
+      <img src="/optimized/guide-makina-160.webp" alt="" class="guide-entry-hero__image" width="160" height="160" decoding="async" />
     </el-card>
 
     <section class="guide-entry-grid">

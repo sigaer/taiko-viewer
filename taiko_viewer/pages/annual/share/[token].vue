@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import QRCode from "qrcode";
 import AnnualPoster from "~/components/account/version-summary/AnnualPoster.vue";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
@@ -27,9 +26,13 @@ const { data, pending, error, refresh } = await useAsyncData(`annual-public-shar
 const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data.value.summary, currentLocale.value, (key, params) => t(key, params || {})) : null);
 const shareUrl = computed(() => process.client ? window.location.href : useRequestURL().href);
 const qrCodeUrl = ref("");
+const createQrCode = async (value: string) => {
+  const { default: QRCode } = await import("qrcode");
+  return QRCode.toDataURL(value, { width: 300, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" });
+};
 watchEffect(async () => {
   if (!process.client || !summary.value) return;
-  qrCodeUrl.value = await QRCode.toDataURL(shareUrl.value, { width: 300, margin: 2, color: { dark: "#17365D", light: "#FFFFFF" }, errorCorrectionLevel: "M" });
+  qrCodeUrl.value = await createQrCode(shareUrl.value);
 });
 watch(currentLocale, () => refresh());
 

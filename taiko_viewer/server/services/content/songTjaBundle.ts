@@ -4,6 +4,7 @@ import { access, readFile, stat } from "node:fs/promises";
 import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { getContentRuntimePaths, readJsonFile } from "./runtime";
+import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
 const execFileAsync = promisify(execFile);
 const songTjaBundleIndexHelperPath = resolve(process.cwd(), "server/services/content/songTjaBundleIndex.py");
@@ -41,6 +42,8 @@ type TjaRootReportPayload = {
 };
 
 let songTjaIndexCache: { cacheKey: string; data: SongTjaIndexPayload } | null = null;
+let songTjaIndexBuildPromise: Promise<SongTjaIndexPayload> | null = null;
+const SONG_TJA_INDEX_CACHE_KEY = "song-tja-index";
 
 const defaultTjaRepoCandidates = ["/home/sigaer/git/ESE_autosync", "/home/sigaer/git/ESE"];
 
@@ -97,49 +100,60 @@ const loadSongTjaIndex = async (forceRefresh = false): Promise<SongTjaIndexPaylo
     return songTjaIndexCache.data;
   }
 
-  await ensureReadablePath(songTjaBundleIndexHelperPath);
-  await ensureReadablePath(mergeIndexPath);
-
-  let stdout = "";
-  let stderr = "";
-
-  try {
-    const result = await execFileAsync(
-      "python3",
-      [
-        songTjaBundleIndexHelperPath,
-        "--song-data",
-        songDataPath,
-        "--tja-root",
-        tjaRoot,
-        "--merge-index",
-        mergeIndexPath
-      ],
-      {
-        maxBuffer: 16 * 1024 * 1024
-      }
-    );
-    stdout = result.stdout;
-    stderr = result.stderr;
-  } catch (error) {
-    const failure = error as { stdout?: string; stderr?: string; message?: string };
-    const detail = [failure.message, failure.stderr, failure.stdout].filter(Boolean).join("\n").trim();
-    throw new Error(`构建歌曲 TJA 索引失败：${detail || "未知错误"}`);
+  if (!forceRefresh && !songTjaIndexCache) {
+    const persisted = await readPersistentCache<{ cacheKey: string; data: SongTjaIndexPayload }>(SONG_TJA_INDEX_CACHE_KEY);
+    if (persisted?.data.cacheKey === cacheKey && persisted.data.data?.matches) {
+      songTjaIndexCache = persisted.data;
+      return persisted.data.data;
+    }
   }
 
-  let payload: SongTjaIndexPayload;
-  try {
-    payload = JSON.parse(stdout) as SongTjaIndexPayload;
-  } catch (error) {
-    const detail = [String((error as Error).message || ""), stderr.trim(), stdout.trim()].filter(Boolean).join("\n");
-    throw new Error(`解析歌曲 TJA 索引失败：${detail}`);
-  }
+  if (songTjaIndexBuildPromise) return songTjaIndexBuildPromise;
 
-  songTjaIndexCache = {
-    cacheKey,
-    data: payload
-  };
-  return payload;
+  songTjaIndexBuildPromise = (async () => {
+    await ensureReadablePath(songTjaBundleIndexHelperPath);
+    await ensureReadablePath(mergeIndexPath);
+
+    let stdout = "";
+    let stderr = "";
+
+    try {
+      const result = await execFileAsync(
+        "python3",
+        [
+          songTjaBundleIndexHelperPath,
+          "--song-data",
+          songDataPath,
+          "--tja-root",
+          tjaRoot,
+          "--merge-index",
+          mergeIndexPath
+        ],
+        { maxBuffer: 16 * 1024 * 1024 }
+      );
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (error) {
+      const failure = error as { stdout?: string; stderr?: string; message?: string };
+      const detail = [failure.message, failure.stderr, failure.stdout].filter(Boolean).join("\n").trim();
+      throw new Error(`构建歌曲 TJA 索引失败：${detail || "未知错误"}`);
+    }
+
+    let payload: SongTjaIndexPayload;
+    try {
+      payload = JSON.parse(stdout) as SongTjaIndexPayload;
+    } catch (error) {
+      const detail = [String((error as Error).message || ""), stderr.trim(), stdout.trim()].filter(Boolean).join("\n");
+      throw new Error(`解析歌曲 TJA 索引失败：${detail}`);
+    }
+
+    songTjaIndexCache = { cacheKey, data: payload };
+    await writePersistentCache(SONG_TJA_INDEX_CACHE_KEY, songTjaIndexCache);
+    return payload;
+  })().finally(() => {
+    songTjaIndexBuildPromise = null;
+  });
+  return songTjaIndexBuildPromise;
 };
 
 const extractWaveField = (content: string) => {
