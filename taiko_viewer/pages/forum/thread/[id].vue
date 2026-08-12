@@ -123,6 +123,9 @@ useViewerSeo(() => ({
 }));
 
 const detail = computed(() => data.value);
+const firstContentImageIndex = computed(() =>
+  detail.value?.contentBlocks.findIndex((block) => block.type !== "paragraph") ?? -1
+);
 
 const setReplyTarget = (id: number | null, label = "") => {
   replyTarget.value = { id, label };
@@ -393,6 +396,7 @@ const renderReplyBlocks = (
             <ForumSafeImage
               :src="block.imageUrl || ''"
               :alt="block.alt || detail.title"
+              :priority="index === firstContentImageIndex"
             />
             <figcaption v-if="block.caption">{{ block.caption }}</figcaption>
           </figure>
@@ -732,8 +736,10 @@ const renderReplyBlocks = (
 
 .thread-image img {
   width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: 22px;
-  object-fit: cover;
+  background: var(--el-fill-color-light, #f5f7fa);
+  object-fit: contain;
 }
 
 .thread-image figcaption {
