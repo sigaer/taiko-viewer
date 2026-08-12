@@ -1,44 +1,17 @@
-@font-face {
-  font-family: "TaikoUI";
-  src: url("../font/NotoSansCJKsc-Regular.otf") format("opentype");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TaikoDisplay";
-  src: url("../font/DDFont.ttf") format("truetype");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TaikoSymbols";
-  src: url("../font/NotoSansSymbols2-Regular.ttf") format("truetype");
-  font-display: swap;
-}
-
 :root {
   --viewer-font-family:
-    "TaikoUI",
-    "TaikoSymbols",
-    "Noto Sans Symbols 2",
-    "Noto Sans CJK SC",
-    "Source Han Sans SC",
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
     "Hiragino Sans GB",
     "Microsoft YaHei UI",
     "Microsoft YaHei",
-    "PingFang SC",
     "Yu Gothic",
     "Meiryo",
-    "Segoe UI Symbol",
+    "Segoe UI",
     "Apple Color Emoji",
     sans-serif;
-  --viewer-display-font:
-    "TaikoDisplay",
-    "TaikoUI",
-    "TaikoSymbols",
-    "Noto Sans CJK SC",
-    "Source Han Sans SC",
-    sans-serif;
+  --viewer-display-font: var(--viewer-font-family);
   --viewer-bg-top: #fdf9f4;
   --viewer-bg-mid: #f7f3ee;
   --viewer-bg-bottom: #f3efe9;
@@ -56,6 +29,20 @@
   --el-color-primary-light-8: #f5efe6;
   --el-color-primary-light-9: #faf6f1;
   --el-color-primary-dark-2: #a8896c;
+}
+
+:root:lang(ja) {
+  --viewer-font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic",
+    "Meiryo",
+    "PingFang SC",
+    "Segoe UI",
+    "Apple Color Emoji",
+    sans-serif;
 }
 
 html,
@@ -76,6 +63,7 @@ body {
   color: var(--viewer-text);
   font-family: var(--viewer-font-family);
   text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
 }
 
 body.story-layout-body {

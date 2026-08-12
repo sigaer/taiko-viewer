@@ -1,12 +1,12 @@
 import type { HomeContentPayload } from "~/types/content";
-import { useClientContentState } from "./useClientContentState";
 
 const createDefaultPayload = (): HomeContentPayload => ({
   latestSongs: []
 });
 
 export const useHomeContent = () =>
-  useClientContentState<HomeContentPayload>(
+  useAsyncData<HomeContentPayload>(
+    "home-content",
     () => useViewerApiFetch()<HomeContentPayload>("/api/content/home"),
-    createDefaultPayload
+    { default: createDefaultPayload }
   );

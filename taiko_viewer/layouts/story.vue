@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
 import { SITE_TITLE } from "~/utils/seo";
+import { buildAnalyticsRouteTemplate, buildAnonymousPageLocation } from "~/utils/analytics";
 
 declare global {
   interface Window {
@@ -68,10 +69,11 @@ const trackGooglePageView = async (path: string) => {
   if (!path || lastTrackedPath.value === path) return;
   await nextTick();
   if (typeof window.gtag !== "function") return;
+  const routeTemplate = buildAnalyticsRouteTemplate(path);
   window.gtag("event", "page_view", {
     page_title: document.title,
-    page_location: window.location.href,
-    page_path: path
+    page_location: buildAnonymousPageLocation(path),
+    page_path: routeTemplate
   });
   lastTrackedPath.value = path;
 };
@@ -93,7 +95,7 @@ onMounted(() => {
     <div class="story-shell">
       <header class="story-shell__chrome" :class="{ 'is-hidden': immersiveStory || isPrivateAnnualCanvas }">
         <NuxtLink :to="localePath('/')" class="story-shell__brand" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
-          <img src="/logo.png" alt="" class="story-shell__logo" />
+          <img src="/logo.png" alt="" class="story-shell__logo" width="70" height="70" />
           <div class="story-shell__brand-copy">
             <strong>{{ SITE_TITLE }}</strong>
             <span>{{ t("account.versionSummary") }}</span>
@@ -119,6 +121,8 @@ onMounted(() => {
     </div>
   </el-config-provider>
 </template>
+
+<style src="~/assets/css/story-font.css"></style>
 
 <style scoped>
 .story-shell {

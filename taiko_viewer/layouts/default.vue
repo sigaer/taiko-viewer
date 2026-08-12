@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
 import { SITE_TITLE } from "~/utils/seo";
+import { buildAnalyticsRouteTemplate, buildAnonymousPageLocation } from "~/utils/analytics";
 
 declare global {
   interface Window {
@@ -25,12 +26,12 @@ const switchLocalePath = useSwitchLocalePath();
 const localeHead = useLocaleHead({ seo: true });
 const isPageLoading = ref(false);
 const isPageLoadingVisible = ref(false);
-const isMobile = ref(false);
 const isMobileNavOpen = ref(false);
 const breadcrumbItems = ref<BreadcrumbItem[]>([]);
 const lastTrackedPath = ref("");
 const nuxtApp = useNuxtApp();
 let loadingTimer: ReturnType<typeof setTimeout> | null = null;
+let mobileMediaQuery: MediaQueryList | null = null;
 const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
 
 useHead(() => ({
@@ -100,10 +101,8 @@ const localeOptions = computed(() => [
   { code: "ja", label: t("locale.ja"), path: switchLocalePath("ja") || localePath("/") }
 ]);
 
-const syncViewport = () => {
-  if (!process.client) return;
-  isMobile.value = window.innerWidth <= 960;
-  if (!isMobile.value) {
+const syncMobileNavState = (event: MediaQueryListEvent | MediaQueryList) => {
+  if (!event.matches) {
     isMobileNavOpen.value = false;
   }
 };
@@ -130,10 +129,11 @@ const trackGooglePageView = async (path: string) => {
   if (!path || lastTrackedPath.value === path) return;
   await nextTick();
   if (typeof window.gtag !== "function") return;
+  const routeTemplate = buildAnalyticsRouteTemplate(path);
   window.gtag("event", "page_view", {
     page_title: document.title,
-    page_location: window.location.href,
-    page_path: path
+    page_location: buildAnonymousPageLocation(path),
+    page_path: routeTemplate
   });
   lastTrackedPath.value = path;
 };
@@ -199,24 +199,24 @@ watch(
   async () => {
     await nextTick();
     stopPageLoading();
-    if (isMobile.value) {
-      closeMobileNav();
-    }
+    closeMobileNav();
     await trackGooglePageView(route.fullPath);
   }
 );
 
 onMounted(() => {
   stopPageLoading();
-  syncViewport();
+  mobileMediaQuery = window.matchMedia("(max-width: 960px)");
+  syncMobileNavState(mobileMediaQuery);
+  mobileMediaQuery.addEventListener("change", syncMobileNavState);
   trackGooglePageView(route.fullPath);
-  window.addEventListener("resize", syncViewport);
 });
 
 onBeforeUnmount(() => {
   stopPageLoading();
   if (!process.client) return;
-  window.removeEventListener("resize", syncViewport);
+  mobileMediaQuery?.removeEventListener("change", syncMobileNavState);
+  mobileMediaQuery = null;
 });
 </script>
 
@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
     <div class="app-shell" :class="{ 'mobile-nav-open': isMobileNavOpen }">
       <transition name="mobile-mask">
         <button
-          v-if="isMobile && isMobileNavOpen"
+          v-if="isMobileNavOpen"
           type="button"
           class="mobile-nav-mask"
           :aria-label="t('layout.closeNav')"
@@ -235,7 +235,7 @@ onBeforeUnmount(() => {
       <aside class="app-sidebar">
         <div class="logo-space">
           <NuxtLink :to="localePath('/')" class="logo-link" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
-            <img src="/logo.png" alt="" class="logo-image" />
+            <img src="/logo.png" alt="" class="logo-image" width="84" height="84" />
           </NuxtLink>
           <div class="locale-switcher" :aria-label="t('layout.switchLanguage')">
             <NuxtLink
@@ -252,7 +252,7 @@ onBeforeUnmount(() => {
         <SidebarNav />
       </aside>
       <main class="app-content">
-        <div v-if="isMobile" class="mobile-nav-row">
+        <div class="mobile-nav-row">
           <button type="button" class="mobile-nav-toggle" @click="toggleMobileNav">
             <span class="mobile-nav-toggle__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">

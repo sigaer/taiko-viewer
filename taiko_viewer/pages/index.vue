@@ -36,7 +36,7 @@ const eventSlides = computed(() => [
   }
 ]);
 
-const { data: homeContent, pending, error } = useHomeContent();
+const { data: homeContent, pending, error } = await useHomeContent();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 
 const getCoverUrl = buildSongCoverPath;
@@ -103,7 +103,14 @@ const gradeSpotlightCopy = computed(() =>
         </a>
       </div>
       <a :href="featuredGradeImage" target="_blank" rel="noopener noreferrer" class="grade-spotlight-media">
-        <img :src="featuredGradeImage" :alt="gradeSpotlightCopy.imageAlt" loading="lazy" />
+        <img
+          :src="featuredGradeImage"
+          :alt="gradeSpotlightCopy.imageAlt"
+          width="1280"
+          height="3662"
+          loading="lazy"
+          decoding="async"
+        />
       </a>
     </section>
 
@@ -145,7 +152,7 @@ const gradeSpotlightCopy = computed(() =>
         <el-carousel class="event-carousel" :interval="4500" trigger="click" indicator-position="outside">
           <el-carousel-item v-for="item in eventSlides" :key="item.image">
             <article class="event-slide">
-              <el-image :src="item.image" fit="cover" class="event-image" />
+              <el-image :src="item.image" fit="cover" class="event-image" lazy />
               <div class="event-overlay">
                 <h4>{{ item.title }}</h4>
               </div>
@@ -501,6 +508,7 @@ const gradeSpotlightCopy = computed(() =>
 
 .home-dynamics {
   padding: 18px 20px;
+  min-height: 280px;
 }
 
 .home-tools {

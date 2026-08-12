@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "TaikoDisplay";
+  src: url("../font/TaikoDisplay-latin.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400 900;
+  font-style: normal;
+  unicode-range: U+0020-00FF, U+2000-206F;
+}
+
+body.story-layout-body {
+  --viewer-display-font: "TaikoDisplay", var(--viewer-font-family);
+}

@@ -10,6 +10,10 @@ const baiduSiteVerification =
   process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "codeva-IokhumYAJv";
 const googleAnalyticsId =
   process.env.NUXT_PUBLIC_GOOGLE_ANALYTICS_ID || process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || "";
+const webVitalsSampleRate = Math.min(
+  1,
+  Math.max(0, Number(process.env.NUXT_PUBLIC_WEB_VITALS_SAMPLE_RATE || 0.2) || 0)
+);
 
 export default defineNuxtConfig({
   ssr: true,
@@ -200,7 +204,8 @@ export default defineNuxtConfig({
       apiBase: "https://static.sakura-bot.cn",
       guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide",
       baiduSiteVerification,
-      googleAnalyticsId
+      googleAnalyticsId,
+      webVitalsSampleRate
     }
   },
   nitro: {

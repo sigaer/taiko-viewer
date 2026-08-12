@@ -31,6 +31,9 @@ HEALTHCHECK_TIMEOUT="${HEALTHCHECK_TIMEOUT:-20}"
 DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-/tmp/taiko-viewer-deploy.lock}"
 BUILD_PID_FILE="${BUILD_PID_FILE:-/tmp/taiko-viewer-nuxt-build.pid}"
 CURRENT_BUILD_PID=""
+BUILD_ROOT=""
+STAGED_OUTPUT="$WEB_DIR/.output.next"
+PREVIOUS_OUTPUT="$WEB_DIR/.output.previous"
 
 run_privileged() {
   if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
@@ -95,8 +98,16 @@ cleanup_current_build() {
   CURRENT_BUILD_PID=""
 }
 
+cleanup_build_root() {
+  if [[ -n "$BUILD_ROOT" && -d "$BUILD_ROOT" ]]; then
+    rm -rf -- "$BUILD_ROOT"
+  fi
+  BUILD_ROOT=""
+}
+
 handle_signal_exit() {
   cleanup_current_build
+  cleanup_build_root
   exit 1
 }
 
@@ -175,16 +186,22 @@ run_nuxt_build() {
   local build_start_epoch
   local build_deadline
   local build_exit=0
-  local build_artifact="$WEB_DIR/.output/server/index.mjs"
+  local build_web_dir
+
+  BUILD_ROOT="$(mktemp -d /tmp/taiko-viewer-release.XXXXXX)"
+  git archive --format=tar HEAD | tar -xf - -C "$BUILD_ROOT"
+  build_web_dir="$BUILD_ROOT/taiko_viewer"
+  ln -s "$WEB_DIR/node_modules" "$build_web_dir/node_modules"
+  local build_artifact="$build_web_dir/.output/server/index.mjs"
 
   build_log="$(mktemp)"
   build_start_epoch="$(date +%s)"
   build_deadline=$((SECONDS + BUILD_TIMEOUT))
 
-  pushd "$WEB_DIR" > /dev/null
+  pushd "$build_web_dir" > /dev/null
   export NODE_OPTIONS="--max-old-space-size=4096"
 
-  WEB_DIR="$WEB_DIR" setsid bash -lc 'cd "$WEB_DIR" && npm run build' >"$build_log" 2>&1 &
+  BUILD_WEB_DIR="$build_web_dir" setsid bash -lc 'cd "$BUILD_WEB_DIR" && npm run build' >"$build_log" 2>&1 &
   build_pid=$!
   CURRENT_BUILD_PID="$build_pid"
   printf '%s\n' "$build_pid" > "$BUILD_PID_FILE"
@@ -241,10 +258,41 @@ run_nuxt_build() {
   rm -f "$build_log"
   clear_build_pidfile "$build_pid"
   CURRENT_BUILD_PID=""
+  rm -rf -- "$STAGED_OUTPUT"
+  mv "$build_web_dir/.output" "$STAGED_OUTPUT"
+  cleanup_build_root
   return 0
 }
 
-trap cleanup_current_build EXIT
+rollback_viewer_output() {
+  echo "  - 健康检查失败，恢复上一份 viewer 构建。"
+  run_privileged systemctl stop taiko-viewer || true
+  rm -rf -- "$STAGED_OUTPUT"
+  if [[ -d "$WEB_DIR/.output" ]]; then
+    mv "$WEB_DIR/.output" "$STAGED_OUTPUT"
+  fi
+  if [[ -d "$PREVIOUS_OUTPUT" ]]; then
+    mv "$PREVIOUS_OUTPUT" "$WEB_DIR/.output"
+    run_privileged systemctl start taiko-viewer
+    wait_for_url "http://127.0.0.1:3100/titles" "回滚后的本地 SSR" || true
+  fi
+}
+
+activate_viewer_output() {
+  if [[ ! -f "$STAGED_OUTPUT/server/index.mjs" ]]; then
+    echo "  - 待发布构建不完整: $STAGED_OUTPUT"
+    return 1
+  fi
+  run_privileged systemctl stop taiko-viewer
+  rm -rf -- "$PREVIOUS_OUTPUT"
+  if [[ -d "$WEB_DIR/.output" ]]; then
+    mv "$WEB_DIR/.output" "$PREVIOUS_OUTPUT"
+  fi
+  mv "$STAGED_OUTPUT" "$WEB_DIR/.output"
+  run_privileged systemctl start taiko-viewer
+}
+
+trap 'cleanup_current_build; cleanup_build_root' EXIT
 trap handle_signal_exit HUP INT TERM
 
 require_singleton
@@ -252,23 +300,35 @@ cleanup_stale_build
 
 cd "$ROOT_DIR"
 
-echo "[1/5] 提交并推送代码..."
-HAS_CHANGES=0
-if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
-  HAS_CHANGES=1
+echo "[1/5] 验证并推送已提交代码..."
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "  - 存在未提交的跟踪文件。部署脚本不会自动暂存，请先按范围提交。"
+  git status --short
+  exit 1
 fi
-
-if [[ "$HAS_CHANGES" -eq 1 ]]; then
-  git add -A
-  if git diff --cached --quiet; then
-    echo "  - 没有可提交内容，跳过提交。"
-  else
-    git commit -m "$COMMIT_MESSAGE"
-    git push "$REMOTE" "$BRANCH"
-  fi
-else
-  echo "  - 工作区无变更，跳过提交推送。"
+HEAD_SUBJECT="$(git log -1 --pretty=%s)"
+if [[ "$HEAD_SUBJECT" != "$COMMIT_MESSAGE" ]]; then
+  echo "  - 参数必须与 HEAD 提交信息完全一致。"
+  echo "    HEAD: $HEAD_SUBJECT"
+  exit 1
 fi
+APP_VERSION="$(node -p "require('$WEB_DIR/package.json').version")"
+if [[ "$COMMIT_MESSAGE" != "$APP_VERSION "* ]]; then
+  echo "  - 提交信息必须以当前 viewer 版本开头: $APP_VERSION"
+  exit 1
+fi
+UNTRACKED_FILES="$(git ls-files --others --exclude-standard)"
+if [[ -n "$UNTRACKED_FILES" ]]; then
+  echo "  - 以下未跟踪文件不会被暂存或打入发布构建："
+  sed 's/^/    /' <<<"$UNTRACKED_FILES"
+fi
+git fetch "$REMOTE" "$BRANCH"
+REMOTE_HEAD="$(git rev-parse "$REMOTE/$BRANCH")"
+if ! git merge-base --is-ancestor "$REMOTE_HEAD" HEAD; then
+  echo "  - 远端 $BRANCH 已出现当前 HEAD 未包含的新提交，请先 rebase 并重新验证。"
+  exit 1
+fi
+git push "$REMOTE" "HEAD:$BRANCH"
 
 echo "[2/5] 安装依赖（按需）..."
 NEED_NPM_INSTALL=0
@@ -299,14 +359,18 @@ run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-viewer.service" /etc/syste
 run_privileged systemctl daemon-reload
 run_privileged nginx -t
 run_privileged systemctl reload nginx
-run_privileged systemctl restart taiko-viewer taiko-sync-receiver
+activate_viewer_output
+run_privileged systemctl restart taiko-sync-receiver
 run_privileged systemctl disable --now taiko-forum || true
-run_privileged systemctl is-active taiko-viewer taiko-sync-receiver
 
 echo "[5/5] 健康检查..."
-wait_for_url "http://127.0.0.1:3100/titles" "本地 SSR"
-wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器"
-wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"
+if ! wait_for_url "http://127.0.0.1:3100/titles" "本地 SSR" ||
+   ! wait_for_url "http://127.0.0.1:3102/health" "本地 Sakura bot 接收器" ||
+   ! wait_for_url "https://viewer.sakura-bot.cn/titles" "viewer 站点"; then
+  rollback_viewer_output
+  exit 1
+fi
+run_privileged systemctl is-active taiko-viewer taiko-sync-receiver
 
 echo "[可选] 百度普通收录主动推送..."
 if [[ -x "$ROOT_DIR/scripts/baidu_push_urls.sh" ]]; then
