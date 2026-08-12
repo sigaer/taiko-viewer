@@ -4,7 +4,7 @@ import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBra
 import type { AccountSongScoresPayload } from "~/types/account-song";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import { buildPageDescription } from "~/utils/seo";
-import { buildSongCoverPath } from "~/utils/songCover";
+import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -149,7 +149,7 @@ const copy = computed(() =>
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
-  return buildSongCoverPath(id);
+  return buildSongCoverThumbnailUrl(id, 400);
 });
 
 const hasEditDifficulty = computed(() => {
@@ -487,7 +487,14 @@ useViewerSeo(() => ({
       <main class="detail-main">
         <section class="detail-left">
           <div class="cover-wrap">
-            <el-image :src="coverUrl" fit="cover" class="cover-image" @error="coverError = true" />
+            <SongCoverImage
+              :song-id="song.id"
+              :alt="getSongPrimaryTitle(song)"
+              sizes="(max-width: 760px) 82vw, 360px"
+              priority
+              class="cover-image"
+              @error="coverError = true"
+            />
           </div>
           <h2>{{ getSongPrimaryTitle(song) }}</h2>
           <p class="jp-name">{{ getSongSecondaryTitle(song) }}</p>

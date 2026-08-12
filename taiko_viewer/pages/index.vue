@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { buildSongCoverPath } from "~/utils/songCover";
 
 const runtimeConfig = useRuntimeConfig();
 const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
 const featuredGradeImage = "/nijiiro_2026_dan_overview.png";
+const featuredGradePreview = "/optimized/nijiiro-2026-960.webp";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
@@ -27,11 +27,11 @@ useViewerSeo(() => ({
 
 const eventSlides = computed(() => [
   {
-    image: "/2026_autumn.png",
+    image: "/optimized/2026-autumn-800.webp",
     title: t("page.home.eventAutumn")
   },
   {
-    image: "/banner_16_9.png",
+    image: "/optimized/huali-esports-800.webp",
     title: t("page.home.eventHualiEsports")
   }
 ]);
@@ -39,7 +39,6 @@ const eventSlides = computed(() => [
 const { data: homeContent, pending, error } = await useHomeContent();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 
-const getCoverUrl = buildSongCoverPath;
 const getSongTitle = (song: (typeof latestSongs.value)[number]) =>
   locale.value === "ja" && song.song_name_jp ? song.song_name_jp : song.song_name;
 const getSongSubtitle = (song: (typeof latestSongs.value)[number]) =>
@@ -104,7 +103,7 @@ const gradeSpotlightCopy = computed(() =>
       </div>
       <a :href="featuredGradeImage" target="_blank" rel="noopener noreferrer" class="grade-spotlight-media">
         <img
-          :src="featuredGradeImage"
+          :src="featuredGradePreview"
           :alt="gradeSpotlightCopy.imageAlt"
           width="1280"
           height="3662"
@@ -186,11 +185,12 @@ const gradeSpotlightCopy = computed(() =>
             class="song-item"
           >
             <div class="song-cover">
-              <el-image :src="getCoverUrl(song.id)" fit="cover" class="song-cover-img">
-                <template #error>
-                  <div class="song-cover-fallback"></div>
-                </template>
-              </el-image>
+              <SongCoverImage
+                :song-id="song.id"
+                :alt="getSongTitle(song)"
+                sizes="54px"
+                class="song-cover-img"
+              />
             </div>
             <div class="song-main">
               <h4>{{ getSongTitle(song) }}</h4>

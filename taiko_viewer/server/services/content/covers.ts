@@ -1,14 +1,13 @@
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import { buildAbsoluteSongCoverUrl } from "~/utils/songCover";
 import {
-  CONTENT_CANONICAL_BASE_URL,
   buildStaticCoverAssetUrl,
+  buildStaticCoverThumbnailUrl,
   getContentRuntimePaths
 } from "./runtime";
 
 export const getSongCoverUrl = (songId: number) =>
-  buildAbsoluteSongCoverUrl(songId, CONTENT_CANONICAL_BASE_URL);
+  buildStaticCoverThumbnailUrl(songId, 400);
 
 export const resolveSongCoverAsset = async (songId: number) => {
   const { repoRoot } = getContentRuntimePaths();

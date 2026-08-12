@@ -7,6 +7,7 @@ import type {
   VersionSummarySongCard,
   VersionSummaryViewModel
 } from "~/types/account-version-summary";
+import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
 
 type UnknownRecord = Record<string, unknown>;
 type Translate = (key: string, params?: Record<string, unknown>) => string;
@@ -47,7 +48,10 @@ const makeSongMapper = (locale: "zh" | "ja") => (value: unknown): VersionSummary
     songNo,
     name: stringValue(song.name) || localizedName || stringValue(song.songName) || stringValue(song.songNameJa) || `ID ${songNo}`,
     subtitle: stringValue(song.subtitle),
-    coverUrl: stringValue(song.coverUrl),
+    // Cached summaries created before the thumbnail rollout may still contain
+    // the legacy proxy/original URL. The song number is the stable source of
+    // truth, so every interactive story uses the lightweight derivative.
+    coverUrl: buildSongCoverThumbnailUrl(songNo, 400),
     playCount: song.playCount === undefined ? undefined : numberValue(song.playCount),
     activeDays: song.activeDays === undefined ? undefined : numberValue(song.activeDays),
     level: nullableNumber(song.level),

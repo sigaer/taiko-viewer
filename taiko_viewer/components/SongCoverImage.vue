@@ -1,0 +1,92 @@
+<script setup lang="ts">
+import {
+  buildSongCoverOriginalUrl,
+  buildSongCoverThumbnailSrcset
+} from "~/utils/songCover";
+
+const props = withDefaults(
+  defineProps<{
+    songId: number;
+    alt?: string;
+    sizes?: string;
+    priority?: boolean;
+    fit?: "cover" | "contain";
+    fallbackSongId?: number;
+  }>(),
+  {
+    alt: "",
+    sizes: "200px",
+    priority: false,
+    fit: "cover",
+    fallbackSongId: 1384
+  }
+);
+
+const emit = defineEmits<{ error: [event: Event] }>();
+const pictureElement = ref<HTMLElement | null>(null);
+const failed = ref(false);
+const shouldLoad = ref(props.priority);
+let visibilityObserver: IntersectionObserver | null = null;
+const activeSongId = computed(() => failed.value ? props.fallbackSongId : props.songId);
+const webpSrcset = computed(() => buildSongCoverThumbnailSrcset(activeSongId.value));
+const originalSrc = computed(() => buildSongCoverOriginalUrl(activeSongId.value));
+
+watch(() => props.songId, () => { failed.value = false; });
+
+const handleError = (event: Event) => {
+  if (!failed.value && props.songId !== props.fallbackSongId) {
+    failed.value = true;
+    return;
+  }
+  emit("error", event);
+};
+
+onMounted(() => {
+  if (shouldLoad.value) return;
+  if (!("IntersectionObserver" in window)) {
+    shouldLoad.value = true;
+    return;
+  }
+
+  visibilityObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    shouldLoad.value = true;
+    visibilityObserver?.disconnect();
+    visibilityObserver = null;
+  }, { rootMargin: "320px 0px" });
+
+  if (pictureElement.value) visibilityObserver.observe(pictureElement.value);
+});
+
+onBeforeUnmount(() => visibilityObserver?.disconnect());
+</script>
+
+<template>
+  <picture ref="pictureElement" class="song-cover-picture">
+    <source v-if="shouldLoad" type="image/webp" :srcset="webpSrcset" :sizes="sizes" />
+    <img
+      :src="shouldLoad ? originalSrc : undefined"
+      :alt="alt"
+      width="400"
+      height="400"
+      :loading="priority ? 'eager' : 'lazy'"
+      :fetchpriority="priority ? 'high' : 'low'"
+      decoding="async"
+      :style="{ objectFit: fit }"
+      @error="handleError"
+    />
+  </picture>
+</template>
+
+<style scoped>
+.song-cover-picture,
+.song-cover-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.song-cover-picture {
+  background: var(--el-fill-color-light, #f5f7fa);
+}
+</style>

@@ -235,7 +235,14 @@ onBeforeUnmount(() => {
       <aside class="app-sidebar">
         <div class="logo-space">
           <NuxtLink :to="localePath('/')" class="logo-link" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
-            <img src="/logo.png" alt="" class="logo-image" width="84" height="84" />
+            <img
+              src="/optimized/logo-168.webp"
+              alt=""
+              class="logo-image"
+              width="84"
+              height="84"
+              decoding="async"
+            />
           </NuxtLink>
           <div class="locale-switcher" :aria-label="t('layout.switchLanguage')">
             <NuxtLink

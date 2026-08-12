@@ -6,7 +6,13 @@ import { createError } from "h3";
 import { buildSongCoverPath } from "~/utils/songCover";
 import { createAdminBackupSnapshot } from "./backup";
 import { recordAdminAction } from "./audit";
-import { coverObjectExists, deleteCoverObject, uploadCoverObject } from "./cover-storage";
+import {
+  buildCoverDerivativeKeys,
+  coverObjectExists,
+  deleteCoverObject,
+  uploadCoverObjects,
+  type CoverDerivative
+} from "./cover-storage";
 import { getAdminManagedPaths, writeFileAtomic } from "./shared";
 import { exportAdminSongs } from "./songs";
 
@@ -24,6 +30,20 @@ const getCoverFilePath = (songId: number) => join(getAdminManagedPaths().coverDi
 
 const getCoverPublicUrl = (songId: number) => {
   return buildSongCoverPath(songId);
+};
+
+export const createCoverDerivatives = async (songId: number, input: Buffer): Promise<CoverDerivative[]> => {
+  const keys = buildCoverDerivativeKeys(songId);
+  const original = await sharp(input).resize(400, 400, { fit: "cover" }).png().toBuffer();
+  const thumbnails = await Promise.all(keys.thumbnails.map(async ({ size, objectKey }) => ({
+    objectKey,
+    contentType: "image/webp" as const,
+    buffer: await sharp(original).resize(size, size, { fit: "cover" }).webp({ quality: 78 }).toBuffer()
+  })));
+  return [
+    { objectKey: keys.original, contentType: "image/png", buffer: original },
+    ...thumbnails
+  ];
 };
 
 const ensureSongExists = async (songId: number) => {
@@ -121,13 +141,9 @@ export const uploadAdminCover = async (input: {
     ]
   });
 
-  const nextBuffer = await sharp(input.buffer)
-    .resize(400, 400, {
-      fit: "cover"
-    })
-    .png()
-    .toBuffer();
-  const { objectKey, cacheTaskId } = await uploadCoverObject(input.songId, nextBuffer);
+  const derivatives = await createCoverDerivatives(input.songId, input.buffer);
+  const nextBuffer = derivatives[0].buffer;
+  const { objectKeys, cacheTaskId } = await uploadCoverObjects(input.songId, derivatives);
   await writeFileAtomic(filePath, nextBuffer);
   await recordAdminAction({
     actorType: "admin",
@@ -142,14 +158,14 @@ export const uploadAdminCover = async (input: {
       songTitle: song.song_name,
       fileName: input.fileName,
       contentType: input.contentType || "",
-      objectKey,
+      objectKeys,
       cacheTaskId
     }
   });
   return {
     songId: input.songId,
     coverUrl: getCoverPublicUrl(input.songId),
-    objectKey
+    objectKeys
   };
 };
 

@@ -95,7 +95,7 @@ onMounted(() => {
     <div class="story-shell">
       <header class="story-shell__chrome" :class="{ 'is-hidden': immersiveStory || isPrivateAnnualCanvas }">
         <NuxtLink :to="localePath('/')" class="story-shell__brand" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
-          <img src="/logo.png" alt="" class="story-shell__logo" width="70" height="70" />
+          <img src="/optimized/logo-168.webp" alt="" class="story-shell__logo" width="70" height="70" decoding="async" />
           <div class="story-shell__brand-copy">
             <strong>{{ SITE_TITLE }}</strong>
             <span>{{ t("account.versionSummary") }}</span>

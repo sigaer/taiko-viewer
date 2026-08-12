@@ -4,9 +4,23 @@ import { createError } from "h3";
 import { getOssClient, getOssRuntimeConfig } from "~/server/internal/account/shared";
 
 const COVER_PREFIX = "cover";
+export const COVER_THUMBNAIL_SIZES = [200, 400] as const;
+export type CoverThumbnailSize = (typeof COVER_THUMBNAIL_SIZES)[number];
+export type CoverDerivative = {
+  objectKey: string;
+  contentType: "image/png" | "image/webp";
+  buffer: Buffer;
+};
 let cachedEsaSiteId = 0;
 
 const getCoverObjectKey = (songId: number) => `${COVER_PREFIX}/${songId}.png`;
+const getCoverThumbnailObjectKey = (songId: number, size: CoverThumbnailSize) =>
+  `${COVER_PREFIX}/thumb/${size}/${songId}.webp`;
+
+export const getCoverObjectKeys = (songId: number) => [
+  getCoverObjectKey(songId),
+  ...COVER_THUMBNAIL_SIZES.map((size) => getCoverThumbnailObjectKey(songId, size))
+];
 
 const getErrorStatus = (error: any) =>
   Number(error?.status || error?.statusCode || error?.res?.status || 0);
@@ -55,13 +69,15 @@ const resolveEsaSiteId = async () => {
 
 const purgeCoverCache = async (songId: number) => {
   const storage = getOssRuntimeConfig();
-  const coverUrl = `${storage.publicBaseUrl.replace(/\/$/, "")}/${getCoverObjectKey(songId)}`;
+  const coverUrls = getCoverObjectKeys(songId).map(
+    (objectKey) => `${storage.publicBaseUrl.replace(/\/$/, "")}/${objectKey}`
+  );
   try {
     const response = await createEsaClient().purgeCaches(
       new EsaSdk.PurgeCachesRequest({
         siteId: await resolveEsaSiteId(),
         type: "file",
-        content: new EsaSdk.PurgeCachesRequestContent({ files: [coverUrl] })
+        content: new EsaSdk.PurgeCachesRequestContent({ files: coverUrls })
       })
     );
     return String(response.body?.taskId || "");
@@ -74,9 +90,9 @@ const purgeCoverCache = async (songId: number) => {
   }
 };
 
-export const coverObjectExists = async (songId: number) => {
+const objectExists = async (objectKey: string) => {
   try {
-    await getOssClient().head(getCoverObjectKey(songId));
+    await getOssClient().head(objectKey);
     return true;
   } catch (error) {
     if (getErrorStatus(error) === 404) return false;
@@ -84,24 +100,38 @@ export const coverObjectExists = async (songId: number) => {
   }
 };
 
-export const uploadCoverObject = async (songId: number, buffer: Buffer) => {
-  const objectKey = getCoverObjectKey(songId);
-  await getOssClient().put(objectKey, buffer, {
+export const coverObjectExists = async (songId: number) => objectExists(getCoverObjectKey(songId));
+
+export const uploadCoverObjects = async (songId: number, derivatives: CoverDerivative[]) => {
+  const client = getOssClient();
+  await Promise.all(derivatives.map((item) => client.put(item.objectKey, item.buffer, {
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": item.contentType,
       "Cache-Control": "public, max-age=31536000, immutable"
     }
-  });
+  })));
   const cacheTaskId = await purgeCoverCache(songId);
-  return { objectKey, cacheTaskId };
+  return { objectKeys: derivatives.map((item) => item.objectKey), cacheTaskId };
 };
 
 export const deleteCoverObject = async (songId: number) => {
   const client = getOssClient();
-  await client.delete(getCoverObjectKey(songId));
-  if (await coverObjectExists(songId)) {
+  const objectKeys = getCoverObjectKeys(songId);
+  await Promise.all(objectKeys.map((objectKey) => client.delete(objectKey).catch((error) => {
+    if (getErrorStatus(error) !== 404) throw error;
+  })));
+  const remaining = await Promise.all(objectKeys.map(objectExists));
+  if (remaining.some(Boolean)) {
     throw createError({ statusCode: 502, statusMessage: "OSS 封面删除校验失败，请重试" });
   }
   const cacheTaskId = await purgeCoverCache(songId);
-  return { cacheTaskId };
+  return { objectKeys, cacheTaskId };
 };
+
+export const buildCoverDerivativeKeys = (songId: number) => ({
+  original: getCoverObjectKey(songId),
+  thumbnails: COVER_THUMBNAIL_SIZES.map((size) => ({
+    size,
+    objectKey: getCoverThumbnailObjectKey(songId, size)
+  }))
+});

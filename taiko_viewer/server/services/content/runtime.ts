@@ -96,3 +96,6 @@ export const buildCanonicalUrl = (path: string) => {
 
 export const buildStaticCoverAssetUrl = (songId: number) =>
   `${CONTENT_STATIC_BASE_URL}/cover/${songId}.png`;
+
+export const buildStaticCoverThumbnailUrl = (songId: number, size: 200 | 400 = 400) =>
+  `${CONTENT_STATIC_BASE_URL}/cover/thumb/${size}/${songId}.webp`;

@@ -64,7 +64,11 @@ const localizedSongTitle = computed(() => {
       </div>
 
       <div v-if="thread.song" class="forum-thread-card__song">
-        <ForumSafeImage :src="thread.song.coverUrl" :alt="localizedSongTitle" />
+        <SongCoverImage
+          :song-id="thread.song.id"
+          :alt="localizedSongTitle"
+          sizes="54px"
+        />
         <div>
           <strong>{{ localizedSongTitle }}</strong>
           <span

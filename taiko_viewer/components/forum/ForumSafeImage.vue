@@ -29,5 +29,5 @@ const handleError = () => {
 </script>
 
 <template>
-  <img :src="currentSrc" :alt="alt" @error="handleError" />
+  <img :src="currentSrc" :alt="alt" loading="lazy" decoding="async" @error="handleError" />
 </template>

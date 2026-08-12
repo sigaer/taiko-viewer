@@ -29,7 +29,17 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
     </div>
     <div class="drum-window__membrane">
       <slot>
-        <img v-if="imageUrl && !imageFailed" :src="imageUrl" :alt="imageAlt" class="drum-window__image" @error="imageFailed = true" />
+        <img
+          v-if="imageUrl && !imageFailed"
+          :src="imageUrl"
+          :alt="imageAlt"
+          class="drum-window__image"
+          width="400"
+          height="400"
+          loading="lazy"
+          decoding="async"
+          @error="imageFailed = true"
+        />
         <AnnualArtworkFallback v-else :kind="fallbackKind" :label="fallback" :mark="fallbackKind === 'don' ? 'DON' : '2026'" />
       </slot>
     </div>

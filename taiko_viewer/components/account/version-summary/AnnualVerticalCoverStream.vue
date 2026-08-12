@@ -41,6 +41,11 @@ const failCover = (key: string) => {
               v-if="song.coverUrl && !failedCovers.has(song.flowKey)"
               :src="song.coverUrl"
               alt=""
+              width="400"
+              height="400"
+              loading="lazy"
+              fetchpriority="low"
+              decoding="async"
               @error="failCover(song.flowKey)"
             />
           </div>

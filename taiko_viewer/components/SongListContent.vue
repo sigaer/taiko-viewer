@@ -22,8 +22,6 @@ const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const query = ref("");
 const pageSize = 12;
-const coverFallbackId = 1384;
-const coverErrors = ref<Record<number, boolean>>({});
 const loadingMore = ref(false);
 const refreshing = ref(false);
 const loadError = ref<unknown>(null);
@@ -110,15 +108,6 @@ const difficultyDefs = [
   { key: "level_4", color: "#ff69b4" },
   { key: "level_5", color: "#8e44ad" }
 ];
-
-const getCoverUrl = (id: number) => `https://static.sakura-bot.cn/cover/${id}.png`;
-const resolveCoverUrl = (id: number) =>
-  coverErrors.value[id] ? getCoverUrl(coverFallbackId) : getCoverUrl(id);
-
-const handleCoverError = (id: number) => {
-  if (coverErrors.value[id]) return;
-  coverErrors.value = { ...coverErrors.value, [id]: true };
-};
 
 const getLevels = (song: SongCatalogItem) =>
   difficultyDefs
@@ -271,13 +260,12 @@ onBeforeUnmount(() => {
           >
             <div class="song-card">
               <div class="song-cover">
-                <el-image
-                  :src="resolveCoverUrl(song.id)"
+                <SongCoverImage
+                  :song-id="song.id"
+                  :alt="getSongTitle(song)"
+                  sizes="(max-width: 640px) 45vw, (max-width: 1100px) 30vw, 220px"
                   fit="contain"
                   class="cover-img"
-                  lazy
-                  loading="lazy"
-                  @error="handleCoverError(song.id)"
                 />
               </div>
               <div class="song-body">

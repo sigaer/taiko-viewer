@@ -59,6 +59,11 @@ watch(() => props.summary.summaryId, () => {
           v-show="loadedCovers.has(song.flowKey)"
           :src="song.coverUrl"
           :alt="index < candidates.length ? song.name : ''"
+          width="400"
+          height="400"
+          :loading="index < 2 ? 'eager' : 'lazy'"
+          :fetchpriority="index === 0 ? 'high' : 'low'"
+          decoding="async"
           @load="markLoaded(song.flowKey)"
           @error="markFailed(song.flowKey)"
         />
