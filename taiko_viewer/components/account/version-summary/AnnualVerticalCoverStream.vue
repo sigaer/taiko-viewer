@@ -3,6 +3,8 @@ import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { selectAnnualCoverSongs } from "~/utils/annualCoverFlow";
 
+const MAX_TRACK_COVERS = 14;
+
 const props = defineProps<{
   summary: VersionSummaryViewModel;
   active: boolean;
@@ -10,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const failedCovers = ref(new Set<string>());
-const songs = computed(() => selectAnnualCoverSongs(props.summary, 14, "period"));
+const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, "period"));
 const streamDuration = computed(() => Math.max(songs.value.length * 2.6, 28));
 const streamStyle = computed(() => ({
   "--cover-stream-duration": `${streamDuration.value}s`
@@ -121,12 +123,17 @@ const failCover = (key: string) => {
 }
 
 @keyframes cover-dive-to-horizon {
+  /* The visible 28.5% window equals four evenly staggered slots in a 14-cover track. */
   0% {
     opacity: 1;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), 0) rotateX(0deg) scale(1.04);
   }
-  72% { opacity: .58; }
-  100% {
+  20.5% { opacity: .58; }
+  28.5% {
+    opacity: 0;
+    transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
+  }
+  28.6%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
   }
@@ -137,10 +144,14 @@ const failCover = (key: string) => {
     opacity: 0;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), -190px) rotateX(-84deg) scale(.54);
   }
-  28% { opacity: .38; }
-  100% {
+  8% { opacity: .38; }
+  28.5% {
     opacity: 1;
-    transform: translate3d(-50%, -48%, 0) rotateX(0deg) scale(1.04);
+    transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
+  }
+  28.6%, 100% {
+    opacity: 0;
+    transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
   }
 }
 

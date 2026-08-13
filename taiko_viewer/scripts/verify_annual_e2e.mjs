@@ -479,6 +479,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.equal(periodMotion.upperIterations, Infinity, "upper period cover stream does not loop continuously");
   assert.ok(periodMotion.visibleUpperCovers > 0, "period cover stream has no visible upper covers");
   assert.ok(periodMotion.visibleLowerCovers > 0, "period cover stream has no visible lower covers");
+  assert.ok(periodMotion.visibleUpperCovers <= 4, `period upper stream shows too many covers: ${periodMotion.visibleUpperCovers}`);
+  assert.ok(periodMotion.visibleLowerCovers <= 4, `period lower stream shows too many covers: ${periodMotion.visibleLowerCovers}`);
   assert.notEqual(periodMotionAfter.lowerTransform, periodMotion.lowerTransform, "lower covers did not move toward the text boundary");
   assert.notEqual(periodMotionAfter.upperTransform, periodMotion.upperTransform, "upper covers did not move away from the text boundary");
   await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
