@@ -457,6 +457,17 @@ const auditOpeningMotion = async (browser, cookie) => {
     const upperAnimation = upperSlot?.getAnimations()[0];
     const lowerTiming = lowerAnimation?.effect?.getTiming();
     const upperTiming = upperAnimation?.effect?.getTiming();
+    const inspectZone = (selector) => {
+      const visible = [...stream.querySelectorAll(`${selector} .vertical-cover-stream__slot`)]
+        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+        .map((slot) => slot.getBoundingClientRect());
+      const overlaps = visible.some((left, index) => visible.slice(index + 1).some((right) =>
+        left.left < right.right && left.right > right.left && left.top < right.bottom && left.bottom > right.top
+      ));
+      return { count: visible.length, overlaps };
+    };
+    const upper = inspectZone(".is-upper");
+    const lower = inspectZone(".is-lower");
     return {
       lowerEasing: lowerTiming?.easing,
       upperEasing: upperTiming?.easing,
@@ -464,8 +475,10 @@ const auditOpeningMotion = async (browser, cookie) => {
       upperIterations: upperTiming?.iterations,
       lowerTransform: lowerSlot ? getComputedStyle(lowerSlot).transform : "",
       upperTransform: upperSlot ? getComputedStyle(upperSlot).transform : "",
-      visibleUpperCovers: [...stream.querySelectorAll(".is-upper img")].filter((image) => Number(getComputedStyle(image.parentElement).opacity) > .02).length,
-      visibleLowerCovers: [...stream.querySelectorAll(".is-lower img")].filter((image) => Number(getComputedStyle(image.parentElement).opacity) > .02).length
+      visibleUpperCovers: upper.count,
+      visibleLowerCovers: lower.count,
+      upperOverlaps: upper.overlaps,
+      lowerOverlaps: lower.overlaps
     };
   });
   await wait(600);
@@ -481,6 +494,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.ok(periodMotion.visibleLowerCovers > 0, "period cover stream has no visible lower covers");
   assert.ok(periodMotion.visibleUpperCovers <= 4, `period upper stream shows too many covers: ${periodMotion.visibleUpperCovers}`);
   assert.ok(periodMotion.visibleLowerCovers <= 4, `period lower stream shows too many covers: ${periodMotion.visibleLowerCovers}`);
+  assert.equal(periodMotion.upperOverlaps, false, "period upper covers overlap each other");
+  assert.equal(periodMotion.lowerOverlaps, false, "period lower covers overlap each other");
   assert.notEqual(periodMotionAfter.lowerTransform, periodMotion.lowerTransform, "lower covers did not move toward the text boundary");
   assert.notEqual(periodMotionAfter.upperTransform, periodMotion.upperTransform, "upper covers did not move away from the text boundary");
   await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });

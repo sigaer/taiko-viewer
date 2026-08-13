@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const failedCovers = ref(new Set<string>());
 const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, "period"));
-const streamDuration = computed(() => Math.max(songs.value.length * 2.6, 28));
+const streamDuration = computed(() => Math.max(songs.value.length * 3.4, 30));
 const streamStyle = computed(() => ({
   "--cover-stream-duration": `${streamDuration.value}s`
 }));
@@ -123,17 +123,17 @@ const failCover = (key: string) => {
 }
 
 @keyframes cover-dive-to-horizon {
-  /* The visible 28.5% window equals four evenly staggered slots in a 14-cover track. */
+  /* One 7.14% travel window hands off directly to the next entry in a 14-cover track. */
   0% {
     opacity: 1;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), 0) rotateX(0deg) scale(1.04);
   }
-  20.5% { opacity: .58; }
-  28.5% {
+  5% { opacity: .58; }
+  7.14% {
     opacity: 0;
     transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
   }
-  28.6%, 100% {
+  7.15%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
   }
@@ -144,12 +144,12 @@ const failCover = (key: string) => {
     opacity: 0;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), -190px) rotateX(-84deg) scale(.54);
   }
-  8% { opacity: .38; }
-  28.5% {
+  2% { opacity: .38; }
+  7.14% {
     opacity: 1;
     transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
   }
-  28.6%, 100% {
+  7.15%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
   }
