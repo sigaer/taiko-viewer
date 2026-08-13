@@ -11,9 +11,13 @@ const props = defineProps<{
 
 const failedCovers = ref(new Set<string>());
 const songs = computed(() => selectAnnualCoverSongs(props.summary, 14, "period"));
+const streamDuration = computed(() => Math.max(songs.value.length * 2.6, 28));
 const streamStyle = computed(() => ({
-  "--cover-stream-duration": `${Math.max(songs.value.length * 2.6, 28)}s`
+  "--cover-stream-duration": `${streamDuration.value}s`
 }));
+const itemStyle = (index: number) => ({
+  "--cover-delay": `${-(streamDuration.value * index / Math.max(songs.value.length, 1))}s`
+});
 
 const failCover = (key: string) => {
   failedCovers.value = new Set(failedCovers.value).add(key);
@@ -27,9 +31,19 @@ const failCover = (key: string) => {
     :style="streamStyle"
     aria-hidden="true"
   >
-    <div v-if="songs.length" class="vertical-cover-stream__track">
-      <div v-for="copy in 2" :key="copy" class="vertical-cover-stream__group">
-        <div v-for="song in songs" :key="`${copy}:${song.flowKey}`" class="vertical-cover-stream__slot">
+    <div
+      v-for="zone in ['upper', 'lower']"
+      :key="zone"
+      class="vertical-cover-stream__zone"
+      :class="`is-${zone}`"
+    >
+      <div v-if="songs.length" class="vertical-cover-stream__track">
+        <div
+          v-for="(song, index) in songs"
+          :key="`${zone}:${song.flowKey}`"
+          class="vertical-cover-stream__slot"
+          :style="itemStyle(index)"
+        >
           <img
             v-if="song.coverUrl && !failedCovers.has(song.flowKey)"
             :src="song.coverUrl"
@@ -49,39 +63,96 @@ const failCover = (key: string) => {
 
 <style scoped>
 .vertical-cover-stream {
+  --cover-zone-height: 31vh;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent);
 }
-.vertical-cover-stream__track { width: 100%; will-change: transform; }
-.vertical-cover-stream.is-running .vertical-cover-stream__track { animation: vertical-cover-drift var(--cover-stream-duration) linear infinite; }
-.vertical-cover-stream__group { display: grid; }
-.vertical-cover-stream__slot { position: relative; height: clamp(96px, 14vh, 144px); }
-.vertical-cover-stream__slot img {
+.vertical-cover-stream__zone {
   position: absolute;
+  left: 0;
+  right: 0;
+  height: 31%;
+  overflow: hidden;
+  perspective: 720px;
+}
+.vertical-cover-stream__zone.is-upper {
+  top: 0;
+  mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, .82) 42%, transparent 100%);
+}
+.vertical-cover-stream__zone.is-lower {
+  bottom: 0;
+  mask-image: linear-gradient(transparent 0%, rgba(0, 0, 0, .82) 58%, #000 100%);
+}
+.vertical-cover-stream__track { position: absolute; inset: 0; }
+.vertical-cover-stream__slot {
+  position: absolute;
+  top: 0;
   left: 50%;
-  top: 50%;
   width: min(76vw, 360px);
   aspect-ratio: 1;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-delay: var(--cover-delay);
+}
+.vertical-cover-stream.is-running .is-lower .vertical-cover-stream__slot { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite; animation-delay: var(--cover-delay); }
+.vertical-cover-stream.is-running .is-upper .vertical-cover-stream__slot { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite; animation-delay: var(--cover-delay); }
+.vertical-cover-stream__slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
-  transform: translate(-50%, -50%) perspective(620px) rotateX(62deg);
   box-shadow: 0 30px 34px rgba(23, 54, 93, 0.24);
   filter: saturate(0.92) contrast(0.96);
 }
 .vertical-cover-stream__slot:empty { display: none; }
-.vertical-cover-stream.is-reduced .vertical-cover-stream__group:nth-child(2),
-.vertical-cover-stream.is-reduced .vertical-cover-stream__slot:not(:nth-child(5)) { display: none; }
+.vertical-cover-stream.is-reduced .vertical-cover-stream__slot { display: none; }
+.vertical-cover-stream.is-reduced .is-lower .vertical-cover-stream__slot:first-child {
+  display: block;
+  opacity: .72;
+  transform: translate3d(-50%, calc(var(--cover-zone-height) - 68%), 0) rotateX(18deg) scale(.9);
+}
+.vertical-cover-stream.is-reduced .is-upper .vertical-cover-stream__slot:nth-child(2) {
+  display: block;
+  opacity: .72;
+  transform: translate3d(-50%, -32%, 0) rotateX(-18deg) scale(.9);
+}
 
-@keyframes vertical-cover-drift { to { transform: translate3d(0, -50%, 0); } }
+@keyframes cover-dive-to-horizon {
+  0% {
+    opacity: 1;
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), 0) rotateX(0deg) scale(1.04);
+  }
+  72% { opacity: .58; }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
+  }
+}
+
+@keyframes cover-rise-from-horizon {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), -190px) rotateX(-84deg) scale(.54);
+  }
+  28% { opacity: .38; }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, -48%, 0) rotateX(0deg) scale(1.04);
+  }
+}
 
 @media (orientation: landscape) and (max-height: 460px) {
-  .vertical-cover-stream__slot { height: clamp(72px, 24vh, 108px); }
-  .vertical-cover-stream__slot img { width: min(34vw, 240px); }
+  .vertical-cover-stream { --cover-zone-height: 100vh; }
+  .vertical-cover-stream__zone { top: 0; bottom: 0; width: 31%; height: 100%; perspective: 620px; }
+  .vertical-cover-stream__zone.is-upper { left: 0; right: auto; mask-image: linear-gradient(90deg, #000, transparent); }
+  .vertical-cover-stream__zone.is-lower { left: auto; right: 0; mask-image: linear-gradient(270deg, #000, transparent); }
+  .vertical-cover-stream__slot { width: min(34vw, 240px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vertical-cover-stream__track { animation: none !important; }
+  .vertical-cover-stream__slot { animation: none !important; }
 }
 </style>

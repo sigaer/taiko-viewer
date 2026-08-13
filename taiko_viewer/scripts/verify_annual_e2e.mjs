@@ -445,34 +445,42 @@ const auditOpeningMotion = async (browser, cookie) => {
     node.dispatchEvent(new Event("scroll"));
   }, periodIndex);
   await page.waitForFunction(
-    () => document.querySelector(".period-story.is-active .vertical-cover-stream__track")?.getAnimations().length,
+    () => document.querySelector(".period-story.is-active .vertical-cover-stream__slot")?.getAnimations().length,
     undefined,
     { timeout: 10_000 }
   );
-  const periodTrack = page.locator(".period-story.is-active .vertical-cover-stream__track");
-  const periodMotion = await periodTrack.evaluate((track) => {
-    const animation = track.getAnimations()[0];
-    const timing = animation?.effect?.getTiming();
-    const viewportHeight = window.innerHeight;
-    const coverCenters = [...track.querySelectorAll("img")].map((image) => {
-      const rect = image.getBoundingClientRect();
-      return rect.top + rect.height / 2;
-    });
+  const periodStream = page.locator(".period-story.is-active .vertical-cover-stream");
+  const periodMotion = await periodStream.evaluate((stream) => {
+    const lowerSlot = stream.querySelector(".is-lower .vertical-cover-stream__slot");
+    const upperSlot = stream.querySelector(".is-upper .vertical-cover-stream__slot");
+    const lowerAnimation = lowerSlot?.getAnimations()[0];
+    const upperAnimation = upperSlot?.getAnimations()[0];
+    const lowerTiming = lowerAnimation?.effect?.getTiming();
+    const upperTiming = upperAnimation?.effect?.getTiming();
     return {
-      easing: timing?.easing,
-      iterations: timing?.iterations,
-      transform: getComputedStyle(track).transform,
-      hasUpperCover: coverCenters.some((center) => center > 0 && center < viewportHeight / 2),
-      hasLowerCover: coverCenters.some((center) => center >= viewportHeight / 2 && center < viewportHeight)
+      lowerEasing: lowerTiming?.easing,
+      upperEasing: upperTiming?.easing,
+      lowerIterations: lowerTiming?.iterations,
+      upperIterations: upperTiming?.iterations,
+      lowerTransform: lowerSlot ? getComputedStyle(lowerSlot).transform : "",
+      upperTransform: upperSlot ? getComputedStyle(upperSlot).transform : "",
+      visibleUpperCovers: [...stream.querySelectorAll(".is-upper img")].filter((image) => Number(getComputedStyle(image.parentElement).opacity) > .02).length,
+      visibleLowerCovers: [...stream.querySelectorAll(".is-lower img")].filter((image) => Number(getComputedStyle(image.parentElement).opacity) > .02).length
     };
   });
   await wait(600);
-  const periodTransformAfter = await periodTrack.evaluate((track) => getComputedStyle(track).transform);
-  assert.equal(periodMotion.easing, "linear", "period cover stream is not linear");
-  assert.equal(periodMotion.iterations, Infinity, "period cover stream does not loop continuously");
-  assert.equal(periodMotion.hasUpperCover, true, "period cover stream has no cover in its upper half");
-  assert.equal(periodMotion.hasLowerCover, true, "period cover stream has no cover in its lower half");
-  assert.notEqual(periodTransformAfter, periodMotion.transform, "period cover stream did not cross the full viewport");
+  const periodMotionAfter = await periodStream.evaluate((stream) => ({
+    lowerTransform: getComputedStyle(stream.querySelector(".is-lower .vertical-cover-stream__slot")).transform,
+    upperTransform: getComputedStyle(stream.querySelector(".is-upper .vertical-cover-stream__slot")).transform
+  }));
+  assert.equal(periodMotion.lowerEasing, "linear", "lower period cover stream is not linear");
+  assert.equal(periodMotion.upperEasing, "linear", "upper period cover stream is not linear");
+  assert.equal(periodMotion.lowerIterations, Infinity, "lower period cover stream does not loop continuously");
+  assert.equal(periodMotion.upperIterations, Infinity, "upper period cover stream does not loop continuously");
+  assert.ok(periodMotion.visibleUpperCovers > 0, "period cover stream has no visible upper covers");
+  assert.ok(periodMotion.visibleLowerCovers > 0, "period cover stream has no visible lower covers");
+  assert.notEqual(periodMotionAfter.lowerTransform, periodMotion.lowerTransform, "lower covers did not move toward the text boundary");
+  assert.notEqual(periodMotionAfter.upperTransform, periodMotion.upperTransform, "upper covers did not move away from the text boundary");
   await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
   reportProgress("period motion: full-height cover stream advanced");
   reportProgress("opening motion: closing");
