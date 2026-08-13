@@ -356,6 +356,11 @@ const auditOpeningMotion = async (browser, cookie) => {
     undefined,
     { timeout: 15_000 }
   );
+  assert.equal(
+    await page.locator(".annual-cover-flow__card .annual-artwork-fallback:visible").count(),
+    0,
+    "opening cover flow rendered placeholders after its preload gate"
+  );
   const beatLaneAudit = await page.evaluate(() => {
     const track = document.querySelector(".annual-beat-lane__track");
     const viewport = document.querySelector(".annual-beat-lane__viewport");
@@ -423,6 +428,53 @@ const auditOpeningMotion = async (browser, cookie) => {
     (nodes) => nodes.map((node) => getComputedStyle(node).animationName)
   );
   assert.ok(animationStates.some((name) => name && name !== "none"), "opening motion effects are not active");
+
+  await page.locator(".annual-opening__start").click();
+  await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(
+    () => document.querySelector(".story-player__slide[data-page-key='profile']")?.getBoundingClientRect().top === 0,
+    undefined,
+    { timeout: 10_000 }
+  );
+  const periodIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
+    slides.findIndex((slide) => slide.getAttribute("data-page-key") === "period")
+  );
+  assert.ok(periodIndex >= 0, "period page is missing from motion audit");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, periodIndex);
+  await page.waitForFunction(
+    () => document.querySelector(".period-story.is-active .vertical-cover-stream__track")?.getAnimations().length,
+    undefined,
+    { timeout: 10_000 }
+  );
+  const periodTrack = page.locator(".period-story.is-active .vertical-cover-stream__track");
+  const periodMotion = await periodTrack.evaluate((track) => {
+    const animation = track.getAnimations()[0];
+    const timing = animation?.effect?.getTiming();
+    const viewportHeight = window.innerHeight;
+    const coverCenters = [...track.querySelectorAll("img")].map((image) => {
+      const rect = image.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    });
+    return {
+      easing: timing?.easing,
+      iterations: timing?.iterations,
+      transform: getComputedStyle(track).transform,
+      hasUpperCover: coverCenters.some((center) => center > 0 && center < viewportHeight / 2),
+      hasLowerCover: coverCenters.some((center) => center >= viewportHeight / 2 && center < viewportHeight)
+    };
+  });
+  await wait(600);
+  const periodTransformAfter = await periodTrack.evaluate((track) => getComputedStyle(track).transform);
+  assert.equal(periodMotion.easing, "linear", "period cover stream is not linear");
+  assert.equal(periodMotion.iterations, Infinity, "period cover stream does not loop continuously");
+  assert.equal(periodMotion.hasUpperCover, true, "period cover stream has no cover in its upper half");
+  assert.equal(periodMotion.hasLowerCover, true, "period cover stream has no cover in its lower half");
+  assert.notEqual(periodTransformAfter, periodMotion.transform, "period cover stream did not cross the full viewport");
+  await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
+  reportProgress("period motion: full-height cover stream advanced");
   reportProgress("opening motion: closing");
   await context.close();
   reportProgress("opening motion: passed");

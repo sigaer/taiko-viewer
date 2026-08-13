@@ -75,8 +75,9 @@ const centerText = computed(() => locale.value === "ja"
   position: absolute;
   z-index: 1;
   inset: 31% 0;
-  background: linear-gradient(90deg, rgba(247, 251, 255, 0.72), #f7fbff 18% 82%, rgba(247, 251, 255, 0.72));
-  box-shadow: 0 -18px 32px rgba(247, 251, 255, 0.72), 0 18px 32px rgba(247, 251, 255, 0.72);
+  background: linear-gradient(90deg, rgba(247, 251, 255, 0.68), rgba(247, 251, 255, 0.9) 18% 82%, rgba(247, 251, 255, 0.68));
+  box-shadow: 0 -18px 32px rgba(247, 251, 255, 0.58), 0 18px 32px rgba(247, 251, 255, 0.58);
+  backdrop-filter: blur(5px);
 }
 
 .period-story__page {
@@ -126,7 +127,7 @@ const centerText = computed(() => locale.value === "ja"
 }
 
 @media (orientation: landscape) and (max-height: 460px) {
-  .period-story::after { inset: 0 31%; background: linear-gradient(rgba(247,251,255,.76), #f7fbff 16% 84%, rgba(247,251,255,.76)); box-shadow: -18px 0 32px rgba(247,251,255,.72), 18px 0 32px rgba(247,251,255,.72); }
+  .period-story::after { inset: 0 31%; background: linear-gradient(rgba(247,251,255,.68), rgba(247,251,255,.9) 16% 84%, rgba(247,251,255,.68)); box-shadow: -18px 0 32px rgba(247,251,255,.58), 18px 0 32px rgba(247,251,255,.58); }
   .period-story__center { width: min(38%, 520px); }
   .period-story__center time { font-size: clamp(1.35rem, 3.5vw, 2rem); }
   .period-story__center img { width: 38px; margin-block: 4px 2px; }

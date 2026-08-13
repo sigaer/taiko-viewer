@@ -11,11 +11,9 @@ const props = defineProps<{
 
 const failedCovers = ref(new Set<string>());
 const songs = computed(() => selectAnnualCoverSongs(props.summary, 14, "period"));
-const upperSongs = computed(() => songs.value.slice(0, 7));
-const lowerSongs = computed(() => {
-  const selected = songs.value.slice(7, 14);
-  return selected.length ? selected : songs.value.slice().reverse();
-});
+const streamStyle = computed(() => ({
+  "--cover-stream-duration": `${Math.max(songs.value.length * 2.6, 28)}s`
+}));
 
 const failCover = (key: string) => {
   failedCovers.value = new Set(failedCovers.value).add(key);
@@ -26,29 +24,23 @@ const failCover = (key: string) => {
   <div
     class="vertical-cover-stream"
     :class="{ 'is-running': active && !reducedMotion, 'is-reduced': reducedMotion }"
+    :style="streamStyle"
     aria-hidden="true"
   >
-    <div
-      v-for="(zoneSongs, zone) in [upperSongs, lowerSongs]"
-      :key="zone"
-      class="vertical-cover-stream__zone"
-      :class="zone === 0 ? 'is-upper' : 'is-lower'"
-    >
-      <div class="vertical-cover-stream__track">
-        <div v-for="copy in 2" :key="copy" class="vertical-cover-stream__group">
-          <div v-for="song in zoneSongs" :key="`${copy}:${song.flowKey}`" class="vertical-cover-stream__slot">
-            <img
-              v-if="song.coverUrl && !failedCovers.has(song.flowKey)"
-              :src="song.coverUrl"
-              alt=""
-              width="400"
-              height="400"
-              loading="lazy"
-              fetchpriority="low"
-              decoding="async"
-              @error="failCover(song.flowKey)"
-            />
-          </div>
+    <div v-if="songs.length" class="vertical-cover-stream__track">
+      <div v-for="copy in 2" :key="copy" class="vertical-cover-stream__group">
+        <div v-for="song in songs" :key="`${copy}:${song.flowKey}`" class="vertical-cover-stream__slot">
+          <img
+            v-if="song.coverUrl && !failedCovers.has(song.flowKey)"
+            :src="song.coverUrl"
+            alt=""
+            width="400"
+            height="400"
+            loading="eager"
+            fetchpriority="low"
+            decoding="async"
+            @error="failCover(song.flowKey)"
+          />
         </div>
       </div>
     </div>
@@ -56,37 +48,37 @@ const failCover = (key: string) => {
 </template>
 
 <style scoped>
-.vertical-cover-stream { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.vertical-cover-stream__zone { position: absolute; left: 0; right: 0; height: 31%; overflow: hidden; }
-.vertical-cover-stream__zone.is-upper { top: 0; mask-image: linear-gradient(#000 74%, transparent); }
-.vertical-cover-stream__zone.is-lower { bottom: 0; mask-image: linear-gradient(transparent, #000 26%); }
+.vertical-cover-stream {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent);
+}
 .vertical-cover-stream__track { width: 100%; will-change: transform; }
-.vertical-cover-stream.is-running .vertical-cover-stream__track { animation: vertical-cover-drift 78s linear infinite; }
-.vertical-cover-stream__zone.is-lower .vertical-cover-stream__track { animation-delay: -36s; }
+.vertical-cover-stream.is-running .vertical-cover-stream__track { animation: vertical-cover-drift var(--cover-stream-duration) linear infinite; }
 .vertical-cover-stream__group { display: grid; }
-.vertical-cover-stream__slot { position: relative; height: clamp(86px, 12vh, 128px); }
+.vertical-cover-stream__slot { position: relative; height: clamp(96px, 14vh, 144px); }
 .vertical-cover-stream__slot img {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(72vw, 340px);
+  width: min(76vw, 360px);
   aspect-ratio: 1;
   object-fit: cover;
-  transform: translate(-50%, -50%) perspective(540px) rotateX(67deg);
-  box-shadow: 0 26px 30px rgba(23, 54, 93, 0.24);
+  transform: translate(-50%, -50%) perspective(620px) rotateX(62deg);
+  box-shadow: 0 30px 34px rgba(23, 54, 93, 0.24);
   filter: saturate(0.92) contrast(0.96);
 }
 .vertical-cover-stream__slot:empty { display: none; }
 .vertical-cover-stream.is-reduced .vertical-cover-stream__group:nth-child(2),
-.vertical-cover-stream.is-reduced .vertical-cover-stream__slot:not(:first-child) { display: none; }
+.vertical-cover-stream.is-reduced .vertical-cover-stream__slot:not(:nth-child(5)) { display: none; }
 
 @keyframes vertical-cover-drift { to { transform: translate3d(0, -50%, 0); } }
 
 @media (orientation: landscape) and (max-height: 460px) {
-  .vertical-cover-stream__zone { width: 31%; height: 100%; }
-  .vertical-cover-stream__zone.is-upper { left: 0; right: auto; mask-image: linear-gradient(90deg, #000 76%, transparent); }
-  .vertical-cover-stream__zone.is-lower { left: auto; right: 0; mask-image: linear-gradient(270deg, #000 76%, transparent); }
-  .vertical-cover-stream__slot img { width: min(29vw, 220px); }
+  .vertical-cover-stream__slot { height: clamp(72px, 24vh, 108px); }
+  .vertical-cover-stream__slot img { width: min(34vw, 240px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

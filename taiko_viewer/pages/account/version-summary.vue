@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch, type WatchStopHandle } from "vue";
 import { ElMessage } from "element-plus";
 import StoryDrawer from "~/components/account/version-summary/StoryDrawer.vue";
 import StoryPlayer from "~/components/account/version-summary/StoryPlayer.vue";
 import AnnualBuildPrelude from "~/components/account/version-summary/AnnualBuildPrelude.vue";
 import type { AnnualSummaryV4, VersionSummaryBinding, VersionSummaryPayload } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
+import { preloadAnnualOpeningCovers } from "~/utils/annualCoverFlow";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError } from "~/utils/viewerError";
 
@@ -36,9 +37,11 @@ const building = ref(false);
 const switchingBindingId = ref<number | null>(null);
 const selectedBindingId = ref<number | null>(null);
 const jobStatus = ref<AnnualJob | null>(null);
+const openingArtworkReadyId = ref("");
 const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 let pollGeneration = 0;
 let pollingJobId = "";
+let stopArtworkPreload: WatchStopHandle | null = null;
 
 const fetchAnnual = async () => {
   try {
@@ -183,7 +186,18 @@ watch(envelope, (value) => {
 watch(locale, async () => { storyStarted.value = false; drawerOpen.value = false; await reloadAnnual(); });
 watch(() => summary.value?.summaryId, (value, oldValue) => { if (value && value !== oldValue) storyStarted.value = false; });
 
-onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
+onMounted(() => {
+  let generation = 0;
+  stopArtworkPreload = watch(summary, async (value) => {
+    const currentGeneration = ++generation;
+    openingArtworkReadyId.value = "";
+    if (!value) return;
+    await preloadAnnualOpeningCovers(value);
+    if (currentGeneration === generation) openingArtworkReadyId.value = value.summaryId;
+  }, { immediate: true });
+});
+
+onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopArtworkPreload?.(); });
 </script>
 
 <template>
@@ -213,6 +227,11 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; });
         <el-button @click="navigateTo(localePath('/account/sync'))">{{ t("annualSummary.state.openSync") }}</el-button>
       </div>
       <small v-if="jobStatusLabel">{{ jobStatusLabel }}</small>
+    </div>
+
+    <div v-else-if="openingArtworkReadyId !== summary.summaryId" class="annual-state annual-state--loading">
+      <div class="annual-state__drum" aria-hidden="true"><i></i></div>
+      <p>{{ t("annualSummary.state.loading") }}</p>
     </div>
 
     <template v-else>

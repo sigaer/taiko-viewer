@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import { selectAnnualCoverSongs } from "~/utils/annualCoverFlow";
+import { isAnnualCoverPreloaded, selectAnnualCoverSongs } from "~/utils/annualCoverFlow";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 
 const props = defineProps<{
@@ -11,8 +11,12 @@ const props = defineProps<{
 }>();
 
 const failedCovers = ref(new Set<string>());
-const loadedCovers = ref(new Set<string>());
 const candidates = computed(() => selectAnnualCoverSongs(props.summary, 12, "opening"));
+const loadedCovers = ref(new Set(
+  candidates.value
+    .filter((song) => song.coverUrl && isAnnualCoverPreloaded(song.coverUrl))
+    .map((song) => song.flowKey)
+));
 const trackSongs = computed(() => candidates.value.length > 1
   ? [...candidates.value, ...candidates.value]
   : candidates.value
@@ -31,7 +35,11 @@ const markLoaded = (key: string) => {
 
 watch(() => props.summary.summaryId, () => {
   failedCovers.value = new Set();
-  loadedCovers.value = new Set();
+  loadedCovers.value = new Set(
+    candidates.value
+      .filter((song) => song.coverUrl && isAnnualCoverPreloaded(song.coverUrl))
+      .map((song) => song.flowKey)
+  );
 });
 </script>
 
