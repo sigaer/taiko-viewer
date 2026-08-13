@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const failedCovers = ref(new Set<string>());
 const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, "period"));
-const streamDuration = computed(() => Math.max(songs.value.length * 3.4, 30));
+const streamDuration = computed(() => Math.max(songs.value.length * 6, 48));
 const streamStyle = computed(() => ({
   "--cover-stream-duration": `${streamDuration.value}s`
 }));
@@ -92,7 +92,7 @@ const failCover = (key: string) => {
   position: absolute;
   top: 0;
   left: 50%;
-  width: min(76vw, 360px);
+  width: min(78vw, 330px);
   aspect-ratio: 1;
   opacity: 0;
   will-change: transform, opacity;
@@ -123,35 +123,35 @@ const failCover = (key: string) => {
 }
 
 @keyframes cover-dive-to-horizon {
-  /* One 7.14% travel window hands off directly to the next entry in a 14-cover track. */
+  /* Four evenly staggered planes share the lower corridor without touching. */
   0% {
-    opacity: 1;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), 0) rotateX(0deg) scale(1.04);
+    opacity: .94;
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) rotateX(72deg) scale(.74);
   }
-  5% { opacity: .58; }
-  7.14% {
+  21% { opacity: .46; }
+  28.45% {
     opacity: 0;
-    transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
+    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
-  7.15%, 100% {
+  28.46%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -48%, -190px) rotateX(84deg) scale(.54);
+    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
 }
 
 @keyframes cover-rise-from-horizon {
   0% {
     opacity: 0;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 52%), -190px) rotateX(-84deg) scale(.54);
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) rotateX(-78deg) scale(.52);
   }
-  2% { opacity: .38; }
-  7.14% {
-    opacity: 1;
-    transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
+  7.5% { opacity: .34; }
+  28.45% {
+    opacity: .94;
+    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
-  7.15%, 100% {
+  28.46%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -100%, 0) rotateX(0deg) scale(1.04);
+    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
 }
 
