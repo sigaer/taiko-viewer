@@ -3,23 +3,58 @@ import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { selectAnnualCoverSongs } from "~/utils/annualCoverFlow";
 
-const MAX_TRACK_COVERS = 14;
+const MAX_TRACK_COVERS = 12;
+const ZONE_SLOT_COUNT = 6;
+const SLOT_INTERVAL_SECONDS = 6;
+
+type CoverFlowItem = ReturnType<typeof selectAnnualCoverSongs>[number] & {
+  slotKey: string;
+  fallback?: boolean;
+};
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
   active: boolean;
   reducedMotion: boolean;
+  variant?: "period" | "overview";
 }>();
 
 const failedCovers = ref(new Set<string>());
-const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, "period"));
-const streamDuration = computed(() => Math.max(songs.value.length * 6, 48));
-const streamStyle = computed(() => ({
-  "--cover-stream-duration": `${streamDuration.value}s`
-}));
-const itemStyle = (index: number) => ({
-  "--cover-delay": `${-(streamDuration.value * index / Math.max(songs.value.length, 1))}s`
+const zones = ["upper", "lower"] as const;
+const variant = computed(() => props.variant || "period");
+const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, variant.value));
+
+const expandZone = (
+  source: ReturnType<typeof selectAnnualCoverSongs>,
+  zone: "upper" | "lower"
+): CoverFlowItem[] => {
+  const fallback = {
+    songNo: 0,
+    name: "",
+    coverUrl: null,
+    flowKey: `fallback:${variant.value}:${zone}`,
+    fallback: true
+  } as unknown as CoverFlowItem;
+  const pool = source.length ? source : [fallback];
+  return Array.from({ length: ZONE_SLOT_COUNT }, (_, index) => ({
+    ...pool[index % pool.length],
+    slotKey: `${variant.value}:${zone}:${index}:${pool[index % pool.length].flowKey}`
+  }));
+};
+
+const zoneItems = computed(() => {
+  const upper = songs.value.filter((_, index) => index % 2 === 0);
+  const lower = songs.value.filter((_, index) => index % 2 === 1);
+  return {
+    upper: expandZone(upper, "upper"),
+    lower: expandZone(lower, "lower")
+  };
 });
+
+const streamStyle = {
+  "--cover-stream-duration": `${ZONE_SLOT_COUNT * SLOT_INTERVAL_SECONDS}s`
+};
+const itemStyle = (index: number) => ({ "--cover-delay": `${-index * SLOT_INTERVAL_SECONDS}s` });
 
 const failCover = (key: string) => {
   failedCovers.value = new Set(failedCovers.value).add(key);
@@ -34,20 +69,21 @@ const failCover = (key: string) => {
     aria-hidden="true"
   >
     <div
-      v-for="zone in ['upper', 'lower']"
+      v-for="zone in zones"
       :key="zone"
       class="vertical-cover-stream__zone"
       :class="`is-${zone}`"
     >
-      <div v-if="songs.length" class="vertical-cover-stream__track">
+      <div class="vertical-cover-stream__track">
         <div
-          v-for="(song, index) in songs"
-          :key="`${zone}:${song.flowKey}`"
+          v-for="(song, index) in zoneItems[zone]"
+          :key="song.slotKey"
           class="vertical-cover-stream__slot"
           :style="itemStyle(index)"
+          :data-flow-key="song.fallback ? '' : song.flowKey"
         >
           <img
-            v-if="song.coverUrl && !failedCovers.has(song.flowKey)"
+            v-if="song.coverUrl && !song.fallback && !failedCovers.has(song.slotKey)"
             :src="song.coverUrl"
             alt=""
             width="400"
@@ -55,8 +91,9 @@ const failCover = (key: string) => {
             loading="eager"
             fetchpriority="low"
             decoding="async"
-            @error="failCover(song.flowKey)"
+            @error="failCover(song.slotKey)"
           />
+          <span v-else class="vertical-cover-stream__fallback"><i></i></span>
         </div>
       </div>
     </div>
@@ -109,7 +146,26 @@ const failCover = (key: string) => {
   box-shadow: 0 30px 34px rgba(23, 54, 93, 0.24);
   filter: saturate(0.92) contrast(0.96);
 }
-.vertical-cover-stream__slot:empty { display: none; }
+.vertical-cover-stream__fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(57, 120, 200, .22);
+  background:
+    linear-gradient(135deg, rgba(247, 251, 255, .96), rgba(185, 219, 251, .92)),
+    #e5f1ff;
+  box-shadow: 0 30px 34px rgba(23, 54, 93, .18);
+}
+.vertical-cover-stream__fallback i {
+  width: 32%;
+  aspect-ratio: 1;
+  border: clamp(5px, 2vw, 10px) solid #3978c8;
+  border-radius: 50%;
+  background: #f7fbff;
+  box-shadow: inset 0 0 0 clamp(3px, 1vw, 6px) rgba(238, 112, 98, .72);
+}
 .vertical-cover-stream.is-reduced .vertical-cover-stream__slot { display: none; }
 .vertical-cover-stream.is-reduced .is-lower .vertical-cover-stream__slot:first-child {
   display: block;
@@ -123,17 +179,16 @@ const failCover = (key: string) => {
 }
 
 @keyframes cover-dive-to-horizon {
-  /* Four evenly staggered planes share the lower corridor without touching. */
   0% {
     opacity: .94;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) rotateX(72deg) scale(.74);
   }
-  21% { opacity: .46; }
-  28.45% {
-    opacity: 0;
+  40% { opacity: .46; }
+  49.95% {
+    opacity: .12;
     transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
-  28.46%, 100% {
+  50%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
@@ -141,15 +196,15 @@ const failCover = (key: string) => {
 
 @keyframes cover-rise-from-horizon {
   0% {
-    opacity: 0;
+    opacity: .3;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) rotateX(-78deg) scale(.52);
   }
-  7.5% { opacity: .34; }
-  28.45% {
+  8% { opacity: .48; }
+  49.95% {
     opacity: .94;
     transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
-  28.46%, 100% {
+  50%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }

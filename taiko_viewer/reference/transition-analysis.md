@@ -1,0 +1,85 @@
+# Period to Overview transition analysis
+
+## Reference
+
+- Source: `页面过渡效果.mp4`
+- Frame: 720 x 1568 portrait
+- Duration: 7.32 s
+- Nominal video stream: 60 fps; average rate is variable and close to 120 fps
+- Forward transition used for calibration: approximately 2.60 s to 4.20 s
+- Viewer transition duration: 1600 ms
+
+The reference content is not copied. Only its plane hierarchy, perspective, timing,
+opacity staging, and continuous background are used.
+
+## Phases
+
+| Internal time | Phase | Viewer mapping |
+| --- | --- | --- |
+| 0-360 ms | Previous copy exits | Period date, heading, body, and facts fade with a short stagger |
+| 80-720 ms | Previous planes leave | Existing upper planes rise; lower planes recede toward the horizon |
+| 320-980 ms | Next planes enter | A new upper/lower plane pair travels in from depth and below |
+| 520-920 ms | Primary copy arrives | Overview eyebrow, title, song count, and chart count fade upward |
+| 840-1240 ms | Secondary fact arrives | Estimated total play time appears after the primary facts |
+| 1240-1600 ms | Settle | Plane scale, rotation, and opacity reach the Overview resting state |
+
+## Layers
+
+| Layer | Start | End | Motion and easing |
+| --- | --- | --- | --- |
+| background | continuous | continuous | Shared ice-blue field; no mount flash or cross-page replacement |
+| previous-upper-plane | y -12%, z 0, rx -72deg | y -88%, z -150px, rx -78deg | `power2.inOut`, 80-720 ms |
+| previous-lower-plane | y 46%, z 0, rx 72deg | y -48%, z -140px, rx 79deg | `power2.in`, 80-720 ms |
+| previous-heading | y 0, opacity 1 | y -12px, opacity 0 | `power2.in`, 0-300 ms |
+| previous-body-copy | y 0, opacity 1 | y -8px, opacity 0 | `power1.in`, 60-360 ms |
+| center-anchor | y 0, scale 1 | y 0, scale 1 | Remains visually stable; only a subtle opacity handoff is allowed |
+| next-upper-plane | y 52%, z -180px, rx -80deg | y -18%, z 0, rx -72deg | `power3.out`, 320-980 ms |
+| next-lower-plane | y 120%, z -170px, rx 80deg | y 48%, z 0, rx 72deg | `power3.out`, 320-980 ms |
+| next-heading | y 16px, opacity 0 | y 0, opacity 1 | `power2.out`, 520-920 ms |
+| next-primary-facts | y 14px, opacity 0 | y 0, opacity 1 | `power2.out`, 600-920 ms |
+| next-duration | y 18px, opacity 0 | y 0, opacity 1 | `power2.out`, 840-1240 ms |
+
+The scene uses a 900 px perspective with its origin near the vertical center. The
+planes remain rigid rectangles; Canvas/WebGL and animated blur are unnecessary.
+
+## DOM mapping and controller
+
+- `PeriodSlide` and `OverviewSlide` render the same scene at fixed times 0 ms and
+  1600 ms, so handing control to or from the transition overlay is pixel-stable.
+- `StoryPlayer` owns the transition clock, locks repeated navigation while it is
+  running, and commits the target scroll-snap position only after the clock ends.
+- `AnnualVerticalCoverStream` supplies deterministic, disjoint upper/lower cover
+  sets. Failed or insufficient covers render a neutral Taiko plane instead of an
+  empty animation slot.
+- In development, `?transitionTime=0..1600` freezes the overlay at an exact clock
+  value for reference-frame comparison. Production ignores the query parameter.
+- Reduced motion replaces the 3D sequence with a 180 ms opacity handoff.
+
+## Comparison checkpoints
+
+Reference times map to viewer clock values as follows:
+
+| Reference | Viewer |
+| --- | --- |
+| 2.60 s | 0 ms |
+| 2.80 s | 200 ms |
+| 3.00 s | 400 ms |
+| 3.20 s | 600 ms |
+| 3.40 s | 800 ms |
+| 3.60 s | 1000 ms |
+| 3.80 s | 1200 ms |
+| 4.00 s | 1400 ms |
+| 4.20 s | 1600 ms |
+
+The first comparison pass prioritizes layer order and timing. The second pass
+adjusts Y/Z travel, `rotateX`, scale, opacity, and per-layer easing independently.
+
+## Calibration result
+
+The nine frozen checkpoints were captured at the 720 x 1568 reference viewport.
+The second pass kept the copy handoff timing, increased each cover corridor's
+visible travel window to 50%, and retained separate upper/lower data pools. This
+produces roughly three readable planes per corridor without reusing the same
+chart across both corridors. The remaining visible difference is content-driven:
+viewer cover aspect ratios vary, while the reference planes use more uniform
+artwork proportions.

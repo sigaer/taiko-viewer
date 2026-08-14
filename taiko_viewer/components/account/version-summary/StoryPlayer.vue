@@ -1,6 +1,14 @@
 <script setup lang="ts">
+import { gsap } from "gsap";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch, type ComponentPublicInstance } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import {
+  PERIOD_OVERVIEW_DURATION_MS,
+  PERIOD_OVERVIEW_REDUCED_DURATION_MS,
+  clampPeriodOverviewTime
+} from "~/utils/annualTransition";
+import AnnualPeriodOverviewScene from "./AnnualPeriodOverviewScene.vue";
 import StoryProgress from "./StoryProgress.vue";
 
 // Pre-rendered, locally owned PCM one-shot; no runtime oscillator or background loop.
@@ -10,6 +18,7 @@ const ANNUAL_BGM = "/audio/annual/natsumatsuri-303-old.ogg";
 const props = defineProps<{ summary: VersionSummaryViewModel; started: boolean }>();
 const emit = defineEmits<{ "open-drawer": []; start: [] }>();
 const { t, locale } = useI18n();
+const route = useRoute();
 const { pages: slides } = useAnnualPages(toRef(props, "summary"), locale);
 
 const containerRef = ref<HTMLElement | null>(null);
@@ -17,12 +26,34 @@ const slideRefs = ref<Array<HTMLElement | null>>([]);
 const activeIndex = ref(0);
 const reducedMotion = ref(false);
 const reducedData = ref(false);
-const soundEnabled = ref(false);
+const soundEnabled = ref(true);
+const bgmPlaying = ref(false);
+const periodOverviewTime = ref(0);
+const transitionOverlayVisible = ref(false);
+const transitionRunning = ref(false);
+const pairEndpoint = ref(false);
 let motionMedia: MediaQueryList | null = null;
 let updateMotionHandler: ((event: MediaQueryListEvent) => void) | null = null;
 let scrollFrame = 0;
 let drumAudio: HTMLAudioElement | null = null;
 let bgmAudio: HTMLAudioElement | null = null;
+let audioGeneration = 0;
+let audioDisposed = false;
+let autoplayRetryBound = false;
+let transitionTween: gsap.core.Tween | null = null;
+let touchStart: { x: number; y: number } | null = null;
+const transitionClock = { value: 0 };
+
+const periodIndex = computed(() => slides.value.findIndex((page) => page.key === "period"));
+const overviewIndex = computed(() => slides.value.findIndex((page) => page.key === "overview"));
+const debugTransitionTime = computed<number | null>(() => {
+  if (!import.meta.dev) return null;
+  const raw = Array.isArray(route.query.transitionTime) ? route.query.transitionTime[0] : route.query.transitionTime;
+  if (raw === undefined || raw === null || raw === "") return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? clampPeriodOverviewTime(value) : null;
+});
+const visibleTransitionTime = computed(() => debugTransitionTime.value ?? periodOverviewTime.value);
 
 const progressItems = computed(() => slides.value.map((page) => ({
   key: page.key,
@@ -57,9 +88,62 @@ const ensureBgm = () => {
   return bgmAudio;
 };
 
+const clearAutoplayRetry = () => {
+  if (!autoplayRetryBound) return;
+  window.removeEventListener("pointerdown", retryAutoplay, true);
+  window.removeEventListener("keydown", retryAutoplay, true);
+  autoplayRetryBound = false;
+};
+
+const retryAutoplay = () => {
+  clearAutoplayRetry();
+  void playBgm();
+};
+
+const armAutoplayRetry = () => {
+  if (autoplayRetryBound || audioDisposed || !soundEnabled.value) return;
+  autoplayRetryBound = true;
+  window.addEventListener("pointerdown", retryAutoplay, { capture: true, once: true });
+  window.addEventListener("keydown", retryAutoplay, { capture: true, once: true });
+};
+
 const playBgm = async () => {
-  if (!soundEnabled.value || !props.started) return;
-  await ensureBgm().play().catch(() => { soundEnabled.value = false; });
+  if (!soundEnabled.value || audioDisposed || document.hidden) return;
+  const generation = audioGeneration;
+  const audio = ensureBgm();
+  try {
+    await audio.play();
+    if (audioDisposed || generation !== audioGeneration || !soundEnabled.value) {
+      audio.pause();
+      return;
+    }
+    bgmPlaying.value = true;
+    clearAutoplayRetry();
+  } catch {
+    bgmPlaying.value = false;
+    armAutoplayRetry();
+  }
+};
+
+const pauseBgm = (reset = false, release = false) => {
+  audioGeneration += 1;
+  bgmAudio?.pause();
+  bgmPlaying.value = false;
+  if (reset && bgmAudio) bgmAudio.currentTime = 0;
+  if (release && bgmAudio) {
+    bgmAudio.removeAttribute("src");
+    bgmAudio.load();
+    bgmAudio = null;
+  }
+};
+
+const disposeAudio = () => {
+  if (audioDisposed) return;
+  audioDisposed = true;
+  clearAutoplayRetry();
+  drumAudio?.pause();
+  drumAudio = null;
+  pauseBgm(true, true);
 };
 
 const toggleSound = async () => {
@@ -68,8 +152,9 @@ const toggleSound = async () => {
     await Promise.all([playDrum(), playBgm()]);
   } else {
     soundEnabled.value = false;
+    clearAutoplayRetry();
     drumAudio?.pause();
-    bgmAudio?.pause();
+    pauseBgm();
   }
 };
 
@@ -86,27 +171,118 @@ const getViewportIndex = () => {
   ));
 };
 
+const syncPairEndpoint = () => {
+  const container = containerRef.value;
+  const index = activeIndex.value;
+  const target = slideRefs.value[index];
+  pairEndpoint.value = Boolean(
+    container
+    && target
+    && (index === periodIndex.value || index === overviewIndex.value)
+    && Math.abs(container.scrollTop - target.offsetTop) <= 2
+  );
+};
+
 const syncActiveIndex = () => {
-  if (!containerRef.value) return;
+  if (!containerRef.value || transitionRunning.value) return;
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   scrollFrame = requestAnimationFrame(() => {
     const container = containerRef.value;
     if (!container) return;
     activeIndex.value = getViewportIndex();
+    syncPairEndpoint();
   });
+};
+
+const commitPage = async (index: number, behavior: ScrollBehavior = "auto") => {
+  activeIndex.value = index;
+  await nextTick();
+  const target = slideRefs.value[index];
+  if (!containerRef.value || !target) return;
+  containerRef.value.scrollTo({ top: target.offsetTop, behavior });
+  if (behavior === "auto") syncPairEndpoint();
+};
+
+const runPeriodOverviewTransition = async (targetIndex: number) => {
+  if (transitionRunning.value || debugTransitionTime.value !== null) return;
+  const forward = targetIndex === overviewIndex.value;
+  const sourceTime = forward ? 0 : PERIOD_OVERVIEW_DURATION_MS;
+  const targetTime = forward ? PERIOD_OVERVIEW_DURATION_MS : 0;
+  const realDuration = reducedMotion.value
+    ? PERIOD_OVERVIEW_REDUCED_DURATION_MS
+    : PERIOD_OVERVIEW_DURATION_MS;
+
+  transitionRunning.value = true;
+  pairEndpoint.value = false;
+  periodOverviewTime.value = sourceTime;
+  transitionClock.value = sourceTime;
+  transitionOverlayVisible.value = true;
+  await nextTick();
+
+  await new Promise<void>((resolve) => {
+    transitionTween?.kill();
+    transitionTween = gsap.to(transitionClock, {
+      value: targetTime,
+      duration: realDuration / 1000,
+      ease: "none",
+      onUpdate: () => { periodOverviewTime.value = transitionClock.value; },
+      onComplete: resolve
+    });
+  });
+
+  await commitPage(targetIndex);
+  await nextTick();
+  transitionOverlayVisible.value = false;
+  transitionRunning.value = false;
+  syncPairEndpoint();
 };
 
 const goToPage = async (index: number, instant = false) => {
   const safeIndex = Math.max(0, Math.min(slides.value.length - 1, index));
-  activeIndex.value = safeIndex;
-  await nextTick();
-  const target = slideRefs.value[safeIndex];
-  if (!containerRef.value || !target) return;
-  containerRef.value.scrollTo({
-    top: target.offsetTop,
-    behavior: instant || reducedMotion.value ? "auto" : "smooth"
-  });
+  if (transitionRunning.value) return;
+  const viewportIndex = getViewportIndex();
+  if (
+    !instant
+    && ((viewportIndex === periodIndex.value && safeIndex === overviewIndex.value)
+      || (viewportIndex === overviewIndex.value && safeIndex === periodIndex.value))
+  ) {
+    await runPeriodOverviewTransition(safeIndex);
+    return;
+  }
+  await commitPage(safeIndex, instant || reducedMotion.value ? "auto" : "smooth");
 };
+
+const navigateFromPair = (direction: -1 | 1) => {
+  const index = activeIndex.value;
+  if (index === periodIndex.value && direction === 1) void goToPage(overviewIndex.value);
+  else if (index === overviewIndex.value && direction === -1) void goToPage(periodIndex.value);
+  else void goToPage(index + direction);
+};
+
+const handleWheel = (event: WheelEvent) => {
+  if (!pairEndpoint.value || Math.abs(event.deltaY) < 8) return;
+  event.preventDefault();
+  navigateFromPair(event.deltaY > 0 ? 1 : -1);
+};
+
+const handleTouchStart = (event: TouchEvent) => {
+  if (!pairEndpoint.value || event.touches.length !== 1) return;
+  touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+};
+
+const handleTouchEnd = (event: TouchEvent) => {
+  if (!touchStart || !pairEndpoint.value || !event.changedTouches.length) {
+    touchStart = null;
+    return;
+  }
+  const deltaX = event.changedTouches[0].clientX - touchStart.x;
+  const deltaY = event.changedTouches[0].clientY - touchStart.y;
+  touchStart = null;
+  if (Math.abs(deltaY) < 42 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
+  navigateFromPair(deltaY < 0 ? 1 : -1);
+};
+
+const handleTouchCancel = () => { touchStart = null; };
 
 const startStory = async () => {
   soundEnabled.value = true;
@@ -159,6 +335,10 @@ watch(activeIndex, (value, oldValue) => {
 });
 
 watch(() => props.summary.summaryId, async () => {
+  transitionTween?.kill();
+  transitionRunning.value = false;
+  transitionOverlayVisible.value = false;
+  periodOverviewTime.value = 0;
   activeIndex.value = 0;
   slideRefs.value = [];
   await nextTick();
@@ -176,29 +356,43 @@ onMounted(async () => {
   updateMotionHandler = (event) => { reducedMotion.value = event.matches || reducedData.value; };
   motionMedia.addEventListener("change", updateMotionHandler);
   window.addEventListener("keydown", handleKeydown);
-  soundEnabled.value = false;
+  window.addEventListener("pagehide", handlePageHide);
+  window.addEventListener("pageshow", handlePageShow);
+  audioDisposed = false;
+  soundEnabled.value = true;
   activeIndex.value = 0;
   await nextTick();
   containerRef.value?.focus({ preventScroll: true });
-  await goToPage(0, true);
+  await goToPage(debugTransitionTime.value === null ? 0 : periodIndex.value, true);
   preloadNextArtwork();
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  void playBgm();
 });
 
 const handleVisibilityChange = () => {
-  if (document.hidden) bgmAudio?.pause();
+  if (document.hidden) pauseBgm();
   else void playBgm();
 };
 
+const handlePageHide = () => pauseBgm(true, true);
+const handlePageShow = () => {
+  if (soundEnabled.value) void playBgm();
+};
+
+onBeforeRouteLeave(() => {
+  soundEnabled.value = false;
+  disposeAudio();
+});
+
 onBeforeUnmount(() => {
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  transitionTween?.kill();
   if (motionMedia && updateMotionHandler) motionMedia.removeEventListener("change", updateMotionHandler);
   window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("pagehide", handlePageHide);
+  window.removeEventListener("pageshow", handlePageShow);
   document.removeEventListener("visibilitychange", handleVisibilityChange);
-  drumAudio?.pause();
-  drumAudio = null;
-  bgmAudio?.pause();
-  bgmAudio = null;
+  disposeAudio();
 });
 </script>
 
@@ -208,7 +402,7 @@ onBeforeUnmount(() => {
       <span></span><span></span><span></span>
     </button>
     <button
-      v-if="started" type="button" class="story-player__sound-trigger" :aria-pressed="soundEnabled"
+      v-if="started" type="button" class="story-player__sound-trigger" :class="{ 'is-playing': bgmPlaying }" :aria-pressed="soundEnabled"
       :aria-label="soundEnabled ? t('annualSummary.controls.soundOff') : t('annualSummary.controls.soundOn')"
       @click="toggleSound"
     >
@@ -221,7 +415,17 @@ onBeforeUnmount(() => {
       :aria-label="t('annualSummary.controls.progress')" @select="goToPage"
     />
 
-    <div ref="containerRef" class="story-player__viewport" tabindex="0" @scroll.passive="syncActiveIndex">
+    <div
+      ref="containerRef"
+      class="story-player__viewport"
+      :class="{ 'is-pair-endpoint': pairEndpoint }"
+      tabindex="0"
+      @scroll.passive="syncActiveIndex"
+      @wheel="handleWheel"
+      @touchstart.passive="handleTouchStart"
+      @touchend="handleTouchEnd"
+      @touchcancel="handleTouchCancel"
+    >
       <div
         v-for="(slide, index) in slides" :key="slide.key"
         :ref="(element) => setSlideRef(index, element)"
@@ -237,6 +441,21 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <div
+      v-if="transitionOverlayVisible || debugTransitionTime !== null"
+      class="story-player__transition-overlay"
+      :class="{ 'is-debug': debugTransitionTime !== null }"
+    >
+      <AnnualPeriodOverviewScene
+        :summary="summary"
+        :period-page-index="periodIndex"
+        :page-total="slides.length"
+        :active="true"
+        :reduced-motion="reducedMotion"
+        :transition-time="visibleTransitionTime"
+      />
+    </div>
+
     <div v-if="started" class="story-player__nav" :aria-label="t('annualSummary.controls.pageNavigation')">
       <button type="button" :disabled="activeIndex === 0" :aria-label="t('annualSummary.controls.previous')" @click="goToPage(activeIndex - 1)">←</button>
       <button type="button" :disabled="activeIndex === slides.length - 1" :aria-label="t('annualSummary.controls.next')" @click="goToPage(activeIndex + 1)">→</button>
@@ -245,5 +464,5 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.story-player{position:relative;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:100dvh}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{min-height:100vh;min-height:100svh;min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media (orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
+.story-player{position:relative;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:100dvh}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player__viewport.is-pair-endpoint{touch-action:none}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{min-height:100vh;min-height:100svh;min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__transition-overlay{position:absolute;z-index:20;inset:0;overflow:hidden;pointer-events:none}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media(orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
 </style>

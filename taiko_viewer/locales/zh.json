@@ -590,7 +590,7 @@
       "opening": { "eyebrow": "2026 · 你的太鼓故事", "title": "{nickname}，来听听你的 2026", "body": "{playCount} 次留下痕迹的挑战、{uniqueSongs} 首相遇过的歌，都在这面鼓里等你。" },
       "profile": { "eyebrow": "PLAYER CARD", "title": "这一年的主角，是 {nickname}", "body": "这张小咚装扮，就是你的专属开场。", "bodyWithTitle": "戴着“{playerTitle}”的称号登场，小咚也替你换好了这一年的装扮。", "bodyWithDan": "以“{dan}”的段位站上鼓面，小咚也替你换好了这一年的装扮。", "bodyWithTitleAndDan": "戴着“{playerTitle}”的称号、以“{dan}”的段位登场——这就是只属于你的玩家卡。" },
       "period": { "eyebrow": "从元旦到此刻", "title": "{totalDays} 天，故事还在继续", "body": "日期向前走，记录也一页页变厚。你的 2026，还没有落下最后一槌。" },
-      "overview": { "eyebrow": "你的鼓手轮廓", "title": "一锤一锤，敲成现在的你", "observedBody": "在被记录下来的旅程里，{playCount} 次挑战落在 {uniqueSongs} 首歌上。每个数字，都有你的鼓点。", "archiveBody": "截至此刻，{uniqueSongs} 首歌与 {uniqueCharts} 张谱面组成了你的太鼓档案。它们都是你走到这里的痕迹。" },
+      "overview": { "eyebrow": "你的鼓手轮廓", "title": "一锤一锤，敲成现在的你", "observedBody": "这一段记录里，{uniqueSongs} 首歌与 {uniqueCharts} 张谱面，勾勒出你的鼓手轮廓。", "archiveBody": "截至此刻，{uniqueSongs} 首歌与 {uniqueCharts} 张谱面，勾勒出你的鼓手轮廓。" },
       "favorite": { "eyebrow": "最爱", "title": "你把《{favoriteSong}》一次次叫回鼓面", "observedBody": "它在这段记录里与你相遇了 {favoriteCount} 次。熟悉的前奏一响，你还是会回到它面前。", "archiveBody": "截至此刻，《{favoriteSong}》是成绩档案里留下挑战最多的歌。反复相遇，本身就是偏爱。" },
       "obsession": { "eyebrow": "念念不忘", "title": "{obsessionDays} 个不同日子里，你都想起《{obsessionSong}》", "body": "有些歌不是打过就结束。你一次次回来，把喜欢敲成了长长的回响。" },
       "favoriteShift": { "eyebrow": "新欢旧爱", "title": "从《{oldFavorite}》到《{newFavorite}》", "body": "旧爱没有退场，新欢已经响起。喜欢的轮廓，也在你的鼓槌下悄悄长大。" },

@@ -537,7 +537,7 @@
       "opening": { "eyebrow": "2026 · あなたの太鼓物語", "title": "{nickname}、2026 年の音を聴こう", "body": "記録に残った {playCount} 回の挑戦と、出会った {uniqueSongs} 曲が、この鼓面で待っています。" },
       "profile": { "eyebrow": "PLAYER CARD", "title": "この一年の主役は、{nickname}", "body": "このきせかえから、あなただけの物語が始まります。", "bodyWithTitle": "「{playerTitle}」を掲げ、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithDan": "「{dan}」として鼓面に立ち、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithTitleAndDan": "「{playerTitle}」を掲げ、「{dan}」として登場——あなただけのプレイヤーカードです。" },
       "period": { "eyebrow": "元日から今まで", "title": "{totalDays} 日、物語はまだ続く", "body": "日付が進むたび、記録も一ページずつ厚くなる。2026 年の最後の一打は、まだ先です。" },
-      "overview": { "eyebrow": "太鼓を叩くあなた", "title": "一打ずつ、今のあなたになった", "observedBody": "記録に残った旅では、{playCount} 回の挑戦が {uniqueSongs} 曲に響きました。どの数字にも、あなたの音があります。", "archiveBody": "今までの {uniqueSongs} 曲と {uniqueCharts} 譜面が、あなたの太鼓アーカイブを形づくっています。ここまで来た足あとです。" },
+      "overview": { "eyebrow": "太鼓を叩くあなた", "title": "一打ずつ、今のあなたになった", "observedBody": "記録に残った {uniqueSongs} 曲と {uniqueCharts} 譜面が、あなたの輪郭を描いています。", "archiveBody": "今までの {uniqueSongs} 曲と {uniqueCharts} 譜面が、あなたの輪郭を描いています。" },
       "favorite": { "eyebrow": "最愛", "title": "『{favoriteSong}』を何度も鼓面へ呼び戻した", "observedBody": "この記録の中で {favoriteCount} 回出会いました。聴き慣れたイントロが鳴れば、やっぱり戻りたくなる一曲です。", "archiveBody": "今の成績アーカイブで、最も多く挑戦が残ったのは『{favoriteSong}』。何度も会うこと、それ自体が好きの証です。" },
       "obsession": { "eyebrow": "忘れられない一曲", "title": "{obsessionDays} 日のそれぞれで、『{obsessionSong}』を思い出した", "body": "一度叩いて終わる曲ばかりではありません。戻るたび、好きが長い余韻になりました。" },
       "favoriteShift": { "eyebrow": "新しい好き、変わらない好き", "title": "『{oldFavorite}』から『{newFavorite}』へ", "body": "前の好きは消えず、新しい好きも鳴り始める。好みの輪郭は、バチの下で少しずつ育ちます。" },

@@ -255,7 +255,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
     }, index);
     await page.waitForFunction((target) => {
       const slide = document.querySelectorAll(".story-player__slide")[target];
-      if (!slide?.querySelector(".story-slide-shell, .annual-opening, .period-story")) return false;
+      if (!slide?.querySelector(".story-slide-shell, .annual-opening, .period-overview-scene")) return false;
       return Math.abs(slide.getBoundingClientRect().top) <= 1;
     }, index, { timeout: 5_000 });
     await wait(80);
@@ -445,11 +445,11 @@ const auditOpeningMotion = async (browser, cookie) => {
     node.dispatchEvent(new Event("scroll"));
   }, periodIndex);
   await page.waitForFunction(
-    () => document.querySelector(".period-story.is-active .vertical-cover-stream__slot")?.getAnimations().length,
+    () => document.querySelector(".period-overview-scene.is-active .vertical-cover-stream__slot")?.getAnimations().length,
     undefined,
     { timeout: 10_000 }
   );
-  const periodStream = page.locator(".period-story.is-active .vertical-cover-stream");
+  const periodStream = page.locator(".story-player__slide[data-page-key='period'] .period-overview-scene.is-active .period-overview-scene__previous-planes .vertical-cover-stream");
   const periodMotion = await periodStream.evaluate((stream) => {
     const lowerSlot = stream.querySelector(".is-lower .vertical-cover-stream__slot");
     const upperSlot = stream.querySelector(".is-upper .vertical-cover-stream__slot");
@@ -478,7 +478,15 @@ const auditOpeningMotion = async (browser, cookie) => {
       visibleUpperCovers: upper.count,
       visibleLowerCovers: lower.count,
       upperOverlaps: upper.overlaps,
-      lowerOverlaps: lower.overlaps
+      lowerOverlaps: lower.overlaps,
+      visibleUpperKeys: [...stream.querySelectorAll(".is-upper .vertical-cover-stream__slot")]
+        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+        .map((slot) => slot.getAttribute("data-flow-key"))
+        .filter(Boolean),
+      visibleLowerKeys: [...stream.querySelectorAll(".is-lower .vertical-cover-stream__slot")]
+        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+        .map((slot) => slot.getAttribute("data-flow-key"))
+        .filter(Boolean)
     };
   });
   await wait(600);
@@ -496,13 +504,199 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.ok(periodMotion.visibleLowerCovers <= 4, `period lower stream shows too many covers: ${periodMotion.visibleLowerCovers}`);
   assert.equal(periodMotion.upperOverlaps, false, "period upper covers overlap each other");
   assert.equal(periodMotion.lowerOverlaps, false, "period lower covers overlap each other");
+  assert.deepEqual(
+    periodMotion.visibleUpperKeys.filter((key) => periodMotion.visibleLowerKeys.includes(key)),
+    [],
+    "period upper and lower streams show the same cover"
+  );
   assert.notEqual(periodMotionAfter.lowerTransform, periodMotion.lowerTransform, "lower covers did not move toward the text boundary");
   assert.notEqual(periodMotionAfter.upperTransform, periodMotion.upperTransform, "upper covers did not move away from the text boundary");
+  const failedCover = periodStream.locator(".vertical-cover-stream__slot img").first();
+  if (await failedCover.count()) {
+    await failedCover.evaluate((image) => image.dispatchEvent(new Event("error")));
+    await page.waitForFunction(() => Boolean(document.querySelector(".story-player__slide[data-page-key='period'] .vertical-cover-stream__fallback")));
+  }
+  const overviewIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
+    slides.findIndex((slide) => slide.getAttribute("data-page-key") === "overview")
+  );
+  assert.equal(overviewIndex, periodIndex + 1, "overview no longer follows period directly");
+  await page.locator(".story-player__viewport").focus();
+  await page.keyboard.press("PageDown");
+  await page.waitForFunction(() => {
+    const scene = document.querySelector(".story-player__transition-overlay .period-overview-scene");
+    const time = Number(scene?.getAttribute("data-transition-time"));
+    return time > 0 && time < 1600;
+  }, undefined, { timeout: 2_000 });
+  await page.waitForFunction(
+    () => {
+      const slide = document.querySelector(".story-player__slide[data-page-key='overview']");
+      return Boolean(slide && Math.abs(slide.getBoundingClientRect().top) <= 1 && !document.querySelector(".story-player__transition-overlay"));
+    },
+    undefined,
+    { timeout: 4_000 }
+  );
+  const overviewCopy = await page.locator(".story-player__slide[data-page-key='overview']").innerText();
+  for (const forbidden of ["已经通关", "已经全连", "已经全良", "已经极"]) {
+    assert.equal(overviewCopy.includes(forbidden), false, `overview still includes ${forbidden}`);
+  }
+  await page.keyboard.press("PageUp");
+  await page.waitForFunction(
+    () => {
+      const slide = document.querySelector(".story-player__slide[data-page-key='period']");
+      return Boolean(slide && Math.abs(slide.getBoundingClientRect().top) <= 1 && !document.querySelector(".story-player__transition-overlay"));
+    },
+    undefined,
+    { timeout: 4_000 }
+  );
   await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
   reportProgress("period motion: full-height cover stream advanced");
   reportProgress("opening motion: closing");
   await context.close();
   reportProgress("opening motion: passed");
+};
+
+const auditTransitionFrames = async (browser, cookie) => {
+  reportProgress("period transition frames: start");
+  const context = await browser.newContext({
+    viewport: { width: 720, height: 1568 },
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "no-preference"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  for (const time of [0, 200, 400, 600, 800, 1000, 1200, 1400, 1600]) {
+    await openAnnualPage(page, `/account/version-summary?transitionTime=${time}`, 90_000);
+    await page.locator(`.story-player__transition-overlay .period-overview-scene[data-transition-time="${time}"]`).waitFor({ state: "visible", timeout: 30_000 });
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all([...document.images].map((image) => image.complete
+        ? Promise.resolve()
+        : new Promise((resolveImage) => {
+            image.addEventListener("load", resolveImage, { once: true });
+            image.addEventListener("error", resolveImage, { once: true });
+          })));
+    });
+    await page.screenshot({ path: `/tmp/annual-transition-${String(time).padStart(4, "0")}.png`, fullPage: false });
+  }
+  await context.close();
+  reportProgress("period transition frames: passed");
+};
+
+const auditAudioLifecycle = async (browser, cookie) => {
+  reportProgress("annual audio lifecycle: start");
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  await context.addInitScript(() => {
+    const eventKey = "annual-audio-events";
+    const record = (event) => {
+      let events = [];
+      try { events = JSON.parse(localStorage.getItem(eventKey) || "[]"); }
+      catch { events = []; }
+      events.push({ ...event, at: performance.timeOrigin + performance.now() });
+      localStorage.setItem(eventKey, JSON.stringify(events));
+    };
+    let blockedBgmAttempts = 1;
+    let documentHidden = false;
+    class AnnualAudioMock extends EventTarget {
+      constructor(src = "") {
+        super();
+        this.src = src;
+        this.currentTime = 0;
+        this.preload = "";
+        this.loop = false;
+        this.volume = 1;
+        this.paused = true;
+      }
+
+      play() {
+        const isBgm = this.src.includes("natsumatsuri-303-old.ogg");
+        const blocked = isBgm && blockedBgmAttempts > 0;
+        if (blocked) blockedBgmAttempts -= 1;
+        record({ type: "play", src: this.src, blocked });
+        if (blocked) return Promise.reject(new DOMException("Autoplay blocked", "NotAllowedError"));
+        this.paused = false;
+        return Promise.resolve();
+      }
+
+      pause() {
+        this.paused = true;
+        record({ type: "pause", src: this.src });
+      }
+
+      load() { record({ type: "load", src: this.src }); }
+      removeAttribute(name) { if (name === "src") this.src = ""; }
+    }
+    Object.defineProperty(window, "Audio", { configurable: true, writable: true, value: AnnualAudioMock });
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => documentHidden });
+    window.__setAnnualDocumentHidden = (value) => {
+      documentHidden = Boolean(value);
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+  });
+
+  const page = await context.newPage();
+  await openAnnualPage(page, "/titles");
+  await page.evaluate(() => localStorage.setItem("annual-audio-events", "[]"));
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  const bgmEvents = () => page.evaluate(() => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.filter((event) => String(event.src || "").includes("natsumatsuri-303-old.ogg"));
+  });
+  await page.waitForFunction(() => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.some((event) => event.type === "play" && event.blocked === true && String(event.src).includes("natsumatsuri-303-old.ogg"));
+  });
+  const initialEvents = await bgmEvents();
+  assert.equal(initialEvents.filter((event) => event.type === "play").length, 1, "BGM was not attempted exactly once when the opening page loaded");
+
+  await page.locator(".annual-opening__start").click();
+  await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(() => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.some((event) => event.type === "play" && event.blocked === false && String(event.src).includes("natsumatsuri-303-old.ogg"));
+  });
+
+  const sound = page.locator(".story-player__sound-trigger");
+  const pauseCountBeforeMute = (await bgmEvents()).filter((event) => event.type === "pause").length;
+  await sound.click();
+  await page.waitForFunction((before) => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.filter((event) => event.type === "pause" && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
+  }, pauseCountBeforeMute);
+  await sound.click();
+
+  const pauseCountBeforeHidden = (await bgmEvents()).filter((event) => event.type === "pause").length;
+  await page.evaluate(() => window.__setAnnualDocumentHidden(true));
+  await page.waitForFunction((before) => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.filter((event) => event.type === "pause" && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
+  }, pauseCountBeforeHidden);
+  const playCountBeforeVisible = (await bgmEvents()).filter((event) => event.type === "play" && !event.blocked).length;
+  await page.evaluate(() => window.__setAnnualDocumentHidden(false));
+  await page.waitForFunction((before) => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.filter((event) => event.type === "play" && !event.blocked && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
+  }, playCountBeforeVisible);
+
+  const pauseCountBeforeExit = (await bgmEvents()).filter((event) => event.type === "pause").length;
+  await page.locator(".story-player__drawer-trigger").click();
+  await page.locator(".story-drawer__actions button").click();
+  await page.waitForURL(/\/account\/profile(?:\?|$)/, { timeout: 15_000 });
+  const exitEvents = await bgmEvents();
+  const allExitEvents = await page.evaluate(() => JSON.parse(localStorage.getItem("annual-audio-events") || "[]"));
+  assert.ok(exitEvents.filter((event) => event.type === "pause").length > pauseCountBeforeExit, "BGM did not pause on route exit");
+  assert.ok(allExitEvents.some((event) => event.type === "load"), "BGM resource was not released on route exit");
+  await context.close();
+  reportProgress("annual audio lifecycle: passed");
 };
 
 let firstUserId = null;
@@ -655,7 +849,9 @@ try {
   });
   reportProgress("browser matrix: launched");
   try {
+    await auditAudioLifecycle(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
+    if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
       { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
       { width: 390, height: 844 }, { width: 844, height: 390 }
@@ -680,7 +876,7 @@ try {
       node.scrollTop = node.clientHeight * target;
       node.dispatchEvent(new Event("scroll"));
     }, archivePeriodIndex);
-    await archivePage.waitForFunction((target) => Boolean(document.querySelectorAll(".story-player__slide")[target]?.querySelector(".period-story")), archivePeriodIndex);
+    await archivePage.waitForFunction((target) => Boolean(document.querySelectorAll(".story-player__slide")[target]?.querySelector(".period-overview-scene")), archivePeriodIndex);
     const archivePeriodLines = (await archivePage.locator(".story-player__slide").nth(archivePeriodIndex).innerText()).split(/\n/).map((line) => line.trim());
     assert.equal(archivePeriodLines.includes("-"), false, "archive period page exposed a raw missing-time placeholder");
     await archivePage.screenshot({ path: "/tmp/annual-e2e-archive-period.png" });

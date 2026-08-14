@@ -46,6 +46,11 @@ assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are v
 assert.equal(storyPlayer.includes('@start="startStory"'), true, "opening start action is not connected to story navigation");
 assert.equal(storyPlayer.includes('/audio/annual/natsumatsuri-303-old.ogg'), true, "annual BGM is missing");
 assert.equal(await exists("public/audio/annual/natsumatsuri-303-old.ogg"), true, "annual BGM asset is missing");
+const playBgmSource = storyPlayer.match(/const playBgm = async \(\) => \{[\s\S]*?\n\};/)?.[0] || "";
+assert.equal(playBgmSource.includes("props.started"), false, "annual BGM still waits for the opening start action");
+assert.equal(storyPlayer.includes('window.addEventListener("pagehide"'), true, "annual BGM is not stopped on page exit");
+assert.equal(storyPlayer.includes("onBeforeRouteLeave"), true, "annual BGM has no route-leave cleanup");
+assert.equal(storyPlayer.includes("debugTransitionTime"), true, "period transition has no development-time freeze control");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
 const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");
@@ -63,9 +68,20 @@ assert.equal(openingCarouselSource.includes("reducedMotion"), true, "opening car
 assert.equal(openingFireworksSource.includes("is-still"), true, "opening fireworks ignore reduced motion");
 assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lane ignores reduced motion");
 const periodMotionSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
+const overviewMotionSource = await read("components/account/version-summary/slides/OverviewSlide.vue");
+const periodOverviewSceneSource = await read("components/account/version-summary/AnnualPeriodOverviewScene.vue");
 const verticalCoverSource = await read("components/account/version-summary/AnnualVerticalCoverStream.vue");
-assert.equal(periodMotionSource.includes("AnnualVerticalCoverStream"), true, "period page cover stream is missing");
+assert.equal(periodMotionSource.includes("AnnualPeriodOverviewScene"), true, "period page does not use the shared transition scene");
+assert.equal(overviewMotionSource.includes("AnnualPeriodOverviewScene"), true, "overview page does not use the shared transition scene");
+assert.equal(overviewMotionSource.includes("StorySlideShell"), false, "overview page still uses the generic slide shell");
+assert.equal(periodOverviewSceneSource.includes("AnnualVerticalCoverStream"), true, "shared period scene has no cover stream");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueSongs"), true, "overview scene is missing the song count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueCharts"), true, "overview scene is missing the chart count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.estimatedTimeText"), true, "overview scene is missing total play time");
+assert.equal(/currentClearCharts|currentFullComboCharts|currentDondafulCharts|currentKiwamiCharts/.test(periodOverviewSceneSource), false, "overview scene still exposes the old achievement grid");
 assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");
+assert.equal(verticalCoverSource.includes("ZONE_SLOT_COUNT = 6"), true, "period cover stream does not use a gap-free fixed cadence");
+assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), true, "period cover stream has no visual fallback plane");
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
@@ -104,6 +120,7 @@ const componentNames = {
 };
 const annualSources = await Promise.all([
   read("components/account/version-summary/StorySlideShell.vue"),
+  read("components/account/version-summary/AnnualPeriodOverviewScene.vue"),
   ...expectedPages.map((page) => read(`components/account/version-summary/slides/${componentNames[page]}.vue`))
 ]);
 for (const source of annualSources) {
@@ -121,10 +138,9 @@ const breakthroughSource = await read("components/account/version-summary/slides
 assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");
 assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
 
-const periodSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
-assert.equal(periodSource.includes("summary.period.firstRecordAt || props.summary.version.startDate"), true, "period page exposes an empty first-record placeholder");
-assert.equal(periodSource.includes("summary.period.lastRecordAt || props.summary.version.effectiveEndDate"), true, "period page exposes an empty last-record placeholder");
-assert.equal(periodSource.includes("summary.copy.period.body"), true, "period page lacks its period narrative");
+assert.equal(periodOverviewSceneSource.includes("summary.period.firstRecordAt || props.summary.version.startDate"), true, "period page exposes an empty first-record placeholder");
+assert.equal(periodOverviewSceneSource.includes("summary.period.lastRecordAt || props.summary.version.effectiveEndDate"), true, "period page exposes an empty last-record placeholder");
+assert.equal(periodOverviewSceneSource.includes("summary.copy.period.body"), true, "period page lacks its period narrative");
 
 const finalTitleSource = await read("components/account/version-summary/slides/FinalTitleSlide.vue");
 assert.equal(finalTitleSource.includes("AnnualDrumWindow"), true, "final title page does not carry the player's MyDon");
