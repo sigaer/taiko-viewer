@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { selectAnnualCoverSongs } from "~/utils/annualCoverFlow";
+import { ANNUAL_COVER_PHASE_KEY, ANNUAL_COVER_STREAM_DURATION_MS } from "~/utils/annualCoverClock";
 
 const MAX_TRACK_COVERS = 12;
 const ZONE_SLOT_COUNT = 6;
@@ -16,13 +17,12 @@ const props = defineProps<{
   summary: VersionSummaryViewModel;
   active: boolean;
   reducedMotion: boolean;
-  variant?: "period" | "overview";
 }>();
 
 const failedCovers = ref(new Set<string>());
 const zones = ["upper", "lower"] as const;
-const variant = computed(() => props.variant || "period");
-const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, variant.value));
+const sharedPhase = inject(ANNUAL_COVER_PHASE_KEY, ref(0));
+const songs = computed(() => selectAnnualCoverSongs(props.summary, MAX_TRACK_COVERS, "period-overview"));
 
 const expandZone = (
   source: ReturnType<typeof selectAnnualCoverSongs>,
@@ -32,13 +32,14 @@ const expandZone = (
     songNo: 0,
     name: "",
     coverUrl: null,
-    flowKey: `fallback:${variant.value}:${zone}`,
+    flowKey: `fallback:${zone}`,
     fallback: true
   } as unknown as CoverFlowItem;
-  const pool = source.length ? source : [fallback];
+  if (!source.length) return [{ ...fallback, slotKey: `fallback:${zone}` }];
+  const pool = source;
   return Array.from({ length: ZONE_SLOT_COUNT }, (_, index) => ({
     ...pool[index % pool.length],
-    slotKey: `${variant.value}:${zone}:${index}:${pool[index % pool.length].flowKey}`
+    slotKey: `${zone}:${index}:${pool[index % pool.length].flowKey}`
   }));
 };
 
@@ -51,9 +52,10 @@ const zoneItems = computed(() => {
   };
 });
 
-const streamStyle = {
-  "--cover-stream-duration": `${ZONE_SLOT_COUNT * SLOT_INTERVAL_SECONDS}s`
-};
+const streamStyle = computed(() => ({
+  "--cover-stream-duration": `${ANNUAL_COVER_STREAM_DURATION_MS / 1000}s`,
+  "--cover-phase": `${sharedPhase.value / 1000}s`
+}));
 const itemStyle = (index: number) => ({ "--cover-delay": `${-index * SLOT_INTERVAL_SECONDS}s` });
 
 const failCover = (key: string) => {
@@ -79,21 +81,24 @@ const failCover = (key: string) => {
           v-for="(song, index) in zoneItems[zone]"
           :key="song.slotKey"
           class="vertical-cover-stream__slot"
+          :class="{ 'is-fallback': song.fallback }"
           :style="itemStyle(index)"
           :data-flow-key="song.fallback ? '' : song.flowKey"
         >
-          <img
-            v-if="song.coverUrl && !song.fallback && !failedCovers.has(song.slotKey)"
-            :src="song.coverUrl"
-            alt=""
-            width="400"
-            height="400"
-            loading="eager"
-            fetchpriority="low"
-            decoding="async"
-            @error="failCover(song.slotKey)"
-          />
-          <span v-else class="vertical-cover-stream__fallback"><i></i></span>
+          <div class="vertical-cover-stream__plane">
+            <img
+              v-if="song.coverUrl && !song.fallback && !failedCovers.has(song.slotKey)"
+              :src="song.coverUrl"
+              alt=""
+              width="400"
+              height="400"
+              loading="eager"
+              fetchpriority="low"
+              decoding="async"
+              @error="failCover(song.slotKey)"
+            />
+            <span v-else class="vertical-cover-stream__fallback"><i></i></span>
+          </div>
         </div>
       </div>
     </div>
@@ -133,11 +138,12 @@ const failCover = (key: string) => {
   aspect-ratio: 1;
   opacity: 0;
   will-change: transform, opacity;
-  animation-delay: var(--cover-delay);
+  animation-delay: calc(var(--cover-delay) - var(--cover-phase));
 }
-.vertical-cover-stream.is-running .is-lower .vertical-cover-stream__slot { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite; animation-delay: var(--cover-delay); }
-.vertical-cover-stream.is-running .is-upper .vertical-cover-stream__slot { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite; animation-delay: var(--cover-delay); }
-.vertical-cover-stream__slot img {
+.vertical-cover-stream.is-running .is-lower .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
+.vertical-cover-stream.is-running .is-upper .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
+.vertical-cover-stream__plane { width: 100%; height: 100%; transform-style: preserve-3d; transform-origin: 50% 50%; will-change: transform; }
+.vertical-cover-stream__plane img {
   display: block;
   width: 100%;
   height: 100%;
@@ -146,6 +152,9 @@ const failCover = (key: string) => {
   box-shadow: 0 30px 34px rgba(23, 54, 93, 0.24);
   filter: saturate(0.92) contrast(0.96);
 }
+.vertical-cover-stream__slot.is-fallback { opacity: .54; }
+.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, -58%, -90px) scale(.58); }
+.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, calc(var(--cover-zone-height) - 42%), -90px) scale(.58); }
 .vertical-cover-stream__fallback {
   display: grid;
   width: 100%;
@@ -170,43 +179,43 @@ const failCover = (key: string) => {
 .vertical-cover-stream.is-reduced .is-lower .vertical-cover-stream__slot:first-child {
   display: block;
   opacity: .72;
-  transform: translate3d(-50%, calc(var(--cover-zone-height) - 68%), 0) rotateX(18deg) scale(.9);
+  transform: translate3d(-50%, calc(var(--cover-zone-height) - 68%), 0) scale(.9);
 }
 .vertical-cover-stream.is-reduced .is-upper .vertical-cover-stream__slot:nth-child(2) {
   display: block;
   opacity: .72;
-  transform: translate3d(-50%, -32%, 0) rotateX(-18deg) scale(.9);
+  transform: translate3d(-50%, -32%, 0) scale(.9);
 }
 
 @keyframes cover-dive-to-horizon {
   0% {
     opacity: .94;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) rotateX(72deg) scale(.74);
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) scale(.74);
   }
-  40% { opacity: .46; }
-  49.95% {
+  13% { opacity: .46; }
+  16.64% {
     opacity: .12;
-    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
+    transform: translate3d(-50%, -54%, -110px) scale(.52);
   }
-  50%, 100% {
+  16.67%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
+    transform: translate3d(-50%, -54%, -110px) scale(.52);
   }
 }
 
 @keyframes cover-rise-from-horizon {
   0% {
     opacity: .3;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) rotateX(-78deg) scale(.52);
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) scale(.52);
   }
-  8% { opacity: .48; }
-  49.95% {
+  3% { opacity: .48; }
+  16.64% {
     opacity: .94;
-    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
+    transform: translate3d(-50%, -54%, 0) scale(.74);
   }
-  50%, 100% {
+  16.67%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
+    transform: translate3d(-50%, -54%, 0) scale(.74);
   }
 }
 

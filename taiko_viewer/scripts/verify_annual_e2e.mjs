@@ -449,7 +449,7 @@ const auditOpeningMotion = async (browser, cookie) => {
     undefined,
     { timeout: 10_000 }
   );
-  const periodStream = page.locator(".story-player__slide[data-page-key='period'] .period-overview-scene.is-active .period-overview-scene__previous-planes .vertical-cover-stream");
+  const periodStream = page.locator(".story-player__slide[data-page-key='period'] .period-overview-scene.is-active .period-overview-scene__cover-planes .vertical-cover-stream");
   const periodMotion = await periodStream.evaluate((stream) => {
     const lowerSlot = stream.querySelector(".is-lower .vertical-cover-stream__slot");
     const upperSlot = stream.querySelector(".is-upper .vertical-cover-stream__slot");
@@ -527,6 +527,20 @@ const auditOpeningMotion = async (browser, cookie) => {
     const time = Number(scene?.getAttribute("data-transition-time"));
     return time > 0 && time < 1600;
   }, undefined, { timeout: 2_000 });
+  const coversAtTransitionLock = await periodStream.evaluate((stream) => [...stream.querySelectorAll(".vertical-cover-stream__slot")]
+    .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+    .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform }))
+  );
+  const transitionPlaneAudit = await page.locator(".story-player__transition-overlay .vertical-cover-stream").evaluate((stream) => ({
+    covers: [...stream.querySelectorAll(".vertical-cover-stream__slot")]
+      .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+      .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform })),
+    upperRotation: getComputedStyle(stream.querySelector(".is-upper .vertical-cover-stream__plane")).transform,
+    lowerRotation: getComputedStyle(stream.querySelector(".is-lower .vertical-cover-stream__plane")).transform
+  }));
+  assert.deepEqual(transitionPlaneAudit.covers, coversAtTransitionLock, "period transition replaced or moved the visible cover planes");
+  assert.notEqual(transitionPlaneAudit.upperRotation, "none", "upper covers did not rotate toward the overview plane state");
+  assert.notEqual(transitionPlaneAudit.lowerRotation, "none", "lower covers did not rotate toward the overview plane state");
   await page.waitForFunction(
     () => {
       const slide = document.querySelector(".story-player__slide[data-page-key='overview']");
@@ -603,22 +617,25 @@ const auditAudioLifecycle = async (browser, cookie) => {
     };
     let blockedBgmAttempts = 1;
     let documentHidden = false;
+    let audioInstance = 0;
     class AnnualAudioMock extends EventTarget {
       constructor(src = "") {
         super();
+        this.instance = ++audioInstance;
         this.src = src;
         this.currentTime = 0;
         this.preload = "";
         this.loop = false;
         this.volume = 1;
         this.paused = true;
+        record({ type: "create", src: this.src, instance: this.instance });
       }
 
       play() {
         const isBgm = this.src.includes("natsumatsuri-303-old.ogg");
         const blocked = isBgm && blockedBgmAttempts > 0;
         if (blocked) blockedBgmAttempts -= 1;
-        record({ type: "play", src: this.src, blocked });
+        record({ type: "play", src: this.src, blocked, instance: this.instance });
         if (blocked) return Promise.reject(new DOMException("Autoplay blocked", "NotAllowedError"));
         this.paused = false;
         return Promise.resolve();
@@ -626,7 +643,7 @@ const auditAudioLifecycle = async (browser, cookie) => {
 
       pause() {
         this.paused = true;
-        record({ type: "pause", src: this.src });
+        record({ type: "pause", src: this.src, instance: this.instance });
       }
 
       load() { record({ type: "load", src: this.src }); }
@@ -664,6 +681,8 @@ const auditAudioLifecycle = async (browser, cookie) => {
     const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
     return events.some((event) => event.type === "play" && event.blocked === false && String(event.src).includes("natsumatsuri-303-old.ogg"));
   });
+  const startedEvents = await bgmEvents();
+  assert.equal(startedEvents.filter((event) => event.type === "play" && !event.blocked).length, 1, "opening gesture issued duplicate BGM play requests");
 
   const sound = page.locator(".story-player__sound-trigger");
   const pauseCountBeforeMute = (await bgmEvents()).filter((event) => event.type === "pause").length;
@@ -686,6 +705,18 @@ const auditAudioLifecycle = async (browser, cookie) => {
     const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
     return events.filter((event) => event.type === "play" && !event.blocked && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
   }, playCountBeforeVisible);
+
+  const createCountBeforePageRestore = (await bgmEvents()).filter((event) => event.type === "create").length;
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("pagehide"));
+    window.dispatchEvent(new Event("pageshow"));
+  });
+  await page.waitForFunction((before) => {
+    const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
+    return events.filter((event) => event.type === "create" && String(event.src).includes("natsumatsuri-303-old.ogg")).length === before + 1;
+  }, createCountBeforePageRestore);
+  const restoredEvents = await bgmEvents();
+  assert.equal(new Set(restoredEvents.filter((event) => event.type === "create").map((event) => event.instance)).size, createCountBeforePageRestore + 1, "page restore reused or overlapped a stale BGM instance");
 
   const pauseCountBeforeExit = (await bgmEvents()).filter((event) => event.type === "pause").length;
   await page.locator(".story-player__drawer-trigger").click();

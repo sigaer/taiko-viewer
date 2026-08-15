@@ -40,16 +40,20 @@ const actualPages = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map((match)
 assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 23-page contract");
 
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
+const annualBgmSource = await read("utils/annualBgm.client.ts");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
 assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are visible before the opening start action");
 assert.equal(storyPlayer.includes('@start="startStory"'), true, "opening start action is not connected to story navigation");
-assert.equal(storyPlayer.includes('/audio/annual/natsumatsuri-303-old.ogg'), true, "annual BGM is missing");
+assert.equal(annualBgmSource.includes('/audio/annual/natsumatsuri-303-old.ogg'), true, "annual BGM is missing");
 assert.equal(await exists("public/audio/annual/natsumatsuri-303-old.ogg"), true, "annual BGM asset is missing");
 const playBgmSource = storyPlayer.match(/const playBgm = async \(\) => \{[\s\S]*?\n\};/)?.[0] || "";
 assert.equal(playBgmSource.includes("props.started"), false, "annual BGM still waits for the opening start action");
 assert.equal(storyPlayer.includes('window.addEventListener("pagehide"'), true, "annual BGM is not stopped on page exit");
 assert.equal(storyPlayer.includes("onBeforeRouteLeave"), true, "annual BGM has no route-leave cleanup");
+assert.equal(storyPlayer.includes("await playBgm();\n  await goToPage"), false, "opening start still triggers a duplicate BGM play request");
+assert.equal(annualBgmSource.includes("activeOwner"), true, "annual BGM is not protected by a unique owner");
+assert.equal(annualBgmSource.includes("pendingPlay"), true, "annual BGM play requests are not deduplicated");
 assert.equal(storyPlayer.includes("debugTransitionTime"), true, "period transition has no development-time freeze control");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
@@ -82,6 +86,10 @@ assert.equal(/currentClearCharts|currentFullComboCharts|currentDondafulCharts|cu
 assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");
 assert.equal(verticalCoverSource.includes("ZONE_SLOT_COUNT = 6"), true, "period cover stream does not use a gap-free fixed cadence");
 assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), true, "period cover stream has no visual fallback plane");
+assert.equal(verticalCoverSource.includes("ANNUAL_COVER_PHASE_KEY"), true, "period cover instances do not share one animation phase");
+assert.equal(periodOverviewSceneSource.includes("period-overview-scene__previous-planes"), false, "period transition still mounts a separate outgoing cover stream");
+assert.equal(periodOverviewSceneSource.includes("period-overview-scene__next-planes"), false, "period transition still mounts a separate incoming cover stream");
+assert.equal((periodOverviewSceneSource.match(/<AnnualVerticalCoverStream/g) || []).length, 1, "period transition does not preserve a single cover plane set");
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
