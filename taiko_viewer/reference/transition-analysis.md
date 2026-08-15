@@ -17,18 +17,20 @@ opacity staging, and continuous background are used.
 | Internal time | Phase | Viewer mapping |
 | --- | --- | --- |
 | 0-360 ms | Previous copy exits | Period date, heading, body, and facts fade with a short stagger |
-| 80-980 ms | Existing planes rotate | The exact Period covers freeze in place and rotate around their horizontal axes |
+| 80-980 ms | Existing planes rotate | The exact Period covers freeze in their existing perspective positions while only their nested faces rotate around the horizontal axis |
 | 520-920 ms | Primary copy arrives | Overview eyebrow, title, song count, and chart count fade upward |
 | 840-1240 ms | Secondary fact arrives | Estimated total play time appears after the primary facts |
-| 1240-1600 ms | Settle | Plane scale, rotation, and opacity reach the Overview resting state |
+| 1240-1600 ms | Settle | Copy opacity and rotation reach the Overview resting state; the cover corridor geometry remains unchanged |
 
 ## Layers
 
 | Layer | Start | End | Motion and easing |
 | --- | --- | --- | --- |
 | background | continuous | continuous | Shared ice-blue field; no mount flash or cross-page replacement |
-| shared-upper-planes | rx 0deg, scale 1 | rx -72deg, scale .88 | `power2.inOut`, 80-980 ms |
-| shared-lower-planes | rx 0deg, scale 1 | rx 72deg, scale .88 | `power2.inOut`, 80-980 ms |
+| upper-cover-slots | rx -78deg to -72deg, scale .52 to .74 | unchanged | Existing stream keyframes preserve the inward-compressed upper corridor |
+| lower-cover-slots | rx 72deg to 78deg, scale .74 to .52 | unchanged | Existing stream keyframes preserve the inward-compressed lower corridor |
+| upper-cover-faces | relative rx 0deg | relative rx -72deg | `power2.inOut`, 80-980 ms |
+| lower-cover-faces | relative rx 0deg | relative rx 72deg | `power2.inOut`, 80-980 ms |
 | previous-heading | y 0, opacity 1 | y -12px, opacity 0 | `power2.in`, 0-300 ms |
 | previous-body-copy | y 0, opacity 1 | y -8px, opacity 0 | `power1.in`, 60-360 ms |
 | center-anchor | y 0, scale 1 | y 0, scale 1 | Remains visually stable; only a subtle opacity handoff is allowed |
@@ -36,10 +38,11 @@ opacity staging, and continuous background are used.
 | next-primary-facts | y 14px, opacity 0 | y 0, opacity 1 | `power2.out`, 600-920 ms |
 | next-duration | y 18px, opacity 0 | y 0, opacity 1 | `power2.out`, 840-1240 ms |
 
-The scene uses a 900 px perspective with its origin near the vertical center. The
-reference runs from a diamond-like plane toward a square. The viewer uses the
-requested inverse direction: square Period covers rotate into diamond-like Overview
-planes. The planes remain rigid rectangles; Canvas/WebGL and animated blur are unnecessary.
+The scene uses a 900 px perspective with its origin near the vertical center. Period
+covers are never reset to front-facing squares: their outer slots retain the prior
+`rotateX`, Y/Z, and scale values that create the inward-compressed corridor. The
+transition adds rotation only to the nested cover face. The planes remain rigid
+rectangles; Canvas/WebGL and animated blur are unnecessary.
 
 ## DOM mapping and controller
 
@@ -80,8 +83,9 @@ adjusts Y/Z travel, `rotateX`, scale, opacity, and per-layer easing independentl
 
 The nine frozen checkpoints were captured at the 720 x 1568 reference viewport.
 The correction pass removed the independently timed Period and Overview streams.
-The cover corridor now freezes at navigation time, keeps cover identity and outer
-transform unchanged, and animates only the nested plane rotation. The blue-white
+The cover corridor freezes at navigation time, keeps cover identity and the prior
+perspective-compressed outer transform unchanged, and animates only the nested face
+rotation. The blue-white
 background uses a 360 x 784 low-frequency texture derived from the supplied
 `page_3.jpg` light field. Heavy downsampling, blur, and hue normalization remove all
 source copy and artwork; the original reference image is not shipped. The remaining

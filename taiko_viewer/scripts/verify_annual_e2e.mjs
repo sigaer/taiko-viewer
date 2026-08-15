@@ -458,13 +458,14 @@ const auditOpeningMotion = async (browser, cookie) => {
     const lowerTiming = lowerAnimation?.effect?.getTiming();
     const upperTiming = upperAnimation?.effect?.getTiming();
     const inspectZone = (selector) => {
-      const visible = [...stream.querySelectorAll(`${selector} .vertical-cover-stream__slot`)]
-        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
-        .map((slot) => slot.getBoundingClientRect());
-      const overlaps = visible.some((left, index) => visible.slice(index + 1).some((right) =>
+      const visibleSlots = [...stream.querySelectorAll(`${selector} .vertical-cover-stream__slot`)]
+        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02);
+      const rects = visibleSlots.map((slot) => slot.getBoundingClientRect());
+      const overlaps = rects.some((left, index) => rects.slice(index + 1).some((right) =>
         left.left < right.right && left.right > right.left && left.top < right.bottom && left.bottom > right.top
       ));
-      return { count: visible.length, overlaps };
+      const transform = visibleSlots[0] ? getComputedStyle(visibleSlots[0]).transform : "none";
+      return { count: rects.length, overlaps, pitch: new DOMMatrix(transform).m23 };
     };
     const upper = inspectZone(".is-upper");
     const lower = inspectZone(".is-lower");
@@ -477,6 +478,8 @@ const auditOpeningMotion = async (browser, cookie) => {
       upperTransform: upperSlot ? getComputedStyle(upperSlot).transform : "",
       visibleUpperCovers: upper.count,
       visibleLowerCovers: lower.count,
+      upperPitch: upper.pitch,
+      lowerPitch: lower.pitch,
       upperOverlaps: upper.overlaps,
       lowerOverlaps: lower.overlaps,
       visibleUpperKeys: [...stream.querySelectorAll(".is-upper .vertical-cover-stream__slot")]
@@ -500,6 +503,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.equal(periodMotion.upperIterations, Infinity, "upper period cover stream does not loop continuously");
   assert.ok(periodMotion.visibleUpperCovers > 0, "period cover stream has no visible upper covers");
   assert.ok(periodMotion.visibleLowerCovers > 0, "period cover stream has no visible lower covers");
+  assert.ok(periodMotion.upperPitch < -.3, `period upper covers lost their inward perspective: ${periodMotion.upperPitch}`);
+  assert.ok(periodMotion.lowerPitch > .3, `period lower covers lost their inward perspective: ${periodMotion.lowerPitch}`);
   assert.ok(periodMotion.visibleUpperCovers <= 4, `period upper stream shows too many covers: ${periodMotion.visibleUpperCovers}`);
   assert.ok(periodMotion.visibleLowerCovers <= 4, `period lower stream shows too many covers: ${periodMotion.visibleLowerCovers}`);
   assert.equal(periodMotion.upperOverlaps, false, "period upper covers overlap each other");
@@ -531,16 +536,31 @@ const auditOpeningMotion = async (browser, cookie) => {
     .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
     .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform }))
   );
-  const transitionPlaneAudit = await page.locator(".story-player__transition-overlay .vertical-cover-stream").evaluate((stream) => ({
-    covers: [...stream.querySelectorAll(".vertical-cover-stream__slot")]
-      .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
-      .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform })),
-    upperRotation: getComputedStyle(stream.querySelector(".is-upper .vertical-cover-stream__plane")).transform,
-    lowerRotation: getComputedStyle(stream.querySelector(".is-lower .vertical-cover-stream__plane")).transform
-  }));
+  const transitionStream = page.locator(".story-player__transition-overlay .vertical-cover-stream");
+  const inspectTransitionPlanes = (stream) => {
+    const upperTransform = getComputedStyle(stream.querySelector(".is-upper .vertical-cover-stream__plane")).transform;
+    const lowerTransform = getComputedStyle(stream.querySelector(".is-lower .vertical-cover-stream__plane")).transform;
+    return {
+      covers: [...stream.querySelectorAll(".vertical-cover-stream__slot")]
+        .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
+        .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform })),
+      upperRotation: upperTransform,
+      lowerRotation: lowerTransform,
+      upperFaceScaleX: new DOMMatrix(upperTransform).m11,
+      lowerFaceScaleX: new DOMMatrix(lowerTransform).m11
+    };
+  };
+  const transitionPlaneAudit = await transitionStream.evaluate(inspectTransitionPlanes);
   assert.deepEqual(transitionPlaneAudit.covers, coversAtTransitionLock, "period transition replaced or moved the visible cover planes");
   assert.notEqual(transitionPlaneAudit.upperRotation, "none", "upper covers did not rotate toward the overview plane state");
   assert.notEqual(transitionPlaneAudit.lowerRotation, "none", "lower covers did not rotate toward the overview plane state");
+  assert.ok(Math.abs(transitionPlaneAudit.upperFaceScaleX - 1) < .001, "transition rescaled the upper cover face");
+  assert.ok(Math.abs(transitionPlaneAudit.lowerFaceScaleX - 1) < .001, "transition rescaled the lower cover face");
+  await wait(220);
+  const transitionPlaneAuditAfter = await transitionStream.evaluate(inspectTransitionPlanes);
+  assert.deepEqual(transitionPlaneAuditAfter.covers, coversAtTransitionLock, "outer cover geometry changed while the nested face rotated");
+  assert.notEqual(transitionPlaneAuditAfter.upperRotation, transitionPlaneAudit.upperRotation, "upper nested cover face did not rotate");
+  assert.notEqual(transitionPlaneAuditAfter.lowerRotation, transitionPlaneAudit.lowerRotation, "lower nested cover face did not rotate");
   await page.waitForFunction(
     () => {
       const slide = document.querySelector(".story-player__slide[data-page-key='overview']");

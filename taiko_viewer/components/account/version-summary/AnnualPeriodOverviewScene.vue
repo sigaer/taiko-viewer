@@ -72,29 +72,26 @@ const buildTimeline = async () => {
       timeline
         .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
         .to([previousCopy, previousPage], { autoAlpha: 0, duration: 1.6, ease: "none" }, 0)
-        .to([nextCopy, nextPage], { autoAlpha: 1, duration: 1.6, ease: "none" }, 0)
-        .to(upperPlanes, { rotationX: -72, scale: .86, duration: 1.6, ease: "none" }, 0)
-        .to(lowerPlanes, { rotationX: 72, scale: .86, duration: 1.6, ease: "none" }, 0);
+        .to([nextCopy, nextPage], { autoAlpha: 1, duration: 1.6, ease: "none" }, 0);
       return;
     }
 
     timeline
       .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
-      .set([upperPlanes, lowerPlanes], { rotationX: 0, scale: 1 }, 0)
+      .set([upperPlanes, lowerPlanes], { rotationX: 0 }, 0)
       .to(previousIntro, { y: -12, autoAlpha: 0, duration: .3, ease: "power2.in" }, 0)
       .to(previousStory, { y: -9, autoAlpha: 0, duration: .32, ease: "power1.in" }, .04)
       .to(previousFacts, { y: -7, autoAlpha: 0, duration: .24, ease: "power1.in" }, .12)
       .to(previousLatest, { autoAlpha: 0, duration: .2, ease: "power1.in" }, .16)
       .to(previousPage, { autoAlpha: 0, duration: .24, ease: "power1.in" }, .08)
-      .to(upperPlanes, { rotationX: -72, scale: .86, duration: .9, ease: "power2.inOut" }, .08)
-      .to(lowerPlanes, { rotationX: 72, scale: .86, duration: .9, ease: "power2.inOut" }, .08)
+      .to(upperPlanes, { rotationX: -72, duration: .9, ease: "power2.inOut" }, .08)
+      .to(lowerPlanes, { rotationX: 72, duration: .9, ease: "power2.inOut" }, .08)
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
       .fromTo(nextFacts, { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .32, ease: "power2.out" }, .6)
       .fromTo(nextAnchor, { scale: .92, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .36, ease: "power2.out" }, .58)
-      .fromTo(nextDuration, { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .84)
-      .to([upperPlanes, lowerPlanes], { scale: .88, duration: .36, ease: "power1.out" }, 1.24);
+      .fromTo(nextDuration, { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .84);
   }, rootRef.value);
   setTimelineTime();
 };

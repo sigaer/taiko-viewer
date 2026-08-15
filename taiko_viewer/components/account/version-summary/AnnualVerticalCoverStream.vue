@@ -153,8 +153,8 @@ const failCover = (key: string) => {
   filter: saturate(0.92) contrast(0.96);
 }
 .vertical-cover-stream__slot.is-fallback { opacity: .54; }
-.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, -58%, -90px) scale(.58); }
-.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, calc(var(--cover-zone-height) - 42%), -90px) scale(.58); }
+.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, -58%, -90px) rotateX(-78deg) scale(.58); }
+.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot.is-fallback { transform: translate3d(-50%, calc(var(--cover-zone-height) - 42%), -90px) rotateX(78deg) scale(.58); }
 .vertical-cover-stream__fallback {
   display: grid;
   width: 100%;
@@ -179,43 +179,43 @@ const failCover = (key: string) => {
 .vertical-cover-stream.is-reduced .is-lower .vertical-cover-stream__slot:first-child {
   display: block;
   opacity: .72;
-  transform: translate3d(-50%, calc(var(--cover-zone-height) - 68%), 0) scale(.9);
+  transform: translate3d(-50%, calc(var(--cover-zone-height) - 68%), 0) rotateX(18deg) scale(.9);
 }
 .vertical-cover-stream.is-reduced .is-upper .vertical-cover-stream__slot:nth-child(2) {
   display: block;
   opacity: .72;
-  transform: translate3d(-50%, -32%, 0) scale(.9);
+  transform: translate3d(-50%, -32%, 0) rotateX(-18deg) scale(.9);
 }
 
 @keyframes cover-dive-to-horizon {
   0% {
     opacity: .94;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) scale(.74);
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) rotateX(72deg) scale(.74);
   }
   13% { opacity: .46; }
   16.64% {
     opacity: .12;
-    transform: translate3d(-50%, -54%, -110px) scale(.52);
+    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
   16.67%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -54%, -110px) scale(.52);
+    transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
 }
 
 @keyframes cover-rise-from-horizon {
   0% {
     opacity: .3;
-    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) scale(.52);
+    transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) rotateX(-78deg) scale(.52);
   }
   3% { opacity: .48; }
   16.64% {
     opacity: .94;
-    transform: translate3d(-50%, -54%, 0) scale(.74);
+    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
   16.67%, 100% {
     opacity: 0;
-    transform: translate3d(-50%, -54%, 0) scale(.74);
+    transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
 }
 
