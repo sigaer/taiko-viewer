@@ -192,12 +192,12 @@ const failCover = (key: string) => {
     opacity: .94;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), 0) rotateX(72deg) scale(.74);
   }
-  13% { opacity: .46; }
-  16.64% {
+  40% { opacity: .46; }
+  49.95% {
     opacity: .12;
     transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
-  16.67%, 100% {
+  50%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -54%, -110px) rotateX(78deg) scale(.52);
   }
@@ -208,12 +208,12 @@ const failCover = (key: string) => {
     opacity: .3;
     transform: translate3d(-50%, calc(var(--cover-zone-height) - 46%), -110px) rotateX(-78deg) scale(.52);
   }
-  3% { opacity: .48; }
-  16.64% {
+  8% { opacity: .48; }
+  49.95% {
     opacity: .94;
     transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }
-  16.67%, 100% {
+  50%, 100% {
     opacity: 0;
     transform: translate3d(-50%, -54%, 0) rotateX(-72deg) scale(.74);
   }

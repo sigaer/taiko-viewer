@@ -88,11 +88,15 @@ assert.equal(periodOverviewSceneSource.includes("summary.overview.estimatedTimeT
 assert.equal(/currentClearCharts|currentFullComboCharts|currentDondafulCharts|currentKiwamiCharts/.test(periodOverviewSceneSource), false, "overview scene still exposes the old achievement grid");
 assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");
 assert.equal(verticalCoverSource.includes("ZONE_SLOT_COUNT = 6"), true, "period cover stream does not use a gap-free fixed cadence");
+assert.equal(verticalCoverSource.includes("49.95%"), true, "period cover stream no longer keeps the 0.46.11 three-plane cadence");
+assert.equal((verticalCoverSource.match(/50%, 100%/g) || []).length, 2, "upper and lower cover streams do not remain visible for half a cycle");
 assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), true, "period cover stream has no visual fallback plane");
 assert.equal(verticalCoverSource.includes("ANNUAL_COVER_PHASE_KEY"), true, "period cover instances do not share one animation phase");
 assert.equal(verticalCoverSource.includes("rotateX(72deg) scale(.74)"), true, "lower cover corridor lost its inward perspective");
 assert.equal(verticalCoverSource.includes("rotateX(-72deg) scale(.74)"), true, "upper cover corridor lost its inward perspective");
-assert.equal(periodOverviewSceneSource.includes("rotationX: 0, scale: 1"), false, "transition still flattens covers into front-facing squares");
+assert.equal(periodOverviewSceneSource.includes("rotationZ: 0"), true, "transition does not start from the 0.46.11 cover orientation");
+assert.equal((periodOverviewSceneSource.match(/rotationZ:\s*45/g) || []).length, 2, "cover faces do not rotate 45 degrees into a diamond");
+assert.equal(/\.to\((?:upper|lower)Planes,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
 assert.equal(/\.to\(upperPlanes,\s*\{[^}]*scale/.test(periodOverviewSceneSource), false, "transition changes upper cover geometry instead of only rotating its face");
 assert.equal(/\.to\(lowerPlanes,\s*\{[^}]*scale/.test(periodOverviewSceneSource), false, "transition changes lower cover geometry instead of only rotating its face");
 assert.equal(periodOverviewSceneSource.includes("period-overview-scene__previous-planes"), false, "period transition still mounts a separate outgoing cover stream");

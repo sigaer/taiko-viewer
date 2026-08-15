@@ -501,8 +501,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.equal(periodMotion.upperEasing, "linear", "upper period cover stream is not linear");
   assert.equal(periodMotion.lowerIterations, Infinity, "lower period cover stream does not loop continuously");
   assert.equal(periodMotion.upperIterations, Infinity, "upper period cover stream does not loop continuously");
-  assert.ok(periodMotion.visibleUpperCovers > 0, "period cover stream has no visible upper covers");
-  assert.ok(periodMotion.visibleLowerCovers > 0, "period cover stream has no visible lower covers");
+  assert.equal(periodMotion.visibleUpperCovers, 3, `period upper stream does not match the 0.46.11 cover count: ${periodMotion.visibleUpperCovers}`);
+  assert.equal(periodMotion.visibleLowerCovers, 3, `period lower stream does not match the 0.46.11 cover count: ${periodMotion.visibleLowerCovers}`);
   assert.ok(periodMotion.upperPitch < -.3, `period upper covers lost their inward perspective: ${periodMotion.upperPitch}`);
   assert.ok(periodMotion.lowerPitch > .3, `period lower covers lost their inward perspective: ${periodMotion.lowerPitch}`);
   assert.ok(periodMotion.visibleUpperCovers <= 4, `period upper stream shows too many covers: ${periodMotion.visibleUpperCovers}`);
@@ -540,27 +540,34 @@ const auditOpeningMotion = async (browser, cookie) => {
   const inspectTransitionPlanes = (stream) => {
     const upperTransform = getComputedStyle(stream.querySelector(".is-upper .vertical-cover-stream__plane")).transform;
     const lowerTransform = getComputedStyle(stream.querySelector(".is-lower .vertical-cover-stream__plane")).transform;
+    const inspectFace = (transform) => {
+      const matrix = new DOMMatrix(transform);
+      return {
+        transform,
+        rotationZ: Math.atan2(matrix.m12, matrix.m11) * 180 / Math.PI,
+        scaleX: Math.hypot(matrix.m11, matrix.m12),
+        xAxisTilt: Math.max(Math.abs(matrix.m23), Math.abs(matrix.m32))
+      };
+    };
     return {
       covers: [...stream.querySelectorAll(".vertical-cover-stream__slot")]
         .filter((slot) => Number(getComputedStyle(slot).opacity) > .02)
         .map((slot) => ({ key: slot.getAttribute("data-flow-key") || "fallback", transform: getComputedStyle(slot).transform })),
-      upperRotation: upperTransform,
-      lowerRotation: lowerTransform,
-      upperFaceScaleX: new DOMMatrix(upperTransform).m11,
-      lowerFaceScaleX: new DOMMatrix(lowerTransform).m11
+      upperFace: inspectFace(upperTransform),
+      lowerFace: inspectFace(lowerTransform)
     };
   };
   const transitionPlaneAudit = await transitionStream.evaluate(inspectTransitionPlanes);
   assert.deepEqual(transitionPlaneAudit.covers, coversAtTransitionLock, "period transition replaced or moved the visible cover planes");
-  assert.notEqual(transitionPlaneAudit.upperRotation, "none", "upper covers did not rotate toward the overview plane state");
-  assert.notEqual(transitionPlaneAudit.lowerRotation, "none", "lower covers did not rotate toward the overview plane state");
-  assert.ok(Math.abs(transitionPlaneAudit.upperFaceScaleX - 1) < .001, "transition rescaled the upper cover face");
-  assert.ok(Math.abs(transitionPlaneAudit.lowerFaceScaleX - 1) < .001, "transition rescaled the lower cover face");
+  assert.ok(Math.abs(transitionPlaneAudit.upperFace.scaleX - 1) < .001, "transition rescaled the upper cover face");
+  assert.ok(Math.abs(transitionPlaneAudit.lowerFace.scaleX - 1) < .001, "transition rescaled the lower cover face");
   await wait(220);
   const transitionPlaneAuditAfter = await transitionStream.evaluate(inspectTransitionPlanes);
   assert.deepEqual(transitionPlaneAuditAfter.covers, coversAtTransitionLock, "outer cover geometry changed while the nested face rotated");
-  assert.notEqual(transitionPlaneAuditAfter.upperRotation, transitionPlaneAudit.upperRotation, "upper nested cover face did not rotate");
-  assert.notEqual(transitionPlaneAuditAfter.lowerRotation, transitionPlaneAudit.lowerRotation, "lower nested cover face did not rotate");
+  assert.ok(transitionPlaneAuditAfter.upperFace.rotationZ > transitionPlaneAudit.upperFace.rotationZ, "upper nested cover face did not rotate within its plane");
+  assert.ok(transitionPlaneAuditAfter.lowerFace.rotationZ > transitionPlaneAudit.lowerFace.rotationZ, "lower nested cover face did not rotate within its plane");
+  assert.ok(transitionPlaneAuditAfter.upperFace.xAxisTilt < .001, "upper nested face still rotates around the X axis");
+  assert.ok(transitionPlaneAuditAfter.lowerFace.xAxisTilt < .001, "lower nested face still rotates around the X axis");
   await page.waitForFunction(
     () => {
       const slide = document.querySelector(".story-player__slide[data-page-key='overview']");
@@ -611,6 +618,25 @@ const auditTransitionFrames = async (browser, cookie) => {
             image.addEventListener("error", resolveImage, { once: true });
           })));
     });
+    if (time === 0 || time === 1600) {
+      const faceTransforms = await page.locator(".story-player__transition-overlay .vertical-cover-stream").evaluate((stream) =>
+        [...stream.querySelectorAll(".vertical-cover-stream__plane")].map((plane) => {
+          const matrix = new DOMMatrix(getComputedStyle(plane).transform);
+          return {
+            rotationZ: Math.atan2(matrix.m12, matrix.m11) * 180 / Math.PI,
+            scaleX: Math.hypot(matrix.m11, matrix.m12),
+            xAxisTilt: Math.max(Math.abs(matrix.m23), Math.abs(matrix.m32))
+          };
+        })
+      );
+      const expectedRotation = time === 0 ? 0 : 45;
+      assert.ok(faceTransforms.length > 0, `transition ${time}ms has no cover faces`);
+      for (const face of faceTransforms) {
+        assert.ok(Math.abs(face.rotationZ - expectedRotation) < .05, `transition ${time}ms cover rotation is ${face.rotationZ}, expected ${expectedRotation}`);
+        assert.ok(Math.abs(face.scaleX - 1) < .001, `transition ${time}ms rescaled a cover face`);
+        assert.ok(face.xAxisTilt < .001, `transition ${time}ms tilted a nested face around the X axis`);
+      }
+    }
     await page.screenshot({ path: `/tmp/annual-transition-${String(time).padStart(4, "0")}.png`, fullPage: false });
   }
   await context.close();
