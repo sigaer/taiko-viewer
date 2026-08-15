@@ -82,7 +82,8 @@ The nine frozen checkpoints were captured at the 720 x 1568 reference viewport.
 The correction pass removed the independently timed Period and Overview streams.
 The cover corridor now freezes at navigation time, keeps cover identity and outer
 transform unchanged, and animates only the nested plane rotation. The blue-white
-background is a code-native reconstruction of the supplied `page_3.jpg` light field;
-the source image is not used because it contains unrelated copy and artwork. The
-remaining visible difference is content-driven: viewer covers vary while the
-reference planes use more uniform artwork proportions.
+background uses a 360 x 784 low-frequency texture derived from the supplied
+`page_3.jpg` light field. Heavy downsampling, blur, and hue normalization remove all
+source copy and artwork; the original reference image is not shipped. The remaining
+visible difference is content-driven: viewer covers vary while the reference planes
+use more uniform artwork proportions.

@@ -163,9 +163,9 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.period-overview-scene{position:relative;width:100%;height:100vh;height:100svh;height:100dvh;overflow:hidden;color:#17365d;background:linear-gradient(90deg,rgba(77,155,236,.46) 0%,rgba(202,231,255,.66) 16%,rgba(248,252,255,.96) 43%,rgba(251,253,255,.98) 58%,rgba(187,223,253,.7) 84%,rgba(68,151,239,.48) 100%),linear-gradient(180deg,#cfe7ff 0%,#f8fcff 47%,#a9d4ff 100%);perspective:900px;perspective-origin:50% 50%}
-.period-overview-scene::before{content:"";position:absolute;z-index:0;inset:0;background:linear-gradient(162deg,rgba(255,255,255,.38),transparent 28%,rgba(65,145,231,.11) 49%,rgba(255,255,255,.32) 71%,rgba(74,151,231,.12));opacity:.9}
-.period-overview-scene::after{content:"";position:absolute;z-index:1;inset:31% 0;background:linear-gradient(90deg,rgba(247,251,255,.68),rgba(247,251,255,.9) 18% 82%,rgba(247,251,255,.68));box-shadow:0 -18px 32px rgba(247,251,255,.58),0 18px 32px rgba(247,251,255,.58);backdrop-filter:blur(5px)}
+.period-overview-scene{position:relative;width:100%;height:100vh;height:100svh;height:100dvh;overflow:hidden;color:#17365d;background:linear-gradient(90deg,rgba(210,232,255,.16),rgba(255,255,255,.58) 44% 58%,rgba(198,226,255,.18)),url("/annual-period-background.webp") center/cover no-repeat,#c7e2ff;perspective:900px;perspective-origin:50% 50%}
+.period-overview-scene::before{content:"";position:absolute;z-index:0;inset:0;background:linear-gradient(162deg,rgba(255,255,255,.22),transparent 29%,rgba(54,137,225,.08) 50%,rgba(255,255,255,.28) 72%,rgba(54,137,225,.1));opacity:.9}
+.period-overview-scene::after{content:"";position:absolute;z-index:1;inset:31% 0;background:linear-gradient(90deg,rgba(244,250,255,.4),rgba(255,255,255,.72) 18% 82%,rgba(244,250,255,.4));box-shadow:0 -28px 46px rgba(247,251,255,.42),0 28px 46px rgba(247,251,255,.42);backdrop-filter:blur(4px)}
 .period-overview-scene__cover-planes{position:absolute;z-index:0;inset:0;transform-style:preserve-3d}
 .period-overview-scene__page{position:absolute;z-index:4;top:max(18px,env(safe-area-inset-top));left:18px;padding:6px 9px;border:1px solid rgba(57,120,200,.2);border-radius:99px;color:#3978c8;background:rgba(247,251,255,.82);font:700 10px/1 var(--viewer-font-family)}
 .period-overview-scene__period-copy,.period-overview-scene__overview-copy{position:absolute;z-index:3;top:50%;left:50%;width:min(88%,610px);transform:translate(-50%,-50%);text-align:center;will-change:opacity}

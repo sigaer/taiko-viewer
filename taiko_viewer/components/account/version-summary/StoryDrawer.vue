@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { VersionSummaryAvailableVersion, VersionSummaryBinding, VersionSummaryViewModel } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -21,6 +21,7 @@ const emit = defineEmits<{
 }>();
 
 const { t, n } = useI18n();
+const exitPending = ref(false);
 const uiText = computed(() => ({
   title: t("annualSummary.drawer.title"),
   versionLabel: t("annualSummary.drawer.version"),
@@ -41,6 +42,17 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
   const title = String(binding.currentTitle || binding.verifiedTitle || "").trim();
   return title ? `${binding.taikoId} · ${title}` : binding.taikoId;
 };
+
+const requestExit = () => {
+  exitPending.value = true;
+  emit("update:modelValue", false);
+};
+
+const handleClosed = () => {
+  if (!exitPending.value) return;
+  exitPending.value = false;
+  emit("exit");
+};
 </script>
 
 <template>
@@ -51,6 +63,7 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
     :append-to-body="true"
     custom-class="story-drawer"
     @update:model-value="emit('update:modelValue', $event)"
+    @closed="handleClosed"
   >
     <div class="story-drawer__body">
       <div class="story-drawer__head">
@@ -94,7 +107,7 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
       </div>
 
       <div class="story-drawer__actions">
-        <el-button v-if="storyStarted" @click="emit('exit')">
+        <el-button v-if="storyStarted" @click="requestExit">
           {{ uiText.exit }}
         </el-button>
       </div>

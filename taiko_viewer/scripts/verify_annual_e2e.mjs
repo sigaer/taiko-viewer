@@ -628,14 +628,14 @@ const auditAudioLifecycle = async (browser, cookie) => {
         this.loop = false;
         this.volume = 1;
         this.paused = true;
-        record({ type: "create", src: this.src, instance: this.instance });
+        record({ type: "create", src: this.src, instance: this.instance, path: location.pathname });
       }
 
       play() {
         const isBgm = this.src.includes("natsumatsuri-303-old.ogg");
         const blocked = isBgm && blockedBgmAttempts > 0;
         if (blocked) blockedBgmAttempts -= 1;
-        record({ type: "play", src: this.src, blocked, instance: this.instance });
+        record({ type: "play", src: this.src, blocked, instance: this.instance, path: location.pathname });
         if (blocked) return Promise.reject(new DOMException("Autoplay blocked", "NotAllowedError"));
         this.paused = false;
         return Promise.resolve();
@@ -655,6 +655,7 @@ const auditAudioLifecycle = async (browser, cookie) => {
       documentHidden = Boolean(value);
       document.dispatchEvent(new Event("visibilitychange"));
     };
+    window.__setAnnualBlockedBgmAttempts = (value) => { blockedBgmAttempts = Math.max(0, Number(value) || 0); };
   });
 
   const page = await context.newPage();
@@ -726,6 +727,34 @@ const auditAudioLifecycle = async (browser, cookie) => {
   const allExitEvents = await page.evaluate(() => JSON.parse(localStorage.getItem("annual-audio-events") || "[]"));
   assert.ok(exitEvents.filter((event) => event.type === "pause").length > pauseCountBeforeExit, "BGM did not pause on route exit");
   assert.ok(allExitEvents.some((event) => event.type === "load"), "BGM resource was not released on route exit");
+
+  const createCountBeforeNavigationEntry = exitEvents.filter((event) => event.type === "create").length;
+  const playCountBeforeNavigationEntry = exitEvents.filter((event) => event.type === "play").length;
+  await page.evaluate(() => window.__setAnnualBlockedBgmAttempts(0));
+  await page.locator(".el-overlay.is-drawer").waitFor({ state: "hidden", timeout: 10_000 });
+  await page.locator(".mobile-nav-toggle").click();
+  const annualNav = page.locator('[data-nav-key="/account/version-summary"]');
+  await annualNav.waitFor({ state: "visible", timeout: 10_000 });
+  await annualNav.click();
+  await page.waitForURL(/\/account\/version-summary(?:\?|$)/, { timeout: 15_000 });
+  await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
+  const navigationEntryEvents = await bgmEvents();
+  assert.equal(
+    navigationEntryEvents.filter((event) => event.type === "create").length,
+    createCountBeforeNavigationEntry + 1,
+    `navigation entry did not reuse one primed BGM instance: ${JSON.stringify(navigationEntryEvents)}`
+  );
+  assert.equal(
+    navigationEntryEvents.filter((event) => event.type === "play").length,
+    playCountBeforeNavigationEntry + 1,
+    `navigation entry did not issue one primed BGM play: ${JSON.stringify(navigationEntryEvents)}`
+  );
+  const newNavigationPlays = navigationEntryEvents.filter((event) => event.type === "play").slice(playCountBeforeNavigationEntry);
+  assert.equal(newNavigationPlays.length, 1, "navigation entry started more than one BGM playback");
+  assert.equal(newNavigationPlays[0].path, "/account/profile", "BGM did not start inside the navigation gesture before the annual route mounted");
+  await page.locator(".annual-opening__start").click();
+  await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
+  assert.equal((await bgmEvents()).filter((event) => event.type === "play").length, playCountBeforeNavigationEntry + 1, "opening start duplicated the primed BGM playback");
   await context.close();
   reportProgress("annual audio lifecycle: passed");
 };

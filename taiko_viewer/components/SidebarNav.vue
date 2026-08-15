@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
+import { primeAnnualBgm, releasePrimedAnnualBgm } from "~/utils/annualBgm.client";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -66,7 +67,17 @@ const goTo = async (path: string) => {
   if (!target || target === route.fullPath || target === route.path) {
     return;
   }
-  await navigateTo(target);
+  const enteringAnnual = path === "/account/version-summary";
+  if (enteringAnnual) void primeAnnualBgm();
+  try {
+    await navigateTo(target);
+  } finally {
+    if (enteringAnnual) {
+      window.setTimeout(() => {
+        if (!window.location.pathname.includes("/account/version-summary")) releasePrimedAnnualBgm();
+      }, 1000);
+    }
+  }
 };
 
 const isDeveloperReviewer = computed(
@@ -293,7 +304,7 @@ const openedGroups = computed(() => {
               </el-menu-item>
             </template>
           </el-sub-menu>
-          <el-menu-item v-else :index="item.key" @click="goTo(item.key)">
+          <el-menu-item v-else :index="item.key" :data-nav-key="item.key" @click="goTo(item.key)">
             <span class="nav-item-label">
               <span class="nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">

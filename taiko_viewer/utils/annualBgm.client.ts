@@ -2,6 +2,7 @@ export const ANNUAL_BGM_SRC = "/audio/annual/natsumatsuri-303-old.ogg";
 
 type PlayingListener = (playing: boolean) => void;
 
+const PRIMED_OWNER = Symbol("annual-bgm-primed-owner");
 let activeOwner: symbol | null = null;
 let activeListener: PlayingListener | null = null;
 let audio: HTMLAudioElement | null = null;
@@ -35,52 +36,71 @@ const stopGlobalAudio = (reset: boolean, release: boolean) => {
   }
 };
 
+const playGlobalAudio = async () => {
+  if (document.hidden) return false;
+  const currentAudio = ensureAudio();
+  if (!currentAudio.paused) {
+    notify(true);
+    return true;
+  }
+  if (pendingPlay) return pendingPlay;
+
+  const playGeneration = generation;
+  playIntent = true;
+  let request: Promise<boolean>;
+  try {
+    request = Promise.resolve(currentAudio.play()).then(() => {
+      if (playGeneration !== generation) {
+        if (!playIntent || audio !== currentAudio) currentAudio.pause();
+        return false;
+      }
+      notify(true);
+      return true;
+    }, () => {
+      if (playGeneration === generation) {
+        playIntent = false;
+        notify(false);
+      }
+      return false;
+    });
+  } catch {
+    playIntent = false;
+    notify(false);
+    return false;
+  }
+
+  pendingPlay = request;
+  request.finally(() => {
+    if (pendingPlay === request) pendingPlay = null;
+  });
+  return request;
+};
+
+export const primeAnnualBgm = () => {
+  if (activeOwner && activeOwner !== PRIMED_OWNER) return Promise.resolve(Boolean(audio && !audio.paused));
+  activeOwner = PRIMED_OWNER;
+  return playGlobalAudio();
+};
+
+export const releasePrimedAnnualBgm = () => {
+  if (activeOwner !== PRIMED_OWNER) return;
+  stopGlobalAudio(true, true);
+  activeOwner = null;
+  activeListener = null;
+};
+
 export const createAnnualBgmSession = (listener: PlayingListener) => {
   const owner = Symbol("annual-bgm-owner");
-  if (activeOwner) stopGlobalAudio(true, true);
   activeOwner = owner;
   activeListener = listener;
+  if (audio && !audio.paused) notify(true);
 
   const ownsAudio = () => activeOwner === owner;
 
   return {
     async play() {
       if (!ownsAudio() || document.hidden) return false;
-      const currentAudio = ensureAudio();
-      if (!currentAudio.paused) {
-        notify(true);
-        return true;
-      }
-      if (pendingPlay) return pendingPlay;
-
-      const playGeneration = generation;
-      playIntent = true;
-      let request: Promise<boolean>;
-      try {
-        request = Promise.resolve(currentAudio.play()).then(() => {
-          if (!ownsAudio() || playGeneration !== generation) {
-            if (!playIntent || audio !== currentAudio) currentAudio.pause();
-            return false;
-          }
-          notify(true);
-          return true;
-        }, () => {
-          if (ownsAudio() && playGeneration === generation) {
-            playIntent = false;
-            notify(false);
-          }
-          return false;
-        });
-      } catch {
-        notify(false);
-        return false;
-      }
-
-      pendingPlay = request;
-      request.finally(() => {
-        if (pendingPlay === request) pendingPlay = null;
-      });
-      return request;
+      return playGlobalAudio();
     },
     pause(reset = false) {
       if (!ownsAudio()) return;

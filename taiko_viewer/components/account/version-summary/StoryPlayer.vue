@@ -42,6 +42,7 @@ let coverClockTimestamp = 0;
 let drumAudio: HTMLAudioElement | null = null;
 let bgmSession: AnnualBgmSession | null = null;
 let audioDisposed = false;
+let routeLeaving = false;
 let autoplayRetryBound = false;
 let transitionTween: gsap.core.Tween | null = null;
 let touchStart: { x: number; y: number } | null = null;
@@ -122,15 +123,17 @@ const pauseBgm = (reset = false) => {
   bgmPlaying.value = false;
 };
 
-const disposeAudio = () => {
+const disposeAudio = (releaseDelay = 0) => {
   if (audioDisposed) return;
   audioDisposed = true;
   clearAutoplayRetry();
   drumAudio?.pause();
   drumAudio = null;
-  bgmSession?.release();
+  const session = bgmSession;
   bgmSession = null;
   bgmPlaying.value = false;
+  if (releaseDelay > 0) window.setTimeout(() => session?.release(), releaseDelay);
+  else session?.release();
 };
 
 const toggleSound = async () => {
@@ -380,6 +383,7 @@ const handlePageShow = () => {
 };
 
 onBeforeRouteLeave(() => {
+  routeLeaving = true;
   soundEnabled.value = false;
   disposeAudio();
 });
@@ -393,7 +397,8 @@ onBeforeUnmount(() => {
   window.removeEventListener("pagehide", handlePageHide);
   window.removeEventListener("pageshow", handlePageShow);
   document.removeEventListener("visibilitychange", handleVisibilityChange);
-  disposeAudio();
+  const remountingAnnual = !routeLeaving && window.location.pathname.includes("/account/version-summary");
+  disposeAudio(remountingAnnual ? 50 : 0);
 });
 </script>
 
