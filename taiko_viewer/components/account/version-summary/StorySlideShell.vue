@@ -39,4 +39,13 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .story-slide-shell__body :deep(span),
 .story-slide-shell__body :deep(small),
 .story-slide-shell__body :deep(p) { color: #5c7697 !important; }
+.story-slide-shell.mood-award-stage{background:radial-gradient(circle at 50% 14%,rgba(148,116,46,.68),transparent 29%),linear-gradient(155deg,#171b35,#0b1028 72%)}
+.story-slide-shell.mood-award-stage .story-slide-shell__backdrop i{border-color:rgba(245,203,114,.2);box-shadow:inset 0 0 0 24px rgba(245,203,114,.04)}
+.story-slide-shell.mood-award-stage .story-slide-shell__page{color:#ffe49c;background:rgba(11,16,40,.72);border-color:rgba(245,203,114,.34)}
+.story-slide-shell.mood-award-stage .story-slide-shell__heading p,.story-slide-shell.mood-award-stage .story-slide-shell__heading>strong{color:#f5cb72;background:rgba(245,203,114,.1)}
+.story-slide-shell.mood-award-stage .story-slide-shell__header h2{color:#fff4d5}
+.story-slide-shell.mood-award-stage .story-slide-shell__lead{color:rgba(255,239,199,.74)}
+.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(strong),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(h3),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(b){color:#fff4d5!important}
+.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(span),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(small),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(p){color:rgba(255,239,199,.74)!important}
+.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(article),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep([class*="__panel"]){border-color:rgba(245,203,114,.2)!important;background-color:rgba(11,16,40,.62)!important}
 </style>

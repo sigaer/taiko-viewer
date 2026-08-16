@@ -509,7 +509,7 @@
       "songWaiting": "次の好きな曲を待っています"
     },
     "controls": {
-      "settings": "ストーリー設定", "soundOn": "BGMと太鼓音をオン", "soundOff": "BGMと太鼓音をオフ", "progress": "年間ストーリーの進行", "pageNavigation": "ページ移動", "previous": "前のページ", "next": "次のページ", "start": "年間の振り返りを開く", "refresh": "もう一度整理", "share": "30 日間の共有を作成", "generatePoster": "現在の言語でポスターを生成", "download": "ポスターを保存", "webShare": "ポスターを共有", "renewShare": "30 日延長", "revokeShare": "共有を取り消す", "back": "年間の振り返りへ戻る", "settingsShort": "設定"
+      "settings": "ストーリー設定", "soundOn": "BGMと太鼓音をオン", "soundOff": "BGMと太鼓音をオフ", "progress": "年間ストーリーの進行", "pageNavigation": "ページ移動", "previous": "前のページ", "next": "次のページ", "start": "年間の振り返りを開く", "viewPoster": "年間ポスターを見る", "refresh": "もう一度整理", "share": "30 日間の共有を作成", "generatePoster": "現在の言語でポスターを生成", "download": "ポスターを保存", "webShare": "ポスターを共有", "renewShare": "30 日延長", "revokeShare": "共有を取り消す", "back": "年間の振り返りへ戻る", "settingsShort": "設定"
     },
     "chapters": { "debut": "はじまり", "habits": "習慣", "preference": "好み", "growth": "成長", "keepsake": "記念" },
     "pages": { "opening": "導入", "profile": "プロフィール", "period": "期間", "overview": "全体像", "favorite": "最愛", "obsession": "余韻", "favoriteShift": "変化", "keyword": "キーワード", "ratingRank": "RT", "monthly": "月別", "weekday": "曜日", "calendar": "暦", "timeOfDay": "時間", "lateNight": "深夜", "speedProfile": "速度", "nearDondaful": "あと一歩", "challenge": "挑戦", "pound": "連打", "highScore": "ハイスコア", "milestones": "瞬間", "breakthrough": "突破", "final": "称号", "poster": "ポスター" },

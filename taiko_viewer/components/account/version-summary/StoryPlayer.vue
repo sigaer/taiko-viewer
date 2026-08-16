@@ -450,6 +450,7 @@ onBeforeUnmount(() => {
           :summary="summary" :page-index="index" :page-total="slides.length"
           :active="activeIndex === index" :reduced-motion="reducedMotion"
           @start="startStory"
+          @next="goToPage(index + 1)"
         />
       </div>
     </div>

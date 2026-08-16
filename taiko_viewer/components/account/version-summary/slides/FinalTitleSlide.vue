@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import AnimatedNumber from "../AnimatedNumber.vue";
 import AnnualDrumWindow from "../AnnualDrumWindow.vue";
+import ParticleLayer from "../ParticleLayer.vue";
 import StorySlideShell from "../StorySlideShell.vue";
 
 const props = defineProps<{
@@ -13,6 +15,7 @@ const props = defineProps<{
 }>();
 
 const themeClass = computed(() => `theme-${props.summary.finalTitle.themeKey || "encouragement"}`);
+const emit = defineEmits<{ next: [] }>();
 const { t } = useI18n();
 </script>
 
@@ -25,11 +28,16 @@ const { t } = useI18n();
     :lead="summary.finalTitle.body"
     :accent="summary.copy.finalTitle.eyebrow"
     tone="gold"
+    mood="award-stage"
+    intensity="high"
     :active="active"
     :reduced-motion="reducedMotion"
   >
+    <template #atmosphere>
+      <ParticleLayer :active="active" :reduced-motion="reducedMotion" density="high" palette="gold" />
+    </template>
     <div class="final-title-slide" :class="themeClass">
-      <div class="final-title-slide__seal" data-animate>
+      <div class="final-title-slide__seal" data-annual-stage="visual">
         <AnnualDrumWindow
           size="large"
           fallback-kind="don"
@@ -44,16 +52,27 @@ const { t } = useI18n();
       </div>
 
       <div class="final-title-slide__body">
-        <article class="final-title-slide__panel" data-animate>
+        <article class="final-title-slide__panel" data-annual-stage="title">
           <span>{{ summary.profileCard?.nickname || summary.user.nickname }}</span>
           <strong>{{ summary.copy.finalTitle.title }}</strong>
           <small>{{ summary.finalTitle.body }}</small>
         </article>
 
-        <article class="final-title-slide__panel final-title-slide__panel--mini" data-animate>
+        <article class="final-title-slide__panel final-title-slide__panel--mini" data-annual-stage="copy">
           <span>{{ summary.finalTitle.evidenceLabel }}</span>
           <strong>{{ summary.finalTitle.evidenceText }}</strong>
         </article>
+
+        <div class="final-title-slide__metrics" data-annual-stage="data">
+          <span><strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.plays") }}</span>
+          <span><strong><AnimatedNumber :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.activeDays") }}</span>
+          <span><strong><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.songs") }}</span>
+        </div>
+
+        <button type="button" class="final-title-slide__poster-cta" data-annual-stage="copy" @click="emit('next')">
+          {{ t("annualSummary.controls.viewPoster") }}
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
     </div>
   </StorySlideShell>
@@ -164,6 +183,45 @@ const { t } = useI18n();
   gap: 14px;
 }
 
+.final-title-slide__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.final-title-slide__metrics > span {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  border: 1px solid rgba(245, 203, 114, .2);
+  border-radius: 16px;
+  color: rgba(255, 239, 199, .7) !important;
+  background: rgba(11, 16, 40, .58);
+  font-size: 10px;
+  text-align: center;
+}
+
+.final-title-slide__metrics strong {
+  margin: 0;
+  color: #ffe49c !important;
+  font: 800 clamp(1.35rem, 3vw, 2rem)/1 var(--viewer-display-font);
+}
+
+.final-title-slide__poster-cta {
+  min-height: 48px;
+  padding: 11px 18px;
+  border: 1px solid rgba(255, 231, 166, .68);
+  border-radius: 999px;
+  color: #211a0c;
+  background: linear-gradient(135deg, #fff2bd, #e9b94f);
+  box-shadow: 0 12px 30px rgba(231, 183, 73, .18);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.final-title-slide__poster-cta span { margin-left: 8px; color: inherit !important; }
+.final-title-slide__poster-cta:focus-visible { outline: 3px solid #ffe49c; outline-offset: 3px; }
+
 .final-title-slide__panel strong {
   font-size: clamp(2.1rem, 4vw, 3.2rem);
   line-height: 1.08;
@@ -198,6 +256,12 @@ const { t } = useI18n();
 .theme-clear .final-title-slide__seal-copy,
 .theme-encouragement .final-title-slide__seal-copy {
   background: linear-gradient(145deg, #17365d, #3978c8 68%, #3978c8);
+}
+
+.final-title-slide .final-title-slide__seal-copy {
+  border-color: rgba(255, 231, 166, .68);
+  background: linear-gradient(145deg, rgba(83, 61, 20, .96), rgba(18, 23, 48, .96));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .34), 0 0 24px rgba(231, 183, 73, .14);
 }
 
 @media (max-width: 960px) {
@@ -239,6 +303,9 @@ const { t } = useI18n();
   .final-title-slide__panel small { display: block; margin-top: 6px; font-size: 0.75rem; line-height: 1.32; overflow: visible; }
   .final-title-slide__panel--mini { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
   .final-title-slide__panel--mini strong { margin-top: 0; font-size: 0.95rem; }
+  .final-title-slide__metrics { gap: 5px; }
+  .final-title-slide__metrics > span { padding: 8px 4px; border-radius: 12px; }
+  .final-title-slide__poster-cta { min-height: 44px; padding-block: 8px; }
 }
 
 @media (orientation: landscape) and (min-width: 721px) and (max-height: 460px) {
