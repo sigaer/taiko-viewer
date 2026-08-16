@@ -429,13 +429,28 @@ const auditOpeningMotion = async (browser, cookie) => {
   );
   assert.ok(animationStates.some((name) => name && name !== "none"), "opening motion effects are not active");
 
-  await page.locator(".annual-opening__start").click();
+  await page.locator(".annual-opening__start").evaluate((button) => {
+    button.click();
+    button.click();
+    button.click();
+  });
+  await page.waitForFunction(() => document.querySelector(".annual-opening__start")?.hasAttribute("disabled"), undefined, { timeout: 1_000 });
   await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
   await page.waitForFunction(
     () => document.querySelector(".story-player__slide[data-page-key='profile']")?.getBoundingClientRect().top === 0,
     undefined,
     { timeout: 10_000 }
   );
+  const openingPauseAudit = await page.locator(".story-player__slide[data-page-key='opening']").evaluate((slide) => ({
+    hidden: slide.getAttribute("aria-hidden"),
+    inert: slide.inert,
+    fireworkState: getComputedStyle(slide.querySelector(".annual-fireworks path")).animationPlayState,
+    beatState: getComputedStyle(slide.querySelector(".annual-beat-lane__track")).animationPlayState
+  }));
+  assert.equal(openingPauseAudit.hidden, "true");
+  assert.equal(openingPauseAudit.inert, true);
+  assert.equal(openingPauseAudit.fireworkState, "paused", "offscreen opening fireworks kept running");
+  assert.equal(openingPauseAudit.beatState, "paused", "offscreen opening beat lane kept running");
   const periodIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
     slides.findIndex((slide) => slide.getAttribute("data-page-key") === "period")
   );
@@ -580,6 +595,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   for (const forbidden of ["已经通关", "已经全连", "已经全良", "已经极"]) {
     assert.equal(overviewCopy.includes(forbidden), false, `overview still includes ${forbidden}`);
   }
+  const overviewPlayCount = page.locator(".story-player__slide[data-page-key='overview'] [data-overview-play-count] .animated-number");
+  assert.equal(await overviewPlayCount.innerText(), await overviewPlayCount.getAttribute("aria-label"), "overview play count did not reach its real value");
   await page.keyboard.press("PageUp");
   await page.waitForFunction(
     () => {
@@ -590,10 +607,57 @@ const auditOpeningMotion = async (browser, cookie) => {
     { timeout: 4_000 }
   );
   await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
+  const finalIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
+    slides.findIndex((slide) => slide.getAttribute("data-page-key") === "final")
+  );
+  const posterIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
+    slides.findIndex((slide) => slide.getAttribute("data-page-key") === "poster")
+  );
+  assert.equal(posterIndex, finalIndex + 1, "poster no longer follows the final title directly");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, finalIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='final']")?.getAttribute("aria-hidden") === "false");
+  const visibleParticles = await page.locator(".story-player__slide[data-page-key='final'] .particle-layer i").evaluateAll((nodes) =>
+    nodes.filter((node) => getComputedStyle(node).display !== "none").length
+  );
+  assert.ok(visibleParticles <= 12, "mobile particle cap exceeded 12");
+  const shareMutations = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST" && /\/shares|\/posters/.test(request.url())) shareMutations.push(request.url());
+  });
+  await page.locator(".final-title-slide__poster-cta").click();
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='poster']")?.getAttribute("aria-hidden") === "false");
+  assert.deepEqual(shareMutations, [], "final CTA duplicated share or poster creation logic");
   reportProgress("period motion: full-height cover stream advanced");
   reportProgress("opening motion: closing");
   await context.close();
   reportProgress("opening motion: passed");
+};
+
+const auditSaveData = async (browser, cookie) => {
+  reportProgress("save-data motion fallback: start");
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "no-preference"
+  });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, "connection", { configurable: true, value: { saveData: true } });
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
+  assert.equal(await page.locator(".annual-opening").evaluate((node) => node.classList.contains("is-reduced")), true);
+  assert.equal(await page.locator(".annual-opening .particle-layer i").count(), 0, "save-data mode still rendered particles");
+  await context.close();
+  reportProgress("save-data motion fallback: passed");
 };
 
 const auditTransitionFrames = async (browser, cookie) => {
@@ -635,6 +699,10 @@ const auditTransitionFrames = async (browser, cookie) => {
         assert.ok(Math.abs(face.rotationZ - expectedRotation) < .05, `transition ${time}ms cover rotation is ${face.rotationZ}, expected ${expectedRotation}`);
         assert.ok(Math.abs(face.scaleX - 1) < .001, `transition ${time}ms rescaled a cover face`);
         assert.ok(face.xAxisTilt < .001, `transition ${time}ms tilted a nested face around the X axis`);
+      }
+      if (time === 1600) {
+        const playCount = page.locator(".story-player__transition-overlay [data-overview-play-count] .animated-number");
+        assert.equal(await playCount.innerText(), await playCount.getAttribute("aria-label"), "frozen overview frame did not reach the final play count");
       }
     }
     await page.screenshot({ path: `/tmp/annual-transition-${String(time).padStart(4, "0")}.png`, fullPage: false });
@@ -956,6 +1024,7 @@ try {
   reportProgress("browser matrix: launched");
   try {
     await auditAudioLifecycle(browser, firstSession);
+    await auditSaveData(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
