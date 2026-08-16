@@ -30,12 +30,12 @@ const setControlledValue = () => {
 
 const play = () => {
   tween?.kill();
-  if (setControlledValue()) return;
   if (!props.active) return;
   if (props.reducedMotion) {
     current.value = finalValue.value;
     return;
   }
+  if (setControlledValue()) return;
   const state = { value: 0 };
   current.value = 0;
   tween = gsap.to(state, {
