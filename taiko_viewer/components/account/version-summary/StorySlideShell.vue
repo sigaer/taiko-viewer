@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import { gsap } from "gsap";
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import AnnualScene from "./AnnualScene.vue";
 
 const props = withDefaults(defineProps<{
   pageIndex: number; pageTotal: number; eyebrow: string; title: string; lead?: string; accent?: string;
   tone?: "ember" | "sunrise" | "aurora" | "royal" | "gold"; active?: boolean; reducedMotion?: boolean;
+  mood?: string; intensity?: "low" | "medium" | "high";
 }>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false });
 
 const rootRef = ref<HTMLElement | null>(null);
 let tween: gsap.core.Timeline | null = null;
+const rootElement = () => (rootRef.value as unknown as { rootEl?: HTMLElement | null } | null)?.rootEl || null;
 const playReveal = async () => {
-  if (!rootRef.value || props.reducedMotion) return;
+  const root = rootElement();
+  if (!root || props.reducedMotion) return;
   await nextTick();
-  const targets = rootRef.value.querySelectorAll<HTMLElement>("[data-animate]");
+  const targets = root.querySelectorAll<HTMLElement>("[data-animate]");
   tween?.kill();
   gsap.set(targets, { clearProps: "all" });
   tween = gsap.timeline().fromTo(targets, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: .58, stagger: .055, ease: "power2.out" });
@@ -22,8 +26,12 @@ onBeforeUnmount(() => tween?.kill());
 </script>
 
 <template>
-  <section ref="rootRef" class="story-slide-shell" :class="[`tone-${tone}`, { 'is-active': active }]">
-    <div class="story-slide-shell__backdrop" aria-hidden="true"><i></i><i></i></div>
+  <AnnualScene ref="rootRef" class="story-slide-shell" :class="[`tone-${tone}`, { 'is-active': active }]" :active="active" :reduced-motion="reducedMotion" :mood="mood" :intensity="intensity">
+    <template #background><slot name="background"><div class="story-slide-shell__backdrop"><i></i><i></i></div></slot></template>
+    <template #atmosphere><slot name="atmosphere" /></template>
+    <template #visual><slot name="visual" /></template>
+    <template #data><slot name="data" /></template>
+    <template #copy><slot name="copy" /></template>
     <div class="story-slide-shell__frame">
       <header class="story-slide-shell__header">
         <div class="story-slide-shell__heading" data-animate>
@@ -35,7 +43,7 @@ onBeforeUnmount(() => tween?.kill());
       </header>
       <div class="story-slide-shell__body"><slot /></div>
     </div>
-  </section>
+  </AnnualScene>
 </template>
 
 <style scoped>
