@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { gsap } from "gsap";
-import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { ref, toRef } from "vue";
 import AnnualScene from "./AnnualScene.vue";
+import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 
 const props = withDefaults(defineProps<{
   pageIndex: number; pageTotal: number; eyebrow: string; title: string; lead?: string; accent?: string;
@@ -10,19 +10,7 @@ const props = withDefaults(defineProps<{
 }>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false });
 
 const rootRef = ref<HTMLElement | null>(null);
-let tween: gsap.core.Timeline | null = null;
-const rootElement = () => (rootRef.value as unknown as { rootEl?: HTMLElement | null } | null)?.rootEl || null;
-const playReveal = async () => {
-  const root = rootElement();
-  if (!root || props.reducedMotion) return;
-  await nextTick();
-  const targets = root.querySelectorAll<HTMLElement>("[data-animate]");
-  tween?.kill();
-  gsap.set(targets, { clearProps: "all" });
-  tween = gsap.timeline().fromTo(targets, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: .58, stagger: .055, ease: "power2.out" });
-};
-watch(() => props.active, (active) => { if (active) void playReveal(); }, { immediate: true });
-onBeforeUnmount(() => tween?.kill());
+useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"));
 </script>
 
 <template>
