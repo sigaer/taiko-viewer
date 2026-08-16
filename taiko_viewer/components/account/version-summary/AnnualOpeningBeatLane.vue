@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ reducedMotion: boolean }>();
+defineProps<{ reducedMotion: boolean; active?: boolean }>();
 
 const donIconUrl = "/api/content/assets/don";
 const oniMeasure14To16 = Array.from({ length: 3 }, (_, measureIndex) =>

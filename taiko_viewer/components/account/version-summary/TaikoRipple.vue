@@ -24,7 +24,12 @@ const play = () => {
   }, props.reducedMotion ? 140 : 760);
 };
 watch(() => props.trigger, play);
-watch(() => props.active, (active) => { if (!active) running.value = false; });
+watch(() => props.active, (active) => {
+  if (active) return;
+  running.value = false;
+  if (timer) window.clearTimeout(timer);
+  timer = null;
+});
 onBeforeUnmount(() => { if (timer) window.clearTimeout(timer); });
 </script>
 

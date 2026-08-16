@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ reducedMotion: boolean }>();
+defineProps<{ reducedMotion: boolean; active?: boolean }>();
 
 const stars = [
   { x: 8, y: 10, size: 6, delay: 0.1 },
