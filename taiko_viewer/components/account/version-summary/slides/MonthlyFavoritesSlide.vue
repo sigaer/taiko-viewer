@@ -12,7 +12,7 @@ const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "
 <template>
   <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" :eyebrow="summary.copy.monthlyFavorites.eyebrow" :title="summary.copy.monthlyFavorites.title" :lead="summary.copy.monthlyFavorites.body" tone="aurora" :active="active" :reduced-motion="reducedMotion">
     <div class="month-timeline" :class="{ dense: summary.monthlyFavorites.length > 6 }">
-      <article v-for="item in summary.monthlyFavorites" :key="item.month" data-animate><i></i><el-image :src="item.song.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ item.monthLabel }}</span><strong>{{ item.song.name }}</strong><small>{{ t("annualSummary.slides.monthly.plays", { count: formatter.format(item.playCount), time: item.estimatedTimeText }) }}</small></div></article>
+      <article v-for="item in summary.monthlyFavorites" :key="item.month" data-animate><i></i><el-image :src="item.song.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ item.monthLabel }}</span><strong>{{ item.song.name }}</strong><small>{{ t("annualSummary.slides.monthly.plays", { songCount: formatter.format(item.song.playCount ?? 0), monthCount: formatter.format(item.playCount), time: item.song.playCount ? `${Math.round(item.song.playCount * 3)} min` : item.estimatedTimeText }) }}</small></div></article>
     </div>
   </StorySlideShell>
 </template>

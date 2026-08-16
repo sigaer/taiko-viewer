@@ -564,7 +564,7 @@
       "overview": { "plays": "記録に残った挑戦", "activeDays": "灯った日", "songs": "出会った曲", "charts": "歩いた譜面", "estimated": "響いた時間", "clear": "クリア", "fullCombo": "フルコンボ", "dondaful": "ドンダフル", "kiwami": "極" },
       "favorite": { "plays": "記録に残った出会い" },
       "shift": { "old": "物語の前半 · 忘れない好き", "new": "物語の後半 · 新しく響いた好き", "times": "{count} 回の出会い" },
-      "monthly": { "estimated": "約 {time}", "plays": "{count} 回 · 約 {time}" },
+      "monthly": { "estimated": "約 {time}", "plays": "主役曲 {songCount} 回 · 月合計 {monthCount} 回 · 約 {time}" },
       "weekday": { "top": "いちばん気が合う曜日", "bottom": "少し静かな曜日" },
       "calendar": { "active": "灯った日", "streak": "止まらなかった最長記録", "days": "{count} 日" },
       "time": { "favorite": "太鼓の音が最も集まる時刻", "periods": { "early_morning": "早朝", "morning": "午前", "noon": "昼", "afternoon": "午後", "evening": "夜", "late_night": "深夜" } },

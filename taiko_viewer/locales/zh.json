@@ -617,7 +617,7 @@
       "overview": { "plays": "留下的挑战", "activeDays": "点亮的日期", "songs": "相遇的歌曲", "charts": "走过的谱面", "estimated": "鼓声时长", "clear": "已经通关", "fullCombo": "已经全连", "dondaful": "已经全良", "kiwami": "已经极" },
       "favorite": { "plays": "被记录的相遇" },
       "shift": { "old": "故事前段 · 放不下的旧爱", "new": "故事后段 · 悄悄登场的新欢", "times": "相遇 {count} 次" },
-      "monthly": { "estimated": "约 {time}", "plays": "{count} 次 · 约 {time}" },
+      "monthly": { "estimated": "约 {time}", "plays": "主打歌 {songCount} 次 · 当月共 {monthCount} 次 · 约 {time}" },
       "weekday": { "top": "最有默契的一天", "bottom": "相对安静的一天" },
       "calendar": { "active": "点亮的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
       "time": { "favorite": "鼓声最集中的时刻", "periods": { "early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜" } },
