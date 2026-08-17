@@ -796,6 +796,80 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
   reportProgress(`phase 2B-1 protected overview ${viewport.width}x${viewport.height}: passed`);
 };
 
+const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
+  reportProgress(`phase 2B-2 favorite scene ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const favoriteIndex = pageKeys.indexOf("favorite");
+  assert.ok(favoriteIndex >= 0, "favorite scene is missing");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, favoriteIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='favorite']")?.getAttribute("aria-hidden") === "false");
+  await page.locator(".story-player__slide[data-page-key='favorite'] .favorite-song-scene").waitFor({ state: "visible", timeout: 10_000 });
+
+  const audit = await page.locator(".story-player__slide[data-page-key='favorite'] .favorite-song-scene").evaluate((scene) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const sceneRect = scene.getBoundingClientRect();
+    const coverRect = scene.querySelector(".song-cover-hero__frame")?.getBoundingClientRect();
+    const title = scene.querySelector(".favorite-song-scene__song-copy h1");
+    const titleRect = title?.getBoundingClientRect();
+    const overflowingText = [...scene.querySelectorAll("h1, p, span, strong, em")]
+      .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none")
+      .filter((node) => {
+        const rect = node.getBoundingClientRect();
+        return rect.left < -1 || rect.right > viewportWidth + 1 || rect.top < -1 || rect.bottom > viewportHeight + 1;
+      })
+      .map((node) => node.textContent.trim().slice(0, 60));
+    return {
+      layers: [...scene.querySelectorAll(":scope > [data-layer]")].map((node) => node.getAttribute("data-layer")),
+      mood: scene.getAttribute("data-scene-mood"),
+      motion: scene.getAttribute("data-motion-state"),
+      fillsViewport: Math.abs(sceneRect.width - viewportWidth) <= 1 && Math.abs(sceneRect.height - viewportHeight) <= 1,
+      coverRatio: coverRect ? coverRect.width / viewportWidth : 0,
+      coverIsSquare: coverRect ? Math.abs(coverRect.width - coverRect.height) <= 1 : false,
+      titleFits: Boolean(titleRect && titleRect.left >= -1 && titleRect.right <= viewportWidth + 1),
+      overflowingText,
+      particleCount: scene.querySelectorAll(".particle-layer i").length,
+      runningAnimations: scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
+    };
+  });
+
+  assert.equal(audit.mood, "cover-spectrum");
+  assert.equal(audit.motion, "reduced");
+  assert.deepEqual(audit.layers, ["background", "atmosphere", "visual", "data", "copy", "transition"]);
+  assert.equal(audit.fillsViewport, true);
+  assert.ok(audit.coverRatio >= .58 && audit.coverRatio <= .72, `favorite cover width ratio ${audit.coverRatio} is outside 58%-72%`);
+  assert.equal(audit.coverIsSquare, true);
+  assert.equal(audit.titleFits, true);
+  assert.deepEqual(audit.overflowingText, []);
+  assert.equal(audit.particleCount, 0);
+  assert.equal(audit.runningAnimations, 0);
+  assert.equal(await page.locator(".story-player__slide[data-page-key='favorite'] .story-slide-shell").count(), 0);
+  assert.equal(await page.locator(".story-player__slide[data-page-key='favorite'] article").count(), 0);
+  assert.equal(await page.locator(".story-player__slide[data-page-key='favorite'] .song-slide__panel, .story-player__slide[data-page-key='favorite'] .song-slide__metric").count(), 0);
+  const favoriteNumber = page.locator(".story-player__slide[data-page-key='favorite'] .favorite-song-scene__play-count .animated-number");
+  if (await favoriteNumber.count()) assert.equal(await favoriteNumber.innerText(), await favoriteNumber.getAttribute("aria-label"));
+  await page.screenshot({ path: `/tmp/annual-phase2b2-favorite-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`phase 2B-2 favorite scene ${viewport.width}x${viewport.height}: passed`);
+};
+
 const auditSaveData = async (browser, cookie) => {
   reportProgress("save-data motion fallback: start");
   const context = await browser.newContext({
@@ -818,6 +892,20 @@ const auditSaveData = async (browser, cookie) => {
   assert.equal(await page.locator(".story-player").getAttribute("data-save-data"), "true", "save-data state was not propagated by StoryPlayer");
   assert.equal(await page.locator(".annual-opening").getAttribute("data-motion-state"), "reduced", "save-data mode did not enter the stable scene state");
   assert.equal(await page.locator(".annual-opening .particle-layer i").count(), 0, "save-data mode still rendered particles");
+  await page.locator(".annual-opening__start").click();
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const favoriteIndex = pageKeys.indexOf("favorite");
+  assert.ok(favoriteIndex >= 0, "save-data story is missing favorite scene");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, favoriteIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='favorite']")?.getAttribute("aria-hidden") === "false");
+  const favoriteScene = page.locator(".story-player__slide[data-page-key='favorite'] .favorite-song-scene");
+  await favoriteScene.waitFor({ state: "visible", timeout: 10_000 });
+  assert.equal(await favoriteScene.getAttribute("data-motion-state"), "reduced");
+  assert.equal(await favoriteScene.locator(".particle-layer i").count(), 0, "save-data favorite scene still rendered particles");
+  assert.equal(await favoriteScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data favorite scene still runs animations");
   await context.close();
   reportProgress("save-data motion fallback: passed");
 };
@@ -1193,6 +1281,7 @@ try {
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
       await auditPhase2AHeroScenes(browser, firstSession, viewport);
       await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);
+      await auditPhase2B2FavoriteScene(browser, firstSession, viewport);
     }
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
@@ -1265,7 +1354,7 @@ try {
   const [expiredRows] = await db.execute("SELECT status FROM web_annual_shares WHERE id = ?", [expiringId]);
   assert.equal(expiredRows[0]?.status, "expired");
 
-  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, protectedTransitionViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
+  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, protectedTransitionViewports: 3, favoriteSceneViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
 } finally {
   if (firstUserId) {
     const [posterRows] = await db.execute("SELECT file_path FROM web_annual_posters WHERE user_id = ?", [firstUserId]).catch(() => [[]]);
