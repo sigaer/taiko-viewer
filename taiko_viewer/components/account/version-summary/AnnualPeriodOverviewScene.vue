@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
 .period-overview-scene::after{content:"";position:absolute;z-index:1;inset:31% 0;border-top:1px solid rgba(84,207,242,.24);border-bottom:1px solid rgba(242,197,97,.2);background:linear-gradient(90deg,rgba(3,15,36,.38),rgba(7,35,68,.84) 18% 82%,rgba(3,15,36,.38));box-shadow:0 -24px 46px rgba(10,68,112,.22),0 24px 46px rgba(5,18,39,.3),inset 0 0 46px rgba(53,160,211,.08);backdrop-filter:blur(3px) saturate(1.08)}
 .period-overview-scene__cover-planes{position:absolute;z-index:0;inset:0;transform-style:preserve-3d}
 .period-overview-scene__particles{z-index:2;opacity:0;transition:opacity .4s ease}
-.period-overview-scene.is-transition-state .period-overview-scene__particles,.period-overview-scene.is-overview-state .period-overview-scene__particles{opacity:.54}
+.period-overview-scene.is-transition-state .period-overview-scene__particles,.period-overview-scene.is-overview-state .period-overview-scene__particles{opacity:.34}
 .period-overview-scene__page{position:absolute;z-index:4;top:max(18px,env(safe-area-inset-top));left:18px;padding:6px 9px;border:1px solid rgba(84,207,242,.34);border-radius:99px;color:#dff8ff;background:rgba(3,20,45,.72);box-shadow:0 0 20px rgba(84,207,242,.1);font:700 10px/1 var(--viewer-font-family)}
 .period-overview-scene__period-copy,.period-overview-scene__overview-copy{position:absolute;z-index:3;top:50%;left:50%;width:min(88%,610px);transform:translate(-50%,-50%);text-align:center;will-change:opacity}
 .period-overview-scene__period-intro>p,.period-overview-scene__overview-heading>p{margin:0;color:var(--period-stage-gold);font-size:12px;font-weight:800;letter-spacing:0;text-shadow:0 0 16px rgba(242,197,97,.2)}
@@ -195,18 +195,25 @@ onBeforeUnmount(() => {
 .period-overview-scene__period-facts span,.period-overview-scene__overview-facts span{display:grid;gap:2px;color:#a9c8dc;font-size:11px}
 .period-overview-scene__period-facts b,.period-overview-scene__overview-facts b{color:var(--period-stage-cyan);font:700 clamp(1.35rem,4vw,2.25rem)/1 var(--viewer-display-font);text-shadow:0 0 18px rgba(84,207,242,.22)}
 .period-overview-scene__period-latest{display:block;margin-top:8px;color:#83a8c1;font-size:10px}
-.period-overview-scene__overview-copy{display:grid;justify-items:center}
-.period-overview-scene__overview-heading{display:grid;justify-items:center;gap:7px}
-.period-overview-scene__overview-heading small{display:block;max-width:480px;color:var(--period-stage-copy);font-size:clamp(11px,1.5vw,14px);line-height:1.5;text-wrap:balance}
-.period-overview-scene__overview-play-count{display:grid;justify-items:center;gap:2px;margin-top:10px;color:#a9c8dc;font-size:11px}
-.period-overview-scene__overview-play-count strong{color:#fff8dc;font:800 clamp(3.6rem,14vw,8.8rem)/.82 var(--viewer-display-font);letter-spacing:-.06em;text-shadow:0 0 22px rgba(242,197,97,.26),0 12px 34px rgba(0,8,24,.52)}
-.period-overview-scene__overview-facts{margin-top:16px}
-.period-overview-scene__overview-anchor{margin-block:16px 10px}
-.period-overview-scene__overview-duration{display:grid;gap:4px;color:#a9c8dc;font-size:11px}
-.period-overview-scene__overview-duration strong{color:var(--period-stage-gold);font:700 clamp(1.75rem,5vw,3rem)/1 var(--viewer-display-font);text-shadow:0 0 18px rgba(242,197,97,.18)}
+.period-overview-scene__overview-copy{display:grid;justify-items:center;isolation:isolate}
+.period-overview-scene__overview-copy::before{content:"";position:absolute;z-index:0;inset:-8% -4%;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,rgba(2,13,32,.38),rgba(4,24,48,.18) 54%,transparent 76%)}
+.period-overview-scene__overview-copy>*{position:relative;z-index:1}
+.period-overview-scene__overview-heading{display:grid;justify-items:center;gap:6px}
+.period-overview-scene__overview-heading>p{font-size:11px;color:rgba(242,197,97,.82)}
+.period-overview-scene__overview-heading h2{font-size:clamp(1.5rem,4.5vw,2.75rem)}
+.period-overview-scene__overview-heading small{display:block;max-width:480px;color:rgba(197,220,237,.78);font-size:clamp(10px,1.35vw,13px);line-height:1.45;text-wrap:balance}
+.period-overview-scene__overview-play-count{display:grid;justify-items:center;gap:3px;margin-top:14px;color:rgba(169,200,220,.76);font-size:10px}
+.period-overview-scene__overview-play-count strong{color:#fff8dc;font:800 clamp(4.2rem,17vw,9.6rem)/.8 var(--viewer-display-font);letter-spacing:-.065em;text-shadow:0 0 30px rgba(242,197,97,.34),0 14px 38px rgba(0,8,24,.58)}
+.period-overview-scene__overview-facts{margin-top:14px;gap:clamp(26px,9vw,68px)}
+.period-overview-scene__overview-facts span{color:rgba(169,200,220,.7);font-size:10px}
+.period-overview-scene__overview-facts b{color:rgba(131,215,239,.86);font-size:clamp(1.05rem,3.2vw,1.65rem);text-shadow:0 0 14px rgba(84,207,242,.14)}
+.period-overview-scene__overview-anchor{width:clamp(34px,6.5vh,52px);margin-block:13px 8px;filter:drop-shadow(0 7px 10px rgba(0,8,24,.38))}
+.period-overview-scene__overview-duration{display:grid;gap:3px;color:rgba(169,200,220,.68);font-size:10px}
+.period-overview-scene__overview-duration strong{color:rgba(226,192,111,.88);font:700 clamp(1.3rem,3.8vw,2.15rem)/1 var(--viewer-display-font);text-shadow:0 0 12px rgba(242,197,97,.1)}
 .period-overview-scene.is-period-state .period-overview-scene__overview-copy,.period-overview-scene.is-period-state .period-overview-scene__page--overview,.period-overview-scene.is-overview-state .period-overview-scene__period-copy,.period-overview-scene.is-overview-state .period-overview-scene__page--period{visibility:hidden;opacity:0}
 .period-overview-scene.is-overview-state .period-overview-scene__overview-copy,.period-overview-scene.is-overview-state .period-overview-scene__page--overview{visibility:visible;opacity:1}
-@media(max-height:700px) and (orientation:portrait){.period-overview-scene__period-story img{margin-block:5px 3px}.period-overview-scene__period-story>p{margin-top:4px;line-height:1.35}.period-overview-scene__period-facts{margin-top:7px}.period-overview-scene__overview-heading{gap:4px}.period-overview-scene__overview-play-count{margin-top:5px}.period-overview-scene__overview-play-count strong{font-size:clamp(3rem,12vw,5rem)}.period-overview-scene__overview-facts{margin-top:6px}.period-overview-scene__overview-anchor{margin-block:5px 3px}}
+@media(max-height:700px) and (orientation:portrait){.period-overview-scene__period-story img{margin-block:5px 3px}.period-overview-scene__period-story>p{margin-top:4px;line-height:1.35}.period-overview-scene__period-facts{margin-top:7px}.period-overview-scene__overview-heading{gap:4px}.period-overview-scene__overview-play-count{margin-top:7px}.period-overview-scene__overview-play-count strong{font-size:clamp(3.7rem,15vw,5.6rem)}.period-overview-scene__overview-facts{margin-top:7px}.period-overview-scene__overview-anchor{margin-block:6px 4px}}
 @media(orientation:landscape) and (max-height:460px){.period-overview-scene::after{inset:0 31%;border-top:0;border-bottom:0;border-left:1px solid rgba(84,207,242,.24);border-right:1px solid rgba(242,197,97,.2);background:linear-gradient(rgba(3,15,36,.4),rgba(7,35,68,.88) 16% 84%,rgba(3,15,36,.4));box-shadow:-18px 0 32px rgba(10,68,112,.22),18px 0 32px rgba(5,18,39,.3)}.period-overview-scene__period-copy,.period-overview-scene__overview-copy{width:min(38%,520px)}.period-overview-scene__period-intro time{font-size:clamp(1.35rem,3.5vw,2rem)}.period-overview-scene__period-story img,.period-overview-scene__overview-anchor{width:38px;margin-block:4px 2px}.period-overview-scene__period-story h2,.period-overview-scene__overview-heading h2{font-size:clamp(1.25rem,3vw,1.8rem)}.period-overview-scene__period-story>p,.period-overview-scene__overview-heading small{display:none}.period-overview-scene__overview-play-count{margin-top:3px}.period-overview-scene__overview-play-count strong{font-size:clamp(2.4rem,8vw,4rem)}.period-overview-scene__period-facts,.period-overview-scene__overview-facts{margin-top:4px}.period-overview-scene__period-facts b,.period-overview-scene__overview-facts b{font-size:1.15rem}.period-overview-scene__overview-anchor{display:none}.period-overview-scene__overview-duration strong{font-size:1.35rem}}
+.period-overview-scene.is-reduced .period-overview-scene__particles{display:none}
 @media(prefers-reduced-motion:reduce){.period-overview-scene *{animation:none!important}}
 </style>

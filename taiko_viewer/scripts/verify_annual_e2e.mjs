@@ -707,8 +707,8 @@ const auditPhase2AHeroScenes = async (browser, cookie, viewport) => {
   reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: passed`);
 };
 
-const auditPhase2B0PeriodOverview = async (browser, cookie, viewport) => {
-  reportProgress(`phase 2B-0 period/overview ${viewport.width}x${viewport.height}: start`);
+const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
+  reportProgress(`phase 2B-1 protected overview ${viewport.width}x${viewport.height}: start`);
   const context = await browser.newContext({
     viewport,
     locale: "zh-CN",
@@ -752,11 +752,23 @@ const auditPhase2B0PeriodOverview = async (browser, cookie, viewport) => {
         return rect.left < -1 || rect.right > viewportWidth + 1 || rect.top < -1 || rect.bottom > viewportHeight + 1;
       })
       .map((node) => node.textContent.trim().slice(0, 60));
+    const playCount = scene.querySelector(".period-overview-scene__overview-play-count strong");
+    const supportingFacts = [...scene.querySelectorAll(".period-overview-scene__overview-facts b")];
+    const duration = scene.querySelector(".period-overview-scene__overview-duration strong");
+    const anchor = scene.querySelector(".period-overview-scene__overview-anchor");
+    const fontSize = (node) => node ? Number.parseFloat(getComputedStyle(node).fontSize) : 0;
     return {
       hasExpectedState: scene.classList.contains(expectedState),
       background,
       visibleCovers,
-      overflowingText
+      overflowingText,
+      overviewHierarchy: playCount ? {
+        playCountSize: fontSize(playCount),
+        largestFactSize: Math.max(0, ...supportingFacts.map(fontSize)),
+        durationSize: fontSize(duration),
+        anchorWidth: anchor?.getBoundingClientRect().width || 0,
+        particleCount: scene.querySelectorAll(".period-overview-scene__particles i").length
+      } : null
     };
   }, stateClass);
 
@@ -766,7 +778,7 @@ const auditPhase2B0PeriodOverview = async (browser, cookie, viewport) => {
   assert.ok(periodAudit.background.includes("radial-gradient"), "period stage background is missing");
   assert.ok(periodAudit.visibleCovers >= 2, "period stable state lost its cover planes");
   assert.deepEqual(periodAudit.overflowingText, []);
-  await page.screenshot({ path: `/tmp/annual-phase2b0-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/tmp/annual-phase2b1-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
 
   await showPage(overviewIndex, "overview");
   const overviewAudit = await inspectScene("overview", "is-overview-state");
@@ -774,9 +786,14 @@ const auditPhase2B0PeriodOverview = async (browser, cookie, viewport) => {
   assert.ok(overviewAudit.background.includes("radial-gradient"), "overview stage background is missing");
   assert.ok(overviewAudit.visibleCovers >= 2, "overview stable state lost its cover planes");
   assert.deepEqual(overviewAudit.overflowingText, []);
-  await page.screenshot({ path: `/tmp/annual-phase2b0-overview-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  assert.ok(overviewAudit.overviewHierarchy, "overview hierarchy could not be inspected");
+  assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.largestFactSize * 3, "supporting facts compete with play count");
+  assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.durationSize * 2.75, "estimated duration competes with play count");
+  assert.ok(overviewAudit.overviewHierarchy.anchorWidth <= 52, "overview drum anchor is too prominent");
+  assert.equal(overviewAudit.overviewHierarchy.particleCount, 0, "reduced-motion overview still rendered particles");
+  await page.screenshot({ path: `/tmp/annual-phase2b1-overview-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
-  reportProgress(`phase 2B-0 period/overview ${viewport.width}x${viewport.height}: passed`);
+  reportProgress(`phase 2B-1 protected overview ${viewport.width}x${viewport.height}: passed`);
 };
 
 const auditSaveData = async (browser, cookie) => {
@@ -1175,7 +1192,7 @@ try {
     await auditOpeningMotion(browser, firstSession);
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
       await auditPhase2AHeroScenes(browser, firstSession, viewport);
-      await auditPhase2B0PeriodOverview(browser, firstSession, viewport);
+      await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);
     }
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
