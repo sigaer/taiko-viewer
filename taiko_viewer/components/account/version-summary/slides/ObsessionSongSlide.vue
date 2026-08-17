@@ -4,6 +4,7 @@ import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StoryCounter from "../StoryCounter.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -46,11 +47,11 @@ const uiText = computed(() =>
       </div>
 
       <div class="obsession-slide__metrics">
-        <article class="obsession-slide__metric" data-animate>
+        <article v-if="isUsableMetric(song?.activeDays)" class="obsession-slide__metric" data-animate>
           <span>{{ uiText.activeDays }}</span>
           <strong><StoryCounter :value="song?.activeDays || 0" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>
-        <article class="obsession-slide__metric" data-animate>
+        <article v-if="isUsableMetric(song?.playCount)" class="obsession-slide__metric" data-animate>
           <span>{{ uiText.playCount }}</span>
           <strong><StoryCounter :value="song?.playCount || 0" :active="active" :reduced-motion="reducedMotion" /></strong>
         </article>

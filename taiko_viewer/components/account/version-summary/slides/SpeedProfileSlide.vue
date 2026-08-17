@@ -2,6 +2,7 @@
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualDrumWindow from "../AnnualDrumWindow.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t } = useI18n();
@@ -23,7 +24,7 @@ const { t } = useI18n();
       </AnnualDrumWindow>
       <div class="speed-slide__story">
         <p data-animate>{{ t('annualSummary.slides.speed.story', { speed: summary.speedProfile.speed }) }}</p>
-        <article data-animate>
+          <article v-if="isUsableMetric(summary.speedProfile.chartCount)" data-animate>
           <span>{{ t('annualSummary.slides.speed.chartCount') }}</span>
           <strong>{{ summary.speedProfile.chartCount }}</strong>
           <small>{{ t('annualSummary.slides.speed.detail') }}</small>

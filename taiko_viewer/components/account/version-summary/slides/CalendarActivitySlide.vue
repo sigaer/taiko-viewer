@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t, locale } = useI18n();
@@ -21,8 +22,8 @@ const inStreak = (date: string) => Boolean(
         <i v-for="day in summary.calendarActivity.days" :key="day.date" :class="{ streak: inStreak(day.date) }" :style="{ '--heat': day.intensity }" :title="`${day.date} · ${formatter.format(day.playCount)}`"></i>
       </div>
       <div class="calendar__facts">
-        <article data-animate><span>{{ t("annualSummary.slides.calendar.active") }}</span><strong>{{ formatter.format(summary.calendarActivity.activeDays) }}</strong></article>
-        <article data-animate><span>{{ t("annualSummary.slides.calendar.streak") }}</span><strong>{{ t("annualSummary.slides.calendar.days", { count: formatter.format(summary.calendarActivity.longestStreak) }) }}</strong><small>{{ summary.calendarActivity.streakLabel }}</small></article>
+        <article v-if="isUsableMetric(summary.calendarActivity.activeDays)" data-animate><span>{{ t("annualSummary.slides.calendar.active") }}</span><strong>{{ formatter.format(summary.calendarActivity.activeDays) }}</strong></article>
+        <article v-if="isUsableMetric(summary.calendarActivity.longestStreak)" data-animate><span>{{ t("annualSummary.slides.calendar.streak") }}</span><strong>{{ t("annualSummary.slides.calendar.days", { count: formatter.format(summary.calendarActivity.longestStreak) }) }}</strong><small>{{ summary.calendarActivity.streakLabel }}</small></article>
       </div>
     </div>
   </StorySlideShell>

@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t, locale } = useI18n();
@@ -13,13 +14,15 @@ const rankLabel = computed(() => {
   if (rank.rankMin && rank.rankMax && rank.rankMin !== rank.rankMax) return `#${numberFormatter.value.format(rank.rankMin)}–${numberFormatter.value.format(rank.rankMax)}`;
   return `#${numberFormatter.value.format(rank.rankMin || rank.rank)}`;
 });
+const hasRating = computed(() => Boolean(props.summary.ratingRank && isUsableMetric(props.summary.ratingRank.rating)));
+const hasPosition = computed(() => Boolean(props.summary.ratingRank && (isUsableMetric(props.summary.ratingRank.rank) || isUsableMetric(props.summary.ratingRank.sampleSize))));
 </script>
 
 <template>
   <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" :eyebrow="summary.copy.ratingRank.eyebrow" :title="summary.copy.ratingRank.title" :lead="summary.copy.ratingRank.body" tone="gold" :active="active" :reduced-motion="reducedMotion">
-    <div v-if="summary.ratingRank" class="rank">
+    <div v-if="hasRating" class="rank">
       <article class="hero" data-animate><span>TAIKOB20</span><strong>{{ summary.ratingRank.rating.toFixed(4) }}</strong><div class="progress"><i :style="{ width: `${summary.ratingRank.percentile}%` }"></i></div><b>{{ t(`annualSummary.slides.rating.tiers.${summary.ratingRank.tier}`) }}</b><small>{{ t("annualSummary.slides.rating.percentile", { value: percentFormatter.format(summary.ratingRank.percentile) }) }}</small></article>
-      <div class="position"><article data-animate><span>{{ t("annualSummary.slides.rating.rank") }}</span><strong>{{ rankLabel }}</strong><small>{{ t("annualSummary.slides.rating.sample", { count: numberFormatter.format(summary.ratingRank.sampleSize) }) }}</small></article><article class="silhouette" data-animate aria-hidden="true"><i></i><i></i><i></i></article></div>
+      <div v-if="hasPosition" class="position"><article data-animate><span>{{ t("annualSummary.slides.rating.rank") }}</span><strong>{{ rankLabel }}</strong><small v-if="isUsableMetric(summary.ratingRank.sampleSize)">{{ t("annualSummary.slides.rating.sample", { count: numberFormatter.format(summary.ratingRank.sampleSize) }) }}</small></article><article v-if="isUsableMetric(summary.ratingRank.sampleSize)" class="silhouette" data-animate aria-hidden="true"><i></i><i></i><i></i></article></div>
     </div>
   </StorySlideShell>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = withDefaults(defineProps<{
   summary: VersionSummaryViewModel;
@@ -21,6 +22,11 @@ const qrLoaded = ref(false);
 const myDonImage = ref<HTMLImageElement | null>(null);
 const coverImage = ref<HTMLImageElement | null>(null);
 const qrImage = ref<HTMLImageElement | null>(null);
+const posterStats = computed(() => [
+  { key: "plays", label: t("annualSummary.slides.overview.plays"), value: props.summary.overview.playCount },
+  { key: "songs", label: t("annualSummary.slides.overview.songs"), value: props.summary.overview.uniqueSongs },
+  { key: "clear", label: t("annualSummary.slides.overview.clear"), value: props.summary.overview.currentClearCharts }
+].filter((stat) => isUsableMetric(stat.value)));
 const inspectLoadedImages = async () => {
   await nextTick();
   if (myDonImage.value?.complete) {
@@ -74,10 +80,8 @@ const formatDate = (value: string | null) => {
       </div>
     </section>
 
-    <section class="annual-poster__stats">
-      <article><span>{{ t("annualSummary.slides.overview.plays") }}</span><strong>{{ n(summary.overview.playCount) }}</strong></article>
-      <article><span>{{ t("annualSummary.slides.overview.songs") }}</span><strong>{{ n(summary.overview.uniqueSongs) }}</strong></article>
-      <article><span>{{ t("annualSummary.slides.overview.clear") }}</span><strong>{{ n(summary.overview.currentClearCharts || 0) }}</strong></article>
+    <section v-if="posterStats.length" class="annual-poster__stats" :style="{ '--poster-stat-count': posterStats.length }">
+      <article v-for="stat in posterStats" :key="stat.key"><span>{{ stat.label }}</span><strong>{{ n(stat.value) }}</strong></article>
     </section>
 
     <section class="annual-poster__memory">
@@ -119,4 +123,6 @@ const formatDate = (value: string | null) => {
 .annual-poster__foot > div > * { grid-area: 1 / 1; width: 100%; height: 100%; }
 .annual-poster__song-art { display: grid !important; place-items: stretch !important; overflow: hidden; }
 .annual-poster__song-art img { width: 100%; height: 100%; object-fit: cover; }
+.annual-poster__stats { grid-template-columns: repeat(var(--poster-stat-count, 3), minmax(0, 1fr)); }
+.annual-poster__title h3 { overflow-wrap: anywhere; }
 </style>

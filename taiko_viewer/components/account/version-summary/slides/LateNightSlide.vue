@@ -3,6 +3,7 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { hasUsableText, isUsableMetric } from "~/utils/annualPresentation";
 
 defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t, locale } = useI18n();
@@ -14,7 +15,7 @@ const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "
     <div v-if="summary.lateNight" class="late">
       <div class="stars" aria-hidden="true"></div>
       <div class="moon" data-animate><el-image :src="summary.lateNight.song.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image></div>
-      <div class="facts"><article data-animate><span>{{ t("annualSummary.slides.late.latest") }}</span><strong>{{ summary.lateNight.latestLabel }}</strong><small>{{ t("annualSummary.slides.milestones.song", { name: summary.lateNight.song.name }) }}</small></article><article data-animate><span>{{ t("annualSummary.slides.late.company") }}</span><strong>{{ t("annualSummary.slides.late.nights", { count: formatter.format(summary.lateNight.activeDays) }) }}</strong><small>{{ t("annualSummary.slides.late.plays", { count: formatter.format(summary.lateNight.playCount) }) }}</small></article></div>
+      <div class="facts"><article v-if="hasUsableText(summary.lateNight.latestLabel) && summary.lateNight.latestLabel !== '—'" data-animate><span>{{ t("annualSummary.slides.late.latest") }}</span><strong>{{ summary.lateNight.latestLabel }}</strong><small>{{ t("annualSummary.slides.milestones.song", { name: summary.lateNight.song.name }) }}</small></article><article v-if="isUsableMetric(summary.lateNight.activeDays)" data-animate><span>{{ t("annualSummary.slides.late.company") }}</span><strong>{{ t("annualSummary.slides.late.nights", { count: formatter.format(summary.lateNight.activeDays) }) }}</strong><small v-if="isUsableMetric(summary.lateNight.playCount)">{{ t("annualSummary.slides.late.plays", { count: formatter.format(summary.lateNight.playCount) }) }}</small></article></div>
     </div>
   </StorySlideShell>
 </template>

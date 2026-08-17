@@ -3,6 +3,7 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StoryRadarChart from "../StoryRadarChart.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -19,7 +20,7 @@ const radarEntries = computed(() => dimensionOrder.map((key) => ({
   key,
   label: t(`annualSummary.keywords.dimensions.${key}`),
   value: Number(profileKeyword.value?.radarValues?.[key] || 0)
-})));
+})).filter((entry) => isUsableMetric(entry.value)));
 const rankedEntries = computed(() => [...radarEntries.value].sort((a, b) => b.value - a.value));
 const radarLabels = computed(() => radarEntries.value.map((entry) => entry.label));
 const radarValues = computed(() => radarEntries.value.map((entry) => entry.value));
@@ -41,9 +42,9 @@ const radarMax = computed(() => {
     :active="active"
     :reduced-motion="reducedMotion"
   >
-    <div class="keyword-slide">
+    <div class="keyword-slide" :class="{ 'is-solo': radarEntries.length < 3 }">
       <article class="keyword-slide__hero" data-animate>
-        <div class="keyword-slide__radar">
+        <div v-if="radarEntries.length >= 3" class="keyword-slide__radar">
           <StoryRadarChart
             :labels="radarLabels"
             :values="radarValues"
@@ -55,11 +56,11 @@ const radarMax = computed(() => {
           <span>{{ t('annualSummary.slides.keyword.signature') }}</span>
           <strong>{{ profileKeyword?.title || summary.finalTitle.title }}</strong>
           <p>{{ t('annualSummary.slides.keyword.story') }}</p>
-          <div class="keyword-slide__seal">
+          <div v-if="profileKeyword?.dimensionLabel" class="keyword-slide__seal">
             <small>{{ t('annualSummary.slides.keyword.brightest') }}</small>
             <b>{{ profileKeyword?.dimensionLabel || summary.finalTitle.eyebrow }}</b>
           </div>
-          <div class="keyword-slide__chips">
+          <div v-if="rankedEntries.length" class="keyword-slide__chips">
             <span v-for="entry in rankedEntries.slice(0, 3)" :key="entry.key">{{ entry.label }}</span>
           </div>
         </div>
@@ -70,6 +71,10 @@ const radarMax = computed(() => {
 
 <style scoped>
 .keyword-slide { height: 100%; min-height: 0; }
+.keyword-slide.is-solo .keyword-slide__hero { grid-template-columns: minmax(0, 1fr); }
+.keyword-slide.is-solo .keyword-slide__copy { max-width: 36rem; justify-self: center; text-align: center; }
+.keyword-slide.is-solo .keyword-slide__seal,
+.keyword-slide.is-solo .keyword-slide__chips { justify-self: center; }
 .keyword-slide__hero {
   height: 100%;
   display: grid;

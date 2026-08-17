@@ -3,6 +3,7 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t, locale } = useI18n();
@@ -12,9 +13,9 @@ const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "
 <template>
   <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" :eyebrow="summary.copy.favoriteShift.eyebrow" :title="summary.copy.favoriteShift.title" :lead="summary.copy.favoriteShift.body" tone="sunrise" :active="active" :reduced-motion="reducedMotion">
     <div v-if="summary.favoriteShift" class="shift">
-      <article data-animate><el-image :src="summary.favoriteShift.oldFavorite.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ t("annualSummary.slides.shift.old") }}</span><strong>{{ summary.favoriteShift.oldFavorite.name }}</strong><small>{{ t("annualSummary.slides.shift.times", { count: formatter.format(summary.favoriteShift.oldFavorite.playCount || 0) }) }}</small></div></article>
+      <article data-animate><el-image :src="summary.favoriteShift.oldFavorite.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ t("annualSummary.slides.shift.old") }}</span><strong>{{ summary.favoriteShift.oldFavorite.name }}</strong><small v-if="isUsableMetric(summary.favoriteShift.oldFavorite.playCount)">{{ t("annualSummary.slides.shift.times", { count: formatter.format(summary.favoriteShift.oldFavorite.playCount) }) }}</small></div></article>
       <i data-animate aria-hidden="true">●</i>
-      <article data-animate><el-image :src="summary.favoriteShift.newFavorite.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ t("annualSummary.slides.shift.new") }}</span><strong>{{ summary.favoriteShift.newFavorite.name }}</strong><small>{{ t("annualSummary.slides.shift.times", { count: formatter.format(summary.favoriteShift.newFavorite.playCount || 0) }) }}</small></div></article>
+      <article data-animate><el-image :src="summary.favoriteShift.newFavorite.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><div><span>{{ t("annualSummary.slides.shift.new") }}</span><strong>{{ summary.favoriteShift.newFavorite.name }}</strong><small v-if="isUsableMetric(summary.favoriteShift.newFavorite.playCount)">{{ t("annualSummary.slides.shift.times", { count: formatter.format(summary.favoriteShift.newFavorite.playCount) }) }}</small></div></article>
     </div>
   </StorySlideShell>
 </template>
