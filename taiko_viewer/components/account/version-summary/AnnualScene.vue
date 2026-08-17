@@ -24,6 +24,7 @@ defineExpose({ rootEl: rootRef });
     :class="[`mood-${mood}`, `intensity-${intensity}`, { 'is-active': active, 'is-reduced': reducedMotion }]"
     :data-scene-mood="mood"
     :data-scene-intensity="intensity"
+    :data-motion-state="reducedMotion ? 'reduced' : active ? 'active' : 'paused'"
   >
     <div class="annual-scene__layer annual-scene__background" data-layer="background" aria-hidden="true"><slot name="background" /></div>
     <div class="annual-scene__layer annual-scene__atmosphere" data-layer="atmosphere" aria-hidden="true"><slot name="atmosphere" /></div>
@@ -68,13 +69,11 @@ defineExpose({ rootEl: rootRef });
 
 .annual-scene.is-reduced :deep(*) {
   scroll-behavior: auto !important;
-  animation-duration: 1ms !important;
-  animation-delay: 0ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 1ms !important;
+  animation: none !important;
+  transition: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .annual-scene :deep(*) { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+  .annual-scene :deep(*) { animation: none !important; transition: none !important; }
 }
 </style>

@@ -51,6 +51,7 @@ assert.equal(registry.includes("bgMood:"), false, "legacy bgMood remains in the 
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
 const annualSceneSource = await read("components/account/version-summary/AnnualScene.vue");
 const storySlideShellSource = await read("components/account/version-summary/StorySlideShell.vue");
+const annualTimelineSource = await read("composables/useAnnualTimeline.ts");
 const annualBgmSource = await read("utils/annualBgm.client.ts");
 const sidebarSource = await read("components/SidebarNav.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
@@ -77,6 +78,20 @@ assert.equal(storySlideShellSource.includes('<slot name="transition" />'), true,
 for (const binding of ["sceneType", "mainFocus", "motionPreset", "mood", "intensity"]) {
   assert.equal(storyPlayer.includes(`slide.${binding}`), true, `StoryPlayer does not expose ${binding}`);
 }
+assert.equal(annualTimelineSource.includes("gsap.context"), true, "annual page timelines are not scoped to a GSAP context");
+assert.equal(annualTimelineSource.includes("context?.revert()"), true, "annual page timeline context is not reverted");
+for (const lifecycleApi of ["requestFrame", "setTimeout", "setInterval", "listen", "onCleanup"]) {
+  assert.equal(annualTimelineSource.includes(lifecycleApi), true, `annual motion scope is missing ${lifecycleApi}`);
+}
+assert.equal(annualTimelineSource.includes("onAnnualMotionActive"), true, "annual motion scope is not exposed to scene pages");
+assert.equal(annualSceneSource.includes("data-motion-state"), true, "AnnualScene does not expose its motion lifecycle state");
+assert.equal(annualSceneSource.includes("animation: none !important"), true, "AnnualScene reduced motion does not use a stable CSS state");
+assert.equal(annualSceneSource.includes("animation-duration: 1ms"), false, "AnnualScene still depends on synthetic 1ms animation completion");
+assert.equal(storyPlayer.includes("transitionWatchdog"), true, "period-to-overview navigation has no completion watchdog");
+assert.equal(storyPlayer.includes("settleTransitionMotion"), true, "period-to-overview transition has no deterministic settle path");
+assert.equal(storyPlayer.includes(":active=\"documentVisible && activeIndex === index\""), true, "background scenes remain active while the document is hidden");
+assert.equal(storyPlayer.includes("stopCoverClock()"), true, "the annual cover RAF has no shared stop path");
+assert.equal(storyPlayer.includes("PERIOD_OVERVIEW_DURATION_MS / 1000"), true, "period-to-overview no longer uses the transitionTime duration contract");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
 const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");

@@ -7,11 +7,16 @@ import { createAnnualBgmSession, type AnnualBgmSession } from "~/utils/annualBgm
 import { ANNUAL_COVER_PHASE_KEY, ANNUAL_COVER_STREAM_DURATION_MS } from "~/utils/annualCoverClock";
 import {
   PERIOD_OVERVIEW_DURATION_MS,
-  PERIOD_OVERVIEW_REDUCED_DURATION_MS,
   clampPeriodOverviewTime
 } from "~/utils/annualTransition";
 import AnnualPeriodOverviewScene from "./AnnualPeriodOverviewScene.vue";
 import StoryProgress from "./StoryProgress.vue";
+
+type AnnualNetworkConnection = {
+  saveData?: boolean;
+  addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+  removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+};
 
 // Pre-rendered, locally owned PCM one-shot; no runtime oscillator or background loop.
 const DRUM_SOUND = "data:audio/wav;base64,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";
@@ -34,8 +39,10 @@ const coverStreamPhase = ref(0);
 const transitionOverlayVisible = ref(false);
 const transitionRunning = ref(false);
 const pairEndpoint = ref(false);
+const documentVisible = ref(true);
 let motionMedia: MediaQueryList | null = null;
-let updateMotionHandler: ((event: MediaQueryListEvent) => void) | null = null;
+let dataConnection: AnnualNetworkConnection | null = null;
+let updateMotionHandler: (() => void) | null = null;
 let scrollFrame = 0;
 let coverClockFrame = 0;
 let coverClockTimestamp = 0;
@@ -45,6 +52,10 @@ let audioDisposed = false;
 let routeLeaving = false;
 let autoplayRetryBound = false;
 let transitionTween: gsap.core.Tween | null = null;
+let transitionWatchdog = 0;
+let transitionResolve: (() => void) | null = null;
+let transitionGeneration = 0;
+let transitionTargetTime: number | null = null;
 let touchStart: { x: number; y: number } | null = null;
 const transitionClock = { value: 0 };
 provide(ANNUAL_COVER_PHASE_KEY, readonly(coverStreamPhase));
@@ -193,14 +204,48 @@ const commitPage = async (index: number, behavior: ScrollBehavior = "auto") => {
   if (behavior === "auto") syncPairEndpoint();
 };
 
+const clearTransitionWatchdog = () => {
+  if (!transitionWatchdog) return;
+  window.clearTimeout(transitionWatchdog);
+  transitionWatchdog = 0;
+};
+
+const settleTransitionMotion = (writeTarget = true) => {
+  clearTransitionWatchdog();
+  transitionTween?.kill();
+  transitionTween = null;
+  if (writeTarget && transitionTargetTime !== null) {
+    transitionClock.value = transitionTargetTime;
+    periodOverviewTime.value = transitionTargetTime;
+  }
+  const resolve = transitionResolve;
+  transitionResolve = null;
+  resolve?.();
+};
+
+const cancelPeriodOverviewTransition = () => {
+  transitionGeneration += 1;
+  settleTransitionMotion(false);
+  transitionTargetTime = null;
+  transitionRunning.value = false;
+  transitionOverlayVisible.value = false;
+};
+
 const runPeriodOverviewTransition = async (targetIndex: number) => {
   if (transitionRunning.value || debugTransitionTime.value !== null) return;
+  const generation = ++transitionGeneration;
   const forward = targetIndex === overviewIndex.value;
   const sourceTime = forward ? 0 : PERIOD_OVERVIEW_DURATION_MS;
   const targetTime = forward ? PERIOD_OVERVIEW_DURATION_MS : 0;
-  const realDuration = reducedMotion.value
-    ? PERIOD_OVERVIEW_REDUCED_DURATION_MS
-    : PERIOD_OVERVIEW_DURATION_MS;
+  transitionTargetTime = targetTime;
+
+  if (reducedMotion.value || !documentVisible.value) {
+    transitionClock.value = targetTime;
+    periodOverviewTime.value = targetTime;
+    await commitPage(targetIndex);
+    transitionTargetTime = null;
+    return;
+  }
 
   transitionRunning.value = true;
   pairEndpoint.value = false;
@@ -210,20 +255,27 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   await nextTick();
 
   await new Promise<void>((resolve) => {
-    transitionTween?.kill();
+    transitionResolve = resolve;
     transitionTween = gsap.to(transitionClock, {
       value: targetTime,
-      duration: realDuration / 1000,
+      duration: PERIOD_OVERVIEW_DURATION_MS / 1000,
       ease: "none",
       onUpdate: () => { periodOverviewTime.value = transitionClock.value; },
-      onComplete: resolve
+      onComplete: () => settleTransitionMotion()
     });
+    transitionWatchdog = window.setTimeout(
+      () => settleTransitionMotion(),
+      PERIOD_OVERVIEW_DURATION_MS + 300
+    );
   });
 
+  if (generation !== transitionGeneration || routeLeaving) return;
   await commitPage(targetIndex);
+  if (generation !== transitionGeneration || routeLeaving) return;
   await nextTick();
   transitionOverlayVisible.value = false;
   transitionRunning.value = false;
+  transitionTargetTime = null;
   syncPairEndpoint();
 };
 
@@ -319,10 +371,23 @@ const preloadNextArtwork = () => {
 };
 
 const updateCoverClock = (timestamp: number) => {
+  coverClockFrame = 0;
+  if (!documentVisible.value || reducedMotion.value || routeLeaving) return;
   if (coverClockTimestamp && !transitionRunning.value) {
     coverStreamPhase.value = (coverStreamPhase.value + timestamp - coverClockTimestamp) % ANNUAL_COVER_STREAM_DURATION_MS;
   }
   coverClockTimestamp = timestamp;
+  coverClockFrame = requestAnimationFrame(updateCoverClock);
+};
+
+const stopCoverClock = () => {
+  if (coverClockFrame) cancelAnimationFrame(coverClockFrame);
+  coverClockFrame = 0;
+  coverClockTimestamp = 0;
+};
+
+const startCoverClock = () => {
+  if (coverClockFrame || !documentVisible.value || reducedMotion.value || routeLeaving) return;
   coverClockFrame = requestAnimationFrame(updateCoverClock);
 };
 
@@ -332,9 +397,7 @@ watch(activeIndex, (value, oldValue) => {
 });
 
 watch(() => props.summary.summaryId, async () => {
-  transitionTween?.kill();
-  transitionRunning.value = false;
-  transitionOverlayVisible.value = false;
+  cancelPeriodOverviewTransition();
   periodOverviewTime.value = 0;
   activeIndex.value = 0;
   slideRefs.value = [];
@@ -346,12 +409,27 @@ watch(slides, () => {
   if (activeIndex.value >= slides.value.length) activeIndex.value = Math.max(0, slides.value.length - 1);
 });
 
+watch(reducedMotion, (isReduced) => {
+  if (isReduced) {
+    stopCoverClock();
+    if (transitionRunning.value) settleTransitionMotion();
+  } else {
+    startCoverClock();
+  }
+});
+
+const syncMotionPreference = () => {
+  reducedData.value = Boolean(dataConnection?.saveData);
+  reducedMotion.value = Boolean(motionMedia?.matches) || reducedData.value;
+};
+
 onMounted(async () => {
   motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
-  reducedData.value = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
-  reducedMotion.value = motionMedia.matches || reducedData.value;
-  updateMotionHandler = (event) => { reducedMotion.value = event.matches || reducedData.value; };
+  dataConnection = (navigator as Navigator & { connection?: AnnualNetworkConnection }).connection || null;
+  updateMotionHandler = syncMotionPreference;
+  syncMotionPreference();
   motionMedia.addEventListener("change", updateMotionHandler);
+  dataConnection?.addEventListener?.("change", updateMotionHandler);
   window.addEventListener("keydown", handleKeydown);
   window.addEventListener("pagehide", handlePageHide);
   window.addEventListener("pageshow", handlePageShow);
@@ -364,18 +442,35 @@ onMounted(async () => {
   await goToPage(debugTransitionTime.value === null ? 0 : periodIndex.value, true);
   preloadNextArtwork();
   document.addEventListener("visibilitychange", handleVisibilityChange);
-  coverClockFrame = requestAnimationFrame(updateCoverClock);
+  documentVisible.value = !document.hidden;
+  startCoverClock();
   void playBgm();
 });
 
 const handleVisibilityChange = () => {
-  if (document.hidden) pauseBgm();
-  else void playBgm();
+  documentVisible.value = !document.hidden;
+  if (!documentVisible.value) {
+    if (scrollFrame) cancelAnimationFrame(scrollFrame);
+    scrollFrame = 0;
+    stopCoverClock();
+    if (transitionRunning.value) settleTransitionMotion();
+    pauseBgm();
+  } else {
+    startCoverClock();
+    void playBgm();
+  }
 };
 
-const handlePageHide = () => disposeAudio();
+const handlePageHide = () => {
+  documentVisible.value = false;
+  stopCoverClock();
+  if (transitionRunning.value) settleTransitionMotion();
+  disposeAudio();
+};
 const handlePageShow = () => {
   audioDisposed = false;
+  documentVisible.value = !document.hidden;
+  startCoverClock();
   if (soundEnabled.value) {
     acquireBgmSession();
     void playBgm();
@@ -384,15 +479,19 @@ const handlePageShow = () => {
 
 onBeforeRouteLeave(() => {
   routeLeaving = true;
+  documentVisible.value = false;
   soundEnabled.value = false;
+  stopCoverClock();
+  cancelPeriodOverviewTransition();
   disposeAudio();
 });
 
 onBeforeUnmount(() => {
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
-  if (coverClockFrame) cancelAnimationFrame(coverClockFrame);
-  transitionTween?.kill();
+  stopCoverClock();
+  cancelPeriodOverviewTransition();
   if (motionMedia && updateMotionHandler) motionMedia.removeEventListener("change", updateMotionHandler);
+  if (dataConnection?.removeEventListener && updateMotionHandler) dataConnection.removeEventListener("change", updateMotionHandler);
   window.removeEventListener("keydown", handleKeydown);
   window.removeEventListener("pagehide", handlePageHide);
   window.removeEventListener("pageshow", handlePageShow);
@@ -403,7 +502,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="story-player" :class="{ 'is-live': started }">
+  <div
+    class="story-player"
+    :class="{ 'is-live': started }"
+    :data-document-visible="documentVisible"
+    :data-reduced-motion="reducedMotion"
+    :data-save-data="reducedData"
+  >
     <button v-if="started" type="button" class="story-player__drawer-trigger" :aria-label="t('annualSummary.controls.settings')" @click="emit('open-drawer')">
       <span></span><span></span><span></span>
     </button>
@@ -451,7 +556,7 @@ onBeforeUnmount(() => {
           :is="slide.component"
           v-if="Math.abs(activeIndex - index) <= 1"
           :summary="summary" :page-index="index" :page-total="slides.length"
-          :active="activeIndex === index" :reduced-motion="reducedMotion"
+          :active="documentVisible && activeIndex === index" :reduced-motion="reducedMotion"
           @start="startStory"
           @next="goToPage(index + 1)"
         />
@@ -467,7 +572,7 @@ onBeforeUnmount(() => {
         :summary="summary"
         :period-page-index="periodIndex"
         :page-total="slides.length"
-        :active="true"
+        :active="documentVisible"
         :reduced-motion="reducedMotion"
         :transition-time="visibleTransitionTime"
       />

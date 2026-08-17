@@ -663,6 +663,8 @@ const auditSaveData = async (browser, cookie) => {
   await waitForStoryPlayerReady(page);
   await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
   assert.equal(await page.locator(".annual-opening").evaluate((node) => node.classList.contains("is-reduced")), true);
+  assert.equal(await page.locator(".story-player").getAttribute("data-save-data"), "true", "save-data state was not propagated by StoryPlayer");
+  assert.equal(await page.locator(".annual-opening").getAttribute("data-motion-state"), "reduced", "save-data mode did not enter the stable scene state");
   assert.equal(await page.locator(".annual-opening .particle-layer i").count(), 0, "save-data mode still rendered particles");
   await context.close();
   reportProgress("save-data motion fallback: passed");
@@ -818,12 +820,14 @@ const auditAudioLifecycle = async (browser, cookie) => {
 
   const pauseCountBeforeHidden = (await bgmEvents()).filter((event) => event.type === "pause").length;
   await page.evaluate(() => window.__setAnnualDocumentHidden(true));
+  await page.waitForFunction(() => document.querySelector(".story-player")?.getAttribute("data-document-visible") === "false");
   await page.waitForFunction((before) => {
     const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
     return events.filter((event) => event.type === "pause" && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
   }, pauseCountBeforeHidden);
   const playCountBeforeVisible = (await bgmEvents()).filter((event) => event.type === "play" && !event.blocked).length;
   await page.evaluate(() => window.__setAnnualDocumentHidden(false));
+  await page.waitForFunction(() => document.querySelector(".story-player")?.getAttribute("data-document-visible") === "true");
   await page.waitForFunction((before) => {
     const events = JSON.parse(localStorage.getItem("annual-audio-events") || "[]");
     return events.filter((event) => event.type === "play" && !event.blocked && String(event.src).includes("natsumatsuri-303-old.ogg")).length > before;
