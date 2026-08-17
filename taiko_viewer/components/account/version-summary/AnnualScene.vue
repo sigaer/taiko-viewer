@@ -25,12 +25,13 @@ defineExpose({ rootEl: rootRef });
     :data-scene-mood="mood"
     :data-scene-intensity="intensity"
   >
-    <div class="annual-scene__layer annual-scene__background" aria-hidden="true"><slot name="background" /></div>
-    <div class="annual-scene__layer annual-scene__atmosphere" aria-hidden="true"><slot name="atmosphere" /></div>
-    <div class="annual-scene__layer annual-scene__visual"><slot name="visual" /></div>
-    <div class="annual-scene__layer annual-scene__data"><slot name="data" /></div>
-    <div class="annual-scene__layer annual-scene__copy"><slot name="copy" /></div>
+    <div class="annual-scene__layer annual-scene__background" data-layer="background" aria-hidden="true"><slot name="background" /></div>
+    <div class="annual-scene__layer annual-scene__atmosphere" data-layer="atmosphere" aria-hidden="true"><slot name="atmosphere" /></div>
+    <div class="annual-scene__layer annual-scene__visual" data-layer="visual"><slot name="visual" /></div>
+    <div class="annual-scene__layer annual-scene__data" data-layer="data"><slot name="data" /></div>
+    <div class="annual-scene__layer annual-scene__copy" data-layer="copy"><slot name="copy" /></div>
     <div class="annual-scene__content"><slot /></div>
+    <div class="annual-scene__layer annual-scene__transition" data-layer="transition" aria-hidden="true"><slot name="transition" /></div>
   </section>
 </template>
 
@@ -59,6 +60,7 @@ defineExpose({ rootEl: rootRef });
 .annual-scene__data { z-index: 3; }
 .annual-scene__copy { z-index: 4; }
 .annual-scene__content { position: relative; z-index: 5; width: 100%; height: 100%; min-height: 0; }
+.annual-scene__transition { z-index: 6; }
 
 .annual-scene:not(.is-active) :deep(*) {
   animation-play-state: paused !important;

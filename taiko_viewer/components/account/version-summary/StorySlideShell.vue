@@ -20,6 +20,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
     <template #visual><slot name="visual" /></template>
     <template #data><slot name="data" /></template>
     <template #copy><slot name="copy" /></template>
+    <template #transition><slot name="transition" /></template>
     <div class="story-slide-shell__frame">
       <header class="story-slide-shell__header">
         <div class="story-slide-shell__heading" data-annual-stage="title">

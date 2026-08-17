@@ -38,8 +38,19 @@ assert.equal(await exists("server/api/account/version-summary.get.ts"), false, "
 const registry = await read("composables/useAnnualPages.ts");
 const actualPages = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map((match) => match[1]);
 assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 23-page contract");
+const registryEntries = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"[^\n]*\}/g)];
+assert.equal(registryEntries.length, expectedPages.length, "annual page registry entries are not statically inspectable");
+for (const [entry, page] of registryEntries) {
+  for (const field of ["sceneType", "mainFocus", "motionPreset", "mood", "intensity"]) {
+    assert.equal(entry.includes(`${field}:`), true, `${page} is missing scene metadata: ${field}`);
+  }
+}
+assert.equal(registry.includes('"profile-stage"'), true, "profile-stage is missing from AnnualSceneMood");
+assert.equal(registry.includes("bgMood:"), false, "legacy bgMood remains in the annual page registry");
 
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
+const annualSceneSource = await read("components/account/version-summary/AnnualScene.vue");
+const storySlideShellSource = await read("components/account/version-summary/StorySlideShell.vue");
 const annualBgmSource = await read("utils/annualBgm.client.ts");
 const sidebarSource = await read("components/SidebarNav.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
@@ -58,6 +69,14 @@ assert.equal(annualBgmSource.includes("pendingPlay"), true, "annual BGM play req
 assert.equal(annualBgmSource.includes("PRIMED_OWNER"), true, "annual BGM cannot be adopted from the navigation gesture");
 assert.equal(sidebarSource.includes("primeAnnualBgm()"), true, "annual navigation does not start BGM inside its user gesture");
 assert.equal(storyPlayer.includes("debugTransitionTime"), true, "period transition has no development-time freeze control");
+for (const layer of ["background", "atmosphere", "visual", "data", "copy", "transition"]) {
+  assert.equal(annualSceneSource.includes(`data-layer="${layer}"`), true, `AnnualScene is missing the ${layer} layer`);
+}
+assert.equal(annualSceneSource.includes('<slot name="transition" />'), true, "AnnualScene has no transition slot");
+assert.equal(storySlideShellSource.includes('<slot name="transition" />'), true, "StorySlideShell does not forward the transition slot");
+for (const binding of ["sceneType", "mainFocus", "motionPreset", "mood", "intensity"]) {
+  assert.equal(storyPlayer.includes(`slide.${binding}`), true, `StoryPlayer does not expose ${binding}`);
+}
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
 const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");

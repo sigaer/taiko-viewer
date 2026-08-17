@@ -191,7 +191,7 @@ type AnnualSceneProps = {
 - `mainFocus`
 - `motionPreset` 或等价配置
 
-现有 `bgMood`、`intensity`、`transitionIn/Out` 保留并成为场景配置的一部分。页面 visible 条件和 23 页顺序不动。
+现有 `bgMood` 在 Phase 1A 直接收敛为 `mood`，不保留双字段；`intensity`、`transitionIn/Out` 继续作为场景配置。页面 visible 条件和 23 页顺序不动。
 
 ### 5.4 Timeline 接入
 
