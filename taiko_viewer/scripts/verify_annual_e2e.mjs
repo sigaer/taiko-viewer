@@ -737,6 +737,15 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
       const slide = document.querySelector(`.story-player__slide[data-page-key='${pageKey}']`);
       return slide?.getAttribute("aria-hidden") === "false" && Boolean(slide.querySelector(".period-overview-scene"));
     }, key);
+    await page.waitForFunction((pageKey) => {
+      const scene = document.querySelector(`.story-player__slide[data-page-key='${pageKey}'] .period-overview-scene`);
+      const covers = [...(scene?.querySelectorAll(".vertical-cover-stream__slot") || [])]
+        .filter((cover) => getComputedStyle(cover).display !== "none" && Number(getComputedStyle(cover).opacity) > .02);
+      return covers.length === 6 && covers.every((cover) => {
+        const image = cover.querySelector("img");
+        return !image || (image.complete && image.naturalWidth > 0);
+      });
+    }, key, { timeout: 15_000 });
   };
 
   const inspectScene = async (key, stateClass) => page.locator(`.story-player__slide[data-page-key='${key}'] .period-overview-scene`).evaluate((scene, expectedState) => {
@@ -756,10 +765,15 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
     const supportingFacts = [...scene.querySelectorAll(".period-overview-scene__overview-facts b")];
     const duration = scene.querySelector(".period-overview-scene__overview-duration strong");
     const anchor = scene.querySelector(".period-overview-scene__overview-anchor");
+    const mascot = scene.querySelector(".period-overview-scene__period-facts img, .period-overview-scene__overview-anchor");
     const fontSize = (node) => node ? Number.parseFloat(getComputedStyle(node).fontSize) : 0;
     return {
       hasExpectedState: scene.classList.contains(expectedState),
+      visualStyle: scene.getAttribute("data-visual-style"),
       background,
+      usesProvidedBackdrop: background.includes("蓝色白色背景图.png")
+        || background.includes("%E8%93%9D%E8%89%B2%E7%99%BD%E8%89%B2%E8%83%8C%E6%99%AF%E5%9B%BE.png"),
+      mascotSrc: mascot?.getAttribute("src") || "",
       visibleCovers,
       overflowingText,
       overviewHierarchy: playCount ? {
@@ -775,16 +789,22 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
   await showPage(periodIndex, "period");
   const periodAudit = await inspectScene("period", "is-period-state");
   assert.equal(periodAudit.hasExpectedState, true);
+  assert.equal(periodAudit.visualStyle, "light-memory-tunnel");
   assert.ok(periodAudit.background.includes("radial-gradient"), "period stage background is missing");
-  assert.ok(periodAudit.visibleCovers >= 2, "period stable state lost its cover planes");
+  assert.equal(periodAudit.usesProvidedBackdrop, true, "period stage does not use the provided blue-white backdrop");
+  assert.equal(periodAudit.mascotSrc, "/dance.gif", "period stage does not use the dancing pixel mascot");
+  assert.equal(periodAudit.visibleCovers, 6, "period stable state does not match the six-plane reference corridor");
   assert.deepEqual(periodAudit.overflowingText, []);
   await page.screenshot({ path: `/tmp/annual-phase2b1-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
 
   await showPage(overviewIndex, "overview");
   const overviewAudit = await inspectScene("overview", "is-overview-state");
   assert.equal(overviewAudit.hasExpectedState, true);
+  assert.equal(overviewAudit.visualStyle, "light-memory-tunnel");
   assert.ok(overviewAudit.background.includes("radial-gradient"), "overview stage background is missing");
-  assert.ok(overviewAudit.visibleCovers >= 2, "overview stable state lost its cover planes");
+  assert.equal(overviewAudit.usesProvidedBackdrop, true, "overview stage does not use the provided blue-white backdrop");
+  assert.equal(overviewAudit.mascotSrc, "/dance.gif", "overview stage does not use the dancing pixel mascot");
+  assert.equal(overviewAudit.visibleCovers, 6, "overview stable state does not match the six-plane reference corridor");
   assert.deepEqual(overviewAudit.overflowingText, []);
   assert.ok(overviewAudit.overviewHierarchy, "overview hierarchy could not be inspected");
   assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.largestFactSize * 3, "supporting facts compete with play count");

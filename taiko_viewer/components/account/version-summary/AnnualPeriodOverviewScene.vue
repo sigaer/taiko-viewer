@@ -21,7 +21,7 @@ const props = defineProps<{
 const { formatDate } = useViewerDateTime();
 const { locale, n, t } = useI18n();
 const rootRef = ref<HTMLElement | null>(null);
-const donIconUrl = "/api/content/assets/don";
+const mascotUrl = "/dance.gif";
 let context: gsap.Context | null = null;
 let timeline: gsap.core.Timeline | null = null;
 
@@ -36,18 +36,23 @@ const stateClass = computed(() => safeTime.value <= 0
     : "is-transition-state");
 const anchorDate = computed(() => props.summary.period.firstRecordAt || props.summary.version.startDate);
 const latestDate = computed(() => props.summary.period.lastRecordAt || props.summary.version.effectiveEndDate);
+const monthCount = computed(() => Math.max(0, Math.round(props.summary.period.totalDays / 30.4375)));
 const centerText = computed(() => locale.value === "ja"
   ? {
-      first: props.summary.period.firstRecordAt ? "最初の一打が記録された日" : "この物語が始まった日",
+      first: props.summary.period.firstRecordAt ? "私たちが初めて出会った日" : "この物語が始まった日",
+      elapsedPrefix: "あれから",
+      elapsedUnit: "日",
+      monthPrefix: "もうすぐ",
+      monthUnit: "か月",
       latest: "ここまで記録された日",
-      elapsed: "物語が続いた日",
-      active: "記録した日"
     }
   : {
-      first: props.summary.period.firstRecordAt ? "第一次留下鼓点" : "这一版故事开始",
+      first: props.summary.period.firstRecordAt ? "我们第一次相遇" : "这一版故事开始",
+      elapsedPrefix: "转眼过去",
+      elapsedUnit: "天",
+      monthPrefix: "已经快",
+      monthUnit: "个月",
       latest: "故事写到这里",
-      elapsed: "故事走过的日子",
-      active: "记录的日期"
     }
 );
 
@@ -122,6 +127,7 @@ onBeforeUnmount(() => {
     class="period-overview-scene"
     :class="[stateClass, { 'is-active': active, 'is-reduced': reducedMotion }]"
     :data-transition-time="safeTime"
+    data-visual-style="light-memory-tunnel"
   >
     <div class="period-overview-scene__cover-planes" aria-hidden="true">
       <AnnualVerticalCoverStream :summary="summary" :active="active" :reduced-motion="reducedMotion" />
@@ -139,17 +145,16 @@ onBeforeUnmount(() => {
 
     <div class="period-overview-scene__period-copy">
       <div class="period-overview-scene__period-intro">
-        <p>{{ centerText.first }}</p>
         <time :datetime="anchorDate">{{ formatDate(anchorDate) }}</time>
+        <h2>{{ centerText.first }}</h2>
       </div>
       <div class="period-overview-scene__period-story">
-        <img :src="donIconUrl" alt="" aria-hidden="true" />
-        <h2>{{ summary.copy.period.title }}</h2>
         <p>{{ summary.copy.period.body }}</p>
       </div>
       <div class="period-overview-scene__period-facts">
-        <span><b>{{ n(summary.period.totalDays) }}</b>{{ centerText.elapsed }}</span>
-        <span v-if="summary.timeCoverage?.status !== 'unavailable' && isUsableMetric(summary.period.activeDays)"><b>{{ n(summary.period.activeDays) }}</b>{{ centerText.active }}</span>
+        <img :src="mascotUrl" alt="" aria-hidden="true" />
+        <span>{{ centerText.elapsedPrefix }} <b>{{ n(summary.period.totalDays) }}</b> {{ centerText.elapsedUnit }}</span>
+        <span v-if="monthCount > 0">{{ centerText.monthPrefix }} <b>{{ n(monthCount) }}</b> {{ centerText.monthUnit }}</span>
       </div>
       <small class="period-overview-scene__period-latest">{{ centerText.latest }} · {{ formatDate(latestDate) }}</small>
     </div>
@@ -168,7 +173,7 @@ onBeforeUnmount(() => {
         <span v-if="isUsableMetric(summary.overview.uniqueSongs)"><b><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.songs") }}</span>
         <span v-if="isUsableMetric(summary.overview.uniqueCharts)"><b><AnimatedNumber :value="summary.overview.uniqueCharts" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.charts") }}</span>
       </div>
-      <img class="period-overview-scene__overview-anchor" :src="donIconUrl" alt="" aria-hidden="true" />
+      <img class="period-overview-scene__overview-anchor" :src="mascotUrl" alt="" aria-hidden="true" />
       <div class="period-overview-scene__overview-duration">
         <span>{{ t("annualSummary.slides.overview.estimated") }}</span>
         <strong v-if="isUsableMetric(summary.overview.estimatedSeconds)">{{ summary.overview.estimatedTimeText }}</strong>
@@ -178,42 +183,375 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.period-overview-scene{--period-stage-ink:#06142e;--period-stage-blue:#0b396d;--period-stage-cyan:#54cff2;--period-stage-gold:#f2c561;--period-stage-copy:#c5dced;position:relative;width:100%;height:100vh;height:100svh;height:100dvh;overflow:hidden;color:#eefaff;background:radial-gradient(circle at 50% 49%,rgba(58,183,230,.3) 0,rgba(24,103,158,.16) 24%,transparent 42%),linear-gradient(180deg,rgba(4,18,42,.72),rgba(7,43,80,.8) 48%,rgba(3,16,38,.9)),url("/annual-period-background.webp") center/cover no-repeat,var(--period-stage-ink);perspective:900px;perspective-origin:50% 50%}
-.period-overview-scene::before{content:"";position:absolute;z-index:0;inset:-18%;background:radial-gradient(circle at 50% 50%,transparent 0 19%,rgba(84,207,242,.22) 19.3% 19.8%,transparent 20.2% 27%,rgba(242,197,97,.14) 27.3% 27.7%,transparent 28.1%),repeating-conic-gradient(from -8deg at 50% 50%,rgba(84,207,242,.11) 0 1.1deg,transparent 1.1deg 11deg),conic-gradient(from 218deg at 50% 50%,rgba(239,91,82,.12),rgba(242,197,97,.1),rgba(73,197,140,.1),rgba(84,207,242,.13),rgba(112,89,184,.12),rgba(239,91,82,.12));mask-image:radial-gradient(circle at 50% 50%,#000 0 58%,transparent 79%);opacity:.86}
-.period-overview-scene::after{content:"";position:absolute;z-index:1;inset:31% 0;border-top:1px solid rgba(84,207,242,.24);border-bottom:1px solid rgba(242,197,97,.2);background:linear-gradient(90deg,rgba(3,15,36,.38),rgba(7,35,68,.84) 18% 82%,rgba(3,15,36,.38));box-shadow:0 -24px 46px rgba(10,68,112,.22),0 24px 46px rgba(5,18,39,.3),inset 0 0 46px rgba(53,160,211,.08);backdrop-filter:blur(3px) saturate(1.08)}
-.period-overview-scene__cover-planes{position:absolute;z-index:0;inset:0;transform-style:preserve-3d}
-.period-overview-scene__particles{z-index:2;opacity:0;transition:opacity .4s ease}
-.period-overview-scene.is-transition-state .period-overview-scene__particles,.period-overview-scene.is-overview-state .period-overview-scene__particles{opacity:.34}
-.period-overview-scene__page{position:absolute;z-index:4;top:max(18px,env(safe-area-inset-top));left:18px;padding:6px 9px;border:1px solid rgba(84,207,242,.34);border-radius:99px;color:#dff8ff;background:rgba(3,20,45,.72);box-shadow:0 0 20px rgba(84,207,242,.1);font:700 10px/1 var(--viewer-font-family)}
-.period-overview-scene__period-copy,.period-overview-scene__overview-copy{position:absolute;z-index:3;top:50%;left:50%;width:min(88%,610px);transform:translate(-50%,-50%);text-align:center;will-change:opacity}
-.period-overview-scene__period-intro>p,.period-overview-scene__overview-heading>p{margin:0;color:var(--period-stage-gold);font-size:12px;font-weight:800;letter-spacing:0;text-shadow:0 0 16px rgba(242,197,97,.2)}
-.period-overview-scene__period-intro time{display:block;margin-top:6px;color:var(--period-stage-cyan);font:700 clamp(1.7rem,5.8vw,3.3rem)/1 var(--viewer-display-font);text-shadow:0 0 22px rgba(84,207,242,.24)}
-.period-overview-scene__period-story img,.period-overview-scene__overview-anchor{display:block;width:clamp(46px,9vh,72px);margin:11px auto 7px;filter:drop-shadow(0 8px 12px rgba(0,8,24,.42)) drop-shadow(0 0 10px rgba(84,207,242,.14))}
-.period-overview-scene__period-story h2,.period-overview-scene__overview-heading h2{margin:0;color:#f7fcff;font:700 clamp(1.65rem,5vw,3.25rem)/1.08 var(--viewer-display-font);text-shadow:0 5px 24px rgba(0,8,24,.58);text-wrap:balance}
-.period-overview-scene__period-story>p{max-width:520px;margin:8px auto 0;color:var(--period-stage-copy);font-size:clamp(11px,1.5vw,14px);line-height:1.55;text-wrap:balance}
-.period-overview-scene__period-facts,.period-overview-scene__overview-facts{display:flex;justify-content:center;gap:clamp(22px,8vw,64px);margin-top:12px}
-.period-overview-scene__period-facts span,.period-overview-scene__overview-facts span{display:grid;gap:2px;color:#a9c8dc;font-size:11px}
-.period-overview-scene__period-facts b,.period-overview-scene__overview-facts b{color:var(--period-stage-cyan);font:700 clamp(1.35rem,4vw,2.25rem)/1 var(--viewer-display-font);text-shadow:0 0 18px rgba(84,207,242,.22)}
-.period-overview-scene__period-latest{display:block;margin-top:8px;color:#83a8c1;font-size:10px}
-.period-overview-scene__overview-copy{display:grid;justify-items:center;isolation:isolate}
-.period-overview-scene__overview-copy::before{content:"";position:absolute;z-index:0;inset:-8% -4%;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,rgba(2,13,32,.38),rgba(4,24,48,.18) 54%,transparent 76%)}
-.period-overview-scene__overview-copy>*{position:relative;z-index:1}
-.period-overview-scene__overview-heading{display:grid;justify-items:center;gap:6px}
-.period-overview-scene__overview-heading>p{font-size:11px;color:rgba(242,197,97,.82)}
-.period-overview-scene__overview-heading h2{font-size:clamp(1.5rem,4.5vw,2.75rem)}
-.period-overview-scene__overview-heading small{display:block;max-width:480px;color:rgba(197,220,237,.78);font-size:clamp(10px,1.35vw,13px);line-height:1.45;text-wrap:balance}
-.period-overview-scene__overview-play-count{display:grid;justify-items:center;gap:3px;margin-top:14px;color:rgba(169,200,220,.76);font-size:10px}
-.period-overview-scene__overview-play-count strong{color:#fff8dc;font:800 clamp(4.2rem,17vw,9.6rem)/.8 var(--viewer-display-font);letter-spacing:-.065em;text-shadow:0 0 30px rgba(242,197,97,.34),0 14px 38px rgba(0,8,24,.58)}
-.period-overview-scene__overview-facts{margin-top:14px;gap:clamp(26px,9vw,68px)}
-.period-overview-scene__overview-facts span{color:rgba(169,200,220,.7);font-size:10px}
-.period-overview-scene__overview-facts b{color:rgba(131,215,239,.86);font-size:clamp(1.05rem,3.2vw,1.65rem);text-shadow:0 0 14px rgba(84,207,242,.14)}
-.period-overview-scene__overview-anchor{width:clamp(34px,6.5vh,52px);margin-block:13px 8px;filter:drop-shadow(0 7px 10px rgba(0,8,24,.38))}
-.period-overview-scene__overview-duration{display:grid;gap:3px;color:rgba(169,200,220,.68);font-size:10px}
-.period-overview-scene__overview-duration strong{color:rgba(226,192,111,.88);font:700 clamp(1.3rem,3.8vw,2.15rem)/1 var(--viewer-display-font);text-shadow:0 0 12px rgba(242,197,97,.1)}
-.period-overview-scene.is-period-state .period-overview-scene__overview-copy,.period-overview-scene.is-period-state .period-overview-scene__page--overview,.period-overview-scene.is-overview-state .period-overview-scene__period-copy,.period-overview-scene.is-overview-state .period-overview-scene__page--period{visibility:hidden;opacity:0}
-.period-overview-scene.is-overview-state .period-overview-scene__overview-copy,.period-overview-scene.is-overview-state .period-overview-scene__page--overview{visibility:visible;opacity:1}
-@media(max-height:700px) and (orientation:portrait){.period-overview-scene__period-story img{margin-block:5px 3px}.period-overview-scene__period-story>p{margin-top:4px;line-height:1.35}.period-overview-scene__period-facts{margin-top:7px}.period-overview-scene__overview-heading{gap:4px}.period-overview-scene__overview-play-count{margin-top:7px}.period-overview-scene__overview-play-count strong{font-size:clamp(3.7rem,15vw,5.6rem)}.period-overview-scene__overview-facts{margin-top:7px}.period-overview-scene__overview-anchor{margin-block:6px 4px}}
-@media(orientation:landscape) and (max-height:460px){.period-overview-scene::after{inset:0 31%;border-top:0;border-bottom:0;border-left:1px solid rgba(84,207,242,.24);border-right:1px solid rgba(242,197,97,.2);background:linear-gradient(rgba(3,15,36,.4),rgba(7,35,68,.88) 16% 84%,rgba(3,15,36,.4));box-shadow:-18px 0 32px rgba(10,68,112,.22),18px 0 32px rgba(5,18,39,.3)}.period-overview-scene__period-copy,.period-overview-scene__overview-copy{width:min(38%,520px)}.period-overview-scene__period-intro time{font-size:clamp(1.35rem,3.5vw,2rem)}.period-overview-scene__period-story img,.period-overview-scene__overview-anchor{width:38px;margin-block:4px 2px}.period-overview-scene__period-story h2,.period-overview-scene__overview-heading h2{font-size:clamp(1.25rem,3vw,1.8rem)}.period-overview-scene__period-story>p,.period-overview-scene__overview-heading small{display:none}.period-overview-scene__overview-play-count{margin-top:3px}.period-overview-scene__overview-play-count strong{font-size:clamp(2.4rem,8vw,4rem)}.period-overview-scene__period-facts,.period-overview-scene__overview-facts{margin-top:4px}.period-overview-scene__period-facts b,.period-overview-scene__overview-facts b{font-size:1.15rem}.period-overview-scene__overview-anchor{display:none}.period-overview-scene__overview-duration strong{font-size:1.35rem}}
-.period-overview-scene.is-reduced .period-overview-scene__particles{display:none}
-@media(prefers-reduced-motion:reduce){.period-overview-scene *{animation:none!important}}
+.period-overview-scene {
+  --memory-white: #f8fcff;
+  --memory-blue: #4b96e8;
+  --memory-cyan: #6cc7f3;
+  --memory-violet: #7d67d6;
+  --memory-ink: #245f96;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--memory-ink);
+  background:
+    radial-gradient(circle at 50% 49%, rgba(255, 255, 255, .8) 0, rgba(255, 255, 255, .28) 32%, transparent 58%),
+    url("/蓝色白色背景图.png") center / cover no-repeat,
+    #b9ddff;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+}
+
+.period-overview-scene::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255, 255, 255, .72) 0 5%, transparent 18%),
+    radial-gradient(circle at 79% 73%, rgba(255, 255, 255, .55) 0 4%, transparent 17%),
+    radial-gradient(ellipse at 50% 50%, transparent 0 30%, rgba(108, 199, 243, .11) 48%, transparent 70%);
+  opacity: .82;
+  pointer-events: none;
+}
+
+.period-overview-scene::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 29% -8%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, .96) 0 22%, rgba(247, 252, 255, .82) 45%, rgba(234, 247, 255, .28) 66%, transparent 78%);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.period-overview-scene__cover-planes {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.period-overview-scene__cover-planes :deep(.vertical-cover-stream__plane img) {
+  box-shadow: 0 24px 38px rgba(43, 104, 166, .22), 0 0 0 1px rgba(255, 255, 255, .72);
+  filter: saturate(.94) contrast(.94) brightness(1.08);
+}
+
+.period-overview-scene__cover-planes :deep(.vertical-cover-stream__slot) {
+  width: min(84vw, 352px);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__slot) { display: none; }
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper) { height: 29%; }
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower) { height: 25%; }
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(1)) {
+  display: block;
+  opacity: .8;
+  transform: translate3d(-50%, -50%, 0) rotateX(-76deg) scale(.9);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(2)) {
+  display: block;
+  opacity: .88;
+  transform: translate3d(-50%, -14%, -24px) rotateX(-78deg) scale(1);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(3)) {
+  display: block;
+  opacity: .7;
+  transform: translate3d(-50%, 14%, -72px) rotateX(-80deg) scale(1);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(1)) {
+  display: block;
+  opacity: .62;
+  transform: translate3d(-50%, -45%, -76px) rotateX(80deg) scale(.92);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(2)) {
+  display: block;
+  opacity: .82;
+  transform: translate3d(-50%, -22%, -28px) rotateX(78deg) scale(.98);
+}
+
+.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(3)) {
+  display: block;
+  opacity: .9;
+  transform: translate3d(-50%, 4%, 0) rotateX(76deg) scale(1);
+}
+
+.period-overview-scene__particles {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+.period-overview-scene.is-transition-state .period-overview-scene__particles,
+.period-overview-scene.is-overview-state .period-overview-scene__particles { opacity: .18; }
+
+.period-overview-scene__page {
+  position: absolute;
+  z-index: 4;
+  top: max(18px, env(safe-area-inset-top));
+  left: 18px;
+  padding: 6px 10px;
+  border: 1px solid rgba(75, 150, 232, .22);
+  border-radius: 99px;
+  color: #397dc1;
+  background: rgba(255, 255, 255, .54);
+  box-shadow: 0 8px 22px rgba(55, 124, 192, .12), inset 0 1px rgba(255, 255, 255, .76);
+  font: 800 10px/1 var(--viewer-font-family);
+}
+
+.period-overview-scene__period-copy,
+.period-overview-scene__overview-copy {
+  position: absolute;
+  z-index: 3;
+  top: 51.5%;
+  left: 50%;
+  width: min(88%, 610px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  will-change: opacity;
+}
+
+.period-overview-scene__period-copy { top: 52%; }
+
+.period-overview-scene__period-intro time,
+.period-overview-scene__period-intro h2,
+.period-overview-scene__overview-heading h2,
+.period-overview-scene__overview-play-count strong {
+  background: linear-gradient(110deg, #287fce 6%, var(--memory-blue) 44%, var(--memory-violet) 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.period-overview-scene__period-intro time,
+.period-overview-scene__period-intro h2 {
+  background-image: linear-gradient(110deg, #755fc8 6%, var(--memory-blue) 52%, #287fce 90%);
+}
+
+.period-overview-scene__period-intro time {
+  display: block;
+  font: 900 clamp(1.75rem, 6.4vw, 3.45rem)/1 var(--viewer-display-font);
+  letter-spacing: 0;
+  filter: drop-shadow(0 4px 12px rgba(70, 137, 210, .16));
+}
+
+.period-overview-scene__period-intro h2,
+.period-overview-scene__overview-heading h2 {
+  margin: 10px 0 0;
+  font: 900 clamp(1.55rem, 5.4vw, 3rem)/1.08 var(--viewer-display-font);
+  letter-spacing: 0;
+  filter: drop-shadow(0 4px 12px rgba(92, 103, 192, .12));
+  text-wrap: balance;
+}
+
+.period-overview-scene__period-story > p {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.period-overview-scene__period-facts {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  color: #3f84c5;
+  font: 900 clamp(1.18rem, 4.7vw, 2.2rem)/1.14 var(--viewer-display-font);
+  letter-spacing: 0;
+  text-shadow: 0 2px rgba(255, 255, 255, .9), 0 5px 18px rgba(66, 137, 206, .14);
+}
+
+.period-overview-scene__period-facts span { white-space: nowrap; }
+
+.period-overview-scene__period-facts b {
+  color: var(--memory-violet);
+  font: inherit;
+}
+
+.period-overview-scene__period-facts img,
+.period-overview-scene__overview-anchor {
+  display: block;
+  width: clamp(48px, 8.3vh, 68px);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 10px rgba(57, 120, 200, .18));
+}
+
+.period-overview-scene__period-facts img { margin-bottom: 16px; }
+
+.period-overview-scene__period-facts span:last-child { margin-top: 13px; }
+
+.period-overview-scene__period-latest {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.period-overview-scene__overview-copy {
+  display: grid;
+  justify-items: center;
+  isolation: isolate;
+}
+
+.period-overview-scene__overview-copy::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -14% -8%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 48%, rgba(255, 255, 255, .62), rgba(255, 255, 255, .2) 54%, transparent 74%);
+}
+
+.period-overview-scene__overview-copy > * { position: relative; z-index: 1; }
+
+.period-overview-scene__overview-heading {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.period-overview-scene__overview-heading > p {
+  margin: 0;
+  color: #4389cb;
+  font: 900 11px/1.2 var(--viewer-font-family);
+}
+
+.period-overview-scene__overview-heading h2 {
+  margin-top: 0;
+  font-size: clamp(1.5rem, 4.8vw, 2.8rem);
+}
+
+.period-overview-scene__overview-heading small {
+  display: block;
+  max-width: 480px;
+  color: rgba(41, 97, 146, .68);
+  font: 700 clamp(10px, 2.6vw, 13px)/1.45 var(--viewer-font-family);
+  text-wrap: balance;
+}
+
+.period-overview-scene__overview-play-count {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-top: 15px;
+  color: rgba(46, 104, 155, .66);
+  font: 800 10px/1 var(--viewer-font-family);
+}
+
+.period-overview-scene__overview-play-count strong {
+  font: 900 clamp(4.3rem, 17vw, 9.8rem)/.8 var(--viewer-display-font);
+  letter-spacing: 0;
+  filter: drop-shadow(0 10px 19px rgba(67, 127, 198, .16));
+}
+
+.period-overview-scene__overview-facts {
+  display: flex;
+  justify-content: center;
+  gap: clamp(28px, 9vw, 70px);
+  margin-top: 15px;
+}
+
+.period-overview-scene__overview-facts span {
+  display: grid;
+  gap: 3px;
+  color: rgba(50, 108, 158, .62);
+  font: 800 10px/1.2 var(--viewer-font-family);
+}
+
+.period-overview-scene__overview-facts b {
+  color: #438dce;
+  font: 900 clamp(1.05rem, 3.2vw, 1.65rem)/1 var(--viewer-display-font);
+  text-shadow: 0 2px rgba(255, 255, 255, .86);
+}
+
+.period-overview-scene__overview-anchor {
+  width: clamp(36px, 6.5vh, 52px);
+  margin-block: 13px 8px;
+}
+
+.period-overview-scene__overview-duration {
+  display: grid;
+  gap: 3px;
+  color: rgba(50, 108, 158, .58);
+  font: 800 10px/1.2 var(--viewer-font-family);
+}
+
+.period-overview-scene__overview-duration strong {
+  color: rgba(112, 88, 194, .82);
+  font: 900 clamp(1.28rem, 3.8vw, 2.05rem)/1 var(--viewer-display-font);
+  text-shadow: 0 2px rgba(255, 255, 255, .82);
+}
+
+.period-overview-scene.is-period-state .period-overview-scene__overview-copy,
+.period-overview-scene.is-period-state .period-overview-scene__page--overview,
+.period-overview-scene.is-overview-state .period-overview-scene__period-copy,
+.period-overview-scene.is-overview-state .period-overview-scene__page--period {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.period-overview-scene.is-overview-state .period-overview-scene__overview-copy,
+.period-overview-scene.is-overview-state .period-overview-scene__page--overview {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-height: 700px) and (orientation: portrait) {
+  .period-overview-scene__period-intro h2 { margin-top: 6px; }
+  .period-overview-scene__period-facts { gap: 2px; margin-top: 7px; }
+  .period-overview-scene__period-facts img { width: 44px; margin-bottom: 8px; }
+  .period-overview-scene__period-facts span:last-child { margin-top: 3px; }
+  .period-overview-scene__overview-heading { gap: 4px; }
+  .period-overview-scene__overview-play-count { margin-top: 7px; }
+  .period-overview-scene__overview-play-count strong { font-size: clamp(3.7rem, 15vw, 5.6rem); }
+  .period-overview-scene__overview-facts { margin-top: 7px; }
+  .period-overview-scene__overview-anchor { margin-block: 6px 4px; }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+  .period-overview-scene::after {
+    inset: -8% 28%;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, .94) 0 28%, rgba(247, 252, 255, .52) 58%, transparent 78%);
+  }
+  .period-overview-scene__period-copy,
+  .period-overview-scene__overview-copy { width: min(38%, 520px); }
+  .period-overview-scene__period-intro time { font-size: clamp(1.35rem, 3.5vw, 2rem); }
+  .period-overview-scene__period-intro h2,
+  .period-overview-scene__overview-heading h2 { margin-top: 4px; font-size: clamp(1.2rem, 3vw, 1.75rem); }
+  .period-overview-scene__overview-heading small { display: none; }
+  .period-overview-scene__period-facts { gap: 1px; margin-top: 4px; font-size: 1.05rem; }
+  .period-overview-scene__period-facts img { width: 36px; }
+  .period-overview-scene__overview-play-count { margin-top: 3px; }
+  .period-overview-scene__overview-play-count strong { font-size: clamp(2.4rem, 8vw, 4rem); }
+  .period-overview-scene__overview-facts { margin-top: 4px; }
+  .period-overview-scene__overview-facts b { font-size: 1.15rem; }
+  .period-overview-scene__overview-anchor { display: none; }
+  .period-overview-scene__overview-duration strong { font-size: 1.35rem; }
+}
+
+.period-overview-scene.is-reduced .period-overview-scene__particles { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .period-overview-scene * { animation: none !important; }
+}
 </style>

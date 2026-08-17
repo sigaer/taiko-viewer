@@ -152,12 +152,17 @@ assert.equal(/\.to\(lowerPlanes,\s*\{[^}]*scale/.test(periodOverviewSceneSource)
 assert.equal(periodOverviewSceneSource.includes("period-overview-scene__previous-planes"), false, "period transition still mounts a separate outgoing cover stream");
 assert.equal(periodOverviewSceneSource.includes("period-overview-scene__next-planes"), false, "period transition still mounts a separate incoming cover stream");
 assert.equal((periodOverviewSceneSource.match(/<AnnualVerticalCoverStream/g) || []).length, 1, "period transition does not preserve a single cover plane set");
-assert.equal(periodOverviewSceneSource.includes('/annual-period-background.webp'), true, "period scene is missing its stage image texture");
-for (const stageToken of ["--period-stage-ink", "--period-stage-cyan", "--period-stage-gold"]) {
-  assert.equal(periodOverviewSceneSource.includes(stageToken), true, `period scene is missing stage token: ${stageToken}`);
+assert.equal(periodOverviewSceneSource.includes('/蓝色白色背景图.png'), true, "period scene is missing the provided blue-white backdrop");
+assert.equal(periodOverviewSceneSource.includes('data-visual-style="light-memory-tunnel"'), true, "period scene does not declare the light memory tunnel style");
+assert.equal(periodOverviewSceneSource.includes('const mascotUrl = "/dance.gif"'), true, "period scene is missing the dancing pixel mascot");
+assert.equal(periodOverviewSceneSource.includes("width: min(84vw, 352px)"), true, "period reduced state lost the reference cover width");
+assert.equal(periodOverviewSceneSource.includes("rotateX(-80deg)"), true, "period reduced state lost the upper reference pitch");
+assert.equal(periodOverviewSceneSource.includes("rotateX(80deg)"), true, "period reduced state lost the lower reference pitch");
+for (const stageToken of ["--memory-white", "--memory-blue", "--memory-violet", "--memory-ink"]) {
+  assert.equal(periodOverviewSceneSource.includes(stageToken), true, `period scene is missing memory tunnel token: ${stageToken}`);
 }
-assert.equal(periodOverviewSceneSource.includes("repeating-conic-gradient"), true, "period scene is missing its taiko stage rhythm field");
-assert.equal(await exists("public/annual-period-background.webp"), true, "period stage image texture is missing");
+assert.equal(await exists("public/蓝色白色背景图.png"), true, "period blue-white backdrop is missing");
+assert.equal(await exists("public/dance.gif"), true, "period dancing pixel mascot is missing");
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
