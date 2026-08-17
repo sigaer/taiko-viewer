@@ -255,7 +255,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
     }, index);
     await page.waitForFunction((target) => {
       const slide = document.querySelectorAll(".story-player__slide")[target];
-      if (!slide?.querySelector(".story-slide-shell, .annual-opening, .period-overview-scene")) return false;
+      if (!slide?.querySelector(".annual-scene, .story-slide-shell, .period-overview-scene")) return false;
       return Math.abs(slide.getBoundingClientRect().top) <= 1;
     }, index, { timeout: 5_000 });
     await wait(80);
@@ -642,6 +642,68 @@ const auditOpeningMotion = async (browser, cookie) => {
   reportProgress("opening motion: closing");
   await context.close();
   reportProgress("opening motion: passed");
+};
+
+const auditPhase2AHeroScenes = async (browser, cookie, viewport) => {
+  reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+
+  const inspectScene = async (selector, expectedMood) => page.locator(selector).evaluate((scene, mood) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const rect = scene.getBoundingClientRect();
+    const layers = [...scene.querySelectorAll(":scope > [data-layer]")].map((node) => node.getAttribute("data-layer"));
+    const overflowingText = [...scene.querySelectorAll("h1, h2, p, strong, span")]
+      .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none")
+      .filter((node) => {
+        const box = node.getBoundingClientRect();
+        return box.left < -1 || box.right > viewportWidth + 1 || box.top < -1 || box.bottom > viewportHeight + 1;
+      })
+      .map((node) => node.textContent.trim().slice(0, 60));
+    return {
+      mood: scene.getAttribute("data-scene-mood"),
+      motion: scene.getAttribute("data-motion-state"),
+      layers,
+      overflowingText,
+      fillsViewport: Math.abs(rect.width - viewportWidth) <= 1 && Math.abs(rect.height - viewportHeight) <= 1,
+      expectedMood: mood
+    };
+  }, expectedMood);
+
+  await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
+  const openingAudit = await inspectScene(".annual-opening", "rainbow-stage");
+  assert.equal(openingAudit.mood, openingAudit.expectedMood);
+  assert.equal(openingAudit.motion, "reduced");
+  assert.deepEqual(openingAudit.layers, ["background", "atmosphere", "visual", "data", "copy", "transition"]);
+  assert.deepEqual(openingAudit.overflowingText, []);
+  assert.equal(openingAudit.fillsViewport, true);
+  await page.screenshot({ path: `/tmp/annual-phase2a-opening-${viewport.width}x${viewport.height}.png`, fullPage: false });
+
+  await page.locator(".annual-opening__start").click();
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='profile']")?.getAttribute("aria-hidden") === "false");
+  await page.locator(".profile-slide").waitFor({ state: "visible", timeout: 10_000 });
+  const profileAudit = await inspectScene(".profile-slide", "profile-stage");
+  assert.equal(profileAudit.mood, profileAudit.expectedMood);
+  assert.equal(profileAudit.motion, "reduced");
+  assert.deepEqual(profileAudit.layers, ["background", "atmosphere", "visual", "data", "copy", "transition"]);
+  assert.deepEqual(profileAudit.overflowingText, []);
+  assert.equal(profileAudit.fillsViewport, true);
+  assert.equal(await page.locator(".story-player__slide[data-page-key='profile'] .story-slide-shell").count(), 0);
+  assert.equal(await page.locator(".story-player__slide[data-page-key='profile'] article").count(), 0);
+  await page.screenshot({ path: `/tmp/annual-phase2a-profile-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: passed`);
 };
 
 const auditSaveData = async (browser, cookie) => {
@@ -1038,6 +1100,9 @@ try {
     await auditAudioLifecycle(browser, firstSession);
     await auditSaveData(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
+    for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
+      await auditPhase2AHeroScenes(browser, firstSession, viewport);
+    }
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
       { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
@@ -1109,7 +1174,7 @@ try {
   const [expiredRows] = await db.execute("SELECT status FROM web_annual_shares WHERE id = ?", [expiringId]);
   assert.equal(expiredRows[0]?.status, "expired");
 
-  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
+  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
 } finally {
   if (firstUserId) {
     const [posterRows] = await db.execute("SELECT file_path FROM web_annual_posters WHERE user_id = ?", [firstUserId]).catch(() => [[]]);

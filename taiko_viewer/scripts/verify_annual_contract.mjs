@@ -94,6 +94,7 @@ assert.equal(storyPlayer.includes("stopCoverClock()"), true, "the annual cover R
 assert.equal(storyPlayer.includes("PERIOD_OVERVIEW_DURATION_MS / 1000"), true, "period-to-overview no longer uses the transitionTime duration contract");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
+const profileSource = await read("components/account/version-summary/slides/ProfileSlide.vue");
 const openingCarouselSource = await read("components/account/version-summary/AnnualOpeningCarousel.vue");
 const openingFireworksSource = await read("components/account/version-summary/AnnualOpeningFireworks.vue");
 const openingBeatLaneSource = await read("components/account/version-summary/AnnualOpeningBeatLane.vue");
@@ -101,6 +102,21 @@ assert.equal(openingSource.includes("AnnualOpeningCarousel"), true, "opening cov
 assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fireworks are missing");
 assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
 assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
+for (const [source, page] of [[openingSource, "opening"], [profileSource, "profile"]]) {
+  assert.equal(source.includes("<AnnualScene"), true, `${page} is not mounted as an AnnualScene`);
+  for (const layer of ["background", "atmosphere", "visual", "data", "copy", "transition"]) {
+    assert.equal(source.includes(`<template #${layer}>`), true, `${page} does not use the ${layer} scene layer`);
+  }
+  assert.equal(source.includes("useAnnualTimeline"), true, `${page} does not use the annual motion lifecycle`);
+}
+assert.equal(openingSource.includes("annual-opening__report"), false, "opening still contains the report-style lower panel");
+assert.equal(openingSource.includes("motionScope?.setTimeout"), true, "opening navigation watchdog is outside the annual motion lifecycle");
+assert.equal(profileSource.includes("StorySlideShell"), false, "profile still uses the report-style slide shell");
+assert.equal(profileSource.includes("<article"), false, "profile still renders fact cards as its primary structure");
+assert.equal(profileSource.includes('mood="profile-stage"'), true, "profile does not use its independent stage mood");
+for (const signature of ["profile-spotlight-open", "profile-portrait-develop", "profile-ribbon-unfurl", "profile-badge-light"]) {
+  assert.equal(profileSource.includes(signature), true, `profile is missing motion signature: ${signature}`);
+}
 assert.equal(openingCarouselSource.includes("linear infinite"), true, "opening cover flow is not continuous and linear");
 assert.equal(openingCarouselSource.includes("setInterval"), false, "opening cover flow still advances in timed steps");
 assert.equal(openingFireworksSource.includes("@keyframes annual-firework-draw"), true, "opening fireworks are not animated");
