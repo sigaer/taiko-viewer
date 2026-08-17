@@ -583,6 +583,7 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.ok(transitionPlaneAuditAfter.lowerFace.rotationZ > transitionPlaneAudit.lowerFace.rotationZ, "lower nested cover face did not rotate within its plane");
   assert.ok(transitionPlaneAuditAfter.upperFace.xAxisTilt < .001, "upper nested face still rotates around the X axis");
   assert.ok(transitionPlaneAuditAfter.lowerFace.xAxisTilt < .001, "lower nested face still rotates around the X axis");
+  await page.screenshot({ path: "/tmp/annual-phase2b0-transition-390x844.png", fullPage: false });
   await page.waitForFunction(
     () => {
       const slide = document.querySelector(".story-player__slide[data-page-key='overview']");
@@ -704,6 +705,78 @@ const auditPhase2AHeroScenes = async (browser, cookie, viewport) => {
   await page.screenshot({ path: `/tmp/annual-phase2a-profile-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: passed`);
+};
+
+const auditPhase2B0PeriodOverview = async (browser, cookie, viewport) => {
+  reportProgress(`phase 2B-0 period/overview ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const periodIndex = pageKeys.indexOf("period");
+  const overviewIndex = pageKeys.indexOf("overview");
+  assert.equal(overviewIndex, periodIndex + 1, "overview no longer follows period directly");
+
+  const showPage = async (index, key) => {
+    await page.locator(".story-player__viewport").evaluate((node, target) => {
+      node.scrollTop = node.clientHeight * target;
+      node.dispatchEvent(new Event("scroll"));
+    }, index);
+    await page.waitForFunction((pageKey) => {
+      const slide = document.querySelector(`.story-player__slide[data-page-key='${pageKey}']`);
+      return slide?.getAttribute("aria-hidden") === "false" && Boolean(slide.querySelector(".period-overview-scene"));
+    }, key);
+  };
+
+  const inspectScene = async (key, stateClass) => page.locator(`.story-player__slide[data-page-key='${key}'] .period-overview-scene`).evaluate((scene, expectedState) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const background = getComputedStyle(scene).backgroundImage;
+    const visibleCovers = [...scene.querySelectorAll(".vertical-cover-stream__slot")]
+      .filter((cover) => getComputedStyle(cover).display !== "none" && Number(getComputedStyle(cover).opacity) > .02).length;
+    const overflowingText = [...scene.querySelectorAll("h2, p, small, strong, span, time")]
+      .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none" && getComputedStyle(node).visibility !== "hidden")
+      .filter((node) => {
+        const rect = node.getBoundingClientRect();
+        return rect.left < -1 || rect.right > viewportWidth + 1 || rect.top < -1 || rect.bottom > viewportHeight + 1;
+      })
+      .map((node) => node.textContent.trim().slice(0, 60));
+    return {
+      hasExpectedState: scene.classList.contains(expectedState),
+      background,
+      visibleCovers,
+      overflowingText
+    };
+  }, stateClass);
+
+  await showPage(periodIndex, "period");
+  const periodAudit = await inspectScene("period", "is-period-state");
+  assert.equal(periodAudit.hasExpectedState, true);
+  assert.ok(periodAudit.background.includes("radial-gradient"), "period stage background is missing");
+  assert.ok(periodAudit.visibleCovers >= 2, "period stable state lost its cover planes");
+  assert.deepEqual(periodAudit.overflowingText, []);
+  await page.screenshot({ path: `/tmp/annual-phase2b0-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
+
+  await showPage(overviewIndex, "overview");
+  const overviewAudit = await inspectScene("overview", "is-overview-state");
+  assert.equal(overviewAudit.hasExpectedState, true);
+  assert.ok(overviewAudit.background.includes("radial-gradient"), "overview stage background is missing");
+  assert.ok(overviewAudit.visibleCovers >= 2, "overview stable state lost its cover planes");
+  assert.deepEqual(overviewAudit.overflowingText, []);
+  await page.screenshot({ path: `/tmp/annual-phase2b0-overview-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`phase 2B-0 period/overview ${viewport.width}x${viewport.height}: passed`);
 };
 
 const auditSaveData = async (browser, cookie) => {
@@ -1102,6 +1175,7 @@ try {
     await auditOpeningMotion(browser, firstSession);
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
       await auditPhase2AHeroScenes(browser, firstSession, viewport);
+      await auditPhase2B0PeriodOverview(browser, firstSession, viewport);
     }
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
@@ -1174,7 +1248,7 @@ try {
   const [expiredRows] = await db.execute("SELECT status FROM web_annual_shares WHERE id = ?", [expiringId]);
   assert.equal(expiredRows[0]?.status, "expired");
 
-  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
+  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, protectedTransitionViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
 } finally {
   if (firstUserId) {
     const [posterRows] = await db.execute("SELECT file_path FROM web_annual_posters WHERE user_id = ?", [firstUserId]).catch(() => [[]]);
