@@ -619,6 +619,14 @@ const auditOpeningMotion = async (browser, cookie) => {
     node.dispatchEvent(new Event("scroll"));
   }, finalIndex);
   await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='final']")?.getAttribute("aria-hidden") === "false");
+  const finalTitleCharacters = page.locator(".story-player__slide[data-page-key='final'] [data-annual-character-title] .final-title-slide__char");
+  assert.ok(await finalTitleCharacters.count() > 1, "final title is not split into grapheme-level reveal nodes");
+  await page.waitForFunction(() => Boolean(document.querySelector(".story-player__slide[data-page-key='final'] .final-title-slide__poster-cta")));
+  const finalNumbers = page.locator(".story-player__slide[data-page-key='final'] .final-title-slide__metrics .animated-number");
+  for (let index = 0; index < await finalNumbers.count(); index += 1) {
+    const number = finalNumbers.nth(index);
+    assert.equal(await number.innerText(), await number.getAttribute("aria-label"), `final metric ${index} did not reach its real value`);
+  }
   const visibleParticles = await page.locator(".story-player__slide[data-page-key='final'] .particle-layer i").evaluateAll((nodes) =>
     nodes.filter((node) => getComputedStyle(node).display !== "none").length
   );

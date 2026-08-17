@@ -168,6 +168,19 @@ const finalTitleSource = await read("components/account/version-summary/slides/F
 assert.equal(finalTitleSource.includes("AnnualDrumWindow"), true, "final title page does not carry the player's MyDon");
 assert.equal(finalTitleSource.includes("summary.finalTitle.evidenceText"), true, "final title evidence is not shown");
 assert.equal(finalTitleSource.includes("summary.poster.keyword"), false, "final title page still exposes an unavailable keyword placeholder");
+assert.equal(finalTitleSource.includes("segmentAnnualTitle"), true, "final title is not revealed by grapheme");
+assert.equal(finalTitleSource.includes("isUsableMetric"), true, "final title still renders zero-valued metrics");
+
+const animatedNumberSource = await read("components/account/version-summary/AnimatedNumber.vue");
+assert.equal(animatedNumberSource.includes('emit("complete", target)'), true, "animated number has no completion feedback event");
+assert.equal(animatedNumberSource.includes("completedForValue"), true, "animated number completion can fire more than once");
+const favoriteSource = await read("components/account/version-summary/slides/FavoriteSongSlide.vue");
+assert.equal(favoriteSource.includes("AnimatedNumber"), true, "favorite song still uses the legacy counter");
+assert.equal(favoriteSource.includes("hasPlayCount"), true, "favorite song does not hide an unavailable play count");
+for (const [component, guard] of [["RatingRankSlide", "hasPosition"], ["SpeedProfileSlide", "isUsableMetric(summary.speedProfile.chartCount)"], ["KeywordSlide", "radarEntries.length >= 3"]]) {
+  const source = await read(`components/account/version-summary/slides/${component}.vue`);
+  assert.equal(source.includes(guard), true, `${component} does not suppress its empty statistic card`);
+}
 
 const drumWindowSource = await read("components/account/version-summary/AnnualDrumWindow.vue");
 assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "drum artwork has no failed-image fallback");
@@ -182,6 +195,7 @@ assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share c
 assert.equal(posterSlideSource.includes("const createShare ="), true, "share creation action is missing");
 assert.equal(posterSlideSource.includes("const generatePoster ="), true, "poster generation action is missing");
 assert.equal(/downloadPoster\(\).*downloadFallback|downloadPoster\(\)\) ElMessage\.success\(t\("annualSummary\.share\.downloadFallback"\)\)/s.test(posterSlideSource), true, "Web Share has no PNG download fallback");
+assert.equal(posterSlideSource.includes('v-if="posterUrl" type="button" @click="downloadPoster"'), true, "generated PNG has no independent save action");
 for (const match of posterSlideSource.matchAll(/min-height:\s*([0-9.]+)px/gi)) {
   assert.ok(Number(match[1]) >= 44, `poster action is shorter than 44px: ${match[0]}`);
 }
