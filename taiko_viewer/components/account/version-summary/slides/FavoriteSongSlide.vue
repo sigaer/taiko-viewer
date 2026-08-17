@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
-import StoryCounter from "../StoryCounter.vue";
+import AnimatedNumber from "../AnimatedNumber.vue";
+import ParticleLayer from "../ParticleLayer.vue";
+import TaikoRipple from "../TaikoRipple.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import { isUsableMetric, hasUsableText } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -14,11 +17,26 @@ const props = defineProps<{
 }>();
 
 const song = computed(() => props.summary.favoriteSong);
+const hasSong = computed(() => Boolean(song.value && hasUsableText(song.value.name)));
+const hasPlayCount = computed(() => isUsableMetric(song.value?.playCount));
+const songNameClass = computed(() => {
+  const length = Array.from(song.value?.name || "").length;
+  return length > 32 ? "is-long" : length > 20 ? "is-compact" : "";
+});
+const feedbackTrigger = ref(0);
+const drumPulse = ref(false);
 const { locale } = useI18n();
 const uiText = computed(() => ({
-  playLabel: locale.value === "ja" ? "記録に残った出会い" : "被记录的相遇",
+  playLabel: locale.value === "ja" ? "太鼓記録" : "鼓点记录",
   coverFallback: "2026"
 }));
+
+const onNumberComplete = () => {
+  if (!props.active || !hasPlayCount.value || drumPulse.value) return;
+  drumPulse.value = true;
+  feedbackTrigger.value += 1;
+  window.setTimeout(() => { drumPulse.value = false; }, 420);
+};
 </script>
 
 <template>
@@ -32,8 +50,11 @@ const uiText = computed(() => ({
     :active="active"
     :reduced-motion="reducedMotion"
   >
-    <div class="song-slide">
-      <div v-if="song" class="song-slide__cover" data-animate>
+    <template #atmosphere>
+      <ParticleLayer :active="active" :reduced-motion="reducedMotion" density="low" palette="rainbow" />
+    </template>
+    <div class="song-slide" :class="{ 'is-pulsing': drumPulse, 'is-solo': !hasSong }">
+      <div v-if="hasSong" class="song-slide__cover" data-annual-stage="visual">
         <el-image :src="song.coverUrl" fit="cover" class="song-slide__image">
           <template #error>
             <AnnualArtworkFallback :label="uiText.coverFallback" />
@@ -42,9 +63,9 @@ const uiText = computed(() => ({
       </div>
 
       <div class="song-slide__info">
-        <article class="song-slide__panel" data-animate>
+        <article v-if="hasSong" class="song-slide__panel" data-annual-stage="title">
           <span>{{ song?.subtitle || summary.version.name }}</span>
-          <strong>{{ song?.name || summary.copy.favoriteSong.title }}</strong>
+          <strong :class="songNameClass">{{ song?.name || summary.copy.favoriteSong.title }}</strong>
           <div class="song-slide__chips">
             <span>{{ summary.version.name }}</span>
             <span v-if="song?.songNo">#{{ song.songNo }}</span>
@@ -52,14 +73,16 @@ const uiText = computed(() => ({
           <small>{{ summary.copy.favoriteSong.body }}</small>
         </article>
 
-        <article class="song-slide__metric" data-animate>
+        <article v-if="hasPlayCount" class="song-slide__metric" data-annual-stage="data">
           <span>{{ uiText.playLabel }}</span>
           <strong>
-            <StoryCounter :value="song?.playCount || 0" :active="active" :reduced-motion="reducedMotion" />
+            <AnimatedNumber :value="song?.playCount || 0" :active="active" :reduced-motion="reducedMotion" :delay="1100" @complete="onNumberComplete" />
           </strong>
         </article>
+        <p v-else class="song-slide__closing" data-annual-stage="copy">{{ locale === "ja" ? "この曲との余韻を、ここにしまいました。" : "这一次相遇，先把余韵收在这里。" }}</p>
       </div>
     </div>
+    <TaikoRipple class="song-slide__ripple" :active="active" :reduced-motion="reducedMotion" :trigger="feedbackTrigger" mode="ambient" origin-x="34%" origin-y="50%" />
   </StorySlideShell>
 </template>
 
@@ -72,6 +95,12 @@ const uiText = computed(() => ({
   height: 100%;
   min-height: 0;
 }
+.song-slide.is-solo { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+.song-slide.is-solo .song-slide__info { width: min(100%, 32rem); }
+.song-slide.is-pulsing .song-slide__image { animation: song-drum-pulse .42s ease-out; }
+.song-slide__closing { margin: 0; color: rgba(255,237,214,.8); line-height: 1.7; }
+.song-slide__ripple { z-index: 6; }
+@keyframes song-drum-pulse { 0%,100% { transform: scale(1); } 36% { transform: scale(1.025); } 65% { transform: scale(.99); } }
 
 @media (max-height: 900px) {
   .song-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 12px; }
@@ -161,7 +190,10 @@ const uiText = computed(() => ({
   color: #fff8ed;
   font-size: clamp(2rem, 4vw, 3.4rem);
   line-height: 1.06;
+  overflow-wrap: anywhere;
 }
+.song-slide__panel strong.is-compact { font-size: clamp(1.55rem, 3.4vw, 2.7rem); }
+.song-slide__panel strong.is-long { font-size: clamp(1.2rem, 2.8vw, 2.1rem); line-height: 1.18; }
 
 .song-slide__panel small {
   display: block;

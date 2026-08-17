@@ -7,6 +7,7 @@ import AnimatedNumber from "./AnimatedNumber.vue";
 import AnnualVerticalCoverStream from "./AnnualVerticalCoverStream.vue";
 import ParticleLayer from "./ParticleLayer.vue";
 import TaikoRipple from "./TaikoRipple.vue";
+import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -27,6 +28,7 @@ let timeline: gsap.core.Timeline | null = null;
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
 const overviewProgress = computed(() => Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
 const overviewRippleTrigger = computed(() => safeTime.value >= 520 ? 1 : 0);
+const overviewCompleteTrigger = ref(0);
 const stateClass = computed(() => safeTime.value <= 0
   ? "is-period-state"
   : safeTime.value >= PERIOD_OVERVIEW_DURATION_MS
@@ -39,17 +41,21 @@ const centerText = computed(() => locale.value === "ja"
       first: props.summary.period.firstRecordAt ? "最初の一打が記録された日" : "この物語が始まった日",
       latest: "ここまで記録された日",
       elapsed: "物語が続いた日",
-      active: "音が灯った日"
+      active: "記録した日"
     }
   : {
       first: props.summary.period.firstRecordAt ? "第一次留下鼓点" : "这一版故事开始",
       latest: "故事写到这里",
       elapsed: "故事走过的日子",
-      active: "点亮的日期"
+      active: "记录的日期"
     }
 );
 
 const setTimelineTime = () => timeline?.pause(safeTime.value / 1000, false);
+const onOverviewComplete = () => {
+  if (!props.active || overviewCompleteTrigger.value) return;
+  overviewCompleteTrigger.value = 1;
+};
 
 const buildTimeline = async () => {
   if (!rootRef.value) return;
@@ -122,6 +128,7 @@ onBeforeUnmount(() => {
     </div>
     <ParticleLayer class="period-overview-scene__particles" :active="active && overviewProgress > 0" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
     <TaikoRipple :active="active" :reduced-motion="reducedMotion" :trigger="overviewRippleTrigger" origin-y="50%" />
+    <TaikoRipple :active="active" :reduced-motion="reducedMotion" :trigger="overviewCompleteTrigger" mode="ambient" origin-y="50%" />
 
     <span class="period-overview-scene__page period-overview-scene__page--period">
       {{ String(periodPageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}
@@ -142,7 +149,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="period-overview-scene__period-facts">
         <span><b>{{ n(summary.period.totalDays) }}</b>{{ centerText.elapsed }}</span>
-        <span v-if="summary.timeCoverage?.status !== 'unavailable'"><b>{{ n(summary.period.activeDays) }}</b>{{ centerText.active }}</span>
+        <span v-if="summary.timeCoverage?.status !== 'unavailable' && isUsableMetric(summary.period.activeDays)"><b>{{ n(summary.period.activeDays) }}</b>{{ centerText.active }}</span>
       </div>
       <small class="period-overview-scene__period-latest">{{ centerText.latest }} · {{ formatDate(latestDate) }}</small>
     </div>
@@ -154,17 +161,17 @@ onBeforeUnmount(() => {
         <small>{{ summary.copy.overview.body }}</small>
       </div>
       <div class="period-overview-scene__overview-play-count" data-overview-play-count>
-        <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></strong>
+        <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" @complete="onOverviewComplete" /></strong>
         <span>{{ t("annualSummary.slides.overview.plays") }}</span>
       </div>
       <div class="period-overview-scene__overview-facts">
-        <span><b><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.songs") }}</span>
-        <span><b><AnimatedNumber :value="summary.overview.uniqueCharts || 0" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.charts") }}</span>
+        <span v-if="isUsableMetric(summary.overview.uniqueSongs)"><b><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.songs") }}</span>
+        <span v-if="isUsableMetric(summary.overview.uniqueCharts)"><b><AnimatedNumber :value="summary.overview.uniqueCharts" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.charts") }}</span>
       </div>
       <img class="period-overview-scene__overview-anchor" :src="donIconUrl" alt="" aria-hidden="true" />
       <div class="period-overview-scene__overview-duration">
         <span>{{ t("annualSummary.slides.overview.estimated") }}</span>
-        <strong>{{ summary.overview.estimatedTimeText }}</strong>
+        <strong v-if="isUsableMetric(summary.overview.estimatedSeconds)">{{ summary.overview.estimatedTimeText }}</strong>
       </div>
     </div>
   </section>

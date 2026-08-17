@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnimatedNumber from "../AnimatedNumber.vue";
 import AnnualDrumWindow from "../AnnualDrumWindow.vue";
 import ParticleLayer from "../ParticleLayer.vue";
 import StorySlideShell from "../StorySlideShell.vue";
+import TaikoRipple from "../TaikoRipple.vue";
+import { isUsableMetric, segmentAnnualTitle } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -17,6 +19,20 @@ const props = defineProps<{
 const themeClass = computed(() => `theme-${props.summary.finalTitle.themeKey || "encouragement"}`);
 const emit = defineEmits<{ next: [] }>();
 const { t } = useI18n();
+const feedbackTrigger = ref(0);
+const completedMetrics = ref(new Set<string>());
+const titleSegments = computed(() => segmentAnnualTitle(props.summary.finalTitle.title));
+const metricEntries = computed(() => [
+  { key: "plays", value: props.summary.overview.playCount, label: t("annualSummary.slides.overview.plays") },
+  { key: "activeDays", value: props.summary.period.activeDays, label: t("annualSummary.slides.overview.activeDays") },
+  { key: "songs", value: props.summary.overview.uniqueSongs, label: t("annualSummary.slides.overview.songs") }
+].filter((entry) => isUsableMetric(entry.value)));
+const ctaReady = computed(() => metricEntries.value.length === 0 || completedMetrics.value.size >= metricEntries.value.length);
+const onMetricComplete = (key: string) => {
+  if (!props.active || completedMetrics.value.has(key)) return;
+  completedMetrics.value = new Set(completedMetrics.value).add(key);
+  feedbackTrigger.value += 1;
+};
 </script>
 
 <template>
@@ -36,7 +52,7 @@ const { t } = useI18n();
     <template #atmosphere>
       <ParticleLayer :active="active" :reduced-motion="reducedMotion" density="high" palette="gold" />
     </template>
-    <div class="final-title-slide" :class="themeClass">
+    <div class="final-title-slide" :class="[themeClass, { 'is-active': active, 'is-reduced': reducedMotion }]">
       <div class="final-title-slide__seal" data-annual-stage="visual">
         <AnnualDrumWindow
           size="large"
@@ -54,7 +70,9 @@ const { t } = useI18n();
       <div class="final-title-slide__body">
         <article class="final-title-slide__panel" data-annual-stage="title">
           <span>{{ summary.profileCard?.nickname || summary.user.nickname }}</span>
-          <strong>{{ summary.copy.finalTitle.title }}</strong>
+          <strong class="final-title-slide__char-title" :aria-label="summary.finalTitle.title" data-annual-character-title>
+            <span v-for="(segment, index) in titleSegments" :key="`${segment}-${index}`" class="final-title-slide__char" :style="{ '--char-index': index }">{{ segment }}</span>
+          </strong>
           <small>{{ summary.finalTitle.body }}</small>
         </article>
 
@@ -63,18 +81,17 @@ const { t } = useI18n();
           <strong>{{ summary.finalTitle.evidenceText }}</strong>
         </article>
 
-        <div class="final-title-slide__metrics" data-annual-stage="data">
-          <span><strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.plays") }}</span>
-          <span><strong><AnimatedNumber :value="summary.period.activeDays" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.activeDays") }}</span>
-          <span><strong><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" /></strong>{{ t("annualSummary.slides.overview.songs") }}</span>
+        <div v-if="metricEntries.length" class="final-title-slide__metrics">
+          <span v-for="(entry, index) in metricEntries" :key="entry.key" data-annual-stage="data"><strong><AnimatedNumber :value="entry.value" :active="active" :reduced-motion="reducedMotion" :delay="1120 + index * 180" @complete="onMetricComplete(entry.key)" /></strong>{{ entry.label }}</span>
         </div>
 
-        <button type="button" class="final-title-slide__poster-cta" data-annual-stage="copy" @click="emit('next')">
+        <button v-if="ctaReady" type="button" class="final-title-slide__poster-cta" data-annual-stage="copy" @click="emit('next')">
           {{ t("annualSummary.controls.viewPoster") }}
           <span aria-hidden="true">→</span>
         </button>
       </div>
     </div>
+    <TaikoRipple :active="active" :reduced-motion="reducedMotion" :trigger="feedbackTrigger" mode="ambient" origin-x="28%" origin-y="48%" />
   </StorySlideShell>
 </template>
 
@@ -167,6 +184,11 @@ const { t } = useI18n();
   margin-top: 10px;
   color: #fff8ed;
 }
+.final-title-slide__char-title { display: block; }
+.final-title-slide__char { display: inline-block; opacity: 1; transform: translateY(0); }
+.final-title-slide.is-active .final-title-slide__char { animation: final-title-char-in .52s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(1.12s + var(--char-index) * 55ms); }
+.final-title-slide.is-reduced .final-title-slide__char { animation: none; }
+@keyframes final-title-char-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
 .final-title-slide__seal strong {
   font-family: var(--viewer-display-font);
