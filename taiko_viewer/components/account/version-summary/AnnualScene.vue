@@ -66,6 +66,10 @@ defineExpose({ rootEl: rootRef });
 
 .annual-scene.is-reduced :deep(*) {
   scroll-behavior: auto !important;
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

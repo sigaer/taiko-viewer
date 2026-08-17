@@ -12,6 +12,7 @@ export const useAnnualTimeline = (
 ) => {
   let timeline: gsap.core.Timeline | null = null;
   let generation = 0;
+  const saveData = () => process.client && Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
 
   const build = async () => {
     const generationAtStart = ++generation;
@@ -22,7 +23,7 @@ export const useAnnualTimeline = (
     const all = [...root.querySelectorAll<HTMLElement>("[data-animate], [data-annual-stage]")];
     const unique = [...new Set(all)];
     timeline = gsap.timeline({ paused: true });
-    if (reducedMotion.value) {
+    if (reducedMotion.value || saveData()) {
       gsap.set(unique, { clearProps: "all", autoAlpha: 1, y: 0, scale: 1 });
       return;
     }
@@ -45,7 +46,7 @@ export const useAnnualTimeline = (
       void build();
       return;
     }
-    if (reducedMotion.value) {
+    if (reducedMotion.value || saveData()) {
       timeline.pause();
       const root = resolveRoot(rootRef.value);
       if (root) gsap.set(root.querySelectorAll<HTMLElement>("[data-animate], [data-annual-stage]"), { clearProps: "all", autoAlpha: 1, y: 0, scale: 1 });
@@ -61,6 +62,7 @@ export const useAnnualTimeline = (
   onBeforeUnmount(() => {
     generation += 1;
     timeline?.kill();
+    timeline = null;
   });
 
   return { buildAnnualTimeline: build };

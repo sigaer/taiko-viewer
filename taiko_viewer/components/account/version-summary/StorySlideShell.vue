@@ -22,12 +22,12 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
     <template #copy><slot name="copy" /></template>
     <div class="story-slide-shell__frame">
       <header class="story-slide-shell__header">
-        <div class="story-slide-shell__heading" data-animate>
+        <div class="story-slide-shell__heading" data-annual-stage="title">
           <span class="story-slide-shell__page">{{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}</span>
           <p>{{ eyebrow }}</p><strong v-if="accent">{{ accent }}</strong>
         </div>
-        <h2 data-animate>{{ title }}</h2>
-        <p v-if="lead" class="story-slide-shell__lead" data-animate>{{ lead }}</p>
+        <h2 data-annual-stage="title">{{ title }}</h2>
+        <p v-if="lead" class="story-slide-shell__lead" data-annual-stage="copy">{{ lead }}</p>
       </header>
       <div class="story-slide-shell__body"><slot /></div>
     </div>
