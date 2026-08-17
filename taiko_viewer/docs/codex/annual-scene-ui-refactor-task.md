@@ -4,6 +4,8 @@
 
 本计划只定义设计系统接入和后续实施阶段。本次文档提交不修改 Vue/TypeScript/CSS、summary v4、后端统计、路由、缓存、版本号或部署状态。
 
+实施时以 `docs/design-system/annual-summary-master.md` 为最高设计输入。`frontend-design` 用于保持项目辨识度，`ui-ux-pro-max` 只做定向 UX/可访问性/动效/技术栈校验；禁止用其自动生成的 landing page 设计系统覆盖现有文档，禁止未经用户授权执行 `--persist`/`--force`。
+
 后续第一轮页面实现仅允许覆盖：
 
 1. Opening
@@ -179,6 +181,8 @@ type AnnualSceneProps = {
 
 `saveData` 不由每个页面各自读取，继续由播放器或统一 motion context 下发。`AnnualScene` 暴露根节点给 timeline composable，并用 data attributes 提供可测试的 scene 元信息。
 
+`profile-stage` 是本次设计系统新增 mood。Phase 1 必须同步扩展 `AnnualSceneMood` union、registry 配置和播放器/场景 CSS mood 映射；如果实现前决定复用 `stage-blue`，应先统一修改设计文档，不能让文档值与 TypeScript 类型长期分叉。
+
 ### 5.3 Registry 接入
 
 在现有 `ANNUAL_PAGE_REGISTRY` 上增量增加：
@@ -215,10 +219,13 @@ Phase 1 新建或扩展统一 composable，使它：
 - 建立统一 scene timeline lifecycle，兼容未迁移页的 `useAnnualTimeline`。
 - 补齐 `AnimatedNumber`、`TaikoRipple`、`ParticleLayer` 的 active/generation/saveData/cleanup 契约。
 - 定义 `profile-spotlight`、`number-impact`、`cover-gather`、`award-reveal` 基础 preset。
+- 为 preset 定义 `reenter` 策略、可中断终态和完成 watchdog；业务导航不依赖动画完成事件才能正确执行。
+- 建立语义颜色、焦点、44px 触控和 8px 间距 tokens，并让固定 chrome 为焦点预留可见空间。
+- StoryPlayer 翻页后维持可预测焦点/读屏顺序，任何时刻焦点不得停留在 `inert` slide。
 
 不做：不改五个页面具体构图，不迁移其他页面。
 
-验收：现有 23 页可运行；period-to-overview debug 不变；非活动页无运行中的 timeline/粒子；reduced motion 直达终态。
+验收：现有 23 页可运行；period-to-overview debug 不变；非活动页无运行中的 timeline/粒子；reduced motion 直达终态；快速中断和完成回调丢失不影响导航与焦点。
 
 ### Phase 2：OpeningPage + ProfilePage
 
@@ -269,7 +276,12 @@ Favorite Song 交付：
 
 - 按 `docs/design-system/annual-summary-anti-patterns.md` 对五页逐项审查。
 - 检查 `390x844`、`720x1568`、`844x390`，覆盖中日文、最长歌名、缺失图片和缺失数字。
+- 检查 200%/400% 缩放、320 CSS px 等效宽度、最大系统文字和用户文字间距覆盖；单屏不足时验证紧凑/滚动态，无核心内容裁切。
+- 对实际 mood 和曲绘 scrim 进行对比度检查：正文至少 4.5:1，大字、有意义图形、控件边界和焦点状态至少 3:1。
+- 检查全部主要触控目标至少 44x44 CSS px、间距至少 8px，固定 chrome/safe area 不遮挡焦点，滑动有按钮与键盘替代。
 - 检查 `prefers-reduced-motion`、saveData、浏览器后台、快速往返和相邻页挂载。
+- 检查静音、自动播放拒绝、后台切换和路由离开；声音不作为唯一反馈且不会离屏残留。
+- 检查快速反向、重复点击、完成事件丢失和路由离开；动画可取消且最终状态确定。
 - 使用 transition debug 检查 Overview 三个关键时间点。
 - 运行年度契约测试、目标 E2E 和生产构建。
 

@@ -25,6 +25,32 @@
 | `--annual-night` | `#081329` | 深色舞台底 |
 | `--annual-night-soft` | `#17254a` | 深色舞台层次 |
 
+### 语义前景与焦点色
+
+| Token | 值 | 允许用途 |
+| --- | --- | --- |
+| `--annual-on-light` | `#13233d` | 亮色背景正文与标题 |
+| `--annual-on-light-secondary` | `#294766` | 亮色背景次要正文 |
+| `--annual-on-dark` | `#f8fbff` | 深色背景正文与标题 |
+| `--annual-on-dark-secondary` | `#dce8f5` | 深色背景次要正文 |
+| `--annual-focus-light` | `#0b5fc7` | 亮色背景焦点环 |
+| `--annual-focus-dark` | `#ffe9a6` | 深色背景焦点环 |
+
+正常文本必须使用经过验证的 `on-*` 组合，不直接把节奏色当正文。正常文本对比度至少 4.5:1，大字、有意义图形、控件边界和焦点状态至少 3:1；动态曲绘背景按叠加 scrim 后的实际像素验证。`--annual-ink-muted` 只用于非关键短标签，不能用于正文、操作名称或唯一证据。
+
+静态基底参考值：
+
+| 前景 / 背景 | 对比度 | 结论 |
+| --- | ---: | --- |
+| `on-light` / `paper` | 15.15:1 | 正文可用 |
+| `on-light-secondary` / `paper` | 9.25:1 | 次要正文可用 |
+| `on-dark` / `night` | 17.82:1 | 正文可用 |
+| `on-dark-secondary` / `night` | 14.89:1 | 次要正文可用 |
+| `focus-light` / `paper` | 5.82:1 | 焦点可用 |
+| `focus-dark` / `night` | 15.37:1 | 焦点可用 |
+
+这些值只覆盖 token 的纯色基底，不替代对渐变、曲绘、scrim、opacity 和 blend 后最终像素的测试。
+
 ### 太鼓与节奏色
 
 | Token | 值 | 用途 |
@@ -69,8 +95,8 @@ Mood 是多色关系，不是一张铺满全页的单色渐变：
 | `--annual-type-hero` | `2.25rem` | `4rem` | 开场标题 |
 | `--annual-type-title` | `1.75rem` | `2.75rem` | 场景标题 |
 | `--annual-type-object-label` | `1.25rem` | `1.75rem` | 歌名/玩家名次级档 |
-| `--annual-type-body` | `0.875rem` | `1rem` | 收束文案 |
-| `--annual-type-meta` | `0.6875rem` | `0.75rem` | 单位、页码、辅助标签 |
+| `--annual-type-body` | `1rem` | `1rem` | 收束文案 |
+| `--annual-type-meta` | `0.75rem` | `0.75rem` | 单位、页码、非关键辅助标签 |
 
 规则：
 
@@ -78,6 +104,9 @@ Mood 是多色关系，不是一张铺满全页的单色渐变：
 - 中日文标题行高 1.08 至 1.2；数字行高 0.88 至 1。
 - 字距默认 `0`；仅短英文元信息可使用不超过 `0.08em` 的正字距。
 - 长歌名按 grapheme 长度分为 normal/compact/long 三档，并允许自然换行。
+- 正文使用无单位行高 `1.5` 至 `1.75`；标题行高可以更紧，但在系统文字放大后必须回到可回流的行高。
+- `TaikoDisplay` 只负责其实际覆盖的拉丁字母与数字。中日文标题通过 700/800 字重、鼓谱式断句、数字基线和逐字节拍形成签名，不拉伸字形、不伪造笔画，也不下载未经确认的网络字体。
+- 用户缩放和系统文字大小优先于视觉稿的 1 至 2 行目标；核心标题、歌名、称号和 CTA 禁止 line clamp。
 
 ## 4. 间距与安全区
 
@@ -91,6 +120,7 @@ Mood 是多色关系，不是一张铺满全页的单色渐变：
 | `--annual-space-6` | `32px` |
 | `--annual-space-7` | `48px` |
 | `--annual-space-8` | `64px` |
+| `--annual-touch-gap` | `8px` |
 
 场景安全内边距：
 
@@ -105,12 +135,14 @@ padding-inline: var(--annual-space-4);
 ## 5. 尺寸与形状
 
 - `--annual-scene-height`: `100dvh`，以 `100svh` 作为兼容声明。
-- `--annual-touch-target`: `44px`，紧凑横屏不得小于 `40px`。
+- `--annual-touch-target`: `44px`，所有方向保持不变；Android WebView 可按产品壳层提高到 48px，但不降低。
+- `--annual-focus-width`: `3px`；`--annual-focus-offset`: `3px`，焦点色按亮/暗背景选择，状态对比至少 3:1。
 - `--annual-radius-sm`: `4px`。
 - `--annual-radius-md`: `8px`。
 - `--annual-radius-round`: `999px`，仅用于鼓面、圆形按钮、徽章和轨迹。
 - 曲绘使用稳定 `aspect-ratio: 1`；海报使用现有 `3 / 4`。
 - 主对象尺寸用容器和断点约束，不因标签、hover 或数字位数改变布局。
+- 当 200%/400% 缩放、最大系统文字或用户文字间距覆盖导致单屏不足时，场景切换为内容驱动高度/可滚动紧凑态；播放器 chrome 预留 `scroll-padding`，保证焦点不被固定控件遮挡。
 
 ## 6. 光、阴影和边界
 
