@@ -2,152 +2,78 @@
 defineProps<{ reducedMotion: boolean; active?: boolean }>();
 
 const stars = [
-  { x: 8, y: 10, size: 6, delay: 0.1 },
-  { x: 20, y: 7, size: 4, delay: 0.7 },
-  { x: 45, y: 5, size: 4, delay: 1.1 },
-  { x: 67, y: 12, size: 6, delay: 0.4 },
-  { x: 75, y: 7, size: 5, delay: 1.5 },
-  { x: 92, y: 12, size: 4, delay: 0.9 },
-  { x: 12, y: 37, size: 5, delay: 1.8 },
-  { x: 32, y: 31, size: 4, delay: 0.3 },
-  { x: 58, y: 29, size: 4, delay: 1.2 },
-  { x: 81, y: 34, size: 6, delay: 0.6 },
-  { x: 39, y: 50, size: 5, delay: 1.4 },
-  { x: 73, y: 52, size: 5, delay: 0.2 }
+  { x: 8, y: 10, size: 5, delay: 0.1 }, { x: 19, y: 7, size: 3, delay: 0.7 },
+  { x: 45, y: 6, size: 4, delay: 1.1 }, { x: 68, y: 11, size: 5, delay: 0.4 },
+  { x: 84, y: 8, size: 4, delay: 1.5 }, { x: 94, y: 17, size: 3, delay: 0.9 },
+  { x: 11, y: 40, size: 4, delay: 1.8 }, { x: 31, y: 32, size: 3, delay: 0.3 },
+  { x: 58, y: 30, size: 3, delay: 1.2 }, { x: 81, y: 35, size: 5, delay: 0.6 },
+  { x: 40, y: 49, size: 4, delay: 1.4 }, { x: 73, y: 53, size: 4, delay: 0.2 },
+  { x: 24, y: 22, size: 2, delay: 1.7 }, { x: 91, y: 46, size: 2, delay: .8 }
 ];
 </script>
 
 <template>
-  <div class="annual-fireworks" :class="{ 'is-still': reducedMotion }" aria-hidden="true">
-    <svg viewBox="0 0 414 310" preserveAspectRatio="xMidYMid slice">
-      <g class="annual-fireworks__burst annual-fireworks__burst--large">
-        <path d="M138 111 C111 70 83 46 49 44" />
-        <path d="M139 111 C119 61 114 35 99 23" />
-        <path d="M139 111 C139 65 145 36 163 25" />
-        <path d="M141 112 C160 69 184 48 213 48" />
-        <path d="M143 114 C176 84 202 76 236 81" />
-        <path d="M143 115 C178 104 211 105 251 124" />
-        <path d="M139 115 C105 92 78 87 38 91" />
-        <path d="M138 116 C103 106 75 112 45 139" />
-        <path d="M138 116 C118 122 99 140 90 166" />
-        <path d="M140 115 C147 137 165 153 191 163" />
+  <div class="annual-fireworks" :class="{ 'is-still': reducedMotion, 'is-active': active }" aria-hidden="true">
+    <svg viewBox="0 0 414 560" preserveAspectRatio="xMidYMid slice">
+      <g class="annual-fireworks__burst annual-fireworks__burst--main">
+        <path d="M138 164 C111 116 82 86 47 80" /><path d="M138 164 C119 108 112 72 96 48" />
+        <path d="M139 164 C135 112 141 76 159 51" /><path d="M141 165 C157 112 181 77 207 72" />
+        <path d="M143 166 C176 123 205 108 235 109" /><path d="M144 168 C183 143 217 137 252 149" />
+        <path d="M144 169 C183 165 218 178 246 201" /><path d="M142 171 C177 187 198 213 204 247" />
+        <path d="M140 171 C149 213 137 242 111 268" /><path d="M138 171 C120 211 94 233 59 240" />
+        <path d="M137 169 C101 197 70 199 37 187" /><path d="M136 168 C99 176 65 164 39 143" />
+        <path d="M137 166 C102 146 80 119 73 88" /><path d="M145 165 C169 144 195 134 223 135" />
+        <path d="M139 164 C128 125 127 97 137 66" /><path d="M140 167 C155 186 175 199 200 207" />
+        <path d="M141 166 C116 158 91 145 74 124" /><path d="M142 170 C167 168 194 174 219 190" />
+        <path d="M139 168 C119 181 103 201 95 226" /><path d="M142 165 C161 131 179 113 201 101" />
       </g>
       <g class="annual-fireworks__burst annual-fireworks__burst--right">
-        <path d="M319 137 C299 105 277 93 251 94" />
-        <path d="M320 138 C315 102 319 78 334 65" />
-        <path d="M321 138 C340 105 363 93 393 98" />
-        <path d="M322 140 C352 122 381 122 414 139" />
-        <path d="M322 142 C355 143 382 157 402 181" />
-        <path d="M320 142 C338 167 341 191 333 214" />
-        <path d="M318 142 C301 165 279 177 253 177" />
-        <path d="M317 140 C287 140 267 151 250 169" />
+        <path d="M320 214 C300 177 276 159 247 159" /><path d="M320 215 C314 173 319 141 335 119" />
+        <path d="M322 215 C340 178 365 162 396 166" /><path d="M323 218 C355 200 383 202 409 218" />
+        <path d="M322 219 C355 226 382 245 398 273" /><path d="M320 220 C337 252 337 282 324 312" />
+        <path d="M318 218 C301 254 277 273 248 278" /><path d="M318 216 C286 220 264 234 245 257" />
+        <path d="M319 216 C301 195 285 182 267 177" /><path d="M321 218 C341 229 361 246 372 267" />
       </g>
       <g class="annual-fireworks__burst annual-fireworks__burst--left-small">
-        <path d="M52 237 C42 213 27 203 8 205" />
-        <path d="M53 238 C52 212 58 197 70 190" />
-        <path d="M54 238 C69 217 86 211 104 217" />
-        <path d="M54 240 C77 236 94 244 105 258" />
-        <path d="M52 240 C35 245 26 257 24 276" />
+        <path d="M53 386 C41 354 25 337 5 338" /><path d="M53 387 C52 354 58 332 73 318" />
+        <path d="M55 388 C72 359 90 350 112 355" /><path d="M55 390 C81 387 101 398 113 417" />
+        <path d="M53 390 C35 399 25 417 23 441" /><path d="M52 388 C37 375 25 366 12 365" />
       </g>
       <g class="annual-fireworks__burst annual-fireworks__burst--bottom">
-        <path d="M180 263 C169 232 150 218 126 217" />
-        <path d="M181 263 C178 231 185 210 201 199" />
-        <path d="M182 263 C203 238 225 232 248 241" />
-        <path d="M183 265 C207 262 228 273 241 292" />
-        <path d="M180 265 C157 271 145 285 143 305" />
+        <path d="M188 490 C176 454 157 434 132 431" /><path d="M188 491 C185 451 191 424 208 408" />
+        <path d="M190 491 C211 458 233 449 258 458" /><path d="M191 494 C218 491 241 504 254 527" />
+        <path d="M187 493 C161 501 148 519 145 544" /><path d="M189 491 C170 482 155 468 147 451" />
       </g>
     </svg>
-
     <i
       v-for="(star, index) in stars"
       :key="index"
       class="annual-fireworks__star"
-      :style="{
-        left: `${star.x}%`,
-        top: `${star.y}%`,
-        width: `${star.size}px`,
-        height: `${star.size}px`,
-        '--star-delay': `${star.delay}s`
-      }"
+      :style="{ left: `${star.x}%`, top: `${star.y}%`, width: `${star.size}px`, height: `${star.size}px`, '--star-delay': `${star.delay}s` }"
     />
   </div>
 </template>
 
 <style scoped>
-.annual-fireworks {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  color: #6b7d91;
-  pointer-events: none;
-}
-
-.annual-fireworks svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.annual-fireworks__burst {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.55;
-  stroke-linecap: round;
-  opacity: 0.52;
-}
-
-.annual-fireworks__burst path {
-  stroke-dasharray: 420;
-  stroke-dashoffset: 420;
-  animation: annual-firework-draw 4.8s cubic-bezier(0.22, 0.75, 0.2, 1) infinite;
-}
-
-.annual-fireworks__burst--large {
-  color: #708194;
-}
-
-.annual-fireworks__burst--large path:nth-child(3n + 1) { animation-delay: -0.35s; }
-.annual-fireworks__burst--large path:nth-child(3n + 2) { animation-delay: -0.18s; }
-.annual-fireworks__burst--right {
-  color: #4f58a1;
-}
-.annual-fireworks__burst--right path { animation-delay: -2.4s; }
-.annual-fireworks__burst--left-small {
-  color: #3e91bb;
-}
-.annual-fireworks__burst--left-small path { animation-delay: -1.35s; }
-.annual-fireworks__burst--bottom {
-  color: #5aa879;
-}
-.annual-fireworks__burst--bottom path { animation-delay: -3.15s; }
-
-.annual-fireworks__star {
-  position: absolute;
-  display: block;
-  background: #78899a;
-  opacity: 0.72;
-  clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
-  animation: annual-star-pulse 2.6s ease-in-out var(--star-delay) infinite;
-}
-
-.annual-fireworks.is-still .annual-fireworks__burst path {
-  stroke-dashoffset: 0;
-  animation: none;
-}
-
-.annual-fireworks.is-still .annual-fireworks__star {
-  animation: none;
-}
-
-@keyframes annual-firework-draw {
-  0%, 10% { stroke-dashoffset: 420; opacity: 0; }
-  34%, 72% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
-}
-
-@keyframes annual-star-pulse {
-  0%, 100% { opacity: 0.35; transform: scale(0.72) rotate(0deg); }
-  50% { opacity: 0.88; transform: scale(1.12) rotate(20deg); }
-}
+.annual-fireworks { position: absolute; inset: 0; overflow: hidden; color: #728399; pointer-events: none; }
+.annual-fireworks svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.annual-fireworks__burst { fill: none; stroke: currentColor; stroke-linecap: round; stroke-dasharray: 420; stroke-dashoffset: 0; opacity: .48; }
+.annual-fireworks__burst path { stroke-width: 1.9; }
+.annual-fireworks__burst path:nth-child(3n) { stroke-width: 2.8; opacity: .62; }
+.annual-fireworks__burst path:nth-child(4n) { stroke-width: 1.35; opacity: .33; }
+.annual-fireworks__burst--main { color: #708194; }
+.annual-fireworks__burst--right { color: #595d9b; opacity: .72; }
+.annual-fireworks__burst--left-small { color: #4f95b5; opacity: .62; }
+.annual-fireworks__burst--bottom { color: #688e9b; opacity: .52; }
+.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst path { animation: annual-firework-draw 7.6s cubic-bezier(.22,.75,.2,1) infinite; }
+.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--right path { animation-delay: -2.8s; }
+.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--left-small path { animation-delay: -1.3s; }
+.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--bottom path { animation-delay: -4.4s; }
+.annual-fireworks__star { position: absolute; display: block; border-radius: 50%; background: #91a1ad; opacity: .58; box-shadow: 0 0 0 1px rgba(171,210,220,.16); }
+.annual-fireworks.is-active:not(.is-still) .annual-fireworks__star { animation: annual-star-pulse 3.8s ease-in-out var(--star-delay) infinite; }
+.annual-fireworks.is-still .annual-fireworks__burst path { stroke-dashoffset: 0; animation: none; }
+.annual-fireworks.is-still .annual-fireworks__star { animation: none; }
+@keyframes annual-firework-draw { 0%, 8% { stroke-dashoffset: 420; opacity: 0; } 26%, 72% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .42; } }
+@keyframes annual-star-pulse { 0%, 100% { opacity: .28; transform: scale(.75); } 50% { opacity: .82; transform: scale(1.2); } }
+@media (prefers-reduced-motion: reduce) { .annual-fireworks__burst path, .annual-fireworks__star { animation: none !important; } }
 </style>

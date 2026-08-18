@@ -7,7 +7,6 @@ import AnnualOpeningBeatLane from "../AnnualOpeningBeatLane.vue";
 import AnnualOpeningCarousel from "../AnnualOpeningCarousel.vue";
 import AnnualOpeningFireworks from "../AnnualOpeningFireworks.vue";
 import AnnualScene from "../AnnualScene.vue";
-import ParticleLayer from "../ParticleLayer.vue";
 import TaikoRipple from "../TaikoRipple.vue";
 
 const props = defineProps<{
@@ -19,8 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ start: [] }>();
-const { t } = useI18n();
-const donIconUrl = "/api/content/assets/don";
+const { t, locale } = useI18n();
 const rippleTrigger = ref(0);
 const startPending = ref(false);
 const navigationSent = ref(false);
@@ -43,14 +41,25 @@ onAnnualMotionActive((scope) => {
   };
 });
 
-const generatedAt = computed(() =>
-  new Intl.DateTimeFormat(undefined, {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(props.summary.generatedAt))
-);
+const reportYear = computed(() => {
+  const keyYear = props.summary.version.key.match(/20\d{2}/)?.[0];
+  const dateYear = props.summary.version.startDate.match(/20\d{2}/)?.[0];
+  return keyYear || dateYear || "2026";
+});
+const reportTitleLines = computed(() => t("annualSummary.openingCover.reportTitle").split("\n"));
+const formatDate = (value: string | null | undefined) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", {
+    year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(date);
+};
+const periodLabel = computed(() => {
+  const start = formatDate(props.summary.version.startDate) || reportYear.value;
+  const end = formatDate(props.summary.version.effectiveEndDate) || formatDate(props.summary.version.endDate) || start;
+  return `${start} — ${end}`;
+});
 
 const completeStoryStart = () => {
   if (!startPending.value || navigationSent.value) return;
@@ -64,14 +73,11 @@ const beginStory = () => {
   startPending.value = true;
   drumPulse.value = true;
   rippleTrigger.value += 1;
-
   if (props.reducedMotion) {
     completeStoryStart();
     return;
   }
-
   motionScope?.setTimeout(() => { drumPulse.value = false; }, 430);
-  // Navigation never relies on the ripple animation event alone.
   motionScope?.setTimeout(completeStoryStart, 960);
 };
 </script>
@@ -88,38 +94,19 @@ const beginStory = () => {
   >
     <template #background>
       <div class="annual-opening__backdrop">
-        <div class="annual-opening__rainbow" />
-        <div class="annual-opening__stage-rays" />
-        <div class="annual-opening__floor" />
+        <div class="annual-opening__sky" />
+        <div class="annual-opening__info-surface" />
+        <div class="annual-opening__horizon" />
       </div>
     </template>
 
     <template #atmosphere>
-      <ParticleLayer :active="active" :reduced-motion="reducedMotion" density="high" palette="rainbow" />
       <AnnualOpeningFireworks :active="active" :reduced-motion="reducedMotion" />
-      <div class="annual-opening__light-rings" aria-hidden="true"><i /><i /><i /></div>
     </template>
 
     <template #visual>
       <div class="annual-opening__carousel" data-annual-stage="visual">
         <AnnualOpeningCarousel :summary="summary" :active="active" :reduced-motion="reducedMotion" />
-      </div>
-      <div class="annual-opening__drum-stage" data-annual-stage="visual">
-        <div class="annual-opening__drum-halo" aria-hidden="true" />
-        <button
-          type="button"
-          class="annual-opening__start"
-          :class="{ 'is-pulsing': drumPulse }"
-          :disabled="startPending"
-          :aria-label="t('annualSummary.controls.start')"
-          @click="beginStory"
-        >
-          <span class="annual-opening__drum-shell">
-            <img class="annual-opening__drum-face" :src="donIconUrl" alt="" aria-hidden="true" />
-          </span>
-          <strong>{{ t("annualSummary.openingCover.startTop") }}</strong>
-          <em>{{ t("annualSummary.openingCover.startBottom") }}</em>
-        </button>
       </div>
       <div class="annual-opening__beat" data-annual-stage="visual">
         <AnnualOpeningBeatLane :active="active" :reduced-motion="reducedMotion" />
@@ -127,22 +114,45 @@ const beginStory = () => {
     </template>
 
     <template #data>
-      <strong class="annual-opening__year" data-annual-stage="data">2026</strong>
-      <span class="annual-opening__operator" data-annual-stage="data">@{{ summary.user.nickname }}</span>
+      <strong class="annual-opening__year" data-annual-stage="data">{{ reportYear }}</strong>
     </template>
 
     <template #copy>
-      <header class="annual-opening__headline">
-        <span class="annual-opening__kicker" data-annual-stage="title">{{ t("annualSummary.openingCover.kicker") }}</span>
-        <h1 data-annual-stage="title">
-          <span class="annual-opening__headline-line">{{ t("annualSummary.openingCover.headline") }}</span>
-          <span class="annual-opening__headline-line is-echo">{{ t("annualSummary.openingCover.subhead") }}</span>
-        </h1>
-      </header>
-      <div class="annual-opening__footer" data-annual-stage="copy">
-        <span>SAKURABOT · TAIKO ANNUAL STAGE</span>
-        <span>{{ t("annualSummary.openingCover.generatedAt", { time: generatedAt }) }}</span>
-      </div>
+      <img class="annual-opening__title-art" src="/title.png" alt="" data-annual-stage="title" />
+      <section class="annual-opening__cover-info" :aria-label="t('annualSummary.openingCover.reportTitle')">
+        <div class="annual-opening__info-head" data-annual-stage="copy">
+          <span class="annual-opening__generated">{{ t("annualSummary.openingCover.generatedBy") }}</span>
+          <div class="annual-opening__utilities" aria-hidden="true">
+            <figure><img src="/friend.png" alt="" /><figcaption>{{ t("annualSummary.openingCover.friendReport") }}</figcaption></figure>
+            <figure><img src="/to_end.png" alt="" /><figcaption>{{ t("annualSummary.openingCover.resultPage") }}</figcaption></figure>
+          </div>
+        </div>
+        <div class="annual-opening__info-main">
+          <div class="annual-opening__info-copy" data-annual-stage="data">
+            <span class="annual-opening__info-year-label">{{ reportYear }}</span>
+            <h1>
+              <span v-for="line in reportTitleLines" :key="line">{{ line }}</span>
+            </h1>
+          </div>
+          <button
+            type="button"
+            class="annual-opening__start"
+            :class="{ 'is-pulsing': drumPulse }"
+            :disabled="startPending"
+            :aria-label="t('annualSummary.controls.start')"
+            data-annual-stage="copy"
+            @click="beginStory"
+          >
+            <span class="annual-opening__start-icon"><img src="/icon.png" alt="" aria-hidden="true" /></span>
+            <strong>{{ t("annualSummary.openingCover.startTop") }}</strong>
+            <em>{{ t("annualSummary.openingCover.startBottom") }}</em>
+          </button>
+        </div>
+        <footer class="annual-opening__legal" data-annual-stage="copy">
+          <span>{{ t("annualSummary.openingCover.period", { period: periodLabel }) }}</span>
+          <span>{{ t("annualSummary.openingCover.consent") }}</span>
+        </footer>
+      </section>
     </template>
 
     <template #transition>
@@ -152,7 +162,7 @@ const beginStory = () => {
         mode="burst"
         :trigger="rippleTrigger"
         origin-x="50%"
-        origin-y="58%"
+        origin-y="61%"
         @complete="completeStoryStart"
       />
     </template>
@@ -160,42 +170,43 @@ const beginStory = () => {
 </template>
 
 <style scoped>
-.annual-opening {
-  --opening-night: #071832;
-  width: 100%; height: 100vh; height: 100svh; height: 100dvh;
-  color: #fff; background: var(--opening-night);
-}
+.annual-opening { --opening-night: #071b42; width: 100%; height: 100vh; height: 100svh; height: 100dvh; color: #fff; background: var(--opening-night); }
 .annual-opening :deep(.annual-scene__content) { pointer-events: none !important; }
-.annual-opening__backdrop { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(circle at 50% 49%, rgba(58,160,219,.42), transparent 27%), linear-gradient(180deg, #06142d 0%, #0b315c 56%, #07162d 100%); }
-.annual-opening__rainbow { position: absolute; inset: -12% -48% 31%; opacity: .32; filter: blur(18px) saturate(1.25); background: conic-gradient(from 247deg at 50% 108%, #f15953, #f6ca57, #49c58c, #42b8e8, #745fe3, #f15953); mask-image: radial-gradient(ellipse at 50% 105%, transparent 0 37%, #000 38% 47%, transparent 49%); }
-.annual-opening__stage-rays { position: absolute; inset: 35% -30% -10%; opacity: .18; background: repeating-conic-gradient(from -9deg at 50% 100%, rgba(255,255,255,.34) 0 2deg, transparent 2deg 12deg); mask-image: linear-gradient(transparent, #000 34%); }
-.annual-opening__floor { position: absolute; inset: 72% -12% -16%; border-top: 1px solid rgba(115,213,255,.42); background: linear-gradient(rgba(90,190,233,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(90,190,233,.13) 1px, transparent 1px); background-size: 36px 24px; transform: perspective(280px) rotateX(58deg); transform-origin: 50% 0; mask-image: linear-gradient(#000, transparent 88%); }
-.annual-opening__light-rings { position: absolute; left: 50%; top: 58%; width: min(86vw,430px); aspect-ratio: 1; transform: translate(-50%,-50%); }
-.annual-opening__light-rings i { position: absolute; inset: calc(var(--ring,0) * 9%); border: 1px solid rgba(121,215,255,.22); border-radius: 50%; box-shadow: 0 0 28px rgba(50,170,232,.12); }
-.annual-opening__light-rings i:nth-child(2) { --ring: 1; border-style: dashed; } .annual-opening__light-rings i:nth-child(3) { --ring: 2; border-color: rgba(255,208,96,.26); }
-.annual-opening__carousel { position: absolute; top: 25.5%; left: -5%; right: -5%; height: 29%; opacity: .66; transform: perspective(520px) rotateX(3deg) rotateZ(-2deg); filter: saturate(.92) brightness(.78); mask-image: linear-gradient(90deg, transparent, #000 10% 90%, transparent); }
-.annual-opening__carousel :deep(.annual-cover-flow) { --cover-size: min(35vw,176px); } .annual-opening__carousel :deep(.annual-cover-flow__card) { border: 1px solid rgba(255,255,255,.2); } .annual-opening__carousel :deep(.annual-cover-flow::before), .annual-opening__carousel :deep(.annual-cover-flow::after) { display: none; }
-.annual-opening__drum-stage { position: absolute; z-index: 3; left: 50%; top: 57.5%; width: min(48vw,220px); aspect-ratio: 1; transform: translate(-50%,-50%); }
-.annual-opening__drum-halo { position: absolute; inset: -23%; border: 1px solid rgba(255,213,99,.5); border-radius: 50%; background: repeating-conic-gradient(from 5deg, rgba(255,217,111,.55) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(transparent 0 62%, #000 63% 65%, transparent 66%); filter: drop-shadow(0 0 12px rgba(255,211,92,.35)); }
-.annual-opening__start { position: absolute; inset: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; color: #fff; background: transparent; cursor: pointer; pointer-events: auto; }
-.annual-opening__start:disabled { cursor: wait; } .annual-opening__start:focus-visible { outline: 4px solid #fff; outline-offset: 9px; }
-.annual-opening__drum-shell { position: absolute; inset: 0; display: grid; place-items: center; border: clamp(7px,2vw,11px) solid #2e2b33; border-radius: 50%; background: radial-gradient(circle at 38% 28%, rgba(255,255,255,.9), transparent 27%), #f7ead3; box-shadow: 0 24px 52px rgba(0,8,24,.55), 0 0 0 5px #ead4aa, 0 0 0 8px #202938, inset 0 -13px 23px rgba(181,123,79,.18); }
-.annual-opening__drum-shell::before { content: ""; position: absolute; inset: 8%; border: 2px dashed rgba(83,56,44,.28); border-radius: inherit; }
-.annual-opening__drum-face { width: 65%; height: 65%; object-fit: contain; filter: drop-shadow(0 7px 5px rgba(74,40,35,.2)); }
-.annual-opening__start > strong, .annual-opening__start > em { position: absolute; z-index: 2; left: 50%; width: 90%; transform: translateX(-50%); color: #102d50; font-family: var(--viewer-display-font); font-style: normal; text-shadow: 0 1px rgba(255,255,255,.8); }
-.annual-opening__start > strong { top: 67%; font-size: 11px; } .annual-opening__start > em { top: 75%; font-size: 15px; font-weight: 800; }
-.annual-opening__beat { position: absolute; z-index: 2; left: 0; right: 0; top: 75%; height: 5.5%; opacity: .9; box-shadow: 0 0 24px rgba(66,185,232,.28); }
-.annual-opening__year { position: absolute; top: 7.4%; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.14); font: 900 clamp(5rem,25vw,8.4rem)/.8 var(--viewer-display-font); text-shadow: 0 0 40px rgba(70,190,242,.16); }
-.annual-opening__operator { position: absolute; right: 5%; bottom: calc(max(20px,env(safe-area-inset-bottom)) + 35px); max-width: 48%; overflow: hidden; color: rgba(195,226,247,.72); font: 800 11px/1.2 var(--viewer-font-family); text-overflow: ellipsis; white-space: nowrap; }
-.annual-opening__headline { position: absolute; z-index: 4; top: 9%; left: 7%; right: 7%; text-align: center; text-shadow: 0 4px 18px rgba(0,13,34,.8); }
-.annual-opening__kicker { display: block; color: #f5d475; font: 800 11px/1.3 var(--viewer-font-family); }
-.annual-opening__headline h1 { margin: 8px 0 0; font-family: var(--viewer-display-font); } .annual-opening__headline-line { display: block; font-size: clamp(2.25rem,10.8vw,4.1rem); line-height: .98; } .annual-opening__headline-line.is-echo { margin-top: 4px; color: #75d4f4; font-size: clamp(1.25rem,6.3vw,2.25rem); }
-.annual-opening__footer { position: absolute; left: 5%; right: 5%; bottom: max(16px,env(safe-area-inset-bottom)); display: flex; justify-content: space-between; gap: 16px; color: rgba(191,222,242,.62); font: 700 10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace; } .annual-opening__footer span:last-child { text-align: right; }
-.annual-opening.is-active:not(.is-reduced) .annual-opening__drum-stage { animation: opening-drum-breathe 2.8s ease-in-out 2.3s infinite; } .annual-opening.is-active:not(.is-reduced) .annual-opening__drum-halo { animation: opening-halo-turn 13s linear infinite; } .annual-opening.is-active:not(.is-reduced) .annual-opening__headline-line { animation: opening-title-unmask .76s cubic-bezier(.2,.8,.2,1) both; } .annual-opening.is-active:not(.is-reduced) .annual-opening__headline-line.is-echo { animation-delay: .23s; } .annual-opening__start.is-pulsing .annual-opening__drum-shell { animation: opening-drum-hit .43s cubic-bezier(.2,.8,.25,1); }
-@keyframes opening-drum-breathe { 0%,100% { transform: translate(-50%,-50%); filter: drop-shadow(0 0 0 rgba(87,206,255,0)); } 50% { transform: translate(-50%,-51.5%); filter: drop-shadow(0 0 15px rgba(87,206,255,.32)); } }
-@keyframes opening-halo-turn { to { transform: rotate(360deg); } } @keyframes opening-title-unmask { from { clip-path: inset(0 50% 0 50%); filter: blur(9px); } to { clip-path: inset(0); filter: blur(0); } } @keyframes opening-drum-hit { 0%,100% { transform: scale(1); } 32% { transform: scale(1.085); } 63% { transform: scale(.975); } }
-@media (min-width:521px) { .annual-opening__carousel { left: calc(50% - 300px); right: calc(50% - 300px); } }
-@media (orientation:landscape) and (max-height:460px) { .annual-opening__headline { top: 8%; left: 3%; right: auto; width: 38%; text-align: left; } .annual-opening__headline-line { font-size: clamp(1.9rem,5.4vw,3rem); } .annual-opening__headline-line.is-echo { font-size: clamp(1.05rem,3.2vw,1.65rem); } .annual-opening__year { top: 10%; left: 17%; font-size: 5rem; } .annual-opening__carousel { top: 8%; left: 34%; right: 3%; height: 68%; } .annual-opening__drum-stage { top: 50%; left: 65%; width: min(43vh,190px); } .annual-opening__beat { top: auto; bottom: 0; right: 42%; height: 13%; } .annual-opening__operator { right: 3%; bottom: 12px; } .annual-opening__footer { left: 3%; right: 52%; bottom: 16%; display: block; } .annual-opening__footer span { display: block; margin-top: 4px; text-align: left!important; } }
-@media (max-height:690px) and (orientation:portrait) { .annual-opening__headline { top: 6%; } .annual-opening__carousel { top: 23%; } .annual-opening__drum-stage { top: 56%; width: min(43vw,190px); } .annual-opening__beat { top: 73%; } .annual-opening__footer { bottom: max(10px,env(safe-area-inset-bottom)); } }
-@media (prefers-reduced-motion:reduce) { .annual-opening__drum-stage, .annual-opening__drum-halo, .annual-opening__headline-line, .annual-opening__drum-shell { animation: none!important; } }
+.annual-opening__backdrop, .annual-opening__sky, .annual-opening__info-surface { position: absolute; inset: 0; }
+.annual-opening__backdrop { overflow: hidden; background: var(--opening-night); }
+.annual-opening__sky { bottom: 33%; background: radial-gradient(circle at 50% 38%, rgba(56, 119, 177, .28), transparent 42%), linear-gradient(180deg, #071a41 0%, #0c3a70 62%, #124f83 100%); }
+.annual-opening__sky::after { content: ""; position: absolute; inset: 0; opacity: .3; background: radial-gradient(circle at 11% 28%, #a3c6d0 0 1px, transparent 2px), radial-gradient(circle at 84% 20%, #819aa9 0 1px, transparent 2px); background-size: 79px 67px, 102px 91px; }
+.annual-opening__info-surface { top: 66%; bottom: 0; background: linear-gradient(160deg, #8ec7e1 0%, #6ea5cb 48%, #a8c7df 100%); }
+.annual-opening__info-surface::before { content: ""; position: absolute; inset: 0; opacity: .22; background: linear-gradient(110deg, rgba(255,255,255,.36), transparent 28% 74%, rgba(15,61,110,.25)); }
+.annual-opening__horizon { position: absolute; top: 66%; left: 0; right: 0; height: 2px; background: rgba(255, 238, 204, .75); box-shadow: 0 -4px 14px rgba(162, 225, 248, .4); }
+.annual-opening__title-art { position: absolute; z-index: 5; top: -2%; left: 50%; width: min(96vw, 470px); height: auto; transform: translateX(-50%); filter: drop-shadow(0 4px 10px rgba(3, 17, 43, .3)); }
+.annual-opening__carousel { position: absolute; z-index: 2; top: 29%; left: 0; right: 0; height: 37%; }
+.annual-opening__beat { position: absolute; z-index: 4; top: 64.2%; left: 0; right: 0; height: clamp(40px, 5.1vh, 48px); }
+.annual-opening__year { position: absolute; z-index: 3; top: 74%; left: 7%; color: rgba(255,255,255,.96); font: 400 clamp(3.7rem, 18vw, 7.4rem)/.78 var(--viewer-display-font); letter-spacing: -.06em; text-shadow: 0 3px 0 rgba(28,89,139,.18); }
+.annual-opening__cover-info { position: absolute; z-index: 4; inset: 69% 0 0; padding: clamp(9px, 2.2vw, 18px) clamp(18px, 5vw, 36px) max(10px, env(safe-area-inset-bottom)); }
+.annual-opening__info-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 32px; }
+.annual-opening__generated { margin-left: clamp(58px, 16vw, 76px); color: rgba(255,255,255,.96); font: 700 clamp(11px, 2.9vw, 15px)/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; text-shadow: 0 1px 3px rgba(18,59,96,.28); }
+.annual-opening__utilities { display: flex; gap: 10px; margin-top: -4px; }
+.annual-opening__utilities figure { width: clamp(36px, 10vw, 50px); margin: 0; text-align: center; }
+.annual-opening__utilities img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(24,57,88,.22)); }
+.annual-opening__utilities figcaption { margin-top: 1px; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); white-space: nowrap; }
+.annual-opening__info-main { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 148px; padding: 5px 0 0; }
+.annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 56px; }
+.annual-opening__info-year-label { display: none; }
+.annual-opening__info-copy h1 { display: grid; gap: 1px; margin: 0; color: #fffdf8; font: 800 clamp(1.65rem, 8.5vw, 3.15rem)/.9 var(--viewer-display-font); letter-spacing: .02em; text-shadow: 0 2px 0 rgba(37,91,127,.24), 0 4px 12px rgba(31,70,105,.22); -webkit-text-stroke: .35px rgba(255,255,255,.6); }
+.annual-opening__start { position: relative; z-index: 3; display: grid; min-width: 84px; min-height: 104px; place-items: center; align-content: center; gap: 1px; padding: 4px; border: 0; color: #fff; background: transparent; cursor: pointer; pointer-events: auto; text-shadow: 0 2px 4px rgba(33,71,108,.32); }
+.annual-opening__start:disabled { cursor: wait; opacity: .82; }
+.annual-opening__start:focus-visible { outline: 3px solid #fff; outline-offset: 4px; border-radius: 12px; }
+.annual-opening__start-icon { display: grid; width: clamp(64px, 18vw, 88px); aspect-ratio: 1; place-items: center; border-radius: 50%; background: rgba(255,255,255,.62); box-shadow: 0 4px 11px rgba(28,76,111,.24); }
+.annual-opening__start-icon img { width: 92%; height: 92%; object-fit: contain; }
+.annual-opening__start strong, .annual-opening__start em { display: block; font-family: var(--viewer-display-font); font-style: normal; line-height: 1.1; }
+.annual-opening__start strong { font-size: clamp(10px, 2.9vw, 14px); }
+.annual-opening__start em { font-size: clamp(13px, 3.6vw, 17px); font-weight: 800; }
+.annual-opening__start.is-pulsing .annual-opening__start-icon { animation: opening-start-hit .43s cubic-bezier(.2,.8,.25,1); }
+.annual-opening__legal { position: absolute; right: clamp(18px, 5vw, 36px); bottom: max(8px, env(safe-area-inset-bottom)); left: clamp(18px, 5vw, 36px); display: grid; gap: 3px; color: rgba(246,251,255,.82); font: 500 clamp(10px, 2.25vw, 11px)/1.25 var(--viewer-font-family); text-align: right; text-shadow: 0 1px 3px rgba(29,66,102,.18); }
+@keyframes opening-start-hit { 0%, 100% { transform: scale(1); } 32% { transform: scale(1.1); } 63% { transform: scale(.97); } }
+@media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } }
+@media (max-height: 690px) and (orientation: portrait) { .annual-opening__title-art { top: -7%; } .annual-opening__carousel { top: 27%; height: 36%; } .annual-opening__cover-info { padding-top: 8px; } .annual-opening__info-main { min-height: 125px; } .annual-opening__legal { font-size: 10px; } }
+@media (orientation: landscape) and (max-height: 460px) { .annual-opening__title-art { top: -16%; left: 24%; width: min(54vw, 390px); } .annual-opening__carousel { top: 5%; left: 34%; right: 2%; height: 59%; } .annual-opening__beat { top: auto; right: 3%; bottom: 0; left: 34%; height: 44px; } .annual-opening__info-surface { top: 0; right: 66%; bottom: 0; } .annual-opening__cover-info { top: 0; right: 66%; padding: 8px 16px; } .annual-opening__horizon { top: 0; bottom: 0; left: 34%; width: 2px; height: auto; } .annual-opening__year { top: 54%; left: 6%; font-size: 4rem; } .annual-opening__info-main { min-height: 150px; align-items: end; } .annual-opening__info-copy h1 { font-size: 1.7rem; } .annual-opening__utilities { display: none; } .annual-opening__legal { left: 16px; right: 16px; text-align: left; } }
+@media (prefers-reduced-motion: reduce) { .annual-opening__start-icon { animation: none !important; } }
 </style>
