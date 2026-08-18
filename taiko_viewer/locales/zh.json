@@ -625,7 +625,7 @@
       "shift": { "old": "故事前段 · 放不下的旧爱", "new": "故事后段 · 悄悄登场的新欢", "times": "相遇 {count} 次" },
       "monthly": { "estimated": "约 {time}", "plays": "主打歌 {songCount} 次 · 当月共 {monthCount} 次 · 约 {time}" },
       "weekday": { "top": "最有默契的一天", "bottom": "相对安静的一天" },
-      "calendar": { "active": "记录的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
+      "calendar": { "title": "{year} 太鼓日历", "primary": "这一版，有 {activeDays} 天留下了鼓声", "longest": "最长连续敲响了 {longestStreak} 天", "emotionLine1": "没有记录的日子，", "emotionLine2": "也一定有自己的节拍", "footnote": "数据来自已同步记录，仅用于年度回顾", "month": "{month}月", "monthSummary": "{month}月，共有 {count} 个记录日", "datePlayCount": "{date}，留下 {count} 次记录", "active": "记录的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
       "time": { "favorite": "鼓声最集中的时刻", "periods": { "early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜" } },
       "late": { "latest": "记录最深的一夜", "company": "夜色里的陪伴", "nights": "{count} 个夜晚", "plays": "留下 {count} 次鼓点" },
       "rating": { "sample": "与 {count} 位站内鼓手并肩", "rank": "这一刻的坐标", "percentile": "已经走在 {value}% 的同行鼓手前面", "tier": "此刻所在的队列", "tiers": { "top1": "站在最前方的 Top 1%", "top5": "走进耀眼的 Top 5%", "top20": "稳稳站进 Top 20%", "top50": "已经越过半程的 Top 50%", "growing": "正在向前生长" } },

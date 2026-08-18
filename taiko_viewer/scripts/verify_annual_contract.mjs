@@ -188,6 +188,9 @@ for (const locale of [zh, ja]) {
   for (const page of expectedPages) assert.equal(typeof locale.pages[page], "string", `missing page locale: ${page}`);
   for (const key of ["renewShare", "revokeShare"]) assert.equal(typeof locale.controls[key], "string", `missing control locale: ${key}`);
   for (const key of ["ready", "renewed", "revoked", "expires", "privacy"]) assert.equal(typeof locale.share[key], "string", `missing share locale: ${key}`);
+  for (const key of ["title", "primary", "longest", "emotionLine1", "emotionLine2", "footnote", "month", "monthSummary", "datePlayCount"]) {
+    assert.equal(typeof locale.slides.calendar[key], "string", `missing calendar locale: ${key}`);
+  }
 }
 
 const componentNames = {
@@ -202,6 +205,8 @@ const componentNames = {
 const annualSources = await Promise.all([
   read("components/account/version-summary/StorySlideShell.vue"),
   read("components/account/version-summary/AnnualPeriodOverviewScene.vue"),
+  read("components/account/version-summary/AnnualCalendarScene.vue"),
+  read("components/account/version-summary/AnnualMonthDotGrid.vue"),
   ...expectedPages.map((page) => read(`components/account/version-summary/slides/${componentNames[page]}.vue`))
 ]);
 for (const source of annualSources) {
@@ -214,6 +219,20 @@ for (const source of annualSources) {
     assert.ok(Number(`0.${match[1]}`) * 16 >= 10, `annual UI contains sub-10px text: ${match[0]}`);
   }
 }
+
+const calendarSlideSource = await read("components/account/version-summary/slides/CalendarActivitySlide.vue");
+const annualCalendarSource = await read("components/account/version-summary/AnnualCalendarScene.vue");
+const annualMonthDotGridSource = await read("components/account/version-summary/AnnualMonthDotGrid.vue");
+assert.equal(calendarSlideSource.includes("AnnualCalendarScene"), true, "calendar page does not use its dedicated annual scene");
+assert.equal(calendarSlideSource.includes('v-if="summary.calendarActivity"'), true, "calendar page lost its availability guard");
+assert.equal(calendarSlideSource.includes("StorySlideShell"), false, "calendar page still uses the dashboard slide shell");
+assert.equal(annualCalendarSource.includes('/蓝色白色背景图.png'), true, "calendar scene is missing the provided blue-white backdrop");
+assert.equal(annualCalendarSource.includes("Calendar.png"), false, "calendar reference image is used by the implementation");
+assert.equal(annualCalendarSource.includes("useAnnualTimeline"), true, "calendar scene does not use the annual motion lifecycle");
+assert.equal(annualCalendarSource.includes("repeat(3, minmax(0, 1fr))"), true, "calendar scene is not a three-column month grid");
+assert.equal(annualCalendarSource.includes("repeat(4, minmax(0, 1fr))"), true, "calendar scene is not a four-row month grid");
+assert.equal(annualMonthDotGridSource.includes("repeat(7, minmax(0, 1fr))"), true, "calendar month is not a seven-column dot grid");
+assert.equal(annualMonthDotGridSource.includes("while (output.length < 42)"), true, "calendar month does not preserve stable six-week geometry");
 
 const breakthroughSource = await read("components/account/version-summary/slides/BreakthroughSlide.vue");
 assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");

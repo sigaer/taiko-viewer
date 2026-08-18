@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { readFile, readdir, rm } from "node:fs/promises";
+import { readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
 import { inflateSync } from "node:zlib";
@@ -890,6 +890,90 @@ const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
   reportProgress(`phase 2B-2 favorite scene ${viewport.width}x${viewport.height}: passed`);
 };
 
+const auditCalendarScene = async (browser, cookie, viewport, locale = "zh") => {
+  reportProgress(`calendar scene ${locale} ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: locale === "ja" ? "ja-JP" : "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, `${locale === "ja" ? "/ja" : ""}/account/version-summary`, 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const calendarIndex = pageKeys.indexOf("calendar");
+  assert.ok(calendarIndex >= 0, "calendar scene is missing");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, calendarIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='calendar']")?.getAttribute("aria-hidden") === "false");
+  const scene = page.locator(".story-player__slide[data-page-key='calendar'] .annual-calendar-scene");
+  await scene.waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(() => {
+    const image = document.querySelector(".annual-calendar-scene__backdrop");
+    return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+  });
+
+  const audit = await scene.evaluate((node, expectedLocale) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const rect = node.getBoundingClientRect();
+    const months = [...node.querySelectorAll(".calendar-month")];
+    const monthRects = months.map((month) => month.getBoundingClientRect());
+    const visibleText = [...node.querySelectorAll("h2, h3, p, span, footer")]
+      .filter((element) => element.textContent?.trim() && getComputedStyle(element).display !== "none")
+      .map((element) => ({ text: element.textContent.trim(), rect: element.getBoundingClientRect() }));
+    const background = node.querySelector(".annual-calendar-scene__backdrop");
+    const imageSources = [...node.querySelectorAll("img")].map((image) => image.getAttribute("src") || "");
+    return {
+      fillsViewport: Math.abs(rect.width - viewportWidth) <= 1 && Math.abs(rect.height - viewportHeight) <= 1,
+      visualStyle: node.getAttribute("data-visual-style"),
+      motionState: node.getAttribute("data-motion-state"),
+      monthCount: months.length,
+      monthColumns: new Set(monthRects.map((month) => Math.round(month.left))).size,
+      monthRows: new Set(monthRects.map((month) => Math.round(month.top))).size,
+      dayDots: node.querySelectorAll(".calendar-dot--day").length,
+      activeDots: node.querySelectorAll(".calendar-dot--active").length,
+      activeDays: Number(node.getAttribute("data-active-days") || 0),
+      hasCards: node.querySelectorAll("article").length > 0,
+      usesProvidedBackdrop: background?.getAttribute("src") === "/蓝色白色背景图.png",
+      usesReferenceImage: imageSources.some((source) => source.includes("Calendar.png")),
+      overflowingText: visibleText.filter(({ rect: textRect }) => textRect.left < -1 || textRect.right > viewportWidth + 1 || textRect.top < -1 || textRect.bottom > viewportHeight + 1).map(({ text }) => text.slice(0, 80)),
+      unresolvedCopy: visibleText.some(({ text }) => /\{[A-Za-z][^}]*\}|annualSummary\./.test(text)),
+      wrongLocale: expectedLocale === "ja"
+        ? visibleText.some(({ text }) => /太鼓日历|这一版|没有记录的日子|年度回顾/.test(text))
+        : visibleText.some(({ text }) => /カレンダー|このバージョン|記録のない日/.test(text)),
+      runningAnimations: node.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
+    };
+  }, locale);
+
+  assert.equal(audit.fillsViewport, true);
+  assert.equal(audit.visualStyle, "annual-dot-calendar");
+  assert.equal(audit.motionState, "reduced");
+  assert.equal(audit.monthCount, 12);
+  assert.equal(audit.monthColumns, 3);
+  assert.equal(audit.monthRows, 4);
+  assert.equal(audit.dayDots, 365);
+  assert.equal(audit.activeDots, audit.activeDays);
+  assert.equal(audit.hasCards, false);
+  assert.equal(audit.usesProvidedBackdrop, true);
+  assert.equal(audit.usesReferenceImage, false);
+  assert.deepEqual(audit.overflowingText, []);
+  assert.equal(audit.unresolvedCopy, false);
+  assert.equal(audit.wrongLocale, false);
+  assert.equal(audit.runningAnimations, 0);
+  await page.screenshot({ path: `/tmp/annual-calendar-${locale}-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`calendar scene ${locale} ${viewport.width}x${viewport.height}: passed`);
+};
+
 const auditSaveData = async (browser, cookie) => {
   reportProgress("save-data motion fallback: start");
   const context = await browser.newContext({
@@ -926,6 +1010,18 @@ const auditSaveData = async (browser, cookie) => {
   assert.equal(await favoriteScene.getAttribute("data-motion-state"), "reduced");
   assert.equal(await favoriteScene.locator(".particle-layer i").count(), 0, "save-data favorite scene still rendered particles");
   assert.equal(await favoriteScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data favorite scene still runs animations");
+  const calendarIndex = pageKeys.indexOf("calendar");
+  if (calendarIndex >= 0) {
+    await page.locator(".story-player__viewport").evaluate((node, target) => {
+      node.scrollTop = node.clientHeight * target;
+      node.dispatchEvent(new Event("scroll"));
+    }, calendarIndex);
+    await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='calendar']")?.getAttribute("aria-hidden") === "false");
+    const calendarScene = page.locator(".story-player__slide[data-page-key='calendar'] .annual-calendar-scene");
+    await calendarScene.waitFor({ state: "visible", timeout: 10_000 });
+    assert.equal(await calendarScene.getAttribute("data-motion-state"), "reduced");
+    assert.equal(await calendarScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data calendar scene still runs animations");
+  }
   await context.close();
   reportProgress("save-data motion fallback: passed");
 };
@@ -1222,6 +1318,26 @@ try {
   assert.match(summaryId, /^annual_[0-9a-f]{24}$/);
   const [summaryRows] = await db.execute("SELECT summary_path FROM web_annual_summaries WHERE id = ? AND user_id = ?", [summaryId, firstUserId]);
   for (const row of summaryRows) summaryDirs.add(dirname(String(row.summary_path)));
+  if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1" && summaryRows[0]?.summary_path) {
+    const summaryPath = String(summaryRows[0].summary_path);
+    const rawSummary = JSON.parse(await readFile(summaryPath, "utf8"));
+    const days = Array.from({ length: 68 }, (_, index) => {
+      const date = new Date(Date.UTC(2026, 0, 1 + index * 4)).toISOString().slice(0, 10);
+      return { date, playCount: 1 + (index % 9) };
+    });
+    rawSummary.sections.calendarActivity = {
+      status: "proxy",
+      data: {
+        days,
+        activeDays: days.length,
+        longestStreak: 4,
+        streakStart: days[0].date,
+        streakEnd: days[3].date,
+        maxPlayCount: 9
+      }
+    };
+    await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\n`);
+  }
   await request(`/api/account/annual-summaries/${encodeURIComponent(summaryId)}`, { cookie: secondSession, expected: 404 });
   await request(`/api/admin/annual-summaries/${encodeURIComponent(summaryId)}/events`, { expected: 401 });
 
@@ -1295,14 +1411,22 @@ try {
   });
   reportProgress("browser matrix: launched");
   try {
-    await auditAudioLifecycle(browser, firstSession);
+    if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1") {
+      for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
+        await auditCalendarScene(browser, firstSession, viewport);
+      }
+      await auditCalendarScene(browser, firstSession, { width: 390, height: 844 }, "ja");
+    } else {
+      await auditAudioLifecycle(browser, firstSession);
     await auditSaveData(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
       await auditPhase2AHeroScenes(browser, firstSession, viewport);
       await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);
       await auditPhase2B2FavoriteScene(browser, firstSession, viewport);
+      await auditCalendarScene(browser, firstSession, viewport);
     }
+    await auditCalendarScene(browser, firstSession, { width: 390, height: 844 }, "ja");
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
     const viewports = [
       { width: 320, height: 568 }, { width: 360, height: 800 }, { width: 375, height: 812 },
@@ -1356,8 +1480,9 @@ try {
       .filter((image) => image.complete && image.naturalWidth === 0 && getComputedStyle(image).display !== "none" && image.getBoundingClientRect().width > 0)
       .map((image) => image.alt || image.getAttribute("src") || "unlabelled"));
     assert.deepEqual(publicBrokenImages, [], "public annual page contains a broken image");
-    await publicPage.screenshot({ path: "/tmp/annual-e2e-public.png" });
-    await publicContext.close();
+      await publicPage.screenshot({ path: "/tmp/annual-e2e-public.png" });
+      await publicContext.close();
+    }
   } finally {
     await browser.close();
   }
@@ -1374,7 +1499,7 @@ try {
   const [expiredRows] = await db.execute("SELECT status FROM web_annual_shares WHERE id = ?", [expiringId]);
   assert.equal(expiredRows[0]?.status, "expired");
 
-  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, protectedTransitionViewports: 3, favoriteSceneViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
+  process.stdout.write(JSON.stringify({ ok: true, schemaVersion: 4, modes: ["version_observed", "current_archive", "empty"], poster: "1080x1440", posterLocales: ["zh", "ja"], posterRateLimit: true, viewports: 5, heroViewports: 3, protectedTransitionViewports: 3, favoriteSceneViewports: 3, calendarSceneViewports: 3, locales: ["zh", "ja"], adminAuth: true, idor: true, revoke: true, expiry: true }) + "\n");
 } finally {
   if (firstUserId) {
     const [posterRows] = await db.execute("SELECT file_path FROM web_annual_posters WHERE user_id = ?", [firstUserId]).catch(() => [[]]);
