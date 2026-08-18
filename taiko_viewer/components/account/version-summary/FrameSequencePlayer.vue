@@ -44,14 +44,35 @@ onAnnualMotionActive((scope) => {
     image.src = url;
     return image;
   });
-  const frameDelay = Math.max(16, Math.round(1000 / Math.max(1, props.fps)));
-  const timer = scope.setInterval(() => {
-    if (!props.loop && frameIndex.value >= frameUrls.value.length - 1) return;
-    frameIndex.value = (frameIndex.value + 1) % frameUrls.value.length;
-  }, frameDelay);
+  const frameDelay = 1000 / Math.max(1, props.fps);
+  let animationFrame = 0;
+  let lastTimestamp = 0;
+  let cancelled = false;
+  const advance = (timestamp: number) => {
+    if (cancelled) return;
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const elapsed = timestamp - lastTimestamp;
+    if (elapsed >= frameDelay) {
+      const frameStep = Math.max(1, Math.floor(elapsed / frameDelay));
+      if (props.loop) {
+        frameIndex.value = (frameIndex.value + frameStep) % frameUrls.value.length;
+      } else {
+        frameIndex.value = Math.min(frameUrls.value.length - 1, frameIndex.value + frameStep);
+      }
+      lastTimestamp += frameStep * frameDelay;
+    }
+    animationFrame = window.requestAnimationFrame(advance);
+  };
+  const decoded = images.map((image) => (
+    typeof image.decode === "function" ? image.decode().catch(() => undefined) : Promise.resolve()
+  ));
+  void Promise.all(decoded).then(() => {
+    if (!cancelled) animationFrame = window.requestAnimationFrame(advance);
+  });
   scope.onCleanup(() => {
+    cancelled = true;
+    window.cancelAnimationFrame(animationFrame);
     images.forEach((image) => { image.src = ""; });
-    window.clearInterval(timer);
   });
 });
 
@@ -98,5 +119,6 @@ onMounted(() => {
   height: 100%;
   object-fit: contain;
   user-select: none;
+  transform: translateZ(0);
 }
 </style>

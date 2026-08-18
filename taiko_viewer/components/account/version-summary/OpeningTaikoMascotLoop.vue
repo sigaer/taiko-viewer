@@ -12,7 +12,7 @@ withDefaults(defineProps<{
   <FrameSequencePlayer
     src-dir="/Loop"
     :frame-count="49"
-    :fps="12"
+    :fps="20"
     :loop="true"
     :active="active"
     :reduced-motion="reducedMotion"

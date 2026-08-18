@@ -187,9 +187,9 @@ const beginStory = () => {
 .annual-opening__info-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 32px; }
 .annual-opening__generated { margin-left: clamp(58px, 16vw, 76px); color: rgba(255,255,255,.96); font: 700 clamp(11px, 2.9vw, 15px)/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; text-shadow: 0 1px 3px rgba(18,59,96,.28); }
 .annual-opening__utilities { display: flex; gap: 10px; margin-top: -4px; }
-.annual-opening__utilities figure { width: clamp(36px, 10vw, 50px); margin: 0; text-align: center; }
+.annual-opening__utilities figure { width: clamp(42px, 11vw, 52px); margin: 0; text-align: center; }
 .annual-opening__utilities img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(24,57,88,.22)); }
-.annual-opening__utilities figcaption { margin-top: 1px; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); white-space: nowrap; }
+.annual-opening__utilities figcaption { min-height: 22px; margin-top: 1px; overflow-wrap: anywhere; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); white-space: normal; }
 .annual-opening__info-main { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 148px; padding: 5px 0 0; }
 .annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 56px; }
 .annual-opening__info-year-label { display: none; }
@@ -205,7 +205,7 @@ const beginStory = () => {
 .annual-opening__start.is-pulsing .annual-opening__start-icon { animation: opening-start-hit .43s cubic-bezier(.2,.8,.25,1); }
 .annual-opening__legal { position: absolute; right: clamp(18px, 5vw, 36px); bottom: max(8px, env(safe-area-inset-bottom)); left: clamp(18px, 5vw, 36px); display: grid; gap: 3px; color: rgba(246,251,255,.82); font: 500 clamp(10px, 2.25vw, 11px)/1.25 var(--viewer-font-family); text-align: right; text-shadow: 0 1px 3px rgba(29,66,102,.18); }
 @keyframes opening-start-hit { 0%, 100% { transform: scale(1); } 32% { transform: scale(1.1); } 63% { transform: scale(.97); } }
-@media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } }
+@media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } .annual-opening__utilities { gap: 5px; } .annual-opening__utilities figure { width: 44px; } .annual-opening__utilities figcaption { font-size: 10px; } }
 @media (max-height: 690px) and (orientation: portrait) { .annual-opening__title-art { top: -7%; } .annual-opening__carousel { top: 27%; height: 36%; } .annual-opening__cover-info { padding-top: 8px; } .annual-opening__info-main { min-height: 125px; } .annual-opening__legal { font-size: 10px; } }
 @media (orientation: landscape) and (max-height: 460px) { .annual-opening__title-art { top: -16%; left: 24%; width: min(54vw, 390px); } .annual-opening__carousel { top: 5%; left: 34%; right: 2%; height: 59%; } .annual-opening__beat { top: auto; right: 3%; bottom: 0; left: 34%; height: 44px; } .annual-opening__info-surface { top: 0; right: 66%; bottom: 0; } .annual-opening__cover-info { top: 0; right: 66%; padding: 8px 16px; } .annual-opening__horizon { top: 0; bottom: 0; left: 34%; width: 2px; height: auto; } .annual-opening__year { top: 54%; left: 6%; font-size: 4rem; } .annual-opening__info-main { min-height: 150px; align-items: end; } .annual-opening__info-copy h1 { font-size: 1.7rem; } .annual-opening__utilities { display: none; } .annual-opening__legal { left: 16px; right: 16px; text-align: left; } }
 @media (prefers-reduced-motion: reduce) { .annual-opening__start-icon { animation: none !important; } }
