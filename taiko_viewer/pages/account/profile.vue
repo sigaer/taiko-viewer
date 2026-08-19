@@ -789,7 +789,8 @@ const confirmBinding = async (taikoId?: string | null) => {
 };
 
 const switchBinding = async (bindingId: number) => {
-  if (switchingId.value === bindingId) return;
+  const binding = profile.value?.bindings.find((item) => item.id === bindingId);
+  if (binding?.isCurrent || switchingId.value === bindingId) return;
   switchingId.value = bindingId;
   try {
     await apiFetch("/api/account/bindings/current", {
@@ -1055,6 +1056,7 @@ const removeQqBinding = async () => {
                 <el-button
                   :type="binding.isCurrent ? 'primary' : 'default'"
                   :loading="switchingId === binding.id"
+                  :disabled="binding.isCurrent || switchingId === binding.id"
                   @click="switchBinding(binding.id)"
                 >
                   {{ binding.isCurrent ? copy.currentUsing : copy.switchCurrent }}
