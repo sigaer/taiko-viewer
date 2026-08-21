@@ -263,10 +263,13 @@ for (const [component, guard] of [["RatingRankSlide", "hasPosition"], ["SpeedPro
 const drumWindowSource = await read("components/account/version-summary/AnnualDrumWindow.vue");
 assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "drum artwork has no failed-image fallback");
 assert.equal(drumWindowSource.includes("AnnualArtworkFallback"), true, "drum artwork fallback is not visual");
-for (const component of ["MonthlyFavoritesSlide", "FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
+for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);
 }
+const monthlyLeafItemSource = await read("components/account/version-summary/AnnualMonthlyLeafItem.vue");
+assert.equal(monthlyLeafItemSource.includes('@error="handleCoverError"'), true, "monthly leaf cover has no failure handler");
+assert.equal(monthlyLeafItemSource.includes("AnnualArtworkFallback"), true, "monthly leaf cover has no visual fallback");
 
 const posterSlideSource = await read("components/account/version-summary/slides/PosterSlide.vue");
 assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");
