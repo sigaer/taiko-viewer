@@ -234,6 +234,21 @@ assert.equal(annualCalendarSource.includes("repeat(4, minmax(0, 1fr))"), true, "
 assert.equal(annualMonthDotGridSource.includes("repeat(7, minmax(0, 1fr))"), true, "calendar month is not a seven-column dot grid");
 assert.equal(annualMonthDotGridSource.includes("while (output.length < 42)"), true, "calendar month does not preserve stable six-week geometry");
 
+const weekdaySlideSource = await read("components/account/version-summary/slides/WeekdayActivitySlide.vue");
+const weekdayForestSource = await read("components/account/version-summary/AnnualWeekdayForestScene.vue");
+assert.equal(weekdaySlideSource.includes("AnnualWeekdayForestScene"), true, "weekday page does not use its dedicated forest scene");
+assert.equal(weekdaySlideSource.includes('v-if="summary.weekdayActivity"'), true, "weekday page lost its availability guard");
+assert.equal(weekdaySlideSource.includes("StorySlideShell"), false, "weekday page still uses the dashboard slide shell");
+assert.equal(weekdayForestSource.includes("useAnnualTimeline"), true, "weekday forest scene does not use the annual motion lifecycle");
+assert.equal(weekdayForestSource.includes('/weekday/backgorund_12.png'), true, "weekday forest scene is missing the provided watercolor backdrop");
+assert.equal(weekdayForestSource.includes("Math.round(count / maxCount.value * 6)"), true, "weekday icons no longer express relative activity");
+assert.equal(weekdayForestSource.includes("slice(0, 5)"), true, "weekday workday traits are not derived from Monday through Friday");
+assert.equal(weekdayForestSource.includes("slice(5)"), true, "weekday weekend traits are not derived from Saturday and Sunday");
+for (const asset of ["002", "036", "038", "006", "010", "023", "034"]) {
+  assert.equal(await exists(`public/weekday/${asset}_key.png`), true, `weekday icon asset is missing: ${asset}_key.png`);
+}
+assert.equal(await exists("public/weekday/backgorund_12.png"), true, "weekday watercolor backdrop is missing");
+
 const breakthroughSource = await read("components/account/version-summary/slides/BreakthroughSlide.vue");
 assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");
 assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
