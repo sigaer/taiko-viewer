@@ -35,6 +35,9 @@ export default defineNitroPlugin((nitroApp) => {
   };
   void refreshRatingsIfDue();
   const maintenanceTimer = setInterval(() => {
+    void cleanupAnnualCache().catch((error) => {
+      console.error("[annual-summary] periodic cache cleanup failed", error);
+    });
     void maintainAnnualStorage().catch((error) => {
       console.error("[annual-summary] periodic maintenance failed", error);
     });

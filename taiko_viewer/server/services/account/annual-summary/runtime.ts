@@ -10,6 +10,7 @@ import {
   rename,
   rm,
   stat,
+  statfs,
   unlink,
   writeFile
 } from "node:fs/promises";
@@ -31,6 +32,23 @@ import {
 import type { AnnualCliEnvelope, AnnualObservationEvent, AnnualSummaryV4 } from "./types";
 
 const CACHE_ROOT_SEGMENT = "annual-summary-v4";
+const NORMALIZED_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const NORMALIZED_CACHE_HIGH_BYTES = 8 * 1024 * 1024 * 1024;
+const NORMALIZED_CACHE_TARGET_BYTES = 6 * 1024 * 1024 * 1024;
+const MIN_CACHE_FREE_BYTES = 20 * 1024 * 1024 * 1024;
+let annualCacheCleanupPromise: Promise<AnnualCacheCleanupStats> | null = null;
+
+export type AnnualCacheCleanupStats = {
+  scannedFiles: number;
+  removedFiles: number;
+  releasedBytes: number;
+  beforeBytes: number;
+  afterBytes: number;
+  freeBytesBefore: number;
+  freeBytesAfter: number;
+  durationMs: number;
+  errors: number;
+};
 
 const safeMessage = (error: unknown) => {
   if (!error || typeof error !== "object") return "";
@@ -572,12 +590,18 @@ const collectReferencedSnapshotHashes = async (root: string) => {
   return referenced;
 };
 
-export const cleanupAnnualCache = async () => {
+const cleanupAnnualCacheUnlocked = async (): Promise<AnnualCacheCleanupStats> => {
+  const startedAt = Date.now();
   const root = getAnnualCacheRoot();
   await ensurePrivateDir(root);
   const normalizedRoot = resolve(root, "normalized");
   const referencedSnapshotHashes = await collectReferencedSnapshotHashes(root);
-  const normalizedCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+  const normalizedCutoff = Date.now() - NORMALIZED_CACHE_TTL_MS;
+  type Candidate = { path: string; size: number; mtimeMs: number };
+  const candidates: Candidate[] = [];
+  let scannedFiles = 0;
+  let errors = 0;
+  let beforeBytes = 0;
   const removeOldTemps = async (dir: string) => {
     await chmod(dir, 0o700).catch(() => undefined);
     const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
@@ -586,23 +610,92 @@ export const cleanupAnnualCache = async () => {
       if (entry.isDirectory()) {
         await removeOldTemps(path);
       } else if (entry.name.endsWith(".tmp")) {
+        scannedFiles += 1;
         const itemStat = await stat(path).catch(() => null);
         if (itemStat && Date.now() - itemStat.mtimeMs > 24 * 60 * 60 * 1000) {
-          await unlink(path).catch(() => undefined);
+          await unlink(path).catch(() => { errors += 1; });
         }
       } else if (path.startsWith(`${normalizedRoot}${sep}`) && entry.name.endsWith(".json")) {
+        scannedFiles += 1;
         const itemStat = await stat(path).catch(() => null);
-        if (itemStat && itemStat.mtimeMs < normalizedCutoff) {
-          const cached = await readAnnualJson<{ contentHash?: string }>(path).catch(() => null);
-          const contentHash = String(cached?.contentHash || "").toLowerCase();
-          if (!contentHash || !referencedSnapshotHashes.has(contentHash)) {
-            await unlink(path).catch(() => undefined);
-          }
+        if (itemStat) {
+          beforeBytes += itemStat.size;
+          candidates.push({ path, size: itemStat.size, mtimeMs: itemStat.mtimeMs });
         }
       }
     }
   };
   await removeOldTemps(root);
+  const filesystemBefore = await statfs(root);
+  const freeBytesBefore = filesystemBefore.bavail * filesystemBefore.bsize;
+  let currentBytes = beforeBytes;
+  let currentFreeBytes = freeBytesBefore;
+  let removedFiles = 0;
+  let releasedBytes = 0;
+  const ordered = candidates.sort((left, right) => left.mtimeMs - right.mtimeMs);
+  const isReferenced = async (candidate: Candidate) => {
+    const cached = await readAnnualJson<{ contentHash?: string }>(candidate.path).catch(() => null);
+    const contentHash = String(cached?.contentHash || "").toLowerCase();
+    return Boolean(contentHash && referencedSnapshotHashes.has(contentHash));
+  };
+  const removeCandidate = async (candidate: Candidate) => {
+    if (await isReferenced(candidate)) return false;
+    try {
+      await unlink(candidate.path);
+      removedFiles += 1;
+      releasedBytes += candidate.size;
+      currentBytes -= candidate.size;
+      currentFreeBytes += candidate.size;
+      return true;
+    } catch {
+      errors += 1;
+      return false;
+    }
+  };
+  const removedPaths = new Set<string>();
+  for (const candidate of ordered) {
+    if (candidate.mtimeMs >= normalizedCutoff) continue;
+    if (await removeCandidate(candidate)) removedPaths.add(candidate.path);
+  }
+  if (currentBytes >= NORMALIZED_CACHE_HIGH_BYTES) {
+    for (const candidate of ordered) {
+      if (currentBytes <= NORMALIZED_CACHE_TARGET_BYTES) break;
+      if (removedPaths.has(candidate.path)) continue;
+      if (await removeCandidate(candidate)) removedPaths.add(candidate.path);
+    }
+  }
+  if (currentFreeBytes < MIN_CACHE_FREE_BYTES) {
+    for (const candidate of ordered) {
+      if (currentFreeBytes >= MIN_CACHE_FREE_BYTES) break;
+      if (removedPaths.has(candidate.path)) continue;
+      if (await removeCandidate(candidate)) removedPaths.add(candidate.path);
+    }
+  }
+  const filesystemAfter = await statfs(root);
+  return {
+    scannedFiles,
+    removedFiles,
+    releasedBytes,
+    beforeBytes,
+    afterBytes: Math.max(0, currentBytes),
+    freeBytesBefore,
+    freeBytesAfter: filesystemAfter.bavail * filesystemAfter.bsize,
+    durationMs: Date.now() - startedAt,
+    errors
+  };
+};
+
+export const cleanupAnnualCache = async (): Promise<AnnualCacheCleanupStats> => {
+  if (annualCacheCleanupPromise) return annualCacheCleanupPromise;
+  annualCacheCleanupPromise = cleanupAnnualCacheUnlocked()
+    .then((stats) => {
+      console.info("[annual-summary] cache cleanup", stats);
+      return stats;
+    })
+    .finally(() => {
+      annualCacheCleanupPromise = null;
+    });
+  return annualCacheCleanupPromise;
 };
 
 export const annualCacheRelativePath = (filePath: string) => relative(getAnnualCacheRoot(), ensureWithinAnnualCache(filePath));
