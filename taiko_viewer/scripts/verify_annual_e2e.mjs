@@ -778,6 +778,7 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
       overflowingText,
       overviewHierarchy: playCount ? {
         playCountSize: fontSize(playCount),
+        supportingFactCount: supportingFacts.length,
         largestFactSize: Math.max(0, ...supportingFacts.map(fontSize)),
         durationSize: fontSize(duration),
         anchorWidth: anchor?.getBoundingClientRect().width || 0,
@@ -807,6 +808,7 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
   assert.equal(overviewAudit.visibleCovers, 6, "overview stable state does not match the six-plane reference corridor");
   assert.deepEqual(overviewAudit.overflowingText, []);
   assert.ok(overviewAudit.overviewHierarchy, "overview hierarchy could not be inspected");
+  assert.equal(overviewAudit.overviewHierarchy.supportingFactCount, 0, "overview still renders supporting song/chart facts");
   assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.largestFactSize * 3, "supporting facts compete with play count");
   assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.durationSize * 2.75, "estimated duration competes with play count");
   assert.ok(overviewAudit.overviewHierarchy.anchorWidth <= 52, "overview drum anchor is too prominent");

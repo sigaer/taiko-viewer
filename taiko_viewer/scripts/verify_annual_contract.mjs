@@ -132,8 +132,8 @@ assert.equal(periodMotionSource.includes("AnnualPeriodOverviewScene"), true, "pe
 assert.equal(overviewMotionSource.includes("AnnualPeriodOverviewScene"), true, "overview page does not use the shared transition scene");
 assert.equal(overviewMotionSource.includes("StorySlideShell"), false, "overview page still uses the generic slide shell");
 assert.equal(periodOverviewSceneSource.includes("AnnualVerticalCoverStream"), true, "shared period scene has no cover stream");
-assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueSongs"), true, "overview scene is missing the song count");
-assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueCharts"), true, "overview scene is missing the chart count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueSongs"), false, "overview scene still renders the song count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueCharts"), false, "overview scene still renders the chart count");
 assert.equal(periodOverviewSceneSource.includes("summary.overview.estimatedTimeText"), true, "overview scene is missing total play time");
 assert.equal(/currentClearCharts|currentFullComboCharts|currentDondafulCharts|currentKiwamiCharts/.test(periodOverviewSceneSource), false, "overview scene still exposes the old achievement grid");
 assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");

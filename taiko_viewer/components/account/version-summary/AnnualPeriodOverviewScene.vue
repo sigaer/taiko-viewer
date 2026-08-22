@@ -79,7 +79,6 @@ const buildTimeline = async () => {
     const previousFacts = rootRef.value!.querySelector(".period-overview-scene__period-facts");
     const previousLatest = rootRef.value!.querySelector(".period-overview-scene__period-latest");
     const nextHeading = rootRef.value!.querySelector(".period-overview-scene__overview-heading");
-    const nextFacts = rootRef.value!.querySelector(".period-overview-scene__overview-facts");
     const nextAnchor = rootRef.value!.querySelector(".period-overview-scene__overview-anchor");
     const nextDuration = rootRef.value!.querySelector(".period-overview-scene__overview-duration");
 
@@ -105,7 +104,6 @@ const buildTimeline = async () => {
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
-      .fromTo(nextFacts, { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .32, ease: "power2.out" }, .6)
       .fromTo(nextAnchor, { scale: .92, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .36, ease: "power2.out" }, .58)
       .fromTo(nextDuration, { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .84);
   }, rootRef.value);
@@ -168,10 +166,6 @@ onBeforeUnmount(() => {
       <div class="period-overview-scene__overview-play-count" data-overview-play-count>
         <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" @complete="onOverviewComplete" /></strong>
         <span>{{ t("annualSummary.slides.overview.plays") }}</span>
-      </div>
-      <div class="period-overview-scene__overview-facts">
-        <span v-if="isUsableMetric(summary.overview.uniqueSongs)"><b><AnimatedNumber :value="summary.overview.uniqueSongs" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.songs") }}</span>
-        <span v-if="isUsableMetric(summary.overview.uniqueCharts)"><b><AnimatedNumber :value="summary.overview.uniqueCharts" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></b>{{ t("annualSummary.slides.overview.charts") }}</span>
       </div>
       <img class="period-overview-scene__overview-anchor" :src="mascotUrl" alt="" aria-hidden="true" />
       <div class="period-overview-scene__overview-duration">
@@ -450,6 +444,9 @@ onBeforeUnmount(() => {
 }
 
 .period-overview-scene__overview-play-count {
+  width: min(100%, 36rem);
+  min-width: 0;
+  container-type: inline-size;
   display: grid;
   justify-items: center;
   gap: 4px;
@@ -459,29 +456,14 @@ onBeforeUnmount(() => {
 }
 
 .period-overview-scene__overview-play-count strong {
-  font: 900 clamp(4.3rem, 17vw, 9.8rem)/.8 var(--viewer-display-font);
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+  font: 900 clamp(3.6rem, 24cqw, 7.2rem)/.86 var(--viewer-display-font);
   letter-spacing: 0;
+  white-space: nowrap;
+  text-overflow: clip;
   filter: drop-shadow(0 10px 19px rgba(67, 127, 198, .16));
-}
-
-.period-overview-scene__overview-facts {
-  display: flex;
-  justify-content: center;
-  gap: clamp(28px, 9vw, 70px);
-  margin-top: 15px;
-}
-
-.period-overview-scene__overview-facts span {
-  display: grid;
-  gap: 3px;
-  color: rgba(50, 108, 158, .62);
-  font: 800 10px/1.2 var(--viewer-font-family);
-}
-
-.period-overview-scene__overview-facts b {
-  color: #438dce;
-  font: 900 clamp(1.05rem, 3.2vw, 1.65rem)/1 var(--viewer-display-font);
-  text-shadow: 0 2px rgba(255, 255, 255, .86);
 }
 
 .period-overview-scene__overview-anchor {
@@ -523,8 +505,7 @@ onBeforeUnmount(() => {
   .period-overview-scene__period-facts span:last-child { margin-top: 3px; }
   .period-overview-scene__overview-heading { gap: 4px; }
   .period-overview-scene__overview-play-count { margin-top: 7px; }
-  .period-overview-scene__overview-play-count strong { font-size: clamp(3.7rem, 15vw, 5.6rem); }
-  .period-overview-scene__overview-facts { margin-top: 7px; }
+  .period-overview-scene__overview-play-count strong { font-size: clamp(3.4rem, 14vw, 5.6rem); }
   .period-overview-scene__overview-anchor { margin-block: 6px 4px; }
 }
 
@@ -542,9 +523,7 @@ onBeforeUnmount(() => {
   .period-overview-scene__period-facts { gap: 1px; margin-top: 4px; font-size: 1.05rem; }
   .period-overview-scene__period-facts img { width: 36px; }
   .period-overview-scene__overview-play-count { margin-top: 3px; }
-  .period-overview-scene__overview-play-count strong { font-size: clamp(2.4rem, 8vw, 4rem); }
-  .period-overview-scene__overview-facts { margin-top: 4px; }
-  .period-overview-scene__overview-facts b { font-size: 1.15rem; }
+  .period-overview-scene__overview-play-count strong { font-size: clamp(2.8rem, 8vw, 4rem); }
   .period-overview-scene__overview-anchor { display: none; }
   .period-overview-scene__overview-duration strong { font-size: 1.35rem; }
 }
