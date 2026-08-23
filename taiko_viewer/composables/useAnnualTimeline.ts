@@ -22,7 +22,10 @@ export type AnnualTimelineOptions = {
   reenter?: AnnualReenterMode;
 };
 
-const resolveRoot = (value: AnnualRoot) => value instanceof HTMLElement ? value : value?.rootEl || null;
+const resolveRoot = (value: AnnualRoot) => {
+  if (typeof HTMLElement !== "undefined" && value instanceof HTMLElement) return value;
+  return value?.rootEl || null;
+};
 const isSaveDataEnabled = () => process.client
   && Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
 
