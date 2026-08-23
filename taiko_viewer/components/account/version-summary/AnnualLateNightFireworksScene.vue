@@ -137,7 +137,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), motionReduced, { reenter: "re
   /* cover_bg_14's purple backing occupies x=42..159, y=10..127 in its 167x164 canvas. */
   inset: 6.1% 4.8% 22% 25.1%;
   overflow: hidden;
-  border-radius: clamp(13px, 3.8vw, 17px);
+  border-radius: clamp(7px, 2vw, 9px);
   background: #315b82;
   box-shadow: 0 0 18px rgba(255, 234, 161, .22);
 }
