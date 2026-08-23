@@ -241,6 +241,8 @@ assert.equal(weekdaySlideSource.includes('v-if="summary.weekdayActivity"'), true
 assert.equal(weekdaySlideSource.includes("StorySlideShell"), false, "weekday page still uses the dashboard slide shell");
 assert.equal(weekdayForestSource.includes("useAnnualTimeline"), true, "weekday forest scene does not use the annual motion lifecycle");
 assert.equal(weekdayForestSource.includes('/weekday/backgorund_12.png'), true, "weekday forest scene is missing the provided watercolor backdrop");
+assert.equal(weekdayForestSource.includes("aspect-ratio:853/1844"), true, "weekday overlays no longer share the backdrop aspect ratio");
+assert.equal(weekdayForestSource.includes("height:max(100%,216.18vw)"), true, "weekday overlay coordinates no longer follow the cover-scaled backdrop");
 assert.equal(weekdayForestSource.includes("Math.round(count / maxCount.value * 6)"), true, "weekday icons no longer express relative activity");
 assert.equal(weekdayForestSource.includes("slice(0, 5)"), true, "weekday workday traits are not derived from Monday through Friday");
 assert.equal(weekdayForestSource.includes("slice(5)"), true, "weekday weekend traits are not derived from Saturday and Sunday");

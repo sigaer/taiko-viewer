@@ -79,8 +79,9 @@ const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.va
 
 <style scoped>
 .annual-weekday-forest-scene{--forest-ink:#294d3a;--forest-deep:#183c2d;--forest-accent:#4f8060;position:relative;width:100%;height:100vh;height:100svh;height:100dvh;overflow:hidden;color:var(--forest-ink);background:#e8ead8}
-.annual-weekday-forest-scene__backdrop{position:absolute;inset:0;background:url("/weekday/backgorund_12.png") center top/cover no-repeat}
-.annual-weekday-forest-scene__content{position:relative;z-index:1;width:min(100%,620px);height:100%;margin:0 auto;padding:max(28px,calc(env(safe-area-inset-top) + 18px)) clamp(14px,5vw,28px) max(26px,calc(env(safe-area-inset-bottom) + 22px))}
+.annual-weekday-forest-scene__backdrop,.annual-weekday-forest-scene__content{position:absolute;top:0;left:50%;height:max(100%,216.18vw);aspect-ratio:853/1844;transform:translateX(-50%)}
+.annual-weekday-forest-scene__backdrop{background:url("/weekday/backgorund_12.png") center top/100% 100% no-repeat}
+.annual-weekday-forest-scene__content{z-index:1;padding:max(28px,calc(env(safe-area-inset-top) + 18px)) clamp(14px,5vw,28px) max(26px,calc(env(safe-area-inset-bottom) + 22px))}
 .annual-weekday-forest-scene__header{position:absolute;top:max(52px,calc(env(safe-area-inset-top) + 42px));left:14%;right:10%;text-align:center;color:var(--forest-deep)}
 .annual-weekday-forest-scene__header h2,.annual-weekday-forest-scene__header h3{margin:0;font-family:var(--viewer-display-font);font-weight:700;letter-spacing:.01em;text-wrap:balance}
 .annual-weekday-forest-scene__header h2{font-size:clamp(18px,5.3vw,28px);line-height:1.25}.annual-weekday-forest-scene__header h3{margin-top:3px;font-size:clamp(13px,3.7vw,19px);line-height:1.35;font-weight:550}.annual-weekday-forest-scene strong{color:var(--forest-accent)}
@@ -91,6 +92,6 @@ const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.va
 .annual-weekday-forest-scene.is-reduced .annual-weekday-forest-scene__icon,.annual-weekday-forest-scene:not(.is-active) .annual-weekday-forest-scene__icon{animation:none;opacity:1;transform:none}
 @keyframes weekday-icon-in{from{opacity:0;transform:translate3d(-8px,0,0) scale(.82)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 @media(max-width:370px){.annual-weekday-forest-scene__row{left:13%;right:4%}.annual-weekday-forest-scene__icons{width:calc(100% - 62px);gap:2px}.annual-weekday-forest-scene__mood{flex-basis:60px;max-width:60px;font-size:12px}.annual-weekday-forest-scene__summary{left:8%;right:8%;font-size:11px}}
-@media(orientation:landscape) and (min-width:721px){.annual-weekday-forest-scene__backdrop{background-size:auto 100%}.annual-weekday-forest-scene__content{width:min(620px,56vh)}}
+@media(orientation:landscape) and (min-width:721px){.annual-weekday-forest-scene__backdrop,.annual-weekday-forest-scene__content{height:100%}}
 @media(prefers-reduced-motion:reduce){.annual-weekday-forest-scene__icon{animation:none;opacity:1;transform:none}}
 </style>
