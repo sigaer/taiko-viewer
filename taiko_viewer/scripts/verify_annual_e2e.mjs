@@ -829,6 +829,11 @@ const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
     const coverRect = scene.querySelector(".song-cover-hero__frame")?.getBoundingClientRect();
     const title = scene.querySelector(".favorite-song-scene__song-copy h1");
     const titleRect = title?.getBoundingClientRect();
+    const countRing = scene.querySelector(".favorite-song-count-ring");
+    const countRingRect = countRing?.getBoundingClientRect();
+    const closing = scene.querySelector(".favorite-song-memory-copy");
+    const closingRect = closing?.getBoundingClientRect();
+    const guideLine = scene.querySelector(".favorite-song-orbit__guide-line");
     const overflowingText = [...scene.querySelectorAll("h1, p, span, strong, em")]
       .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none")
       .filter((node) => {
@@ -844,6 +849,11 @@ const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
       coverRatio: coverRect ? coverRect.width / viewportWidth : 0,
       coverIsSquare: coverRect ? Math.abs(coverRect.width - coverRect.height) <= 1 : false,
       titleFits: Boolean(titleRect && titleRect.left >= -1 && titleRect.right <= viewportWidth + 1),
+      countRingIsRound: countRingRect ? Math.abs(countRingRect.width - countRingRect.height) <= 1 : false,
+      countRingBelowTitle: Boolean(countRingRect && titleRect && countRingRect.top > titleRect.bottom + 12),
+      closingBelowCountRing: Boolean(closingRect && countRingRect && closingRect.top > countRingRect.bottom + 16),
+      hasGuideLine: guideLine instanceof SVGPathElement && Number.parseFloat(getComputedStyle(guideLine).strokeWidth) > 0,
+      hasClosingAccent: Boolean(scene.querySelector(".favorite-song-memory-copy em")?.textContent?.includes("鼓点")),
       overflowingText,
       particleCount: scene.querySelectorAll(".particle-layer i").length,
       runningAnimations: scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
@@ -857,6 +867,11 @@ const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
   assert.ok(audit.coverRatio >= .58 && audit.coverRatio <= .72, `favorite cover width ratio ${audit.coverRatio} is outside 58%-72%`);
   assert.equal(audit.coverIsSquare, true);
   assert.equal(audit.titleFits, true);
+  assert.equal(audit.countRingIsRound, true);
+  assert.equal(audit.countRingBelowTitle, true);
+  assert.equal(audit.closingBelowCountRing, true);
+  assert.equal(audit.hasGuideLine, true);
+  assert.equal(audit.hasClosingAccent, true);
   assert.deepEqual(audit.overflowingText, []);
   assert.equal(audit.particleCount, 0);
   assert.equal(audit.runningAnimations, 0);

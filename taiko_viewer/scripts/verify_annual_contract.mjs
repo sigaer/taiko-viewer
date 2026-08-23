@@ -288,8 +288,14 @@ const animatedNumberSource = await read("components/account/version-summary/Anim
 assert.equal(animatedNumberSource.includes('emit("complete", target)'), true, "animated number has no completion feedback event");
 assert.equal(animatedNumberSource.includes("completedForValue"), true, "animated number completion can fire more than once");
 const favoriteSource = await read("components/account/version-summary/slides/FavoriteSongSlide.vue");
-assert.equal(favoriteSource.includes("AnimatedNumber"), true, "favorite song still uses the legacy counter");
+const favoriteCountRingSource = await read("components/account/version-summary/FavoriteSongPlayCountRing.vue");
+const favoriteOrbitSource = await read("components/account/version-summary/FavoriteSongOrbitDecor.vue");
+const favoriteClosingSource = await read("components/account/version-summary/FavoriteSongMemoryCopy.vue");
+assert.equal(favoriteCountRingSource.includes("AnimatedNumber"), true, "favorite song count ring does not use the shared counter");
 assert.equal(favoriteSource.includes("hasPlayCount"), true, "favorite song does not hide an unavailable play count");
+assert.equal(favoriteSource.includes("songNoText"), true, "favorite song does not guard an unavailable song number");
+assert.equal(favoriteOrbitSource.includes("favorite-song-orbit__guide-line"), true, "favorite song lacks its cover-to-count guide line");
+assert.equal(favoriteClosingSource.includes("<em>鼓点</em>"), true, "favorite song closing copy lacks its rhythmic accent");
 for (const [component, guard] of [["RatingRankSlide", "hasPosition"], ["SpeedProfileSlide", "isUsableMetric(summary.speedProfile.chartCount)"], ["KeywordSlide", "radarEntries.length >= 3"]]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes(guard), true, `${component} does not suppress its empty statistic card`);
