@@ -349,9 +349,9 @@ const auditOpeningMotion = async (browser, cookie) => {
   await page.locator(".annual-opening").waitFor({ state: "visible", timeout: 30_000 });
   reportProgress("opening motion: opening visible");
   await page.waitForFunction(
-    () => [".annual-opening__drum-face", ".annual-beat-lane__don img"].every((selector) => {
+    () => [".annual-opening__title-art", ".annual-beat-lane__track img", ".annual-beat-lane__mascot img"].every((selector) => {
       const image = document.querySelector(selector);
-      return image instanceof HTMLImageElement && image.complete && image.naturalWidth >= 256;
+      return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
     }),
     undefined,
     { timeout: 15_000 }
@@ -363,52 +363,30 @@ const auditOpeningMotion = async (browser, cookie) => {
   );
   const beatLaneAudit = await page.evaluate(() => {
     const track = document.querySelector(".annual-beat-lane__track");
-    const viewport = document.querySelector(".annual-beat-lane__viewport");
-    const sequences = [...document.querySelectorAll(".annual-beat-lane__sequence")];
-    if (!(track instanceof HTMLElement) || !(viewport instanceof HTMLElement) || sequences.length !== 2) return null;
-    const encode = (sequence) => [...sequence.children].map((beat) => {
-      if (beat.querySelector(".is-don")) return "1";
-      if (beat.querySelector(".is-ka")) return "2";
-      return "0";
-    }).join("");
+    const strips = [...document.querySelectorAll(".annual-beat-lane__track img")];
+    if (!(track instanceof HTMLElement) || strips.length !== 2) return null;
     const animation = track.getAnimations()[0];
     if (!animation?.effect) return null;
     const duration = Number(animation.effect.getComputedTiming().duration);
-    animation.pause();
-    const visibleNotes = (sequence) => {
-      const viewportRect = viewport.getBoundingClientRect();
-      return [...sequence.querySelectorAll("i")]
-        .map((note) => {
-          const rect = note.getBoundingClientRect();
-          return {
-            kind: note.className,
-            x: Math.round((rect.left - viewportRect.left) * 10) / 10
-          };
-        })
-        .filter((note) => note.x >= 5 && note.x <= viewportRect.width - 5);
-    };
-    animation.currentTime = 0;
-    const atStart = visibleNotes(sequences[0]);
-    animation.currentTime = duration - 0.1;
-    const atBoundary = visibleNotes(sequences[1]);
-    animation.currentTime = 0;
-    animation.play();
     return {
-      patterns: sequences.map(encode),
-      sequenceWidths: sequences.map((sequence) => sequence.getBoundingClientRect().width),
+      stripSources: strips.map((strip) => strip.getAttribute("src")),
+      stripNaturalSizes: strips.map((strip) => [strip.naturalWidth, strip.naturalHeight]),
+      stripWidths: strips.map((strip) => strip.getBoundingClientRect().width),
       trackWidth: track.scrollWidth,
       duration,
-      atStart,
-      atBoundary
+      easing: animation.effect.getTiming().easing,
+      iterations: animation.effect.getTiming().iterations
     };
   });
-  const expectedBeatPattern = "1110111011102220".repeat(3);
   assert.ok(beatLaneAudit, "opening beat lane is incomplete");
-  assert.deepEqual(beatLaneAudit.patterns, [expectedBeatPattern, expectedBeatPattern], "opening beat lane does not match song 303 Oni measures 14–16");
-  assert.equal(beatLaneAudit.sequenceWidths[0], beatLaneAudit.sequenceWidths[1]);
-  assert.equal(beatLaneAudit.trackWidth, beatLaneAudit.sequenceWidths[0] * 2);
-  assert.deepEqual(beatLaneAudit.atBoundary, beatLaneAudit.atStart, "opening beat lane jumps at the loop boundary");
-  const coverTrack = page.locator(".annual-cover-flow__track");
+  assert.deepEqual(beatLaneAudit.stripSources, ["/track.png", "/track.png"]);
+  assert.deepEqual(beatLaneAudit.stripNaturalSizes, [[704, 35], [704, 35]]);
+  assert.equal(beatLaneAudit.stripWidths[0], beatLaneAudit.stripWidths[1]);
+  assert.equal(beatLaneAudit.trackWidth, beatLaneAudit.stripWidths[0] * 2);
+  assert.equal(beatLaneAudit.duration, 11_500);
+  assert.equal(beatLaneAudit.easing, "linear");
+  assert.equal(beatLaneAudit.iterations, Infinity);
+  const coverTrack = page.locator(".opening-cover-carousel__flow-card").first();
   const coverAnimation = await coverTrack.evaluate((track) => {
     const animation = track.getAnimations()[0];
     const timing = animation?.effect?.getTiming();
@@ -976,6 +954,103 @@ const auditCalendarScene = async (browser, cookie, viewport, locale = "zh") => {
   reportProgress(`calendar scene ${locale} ${viewport.width}x${viewport.height}: passed`);
 };
 
+const auditLateNightScene = async (browser, cookie, viewport) => {
+  reportProgress(`late-night scene ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const lateNightIndex = pageKeys.indexOf("lateNight");
+  assert.ok(lateNightIndex >= 0, "late-night scene is missing");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, lateNightIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='lateNight']")?.getAttribute("aria-hidden") === "false");
+  const scene = page.locator(".story-player__slide[data-page-key='lateNight'] .annual-late-night-fireworks");
+  await scene.waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(() => [
+    ".annual-late-night-fireworks__backdrop",
+    ".annual-late-night-fireworks__cover-frame"
+  ].every((selector) => {
+    const image = document.querySelector(selector);
+    return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+  }));
+
+  const audit = await scene.evaluate((node) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const rect = node.getBoundingClientRect();
+    const cover = node.querySelector(".annual-late-night-fireworks__cover")?.getBoundingClientRect();
+    const copy = node.querySelector(".annual-late-night-fireworks__copy")?.getBoundingClientRect();
+    const stats = node.querySelector(".annual-late-night-fireworks__stats")?.getBoundingClientRect();
+    const background = node.querySelector(".annual-late-night-fireworks__backdrop");
+    const frame = node.querySelector(".annual-late-night-fireworks__cover-frame");
+    const imageSources = [...node.querySelectorAll("img")].map((image) => image.getAttribute("src") || "");
+    const visibleText = [...node.querySelectorAll("p, strong")]
+      .filter((element) => element.textContent?.trim() && getComputedStyle(element).display !== "none")
+      .map((element) => ({ text: element.textContent.trim(), rect: element.getBoundingClientRect() }));
+    const sceneText = node.textContent || "";
+    return {
+      fillsViewport: Math.abs(rect.width - viewportWidth) <= 1 && Math.abs(rect.height - viewportHeight) <= 1,
+      visualStyle: node.getAttribute("data-visual-style"),
+      motionState: node.getAttribute("data-motion-state"),
+      backgroundSrc: background?.getAttribute("src") || "",
+      backgroundSize: background instanceof HTMLImageElement ? [background.naturalWidth, background.naturalHeight] : [],
+      frameSrc: frame?.getAttribute("src") || "",
+      frameSize: frame instanceof HTMLImageElement ? [frame.naturalWidth, frame.naturalHeight] : [],
+      usesReferenceImage: imageSources.some((source) => source.includes("2025版本报告-N14-效果图-v1.0.png")),
+      hasOldLayout: node.querySelectorAll(".moon, .facts, article, .story-slide-shell").length > 0,
+      coverRect: cover ? { left: cover.left, top: cover.top, width: cover.width, height: cover.height } : null,
+      copyTop: copy?.top ?? -1,
+      statsBottom: stats?.bottom ?? -1,
+      hasSongLine: visibleText.some(({ text }) => /^《.+》$/.test(text)),
+      hasCompanionLine: visibleText.some(({ text }) => text === "陪你到深夜"),
+      hasActiveDaysLine: visibleText.some(({ text }) => /^你在 .+ 个深夜$/.test(text)),
+      hasPlayCountLine: visibleText.some(({ text }) => /^共计留下 .+ 次鼓点$/.test(text)),
+      unsafeCopy: /undefined|null|NaN|—/.test(sceneText),
+      overflowingText: visibleText.filter(({ rect: textRect }) => textRect.left < -1 || textRect.right > viewportWidth + 1 || textRect.top < -1 || textRect.bottom > viewportHeight + 1).map(({ text }) => text.slice(0, 80)),
+      runningAnimations: node.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
+    };
+  });
+
+  assert.equal(audit.fillsViewport, true);
+  assert.equal(audit.visualStyle, "summer-fireworks-memory");
+  assert.equal(audit.motionState, "reduced");
+  assert.equal(audit.backgroundSrc, "/lateNight/background_14.png");
+  assert.deepEqual(audit.backgroundSize, [414, 896]);
+  assert.equal(audit.frameSrc, "/lateNight/cover_bg_14.png");
+  assert.deepEqual(audit.frameSize, [167, 164]);
+  assert.equal(audit.usesReferenceImage, false);
+  assert.equal(audit.hasOldLayout, false);
+  assert.ok(audit.coverRect && audit.coverRect.left >= 28 && audit.coverRect.left <= 60, "late-night cover is not left aligned");
+  assert.ok(audit.coverRect && audit.coverRect.width >= 88 && audit.coverRect.width <= 116, "late-night cover size differs from the reference hierarchy");
+  assert.ok(audit.coverRect && Math.abs(audit.coverRect.width - audit.coverRect.height) <= 3, "late-night cover is not square");
+  assert.ok(audit.copyTop > viewport.height * .52 && audit.copyTop < viewport.height * .66, "late-night copy is outside the middle-lower stage");
+  assert.ok(audit.statsBottom > 0 && audit.statsBottom < viewport.height - 76, "late-night statistics collide with bottom controls or safe area");
+  assert.equal(audit.hasSongLine, true);
+  assert.equal(audit.hasCompanionLine, true);
+  assert.equal(audit.hasActiveDaysLine, true);
+  assert.equal(audit.hasPlayCountLine, true);
+  assert.equal(audit.unsafeCopy, false);
+  assert.deepEqual(audit.overflowingText, []);
+  assert.equal(audit.runningAnimations, 0);
+  await page.screenshot({ path: `/tmp/annual-late-night-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`late-night scene ${viewport.width}x${viewport.height}: passed`);
+};
+
 const auditSaveData = async (browser, cookie) => {
   reportProgress("save-data motion fallback: start");
   const context = await browser.newContext({
@@ -1023,6 +1098,18 @@ const auditSaveData = async (browser, cookie) => {
     await calendarScene.waitFor({ state: "visible", timeout: 10_000 });
     assert.equal(await calendarScene.getAttribute("data-motion-state"), "reduced");
     assert.equal(await calendarScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data calendar scene still runs animations");
+  }
+  const lateNightIndex = pageKeys.indexOf("lateNight");
+  if (lateNightIndex >= 0) {
+    await page.locator(".story-player__viewport").evaluate((node, target) => {
+      node.scrollTop = node.clientHeight * target;
+      node.dispatchEvent(new Event("scroll"));
+    }, lateNightIndex);
+    await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='lateNight']")?.getAttribute("aria-hidden") === "false");
+    const lateNightScene = page.locator(".story-player__slide[data-page-key='lateNight'] .annual-late-night-fireworks");
+    await lateNightScene.waitFor({ state: "visible", timeout: 10_000 });
+    assert.equal(await lateNightScene.getAttribute("data-motion-state"), "reduced");
+    assert.equal(await lateNightScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data late-night scene still runs animations");
   }
   await context.close();
   reportProgress("save-data motion fallback: passed");
@@ -1427,6 +1514,7 @@ try {
       await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);
       await auditPhase2B2FavoriteScene(browser, firstSession, viewport);
       await auditCalendarScene(browser, firstSession, viewport);
+      await auditLateNightScene(browser, firstSession, viewport);
     }
     await auditCalendarScene(browser, firstSession, { width: 390, height: 844 }, "ja");
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);

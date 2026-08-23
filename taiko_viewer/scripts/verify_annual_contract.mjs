@@ -251,6 +251,24 @@ for (const asset of ["002", "036", "038", "006", "010", "023", "034"]) {
 }
 assert.equal(await exists("public/weekday/backgorund_12.png"), true, "weekday watercolor backdrop is missing");
 
+const lateNightSlideSource = await read("components/account/version-summary/slides/LateNightSlide.vue");
+const lateNightSceneSource = await read("components/account/version-summary/AnnualLateNightFireworksScene.vue");
+assert.equal(lateNightSlideSource.includes("AnnualLateNightFireworksScene"), true, "late-night page does not use its dedicated fireworks scene");
+assert.equal(lateNightSlideSource.includes('v-if="summary.lateNight"'), true, "late-night page lost its availability guard");
+assert.equal(lateNightSlideSource.includes("StorySlideShell"), false, "late-night page still uses the dashboard slide shell");
+assert.equal(lateNightSlideSource.includes('new Intl.NumberFormat("zh-CN")'), true, "late-night metrics are not formatted for Chinese");
+assert.equal(lateNightSlideSource.includes('"某个深夜"'), true, "late-night time has no safe Chinese fallback");
+assert.equal(lateNightSlideSource.includes('"这首歌"'), true, "late-night song has no safe Chinese fallback");
+assert.equal(lateNightSceneSource.includes("useAnnualTimeline"), true, "late-night scene does not use the annual motion lifecycle");
+assert.equal(lateNightSceneSource.includes("saveData"), true, "late-night scene does not reduce motion for save-data mode");
+assert.equal(lateNightSceneSource.includes('/lateNight/background_14.png'), true, "late-night scene is missing the fireworks backdrop");
+assert.equal(lateNightSceneSource.includes('/lateNight/cover_bg_14.png'), true, "late-night scene is missing the transparent cover frame");
+assert.equal(lateNightSceneSource.includes("2025版本报告-N14-效果图-v1.0.png"), false, "late-night reference image is used by the implementation");
+assert.equal(lateNightSceneSource.includes("陪你到深夜"), true, "late-night scene is missing its fixed Chinese memory line");
+for (const asset of ["2025版本报告-N14-效果图-v1.0.png", "background_14.png", "cover_bg_14.png"]) {
+  assert.equal(await exists(`public/lateNight/${asset}`), true, `late-night asset is missing: ${asset}`);
+}
+
 const breakthroughSource = await read("components/account/version-summary/slides/BreakthroughSlide.vue");
 assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");
 assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
