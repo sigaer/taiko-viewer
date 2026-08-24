@@ -6,7 +6,7 @@ import { normalizeAnnualSummary } from "~/utils/annualSummary";
 
 declare global { interface Window { __ANNUAL_POSTER_READY__?: boolean } }
 
-definePageMeta({ layout: "story", keepalive: false });
+definePageMeta({ layout: "story", keepalive: false, mobileNav: false });
 const route = useRoute();
 const apiFetch = useViewerApiFetch();
 const { t } = useI18n();

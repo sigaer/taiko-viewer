@@ -52,6 +52,9 @@
     "toolbox": "查谱工具",
     "accountGroup": "账号系统",
     "community": "社区服务",
+    "discovery": "发现",
+    "myTaiko": "我的太鼓",
+    "more": "更多",
     "logout": "退出登录"
   },
   "common": {
@@ -261,6 +264,18 @@
     "supportReview": "工单审批"
   },
   "page": {
+    "more": {
+      "desc": "段位、攻略、社区、工具与账户设置的集中入口。"
+    },
+    "myTaiko": {
+      "desc": "查看你的成绩、Rating、推荐与歌曲进度入口。",
+      "guestTitle": "登录后查看你的太鼓数据",
+      "guestDesc": "登录并绑定太鼓账号后，可以从这里进入成绩、B30、推荐、歌曲进度与年度总结。",
+      "guestCta": "查看我的太鼓数据",
+      "readyTitle": "欢迎回来，{name}",
+      "readyDesc": "从这里继续查看你的成绩与个人工具。",
+      "linksTitle": "我的太鼓"
+    },
     "home": {
       "desc": "太鼓达人国行数据看板首页，提供最新活动、歌曲列表、谱面攻略与段位查询入口。",
       "eventAutumn": "<奖励满满2026秋季>",

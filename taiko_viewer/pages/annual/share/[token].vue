@@ -3,7 +3,7 @@ import AnnualPoster from "~/components/account/version-summary/AnnualPoster.vue"
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 
-definePageMeta({ layout: "story", keepalive: false });
+definePageMeta({ layout: "story", keepalive: false, mobileNav: false });
 useHead({
   meta: [
     { name: "robots", content: "noindex, nofollow, noarchive" },

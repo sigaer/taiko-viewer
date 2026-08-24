@@ -4,6 +4,7 @@ import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
 import { SITE_TITLE } from "~/utils/seo";
 import { buildAnalyticsRouteTemplate, buildAnonymousPageLocation } from "~/utils/analytics";
+import { isImmersiveRoute, resolveMobileTab } from "~/utils/navigation";
 
 declare global {
   interface Window {
@@ -33,6 +34,10 @@ const nuxtApp = useNuxtApp();
 let loadingTimer: ReturnType<typeof setTimeout> | null = null;
 let mobileMediaQuery: MediaQueryList | null = null;
 const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
+const mobileActiveTab = computed(() => resolveMobileTab(route.path, route.meta.mobileNav));
+const showMobileTabBar = computed(
+  () => Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
+);
 
 useHead(() => ({
   htmlAttrs: localeHead.value.htmlAttrs,
@@ -258,7 +263,7 @@ onBeforeUnmount(() => {
         </div>
         <SidebarNav />
       </aside>
-      <main class="app-content">
+      <main class="app-content" :class="{ 'has-mobile-tabbar': showMobileTabBar }">
         <div class="mobile-nav-row">
           <button type="button" class="mobile-nav-toggle" @click="toggleMobileNav">
             <span class="mobile-nav-toggle__icon" aria-hidden="true">
@@ -407,6 +412,7 @@ onBeforeUnmount(() => {
           <slot />
         </section>
       </main>
+      <MobileTabBar v-if="showMobileTabBar" :active-tab="mobileActiveTab" />
     </div>
   </el-config-provider>
 </template>
@@ -597,6 +603,12 @@ onBeforeUnmount(() => {
 @media (min-width: 961px) {
   .mobile-nav-row {
     display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .app-content.has-mobile-tabbar {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
   }
 }
 </style>

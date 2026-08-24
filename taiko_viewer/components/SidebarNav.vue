@@ -48,7 +48,8 @@ const iconPaths: Record<string, string> = {
   key:
     "M14 8a4 4 0 1 0 0 8h1.5l3.5 3.5 1-1-1.6-1.6 1.6-1.6-1-1-1.6 1.6-1.6-1.6-1 1 1.7 1.7H14a4 4 0 0 0 0-8z",
   logout:
-    "M10 17l5-5-5-5 M15 12H6 M18 4h-7a2 2 0 0 0-2 2v2 M18 20h-7a2 2 0 0 1-2-2v-2"
+    "M10 17l5-5-5-5 M15 12H6 M18 4h-7a2 2 0 0 0-2 2v2 M18 20h-7a2 2 0 0 1-2-2v-2",
+  home: "M4 11.5l8-6 8 6v7a1 1 0 0 1-1 1h-4v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5H5a1 1 0 0 1-1-1v-7z"
 };
 
 const handleLogout = async () => {
@@ -86,12 +87,14 @@ const isDeveloperReviewer = computed(
 
 const groups = computed(() => [
   {
-    title: t("nav.functional"),
-    icon: "grid",
+    title: t("nav.home"),
+    icon: "home",
+    items: [{ key: "/", label: t("nav.home"), icon: "home" }]
+  },
+  {
+    title: t("nav.discovery"),
+    icon: "music",
     items: [
-      { key: "/titles", label: t("nav.titles"), icon: "badge" },
-      { key: "/forum", label: t("nav.forum"), icon: "forum" },
-      { key: "/alias-log", label: t("nav.aliasLog"), icon: "history" },
       {
         key: "/songs",
         label: t("nav.songs"),
@@ -118,54 +121,72 @@ const groups = computed(() => [
         label: t("nav.guide"),
         icon: "book",
         children: buildGuideChildren()
+      },
+      { key: "/titles", label: t("nav.titles"), icon: "badge" }
+    ]
+  },
+  {
+    title: t("nav.myTaiko"),
+    icon: "user",
+    items: [
+      { key: "/my", label: t("nav.myTaiko"), icon: "user" },
+      { key: "/account/songs", label: t("account.songs"), icon: "music" },
+      { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
+      { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },
+      { key: "/tools/progress", label: t("tools.progress"), icon: "trophy" },
+      ...(accountUser.value?.annualSummaryAccess
+        ? [{ key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" }]
+        : [])
+    ]
+  },
+  {
+    title: t("nav.community"),
+    icon: "forum",
+    items: [
+      {
+        key: "/forum",
+        label: t("nav.forum"),
+        icon: "forum",
+        children: [
+          { key: "/forum/new", label: t("forum.newThread") },
+          { key: "/forum/me", label: t("forum.myCommunity") },
+          { key: "/forum/notifications", label: t("forum.notifications") }
+        ]
       }
     ]
   },
   {
-    title: t("nav.toolbox"),
+    title: t("nav.more"),
     icon: "grid",
     items: [
-      { key: "/tools", label: t("nav.tools"), icon: "grid" },
-      { key: "/tools/chart-config", label: t("tools.chartConfig"), icon: "book" },
-      { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" },
-      { key: "/tools/progress", label: t("tools.progress"), icon: "trophy" },
-      { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
-      { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },
-      { key: "/tools/trend", label: t("tools.trend"), icon: "history" },
-      { key: "/tools/word-cloud", label: t("tools.wordCloud"), icon: "badge" }
-    ]
-  },
-  {
-    title: t("nav.accountGroup"),
-    icon: "user",
-    items: accountUser.value
-      ? [
-          { key: "/account/profile", label: t("account.profile"), icon: "user" },
-          { key: "/account/songs", label: t("account.songs"), icon: "music" },
-          { key: "/account/sync", label: t("account.sync"), icon: "history" },
-          ...(accountUser.value.annualSummaryAccess
-            ? [{ key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" }]
-            : []),
-          { key: "/account/developer", label: t("account.developer"), icon: "badge" },
-          ...(isDeveloperReviewer.value
-            ? [
-                { key: "/account/developer/review", label: t("account.developerReview"), icon: "key" },
-                { key: "/account/support/review", label: t("account.supportReview"), icon: "support" }
-              ]
-            : [])
+      {
+        key: "/tools",
+        label: t("nav.tools"),
+        icon: "grid",
+        children: [
+          { key: "/tools/chart-config", label: t("tools.chartConfig") },
+          { key: "/tools/note-count", label: t("tools.noteCount") },
+          { key: "/tools/trend", label: t("tools.trend") },
+          { key: "/tools/word-cloud", label: t("tools.wordCloud") }
         ]
-      : [
-          { key: "/account/login", label: t("account.login"), icon: "key" },
-          { key: "/account/register", label: t("account.register"), icon: "user" }
-        ]
-  },
-  {
-    title: t("nav.community"),
-    icon: "settings",
-    items: [
-      { key: "/forum/new", label: t("forum.newThread"), icon: "forum" },
-      { key: "/forum/me", label: t("forum.myCommunity"), icon: "user" },
+      },
+      { key: "/account/sync", label: t("account.sync"), icon: "history" },
+      { key: "/account/profile", label: t("account.profile"), icon: "user" },
+      { key: "/account/developer", label: t("account.developer"), icon: "badge" },
+      ...(isDeveloperReviewer.value
+        ? [
+            { key: "/account/developer/review", label: t("account.developerReview"), icon: "key" },
+            { key: "/account/support/review", label: t("account.supportReview"), icon: "support" }
+          ]
+        : []),
+      ...(!accountUser.value
+        ? [
+            { key: "/account/login", label: t("account.login"), icon: "key" },
+            { key: "/account/register", label: t("account.register"), icon: "user" }
+          ]
+        : []),
       { key: "/support", label: t("nav.support"), icon: "support" },
+      { key: "/alias-log", label: t("nav.aliasLog"), icon: "history" },
       { key: "/settings", label: t("nav.settings"), icon: "settings" },
       { key: "/about", label: t("nav.about"), icon: "info" }
     ]
@@ -180,6 +201,7 @@ const activePath = computed(() => {
         ? route.path.slice(3) || "/"
         : route.path;
   if (normalizedPath === "/") return "/";
+  if (normalizedPath === "/my") return "/my";
   if (normalizedPath.startsWith("/tools")) return normalizedPath === "/tools" ? "/tools" : normalizedPath;
   if (normalizedPath.startsWith("/forum")) return normalizedPath === "/forum/new" || normalizedPath === "/forum/me" ? normalizedPath : "/forum";
   if (normalizedPath === "/songs") return "/songs/available";
@@ -207,8 +229,11 @@ const activePath = computed(() => {
 });
 
 const openedGroups = computed(() => {
+  if (activePath.value === "/my") return [];
   if (activePath.value.startsWith("/songs")) return ["/songs"];
   if (activePath.value.startsWith("/grade")) return ["/grade"];
+  if (activePath.value.startsWith("/forum")) return ["/forum"];
+  if (activePath.value.startsWith("/tools")) return ["/tools"];
   if (activePath.value.startsWith("/account")) return [];
   if (activePath.value.startsWith("/guide")) {
     const normalizedPath =
