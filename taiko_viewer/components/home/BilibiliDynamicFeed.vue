@@ -30,7 +30,7 @@ const copy = computed(() =>
         forward: "転送",
         comment: "コメント",
         like: "いいね",
-        disclaimer: "内容は Bilibili 提供の公開情報を表示しています"
+        disclaimer: "出典：Bilibili"
       }
     : {
         title: "动态",
@@ -44,7 +44,7 @@ const copy = computed(() =>
         forward: "转发",
         comment: "评论",
         like: "点赞",
-        disclaimer: "内容来源于 Bilibili，仅供展示"
+        disclaimer: "来源：Bilibili"
       }
 );
 

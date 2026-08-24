@@ -21,7 +21,6 @@ const getSubtitle = (song: SongCatalogItem) =>
     <HomeSectionHeader
       heading-id="guest-latest-title"
       :title="t('home.latestSongs')"
-      :description="t('page.home.guest.latestDescription')"
       :link-label="t('common.viewAll')"
       :link-to="localePath('/songs/available')"
     />

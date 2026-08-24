@@ -4,6 +4,7 @@ import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
 import { SITE_TITLE } from "~/utils/seo";
 import { buildAnalyticsRouteTemplate, buildAnonymousPageLocation } from "~/utils/analytics";
+import { resolveHomePresentation, shouldHideHomeChrome } from "~/utils/homePresentation";
 import { isImmersiveRoute, resolveMobileTab } from "~/utils/navigation";
 
 declare global {
@@ -35,6 +36,14 @@ let loadingTimer: ReturnType<typeof setTimeout> | null = null;
 let mobileMediaQuery: MediaQueryList | null = null;
 const googleAnalyticsId = computed(() => String(runtimeConfig.public.googleAnalyticsId || "").trim());
 const mobileActiveTab = computed(() => resolveMobileTab(route.path, route.meta.mobileNav));
+const homeStateResolver = useHomeState();
+if (route.meta.navKey === "/") await homeStateResolver.resolve();
+const homePresentation = computed(() =>
+  resolveHomePresentation(homeStateResolver.status.value, homeStateResolver.homeState.value)
+);
+const hideGuestHomeChrome = computed(
+  () => shouldHideHomeChrome(route.meta.navKey, homePresentation.value)
+);
 const showMobileTabBar = computed(
   () => Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
 );
@@ -279,7 +288,7 @@ onBeforeUnmount(() => {
             </span>
           </button>
         </div>
-        <nav class="breadcrumb-bar">
+        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar">
           <el-breadcrumb :key="route.fullPath" separator="/">
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbItems"
@@ -302,7 +311,7 @@ onBeforeUnmount(() => {
             </el-breadcrumb-item>
           </el-breadcrumb>
         </nav>
-        <header class="page-header">
+        <header v-if="!hideGuestHomeChrome" class="page-header">
           <div class="page-header__info">
             <div class="page-title-row">
               <span class="page-title-icon" aria-hidden="true">
@@ -395,7 +404,7 @@ onBeforeUnmount(() => {
               </span>
               <h1>{{ pageTitle }}</h1>
             </div>
-            <p>{{ pageDesc }}</p>
+            <p v-if="!route.meta.hidePageDescription">{{ pageDesc }}</p>
           </div>
         </header>
         <section class="page-body">

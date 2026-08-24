@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveHomePresentation } from "../utils/homePresentation.ts";
+import { resolveHomePresentation, shouldHideHomeChrome } from "../utils/homePresentation.ts";
 
 test("guest receives the new guest home", () => {
   assert.equal(resolveHomePresentation("ready", "guest"), "guest");
@@ -18,4 +18,12 @@ test("resolver errors use public fallback without becoming guest", () => {
 
 test("loading remains neutral", () => {
   assert.equal(resolveHomePresentation("loading", null), "loading");
+});
+
+test("only guest-style root home hides shared page chrome", () => {
+  assert.equal(shouldHideHomeChrome("/", "guest"), true);
+  assert.equal(shouldHideHomeChrome("/", "public_error"), true);
+  assert.equal(shouldHideHomeChrome("/", "existing"), false);
+  assert.equal(shouldHideHomeChrome("/", "loading"), false);
+  assert.equal(shouldHideHomeChrome("/more", "guest"), false);
 });

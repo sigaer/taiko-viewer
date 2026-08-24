@@ -16,7 +16,6 @@ const tools = [
     <HomeSectionHeader
       heading-id="guest-tools-title"
       :title="t('page.home.guest.publicTools')"
-      :description="t('page.home.guest.publicToolsDescription')"
       :link-label="t('common.viewAll')"
       :link-to="localePath('/tools')"
     />

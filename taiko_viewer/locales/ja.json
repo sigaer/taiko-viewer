@@ -269,16 +269,14 @@
     "more": {
       "desc": "段位、攻略、コミュニティ、ツール、アカウント設定への入口です。",
       "apiDocs": "API ドキュメント",
-      "language": "言語",
-      "languageDescription": "表示言語を切り替え"
+      "language": "言語"
     },
     "myTaiko": {
       "desc": "成績、Rating、おすすめ、楽曲進捗への入口です。",
       "guestTitle": "ログインして自分の太鼓データを見る",
-      "guestDesc": "ログインして太鼓アカウントを連携すると、成績、B30、おすすめ、楽曲進捗、年間まとめを確認できます。",
+      "guestDesc": "ログインして太鼓アカウントを連携し、成績、B30、おすすめ、楽曲進捗、年間まとめを確認します。",
       "guestCta": "マイ太鼓データを見る",
       "readyTitle": "おかえりなさい、{name}",
-      "readyDesc": "ここから成績と個人ツールを続けて確認できます。",
       "linksTitle": "マイ太鼓"
     },
     "home": {
@@ -296,17 +294,14 @@
         "browseSongs": "楽曲を見る",
         "accountCta": "マイ太鼓データを見る",
         "scope": "中国版楽曲 · 譜面プレビュー · 段位 · Rating · 成績分析",
-        "latestDescription": "中国版に最近追加された楽曲",
         "currentEvents": "現在のトピック",
-        "currentEventsDescription": "開催中のイベントと Viewer の公開情報",
         "danTitle": "ニジイロ 2026 段位道場",
-        "danDescription": "課題曲と赤・金合格条件をすばやく確認。詳しい内容は段位ページで確認できます。",
+        "danDescription": "課題曲と赤・金合格条件",
         "danCta": "段位を見る",
         "danImageAlt": "ニジイロ 2026 段位道場のプレビュー",
         "publicTools": "よく使うツール",
-        "publicToolsDescription": "ログインせずに使える譜面・攻略ツール",
         "accountTitle": "Viewer を自分の太鼓ホームに",
-        "accountDescription": "ログインして太鼓アカウントを連携すると、成績、B30、Rating、おすすめ、楽曲進捗、年間まとめを一か所で確認できます。",
+        "accountDescription": "成績、B30、Rating、おすすめ、楽曲進捗、年間まとめを一つの入口に集約します。",
         "accountFeatures": "ログイン後に使える機能",
         "accountStatusUnavailable": "アカウント状態を確認できません。楽曲検索、最新楽曲、段位などの公開機能はそのまま利用できます。"
       }

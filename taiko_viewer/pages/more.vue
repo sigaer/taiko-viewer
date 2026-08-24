@@ -14,6 +14,7 @@ definePageMeta({
   pageTitleKey: "nav.more",
   pageDescKey: "page.more.desc",
   navKey: "/more",
+  hidePageDescription: true,
   breadcrumbs: [{ labelKey: "nav.more", to: "/more" }]
 });
 
@@ -78,10 +79,7 @@ const groups = [
       </div>
     </section>
     <section class="more-group panel-card more-language">
-      <div class="more-language__heading">
-        <h2>{{ t("page.more.language") }}</h2>
-        <span>{{ t("page.more.languageDescription") }}</span>
-      </div>
+      <h2>{{ t("page.more.language") }}</h2>
       <div class="more-language__options">
         <NuxtLink
           v-for="item in localeOptions"
@@ -111,18 +109,6 @@ const groups = [
   margin: 0 0 12px;
   color: var(--viewer-text);
   font-size: 16px;
-}
-
-.more-language__heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.more-language__heading span {
-  color: var(--viewer-text-muted);
-  font-size: 12px;
 }
 
 .more-language__options {

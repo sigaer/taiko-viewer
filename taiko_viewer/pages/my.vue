@@ -10,6 +10,7 @@ definePageMeta({
   pageTitleKey: "nav.myTaiko",
   pageDescKey: "page.myTaiko.desc",
   navKey: "/my",
+  hidePageDescription: true,
   breadcrumbs: [{ labelKey: "nav.myTaiko", to: "/my" }]
 });
 
@@ -40,7 +41,6 @@ const personalLinks = [
     <section v-else class="my-intro panel-card">
       <p class="my-intro__eyebrow">{{ t("nav.myTaiko") }}</p>
       <h2>{{ t("page.myTaiko.readyTitle", { name: accountUser.username }) }}</h2>
-      <p>{{ t("page.myTaiko.readyDesc") }}</p>
     </section>
 
     <section class="my-links panel-card">

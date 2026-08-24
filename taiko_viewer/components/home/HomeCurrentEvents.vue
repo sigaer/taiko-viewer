@@ -35,7 +35,6 @@ onBeforeUnmount(() => observer?.disconnect());
     <HomeSectionHeader
       heading-id="guest-events-title"
       :title="t('page.home.guest.currentEvents')"
-      :description="t('page.home.guest.currentEventsDescription')"
     />
     <div class="guest-events__grid">
       <article v-for="event in events.slice(0, 2)" :key="event.image" class="guest-event-card panel-card">

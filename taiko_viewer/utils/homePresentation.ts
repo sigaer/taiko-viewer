@@ -10,3 +10,8 @@ export const resolveHomePresentation = (
   if (status === "error") return "public_error";
   return homeState === "guest" ? "guest" : "existing";
 };
+
+export const shouldHideHomeChrome = (
+  navKey: unknown,
+  presentation: HomePresentation
+) => navKey === "/" && (presentation === "guest" || presentation === "public_error");

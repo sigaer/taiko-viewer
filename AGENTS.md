@@ -44,3 +44,42 @@
   - `build`
   - `.dart_tool`
   - coverage, logs, local caches
+
+## UI Copy and Specification Leakage
+
+Do not copy explanatory language from prompts, task specifications, plans,
+design rationale, implementation notes, or acceptance criteria directly into
+user-facing UI.
+
+Always distinguish between:
+
+1. Product Copy
+   - Information or actions the end user genuinely needs.
+   - Examples: feature names, data, navigation labels, concise value
+     propositions, and calls to action.
+2. State Copy
+   - Information required to understand an error, permission, empty state,
+     loading state, or next action.
+3. Implementation Rationale
+   - Explanations for developers or reviewers about component purpose,
+     omitted content, data sources, implementation phase, or deferred work.
+   - Keep this in specifications, comments, docs, PRs, or code review; do not
+     render it to end users by default.
+
+Avoid explanatory subtitles added only to make a section feel complete.
+Prefer nouns, actual data, actions, and concise value statements over
+explanations of how the interface is implemented.
+
+Before completing any user-facing UI task, review newly added visible strings:
+
+- remove prompt/specification language and design rationale;
+- remove redundant subtitles when the title and controls already communicate
+  the purpose;
+- retain necessary state, legal, source-attribution, accessibility, and error
+  information.
+
+If removing a sentence still leaves the user able to understand what the
+section is and what action they can take, prefer removing it.
+
+This rule applies to all Viewer UI, including Home, Personal Home, song detail,
+forum, tools, annual recap, developer, settings, mobile, and desktop screens.

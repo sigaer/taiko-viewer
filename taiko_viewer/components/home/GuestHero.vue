@@ -21,7 +21,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
         Sakura Taiko Viewer
         <span>v{{ appVersion }}</span>
       </p>
-      <h2 id="guest-home-title">{{ t("page.home.guest.heroTitle") }}</h2>
+      <h1 id="guest-home-title">{{ t("page.home.guest.heroTitle") }}</h1>
       <p class="guest-hero__lead">{{ t("page.home.guest.heroDescription") }}</p>
       <HomeGuestSongSearch />
       <div class="guest-hero__actions">
@@ -93,7 +93,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
   opacity: 0.72;
 }
 
-.guest-hero h2 {
+.guest-hero h1 {
   max-width: 760px;
   margin: 0;
   color: #3d2c22;
@@ -206,7 +206,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
     linear-gradient(135deg, rgba(35, 29, 25, 0.98), rgba(28, 23, 20, 0.98));
 }
 
-:global(body.theme-dark .guest-hero h2) {
+:global(body.theme-dark .guest-hero h1) {
   color: #f7eee6;
 }
 
@@ -258,7 +258,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
     font-size: 11px;
   }
 
-  .guest-hero h2 {
+  .guest-hero h1 {
     max-width: 92%;
     font-size: clamp(27px, 8.5vw, 36px);
   }
@@ -313,7 +313,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
     gap: 8px;
   }
 
-  .guest-hero h2 {
+  .guest-hero h1 {
     max-width: 78%;
     font-size: clamp(28px, 5vw, 36px);
   }

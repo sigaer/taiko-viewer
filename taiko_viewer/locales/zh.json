@@ -270,16 +270,14 @@
     "more": {
       "desc": "段位、攻略、社区、工具与账户设置的集中入口。",
       "apiDocs": "API 文档",
-      "language": "语言",
-      "languageDescription": "切换界面语言"
+      "language": "语言"
     },
     "myTaiko": {
       "desc": "查看你的成绩、Rating、推荐与歌曲进度入口。",
       "guestTitle": "登录后查看你的太鼓数据",
-      "guestDesc": "登录并绑定太鼓账号后，可以从这里进入成绩、B30、推荐、歌曲进度与年度总结。",
+      "guestDesc": "登录并绑定太鼓账号，查看成绩、B30、推荐、歌曲进度与年度总结。",
       "guestCta": "查看我的太鼓数据",
       "readyTitle": "欢迎回来，{name}",
-      "readyDesc": "从这里继续查看你的成绩与个人工具。",
       "linksTitle": "我的太鼓"
     },
     "home": {
@@ -297,17 +295,14 @@
         "browseSongs": "浏览歌曲",
         "accountCta": "查看我的太鼓数据",
         "scope": "国服曲库 · 谱面预览 · 段位 · Rating · 成绩分析",
-        "latestDescription": "刚刚加入国服曲库的歌曲",
         "currentEvents": "当前动态",
-        "currentEventsDescription": "近期活动与 Viewer 公开更新",
         "danTitle": "虹2026 段位道场",
-        "danDescription": "快速查看当前课题曲与赤、金合格条件，完整内容保留在段位页。",
+        "danDescription": "课题曲与赤、金合格条件",
         "danCta": "查看段位",
         "danImageAlt": "虹2026 段位道场摘要预览",
         "publicTools": "常用工具",
-        "publicToolsDescription": "无需登录即可使用的查谱与攻略入口",
         "accountTitle": "把 Viewer 变成你的太鼓主页",
-        "accountDescription": "登录并绑定太鼓账号后，成绩、B30、Rating、推荐、歌曲进度与年度总结会汇集到你的个人入口。",
+        "accountDescription": "成绩、B30、Rating、推荐、歌曲进度与年度总结，集中在你的个人入口。",
         "accountFeatures": "登录后可用能力",
         "accountStatusUnavailable": "暂时无法确认账号状态，搜歌、最新歌曲和段位等公开功能仍可正常使用。"
       }
