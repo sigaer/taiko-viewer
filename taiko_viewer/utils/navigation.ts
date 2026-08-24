@@ -43,6 +43,6 @@ export const isImmersiveRoute = (path: string, mobileNavMeta?: unknown) => {
 export const mobileTabLabelKey: Record<MobileTab, string> = {
   home: "nav.home",
   songs: "nav.songsTab",
-  my: "nav.myTaiko",
+  my: "nav.my",
   more: "nav.more"
 };
