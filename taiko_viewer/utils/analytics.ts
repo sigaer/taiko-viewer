@@ -27,3 +27,11 @@ export const buildAnonymousPageLocation = (input: string) => {
   if (!process.client) return routeTemplate;
   return `${window.location.origin}${routeTemplate}`;
 };
+
+export const trackViewerEvent = (name: string, params: Record<string, string | number | boolean> = {}) => {
+  if (!process.client || typeof window.gtag !== "function") return;
+  window.gtag("event", name, {
+    ...params,
+    route_template: buildAnalyticsRouteTemplate(window.location.pathname)
+  });
+};

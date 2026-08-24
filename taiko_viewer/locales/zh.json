@@ -285,7 +285,32 @@
     "home": {
       "desc": "太鼓达人国行数据看板首页，提供最新活动、歌曲列表、谱面攻略与段位查询入口。",
       "eventAutumn": "<奖励满满2026秋季>",
-      "eventHualiEsports": "<华立电竞联动课题曲活动>"
+      "eventHualiEsports": "<华立电竞联动课题曲活动>",
+      "guest": {
+        "heroTitle": "国服《太鼓之达人》歌曲、谱面与玩家数据工具",
+        "heroDescription": "从搜一首歌开始，查看国服曲库、谱面信息与段位；登录后继续进入你的成绩世界。",
+        "searchLabel": "搜索国服太鼓歌曲",
+        "searchPlaceholder": "搜索曲名、日文名、分类或歌曲 ID",
+        "clearSearch": "清空歌曲搜索",
+        "searchFailed": "歌曲搜索暂时不可用，请稍后重试",
+        "searchEmpty": "没有找到匹配歌曲，试试更短的曲名或歌曲 ID",
+        "browseSongs": "浏览歌曲",
+        "accountCta": "查看我的太鼓数据",
+        "scope": "国服曲库 · 谱面预览 · 段位 · Rating · 成绩分析",
+        "latestDescription": "刚刚加入国服曲库的歌曲",
+        "currentEvents": "当前动态",
+        "currentEventsDescription": "近期活动与 Viewer 公开更新",
+        "danTitle": "虹2026 段位道场",
+        "danDescription": "快速查看当前课题曲与赤、金合格条件，完整内容保留在段位页。",
+        "danCta": "查看段位",
+        "danImageAlt": "虹2026 段位道场摘要预览",
+        "publicTools": "常用工具",
+        "publicToolsDescription": "无需登录即可使用的查谱与攻略入口",
+        "accountTitle": "把 Viewer 变成你的太鼓主页",
+        "accountDescription": "登录并绑定太鼓账号后，成绩、B30、Rating、推荐、歌曲进度与年度总结会汇集到你的个人入口。",
+        "accountFeatures": "登录后可用能力",
+        "accountStatusUnavailable": "暂时无法确认账号状态，搜歌、最新歌曲和段位等公开功能仍可正常使用。"
+      }
     },
     "titles": {
       "title": "称号一览",

@@ -284,7 +284,32 @@
     "home": {
       "desc": "中国版太鼓の達人データビューアーのホーム。最新イベント、楽曲一覧、譜面攻略、段位情報への入口を提供します。",
       "eventAutumn": "<2026 秋の豪華報酬イベント>",
-      "eventHualiEsports": "<華立eスポーツコラボ課題曲イベント>"
+      "eventHualiEsports": "<華立eスポーツコラボ課題曲イベント>",
+      "guest": {
+        "heroTitle": "中国版『太鼓の達人』の楽曲・譜面・プレイヤーデータツール",
+        "heroDescription": "まずは一曲検索。中国版の楽曲、譜面、段位を確認し、ログイン後は自分の成績へ進めます。",
+        "searchLabel": "中国版太鼓の達人の楽曲を検索",
+        "searchPlaceholder": "曲名、日本語名、分類、楽曲 ID を検索",
+        "clearSearch": "楽曲検索をクリア",
+        "searchFailed": "楽曲検索を利用できません。しばらくしてから再試行してください。",
+        "searchEmpty": "一致する楽曲がありません。短い曲名や楽曲 ID をお試しください。",
+        "browseSongs": "楽曲を見る",
+        "accountCta": "マイ太鼓データを見る",
+        "scope": "中国版楽曲 · 譜面プレビュー · 段位 · Rating · 成績分析",
+        "latestDescription": "中国版に最近追加された楽曲",
+        "currentEvents": "現在のトピック",
+        "currentEventsDescription": "開催中のイベントと Viewer の公開情報",
+        "danTitle": "ニジイロ 2026 段位道場",
+        "danDescription": "課題曲と赤・金合格条件をすばやく確認。詳しい内容は段位ページで確認できます。",
+        "danCta": "段位を見る",
+        "danImageAlt": "ニジイロ 2026 段位道場のプレビュー",
+        "publicTools": "よく使うツール",
+        "publicToolsDescription": "ログインせずに使える譜面・攻略ツール",
+        "accountTitle": "Viewer を自分の太鼓ホームに",
+        "accountDescription": "ログインして太鼓アカウントを連携すると、成績、B30、Rating、おすすめ、楽曲進捗、年間まとめを一か所で確認できます。",
+        "accountFeatures": "ログイン後に使える機能",
+        "accountStatusUnavailable": "アカウント状態を確認できません。楽曲検索、最新楽曲、段位などの公開機能はそのまま利用できます。"
+      }
     },
     "titles": {
       "title": "称号一覧",

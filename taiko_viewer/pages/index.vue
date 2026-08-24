@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { resolveHomePresentation } from "~/utils/homePresentation";
 
 const runtimeConfig = useRuntimeConfig();
 const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
@@ -41,6 +42,9 @@ const homeStateResolver = useHomeState();
 await homeStateResolver.resolve();
 const homeState = homeStateResolver.homeState;
 const homeStateStatus = homeStateResolver.status;
+const homePresentation = computed(() =>
+  resolveHomePresentation(homeStateStatus.value, homeState.value)
+);
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 const dynamicsSection = ref<HTMLElement | null>(null);
 const showDynamics = ref(false);
@@ -87,7 +91,26 @@ const gradeSpotlightCopy = computed(() =>
     class="home-page"
     :data-home-state="homeState || undefined"
     :data-home-state-status="homeStateStatus"
+    :data-home-presentation="homePresentation"
   >
+    <HomeGuestHome
+      v-if="homePresentation === 'guest' || homePresentation === 'public_error'"
+      :latest-songs="latestSongs"
+      :content-pending="pending"
+      :content-failed="!!error"
+      :account-status-unavailable="homePresentation === 'public_error'"
+      :events="eventSlides"
+    />
+
+    <section v-else-if="homePresentation === 'loading'" class="home-neutral-loading" aria-live="polite">
+      <div class="home-neutral-loading__hero shimmer-card"></div>
+      <div class="home-neutral-loading__rail">
+        <div v-for="index in 4" :key="index" class="shimmer-card"></div>
+      </div>
+      <span class="sr-only">{{ t("layout.loading") }}</span>
+    </section>
+
+    <template v-else>
     <el-alert
       :title="t('home.betaNotice')"
       type="warning"
@@ -236,6 +259,7 @@ const gradeSpotlightCopy = computed(() =>
     <footer class="home-footer">
       {{ t("site.copyright") }}
     </footer>
+    </template>
   </div>
 </template>
 
@@ -243,6 +267,39 @@ const gradeSpotlightCopy = computed(() =>
 .home-page {
   display: grid;
   gap: 16px;
+}
+
+.home-neutral-loading {
+  display: grid;
+  gap: 18px;
+}
+
+.home-neutral-loading__hero {
+  min-height: 360px;
+  border-radius: 26px;
+}
+
+.home-neutral-loading__rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-neutral-loading__rail > div {
+  min-height: 190px;
+  border-radius: 18px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .beta-alert {
@@ -623,6 +680,14 @@ const gradeSpotlightCopy = computed(() =>
 }
 
 @media (max-width: 780px) {
+  .home-neutral-loading__hero {
+    min-height: 330px;
+  }
+
+  .home-neutral-loading__rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .home-tools-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

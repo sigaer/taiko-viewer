@@ -4,12 +4,17 @@ import type { BilibiliDynamicItem } from "~/types/bilibili";
 import { useBilibiliDynamics } from "~/composables/useBilibiliDynamics";
 import { BILIBILI_DYNAMIC_UID, BILIBILI_SPACE_URL } from "~/utils/bilibili";
 
+const props = withDefaults(defineProps<{ limit?: number }>(), { limit: 0 });
+
 const { locale } = useI18n();
 const { items, pending, error, reload } = useBilibiliDynamics(BILIBILI_DYNAMIC_UID);
 
 const previewVisible = ref(false);
 const previewImage = ref<string | null>(null);
 const expandedMap = ref<Record<string, boolean>>({});
+const visibleItems = computed(() =>
+  props.limit > 0 ? items.value.slice(0, props.limit) : items.value
+);
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -130,11 +135,11 @@ const openPreview = (url: string, event: Event) => {
       <el-button type="primary" @click="reload">{{ copy.retry }}</el-button>
     </el-empty>
 
-    <el-empty v-else-if="!items.length" :description="copy.empty" />
+    <el-empty v-else-if="!visibleItems.length" :description="copy.empty" />
 
     <div v-else class="dynamic-list">
       <a
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.id_str"
         :href="getJumpUrl(item)"
         target="_blank"
@@ -259,6 +264,9 @@ const openPreview = (url: string, event: Event) => {
 }
 
 .space-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   font-size: 13px;
   color: #7a6552;
   text-decoration: none;
@@ -365,6 +373,9 @@ const openPreview = (url: string, event: Event) => {
 }
 
 .dynamic-expand {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   justify-self: start;
   border: none;
   background: transparent;
@@ -472,6 +483,27 @@ const openPreview = (url: string, event: Event) => {
   max-height: 80vh;
   object-fit: contain;
   display: block;
+}
+
+:global(body.theme-dark .space-link),
+:global(body.theme-dark .dynamic-action),
+:global(body.theme-dark .dynamic-time),
+:global(body.theme-dark .dynamic-stats),
+:global(body.theme-dark .dynamic-disclaimer) {
+  color: #b9aa9d;
+}
+
+:global(body.theme-dark .dynamic-card) {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(35, 30, 27, 0.92);
+}
+
+:global(body.theme-dark .dynamic-text) {
+  color: #eee2d7;
+}
+
+:global(body.theme-dark .dynamic-archive) {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 @media (max-width: 780px) {
