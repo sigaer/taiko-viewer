@@ -305,6 +305,32 @@
         "accountDescription": "成绩、B30、Rating、推荐、歌曲进度与年度总结，集中在你的个人入口。",
         "accountFeatures": "登录后可用能力",
         "accountStatusUnavailable": "暂时无法确认账号状态，搜歌、最新歌曲和段位等公开功能仍可正常使用。"
+      },
+      "personal": {
+        "eyebrow": "我的太鼓",
+        "title": "你的太鼓首页",
+        "greeting": "欢迎回来，{name}",
+        "rating": "当前 Rating",
+        "ratingUpdated": "来自当前成绩",
+        "connected": "成绩已连接",
+        "summaryUnavailable": "个人摘要暂时不可用",
+        "viewScores": "查看我的成绩",
+        "unboundTitle": "连接你的太鼓数据",
+        "unboundBody": "绑定一个太鼓账号后，这里会显示你的成绩与推荐。",
+        "bindCta": "绑定账号",
+        "emptyTitle": "账号已连接",
+        "emptyBody": "同步成绩后，这里会出现你的个人数据。",
+        "syncCta": "同步成绩",
+        "recommendationEyebrow": "今天推荐",
+        "recommendationTitle": "试试这首",
+        "recommendationSong": "推荐歌曲",
+        "level": "{level} 星",
+        "newToYou": "还没有这首的成绩",
+        "keepPlaying": "继续挑战这首",
+        "viewSong": "查看歌曲",
+        "recommendationUnavailable": "推荐暂时不可用",
+        "noRecommendation": "暂时没有可推荐的歌曲",
+        "openRecommendationTool": "打开推荐工具"
       }
     },
     "titles": {

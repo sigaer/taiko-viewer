@@ -6,10 +6,10 @@ test("guest receives the new guest home", () => {
   assert.equal(resolveHomePresentation("ready", "guest"), "guest");
 });
 
-test("all authenticated states keep the existing fallback", () => {
-  assert.equal(resolveHomePresentation("ready", "authenticated_unbound"), "existing");
-  assert.equal(resolveHomePresentation("ready", "authenticated_bound_empty"), "existing");
-  assert.equal(resolveHomePresentation("ready", "authenticated_ready"), "existing");
+test("all authenticated states use the personal home", () => {
+  assert.equal(resolveHomePresentation("ready", "authenticated_unbound"), "authenticated");
+  assert.equal(resolveHomePresentation("ready", "authenticated_bound_empty"), "authenticated");
+  assert.equal(resolveHomePresentation("ready", "authenticated_ready"), "authenticated");
 });
 
 test("resolver errors use public fallback without becoming guest", () => {
@@ -20,10 +20,10 @@ test("loading remains neutral", () => {
   assert.equal(resolveHomePresentation("loading", null), "loading");
 });
 
-test("only guest-style root home hides shared page chrome", () => {
+test("all resolved root home presentations hide shared page chrome", () => {
   assert.equal(shouldHideHomeChrome("/", "guest"), true);
   assert.equal(shouldHideHomeChrome("/", "public_error"), true);
-  assert.equal(shouldHideHomeChrome("/", "existing"), false);
+  assert.equal(shouldHideHomeChrome("/", "authenticated"), true);
   assert.equal(shouldHideHomeChrome("/", "loading"), false);
   assert.equal(shouldHideHomeChrome("/more", "guest"), false);
 });

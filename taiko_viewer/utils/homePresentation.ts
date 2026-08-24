@@ -1,6 +1,6 @@
 import type { HomeResolverStatus, HomeState } from "~/utils/homeState";
 
-export type HomePresentation = "loading" | "guest" | "public_error" | "existing";
+export type HomePresentation = "loading" | "guest" | "public_error" | "authenticated";
 
 export const resolveHomePresentation = (
   status: HomeResolverStatus,
@@ -8,10 +8,10 @@ export const resolveHomePresentation = (
 ): HomePresentation => {
   if (status === "loading") return "loading";
   if (status === "error") return "public_error";
-  return homeState === "guest" ? "guest" : "existing";
+  return homeState === "guest" ? "guest" : "authenticated";
 };
 
 export const shouldHideHomeChrome = (
   navKey: unknown,
   presentation: HomePresentation
-) => navKey === "/" && (presentation === "guest" || presentation === "public_error");
+) => navKey === "/" && presentation !== "loading";
