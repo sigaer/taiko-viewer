@@ -16,6 +16,7 @@ type AccountAuthPayload = {
 export const useAccountAuthStatus = () => {
   const accountUser = useState<AccountAuthUser | null>("account-user", () => null);
   const accountLoaded = useState<boolean>("account-user-loaded", () => false);
+  const accountAuthError = useState<string | null>("account-user-error", () => null);
   const requestHeaders = import.meta.server ? useRequestHeaders(["cookie"]) : undefined;
 
   const fetchAccountAuthPayload = async () =>
@@ -28,11 +29,13 @@ export const useAccountAuthStatus = () => {
       return accountUser.value;
     }
 
+    accountAuthError.value = null;
     try {
       const data = await fetchAccountAuthPayload();
       accountUser.value = data.user;
-    } catch {
+    } catch (error) {
       accountUser.value = null;
+      accountAuthError.value = error instanceof Error ? error.message : "登录状态获取失败";
     } finally {
       accountLoaded.value = true;
     }
@@ -45,11 +48,13 @@ export const useAccountAuthStatus = () => {
   const clearResolvedAccountUser = () => {
     accountUser.value = null;
     accountLoaded.value = true;
+    accountAuthError.value = null;
   };
 
   return {
     accountUser,
     accountLoaded,
+    accountAuthError,
     resolveAccountUser,
     isAuthenticated,
     clearResolvedAccountUser

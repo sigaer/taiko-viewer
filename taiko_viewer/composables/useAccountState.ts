@@ -21,6 +21,7 @@ export const useAccountState = () => {
   return {
     accountUser,
     accountLoaded,
+    accountAuthError,
     fetchCurrentUser,
     clearAccountUser
   };

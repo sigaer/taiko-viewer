@@ -37,6 +37,8 @@ const eventSlides = computed(() => [
 ]);
 
 const { data: homeContent, pending, error } = await useHomeContent();
+const homeStateResolver = useHomeState();
+await homeStateResolver.resolve();
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 const dynamicsSection = ref<HTMLElement | null>(null);
 const showDynamics = ref(false);
@@ -79,7 +81,11 @@ const gradeSpotlightCopy = computed(() =>
 </script>
 
 <template>
-  <div class="home-page">
+  <div
+    class="home-page"
+    :data-home-state="homeStateResolver.homeState || undefined"
+    :data-home-state-status="homeStateResolver.status"
+  >
     <el-alert
       :title="t('home.betaNotice')"
       type="warning"

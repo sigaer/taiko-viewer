@@ -19,6 +19,7 @@
     "test:annual": "node ./scripts/verify_annual_contract.mjs",
     "test:annual:e2e": "node ./scripts/verify_annual_e2e.mjs",
     "test:branch-audio": "node ./scripts/verify_branch_audio_contract.mjs",
+    "test:home-state": "node --experimental-strip-types --test tests/homeStateResolver.test.ts",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

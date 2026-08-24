@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { buildPageDescription } from "~/utils/seo";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const switchLocalePath = useSwitchLocalePath();
+
+const localeOptions = computed(() => [
+  { code: "zh", label: t("locale.zh"), path: switchLocalePath("zh") || localePath("/more") },
+  { code: "ja", label: t("locale.ja"), path: switchLocalePath("ja") || localePath("/more") }
+]);
 
 definePageMeta({
   pageTitleKey: "nav.more",
@@ -71,6 +77,23 @@ const groups = [
         </NuxtLink>
       </div>
     </section>
+    <section class="more-group panel-card more-language">
+      <div class="more-language__heading">
+        <h2>{{ t("page.more.language") }}</h2>
+        <span>{{ t("page.more.languageDescription") }}</span>
+      </div>
+      <div class="more-language__options">
+        <NuxtLink
+          v-for="item in localeOptions"
+          :key="item.code"
+          :to="item.path"
+          class="more-language__option"
+          :class="{ active: item.code === locale }"
+        >
+          {{ item.label }}
+        </NuxtLink>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -88,6 +111,44 @@ const groups = [
   margin: 0 0 12px;
   color: var(--viewer-text);
   font-size: 16px;
+}
+
+.more-language__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.more-language__heading span {
+  color: var(--viewer-text-muted);
+  font-size: 12px;
+}
+
+.more-language__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.more-language__option {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid var(--viewer-border);
+  border-radius: 999px;
+  color: var(--viewer-text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.more-language__option.active {
+  border-color: transparent;
+  color: #fff;
+  background: var(--viewer-accent-strong);
 }
 
 .more-group__items {

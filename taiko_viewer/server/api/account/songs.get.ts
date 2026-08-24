@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
     keyword: query.keyword,
     level: query.level,
     page: query.page,
-    pageSize: query.pageSize
+    pageSize: query.pageSize,
+    scoreOnly: query.scoreOnly
   });
 });

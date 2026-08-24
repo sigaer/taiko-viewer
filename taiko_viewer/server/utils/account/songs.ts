@@ -32,6 +32,23 @@ const SONG_MUTABLE_KEYS = [
   "combo_cnt"
 ] as const;
 
+const SCORE_FIELDS = [
+  "high_score",
+  "best_score_rank",
+  "good_cnt",
+  "ok_cnt",
+  "ng_cnt",
+  "pound_cnt",
+  "stage_cnt",
+  "clear_cnt",
+  "full_combo_cnt",
+  "dondaful_combo_cnt",
+  "combo_cnt"
+] as const;
+
+export const hasEffectiveScoreRecord = (song: UserdataSong) =>
+  SCORE_FIELDS.some((field) => parsePositiveInt(song[field]) > 0);
+
 const sanitizeSongValues = (values: EditableSongFields) => {
   const sanitized: Partial<UserdataSong> = {};
   for (const key of SONG_MUTABLE_KEYS) {
@@ -105,7 +122,7 @@ const removeSongLock = async (userId: number, taikoId: string, songNo: number, l
 
 export const listAccountSongs = async (
   userId: number,
-  query: { keyword?: unknown; level?: unknown; page?: unknown; pageSize?: unknown }
+  query: { keyword?: unknown; level?: unknown; page?: unknown; pageSize?: unknown; scoreOnly?: unknown }
 ) => {
   const binding = await getCurrentBindingRow(userId);
   if (!binding) {
@@ -120,8 +137,11 @@ export const listAccountSongs = async (
   const levelFilter = Number(query.level || 0);
   const page = Math.max(1, Number(query.page || 1));
   const pageSize = Math.min(100, Math.max(10, Number(query.pageSize || 25)));
+  const scoreOnly = query.scoreOnly === true || String(query.scoreOnly || "") === "1";
 
-  const rows = (userdata.songs || []).map((song) => toSongRow(song, catalog.map.get(Number(song.song_no)), lockedKeys));
+  const rows = (userdata.songs || [])
+    .filter((song) => !scoreOnly || hasEffectiveScoreRecord(song))
+    .map((song) => toSongRow(song, catalog.map.get(Number(song.song_no)), lockedKeys));
   const filtered = rows.filter((row) => {
     if (levelFilter > 0 && row.level !== levelFilter) return false;
     if (!keyword) return true;

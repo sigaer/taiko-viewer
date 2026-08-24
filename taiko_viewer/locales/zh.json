@@ -26,6 +26,7 @@
   },
   "layout": {
     "menu": "菜单",
+    "openNav": "打开辅助导航",
     "closeNav": "关闭导航",
     "loading": "加载中...",
     "language": "语言",
@@ -268,7 +269,9 @@
   "page": {
     "more": {
       "desc": "段位、攻略、社区、工具与账户设置的集中入口。",
-      "apiDocs": "API 文档"
+      "apiDocs": "API 文档",
+      "language": "语言",
+      "languageDescription": "切换界面语言"
     },
     "myTaiko": {
       "desc": "查看你的成绩、Rating、推荐与歌曲进度入口。",

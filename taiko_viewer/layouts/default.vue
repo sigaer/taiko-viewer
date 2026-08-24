@@ -265,25 +265,19 @@ onBeforeUnmount(() => {
       </aside>
       <main class="app-content" :class="{ 'has-mobile-tabbar': showMobileTabBar }">
         <div class="mobile-nav-row">
-          <button type="button" class="mobile-nav-toggle" @click="toggleMobileNav">
+          <button
+            type="button"
+            class="mobile-nav-toggle"
+            :aria-label="t('layout.openNav')"
+            :title="t('layout.openNav')"
+            @click="toggleMobileNav"
+          >
             <span class="mobile-nav-toggle__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M4 7h16 M4 12h16 M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
               </svg>
             </span>
-            <span>{{ t("layout.menu") }}</span>
           </button>
-          <div class="locale-switcher locale-switcher--mobile" :aria-label="t('layout.switchLanguage')">
-            <NuxtLink
-              v-for="item in localeOptions"
-              :key="item.code"
-              class="locale-chip"
-              :class="{ active: item.code === locale }"
-              :to="item.path"
-            >
-              {{ item.label }}
-            </NuxtLink>
-          </div>
         </div>
         <nav class="breadcrumb-bar">
           <el-breadcrumb :key="route.fullPath" separator="/">
@@ -460,7 +454,7 @@ onBeforeUnmount(() => {
 .mobile-nav-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -468,20 +462,26 @@ onBeforeUnmount(() => {
 .mobile-nav-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(139, 107, 77, 0.32);
-  background: rgba(255, 255, 255, 0.88);
-  border-radius: 10px;
-  color: #7a5a3e;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 6px 10px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 12px;
+  color: var(--viewer-text-muted);
+  padding: 0;
   cursor: pointer;
 }
 
+.mobile-nav-toggle:hover,
+.mobile-nav-toggle:focus-visible {
+  border-color: var(--viewer-border);
+  background: rgba(196, 164, 132, 0.1);
+}
+
 .mobile-nav-toggle__icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
 }
 
