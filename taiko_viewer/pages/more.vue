@@ -43,6 +43,7 @@ const groups = [
     title: "nav.accountGroup",
     items: [
       { path: "/account/sync", label: "account.sync" },
+      { path: "/docs/score-token", label: "page.more.apiDocs" },
       { path: "/account/developer", label: "account.developer" },
       { path: "/settings", label: "nav.settings" },
       { path: "/about", label: "nav.about" }

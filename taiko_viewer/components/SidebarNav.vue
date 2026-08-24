@@ -171,6 +171,7 @@ const groups = computed(() => [
         ]
       },
       { key: "/account/sync", label: t("account.sync"), icon: "history" },
+      { key: "/docs/score-token", label: t("page.more.apiDocs"), icon: "book" },
       { key: "/account/profile", label: t("account.profile"), icon: "user" },
       { key: "/account/developer", label: t("account.developer"), icon: "badge" },
       ...(isDeveloperReviewer.value

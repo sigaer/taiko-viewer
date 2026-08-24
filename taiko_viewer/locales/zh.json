@@ -29,7 +29,8 @@
     "closeNav": "关闭导航",
     "loading": "加载中...",
     "language": "语言",
-    "switchLanguage": "切换语言"
+    "switchLanguage": "切换语言",
+    "mobileNavigation": "移动端主导航"
   },
   "nav": {
     "home": "首页",
@@ -37,6 +38,7 @@
     "forum": "论坛社区",
     "aliasLog": "别名修改日志",
     "songs": "歌曲列表",
+    "songsTab": "歌曲",
     "songsAvailable": "实装歌曲",
     "songsRemoved": "未实装/已下架歌曲",
     "v2Constants": "V2 定数",
@@ -265,7 +267,8 @@
   },
   "page": {
     "more": {
-      "desc": "段位、攻略、社区、工具与账户设置的集中入口。"
+      "desc": "段位、攻略、社区、工具与账户设置的集中入口。",
+      "apiDocs": "API 文档"
     },
     "myTaiko": {
       "desc": "查看你的成绩、Rating、推荐与歌曲进度入口。",

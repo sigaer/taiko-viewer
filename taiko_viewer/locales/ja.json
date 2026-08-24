@@ -28,7 +28,8 @@
     "closeNav": "ナビを閉じる",
     "loading": "読み込み中...",
     "language": "言語",
-    "switchLanguage": "言語を切り替え"
+    "switchLanguage": "言語を切り替え",
+    "mobileNavigation": "モバイルメインナビゲーション"
   },
   "nav": {
     "home": "ホーム",
@@ -36,6 +37,7 @@
     "forum": "フォーラム",
     "aliasLog": "別名変更ログ",
     "songs": "楽曲一覧",
+    "songsTab": "楽曲",
     "songsAvailable": "実装曲",
     "songsRemoved": "未実装・削除曲",
     "v2Constants": "V2 定数",
@@ -264,7 +266,8 @@
   },
   "page": {
     "more": {
-      "desc": "段位、攻略、コミュニティ、ツール、アカウント設定への入口です。"
+      "desc": "段位、攻略、コミュニティ、ツール、アカウント設定への入口です。",
+      "apiDocs": "API ドキュメント"
     },
     "myTaiko": {
       "desc": "成績、Rating、おすすめ、楽曲進捗への入口です。",
