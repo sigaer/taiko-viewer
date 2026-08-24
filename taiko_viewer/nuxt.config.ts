@@ -240,6 +240,7 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: false,
+      failOnError: false,
       routes: ["/grade", "/grade/2023", "/grade/2024", "/settings", "/about", "/ja", "/ja/settings", "/ja/about"]
     }
   },
