@@ -6,6 +6,7 @@ export const useAccountState = () => {
   const {
     accountUser,
     accountLoaded,
+    accountAuthError,
     resolveAccountUser,
     clearResolvedAccountUser
   } = useAccountAuthStatus();
