@@ -5,6 +5,8 @@ defineProps<{ accountStatusUnavailable?: boolean }>();
 
 const { t } = useI18n();
 const localePath = useLocalePath();
+const runtimeConfig = useRuntimeConfig();
+const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
 </script>
 
 <template>
@@ -15,7 +17,10 @@ const localePath = useLocalePath();
       <span></span>
     </div>
     <div class="guest-hero__content">
-      <p class="guest-hero__brand">Sakura Taiko Viewer</p>
+      <p class="guest-hero__brand">
+        Sakura Taiko Viewer
+        <span>v{{ appVersion }}</span>
+      </p>
       <h2 id="guest-home-title">{{ t("page.home.guest.heroTitle") }}</h2>
       <p class="guest-hero__lead">{{ t("page.home.guest.heroDescription") }}</p>
       <HomeGuestSongSearch />
@@ -79,6 +84,13 @@ const localePath = useLocalePath();
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.guest-hero__brand span {
+  margin-left: 0.45em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
 }
 
 .guest-hero h2 {
