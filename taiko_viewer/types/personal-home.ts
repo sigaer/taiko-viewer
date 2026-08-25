@@ -1,16 +1,7 @@
-import type { PlayerRatingIntelligence } from "./recommendation-intelligence";
+import type { OrdinaryRecommendationItem, OrdinaryRecommendationsPayload, PlayerRatingIntelligence } from "./recommendation-intelligence";
 
 export type PersonalRatingSummary = PlayerRatingIntelligence;
 
-export type PersonalRecommendation = {
-  title: string;
-  song_id: number;
-  level: number;
-  is_unplayed: boolean;
-  user_indicator: number;
-  reference_indicator: number;
-};
+export type PersonalRecommendation = OrdinaryRecommendationItem & { song_id: number; is_unplayed: boolean };
 
-export type PersonalRecommendationsPayload = {
-  items: PersonalRecommendation[];
-};
+export type PersonalRecommendationsPayload = Omit<OrdinaryRecommendationsPayload, "items"> & { items: PersonalRecommendation[] };
