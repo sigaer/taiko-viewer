@@ -90,6 +90,7 @@
       "eyebrow": "マイ太鼓",
       "greeting": "おかえりなさい、{name}",
       "rating": "Rating",
+      "ratingBasis": "総合 Rating",
       "connected": "成績を接続済み",
       "summaryUnavailable": "個人サマリーを利用できません",
       "viewScores": "自分の成績を見る",

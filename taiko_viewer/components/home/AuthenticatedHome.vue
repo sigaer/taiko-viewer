@@ -92,6 +92,7 @@ const trackClick = (event: string, source: string) => {
           <strong v-else-if="formatRating">{{ formatRating }}</strong>
           <strong v-else>{{ t("home.personal.connected") }}</strong>
           <small v-if="!ratingPending && ratingError">{{ t("home.personal.summaryUnavailable") }}</small>
+          <small v-else-if="!ratingPending && rating?.model === 'v1'">{{ t("home.personal.ratingBasis") }}</small>
         </div>
         <NuxtLink
           :to="localePath('/my')"

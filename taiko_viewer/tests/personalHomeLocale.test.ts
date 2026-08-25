@@ -7,6 +7,7 @@ const personalHomeKeys = [
   "home.personal.eyebrow",
   "home.personal.greeting",
   "home.personal.rating",
+  "home.personal.ratingBasis",
   "home.personal.viewScores",
   "home.personal.connected",
   "home.personal.summaryUnavailable",
@@ -41,6 +42,13 @@ for (const [locale, messages] of [["zh", zh], ["ja", ja]] as const) {
     }
   });
 }
+
+test("home copy does not claim unsupported ability judgments", () => {
+  for (const messages of [zh, ja]) {
+    const text = JSON.stringify(messages.home.personal);
+    assert.doesNotMatch(text, /短板|弱项|强项|练习重点|弱点|苦手|強み|練習重点/);
+  }
+});
 
 test("mobile tab and personal page use separate labels", () => {
   assert.equal(zh.nav.my, "我的");

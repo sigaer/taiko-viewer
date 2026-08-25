@@ -91,6 +91,7 @@
       "eyebrow": "我的太鼓",
       "greeting": "欢迎回来，{name}",
       "rating": "Rating",
+      "ratingBasis": "综合 Rating",
       "connected": "成绩已连接",
       "summaryUnavailable": "个人摘要暂时不可用",
       "viewScores": "查看我的成绩",

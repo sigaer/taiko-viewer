@@ -1,7 +1,6 @@
-export type PersonalRatingSummary = {
-  current: number | null;
-  scoreCount: number;
-};
+import type { PlayerRatingIntelligence } from "./recommendation-intelligence";
+
+export type PersonalRatingSummary = PlayerRatingIntelligence;
 
 export type PersonalRecommendation = {
   title: string;
