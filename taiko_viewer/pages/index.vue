@@ -5,7 +5,7 @@ import { buildPageDescription } from "~/utils/seo";
 import { resolveHomePresentation } from "~/utils/homePresentation";
 
 const { t } = useI18n();
-const { data: homeContent, pending, error } = await useHomeContent();
+const { data: homeContent, pending, error } = useHomeContent();
 const { accountUser } = useAccountAuthStatus();
 const homeStateResolver = useHomeState();
 await homeStateResolver.resolve();
@@ -14,6 +14,12 @@ const homeStateStatus = homeStateResolver.status;
 const homePresentation = computed(() =>
   resolveHomePresentation(homeStateStatus.value, homeState.value)
 );
+const authenticatedHomeState = computed(() => {
+  if (homeState.value === "authenticated_bound_empty" || homeState.value === "authenticated_ready") {
+    return homeState.value;
+  }
+  return "authenticated_unbound";
+});
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 const eventSlides = computed(() => [
   { image: "/optimized/2026-autumn-800.webp", title: t("page.home.eventAutumn") },
@@ -62,7 +68,7 @@ useViewerSeo(() => ({
 
     <HomeAuthenticatedHome
       v-else
-      :state="homeState || 'authenticated_unbound'"
+      :state="authenticatedHomeState"
       :user="accountUser"
       :latest-songs="latestSongs"
       :content-pending="pending"

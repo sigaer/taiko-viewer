@@ -74,6 +74,11 @@ const tabs: Array<{ key: MobileTab; path: string; icon: string }> = [
   background: rgba(196, 164, 132, 0.16);
 }
 
+.mobile-tabbar__item:focus-visible {
+  outline: 3px solid var(--viewer-accent-strong);
+  outline-offset: -3px;
+}
+
 .mobile-tabbar__icon {
   width: 21px;
   height: 21px;

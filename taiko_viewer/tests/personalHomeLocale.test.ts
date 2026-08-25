@@ -48,3 +48,12 @@ test("mobile tab and personal page use separate labels", () => {
   assert.equal(ja.nav.my, "マイ");
   assert.equal(ja.nav.myTaiko, "マイ太鼓");
 });
+
+test("personal home error copy does not expose implementation details", () => {
+  for (const messages of [zh, ja]) {
+    for (const key of ["home.personal.summaryUnavailable", "home.personal.recommendationUnavailable"]) {
+      const value = String(resolve(messages, key));
+      assert.doesNotMatch(value, /\/api\/|\b(?:500|502)\b|timeout|worker/i);
+    }
+  }
+});

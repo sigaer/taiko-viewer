@@ -38,6 +38,7 @@ const runSearch = async () => {
   const sequence = ++requestSequence;
   loading.value = true;
   failed.value = false;
+  open.value = true;
   try {
     const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", {
       query: {

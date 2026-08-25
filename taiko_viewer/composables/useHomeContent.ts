@@ -5,8 +5,11 @@ const createDefaultPayload = (): HomeContentPayload => ({
 });
 
 export const useHomeContent = () =>
-  useAsyncData<HomeContentPayload>(
+  useLazyAsyncData<HomeContentPayload>(
     "home-content",
     () => useViewerApiFetch()<HomeContentPayload>("/api/content/home"),
-    { default: createDefaultPayload }
+    {
+      default: createDefaultPayload,
+      server: false
+    }
   );

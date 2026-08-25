@@ -137,6 +137,12 @@ const groups = [
   background: var(--viewer-accent-strong);
 }
 
+.more-language__option:focus-visible,
+.more-link:focus-visible {
+  outline: 3px solid var(--viewer-accent-strong);
+  outline-offset: 2px;
+}
+
 .more-group__items {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

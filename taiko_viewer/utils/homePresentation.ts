@@ -15,3 +15,8 @@ export const shouldHideHomeChrome = (
   navKey: unknown,
   presentation: HomePresentation
 ) => navKey === "/" && presentation !== "loading";
+
+export const shouldShowPersonalRecommendation = (
+  pending: boolean,
+  hasRecommendation: boolean
+) => pending || hasRecommendation;

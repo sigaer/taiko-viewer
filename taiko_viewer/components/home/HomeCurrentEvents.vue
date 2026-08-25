@@ -8,6 +8,7 @@ defineProps<{
 const { t } = useI18n();
 const sectionRef = ref<HTMLElement | null>(null);
 const showDynamics = ref(false);
+const dynamicsAvailable = ref(true);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
@@ -42,8 +43,12 @@ onBeforeUnmount(() => observer?.disconnect());
         <div><h3>{{ event.title }}</h3></div>
       </article>
     </div>
-    <div class="guest-events__dynamic panel-card">
-      <LazyHomeBilibiliDynamicFeed v-if="showDynamics" :limit="1" />
+    <div v-if="dynamicsAvailable" class="guest-events__dynamic panel-card">
+      <LazyHomeBilibiliDynamicFeed
+        v-if="showDynamics"
+        :limit="1"
+        @unavailable="dynamicsAvailable = false"
+      />
       <div v-else class="guest-events__placeholder shimmer-card" aria-hidden="true"></div>
     </div>
   </section>

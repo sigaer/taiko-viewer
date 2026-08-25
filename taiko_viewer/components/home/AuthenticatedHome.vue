@@ -3,6 +3,7 @@ import type { AccountAuthUser } from "~/composables/useAccountAuthStatus";
 import type { HomeState } from "~/utils/homeState";
 import type { SongCatalogItem } from "~/types/content";
 import { trackViewerEvent } from "~/utils/analytics";
+import { shouldShowPersonalRecommendation } from "~/utils/homePresentation";
 
 const props = defineProps<{
   state: Exclude<HomeState, "guest">;
@@ -17,11 +18,14 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
 const isReady = computed(() => props.state === "authenticated_ready");
-const { rating, ratingPending, ratingError, recommendations, recommendationsPending, recommendationsError } =
+const { rating, ratingPending, ratingError, recommendations, recommendationsPending } =
   usePersonalHome(isReady, userId);
 
 const displayName = computed(() => props.user?.username || t("account.title"));
 const recommendation = computed(() => recommendations.value.items[0] || null);
+const showRecommendation = computed(() =>
+  shouldShowPersonalRecommendation(recommendationsPending.value, Boolean(recommendation.value))
+);
 const recommendationTitle = computed(() => {
   if (!recommendation.value) return "";
   return recommendation.value.title || t("home.personal.recommendationSong");
@@ -99,7 +103,11 @@ const trackClick = (event: string, source: string) => {
         </NuxtLink>
       </div>
 
-      <section class="recommendation-card panel-card" aria-labelledby="recommendation-title">
+      <section
+        v-if="showRecommendation"
+        class="recommendation-card panel-card"
+        aria-labelledby="recommendation-title"
+      >
         <div class="recommendation-card__heading">
           <h2 id="recommendation-title">{{ t("home.personal.recommendationEyebrow") }}</h2>
         </div>
@@ -134,12 +142,6 @@ const trackClick = (event: string, source: string) => {
             <span aria-hidden="true">→</span>
           </NuxtLink>
         </template>
-        <div v-else class="recommendation-card__empty">
-          <p>{{ recommendationsError ? t("home.personal.recommendationUnavailable") : t("home.personal.noRecommendation") }}</p>
-          <NuxtLink :to="localePath('/tools/recommend')" class="personal-button personal-button--secondary">
-            {{ t("home.personal.openRecommendationTool") }}
-          </NuxtLink>
-        </div>
       </section>
     </section>
 
@@ -209,7 +211,11 @@ const trackClick = (event: string, source: string) => {
   line-height: 1.1;
 }
 
-.personal-status h1 { font-size: clamp(24px, 3vw, 34px); }
+.personal-status h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(24px, 3vw, 34px);
+}
 .recommendation-card h2 { font-size: clamp(22px, 2.5vw, 30px); }
 
 .personal-rating { display: grid; gap: 4px; }
@@ -240,12 +246,19 @@ const trackClick = (event: string, source: string) => {
 .recommendation-card__song { min-width: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 18px; color: inherit; text-decoration: none; }
 .recommendation-card__cover { aspect-ratio: 1; overflow: hidden; border-radius: 18px; background: linear-gradient(145deg, #fff, var(--personal-accent-soft)); box-shadow: 0 12px 25px rgba(104, 70, 45, 0.14); }
 .recommendation-card__details { min-width: 0; display: grid; gap: 8px; }
-.recommendation-card__details strong { overflow: hidden; color: var(--personal-ink); font-size: clamp(17px, 2vw, 24px); line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.recommendation-card__details strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--personal-ink);
+  font-size: clamp(17px, 2vw, 24px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
 .recommendation-card__details span { color: var(--personal-accent); font-size: 14px; font-weight: 800; }
 .recommendation-card__arrow { color: var(--personal-accent); font-size: 26px; }
 .recommendation-card__loading { min-height: 170px; border-radius: 18px; }
-.recommendation-card__empty { display: grid; align-content: center; justify-items: start; gap: 14px; min-height: 170px; color: var(--personal-muted); }
-.recommendation-card__empty p { margin: 0; }
 
 .personal-onboarding { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 24px; padding: clamp(24px, 5vw, 48px); }
 .personal-onboarding__mark { width: 86px; height: 86px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 6px solid #fff; border-radius: 50%; background: var(--personal-accent); box-shadow: 0 12px 25px rgba(104, 70, 45, 0.16); }
@@ -255,7 +268,17 @@ const trackClick = (event: string, source: string) => {
 .personal-onboarding h1 { font-size: clamp(26px, 4vw, 42px); }
 .personal-onboarding p:not(.personal-eyebrow) { max-width: 540px; margin: 0 0 4px; color: var(--personal-muted); line-height: 1.65; }
 
-:global(body.theme-dark .authenticated-home) { --personal-ink: #f5e7dc; --personal-muted: #c6b3a5; --personal-accent: #e58b6e; --personal-accent-soft: #493128; }
+:global(body.theme-dark .authenticated-home) {
+  --personal-ink: #f5e7dc;
+  --personal-muted: #c6b3a5;
+  --personal-accent: #e58b6e;
+  --personal-accent-soft: #493128;
+  --viewer-text: #f2e7dc;
+  --viewer-text-muted: #c1b2a5;
+  --viewer-accent-strong: #d89368;
+  --viewer-surface: rgba(27, 24, 22, 0.92);
+  --viewer-border: rgba(255, 255, 255, 0.12);
+}
 :global(body.theme-dark .personal-status),
 :global(body.theme-dark .recommendation-card),
 :global(body.theme-dark .personal-onboarding) { border-color: rgba(255, 255, 255, 0.12); background: linear-gradient(135deg, rgba(46, 35, 29, 0.98), rgba(54, 38, 31, 0.94)); }

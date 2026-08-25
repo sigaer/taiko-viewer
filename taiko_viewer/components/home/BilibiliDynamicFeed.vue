@@ -5,9 +5,10 @@ import { useBilibiliDynamics } from "~/composables/useBilibiliDynamics";
 import { BILIBILI_DYNAMIC_UID, BILIBILI_SPACE_URL } from "~/utils/bilibili";
 
 const props = withDefaults(defineProps<{ limit?: number }>(), { limit: 0 });
+const emit = defineEmits<{ unavailable: [] }>();
 
 const { locale } = useI18n();
-const { items, pending, error, reload } = useBilibiliDynamics(BILIBILI_DYNAMIC_UID);
+const { items, pending, error } = useBilibiliDynamics(BILIBILI_DYNAMIC_UID);
 
 const previewVisible = ref(false);
 const previewImage = ref<string | null>(null);
@@ -16,14 +17,16 @@ const visibleItems = computed(() =>
   props.limit > 0 ? items.value.slice(0, props.limit) : items.value
 );
 
+watch(error, (value) => {
+  if (value) emit("unavailable");
+});
+
 const copy = computed(() =>
   locale.value === "ja"
     ? {
         title: "投稿",
         profile: "Bilibili ホームを見る",
         previewAlt: "プレビュー",
-        loadFailed: "投稿の取得に失敗しました：",
-        retry: "再試行",
         empty: "投稿はまだありません",
         collapse: "折りたたむ",
         expand: "全文を見る",
@@ -36,8 +39,6 @@ const copy = computed(() =>
         title: "动态",
         profile: "查看 B 站主页",
         previewAlt: "预览",
-        loadFailed: "获取动态失败：",
-        retry: "重试",
         empty: "暂无动态",
         collapse: "收起全文",
         expand: "查看全文",
@@ -130,10 +131,6 @@ const openPreview = (url: string, event: Event) => {
     <div v-if="pending" class="dynamic-list">
       <article v-for="index in 3" :key="index" class="dynamic-card dynamic-card--skeleton shimmer-card" />
     </div>
-
-    <el-empty v-else-if="error" :description="`${copy.loadFailed}${error}`">
-      <el-button type="primary" @click="reload">{{ copy.retry }}</el-button>
-    </el-empty>
 
     <el-empty v-else-if="!visibleItems.length" :description="copy.empty" />
 
