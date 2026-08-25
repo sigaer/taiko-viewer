@@ -80,23 +80,18 @@ const trackClick = (event: string, source: string) => {
 
     <section v-else class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">
-        <div class="personal-status__topline">
-          <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
-          <span class="personal-status__dot" aria-hidden="true"></span>
-        </div>
-        <h1 id="personal-home-title">{{ t("home.personal.title") }}</h1>
-        <p class="personal-greeting">{{ t("home.personal.greeting", { name: displayName }) }}</p>
+        <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
+        <h1 id="personal-home-title">{{ t("home.personal.greeting", { name: displayName }) }}</h1>
         <div class="personal-rating" :class="{ 'personal-rating--loading': ratingPending }" aria-live="polite">
           <span>{{ t("home.personal.rating") }}</span>
           <strong v-if="ratingPending">—</strong>
           <strong v-else-if="formatRating">{{ formatRating }}</strong>
           <strong v-else>{{ t("home.personal.connected") }}</strong>
-          <small v-if="!ratingPending && formatRating">{{ t("home.personal.ratingUpdated") }}</small>
-          <small v-else-if="!ratingPending && ratingError">{{ t("home.personal.summaryUnavailable") }}</small>
+          <small v-if="!ratingPending && ratingError">{{ t("home.personal.summaryUnavailable") }}</small>
         </div>
         <NuxtLink
           :to="localePath('/my')"
-          class="personal-button personal-button--primary"
+          class="personal-button personal-button--secondary"
           @click="trackClick('home_personal_scores_click', 'status')"
         >
           {{ t("home.personal.viewScores") }}
@@ -106,11 +101,7 @@ const trackClick = (event: string, source: string) => {
 
       <section class="recommendation-card panel-card" aria-labelledby="recommendation-title">
         <div class="recommendation-card__heading">
-          <div>
-            <p class="personal-eyebrow">{{ t("home.personal.recommendationEyebrow") }}</p>
-            <h2 id="recommendation-title">{{ t("home.personal.recommendationTitle") }}</h2>
-          </div>
-          <span class="recommendation-card__beat" aria-hidden="true">●</span>
+          <h2 id="recommendation-title">{{ t("home.personal.recommendationEyebrow") }}</h2>
         </div>
         <div v-if="recommendationsPending" class="recommendation-card__loading shimmer-card" aria-busy="true"></div>
         <template v-else-if="recommendation">
@@ -131,14 +122,12 @@ const trackClick = (event: string, source: string) => {
             <div class="recommendation-card__details">
               <strong>{{ recommendationTitle }}</strong>
               <span>{{ t("home.personal.level", { level: recommendation.level }) }}</span>
-              <small v-if="recommendation.is_unplayed">{{ t("home.personal.newToYou") }}</small>
-              <small v-else>{{ t("home.personal.keepPlaying") }}</small>
             </div>
             <span class="recommendation-card__arrow" aria-hidden="true">↗</span>
           </NuxtLink>
           <NuxtLink
             :to="localePath(`/songs/${recommendation.song_id}`)"
-            class="personal-button personal-button--secondary"
+            class="personal-button personal-button--primary"
             @click="trackClick('home_recommendation_click', 'cta')"
           >
             {{ t("home.personal.viewSong") }}
@@ -195,7 +184,6 @@ const trackClick = (event: string, source: string) => {
   padding: clamp(22px, 4vw, 38px);
 }
 
-.personal-status__topline,
 .recommendation-card__heading {
   display: flex;
   align-items: flex-start;
@@ -223,10 +211,6 @@ const trackClick = (event: string, source: string) => {
 
 .personal-status h1 { font-size: clamp(24px, 3vw, 34px); }
 .recommendation-card h2 { font-size: clamp(22px, 2.5vw, 30px); }
-.personal-greeting { margin: -8px 0 0; color: var(--personal-muted); font-size: 15px; }
-.personal-status__dot,
-.recommendation-card__beat { width: 14px; height: 14px; border-radius: 50%; background: var(--personal-accent); box-shadow: 0 0 0 7px rgba(184, 77, 55, 0.12); }
-.recommendation-card__beat { color: var(--personal-accent); font-size: 12px; line-height: 14px; text-align: center; box-shadow: none; }
 
 .personal-rating { display: grid; gap: 4px; }
 .personal-rating span { color: var(--personal-muted); font-size: 13px; font-weight: 700; }
@@ -258,7 +242,6 @@ const trackClick = (event: string, source: string) => {
 .recommendation-card__details { min-width: 0; display: grid; gap: 8px; }
 .recommendation-card__details strong { overflow: hidden; color: var(--personal-ink); font-size: clamp(17px, 2vw, 24px); line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 .recommendation-card__details span { color: var(--personal-accent); font-size: 14px; font-weight: 800; }
-.recommendation-card__details small { color: var(--personal-muted); font-size: 12px; }
 .recommendation-card__arrow { color: var(--personal-accent); font-size: 26px; }
 .recommendation-card__loading { min-height: 170px; border-radius: 18px; }
 .recommendation-card__empty { display: grid; align-content: center; justify-items: start; gap: 14px; min-height: 170px; color: var(--personal-muted); }

@@ -5,10 +5,8 @@ import ja from "../locales/ja.json" with { type: "json" };
 
 const personalHomeKeys = [
   "home.personal.eyebrow",
-  "home.personal.title",
   "home.personal.greeting",
   "home.personal.rating",
-  "home.personal.ratingUpdated",
   "home.personal.viewScores",
   "home.personal.connected",
   "home.personal.summaryUnavailable",
@@ -19,11 +17,8 @@ const personalHomeKeys = [
   "home.personal.emptyBody",
   "home.personal.syncCta",
   "home.personal.recommendationEyebrow",
-  "home.personal.recommendationTitle",
   "home.personal.recommendationSong",
   "home.personal.level",
-  "home.personal.newToYou",
-  "home.personal.keepPlaying",
   "home.personal.viewSong",
   "home.personal.recommendationUnavailable",
   "home.personal.noRecommendation",
