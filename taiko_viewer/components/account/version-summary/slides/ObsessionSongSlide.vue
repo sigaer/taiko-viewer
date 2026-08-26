@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import AnnualObsessionGreenEchoScene from "../AnnualObsessionGreenEchoScene.vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
-import StoryCounter from "../StoryCounter.vue";
-import StorySlideShell from "../StorySlideShell.vue";
-import { isUsableMetric } from "~/utils/annualPresentation";
+import { hasUsableText } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -14,230 +12,35 @@ const props = defineProps<{
   reducedMotion: boolean;
 }>();
 
+const formatter = new Intl.NumberFormat("zh-CN");
 const song = computed(() => props.summary.obsessionSong);
-const { locale } = useI18n();
-const uiText = computed(() =>
-  locale.value === "ja"
-    ? { activeDays: "思い出した日", playCount: "重ねた出会い", memory: "余韻", coverFallback: "2026" }
-    : { activeDays: "想起它的日子", playCount: "重逢的次数", memory: "回响", coverFallback: "2026" }
-);
+
+const safeMetric = (value: unknown) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? Math.max(0, Math.round(numeric)) : 0;
+};
+const safeText = (value: unknown, fallback: string) => hasUsableText(value)
+  && !["undefined", "null", "nan"].includes(value.trim().toLowerCase())
+  ? value.trim()
+  : fallback;
+const safeCoverUrl = (value: unknown) => safeText(value, "")
+  && !["undefined", "null"].includes(String(value).trim().toLowerCase())
+  ? String(value).trim()
+  : "";
+
+const activeDaysText = computed(() => formatter.format(safeMetric(song.value?.activeDays)));
+const playCountText = computed(() => formatter.format(safeMetric(song.value?.playCount)));
+const songName = computed(() => safeText(song.value?.name, "这首歌"));
+const coverUrl = computed(() => safeCoverUrl(song.value?.coverUrl));
 </script>
 
 <template>
-  <StorySlideShell
-    :page-index="pageIndex"
-    :page-total="pageTotal"
-    :eyebrow="summary.copy.obsessionSong.eyebrow"
-    :title="summary.copy.obsessionSong.title"
-    :lead="summary.copy.obsessionSong.body"
-    tone="royal"
+  <AnnualObsessionGreenEchoScene
     :active="active"
     :reduced-motion="reducedMotion"
-  >
-    <div class="obsession-slide">
-      <div class="obsession-slide__memory" data-animate>
-        <el-image v-if="song" :src="song.coverUrl" fit="cover" class="obsession-slide__cover">
-          <template #error>
-            <AnnualArtworkFallback :label="uiText.coverFallback" />
-          </template>
-        </el-image>
-        <div class="obsession-slide__echoes">
-          <span v-for="index in Math.min(song?.activeDays || 0, 7)" :key="index"></span>
-        </div>
-      </div>
-
-      <div class="obsession-slide__metrics">
-        <article v-if="isUsableMetric(song?.activeDays)" class="obsession-slide__metric" data-animate>
-          <span>{{ uiText.activeDays }}</span>
-          <strong><StoryCounter :value="song?.activeDays || 0" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article v-if="isUsableMetric(song?.playCount)" class="obsession-slide__metric" data-animate>
-          <span>{{ uiText.playCount }}</span>
-          <strong><StoryCounter :value="song?.playCount || 0" :active="active" :reduced-motion="reducedMotion" /></strong>
-        </article>
-        <article class="obsession-slide__metric obsession-slide__metric--wide" data-animate>
-          <span>{{ uiText.memory }}</span>
-          <strong>{{ song?.name || summary.copy.obsessionSong.title }}</strong>
-          <small>{{ summary.copy.obsessionSong.body }}</small>
-        </article>
-      </div>
-    </div>
-  </StorySlideShell>
+    :active-days-text="activeDaysText"
+    :play-count-text="playCountText"
+    :song-name="songName"
+    :cover-url="coverUrl"
+  />
 </template>
-
-<style scoped>
-.obsession-slide {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
-  gap: 18px;
-  align-items: stretch;
-  height: 100%;
-  min-height: 0;
-}
-
-@media (max-height: 900px) {
-  .obsession-slide { grid-template-columns: minmax(110px, 30vh) minmax(0, 1fr); gap: 10px; }
-  .obsession-slide__metric { padding: 12px 14px; border-radius: 20px; }
-}
-
-@media (max-width: 720px) and (max-height: 900px) {
-  .obsession-slide { grid-template-columns: minmax(94px, 28vw) minmax(0, 1fr); }
-  .obsession-slide__memory { grid-template-columns: 1fr; }
-}
-
-.obsession-slide__memory,
-.obsession-slide__metric {
-  padding: 22px;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(16px);
-}
-
-.obsession-slide__memory {
-  display: grid;
-  gap: 16px;
-}
-
-.obsession-slide__cover {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 30px;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(155, 201, 255, 0.28), rgba(57, 120, 200, 0.22));
-}
-
-.obsession-slide__cover--fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 248, 237, 0.86);
-  font-family: var(--viewer-display-font);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  letter-spacing: 0.08em;
-}
-
-.obsession-slide__echoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.obsession-slide__echoes span {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(155, 201, 255, 0.92), rgba(57, 120, 200, 0.92));
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
-}
-
-.obsession-slide__metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.obsession-slide__metric span {
-  display: block;
-  color: rgba(255, 230, 196, 0.68);
-  letter-spacing: 0.14em;
-  font-size: 12px;
-}
-
-.obsession-slide__metric strong {
-  display: block;
-  margin-top: 10px;
-  color: #fff8ed;
-  font-size: clamp(2rem, 3.8vw, 3rem);
-  line-height: 1.08;
-}
-
-.obsession-slide__metric small {
-  display: block;
-  margin-top: 14px;
-  color: rgba(255, 237, 214, 0.76);
-  line-height: 1.84;
-}
-
-.obsession-slide__metric--wide {
-  grid-column: span 2;
-}
-
-@media (max-width: 960px) {
-  .obsession-slide {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 720px) {
-  .obsession-slide {
-    grid-template-columns: 118px minmax(0, 1fr);
-    align-items: start;
-  }
-
-  .obsession-slide__memory,
-  .obsession-slide__metric {
-    padding: 16px;
-    border-radius: 22px;
-  }
-
-  .obsession-slide__cover {
-    border-radius: 22px;
-  }
-
-  .obsession-slide__echoes {
-    gap: 8px;
-  }
-
-  .obsession-slide__echoes span {
-    width: 14px;
-    height: 14px;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
-  }
-
-  .obsession-slide__metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .obsession-slide__metric--wide {
-    grid-column: 1 / -1;
-  }
-
-  .obsession-slide__metric strong {
-    font-size: clamp(1.4rem, 5vw, 2.1rem);
-  }
-
-  .obsession-slide__metric small {
-    margin-top: 12px;
-    line-height: 1.72;
-  }
-}
-
-@media (max-width: 420px) {
-  .obsession-slide {
-    grid-template-columns: 1fr;
-  }
-
-  .obsession-slide__metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .obsession-slide__metric--wide {
-    grid-column: span 1;
-  }
-}
-
-@media (max-width: 720px) {
-  .obsession-slide { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; align-items: start; }
-  .obsession-slide__memory { display: grid; padding: 8px; border-radius: 16px; gap: 7px; }
-  .obsession-slide__cover { border-radius: 13px; }
-  .obsession-slide__echoes { display: flex; gap: 4px; }
-  .obsession-slide__echoes span { width: 8px; height: 8px; box-shadow: none; }
-  .obsession-slide__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .obsession-slide__metric { padding: 9px 10px; border-radius: 16px; }
-  .obsession-slide__metric--wide { grid-column: 1 / -1; }
-  .obsession-slide__metric span { font-size: 10px; letter-spacing: 0.08em; }
-  .obsession-slide__metric strong { margin-top: 5px; font-size: clamp(1.05rem, 5vw, 1.4rem); overflow-wrap: anywhere; }
-  .obsession-slide__metric small { display: block; margin-top: 6px; font-size: 0.75rem; line-height: 1.32; overflow: visible; }
-}
-</style>

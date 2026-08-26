@@ -251,6 +251,26 @@ for (const asset of ["002", "036", "038", "006", "010", "023", "034"]) {
 }
 assert.equal(await exists("public/weekday/backgorund_12.png"), true, "weekday watercolor backdrop is missing");
 
+const obsessionSlideSource = await read("components/account/version-summary/slides/ObsessionSongSlide.vue");
+const obsessionSceneSource = await read("components/account/version-summary/AnnualObsessionGreenEchoScene.vue");
+const obsessionCoverSource = await read("components/account/version-summary/AnnualObsessionCoverBlock.vue");
+assert.equal(obsessionSlideSource.includes("AnnualObsessionGreenEchoScene"), true, "obsession page does not use its dedicated green echo scene");
+assert.equal(obsessionSlideSource.includes('new Intl.NumberFormat("zh-CN")'), true, "obsession metrics are not formatted for Chinese");
+assert.equal(obsessionSlideSource.includes('"这首歌"'), true, "obsession song has no safe Chinese fallback");
+assert.equal(obsessionSlideSource.includes("StorySlideShell"), false, "obsession page still uses the dashboard slide shell");
+assert.equal(obsessionSlideSource.includes("obsession-slide__metrics"), false, "obsession page still renders metric cards");
+assert.equal(obsessionSlideSource.includes("obsession-slide__echoes"), false, "obsession page still renders echo dots");
+assert.equal(obsessionSceneSource.includes("useAnnualTimeline"), true, "obsession scene does not use the annual motion lifecycle");
+assert.equal(obsessionSceneSource.includes("saveData"), true, "obsession scene does not reduce motion for save-data mode");
+assert.equal(obsessionSceneSource.includes('/obsession/background_6.png'), true, "obsession scene is missing the green watercolor backdrop");
+assert.equal(obsessionSceneSource.includes("2025版本报告-N6-效果图-v1.0.png"), false, "obsession reference image is used by the implementation");
+assert.equal(obsessionSceneSource.includes("cover_bg.png"), false, "obsession example cover is used by the implementation");
+assert.equal(obsessionCoverSource.includes(":src=\"coverUrl\""), true, "obsession cover is not rendered from live song data");
+assert.equal(obsessionCoverSource.includes("AnnualArtworkFallback"), true, "obsession cover has no visual fallback");
+for (const asset of ["2025版本报告-N6-效果图-v1.0.png", "background_6.png", "cover_bg.png"]) {
+  assert.equal(await exists(`public/obsession/${asset}`), true, `obsession asset is missing: ${asset}`);
+}
+
 const lateNightSlideSource = await read("components/account/version-summary/slides/LateNightSlide.vue");
 const lateNightSceneSource = await read("components/account/version-summary/AnnualLateNightFireworksScene.vue");
 assert.equal(lateNightSlideSource.includes("AnnualLateNightFireworksScene"), true, "late-night page does not use its dedicated fireworks scene");

@@ -1066,6 +1066,106 @@ const auditLateNightScene = async (browser, cookie, viewport) => {
   reportProgress(`late-night scene ${viewport.width}x${viewport.height}: passed`);
 };
 
+const auditObsessionScene = async (browser, cookie, viewport) => {
+  reportProgress(`obsession scene ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({
+    viewport,
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "reduce"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const obsessionIndex = pageKeys.indexOf("obsession");
+  assert.ok(obsessionIndex >= 0, "obsession scene is missing");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, obsessionIndex);
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='obsession']")?.getAttribute("aria-hidden") === "false");
+  const scene = page.locator(".story-player__slide[data-page-key='obsession'] .annual-obsession-green-echo");
+  await scene.waitFor({ state: "visible", timeout: 10_000 });
+  await page.waitForFunction(() => {
+    const image = document.querySelector(".annual-obsession-green-echo__backdrop");
+    return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+  });
+
+  const audit = await scene.evaluate((node) => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const rect = node.getBoundingClientRect();
+    const headline = node.querySelector(".annual-obsession-green-echo__headline")?.getBoundingClientRect();
+    const cover = node.querySelector(".annual-obsession-cover")?.getBoundingClientRect();
+    const song = node.querySelector(".annual-obsession-green-echo__cover-area h1")?.getBoundingClientRect();
+    const closing = node.querySelector(".annual-obsession-green-echo__closing")?.getBoundingClientRect();
+    const background = node.querySelector(".annual-obsession-green-echo__backdrop");
+    const imageSources = [...node.querySelectorAll("img")].map((image) => image.getAttribute("src") || "");
+    const visibleText = [...node.querySelectorAll("p, h1, strong")]
+      .filter((element) => element.textContent?.trim() && getComputedStyle(element).display !== "none")
+      .map((element) => ({ text: element.textContent.trim(), rect: element.getBoundingClientRect() }));
+    const sceneText = node.textContent || "";
+    return {
+      fillsViewport: Math.abs(rect.width - viewportWidth) <= 1 && Math.abs(rect.height - viewportHeight) <= 1,
+      motionState: node.getAttribute("data-motion-state"),
+      sceneZIndex: Number(getComputedStyle(node).zIndex),
+      backgroundSrc: background?.getAttribute("src") || "",
+      backgroundSize: background instanceof HTMLImageElement ? [background.naturalWidth, background.naturalHeight] : [],
+      usesReferenceImage: imageSources.some((source) => source.includes("2025版本报告-N6-效果图-v1.0.png")),
+      usesExampleCover: imageSources.some((source) => source.includes("cover_bg.png")),
+      hasOldLayout: node.querySelectorAll(".story-slide-shell, .obsession-slide__metrics, .obsession-slide__echoes, article").length > 0,
+      headlineTop: headline?.top ?? -1,
+      coverRect: cover ? { left: cover.left, top: cover.top, width: cover.width, height: cover.height } : null,
+      songBottom: song?.bottom ?? -1,
+      closingRect: closing ? { top: closing.top, bottom: closing.bottom } : null,
+      hasActiveDaysLine: visibleText.some(({ text }) => /^\d[\d,]* 个不同的日子里$/.test(text)),
+      hasPlayCountLine: visibleText.some(({ text }) => /^你与它重逢 \d[\d,]* 次$/.test(text)),
+      hasSongLine: visibleText.some(({ text }) => /^《.+》$/.test(text)),
+      hasClosingLines: visibleText.some(({ text }) => text === "有些歌不是打过就结束")
+        && visibleText.some(({ text }) => text === "一次次重逢，把喜欢敲成了回响"),
+      unsafeCopy: /undefined|null|NaN/.test(sceneText),
+      overflowingText: visibleText.filter(({ rect: textRect }) => textRect.left < -1 || textRect.right > viewportWidth + 1 || textRect.top < -1 || textRect.bottom > viewportHeight + 1).map(({ text }) => text.slice(0, 80)),
+      brokenImages: [...node.querySelectorAll("img")]
+        .filter((image) => image.complete && image.naturalWidth === 0 && getComputedStyle(image).display !== "none" && image.getBoundingClientRect().width > 0)
+        .map((image) => image.alt || image.getAttribute("src") || "unlabelled"),
+      runningAnimations: node.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
+    };
+  });
+
+  assert.equal(audit.fillsViewport, true);
+  assert.equal(audit.motionState, "reduced");
+  assert.ok(audit.sceneZIndex >= 1, "obsession scene does not cover the global dynamic-line canvas");
+  assert.equal(audit.backgroundSrc, "/obsession/background_6.png");
+  assert.deepEqual(audit.backgroundSize, [414, 896]);
+  assert.equal(audit.usesReferenceImage, false);
+  assert.equal(audit.usesExampleCover, false);
+  assert.equal(audit.hasOldLayout, false);
+  assert.ok(audit.headlineTop >= 68 && audit.headlineTop <= 112, "obsession headline is outside the upper memory stage");
+  assert.ok(audit.coverRect && audit.coverRect.top > viewport.height * .42 && audit.coverRect.top < viewport.height * .54, "obsession cover is outside the middle stage");
+  assert.ok(audit.coverRect && audit.coverRect.width >= 98 && audit.coverRect.width <= 128, "obsession cover size differs from the reference hierarchy");
+  assert.ok(audit.coverRect && Math.abs(audit.coverRect.width - audit.coverRect.height) <= 1, "obsession cover is not square");
+  assert.ok(audit.coverRect && Math.abs(audit.coverRect.left + audit.coverRect.width / 2 - viewport.width / 2) <= 1, "obsession cover is not centered");
+  assert.ok(audit.songBottom > 0 && audit.songBottom < viewport.height * .7, "obsession song title is outside its visual group");
+  assert.ok(audit.closingRect && audit.closingRect.top > viewport.height * .68 && audit.closingRect.bottom < viewport.height - 72, "obsession closing copy collides with the safe area");
+  assert.equal(audit.hasActiveDaysLine, true);
+  assert.equal(audit.hasPlayCountLine, true);
+  assert.equal(audit.hasSongLine, true);
+  assert.equal(audit.hasClosingLines, true);
+  assert.equal(audit.unsafeCopy, false);
+  assert.deepEqual(audit.overflowingText, []);
+  assert.deepEqual(audit.brokenImages, []);
+  assert.equal(audit.runningAnimations, 0);
+  await page.screenshot({ path: `/tmp/annual-obsession-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await context.close();
+  reportProgress(`obsession scene ${viewport.width}x${viewport.height}: passed`);
+};
+
 const auditSaveData = async (browser, cookie) => {
   reportProgress("save-data motion fallback: start");
   const context = await browser.newContext({
@@ -1442,6 +1542,23 @@ try {
     };
     await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\n`);
   }
+  if (environment.ANNUAL_E2E_OBSESSION_ONLY === "1" && summaryRows[0]?.summary_path) {
+    const summaryPath = String(summaryRows[0].summary_path);
+    const rawSummary = JSON.parse(await readFile(summaryPath, "utf8"));
+    rawSummary.sections.obsessionSong = {
+      status: "proxy",
+      data: {
+        songNo: 1318,
+        level: 4,
+        songName: "Irregular Clock",
+        songNameJa: "Irregular Clock",
+        stars: 9,
+        activeDays: 25,
+        playCount: 35
+      }
+    };
+    await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\n`);
+  }
   await request(`/api/account/annual-summaries/${encodeURIComponent(summaryId)}`, { cookie: secondSession, expected: 404 });
   await request(`/api/admin/annual-summaries/${encodeURIComponent(summaryId)}/events`, { expected: 401 });
 
@@ -1515,7 +1632,11 @@ try {
   });
   reportProgress("browser matrix: launched");
   try {
-    if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1") {
+    if (environment.ANNUAL_E2E_OBSESSION_ONLY === "1") {
+      for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
+        await auditObsessionScene(browser, firstSession, viewport);
+      }
+    } else if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1") {
       for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
         await auditCalendarScene(browser, firstSession, viewport);
       }
