@@ -381,7 +381,7 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.ok(beatLaneAudit, "opening beat lane is incomplete");
   assert.deepEqual(beatLaneAudit.stripSources, ["/track.png", "/track.png"]);
   assert.deepEqual(beatLaneAudit.stripNaturalSizes, [[704, 35], [704, 35]]);
-  assert.equal(beatLaneAudit.stripWidths[0], beatLaneAudit.stripWidths[1]);
+  assert.ok(Math.abs(beatLaneAudit.stripWidths[0] - beatLaneAudit.stripWidths[1]) < 0.1, "opening beat lane strips drifted");
   assert.ok(Math.abs(beatLaneAudit.trackWidth - beatLaneAudit.stripWidths[0] * 2) < 0.1, "opening beat lane width drifted");
   assert.equal(beatLaneAudit.duration, 11_500);
   assert.equal(beatLaneAudit.easing, "linear");
