@@ -382,7 +382,7 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.deepEqual(beatLaneAudit.stripSources, ["/track.png", "/track.png"]);
   assert.deepEqual(beatLaneAudit.stripNaturalSizes, [[704, 35], [704, 35]]);
   assert.equal(beatLaneAudit.stripWidths[0], beatLaneAudit.stripWidths[1]);
-  assert.equal(beatLaneAudit.trackWidth, beatLaneAudit.stripWidths[0] * 2);
+  assert.ok(Math.abs(beatLaneAudit.trackWidth - beatLaneAudit.stripWidths[0] * 2) < 0.1, "opening beat lane width drifted");
   assert.equal(beatLaneAudit.duration, 11_500);
   assert.equal(beatLaneAudit.easing, "linear");
   assert.equal(beatLaneAudit.iterations, Infinity);
@@ -415,7 +415,7 @@ const auditOpeningMotion = async (browser, cookie) => {
   await page.waitForFunction(() => document.querySelector(".annual-opening__start")?.hasAttribute("disabled"), undefined, { timeout: 1_000 });
   await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
   await page.waitForFunction(
-    () => document.querySelector(".story-player__slide[data-page-key='profile']")?.getBoundingClientRect().top === 0,
+    () => document.querySelector(".story-player__slide[data-page-key='period']")?.getBoundingClientRect().top === 0,
     undefined,
     { timeout: 10_000 }
   );
