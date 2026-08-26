@@ -331,16 +331,21 @@ const drumWindowSource = await read("components/account/version-summary/AnnualDr
 assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "drum artwork has no failed-image fallback");
 assert.equal(drumWindowSource.includes("AnnualArtworkFallback"), true, "drum artwork fallback is not visual");
 const growthSongStageSource = await read("components/account/version-summary/AnnualGrowthSongStage.vue");
+const profileStageFrameSource = await read("components/account/version-summary/AnnualProfileStageFrame.vue");
 const nearDondafulSource = await read("components/account/version-summary/slides/NearDondafulSlide.vue");
 const challengeSource = await read("components/account/version-summary/slides/ChallengeSlide.vue");
 for (const [source, page] of [[nearDondafulSource, "nearDondaful"], [challengeSource, "challenge"]]) {
   assert.equal(source.includes("AnnualGrowthSongStage"), true, `${page} does not use the shared growth song stage`);
+  assert.equal(source.includes("AnnualProfileStageFrame"), true, `${page} does not use the transplanted profile stage frame`);
   assert.equal(source.includes("StorySlideShell"), false, `${page} still uses the report-style slide shell`);
-  assert.equal(source.includes("useAnnualTimeline"), true, `${page} does not use the annual motion lifecycle`);
   assert.equal(source.includes("saveData"), true, `${page} does not reduce effects for save-data mode`);
 }
 assert.equal(growthSongStageSource.includes("AnnualArtworkFallback"), true, "growth song stage has no visual fallback");
 assert.equal(growthSongStageSource.includes('tone?: "near" | "challenge"'), true, "growth song stage does not distinguish its two tones");
+for (const slot of ["header", "center", "primary-panel", "secondary-panel", "footer"]) {
+  assert.equal(profileStageFrameSource.includes(`name="${slot}"`), true, `profile stage frame is missing ${slot} slot`);
+}
+assert.equal(profileStageFrameSource.includes("useAnnualTimeline"), true, "profile stage frame does not use the annual motion lifecycle");
 for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);
