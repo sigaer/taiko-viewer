@@ -11,7 +11,7 @@ const okCountText = computed(() => formatter.format(safeNumber(props.summary.nea
 const scoreText = computed(() => formatter.format(safeNumber(props.summary.nearDondaful?.score)));
 </script>
 <template>
-  <AnnualProfileStageFrame v-if="summary.nearDondaful" tone="near" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.nearDondaful.title">
+  <AnnualProfileStageFrame v-if="summary.nearDondaful" class="near-growth" tone="near" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.nearDondaful.title">
     <template #header><span>ALMOST DONDAFUL · 2026</span><h1>离全良只差最后一步</h1><p>这一首歌，正在等你把最后一槌落下。</p></template>
     <template #center><AnnualGrowthSongStage tone="near" size="large" :image-url="summary.nearDondaful.song.coverUrl" :image-alt="songName" fallback="2026" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" /></template>
     <template #primary-panel><span>SONG IN THE SPOTLIGHT</span><strong>《{{ songName }}》</strong><em>离全良只差 <b>{{ okCountText }} 个可</b></em></template>

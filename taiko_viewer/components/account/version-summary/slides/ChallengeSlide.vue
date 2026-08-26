@@ -12,7 +12,7 @@ const observedPlayCountText = computed(() => formatter.format(safeNumber(props.s
 const showObservedCount = computed(() => safeNumber(props.summary.challenge?.observedPlayCount) !== safeNumber(props.summary.challenge?.playCount));
 </script>
 <template>
-  <AnnualProfileStageFrame v-if="summary.challenge" tone="challenge" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.challenge.title">
+  <AnnualProfileStageFrame v-if="summary.challenge" class="challenge-growth" tone="challenge" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.challenge.title">
     <template #header><span>KEEP TRYING · 2026</span><h1>你还在敲这扇门</h1><p>答案还没有全部交出来，但你没有转身。</p></template>
     <template #center><AnnualGrowthSongStage tone="challenge" size="large" :image-url="summary.challenge.song.coverUrl" :image-alt="songName" fallback="2026" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" /></template>
     <template #primary-panel><span>SONG IN THE SPOTLIGHT</span><strong>《{{ songName }}》</strong><em>你向它敲了 <b>{{ playCountText }} 次门</b></em></template>
