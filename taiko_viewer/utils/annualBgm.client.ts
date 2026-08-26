@@ -22,6 +22,33 @@ const ensureAudio = () => {
   return audio;
 };
 
+export const preloadAnnualBgm = () => {
+  if (typeof document === "undefined") return Promise.resolve(false);
+  const currentAudio = ensureAudio();
+  if (!currentAudio.paused || currentAudio.readyState >= 3) return Promise.resolve(true);
+  if (pendingPlay) return pendingPlay;
+  currentAudio.load();
+  return new Promise<boolean>((resolve) => {
+    let settled = false;
+    const finish = (loaded: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      currentAudio.removeEventListener("canplay", onReady);
+      currentAudio.removeEventListener("canplaythrough", onReady);
+      currentAudio.removeEventListener("error", onError);
+      resolve(loaded);
+    };
+    const onReady = () => finish(true);
+    const onError = () => finish(false);
+    const timeout = window.setTimeout(() => finish(currentAudio.readyState >= 3), 8000);
+    currentAudio.addEventListener("canplay", onReady, { once: true });
+    currentAudio.addEventListener("canplaythrough", onReady, { once: true });
+    currentAudio.addEventListener("error", onError, { once: true });
+    if (currentAudio.readyState >= 3) finish(true);
+  });
+};
+
 const stopGlobalAudio = (reset: boolean, release: boolean) => {
   generation += 1;
   playIntent = false;

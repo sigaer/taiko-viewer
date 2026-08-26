@@ -7,6 +7,7 @@ import AnnualBuildPrelude from "~/components/account/version-summary/AnnualBuild
 import type { AnnualSummaryV4, VersionSummaryBinding, VersionSummaryPayload } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 import { preloadAnnualOpeningCovers } from "~/utils/annualCoverFlow";
+import { ANNUAL_BGM_SRC, preloadAnnualBgm } from "~/utils/annualBgm.client";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError } from "~/utils/viewerError";
 
@@ -30,6 +31,17 @@ const apiFetch = useViewerApiFetch();
 
 definePageMeta({ layout: "story", middleware: ["account-auth", "annual-summary-access"], keepalive: false, mobileNav: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
 useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPageDescription(t("page.account.versionSummary.desc")), path: "/account/version-summary" }));
+useHead({
+  link: [
+    { rel: "preload", as: "audio", href: ANNUAL_BGM_SRC, type: "audio/ogg" },
+    { rel: "preload", as: "image", href: "/title.png", fetchpriority: "high" },
+    { rel: "preload", as: "image", href: "/friend.png" },
+    { rel: "preload", as: "image", href: "/to_end.png" },
+    { rel: "preload", as: "image", href: "/icon.png" }
+  ]
+});
+
+if (import.meta.client) void preloadAnnualBgm();
 
 const storyStarted = ref(false);
 const drawerOpen = ref(false);

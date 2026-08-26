@@ -49,6 +49,7 @@ assert.equal(registry.includes('"profile-stage"'), true, "profile-stage is missi
 assert.equal(registry.includes("bgMood:"), false, "legacy bgMood remains in the annual page registry");
 
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
+const annualPage = await read("pages/account/version-summary.vue");
 const annualSceneSource = await read("components/account/version-summary/AnnualScene.vue");
 const storySlideShellSource = await read("components/account/version-summary/StorySlideShell.vue");
 const annualTimelineSource = await read("composables/useAnnualTimeline.ts");
@@ -68,6 +69,12 @@ assert.equal(storyPlayer.includes("await playBgm();\n  await goToPage"), false, 
 assert.equal(annualBgmSource.includes("activeOwner"), true, "annual BGM is not protected by a unique owner");
 assert.equal(annualBgmSource.includes("pendingPlay"), true, "annual BGM play requests are not deduplicated");
 assert.equal(annualBgmSource.includes("PRIMED_OWNER"), true, "annual BGM cannot be adopted from the navigation gesture");
+assert.equal(annualBgmSource.includes("preloadAnnualBgm"), true, "annual BGM has no route-level preload helper");
+assert.equal(annualPage.includes('rel: "preload"'), true, "annual opening assets are not declared as route preloads");
+for (const asset of ["/title.png", "/friend.png", "/to_end.png", "/icon.png"]) {
+  assert.equal(annualPage.includes(`href: "${asset}"`), true, `annual opening asset is not preloaded: ${asset}`);
+}
+assert.equal(annualPage.includes("preloadAnnualBgm()"), true, "annual route does not warm the BGM resource");
 assert.equal(sidebarSource.includes("primeAnnualBgm()"), true, "annual navigation does not start BGM inside its user gesture");
 assert.equal(storyPlayer.includes("debugTransitionTime"), true, "period transition has no development-time freeze control");
 for (const layer of ["background", "atmosphere", "visual", "data", "copy", "transition"]) {
