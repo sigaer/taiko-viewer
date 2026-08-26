@@ -8,8 +8,9 @@ const props = withDefaults(defineProps<{
   reducedMotion: boolean;
   saveData?: boolean;
   tone?: "near" | "challenge";
+  motionPreset?: "growth-near-glow" | "growth-challenge-pulse";
   ariaLabel?: string;
-}>(), { saveData: false, tone: "near", ariaLabel: "" });
+}>(), { saveData: false, tone: "near", motionPreset: "growth-near-glow", ariaLabel: "" });
 
 const rootRef = ref<HTMLElement | null>(null);
 useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"), { reenter: "restart" });
@@ -19,7 +20,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
   <AnnualScene
     ref="rootRef"
     class="annual-profile-stage"
-    :class="[`annual-profile-stage--${tone}`, { 'is-save-data': saveData }]"
+    :class="[`annual-profile-stage--${tone}`, `annual-profile-stage--${motionPreset}`, { 'is-save-data': saveData }]"
     mood="profile-stage"
     intensity="medium"
     :active="active"
@@ -76,4 +77,10 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 @media(max-height:700px) and (orientation:portrait){.annual-profile-stage__header{top:3%}.annual-profile-stage__center{top:38%;width:min(60vw,255px)}.annual-profile-stage__center :deep(.growth-song-stage){--stage-size:min(38vh,60vw,245px)}.annual-profile-stage__primary{top:64%}.annual-profile-stage__secondary{top:74%}.annual-profile-stage__footer{bottom:max(5%,calc(env(safe-area-inset-bottom) + 38px))}}
 @media(orientation:landscape) and (max-height:460px){.annual-profile-stage__header{top:8%;left:48%;right:5%;text-align:left}.annual-profile-stage__center{top:49%;left:28%;width:min(67vh,300px)}.annual-profile-stage__center :deep(.growth-song-stage){--stage-size:min(68vh,285px)}.annual-profile-stage__primary{top:55%;left:70%;width:45%}.annual-profile-stage__secondary{top:72%;left:70%}.annual-profile-stage__footer{left:49%;right:7%;bottom:8%;text-align:left}.annual-profile-stage__spotlight{right:44%;clip-path:polygon(40% 0,60% 0,94% 100%,6% 100%)}}
 @media(prefers-reduced-motion:reduce){.annual-profile-stage *{animation:none!important}}
+.annual-profile-stage__footer{bottom:max(9%,calc(env(safe-area-inset-bottom) + 84px));line-height:1.55}.annual-profile-stage__footer :deep(p){max-width:560px;margin:0 auto}.annual-profile-stage__footer :deep(span){display:block}
+.annual-profile-stage--growth-near-glow.is-active:not(.is-reduced) .annual-profile-stage__spotlight{animation-duration:1.35s}.annual-profile-stage--growth-near-glow.is-active:not(.is-reduced) .annual-profile-stage__center{animation-duration:.95s;animation-delay:.5s}.annual-profile-stage--growth-near-glow.is-active:not(.is-reduced) .annual-profile-stage__primary{animation-duration:.7s;animation-delay:1s}.annual-profile-stage--growth-near-glow.is-active:not(.is-reduced) .annual-profile-stage__secondary{animation-duration:.8s;animation-delay:1.35s}.annual-profile-stage--growth-near-glow.is-active:not(.is-reduced) .annual-profile-stage__footer{animation:profile-stage-footer .7s ease-out 1.8s both}
+.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__spotlight{animation-duration:.9s}.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__center{animation-duration:.85s;animation-delay:.2s}.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__primary{animation-duration:.55s;animation-delay:.65s}.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__secondary{animation:profile-stage-challenge-badge .95s ease-out .9s both}.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__footer{animation:profile-stage-footer .65s ease-out 1.55s both}.annual-profile-stage--growth-challenge-pulse.is-active:not(.is-reduced) .annual-profile-stage__orbit i:nth-child(2){animation-duration:11s}
+@keyframes profile-stage-challenge-badge{from{transform:translateX(-50%) scale(.82);opacity:.25;box-shadow:0 0 0 rgba(91,211,242,0)}55%{transform:translateX(-50%) scale(1.04);opacity:1;box-shadow:0 0 30px rgba(91,211,242,.36)}to{transform:translateX(-50%) scale(1);opacity:1;box-shadow:0 0 24px rgba(91,211,242,.16)}}@keyframes profile-stage-footer{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:720px){.annual-profile-stage__footer{bottom:max(9%,calc(env(safe-area-inset-bottom) + 84px));font-size:11px;line-height:1.5}}
+@media(max-height:700px) and (orientation:portrait){.annual-profile-stage__footer{bottom:max(7%,calc(env(safe-area-inset-bottom) + 72px))}}
 </style>

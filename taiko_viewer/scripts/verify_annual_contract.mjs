@@ -346,6 +346,12 @@ for (const slot of ["header", "center", "primary-panel", "secondary-panel", "foo
   assert.equal(profileStageFrameSource.includes(`name="${slot}"`), true, `profile stage frame is missing ${slot} slot`);
 }
 assert.equal(profileStageFrameSource.includes("useAnnualTimeline"), true, "profile stage frame does not use the annual motion lifecycle");
+assert.equal(profileStageFrameSource.includes("growth-near-glow"), true, "near growth motion preset is missing");
+assert.equal(profileStageFrameSource.includes("growth-challenge-pulse"), true, "challenge growth motion preset is missing");
+assert.equal(nearDondafulSource.includes("motion-preset=\"growth-near-glow\""), true, "near page does not select its motion preset");
+assert.equal(challengeSource.includes("motion-preset=\"growth-challenge-pulse\""), true, "challenge page does not select its motion preset");
+assert.equal(nearDondafulSource.includes("<span>下一次落槌，也许就是满屏金光。</span>"), true, "near footer is not split into stable lines");
+assert.equal(challengeSource.includes("<span>而你也没有转身。</span>"), true, "challenge footer is not split into stable lines");
 for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);
