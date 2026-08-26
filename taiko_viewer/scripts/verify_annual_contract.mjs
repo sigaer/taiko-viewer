@@ -12,7 +12,7 @@ const generatedTypeCheck = spawnSync(process.execPath, ["scripts/generate_annual
 assert.equal(generatedTypeCheck.status, 0, generatedTypeCheck.stderr || "generated annual types are stale");
 
 const expectedPages = [
-  "opening", "profile", "period", "overview",
+  "opening", "period", "overview",
   "favorite", "obsession", "favoriteShift", "keyword", "ratingRank",
   "monthly", "weekday", "calendar", "timeOfDay", "lateNight",
   "speedProfile", "nearDondaful", "challenge", "pound", "highScore", "milestones", "breakthrough",
@@ -37,7 +37,7 @@ assert.equal(await exists("server/api/account/version-summary.get.ts"), false, "
 
 const registry = await read("composables/useAnnualPages.ts");
 const actualPages = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map((match) => match[1]);
-assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 23-page contract");
+assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 22-page contract");
 const registryEntries = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"[^\n]*\}/g)];
 assert.equal(registryEntries.length, expectedPages.length, "annual page registry entries are not statically inspectable");
 for (const [entry, page] of registryEntries) {
@@ -117,6 +117,8 @@ assert.equal(profileSource.includes('mood="profile-stage"'), true, "profile does
 for (const signature of ["profile-spotlight-open", "profile-portrait-develop", "profile-ribbon-unfurl", "profile-badge-light"]) {
   assert.equal(profileSource.includes(signature), true, `profile is missing motion signature: ${signature}`);
 }
+assert.equal(registry.includes('key: "profile"'), false, "profile remains registered in the annual story flow");
+assert.equal(/import\s+ProfileSlide\b/.test(registry), false, "unused ProfileSlide import remains in the annual registry");
 assert.equal(openingCarouselSource.includes("linear infinite"), true, "opening cover flow is not continuous and linear");
 assert.equal(openingCarouselSource.includes("setInterval"), false, "opening cover flow still advances in timed steps");
 assert.equal(openingFireworksSource.includes("@keyframes annual-firework-draw"), true, "opening fireworks are not animated");
@@ -328,6 +330,17 @@ assert.equal(keywordSigilSource.includes("StorySlideShell"), false, "keyword sig
 const drumWindowSource = await read("components/account/version-summary/AnnualDrumWindow.vue");
 assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "drum artwork has no failed-image fallback");
 assert.equal(drumWindowSource.includes("AnnualArtworkFallback"), true, "drum artwork fallback is not visual");
+const growthSongStageSource = await read("components/account/version-summary/AnnualGrowthSongStage.vue");
+const nearDondafulSource = await read("components/account/version-summary/slides/NearDondafulSlide.vue");
+const challengeSource = await read("components/account/version-summary/slides/ChallengeSlide.vue");
+for (const [source, page] of [[nearDondafulSource, "nearDondaful"], [challengeSource, "challenge"]]) {
+  assert.equal(source.includes("AnnualGrowthSongStage"), true, `${page} does not use the shared growth song stage`);
+  assert.equal(source.includes("StorySlideShell"), false, `${page} still uses the report-style slide shell`);
+  assert.equal(source.includes("useAnnualTimeline"), true, `${page} does not use the annual motion lifecycle`);
+  assert.equal(source.includes("saveData"), true, `${page} does not reduce effects for save-data mode`);
+}
+assert.equal(growthSongStageSource.includes("AnnualArtworkFallback"), true, "growth song stage has no visual fallback");
+assert.equal(growthSongStageSource.includes('tone?: "near" | "challenge"'), true, "growth song stage does not distinguish its two tones");
 for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);

@@ -556,7 +556,7 @@ onBeforeUnmount(() => {
           :is="slide.component"
           v-if="Math.abs(activeIndex - index) <= 1"
           :summary="summary" :page-index="index" :page-total="slides.length"
-          :active="documentVisible && activeIndex === index" :reduced-motion="reducedMotion"
+          :active="documentVisible && activeIndex === index" :reduced-motion="reducedMotion" :save-data="reducedData"
           @start="startStory"
           @next="goToPage(index + 1)"
         />

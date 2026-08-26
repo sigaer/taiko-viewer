@@ -3,7 +3,6 @@ import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { metricAvailable } from "~/utils/annualSummary";
 
 import OpeningSlide from "~/components/account/version-summary/slides/OpeningSlide.vue";
-import ProfileSlide from "~/components/account/version-summary/slides/ProfileSlide.vue";
 import PeriodSlide from "~/components/account/version-summary/slides/PeriodSlide.vue";
 import OverviewSlide from "~/components/account/version-summary/slides/OverviewSlide.vue";
 import FavoriteSongSlide from "~/components/account/version-summary/slides/FavoriteSongSlide.vue";
@@ -33,7 +32,7 @@ export type AnnualSceneMood = "rainbow-stage" | "profile-stage" | "stage-blue" |
 export type AnnualMotionPreset = "legacy-staged" | "opening-reveal" | "profile-spotlight" | "period-cover-flow" | "overview-impact" | "song-memory" | "award-reveal";
 export type AnnualTransitionKey = "fade" | "slide" | "taiko-ripple" | "cover-turn" | "night-fade" | "gold-burst";
 export type AnnualPageKey =
-  | "opening" | "profile" | "period" | "overview"
+  | "opening" | "period" | "overview"
   | "favorite" | "obsession" | "favoriteShift" | "keyword" | "ratingRank"
   | "monthly" | "weekday" | "calendar" | "timeOfDay" | "lateNight"
   | "speedProfile" | "nearDondaful" | "challenge" | "pound" | "highScore" | "milestones" | "breakthrough"
@@ -60,7 +59,6 @@ const has = (field: keyof VersionSummaryViewModel, statusKey = field as keyof No
 
 export const ANNUAL_PAGE_REGISTRY: readonly AnnualPageDefinition[] = [
   { key: "opening", chapter: "debut", component: OpeningSlide, labelKey: "annualSummary.pages.opening", sceneType: "hero", mainFocus: "taiko-drum", motionPreset: "opening-reveal", mood: "rainbow-stage", intensity: "high", transitionIn: "fade", transitionOut: "taiko-ripple", visible: always },
-  { key: "profile", chapter: "debut", component: ProfileSlide, labelKey: "annualSummary.pages.profile", sceneType: "hero", mainFocus: "player-avatar", motionPreset: "profile-spotlight", mood: "profile-stage", intensity: "medium", transitionIn: "taiko-ripple", transitionOut: "fade", visible: always },
   { key: "period", chapter: "debut", component: PeriodSlide, labelKey: "annualSummary.pages.period", sceneType: "pattern", mainFocus: "annual-period", motionPreset: "period-cover-flow", mood: "stage-blue", intensity: "medium", transitionIn: "fade", transitionOut: "cover-turn", visible: always },
   { key: "overview", chapter: "debut", component: OverviewSlide, labelKey: "annualSummary.pages.overview", sceneType: "impact-number", mainFocus: "play-count", motionPreset: "overview-impact", mood: "bright-impact", intensity: "high", transitionIn: "cover-turn", transitionOut: "fade", visible: always },
 

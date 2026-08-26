@@ -239,7 +239,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   await page.locator(".annual-opening__start").click();
   await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
   const slideCount = await page.locator(".story-player__slide").count();
-  assert.ok(slideCount >= 4 && slideCount <= 23, `unexpected slide count: ${slideCount}`);
+  assert.ok(slideCount >= 4 && slideCount <= 22, `unexpected slide count: ${slideCount}`);
   const sound = page.locator(".story-player__sound-trigger");
   assert.equal(await sound.getAttribute("aria-pressed"), "true");
   await sound.click();
@@ -623,8 +623,8 @@ const auditOpeningMotion = async (browser, cookie) => {
   reportProgress("opening motion: passed");
 };
 
-const auditPhase2AHeroScenes = async (browser, cookie, viewport) => {
-  reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: start`);
+const auditOpeningPeriodFlow = async (browser, cookie, viewport) => {
+  reportProgress(`opening-period flow ${viewport.width}x${viewport.height}: start`);
   const context = await browser.newContext({
     viewport,
     locale: "zh-CN",
@@ -670,19 +670,66 @@ const auditPhase2AHeroScenes = async (browser, cookie, viewport) => {
   await page.screenshot({ path: `/tmp/annual-phase2a-opening-${viewport.width}x${viewport.height}.png`, fullPage: false });
 
   await page.locator(".annual-opening__start").click();
-  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='profile']")?.getAttribute("aria-hidden") === "false");
-  await page.locator(".profile-slide").waitFor({ state: "visible", timeout: 10_000 });
-  const profileAudit = await inspectScene(".profile-slide", "profile-stage");
-  assert.equal(profileAudit.mood, profileAudit.expectedMood);
-  assert.equal(profileAudit.motion, "reduced");
-  assert.deepEqual(profileAudit.layers, ["background", "atmosphere", "visual", "data", "copy", "transition"]);
-  assert.deepEqual(profileAudit.overflowingText, []);
-  assert.equal(profileAudit.fillsViewport, true);
-  assert.equal(await page.locator(".story-player__slide[data-page-key='profile'] .story-slide-shell").count(), 0);
-  assert.equal(await page.locator(".story-player__slide[data-page-key='profile'] article").count(), 0);
-  await page.screenshot({ path: `/tmp/annual-phase2a-profile-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='period']")?.getAttribute("aria-hidden") === "false");
+  assert.equal(await page.locator(".story-player__slide[data-page-key='profile']").count(), 0);
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  assert.deepEqual(pageKeys.slice(0, 3), ["opening", "period", "overview"]);
   await context.close();
-  reportProgress(`phase 2A heroes ${viewport.width}x${viewport.height}: passed`);
+  reportProgress(`opening-period flow ${viewport.width}x${viewport.height}: passed`);
+};
+
+const auditGrowthSongScenes = async (browser, cookie, viewport) => {
+  reportProgress(`growth song scenes ${viewport.width}x${viewport.height}: start`);
+  const context = await browser.newContext({ viewport, locale: "zh-CN", timezoneId: "Asia/Shanghai", reducedMotion: "reduce" });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+
+  for (const key of ["nearDondaful", "challenge"]) {
+    const index = pageKeys.indexOf(key);
+    assert.ok(index >= 0, `${key} page is unavailable in the E2E fixture`);
+    await page.locator(".story-player__viewport").evaluate((node, target) => {
+      node.scrollTop = node.clientHeight * target;
+      node.dispatchEvent(new Event("scroll"));
+    }, index);
+    const sceneSelector = key === "nearDondaful" ? ".near-growth" : ".challenge-growth";
+    await page.locator(sceneSelector).waitFor({ state: "visible", timeout: 10_000 });
+    const audit = await page.locator(sceneSelector).evaluate((scene) => {
+      const viewportWidth = document.documentElement.clientWidth;
+      const viewportHeight = document.documentElement.clientHeight;
+      const sceneRect = scene.getBoundingClientRect();
+      const textOverflow = [...scene.querySelectorAll("h2, h3, p, span, strong, small, b")]
+        .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none")
+        .filter((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.left < -1 || rect.right > viewportWidth + 1 || rect.top < -1 || rect.bottom > viewportHeight + 1;
+        })
+        .map((node) => node.textContent.trim().slice(0, 80));
+      const stageRect = scene.querySelector(".growth-song-stage")?.getBoundingClientRect();
+      const navRect = document.querySelector(".story-player__nav")?.getBoundingClientRect();
+      const copyRect = scene.querySelector(scene.classList.contains("near-growth") ? ".near-growth__copy" : ".challenge-growth__copy")?.getBoundingClientRect();
+      return {
+        fillsViewport: Math.abs(sceneRect.width - viewportWidth) <= 1 && Math.abs(sceneRect.height - viewportHeight) <= 1,
+        textOverflow,
+        stageIsRound: Boolean(stageRect && Math.abs(stageRect.width - stageRect.height) <= 1),
+        navOverlap: Boolean(copyRect && navRect && copyRect.left < navRect.right && copyRect.right > navRect.left && copyRect.top < navRect.bottom && copyRect.bottom > navRect.top),
+        motion: scene.getAttribute("data-motion-state")
+      };
+    });
+    assert.equal(audit.fillsViewport, true, `${key} does not fill the viewport`);
+    assert.deepEqual(audit.textOverflow, [], `${key} contains overflowing text`);
+    assert.equal(audit.stageIsRound, true, `${key} growth stage is not square/circular`);
+    assert.equal(audit.navOverlap, false, `${key} copy overlaps page navigation`);
+    assert.equal(audit.motion, "reduced", `${key} reduced-motion state is not stable`);
+    await page.screenshot({ path: `/tmp/annual-growth-${key}-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  }
+  await context.close();
+  reportProgress(`growth song scenes ${viewport.width}x${viewport.height}: passed`);
 };
 
 const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
@@ -1646,11 +1693,12 @@ try {
     await auditSaveData(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
-      await auditPhase2AHeroScenes(browser, firstSession, viewport);
+      await auditOpeningPeriodFlow(browser, firstSession, viewport);
       await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);
       await auditPhase2B2FavoriteScene(browser, firstSession, viewport);
       await auditCalendarScene(browser, firstSession, viewport);
       await auditLateNightScene(browser, firstSession, viewport);
+      await auditGrowthSongScenes(browser, firstSession, viewport);
     }
     await auditCalendarScene(browser, firstSession, { width: 390, height: 844 }, "ja");
     if (environment.ANNUAL_E2E_TRANSITION_DEBUG === "1") await auditTransitionFrames(browser, firstSession);
