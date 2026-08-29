@@ -353,6 +353,9 @@ const removeDeprecatedTag = (slug: string) => {
 :global(body.theme-dark .ugc-tip), :global(body.theme-dark .ugc-tags li), :global(body.theme-dark .ugc-choice), :global(body.theme-dark .ugc-tag-option), :global(body.theme-dark .ugc-tag-editor-toggle) { color: #eadbcf; background: rgba(255, 255, 255, 0.065); }
 :global(body.theme-dark .ugc-choice.is-selected), :global(body.theme-dark .ugc-tag-option.is-selected) { border-color: #e29a78; color: #fff4ec; background: #71402d; box-shadow: inset 0 0 0 1px rgba(255, 226, 210, 0.34); }
 :global(body.theme-dark .ugc-summary-line), :global(body.theme-dark .ugc-cold-copy), :global(body.theme-dark .ugc-distribution li), :global(body.theme-dark .ugc-tip footer), :global(body.theme-dark .ugc-tip__author), :global(body.theme-dark .ugc-tags small), :global(body.theme-dark .ugc-control-meta), :global(body.theme-dark .ugc-tag-group h5), :global(body.theme-dark .ugc-tag-editor__footer) { color: #cbbbae; }
+:global(body.theme-dark .ugc-inline-error) { color: #ffaaa1; }
+:global(body.theme-dark .ugc-clear), :global(body.theme-dark .ugc-deprecated-tags), :global(body.theme-dark .ugc-deprecated-tags button) { color: #d8b8a6; }
+:global(body.theme-dark .ugc-choice:disabled), :global(body.theme-dark .ugc-tag-editor-toggle:disabled), :global(body.theme-dark .ugc-clear:disabled) { opacity: 0.6; }
 :global(body.theme-dark .ugc-tag-done) { color: #1e120d; background: #efb091; border-color: #efb091; }
 @media (max-width: 700px) {
   .chart-ugc-section { margin-top: 22px; padding-top: 20px; }
