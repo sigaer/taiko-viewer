@@ -169,6 +169,10 @@ const toggleHelpful = (tipId: string) => {
   if (!props.authenticated) return emit("login");
   emit("helpfulChange", tipId, !helpfulSet.value.has(tipId));
 };
+const openReport = (tipId: string) => {
+  if (!props.authenticated) return emit("login");
+  reportTipId.value = tipId;
+};
 const submitReport = () => {
   if (!reportTipId.value) return;
   emit("report", reportTipId.value, reportReason.value);
@@ -346,7 +350,7 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
                 {{ t("ugc.helpfulCount", { count: tip.helpfulCount }) }}
               </button>
               <span v-if="props.helpfulErrorById[tip.tipId]" class="ugc-inline-error">{{ t(props.helpfulErrorById[tip.tipId] || "ugc.helpfulError") }}</span>
-              <button type="button" class="ugc-report-trigger" @click="reportTipId = tip.tipId">{{ t("ugc.report") }}</button>
+              <button type="button" class="ugc-report-trigger" @click="openReport(tip.tipId)">{{ t("ugc.report") }}</button>
             </footer>
           </article>
         </div>
