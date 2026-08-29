@@ -10,6 +10,12 @@ export const UGC_USER_MAX_TAGS = 5;
 export const UGC_INITIAL_TIP_LIMIT = 3;
 export const UGC_WRITE_RATE_LIMIT = 30;
 export const UGC_WRITE_RATE_WINDOW_MS = 60 * 1000;
+export const UGC_TIP_WRITE_RATE_LIMIT = 8;
+export const UGC_HELPFUL_RATE_LIMIT = 30;
+export const UGC_REPORT_RATE_LIMIT = 5;
+export const UGC_ADMIN_MODERATION_RATE_LIMIT = 30;
+export const UGC_TIP_MAX_CODE_POINTS = 120;
+export const UGC_REPORT_REASONS = ["spam", "abuse", "advertising", "link", "duplicate", "other"] as const;
 export const UGC_ANONYMOUS_DISPLAY_NAME = "已注销用户";
 export const UGC_ANONYMOUS_AVATAR_URL = "https://viewer.sakura-bot.cn/miku.png";
 

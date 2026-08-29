@@ -18,6 +18,9 @@ type TagQueue = {
   running: boolean;
 };
 
+type HelpfulQueue = { desired: boolean; confirmed: boolean; running: boolean };
+type TipQueue = { desired: string; confirmed: string; running: boolean };
+
 const sameTags = (left: string[], right: string[]) =>
   left.length === right.length && left.every((slug, index) => slug === right[index]);
 
@@ -66,10 +69,16 @@ export const useChartUgc = async (
   const viewerStates = reactive<Record<string, ViewerChartUgcState | null>>({});
   const difficultyQueues = new Map<string, DifficultyQueue>();
   const tagQueues = new Map<string, TagQueue>();
+  const helpfulQueues = new Map<string, HelpfulQueue>();
+  const tipQueues = new Map<string, TipQueue>();
   const difficultySavingByKey = reactive<Record<string, boolean>>({});
   const tagSavingByKey = reactive<Record<string, boolean>>({});
   const difficultyErrorByKey = reactive<Record<string, string | null>>({});
   const tagErrorByKey = reactive<Record<string, string | null>>({});
+  const tipSavingByKey = reactive<Record<string, boolean>>({});
+  const tipErrorByKey = reactive<Record<string, string | null>>({});
+  const helpfulSavingById = reactive<Record<string, boolean>>({});
+  const helpfulErrorById = reactive<Record<string, string | null>>({});
 
   const installViewerState = (state: ViewerChartUgcState) => {
     const key = keyForState(state);
@@ -105,6 +114,125 @@ export const useChartUgc = async (
   const refreshPublicIfCurrent = async (key: string) => {
     if (requestKey() !== key) return;
     await publicState.refresh();
+  };
+
+  const drainTipQueue = async (key: string) => {
+    const queue = tipQueues.get(key);
+    if (!queue || queue.running) return;
+    queue.running = true;
+    tipSavingByKey[key] = true;
+    tipErrorByKey[key] = null;
+    try {
+      while (queue.desired !== queue.confirmed) {
+        const target = queue.desired;
+        const [targetSongId, targetDifficulty] = key.split("-").map(Number);
+        try {
+          const response = await apiFetch<{ tipId: string; body: string; status: "active" }>(
+            '/api/account/charts/' + targetSongId + '/' + targetDifficulty + '/ugc/tip', { method: "PUT", body: { body: target } }
+          );
+          queue.confirmed = response.body;
+          if (requestKey() === key && viewerStates[key]) viewerStates[key] = { ...viewerStates[key]!, tip: response };
+          if (queue.desired === target) await refreshPublicIfCurrent(key);
+        } catch (error) {
+          if (queue.desired === target) {
+            queue.desired = queue.confirmed;
+            tipErrorByKey[key] = "ugc.tip.saveError";
+            throw error;
+          }
+        }
+      }
+    } finally {
+      queue.running = false;
+      tipSavingByKey[key] = false;
+    }
+  };
+
+  const saveTip = async (body: string) => {
+    const user = await resolveAccountUser();
+    if (!user) return goToLogin();
+    const key = requestKey();
+    const confirmed = viewerStates[key]?.tip?.body || "";
+    const queue = tipQueues.get(key) || { confirmed, desired: confirmed, running: false };
+    tipQueues.set(key, queue);
+    queue.desired = body;
+    void drainTipQueue(key);
+  };
+
+  const deleteTip = async () => {
+    const user = await resolveAccountUser();
+    if (!user) return goToLogin();
+    const key = requestKey();
+    tipSavingByKey[key] = true;
+    tipErrorByKey[key] = null;
+    try {
+      const response = await apiFetch<{ tipId: string; status: "deleted" }>(
+        '/api/account/charts/' + toValue(songId) + '/' + toValue(difficultyCode) + '/ugc/tip', { method: "DELETE" }
+      );
+      if (requestKey() === key && viewerStates[key]?.tip) viewerStates[key] = { ...viewerStates[key]!, tip: { ...viewerStates[key]!.tip!, status: "deleted" } };
+      await refreshPublicIfCurrent(key);
+      return response;
+    } catch (error) {
+      tipErrorByKey[key] = "ugc.tip.deleteError";
+      throw error;
+    } finally {
+      tipSavingByKey[key] = false;
+    }
+  };
+
+  const drainHelpfulQueue = async (tipId: string, key: string) => {
+    const queue = helpfulQueues.get(tipId);
+    if (!queue || queue.running) return;
+    queue.running = true;
+    helpfulSavingById[tipId] = true;
+    helpfulErrorById[tipId] = null;
+    try {
+      while (queue.desired !== queue.confirmed) {
+        const target = queue.desired;
+        try {
+          const response = await apiFetch<{ tipId: string; enabled: boolean; helpfulCount: number }>(
+            '/api/account/chart-tips/' + tipId + '/helpful', { method: "PUT", body: { enabled: target } }
+          );
+          queue.confirmed = response.enabled;
+          if (requestKey() === key && publicState.data.value) {
+            publicState.data.value = {
+              ...publicState.data.value,
+              tips: publicState.data.value.tips.map((tip) => tip.tipId === tipId ? { ...tip, helpfulCount: response.helpfulCount } : tip)
+            };
+          }
+        } catch (error) {
+          if (queue.desired === target) {
+            queue.desired = queue.confirmed;
+            helpfulErrorById[tipId] = "ugc.helpfulError";
+            throw error;
+          }
+        }
+      }
+      const state = viewerStates[key];
+      if (state) viewerStates[key] = { ...state, helpfulTipIds: queue.confirmed ? [...new Set([...state.helpfulTipIds, tipId])] : state.helpfulTipIds.filter((id) => id !== tipId) };
+      await refreshPublicIfCurrent(key);
+    } finally {
+      queue.running = false;
+      helpfulSavingById[tipId] = false;
+    }
+  };
+
+  const setHelpful = async (tipId: string, enabled: boolean) => {
+    const user = await resolveAccountUser();
+    if (!user) return goToLogin();
+    const key = requestKey();
+    const state = viewerStates[key];
+    const confirmed = Boolean(state?.helpfulTipIds.includes(tipId));
+    const queue = helpfulQueues.get(tipId) || { confirmed, desired: confirmed, running: false };
+    helpfulQueues.set(tipId, queue);
+    queue.desired = enabled;
+    if (state) viewerStates[key] = { ...state, helpfulTipIds: enabled ? [...new Set([...state.helpfulTipIds, tipId])] : state.helpfulTipIds.filter((id) => id !== tipId) };
+    void drainHelpfulQueue(tipId, key);
+  };
+
+  const reportTip = async (tipId: string, reason: string) => {
+    const user = await resolveAccountUser();
+    if (!user) return goToLogin();
+    return apiFetch('/api/account/chart-tips/' + tipId + '/reports', { method: "POST", body: { reason } });
   };
 
   const drainDifficultyQueue = async (key: string) => {
@@ -250,10 +378,18 @@ export const useChartUgc = async (
     tagSaving,
     difficultyError,
     tagError,
+    tipSaving: computed(() => Boolean(tipSavingByKey[requestKey()])),
+    tipError: computed(() => tipErrorByKey[requestKey()] || null),
+    helpfulSavingById,
+    helpfulErrorById,
     interactionUnavailable,
     interactionPending,
     setDifficultyVote,
     setTagSlugs,
+    saveTip,
+    deleteTip,
+    setHelpful,
+    reportTip,
     goToLogin
   };
 };

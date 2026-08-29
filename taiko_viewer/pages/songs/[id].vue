@@ -57,10 +57,18 @@ const {
   tagSaving: chartUgcTagSaving,
   difficultyError: chartUgcDifficultyError,
   tagError: chartUgcTagError,
+  tipSaving: chartUgcTipSaving,
+  tipError: chartUgcTipError,
+  helpfulSavingById: chartUgcHelpfulSavingById,
+  helpfulErrorById: chartUgcHelpfulErrorById,
   interactionUnavailable: chartUgcInteractionUnavailable,
   interactionPending: chartUgcInteractionPending,
   setDifficultyVote: setChartUgcDifficultyVote,
   setTagSlugs: setChartUgcTagSlugs,
+  saveTip: saveChartUgcTip,
+  deleteTip: deleteChartUgcTip,
+  setHelpful: setChartUgcHelpful,
+  reportTip: reportChartUgcTip,
   goToLogin: goToChartUgcLogin
 } = chartUgcState;
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
@@ -821,9 +829,17 @@ useViewerSeo(() => ({
         :tag-saving="chartUgcTagSaving"
         :difficulty-error-key="chartUgcDifficultyError"
         :tag-error-key="chartUgcTagError"
+        :tip-saving="chartUgcTipSaving"
+        :tip-error-key="chartUgcTipError"
+        :helpful-saving-by-id="chartUgcHelpfulSavingById"
+        :helpful-error-by-id="chartUgcHelpfulErrorById"
         :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
         @difficulty-change="setChartUgcDifficultyVote"
         @tags-change="setChartUgcTagSlugs"
+        @tip-save="saveChartUgcTip"
+        @tip-delete="deleteChartUgcTip"
+        @helpful-change="setChartUgcHelpful"
+        @report="reportChartUgcTip"
         @login="goToChartUgcLogin"
       />
 

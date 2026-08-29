@@ -137,7 +137,7 @@ export const getViewerChartUgcState = async (chart: ResolvedUgcChart, userId: nu
       `SELECT helpful.tip_id AS tipId
          FROM chart_tip_helpful helpful
          INNER JOIN chart_tips tip ON tip.tip_id = helpful.tip_id
-        WHERE helpful.user_id = ? AND tip.chart_id = ?
+        WHERE helpful.user_id = ? AND tip.chart_id = ? AND tip.status = 'active'
         ORDER BY helpful.tip_id`,
       [userId, chart.chartId]
     ).then(([rows]) => rows)

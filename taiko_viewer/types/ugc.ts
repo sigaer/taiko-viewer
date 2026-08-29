@@ -49,6 +49,27 @@ export type ChartUgcTip = {
   createdAt: string;
 };
 
+export type ViewerTipStatus = "active" | "hidden" | "deleted";
+
+export type ChartUgcReportReason = "spam" | "abuse" | "advertising" | "link" | "duplicate" | "other";
+
+export type ChartUgcModerationAction = "hide" | "restore";
+
+export type ChartUgcReportQueueItem = {
+  reportId: string;
+  reason: ChartUgcReportReason;
+  status: "pending" | "resolved" | "dismissed";
+  createdAt: string;
+  reportCount: number;
+  tip: {
+    tipId: string;
+    body: string;
+    status: ViewerTipStatus;
+    author: ChartUgcTip["author"];
+    chart: ChartUgcIdentity;
+  };
+};
+
 export type ChartUgcSummary = {
   chart: ChartUgcIdentity;
   difficulty: ChartUgcDifficultyAggregate;
@@ -65,7 +86,7 @@ export type ViewerChartUgcState = {
   tip: {
     tipId: string;
     body: string;
-    status: "active" | "hidden" | "deleted";
+    status: ViewerTipStatus;
   } | null;
   helpfulTipIds: string[];
 };

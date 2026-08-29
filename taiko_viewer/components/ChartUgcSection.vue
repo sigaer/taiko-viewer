@@ -17,12 +17,20 @@ const props = defineProps<{
   tagSaving: boolean;
   difficultyErrorKey: string | null;
   tagErrorKey: string | null;
+  tipSaving: boolean;
+  tipErrorKey: string | null;
+  helpfulSavingById: Record<string, boolean>;
+  helpfulErrorById: Record<string, string | null>;
 }>();
 
 const emit = defineEmits<{
   difficultyChange: [value: ChartDifficultyVoteValue | null];
   tagsChange: [slugs: string[]];
   login: [];
+  tipSave: [body: string];
+  tipDelete: [];
+  helpfulChange: [tipId: string, enabled: boolean];
+  report: [tipId: string, reason: string];
 }>();
 
 const { t } = useI18n();
@@ -30,6 +38,14 @@ const bucketValues = [-2, -1, 0, 1, 2] as const satisfies readonly ChartDifficul
 const tagGroupOrder = ["rhythm", "technique", "stamina", "readability_speed", "structure"] as const;
 const tagEditorOpen = ref(false);
 const tagLimitReached = ref(false);
+const tipEditorOpen = ref(false);
+const tipBody = ref("");
+const reportTipId = ref<string | null>(null);
+const reportReason = ref("other");
+const tipBodyLength = computed(() => Array.from(tipBody.value).length);
+const myTip = computed(() => props.viewerState?.tip || null);
+const helpfulSet = computed(() => new Set(props.viewerState?.helpfulTipIds || []));
+const canTipWrite = computed(() => props.authenticated && Boolean(props.viewerState) && !props.interactionUnavailable);
 
 const distributionRows = computed(() => {
   const count = props.summary.difficulty.count;
@@ -59,6 +75,10 @@ const canWrite = computed(() => props.authenticated && Boolean(props.viewerState
 watch(() => props.summary.chart.difficultyCode, () => {
   tagEditorOpen.value = false;
   tagLimitReached.value = false;
+  tipEditorOpen.value = false;
+});
+watch(() => myTip.value?.body, (body) => {
+  if (body && tipEditorOpen.value && body === tipBody.value && !props.tipSaving) tipEditorOpen.value = false;
 });
 
 const chooseDifficulty = (value: ChartDifficultyVoteValue) => {
@@ -125,6 +145,31 @@ const toggleTag = (slug: string) => {
 const removeDeprecatedTag = (slug: string) => {
   if (!canWrite.value) return;
   emit("tagsChange", selectedTagSlugs.value.filter((selected) => selected !== slug));
+};
+
+const openTipEditor = () => {
+  if (!props.authenticated) return emit("login");
+  if (!canTipWrite.value || myTip.value?.status === "hidden") return;
+  tipBody.value = myTip.value?.body || "";
+  tipEditorOpen.value = true;
+};
+const cancelTipEditor = () => { tipEditorOpen.value = false; };
+const saveTip = () => {
+  if (!tipBody.value.trim() || tipBodyLength.value > 120 || props.tipSaving) return;
+  emit("tipSave", tipBody.value);
+};
+const deleteTip = () => {
+  if (typeof window !== "undefined" && !window.confirm(t("ugc.tip.deleteConfirm"))) return;
+  emit("tipDelete");
+};
+const toggleHelpful = (tipId: string) => {
+  if (!props.authenticated) return emit("login");
+  emit("helpfulChange", tipId, !helpfulSet.value.has(tipId));
+};
+const submitReport = () => {
+  if (!reportTipId.value) return;
+  emit("report", reportTipId.value, reportReason.value);
+  reportTipId.value = null;
 };
 </script>
 
@@ -279,9 +324,10 @@ const removeDeprecatedTag = (slug: string) => {
         </ClientOnly>
       </section>
 
-      <section v-if="summary.tips.length" class="ugc-panel ugc-panel--tips" aria-labelledby="chart-ugc-tips-title">
+      <section class="ugc-panel ugc-panel--tips" aria-labelledby="chart-ugc-tips-title">
         <h4 id="chart-ugc-tips-title">{{ t("ugc.tipsTitle") }}</h4>
-        <div class="ugc-tips">
+        <p v-if="!summary.tips.length" class="ugc-cold-copy">{{ t("ugc.tipsEmpty") }}</p>
+        <div v-else class="ugc-tips">
           <article v-for="tip in summary.tips" :key="tip.tipId" class="ugc-tip">
             <p>{{ tip.body }}</p>
             <footer>
@@ -290,9 +336,38 @@ const removeDeprecatedTag = (slug: string) => {
                 <span>{{ tip.author.isDeleted ? t("ugc.deletedUser") : tip.author.displayName }}</span>
               </span>
               <span v-if="tip.verifiedPlay" class="ugc-tip__verified">{{ t("ugc.verifiedPlay") }}</span>
-              <span>{{ t("ugc.helpfulCount", { count: tip.helpfulCount }) }}</span>
+              <button type="button" class="ugc-helpful" :class="{ 'is-selected': helpfulSet.has(tip.tipId) }" :aria-pressed="helpfulSet.has(tip.tipId)" :disabled="Boolean(props.helpfulSavingById[tip.tipId])" @click="toggleHelpful(tip.tipId)">
+                <span aria-hidden="true">{{ helpfulSet.has(tip.tipId) ? "✓" : "♡" }}</span>
+                {{ t("ugc.helpfulCount", { count: tip.helpfulCount }) }}
+              </button>
+              <span v-if="props.helpfulErrorById[tip.tipId]" class="ugc-inline-error">{{ t(props.helpfulErrorById[tip.tipId] || "ugc.helpfulError") }}</span>
+              <button type="button" class="ugc-report-trigger" @click="reportTipId = tip.tipId">{{ t("ugc.report") }}</button>
             </footer>
           </article>
+        </div>
+        <div class="ugc-tip-actions">
+          <button type="button" class="ugc-tip-primary" :disabled="authenticated && (!canTipWrite || interactionPending || myTip?.status === 'hidden')" @click="openTipEditor">
+            {{ myTip?.status === "active" ? t("ugc.editTip") : t("ugc.leaveTip") }}
+          </button>
+          <button v-if="myTip?.status === 'active'" type="button" class="ugc-tip-delete" :disabled="tipSaving" @click="deleteTip">{{ t("ugc.deleteTip") }}</button>
+        </div>
+        <p v-if="myTip?.status === 'hidden'" class="ugc-tip-status">{{ t("ugc.tip.hidden") }}</p>
+        <div v-if="tipEditorOpen" class="ugc-tip-editor">
+          <label for="ugc-tip-body">{{ t("ugc.tip.label") }}</label>
+          <textarea id="ugc-tip-body" v-model="tipBody" rows="3" maxlength="120" :aria-describedby="tipErrorKey ? 'ugc-tip-error' : 'ugc-tip-count'"></textarea>
+          <div id="ugc-tip-count" class="ugc-tip-editor__meta"><span>{{ t("ugc.tip.remaining", { count: Math.max(0, 120 - tipBodyLength) }) }}</span><span>{{ tipBodyLength }} / 120</span></div>
+          <div class="ugc-tip-editor__actions">
+            <button type="button" class="ugc-tip-primary" :disabled="tipSaving || !tipBody.trim() || tipBodyLength > 120" @click="saveTip">{{ t("ugc.save") }}</button>
+            <button type="button" class="ugc-tip-secondary" :disabled="tipSaving" @click="cancelTipEditor">{{ t("ugc.cancel") }}</button>
+          </div>
+          <p v-if="tipErrorKey" id="ugc-tip-error" class="ugc-inline-error" role="alert">{{ t(tipErrorKey) }}</p>
+        </div>
+        <div v-if="reportTipId" class="ugc-report-editor">
+          <label for="ugc-report-reason">{{ t("ugc.reportReason") }}</label>
+          <select id="ugc-report-reason" v-model="reportReason">
+            <option value="spam">{{ t("ugc.reportReasons.spam") }}</option><option value="abuse">{{ t("ugc.reportReasons.abuse") }}</option><option value="advertising">{{ t("ugc.reportReasons.advertising") }}</option><option value="link">{{ t("ugc.reportReasons.link") }}</option><option value="duplicate">{{ t("ugc.reportReasons.duplicate") }}</option><option value="other">{{ t("ugc.reportReasons.other") }}</option>
+          </select>
+          <div class="ugc-tip-editor__actions"><button type="button" class="ugc-tip-primary" @click="submitReport">{{ t("ugc.submitReport") }}</button><button type="button" class="ugc-tip-secondary" @click="reportTipId = null">{{ t("ugc.cancel") }}</button></div>
         </div>
       </section>
     </div>
@@ -345,6 +420,20 @@ const removeDeprecatedTag = (slug: string) => {
 .ugc-tip { min-width: 0; border-left: 3px solid rgba(189, 121, 87, 0.46); padding: 9px 11px; background: rgba(255, 255, 255, 0.72); }
 .ugc-tip p { margin: 0; color: #493a31; font-size: 13px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ugc-tip footer { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 12px; margin-top: 8px; color: #7b695c; font-size: 11px; }
+.ugc-helpful, .ugc-report-trigger, .ugc-tip-primary, .ugc-tip-secondary, .ugc-tip-delete { min-height: 36px; border: 1px solid transparent; border-radius: 9px; padding: 5px 9px; font: inherit; font-size: 11px; cursor: pointer; }
+.ugc-helpful { color: #76513d; background: rgba(189, 121, 87, 0.1); }
+.ugc-helpful.is-selected { border-color: #a95837; color: #73351f; background: #f9dfd3; font-weight: 800; }
+.ugc-helpful:disabled { opacity: .55; cursor: wait; }
+.ugc-report-trigger, .ugc-tip-delete { color: #8a6651; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.ugc-tip-actions, .ugc-tip-editor__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.ugc-tip-primary { color: #fff; background: #8e5539; border-color: #8e5539; }
+.ugc-tip-secondary { color: #6f5d50; border-color: rgba(119, 88, 61, 0.22); background: transparent; }
+.ugc-tip-primary:disabled, .ugc-tip-secondary:disabled, .ugc-tip-delete:disabled { opacity: .5; cursor: not-allowed; }
+.ugc-tip-editor, .ugc-report-editor { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(139, 107, 77, .2); }
+.ugc-tip-editor label, .ugc-report-editor label { color: #5c4838; font-size: 12px; font-weight: 700; }
+.ugc-tip-editor textarea, .ugc-report-editor select { width: 100%; box-sizing: border-box; border: 1px solid rgba(119, 88, 61, .25); border-radius: 9px; padding: 9px; color: #493a31; background: #fff; font: inherit; font-size: 13px; line-height: 1.55; }
+.ugc-tip-editor__meta { display: flex; justify-content: space-between; color: #806d5f; font-size: 11px; }
+.ugc-tip-status { margin: 10px 0 0; color: #9a6049; font-size: 12px; }
 .ugc-tip__author { display: inline-flex; align-items: center; gap: 6px; color: #5d4b3e; font-weight: 700; }
 .ugc-tip__author img { border-radius: 50%; object-fit: cover; }
 .ugc-tip__verified { color: #5c7158; font-weight: 700; }
@@ -354,6 +443,11 @@ const removeDeprecatedTag = (slug: string) => {
 :global(body.theme-dark .ugc-choice.is-selected), :global(body.theme-dark .ugc-tag-option.is-selected) { border-color: #e29a78; color: #fff4ec; background: #71402d; box-shadow: inset 0 0 0 1px rgba(255, 226, 210, 0.34); }
 :global(body.theme-dark .ugc-summary-line), :global(body.theme-dark .ugc-cold-copy), :global(body.theme-dark .ugc-distribution li), :global(body.theme-dark .ugc-tip footer), :global(body.theme-dark .ugc-tip__author), :global(body.theme-dark .ugc-tags small), :global(body.theme-dark .ugc-control-meta), :global(body.theme-dark .ugc-tag-group h5), :global(body.theme-dark .ugc-tag-editor__footer) { color: #cbbbae; }
 :global(body.theme-dark .ugc-inline-error) { color: #ffaaa1; }
+:global(body.theme-dark .ugc-helpful) { color: #f0cdbb; background: rgba(226, 154, 120, .15); }
+:global(body.theme-dark .ugc-helpful.is-selected) { color: #fff4ec; background: #71402d; }
+:global(body.theme-dark .ugc-tip-editor label), :global(body.theme-dark .ugc-report-editor label) { color: #eadbcf; }
+:global(body.theme-dark .ugc-tip-editor textarea), :global(body.theme-dark .ugc-report-editor select) { color: #f1e6dc; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .2); }
+:global(body.theme-dark .ugc-tip-editor__meta), :global(body.theme-dark .ugc-tip-secondary) { color: #cbbbae; }
 :global(body.theme-dark .ugc-clear), :global(body.theme-dark .ugc-deprecated-tags), :global(body.theme-dark .ugc-deprecated-tags button) { color: #d8b8a6; }
 :global(body.theme-dark .ugc-choice:disabled), :global(body.theme-dark .ugc-tag-editor-toggle:disabled), :global(body.theme-dark .ugc-clear:disabled) { opacity: 0.6; }
 :global(body.theme-dark .ugc-tag-done) { color: #1e120d; background: #efb091; border-color: #efb091; }
