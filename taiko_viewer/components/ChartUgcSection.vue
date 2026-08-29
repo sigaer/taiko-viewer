@@ -355,8 +355,8 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
           </article>
         </div>
         <div class="ugc-tip-actions">
-          <button type="button" class="ugc-tip-primary" :disabled="authenticated && (!canTipWrite || interactionPending || myTip?.status === 'hidden')" @click="openTipEditor">
-            {{ myTip?.status === "active" ? t("ugc.editTip") : t("ugc.leaveTip") }}
+          <button type="button" class="ugc-tip-primary" :disabled="myTip?.status === 'hidden' || (authenticated && (!canTipWrite || interactionPending))" @click="openTipEditor">
+            {{ myTip?.status === "active" || myTip?.status === "hidden" ? t("ugc.editTip") : t("ugc.leaveTip") }}
           </button>
           <button v-if="myTip?.status === 'active'" type="button" class="ugc-tip-delete" :disabled="tipSaving" @click="deleteTip">{{ t("ugc.deleteTip") }}</button>
         </div>
