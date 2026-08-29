@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { buildPageDescription } from "~/utils/seo";
+import { buildPageDescription, SITE_TITLE } from "~/utils/seo";
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const switchLocalePath = useSwitchLocalePath();
+const runtimeConfig = useRuntimeConfig();
+const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev";
 
 const localeOptions = computed(() => [
   { code: "zh", label: t("locale.zh"), path: switchLocalePath("zh") || localePath("/more") },
@@ -92,6 +94,9 @@ const groups = [
         </NuxtLink>
       </div>
     </section>
+    <footer class="more-product-meta">
+      {{ SITE_TITLE }} · v{{ appVersion }}
+    </footer>
   </div>
 </template>
 
@@ -135,6 +140,18 @@ const groups = [
   border-color: transparent;
   color: #fff;
   background: var(--viewer-accent-strong);
+}
+
+.more-product-meta {
+  padding: 4px 4px 2px;
+  color: var(--viewer-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+:global(body.theme-dark .more-product-meta) {
+  color: #cbbbae;
 }
 
 .more-language__option:focus-visible,
