@@ -81,6 +81,7 @@ export const useChartUgc = async (
   const helpfulErrorById = reactive<Record<string, string | null>>({});
   const reportSavingById = reactive<Record<string, boolean>>({});
   const reportErrorById = reactive<Record<string, string | null>>({});
+  const reportSuccessById = reactive<Record<string, boolean>>({});
 
   const installViewerState = (state: ViewerChartUgcState) => {
     const key = keyForState(state);
@@ -236,8 +237,11 @@ export const useChartUgc = async (
     if (!user) return goToLogin();
     reportSavingById[tipId] = true;
     reportErrorById[tipId] = null;
+    reportSuccessById[tipId] = false;
     try {
-      return await apiFetch('/api/account/chart-tips/' + tipId + '/reports', { method: "POST", body: { reason } });
+      const response = await apiFetch('/api/account/chart-tips/' + tipId + '/reports', { method: "POST", body: { reason } });
+      reportSuccessById[tipId] = true;
+      return response;
     } catch (error) {
       reportErrorById[tipId] = "ugc.reportError";
       throw error;
@@ -395,6 +399,7 @@ export const useChartUgc = async (
     helpfulErrorById,
     reportSavingById,
     reportErrorById,
+    reportSuccessById,
     interactionUnavailable,
     interactionPending,
     setDifficultyVote,

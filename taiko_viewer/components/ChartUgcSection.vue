@@ -23,6 +23,7 @@ const props = defineProps<{
   helpfulErrorById: Record<string, string | null>;
   reportSavingById: Record<string, boolean>;
   reportErrorById: Record<string, string | null>;
+  reportSuccessById: Record<string, boolean>;
 }>();
 
 const emit = defineEmits<{
@@ -172,6 +173,9 @@ const submitReport = () => {
   if (!reportTipId.value) return;
   emit("report", reportTipId.value, reportReason.value);
 };
+watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : false, (success) => {
+  if (success) reportTipId.value = null;
+});
 </script>
 
 <template>
@@ -371,6 +375,7 @@ const submitReport = () => {
           <div class="ugc-tip-editor__actions"><button type="button" class="ugc-tip-primary" :disabled="Boolean(props.reportSavingById[reportTipId])" @click="submitReport">{{ t("ugc.submitReport") }}</button><button type="button" class="ugc-tip-secondary" @click="reportTipId = null">{{ t("ugc.cancel") }}</button></div>
           <p v-if="props.reportErrorById[reportTipId]" class="ugc-inline-error" role="alert">{{ t(props.reportErrorById[reportTipId] || "ugc.reportError") }}</p>
         </div>
+        <p v-if="Object.values(props.reportSuccessById).some(Boolean)" class="ugc-report-success" role="status">{{ t("ugc.reportSuccess") }}</p>
       </section>
     </div>
   </section>
@@ -436,6 +441,7 @@ const submitReport = () => {
 .ugc-tip-editor textarea, .ugc-report-editor select { width: 100%; box-sizing: border-box; border: 1px solid rgba(119, 88, 61, .25); border-radius: 9px; padding: 9px; color: #493a31; background: #fff; font: inherit; font-size: 13px; line-height: 1.55; }
 .ugc-tip-editor__meta { display: flex; justify-content: space-between; color: #806d5f; font-size: 11px; }
 .ugc-tip-status { margin: 10px 0 0; color: #9a6049; font-size: 12px; }
+.ugc-report-success { margin: 9px 0 0; color: #477248; font-size: 12px; font-weight: 700; }
 .ugc-tip__author { display: inline-flex; align-items: center; gap: 6px; color: #5d4b3e; font-weight: 700; }
 .ugc-tip__author img { border-radius: 50%; object-fit: cover; }
 .ugc-tip__verified { color: #5c7158; font-weight: 700; }
@@ -450,6 +456,7 @@ const submitReport = () => {
 :global(body.theme-dark .ugc-tip-editor label), :global(body.theme-dark .ugc-report-editor label) { color: #eadbcf; }
 :global(body.theme-dark .ugc-tip-editor textarea), :global(body.theme-dark .ugc-report-editor select) { color: #f1e6dc; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .2); }
 :global(body.theme-dark .ugc-tip-editor__meta), :global(body.theme-dark .ugc-tip-secondary) { color: #cbbbae; }
+:global(body.theme-dark .ugc-report-success) { color: #a9d9aa; }
 :global(body.theme-dark .ugc-clear), :global(body.theme-dark .ugc-deprecated-tags), :global(body.theme-dark .ugc-deprecated-tags button) { color: #d8b8a6; }
 :global(body.theme-dark .ugc-choice:disabled), :global(body.theme-dark .ugc-tag-editor-toggle:disabled), :global(body.theme-dark .ugc-clear:disabled) { opacity: 0.6; }
 :global(body.theme-dark .ugc-tag-done) { color: #1e120d; background: #efb091; border-color: #efb091; }

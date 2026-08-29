@@ -789,6 +789,7 @@
     "reportReasons": { "spam": "垃圾信息", "abuse": "辱骂或骚扰", "advertising": "广告", "link": "可疑链接", "duplicate": "重复内容", "other": "其他" },
     "helpfulError": "操作失败，请稍后重试",
     "reportError": "举报失败，请稍后重试",
+    "reportSuccess": "举报已提交",
     "tip": { "label": "提示内容", "remaining": "还可输入 {count} 字", "saveError": "保存失败，请检查内容后重试", "deleteError": "删除失败，请稍后重试", "deleteConfirm": "确定删除这条提示吗？", "hidden": "这条提示当前不可公开显示" },
     "verifiedPlay": "已游玩",
     "helpfulCount": "有帮助 {count}",

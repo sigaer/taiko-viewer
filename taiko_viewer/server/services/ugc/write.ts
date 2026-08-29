@@ -187,12 +187,22 @@ export const reportChartTip = async (userId: number, tipIdInput: unknown, reason
   if (!Number.isSafeInteger(tipId) || tipId <= 0) throw createError({ statusCode: 400, statusMessage: "提示 ID 无效" });
   const reason = normalizeReportReason(reasonInput);
   await ensureUgcSchema();
-  const db = getUgcDb();
-  const [tipRows] = await db.execute<UgcDbRow<{ status: ViewerTipStatus }>[]>("SELECT status FROM chart_tips WHERE tip_id = ? LIMIT 1", [tipId]);
-  if (!tipRows[0] || tipRows[0].status === "deleted") throw createError({ statusCode: 404, statusMessage: "提示不存在" });
-  const [insertResult] = await db.execute<ResultSetHeader>("INSERT IGNORE INTO chart_tip_reports (tip_id, reporter_user_id, reason) VALUES (?, ?, ?)", [tipId, userId, reason]);
-  const [rows] = await db.execute<UgcDbRow<{ reportId: number; status: string }>[]>("SELECT report_id AS reportId, status FROM chart_tip_reports WHERE tip_id = ? AND reporter_user_id = ? LIMIT 1", [tipId, userId]);
-  return { reportId: String(rows[0]?.reportId || ""), status: String(rows[0]?.status || "pending"), duplicate: Number(insertResult.affectedRows || 0) === 0 };
+  const connection = await getUgcDb().getConnection();
+  try {
+    await connection.beginTransaction();
+    const tip = await lockTip(connection, tipId);
+    if (tip.status === "deleted") throw createError({ statusCode: 404, statusMessage: "提示不存在" });
+    if (tip.status === "hidden") throw createError({ statusCode: 409, statusMessage: "该提示当前不可举报" });
+    const [insertResult] = await connection.execute<ResultSetHeader>("INSERT IGNORE INTO chart_tip_reports (tip_id, reporter_user_id, reason) VALUES (?, ?, ?)", [tipId, userId, reason]);
+    const [rows] = await connection.execute<UgcDbRow<{ reportId: number; status: string }>[]>("SELECT report_id AS reportId, status FROM chart_tip_reports WHERE tip_id = ? AND reporter_user_id = ? LIMIT 1", [tipId, userId]);
+    await connection.commit();
+    return { reportId: String(rows[0]?.reportId || ""), status: String(rows[0]?.status || "pending"), duplicate: Number(insertResult.affectedRows || 0) === 0 };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 export const moderateChartTip = async (operatorUserId: number, tipIdInput: unknown, actionInput: unknown, reasonInput: unknown) => {
