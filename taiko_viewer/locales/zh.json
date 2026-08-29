@@ -730,6 +730,54 @@
       "breakthrough_rating_gain": { "title": "RT 上升者", "body": "TAIKOB20 向上跳了一格，日复一日的积累终于有了刻度。" }
     }
   },
+  "ugc": {
+    "sectionTitle": "玩家谱面体验",
+    "difficulty": {
+      "title": "玩家体感",
+      "count": "{count} 位玩家留下体感",
+      "verifiedCount": "其中 {count} 位已游玩",
+      "distributionLabel": "体感难度分布",
+      "votes": "{count} 人",
+      "summary": {
+        "insufficient": "样本还少",
+        "mixed": "意见较分散",
+        "easy": "整体偏易",
+        "balanced": "整体合理",
+        "hard": "整体偏难"
+      },
+      "buckets": {
+        "-2": "明显偏易",
+        "-1": "偏易",
+        "0": "合理",
+        "1": "偏难",
+        "2": "明显偏难"
+      }
+    },
+    "tagsTitle": "常见标签",
+    "tagVotes": "{count} 人",
+    "tipsTitle": "玩家提示",
+    "verifiedPlay": "已游玩",
+    "helpfulCount": "有帮助 {count}",
+    "deletedUser": "已注销用户",
+    "tags": {
+      "rhythmTricky": "节奏难",
+      "evenPatterns": "偶数",
+      "twentyFourthNotes": "24 分",
+      "tempoChanges": "变速",
+      "compoundPatterns": "复合",
+      "longCompounds": "长复合",
+      "drumrolls": "滚奏",
+      "streams": "连打",
+      "bigNotes": "大音符",
+      "stamina": "体力",
+      "endurance": "耐力",
+      "highSpeed": "高速",
+      "lowSpeed": "低速",
+      "readability": "视认",
+      "backloaded": "后半难",
+      "localSpike": "局部难"
+    }
+  },
   "toolsApi": {
     "chartConfig": {
       "required": "请提供查询内容，例如：16 oxxo 180 鬼10",

@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
 import type { AccountSongScoresPayload } from "~/types/account-song";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
+import type { ChartDifficultyCode } from "~/types/ugc";
 import { buildPageDescription } from "~/utils/seo";
 import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
 
@@ -17,8 +18,16 @@ const drumVolume = ref(1);
 const drumMuted = ref(false);
 const audioErrors = ref<Record<string, boolean>>({});
 const drumAudioRefs = new Map<string, HTMLAudioElement>();
+const trackLevelMap: Record<string, ChartDifficultyCode> = {
+  EASY: 1,
+  NORMAL: 2,
+  HARD: 3,
+  ONI: 4,
+  EDIT: 5
+};
 
 const songId = computed(() => Number(route.params.id));
+const selectedDifficultyCode = computed(() => trackLevelMap[selectedTrack.value] || 4);
 const apiFetch = useViewerApiFetch();
 const { accountUser, resolveAccountUser } = useAccountAuthStatus();
 
@@ -28,7 +37,13 @@ definePageMeta({
   navKey: "/songs/available"
 });
 
-const { data: songDetail, pending, error } = await useSongDetail(songId);
+const [songDetailState, chartUgcState] = await Promise.all([
+  useSongDetail(songId),
+  useChartUgc(songId, selectedDifficultyCode)
+]);
+const { data: songDetail, pending, error } = songDetailState;
+const { publicState: chartUgcPublicState, hasUsefulPublicContent: hasUsefulChartUgc } = chartUgcState;
+const chartUgcSummary = chartUgcPublicState.data;
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 const { data: accountScores, pending: accountScoresPending } = useLazyAsyncData<
   AccountSongScoresPayload & { unavailable?: boolean }
@@ -295,14 +310,6 @@ const radarLabels = computed(() =>
     ? ["複合処理", "平均密度", "瞬間密度", "叩き分け", "BPM変化", "HS変化"]
     : ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"]
 );
-
-const trackLevelMap: Record<string, number> = {
-  EASY: 1,
-  NORMAL: 2,
-  HARD: 3,
-  ONI: 4,
-  EDIT: 5
-};
 
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
@@ -783,6 +790,12 @@ useViewerSeo(() => ({
           </div>
         </section>
       </main>
+
+      <ChartUgcSection
+        v-if="hasUsefulChartUgc && chartUgcSummary"
+        :summary="chartUgcSummary"
+        :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
+      />
 
       <AccountSongScores
         v-if="accountUser"

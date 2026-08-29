@@ -676,6 +676,54 @@
       "breakthrough_rating_gain": { "title": "RT を伸ばす人", "body": "TAIKOB20 が一目盛り上がり、毎日の積み重ねに数字がつきました。" }
     }
   },
+  "ugc": {
+    "sectionTitle": "プレイヤーの譜面体験",
+    "difficulty": {
+      "title": "体感難度",
+      "count": "{count} 人が体感を残しました",
+      "verifiedCount": "うち {count} 人がプレイ済み",
+      "distributionLabel": "体感難度の分布",
+      "votes": "{count} 人",
+      "summary": {
+        "insufficient": "まだ少数の意見です",
+        "mixed": "意見が分かれています",
+        "easy": "全体的に易しめ",
+        "balanced": "全体的に適正",
+        "hard": "全体的に難しめ"
+      },
+      "buckets": {
+        "-2": "かなり易しい",
+        "-1": "易しい",
+        "0": "適正",
+        "1": "難しい",
+        "2": "かなり難しい"
+      }
+    },
+    "tagsTitle": "よく選ばれるタグ",
+    "tagVotes": "{count} 人",
+    "tipsTitle": "プレイヤーのヒント",
+    "verifiedPlay": "プレイ済み",
+    "helpfulCount": "参考になった {count}",
+    "deletedUser": "退会済みユーザー",
+    "tags": {
+      "rhythmTricky": "リズム難",
+      "evenPatterns": "偶数",
+      "twentyFourthNotes": "24分",
+      "tempoChanges": "変速",
+      "compoundPatterns": "複合",
+      "longCompounds": "長複合",
+      "drumrolls": "ロール",
+      "streams": "連打",
+      "bigNotes": "大音符",
+      "stamina": "体力",
+      "endurance": "持久力",
+      "highSpeed": "高速",
+      "lowSpeed": "低速",
+      "readability": "視認",
+      "backloaded": "後半難",
+      "localSpike": "局所難"
+    }
+  },
   "toolsApi": {
     "chartConfig": {
       "required": "検索内容を入力してください。例：16 oxxo 180 鬼10",
