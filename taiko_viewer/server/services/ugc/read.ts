@@ -1,6 +1,8 @@
 import type {
   ChartDifficultyVoteValue,
   ChartUgcSummary,
+  ChartUgcTagDefinition,
+  ViewerChartUgcTagSelection,
   ViewerChartUgcState
 } from "../../../types/ugc";
 import { aggregateDifficultyVotes, selectCommonTagAggregates } from "./aggregate";
@@ -19,6 +21,7 @@ const toIso = (value: Date | string) => {
 
 type DifficultyRow = { value: ChartDifficultyVoteValue; verifiedPlay: number };
 type TagRow = { slug: string; labelKey: string; groupKey: string; count: number };
+type TagDefinitionRow = ChartUgcTagDefinition & { status?: "active" | "deprecated" };
 type TipRow = {
   tipId: number;
   body: string;
@@ -32,7 +35,7 @@ type TipRow = {
 export const getPublicChartUgcSummary = async (chart: ResolvedUgcChart): Promise<ChartUgcSummary> => {
   await ensureUgcSchema();
   const db = getUgcDb();
-  const [difficultyRows, tagRows, tagVoterRows, tipRows] = await Promise.all([
+  const [difficultyRows, tagRows, tagVoterRows, availableTagRows, tipRows] = await Promise.all([
     db.execute<UgcDbRow<DifficultyRow>[]>(
       "SELECT value, verified_play AS verifiedPlay FROM chart_difficulty_votes WHERE chart_id = ? ORDER BY user_id",
       [chart.chartId]
@@ -52,6 +55,12 @@ export const getPublicChartUgcSummary = async (chart: ResolvedUgcChart): Promise
          INNER JOIN ugc_tags tag ON tag.tag_id = vote.tag_id
         WHERE vote.chart_id = ? AND tag.status = 'active'`,
       [chart.chartId]
+    ).then(([rows]) => rows),
+    db.execute<UgcDbRow<TagDefinitionRow>[]>(
+      `SELECT slug, label_key AS labelKey, group_key AS groupKey, sort_order AS sortOrder
+         FROM ugc_tags
+        WHERE status = 'active'
+        ORDER BY sort_order, slug`
     ).then(([rows]) => rows),
     db.execute<UgcDbRow<TipRow>[]>(
       `SELECT tip.tip_id AS tipId, tip.body_text AS body, tip.verified_play AS verifiedPlay,
@@ -77,6 +86,12 @@ export const getPublicChartUgcSummary = async (chart: ResolvedUgcChart): Promise
       tagRows.map((row) => ({ slug: String(row.slug), labelKey: String(row.labelKey), groupKey: String(row.groupKey), count: Number(row.count) })),
       Number(tagVoterRows[0]?.count || 0)
     ),
+    availableTags: availableTagRows.map((row) => ({
+      slug: String(row.slug),
+      labelKey: String(row.labelKey),
+      groupKey: String(row.groupKey),
+      sortOrder: Number(row.sortOrder)
+    })),
     tips: tipRows.map((row) => ({
       tipId: String(row.tipId),
       body: String(row.body),
@@ -102,8 +117,9 @@ export const getViewerChartUgcState = async (chart: ResolvedUgcChart, userId: nu
       "SELECT value FROM chart_difficulty_votes WHERE chart_id = ? AND user_id = ? LIMIT 1",
       [chart.chartId, userId]
     ).then(([rows]) => rows),
-    db.execute<UgcDbRow<{ slug: string }>[]>(
-      `SELECT tag.slug
+    db.execute<UgcDbRow<TagDefinitionRow>[]>(
+      `SELECT tag.slug, tag.label_key AS labelKey, tag.group_key AS groupKey,
+              tag.sort_order AS sortOrder, tag.status
          FROM chart_tag_votes vote
          INNER JOIN ugc_tags tag ON tag.tag_id = vote.tag_id
         WHERE vote.chart_id = ? AND vote.user_id = ?
@@ -128,8 +144,16 @@ export const getViewerChartUgcState = async (chart: ResolvedUgcChart, userId: nu
   ]);
   const tip = tipRows[0];
   return {
+    chart: { chartId: String(chart.chartId), songId: chart.songId, difficultyCode: chart.difficultyCode },
     difficultyVote: difficultyRows[0] ? Number(difficultyRows[0].value) as ChartDifficultyVoteValue : null,
     tagSlugs: tagRows.map((row) => String(row.slug)),
+    tagSelections: tagRows.map((row) => ({
+      slug: String(row.slug),
+      labelKey: String(row.labelKey),
+      groupKey: String(row.groupKey),
+      sortOrder: Number(row.sortOrder),
+      status: String(row.status) as ViewerChartUgcTagSelection["status"]
+    })),
     tip: tip ? { tipId: String(tip.tipId), body: String(tip.body), status: tip.status } : null,
     helpfulTipIds: helpfulRows.map((row) => String(row.tipId))
   };

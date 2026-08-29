@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { mkdir, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import mysql from "mysql2/promise";
 
 const stateArg = process.argv.find((arg) => arg.startsWith("--state="));
@@ -15,7 +17,22 @@ const config = {
 if (!config.database.endsWith("_test")) throw new Error("UGC browser fixtures are restricted to a database ending in _test");
 
 const connection = await mysql.createConnection({ ...config, charset: "utf8mb4" });
-const tokens = { userA: "a".repeat(64), userB: "b".repeat(64) };
+const tokens = Object.fromEntries("ABCDEFG".split("").map((letter) => [`user${letter}`, letter.toLowerCase().repeat(64)]));
+const userdataDir = String(process.env.TAIKO_USERDATA_DIR || "").trim();
+if (userdataDir) {
+  const resolvedUserdataDir = resolve(userdataDir);
+  if (!resolvedUserdataDir.startsWith("/tmp/")) throw new Error("UGC test userdata must be under /tmp");
+  await mkdir(resolvedUserdataDir, { recursive: true });
+  const payloads = {
+    "fixture-wahlap": { songs: [{ song_no: 1419, level: 4, high_score: 900000 }] },
+    "fixture-hiroba": { songs: [{ song_no: 1419, level: 4, stage_cnt: 1 }] },
+    "fixture-manual": { songs: [{ song_no: 1419, level: 4, high_score: 950000 }] },
+    "fixture-no-match": { songs: [{ song_no: 1, level: 4, high_score: 800000 }] }
+  };
+  for (const [taikoId, payload] of Object.entries(payloads)) {
+    await writeFile(resolve(resolvedUserdataDir, `${taikoId}data.json`), `${JSON.stringify(payload)}\n`, "utf8");
+  }
+}
 try {
   await connection.execute(
     `CREATE TABLE IF NOT EXISTS web_user_sessions (
@@ -42,11 +59,26 @@ try {
         (102, 'fixture-b', 'fixture-b@example.test', 'hash', 'https://viewer.sakura-bot.cn/miku.png'),
         (103, 'fixture-c', 'fixture-c@example.test', 'hash', NULL),
         (104, 'fixture-d', 'fixture-d@example.test', 'hash', NULL),
-        (105, 'fixture-deleted', 'fixture-deleted@example.test', 'hash', NULL)`
+        (105, 'fixture-deleted', 'fixture-deleted@example.test', 'hash', NULL),
+        (106, 'fixture-no-binding', 'fixture-no-binding@example.test', 'hash', NULL),
+        (107, 'fixture-rate-limit', 'fixture-rate-limit@example.test', 'hash', NULL)`
     );
     await connection.execute(
-      "INSERT INTO web_user_sessions (session_token, user_id, expires_at) VALUES (?, 101, DATE_ADD(NOW(), INTERVAL 1 DAY)), (?, 102, DATE_ADD(NOW(), INTERVAL 1 DAY))",
-      [tokens.userA, tokens.userB]
+      `INSERT INTO web_user_sessions (session_token, user_id, expires_at) VALUES
+        (?, 101, DATE_ADD(NOW(), INTERVAL 1 DAY)), (?, 102, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+        (?, 103, DATE_ADD(NOW(), INTERVAL 1 DAY)), (?, 104, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+        (?, 105, DATE_ADD(NOW(), INTERVAL 1 DAY)), (?, 106, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+        (?, 107, DATE_ADD(NOW(), INTERVAL 1 DAY))`,
+      Object.values(tokens)
+    );
+    await connection.execute(
+      `INSERT INTO web_taiko_bindings
+        (user_id, taiko_id, source, manual_account_id, is_current, verified_title, verified_titleplate_id)
+       VALUES
+        (101, 'fixture-wahlap', 'wahlap', NULL, 1, NULL, NULL),
+        (102, 'fixture-hiroba', 'hiroba', NULL, 1, NULL, NULL),
+        (103, 'fixture-manual', 'manual', 'fixture-manual', 1, NULL, NULL),
+        (104, 'fixture-no-match', 'wahlap', NULL, 1, NULL, NULL)`
     );
     const [chartRows] = await connection.query(
       "SELECT chart_id AS chartId, difficulty_code AS difficultyCode FROM ugc_charts WHERE song_id = 1419 AND difficulty_code IN (4, 5) AND status = 'active'"

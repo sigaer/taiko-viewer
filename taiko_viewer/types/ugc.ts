@@ -25,6 +25,17 @@ export type ChartUgcTagAggregate = {
   percentage: number;
 };
 
+export type ChartUgcTagDefinition = {
+  slug: string;
+  labelKey: string;
+  groupKey: string;
+  sortOrder: number;
+};
+
+export type ViewerChartUgcTagSelection = ChartUgcTagDefinition & {
+  status: "active" | "deprecated";
+};
+
 export type ChartUgcTip = {
   tipId: string;
   body: string;
@@ -42,12 +53,15 @@ export type ChartUgcSummary = {
   chart: ChartUgcIdentity;
   difficulty: ChartUgcDifficultyAggregate;
   tags: ChartUgcTagAggregate[];
+  availableTags: ChartUgcTagDefinition[];
   tips: ChartUgcTip[];
 };
 
 export type ViewerChartUgcState = {
+  chart: ChartUgcIdentity;
   difficultyVote: ChartDifficultyVoteValue | null;
   tagSlugs: string[];
+  tagSelections: ViewerChartUgcTagSelection[];
   tip: {
     tipId: string;
     body: string;

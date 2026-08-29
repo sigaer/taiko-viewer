@@ -1,7 +1,8 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { H3Event } from "h3";
-import { createError, getRequestIP, setHeader } from "h3";
+import { createError, getRequestIP } from "h3";
 import type { AnnualLocale, AnnualShareRow, AnnualSummaryV4 } from "./types";
+import { createMemoryRateLimiter } from "~/server/utils/rate-limit";
 
 const SHARE_TOKEN_CONTEXT = "taiko-annual-share-v1";
 const RENDER_TOKEN_CONTEXT = "taiko-annual-render-v1";
@@ -9,7 +10,12 @@ const PUBLIC_RATE_WINDOW_MS = 60 * 1000;
 const PUBLIC_RATE_LIMIT = 120;
 const PUBLIC_RATE_MAX_BUCKETS = 5000;
 
-const publicRateBuckets = new Map<string, { count: number; resetAt: number }>();
+const enforceAnnualPublicRequestRate = createMemoryRateLimiter({
+  windowMs: PUBLIC_RATE_WINDOW_MS,
+  limit: PUBLIC_RATE_LIMIT,
+  maxBuckets: PUBLIC_RATE_MAX_BUCKETS,
+  message: "请求过于频繁，请稍后重试"
+});
 
 const requireSecret = (name: "share" | "render") => {
   const runtimeConfig = useRuntimeConfig();
@@ -83,27 +89,7 @@ export const buildAnnualPosterPublicUrl = (token: string, locale?: AnnualLocale)
 
 export const enforceAnnualPublicRateLimit = (event: H3Event) => {
   const address = getRequestIP(event, { xForwardedFor: true }) || "unknown";
-  const now = Date.now();
-  if (!publicRateBuckets.has(address) && publicRateBuckets.size >= PUBLIC_RATE_MAX_BUCKETS) {
-    for (const [key, value] of publicRateBuckets) {
-      if (value.resetAt <= now) publicRateBuckets.delete(key);
-    }
-    while (publicRateBuckets.size >= PUBLIC_RATE_MAX_BUCKETS) {
-      const oldestKey = publicRateBuckets.keys().next().value;
-      if (!oldestKey) break;
-      publicRateBuckets.delete(oldestKey);
-    }
-  }
-  const bucket = publicRateBuckets.get(address);
-  if (!bucket || bucket.resetAt <= now) {
-    publicRateBuckets.set(address, { count: 1, resetAt: now + PUBLIC_RATE_WINDOW_MS });
-    return;
-  }
-  bucket.count += 1;
-  if (bucket.count > PUBLIC_RATE_LIMIT) {
-    setHeader(event, "Retry-After", Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)));
-    throw createError({ statusCode: 429, statusMessage: "请求过于频繁，请稍后重试" });
-  }
+  enforceAnnualPublicRequestRate(event, address);
 };
 
 const PRIVATE_KEYS = new Set([

@@ -4,6 +4,7 @@ import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
+const route = useRoute();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { fetchCurrentUser } = useAccountState();
@@ -18,6 +19,12 @@ const form = reactive({
   password: "",
 });
 const rememberCredentials = ref(false);
+const redirectAfterLogin = computed(() => {
+  const target = String(route.query.redirect || "").trim();
+  return target.startsWith("/") && !target.startsWith("//") && !/[\r\n]/.test(target)
+    ? target
+    : localePath("/account/profile");
+});
 
 definePageMeta({
   middleware: "account-guest",
@@ -94,7 +101,7 @@ const submit = async () => {
     }
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
-    await navigateTo(localePath("/account/profile"));
+    await navigateTo(redirectAfterLogin.value);
   } catch (error: any) {
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
   } finally {

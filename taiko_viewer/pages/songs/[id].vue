@@ -13,7 +13,6 @@ const localePath = useLocalePath();
 const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverError = ref(false);
-const selectedTrack = ref("ONI");
 const drumVolume = ref(1);
 const drumMuted = ref(false);
 const audioErrors = ref<Record<string, boolean>>({});
@@ -25,6 +24,15 @@ const trackLevelMap: Record<string, ChartDifficultyCode> = {
   ONI: 4,
   EDIT: 5
 };
+const levelTrackMap: Record<ChartDifficultyCode, string> = {
+  1: "EASY",
+  2: "NORMAL",
+  3: "HARD",
+  4: "ONI",
+  5: "EDIT"
+};
+const requestedDifficulty = Number(route.query.difficulty) as ChartDifficultyCode;
+const selectedTrack = ref(levelTrackMap[requestedDifficulty] || "ONI");
 
 const songId = computed(() => Number(route.params.id));
 const selectedDifficultyCode = computed(() => trackLevelMap[selectedTrack.value] || 4);
@@ -42,8 +50,19 @@ const [songDetailState, chartUgcState] = await Promise.all([
   useChartUgc(songId, selectedDifficultyCode)
 ]);
 const { data: songDetail, pending, error } = songDetailState;
-const { publicState: chartUgcPublicState, hasUsefulPublicContent: hasUsefulChartUgc } = chartUgcState;
-const chartUgcSummary = chartUgcPublicState.data;
+const {
+  publicSummary: chartUgcSummary,
+  viewerState: chartUgcViewerState,
+  difficultySaving: chartUgcDifficultySaving,
+  tagSaving: chartUgcTagSaving,
+  difficultyError: chartUgcDifficultyError,
+  tagError: chartUgcTagError,
+  interactionUnavailable: chartUgcInteractionUnavailable,
+  interactionPending: chartUgcInteractionPending,
+  setDifficultyVote: setChartUgcDifficultyVote,
+  setTagSlugs: setChartUgcTagSlugs,
+  goToLogin: goToChartUgcLogin
+} = chartUgcState;
 const song = computed<SongCatalogItem | null>(() => songDetail.value.song);
 const { data: accountScores, pending: accountScoresPending } = useLazyAsyncData<
   AccountSongScoresPayload & { unavailable?: boolean }
@@ -792,9 +811,20 @@ useViewerSeo(() => ({
       </main>
 
       <ChartUgcSection
-        v-if="hasUsefulChartUgc && chartUgcSummary"
+        v-if="chartUgcSummary"
         :summary="chartUgcSummary"
+        :viewer-state="chartUgcViewerState"
+        :authenticated="Boolean(accountUser)"
+        :interaction-pending="chartUgcInteractionPending"
+        :interaction-unavailable="chartUgcInteractionUnavailable"
+        :difficulty-saving="chartUgcDifficultySaving"
+        :tag-saving="chartUgcTagSaving"
+        :difficulty-error-key="chartUgcDifficultyError"
+        :tag-error-key="chartUgcTagError"
         :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
+        @difficulty-change="setChartUgcDifficultyVote"
+        @tags-change="setChartUgcTagSlugs"
+        @login="goToChartUgcLogin"
       />
 
       <AccountSongScores
