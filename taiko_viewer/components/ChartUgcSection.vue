@@ -21,6 +21,8 @@ const props = defineProps<{
   tipErrorKey: string | null;
   helpfulSavingById: Record<string, boolean>;
   helpfulErrorById: Record<string, string | null>;
+  reportSavingById: Record<string, boolean>;
+  reportErrorById: Record<string, string | null>;
 }>();
 
 const emit = defineEmits<{
@@ -169,7 +171,6 @@ const toggleHelpful = (tipId: string) => {
 const submitReport = () => {
   if (!reportTipId.value) return;
   emit("report", reportTipId.value, reportReason.value);
-  reportTipId.value = null;
 };
 </script>
 
@@ -367,7 +368,8 @@ const submitReport = () => {
           <select id="ugc-report-reason" v-model="reportReason">
             <option value="spam">{{ t("ugc.reportReasons.spam") }}</option><option value="abuse">{{ t("ugc.reportReasons.abuse") }}</option><option value="advertising">{{ t("ugc.reportReasons.advertising") }}</option><option value="link">{{ t("ugc.reportReasons.link") }}</option><option value="duplicate">{{ t("ugc.reportReasons.duplicate") }}</option><option value="other">{{ t("ugc.reportReasons.other") }}</option>
           </select>
-          <div class="ugc-tip-editor__actions"><button type="button" class="ugc-tip-primary" @click="submitReport">{{ t("ugc.submitReport") }}</button><button type="button" class="ugc-tip-secondary" @click="reportTipId = null">{{ t("ugc.cancel") }}</button></div>
+          <div class="ugc-tip-editor__actions"><button type="button" class="ugc-tip-primary" :disabled="Boolean(props.reportSavingById[reportTipId])" @click="submitReport">{{ t("ugc.submitReport") }}</button><button type="button" class="ugc-tip-secondary" @click="reportTipId = null">{{ t("ugc.cancel") }}</button></div>
+          <p v-if="props.reportErrorById[reportTipId]" class="ugc-inline-error" role="alert">{{ t(props.reportErrorById[reportTipId] || "ugc.reportError") }}</p>
         </div>
       </section>
     </div>

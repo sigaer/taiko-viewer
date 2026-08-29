@@ -734,6 +734,7 @@
     "submitReport": "報告を送信",
     "reportReasons": { "spam": "スパム", "abuse": "嫌がらせ・暴言", "advertising": "広告", "link": "不審なリンク", "duplicate": "重複内容", "other": "その他" },
     "helpfulError": "操作に失敗しました。しばらくしてからお試しください",
+    "reportError": "報告に失敗しました。しばらくしてからお試しください",
     "tip": { "label": "ヒント内容", "remaining": "あと {count} 文字", "saveError": "保存できませんでした。内容を確認してください", "deleteError": "削除できませんでした", "deleteConfirm": "このヒントを削除しますか？", "hidden": "このヒントは現在公開されていません" },
     "verifiedPlay": "プレイ済み",
     "helpfulCount": "参考になった {count}",

@@ -61,6 +61,8 @@ const {
   tipError: chartUgcTipError,
   helpfulSavingById: chartUgcHelpfulSavingById,
   helpfulErrorById: chartUgcHelpfulErrorById,
+  reportSavingById: chartUgcReportSavingById,
+  reportErrorById: chartUgcReportErrorById,
   interactionUnavailable: chartUgcInteractionUnavailable,
   interactionPending: chartUgcInteractionPending,
   setDifficultyVote: setChartUgcDifficultyVote,
@@ -833,6 +835,8 @@ useViewerSeo(() => ({
         :tip-error-key="chartUgcTipError"
         :helpful-saving-by-id="chartUgcHelpfulSavingById"
         :helpful-error-by-id="chartUgcHelpfulErrorById"
+        :report-saving-by-id="chartUgcReportSavingById"
+        :report-error-by-id="chartUgcReportErrorById"
         :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
         @difficulty-change="setChartUgcDifficultyVote"
         @tags-change="setChartUgcTagSlugs"
