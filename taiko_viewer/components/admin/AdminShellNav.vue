@@ -3,6 +3,7 @@ const route = useRoute();
 
 const navItems = [
   { to: "/admin/taiko/dashboard", label: "工作台", short: "台" },
+  { to: "/admin/taiko/chart-ugc", label: "UGC 审核", short: "U" },
   { to: "/admin/taiko/songs", label: "歌曲数据", short: "曲" },
   { to: "/admin/taiko/guides", label: "谱面攻略", short: "谱" },
   { to: "/admin/taiko/aliases", label: "别名管理", short: "别" },

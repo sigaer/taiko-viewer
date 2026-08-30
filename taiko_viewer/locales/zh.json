@@ -813,6 +813,15 @@
       "localSpike": "局部难"
     }
   },
+  "adminUgc": {
+    "pendingTitle": "待处理举报", "overviewTitle": "UGC 概览", "historyTitle": "审核历史", "qualityTitle": "数据质量", "topCharts": "活跃谱面",
+    "emptyQueue": "暂无待处理举报", "emptyHistory": "暂无审核记录", "refresh": "刷新", "loadError": "UGC 数据加载失败",
+    "hide": "隐藏", "restore": "恢复", "viewChart": "查看谱面", "confirmTitle": "确认操作", "hideConfirm": "隐藏后该提示将不再公开，继续吗？",
+    "reasonTitle": "操作原因", "reasonPrompt": "请填写简短原因", "reasonRequired": "请输入原因", "restoreReason": "恢复公开", "submit": "提交", "cancel": "取消", "hidden": "提示已隐藏", "restored": "提示已恢复", "actionError": "操作失败，请刷新后重试",
+    "helpfulValue": "有帮助 {count}", "reportsValue": "举报 {count}", "reasonValue": "原因：{reason}", "difficultyValue": "难度 {value}", "deletedOperator": "已注销管理员",
+    "activeCharts": "活跃谱面", "chartsWithUgc": "有 UGC 的谱面", "difficultyVotes": "难度投票", "tagVotes": "标签投票", "activeTips": "公开提示", "hiddenTips": "隐藏提示", "helpful": "有帮助标记", "pendingReports": "待处理举报",
+    "verifiedDifficulty": "已游玩难度", "verifiedTags": "已游玩标签", "verifiedTips": "已游玩提示", "avgTags": "每位贡献者平均标签", "last24h": "最近 24 小时", "last7d": "最近 7 天", "last30d": "最近 30 天", "allTime": "全部时间"
+  },
   "toolsApi": {
     "chartConfig": {
       "required": "请提供查询内容，例如：16 oxxo 180 鬼10",

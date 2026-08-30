@@ -60,14 +60,74 @@ export type ChartUgcReportQueueItem = {
   reason: ChartUgcReportReason;
   status: "pending" | "resolved" | "dismissed";
   createdAt: string;
+  firstReportAt: string;
+  latestReportAt: string;
+  helpfulCount: number;
   reportCount: number;
   tip: {
     tipId: string;
     body: string;
     status: ViewerTipStatus;
+    verifiedPlay: boolean;
     author: ChartUgcTip["author"];
     chart: ChartUgcIdentity;
+    songTitle: string;
   };
+};
+
+export type ChartUgcModerationHistoryItem = {
+  id: string;
+  targetType: string;
+  targetId: string;
+  action: string;
+  reason: string | null;
+  operatorDisplayName: string;
+  operatorDeleted: boolean;
+  createdAt: string;
+};
+
+export type UgcOperationsWindow = "24h" | "7d" | "30d" | "all";
+
+export type UgcOperationsOverview = {
+  window: UgcOperationsWindow;
+  charts: {
+    active: number;
+    withAnyUgc: number;
+    withDifficultyVotes: number;
+    withTags: number;
+    withTips: number;
+  };
+  contributions: {
+    difficultyVotes: number;
+    tagVotes: number;
+    activeTips: number;
+    deletedTips: number;
+    hiddenTips: number;
+    helpful: number;
+    reportsPending: number;
+    reportsResolved: number;
+  };
+  quality: {
+    verifiedDifficultyCount: number;
+    verifiedDifficultyRatio: number;
+    verifiedTagCount: number;
+    verifiedTagRatio: number;
+    verifiedTipCount: number;
+    verifiedTipRatio: number;
+    averageTagsPerContributor: number;
+    tipsWithHelpful: number;
+    tipsWithReports: number;
+  };
+  periods: Record<UgcOperationsWindow, {
+    difficultyVotes: number;
+    tagVotes: number;
+    tips: number;
+    helpful: number;
+    reports: number;
+  }>;
+  topCharts: Array<{ chartId: string; songId: number; difficultyCode: number; songTitle: string; contributions: number }>;
+  difficultyDistribution: Array<{ value: number; count: number }>;
+  tagFrequency: Array<{ slug: string; labelKey: string; count: number }>;
 };
 
 export type ChartUgcSummary = {

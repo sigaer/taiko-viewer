@@ -7,6 +7,7 @@ import { normalizeDifficultyVoteValue, normalizeModerationReason, normalizeRepor
 import type { ViewerTipStatus } from "../../../types/ugc";
 import { UGC_ANONYMOUS_AVATAR_URL, UGC_ANONYMOUS_DISPLAY_NAME } from "./constants";
 import { ensureUgcSchema, getUgcDb, type UgcDbRow } from "../../utils/ugc-db";
+import { getSongCatalog } from "../content/songs";
 
 export const setChartDifficultyVote = async (
   userId: number,
@@ -205,7 +206,7 @@ export const reportChartTip = async (userId: number, tipIdInput: unknown, reason
   }
 };
 
-export const moderateChartTip = async (operatorUserId: number, tipIdInput: unknown, actionInput: unknown, reasonInput: unknown) => {
+export const moderateChartTip = async (operatorUserId: number | null, tipIdInput: unknown, actionInput: unknown, reasonInput: unknown) => {
   const tipId = Number(tipIdInput);
   const action = actionInput === "hide" || actionInput === "restore" ? actionInput : null;
   if (!Number.isSafeInteger(tipId) || tipId <= 0 || !action) throw createError({ statusCode: 400, statusMessage: "管理操作无效" });
@@ -237,10 +238,27 @@ export const listChartTipReports = async () => {
   await ensureUgcSchema();
   const db = getUgcDb();
   const [rows] = await db.execute<UgcDbRow<any>[]>(
-    "SELECT report.report_id AS reportId, report.reason, report.status AS reportStatus, report.created_at AS createdAt, tip.tip_id AS tipId, tip.body_text AS body, tip.status AS tipStatus, tip.verified_play AS verifiedPlay, tip.chart_id AS chartId, chart.song_id AS songId, chart.difficulty_code AS difficultyCode, account.username AS displayName, account.avatar_url AS avatarUrl, (SELECT COUNT(*) FROM chart_tip_reports r2 WHERE r2.tip_id = tip.tip_id) AS reportCount FROM chart_tip_reports report INNER JOIN chart_tips tip ON tip.tip_id = report.tip_id INNER JOIN ugc_charts chart ON chart.chart_id = tip.chart_id LEFT JOIN web_user_accounts account ON account.id = tip.author_user_id WHERE report.status = 'pending' ORDER BY report.created_at ASC, report.report_id ASC"
+    `SELECT report.report_id AS reportId, report.reason, report.status AS reportStatus, report.created_at AS createdAt,
+            tip.tip_id AS tipId, tip.body_text AS body, tip.status AS tipStatus, tip.verified_play AS verifiedPlay,
+            tip.chart_id AS chartId, chart.song_id AS songId, chart.difficulty_code AS difficultyCode,
+            account.username AS displayName, account.avatar_url AS avatarUrl,
+            (SELECT COUNT(*) FROM chart_tip_reports r2 WHERE r2.tip_id = tip.tip_id) AS reportCount,
+            (SELECT COUNT(*) FROM chart_tip_helpful h WHERE h.tip_id = tip.tip_id) AS helpfulCount,
+            (SELECT MIN(r3.created_at) FROM chart_tip_reports r3 WHERE r3.tip_id = tip.tip_id) AS firstReportAt,
+            (SELECT MAX(r4.created_at) FROM chart_tip_reports r4 WHERE r4.tip_id = tip.tip_id) AS latestReportAt
+       FROM chart_tip_reports report
+       INNER JOIN chart_tips tip ON tip.tip_id = report.tip_id
+       INNER JOIN ugc_charts chart ON chart.chart_id = tip.chart_id
+       LEFT JOIN web_user_accounts account ON account.id = tip.author_user_id
+      WHERE report.status = 'pending'
+      ORDER BY report.created_at ASC, report.report_id ASC`
   );
+  const songs = await getSongCatalog();
+  const songTitles = new Map(songs.map((song) => [Number(song.id), String(song.song_name || song.song_name_jp || `#${song.id}`)]));
   return rows.map((row) => ({
-    reportId: String(row.reportId), reason: String(row.reason), status: String(row.reportStatus), createdAt: new Date(row.createdAt).toISOString(), reportCount: Number(row.reportCount || 0),
-    tip: { tipId: String(row.tipId), body: String(row.body), status: row.tipStatus as ViewerTipStatus, author: { displayName: String(row.displayName || UGC_ANONYMOUS_DISPLAY_NAME), avatarUrl: String(row.avatarUrl || UGC_ANONYMOUS_AVATAR_URL), isDeleted: !row.displayName }, chart: { chartId: String(row.chartId), songId: Number(row.songId), difficultyCode: Number(row.difficultyCode) } }
+    reportId: String(row.reportId), reason: String(row.reason), status: String(row.reportStatus), createdAt: new Date(row.createdAt).toISOString(),
+    firstReportAt: new Date(row.firstReportAt || row.createdAt).toISOString(), latestReportAt: new Date(row.latestReportAt || row.createdAt).toISOString(),
+    helpfulCount: Number(row.helpfulCount || 0), reportCount: Number(row.reportCount || 0),
+    tip: { tipId: String(row.tipId), body: String(row.body), status: row.tipStatus as ViewerTipStatus, verifiedPlay: Boolean(row.verifiedPlay), author: { displayName: String(row.displayName || UGC_ANONYMOUS_DISPLAY_NAME), avatarUrl: String(row.avatarUrl || UGC_ANONYMOUS_AVATAR_URL), isDeleted: !row.displayName }, chart: { chartId: String(row.chartId), songId: Number(row.songId), difficultyCode: Number(row.difficultyCode) }, songTitle: songTitles.get(Number(row.songId)) || `#${row.songId}` }
   }));
 };

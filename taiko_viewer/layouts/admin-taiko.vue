@@ -9,6 +9,7 @@ await fetchCurrentAdmin();
 
 const breadcrumbMap: Record<string, string> = {
   "/admin/taiko/dashboard": "工作台",
+  "/admin/taiko/chart-ugc": "UGC 审核",
   "/admin/taiko/songs": "歌曲数据",
   "/admin/taiko/guides": "谱面攻略",
   "/admin/taiko/aliases": "别名管理",

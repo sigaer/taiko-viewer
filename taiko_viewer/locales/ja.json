@@ -759,6 +759,15 @@
       "localSpike": "局所難"
     }
   },
+  "adminUgc": {
+    "pendingTitle": "対応待ちの報告", "overviewTitle": "UGC 概要", "historyTitle": "モデレーション履歴", "qualityTitle": "データ品質", "topCharts": "活発な譜面",
+    "emptyQueue": "対応待ちの報告はありません", "emptyHistory": "履歴はありません", "refresh": "更新", "loadError": "UGC データを読み込めませんでした",
+    "hide": "非公開", "restore": "公開に戻す", "viewChart": "譜面を見る", "confirmTitle": "操作の確認", "hideConfirm": "このヒントを非公開にしますか？",
+    "reasonTitle": "操作理由", "reasonPrompt": "短い理由を入力してください", "reasonRequired": "理由を入力してください", "restoreReason": "公開に戻す", "submit": "送信", "cancel": "キャンセル", "hidden": "ヒントを非公開にしました", "restored": "ヒントを公開に戻しました", "actionError": "操作に失敗しました。更新して再試行してください",
+    "helpfulValue": "参考になった {count}", "reportsValue": "報告 {count}", "reasonValue": "理由：{reason}", "difficultyValue": "難度 {value}", "deletedOperator": "退会済み管理者",
+    "activeCharts": "公開中の譜面", "chartsWithUgc": "UGC のある譜面", "difficultyVotes": "難度投票", "tagVotes": "タグ投票", "activeTips": "公開ヒント", "hiddenTips": "非公開ヒント", "helpful": "参考になった", "pendingReports": "対応待ち報告",
+    "verifiedDifficulty": "プレイ済み難度", "verifiedTags": "プレイ済みタグ", "verifiedTips": "プレイ済みヒント", "avgTags": "投稿者ごとの平均タグ数", "last24h": "過去 24 時間", "last7d": "過去 7 日", "last30d": "過去 30 日", "allTime": "全期間"
+  },
   "toolsApi": {
     "chartConfig": {
       "required": "検索内容を入力してください。例：16 oxxo 180 鬼10",

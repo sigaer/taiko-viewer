@@ -1,9 +1,9 @@
 import { listChartTipReports } from "~/server/services/ugc";
-import { requireModerator } from "~/server/internal/forum/shared";
+import { requireUgcModerator } from "~/server/utils/admin/ugc-auth";
 import { setPrivateNoStore } from "~/server/utils/cache-policy";
 
 export default defineEventHandler(async (event) => {
   setPrivateNoStore(event);
-  await requireModerator(event);
+  await requireUgcModerator(event);
   return { items: await listChartTipReports() };
 });
