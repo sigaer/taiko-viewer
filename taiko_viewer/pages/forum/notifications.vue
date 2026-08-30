@@ -59,6 +59,11 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
   like: t("forum.notificationsType.like"),
   system: t("forum.notificationsType.system")
 }));
+
+const openNotification = async (item: ForumNotification) => {
+  if (!item.threadId) return;
+  await navigateTo(localePath(`/forum/thread/${item.threadId}`));
+};
 </script>
 
 <template>
@@ -78,10 +83,14 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
         :key="item.id"
         class="panel-card notification-card"
         :class="{ unread: !item.isRead }"
+        :tabindex="item.threadId ? 0 : undefined"
+        :role="item.threadId ? 'link' : undefined"
+        @click="openNotification(item)"
+        @keydown.enter="openNotification(item)"
       >
         <div class="notification-card__main">
           <div class="notification-card__meta">
-            <span class="notification-type">{{ typeLabelMap[item.type] || item.type }}</span>
+            <span class="notification-type"><span aria-hidden="true">{{ item.type === 'reply' ? '↩' : item.type === 'like' ? '♡' : item.type === 'mention' ? '@' : '!' }}</span> {{ typeLabelMap[item.type] || item.type }}</span>
             <span>{{ formatDateTime(item.createdAt) }}</span>
           </div>
           <h3>{{ item.title }}</h3>
@@ -90,9 +99,7 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
             <ForumUserBadge :user="item.actor" compact />
           </div>
         </div>
-        <NuxtLink v-if="item.threadId" :to="localePath(`/forum/thread/${item.threadId}`)" class="notification-card__link">
-          {{ t("forum.viewThread") }}
-        </NuxtLink>
+        <span v-if="item.threadId" class="notification-card__arrow" aria-hidden="true">→</span>
       </article>
     </section>
   </div>
@@ -139,7 +146,11 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
   justify-content: space-between;
   gap: 16px;
   border-left: 6px solid transparent;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
 }
+
+.notification-card:hover, .notification-card:focus-visible { background: color-mix(in srgb, var(--viewer-accent-strong) 8%, var(--viewer-surface)); outline: none; }
 
 .notification-card.unread {
   border-left-color: #d84a34;
@@ -170,15 +181,7 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
   font-size: 22px;
 }
 
-.notification-card__link {
-  min-width: 100px;
-  text-align: center;
-  padding: 12px 16px;
-  border-radius: 999px;
-  color: #fff;
-  text-decoration: none;
-  background: linear-gradient(135deg, #3a7aa3, #57a8d7);
-}
+.notification-card__arrow { color: var(--viewer-accent-strong); font-size: 22px; }
 
 body.theme-dark .notification-head p,
 body.theme-dark .notification-card p,
@@ -193,8 +196,6 @@ body.theme-dark .notification-card__meta {
     align-items: flex-start;
   }
 
-  .notification-card__link {
-    width: 100%;
-  }
+  .notification-card__arrow { align-self: flex-end; }
 }
 </style>

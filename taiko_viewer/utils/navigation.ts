@@ -1,4 +1,4 @@
-export type MobileTab = "home" | "songs" | "my" | "more";
+export type MobileTab = "home" | "songs" | "community" | "my" | "more";
 
 const normalizePath = (path: string) => {
   const withoutLocale = path === "/ja" ? "/" : path.startsWith("/ja/") ? path.slice(3) || "/" : path;
@@ -12,6 +12,7 @@ export const resolveMobileTab = (path: string, mobileNavMeta?: unknown): MobileT
   if (normalizedPath === "/") return "home";
   if (normalizedPath === "/my" || normalizedPath.startsWith("/my/")) return "my";
   if (normalizedPath === "/songs" || normalizedPath.startsWith("/songs/")) return "songs";
+  if (normalizedPath === "/forum" || normalizedPath.startsWith("/forum/")) return "community";
 
   if (
     normalizedPath === "/account/songs" ||
@@ -43,6 +44,7 @@ export const isImmersiveRoute = (path: string, mobileNavMeta?: unknown) => {
 export const mobileTabLabelKey: Record<MobileTab, string> = {
   home: "nav.home",
   songs: "nav.songsTab",
+  community: "nav.community",
   my: "nav.my",
   more: "nav.more"
 };

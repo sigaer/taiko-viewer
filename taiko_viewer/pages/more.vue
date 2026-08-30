@@ -33,8 +33,7 @@ const groups = [
     items: [
       { path: "/grade", label: "nav.grade" },
       { path: "/guide", label: "nav.guide" },
-      { path: "/titles", label: "nav.titles" },
-      { path: "/forum", label: "nav.forum" }
+      { path: "/titles", label: "nav.titles" }
     ]
   },
   {
@@ -43,8 +42,7 @@ const groups = [
     items: [
       { path: "/tools", label: "nav.tools" },
       { path: "/tools/chart-config", label: "tools.chartConfig" },
-      { path: "/tools/note-count", label: "tools.noteCount" },
-      { path: "/tools/word-cloud", label: "tools.wordCloud" }
+      { path: "/tools/note-count", label: "tools.noteCount" }
     ]
   },
   {

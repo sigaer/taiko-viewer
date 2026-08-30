@@ -25,6 +25,7 @@ const personalLinks = [
   { path: "/tools/b30", label: "tools.b30" },
   { path: "/tools/recommend", label: "tools.recommend" },
   { path: "/tools/progress", label: "tools.progress" },
+  { path: "/tools/word-cloud", label: "tools.wordCloud" },
   { path: "/account/profile", label: "account.profile" },
   { path: "/account/version-summary", label: "account.versionSummary" }
 ];

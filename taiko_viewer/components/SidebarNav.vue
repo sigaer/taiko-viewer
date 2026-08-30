@@ -134,6 +134,7 @@ const groups = computed(() => [
       { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
       { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },
       { key: "/tools/progress", label: t("tools.progress"), icon: "trophy" },
+      { key: "/tools/word-cloud", label: t("tools.wordCloud"), icon: "badge" },
       ...(accountUser.value?.annualSummaryAccess
         ? [{ key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" }]
         : [])
@@ -166,8 +167,7 @@ const groups = computed(() => [
         children: [
           { key: "/tools/chart-config", label: t("tools.chartConfig") },
           { key: "/tools/note-count", label: t("tools.noteCount") },
-          { key: "/tools/trend", label: t("tools.trend") },
-          { key: "/tools/word-cloud", label: t("tools.wordCloud") }
+          { key: "/tools/trend", label: t("tools.trend") }
         ]
       },
       { key: "/account/sync", label: t("account.sync"), icon: "history" },

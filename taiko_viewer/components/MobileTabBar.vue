@@ -10,6 +10,7 @@ const localePath = useLocalePath();
 const tabs: Array<{ key: MobileTab; path: string; icon: string }> = [
   { key: "home", path: "/", icon: "M4 11.5l8-6 8 6v7a1 1 0 0 1-1 1h-4v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5H5a1 1 0 0 1-1-1v-7z" },
   { key: "songs", path: "/songs/available", icon: "M9 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm8-2.5V6l-9 2.5v9.5" },
+  { key: "community", path: "/forum", icon: "M5 6.5h14A1.5 1.5 0 0 1 20.5 8v8A1.5 1.5 0 0 1 19 17.5H10l-4.5 3V8A1.5 1.5 0 0 1 7 6.5z M9 10.25h6 M9 13.75h4" },
   { key: "my", path: "/my", icon: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4.5 20a7.5 7.5 0 0 1 15 0" },
   { key: "more", path: "/more", icon: "M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z" }
 ];
@@ -43,7 +44,7 @@ const tabs: Array<{ key: MobileTab; path: string; icon: string }> = [
   bottom: 0;
   z-index: 30;
   display: none;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   min-height: 60px;
   padding: 6px 10px max(6px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--viewer-border);

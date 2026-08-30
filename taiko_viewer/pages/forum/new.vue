@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
+import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
 
 type UploadedImage = {
   imageUrl: string;
@@ -47,6 +48,11 @@ const paragraphBlocks = ref<string[]>([]);
 const imageBlocks = ref<UploadedImage[]>([]);
 const uploading = ref(false);
 const submitting = ref(false);
+const showMoreOptions = ref(false);
+const songQuery = ref("");
+const songResults = ref<SongCatalogItem[]>([]);
+const songLoading = ref(false);
+const selectedSong = ref<SongCatalogItem | null>(null);
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -69,12 +75,12 @@ const copy = computed(() =>
         summaryPlaceholder: "未入力の場合は本文1段目から自動抽出します",
         tags: "タグ",
         tagsPlaceholder: "空白またはカンマ区切り。例：段位 全良 配速",
-        songId: "関連曲 ID",
-        songIdPlaceholder: "任意。攻略や戦績投稿向け",
+        songId: "関連曲",
+        songIdPlaceholder: "曲名を検索して選択",
         difficulty: "関連難易度",
         level: "星数",
         levelPlaceholder: "例：10",
-        paragraphs: "本文段落",
+        paragraphs: "正文",
         paragraphDraftPlaceholder: "本文を入力して「本文に追加」を押すと内容リストに入ります",
         paragraphCount: "{count} 段",
         addParagraph: "本文に追加",
@@ -109,12 +115,12 @@ const copy = computed(() =>
         summaryPlaceholder: "不填则自动从首段正文提取",
         tags: "标签",
         tagsPlaceholder: "用空格或逗号分隔，如：段位 全良 配速",
-        songId: "关联曲目 ID",
-        songIdPlaceholder: "可选，用于攻略或战报贴",
+        songId: "关联歌曲",
+        songIdPlaceholder: "搜索歌曲后选择",
         difficulty: "关联难度",
         level: "星级",
         levelPlaceholder: "例如 10",
-        paragraphs: "正文段落",
+        paragraphs: "正文",
         paragraphDraftPlaceholder: "输入一段正文，点击加入正文后进入内容序列",
         paragraphCount: "{count} 段",
         addParagraph: "加入正文",
@@ -153,12 +159,32 @@ const threadTypeOptions = computed(() => [
   { label: copy.value.official, value: "official" }
 ]);
 const difficultyOptions = computed(() =>
-  [1, 2, 3, 4, 5].map((value) => ({
+  [1, 2, 3, 4, 5].filter((value) => !selectedSong.value || selectedSong.value[`level_${value}` as keyof SongCatalogItem] !== undefined && selectedSong.value[`level_${value}` as keyof SongCatalogItem] !== null && String(selectedSong.value[`level_${value}` as keyof SongCatalogItem]) !== "").map((value) => ({
     value: String(value),
     label: t(`difficulty.${value}`)
   }))
 );
 const getSectionLabel = (section: ForumSection) => t(`forum.sections.${section.slug}.name`);
+
+const searchSongs = async () => {
+  const keyword = songQuery.value.trim();
+  if (!keyword) { songResults.value = []; return; }
+  songLoading.value = true;
+  try {
+    const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", { query: { view: "list", shelfStatus: 0, page: 1, pageSize: 8, keyword } });
+    songResults.value = payload.songs;
+  } finally {
+    songLoading.value = false;
+  }
+};
+
+const chooseSong = (song: SongCatalogItem) => {
+  selectedSong.value = song;
+  form.songId = String(song.id);
+  songQuery.value = song.song_name;
+  songResults.value = [];
+  form.difficultyType = "";
+};
 
 const addParagraph = () => {
   if (!form.paragraphDraft.trim()) return;
@@ -247,78 +273,22 @@ const submit = async () => {
   <div class="forum-new-page">
     <section class="panel-card composer-panel">
       <div class="composer-panel__head">
-        <div>
-          <h2>{{ copy.heading }}</h2>
-          <p>{{ threadTypeTips[form.threadType] }}</p>
-        </div>
+        <div><h2>{{ copy.heading }}</h2><p>{{ threadTypeTips[form.threadType] }}</p></div>
         <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
       </div>
 
       <el-form label-position="top">
-        <div class="composer-grid">
-          <el-form-item :label="copy.section">
-            <el-select v-model="form.sectionSlug">
-              <el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" />
-            </el-select>
-          </el-form-item>
-          <el-form-item :label="copy.threadType">
-            <el-select v-model="form.threadType">
-              <el-option v-for="option in threadTypeOptions" :key="option.value" :label="option.label" :value="option.value" />
-            </el-select>
-          </el-form-item>
-        </div>
+        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><el-select v-model="form.threadType"><el-option v-for="option in threadTypeOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item></div>
 
         <el-form-item :label="copy.title">
           <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
         </el-form-item>
 
-        <el-form-item :label="copy.summary">
-          <el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" />
-        </el-form-item>
+        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span>{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><p>{{ text }}</p><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
 
-        <el-form-item :label="copy.tags">
-          <el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" />
-        </el-form-item>
+        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open"><summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary><div class="more-options__body"><el-form-item :label="copy.summary"><el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" /></el-form-item><el-form-item :label="copy.tags"><el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" /></el-form-item><div class="song-picker"><label>{{ copy.songId }}</label><div class="song-picker__search"><el-input v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" /><el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button></div><div v-if="songResults.length" class="song-picker__results"><button v-for="song in songResults" :key="song.id" type="button" @click="chooseSong(song)"><span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span><small>#{{ song.id }} · {{ song.type }}</small></button></div><p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p></div><div v-if="selectedSong" class="composer-grid composer-grid--song"><el-form-item :label="copy.difficulty"><el-select v-model="form.difficultyType" clearable><el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item><el-form-item :label="copy.level"><el-input v-model="form.level" :placeholder="copy.levelPlaceholder" /></el-form-item></div></div></details>
 
-        <div class="composer-grid composer-grid--song">
-          <el-form-item :label="copy.songId">
-            <el-input v-model="form.songId" :placeholder="copy.songIdPlaceholder" />
-          </el-form-item>
-          <el-form-item :label="copy.difficulty">
-            <el-select v-model="form.difficultyType" clearable>
-              <el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" />
-            </el-select>
-          </el-form-item>
-          <el-form-item :label="copy.level">
-            <el-input v-model="form.level" :placeholder="copy.levelPlaceholder" />
-          </el-form-item>
-        </div>
-
-        <section class="block-editor">
-          <div class="block-editor__head">
-            <h3>{{ copy.paragraphs }}</h3>
-            <span>{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span>
-          </div>
-          <el-input
-            v-model="form.paragraphDraft"
-            type="textarea"
-            :rows="5"
-            maxlength="4000"
-            show-word-limit
-            :placeholder="copy.paragraphDraftPlaceholder"
-          />
-          <div class="block-editor__actions">
-            <el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button>
-          </div>
-          <div class="block-list">
-            <div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item">
-              <p>{{ text }}</p>
-              <el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button>
-            </div>
-          </div>
-        </section>
-
-        <section class="block-editor">
+        <section class="block-editor block-editor--attachments">
           <div class="block-editor__head">
             <h3>{{ copy.images }}</h3>
             <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
@@ -385,8 +355,22 @@ const submit = async () => {
 }
 
 .composer-grid--song {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+
+.composer-grid--compact { margin-bottom: 2px; }
+.more-options { margin-top: 12px; border-top: 1px solid var(--viewer-border); border-bottom: 1px solid var(--viewer-border); }
+.more-options summary { padding: 14px 2px; color: var(--viewer-accent-strong); font-weight: 700; cursor: pointer; }
+.more-options__body { display: grid; gap: 4px; padding: 4px 0 12px; }
+.song-picker { display: grid; gap: 8px; margin: 2px 0 10px; }
+.song-picker > label { color: var(--viewer-text); font-size: 14px; font-weight: 600; }
+.song-picker__search { display: flex; gap: 8px; }
+.song-picker__search .el-input { flex: 1; }
+.song-picker__results { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; padding: 4px; border: 1px solid var(--viewer-border); border-radius: 12px; background: var(--viewer-surface); }
+.song-picker__results button { display: grid; gap: 2px; padding: 9px 10px; border: 0; border-radius: 8px; color: var(--viewer-text); background: transparent; text-align: left; cursor: pointer; }
+.song-picker__results button:hover, .song-picker__results button:focus-visible { background: color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); outline: none; }
+.song-picker__results small { color: var(--viewer-text-muted); }
+.song-picker__selected { margin: 0; padding: 8px 10px; border-radius: 8px; color: var(--viewer-accent-strong); background: color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); font-size: 13px; }
 
 .block-editor {
   display: grid;
@@ -477,5 +461,8 @@ body.theme-dark .image-card {
   .image-grid {
     grid-template-columns: 1fr;
   }
+
+  .composer-panel { padding: 16px; }
+  .composer-grid--song { grid-template-columns: 1fr; }
 }
 </style>

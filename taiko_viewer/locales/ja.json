@@ -35,7 +35,7 @@
   "nav": {
     "home": "ホーム",
     "titles": "称号一覧",
-    "forum": "フォーラム",
+    "forum": "コミュニティ",
     "aliasLog": "別名変更ログ",
     "songs": "楽曲一覧",
     "songsTab": "楽曲",
@@ -165,7 +165,7 @@
     "unknown": "譜面未紐付け"
   },
   "forum": {
-    "title": "フォーラム",
+    "title": "コミュニティ",
     "section": "セクション",
     "threadDetail": "スレッド詳細",
     "notifications": "通知",
@@ -419,6 +419,17 @@
       "index": {
         "desc": "太鼓の達人プレイヤー向け交流フォーラム。告知、攻略、段位、戦績共有を集約します。",
         "keyword": "プレイヤーコミュニティ",
+        "kicker": "プレイヤーコミュニティ",
+        "subtitle": "いまドンだーが話していることから、気になる投稿を見つけましょう。",
+        "filtersLabel": "コミュニティの絞り込み",
+        "latest": "最新",
+        "hot": "人気",
+        "featured": "注目",
+        "activeEyebrow": "いま話題",
+        "activeTitle": "進行中の話題",
+        "feedEyebrow": "コミュニティ更新",
+        "feedTitle": "最新の投稿",
+        "empty": "まだ議論はありません",
         "heroTitle": "攻略、戦績、段位、交流をひとつの鼓面へ。",
         "heroDesc": "中国版プレイヤーとドンダーひろば利用者向けに、従来型フォーラムの秩序と公式コミュニティの雰囲気を両立します。",
         "posterLabel": "ドンだー频道",

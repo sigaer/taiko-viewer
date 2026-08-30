@@ -23,6 +23,7 @@ const replyTarget = ref<{ id: number | null; label: string }>({
   id: null,
   label: "",
 });
+const replyExpanded = ref(false);
 const submitting = ref(false);
 const uploadingImages = ref(false);
 const likingThread = ref(false);
@@ -129,6 +130,7 @@ const firstContentImageIndex = computed(() =>
 
 const setReplyTarget = (id: number | null, label = "") => {
   replyTarget.value = { id, label };
+  replyExpanded.value = true;
 };
 
 const getReplyTargetUsername = (
@@ -245,6 +247,7 @@ const submitReply = async () => {
     replyBody.value = "";
     replyImages.value = [];
     replyTarget.value = { id: null, label: "" };
+    replyExpanded.value = false;
     ElMessage.success(copy.value.replySuccess);
     await refresh();
   } catch (error: any) {
@@ -385,7 +388,7 @@ const renderReplyBlocks = (
         </div>
       </section>
 
-      <section class="panel-card thread-content">
+      <section class="thread-content">
         <div
           v-for="(block, index) in detail.contentBlocks"
           :key="`${block.type}-${index}`"
@@ -403,10 +406,10 @@ const renderReplyBlocks = (
         </div>
       </section>
 
-      <section class="panel-card reply-box">
+      <section class="reply-box" :class="{ 'is-expanded': replyExpanded }">
         <div class="reply-box__head">
           <div>
-            <h3>{{ copy.publishReply }}</h3>
+            <h3>{{ replyExpanded ? copy.publishReply : copy.replyThread }}</h3>
             <p v-if="replyTarget.label">{{ copy.replyTarget.replace("{label}", replyTarget.label) }}</p>
             <p v-else>{{ copy.replyHint }}</p>
           </div>
@@ -417,13 +420,14 @@ const renderReplyBlocks = (
         <el-input
           v-model="replyBody"
           type="textarea"
-          :rows="5"
+          :rows="replyExpanded ? 5 : 1"
           maxlength="1000"
           show-word-limit
           :disabled="detail.isLocked"
           :placeholder="copy.replyPlaceholder"
+          @focus="replyExpanded = true"
         />
-        <div class="reply-box__upload">
+        <div v-if="replyExpanded" class="reply-box__upload">
           <label class="reply-upload-trigger">
             <input
               type="file"
@@ -442,7 +446,7 @@ const renderReplyBlocks = (
           </label>
           <span>{{ copy.imageHint }}</span>
         </div>
-        <div v-if="replyImages.length" class="reply-image-grid">
+        <div v-if="replyExpanded && replyImages.length" class="reply-image-grid">
           <div
             v-for="(imageUrl, index) in replyImages"
             :key="`${imageUrl}-${index}`"
@@ -455,6 +459,7 @@ const renderReplyBlocks = (
           </div>
         </div>
         <el-button
+          v-if="replyExpanded"
           type="primary"
           :disabled="detail.isLocked || uploadingImages"
           :loading="submitting"
@@ -468,7 +473,7 @@ const renderReplyBlocks = (
         <article
           v-for="post in detail.posts"
           :key="post.id"
-          class="panel-card floor-card"
+          class="floor-card"
         >
           <div class="floor-card__head">
             <div class="floor-card__user">
@@ -612,6 +617,33 @@ const renderReplyBlocks = (
 .reply-box,
 .floor-card {
   padding: 20px;
+}
+
+.thread-content {
+  max-width: 780px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.reply-box {
+  position: sticky;
+  bottom: 16px;
+  z-index: 8;
+  border: 1px solid var(--viewer-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--viewer-surface) 96%, transparent);
+  box-shadow: 0 12px 28px rgba(77, 55, 39, .14);
+}
+
+.reply-box:not(.is-expanded) { padding: 10px 12px; }
+.reply-box:not(.is-expanded) .reply-box__head p { display: none; }
+.reply-box:not(.is-expanded) .reply-box__head { margin: 0; }
+.reply-box:not(.is-expanded) :deep(.el-textarea__inner) { min-height: 38px !important; }
+
+.floor-card {
+  border-bottom: 1px solid var(--viewer-border);
+  border-radius: 0;
+  background: transparent;
 }
 
 .thread-header__top h2 {
@@ -895,5 +927,9 @@ body.theme-dark .blocked-content-card {
   .thread-header__top h2 {
     font-size: 28px;
   }
+
+  .reply-box { bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .thread-header { padding: 16px; }
+  .thread-content, .floor-card { padding-left: 4px; padding-right: 4px; }
 }
 </style>

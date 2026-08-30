@@ -1,551 +1,110 @@
 <script setup lang="ts">
-import type { ForumHomePayload } from "~/types/forum";
+import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
+const route = useRoute();
+const activeFilter = useState("community-filter", () => String(route.query.filter || "latest"));
 
-definePageMeta({
-  pageTitleKey: "forum.title",
-  pageDescKey: "page.forum.index.desc",
-  navKey: "/forum",
-  breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }]
+definePageMeta({ pageTitleKey: "forum.title", pageDescKey: "page.forum.index.desc", navKey: "/forum", breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }] });
+useViewerSeo(() => ({ title: t("forum.title"), description: buildPageDescription(t("page.forum.index.desc")), path: "/forum", keywords: [t("forum.title"), t("page.forum.index.keyword")] }));
+
+const { data, pending, refresh } = await useLazyAsyncData<ForumHomePayload>("forum-home", () => apiFetch("/api/forum/home"), {
+  default: () => ({ sections: [], featuredThreads: [], hotThreads: [], latestGuides: [], announcements: [], leaderboard: [], currentUser: null, unreadNotificationCount: 0, highlightedTags: [] })
 });
-
-useViewerSeo(() => ({
-  title: t("forum.title"),
-  description: buildPageDescription(t("page.forum.index.desc")),
-  path: "/forum",
-  keywords: [t("forum.title"), t("page.forum.index.keyword"), t("forum.types.achievement")]
-}));
-
-const { data, pending, refresh } = useLazyAsyncData<ForumHomePayload>(
-  "forum-home",
-  () => apiFetch("/api/forum/home"),
-  {
-    default: () => ({
-      sections: [],
-      featuredThreads: [],
-      hotThreads: [],
-      latestGuides: [],
-      announcements: [],
-      leaderboard: [],
-      currentUser: null,
-      unreadNotificationCount: 0,
-      highlightedTags: []
-    })
-  }
-);
-
 const home = computed(() => data.value);
-const getSectionName = (slug: string, fallback: string) => t(`forum.sections.${slug}.name`, fallback);
-const getSectionDescription = (slug: string, fallback: string) => t(`forum.sections.${slug}.description`, fallback);
+const getSectionName = (slug: string, fallback = "") => t(`forum.sections.${slug}.name`, fallback);
+const uniqueThreads = (groups: ForumThreadCard[][]) => {
+  const seen = new Set<number>();
+  return groups.flat().filter((thread) => !seen.has(thread.id) && seen.add(thread.id));
+};
+const feedThreads = computed(() => {
+  const source = activeFilter.value === "hot" ? home.value?.hotThreads || [] : activeFilter.value === "guide" ? home.value?.latestGuides || [] : activeFilter.value === "featured" ? home.value?.featuredThreads || [] : uniqueThreads([home.value?.featuredThreads || [], home.value?.hotThreads || [], home.value?.latestGuides || [], home.value?.announcements || []]);
+  return uniqueThreads([source]).slice(0, 12);
+});
+const filters = computed(() => [
+  { key: "latest", label: t("page.forum.index.latest") },
+  { key: "hot", label: t("page.forum.index.hot") },
+  { key: "guide", label: t("forum.types.guide") },
+  { key: "featured", label: t("page.forum.index.featured") }
+]);
+
+const scrollStorageKey = "community-scroll-position";
+let saveScrollPosition: (() => void) | null = null;
+onMounted(() => {
+  const saved = Number(sessionStorage.getItem(scrollStorageKey) || 0);
+  if (saved > 0) requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: "instant" as ScrollBehavior }));
+  saveScrollPosition = () => sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
+  window.addEventListener("scroll", saveScrollPosition, { passive: true });
+});
+onBeforeUnmount(() => {
+  if (saveScrollPosition) window.removeEventListener("scroll", saveScrollPosition);
+  saveScrollPosition = null;
+});
 </script>
 
 <template>
-  <div class="forum-home-page">
-    <section class="forum-home-hero panel-card">
-      <div class="forum-home-hero__copy">
-        <span class="forum-home-hero__eyebrow">Taiko Festival Forum</span>
-        <h2>{{ t("page.forum.index.heroTitle") }}</h2>
-        <p>{{ t("page.forum.index.heroDesc") }}</p>
-        <div class="forum-home-hero__actions">
-          <NuxtLink :to="localePath('/forum/new')" class="hero-action hero-action--primary">{{ t("forum.newThread") }}</NuxtLink>
-          <NuxtLink :to="localePath('/forum/notifications')" class="hero-action">
-            {{ t("forum.notifications") }}
-            <span v-if="home?.unreadNotificationCount" class="hero-action__count">
-              {{ home.unreadNotificationCount }}
-            </span>
-          </NuxtLink>
-        </div>
+  <div class="community-page">
+    <header class="community-header">
+      <div><p class="community-kicker">{{ t("page.forum.index.kicker") }}</p><h2>{{ t("forum.title") }}</h2><p class="community-subtitle">{{ t("page.forum.index.subtitle") }}</p></div>
+      <div class="community-header__actions">
+        <NuxtLink :to="localePath('/forum/notifications')" class="community-icon-link" :aria-label="t('forum.notifications')">◌<span v-if="home?.unreadNotificationCount" class="notification-dot">{{ home.unreadNotificationCount }}</span></NuxtLink>
+        <NuxtLink :to="localePath('/forum/new')" class="community-publish">{{ t("forum.newThread") }}</NuxtLink>
       </div>
-      <div class="forum-home-hero__poster">
-        <div class="poster-disc poster-disc--outer"></div>
-        <div class="poster-disc poster-disc--inner"></div>
-        <div class="poster-score">
-          <span>{{ t("page.forum.index.posterLabel") }}</span>
-          <strong>{{ home?.sections.length || 0 }}</strong>
-          <small>{{ t("page.forum.index.posterSuffix") }}</small>
-        </div>
-      </div>
+    </header>
+    <nav class="community-filters" :aria-label="t('page.forum.index.filtersLabel')">
+      <button v-for="filter in filters" :key="filter.key" type="button" class="community-filter" :class="{ 'is-active': activeFilter === filter.key }" :aria-pressed="activeFilter === filter.key" @click="activeFilter = filter.key">{{ filter.label }}</button>
+      <span class="community-filter__rule" aria-hidden="true"></span>
+      <NuxtLink v-for="section in home?.sections?.slice(0, 4)" :key="section.id" :to="localePath(`/forum/section/${section.slug}`)" class="community-section-link">{{ getSectionName(section.slug, section.name) }}</NuxtLink>
+    </nav>
+    <section class="community-rail" aria-labelledby="active-discussions-title">
+      <div class="community-section-heading"><div><p class="eyebrow">{{ t("page.forum.index.activeEyebrow") }}</p><h3 id="active-discussions-title">{{ t("page.forum.index.activeTitle") }}</h3></div><button type="button" class="text-action" @click="refresh">{{ t("common.retry") }}</button></div>
+      <div v-if="pending" class="community-rail__items"><div v-for="n in 3" :key="n" class="community-skeleton"></div></div>
+      <div v-else-if="home?.hotThreads?.length" class="community-rail__items"><NuxtLink v-for="thread in home.hotThreads.slice(0, 4)" :key="thread.id" :to="localePath(`/forum/thread/${thread.id}`)" class="active-thread"><span class="active-thread__type">{{ getSectionName(thread.section.slug, thread.section.name) }}</span><strong>{{ thread.title }}</strong><span>{{ thread.replyCount }} {{ t("forum.stats.reply") }} · {{ thread.likeCount }} {{ t("forum.stats.like") }}</span></NuxtLink></div>
+      <p v-else class="community-empty">{{ t("page.forum.index.empty") }}</p>
     </section>
-
-    <div class="forum-home-grid">
-      <aside class="forum-home-side">
-        <section class="panel-card side-panel">
-          <div class="side-panel__head">
-            <h3>{{ t("page.forum.index.sectionsTitle") }}</h3>
-            <NuxtLink :to="localePath('/forum/section/score-guides')">{{ t("page.forum.index.viewGuides") }}</NuxtLink>
-          </div>
-          <div class="section-list">
-            <NuxtLink
-              v-for="section in home?.sections"
-              :key="section.id"
-              :to="localePath(`/forum/section/${section.slug}`)"
-              class="section-item"
-              :style="{ '--section-accent': section.accentColor }"
-            >
-              <strong>{{ getSectionName(section.slug, section.name) }}</strong>
-              <span>{{ getSectionDescription(section.slug, section.description) }}</span>
-              <em>{{ t("page.forum.index.threadCount", { count: section.threadCount }) }}</em>
-            </NuxtLink>
-          </div>
-        </section>
-
-        <section class="panel-card side-panel">
-          <div class="side-panel__head">
-            <h3>{{ t("page.forum.index.quickLinks") }}</h3>
-          </div>
-          <div class="quick-links">
-            <NuxtLink :to="localePath('/forum/section/official')">{{ getSectionName("official", "") }}</NuxtLink>
-            <NuxtLink :to="localePath('/forum/section/dojo')">{{ getSectionName("dojo", "") }}</NuxtLink>
-            <NuxtLink :to="localePath('/forum/section/achievements')">{{ getSectionName("achievements", "") }}</NuxtLink>
-            <NuxtLink :to="localePath('/forum/me')">{{ t("forum.myCommunity") }}</NuxtLink>
-            <NuxtLink :to="localePath('/account/sync')">{{ t("account.sync") }}</NuxtLink>
-            <NuxtLink :to="localePath('/account/developer')">{{ t("account.developer") }}</NuxtLink>
-          </div>
-        </section>
-      </aside>
-
-      <main class="forum-home-main">
-        <section class="forum-stream panel-card">
-          <div class="panel-head">
-            <div>
-              <h3>{{ t("page.forum.index.featuredTitle") }}</h3>
-              <p>{{ t("page.forum.index.featuredDesc") }}</p>
-            </div>
-            <span class="panel-head__meta">{{ t("page.forum.index.featuredMeta") }}</span>
-          </div>
-          <div v-if="pending" class="forum-skeleton-grid">
-            <div class="shimmer-card" v-for="index in 2" :key="index"></div>
-          </div>
-          <el-empty v-else-if="!home?.featuredThreads.length" :description="t('page.forum.index.noFeatured')" />
-          <div v-else class="thread-stack">
-            <ForumThreadCard
-              v-for="thread in home.featuredThreads"
-              :key="thread.id"
-              :thread="thread"
-              :compact="home.featuredThreads.length > 1"
-            />
-          </div>
-        </section>
-
-        <section class="forum-stream panel-card">
-          <div class="panel-head">
-            <div>
-              <h3>{{ t("page.forum.index.hotTitle") }}</h3>
-              <p>{{ t("page.forum.index.hotDesc") }}</p>
-            </div>
-          </div>
-          <el-empty v-if="!pending && !home?.hotThreads.length" :description="t('page.forum.index.noHot')" />
-          <div v-else class="thread-stack thread-stack--compact">
-            <ForumThreadCard v-for="thread in home?.hotThreads" :key="thread.id" :thread="thread" compact />
-          </div>
-        </section>
-
-        <section class="forum-stream panel-card">
-          <div class="panel-head">
-            <div>
-              <h3>{{ t("page.forum.index.latestGuideTitle") }}</h3>
-              <p>{{ t("page.forum.index.latestGuideDesc") }}</p>
-            </div>
-            <NuxtLink :to="localePath('/forum/section/score-guides')">{{ t("page.forum.index.enterGuide") }}</NuxtLink>
-          </div>
-          <el-empty v-if="!pending && !home?.latestGuides.length" :description="t('page.forum.index.noGuides')" />
-          <div v-else class="thread-stack thread-stack--compact">
-            <ForumThreadCard v-for="thread in home?.latestGuides" :key="thread.id" :thread="thread" compact />
-          </div>
-        </section>
-      </main>
-
-      <aside class="forum-home-side forum-home-side--right">
-        <section class="panel-card side-panel user-panel">
-          <div class="side-panel__head">
-            <h3>{{ home?.currentUser ? t("page.forum.index.currentUser") : t("page.forum.index.joinCommunity") }}</h3>
-            <button type="button" class="link-button" @click="refresh">{{ t("common.retry") }}</button>
-          </div>
-          <template v-if="home?.currentUser">
-            <ForumUserBadge :user="home.currentUser" />
-            <div class="user-panel__actions">
-              <NuxtLink :to="localePath('/forum/me')">{{ t("page.forum.index.myThreads") }}</NuxtLink>
-              <NuxtLink :to="localePath('/forum/notifications')">{{ t("forum.notifications") }} {{ home.unreadNotificationCount }}</NuxtLink>
-            </div>
-          </template>
-          <div v-else class="guest-card">
-            <p>{{ t("page.forum.index.guestDesc") }}</p>
-            <div class="user-panel__actions">
-              <NuxtLink :to="localePath('/account/login')">{{ t("account.login") }}</NuxtLink>
-              <NuxtLink :to="localePath('/account/register')">{{ t("account.register") }}</NuxtLink>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel-card side-panel">
-          <div class="side-panel__head">
-            <h3>{{ t("page.forum.index.announcements") }}</h3>
-          </div>
-          <el-empty v-if="!pending && !home?.announcements.length" :description="t('page.forum.index.noAnnouncements')" />
-          <div v-else class="announcement-list">
-            <NuxtLink v-for="thread in home?.announcements" :key="thread.id" :to="localePath(`/forum/thread/${thread.id}`)">
-              <strong>{{ thread.title }}</strong>
-              <span>{{ thread.summary }}</span>
-            </NuxtLink>
-          </div>
-        </section>
-
-        <section class="panel-card side-panel">
-          <div class="side-panel__head">
-            <h3>{{ t("page.forum.index.tags") }}</h3>
-          </div>
-          <div class="tag-cloud">
-            <span v-for="tag in home?.highlightedTags" :key="tag">#{{ tag }}</span>
-          </div>
-        </section>
-
-        <section class="panel-card side-panel">
-          <div class="side-panel__head">
-            <h3>{{ t("page.forum.index.leaderboard") }}</h3>
-          </div>
-          <el-empty v-if="!pending && !home?.leaderboard.length" :description="t('page.forum.index.noLeaderboard')" />
-          <div v-else class="leaderboard-list">
-            <div v-for="(entry, index) in home?.leaderboard" :key="entry.author.id" class="leaderboard-item">
-              <span class="leaderboard-item__rank">{{ index + 1 }}</span>
-              <ForumUserBadge :user="entry.author" compact />
-              <div class="leaderboard-item__stats">
-                <span>{{ t("page.forum.index.postStat", { count: entry.threadCount }) }}</span>
-                <span>{{ t("page.forum.index.likeStat", { count: entry.likeCount }) }}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </aside>
-    </div>
+    <section class="community-feed" aria-labelledby="latest-discussions-title">
+      <div class="community-section-heading"><div><p class="eyebrow">{{ t("page.forum.index.feedEyebrow") }}</p><h3 id="latest-discussions-title">{{ t("page.forum.index.feedTitle") }}</h3></div><NuxtLink :to="localePath('/forum')" class="text-action">{{ t("common.viewAll") }}</NuxtLink></div>
+      <div v-if="pending" class="community-feed__list"><div v-for="n in 4" :key="n" class="community-skeleton community-skeleton--row"></div></div>
+      <div v-else-if="feedThreads.length" class="community-feed__list"><ForumThreadCard v-for="thread in feedThreads" :key="thread.id" :thread="thread" compact /></div>
+      <p v-else class="community-empty">{{ t("page.forum.index.empty") }}</p>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.forum-home-page {
-  display: grid;
-  gap: 18px;
-}
-
-.forum-home-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
-  gap: 18px;
-  overflow: hidden;
-  position: relative;
-  background:
-    radial-gradient(circle at top left, rgba(255, 194, 129, 0.46), transparent 38%),
-    radial-gradient(circle at bottom right, rgba(59, 124, 168, 0.18), transparent 36%),
-    linear-gradient(135deg, rgba(255, 251, 246, 0.94), rgba(255, 242, 224, 0.92));
-}
-
-.forum-home-hero__copy {
-  display: grid;
-  gap: 14px;
-  padding: 12px 4px;
-}
-
-.forum-home-hero__eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #b55a38;
-}
-
-.forum-home-hero__copy h2 {
-  margin: 0;
-  font-size: 38px;
-  line-height: 1.16;
-}
-
-.forum-home-hero__copy p {
-  margin: 0;
-  line-height: 1.9;
-  color: #705846;
-}
-
-.forum-home-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.hero-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  border-radius: 999px;
-  text-decoration: none;
-  color: #7b5637;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.hero-action--primary {
-  color: #fff;
-  background: linear-gradient(135deg, #d84a34, #f08a24);
-  box-shadow: 0 16px 26px rgba(216, 74, 52, 0.22);
-}
-
-.hero-action__count {
-  min-width: 24px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(216, 74, 52, 0.16);
-  color: #c34a34;
-  text-align: center;
-}
-
-.forum-home-hero__poster {
-  position: relative;
-  min-height: 280px;
-  display: grid;
-  place-items: center;
-}
-
-.poster-disc {
-  position: absolute;
-  border-radius: 50%;
-}
-
-.poster-disc--outer {
-  width: 260px;
-  height: 260px;
-  background: radial-gradient(circle at center, #ffe7cb 0%, #f2b767 45%, #dd5936 80%, #bf3f2e 100%);
-  box-shadow: inset 0 0 0 22px rgba(255, 250, 239, 0.82);
-}
-
-.poster-disc--inner {
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle at center, #fff4ea, #ffd8a9);
-  box-shadow: 0 12px 24px rgba(170, 90, 46, 0.25);
-}
-
-.poster-score {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 4px;
-  text-align: center;
-}
-
-.poster-score span,
-.poster-score small {
-  color: #7e6048;
-}
-
-.poster-score strong {
-  font-size: 56px;
-  line-height: 1;
-  color: #d84a34;
-}
-
-.forum-home-grid {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.65fr) minmax(240px, 0.9fr);
-  gap: 18px;
-  align-items: start;
-}
-
-.forum-home-side,
-.forum-home-main {
-  display: grid;
-  gap: 18px;
-}
-
-.side-panel,
-.forum-stream {
-  padding: 18px;
-}
-
-.side-panel__head,
-.panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.side-panel__head h3,
-.panel-head h3 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.side-panel__head a,
-.panel-head a,
-.link-button {
-  color: #b25237;
-  text-decoration: none;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.panel-head__meta {
-  color: #9b6a46;
-  font-size: 13px;
-}
-
-.panel-head p {
-  margin: 4px 0 0;
-  color: #776353;
-  line-height: 1.7;
-}
-
-.section-list,
-.thread-stack,
-.announcement-list,
-.leaderboard-list {
-  display: grid;
-  gap: 12px;
-}
-
-.thread-stack--compact {
-  gap: 14px;
-}
-
-.section-item,
-.announcement-list a {
-  display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  text-decoration: none;
-  color: #382d24;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--section-accent, #d84a34) 11%, white), rgba(255, 255, 255, 0.82));
-}
-
-.section-item span,
-.announcement-list a span {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #765d4b;
-}
-
-.section-item em {
-  font-style: normal;
-  font-size: 12px;
-  color: #b15a3b;
-}
-
-.quick-links,
-.user-panel__actions,
-.tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.quick-links a,
-.user-panel__actions a,
-.tag-cloud span {
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 12px;
-  border-radius: 999px;
-  text-decoration: none;
-  background: rgba(255, 245, 230, 0.88);
-  color: #8c5731;
-}
-
-.guest-card p {
-  margin: 0 0 14px;
-  color: #765f4d;
-  line-height: 1.8;
-}
-
-.leaderboard-item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.leaderboard-item__rank {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, #d84a34, #f0a53f);
-}
-
-.leaderboard-item__stats {
-  display: grid;
-  justify-items: end;
-  gap: 4px;
-  font-size: 12px;
-  color: #7f6856;
-}
-
-.forum-skeleton-grid {
-  display: grid;
-  gap: 14px;
-}
-
-body.theme-dark .forum-home-hero {
-  background:
-    radial-gradient(circle at top left, rgba(237, 138, 82, 0.22), transparent 38%),
-    radial-gradient(circle at bottom right, rgba(59, 124, 168, 0.22), transparent 36%),
-    linear-gradient(135deg, rgba(30, 25, 22, 0.96), rgba(23, 19, 17, 0.94));
-}
-
-body.theme-dark .forum-home-hero__copy p,
-body.theme-dark .panel-head p,
-body.theme-dark .section-item span,
-body.theme-dark .announcement-list a span,
-body.theme-dark .guest-card p,
-body.theme-dark .leaderboard-item__stats {
-  color: #c5b3a6;
-}
-
-body.theme-dark .hero-action,
-body.theme-dark .quick-links a,
-body.theme-dark .user-panel__actions a,
-body.theme-dark .tag-cloud span {
-  background: rgba(72, 50, 36, 0.54);
-  color: #f1d7bc;
-}
-
-body.theme-dark .section-item,
-body.theme-dark .announcement-list a {
-  color: #f0e2d6;
-}
-
-@media (max-width: 1180px) {
-  .forum-home-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .forum-home-side {
-    order: 2;
-  }
-
-  .forum-home-main {
-    order: 1;
-  }
-
-  .forum-home-side--right {
-    order: 3;
-  }
-}
-
-@media (max-width: 860px) {
-  .forum-home-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .forum-home-hero__copy h2 {
-    font-size: 30px;
-  }
-}
+.community-page { display: grid; gap: 20px; max-width: 1040px; margin: 0 auto; }
+.community-header { display: flex; align-items: end; justify-content: space-between; gap: 18px; padding: 4px 0 2px; }
+.community-kicker, .eyebrow { margin: 0; color: var(--viewer-accent-strong); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.community-header h2 { margin: 5px 0 0; color: var(--viewer-text); font-size: clamp(28px, 5vw, 42px); letter-spacing: -.03em; }
+.community-subtitle { max-width: 560px; margin: 6px 0 0; color: var(--viewer-text-muted); line-height: 1.55; }
+.community-header__actions { display: flex; align-items: center; gap: 9px; }
+.community-icon-link, .community-publish { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; text-decoration: none; font-weight: 700; }
+.community-icon-link { position: relative; width: 44px; color: var(--viewer-text-muted); border: 1px solid var(--viewer-border); font-size: 22px; }
+.community-publish { padding: 0 16px; color: #fff; background: var(--viewer-accent-strong); box-shadow: 0 8px 18px rgba(196, 127, 79, .2); }
+.notification-dot { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 2px 4px; border-radius: 99px; color: #fff; background: #c64c3a; font-size: 10px; text-align: center; }
+.community-filters { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+.community-filters::-webkit-scrollbar { display: none; }
+.community-filter, .community-section-link { min-height: 38px; display: inline-flex; align-items: center; flex: 0 0 auto; padding: 0 14px; border: 1px solid var(--viewer-border); border-radius: 999px; color: var(--viewer-text-muted); background: transparent; font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+.community-filter.is-active { border-color: var(--viewer-accent-strong); color: #fff; background: var(--viewer-accent-strong); }
+.community-section-link { border-style: dashed; }
+.community-filter__rule { width: 1px; height: 22px; flex: 0 0 auto; margin: 0 2px; background: var(--viewer-border); }
+.community-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.community-section-heading h3 { margin: 3px 0 0; color: var(--viewer-text); font-size: 20px; }
+.text-action { color: var(--viewer-accent-strong); background: none; border: 0; font: inherit; font-size: 13px; cursor: pointer; text-decoration: none; }
+.community-rail__items { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(210px, 280px); gap: 10px; overflow-x: auto; padding-bottom: 3px; }
+.active-thread { min-height: 116px; display: grid; align-content: start; gap: 7px; padding: 14px; border: 1px solid var(--viewer-border); border-radius: 14px; color: var(--viewer-text); background: var(--viewer-surface); text-decoration: none; transition: border-color .18s ease, transform .18s ease; }
+.active-thread:hover, .active-thread:focus-visible { border-color: var(--viewer-accent-strong); transform: translateY(-1px); }
+.active-thread strong { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 15px; line-height: 1.35; }
+.active-thread span:last-child { color: var(--viewer-text-muted); font-size: 12px; }
+.active-thread__type { color: var(--viewer-accent-strong); font-size: 11px; }
+.community-feed__list { display: grid; gap: 0; border-top: 1px solid var(--viewer-border); }
+.community-empty { margin: 0; padding: 24px 0; color: var(--viewer-text-muted); }
+.community-skeleton { height: 116px; border-radius: 14px; background: linear-gradient(90deg, var(--viewer-surface), color-mix(in srgb, var(--viewer-border) 60%, var(--viewer-surface)), var(--viewer-surface)); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.community-skeleton--row { height: 92px; border-radius: 0; border-bottom: 1px solid var(--viewer-border); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (max-width: 560px) { .community-header { align-items: flex-start; } .community-publish { padding: 0 12px; font-size: 13px; } }
+@media (prefers-reduced-motion: reduce) { .community-skeleton { animation: none; } .active-thread { transition: none; } }
 </style>

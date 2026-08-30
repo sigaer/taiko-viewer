@@ -121,9 +121,23 @@ const localizedSongTitle = computed(() => {
 }
 
 .forum-thread-card.compact {
-  grid-template-columns: 1fr;
-  padding: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 150px);
+  padding: 16px 0;
+  border: 0;
+  border-bottom: 1px solid var(--viewer-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
+
+.forum-thread-card.compact .forum-thread-card__main { gap: 7px; }
+.forum-thread-card.compact .forum-thread-card__title { font-size: 18px; }
+.forum-thread-card.compact .forum-thread-card__summary { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; font-size: 13px; }
+.forum-thread-card.compact .forum-thread-card__badges { gap: 6px; }
+.forum-thread-card.compact .section-pill,
+.forum-thread-card.compact .type-pill,
+.forum-thread-card.compact .state-pill { padding: 3px 8px; font-size: 11px; }
+.forum-thread-card.compact .forum-thread-card__cover { min-height: 88px; max-height: 108px; border-radius: 12px; }
 
 .forum-thread-card__main {
   display: grid;
@@ -279,6 +293,11 @@ body.theme-dark .forum-thread-card {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+body.theme-dark .forum-thread-card.compact {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 body.theme-dark .forum-thread-card__title {
   color: #f3e5d8;
 }
@@ -301,6 +320,9 @@ body.theme-dark .forum-thread-card__song {
   .forum-thread-card__title {
     font-size: 21px;
   }
+
+  .forum-thread-card.compact { grid-template-columns: minmax(0, 1fr) minmax(88px, 120px); }
+  .forum-thread-card.compact .forum-thread-card__title { font-size: 17px; }
 
   .forum-thread-card__footer {
     flex-direction: column;
