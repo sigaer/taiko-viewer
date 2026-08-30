@@ -10,6 +10,7 @@ import {
   UGC_WRITE_RATE_WINDOW_MS
 } from "./constants";
 
+// These buckets are process-local and are sufficient for the current single-instance deployment.
 const enforceUgcWriteRequestRate = createMemoryRateLimiter({
   windowMs: UGC_WRITE_RATE_WINDOW_MS,
   limit: UGC_WRITE_RATE_LIMIT,
