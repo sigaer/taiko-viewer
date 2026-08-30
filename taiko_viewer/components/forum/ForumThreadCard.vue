@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ForumThreadCard } from "~/types/forum";
+import { resolveForumSectionTranslation } from "~/utils/forum";
 
 const props = defineProps<{
   thread: ForumThreadCard;
@@ -22,7 +23,7 @@ const statList = computed(() => [
 ]);
 
 const localizedSectionName = computed(
-  () => t(`forum.sections.${props.thread.section.slug}.name`, props.thread.section.name)
+  () => resolveForumSectionTranslation(t, props.thread.section.slug, props.thread.section.name)
 );
 const localizedDifficultyLabel = computed(() =>
   props.thread.song?.difficultyType ? t(`difficulty.${props.thread.song.difficultyType}`) : t("difficulty.unknown")

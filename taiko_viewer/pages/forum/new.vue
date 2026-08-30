@@ -4,12 +4,14 @@ import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
 import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
+import { resolveForumSectionTranslation } from "~/utils/forum";
 
 type UploadedImage = {
   imageUrl: string;
   caption: string;
 };
 
+const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -34,7 +36,7 @@ useViewerSeo(() => ({
 
 const form = reactive({
   sectionSlug: "score-guides",
-  threadType: "guide",
+  threadType: "discussion",
   title: "",
   summary: "",
   tagsInput: "",
@@ -43,6 +45,7 @@ const form = reactive({
   level: "",
   paragraphDraft: ""
 });
+form.sectionSlug = String(route.query.section || form.sectionSlug);
 
 const paragraphBlocks = ref<string[]>([]);
 const imageBlocks = ref<UploadedImage[]>([]);
@@ -81,7 +84,7 @@ const copy = computed(() =>
         level: "星数",
         levelPlaceholder: "例：10",
         paragraphs: "正文",
-        paragraphDraftPlaceholder: "本文を入力して「本文に追加」を押すと内容リストに入ります",
+        paragraphDraftPlaceholder: "話したいことを書いてみましょう",
         paragraphCount: "{count} 段",
         addParagraph: "本文に追加",
         images: "画像",
@@ -121,7 +124,7 @@ const copy = computed(() =>
         level: "星级",
         levelPlaceholder: "例如 10",
         paragraphs: "正文",
-        paragraphDraftPlaceholder: "输入一段正文，点击加入正文后进入内容序列",
+        paragraphDraftPlaceholder: "想说点什么？",
         paragraphCount: "{count} 段",
         addParagraph: "加入正文",
         images: "插图",
@@ -164,7 +167,11 @@ const difficultyOptions = computed(() =>
     label: t(`difficulty.${value}`)
   }))
 );
-const getSectionLabel = (section: ForumSection) => t(`forum.sections.${section.slug}.name`);
+const selectedSongLevel = computed(() => {
+  if (!selectedSong.value || !form.difficultyType) return "";
+  return String(selectedSong.value[`level_${form.difficultyType}` as keyof SongCatalogItem] ?? "");
+});
+const getSectionLabel = (section: ForumSection) => resolveForumSectionTranslation(t, section.slug, section.name);
 
 const searchSongs = async () => {
   const keyword = songQuery.value.trim();
@@ -185,6 +192,10 @@ const chooseSong = (song: SongCatalogItem) => {
   songResults.value = [];
   form.difficultyType = "";
 };
+
+watch(selectedSongLevel, (level) => {
+  form.level = level;
+});
 
 const addParagraph = () => {
   if (!form.paragraphDraft.trim()) return;
@@ -271,20 +282,20 @@ const submit = async () => {
 
 <template>
   <div class="forum-new-page">
-    <section class="panel-card composer-panel">
+    <section class="composer-panel">
       <div class="composer-panel__head">
-        <div><h2>{{ copy.heading }}</h2><p>{{ threadTypeTips[form.threadType] }}</p></div>
+        <div><p class="composer-context">{{ locale === 'ja' ? '話したいことを入力してください' : '选择版块并开始讨论' }}</p><p>{{ threadTypeTips[form.threadType] }}</p></div>
         <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
       </div>
 
       <el-form label-position="top">
-        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><el-select v-model="form.threadType"><el-option v-for="option in threadTypeOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item></div>
+        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><div class="type-chips"><button v-for="option in threadTypeOptions" :key="option.value" type="button" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button></div></el-form-item></div>
 
         <el-form-item :label="copy.title">
           <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
         </el-form-item>
 
-        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span>{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><p>{{ text }}</p><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
+        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div v-if="form.threadType === 'guide'" class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div v-if="form.threadType === 'guide'" class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><p>{{ text }}</p><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
 
         <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open"><summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary><div class="more-options__body"><el-form-item :label="copy.summary"><el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" /></el-form-item><el-form-item :label="copy.tags"><el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" /></el-form-item><div class="song-picker"><label>{{ copy.songId }}</label><div class="song-picker__search"><el-input v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" /><el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button></div><div v-if="songResults.length" class="song-picker__results"><button v-for="song in songResults" :key="song.id" type="button" @click="chooseSong(song)"><span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span><small>#{{ song.id }} · {{ song.type }}</small></button></div><p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p></div><div v-if="selectedSong" class="composer-grid composer-grid--song"><el-form-item :label="copy.difficulty"><el-select v-model="form.difficultyType" clearable><el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item><el-form-item :label="copy.level"><el-input v-model="form.level" :placeholder="copy.levelPlaceholder" /></el-form-item></div></div></details>
 
@@ -321,7 +332,7 @@ const submit = async () => {
 
 .composer-panel {
   width: min(980px, 100%);
-  padding: 22px;
+  padding: 4px 0 24px;
 }
 
 .composer-panel__head {
@@ -336,6 +347,8 @@ const submit = async () => {
   margin: 0;
   font-size: 32px;
 }
+
+.composer-context { margin: 0; color: var(--viewer-text); font-size: 22px; font-weight: 750; }
 
 .composer-panel__head p {
   margin: 8px 0 0;
@@ -353,6 +366,10 @@ const submit = async () => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+
+.type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.type-chips button { min-height: 38px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color: var(--viewer-text-muted); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.type-chips button.active { border-color: var(--viewer-accent-strong); color: #fff; background: var(--viewer-accent-strong); }
 
 .composer-grid--song {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -380,6 +397,9 @@ const submit = async () => {
   border-radius: 22px;
   background: rgba(255, 249, 242, 0.9);
 }
+
+.block-editor--body { padding: 0; margin-top: 5px; border-radius: 0; background: transparent; }
+.block-editor--body .block-editor__head h3 { font-size: 15px; }
 
 .block-editor__head {
   display: flex;
@@ -444,6 +464,8 @@ body.theme-dark .block-editor__head span {
 body.theme-dark .block-editor {
   background: rgba(50, 36, 29, 0.68);
 }
+
+body.theme-dark .block-editor--body { background: transparent; }
 
 body.theme-dark .block-list__item,
 body.theme-dark .image-card {

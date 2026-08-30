@@ -13,7 +13,7 @@ type NotificationPayload = {
 const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
-const { formatDateTime } = useViewerDateTime();
+const { formatDateTime, formatDate } = useViewerDateTime();
 
 definePageMeta({
   middleware: "account-auth",
@@ -64,16 +64,24 @@ const openNotification = async (item: ForumNotification) => {
   if (!item.threadId) return;
   await navigateTo(localePath(`/forum/thread/${item.threadId}`));
 };
+
+const formatNotificationTime = (value: string) => {
+  const timestamp = new Date(value).getTime();
+  const ageMinutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+  if (ageMinutes < 60) return t("forum.relativeMinutes", { count: ageMinutes });
+  if (ageMinutes < 1440) return t("forum.relativeHours", { count: Math.floor(ageMinutes / 60) });
+  if (ageMinutes < 2880) return t("forum.relativeYesterday");
+  return formatDate(value);
+};
 </script>
 
 <template>
   <div class="forum-notifications-page">
     <section class="panel-card notification-head">
       <div>
-        <h2>{{ t("forum.notifications") }}</h2>
-        <p>{{ t("page.forum.notifications.summary", { unread: data?.unreadCount || 0, total: data?.total || 0 }) }}</p>
+        <p class="notification-count">{{ t("page.forum.notifications.summary", { unread: data?.unreadCount || 0, total: data?.total || 0 }) }}</p>
       </div>
-      <el-button type="primary" plain @click="markAllRead">{{ t("forum.markAllRead") }}</el-button>
+      <el-button v-if="data?.unreadCount" type="primary" plain @click="markAllRead">{{ t("forum.markAllRead") }}</el-button>
     </section>
 
     <section class="notification-list">
@@ -81,7 +89,7 @@ const openNotification = async (item: ForumNotification) => {
       <article
         v-for="item in data?.items"
         :key="item.id"
-        class="panel-card notification-card"
+        class="notification-card"
         :class="{ unread: !item.isRead }"
         :tabindex="item.threadId ? 0 : undefined"
         :role="item.threadId ? 'link' : undefined"
@@ -91,13 +99,10 @@ const openNotification = async (item: ForumNotification) => {
         <div class="notification-card__main">
           <div class="notification-card__meta">
             <span class="notification-type"><span aria-hidden="true">{{ item.type === 'reply' ? '↩' : item.type === 'like' ? '♡' : item.type === 'mention' ? '@' : '!' }}</span> {{ typeLabelMap[item.type] || item.type }}</span>
-            <span>{{ formatDateTime(item.createdAt) }}</span>
+            <span :title="formatDateTime(item.createdAt)">{{ formatNotificationTime(item.createdAt) }}</span>
           </div>
           <h3>{{ item.title }}</h3>
           <p>{{ item.body }}</p>
-          <div v-if="item.actor" class="notification-card__actor">
-            <ForumUserBadge :user="item.actor" compact />
-          </div>
         </div>
         <span v-if="item.threadId" class="notification-card__arrow" aria-hidden="true">→</span>
       </article>
@@ -113,7 +118,7 @@ const openNotification = async (item: ForumNotification) => {
 
 .notification-head,
 .notification-card {
-  padding: 20px;
+  padding: 14px 4px;
 }
 
 .notification-head {
@@ -123,10 +128,7 @@ const openNotification = async (item: ForumNotification) => {
   gap: 12px;
 }
 
-.notification-head h2 {
-  margin: 0;
-  font-size: 30px;
-}
+.notification-count { margin: 0; color: var(--viewer-text-muted); font-size: 14px; }
 
 .notification-head p,
 .notification-card p {
@@ -137,7 +139,8 @@ const openNotification = async (item: ForumNotification) => {
 
 .notification-list {
   display: grid;
-  gap: 14px;
+  gap: 0;
+  border-top: 1px solid var(--viewer-border);
 }
 
 .notification-card {
@@ -145,7 +148,8 @@ const openNotification = async (item: ForumNotification) => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-left: 6px solid transparent;
+  border-bottom: 1px solid var(--viewer-border);
+  border-left: 3px solid transparent;
   cursor: pointer;
   transition: background .18s ease, border-color .18s ease;
 }
@@ -158,7 +162,7 @@ const openNotification = async (item: ForumNotification) => {
 
 .notification-card__main {
   display: grid;
-  gap: 10px;
+  gap: 5px;
 }
 
 .notification-card__meta {
@@ -170,7 +174,7 @@ const openNotification = async (item: ForumNotification) => {
 }
 
 .notification-type {
-  padding: 4px 10px;
+  padding: 2px 7px;
   border-radius: 999px;
   color: #fff;
   background: linear-gradient(135deg, #d84a34, #f08a24);
@@ -178,8 +182,10 @@ const openNotification = async (item: ForumNotification) => {
 
 .notification-card h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 16px;
 }
+
+.notification-card p { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; line-height: 1.5; }
 
 .notification-card__arrow { color: var(--viewer-accent-strong); font-size: 22px; }
 
@@ -187,6 +193,10 @@ body.theme-dark .notification-head p,
 body.theme-dark .notification-card p,
 body.theme-dark .notification-card__meta {
   color: #c6b4a7;
+}
+
+@media (min-width: 861px) {
+  .notification-list, .notification-head { max-width: 760px; }
 }
 
 @media (max-width: 860px) {

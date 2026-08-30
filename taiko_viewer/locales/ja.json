@@ -176,6 +176,9 @@
     "markAllRead": "すべて既読にする",
     "emptyNotifications": "通知はまだありません",
     "allMarkedRead": "すべての通知を既読にしました",
+    "relativeMinutes": "{count} 分前",
+    "relativeHours": "{count} 時間前",
+    "relativeYesterday": "昨日",
     "types": {
       "discussion": "雑談",
       "guide": "攻略",
@@ -258,6 +261,14 @@
       "achievements": {
         "name": "戦績共有",
         "description": "全良、金冠、高得点、個人の節目を共有。"
+      },
+      "arcade": {
+        "name": "ゲームセンター",
+        "description": "筐体の環境、メンテナンス、地域の交流や誘い。"
+      },
+      "creative": {
+        "name": "二次創作・雑談",
+        "description": "二次創作、グッズ、音楽などの話題。"
       },
       "general": {
         "name": "総合雑談",
@@ -483,6 +494,8 @@
         "sortLatest": "最新",
         "sortHot": "人気",
         "sortFeatured": "注目",
+        "sortLabel": "並び順",
+        "filter": "絞り込み",
         "allTypes": "すべての種類",
         "applyFilters": "絞り込み適用",
         "empty": "この条件ではスレッドがありません",

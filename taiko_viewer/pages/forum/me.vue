@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
+import { resolveForumSectionTranslation } from "~/utils/forum";
 
 type ProfilePayload = {
   user: {
@@ -99,7 +100,7 @@ const copy = computed(() =>
         restore: "恢复"
       }
 );
-const getSectionLabel = (slug: string) => t(`forum.sections.${slug}.name`);
+const getSectionLabel = (slug: string) => resolveForumSectionTranslation(t, slug, slug);
 
 const { data: homeData, refresh: refreshHome } = await useAsyncData<ForumHomePayload>(
   "forum-me-home",

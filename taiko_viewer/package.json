@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.50.17",
+  "version": "0.50.18",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -21,6 +21,7 @@
     "test:branch-audio": "node ./scripts/verify_branch_audio_contract.mjs",
     "test:home-state": "node --experimental-strip-types --test tests/homeStateResolver.test.ts tests/homePresentation.test.ts tests/personalHomeLocale.test.ts",
     "test:version": "node --test tests/versionProjection.test.mjs",
+    "test:forum": "node --test tests/forumI18n.test.mjs",
     "test:admin-auth": "node --test tests/adminAuthTrustBoundary.test.mjs",
     "test:ugc": "node --test tests/ugcCatalog.test.mjs && node --experimental-strip-types --test tests/ugcAggregate.test.ts tests/ugcVerifiedPlay.test.ts tests/ugcWriteValidation.test.ts",
     "test:ugc:db": "node --test tests/ugcDatabase.integration.test.mjs",

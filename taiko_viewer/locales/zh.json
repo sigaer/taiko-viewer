@@ -177,6 +177,9 @@
     "markAllRead": "全部标记已读",
     "emptyNotifications": "通知中心还是空的",
     "allMarkedRead": "通知已全部标记为已读",
+    "relativeMinutes": "{count} 分钟前",
+    "relativeHours": "{count} 小时前",
+    "relativeYesterday": "昨天",
     "types": {
       "discussion": "讨论",
       "guide": "攻略",
@@ -259,6 +262,14 @@
       "achievements": {
         "name": "晒分战报",
         "description": "全良、金冠、高分与个人里程碑展示。"
+      },
+      "arcade": {
+        "name": "同城机厅",
+        "description": "机厅环境、鼓况反馈、同城交流与约鼓闲聊。"
+      },
+      "creative": {
+        "name": "二创杂谈",
+        "description": "同人创作、周边、音乐闲聊和跨坑交流。"
       },
       "general": {
         "name": "综合讨论",
@@ -484,6 +495,8 @@
         "sortLatest": "最新",
         "sortHot": "热帖",
         "sortFeatured": "精选",
+        "sortLabel": "排序",
+        "filter": "筛选",
         "allTypes": "全部类型",
         "applyFilters": "应用筛选",
         "empty": "当前筛选下还没有帖子",

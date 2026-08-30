@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumThreadDetail } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
+import { resolveForumSectionTranslation } from "~/utils/forum";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -107,7 +108,7 @@ const copy = computed(() =>
         loginForLike: "请先登录后再点赞"
       }
 );
-const getSectionName = (slug: string) => t(`forum.sections.${slug}.name`);
+const getSectionName = (slug: string, fallback = slug) => resolveForumSectionTranslation(t, slug, fallback);
 const getSongDifficultyLabel = (difficultyType: number | null, fallback: string) =>
   difficultyType ? t(`difficulty.${difficultyType}`) : fallback;
 
@@ -328,7 +329,7 @@ const renderReplyBlocks = (
               class="thread-section-pill"
               :style="{ '--accent': detail.section.accentColor }"
             >
-              {{ getSectionName(detail.section.slug) }}
+              {{ getSectionName(detail.section.slug, detail.section.name) }}
             </NuxtLink>
             <span v-if="detail.isPinned" class="thread-state">{{ t("forum.states.pinned") }}</span>
             <span
@@ -416,6 +417,7 @@ const renderReplyBlocks = (
           <el-button v-if="replyTarget.id" text @click="setReplyTarget(null)"
             >{{ copy.cancelTarget }}</el-button
           >
+          <el-button v-if="replyExpanded" text @click="replyExpanded = false">{{ t("common.cancel") }}</el-button>
         </div>
         <el-input
           v-model="replyBody"
@@ -928,7 +930,9 @@ body.theme-dark .blocked-content-card {
     font-size: 28px;
   }
 
+  .forum-thread-page { padding-bottom: 150px; }
   .reply-box { bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .reply-box.is-expanded { position: fixed; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); max-height: min(62vh, 460px); overflow-y: auto; }
   .thread-header { padding: 16px; }
   .thread-content, .floor-card { padding-left: 4px; padding-right: 4px; }
 }
