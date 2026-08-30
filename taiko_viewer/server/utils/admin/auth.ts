@@ -25,34 +25,6 @@ type RemoteResult<T> = {
   data: T;
 };
 
-const decodeJwtSegment = (token: string, index: number) => {
-  const segment = String(token.split(".")[index] || "").trim();
-  if (!segment) return null;
-  const normalized = segment.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-  try {
-    return JSON.parse(Buffer.from(padded, "base64").toString("utf-8")) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-};
-
-const parseTaikoAdminToken = (token: string): TaikoAdminUser | null => {
-  const payload = decodeJwtSegment(token, 1);
-  const exp = Number(payload?.exp || 0);
-  const id = Number(payload?.id || 0);
-  const username = String(payload?.username || "").trim();
-  if (!exp || !username) {
-    return null;
-  }
-  return {
-    id,
-    username,
-    exp,
-    expiresAt: new Date(exp * 1000).toISOString()
-  };
-};
-
 const getAdminTokenFromEvent = (event: H3Event) => {
   const authHeader = String(getHeader(event, "authorization") || "").trim();
   if (authHeader.toLowerCase().startsWith("bearer ")) {
@@ -122,15 +94,52 @@ export const getTaikoAdminSession = async (event: H3Event): Promise<TaikoAdminSe
   if (!token) {
     return null;
   }
-  const user = parseTaikoAdminToken(token);
-  if (!user || user.exp * 1000 <= Date.now()) {
-    clearAdminSession(event);
+  try {
+    const user = await verifyTaikoAdminToken(token);
+    return { token, user };
+  } catch (error: any) {
+    if (Number(error?.statusCode || 0) === 401) {
+      clearAdminSession(event);
+      return null;
+    }
+    throw error;
+  }
+};
+
+const normalizeVerifiedAdminUser = (value: unknown): TaikoAdminUser | null => {
+  const data = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const id = Number(data.id);
+  const exp = Number(data.exp);
+  const username = String(data.username || "").trim();
+  if (!Number.isSafeInteger(id) || id <= 0 || !username || !Number.isFinite(exp) || exp * 1000 <= Date.now()) {
     return null;
   }
   return {
-    token,
-    user
+    id,
+    username,
+    exp,
+    expiresAt: new Date(exp * 1000).toISOString()
   };
+};
+
+const verifyTaikoAdminToken = async (token: string): Promise<TaikoAdminUser> => {
+  try {
+    const data = await fetchTaikoAdminResult<unknown>("/taiko/manage/auth/me", {
+      method: "GET",
+      token
+    });
+    const user = normalizeVerifiedAdminUser(data);
+    if (!user) {
+      throw createError({ statusCode: 401, statusMessage: "管理端令牌身份无效" });
+    }
+    return user;
+  } catch (error: any) {
+    const statusCode = Number(error?.statusCode || error?.response?.status || 0);
+    if (statusCode === 401) {
+      throw createError({ statusCode: 401, statusMessage: "管理端令牌无效或已过期" });
+    }
+    throw createError({ statusCode: 503, statusMessage: "管理端认证服务暂不可用" });
+  }
 };
 
 export const requireTaikoAdminSession = async (event: H3Event) => {
@@ -173,10 +182,7 @@ export const loginTaikoAdmin = async (
         password
       }
     });
-    const user = parseTaikoAdminToken(token);
-    if (!user) {
-      throw createError({ statusCode: 502, statusMessage: "管理端令牌解析失败" });
-    }
+    const user = await verifyTaikoAdminToken(token);
     setAdminSession(event, token, user);
     await recordAdminAction({
       actorType: "admin",
