@@ -58,7 +58,7 @@ const groups = [
   },
   {
     key: "support",
-    title: "nav.community",
+    title: "nav.support",
     items: [
       { path: "/support", label: "nav.support" },
       { path: "/alias-log", label: "nav.aliasLog" }
