@@ -122,14 +122,14 @@ export const UGC_CREATE_TABLE_STATEMENTS = [
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     target_type VARCHAR(16) NOT NULL,
     target_id BIGINT UNSIGNED NOT NULL,
-    operator_user_id BIGINT UNSIGNED NOT NULL,
+    operator_user_id BIGINT UNSIGNED DEFAULT NULL,
     action VARCHAR(32) NOT NULL,
     reason VARCHAR(255) DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_chart_ugc_moderation_target (target_type, target_id, created_at),
     KEY idx_chart_ugc_moderation_operator (operator_user_id, created_at),
     CONSTRAINT fk_chart_ugc_moderation_operator FOREIGN KEY (operator_user_id)
-      REFERENCES web_user_accounts(id) ON DELETE CASCADE
+      REFERENCES web_user_accounts(id) ON DELETE SET NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`
 ] as const;
 

@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.50.13",
+  "version": "0.50.14",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -23,9 +23,11 @@
     "test:version": "node --test tests/versionProjection.test.mjs",
     "test:ugc": "node --test tests/ugcCatalog.test.mjs && node --experimental-strip-types --test tests/ugcAggregate.test.ts tests/ugcVerifiedPlay.test.ts tests/ugcWriteValidation.test.ts",
     "test:ugc:db": "node --test tests/ugcDatabase.integration.test.mjs",
+    "test:ugc:migration": "node --experimental-strip-types --test tests/ugcModerationRetention.integration.test.mjs",
     "test:ugc:e2e": "node scripts/verify_ugc_phase_1b.mjs",
     "ugc:catalog": "node scripts/verify_ugc_chart_catalog.mjs",
     "ugc:migrate": "node --experimental-strip-types scripts/migrate_ugc_schema.ts",
+    "ugc:migrate:audit-retention": "node --experimental-strip-types scripts/migrate_ugc_moderation_log_retention.ts",
     "ugc:seed-tags": "node scripts/seed_ugc_tags.mjs",
     "ugc:sync-registry": "node scripts/sync_ugc_registry.mjs",
     "test:home:e2e": "node ./scripts/verify_home_p0e.mjs",

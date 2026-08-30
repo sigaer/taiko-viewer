@@ -100,7 +100,7 @@ test("account and chart deletion semantics preserve anonymous tips and cascade r
   await connection.execute("INSERT INTO chart_tips (tip_id, chart_id, author_user_id, body_text) VALUES (1, 1, 1, 'kept anonymously')");
   await connection.execute("INSERT INTO chart_tip_helpful (tip_id, user_id) VALUES (1, 2)");
   await connection.execute("INSERT INTO chart_tip_reports (tip_id, reporter_user_id, reason, resolved_by_user_id) VALUES (1, 2, 'spam', 2)");
-  await connection.execute("INSERT INTO chart_ugc_moderation_logs (target_type, target_id, operator_user_id, action) VALUES ('tip', 1, 2, 'hide')");
+  await connection.execute("INSERT INTO chart_ugc_moderation_logs (target_type, target_id, operator_user_id, action, reason, created_at) VALUES ('tip', 1, 2, 'hide', 'retention check', '2026-08-30 12:34:56')");
 
   await connection.execute("DELETE FROM web_user_accounts WHERE id = 1");
   const [afterAuthorDelete] = await connection.query("SELECT author_user_id AS authorUserId FROM chart_tips WHERE tip_id = 1");
@@ -115,8 +115,19 @@ test("account and chart deletion semantics preserve anonymous tips and cascade r
   assert.equal(Number(helpfulRows[0].count), 0);
   const [reportRows] = await connection.query("SELECT reporter_user_id AS reporter, resolved_by_user_id AS resolver FROM chart_tip_reports WHERE tip_id = 1");
   assert.deepEqual(reportRows[0], { reporter: null, resolver: null });
-  const [moderationRows] = await connection.query("SELECT COUNT(*) AS count FROM chart_ugc_moderation_logs");
-  assert.equal(Number(moderationRows[0].count), 0);
+  const [moderationRows] = await connection.query(
+    "SELECT target_type AS targetType, target_id AS targetId, operator_user_id AS operatorUserId, action, reason, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS createdAt FROM chart_ugc_moderation_logs"
+  );
+  assert.deepEqual(moderationRows, [{
+    targetType: "tip",
+    targetId: 1,
+    operatorUserId: null,
+    action: "hide",
+    reason: "retention check",
+    createdAt: "2026-08-30 12:34:56"
+  }]);
+  const [tipAfterOperatorDelete] = await connection.query("SELECT tip_id AS tipId FROM chart_tips WHERE tip_id = 1");
+  assert.deepEqual(tipAfterOperatorDelete, [{ tipId: 1 }]);
 
   await connection.execute("DELETE FROM ugc_charts WHERE chart_id = 1");
   const [tipRows] = await connection.query("SELECT COUNT(*) AS count FROM chart_tips");
