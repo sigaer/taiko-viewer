@@ -19,6 +19,25 @@ export const GROWTH_DIMENSION_LABELS: Record<RatingDimensionKey, { zh: string; j
   complex: { zh: "复合处理", ja: "複合処理" }
 };
 
+export const GROWTH_DIMENSION_SHORT_LABELS: Record<RatingDimensionKey, { zh: string; ja: string }> = {
+  big_song: { zh: "大歌", ja: "大歌" },
+  stamina: { zh: "体力", ja: "体力" },
+  speed: { zh: "高速", ja: "高速" },
+  accuracy_power: { zh: "精度", ja: "精度" },
+  rhythm: { zh: "节奏", ja: "リズム" },
+  complex: { zh: "复合", ja: "複合" }
+};
+
+export type GrowthGreetingPeriod = "morning" | "noon" | "afternoon" | "evening";
+
+export const growthGreetingPeriod = (value: Date = new Date(), timezone = "Asia/Shanghai"): GrowthGreetingPeriod => {
+  const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", hourCycle: "h23" }).format(value));
+  if (hour < 11) return "morning";
+  if (hour < 14) return "noon";
+  if (hour < 18) return "afternoon";
+  return "evening";
+};
+
 export const resolveGrowthSufficiency = (sampleCount: number, mode: GrowthDataMode): GrowthDataSufficiency => {
   if (mode === "INSUFFICIENT" || sampleCount <= 0) return "insufficient";
   return sampleCount >= 20 ? "ready" : "limited";

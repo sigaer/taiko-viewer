@@ -109,8 +109,15 @@
       "openRecommendationTool": "おすすめツールを開く"
     },
     "growth": {
+      "greeting": {
+        "morning": "おはよう、{name}",
+        "noon": "こんにちは、{name}",
+        "afternoon": "こんにちは、{name}",
+        "evening": "こんばんは、{name}"
+      },
       "limitedTitle": "成績をもう少し集める",
-      "focusDescription": "次はこの力を優先して練習",
+      "nextFocus": "次の一歩",
+      "nextFocusValue": "次は{dimension}を練習",
       "tieHint": "2つの力が同率です",
       "skillOverview": "6つの力の概要",
       "limitedBody": "成績が増えると、練習の方向が見えてきます。",

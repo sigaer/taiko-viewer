@@ -69,7 +69,7 @@ const trackClick = (event: string, source: string) => {
       </div>
     </section>
 
-    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :pending="growthPending" :failed="!!growthError" />
+    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :display-name="displayName" :pending="growthPending" :failed="!!growthError" />
 
     <section v-else class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">
