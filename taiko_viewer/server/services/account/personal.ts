@@ -33,6 +33,21 @@ export const runPythonJson = async (args: string[]) => {
   }
 };
 
+export const runGrowthPythonJson = async (taikoId: string, dataMode: string, limit = 3) => {
+  const { repoRoot } = getRuntimePaths();
+  try {
+    const result = await execFileAsync("python3", ["-m", "growth_compute", "growth", "--user", taikoId, "--data-mode", dataMode, "--limit", String(limit)], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      maxBuffer: 12 * 1024 * 1024,
+      env: { ...process.env, TAIKO_COMPUTE_ONLY: "1" }
+    });
+    return JSON.parse(String(result.stdout || ""));
+  } catch {
+    throw createError({ statusCode: 502, statusMessage: "个人成长计算结果无效" });
+  }
+};
+
 export const getPersonalRatingSummary = async (userId: number): Promise<PlayerRatingIntelligence> => {
   const binding = await ensureBindingWithUserdata(userId);
   const { repoRoot } = getRuntimePaths();
