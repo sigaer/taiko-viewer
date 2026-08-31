@@ -115,14 +115,15 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   const [current, catalog, history] = await Promise.all([readUserdata(binding.taiko_id), getSongCatalog(), loadHistory(binding.taiko_id)]);
   const scoreDurationMs = performance.now() - scoreStartedAt;
   const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
-  const computeStartedAt = performance.now();
   const computePromise = runGrowthPythonJson(binding.taiko_id, mode, 3);
-  const stateStartedAt = performance.now();
   const computed = await computePromise;
+  const stateAggregationStartedAt = performance.now();
   const playerState = buildPlayerGrowthState(computed.playerState.dimensions, computed.playerState.sampleCount, mode, computed.playerState.overallRating);
-  const stateDurationMs = performance.now() - stateStartedAt;
+  const stateAggregationDurationMs = performance.now() - stateAggregationStartedAt;
+  const stateDurationMs = stateAggregationDurationMs;
   const progressStartedAt = performance.now();
   const dailyProgressPromise = Promise.resolve().then(() => buildDailyProgress(current, catalog, history));
+  const planStartedAt = performance.now();
   const recommendations = computed.todayPlan.items;
   const usedFallback = Boolean(computed.todayPlan.usedFallback);
   const scoreMap = new Map((current.songs || []).map((song) => [chartKey(song), song]));
@@ -133,6 +134,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
     if (!difficulty.difficultyType) return null;
     return { songId: item.songId, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.isUnplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
   }).filter(Boolean) as GrowthPlanItem[];
+  const planDurationMs = performance.now() - planStartedAt;
   const dailyProgress = await dailyProgressPromise;
   const progressDurationMs = performance.now() - progressStartedAt;
   console.info("[player-growth] overview timing", {
@@ -140,7 +142,10 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
     authDurationMs: Math.round(authDurationMs),
     scoreDurationMs: Math.round(scoreDurationMs),
     stateDurationMs: Math.round(stateDurationMs),
-    planDurationMs: Math.round(performance.now() - computeStartedAt),
+    planDurationMs: Math.round(planDurationMs),
+    pythonDurationMs: Number(computed.timing?.totalPythonMs || 0),
+    pythonTiming: computed.timing || null,
+    stateAggregationDurationMs: Math.round(stateAggregationDurationMs),
     progressDurationMs: Math.round(progressDurationMs),
     totalDurationMs: Math.round(performance.now() - requestStartedAt),
     recommendationCount: items.length,
