@@ -37,13 +37,13 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       </div>
       <div class="growth-loading__plan shimmer-card">
         <span class="growth-skeleton__line growth-skeleton__line--section"></span>
-        <span class="growth-skeleton__row"></span>
-        <span class="growth-skeleton__row"></span>
-        <span class="growth-skeleton__row"></span>
+        <span class="growth-skeleton__row shimmer-card"></span>
+        <span class="growth-skeleton__row shimmer-card"></span>
+        <span class="growth-skeleton__row shimmer-card"></span>
       </div>
       <div class="growth-loading__progress shimmer-card">
         <span class="growth-skeleton__line growth-skeleton__line--section"></span>
-        <span class="growth-skeleton__line growth-skeleton__line--progress"></span>
+        <span class="growth-skeleton__line growth-skeleton__line--progress shimmer-card"></span>
       </div>
     </div>
     <el-alert v-else-if="failed" :title="t('home.growth.loadFailed')" type="warning" :closable="false" show-icon />
@@ -73,7 +73,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         </div>
       </header>
 
-      <section class="growth-plan panel-card" aria-labelledby="growth-plan-title">
+      <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
             <h2 id="growth-plan-title">{{ t("home.growth.planTitle") }}</h2>
@@ -100,30 +100,32 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
-      <section class="growth-progress panel-card" aria-labelledby="growth-progress-title">
+      <section class="growth-progress" aria-labelledby="growth-progress-title">
         <div class="growth-section-head">
           <div>
             <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
           </div>
         </div>
-        <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
-        <template v-else>
-          <div class="growth-metrics">
-            <div v-for="metric in summaryMetrics" :key="metric.label" class="growth-metric"><strong>{{ metric.value }}</strong><span>{{ metric.label }}</span></div>
-          </div>
-          <div v-if="progress.breakthrough" class="growth-breakthrough">
-            <span>{{ t("home.growth.recentBreakthrough") }}</span>
-            <strong>{{ progress.breakthrough.title }}</strong>
-            <small v-if="progress.breakthrough.scoreDelta">+{{ progress.breakthrough.scoreDelta.toLocaleString() }}</small>
-          </div>
-        </template>
+        <div class="growth-progress__card panel-card">
+          <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
+          <template v-else>
+            <div class="growth-metrics">
+              <div v-for="metric in summaryMetrics" :key="metric.label" class="growth-metric"><strong>{{ metric.value }}</strong><span>{{ metric.label }}</span></div>
+            </div>
+            <div v-if="progress.breakthrough" class="growth-breakthrough">
+              <span>{{ t("home.growth.recentBreakthrough") }}</span>
+              <strong>{{ progress.breakthrough.title }}</strong>
+              <small v-if="progress.breakthrough.scoreDelta">+{{ progress.breakthrough.scoreDelta.toLocaleString() }}</small>
+            </div>
+          </template>
+        </div>
       </section>
     </template>
   </section>
 </template>
 
 <style scoped>
-.growth-surface { display: grid; gap: 0; }
+.growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; gap: var(--growth-section-gap); }
 .growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
 .growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
@@ -147,10 +149,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-skill--priority { border-top-color: rgba(184,77,55,.55); }
 .growth-skill--priority::after { content: ""; position: absolute; top: -2px; left: 0; width: 24px; height: 2px; border-radius: 99px; background: #b84d37; }
 .growth-skill--priority span, .growth-skill--priority strong { font-weight: 800; }
-.growth-plan, .growth-progress { display: grid; gap: 15px; padding: 24px 0; border-top: 1px solid rgba(151,105,73,.18); }
+.growth-plan, .growth-progress { display: grid; gap: 8px; min-width: 0; }
 .growth-reason { margin: 0; color: #806b5c; font-size: 13px; line-height: 1.55; }
-.growth-plan__items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; color: inherit; text-decoration: none; background: rgba(255,255,255,.5); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.growth-plan__items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--growth-card-gap); margin-top: 8px; }
+.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 16px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; color: inherit; text-decoration: none; background: rgba(255,255,255,.5); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
 .growth-plan__item:hover { transform: translateY(-2px); border-color: rgba(184,77,55,.35); background: #fff; }
 .growth-plan__item:focus-visible { outline: 3px solid #d18366; outline-offset: 3px; }
 .growth-plan__cover { aspect-ratio: 1; overflow: hidden; border-radius: 10px; background: #f2e5da; }
@@ -160,6 +162,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-plan__details small { color: #806b5c; font-variant-numeric: tabular-nums; }
 .growth-plan__arrow { color: #b84d37; font-size: 20px; }
 .growth-empty { margin: 0; color: #806b5c; font-size: 13px; }
+.growth-progress__card { display: grid; gap: 18px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
 .growth-metrics { display: flex; flex-wrap: wrap; gap: 10px; }
 .growth-metric { min-width: 92px; display: grid; gap: 2px; padding-right: 16px; border-right: 1px solid rgba(151,105,73,.18); }
 .growth-metric strong { color: #342922; font: 800 24px/1 var(--viewer-display-font); }
@@ -176,19 +179,19 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 :global(body.theme-dark .growth-skill--priority) { border-top-color: rgba(229,139,110,.65); }
 :global(body.theme-dark .growth-skill--priority::after) { background: #e58b6e; }
 :global(body.theme-dark .growth-plan__item) { border-color: rgba(255,255,255,.1); background: rgba(48,36,30,.65); }
-.growth-loading { display: grid; gap: 16px; }
+.growth-loading { display: grid; gap: var(--growth-section-gap); }
 .growth-loading > div { display: grid; align-content: start; gap: 14px; min-height: 150px; padding: clamp(22px, 4vw, 34px); border-radius: 22px; }
 .growth-loading__focus { min-height: 235px !important; }
-.growth-loading__plan, .growth-loading__progress { min-height: 180px !important; }
-.growth-skeleton__line, .growth-skeleton__row { display: block; border-radius: 6px; background: rgba(151,105,73,.16); }
+.growth-loading__plan, .growth-loading__progress { min-height: 180px !important; padding: 0; background: none; }
+.growth-skeleton__line, .growth-skeleton__row { display: block; min-height: 0; border-radius: 6px; background: rgba(151,105,73,.16); }
 .growth-skeleton__line--title { width: min(56%, 240px); height: 30px; }
 .growth-skeleton__line--rating { width: 92px; height: 26px; margin-left: auto; }
 .growth-skeleton__line--focus { width: min(72%, 310px); height: 36px; margin-top: 8px; }
 .growth-skeleton__line--skills { width: 100%; height: 42px; margin-top: auto; }
 .growth-skeleton__line--section { width: 130px; height: 27px; }
 .growth-skeleton__line--progress { width: 78%; height: 58px; margin-top: 10px; }
-.growth-skeleton__row { width: 100%; height: 58px; }
+.growth-skeleton__row { width: 100%; height: 58px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-focus { padding: 19px; border-radius: 18px; } .growth-plan, .growth-progress { padding: 20px 0; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-breakthrough { grid-template-columns: 1fr auto; } .growth-breakthrough span { grid-column: 1 / -1; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__focus { min-height: 190px !important; } }
+@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-breakthrough { grid-template-columns: 1fr auto; } .growth-breakthrough span { grid-column: 1 / -1; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>
