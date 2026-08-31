@@ -214,7 +214,7 @@ const chooseSong = (song: SongCatalogItem) => {
 
 watch(selectedSongLevel, (level) => {
   form.level = level;
-});
+}, { immediate: true });
 
 const addParagraph = () => {
   if (!form.paragraphDraft.trim()) return;
