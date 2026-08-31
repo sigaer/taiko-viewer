@@ -80,7 +80,7 @@ const localizedSongTitle = computed(() => {
       </div>
 
       <div class="forum-thread-card__footer">
-        <ForumUserBadge :user="thread.author" compact />
+        <ForumUserBadge :user="thread.author" compact minimal />
         <div class="forum-thread-card__stats">
           <span v-for="item in statList" :key="item.label"
             >{{ item.label }} {{ item.value }}</span
@@ -132,6 +132,8 @@ const localizedSongTitle = computed(() => {
 }
 
 .forum-thread-card.compact .forum-thread-card__main { gap: 7px; }
+.forum-thread-card.compact .forum-thread-card__footer { order: -2; }
+.forum-thread-card.compact .forum-thread-card__badges { order: -1; }
 .forum-thread-card.compact .forum-thread-card__title { font-size: 18px; }
 .forum-thread-card.compact .forum-thread-card__summary { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; font-size: 13px; }
 .forum-thread-card.compact .forum-thread-card__badges { gap: 6px; }

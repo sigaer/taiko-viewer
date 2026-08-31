@@ -44,6 +44,7 @@ const homePresentation = computed(() =>
 const hideGuestHomeChrome = computed(
   () => shouldHideHomeChrome(route.meta.navKey, homePresentation.value)
 );
+const hidePageHeader = computed(() => Boolean(route.meta.hidePageHeader));
 const showMobileTabBar = computed(
   () => Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
 );
@@ -288,7 +289,7 @@ onBeforeUnmount(() => {
             </span>
           </button>
         </div>
-        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar">
+        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum') }">
           <el-breadcrumb :key="route.fullPath" separator="/">
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbItems"
@@ -311,7 +312,7 @@ onBeforeUnmount(() => {
             </el-breadcrumb-item>
           </el-breadcrumb>
         </nav>
-        <header v-if="!hideGuestHomeChrome" class="page-header">
+        <header v-if="!hideGuestHomeChrome && !hidePageHeader" class="page-header">
           <div class="page-header__info">
             <div class="page-title-row">
               <span class="page-title-icon" aria-hidden="true">
@@ -547,6 +548,10 @@ onBeforeUnmount(() => {
   margin-bottom: 10px;
   font-size: 12px;
   color: #7a6552;
+}
+
+@media (max-width: 700px) {
+  .breadcrumb-bar.forum-breadcrumb { display: none; }
 }
 
 .breadcrumb-bar :deep(a) {

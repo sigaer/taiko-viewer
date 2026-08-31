@@ -15,6 +15,7 @@ definePageMeta({
   pageTitleKey: "forum.threadDetail",
   pageDescKey: "page.forum.thread.desc",
   navKey: "/forum",
+  hidePageHeader: true,
   breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }, { labelKey: "forum.threadDetail" }],
 });
 
@@ -36,9 +37,9 @@ const copy = computed(() =>
     ? {
         publishReply: "返信を書く",
         replyTarget: "現在の返信先：{label}",
-        replyHint: "このテーマへの感想や攻略の補足を書いてください。",
+        replyHint: "感想や攻略の補足を書いてください。",
         cancelTarget: "指定返信を解除",
-        replyPlaceholder: "@ユーザー名 で他のプレイヤーにメンションできます",
+        replyPlaceholder: "返信を書く…",
         uploading: "アップロード中...",
         addImage: "画像を追加（{count}/4）",
         imageHint: "画像のみの返信にも対応。最大 4 枚",
@@ -50,14 +51,14 @@ const copy = computed(() =>
         expand: "表示する",
         likeThread: "スレッドにいいね",
         likedThread: "いいね済み",
-        replyThread: "テーマに返信",
+        replyThread: "返信",
         floorReply: "{username} さんの投稿に返信",
         replyToFloor: "投稿に返信",
         replyToUser: "@{username} へ返信",
         reply: "返信",
         liked: "いいね済み",
         like: "いいね",
-        empty: "まだ返信がありません。最初の返信を書いてみましょう。",
+        empty: "まだ返信はありません。",
         uploadLimit: "1 件の返信に添付できる画像は最大 4 枚です",
         uploadDone: "返信画像をアップロードしました",
         uploadFailed: "画像アップロードに失敗しました",
@@ -68,14 +69,16 @@ const copy = computed(() =>
         likeRemoved: "いいねを取り消しました",
         likeSuccess: "いいねしました",
         likeFailed: "いいねに失敗しました",
-        loginForLike: "ログイン後にいいねしてください"
+        loginForLike: "ログイン後にいいねしてください",
+        articleBody: "本文",
+        articleActions: "記事の操作"
       }
     : {
         publishReply: "发表回复",
         replyTarget: "当前回复给：{label}",
-        replyHint: "对主题发表你的观点或继续补充攻略。",
+        replyHint: "分享你的看法或补充攻略。",
         cancelTarget: "取消定向回复",
-        replyPlaceholder: "输入回复内容，可使用 @用户名 提及其他鼓友",
+        replyPlaceholder: "写下回复…",
         uploading: "上传中...",
         addImage: "添加图片（{count}/4）",
         imageHint: "支持纯图片回复，最多 4 张",
@@ -87,14 +90,14 @@ const copy = computed(() =>
         expand: "展开查看",
         likeThread: "点赞主题",
         likedThread: "已点赞",
-        replyThread: "回复主题",
+        replyThread: "回复",
         floorReply: "{username} 的楼层",
         replyToFloor: "回复楼层",
         replyToUser: "回复 @{username}",
         reply: "回复",
         liked: "已赞",
         like: "点赞",
-        empty: "还没有回复，抢个沙发吧",
+        empty: "还没有回复",
         uploadLimit: "单条回复最多上传 4 张图片",
         uploadDone: "回复图片上传完成",
         uploadFailed: "图片上传失败",
@@ -105,7 +108,9 @@ const copy = computed(() =>
         likeRemoved: "已取消点赞",
         likeSuccess: "点赞成功",
         likeFailed: "点赞失败",
-        loginForLike: "请先登录后再点赞"
+        loginForLike: "请先登录后再点赞",
+        articleBody: "正文",
+        articleActions: "文章操作"
       }
 );
 const getSectionName = (slug: string, fallback = slug) => resolveForumSectionTranslation(t, slug, fallback);
@@ -321,7 +326,8 @@ const renderReplyBlocks = (
     />
 
     <template v-else-if="detail">
-      <section class="panel-card thread-header">
+      <article class="thread-article">
+      <header class="thread-header">
         <div class="thread-header__top">
           <div class="thread-header__badges">
             <NuxtLink
@@ -343,15 +349,13 @@ const renderReplyBlocks = (
               >{{ t("forum.states.locked") }}</span
             >
           </div>
-          <h2>{{ detail.title }}</h2>
-          <p>{{ detail.summary }}</p>
+          <h1>{{ detail.title }}</h1>
         </div>
 
         <div class="thread-header__meta">
-          <ForumUserBadge :user="detail.author" />
+          <ForumUserBadge :user="detail.author" minimal />
           <div class="thread-header__stats">
             <span>{{ detail.replyCount }} {{ t("forum.stats.reply") }}</span>
-            <span>{{ detail.likeCount }} {{ t("forum.stats.like") }}</span>
             <span>{{ detail.viewCount }} {{ t("forum.stats.view") }}</span>
             <span>{{ formatDateTime(detail.createdAt) }}</span>
           </div>
@@ -374,21 +378,9 @@ const renderReplyBlocks = (
           <span v-for="tag in detail.tags" :key="tag">#{{ tag }}</span>
         </div>
 
-        <div class="thread-actions">
-          <el-button
-            :type="detail.viewerHasLiked ? 'warning' : 'default'"
-            :loading="likingThread"
-            @click="toggleThreadLike"
-          >
-            {{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}
-          </el-button>
-          <el-button type="primary" plain @click="setReplyTarget(null)"
-            >{{ copy.replyThread }}</el-button
-          >
-        </div>
-      </section>
+      </header>
 
-      <section class="thread-content">
+      <section class="thread-content" :aria-label="copy.articleBody">
         <div
           v-for="(block, index) in detail.contentBlocks"
           :key="`${block.type}-${index}`"
@@ -406,6 +398,16 @@ const renderReplyBlocks = (
         </div>
       </section>
 
+      <div class="thread-actions" :aria-label="copy.articleActions">
+        <el-button class="thread-action" :type="detail.viewerHasLiked ? 'warning' : 'default'" :loading="likingThread" @click="toggleThreadLike">
+          {{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}
+        </el-button>
+        <el-button class="thread-action" type="primary" plain @click="setReplyTarget(null)">{{ copy.replyThread }}</el-button>
+      </div>
+
+      <section class="reply-section" aria-labelledby="replies-title">
+        <div class="reply-section__divider" aria-hidden="true"></div>
+        <h2 id="replies-title">{{ t("forum.stats.reply") }} {{ detail.replyCount }}</h2>
       <section class="reply-box" :class="{ 'is-expanded': replyExpanded }">
         <div class="reply-box__head">
           <div>
@@ -603,6 +605,8 @@ const renderReplyBlocks = (
           :description="copy.empty"
         />
       </section>
+      </section>
+      </article>
     </template>
   </div>
 </template>
@@ -610,19 +614,20 @@ const renderReplyBlocks = (
 <style scoped>
 .forum-thread-page {
   display: grid;
-  gap: 18px;
 }
+
+.thread-article { max-width: 780px; }
 
 .thread-header,
 .thread-content,
 .reply-box,
 .floor-card {
-  padding: 20px;
+  padding: 0;
 }
 
 .thread-content {
   max-width: 780px;
-  padding-top: 4px;
+  padding-top: 26px;
   padding-bottom: 4px;
 }
 
@@ -647,13 +652,13 @@ const renderReplyBlocks = (
   background: transparent;
 }
 
-.thread-header__top h2 {
-  margin: 10px 0 10px;
-  font-size: 34px;
+.thread-header__top h1 {
+  margin: 14px 0 0;
+  color: var(--viewer-text);
+  font-size: clamp(30px, 5vw, 46px);
   line-height: 1.22;
 }
 
-.thread-header__top p,
 .reply-box__head p,
 .thread-content p {
   margin: 0;
@@ -775,11 +780,13 @@ const renderReplyBlocks = (
 }
 
 .thread-image img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  width: auto;
+  max-width: 100%;
   border-radius: 22px;
-  background: var(--el-fill-color-light, #f5f7fa);
+  max-height: min(80vh, 900px);
   object-fit: contain;
+  margin: 0 auto;
+  background: transparent;
 }
 
 .thread-image figcaption {
@@ -838,6 +845,12 @@ const renderReplyBlocks = (
   gap: 16px;
 }
 
+.thread-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; padding: 14px 0 24px; border-bottom: 1px solid var(--viewer-border); }
+.thread-action { border-radius: 999px; }
+.reply-section { padding-top: 28px; }
+.reply-section__divider { height: 1px; background: var(--viewer-border); }
+.reply-section h2 { margin: 20px 0 14px; color: var(--viewer-text); font-size: 22px; }
+
 .floor-card__user {
   display: flex;
   align-items: center;
@@ -869,9 +882,8 @@ const renderReplyBlocks = (
 }
 
 .sub-reply-item {
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255, 247, 238, 0.92);
+  padding: 14px 0 0 28px;
+  border-top: 1px solid var(--viewer-border);
 }
 
 .blocked-content-card {
@@ -897,7 +909,6 @@ const renderReplyBlocks = (
   font-size: 12px;
 }
 
-body.theme-dark .thread-header__top p,
 body.theme-dark .reply-box__head p,
 body.theme-dark .thread-content p,
 body.theme-dark .thread-header__stats,
@@ -911,7 +922,6 @@ body.theme-dark .reply-box__upload {
 }
 
 body.theme-dark .thread-song-bind,
-body.theme-dark .sub-reply-item,
 body.theme-dark .reply-image-card {
   background: rgba(64, 43, 31, 0.72);
 }
@@ -932,14 +942,14 @@ body.theme-dark .blocked-content-card {
     align-items: flex-start;
   }
 
-  .thread-header__top h2 {
+  .thread-header__top h1 {
     font-size: 28px;
   }
 
   .forum-thread-page { padding-bottom: 150px; }
   .reply-box { bottom: calc(72px + env(safe-area-inset-bottom)); }
   .reply-box.is-expanded { position: fixed; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); max-height: min(62vh, 460px); overflow-y: auto; }
-  .thread-header { padding: 16px; }
+  .thread-header { padding: 0; }
   .thread-content, .floor-card { padding-left: 4px; padding-right: 4px; }
 }
 </style>

@@ -4,6 +4,7 @@ import type { ForumUserBadge } from "~/types/forum";
 const props = defineProps<{
   user: ForumUserBadge;
   compact?: boolean;
+  minimal?: boolean;
 }>();
 
 const { t } = useI18n();
@@ -15,7 +16,7 @@ const localizedTaikoId = computed(() =>
 </script>
 
 <template>
-  <div class="forum-user" :class="{ compact }">
+  <div class="forum-user" :class="{ compact, minimal }">
     <ForumSafeImage
       class="forum-user__avatar"
       :src="user.avatarUrl"
@@ -28,7 +29,7 @@ const localizedTaikoId = computed(() =>
           localizedRoleLabel
         }}</span>
       </div>
-      <div class="forum-user__detail">
+      <div v-if="!minimal" class="forum-user__detail">
         <span>{{ localizedTaikoId }}</span>
         <span v-if="user.verifiedTitle">{{ user.verifiedTitle }}</span>
       </div>
