@@ -14,10 +14,10 @@ const visibleKeys = [
   "community.chartActivity.title",
   "community.chartActivity.participants",
   "community.chartActivity.viewChart",
-  "home.growth.currentState",
-  "home.growth.focusTitle",
-  "home.growth.todayPlan",
-  "home.growth.dailyProgress",
+  "home.growth.limitedTitle",
+  "home.growth.focusDescription",
+  "home.growth.planTitle",
+  "home.growth.progressTitle",
   "home.growth.noPlay",
   "home.growth.loadFailed"
 ];
@@ -41,5 +41,15 @@ for (const locale of ["zh", "ja"]) {
       assert.notEqual(value, key, `${locale} raw key ${key}`);
       assert.ok(value.trim(), `${locale} empty ${key}`);
     }
+  });
+
+  test(`${locale} growth copy avoids duplicate prompt labels`, () => {
+    const growth = messages.home.growth;
+    assert.equal(growth.currentState, undefined);
+    assert.equal(growth.focusTitle, undefined);
+    assert.equal(growth.todayPlan, undefined);
+    assert.equal(growth.dailyProgress, undefined);
+    assert.equal(growth.planTitle, locale === "zh" ? "练这三首" : "この3曲を練習");
+    assert.equal(growth.progressTitle, locale === "zh" ? "今天" : "今日");
   });
 }

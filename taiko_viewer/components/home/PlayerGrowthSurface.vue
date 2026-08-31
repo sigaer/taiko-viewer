@@ -10,7 +10,8 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
 const focusLabel = computed(() => props.overview.playerState.dataSufficiency === "ready" ? dimensionLabel(props.overview.playerState.priorityDimension) : "");
-const planReason = computed(() => props.overview.todayPlan.usedFallback ? t("home.growth.generalReason") : t("home.growth.dimensionReason", { dimension: focusLabel.value }));
+const focusValue = computed(() => props.overview.playerState.skills.find((item) => item.key === props.overview.playerState.priorityDimension)?.value ?? null);
+const planReason = computed(() => props.overview.todayPlan.usedFallback ? t("home.growth.planReasonGeneral") : t("home.growth.planReasonDimension", { dimension: focusLabel.value }));
 const progress = computed(() => props.overview.dailyProgress);
 const hasProgress = computed(() => progress.value.attendance === "played");
 const summaryMetrics = computed(() => [
@@ -28,14 +29,14 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
     <div v-if="pending" class="growth-loading" aria-busy="true">
       <div class="growth-loading__focus shimmer-card"></div>
       <div class="growth-loading__plan shimmer-card"></div>
+      <div class="growth-loading__progress shimmer-card"></div>
     </div>
     <el-alert v-else-if="failed" :title="t('home.growth.loadFailed')" type="warning" :closable="false" show-icon />
     <template v-else>
       <header class="growth-focus panel-card">
         <div class="growth-focus__topline">
           <div>
-            <p class="growth-eyebrow">{{ t("home.growth.currentState") }}</p>
-            <h1 id="growth-title">{{ t("home.growth.focusTitle") }}</h1>
+            <h1 id="growth-title">{{ focusLabel || t("home.growth.limitedTitle") }}</h1>
           </div>
           <div v-if="overview.playerState.overallRating !== null" class="growth-rating">
             <span>Rating</span>
@@ -43,13 +44,12 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           </div>
         </div>
         <div v-if="focusLabel" class="growth-focus__dimension">
-          <span>{{ t("home.growth.priority") }}</span>
-          <strong>{{ focusLabel }}</strong>
+          <strong>{{ focusValue?.toFixed(2) }}</strong>
+          <span>{{ t("home.growth.focusDescription") }}</span>
           <small v-if="overview.playerState.tiedDimensions.length > 1">{{ t("home.growth.tieHint") }}</small>
         </div>
         <div v-else class="growth-focus__limited">
-          <strong>{{ t("home.growth.dataAccumulating") }}</strong>
-          <span>{{ t("home.growth.dataAccumulatingBody") }}</span>
+          <span>{{ t("home.growth.limitedBody") }}</span>
         </div>
         <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
           <div v-for="item in skillItems" :key="item.key" class="growth-skill">
@@ -62,10 +62,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <section class="growth-plan panel-card" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
-            <p class="growth-eyebrow">{{ t("home.growth.nextStep") }}</p>
-            <h2 id="growth-plan-title">{{ t("home.growth.todayPlan") }}</h2>
+            <h2 id="growth-plan-title">{{ t("home.growth.planTitle") }}</h2>
           </div>
-          <span v-if="focusLabel" class="growth-plan__target">{{ focusLabel }}</span>
         </div>
         <p class="growth-reason">{{ planReason }}</p>
         <div v-if="overview.todayPlan.items.length" class="growth-plan__items">
@@ -91,10 +89,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <section class="growth-progress panel-card" aria-labelledby="growth-progress-title">
         <div class="growth-section-head">
           <div>
-            <p class="growth-eyebrow">{{ t("home.growth.feedback") }}</p>
-            <h2 id="growth-progress-title">{{ t("home.growth.dailyProgress") }}</h2>
+            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
           </div>
-          <span v-if="hasProgress" class="growth-attendance">{{ t("home.growth.attended") }}</span>
         </div>
         <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
         <template v-else>
@@ -113,11 +109,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 </template>
 
 <style scoped>
-.growth-surface { display: grid; gap: 16px; }
-.growth-focus, .growth-plan, .growth-progress { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
+.growth-surface { display: grid; gap: 0; }
+.growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
 .growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.growth-eyebrow { margin: 0 0 5px; color: #b84d37; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
 .growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color: #342922; font-family: var(--viewer-display-font); line-height: 1.1; }
 .growth-focus h1 { font-size: clamp(24px, 3.4vw, 36px); }
 .growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
@@ -126,15 +121,14 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-rating strong { color: #342922; font: 800 28px/1 var(--viewer-display-font); }
 .growth-focus__dimension { display: grid; gap: 5px; padding: 18px 20px; border-left: 4px solid #b84d37; background: rgba(184,77,55,.07); }
 .growth-focus__dimension span, .growth-focus__dimension small { color: #806b5c; font-size: 12px; }
-.growth-focus__dimension strong { color: #b84d37; font: 800 clamp(27px, 4vw, 42px)/1.05 var(--viewer-display-font); }
+.growth-focus__dimension strong { color: #b84d37; font: 800 clamp(34px, 5vw, 50px)/1 var(--viewer-display-font); }
 .growth-focus__limited { display: grid; gap: 4px; color: #806b5c; }
-.growth-focus__limited strong { color: #342922; font-size: 17px; }
+.growth-focus__limited span { max-width: 42ch; font-size: 14px; line-height: 1.55; }
 .growth-skills { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .growth-skill { display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid rgba(151,105,73,.2); }
 .growth-skill span { color: #806b5c; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .growth-skill strong { color: #49382d; font-size: 14px; font-variant-numeric: tabular-nums; }
-.growth-plan, .growth-progress { padding: 22px; display: grid; gap: 15px; }
-.growth-plan__target, .growth-attendance { padding: 6px 10px; border-radius: 999px; color: #9a442f; background: rgba(184,77,55,.1); font-size: 11px; font-weight: 800; }
+.growth-plan, .growth-progress { display: grid; gap: 15px; padding: 24px 0; border-top: 1px solid rgba(151,105,73,.18); }
 .growth-reason { margin: 0; color: #806b5c; font-size: 13px; line-height: 1.55; }
 .growth-plan__items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 10px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; color: inherit; text-decoration: none; background: rgba(255,255,255,.5); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
@@ -154,14 +148,16 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-breakthrough { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(151,105,73,.16); }
 .growth-breakthrough strong { min-width: 0; overflow: hidden; color: #49382d; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .growth-breakthrough small { color: #b84d37; font-size: 13px; font-weight: 800; }
-.growth-loading { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.growth-loading > div { min-height: 250px; border-radius: 22px; }
-:global(body.theme-dark .growth-focus), :global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
-:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-focus__limited strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong), :global(body.theme-dark .growth-metric strong), :global(body.theme-dark .growth-breakthrough strong) { color: #f5e7dc; }
-:global(body.theme-dark .growth-eyebrow), :global(body.theme-dark .growth-focus__dimension strong), :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-breakthrough small) { color: #e58b6e; }
+:global(body.theme-dark .growth-focus) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
+:global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); }
+:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong), :global(body.theme-dark .growth-metric strong), :global(body.theme-dark .growth-breakthrough strong) { color: #f5e7dc; }
+:global(body.theme-dark .growth-focus__dimension strong), :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-breakthrough small) { color: #e58b6e; }
 :global(body.theme-dark .growth-focus__dimension) { background: rgba(229,139,110,.1); }
 :global(body.theme-dark .growth-plan__item) { border-color: rgba(255,255,255,.1); background: rgba(48,36,30,.65); }
+.growth-loading { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.growth-loading > div { min-height: 150px; border-radius: 22px; }
+.growth-loading__focus { grid-column: 1 / -1; min-height: 235px !important; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-focus, .growth-plan, .growth-progress { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-breakthrough { grid-template-columns: 1fr auto; } .growth-breakthrough span { grid-column: 1 / -1; } .growth-loading { grid-template-columns: 1fr; } .growth-loading > div { min-height: 180px; } }
+@media (max-width: 520px) { .growth-focus { padding: 19px; border-radius: 18px; } .growth-plan, .growth-progress { padding: 20px 0; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-breakthrough { grid-template-columns: 1fr auto; } .growth-breakthrough span { grid-column: 1 / -1; } .growth-loading { grid-template-columns: 1fr; } .growth-loading > div { min-height: 130px; border-radius: 18px; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>
