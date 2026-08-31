@@ -108,6 +108,30 @@
       "recommendationUnavailable": "推荐暂时不可用",
       "noRecommendation": "暂时没有可推荐的歌曲",
       "openRecommendationTool": "打开推荐工具"
+    },
+    "growth": {
+      "currentState": "我的状态",
+      "focusTitle": "当前重点",
+      "priority": "当前最值得优先提升",
+      "tieHint": "两个维度并列",
+      "skillOverview": "六维概览",
+      "dataAccumulating": "数据仍在积累",
+      "dataAccumulatingBody": "同步更多成绩后，这里会给出更具体的练习方向。",
+      "nextStep": "下一步",
+      "todayPlan": "今天练什么",
+      "dimensionReason": "{dimension} 是你当前最值得优先提升的维度。",
+      "generalReason": "先从综合推荐中挑一首合适的谱面。",
+      "noRecommendation": "暂时没有合适的练习谱面。",
+      "feedback": "今天",
+      "dailyProgress": "今日成果",
+      "attended": "今日已出勤",
+      "noPlay": "今天还没有新的游玩记录",
+      "progressUnavailable": "最近还没有可确认的游玩记录",
+      "uniqueCharts": "涉及谱面",
+      "newBest": "刷新最高分",
+      "crownChanges": "段位变化",
+      "recentBreakthrough": "最近突破",
+      "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用"
     }
   },
   "songs": {

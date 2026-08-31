@@ -107,6 +107,30 @@
       "recommendationUnavailable": "おすすめを利用できません",
       "noRecommendation": "おすすめできる楽曲がありません",
       "openRecommendationTool": "おすすめツールを開く"
+    },
+    "growth": {
+      "currentState": "プレイヤー状態",
+      "focusTitle": "今の重点",
+      "priority": "優先して伸ばしたい力",
+      "tieHint": "2つの力が同率です",
+      "skillOverview": "6つの力の概要",
+      "dataAccumulating": "データを集計中",
+      "dataAccumulatingBody": "成績を同期すると、練習の方向がより具体的になります。",
+      "nextStep": "次の一歩",
+      "todayPlan": "今日の練習",
+      "dimensionReason": "今は{dimension}を優先して伸ばすのがおすすめです。",
+      "generalReason": "総合おすすめから、今のあなたに合う譜面を選びました。",
+      "noRecommendation": "条件に合う練習譜面がありません。",
+      "feedback": "今日",
+      "dailyProgress": "今日の成果",
+      "attended": "今日はプレイ済み",
+      "noPlay": "今日はまだプレイ記録がありません",
+      "progressUnavailable": "確認できるプレイ記録がまだありません",
+      "uniqueCharts": "プレイした譜面",
+      "newBest": "自己ベスト更新",
+      "crownChanges": "クリア状態の変化",
+      "recentBreakthrough": "最近の突破",
+      "loadFailed": "成長提案を利用できません。他のホーム機能は利用できます"
     }
   },
   "songs": {

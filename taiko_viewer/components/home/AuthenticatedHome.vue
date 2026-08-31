@@ -3,7 +3,6 @@ import type { AccountAuthUser } from "~/composables/useAccountAuthStatus";
 import type { HomeState } from "~/utils/homeState";
 import type { SongCatalogItem } from "~/types/content";
 import { trackViewerEvent } from "~/utils/analytics";
-import { shouldShowPersonalRecommendation } from "~/utils/homePresentation";
 
 const props = defineProps<{
   state: Exclude<HomeState, "guest">;
@@ -18,21 +17,9 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
 const isReady = computed(() => props.state === "authenticated_ready");
-const { rating, ratingPending, ratingError, recommendations, recommendationsPending } =
-  usePersonalHome(isReady, userId);
+const { growth, pending: growthPending, error: growthError } = usePlayerGrowth(isReady, userId);
 
 const displayName = computed(() => props.user?.username || t("account.title"));
-const recommendation = computed(() => recommendations.value.items[0] || null);
-const showRecommendation = computed(() =>
-  shouldShowPersonalRecommendation(recommendationsPending.value, Boolean(recommendation.value))
-);
-const recommendationTitle = computed(() => {
-  if (!recommendation.value) return "";
-  return recommendation.value.title || t("home.personal.recommendationSong");
-});
-const formatRating = computed(() =>
-  rating.value.current === null ? "" : rating.value.current.toFixed(2)
-);
 const stateCopy = computed(() => {
   if (props.state === "authenticated_unbound") {
     return {
@@ -82,18 +69,12 @@ const trackClick = (event: string, source: string) => {
       </div>
     </section>
 
+    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :pending="growthPending" :failed="!!growthError" />
+
     <section v-else class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">
         <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
         <h1 id="personal-home-title">{{ t("home.personal.greeting", { name: displayName }) }}</h1>
-        <div class="personal-rating" :class="{ 'personal-rating--loading': ratingPending }" aria-live="polite">
-          <span>{{ t("home.personal.rating") }}</span>
-          <strong v-if="ratingPending">—</strong>
-          <strong v-else-if="formatRating">{{ formatRating }}</strong>
-          <strong v-else>{{ t("home.personal.connected") }}</strong>
-          <small v-if="!ratingPending && ratingError">{{ t("home.personal.summaryUnavailable") }}</small>
-          <small v-else-if="!ratingPending && rating?.model === 'v1'">{{ t("home.personal.ratingBasis") }}</small>
-        </div>
         <NuxtLink
           :to="localePath('/my')"
           class="personal-button personal-button--secondary"
@@ -104,46 +85,6 @@ const trackClick = (event: string, source: string) => {
         </NuxtLink>
       </div>
 
-      <section
-        v-if="showRecommendation"
-        class="recommendation-card panel-card"
-        aria-labelledby="recommendation-title"
-      >
-        <div class="recommendation-card__heading">
-          <h2 id="recommendation-title">{{ t("home.personal.recommendationEyebrow") }}</h2>
-        </div>
-        <div v-if="recommendationsPending" class="recommendation-card__loading shimmer-card" aria-busy="true"></div>
-        <template v-else-if="recommendation">
-          <NuxtLink
-            :to="localePath(`/songs/${recommendation.song_id}`)"
-            class="recommendation-card__song"
-            @click="trackClick('home_recommendation_click', 'spotlight')"
-          >
-            <div class="recommendation-card__cover">
-              <SongCoverImage
-                :song-id="recommendation.song_id"
-                :alt="recommendationTitle"
-                sizes="(max-width: 720px) 112px, 160px"
-                :priority="true"
-                fit="contain"
-              />
-            </div>
-            <div class="recommendation-card__details">
-              <strong>{{ recommendationTitle }}</strong>
-              <span>{{ t("home.personal.level", { level: recommendation.level }) }}</span>
-            </div>
-            <span class="recommendation-card__arrow" aria-hidden="true">↗</span>
-          </NuxtLink>
-          <NuxtLink
-            :to="localePath(`/songs/${recommendation.song_id}`)"
-            class="personal-button personal-button--primary"
-            @click="trackClick('home_recommendation_click', 'cta')"
-          >
-            {{ t("home.personal.viewSong") }}
-            <span aria-hidden="true">→</span>
-          </NuxtLink>
-        </template>
-      </section>
     </section>
 
     <HomeLatestSongs :songs="latestSongs" :pending="contentPending" :failed="contentFailed" />

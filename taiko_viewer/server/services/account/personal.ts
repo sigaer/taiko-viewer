@@ -19,7 +19,7 @@ const ensureBindingWithUserdata = async (userId: number) => {
   return binding;
 };
 
-const runPythonJson = async (args: string[]) => {
+export const runPythonJson = async (args: string[]) => {
   const { repoRoot } = getRuntimePaths();
   try {
     const result = await execFileAsync("python3", ["-m", "plugins.utils.recommendation_intelligence", ...args], {
@@ -43,6 +43,15 @@ export const getPersonalRatingSummary = async (userId: number): Promise<PlayerRa
 export const getPersonalRecommendations = async (userId: number): Promise<PersonalRecommendationPayload> => {
   const binding = await ensureBindingWithUserdata(userId);
   const payload = (await runPythonJson(["ordinary", binding.taiko_id, "--basis", "rating", "--limit", "3"])) as OrdinaryRecommendationsPayload;
+  return {
+    ...payload,
+    items: payload.items.map((item) => ({ ...item, song_id: item.songId, is_unplayed: item.isUnplayed }))
+  };
+};
+
+export const getPersonalDimensionRecommendations = async (userId: number, dimension: string): Promise<PersonalRecommendationPayload> => {
+  const binding = await ensureBindingWithUserdata(userId);
+  const payload = (await runPythonJson(["ordinary", binding.taiko_id, "--basis", dimension, "--limit", "3"])) as OrdinaryRecommendationsPayload;
   return {
     ...payload,
     items: payload.items.map((item) => ({ ...item, song_id: item.songId, is_unplayed: item.isUnplayed }))
