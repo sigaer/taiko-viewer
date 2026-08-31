@@ -1,9 +1,10 @@
 import { access, constants as fsConstants, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createError } from "h3";
-import type { OrdinaryRecommendationsPayload, PlayerRatingIntelligence, RatingDimensionKey } from "~/types/recommendation-intelligence";
-import type { GrowthDailyProgress, GrowthDataMode, PlayerGrowthOverview } from "~/types/player-growth";
+import type { OrdinaryRecommendationsPayload, RatingDimensionKey } from "~/types/recommendation-intelligence";
+import type { GrowthDailyProgress, GrowthDataMode, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
 import { buildPlayerGrowthState, growthCalendarDay } from "~/utils/playerGrowth";
+import { resolveDifficultyPresentation } from "~/utils/difficulty";
 import { getSongCatalog } from "~/server/services/content";
 import { getCurrentBindingRow, getRuntimePaths, getUserdataPath, readUserdata, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
 import { getPersonalDimensionRecommendations, getPersonalRatingSummary, getPersonalRecommendations } from "./personal";
@@ -57,9 +58,8 @@ const changedSongs = (before: Map<string, UserdataSong>, after: Map<string, User
   return changes;
 };
 
-const buildDailyProgress = async (taikoId: string, current: UserdataPayload, catalog: Awaited<ReturnType<typeof getSongCatalog>>): Promise<GrowthDailyProgress> => {
+const buildDailyProgress = async (current: UserdataPayload, catalog: Awaited<ReturnType<typeof getSongCatalog>>, history: Snapshot[]): Promise<GrowthDailyProgress> => {
   const calendarDay = growthCalendarDay(new Date(), TIMEZONE);
-  const history = await loadHistory(taikoId);
   const mode: GrowthDataMode = history.length && history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.some((song) => growthCalendarDay(reliableTimestamp(song), TIMEZONE) === calendarDay) ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
   const events: Array<{ before?: UserdataSong; after: UserdataSong }> = [];
   let state = new Map<string, UserdataSong>();
@@ -106,12 +106,22 @@ const buildDailyProgress = async (taikoId: string, current: UserdataPayload, cat
 };
 
 export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGrowthOverview> => {
+  const requestStartedAt = performance.now();
+  const authStartedAt = performance.now();
   const binding = await getCurrentBindingRow(userId);
+  const authDurationMs = performance.now() - authStartedAt;
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   try { await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK); } catch { throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" }); }
-  const [rating, current, catalog] = await Promise.all([getPersonalRatingSummary(userId), readUserdata(binding.taiko_id), getSongCatalog()]);
-  const mode: GrowthDataMode = (await loadHistory(binding.taiko_id)).some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
+  const scoreStartedAt = performance.now();
+  const [rating, current, catalog, history] = await Promise.all([getPersonalRatingSummary(userId), readUserdata(binding.taiko_id), getSongCatalog(), loadHistory(binding.taiko_id)]);
+  const scoreDurationMs = performance.now() - scoreStartedAt;
+  const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
+  const stateStartedAt = performance.now();
   const playerState = buildPlayerGrowthState(rating.dimensions, rating.sampleCount, mode, rating.overallRating);
+  const stateDurationMs = performance.now() - stateStartedAt;
+  const planStartedAt = performance.now();
+  const progressStartedAt = performance.now();
+  const dailyProgressPromise = Promise.resolve().then(() => buildDailyProgress(current, catalog, history));
   let recommendations: OrdinaryRecommendationsPayload & { items: Array<OrdinaryRecommendationsPayload["items"][number] & { song_id: number; is_unplayed: boolean }> };
   let usedFallback = false;
   if (playerState.priorityDimension && playerState.dataSufficiency === "ready") {
@@ -130,8 +140,26 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   const scoreMap = new Map((current.songs || []).map((song) => [chartKey(song), song]));
   const items = recommendations.items.slice(0, 3).map((item) => {
     const song = scoreMap.get(`${item.song_id}:${item.level}`);
-    return { songId: item.song_id, level: item.level, title: item.title, isUnplayed: item.is_unplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
+    const catalogSong = catalog.find((entry) => Number(entry.id) === item.song_id) || null;
+    const difficulty = resolveDifficultyPresentation(catalogSong, item.level);
+    if (!difficulty.difficultyType) return null;
+    return { songId: item.song_id, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.is_unplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
+  }).filter(Boolean) as GrowthPlanItem[];
+  const planDurationMs = performance.now() - planStartedAt;
+  const dailyProgress = await dailyProgressPromise;
+  const progressDurationMs = performance.now() - progressStartedAt;
+  console.info("[player-growth] overview timing", {
+    userId,
+    authDurationMs: Math.round(authDurationMs),
+    scoreDurationMs: Math.round(scoreDurationMs),
+    stateDurationMs: Math.round(stateDurationMs),
+    planDurationMs: Math.round(planDurationMs),
+    progressDurationMs: Math.round(progressDurationMs),
+    totalDurationMs: Math.round(performance.now() - requestStartedAt),
+    recommendationCount: items.length,
+    historyFileCount: history.length,
+    dataMode: mode,
+    recommendationFallback: usedFallback
   });
-  const dailyProgress = await buildDailyProgress(binding.taiko_id, current, catalog);
   return { playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
 };

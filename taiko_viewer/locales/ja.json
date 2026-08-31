@@ -185,7 +185,7 @@
     "2": "ふつう",
     "3": "むずかしい",
     "4": "おに",
-    "5": "裏譜面",
+    "5": "おに（裏）",
     "unknown": "譜面未紐付け"
   },
   "forum": {
@@ -310,7 +310,8 @@
     "chartActivity": {
       "eyebrow": "プレイヤーの経験",
       "title": "譜面の動き",
-      "participants": "{count} 人が経験を共有"
+      "participants": "{count} 人が経験を共有",
+      "viewChart": "譜面を見る"
     }
   },
   "tools": {

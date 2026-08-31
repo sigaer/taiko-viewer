@@ -2,6 +2,7 @@
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import type { PlayerGrowthOverview } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS } from "~/utils/playerGrowth";
+import { difficultyLabelKey } from "~/utils/difficulty";
 import { trackViewerEvent } from "~/utils/analytics";
 
 const props = defineProps<{ overview: PlayerGrowthOverview; pending?: boolean; failed?: boolean }>();
@@ -70,15 +71,15 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <div v-if="overview.todayPlan.items.length" class="growth-plan__items">
           <NuxtLink
             v-for="item in overview.todayPlan.items"
-            :key="`${item.songId}-${item.level}`"
-            :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level) } })"
+            :key="`${item.songId}-${item.difficultyType}`"
+            :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.difficultyType) } })"
             class="growth-plan__item"
             @click="trackPlanClick(item.songId)"
           >
             <div class="growth-plan__cover"><SongCoverImage :song-id="item.songId" :alt="item.title" sizes="72px" /></div>
             <div class="growth-plan__details">
               <strong>{{ item.title }}</strong>
-              <span>{{ t("home.personal.level", { level: item.level }) }}</span>
+              <span>{{ t(difficultyLabelKey(item.difficultyType)) }}<template v-if="item.starLevel"> · {{ item.starLevel }}{{ t("guide.starSuffix") }}</template></span>
               <small v-if="item.currentBestScore">{{ item.currentBestScore.toLocaleString() }}</small>
             </div>
             <span class="growth-plan__arrow" aria-hidden="true">↗</span>

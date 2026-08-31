@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { CommunityChartActivity } from "~/types/ugc";
+import { difficultyLabelKey } from "~/utils/difficulty";
 
 const props = defineProps<{ item: CommunityChartActivity }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const title = computed(() => locale.value === "ja" && props.item.songTitleJp ? props.item.songTitleJp : props.item.songTitle);
-const difficultyLabel = computed(() => t(`difficulty.${props.item.difficulty}`));
+const difficultyLabel = computed(() => t(difficultyLabelKey(props.item.difficulty)));
 const summaryLabel = computed(() => props.item.difficultySummary ? t(`ugc.difficulty.summary.${props.item.difficultySummary}`) : "");
 const tagLabel = (labelKey: string) => t(labelKey);
 </script>

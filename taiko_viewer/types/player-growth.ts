@@ -15,7 +15,8 @@ export type PlayerGrowthState = {
 
 export type GrowthPlanItem = {
   songId: number;
-  level: number;
+  difficultyType: 1 | 2 | 3 | 4 | 5;
+  starLevel: number | null;
   title: string;
   isUnplayed: boolean;
   targetDimension: RatingDimensionKey | null;

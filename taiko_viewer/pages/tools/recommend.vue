@@ -93,11 +93,11 @@ const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
             <div v-if="!targetData.items.length" class="empty-state">{{ copy.empty }}</div>
             <div v-else class="target-list">
               <article v-for="item in targetData.items" :key="`${item.songId}-${item.level}`" class="target-item">
-                <NuxtLink :to="localePath(`/songs/${item.songId}`)" class="target-item__song">
+                <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level) } })" class="target-item__song">
                   <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="64px" fit="contain" />
                   <span class="target-item__title">{{ item.title }}</span>
                 </NuxtLink>
-                <div class="target-item__meta"><span>{{ item.level }}★</span><span>{{ copy.index }} {{ item.targetRecommendationIndex.toFixed(1) }}</span></div>
+                <div class="target-item__meta"><span>{{ item.star }}★</span><span>{{ copy.index }} {{ item.targetRecommendationIndex.toFixed(1) }}</span></div>
                 <div class="target-item__metrics"><span>{{ copy.current }} {{ item.currentScore === null ? copy.unplayed : item.currentScore.toLocaleString() }}</span><span>{{ copy.targetScore }} {{ item.targetScore === null ? targetLabel : item.targetScore.toLocaleString() }}</span><span>{{ copy.gap }} {{ formatGap(item) }}</span></div>
                 <div class="progress-line"><span :style="{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }"></span></div>
                 <small>{{ copy.progress }} {{ item.progressPercent.toFixed(1) }}%</small>

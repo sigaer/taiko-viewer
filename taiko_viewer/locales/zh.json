@@ -186,7 +186,7 @@
     "2": "普通",
     "3": "困难",
     "4": "魔王",
-    "5": "里谱",
+    "5": "魔王（里）",
     "unknown": "未绑定谱面"
   },
   "forum": {
@@ -311,7 +311,8 @@
     "chartActivity": {
       "eyebrow": "玩家经验",
       "title": "谱面动态",
-      "participants": "{count} 位玩家留下了经验"
+      "participants": "{count} 位玩家留下了经验",
+      "viewChart": "查看谱面"
     }
   },
   "tools": {
