@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
     <section v-if="chartActivityPending || chartActivity?.items?.length" class="community-chart-activity" aria-labelledby="chart-activity-title">
       <div class="community-section-heading"><div><p class="eyebrow">{{ t("community.chartActivity.eyebrow") }}</p><h3 id="chart-activity-title">{{ t("community.chartActivity.title") }}</h3></div></div>
       <div v-if="chartActivityPending" class="community-chart-activity__grid"><div v-for="n in 2" :key="n" class="community-skeleton"></div></div>
-      <div v-else class="community-chart-activity__grid" :class="{ 'is-single': chartActivity.items.length === 1 }"><CommunityChartActivityCard v-for="item in chartActivity.items" :key="item.chartId" :item="item" /></div>
+      <div v-else class="community-chart-activity__grid" :class="{ 'is-single': chartActivity.items.length === 1 }"><ForumCommunityChartActivityCard v-for="item in chartActivity.items" :key="item.chartId" :item="item" /></div>
     </section>
     <section class="community-feed" aria-labelledby="latest-discussions-title">
       <div class="community-section-heading"><div><p class="eyebrow">{{ t("page.forum.index.feedEyebrow") }}</p><h3 id="latest-discussions-title">{{ t("page.forum.index.feedTitle") }}</h3></div><NuxtLink :to="localePath('/forum')" class="text-action">{{ t("common.viewAll") }}</NuxtLink></div>
