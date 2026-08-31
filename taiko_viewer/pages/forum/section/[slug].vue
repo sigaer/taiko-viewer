@@ -21,6 +21,8 @@ const filterState = reactive({
   keyword: String(route.query.keyword || ""),
   sort: String(route.query.sort || "latest"),
   threadType: String(route.query.threadType || ""),
+  songId: String(route.query.songId || ""),
+  difficultyType: String(route.query.difficultyType || ""),
   page: Number(route.query.page || 1)
 });
 const filterOpen = ref(false);
@@ -66,6 +68,8 @@ const requestQuery = computed(() => ({
   keyword: filterState.keyword,
   sort: filterState.sort,
   threadType: filterState.threadType,
+  songId: filterState.songId,
+  difficultyType: filterState.difficultyType,
   page: filterState.page,
   pageSize: 12
 }));
@@ -115,6 +119,8 @@ const pushFilters = async (page = 1) => {
       keyword: filterState.keyword || undefined,
       sort: filterState.sort !== "latest" ? filterState.sort : undefined,
       threadType: filterState.threadType || undefined,
+      songId: filterState.songId || undefined,
+      difficultyType: filterState.difficultyType || undefined,
       page: page > 1 ? String(page) : undefined
     }
   });
@@ -128,6 +134,8 @@ watch(
     filterState.keyword = String(query.keyword || "");
     filterState.sort = String(query.sort || "latest");
     filterState.threadType = String(query.threadType || "");
+    filterState.songId = String(query.songId || "");
+    filterState.difficultyType = String(query.difficultyType || "");
     filterState.page = Math.max(1, Number(query.page || 1));
   }
 );

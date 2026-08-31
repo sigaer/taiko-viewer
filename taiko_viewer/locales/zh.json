@@ -277,6 +277,19 @@
       }
     }
   },
+  "community": {
+    "relatedDiscussions": "相关讨论",
+    "viewAllDiscussions": "查看全部讨论",
+    "discussThisChart": "讨论这张谱",
+    "discussingChart": "正在讨论这张谱",
+    "noRelatedDiscussions": "还没有相关讨论",
+    "viewChart": "查看谱面",
+    "chartActivity": {
+      "eyebrow": "玩家经验",
+      "title": "谱面动态",
+      "participants": "{count} 位玩家留下了经验"
+    }
+  },
   "tools": {
     "title": "查谱工具",
     "chartConfig": "查配置",

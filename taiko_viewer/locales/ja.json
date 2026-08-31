@@ -276,6 +276,19 @@
       }
     }
   },
+  "community": {
+    "relatedDiscussions": "関連ディスカッション",
+    "viewAllDiscussions": "すべてのディスカッションを見る",
+    "discussThisChart": "この譜面について話す",
+    "discussingChart": "この譜面について投稿",
+    "noRelatedDiscussions": "関連する投稿はまだありません",
+    "viewChart": "譜面を見る",
+    "chartActivity": {
+      "eyebrow": "プレイヤーの経験",
+      "title": "譜面の動き",
+      "participants": "{count} 人が経験を共有"
+    }
+  },
   "tools": {
     "title": "譜面ツール",
     "chartConfig": "配置検索",

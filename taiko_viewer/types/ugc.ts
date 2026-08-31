@@ -138,6 +138,26 @@ export type ChartUgcSummary = {
   tips: ChartUgcTip[];
 };
 
+export type CommunityChartActivity = {
+  chartId: string;
+  songId: number;
+  difficulty: ChartDifficultyCode;
+  songTitle: string;
+  songTitleJp: string;
+  cover: string;
+  level: number | null;
+  difficultySummary: ChartUgcSummaryKind | null;
+  participantCount: number;
+  tags: Array<{ slug: string; labelKey: string; count: number }>;
+  tipPreview: { body: string; helpfulCount: number } | null;
+  activityAt: string | null;
+  href: string;
+};
+
+export type CommunityChartActivityPayload = {
+  items: CommunityChartActivity[];
+};
+
 export type ViewerChartUgcState = {
   chart: ChartUgcIdentity;
   difficultyVote: ChartDifficultyVoteValue | null;

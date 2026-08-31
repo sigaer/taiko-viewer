@@ -849,6 +849,8 @@ useViewerSeo(() => ({
         @login="goToChartUgcLogin"
       />
 
+      <SongRelatedDiscussions :song-id="songId" :difficulty-type="selectedDifficultyCode" />
+
       <AccountSongScores
         v-if="accountUser"
         :items="accountScores.items"

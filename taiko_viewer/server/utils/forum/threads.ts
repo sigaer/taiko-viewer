@@ -104,6 +104,11 @@ export const listForumThreads = async (
     filters.push("t.song_id = ?");
     params.push(songId);
   }
+  const difficultyType = sanitizeInt(query.difficultyType, 0);
+  if (difficultyType > 0 && difficultyType <= 5) {
+    filters.push("t.difficulty_type = ?");
+    params.push(difficultyType);
+  }
   if (scope) {
     if (!viewer) {
       throw createError({ statusCode: 401, statusMessage: "请先登录" });
@@ -276,26 +281,46 @@ export const getForumThreadDetail = async (event: H3Event, threadIdInput: unknow
   } satisfies ForumThreadDetail;
 };
 
-const validateSongBinding = async (payload: { songId?: unknown; difficultyType?: unknown; level?: unknown }) => {
+export const validateSongBinding = async (payload: { songId?: unknown; difficultyType?: unknown; level?: unknown }) => {
+  const rawSongId = payload.songId;
+  const hasSong = rawSongId !== undefined && rawSongId !== null && String(rawSongId).trim() !== "";
   const songId = sanitizeInt(payload.songId, 0);
-  if (songId <= 0) {
+  if (!hasSong) {
     return {
       songId: null,
       difficultyType: null,
       level: null
     };
   }
-  const difficultyType = sanitizeInt(payload.difficultyType, 0);
-  const level = sanitizeInt(payload.level, 0);
+  if (songId <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "关联曲目无效" });
+  }
+  const rawDifficulty = payload.difficultyType;
+  const hasDifficulty = rawDifficulty !== undefined && rawDifficulty !== null && String(rawDifficulty).trim() !== "";
+  const difficultyType = sanitizeInt(rawDifficulty, 0);
   const catalog = await getSongCatalog();
   const song = catalog.map.get(songId);
   if (!song) {
     throw createError({ statusCode: 400, statusMessage: "关联曲目不存在" });
   }
+  if (!hasDifficulty) {
+    return { songId, difficultyType: null, level: null };
+  }
+  if (difficultyType < 1 || difficultyType > 5) {
+    throw createError({ statusCode: 400, statusMessage: "关联难度无效" });
+  }
+  const catalogLevel = song[`level_${difficultyType}` as keyof typeof song];
+  if (catalogLevel === undefined || catalogLevel === null || String(catalogLevel).trim() === "" || String(catalogLevel).trim() === "-") {
+    throw createError({ statusCode: 400, statusMessage: "该歌曲没有此难度谱面" });
+  }
+  const authoritativeLevel = Number(catalogLevel);
+  if (!Number.isFinite(authoritativeLevel) || authoritativeLevel <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "该歌曲的难度等级无效" });
+  }
   return {
     songId,
-    difficultyType: difficultyType > 0 ? difficultyType : null,
-    level: level > 0 ? level : null
+    difficultyType,
+    level: Math.trunc(authoritativeLevel)
   };
 };
 

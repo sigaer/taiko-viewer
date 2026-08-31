@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
-import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
+import type { SongCatalogItem, SongCatalogPagePayload, SongDetailPayload } from "~/types/content";
 import { resolveForumSectionTranslation } from "~/utils/forum";
 
 type UploadedImage = {
@@ -56,6 +56,7 @@ const songQuery = ref("");
 const songResults = ref<SongCatalogItem[]>([]);
 const songLoading = ref(false);
 const selectedSong = ref<SongCatalogItem | null>(null);
+const contextualSong = ref(false);
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -171,6 +172,24 @@ const selectedSongLevel = computed(() => {
   if (!selectedSong.value || !form.difficultyType) return "";
   return String(selectedSong.value[`level_${form.difficultyType}` as keyof SongCatalogItem] ?? "");
 });
+
+const contextualSongId = Number(route.query.songId || 0);
+const contextualDifficulty = Number(route.query.difficulty || 0);
+if (Number.isInteger(contextualSongId) && contextualSongId > 0) {
+  try {
+    const payload = await apiFetch<SongDetailPayload>(`/api/content/songs/${contextualSongId}`);
+    if (payload.song) {
+      selectedSong.value = payload.song;
+      form.songId = String(payload.song.id);
+      songQuery.value = payload.song.song_name;
+      const hasDifficulty = contextualDifficulty >= 1 && contextualDifficulty <= 5 && payload.song[`level_${contextualDifficulty}` as keyof SongCatalogItem] !== undefined && payload.song[`level_${contextualDifficulty}` as keyof SongCatalogItem] !== null && String(payload.song[`level_${contextualDifficulty}` as keyof SongCatalogItem]).trim() !== "";
+      if (hasDifficulty) {
+        form.difficultyType = String(contextualDifficulty);
+        contextualSong.value = true;
+      }
+    }
+  } catch {}
+}
 const getSectionLabel = (section: ForumSection) => resolveForumSectionTranslation(t, section.slug, section.name);
 
 const searchSongs = async () => {
@@ -288,6 +307,11 @@ const submit = async () => {
         <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
       </div>
 
+      <section v-if="contextualSong && selectedSong" class="composer-context-card" aria-live="polite">
+        <img :src="`/api/content/covers/${selectedSong.id}`" :alt="selectedSong.song_name" />
+        <div><strong>{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</strong><span>{{ t(`community.discussingChart`) }} · {{ t(`difficulty.${form.difficultyType}`) }} · {{ form.level }}{{ t("guide.starSuffix") }}</span></div>
+      </section>
+
       <el-form label-position="top">
         <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><div class="type-chips"><button v-for="option in threadTypeOptions" :key="option.value" type="button" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button></div></el-form-item></div>
 
@@ -334,6 +358,12 @@ const submit = async () => {
   width: min(980px, 100%);
   padding: 4px 0 24px;
 }
+
+.composer-context-card { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--viewer-border); border-radius: 14px; background: var(--viewer-surface); }
+.composer-context-card img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
+.composer-context-card div { display: grid; gap: 4px; min-width: 0; }
+.composer-context-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-context-card span { color: var(--viewer-text-muted); font-size: 13px; }
 
 .composer-panel__head {
   display: flex;

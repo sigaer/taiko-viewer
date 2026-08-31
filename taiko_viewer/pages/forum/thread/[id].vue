@@ -357,19 +357,18 @@ const renderReplyBlocks = (
           </div>
         </div>
 
-        <div v-if="detail.song" class="thread-song-bind">
-          <ForumSafeImage
-            :src="detail.song.coverUrl"
-            :alt="detail.song.title"
-          />
+        <NuxtLink
+          v-if="detail.song"
+          class="thread-song-bind"
+          :to="localePath({ path: `/songs/${detail.song.id}`, query: detail.song.difficultyType ? { difficulty: String(detail.song.difficultyType) } : {}, hash: detail.song.difficultyType ? '#chart-ugc' : undefined })"
+        >
+          <ForumSafeImage :src="detail.song.coverUrl" :alt="detail.song.title" />
           <div>
             <strong>{{ detail.song.title }}</strong>
-            <span
-              >{{ getSongDifficultyLabel(detail.song.difficultyType, detail.song.difficultyLabel) }} ·
-              {{ detail.song.level || "?" }}{{ t("guide.starSuffix") }}</span
-            >
+            <span>{{ getSongDifficultyLabel(detail.song.difficultyType, detail.song.difficultyLabel) }}<template v-if="detail.song.difficultyType"> · {{ detail.song.level || "?" }}{{ t("guide.starSuffix") }}</template></span>
+            <small>{{ t("community.viewChart") }} →</small>
           </div>
-        </div>
+        </NuxtLink>
 
         <div v-if="detail.tags.length" class="thread-tags">
           <span v-for="tag in detail.tags" :key="tag">#{{ tag }}</span>
@@ -735,6 +734,8 @@ const renderReplyBlocks = (
   padding: 12px 14px;
   border-radius: 20px;
   background: rgba(255, 239, 219, 0.8);
+  color: inherit;
+  text-decoration: none;
 }
 
 .thread-song-bind img {
@@ -752,6 +753,11 @@ const renderReplyBlocks = (
 .thread-song-bind span {
   color: #7f6654;
   font-size: 13px;
+}
+
+.thread-song-bind small {
+  color: #b25237;
+  font-size: 12px;
 }
 
 .thread-tags span {

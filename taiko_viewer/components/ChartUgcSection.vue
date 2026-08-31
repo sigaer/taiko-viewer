@@ -183,7 +183,7 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
 </script>
 
 <template>
-  <section class="chart-ugc-section" aria-labelledby="chart-ugc-title">
+  <section id="chart-ugc" class="chart-ugc-section" aria-labelledby="chart-ugc-title">
     <header class="chart-ugc-head">
       <div>
         <span class="chart-ugc-eyebrow">PLAYER NOTES</span>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
+import type { CommunityChartActivityPayload } from "~/types/ugc";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveForumSectionTranslation } from "~/utils/forum";
 
@@ -14,6 +15,10 @@ useViewerSeo(() => ({ title: t("forum.title"), description: buildPageDescription
 
 const { data, pending, refresh } = await useLazyAsyncData<ForumHomePayload>("forum-home", () => apiFetch("/api/forum/home"), {
   default: () => ({ sections: [], featuredThreads: [], hotThreads: [], latestGuides: [], announcements: [], leaderboard: [], currentUser: null, unreadNotificationCount: 0, highlightedTags: [] })
+});
+const { data: chartActivity, pending: chartActivityPending } = await useLazyAsyncData<CommunityChartActivityPayload>("community-chart-activity", () => apiFetch("/api/content/community/chart-activity"), {
+  default: () => ({ items: [] }),
+  server: true
 });
 const home = computed(() => data.value);
 const getSectionName = (slug: string, fallback = "") => resolveForumSectionTranslation(t, slug, fallback);
@@ -65,6 +70,11 @@ onBeforeUnmount(() => {
       <div v-if="pending" class="community-rail__items"><div v-for="n in 3" :key="n" class="community-skeleton"></div></div>
       <div v-else-if="home?.hotThreads?.length" class="community-rail__items" :class="{ 'is-single': home.hotThreads.length === 1 }"><NuxtLink v-for="thread in home.hotThreads.slice(0, 4)" :key="thread.id" :to="localePath(`/forum/thread/${thread.id}`)" class="active-thread"><span class="active-thread__type">{{ getSectionName(thread.section.slug, thread.section.name) }}</span><strong>{{ thread.title }}</strong><span>{{ thread.replyCount }} {{ t("forum.stats.reply") }} · {{ thread.likeCount }} {{ t("forum.stats.like") }}</span></NuxtLink></div>
     </section>
+    <section v-if="chartActivityPending || chartActivity?.items?.length" class="community-chart-activity" aria-labelledby="chart-activity-title">
+      <div class="community-section-heading"><div><p class="eyebrow">{{ t("community.chartActivity.eyebrow") }}</p><h3 id="chart-activity-title">{{ t("community.chartActivity.title") }}</h3></div></div>
+      <div v-if="chartActivityPending" class="community-chart-activity__grid"><div v-for="n in 2" :key="n" class="community-skeleton"></div></div>
+      <div v-else class="community-chart-activity__grid" :class="{ 'is-single': chartActivity.items.length === 1 }"><CommunityChartActivityCard v-for="item in chartActivity.items" :key="item.chartId" :item="item" /></div>
+    </section>
     <section class="community-feed" aria-labelledby="latest-discussions-title">
       <div class="community-section-heading"><div><p class="eyebrow">{{ t("page.forum.index.feedEyebrow") }}</p><h3 id="latest-discussions-title">{{ t("page.forum.index.feedTitle") }}</h3></div><NuxtLink :to="localePath('/forum')" class="text-action">{{ t("common.viewAll") }}</NuxtLink></div>
       <div v-if="pending" class="community-feed__list"><div v-for="n in 4" :key="n" class="community-skeleton community-skeleton--row"></div></div>
@@ -103,10 +113,13 @@ onBeforeUnmount(() => {
 .active-thread span:last-child { color: var(--viewer-text-muted); font-size: 12px; }
 .active-thread__type { color: var(--viewer-accent-strong); font-size: 11px; }
 .community-feed__list { display: grid; gap: 0; border-top: 1px solid var(--viewer-border); }
+.community-chart-activity__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.community-chart-activity__grid.is-single { grid-template-columns: minmax(0, 1fr); }
 .community-empty { margin: 0; padding: 24px 0; color: var(--viewer-text-muted); }
 .community-skeleton { height: 116px; border-radius: 14px; background: linear-gradient(90deg, var(--viewer-surface), color-mix(in srgb, var(--viewer-border) 60%, var(--viewer-surface)), var(--viewer-surface)); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
 .community-skeleton--row { height: 92px; border-radius: 0; border-bottom: 1px solid var(--viewer-border); }
 @keyframes shimmer { to { background-position: -200% 0; } }
+@media (max-width: 700px) { .community-chart-activity__grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .community-header { align-items: flex-start; } .community-publish { padding: 0 12px; font-size: 13px; } }
 @media (prefers-reduced-motion: reduce) { .community-skeleton { animation: none; } .active-thread { transition: none; } }
 </style>
