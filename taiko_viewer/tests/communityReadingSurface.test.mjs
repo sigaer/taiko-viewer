@@ -98,6 +98,44 @@ test("community dark mode remaps semantic text and composer surface tokens", () 
   assert.match(thread, /body\.theme-dark \.reply-box :deep\(\.el-textarea__inner\) \{[\s\S]*var\(--viewer-text\)/);
 });
 
+test("notifications mark one item read locally before deep-link navigation", () => {
+  const source = read("pages/forum/notifications.vue");
+  const openNotification = source.slice(source.indexOf("const openNotification"), source.indexOf("const formatNotificationTime"));
+  assert.match(openNotification, /item\.isRead = true/);
+  assert.match(openNotification, /body: \{ ids: \[item\.id\] \}/);
+  assert.match(openNotification, /syncUnreadCount\(result\.unreadCount\)/);
+  assert.match(source, /hash: item\.postId \? `#reply-\$\{item\.postId\}` : undefined/);
+  assert.doesNotMatch(openNotification, /refresh\(/);
+});
+
+test("reply deep links use stable ids after DOM render and highlight the target", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  assert.match(source, /:id="`reply-\$\{post\.id\}`"/);
+  assert.match(source, /:id="`reply-\$\{reply\.id\}`"/);
+  assert.match(source, /threadPageMounted\.value[\s\S]*await nextTick\(\)[\s\S]*await waitForRouteScroll\(\)[\s\S]*requestAnimationFrame\(locate\)/);
+  assert.match(source, /requestAnimationFrame\(\(\) => requestAnimationFrame\(\(\) => resolve\(\)\)\)/);
+  assert.match(source, /target\.scrollIntoView\(\{ block: "center", behavior: "auto" \}\)/);
+  assert.match(source, /target\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(source, /setTimeout\([\s\S]*1800/);
+  assert.match(source, /replyUnavailable: "这条回复已不可用"/);
+  assert.match(source, /replyUnavailable: "この返信は利用できません"/);
+});
+
+test("thread images open an accessible lightweight viewer without losing scroll", () => {
+  const thread = read("pages/forum/thread/[id].vue");
+  const viewer = read("components/forum/ForumMediaViewer.vue");
+  assert.match(thread, /class="thread-image__trigger"/);
+  assert.match(thread, /<ForumMediaViewer/);
+  assert.match(viewer, /class="forum-media-viewer"/);
+  assert.match(viewer, /role="dialog"/);
+  assert.match(viewer, /aria-modal="true"/);
+  assert.match(viewer, /event\.key === "Escape"/);
+  assert.match(viewer, /preservedScrollY\.value = window\.scrollY/);
+  assert.match(viewer, /window\.scrollTo\(\{ top: preservedScrollY\.value, behavior: "auto" \}\)/);
+  assert.match(viewer, /touch-action: pinch-zoom/);
+  assert.match(viewer, /items\.length > 1/);
+});
+
 test("reply list keeps internal rhythm and a bottom inset above fixed composer", () => {
   const source = read("pages/forum/thread/[id].vue");
   assert.match(source, /\.reply-list \{[\s\S]*gap: 18px/);

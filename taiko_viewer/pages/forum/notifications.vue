@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import type { ForumNotification } from "~/types/forum";
+import type { ForumHomePayload, ForumNotification } from "~/types/forum";
 
 type NotificationPayload = {
   total: number;
@@ -14,6 +14,14 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime, formatDate } = useViewerDateTime();
+const forumHome = useNuxtData<ForumHomePayload>("forum-home").data;
+const forumMeHome = useNuxtData<ForumHomePayload>("forum-me-home").data;
+
+const syncUnreadCount = (unreadCount: number) => {
+  if (data.value) data.value.unreadCount = unreadCount;
+  if (forumHome.value) forumHome.value.unreadNotificationCount = unreadCount;
+  if (forumMeHome.value) forumMeHome.value.unreadNotificationCount = unreadCount;
+};
 
 definePageMeta({
   middleware: "account-auth",
@@ -26,7 +34,7 @@ definePageMeta({
   ]
 });
 
-const { data, pending, refresh } = await useAsyncData<NotificationPayload>(
+const { data, pending } = await useAsyncData<NotificationPayload>(
   "forum-notifications",
   () => apiFetch("/api/forum/notifications"),
   {
@@ -41,14 +49,31 @@ const { data, pending, refresh } = await useAsyncData<NotificationPayload>(
 );
 
 const markAllRead = async () => {
+  const previousState = {
+    unreadCount: data.value?.unreadCount || 0,
+    items: (data.value?.items || []).map((item) => ({ id: item.id, isRead: item.isRead }))
+  };
+  if (data.value) {
+    syncUnreadCount(0);
+    data.value.items.forEach((item) => {
+      item.isRead = true;
+    });
+  }
   try {
-    await apiFetch("/api/forum/notifications/read", {
+    const result = await apiFetch<{ unreadCount: number }>("/api/forum/notifications/read", {
       method: "POST",
       body: {}
     });
+    syncUnreadCount(result.unreadCount);
     ElMessage.success(t("forum.allMarkedRead"));
-    await refresh();
   } catch (error: any) {
+    if (data.value) {
+      syncUnreadCount(previousState.unreadCount);
+      const previousById = new Map(previousState.items.map((item) => [item.id, item.isRead]));
+      data.value.items.forEach((item) => {
+        item.isRead = previousById.get(item.id) ?? item.isRead;
+      });
+    }
     ElMessage.error(error?.data?.statusMessage || error?.message || t("errors.actionFailed"));
   }
 };
@@ -60,9 +85,41 @@ const typeLabelMap = computed<Record<string, string>>(() => ({
   system: t("forum.notificationsType.system")
 }));
 
+const openingNotificationId = ref<number | null>(null);
+
+const getNotificationTarget = (item: ForumNotification) => {
+  if (!item.threadId) return null;
+  return localePath({
+    path: `/forum/thread/${item.threadId}`,
+    hash: item.postId ? `#reply-${item.postId}` : undefined
+  });
+};
+
 const openNotification = async (item: ForumNotification) => {
-  if (!item.threadId) return;
-  await navigateTo(localePath(`/forum/thread/${item.threadId}`));
+  if (openingNotificationId.value === item.id) return;
+  openingNotificationId.value = item.id;
+  const previousUnreadCount = data.value?.unreadCount || 0;
+  const wasRead = item.isRead;
+  if (!wasRead) {
+    item.isRead = true;
+    syncUnreadCount(Math.max(0, previousUnreadCount - 1));
+    try {
+      const result = await apiFetch<{ unreadCount: number }>("/api/forum/notifications/read", {
+        method: "POST",
+        body: { ids: [item.id] }
+      });
+      syncUnreadCount(result.unreadCount);
+    } catch (error: any) {
+      item.isRead = wasRead;
+      syncUnreadCount(previousUnreadCount);
+      ElMessage.error(error?.data?.statusMessage || error?.message || t("errors.actionFailed"));
+      openingNotificationId.value = null;
+      return;
+    }
+  }
+  const target = getNotificationTarget(item);
+  if (target) await navigateTo(target);
+  openingNotificationId.value = null;
 };
 
 const formatNotificationTime = (value: string) => {
@@ -79,7 +136,7 @@ const formatNotificationTime = (value: string) => {
   <div class="forum-notifications-page">
     <section class="panel-card notification-head">
       <div>
-        <p class="notification-count">{{ t("page.forum.notifications.summary", { unread: data?.unreadCount || 0, total: data?.total || 0 }) }}</p>
+        <p class="notification-count" aria-live="polite">{{ t("page.forum.notifications.summary", { unread: data?.unreadCount || 0, total: data?.total || 0 }) }}</p>
       </div>
       <el-button v-if="data?.unreadCount" type="primary" plain @click="markAllRead">{{ t("forum.markAllRead") }}</el-button>
     </section>
@@ -91,8 +148,10 @@ const formatNotificationTime = (value: string) => {
         :key="item.id"
         class="notification-card"
         :class="{ unread: !item.isRead }"
-        :tabindex="item.threadId ? 0 : undefined"
-        :role="item.threadId ? 'link' : undefined"
+        tabindex="0"
+        :role="item.threadId ? 'link' : 'button'"
+        :aria-label="item.title"
+        :aria-busy="openingNotificationId === item.id"
         @click="openNotification(item)"
         @keydown.enter="openNotification(item)"
       >

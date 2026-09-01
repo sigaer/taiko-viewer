@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
-import type { ForumThreadDetail } from "~/types/forum";
+import type { ForumContentBlock, ForumThreadDetail } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
 import { FORUM_IMAGE_MAX_BYTES, resolveForumSectionTranslation } from "~/utils/forum";
 
@@ -78,7 +78,12 @@ const copy = computed(() =>
         likeFailed: "いいねに失敗しました",
         loginForLike: "ログイン後にいいねしてください",
         articleBody: "本文",
-        articleActions: "記事の操作"
+        articleActions: "記事の操作",
+        imageViewer: "画像ビューア",
+        closeImageViewer: "画像ビューアを閉じる",
+        previousImage: "前の画像",
+        nextImage: "次の画像",
+        replyUnavailable: "この返信は利用できません"
       }
     : {
         publishReply: "发表回复",
@@ -118,7 +123,12 @@ const copy = computed(() =>
         likeFailed: "点赞失败",
         loginForLike: "请先登录后再点赞",
         articleBody: "正文",
-        articleActions: "文章操作"
+        articleActions: "文章操作",
+        imageViewer: "图片查看器",
+        closeImageViewer: "关闭图片查看器",
+        previousImage: "上一张图片",
+        nextImage: "下一张图片",
+        replyUnavailable: "这条回复已不可用"
       }
 );
 const getSectionName = (slug: string, fallback = slug) => resolveForumSectionTranslation(t, slug, fallback);
@@ -141,6 +151,100 @@ const detail = computed(() => data.value);
 const firstContentImageIndex = computed(() =>
   detail.value?.contentBlocks.findIndex((block) => block.type !== "paragraph") ?? -1
 );
+
+type ViewerImage = {
+  url: string;
+  alt: string;
+};
+
+const imageViewerItems = computed<ViewerImage[]>(() => {
+  const items: ViewerImage[] = [];
+  const addBlocks = (blocks: ForumContentBlock[] | undefined) => {
+    for (const block of blocks || []) {
+      if (block.type === "image" && block.imageUrl) {
+        items.push({ url: block.imageUrl, alt: block.alt || block.caption || t("forum.threadDetail") });
+      }
+    }
+  };
+  addBlocks(detail.value?.contentBlocks);
+  for (const post of detail.value?.posts || []) {
+    if (!post.isBlockedAuthor || revealedBlockedPostIds.value.includes(post.id)) addBlocks(post.contentBlocks);
+    for (const reply of post.replies) {
+      if (!reply.isBlockedAuthor || revealedBlockedPostIds.value.includes(reply.id)) addBlocks(reply.contentBlocks);
+    }
+  }
+  return items;
+});
+
+const viewerOpen = ref(false);
+const viewerIndex = ref(0);
+const viewerTrigger = ref<HTMLElement | null>(null);
+
+const openImageViewer = (url: string, event?: MouseEvent) => {
+  if (!url || !import.meta.client) return;
+  const index = imageViewerItems.value.findIndex((item) => item.url === url);
+  viewerIndex.value = index >= 0 ? index : 0;
+  viewerTrigger.value = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+  viewerOpen.value = true;
+};
+
+const highlightedReplyId = ref<number | null>(null);
+const threadPageMounted = ref(false);
+let handledReplyHash = "";
+let highlightTimer: ReturnType<typeof setTimeout> | null = null;
+
+const waitForRouteScroll = () => new Promise<void>((resolve) => {
+  requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+});
+
+const scrollToReplyHash = async () => {
+  if (!import.meta.client || !threadPageMounted.value || !detail.value || !route.hash || route.hash === handledReplyHash) return;
+  const match = route.hash.match(/^#reply-(\d+)$/);
+  if (!match) return;
+  const replyId = Number(match[1]);
+  await nextTick();
+  await waitForRouteScroll();
+  let attempts = 0;
+  const locate = () => {
+    const target = document.getElementById(`reply-${replyId}`);
+    if (!target && attempts++ < 4) {
+      requestAnimationFrame(locate);
+      return;
+    }
+    handledReplyHash = route.hash;
+    if (!target) {
+      document.getElementById("replies-title")?.scrollIntoView({ block: "start", behavior: "smooth" });
+      ElMessage.info(copy.value.replyUnavailable);
+      return;
+    }
+    target.scrollIntoView({ block: "center", behavior: "auto" });
+    target.focus({ preventScroll: true });
+    highlightedReplyId.value = replyId;
+    if (highlightTimer) clearTimeout(highlightTimer);
+    highlightTimer = setTimeout(() => {
+      highlightedReplyId.value = null;
+      highlightTimer = null;
+    }, 1800);
+  };
+  requestAnimationFrame(locate);
+};
+
+watch([() => detail.value, () => route.hash], () => {
+  if (!route.hash) {
+    handledReplyHash = "";
+    highlightedReplyId.value = null;
+    return;
+  }
+  void scrollToReplyHash();
+}, { immediate: true });
+
+onMounted(() => {
+  threadPageMounted.value = true;
+  void scrollToReplyHash();
+});
+onBeforeUnmount(() => {
+  if (highlightTimer) clearTimeout(highlightTimer);
+});
 
 const setReplyTarget = (id: number | null, label = "") => {
   replyTarget.value = { id, label };
@@ -435,11 +539,18 @@ const renderReplyBlocks = (
         >
           <p v-if="block.type === 'paragraph'">{{ block.text }}</p>
           <figure v-else class="thread-image">
-            <ForumSafeImage
-              :src="block.imageUrl || ''"
-              :alt="block.alt || detail.title"
-              :priority="index === firstContentImageIndex"
-            />
+            <button
+              type="button"
+              class="thread-image__trigger"
+              :aria-label="`${copy.imageViewer}: ${block.alt || detail.title}`"
+              @click="openImageViewer(block.imageUrl || '', $event)"
+            >
+              <ForumSafeImage
+                :src="block.imageUrl || ''"
+                :alt="block.alt || detail.title"
+                :priority="index === firstContentImageIndex"
+              />
+            </button>
             <figcaption v-if="block.caption">{{ block.caption }}</figcaption>
           </figure>
         </div>
@@ -547,6 +658,9 @@ const renderReplyBlocks = (
           v-for="post in detail.posts"
           :key="post.id"
           class="floor-card"
+          :id="`reply-${post.id}`"
+          :class="{ 'is-targeted': highlightedReplyId === post.id }"
+          tabindex="-1"
         >
           <div class="floor-card__head">
             <div class="floor-card__user">
@@ -573,14 +687,21 @@ const renderReplyBlocks = (
               class="thread-block floor-card__body"
             >
               <p v-if="block.type === 'paragraph'">{{ block.text }}</p>
-              <figure v-else class="thread-image">
-                <ForumSafeImage
-                  :src="block.imageUrl || ''"
-                  :alt="block.caption || 'reply image'"
-                />
-                <figcaption v-if="block.caption">
-                  {{ block.caption }}
-                </figcaption>
+                <figure v-else class="thread-image">
+                  <button
+                    type="button"
+                    class="thread-image__trigger"
+                    :aria-label="`${copy.imageViewer}: ${block.caption || copy.reply}`"
+                    @click="openImageViewer(block.imageUrl || '', $event)"
+                  >
+                    <ForumSafeImage
+                      :src="block.imageUrl || ''"
+                      :alt="block.caption || 'reply image'"
+                    />
+                  </button>
+                  <figcaption v-if="block.caption">
+                    {{ block.caption }}
+                  </figcaption>
               </figure>
             </div>
           </template>
@@ -610,6 +731,9 @@ const renderReplyBlocks = (
               v-for="reply in post.replies"
               :key="reply.id"
               class="sub-reply-item"
+              :id="`reply-${reply.id}`"
+              :class="{ 'is-targeted': highlightedReplyId === reply.id }"
+              tabindex="-1"
             >
               <div class="sub-reply-item__head">
                 <ForumUserBadge :user="reply.author" compact />
@@ -642,14 +766,21 @@ const renderReplyBlocks = (
                   class="thread-block"
                 >
                   <p v-if="block.type === 'paragraph'">{{ block.text }}</p>
-                  <figure v-else class="thread-image">
-                    <ForumSafeImage
-                      :src="block.imageUrl || ''"
-                      :alt="block.caption || 'reply image'"
-                    />
-                    <figcaption v-if="block.caption">
-                      {{ block.caption }}
-                    </figcaption>
+                    <figure v-else class="thread-image">
+                      <button
+                        type="button"
+                        class="thread-image__trigger"
+                        :aria-label="`${copy.imageViewer}: ${block.caption || copy.reply}`"
+                        @click="openImageViewer(block.imageUrl || '', $event)"
+                      >
+                        <ForumSafeImage
+                          :src="block.imageUrl || ''"
+                          :alt="block.caption || 'reply image'"
+                        />
+                      </button>
+                      <figcaption v-if="block.caption">
+                        {{ block.caption }}
+                      </figcaption>
                   </figure>
                 </div>
               </template>
@@ -687,6 +818,17 @@ const renderReplyBlocks = (
       </section>
       </article>
     </template>
+
+    <ForumMediaViewer
+      v-model:visible="viewerOpen"
+      v-model:index="viewerIndex"
+      :items="imageViewerItems"
+      :trigger="viewerTrigger"
+      :label="copy.imageViewer"
+      :close-label="copy.closeImageViewer"
+      :previous-label="copy.previousImage"
+      :next-label="copy.nextImage"
+    />
   </div>
 </template>
 
@@ -865,7 +1007,25 @@ const renderReplyBlocks = (
   gap: 10px;
 }
 
-.thread-image img {
+.thread-image__trigger {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.thread-image__trigger:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--viewer-accent) 58%, transparent);
+  outline-offset: 4px;
+}
+
+.thread-image img,
+.thread-image__trigger :deep(img) {
   width: auto;
   max-width: 100%;
   border-radius: 22px;
@@ -873,6 +1033,18 @@ const renderReplyBlocks = (
   object-fit: contain;
   margin: 0 auto;
   background: transparent;
+}
+
+.floor-card,
+.sub-reply-item {
+  scroll-margin-top: 88px;
+  scroll-margin-bottom: 120px;
+  transition: background-color 180ms ease;
+}
+
+.floor-card.is-targeted,
+.sub-reply-item.is-targeted {
+  background: color-mix(in srgb, var(--viewer-accent) 12%, transparent);
 }
 
 .thread-image figcaption {
@@ -1061,6 +1233,11 @@ body.theme-dark .reply-box :deep(.el-textarea__inner) {
 
 body.theme-dark .reply-box :deep(.el-textarea__inner::placeholder) {
   color: var(--viewer-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floor-card,
+  .sub-reply-item { transition: none; }
 }
 
 body.theme-dark .reply-upload-trigger,
