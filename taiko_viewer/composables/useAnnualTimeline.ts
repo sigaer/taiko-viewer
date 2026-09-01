@@ -20,6 +20,13 @@ export type AnnualMotionEffectScope = {
 
 export type AnnualTimelineOptions = {
   reenter?: AnnualReenterMode;
+  configureTimeline?: (context: {
+    root: HTMLElement;
+    timeline: gsap.core.Timeline;
+    group: (stage: string) => NodeListOf<HTMLElement>;
+    select: (selector: string) => HTMLElement[];
+    fallback: HTMLElement[];
+  }) => void;
 };
 
 const resolveRoot = (value: AnnualRoot) => {
@@ -200,12 +207,22 @@ export const useAnnualTimeline = (
         paused: true,
         onComplete: () => { timelineCompleted = true; }
       });
-      timeline
-        .to(group("title"), { autoAlpha: 1, y: 0, duration: .5, ease: "power2.out" }, .3)
-        .to(group("visual"), { autoAlpha: 1, y: 0, duration: .58, stagger: .05, ease: "back.out(1.2)" }, .72)
-        .to(group("data"), { autoAlpha: 1, y: 0, duration: .58, stagger: .08, ease: "power2.out" }, 1.18)
-        .to(group("copy"), { autoAlpha: 1, y: 0, duration: .58, stagger: .06, ease: "power2.out" }, 1.95)
-        .to(fallback, { autoAlpha: 1, y: 0, duration: .58, stagger: .055, ease: "power2.out" }, .3);
+      if (options.configureTimeline) {
+        options.configureTimeline({
+          root,
+          timeline,
+          group,
+          select: (selector) => [...root.querySelectorAll<HTMLElement>(selector)],
+          fallback
+        });
+      } else {
+        timeline
+          .to(group("title"), { autoAlpha: 1, y: 0, duration: .5, ease: "power2.out" }, .3)
+          .to(group("visual"), { autoAlpha: 1, y: 0, duration: .58, stagger: .05, ease: "back.out(1.2)" }, .72)
+          .to(group("data"), { autoAlpha: 1, y: 0, duration: .58, stagger: .08, ease: "power2.out" }, 1.18)
+          .to(group("copy"), { autoAlpha: 1, y: 0, duration: .58, stagger: .06, ease: "power2.out" }, 1.95)
+          .to(fallback, { autoAlpha: 1, y: 0, duration: .58, stagger: .055, ease: "power2.out" }, .3);
+      }
     }, root);
     syncLifecycle();
   };

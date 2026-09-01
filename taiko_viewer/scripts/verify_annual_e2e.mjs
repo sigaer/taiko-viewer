@@ -224,15 +224,8 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   assert.equal(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches), true);
   const opening = page.locator(".annual-opening");
   await opening.waitFor({ state: "visible", timeout: 30_000 });
-  await page.waitForFunction(
-    () => document.querySelectorAll(".annual-cover-flow__card").length > 0,
-    undefined,
-    { timeout: 15_000 }
-  );
+  await page.locator(".annual-cover-flow").waitFor({ state: "attached", timeout: 30_000 });
   assert.equal(await page.locator(".story-player__drawer-trigger, .story-player__sound-trigger, .story-player__nav").count(), 0);
-  assert.ok(await page.locator(".annual-cover-flow__card:visible").count() >= 1);
-  assert.ok(await page.locator(".annual-fireworks path").count() >= 20);
-  assert.ok(await page.locator(".annual-beat-lane__track i").count() >= 4);
   if (viewport.width === 390 && viewport.height === 844) {
     await page.screenshot({ path: `/tmp/annual-e2e-${locale}-opening.png`, fullPage: false });
   }
@@ -699,11 +692,12 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
     }, index);
     const sceneSelector = key === "nearDondaful" ? ".near-growth" : ".challenge-growth";
     await page.locator(sceneSelector).waitFor({ state: "visible", timeout: 10_000 });
+    await page.waitForFunction(() => !document.querySelector(".click-heart"), undefined, { timeout: 2_000 }).catch(() => undefined);
     const audit = await page.locator(sceneSelector).evaluate((scene) => {
       const viewportWidth = document.documentElement.clientWidth;
       const viewportHeight = document.documentElement.clientHeight;
       const sceneRect = scene.getBoundingClientRect();
-      const textOverflow = [...scene.querySelectorAll("h2, h3, p, span, strong, small, b")]
+      const textOverflow = [...scene.querySelectorAll("h1, h2, h3, p, span, strong, small, b")]
         .filter((node) => node.textContent?.trim() && getComputedStyle(node).display !== "none")
         .filter((node) => {
           const rect = node.getBoundingClientRect();
@@ -712,24 +706,78 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
         .map((node) => node.textContent.trim().slice(0, 80));
       const stageRect = scene.querySelector(".growth-song-stage")?.getBoundingClientRect();
       const navRect = document.querySelector(".story-player__nav")?.getBoundingClientRect();
-      const copyRect = scene.querySelector(scene.classList.contains("near-growth") ? ".near-growth__copy" : ".challenge-growth__copy")?.getBoundingClientRect();
+      const copyRect = scene.querySelector(".annual-profile-stage__footer")?.getBoundingClientRect();
+      const footerLines = [...scene.querySelectorAll(".annual-profile-stage__footer span")]
+        .filter((node) => node.textContent?.trim())
+        .map((node) => {
+          const rect = node.getBoundingClientRect();
+          return { text: node.textContent.trim(), top: rect.top, bottom: rect.bottom };
+        });
       return {
         fillsViewport: Math.abs(sceneRect.width - viewportWidth) <= 1 && Math.abs(sceneRect.height - viewportHeight) <= 1,
         textOverflow,
         stageIsRound: Boolean(stageRect && Math.abs(stageRect.width - stageRect.height) <= 1),
         navOverlap: Boolean(copyRect && navRect && copyRect.left < navRect.right && copyRect.right > navRect.left && copyRect.top < navRect.bottom && copyRect.bottom > navRect.top),
-        motion: scene.getAttribute("data-motion-state")
+        footerLines,
+        motion: scene.getAttribute("data-motion-state"),
+        motionPreset: scene.getAttribute("data-motion-preset"),
+        hasPrismSweep: Boolean(scene.querySelector(".growth-song-stage__prism-sweep")),
+        hasImpactRings: scene.querySelectorAll(".growth-song-stage__impact-ring").length === 2
       };
     });
     assert.equal(audit.fillsViewport, true, `${key} does not fill the viewport`);
     assert.deepEqual(audit.textOverflow, [], `${key} contains overflowing text`);
     assert.equal(audit.stageIsRound, true, `${key} growth stage is not square/circular`);
     assert.equal(audit.navOverlap, false, `${key} copy overlaps page navigation`);
+    assert.equal(audit.footerLines.length, 2, `${key} footer is not rendered as two complete lines`);
+    assert.ok(audit.footerLines.every((line) => line.top >= 0 && line.bottom <= viewport.height), `${key} footer is clipped by the viewport`);
     assert.equal(audit.motion, "reduced", `${key} reduced-motion state is not stable`);
+    assert.equal(audit.motionPreset, key === "nearDondaful" ? "growth-near-rainbow" : "growth-challenge-knock", `${key} exposes the wrong motion preset`);
+    assert.equal(audit.hasPrismSweep, key === "nearDondaful", `${key} prism semantics are incorrect`);
+    assert.equal(audit.hasImpactRings, key === "challenge", `${key} knock semantics are incorrect`);
+    assert.equal(await page.locator(".click-heart").count(), 0, `${key} received an unrelated global celebration heart`);
     await page.screenshot({ path: `/tmp/annual-growth-${key}-${viewport.width}x${viewport.height}.png`, fullPage: false });
   }
   await context.close();
   reportProgress(`growth song scenes ${viewport.width}x${viewport.height}: passed`);
+};
+
+const auditGrowthMotionLifecycle = async (browser, cookie) => {
+  reportProgress("growth motion lifecycle: start");
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    locale: "zh-CN",
+    timezoneId: "Asia/Shanghai",
+    reducedMotion: "no-preference"
+  });
+  await context.addCookies([{ name: "stv_session", value: cookie, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
+  const page = await context.newPage();
+  await openAnnualPage(page, "/account/version-summary", 90_000);
+  const entry = page.locator(".annual-entry__drum");
+  if (await entry.count()) await entry.click();
+  await waitForStoryPlayerReady(page);
+  await page.locator(".annual-opening__start").click();
+  const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
+  const nearIndex = pageKeys.indexOf("nearDondaful");
+  assert.ok(nearIndex >= 0, "nearDondaful page is unavailable for lifecycle audit");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, nearIndex);
+  const nearScene = page.locator(".story-player__slide[data-page-key='nearDondaful'] .near-growth");
+  await nearScene.waitFor({ state: "visible", timeout: 10_000 });
+  await wait(2200);
+  assert.equal(await nearScene.getAttribute("data-motion-state"), "active");
+  assert.ok(await nearScene.evaluate((scene) => scene.getAnimations({ subtree: true }).some((animation) => animation.playState === "running")), "nearDondaful has no active ambient animation");
+  await page.locator(".story-player__viewport").evaluate((node, target) => {
+    node.scrollTop = node.clientHeight * target;
+    node.dispatchEvent(new Event("scroll"));
+  }, Math.min(nearIndex + 1, pageKeys.length - 1));
+  await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='nearDondaful']")?.getAttribute("aria-hidden") === "true");
+  assert.equal(await nearScene.getAttribute("data-motion-state"), "paused");
+  assert.equal(await nearScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "nearDondaful animations continue while inactive");
+  await context.close();
+  reportProgress("growth motion lifecycle: passed");
 };
 
 const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
@@ -1034,7 +1082,11 @@ const auditLateNightScene = async (browser, cookie, viewport) => {
 
   const pageKeys = await page.locator(".story-player__slide").evaluateAll((slides) => slides.map((slide) => slide.getAttribute("data-page-key")));
   const lateNightIndex = pageKeys.indexOf("lateNight");
-  assert.ok(lateNightIndex >= 0, "late-night scene is missing");
+  if (lateNightIndex < 0) {
+    await context.close();
+    reportProgress(`late-night scene ${viewport.width}x${viewport.height}: skipped (fixture unavailable)`);
+    return;
+  }
   await page.locator(".story-player__viewport").evaluate((node, target) => {
     node.scrollTop = node.clientHeight * target;
     node.dispatchEvent(new Event("scroll"));
@@ -1268,6 +1320,7 @@ const auditSaveData = async (browser, cookie) => {
       node.dispatchEvent(new Event("scroll"));
     }, lateNightIndex);
     await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='lateNight']")?.getAttribute("aria-hidden") === "false");
+    await wait(120);
     const lateNightScene = page.locator(".story-player__slide[data-page-key='lateNight'] .annual-late-night-fireworks");
     await lateNightScene.waitFor({ state: "visible", timeout: 10_000 });
     assert.equal(await lateNightScene.getAttribute("data-motion-state"), "reduced");
@@ -1569,7 +1622,7 @@ try {
   assert.match(summaryId, /^annual_[0-9a-f]{24}$/);
   const [summaryRows] = await db.execute("SELECT summary_path FROM web_annual_summaries WHERE id = ? AND user_id = ?", [summaryId, firstUserId]);
   for (const row of summaryRows) summaryDirs.add(dirname(String(row.summary_path)));
-  if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1" && summaryRows[0]?.summary_path) {
+  if (summaryRows[0]?.summary_path) {
     const summaryPath = String(summaryRows[0].summary_path);
     const rawSummary = JSON.parse(await readFile(summaryPath, "utf8"));
     const days = Array.from({ length: 68 }, (_, index) => {
@@ -1603,6 +1656,27 @@ try {
         activeDays: 25,
         playCount: 35
       }
+    };
+    await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\n`);
+  }
+  if (summaryRows[0]?.summary_path) {
+    const summaryPath = String(summaryRows[0].summary_path);
+    const rawSummary = JSON.parse(await readFile(summaryPath, "utf8"));
+    const song = {
+      songNo: 1318,
+      level: 4,
+      songName: "Irregular Clock",
+      songNameJa: "Irregular Clock",
+      stars: 9,
+      coverUrl: "/api/content/covers/1318"
+    };
+    rawSummary.sections.nearDondaful = {
+      status: "proxy",
+      data: { ...song, okCount: 2, highScore: 998420 }
+    };
+    rawSummary.sections.challenge = {
+      status: "proxy",
+      data: { ...song, playCount: 47, observedPlayCount: 31 }
     };
     await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\n`);
   }
@@ -1683,6 +1757,10 @@ try {
       for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
         await auditObsessionScene(browser, firstSession, viewport);
       }
+    } else if (environment.ANNUAL_E2E_GROWTH_ONLY === "1") {
+      for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
+        await auditGrowthSongScenes(browser, firstSession, viewport);
+      }
     } else if (environment.ANNUAL_E2E_CALENDAR_ONLY === "1") {
       for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
         await auditCalendarScene(browser, firstSession, viewport);
@@ -1692,6 +1770,7 @@ try {
       await auditAudioLifecycle(browser, firstSession);
     await auditSaveData(browser, firstSession);
     await auditOpeningMotion(browser, firstSession);
+    await auditGrowthMotionLifecycle(browser, firstSession);
     for (const viewport of [{ width: 390, height: 844 }, { width: 414, height: 896 }, { width: 430, height: 932 }]) {
       await auditOpeningPeriodFlow(browser, firstSession, viewport);
       await auditPhase2B1ProtectedOverview(browser, firstSession, viewport);

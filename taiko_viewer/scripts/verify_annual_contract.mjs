@@ -49,6 +49,7 @@ assert.equal(registry.includes('"profile-stage"'), true, "profile-stage is missi
 assert.equal(registry.includes("bgMood:"), false, "legacy bgMood remains in the annual page registry");
 
 const storyPlayer = await read("components/account/version-summary/StoryPlayer.vue");
+const clickLoveSource = await read("plugins/clicklove.client.js");
 const annualPage = await read("pages/account/version-summary.vue");
 const annualSceneSource = await read("components/account/version-summary/AnnualScene.vue");
 const storySlideShellSource = await read("components/account/version-summary/StorySlideShell.vue");
@@ -95,6 +96,7 @@ assert.equal(annualSceneSource.includes("data-motion-state"), true, "AnnualScene
 assert.equal(annualSceneSource.includes("animation: none !important"), true, "AnnualScene reduced motion does not use a stable CSS state");
 assert.equal(annualSceneSource.includes("animation-duration: 1ms"), false, "AnnualScene still depends on synthetic 1ms animation completion");
 assert.equal(storyPlayer.includes("transitionWatchdog"), true, "period-to-overview navigation has no completion watchdog");
+assert.equal(clickLoveSource.includes('closest(".story-player, .annual-page")'), true, "global click hearts still leak celebration effects into annual story scenes");
 assert.equal(storyPlayer.includes("settleTransitionMotion"), true, "period-to-overview transition has no deterministic settle path");
 assert.equal(storyPlayer.includes(":active=\"documentVisible && activeIndex === index\""), true, "background scenes remain active while the document is hidden");
 assert.equal(storyPlayer.includes("stopCoverClock()"), true, "the annual cover RAF has no shared stop path");
@@ -339,6 +341,7 @@ assert.equal(drumWindowSource.includes('@error="imageFailed = true"'), true, "dr
 assert.equal(drumWindowSource.includes("AnnualArtworkFallback"), true, "drum artwork fallback is not visual");
 const growthSongStageSource = await read("components/account/version-summary/AnnualGrowthSongStage.vue");
 const profileStageFrameSource = await read("components/account/version-summary/AnnualProfileStageFrame.vue");
+const growthMotionSource = await read("utils/annualGrowthMotion.ts");
 const nearDondafulSource = await read("components/account/version-summary/slides/NearDondafulSlide.vue");
 const challengeSource = await read("components/account/version-summary/slides/ChallengeSlide.vue");
 for (const [source, page] of [[nearDondafulSource, "nearDondaful"], [challengeSource, "challenge"]]) {
@@ -353,11 +356,18 @@ for (const slot of ["header", "center", "primary-panel", "secondary-panel", "foo
   assert.equal(profileStageFrameSource.includes(`name="${slot}"`), true, `profile stage frame is missing ${slot} slot`);
 }
 assert.equal(profileStageFrameSource.includes("useAnnualTimeline"), true, "profile stage frame does not use the annual motion lifecycle");
-assert.equal(profileStageFrameSource.includes("growth-near-glow"), true, "near growth motion preset is missing");
-assert.equal(profileStageFrameSource.includes("growth-challenge-pulse"), true, "challenge growth motion preset is missing");
-assert.equal(nearDondafulSource.includes("motion-preset=\"growth-near-glow\""), true, "near page does not select its motion preset");
-assert.equal(challengeSource.includes("motion-preset=\"growth-challenge-pulse\""), true, "challenge page does not select its motion preset");
-assert.equal(nearDondafulSource.includes("<span>下一次落槌，也许就是满屏金光。</span>"), true, "near footer is not split into stable lines");
+assert.equal(profileStageFrameSource.includes("createAnnualGrowthTimeline"), true, "profile stage frame does not use the dedicated growth choreography module");
+assert.equal(growthMotionSource.includes("growth-near-rainbow"), true, "near rainbow motion preset is missing");
+assert.equal(growthMotionSource.includes("growth-challenge-knock"), true, "challenge knock motion preset is missing");
+assert.equal(nearDondafulSource.includes("motion-preset=\"growth-near-rainbow\""), true, "near page does not select its rainbow motion preset");
+assert.equal(challengeSource.includes("motion-preset=\"growth-challenge-knock\""), true, "challenge page does not select its knock motion preset");
+assert.equal(growthSongStageSource.includes("growth-song-stage__prism-sweep"), true, "near stage has no prism sweep");
+assert.equal(growthSongStageSource.includes("growth-song-stage__impact-ring"), true, "challenge stage has no knock impact rings");
+assert.equal(nearDondafulSource.includes("near-prism-dust"), true, "near page has no restrained spectral particles");
+assert.equal(challengeSource.includes("challenge-pressure"), true, "challenge page has no pressure lines");
+assert.equal(/#f2c45f|#ffe08a|#ffd700|gold/i.test(challengeSource), false, "challenge page misuses gold completion semantics");
+assert.equal(/prism|rainbow|spectrum|#ff9d|#c590/i.test(challengeSource), false, "challenge page misuses rainbow completion semantics");
+assert.equal(nearDondafulSource.includes("<span>下一次落槌，也许就会亮成完整彩虹。</span>"), true, "near footer is not split into stable lines");
 assert.equal(challengeSource.includes("<span>而你也没有转身。</span>"), true, "challenge footer is not split into stable lines");
 for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);

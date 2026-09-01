@@ -29,7 +29,7 @@ export type AnnualChapterKey = "debut" | "habits" | "preference" | "growth" | "k
 export type AnnualSceneIntensity = "low" | "medium" | "high";
 export type AnnualSceneType = "hero" | "impact-number" | "song-memory" | "pattern" | "award";
 export type AnnualSceneMood = "rainbow-stage" | "profile-stage" | "stage-blue" | "bright-impact" | "cover-spectrum" | "time-blue" | "midnight" | "award-purple" | "award-stage";
-export type AnnualMotionPreset = "legacy-staged" | "opening-reveal" | "profile-spotlight" | "period-cover-flow" | "overview-impact" | "song-memory" | "award-reveal";
+export type AnnualMotionPreset = "legacy-staged" | "opening-reveal" | "profile-spotlight" | "period-cover-flow" | "overview-impact" | "song-memory" | "growth-near-rainbow" | "growth-challenge-knock" | "award-reveal";
 export type AnnualTransitionKey = "fade" | "slide" | "taiko-ripple" | "cover-turn" | "night-fade" | "gold-burst";
 export type AnnualPageKey =
   | "opening" | "period" | "overview"
@@ -75,8 +75,8 @@ export const ANNUAL_PAGE_REGISTRY: readonly AnnualPageDefinition[] = [
   { key: "lateNight", chapter: "preference", component: LateNightSlide, labelKey: "annualSummary.pages.lateNight", sceneType: "pattern", mainFocus: "night-session", motionPreset: "legacy-staged", mood: "midnight", intensity: "high", transitionIn: "night-fade", transitionOut: "fade", visible: has("lateNight") },
 
   { key: "speedProfile", chapter: "growth", component: SpeedProfileSlide, labelKey: "annualSummary.pages.speedProfile", sceneType: "pattern", mainFocus: "speed-dial", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "fade", transitionOut: "slide", visible: has("speedProfile") },
-  { key: "nearDondaful", chapter: "growth", component: NearDondafulSlide, labelKey: "annualSummary.pages.nearDondaful", sceneType: "song-memory", mainFocus: "near-dondaful-song", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("nearDondaful") },
-  { key: "challenge", chapter: "growth", component: ChallengeSlide, labelKey: "annualSummary.pages.challenge", sceneType: "song-memory", mainFocus: "challenge-song", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("challenge") },
+  { key: "nearDondaful", chapter: "growth", component: NearDondafulSlide, labelKey: "annualSummary.pages.nearDondaful", sceneType: "song-memory", mainFocus: "near-dondaful-song", motionPreset: "growth-near-rainbow", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("nearDondaful") },
+  { key: "challenge", chapter: "growth", component: ChallengeSlide, labelKey: "annualSummary.pages.challenge", sceneType: "song-memory", mainFocus: "challenge-song", motionPreset: "growth-challenge-knock", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("challenge") },
   { key: "pound", chapter: "growth", component: PoundSlide, labelKey: "annualSummary.pages.pound", sceneType: "impact-number", mainFocus: "pound-count", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("pound") },
   { key: "highScore", chapter: "growth", component: HighScoreSlide, labelKey: "annualSummary.pages.highScore", sceneType: "song-memory", mainFocus: "high-score-song", motionPreset: "legacy-staged", mood: "award-purple", intensity: "high", transitionIn: "slide", transitionOut: "gold-burst", visible: has("highScore") },
   { key: "milestones", chapter: "growth", component: MilestonesSlide, labelKey: "annualSummary.pages.milestones", sceneType: "award", mainFocus: "milestone", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "gold-burst", transitionOut: "slide", visible: has("milestones") },
