@@ -59,6 +59,41 @@ test("reply actions focus the shared composer and preserve target context", () =
   assert.match(source, /replyTarget\.label/);
 });
 
+test("thread mutations update local state without route-level refresh", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  const threadLike = source.slice(source.indexOf("const toggleThreadLike"), source.indexOf("const togglePostLike"));
+  const postLike = source.slice(source.indexOf("const togglePostLike"), source.indexOf("const renderReplyBlocks"));
+  assert.match(threadLike, /apiFetch<ForumLikeMutationResult>/);
+  assert.match(threadLike, /detail\.value\.viewerHasLiked = result\.liked/);
+  assert.match(threadLike, /detail\.value\.likeCount = result\.likeCount/);
+  assert.doesNotMatch(threadLike, /await refresh\(\)/);
+  assert.match(postLike, /currentPost\.viewerHasLiked = result\.liked/);
+  assert.match(postLike, /currentPost\.likeCount = result\.likeCount/);
+  assert.doesNotMatch(postLike, /await refresh\(\)/);
+  assert.match(source, /data\.value = result/);
+  assert.match(source, /restoreScrollPosition\(scrollY\)/);
+});
+
+test("thread actions expose lightweight icon, pressed, and focus states", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  assert.match(source, /class="thread-action__icon"/);
+  assert.match(source, /class="reply-action__icon"/);
+  assert.match(source, /:aria-pressed="detail\.viewerHasLiked"/);
+  assert.match(source, /:aria-pressed="post\.viewerHasLiked"/);
+  assert.match(source, /\.thread-action:focus-visible/);
+  assert.match(source, /\.reply-action:active/);
+  assert.match(source, /min-height: 44px/);
+});
+
+test("reply list keeps internal rhythm and a bottom inset above fixed composer", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  assert.match(source, /\.reply-list \{[\s\S]*gap: 18px/);
+  assert.match(source, /\.floor-card__actions \{ margin-top: 12px; padding-bottom: 4px; \}/);
+  assert.match(source, /\.sub-reply-item \{[\s\S]*padding: 16px 0 16px 28px/);
+  assert.match(source, /\.reply-list \{ padding-bottom: 24px; \}/);
+  assert.match(source, /--thread-composer-height: 64px/);
+});
+
 test("thread feed items navigate as accessible full-row targets", () => {
   const source = read("components/forum/ForumThreadCard.vue");
   assert.match(source, /role="link"/);

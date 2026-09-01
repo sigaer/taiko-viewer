@@ -36,21 +36,23 @@ const localizedSongTitle = computed(() => {
   return locale.value === "ja" && props.thread.song.titleJp ? props.thread.song.titleJp : props.thread.song.title;
 });
 
-const isInteractiveTarget = (target: EventTarget | null) =>
-  target instanceof Element &&
-  Boolean(target.closest("a, button, input, textarea, select, [role='button'], [role='link']"));
+const isInteractiveTarget = (target: EventTarget | null, currentTarget: EventTarget | null) => {
+  if (!(target instanceof Element)) return false;
+  const interactiveTarget = target.closest("a, button, input, textarea, select, [role='button'], [role='link']");
+  return Boolean(interactiveTarget && interactiveTarget !== currentTarget);
+};
 
 const openThread = () => {
   void router.push(threadPath.value);
 };
 
 const handleCardClick = (event: MouseEvent) => {
-  if (isInteractiveTarget(event.target)) return;
+  if (isInteractiveTarget(event.target, event.currentTarget)) return;
   openThread();
 };
 
 const handleCardKeydown = (event: KeyboardEvent) => {
-  if (event.key !== "Enter" || isInteractiveTarget(event.target)) return;
+  if (event.key !== "Enter" || isInteractiveTarget(event.target, event.currentTarget)) return;
   event.preventDefault();
   openThread();
 };

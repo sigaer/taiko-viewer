@@ -33,6 +33,11 @@ const activePostLikeId = ref<number | null>(null);
 const revealedBlockedPostIds = ref<number[]>([]);
 const replyInput = ref<{ focus?: () => void } | null>(null);
 
+type ForumLikeMutationResult = {
+  liked: boolean;
+  likeCount: number;
+};
+
 const copy = computed(() =>
   locale.value === "ja"
     ? {
@@ -120,7 +125,7 @@ const getSectionName = (slug: string, fallback = slug) => resolveForumSectionTra
 const getSongDifficultyLabel = (difficultyType: number | null, fallback: string) =>
   difficultyType ? t(`difficulty.${difficultyType}`) : fallback;
 
-const { data, pending, refresh } = await useAsyncData<ForumThreadDetail>(
+const { data, pending } = await useAsyncData<ForumThreadDetail>(
   () => `forum-thread-${route.params.id}`,
   () => apiFetch(`/api/forum/threads/${route.params.id}`),
 );
@@ -240,6 +245,12 @@ const toggleBlockedContent = (postId: number) => {
 const isBlockedContentVisible = (postId: number) =>
   revealedBlockedPostIds.value.includes(postId);
 
+const restoreScrollPosition = async (scrollY: number) => {
+  if (!import.meta.client) return;
+  await nextTick();
+  requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
+};
+
 const submitReply = async () => {
   if (
     (!replyBody.value.trim() && !replyImages.value.length) ||
@@ -262,7 +273,8 @@ const submitReply = async () => {
         imageUrl,
       })),
     ];
-    await apiFetch(`/api/forum/threads/${route.params.id}/replies`, {
+    const scrollY = import.meta.client ? window.scrollY : 0;
+    const result = await apiFetch<ForumThreadDetail>(`/api/forum/threads/${route.params.id}/replies`, {
       method: "POST",
       body: {
         bodyText: replyBody.value,
@@ -270,12 +282,13 @@ const submitReply = async () => {
         parentPostId: replyTarget.value.id || undefined,
       },
     });
+    data.value = result;
     replyBody.value = "";
     replyImages.value = [];
     replyTarget.value = { id: null, label: "" };
     replyExpanded.value = false;
     ElMessage.success(copy.value.replySuccess);
-    await refresh();
+    await restoreScrollPosition(scrollY);
   } catch (error: any) {
     showActionError(error, copy.value.replyFailed, copy.value.loginForReply);
   } finally {
@@ -288,11 +301,14 @@ const toggleThreadLike = async () => {
   likingThread.value = true;
   try {
     const wasLiked = Boolean(detail.value?.viewerHasLiked);
-    await apiFetch(`/api/forum/threads/${route.params.id}/like`, {
+    const result = await apiFetch<ForumLikeMutationResult>(`/api/forum/threads/${route.params.id}/like`, {
       method: "POST",
     });
+    if (detail.value) {
+      detail.value.viewerHasLiked = result.liked;
+      detail.value.likeCount = result.likeCount;
+    }
     ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
-    await refresh();
   } catch (error: any) {
     showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
@@ -311,11 +327,14 @@ const togglePostLike = async (postId: number) => {
         .flatMap((post) => post.replies)
         .find((reply) => reply.id === postId);
     const wasLiked = Boolean(currentPost?.viewerHasLiked);
-    await apiFetch(`/api/forum/posts/${postId}/like`, {
+    const result = await apiFetch<ForumLikeMutationResult>(`/api/forum/posts/${postId}/like`, {
       method: "POST",
     });
+    if (currentPost) {
+      currentPost.viewerHasLiked = result.liked;
+      currentPost.likeCount = result.likeCount;
+    }
     ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
-    await refresh();
   } catch (error: any) {
     showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
@@ -419,10 +438,22 @@ const renderReplyBlocks = (
       </section>
 
       <div class="thread-actions" :aria-label="copy.articleActions">
-        <el-button class="thread-action" :type="detail.viewerHasLiked ? 'warning' : 'default'" :loading="likingThread" @click="toggleThreadLike">
-          {{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}
+        <el-button
+          class="thread-action"
+          :class="{ 'is-liked': detail.viewerHasLiked }"
+          :aria-pressed="detail.viewerHasLiked"
+          :loading="likingThread"
+          @click="toggleThreadLike"
+        >
+          <svg class="thread-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="detail.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
+          <span>{{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}</span>
+          <span class="thread-action__count">{{ detail.likeCount }}</span>
         </el-button>
-        <el-button class="thread-action" type="primary" plain @click="setReplyTarget(null)">{{ copy.replyThread }}</el-button>
+        <el-button class="thread-action" @click="setReplyTarget(null)">
+          <svg class="thread-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H9l-4 3v-13Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
+          <span>{{ copy.replyThread }}</span>
+          <span class="thread-action__count">{{ detail.replyCount }}</span>
+        </el-button>
       </div>
 
       <section class="reply-section" aria-labelledby="replies-title">
@@ -547,17 +578,22 @@ const renderReplyBlocks = (
           </template>
           <div class="floor-card__actions">
             <el-button
+              class="reply-action"
+              :class="{ 'is-liked': post.viewerHasLiked }"
               size="small"
+              :aria-pressed="post.viewerHasLiked"
               :loading="activePostLikeId === post.id"
               @click="togglePostLike(post.id)"
             >
-              {{ post.viewerHasLiked ? copy.liked : copy.like }} {{ post.likeCount }}
+              <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="post.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
+              <span>{{ post.viewerHasLiked ? copy.liked : copy.like }}</span>
+              <span>{{ post.likeCount }}</span>
             </el-button>
             <el-button
+              class="reply-action"
               size="small"
-              text
               @click="setReplyTarget(post.id, copy.floorReply.replace('{username}', post.author.username))"
-              >{{ copy.replyToFloor }}</el-button
+              ><svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H9l-4 3v-13Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg><span>{{ copy.replyToFloor }}</span></el-button
             >
           </div>
 
@@ -611,20 +647,24 @@ const renderReplyBlocks = (
               </template>
               <div class="floor-card__actions">
                 <el-button
+                  class="reply-action"
+                  :class="{ 'is-liked': reply.viewerHasLiked }"
                   size="small"
+                  :aria-pressed="reply.viewerHasLiked"
                   :loading="activePostLikeId === reply.id"
                   @click="togglePostLike(reply.id)"
                 >
-                  {{ reply.viewerHasLiked ? copy.liked : copy.like }}
-                  {{ reply.likeCount }}
+                  <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="reply.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
+                  <span>{{ reply.viewerHasLiked ? copy.liked : copy.like }}</span>
+                  <span>{{ reply.likeCount }}</span>
                 </el-button>
                 <el-button
+                  class="reply-action"
                   size="small"
-                  text
                   @click="
                     setReplyTarget(reply.id, copy.replyToUser.replace('{username}', reply.author.username))
                   "
-                  >{{ copy.reply }}</el-button
+                  ><svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H9l-4 3v-13Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg><span>{{ copy.reply }}</span></el-button
                 >
               </div>
             </div>
@@ -880,14 +920,41 @@ const renderReplyBlocks = (
 
 .reply-list {
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
-.thread-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; padding: 14px 0 24px; }
-.thread-action { border-radius: 999px; }
+.thread-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding: 14px 0 24px; }
+.thread-action,
+.reply-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  gap: 7px;
+  margin-left: 0 !important;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--viewer-text-muted);
+  background: transparent;
+  font-weight: 650;
+  transition: background-color 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+.reply-action { min-height: 38px; padding: 6px 9px; font-size: 12px; }
+.thread-action__icon,
+.reply-action__icon { width: 17px; height: 17px; flex: 0 0 auto; }
+.thread-action__count { min-width: 1ch; }
+.thread-action:hover,
+.reply-action:hover { color: var(--viewer-text); background: color-mix(in srgb, var(--viewer-accent) 10%, transparent); }
+.thread-action:active,
+.reply-action:active { opacity: .78; background: color-mix(in srgb, var(--viewer-accent) 16%, transparent); }
+.thread-action:focus-visible,
+.reply-action:focus-visible { outline: 2px solid color-mix(in srgb, var(--viewer-accent) 58%, transparent); outline-offset: 2px; }
+.thread-action.is-liked,
+.reply-action.is-liked { color: var(--viewer-accent-strong); }
 .reply-section { padding-top: 28px; }
 .reply-section__divider { height: 1px; background: var(--viewer-border); }
-.reply-section h2 { margin: 20px 0 14px; color: var(--viewer-text); font-size: 22px; }
+.reply-section h2 { margin: 20px 0 16px; color: var(--viewer-text); font-size: 22px; }
 
 .floor-card__user {
   display: flex;
@@ -907,6 +974,9 @@ const renderReplyBlocks = (
   line-height: 1.85;
 }
 
+.floor-card__head { padding-top: 4px; }
+.floor-card__actions { margin-top: 12px; padding-bottom: 4px; }
+
 .sub-reply-item__target {
   margin: 12px 0 -4px;
   color: #b35239;
@@ -920,7 +990,7 @@ const renderReplyBlocks = (
 }
 
 .sub-reply-item {
-  padding: 14px 0 0 28px;
+  padding: 16px 0 16px 28px;
   border-top: 1px solid var(--viewer-border);
 }
 
@@ -985,7 +1055,7 @@ body.theme-dark .blocked-content-card {
   }
 
   .forum-thread-page { padding-bottom: calc(var(--thread-nav-offset) + var(--thread-composer-height) + 16px); }
-  .reply-list { padding-bottom: calc(var(--thread-composer-height) + 16px); }
+  .reply-list { padding-bottom: 24px; }
   .reply-box { position: fixed; left: 0; right: 0; bottom: var(--thread-nav-offset); z-index: 25; }
   .reply-box.is-expanded { max-height: min(62vh, 460px); overflow: hidden; }
   .thread-header { padding: 0; }
