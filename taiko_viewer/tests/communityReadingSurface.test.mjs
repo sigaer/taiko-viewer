@@ -38,6 +38,27 @@ test("thread media does not use a colored attachment panel", () => {
   assert.doesNotMatch(mediaStyles, /aspect-ratio/);
 });
 
+test("reply surface uses one boundary and a bottom composer", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  const actionStyles = source.slice(source.indexOf(".thread-actions {"), source.indexOf(".thread-action {"));
+  assert.doesNotMatch(actionStyles, /border-bottom/);
+  assert.match(source, /class="reply-section__divider"/);
+  assert.match(source, /v-if="!replyExpanded"[\s\S]*class="reply-box__open"/);
+  assert.match(source, /--thread-nav-offset: calc\(66px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(source, /bottom: var\(--thread-nav-offset\)/);
+  assert.doesNotMatch(source, /\.reply-box\s*\{[\s\S]*position: sticky/);
+  assert.doesNotMatch(source, /\.reply-list\s*\{[\s\S]*overflow-y/);
+});
+
+test("reply actions focus the shared composer and preserve target context", () => {
+  const source = read("pages/forum/thread/[id].vue");
+  assert.match(source, /const setReplyTarget[\s\S]*replyExpanded\.value = true[\s\S]*replyInput\.value\?\.focus/);
+  assert.match(source, /setReplyTarget\(null\)/);
+  assert.match(source, /setReplyTarget\(post\.id/);
+  assert.match(source, /setReplyTarget\(reply\.id/);
+  assert.match(source, /replyTarget\.label/);
+});
+
 test("forum visible copy does not contain removed prompt headings", () => {
   for (const locale of ["zh", "ja"]) {
     const messages = JSON.parse(read(`locales/${locale}.json`));

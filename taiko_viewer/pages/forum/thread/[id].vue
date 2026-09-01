@@ -31,6 +31,7 @@ const uploadingImages = ref(false);
 const likingThread = ref(false);
 const activePostLikeId = ref<number | null>(null);
 const revealedBlockedPostIds = ref<number[]>([]);
+const replyInput = ref<{ focus?: () => void } | null>(null);
 
 const copy = computed(() =>
   locale.value === "ja"
@@ -137,6 +138,12 @@ const firstContentImageIndex = computed(() =>
 const setReplyTarget = (id: number | null, label = "") => {
   replyTarget.value = { id, label };
   replyExpanded.value = true;
+  nextTick(() => replyInput.value?.focus?.());
+};
+
+const openReplyComposer = () => {
+  replyExpanded.value = true;
+  nextTick(() => replyInput.value?.focus?.());
 };
 
 const getReplyTargetUsername = (
@@ -409,7 +416,7 @@ const renderReplyBlocks = (
         <div class="reply-section__divider" aria-hidden="true"></div>
         <h2 id="replies-title">{{ t("forum.stats.reply") }} {{ detail.replyCount }}</h2>
       <section class="reply-box" :class="{ 'is-expanded': replyExpanded }">
-        <div class="reply-box__head">
+        <div v-if="replyExpanded" class="reply-box__head">
           <div>
             <h3>{{ replyExpanded ? copy.publishReply : copy.replyThread }}</h3>
             <p v-if="replyTarget.label">{{ copy.replyTarget.replace("{label}", replyTarget.label) }}</p>
@@ -421,6 +428,8 @@ const renderReplyBlocks = (
           <el-button v-if="replyExpanded" text @click="replyExpanded = false">{{ t("common.cancel") }}</el-button>
         </div>
         <el-input
+          ref="replyInput"
+          class="reply-box__field"
           v-model="replyBody"
           type="textarea"
           :rows="replyExpanded ? 5 : 1"
@@ -430,6 +439,15 @@ const renderReplyBlocks = (
           :placeholder="copy.replyPlaceholder"
           @focus="replyExpanded = true"
         />
+        <el-button
+          v-if="!replyExpanded"
+          class="reply-box__open"
+          text
+          :aria-label="copy.publishReply"
+          @click="openReplyComposer"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 12-7-3.5 7L17 19 5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </el-button>
         <div v-if="replyExpanded" class="reply-box__upload">
           <label class="reply-upload-trigger">
             <input
@@ -613,6 +631,8 @@ const renderReplyBlocks = (
 
 <style scoped>
 .forum-thread-page {
+  --thread-nav-offset: calc(66px + env(safe-area-inset-bottom));
+  --thread-composer-height: 58px;
   display: grid;
 }
 
@@ -632,19 +652,18 @@ const renderReplyBlocks = (
 }
 
 .reply-box {
-  position: sticky;
-  bottom: 16px;
-  z-index: 8;
   border: 1px solid var(--viewer-border);
   border-radius: 16px;
   background: color-mix(in srgb, var(--viewer-surface) 96%, transparent);
-  box-shadow: 0 12px 28px rgba(77, 55, 39, .14);
+  box-shadow: 0 8px 20px rgba(77, 55, 39, .1);
 }
 
 .reply-box:not(.is-expanded) { padding: 10px 12px; }
-.reply-box:not(.is-expanded) .reply-box__head p { display: none; }
-.reply-box:not(.is-expanded) .reply-box__head { margin: 0; }
+.reply-box:not(.is-expanded) { display: flex; align-items: center; gap: 8px; min-height: var(--thread-composer-height); padding: 7px 10px 7px 12px; }
 .reply-box:not(.is-expanded) :deep(.el-textarea__inner) { min-height: 38px !important; }
+.reply-box:not(.is-expanded) :deep(.el-input__count) { display: none; }
+.reply-box__open { flex: 0 0 40px; width: 40px; height: 40px; margin: 0; color: var(--viewer-accent-strong); }
+.reply-box__open svg { width: 20px; height: 20px; }
 
 .floor-card {
   border-bottom: 1px solid var(--viewer-border);
@@ -845,7 +864,7 @@ const renderReplyBlocks = (
   gap: 16px;
 }
 
-.thread-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; padding: 14px 0 24px; border-bottom: 1px solid var(--viewer-border); }
+.thread-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; padding: 14px 0 24px; }
 .thread-action { border-radius: 999px; }
 .reply-section { padding-top: 28px; }
 .reply-section__divider { height: 1px; background: var(--viewer-border); }
@@ -946,9 +965,10 @@ body.theme-dark .blocked-content-card {
     font-size: 28px;
   }
 
-  .forum-thread-page { padding-bottom: 150px; }
-  .reply-box { bottom: calc(72px + env(safe-area-inset-bottom)); }
-  .reply-box.is-expanded { position: fixed; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); max-height: min(62vh, 460px); overflow-y: auto; }
+  .forum-thread-page { padding-bottom: calc(var(--thread-nav-offset) + var(--thread-composer-height) + 16px); }
+  .reply-list { padding-bottom: calc(var(--thread-composer-height) + 16px); }
+  .reply-box { position: fixed; left: 10px; right: 10px; bottom: var(--thread-nav-offset); z-index: 25; }
+  .reply-box.is-expanded { max-height: min(62vh, 460px); overflow: hidden; }
   .thread-header { padding: 0; }
   .thread-content, .floor-card { padding-left: 4px; padding-right: 4px; }
 }
