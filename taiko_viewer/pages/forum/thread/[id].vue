@@ -296,8 +296,10 @@ const submitReply = async () => {
   }
 };
 
-const toggleThreadLike = async () => {
+const toggleThreadLike = async (event?: MouseEvent) => {
   if (likingThread.value) return;
+  const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+  const scrollY = import.meta.client ? window.scrollY : 0;
   likingThread.value = true;
   try {
     const wasLiked = Boolean(detail.value?.viewerHasLiked);
@@ -313,11 +315,15 @@ const toggleThreadLike = async () => {
     showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
     likingThread.value = false;
+    await restoreScrollPosition(scrollY);
+    trigger?.focus({ preventScroll: true });
   }
 };
 
-const togglePostLike = async (postId: number) => {
+const togglePostLike = async (postId: number, event?: MouseEvent) => {
   if (activePostLikeId.value === postId) return;
+  const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+  const scrollY = import.meta.client ? window.scrollY : 0;
   activePostLikeId.value = postId;
   try {
     const allPosts = detail.value?.posts || [];
@@ -339,6 +345,8 @@ const togglePostLike = async (postId: number) => {
     showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
     activePostLikeId.value = null;
+    await restoreScrollPosition(scrollY);
+    trigger?.focus({ preventScroll: true });
   }
 };
 
@@ -443,7 +451,7 @@ const renderReplyBlocks = (
           :class="{ 'is-liked': detail.viewerHasLiked }"
           :aria-pressed="detail.viewerHasLiked"
           :loading="likingThread"
-          @click="toggleThreadLike"
+          @click="toggleThreadLike($event)"
         >
           <svg class="thread-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="detail.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
           <span>{{ detail.viewerHasLiked ? copy.likedThread : copy.likeThread }}</span>
@@ -583,7 +591,7 @@ const renderReplyBlocks = (
               size="small"
               :aria-pressed="post.viewerHasLiked"
               :loading="activePostLikeId === post.id"
-              @click="togglePostLike(post.id)"
+              @click="togglePostLike(post.id, $event)"
             >
               <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="post.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
               <span>{{ post.viewerHasLiked ? copy.liked : copy.like }}</span>
@@ -652,7 +660,7 @@ const renderReplyBlocks = (
                   size="small"
                   :aria-pressed="reply.viewerHasLiked"
                   :loading="activePostLikeId === reply.id"
-                  @click="togglePostLike(reply.id)"
+                  @click="togglePostLike(reply.id, $event)"
                 >
                   <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="reply.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
                   <span>{{ reply.viewerHasLiked ? copy.liked : copy.like }}</span>

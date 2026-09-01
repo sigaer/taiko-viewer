@@ -66,9 +66,13 @@ test("thread mutations update local state without route-level refresh", () => {
   assert.match(threadLike, /apiFetch<ForumLikeMutationResult>/);
   assert.match(threadLike, /detail\.value\.viewerHasLiked = result\.liked/);
   assert.match(threadLike, /detail\.value\.likeCount = result\.likeCount/);
+  assert.match(threadLike, /restoreScrollPosition\(scrollY\)/);
+  assert.match(threadLike, /trigger\?\.focus\(\{ preventScroll: true \}\)/);
   assert.doesNotMatch(threadLike, /await refresh\(\)/);
   assert.match(postLike, /currentPost\.viewerHasLiked = result\.liked/);
   assert.match(postLike, /currentPost\.likeCount = result\.likeCount/);
+  assert.match(postLike, /restoreScrollPosition\(scrollY\)/);
+  assert.match(postLike, /trigger\?\.focus\(\{ preventScroll: true \}\)/);
   assert.doesNotMatch(postLike, /await refresh\(\)/);
   assert.match(source, /data\.value = result/);
   assert.match(source, /restoreScrollPosition\(scrollY\)/);
