@@ -658,7 +658,6 @@ const renderReplyBlocks = (
   box-shadow: 0 8px 20px rgba(77, 55, 39, .1);
 }
 
-.reply-box:not(.is-expanded) { padding: 10px 12px; }
 .reply-box:not(.is-expanded) { display: flex; align-items: center; gap: 8px; min-height: var(--thread-composer-height); padding: 7px 10px 7px 12px; }
 .reply-box:not(.is-expanded) :deep(.el-textarea__inner) { min-height: 38px !important; }
 .reply-box:not(.is-expanded) :deep(.el-input__count) { display: none; }
@@ -951,7 +950,7 @@ body.theme-dark .blocked-content-card {
   color: #f2dac2;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .thread-header__meta,
   .floor-card__head,
   .thread-song-bind,
