@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumThreadDetail } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
-import { resolveForumSectionTranslation } from "~/utils/forum";
+import { FORUM_IMAGE_MAX_BYTES, resolveForumSectionTranslation } from "~/utils/forum";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -62,6 +62,7 @@ const copy = computed(() =>
         empty: "まだ返信はありません。",
         uploadLimit: "1 件の返信に添付できる画像は最大 4 枚です",
         uploadDone: "返信画像をアップロードしました",
+        uploadTooLarge: "1枚の画像は20MB以内で選択してください",
         uploadFailed: "画像アップロードに失敗しました",
         loginForUpload: "ログイン後に画像をアップロードしてください",
         replySuccess: "返信を投稿しました",
@@ -101,6 +102,7 @@ const copy = computed(() =>
         empty: "还没有回复",
         uploadLimit: "单条回复最多上传 4 张图片",
         uploadDone: "回复图片上传完成",
+        uploadTooLarge: "单张图片不能超过 20MB",
         uploadFailed: "图片上传失败",
         loginForUpload: "请先登录后再上传图片",
         replySuccess: "回复成功",
@@ -182,6 +184,11 @@ const uploadReplyImages = async (event: Event) => {
     if (input) input.value = "";
     return;
   }
+  if (files.some((file) => file.size > FORUM_IMAGE_MAX_BYTES)) {
+    ElMessage.warning(copy.value.uploadTooLarge);
+    if (input) input.value = "";
+    return;
+  }
   uploadingImages.value = true;
   try {
     for (const file of files.slice(
@@ -203,6 +210,12 @@ const uploadReplyImages = async (event: Event) => {
     }
     ElMessage.success(copy.value.uploadDone);
   } catch (error: any) {
+    const statusCode = Number(error?.statusCode || error?.data?.statusCode || 0);
+    const statusMessage = String(error?.data?.statusMessage || error?.message || "");
+    if (statusCode === 413 || statusMessage.includes("20MB") || statusMessage.includes("图片过大")) {
+      ElMessage.warning(copy.value.uploadTooLarge);
+      return;
+    }
     showActionError(error, copy.value.uploadFailed, copy.value.loginForUpload);
   } finally {
     uploadingImages.value = false;
@@ -632,7 +645,10 @@ const renderReplyBlocks = (
 <style scoped>
 .forum-thread-page {
   --thread-nav-offset: calc(66px + env(safe-area-inset-bottom));
-  --thread-composer-height: 58px;
+  --thread-composer-height: 64px;
+  --thread-composer-inline-padding: 15px;
+  --thread-composer-block-padding: 11px;
+  --thread-composer-action-gap: 11px;
   display: grid;
 }
 
@@ -652,16 +668,20 @@ const renderReplyBlocks = (
 }
 
 .reply-box {
-  border: 1px solid var(--viewer-border);
-  border-radius: 16px;
+  padding: var(--thread-composer-block-padding) var(--thread-composer-inline-padding);
+  border: 0;
+  border-top: 1px solid var(--viewer-border);
+  border-radius: 0;
   background: color-mix(in srgb, var(--viewer-surface) 96%, transparent);
-  box-shadow: 0 8px 20px rgba(77, 55, 39, .1);
+  box-shadow: none;
 }
 
-.reply-box:not(.is-expanded) { display: flex; align-items: center; gap: 8px; min-height: var(--thread-composer-height); padding: 7px 10px 7px 12px; }
-.reply-box:not(.is-expanded) :deep(.el-textarea__inner) { min-height: 38px !important; }
+.reply-box:not(.is-expanded) { display: flex; align-items: center; gap: var(--thread-composer-action-gap); min-height: var(--thread-composer-height); }
+.reply-box:not(.is-expanded) :deep(.el-textarea__inner) { min-height: 42px !important; }
 .reply-box:not(.is-expanded) :deep(.el-input__count) { display: none; }
-.reply-box__open { flex: 0 0 40px; width: 40px; height: 40px; margin: 0; color: var(--viewer-accent-strong); }
+.reply-box__field { flex: 1 1 auto; min-width: 0; }
+.reply-box :deep(.el-textarea__inner) { padding: 10px 13px; border-radius: 13px; }
+.reply-box__open { flex: 0 0 42px; width: 42px; height: 42px; margin: 0; color: var(--viewer-accent-strong); }
 .reply-box__open svg { width: 20px; height: 20px; }
 
 .floor-card {
@@ -814,7 +834,7 @@ const renderReplyBlocks = (
 
 .reply-box {
   display: grid;
-  gap: 14px;
+  gap: var(--thread-composer-action-gap);
 }
 
 .reply-box__upload {
@@ -966,7 +986,7 @@ body.theme-dark .blocked-content-card {
 
   .forum-thread-page { padding-bottom: calc(var(--thread-nav-offset) + var(--thread-composer-height) + 16px); }
   .reply-list { padding-bottom: calc(var(--thread-composer-height) + 16px); }
-  .reply-box { position: fixed; left: 10px; right: 10px; bottom: var(--thread-nav-offset); z-index: 25; }
+  .reply-box { position: fixed; left: 0; right: 0; bottom: var(--thread-nav-offset); z-index: 25; }
   .reply-box.is-expanded { max-height: min(62vh, 460px); overflow: hidden; }
   .thread-header { padding: 0; }
   .thread-content, .floor-card { padding-left: 4px; padding-right: 4px; }

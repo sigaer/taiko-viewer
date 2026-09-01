@@ -1,3 +1,6 @@
+export const FORUM_IMAGE_MAX_MB = 20;
+export const FORUM_IMAGE_MAX_BYTES = FORUM_IMAGE_MAX_MB * 1024 * 1024;
+
 export const resolveForumSectionTranslation = (
   translate: (key: string, fallback?: string) => string,
   slug: string,

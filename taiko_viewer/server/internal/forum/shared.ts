@@ -32,10 +32,11 @@ import {
   requireAccountUser
 } from "~/server/utils/account";
 import { ensureForumSchema } from "~/server/utils/forum-db";
+import { FORUM_IMAGE_MAX_BYTES } from "~/utils/forum";
 
 export { ensureForumSchema };
 
-export const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
+export const IMAGE_MAX_BYTES = FORUM_IMAGE_MAX_BYTES;
 export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
 export const DEFAULT_TAGS = ["全良", "段位", "攻略", "金冠", "活动"];
 export const ALLOWED_IMAGE_MIME_TYPES = [

@@ -4,7 +4,7 @@ import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
 import type { SongCatalogItem, SongCatalogPagePayload, SongDetailPayload } from "~/types/content";
-import { resolveForumSectionTranslation } from "~/utils/forum";
+import { FORUM_IMAGE_MAX_BYTES, resolveForumSectionTranslation } from "~/utils/forum";
 
 type UploadedImage = {
   imageUrl: string;
@@ -96,6 +96,7 @@ const copy = computed(() =>
         remove: "削除",
         contentRequired: "本文または画像を 1 つ以上追加してください",
         uploadSuccess: "画像をアップロードしました",
+        uploadTooLarge: "1枚の画像は20MB以内で選択してください",
         uploadFailed: "画像アップロードに失敗しました",
         publishSuccess: "投稿を公開しました",
         publishFailed: "投稿に失敗しました"
@@ -136,6 +137,7 @@ const copy = computed(() =>
         remove: "移除",
         contentRequired: "至少需要一段正文或一张图片",
         uploadSuccess: "图片上传完成",
+        uploadTooLarge: "单张图片不能超过 20MB",
         uploadFailed: "图片上传失败",
         publishSuccess: "帖子已发布",
         publishFailed: "发帖失败"
@@ -230,7 +232,19 @@ const removeImage = (index: number) => {
   imageBlocks.value.splice(index, 1);
 };
 
+const validateImageFile = (file: File) => {
+  if (file.size > FORUM_IMAGE_MAX_BYTES) {
+    ElMessage.warning(copy.value.uploadTooLarge);
+    return false;
+  }
+  return true;
+};
+
 const uploadImage = async (options: any) => {
+  if (options.file && !validateImageFile(options.file)) {
+    options.onError?.(new Error(copy.value.uploadTooLarge));
+    return;
+  }
   uploading.value = true;
   try {
     const body = new FormData();
@@ -246,7 +260,14 @@ const uploadImage = async (options: any) => {
     ElMessage.success(copy.value.uploadSuccess);
     options.onSuccess?.(result, options.file);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.uploadFailed);
+    const statusCode = Number(error?.statusCode || error?.data?.statusCode || 0);
+    const statusMessage = String(error?.data?.statusMessage || error?.message || "");
+    const isOversized = statusCode === 413 || statusMessage.includes("20MB") || statusMessage.includes("图片过大");
+    if (isOversized) {
+      ElMessage.warning(copy.value.uploadTooLarge);
+    } else {
+      ElMessage.error(statusMessage || copy.value.uploadFailed);
+    }
     options.onError?.(error);
   } finally {
     uploading.value = false;
@@ -328,7 +349,7 @@ const submit = async () => {
             <h3>{{ copy.images }}</h3>
             <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
           </div>
-          <el-upload :show-file-list="false" :http-request="uploadImage" accept="image/*">
+          <el-upload :show-file-list="false" :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
             <el-button :loading="uploading">{{ copy.uploadImage }}</el-button>
           </el-upload>
           <div class="image-grid">

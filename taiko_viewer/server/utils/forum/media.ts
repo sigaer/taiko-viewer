@@ -34,7 +34,7 @@ export const uploadForumImage = async (event: H3Event, file: MultiPartData) => {
     throw createError({ statusCode: 400, statusMessage: "未收到论坛图片" });
   }
   if ((file.data as Buffer).byteLength > IMAGE_MAX_BYTES) {
-    throw createError({ statusCode: 400, statusMessage: "论坛图片过大，请控制在 8MB 以内" });
+    throw createError({ statusCode: 400, statusMessage: "论坛图片过大，请控制在 20MB 以内" });
   }
   const mime = String(file.type || "").toLowerCase();
   const detectedFormat = await detectImageFormat(file.data as Buffer);

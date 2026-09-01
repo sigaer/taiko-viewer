@@ -8,6 +8,9 @@ const props = defineProps<{
 }>();
 
 const { t, locale } = useI18n();
+const router = useRouter();
+
+const threadPath = computed(() => `/forum/thread/${props.thread.id}`);
 
 const threadTypeLabelMap: Record<ForumThreadCard["threadType"], string> = {
   discussion: t("forum.types.discussion"),
@@ -32,10 +35,37 @@ const localizedSongTitle = computed(() => {
   if (!props.thread.song) return "";
   return locale.value === "ja" && props.thread.song.titleJp ? props.thread.song.titleJp : props.thread.song.title;
 });
+
+const isInteractiveTarget = (target: EventTarget | null) =>
+  target instanceof Element &&
+  Boolean(target.closest("a, button, input, textarea, select, [role='button'], [role='link']"));
+
+const openThread = () => {
+  void router.push(threadPath.value);
+};
+
+const handleCardClick = (event: MouseEvent) => {
+  if (isInteractiveTarget(event.target)) return;
+  openThread();
+};
+
+const handleCardKeydown = (event: KeyboardEvent) => {
+  if (event.key !== "Enter" || isInteractiveTarget(event.target)) return;
+  event.preventDefault();
+  openThread();
+};
 </script>
 
 <template>
-  <article class="forum-thread-card" :class="{ compact }">
+  <article
+    class="forum-thread-card"
+    :class="{ compact }"
+    role="link"
+    tabindex="0"
+    :aria-label="thread.title"
+    @click="handleCardClick"
+    @keydown="handleCardKeydown"
+  >
     <div class="forum-thread-card__main">
       <div class="forum-thread-card__badges">
         <NuxtLink
@@ -119,6 +149,22 @@ const localizedSongTitle = computed(() => {
     );
   border: 1px solid rgba(218, 163, 104, 0.14);
   box-shadow: 0 18px 28px rgba(173, 132, 86, 0.12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 140ms ease, border-color 140ms ease, opacity 140ms ease;
+}
+
+.forum-thread-card:hover {
+  background: color-mix(in srgb, var(--viewer-surface) 92%, var(--viewer-accent) 8%);
+}
+
+.forum-thread-card:active {
+  background: color-mix(in srgb, var(--viewer-surface) 86%, var(--viewer-accent) 14%);
+}
+
+.forum-thread-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--viewer-accent) 56%, transparent);
+  outline-offset: 3px;
 }
 
 .forum-thread-card.compact {
@@ -129,6 +175,14 @@ const localizedSongTitle = computed(() => {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.forum-thread-card.compact:hover {
+  background: color-mix(in srgb, var(--viewer-surface) 90%, var(--viewer-accent) 10%);
+}
+
+.forum-thread-card.compact:active {
+  background: color-mix(in srgb, var(--viewer-surface) 84%, var(--viewer-accent) 16%);
 }
 
 .forum-thread-card.compact .forum-thread-card__main { gap: 7px; }
@@ -299,6 +353,22 @@ body.theme-dark .forum-thread-card {
 body.theme-dark .forum-thread-card.compact {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.theme-dark .forum-thread-card:hover {
+  background: color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
+}
+
+body.theme-dark .forum-thread-card:active {
+  background: color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
+}
+
+body.theme-dark .forum-thread-card.compact:hover {
+  background: color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
+}
+
+body.theme-dark .forum-thread-card.compact:active {
+  background: color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
 }
 
 body.theme-dark .forum-thread-card__title {

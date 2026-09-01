@@ -59,6 +59,34 @@ test("reply actions focus the shared composer and preserve target context", () =
   assert.match(source, /replyTarget\.label/);
 });
 
+test("thread feed items navigate as accessible full-row targets", () => {
+  const source = read("components/forum/ForumThreadCard.vue");
+  assert.match(source, /role="link"/);
+  assert.match(source, /tabindex="0"/);
+  assert.match(source, /@click="handleCardClick"/);
+  assert.match(source, /@keydown="handleCardKeydown"/);
+  assert.match(source, /target\.closest\("a, button, input/);
+  assert.match(source, /:focus-visible/);
+  assert.match(source, /:active/);
+  assert.match(source, /cursor: pointer/);
+});
+
+test("forum image uploads share the 20MB boundary", () => {
+  const shared = read("utils/forum.ts");
+  const server = read("server/internal/forum/shared.ts");
+  const media = read("server/utils/forum/media.ts");
+  const newThread = read("pages/forum/new.vue");
+  const thread = read("pages/forum/thread/[id].vue");
+  assert.match(shared, /FORUM_IMAGE_MAX_MB = 20/);
+  assert.match(shared, /FORUM_IMAGE_MAX_BYTES = FORUM_IMAGE_MAX_MB \* 1024 \* 1024/);
+  assert.match(server, /IMAGE_MAX_BYTES = FORUM_IMAGE_MAX_BYTES/);
+  assert.match(media, /论坛图片过大，请控制在 20MB 以内/);
+  assert.match(newThread, /before-upload="validateImageFile"/);
+  assert.match(newThread, /单张图片不能超过 20MB/);
+  assert.match(thread, /FORUM_IMAGE_MAX_BYTES/);
+  assert.match(thread, /1枚の画像は20MB以内で選択してください/);
+});
+
 test("forum visible copy does not contain removed prompt headings", () => {
   for (const locale of ["zh", "ja"]) {
     const messages = JSON.parse(read(`locales/${locale}.json`));
