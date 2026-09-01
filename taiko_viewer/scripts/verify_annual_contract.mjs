@@ -357,6 +357,15 @@ for (const slot of ["header", "center", "primary-panel", "secondary-panel", "foo
 }
 assert.equal(profileStageFrameSource.includes("useAnnualTimeline"), true, "profile stage frame does not use the annual motion lifecycle");
 assert.equal(profileStageFrameSource.includes("createAnnualGrowthTimeline"), true, "profile stage frame does not use the dedicated growth choreography module");
+for (const anchorToken of ["--stage-center-x", "--stage-top", "--stage-size", "--main-panel-top", "--secondary-panel-top", "--footer-copy-bottom"]) {
+  assert.equal(profileStageFrameSource.includes(anchorToken), true, `profile stage frame is missing shared anchor token: ${anchorToken}`);
+}
+assert.equal(profileStageFrameSource.includes("annual-profile-stage__stage-slot"), true, "growth stage has no stable positioning wrapper");
+assert.equal(profileStageFrameSource.includes("annual-profile-stage__stage-motion"), true, "growth stage has no isolated motion wrapper");
+assert.equal(growthMotionSource.includes('select(".annual-profile-stage__stage-motion")'), true, "growth motion still targets the layout positioning wrapper");
+assert.equal(profileStageFrameSource.includes("annual-profile-stage__alignment-debug"), true, "profile stage has no optional alignment overlay");
+assert.equal(growthSongStageSource.includes("growth-song-stage__orbit"), true, "growth orbit is not anchored inside the song disc");
+assert.equal(profileStageFrameSource.includes("annual-profile-stage__orbit"), false, "growth orbit remains detached from the song disc");
 assert.equal(growthMotionSource.includes("growth-near-rainbow"), true, "near rainbow motion preset is missing");
 assert.equal(growthMotionSource.includes("growth-challenge-knock"), true, "challenge knock motion preset is missing");
 assert.equal(nearDondafulSource.includes("motion-preset=\"growth-near-rainbow\""), true, "near page does not select its rainbow motion preset");

@@ -705,6 +705,11 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
         })
         .map((node) => node.textContent.trim().slice(0, 80));
       const stageRect = scene.querySelector(".growth-song-stage")?.getBoundingClientRect();
+      const rimRect = scene.querySelector(".growth-song-stage__rim")?.getBoundingClientRect();
+      const coverRect = scene.querySelector(".growth-song-stage__membrane")?.getBoundingClientRect();
+      const orbitRect = scene.querySelector(".growth-song-stage__orbit")?.getBoundingClientRect();
+      const primaryRect = scene.querySelector(".annual-profile-stage__primary-slot")?.getBoundingClientRect();
+      const secondaryRect = scene.querySelector(".annual-profile-stage__secondary-slot")?.getBoundingClientRect();
       const navRect = document.querySelector(".story-player__nav")?.getBoundingClientRect();
       const copyRect = scene.querySelector(".annual-profile-stage__footer")?.getBoundingClientRect();
       const footerLines = [...scene.querySelectorAll(".annual-profile-stage__footer span")]
@@ -713,10 +718,24 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
           const rect = node.getBoundingClientRect();
           return { text: node.textContent.trim(), top: rect.top, bottom: rect.bottom };
         });
+      const center = (rect) => rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : null;
+      const stageCenter = center(stageRect);
+      const centerDelta = (rect) => {
+        const target = center(rect);
+        return stageCenter && target ? { x: Math.abs(target.x - stageCenter.x), y: Math.abs(target.y - stageCenter.y) } : null;
+      };
       return {
         fillsViewport: Math.abs(sceneRect.width - viewportWidth) <= 1 && Math.abs(sceneRect.height - viewportHeight) <= 1,
         textOverflow,
         stageIsRound: Boolean(stageRect && Math.abs(stageRect.width - stageRect.height) <= 1),
+        centerDeltas: {
+          rim: centerDelta(rimRect),
+          cover: centerDelta(coverRect),
+          orbit: centerDelta(orbitRect)
+        },
+        stagePanelGap: stageRect && primaryRect ? primaryRect.top - stageRect.bottom : -1,
+        panelGap: primaryRect && secondaryRect ? secondaryRect.top - primaryRect.bottom : -1,
+        footerNavGap: copyRect && navRect ? navRect.top - copyRect.bottom : -1,
         navOverlap: Boolean(copyRect && navRect && copyRect.left < navRect.right && copyRect.right > navRect.left && copyRect.top < navRect.bottom && copyRect.bottom > navRect.top),
         footerLines,
         motion: scene.getAttribute("data-motion-state"),
@@ -728,6 +747,12 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
     assert.equal(audit.fillsViewport, true, `${key} does not fill the viewport`);
     assert.deepEqual(audit.textOverflow, [], `${key} contains overflowing text`);
     assert.equal(audit.stageIsRound, true, `${key} growth stage is not square/circular`);
+    for (const [part, delta] of Object.entries(audit.centerDeltas)) {
+      assert.ok(delta && delta.x <= 1 && delta.y <= 1, `${key} ${part} is not concentric with the song stage`);
+    }
+    assert.ok(audit.stagePanelGap >= 18, `${key} main panel is too close to the song stage: ${audit.stagePanelGap}px`);
+    assert.ok(audit.panelGap >= 10, `${key} secondary panel is too close to the main panel: ${audit.panelGap}px`);
+    assert.ok(audit.footerNavGap >= 8, `${key} footer does not clear the navigation boundary: ${audit.footerNavGap}px`);
     assert.equal(audit.navOverlap, false, `${key} copy overlaps page navigation`);
     assert.equal(audit.footerLines.length, 2, `${key} footer is not rendered as two complete lines`);
     assert.ok(audit.footerLines.every((line) => line.top >= 0 && line.bottom <= viewport.height), `${key} footer is clipped by the viewport`);
@@ -766,6 +791,35 @@ const auditGrowthMotionLifecycle = async (browser, cookie) => {
   }, nearIndex);
   const nearScene = page.locator(".story-player__slide[data-page-key='nearDondaful'] .near-growth");
   await nearScene.waitFor({ state: "visible", timeout: 10_000 });
+  const inspectAnchors = () => nearScene.evaluate((scene) => {
+    const rect = (selector) => scene.querySelector(selector)?.getBoundingClientRect();
+    const stage = rect(".growth-song-stage");
+    const rim = rect(".growth-song-stage__rim");
+    const cover = rect(".growth-song-stage__membrane");
+    const primary = rect(".annual-profile-stage__primary-slot");
+    const secondary = rect(".annual-profile-stage__secondary-slot");
+    const centerDelta = (target) => stage && target ? {
+      x: Math.abs(target.left + target.width / 2 - (stage.left + stage.width / 2)),
+      y: Math.abs(target.top + target.height / 2 - (stage.top + stage.height / 2))
+    } : null;
+    return {
+      rim: centerDelta(rim),
+      cover: centerDelta(cover),
+      stagePanelGap: stage && primary ? primary.top - stage.bottom : -1,
+      panelGap: primary && secondary ? secondary.top - primary.bottom : -1
+    };
+  });
+  const assertStableAnchors = (audit, phase) => {
+    assert.ok(audit.rim && audit.rim.x <= 1 && audit.rim.y <= 1, `nearDondaful rim drifts during ${phase}`);
+    assert.ok(audit.cover && audit.cover.x <= 1 && audit.cover.y <= 1, `nearDondaful cover drifts during ${phase}`);
+    assert.ok(audit.stagePanelGap >= 18, `nearDondaful stage/panel gap collapses during ${phase}`);
+    assert.ok(audit.panelGap >= 10, `nearDondaful panel gap collapses during ${phase}`);
+  };
+  assertStableAnchors(await inspectAnchors(), "entrance start");
+  await wait(620);
+  assertStableAnchors(await inspectAnchors(), "entrance middle");
+  await wait(780);
+  assertStableAnchors(await inspectAnchors(), "entrance settle");
   await wait(2200);
   assert.equal(await nearScene.getAttribute("data-motion-state"), "active");
   assert.ok(await nearScene.evaluate((scene) => scene.getAnimations({ subtree: true }).some((animation) => animation.playState === "running")), "nearDondaful has no active ambient animation");
@@ -1301,6 +1355,19 @@ const auditSaveData = async (browser, cookie) => {
   assert.equal(await favoriteScene.getAttribute("data-motion-state"), "reduced");
   assert.equal(await favoriteScene.locator(".particle-layer i").count(), 0, "save-data favorite scene still rendered particles");
   assert.equal(await favoriteScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, "save-data favorite scene still runs animations");
+  for (const key of ["nearDondaful", "challenge"]) {
+    const index = pageKeys.indexOf(key);
+    assert.ok(index >= 0, `save-data story is missing ${key}`);
+    await page.locator(".story-player__viewport").evaluate((node, target) => {
+      node.scrollTop = node.clientHeight * target;
+      node.dispatchEvent(new Event("scroll"));
+    }, index);
+    await page.waitForFunction((pageKey) => document.querySelector(`.story-player__slide[data-page-key='${pageKey}']`)?.getAttribute("aria-hidden") === "false", key);
+    const growthScene = page.locator(`.story-player__slide[data-page-key='${key}'] ${key === "nearDondaful" ? ".near-growth" : ".challenge-growth"}`);
+    await growthScene.waitFor({ state: "visible", timeout: 10_000 });
+    assert.equal(await growthScene.getAttribute("data-motion-state"), "reduced", `save-data ${key} did not enter the stable state`);
+    assert.equal(await growthScene.evaluate((scene) => scene.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length), 0, `save-data ${key} still runs animations`);
+  }
   const calendarIndex = pageKeys.indexOf("calendar");
   if (calendarIndex >= 0) {
     await page.locator(".story-player__viewport").evaluate((node, target) => {

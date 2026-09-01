@@ -40,9 +40,10 @@ const showObservedCount = computed(() => safeNumber(props.summary.challenge?.obs
   background: linear-gradient(180deg, rgba(172, 218, 250, .48), rgba(26, 95, 156, .25) 72%, transparent);
 }
 
-.challenge-growth :deep(.annual-profile-stage__orbit i) { border-color: rgba(116, 205, 247, .22); }
-.challenge-growth :deep(.annual-profile-stage__orbit i:nth-child(2)) { border-style: solid; opacity: .48; }
-.challenge-growth :deep(.annual-profile-stage__orbit i:nth-child(3)) { border-color: rgba(183, 229, 249, .12); }
+.challenge-growth { --secondary-panel-height: 62px; }
+.challenge-growth :deep(.growth-song-stage__orbit i) { border-color: rgba(116, 205, 247, .22); }
+.challenge-growth :deep(.growth-song-stage__orbit i:nth-child(2)) { border-style: solid; opacity: .48; }
+.challenge-growth :deep(.growth-song-stage__orbit i:nth-child(3)) { border-color: rgba(183, 229, 249, .12); }
 
 .challenge-growth :deep(.annual-profile-stage__primary) {
   background:
@@ -68,7 +69,7 @@ const showObservedCount = computed(() => safeNumber(props.summary.challenge?.obs
   top: 16%;
   bottom: 13%;
   width: 1px;
-  background: linear-gradient(transparent, rgba(155, 222, 250, .34), transparent);
+  background: linear-gradient(transparent 0 8%, rgba(155, 222, 250, .12) 24%, rgba(189, 232, 250, .44) 55%, rgba(79, 155, 211, .18) 76%, transparent);
   transform: rotate(9deg);
   animation: challenge-pressure 7s ease-in-out 1.7s infinite;
 }

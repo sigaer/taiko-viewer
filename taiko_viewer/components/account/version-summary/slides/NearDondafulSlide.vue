@@ -28,7 +28,7 @@ const scoreText = computed(() => formatter.format(safeNumber(props.summary.nearD
     linear-gradient(165deg, #07162d 0%, #0c3b6b 54%, #07152b 100%);
 }
 
-.near-growth :deep(.annual-profile-stage__orbit i:nth-child(3)) {
+.near-growth :deep(.growth-song-stage__orbit i:nth-child(3)) {
   border-color: rgba(124, 224, 255, .3);
   box-shadow: 0 0 18px rgba(130, 176, 255, .08);
 }

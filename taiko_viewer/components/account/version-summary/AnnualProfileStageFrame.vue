@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRef } from "vue";
+import { computed, ref, toRef } from "vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 import { createAnnualGrowthTimeline, type GrowthMotionPreset } from "~/utils/annualGrowthMotion";
 import AnnualScene from "./AnnualScene.vue";
@@ -11,9 +11,15 @@ const props = withDefaults(defineProps<{
   tone?: "near" | "challenge";
   motionPreset?: GrowthMotionPreset;
   ariaLabel?: string;
-}>(), { saveData: false, tone: "near", motionPreset: "growth-near-rainbow", ariaLabel: "" });
+  debugAlignment?: boolean;
+}>(), { saveData: false, tone: "near", motionPreset: "growth-near-rainbow", ariaLabel: "", debugAlignment: false });
 
 const rootRef = ref<HTMLElement | null>(null);
+const debugAlignmentEnabled = computed(() => props.debugAlignment || (
+  import.meta.dev
+  && process.client
+  && new URLSearchParams(window.location.search).has("annualAlignmentDebug")
+));
 useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"), {
   reenter: "restart",
   configureTimeline: createAnnualGrowthTimeline(() => props.motionPreset)
@@ -24,7 +30,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
   <AnnualScene
     ref="rootRef"
     class="annual-profile-stage"
-    :class="[`annual-profile-stage--${tone}`, `annual-profile-stage--${motionPreset}`, { 'is-save-data': saveData }]"
+    :class="[`annual-profile-stage--${tone}`, `annual-profile-stage--${motionPreset}`, { 'is-save-data': saveData, 'is-debug-alignment': debugAlignmentEnabled }]"
     :data-motion-preset="motionPreset"
     mood="profile-stage"
     intensity="medium"
@@ -41,20 +47,25 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
     </template>
     <template #atmosphere>
       <div class="annual-profile-stage__spotlight" aria-hidden="true"><i /><i /></div>
-      <div class="annual-profile-stage__orbit" aria-hidden="true"><i /><i /><i /></div>
       <div v-if="!saveData" class="annual-profile-stage__beam-lines" aria-hidden="true"><i /><i /><i /></div>
       <slot name="atmosphere" />
     </template>
     <template #visual>
-      <div class="annual-profile-stage__center" data-annual-stage="visual">
-        <div class="annual-profile-stage__center-shadow" aria-hidden="true" />
-        <slot name="center" />
+      <div class="annual-profile-stage__stage-slot">
+        <div class="annual-profile-stage__stage-motion" data-annual-stage="visual">
+          <div class="annual-profile-stage__center-shadow" aria-hidden="true" />
+          <slot name="center" />
+        </div>
       </div>
     </template>
     <template #data>
       <div class="annual-profile-stage__panels">
-        <div class="annual-profile-stage__primary" data-annual-stage="data"><slot name="primary-panel" /></div>
-        <div class="annual-profile-stage__secondary" data-annual-stage="data"><slot name="secondary-panel" /></div>
+        <div class="annual-profile-stage__primary-slot">
+          <div class="annual-profile-stage__primary" data-annual-stage="data"><slot name="primary-panel" /></div>
+        </div>
+        <div class="annual-profile-stage__secondary-slot">
+          <div class="annual-profile-stage__secondary" data-annual-stage="data"><slot name="secondary-panel" /></div>
+        </div>
       </div>
     </template>
     <template #copy>
@@ -62,6 +73,14 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
       <footer class="annual-profile-stage__footer" data-annual-stage="copy"><slot name="footer" /></footer>
     </template>
     <template #transition><slot name="transition" /></template>
+    <div v-if="debugAlignmentEnabled" class="annual-profile-stage__alignment-debug" aria-hidden="true">
+      <i class="is-page-axis" />
+      <i class="is-stage-bounds" />
+      <i class="is-stage-center" />
+      <i class="is-primary-center" />
+      <i class="is-secondary-center" />
+      <i class="is-footer-boundary" />
+    </div>
   </AnnualScene>
 </template>
 
@@ -69,6 +88,17 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage {
   --stage-ink: #061226;
   --stage-cyan: #66d8ff;
+  --stage-center-x: 50%;
+  --stage-top: clamp(180px, 24.8dvh, 240px);
+  --stage-size: clamp(230px, 61vw, 300px);
+  --panel-gap: clamp(24px, 2.9dvh, 30px);
+  --main-panel-height: clamp(68px, 8.2dvh, 78px);
+  --secondary-gap: clamp(12px, 1.6dvh, 18px);
+  --secondary-panel-height: 48px;
+  --nav-reserved-height: 84px;
+  --footer-copy-bottom: calc(env(safe-area-inset-bottom) + var(--nav-reserved-height));
+  --main-panel-top: calc(var(--stage-top) + var(--stage-size) + var(--panel-gap));
+  --secondary-panel-top: calc(var(--main-panel-top) + var(--main-panel-height) + var(--secondary-gap));
   position: relative;
   width: 100%;
   height: 100%;
@@ -150,25 +180,6 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage__spotlight i:first-child { left: 37%; transform: rotate(-8deg); }
 .annual-profile-stage__spotlight i:last-child { right: 37%; transform: rotate(8deg); }
 
-.annual-profile-stage__orbit {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: min(72vw, 390px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-}
-
-.annual-profile-stage__orbit i {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(91, 211, 242, .17);
-  border-radius: 50%;
-}
-
-.annual-profile-stage__orbit i:nth-child(2) { inset: 7%; border-style: dashed; }
-.annual-profile-stage__orbit i:nth-child(3) { inset: 14%; border-color: rgba(102, 216, 255, .16); }
-
 .annual-profile-stage__beam-lines i {
   position: absolute;
   top: 8%;
@@ -182,16 +193,23 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage__beam-lines i:nth-child(2) { right: 20%; transform: rotate(-10deg); }
 .annual-profile-stage__beam-lines i:nth-child(3) { left: 50%; opacity: .28; }
 
-.annual-profile-stage__center {
+.annual-profile-stage__stage-slot {
   position: absolute;
   z-index: 2;
-  left: 50%;
-  top: 41%;
-  width: min(64vw, 340px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  left: var(--stage-center-x);
+  top: var(--stage-top);
+  width: var(--stage-size);
+  height: var(--stage-size);
+  transform: translateX(-50%);
+}
+
+.annual-profile-stage__stage-motion {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: grid;
   place-items: center;
+  transform-origin: 50% 50%;
 }
 
 .annual-profile-stage__center-shadow {
@@ -205,19 +223,40 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
   filter: blur(13px);
 }
 
-.annual-profile-stage__center :deep(.growth-song-stage) { --stage-size: min(43vh, 64vw, 315px); }
+.annual-profile-stage__stage-motion :deep(.growth-song-stage) { --stage-size: 100%; }
 .annual-profile-stage__panels { position: absolute; inset: 0; }
 
-.annual-profile-stage__primary {
+.annual-profile-stage__primary-slot,
+.annual-profile-stage__secondary-slot {
   position: absolute;
-  z-index: 2;
-  top: 67.2%;
-  left: 50%;
-  width: min(88%, 410px);
-  min-height: 50px;
-  padding: 8px 38px 9px;
+  left: var(--stage-center-x);
   transform: translateX(-50%);
+}
+
+.annual-profile-stage__primary-slot {
+  top: var(--main-panel-top);
+  width: min(88%, 410px);
+  height: var(--main-panel-height);
+}
+
+.annual-profile-stage__secondary-slot {
+  top: var(--secondary-panel-top);
+  width: fit-content;
+  min-width: 142px;
+  max-width: 82%;
+  height: var(--secondary-panel-height);
+}
+
+.annual-profile-stage__primary {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding: 8px 38px 9px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   color: #fff;
   text-align: center;
   background:
@@ -243,15 +282,16 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage__primary :deep(strong) { display: block; margin-top: 3px; overflow-wrap: anywhere; font-size: clamp(.92rem, 4vw, 1.18rem); line-height: 1.16; }
 
 .annual-profile-stage__secondary {
-  position: absolute;
+  position: relative;
   z-index: 3;
-  top: 76%;
-  left: 50%;
+  width: 100%;
+  height: 100%;
   min-width: 142px;
-  max-width: 82%;
   padding: 6px 18px 7px;
-  transform: translateX(-50%);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-top: 1px solid rgba(113, 218, 255, .58);
   border-bottom: 1px solid rgba(113, 218, 255, .58);
   color: #dff7ff;
@@ -296,7 +336,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
   z-index: 4;
   left: 9%;
   right: 9%;
-  bottom: max(10%, calc(env(safe-area-inset-bottom) + 76px));
+  bottom: var(--footer-copy-bottom);
   margin: 0;
   color: rgba(218, 241, 252, .82);
   font: 600 12px/1.55 var(--viewer-font-family);
@@ -307,10 +347,6 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage__footer :deep(span) { display: block; }
 .annual-profile-stage__footer :deep(strong) { color: #fff; font-weight: 800; }
 
-.annual-profile-stage--growth-near-rainbow.is-active:not(.is-reduced):not(.is-save-data) .annual-profile-stage__orbit i:nth-child(2) {
-  animation: profile-stage-ring-breathe 7s ease-in-out 1.8s infinite;
-}
-
 .annual-profile-stage--growth-challenge-knock.is-active:not(.is-reduced):not(.is-save-data) .annual-profile-stage__stage-grid {
   animation: profile-stage-pressure-breathe 7s ease-in-out 1.7s infinite;
 }
@@ -319,54 +355,75 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .annual-profile-stage.is-reduced *,
 .annual-profile-stage.is-save-data * { animation: none !important; transition: none !important; }
 
-@keyframes profile-stage-ring-breathe {
-  0%, 82%, 100% { opacity: .42; }
-  88% { opacity: .76; }
-}
-
 @keyframes profile-stage-pressure-breathe {
   0%, 72%, 100% { opacity: .72; }
   80% { opacity: 1; }
 }
 
 @media (max-width: 720px) {
+  .annual-profile-stage {
+    --stage-top: clamp(178px, 24.8dvh, 232px);
+    --stage-size: clamp(218px, 61vw, 272px);
+  }
   .annual-profile-stage__header { top: max(6.2%, calc(env(safe-area-inset-top) + 46px)); left: 6%; right: 6%; }
   .annual-profile-stage__header :deep(h1) { font-size: clamp(1.16rem, 5.5vw, 1.55rem); }
   .annual-profile-stage__header :deep(p) { margin-top: 5px; font-size: 11px; line-height: 1.35; }
-  .annual-profile-stage__center { top: 38.4%; width: min(61vw, 260px); }
-  .annual-profile-stage__center :deep(.growth-song-stage) { --stage-size: min(36vh, 61vw, 250px); }
-  .annual-profile-stage__orbit { top: 40.5%; width: min(73vw, 310px); }
-  .annual-profile-stage__primary { top: 64.8%; width: 92%; padding: 7px 30px 8px; }
-  .annual-profile-stage__secondary { top: 73.6%; max-width: 84%; padding: 6px 14px; }
-  .annual-profile-stage__footer { left: 7%; right: max(7%, 92px); bottom: max(9.4%, calc(env(safe-area-inset-bottom) + 72px)); font-size: 11px; line-height: 1.5; }
-}
-
-@media (max-width: 720px) and (min-height: 880px) {
-  .annual-profile-stage__center { top: 39.5%; }
-  .annual-profile-stage__primary { top: 65.8%; }
-  .annual-profile-stage__secondary { top: 74.2%; }
-  .annual-profile-stage__footer { bottom: max(9.2%, calc(env(safe-area-inset-bottom) + 74px)); }
+  .annual-profile-stage__primary-slot { width: 92%; }
+  .annual-profile-stage__primary { padding: 7px 30px 8px; }
+  .annual-profile-stage__secondary-slot { max-width: 84%; }
+  .annual-profile-stage__secondary { padding: 6px 14px; }
+  .annual-profile-stage__footer { left: 7%; right: max(7%, 92px); font-size: 11px; line-height: 1.5; }
 }
 
 @media (max-height: 700px) and (orientation: portrait) {
+  .annual-profile-stage {
+    --stage-top: 118px;
+    --stage-size: clamp(170px, 55vw, 220px);
+    --panel-gap: 14px;
+    --main-panel-height: 58px;
+    --secondary-gap: 8px;
+    --secondary-panel-height: 50px;
+    --nav-reserved-height: 62px;
+  }
   .annual-profile-stage__header { top: max(5.5%, calc(env(safe-area-inset-top) + 42px)); }
   .annual-profile-stage__header :deep(p) { display: none; }
-  .annual-profile-stage__center { top: 35.5%; width: min(55vw, 230px); }
-  .annual-profile-stage__center :deep(.growth-song-stage) { --stage-size: min(34vh, 55vw, 220px); }
-  .annual-profile-stage__primary { top: 60.5%; }
-  .annual-profile-stage__secondary { top: 70.5%; }
-  .annual-profile-stage__footer { bottom: max(9%, calc(env(safe-area-inset-bottom) + 62px)); line-height: 1.42; }
+  .annual-profile-stage__footer { line-height: 1.42; }
 }
 
 @media (orientation: landscape) and (max-height: 460px) {
+  .annual-profile-stage {
+    --stage-center-x: 27%;
+    --stage-top: calc(50% - var(--stage-size) / 2);
+    --stage-size: min(64vh, 275px);
+    --main-panel-top: 42%;
+    --secondary-panel-top: 65%;
+    --main-panel-height: 66px;
+    --secondary-panel-height: 50px;
+    --footer-copy-bottom: 4%;
+  }
   .annual-profile-stage__header { top: 12%; left: 48%; right: 5%; text-align: left; }
-  .annual-profile-stage__center { top: 49%; left: 27%; width: min(64vh, 285px); }
-  .annual-profile-stage__center :deep(.growth-song-stage) { --stage-size: min(64vh, 275px); }
-  .annual-profile-stage__primary { top: 50%; left: 70%; width: 45%; }
-  .annual-profile-stage__secondary { top: 68%; left: 70%; }
-  .annual-profile-stage__footer { left: 49%; right: 8%; bottom: 7%; text-align: left; }
+  .annual-profile-stage__primary-slot { left: 70%; width: 45%; }
+  .annual-profile-stage__secondary-slot { left: 70%; }
+  .annual-profile-stage__footer { left: 49%; right: 8%; text-align: left; }
   .annual-profile-stage__spotlight { right: 44%; clip-path: polygon(40% 0, 60% 0, 94% 100%, 6% 100%); }
 }
+
+.annual-profile-stage__alignment-debug {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  pointer-events: none;
+}
+
+.annual-profile-stage__alignment-debug i { position: absolute; display: block; }
+.annual-profile-stage__alignment-debug .is-page-axis { top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(255, 70, 130, .78); }
+.annual-profile-stage__alignment-debug .is-stage-bounds { top: var(--stage-top); left: var(--stage-center-x); width: var(--stage-size); height: var(--stage-size); border: 1px solid rgba(93, 255, 215, .92); border-radius: 50%; transform: translateX(-50%); }
+.annual-profile-stage__alignment-debug .is-stage-center { top: calc(var(--stage-top) + var(--stage-size) / 2); left: var(--stage-center-x); width: 9px; height: 9px; border: 1px solid #fff; border-radius: 50%; background: #ff4682; transform: translate(-50%, -50%); }
+.annual-profile-stage__alignment-debug .is-primary-center,
+.annual-profile-stage__alignment-debug .is-secondary-center { left: 5%; right: 5%; height: 1px; background: rgba(255, 227, 94, .9); }
+.annual-profile-stage__alignment-debug .is-primary-center { top: calc(var(--main-panel-top) + var(--main-panel-height) / 2); }
+.annual-profile-stage__alignment-debug .is-secondary-center { top: calc(var(--secondary-panel-top) + var(--secondary-panel-height) / 2); background: rgba(119, 207, 255, .95); }
+.annual-profile-stage__alignment-debug .is-footer-boundary { left: 0; right: 0; bottom: var(--footer-copy-bottom); height: 1px; background: rgba(255, 120, 82, .95); }
 
 @media (prefers-reduced-motion: reduce) {
   .annual-profile-stage * { animation: none !important; transition: none !important; }

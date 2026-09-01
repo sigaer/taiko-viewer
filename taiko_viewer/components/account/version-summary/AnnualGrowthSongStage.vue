@@ -27,10 +27,11 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
 </script>
 
 <template>
-  <div class="growth-song-stage" :class="[`growth-song-stage--${tone}`, `growth-song-stage--${size}`, { 'is-active': active, 'is-reduced': reducedMotion, 'is-save-data': saveData }]" data-annual-stage="visual">
+  <div class="growth-song-stage" :class="[`growth-song-stage--${tone}`, `growth-song-stage--${size}`, { 'is-active': active, 'is-reduced': reducedMotion, 'is-save-data': saveData }]">
     <div class="growth-song-stage__halo" aria-hidden="true" />
+    <div class="growth-song-stage__orbit" aria-hidden="true"><i /><i /><i /></div>
     <div class="growth-song-stage__rim" aria-hidden="true">
-      <i v-for="index in 24" :key="index" class="growth-song-stage__tick" :class="{ 'is-final-tick': index === 24 }" :style="{ '--turn': `${index * 15}deg` }" />
+      <i v-for="index in 24" :key="index" class="growth-song-stage__tick" :class="{ 'is-final-tick': index === 24 }" :style="{ '--turn': `${index * 15}deg` }"><span class="growth-song-stage__tick-mark" /></i>
     </div>
     <div v-if="tone === 'near'" class="growth-song-stage__prism-rim" aria-hidden="true"><i class="growth-song-stage__prism-sweep" /></div>
     <div v-else class="growth-song-stage__impact-rings" aria-hidden="true"><i class="growth-song-stage__impact-ring" /><i class="growth-song-stage__impact-ring" /></div>
@@ -52,6 +53,7 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   display: grid;
   place-items: center;
   flex: 0 0 auto;
+  transform-origin: 50% 50%;
 }
 
 .growth-song-stage--medium { --stage-size: min(34vh, 280px); }
@@ -69,6 +71,25 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   inset: -23%;
   background: radial-gradient(circle, rgba(39, 120, 215, .34), rgba(39, 120, 215, .09) 44%, transparent 71%);
 }
+
+.growth-song-stage__orbit {
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.growth-song-stage__orbit i {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(91, 211, 242, .17);
+  border-radius: 50%;
+  transform-origin: 50% 50%;
+}
+
+.growth-song-stage__orbit i:nth-child(2) { inset: 7%; border-style: dashed; }
+.growth-song-stage__orbit i:nth-child(3) { inset: 14%; border-color: rgba(102, 216, 255, .16); }
 
 .growth-song-stage__rim {
   position: absolute;
@@ -91,8 +112,8 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   transform: rotate(var(--turn));
 }
 
-.growth-song-stage__tick::before {
-  content: "";
+.growth-song-stage__tick-mark {
+  display: block;
   width: clamp(3px, 1.5%, 7px);
   height: clamp(12px, 4.3%, 19px);
   border-radius: 99px;
@@ -100,7 +121,7 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   box-shadow: 0 0 7px rgba(200, 239, 255, .7);
 }
 
-.growth-song-stage--near .growth-song-stage__tick.is-final-tick::before {
+.growth-song-stage--near .growth-song-stage__tick.is-final-tick .growth-song-stage__tick-mark {
   background: linear-gradient(180deg, #fff, #b9eeff);
   box-shadow: 0 0 11px rgba(183, 237, 255, .95);
 }
@@ -119,7 +140,7 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   inset: 0;
   border-radius: 50%;
   opacity: .52;
-  background: conic-gradient(from 0deg, transparent 0 8deg, #68e8ff 14deg, #7f8cff 36deg, #d87cff 58deg, #ff7e98 78deg, #ffd66b 99deg, #7cf6b4 118deg, transparent 145deg 360deg);
+  background: conic-gradient(from 0deg, transparent 0 212deg, #68e8ff 222deg, #7f8cff 244deg, #d87cff 263deg, #ff7e98 282deg, #ffd66b 298deg, #7cf6b4 312deg, transparent 320deg 360deg);
   filter: drop-shadow(0 0 8px rgba(136, 218, 255, .56));
 }
 
@@ -131,6 +152,7 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   border-radius: 50%;
   opacity: 0;
   box-shadow: 0 0 18px rgba(75, 169, 225, .28);
+  transform-origin: 50% 50%;
 }
 .growth-song-stage__impact-ring:nth-child(2) { inset: -4%; }
 
@@ -167,6 +189,10 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   animation: growth-near-breathe 8s ease-in-out 1.8s infinite;
 }
 
+.growth-song-stage--near.is-active:not(.is-reduced):not(.is-save-data) .growth-song-stage__orbit i:nth-child(2) {
+  animation: growth-near-orbit-breathe 6.4s ease-in-out 2.2s infinite;
+}
+
 .growth-song-stage--challenge.is-active:not(.is-reduced):not(.is-save-data) .growth-song-stage__halo {
   animation: growth-challenge-knock 4.6s ease-in-out 1.7s infinite;
 }
@@ -179,14 +205,19 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
 .growth-song-stage--near.is-save-data .growth-song-stage__prism-sweep { opacity: .62; transform: rotate(24deg); }
 
 @keyframes growth-prism-return {
-  0%, 78%, 100% { transform: rotate(0deg); opacity: .24; }
-  86% { transform: rotate(92deg); opacity: .72; }
-  92% { transform: rotate(128deg); opacity: .28; }
+  0%, 78%, 100% { transform: rotate(50deg); opacity: .42; }
+  86% { transform: rotate(132deg); opacity: .82; }
+  92% { transform: rotate(166deg); opacity: .46; }
 }
 
 @keyframes growth-near-breathe {
   0%, 82%, 100% { transform: scale(1); opacity: .7; }
   89% { transform: scale(1.025); opacity: .88; }
+}
+
+@keyframes growth-near-orbit-breathe {
+  0%, 80%, 100% { opacity: .34; transform: rotate(0deg); }
+  88% { opacity: .7; transform: rotate(18deg); }
 }
 
 @keyframes growth-challenge-knock {
