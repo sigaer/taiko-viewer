@@ -33,8 +33,27 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
     <div class="growth-song-stage__rim" aria-hidden="true">
       <i v-for="index in 24" :key="index" class="growth-song-stage__tick" :class="{ 'is-final-tick': index === 24 }" :style="{ '--turn': `${index * 15}deg` }"><span class="growth-song-stage__tick-mark" /></i>
     </div>
-    <div v-if="tone === 'near'" class="growth-song-stage__prism-rim" aria-hidden="true"><i class="growth-song-stage__prism-sweep" /></div>
-    <div v-else class="growth-song-stage__impact-rings" aria-hidden="true"><i class="growth-song-stage__impact-ring" /><i class="growth-song-stage__impact-ring" /></div>
+    <template v-if="tone === 'near'">
+      <svg class="growth-song-stage__spectrum-ring" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="growth-near-spectrum" x1="8%" y1="10%" x2="92%" y2="90%">
+            <stop offset="0%" stop-color="#57ecff" />
+            <stop offset="22%" stop-color="#7588ff" />
+            <stop offset="43%" stop-color="#d379ff" />
+            <stop offset="62%" stop-color="#ff789e" />
+            <stop offset="80%" stop-color="#ffd86f" />
+            <stop offset="100%" stop-color="#67f4bd" />
+          </linearGradient>
+        </defs>
+        <circle class="growth-song-stage__spectrum-track" cx="50" cy="50" r="47" pathLength="100" />
+        <circle class="growth-song-stage__spectrum-progress" cx="50" cy="50" r="47" pathLength="100" />
+      </svg>
+      <div class="growth-song-stage__prism-rim" aria-hidden="true"><i class="growth-song-stage__prism-sweep" /></div>
+    </template>
+    <template v-else>
+      <div class="growth-song-stage__impact-residue" aria-hidden="true"><i /><i /></div>
+      <div class="growth-song-stage__impact-rings" aria-hidden="true"><i class="growth-song-stage__impact-ring" /><i class="growth-song-stage__impact-ring" /></div>
+    </template>
     <div class="growth-song-stage__membrane">
       <img v-if="imageUrl && !imageFailed" :src="imageUrl" :alt="imageAlt" class="growth-song-stage__image" width="460" height="460" loading="lazy" decoding="async" @error="imageFailed = true">
       <AnnualArtworkFallback v-else kind="cover" :label="fallback" mark="2026" />
@@ -65,6 +84,17 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   border-radius: 50%;
   background: radial-gradient(circle, rgba(103, 198, 255, .27), rgba(103, 198, 255, .08) 42%, transparent 69%);
   opacity: .78;
+}
+
+.growth-song-stage--near .growth-song-stage__halo {
+  inset: -26%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(91, 232, 255, .42), transparent 35%),
+    radial-gradient(circle at 68% 34%, rgba(211, 116, 255, .34), transparent 38%),
+    radial-gradient(circle at 62% 72%, rgba(255, 202, 105, .28), transparent 34%),
+    radial-gradient(circle, rgba(105, 205, 255, .2), transparent 70%);
+  opacity: .94;
+  filter: blur(1px) saturate(1.18);
 }
 
 .growth-song-stage--challenge .growth-song-stage__halo {
@@ -103,6 +133,11 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   background: conic-gradient(from 5deg, #0d4d97 0deg 22deg, transparent 22deg 31deg, #227ec2 31deg 53deg, transparent 53deg 65deg, #0d4d97 65deg 93deg, transparent 93deg 105deg, #227ec2 105deg 133deg, transparent 133deg 146deg, #0d4d97 146deg 177deg, transparent 177deg 190deg, #227ec2 190deg 221deg, transparent 221deg 234deg, #0d4d97 234deg 267deg, transparent 267deg 281deg, #227ec2 281deg 314deg, transparent 314deg 328deg, #0d4d97 328deg 360deg);
 }
 
+.growth-song-stage--near .growth-song-stage__rim {
+  background: conic-gradient(from -8deg, #1378bd 0deg 19deg, transparent 19deg 28deg, #4ac5ec 28deg 48deg, transparent 48deg 58deg, #416ee0 58deg 83deg, transparent 83deg 94deg, #b461e5 94deg 119deg, transparent 119deg 130deg, #e868a6 130deg 159deg, transparent 159deg 170deg, #f4ac60 170deg 196deg, transparent 196deg 207deg, #64dbaa 207deg 236deg, transparent 236deg 248deg, #39c8df 248deg 273deg, transparent 273deg 284deg, #516edb 284deg 315deg, transparent 315deg 326deg, #c55fce 326deg 352deg, transparent 352deg);
+  box-shadow: 0 24px 55px rgba(69, 110, 190, .22), 0 0 0 1px rgba(255, 255, 255, .72), 0 0 24px rgba(150, 119, 255, .2);
+}
+
 .growth-song-stage__tick {
   position: absolute;
   inset: 0;
@@ -124,6 +159,36 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
 .growth-song-stage--near .growth-song-stage__tick.is-final-tick .growth-song-stage__tick-mark {
   background: linear-gradient(180deg, #fff, #b9eeff);
   box-shadow: 0 0 11px rgba(183, 237, 255, .95);
+}
+
+.growth-song-stage__spectrum-ring {
+  position: absolute;
+  inset: -7%;
+  width: 114%;
+  height: 114%;
+  overflow: visible;
+  pointer-events: none;
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 0 7px rgba(91, 231, 255, .62)) drop-shadow(0 0 13px rgba(211, 121, 255, .3));
+}
+
+.growth-song-stage__spectrum-track,
+.growth-song-stage__spectrum-progress {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.growth-song-stage__spectrum-track {
+  stroke: rgba(188, 230, 255, .14);
+  stroke-width: 2;
+}
+
+.growth-song-stage__spectrum-progress {
+  stroke: url(#growth-near-spectrum);
+  stroke-width: 3.2;
+  stroke-dasharray: 92 8;
+  stroke-dashoffset: 0;
 }
 
 .growth-song-stage__prism-rim {
@@ -155,6 +220,26 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
   transform-origin: 50% 50%;
 }
 .growth-song-stage__impact-ring:nth-child(2) { inset: -4%; }
+
+.growth-song-stage__impact-residue {
+  position: absolute;
+  inset: -6%;
+  pointer-events: none;
+}
+
+.growth-song-stage__impact-residue i {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(126, 215, 255, .22);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgba(47, 143, 209, .14), inset 0 0 18px rgba(103, 199, 244, .06);
+  transform: scale(1.18);
+}
+
+.growth-song-stage__impact-residue i:nth-child(2) {
+  border-color: rgba(104, 173, 224, .12);
+  transform: scale(1.36);
+}
 
 .growth-song-stage__membrane {
   position: absolute;
@@ -203,6 +288,10 @@ watch(() => props.imageUrl, () => { imageFailed.value = false; });
 .growth-song-stage.is-reduced .growth-song-stage__halo { opacity: .55; }
 .growth-song-stage--near.is-reduced .growth-song-stage__prism-sweep,
 .growth-song-stage--near.is-save-data .growth-song-stage__prism-sweep { opacity: .62; transform: rotate(24deg); }
+.growth-song-stage--near.is-reduced .growth-song-stage__spectrum-progress,
+.growth-song-stage--near.is-save-data .growth-song-stage__spectrum-progress { stroke-dashoffset: 0; }
+.growth-song-stage--challenge.is-reduced .growth-song-stage__impact-residue,
+.growth-song-stage--challenge.is-save-data .growth-song-stage__impact-residue { opacity: .72; }
 
 @keyframes growth-prism-return {
   0%, 78%, 100% { transform: rotate(50deg); opacity: .42; }

@@ -371,9 +371,14 @@ assert.equal(growthMotionSource.includes("growth-challenge-knock"), true, "chall
 assert.equal(nearDondafulSource.includes("motion-preset=\"growth-near-rainbow\""), true, "near page does not select its rainbow motion preset");
 assert.equal(challengeSource.includes("motion-preset=\"growth-challenge-knock\""), true, "challenge page does not select its knock motion preset");
 assert.equal(growthSongStageSource.includes("growth-song-stage__prism-sweep"), true, "near stage has no prism sweep");
+assert.equal(growthSongStageSource.includes("growth-song-stage__spectrum-ring"), true, "near stage has no large spectrum achievement ring");
+assert.equal(growthSongStageSource.includes("stroke-dasharray: 92 8"), true, "near spectrum ring does not preserve the final-step gap");
 assert.equal(growthSongStageSource.includes("growth-song-stage__impact-ring"), true, "challenge stage has no knock impact rings");
+assert.equal(growthSongStageSource.includes("growth-song-stage__impact-residue"), true, "challenge stage has no static impact residue");
 assert.equal(nearDondafulSource.includes("near-prism-dust"), true, "near page has no restrained spectral particles");
+assert.equal(nearDondafulSource.includes("near-spectrum-atmosphere"), true, "near page has no spectrum stage atmosphere");
 assert.equal(challengeSource.includes("challenge-pressure"), true, "challenge page has no pressure lines");
+assert.equal(challengeSource.includes("challenge-door-light"), true, "challenge page has no cold door-slit spotlight");
 assert.equal(/#f2c45f|#ffe08a|#ffd700|gold/i.test(challengeSource), false, "challenge page misuses gold completion semantics");
 assert.equal(/prism|rainbow|spectrum|#ff9d|#c590/i.test(challengeSource), false, "challenge page misuses rainbow completion semantics");
 assert.equal(nearDondafulSource.includes("<span>下一次落槌，也许就会亮成完整彩虹。</span>"), true, "near footer is not split into stable lines");

@@ -741,7 +741,11 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
         motion: scene.getAttribute("data-motion-state"),
         motionPreset: scene.getAttribute("data-motion-preset"),
         hasPrismSweep: Boolean(scene.querySelector(".growth-song-stage__prism-sweep")),
-        hasImpactRings: scene.querySelectorAll(".growth-song-stage__impact-ring").length === 2
+        hasSpectrumRing: Boolean(scene.querySelector(".growth-song-stage__spectrum-ring")),
+        hasSpectrumAtmosphere: Boolean(scene.querySelector(".near-spectrum-atmosphere")),
+        hasImpactRings: scene.querySelectorAll(".growth-song-stage__impact-ring").length === 2,
+        hasImpactResidue: scene.querySelectorAll(".growth-song-stage__impact-residue i").length === 2,
+        hasDoorLight: Boolean(scene.querySelector(".challenge-door-light"))
       };
     });
     assert.equal(audit.fillsViewport, true, `${key} does not fill the viewport`);
@@ -759,7 +763,11 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
     assert.equal(audit.motion, "reduced", `${key} reduced-motion state is not stable`);
     assert.equal(audit.motionPreset, key === "nearDondaful" ? "growth-near-rainbow" : "growth-challenge-knock", `${key} exposes the wrong motion preset`);
     assert.equal(audit.hasPrismSweep, key === "nearDondaful", `${key} prism semantics are incorrect`);
+    assert.equal(audit.hasSpectrumRing, key === "nearDondaful", `${key} spectrum ring semantics are incorrect`);
+    assert.equal(audit.hasSpectrumAtmosphere, key === "nearDondaful", `${key} spectrum atmosphere semantics are incorrect`);
     assert.equal(audit.hasImpactRings, key === "challenge", `${key} knock semantics are incorrect`);
+    assert.equal(audit.hasImpactResidue, key === "challenge", `${key} static impact residue semantics are incorrect`);
+    assert.equal(audit.hasDoorLight, key === "challenge", `${key} door-slit pressure semantics are incorrect`);
     assert.equal(await page.locator(".click-heart").count(), 0, `${key} received an unrelated global celebration heart`);
     await page.screenshot({ path: `/tmp/annual-growth-${key}-${viewport.width}x${viewport.height}.png`, fullPage: false });
   }
