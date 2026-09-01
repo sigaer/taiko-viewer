@@ -89,6 +89,15 @@ test("thread actions expose lightweight icon, pressed, and focus states", () => 
   assert.match(source, /min-height: 44px/);
 });
 
+test("community dark mode remaps semantic text and composer surface tokens", () => {
+  const thread = read("pages/forum/thread/[id].vue");
+  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-text: #f2e7dc/);
+  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-text-muted: #cab8aa/);
+  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-surface: rgba\(27, 24, 22, 0\.92\)/);
+  assert.match(thread, /body\.theme-dark \.reply-box \{[\s\S]*var\(--viewer-surface\)/);
+  assert.match(thread, /body\.theme-dark \.reply-box :deep\(\.el-textarea__inner\) \{[\s\S]*var\(--viewer-text\)/);
+});
+
 test("reply list keeps internal rhythm and a bottom inset above fixed composer", () => {
   const source = read("pages/forum/thread/[id].vue");
   assert.match(source, /\.reply-list \{[\s\S]*gap: 18px/);

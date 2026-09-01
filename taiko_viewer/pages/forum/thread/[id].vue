@@ -1025,6 +1025,13 @@ const renderReplyBlocks = (
   font-size: 12px;
 }
 
+body.theme-dark .forum-thread-page {
+  --viewer-text: #f2e7dc;
+  --viewer-text-muted: #cab8aa;
+  --viewer-surface: rgba(27, 24, 22, 0.92);
+  --viewer-border: rgba(255, 255, 255, 0.12);
+}
+
 body.theme-dark .reply-box__head p,
 body.theme-dark .thread-content p,
 body.theme-dark .thread-header__stats,
@@ -1040,6 +1047,20 @@ body.theme-dark .reply-box__upload {
 body.theme-dark .thread-song-bind,
 body.theme-dark .reply-image-card {
   background: rgba(64, 43, 31, 0.72);
+}
+
+body.theme-dark .reply-box {
+  background: color-mix(in srgb, var(--viewer-surface) 96%, transparent);
+}
+
+body.theme-dark .reply-box :deep(.el-textarea__inner) {
+  color: var(--viewer-text);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+}
+
+body.theme-dark .reply-box :deep(.el-textarea__inner::placeholder) {
+  color: var(--viewer-text-muted);
 }
 
 body.theme-dark .reply-upload-trigger,
