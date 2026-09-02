@@ -23,6 +23,7 @@ async function run(worker) {
     const requestStartedAt = new Map();
     const requestDurations = [];
     const externalFailures = [];
+    const warnings = [];
     const apiStatuses = {};
     const errors = [];
     page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
@@ -38,7 +39,7 @@ async function run(worker) {
       const responsePath = new URL(response.url()).pathname;
       if (responsePath === "/api/account/auth/me" || responsePath.startsWith("/api/account/annual-summaries/")) apiStatuses[responsePath] = response.status();
       requestDurations.push({ url: response.url(), durationMs, status: response.status(), type: request.resourceType(), bytes: length });
-      if (request.resourceType() === "image" && response.status() === 404) errors.push(`image 404: ${response.url()}`);
+      if (request.resourceType() === "image" && response.status() === 404) warnings.push(`image 404 (cover fallback expected): ${response.url()}`);
       if (response.status() >= 500) errors.push(`5xx: ${response.status()} ${response.url()}`);
       resources.set(`${response.url()}#${totalRequests}`, { url: response.url(), status: response.status(), type: request.resourceType(), bytes: length, cache: headers["cache-control"] || "", durationMs: startedRequest ? Date.now() - startedRequest.started : 0 });
       pending.delete(request);
@@ -63,7 +64,8 @@ async function run(worker) {
       .slice(0, 10)
       .map((item) => ({ url: item.url, durationMs: item.durationMs, status: item.status || 0, type: item.type, pending: Boolean(item.pending) }));
     const values = [...resources.values()];
-    results.push({ worker, viewport: `${width}x${height}`, homepageStatus: homepage.response?.status() || 0, entryStatus: entry.response?.status() || 0, finalUrl: page.url(), authenticationRedirect: /\/account\/login/.test(page.url()), authMeStatus: apiStatuses["/api/account/auth/me"] || null, annualSummaryStatus: apiStatuses["/api/account/annual-summaries/annual_2026"] || null, domcontentloadedMs: entry.domContentLoadedMs, loadMs: entry.loadMs, loadSucceeded: entry.loadSucceeded, networkIdle: entry.networkIdle, networkIdleMs: entry.networkIdleMs, containerFound: entry.containerFound, totalRequests, pendingOver10s: [...pending.values()].filter((item) => Date.now() - item.started >= 10_000).length, failedRequests: errors.filter((error) => error.startsWith("requestfailed")).length, externalFailures, notFound: values.filter((item) => item.status === 404).length, serverErrors: values.filter((item) => item.status >= 500).length, images: values.filter((item) => item.type === "image").length, bytes: values.reduce((sum, item) => sum + item.bytes, 0), noStore: values.filter((item) => /no-store/i.test(item.cache)).length, resourceUrls: values.filter((item) => ["script", "stylesheet", "image", "font"].includes(item.type)).map((item) => ({ url: item.url, type: item.type, status: item.status, bytes: item.bytes, cache: item.cache })), slowest10: slowRequests, errors });
+    const brokenVisibleImages = await page.locator("img").evaluateAll((images) => images.filter((image) => image.complete && image.naturalWidth === 0 && image.getClientRects().length > 0).map((image) => image.currentSrc || image.src));
+    results.push({ worker, viewport: `${width}x${height}`, homepageStatus: homepage.response?.status() || 0, entryStatus: entry.response?.status() || 0, finalUrl: page.url(), authenticationRedirect: /\/account\/login/.test(page.url()), authMeStatus: apiStatuses["/api/account/auth/me"] || null, annualSummaryStatus: apiStatuses["/api/account/annual-summaries/annual_2026"] || null, domcontentloadedMs: entry.domContentLoadedMs, loadMs: entry.loadMs, loadSucceeded: entry.loadSucceeded, networkIdle: entry.networkIdle, networkIdleMs: entry.networkIdleMs, containerFound: entry.containerFound, totalRequests, pendingOver10s: [...pending.values()].filter((item) => Date.now() - item.started >= 10_000).length, failedRequests: errors.filter((error) => error.startsWith("requestfailed")).length, externalFailures, warnings, coverFallbackHandled: brokenVisibleImages.length === 0, brokenVisibleImages, notFound: values.filter((item) => item.status === 404).length, serverErrors: values.filter((item) => item.status >= 500).length, images: values.filter((item) => item.type === "image").length, bytes: values.reduce((sum, item) => sum + item.bytes, 0), noStore: values.filter((item) => /no-store/i.test(item.cache)).length, resourceUrls: values.filter((item) => ["script", "stylesheet", "image", "font"].includes(item.type)).map((item) => ({ url: item.url, type: item.type, status: item.status, bytes: item.bytes, cache: item.cache })), slowest10: slowRequests, errors });
     await context.close();
   }
   await browser.close();
