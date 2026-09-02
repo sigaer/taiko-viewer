@@ -14,23 +14,49 @@ async function run(worker) {
     const page = await context.newPage();
     const started = Date.now();
     const resources = new Map();
+    const pending = new Map();
+    let totalRequests = 0;
+    const requestStartedAt = new Map();
+    const requestDurations = [];
+    const externalFailures = [];
     const errors = [];
     page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
-    page.on("requestfailed", (request) => errors.push(`requestfailed: ${request.url()}`));
+    page.on("request", (request) => { totalRequests += 1; const item = { started: Date.now(), url: request.url(), method: request.method(), type: request.resourceType() }; requestStartedAt.set(request, item); pending.set(request, item); });
+    page.on("requestfailed", (request) => { const message = `requestfailed: ${request.url()}`; if (/google-analytics\.com|googletagmanager\.com/i.test(request.url())) externalFailures.push(message); else errors.push(message); pending.delete(request); requestStartedAt.delete(request); });
     page.on("console", (message) => { if (message.type() === "error") errors.push(`console: ${message.text()}`); });
     page.on("response", async (response) => {
       const request = response.request();
-      if (request.resourceType() === "image" && response.status() === 404) errors.push(`image 404: ${response.url()}`);
-      if (response.status() >= 500) errors.push(`5xx: ${response.status()} ${response.url()}`);
+      const startedRequest = requestStartedAt.get(request);
+      const durationMs = startedRequest ? Date.now() - startedRequest.started : 0;
       const headers = response.headers();
       const length = Number(headers["content-length"] || 0);
-      resources.set(response.url(), { status: response.status(), type: request.resourceType(), bytes: length, cache: headers["cache-control"] || "" });
+      requestDurations.push({ url: response.url(), durationMs, status: response.status(), type: request.resourceType(), bytes: length });
+      if (request.resourceType() === "image" && response.status() === 404) errors.push(`image 404: ${response.url()}`);
+      if (response.status() >= 500) errors.push(`5xx: ${response.status()} ${response.url()}`);
+      resources.set(`${response.url()}#${totalRequests}`, { url: response.url(), status: response.status(), type: request.resourceType(), bytes: length, cache: headers["cache-control"] || "", durationMs: startedRequest ? Date.now() - startedRequest.started : 0 });
+      pending.delete(request);
+      requestStartedAt.delete(request);
     });
-    const homepage = await page.goto(`${base}/`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    const firstPaint = Date.now() - started;
-    await page.goto(`${base}/account/version-summary`, { waitUntil: "networkidle", timeout: 30_000 }).catch((error) => errors.push(`navigation: ${error.message}`));
-    const networkIdle = Date.now() - started;
-    results.push({ worker, viewport: `${width}x${height}`, firstPaintMs: firstPaint, networkIdleMs: networkIdle, homepageStatus: homepage?.status() || 0, resources: resources.size, images: [...resources.values()].filter((item) => item.type === "image").length, bytes: [...resources.values()].reduce((sum, item) => sum + item.bytes, 0), noStore: [...resources.values()].filter((item) => /no-store/i.test(item.cache)).length, errors });
+    const gotoObserved = async (url, selector) => {
+      const navStarted = Date.now();
+      const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15_000 }).catch((error) => { errors.push(`navigation domcontentloaded: ${error.message}`); return null; });
+      const domContentLoadedMs = Date.now() - navStarted;
+      const loadPromise = page.waitForLoadState("load", { timeout: 5_000 }).then(() => true).catch(() => false);
+      const loadSucceeded = await loadPromise;
+      const loadMs = Date.now() - navStarted;
+      const containerFound = await page.locator(selector).first().waitFor({ state: "attached", timeout: 5_000 }).then(() => true).catch(() => false);
+      const idlePromise = page.waitForLoadState("networkidle", { timeout: 5_000 }).then(() => true).catch(() => false);
+      const networkIdle = await idlePromise;
+      return { response, domContentLoadedMs, loadMs, loadSucceeded, containerFound, networkIdle, networkIdleMs: Date.now() - navStarted };
+    };
+    const homepage = await gotoObserved(`${base}/`, "#__nuxt");
+    const entry = await gotoObserved(`${base}/account/version-summary`, ".annual-page, main, #__nuxt");
+    const slowRequests = [...requestDurations, ...[...pending.values()].map((item) => ({ ...item, durationMs: Date.now() - item.started, pending: true }))]
+      .sort((left, right) => right.durationMs - left.durationMs)
+      .slice(0, 10)
+      .map((item) => ({ url: item.url, durationMs: item.durationMs, status: item.status || 0, type: item.type, pending: Boolean(item.pending) }));
+    const values = [...resources.values()];
+    results.push({ worker, viewport: `${width}x${height}`, homepageStatus: homepage.response?.status() || 0, entryStatus: entry.response?.status() || 0, domcontentloadedMs: entry.domContentLoadedMs, loadMs: entry.loadMs, loadSucceeded: entry.loadSucceeded, networkIdle: entry.networkIdle, networkIdleMs: entry.networkIdleMs, containerFound: entry.containerFound, totalRequests, pendingOver10s: [...pending.values()].filter((item) => Date.now() - item.started >= 10_000).length, failedRequests: errors.filter((error) => error.startsWith("requestfailed")).length, externalFailures, notFound: values.filter((item) => item.status === 404).length, serverErrors: values.filter((item) => item.status >= 500).length, images: values.filter((item) => item.type === "image").length, bytes: values.reduce((sum, item) => sum + item.bytes, 0), noStore: values.filter((item) => /no-store/i.test(item.cache)).length, resourceUrls: values.filter((item) => ["script", "stylesheet", "image", "font"].includes(item.type)).map((item) => ({ url: item.url, type: item.type, status: item.status, bytes: item.bytes, cache: item.cache })), slowest10: slowRequests, errors });
     await context.close();
   }
   await browser.close();

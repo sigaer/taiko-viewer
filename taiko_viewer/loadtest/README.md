@@ -55,7 +55,7 @@ BASE=http://127.0.0.1:3100 k6 run --vus 3 --duration 30s loadtest/opening-static
 BASE=https://viewer.sakura-bot.cn ASSETS='/_nuxt/实际hash.js,/Calendar.png,/Opening.png,/Overview.png,/2026_autumn.png' k6 run --vus 3 --duration 30s loadtest/opening-static-assets.js
 ```
 
-`ASSETS` 应来自真实 Network 记录；默认清单含年度素材示例，目录占位符可能返回 404，仅用于提醒替换。
+`ASSETS` 应来自真实 Network 记录。默认清单已按 2026-09-02 本机构建采样写入实际 Nuxt hash chunk 和首屏图片；重新构建后 hash 可能变化，应重新运行浏览器采样并更新清单。
 
 浏览器开屏稳定性（不是服务端大压测）：
 

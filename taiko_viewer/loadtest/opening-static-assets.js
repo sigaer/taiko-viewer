@@ -4,8 +4,16 @@ import { Counter, Trend } from "k6/metrics";
 
 const base = (__ENV.BASE || "http://127.0.0.1:3100").replace(/\/$/, "");
 const assets = (__ENV.ASSETS || [
-  "/_nuxt/", "/Calendar.png", "/Opening.png", "/Overview.png", "/2026_autumn.png",
-  "/annual/", "/monthly/monthly.png", "/weekday/038_key.png", "/favoriteShift/cover_bg_7.png"
+  "/_nuxt/Cnx4mmAK.js",
+  "/_nuxt/index.pyZ7quO9.css",
+  "/_nuxt/arG6RtbU.js",
+  "/optimized/logo-168.webp",
+  "/optimized/2026-autumn-800.webp",
+  "/optimized/nijiiro-2026-640.webp",
+  "/kantan.png",
+  "/futsuu.png",
+  "/muzukashii.png",
+  "/oni.png"
 ].join(",")).split(",").map((value) => value.trim()).filter(Boolean);
 export const options = { vus: Number(__ENV.VUS || 3), duration: __ENV.DURATION || "30s" };
 const duration = new Trend("opening_asset_duration");
