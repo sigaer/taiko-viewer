@@ -19,6 +19,7 @@ async function run(worker) {
     const requestStartedAt = new Map();
     const requestDurations = [];
     const externalFailures = [];
+    const apiStatuses = {};
     const errors = [];
     page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
     page.on("request", (request) => { totalRequests += 1; const item = { started: Date.now(), url: request.url(), method: request.method(), type: request.resourceType() }; requestStartedAt.set(request, item); pending.set(request, item); });
@@ -30,6 +31,8 @@ async function run(worker) {
       const durationMs = startedRequest ? Date.now() - startedRequest.started : 0;
       const headers = response.headers();
       const length = Number(headers["content-length"] || 0);
+      const responsePath = new URL(response.url()).pathname;
+      if (responsePath === "/api/account/auth/me" || responsePath.startsWith("/api/account/annual-summaries/")) apiStatuses[responsePath] = response.status();
       requestDurations.push({ url: response.url(), durationMs, status: response.status(), type: request.resourceType(), bytes: length });
       if (request.resourceType() === "image" && response.status() === 404) errors.push(`image 404: ${response.url()}`);
       if (response.status() >= 500) errors.push(`5xx: ${response.status()} ${response.url()}`);
@@ -56,7 +59,7 @@ async function run(worker) {
       .slice(0, 10)
       .map((item) => ({ url: item.url, durationMs: item.durationMs, status: item.status || 0, type: item.type, pending: Boolean(item.pending) }));
     const values = [...resources.values()];
-    results.push({ worker, viewport: `${width}x${height}`, homepageStatus: homepage.response?.status() || 0, entryStatus: entry.response?.status() || 0, domcontentloadedMs: entry.domContentLoadedMs, loadMs: entry.loadMs, loadSucceeded: entry.loadSucceeded, networkIdle: entry.networkIdle, networkIdleMs: entry.networkIdleMs, containerFound: entry.containerFound, totalRequests, pendingOver10s: [...pending.values()].filter((item) => Date.now() - item.started >= 10_000).length, failedRequests: errors.filter((error) => error.startsWith("requestfailed")).length, externalFailures, notFound: values.filter((item) => item.status === 404).length, serverErrors: values.filter((item) => item.status >= 500).length, images: values.filter((item) => item.type === "image").length, bytes: values.reduce((sum, item) => sum + item.bytes, 0), noStore: values.filter((item) => /no-store/i.test(item.cache)).length, resourceUrls: values.filter((item) => ["script", "stylesheet", "image", "font"].includes(item.type)).map((item) => ({ url: item.url, type: item.type, status: item.status, bytes: item.bytes, cache: item.cache })), slowest10: slowRequests, errors });
+    results.push({ worker, viewport: `${width}x${height}`, homepageStatus: homepage.response?.status() || 0, entryStatus: entry.response?.status() || 0, finalUrl: page.url(), authenticationRedirect: /\/account\/login/.test(page.url()), authMeStatus: apiStatuses["/api/account/auth/me"] || null, annualSummaryStatus: apiStatuses["/api/account/annual-summaries/annual_2026"] || null, domcontentloadedMs: entry.domContentLoadedMs, loadMs: entry.loadMs, loadSucceeded: entry.loadSucceeded, networkIdle: entry.networkIdle, networkIdleMs: entry.networkIdleMs, containerFound: entry.containerFound, totalRequests, pendingOver10s: [...pending.values()].filter((item) => Date.now() - item.started >= 10_000).length, failedRequests: errors.filter((error) => error.startsWith("requestfailed")).length, externalFailures, notFound: values.filter((item) => item.status === 404).length, serverErrors: values.filter((item) => item.status >= 500).length, images: values.filter((item) => item.type === "image").length, bytes: values.reduce((sum, item) => sum + item.bytes, 0), noStore: values.filter((item) => /no-store/i.test(item.cache)).length, resourceUrls: values.filter((item) => ["script", "stylesheet", "image", "font"].includes(item.type)).map((item) => ({ url: item.url, type: item.type, status: item.status, bytes: item.bytes, cache: item.cache })), slowest10: slowRequests, errors });
     await context.close();
   }
   await browser.close();

@@ -88,6 +88,17 @@ ALLOW_BUILD_TEST=1 COOKIE='stv_session=测试账号cookie' BASE=http://127.0.0.1
 
 生产只做入口 API 3 VU/1 分钟、静态资源低强度（不超过约 30 并发等效）、浏览器 1–2 并发；禁止 100+ VU、批量 build/poster、真实用户 cookie 和任何 Nginx/限流配置改动。测试期间观察 `journalctl -u taiko-viewer.service -f`、nginx access/error、CPU、Node 内存、`free -h`、swap、`iostat -xz 1`、`ss -s`、502/504、重启和数据库连接；触发停止条件立即中止。
 
+## 无 k6 时的 Node 兜底
+
+k6 仍是推荐的正式压测工具。当前机器无法安装 k6 时，可以先用只依赖 Node 内置模块的低风险 smoke：
+
+```bash
+BASE=http://127.0.0.1:3100 VUS=3 DURATION=30 node loadtest/node-entry-smoke.mjs
+BASE=http://127.0.0.1:3100 VUS=3 DURATION=30 node loadtest/node-static-smoke.mjs
+```
+
+登录态入口可额外设置 `COOKIE='stv_session=测试账号cookie'`。Node 脚本只用于发现明显 404、5xx、超时和延迟异常，不替代 k6 的稳定并发模型、阈值、趋势与分布能力；正式容量测试仍应在独立压测机安装 k6 后执行。`node-static-smoke.mjs` 默认使用最近采样的 Nuxt hash 资源，viewer 重新构建后必须重新采样更新。生产依然禁止高压。
+
 ## k6 命令
 
 在 `taiko_viewer` 目录执行：
