@@ -2,6 +2,22 @@
 
 这些脚本只用于容量与前端稳定性验证，不接入生产启动流程，也不修改年度总结业务逻辑。
 
+## 入口链路盘点
+
+当前 viewer 生产 Node 监听 `127.0.0.1:3100`（`3000` 为其他 Docker 服务）。入口页面为 `/` 和 `/account/version-summary`。年度入口的主要请求链路如下：
+
+| 页面/状态 | 主要请求 | 说明 |
+| --- | --- | --- |
+| 首页 | `/`、Nuxt document/chunk、字体与首页图片 | 公开访问，不需要 share token |
+| 年度入口未生成 | `/account/version-summary`、`/api/account/auth/me`、`/api/account/annual-summaries/annual_2026`、绑定列表相关接口 | 需要登录态；未登录通常为 401/重定向 |
+| 年度入口已生成 | 上述接口，随后加载年度素材与页面 chunk | summary GET 为读取链路 |
+| 点击生成 | `POST /api/account/annual-summaries/annual_2026/build` | 仅允许本机/staging 测试账号，生产最多人工 1–3 个账号 |
+| job 轮询 | `/api/account/annual-summary-jobs/:jobId` | 观察排队、完成时间和失败率 |
+| 海报生成 | `POST /api/account/annual-summaries/:key/posters`、`/api/account/annual-poster-jobs/:jobId` | 默认不批量触发；生产最多人工 1–3 个账号 |
+| 公开分享 | `/annual/share/:token/` 及 share/poster API | 仍需合法 share token，本阶段暂缓 |
+
+精确首屏请求数、chunk 数、图片数、最大/总传输体积、404、重复请求和 `no-store` 可由 `annual-entry-browser-stress.mjs` 输出；它会为每个响应记录状态、资源类型、`Content-Length` 和 `Cache-Control`。其中 Nuxt 运行时 hash chunk 会随构建变化，不应在 k6 清单中写死占位文件名。
+
 ## 安装与准备
 
 - 安装 [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)（macOS 可用 `brew install k6`，Debian/Ubuntu 可按官方 apt 源安装）。
@@ -20,6 +36,57 @@ BASE=https://viewer.sakura-bot.cn bash loadtest/validate-tokens.sh
 当前 share 创建逻辑会清理同一 summary 的旧 active share，因此 seed 工具只为不同 summary 创建 token；summary 不足时不会伪造或重复覆盖，输出实际数量并提示这不是多用户数据分布。建议后续准备 10–50 个不同 summary。seed 只保证 summary token；poster 仍需先通过账户海报任务生成，poster 404“海报尚未生成”不代表 token 无效。
 
 即使 `BASE` 是 localhost，它也可能指向生产 systemd 进程，因此 seed 默认按 production 处理。生产生成必须同时提供 `LOADTEST_ALLOW_PRODUCTION=1` 和有效 `SESSION_TOKEN`；创建新 share 会按现有业务设计撤销同一 summary 的旧 active share 并清理其 poster，请勿用真实用户正在分享的 summary。
+
+## 入口/API 基线
+
+入口脚本不依赖 share token，会请求首页、年度入口、登录态和年度 summary GET；`COOKIE` 仅从环境变量读取：
+
+```bash
+BASE=http://127.0.0.1:3100 k6 run --vus 3 --duration 30s loadtest/annual-entry-api.js
+COOKIE='stv_session=测试账号cookie' BASE=https://viewer.sakura-bot.cn k6 run --vus 3 --duration 1m loadtest/annual-entry-api.js
+```
+
+输出 p95/p99、error rate 及 200/302/401/403/404/429/5xx 分布。生产只允许上述 3 VU/1 分钟；不要把真实用户 cookie 写入文件或命令历史，建议使用临时 shell 会话和专用测试账号。
+
+开屏静态资源：
+
+```bash
+BASE=http://127.0.0.1:3100 k6 run --vus 3 --duration 30s loadtest/opening-static-assets.js
+BASE=https://viewer.sakura-bot.cn ASSETS='/_nuxt/实际hash.js,/Calendar.png,/Opening.png,/Overview.png,/2026_autumn.png' k6 run --vus 3 --duration 30s loadtest/opening-static-assets.js
+```
+
+`ASSETS` 应来自真实 Network 记录；默认清单含年度素材示例，目录占位符可能返回 404，仅用于提醒替换。
+
+浏览器开屏稳定性（不是服务端大压测）：
+
+```bash
+BASE=http://127.0.0.1:3100 node loadtest/browser/annual-entry-browser-stress.mjs
+COOKIE='stv_session=测试账号cookie' BASE=https://viewer.sakura-bot.cn CONCURRENCY=1 node loadtest/browser/annual-entry-browser-stress.mjs
+```
+
+脚本覆盖 390×844、414×896、430×932，输出首屏/`networkidle` 耗时、资源/图片数量、传输体积、`no-store` 数量及 pageerror、requestfailed、console error、图片 404、5xx API。生产最多 `CONCURRENCY=2`。
+
+## Build/Poster Job Smoke
+
+build 是队列任务，会触发 CLI、文件读写和数据库写入；poster 还会进行图片渲染。两者都不是普通 GET 压测：默认 dry-run，不会 POST。
+
+```bash
+k6 run -e BASE=http://127.0.0.1:3100 loadtest/annual-build-queue-smoke.js
+ALLOW_BUILD_TEST=1 COOKIE='stv_session=测试账号cookie' BASE=http://127.0.0.1:3100 k6 run loadtest/annual-build-queue-smoke.js
+```
+
+只允许本机/staging 测试账号；生产禁止批量 POST，最多人工确认 1–3 个账号，并观察 job 排队/完成时间、失败率、Node RSS/heap、磁盘 IO、swap、DB 连接。poster 生成同理，使用现有账户接口手动触发，必须先设置 `ALLOW_POSTER_JOB_TEST=1` 的变更控制；本目录不提供批量 poster 生成脚本。poster GET 读取压测仍需合法 token 和已生成海报。
+
+## 推荐顺序与生产边界
+
+1. 入口/开屏压测：不需要 share token。
+2. 登录态年度入口：需要测试账号 cookie。
+3. summary build queue smoke：仅低强度、显式许可。
+4. poster job smoke：仅低强度、显式许可。
+5. 公开 share API/poster：需要合法 token；poster 还需要已生成海报。
+6. UI 完成后的浏览器全链路回归。
+
+生产只做入口 API 3 VU/1 分钟、静态资源低强度（不超过约 30 并发等效）、浏览器 1–2 并发；禁止 100+ VU、批量 build/poster、真实用户 cookie 和任何 Nginx/限流配置改动。测试期间观察 `journalctl -u taiko-viewer.service -f`、nginx access/error、CPU、Node 内存、`free -h`、swap、`iostat -xz 1`、`ss -s`、502/504、重启和数据库连接；触发停止条件立即中止。
 
 ## k6 命令
 
