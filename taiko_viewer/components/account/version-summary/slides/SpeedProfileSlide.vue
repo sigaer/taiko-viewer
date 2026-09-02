@@ -3,15 +3,18 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
 import { getSpeedProfileCopy } from "~/utils/annualCopy";
+import { isUsableMetric } from "~/utils/annualPresentation";
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { locale } = useI18n();
 const copy = computed(() => getSpeedProfileCopy(props.summary.speedProfile, locale.value === "ja" ? "ja" : "zh"));
 const speed = computed(() => props.summary.speedProfile?.speed || 0);
+// Keep the statistic card hidden when the metric is unavailable.
+const hasChartCount = computed(() => Boolean(props.summary.speedProfile && isUsableMetric(props.summary.speedProfile.chartCount))); // isUsableMetric(summary.speedProfile.chartCount)
 </script>
 <template>
   <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED SIGNATURE" :title="copy.title" :lead="copy.body" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
     <template #background><div class="speed-bg"><img src="/annual/speedProfile/background.png" alt=""><img class="speed-bg__city" src="/annual/speedProfile/city-silhouette.png" alt=""></div></template>
-    <div class="speed-slide"><div class="speed-dial" data-animate><div class="speed-dial__ticks"><i v-for="i in 12" :key="i" :style="{ transform: `rotate(${i * 25 - 150}deg)` }" /></div><strong>{{ speed ? speed.toFixed(1) : '—' }}</strong><span>×</span><em>{{ copy.tag }}</em></div><div class="speed-story"><span>年度倍速偏好</span><h3 data-animate>{{ copy.tag }}</h3><p data-animate>{{ copy.body }}</p><div v-if="speed" class="speed-story__stat"><b>{{ props.summary.speedProfile?.chartCount }}</b><small> 张谱面留下这个速度</small></div></div></div>
+    <div class="speed-slide"><div class="speed-dial" data-animate><div class="speed-dial__ticks"><i v-for="i in 12" :key="i" :style="{ transform: `rotate(${i * 25 - 150}deg)` }" /></div><strong>{{ speed ? speed.toFixed(1) : '—' }}</strong><span>×</span><em>{{ copy.tag }}</em></div><div class="speed-story"><span>年度倍速偏好</span><h3 data-animate>{{ copy.tag }}</h3><p data-animate>{{ copy.body }}</p><div v-if="hasChartCount" class="speed-story__stat"><b>{{ props.summary.speedProfile?.chartCount }}</b><small> 张谱面留下这个速度</small></div></div></div>
   </StorySlideShell>
 </template>
 <style scoped>
