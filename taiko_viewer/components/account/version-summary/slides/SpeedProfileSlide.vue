@@ -1,47 +1,19 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import AnnualDrumWindow from "../AnnualDrumWindow.vue";
 import StorySlideShell from "../StorySlideShell.vue";
-import { isUsableMetric } from "~/utils/annualPresentation";
-
-defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
-const { t } = useI18n();
+import { getSpeedProfileCopy } from "~/utils/annualCopy";
+const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
+const { locale } = useI18n();
+const copy = computed(() => getSpeedProfileCopy(props.summary.speedProfile, locale.value === "ja" ? "ja" : "zh"));
+const speed = computed(() => props.summary.speedProfile?.speed || 0);
 </script>
-
 <template>
-  <StorySlideShell
-    :page-index="pageIndex" :page-total="pageTotal"
-    :eyebrow="summary.copy.speedProfile.eyebrow"
-    :title="summary.copy.speedProfile.title"
-    :lead="summary.copy.speedProfile.body"
-    tone="royal" :active="active" :reduced-motion="reducedMotion"
-  >
-    <div v-if="summary.speedProfile" class="speed-slide">
-      <AnnualDrumWindow data-animate size="large">
-        <div class="speed-slide__number">
-          <strong>{{ summary.speedProfile.speed }}</strong><span>×</span>
-        </div>
-      </AnnualDrumWindow>
-      <div class="speed-slide__story">
-        <p data-animate>{{ t('annualSummary.slides.speed.story', { speed: summary.speedProfile.speed }) }}</p>
-          <article v-if="isUsableMetric(summary.speedProfile.chartCount)" data-animate>
-          <span>{{ t('annualSummary.slides.speed.chartCount') }}</span>
-          <strong>{{ summary.speedProfile.chartCount }}</strong>
-          <small>{{ t('annualSummary.slides.speed.detail') }}</small>
-        </article>
-      </div>
-    </div>
+  <StorySlideShell :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED SIGNATURE" :title="copy.title" :lead="copy.body" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+    <template #background><div class="speed-bg"><img src="/annual/speedProfile/background.png" alt=""><img class="speed-bg__city" src="/annual/speedProfile/city-silhouette.png" alt=""></div></template>
+    <div class="speed-slide"><div class="speed-dial" data-animate><div class="speed-dial__ticks"><i v-for="i in 12" :key="i" :style="{ transform: `rotate(${i * 25 - 150}deg)` }" /></div><strong>{{ speed ? speed.toFixed(1) : '—' }}</strong><span>×</span><em>{{ copy.tag }}</em></div><div class="speed-story"><span>年度倍速偏好</span><h3 data-animate>{{ copy.tag }}</h3><p data-animate>{{ copy.body }}</p><div v-if="speed" class="speed-story__stat"><b>{{ props.summary.speedProfile?.chartCount }}</b><small> 张谱面留下这个速度</small></div></div></div>
   </StorySlideShell>
 </template>
-
 <style scoped>
-.speed-slide { height: 100%; display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr); align-items: center; gap: clamp(18px, 5vw, 64px); }
-.speed-slide__number { display: flex; align-items: baseline; color: #17365d; }
-.speed-slide__number strong { font: 700 clamp(4rem, 14vw, 9rem)/.8 var(--viewer-display-font); }
-.speed-slide__number span { color: #3978c8; font-size: clamp(1.8rem, 5vw, 3.6rem); }
-.speed-slide__story > p { margin: 0 0 18px; color: #17365d; font: 700 clamp(1.4rem, 3.5vw, 2.6rem)/1.35 var(--viewer-display-font); }
-.speed-slide__story article { padding: 20px; border-radius: 22px; background: rgba(247,251,255,.8); border: 1px solid rgba(57,120,200,.16); }
-.speed-slide__story span,.speed-slide__story small { display:block; color:#5c7697; font-size:12px; }
-.speed-slide__story strong { display:block; margin:7px 0; color:#3978c8; font-size:2.4rem; }
-@media(max-width:720px){.speed-slide{grid-template-columns:auto 1fr;gap:12px;align-items:start}.speed-slide__story>p{font-size:1.05rem;margin-bottom:8px}.speed-slide__story article{padding:10px;border-radius:15px}.speed-slide__story strong{font-size:1.5rem}}
+.speed-bg{position:absolute;inset:0;background:#15163b;overflow:hidden}.speed-bg>img:first-child{width:100%;height:100%;object-fit:cover;opacity:.72}.speed-bg__city{position:absolute;bottom:0;width:100%;opacity:.68}.speed-slide{height:100%;display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,1.1fr);gap:clamp(18px,5vw,64px);align-items:center;color:#fff}.speed-dial{position:relative;justify-self:center;width:min(40vh,350px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#36366b 0 53%,#191a44 54%);border:2px solid #f5cb72aa;box-shadow:0 0 0 12px #f5cb721c,0 24px 52px #07071c99}.speed-dial__ticks{position:absolute;inset:10%;border-radius:50%}.speed-dial__ticks i{position:absolute;left:50%;top:0;width:2px;height:12px;background:#f5cb72;transform-origin:50% 175px}.speed-dial strong{margin-top:-12px;color:#fff4d5;font:700 clamp(4rem,13vw,8rem)/.8 var(--viewer-display-font)}.speed-dial>span{margin-top:-28px;color:#f5cb72;font-size:2rem}.speed-dial em{position:absolute;bottom:18%;color:#f5cb72;font-size:12px;font-style:normal;letter-spacing:.1em}.speed-story>span{color:#f5cb72;font-size:12px;letter-spacing:.14em}.speed-story h3{margin:12px 0 9px;color:#fff;font:700 clamp(1.5rem,4vw,3rem)/1.08 var(--viewer-display-font)}.speed-story p{max-width:32ch;margin:0;color:#ffefc7c2;font-size:13px;line-height:1.6}.speed-story__stat{margin-top:22px;color:#f5cb72}.speed-story__stat b{font-size:2rem;color:#fff4d5}.speed-story__stat small{margin-left:8px;font-size:12px}@media(max-width:720px){.speed-slide{grid-template-columns:44% 1fr;gap:12px}.speed-dial{width:min(31vh,175px);box-shadow:0 0 0 7px #f5cb721c,0 16px 30px #07071c99}.speed-dial__ticks i{transform-origin:50% 88px!important;height:7px}.speed-dial strong{font-size:clamp(3rem,14vw,5rem)}.speed-dial>span{font-size:1.3rem}.speed-story h3{font-size:1.2rem;margin:8px 0}.speed-story p{font-size:12px;line-height:1.4}.speed-story__stat{margin-top:12px}}@media(prefers-reduced-motion:reduce){.speed-dial{animation:none}}
 </style>

@@ -274,7 +274,8 @@ export const normalizeAnnualSummary = (
     level: nullableNumber(challengeRaw.stars)
   } : null;
   const poundRaw = record(poundMetric.data); const poundTopSong = mapSong(poundRaw.topSong);
-  const pound = poundMetric.status !== "unavailable" ? { totalPoundCount: numberValue(poundRaw.totalPoundCount), topSong: poundTopSong, topPoundCount: numberValue(poundRaw.topPoundCount) } : null;
+  const poundSpeed = [poundRaw.speed, poundRaw.maxSpeed, poundRaw.topSpeed, poundRaw.hitsPerSecond].map(nullableNumber).find((value) => value !== null) ?? null;
+  const pound = poundMetric.status !== "unavailable" ? { totalPoundCount: numberValue(poundRaw.totalPoundCount), topSong: poundTopSong, topPoundCount: numberValue(poundRaw.topPoundCount), speed: poundSpeed } : null;
   const highRaw = record(highScoreMetric.data); const highSong = mapSong(highRaw);
   const highScore = highSong ? { song: highSong, score: numberValue(highRaw.highScore), occurredAt: stringValue(highRaw.recordedAt) || null, happenedLabel: formatDateTime(highRaw.recordedAt, locale) } : null;
 

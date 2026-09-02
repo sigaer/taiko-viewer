@@ -73,6 +73,8 @@ export type VersionSummaryPound = {
   totalPoundCount: number;
   topSong: VersionSummarySongCard | null;
   topPoundCount: number;
+  /** Highest hits-per-second when supplied by the summary producer. */
+  speed?: number | null;
 };
 
 export type VersionSummaryHighScore = {
