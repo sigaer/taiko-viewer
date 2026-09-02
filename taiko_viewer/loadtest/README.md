@@ -7,6 +7,19 @@
 - 安装 [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)（macOS 可用 `brew install k6`，Debian/Ubuntu 可按官方 apt 源安装）。
 - 安装 Playwright：在 `taiko_viewer` 执行 `npm install -D playwright`，再执行 `npx playwright install chromium`。
 - 复制 `loadtest/tokens.txt.example` 为 `loadtest/tokens.txt`，每行放一个可公开访问的 share token；真实 token 不提交，`.gitignore` 已忽略该文件。
+- `loadtest/seed-annual-share-tokens.mjs` 通过现有登录态 share API 生成 token，不手写签名。需设置 `SESSION_TOKEN`（对应 `stv_session`）及数据库环境变量；默认禁止生产环境，生产必须显式设置 `LOADTEST_ALLOW_PRODUCTION=1`。
+
+生成与验证：
+
+```bash
+LOADTEST_ENV=staging SESSION_TOKEN='your-session-cookie' TOKEN_COUNT=10 LOCALE=zh node loadtest/seed-annual-share-tokens.mjs
+BASE=http://127.0.0.1:3100 bash loadtest/validate-tokens.sh
+BASE=https://viewer.sakura-bot.cn bash loadtest/validate-tokens.sh
+```
+
+当前 share 创建逻辑会清理同一 summary 的旧 active share，因此 seed 工具只为不同 summary 创建 token；summary 不足时不会伪造或重复覆盖，输出实际数量并提示这不是多用户数据分布。建议后续准备 10–50 个不同 summary。seed 只保证 summary token；poster 仍需先通过账户海报任务生成，poster 404“海报尚未生成”不代表 token 无效。
+
+即使 `BASE` 是 localhost，它也可能指向生产 systemd 进程，因此 seed 默认按 production 处理。生产生成必须同时提供 `LOADTEST_ALLOW_PRODUCTION=1` 和有效 `SESSION_TOKEN`；创建新 share 会按现有业务设计撤销同一 summary 的旧 active share 并清理其 poster，请勿用真实用户正在分享的 summary。
 
 ## k6 命令
 
