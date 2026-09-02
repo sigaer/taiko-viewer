@@ -10,7 +10,11 @@ async function run(worker) {
   const browser = await chromium.launch({ executablePath });
   const results = [];
   for (const [width, height] of viewports) {
-    const context = await browser.newContext({ ...devices["iPhone 12"], viewport: { width, height }, extraHTTPHeaders: cookie ? { Cookie: cookie } : {} });
+    const context = await browser.newContext({ ...devices["iPhone 12"], viewport: { width, height } });
+    if (cookie) {
+      const session = cookie.match(/(?:^|;\s*)stv_session=([^;]+)/)?.[1];
+      if (session) await context.addCookies([{ name: "stv_session", value: session, url: base, httpOnly: true, sameSite: "Lax" }]);
+    }
     const page = await context.newPage();
     const started = Date.now();
     const resources = new Map();
