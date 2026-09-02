@@ -2,7 +2,7 @@ import http from "k6/http";
 import { check } from "k6";
 import { Rate, Trend } from "k6/metrics";
 
-const base = (__ENV.BASE || "http://127.0.0.1:3000").replace(/\/$/, "");
+const base = (__ENV.BASE || "http://127.0.0.1:3100").replace(/\/$/, "");
 const defaults = [
   "/_nuxt/", "/monthly/monthly.png", "/weekday/038_key.png", "/lateNight/", "/favoriteShift/cover_bg_7.png",
   "/obsession/", "/annual/", "/assets/cover/", "/Calendar.png", "/Overview.png", "/2026_autumn.png",

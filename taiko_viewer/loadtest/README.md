@@ -13,11 +13,11 @@
 在 `taiko_viewer` 目录执行：
 
 ```bash
-k6 run -e BASE=http://127.0.0.1:3000 loadtest/annual-share-api.js
+k6 run -e BASE=http://127.0.0.1:3100 loadtest/annual-share-api.js
 k6 run -e BASE=https://staging.example.com -e VUS=10 -e DURATION=2m loadtest/annual-share-api.js
-k6 run -e BASE=http://127.0.0.1:3000 loadtest/annual-poster.js
+k6 run -e BASE=http://127.0.0.1:3100 loadtest/annual-poster.js
 k6 run -e BASE=https://staging.example.com -e VUS=5 -e DURATION=1m loadtest/annual-poster.js
-k6 run -e BASE=http://127.0.0.1:3000 -e ASSETS='/_nuxt/app.js,/monthly/monthly.png,/weekday/038_key.png,/favoriteShift/cover_bg_7.png,/Calendar.png' loadtest/annual-static-assets.js
+k6 run -e BASE=http://127.0.0.1:3100 -e ASSETS='/_nuxt/app.js,/monthly/monthly.png,/weekday/038_key.png,/favoriteShift/cover_bg_7.png,/Calendar.png' loadtest/annual-static-assets.js
 ```
 
 静态脚本默认包含 `/_nuxt/*`、`/monthly/*`、`/weekday/*`、`/lateNight/*`、`/favoriteShift/*`、`/obsession/*`、`/annual/*`、`/assets/cover/*` 的示例路径；请用 `ASSETS` 替换为 staging 构建中实际存在的文件，避免把目录占位符当成 404 结论。
@@ -27,7 +27,7 @@ k6 run -e BASE=http://127.0.0.1:3000 -e ASSETS='/_nuxt/app.js,/monthly/monthly.p
 浏览器脚本不是大规模服务端压测。它用 414×896 移动视口打开公开页，等待加载后连续翻页并收集 `pageerror`、失败请求和 console error：
 
 ```bash
-BASE=http://127.0.0.1:3000 TOKEN='your-token' CONCURRENCY=2 ROUNDS=12 node loadtest/browser/annual-browser-stress.mjs
+BASE=http://127.0.0.1:3100 TOKEN='your-token' CONCURRENCY=2 ROUNDS=12 node loadtest/browser/annual-browser-stress.mjs
 ```
 
 可设置 `REDUCED_MOTION=1`、`PAUSE_MS`；`ROUNDS` 建议 10–20。

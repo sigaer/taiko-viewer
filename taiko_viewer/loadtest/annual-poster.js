@@ -2,7 +2,7 @@ import http from "k6/http";
 import { check } from "k6";
 import { Counter, Rate, Trend } from "k6/metrics";
 
-const base = (__ENV.BASE || "http://127.0.0.1:3000").replace(/\/$/, "");
+const base = (__ENV.BASE || "http://127.0.0.1:3100").replace(/\/$/, "");
 const tokens = open("tokens.txt").split(/\r?\n/).map((v) => v.trim()).filter((v) => v && !v.startsWith("#"));
 if (!tokens.length) throw new Error("loadtest/tokens.txt has no usable tokens");
 

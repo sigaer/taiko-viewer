@@ -1,6 +1,6 @@
 import { chromium, devices } from "playwright";
 
-const base = (process.env.BASE || "http://127.0.0.1:3000").replace(/\/$/, "");
+const base = (process.env.BASE || "http://127.0.0.1:3100").replace(/\/$/, "");
 const concurrency = Number(process.env.CONCURRENCY || 2);
 const rounds = Number(process.env.ROUNDS || 10);
 const token = process.env.TOKEN || "";
