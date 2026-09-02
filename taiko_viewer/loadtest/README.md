@@ -97,6 +97,8 @@ BASE=http://127.0.0.1:3100 VUS=3 DURATION=30 node loadtest/node-entry-smoke.mjs
 BASE=http://127.0.0.1:3100 VUS=3 DURATION=30 node loadtest/node-static-smoke.mjs
 ```
 
+两者默认每个 VU 间隔 250ms，并加入 50ms 抖动；可用 `REQUEST_INTERVAL_MS`、`JITTER_MS`、`MAX_RPS`、`WARMUP_SECONDS` 和 `OUTPUT_JSON` 调整。`REQUEST_INTERVAL_MS=0` 且不设 `MAX_RPS` 会恢复无节流 burst，仅用于本机短时复现，不属于 smoke；生产禁止这种 burst 模式。
+
 登录态入口可额外设置 `COOKIE='stv_session=测试账号cookie'`。Node 脚本只用于发现明显 404、5xx、超时和延迟异常，不替代 k6 的稳定并发模型、阈值、趋势与分布能力；正式容量测试仍应在独立压测机安装 k6 后执行。`node-static-smoke.mjs` 默认使用最近采样的 Nuxt hash 资源，viewer 重新构建后必须重新采样更新。生产依然禁止高压。
 
 ## k6 命令
