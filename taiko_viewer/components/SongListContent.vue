@@ -129,6 +129,9 @@ const buildSongDetailLink = (songId: number) => {
   if (props.shelfStatus === 1) {
     return localePath({ path, query: { list: "removed" } });
   }
+  if (props.shelfStatus === 2) {
+    return localePath({ path, query: { list: "other" } });
+  }
   return localePath(path);
 };
 

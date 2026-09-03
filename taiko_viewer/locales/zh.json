@@ -42,6 +42,7 @@
     "songsTab": "歌曲",
     "songsAvailable": "实装歌曲",
     "songsRemoved": "未实装/已下架歌曲",
+    "songsOther": "其他歌曲",
     "v2Constants": "V2 定数",
     "grade": "段位查询",
     "guide": "谱面攻略",
@@ -407,6 +408,12 @@
         "desc": "国行太鼓已下架歌曲归档，支持按曲名与分类搜索。",
         "keyword": "国行歌曲",
         "panelDesc": "展示已下架歌曲，支持按名称与分类搜索。"
+      },
+      "other": {
+        "title": "其他歌曲",
+        "desc": "未收录进常规曲库的歌曲（街机旧编号、Switch/主机独占等），支持按曲名与分类搜索。",
+        "keyword": "其他歌曲",
+        "panelDesc": "展示未纳入常规编号的其他歌曲，支持按名称与分类搜索。"
       },
       "v2Constants": {
         "title": "V2 定数",

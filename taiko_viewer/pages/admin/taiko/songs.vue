@@ -191,6 +191,7 @@ const levelText = (row: Record<string, any>) =>
         <el-select v-model="filters.shelfStatus" clearable placeholder="上下架状态">
           <el-option label="已收录" value="0" />
           <el-option label="未收录 / 下架" value="1" />
+          <el-option label="其他歌曲" value="2" />
         </el-select>
         <div class="admin-filter-actions">
           <el-button @click="applyFilters">筛选</el-button>
@@ -275,6 +276,7 @@ const levelText = (row: Record<string, any>) =>
           <el-select v-model="form.shelf_status">
             <el-option label="已收录" :value="0" />
             <el-option label="未收录 / 下架" :value="1" />
+            <el-option label="其他歌曲" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item label="简单">

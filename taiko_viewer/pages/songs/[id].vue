@@ -103,12 +103,18 @@ const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
 };
 const songListPath = computed(() => {
   if (route.query.list === "removed") return "/songs/removed";
+  if (route.query.list === "other") return "/songs/other";
   if (route.query.list === "available") return "/songs/available";
-  return normalizedShelfStatus(song.value?.shelf_status) === 1 ? "/songs/removed" : "/songs/available";
+  const status = normalizedShelfStatus(song.value?.shelf_status);
+  if (status === 1) return "/songs/removed";
+  if (status === 2) return "/songs/other";
+  return "/songs/available";
 });
-const songListLabelKey = computed(() =>
-  songListPath.value === "/songs/removed" ? "nav.songsRemoved" : "nav.songsAvailable"
-);
+const songListLabelKey = computed(() => {
+  if (songListPath.value === "/songs/removed") return "nav.songsRemoved";
+  if (songListPath.value === "/songs/other") return "nav.songsOther";
+  return "nav.songsAvailable";
+});
 
 watch(
   () => [song.value?.shelf_status, route.query.list] as const,

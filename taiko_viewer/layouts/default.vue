@@ -174,11 +174,12 @@ const buildBreadcrumbs = () => {
   }
   if (/^\/(?:ja\/)?songs\/[^/]+$/.test(route.path)) {
     const isRemovedList = route.query.list === "removed";
+    const isOtherList = route.query.list === "other";
     return [
       { labelKey: "nav.home", to: "/" },
       {
-        labelKey: isRemovedList ? "nav.songsRemoved" : "nav.songsAvailable",
-        to: isRemovedList ? "/songs/removed" : "/songs/available"
+        labelKey: isRemovedList ? "nav.songsRemoved" : isOtherList ? "nav.songsOther" : "nav.songsAvailable",
+        to: isRemovedList ? "/songs/removed" : isOtherList ? "/songs/other" : "/songs/available"
       },
       { labelKey: "songs.detail" }
     ];
