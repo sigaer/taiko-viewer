@@ -419,22 +419,33 @@ const normalizeRatingRankDistribution = (value: unknown): AnnualRatingRankDistri
   };
 };
 
+const RATING_DISTRIBUTION_MEMO_TTL_MS = 5 * 60 * 1000;
+let ratingDistributionMemo: { value: AnnualRatingDistribution | null; at: number } | null = null;
+
 export const readCachedAnnualRatingDistribution = async (): Promise<AnnualRatingDistribution | null> => {
+  const now = Date.now();
+  if (ratingDistributionMemo && now - ratingDistributionMemo.at < RATING_DISTRIBUTION_MEMO_TTL_MS) {
+    return ratingDistributionMemo.value;
+  }
   const cachePath = resolve(getAnnualCacheRoot(), "ratings", "distribution.json");
   const cached = await readAnnualJson<AnnualRatingDistribution>(cachePath).catch(() => null);
-  return cached && Array.isArray(cached.ratings) ? cached : null;
+  const value = cached && Array.isArray(cached.ratings) ? cached : null;
+  ratingDistributionMemo = { value, at: now };
+  return value;
 };
 
 export const refreshAnnualRatingDistribution = async (): Promise<AnnualRatingDistribution | null> => {
   try {
     const cachePath = resolve(getAnnualCacheRoot(), "ratings", "distribution.json");
-    return await withAnnualFileLock("rating-distribution", async () => {
+    const payload = await withAnnualFileLock("rating-distribution", async () => {
       const fingerprint = await getAnnualRatingInputFingerprint();
       const built = await runAnnualRatingsCli();
-      const payload = { ...built, fingerprint };
-      await atomicWriteJson(cachePath, payload);
-      return payload;
+      const builtPayload = { ...built, fingerprint };
+      await atomicWriteJson(cachePath, builtPayload);
+      return builtPayload;
     });
+    ratingDistributionMemo = null;
+    return payload;
   } catch (error) {
     console.error("[annual-summary] rating distribution failed", safeMessage(error) || error);
     return null;

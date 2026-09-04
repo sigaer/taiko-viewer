@@ -84,3 +84,22 @@ export const enrichAnnualRatingRank = async (summary: AnnualSummaryV4): Promise<
     }
   };
 };
+
+export const enrichAnnualRatingDistributionAtRead = async (summary: AnnualSummaryV4): Promise<AnnualSummaryV4> => {
+  const section = summary.sections.ratingRank;
+  if (!section || section.status !== "exact") return summary;
+  const data = section.data && typeof section.data === "object" ? (section.data as Record<string, unknown>) : null;
+  if (!data || !(Number(data.rating) > 0)) return summary;
+  const distribution = await getAnnualRatingDistribution();
+  if (!distribution?.distribution) return summary;
+  return {
+    ...summary,
+    sections: {
+      ...summary.sections,
+      ratingRank: {
+        ...section,
+        data: { ...data, distribution: distribution.distribution }
+      }
+    }
+  };
+};

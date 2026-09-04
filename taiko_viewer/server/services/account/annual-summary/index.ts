@@ -25,7 +25,7 @@ import {
 } from "./constants";
 import { createAnnualQrCodeDataUrl, renderAnnualPoster } from "./poster";
 import { enrichAnnualSummary } from "./presentation";
-import { enrichAnnualRatingRank } from "./ratings";
+import { enrichAnnualRatingDistributionAtRead, enrichAnnualRatingRank } from "./ratings";
 import {
   countRecentAnnualJobs,
   deleteAnnualSummaryForGc,
@@ -121,11 +121,12 @@ const safeReadSummary = async (row: AnnualSummaryRow | null) => {
 
 const withOwnerAssets = async (summary: AnnualSummaryV4, locale: AnnualLocale) => {
   const enriched = await enrichAnnualSummary(summary, locale);
+  const withRating = await enrichAnnualRatingDistributionAtRead(enriched);
   return {
-    ...enriched,
+    ...withRating,
     profileCard: {
-      ...(enriched.profileCard || {}),
-      myDonUrl: `/api/account/annual-summaries/${encodeURIComponent(enriched.summaryId)}/my-don`
+      ...(withRating.profileCard || {}),
+      myDonUrl: `/api/account/annual-summaries/${encodeURIComponent(withRating.summaryId)}/my-don`
     }
   };
 };
