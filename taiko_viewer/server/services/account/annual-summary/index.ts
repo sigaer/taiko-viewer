@@ -26,6 +26,8 @@ import { enrichAnnualRatingRank } from "./ratings";
 import {
   countRecentAnnualJobs,
   deleteAnnualSummaryForGc,
+  deleteAnnualSummaryForAdmin,
+  listAnnualSummariesForAdmin,
   deleteOldAnnualJobs,
   deleteAnnualPostersForShare,
   expireAnnualShare,
@@ -696,6 +698,29 @@ export const getAdminAnnualEvents = async (
     pageSize,
     events: filtered.slice(offset, offset + pageSize).map((event) => toAdminAnnualEvent(event))
   };
+};
+
+export const getAdminAnnualSummaries = async (targetInput: unknown) => {
+  const target = String(targetInput || "").trim();
+  if (!target) throw createError({ statusCode: 400, statusMessage: "请输入用户 ID 或昵称" });
+  const rows = await listAnnualSummariesForAdmin(target);
+  return rows.map((row) => ({ id: row.id, username: row.username, taikoId: row.taiko_id, nickname: row.verified_title, versionKey: row.version_key, generatedAt: new Date(row.generated_at).toISOString(), dataMode: row.data_mode }));
+};
+
+export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?: unknown) => {
+  const row = await findAnnualSummaryById(summaryId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const summary = await safeReadSummary(row);
+  if (!summary) throw createError({ statusCode: 410, statusMessage: "年度总结文件不可用" });
+  return withOwnerAssets(summary, normalizeAnnualLocale(localeInput));
+};
+
+export const removeAdminAnnualSummary = async (summaryId: string) => {
+  const row = await findAnnualSummaryById(summaryId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const deleted = await deleteAnnualSummaryForAdmin(summaryId);
+  if (deleted) await removeAnnualPath(dirname(row.summary_path)).catch(() => undefined);
+  return { deleted };
 };
 
 export const readAnnualImage = (filePath: string) => readFile(filePath);

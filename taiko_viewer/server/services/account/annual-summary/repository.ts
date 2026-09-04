@@ -47,6 +47,21 @@ export const findAnnualSummaryById = async (summaryId: string) => {
   return rows[0] || null;
 };
 
+export const listAnnualSummariesForAdmin = async (target: string) => {
+  await ensureAccountSchema();
+  const value = `%${target}%`;
+  const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow & { username: string; taiko_id: string; verified_title: string | null }>[]>(
+    `SELECT s.*, a.username, b.taiko_id, b.verified_title
+     FROM web_annual_summaries s
+     INNER JOIN web_user_accounts a ON a.id = s.user_id
+     INNER JOIN web_taiko_bindings b ON b.id = s.binding_id
+     WHERE a.username LIKE ? OR b.taiko_id LIKE ? OR b.verified_title LIKE ?
+     ORDER BY s.generated_at DESC LIMIT 100`,
+    [value, value, value]
+  );
+  return rows;
+};
+
 export const findAnnualBinding = async (bindingId: number, userId: number) => {
   await ensureAccountSchema();
   const [rows] = await getAccountDb().execute<DbRow<BindingRow>[]>(
@@ -472,6 +487,12 @@ export const deleteAnnualSummaryForGc = async (summaryId: string) => {
      )`,
     [summaryId]
   );
+  return result.affectedRows > 0;
+};
+
+export const deleteAnnualSummaryForAdmin = async (summaryId: string) => {
+  await ensureAccountSchema();
+  const [result] = await getAccountDb().execute<ResultSetHeader>("DELETE FROM web_annual_summaries WHERE id = ?", [summaryId]);
   return result.affectedRows > 0;
 };
 
