@@ -7,14 +7,15 @@ const props = withDefaults(defineProps<{
   pageIndex: number; pageTotal: number; eyebrow: string; title: string; lead?: string; accent?: string;
   tone?: "ember" | "sunrise" | "aurora" | "royal" | "gold"; active?: boolean; reducedMotion?: boolean;
   mood?: string; intensity?: "low" | "medium" | "high";
-}>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false });
+  variant?: "default" | "poster";
+}>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false, variant: "default" });
 
 const rootRef = ref<HTMLElement | null>(null);
 useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"));
 </script>
 
 <template>
-  <AnnualScene ref="rootRef" class="story-slide-shell" :class="[`tone-${tone}`, { 'is-active': active }]" :active="active" :reduced-motion="reducedMotion" :mood="mood" :intensity="intensity">
+  <AnnualScene ref="rootRef" class="story-slide-shell" :class="[`tone-${tone}`, `variant-${variant}`, { 'is-active': active }]" :active="active" :reduced-motion="reducedMotion" :mood="mood" :intensity="intensity">
     <template #background><slot name="background"><div class="story-slide-shell__backdrop"><i></i><i></i></div></slot></template>
     <template #atmosphere><slot name="atmosphere" /></template>
     <template #visual><slot name="visual" /></template>
@@ -49,4 +50,13 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 .story-slide-shell.mood-award-stage .story-slide-shell__body :deep(strong),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(h3),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(b){color:#fff4d5!important}
 .story-slide-shell.mood-award-stage .story-slide-shell__body :deep(span),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(small),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep(p){color:rgba(255,239,199,.74)!important}
 .story-slide-shell.mood-award-stage .story-slide-shell__body :deep(article),.story-slide-shell.mood-award-stage .story-slide-shell__body :deep([class*="__panel"]){border-color:rgba(245,203,114,.2)!important;background-color:rgba(11,16,40,.62)!important}
+.story-slide-shell.variant-poster{padding-top:clamp(3.6rem,8vh,5.6rem);padding-bottom:clamp(3.6rem,8vh,5rem)}
+.variant-poster .story-slide-shell__frame{height:100%;display:flex;flex-direction:column;gap:0;max-width:760px}
+.variant-poster .story-slide-shell__header{display:block;position:relative;z-index:2;text-align:center;flex:0 0 auto}
+.variant-poster .story-slide-shell__heading{justify-content:center}.variant-poster .story-slide-shell__heading p{letter-spacing:.22em}
+.variant-poster .story-slide-shell__header h2{margin:.35rem auto 0;font-size:clamp(2rem,8vw,4.7rem);line-height:.95;text-wrap:balance}
+.variant-poster .story-slide-shell__lead{display:none}
+.variant-poster .story-slide-shell__body{display:block;flex:1;min-height:0}
+.variant-poster .story-slide-shell__body :deep(>*){height:100%}
+@media(max-width:720px){.variant-poster .story-slide-shell__header h2{font-size:clamp(1.8rem,8vw,3rem)}.variant-poster .story-slide-shell__frame{max-width:100%}}
 </style>
