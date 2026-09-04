@@ -11,7 +11,7 @@ const copy=computed(()=>getSpeedProfileCopy(profile.value,locale.value==='ja'?'j
 // Guard unavailable metrics with isUsableMetric(summary.speedProfile.chartCount).
 const hasCount=computed(()=>!!profile.value&&isUsableMetric(profile.value.chartCount));
 </script>
-<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED SIGNATURE" :title="profile ? copy.title : '今年还没有形成倍速画像'" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED SIGNATURE" :title="profile ? '年度倍速画像' : '今年还没有形成倍速画像'" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
  <template #background><div class="profile-poster__bg"><img src="/annual/speedProfile/background.png" alt=""><div class="profile-poster__city" /></div></template>
  <div class="profile-poster" :class="{'is-empty':!profile}"><div class="profile-poster__headline" data-animate><p>这一年，你的节奏档位</p><strong>{{ profile ? profile.speed.toFixed(1) : '—' }}<small>×</small></strong><span v-if="hasCount">使用在 <b>{{ profile?.chartCount }}</b> 张谱面</span></div><div class="profile-poster__record"><AnnualVinylRecord :center-text="profile ? `${profile.speed.toFixed(1)}×` : '—'" tone="light" :active="active" :reduced-motion="reducedMotion" /></div><div class="profile-poster__footer" data-animate><strong>{{ profile ? copy.tag : '节奏画像待生成' }}</strong><p>{{ profile ? copy.body : '多打几首歌，你的节奏档位就会慢慢浮现。' }}</p></div></div>
 </StorySlideShell></template>

@@ -10,7 +10,7 @@ const copy=computed(()=>getPoundSpeedCopy(props.summary.pound,locale.value==='ja
 const speed=computed(()=>props.summary.pound?.speed);
 const song=computed(()=>props.summary.pound?.topSong);
 </script>
-<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED BURST" :title="song?.name || copy.title" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED BURST" :title="speed ? '最高秒速歌曲' : '最高秒速记录'" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
   <template #background><div class="pound-poster__bg"><img src="/annual/pound/background.webp" alt=""><div class="pound-poster__city" /></div></template>
   <div class="pound-poster" :class="{'is-empty':!speed}"><div class="pound-poster__hero"><p class="pound-poster__kicker">{{ speed ? copy.title : '今年还没有记录到最高秒速' }}</p><div class="pound-poster__speed" data-animate><strong>{{ speed ? speed.toFixed(1) : '—' }}</strong><span>打 / 秒</span></div><p class="pound-poster__sub">{{ speed ? copy.body : '等下一段连打，把鼓点推到更快的位置。' }}</p></div><div class="pound-poster__record"><AnnualVinylRecord :cover-url="song?.coverUrl" :cover-alt="song?.name" :active="active" :reduced-motion="reducedMotion" /><div class="pound-poster__caption">{{ song?.name || t('annualSummary.common.songWaiting') }}<small v-if="speed">按连打区间换算</small></div></div></div>
 </StorySlideShell></template>
