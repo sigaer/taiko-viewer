@@ -220,6 +220,13 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
   return withAnnualFileLock(`build:${job.user_id}:${job.binding_id}:${job.version_key}`, async () => {
     const existing = await findLatestAnnualSummary(job.user_id, job.binding_id, job.version_key);
     if (existing && (await safeReadSummary(existing))) return existing;
+    if (existing) {
+      // Stale or schema-drifted cached summary: clear the row and its files so
+      // the rebuild can insert a fresh summary without hitting the unique
+      // (user_id, binding_id, version_key) constraint.
+      await deleteAnnualSummaryForAdmin(existing.id).catch(() => undefined);
+      await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined);
+    }
 
     const envelope = await runAnnualSummaryCli(binding.taiko_id, async ({ stage, percent, detail }) => {
       const parts = [

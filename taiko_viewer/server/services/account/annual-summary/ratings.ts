@@ -9,6 +9,22 @@ const ratingTier = (topPercent: number) => {
   return "growing";
 };
 
+const profileField = (summary: AnnualSummaryV4, key: string) => {
+  const profile = (summary.profileCard || {}) as Record<string, unknown>;
+  return profile[key];
+};
+
+const resolvePlayerRank = (summary: AnnualSummaryV4) => {
+  const danMax = Math.floor(Number(profileField(summary, "danMax") || 0));
+  if (danMax >= 1 && danMax <= 19) {
+    return {
+      rankKey: `grade_${danMax}`,
+      rankLabel: String(profileField(summary, "danName") || `grade_${danMax}`)
+    };
+  }
+  return { rankKey: null, rankLabel: null };
+};
+
 export const enrichAnnualRatingRank = async (summary: AnnualSummaryV4): Promise<AnnualSummaryV4> => {
   const original = summary.sections.ratingRank || { status: "unavailable", data: null };
   const originalData =
@@ -40,6 +56,7 @@ export const enrichAnnualRatingRank = async (summary: AnnualSummaryV4): Promise<
   const midRank = Number(((rankMin + rankMax) / 2).toFixed(1));
   const topPercent = Number(((midRank / sampleSize) * 100).toFixed(2));
   const percentile = Number(Math.max(0, 100 - topPercent).toFixed(2));
+  const { rankKey, rankLabel } = resolvePlayerRank(summary);
 
   return {
     ...summary,
@@ -58,6 +75,9 @@ export const enrichAnnualRatingRank = async (summary: AnnualSummaryV4): Promise<
           percentile,
           topPercent,
           tier: ratingTier(topPercent),
+          rankKey,
+          rankLabel,
+          distribution: distribution.distribution || null,
           asOf: distribution.generatedAt
         }
       }

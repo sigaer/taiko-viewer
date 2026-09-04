@@ -257,12 +257,30 @@ export const getAnnualInputFingerprint = async (taikoId: string) => {
   return hash.digest("hex");
 };
 
+export type AnnualRatingRankDistribution = {
+  ratingMin: number;
+  ratingMax: number;
+  ratingStep: number;
+  ranks: Array<{
+    key: string;
+    label: string;
+    order: number;
+    colorGroup?: "low" | "mid" | "high";
+    bins: Array<{
+      ratingMin: number;
+      ratingMax: number;
+      relative: number;
+    }>;
+  }>;
+};
+
 export type AnnualRatingDistribution = {
   fingerprint: string;
   generatedAt: string;
   ratings: number[];
   scannedCount: number;
   discardedCount: number;
+  distribution?: AnnualRatingRankDistribution | null;
 };
 
 let ratingFingerprintMemo: { manifestFingerprint: string; contentFingerprint: string } | null = null;
@@ -357,7 +375,47 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
     generatedAt: new Date(String(parsed.generatedAt || Date.now())).toISOString(),
     ratings,
     scannedCount: Math.max(0, Math.floor(Number(parsed.scannedCount) || 0)),
-    discardedCount: Math.max(0, Math.floor(Number(parsed.discardedCount) || 0))
+    discardedCount: Math.max(0, Math.floor(Number(parsed.discardedCount) || 0)),
+    distribution: normalizeRatingRankDistribution(parsed.distribution)
+  };
+};
+
+const normalizeRatingRankDistribution = (value: unknown): AnnualRatingRankDistribution | null => {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const ranksRaw = Array.isArray(raw.ranks) ? raw.ranks : [];
+  const ranks = ranksRaw.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const rank = item as Record<string, unknown>;
+    const order = Math.floor(Number(rank.order) || 0);
+    if (order < 1 || order > 19) return [];
+    const binsRaw = Array.isArray(rank.bins) ? rank.bins : [];
+    const bins = binsRaw.flatMap((binItem) => {
+      if (!binItem || typeof binItem !== "object") return [];
+      const bin = binItem as Record<string, unknown>;
+      const ratingMin = Number(bin.ratingMin);
+      const ratingMax = Number(bin.ratingMax);
+      if (!Number.isFinite(ratingMin) || !Number.isFinite(ratingMax) || ratingMax <= ratingMin) return [];
+      const relative = Math.min(1, Math.max(0, Number(bin.relative) || 0));
+      return [{ ratingMin, ratingMax, relative }];
+    });
+    const colorGroup = ["low", "mid", "high"].includes(String(rank.colorGroup))
+      ? String(rank.colorGroup) as "low" | "mid" | "high"
+      : undefined;
+    return [{
+      key: String(rank.key || `grade_${order}`),
+      label: String(rank.label || ""),
+      order,
+      colorGroup,
+      bins
+    }];
+  });
+  if (ranks.length < 19) return null;
+  return {
+    ratingMin: Number(raw.ratingMin) || 0,
+    ratingMax: Number(raw.ratingMax) || 0,
+    ratingStep: Number(raw.ratingStep) || 0,
+    ranks: ranks.sort((left, right) => left.order - right.order).slice(0, 19)
   };
 };
 
