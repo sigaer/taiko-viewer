@@ -69,14 +69,13 @@ export const findAnnualBinding = async (bindingId: number, userId: number) => {
   return rows[0] || null;
 };
 
-export const listAnnualBindingsForAdmin = async (target: string) => {
+export const listAnnualBindingsForAdmin = async () => {
   await ensureAccountSchema();
-  const value = `%${target}%`;
   const [rows] = await getAccountDb().execute<DbRow<BindingRow & { username: string; email: string }>[]>(
     `SELECT b.*, a.username, a.email
      FROM web_taiko_bindings b INNER JOIN web_user_accounts a ON a.id = b.user_id
-     WHERE b.is_current = 1 AND (b.taiko_id LIKE ? OR a.username LIKE ? OR b.verified_title LIKE ?)
-     ORDER BY b.updated_at DESC LIMIT 100`, [value, value, value]
+     WHERE b.is_current = 1
+     ORDER BY b.updated_at DESC LIMIT 1000`, []
   );
   return rows;
 };

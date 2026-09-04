@@ -6,6 +6,7 @@ import {
   enrichBindingWithCurrentTitle,
   getCurrentBindingRow,
   sanitizeBinding,
+  readUserdata,
   type BindingRow
 } from "~/server/internal/account/shared";
 import { getMyDonImageBuffer } from "~/server/utils/account/my-don";
@@ -717,8 +718,14 @@ export const getAdminAnnualSummaries = async (targetInput: unknown) => {
 export const getAdminAnnualTargets = async (targetInput: unknown) => {
   const target = String(targetInput || "").trim();
   if (target.length < 1) throw createError({ statusCode: 400, statusMessage: "请输入用户 ID、昵称或用户名" });
-  const rows = await listAnnualBindingsForAdmin(target);
-  return rows.map((row) => ({ userId: row.user_id, bindingId: row.id, taikoId: row.taiko_id, username: row.username, nickname: row.verified_title || "" }));
+  const rows = await listAnnualBindingsForAdmin();
+  const items = await Promise.all(rows.map(async (row) => {
+    let nickname = "";
+    try { const userdata = await readUserdata(row.taiko_id); const profile = userdata.profile as Record<string, unknown> | undefined; const costume = profile?.gameCostume as Record<string, unknown> | undefined; nickname = String(profile?.mydon_name || costume?.mydon_name || "").trim(); } catch { /* stale binding */ }
+    const haystack = [row.taiko_id, row.username, nickname].join(" ").toLowerCase();
+    return haystack.includes(target.toLowerCase()) ? { userId: row.user_id, bindingId: row.id, taikoId: row.taiko_id, username: row.username, nickname } : null;
+  }));
+  return items.filter(Boolean);
 };
 
 export const queueAdminAnnualSummaryBuild = async (userId: number, versionInput: unknown, options: { locale?: unknown; force?: boolean } = {}) => {
