@@ -704,7 +704,13 @@ export const getAdminAnnualSummaries = async (targetInput: unknown) => {
   const target = String(targetInput || "").trim();
   if (!target) throw createError({ statusCode: 400, statusMessage: "请输入用户 ID 或昵称" });
   const rows = await listAnnualSummariesForAdmin(target);
-  return rows.map((row) => ({ id: row.id, username: row.username, taikoId: row.taiko_id, nickname: row.verified_title, versionKey: row.version_key, generatedAt: new Date(row.generated_at).toISOString(), dataMode: row.data_mode }));
+  const items = await Promise.all(rows.map(async (row) => {
+    const summary = await safeReadSummary(row);
+    const nickname = String((summary?.profileCard as { nickname?: unknown } | undefined)?.nickname || "").trim();
+    if (![row.username, row.taiko_id, nickname].some((value) => String(value || "").toLowerCase().includes(target.toLowerCase()))) return null;
+    return { id: row.id, username: row.username, taikoId: row.taiko_id, nickname, versionKey: row.version_key, generatedAt: new Date(row.generated_at).toISOString(), dataMode: row.data_mode };
+  }));
+  return items.filter(Boolean);
 };
 
 export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?: unknown) => {
