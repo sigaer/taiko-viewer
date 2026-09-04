@@ -25,7 +25,7 @@ const finiteNonNegative = (value: unknown) => {
 };
 
 const annualYear = computed(() => {
-  for (const candidate of [props.summary.version.startDate, props.summary.version.key, props.summary.version.name]) {
+  for (const candidate of [props.summary.version.name, props.summary.version.key, props.summary.version.startDate]) {
     const match = String(candidate || "").match(/(?:^|\D)(20\d{2})(?:\D|$)/);
     if (match) return Number(match[1]);
   }
@@ -37,11 +37,17 @@ const activeDays = computed(() => Math.round(finiteNonNegative(activity.value?.a
 const longestStreak = computed(() => Math.round(finiteNonNegative(activity.value?.longestStreak)));
 const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "ja-JP" : "zh-CN"));
 
+const startMonth = computed(() => {
+  const match = String(props.summary.version.startDate || "").match(/^(\d{4})-(\d{2})/);
+  if (match) return { year: Number(match[1]), month: Number(match[2]) };
+  return { year: annualYear.value, month: 1 };
+});
+
 const normalizedDays = computed(() => {
   const byDate = new Map<string, CalendarDay>();
   for (const rawDay of activity.value?.days || []) {
     const match = String(rawDay?.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!match || Number(match[1]) !== annualYear.value) continue;
+    if (!match) continue;
     const date = `${match[1]}-${match[2]}-${match[3]}`;
     const current = byDate.get(date);
     const playCount = finiteNonNegative(rawDay.playCount);
@@ -56,9 +62,11 @@ const normalizedDays = computed(() => {
 });
 
 const monthGroups = computed(() => Array.from({ length: 12 }, (_, index) => {
-  const month = index + 1;
-  const prefix = `${annualYear.value}-${String(month).padStart(2, "0")}-`;
-  return { month, days: normalizedDays.value.filter((day) => day.date.startsWith(prefix)) };
+  const total = startMonth.value.year * 12 + (startMonth.value.month - 1) + index;
+  const year = Math.floor(total / 12);
+  const month = (total % 12) + 1;
+  const prefix = `${year}-${String(month).padStart(2, "0")}-`;
+  return { year, month, days: normalizedDays.value.filter((day) => day.date.startsWith(prefix)) };
 }));
 
 </script>
@@ -103,10 +111,10 @@ const monthGroups = computed(() => Array.from({ length: 12 }, (_, index) => {
       <div class="annual-calendar-scene__months">
         <AnnualMonthDotGrid
           v-for="group in monthGroups"
-          :key="group.month"
+          :key="`${group.year}-${group.month}`"
           data-annual-stage="visual"
           :month="group.month"
-          :year="annualYear"
+          :year="group.year"
           :days="group.days"
           :start-date="summary.version.startDate"
           :end-date="summary.version.effectiveEndDate"

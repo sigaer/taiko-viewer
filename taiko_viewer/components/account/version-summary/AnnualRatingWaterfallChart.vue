@@ -30,9 +30,9 @@ const chartRight = 1010;
 const chartTop = 60;
 const chartBottom = 644;
 const axisY = 672;
-const layerGap = 19;
+const layerGap = 28;
 const layerDepth = 3;
-const maxPeakHeight = 92;
+const maxPeakHeight = 84;
 const fallbackRatingMax = 16;
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
