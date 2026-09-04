@@ -399,11 +399,12 @@ export const recoverAnnualJobs = async () => {
 export const queueAccountAnnualSummaryBuild = async (
   userId: number,
   versionInput: unknown,
-  options: { locale?: unknown } = {}
+  options: { locale?: unknown; bindingId?: number } = {}
 ) => {
   const version = resolveAnnualVersion(versionInput);
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
-  const binding = await requireCurrentAnnualBinding(userId);
+  const binding = options.bindingId ? await findAnnualBinding(options.bindingId, userId) : await requireCurrentAnnualBinding(userId);
+  if (!binding) throw createError({ statusCode: 400, statusMessage: "目标绑定不存在" });
   return withAnnualFileLock(`queue:build:${userId}:${binding.id}:${version.key}`, async () => {
     const active = await findActiveAnnualJob({ userId, bindingId: binding.id, versionKey: version.key, type: "build" });
     if (active) return { job: serializeAnnualJob(active), summary: null };
@@ -732,6 +733,18 @@ export const queueAdminAnnualSummaryBuild = async (userId: number, versionInput:
   const version = resolveAnnualVersion(versionInput);
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
   const binding = await requireCurrentAnnualBinding(userId);
+  if (options.force) {
+    const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
+    if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
+  }
+  return queueAccountAnnualSummaryBuild(userId, version.key, { ...options, bindingId });
+};
+
+export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bindingId: number, versionInput: unknown, options: { locale?: unknown; force?: boolean } = {}) => {
+  const version = resolveAnnualVersion(versionInput);
+  if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
+  const binding = await findAnnualBinding(bindingId, userId);
+  if (!binding) throw createError({ statusCode: 404, statusMessage: "目标绑定不存在" });
   if (options.force) {
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }

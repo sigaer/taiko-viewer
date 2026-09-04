@@ -74,7 +74,6 @@ export const listAnnualBindingsForAdmin = async () => {
   const [rows] = await getAccountDb().execute<DbRow<BindingRow & { username: string; email: string }>[]>(
     `SELECT b.*, a.username, a.email
      FROM web_taiko_bindings b INNER JOIN web_user_accounts a ON a.id = b.user_id
-     WHERE b.is_current = 1
      ORDER BY b.updated_at DESC LIMIT 1000`, []
   );
   return rows;
