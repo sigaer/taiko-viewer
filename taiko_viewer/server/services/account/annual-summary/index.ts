@@ -28,6 +28,7 @@ import {
   deleteAnnualSummaryForGc,
   deleteAnnualSummaryForAdmin,
   listAnnualSummariesForAdmin,
+  listAnnualBindingsForAdmin,
   deleteOldAnnualJobs,
   deleteAnnualPostersForShare,
   expireAnnualShare,
@@ -711,6 +712,24 @@ export const getAdminAnnualSummaries = async (targetInput: unknown) => {
     return { id: row.id, username: row.username, taikoId: row.taiko_id, nickname, versionKey: row.version_key, generatedAt: new Date(row.generated_at).toISOString(), dataMode: row.data_mode };
   }));
   return items.filter(Boolean);
+};
+
+export const getAdminAnnualTargets = async (targetInput: unknown) => {
+  const target = String(targetInput || "").trim();
+  if (target.length < 1) throw createError({ statusCode: 400, statusMessage: "请输入用户 ID、昵称或用户名" });
+  const rows = await listAnnualBindingsForAdmin(target);
+  return rows.map((row) => ({ userId: row.user_id, bindingId: row.id, taikoId: row.taiko_id, username: row.username, nickname: row.verified_title || "" }));
+};
+
+export const queueAdminAnnualSummaryBuild = async (userId: number, versionInput: unknown, options: { locale?: unknown; force?: boolean } = {}) => {
+  const version = resolveAnnualVersion(versionInput);
+  if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
+  const binding = await requireCurrentAnnualBinding(userId);
+  if (options.force) {
+    const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
+    if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
+  }
+  return queueAccountAnnualSummaryBuild(userId, version.key, options);
 };
 
 export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?: unknown) => {

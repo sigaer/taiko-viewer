@@ -1,2 +1,2 @@
-const OPERATORS = new Set(["sigaer", "maru", "马路maru"]);
+const OPERATORS = new Set(["ichika", "maru"]);
 export const isAnnualReportOperator = (username: string) => OPERATORS.has(String(username || "").trim());
