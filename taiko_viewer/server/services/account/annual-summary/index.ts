@@ -1,12 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { readdir } from "node:fs/promises";
 import { createError } from "h3";
 import {
   enrichBindingWithCurrentTitle,
   getCurrentBindingRow,
   sanitizeBinding,
   readUserdata,
+  getRuntimePaths,
   type BindingRow
 } from "~/server/internal/account/shared";
 import { getMyDonImageBuffer } from "~/server/utils/account/my-don";
@@ -720,11 +722,18 @@ export const getAdminAnnualTargets = async (targetInput: unknown) => {
   const target = String(targetInput || "").trim();
   if (target.length < 1) throw createError({ statusCode: 400, statusMessage: "请输入用户 ID、昵称或用户名" });
   const rows = await listAnnualBindingsForAdmin();
-  const items = await Promise.all(rows.map(async (row) => {
+  const byTaikoId = new Map(rows.map((row) => [String(row.taiko_id), row]));
+  const files = await readdir(getRuntimePaths().userdataDir, { withFileTypes: true }).catch(() => []);
+  const taikoIds = new Set<string>();
+  for (const entry of files) {
+    if (entry.isFile() && entry.name.endsWith("data.json") && !entry.name.startsWith("data_")) taikoIds.add(entry.name.slice(0, -"data.json".length));
+  }
+  const items = await Promise.all([...taikoIds].map(async (taikoId) => {
+    const row = byTaikoId.get(taikoId);
     let nickname = "";
-    try { const userdata = await readUserdata(row.taiko_id); const profile = userdata.profile as Record<string, unknown> | undefined; const costume = profile?.gameCostume as Record<string, unknown> | undefined; nickname = String(profile?.mydon_name || costume?.mydon_name || "").trim(); } catch { /* stale binding */ }
-    const haystack = [row.taiko_id, row.username, nickname].join(" ").toLowerCase();
-    return haystack.includes(target.toLowerCase()) ? { userId: row.user_id, bindingId: row.id, taikoId: row.taiko_id, username: row.username, nickname } : null;
+    try { const userdata = await readUserdata(taikoId); const profile = userdata.profile as Record<string, unknown> | undefined; const costume = profile?.gameCostume as Record<string, unknown> | undefined; nickname = String(profile?.mydon_name || costume?.mydon_name || "").trim(); } catch { /* malformed or concurrently removed data */ }
+    const haystack = [taikoId, row?.username || "", nickname].join(" ").toLowerCase();
+    return haystack.includes(target.toLowerCase()) ? { userId: row?.user_id ?? null, bindingId: row?.id ?? null, taikoId, username: row?.username || "", nickname, hasViewerAccount: Boolean(row) } : null;
   }));
   return items.filter(Boolean);
 };
@@ -750,6 +759,14 @@ export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bin
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
   }
   return queueAccountAnnualSummaryBuild(userId, version.key, options);
+};
+
+export const buildAdminAnnualPreview = async (taikoIdInput: unknown) => {
+  const taikoId = String(taikoIdInput || "").trim();
+  if (!/^\d+$/.test(taikoId)) throw createError({ statusCode: 400, statusMessage: "目标鼓众 ID 无效" });
+  const envelope = await runAnnualSummaryCli(taikoId);
+  const summary = await enrichAnnualRatingRank({ ...envelope.summary, schemaVersion: ANNUAL_SCHEMA_VERSION, version: getAnnualVersion() });
+  return { summary, generatedFor: taikoId, persisted: false };
 };
 
 export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?: unknown) => {
