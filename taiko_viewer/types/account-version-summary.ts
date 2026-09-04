@@ -177,6 +177,24 @@ export type VersionSummaryRatingRank = {
   percentile: number;
   tier: string;
   generatedAt: string;
+  rankKey?: string | null;
+  rankLabel?: string | null;
+  distribution?: {
+    ratingMin: number;
+    ratingMax: number;
+    ratingStep: number;
+    ranks: Array<{
+      key: string;
+      label: string;
+      order: number;
+      colorGroup?: "low" | "mid" | "high";
+      bins: Array<{
+        ratingMin: number;
+        ratingMax: number;
+        relative: number;
+      }>;
+    }>;
+  } | null;
 };
 
 export type VersionSummaryCopyBlock = {

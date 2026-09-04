@@ -705,6 +705,7 @@
       "time": { "favorite": "太鼓の音が最も集まる時刻", "periods": { "early_morning": "早朝", "morning": "午前", "noon": "昼", "afternoon": "午後", "evening": "夜", "late_night": "深夜" } },
       "late": { "latest": "最も深い夜の記録", "company": "夜の相棒", "nights": "{count} 夜", "plays": "{count} 打を残した" },
       "rating": { "sample": "サイト内の {count} 人のプレイヤーと一緒に", "rank": "今いる場所", "percentile": "仲間の {value}% より先まで来た", "tier": "今いる隊列", "tiers": { "top1": "先頭を走る Top 1%", "top5": "まぶしい Top 5%", "top20": "しっかり届いた Top 20%", "top50": "半分を越えた Top 50%", "growing": "ここから伸びていく場所" } },
+      "ratingRank": { "eyebrow": "TAIKOB20 · 年度の位置", "title": "太鼓衆の山脈の中の、あなたの座標", "b20Value": "TAIKO B20 は", "percentileBefore": "仲間の", "percentileAfter": "% を越えた", "copyLow": "これは数字ではなく、太鼓衆の分布の中のあなたの座標です。", "copyMid": "一歩ずつの上達が、あなたをより前の斜面へ連れてきました。", "copyHigh": "青い麓から赤い峰まで、あなたはここまで来ました。", "emptyTitle": "今年の rating 座標は記録済み", "emptyBody": "分布図はまだ生成中ですが、あなたの一年の位置はもう灯されています。", "missingTitle": "今年はまだ rating の肖像がありません", "missingBody": "もう少し太鼓を打てば、太鼓衆の山脈の中のあなたの位置が現れます。" },
       "keyword": { "signature": "あなたの鼓面らしさ", "brightest": "いちばん明るい角", "shape": "あなたの六角形", "story": "冷たい数字の並びではなく、鼓面と向き合うときに、いちばんあなたらしくなる形です。" },
       "speed": { "eyebrow": "SPEED SIGNATURE", "title": "少し速いくらいが、あなたのテンポ", "lead": "{speed}× が、成績に残るあなたのサインになりました。", "story": "最も多く残ったのは {speed}×", "chartCount": "この速さを刻んだ譜面", "detail": "鼓面を追う勢いは、少しも遅れていません。" },
       "near": { "eyebrow": "ALMOST DONDAFUL", "title": "金色まで、あと数打", "lead": "『{song}』は全良まであと{count}可。鼓面は最後の仕上げを待っています。", "okCount": "あと {count} 可", "score": "ここまで伸ばした最高得点" },

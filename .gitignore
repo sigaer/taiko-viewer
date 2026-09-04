@@ -39,3 +39,6 @@ taiko_viewer/称号.htm
 taiko_viewer/称号_files/
 taiko_viewer/首页Viewer.htm
 taiko_viewer/首页Viewer_files/
+
+# Local DB backups
+backups/

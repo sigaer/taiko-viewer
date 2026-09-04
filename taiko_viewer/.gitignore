@@ -28,3 +28,19 @@ dist-ssr
 
 # Local load-test credentials
 loadtest/tokens.txt
+
+# Local verification artifacts
+test-results/
+
+# Local reference assets (not shipped to production)
+reference/*.mp4
+reference/frames/
+public/Calendar.png
+public/Opening.png
+public/Overview.png
+public/Period.jpg
+public/page_3_exg.gif
+public/weekday.zip
+public/好友按钮.png
+public/monthly/monthly.png
+public/annual/**/*效果图.png

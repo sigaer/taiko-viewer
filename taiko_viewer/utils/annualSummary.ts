@@ -19,12 +19,19 @@ const stringValue = (value: unknown, fallback = "") => typeof value === "string"
 const numberValue = (value: unknown, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 const nullableNumber = (value: unknown) => value === null || value === undefined || value === "" ? null : numberValue(value);
 
+export const ANNUAL_RATING_RANK_LABELS = {
+  zh: ["五级", "四级", "三级", "二级", "一级", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "达人"],
+  ja: ["五級", "四級", "三級", "二級", "一級", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "達人"]
+} as const;
+
+export const getAnnualRatingRankLabels = (locale: "zh" | "ja") => [...ANNUAL_RATING_RANK_LABELS[locale]];
+
 const formatDanGrade = (value: unknown, locale: "zh" | "ja") => {
   const raw = stringValue(value).trim();
   if (!raw) return "";
   const names = locale === "ja"
-    ? ["", "五級", "四級", "三級", "二級", "一級", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "達人"]
-    : ["", "五级", "四级", "三级", "二级", "一级", "初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段", "玄人", "名人", "超人", "达人"];
+    ? ["", ...ANNUAL_RATING_RANK_LABELS.ja]
+    : ["", ...ANNUAL_RATING_RANK_LABELS.zh];
   const code = Number(raw);
   if (Number.isInteger(code) && code > 0 && code < names.length) return names[code] || raw;
   return locale === "ja" ? raw.replaceAll("级", "級").replaceAll("达人", "達人") : raw.replaceAll("級", "级").replaceAll("達人", "达人");
@@ -257,9 +264,34 @@ export const normalizeAnnualSummary = (
   } : null;
 
   const ratingRaw = record(ratingMetric.data);
+  const ratingDistributionRaw = record(ratingRaw.distribution);
   const ratingRank = ratingMetric.status !== "unavailable" ? {
     rating: numberValue(ratingRaw.rating), rank: numberValue(ratingRaw.rank), rankMin: nullableNumber(ratingRaw.rankMin), rankMax: nullableNumber(ratingRaw.rankMax),
-    sampleSize: numberValue(ratingRaw.sampleSize), percentile: numberValue(ratingRaw.percentile), tier: stringValue(ratingRaw.tier), generatedAt: stringValue(ratingRaw.asOf, raw.generatedAt)
+    sampleSize: numberValue(ratingRaw.sampleSize), percentile: numberValue(ratingRaw.percentile), tier: stringValue(ratingRaw.tier), generatedAt: stringValue(ratingRaw.asOf, raw.generatedAt),
+    rankKey: stringValue(ratingRaw.rankKey) || null, rankLabel: stringValue(ratingRaw.rankLabel) || null,
+    distribution: Array.isArray(ratingDistributionRaw.ranks) ? {
+      ratingMin: numberValue(ratingDistributionRaw.ratingMin),
+      ratingMax: numberValue(ratingDistributionRaw.ratingMax),
+      ratingStep: numberValue(ratingDistributionRaw.ratingStep),
+      ranks: ratingDistributionRaw.ranks.flatMap((item) => {
+        const rankRow = record(item);
+        const bins = Array.isArray(rankRow.bins) ? rankRow.bins.flatMap((bin) => {
+          const binRow = record(bin);
+          return [{
+            ratingMin: numberValue(binRow.ratingMin),
+            ratingMax: numberValue(binRow.ratingMax),
+            relative: Math.min(1, Math.max(0, numberValue(binRow.relative)))
+          }];
+        }) : [];
+        return [{
+          key: stringValue(rankRow.key),
+          label: stringValue(rankRow.label),
+          order: numberValue(rankRow.order),
+          colorGroup: ["low", "mid", "high"].includes(stringValue(rankRow.colorGroup)) ? stringValue(rankRow.colorGroup) as "low" | "mid" | "high" : undefined,
+          bins
+        }];
+      })
+    } : null
   } : null;
 
   const speedRaw = record(speedMetric.data);
