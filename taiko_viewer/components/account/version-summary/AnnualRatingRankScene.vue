@@ -228,7 +228,7 @@ const copyLine = computed(() => {
 }
 .annual-rating-rank-scene__summary {
   animation: annual-rr-rise 0.6s ease-out both;
-  animation-delay: 1.3s;
+  animation-delay: 1.0s;
 }
 @keyframes annual-rr-rise {
   from { opacity: 0; transform: translateY(14px); }

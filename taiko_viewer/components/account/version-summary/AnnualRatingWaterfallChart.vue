@@ -316,29 +316,24 @@ const isEmpty = computed(() => props.ranks.length === 0);
   animation: annual-waterfall-fade 0.6s ease-out both;
 }
 .annual-rating-waterfall-chart__grid {
-  animation-delay: 0.08s;
-  animation-name: annual-waterfall-grid-in;
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
+  animation-delay: 0.18s;
 }
 .annual-rating-waterfall-chart__baselines {
-  animation-delay: 0.16s;
+  animation-delay: 0.18s;
 }
 .annual-rating-waterfall-chart__labels {
-  animation-delay: 0.24s;
+  animation-delay: 0.22s;
 }
 .annual-rating-waterfall-chart__empty-hint {
   animation-delay: 0.2s;
 }
 .annual-rating-waterfall-chart__layer {
-  animation: annual-waterfall-layer-rise 0.85s cubic-bezier(0.22, 0.9, 0.32, 1) both;
-  animation-delay: calc(var(--i, 0) * 46ms + 0.32s);
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
+  animation: annual-waterfall-layer-in 0.7s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+  animation-delay: calc(var(--i, 0) * 38ms + 0.3s);
 }
 .annual-rating-waterfall-chart__marker {
   animation: annual-waterfall-marker-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: 1.15s;
+  animation-delay: 0.8s;
   transform-box: fill-box;
   transform-origin: 50% 50%;
 }
@@ -353,8 +348,8 @@ const isEmpty = computed(() => props.ranks.length === 0);
   letter-spacing: 0;
 }
 .annual-rating-waterfall-chart__labels text {
-  fill: #5c3d22;
-  font-size: 30px;
+  fill: #4a2f1a;
+  font-size: 42px;
   font-weight: 700;
 }
 .annual-rating-waterfall-chart__rank-tags text {
@@ -370,13 +365,9 @@ const isEmpty = computed(() => props.ranks.length === 0);
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes annual-waterfall-grid-in {
-  from { opacity: 0; transform: scaleY(0.9); }
-  to { opacity: 1; transform: scaleY(1); }
-}
-@keyframes annual-waterfall-layer-rise {
-  from { opacity: 0; transform: scaleY(0); }
-  to { opacity: 1; transform: scaleY(1); }
+@keyframes annual-waterfall-layer-in {
+  from { opacity: 0.22; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes annual-waterfall-marker-in {
   from { opacity: 0; transform: scale(0.4); }
