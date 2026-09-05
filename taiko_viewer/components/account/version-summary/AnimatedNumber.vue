@@ -26,6 +26,8 @@ const formatted = computed(() => current.value === null
   ? "--"
   : numberFormatter.value.format(Number(current.value.toFixed(props.decimals))));
 const finalValue = computed(() => Number(props.value || 0));
+// 最终格式化文本用于 ghost 占位，保证组件布局宽度始终等于最终值宽度。
+const finalText = computed(() => numberFormatter.value.format(finalValue.value));
 
 const setControlledValue = () => {
   if (props.progress === null || props.progress === undefined) return false;
@@ -89,9 +91,27 @@ onBeforeUnmount(() => tween?.kill());
 </script>
 
 <template>
-  <span class="animated-number" :aria-label="numberFormatter.format(finalValue)">{{ formatted }}</span>
+  <span class="animated-number" :aria-label="finalText">
+    <span class="animated-number__ghost" aria-hidden="true">{{ finalText }}</span>
+    <span class="animated-number__value">{{ formatted }}</span>
+  </span>
 </template>
 
 <style scoped>
-.animated-number { display: inline-block; font-variant-numeric: tabular-nums; }
+.animated-number {
+  display: inline-grid;
+  grid-template-areas: "number";
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  line-height: 1;
+}
+.animated-number__ghost,
+.animated-number__value {
+  grid-area: number;
+  min-width: 0;
+}
+.animated-number__ghost {
+  visibility: hidden;
+  pointer-events: none;
+}
 </style>

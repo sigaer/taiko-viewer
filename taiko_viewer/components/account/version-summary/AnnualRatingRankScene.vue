@@ -172,13 +172,23 @@ const copyLine = computed(() => {
 }
 .annual-rating-rank-scene__line--strong {
   color: #5a351f;
-  font: 700 clamp(1.6rem, 5.6vw, 2.7rem) / 1.02 var(--viewer-display-font);
+  font: 700 clamp(1.3rem, 4.9vw, 2.3rem) / 1.05 var(--viewer-display-font);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  min-height: 1.1em;
+}
+.annual-rating-rank-scene__line--strong > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .annual-rating-rank-scene__line--strong .animated-number {
+  flex: 0 0 auto;
   color: #b03b2a;
   font-variant-numeric: tabular-nums;
 }
 .annual-rating-rank-scene__rank {
+  flex: 0 0 auto;
+  white-space: nowrap;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
