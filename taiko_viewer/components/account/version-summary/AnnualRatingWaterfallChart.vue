@@ -24,15 +24,15 @@ const props = defineProps<{
 const RANK_COUNT = 19;
 
 const viewBoxWidth = 1200;
-const viewBoxHeight = 760;
-const chartLeft = 74;
+const viewBoxHeight = 1700;
+const chartLeft = 90;
 const chartRight = 1010;
-const chartTop = 60;
-const chartBottom = 644;
-const axisY = 672;
-const layerGap = 28;
+const chartTop = 70;
+const chartBottom = 1600;
+const axisY = 1630;
+const layerGap = 76;
 const layerDepth = 3;
-const maxPeakHeight = 84;
+const maxPeakHeight = 162;
 const fallbackRatingMax = 16;
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
@@ -109,7 +109,7 @@ const createLayerPath = (rank: RankEntry, layerIndex: number) => {
   const offset = layerIndex * layerDepth;
   const points = rank.bins.map((bin) => ({
     x: xForRating((bin.ratingMin + bin.ratingMax) / 2) + offset,
-    y: yForValue(baseline, bin.relative) - layerIndex * 1.05
+    y: yForValue(baseline, bin.relative) - layerIndex * 1.8
   }));
   const firstX = xForRating(rank.bins[0].ratingMin) + offset;
   const lastX = xForRating(rank.bins[rank.bins.length - 1].ratingMax) + offset;
@@ -153,7 +153,7 @@ const rankLabelItems = computed(() =>
     key: layer.key,
     order: layer.order,
     label: layer.label,
-    y: layer.baseline + 5,
+    y: layer.baseline + 8,
     isCurrent: layer.isCurrent
   }))
 );
@@ -258,7 +258,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
           v-for="grid in verticalGrid"
           :key="`axis-${grid.x}`"
           :x="grid.x"
-          :y="axisY + 18"
+          :y="axisY + 40"
           text-anchor="middle"
         >
           {{ grid.label }}
@@ -349,12 +349,12 @@ const isEmpty = computed(() => props.ranks.length === 0);
 .annual-rating-waterfall-chart__labels text,
 .annual-rating-waterfall-chart__rank-tags text {
   fill: #7e6f5a;
-  font: 600 15px/1 var(--viewer-font-family);
+  font: 600 28px/1 var(--viewer-font-family);
   letter-spacing: 0;
 }
 .annual-rating-waterfall-chart__rank-tags text {
   fill: #7d5f49;
-  font-size: 14px;
+  font-size: 26px;
   text-anchor: start;
 }
 .annual-rating-waterfall-chart__rank-tags text.is-current {

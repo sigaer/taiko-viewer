@@ -121,8 +121,8 @@ const copyLine = computed(() => {
   z-index: 1;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: clamp(8px, 1.2vh, 14px);
-  padding: max(46px, calc(env(safe-area-inset-top) + 34px)) clamp(16px, 3.4vw, 30px) max(38px, calc(env(safe-area-inset-bottom) + 30px));
+  gap: clamp(5px, 0.8vh, 9px);
+  padding: max(44px, calc(env(safe-area-inset-top) + 30px)) clamp(16px, 3.4vw, 30px) max(34px, calc(env(safe-area-inset-bottom) + 26px));
   box-sizing: border-box;
 }
 .annual-rating-rank-scene__header {
