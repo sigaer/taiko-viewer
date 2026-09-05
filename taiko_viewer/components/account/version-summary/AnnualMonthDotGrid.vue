@@ -138,6 +138,8 @@ const monthSummary = computed(() => t("annualSummary.slides.calendar.monthSummar
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   align-content: start;
+  justify-items: center;
+  text-align: center;
   gap: clamp(5px, .8vh, 8px);
   contain: layout paint style;
 }

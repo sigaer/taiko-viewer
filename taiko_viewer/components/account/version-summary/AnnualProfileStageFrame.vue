@@ -372,7 +372,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
   .annual-profile-stage__primary { padding: 7px 30px 8px; }
   .annual-profile-stage__secondary-slot { max-width: 84%; }
   .annual-profile-stage__secondary { padding: 6px 14px; }
-  .annual-profile-stage__footer { left: 7%; right: max(7%, 92px); font-size: 11px; line-height: 1.5; }
+  .annual-profile-stage__footer { left: 7%; right: 7%; font-size: 11px; line-height: 1.5; }
 }
 
 @media (max-height: 700px) and (orientation: portrait) {

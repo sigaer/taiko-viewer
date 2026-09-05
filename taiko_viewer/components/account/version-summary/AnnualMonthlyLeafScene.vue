@@ -56,6 +56,21 @@ const topMonth = computed(() => {
 const itemDensity = computed(() => items.value.length > 9 ? "ultra-dense" : items.value.length > 6 ? "dense" : "standard");
 const topMonthLabel = computed(() => topMonth.value?.monthLabel || "—");
 const motionDisabled = computed(() => props.reducedMotion || saveData.value);
+
+// 叶片长度的数据依据：优先用游玩时长，退化为游玩次数。
+const leafMetric = (item: VersionSummaryMonthlyFavorite) => {
+  const seconds = finite(item.estimatedSeconds);
+  return seconds > 0 ? seconds : finite(item.playCount);
+};
+const maxMetric = computed(() => Math.max(...items.value.map(leafMetric), 0));
+const leafDensity = (item: VersionSummaryMonthlyFavorite) => {
+  const max = maxMetric.value;
+  if (!(max > 0)) return 0.5;
+  return leafMetric(item) / max;
+};
+const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
+  topMonth.value && topMonth.value.month === item.month && topMonth.value.song.songNo === item.song.songNo
+);
 </script>
 
 <template>
@@ -91,6 +106,8 @@ const motionDisabled = computed(() => props.reducedMotion || saveData.value);
           :index="index"
           :compact="itemDensity !== 'standard'"
           :motion-disabled="motionDisabled"
+          :density="leafDensity(item)"
+          :is-top="isTopMonth(item)"
         />
       </main>
       <div v-else class="annual-monthly-leaf-scene__empty" data-annual-stage="copy">
@@ -106,7 +123,7 @@ const motionDisabled = computed(() => props.reducedMotion || saveData.value);
 </template>
 
 <style scoped>
-.annual-monthly-leaf-scene{position:relative;width:100%;height:100%;min-height:100vh;min-height:100svh;min-height:100dvh;overflow:hidden;background:#e7f1e4;color:#1d612e}.annual-monthly-leaf-scene__backdrop{position:absolute;left:50%;top:0;width:min(414px,100%);height:100%;transform:translateX(-50%);object-fit:cover;object-position:center;pointer-events:none}.annual-monthly-leaf-scene__inner{position:relative;width:min(414px,100%);height:100%;min-height:100%;margin:0 auto;padding:clamp(10px,3.5vh,32px) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));box-sizing:border-box}.annual-monthly-leaf-scene__header{position:absolute;top:max(clamp(24px,5.6vh,54px),calc(env(safe-area-inset-top) + 12px));left:0;right:0;display:grid;justify-items:center;gap:clamp(8px,1.5vh,13px);z-index:5}.annual-monthly-leaf-scene__title{display:block;width:min(196px,52vw);height:auto}.annual-monthly-leaf-scene__subtitle-row{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.2vw,13px);height:22px}.annual-monthly-leaf-scene__subtitle-row>img:first-child,.annual-monthly-leaf-scene__subtitle-row>img:last-child{width:22px;height:20px;object-fit:contain}.annual-monthly-leaf-scene__subtitle{width:min(113px,30vw);height:auto}.annual-monthly-leaf-scene__timeline{position:absolute;top:19%;left:0;right:0;bottom:23%;display:grid;grid-template-rows:repeat(var(--monthly-count, 6), minmax(0,1fr));align-items:stretch;gap:clamp(3px,1vh,9px);padding:0 8px}.annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item){min-height:0}.annual-monthly-leaf-scene__summary{position:absolute;right:7%;bottom:max(16px,calc(env(safe-area-inset-bottom) + 6px));display:grid;justify-items:end;gap:3px;z-index:5}.annual-monthly-leaf-scene__summary p{display:flex;align-items:end;justify-content:end;gap:4px;margin:0;min-height:25px}.annual-monthly-leaf-scene__summary p img{width:min(187px,48vw);height:auto}.annual-monthly-leaf-scene__summary strong{color:#77b313;font:800 clamp(28px,8.5vw,39px)/.8 var(--viewer-display-font);white-space:nowrap}.annual-monthly-leaf-scene__summary>img{width:min(167px,43vw);height:auto}.annual-monthly-leaf-scene__empty{position:absolute;inset:32% 20% 26%;display:grid;place-items:center;text-align:center}.annual-monthly-leaf-scene.density-dense .annual-monthly-leaf-scene__timeline{top:18%;bottom:22%;gap:1px}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline{top:17%;bottom:21%;gap:0}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item__cover){transform:scale(.76)}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item__leaf){height:min(34px,100%)}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__summary{transform:scale(.86);transform-origin:right bottom}
+.annual-monthly-leaf-scene{position:relative;width:100%;height:100%;min-height:100vh;min-height:100svh;min-height:100dvh;overflow:hidden;background:#e7f1e4;color:#1d612e}.annual-monthly-leaf-scene__backdrop{position:absolute;left:50%;top:0;width:min(414px,100%);height:100%;transform:translateX(-50%);object-fit:cover;object-position:center;pointer-events:none}.annual-monthly-leaf-scene__inner{position:relative;width:min(414px,100%);height:100%;min-height:100%;margin:0 auto;padding:clamp(10px,3.5vh,32px) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));box-sizing:border-box}.annual-monthly-leaf-scene__header{position:absolute;top:max(clamp(24px,5.6vh,54px),calc(env(safe-area-inset-top) + 12px));left:0;right:0;display:grid;justify-items:center;gap:clamp(8px,1.5vh,13px);z-index:5}.annual-monthly-leaf-scene__title{display:block;width:min(196px,52vw);height:auto}.annual-monthly-leaf-scene__subtitle-row{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.2vw,13px);height:22px}.annual-monthly-leaf-scene__subtitle-row>img:first-child,.annual-monthly-leaf-scene__subtitle-row>img:last-child{width:22px;height:20px;object-fit:contain}.annual-monthly-leaf-scene__subtitle{width:min(113px,30vw);height:auto}.annual-monthly-leaf-scene__timeline{position:absolute;top:19%;left:0;right:0;bottom:23%;display:grid;grid-template-rows:repeat(var(--monthly-count, 6), minmax(0,1fr));align-items:stretch;gap:clamp(3px,1vh,9px);padding:0 8px}.annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item){min-height:0}.annual-monthly-leaf-scene__summary{position:absolute;right:7%;bottom:max(86px,calc(env(safe-area-inset-bottom) + 74px));display:grid;justify-items:end;gap:3px;z-index:5}.annual-monthly-leaf-scene__summary p{display:flex;align-items:end;justify-content:end;gap:4px;margin:0;min-height:25px}.annual-monthly-leaf-scene__summary p img{width:min(187px,48vw);height:auto}.annual-monthly-leaf-scene__summary strong{color:#77b313;font:800 clamp(28px,8.5vw,39px)/.8 var(--viewer-display-font);white-space:nowrap}.annual-monthly-leaf-scene__summary>img{width:min(167px,43vw);height:auto}.annual-monthly-leaf-scene__empty{position:absolute;inset:32% 20% 26%;display:grid;place-items:center;text-align:center}.annual-monthly-leaf-scene.density-dense .annual-monthly-leaf-scene__timeline{top:18%;bottom:22%;gap:1px}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline{top:17%;bottom:21%;gap:0}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item__cover){transform:scale(.76)}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item__leaf){height:min(34px,100%)}.annual-monthly-leaf-scene.density-ultra-dense .annual-monthly-leaf-scene__summary{transform:scale(.86);transform-origin:right bottom}
 @media (min-width:721px){.annual-monthly-leaf-scene__inner{box-shadow:0 0 70px rgba(34,92,48,.08)}}
 @media (max-height:700px){.annual-monthly-leaf-scene__header{top:22px;gap:5px}.annual-monthly-leaf-scene__timeline{top:17%;bottom:21%}.annual-monthly-leaf-scene__summary{transform:scale(.8);transform-origin:right bottom}}
 @media (prefers-reduced-motion:reduce){.annual-monthly-leaf-scene__timeline :deep(.monthly-leaf-item__leaf>img){animation:none;transform:scaleX(1);will-change:auto}}
