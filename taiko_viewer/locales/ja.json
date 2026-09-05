@@ -715,6 +715,7 @@
       "milestones": { "song": "『{name}』", "effort": "★{stars} · 累計 {plays} 回挑戦", "onlyOnce": "この一度は、簡単には届かなかった" },
       "breakthrough": { "dan": "段位の一歩", "ratingGain": "RT の伸び", "ratingJourney": "ここから、ここまで", "songAttempts": "この曲に重ねた挑戦", "times": "{count} 回", "difficulty": "越えた壁の高さ" },
       "final": { "firstSteps": "物語の最初の音", "fromBreakthrough": "この瞬間から生まれた称号", "fromSpeed": "成績に残った速さ", "fromKeyword": "いちばんあなたらしい言葉", "fromJourney": "歩いてきた道の名前", "times": "{count} 回の挑戦" },
+      "finale": { "eyebrow": "年度の突破 · 称号の授与", "flashEyebrow": "年度の突破", "missingTitle": "あなたの年度称号はまだ生成中", "missingBody": "次の太鼓の一打で、もっとはっきりします。" },
       "poster": { "finalTitle": "年間称号", "favorite": "最愛曲", "keyword": "キーワード", "scan": "スキャンして振り返りを見る", "expires": "共有期限 {date}" }
     },
     "keywords": {

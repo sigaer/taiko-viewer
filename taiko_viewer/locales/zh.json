@@ -769,6 +769,7 @@
       "milestones": { "song": "《{name}》", "effort": "★{stars} · 累计尝试 {plays} 次", "onlyOnce": "这一次，来得很不容易" },
       "breakthrough": { "dan": "段位向上", "ratingGain": "RT 向上", "ratingJourney": "从这里走到这里", "songAttempts": "鼓点记录", "times": "{count} 次", "difficulty": "这道墙的高度" },
       "final": { "firstSteps": "故事的第一声", "fromBreakthrough": "称号因这一刻亮起", "fromSpeed": "留在成绩里的速度", "fromKeyword": "最像你的关键词", "fromJourney": "一路走来的名字", "times": "{count} 次挑战" },
+      "finale": { "eyebrow": "年度突破 · 称号授予", "flashEyebrow": "年度突破", "missingTitle": "你的年度称号仍在生成", "missingBody": "下一次鼓点落下时，它会更清楚。" },
       "poster": { "finalTitle": "年度称号", "favorite": "最爱歌曲", "keyword": "关键词", "scan": "扫码查看这份回顾", "expires": "分享有效期至 {date}" }
     },
     "keywords": {

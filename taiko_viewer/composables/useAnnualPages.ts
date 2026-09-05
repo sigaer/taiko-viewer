@@ -21,8 +21,7 @@ import ChallengeSlide from "~/components/account/version-summary/slides/Challeng
 import PoundSlide from "~/components/account/version-summary/slides/PoundSlide.vue";
 import HighScoreSlide from "~/components/account/version-summary/slides/HighScoreSlide.vue";
 import MilestonesSlide from "~/components/account/version-summary/slides/MilestonesSlide.vue";
-import BreakthroughSlide from "~/components/account/version-summary/slides/BreakthroughSlide.vue";
-import FinalTitleSlide from "~/components/account/version-summary/slides/FinalTitleSlide.vue";
+import AnnualFinaleSlide from "~/components/account/version-summary/slides/AnnualFinaleSlide.vue";
 import PosterSlide from "~/components/account/version-summary/slides/PosterSlide.vue";
 
 export type AnnualChapterKey = "debut" | "habits" | "preference" | "growth" | "keepsake";
@@ -35,7 +34,7 @@ export type AnnualPageKey =
   | "opening" | "period" | "overview"
   | "favorite" | "obsession" | "favoriteShift" | "keyword" | "ratingRank"
   | "monthly" | "weekday" | "calendar" | "timeOfDay" | "lateNight"
-  | "speedProfile" | "nearDondaful" | "challenge" | "pound" | "highScore" | "milestones" | "breakthrough"
+  | "speedProfile" | "nearDondaful" | "challenge" | "pound" | "highScore" | "milestones"
   | "final" | "poster";
 
 export type AnnualPageDefinition = {
@@ -79,10 +78,9 @@ export const ANNUAL_PAGE_REGISTRY: readonly AnnualPageDefinition[] = [
   { key: "challenge", chapter: "growth", component: ChallengeSlide, labelKey: "annualSummary.pages.challenge", sceneType: "song-memory", mainFocus: "challenge-song", motionPreset: "growth-challenge-knock", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("challenge") },
   { key: "pound", chapter: "growth", component: PoundSlide, labelKey: "annualSummary.pages.pound", sceneType: "impact-number", mainFocus: "pound-count", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "slide", transitionOut: "slide", visible: has("pound") },
   { key: "highScore", chapter: "growth", component: HighScoreSlide, labelKey: "annualSummary.pages.highScore", sceneType: "song-memory", mainFocus: "high-score-song", motionPreset: "legacy-staged", mood: "award-purple", intensity: "high", transitionIn: "slide", transitionOut: "gold-burst", visible: has("highScore") },
-  { key: "milestones", chapter: "growth", component: MilestonesSlide, labelKey: "annualSummary.pages.milestones", sceneType: "award", mainFocus: "milestone", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "gold-burst", transitionOut: "slide", visible: has("milestones") },
-  { key: "breakthrough", chapter: "growth", component: BreakthroughSlide, labelKey: "annualSummary.pages.breakthrough", sceneType: "award", mainFocus: "breakthrough", motionPreset: "legacy-staged", mood: "award-stage", intensity: "high", transitionIn: "gold-burst", transitionOut: "gold-burst", visible: has("breakthrough") },
+  { key: "milestones", chapter: "growth", component: MilestonesSlide, labelKey: "annualSummary.pages.milestones", sceneType: "award", mainFocus: "milestone", motionPreset: "legacy-staged", mood: "award-purple", intensity: "medium", transitionIn: "gold-burst", transitionOut: "gold-burst", visible: has("milestones") },
 
-  { key: "final", chapter: "keepsake", component: FinalTitleSlide, labelKey: "annualSummary.pages.final", sceneType: "award", mainFocus: "annual-title", motionPreset: "award-reveal", mood: "award-stage", intensity: "high", transitionIn: "gold-burst", transitionOut: "fade", visible: always },
+  { key: "final", chapter: "keepsake", component: AnnualFinaleSlide, labelKey: "annualSummary.pages.final", sceneType: "award", mainFocus: "annual-finale", motionPreset: "award-reveal", mood: "award-stage", intensity: "high", transitionIn: "gold-burst", transitionOut: "fade", visible: always },
   { key: "poster", chapter: "keepsake", component: PosterSlide, labelKey: "annualSummary.pages.poster", sceneType: "award", mainFocus: "annual-poster", motionPreset: "legacy-staged", mood: "award-stage", intensity: "medium", transitionIn: "fade", transitionOut: "fade", visible: always }
 ] as const;
 

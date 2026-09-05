@@ -15,7 +15,7 @@ const expectedPages = [
   "opening", "period", "overview",
   "favorite", "obsession", "favoriteShift", "keyword", "ratingRank",
   "monthly", "weekday", "calendar", "timeOfDay", "lateNight",
-  "speedProfile", "nearDondaful", "challenge", "pound", "highScore", "milestones", "breakthrough",
+  "speedProfile", "nearDondaful", "challenge", "pound", "highScore", "milestones",
   "final", "poster"
 ];
 
@@ -211,7 +211,7 @@ const componentNames = {
   weekday: "WeekdayActivitySlide", calendar: "CalendarActivitySlide", timeOfDay: "TimeOfDaySlide",
   lateNight: "LateNightSlide", speedProfile: "SpeedProfileSlide", nearDondaful: "NearDondafulSlide",
   challenge: "ChallengeSlide", pound: "PoundSlide", highScore: "HighScoreSlide", milestones: "MilestonesSlide",
-  breakthrough: "BreakthroughSlide", final: "FinalTitleSlide", poster: "PosterSlide"
+  final: "AnnualFinaleSlide", poster: "PosterSlide"
 };
 const annualSources = await Promise.all([
   read("components/account/version-summary/StorySlideShell.vue"),
@@ -300,20 +300,18 @@ for (const asset of ["2025版本报告-N14-效果图-v1.0.png", "background_14.p
   assert.equal(await exists(`public/lateNight/${asset}`), true, `late-night asset is missing: ${asset}`);
 }
 
-const breakthroughSource = await read("components/account/version-summary/slides/BreakthroughSlide.vue");
-assert.equal(breakthroughSource.includes("summary.breakthrough.evidence"), true, "breakthrough page does not render type-specific evidence");
-assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(breakthroughSource), false, "breakthrough page still renders unconditional numeric deltas");
-
 assert.equal(periodOverviewSceneSource.includes("summary.period.firstRecordAt || props.summary.version.startDate"), true, "period page exposes an empty first-record placeholder");
 assert.equal(periodOverviewSceneSource.includes("summary.period.lastRecordAt || props.summary.version.effectiveEndDate"), true, "period page exposes an empty last-record placeholder");
 assert.equal(periodOverviewSceneSource.includes("summary.copy.period.body"), true, "period page lacks its period narrative");
 
-const finalTitleSource = await read("components/account/version-summary/slides/FinalTitleSlide.vue");
-assert.equal(finalTitleSource.includes("AnnualDrumWindow"), true, "final title page does not carry the player's MyDon");
-assert.equal(finalTitleSource.includes("summary.finalTitle.evidenceText"), true, "final title evidence is not shown");
-assert.equal(finalTitleSource.includes("summary.poster.keyword"), false, "final title page still exposes an unavailable keyword placeholder");
-assert.equal(finalTitleSource.includes("segmentAnnualTitle"), true, "final title is not revealed by grapheme");
-assert.equal(finalTitleSource.includes("isUsableMetric"), true, "final title still renders zero-valued metrics");
+const finaleSource = await read("components/account/version-summary/slides/AnnualFinaleSlide.vue");
+assert.equal(finaleSource.includes("summary.breakthrough.evidence"), true, "finale page does not render the breakthrough evidence");
+assert.equal(/summary\.breakthrough\.(scoreDelta|playDelta)/.test(finaleSource), false, "finale page still renders unconditional numeric deltas");
+assert.equal(finaleSource.includes("AnnualDrumWindow"), true, "finale page does not carry the player's MyDon");
+assert.equal(finaleSource.includes("summary.finalTitle.title"), true, "finale page does not grant the annual title");
+assert.equal(finaleSource.includes("summary.poster.keyword"), false, "finale page still exposes an unavailable keyword placeholder");
+assert.equal(finaleSource.includes("segmentAnnualTitle"), true, "finale title is not revealed by grapheme");
+assert.equal(finaleSource.includes("isUsableMetric"), true, "finale page still renders zero-valued metrics");
 
 const animatedNumberSource = await read("components/account/version-summary/AnimatedNumber.vue");
 assert.equal(animatedNumberSource.includes('emit("complete", target)'), true, "animated number has no completion feedback event");
