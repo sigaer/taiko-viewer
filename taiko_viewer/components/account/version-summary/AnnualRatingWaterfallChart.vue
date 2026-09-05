@@ -135,7 +135,7 @@ const layers = computed(() =>
 const formatTick = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
 
 const verticalGrid = computed(() => {
-  const divisions = 8;
+  const divisions = 4;
   const output: Array<{ x: number; label: string }> = [];
   for (let index = 0; index <= divisions; index += 1) {
     const ratio = index / divisions;
@@ -258,14 +258,14 @@ const isEmpty = computed(() => props.ranks.length === 0);
           v-for="grid in verticalGrid"
           :key="`axis-${grid.x}`"
           :x="grid.x"
-          :y="axisY + 40"
+          :y="axisY + 34"
           text-anchor="middle"
         >
           {{ grid.label }}
         </text>
       </g>
 
-      <path :d="`M ${chartLeft} ${axisY} L ${chartRight} ${axisY}`" stroke="#8d7d69" stroke-opacity=".4" stroke-width="1.4" fill="none" />
+      <path :d="`M ${chartLeft} ${axisY} L ${chartRight} ${axisY}`" stroke="#8d7d69" stroke-opacity=".6" stroke-width="1.6" fill="none" />
 
       <g v-if="hasMarker" class="annual-rating-waterfall-chart__marker">
         <line :x1="markerX" :y1="axisY" :x2="markerX" :y2="chartBottom" stroke="#c2513c" stroke-opacity=".3" stroke-width="1.4" stroke-dasharray="3 5" />
@@ -351,6 +351,11 @@ const isEmpty = computed(() => props.ranks.length === 0);
   fill: #7e6f5a;
   font: 600 28px/1 var(--viewer-font-family);
   letter-spacing: 0;
+}
+.annual-rating-waterfall-chart__labels text {
+  fill: #5c3d22;
+  font-size: 30px;
+  font-weight: 700;
 }
 .annual-rating-waterfall-chart__rank-tags text {
   fill: #7d5f49;

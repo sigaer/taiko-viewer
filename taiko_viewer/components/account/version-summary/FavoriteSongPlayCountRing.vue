@@ -109,13 +109,14 @@ const emit = defineEmits<{ complete: [] }>();
   z-index: 1;
   display: grid;
   justify-items: center;
-  padding-top: 4px;
+  align-content: center;
+  padding: 12px 10px;
   text-align: center;
 }
 
 .favorite-song-count-ring__label {
   color: rgba(239, 246, 244, 0.84);
-  font: 600 clamp(10px, 2.75vw, 12px)/1.35 var(--viewer-font-family);
+  font: 600 clamp(9px, 2.4vw, 11px)/1.15 var(--viewer-font-family);
   letter-spacing: 0.02em;
 }
 
@@ -124,9 +125,9 @@ const emit = defineEmits<{ complete: [] }>();
   align-items: baseline;
   justify-content: center;
   gap: 5px;
-  margin-top: 4px;
+  margin-top: 2px;
   color: #ffe19a;
-  font: 900 clamp(2.85rem, 12.6vw, 3.65rem)/0.88 var(--viewer-display-font);
+  font: 900 clamp(2.85rem, 12.6vw, 3.65rem)/0.9 var(--viewer-display-font);
   letter-spacing: -0.035em;
   text-shadow: 0 4px 24px rgba(248, 215, 126, 0.2);
 }
@@ -136,5 +137,11 @@ const emit = defineEmits<{ complete: [] }>();
   font: 800 clamp(11px, 3.1vw, 14px)/1 var(--viewer-font-family);
   font-style: normal;
   letter-spacing: 0;
+}
+
+@media (max-height:820px) and (orientation:portrait) {
+  .favorite-song-count-ring__content { padding: 8px; }
+  .favorite-song-count-ring__value { font-size: clamp(2.1rem, 9.5vw, 2.5rem); }
+  .favorite-song-count-ring__value em { font-size: clamp(10px, 2.8vw, 12px); }
 }
 </style>
