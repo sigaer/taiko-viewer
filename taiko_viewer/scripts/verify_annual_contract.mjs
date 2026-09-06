@@ -415,8 +415,11 @@ assert.equal(annualPageSource.includes("重新生成"), false, "successful annua
 const annualConstantsSource = await read("server/services/account/annual-summary/constants.ts");
 assert.equal(annualConstantsSource.includes('ANNUAL_END_DATE = "2026-09-11"'), true, "annual end date is not fixed");
 assert.equal(annualConstantsSource.includes('ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00"'), true, "annual public opening is not configured");
+assert.equal(annualConstantsSource.includes('ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.1.4"'), true, "annual producer version is stale");
 const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
 const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
+const annualServiceSource = await read("server/services/account/annual-summary/index.ts");
+assert.equal(annualServiceSource.includes("summary.provenance?.algorithmVersion !== ANNUAL_ALGORITHM_VERSION"), true, "stale annual summaries are still served");
 assert.equal(annualRatingsSource.includes("getAnnualRatingDistribution"), true, "annual rating enrichment does not use the cache reader");
 assert.equal(annualRuntimeSource.includes("export const getAnnualRatingDistribution = readCachedAnnualRatingDistribution"), true, "user rating lookup can rebuild the distribution");
 

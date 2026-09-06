@@ -13,6 +13,7 @@ import {
 } from "~/server/internal/account/shared";
 import { getMyDonImageBuffer } from "~/server/utils/account/my-don";
 import {
+  ANNUAL_ALGORITHM_VERSION,
   ANNUAL_MAX_EVENT_PAGE_SIZE,
   ANNUAL_POSTER_COOLDOWN_MS,
   ANNUAL_POSTER_HEIGHT,
@@ -112,7 +113,9 @@ const requireCurrentAnnualBinding = async (userId: number) => {
 const safeReadSummary = async (row: AnnualSummaryRow | null) => {
   if (!row || Number(row.schema_version) !== ANNUAL_SCHEMA_VERSION) return null;
   try {
-    return await readAnnualSummary(row.summary_path);
+    const summary = await readAnnualSummary(row.summary_path);
+    if (summary.provenance?.algorithmVersion !== ANNUAL_ALGORITHM_VERSION) return null;
+    return summary;
   } catch (error) {
     console.warn("[annual-summary] cached summary is unavailable", row?.id, error);
     return null;
