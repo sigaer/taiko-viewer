@@ -7,7 +7,6 @@ import AnnualOpeningBeatLane from "../AnnualOpeningBeatLane.vue";
 import AnnualOpeningCarousel from "../AnnualOpeningCarousel.vue";
 import AnnualOpeningFireworks from "../AnnualOpeningFireworks.vue";
 import AnnualScene from "../AnnualScene.vue";
-import TaikoRipple from "../TaikoRipple.vue";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -19,7 +18,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{ start: [] }>();
 const { t, locale } = useI18n();
-const rippleTrigger = ref(0);
 const startPending = ref(false);
 const navigationSent = ref(false);
 const drumPulse = ref(false);
@@ -72,7 +70,6 @@ const beginStory = () => {
   if (!props.active || startPending.value || navigationSent.value) return;
   startPending.value = true;
   drumPulse.value = true;
-  rippleTrigger.value += 1;
   if (props.reducedMotion) {
     completeStoryStart();
     return;
@@ -156,15 +153,6 @@ const beginStory = () => {
     </template>
 
     <template #transition>
-      <TaikoRipple
-        :active="active"
-        :reduced-motion="reducedMotion"
-        mode="burst"
-        :trigger="rippleTrigger"
-        origin-x="50%"
-        origin-y="61%"
-        @complete="completeStoryStart"
-      />
     </template>
   </AnnualScene>
 </template>

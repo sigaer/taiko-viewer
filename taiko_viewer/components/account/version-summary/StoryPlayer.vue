@@ -240,6 +240,11 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   if (transitionRunning.value || debugTransitionTime.value !== null) return;
   const generation = ++transitionGeneration;
   const forward = targetIndex === overviewIndex.value;
+  if (!forward) {
+    await commitPage(targetIndex);
+    transitionTargetTime = null;
+    return;
+  }
   const sourceTime = forward ? 0 : PERIOD_OVERVIEW_DURATION_MS;
   const targetTime = forward ? PERIOD_OVERVIEW_DURATION_MS : 0;
   transitionTargetTime = targetTime;

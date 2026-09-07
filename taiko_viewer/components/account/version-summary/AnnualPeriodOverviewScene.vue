@@ -6,7 +6,6 @@ import { PERIOD_OVERVIEW_DURATION_MS } from "~/utils/annualTransition";
 import AnimatedNumber from "./AnimatedNumber.vue";
 import AnnualVerticalCoverStream from "./AnnualVerticalCoverStream.vue";
 import ParticleLayer from "./ParticleLayer.vue";
-import TaikoRipple from "./TaikoRipple.vue";
 import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{
@@ -27,8 +26,6 @@ let timeline: gsap.core.Timeline | null = null;
 
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
 const overviewProgress = computed(() => Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
-const overviewRippleTrigger = computed(() => safeTime.value >= 520 ? 1 : 0);
-const overviewCompleteTrigger = ref(0);
 const stateClass = computed(() => safeTime.value <= 0
   ? "is-period-state"
   : safeTime.value >= PERIOD_OVERVIEW_DURATION_MS
@@ -57,10 +54,6 @@ const centerText = computed(() => locale.value === "ja"
 );
 
 const setTimelineTime = () => timeline?.pause(safeTime.value / 1000, false);
-const onOverviewComplete = () => {
-  if (!props.active || overviewCompleteTrigger.value) return;
-  overviewCompleteTrigger.value = 1;
-};
 
 const buildTimeline = async () => {
   if (!rootRef.value) return;
@@ -131,8 +124,6 @@ onBeforeUnmount(() => {
       <AnnualVerticalCoverStream :summary="summary" :active="active" :reduced-motion="reducedMotion" />
     </div>
     <ParticleLayer class="period-overview-scene__particles" :active="active && overviewProgress > 0" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
-    <TaikoRipple :active="active" :reduced-motion="reducedMotion" :trigger="overviewRippleTrigger" origin-y="50%" />
-    <TaikoRipple :active="active" :reduced-motion="reducedMotion" :trigger="overviewCompleteTrigger" mode="ambient" origin-y="50%" />
 
     <span class="period-overview-scene__page period-overview-scene__page--period">
       {{ String(periodPageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}
@@ -164,7 +155,7 @@ onBeforeUnmount(() => {
         <small>{{ summary.copy.overview.body }}</small>
       </div>
       <div class="period-overview-scene__overview-play-count" data-overview-play-count>
-        <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" @complete="onOverviewComplete" /></strong>
+        <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></strong>
         <span>{{ t("annualSummary.slides.overview.plays") }}</span>
       </div>
       <img class="period-overview-scene__overview-anchor" :src="mascotUrl" alt="" aria-hidden="true" />
