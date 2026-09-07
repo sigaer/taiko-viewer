@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
 import { getPoundSpeedCopy } from "~/utils/annualCopy";
@@ -9,6 +9,9 @@ const { locale, t } = useI18n();
 const copy = computed(() => getPoundSpeedCopy(props.summary.pound, locale.value === "ja" ? "ja" : "zh"));
 const speed = computed(() => props.summary.pound?.speed);
 const song = computed(() => props.summary.pound?.topSong);
+const cityLoaded = ref(false);
+const recordLoaded = ref(false);
+const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 </script>
 
 <template>
@@ -30,14 +33,11 @@ const song = computed(() => props.summary.pound?.topSong);
         <p class="pound-poster__sub">{{ speed ? copy.body : "等下一段连打，把鼓点推到更快的位置。" }}</p>
       </div>
 
-      <div class="pound-poster__horizon" aria-hidden="true">
-        <img class="pound-poster__city" src="/annual/pound/city-silhouette.png" alt="">
-        <div class="pound-poster__black-band"></div>
-      </div>
-
-      <div class="pound-poster__stage">
-        <div class="pound-poster__record-wrap">
-          <img class="pound-poster__record-player" src="/annual/pound/record-player.png" alt="" aria-hidden="true">
+      <div class="vinyl-stack" :class="{ 'is-ready': assetsReady }" aria-hidden="true">
+        <img class="vinyl-stack__city" src="/annual/pound/city-silhouette.png" alt="" @load="cityLoaded = true">
+        <div class="vinyl-stack__band"></div>
+        <div class="vinyl-stack__record">
+          <img class="vinyl-stack__record-image" src="/annual/pound/record-player.png" alt="" @load="recordLoaded = true">
           <div class="pound-poster__center">
             <img v-if="song?.coverUrl" :src="song.coverUrl" :alt="song.name || ''" loading="lazy">
             <span v-else>♪</span>
@@ -53,9 +53,6 @@ const song = computed(() => props.summary.pound?.topSong);
 <style scoped>
 .pound-poster__bg { position: absolute; inset: 0; overflow: hidden; background: #1d1b3b; }
 .pound-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.pound-poster__horizon { position: absolute; z-index: 6; left: 0; right: 0; top: 43%; pointer-events: none; }
-.pound-poster__city { display: block; width: 100%; height: auto; opacity: 0.92; }
-.pound-poster__black-band { height: clamp(52px, 7vh, 72px); margin-top: -1px; background: #050505; }
 .pound-poster__noise { position: absolute; left: 0; right: 0; top: 48%; width: 100%; height: auto; mix-blend-mode: overlay; opacity: 0.35; }
 
 .pound-poster { height: 100%; display: flex; flex-direction: column; align-items: center; color: #fff; }
@@ -66,9 +63,12 @@ const song = computed(() => props.summary.pound?.topSong);
 .pound-poster__speed span { font-weight: 700; font-size: clamp(0.8rem, 3vw, 1.25rem); white-space: nowrap; }
 .pound-poster__sub { max-width: 92vw; margin: 0.5rem auto 0; color: #ffe8f3cc; font-size: clamp(10px, 3.1vw, 12.5px); line-height: 1.4; white-space: nowrap; }
 
-.pound-poster__stage { position: relative; z-index: 4; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0; width: 100%; }
-.pound-poster__record-wrap { position: relative; width: min(94vw, 430px); }
-.pound-poster__record-player { width: 100%; height: auto; display: block; filter: drop-shadow(0 18px 32px rgba(10, 8, 30, 0.45)); }
+.vinyl-stack { --city-h: calc(100vw * 162 / 414); --record-h: calc(100vw * 348 / 414); --band-h: clamp(42px, 6.2vh, 64px); position: absolute; z-index: 5; top: 43%; left: 50%; width: 100vw; max-width: none; transform: translateX(-50%); opacity: 0; pointer-events: none; }
+.vinyl-stack.is-ready { opacity: 1; transition: opacity 240ms ease-out; }
+.vinyl-stack__city { display: block; width: 100vw; max-width: none; height: var(--city-h); object-fit: fill; opacity: .92; }
+.vinyl-stack__band { width: 100vw; height: var(--band-h); margin-top: -1px; background: #050505; }
+.vinyl-stack__record { position: relative; width: 100vw; height: var(--record-h); margin-top: -2px; }
+.vinyl-stack__record-image { display: block; width: 100vw; max-width: none; height: var(--record-h); object-fit: fill; filter: drop-shadow(0 18px 32px rgba(10, 8, 30, .45)); }
 .pound-poster__center { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
 .pound-poster__center img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pound-poster__center span { font: 800 clamp(1.6rem, 6vw, 2.4rem) / 1 var(--viewer-display-font); color: #fff; }
@@ -77,9 +77,8 @@ const song = computed(() => props.summary.pound?.topSong);
 
 .is-empty .pound-poster__speed strong { color: #ffffffb8; }
 @media (max-height: 720px) {
-  .pound-poster__record-player { width: min(82vw, 360px); }
   .pound-poster__center { width: clamp(86px, 24vw, 112px); }
   .pound-poster__speed strong { font-size: clamp(3.4rem, 16vw, 6rem); }
-  .pound-poster__horizon { top: 45%; }
+  .vinyl-stack { top: 45%; }
 }
 </style>
