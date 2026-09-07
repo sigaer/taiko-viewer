@@ -11,6 +11,7 @@ import {
 } from "~/utils/annualTransition";
 import AnnualPeriodOverviewScene from "./AnnualPeriodOverviewScene.vue";
 import StoryProgress from "./StoryProgress.vue";
+import { ANNUAL_NAVIGATION_MOTION_KEY, type AnnualNavigationMotion } from "~/utils/annualNavigationMotion";
 
 type AnnualNetworkConnection = {
   saveData?: boolean;
@@ -58,6 +59,10 @@ let transitionGeneration = 0;
 let transitionTargetTime: number | null = null;
 let touchStart: { x: number; y: number } | null = null;
 const transitionClock = { value: 0 };
+// Annual number motion is one-shot: once a slide has been left, returning to it
+// must render the settled value instead of replaying count-up/count-down.
+const navigationMotion: AnnualNavigationMotion = { visited: new Set<number>(), direction: "initial" };
+provide(ANNUAL_NAVIGATION_MOTION_KEY, navigationMotion);
 provide(ANNUAL_COVER_PHASE_KEY, readonly(coverStreamPhase));
 
 const periodIndex = computed(() => slides.value.findIndex((page) => page.key === "period"));
@@ -392,12 +397,18 @@ const startCoverClock = () => {
 };
 
 watch(activeIndex, (value, oldValue) => {
+  if (value !== oldValue) {
+    navigationMotion.direction = value > oldValue ? "forward" : "backward";
+    navigationMotion.visited.add(oldValue);
+  }
   if (value !== oldValue) void playDrum();
   preloadNextArtwork();
 });
 
 watch(() => props.summary.summaryId, async () => {
   cancelPeriodOverviewTransition();
+  navigationMotion.visited.clear();
+  navigationMotion.direction = "initial";
   periodOverviewTime.value = 0;
   activeIndex.value = 0;
   slideRefs.value = [];

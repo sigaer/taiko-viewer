@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { gsap } from "gsap";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, ref, watch } from "vue";
+import { ANNUAL_NAVIGATION_MOTION_KEY, type AnnualNavigationMotion } from "~/utils/annualNavigationMotion";
 
 const props = withDefaults(defineProps<{
   value: number;
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{ complete: [value: number] }>();
 
 const { locale } = useI18n();
+const navigationMotion = inject<AnnualNavigationMotion | null>(ANNUAL_NAVIGATION_MOTION_KEY, null);
 const current = ref<number | null>(null);
 let tween: gsap.core.Tween | null = null;
 let completedForValue: number | null = null;
@@ -41,11 +43,18 @@ const play = () => {
   tween = null;
   const target = finalValue.value;
   if (!props.active) {
-    current.value = null;
+    current.value = target;
+    if (navigationMotion?.direction !== "initial") completedForValue = target;
     return;
   }
-  if (completedForValue !== target) completedForValue = null;
-  if (props.reducedMotion) {
+  // A component can be deactivated while its slide remains mounted. Preserve
+  // the settled target so re-entering does not replay or reverse the number.
+  if (completedForValue === target && props.progress === null) {
+    current.value = target;
+    return;
+  }
+  const returnToVisited = props.progress === null && navigationMotion?.direction === "backward";
+  if (props.reducedMotion || returnToVisited) {
     current.value = target;
     if (completedForValue === null) {
       completedForValue = target;
@@ -80,7 +89,6 @@ const play = () => {
     }
   });
 };
-
 watch([() => props.value, () => props.active, () => props.reducedMotion, () => props.progress], play, { immediate: true });
 watch(() => props.active, (active) => {
   if (!active) tween?.pause();

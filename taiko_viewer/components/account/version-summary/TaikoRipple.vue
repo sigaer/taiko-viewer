@@ -51,6 +51,10 @@ onBeforeUnmount(() => { if (timer) window.clearTimeout(timer); });
 .taiko-ripple.is-running i:nth-child(2) { animation-delay: .09s; }
 .taiko-ripple.is-running i:nth-child(3) { animation-delay: .18s; }
 .taiko-ripple.mode-burst i { width: 12px; border-color: rgba(255,226,147,.9); }
+/* The legacy burst was a full-screen scale(90) circle reveal. Keep the
+   completion timer for the opening interaction, but remove the distracting
+   overlay entirely. Ambient ripples remain available to scene-specific users. */
+.taiko-ripple.mode-burst i { display: none; }
 @keyframes taiko-ripple-expand { 0% { transform: translate(-50%,-50%) scale(0); opacity: .9; } 70% { opacity: .42; } 100% { transform: translate(-50%,-50%) scale(90); opacity: 0; } }
 @media(prefers-reduced-motion:reduce){.taiko-ripple.is-running i{animation-duration:.12s}}
 </style>
