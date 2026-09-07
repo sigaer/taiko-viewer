@@ -11,8 +11,9 @@ const speedText = computed(() => profile.value ? profile.value.speed.toFixed(1).
 // Guard unavailable metrics with isUsableMetric(summary.speedProfile.chartCount).
 const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.chartCount));
 const cityLoaded = ref(false);
+const noiseLoaded = ref(false);
 const recordLoaded = ref(false);
-const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
+const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && recordLoaded.value);
 </script>
 
 <template>
@@ -32,7 +33,7 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 
       <div class="vinyl-stack" :class="{ 'is-ready': assetsReady }" aria-hidden="true">
         <img class="vinyl-stack__city" src="/annual/speedProfile/city-silhouette.png" alt="" @load="cityLoaded = true">
-        <div class="vinyl-stack__band"></div>
+        <img class="vinyl-stack__noise" src="/annual/speedProfile/noise.png" alt="" @load="noiseLoaded = true">
         <div class="vinyl-stack__record">
           <img class="vinyl-stack__record-image" src="/annual/speedProfile/record-player.png" alt="" @load="recordLoaded = true">
           <div class="profile-poster__center">{{ speedText }}×</div>
@@ -50,7 +51,6 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 <style scoped>
 .profile-poster__bg { position: absolute; inset: 0; overflow: hidden; background: #dfe57c; }
 .profile-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.profile-poster__noise { position: absolute; left: 0; right: 0; top: 48%; width: 100%; height: auto; mix-blend-mode: overlay; opacity: 0.4; }
 
 .profile-poster { height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; color: #162317; }
 .profile-poster__headline { position: relative; z-index: 2; padding-top: 0.5rem; }
@@ -58,11 +58,12 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 .profile-poster__headline > strong small { font-size: 0.24em; letter-spacing: 0; }
 .profile-poster__headline > p { max-width: 22ch; margin: 0.5rem auto 0; color: #2f5230; font-size: clamp(0.95rem, 4vw, 1.25rem); font-weight: 700; line-height: 1.35; }
 
-.vinyl-stack { --city-h: calc(100vw * 162 / 414); --record-h: calc(100vw * 348 / 414); --band-h: clamp(42px, 6.2vh, 64px); position: absolute; z-index: 5; top: 43%; left: 50%; width: 100vw; max-width: none; transform: translateX(-50%); opacity: 0; pointer-events: none; }
+.vinyl-stack { --split-y: 43%; --building-h: calc(100vw * 162 / 414); --record-h: calc(100vw * 348 / 414); --noise-h: clamp(48px, 7svh, 64px); position: absolute; z-index: 5; top: calc(var(--split-y) - var(--building-h)); left: 50%; width: 100vw; height: calc(var(--building-h) + var(--noise-h) + var(--record-h)); max-width: none; transform: translateX(-50%); opacity: 0; pointer-events: none; }
 .vinyl-stack.is-ready { opacity: 1; transition: opacity 240ms ease-out; }
-.vinyl-stack__city { display: block; width: 100vw; max-width: none; height: var(--city-h); object-fit: fill; opacity: .95; }
-.vinyl-stack__band { width: 100vw; height: var(--band-h); margin-top: -1px; background: #050505; }
-.vinyl-stack__record { position: relative; width: 100vw; height: var(--record-h); margin-top: -2px; }
+.vinyl-stack__city,.vinyl-stack__noise,.vinyl-stack__record { position: absolute; left: 50%; width: 100vw; max-width: none; transform: translateX(-50%); }
+.vinyl-stack__city { top: 0; height: var(--building-h); object-fit: fill; opacity: .95; }
+.vinyl-stack__noise { top: var(--building-h); height: var(--noise-h); object-fit: fill; }
+.vinyl-stack__record { top: calc(var(--building-h) + var(--noise-h) - 1px); height: var(--record-h); }
 .vinyl-stack__record-image { display: block; width: 100vw; max-width: none; height: var(--record-h); object-fit: fill; filter: grayscale(1) brightness(1.32) drop-shadow(0 18px 32px rgba(20, 40, 20, .35)); }
 .profile-poster__center { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 34% 28%, #f0f6a8, #c4e05c 55%, #7fbf5a); color: #1b2c19; font: 900 clamp(1.5rem, 6vw, 2.3rem) / 1 var(--viewer-display-font); box-shadow: 0 0 0 7px rgba(12, 14, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.18), 0 12px 26px rgba(0, 0, 0, 0.35); }
 
@@ -72,9 +73,8 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 
 .is-empty .profile-poster__center { opacity: 0.72; }
 @media (max-height: 740px) {
-  .profile-poster__record-player { width: min(84vw, 370px); }
   .profile-poster__headline > strong { font-size: clamp(3.4rem, 16vw, 6rem); }
   .profile-poster__center { width: clamp(88px, 25vw, 116px); }
-  .vinyl-stack { top: 45%; }
+  .vinyl-stack { --split-y: 47%; }
 }
 </style>

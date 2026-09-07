@@ -10,8 +10,9 @@ const copy = computed(() => getPoundSpeedCopy(props.summary.pound, locale.value 
 const speed = computed(() => props.summary.pound?.speed);
 const song = computed(() => props.summary.pound?.topSong);
 const cityLoaded = ref(false);
+const noiseLoaded = ref(false);
 const recordLoaded = ref(false);
-const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
+const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && recordLoaded.value);
 </script>
 
 <template>
@@ -35,7 +36,7 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 
       <div class="vinyl-stack" :class="{ 'is-ready': assetsReady }" aria-hidden="true">
         <img class="vinyl-stack__city" src="/annual/pound/city-silhouette.png" alt="" @load="cityLoaded = true">
-        <div class="vinyl-stack__band"></div>
+        <img class="vinyl-stack__noise" src="/annual/pound/noise.png" alt="" @load="noiseLoaded = true">
         <div class="vinyl-stack__record">
           <img class="vinyl-stack__record-image" src="/annual/pound/record-player.png" alt="" @load="recordLoaded = true">
           <div class="pound-poster__center">
@@ -53,7 +54,6 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 <style scoped>
 .pound-poster__bg { position: absolute; inset: 0; overflow: hidden; background: #1d1b3b; }
 .pound-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.pound-poster__noise { position: absolute; left: 0; right: 0; top: 48%; width: 100%; height: auto; mix-blend-mode: overlay; opacity: 0.35; }
 
 .pound-poster { height: 100%; display: flex; flex-direction: column; align-items: center; color: #fff; }
 .pound-poster__hero { text-align: center; z-index: 2; padding-top: 0.5rem; }
@@ -63,11 +63,12 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 .pound-poster__speed span { font-weight: 700; font-size: clamp(0.8rem, 3vw, 1.25rem); white-space: nowrap; }
 .pound-poster__sub { max-width: 92vw; margin: 0.5rem auto 0; color: #ffe8f3cc; font-size: clamp(10px, 3.1vw, 12.5px); line-height: 1.4; white-space: nowrap; }
 
-.vinyl-stack { --city-h: calc(100vw * 162 / 414); --record-h: calc(100vw * 348 / 414); --band-h: clamp(42px, 6.2vh, 64px); position: absolute; z-index: 5; top: 43%; left: 50%; width: 100vw; max-width: none; transform: translateX(-50%); opacity: 0; pointer-events: none; }
+.vinyl-stack { --split-y: 43%; --building-h: calc(100vw * 162 / 414); --record-h: calc(100vw * 348 / 414); --noise-h: clamp(48px, 7svh, 64px); position: absolute; z-index: 5; top: calc(var(--split-y) - var(--building-h)); left: 50%; width: 100vw; height: calc(var(--building-h) + var(--noise-h) + var(--record-h)); max-width: none; transform: translateX(-50%); opacity: 0; pointer-events: none; }
 .vinyl-stack.is-ready { opacity: 1; transition: opacity 240ms ease-out; }
-.vinyl-stack__city { display: block; width: 100vw; max-width: none; height: var(--city-h); object-fit: fill; opacity: .92; }
-.vinyl-stack__band { width: 100vw; height: var(--band-h); margin-top: -1px; background: #050505; }
-.vinyl-stack__record { position: relative; width: 100vw; height: var(--record-h); margin-top: -2px; }
+.vinyl-stack__city,.vinyl-stack__noise,.vinyl-stack__record { position: absolute; left: 50%; width: 100vw; max-width: none; transform: translateX(-50%); }
+.vinyl-stack__city { top: 0; height: var(--building-h); object-fit: fill; opacity: .92; }
+.vinyl-stack__noise { top: var(--building-h); height: var(--noise-h); object-fit: fill; }
+.vinyl-stack__record { top: calc(var(--building-h) + var(--noise-h) - 1px); height: var(--record-h); }
 .vinyl-stack__record-image { display: block; width: 100vw; max-width: none; height: var(--record-h); object-fit: fill; filter: drop-shadow(0 18px 32px rgba(10, 8, 30, .45)); }
 .pound-poster__center { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
 .pound-poster__center img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -79,6 +80,6 @@ const assetsReady = computed(() => cityLoaded.value && recordLoaded.value);
 @media (max-height: 720px) {
   .pound-poster__center { width: clamp(86px, 24vw, 112px); }
   .pound-poster__speed strong { font-size: clamp(3.4rem, 16vw, 6rem); }
-  .vinyl-stack { top: 45%; }
+  .vinyl-stack { --split-y: 47%; }
 }
 </style>
