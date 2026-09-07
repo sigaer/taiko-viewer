@@ -16,7 +16,6 @@ const song = computed(() => props.summary.pound?.topSong);
     <template #background>
       <div class="pound-poster__bg">
         <img class="pound-poster__sky" src="/annual/pound/background.webp" alt="" aria-hidden="true">
-        <img class="pound-poster__city" src="/annual/pound/city-silhouette.png" alt="" aria-hidden="true">
         <img class="pound-poster__noise" src="/annual/pound/noise.png" alt="" aria-hidden="true">
       </div>
     </template>
@@ -29,6 +28,11 @@ const song = computed(() => props.summary.pound?.topSong);
           <span>打 / 秒</span>
         </div>
         <p class="pound-poster__sub">{{ speed ? copy.body : "等下一段连打，把鼓点推到更快的位置。" }}</p>
+      </div>
+
+      <div class="pound-poster__horizon" aria-hidden="true">
+        <img class="pound-poster__city" src="/annual/pound/city-silhouette.png" alt="">
+        <div class="pound-poster__black-band"></div>
       </div>
 
       <div class="pound-poster__stage">
@@ -49,7 +53,9 @@ const song = computed(() => props.summary.pound?.topSong);
 <style scoped>
 .pound-poster__bg { position: absolute; inset: 0; overflow: hidden; background: #1d1b3b; }
 .pound-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.pound-poster__city { position: absolute; left: 0; right: 0; top: 34%; width: 100%; height: auto; opacity: 0.92; }
+.pound-poster__horizon { position: absolute; z-index: 6; left: 0; right: 0; top: 43%; pointer-events: none; }
+.pound-poster__city { display: block; width: 100%; height: auto; opacity: 0.92; }
+.pound-poster__black-band { height: clamp(52px, 7vh, 72px); margin-top: -1px; background: #050505; }
 .pound-poster__noise { position: absolute; left: 0; right: 0; top: 48%; width: 100%; height: auto; mix-blend-mode: overlay; opacity: 0.35; }
 
 .pound-poster { height: 100%; display: flex; flex-direction: column; align-items: center; color: #fff; }
@@ -60,7 +66,7 @@ const song = computed(() => props.summary.pound?.topSong);
 .pound-poster__speed span { font-weight: 700; font-size: clamp(0.8rem, 3vw, 1.25rem); white-space: nowrap; }
 .pound-poster__sub { max-width: 92vw; margin: 0.5rem auto 0; color: #ffe8f3cc; font-size: clamp(10px, 3.1vw, 12.5px); line-height: 1.4; white-space: nowrap; }
 
-.pound-poster__stage { position: relative; z-index: 1; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0; width: 100%; }
+.pound-poster__stage { position: relative; z-index: 4; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0; width: 100%; }
 .pound-poster__record-wrap { position: relative; width: min(94vw, 430px); }
 .pound-poster__record-player { width: 100%; height: auto; display: block; filter: drop-shadow(0 18px 32px rgba(10, 8, 30, 0.45)); }
 .pound-poster__center { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
@@ -74,6 +80,6 @@ const song = computed(() => props.summary.pound?.topSong);
   .pound-poster__record-player { width: min(82vw, 360px); }
   .pound-poster__center { width: clamp(86px, 24vw, 112px); }
   .pound-poster__speed strong { font-size: clamp(3.4rem, 16vw, 6rem); }
+  .pound-poster__horizon { top: 45%; }
 }
 </style>
-

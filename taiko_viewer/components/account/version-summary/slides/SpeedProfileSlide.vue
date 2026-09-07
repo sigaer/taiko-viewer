@@ -17,7 +17,6 @@ const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.
     <template #background>
       <div class="profile-poster__bg">
         <img class="profile-poster__sky" src="/annual/speedProfile/background.png" alt="" aria-hidden="true">
-        <img class="profile-poster__city" src="/annual/speedProfile/city-silhouette.png" alt="" aria-hidden="true">
         <img class="profile-poster__noise" src="/annual/speedProfile/noise.png" alt="" aria-hidden="true">
       </div>
     </template>
@@ -26,6 +25,11 @@ const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.
       <div class="profile-poster__headline" data-animate>
         <strong>{{ speedText }}<small>×</small></strong>
         <p>{{ t("annualSummary.slides.speed.lead", { speed: speedText }) }}</p>
+      </div>
+
+      <div class="profile-poster__horizon" aria-hidden="true">
+        <img class="profile-poster__city" src="/annual/speedProfile/city-silhouette.png" alt="">
+        <div class="profile-poster__black-band"></div>
       </div>
 
       <div class="profile-poster__stage">
@@ -46,7 +50,9 @@ const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.
 <style scoped>
 .profile-poster__bg { position: absolute; inset: 0; overflow: hidden; background: #dfe57c; }
 .profile-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.profile-poster__city { position: absolute; left: 0; right: 0; top: 34%; width: 100%; height: auto; opacity: 0.95; }
+.profile-poster__horizon { position: absolute; z-index: 6; left: 0; right: 0; top: 43%; pointer-events: none; }
+.profile-poster__city { display: block; width: 100%; height: auto; opacity: 0.95; }
+.profile-poster__black-band { height: clamp(52px, 7vh, 72px); margin-top: -1px; background: #050505; }
 .profile-poster__noise { position: absolute; left: 0; right: 0; top: 48%; width: 100%; height: auto; mix-blend-mode: overlay; opacity: 0.4; }
 
 .profile-poster { height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; color: #162317; }
@@ -55,7 +61,7 @@ const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.
 .profile-poster__headline > strong small { font-size: 0.24em; letter-spacing: 0; }
 .profile-poster__headline > p { max-width: 22ch; margin: 0.5rem auto 0; color: #2f5230; font-size: clamp(0.95rem, 4vw, 1.25rem); font-weight: 700; line-height: 1.35; }
 
-.profile-poster__stage { position: relative; z-index: 1; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0; width: 100%; }
+.profile-poster__stage { position: relative; z-index: 4; flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 0; width: 100%; }
 .profile-poster__record-wrap { position: relative; width: min(94vw, 430px); }
 .profile-poster__record-player { width: 100%; height: auto; display: block; filter: grayscale(1) brightness(1.32) drop-shadow(0 18px 32px rgba(20, 40, 20, 0.35)); }
 .profile-poster__center { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 34% 28%, #f0f6a8, #c4e05c 55%, #7fbf5a); color: #1b2c19; font: 900 clamp(1.5rem, 6vw, 2.3rem) / 1 var(--viewer-display-font); box-shadow: 0 0 0 7px rgba(12, 14, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.18), 0 12px 26px rgba(0, 0, 0, 0.35); }
@@ -69,6 +75,6 @@ const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.
   .profile-poster__record-player { width: min(84vw, 370px); }
   .profile-poster__headline > strong { font-size: clamp(3.4rem, 16vw, 6rem); }
   .profile-poster__center { width: clamp(88px, 25vw, 116px); }
+  .profile-poster__horizon { top: 45%; }
 }
 </style>
-
