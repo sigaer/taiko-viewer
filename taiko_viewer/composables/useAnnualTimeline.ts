@@ -2,7 +2,7 @@ import { gsap } from "gsap";
 import { nextTick, onBeforeUnmount, onMounted, watch, type Ref } from "vue";
 
 type AnnualRoot = HTMLElement | { rootEl?: HTMLElement | null } | null;
-type AnnualReenterMode = "resume" | "restart" | "final";
+export type AnnualReenterMode = "resume" | "restart" | "final";
 type AnnualEffectCleanup = () => void;
 
 export type AnnualMotionEffectScope = {

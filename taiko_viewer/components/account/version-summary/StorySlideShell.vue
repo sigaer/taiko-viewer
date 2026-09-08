@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { ref, toRef } from "vue";
 import AnnualScene from "./AnnualScene.vue";
-import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
+import { useAnnualTimeline, type AnnualReenterMode } from "~/composables/useAnnualTimeline";
 
 const props = withDefaults(defineProps<{
   pageIndex: number; pageTotal: number; eyebrow: string; title: string; lead?: string; accent?: string;
   tone?: "ember" | "sunrise" | "aurora" | "royal" | "gold"; active?: boolean; reducedMotion?: boolean;
   mood?: string; intensity?: "low" | "medium" | "high";
   variant?: "default" | "poster";
+  reenter?: AnnualReenterMode;
 }>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false, variant: "default" });
 
 const rootRef = ref<HTMLElement | null>(null);
-useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"));
+useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"), { reenter: props.reenter });
 </script>
 
 <template>
