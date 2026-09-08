@@ -23,7 +23,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
     <template #data><slot name="data" /></template>
     <template #copy><slot name="copy" /></template>
     <template #transition><slot name="transition" /></template>
-    <div class="story-slide-shell__frame">
+<div class="story-slide-shell__frame">
       <header class="story-slide-shell__header">
         <div class="story-slide-shell__heading" data-annual-stage="title">
           <span class="story-slide-shell__page">{{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}</span>
@@ -32,7 +32,7 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
         <h2 data-annual-stage="title">{{ title }}</h2>
         <p v-if="lead" class="story-slide-shell__lead" data-annual-stage="copy">{{ lead }}</p>
       </header>
-      <div class="story-slide-shell__body"><slot /></div>
+    <div class="story-slide-shell__body"><slot /></div>
     </div>
   </AnnualScene>
 </template>
