@@ -736,7 +736,7 @@
       "timeOfDay": { "eyebrow": "你的鼓声时刻", "title": "{favoriteHour}，最容易听见你的鼓声", "body": "记录把最多鼓点留在这个时刻，《{timeSong}》也在时间旁边留下了名字。" },
       "lateNight": { "eyebrow": "夜鼓未央", "title": "{lateTime}，夜色还没有替你收鼓", "body": "{lateNights} 个被记录的夜晚里，《{lateSong}》陪你的鼓声走得最深。" },
       "rating": { "eyebrow": "TAIKOB20", "title": "{rating}，是你此刻的坐标", "body": "和 {ratingSample} 位站内鼓手站在同一张图上，你走到了 {ratingPosition}。数字不是终点，只是把这一刻的你认真标下。" },
-      "milestones": { "eyebrow": "高光时刻", "title": "{milestoneCount} 个瞬间，把成长点亮", "body": "新的通关、全连与全良在这段记录里接连亮起。成长不需要旁白，成绩已经替你说了。" },
+      "milestones": { "eyebrow": "高光时刻", "title": "高光时刻", "body": "新的通关、全连与全良在这段记录里接连亮起。成长不需要旁白，成绩已经替你说了。" },
       "keyword": { "eyebrow": "鼓面关键词", "title": "你的鼓面关键词：{keywordTitle}", "body": "{keywordDimension} 最先亮起。鼓面记住了你出手时的样子。" },
       "speed": { "eyebrow": "SPEED SIGNATURE", "title": "{speed}×，是你刻进成绩里的速度", "body": "{speedCharts} 张谱面的成绩页留着这份节奏。鼓面快一点，气势也跟着向前一点。" },
       "near": { "eyebrow": "ALMOST DONDAFUL", "title": "《{nearSong}》，离全良只差 {nearOk} 个可", "body": "鼓面已经亮到最后一小步。下一次落槌，也许就是满屏金光。" },

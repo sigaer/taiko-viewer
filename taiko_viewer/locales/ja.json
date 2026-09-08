@@ -682,7 +682,7 @@
       "timeOfDay": { "eyebrow": "あなたの響く時間", "title": "{favoriteHour}、あなたの音がいちばん聞こえる", "body": "この時刻に最も多くの太鼓の音が残り、『{timeSong}』の名前も時間のそばに刻まれました。" },
       "lateNight": { "eyebrow": "夜鼓は続く", "title": "{lateTime}、夜はまだ太鼓を止めない", "body": "記録に残った {lateNights} 夜では、『{lateSong}』がいちばん深い時間まで音を連れていきました。" },
       "rating": { "eyebrow": "TAIKOB20", "title": "{rating}、今のあなたの座標", "body": "サイト内の {ratingSample} 人のプレイヤーと同じ図に立つと、今いる場所は {ratingPosition}。数字はゴールではなく、今を丁寧に刻む目印です。" },
-      "milestones": { "eyebrow": "光った瞬間", "title": "{milestoneCount} の瞬間が、成長を灯した", "body": "新しいクリア、フルコンボ、ドンダフルが記録の中で次々に灯りました。成績そのものが、成長を語っています。" },
+      "milestones": { "eyebrow": "光った瞬間", "title": "光った瞬間", "body": "新しいクリア、フルコンボ、ドンダフルが記録の中で次々に灯りました。成績そのものが、成長を語っています。" },
       "keyword": { "eyebrow": "鼓面キーワード", "title": "あなたのキーワードは「{keywordTitle}」", "body": "{keywordDimension} が最初に光る。鼓面は、打ち始めた瞬間のあなたを覚えています。" },
       "speed": { "eyebrow": "SPEED SIGNATURE", "title": "{speed}×、成績に刻んだスピード", "body": "{speedCharts} 譜面の成績欄に、このテンポが残っています。鼓面が速くなれば、勢いも一歩前へ。" },
       "near": { "eyebrow": "ALMOST DONDAFUL", "title": "『{nearSong}』、全良まであと{nearOk}可", "body": "金色の鼓面まで、ほんのあと一歩。次の一打で、すべてが光るかもしれません。" },
