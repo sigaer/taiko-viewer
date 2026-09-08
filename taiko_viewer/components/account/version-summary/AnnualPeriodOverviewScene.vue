@@ -15,6 +15,7 @@ const props = defineProps<{
   active: boolean;
   reducedMotion: boolean;
   transitionTime: number;
+  reverseTransition?: boolean;
 }>();
 
 const { formatDate } = useViewerDateTime();
@@ -25,7 +26,9 @@ let context: gsap.Context | null = null;
 let timeline: gsap.core.Timeline | null = null;
 
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
-const overviewProgress = computed(() => Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
+const overviewProgress = computed(() => props.reverseTransition
+  ? 1
+  : Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
 const stateClass = computed(() => safeTime.value <= 0
   ? "is-period-state"
   : safeTime.value >= PERIOD_OVERVIEW_DURATION_MS

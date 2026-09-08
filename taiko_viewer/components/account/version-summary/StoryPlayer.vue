@@ -59,6 +59,7 @@ let transitionGeneration = 0;
 let transitionTargetTime: number | null = null;
 let touchStart: { x: number; y: number } | null = null;
 const transitionClock = { value: 0 };
+const transitionForward = ref(true);
 // Annual number motion is one-shot: once a slide has been left, returning to it
 // must render the settled value instead of replaying count-up/count-down.
 const navigationMotion: AnnualNavigationMotion = { visited: new Set<number>(), direction: "initial" };
@@ -240,11 +241,7 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   if (transitionRunning.value || debugTransitionTime.value !== null) return;
   const generation = ++transitionGeneration;
   const forward = targetIndex === overviewIndex.value;
-  if (!forward) {
-    await commitPage(targetIndex);
-    transitionTargetTime = null;
-    return;
-  }
+  transitionForward.value = forward;
   const sourceTime = forward ? 0 : PERIOD_OVERVIEW_DURATION_MS;
   const targetTime = forward ? PERIOD_OVERVIEW_DURATION_MS : 0;
   transitionTargetTime = targetTime;
@@ -591,6 +588,7 @@ onBeforeUnmount(() => {
         :active="documentVisible"
         :reduced-motion="reducedMotion"
         :transition-time="visibleTransitionTime"
+        :reverse-transition="!transitionForward"
       />
     </div>
 
