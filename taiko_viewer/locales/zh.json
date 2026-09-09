@@ -693,6 +693,7 @@
     },
     "share": { "generating": "正在生成海报…", "created": "30 天分享已经创建，接下来可以生成海报。", "ready": "分享页和海报已生成", "downloadFallback": "系统分享没有打开，已改为下载海报。", "posterFirst": "请先生成海报，再把这一页分享出去。", "renewed": "分享有效期已续期 30 天", "revoked": "公开分享已撤销", "expires": "有效期至 {date}", "failed": "分享或海报生成失败，请稍后重试", "privacy": "创建后将生成一个不可枚举的公开链接，默认 30 天后失效；你可以在这里续期或提前撤销。", "expired": "这份年度回顾已到期或被撤销。", "publicLead": "这是一份由玩家主动公开的 2026 太鼓回顾。" },
     "milestoneTypes": { "clear": "新的通关亮起", "full_combo": "新的全连亮起", "dondaful": "新的全良亮起" },
+    "milestoneTypeLabels": { "clear": "过关", "full_combo": "全连", "dondaful": "全良" },
     "entry": {
       "eyebrow": "2026 / 持续更新",
       "title": "你的鼓声，都留在这里",

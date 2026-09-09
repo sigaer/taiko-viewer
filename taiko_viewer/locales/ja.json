@@ -650,6 +650,7 @@
     "buildPrelude": { "eyebrow": "振り返りの序章 · 製本中", "title": "あなたの太鼓が、物語になっています", "failedTitle": "製本が途中で止まりました", "lead": "今年の記録をたどりながら、好きな曲、成長、響きを集めています。", "waiting": "前の物語が完成するのを待っています", "background": "ページを離れても処理は続きます。戻ると現在の進捗から表示します。", "retry": "もう一度整理" },
     "buildStages": { "queued": "整理キューを待っています", "preparing": "年間記録を準備しています", "history": "成績の軌跡を復元しています", "events": "一つひとつの変化を探しています", "summaries": "好みと成長をまとめています", "personal_complete": "個人ストーリーが形になりました", "rating": "サイト内の位置を追加しています", "assets": "物語とどんちゃんを製本しています", "completed": "年間の振り返りが完成しました", "failed": "年間の振り返りを整理できませんでした", "running": "年間の振り返りを整理しています" },
     "milestoneTypes": { "clear": "新しいクリアが灯る", "full_combo": "新しいフルコンボが灯る", "dondaful": "新しいドンダフルが灯る" },
+    "milestoneTypeLabels": { "clear": "クリア", "full_combo": "フルコンボ", "dondaful": "ドンダフル" },
     "entry": { "eyebrow": "2026 / 更新中", "title": "あなたの音が、ここに残っています", "lead": "きせかえ、段位、称号、そして足あとを残した記録が、開かれるのを待っています。", "binding": "現在の連携", "titleLabel": "年間称号", "playCount": "プレイ記録", "activeDays": "記録した日", "uniqueSongs": "曲の記録" },
     "openingCover": {
       "kicker": "花火のあいだに、あなたの音が残る",
