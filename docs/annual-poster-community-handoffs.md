@@ -1,0 +1,121 @@
+# Annual Poster Community — Agent Handoffs
+
+## Coordinator / setup
+
+- Agent / role: `/root` — Coordinator
+- Phase: Phase A — Poster Static Rebuild (setup)
+- 完成内容: Read and confirmed the sole implementation spec; established execution status and collaboration rules.
+- 修改文件: `docs/annual-poster-community-plan.md`, `docs/annual-poster-community-status.md`, `docs/annual-poster-community-handoffs.md`, `AGENTS.md`
+- 测试结果: Baseline read from `taiko_viewer/package.json` (`0.53.33`) and Git (`736dc0d`); unrelated worktree modification recorded.
+- 未解决问题: Phase A static rebuild and audits not yet completed.
+- Gate 状态: Gate A = PENDING
+- Safe next action: Start isolated Agent A (writer), Agent B (data-contract read-only auditor), and Agent C (visual QA read-only).
+
+## Agent C / Visual QA
+
+- Agent / role: Agent C — Visual QA (read-only)
+- Phase: Phase A — Poster Static Rebuild
+- 完成内容: Audited current implementation against the Phase A scope. Poster remains the legacy 30-day share flow; required static rebuild elements and assets are absent.
+- 修改文件: None
+- 测试结果: No Nuxt/viewer process was running. Five viewport screenshots, console, 404, overflow, navigation overlap, clipping, and occlusion checks were not executable.
+- 未解决问题: Agent A has not landed the static rebuild; Agent B audit was blocked by collaboration stream disconnect; no visual evidence exists.
+- Gate 状态: Gate A = PENDING
+- Safe next action: Retry Agent A implementation and Agent B contract audit; only then run visual QA against a running local viewer.
+
+## Collaboration incident
+
+- Agent / role: Coordinator
+- Phase: Phase A — Poster Static Rebuild
+- 完成内容: Retried isolated Agent A and Agent B assignments; both failed with collaboration stream disconnect before completion.
+- 修改文件: None beyond the setup docs and AGENTS rule.
+- 测试结果: Repository baseline remains version `0.53.33`, commit `736dc0d`; unrelated `title_song_relations.json` modification preserved.
+- 未解决问题: Phase A implementation and data audit are not complete.
+- Gate 状态: Gate A = PENDING
+- Safe next action: Wait for the next instruction or retry agents when collaboration service is available; do not deploy or enter Phase B.
+
+## 2026-09-09 / Main Agent recovery and material preflight
+
+- Agent / role: `/root` — Coordinator / sole UI writer; read-only preflight performed serially by the main Agent.
+- Phase: Phase A — Poster Static Rebuild.
+- Baseline: HEAD `736dc0d 0.53.33 修复年度时段坐标与阴影层级`; package version `0.53.33`; status `IN_PROGRESS`; Gate A `PENDING`. No discrepancy from the user’s expected baseline.
+- Completed: Read repository instructions, master plan, status and handoffs; inspected Git changes and source types; searched for the required artwork. Preserved all pre-existing changes.
+- Modified files this turn: `docs/annual-poster-community-status.md`, `docs/annual-poster-community-handoffs.md` only.
+- Data Contract preflight: all four-grid/six-metric fields exist. `pound.speed?: number | null` requires missing-state handling; counts are not speed. Mini profile uses profileCard, with finalTitle.title as title fallback. timeOfDay range must match topPeriod. No implementation audit PASS is claimed.
+- Unresolved: original background_22.png (414×896), square_bg.png (363×554), and reference image are unavailable. No CSS redraw or fabricated reference was substituted. Restore poster.zip before master implementation.
+- Visual QA: implementation missing; five requested viewport captures and 414×896 reference/implementation/side-by-side not produced. Console, 404, overflow and navigation occlusion are unverified, not zero.
+- Tests: source/type inspection only; no UI change, build, runtime test or production operation.
+- Gate evaluation: FAIL due to missing required artwork, implementation and evidence; Gate A remains PENDING.
+- Safe next action: obtain original assets; main Agent writes 414×896 master, then remaining viewports; run Data Contract Audit and Visual QA serially read-only, with main-Agent fallback. Coordinator may set PASS only with all Gate A evidence. Stop after Phase A.
+- Phase B–F touched: NO. Production writes: NO. Deployment: NO.
+
+## 2026-09-09 / Phase A final integration — Gate A PASS
+
+- Agent / role: `/root` — Coordinator / sole UI writer.
+- Collaboration: Data Contract Audit `/root/data_contract_audit` completed read-only first (PASS); Visual QA `/root/visual_qa` then completed read-only (PASS), including a follow-up review of the Japanese compose fix. No child wrote UI or deployed.
+- Baseline: version `0.53.33`, HEAD `736dc0d`; no mismatch with requested baseline. Current uncommitted working version `0.53.34`; package-lock matches. Patch reflects this static compatible UX correction, not completion of the planned community features.
+- Materials: user supplied root `poster.zip`; original background_22.png and square_bg.png copied byte-for-byte into public/annual/poster. Reference extracted only for local evidence. Zip remains outside implementation changes.
+- Phase A files:
+  - `taiko_viewer/components/account/version-summary/slides/PosterSlide.vue`
+  - `taiko_viewer/components/account/version-summary/slides/LegacyPosterShare.vue` (byte-identical to baseline PosterSlide)
+  - `taiko_viewer/components/account/version-summary/AnnualShareGrid.vue`
+  - `taiko_viewer/public/annual/poster/background_22.png`
+  - `taiko_viewer/public/annual/poster/square_bg.png`
+  - `taiko_viewer/locales/zh.json`, `taiko_viewer/locales/ja.json`
+  - `taiko_viewer/package.json`, `taiko_viewer/package-lock.json`
+  - `taiko_viewer/scripts/verify_annual_contract.mjs` (relocated legacy assertions)
+  - `taiko_viewer/scripts/verify_annual_poster_static.mjs` (isolated static QA only)
+  - `docs/annual-poster-community-plan.md` (Phase A checklist result only), `docs/annual-poster-community-status.md`, `docs/annual-poster-community-handoffs.md`
+- Four-grid mapping: favoriteSong; pound.topSong + pound.speed; profileCard MyDon/nickname/title/danName with finalTitle.title fallback; highScore.song + score. Pound counts do not substitute for speed.
+- Six fields: overview.playCount; overview.uniqueSongs; overview.currentClearCharts; period.activeDays; timeOfDay.topLabel and range matched by topPeriod, fallback favoriteHourLabel; ratingRank.rankLabel + rating. Missing fields preserve geometry and zero remains zero.
+- Static controls: honest empty danmaku area, editable input, two independently toggleable default-checked sync checkboxes, disabled send/save buttons with unavailable state titles. No reaction feed, send, export, upload or community behavior. Legacy shares remain a secondary dialog, mounted on first open.
+- Data Audit: PASS for source contract and phase boundary. No legacy production API writes were tested.
+- Visual QA: PASS for the Gate A seven conditions. 414×896 master first, grid x25.5/y226.03/w362.98/h553.97; other four sizes checked afterwards. Long text and missing-data fixtures checked. Japanese compose overflow found and corrected; five sizes and Japanese master rerun, then visual re-review PASS.
+- Commands and results (cwd taiko_viewer):
+  - `npm run test:annual` — PASS; 21 pages, schema v4, zh/ja.
+  - `POSTER_QA_MASTER_ONLY=1 node scripts/verify_annual_poster_static.mjs` — initial master PASS.
+  - `node scripts/verify_annual_poster_static.mjs` — final five-viewports / long text / missing data / controls PASS.
+  - `POSTER_QA_MASTER_ONLY=1 POSTER_QA_LANG=ja POSTER_QA_OUT=/tmp/annual-poster-phase-a/ja node scripts/verify_annual_poster_static.mjs` — final Japanese master PASS.
+  - `npm run build` — final source build PASS, exit code 0; local validation only.
+  - `git diff --check` — PASS.
+- Evidence: `/tmp/annual-poster-phase-a/evidence/414x896.png`, `390x844.png`, `430x932.png`, `390x760.png`, `414x800.png`; `414x896-reference.png`; `414x896-side-by-side.png` (reference left); `five-viewports.png`, `long-text.png`, `missing.png`, `report.json`. Japanese master/report under `/tmp/annual-poster-phase-a/ja/`. Build/contract logs under `/tmp/annual-poster-phase-a/`.
+- Console / 404 / overflow: all five normal viewport reports have zero console/page errors, zero HTTP >=400, zero measured element/body overflow, zero navigation collision, and zero attempted writes. Both checkbox defaults true.
+- Evidence limitations: actual UI and StoryPlayer in isolated Vite harness, synthetic summary/local placeholder artwork, stubbed BGM, all external requests/writes blocked. No full Nuxt route/auth flow, live user artwork, soft keyboard, sending/export, or production validation is claimed. Screenshot QA is not a share-card renderer.
+- Coordinator Gate A decision: PASS; status is COMPLETED, Phase remains A. Master plan Phase A row updated. No automatic Phase B entry.
+- Existing unrelated AGENTS.md/title_song_relations.json changes preserved. No commit/push.
+- Safe next action: stop and await user instruction; future work must restore status and respect the next phase's scope. Do not treat checked sync controls as implemented business behavior.
+- Phase B–F touched: NO. Server feature/schema changes: NO. Production writes: NO. Deployment: NO.
+
+## 2026-09-09 / Human visual review — Gate A reopened
+
+- User requested Gate A PASS → PENDING; status IN_PROGRESS, Phase A continues without restarting. Earlier data audit remains valid; history retained.
+- Feedback: song slots in QA show identical generic records; media form separate small cards instead of a centered, gapless 2×2 square mosaic. Profile media is undersized.
+- Required correction: three real distinct song covers using existing summary coverUrl paths; equal profile tile; media width approximately 64.5% of square_bg, aspect 1, zero gaps; labels/values outside media.
+- Preserve approved Poster background, danmaku/input/actions/checkboxes, square_bg position, six metrics, legacy entry and vertical layout.
+- First produce only 414×896 reference/implementation/side-by-side. Wait for human confirmation before remaining four viewports; no automated Gate PASS.
+- Working version remains 0.53.34; no commit, push, production write, deployment or Phase B–F work.
+
+## 2026-09-09 / Media mosaic correction — master ready for human review
+
+- Main Agent continued Phase A without restarting. Gate A remains PENDING / status IN_PROGRESS after human reopen. Earlier audit history preserved.
+- This round changed AnnualShareGrid.vue, static QA fixture/script, status/handoff and the plan's current Phase A row/footer to reflect the reopen. No changes to PosterSlide, surrounding controls, six fields, original background/square PNGs, locales or 0.53.34 version.
+- DOM: top labels / one centered gapless 2×2 media mosaic / bottom labels / existing stats. Three square `<img>` use existing song.coverUrl and object-fit:cover, radius:0. Profile is an equally sized square with large MyDon and nickname/title; text outside song images cannot resize the mosaic.
+- Root cause: prior QA assigned one generic record-player.png to all three song.coverUrl fields. Grid itself had no vinyl component, but used four independently laid-out small images. Corrected both causes rather than only changing a border radius.
+- Resolver read-only audit: FavoriteSongSlide, PoundSlide and HighScoreSlide consume the same three ViewModel song objects. makeSongMapper in utils/annualSummary.ts calls buildSongCoverThumbnailUrl(songNo,400); no new cover resolver or backend logic.
+- Fixture: actual catalog IDs 816/463/243 (星屑ストラック / 幽玄ノ乱 / 万戈イム－一ノ十), each resolved through utils/songCover.ts. Anonymous public CDN GETs return three distinct real 400×400 WebP images. Sources/hashes recorded in cover-sources.json. Other summary values remain synthetic. No account data or writes used.
+- Master geometry: square_bg unchanged at x25.5/y226.03/362.98×553.97; media x89.93/y324.03/234.11×234.11; four tiles approximately117.05×117.05; profile equal; gap0. Media aligned to actual supplied raster rather than its approximate coordinate estimate.
+- Tests: `node scripts/verify_annual_poster_static.mjs` defaults to 414×896 only; master, three resolved cover URLs, dimensions/adjoining edges/center, missing data, long text and controls PASS. `npm run test:annual` PASS. `git diff --check` PASS. No new full build or five-viewport run claimed.
+- Evidence under `/tmp/annual-poster-phase-a/mosaic-review/`: 414x896-reference.png, 414x896.png, 414x896-side-by-side.png (reference left), report.json, cover-sources.json, long-text.png, missing.png, qa.log. Prior evidence retained separately.
+- Master console/404/overflow/occlusion/writes all zero. Background grid/nav geometry, six-stat text and checkbox states equal prior master report.
+- Human checkpoint: wait for user confirmation of master before `POSTER_QA_ALL_VIEWPORTS=1 node scripts/verify_annual_poster_static.mjs`; do not treat automatic assertions as Gate PASS. Corrected five-viewports are NOT YET RUN.
+- Gate A: PENDING. Baseline 736dc0d / 0.53.33; working version 0.53.34 unchanged and uncommitted. Commit NO, push NO, deployment NO, production writes NO, Phase B–F NO.
+
+## 2026-09-09 / Phase A closeout and runtime consistency audit
+
+- User manually accepted 414×896, 390×844, 430×932, 390×760 and 414×800; the corrected AnnualShareGrid 2×2 mosaic is accepted.
+- Gate A passed after user manual multi-viewport visual acceptance.
+- Closeout audit confirmed the supplied artwork, AnnualShareGrid mapping, three distinct real covers, equal gapless centered tiles, six fields, checked sync controls, secondary legacy entry, and no Phase B–F/server/DB/Forum implementation.
+- Validation: `npm run test:annual` PASS; `POSTER_QA_ALL_VIEWPORTS=1 CHOKIDAR_USEPOLLING=1 node scripts/verify_annual_poster_static.mjs` PASS; `npm run build` PASS; `git diff --check` PASS.
+- Checkpoint target is working version `0.53.34`; unrelated `title_song_relations.json`, `AGENTS.md` and `poster.zip` are excluded.
+- Runtime audit: HEAD `736dc0d`; package version `0.53.34`; local 3100 and online viewer both report appVersion `0.53.33`; `taiko-viewer.service` active since `2026-09-09 11:09:41 CST`.
+- The audit build refreshed shared `.output` to `0.53.34` while the service stayed on its existing 0.53.33 process. Browser checks reproduced multiple `/_nuxt/*.js` HTTP 500 responses and one build metadata JSON HTTP 500. Direct probes for the new Poster PNGs returned HTTP 404 locally and online; no CSS, song-cover, API or SSR-route failure was observed. This is mixed/stale build evidence; no repair was performed.
+- No push, deployment, restart, production write, copy or rsync was performed. Stop at Phase A and await Phase B instruction.

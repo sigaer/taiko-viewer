@@ -625,6 +625,7 @@
     }
   },
   "annualSummary": {
+    "staticPoster": {"report": "年度报告", "reflections": "年度感想", "empty": "还没有年度感想", "placeholder": "输入年度感想，分享你与太鼓的故事", "sync": "同步分享到社区", "send": "发送感想", "save": "保存图片", "legacy": "更多分享方式 · 30 天链接", "unavailable": "暂不可用", "close": "关闭"},
     "name": "2026 太鼓回顾（持续更新）",
     "common": {
       "coverFallback": "咚",

@@ -392,7 +392,7 @@ const monthlyLeafItemSource = await read("components/account/version-summary/Ann
 assert.equal(monthlyLeafItemSource.includes('@error="handleCoverError"'), true, "monthly leaf cover has no failure handler");
 assert.equal(monthlyLeafItemSource.includes("AnnualArtworkFallback"), true, "monthly leaf cover has no visual fallback");
 
-const posterSlideSource = await read("components/account/version-summary/slides/PosterSlide.vue");
+const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");
 assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");
 assert.equal(posterSlideSource.includes("const createShare ="), true, "share creation action is missing");
 assert.equal(posterSlideSource.includes("const generatePoster ="), true, "poster generation action is missing");

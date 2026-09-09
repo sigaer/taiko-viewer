@@ -624,6 +624,7 @@
     }
   },
   "annualSummary": {
+    "staticPoster": {"report": "年間レポート", "reflections": "今年の感想", "empty": "今年の感想はまだありません", "placeholder": "太鼓と過ごした一年の感想を入力", "sync": "コミュニティにも共有", "send": "感想を送信", "save": "画像を保存", "legacy": "その他の共有 · 30日間リンク", "unavailable": "現在利用できません", "close": "閉じる"},
     "name": "2026 太鼓の振り返り（更新中）",
     "common": {
       "coverFallback": "ドン",
