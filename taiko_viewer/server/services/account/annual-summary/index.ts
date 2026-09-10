@@ -778,7 +778,14 @@ export const createAccountAnnualShareCard = async (
   // Saving the image is the primary operation; the Forum sync is an optional side
   // effect that can only downgrade its own status, never the saved share card.
   if (options.syncCommunity !== true) {
-    return { shareCard, cached: cachedUsable, communitySync: buildShareCardSyncDto(card, null, false) };
+    const dto = buildShareCardSyncDto(card, null, false);
+    return {
+      shareCard,
+      cached: cachedUsable,
+      // This request did not ask for a community sync, so report that even when an
+      // earlier save already synced the same card; the thread stays informational.
+      communitySync: { ...dto, status: "skipped", reason: "not-requested", message: "分享图片已保存" }
+    };
   }
   if (card.forum_thread_id) {
     return { shareCard, cached: cachedUsable, communitySync: buildShareCardSyncDto(card, null, true) };
