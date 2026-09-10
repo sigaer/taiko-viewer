@@ -26,13 +26,16 @@ Current Round:
 **UX-1 — Functional & Data Correctness**
 
 Status:
-**UX-1 COMPLETE — released `0.57.3`, Gate PASS**
+**UX-2 COMPLETE — released `0.58.0`, Gate PASS**
 
 Gate UX-1:
-**PASS**（2026-09-11，见下方「Gate UX-1 判定」）
+**PASS**（2026-09-11，`0.57.3`，见「Gate UX-1 判定」）
+
+Gate UX-2:
+**PASS**（2026-09-11，`0.58.0`，见「Gate UX-2 判定」）
 
 Next allowed round:
-UX-2 / UX-3 仍需用户显式指令；本轮结束后已停止，未自动开始。
+UX-3 仍需用户显式指令；本轮结束后已停止，未自动开始。
 
 ---
 
@@ -622,3 +625,58 @@ Gate UX-2:
   两个 slide 包装层转发 `flowing`、time 页 rotor 单一动画与 2–5 位字号、
   `slides.time.theme` 在 zh/ja 均存在。
 - 未建立动画单测 / 像素 diff / 截图矩阵 / RAF 模拟器。
+
+## UX-2 Release 记录
+
+| 时间 | 事件 | 结果 |
+| --- | --- | --- |
+| 2026-09-11 | `git diff --check` | clean |
+| 2026-09-11 | `npm run test:annual` | `{"ok":true,"pageCount":21,"locales":["zh","ja"],"schemaVersion":4}` |
+| 2026-09-11 | `npm run test:annual:period` | 4 pass / 0 fail |
+| 2026-09-11 | `npm run build` | exit 0，Build complete |
+| 2026-09-11 | release commit `627f6a5` | `0.58.0 年度回顾动画与交互节奏改造` |
+| 2026-09-11 | `scripts/deploy_forum_web.sh "0.58.0 年度回顾动画与交互节奏改造"` | **exit 0**；健康检查 active/active |
+| 2026-09-11 | 线上 smoke + 真实账号验收 | 通过（见下） |
+
+- 版本徽标在线为 `0.58.0`；`/titles` 200、`/account/version-summary` 未登录 302（预期）、`/sitemap.xml` 200。
+- 百度推送仍为当日配额已满（脚本内置可选步骤，不影响部署）。
+- 既有脏文件 `taiko_viewer/assets/data/title_song_relations.json` 按惯例 stash → 部署后还原，
+  SHA-256 前后一致 `b44083d2…8134`，未进入本轮提交。
+
+### 线上真实账号验收（414×896，`viewer.sakura-bot.cn`）
+
+| 检查 | 线上结果 |
+| --- | --- |
+| 烟花有粒子帧（12s / 24 采样） | 20/24，亮度层次 16 级，峰值 alpha 79 |
+| 烟花不干扰文字 | canvas opacity 0.62；年份 1、开始按钮 1、「直达结果页」存在 |
+| 过渡时钟 | true（rotation 12 个不同 transform 值） |
+| overlay flowing 帧 | 17/26（其余为过渡未开始/已结束） |
+| 封面交接 | 页面层 `…0.533858…` → overlay 首帧 `…0.533654…`（同一相位，连续） |
+| time 页首屏主题 | «你的鼓声时刻 / 你的鼓声，最常在什么时候响起？» opacity 1 |
+| 右下结论 reveal | 350ms 时仍为 opacity 0（第二拍），稍后出现 |
+| 轮盘旋转 | `time-wheel-rotation`，rotor transform 持续变化 |
+| 数字裁切 | 采样计数 `0`（43.06px）右边界 289 < 轮盘 481，无越界 |
+| 临时 session | 已删除并校验为 0 行 |
+
+## Gate UX-2 判定
+
+**PASS**（2026-09-11，`0.58.0`）
+
+| 条目 | 结论 |
+| --- | --- |
+| Opening 烟花具有真实爆发感 | PASS（径向高速粒子 + 重力 + 拖尾 + 随机不对称） |
+| 烟花持续错峰出现 | PASS（20/24 采样帧有粒子，无长静默） |
+| Opening 内容可读性不下降 | PASS（整层 0.62，标题/年份/两个入口 opacity 1） |
+| Period→Overview vertical flow 不停止 | PASS（页面层 21/21 帧位移，overlay 层持续位移） |
+| rotation 与 vertical flow 同时存在 | PASS（旋转只作用于独立旋转层，同一时段两者都在动） |
+| transition 不再出现明显卡顿/重启 | PASS（共享 `--cover-phase`，交接相位连续，无 pause/重启动画） |
+| timeOfDays 进入立即有主题提示 | PASS（~350ms opacity 1） |
+| 6 个 label 与对应 sector 一起旋转 | PASS（同处 `time-wheel__rotor` 单一动画） |
+| 次数字号适当缩小 | PASS（43.06 / 36.85 / 30.64px 分级） |
+| 实际最大数字不裁切 | PASS（0/43/46/122/996/1,206 三个视口全部无越界） |
+| 页面信息 reveal 节奏自然 | PASS（主题 → 转盘 → 焦点 → 结论 四拍） |
+| 未开始 UX-3 | PASS |
+| deploy 成功 | PASS（exit 0） |
+| online smoke 成功 | PASS |
+
+Gate UX-2 = **PASS**。UX-3 未开始，等待用户显式指令。
