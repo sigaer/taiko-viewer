@@ -198,6 +198,14 @@ assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-ro
 assert.equal(periodOverviewSceneSource.includes("--cover-rotation"), false, "rotation is still driven by a CSS variable instead of the timeline");
 assert.equal(/\.to\([^)]*,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
 assert.equal(/\.pause\(\)/.test(periodOverviewSceneSource), false, "period transition still pauses the cover stream");
+// The shared cover phase must keep advancing while the transition plays, because
+// the slot animation is paused and the visible cover position comes from it.
+assert.equal(
+  /if \(coverClockTimestamp\) \{\s*coverStreamPhase\.value = \(coverStreamPhase\.value \+ timestamp - coverClockTimestamp\)/.test(storyPlayer),
+  true,
+  "cover phase is still frozen while the period transition runs"
+);
+assert.equal(/!transitionRunning\.value\) \{\s*coverStreamPhase/.test(storyPlayer), false, "cover phase still checks transitionRunning");
 const coverStreamSource = verticalCoverSource;
 assert.equal(coverStreamSource.includes("vertical-cover-stream__rotation"), false, "the rejected per-cover rotation layer is back");
 assert.equal(coverStreamSource.includes("__plane"), true, "cover stream lost its plane element");

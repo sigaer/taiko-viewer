@@ -66,8 +66,8 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
               <span>{{ slot.label }} · {{ slot.range }}</span>
             </div>
           </div>
+          <div class="time-wheel__don-assembly" aria-hidden="true"><i class="time-wheel__don-shadow"></i><i class="time-wheel__don-backplate"></i><div class="time-wheel__don-window"><img src="/annual/timeOfDay/half_dong_ka.png" alt=""></div></div>
         </div>
-        <div class="time-wheel__don-assembly" aria-hidden="true"><i class="time-wheel__don-shadow"></i><i class="time-wheel__don-backplate"></i><div class="time-wheel__don-window"><img src="/annual/timeOfDay/half_dong_ka.png" alt=""></div></div>
       </div>
       <div class="time-of-day-conclusion" data-annual-stage="copy"><span>{{ t("annualSummary.slides.time.favorite") }}</span><strong>{{ summary.timeOfDay.favoriteHourLabel }}</strong></div>
     </div>

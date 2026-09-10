@@ -389,7 +389,11 @@ const preloadNextArtwork = () => {
 const updateCoverClock = (timestamp: number) => {
   coverClockFrame = 0;
   if (!documentVisible.value || reducedMotion.value || routeLeaving) return;
-  if (coverClockTimestamp && !transitionRunning.value) {
+  // The shared cover phase must keep advancing during the Period <-> Overview
+  // transition. The original implementation skipped it whenever the transition
+  // was running, which is why the covers froze while the rotation played: the
+  // slots' CSS animation is paused and their position comes from this phase.
+  if (coverClockTimestamp) {
     coverStreamPhase.value = (coverStreamPhase.value + timestamp - coverClockTimestamp) % ANNUAL_COVER_STREAM_DURATION_MS;
   }
   coverClockTimestamp = timestamp;
