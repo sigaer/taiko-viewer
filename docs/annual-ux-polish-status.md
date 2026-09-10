@@ -866,10 +866,67 @@ time-wheel                 （容器，不旋转）
 | 首屏主题 | 保留（进入即可见） |
 | 数字防裁切 | 保留（2–5 位分级字号、`tabular-nums`、`overflow-wrap`） |
 
+### B-bis. 按用户提供的 0.53.33 原始 `TimeOfDaySlide.vue` 逐条核对
+
+用户已提供 UX-2 修改前的原始文件作为**视觉几何权威基线**，并明确
+`--wheel-x: 0px` + `left = wheel-x - radius` + `clip-path: inset(0 0 0 50%)`
+意味着「**圆心恒在 viewport 左边界，只显示右半边**」是原始设计。
+本轮实现已按该基线逐条核对（`components/account/version-summary/slides/TimeOfDaySlide.vue`）：
+
+| 基线要求 | 实现 |
+| --- | --- |
+| `--wheel-x: 0px` | 一致 |
+| `rotor left = wheel-x - radius` | 一致 |
+| rotor `clip-path: inset(0 0 0 50%)` | 一致（只显示右半圆） |
+| Don window `clip-path: inset(0 0 0 50%)` | 一致 |
+| slot 初始角度 `-75 + index * 30`（另一组 `+105`） | 一致 |
+| `time-slot-flow 40s linear infinite` | 一致，未重构 |
+| `time-slot-counter` 保持文字正向 | 一致 |
+| 两条 edge circle 固定 | 一致（移到独立 `.time-wheel__bearing`，不再随任何 transform） |
+| rotor 固定（绝不旋转整个 rotor） | 一致：rotor 上没有任何 rotation 动画 |
+| Don assembly 固定，仅保留自身 `don-spin` | 一致：`don-spin 9s` 保留，位置不随 slot 运动 |
+| 6 个 slot 不堆叠 | 一致（实测半径 322px，六个可见 slot 分布正常） |
+| sector 使用与 slot 相同的环形运动 | 一致：sector 作为**每个 slot 自身的子元素**，由同一个 slot 动画带动 |
+
+浏览器实测（414×896，`0.58.2`）：
+
+- Don window 中心恒为 `(207, 448)`；2.5s 后仍为 `(207, 448)`（不随转盘移动）。
+- outer / inner edge circle 中心恒为 `(207, 448)`，`rotor transform: none`（不跟随旋转）。
+- 六个可见 slot 中心半径实测 322px，与 `--wheel-radius * .87` 相符。
+
+说明：Don assembly 在源码中位于 rotor 元素之外（原始文件在其内）。
+由于 Don 的包围盒（半径 79px）位于 rotor 包围盒之外，`clip-path` 并不作用于它，
+**两种写法的渲染结果完全相同**，因此本轮不改动这一点以避免无意义的版本抖动。
+
 ### C. 保留项
 
 Opening Canvas 烟花、timeOfDay 首屏 theme、数字分级字号与防裁切全部保留。
 UX-1 的 Period 天数与 favoriteShift 逻辑未触碰。
+
+### C-bis. `0.58.2` 发布与验收记录
+
+| 步骤 | 结果 |
+| --- | --- |
+| `git diff --check` | clean |
+| `npm run test:annual` | ok（契约已改为校验「原始几何」不变量） |
+| `npm run build` | exit 0 |
+| release commit | `d938527 0.58.2 恢复年度回顾转场旋转与时间轮原始几何` |
+| `scripts/deploy_forum_web.sh "0.58.2 …"` | **exit 0**，健康检查 active/active |
+| 线上版本徽标 | `0.58.2` |
+| 线上 smoke | `/titles` 200、未登录 `/account/version-summary` 302（预期） |
+
+Period→Overview 逐帧数值（本地 414×896 录制，封面条带相邻帧灰度差）：
+
+| 阶段 | 帧 | 条带差 |
+| --- | --- | --- |
+| Period 稳态 | 50–60 | 33.2 / 144.5 |
+| 旋转进行中 | 70–100 | 12.1 / 13.8 / 15.4 / 17.9 |
+| Overview 保持菱形 | 110–150 | 17.5 / 11.2 / 20.6 / 17.9 / 19.8 |
+
+即：**矩形流动 → 边流动边旋转 → 菱形保持且继续流动**，全程无冻结帧、无回摆。
+
+素材（`backups/` 已被 gitignore）：`backups/ux2-corrective/` 下已存
+`local-0.58.1.webm` / `live-0.58.1.webm` / 两张逐帧截图。
 
 ### D. 验收方式
 
