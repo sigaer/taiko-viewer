@@ -11,16 +11,16 @@ Latest user instruction overrides historical execution/testing/deployment restri
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase E — Share Card Export
+Phase F — Share Card → Forum
 
 Status:
-COMPLETE
+RELEASED — online smoke pending at commit time
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase F — share card → Forum (not started; this task ends at Phase E).
+None — Phase F is the last phase of this plan.
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
@@ -41,6 +41,9 @@ Phase D is complete: the Poster reaction sync creates a general/discussion threa
 
 Gate E:
 PASS
+
+Gate F:
+PENDING — set to PASS by the online smoke record appended after deployment of `0.57.0`.
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -331,3 +334,14 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Route fix verified in production: all annual-summaries children now answer with handler errors instead of the router's "Page not found" — `shares`, `posters`, `build`, `my-don`, `reactions` and the new `share-card`. The previously broken owner snapshot route now returns 200 with the 580,551-byte PNG, byte-identical to the live MyDon (`07c8ebea…`), and the Poster page's profile tile is served by the snapshot again with the Phase B fallback left unused.
 - Phase D non-regression: the reaction textarea, send control and a moving barrage of 7 bubbles were present on the same page, and the reactions endpoint still resolves. Browser page errors were 0.
 - Gate E: PASS. Phase E = COMPLETE. Phase F not started.
+## 2026-09-10 / Phase F — Share Card → Forum
+
+- Goal: the 同步分享到社区 checkbox beside 保存分享图片 now really works. `syncCommunity=false` only saves the image; `syncCommunity=true` saves the same Phase E image, uploads it through the Forum image pipeline and creates one `general` / `discussion` thread whose body is exactly that one image.
+- No second renderer: the sync reuses the Phase E artifact. The share-card row is the source of truth — the stored PNG is read back from the annual cache and handed to the image pipeline, so nothing is re-rendered, no AnnualShareGrid copy exists, and the Forum source image is the four-tile share card.
+- Forum image pipeline reuse: `uploadForumImageBuffer` was extracted from `uploadForumImage` in `server/utils/forum/media.ts`, so the browser upload endpoint and the share-card sync share one implementation (size/mime/format validation, `sharp` rotate + 1600px inside + WebP q84, OSS put, metadata). The browser endpoint keeps its identical behaviour and the share-card sync never calls a browser API.
+- Thread contract, fixed server-side and not client-controlled: `section = general`, `threadType = discussion`, title exactly 快来看看我的年度报告吧～, body exactly one `image` block built from the uploaded URL. No paragraph block, no summary link, no 30-day public share URL, no QR code and no second image. The thread summary column mirrors the mandated title instead of the generic image-only placeholder sentence; the existing core also derives the thread cover from that image block.
+- Primary/secondary split: the share card is saved first and always returned. A Forum failure, a rate-limit skip, or a lock timeout only downgrades `communitySync` and cannot roll back the image or block the download. The response carries `communitySync: { requested, status, reason, threadId, imageUrl, message }`.
+- Idempotency without a new framework: the share-card row is the anchor. A card that already has `forum_thread_id` returns the stored result immediately — no re-upload, no second thread. Otherwise the sync runs inside the existing `withAnnualFileLock` keyed by the card id and re-reads the row inside the lock, and `markAnnualShareCardForumSync` only writes when `forum_thread_id IS NULL`, so repeated or concurrent saves of the same card cannot post twice.
+- Rate limiting reuses Phase D: `claimForumSyncBudget` is the extracted helper behind the existing 30-second / 10-per-day Forum-sync limiters, now shared by the reaction sync and the share-card sync. Phase D's reaction outcomes and messages are unchanged, and both features keep their own persisted records (reaction row versus share-card row).
+- Still decoupled from the legacy flow: saving with sync on creates no `web_annual_shares` row and no public URL, and the legacy 更多分享方式 dialog is untouched. The client sends the current checkbox value and shows three distinct outcomes (saved only, saved + synced, saved but sync failed or rate-limited) without navigating to the Forum.
+- Version `0.57.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy.

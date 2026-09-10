@@ -74,15 +74,18 @@ const openLegacy = async () => { legacyOpened.value = true; await nextTick(); le
 const savingImage = ref(false);
 const imageError = ref('');
 const imageNotice = ref('');
-// The community checkbox next to the save button stays inert until Phase F; saving
-// the share card must not create a public share or a Forum thread.
+// Saving the share card is the primary operation. The community checkbox only asks
+// the server for an optional Forum side effect, and never creates a public share.
 const saveShareCard = async () => {
   if (savingImage.value) return;
   savingImage.value = true; imageError.value = ''; imageNotice.value = '';
   try {
-    const result = await apiFetch<{ shareCard?: { id: string; imageUrl: string; width: number; height: number } }>(
+    const result = await apiFetch<{
+      shareCard?: { id: string; imageUrl: string; width: number; height: number };
+      communitySync?: { requested?: boolean; status?: string; reason?: string; threadId?: number | null };
+    }>(
       `/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/share-card`,
-      { method: 'POST', body: { locale: locale.value.startsWith('ja') ? 'ja' : 'zh' } }
+      { method: 'POST', body: { locale: locale.value.startsWith('ja') ? 'ja' : 'zh', syncCommunity: imageSync.value } }
     );
     const imageUrl = result?.shareCard?.imageUrl;
     if (!imageUrl) throw new Error('share card image missing');
@@ -97,7 +100,14 @@ const saveShareCard = async () => {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
-    imageNotice.value = localized('分享图片已保存', '共有画像を保存しました');
+    const sync = result?.communitySync;
+    imageNotice.value = sync?.status === 'synced'
+      ? localized('分享图片已保存，已同步到社区', '共有画像を保存し、コミュニティにも共有しました')
+      : sync?.status === 'failed'
+        ? localized('分享图片已保存，但同步社区失败', '共有画像は保存しましたが、コミュニティへの共有に失敗しました')
+        : sync?.reason === 'rate-limited'
+          ? localized('分享图片已保存；社区同步过于频繁，本次未同步社区', '共有画像は保存しました。共有が集中しているため、今回はコミュニティに共有していません')
+          : localized('分享图片已保存', '共有画像を保存しました');
   } catch (error: any) {
     imageError.value = error?.data?.statusMessage || localized('分享图片保存失败，请稍后再试', '共有画像を保存できませんでした。もう一度お試しください');
   } finally { savingImage.value = false; }

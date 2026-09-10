@@ -26,23 +26,27 @@ export const readForumImageMultipart = async (event: H3Event) => {
   return image;
 };
 
-export const uploadForumImage = async (event: H3Event, file: MultiPartData) => {
-  await ensureForumSchema();
-  const user = await requireAccountUser(event);
-  await ensureForumProfile(user.id);
-  if (!file?.data?.length) {
+// Shared server-side image pipeline: validate, downscale, convert to WebP and put
+// on OSS. The browser upload endpoint and server-side producers (annual share card)
+// both go through this so there is only one image implementation.
+export const uploadForumImageBuffer = async (input: {
+  userId: number;
+  data: Buffer;
+  mime?: string;
+}) => {
+  if (!input?.data?.length) {
     throw createError({ statusCode: 400, statusMessage: "未收到论坛图片" });
   }
-  if ((file.data as Buffer).byteLength > IMAGE_MAX_BYTES) {
+  if (input.data.byteLength > IMAGE_MAX_BYTES) {
     throw createError({ statusCode: 400, statusMessage: "论坛图片过大，请控制在 20MB 以内" });
   }
-  const mime = String(file.type || "").toLowerCase();
-  const detectedFormat = await detectImageFormat(file.data as Buffer);
+  const mime = String(input.mime || "").toLowerCase();
+  const detectedFormat = await detectImageFormat(input.data);
   const allowedMime = ALLOWED_IMAGE_MIME_TYPES.includes(mime as (typeof ALLOWED_IMAGE_MIME_TYPES)[number]);
   if (!allowedMime && !ALLOWED_IMAGE_FORMATS.has(detectedFormat)) {
     throw createError({ statusCode: 400, statusMessage: "仅支持 JPG、PNG、WEBP、GIF 图片" });
   }
-  const buffer = await sharp(file.data as Buffer, { animated: true })
+  const buffer = await sharp(input.data, { animated: true })
     .rotate()
     .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
     .webp({ quality: 84 })
@@ -50,7 +54,7 @@ export const uploadForumImage = async (event: H3Event, file: MultiPartData) => {
   const meta = await sharp(buffer).metadata();
   const ossConfig = requireConfiguredOss();
   const client = getOssClient();
-  const key = `forum/threads/${user.id}/${Date.now()}.webp`;
+  const key = `forum/threads/${input.userId}/${Date.now()}.webp`;
   await client.put(key, buffer, {
     headers: {
       "Content-Type": "image/webp"
@@ -62,4 +66,15 @@ export const uploadForumImage = async (event: H3Event, file: MultiPartData) => {
     width: sanitizeInt(meta.width),
     height: sanitizeInt(meta.height)
   };
+};
+
+export const uploadForumImage = async (event: H3Event, file: MultiPartData) => {
+  await ensureForumSchema();
+  const user = await requireAccountUser(event);
+  await ensureForumProfile(user.id);
+  return await uploadForumImageBuffer({
+    userId: user.id,
+    data: file?.data as Buffer,
+    mime: String(file?.type || "")
+  });
 };

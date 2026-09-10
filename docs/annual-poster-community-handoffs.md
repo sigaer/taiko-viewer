@@ -287,3 +287,14 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - For the next agent: the share-card render is synchronous by design (no job table), `web_annual_share_cards.forum_image_url` and `forum_thread_id` exist but are unused, and the plan's fingerprint cache is implemented through the unique `(summary_id, locale, fingerprint)` key plus file reuse.
 - Phase E = COMPLETE, Gate E = PASS. Phase F not started.
 - This acceptance record is a local-only documentation commit after the release push. Do not push it manually or redeploy unchanged web code solely to publish it; the next release will carry it.
+
+## 2026-09-10 / Phase F — Share Card → Forum (released, online smoke pending)
+
+- The 同步分享到社区 checkbox beside 保存分享图片 is now live. `syncCommunity=false` saves the image only; `syncCommunity=true` saves the same image, uploads it through the Forum pipeline and creates one `general` / `discussion` thread.
+- Reuse, not duplication: the Forum source image is the stored Phase E share-card PNG read back from the annual cache, and `server/utils/forum/media.ts` now exposes `uploadForumImageBuffer`, the extracted body of the existing browser upload endpoint (validation, `sharp` resize, WebP q84, OSS put). There is no second renderer, no AnnualShareGrid copy and no browser API round-trip.
+- Contract fixed server-side: title 快来看看我的年度报告吧～, body exactly one `image` block, section `general`, type `discussion`, no paragraph, no link, no QR, no second image. The thread summary mirrors the mandated title rather than the generic image-only placeholder; the core derives the thread cover from the image block.
+- Idempotency is anchored on the share-card row: an existing `forum_thread_id` returns the stored result without re-uploading or re-posting, and a new sync runs under the existing `withAnnualFileLock` keyed by card id with a re-read inside the lock plus a `forum_thread_id IS NULL` guarded write, so repeat or concurrent saves cannot create a second thread.
+- Failure isolation matches Phase D: the image is primary. A Forum error, rate-limit skip or lock timeout is reported through `communitySync` and never blocks the saved image or the download. Rate limiting reuses the extracted `claimForumSyncBudget` helper (30s / 10 per day) shared with the reaction sync; each feature keeps its own persisted record.
+- Legacy isolation intact: no `web_annual_shares` row and no public URL are created, and the legacy dialog is untouched.
+- Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) stay preserved and excluded, and must again be isolated reversibly for the deploy run.
+- Version `0.57.0` (minor). This is the final phase of the plan.

@@ -491,6 +491,21 @@ export const insertAnnualShareCard = async (input: {
   return findAnnualShareCard(input.summaryId, input.locale, input.fingerprint);
 };
 
+export const markAnnualShareCardForumSync = async (input: {
+  cardId: string;
+  imageUrl: string;
+  threadId: number;
+}) => {
+  await ensureAccountSchema();
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE web_annual_share_cards
+     SET forum_image_url = ?, forum_thread_id = ?, updated_at = NOW()
+     WHERE id = ? AND forum_thread_id IS NULL`,
+    [input.imageUrl, input.threadId, input.cardId]
+  );
+  return result.affectedRows > 0;
+};
+
 export const listAnnualPosterPathsForShare = async (shareId: string) => {
   await ensureAccountSchema();
   const [rows] = await getAccountDb().execute<DbRow<{ file_path: string }>[]>(

@@ -3,6 +3,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { readdir } from "node:fs/promises";
 import { createError } from "h3";
+import type { H3Event } from "h3";
 import {
   enrichBindingWithCurrentTitle,
   getCurrentBindingRow,
@@ -65,6 +66,7 @@ import {
   markAnnualJobCompleted,
   markAnnualJobFailed,
   markAnnualJobRunning,
+  markAnnualShareCardForumSync,
   recoverInterruptedAnnualJobs,
   renewAnnualShare,
   revokeAnnualShare,
@@ -83,6 +85,12 @@ import {
   runAnnualSummaryCli,
   withAnnualFileLock
 } from "./runtime";
+import {
+  syncAnnualShareCardToCommunity,
+  type CommunitySyncOutcome,
+  type CommunitySyncReason,
+  type CommunitySyncStatus
+} from "./forum-sync";
 import {
   buildAnnualPosterPublicUrl,
   buildAnnualShareUrl,
@@ -721,31 +729,88 @@ const getShareCardFingerprint = (row: AnnualSummaryRow, locale: AnnualLocale) =>
     .update(`${row.input_fingerprint}:${locale}:${ANNUAL_SHARE_CARD_WIDTH}x${ANNUAL_SHARE_CARD_HEIGHT}:${ANNUAL_SHARE_CARD_RENDERER_REVISION}`)
     .digest("hex");
 
-export const createAccountAnnualShareCard = async (userId: number, summaryId: string, localeInput?: unknown) => {
+const buildShareCardSyncDto = (
+  card: AnnualShareCardRow,
+  outcome: { status: CommunitySyncStatus; reason: CommunitySyncReason; message: string; threadId?: number; imageUrl?: string } | null,
+  requested: boolean
+) => ({
+  requested,
+  status: outcome?.status || (card.forum_thread_id ? "synced" : "skipped"),
+  reason: outcome?.reason || (card.forum_thread_id ? "synced" : "not-requested"),
+  threadId: outcome?.threadId ?? card.forum_thread_id ?? null,
+  imageUrl: outcome?.imageUrl ?? card.forum_image_url ?? null,
+  message: outcome?.message || (card.forum_thread_id ? "分享图片已保存，已同步到社区" : "分享图片已保存")
+});
+
+export const createAccountAnnualShareCard = async (
+  event: H3Event,
+  userId: number,
+  summaryId: string,
+  options: { locale?: unknown; syncCommunity?: unknown; actorUsername: string }
+) => {
   const row = await findOwnerAnnualSummary(summaryId, userId);
   if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
   const summary = await safeReadSummary(row);
   if (!summary) throw createError({ statusCode: 410, statusMessage: "年度回顾文件暂不可用，请联系管理员" });
-  const locale = normalizeAnnualLocale(localeInput);
+  const locale = normalizeAnnualLocale(options.locale);
   const fingerprint = getShareCardFingerprint(row, locale);
   const cached = await findAnnualShareCard(summaryId, locale, fingerprint);
-  if (cached && (await access(cached.file_path).then(() => true).catch(() => false))) {
-    return { shareCard: buildShareCardDto(cached), cached: true };
+  const cachedUsable = Boolean(cached && (await access(cached.file_path).then(() => true).catch(() => false)));
+  let card = cachedUsable ? cached! : null;
+  if (!card) {
+    const outputPath = getAnnualShareCardPath(row, fingerprint);
+    await renderAnnualShareCard({ summaryId, locale, outputPath });
+    const stored = await insertAnnualShareCard({
+      id: cached?.id || randomUUID(),
+      summaryId,
+      userId,
+      locale,
+      fingerprint,
+      filePath: outputPath,
+      width: ANNUAL_SHARE_CARD_WIDTH,
+      height: ANNUAL_SHARE_CARD_HEIGHT
+    });
+    if (!stored) throw createError({ statusCode: 500, statusMessage: "分享图片保存失败" });
+    card = stored;
   }
-  const outputPath = getAnnualShareCardPath(row, fingerprint);
-  await renderAnnualShareCard({ summaryId, locale, outputPath });
-  const stored = await insertAnnualShareCard({
-    id: cached?.id || randomUUID(),
-    summaryId,
-    userId,
-    locale,
-    fingerprint,
-    filePath: outputPath,
-    width: ANNUAL_SHARE_CARD_WIDTH,
-    height: ANNUAL_SHARE_CARD_HEIGHT
-  });
-  if (!stored) throw createError({ statusCode: 500, statusMessage: "分享图片保存失败" });
-  return { shareCard: buildShareCardDto(stored), cached: false };
+  const shareCard = buildShareCardDto(card);
+
+  // Saving the image is the primary operation; the Forum sync is an optional side
+  // effect that can only downgrade its own status, never the saved share card.
+  if (options.syncCommunity !== true) {
+    return { shareCard, cached: cachedUsable, communitySync: buildShareCardSyncDto(card, null, false) };
+  }
+  if (card.forum_thread_id) {
+    return { shareCard, cached: cachedUsable, communitySync: buildShareCardSyncDto(card, null, true) };
+  }
+
+  let outcome: (CommunitySyncOutcome & { imageUrl?: string }) | null = null;
+  try {
+    // The share-card row is the idempotency anchor: the lock plus the re-read inside
+    // it means repeated or concurrent saves of the same card cannot post twice.
+    outcome = await withAnnualFileLock(`annual-share-card-forum-sync:${card.id}`, async () => {
+      const fresh = await findOwnerAnnualShareCard(card.id, userId);
+      if (fresh?.forum_thread_id) {
+        return { status: "synced" as const, reason: "synced" as const, threadId: fresh.forum_thread_id, imageUrl: fresh.forum_image_url || undefined, message: "分享图片已保存，已同步到社区" };
+      }
+      const imageData = await readAnnualImage(card.file_path);
+      const result = await syncAnnualShareCardToCommunity({
+        event,
+        actorUserId: userId,
+        actorUsername: options.actorUsername,
+        imageData
+      });
+      if (result.status === "synced" && result.threadId && result.imageUrl) {
+        await markAnnualShareCardForumSync({ cardId: card.id, imageUrl: result.imageUrl, threadId: result.threadId });
+      }
+      return result;
+    });
+  } catch (error) {
+    console.warn("[annual-share-card] forum sync aborted", card.id, (error as { statusMessage?: string })?.statusMessage || error);
+    outcome = { status: "failed", reason: "failed", message: "分享图片已保存，但同步社区失败" };
+  }
+  const refreshed = (await findOwnerAnnualShareCard(card.id, userId)) || card;
+  return { shareCard, cached: cachedUsable, communitySync: buildShareCardSyncDto(refreshed, outcome, true) };
 };
 
 export const getOwnerAnnualShareCardPath = async (userId: number, cardId: string) => {
