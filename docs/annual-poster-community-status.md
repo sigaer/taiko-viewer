@@ -11,16 +11,22 @@ Latest user instruction overrides historical execution/testing/deployment restri
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase F — Share Card → Forum
+Complete — final closeout
 
 Status:
 COMPLETE
+
+Phase A–F:
+A PASS · B PASS (+ `0.54.1` hotfix VERIFIED ONLINE) · C PASS · D PASS · E PASS · F PASS
+
+Production:
+`0.57.1` (see the final closeout record at the end of this file)
 
 Gate A:
 PASS
 
 Next allowed phase:
-None — Phase F is the last phase of this plan.
+None — the plan's phases A–F are finished.
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
@@ -355,3 +361,12 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - No regression: the Poster still shows four tiles with the loaded profile card, a moving barrage of 5 bubbles, the reaction input and the 保存图片 button; the annual reactions route still resolves; browser page errors were 0.
 - Test artifacts left in 闲聊杂谈 by this acceptance: threads `53` (zh card), `55` (ja card, linked) and `54`, an unlinked ja thread created by the pre-fix concurrency race. All three can be hidden or deleted by a moderator.
 - Gate F: PASS. Phase F = COMPLETE. This was the final phase of the plan.
+## 2026-09-10 / Final closeout — known issues and polish audit
+
+- Scope of this round was audit and closeout only: no new product scope, no re-acceptance of Phases A–F, no new test infrastructure. One real product bug (admin preview MyDon) was found to still exist and was fixed as a single patch release.
+- **Known Issue A — admin preview MyDon (fixed in `0.57.1`).** Confirmed by code audit: admin previews are served by `withOwnerAssets`, which emits the owner-scoped `/api/account/annual-summaries/:summaryId/my-don`. An operator is not that summary's owner, so the request fails and the client-side Phase B fallback retried `/api/account/my-don`, which — when the operator also has a viewer session — returned the **operator's own** MyDon. Admin payloads (`getAdminAnnualSummaryById`, and the cached branch of `queueAdminAnnualSummaryBuild`) now go through a new `withAdminAssets`, which points `profileCard.myDonUrl` at the operator-gated `GET /api/admin/annual-summaries/:summaryId/my-don`. That route reuses the same resolution order as the internal renderer (stored snapshot, then the owner's live MyDon rendered server-side) and always serves the **summary owner's** asset. Because the URL is no longer prefixed with `/api/account/annual-summaries/`, the owner fallback cannot fire for an operator. Owner page, public share, internal export, Phase E/F rendering and AnnualShareGrid geometry are untouched. The operator-side visual confirmation still requires an `ichika`/`maru` admin login, which this session does not hold; the unauthenticated route is verified to be guarded.
+- **Known Issue B — Forum home section chips (`slice(0, 4)`): decision is to keep the current behaviour.** The nine sections are ordered official(10), events(20), beginner-help(30), score-guides(40), dojo(50), achievements(60), arcade(70), general(80), creative(90), so the home row shows the first four and 闲聊杂谈 / 同名二创 are 8th and 9th. The container is a single `display:flex` row with `overflow-x:auto` and hidden scrollbars, shared by four filter buttons, a separator and the section chips; with nine chips the row exceeds the 1040px container and still scrolls, so removing the slice would not break the layout — but the two new sections would sit off-screen at the far right, i.e. no real discoverability gain, while the primary filter controls would share an even longer hidden-scrollbar row. Both sections are already reachable and visible in the composer section select and on their own section pages. Recommendation: leave as-is; if home-page discovery of all sections becomes a requirement, treat it as a dedicated UI task (for example a 全部版块 entry point) rather than removing the slice.
+- **Known Issue C — acceptance threads.** All three share-card threads are `published`, `view_count` 2, `like_count` 0, `replies` 0 and not featured. `53` (zh card) and `55` (ja card) are referenced by their share-card rows and are valid acceptance posts to keep. `54` is referenced by no share-card row and was created by the pre-fix concurrency race, so it is a pure test artifact with no real interaction and is suitable for hiding or deletion — not performed here, since production deletion requires explicit approval.
+- **Phase E job/polling deviation: accepted as intentional.** The master plan sketched a job queue plus polling; `0.56.0+` renders the share card synchronously through Playwright, and thirteen days of real production use show stable generation with no timeout evidence. No queue, worker, polling layer or job table will be added.
+- Already-fixed items remain recorded above and are unchanged by this round: the Nitro `[summaryId]`/`[key]` route collision that shadowed `my-don`, `shares`, `posters` and `build` (fixed in `0.56.0`), and the Phase F concurrent-upsert id clobbering that lost the `forum_thread_id` linkage (fixed in `0.57.0`).
+- Version `0.57.1` (patch: admin preview asset fix). `scripts/deploy_forum_web.sh` with the release subject exited 0. No further phases, features or polish are planned.

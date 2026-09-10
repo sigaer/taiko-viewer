@@ -151,6 +151,21 @@ const withOwnerAssets = async (summary: AnnualSummaryV4, locale: AnnualLocale) =
   };
 };
 
+// Admin previews render someone else's summary in the operator's browser. The
+// owner-scoped account route cannot serve that operator (and the client fallback
+// would then show the operator's own MyDon), so admin payloads point at an
+// operator-gated route that always serves the summary owner's asset.
+const withAdminAssets = async (summary: AnnualSummaryV4, locale: AnnualLocale) => {
+  const enriched = await withOwnerAssets(summary, locale);
+  return {
+    ...enriched,
+    profileCard: {
+      ...(enriched.profileCard || {}),
+      myDonUrl: `/api/admin/annual-summaries/${encodeURIComponent(enriched.summaryId)}/my-don`
+    }
+  };
+};
+
 const getSummaryMyDonPath = (row: AnnualSummaryRow) => `${dirname(row.summary_path)}/my-don.png`;
 
 const buildPosterDto = (poster: AnnualPosterRow) => ({
@@ -453,7 +468,7 @@ export const queueAccountAnnualSummaryBuild = async (
           parameters: {},
           completed: true
         });
-        return { job: serializeAnnualJob(completed!), summary: await withOwnerAssets(cached, normalizeAnnualLocale(options.locale)) };
+        return { job: serializeAnnualJob(completed!), summary: await withAdminAssets(cached, normalizeAnnualLocale(options.locale)) };
       }
     }
 
@@ -848,24 +863,35 @@ export const getInternalAnnualShareCardPayload = async (summaryId: string, token
   };
 };
 
+// Shared MyDon resolution order: stored snapshot first, then the owner's live MyDon
+// rendered server-side (never the browser owner session). Used by the internal
+// share-card renderer and by the operator-gated admin preview.
+const resolveSummaryMyDon = async (row: AnnualSummaryRow, summaryId: string) => {
+  const snapshot = getSummaryMyDonPath(row);
+  if (await access(snapshot).then(() => true).catch(() => false)) {
+    return { kind: "snapshot" as const, path: snapshot };
+  }
+  const buffer = await getMyDonImageBuffer(row.user_id).catch((error) => {
+    console.warn("[annual-summary] live MyDon unavailable", summaryId, (error as { statusMessage?: string })?.statusMessage || error);
+    return null;
+  });
+  if (!buffer) throw createError({ statusCode: 404, statusMessage: "小咚形象不可用" });
+  return { kind: "live" as const, buffer };
+};
+
 export const getInternalAnnualShareCardMyDon = async (summaryId: string, tokenInput: unknown) => {
   if (!verifyAnnualShareCardRenderToken(tokenInput, summaryId)) {
     throw createError({ statusCode: 403, statusMessage: "分享图片渲染凭据无效" });
   }
   const row = await findAnnualSummaryById(summaryId);
   if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
-  // Same preference order as the owner page: stored snapshot first, then the
-  // owner's live MyDon rendered server-side (never the browser owner session).
-  const snapshot = getSummaryMyDonPath(row);
-  if (await access(snapshot).then(() => true).catch(() => false)) {
-    return { kind: "snapshot" as const, path: snapshot };
-  }
-  const buffer = await getMyDonImageBuffer(row.user_id).catch((error) => {
-    console.warn("[annual-summary] share card live MyDon unavailable", summaryId, (error as { statusMessage?: string })?.statusMessage || error);
-    return null;
-  });
-  if (!buffer) throw createError({ statusCode: 404, statusMessage: "小咚形象不可用" });
-  return { kind: "live" as const, buffer };
+  return await resolveSummaryMyDon(row, summaryId);
+};
+
+export const getAdminAnnualMyDon = async (summaryId: string) => {
+  const row = await findAnnualSummaryById(summaryId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  return await resolveSummaryMyDon(row, summaryId);
 };
 
 export const getAdminAnnualEvents = async (
@@ -962,7 +988,7 @@ export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?:
   if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
   const summary = await safeReadSummary(row);
   if (!summary) throw createError({ statusCode: 410, statusMessage: "年度总结文件不可用" });
-  return withOwnerAssets(summary, normalizeAnnualLocale(localeInput));
+  return withAdminAssets(summary, normalizeAnnualLocale(localeInput));
 };
 
 export const removeAdminAnnualSummary = async (summaryId: string) => {
