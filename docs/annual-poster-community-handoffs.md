@@ -244,3 +244,14 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Poster non-regression: four 117.05px tiles, real profile card from `/api/account/my-don`, moving barrage, reaction input present, browser page errors 0; annual reaction and share writes in the window were 0.
 - Phase C = COMPLETE, Gate C = PASS. Phase D not started. Optional: `/forum/thread/50` is a genuine test discussion and can be hidden or deleted by a moderator whenever it is no longer useful.
 - This acceptance record is a local-only documentation commit after the release push. Do not push it manually or redeploy unchanged web code solely to publish it; the next release will carry it.
+
+## 2026-09-10 / Phase D — Reaction → Forum (released, online smoke pending)
+
+- Implemented only the Poster reaction sync. The client still sends just `syncCommunity: true/false`; the server fixes `general` + `discussion` and uses the reaction text as both title and body, with tags 年度报告 / 年度感想 and no song binding.
+- `createForumThread` was split into `createForumThreadCore(...)` + a normal wrapper. The public composer keeps its 4-character title minimum through the `normal` policy; the annual integration uses the `integration` policy, so a short reaction can become a thread without loosening the ordinary posting rule. Everything else in the ordinary pipeline (schema bootstrap, profile provisioning, section/type validation, official role gate, sanitisation, tags, song binding, insert, mention notifications) is shared.
+- Sync is idempotent by construction: only the request that inserted the reaction performs the Forum side effect, and the outcome is persisted on the reaction row (`synced` + `forum_thread_id`, or `failed`, or `skipped`). A same-nonce retry therefore returns the stored outcome and can never create a second thread.
+- Failure semantics follow the plan: the reaction is primary. A Forum error persists `failed` and still returns the published reaction with HTTP 200; a sync-rate-limited request (one per 30s, 10 per day, server-side) returns `skipped` / `rate-limited`; a marker-write failure is logged and does not fail the send.
+- The Poster notice now reflects the server status: synced, 社区同步失败, 社区同步过于频繁 (弹幕 only), or not requested, in both zh and ja.
+- Verification for this release must cover the four Gate D cases against the real deployment (sync=false, sync=true, same-nonce retry, rate-limited), and must confirm that only the sync=true case creates a thread.
+- Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) stay preserved and excluded, and must again be isolated reversibly for the deploy run because the script refuses a dirty tree.
+- Version `0.55.0` (minor). Phase E not started.

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { ResultSetHeader } from "mysql2/promise";
 import { requireAccountAnnualSummaryUser } from "./access";
 import { findOwnerAnnualSummary } from "./repository";
+import { syncAnnualReactionToCommunity, type CommunitySyncOutcome } from "./forum-sync";
 import { ANNUAL_VERSION_KEY } from "./constants";
 import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
 import { loadBadgeMap } from "~/server/internal/forum/shared";
@@ -50,23 +51,75 @@ export const createAnnualReaction = async (event: H3Event, summaryId: string) =>
   const body = (await readBody<{ content?: unknown; syncCommunity?: unknown; clientNonce?: unknown }>(event).catch(() => ({}))) || {};
   const nonce = String(body.clientNonce || "").trim(); if (!/^[0-9a-f-]{16,36}$/iu.test(nonce)) throw createError({ statusCode: 400, statusMessage: "请求标识无效" });
   await ensureAccountSchema(); const db = getAccountDb();
+  const selectReaction = async () => {
+    const [rows] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
+    return rows[0] || null;
+  };
   return serializeUserWrite(user.id, async () => {
-    const [existing] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
-    const row = existing[0] || null;
-    if (!row) {
+    const existing = await selectReaction();
+    let inserted = false;
+    if (!existing) {
       const content = normalizeReaction(body.content);
       perSecond(event, String(user.id)); perHour(event, String(user.id));
       const id = randomUUID();
       try {
         await db.execute<ResultSetHeader>("INSERT INTO web_annual_poster_reactions (id,user_id,summary_id,version_key,content,status,community_sync_requested,community_sync_status,client_nonce) VALUES (?,?,?,?,?,'published',?, 'skipped', ?)", [id, user.id, summary.id, summary.version_key, content, body.syncCommunity === true ? 1 : 0, nonce]);
+        inserted = true;
       } catch (error: any) {
         if (String(error?.code || "") !== "ER_DUP_ENTRY" && Number(error?.errno || 0) !== 1062) throw error;
       }
     }
-    const [rows] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
-    const reaction = rows[0];
+    const reaction = await selectReaction();
     if (!reaction) throw createError({ statusCode: 500, statusMessage: "感想保存失败" });
+
+    // Only the request that created the reaction owns the Forum side effect, so a
+    // same-nonce retry can never create a second thread. A failed or rate-limited
+    // sync keeps the reaction and stores its outcome for every later retry.
+    let outcome: CommunitySyncOutcome | null = null;
+    if (inserted && reaction.community_sync_requested) {
+      outcome = await syncAnnualReactionToCommunity({
+        event,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        content: reaction.content
+      });
+      try {
+        if (outcome.status === "synced" && outcome.threadId) {
+          await db.execute("UPDATE web_annual_poster_reactions SET community_sync_status = 'synced', forum_thread_id = ? WHERE id = ? AND forum_thread_id IS NULL", [outcome.threadId, reaction.id]);
+        } else if (outcome.status === "failed") {
+          await db.execute("UPDATE web_annual_poster_reactions SET community_sync_status = 'failed' WHERE id = ?", [reaction.id]);
+        }
+      } catch (error) {
+        // Reaction and thread already exist; a failed marker write must not fail the send.
+        console.warn("[annual-reaction] community sync marker update failed", reaction.id, error);
+      }
+    }
+
+    const stored = (await selectReaction()) || reaction;
     const badges = await loadBadgeMap([user.id]);
-    return { reaction: serialize(reaction, badges.get(user.id)), communitySync: { requested: Boolean(reaction.community_sync_requested), status: "skipped", message: "感想已发送，本次未同步到社区" } };
+    const requested = Boolean(stored.community_sync_requested);
+    const persisted = stored.community_sync_status === "synced"
+      ? "synced"
+      : stored.community_sync_status === "failed"
+        ? "failed"
+        : "skipped";
+    const status = outcome?.status || persisted;
+    const message = status === "synced"
+      ? "感想已发送，已同步到社区"
+      : status === "failed"
+        ? "感想已发送，社区同步失败。"
+        : requested
+          ? "感想已发送；社区同步过于频繁，本次仅显示弹幕。"
+          : "感想已发送，本次未同步到社区";
+    return {
+      reaction: serialize(stored, badges.get(user.id)),
+      communitySync: {
+        requested,
+        status,
+        reason: status === "skipped" ? (requested ? "rate-limited" : "not-requested") : status,
+        threadId: outcome?.threadId ?? stored.forum_thread_id ?? null,
+        message
+      }
+    };
   });
 };

@@ -47,12 +47,19 @@ const sendReaction = async () => {
   if (!pendingSend || pendingSend.content !== content || pendingSend.syncCommunity !== reactionSync.value) pendingSend = { content, syncCommunity: reactionSync.value, nonce: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}` };
   const nonce = pendingSend.nonce;
   try {
-    const result = await apiFetch<{ reaction: AnnualReaction }>(`/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/reactions`, { method: 'POST', body: { content, syncCommunity: reactionSync.value, clientNonce: nonce } });
+    const result = await apiFetch<{ reaction: AnnualReaction; communitySync?: { requested?: boolean; status?: string; reason?: string; threadId?: number | null } }>(`/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/reactions`, { method: 'POST', body: { content, syncCommunity: reactionSync.value, clientNonce: nonce } });
     if (result.reaction?.status === 'published' && loadingReactions.value) sentDuringFetch.set(result.reaction.id, result.reaction);
     if (result.reaction?.status === 'published' && !reactions.value.some((item) => item.id === result.reaction.id)) reactions.value = [...reactions.value, result.reaction];
     reflection.value = '';
     pendingSend = null;
-    sendNotice.value = reactionSync.value ? localized('感想已发送，本次未同步到社区', '感想を送信しました。コミュニティには共有されていません') : '';
+    const syncStatus = result.communitySync?.status;
+    sendNotice.value = syncStatus === 'synced'
+      ? localized('感想已发送，已同步到社区', '感想を送信しました。コミュニティにも共有しました')
+      : syncStatus === 'failed'
+        ? localized('感想已发送，社区同步失败。', '感想を送信しました。コミュニティへの共有に失敗しました。')
+        : result.communitySync?.reason === 'rate-limited'
+          ? localized('感想已发送；社区同步过于频繁，本次仅显示弹幕。', '感想を送信しました。共有が集中しているため、今回は弾幕のみ表示します。')
+          : localized('感想已发送，本次未同步到社区', '感想を送信しました。コミュニティには共有されていません');
   } catch (error: any) {
     reactionError.value = error?.data?.statusMessage || localized('发送失败，请稍后再试', '送信できませんでした。もう一度お試しください');
   } finally { sending.value = false; }

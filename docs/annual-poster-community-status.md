@@ -11,16 +11,16 @@ Latest user instruction overrides historical execution/testing/deployment restri
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase C — Forum Taxonomy
+Phase D — Reaction → Forum
 
 Status:
-COMPLETE
+RELEASED — online smoke pending at commit time
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase D — reaction → Forum sync (not started; this task ends at Phase C).
+Phase E — share card export (not started; this task ends at Phase D).
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
@@ -31,6 +31,11 @@ Phase B is complete. Local real-product acceptance and the authorized production
 
 Gate C:
 PASS
+
+Phase C is complete: `general` = 闲聊杂谈 and `creative` = 同名二创 are live in `0.54.2`.
+
+Gate D:
+PENDING — set to PASS by the online smoke record appended after deployment of `0.55.0`.
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -282,3 +287,12 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Phase B non-regression: no Phase B file was modified (see the release diff), and the Poster page still renders four 117.05px mosaic tiles with the real profile card (`/api/account/my-don`, loaded, no fallback), a moving barrage and the reaction input. Annual reaction/share writes in the window were 0.
 - Note for the next agent: the Forum home chip row renders only `home.sections.slice(0, 4)` in `pages/forum/index.vue` (pre-existing behaviour, deliberately not changed here), so on the Forum home the two new names appear only from the fifth section onward. Both names are reachable and visible in the composer select and on their section pages.
 - Gate C: PASS. Phase C = COMPLETE. Phase D not started.
+## 2026-09-10 / Phase D — Reaction → Forum
+
+- Scope is exactly the Poster reaction sync: `syncCommunity=false` stores only the reaction; `syncCommunity=true` stores the reaction and additionally creates one `general` / `discussion` thread whose title and body are the reaction text. No Phase E/F work, and the client still cannot choose a section or a thread type.
+- `taiko_viewer/server/utils/forum/threads.ts`: `createForumThread` was split into a reusable `createForumThreadCore({ actorUserId, actorUsername, payload, titlePolicy })` plus a thin normal entry that resolves the session user and returns the thread detail. The core still runs the full ordinary pipeline — forum schema bootstrap, forum-profile provisioning, section lookup, thread-type validation, `official` role gate, content-block sanitisation, tag normalisation, song-binding validation, insert and mention notifications. Only the title minimum is policy-driven: `normal` keeps 4 characters for the public composer, `integration` allows 1 so a short reaction can become a thread. The public posting rule itself was not changed.
+- New `taiko_viewer/server/services/account/annual-summary/forum-sync.ts` owns the integration: it hardcodes `sectionSlug: "general"`, `threadType: "discussion"`, `title`/`summary`/paragraph `text` = reaction content, tags 年度报告 / 年度感想, and never binds a song. It applies its own server-side rate limit, stricter than the reaction limit: at most one sync per 30 seconds and 10 per day for the same user. A limited sync returns `status: "skipped"`, `reason: "rate-limited"` and never fails the reaction.
+- `taiko_viewer/server/services/account/annual-summary/reactions.ts`: the reaction insert is unchanged and remains the primary operation. The Forum side effect runs only for the request that actually inserted the reaction, so a same-nonce retry can never create a second thread; retries return the stored outcome. Success persists `community_sync_status = 'synced'` with `forum_thread_id`, a Forum error persists `'failed'` and still returns the published reaction, and a marker-write failure is logged without failing the send. Responses now carry `communitySync: { requested, status, reason, threadId, message }`.
+- `taiko_viewer/components/account/version-summary/slides/PosterSlide.vue`: the notice after sending now reflects the real server outcome instead of the checkbox — synced, `failed` (感想已发送，社区同步失败。), rate-limited (感想已发送；社区同步过于频繁，本次仅显示弹幕。) or not requested, with Japanese equivalents. The send button still reports only the reaction result, so a Forum failure never looks like a whole-send failure.
+- No Flutter change: the app has no annual reaction posting path.
+- Version `0.55.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy. Phase E is not started.

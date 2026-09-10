@@ -324,16 +324,32 @@ export const validateSongBinding = async (payload: { songId?: unknown; difficult
   };
 };
 
-export const createForumThread = async (event: H3Event, payload: Record<string, unknown>) => {
+export type ForumThreadTitlePolicy = "normal" | "integration";
+
+// The ordinary composer keeps its 4-character minimum. Integration callers
+// (annual reaction sync) may legitimately post a shorter sentence, so the
+// relaxation lives here instead of loosening the shared public rule.
+const FORUM_THREAD_TITLE_MIN_LENGTH: Record<ForumThreadTitlePolicy, number> = {
+  normal: 4,
+  integration: 1
+};
+
+export const createForumThreadCore = async (options: {
+  actorUserId: number;
+  actorUsername: string;
+  payload: Record<string, unknown>;
+  titlePolicy?: ForumThreadTitlePolicy;
+}) => {
   await ensureForumSchema();
-  const user = await requireAccountUser(event);
-  const profile = await ensureForumProfile(user.id);
+  const { actorUserId, actorUsername, payload } = options;
+  const titleMinLength = FORUM_THREAD_TITLE_MIN_LENGTH[options.titlePolicy || "normal"];
+  const profile = await ensureForumProfile(actorUserId);
   const title = clipText(String(payload.title || ""), 120);
   if (!title) {
     throw createError({ statusCode: 400, statusMessage: "请输入标题" });
   }
-  if (title.length < 4) {
-    throw createError({ statusCode: 400, statusMessage: "标题至少需要 4 个字符" });
+  if (title.length < titleMinLength) {
+    throw createError({ statusCode: 400, statusMessage: `标题至少需要 ${titleMinLength} 个字符` });
   }
   const sectionSlug = String(payload.sectionSlug || "").trim();
   if (!sectionSlug) {
@@ -365,7 +381,7 @@ export const createForumThread = async (event: H3Event, payload: Record<string, 
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', NOW())`,
     [
       section.id,
-      user.id,
+      actorUserId,
       threadType,
       title,
       summary,
@@ -379,18 +395,28 @@ export const createForumThread = async (event: H3Event, payload: Record<string, 
   );
   const threadId = result.insertId;
   await createMentionNotifications({
-    actorUserId: user.id,
+    actorUserId,
     usernames: extractMentions(paragraphTexts),
     title: `你在帖子中被提及：${title}`,
-    bodyPrefix: `${user.username} 在新帖《${clipText(title, 24)}》中提到了你`,
+    bodyPrefix: `${actorUsername} 在新帖《${clipText(title, 24)}》中提到了你`,
     messageKey: "forum.notificationMessages.threadMention",
     messageParams: {
       threadTitle: title,
-      actorUsername: user.username
+      actorUsername
     },
     threadId
   });
-  return await getForumThreadDetail(event, threadId);
+  return { threadId, title, sectionSlug, threadType };
+};
+
+export const createForumThread = async (event: H3Event, payload: Record<string, unknown>) => {
+  const user = await requireAccountUser(event);
+  const created = await createForumThreadCore({
+    actorUserId: user.id,
+    actorUsername: user.username,
+    payload
+  });
+  return await getForumThreadDetail(event, created.threadId);
 };
 
 export const createForumReply = async (event: H3Event, threadIdInput: unknown, payload: Record<string, unknown>) => {
