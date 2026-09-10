@@ -14,24 +14,24 @@ Current Phase:
 Phase B — Danmaku Core
 
 Status:
-IN_PROGRESS
+COMPLETE
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase B — Danmaku Core (active in feature worktree).
+Phase C — Forum Taxonomy (not started; this task ends at Phase B).
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
 Gate B:
-PENDING
+PASS
 
-Phase B is active in the feature worktree. Gate B remains pending until the real Poster reaction path is verified end to end.
+Phase B is complete. Local real-product acceptance and the authorized production account smoke both passed.
 
 ## Current Phase B recovery — 2026-09-10
 
-- Working version: `0.54.0` (minor: authenticated reaction publishing and live barrage). Production is still `0.53.34` / `bb72232` until standard deployment succeeds.
+- Released version: `0.54.0` / `bed1bd9` (minor: authenticated reaction publishing and live barrage). Standard deployment succeeded with exit 0; local 3100 and online viewer both report appVersion 0.54.0.
 - Backend: nonce lookup before rate limiting; same-user in-flight requests serialized; duplicate-key race re-reads the existing row. GET LIMIT is a bounded integer. Empty/overlong/non-text input rejected; whitespace normalized.
 - Real API evidence: POST 200, GET 200, concurrent same nonce 200/200 with the same ID and exactly one DB row, new nonce within the window 429, fresh nonce after the window 200, hidden omitted, Forum thread delta 0.
 - Actual Nuxt Poster: missing useViewerApiFetch initialization fixed; click POST 200, immediate append, 36.4px leftward displacement in 0.7s, reload read-back verified. A 30-second multi-item run had continuous visible motion, no lane collisions and no page errors.
@@ -40,8 +40,10 @@ Phase B is active in the feature worktree. Gate B remains pending until the real
 - External local QA files and credentials stay outside Git. Test dev uses `/tmp/annual-test-runtime.cjs` (checks SELECT DATABASE and mutation opt-in) and `/tmp/annual-phase-b-layer` (Element Plus dev cache), with isolated test cache paths.
 - Local product acceptance: PASS. Single-row feed has continuous visible motion for 30 seconds without extra rows; inactive pause/resume PASS; background hidden refresh and zero-only empty state PASS; five viewport checks PASS (414×896, 390×844, 430×932, 390×760, 414×800). Short screens reserve at least 64px for three non-overlapping lanes. No browser page errors.
 - Admin route rejects unauthenticated PATCH with 401. Hidden feed behavior verified against the actual test DB.
-- Release readiness: READY. Final isolated worktree build PASS (exit 0), annual contract PASS, diff audit PASS. Gate B remains PENDING only until standard deployment and the authorized production account smoke complete.
-- Authorized online acceptance account: sigaer, drum ID 2258735; existing authenticated session and annual summary confirmed without changing production records.
+- Gate B: PASS. Final isolated worktree build PASS (exit 0), annual contract PASS, diff audit PASS, standard deployment PASS, authorized production account smoke PASS.
+- Authorized online acceptance account: sigaer, drum ID 2258735. Actual Poster sent “今年也要开心打鼓！”; POST/GET 200, same nonce retry 200 with the same ID, exactly one production reaction row, sync skipped, no Forum thread. Immediate append/reload and continuous 30-second motion PASS; page errors 0. Both global and account-specific Forum thread deltas are 0.
+- Online evidence: /tmp/annual-phase-b-online-final.json, /tmp/annual-phase-b-online-report.json, /tmp/annual-phase-b-online-sent.png. Reaction ID: 5e4b7bc5-1dcb-43c1-8ad2-e4f70168d3de. No secrets are stored in these project documents.
+- Original main title_song_relations.json and poster.zip were preserved with matching pre/post hashes. Existing main documentation additions were incorporated. No Phase C/D implementation was performed.
 
 ## Phase B-0 test database isolation bootstrap
 
@@ -165,7 +167,7 @@ Gate A passed after user manual multi-viewport visual acceptance.
 
 ## Safe next action
 
-Complete remaining local visual checks and the feature-worktree build; then follow the Execution Policy Override release sequence. Do not enter Phase C or manually push main.
+Phase B is complete. Do not begin Phase C as part of this task. Final acceptance documentation is committed locally; no manual main push is performed.
 
 ## Historical Phase A working version
 

@@ -195,3 +195,15 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Target release: 0.54.0. User authorized production acceptance with sigaer / drum ID 2258735. No production feature write, main push or deployment has occurred at this checkpoint. Next: finish isolated build, release audit/commit, integrate main, standard deploy, online smoke, then final Gate B PASS. No Phase C work.
 
 - Final isolated build PASS (exit 0); annual contract PASS; git diff --check PASS. Local Gate B product requirements are ready for release; final Gate remains pending online acceptance.
+
+## 2026-09-10 / Phase B released and online accepted — Gate B PASS
+
+- Release commit: `bed1bd9 0.54.0 年度Poster接入感想弹幕与审核`; integrated into main with fast-forward.
+- Standard `bash scripts/deploy_forum_web.sh "0.54.0 年度Poster接入感想弹幕与审核"` succeeded (exit 0). The script pushed main, built in its isolated archive directory, switched output, and passed service/local/online health checks. Optional Baidu push reached its daily quota; deployment succeeded.
+- Production version: 0.54.0 at 127.0.0.1:3100 and viewer.sakura-bot.cn.
+- User explicitly authorized sigaer / drum ID 2258735 for acceptance. Reused the account's existing authenticated session without exposing its token.
+- Actual production Poster sent “今年也要开心打鼓！”. POST and GET both 200. Same-nonce immediate retry returned 200 and the identical reaction ID. Database count for that user+nonce is exactly 1; sync status skipped and forum_thread_id NULL.
+- Production reaction: `5e4b7bc5-1dcb-43c1-8ad2-e4f70168d3de`. Immediate append, measured leftward motion, reload and 30 seconds of continuously visible moving barrage all PASS. Browser page errors 0. Global and account-specific Forum thread deltas both 0.
+- Local sanitize, new-nonce rate limit, published/hidden, one-item loop, lifecycle, background hide/zero empty state and five-viewport acceptance remain PASS.
+- Gate B: PASS. Phase C/D not started. Main's original title_song_relations.json and poster.zip were restored/preserved with identical hashes; prior main document additions were incorporated.
+- Final acceptance docs are a local-only documentation checkpoint after the script's release push. Do not manually push main or redeploy unchanged web code solely to publish this record.
