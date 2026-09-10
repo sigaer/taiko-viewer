@@ -234,3 +234,13 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Seed idempotency was proven against the isolated `_test` database (explicit mutation opt-in plus `SELECT DATABASE()` check) by running the production `seedSections()` SQL twice, and not by adding fixtures or a suite.
 - Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) remain preserved and excluded from the Phase C commit, and must again be isolated reversibly for the deployment run because the deploy script refuses a dirty tree.
 - Version `0.54.2`; deploy with the standard script follows. Phase D not started.
+
+## 2026-09-10 / Phase C deployed and accepted online — Gate C PASS
+
+- Release commit `a533a5b 0.54.2 社区新增闲聊杂谈并调整二创分区名称`; the standard `bash scripts/deploy_forum_web.sh "0.54.2 社区新增闲聊杂谈并调整二创分区名称"` exited 0 and performed the push, isolated build, output switch, service restart and health checks itself. Deployed appVersion `0.54.2` locally and on viewer.sakura-bot.cn.
+- The unrelated `taiko_viewer/assets/data/title_song_relations.json` was again isolated with a reversible stash for the run and restored immediately afterwards with a matching SHA-256 (`b44083d2…`); the stash is dropped. `poster.zip` stays untracked.
+- Production `GET /api/forum/sections` returns 9 unique sections: `general`=闲聊杂谈(80) and `creative`=同名二创(90). The composer select lists both names once each. `/forum/section/creative` kept its pre-existing thread `/forum/thread/28` and now displays the 同名二创 heading; the thread still resolves to `section/creative`, confirming a display-name rename rather than an identity migration.
+- One ordinary discussion was posted through the real UI into 闲聊杂谈: `POST /api/forum/threads` 200, thread `/forum/thread/50`, section label 闲聊杂谈. It was the only thread created in the window, which also demonstrates that no reaction-driven Forum thread exists yet (Phase D untouched).
+- Poster non-regression: four 117.05px tiles, real profile card from `/api/account/my-don`, moving barrage, reaction input present, browser page errors 0; annual reaction and share writes in the window were 0.
+- Phase C = COMPLETE, Gate C = PASS. Phase D not started. Optional: `/forum/thread/50` is a genuine test discussion and can be hidden or deleted by a moderator whenever it is no longer useful.
+- This acceptance record is a local-only documentation commit after the release push. Do not push it manually or redeploy unchanged web code solely to publish it; the next release will carry it.

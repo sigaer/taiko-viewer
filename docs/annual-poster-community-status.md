@@ -14,7 +14,7 @@ Current Phase:
 Phase C — Forum Taxonomy
 
 Status:
-RELEASED — online smoke pending at commit time
+COMPLETE
 
 Gate A:
 PASS
@@ -30,7 +30,7 @@ PASS
 Phase B is complete. Local real-product acceptance and the authorized production account smoke both passed. The post-release profile-card hotfix `0.54.1` is VERIFIED ONLINE.
 
 Gate C:
-PENDING — set to PASS by the online smoke record appended after deployment of `0.54.2`.
+PASS
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -275,3 +275,10 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Flutter needs no change: `taiko_forum_app/lib/services/api_client.dart` reads `/api/forum/sections` and `ForumSection` consumes the server `name`; no hardcoded section names exist in the app.
 - `node --test tests/forumI18n.test.mjs` passes (6/6) for both locales.
 - Version `0.54.2`; pending deploy. Phase D is not started.
+- Release commit `a533a5b 0.54.2 社区新增闲聊杂谈并调整二创分区名称` on main. Standard `bash scripts/deploy_forum_web.sh "0.54.2 社区新增闲聊杂谈并调整二创分区名称"` succeeded with exit 0 (push, isolated archive build, output switch, service restart and health checks all by the script; optional Baidu push reported `over quota`, non-blocking). Deployed appVersion is `0.54.2` at 127.0.0.1:3100 and `https://viewer.sakura-bot.cn`.
+- Online `GET /api/forum/sections` returns 9 sections with unique slugs: `general` = 闲聊杂谈 (`sortOrder` 80, `threadCount` 0 at smoke time) and `creative` = 同名二创 (`sortOrder` 90, `threadCount` 1). No duplicate row and no duplicate option.
+- Online web smoke (authorized account): the composer section select at `/forum/new` lists all nine labels with 闲聊杂谈 and 同名二创 exactly once each; `/forum/section/creative` renders 同名二创 as its heading with its original description and still lists the pre-existing thread `/forum/thread/28` (红茶店「雨天」（印象故事）), which opens normally and still links to `/forum/section/creative`; `/forum/section/general` renders 闲聊杂谈 and lists the new thread. Browser page errors were 0.
+- Real posting check: one ordinary discussion was created through the actual UI in 闲聊杂谈 — `POST /api/forum/threads` returned 200, the browser landed on `/forum/thread/50`, the thread page labels its section 闲聊杂谈 and the section lists it. This is the only thread created in the window, so no reaction-driven Forum thread was produced (Phase D not implemented).
+- Phase B non-regression: no Phase B file was modified (see the release diff), and the Poster page still renders four 117.05px mosaic tiles with the real profile card (`/api/account/my-don`, loaded, no fallback), a moving barrage and the reaction input. Annual reaction/share writes in the window were 0.
+- Note for the next agent: the Forum home chip row renders only `home.sections.slice(0, 4)` in `pages/forum/index.vue` (pre-existing behaviour, deliberately not changed here), so on the Forum home the two new names appear only from the fifth section onward. Both names are reachable and visible in the composer select and on their section pages.
+- Gate C: PASS. Phase C = COMPLETE. Phase D not started.
