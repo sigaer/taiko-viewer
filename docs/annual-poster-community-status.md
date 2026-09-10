@@ -14,7 +14,7 @@ Current Phase:
 Phase F — Share Card → Forum
 
 Status:
-RELEASED — online smoke pending at commit time
+COMPLETE
 
 Gate A:
 PASS
@@ -43,7 +43,7 @@ Gate E:
 PASS
 
 Gate F:
-PENDING — set to PASS by the online smoke record appended after deployment of `0.57.0`.
+PASS
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -345,3 +345,13 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Rate limiting reuses Phase D: `claimForumSyncBudget` is the extracted helper behind the existing 30-second / 10-per-day Forum-sync limiters, now shared by the reaction sync and the share-card sync. Phase D's reaction outcomes and messages are unchanged, and both features keep their own persisted records (reaction row versus share-card row).
 - Still decoupled from the legacy flow: saving with sync on creates no `web_annual_shares` row and no public URL, and the legacy 更多分享方式 dialog is untouched. The client sends the current checkbox value and shows three distinct outcomes (saved only, saved + synced, saved but sync failed or rate-limited) without navigating to the Forum.
 - Version `0.57.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy.
+- Release commits `140feb3 0.57.0 年度分享图片支持同步到社区`, `04ccec7 0.57.0 修正分享图片社区同步状态语义`, `15d287f 0.57.0 修正分享图片卡片并发写入的 id 覆盖` (same version, no second bump). The standard `scripts/deploy_forum_web.sh` run for the final subject exited 0 with push, isolated build, output switch, restart and health checks; appVersion `0.57.0` is live locally and on `https://viewer.sakura-bot.cn`. The unrelated `title_song_relations.json` was stashed and restored with a matching SHA-256 on every run.
+- Two defects were found by the real smoke and fixed forward before acceptance: (1) saving with the community checkbox **off** on a card that an earlier save had already synced reported `synced`, so the notice contradicted the checkbox — the not-requested branch now always reports `skipped` / `not-requested` while still exposing the stored thread; (2) two **concurrent first saves** of the same fingerprint raced in `insertAnnualShareCard`, whose `ON DUPLICATE KEY UPDATE id = VALUES(id)` let the loser steal the row id, so the winner's `forum_thread_id` write matched no row and the linkage was lost. The upsert no longer touches `id`, which keeps the row identity stable.
+- Gate F online smoke with the authorized account: `sync OFF` (on an already synced card) returned `requested=false`, `status=skipped`, `reason=not-requested`, notice 分享图片已保存, a 957,241-byte download and no new thread; `sync ON` for a fresh card with **two concurrent** requests created exactly one thread (`55`), both responses reporting that thread and the same uploaded image, and the card row persisted `forum_thread_id=55` plus its `forum_image_url`.
+- Thread contract verified through the real API and the rendered page for thread `55`: `section=general`, `sectionName=闲聊杂谈`, `threadType=discussion`, `title=快来看看我的年度报告吧～`, and `contentBlocks` is exactly one `image` block pointing at the uploaded share card; the page renders that image (1049px wide, `image/webp`, 131,642 bytes) with no paragraph body text.
+- The uploaded Forum image is the Phase E share card: 1049×1600 WebP from the 1080×1648 PNG, showing the three real covers, the real MyDon profile card with nickname/title, and the six statistics, with no barrage, no reaction input, no buttons, no poster background and no `AnnualArtworkFallback`.
+- Retry and idempotency: repeating the save for the already synced `zh` card returned the stored thread `53` and the stored image without re-uploading or creating a thread; a concurrent repeat pair for the `ja` card returned thread `55` twice with the thread count unchanged; a following sequential retry also reused `55`.
+- Decoupling: `web_annual_shares` for the user stayed 0 through every case, no public URL was created, and the legacy dialog was never invoked.
+- No regression: the Poster still shows four tiles with the loaded profile card, a moving barrage of 5 bubbles, the reaction input and the 保存图片 button; the annual reactions route still resolves; browser page errors were 0.
+- Test artifacts left in 闲聊杂谈 by this acceptance: threads `53` (zh card), `55` (ja card, linked) and `54`, an unlinked ja thread created by the pre-fix concurrency race. All three can be hidden or deleted by a moderator.
+- Gate F: PASS. Phase F = COMPLETE. This was the final phase of the plan.
