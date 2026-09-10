@@ -26,10 +26,12 @@ Current Round:
 **UX-1 — Functional & Data Correctness**
 
 Status:
-**CODE COMPLETE — verification and release pending**
+**UX-1 CODE SHIPPED — Gate UX-1 pending logged-in acceptance**
 
 Gate UX-1:
-NOT EVALUATED (waits on release + online smoke)
+**CONDITIONAL** — 代码、契约、构建、发布与线上产物 smoke 全部通过；
+但登录态下的年度回顾真实渲染（含「XXX 天」口径与「回到入口」计时）尚未复核，
+因此**不宣告 PASS**，也不进入 UX-2。
 
 Next allowed round:
 None until Gate UX-1 is explicitly PASS.
@@ -257,19 +259,27 @@ None until Gate UX-1 is explicitly PASS.
 
 ## 未决问题 / 风险
 
-- **UX-1.6 浏览器实测缺失**：需要一次带年度访问权限账号的 DevTools Performance 录制
-  （点击「回到入口」→ profile 页可见），确认修复后的端到端时间，并把「4~5 秒」的剩余部分
-  归因到具体请求（重点看 `/api/account/profile`、`/api/account/my-don/showcase` 的耗时，
-  以及 `/api/account/my-don` 是否 cache miss 触发 `python3 my_don_cli` 秒级渲染）。
+- **仍需一次登录态端到端验证（Gate UX-1 唯一未闭环项）**：需要一个具备 `annualSummaryAccess`
+  的账号，复核三件事：
+  1. Period 页「XXX 天」是否等于「最早游玩日 → 今天」的含首末日跨度；
+  2. Opening 只剩「直达结果页」一个入口，点击后到达 story 末页；
+  3. 点击「回到入口」的端到端时间（DevTools Performance 录制），确认 0.3s 门控与串行 await
+     消除后是否达到亚秒级；若仍有秒级残留，重点看 `/api/account/profile`、
+     `/api/account/my-don/showcase` 的真实耗时，以及 `/api/account/my-don` 是否 cache miss
+     触发 `python3 my_don_cli` 渲染。
 - **favoriteShift 的恢复需要上游改动**：本仓库无法让这些账号重新得到「新欢旧爱」，
-  因为生成器的前段窗口固定在赛季开始附近。是否调整属于产品决策。
+  因为生成器（`/home/sigaer/taiko/plugins/utils/annual_summary/aggregates.py:319-321`）的
+  前段窗口固定在赛季开始附近。是否调整属于产品决策，本轮不动上游。
 - `/friend.png`（1,170,916 B）仍在 `public/`，当前无代码引用；是否删除待确认。
-- `el-drawer` 的 `custom-class` 在 element-plus 2.13 已失效，抽屉面板样式需一次 DOM 复核。
+- `el-drawer` 的 `custom-class` 在 element-plus 2.13 已失效（类型中已移除 `customClass`），
+  抽屉面板级样式（`:deep(.story-drawer)` 的背景与内边距）可能一直未生效，需一次 DOM 复核。
+- `period.totalDays` 在归一化（SSR 或加载时）按「当天」计算。跨零点长驻页面不会自增；
+  跨零点首屏的 SSR/水合日界差异最多带来 1 天偏差。当前口径下这是可接受的已知边界。
 - UX-1.5 遗留的两个潜在（当前数据未触发）问题未改：单维为 0 时会被 `isUsableMetric` 丢掉
   （六边形变五边形，但 aria-label 仍写「六维」）；`sectionStatus.keyword` 可用但
   `dimensionKey` 为空时会渲染空占位。
 - `taiko_viewer/assets/data/title_song_relations.json` 为本轮开始前既有的工作区改动，
-  按用户决定：部署前 stash、部署成功后原样还原，不进入 UX-1 提交。
+  按用户决定已 stash / 部署后原样还原，未进入 UX-1 提交。
 
 ---
 
@@ -281,9 +291,38 @@ None until Gate UX-1 is explicitly PASS.
 
 | 时间 | 事件 | 结果 |
 | --- | --- | --- |
-| 2026-09-11 | release commit | 待记录 |
-| 2026-09-11 | `scripts/deploy_forum_web.sh "<HEAD subject>"` | 待记录 |
-| 2026-09-11 | 线上 smoke | 待记录 |
+| 2026-09-11 | release commit `39b26b7` | 已提交（14 个文件 + 2 个新文档 + 1 个新测试） |
+| 2026-09-11 | `scripts/deploy_forum_web.sh "0.57.2 修正年度回顾入口与统计天数"` | **exit 0**；push、隔离构建、产物切换、服务重启、内部与线上健康检查全部通过 |
+| 2026-09-11 | 线上 smoke | 通过（见下） |
+
+### 部署证据
+
+- 脚本输出：`[5/5] 健康检查...` → `active / active` → `部署完成: 代码已推送并发布到 viewer.sakura-bot.cn`，退出码 0。
+  构建日志末尾为 `Build complete!`，产物 `Σ Total size: 66.2 MB (23.5 MB gzip)`。
+- 百度推送返回 `{"error":400,"message":"over quota"}`（当日配额已满）。这是脚本内置的可选步骤，
+  按脚本自身语义「不影响站点部署」，因此未视为失败。
+- 工作区：部署前按用户决定 stash `taiko_viewer/assets/data/title_song_relations.json`，
+  部署成功后 `git stash pop` 还原，SHA-256 前后一致
+  `b44083d2897bb7b1e4e94d50415bf1c88f8dbcd1de037943f65ef46d959e8134`。
+
+### 线上 smoke（2026-09-11）
+
+| 检查 | 结果 |
+| --- | --- |
+| `https://viewer.sakura-bot.cn/titles` | 200，0.25s |
+| 首页版本徽标（`GuestHero` 读 `runtimeConfig.public.appVersion`） | 渲染出 **0.57.2** |
+| `https://viewer.sakura-bot.cn/account/version-summary` | 302 → 登录（未登录时的预期行为） |
+| `https://viewer.sakura-bot.cn/account/profile` | 302 → 登录（预期行为） |
+| `https://viewer.sakura-bot.cn/sitemap.xml` | 200，0.035s |
+| 线上 `_nuxt/Dd9LkHfl.js`（年度入口/StoryPlayer chunk） | 200，242,898 B；`jump-to-end` 出现 2 次 |
+| 线上 `friendReport` | 0 次；旧构建 chunk `B5_BPG2D.js` 已 404 |
+| 未登录 `GET /api/account/profile`、`/api/account/my-don/showcase` | 401，20–31ms（预期；该结果不代表登录后的耗时） |
+
+- **未能完成的 smoke**：登录态下的年度回顾真实渲染与「回到入口」计时。原因：本会话没有可用的
+  年度访问账号（`ANNUAL_PUBLIC_OPEN_AT = 2026-10-02`，尚未对普通用户开放），也没有管理员会话；
+  经授权的生产 DB 写入（创建会话/测试账号）本会话不可执行，因此没有以任何方式绕过鉴权。
+  已用「线上 chunk 内容 + 版本徽标」这一层作为「发布产物正确」的证据，把登录态端到端验证
+  列为 Gate UX-1 的待办（见下）。
 
 ---
 
