@@ -340,6 +340,15 @@ const startStory = async () => {
   await goToPage(Math.min(1, slides.value.length - 1));
 };
 
+// The opening cover offers a direct entry into the closing page. It starts the
+// story and jumps to the last slide without replaying the intermediate chapters.
+const startStoryAtEnd = async () => {
+  soundEnabled.value = true;
+  emit("start");
+  await nextTick();
+  await commitPage(Math.max(0, slides.value.length - 1));
+};
+
 const isInteractiveTarget = (target: EventTarget | null) => {
   const element = target instanceof HTMLElement ? target : null;
   return Boolean(element?.closest("button, a, input, textarea, select, [role='button'], [contenteditable='true']"));
@@ -418,8 +427,15 @@ watch(() => props.summary.summaryId, async () => {
   containerRef.value?.scrollTo({ top: 0, behavior: "auto" });
 });
 
-watch(slides, () => {
-  if (activeIndex.value >= slides.value.length) activeIndex.value = Math.max(0, slides.value.length - 1);
+// A page can drop out of the registry when a section becomes unavailable, which
+// shrinks the story under a viewport that is already scrolled. Re-anchor on the
+// page the player was reading so the visible slide always matches activeIndex.
+watch(slides, async (next, previous) => {
+  if (next.length === previous?.length) return;
+  if (activeIndex.value >= next.length) activeIndex.value = Math.max(0, next.length - 1);
+  slideRefs.value.length = next.length;
+  await nextTick();
+  await commitPage(activeIndex.value);
 });
 
 watch(reducedMotion, (isReduced) => {
@@ -571,6 +587,7 @@ onBeforeUnmount(() => {
           :summary="summary" :page-index="index" :page-total="slides.length"
           :active="documentVisible && activeIndex === index" :reduced-motion="reducedMotion" :save-data="reducedData"
           @start="startStory"
+          @jump-to-end="startStoryAtEnd"
           @next="goToPage(index + 1)"
         />
       </div>

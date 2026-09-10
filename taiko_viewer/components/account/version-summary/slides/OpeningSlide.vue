@@ -16,7 +16,7 @@ const props = defineProps<{
   reducedMotion: boolean;
 }>();
 
-const emit = defineEmits<{ start: [] }>();
+const emit = defineEmits<{ start: []; "jump-to-end": [] }>();
 const { t, locale } = useI18n();
 const startPending = ref(false);
 const navigationSent = ref(false);
@@ -59,24 +59,29 @@ const periodLabel = computed(() => {
   return `${start} — ${end}`;
 });
 
-const completeStoryStart = () => {
-  if (!startPending.value || navigationSent.value) return;
+const completeStoryStart = (direct: boolean) => {
+  if (navigationSent.value || !startPending.value) return;
   startPending.value = false;
   navigationSent.value = true;
-  emit("start");
+  if (direct) emit("jump-to-end");
+  else emit("start");
 };
 
-const beginStory = () => {
+const requestStart = (direct: boolean) => {
   if (!props.active || startPending.value || navigationSent.value) return;
   startPending.value = true;
   drumPulse.value = true;
   if (props.reducedMotion) {
-    completeStoryStart();
+    motionScope?.setTimeout(() => { drumPulse.value = false; }, 160);
+    motionScope?.setTimeout(() => completeStoryStart(direct), 180);
     return;
   }
   motionScope?.setTimeout(() => { drumPulse.value = false; }, 430);
-  motionScope?.setTimeout(completeStoryStart, 960);
+  motionScope?.setTimeout(() => completeStoryStart(direct), 960);
 };
+
+const beginStory = () => requestStart(false);
+const jumpToResultPage = () => requestStart(true);
 </script>
 
 <template>
@@ -119,10 +124,16 @@ const beginStory = () => {
       <section class="annual-opening__cover-info" :aria-label="t('annualSummary.openingCover.reportTitle')">
         <div class="annual-opening__info-head" data-annual-stage="copy">
           <span class="annual-opening__generated">{{ t("annualSummary.openingCover.generatedBy") }}</span>
-          <div class="annual-opening__utilities" aria-hidden="true">
-            <figure><img src="/friend.png" alt="" /><figcaption>{{ t("annualSummary.openingCover.friendReport") }}</figcaption></figure>
-            <figure><img src="/to_end.png" alt="" /><figcaption>{{ t("annualSummary.openingCover.resultPage") }}</figcaption></figure>
-          </div>
+          <button
+            type="button"
+            class="annual-opening__direct"
+            :disabled="startPending"
+            :aria-label="t('annualSummary.openingCover.resultPage')"
+            @click="jumpToResultPage"
+          >
+            <img src="/to_end.png" alt="" aria-hidden="true" />
+            <span>{{ t("annualSummary.openingCover.resultPage") }}</span>
+          </button>
         </div>
         <div class="annual-opening__info-main">
           <div class="annual-opening__info-copy" data-annual-stage="data">
@@ -172,12 +183,13 @@ const beginStory = () => {
 .annual-opening__beat { position: absolute; z-index: 4; top: 64.2%; left: 0; right: 0; height: clamp(40px, 5.1vh, 48px); }
 .annual-opening__year { position: absolute; z-index: 3; top: 74%; left: 7%; color: rgba(255,255,255,.96); font: 400 clamp(3.7rem, 18vw, 7.4rem)/.78 var(--viewer-display-font); letter-spacing: -.06em; text-shadow: 0 3px 0 rgba(28,89,139,.18); }
 .annual-opening__cover-info { position: absolute; z-index: 4; inset: 69% 0 0; padding: clamp(9px, 2.2vw, 18px) clamp(18px, 5vw, 36px) max(10px, env(safe-area-inset-bottom)); }
-.annual-opening__info-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 32px; }
+.annual-opening__info-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 34px; }
 .annual-opening__generated { margin-left: clamp(58px, 16vw, 76px); color: rgba(255,255,255,.96); font: 700 clamp(11px, 2.9vw, 15px)/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; text-shadow: 0 1px 3px rgba(18,59,96,.28); }
-.annual-opening__utilities { display: flex; gap: 10px; margin-top: -4px; }
-.annual-opening__utilities figure { width: clamp(42px, 11vw, 52px); margin: 0; text-align: center; }
-.annual-opening__utilities img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(24,57,88,.22)); }
-.annual-opening__utilities figcaption { min-height: 22px; margin-top: 1px; overflow-wrap: anywhere; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); white-space: normal; }
+.annual-opening__direct { display: grid; width: clamp(46px, 12vw, 56px); margin-top: -4px; padding: 0; border: 0; place-items: center; gap: 1px; color: inherit; background: transparent; cursor: pointer; pointer-events: auto; }
+.annual-opening__direct:disabled { cursor: wait; opacity: .82; }
+.annual-opening__direct:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 12px; }
+.annual-opening__direct img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(24,57,88,.22)); }
+.annual-opening__direct span { min-height: 22px; margin-top: 1px; overflow-wrap: anywhere; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); text-shadow: 0 1px 3px rgba(18,59,96,.28); }
 .annual-opening__info-main { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 148px; padding: 5px 0 0; }
 .annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 56px; }
 .annual-opening__info-year-label { display: none; }
@@ -193,8 +205,8 @@ const beginStory = () => {
 .annual-opening__start.is-pulsing .annual-opening__start-icon { animation: opening-start-hit .43s cubic-bezier(.2,.8,.25,1); }
 .annual-opening__legal { position: absolute; right: clamp(18px, 5vw, 36px); bottom: max(8px, env(safe-area-inset-bottom)); left: clamp(18px, 5vw, 36px); display: grid; gap: 3px; color: rgba(246,251,255,.82); font: 500 clamp(10px, 2.25vw, 11px)/1.25 var(--viewer-font-family); text-align: right; text-shadow: 0 1px 3px rgba(29,66,102,.18); }
 @keyframes opening-start-hit { 0%, 100% { transform: scale(1); } 32% { transform: scale(1.1); } 63% { transform: scale(.97); } }
-@media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } .annual-opening__utilities { gap: 5px; } .annual-opening__utilities figure { width: 44px; } .annual-opening__utilities figcaption { font-size: 10px; } }
+@media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } .annual-opening__direct { width: clamp(42px, 11vw, 48px); } .annual-opening__direct span { font-size: 10px; } }
 @media (max-height: 690px) and (orientation: portrait) { .annual-opening__title-art { top: -7%; } .annual-opening__carousel { top: 27%; height: 36%; } .annual-opening__cover-info { padding-top: 8px; } .annual-opening__info-main { min-height: 125px; } .annual-opening__legal { font-size: 10px; } }
-@media (orientation: landscape) and (max-height: 460px) { .annual-opening__title-art { top: -16%; left: 24%; width: min(54vw, 390px); } .annual-opening__carousel { top: 5%; left: 34%; right: 2%; height: 59%; } .annual-opening__beat { top: auto; right: 3%; bottom: 0; left: 34%; height: 44px; } .annual-opening__info-surface { top: 0; right: 66%; bottom: 0; } .annual-opening__cover-info { top: 0; right: 66%; padding: 8px 16px; } .annual-opening__horizon { top: 0; bottom: 0; left: 34%; width: 2px; height: auto; } .annual-opening__year { top: 54%; left: 6%; font-size: 4rem; } .annual-opening__info-main { min-height: 150px; align-items: end; } .annual-opening__info-copy h1 { font-size: 1.7rem; } .annual-opening__utilities { display: none; } .annual-opening__legal { left: 16px; right: 16px; text-align: left; } }
+@media (orientation: landscape) and (max-height: 460px) { .annual-opening__title-art { top: -16%; left: 24%; width: min(54vw, 390px); } .annual-opening__carousel { top: 5%; left: 34%; right: 2%; height: 59%; } .annual-opening__beat { top: auto; right: 3%; bottom: 0; left: 34%; height: 44px; } .annual-opening__info-surface { top: 0; right: 66%; bottom: 0; } .annual-opening__cover-info { top: 0; right: 66%; padding: 8px 16px; } .annual-opening__horizon { top: 0; bottom: 0; left: 34%; width: 2px; height: auto; } .annual-opening__year { top: 54%; left: 6%; font-size: 4rem; } .annual-opening__info-main { min-height: 150px; align-items: end; } .annual-opening__info-copy h1 { font-size: 1.7rem; } .annual-opening__direct { display: none; } .annual-opening__legal { left: 16px; right: 16px; text-align: left; } }
 @media (prefers-reduced-motion: reduce) { .annual-opening__start-icon { animation: none !important; } }
 </style>

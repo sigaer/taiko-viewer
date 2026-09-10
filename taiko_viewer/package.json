@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.57.1",
+  "version": "0.57.2",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -19,6 +19,7 @@
     "test:annual": "node ./scripts/verify_annual_contract.mjs",
     "test:annual:db": "node --env-file=.env.test.local ./scripts/test_annual_db_isolation.mjs",
     "test:annual:e2e": "node ./scripts/verify_annual_e2e.mjs",
+    "test:annual:period": "node --test tests/annualPeriodDays.test.mjs",
     "test:branch-audio": "node ./scripts/verify_branch_audio_contract.mjs",
     "test:home-state": "node --experimental-strip-types --test tests/homeStateResolver.test.ts tests/homePresentation.test.ts tests/personalHomeLocale.test.ts",
     "test:version": "node --test tests/versionProjection.test.mjs",

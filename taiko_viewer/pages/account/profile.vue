@@ -367,7 +367,7 @@ const copy = computed(() =>
       }
 );
 
-const { data, pending, refresh } = await useAsyncData<ProfilePayload>(
+const { data, pending, refresh } = useAsyncData<ProfilePayload>(
   "account-profile",
   () => apiFetch("/api/account/profile"),
   {
@@ -393,12 +393,15 @@ const { data, pending, refresh } = await useAsyncData<ProfilePayload>(
 );
 
 const profile = computed(() => data.value);
+// The two payloads are independent, so they must not suspend the route in
+// sequence: awaiting them one after another doubles the time the page spends
+// with nothing on screen after a navigation.
 const {
   data: myDonShowcaseData,
   error: myDonShowcaseError,
   pending: myDonShowcasePending,
   refresh: refreshMyDonShowcase
-} = await useAsyncData<MyDonShowcasePayload>(
+} = useAsyncData<MyDonShowcasePayload>(
   "account-mydon-showcase",
   () => apiFetch("/api/account/my-don/showcase"),
   {

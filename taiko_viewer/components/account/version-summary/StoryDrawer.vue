@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type { VersionSummaryAvailableVersion, VersionSummaryBinding, VersionSummaryViewModel } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -22,6 +22,7 @@ const emit = defineEmits<{
 
 const { t, n } = useI18n();
 const exitPending = ref(false);
+const exitSettled = ref(false);
 const uiText = computed(() => ({
   title: t("annualSummary.drawer.title"),
   versionLabel: t("annualSummary.drawer.version"),
@@ -43,16 +44,27 @@ const bindingOptionLabel = (binding: VersionSummaryBinding) => {
   return title ? `${binding.taikoId} · ${title}` : binding.taikoId;
 };
 
+// Leaving the story must not wait for the drawer's leave transition, so the
+// exit is emitted on the click. `@closed` then only covers a dismissal that
+// does not reach the button, and `exitSettled` keeps the event single.
 const requestExit = () => {
+  if (exitPending.value) return;
   exitPending.value = true;
   emit("update:modelValue", false);
+  exitSettled.value = true;
+  emit("exit");
 };
 
 const handleClosed = () => {
-  if (!exitPending.value) return;
+  const alreadyEmitted = exitSettled.value;
+  exitSettled.value = false;
+  if (!exitPending.value || alreadyEmitted) return;
   exitPending.value = false;
   emit("exit");
 };
+
+// Reopening the panel starts a fresh exit attempt.
+watch(() => props.modelValue, (open) => { if (open) { exitPending.value = false; exitSettled.value = false; } });
 </script>
 
 <template>

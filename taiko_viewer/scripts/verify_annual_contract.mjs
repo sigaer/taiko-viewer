@@ -72,9 +72,10 @@ assert.equal(annualBgmSource.includes("pendingPlay"), true, "annual BGM play req
 assert.equal(annualBgmSource.includes("PRIMED_OWNER"), true, "annual BGM cannot be adopted from the navigation gesture");
 assert.equal(annualBgmSource.includes("preloadAnnualBgm"), true, "annual BGM has no route-level preload helper");
 assert.equal(annualPage.includes('rel: "preload"'), true, "annual opening assets are not declared as route preloads");
-for (const asset of ["/title.png", "/friend.png", "/to_end.png", "/icon.png"]) {
+for (const asset of ["/title.png", "/to_end.png", "/icon.png"]) {
   assert.equal(annualPage.includes(`href: "${asset}"`), true, `annual opening asset is not preloaded: ${asset}`);
 }
+assert.equal(annualPage.includes("/friend.png"), false, "removed opening utility asset is still preloaded");
 assert.equal(annualPage.includes("preloadAnnualBgm()"), true, "annual route does not warm the BGM resource");
 assert.equal(sidebarSource.includes("primeAnnualBgm()"), true, "annual navigation does not start BGM inside its user gesture");
 assert.equal(storyPlayer.includes("debugTransitionTime"), true, "period transition has no development-time freeze control");
@@ -111,6 +112,13 @@ assert.equal(openingSource.includes("AnnualOpeningCarousel"), true, "opening cov
 assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fireworks are missing");
 assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
 assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
+assert.equal(openingSource.includes("friendReport"), false, "opening still offers the removed friend report entry");
+assert.equal(openingSource.includes("/friend.png"), false, "opening still references the removed friend report artwork");
+assert.equal(openingSource.includes("annual-opening__utilities"), false, "opening still renders the removed utility row");
+assert.equal(openingSource.includes("jumpToResultPage"), true, "opening result-page shortcut is not connected");
+assert.equal(openingSource.includes('emit("jump-to-end")'), true, "opening result-page shortcut does not request the closing page");
+assert.equal(storyPlayer.includes('@jump-to-end="startStoryAtEnd"'), true, "opening result-page shortcut is not wired to story navigation");
+assert.equal(storyPlayer.includes("const startStoryAtEnd"), true, "story player has no closing-page shortcut handler");
 for (const [source, page] of [[openingSource, "opening"], [profileSource, "profile"]]) {
   assert.equal(source.includes("<AnnualScene"), true, `${page} is not mounted as an AnnualScene`);
   for (const layer of ["background", "atmosphere", "visual", "data", "copy", "transition"]) {
@@ -177,6 +185,32 @@ assert.equal(await exists("public/dance.gif"), true, "period dancing pixel masco
 
 const zhSource = await read("locales/zh.json");
 const jaSource = await read("locales/ja.json");
+const storyDrawerSource = await read("components/account/version-summary/StoryDrawer.vue");
+const annualProfileSource = await read("pages/account/profile.vue");
+assert.equal(storyDrawerSource.includes("exitSettled"), true, "story exit can navigate twice from one click");
+assert.equal(/emit\(["']exit["']\)/g.test(storyDrawerSource), true, "story drawer no longer emits its exit action");
+assert.equal(
+  storyDrawerSource.indexOf('emit("exit")') < storyDrawerSource.indexOf('@closed="'),
+  true,
+  "story exit still waits for the drawer leave transition"
+);
+assert.equal(
+  /const \{ data, pending, refresh \} = useAsyncData<ProfilePayload>/.test(annualProfileSource),
+  true,
+  "profile payload became a suspending await again"
+);
+assert.equal(
+  /const \{\s*data: myDonShowcaseData,[\s\S]{0,400}?\} = useAsyncData<MyDonShowcasePayload>/.test(annualProfileSource)
+    && !/await useAsyncData<MyDonShowcasePayload>/.test(annualProfileSource),
+  true,
+  "profile showcase payload suspends the route after the profile payload"
+);
+const annualSummarySource = await read("utils/annualSummary.ts");
+assert.equal(annualSummarySource.includes('ANNUAL_CALENDAR_TIME_ZONE = "Asia/Shanghai"'), true, "annual day counting lost its season time zone");
+assert.equal(annualSummarySource.includes("calendarDaySpan"), true, "annual day counting has no calendar span helper");
+assert.equal(annualSummarySource.includes("earliestPlayDay"), true, "annual day counting is not anchored to the first played day");
+assert.equal(annualSummarySource.includes("periodTotalDays"), true, "annual day counting does not resolve a period total");
+assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days still pass through from upstream");
 assert.equal(/虹2025|2025 \/ 版本总结/.test(`${zhSource}\n${jaSource}`), false, "legacy 2025 annual copy remains");
 const zh = JSON.parse(zhSource).annualSummary;
 const ja = JSON.parse(jaSource).annualSummary;

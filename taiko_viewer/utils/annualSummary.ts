@@ -15,6 +15,57 @@ type Translate = (key: string, params?: Record<string, unknown>) => string;
 const record = (value: unknown): UnknownRecord =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : {};
 
+// The annual recap reports every day boundary in the season time zone, so the
+// "how many days has this story been running" figure must be anchored to the
+// same calendar day the player actually saw.
+const ANNUAL_CALENDAR_TIME_ZONE = "Asia/Shanghai";
+const MONTH_DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const annualCalendarFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: ANNUAL_CALENDAR_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
+
+const calendarParts = (value: unknown): string => {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return "";
+  const plain = raw.match(MONTH_DAY_PATTERN);
+  const date = plain ? new Date(`${raw}T00:00:00Z`) : new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  const parts = annualCalendarFormatter.formatToParts(date);
+  const year = parts.find((item) => item.type === "year")?.value || "";
+  const month = parts.find((item) => item.type === "month")?.value || "";
+  const day = parts.find((item) => item.type === "day")?.value || "";
+  return year && month && day ? `${year}-${month}-${day}` : "";
+};
+
+const calendarDayNumber = (dayKey: string): number | null => {
+  const match = dayKey.match(MONTH_DAY_PATTERN);
+  if (!match) return null;
+  return Math.round(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86_400_000);
+};
+
+const earliestCalendarDay = (values: unknown[]): string => {
+  let earliest = "";
+  for (const value of values) {
+    const dayKey = calendarParts(value);
+    if (!dayKey) continue;
+    if (!earliest || dayKey < earliest) earliest = dayKey;
+  }
+  return earliest;
+};
+
+// Inclusive span in calendar days, counted from the first real play day to the
+// current day in the season time zone.
+const calendarDaySpan = (startDay: string, endDay: string): number | null => {
+  const start = calendarDayNumber(startDay);
+  const end = calendarDayNumber(endDay);
+  if (start === null || end === null || end < start) return null;
+  return end - start + 1;
+};
+
 const stringValue = (value: unknown, fallback = "") => typeof value === "string" ? value : fallback;
 const numberValue = (value: unknown, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 const nullableNumber = (value: unknown) => value === null || value === undefined || value === "" ? null : numberValue(value);
@@ -425,6 +476,27 @@ export const normalizeAnnualSummary = (
     : ratingRankMin
       ? `#${formatNumber(ratingRankMin)}`
       : "—";
+  // The upstream summary reports the season window length, which the Period
+  // page presents as the elapsed days of the player's own story. Re-anchor it
+  // to the first day the player actually played and count up to today, capped
+  // by the season window so the figure can never exceed the reported range.
+  const versionStartDay = calendarParts(version.startDate);
+  const seasonLastDay = calendarParts(version.effectiveEndDate) || calendarParts(version.endDate) || versionStartDay;
+  // Only observed play activity may anchor the count: `coverage.firstSnapshotAt`
+  // is a collection window boundary, not a day the player actually played.
+  const earliestPlayDay = earliestCalendarDay([
+    calendarParts(period.firstRecordAt),
+    ...(calendarActivity?.days.map((day) => day.date) || [])
+  ]) || versionStartDay;
+  const todayDay = calendarParts(new Date());
+  const periodTotalDays = (() => {
+    const seasonSpan = versionStartDay && seasonLastDay ? calendarDaySpan(versionStartDay, seasonLastDay) : null;
+    const storySpan = earliestPlayDay && todayDay ? calendarDaySpan(earliestPlayDay, todayDay) : null;
+    const upstreamDays = numberValue(period.totalDays);
+    const resolved = storySpan ?? upstreamDays;
+    if (seasonSpan !== null && resolved > seasonSpan) return seasonSpan;
+    return resolved;
+  })();
   const narrativeContext: AnnualNarrativeContext = {
     mode,
     profileBodyKey,
@@ -434,7 +506,7 @@ export const normalizeAnnualSummary = (
     playCount: formatNumber(playCount),
     uniqueSongs: formatNumber(uniqueSongs),
     uniqueCharts: formatNumber(uniqueCharts),
-    totalDays: formatNumber(numberValue(period.totalDays)),
+    totalDays: formatNumber(periodTotalDays),
     activeDays: formatNumber(activeDays),
     favoriteSong: favoriteSong?.name || "—",
     favoriteCount: formatNumber(favoriteSong?.playCount || 0),
@@ -493,7 +565,7 @@ export const normalizeAnnualSummary = (
     },
     coverage: { snapshotCount: numberValue(coverage.snapshotCount), firstSnapshotAt: stringValue(coverage.firstSnapshotAt) || null, lastSnapshotAt: stringValue(coverage.lastSnapshotAt) || null, partialStart: Boolean(coverage.partialStart) },
     timeCoverage: { status: stringValue(timeCoverage.status, "unavailable") as AnnualMetricStatus, ratio: numberValue(timeCoverage.ratio), trustedPlayCount: numberValue(timeCoverage.trustedProxyPlayCount), totalPlayCount: numberValue(timeCoverage.totalObservedPlayCount), precision: timeCoverage.eligible ? "batch_last_play_proxy" : "none", note: null },
-    period: { firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: numberValue(period.totalDays), activeDays },
+    period: { firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: periodTotalDays, activeDays },
     overview: { playCount, uniqueSongs, uniqueCharts: numberValue(overview.uniqueCharts), estimatedSeconds: numberValue(overview.estimatedSeconds), estimatedTimeText: stringValue(overview.estimatedTimeText) || (numberValue(overview.estimatedSeconds) >= 3600 ? `${(numberValue(overview.estimatedSeconds) / 3600).toFixed(1)} h` : `${Math.round(numberValue(overview.estimatedSeconds) / 60)} min`), currentClearCharts: numberValue(overview.currentClearCharts), currentFullComboCharts: numberValue(overview.currentFullComboCharts), currentDondafulCharts: numberValue(overview.currentDondafulCharts), currentKiwamiCharts: numberValue(overview.currentKiwamiCharts) },
     coverSongs,
     favoriteSong, obsessionSong, favoriteShift, monthlyFavorites, weekdayActivity, calendarActivity, timeOfDay, lateNight,
@@ -507,5 +579,11 @@ export const normalizeAnnualSummary = (
   } as VersionSummaryViewModel;
 };
 
+const metricHasPayload = (data: unknown) =>
+  data !== null && data !== undefined && (!Array.isArray(data) || data.length > 0);
+
+// A section is only worth a story page when the algorithm published it AND the
+// payload can actually be rendered. Treating a published-but-empty section as
+// visible would mount a full-height page with nothing on it.
 export const metricAvailable = (status: AnnualMetricStatus | undefined, data: unknown) =>
-  status ? status !== "unavailable" : data !== null && data !== undefined && (!Array.isArray(data) || data.length > 0);
+  status ? status !== "unavailable" && metricHasPayload(data) : metricHasPayload(data);

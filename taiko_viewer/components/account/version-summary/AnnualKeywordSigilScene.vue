@@ -21,21 +21,42 @@ const motionReduced = computed(() => props.reducedMotion || saveData.value);
 useAnnualTimeline(rootRef, toRef(props, "active"), motionReduced, { reenter: "restart" });
 
 const dimensionOrder = ["big_song", "stamina", "speed", "accuracy", "rhythm", "complex"] as const;
+// Cached summaries key the radar by the annual dimension names, while the
+// shared recommendation model exposes the same dimensions as `accuracy_power`
+// and `complex_proc`. Accept either spelling so a producer change cannot
+// silently drop two axes.
+const dimensionAliases: Record<(typeof dimensionOrder)[number], readonly string[]> = {
+  big_song: ["big_song"],
+  stamina: ["stamina"],
+  speed: ["speed"],
+  accuracy: ["accuracy", "accuracy_power"],
+  rhythm: ["rhythm"],
+  complex: ["complex", "complex_proc"]
+};
 const profileKeyword = computed(() => props.summary.keywordProfile || props.summary.keyword);
 const cleanText = (value: unknown, fallback = "") => {
   const text = typeof value === "string" ? value.trim() : "";
   return text && text !== "undefined" && text !== "null" && !/^annualSummary\./.test(text) ? text : fallback;
 };
-const radarEntries = computed<AnnualKeywordRadarEntry[]>(() => dimensionOrder.map((key) => ({
-  key,
-  label: cleanText(t(`annualSummary.keywords.dimensions.${key}`), key),
-  value: Number(profileKeyword.value?.radarValues?.[key])
-})).filter((entry) => isUsableMetric(entry.value)));
+const radarEntries = computed<AnnualKeywordRadarEntry[]>(() => dimensionOrder.map((key) => {
+  const values = profileKeyword.value?.radarValues || {};
+  const source = dimensionAliases[key].map((alias) => Number(values[alias])).find((value) => isUsableMetric(value));
+  return {
+    key,
+    label: cleanText(t(`annualSummary.keywords.dimensions.${key}`), key),
+    value: source ?? Number.NaN
+  };
+}).filter((entry) => isUsableMetric(entry.value)));
 const rankedEntries = computed(() => [...radarEntries.value].sort((left, right) => right.value - left.value));
 const topEntries = computed(() => rankedEntries.value.slice(0, 3));
+// The six dimensions share one documented scale, so the sigil uses that fixed
+// scale instead of each account's own maximum. A self-scaled radar would push
+// every account's peak onto the outer ring and would also make a slightly
+// higher dimension draw a shorter spike.
+const ANNUAL_KEYWORD_RADAR_MAX = 15.5;
 const radarMax = computed(() => {
   const maximum = Math.max(...radarEntries.value.map((entry) => entry.value), 0);
-  return maximum <= 0 ? 10 : Math.max(10, Math.ceil(maximum * 2) / 2);
+  return Math.max(ANNUAL_KEYWORD_RADAR_MAX, Math.ceil(maximum));
 });
 const highlightKey = computed(() => {
   const supplied = cleanText(profileKeyword.value?.dimensionKey);
@@ -81,9 +102,9 @@ const body = computed(() => cleanText(
 
     <div class="annual-keyword-sigil-scene__content">
       <header class="annual-keyword-sigil-scene__header">
-        <p class="annual-keyword-sigil-scene__eyebrow" data-annual-stage="title">鼓面关键词</p>
+        <p class="annual-keyword-sigil-scene__eyebrow" data-annual-stage="title">{{ t("annualSummary.keywords.eyebrow") }}</p>
         <h2 class="annual-keyword-sigil-scene__title" data-annual-stage="title">{{ keywordTitle }}</h2>
-        <p class="annual-keyword-sigil-scene__lead" data-annual-stage="copy">这一年，鼓面记住了你的出手方式。</p>
+        <p class="annual-keyword-sigil-scene__lead" data-annual-stage="copy">{{ t("annualSummary.keywords.lead") }}</p>
       </header>
 
       <div class="annual-keyword-sigil-scene__sigil-wrap" :class="{ 'is-empty': radarEntries.length < 3 }">
@@ -100,7 +121,7 @@ const body = computed(() => cleanText(
           <span></span><i></i>
         </div>
 
-        <ol v-if="topEntries.length" class="annual-keyword-sigil-scene__tags" aria-label="最鲜明的三个鼓面维度">
+        <ol v-if="topEntries.length" class="annual-keyword-sigil-scene__tags" :aria-label="t('annualSummary.keywords.tagsLabel')">
           <li
             v-for="(entry, index) in topEntries"
             :key="entry.key"
@@ -113,12 +134,12 @@ const body = computed(() => cleanText(
       </div>
 
       <div v-if="dimensionLabel" class="annual-keyword-sigil-scene__beacon" data-annual-stage="data">
-        <span>最先亮起的是</span>
+        <span>{{ t("annualSummary.keywords.beaconPrefix") }}</span>
         <strong>{{ dimensionLabel }}</strong>
       </div>
 
       <p v-if="body" class="annual-keyword-sigil-scene__body" data-annual-stage="copy">{{ body }}</p>
-      <p class="annual-keyword-sigil-scene__closing" data-annual-stage="copy">这就是你的年度鼓面印记。</p>
+      <p class="annual-keyword-sigil-scene__closing" data-annual-stage="copy">{{ t("annualSummary.keywords.closing") }}</p>
     </div>
   </AnnualScene>
 </template>
