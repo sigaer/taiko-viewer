@@ -26,16 +26,28 @@ Current Round:
 **UX-1 — Functional & Data Correctness**
 
 Status:
-**UX-2 COMPLETE — released `0.58.0`, Gate PASS**
+**UX-2 REOPENED — `0.58.0` corrective iteration in progress**
 
 Gate UX-1:
 **PASS**（2026-09-11，`0.57.3`，见「Gate UX-1 判定」）
 
 Gate UX-2:
-**PASS**（2026-09-11，`0.58.0`，见「Gate UX-2 判定」）
+**REOPENED / PENDING** — `0.58.0` 的自动化验收曾记录为 PASS，
+但随后的人工实机验收**失败**，因此 Gate 重新打开：
+
+> manual real-device acceptance failed:
+> 1. Period→Overview introduced incorrect persistent clockwise cover-stream
+>    rotation (~45°) and did not satisfy the intended transition.
+> 2. timeOfDay grouped the full semicircle into one rotor, causing the entire
+>    semicircle composition to rotate away, rather than moving each label with
+>    its corresponding sector.
+
+即：**automated/technical acceptance passed, manual visual acceptance
+subsequently failed, therefore Gate reopened.** 下方 `0.58.0` 的原始 PASS 记录
+予以保留、不做删除，作为「数值验收 ≠ 视觉正确」的记录。
 
 Next allowed round:
-UX-3 仍需用户显式指令；本轮结束后已停止，未自动开始。
+UX-3 仍然禁止；先完成 `0.58.0` 的 corrective iteration。
 
 ---
 
@@ -657,6 +669,97 @@ Gate UX-2:
 | 轮盘旋转 | `time-wheel-rotation`，rotor transform 持续变化 |
 | 数字裁切 | 采样计数 `0`（43.06px）右边界 289 < 轮盘 481，无越界 |
 | 临时 session | 已删除并校验为 0 行 |
+
+## UX-2 corrective iteration（`0.58.1`，2026-09-11）
+
+只返修 A（Period → Overview）与 B（timeOfDay sector/label 运动）。
+Opening Canvas 烟花、timeOfDay 首屏主题、数字分级字号与防裁切全部**保留未动**。
+
+### A. Period → Overview
+
+**0.58.0 为什么产生 45° persistent rotation**
+
+- 0.58.0 把旋转从「每个封面」改为「整个 cover stream 的包装层」
+  `period-overview-scene__cover-rotation`，并把 `rotationZ: 45` 写在这一层上。
+- 该包装层是 `inset: 0` 的整屏元素，`transform-origin: 50% 50%` 即**视口中心**，
+  于是旋转变成绕屏幕中心的整体倾斜，而不是每张封面绕自身中心的自转。
+- 更关键的是：过渡结束后 GSAP 留下的 `rotate(45deg)` 是**内联 transform**，
+  不会被 CSS 关键帧覆盖，因此 Overview 稳态长期停留在 45° 倾斜。
+
+**0.57.3 的原始 rotation 语义**
+
+- 时间轴对 `.vertical-cover-stream__zone.is-upper/.is-lower .vertical-cover-stream__plane`
+  逐个写 `rotationZ: 0 → 45`（`duration .9`，`ease power2.inOut`，从 `.08` 开始）。
+- 即：**每张封面绕自身中心旋转**，`__plane` 与槽位中心重合，
+  所以封面在「上下流动的同一位置」原地转为菱形姿态，而不是整屏倾倒。
+
+**如何只保留原 rotation + continuous vertical flow**
+
+- 撤销整屏包装层，改为在 `AnnualVerticalCoverStream` 内部新增**每封面**的
+  `.vertical-cover-stream__rotation` 子层，其 `transform: rotate(var(--cover-rotation, 0deg))`，
+  旋转中心就是封面自身的中心 —— 与 0.57.3 完全一致。
+- 旋转值不再由 GSAP 写 transform，而是由**过渡时钟**驱动：
+  `syncCoverFlow(safeTime)` 按原有的 `.08s` 起点与 `.9s` 时长、`power2.inOut` 曲线
+  计算 0 → 45 → 0，写入场景根的 `--cover-rotation`。
+  这样旋转不再占用任何元素的 `transform` 属性，
+  纵向流动（在 `__slot` 上）全程继续，两者互不覆盖。
+- **Overview 最终 rotation 为 neutral**：角度在过渡后半段回到 0，
+  实测过渡结束后 `--cover-rotation = 0deg`，Period 与 Overview 两个实例的
+  `__rotation` 计算 transform 均为 `matrix(1, 0, 0, 1, 0, 0)`。
+- 未使用任何 counter-rotate 抵消。
+- 保留上一轮已修好的部分：`flowing` 独立于「激活页」信号，
+  `PeriodSlide` / `OverviewSlide` 继续转发 `flowing`，过渡期间封面流不停。
+
+### B. timeOfDay
+
+**为什么整个 semicircle 被转走**
+
+- 0.58.0 把全部 sector 与全部 label 放进同一个 `time-wheel__rotor`，
+  再对 rotor 施加 `animation: time-wheel-rotation`（`rotate(0 → 360deg)`）。
+- 于是**整个半圆连同它的朝向一起旋转**，构图整体转走 —— 这正是用户看到的现象。
+  绑定 label 与 sector 的目标是以「整体旋转」为代价换来的，代价不可接受。
+
+**新的 item-level 结构（固定 shell + 6 个运动 item）**
+
+```text
+time-wheel                 （容器，不旋转）
+├── time-wheel__outer-dim  （内圈压暗，固定）
+├── time-wheel__shell      （固定半圆壳：半径/圆心/朝向/clip 全不变）
+├── time-wheel__stage      （固定裁剪层：clip-path: inset(0 0 0 50%)）
+│   └── time-wheel__item × 12  （每个 item = 自己的 sector + 自己的 label）
+│         ├── time-wheel__item-svg > time-wheel__sector  （按 item 角度生成）
+│         └── time-wheel__slot > count + "label · range"
+└── time-wheel__don-assembly（固定）
+```
+
+- 每个 item 只有**一个**角度状态 `--slot-angle`，
+  `animation: time-wheel-orbit` 让 item 从 `rotate(--slot-angle)` 转到 `+360deg`；
+  label 用 `rotate(calc(var(--slot-angle) * -1))` 反向自转保持正立。
+- sector 的路径按 `--slot-angle` 生成并**渲染在 item 内部**，
+  因此 sector 与 label 由同一个 transform 驱动，物理上不可能分离。
+- shell / stage / don 的 `transform` 恒为 `none`：实测 12 次采样中
+  `shellStatic = true`、`stageStatic = true`、`itemMoved = true`（12 个不同帧），
+  视频逐帧比对确认半圆朝向与构图边界完全不动。
+
+### 保留的 timeOfDay 既有修复
+
+首屏主题文案（~350ms 可见）、结论第二拍、`is-digits-2..5` 分级字号、
+`tabular-nums`、5 位数防裁切、`overflow-wrap: anywhere` 全部保留，未改动。
+
+### 验收方式改变
+
+本轮不再以 transform 变化数、RAF 采样数、phase 连续性作为 Gate 依据。
+改为：**在开发环境录制真实连续视频**，逐帧人工比对后再发布。
+
+- 录制：`recordVideo` 30s @414×896，覆盖 Period→Overview 完整转场
+  （含稳态前后各数秒）与 timeOfDay 一个完整轮转周期的开头。
+- 逐帧比对结果：
+  - 封面在过渡中**原地**转为菱形姿态（每帧约 8–10°），落回后恢复水平，
+    稳态（Period 与 Overview）均为水平，无 45° 残留；
+  - 半圆的外壳标记与扇形条带在整段视频中位置完全一致，
+    只有其内部的数字与标签沿轨迹移动。
+- 自动化检查仅作为辅助：`test:annual` 通过、构建 exit 0、
+  `--cover-rotation` 在过渡结束后为 `0deg`。
 
 ## Gate UX-2 判定
 

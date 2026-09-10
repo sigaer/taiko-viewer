@@ -28,6 +28,25 @@ let context: gsap.Context | null = null;
 let timeline: gsap.core.Timeline | null = null;
 
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
+// The page transition rotates every cover plane about its own centre, exactly as
+// the pre-UX-2 timeline did, but the rotation is driven from the transition clock
+// instead of a GSAP transform tween. That keeps it off the plane's `transform`
+// property, so the vertical cover flow keeps animating underneath, and lets the
+// rotation return to neutral after the transition instead of becoming a
+// permanent layout tilt.
+const ROTATION_START_MS = 80;
+const ROTATION_SPAN_MS = 900;
+const ROTATION_MAX_DEG = 45;
+const coverRotation = ref(0);
+const syncCoverFlow = (time: number) => {
+  const progress = Math.max(0, Math.min(1, (time - ROTATION_START_MS) / ROTATION_SPAN_MS));
+  // Matches the original power2.inOut rotation curve: out to the diamond pose at
+  // the midpoint of the transition, back to the neutral pose when Overview lands.
+  const eased = progress < 0.5 ? 2 * progress * progress : 1 - ((-2 * progress + 2) ** 2) / 2;
+  const angle = eased <= 0.5 ? eased * 2 * ROTATION_MAX_DEG : (1 - eased) * 2 * ROTATION_MAX_DEG;
+  coverRotation.value = Math.abs(angle) < 0.01 ? 0 : angle;
+};
+const sceneStyle = computed(() => ({ "--cover-rotation": `${coverRotation.value}deg` }));
 const overviewProgress = computed(() => props.reverseTransition
   ? 1
   : Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
@@ -58,17 +77,16 @@ const centerText = computed(() => locale.value === "ja"
     }
 );
 
-const setTimelineTime = () => timeline?.pause(safeTime.value / 1000, false);
+const setTimelineTime = () => {
+  timeline?.pause(safeTime.value / 1000, false);
+  syncCoverFlow(safeTime.value);
+};
 
 const buildTimeline = async () => {
   if (!rootRef.value) return;
   await nextTick();
   context?.revert();
   context = gsap.context(() => {
-    const coverPlanes = rootRef.value!.querySelector(".period-overview-scene__cover-planes");
-    // The page transition only ever rotates the dedicated rotation layer, so the
-    // cover stream keeps its own vertical animation running underneath.
-    const rotationLayer = rootRef.value!.querySelector(".period-overview-scene__cover-rotation");
     const previousCopy = rootRef.value!.querySelector(".period-overview-scene__period-copy");
     const nextCopy = rootRef.value!.querySelector(".period-overview-scene__overview-copy");
     const previousPage = rootRef.value!.querySelector(".period-overview-scene__page--period");
@@ -92,13 +110,11 @@ const buildTimeline = async () => {
 
     timeline
       .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
-      .set(rotationLayer, { rotationZ: 0 }, 0)
       .to(previousIntro, { y: -12, autoAlpha: 0, duration: .3, ease: "power2.in" }, 0)
       .to(previousStory, { y: -9, autoAlpha: 0, duration: .32, ease: "power1.in" }, .04)
       .to(previousFacts, { y: -7, autoAlpha: 0, duration: .24, ease: "power1.in" }, .12)
       .to(previousLatest, { autoAlpha: 0, duration: .2, ease: "power1.in" }, .16)
       .to(previousPage, { autoAlpha: 0, duration: .24, ease: "power1.in" }, .08)
-      .to(rotationLayer, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
@@ -122,13 +138,12 @@ onBeforeUnmount(() => {
     ref="rootRef"
     class="period-overview-scene"
     :class="[stateClass, { 'is-active': active, 'is-reduced': reducedMotion }]"
+    :style="sceneStyle"
     :data-transition-time="safeTime"
     data-visual-style="light-memory-tunnel"
   >
     <div class="period-overview-scene__cover-planes" aria-hidden="true">
-      <div class="period-overview-scene__cover-rotation">
-        <AnnualVerticalCoverStream :summary="summary" :active="active" :flowing="flowing ?? active" :reduced-motion="reducedMotion" />
-      </div>
+      <AnnualVerticalCoverStream :summary="summary" :active="active" :flowing="flowing ?? active" :reduced-motion="reducedMotion" />
     </div>
     <ParticleLayer class="period-overview-scene__particles" :active="active && overviewProgress > 0" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
 
@@ -226,15 +241,6 @@ onBeforeUnmount(() => {
   transform-style: preserve-3d;
 }
 
-/* Independent transform layer: the page transition rotates this wrapper while
-   the cover stream keeps running its own vertical loop inside it. */
-.period-overview-scene__cover-rotation {
-  position: absolute;
-  inset: 0;
-  transform-origin: 50% 50%;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
 
 .period-overview-scene__cover-planes :deep(.vertical-cover-stream__plane img) {
   box-shadow: 0 24px 38px rgba(43, 104, 166, .22), 0 0 0 1px rgba(255, 255, 255, .72);
