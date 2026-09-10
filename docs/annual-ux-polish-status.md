@@ -903,6 +903,46 @@ time-wheel                 （容器，不旋转）
 Opening Canvas 烟花、timeOfDay 首屏 theme、数字分级字号与防裁切全部保留。
 UX-1 的 Period 天数与 favoriteShift 逻辑未触碰。
 
+### B-ter. `0.58.3` 两处根因修复
+
+**Don 半圆裁切（`0.58.2` 仍错误）**
+
+- 用户提供的原始 `TimeOfDaySlide.vue` 显示 `time-wheel__don-assembly` 位于
+  `time-wheel__rotor` **内部**。rotor 定位在 `left = wheel-x - radius`
+  （`--wheel-x: 0px`）且带 `clip-path: inset(0 0 0 50%)`，
+  因此 Don/Ka 的中心恰好落在 viewport 左边界、只露右半边。
+- `0.58.2` 把 Don 移到了 rotor **外部**，它不再被裁切，于是显示在屏幕中央 —— 这是错的。
+- `0.58.3` 已把 Don 移回 rotor 内部。实测：Don window 中心 `cx = 0`（viewport 宽 414），
+  `rotor clip = inset(0px 0px 0px 50%)`，`don window clip = inset(0px 0px 0px 50%)`。
+
+**封面流动冻结（0.57.3 起就存在，这才是「停 → 转 → 再动」的根因）**
+
+- `StoryPlayer.updateCoverClock` 自 0.57.3 起就有守卫
+  `if (coverClockTimestamp && !transitionRunning.value)`，即**过渡期间不推进共享相位**。
+- 关键机制：封面的 `cover-dive-to-horizon` 动画本身就是 `paused`，
+  封面的可见位置完全来自 `--cover-phase`（`animation-delay`）。
+  因此相位不推进 ⇒ **封面位置完全冻结**，与旋转无关。
+  此前所有「flowing / is-flowing / transform 计数」的改动都没有触及这一行，
+  所以问题一直存在。
+- `0.58.3` 移除该守卫，相位在过渡期间继续推进。
+
+实测（本地 414×896，逐帧读取 `--cover-phase`）：
+
+| 阶段 | 相位推进 |
+| --- | --- |
+| Period 稳态 | 4/4 采样帧推进 |
+| **过渡进行中** | **21/21 采样帧推进**（7.90 → 9.50s） |
+| Overview 稳态 | 4/4 采样帧推进 |
+
+旋转仍为单向状态迁移（实测封面 plane 角度）：
+
+| 时刻 | overlay | base period | base overview |
+| --- | --- | --- | --- |
+| 过渡前 | – | 0° | 45° |
+| 过渡中 | 40.9° | 0° | 45° |
+| 过渡后 | – | 0° | **45°（保持菱形）** |
+| 4s 后 | – | 0° | **45°（不回摆）** |
+
 ### C-bis. `0.58.2` 发布与验收记录
 
 | 步骤 | 结果 |
@@ -913,6 +953,9 @@ UX-1 的 Period 天数与 favoriteShift 逻辑未触碰。
 | release commit | `d938527 0.58.2 恢复年度回顾转场旋转与时间轮原始几何` |
 | `scripts/deploy_forum_web.sh "0.58.2 …"` | **exit 0**，健康检查 active/active |
 | 线上版本徽标 | `0.58.2` |
+| release commit（修正） | `7956cd4 0.58.3 修正年度回顾封面流动冻结与时间轮 Don 半圆裁切` |
+| `scripts/deploy_forum_web.sh "0.58.3 …"` | **exit 0**，健康检查 active/active |
+| 线上版本徽标（当前） | **`0.58.3`** |
 | 线上 smoke | `/titles` 200、未登录 `/account/version-summary` 302（预期） |
 
 Period→Overview 逐帧数值（本地 414×896 录制，封面条带相邻帧灰度差）：
