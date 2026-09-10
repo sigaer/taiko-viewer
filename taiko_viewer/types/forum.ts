@@ -275,11 +275,19 @@ export const FORUM_SECTION_SEEDS: ForumSectionSeed[] = [
     sortOrder: 70,
   },
   {
+    slug: "general",
+    name: "闲聊杂谈",
+    description: "日常闲聊、曲目感想、年度回顾与社区杂谈。",
+    icon: "spark",
+    accentColor: "#3f97d1",
+    sortOrder: 80,
+  },
+  {
     slug: "creative",
-    name: "二创杂谈",
-    description: "同人创作、周边、音乐闲聊和跨坑交流。",
+    name: "同名二创",
+    description: "绘画、视频、音乐、同人创作与其它二次创作。",
     icon: "spark",
     accentColor: "#c75d88",
-    sortOrder: 80,
+    sortOrder: 90,
   },
 ];

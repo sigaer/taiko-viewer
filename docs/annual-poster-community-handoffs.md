@@ -214,3 +214,23 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Owner-only scope is enforced by the snapshot path prefix, so public share and internal poster-export snapshots never request the owner-only resource. Verified in a real browser against the actual component module, with the unpatched build reproducing the defect in the same harness.
 - Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) are preserved and excluded from this hotfix, per the standing instruction; they must be isolated reversibly for the deployment run because the deploy script refuses a dirty tree, then restored with matching hashes.
 - Version `0.54.1`; pending deploy. Phase B remains COMPLETE / PASS; Phase C NO.
+
+## 2026-09-10 / Phase B post-release hotfix deployed and verified online
+
+- Release commit `6d810ea 0.54.1 修复年度Poster称号展示资料卡资源回退`, fast-forward state on main already contained it. Standard `bash scripts/deploy_forum_web.sh "0.54.1 修复年度Poster称号展示资料卡资源回退"` exited 0 and pushed main itself; no manual push, no manual build/output swap, no service restart by hand.
+- Because that script refuses a dirty tree, the unrelated `taiko_viewer/assets/data/title_song_relations.json` was isolated with a reversible stash and restored immediately afterwards; its SHA-256 matched before and after (`b44083d2…`) and the stash is dropped. `poster.zip` remains untracked and untouched.
+- Deployed appVersion `0.54.1` on 127.0.0.1:3100 and viewer.sakura-bot.cn. Production network trace: snapshot `/api/account/annual-summaries/annual_8357acbcad4494b16903122a/my-don` → 404, then owner-only `/api/account/my-don` → 200, and the tile displayed the live MyDon image with no `AnnualArtworkFallback`. Covers, 2×2 geometry (117.05px tiles, gap 0), moving barrage and the reaction input area were all normal; page errors 0.
+- Acceptance used read-only authenticated GETs only: annual jobs, reactions, summary updates and share creations written during the window were all 0. The temporary production session and DB defaults files were deleted after use.
+- Hotfix = VERIFIED ONLINE. Phase B remains COMPLETE / PASS; Phase C not started.
+- This acceptance record is a local-only documentation checkpoint after the release push. Do not manually push main or redeploy unchanged web code solely to publish it.
+
+## 2026-09-10 / Phase C — Forum Taxonomy (released, online smoke pending)
+
+- Scope was exactly the two product changes: add `general` (闲聊杂谈) and rename the `creative` display name to 同名二创. No new taxonomy framework, no Phase D work, and no reaction-driven Forum thread creation.
+- Touched files: `taiko_viewer/types/forum.ts` (seed list), `taiko_viewer/locales/zh.json`, `taiko_viewer/locales/ja.json`, `taiko_viewer/package.json`, `taiko_viewer/package-lock.json`. Nothing touched `PosterSlide`, `AnnualShareGrid`, the reaction API, barrage scheduling, idempotency or rate limiting.
+- `general` reuses the existing bootstrap: it is a new entry in `FORUM_SECTION_SEEDS`, and `seedSections()` upserts it on the unique slug, so it is inserted once, is repeatable and cannot duplicate. `creative` is the same row as before (same id, slug, route, API identity) with only its name/description/`sort_order` updated; its existing threads are untouched.
+- The web UI resolves section names from i18n with the API `name` as fallback, so both layers were updated together. Note for the next agent: the Forum home chip row renders only the first four sections (`slice(0, 4)` in `pages/forum/index.vue`, pre-existing behaviour that this phase deliberately did not change), so the two new names appear in the composer section select (`/forum/new`) and on the section pages rather than in that home chip row. Whether the home chip row should list all sections is an open UI decision, not part of Phase C.
+- Known narrow boundary carried from the hotfix (recorded, deliberately not fixed here): admin preview of another user's annual report can resolve the owner-shaped `my-don` snapshot to the signed-in operator's own `/api/account/my-don`. It does not affect the owner page, public share or poster export, and it is not a Phase C blocker.
+- Seed idempotency was proven against the isolated `_test` database (explicit mutation opt-in plus `SELECT DATABASE()` check) by running the production `seedSections()` SQL twice, and not by adding fixtures or a suite.
+- Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) remain preserved and excluded from the Phase C commit, and must again be isolated reversibly for the deployment run because the deploy script refuses a dirty tree.
+- Version `0.54.2`; deploy with the standard script follows. Phase D not started.

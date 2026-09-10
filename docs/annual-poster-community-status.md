@@ -11,23 +11,26 @@ Latest user instruction overrides historical execution/testing/deployment restri
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase B — Danmaku Core
+Phase C — Forum Taxonomy
 
 Status:
-COMPLETE
+RELEASED — online smoke pending at commit time
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase C — Forum Taxonomy (not started; this task ends at Phase B).
+Phase D — reaction → Forum sync (not started; this task ends at Phase C).
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
 Gate B:
 PASS
 
-Phase B is complete. Local real-product acceptance and the authorized production account smoke both passed.
+Phase B is complete. Local real-product acceptance and the authorized production account smoke both passed. The post-release profile-card hotfix `0.54.1` is VERIFIED ONLINE.
+
+Gate C:
+PENDING — set to PASS by the online smoke record appended after deployment of `0.54.2`.
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -258,4 +261,17 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Local verification (real browser, real component module, no production access): the owner snapshot is requested first and the live resource second; the live resource renders with no placeholder; public-share and internal-poster snapshot shapes never issue the owner-only request; the four mosaic tiles remain equal 133.5px squares with gap 0. The unpatched baseline reproduces the original defect in the same harness (snapshot only, then placeholder).
 - The authenticated full-page dev smoke is not reproducible in this environment: the isolated test DB user lacks the `REFERENCES` privilege, so account schema DDL fails for any fresh dev process. This is the known pre-existing test-infrastructure limitation and was not repaired.
 - Fixed in `0.54.1` locally; pending deploy. Online acceptance follows the standard deployment script.
-- Phase B remains COMPLETE / PASS. This is a post-release corrective hotfix; Phase C has not started.
+- Release commit `6d810ea 0.54.1 修复年度Poster称号展示资料卡资源回退` on main. Standard `bash scripts/deploy_forum_web.sh "0.54.1 修复年度Poster称号展示资料卡资源回退"` succeeded with exit 0; the script pushed main, built in its isolated archive directory, switched output and passed service/local/online health checks. Optional Baidu push reported `over quota` (non-blocking, as before).
+- Deployed appVersion is `0.54.1` at 127.0.0.1:3100 and `https://viewer.sakura-bot.cn`.
+- Online acceptance (read-only GET, authenticated authorized account, no production write): the annual snapshot `GET /api/account/annual-summaries/annual_8357acbcad4494b16903122a/my-don` returned 404 and the owner-only fallback `GET /api/account/my-don` returned 200; the 称号展示 tile rendered that live resource (`naturalWidth` 944) with **no** `AnnualArtworkFallback`. The three song covers loaded, the four mosaic tiles stayed equal 117.05px squares with gap 0, the barrage bubbles moved, the reaction textarea and send control were present, and browser page errors were 0. Annual jobs, reactions, summary updates and share creations written during the window were all 0.
+- Hotfix = VERIFIED ONLINE. Phase B remains COMPLETE / PASS. This is a post-release corrective hotfix; Phase C has not started.
+## 2026-09-10 / Phase C — Forum Taxonomy
+
+- Product scope is exactly two taxonomy changes, with no new taxonomy framework: add section `general` (闲聊杂谈) and rename the display name of the existing `creative` section from 二创杂谈 to 同名二创 with `sortOrder` 80 → 90. `creative` keeps its slug, row identity, route and API identity; no thread is migrated.
+- Implementation reuses the existing bootstrap only: `FORUM_SECTION_SEEDS` in `taiko_viewer/types/forum.ts` plus `seedSections()` inside `ensureForumSchema()` (`taiko_viewer/server/utils/forum-db.ts`), which upserts on the unique `slug` key. `GET /api/forum/sections` reads from `forum_sections`, and the web UI resolves names through `forum.sections.<slug>.name` in `taiko_viewer/utils/forum.ts`, so both the seed and `locales/zh.json` / `locales/ja.json` carry the new names.
+- Seed values: `general` = 闲聊杂谈, description 日常闲聊、曲目感想、年度回顾与社区杂谈。, `icon: "spark"` (an existing icon name; the field is not rendered by any current web or Flutter surface), `accentColor: "#3f97d1"` (reused design-system colour), `sortOrder: 80`. `creative` = 同名二创, description 绘画、视频、音乐、同人创作与其它二次创作。, `sortOrder: 90`.
+- Seed idempotency was verified by running the exact `seedSections()` SQL twice against the isolated `_test` database with `SELECT DATABASE()` confirmed as `taiko_annual_poster_test` and explicit mutation opt-in: the second run kept identical row ids and produced no duplicate slug, ending at 9 rows with `general=闲聊杂谈(80)` and `creative=同名二创(90)`; `creative` kept its original row id, so its existing threads stay in place.
+- The authenticated/local dev API and page smoke remain impossible for the known pre-existing reason recorded under the hotfix above (test DB user lacks `REFERENCES`, so `ensureAccountSchema()` fails for any fresh dev process). No test infrastructure was built to work around it; `GET /api/forum/sections` is verified against production after deployment instead.
+- Flutter needs no change: `taiko_forum_app/lib/services/api_client.dart` reads `/api/forum/sections` and `ForumSection` consumes the server `name`; no hardcoded section names exist in the app.
+- `node --test tests/forumI18n.test.mjs` passes (6/6) for both locales.
+- Version `0.54.2`; pending deploy. Phase D is not started.
