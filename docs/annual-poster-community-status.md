@@ -14,7 +14,7 @@ Current Phase:
 Phase D — Reaction → Forum
 
 Status:
-RELEASED — online smoke pending at commit time
+COMPLETE
 
 Gate A:
 PASS
@@ -35,7 +35,7 @@ PASS
 Phase C is complete: `general` = 闲聊杂谈 and `creative` = 同名二创 are live in `0.54.2`.
 
 Gate D:
-PENDING — set to PASS by the online smoke record appended after deployment of `0.55.0`.
+PASS
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -296,3 +296,13 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - `taiko_viewer/components/account/version-summary/slides/PosterSlide.vue`: the notice after sending now reflects the real server outcome instead of the checkbox — synced, `failed` (感想已发送，社区同步失败。), rate-limited (感想已发送；社区同步过于频繁，本次仅显示弹幕。) or not requested, with Japanese equivalents. The send button still reports only the reaction result, so a Forum failure never looks like a whole-send failure.
 - No Flutter change: the app has no annual reaction posting path.
 - Version `0.55.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy. Phase E is not started.
+- Release commit `b23f325 0.55.0 年度感想支持同步到闲聊杂谈`. Standard `bash scripts/deploy_forum_web.sh "0.55.0 年度感想支持同步到闲聊杂谈"` exited 0 and performed the push, isolated build, output switch, restart and health checks; the deployed artifact at 127.0.0.1:3100 contains the new sync strings, and appVersion is `0.55.0` locally and on `https://viewer.sakura-bot.cn`.
+- Gate D online smoke with the authorized account, against the real deployment (all requests authenticated, all verification read-only):
+  - Case 1 `syncCommunity=false`: POST 200, `communitySync.status=skipped`, `reason=not-requested`, `threadId=null`; the `general` thread count stayed 1, so no Forum thread was created.
+  - Case 2 `syncCommunity=true`: POST 200, `communitySync.status=synced`, `threadId=51`; the `general` count went 1 → 2. `GET /api/forum/threads/51` reports `section.slug=general`, `threadType=discussion`, `title` = the reaction, exactly one paragraph block whose text is the reaction, `songId=null`, tags 年度报告 / 年度感想.
+  - Case 3 same-nonce replay of Case 2: POST 200, identical reaction id `215aae42…`, identical `threadId=51`, and the `general` count stayed 2 — no duplicate reaction row and no duplicate thread.
+  - Case 4 second `syncCommunity=true` inside the 30-second sync window: POST 200 with the reaction created (`764b2396…`), `communitySync.status=skipped`, `reason=rate-limited`, no thread (count stayed 2). The reaction was not lost and the response was not an error.
+  - Case 5 real Poster UI: the community checkbox is enabled by default; sending through the actual page returned `status=synced`, `threadId=52`, the visible notice read 感想已发送，已同步到社区, the new reaction appeared in the barrage, and `/forum/thread/52` renders under 闲聊杂谈 with the reaction as title and body. Browser page errors were 0.
+- DB confirmation: four nonces produced exactly four reaction rows — `skipped`/`not-requested` (no thread), `synced` + `forum_thread_id=51`, `skipped`/`rate-limited` (no thread) and `synced` + `forum_thread_id=52`.
+- The Forum-failure branch (`community_sync_status='failed'`, reaction preserved) is guaranteed structurally rather than induced in production: the reaction INSERT commits before the sync runs, and the sync call is fully wrapped so it downgrades only the sync status. Inducing a real Forum failure on the live site was deliberately not performed.
+- Gate D: PASS. Phase D = COMPLETE. Phase E not started.

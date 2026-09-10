@@ -255,3 +255,12 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Verification for this release must cover the four Gate D cases against the real deployment (sync=false, sync=true, same-nonce retry, rate-limited), and must confirm that only the sync=true case creates a thread.
 - Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) stay preserved and excluded, and must again be isolated reversibly for the deploy run because the script refuses a dirty tree.
 - Version `0.55.0` (minor). Phase E not started.
+
+## 2026-09-10 / Phase D deployed and accepted online — Gate D PASS
+
+- Release commit `b23f325 0.55.0 年度感想支持同步到闲聊杂谈`; the standard `bash scripts/deploy_forum_web.sh "0.55.0 年度感想支持同步到闲聊杂谈"` exited 0 and did the push, isolated build, output switch, restart and health checks itself. appVersion `0.55.0` is live locally and online, and the deployed server chunk contains the new sync strings. The unrelated `title_song_relations.json` was again isolated with a reversible stash and restored with a matching SHA-256 (`b44083d2…`).
+- Gate D ran against production with the authorized account and read-only verification: `sync=false` created only a reaction; `sync=true` created the reaction plus one `general`/`discussion` thread whose title and body are the reaction (`/forum/thread/51`, tags 年度报告 / 年度感想, no song binding); a same-nonce replay returned the identical reaction id and the identical thread with no duplicates; a second `sync=true` inside the 30-second window still saved the reaction but returned `skipped` / `rate-limited` and created no thread; and a real Poster UI send returned `synced`, showed 感想已发送，已同步到社区, appended to the barrage and produced `/forum/thread/52`.
+- Four nonces produced exactly four reaction rows, and the `general` thread count moved 1 → 2 → 2 → 2 → 3 exactly as expected. Browser page errors were 0.
+- The Forum-failure branch was not induced on the live site; it is guaranteed by construction because the reaction insert commits first and the sync is fully wrapped so it can only downgrade the sync status.
+- Phase D = COMPLETE, Gate D = PASS. Phase E not started. The smoke left two genuine threads in 闲聊杂谈 (`/forum/thread/51`, `/forum/thread/52`) that a moderator can hide or delete when they are no longer useful.
+- This acceptance record is a local-only documentation commit after the release push. Do not push it manually or redeploy unchanged web code solely to publish it; the next release will carry it.
