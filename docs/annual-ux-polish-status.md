@@ -903,6 +903,34 @@ time-wheel                 （容器，不旋转）
 Opening Canvas 烟花、timeOfDay 首屏 theme、数字分级字号与防裁切全部保留。
 UX-1 的 Period 天数与 favoriteShift 逻辑未触碰。
 
+### B-quater. `0.58.4` sector 对齐到 slot 背景
+
+用户确认 Period→Overview 已通过，仅剩 timeOfDay：sector 与 slot 是「毫不相关的几个元素同频转动」，
+要求把每组 sector 放到对应 slot 的背后，slot 位置本身不动。
+
+**实现**
+
+- 12 个 sector 移入 `time-wheel__rotor` 内的共享 SVG 层 `.time-wheel__sectors`
+  （viewBox 与 rotor 同心同尺寸），因此坐标原点就是转盘圆心。
+- 每个 sector 包在 `.time-wheel__sector-flow` 组内，该组使用与 slot
+  **完全相同**的 `time-slot-flow-sector` 关键帧（`rotate(--angle) → rotate(--angle + 360deg)`，
+  40s linear infinite）。
+- sector 路径改为 `sectorPath(0)`，即以组自身轴为基准绘制；
+  组的旋转角度恰好就是 slot 的角度，所以扇形中点 = slot 角度。
+- 环沿（outer / inner 圆）保持在 rotor 外的固定 `.time-wheel__bearing` 层不变。
+- Don assembly 保持在 rotor 内（`0.58.3` 已修正的右半边裁切）。
+
+**实测（本地 414×896）**
+
+| 项 | 值 |
+| --- | --- |
+| 转盘圆心 | (0, 466)（viewport 左边界） |
+| sector 组与 slot 的相位差 | **0.00°**（两次采样均为 0.00） |
+| 两者的动画推进速率比 | **1.000**（同为 8.25°/900ms） |
+| slot `--angle` 集合 | 15/45/75/105/135/165/195/225/255/285/315/345 |
+
+即 sector 与 slot 角度完全一致、同速旋转，扇形中点始终落在其 slot 上。
+
 ### B-ter. `0.58.3` 两处根因修复
 
 **Don 半圆裁切（`0.58.2` 仍错误）**

@@ -152,8 +152,11 @@ const timeOfDaySource = await read("components/account/version-summary/slides/Ti
 // its sector share one angle state instead of two independent animations.
 assert.equal(timeOfDaySource.includes("time-wheel__bearing"), true, "time page has no fixed ring bearing");
 assert.equal(timeOfDaySource.includes("time-wheel__rotor"), true, "time page lost its original rotor");
-assert.equal(timeOfDaySource.includes("time-wheel__slot-svg"), true, "time slots do not carry their own half-sector");
+assert.equal(timeOfDaySource.includes("time-wheel__sector-flow"), true, "time sectors have no per-slot rotation group");
+assert.equal(timeOfDaySource.includes("time-wheel__sectors"), true, "time sectors have no shared layer in the rotor coordinate space");
 assert.equal(/@keyframes time-slot-flow/.test(timeOfDaySource), true, "time slots no longer travel the wheel");
+assert.equal(/@keyframes time-slot-flow-sector/.test(timeOfDaySource), true, "per-slot sectors do not rotate with their slot");
+assert.equal(timeOfDaySource.includes("sectorPath(0)"), true, "the wedge is not built on its group axis");
 assert.equal(/@keyframes time-slot-counter/.test(timeOfDaySource), true, "time labels no longer keep their own upright angle");
 assert.equal(timeOfDaySource.includes("time-wheel__shell"), false, "the rejected fixed-shell rewrite is back");
 assert.equal(timeOfDaySource.includes("time-wheel__item"), false, "the rejected item rewrite is back");

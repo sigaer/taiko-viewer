@@ -20,15 +20,19 @@ const wheelSlots = computed(() => periods.value.flatMap((period, index) => [
   { ...period, angle: 105 + index * 30, instance: "b" }
 ]));
 
-// Each slot carries its own half-sector. The sector is drawn for the slot's own
-// angle and travels inside the slot, so a label and its sector always move as one
-// unit instead of using two independent angle states.
+// Each slot draws its own half-sector in a shared SVG layer. The wedge is built
+// at the slot's own angle and then rotates with the very same 40s / 360deg
+// keyframes as the slot, so a wedge always stays the background of its own slot.
+const SECTOR_HALF_WIDTH_DEG = 14;
+const SECTOR_OUTER = 368;
+const SECTOR_INNER = 286;
 const sectorPath = (angle: number) => {
   const point = (degrees: number, radius: number) =>
     `${(Math.cos(degrees * Math.PI / 180) * radius).toFixed(2)} ${(Math.sin(degrees * Math.PI / 180) * radius).toFixed(2)}`;
-  const start = angle - 14;
-  const end = angle + 14;
-  return `M ${point(start, 368)} A 368 368 0 0 1 ${point(end, 368)} L ${point(end, 286)} A 286 286 0 0 0 ${point(start, 286)} Z`;
+  const start = angle - SECTOR_HALF_WIDTH_DEG;
+  const end = angle + SECTOR_HALF_WIDTH_DEG;
+  return `M ${point(start, SECTOR_OUTER)} A ${SECTOR_OUTER} ${SECTOR_OUTER} 0 0 1 ${point(end, SECTOR_OUTER)}`
+    + ` L ${point(end, SECTOR_INNER)} A ${SECTOR_INNER} ${SECTOR_INNER} 0 0 0 ${point(start, SECTOR_INNER)} Z`;
 };
 
 // The centre reel is sized from the real digit count instead of one fixed size,
@@ -51,6 +55,16 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
           <circle cx="0" cy="0" r="286" class="time-wheel__edge time-wheel__edge--inner" />
         </svg>
         <div class="time-wheel__rotor" aria-hidden="true">
+          <svg class="time-wheel__sectors" viewBox="-400 -400 800 800" aria-hidden="true">
+            <g
+              v-for="slot in wheelSlots"
+              :key="`sector-${slot.key}-${slot.instance}`"
+              class="time-wheel__sector-flow"
+              :style="{ '--angle': `${slot.angle}deg` }"
+            >
+              <path class="time-wheel__sector" :class="{ 'is-peak': slot.key === peakKey }" :d="sectorPath(0)" />
+            </g>
+          </svg>
           <div
             v-for="slot in wheelSlots"
             :key="`${slot.key}-${slot.instance}`"
@@ -58,9 +72,6 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
             :class="{ 'is-peak': slot.key === peakKey }"
             :style="{ '--angle': `${slot.angle}deg`, '--strength': slot.key === peakKey ? 1 : .82 }"
           >
-            <svg class="time-wheel__slot-svg" viewBox="-400 -400 800 800" aria-hidden="true">
-              <path class="time-wheel__sector" :class="{ 'is-peak': slot.key === peakKey }" :d="sectorPath(slot.angle)" />
-            </svg>
             <div class="time-wheel__slot-content">
               <strong class="time-wheel__count" :class="`is-digits-${countDigits(slot.playCount)}`">{{ formatter.format(slot.playCount) }}</strong>
               <span>{{ slot.label }} · {{ slot.range }}</span>
@@ -89,10 +100,11 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
 .time-wheel__slot{position:absolute;left:50%;top:50%;width:180px;text-align:center;transform:translate(-50%,-50%) rotate(var(--angle)) translateX(calc(var(--wheel-radius)*.87));transform-origin:center;animation:time-slot-flow 40s linear normal infinite;opacity:var(--strength);text-shadow:0 3px 15px rgba(10,24,42,.56);z-index:6}
 /* The slot's own sector shares the slot's angle state and lives inside the slot,
    so the two always travel together. */
-.time-wheel__slot-svg{position:absolute;left:50%;top:50%;width:calc(var(--wheel-radius)*2);height:calc(var(--wheel-radius)*2);margin:calc(var(--wheel-radius) * -1) 0 0 calc(var(--wheel-radius) * -1);overflow:visible;pointer-events:none}
+.time-wheel__sectors{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
 .time-wheel__sector{fill:rgba(255,255,255,.19);stroke:rgba(255,255,255,.11);stroke-width:1}
+.time-wheel__sector-flow{transform-origin:0 0;animation:time-slot-flow-sector 40s linear normal infinite}
 .time-wheel__sector.is-peak{fill:rgba(255,255,255,.29)}
-.time-wheel__slot-content{position:relative;transform:rotate(calc(var(--angle) * -1));animation:time-slot-counter 40s linear normal infinite}
+.time-wheel__slot-content{position:relative;z-index:1;transform:rotate(calc(var(--angle) * -1));animation:time-slot-counter 40s linear normal infinite}
 .time-wheel__count{display:block;color:#fff;font-variant-numeric:tabular-nums;font-family:var(--viewer-display-font);font-weight:700;line-height:.86;letter-spacing:-.03em;max-width:100%;overflow-wrap:anywhere}
 .time-wheel__count.is-digits-2{font-size:clamp(1.55rem,9.5vw,3.1rem)}.time-wheel__count.is-digits-3{font-size:clamp(1.4rem,8.6vw,2.8rem)}.time-wheel__count.is-digits-4{font-size:clamp(1.2rem,7.4vw,2.4rem)}.time-wheel__count.is-digits-5{font-size:clamp(1rem,6vw,2rem)}
 .time-wheel__slot.is-peak .time-wheel__count{font-size:clamp(1.7rem,10.6vw,3.5rem);text-shadow:0 0 18px rgba(255,240,184,.52)}
@@ -108,7 +120,7 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
 .time-wheel__don-window img{position:absolute;left:0;top:0;width:136px;height:136px;max-width:none;object-fit:contain;animation:don-spin 9s linear normal infinite;will-change:transform}
 .time-of-day-conclusion{position:absolute;right:7%;bottom:8%;display:flex;align-items:baseline;gap:10px;color:#fff;text-align:right;text-shadow:0 3px 16px rgba(10,24,42,.6)}
 .time-of-day-conclusion span{font:700 clamp(13px,3.5vw,18px)/1 var(--viewer-font-family)}.time-of-day-conclusion strong{font:700 clamp(2.4rem,12vw,5rem)/.82 var(--viewer-display-font)}
-@keyframes time-slot-flow{from{transform:translate(-50%,-50%) rotate(var(--angle)) translateX(calc(var(--wheel-radius)*.87))}to{transform:translate(-50%,-50%) rotate(calc(var(--angle) + 360deg)) translateX(calc(var(--wheel-radius)*.87))}}@keyframes time-slot-counter{from{transform:rotate(calc(var(--angle) * -1))}to{transform:rotate(calc((var(--angle) + 360deg) * -1))}}@keyframes don-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.annual-scene:not(.is-active) .time-wheel__slot,.annual-scene:not(.is-active) .time-wheel__slot-content,.annual-scene:not(.is-active) .time-wheel__don-window img{animation-play-state:paused}.annual-scene.is-reduced .time-wheel__slot,.annual-scene.is-reduced .time-wheel__slot-content,.annual-scene.is-reduced .time-wheel__don-window img{animation:none}
+@keyframes time-slot-flow{from{transform:translate(-50%,-50%) rotate(var(--angle)) translateX(calc(var(--wheel-radius)*.87))}to{transform:translate(-50%,-50%) rotate(calc(var(--angle) + 360deg)) translateX(calc(var(--wheel-radius)*.87))}}@keyframes time-slot-counter{from{transform:rotate(calc(var(--angle) * -1))}to{transform:rotate(calc((var(--angle) + 360deg) * -1))}}@keyframes time-slot-flow-sector{from{transform:rotate(var(--angle))}to{transform:rotate(calc(var(--angle) + 360deg))}}@keyframes don-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.annual-scene:not(.is-active) .time-wheel__slot,.annual-scene:not(.is-active) .time-wheel__slot-content,.annual-scene:not(.is-active) .time-wheel__sector-flow,.annual-scene:not(.is-active) .time-wheel__don-window img{animation-play-state:paused}.annual-scene.is-reduced .time-wheel__slot,.annual-scene.is-reduced .time-wheel__slot-content,.annual-scene.is-reduced .time-wheel__sector-flow,.annual-scene.is-reduced .time-wheel__don-window img{animation:none}
 @media(max-width:720px){.time-wheel{--wheel-radius:min(89vw,370px)}.time-wheel__slot{width:145px}.time-wheel__slot span{font-size:12px}.time-wheel__don-assembly{width:160px;height:160px}.time-wheel__don-backplate{width:158px;height:158px}.time-wheel__don-window{width:136px;height:136px}.time-wheel__don-window img{width:136px;height:136px}.time-of-day-conclusion{right:6%;bottom:5%;gap:7px}.time-of-day-conclusion span{font-size:12px}.time-of-day-conclusion strong{font-size:3.3rem}}
 @media(max-height:680px){.time-wheel{--wheel-y:51%;--wheel-radius:min(88vw,315px)}.time-wheel__count.is-digits-2{font-size:1.65rem}.time-wheel__count.is-digits-3{font-size:1.5rem}.time-wheel__count.is-digits-4{font-size:1.3rem}.time-wheel__count.is-digits-5{font-size:1.1rem}.time-wheel__slot.is-peak .time-wheel__count{font-size:2rem}.time-of-day-conclusion{bottom:4%}}
 </style>
