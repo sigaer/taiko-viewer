@@ -147,18 +147,18 @@ assert.equal(openingBeatLaneSource.includes("@keyframes annual-beat-scroll"), tr
 assert.equal(openingCarouselSource.includes("reducedMotion"), true, "opening carousel ignores reduced motion");
 assert.equal(openingFireworksSource.includes("is-still"), true, "opening fireworks ignore reduced motion");
 const timeOfDaySource = await read("components/account/version-summary/slides/TimeOfDaySlide.vue");
-// UX-2 corrective: the semicircle is a fixed shell; only per-item groups travel
-// along it, and each item keeps its own half-sector bound to its own label.
-assert.equal(timeOfDaySource.includes("time-wheel__shell"), true, "time page has no fixed semicircle shell");
-assert.equal(timeOfDaySource.includes("time-wheel__stage"), true, "time page has no fixed stage for the travelling items");
-assert.equal(timeOfDaySource.includes("time-wheel__item"), true, "time page has no per-item group");
-assert.equal(timeOfDaySource.includes("time-wheel__rotor"), false, "the whole semicircle is still one rotating rotor");
-assert.equal(/time-wheel__sector/.test(timeOfDaySource), true, "time items lost their half-sector");
-assert.equal((timeOfDaySource.match(/time-wheel__item\b/g) || []).length >= 2, true, "time page does not render one group per item");
-assert.equal(/@keyframes time-wheel-orbit/.test(timeOfDaySource), true, "time items do not travel the wheel");
-assert.equal(/time-wheel__item\{[^}]*animation:time-wheel-orbit/.test(timeOfDaySource.replace(/\s+/g, "")), true, "time item orbit is not attached to the item group");
-assert.equal(/time-wheel__item-svg/.test(timeOfDaySource), true, "time items do not carry their own sector geometry");
-assert.equal(timeOfDaySource.includes("rotate(calc(var(--slot-angle) * -1))"), true, "time labels no longer keep their own upright angle");
+// UX-2 corrective: the original 0.57.3 wheel geometry is the baseline. The ring
+// bearing is fixed, and every slot carries its own half-sector so the label and
+// its sector share one angle state instead of two independent animations.
+assert.equal(timeOfDaySource.includes("time-wheel__bearing"), true, "time page has no fixed ring bearing");
+assert.equal(timeOfDaySource.includes("time-wheel__rotor"), true, "time page lost its original rotor");
+assert.equal(timeOfDaySource.includes("time-wheel__slot-svg"), true, "time slots do not carry their own half-sector");
+assert.equal(/@keyframes time-slot-flow/.test(timeOfDaySource), true, "time slots no longer travel the wheel");
+assert.equal(/@keyframes time-slot-counter/.test(timeOfDaySource), true, "time labels no longer keep their own upright angle");
+assert.equal(timeOfDaySource.includes("time-wheel__shell"), false, "the rejected fixed-shell rewrite is back");
+assert.equal(timeOfDaySource.includes("time-wheel__item"), false, "the rejected item rewrite is back");
+assert.equal(timeOfDaySource.includes("--wheel-radius:min(88vw,372px)"), true, "time wheel lost its original radius");
+assert.equal(timeOfDaySource.includes("--wheel-y:52%"), true, "time wheel lost its original stage position");
 assert.equal(timeOfDaySource.includes("countDigits"), true, "time centre reel does not adapt to the digit count");
 for (const digits of [2, 3, 4, 5]) {
   assert.equal(timeOfDaySource.includes(`is-digits-${digits}`), true, `time centre reel has no size for ${digits}-digit counts`);
@@ -187,20 +187,20 @@ assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), tr
 assert.equal(verticalCoverSource.includes("ANNUAL_COVER_PHASE_KEY"), true, "period cover instances do not share one animation phase");
 assert.equal(verticalCoverSource.includes("rotateX(72deg) scale(.74)"), true, "lower cover corridor lost its inward perspective");
 assert.equal(verticalCoverSource.includes("rotateX(-72deg) scale(.74)"), true, "upper cover corridor lost its inward perspective");
-// UX-2 corrective: the transition rotation is driven from the transition clock and
-// applied about each cover's own centre, and it must return to neutral when the
-// Overview lands, so no persistent 45-degree tilt can survive the transition.
-assert.equal(periodOverviewSceneSource.includes("--cover-rotation"), true, "period transition does not publish a cover rotation value");
-assert.equal(periodOverviewSceneSource.includes("coverRotation"), true, "period transition has no rotation state");
-assert.equal(/ROTATION_MAX_DEG = 45/.test(periodOverviewSceneSource), true, "period transition lost its 45-degree rotation target");
-assert.equal(/syncCoverFlow\(safeTime\.value\)/.test(periodOverviewSceneSource), true, "cover rotation is not driven by the transition clock");
-assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-rotation"), false, "the removed whole-stream rotation wrapper is back");
-assert.equal(/upperPlanes|lowerPlanes/.test(periodOverviewSceneSource), false, "period transition does not rotate the cover planes themselves");
+// UX-2 corrective: the transition rotates every cover plane about its own centre
+// (0.57.3 semantics) as a one-way state change led by Period -> Overview. It must
+// never yoyo back, and no whole-stream rotation wrapper may come back.
+assert.equal(/upperPlanes|lowerPlanes/.test(periodOverviewSceneSource), true, "period transition no longer rotates the cover planes themselves");
+assert.equal(/\.set\(\[upperPlanes, lowerPlanes\], \{ rotationZ: 0 \}/.test(periodOverviewSceneSource), true, "period state is not reset to the rectangular pose");
+assert.equal((periodOverviewSceneSource.match(/rotationZ: 45/g) || []).length, 2, "cover planes do not both rotate to the diamond pose");
+assert.equal(/rotationZ: 0[^\n]*\}[^\n]*\.08/.test(periodOverviewSceneSource), false, "transition still reverses the rotation");
+assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-rotation"), false, "the rejected whole-stream rotation wrapper is back");
+assert.equal(periodOverviewSceneSource.includes("--cover-rotation"), false, "rotation is still driven by a CSS variable instead of the timeline");
 assert.equal(/\.to\([^)]*,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
 assert.equal(/\.pause\(\)/.test(periodOverviewSceneSource), false, "period transition still pauses the cover stream");
 const coverStreamSource = verticalCoverSource;
-assert.equal(coverStreamSource.includes("vertical-cover-stream__rotation"), true, "covers have no per-cover rotation layer");
-assert.equal(coverStreamSource.includes("rotate(var(--cover-rotation, 0deg))"), true, "per-cover rotation is not bound to the transition value");
+assert.equal(coverStreamSource.includes("vertical-cover-stream__rotation"), false, "the rejected per-cover rotation layer is back");
+assert.equal(coverStreamSource.includes("__plane"), true, "cover stream lost its plane element");
 // UX-2: the ambient flow must not be gated on the scene's active flag.
 assert.equal(verticalCoverSource.includes("is-flowing"), true, "cover stream has no independent flow state");
 assert.equal(verticalCoverSource.includes("is-running"), false, "cover stream still ties its flow to the active flag");

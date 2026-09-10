@@ -32,7 +32,8 @@ Gate UX-1:
 **PASS**（2026-09-11，`0.57.3`，见「Gate UX-1 判定」）
 
 Gate UX-2:
-**REOPENED / PENDING** — `0.58.0` 的自动化验收曾记录为 PASS，
+**PENDING**（第二次人工验收失败后重开；`0.58.2` 采用「恢复原始设计几何 + 最小修复」
+策略，等待用户真实视频确认） — `0.58.0` 的自动化验收曾记录为 PASS，
 但随后的人工实机验收**失败**，因此 Gate 重新打开：
 
 > manual real-device acceptance failed:
@@ -782,6 +783,98 @@ time-wheel                 （容器，不旋转）
     只有其内部的数字与标签沿轨迹移动。
 - 自动化检查仅作为辅助：`test:annual` 通过、构建 exit 0、
   `--cover-rotation` 在过渡结束后为 `0deg`。
+
+## UX-2 corrective iteration 2（`0.58.2`）— 恢复原始设计几何
+
+第二次人工验收确认 `0.58.1` 仍然错误，因此**放弃继续在自研动画结构上微调**，
+改为唯一策略：**恢复 0.57.3 的原始几何 + 只修原始问题**。
+
+### A. Period → Overview
+
+**`0.58.0`/`0.58.1` 错在哪**
+
+- `0.58.0`：把旋转搬到整屏包装层 `period-overview-scene__cover-rotation`
+  （`transform-origin` = 视口中心）→ 变成整屏倾倒，且过渡后残留 45° 内联 transform
+  → Overview 长期菱形化但 Period 也被扭走。
+- `0.58.1`：改回「每封面绕自身中心」的几何，但把旋转做成
+  `0 → 45 → 0` 的**时钟驱动 accent** → 用户看到「转过去又转回来」，
+  Overview 最终仍是矩形。
+
+**0.57.3 的原始语义（本轮基线）**
+
+- 时间轴对 `.vertical-cover-stream__zone.is-upper/.is-lower .vertical-cover-stream__plane`
+  写 `rotationZ: 0 → 45`（`duration .9`、`ease power2.inOut`、起点 `.08`）。
+- 由于 `PeriodSlide` 以 `transition-time = 0`、`OverviewSlide` 以
+  `transition-time = PERIOD_OVERVIEW_DURATION_MS` 渲染同一个场景，
+  **Period 稳态 = 矩形（rotationZ 0），Overview 稳态 = 菱形（rotationZ 45）**。
+- 这是一个**状态迁移**（state transition），不是一次性 accent：
+  过渡结束后保持 45，不回摆。
+
+**本轮实现**
+
+- 完整恢复上述 per-plane GSAP 语义：`upperPlanes/lowerPlanes` 目标、
+  `.set(..., { rotationZ: 0 }, 0)`、两个 `.to(..., { rotationZ: 45 })`。
+- 删除所有自研机制：整屏包装层、`--cover-rotation` CSS 变量、
+  每封面 rotation 子层、时钟驱动的 `syncCoverFlow`。
+- 不再有任何「转回 0」的 tween，也不再在过渡后清理 transform。
+- 纵向流动保持独立：流动动画在 `__slot` 上，旋转写在 `__plane` 上，
+  两者是不同元素的不同 transform，互不覆盖；
+  `flowing`（= 该场景已挂载且文档可见）继续让 `is-flowing` 在整个过渡期间为真，
+  过渡中没有 `pause` / `animation-play-state` / 重新 mount / phase 重置。
+
+**逐帧人工验收（本地 414×896 录制，10fps）**
+
+| 阶段 | 观察结果 |
+| --- | --- |
+| Period 稳态 | 矩形封面流持续纵向流动 |
+| 过渡中 | 封面在继续流动的同时原地旋转（每帧约 8–10°） |
+| Overview 稳态 | **保持菱形姿态**，且封面条带逐帧仍在位移（相邻帧灰度差 16.5–17.9） |
+
+### B. timeOfDay
+
+**`0.58.0`/`0.58.1` 错在哪**
+
+- `0.58.0`：把全部 sector 与 label 放进同一个 `time-wheel__rotor` 并对 rotor 施加
+  `rotate(0 → 360deg)` → **整个半圆连同朝向一起转走**。
+- `0.58.1`：改为「固定 shell + item 数组」，虽然半圆不再旋转，但**破坏了原始构图**：
+  Don/Ka 被放进带 `clip-path` 的 stage 内、六个 slot 的半径与分布改变、
+  label 与数字堆叠、整屏出现巨大半圆。
+
+**本轮实现（回到原始几何）**
+
+- slot 几何、半径、角度、clip、Don/Ka 位置全部回到 0.57.3：
+  `--wheel-radius: min(88vw,372px)`、`--wheel-y: 52%`、
+  slot `width: 180px`（移动端 145px）、`time-slot-flow` / `time-slot-counter` 关键帧、
+  Don assembly 结构与 `--ring-inner-radius` 推导均未改动。
+- **原始问题的唯一修复**：每个 slot 自带它自己的半扇形。
+  slot 的 keyframes 保持 0.57.3 原样（仍由 `var(--angle)` 驱动），
+  半扇形现在绘制在 **slot 内部**的 `.time-wheel__slot-svg` 中、路径取 slot 自身的
+  `--angle` —— 于是 label 与它的 sector 由**同一个 slot 动画**一起移动，
+  不存在第二套独立角度状态，也没有新增任何旋转层。
+- 环的外沿/内沿圆弧移到**固定的** `.time-wheel__bearing` 层（不参与任何 transform），
+  因此圆环参考线不会随 slot 转走，构图边界固定。
+- Don/Ka 回到 rotor 之外的固定层，位置与 0.57.3 一致。
+
+**逐帧人工验收（同一段录制）**
+
+| 检查 | 结果 |
+| --- | --- |
+| Don/Ka 位置 | 与原设计一致（居中于圆环轴心），未跑位 |
+| 六个 slot | 沿右侧半环均匀分布，无堆叠 |
+| label 与 sector | 同步换位（同一 slot 动画驱动） |
+| 整体构图 | 与原设计一致，无整屏巨环 |
+| 首屏主题 | 保留（进入即可见） |
+| 数字防裁切 | 保留（2–5 位分级字号、`tabular-nums`、`overflow-wrap`） |
+
+### C. 保留项
+
+Opening Canvas 烟花、timeOfDay 首屏 theme、数字分级字号与防裁切全部保留。
+UX-1 的 Period 天数与 favoriteShift 逻辑未触碰。
+
+### D. 验收方式
+
+本轮继续以**真实连续视频 + 逐帧人工比对**为准，不使用 transform 计数作为结论；
+自动化检查（契约脚本、构建）仅作辅助。
 
 ## Gate UX-2 判定
 

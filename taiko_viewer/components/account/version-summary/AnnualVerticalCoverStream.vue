@@ -92,20 +92,18 @@ const isFlowing = computed(() => props.flowing ?? props.active);
           :data-flow-key="song.fallback ? '' : song.flowKey"
         >
           <div class="vertical-cover-stream__plane">
-            <div class="vertical-cover-stream__rotation">
-              <img
-                v-if="song.coverUrl && !song.fallback && !failedCovers.has(song.slotKey)"
-                :src="song.coverUrl"
-                alt=""
-                width="400"
-                height="400"
-                loading="eager"
-                fetchpriority="low"
-                decoding="async"
-                @error="failCover(song.slotKey)"
-              />
-              <span v-else class="vertical-cover-stream__fallback"><i></i></span>
-            </div>
+            <img
+              v-if="song.coverUrl && !song.fallback && !failedCovers.has(song.slotKey)"
+              :src="song.coverUrl"
+              alt=""
+              width="400"
+              height="400"
+              loading="eager"
+              fetchpriority="low"
+              decoding="async"
+              @error="failCover(song.slotKey)"
+            />
+            <span v-else class="vertical-cover-stream__fallback"><i></i></span>
           </div>
         </div>
       </div>
@@ -151,11 +149,6 @@ const isFlowing = computed(() => props.flowing ?? props.active);
 .vertical-cover-stream.is-flowing .is-lower .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
 .vertical-cover-stream.is-flowing .is-upper .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
 .vertical-cover-stream__plane { width: 100%; height: 100%; transform-style: preserve-3d; transform-origin: 50% 50%; will-change: transform; }
-/* The page transition owns this rotation and it is applied about each cover's own
-   centre, matching the pre-UX-2 transition semantics. It lives on its own element
-   so it never overwrites the vertical flow running on the parent slot, and it
-   returns to 0deg once the transition settles. */
-.vertical-cover-stream__rotation { width: 100%; height: 100%; transform-style: preserve-3d; transform-origin: 50% 50%; transform: rotate(var(--cover-rotation, 0deg)); }
 .vertical-cover-stream__plane img {
   display: block;
   width: 100%;

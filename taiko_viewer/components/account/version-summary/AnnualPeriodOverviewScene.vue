@@ -28,25 +28,7 @@ let context: gsap.Context | null = null;
 let timeline: gsap.core.Timeline | null = null;
 
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
-// The page transition rotates every cover plane about its own centre, exactly as
-// the pre-UX-2 timeline did, but the rotation is driven from the transition clock
-// instead of a GSAP transform tween. That keeps it off the plane's `transform`
-// property, so the vertical cover flow keeps animating underneath, and lets the
-// rotation return to neutral after the transition instead of becoming a
-// permanent layout tilt.
-const ROTATION_START_MS = 80;
-const ROTATION_SPAN_MS = 900;
-const ROTATION_MAX_DEG = 45;
-const coverRotation = ref(0);
-const syncCoverFlow = (time: number) => {
-  const progress = Math.max(0, Math.min(1, (time - ROTATION_START_MS) / ROTATION_SPAN_MS));
-  // Matches the original power2.inOut rotation curve: out to the diamond pose at
-  // the midpoint of the transition, back to the neutral pose when Overview lands.
-  const eased = progress < 0.5 ? 2 * progress * progress : 1 - ((-2 * progress + 2) ** 2) / 2;
-  const angle = eased <= 0.5 ? eased * 2 * ROTATION_MAX_DEG : (1 - eased) * 2 * ROTATION_MAX_DEG;
-  coverRotation.value = Math.abs(angle) < 0.01 ? 0 : angle;
-};
-const sceneStyle = computed(() => ({ "--cover-rotation": `${coverRotation.value}deg` }));
+
 const overviewProgress = computed(() => props.reverseTransition
   ? 1
   : Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
@@ -77,16 +59,20 @@ const centerText = computed(() => locale.value === "ja"
     }
 );
 
-const setTimelineTime = () => {
-  timeline?.pause(safeTime.value / 1000, false);
-  syncCoverFlow(safeTime.value);
-};
+const setTimelineTime = () => timeline?.pause(safeTime.value / 1000, false);
 
 const buildTimeline = async () => {
   if (!rootRef.value) return;
   await nextTick();
   context?.revert();
   context = gsap.context(() => {
+    // 0.57.3 semantics: every cover plane rotates about its OWN centre, so the
+    // Period state is the rectangular stream and the Overview state is the same
+    // stream in the diamond pose. The rotation is a state transition, not a
+    // temporary accent, so it is never reversed.
+    const coverPlanes = rootRef.value!.querySelector(".period-overview-scene__cover-planes");
+    const upperPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-upper .vertical-cover-stream__plane");
+    const lowerPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-lower .vertical-cover-stream__plane");
     const previousCopy = rootRef.value!.querySelector(".period-overview-scene__period-copy");
     const nextCopy = rootRef.value!.querySelector(".period-overview-scene__overview-copy");
     const previousPage = rootRef.value!.querySelector(".period-overview-scene__page--period");
@@ -110,11 +96,14 @@ const buildTimeline = async () => {
 
     timeline
       .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
+      .set([upperPlanes, lowerPlanes], { rotationZ: 0 }, 0)
       .to(previousIntro, { y: -12, autoAlpha: 0, duration: .3, ease: "power2.in" }, 0)
       .to(previousStory, { y: -9, autoAlpha: 0, duration: .32, ease: "power1.in" }, .04)
       .to(previousFacts, { y: -7, autoAlpha: 0, duration: .24, ease: "power1.in" }, .12)
       .to(previousLatest, { autoAlpha: 0, duration: .2, ease: "power1.in" }, .16)
       .to(previousPage, { autoAlpha: 0, duration: .24, ease: "power1.in" }, .08)
+      .to(upperPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
+      .to(lowerPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
@@ -138,7 +127,6 @@ onBeforeUnmount(() => {
     ref="rootRef"
     class="period-overview-scene"
     :class="[stateClass, { 'is-active': active, 'is-reduced': reducedMotion }]"
-    :style="sceneStyle"
     :data-transition-time="safeTime"
     data-visual-style="light-memory-tunnel"
   >
