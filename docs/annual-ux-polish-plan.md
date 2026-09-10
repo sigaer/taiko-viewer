@@ -229,14 +229,85 @@ to_end.png   + t("annualSummary.openingCover.resultPage")    → 「直达结果
 
 ---
 
-## 6. UX-2 / UX-3 预留（本轮不执行）
+## 6. UX-2 — Animation & Interaction Rhythm（Round 2）
 
-仅登记方向，**不得在 Round 1 实现**：
+**触发**：Gate UX-1 = PASS（生产 `0.57.3`）后，用户指定的第二轮。
+**范围（只做这三项）**：
 
-- UX-2（内容与叙事打磨）：文案层级、章节节奏、空态与降级表现。
-- UX-3（视觉与动效打磨）：跨端视口一致性、动效预算、可访问性回归。
+| ID | 区域 | 目标 |
+| --- | --- | --- |
+| UX-2.1 | Opening | 重做为真正的爆发式烟花：中心爆发、径向高速粒子、轻微重力与拖尾、错峰多组、持续循环 |
+| UX-2.2 | Period → Overview | 纵向基础运动全程不停；旋转只作为**叠加**自由度，不再与纵向位移争用同一个 transform |
+| UX-2.3 | timeOfDays | 首屏第一拍即给出主题；六个 label 与其半扇形同属一个旋转组；中央次数字号适配 2–5 位且不裁切 |
 
-进入任一后续 Round 必须满足：UX-1 Gate 已 `PASS`，且用户显式指令开始。
+**明确不做（留给 UX-3）**：Opening 烟花以外的视觉、Period→Overview 以外的动画、
+favorite / keyword / ratingRank / month / Calendar / speedProfile / pound / highScore /
+breakthrough / Poster 四格对齐，以及 `el-drawer` 的 `custom-class` 问题（UX-1 已真实验收「回到入口」正常）。
+
+### 6.1 UX-2.1 Opening 烟花
+
+- 实现：`AnnualOpeningFireworks.vue` 改为 **Canvas 2D 粒子系统**（不引入新依赖）。
+- 结构：7 个错峰 generator（各自位置 / 数量 / 初速 / 色相 / 起始偏移 / 周期），
+  每次爆发从 0 开始按帧累积，粒子数 12–30、速度与拖尾长度带随机抖动、
+  方向整体旋转 + 环向抖动以保证不完全对称、`GRAVITY` 向下漂移 + `DRAG` 速度衰减、
+  `lighter` 叠加混合 + 短拖尾线表现速度感。
+- 层级：属于 ambient 层，整层 `opacity: 0.62`，粒子半径小、颜色偏冷白，
+  不抢标题、开始按钮与「直达结果页」的焦点。
+- 生命周期：`active` 且页面可见且非 reduced-motion 时才跑 `requestAnimationFrame`；
+  `visibilitychange`、`active`、`reducedMotion` 变化都会同步启停；
+  reduced-motion 渲染 3 组静态定格。
+- 契约新增：必须有 canvas、`requestAnimationFrame`、`GRAVITY`、`visibilitychange`、`GENERATORS`。
+
+### 6.2 UX-2.2 Period → Overview transform 解耦
+
+- 根因：页面切换的 GSAP 时间轴直接对每个封面 `vertical-cover-stream__plane` 写 `rotationZ`，
+  与封面自身的纵向 CSS 动画落在同一个元素上；同时封面流的运行态被绑在「当前激活页」上。
+- 修复：
+  1. 新增**只负责旋转**的 DOM 层 `period-overview-scene__cover-rotation`（`__cover-planes` 与
+     `AnnualVerticalCoverStream` 之间），GSAP 只写这一层，纵向动画仍在 `__slot` 上，两个自由度彻底分离。
+  2. 封面流新增独立的 `flowing` 状态：只要 period/overview 这一对仍是当前页（含过渡进行中）就持续流动，
+     不再依赖「激活页」信号；`PeriodSlide` / `OverviewSlide` 两个包装组件都必须转发该状态。
+  3. 页面切换过程中不再有任何 `.pause()` 或 `animation-play-state: paused` 作用于封面流。
+
+### 6.3 UX-2.3 timeOfDays 页面节奏
+
+- 首屏第一拍：新增 `time-of-day-theme`（复用 `copy.timeOfDay.eyebrow` + 新增
+  `slides.time.theme`），进入即 100% 可见；右下角原有结论保留为第二拍（reveal ≈1.5s）。
+- 旋转结构：六个 label 从原来的「与 SVG 平行播放的 12 个 slot 动画」改为
+  **与半扇形同处一个 rotor 组**（`time-wheel__rotor` 内同时含 svg sector 与 slot），
+  角度只由 `--angle` 一个状态决定，物理上不可能与扇形错位。
+- 数字：`time-wheel__count` 按真实位数选择 `is-digits-2..5` 的 `clamp()` 字号，
+  配 `tabular-nums`、`max-width: 100%`、`overflow-wrap: anywhere`，
+  中央轮盘槽宽 `min(46vw,190px)`；不再对单个数字写死字号。
+
+### 6.4 UX-2 验收（真实播放，非静态截图）
+
+主视口 414×896，另快速确认 390×844 / 430×932。判定依据一律为**真实浏览器连续播放**：
+
+| 检查 | 方法 | 通过标准 |
+| --- | --- | --- |
+| 烟花爆发感 | Canvas 采样亮度能量 12s | 有连续错峰粒子、亮度层次多、无长静默 |
+| 烟花可读性 | 逐元素透明度与层级 | 标题/年份/两个入口均 100% 可见，烟花整层 0.62 |
+| 纵向流动不停 | 逐帧比对 slot transform + bounding rect | 过渡全程持续位移，无冻结帧 |
+| 旋转叠加 | 逐帧比对 rotation 层 transform + transition clock | 旋转进行且与流动同时存在，交接前后封面位置一致 |
+| 首屏主题 | 进入后 ~350ms 读 DOM | theme 文案已可见，结论仍为后续 reveal |
+| label 与扇形同步 | DOM/契约双重检查 | 二者同属一个 rotor 组，无独立动画 |
+| 数字适配 | 读取每个 count 的 rect 与轮盘边界 | 2–5 位均不越界，无左右裁切 |
+
+**不建立**：动画单测、像素 diff、截图矩阵、RAF 模拟器、timeline 测试框架。
+沿用已有低成本契约脚本（`npm run test:annual`）并补充结构性断言。
+
+### 6.5 UX-2 结果（2026-09-11）
+
+三项均已交付并随 `0.58.0` 上线，Gate UX-2 = **PASS**。逐项证据见
+`docs/annual-ux-polish-status.md` 的「Round 2 — UX-2」章节。
+
+### 6.6 UX-3 预留（本轮不执行）
+
+进入 UX-3 必须满足：Gate UX-2 已 `PASS`，且用户显式指令开始。
+登记方向不变：favorite 排版、keyword 文案、ratingRank 位置、month 叶片、Calendar 文案、
+speedProfile / pound / highScore 唱片与标题、breakthrough 卡片、Poster 2×2 对齐、
+4 个歌曲封面 404 的资源清理、`el-drawer` 面板级样式。
 
 ---
 

@@ -14,6 +14,8 @@ const props = defineProps<{
   pageTotal: number;
   active: boolean;
   reducedMotion: boolean;
+  /** Keeps the ambient cover flow running independently of the page transition. */
+  flowing?: boolean;
   transitionTime: number;
   reverseTransition?: boolean;
 }>();
@@ -64,8 +66,9 @@ const buildTimeline = async () => {
   context?.revert();
   context = gsap.context(() => {
     const coverPlanes = rootRef.value!.querySelector(".period-overview-scene__cover-planes");
-    const upperPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-upper .vertical-cover-stream__plane");
-    const lowerPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-lower .vertical-cover-stream__plane");
+    // The page transition only ever rotates the dedicated rotation layer, so the
+    // cover stream keeps its own vertical animation running underneath.
+    const rotationLayer = rootRef.value!.querySelector(".period-overview-scene__cover-rotation");
     const previousCopy = rootRef.value!.querySelector(".period-overview-scene__period-copy");
     const nextCopy = rootRef.value!.querySelector(".period-overview-scene__overview-copy");
     const previousPage = rootRef.value!.querySelector(".period-overview-scene__page--period");
@@ -89,14 +92,13 @@ const buildTimeline = async () => {
 
     timeline
       .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
-      .set([upperPlanes, lowerPlanes], { rotationZ: 0 }, 0)
+      .set(rotationLayer, { rotationZ: 0 }, 0)
       .to(previousIntro, { y: -12, autoAlpha: 0, duration: .3, ease: "power2.in" }, 0)
       .to(previousStory, { y: -9, autoAlpha: 0, duration: .32, ease: "power1.in" }, .04)
       .to(previousFacts, { y: -7, autoAlpha: 0, duration: .24, ease: "power1.in" }, .12)
       .to(previousLatest, { autoAlpha: 0, duration: .2, ease: "power1.in" }, .16)
       .to(previousPage, { autoAlpha: 0, duration: .24, ease: "power1.in" }, .08)
-      .to(upperPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
-      .to(lowerPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
+      .to(rotationLayer, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
@@ -124,7 +126,9 @@ onBeforeUnmount(() => {
     data-visual-style="light-memory-tunnel"
   >
     <div class="period-overview-scene__cover-planes" aria-hidden="true">
-      <AnnualVerticalCoverStream :summary="summary" :active="active" :reduced-motion="reducedMotion" />
+      <div class="period-overview-scene__cover-rotation">
+        <AnnualVerticalCoverStream :summary="summary" :active="active" :flowing="flowing ?? active" :reduced-motion="reducedMotion" />
+      </div>
     </div>
     <ParticleLayer class="period-overview-scene__particles" :active="active && overviewProgress > 0" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
 
@@ -220,6 +224,16 @@ onBeforeUnmount(() => {
   z-index: 0;
   inset: 0;
   transform-style: preserve-3d;
+}
+
+/* Independent transform layer: the page transition rotates this wrapper while
+   the cover stream keeps running its own vertical loop inside it. */
+.period-overview-scene__cover-rotation {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .period-overview-scene__cover-planes :deep(.vertical-cover-stream__plane img) {

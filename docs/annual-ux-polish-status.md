@@ -506,3 +506,119 @@ Gate UX-1 = **PASS**。UX-2 / UX-3 未开始，等待用户显式指令。
 - 不修改 `deploy_forum_web.sh`。
 - 普通 bug 前进修复（fix forward），不回滚线上。
 - 任何生产写操作都需要用户显式授权。
+
+---
+
+# Round 2 — UX-2 Animation & Interaction Rhythm
+
+Current Round:
+**UX-2 — Animation & Interaction Rhythm**
+
+Status:
+**COMPLETE — released `0.58.0`**
+
+Gate UX-2:
+**PASS**（2026-09-11，见「Gate UX-2 判定」）
+
+范围：只做 Opening 烟花、Period → Overview 封面连续运动、timeOfDays 页面节奏与旋转结构。
+未开始 UX-3。
+
+## UX-2.1 Opening 爆发式烟花
+
+- 实现方式：`AnnualOpeningFireworks.vue` 由 22 条静态 SVG bezier 路径改为
+  **Canvas 2D 粒子系统**（无新依赖，约 200 行）。
+- 爆发/循环结构：
+  - 7 个错峰 generator，各自持有位置 / 粒子数 / 初速 / 色相 / 起始偏移 / 周期；
+  - 单次爆发 16–30 个粒子，径向初速 `0.00062–0.00105 × min(w,h)` 并带 0.52–1.28 倍随机；
+  - 整环随机旋转 + 每粒子 ±0.11 rad 抖动 + 二次谐波偏置，保证**不完全对称**；
+  - `GRAVITY = 0.00034`、`DRAG = 0.00165`：先高速放射，再减速并向下漂移；
+  - 生命周期 760–1360ms，`(1-progress)²` 淡出；
+  - 每个粒子绘制「当前点 → 26ms 前沿」的短线段作为拖尾，用 `lighter` 叠加，
+    形成速度感而非静态线条；
+  - 周期 3.4–4.6s 且相互错开，短于粒子寿命，因此**始终有爆发在播**。
+- 层级：整层 `opacity: 0.62`，粒子半径 ≤ ~2.4px、冷白/青蓝色相，
+  不覆盖标题、年份、开始按钮与「直达结果页」。
+- 生命周期：仅当 `active` 且 `document.hidden === false` 且非 reduced-motion 时跑 RAF；
+  `visibilitychange` / `active` / `reducedMotion` 变化都会同步启停；
+  reduced-motion 下渲染 3 组静态定格且完全不启动 RAF。
+- 真实播放测量（414×896，12 秒 24 次采样）：有粒子帧 18–20/24，
+  亮度层次 14–19 级，峰值平均 alpha 66–86，无长时间静默；
+  标题 / 年份 / 两个入口 opacity 均为 1，canvas opacity 0.62。
+
+## UX-2.2 Period → Overview 封面连续运动
+
+- 根因（两处叠加）：
+  1. 页面切换的 GSAP 时间轴直接对 `vertical-cover-stream__plane` 写 `rotationZ`，
+     与封面自身的纵向 CSS 动画落在**同一个元素**上；
+  2. 封面流的运行态被绑在「当前激活页」信号上，过渡期间该信号落在旧页，
+     造成「先停 → 再转 → 再重启」的观感。
+- transform 解耦方式：
+  - 在 `__cover-planes` 与 `AnnualVerticalCoverStream` 之间新增
+    `period-overview-scene__cover-rotation`，**只承担旋转**；
+  - GSAP 只写这一层（`rotationZ: 0 → 45`，0.9s），
+    纵向动画继续由 `__slot` 上的 `cover-dive-to-horizon` / `cover-rise-from-horizon` 承担；
+  - 过渡期间不再有任何 `.pause()` 或 `animation-play-state: paused` 作用于封面流。
+- 全程保持 vertical motion 的证据（414×896，逐 60ms 采样 45 帧）：
+  - 页面层：21/21 有效帧都在位移；
+  - 覆盖层（overlay，过渡期间真正可见的一层）：12/23 有效帧位移，
+    其余帧处于淡入淡出/透明度 0 的保持段，非冻结；
+  - 旋转层：17 个不同的 transform 值，`data-transition-time` 时钟在过渡中持续推进；
+  - 两个实例共享同一个 `--cover-phase`（同一时刻均为 `5.616442s`），
+    因此交接瞬间封面相位连续，不出现跳变。
+- 修复过程中发现并修掉一个真实缺陷：`PeriodSlide` / `OverviewSlide` 包装组件
+  未转发新增的 `flowing` 状态，导致封面流在过渡期间整体停住；
+  已补两个包装层的转发，并在契约脚本中加入断言防止回归。
+
+## UX-2.3 timeOfDays 页面节奏与旋转结构
+
+- 首屏新增内容：`time-of-day-theme`（`copy.timeOfDay.eyebrow` + 新增
+  `slides.time.theme`，zh「你的鼓声，最常在什么时候响起？」/ ja「あなたの音が、いちばん響くのはいつ？」），
+  进入后 ~350ms 即为 opacity 1；右下角原有结论保持不变，作为第二拍 reveal。
+- label + sector 同步旋转的实现：把六个 label 从「与 SVG 平行播放的 12 个 slot 动画」
+  移入 `time-wheel__rotor`，与半扇形 SVG **同处一个 transform group**；
+  角度只由 `--angle` 一个状态决定，并删除 `time-slot-flow` / `time-slot-counter` 两套独立动画，
+  物理上不可能再出现「文字在框上滑动」。
+- 数字裁切根因：中央槽位固定 `width: 180px`，而原字号是
+  `clamp(1.55rem,9.5vw,3.1rem)`（414px 宽下实测 43.06px），
+  4 位计数已达 181px、5 位（如 `1,206`）必然越过轮盘右边界被 clip。
+- 数字修复：`time-wheel__count` 按真实位数套用 `is-digits-2..5` 的 `clamp()` 字号
+  （414px 下实测 43.06 / 36.85 / 30.64px），配 `tabular-nums`、
+  `max-width: 100%`、`overflow-wrap: anywhere`；槽宽改为 `min(46vw,190px)`。
+  实测 12 个计数（0 / 43 / 46 / 122 / 996 / 1,206）在三个视口下
+  `overflowRight` 与 `overflowLeft` 全为 false，无任何裁切。
+- 动画层次（四拍）：主题（≈0ms）→ 轮盘转动（常驻）→ 中央时段/次数成为焦点（peak 加亮）→
+  右下结论 reveal（≈1.5s）。
+
+## UX-2 验收（真实连续播放）
+
+| 视口 | 烟花有粒子帧 | 过渡时钟 | overlay flowing | 旋转不同值 | 主题可见 | 轮盘旋转 | 数字越界 | 运行错误 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 414×896 | 18/24 | true | 18/26 | 12 | opacity 1 | true | 0 | none |
+| 390×844 | 20/24 | true | 18/26 | 12 | opacity 1 | true | 0 | none |
+| 430×932 | 19/24 | true | 18/26 | 12 | opacity 1 | true | 0 | none |
+
+（overlay flowing 为「采样到 overlay 且处于 flowing 状态」的帧数，
+未采到 overlay 的帧是过渡尚未开始或已结束的正常阶段。）
+
+## 4 个 cover 404 是否影响本轮
+
+- 已定位：**只有 1 个 URL** 404，即 `https://static.sakura-bot.cn/cover/thumb/400/1405.webp`
+  （该曲目没有 400px 缩略图）；浏览器把它记为 4 条 console error 是因为它在
+  Opening 轮播与 Period 封面流中被多次请求。
+- 影响评估：`AnnualVerticalCoverStream` 对加载失败的封面会回退到 `vertical-cover-stream__fallback`
+  占位平面，**动画照常运行**；Opening / Period / Overview / timeOfDays 三个目标页面的
+  验收结果不受影响（见上表）。
+- 结论：本轮**不做**资源修复，登记到 UX-3 / 独立资源清理，不启动全量资源扫描。
+
+## el-drawer custom-class
+
+本轮未处理。真实页面观察未发现抽屉样式异常，「回到入口」在 UX-1 已验收正常。
+元素面板级样式风险仍登记在下方遗留项中。
+
+## UX-2 版本与提交
+
+- 版本：`0.58.0`（minor：动画与交互节奏的向后兼容改造），只 bump 一次。
+- 契约脚本新增断言：烟花 canvas/RAF/重力/可见性、封面旋转层与流动解耦、
+  两个 slide 包装层转发 `flowing`、time 页 rotor 单一动画与 2–5 位字号、
+  `slides.time.theme` 在 zh/ja 均存在。
+- 未建立动画单测 / 像素 diff / 截图矩阵 / RAF 模拟器。

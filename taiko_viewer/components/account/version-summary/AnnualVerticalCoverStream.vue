@@ -17,6 +17,10 @@ const props = defineProps<{
   summary: VersionSummaryViewModel;
   active: boolean;
   reducedMotion: boolean;
+  // Ambient vertical flow is deliberately independent from the "active scene"
+  // signal: it must keep running while the page transition plays, otherwise the
+  // covers appear to freeze and then restart.
+  flowing?: boolean;
 }>();
 
 const failedCovers = ref(new Set<string>());
@@ -61,12 +65,14 @@ const itemStyle = (index: number) => ({ "--cover-delay": `${-index * SLOT_INTERV
 const failCover = (key: string) => {
   failedCovers.value = new Set(failedCovers.value).add(key);
 };
+
+const isFlowing = computed(() => props.flowing ?? props.active);
 </script>
 
 <template>
   <div
     class="vertical-cover-stream"
-    :class="{ 'is-running': active && !reducedMotion, 'is-reduced': reducedMotion }"
+    :class="{ 'is-flowing': isFlowing && !reducedMotion, 'is-reduced': reducedMotion }"
     :style="streamStyle"
     aria-hidden="true"
   >
@@ -140,8 +146,8 @@ const failCover = (key: string) => {
   will-change: transform, opacity;
   animation-delay: calc(var(--cover-delay) - var(--cover-phase));
 }
-.vertical-cover-stream.is-running .is-lower .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
-.vertical-cover-stream.is-running .is-upper .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
+.vertical-cover-stream.is-flowing .is-lower .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-dive-to-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
+.vertical-cover-stream.is-flowing .is-upper .vertical-cover-stream__slot:not(.is-fallback) { animation: cover-rise-from-horizon var(--cover-stream-duration) linear infinite paused; animation-delay: calc(var(--cover-delay) - var(--cover-phase)); }
 .vertical-cover-stream__plane { width: 100%; height: 100%; transform-style: preserve-3d; transform-origin: 50% 50%; will-change: transform; }
 .vertical-cover-stream__plane img {
   display: block;

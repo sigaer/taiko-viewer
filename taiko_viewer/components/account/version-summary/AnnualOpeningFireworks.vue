@@ -1,79 +1,262 @@
 <script setup lang="ts">
-defineProps<{ reducedMotion: boolean; active?: boolean }>();
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
-const stars = [
-  { x: 8, y: 10, size: 5, delay: 0.1 }, { x: 19, y: 7, size: 3, delay: 0.7 },
-  { x: 45, y: 6, size: 4, delay: 1.1 }, { x: 68, y: 11, size: 5, delay: 0.4 },
-  { x: 84, y: 8, size: 4, delay: 1.5 }, { x: 94, y: 17, size: 3, delay: 0.9 },
-  { x: 11, y: 40, size: 4, delay: 1.8 }, { x: 31, y: 32, size: 3, delay: 0.3 },
-  { x: 58, y: 30, size: 3, delay: 1.2 }, { x: 81, y: 35, size: 5, delay: 0.6 },
-  { x: 40, y: 49, size: 4, delay: 1.4 }, { x: 73, y: 53, size: 4, delay: 0.2 },
-  { x: 24, y: 22, size: 2, delay: 1.7 }, { x: 91, y: 46, size: 2, delay: .8 }
-];
+const props = withDefaults(defineProps<{
+  reducedMotion: boolean;
+  active?: boolean;
+  /** Overall particle brightness. The fireworks are ambient, so this stays low. */
+  opacity?: number;
+}>(), {
+  active: false,
+  opacity: 0.62
+});
+
+type Burst = {
+  x: number;
+  y: number;
+  startedAt: number;
+  cadence: number;
+  count: number;
+  speed: number;
+  hue: number;
+  radiusBase: number;
+};
+
+type Particle = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  ttl: number;
+  size: number;
+  hue: number;
+  drag: number;
+};
+
+// Staggered generators rather than one loop: every burst uses its own position,
+// size, count and start offset so the sky never repeats the same shape twice.
+// Cadences are deliberately shorter than a particle lifetime so consecutive
+// bursts overlap and the sky is never empty between them.
+const GENERATORS = [
+  { x: 0.24, y: 0.20, count: 26, speed: 1.00, hue: 194, size: 1.00, delay: 0.00, cadence: 3.40 },
+  { x: 0.72, y: 0.15, count: 20, speed: 0.86, hue: 258, size: 0.88, delay: 0.45, cadence: 3.90 },
+  { x: 0.50, y: 0.30, count: 30, speed: 1.12, hue: 178, size: 1.08, delay: 1.10, cadence: 4.40 },
+  { x: 0.14, y: 0.40, count: 16, speed: 0.74, hue: 205, size: 0.76, delay: 1.80, cadence: 4.10 },
+  { x: 0.86, y: 0.38, count: 22, speed: 0.94, hue: 232, size: 0.94, delay: 2.40, cadence: 3.60 },
+  { x: 0.38, y: 0.12, count: 18, speed: 0.82, hue: 188, size: 0.82, delay: 3.10, cadence: 4.60 },
+  { x: 0.64, y: 0.46, count: 24, speed: 1.04, hue: 268, size: 1.02, delay: 3.70, cadence: 4.00 }
+] as const;
+
+const GRAVITY = 0.00034;
+const DRAG = 0.00165;
+const MAX_PARTICLES = 420;
+
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+let context: CanvasRenderingContext2D | null = null;
+let frame = 0;
+let resizeObserver: ResizeObserver | null = null;
+let size = { width: 0, height: 0, scale: 1 };
+let particles: Particle[] = [];
+let generators: Burst[] = [];
+let lastTimestamp = 0;
+let elapsed = 0;
+
+const random = (min: number, max: number) => min + Math.random() * (max - min);
+
+const buildGenerators = () => {
+  generators = GENERATORS.map((generator) => ({
+    x: generator.x,
+    y: generator.y,
+    startedAt: generator.delay * 1000,
+    cadence: generator.cadence * 1000,
+    count: Math.round(generator.count * random(0.86, 1.14)),
+    speed: generator.speed * random(0.9, 1.1),
+    hue: generator.hue + random(-12, 12),
+    radiusBase: generator.size * random(0.88, 1.12)
+  }));
+};
+
+const spawnBurst = (generator: Burst, short = false) => {
+  const base = Math.min(size.width, size.height);
+  const strength = generator.speed * base * (short ? 0.00062 : 0.00105);
+  // An explosion is never evenly distributed: the whole ring is rotated, the
+  // radial gaps are jittered and a few embers get far more speed than the rest.
+  const twist = random(0, Math.PI * 2);
+  const bias = random(-0.4, 0.4);
+  for (let index = 0; index < generator.count; index += 1) {
+    if (particles.length >= MAX_PARTICLES) break;
+    const t = index / generator.count;
+    const angle = twist + t * Math.PI * 2 + random(-0.11, 0.11) + bias;
+    const speed = strength * random(0.52, 1.28) * (1 + Math.cos(angle * 2) * 0.16);
+    particles.push({
+      x: generator.x * size.width + random(-3, 3),
+      y: generator.y * size.height + random(-3, 3),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0,
+      ttl: random(760, 1360),
+      size: generator.radiusBase * random(0.7, 1.9) * size.scale,
+      hue: generator.hue + random(-16, 16),
+      drag: DRAG * random(0.78, 1.24)
+    });
+  }
+};
+
+const advance = (timestamp: number, forceDuration = 0) => {
+  const delta = forceDuration || Math.min(lastTimestamp ? timestamp - lastTimestamp : 16, 48);
+  lastTimestamp = timestamp;
+  elapsed += delta;
+
+  for (const generator of generators) {
+    const local = elapsed - generator.startedAt;
+    if (local < 0) continue;
+    const within = local % generator.cadence;
+    // The first pass plays a compact burst so the sky is alive immediately.
+    const compact = elapsed < 1200;
+    if (within < delta) spawnBurst(generator, compact);
+  }
+
+  for (let index = particles.length - 1; index >= 0; index -= 1) {
+    const particle = particles[index];
+    particle.life += delta;
+    if (particle.life >= particle.ttl) {
+      particles.splice(index, 1);
+      continue;
+    }
+    const damping = Math.max(0, 1 - particle.drag * delta);
+    particle.vx *= damping;
+    particle.vy = particle.vy * damping + GRAVITY * delta;
+    particle.x += particle.vx * delta;
+    particle.y += particle.vy * delta;
+  }
+};
+
+const draw = () => {
+  if (!context) return;
+  const { width, height, scale } = size;
+  context.setTransform(scale, 0, 0, scale, 0, 0);
+  context.clearRect(0, 0, width, height);
+  context.globalCompositeOperation = "lighter";
+  context.lineCap = "round";
+  for (const particle of particles) {
+    const progress = particle.life / particle.ttl;
+    const alpha = (1 - progress) * (1 - progress) * 0.9;
+    if (alpha <= 0.01) continue;
+    // A short motion trail reads as speed without a real motion-blur pass.
+    const trailX = particle.x - particle.vx * 26;
+    const trailY = particle.y - particle.vy * 26;
+    context.strokeStyle = `hsla(${particle.hue}, 82%, 86%, ${alpha})`;
+    context.lineWidth = particle.size;
+    context.beginPath();
+    context.moveTo(trailX, trailY);
+    context.lineTo(particle.x, particle.y);
+    context.stroke();
+  }
+  context.globalCompositeOperation = "source-over";
+};
+
+const renderFrame = (timestamp: number) => {
+  advance(timestamp);
+  draw();
+  frame = window.requestAnimationFrame(renderFrame);
+};
+
+const renderStatic = () => {
+  particles = [];
+  buildGenerators();
+  lastTimestamp = 0;
+  elapsed = 0;
+  // Three settled bursts give reduced-motion users a legible still image.
+  for (const generator of generators.slice(0, 3)) {
+    spawnBurst(generator, false);
+    advance(0, 520);
+  }
+  draw();
+};
+
+const stop = () => {
+  if (!frame) return;
+  window.cancelAnimationFrame(frame);
+  frame = 0;
+};
+
+const start = () => {
+  if (frame || !context) return;
+  lastTimestamp = 0;
+  frame = window.requestAnimationFrame(renderFrame);
+};
+
+const resize = () => {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scale = Math.min(window.devicePixelRatio || 1, 2);
+  size = { width: rect.width, height: rect.height, scale };
+  canvas.width = Math.max(1, Math.round(rect.width * scale));
+  canvas.height = Math.max(1, Math.round(rect.height * scale));
+  if (props.reducedMotion) renderStatic();
+  else draw();
+};
+
+const sync = () => {
+  if (!canvasRef.value) return;
+  const shouldRun = props.active && !props.reducedMotion && !document.hidden;
+  if (shouldRun) start();
+  else {
+    stop();
+    if (props.reducedMotion) renderStatic();
+  }
+};
+
+const handleVisibility = () => sync();
+
+onMounted(() => {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  context = canvas.getContext("2d");
+  buildGenerators();
+  resize();
+  resizeObserver = new ResizeObserver(() => resize());
+  resizeObserver.observe(canvas);
+  document.addEventListener("visibilitychange", handleVisibility);
+  sync();
+});
+
+watch(() => [props.active, props.reducedMotion], () => sync());
+
+onBeforeUnmount(() => {
+  stop();
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  document.removeEventListener("visibilitychange", handleVisibility);
+  particles = [];
+  context = null;
+});
 </script>
 
 <template>
-  <div class="annual-fireworks" :class="{ 'is-still': reducedMotion, 'is-active': active }" aria-hidden="true">
-    <svg viewBox="0 0 414 560" preserveAspectRatio="xMidYMid slice">
-      <g class="annual-fireworks__burst annual-fireworks__burst--main">
-        <path d="M138 164 C111 116 82 86 47 80" /><path d="M138 164 C119 108 112 72 96 48" />
-        <path d="M139 164 C135 112 141 76 159 51" /><path d="M141 165 C157 112 181 77 207 72" />
-        <path d="M143 166 C176 123 205 108 235 109" /><path d="M144 168 C183 143 217 137 252 149" />
-        <path d="M144 169 C183 165 218 178 246 201" /><path d="M142 171 C177 187 198 213 204 247" />
-        <path d="M140 171 C149 213 137 242 111 268" /><path d="M138 171 C120 211 94 233 59 240" />
-        <path d="M137 169 C101 197 70 199 37 187" /><path d="M136 168 C99 176 65 164 39 143" />
-        <path d="M137 166 C102 146 80 119 73 88" /><path d="M145 165 C169 144 195 134 223 135" />
-        <path d="M139 164 C128 125 127 97 137 66" /><path d="M140 167 C155 186 175 199 200 207" />
-        <path d="M141 166 C116 158 91 145 74 124" /><path d="M142 170 C167 168 194 174 219 190" />
-        <path d="M139 168 C119 181 103 201 95 226" /><path d="M142 165 C161 131 179 113 201 101" />
-      </g>
-      <g class="annual-fireworks__burst annual-fireworks__burst--right">
-        <path d="M320 214 C300 177 276 159 247 159" /><path d="M320 215 C314 173 319 141 335 119" />
-        <path d="M322 215 C340 178 365 162 396 166" /><path d="M323 218 C355 200 383 202 409 218" />
-        <path d="M322 219 C355 226 382 245 398 273" /><path d="M320 220 C337 252 337 282 324 312" />
-        <path d="M318 218 C301 254 277 273 248 278" /><path d="M318 216 C286 220 264 234 245 257" />
-        <path d="M319 216 C301 195 285 182 267 177" /><path d="M321 218 C341 229 361 246 372 267" />
-      </g>
-      <g class="annual-fireworks__burst annual-fireworks__burst--left-small">
-        <path d="M53 386 C41 354 25 337 5 338" /><path d="M53 387 C52 354 58 332 73 318" />
-        <path d="M55 388 C72 359 90 350 112 355" /><path d="M55 390 C81 387 101 398 113 417" />
-        <path d="M53 390 C35 399 25 417 23 441" /><path d="M52 388 C37 375 25 366 12 365" />
-      </g>
-      <g class="annual-fireworks__burst annual-fireworks__burst--bottom">
-        <path d="M188 490 C176 454 157 434 132 431" /><path d="M188 491 C185 451 191 424 208 408" />
-        <path d="M190 491 C211 458 233 449 258 458" /><path d="M191 494 C218 491 241 504 254 527" />
-        <path d="M187 493 C161 501 148 519 145 544" /><path d="M189 491 C170 482 155 468 147 451" />
-      </g>
-    </svg>
-    <i
-      v-for="(star, index) in stars"
-      :key="index"
-      class="annual-fireworks__star"
-      :style="{ left: `${star.x}%`, top: `${star.y}%`, width: `${star.size}px`, height: `${star.size}px`, '--star-delay': `${star.delay}s` }"
-    />
+  <div
+    class="annual-fireworks"
+    :class="{ 'is-still': reducedMotion, 'is-active': active }"
+    :style="{ '--firework-opacity': opacity }"
+    aria-hidden="true"
+  >
+    <canvas ref="canvasRef" class="annual-fireworks__canvas"></canvas>
   </div>
 </template>
 
 <style scoped>
-.annual-fireworks { position: absolute; inset: 0; overflow: hidden; color: #728399; pointer-events: none; }
-.annual-fireworks svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.annual-fireworks__burst { fill: none; stroke: currentColor; stroke-linecap: round; stroke-dasharray: 420; stroke-dashoffset: 0; opacity: .48; }
-.annual-fireworks__burst path { stroke-width: 1.9; }
-.annual-fireworks__burst path:nth-child(3n) { stroke-width: 2.8; opacity: .62; }
-.annual-fireworks__burst path:nth-child(4n) { stroke-width: 1.35; opacity: .33; }
-.annual-fireworks__burst--main { color: #708194; }
-.annual-fireworks__burst--right { color: #595d9b; opacity: .72; }
-.annual-fireworks__burst--left-small { color: #4f95b5; opacity: .62; }
-.annual-fireworks__burst--bottom { color: #688e9b; opacity: .52; }
-.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst path { animation: annual-firework-draw 7.6s cubic-bezier(.22,.75,.2,1) infinite; }
-.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--right path { animation-delay: -2.8s; }
-.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--left-small path { animation-delay: -1.3s; }
-.annual-fireworks.is-active:not(.is-still) .annual-fireworks__burst--bottom path { animation-delay: -4.4s; }
-.annual-fireworks__star { position: absolute; display: block; border-radius: 50%; background: #91a1ad; opacity: .58; box-shadow: 0 0 0 1px rgba(171,210,220,.16); }
-.annual-fireworks.is-active:not(.is-still) .annual-fireworks__star { animation: annual-star-pulse 3.8s ease-in-out var(--star-delay) infinite; }
-.annual-fireworks.is-still .annual-fireworks__burst path { stroke-dashoffset: 0; animation: none; }
-.annual-fireworks.is-still .annual-fireworks__star { animation: none; }
-@keyframes annual-firework-draw { 0%, 8% { stroke-dashoffset: 420; opacity: 0; } 26%, 72% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .42; } }
-@keyframes annual-star-pulse { 0%, 100% { opacity: .28; transform: scale(.75); } 50% { opacity: .82; transform: scale(1.2); } }
-@media (prefers-reduced-motion: reduce) { .annual-fireworks__burst path, .annual-fireworks__star { animation: none !important; } }
+.annual-fireworks { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.annual-fireworks__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Ambient layer: bright enough to read as an explosion, dim enough that the
+     cover title, the year and the two opening actions stay the focus. */
+  opacity: var(--firework-opacity, .62);
+  transition: opacity .4s ease;
+}
+.annual-fireworks.is-still .annual-fireworks__canvas { opacity: calc(var(--firework-opacity, .62) * .78); }
+@media (prefers-reduced-motion: reduce) { .annual-fireworks__canvas { transition: none; } }
 </style>

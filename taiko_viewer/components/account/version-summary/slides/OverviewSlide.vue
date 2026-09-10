@@ -9,6 +9,8 @@ defineProps<{
   pageTotal: number;
   active: boolean;
   reducedMotion: boolean;
+  /** Forwarded so the ambient cover flow keeps running during the pair transition. */
+  flowing?: boolean;
 }>();
 </script>
 
@@ -18,6 +20,7 @@ defineProps<{
     :period-page-index="pageIndex - 1"
     :page-total="pageTotal"
     :active="active"
+    :flowing="flowing ?? active"
     :reduced-motion="reducedMotion"
     :transition-time="PERIOD_OVERVIEW_DURATION_MS"
   />

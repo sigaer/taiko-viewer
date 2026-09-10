@@ -138,10 +138,30 @@ assert.equal(registry.includes('key: "profile"'), false, "profile remains regist
 assert.equal(/import\s+ProfileSlide\b/.test(registry), false, "unused ProfileSlide import remains in the annual registry");
 assert.equal(openingCarouselSource.includes("linear infinite"), true, "opening cover flow is not continuous and linear");
 assert.equal(openingCarouselSource.includes("setInterval"), false, "opening cover flow still advances in timed steps");
-assert.equal(openingFireworksSource.includes("@keyframes annual-firework-draw"), true, "opening fireworks are not animated");
+assert.equal(openingFireworksSource.includes("<canvas"), true, "opening fireworks lost their particle canvas");
+assert.equal(openingFireworksSource.includes("requestAnimationFrame"), true, "opening fireworks are not animated");
+assert.equal(/GRAVITY/.test(openingFireworksSource), true, "opening firework particles ignore gravity");
+assert.equal(openingFireworksSource.includes("visibilitychange"), true, "opening fireworks keep running in a hidden document");
+assert.equal(/GENERATORS\s*=\s*\[/.test(openingFireworksSource), true, "opening fireworks have no staggered burst schedule");
 assert.equal(openingBeatLaneSource.includes("@keyframes annual-beat-scroll"), true, "opening beat lane is not animated");
 assert.equal(openingCarouselSource.includes("reducedMotion"), true, "opening carousel ignores reduced motion");
 assert.equal(openingFireworksSource.includes("is-still"), true, "opening fireworks ignore reduced motion");
+const timeOfDaySource = await read("components/account/version-summary/slides/TimeOfDaySlide.vue");
+assert.equal(timeOfDaySource.includes("time-wheel__rotor"), true, "time page has no rotating wheel group");
+assert.equal(timeOfDaySource.includes("time-wheel-rotation"), true, "time wheel group does not rotate");
+// One rotor group carries both the half-sectors and their labels, so their
+// angles cannot drift apart.
+assert.equal((timeOfDaySource.match(/class="time-wheel__rotor"/g) || []).length, 1, "time page has more than one rotor group");
+assert.equal((timeOfDaySource.match(/time-wheel__sector/g) || []).length >= 1 && (timeOfDaySource.match(/time-wheel__slot"/g) || []).length >= 1, true, "time page lost its sectors or labels");
+assert.equal(/\.time-wheel__rotor\{[^}]*animation:time-wheel-rotation/.test(timeOfDaySource), true, "time wheel rotation is not attached to the rotor group");
+assert.equal(/time-slot-flow|time-slot-counter/.test(timeOfDaySource), false, "time labels still rotate independently of their sectors");
+assert.equal(timeOfDaySource.includes("countDigits"), true, "time centre reel does not adapt to the digit count");
+for (const digits of [2, 3, 4, 5]) {
+  assert.equal(timeOfDaySource.includes(`is-digits-${digits}`), true, `time centre reel has no size for ${digits}-digit counts`);
+}
+assert.equal(timeOfDaySource.includes("tabular-nums"), true, "time centre reel is not using tabular figures");
+assert.equal(timeOfDaySource.includes("overflow-wrap:anywhere"), true, "time centre reel cannot wrap an overlong count");
+assert.equal(timeOfDaySource.includes('t("annualSummary.slides.time.theme")'), true, "time page does not render its immediate theme copy");
 assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lane ignores reduced motion");
 const periodMotionSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
 const overviewMotionSource = await read("components/account/version-summary/slides/OverviewSlide.vue");
@@ -163,11 +183,27 @@ assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), tr
 assert.equal(verticalCoverSource.includes("ANNUAL_COVER_PHASE_KEY"), true, "period cover instances do not share one animation phase");
 assert.equal(verticalCoverSource.includes("rotateX(72deg) scale(.74)"), true, "lower cover corridor lost its inward perspective");
 assert.equal(verticalCoverSource.includes("rotateX(-72deg) scale(.74)"), true, "upper cover corridor lost its inward perspective");
+// UX-2: the page transition must own a rotation-only layer so the cover stream
+// keeps its own vertical animation running underneath it.
+assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-rotation"), true, "period transition has no dedicated cover rotation layer");
+assert.equal(/const rotationLayer = rootRef\.value!\.querySelector\("\.period-overview-scene__cover-rotation"\)/.test(periodOverviewSceneSource), true, "period transition does not target the rotation layer");
 assert.equal(periodOverviewSceneSource.includes("rotationZ: 0"), true, "transition does not start from the 0.46.11 cover orientation");
-assert.equal((periodOverviewSceneSource.match(/rotationZ:\s*45/g) || []).length, 2, "cover faces do not rotate 45 degrees into a diamond");
-assert.equal(/\.to\((?:upper|lower)Planes,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
-assert.equal(/\.to\(upperPlanes,\s*\{[^}]*scale/.test(periodOverviewSceneSource), false, "transition changes upper cover geometry instead of only rotating its face");
-assert.equal(/\.to\(lowerPlanes,\s*\{[^}]*scale/.test(periodOverviewSceneSource), false, "transition changes lower cover geometry instead of only rotating its face");
+assert.equal((periodOverviewSceneSource.match(/\.to\(rotationLayer,\s*\{[^}]*rotationZ: 45/g) || []).length, 1, "cover rotation is not applied exactly once to the rotation layer");
+assert.equal(/upperPlanes|lowerPlanes/.test(periodOverviewSceneSource), false, "period transition still rotates individual cover planes");
+assert.equal(/\.to\([^)]*,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
+assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-rotation {"), true, "cover rotation layer has no layout rule");
+assert.equal(/\.pause\(\)/.test(periodOverviewSceneSource), false, "period transition still pauses the cover stream");
+// UX-2: the ambient flow must not be gated on the scene's active flag.
+assert.equal(verticalCoverSource.includes("is-flowing"), true, "cover stream has no independent flow state");
+assert.equal(verticalCoverSource.includes("is-running"), false, "cover stream still ties its flow to the active flag");
+assert.equal(verticalCoverSource.includes("flowing?: boolean"), true, "cover stream does not accept an independent flow flag");
+assert.equal(storyPlayer.includes(":flowing="), true, "story player does not drive the independent cover flow");
+// Both slide wrappers must forward the flow flag, otherwise the covers freeze
+// whenever the pair transition takes over.
+for (const [wrapper, name] of [[periodMotionSource, "PeriodSlide"], [overviewMotionSource, "OverviewSlide"]]) {
+  assert.equal(wrapper.includes("flowing?: boolean"), true, `${name} does not accept the cover flow flag`);
+  assert.equal(wrapper.includes(":flowing="), true, `${name} does not forward the cover flow flag`);
+}
 assert.equal(periodOverviewSceneSource.includes("period-overview-scene__previous-planes"), false, "period transition still mounts a separate outgoing cover stream");
 assert.equal(periodOverviewSceneSource.includes("period-overview-scene__next-planes"), false, "period transition still mounts a separate incoming cover stream");
 assert.equal((periodOverviewSceneSource.match(/<AnnualVerticalCoverStream/g) || []).length, 1, "period transition does not preserve a single cover plane set");
@@ -249,6 +285,9 @@ for (const locale of [zh, ja]) {
   for (const key of ["title", "primary", "longest", "emotionLine1", "emotionLine2", "footnote", "month", "monthSummary", "datePlayCount"]) {
     assert.equal(typeof locale.slides.calendar[key], "string", `missing calendar locale: ${key}`);
   }
+  // UX-2: the time page must state its theme on the first beat of the page.
+  assert.equal(typeof locale.slides.time.theme, "string", "time page has no immediate theme copy");
+  assert.ok(locale.slides.time.theme.length > 4, "time page theme copy is a placeholder");
 }
 
 const componentNames = {
