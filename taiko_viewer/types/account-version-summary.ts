@@ -227,6 +227,9 @@ export type VersionSummaryViewModel = {
     partialStart: boolean;
   };
   period: {
+    // Earliest real play moment the account's own data can prove, independent of
+    // the annual observation window. Produced by the upstream generator.
+    firstActualPlayDate: string | null;
     firstRecordAt: string | null;
     lastRecordAt: string | null;
     totalDays: number;

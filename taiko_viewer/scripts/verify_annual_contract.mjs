@@ -208,9 +208,22 @@ assert.equal(
 const annualSummarySource = await read("utils/annualSummary.ts");
 assert.equal(annualSummarySource.includes('ANNUAL_CALENDAR_TIME_ZONE = "Asia/Shanghai"'), true, "annual day counting lost its season time zone");
 assert.equal(annualSummarySource.includes("calendarDaySpan"), true, "annual day counting has no calendar span helper");
-assert.equal(annualSummarySource.includes("earliestPlayDay"), true, "annual day counting is not anchored to the first played day");
+assert.equal(annualSummarySource.includes("firstActualPlayDate"), true, "annual day counting ignores the proven first play day");
+assert.equal(annualSummarySource.includes("earliestPlayDay"), true, "annual day counting is not anchored to a first play day");
 assert.equal(annualSummarySource.includes("periodTotalDays"), true, "annual day counting does not resolve a period total");
 assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days still pass through from upstream");
+assert.equal(annualSummarySource.includes("seasonSpan"), false, "period total days is still capped by the season window");
+const annualPeriodSchema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
+assert.equal(
+  Object.prototype.hasOwnProperty.call(annualPeriodSchema.properties.period.properties, "firstActualPlayDate"),
+  true,
+  "the annual schema does not declare firstActualPlayDate"
+);
+assert.equal(
+  annualPeriodSchema.properties.period.required.includes("firstActualPlayDate"),
+  true,
+  "firstActualPlayDate is not a required period field"
+);
 assert.equal(/虹2025|2025 \/ 版本总结/.test(`${zhSource}\n${jaSource}`), false, "legacy 2025 annual copy remains");
 const zh = JSON.parse(zhSource).annualSummary;
 const ja = JSON.parse(jaSource).annualSummary;

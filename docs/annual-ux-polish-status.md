@@ -38,14 +38,147 @@ None until Gate UX-1 is explicitly PASS.
 
 ---
 
+## Round 1.1 — 真实账号收口（2026-09-11）
+
+用户已用测试账号（taikoId `2258735` / `sigaer` / `1106865024@qq.com`）完成真实页面验收：
+
+| 项 | 用户结论 |
+| --- | --- |
+| Opening 直达结果页 | **PASS** |
+| Poster 回到入口 | **PASS** |
+| Period「转眼过去 XXX 天」 | **FAIL**（显示值与「最早实际游玩日 → 今天」不符） |
+
+因此本轮只做两件事：**A. Period 天数真实 bug**、**B. favoriteShift observed-span 口径**。
+其余 UX 项（Opening 烟花、Period→Overview 动画、favorite 排版、keyword 文案、ratingRank、
+month、Calendar、timeOfDay、speedProfile、pound、highScore、breakthrough、Poster 四格对齐）
+一律留待 UX-2 / UX-3，本轮未触碰。
+
+### A. Period 天数 — 旧值为什么错
+
+真实账号（缓存 key `d6b5915c…` / summary `annual_8357acbcad4494b16903122a`）逐层对账：
+
+| 层 | 最早时间 | 说明 |
+| --- | --- | --- |
+| A 原始 userdata（204 个快照 + `2258735data.json`） | **2023-11-18 15:31:41** | `highscore_datetime` 与 `update_datetime` 同值；被 16 个跨 5 个月的独立快照交叉印证 |
+| B generator 输入（`load_snapshot_history`） | 快照观测范围 2026-01-16 21:43:20 → 2026-09-08 21:10:00 | 生成器能读到全部快照，但事件窗口被 `ANNUAL_START_AT` 截取 |
+| C 生成的 annual events | 最早区间 2026-01-16 21:43:20；最早「精确时刻」**2026-01-17 14:58:55** | 只有带 `representativeAt` 的才算精确游玩时刻 |
+| D 旧 summary / normalized | `firstRecordAt = 2026-01-17`（窗口内第一条）；`firstActualPlayDate` **字段不存在** | 赛季窗口把 2023–2025 的历史全部裁掉 |
+| E 修复前线上实际渲染 | **237 天** | 用户看到的 M = 237 |
+| F 产品定义应有值 | **1028 天** | 2023-11-18 → 2026-09-10 含首末日 |
+
+旧值 237 由两个**叠加**原因造成，两者都必须修：
+
+1. **数据源错**：Viewer 只能看到被赛季窗口截断后的 events，
+   `min(played_at)` 最多得到「当前年度窗口内最早游玩」= 2026-01-17，而非账号真实最早游玩日。
+2. **Viewer 计算 bug（关键）**：上一轮新增的 `calendarParts()` 只接受 **string**，
+   而「今天」以 `new Date()` 传入 → 直接返回空串 → `storySpan = null`
+   → 代码**静默 fallback** 回上游窗口值。实测把真实 summary 跑一遍，得到的就是 **237**，
+   与用户看到的值完全一致 —— 即上一轮的「重新锚定」**从未真正生效**；
+   上一轮 unit test 之所以通过，是因为它复刻了 helper 而没有调用真实调用点。
+
+修复：
+
+- **上游（source of truth）**：生成器新增正式字段 `period.firstActualPlayDate`，
+  由 `helpers.first_actual_play_datetime(state)` 从 `selection.start_state`
+  （赛季窗口之前的最后一个快照状态，已携带账号完整可玩档案）的
+  `highscore_datetime` / `update_datetime` 取最小值。
+  文件：`plugins/utils/annual_summary/{helpers,aggregates,service}.py`；
+  运行时副本 `/home/sigaer/taiko/plugins/...` 与 git 副本
+  `/home/sigaer/git/Sakura_bot/taiko/plugins/...` 已同步。
+- **schema**：`schemas/annual-summary-v4.schema.json` 的 `period` 新增必填
+  `firstActualPlayDate`（`type: ["string","null"], format: "date"`）。
+- **Viewer**：`utils/annualSummary.ts` 改为消费该字段，
+  `totalDays = date(today) - date(firstActualPlayDate) + 1`（`Asia/Shanghai` 自然日，含首末日），
+  并**移除赛季窗口封顶**（真实历史 1028 天本就长于 338 天的赛季）；
+  仅当字段缺失（旧缓存）时才回退到窗口内首条记录。
+  同时修掉 `calendarParts()` 不接受 `Date` 的静默失败。
+- **类型**：`types/account-version-summary.ts` 的 `period` 增加 `firstActualPlayDate`。
+
+**真实账号验收集（同一账号、同一天）**：
+
+| 项 | 值 |
+| --- | --- |
+| firstActualPlayDate | `2023-11-18` |
+| today | `2026-09-10` |
+| expectedDays | **1028** |
+| Period renderedDays（真实浏览器 DOM：`转眼过去 1,028 天`） | **1028** |
+| 旧值 M | 237（原因见上） |
+
+验证方式：为授权账号签发一次性 session（用后即删），在本机 `.output` 实例上用真实浏览器打开
+`/account/version-summary`，读取 `.period-overview-scene__period-facts` 的真实文本。
+story 页数同时从 20 页变为 **21 页**，即 favoriteShift 已回归。
+
+### B. favoriteShift — observed-span 新口径
+
+产品口径（用户已正式确定）：不再使用固定赛季窗口的绝对前/后 25%，
+改用「本次用于分析的有效游玩事件」自身的观测跨度：
+
+```text
+firstActualPlayDate = 有效游玩事件中最早 played_at
+lastActualPlayDate  = 有效游玩事件中最晚 played_at
+earlyWindow = [first, first + 25% span]
+lateWindow  = [last  - 25% span, last]
+```
+
+只改 early/late 的**时间锚点**；原有业务判定全部保留
+（minimum play count、candidate selection、favorite ranking、change threshold、
+`no_favorite_change`、数据不足隐藏）。边界沿用现有实现一致的时间比较方式，不重构 aggregates。
+
+- 旧窗口（真实账号）：`early_limit = 2025-12-31 00:00:00` → **early 事件 0 条** → `early = None`
+  → `no_favorite_change` → 页面隐藏（即上一轮定位到的现象）。
+- 新窗口（observed span 2026-01-17 → 2026-09-05，232 天）：
+  - `early_limit = 2026-03-16` → 604 条事件 → top `975 幾望の月`（16 次）
+  - `late_limit = 2026-07-09` → 403 条事件 → top `1031 Hello, Worldooon!!`（22 次）
+  - 两阶段最爱不同 → **favoriteShift 恢复**（`status: proxy`）
+- 与历史证据一致：`backups/annual-cold-build-2258735-20260902` 中旧窗口（v4.1.2）的
+  `favoriteShift` 正是 `975×15` → `1031×22`，新口径复现了同一对歌曲。
+
+**哪些真实账号恢复**：
+
+| 账号（缓存 key） | 旧窗口 early 事件 | 结论 |
+| --- | --- | --- |
+| `d6b5915c…`（验收账号，已真实重建并实测） | 0 | **恢复**：`幾望の月` → `Hello, Worldooon!!`；story 20 页 → **21 页** |
+| `4ec7bb41…` / `799e146a…` / `e722cecd…` | 未逐一重建 | 口径对所有账号一致生效；各自重建后按同一判定输出，允许继续隐藏 |
+
+**仍允许隐藏**：若某账号 observed span 太短、early/late 数据不足、两阶段最爱无实际变化或未达现有阈值，
+继续输出 `no_favorite_change` 并隐藏页面 —— 不为了「让页面回来」降低任何阈值。
+
+### 上游改动的生效方式
+
+生成器 `.py` 与 schema 都在 Viewer 的 input fingerprint 内
+（`server/services/account/annual-summary/runtime.ts:222-228`），
+因此**无需手动失效缓存**：下一次打开年度回顾时指纹不匹配 → `state: missing` → 自动重建。
+验收账号已通过 Viewer 自身的 build 接口完成真实重建
+（job `219d5278-9af0-40c7-8ba7-8b627f1348dc`，status `completed`，100%，
+新 summaryId `annual_f2163f3515a5832fa256a501`）。
+
+### 上一轮 Viewer 防御代码保留
+
+上一轮的两处防御**保留未撤销**：空 favoriteShift payload 不生成空白页、
+story 页数变化后重新锚定视口。上游修复不影响它们。
+
+### 本轮验证与新增测试
+
+- `npm run test:annual` 通过：`{"ok":true,"pageCount":21,"locales":["zh","ja"],"schemaVersion":4}`
+- `npm run test:annual:period` 通过：5 + 4 = 9 个用例全绿
+- 新增 `tests/annualPeriodNormalize.test.mjs`：**直接调用真实 `normalizeAnnualSummary`**
+  （通过 `tests/support/nuxtAliasHooks.mjs` 解析 Nuxt 的 `~` 别名），
+  断言 `firstActualPlayDate`、`renderedDays == expectedDays`、不再被赛季窗口封顶、
+  旧缓存回退可用、上海自然日不受宿主时区影响。
+  这正是上一轮缺失的那一层：复刻 helper 无法发现真实调用点的 bug。
+- 新增 `tests/annualPeriodDays.test.mjs` 用例：验收账号的 `firstActualPlayDate`
+  必须早于其观测窗口首日（`2023-11-18 < 2026-01-17`）。
+
+---
+
 ## Round 1 — UX-1 明细
 
 | ID | 区域 | 项 | 状态 |
 | --- | --- | --- | --- |
 | UX-1.1 | Opening | 删除「好友年度报告」 | DONE |
 | UX-1.2 | Opening | 修复「直达结果页」 | DONE |
-| UX-1.3 | Period | 「XXX 天」基于最早实际游玩日期 | DONE |
-| UX-1.4 | favoriteShift | 改变数据范围后页面消失（根因调查） | DONE（根因在上游 + 两处 viewer 防御修复） |
+| UX-1.3 | Period | 「XXX 天」基于最早实际游玩日期 | DONE（Round 1.1 修正真实数据源与真实调用点 bug，验收账号 1028 天实测一致） |
+| UX-1.4 | favoriteShift | 改变数据范围后页面消失 | DONE（Round 1.1 改为 observed-span 口径；验收账号已恢复） |
 | UX-1.5 | keyword | 核实六维数据与 radar max | DONE（radar max 修复 + ja i18n 修复） |
 | UX-1.6 | 全局 | 「回到入口」4~5 秒延迟调查 | DONE（0.3s 抽屉门控 + 串行 await 修复；浏览器实测受限，见遗留） |
 
@@ -285,9 +418,9 @@ None until Gate UX-1 is explicitly PASS.
 
 ## Release 记录
 
-- 目标版本：`0.57.2`（patch；删除一个装饰入口、修复一个死控件、修正一个展示口径、
-  两处性能/防御修复、keyword i18n 修复）。
-- 提交信息：`0.57.2 修正年度回顾入口与统计天数`。
+- 目标版本：`0.57.3`（patch；Period 天数真实数据源与计算修复 + favoriteShift observed-span 口径）。
+- 提交信息：`0.57.3 修正年度回顾天数数据源与偏爱变化窗口`。
+- `0.57.2` 为 Round 1 首次发布（入口与展示口径修复），其记录保留在下方。
 
 | 时间 | 事件 | 结果 |
 | --- | --- | --- |

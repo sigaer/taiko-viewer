@@ -89,3 +89,20 @@ test("cached summaries report a story span that starts at the first played day",
     assert.ok(storyStart > seasonStartTime, `${file} story must start later than the season`);
   }
 });
+
+// The real acceptance account (taiko id 2258735) proves the product definition
+// end to end: the game's own record reaches back to 2023, while the annual
+// observation window only starts in 2026. The window-scoped fields can never
+// produce the first date, so the generator has to publish it separately.
+test("the acceptance account's first actual play day precedes its observation window", async () => {
+  const file = resolve(
+    process.cwd(),
+    ".data/account-cache/annual-summary-v4/summaries/d6b5915c46057bcb005f46f6/annual_2026/annual_8357acbcad4494b16903122a/summary.json"
+  );
+  const summary = JSON.parse(await readFile(file, "utf8").catch(() => "null") ?? "null");
+  if (!summary) return;
+  const firstActualPlayDay = calendarParts(summary.period?.firstActualPlayDate);
+  const windowFirstDay = calendarParts(summary.period?.firstRecordAt);
+  assert.equal(firstActualPlayDay, "2023-11-18", "the acceptance account lost its proven first play day");
+  assert.ok(windowFirstDay > firstActualPlayDay, "the window-scoped field must not define the story start");
+});
