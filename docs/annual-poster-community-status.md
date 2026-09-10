@@ -14,7 +14,7 @@ Current Phase:
 Phase E — Share Card Export
 
 Status:
-RELEASED — online smoke pending at commit time
+COMPLETE
 
 Gate A:
 PASS
@@ -40,7 +40,7 @@ PASS
 Phase D is complete: the Poster reaction sync creates a general/discussion thread, live in `0.55.0`.
 
 Gate E:
-PENDING — set to PASS by the online smoke record appended after deployment of `0.56.0`.
+PASS
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -322,3 +322,12 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Decoupling is explicit: saving the share card creates no 30-day public share, no public URL and no Forum thread, and the 同步分享到社区 checkbox next to the save button stays inert for now (Phase F). The legacy 更多分享方式 dialog is untouched.
 - Root-cause fix found while wiring this phase: `server/api/account/annual-summaries/[summaryId]/reactions.post.ts` (added in `bed1bd9`) put a second param name at the same route position as the existing `[key]/` directory. Nitro resolves only one of the two param subtrees, so every `[key]/*` route — `my-don`, `shares`, `posters`, `build` — returned the router's "Page not found" in production, while `/api/account/annual-summaries/:key` and `:summaryId/reactions` kept working. That is the real reason the annual snapshot my-don URL failed and the profile tile fell back in `0.54.0`; the Phase B hotfix had masked the symptom with the live MyDon fallback. All annual-summaries child routes are now consolidated under `[key]`, verified locally by route resolution before release (HEAD reproduces the router 404; the patched tree resolves all seven routes).
 - Version `0.56.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy. Phase F is not started.
+- Release commit `f281826 0.56.0 年度总结四格分享图支持服务端导出`. Standard `bash scripts/deploy_forum_web.sh "0.56.0 年度总结四格分享图支持服务端导出"` exited 0 with push, isolated build, output switch, restart and health checks; appVersion `0.56.0` is live locally and on `https://viewer.sakura-bot.cn`.
+- Gate E online smoke with the authorized account: the real Poster page rendered four 133.5px tiles (profile image `naturalWidth` 944, three covers 400) and six stats; the real 保存图片 button returned POST 200 with `shareCard { id, imageUrl, width: 1080, height: 1648 }`, and the browser downloaded `taiko-annual-annual_8357acbcad4494b16903122a.png` (957,241 bytes) with the notice 分享图片已保存. The saved file is a real **1080×1648** PNG (ratio 0.6553 vs the design 0.6552), and visual review confirms it contains only the share card: the three real covers, the real MyDon profile card with nickname and title, and the six statistics — no barrage, no reaction input, no buttons and no poster background, with no cropping and crisp text.
+- Preview/export consistency: the on-page grid (414×632 element capture, ratio 0.6551) and the exported 1080×1648 image have the same tile order, covers, profile card, caption, six stats, proportions and spacing; only scale differs. Both are the same `AnnualShareGrid.vue`.
+- Fingerprint cache: a second save returned POST 200 with `cached: true`, the same `shareCard.id`, and a byte-identical PNG (`b15372fe…`), so no re-render and no extra row.
+- Decoupling verified by database counts: `web_annual_shares` for the user stayed 0, `forum_threads` stayed 11, and `web_annual_share_cards` went 0 → 1.
+- Owner-only image: `GET /api/account/annual-share-cards/:id/image` returned 200 `image/png` for the owner and 401 for an anonymous context.
+- Route fix verified in production: all annual-summaries children now answer with handler errors instead of the router's "Page not found" — `shares`, `posters`, `build`, `my-don`, `reactions` and the new `share-card`. The previously broken owner snapshot route now returns 200 with the 580,551-byte PNG, byte-identical to the live MyDon (`07c8ebea…`), and the Poster page's profile tile is served by the snapshot again with the Phase B fallback left unused.
+- Phase D non-regression: the reaction textarea, send control and a moving barrage of 7 bubbles were present on the same page, and the reactions endpoint still resolves. Browser page errors were 0.
+- Gate E: PASS. Phase E = COMPLETE. Phase F not started.
