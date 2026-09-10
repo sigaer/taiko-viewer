@@ -484,10 +484,12 @@ export const insertAnnualShareCard = async (input: {
     `INSERT INTO web_annual_share_cards
       (id, summary_id, user_id, locale, fingerprint, file_path, width, height)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE id = VALUES(id), file_path = VALUES(file_path),
+     ON DUPLICATE KEY UPDATE file_path = VALUES(file_path),
        width = VALUES(width), height = VALUES(height), updated_at = NOW()`,
     [input.id, input.summaryId, input.userId, input.locale, input.fingerprint, input.filePath, input.width, input.height]
   );
+  // The row id must stay stable: concurrent first saves of the same fingerprint must
+  // not steal each other's id, otherwise a later forum_thread_id write would miss.
   return findAnnualShareCard(input.summaryId, input.locale, input.fingerprint);
 };
 
