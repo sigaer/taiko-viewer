@@ -207,3 +207,10 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Local sanitize, new-nonce rate limit, published/hidden, one-item loop, lifecycle, background hide/zero empty state and five-viewport acceptance remain PASS.
 - Gate B: PASS. Phase C/D not started. Main's original title_song_relations.json and poster.zip were restored/preserved with identical hashes; prior main document additions were incorporated.
 - Final acceptance docs are a local-only documentation checkpoint after the script's release push. Do not manually push main or redeploy unchanged web code solely to publish this record.
+## 2026-09-10 / Phase B post-release visual regression hotfix
+
+- Profile-card tile unexpectedly fell back to placeholder after `0.54.0`; diff audit confirmed no `AnnualShareGrid` or profile mapping change between `bb72232` and `bed1bd9`.
+- Fixed `AnnualShareGrid.vue` data-resource fallback to authenticated `/api/account/my-don`; no poster layout, barrage, reaction API/schema, or Forum changes.
+- Owner-only scope is enforced by the snapshot path prefix, so public share and internal poster-export snapshots never request the owner-only resource. Verified in a real browser against the actual component module, with the unpatched build reproducing the defect in the same harness.
+- Unrelated working-tree changes (`taiko_viewer/assets/data/title_song_relations.json`, `poster.zip`) are preserved and excluded from this hotfix, per the standing instruction; they must be isolated reversibly for the deployment run because the deploy script refuses a dirty tree, then restored with matching hashes.
+- Version `0.54.1`; pending deploy. Phase B remains COMPLETE / PASS; Phase C NO.

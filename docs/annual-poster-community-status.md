@@ -249,3 +249,13 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - New evidence: `/tmp/annual-poster-phase-a/mosaic-review/414x896-reference.png`, `414x896.png`, `414x896-side-by-side.png` (reference left), `report.json`, `cover-sources.json`, `long-text.png`, `missing.png`, `qa.log`.
 - At that checkpoint Gate A remained PENDING pending human confirmation; this was superseded by the closeout recorded above.
 - Version 0.53.34 unchanged; baseline 736dc0d / 0.53.33 unchanged. No commit, push, build/deploy, production write or Phase B–F work in this correction. Public artwork GETs only.
+## 2026-09-10 / Phase B post-release visual regression hotfix
+
+- Regression: profile-card tile unexpectedly fell back to the placeholder artwork on the Poster page after the `0.54.0` release.
+- Root cause: `AnnualShareGrid.vue` still received the real `profileCard` fields, but its owner snapshot `myDonUrl` could fail; the existing image error handler immediately selected `AnnualArtworkFallback`.
+- Fix-forward: when the owner snapshot URL fails, retry the authenticated `/api/account/my-don` resource before allowing the generic fallback. Mosaic geometry and all Phase B barrage/reaction code remain unchanged.
+- Scope guard: the retry applies only to snapshots served from the owner-authenticated asset path `/api/account/annual-summaries/*/my-don`. Public share (`/api/annual/shares/*/my-don`) and internal poster-export (`/api/internal/annual-posters/*/my-don`) snapshots keep their previous single-source behaviour, so legacy public share and poster export are unaffected.
+- Local verification (real browser, real component module, no production access): the owner snapshot is requested first and the live resource second; the live resource renders with no placeholder; public-share and internal-poster snapshot shapes never issue the owner-only request; the four mosaic tiles remain equal 133.5px squares with gap 0. The unpatched baseline reproduces the original defect in the same harness (snapshot only, then placeholder).
+- The authenticated full-page dev smoke is not reproducible in this environment: the isolated test DB user lacks the `REFERENCES` privilege, so account schema DDL fails for any fresh dev process. This is the known pre-existing test-infrastructure limitation and was not repaired.
+- Fixed in `0.54.1` locally; pending deploy. Online acceptance follows the standard deployment script.
+- Phase B remains COMPLETE / PASS. This is a post-release corrective hotfix; Phase C has not started.

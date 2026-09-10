@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import type { VersionSummaryViewModel } from '~/types/account-version-summary';
 import AnnualArtworkFallback from './AnnualArtworkFallback.vue';
 const props = defineProps<{ summary: VersionSummaryViewModel; locale: string; exportMode?: boolean }>();
 const failed = reactive<Record<string, boolean>>({});
+const profileLiveFallbackTried = ref(false);
+const profileImageUrl = computed(() => {
+  if (profileLiveFallbackTried.value && props.summary.profileCard?.myDonUrl?.startsWith('/api/account/annual-summaries/')) return '/api/account/my-don';
+  return props.summary.profileCard?.myDonUrl || '';
+});
 watch(() => props.summary, () => { Object.keys(failed).forEach(key => delete failed[key]); });
+watch(() => props.summary.profileCard?.myDonUrl, () => { profileLiveFallbackTried.value = false; });
 const ja = computed(() => props.locale === 'ja');
 const missing = computed(() => ja.value ? '記録なし' : '暂无记录');
 const number = (value: number | null | undefined) => value != null && Number.isFinite(value) ? new Intl.NumberFormat(props.locale === 'ja' ? 'ja-JP' : 'zh-CN', { maximumFractionDigits: 2 }).format(value) : '—';
@@ -43,7 +49,7 @@ const stats = computed(() => {
         <div v-for="cell in cells" :key="cell.key" class="annual-share-grid__tile" :class="`annual-share-grid__tile--${cell.key}`" :aria-label="cell.label">
           <template v-if="cell.key === 'profile'">
             <div class="annual-share-grid__don">
-              <img v-if="summary.profileCard?.myDonUrl && !failed.profile" :src="summary.profileCard.myDonUrl" alt="MyDon" @error="failed.profile = true">
+              <img v-if="profileImageUrl && !failed.profile" :src="profileImageUrl" alt="MyDon" @error="(event) => { if (summary.profileCard?.myDonUrl?.startsWith('/api/account/annual-summaries/') && !profileLiveFallbackTried) { profileLiveFallbackTried = true; } else { failed.profile = true; } }">
               <AnnualArtworkFallback v-else kind="don" label="MyDon" mark="" />
             </div>
             <div class="annual-share-grid__profile-caption">
