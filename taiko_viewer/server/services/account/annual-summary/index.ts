@@ -19,12 +19,15 @@ import {
   ANNUAL_POSTER_HEIGHT,
   ANNUAL_POSTER_WIDTH,
   ANNUAL_SCHEMA_VERSION,
+  ANNUAL_SHARE_CARD_HEIGHT,
+  ANNUAL_SHARE_CARD_RENDERER_REVISION,
+  ANNUAL_SHARE_CARD_WIDTH,
   ANNUAL_SHARE_TTL_MS,
   ANNUAL_VERSION_KEY,
   getAnnualVersion,
   resolveAnnualVersion
 } from "./constants";
-import { createAnnualQrCodeDataUrl, renderAnnualPoster } from "./poster";
+import { createAnnualQrCodeDataUrl, renderAnnualPoster, renderAnnualShareCard } from "./poster";
 import { enrichAnnualSummary } from "./presentation";
 import { enrichAnnualRatingDistributionAtRead, enrichAnnualRatingRank } from "./ratings";
 import {
@@ -44,13 +47,16 @@ import {
   findAnnualPosterById,
   findAnnualPosterForShare,
   findAnnualShareById,
+  findAnnualShareCard,
   findAnnualSummaryById,
+  findOwnerAnnualShareCard,
   findLatestAnnualSummary,
   findOwnerAnnualJob,
   findOwnerAnnualShare,
   findOwnerAnnualSummary,
   insertAnnualJob,
   insertAnnualShare,
+  insertAnnualShareCard,
   insertAnnualSummary,
   listActiveAnnualShares,
   listAnnualSharesNeedingPosterCleanup,
@@ -80,13 +86,15 @@ import {
 import {
   buildAnnualPosterPublicUrl,
   buildAnnualShareUrl,
+  createAnnualShareCardRenderToken,
   createAnnualShareToken,
   hashAnnualToken,
   normalizeAnnualLocale,
   parseAndVerifyAnnualShareToken,
   toAdminAnnualEvent,
   toPublicAnnualSummary,
-  verifyAnnualRenderToken
+  verifyAnnualRenderToken,
+  verifyAnnualShareCardRenderToken
 } from "./security";
 import type {
   AnnualJobParameters,
@@ -94,6 +102,7 @@ import type {
   AnnualJobType,
   AnnualLocale,
   AnnualPosterRow,
+  AnnualShareCardRow,
   AnnualShareRow,
   AnnualSummaryRow,
   AnnualSummaryV4
@@ -689,6 +698,102 @@ export const getInternalAnnualMyDonPath = async (summaryId: string, tokenInput: 
     throw createError({ statusCode: 404, statusMessage: "小咚形象不可用" });
   });
   return path;
+};
+
+/**
+ * Share card: the AnnualShareGrid four-tile image the Poster page lets the owner
+ * save. It reuses the existing Playwright renderer and the existing annual cache,
+ * and deliberately has no relationship with the 30-day public share or the
+ * legacy poster job.
+ */
+const getAnnualShareCardPath = (row: AnnualSummaryRow, fingerprint: string) =>
+  `${dirname(row.summary_path)}/share-cards/${fingerprint}.png`;
+
+const buildShareCardDto = (row: AnnualShareCardRow) => ({
+  id: row.id,
+  imageUrl: `/api/account/annual-share-cards/${encodeURIComponent(row.id)}/image`,
+  width: Number(row.width),
+  height: Number(row.height)
+});
+
+const getShareCardFingerprint = (row: AnnualSummaryRow, locale: AnnualLocale) =>
+  createHash("sha256")
+    .update(`${row.input_fingerprint}:${locale}:${ANNUAL_SHARE_CARD_WIDTH}x${ANNUAL_SHARE_CARD_HEIGHT}:${ANNUAL_SHARE_CARD_RENDERER_REVISION}`)
+    .digest("hex");
+
+export const createAccountAnnualShareCard = async (userId: number, summaryId: string, localeInput?: unknown) => {
+  const row = await findOwnerAnnualSummary(summaryId, userId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const summary = await safeReadSummary(row);
+  if (!summary) throw createError({ statusCode: 410, statusMessage: "年度回顾文件暂不可用，请联系管理员" });
+  const locale = normalizeAnnualLocale(localeInput);
+  const fingerprint = getShareCardFingerprint(row, locale);
+  const cached = await findAnnualShareCard(summaryId, locale, fingerprint);
+  if (cached && (await access(cached.file_path).then(() => true).catch(() => false))) {
+    return { shareCard: buildShareCardDto(cached), cached: true };
+  }
+  const outputPath = getAnnualShareCardPath(row, fingerprint);
+  await renderAnnualShareCard({ summaryId, locale, outputPath });
+  const stored = await insertAnnualShareCard({
+    id: cached?.id || randomUUID(),
+    summaryId,
+    userId,
+    locale,
+    fingerprint,
+    filePath: outputPath,
+    width: ANNUAL_SHARE_CARD_WIDTH,
+    height: ANNUAL_SHARE_CARD_HEIGHT
+  });
+  if (!stored) throw createError({ statusCode: 500, statusMessage: "分享图片保存失败" });
+  return { shareCard: buildShareCardDto(stored), cached: false };
+};
+
+export const getOwnerAnnualShareCardPath = async (userId: number, cardId: string) => {
+  const row = await findOwnerAnnualShareCard(cardId, userId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "分享图片不存在" });
+  await access(row.file_path).catch(() => {
+    throw createError({ statusCode: 404, statusMessage: "分享图片不存在" });
+  });
+  return row.file_path;
+};
+
+export const getInternalAnnualShareCardPayload = async (summaryId: string, tokenInput: unknown, localeInput?: unknown) => {
+  if (!verifyAnnualShareCardRenderToken(tokenInput, summaryId)) {
+    throw createError({ statusCode: 403, statusMessage: "分享图片渲染凭据无效" });
+  }
+  const row = await findAnnualSummaryById(summaryId);
+  const summary = await safeReadSummary(row);
+  if (!row || !summary) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const enriched = await withOwnerAssets(summary, normalizeAnnualLocale(localeInput));
+  return {
+    summary: {
+      ...enriched,
+      profileCard: {
+        ...(enriched.profileCard || {}),
+        myDonUrl: `/api/internal/annual-share-cards/${encodeURIComponent(summaryId)}/my-don?token=${encodeURIComponent(String(tokenInput))}`
+      }
+    }
+  };
+};
+
+export const getInternalAnnualShareCardMyDon = async (summaryId: string, tokenInput: unknown) => {
+  if (!verifyAnnualShareCardRenderToken(tokenInput, summaryId)) {
+    throw createError({ statusCode: 403, statusMessage: "分享图片渲染凭据无效" });
+  }
+  const row = await findAnnualSummaryById(summaryId);
+  if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  // Same preference order as the owner page: stored snapshot first, then the
+  // owner's live MyDon rendered server-side (never the browser owner session).
+  const snapshot = getSummaryMyDonPath(row);
+  if (await access(snapshot).then(() => true).catch(() => false)) {
+    return { kind: "snapshot" as const, path: snapshot };
+  }
+  const buffer = await getMyDonImageBuffer(row.user_id).catch((error) => {
+    console.warn("[annual-summary] share card live MyDon unavailable", summaryId, (error as { statusMessage?: string })?.statusMessage || error);
+    return null;
+  });
+  if (!buffer) throw createError({ statusCode: 404, statusMessage: "小咚形象不可用" });
+  return { kind: "live" as const, buffer };
 };
 
 export const getAdminAnnualEvents = async (

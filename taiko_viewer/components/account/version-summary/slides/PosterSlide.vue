@@ -71,6 +71,37 @@ onBeforeUnmount(() => { stopRefresh(); fetchSequence++; document.removeEventList
 const legacyDialog = ref<HTMLDialogElement | null>(null);
 const legacyOpened = ref(false);
 const openLegacy = async () => { legacyOpened.value = true; await nextTick(); legacyDialog.value?.showModal(); };
+const savingImage = ref(false);
+const imageError = ref('');
+const imageNotice = ref('');
+// The community checkbox next to the save button stays inert until Phase F; saving
+// the share card must not create a public share or a Forum thread.
+const saveShareCard = async () => {
+  if (savingImage.value) return;
+  savingImage.value = true; imageError.value = ''; imageNotice.value = '';
+  try {
+    const result = await apiFetch<{ shareCard?: { id: string; imageUrl: string; width: number; height: number } }>(
+      `/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/share-card`,
+      { method: 'POST', body: { locale: locale.value.startsWith('ja') ? 'ja' : 'zh' } }
+    );
+    const imageUrl = result?.shareCard?.imageUrl;
+    if (!imageUrl) throw new Error('share card image missing');
+    const response = await fetch(imageUrl, { credentials: 'include' });
+    if (!response.ok) throw new Error(`share card image ${response.status}`);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = `taiko-annual-${props.summary.summaryId}.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+    imageNotice.value = localized('分享图片已保存', '共有画像を保存しました');
+  } catch (error: any) {
+    imageError.value = error?.data?.statusMessage || localized('分享图片保存失败，请稍后再试', '共有画像を保存できませんでした。もう一度お試しください');
+  } finally { savingImage.value = false; }
+};
 </script>
 
 <template>
@@ -83,10 +114,10 @@ const openLegacy = async () => { legacyOpened.value = true; await nextTick(); le
       <div class="poster-scene__compose">
         <label class="poster-scene__input"><span class="poster-scene__sr">{{ t('annualSummary.staticPoster.reflections') }}</span><textarea v-model="reflection" maxlength="60" :placeholder="t('annualSummary.staticPoster.placeholder')" /></label>
         <div class="poster-scene__send"><label class="poster-scene__sync"><input v-model="reactionSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label><button type="button" :disabled="sending || !reflection.trim()" @click="sendReaction">{{ sending ? localized('发送中…', '送信中…') : t('annualSummary.staticPoster.send') }}</button></div>
-        <p v-if="reactionError || loadError || sendNotice" class="poster-scene__error" role="status">{{ reactionError || loadError || sendNotice }}</p>
+        <p v-if="reactionError || imageError || loadError || sendNotice || imageNotice" class="poster-scene__error" role="status">{{ reactionError || imageError || loadError || sendNotice || imageNotice }}</p>
       </div>
       <AnnualShareGrid class="poster-scene__grid" :summary="summary" :locale="locale" />
-      <div class="poster-scene__actions"><button type="button" disabled :title="t('annualSummary.staticPoster.unavailable')">{{ t('annualSummary.staticPoster.save') }}</button><label class="poster-scene__sync"><input v-model="imageSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label><button type="button" class="poster-scene__legacy" @click="openLegacy">{{ t('annualSummary.staticPoster.legacy') }}</button></div>
+      <div class="poster-scene__actions"><button type="button" :disabled="savingImage" @click="saveShareCard">{{ savingImage ? localized('生成中…', '生成中…') : t('annualSummary.staticPoster.save') }}</button><label class="poster-scene__sync"><input v-model="imageSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label><button type="button" class="poster-scene__legacy" @click="openLegacy">{{ t('annualSummary.staticPoster.legacy') }}</button></div>
     </div>
     <dialog ref="legacyDialog" class="poster-scene__dialog"><button class="poster-scene__close" type="button" @click="legacyDialog?.close()">{{ t('annualSummary.staticPoster.close') }}</button><LegacyPosterShare v-if="legacyOpened" v-bind="props" /></dialog>
   </section>

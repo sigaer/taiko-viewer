@@ -14,6 +14,11 @@ export const ANNUAL_RATING_TIMEOUT_MS = 10 * 60 * 1000;
 export const ANNUAL_POSTER_TIMEOUT_MS = 60 * 1000;
 export const ANNUAL_POSTER_WIDTH = 1080;
 export const ANNUAL_POSTER_HEIGHT = 1440;
+// The share card keeps the square_bg 363x554 ratio instead of the legacy poster frame.
+export const ANNUAL_SHARE_CARD_WIDTH = 1080;
+export const ANNUAL_SHARE_CARD_HEIGHT = 1648;
+// Bump when the rendered share-card markup or CSS changes so cached files are re-rendered.
+export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v1";
 export const ANNUAL_MAX_EVENT_PAGE_SIZE = 200;
 
 export const getAnnualVersion = (): AnnualVersion => ({

@@ -391,6 +391,26 @@ const CREATE_TABLES = [
     CONSTRAINT fk_annual_reaction_summary FOREIGN KEY (summary_id)
       REFERENCES web_annual_summaries(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_share_cards (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    summary_id CHAR(36) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    locale VARCHAR(8) NOT NULL,
+    fingerprint CHAR(64) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    width INT UNSIGNED NOT NULL DEFAULT 1080,
+    height INT UNSIGNED NOT NULL DEFAULT 1648,
+    forum_image_url VARCHAR(1024) DEFAULT NULL,
+    forum_thread_id BIGINT UNSIGNED DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_annual_share_card_fingerprint (summary_id, locale, fingerprint),
+    KEY idx_annual_share_card_user (user_id, created_at),
+    CONSTRAINT fk_annual_share_card_user FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_annual_share_card_summary FOREIGN KEY (summary_id)
+      REFERENCES web_annual_summaries(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_annual_summary_jobs (
     id CHAR(36) NOT NULL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,

@@ -11,16 +11,16 @@ Latest user instruction overrides historical execution/testing/deployment restri
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase D — Reaction → Forum
+Phase E — Share Card Export
 
 Status:
-COMPLETE
+RELEASED — online smoke pending at commit time
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase E — share card export (not started; this task ends at Phase D).
+Phase F — share card → Forum (not started; this task ends at Phase E).
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
@@ -36,6 +36,11 @@ Phase C is complete: `general` = 闲聊杂谈 and `creative` = 同名二创 are 
 
 Gate D:
 PASS
+
+Phase D is complete: the Poster reaction sync creates a general/discussion thread, live in `0.55.0`.
+
+Gate E:
+PENDING — set to PASS by the online smoke record appended after deployment of `0.56.0`.
 
 ## Current Phase B recovery — 2026-09-10
 
@@ -306,3 +311,14 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - DB confirmation: four nonces produced exactly four reaction rows — `skipped`/`not-requested` (no thread), `synced` + `forum_thread_id=51`, `skipped`/`rate-limited` (no thread) and `synced` + `forum_thread_id=52`.
 - The Forum-failure branch (`community_sync_status='failed'`, reaction preserved) is guaranteed structurally rather than induced in production: the reaction INSERT commits before the sync runs, and the sync call is fully wrapped so it downgrades only the sync status. Inducing a real Forum failure on the live site was deliberately not performed.
 - Gate D: PASS. Phase D = COMPLETE. Phase E not started.
+## 2026-09-10 / Phase E — Share Card Export
+
+- Goal: the Poster's existing 保存分享图片 button now exports a real server-rendered image, and the only visual subject is `AnnualShareGrid.vue` — not the poster page, barrage, reaction input or buttons.
+- Preview and export share one implementation: the new internal render page `/account/annual-share-card/:summaryId` mounts the same `AnnualShareGrid.vue` the Poster shows, with the same normalized owner view model (`getInternalAnnualShareCardPayload` reuses the owner asset enrichment). There is no second template, canvas redraw or duplicate component.
+- Rendering reuses the existing Playwright/Chromium renderer: `renderAnnualPoster` and the new `renderAnnualShareCard` now share one `screenshotAnnualPage` helper (same launch flags, same fonts/images wait, same reduced motion). The share card renders at 1080×1648 — the square_bg 363×554 ratio, not the legacy 1080×1440 poster frame — waits for the `__ANNUAL_SHARE_CARD_READY__` marker, then screenshots the exact viewport clip. The page pins the card to 1080×1648 (`aspect-ratio:auto`) so nothing is cropped.
+- Profile/MyDon: the internal render route `/api/internal/annual-share-cards/:summaryId/my-don` keeps the owner-page order — stored snapshot first, then the owner's live MyDon rendered server-side through the existing `getMyDonImageBuffer`. It never calls the browser-session `/api/account/my-don`, so the export cannot fall back to the round placeholder for a bound owner.
+- Export API follows the plan's naming: `POST /api/account/annual-summaries/:key/share-card` (owner-only, returns `{ shareCard: { id, imageUrl, width, height }, cached }`) and the owner-only image route `GET /api/account/annual-share-cards/:id/image`. Results are cached by fingerprint (`sha256` of the summary input fingerprint, locale, size and a renderer revision) in the additive `web_annual_share_cards` table, with files stored under the existing annual cache directory. Re-saving hits the cache instead of re-rendering.
+- Deliberate deviation from the plan sketch: no job/polling layer. The plan prefers extending the annual job queue, but a share-card render is a single synchronous pass, and the user instruction for this phase asked for the render chain to return the image directly. The plan's `forum_image_url` / `forum_thread_id` columns are declared but unused; Phase F owns them.
+- Decoupling is explicit: saving the share card creates no 30-day public share, no public URL and no Forum thread, and the 同步分享到社区 checkbox next to the save button stays inert for now (Phase F). The legacy 更多分享方式 dialog is untouched.
+- Root-cause fix found while wiring this phase: `server/api/account/annual-summaries/[summaryId]/reactions.post.ts` (added in `bed1bd9`) put a second param name at the same route position as the existing `[key]/` directory. Nitro resolves only one of the two param subtrees, so every `[key]/*` route — `my-don`, `shares`, `posters`, `build` — returned the router's "Page not found" in production, while `/api/account/annual-summaries/:key` and `:summaryId/reactions` kept working. That is the real reason the annual snapshot my-don URL failed and the profile tile fell back in `0.54.0`; the Phase B hotfix had masked the symptom with the live MyDon fallback. All annual-summaries child routes are now consolidated under `[key]`, verified locally by route resolution before release (HEAD reproduces the router 404; the patched tree resolves all seven routes).
+- Version `0.56.0` (minor, backward-compatible feature per the AGENTS release policy); pending deploy. Phase F is not started.

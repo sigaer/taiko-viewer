@@ -9,6 +9,7 @@ import type {
   AnnualLocale,
   AnnualPosterRow,
   AnnualShareRow,
+  AnnualShareCardRow,
   AnnualSummaryRow
 } from "./types";
 
@@ -448,6 +449,46 @@ export const upsertAnnualPoster = async (input: {
     [input.id, input.summaryId, input.shareId, input.userId, input.locale, input.fingerprint, input.filePath, input.width, input.height]
   );
   return findAnnualPosterById(input.id);
+};
+
+export const findAnnualShareCard = async (summaryId: string, locale: AnnualLocale, fingerprint: string) => {
+  await ensureAccountSchema();
+  const [rows] = await getAccountDb().execute<DbRow<AnnualShareCardRow>[]>(
+    "SELECT * FROM web_annual_share_cards WHERE summary_id = ? AND locale = ? AND fingerprint = ? LIMIT 1",
+    [summaryId, locale, fingerprint]
+  );
+  return rows[0] || null;
+};
+
+export const findOwnerAnnualShareCard = async (cardId: string, userId: number) => {
+  await ensureAccountSchema();
+  const [rows] = await getAccountDb().execute<DbRow<AnnualShareCardRow>[]>(
+    "SELECT * FROM web_annual_share_cards WHERE id = ? AND user_id = ? LIMIT 1",
+    [cardId, userId]
+  );
+  return rows[0] || null;
+};
+
+export const insertAnnualShareCard = async (input: {
+  id: string;
+  summaryId: string;
+  userId: number;
+  locale: AnnualLocale;
+  fingerprint: string;
+  filePath: string;
+  width: number;
+  height: number;
+}) => {
+  await ensureAccountSchema();
+  await getAccountDb().execute(
+    `INSERT INTO web_annual_share_cards
+      (id, summary_id, user_id, locale, fingerprint, file_path, width, height)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE id = VALUES(id), file_path = VALUES(file_path),
+       width = VALUES(width), height = VALUES(height), updated_at = NOW()`,
+    [input.id, input.summaryId, input.userId, input.locale, input.fingerprint, input.filePath, input.width, input.height]
+  );
+  return findAnnualShareCard(input.summaryId, input.locale, input.fingerprint);
 };
 
 export const listAnnualPosterPathsForShare = async (shareId: string) => {

@@ -107,3 +107,18 @@ export type AnnualJobParameters = {
   locale?: AnnualLocale;
   shareId?: string;
 };
+
+export type AnnualShareCardRow = {
+  id: string;
+  summary_id: string;
+  user_id: number;
+  locale: AnnualLocale;
+  fingerprint: string;
+  file_path: string;
+  width: number;
+  height: number;
+  forum_image_url: string | null;
+  forum_thread_id: number | null;
+  created_at: Date | string;
+  updated_at: Date | string;
+};

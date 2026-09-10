@@ -6,6 +6,7 @@ import { createMemoryRateLimiter } from "~/server/utils/rate-limit";
 
 const SHARE_TOKEN_CONTEXT = "taiko-annual-share-v1";
 const RENDER_TOKEN_CONTEXT = "taiko-annual-render-v1";
+const SHARE_CARD_RENDER_TOKEN_CONTEXT = "taiko-annual-share-card-render-v1";
 const PUBLIC_RATE_WINDOW_MS = 60 * 1000;
 const PUBLIC_RATE_LIMIT = 120;
 const PUBLIC_RATE_MAX_BUCKETS = 5000;
@@ -70,6 +71,21 @@ export const verifyAnnualRenderToken = (tokenInput: unknown, summaryId: string) 
   if (!posterId || !shareId || !providedSignature || extra) return null;
   const expected = sign(requireSecret("render"), RENDER_TOKEN_CONTEXT, `${summaryId}:${posterId}:${shareId}:${expiresAt}`);
   return safeEqualText(providedSignature, expected) ? { posterId, shareId, expiresAt } : null;
+};
+
+// Share-card rendering has no 30-day public share behind it, so it gets its own
+// scoped token context instead of reusing the legacy poster/share token shape.
+export const createAnnualShareCardRenderToken = (summaryId: string, expiresAt: number) =>
+  `${expiresAt}.${sign(requireSecret("render"), SHARE_CARD_RENDER_TOKEN_CONTEXT, `${summaryId}:${expiresAt}`)}`;
+
+export const verifyAnnualShareCardRenderToken = (tokenInput: unknown, summaryId: string) => {
+  const token = String(tokenInput || "").trim();
+  const [expiresRaw, providedSignature, extra] = token.split(".");
+  const expiresAt = Number(expiresRaw);
+  if (!Number.isFinite(expiresAt) || expiresAt < Date.now() || expiresAt > Date.now() + 5 * 60 * 1000) return null;
+  if (!providedSignature || extra) return null;
+  const expected = sign(requireSecret("render"), SHARE_CARD_RENDER_TOKEN_CONTEXT, `${summaryId}:${expiresAt}`);
+  return safeEqualText(providedSignature, expected) ? { expiresAt } : null;
 };
 
 export const getAnnualPublicBaseUrl = () => {

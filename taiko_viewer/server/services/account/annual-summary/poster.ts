@@ -4,10 +4,12 @@ import { createError } from "h3";
 import {
   ANNUAL_POSTER_HEIGHT,
   ANNUAL_POSTER_TIMEOUT_MS,
-  ANNUAL_POSTER_WIDTH
+  ANNUAL_POSTER_WIDTH,
+  ANNUAL_SHARE_CARD_HEIGHT,
+  ANNUAL_SHARE_CARD_WIDTH
 } from "./constants";
 import { atomicWriteFile } from "./runtime";
-import { createAnnualRenderToken } from "./security";
+import { createAnnualRenderToken, createAnnualShareCardRenderToken } from "./security";
 import type { AnnualLocale } from "./types";
 
 const safePosterError = (error: unknown) => {
@@ -49,6 +51,63 @@ export const createAnnualQrCodeDataUrl = async (url: string) => {
   }
 };
 
+const screenshotAnnualPage = async (input: {
+  url: URL;
+  locale: AnnualLocale;
+  width: number;
+  height: number;
+  readyFlag: string;
+  outputPath: string;
+  failureMessage: string;
+}) => {
+  const runtime = getPosterRuntime();
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null;
+  try {
+    browser = await chromium.launch({
+      executablePath: runtime.chromiumPath,
+      headless: true,
+      args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--font-render-hinting=none"]
+    });
+    const context = await browser.newContext({
+      viewport: { width: input.width, height: input.height },
+      deviceScaleFactor: 1,
+      locale: input.locale === "ja" ? "ja-JP" : "zh-CN",
+      timezoneId: "Asia/Shanghai",
+      reducedMotion: "reduce"
+    });
+    const page = await context.newPage();
+    page.setDefaultTimeout(ANNUAL_POSTER_TIMEOUT_MS);
+    await page.goto(input.url.toString(), { waitUntil: "domcontentloaded", timeout: ANNUAL_POSTER_TIMEOUT_MS });
+    await page.waitForFunction(
+      (flag) => (window as unknown as Record<string, unknown>)[flag] === true,
+      input.readyFlag,
+      { timeout: ANNUAL_POSTER_TIMEOUT_MS }
+    );
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all(
+        Array.from(document.images).map((image) =>
+          image.complete ? Promise.resolve() : image.decode().catch(() => undefined)
+        )
+      );
+    });
+    const buffer = await page.screenshot({
+      type: "png",
+      animations: "disabled",
+      caret: "hide",
+      clip: { x: 0, y: 0, width: input.width, height: input.height }
+    });
+    await atomicWriteFile(input.outputPath, buffer);
+    await context.close();
+    return { width: input.width, height: input.height };
+  } catch (error) {
+    console.error("[annual-summary] render failed", input.readyFlag, safePosterError(error));
+    throw createError({ statusCode: 500, statusMessage: input.failureMessage });
+  } finally {
+    await browser?.close().catch(() => undefined);
+  }
+};
+
 export const renderAnnualPoster = async (input: {
   summaryId: string;
   posterId: string;
@@ -64,49 +123,37 @@ export const renderAnnualPoster = async (input: {
   url.searchParams.set("locale", input.locale);
   url.searchParams.set("renderToken", renderToken);
 
-  let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null;
-  try {
-    browser = await chromium.launch({
-      executablePath: runtime.chromiumPath,
-      headless: true,
-      args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--font-render-hinting=none"]
-    });
-    const context = await browser.newContext({
-      viewport: { width: ANNUAL_POSTER_WIDTH, height: ANNUAL_POSTER_HEIGHT },
-      deviceScaleFactor: 1,
-      locale: input.locale === "ja" ? "ja-JP" : "zh-CN",
-      timezoneId: "Asia/Shanghai",
-      reducedMotion: "reduce"
-    });
-    const page = await context.newPage();
-    page.setDefaultTimeout(ANNUAL_POSTER_TIMEOUT_MS);
-    await page.goto(url.toString(), { waitUntil: "domcontentloaded", timeout: ANNUAL_POSTER_TIMEOUT_MS });
-    await page.waitForFunction(
-      () => (window as typeof window & { __ANNUAL_POSTER_READY__?: boolean }).__ANNUAL_POSTER_READY__ === true,
-      undefined,
-      { timeout: ANNUAL_POSTER_TIMEOUT_MS }
-    );
-    await page.evaluate(async () => {
-      await document.fonts.ready;
-      await Promise.all(
-        Array.from(document.images).map((image) =>
-          image.complete ? Promise.resolve() : image.decode().catch(() => undefined)
-        )
-      );
-    });
-    const buffer = await page.screenshot({
-      type: "png",
-      animations: "disabled",
-      caret: "hide",
-      clip: { x: 0, y: 0, width: ANNUAL_POSTER_WIDTH, height: ANNUAL_POSTER_HEIGHT }
-    });
-    await atomicWriteFile(input.outputPath, buffer);
-    await context.close();
-    return { width: ANNUAL_POSTER_WIDTH, height: ANNUAL_POSTER_HEIGHT };
-  } catch (error) {
-    console.error("[annual-summary] poster rendering failed", safePosterError(error));
-    throw createError({ statusCode: 500, statusMessage: "年度总结海报生成失败，请稍后重试" });
-  } finally {
-    await browser?.close().catch(() => undefined);
-  }
+  return await screenshotAnnualPage({
+    url,
+    locale: input.locale,
+    width: ANNUAL_POSTER_WIDTH,
+    height: ANNUAL_POSTER_HEIGHT,
+    readyFlag: "__ANNUAL_POSTER_READY__",
+    outputPath: input.outputPath,
+    failureMessage: "年度总结海报生成失败，请稍后重试"
+  });
+};
+
+export const renderAnnualShareCard = async (input: {
+  summaryId: string;
+  locale: AnnualLocale;
+  outputPath: string;
+}) => {
+  const runtime = getPosterRuntime();
+  const expiresAt = Date.now() + Math.min(ANNUAL_POSTER_TIMEOUT_MS + 30_000, 2 * 60 * 1000);
+  const renderToken = createAnnualShareCardRenderToken(input.summaryId, expiresAt);
+  const localePrefix = input.locale === "ja" ? "/ja" : "";
+  const url = new URL(`${localePrefix}/account/annual-share-card/${encodeURIComponent(input.summaryId)}`, runtime.internalBaseUrl);
+  url.searchParams.set("locale", input.locale);
+  url.searchParams.set("renderToken", renderToken);
+
+  return await screenshotAnnualPage({
+    url,
+    locale: input.locale,
+    width: ANNUAL_SHARE_CARD_WIDTH,
+    height: ANNUAL_SHARE_CARD_HEIGHT,
+    readyFlag: "__ANNUAL_SHARE_CARD_READY__",
+    outputPath: input.outputPath,
+    failureMessage: "年度分享图片生成失败，请稍后重试"
+  });
 };
