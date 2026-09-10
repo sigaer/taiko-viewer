@@ -237,3 +237,32 @@ to_end.png   + t("annualSummary.openingCover.resultPage")    → 「直达结果
 - UX-3（视觉与动效打磨）：跨端视口一致性、动效预算、可访问性回归。
 
 进入任一后续 Round 必须满足：UX-1 Gate 已 `PASS`，且用户显式指令开始。
+
+---
+
+## 7. Round 1 结果（2026-09-11 收尾）
+
+Round 1 的六项均已交付并随 `0.57.2` 发布上线；逐项证据、根因与遗留项见
+`docs/annual-ux-polish-status.md` 的「UX-1 完成记录」与「Release 记录」。
+
+| ID | 结果 | 类型 |
+| --- | --- | --- |
+| UX-1.1 | 已删除好友年度报告入口、i18n key 与资源预载 | 代码 |
+| UX-1.2 | 直达结果页已改为真实控件并直达 story 末页 | 代码 |
+| UX-1.3 | XXX 天已改为「最早实际游玩日 → 今天」 | 代码 + 测试 |
+| UX-1.4 | 根因定位到上游窗口定义；viewer 侧两处防御修复 | 调查 + 代码 |
+| UX-1.5 | 六维链路核实；radar max 改固定量程 15.5；补全 ja 文案 | 核实 + 代码 |
+| UX-1.6 | 定位 0.3s 抽屉门控与串行 await 并修复 | 调查 + 代码 |
+
+**Gate UX-1 = CONDITIONAL**：契约脚本、单元测试、构建、隔离预览、产物核对、
+标准部署与线上产物 smoke 全部通过；唯一未闭环项是**登录态下的年度回顾真实渲染复核**
+（需要一个具备 `annualSummaryAccess` 的账号；`ANNUAL_PUBLIC_OPEN_AT = 2026-10-02`
+之前普通用户不可访问，本会话未绕过鉴权）。因此不宣告 PASS，也不进入 UX-2。
+
+### 本轮的两项跨仓库结论（需要用户决策，不在本仓库修复范围）
+
+1. **favoriteShift 消失**是上游窗口定义的后果：生成器把「旧爱」区间固定在赛季开始附近
+   （`plugins/utils/annual_summary/aggregates.py:319-321`、`snapshots.py:318`），
+   而不是按账号自身观测覆盖推导。让这些账号重新拿到「新欢旧爱」必须改上游。
+2. **Period 天数**的上游值同样是赛季窗口长度；本轮只在 Viewer 消费侧重锚定，
+   未修改年度算法与 schema（遵循 Locked Decisions）。
