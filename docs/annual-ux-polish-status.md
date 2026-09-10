@@ -741,6 +741,28 @@ time-wheel                 （容器，不旋转）
   `shellStatic = true`、`stageStatic = true`、`itemMoved = true`（12 个不同帧），
   视频逐帧比对确认半圆朝向与构图边界完全不动。
 
+### C. 发布与线上确认（`0.58.1`）
+
+| 步骤 | 结果 |
+| --- | --- |
+| `git diff --check` | clean |
+| `npm run test:annual` | `{"ok":true,"pageCount":21,"locales":["zh","ja"],"schemaVersion":4}` |
+| `npm run build` | exit 0 |
+| release commit | `298e860 0.58.1 修正年度回顾转场旋转与时间轮运动结构` |
+| `scripts/deploy_forum_web.sh "0.58.1 修正年度回顾转场旋转与时间轮运动结构"` | **exit 0**，健康检查 active/active |
+| 线上版本徽标 | `0.58.1` |
+| 线上 smoke | `/titles` 200、未登录 `/account/version-summary` 302（预期） |
+| 线上录制复核 | `--cover-rotation` 在 Period 与 Overview 均为 `0deg`；`shellStatic/stageStatic = true`；item 与 slot 各有 14 个不同帧 |
+
+- 既有脏文件 `title_song_relations.json` 照例 stash → 部署后还原，SHA-256 一致。
+- 线上录制的逐帧比对与本地一致：封面在过渡中原地转为菱形、随后落回水平，
+  Overview 稳态无倾斜；半圆外壳与扇形条带全程不动。
+- 素材留存（`backups/` 已被 `.gitignore` 忽略，不进仓库）：
+  `backups/ux2-corrective/local-0.58.1.webm`（本地录制）、
+  `backups/ux2-corrective/live-0.58.1.webm`（线上录制）、
+  `backups/ux2-corrective/frames-period-overview.png` 与
+  `backups/ux2-corrective/frames-timeofday.png`（逐帧比对截图）。
+
 ### 保留的 timeOfDay 既有修复
 
 首屏主题文案（~350ms 可见）、结论第二拍、`is-digits-2..5` 分级字号、
