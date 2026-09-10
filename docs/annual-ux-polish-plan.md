@@ -242,27 +242,38 @@ to_end.png   + t("annualSummary.openingCover.resultPage")    → 「直达结果
 
 ## 7. Round 1 结果（2026-09-11 收尾）
 
-Round 1 的六项均已交付并随 `0.57.2` 发布上线；逐项证据、根因与遗留项见
-`docs/annual-ux-polish-status.md` 的「UX-1 完成记录」与「Release 记录」。
+Round 1 的六项均已交付并随 `0.57.2` / `0.57.3` 发布上线；逐项证据、根因与遗留项见
+`docs/annual-ux-polish-status.md` 的「UX-1 完成记录」「Round 1.1」「Release 记录」。
 
 | ID | 结果 | 类型 |
 | --- | --- | --- |
 | UX-1.1 | 已删除好友年度报告入口、i18n key 与资源预载 | 代码 |
 | UX-1.2 | 直达结果页已改为真实控件并直达 story 末页 | 代码 |
-| UX-1.3 | XXX 天已改为「最早实际游玩日 → 今天」 | 代码 + 测试 |
-| UX-1.4 | 根因定位到上游窗口定义；viewer 侧两处防御修复 | 调查 + 代码 |
+| UX-1.3 | XXX 天改为消费上游 `firstActualPlayDate`，并修掉真实调用点 bug | 数据源 + 代码 + 测试 |
+| UX-1.4 | favoriteShift 改按账号 observed span 的 25% 取 early/late | 上游 + 代码 |
 | UX-1.5 | 六维链路核实；radar max 改固定量程 15.5；补全 ja 文案 | 核实 + 代码 |
-| UX-1.6 | 定位 0.3s 抽屉门控与串行 await 并修复 | 调查 + 代码 |
+| UX-1.6 | 定位 0.3s 抽屉门控与串行 await 并修复（线上实测 483 ms） | 调查 + 代码 |
 
-**Gate UX-1 = CONDITIONAL**：契约脚本、单元测试、构建、隔离预览、产物核对、
-标准部署与线上产物 smoke 全部通过；唯一未闭环项是**登录态下的年度回顾真实渲染复核**
-（需要一个具备 `annualSummaryAccess` 的账号；`ANNUAL_PUBLIC_OPEN_AT = 2026-10-02`
-之前普通用户不可访问，本会话未绕过鉴权）。因此不宣告 PASS，也不进入 UX-2。
+**Gate UX-1 = PASS**（2026-09-11，`0.57.3`）：契约脚本、period 用例、构建、
+标准部署与**线上真实账号浏览器验收**全部通过。验收数据：
+`firstActualPlayDate = 2023-11-18`、`today = 2026-09-10`、`expectedDays = 1028`、
+`renderedDays = 1028`；favoriteShift 按 observed-span 口径恢复（story 20 → 21 页）；
+「回到入口」483 ms。UX-2 / UX-3 未开始，等待用户显式指令。
 
-### 本轮的两项跨仓库结论（需要用户决策，不在本仓库修复范围）
+### Round 1.1 补充（2026-09-11）
 
-1. **favoriteShift 消失**是上游窗口定义的后果：生成器把「旧爱」区间固定在赛季开始附近
-   （`plugins/utils/annual_summary/aggregates.py:319-321`、`snapshots.py:318`），
-   而不是按账号自身观测覆盖推导。让这些账号重新拿到「新欢旧爱」必须改上游。
-2. **Period 天数**的上游值同样是赛季窗口长度；本轮只在 Viewer 消费侧重锚定，
-   未修改年度算法与 schema（遵循 Locked Decisions）。
+用户真实验收发现 Period 天数仍不正确，据此追加两项；其余 UX 项（Opening 烟花、
+Period→Overview 动画、favorite 排版、keyword 文案、ratingRank、month、Calendar、
+timeOfDay、speedProfile、pound、highScore、breakthrough、Poster 四格对齐）
+一律留给 UX-2 / UX-3，本轮未触碰。
+
+1. **Period 天数真实 bug**：正确来源是**账号可玩数据中最早的真实游玩时刻**，
+   由生成器新增字段 `period.firstActualPlayDate` 提供（赛季窗口会把 2023–2025 的历史裁掉，
+   Viewer 无法自行得知）；同时 Viewer 侧 `calendarParts()` 只接受字符串，
+   导致「今天」解析失败并**静默回退**到窗口值 —— 这是上一轮该项实际未生效的原因。
+2. **favoriteShift observed-span 口径**：early/late 窗口由固定赛季窗口的绝对 25%
+   改为账号自身观测跨度的 25%，只换锚点；全部业务阈值与 `no_favorite_change` 保持原样。
+
+因此 **Locked Decision 1 的边界被用户显式修订**：本轮确实修改了上游生成器与
+`schemas/annual-summary-v4.schema.json`（新增必填 `period.firstActualPlayDate`），
+但仍**未改动**年度算法本身，也未改动其他 section 的判定逻辑。

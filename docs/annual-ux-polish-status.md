@@ -26,15 +26,13 @@ Current Round:
 **UX-1 — Functional & Data Correctness**
 
 Status:
-**UX-1 CODE SHIPPED — Gate UX-1 pending logged-in acceptance**
+**UX-1 COMPLETE — released `0.57.3`, Gate PASS**
 
 Gate UX-1:
-**CONDITIONAL** — 代码、契约、构建、发布与线上产物 smoke 全部通过；
-但登录态下的年度回顾真实渲染（含「XXX 天」口径与「回到入口」计时）尚未复核，
-因此**不宣告 PASS**，也不进入 UX-2。
+**PASS**（2026-09-11，见下方「Gate UX-1 判定」）
 
 Next allowed round:
-None until Gate UX-1 is explicitly PASS.
+UX-2 / UX-3 仍需用户显式指令；本轮结束后已停止，未自动开始。
 
 ---
 
@@ -392,17 +390,15 @@ story 页数变化后重新锚定视口。上游修复不影响它们。
 
 ## 未决问题 / 风险
 
-- **仍需一次登录态端到端验证（Gate UX-1 唯一未闭环项）**：需要一个具备 `annualSummaryAccess`
-  的账号，复核三件事：
-  1. Period 页「XXX 天」是否等于「最早游玩日 → 今天」的含首末日跨度；
-  2. Opening 只剩「直达结果页」一个入口，点击后到达 story 末页；
-  3. 点击「回到入口」的端到端时间（DevTools Performance 录制），确认 0.3s 门控与串行 await
-     消除后是否达到亚秒级；若仍有秒级残留，重点看 `/api/account/profile`、
-     `/api/account/my-don/showcase` 的真实耗时，以及 `/api/account/my-don` 是否 cache miss
-     触发 `python3 my_don_cli` 渲染。
-- **favoriteShift 的恢复需要上游改动**：本仓库无法让这些账号重新得到「新欢旧爱」，
-  因为生成器（`/home/sigaer/taiko/plugins/utils/annual_summary/aggregates.py:319-321`）的
-  前段窗口固定在赛季开始附近。是否调整属于产品决策，本轮不动上游。
+- ~~仍需一次登录态端到端验证~~ **已闭环**（Round 1.1）：真实账号在线上完成验收，
+  Period 1028 天一致、「直达结果页」到达第 21/21 页、「回到入口」483 ms。见
+  「线上真实账号验收记录」。
+- ~~favoriteShift 的恢复需要上游改动~~ **已实施**：early/late 窗口改按账号 observed span 计算，
+  验收账号已恢复。上游运行时副本与 git 副本已同步（`helpers.py` / `aggregates.py` / `service.py`）。
+  注意：`ratings.py` 在两份副本间存在**本轮之前就有的**差异，本轮未触碰。
+- **其余 3 个缓存账号未逐一重建**：`4ec7bb41…` / `799e146a…` / `e722cecd…`。
+  新口径对所有账号一致生效，但各自重建后是否恢复取决于其真实偏好是否变化；
+  不满足阈值时继续隐藏是预期结果，不做强制出现。
 - `/friend.png`（1,170,916 B）仍在 `public/`，当前无代码引用；是否删除待确认。
 - `el-drawer` 的 `custom-class` 在 element-plus 2.13 已失效（类型中已移除 `customClass`），
   抽屉面板级样式（`:deep(.story-drawer)` 的背景与内边距）可能一直未生效，需一次 DOM 复核。
@@ -411,8 +407,9 @@ story 页数变化后重新锚定视口。上游修复不影响它们。
 - UX-1.5 遗留的两个潜在（当前数据未触发）问题未改：单维为 0 时会被 `isUsableMetric` 丢掉
   （六边形变五边形，但 aria-label 仍写「六维」）；`sectionStatus.keyword` 可用但
   `dimensionKey` 为空时会渲染空占位。
+- 线上验收时观察到 4 条 404（歌曲封面缩略图缺失），属既有视觉问题，归 UX-2 / UX-3。
 - `taiko_viewer/assets/data/title_song_relations.json` 为本轮开始前既有的工作区改动，
-  按用户决定已 stash / 部署后原样还原，未进入 UX-1 提交。
+  按用户决定已 stash / 部署后原样还原（SHA-256 前后一致），未进入本轮提交。
 
 ---
 
@@ -426,7 +423,31 @@ story 页数变化后重新锚定视口。上游修复不影响它们。
 | --- | --- | --- |
 | 2026-09-11 | release commit `39b26b7` | 已提交（14 个文件 + 2 个新文档 + 1 个新测试） |
 | 2026-09-11 | `scripts/deploy_forum_web.sh "0.57.2 修正年度回顾入口与统计天数"` | **exit 0**；push、隔离构建、产物切换、服务重启、内部与线上健康检查全部通过 |
-| 2026-09-11 | 线上 smoke | 通过（见下） |
+| 2026-09-11 | 线上 smoke（0.57.2） | 通过（见下） |
+| 2026-09-11 | Round 1.1 真实账号验收发现 Period FAIL | 见「Round 1.1」 |
+| 2026-09-11 | release commit `19662a1` | `0.57.3 修正年度回顾天数数据源与偏爱变化窗口` |
+| 2026-09-11 | `scripts/deploy_forum_web.sh "0.57.3 修正年度回顾天数数据源与偏爱变化窗口"` | **exit 0**；健康检查 active/active |
+| 2026-09-11 | 线上真实账号验收（`viewer.sakura-bot.cn`） | **全部通过** |
+
+### 线上真实账号验收记录（`0.57.3`，2026-09-11）
+
+方式：为授权账号（taikoId `2258735`）签发一次性 session（用后即删），
+用真实 Chromium 打开 `https://viewer.sakura-bot.cn/account/version-summary` 读取真实 DOM。
+
+| 检查 | 结果 |
+| --- | --- |
+| 线上版本徽标 | `0.57.3` |
+| `/titles` · `/sitemap.xml` | 200 |
+| `/account/version-summary`（未登录） | 302 → 登录（预期） |
+| Opening 工具位 | `annual-opening__utilities` = 0，`annual-opening__direct` = 1，文案「直达结果页」，`/friend.png` 引用 = 0 |
+| 直达结果页 | 点击后位于第 21/21 页，`pageKey = poster` |
+| **Period 天数** | **「转眼过去 1,028 天」** = expectedDays 1028 ✔ |
+| story 页数 | **21 页**（修复前 20 页）→ favoriteShift 已回归 |
+| 「回到入口」 | 点击 → `/account/profile`，**483 ms**（修复前需等整段抽屉离场动画） |
+| console errors | 4 条 404（歌曲封面缩略图缺失，属既有视觉问题，归 UX-2/UX-3） |
+| 临时 session | 已删除并校验为 0 行 |
+
+### 线上 smoke（2026-09-11，`0.57.2`）
 
 ### 部署证据
 
@@ -451,11 +472,30 @@ story 页数变化后重新锚定视口。上游修复不影响它们。
 | 线上 `friendReport` | 0 次；旧构建 chunk `B5_BPG2D.js` 已 404 |
 | 未登录 `GET /api/account/profile`、`/api/account/my-don/showcase` | 401，20–31ms（预期；该结果不代表登录后的耗时） |
 
-- **未能完成的 smoke**：登录态下的年度回顾真实渲染与「回到入口」计时。原因：本会话没有可用的
-  年度访问账号（`ANNUAL_PUBLIC_OPEN_AT = 2026-10-02`，尚未对普通用户开放），也没有管理员会话；
-  经授权的生产 DB 写入（创建会话/测试账号）本会话不可执行，因此没有以任何方式绕过鉴权。
-  已用「线上 chunk 内容 + 版本徽标」这一层作为「发布产物正确」的证据，把登录态端到端验证
-  列为 Gate UX-1 的待办（见下）。
+- **未能完成的 smoke**：登录态下的年度回顾真实渲染与「回到入口」计时。
+  该限制已在 Round 1.1 解除：用户提供了授权测试账号，并以真实浏览器在
+  `viewer.sakura-bot.cn` 完成登录态验收（见「线上真实账号验收记录」）。
+
+---
+
+## Gate UX-1 判定
+
+**PASS**（2026-09-11）
+
+用户侧已确认：Opening 直达结果页 = PASS、Poster 回到入口 = PASS（本轮不重复验收）。
+
+本轮要求的另外两项，已在**线上真实账号**上闭环：
+
+1. **Period**：`firstActualPlayDate = 2023-11-18`、`today = 2026-09-10`、
+   `expectedDays = 1028`、`renderedDays = 1028`，严格一致。
+2. **favoriteShift**：observed-span 新口径生效，真实有变化的验收账号已恢复
+   （`幾望の月` → `Hello, Worldooon!!`，story 20 → 21 页）；
+   仍不满足既有阈值的账号允许继续隐藏，且未降低任何阈值。
+
+判定依据：契约脚本、9 个 period 用例、`nuxt build` exit 0、
+标准部署脚本 exit 0、线上版本徽标 `0.57.3`、线上真实浏览器验收全部通过。
+
+Gate UX-1 = **PASS**。UX-2 / UX-3 未开始，等待用户显式指令。
 
 ---
 
