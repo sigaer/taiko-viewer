@@ -423,7 +423,13 @@ assert.equal(annualServiceSource.includes("summary.provenance?.algorithmVersion 
 assert.equal(annualRatingsSource.includes("getAnnualRatingDistribution"), true, "annual rating enrichment does not use the cache reader");
 assert.equal(annualRuntimeSource.includes("export const getAnnualRatingDistribution = readCachedAnnualRatingDistribution"), true, "user rating lookup can rebuild the distribution");
 
-const schema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
+const schemaCandidates = ["../../../schemas/annual-summary-v4.schema.json", "../../schemas/annual-summary-v4.schema.json"];
+let schemaText = "";
+for (const candidate of schemaCandidates) {
+  try { schemaText = await read(candidate); break; } catch {}
+}
+assert.ok(schemaText, "annual summary schema is unavailable");
+const schema = JSON.parse(schemaText);
 assert.equal(schema.properties.schemaVersion.const, 4);
 assert.ok(schema.required.includes("provenance"));
 assert.ok(schema.$defs.annualObservationEvent.required.includes("timePrecision"));

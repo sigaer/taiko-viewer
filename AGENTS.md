@@ -1,3 +1,13 @@
+## Execution Policy Override — 2026-09-10
+
+Latest user instruction overrides historical execution/testing/deployment restrictions below; product definitions and Phase boundaries remain unchanged.
+
+- Real business behavior first. Phase B-0 = PASS; DB Isolation = PASS; BLOCKED_PENDING_DB_ISOLATION = RESOLVED. Do not restart B-0 or require REFERENCES/fixtures/full staging.
+- Continue existing Phase B code in the feature worktree. Verify real authenticated POST/GET, nonce retries, sanitize, rate limit, hidden, Poster immediate append/reload and moving barrage; Forum thread delta must remain zero.
+- Each Phase may release independently after its product Gate is ready. For Phase B: audit changes, bump minor version, create release commit, integrate into main, then use only scripts/deploy_forum_web.sh with the HEAD subject. No manual push, output replacement or restart; stop if the script fails.
+- Before release, mutations use the isolated test DB with SELECT DATABASE() and explicit mutation opt-in. After release, authorized real online smoke verifies the product; ordinary bugs are fixed forward. Final Gate B PASS follows online smoke.
+- Only the final integration agent deploys. No Phase C/D work during Phase B. Existing historical no-deploy/feature-only/exhaustive-test rules do not override this policy.
+
 # Repository Notes
 
 ## Scope
@@ -44,6 +54,19 @@
   - `build`
   - `.dart_tool`
   - coverage, logs, local caches
+
+## Annual Poster Community Collaboration
+
+All Agents participating in the annual Poster community project must read, before modifying code:
+
+1. `docs/annual-poster-community-plan.md`
+2. `docs/annual-poster-community-status.md`
+3. the latest relevant handoff in `docs/annual-poster-community-handoffs.md`
+4. `git status` and `git diff`
+
+The status file is authoritative for the current Phase and Gate. Do not infer phase completion merely because code exists. A Gate that is not explicitly `PASS` forbids entering the next Phase. Locked Decisions must not be reopened or changed without Coordinator approval. Only one write Agent may modify an implementation area at a time; other Agents are read-only audit/QA by default. Child Agents may not deploy. Only the final integration Agent may deploy, and Viewer deployment must use `scripts/deploy_forum_web.sh "<HEAD subject>"`; if the deployment script fails, stop without fallback. Ordinary Viewer/UI work must not modify `deploy_forum_web.sh` unless explicitly requested by the user.
+
+For annual Poster Phase B–F integration or migration tests, never connect to production DB. Mutating tests must require an actual `SELECT DATABASE()` result ending in `_test` and explicit `TAIKO_ALLOW_TEST_DB_MUTATION=1`; an environment variable name alone is not proof of safety. Do not copy production data into test databases, and treat any production write as a Gate blocker. Test secrets remain outside Git, status/handoff documents and shell-visible command text.
 
 ## UI Copy and Specification Leakage
 

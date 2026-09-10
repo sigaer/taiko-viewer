@@ -1,0 +1,72 @@
+import type { H3Event } from "h3";
+import { createError, getQuery, readBody } from "h3";
+import { randomUUID } from "node:crypto";
+import type { ResultSetHeader } from "mysql2/promise";
+import { requireAccountAnnualSummaryUser } from "./access";
+import { findOwnerAnnualSummary } from "./repository";
+import { ANNUAL_VERSION_KEY } from "./constants";
+import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
+import { loadBadgeMap } from "~/server/internal/forum/shared";
+import { setPrivateNoStore } from "~/server/utils/cache-policy";
+import { createMemoryRateLimiter } from "~/server/utils/rate-limit";
+import { toIso } from "~/server/internal/account/shared";
+
+type ReactionRow = { id: string; user_id: number; summary_id: string; version_key: string; content: string; status: string; community_sync_requested: number; community_sync_status: string; forum_thread_id: number | null; client_nonce: string; created_at: Date | string; updated_at: Date | string };
+const perSecond = createMemoryRateLimiter({ windowMs: 3000, limit: 1, maxBuckets: 10000, message: "发送过于频繁，请稍后再试" });
+const perHour = createMemoryRateLimiter({ windowMs: 60 * 60 * 1000, limit: 60, maxBuckets: 10000, message: "每小时最多发送 60 条感想" });
+// Serialize requests from one user so an in-flight retry reaches the nonce
+// lookup after the first insert. The unique key remains the cross-worker guard.
+const userWrites = new Map<number, Promise<unknown>>();
+const serializeUserWrite = async <T>(userId: number, write: () => Promise<T>): Promise<T> => {
+  const previous = userWrites.get(userId) || Promise.resolve();
+  const pending = previous.catch(() => {}).then(write);
+  userWrites.set(userId, pending);
+  try { return await pending; }
+  finally { if (userWrites.get(userId) === pending) userWrites.delete(userId); }
+};
+const normalizeReaction = (value: unknown) => {
+  if (typeof value !== "string") throw createError({ statusCode: 400, statusMessage: "请输入年度感想" });
+  const text = value.replace(/[\r\n]+/g, " ").replace(/\s+/gu, " ").trim();
+  if (!text) throw createError({ statusCode: 400, statusMessage: "请输入年度感想" });
+  if (Array.from(text).length > 60) throw createError({ statusCode: 400, statusMessage: "年度感想不能超过 60 个字" });
+  if (/[<>]/u.test(text)) throw createError({ statusCode: 400, statusMessage: "年度感想仅支持纯文本" });
+  return text;
+};
+const serialize = (row: ReactionRow, badge?: { id: number; username: string; avatarUrl: string }) => ({ id: row.id, status: row.status, content: row.content, createdAt: toIso(row.created_at), author: { userId: row.user_id, username: badge?.username || "未知鼓友", avatarUrl: badge?.avatarUrl || "https://viewer.sakura-bot.cn/miku.png" } });
+
+export const listAnnualReactions = async (event: H3Event) => {
+  setPrivateNoStore(event);
+  await requireAccountAnnualSummaryUser(event); await ensureAccountSchema();
+  const query = getQuery(event); const versionKey = String(query.versionKey || ANNUAL_VERSION_KEY).trim();
+  const limit = Math.trunc(Math.min(100, Math.max(1, Number(query.limit || 40) || 40)));
+  const [rows] = await getAccountDb().execute<DbRow<ReactionRow>[]>(`SELECT * FROM web_annual_poster_reactions WHERE version_key = ? AND status = 'published' ORDER BY created_at DESC LIMIT ${limit}`, [versionKey]);
+  const badges = await loadBadgeMap(rows.map((row) => row.user_id));
+  return { items: rows.reverse().map((row) => serialize(row, badges.get(row.user_id))) };
+};
+
+export const createAnnualReaction = async (event: H3Event, summaryId: string) => {
+  setPrivateNoStore(event); const user = await requireAccountAnnualSummaryUser(event);
+  const summary = await findOwnerAnnualSummary(summaryId, user.id); if (!summary || summary.version_key !== ANNUAL_VERSION_KEY) throw createError({ statusCode: 404, statusMessage: "年度回顾不存在" });
+  const body = (await readBody<{ content?: unknown; syncCommunity?: unknown; clientNonce?: unknown }>(event).catch(() => ({}))) || {};
+  const nonce = String(body.clientNonce || "").trim(); if (!/^[0-9a-f-]{16,36}$/iu.test(nonce)) throw createError({ statusCode: 400, statusMessage: "请求标识无效" });
+  await ensureAccountSchema(); const db = getAccountDb();
+  return serializeUserWrite(user.id, async () => {
+    const [existing] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
+    const row = existing[0] || null;
+    if (!row) {
+      const content = normalizeReaction(body.content);
+      perSecond(event, String(user.id)); perHour(event, String(user.id));
+      const id = randomUUID();
+      try {
+        await db.execute<ResultSetHeader>("INSERT INTO web_annual_poster_reactions (id,user_id,summary_id,version_key,content,status,community_sync_requested,community_sync_status,client_nonce) VALUES (?,?,?,?,?,'published',?, 'skipped', ?)", [id, user.id, summary.id, summary.version_key, content, body.syncCommunity === true ? 1 : 0, nonce]);
+      } catch (error: any) {
+        if (String(error?.code || "") !== "ER_DUP_ENTRY" && Number(error?.errno || 0) !== 1062) throw error;
+      }
+    }
+    const [rows] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
+    const reaction = rows[0];
+    if (!reaction) throw createError({ statusCode: 500, statusMessage: "感想保存失败" });
+    const badges = await loadBadgeMap([user.id]);
+    return { reaction: serialize(reaction, badges.get(user.id)), communitySync: { requested: Boolean(reaction.community_sync_requested), status: "skipped", message: "感想已发送，本次未同步到社区" } };
+  });
+};

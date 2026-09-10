@@ -119,3 +119,79 @@
 - Runtime audit: HEAD `736dc0d`; package version `0.53.34`; local 3100 and online viewer both report appVersion `0.53.33`; `taiko-viewer.service` active since `2026-09-09 11:09:41 CST`.
 - The audit build refreshed shared `.output` to `0.53.34` while the service stayed on its existing 0.53.33 process. Browser checks reproduced multiple `/_nuxt/*.js` HTTP 500 responses and one build metadata JSON HTTP 500. Direct probes for the new Poster PNGs returned HTTP 404 locally and online; no CSS, song-cover, API or SSR-route failure was observed. This is mixed/stale build evidence; no repair was performed.
 - No push, deployment, restart, production write, copy or rsync was performed. Stop at Phase A and await Phase B instruction.
+
+## 2026-09-09 / Phase A release stabilization complete
+
+- Standard deployment command `bash scripts/deploy_forum_web.sh "0.53.34 年度Poster完成静态四格与分享入口重构"` executed successfully with exit code 0.
+- The script pushed `bb72232` to `origin/main`, built the isolated release artifact, passed Nginx validation, activated the viewer output and restarted the managed services. Optional Baidu push returned HTTP 400 `over quota` and did not block deployment.
+- Unrelated files were isolated with a reversible stash and restored afterwards. SHA-256 values for `AGENTS.md`, `taiko_viewer/assets/data/title_song_relations.json` and `poster.zip` matched before and after deployment.
+- Deployed version/commit: `0.53.34` / `bb72232`.
+- Read-only canary passed: local and online appVersion `0.53.34`; service active; representative JS/CSS, build metadata and `/titles` SSR returned HTTP 200; both Poster PNGs returned HTTP 200. No mixed-version evidence remains.
+- Production write: NO. Phase B started: NO. No follow-up Viewer deployment is needed for this documentation update.
+
+## 2026-09-09 / Phase B start blocked on database isolation
+
+- Feature worktree: `/home/sigaer/taiko/taiko-forum-worktrees/annual-poster-community`; branch `feature/annual-poster-community`; baseline `bb72232` / `0.53.34`.
+- Phase B implementation has not started. Gate B is `PENDING`.
+- Read-only DB audit found only database `taiko` on the configured MySQL instance; the available `taiko_viewer` account has privileges only on `taiko.*`. No dedicated `_test` database or test credentials are available.
+- Existing DB integration and migration scripts can DELETE rows or mutate schema and several do not enforce a `_test` suffix. They must not be run with production credentials. Only the browser fixture/E2E paths currently enforce `_test`.
+- STOP condition triggered: do not add the reaction table, run migrations, run DB integration tests, or issue reaction/Forum writes until an isolated database such as `taiko_annual_poster_test` with dedicated credentials is provisioned and verified with `SELECT DATABASE()` and grants.
+- Production runtime remains unchanged: local and online appVersion `0.53.34`; `taiko-viewer.service` active; production `.output` fingerprint unchanged during this audit. No deployment, restart, production DB write, Forum write or push to `main` occurred.
+
+## 2026-09-09 / Phase B-0 historical block before administrator setup
+
+- Scope was limited to test database isolation bootstrap; reaction backend, schema migration, reaction POST, Forum write and integration mutation were not started.
+- Production configuration uses `TAIKO_DB_HOST=127.0.0.1`, `TAIKO_DB_PORT=3306`, `TAIKO_DB_USER=taiko_viewer`, `TAIKO_DB_NAME=taiko`; secret values were not logged. `account-db.ts` is the pool/schema connection path.
+- At that time, the production-only account showed only `taiko.*`, and local `root` admin login was denied; the test database had not yet been provisioned.
+- This historical block was superseded by administrator-side setup recorded in the later B-0 entries.
+- Required administrator action is captured in status.md as an unexecuted SQL template using production collation `utf8mb4_general_ci`, followed by `SELECT DATABASE(), CURRENT_USER()` and `SHOW GRANTS` verification.
+- Gate B-0: `PENDING`; blocker remains `BLOCKED_PENDING_DB_ISOLATION`. Production appVersion remains `0.53.34`, service active, and production `.output` fingerprint unchanged. No push, deploy, production write or Phase B reaction implementation occurred.
+
+## 2026-09-09 / Phase B-0 references privilege boundary found
+
+- Test-only `.env.test.local` is ignored by `taiko_viewer/.gitignore`; application MySQL connection returned the expected test DB identity and grants.
+- Guard tests passed for missing opt-in and wrong database, and the basic guarded CREATE/INSERT/SELECT/DELETE/DROP probe passed.
+- Synthetic fixture setup stopped at the first foreign-key definition with MySQL `ER_TABLEACCESS_DENIED_ERROR` / `REFERENCES command denied` for `taiko_annual_poster_test.annual_phase_b_test_users`.
+- No privilege was added. Guarded cleanup removed all attempted fixture tables; the test database is empty again.
+- Only a minimal `REFERENCES` grant on `taiko_annual_poster_test` is suggested if FK-based fixtures are required. Gate B-0 remains `PENDING`; do not continue schema initialization or reaction implementation until the grant is approved and re-verified.
+
+## 2026-09-09 / Phase B-0 application verification and REFERENCES stop
+
+- Administrator supplied the test credential out of band. It was used only through the ignored `taiko_viewer/.env.test.local`; the secret is not recorded in Git, docs or reports.
+- MySQL CLI and the Node/MySQL test path both verified `DATABASE() = taiko_annual_poster_test` and `CURRENT_USER() = taiko_viewer_test@127.0.0.1`. Grants are limited to the test database (`SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `DROP`, `INDEX`, `ALTER`) plus required `USAGE`; no production/global business grant, `SUPER`, `FILE`, `PROCESS`, `CREATE USER` or `GRANT OPTION`.
+- Mutation guard tests passed: missing opt-in rejected, wrong-database mock rejected before mutation, and explicit opt-in CREATE/INSERT/SELECT/DELETE/DROP probe passed.
+- Synthetic fixture setup was intentionally stopped at its first FK statement because MySQL returned `ER_TABLEACCESS_DENIED_ERROR` / `REFERENCES command denied`. The guard-cleanup pass removed all temporary tables; no fixture rows remain.
+- No `REFERENCES` privilege was added. Gate B-0 remains `PENDING` until an administrator explicitly grants and verifies only that minimum privilege, if FK fixtures remain necessary.
+
+## 2026-09-09 / Phase B real business path resumed
+
+- Project execution strategy changed to real business vertical slice first. Gate B-0 is `PASS`; `BLOCKED_PENDING_DB_ISOLATION` is resolved.
+- Dedicated test DB identity and guarded mutation were verified. No `REFERENCES` privilege was requested or added; the abandoned synthetic FK fixture is not a Phase B requirement.
+- Formal `web_annual_poster_reactions` schema and authenticated GET/POST service/API were added in the feature worktree. `syncCommunity` is recorded as requested with `community_sync_status = skipped`; no Forum write path is called.
+- Test-only schema bootstrap removes FK clauses when the selected database ends in `_test` and explicit mutation opt-in is present; production DDL behavior is unchanged.
+- Remaining work: connect PosterSlide to GET/POST, implement barrage scheduler/immediate append/background refresh/lifecycle, run real test-DB user-path verification, then decide Gate B and create/push a feature checkpoint. Production checkout, port 3100, production `.output`, production DB and Forum remain untouched.
+
+## Execution Policy Override — 2026-09-10
+
+Latest user instruction overrides historical execution/testing/deployment restrictions below; product definitions and Phase boundaries remain unchanged.
+
+- Real business behavior first. Phase B-0 = PASS; DB Isolation = PASS; BLOCKED_PENDING_DB_ISOLATION = RESOLVED. Do not restart B-0 or require REFERENCES/fixtures/full staging.
+- Continue existing Phase B code in the feature worktree. Verify real authenticated POST/GET, nonce retries, sanitize, rate limit, hidden, Poster immediate append/reload and moving barrage; Forum thread delta must remain zero.
+- Each Phase may release independently after its product Gate is ready. For Phase B: audit changes, bump minor version, create release commit, integrate into main, then use only scripts/deploy_forum_web.sh with the HEAD subject. No manual push, output replacement or restart; stop if the script fails.
+- Before release, mutations use the isolated test DB with SELECT DATABASE() and explicit mutation opt-in. After release, authorized real online smoke verifies the product; ordinary bugs are fixed forward. Final Gate B PASS follows online smoke.
+- Only the final integration agent deploys. No Phase C/D work during Phase B. Existing historical no-deploy/feature-only/exhaustive-test rules do not override this policy.
+
+Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retries still needed serialization. security.ts is unchanged. Test FK stripping is removed from account/forum production helpers; reaction schema is retained. Port 3101 was not listening; 3100 remains untouched. Gate B remains PENDING.
+
+## 2026-09-10 / Phase B product path verified locally
+
+- Recovered the existing uncommitted Phase B implementation, retained reaction schema/API, and removed in-source account/forum FK stripping. security.ts was already restored. B-0 is PASS and not reopened.
+- Completed same-nonce in-flight serialization plus duplicate-key recovery. Real POST/GET passed, concurrent retry returned the same ID with one DB row, fresh nonce within 3s returned 429 and after the window returned 200. Basic sanitize, hidden exclusion and Forum delta=0 passed.
+- Fixed the missing useViewerApiFetch initialization in PosterSlide. Actual Nuxt UI click sent HTTP 200 and immediately displayed the result; measured 36.4px leftward movement in 0.7s, then reload returned the same reaction.
+- Extracted AnnualPosterDanmaku with measured widths, 52px/s (22px/s reduced-motion), 72px lane gaps, low-data visual repeats, and active/document-visibility lifecycle. Added admin status endpoint using existing remote admin auth and audit logs.
+- Thirty-second multi-item and single-item actual-page runs passed. Five viewport visual audit passed after reserving 64px for three lanes on short screens. Background hide refresh and zero-only empty state passed. Browser page errors: 0.
+- Evidence remains outside Git: /tmp/annual-phase-b-api-report.json, /tmp/annual-phase-b-ui-report.json, /tmp/annual-phase-b-low-data-report.json, /tmp/annual-phase-b-visual.log, /tmp/annual-phase-b-{width}x{height}.png.
+- Dev-only compatibility lives outside application source: /tmp/annual-test-runtime.cjs and /tmp/annual-phase-b-layer. Secrets remain in ignored env/session files. A build was interrupted with exit 143 during a user turn; final build is run with 3101 stopped to avoid shared .nuxt interference.
+- Target release: 0.54.0. User authorized production acceptance with sigaer / drum ID 2258735. No production feature write, main push or deployment has occurred at this checkpoint. Next: finish isolated build, release audit/commit, integrate main, standard deploy, online smoke, then final Gate B PASS. No Phase C work.
+
+- Final isolated build PASS (exit 0); annual contract PASS; git diff --check PASS. Local Gate B product requirements are ready for release; final Gate remains pending online acceptance.

@@ -1,20 +1,105 @@
+## Execution Policy Override — 2026-09-10
+
+Latest user instruction overrides historical execution/testing/deployment restrictions below; product definitions and Phase boundaries remain unchanged.
+
+- Real business behavior first. Phase B-0 = PASS; DB Isolation = PASS; BLOCKED_PENDING_DB_ISOLATION = RESOLVED. Do not restart B-0 or require REFERENCES/fixtures/full staging.
+- Continue existing Phase B code in the feature worktree. Verify real authenticated POST/GET, nonce retries, sanitize, rate limit, hidden, Poster immediate append/reload and moving barrage; Forum thread delta must remain zero.
+- Each Phase may release independently after its product Gate is ready. For Phase B: audit changes, bump minor version, create release commit, integrate into main, then use only scripts/deploy_forum_web.sh with the HEAD subject. No manual push, output replacement or restart; stop if the script fails.
+- Before release, mutations use the isolated test DB with SELECT DATABASE() and explicit mutation opt-in. After release, authorized real online smoke verifies the product; ordinary bugs are fixed forward. Final Gate B PASS follows online smoke.
+- Only the final integration agent deploys. No Phase C/D work during Phase B. Existing historical no-deploy/feature-only/exhaustive-test rules do not override this policy.
+
 # Annual Poster Community — Execution Status
 
 Current Phase:
-Phase A — Poster Static Rebuild
+Phase B — Danmaku Core
 
 Status:
-COMPLETED
+IN_PROGRESS
 
 Gate A:
 PASS
 
 Next allowed phase:
-Phase B — Danmaku Core (not started; requires a new user instruction).
+Phase B — Danmaku Core (active in feature worktree).
 
 Gate A passed after user manual multi-viewport visual acceptance.
 
-Phase B remains forbidden until a new user instruction. The reopened-master review below is historical; the current Gate A decision is PASS.
+Gate B:
+PENDING
+
+Phase B is active in the feature worktree. Gate B remains pending until the real Poster reaction path is verified end to end.
+
+## Current Phase B recovery — 2026-09-10
+
+- Working version: `0.54.0` (minor: authenticated reaction publishing and live barrage). Production is still `0.53.34` / `bb72232` until standard deployment succeeds.
+- Backend: nonce lookup before rate limiting; same-user in-flight requests serialized; duplicate-key race re-reads the existing row. GET LIMIT is a bounded integer. Empty/overlong/non-text input rejected; whitespace normalized.
+- Real API evidence: POST 200, GET 200, concurrent same nonce 200/200 with the same ID and exactly one DB row, new nonce within the window 429, fresh nonce after the window 200, hidden omitted, Forum thread delta 0.
+- Actual Nuxt Poster: missing useViewerApiFetch initialization fixed; click POST 200, immediate append, 36.4px leftward displacement in 0.7s, reload read-back verified. A 30-second multi-item run had continuous visible motion, no lane collisions and no page errors.
+- Product code: separate measured-width barrage component, 52px/s (22px/s reduced motion), 72px lane gap, low-data visual copies, active/visibility pause, 20-second refresh, persistent nonce on failed sends, in-flight GET/POST merge, admin hide/publish endpoint using existing admin authentication and action log.
+- Cleanup: security.ts unchanged; forum-db.ts restored; account-db.ts contains only formal reaction DDL. No test FK stripping or security bypass remains in application code. Existing test guard and worktree schema-path resolution retained.
+- External local QA files and credentials stay outside Git. Test dev uses `/tmp/annual-test-runtime.cjs` (checks SELECT DATABASE and mutation opt-in) and `/tmp/annual-phase-b-layer` (Element Plus dev cache), with isolated test cache paths.
+- Local product acceptance: PASS. Single-row feed has continuous visible motion for 30 seconds without extra rows; inactive pause/resume PASS; background hidden refresh and zero-only empty state PASS; five viewport checks PASS (414×896, 390×844, 430×932, 390×760, 414×800). Short screens reserve at least 64px for three non-overlapping lanes. No browser page errors.
+- Admin route rejects unauthenticated PATCH with 401. Hidden feed behavior verified against the actual test DB.
+- Release readiness: READY. Final isolated worktree build PASS (exit 0), annual contract PASS, diff audit PASS. Gate B remains PENDING only until standard deployment and the authorized production account smoke complete.
+- Authorized online acceptance account: sigaer, drum ID 2258735; existing authenticated session and annual summary confirmed without changing production records.
+
+## Phase B-0 test database isolation bootstrap
+
+- Gate B-0: `PASS`. The dedicated non-production `_test` database and credentials are verified with guarded mutation smoke tests.
+- Production DB configuration audit (names only): `/etc/taiko-viewer.env` uses `TAIKO_DB_HOST=127.0.0.1`, `TAIKO_DB_PORT=3306`, `TAIKO_DB_USER=taiko_viewer`, `TAIKO_DB_NAME=taiko`; the password is not recorded.
+- Application connection path: `taiko_viewer/server/utils/account-db.ts` reads runtime config first, then `TAIKO_DB_*`, creates the MySQL pool in `getAccountDb()`, and schema helpers use that pool through `ensureAccountSchema()`.
+- The earlier production-only probe reported `SELECT DATABASE()` as `NULL` and `CURRENT_USER()` as `taiko_viewer@127.0.0.1`; that result is historical production evidence, not test evidence.
+- Production database defaults are `utf8mb4` / `utf8mb4_general_ci`; these are the required defaults for the isolated test database.
+- Administrator-side setup created `taiko_annual_poster_test` and `taiko_viewer_test@127.0.0.1`; application-layer test connection verification passes.
+- `BLOCKED_PENDING_DB_ISOLATION` is resolved. The test account intentionally has no `REFERENCES` privilege; the old in-source FK stripping workaround has been removed. The isolated dev process uses an external guarded preload; production DDL is unchanged apart from the formal reaction table.
+- No production DB mutation was executed. Production DB, service, `.output`, port 3100 and online runtime remain untouched.
+
+### Administrator-only SQL template (not executed)
+
+```sql
+CREATE DATABASE `taiko_annual_poster_test`
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE USER `taiko_viewer_test`@`127.0.0.1` IDENTIFIED BY '<GENERATE_UNIQUE_TEST_PASSWORD_OUTSIDE_SHELL_HISTORY>';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP
+  ON `taiko_annual_poster_test`.* TO `taiko_viewer_test`@`127.0.0.1`;
+FLUSH PRIVILEGES;
+```
+
+After execution, the test operator must verify with the test credentials:
+
+```sql
+SELECT DATABASE(), CURRENT_USER();
+SHOW GRANTS;
+```
+
+Expected: database `taiko_annual_poster_test`; grants reference only ``taiko_annual_poster_test`.*`` and contain no `taiko`.* / `*.*` grant, `SUPER`, `FILE`, `PROCESS`, `CREATE USER` or `GRANT OPTION`.
+
+### Historical references privilege finding (resolved without privilege expansion)
+
+- Application-layer connection and grants verification passed using the test-only env; the test database and account identity are correct.
+- Synthetic fixture setup stopped at the first foreign-key definition with MySQL `ER_TABLEACCESS_DENIED_ERROR (1142)`: `REFERENCES command denied` for `taiko_annual_poster_test.annual_phase_b_test_users`.
+- Guarded cleanup removed all attempted fixture tables; the test database is empty afterwards.
+- No privilege expansion was performed. The abandoned synthetic FK fixture is not part of the Phase B path:
+
+```sql
+GRANT REFERENCES ON `taiko_annual_poster_test`.*
+  TO `taiko_viewer_test`@`127.0.0.1`;
+FLUSH PRIVILEGES;
+```
+
+- Gate B-0 is `PASS`; no production data was copied and no production write occurred.
+
+## Phase A release stabilization
+
+- Phase A: COMPLETE; Gate A: PASS.
+- Deployed version: `0.53.34`.
+- Deployed commit: `bb72232 0.53.34 年度Poster完成静态四格与分享入口重构`.
+- `runtime mixed-version incident resolved by standard deployment.`
+- Standard `scripts/deploy_forum_web.sh` completed with exit code 0 and pushed `bb72232` to `origin/main`.
+- Read-only canary passed: local and online appVersion `0.53.34`; `taiko-viewer.service` active; representative JS/CSS, build metadata and `/titles` SSR returned HTTP 200; both Poster PNGs returned HTTP 200.
+- No production write requests were made. Phase B has not started.
+
+Phase B is in progress in the isolated feature worktree. The current Gate A decision remains PASS.
 
 ## Baseline
 
@@ -80,9 +165,9 @@ Gate A passed after user manual multi-viewport visual acceptance.
 
 ## Safe next action
 
-Stop at Phase A and await a new Phase B instruction. Do not deploy or push this checkpoint automatically.
+Complete remaining local visual checks and the feature-worktree build; then follow the Execution Policy Override release sequence. Do not enter Phase C or manually push main.
 
-## Current working version
+## Historical Phase A working version
 
 - Working package/package-lock version: `0.53.34` (compatible static UX rebuild).
 - Baseline remains `0.53.33` / `736dc0d`; HEAD has not changed and this work is uncommitted.

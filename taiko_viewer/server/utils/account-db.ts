@@ -370,6 +370,27 @@ const CREATE_TABLES = [
     CONSTRAINT fk_web_annual_summaries_binding_id FOREIGN KEY (binding_id)
       REFERENCES web_taiko_bindings(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_annual_poster_reactions (
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    summary_id CHAR(36) NOT NULL,
+    version_key VARCHAR(64) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'published',
+    community_sync_requested TINYINT(1) NOT NULL DEFAULT 0,
+    community_sync_status VARCHAR(16) NOT NULL DEFAULT 'skipped',
+    forum_thread_id BIGINT UNSIGNED DEFAULT NULL,
+    client_nonce CHAR(36) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_annual_reaction_user_nonce (user_id, client_nonce),
+    KEY idx_annual_reaction_feed (version_key, status, created_at),
+    KEY idx_annual_reaction_summary (summary_id, created_at),
+    CONSTRAINT fk_annual_reaction_user FOREIGN KEY (user_id)
+      REFERENCES web_user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_annual_reaction_summary FOREIGN KEY (summary_id)
+      REFERENCES web_annual_summaries(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS web_annual_summary_jobs (
     id CHAR(36) NOT NULL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,

@@ -4,7 +4,14 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const schemaPath = resolve(root, "../../schemas/annual-summary-v4.schema.json");
+const schemaCandidates = [
+  resolve(root, "../../../schemas/annual-summary-v4.schema.json"),
+  resolve(root, "../../schemas/annual-summary-v4.schema.json")
+];
+let schemaPath = schemaCandidates[0];
+for (const candidate of schemaCandidates) {
+  try { await readFile(candidate); schemaPath = candidate; break; } catch {}
+}
 const outputPath = resolve(root, "types/annual-summary-v4.generated.ts");
 const schema = JSON.parse(await readFile(schemaPath, "utf8"));
 const union = (values) => values.map((value) => JSON.stringify(value)).join(" | ");
