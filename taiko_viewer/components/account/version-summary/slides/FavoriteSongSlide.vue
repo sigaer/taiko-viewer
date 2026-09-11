@@ -27,7 +27,6 @@ const hasSong = computed(() => Boolean(song.value && hasUsableText(song.value.na
 const hasPlayCount = computed(() => isUsableMetric(song.value?.playCount));
 const isJapanese = computed(() => locale.value === "ja");
 const songName = computed(() => hasSong.value ? song.value!.name : isJapanese.value ? "この曲" : "这首歌");
-const songNoText = computed(() => isUsableMetric(song.value?.songNo) ? `#${song.value!.songNo}` : "");
 const songNameClass = computed(() => {
   const length = segmentAnnualTitle(songName.value).length;
   return length > 30 ? "is-long" : length > 19 ? "is-compact" : "";
@@ -132,9 +131,6 @@ const onNumberComplete = () => {
 
       <div class="favorite-closing-stack">
         <div class="favorite-song-scene__song-copy" data-annual-stage="data">
-          <div class="favorite-song-scene__credits">
-            <span v-if="songNoText">{{ songNoText }}</span>
-          </div>
           <h1 :class="songNameClass">{{ songName }}</h1>
         </div>
 
@@ -159,9 +155,6 @@ const onNumberComplete = () => {
         />
       </div>
 
-      <span class="favorite-song-scene__counter" data-annual-stage="copy">
-        {{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}
-      </span>
     </template>
 
     <template #transition>

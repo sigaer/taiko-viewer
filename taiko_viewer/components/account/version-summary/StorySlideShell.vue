@@ -9,6 +9,7 @@ const props = withDefaults(defineProps<{
   mood?: string; intensity?: "low" | "medium" | "high";
   variant?: "default" | "poster";
   reenter?: AnnualReenterMode;
+  showMeta?: boolean;
 }>(), { lead: "", accent: "", tone: "royal", active: false, reducedMotion: false, variant: "default" });
 
 const rootRef = ref<HTMLElement | null>(null);
@@ -26,8 +27,8 @@ useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion")
 <div class="story-slide-shell__frame">
       <header class="story-slide-shell__header">
         <div class="story-slide-shell__heading" data-annual-stage="title">
-          <span class="story-slide-shell__page">{{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}</span>
-          <p>{{ eyebrow }}</p><strong v-if="accent">{{ accent }}</strong>
+          <span v-if="showMeta !== false" class="story-slide-shell__page">{{ String(pageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}</span>
+          <p v-if="showMeta !== false && eyebrow">{{ eyebrow }}</p><strong v-if="showMeta !== false && accent">{{ accent }}</strong>
         </div>
         <h2 data-annual-stage="title">{{ title }}</h2>
         <p v-if="lead" class="story-slide-shell__lead" data-annual-stage="copy">{{ lead }}</p>

@@ -16,7 +16,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 </script>
 
 <template>
-  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED BURST" :title="speed ? '最高秒速歌曲' : '最高秒速记录'" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="" :show-meta="false" :title="speed ? '最高秒速歌曲' : '最高秒速记录'" tone="royal" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
     <template #background>
       <div class="pound-poster__bg">
         <img class="pound-poster__sky" src="/annual/pound/background.webp" alt="" aria-hidden="true">

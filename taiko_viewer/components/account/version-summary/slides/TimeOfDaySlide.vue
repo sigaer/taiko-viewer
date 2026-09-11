@@ -45,11 +45,12 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
     <template #background><img class="time-of-day-scene__background" src="/annual/timeOfDay/background_13.png" alt="" aria-hidden="true"></template>
     <div v-if="summary.timeOfDay" class="time-of-day-poster">
       <header class="time-of-day-theme" data-annual-stage="title">
-        <p>{{ t("annualSummary.copy.timeOfDay.eyebrow") }}</p>
+        <p>{{ t("annualSummary.slides.time.theme") }}</p>
       </header>
       <div class="time-wheel" aria-label="年度六个时段">
         <div class="time-wheel__outer-dim" aria-hidden="true"></div>
         <div class="time-wheel__rotor" aria-hidden="true">
+          <div class="time-wheel__bearing" aria-hidden="true"></div>
           <svg class="time-wheel__sectors" viewBox="-400 -400 800 800" aria-hidden="true">
             <g
               v-for="slot in wheelSlots"

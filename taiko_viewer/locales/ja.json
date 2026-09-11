@@ -702,7 +702,7 @@
       "shift": { "old": "物語の前半 · 忘れない好き", "new": "物語の後半 · 新しく響いた好き", "times": "{count} 回の出会い" },
       "monthly": { "estimated": "約 {time}", "plays": "主役曲 {songCount} 回 · 月合計 {monthCount} 回 · 約 {time}" },
       "weekday": { "top": "いちばん気が合う曜日", "bottom": "少し静かな曜日" },
-      "calendar": { "title": "{year} 太鼓カレンダー", "primary": "このバージョンでは {activeDays} 日、太鼓の記録が残りました", "longest": "最長連続記録は {longestStreak} 日です", "emotionLine1": "記録のない日にも、", "emotionLine2": "きっと自分だけのリズムがありました", "footnote": "同期済みの記録をもとに生成されています", "month": "{month}月", "monthSummary": "{month}月は {count} 日の記録があります", "datePlayCount": "{date}、{count} 回の記録", "active": "記録した日", "streak": "止まらなかった最長記録", "days": "{count} 日" },
+      "calendar": { "title": "虹2025 太鼓カレンダー", "primary": "このバージョンでは {activeDays} 日、太鼓の記録が残りました", "longest": "最長連続記録は {longestStreak} 日です", "emotionLine1": "記録のない日にも、", "emotionLine2": "きっと自分だけのリズムがありました", "month": "{month}月", "monthSummary": "{month}月は {count} 日の記録があります", "datePlayCount": "{date}、{count} 回の記録", "active": "記録した日", "streak": "止まらなかった最長記録", "days": "{count} 日" },
       "time": { "favorite": "太鼓の音が最も集まる時刻", "theme": "あなたの音が、いちばん響くのはいつ？", "periods": {"early_morning": "早朝", "morning": "午前", "noon": "昼", "afternoon": "午後", "evening": "夜", "late_night": "深夜"} },
       "late": { "latest": "最も深い夜の記録", "company": "夜の相棒", "nights": "{count} 夜", "plays": "{count} 打を残した" },
       "rating": { "sample": "サイト内の {count} 人のプレイヤーと一緒に", "rank": "今いる場所", "percentile": "仲間の {value}% より先まで来た", "tier": "今いる隊列", "tiers": { "top1": "先頭を走る Top 1%", "top5": "まぶしい Top 5%", "top20": "しっかり届いた Top 20%", "top50": "半分を越えた Top 50%", "growing": "ここから伸びていく場所" } },

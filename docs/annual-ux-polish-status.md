@@ -50,6 +50,10 @@ subsequently failed, therefore Gate reopened.** 下方 `0.58.0` 的原始 PASS �
 Next allowed round:
 UX-3 仍然禁止；先完成 `0.58.0` 的 corrective iteration。
 
+## UX-3A — Visual Cleanup & Layout（2026-09-11）
+
+Implementation complete; technical checks pending user visual acceptance. Updated favorite, ratingRank, calendar copy, speed/pound/high-score metadata, and Poster outer alignment. Frozen Opening/Period/Overview transition/timeOfDay baselines were not redesigned.
+
 ---
 
 ## Round 1.1 — 真实账号收口（2026-09-11）

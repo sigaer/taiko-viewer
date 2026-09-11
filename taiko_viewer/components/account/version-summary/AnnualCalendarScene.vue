@@ -122,7 +122,6 @@ const monthGroups = computed(() => Array.from({ length: 12 }, (_, index) => {
         />
       </div>
 
-      <footer data-annual-stage="copy">{{ t("annualSummary.slides.calendar.footnote") }}</footer>
     </div>
   </AnnualScene>
 </template>

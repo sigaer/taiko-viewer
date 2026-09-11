@@ -17,7 +17,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 </script>
 
 <template>
-  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="SPEED SIGNATURE" :title="t('annualSummary.slides.speed.title')" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="" :show-meta="false" :title="t('annualSummary.slides.speed.title')" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
     <template #background>
       <div class="profile-poster__bg">
         <img class="profile-poster__sky" src="/annual/speedProfile/background.png" alt="" aria-hidden="true">

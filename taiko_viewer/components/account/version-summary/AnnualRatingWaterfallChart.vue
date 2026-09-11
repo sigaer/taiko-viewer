@@ -279,17 +279,6 @@ const isEmpty = computed(() => props.ranks.length === 0);
         />
       </g>
 
-      <g class="annual-rating-waterfall-chart__rank-tags">
-        <text
-          v-for="tag in rankLabelItems"
-          :key="`rank-${tag.key}`"
-          :x="chartRight + 26"
-          :y="tag.y"
-          :class="{ 'is-current': tag.isCurrent }"
-        >
-          {{ String(tag.order).padStart(2, "0") }} {{ tag.label }}
-        </text>
-      </g>
     </svg>
   </div>
 </template>

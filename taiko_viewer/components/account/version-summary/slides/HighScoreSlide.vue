@@ -9,7 +9,7 @@ const props=defineProps<{summary:VersionSummaryViewModel;pageIndex:number;pageTo
 const {locale,t}=useI18n(); const item=computed(()=>props.summary.highScore);
 const copy=computed(()=>getHighScoreCopy(item.value,locale.value==='ja'?'ja':'zh'));
 </script>
-<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="HIGH SCORE" :title="item?.song.name || copy.title" tone="gold" mood="award-stage" :active="active" :reduced-motion="reducedMotion">
+<template><StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="" :show-meta="false" :title="item?.song.name || copy.title" tone="gold" mood="award-stage" :active="active" :reduced-motion="reducedMotion">
  <template #background><div class="score-poster__bg"><img src="/annual/highScore/background.png" alt=""><i /><i /></div></template>
  <div class="score-poster" :class="{'is-empty':!item}"><p class="score-poster__line" data-animate>{{ item ? copy.title : '今年还没有最高分记录' }}</p><div class="score-poster__record"><AnnualVinylRecord record-src="/annual/highScore/record-player.png" :cover-url="item?.song.coverUrl" :cover-alt="item?.song.name" :active="active" :reduced-motion="reducedMotion" /></div><div class="score-poster__score" data-animate><AnimatedNumber v-if="item" :value="item.score" :active="active" :reduced-motion="reducedMotion" :duration="1400" :delay="250" /><span v-else>—</span><small>SCORE</small></div><p class="score-poster__date">{{ item?.happenedLabel || t('annualSummary.common.unavailable') }}</p><p class="score-poster__copy">{{ item ? copy.body : '下一次游玩，也许就是年度高分的起点。' }}</p></div>
 </StorySlideShell></template>
