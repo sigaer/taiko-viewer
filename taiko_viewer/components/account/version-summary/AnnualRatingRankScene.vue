@@ -107,9 +107,9 @@ const copyLine = computed(() => {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
 }
 .annual-rating-rank-scene__paper {
+  height: 100%;
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(249, 243, 229, 0.9), rgba(241, 225, 199, 0.92)),
