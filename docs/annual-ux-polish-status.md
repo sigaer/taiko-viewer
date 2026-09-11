@@ -58,6 +58,10 @@ UX-3A visual fix-forward: rating plot now translates as a unified SVG group whil
 
 `0.58.8` deployed successfully; final online visual acceptance passed on 2026-09-11. Gate UX-3A: **PASS**. UX-3B has not started.
 
+## UX-3B — Implementation in progress
+
+Audited Keyword variants, monthly leaf sizing, Pound speed source, Breakthrough types, and the 1405 cover path. Keyword/month/Pound/Breakthrough/1405 cleanup is implemented; technical checks pass and release `0.59.0` is ready. UX-3B remains awaiting visual acceptance.
+
 ---
 
 ## Round 1.1 — 真实账号收口（2026-09-11）

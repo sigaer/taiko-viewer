@@ -153,16 +153,16 @@ const metricEntries = computed(() => [
   width: min(92%, 460px);
   transform: translateX(-50%);
   padding: 14px 16px;
-  border: 1px solid rgba(140, 190, 255, 0.4);
+  border: 1px solid rgba(180, 214, 255, 0.62);
   border-radius: 20px;
-  background: rgba(120, 176, 245, 0.14);
+  background: rgba(120, 176, 245, 0.24);
   backdrop-filter: blur(10px);
   display: grid;
   gap: 6px;
   animation: annual-finale-flash 2.5s ease-in-out both;
 }
 .annual-finale-scene__flash-eyebrow {
-  color: rgba(224, 240, 255, 0.82);
+  color: rgba(242, 249, 255, 0.94);
   font-size: 12px;
   letter-spacing: 0.1em;
 }

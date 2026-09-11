@@ -9,6 +9,7 @@ const props = defineProps<{
   compact?: boolean;
   motionDisabled?: boolean;
   density?: number;
+  sharedLongestName?: number;
   isTop?: boolean;
 }>();
 
@@ -53,7 +54,8 @@ const leafWidth = computed(() => {
   const maxWidth = props.compact ? 148 : 224;
   const dataWidth = Math.round(minWidth + (maxWidth - minWidth) * density);
   const padding = props.compact ? 34 : 46;
-  const nameMinWidth = Math.round(estimateNameWidth(fontSpec.value.max) + padding);
+  const sharedLength = Math.max(nameLength.value, props.sharedLongestName || 0);
+  const nameMinWidth = Math.round(estimateNameWidth(fontSpec.value.max) + padding + Math.max(0, sharedLength - nameLength.value) * fontSpec.value.max * 0.35);
   return `${Math.min(maxWidth, Math.max(dataWidth, nameMinWidth))}px`;
 });
 

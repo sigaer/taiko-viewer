@@ -68,6 +68,7 @@ const leafDensity = (item: VersionSummaryMonthlyFavorite) => {
   if (!(max > 0)) return 0.5;
   return leafMetric(item) / max;
 };
+const longestName = computed(() => items.value.reduce((max, item) => Math.max(max, [...String(item.song.name || "")].length), 0));
 const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
   topMonth.value && topMonth.value.month === item.month && topMonth.value.song.songNo === item.song.songNo
 );
@@ -107,6 +108,7 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
           :compact="itemDensity !== 'standard'"
           :motion-disabled="motionDisabled"
           :density="leafDensity(item)"
+          :shared-longest-name="longestName"
           :is-top="isTopMonth(item)"
         />
       </main>

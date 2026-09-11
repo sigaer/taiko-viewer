@@ -12,7 +12,7 @@ const props = defineProps<{
   reducedMotion: boolean;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const rootRef = ref<InstanceType<typeof AnnualScene> | null>(null);
 const saveData = ref(process.client && Boolean(
   (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
@@ -74,6 +74,22 @@ const body = computed(() => cleanText(
   profileKeyword.value?.body,
   cleanText(props.summary.copy.keyword.body)
 ));
+const variantCopy: Record<string, { zh: string[]; ja: string[] }> = {
+  big_song: { zh: ["大歌一响，你反而更容易进入状态。越是铺满屏幕的鼓点，越能把你的气势带出来。", "别人看到的是密密麻麻的音符，你看到的更像是一段可以一口气冲过去的路。", "鼓面越热闹，你越有存在感。大段配置没有把你压住，反而成了这一年的高光。"], ja: ["大きな音符が響くほど、あなたは調子を上げていきます。", "密集した音符も、あなたには一気に駆け抜ける道に見えました。", "にぎやかな譜面ほど存在感が増し、今年のハイライトになりました。"] },
+  stamina: { zh: ["你的优势不只在某一槌，而在下一槌、再下一槌。长时间保持节奏，本身就是实力。", "很多谱面难在坚持，而你最鲜明的特征，就是鼓点持续很久以后依然没有掉队。", "从开头敲到最后，稳定比爆发更难。耐力留下了很深的一笔。"], ja: ["強みは一打ではなく、次の一打、その先まで続くリズムです。", "長く続く譜面でも、あなたの鼓動は最後まで遅れませんでした。", "最初から最後まで保つ安定感が、深い一筆を残しました。"] },
+  speed: { zh: ["速度一上来，你的节奏反而更清楚。快速配置是这一年最像你的鼓面语言之一。", "鼓点开始加速以后，你没有被它甩开。越快的段落，越容易留下属于你的痕迹。", "有些人怕谱面突然提速，而你更像是在等它跑起来。"], ja: ["速度が上がるほど、あなたのリズムはかえって鮮明になります。", "加速する鼓点にも置いていかれず、速い場面ほど跡を残しました。", "急な加速を恐れず、譜面が走り出すのを待っているようでした。"] },
+  accuracy: { zh: ["不是每一槌都要很响，但每一槌都想落在对的位置。精度成了这一年的执念。", "你留下的不只是高分，还有越来越干净的判定。一次次修正，最后都写进了成绩。", "鼓面上的距离有时只有一点点，而你花了一整年，把这一点点越磨越小。"], ja: ["すべての一打を大きくするのではなく、正しい場所へ落とすことを選びました。", "高いスコアだけでなく、磨かれた判定が一年の記録に残っています。", "わずかな距離を、一年かけて少しずつ縮めていきました。"] },
+  rhythm: { zh: ["复杂的不一定是速度，而是何时落槌。你对节奏变化的适应，构成了很鲜明的个人轮廓。", "疏密、停顿、错位——节奏不断变化，你却总能重新找到下一槌该落在哪里。", "有些谱面靠手速，有些谱面靠感觉。你的这一维，更像是把节奏真正听进去了。"], ja: ["難しさは速さだけでなく、いつ打つか。変化への適応が輪郭になりました。", "間やずれが変わっても、次の一打の場所をすぐに見つけました。", "手速だけでなく感覚で、リズムを本当に聴き取っていました。"] },
+  complex: { zh: ["左右手、复合、变化不断叠在一起，你依然愿意钻进去把它拆开。", "越是不按套路出现的配置，越容易留下你的挑战记录。复杂本身没有让你退开。", "鼓点交错的时候，你最鲜明的能力才开始出现：把混乱重新敲成自己的节奏。"], ja: ["左右の手、複合、変化が重なっても、入り込んで一つずつほどきました。", "型どおりでない配置ほど、あなたの挑戦の記録を残しました。", "音符が交差するとき、混乱を自分のリズムへ変える力が現れます。"] }
+};
+const bodyVariant = computed(() => {
+  const key = highlightKey.value || "big_song";
+  const variants = variantCopy[key]?.[locale.value === "ja" ? "ja" : "zh"] || [];
+  if (!variants.length) return body.value;
+  const seed = `${props.summary.user?.nickname || "player"}:${key}:${props.summary.version?.key || "annual"}`;
+  const hash = Array.from(seed).reduce((n, ch) => (n * 31 + ch.charCodeAt(0)) >>> 0, 0);
+  return variants[hash % variants.length];
+});
 </script>
 
 <template>
@@ -138,7 +154,7 @@ const body = computed(() => cleanText(
         <strong>{{ dimensionLabel }}</strong>
       </div>
 
-      <p v-if="body" class="annual-keyword-sigil-scene__body" data-annual-stage="copy">{{ body }}</p>
+      <p v-if="bodyVariant" class="annual-keyword-sigil-scene__body" data-annual-stage="copy">{{ bodyVariant }}</p>
       <p class="annual-keyword-sigil-scene__closing" data-annual-stage="copy">{{ t("annualSummary.keywords.closing") }}</p>
     </div>
   </AnnualScene>

@@ -12,9 +12,11 @@ export const getPoundSpeedCopy = (pound: VersionSummaryPound | null | undefined,
   const seed = `${pound.topSong?.songNo || 0}:${pound.speed}`;
   const zh = ["今年最快的一首歌", "你的最高秒速，停在这一刻", "鼓槌冲到最快的那一刻"];
   const ja = ["今年いちばん速かった一曲", "あなたの最高秒速は、この瞬間に", "バチが最速へ駆け抜けた一打"];
-  const bodyZh = ["不是每一次连打都会被记住，但这一秒足够快。", "这首歌记录了你今年最锋利的一次爆发。", "速度没有停在鼓面上，它冲进了年度记录。"];
+  const tierZh = pound.speed >= 50 ? "秒速 50。你确定是在连打，不是在给鼓面做压力测试吗？" : pound.speed >= 45 ? "秒速 45——这时候比起数鼓点，更像是在听一阵鼓点风暴。" : pound.speed >= 40 ? "秒速 40。鼓面上的声音几乎连成了一整片。" : pound.speed >= 35 ? "超过秒速 35，连打已经密得快要看不清落槌的间隙。" : pound.speed >= 30 ? "秒速 30 已经不是随手敲敲了，鼓槌开始带起风声。" : "鼓点一下一下连起来，速度还在继续往上追。";
+  const tierJa = pound.speed >= 50 ? "秒速 50。連打というより、太鼓の耐久テストかもしれません。" : pound.speed >= 45 ? "秒速 45——数えるより、鼓点の嵐を聴くような速さです。" : pound.speed >= 40 ? "秒速 40。音符がほとんど一つの流れになりました。" : pound.speed >= 35 ? "秒速 35を越え、打点の隙間が見えないほど密になりました。" : pound.speed >= 30 ? "秒速 30は、もう軽い連打ではありません。" : "鼓点を一つずつつなぎながら、速度はまだ上がっていきます。";
+  const bodyZh = [tierZh];
   const bodyJa = ["すべての連打が残るわけじゃない。でも、この一秒は速かった。", "この曲が、今年いちばん鋭い爆発を記録しました。", "速さは鼓面を越えて、年間の記録へ駆け抜けました。"];
-  return { title: pick(locale === "ja" ? ja : zh, seed), body: pick(locale === "ja" ? bodyJa : bodyZh, `${seed}:body`) };
+  return { title: pick(locale === "ja" ? ja : zh, seed), body: locale === "ja" ? tierJa : pick(bodyZh, `${seed}:body`) };
 };
 
 export const getHighScoreCopy = (highScore: VersionSummaryHighScore | null | undefined, locale: "zh" | "ja" = "zh") => {
