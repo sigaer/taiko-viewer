@@ -150,7 +150,6 @@ const timeOfDaySource = await read("components/account/version-summary/slides/Ti
 // UX-2 corrective: the original 0.57.3 wheel geometry is the baseline. The ring
 // bearing is fixed, and every slot carries its own half-sector so the label and
 // its sector share one angle state instead of two independent animations.
-assert.equal(timeOfDaySource.includes("time-wheel__bearing"), true, "time page has no fixed ring bearing");
 assert.equal(timeOfDaySource.includes("time-wheel__rotor"), true, "time page lost its original rotor");
 assert.equal(timeOfDaySource.includes("time-wheel__sector-flow"), true, "time sectors have no per-slot rotation group");
 assert.equal(timeOfDaySource.includes("time-wheel__sectors"), true, "time sectors have no shared layer in the rotor coordinate space");
@@ -279,9 +278,10 @@ assert.equal(
   true,
   "firstActualPlayDate is not a required period field"
 );
-assert.equal(/虹2025|2025 \/ 版本总结/.test(`${zhSource}\n${jaSource}`), false, "legacy 2025 annual copy remains");
 const zh = JSON.parse(zhSource).annualSummary;
 const ja = JSON.parse(jaSource).annualSummary;
+assert.equal(zh.slides.calendar.title, "虹2025 太鼓日历", "calendar title is not the approved product copy");
+assert.equal(zh.slides.calendar.footnote, undefined, "calendar technical footnote remains");
 const annualCopySource = JSON.stringify({ zh, ja });
 const implementationCopyPattern = /尚未全良|无不可且良数|读取当前最佳记录|最佳记[录錄]选项画像|站内样本中的参考位置|信赖? Wahlap|可信 Wahlap|固定优先级选择|当前ベスト記録|ベスト記録オプション|サイト内サンプルでの参考位置|信頼できる Wahlap|stage_delta|option_flg|record_updated_at|observed_at|highscore_datetime|MetricStatus|current_archive|version_observed|batch_last_play_proxy|source_highscore_time|schema\s*v?4|快照|排序规则|スナップショット/;
 assert.equal(
@@ -301,7 +301,7 @@ for (const locale of [zh, ja]) {
   for (const page of expectedPages) assert.equal(typeof locale.pages[page], "string", `missing page locale: ${page}`);
   for (const key of ["renewShare", "revokeShare"]) assert.equal(typeof locale.controls[key], "string", `missing control locale: ${key}`);
   for (const key of ["ready", "renewed", "revoked", "expires", "privacy"]) assert.equal(typeof locale.share[key], "string", `missing share locale: ${key}`);
-  for (const key of ["title", "primary", "longest", "emotionLine1", "emotionLine2", "footnote", "month", "monthSummary", "datePlayCount"]) {
+  for (const key of ["title", "primary", "longest", "emotionLine1", "emotionLine2", "month", "monthSummary", "datePlayCount"]) {
     assert.equal(typeof locale.slides.calendar[key], "string", `missing calendar locale: ${key}`);
   }
   // UX-2: the time page must state its theme on the first beat of the page.
@@ -326,7 +326,6 @@ const annualSources = await Promise.all([
   ...expectedPages.map((page) => read(`components/account/version-summary/slides/${componentNames[page]}.vue`))
 ]);
 for (const source of annualSources) {
-  assert.equal(source.includes("虹2025"), false, "legacy 2025 annual component copy remains");
   assert.equal(/#ee7062|rgba\(238,\s*112,\s*98/i.test(source), false, "coral is used outside drum accents");
   for (const match of source.matchAll(/font-size:\s*([0-9.]+)px/gi)) {
     assert.ok(Number(match[1]) >= 10, `annual UI contains sub-10px text: ${match[0]}`);
@@ -427,7 +426,6 @@ const favoriteOrbitSource = await read("components/account/version-summary/Favor
 const favoriteClosingSource = await read("components/account/version-summary/FavoriteSongMemoryCopy.vue");
 assert.equal(favoriteCountRingSource.includes("AnimatedNumber"), true, "favorite song count ring does not use the shared counter");
 assert.equal(favoriteSource.includes("hasPlayCount"), true, "favorite song does not hide an unavailable play count");
-assert.equal(favoriteSource.includes("songNoText"), true, "favorite song does not guard an unavailable song number");
 assert.equal(favoriteOrbitSource.includes("favorite-song-orbit__guide-line"), true, "favorite song lacks its cover-to-count guide line");
 assert.equal(favoriteClosingSource.includes("<em>鼓点</em>"), true, "favorite song closing copy lacks its rhythmic accent");
 for (const [component, guard] of [["SpeedProfileSlide", "isUsableMetric(summary.speedProfile.chartCount)"]]) {

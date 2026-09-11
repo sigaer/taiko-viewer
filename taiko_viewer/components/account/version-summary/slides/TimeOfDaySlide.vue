@@ -50,7 +50,6 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
       <div class="time-wheel" aria-label="年度六个时段">
         <div class="time-wheel__outer-dim" aria-hidden="true"></div>
         <div class="time-wheel__rotor" aria-hidden="true">
-          <div class="time-wheel__bearing" aria-hidden="true"></div>
           <svg class="time-wheel__sectors" viewBox="-400 -400 800 800" aria-hidden="true">
             <g
               v-for="slot in wheelSlots"
