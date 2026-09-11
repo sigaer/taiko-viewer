@@ -56,6 +56,8 @@ Implementation complete; technical checks pending user visual acceptance. Update
 
 UX-3A visual fix-forward: rating plot now translates as a unified SVG group while retaining tier names without ordinals; speedProfile/pound center markers align to the record center; Poster outer offset was removed. Release `0.58.7` is awaiting visual re-acceptance.
 
+`0.58.7` deployed successfully; `0.58.8` is ready for deployment with the material-position correction. Awaiting user visual re-acceptance.
+
 ---
 
 ## Round 1.1 — 真实账号收口（2026-09-11）
