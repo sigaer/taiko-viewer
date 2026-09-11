@@ -46,14 +46,9 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
     <div v-if="summary.timeOfDay" class="time-of-day-poster">
       <header class="time-of-day-theme" data-annual-stage="title">
         <p>{{ t("annualSummary.copy.timeOfDay.eyebrow") }}</p>
-        <h2>{{ t("annualSummary.slides.time.theme") }}</h2>
       </header>
       <div class="time-wheel" aria-label="年度六个时段">
         <div class="time-wheel__outer-dim" aria-hidden="true"></div>
-        <svg class="time-wheel__bearing" viewBox="-400 -400 800 800" aria-hidden="true">
-          <circle cx="0" cy="0" r="368" class="time-wheel__edge" />
-          <circle cx="0" cy="0" r="286" class="time-wheel__edge time-wheel__edge--inner" />
-        </svg>
         <div class="time-wheel__rotor" aria-hidden="true">
           <svg class="time-wheel__sectors" viewBox="-400 -400 800 800" aria-hidden="true">
             <g
@@ -89,13 +84,8 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
 .time-of-day-scene{background:#152949}.time-of-day-scene__background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.time-of-day-poster{position:absolute;inset:0;color:#fff}
 .time-of-day-theme{position:absolute;z-index:6;left:6%;top:max(62px,calc(env(safe-area-inset-top) + 50px));max-width:62%;text-shadow:0 3px 16px rgba(10,24,42,.62)}
 .time-of-day-theme p{margin:0;color:rgba(206,230,255,.86);font:700 clamp(10px,2.7vw,13px)/1 var(--viewer-font-family);letter-spacing:.22em}
-.time-of-day-theme h2{margin:9px 0 0;color:#fff;font:700 clamp(1.12rem,5vw,1.7rem)/1.22 var(--viewer-display-font);letter-spacing:.01em;text-wrap:balance}
 .time-wheel{--wheel-x:0px;--wheel-y:52%;--wheel-radius:min(88vw,372px);--ring-outer-radius:calc(var(--wheel-radius) * .92);--ring-inner-radius:calc(var(--wheel-radius) * .715);--don-backplate-radius:79px;position:absolute;inset:0;overflow:visible}
 .time-wheel__outer-dim{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at var(--wheel-x) var(--wheel-y),transparent 0 var(--ring-inner-radius),rgba(0,0,0,.4) calc(var(--ring-inner-radius) + 1px) 100%)}
-/* Fixed bearing: the ring edges never rotate, so the composition cannot turn away. */
-.time-wheel__bearing{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:2;pointer-events:none}
-.time-wheel__edge{fill:none;stroke:rgba(255,255,255,.52);stroke-width:2}
-.time-wheel__edge--inner{stroke:rgba(255,255,255,.2);stroke-width:1}
 .time-wheel__rotor{position:absolute;left:calc(var(--wheel-x) - var(--wheel-radius));top:calc(var(--wheel-y) - var(--wheel-radius));width:calc(var(--wheel-radius)*2);height:calc(var(--wheel-radius)*2);overflow:hidden;clip-path:inset(0 0 0 50%);transform-origin:center;will-change:transform;z-index:2}
 .time-wheel__slot{position:absolute;left:50%;top:50%;width:180px;text-align:center;transform:translate(-50%,-50%) rotate(var(--angle)) translateX(calc(var(--wheel-radius)*.87));transform-origin:center;animation:time-slot-flow 40s linear normal infinite;opacity:var(--strength);text-shadow:0 3px 15px rgba(10,24,42,.56);z-index:6}
 /* The slot's own sector shares the slot's angle state and lives inside the slot,
