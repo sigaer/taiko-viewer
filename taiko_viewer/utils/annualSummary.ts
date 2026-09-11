@@ -480,21 +480,23 @@ export const normalizeAnnualSummary = (
       ? `#${formatNumber(ratingRankMin)}`
       : "—";
   // The Period page reports how long the player's own story has been running, so
-  // it counts from the earliest real play day the account's data can prove up to
-  // today. That anchor is published by the generator as `firstActualPlayDate`
-  // because the annual window trims the observation events long before they
-  // reach the viewer; the older window-scoped fields remain only as a fallback
-  // for summaries generated before the field existed.
+  // it counts from the first record the backend actually observed for this
+  // account up to the moment that report was generated. `firstActualPlayDate` is
+  // that anchor as published by the generator; the window-scoped fields remain
+  // only as a fallback for summaries generated before the anchor existed.
   const firstActualPlayDay = calendarParts(period.firstActualPlayDate);
   const earliestPlayDay = firstActualPlayDay
     || earliestCalendarDay([
       calendarParts(period.firstRecordAt),
       ...(calendarActivity?.days.map((day) => day.date) || [])
     ]);
-  const todayDay = calendarParts(new Date());
+  // "Now" is the backend generation timestamp, never the visitor's clock: the
+  // figure has to be identical on the server render, on hydration and on a later
+  // reopen, and must not depend on a local time zone.
+  const generatedDay = calendarParts(raw.generatedAt);
   const periodTotalDays = (() => {
-    const storySpan = earliestPlayDay && todayDay ? calendarDaySpan(earliestPlayDay, todayDay) : null;
-    // Without a provable first play day the only honest figure left is what the
+    const storySpan = earliestPlayDay && generatedDay ? calendarDaySpan(earliestPlayDay, generatedDay) : null;
+    // Without a provable first record the only honest figure left is what the
     // algorithm reported for its own window.
     return storySpan ?? numberValue(period.totalDays);
   })();

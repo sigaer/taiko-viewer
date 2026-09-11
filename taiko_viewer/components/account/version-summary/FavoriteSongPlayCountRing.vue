@@ -127,7 +127,7 @@ const emit = defineEmits<{ complete: [] }>();
   gap: 5px;
   margin-top: 2px;
   color: #ffe19a;
-  font: 900 clamp(2.85rem, 12.6vw, 3.65rem)/0.9 var(--viewer-display-font);
+  font: 900 clamp(2.8rem,10vw,3.6rem)/.9 var(--viewer-display-font);
   letter-spacing: -0.035em;
   text-shadow: 0 4px 24px rgba(248, 215, 126, 0.2);
 }

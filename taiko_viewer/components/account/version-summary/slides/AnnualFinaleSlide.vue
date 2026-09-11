@@ -328,7 +328,7 @@ const metricEntries = computed(() => [
   0% { opacity: 0; transform: translate(-50%, 18px) scale(0.96); }
   16% { opacity: 1; transform: translate(-50%, 0) scale(1); }
   66% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  100% { opacity: 0.16; transform: translate(-50%, -12px) scale(0.9); }
+  100% { opacity: 0.52; transform: translate(-50%, -12px) scale(0.9); }
 }
 
 @media (max-width: 720px) {

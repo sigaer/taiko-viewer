@@ -50,4 +50,8 @@ defineProps<{
   border-radius: inherit;
   object-fit: cover;
 }
+
+.annual-obsession-cover__image {
+  border-radius: 12px;
+}
 </style>

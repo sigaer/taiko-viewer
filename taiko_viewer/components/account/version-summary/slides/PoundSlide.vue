@@ -57,8 +57,8 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 
 .pound-poster { --split-y: calc(43% + 4px); --building-h: calc(100vw * 162 / 414); --noise-h: clamp(80px, 12svh, 100px); --record-h: calc(100vw * 348 / 414); --record-clear-top: calc(var(--record-h) * 87 / 348); position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; color: #fff; }
 .pound-poster__hero { text-align: center; z-index: 2; padding-top: 0.5rem; }
-.pound-poster__kicker { margin: 0; color: #fff; font: 700 clamp(1.15rem, 5vw, 2.2rem) / 1.05 var(--viewer-display-font); text-wrap: balance; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4); }
-.pound-poster__speed { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-top: 0.3rem; }
+.pound-poster__kicker { margin: 0; color: #27365d; font: 700 clamp(1.15rem, 5vw, 2.2rem) / 1.05 var(--viewer-display-font); text-wrap: balance; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4); }
+.pound-poster__speed { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-top: 1rem; }
 .pound-poster__speed strong { font: 800 clamp(4.4rem, 20vw, 8.5rem) / 0.84 var(--viewer-display-font); letter-spacing: -0.06em; color: #fff; text-shadow: 0 4px 28px rgba(0, 0, 0, 0.45); }
 .pound-poster__speed span { font-weight: 700; font-size: clamp(0.8rem, 3vw, 1.25rem); white-space: nowrap; }
 .pound-poster__sub { max-width: 92vw; margin: 0.5rem auto 0; color: #ffe8f3cc; font-size: clamp(10px, 3.1vw, 12.5px); line-height: 1.4; white-space: nowrap; }

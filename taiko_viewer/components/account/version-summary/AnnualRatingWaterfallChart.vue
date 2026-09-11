@@ -148,12 +148,17 @@ const verticalGrid = computed(() => {
   return output;
 });
 
+// Tier names sit to the right of the plot and ride 14px above their own layer
+// baseline so the enlarged labels stay clear of the waterfall geometry.
+const rankTagX = chartRight + 90;
+const rankTagYOffset = -6;
+
 const rankLabelItems = computed(() =>
   layers.value.map((layer) => ({
     key: layer.key,
     order: layer.order,
     label: layer.label,
-    y: layer.baseline + 8,
+    y: layer.baseline + rankTagYOffset,
     isCurrent: layer.isCurrent
   }))
 );
@@ -282,7 +287,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
       </g>
 
       <g class="annual-rating-waterfall-chart__rank-tags">
-        <text v-for="tag in rankLabelItems" :key="`rank-${tag.key}`" :x="chartRight + 26" :y="tag.y" :class="{ 'is-current': tag.isCurrent }">{{ tag.label }}</text>
+        <text v-for="tag in rankLabelItems" :key="`rank-${tag.key}`" :x="rankTagX" :y="tag.y" :class="{ 'is-current': tag.isCurrent }">{{ tag.label }}</text>
       </g>
 
       </g>
@@ -351,7 +356,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
 }
 .annual-rating-waterfall-chart__rank-tags text {
   fill: #7d5f49;
-  font-size: 26px;
+  font-size: 30px;
   text-anchor: start;
 }
 .annual-rating-waterfall-chart__rank-tags text.is-current {

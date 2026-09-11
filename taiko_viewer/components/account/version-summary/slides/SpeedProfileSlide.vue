@@ -53,7 +53,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 .profile-poster__sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 
 .profile-poster { --split-y: calc(43% + 4px); --building-h: calc(100vw * 162 / 414); --noise-h: clamp(80px, 12svh, 100px); --record-h: calc(100vw * 348 / 414); --record-clear-top: calc(var(--record-h) * 87 / 348); position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; color: #162317; }
-.profile-poster__headline { position: relative; z-index: 2; padding-top: 0.5rem; }
+.profile-poster__headline { position: relative; z-index: 2; padding-top: 1rem; }
 .profile-poster__headline > strong { display: block; color: #172619; font: 900 clamp(4.6rem, 20vw, 8.5rem) / 0.86 var(--viewer-display-font); letter-spacing: -0.06em; text-shadow: 0 2px 18px rgba(255, 255, 255, 0.4); }
 .profile-poster__headline > strong small { font-size: 0.24em; letter-spacing: 0; }
 .profile-poster__headline > p { max-width: 22ch; margin: 0.5rem auto 0; color: #2f5230; font-size: clamp(0.95rem, 4vw, 1.25rem); font-weight: 700; line-height: 1.35; }

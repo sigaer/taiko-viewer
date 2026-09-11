@@ -90,19 +90,41 @@ test("cached summaries report a story span that starts at the first played day",
   }
 });
 
-// The real acceptance account (taiko id 2258735) proves the product definition
-// end to end: the game's own record reaches back to 2023, while the annual
-// observation window only starts in 2026. The window-scoped fields can never
-// produce the first date, so the generator has to publish it separately.
-test("the acceptance account's first actual play day precedes its observation window", async () => {
-  const file = resolve(
-    process.cwd(),
-    ".data/account-cache/annual-summary-v4/summaries/d6b5915c46057bcb005f46f6/annual_2026/annual_8357acbcad4494b16903122a/summary.json"
-  );
-  const summary = JSON.parse(await readFile(file, "utf8").catch(() => "null") ?? "null");
-  if (!summary) return;
-  const firstActualPlayDay = calendarParts(summary.period?.firstActualPlayDate);
-  const windowFirstDay = calendarParts(summary.period?.firstRecordAt);
-  assert.equal(firstActualPlayDay, "2023-11-18", "the acceptance account lost its proven first play day");
-  assert.ok(windowFirstDay > firstActualPlayDay, "the window-scoped field must not define the story start");
+// The real acceptance account (taiko id 2258735) is the one that reported 1029
+// days: its game archive reaches back to 2023-11-18, but the sync pipeline only
+// observed the account from 2026-01-16 on. The story anchor may never precede
+// the system's own first record of the account, and the window-scoped fields
+// (`firstRecordAt` / `coverage.firstSnapshotAt`) are what prove that boundary.
+// Only summaries produced by the current algorithm are audited; older cached
+// files still carry the previous anchor.
+test("the acceptance account never anchors its story before the first observed record", async () => {
+  const CURRENT_ALGORITHM = "annual-observation-v4.2.0";
+  const cacheRoot = resolve(process.cwd(), ".data/account-cache/annual-summary-v4/summaries");
+  const summaryFiles = [];
+  const walk = async (directory) => {
+    for (const entry of await readdir(directory, { withFileTypes: true }).catch(() => [])) {
+      const path = resolve(directory, entry.name);
+      if (entry.isDirectory()) await walk(path);
+      else if (entry.name === "summary.json") summaryFiles.push(path);
+    }
+  };
+  await walk(cacheRoot).catch(() => undefined);
+  for (const file of summaryFiles) {
+    const summary = JSON.parse(await readFile(file, "utf8").catch(() => "null") ?? "null");
+    if (!summary || summary.provenance?.algorithmVersion !== CURRENT_ALGORITHM) continue;
+    const firstActualPlayDay = calendarParts(summary.period?.firstActualPlayDate);
+    const firstRecordDay = calendarParts(summary.period?.firstRecordAt);
+    const firstSnapshotDay = calendarParts(summary.coverage?.firstSnapshotAt);
+    assert.ok(firstActualPlayDay, `${file} has no first-record day`);
+    assert.ok(firstRecordDay, `${file} has no first-record timestamp`);
+    assert.ok(firstSnapshotDay, `${file} has no first observed snapshot`);
+    assert.ok(
+      firstActualPlayDay >= firstRecordDay,
+      `${file} anchors its story before the first record the system observed`
+    );
+    assert.ok(
+      firstRecordDay <= firstSnapshotDay,
+      `${file} first record is later than the first observed snapshot`
+    );
+  }
 });

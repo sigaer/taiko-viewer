@@ -44,6 +44,10 @@ const reportYear = computed(() => {
   const dateYear = props.summary.version.startDate.match(/20\d{2}/)?.[0];
   return keyYear || dateYear || "2026";
 });
+// Display-only cover label. The opening cover advertises the edition by its
+// public name; `reportYear` stays the machine-readable annual_2026 key that the
+// rest of the report (calendar, summaries, API) is built on.
+const reportYearLabel = computed(() => t("annualSummary.openingCover.yearLabel"));
 const reportTitleLines = computed(() => t("annualSummary.openingCover.reportTitle").split("\n"));
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "";
@@ -116,7 +120,7 @@ const jumpToResultPage = () => requestStart(true);
     </template>
 
     <template #data>
-      <strong class="annual-opening__year" data-annual-stage="data">{{ reportYear }}</strong>
+      <strong class="annual-opening__year" data-annual-stage="data">{{ reportYearLabel }}</strong>
     </template>
 
     <template #copy>
@@ -137,7 +141,7 @@ const jumpToResultPage = () => requestStart(true);
         </div>
         <div class="annual-opening__info-main">
           <div class="annual-opening__info-copy" data-annual-stage="data">
-            <span class="annual-opening__info-year-label">{{ reportYear }}</span>
+            <span class="annual-opening__info-year-label">{{ reportYearLabel }}</span>
             <h1>
               <span v-for="line in reportTitleLines" :key="line">{{ line }}</span>
             </h1>
@@ -193,7 +197,7 @@ const jumpToResultPage = () => requestStart(true);
 .annual-opening__info-main { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 148px; padding: 5px 0 0; }
 .annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 56px; }
 .annual-opening__info-year-label { display: none; }
-.annual-opening__info-copy h1 { display: grid; gap: 1px; margin: 0; color: #fffdf8; font: 800 clamp(1.65rem, 8.5vw, 3.15rem)/.9 var(--viewer-display-font); letter-spacing: .02em; text-shadow: 0 2px 0 rgba(37,91,127,.24), 0 4px 12px rgba(31,70,105,.22); -webkit-text-stroke: .35px rgba(255,255,255,.6); }
+.annual-opening__info-copy h1 { display: grid; gap: 0.8rem; margin: 0; color: #fffdf8; font: 800 clamp(1.65rem, 8.5vw, 3.15rem)/.9 var(--viewer-display-font); letter-spacing: .02em; text-shadow: 0 2px 0 rgba(37,91,127,.24), 0 4px 12px rgba(31,70,105,.22); -webkit-text-stroke: .35px rgba(255,255,255,.6); }
 .annual-opening__start { position: relative; z-index: 3; display: grid; min-width: 84px; min-height: 104px; place-items: center; align-content: center; gap: 1px; padding: 4px; border: 0; color: #fff; background: transparent; cursor: pointer; pointer-events: auto; text-shadow: 0 2px 4px rgba(33,71,108,.32); }
 .annual-opening__start:disabled { cursor: wait; opacity: .82; }
 .annual-opening__start:focus-visible { outline: 3px solid #fff; outline-offset: 4px; border-radius: 12px; }
@@ -203,7 +207,7 @@ const jumpToResultPage = () => requestStart(true);
 .annual-opening__start strong { font-size: clamp(10px, 2.9vw, 14px); }
 .annual-opening__start em { font-size: clamp(13px, 3.6vw, 17px); font-weight: 800; }
 .annual-opening__start.is-pulsing .annual-opening__start-icon { animation: opening-start-hit .43s cubic-bezier(.2,.8,.25,1); }
-.annual-opening__legal { position: absolute; right: clamp(18px, 5vw, 36px); bottom: max(8px, env(safe-area-inset-bottom)); left: clamp(18px, 5vw, 36px); display: grid; gap: 3px; color: rgba(246,251,255,.82); font: 500 clamp(10px, 2.25vw, 11px)/1.25 var(--viewer-font-family); text-align: right; text-shadow: 0 1px 3px rgba(29,66,102,.18); }
+.annual-opening__legal { position: absolute; right: clamp(18px, 5vw, 36px); bottom: max(8px, env(safe-area-inset-bottom)); left: clamp(18px, 5vw, 36px); display: grid; gap: 3px; color: rgba(246,251,255,.82); font: 500 clamp(10px, 2.25vw, 11px)/1.25 var(--viewer-font-family); text-align: left; text-shadow: 0 1px 3px rgba(29,66,102,.18); }
 @keyframes opening-start-hit { 0%, 100% { transform: scale(1); } 32% { transform: scale(1.1); } 63% { transform: scale(.97); } }
 @media (max-width: 370px) { .annual-opening__info-main { min-height: 132px; } .annual-opening__info-copy h1 { font-size: clamp(1.42rem, 8vw, 2.2rem); } .annual-opening__start { min-width: 76px; } .annual-opening__start-icon { width: 65px; } .annual-opening__direct { width: clamp(42px, 11vw, 48px); } .annual-opening__direct span { font-size: 10px; } }
 @media (max-height: 690px) and (orientation: portrait) { .annual-opening__title-art { top: -7%; } .annual-opening__carousel { top: 27%; height: 36%; } .annual-opening__cover-info { padding-top: 8px; } .annual-opening__info-main { min-height: 125px; } .annual-opening__legal { font-size: 10px; } }

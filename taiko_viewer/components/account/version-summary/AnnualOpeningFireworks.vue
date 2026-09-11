@@ -37,20 +37,22 @@ type Particle = {
 // Staggered generators rather than one loop: every burst uses its own position,
 // size, count and start offset so the sky never repeats the same shape twice.
 // Cadences are deliberately shorter than a particle lifetime so consecutive
-// bursts overlap and the sky is never empty between them.
+// bursts overlap and the sky is never empty between them. The schedule keeps the
+// original geometry, trajectory and palette; only the cadence (slightly
+// tighter), the per-burst particle count and the particle lifetime are tuned.
 const GENERATORS = [
-  { x: 0.24, y: 0.20, count: 26, speed: 1.00, hue: 194, size: 1.00, delay: 0.00, cadence: 3.40 },
-  { x: 0.72, y: 0.15, count: 20, speed: 0.86, hue: 258, size: 0.88, delay: 0.45, cadence: 3.90 },
-  { x: 0.50, y: 0.30, count: 30, speed: 1.12, hue: 178, size: 1.08, delay: 1.10, cadence: 4.40 },
-  { x: 0.14, y: 0.40, count: 16, speed: 0.74, hue: 205, size: 0.76, delay: 1.80, cadence: 4.10 },
-  { x: 0.86, y: 0.38, count: 22, speed: 0.94, hue: 232, size: 0.94, delay: 2.40, cadence: 3.60 },
-  { x: 0.38, y: 0.12, count: 18, speed: 0.82, hue: 188, size: 0.82, delay: 3.10, cadence: 4.60 },
-  { x: 0.64, y: 0.46, count: 24, speed: 1.04, hue: 268, size: 1.02, delay: 3.70, cadence: 4.00 }
+  { x: 0.24, y: 0.20, count: 30, speed: 1.00, hue: 194, size: 1.00, delay: 0.00, cadence: 2.90 },
+  { x: 0.72, y: 0.15, count: 23, speed: 0.86, hue: 258, size: 0.88, delay: 0.45, cadence: 3.30 },
+  { x: 0.50, y: 0.30, count: 34, speed: 1.12, hue: 178, size: 1.08, delay: 1.10, cadence: 3.75 },
+  { x: 0.14, y: 0.40, count: 18, speed: 0.74, hue: 205, size: 0.76, delay: 1.80, cadence: 3.50 },
+  { x: 0.86, y: 0.38, count: 25, speed: 0.94, hue: 232, size: 0.94, delay: 2.40, cadence: 3.05 },
+  { x: 0.38, y: 0.12, count: 21, speed: 0.82, hue: 188, size: 0.82, delay: 3.10, cadence: 3.90 },
+  { x: 0.64, y: 0.46, count: 27, speed: 1.04, hue: 268, size: 1.02, delay: 3.70, cadence: 3.40 }
 ] as const;
 
 const GRAVITY = 0.00034;
 const DRAG = 0.00165;
-const MAX_PARTICLES = 420;
+const MAX_PARTICLES = 540;
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let context: CanvasRenderingContext2D | null = null;
@@ -95,7 +97,7 @@ const spawnBurst = (generator: Burst, short = false) => {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       life: 0,
-      ttl: random(760, 1360),
+      ttl: random(1000, 1750),
       size: generator.radiusBase * random(0.7, 1.9) * size.scale,
       hue: generator.hue + random(-16, 16),
       drag: DRAG * random(0.78, 1.24)
