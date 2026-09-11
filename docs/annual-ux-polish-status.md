@@ -60,7 +60,7 @@ UX-3A visual fix-forward: rating plot now translates as a unified SVG group whil
 
 ## UX-3B — Implementation in progress
 
-Audited Keyword variants, monthly leaf sizing, Pound speed source, Breakthrough types, and the 1405 cover path. Keyword/month/Pound/Breakthrough/1405 cleanup is implemented; technical checks pass and release `0.59.0` is ready. UX-3B remains awaiting visual acceptance.
+UX-3B repair pass: Keyword remains frozen; Month now measures the longest visible title and applies a shared measured width to the leaf image itself; Pound tier copy no longer duplicates the speed prefix; Breakthrough secondary card contrast is increased on the visible card selector. Technical checks pass; release `0.59.1` is ready for visual re-acceptance.
 
 ---
 

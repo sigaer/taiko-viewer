@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef } from "vue";
+import { computed, ref, toRef, onMounted, onBeforeUnmount } from "vue";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 import AnnualMonthlyLeafItem from "./AnnualMonthlyLeafItem.vue";
 import AnnualScene from "./AnnualScene.vue";
@@ -69,6 +69,22 @@ const leafDensity = (item: VersionSummaryMonthlyFavorite) => {
   return leafMetric(item) / max;
 };
 const longestName = computed(() => items.value.reduce((max, item) => Math.max(max, [...String(item.song.name || "")].length), 0));
+const sharedLeafWidth = ref(0);
+let leafResizeObserver: ResizeObserver | null = null;
+const measureLeafWidth = () => {
+  if (!process.client || !rootRef.value) return;
+  const host = rootRef.value.$el?.querySelector<HTMLElement>(".annual-monthly-leaf-scene__timeline");
+  if (!host) return;
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  context.font = "700 12px var(--viewer-font-family, sans-serif)";
+  const maxText = items.value.reduce((max, item) => Math.max(max, context.measureText(`《${item.song.name}》`).width), 0);
+  const available = Math.max(120, host.clientWidth - 76);
+  sharedLeafWidth.value = Math.min(available, Math.max(98, Math.ceil(maxText + 54)));
+};
+onMounted(() => { measureLeafWidth(); leafResizeObserver = new ResizeObserver(measureLeafWidth); const host = rootRef.value?.$el?.querySelector<HTMLElement>(".annual-monthly-leaf-scene__timeline"); if (host) leafResizeObserver.observe(host); });
+onBeforeUnmount(() => leafResizeObserver?.disconnect());
 const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
   topMonth.value && topMonth.value.month === item.month && topMonth.value.song.songNo === item.song.songNo
 );
@@ -109,6 +125,7 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
           :motion-disabled="motionDisabled"
           :density="leafDensity(item)"
           :shared-longest-name="longestName"
+          :shared-width="sharedLeafWidth || undefined"
           :is-top="isTopMonth(item)"
         />
       </main>

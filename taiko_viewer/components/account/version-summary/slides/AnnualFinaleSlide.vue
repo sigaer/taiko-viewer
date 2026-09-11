@@ -155,24 +155,24 @@ const metricEntries = computed(() => [
   padding: 14px 16px;
   border: 1px solid rgba(180, 214, 255, 0.62);
   border-radius: 20px;
-  background: rgba(120, 176, 245, 0.24);
+  background: rgba(8, 28, 62, 0.58);
   backdrop-filter: blur(10px);
   display: grid;
   gap: 6px;
   animation: annual-finale-flash 2.5s ease-in-out both;
 }
 .annual-finale-scene__flash-eyebrow {
-  color: rgba(242, 249, 255, 0.94);
+  color: #ffffff;
   font-size: 12px;
   letter-spacing: 0.1em;
 }
 .annual-finale-scene__flash-song {
-  color: #eaf4ff;
+  color: #ffffff;
   font: 700 clamp(1.05rem, 4vw, 1.5rem) / 1.1 var(--viewer-display-font);
   overflow-wrap: anywhere;
 }
 .annual-finale-scene__flash-sub {
-  color: rgba(214, 234, 255, 0.7);
+  color: rgba(235, 245, 255, 0.9);
   font-size: 12px;
 }
 .annual-finale-scene__flash-tags {
@@ -185,9 +185,9 @@ const metricEntries = computed(() => [
 .annual-finale-scene__flash-tags b {
   padding: 3px 10px;
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(180, 214, 255, 0.35);
-  color: #f3f9ff;
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(220, 238, 255, 0.62);
+  color: #ffffff;
   font-size: 12px;
   font-weight: 650;
 }

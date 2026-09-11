@@ -10,6 +10,7 @@ const props = defineProps<{
   motionDisabled?: boolean;
   density?: number;
   sharedLongestName?: number;
+  sharedWidth?: number;
   isTop?: boolean;
 }>();
 
@@ -51,12 +52,12 @@ const leafFontSize = computed(() => fontSpec.value.css);
 const leafWidth = computed(() => {
   const density = Math.min(1, Math.max(0, props.density ?? 0.45));
   const minWidth = props.compact ? 88 : 98;
-  const maxWidth = props.compact ? 148 : 224;
+  const maxWidth = props.compact ? 224 : 260;
   const dataWidth = Math.round(minWidth + (maxWidth - minWidth) * density);
   const padding = props.compact ? 34 : 46;
   const sharedLength = Math.max(nameLength.value, props.sharedLongestName || 0);
   const nameMinWidth = Math.round(estimateNameWidth(fontSpec.value.max) + padding + Math.max(0, sharedLength - nameLength.value) * fontSpec.value.max * 0.35);
-  return `${Math.min(maxWidth, Math.max(dataWidth, nameMinWidth))}px`;
+  return `${Math.min(maxWidth, Math.max(dataWidth, nameMinWidth, props.sharedWidth || 0))}px`;
 });
 
 const handleCoverError = () => {

@@ -16,7 +16,7 @@ export const getPoundSpeedCopy = (pound: VersionSummaryPound | null | undefined,
   const tierJa = pound.speed >= 50 ? "秒速 50。連打というより、太鼓の耐久テストかもしれません。" : pound.speed >= 45 ? "秒速 45——数えるより、鼓点の嵐を聴くような速さです。" : pound.speed >= 40 ? "秒速 40。音符がほとんど一つの流れになりました。" : pound.speed >= 35 ? "秒速 35を越え、打点の隙間が見えないほど密になりました。" : pound.speed >= 30 ? "秒速 30は、もう軽い連打ではありません。" : "鼓点を一つずつつなぎながら、速度はまだ上がっていきます。";
   const bodyZh = [tierZh];
   const bodyJa = ["すべての連打が残るわけじゃない。でも、この一秒は速かった。", "この曲が、今年いちばん鋭い爆発を記録しました。", "速さは鼓面を越えて、年間の記録へ駆け抜けました。"];
-  return { title: pick(locale === "ja" ? ja : zh, seed), body: locale === "ja" ? tierJa : pick(bodyZh, `${seed}:body`) };
+  return { title: pick(locale === "ja" ? ja : zh, seed), body: locale === "ja" ? tierJa.replace(/^秒速\s*\d+(?:\.\d+)?[。．]?\s*/, "") : pick(bodyZh, `${seed}:body`).replace(/^秒速\s*\d+(?:\.\d+)?[。．]?\s*/, "") };
 };
 
 export const getHighScoreCopy = (highScore: VersionSummaryHighScore | null | undefined, locale: "zh" | "ja" = "zh") => {
