@@ -185,7 +185,7 @@ const jumpToResultPage = () => requestStart(true);
 .annual-opening__title-art { position: absolute; z-index: 5; top: -2%; left: 50%; width: min(96vw, 470px); height: auto; transform: translateX(-50%); filter: drop-shadow(0 4px 10px rgba(3, 17, 43, .3)); }
 .annual-opening__carousel { position: absolute; z-index: 2; top: 29%; left: 0; right: 0; height: 37%; }
 .annual-opening__beat { position: absolute; z-index: 4; top: 64.2%; left: 0; right: 0; height: clamp(40px, 5.1vh, 48px); }
-.annual-opening__year { position: absolute; z-index: 3; top: 74%; left: 7%; color: rgba(255,255,255,.96); font: 400 clamp(3.7rem, 18vw, 7.4rem)/.78 var(--viewer-display-font); letter-spacing: -.06em; text-shadow: 0 3px 0 rgba(28,89,139,.18); }
+.annual-opening__year { position: absolute; z-index: 3; top: 74%; left: 5%; color: rgba(255,255,255,.96); font: 400 clamp(3.7rem, 18vw, 7.4rem)/.78 Arial, Helvetica, sans-serif; text-shadow: 0 3px 0 rgba(28,89,139,.18); }
 .annual-opening__cover-info { position: absolute; z-index: 4; inset: 69% 0 0; padding: clamp(9px, 2.2vw, 18px) clamp(18px, 5vw, 36px) max(10px, env(safe-area-inset-bottom)); }
 .annual-opening__info-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 34px; }
 .annual-opening__generated { margin-left: clamp(58px, 16vw, 76px); color: rgba(255,255,255,.96); font: 700 clamp(11px, 2.9vw, 15px)/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; text-shadow: 0 1px 3px rgba(18,59,96,.28); }
@@ -195,7 +195,7 @@ const jumpToResultPage = () => requestStart(true);
 .annual-opening__direct img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(24,57,88,.22)); }
 .annual-opening__direct span { min-height: 22px; margin-top: 1px; overflow-wrap: anywhere; color: rgba(255,255,255,.88); font: 700 10px/1.1 var(--viewer-font-family); text-shadow: 0 1px 3px rgba(18,59,96,.28); }
 .annual-opening__info-main { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 148px; padding: 5px 0 0; }
-.annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 56px; }
+.annual-opening__info-copy { position: relative; z-index: 2; display: grid; gap: 4px; margin-top: 0.6rem; }
 .annual-opening__info-year-label { display: none; }
 .annual-opening__info-copy h1 { display: grid; gap: 0.8rem; margin: 0; color: #fffdf8; font: 800 clamp(1.65rem, 8.5vw, 3.15rem)/.9 var(--viewer-display-font); letter-spacing: .02em; text-shadow: 0 2px 0 rgba(37,91,127,.24), 0 4px 12px rgba(31,70,105,.22); -webkit-text-stroke: .35px rgba(255,255,255,.6); }
 .annual-opening__start { position: relative; z-index: 3; display: grid; min-width: 84px; min-height: 104px; place-items: center; align-content: center; gap: 1px; padding: 4px; border: 0; color: #fff; background: transparent; cursor: pointer; pointer-events: auto; text-shadow: 0 2px 4px rgba(33,71,108,.32); }

@@ -61,7 +61,11 @@ test("the inclusive span counts both the first and the last day", () => {
   assert.equal(span("2026-09-10", "2026-04-20"), null);
 });
 
-test("cached summaries report a story span that starts at the first played day", async () => {
+// The upstream `period.totalDays` stays the season window length, which is
+// exactly why the viewer re-anchors it instead of rendering it directly. The
+// story anchor itself is checked separately below, because a first observed
+// record legitimately predates the season window for long-synced accounts.
+test("cached summaries keep a season-window length upstream", async () => {
   const cacheRoot = resolve(process.cwd(), ".data/account-cache/annual-summary-v4/summaries");
   const summaryFiles = [];
   const walk = async (directory) => {
@@ -80,24 +84,20 @@ test("cached summaries report a story span that starts at the first played day",
     const upstreamDays = Number(summary.period?.totalDays);
     assert.ok(firstDay, `${file} has no first record day`);
     assert.ok(seasonStart, `${file} has no season start day`);
-    // The upstream figure must be the season window length, which is exactly
-    // why the viewer re-anchors it instead of rendering it directly.
     assert.ok(upstreamDays > 200, `${file} no longer looks like a season window length`);
-    assert.ok(firstDay > seasonStart, `${file} first record is not after the season start`);
-    const storyStart = new Date(`${firstDay}T00:00:00Z`).getTime();
-    const seasonStartTime = new Date(`${seasonStart}T00:00:00Z`).getTime();
-    assert.ok(storyStart > seasonStartTime, `${file} story must start later than the season`);
   }
 });
 
 // The real acceptance account (taiko id 2258735) is the one that reported 1029
 // days: its game archive reaches back to 2023-11-18, but the sync pipeline only
-// observed the account from 2026-01-16 on. The story anchor may never precede
-// the system's own first record of the account, and the window-scoped fields
-// (`firstRecordAt` / `coverage.firstSnapshotAt`) are what prove that boundary.
+// observed the account from 2026-01-16 on. The story anchor has to be the
+// system's own first record, so `firstActualPlayDate` is exactly the calendar
+// day of `firstRecordAt`, and neither may postdate the first observed snapshot.
+// A long-synced account may legitimately start its story before the season
+// window opens, so the anchor is not compared against the season start.
 // Only summaries produced by the current algorithm are audited; older cached
 // files still carry the previous anchor.
-test("the acceptance account never anchors its story before the first observed record", async () => {
+test("current summaries anchor the story on the first observed record", async () => {
   const CURRENT_ALGORITHM = "annual-observation-v4.2.0";
   const cacheRoot = resolve(process.cwd(), ".data/account-cache/annual-summary-v4/summaries");
   const summaryFiles = [];
@@ -114,17 +114,20 @@ test("the acceptance account never anchors its story before the first observed r
     if (!summary || summary.provenance?.algorithmVersion !== CURRENT_ALGORITHM) continue;
     const firstActualPlayDay = calendarParts(summary.period?.firstActualPlayDate);
     const firstRecordDay = calendarParts(summary.period?.firstRecordAt);
+    const lastRecordDay = calendarParts(summary.period?.lastRecordAt);
     const firstSnapshotDay = calendarParts(summary.coverage?.firstSnapshotAt);
     assert.ok(firstActualPlayDay, `${file} has no first-record day`);
     assert.ok(firstRecordDay, `${file} has no first-record timestamp`);
     assert.ok(firstSnapshotDay, `${file} has no first observed snapshot`);
-    assert.ok(
-      firstActualPlayDay >= firstRecordDay,
-      `${file} anchors its story before the first record the system observed`
+    assert.equal(
+      firstActualPlayDay,
+      firstRecordDay,
+      `${file} anchors its story on a different day than the first observed record`
     );
     assert.ok(
       firstRecordDay <= firstSnapshotDay,
       `${file} first record is later than the first observed snapshot`
     );
+    assert.ok(firstRecordDay <= lastRecordDay, `${file} first record is later than its last record`);
   }
 });
