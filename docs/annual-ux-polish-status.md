@@ -23,10 +23,10 @@
 ## 当前状态
 
 Current Round:
-**UX-1 — Functional & Data Correctness**
+**UX-3B — Visual Cleanup & Layout**
 
 Status:
-**UX-2 REOPENED — `0.58.0` corrective iteration in progress**
+**Annual UX Polish COMPLETE — all UX-1 through UX-3B gates passed**
 
 Gate UX-1:
 **PASS**（2026-09-11，`0.57.3`，见「Gate UX-1 判定」）
@@ -49,6 +49,29 @@ subsequently failed, therefore Gate reopened.** 下方 `0.58.0` 的原始 PASS �
 
 Next allowed round:
 UX-3 仍然禁止；先完成 `0.58.0` 的 corrective iteration。
+
+## Final closeout — Annual UX Polish（2026-09-11）
+
+线上基线：`0.59.1`
+
+| Round | Status | Gate | Evidence |
+| --- | --- | --- | --- |
+| UX-1 | COMPLETE | PASS | 线上真实账号验收与技术检查 |
+| UX-2 | COMPLETE | PASS | 线上真实页面连续播放与人工视觉验收 |
+| UX-3A | COMPLETE | PASS | `0.58.8` 线上真实页面人工视觉验收 |
+| UX-3B | COMPLETE | PASS | `0.59.1` 线上真实页面人工视觉验收 |
+
+UX-3B 最终人工验收（2026-09-11）确认 Keyword、Month、Pound、Breakthrough 全部通过。
+
+本次 release 证据：
+
+- `scripts/deploy_forum_web.sh` exit code `0`
+- production appVersion `0.59.1`
+- unrelated workspace stash / restore successful
+- `title_song_relations.json` SHA-256 unchanged：`af152eb9c781afe9664421735ad7f65c6c46d1a69fd668138d3f3ec47c3e30a8`
+- `poster.zip` preserved
+
+Annual UX Polish 本阶段正式冻结；不自动开始后续 UX 阶段。
 
 ## UX-3A — Visual Cleanup & Layout（2026-09-11）
 

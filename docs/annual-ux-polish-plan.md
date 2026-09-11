@@ -311,7 +311,22 @@ speedProfile / pound / highScore 唱片与标题、breakthrough 卡片、Poster 
 
 ---
 
-## 7. Round 1 结果（2026-09-11 收尾）
+## 7. Final closeout — Annual UX Polish（2026-09-11）
+
+线上基线：`0.59.1`。
+
+| Round | Status | Gate |
+| --- | --- | --- |
+| UX-1 | COMPLETE | PASS |
+| UX-2 | COMPLETE | PASS |
+| UX-3A | COMPLETE | PASS |
+| UX-3B | COMPLETE | PASS |
+
+UX-3B 的 Keyword、Month、Pound、Breakthrough 已于 2026-09-11 在 `0.59.1` 线上真实页面完成用户人工视觉验收并通过。
+
+本阶段 release 证据：部署脚本 exit code `0`，production appVersion `0.59.1`；unrelated workspace stash/restore 成功；`title_song_relations.json` SHA-256 未变化；`poster.zip` 保留。Annual UX Polish 本阶段正式冻结，不自动开始新的 UX 阶段。
+
+## 8. Round 1 结果（2026-09-11 收尾）
 
 Round 1 的六项均已交付并随 `0.57.2` / `0.57.3` 发布上线；逐项证据、根因与遗留项见
 `docs/annual-ux-polish-status.md` 的「UX-1 完成记录」「Round 1.1」「Release 记录」。
