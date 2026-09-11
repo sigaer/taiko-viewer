@@ -48,7 +48,12 @@ const reportYear = computed(() => {
 // public name; `reportYear` stays the machine-readable annual_2026 key that the
 // rest of the report (calendar, summaries, API) is built on.
 const reportYearLabel = computed(() => t("annualSummary.openingCover.yearLabel"));
-const reportTitleLines = computed(() => t("annualSummary.openingCover.reportTitle").split("\n"));
+// The cover prints only the edition line of the report title; the game-name line
+// stays in the artwork and in the section aria-label.
+const reportTitleLines = computed(() => {
+  const lines = t("annualSummary.openingCover.reportTitle").split("\n");
+  return lines.length > 1 ? lines.slice(1) : lines;
+});
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "";
   const date = new Date(value);
