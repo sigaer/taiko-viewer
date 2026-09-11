@@ -150,8 +150,6 @@ const copyLine = computed(() => {
   background: linear-gradient(180deg, rgba(255, 250, 240, 0.5), rgba(247, 233, 206, 0.35));
   box-shadow: 0 18px 36px rgba(120, 89, 48, 0.1);
   overflow: hidden;
-  transform: translateY(-10px);
-  margin-bottom: -10px;
 }
 .annual-rating-rank-scene__summary {
   min-width: 0;

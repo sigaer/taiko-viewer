@@ -70,7 +70,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 .vinyl-stack__noise { top: var(--building-h); height: var(--noise-h); object-fit: fill; }
 .vinyl-stack__record { top: calc(var(--building-h) + var(--noise-h) - var(--record-clear-top) - 1px); height: var(--record-h); }
 .vinyl-stack__record-image { display: block; width: 100vw; max-width: none; height: var(--record-h); object-fit: fill; filter: drop-shadow(0 18px 32px rgba(10, 8, 30, .45)); }
-.pound-poster__center { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
+.pound-poster__center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(100px, 29vw, 134px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
 .pound-poster__center img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pound-poster__center span { font: 800 clamp(1.6rem, 6vw, 2.4rem) / 1 var(--viewer-display-font); color: #fff; }
 

@@ -143,6 +143,3 @@ const saveShareCard = async () => {
 .poster-scene__dialog{width:min(900px,94vw);height:85dvh;max-height:85dvh;padding:0;border:1px solid #ccd9e5;border-radius:18px;background:#f7fbff;overflow:auto}.poster-scene__dialog::backdrop{background:#00192bc4}.poster-scene__close{position:sticky;top:8px;left:12px;z-index:2;min-height:44px;padding:8px 16px;border:1px solid #3978c8;border-radius:99px;background:#fff;color:#17365d;cursor:pointer}
 @media(max-height:810px){.poster-scene__layout{grid-template-rows:minmax(64px,1fr) 76px auto 100px;gap:6px}.poster-scene__grid{width:min(87.68cqw,363px,calc((100cqh - 322px)*363/554))}}
 </style>
-<style scoped>
-.poster-scene__grid { transform: translateX(4px); }
-</style>

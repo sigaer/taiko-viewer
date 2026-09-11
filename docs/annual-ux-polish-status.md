@@ -54,6 +54,8 @@ UX-3 仍然禁止；先完成 `0.58.0` 的 corrective iteration。
 
 Implementation complete; technical checks pending user visual acceptance. Updated favorite, ratingRank, calendar copy, speed/pound/high-score metadata, and Poster outer alignment. Frozen Opening/Period/Overview transition/timeOfDay baselines were not redesigned.
 
+UX-3A visual fix-forward: rating plot now translates as a unified SVG group while retaining tier names without ordinals; speedProfile/pound center markers align to the record center; Poster outer offset was removed. Release `0.58.7` is awaiting visual re-acceptance.
+
 ---
 
 ## Round 1.1 — 真实账号收口（2026-09-11）

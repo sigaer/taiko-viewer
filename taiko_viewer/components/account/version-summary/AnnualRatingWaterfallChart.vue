@@ -204,6 +204,8 @@ const isEmpty = computed(() => props.ranks.length === 0);
       <rect x="0" y="0" :width="viewBoxWidth" :height="viewBoxHeight" fill="url(#rating-waterfall-bg)" />
       <rect x="0" y="0" :width="viewBoxWidth" :height="viewBoxHeight" fill="url(#rating-waterfall-horizon)" />
 
+      <g class="annual-rating-waterfall-chart__plot" transform="translate(0 -55)">
+
       <g class="annual-rating-waterfall-chart__grid">
         <path
           v-for="grid in verticalGrid"
@@ -277,6 +279,12 @@ const isEmpty = computed(() => props.ranks.length === 0);
           stroke="#b83a2f"
           stroke-width="1"
         />
+      </g>
+
+      <g class="annual-rating-waterfall-chart__rank-tags">
+        <text v-for="tag in rankLabelItems" :key="`rank-${tag.key}`" :x="chartRight + 26" :y="tag.y" :class="{ 'is-current': tag.isCurrent }">{{ tag.label }}</text>
+      </g>
+
       </g>
 
     </svg>
