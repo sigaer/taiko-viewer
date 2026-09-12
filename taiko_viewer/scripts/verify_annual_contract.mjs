@@ -518,7 +518,7 @@ assert.equal(annualPageSource.includes("重新生成"), false, "successful annua
 const annualConstantsSource = await read("server/services/account/annual-summary/constants.ts");
 assert.equal(annualConstantsSource.includes('ANNUAL_END_DATE = "2026-09-11"'), true, "annual end date is not fixed");
 assert.equal(annualConstantsSource.includes('ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00"'), true, "annual public opening is not configured");
-assert.equal(annualConstantsSource.includes('ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.2.0"'), true, "annual producer version is stale");
+assert.equal(annualConstantsSource.includes('ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.3.0"'), true, "annual producer version is stale");
 const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
 const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
 const annualServiceSource = await read("server/services/account/annual-summary/index.ts");
