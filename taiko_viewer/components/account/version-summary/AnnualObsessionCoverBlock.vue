@@ -31,7 +31,7 @@ defineProps<{
   aspect-ratio: 1;
   overflow: hidden;
   border: clamp(4px, 1.2vw, 6px) solid #245f36;
-  border-radius: 14%;
+  border-radius: 1%;
   background: #dce9bd;
   box-shadow:
     0 9px 20px rgba(13, 46, 24, 0.34),
@@ -47,11 +47,7 @@ defineProps<{
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
-
-.annual-obsession-cover__image {
   border-radius: 1%;
+  object-fit: cover;
 }
 </style>
