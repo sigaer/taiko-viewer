@@ -110,7 +110,6 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
   box-shadow: 0 0 calc(var(--wheel-radius) * 0.045) calc(var(--wheel-radius) * 0.038) rgba(8, 24, 42, 0.38),inset 0 0 14px 3px rgba(255, 255, 255, .32);
   pointer-events: none;
   z-index: 2;
-  border: 0.1px solid white;
 }
 .time-wheel::before {
   content: "";
@@ -148,9 +147,9 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
 .time-wheel__don-backplate{width:198px;height:198px;background:rgba(255,255,255,.62);z-index:4}
 .time-wheel__don-window{width:136px;height:136px;overflow:hidden;clip-path:inset(0 0 0 50%);z-index:5}
 .time-wheel__don-window img{position:absolute;left:0;top:0;width:136px;height:136px;max-width:none;object-fit:contain;animation:don-spin 9s linear normal infinite;will-change:transform}
-.time-of-day-conclusion{position:absolute;right:7%;bottom:7%;display:flex;flex-direction:column;align-items:baseline;gap:1.5vh;color:#fff;text-align:right;text-shadow:0 3px 16px rgba(10,24,42,.6);z-index:1}
+.time-of-day-conclusion{position:absolute;right:7%;bottom:7%;display:flex;flex-direction:column;align-items:center;gap:1.5vh;color:#fff;text-align:right;text-shadow:0 3px 16px rgba(10,24,42,.6);z-index:1}
 .time-of-day-conclusion p{margin:0;font:700 15px/1 var(--viewer-font-family)}.time-of-day-conclusion strong{font:700 clamp(2.4rem,12vw,5rem)/1 var(--viewer-display-font)}
 @keyframes time-slot-flow{from{transform:translate(-50%,-50%) rotate(var(--angle)) translateX(calc(var(--wheel-radius)*.87))}to{transform:translate(-50%,-50%) rotate(calc(var(--angle) + 360deg)) translateX(calc(var(--wheel-radius)*.87))}}@keyframes time-slot-counter{from{transform:rotate(calc(var(--angle) * -1))}to{transform:rotate(calc((var(--angle) + 360deg) * -1))}}@keyframes time-slot-flow-sector{from{transform:rotate(var(--angle))}to{transform:rotate(calc(var(--angle) + 360deg))}}@keyframes don-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.annual-scene:not(.is-active) .time-wheel__slot,.annual-scene:not(.is-active) .time-wheel__slot-content,.annual-scene:not(.is-active) .time-wheel__sector-flow,.annual-scene:not(.is-active) .time-wheel__don-window img{animation-play-state:paused}.annual-scene.is-reduced .time-wheel__slot,.annual-scene.is-reduced .time-wheel__slot-content,.annual-scene.is-reduced .time-wheel__sector-flow,.annual-scene.is-reduced .time-wheel__don-window img{animation:none}
-@media(max-width:720px){.time-wheel__slot{width:145px}.time-wheel__slot span{font-size:12px}.time-wheel__don-assembly{width:200px;height:200px}.time-wheel__don-backplate{width:198px;height:198px}.time-wheel__don-window{width:136px;height:136px}.time-wheel__don-window img{width:136px;height:136px}.time-of-day-conclusion{right:6%;gap:7px}.time-of-day-conclusion p{font-size:12px}.time-of-day-conclusion strong{font-size:3.3rem}}
+@media(max-width:720px){.time-wheel__slot{width:145px}.time-wheel__slot span{font-size:12px}.time-wheel__don-assembly{width:200px;height:200px}.time-wheel__don-backplate{width:198px;height:198px}.time-wheel__don-window{width:136px;height:136px}.time-wheel__don-window img{width:136px;height:136px}}
 @media(max-height:680px){.time-wheel__count.is-digits-2{font-size:1.65rem}.time-wheel__count.is-digits-3{font-size:1.5rem}.time-wheel__count.is-digits-4{font-size:1.3rem}.time-wheel__count.is-digits-5{font-size:1.1rem}.time-wheel__slot.is-peak .time-wheel__count{font-size:2rem}}
 </style>
