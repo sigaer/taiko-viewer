@@ -37,9 +37,7 @@ type Particle = {
 // Staggered generators rather than one loop: every burst uses its own position,
 // size, count and start offset so the sky never repeats the same shape twice.
 // Cadences are deliberately shorter than a particle lifetime so consecutive
-// bursts overlap and the sky is never empty between them. The schedule keeps the
-// original geometry, trajectory and palette; only the cadence (slightly
-// tighter), the per-burst particle count and the particle lifetime are tuned.
+// bursts overlap and the sky is never empty between them.
 const GENERATORS = [
   { x: 0.24, y: 0.20, count: 30, speed: 1.00, hue: 194, size: 1.00, delay: 0.00, cadence: 2.90 },
   { x: 0.72, y: 0.15, count: 23, speed: 0.86, hue: 258, size: 0.88, delay: 0.45, cadence: 3.30 },
@@ -50,8 +48,18 @@ const GENERATORS = [
   { x: 0.64, y: 0.46, count: 27, speed: 1.04, hue: 268, size: 1.02, delay: 3.70, cadence: 3.40 }
 ] as const;
 
-const GRAVITY = 0.00034;
-const DRAG = 0.00165;
+// Playback speed of the whole display. Every time constant below (velocity,
+// gravity, drag, particle lifetime, motion trail, burst cadence, opening delay)
+// is scaled by it, so a larger value plays the exact same fireworks slower
+// instead of turning them into a different, longer-lived effect: a particle
+// still travels the same distance and falls the same way, it just takes
+// PLAYBACK_TIME_SCALE times as long to do it.
+const PLAYBACK_TIME_SCALE = 3;
+
+const GRAVITY = 0.00034 / (PLAYBACK_TIME_SCALE * PLAYBACK_TIME_SCALE);
+const DRAG = 0.00165 / PLAYBACK_TIME_SCALE;
+const TRAIL_MS = 26 * PLAYBACK_TIME_SCALE;
+const OPENING_COMPACT_MS = 1200 * PLAYBACK_TIME_SCALE;
 const MAX_PARTICLES = 540;
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -70,8 +78,8 @@ const buildGenerators = () => {
   generators = GENERATORS.map((generator) => ({
     x: generator.x,
     y: generator.y,
-    startedAt: generator.delay * 1000,
-    cadence: generator.cadence * 1000,
+    startedAt: generator.delay * 1000 * PLAYBACK_TIME_SCALE,
+    cadence: generator.cadence * 1000 * PLAYBACK_TIME_SCALE,
     count: Math.round(generator.count * random(0.86, 1.14)),
     speed: generator.speed * random(0.9, 1.1),
     hue: generator.hue + random(-12, 12),
@@ -81,7 +89,7 @@ const buildGenerators = () => {
 
 const spawnBurst = (generator: Burst, short = false) => {
   const base = Math.min(size.width, size.height);
-  const strength = generator.speed * base * (short ? 0.00062 : 0.00105);
+  const strength = generator.speed * base * (short ? 0.00062 : 0.00105) / PLAYBACK_TIME_SCALE;
   // An explosion is never evenly distributed: the whole ring is rotated, the
   // radial gaps are jittered and a few embers get far more speed than the rest.
   const twist = random(0, Math.PI * 2);
@@ -97,7 +105,7 @@ const spawnBurst = (generator: Burst, short = false) => {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       life: 0,
-      ttl: random(1000, 1750),
+      ttl: random(1000, 1750) * PLAYBACK_TIME_SCALE,
       size: generator.radiusBase * random(0.7, 1.9) * size.scale,
       hue: generator.hue + random(-16, 16),
       drag: DRAG * random(0.78, 1.24)
@@ -115,7 +123,7 @@ const advance = (timestamp: number, forceDuration = 0) => {
     if (local < 0) continue;
     const within = local % generator.cadence;
     // The first pass plays a compact burst so the sky is alive immediately.
-    const compact = elapsed < 1200;
+    const compact = elapsed < OPENING_COMPACT_MS;
     if (within < delta) spawnBurst(generator, compact);
   }
 
@@ -146,8 +154,8 @@ const draw = () => {
     const alpha = (1 - progress) * (1 - progress) * 0.9;
     if (alpha <= 0.01) continue;
     // A short motion trail reads as speed without a real motion-blur pass.
-    const trailX = particle.x - particle.vx * 26;
-    const trailY = particle.y - particle.vy * 26;
+    const trailX = particle.x - particle.vx * TRAIL_MS;
+    const trailY = particle.y - particle.vy * TRAIL_MS;
     context.strokeStyle = `hsla(${particle.hue}, 82%, 86%, ${alpha})`;
     context.lineWidth = particle.size;
     context.beginPath();
@@ -172,7 +180,7 @@ const renderStatic = () => {
   // Three settled bursts give reduced-motion users a legible still image.
   for (const generator of generators.slice(0, 3)) {
     spawnBurst(generator, false);
-    advance(0, 520);
+    advance(0, 520 * PLAYBACK_TIME_SCALE);
   }
   draw();
 };

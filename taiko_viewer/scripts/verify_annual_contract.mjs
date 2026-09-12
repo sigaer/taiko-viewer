@@ -159,7 +159,7 @@ assert.equal(timeOfDaySource.includes("sectorPath(0)"), true, "the wedge is not 
 assert.equal(/@keyframes time-slot-counter/.test(timeOfDaySource), true, "time labels no longer keep their own upright angle");
 assert.equal(timeOfDaySource.includes("time-wheel__shell"), false, "the rejected fixed-shell rewrite is back");
 assert.equal(timeOfDaySource.includes("time-wheel__item"), false, "the rejected item rewrite is back");
-assert.equal(timeOfDaySource.includes("--wheel-radius:min(88vw,372px)"), true, "time wheel lost its original radius");
+assert.equal(timeOfDaySource.includes("--wheel-radius:min(88vw,45vh,370px)"), true, "time wheel lost its approved radius");
 assert.equal(timeOfDaySource.includes("--wheel-y:52%"), true, "time wheel lost its original stage position");
 assert.equal(timeOfDaySource.includes("countDigits"), true, "time centre reel does not adapt to the digit count");
 for (const digits of [2, 3, 4, 5]) {

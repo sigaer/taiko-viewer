@@ -26,7 +26,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 
     <div class="pound-poster" :class="{ 'is-empty': !speed }">
       <div class="pound-poster__hero">
-        <p class="pound-poster__kicker">{{ speed ? copy.title : "今年还没有记录到最高秒速" }}</p>
+        <h2 class="pound-poster__kicker">{{ song?.name || t("annualSummary.common.songWaiting") }}</h2>
         <div class="pound-poster__speed" data-animate>
           <strong>{{ speed ? speed.toFixed(1) : "—" }}</strong>
           <span>打 / 秒</span>
@@ -45,8 +45,6 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
           </div>
         </div>
       </div>
-
-      <div class="pound-poster__caption">{{ song?.name || t("annualSummary.common.songWaiting") }}</div>
     </div>
   </StorySlideShell>
 </template>
@@ -73,8 +71,6 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 .pound-poster__center { position: absolute; left: 50%; top: 31.5%; transform: translate(-50%, -50%); width: 43.5vw; aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
 .pound-poster__center img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pound-poster__center span { font: 800 clamp(1.6rem, 6vw, 2.4rem) / 1 var(--viewer-display-font); color: #fff; }
-
-.pound-poster__caption { position: absolute; z-index: 8; top: calc(var(--split-y) + var(--noise-h) + var(--record-h) - var(--record-clear-top) + 8px); left: 5%; right: 5%; margin: 0; padding-bottom: 0.2rem; text-align: center; font: 700 clamp(1rem, 4vw, 1.5rem) / 1.1 var(--viewer-display-font); max-width: 90vw; overflow-wrap: anywhere; color: #fff; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5); }
 
 .is-empty .pound-poster__speed strong { color: #ffffffb8; }
 @media (max-height: 720px) {
