@@ -160,7 +160,7 @@ assert.equal(/@keyframes time-slot-counter/.test(timeOfDaySource), true, "time l
 assert.equal(timeOfDaySource.includes("time-wheel__shell"), false, "the rejected fixed-shell rewrite is back");
 assert.equal(timeOfDaySource.includes("time-wheel__item"), false, "the rejected item rewrite is back");
 assert.equal(timeOfDaySource.includes("--wheel-radius:min(88vw,45vh,370px)"), true, "time wheel lost its approved radius");
-assert.equal(timeOfDaySource.includes("--wheel-y:52%"), true, "time wheel lost its original stage position");
+assert.equal(timeOfDaySource.includes("--wheel-y:50%"), true, "time wheel lost its approved stage position");
 assert.equal(timeOfDaySource.includes("countDigits"), true, "time centre reel does not adapt to the digit count");
 for (const digits of [2, 3, 4, 5]) {
   assert.equal(timeOfDaySource.includes(`is-digits-${digits}`), true, `time centre reel has no size for ${digits}-digit counts`);
