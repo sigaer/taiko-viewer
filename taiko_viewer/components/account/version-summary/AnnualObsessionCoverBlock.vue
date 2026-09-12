@@ -52,6 +52,6 @@ defineProps<{
 }
 
 .annual-obsession-cover__image {
-  border-radius: 12px;
+  border-radius: 1%;
 }
 </style>

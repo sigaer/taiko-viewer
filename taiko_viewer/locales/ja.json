@@ -669,7 +669,7 @@
       "resultPage": "結果ページへ",
       "coverFlow": "中央の楽曲ジャケットカルーセル"
     },
-    "drawer": { "title": "ストーリー設定", "version": "対象期間", "binding": "連携 ID", "currentTitle": "現在の称号", "summary": "この記録", "exit": "入口へ戻る", "generated": "{time} に生成" },
+    "drawer": { "title": "ストーリー設定", "versionTitle": "虹2025 バージョンまとめ", "version": "対象期間", "binding": "連携 ID", "currentTitle": "現在の称号", "summary": "この記録", "exit": "入口へ戻る", "generated": "{time} に生成" },
     "copy": {
       "opening": { "eyebrow": "2026 · あなたの太鼓物語", "title": "{nickname}、2026 年の音を聴こう", "body": "{playCount} 回のプレイと {uniqueSongs} 曲が、この鼓面で待っています。" },
       "profile": { "eyebrow": "PLAYER CARD", "title": "この一年の主役は、{nickname}", "body": "このきせかえから、あなただけの物語が始まります。", "bodyWithTitle": "「{playerTitle}」を掲げ、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithDan": "「{dan}」として鼓面に立ち、今年のきせかえで登場。これはあなただけの一枚です。", "bodyWithTitleAndDan": "「{playerTitle}」を掲げ、「{dan}」として登場——あなただけのプレイヤーカードです。" },

@@ -25,6 +25,7 @@ const exitPending = ref(false);
 const exitSettled = ref(false);
 const uiText = computed(() => ({
   title: t("annualSummary.drawer.title"),
+  versionTitle: t("annualSummary.drawer.versionTitle"),
   versionLabel: t("annualSummary.drawer.version"),
   bindingLabel: t("annualSummary.drawer.binding"),
   titleLabel: t("annualSummary.drawer.currentTitle"),
@@ -81,14 +82,13 @@ watch(() => props.modelValue, (open) => { if (open) { exitPending.value = false;
       <div class="story-drawer__head">
         <div>
           <p>{{ uiText.title }}</p>
-          <h3>{{ selectedVersion.name }}</h3>
+          <h3>{{ uiText.versionTitle }}</h3>
         </div>
-        <span>{{ versionRangeText }}</span>
       </div>
 
       <div class="story-drawer__panel">
         <span>{{ uiText.versionLabel }}</span>
-        <strong>{{ selectedVersion.name }}</strong>
+        <strong>{{ versionRangeText }}</strong>
       </div>
 
       <div class="story-drawer__panel">
@@ -168,11 +168,6 @@ watch(() => props.modelValue, (open) => { if (open) { exitPending.value = false;
   font-family: var(--viewer-display-font);
   font-size: 34px;
   line-height: 1;
-}
-
-.story-drawer__head > span {
-  color: #7890ab;
-  font-size: 12px;
 }
 
 .story-drawer__panel {

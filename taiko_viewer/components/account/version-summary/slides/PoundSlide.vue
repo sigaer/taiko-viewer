@@ -26,7 +26,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 
     <div class="pound-poster" :class="{ 'is-empty': !speed }">
       <div class="pound-poster__hero">
-        <h2 class="pound-poster__kicker">{{ song?.name || t("annualSummary.common.songWaiting") }}</h2>
+        <h2 class="pound-poster__kicker" data-animate>{{ song?.name || t("annualSummary.common.songWaiting") }}</h2>
         <div class="pound-poster__speed" data-animate>
           <strong>{{ speed ? speed.toFixed(1) : "—" }}</strong>
           <span>打 / 秒</span>
