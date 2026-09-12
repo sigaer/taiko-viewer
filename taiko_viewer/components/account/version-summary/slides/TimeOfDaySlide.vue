@@ -101,7 +101,6 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
 .time-wheel::after {
   content: "";
   position: absolute;
-  left: 50%;
   top: 50%;
   width: calc(var(--wheel-radius) * 0.715 + 99px);
   height: calc(var(--wheel-radius) * 0.715 + 99px);
