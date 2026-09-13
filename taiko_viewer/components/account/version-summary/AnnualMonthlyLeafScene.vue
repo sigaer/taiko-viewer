@@ -39,10 +39,20 @@ const compactMonthLabel = (item: VersionSummaryMonthlyFavorite) => {
   return parsed >= 1 && parsed <= 12 ? `${parsed}月` : "月";
 };
 
+// The season spans a calendar-year boundary (2025-10 → 2026-09), so the vine has
+// to follow the season, not the month number: ordering by 1..12 alone would put
+// October–December of the opening year behind the following September.
+const monthOrderKey = (item: VersionSummaryMonthlyFavorite) => {
+  const iso = String(item.month || "").trim().match(/^(\d{4})-(0[1-9]|1[0-2])/);
+  if (iso) return `${iso[1]}-${iso[2]}`;
+  const parsed = monthNumber(item);
+  return parsed >= 1 && parsed <= 12 ? `0000-${String(parsed).padStart(2, "0")}` : "9999-99";
+};
+
 const items = computed(() => props.summary.monthlyFavorites
   .filter((item) => item?.song && String(item.song.name || "").trim())
   .map((item) => ({ ...item, monthLabel: compactMonthLabel(item) }))
-  .sort((a, b) => monthNumber(a) - monthNumber(b)));
+  .sort((a, b) => monthOrderKey(a).localeCompare(monthOrderKey(b))));
 
 const topMonth = computed(() => {
   if (!items.value.length) return null;

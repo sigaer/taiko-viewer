@@ -494,6 +494,15 @@ for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlid
 const monthlyLeafItemSource = await read("components/account/version-summary/AnnualMonthlyLeafItem.vue");
 assert.equal(monthlyLeafItemSource.includes('@error="handleCoverError"'), true, "monthly leaf cover has no failure handler");
 assert.equal(monthlyLeafItemSource.includes("AnnualArtworkFallback"), true, "monthly leaf cover has no visual fallback");
+const monthlyLeafSceneSource = await read("components/account/version-summary/AnnualMonthlyLeafScene.vue");
+// The season spans a calendar-year boundary, so the vine must order by season
+// month rather than by the 1..12 month number.
+assert.equal(monthlyLeafSceneSource.includes("monthOrderKey"), true, "monthly vine lost its season-ordered month key");
+assert.equal(
+  /\.sort\(\(a, b\) => monthNumber\(a\) - monthNumber\(b\)\)/.test(monthlyLeafSceneSource),
+  false,
+  "monthly vine orders months by number across the year boundary"
+);
 
 const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");
 assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");
