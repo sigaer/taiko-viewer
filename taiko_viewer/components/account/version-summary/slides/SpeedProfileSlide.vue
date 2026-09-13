@@ -3,11 +3,20 @@ import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
 import { isUsableMetric } from "~/utils/annualPresentation";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t } = useI18n();
 const profile = computed(() => props.summary.speedProfile);
 const speedText = computed(() => profile.value ? profile.value.speed.toFixed(1).replace(/\.0$/, "") : "—");
+// The band the chosen speed falls into picks the wording: the same "used 1.3×
+// the most" fact reads as restraint, cruise or full-send depending on the band.
+const narrative = computed(() => selectNarrative("speedProfile", props.summary));
+const narrativeCopy = computed(() => ({
+  title: t(narrativeKey("speedProfile", narrative.value, "title")),
+  lead: t(narrativeKey("speedProfile", narrative.value, "lead"), { speed: speedText.value }),
+  detail: t(narrativeKey("speedProfile", narrative.value, "detail"))
+}));
 // Guard unavailable metrics with isUsableMetric(summary.speedProfile.chartCount).
 const hasCount = computed(() => !!profile.value && isUsableMetric(profile.value.chartCount));
 const cityLoaded = ref(false);
@@ -17,7 +26,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 </script>
 
 <template>
-  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="" :show-meta="false" :title="t('annualSummary.slides.speed.title')" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
+  <StorySlideShell variant="poster" :page-index="pageIndex" :page-total="pageTotal" eyebrow="" :show-meta="false" :title="narrativeCopy.title" tone="aurora" mood="speed-night" :active="active" :reduced-motion="reducedMotion">
     <template #background>
       <div class="profile-poster__bg">
         <img class="profile-poster__sky" src="/annual/speedProfile/background.png" alt="" aria-hidden="true">
@@ -28,7 +37,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
     <div class="profile-poster" :class="{ 'is-empty': !profile }">
       <div class="profile-poster__headline" data-animate>
         <strong>{{ speedText }}<small>×</small></strong>
-        <p>{{ t("annualSummary.slides.speed.lead", { speed: speedText }) }}</p>
+        <p>{{ narrativeCopy.lead }}</p>
       </div>
 
       <div class="vinyl-stack" :class="{ 'is-ready': assetsReady }" aria-hidden="true">
@@ -41,7 +50,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
       </div>
 
       <div class="profile-poster__footer" data-animate>
-        <p>{{ t("annualSummary.slides.speed.detail") }}</p>
+        <p>{{ narrativeCopy.detail }}</p>
         <span v-if="hasCount">{{ t("annualSummary.slides.speed.chartCount") }} · {{ profile?.chartCount }}</span>
       </div>
     </div>

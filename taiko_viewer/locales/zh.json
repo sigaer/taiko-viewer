@@ -724,6 +724,266 @@
     "drawer": {
       "title": "故事设置", "versionTitle": "虹2025 版本总结", "version": "统计周期", "binding": "当前绑定", "currentTitle": "当前称号", "summary": "这段记录", "exit": "回到入口", "generated": "生成于 {time}"
     },
+    "narrative": {
+      "timeOfDay": {
+        "morning": {
+          "v1": {
+            "theme": "清晨的鼓点，先于城市醒来"
+          },
+          "v2": {
+            "theme": "天亮前后的鼓声，最常落在你手里"
+          },
+          "v3": {
+            "theme": "你的节拍，从早上就开始"
+          }
+        },
+        "daytime": {
+          "v1": {
+            "theme": "日头正盛时，鼓声也最热闹"
+          },
+          "v2": {
+            "theme": "午后的鼓点，一段接一段"
+          },
+          "v3": {
+            "theme": "白天的时间，被你敲成了节拍"
+          }
+        },
+        "evening": {
+          "v1": {
+            "theme": "入夜前后的鼓声，最常响起"
+          },
+          "v2": {
+            "theme": "一天落幕时，鼓声才刚热起来"
+          },
+          "v3": {
+            "theme": "傍晚的节拍，是一天的收束"
+          }
+        },
+        "late_night": {
+          "v1": {
+            "theme": "夜深之后的鼓点，最安静也最清楚"
+          },
+          "v2": {
+            "theme": "城市的灯关了，鼓面还亮着"
+          },
+          "v3": {
+            "theme": "深夜的节拍，留给还不想停的人"
+          }
+        }
+      },
+      "calendar": {
+        "occasional": {
+          "v1": {
+            "primary": "这一版留下了 {activeDays} 天鼓声",
+            "longest": "最长的一段连着 {longestStreak} 天",
+            "emotion1": "空白的那些天，",
+            "emotion2": "也在等下一次落槌"
+          },
+          "v2": {
+            "primary": "{activeDays} 天里，鼓声落了又起",
+            "longest": "连着的日子停在 {longestStreak} 天",
+            "emotion1": "没亮起的格子，",
+            "emotion2": "留着下一次的节拍"
+          }
+        },
+        "sprint": {
+          "v1": {
+            "primary": "{activeDays} 天，却敲得很集中",
+            "longest": "一口气连了 {longestStreak} 天",
+            "emotion1": "日子不多，",
+            "emotion2": "那几天却一直没停"
+          },
+          "v2": {
+            "primary": "记录只有 {activeDays} 天，但没断线",
+            "longest": "最长的一串是 {longestStreak} 天",
+            "emotion1": "天数不算多，",
+            "emotion2": "那几天鼓面没凉过"
+          }
+        },
+        "steady": {
+          "v1": {
+            "primary": "{activeDays} 天有鼓声，节奏稳定",
+            "longest": "最长连了 {longestStreak} 天",
+            "emotion1": "一格一格亮起来，",
+            "emotion2": "连成了这一年的底色"
+          },
+          "v2": {
+            "primary": "这一版记下了 {activeDays} 天",
+            "longest": "连续最长的一段是 {longestStreak} 天",
+            "emotion1": "那些亮过的日子，",
+            "emotion2": "是习惯留下的痕迹"
+          }
+        },
+        "persistent": {
+          "v1": {
+            "primary": "{activeDays} 天，几乎没让鼓面闲着",
+            "longest": "最长一段连着 {longestStreak} 天",
+            "emotion1": "从年初到年尾，",
+            "emotion2": "鼓声一直没有走远"
+          },
+          "v2": {
+            "primary": "这一年有 {activeDays} 天在敲",
+            "longest": "连得最久的一次是 {longestStreak} 天",
+            "emotion1": "日历翻过去，",
+            "emotion2": "鼓点始终接得上"
+          }
+        }
+      },
+      "speedProfile": {
+        "original": {
+          "v1": {
+            "title": "原速的鼓点，也有自己的重心",
+            "lead": "{speed}× 是你的常用档位，鼓面跟着你的呼吸走。",
+            "detail": "速度不急，落点却很清楚。"
+          },
+          "v2": {
+            "title": "不快，但每一步都踩得准",
+            "lead": "{speed}× 用得最多，节奏由你自己定。",
+            "detail": "不用加速，也能把鼓面照顾周全。"
+          }
+        },
+        "cruise": {
+          "v1": {
+            "title": "稍微提一点速，正好合手",
+            "lead": "{speed}× 停在顺手的位置，快慢都留有余地。",
+            "detail": "不算极速，却一直稳得住。"
+          },
+          "v2": {
+            "title": "顺手的速度，最常被你选中",
+            "lead": "{speed}× 是这一年的常用速度。",
+            "detail": "速度提上来了，落点没散。"
+          }
+        },
+        "fast": {
+          "v1": {
+            "title": "快一档，鼓面才跟得上你",
+            "lead": "{speed}× 成了常驻档位，鼓点密得连成片。",
+            "detail": "手速跟上之后，气势也提了上来。"
+          },
+          "v2": {
+            "title": "提速之后，节奏更顺了",
+            "lead": "{speed}× 用得最多，音符开始挤在一起。",
+            "detail": "快到这个档位，鼓面明显更热。"
+          }
+        },
+        "extreme": {
+          "v1": {
+            "title": "把速度推到极限的那一档",
+            "lead": "{speed}× 是这一年的签名，多数谱面都在这个档位完成。",
+            "detail": "速度拉满之后，考验的是稳定。"
+          },
+          "v2": {
+            "title": "极限档位，也照样落得准",
+            "lead": "{speed}× 用得最多，鼓点几乎没有间隙。",
+            "detail": "越快的档位，越看得出控制力。"
+          }
+        }
+      },
+      "challenge": {
+        "tap": {
+          "v1": {
+            "title": "门才刚被你敲响",
+            "lead": "次数不多，但每一次都算数。"
+          },
+          "v2": {
+            "title": "门还没热，你已经在敲",
+            "lead": "次数还少，节奏刚刚起头。"
+          }
+        },
+        "push": {
+          "v1": {
+            "title": "你还在敲这扇门",
+            "lead": "门没开，你还是又敲了一次。"
+          },
+          "v2": {
+            "title": "这扇门，你敲了很多次",
+            "lead": "门没开，你也没走。"
+          }
+        },
+        "siege": {
+          "v1": {
+            "title": "这扇门，你敲了很久",
+            "lead": "次数堆在一起，已经不是随手一试。"
+          },
+          "v2": {
+            "title": "门还没让开，你又来了",
+            "lead": "敲到第几十次，答案还在门后。"
+          }
+        },
+        "vow": {
+          "v1": {
+            "title": "这扇门，你敲了一整年",
+            "lead": "一百多次之后，这更像一个约定。"
+          },
+          "v2": {
+            "title": "门前的痕迹，已经数不清",
+            "lead": "敲到这个次数，节奏比答案先到。"
+          }
+        }
+      },
+      "nearDondaful": {
+        "razor_standard": {
+          "v1": {
+            "title": "离全良只差最后一步",
+            "lead": "这一首歌，正在等你把最后一槌落下。"
+          },
+          "v2": {
+            "title": "差一点点，就是全良",
+            "lead": "只差几个可，鼓面已经亮了。"
+          }
+        },
+        "razor_ten_star": {
+          "v1": {
+            "title": "十星谱上，只差一口气",
+            "lead": "高难度的谱面，也已经走到最后一步。"
+          },
+          "v2": {
+            "title": "这么难的谱，只差一点",
+            "lead": "在十星谱上差这几个可，分量并不轻。"
+          }
+        },
+        "near_standard": {
+          "v1": {
+            "title": "离全良还有一小段路",
+            "lead": "差几个可的距离，多打几遍就能追上。"
+          },
+          "v2": {
+            "title": "全良在前面，不算远",
+            "lead": "剩下的几个可，还在等你收尾。"
+          }
+        },
+        "near_ten_star": {
+          "v1": {
+            "title": "十星谱的全良，在眼前",
+            "lead": "高难谱面还差几个可，进度已经很清楚。"
+          },
+          "v2": {
+            "title": "难谱上的缺口，在变小",
+            "lead": "剩下的几个可，是这张谱最后的关卡。"
+          }
+        },
+        "distant_standard": {
+          "v1": {
+            "title": "全良还远，方向很清楚",
+            "lead": "差的判定还不少，但终点已经能看见。"
+          },
+          "v2": {
+            "title": "还有一段，才到全良",
+            "lead": "缺口还在，慢慢补就好。"
+          }
+        },
+        "distant_ten_star": {
+          "v1": {
+            "title": "十星的全良，值得慢慢磨",
+            "lead": "高难谱面差着一截，进度却一直没停。"
+          },
+          "v2": {
+            "title": "难谱的缺口，一点点补",
+            "lead": "在十星谱上追平，本来就需要时间。"
+          }
+        }
+      }
+    },
     "copy": {
       "opening": { "eyebrow": "2026 · 你的太鼓故事", "title": "{nickname}，来听听你的 2026", "body": "{playCount} 次游玩、{uniqueSongs} 首歌，都在这面鼓里等你。" },
       "profile": { "eyebrow": "PLAYER CARD", "title": "这一年的主角，是 {nickname}", "body": "这张小咚装扮，就是你的专属开场。", "bodyWithTitle": "戴着“{playerTitle}”的称号登场，小咚也替你换好了这一年的装扮。", "bodyWithDan": "以“{dan}”的段位站上鼓面，小咚也替你换好了这一年的装扮。", "bodyWithTitleAndDan": "戴着“{playerTitle}”的称号、以“{dan}”的段位登场——这就是只属于你的玩家卡。" },
@@ -757,15 +1017,15 @@
       "shift": { "old": "故事前段 · 放不下的旧爱", "new": "故事后段 · 悄悄登场的新欢", "times": "相遇 {count} 次" },
       "monthly": { "estimated": "约 {time}", "plays": "主打歌 {songCount} 次 · 当月共 {monthCount} 次 · 约 {time}" },
       "weekday": { "top": "最有默契的一天", "bottom": "相对安静的一天" },
-      "calendar": { "title": "虹2025 太鼓日历", "primary": "这一版，有 {activeDays} 天留下了鼓声", "longest": "最长连续敲响了 {longestStreak} 天", "emotionLine1": "没有记录的日子，", "emotionLine2": "也一定有自己的节拍", "month": "{month}月", "monthSummary": "{month}月，共有 {count} 个记录日", "datePlayCount": "{date}，留下 {count} 次记录", "active": "记录的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
-      "time": { "favorite": "鼓声最集中的时刻", "theme": "你的鼓声，最常在什么时候响起？", "periods": {"early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜"} },
+      "calendar": { "title": "虹2025 太鼓日历", "month": "{month}月", "monthSummary": "{month}月，共有 {count} 个记录日", "datePlayCount": "{date}，留下 {count} 次记录", "active": "记录的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
+      "time": { "wheelLabel": "年度六个时段", "favorite": "鼓声最集中的时刻", "periods": {"early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜"} },
       "late": { "latest": "记录最深的一夜", "company": "夜色里的陪伴", "nights": "{count} 个夜晚", "plays": "留下 {count} 次鼓点" },
       "rating": { "sample": "与 {count} 位站内鼓手并肩", "rank": "这一刻的坐标", "percentile": "已经走在 {value}% 的同行鼓手前面", "tier": "此刻所在的队列", "tiers": { "top1": "站在最前方的 Top 1%", "top5": "走进耀眼的 Top 5%", "top20": "稳稳站进 Top 20%", "top50": "已经越过半程的 Top 50%", "growing": "正在向前生长" } },
       "ratingRank": { "eyebrow": "TAIKOB20 · 年度位置", "title": "你在鼓众山脉里的坐标", "b20Value": "Rating 高达", "percentileBefore": "已经越过", "percentileAfter": "% 的鼓手", "copyLow": "这不是一串数字，而是你在鼓众分布里的坐标。", "copyMid": "每一次提升，都让你站到更靠前的山坡。", "copyHigh": "从蓝色山脚到红色峰脊，你已经走到了这里。", "emptyTitle": "今年的 rating 坐标已经记录", "emptyBody": "完整分布图还在生成中，但你的年度位置已经被点亮。", "missingTitle": "今年还没有形成 rating 画像", "missingBody": "再多打几首，你在鼓众山脉中的位置就会出现。" },
       "keyword": { "signature": "你的鼓面性格", "brightest": "最亮的一角", "shape": "你的六维鼓面", "story": "这不是一串冷冰冰的分数，而是你面对鼓面时，最像自己的样子。" },
-      "speed": { "eyebrow": "SPEED SIGNATURE", "title": "快一点，正好装下你的节奏", "lead": "{speed}× 的速度，已经成为成绩页上的个人签名。", "story": "最常留下的是 {speed}×", "chartCount": "刻着这份速度的谱面", "detail": "鼓面向前追，你的气势也没有落后。" },
-      "near": { "eyebrow": "ALMOST DONDAFUL", "title": "离满屏金光，只剩最后几槌", "lead": "《{song}》只剩 {count} 个可，鼓面已经在等你收尾。", "okCount": "只差 {count} 个可", "score": "已经写下的最高分" },
-      "challenge": { "eyebrow": "KEEP TRYING", "title": "这扇门，你还在敲", "lead": "你向《{song}》敲了 {count} 次门，每一次都比转身更勇敢。", "total": "成绩表里的累计挑战", "observedInPeriod": "其中 {count} 次被这一版记录下来", "story": "它还没有完全打开，而你也没有转身。" },
+      "speed": { "eyebrow": "SPEED SIGNATURE", "story": "最常留下的是 {speed}×", "chartCount": "刻着这份速度的谱面" },
+      "near": { "eyebrow": "ALMOST DONDAFUL", "spotlight": "SONG IN THE SPOTLIGHT", "songQuoted": "《{song}》", "unknownSong": "这首歌", "okBefore": "离全良只差", "okCount": "{count} 个可", "score": "已经写下的最高分", "footer1Before": "鼓面已经亮到", "footer1Strong": "最后一小步", "footer1After": "。", "footer2": "下一次落槌，也许就会亮成完整彩虹。" },
+      "challenge": { "eyebrow": "KEEP TRYING", "spotlight": "SONG IN THE SPOTLIGHT", "songQuoted": "《{song}》", "unknownSong": "这首歌", "knockBefore": "你向它敲了", "knockAfter": "次门", "total": "成绩表里的累计挑战", "totalValue": "{count} 次", "observedInPeriod": "其中 {count} 次被这一版记录下来", "story1": "它还没有把答案全部交出来，", "story2": "而你也没有转身。" },
       "pound": { "eyebrow": "DRUMROLL", "title": "密密麻麻的连打，是你的签名", "lead": "{count} 连打散落在一张张谱面里，如今一起响了起来。", "unit": "连打", "story": "哇，你一定是搓鼓高手吧！", "topSong": "最密集的一段留在", "ending": "鼓槌落下去，连打就替你把气势写满。" },
       "highScore": { "eyebrow": "HIGH SCORE", "title": "成绩页记住了这次向上", "lead": "{time}，《{song}》的分数被你推到 {score}。", "celebration": "这一格新高，已经替那一刻发出欢呼。" },
       "milestones": { "song": "《{name}》", "effort": "★{stars} · 累计尝试 {plays} 次", "onlyOnce": "这一次，来得很不容易" },

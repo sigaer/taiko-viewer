@@ -3,6 +3,7 @@ import { computed, ref, toRef } from "vue";
 import AnnualMonthDotGrid from "./AnnualMonthDotGrid.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 
 type CalendarDay = NonNullable<VersionSummaryViewModel["calendarActivity"]>["days"][number];
@@ -36,6 +37,16 @@ const activity = computed(() => props.summary.calendarActivity);
 const activeDays = computed(() => Math.round(finiteNonNegative(activity.value?.activeDays)));
 const longestStreak = computed(() => Math.round(finiteNonNegative(activity.value?.longestStreak)));
 const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "ja-JP" : "zh-CN"));
+
+// Active days and the longest streak are read together, so a short burst and a
+// year-long habit never share the same sentence.
+const narrative = computed(() => selectNarrative("calendar", props.summary));
+const narrativeCopy = computed(() => ({
+  primary: t(narrativeKey("calendar", narrative.value, "primary"), { activeDays: formatter.value.format(activeDays.value) }),
+  longest: t(narrativeKey("calendar", narrative.value, "longest"), { longestStreak: formatter.value.format(longestStreak.value) }),
+  emotionLine1: t(narrativeKey("calendar", narrative.value, "emotion1")),
+  emotionLine2: t(narrativeKey("calendar", narrative.value, "emotion2"))
+}));
 
 const startMonth = computed(() => {
   const match = String(props.summary.version.startDate || "").match(/^(\d{4})-(\d{2})/);
@@ -98,12 +109,12 @@ const monthGroups = computed(() => Array.from({ length: 12 }, (_, index) => {
         </div>
         <div class="annual-calendar-scene__narrative">
           <p class="annual-calendar-scene__summary" data-annual-stage="title">
-            <span>{{ t("annualSummary.slides.calendar.primary", { activeDays: formatter.format(activeDays) }) }}</span>
-            <span>{{ t("annualSummary.slides.calendar.longest", { longestStreak: formatter.format(longestStreak) }) }}</span>
+            <span>{{ narrativeCopy.primary }}</span>
+            <span>{{ narrativeCopy.longest }}</span>
           </p>
           <p class="annual-calendar-scene__reflection" data-annual-stage="copy">
-            <span>{{ t("annualSummary.slides.calendar.emotionLine1") }}</span>
-            <span>{{ t("annualSummary.slides.calendar.emotionLine2") }}</span>
+            <span>{{ narrativeCopy.emotionLine1 }}</span>
+            <span>{{ narrativeCopy.emotionLine2 }}</span>
           </p>
         </div>
       </header>

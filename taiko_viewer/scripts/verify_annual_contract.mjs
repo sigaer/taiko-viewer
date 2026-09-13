@@ -167,7 +167,7 @@ for (const digits of [2, 3, 4, 5]) {
 }
 assert.equal(timeOfDaySource.includes("tabular-nums"), true, "time centre reel is not using tabular figures");
 assert.equal(timeOfDaySource.includes("overflow-wrap:anywhere"), true, "time centre reel cannot wrap an overlong count");
-assert.equal(timeOfDaySource.includes('t("annualSummary.slides.time.theme")'), true, "time page does not render its immediate theme copy");
+assert.equal(timeOfDaySource.includes('narrativeKey("timeOfDay"'), true, "time page does not render its data-typed theme copy");
 assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lane ignores reduced motion");
 const periodMotionSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
 const overviewMotionSource = await read("components/account/version-summary/slides/OverviewSlide.vue");
@@ -301,12 +301,92 @@ for (const locale of [zh, ja]) {
   for (const page of expectedPages) assert.equal(typeof locale.pages[page], "string", `missing page locale: ${page}`);
   for (const key of ["renewShare", "revokeShare"]) assert.equal(typeof locale.controls[key], "string", `missing control locale: ${key}`);
   for (const key of ["ready", "renewed", "revoked", "expires", "privacy"]) assert.equal(typeof locale.share[key], "string", `missing share locale: ${key}`);
-  for (const key of ["title", "primary", "longest", "emotionLine1", "emotionLine2", "month", "monthSummary", "datePlayCount"]) {
+  for (const key of ["title", "month", "monthSummary", "datePlayCount"]) {
     assert.equal(typeof locale.slides.calendar[key], "string", `missing calendar locale: ${key}`);
   }
-  // UX-2: the time page must state its theme on the first beat of the page.
-  assert.equal(typeof locale.slides.time.theme, "string", "time page has no immediate theme copy");
-  assert.ok(locale.slides.time.theme.length > 4, "time page theme copy is a placeholder");
+  assert.equal(locale.slides.calendar.primary, undefined, "calendar still ships a second, untyped wording next to the typed narrative");
+  // UX-2: the time page states its theme on the first beat, now through the typed narrative.
+  assert.equal(locale.slides.time.theme, undefined, "time page still ships a second, untyped wording next to the typed narrative");
+  assert.equal(typeof locale.slides.time.favorite, "string", "time page has no favourite-hour label");
+}
+
+// Copy typing: every archetype the selector can produce carries its own wording in
+// both locales, and each of the five pages renders that wording through the shared
+// selector instead of holding a hardcoded sentence.
+const narrativeSource = await read("utils/annualNarrative.ts");
+assert.equal(narrativeSource.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, "").includes("Math.random"), false, "annual narrative selection is not deterministic");
+const narrativePages = {
+  timeOfDay: { archetypes: ["morning", "daytime", "evening", "late_night"], fields: ["theme"] },
+  calendar: { archetypes: ["occasional", "sprint", "steady", "persistent"], fields: ["primary", "longest", "emotion1", "emotion2"] },
+  speedProfile: { archetypes: ["original", "cruise", "fast", "extreme"], fields: ["title", "lead", "detail"] },
+  challenge: { archetypes: ["tap", "push", "siege", "vow"], fields: ["title", "lead"] },
+  nearDondaful: { archetypes: ["razor_standard", "razor_ten_star", "near_standard", "near_ten_star", "distant_standard", "distant_ten_star"], fields: ["title", "lead"] }
+};
+for (const locale of [zh, ja]) {
+  for (const [page, { archetypes, fields }] of Object.entries(narrativePages)) {
+    for (const archetype of archetypes) {
+      const variants = locale.narrative?.[page]?.[archetype];
+      assert.equal(typeof variants, "object", `missing ${page} narrative archetype: ${archetype}`);
+      const entries = Object.entries(variants);
+      assert.ok(entries.length >= 2 && entries.length <= 3, `${page}/${archetype} must ship 2-3 wording variants`);
+      for (const [variant, copy] of entries) {
+        for (const field of fields) {
+          assert.equal(typeof copy[field], "string", `missing narrative copy: ${page}/${archetype}/${variant}/${field}`);
+          assert.ok(copy[field].length > 3, `placeholder narrative copy: ${page}/${archetype}/${variant}/${field}`);
+        }
+      }
+    }
+  }
+}
+// The selector itself is exercised on synthetic edge cases, so a value the locale
+// does not cover (or a non-deterministic variant) cannot ship unnoticed.
+const { selectNarrative, NARRATIVE_VARIANTS } = await import(new URL("../utils/annualNarrative.ts", import.meta.url).href);
+const syntheticSummary = (patch = {}) => ({ summaryId: "annual_contract_probe", version: { key: "annual_2026" }, ...patch });
+const narrativeProbes = {
+  timeOfDay: [undefined, { topPeriod: "early_morning" }, { topPeriod: "morning" }, { topPeriod: "noon" }, { topPeriod: "afternoon" },
+    { topPeriod: "evening" }, { topPeriod: "late_night" }, { topPeriod: "dusk", favoriteHour: 0 }, { topPeriod: "dusk", favoriteHour: 10 },
+    { topPeriod: "dusk", favoriteHour: 16 }, { topPeriod: "dusk", favoriteHour: 23 }],
+  calendar: [undefined, { activeDays: 0, longestStreak: 0 }, { activeDays: 19, longestStreak: 5 }, { activeDays: 20, longestStreak: 3 },
+    { activeDays: 59, longestStreak: 30 }, { activeDays: 60, longestStreak: 7 }, { activeDays: 400, longestStreak: 2 }],
+  speedProfile: [undefined, { speed: 0 }, { speed: 1 }, { speed: 1.25 }, { speed: 1.26 }, { speed: 1.45 }, { speed: 1.6 }, { speed: 1.61 }, { speed: 4 }],
+  challenge: [undefined, { playCount: 0 }, { playCount: 29 }, { playCount: 30 }, { playCount: 69 }, { playCount: 70 }, { playCount: 120 }, { playCount: 121 }],
+  nearDondaful: [undefined, { okCount: 1, song: { stars: 9 } }, { okCount: 1, song: { stars: 10 } }, { okCount: 3, song: { stars: 8 } },
+    { okCount: 6, song: { stars: 7 } }, { okCount: 10, song: { stars: 10 } }]
+};
+for (const [page, probes] of Object.entries(narrativeProbes)) {
+  const declared = Object.keys(zh.narrative[page]);
+  assert.equal(typeof NARRATIVE_VARIANTS[page], "number", `${page} has no declared variant count`);
+  for (const probe of probes) {
+    const summary = syntheticSummary({ [page]: probe === undefined ? null : probe });
+    const selection = selectNarrative(page, summary);
+    assert.equal(declared.includes(selection.archetype), true, `${page} selects an archetype the locale does not ship: ${selection.archetype}`);
+    assert.ok(selection.variant >= 1 && selection.variant <= NARRATIVE_VARIANTS[page], `${page} variant out of range: ${selection.variant}`);
+    assert.deepEqual(selectNarrative(page, summary), selection, `${page} selection is not stable for the same input`);
+    for (const field of narrativePages[page].fields) {
+      for (const variant of Object.keys(zh.narrative[page][selection.archetype])) {
+        assert.equal(typeof zh.narrative[page][selection.archetype][variant][field], "string", `zh has no ${page}.${selection.archetype}.${variant}.${field}`);
+        assert.equal(typeof ja.narrative[page][selection.archetype][variant][field], "string", `ja has no ${page}.${selection.archetype}.${variant}.${field}`);
+      }
+    }
+  }
+}
+// A different account must be able to land on a different wording for the same archetype.
+const probeVariants = new Set();
+for (let index = 0; index < 40; index += 1) {
+  probeVariants.add(selectNarrative("calendar", syntheticSummary({ summaryId: `annual_contract_probe_${index}`, calendarActivity: { activeDays: 80, longestStreak: 40 } })).variant);
+}
+assert.ok(probeVariants.size > 1, "one archetype always resolves to a single variant");
+
+// The five typed pages read their sentences from the shared selector.
+for (const [file, token] of [  ["components/account/version-summary/slides/TimeOfDaySlide.vue", 'selectNarrative("timeOfDay"'],
+  ["components/account/version-summary/AnnualCalendarScene.vue", 'selectNarrative("calendar"'],
+  ["components/account/version-summary/slides/SpeedProfileSlide.vue", 'selectNarrative("speedProfile"'],
+  ["components/account/version-summary/slides/ChallengeSlide.vue", 'selectNarrative("challenge"'],
+  ["components/account/version-summary/slides/NearDondafulSlide.vue", 'selectNarrative("nearDondaful"']
+]) {
+  const source = await read(file);
+  assert.equal(source.includes(token), true, `${file} does not read the shared narrative selector`);
+  assert.equal(source.includes("narrativeKey("), true, `${file} does not render typed narrative copy`);
 }
 
 const componentNames = {
@@ -485,8 +565,17 @@ assert.equal(challengeSource.includes("challenge-pressure"), true, "challenge pa
 assert.equal(challengeSource.includes("challenge-door-light"), true, "challenge page has no cold door-slit spotlight");
 assert.equal(/#f2c45f|#ffe08a|#ffd700|gold/i.test(challengeSource), false, "challenge page misuses gold completion semantics");
 assert.equal(/prism|rainbow|spectrum|#ff9d|#c590/i.test(challengeSource), false, "challenge page misuses rainbow completion semantics");
-assert.equal(nearDondafulSource.includes("<span>下一次落槌，也许就会亮成完整彩虹。</span>"), true, "near footer is not split into stable lines");
-assert.equal(challengeSource.includes("<span>而你也没有转身。</span>"), true, "challenge footer is not split into stable lines");
+assert.equal(nearDondafulSource.includes("footer1Strong"), true, "near footer lost its accented final step");
+assert.equal(challengeSource.includes("story1") && challengeSource.includes("story2"), true, "challenge footer lost its two closing lines");
+// Both closing lines stay split into their own <span>s, but the words now come from
+// the typed locale block instead of being hardcoded in the template.
+for (const [source, page] of [[nearDondafulSource, "nearDondaful"], [challengeSource, "challenge"]]) {
+  const opening = source.indexOf("<template #footer>");
+  const footer = source.slice(opening, source.indexOf("</template>", opening));
+  assert.equal(opening > -1 && (footer.match(/<span>/g) || []).length, 2, `${page} footer is not split into stable lines`);
+  assert.equal(/annualSummary\.slides\.(near|challenge)\./.test(footer), true, `${page} footer is not localized`);
+  assert.equal(/[一-龥]/.test(source.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, "")), false, `${page} still holds hardcoded Chinese`);
+}
 for (const component of ["FavoriteShiftSlide", "LateNightSlide", "MilestonesSlide"]) {
   const source = await read(`components/account/version-summary/slides/${component}.vue`);
   assert.equal(source.includes("#error"), true, `${component} has no cover failure fallback`);

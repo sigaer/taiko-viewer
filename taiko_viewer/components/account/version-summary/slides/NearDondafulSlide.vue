@@ -3,20 +3,29 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualGrowthSongStage from "../AnnualGrowthSongStage.vue";
 import AnnualProfileStageFrame from "../AnnualProfileStageFrame.vue";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 const props = withDefaults(defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean; saveData?: boolean }>(), { saveData: false });
+const { t } = useI18n();
 const formatter = new Intl.NumberFormat("zh-CN");
 const safeNumber = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : 0;
-const songName = computed(() => props.summary.nearDondaful?.song?.name?.trim() || "这首歌");
+const songName = computed(() => props.summary.nearDondaful?.song?.name?.trim() || t("annualSummary.slides.near.unknownSong"));
 const okCountText = computed(() => formatter.format(safeNumber(props.summary.nearDondaful?.okCount)));
 const scoreText = computed(() => formatter.format(safeNumber(props.summary.nearDondaful?.score)));
+// How close the chart is to a full-perfect run, and whether it is a ten-star
+// chart at all, decide which sentence the player reads.
+const narrative = computed(() => selectNarrative("nearDondaful", props.summary));
+const narrativeCopy = computed(() => ({
+  title: t(narrativeKey("nearDondaful", narrative.value, "title")),
+  lead: t(narrativeKey("nearDondaful", narrative.value, "lead"))
+}));
 </script>
 <template>
   <AnnualProfileStageFrame v-if="summary.nearDondaful" class="near-growth" tone="near" motion-preset="growth-near-rainbow" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.nearDondaful.title">
-    <template #header><span>ALMOST DONDAFUL · 2026</span><h1>离全良只差最后一步</h1><p>这一首歌，正在等你把最后一槌落下。</p></template>
+    <template #header><span>{{ t("annualSummary.slides.near.eyebrow") }} · 2026</span><h1>{{ narrativeCopy.title }}</h1><p>{{ narrativeCopy.lead }}</p></template>
     <template #center><AnnualGrowthSongStage tone="near" size="large" :image-url="summary.nearDondaful.song.coverUrl" :image-alt="songName" fallback="2026" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" /></template>
-    <template #primary-panel><span>SONG IN THE SPOTLIGHT</span><strong>《{{ songName }}》</strong><em>离全良只差 <b>{{ okCountText }} 个可</b></em></template>
-    <template #secondary-panel><span>已经写下的最高分</span><strong>{{ scoreText }}</strong></template>
-    <template #footer><p><span>鼓面已经亮到<strong>最后一小步</strong>。</span><span>下一次落槌，也许就会亮成完整彩虹。</span></p></template>
+    <template #primary-panel><span>{{ t("annualSummary.slides.near.spotlight") }}</span><strong>{{ t("annualSummary.slides.near.songQuoted", { song: songName }) }}</strong><em>{{ t("annualSummary.slides.near.okBefore") }} <b>{{ t("annualSummary.slides.near.okCount", { count: okCountText }) }}</b></em></template>
+    <template #secondary-panel><span>{{ t("annualSummary.slides.near.score") }}</span><strong>{{ scoreText }}</strong></template>
+    <template #footer><p><span>{{ t("annualSummary.slides.near.footer1Before") }}<strong>{{ t("annualSummary.slides.near.footer1Strong") }}</strong>{{ t("annualSummary.slides.near.footer1After") }}</span><span>{{ t("annualSummary.slides.near.footer2") }}</span></p></template>
     <template #atmosphere>
       <div class="near-spectrum-atmosphere" aria-hidden="true">
         <i class="near-spectrum-atmosphere__aurora" />

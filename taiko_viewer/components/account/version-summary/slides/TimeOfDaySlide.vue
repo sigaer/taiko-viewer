@@ -3,6 +3,7 @@ import { computed, ref, toRef } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualScene from "../AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
 const { t, locale } = useI18n();
@@ -24,6 +25,10 @@ useAnnualTimeline(sceneRef, toRef(props, "active"), toRef(props, "reducedMotion"
 const formatter = computed(() => new Intl.NumberFormat(locale.value === "ja" ? "ja-JP" : "zh-CN"));
 const periods = computed(() => props.summary.timeOfDay?.periods ?? []);
 const peakKey = computed(() => props.summary.timeOfDay?.topPeriod ?? "");
+// The theme line is typed by the player's own peak period, so two accounts with
+// the same "morning person" shape still do not have to read the same sentence.
+const narrative = computed(() => selectNarrative("timeOfDay", props.summary));
+const themeText = computed(() => t(narrativeKey("timeOfDay", narrative.value, "theme")));
 
 // Identical slot geometry to the pre-UX-2 implementation: six periods projected
 // onto the visible right half of the ring, each one appearing twice so the ring
@@ -58,9 +63,9 @@ const countDigits = (value: number) => Math.max(2, Math.min(5, String(Math.abs(M
     <template #background><img class="time-of-day-scene__background" src="/annual/timeOfDay/background_13.png" alt="" aria-hidden="true"></template>
     <div v-if="summary.timeOfDay" class="time-of-day-poster">
       <header class="time-of-day-theme" data-annual-stage="title">
-        <p>{{ t("annualSummary.slides.time.theme") }}</p>
+        <p>{{ themeText }}</p>
       </header>
-      <div class="time-wheel" aria-label="年度六个时段">
+      <div class="time-wheel" :aria-label="t('annualSummary.slides.time.wheelLabel')">
         <div class="time-wheel__outer-dim" aria-hidden="true"></div>
         <div class="time-wheel__rotor" aria-hidden="true">
           <svg class="time-wheel__sectors" viewBox="-400 -400 800 800" aria-hidden="true">

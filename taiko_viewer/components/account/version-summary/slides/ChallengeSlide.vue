@@ -3,21 +3,29 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualGrowthSongStage from "../AnnualGrowthSongStage.vue";
 import AnnualProfileStageFrame from "../AnnualProfileStageFrame.vue";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 const props = withDefaults(defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean; saveData?: boolean }>(), { saveData: false });
+const { t } = useI18n();
 const formatter = new Intl.NumberFormat("zh-CN");
 const safeNumber = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : 0;
-const songName = computed(() => props.summary.challenge?.song?.name?.trim() || "这首歌");
+const songName = computed(() => props.summary.challenge?.song?.name?.trim() || t("annualSummary.slides.challenge.unknownSong"));
 const playCountText = computed(() => formatter.format(safeNumber(props.summary.challenge?.playCount)));
 const observedPlayCountText = computed(() => formatter.format(safeNumber(props.summary.challenge?.observedPlayCount)));
 const showObservedCount = computed(() => safeNumber(props.summary.challenge?.observedPlayCount) !== safeNumber(props.summary.challenge?.playCount));
+// How long the player has been knocking on this one door decides the wording.
+const narrative = computed(() => selectNarrative("challenge", props.summary));
+const narrativeCopy = computed(() => ({
+  title: t(narrativeKey("challenge", narrative.value, "title")),
+  lead: t(narrativeKey("challenge", narrative.value, "lead"))
+}));
 </script>
 <template>
   <AnnualProfileStageFrame v-if="summary.challenge" class="challenge-growth" tone="challenge" motion-preset="growth-challenge-knock" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" :aria-label="summary.copy.challenge.title">
-    <template #header><span>KEEP TRYING · 2026</span><h1>你还在敲这扇门</h1><p>答案还没有全部交出来，但你没有转身。</p></template>
+    <template #header><span>{{ t("annualSummary.slides.challenge.eyebrow") }} · 2026</span><h1>{{ narrativeCopy.title }}</h1><p>{{ narrativeCopy.lead }}</p></template>
     <template #center><AnnualGrowthSongStage tone="challenge" size="large" :image-url="summary.challenge.song.coverUrl" :image-alt="songName" fallback="2026" :active="active" :reduced-motion="reducedMotion" :save-data="saveData" /></template>
-    <template #primary-panel><span>SONG IN THE SPOTLIGHT</span><strong>《{{ songName }}》</strong><em>你向它敲了 <b>{{ playCountText }} 次门</b></em></template>
-    <template #secondary-panel><span>成绩表里的累计挑战</span><strong>{{ playCountText }} 次</strong><small v-if="showObservedCount">其中 {{ observedPlayCountText }} 次被这一版记录下来</small></template>
-    <template #footer><p><span>它还没有把答案全部交出来，</span><span>而你也没有转身。</span></p></template>
+    <template #primary-panel><span>{{ t("annualSummary.slides.challenge.spotlight") }}</span><strong>{{ t("annualSummary.slides.challenge.songQuoted", { song: songName }) }}</strong><em>{{ t("annualSummary.slides.challenge.knockBefore") }} <b>{{ playCountText }} {{ t("annualSummary.slides.challenge.knockAfter") }}</b></em></template>
+    <template #secondary-panel><span>{{ t("annualSummary.slides.challenge.total") }}</span><strong>{{ t("annualSummary.slides.challenge.totalValue", { count: playCountText }) }}</strong><small v-if="showObservedCount">{{ t("annualSummary.slides.challenge.observedInPeriod", { count: observedPlayCountText }) }}</small></template>
+    <template #footer><p><span>{{ t("annualSummary.slides.challenge.story1") }}</span><span>{{ t("annualSummary.slides.challenge.story2") }}</span></p></template>
     <template #atmosphere>
       <div class="challenge-door-light" aria-hidden="true"><i /><i /></div>
       <div class="challenge-pressure" aria-hidden="true"><i v-for="index in 7" :key="index" /></div>
