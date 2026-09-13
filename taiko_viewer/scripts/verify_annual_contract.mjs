@@ -592,15 +592,15 @@ assert.equal(
   false,
   "monthly vine orders months by number across the year boundary"
 );
-// The leaf length is the only mark that encodes a month's play volume, so the
-// busiest month must own the longest leaf, and a long song title elsewhere may
-// only raise that leaf's own readable minimum.
-assert.equal(monthlyLeafSceneSource.includes("monthlyLeafWidths"), true, "monthly vine does not derive leaf widths from the shared helper");
+// The leaf length is the only mark that encodes a month's play volume: every leaf
+// starts at the width the longest title needs, the rest is handed out in proportion
+// to plays, and the busiest month is pulled further than any other.
+assert.equal(monthlyLeafSceneSource.includes("monthlyLeafLayout"), true, "monthly vine does not derive its leaf geometry from the shared helper");
 assert.equal(monthlyLeafSceneSource.includes("sharedLeafWidth"), false, "monthly vine still sizes leaves from the longest song title");
 assert.equal(monthlyLeafSceneSource.includes("measureText"), false, "monthly vine still measures titles on the client");
 assert.equal(monthlyLeafItemSource.includes("leafWidth: number"), true, "monthly leaf does not take its length as a prop");
-assert.equal(monthlyLeafItemSource.includes("monthlyLeafFontSpec"), true, "monthly leaf does not share the title font tiers");
-const { monthlyLeafWidths, monthlyLeafFontSpec, estimateMonthlyLeafNameWidth } = await import(new URL("../utils/annualMonthlyLeaf.ts", import.meta.url).href);
+assert.equal(monthlyLeafItemSource.includes("leafFont: number"), true, "monthly leaf does not take its fitted font size");
+const { monthlyLeafLayout, estimateMonthlyLeafNameWidth, monthlyLeafMetrics } = await import(new URL("../utils/annualMonthlyLeaf.ts", import.meta.url).href);
 for (const compact of [false, true]) {
   const probes = [
     { name: "短歌", metric: 12 },
@@ -608,20 +608,24 @@ for (const compact of [false, true]) {
     { name: "中等长度的歌名", metric: 300 },
     { name: "最忙的一个月", metric: 900 }
   ];
-  const widths = monthlyLeafWidths(probes, compact);
-  assert.equal(widths.length, probes.length, "monthly leaf helper dropped an item");
-  const busiest = widths[3];
-  for (const [index, width] of widths.entries()) {
-    assert.ok(Number.isFinite(width) && width > 0, `monthly leaf width is not usable: ${width}`);
-    if (index !== 3) assert.ok(width <= busiest, "a quieter month got a longer leaf than the busiest month");
+  const layout = monthlyLeafLayout(probes, compact);
+  assert.equal(layout.length, probes.length, "monthly leaf helper dropped an item");
+  for (const [index, entry] of layout.entries()) {
+    assert.ok(Number.isFinite(entry.width) && entry.width > 0, `monthly leaf width is not usable: ${entry.width}`);
+    assert.ok(entry.fontPx >= 6, `monthly leaf font is too small: ${entry.fontPx}`);
+    const textWidth = estimateMonthlyLeafNameWidth(probes[index].name, entry.fontPx);
+    assert.ok(textWidth + monthlyLeafMetrics(compact).insets <= entry.width, `monthly leaf clips its title: ${probes[index].name}`);
   }
-  assert.ok(busiest > Math.max(widths[0], widths[1], widths[2]), "the busiest month does not own the longest leaf");
-  // a title long enough to saturate the cap still must not outgrow the busiest month
-  const saturated = monthlyLeafWidths([{ name: "很长的歌名".repeat(12), metric: 900 }, { name: "短", metric: 5 }], compact);
-  assert.ok(saturated[0] > saturated[1], "the busiest month loses to a long title");
-  assert.equal(monthlyLeafWidths([], compact).length, 0, "monthly leaf helper does not handle an empty month list");
-  assert.equal(monthlyLeafFontSpec(30, compact).max > 0, true, "monthly leaf font tiers are missing");
-  assert.ok(estimateMonthlyLeafNameWidth("ABCDEFGHIJ", 10) > 10 * 8, "monthly leaf width estimate is too optimistic");
+  const widths = layout.map((entry) => entry.width);
+  assert.ok(widths[3] > Math.max(widths[0], widths[1], widths[2]), "the busiest month does not own the longest leaf");
+  // same slope for every month, so the extra length is linear in the play count
+  const slope = (widths[2] - widths[1]) / (probes[2].metric - probes[1].metric);
+  const floor = widths[1] - slope * probes[1].metric;
+  for (const [index, probe] of probes.entries()) {
+    if (index === 3) continue;
+    assert.ok(Math.abs((floor + slope * probe.metric) - widths[index]) <= 2, "monthly leaf length is not proportional to plays");
+  }
+  assert.equal(monthlyLeafLayout([], compact).length, 0, "monthly leaf helper does not handle an empty month list");
 }
 
 const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");

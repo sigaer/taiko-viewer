@@ -4,7 +4,7 @@ import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 import AnnualMonthlyLeafItem from "./AnnualMonthlyLeafItem.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
-import { monthlyLeafWidths } from "~/utils/annualMonthlyLeaf";
+import { monthlyLeafLayout } from "~/utils/annualMonthlyLeaf";
 import type { VersionSummaryMonthlyFavorite, VersionSummaryViewModel } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -68,8 +68,9 @@ const itemDensity = computed(() => items.value.length > 9 ? "ultra-dense" : item
 const topMonthLabel = computed(() => topMonth.value?.monthLabel || "—");
 const motionDisabled = computed(() => props.reducedMotion || saveData.value);
 
-// 叶片长度：完全由月度游玩量决定，并保证“游玩最多的月份叶片最长”。
-const leafWidths = computed(() => monthlyLeafWidths(
+// 叶片几何：先取“最长歌名所需长度”作为共同起点，再按游玩量比例分配剩余长度，
+// 游玩最多的月份额外拉长（见 utils/annualMonthlyLeaf.ts）。
+const leafLayout = computed(() => monthlyLeafLayout(
   items.value.map((item) => ({ name: String(item.song.name || ""), metric: leafMetric(item) })),
   itemDensity.value !== "standard"
 ));
@@ -111,7 +112,8 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
           :index="index"
           :compact="itemDensity !== 'standard'"
           :motion-disabled="motionDisabled"
-          :leaf-width="leafWidths[index] || 0"
+          :leaf-width="leafLayout[index]?.width || 0"
+          :leaf-font="leafLayout[index]?.fontPx || 12"
           :is-top="isTopMonth(item)"
         />
       </main>

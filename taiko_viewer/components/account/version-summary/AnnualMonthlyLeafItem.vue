@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
-import { monthlyLeafFontSpec } from "~/utils/annualMonthlyLeaf";
 import type { VersionSummaryMonthlyFavorite } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -11,18 +10,16 @@ const props = defineProps<{
   motionDisabled?: boolean;
   /** Leaf length in px; the scene derives it from the month's play metric. */
   leafWidth: number;
+  /** Title font size in px; the scene fits it so the title always stays inside the leaf. */
+  leafFont: number;
   isTop?: boolean;
 }>();
 
 const coverFailed = ref(false);
 const leafSrc = computed(() => props.index % 2 === 0 ? "/monthly/leaf_1_11.png" : "/monthly/leaf_2_11.png");
 
-// 歌名严格单行：字号按长度分档；叶片长度只由月度游玩量决定，
-// 歌名仅决定自己这条叶片“至少要有多宽才读得全”（见 utils/annualMonthlyLeaf.ts）。
-const nameChars = computed(() => [...String(props.item.song?.name || "")]);
-const nameLength = computed(() => nameChars.value.length);
-const fontSpec = computed(() => monthlyLeafFontSpec(nameLength.value, Boolean(props.compact)));
-const leafFontSize = computed(() => fontSpec.value.css);
+// 歌名严格单行：叶片长度与字号都由月度游玩量与“最长歌名所需长度”推导，
+// 见 utils/annualMonthlyLeaf.ts（保证《》完整落在叶片内，且叶片长度与游玩量成比例）。
 
 const handleCoverError = () => {
   coverFailed.value = true;
@@ -33,7 +30,7 @@ const handleCoverError = () => {
   <article
     class="monthly-leaf-item"
     :class="{ 'is-compact': compact, 'is-motion-disabled': motionDisabled, 'is-top': isTop }"
-    :style="{ '--leaf-delay': `${Math.min(index * 70, 700)}ms`, '--leaf-width': `${leafWidth}px`, '--leaf-font': leafFontSize }"
+    :style="{ '--leaf-delay': `${Math.min(index * 70, 700)}ms`, '--leaf-width': `${leafWidth}px`, '--leaf-font': `${leafFont}px` }"
     :aria-label="`${item.monthLabel} ${item.song.name}`"
   >
     <div class="monthly-leaf-item__month" data-annual-stage="visual">
