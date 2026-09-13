@@ -5,6 +5,7 @@ import AnnualMonthlyLeafItem from "./AnnualMonthlyLeafItem.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 import { monthlyLeafLayout } from "~/utils/annualMonthlyLeaf";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 import type { VersionSummaryMonthlyFavorite, VersionSummaryViewModel } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -17,6 +18,7 @@ const props = defineProps<{
 
 const rootRef = ref<InstanceType<typeof AnnualScene> | null>(null);
 useAnnualTimeline(rootRef, toRef(props, "active"), toRef(props, "reducedMotion"), { reenter: "restart" });
+const { t } = useI18n();
 const saveData = ref(process.client && Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData));
 
 const finite = (value: unknown) => {
@@ -74,6 +76,14 @@ const leafLayout = computed(() => monthlyLeafLayout(
   items.value.map((item) => ({ name: String(item.song.name || ""), metric: leafMetric(item) })),
   itemDensity.value !== "standard"
 ));
+// How much of the year has a representative song types the page's narrative, which
+// this page renders as its accessible footer pair (the visible wording is baked
+// into the artwork, so no text node changes here).
+const narrative = computed(() => selectNarrative("monthly", props.summary));
+const narrativeCopy = computed(() => ({
+  footer1: t(narrativeKey("monthly", narrative.value, "footer1")),
+  footer2: t(narrativeKey("monthly", narrative.value, "footer2"))
+}));
 const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
   topMonth.value && topMonth.value.month === item.month && topMonth.value.song.songNo === item.song.songNo
 );
@@ -99,12 +109,12 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
         <img class="annual-monthly-leaf-scene__title" src="/monthly/title_11.png" alt="月度游玩时长" width="196" height="33">
         <div class="annual-monthly-leaf-scene__subtitle-row">
           <img src="/monthly/grass_left_11.png" alt="" aria-hidden="true" width="22" height="20">
-          <img class="annual-monthly-leaf-scene__subtitle" src="/monthly/subtitle_11.png" alt="歌曲为当月代表歌曲" width="113" height="13">
+          <img class="annual-monthly-leaf-scene__subtitle" src="/monthly/subtitle_11.png" :alt="t('annualSummary.slides.monthly.subtitleAlt')" width="113" height="13">
           <img src="/monthly/grass_right_11.png" alt="" aria-hidden="true" width="22" height="20">
         </div>
       </header>
 
-      <main v-if="items.length" class="annual-monthly-leaf-scene__timeline" :style="{ '--monthly-count': items.length }" :aria-label="`月度代表歌曲，共 ${items.length} 个月`">
+      <main v-if="items.length" class="annual-monthly-leaf-scene__timeline" :style="{ '--monthly-count': items.length }" :aria-label="t('annualSummary.slides.monthly.timelineLabel', { count: items.length })">
         <AnnualMonthlyLeafItem
           v-for="(item, index) in items"
           :key="`${item.month}-${item.song.songNo}`"
@@ -118,12 +128,12 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
         />
       </main>
       <div v-else class="annual-monthly-leaf-scene__empty" data-annual-stage="copy">
-        <AnnualArtworkFallback label="暂无月度代表歌曲" />
+        <AnnualArtworkFallback :label="t('annualSummary.slides.monthly.emptyLabel')" />
       </div>
 
       <footer class="annual-monthly-leaf-scene__summary" data-annual-stage="copy">
-        <p><img src="/monthly/text_1_11.png" alt="你游玩最多的月份是" width="187" height="22"><strong>{{ topMonthLabel }}</strong></p>
-        <img src="/monthly/text_2_11.png" alt="太鼓总是与你同行" width="167" height="22">
+        <p><img src="/monthly/text_1_11.png" :alt="narrativeCopy.footer1" width="187" height="22"><strong>{{ topMonthLabel }}</strong></p>
+        <img src="/monthly/text_2_11.png" :alt="narrativeCopy.footer2" width="167" height="22">
       </footer>
     </div>
   </AnnualScene>

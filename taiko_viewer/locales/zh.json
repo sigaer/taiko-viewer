@@ -628,7 +628,7 @@
     "staticPoster": {"report": "年度报告", "reflections": "年度感想", "empty": "还没有年度感想", "placeholder": "输入年度感想，分享你与太鼓的故事", "sync": "同步分享到社区", "send": "发送感想", "save": "保存图片", "legacy": "更多分享方式 · 30 天链接", "unavailable": "暂不可用", "close": "关闭"},
     "name": "2026 太鼓回顾（持续更新）",
     "common": {
-      "coverFallback": "咚",
+      "songCover": "歌曲封面", "coverFallback": "咚",
       "observed": "这段被记录的旅程",
       "archive": "截至此刻的你",
       "observedQualifier": "这些，是记录为你留住的鼓点。",
@@ -982,6 +982,198 @@
             "lead": "在十星谱上追平，本来就需要时间。"
           }
         }
+      },
+      "obsession": {
+      "encounter": {
+        "v1": {
+          "closing1": "只是偶尔遇见",
+          "closing2": "它没有住进日常，也没被忘掉"
+        },
+        "v2": {
+          "closing1": "隔一阵才想起一次",
+          "closing2": "相遇不多，每次都清楚"
+        }
+      },
+      "burst": {
+        "v1": {
+          "closing1": "有几天它被反复翻开",
+          "closing2": "短时间里，全都在敲这首"
+        },
+        "v2": {
+          "closing1": "它来得集中",
+          "closing2": "几次坐定，就把它敲了很多遍"
+        }
+      },
+      "attached": {
+        "v1": {
+          "closing1": "隔一段时间它又回来",
+          "closing2": "不是每天，但总能再见"
+        },
+        "v2": {
+          "closing1": "想起来时会点开它",
+          "closing2": "断断续续，一直没真的离开"
+        }
+      },
+      "devoted": {
+        "v1": {
+          "closing1": "它常在，像个旧习惯",
+          "closing2": "打开鼓面，它总在候选里"
+        },
+        "v2": {
+          "closing1": "很多天里它都在场",
+          "closing2": "不用特意想起，手会找过去"
+        }
+      }
+      },
+      "favoriteShift": {
+      "handover": {
+        "v1": {
+          "line1": "新的站到了前面",
+          "line2": "旧的退到旁边"
+        },
+        "v2": {
+          "line1": "接棒的是新的一首",
+          "line2": "喜欢换了方向"
+        }
+      },
+      "transition": {
+        "v1": {
+          "line1": "重心慢慢移过去",
+          "line2": "旧爱让出了中间"
+        },
+        "v2": {
+          "line1": "新的一点点走近",
+          "line2": "只是顺序变了"
+        }
+      },
+      "flicker": {
+        "v1": {
+          "line1": "新的刚冒出头",
+          "line2": "中心还是旧的"
+        },
+        "v2": {
+          "line1": "口味动了一下",
+          "line2": "旧爱仍占大半"
+        }
+      }
+      },
+      "monthly": {
+      "brief": {
+        "v1": {
+          "footer1": "记得最清楚的是",
+          "footer2": "亮的时间不长，也留下了痕迹"
+        },
+        "v2": {
+          "footer1": "最热闹的那个月是",
+          "footer2": "声音不多，却认得出来"
+        }
+      },
+      "seasonal": {
+        "v1": {
+          "footer1": "声音最密的月份是",
+          "footer2": "像是集中在几个时期"
+        },
+        "v2": {
+          "footer1": "最响的那一段是",
+          "footer2": "像是有几个固定的季节"
+        }
+      },
+      "recurring": {
+        "v1": {
+          "footer1": "最常响起的那一个月是",
+          "footer2": "很多个月份都有代表的声音"
+        },
+        "v2": {
+          "footer1": "轮流站到中间的是",
+          "footer2": "月份翻过去，声音没断"
+        }
+      },
+      "year_round": {
+        "v1": {
+          "footer1": "整年最亮的那个月是",
+          "footer2": "几乎每个月都有歌"
+        },
+        "v2": {
+          "footer1": "最亮的那个月是",
+          "footer2": "其余月份，也各有各的声音"
+        }
+      }
+      },
+      "weekday": {
+      "anchored": {
+        "v1": {
+          "titleBefore": "一周里最固定的那天是",
+          "titleAfter": "，几乎成了约定"
+        },
+        "v2": {
+          "titleBefore": "说好要见的那天是",
+          "titleAfter": "，别的日子都算偶然"
+        }
+      },
+      "weekend": {
+        "v1": {
+          "titleBefore": "一周里最热闹的是",
+          "titleAfter": "，周末总是先响起"
+        },
+        "v2": {
+          "titleBefore": "到了周末，最常响起的是",
+          "titleAfter": "，两天都比平时热闹"
+        }
+      },
+      "workday": {
+        "v1": {
+          "titleBefore": "工作日里最投入的是",
+          "titleAfter": "，忙完才有这一会儿"
+        },
+        "v2": {
+          "titleBefore": "一周的重心落在",
+          "titleAfter": "，工作日里它最响"
+        }
+      },
+      "balanced": {
+        "v1": {
+          "titleBefore": "一周里分得最匀的是",
+          "titleAfter": "，七天几乎一样多"
+        },
+        "v2": {
+          "titleBefore": "七天里最响的也只是",
+          "titleAfter": "，差距并不明显"
+        }
+      }
+      },
+      "lateNight": {
+      "occasional": {
+        "v1": {
+          "line": "偶尔陪到很晚"
+        },
+        "v2": {
+          "line": "深夜只来过几次"
+        }
+      },
+      "familiar": {
+        "v1": {
+          "line": "夜里也常陪着"
+        },
+        "v2": {
+          "line": "深夜不再算例外"
+        }
+      },
+      "frequent": {
+        "v1": {
+          "line": "很多夜里都有它"
+        },
+        "v2": {
+          "line": "深夜出现得很密"
+        }
+      },
+      "nocturnal": {
+        "v1": {
+          "line": "深夜就是主场"
+        },
+        "v2": {
+          "line": "夜里最常遇见它"
+        }
+      }
       }
     },
     "copy": {
@@ -1014,12 +1206,13 @@
       "period": { "start": "开始", "now": "当前", "end": "结束", "first": "故事第一次亮起", "latest": "故事写到这里", "totalDays": "展开的日子", "activeDays": "记录的日期", "archiveTitle": "这一页已经为你收好", "archiveBody": "时间没有被勉强猜测，但一路积攒的成绩都在这里。" },
       "overview": { "plays": "游玩记录", "activeDays": "记录的日期", "songs": "鼓点记录", "charts": "谱面记录", "estimated": "鼓声时长", "clear": "已经通关", "fullCombo": "已经全连", "dondaful": "已经全良", "kiwami": "已经极" },
       "favorite": { "plays": "鼓点记录" },
-      "shift": { "old": "故事前段 · 放不下的旧爱", "new": "故事后段 · 悄悄登场的新欢", "times": "相遇 {count} 次" },
-      "monthly": { "estimated": "约 {time}", "plays": "主打歌 {songCount} 次 · 当月共 {monthCount} 次 · 约 {time}" },
-      "weekday": { "top": "最有默契的一天", "bottom": "相对安静的一天" },
+      "obsession": { "headlineDaysSuffix": "个不同的日子里", "headlinePlaysBefore": "你与它重逢", "headlinePlaysAfter": "次", "sceneLabel": "{days} 个不同的日子里，你与它重逢 {plays} 次。《{song}》", "unknownSong": "这首歌" },
+      "shift": { "oldLabel": "放不下的旧爱", "newLabel": "刚邂逅的新欢", "timesColon": "：", "timesUnit": "次", "newTimesPrefix": "相遇 ", "newTimesSuffix": " 次：", "sceneLabel": "新旧偏爱", "unknownSong": "这首歌" },
+      "monthly": { "titleAlt": "月度游玩时长", "subtitleAlt": "歌曲为当月代表歌曲", "timelineLabel": "月度代表歌曲，共 {count} 个月", "emptyLabel": "暂无月度代表歌曲" },
+      "weekday": { "leastSuffix": " 打得相对较少", "tracksLabel": "一周七天的太鼓情绪画像", "rowLabel": "{day}，{mood}", "workdaySummary": "工作日的你 = ", "weekendSummary": "周末的你 = ", "idleWorkday": "还在蓄力", "idleWeekend": "安静蓄力", "days": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"], "moods": ["最后亿把", "开心", "激动", "暴食", "偷懒", "敲击太鼓", "投入硬币"] },
       "calendar": { "title": "虹2025 太鼓日历", "month": "{month}月", "monthSummary": "{month}月，共有 {count} 个记录日", "datePlayCount": "{date}，留下 {count} 次记录", "active": "记录的日期", "streak": "没有停下的最长一段", "days": "{count} 天" },
       "time": { "wheelLabel": "年度六个时段", "favorite": "鼓声最集中的时刻", "periods": {"early_morning": "清晨", "morning": "上午", "noon": "中午", "afternoon": "下午", "evening": "晚间", "late_night": "深夜"} },
-      "late": { "latest": "记录最深的一夜", "company": "夜色里的陪伴", "nights": "{count} 个夜晚", "plays": "留下 {count} 次鼓点" },
+      "late": { "nightsBefore": "你在", "nightsAfter": "个深夜", "playsBefore": "共计留下", "playsAfter": "次鼓点", "unknownTime": "某个深夜", "unknownSong": "这首歌" },
       "rating": { "sample": "与 {count} 位站内鼓手并肩", "rank": "这一刻的坐标", "percentile": "已经走在 {value}% 的同行鼓手前面", "tier": "此刻所在的队列", "tiers": { "top1": "站在最前方的 Top 1%", "top5": "走进耀眼的 Top 5%", "top20": "稳稳站进 Top 20%", "top50": "已经越过半程的 Top 50%", "growing": "正在向前生长" } },
       "ratingRank": { "eyebrow": "TAIKOB20 · 年度位置", "title": "你在鼓众山脉里的坐标", "b20Value": "Rating 高达", "percentileBefore": "已经越过", "percentileAfter": "% 的鼓手", "copyLow": "这不是一串数字，而是你在鼓众分布里的坐标。", "copyMid": "每一次提升，都让你站到更靠前的山坡。", "copyHigh": "从蓝色山脚到红色峰脊，你已经走到了这里。", "emptyTitle": "今年的 rating 坐标已经记录", "emptyBody": "完整分布图还在生成中，但你的年度位置已经被点亮。", "missingTitle": "今年还没有形成 rating 画像", "missingBody": "再多打几首，你在鼓众山脉中的位置就会出现。" },
       "keyword": { "signature": "你的鼓面性格", "brightest": "最亮的一角", "shape": "你的六维鼓面", "story": "这不是一串冷冰冰的分数，而是你面对鼓面时，最像自己的样子。" },

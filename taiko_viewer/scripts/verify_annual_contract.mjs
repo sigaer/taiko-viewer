@@ -320,7 +320,12 @@ const narrativePages = {
   calendar: { archetypes: ["occasional", "sprint", "steady", "persistent"], fields: ["primary", "longest", "emotion1", "emotion2"] },
   speedProfile: { archetypes: ["mild", "cruise", "fast", "extreme"], fields: ["title", "lead", "detail"] },
   challenge: { archetypes: ["tap", "push", "siege", "vow"], fields: ["title", "lead"] },
-  nearDondaful: { archetypes: ["razor_standard", "razor_ten_star", "near_standard", "near_ten_star", "distant_standard", "distant_ten_star"], fields: ["title", "lead"] }
+  nearDondaful: { archetypes: ["razor_standard", "razor_ten_star", "near_standard", "near_ten_star", "distant_standard", "distant_ten_star"], fields: ["title", "lead"] },
+  obsession: { archetypes: ["encounter", "burst", "attached", "devoted"], fields: ["closing1", "closing2"] },
+  favoriteShift: { archetypes: ["handover", "transition", "flicker"], fields: ["line1", "line2"] },
+  monthly: { archetypes: ["brief", "seasonal", "recurring", "year_round"], fields: ["footer1", "footer2"] },
+  weekday: { archetypes: ["anchored", "weekend", "workday", "balanced"], fields: ["titleBefore", "titleAfter"] },
+  lateNight: { archetypes: ["occasional", "familiar", "frequent", "nocturnal"], fields: ["line"] }
 };
 for (const locale of [zh, ja]) {
   for (const [page, { archetypes, fields }] of Object.entries(narrativePages)) {
@@ -351,7 +356,20 @@ const narrativeProbes = {
   speedProfile: [undefined, { speed: 0 }, { speed: 1 }, { speed: 1.25 }, { speed: 1.26 }, { speed: 1.45 }, { speed: 1.6 }, { speed: 1.61 }, { speed: 4 }],
   challenge: [undefined, { playCount: 0 }, { playCount: 29 }, { playCount: 30 }, { playCount: 69 }, { playCount: 70 }, { playCount: 120 }, { playCount: 121 }],
   nearDondaful: [undefined, { okCount: 1, song: { stars: 9 } }, { okCount: 1, song: { stars: 10 } }, { okCount: 3, song: { stars: 8 } },
-    { okCount: 6, song: { stars: 7 } }, { okCount: 10, song: { stars: 10 } }]
+    { okCount: 6, song: { stars: 7 } }, { okCount: 10, song: { stars: 10 } }],
+  obsession: [undefined, { activeDays: 1, playCount: 1 }, { activeDays: 5, playCount: 5 }, { activeDays: 6, playCount: 30 },
+    { activeDays: 12, playCount: 20 }, { activeDays: 18, playCount: 30 }, { activeDays: 40, playCount: 80 }, { activeDays: 100, playCount: 120 }],
+  favoriteShift: [undefined, { oldFavorite: { playCount: 10 }, newFavorite: { playCount: 1 } },
+    { oldFavorite: { playCount: 10 }, newFavorite: { playCount: 10 } }, { oldFavorite: { playCount: 1 }, newFavorite: { playCount: 10 } },
+    { oldFavorite: { playCount: 0 }, newFavorite: { playCount: 0 } }],
+  monthly: [undefined, [], Array.from({ length: 1 }, (_, index) => ({ song: { name: `song-${index}` } })),
+    Array.from({ length: 3 }, (_, index) => ({ song: { name: `song-${index}` } })),
+    Array.from({ length: 6 }, (_, index) => ({ song: { name: `song-${index}` } })),
+    Array.from({ length: 9 }, (_, index) => ({ song: { name: `song-${index}` } })),
+    Array.from({ length: 12 }, (_, index) => ({ song: { name: `song-${index}` } }))],
+  weekday: [undefined, { counts: [1, 1, 1, 1, 1, 1, 1], totalPlays: 7 }, { counts: [1, 1, 1, 1, 1, 20, 20], totalPlays: 45 },
+    { counts: [30, 30, 30, 30, 30, 1, 1], totalPlays: 152 }, { counts: [1, 1, 40, 1, 1, 1, 1], totalPlays: 46 }],
+  lateNight: [undefined, { activeDays: 1 }, { activeDays: 4 }, { activeDays: 12 }, { activeDays: 25 }, { activeDays: 80 }]
 };
 for (const [page, probes] of Object.entries(narrativeProbes)) {
   const declared = Object.keys(zh.narrative[page]);
@@ -451,7 +469,7 @@ const obsessionSceneSource = await read("components/account/version-summary/Annu
 const obsessionCoverSource = await read("components/account/version-summary/AnnualObsessionCoverBlock.vue");
 assert.equal(obsessionSlideSource.includes("AnnualObsessionGreenEchoScene"), true, "obsession page does not use its dedicated green echo scene");
 assert.equal(obsessionSlideSource.includes('new Intl.NumberFormat("zh-CN")'), true, "obsession metrics are not formatted for Chinese");
-assert.equal(obsessionSlideSource.includes('"这首歌"'), true, "obsession song has no safe Chinese fallback");
+assert.equal(obsessionSlideSource.includes('annualSummary.slides.obsession.unknownSong'), true, "obsession song has no safe locale fallback");
 assert.equal(obsessionSlideSource.includes("StorySlideShell"), false, "obsession page still uses the dashboard slide shell");
 assert.equal(obsessionSlideSource.includes("obsession-slide__metrics"), false, "obsession page still renders metric cards");
 assert.equal(obsessionSlideSource.includes("obsession-slide__echoes"), false, "obsession page still renders echo dots");
@@ -472,14 +490,15 @@ assert.equal(lateNightSlideSource.includes("AnnualLateNightFireworksScene"), tru
 assert.equal(lateNightSlideSource.includes('v-if="summary.lateNight"'), true, "late-night page lost its availability guard");
 assert.equal(lateNightSlideSource.includes("StorySlideShell"), false, "late-night page still uses the dashboard slide shell");
 assert.equal(lateNightSlideSource.includes('new Intl.NumberFormat("zh-CN")'), true, "late-night metrics are not formatted for Chinese");
-assert.equal(lateNightSlideSource.includes('"某个深夜"'), true, "late-night time has no safe Chinese fallback");
-assert.equal(lateNightSlideSource.includes('"这首歌"'), true, "late-night song has no safe Chinese fallback");
+assert.equal(lateNightSlideSource.includes("annualSummary.slides.late.unknownTime"), true, "late-night time has no safe locale fallback");
+assert.equal(lateNightSlideSource.includes("annualSummary.slides.late.unknownSong"), true, "late-night song has no safe locale fallback");
 assert.equal(lateNightSceneSource.includes("useAnnualTimeline"), true, "late-night scene does not use the annual motion lifecycle");
 assert.equal(lateNightSceneSource.includes("saveData"), true, "late-night scene does not reduce motion for save-data mode");
 assert.equal(lateNightSceneSource.includes('/lateNight/background_14.png'), true, "late-night scene is missing the fireworks backdrop");
 assert.equal(lateNightSceneSource.includes('/lateNight/cover_bg_14.png'), true, "late-night scene is missing the transparent cover frame");
 assert.equal(lateNightSceneSource.includes("2025版本报告-N14-效果图-v1.0.png"), false, "late-night reference image is used by the implementation");
-assert.equal(lateNightSceneSource.includes("陪你到深夜"), true, "late-night scene is missing its fixed Chinese memory line");
+assert.equal(lateNightSceneSource.includes('class="annual-late-night-fireworks__with"'), true, "late-night scene is missing its memory line slot");
+assert.equal(lateNightSceneSource.includes("{{ line }}"), true, "late-night memory line is not rendered from the typed narrative");
 for (const asset of ["2025版本报告-N14-效果图-v1.0.png", "background_14.png", "cover_bg_14.png"]) {
   assert.equal(await exists(`public/lateNight/${asset}`), true, `late-night asset is missing: ${asset}`);
 }
@@ -567,6 +586,36 @@ assert.equal(/#f2c45f|#ffe08a|#ffd700|gold/i.test(challengeSource), false, "chal
 assert.equal(/prism|rainbow|spectrum|#ff9d|#c590/i.test(challengeSource), false, "challenge page misuses rainbow completion semantics");
 assert.equal(nearDondafulSource.includes("footer1Strong"), true, "near footer lost its accented final step");
 assert.equal(challengeSource.includes("story1") && challengeSource.includes("story2"), true, "challenge footer lost its two closing lines");
+// Copy-2 pages: every word now comes from the locale instead of the template.
+for (const file of [
+  "components/account/version-summary/AnnualObsessionGreenEchoScene.vue",
+  "components/account/version-summary/AnnualFavoriteShiftGinkgoScene.vue",
+  "components/account/version-summary/AnnualWeekdayForestScene.vue",
+  "components/account/version-summary/AnnualLateNightFireworksScene.vue",
+  "components/account/version-summary/slides/ObsessionSongSlide.vue",
+  "components/account/version-summary/slides/FavoriteShiftSlide.vue",
+  "components/account/version-summary/slides/LateNightSlide.vue"
+]) {
+  const source = await read(file);
+  assert.equal(/[一-龥]/.test(source.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, "")), false, `${file} still holds hardcoded Chinese`);
+}
+// The monthly page renders its words from artwork, so its typed narrative lives in
+// the accessible text; the only literal CJK left there is the month unit.
+const monthlySceneSource = await read("components/account/version-summary/AnnualMonthlyLeafScene.vue");
+assert.equal(monthlySceneSource.includes('narrativeKey("monthly"'), true, "monthly page does not render its typed narrative");
+for (const [locale, key] of [[zh, "monthly"], [ja, "monthly"]]) {
+  assert.equal(typeof locale.slides.monthly.timelineLabel, "string", `${key} has no timeline label`);
+  assert.equal(typeof locale.slides.monthly.emptyLabel, "string", `${key} has no empty label`);
+}
+for (const [locale] of [[zh], [ja]]) {
+  for (const page of ["obsession", "shift", "late"]) {
+    assert.equal(typeof locale.slides[page], "object", `missing ${page} labels`);
+  }
+  assert.equal(locale.slides.weekday.moods.length, 7, "weekday moods are incomplete");
+  assert.equal(locale.slides.weekday.days.length, 7, "weekday day labels are incomplete");
+  assert.equal(typeof locale.common.songCover, "string", "cover fallback label is missing");
+}
+
 // Both closing lines stay split into their own <span>s, but the words now come from
 // the typed locale block instead of being hardcoded in the template.
 for (const [source, page] of [[nearDondafulSource, "nearDondaful"], [challengeSource, "challenge"]]) {

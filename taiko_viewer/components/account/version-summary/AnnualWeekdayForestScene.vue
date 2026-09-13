@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from "vue";
 import AnnualScene from "./AnnualScene.vue";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 
@@ -23,24 +24,33 @@ const finiteCount = (value: unknown) => {
   return Number.isFinite(number) && number > 0 ? number : 0;
 };
 
+const { t } = useI18n();
 const weekdayMeta = [
-  { label: "周一", icon: "/weekday/002_key.png", mood: "最后亿把", top: "18%" },
-  { label: "周二", icon: "/weekday/036_key.png", mood: "开心", top: "25.7%" },
-  { label: "周三", icon: "/weekday/038_key.png", mood: "激动", top: "33.4%" },
-  { label: "周四", icon: "/weekday/006_key.png", mood: "暴食", top: "41.1%" },
-  { label: "周五", icon: "/weekday/010_key.png", mood: "偷懒", top: "48.8%" },
-  { label: "周六", icon: "/weekday/023_key.png", mood: "敲击太鼓", top: "56.5%" },
-  { label: "周日", icon: "/weekday/034_key.png", mood: "投入硬币", top: "64.2%" }
+  { icon: "/weekday/002_key.png", top: "18%" },
+  { icon: "/weekday/036_key.png", top: "25.7%" },
+  { icon: "/weekday/038_key.png", top: "33.4%" },
+  { icon: "/weekday/006_key.png", top: "41.1%" },
+  { icon: "/weekday/010_key.png", top: "48.8%" },
+  { icon: "/weekday/023_key.png", top: "56.5%" },
+  { icon: "/weekday/034_key.png", top: "64.2%" }
 ] as const;
+const weekdayMoods = computed(() => weekdayMeta.map((_, index) => t(`annualSummary.slides.weekday.moods.${index}`)));
+// The shape of the week (one dominant day, a weekend-heavy week, a working-day week,
+// or an even spread) picks the headline; the concrete weekday stays an interpolation.
+const narrative = computed(() => selectNarrative("weekday", props.summary));
+const narrativeCopy = computed(() => ({
+  titleBefore: t(narrativeKey("weekday", narrative.value, "titleBefore")),
+  titleAfter: t(narrativeKey("weekday", narrative.value, "titleAfter"))
+}));
 const activity = computed(() => props.summary.weekdayActivity);
 const counts = computed(() => weekdayMeta.map((_, index) => finiteCount(activity.value?.counts?.[index])));
 const maxCount = computed(() => Math.max(...counts.value, 1));
 const rows = computed<WeekdayRow[]>(() => weekdayMeta.map((meta, index) => {
   const count = counts.value[index];
   const iconCount = count > 0 ? Math.min(6, Math.max(1, Math.round(count / maxCount.value * 6))) : 0;
-  return { ...meta, count, iconCount };
+  return { ...meta, label: labels.value[index], mood: weekdayMoods.value[index], count, iconCount };
 }));
-const labels = computed(() => activity.value?.labels || weekdayMeta.map(({ label }) => label));
+const labels = computed(() => activity.value?.labels || weekdayMeta.map((_, index) => t(`annualSummary.slides.weekday.days.${index}`)));
 const safeLabel = (value: unknown, fallback: string) => {
   const text = String(value ?? "").trim();
   return text && text !== "undefined" && text !== "null" ? text : fallback;
@@ -49,8 +59,8 @@ const topLabel = computed(() => safeLabel(activity.value?.topLabel, labels.value
 const bottomLabel = computed(() => safeLabel(activity.value?.bottomLabel, labels.value[activity.value?.bottomWeekday ?? -1] || "—"));
 const workdayTraits = computed(() => rows.value.slice(0, 5).filter((row) => row.count > 0).sort((a, b) => b.count - a.count).slice(0, 3).map((row) => row.mood));
 const weekendTraits = computed(() => rows.value.slice(5).filter((row) => row.count > 0).map((row) => row.mood));
-const workdayText = computed(() => workdayTraits.value.length ? workdayTraits.value : ["还在蓄力"]);
-const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.value : ["安静蓄力"]);
+const workdayText = computed(() => workdayTraits.value.length ? workdayTraits.value : [t("annualSummary.slides.weekday.idleWorkday")]);
+const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.value : [t("annualSummary.slides.weekday.idleWeekend")]);
 </script>
 
 <template>
@@ -58,10 +68,10 @@ const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.va
     <template #background><div class="annual-weekday-forest-scene__backdrop" aria-hidden="true"></div></template>
     <div class="annual-weekday-forest-scene__content">
       <header class="annual-weekday-forest-scene__header" data-annual-stage="title">
-        <h2>你最爱在 <strong>{{ topLabel }}</strong> 打太鼓</h2>
-        <h3><strong>{{ bottomLabel }}</strong> 打得相对较少</h3>
+        <h2>{{ narrativeCopy.titleBefore }}<strong>{{ topLabel }}</strong>{{ narrativeCopy.titleAfter }}</h2>
+        <h3><strong>{{ bottomLabel }}</strong>{{ t("annualSummary.slides.weekday.leastSuffix") }}</h3>
       </header>
-      <div class="annual-weekday-forest-scene__tracks" aria-label="一周七天的太鼓情绪画像">
+      <div class="annual-weekday-forest-scene__tracks" :aria-label="t('annualSummary.slides.weekday.tracksLabel')">
         <div v-for="(row, rowIndex) in rows" :key="row.label" class="annual-weekday-forest-scene__row" data-annual-stage="visual" :style="{ top: row.top, '--row-index': rowIndex }" :aria-label="`${row.label}，${row.mood}`">
           <div class="annual-weekday-forest-scene__icons" aria-hidden="true">
             <img v-for="index in row.iconCount" :key="`${row.label}-${index}`" class="annual-weekday-forest-scene__icon" :style="{ '--icon-index': index - 1 }" :src="row.icon" alt="">
@@ -70,8 +80,8 @@ const weekendText = computed(() => weekendTraits.value.length ? weekendTraits.va
         </div>
       </div>
       <footer class="annual-weekday-forest-scene__summary" data-annual-stage="copy">
-        <p>工作日的你 = <span v-for="trait in workdayText" :key="trait"><strong>{{ trait }}</strong></span></p>
-        <p>周末的你 = <span v-for="trait in weekendText" :key="trait"><strong>{{ trait }}</strong></span></p>
+        <p>{{ t("annualSummary.slides.weekday.workdaySummary") }}<span v-for="trait in workdayText" :key="trait"><strong>{{ trait }}</strong></span></p>
+        <p>{{ t("annualSummary.slides.weekday.weekendSummary") }}<span v-for="trait in weekendText" :key="trait"><strong>{{ trait }}</strong></span></p>
       </footer>
     </div>
   </AnnualScene>

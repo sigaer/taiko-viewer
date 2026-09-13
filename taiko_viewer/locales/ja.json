@@ -627,7 +627,7 @@
     "staticPoster": {"report": "年間レポート", "reflections": "今年の感想", "empty": "今年の感想はまだありません", "placeholder": "太鼓と過ごした一年の感想を入力", "sync": "コミュニティにも共有", "send": "感想を送信", "save": "画像を保存", "legacy": "その他の共有 · 30日間リンク", "unavailable": "現在利用できません", "close": "閉じる"},
     "name": "2026 太鼓の振り返り（更新中）",
     "common": {
-      "coverFallback": "ドン",
+      "songCover": "曲のジャケット", "coverFallback": "ドン",
       "observed": "記録に残った旅",
       "archive": "今ここにいるあなた",
       "observedQualifier": "記録が、あなたの音をここまで残してくれました。",
@@ -928,6 +928,198 @@
             "lead": "十星で「可」を減らすには、時間がかかります。"
           }
         }
+      },
+      "obsession": {
+      "encounter": {
+        "v1": {
+          "closing1": "ときどき思い出すくらい",
+          "closing2": "それでも忘れはしなかった"
+        },
+        "v2": {
+          "closing1": "しばらくぶりに開く一曲",
+          "closing2": "回数は少なくても、そのたびに残る"
+        }
+      },
+      "burst": {
+        "v1": {
+          "closing1": "数日のあいだ、何度も開いた",
+          "closing2": "短い期間だけ、この曲を叩いていた"
+        },
+        "v2": {
+          "closing1": "集中して通った一曲",
+          "closing2": "座るたび、同じ曲へ戻っていた"
+        }
+      },
+      "attached": {
+        "v1": {
+          "closing1": "しばらくすると戻ってくる",
+          "closing2": "毎日ではないけれど、また会える"
+        },
+        "v2": {
+          "closing1": "思い出したときに開く",
+          "closing2": "途切れながらも、離れきってはいない"
+        }
+      },
+      "devoted": {
+        "v1": {
+          "closing1": "いるのが当たり前の一曲",
+          "closing2": "鼓面を開けば、いつもそこにいた"
+        },
+        "v2": {
+          "closing1": "多くの日に、この曲がいた",
+          "closing2": "探さなくても、手が覚えている"
+        }
+      }
+      },
+      "favoriteShift": {
+      "handover": {
+        "v1": {
+          "line1": "新しい曲が前へ",
+          "line2": "前の曲は横へ"
+        },
+        "v2": {
+          "line1": "主役が入れ替わる",
+          "line2": "音の向きが変わる"
+        }
+      },
+      "transition": {
+        "v1": {
+          "line1": "重心が移っていく",
+          "line2": "真ん中を譲った"
+        },
+        "v2": {
+          "line1": "少しずつ近づく",
+          "line2": "順番が変わっただけ"
+        }
+      },
+      "flicker": {
+        "v1": {
+          "line1": "新しい曲の気配",
+          "line2": "主役はまだ前の曲"
+        },
+        "v2": {
+          "line1": "好みが動いた年",
+          "line2": "前の曲がまだ中心"
+        }
+      }
+      },
+      "monthly": {
+      "brief": {
+        "v1": {
+          "footer1": "いちばんよく覚えているのは",
+          "footer2": "短い期間でも、跡は残りました"
+        },
+        "v2": {
+          "footer1": "いちばん賑やかだったのは",
+          "footer2": "音は多くないけれど、すぐ分かる"
+        }
+      },
+      "seasonal": {
+        "v1": {
+          "footer1": "音が濃かったのは",
+          "footer2": "いくつかの時期に集まっている"
+        },
+        "v2": {
+          "footer1": "よく響いたのは",
+          "footer2": "決まった季節みたいに巡る"
+        }
+      },
+      "recurring": {
+        "v1": {
+          "footer1": "いちばん多く鳴ったのは",
+          "footer2": "多くの月に、代表の一曲があった"
+        },
+        "v2": {
+          "footer1": "真ん中に立ったのは",
+          "footer2": "月を追うごとに、音は途切れず"
+        }
+      },
+      "year_round": {
+        "v1": {
+          "footer1": "いちばん長く光っていたのは",
+          "footer2": "どの月にも、それぞれの曲がいた"
+        },
+        "v2": {
+          "footer1": "いちばん明るい月は",
+          "footer2": "ほかの月も、静かに鳴っていた"
+        }
+      }
+      },
+      "weekday": {
+      "anchored": {
+        "v1": {
+          "titleBefore": "一週間でいちばん決まっているのは",
+          "titleAfter": "、ほぼ約束みたいに"
+        },
+        "v2": {
+          "titleBefore": "会いに行く日は",
+          "titleAfter": "、ほかの日は偶然です"
+        }
+      },
+      "weekend": {
+        "v1": {
+          "titleBefore": "一週間でいちばん賑わうのは",
+          "titleAfter": "、週末が先に鳴る"
+        },
+        "v2": {
+          "titleBefore": "週末にいちばん鳴るのは",
+          "titleAfter": "、土日はいつも濃い"
+        }
+      },
+      "workday": {
+        "v1": {
+          "titleBefore": "平日でいちばん集中するのは",
+          "titleAfter": "、仕事のあとの一息"
+        },
+        "v2": {
+          "titleBefore": "一週間の重心は",
+          "titleAfter": "、平日にあります"
+        }
+      },
+      "balanced": {
+        "v1": {
+          "titleBefore": "一週間でいちばん鳴るのは",
+          "titleAfter": "、七日ほぼ同じくらい"
+        },
+        "v2": {
+          "titleBefore": "七日でいちばん多い日でも",
+          "titleAfter": "、差は大きくありません"
+        }
+      }
+      },
+      "lateNight": {
+      "occasional": {
+        "v1": {
+          "line": "たまに夜まで一緒"
+        },
+        "v2": {
+          "line": "深夜は数えるほど"
+        }
+      },
+      "familiar": {
+        "v1": {
+          "line": "夜もよく一緒に"
+        },
+        "v2": {
+          "line": "深夜はもう普通"
+        }
+      },
+      "frequent": {
+        "v1": {
+          "line": "多くの夜にいた"
+        },
+        "v2": {
+          "line": "深夜によく会う"
+        }
+      },
+      "nocturnal": {
+        "v1": {
+          "line": "深夜が主戦場"
+        },
+        "v2": {
+          "line": "夜にいちばん会う"
+        }
+      }
       }
     },
     "copy": {
@@ -960,12 +1152,13 @@
       "period": { "start": "開始", "now": "現在", "end": "終了", "first": "物語が最初に灯った日", "latest": "物語の今", "totalDays": "広がった日々", "activeDays": "記録した日", "archiveTitle": "この一枚に大切にしまいました", "archiveBody": "時刻を無理に推測せず、積み重ねた成績だけをここに残しています。" },
       "overview": { "plays": "プレイ記録", "activeDays": "記録した日", "songs": "曲の記録", "charts": "譜面記録", "estimated": "響いた時間", "clear": "クリア", "fullCombo": "フルコンボ", "dondaful": "ドンダフル", "kiwami": "極" },
       "favorite": { "plays": "太鼓記録" },
-      "shift": { "old": "物語の前半 · 忘れない好き", "new": "物語の後半 · 新しく響いた好き", "times": "{count} 回の出会い" },
-      "monthly": { "estimated": "約 {time}", "plays": "主役曲 {songCount} 回 · 月合計 {monthCount} 回 · 約 {time}" },
-      "weekday": { "top": "いちばん気が合う曜日", "bottom": "少し静かな曜日" },
+      "obsession": { "headlineDaysSuffix": "日それぞれに", "headlinePlaysBefore": "この曲と会ったのは", "headlinePlaysAfter": "回", "sceneLabel": "{days} 日それぞれに、この曲と {plays} 回。『{song}』", "unknownSong": "この一曲" },
+      "shift": { "oldLabel": "手放せなかった一曲", "newLabel": "出会ったばかりの一曲", "timesColon": "：", "timesUnit": "回", "newTimesPrefix": "出会って ", "newTimesSuffix": " 回：", "sceneLabel": "好きの移り変わり", "unknownSong": "この一曲" },
+      "monthly": { "titleAlt": "月ごとのプレイ時間", "subtitleAlt": "その月の代表曲", "timelineLabel": "月ごとの代表曲、全 {count} か月", "emptyLabel": "月ごとの代表曲はまだありません" },
+      "weekday": { "leastSuffix": " は少なめです", "tracksLabel": "一週間の太鼓の気分", "rowLabel": "{day}、{mood}", "workdaySummary": "平日のあなた = ", "weekendSummary": "週末のあなた = ", "idleWorkday": "充電中", "idleWeekend": "静かに充電中", "days": ["月", "火", "水", "木", "金", "土", "日"], "moods": ["最後にもう一回", "うれしい", "熱くなる", "食べすぎ", "さぼり気味", "太鼓を叩く", "コインを入れる"] },
       "calendar": { "title": "虹2025 太鼓カレンダー", "month": "{month}月", "monthSummary": "{month}月は {count} 日の記録があります", "datePlayCount": "{date}、{count} 回の記録", "active": "記録した日", "streak": "止まらなかった最長記録", "days": "{count} 日" },
       "time": { "wheelLabel": "一年の6つの時間帯", "favorite": "太鼓の音が最も集まる時刻", "periods": {"early_morning": "早朝", "morning": "午前", "noon": "昼", "afternoon": "午後", "evening": "夜", "late_night": "深夜"} },
-      "late": { "latest": "最も深い夜の記録", "company": "夜の相棒", "nights": "{count} 夜", "plays": "{count} 打を残した" },
+      "late": { "nightsBefore": "深夜は", "nightsAfter": "夜", "playsBefore": "残した打音は", "playsAfter": "回", "unknownTime": "ある深夜", "unknownSong": "この一曲" },
       "rating": { "sample": "サイト内の {count} 人のプレイヤーと一緒に", "rank": "今いる場所", "percentile": "仲間の {value}% より先まで来た", "tier": "今いる隊列", "tiers": { "top1": "先頭を走る Top 1%", "top5": "まぶしい Top 5%", "top20": "しっかり届いた Top 20%", "top50": "半分を越えた Top 50%", "growing": "ここから伸びていく場所" } },
       "ratingRank": { "eyebrow": "TAIKOB20 · 年度の位置", "title": "太鼓衆の山脈の中の、あなたの座標", "b20Value": "TAIKO B20 は", "percentileBefore": "仲間の", "percentileAfter": "% を越えた", "copyLow": "これは数字ではなく、太鼓衆の分布の中のあなたの座標です。", "copyMid": "一歩ずつの上達が、あなたをより前の斜面へ連れてきました。", "copyHigh": "青い麓から赤い峰まで、あなたはここまで来ました。", "emptyTitle": "今年の rating 座標は記録済み", "emptyBody": "分布図はまだ生成中ですが、あなたの一年の位置はもう灯されています。", "missingTitle": "今年はまだ rating の肖像がありません", "missingBody": "もう少し太鼓を打てば、太鼓衆の山脈の中のあなたの位置が現れます。" },
       "keyword": { "signature": "あなたの鼓面らしさ", "brightest": "いちばん明るい角", "shape": "あなたの六角形", "story": "冷たい数字の並びではなく、鼓面と向き合うときに、いちばんあなたらしくなる形です。" },

@@ -3,8 +3,10 @@ import { computed } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import AnnualLateNightFireworksScene from "../AnnualLateNightFireworksScene.vue";
+import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
 import { hasUsableText, isUsableMetric } from "~/utils/annualPresentation";
 
+const { t } = useI18n();
 const props = defineProps<{
   summary: VersionSummaryViewModel;
   pageIndex: number;
@@ -19,13 +21,13 @@ const safeLatestLabel = computed(() => {
   const value = lateNight.value?.latestLabel;
   return hasUsableText(value) && value.trim() !== "—" && !["undefined", "null"].includes(value.trim().toLowerCase())
     ? value.trim()
-    : "某个深夜";
+    : t("annualSummary.slides.late.unknownTime");
 });
 const safeSongName = computed(() => {
   const value = lateNight.value?.song?.name;
   return hasUsableText(value) && !["undefined", "null"].includes(value.trim().toLowerCase())
     ? value.trim()
-    : "这首歌";
+    : t("annualSummary.slides.late.unknownSong");
 });
 const safeCoverUrl = computed(() => {
   const value = lateNight.value?.song?.coverUrl;
@@ -44,6 +46,11 @@ const playCountText = computed(() => isUsableMetric(lateNight.value?.playCount)
     v-if="summary.lateNight"
     :active="active"
     :reduced-motion="reducedMotion"
+    :line="narrativeLine"
+    :nights-before="t('annualSummary.slides.late.nightsBefore')"
+    :nights-after="t('annualSummary.slides.late.nightsAfter')"
+    :plays-before="t('annualSummary.slides.late.playsBefore')"
+    :plays-after="t('annualSummary.slides.late.playsAfter')"
     :latest-label="safeLatestLabel"
     :song-name="safeSongName"
     :active-days-text="activeDaysText"
@@ -52,10 +59,10 @@ const playCountText = computed(() => isUsableMetric(lateNight.value?.playCount)
     <template #cover>
       <el-image v-if="safeCoverUrl" :src="safeCoverUrl" fit="cover">
         <template #error>
-          <AnnualArtworkFallback label="歌曲封面" />
+          <AnnualArtworkFallback :label="t('annualSummary.common.songCover')" />
         </template>
       </el-image>
-      <AnnualArtworkFallback v-else label="歌曲封面" />
+      <AnnualArtworkFallback v-else :label="t('annualSummary.common.songCover')" />
     </template>
   </AnnualLateNightFireworksScene>
 </template>

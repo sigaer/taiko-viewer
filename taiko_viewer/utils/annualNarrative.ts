@@ -24,7 +24,9 @@ export type NarrativeSelection = {
   secondaryType?: string;
 };
 
-export type NarrativePageKey = "timeOfDay" | "calendar" | "speedProfile" | "challenge" | "nearDondaful";
+export type NarrativePageKey =
+  | "timeOfDay" | "calendar" | "speedProfile" | "challenge" | "nearDondaful"
+  | "obsession" | "favoriteShift" | "monthly" | "weekday" | "lateNight";
 
 /** FNV-1a: tiny, stable across runtimes, and independent of Math.random(). */
 const stableHash = (value: string) => {
@@ -110,6 +112,83 @@ const nearDondafulArchetype = (summary: VersionSummaryViewModel): Archetype => {
   return { archetype: `${closeness}_${difficulty}`, intensity, secondaryType: difficulty };
 };
 
+/**
+ * How often the one song kept coming back: a few scattered encounters, a burst of
+ * consecutive sittings, a returning habit, or a song that stayed all year. The
+ * per-day density separates a burst from an ordinary returning habit, so no extra
+ * secondary dimension is needed to tell the two stories apart.
+ */
+const obsessionArchetype = (summary: VersionSummaryViewModel): Archetype => {
+  const days = finite(summary.obsessionSong?.activeDays);
+  const plays = finite(summary.obsessionSong?.playCount);
+  const density = days > 0 ? plays / days : 0;
+  if (days <= 5) return { archetype: "encounter", intensity: "low", secondaryType: density >= 4 ? "burst" : "steady" };
+  if (density >= 4) return { archetype: "burst", intensity: "high", secondaryType: "burst" };
+  if (days >= 18) return { archetype: "devoted", intensity: "high", secondaryType: density <= 2 ? "long_running" : "steady" };
+  return { archetype: "attached", intensity: "mid", secondaryType: density <= 2 ? "long_running" : "steady" };
+};
+
+/**
+ * The page compares the top song of the account's own first quarter with the top
+ * song of its last quarter, so the share the new favourite holds between the two
+ * anchors is exactly the size of the turn: a clear handover, a shift in progress,
+ * or a new song that has only just appeared.
+ */
+const favoriteShiftArchetype = (summary: VersionSummaryViewModel): Archetype => {
+  const oldPlays = finite(summary.favoriteShift?.oldFavorite?.playCount);
+  const newPlays = finite(summary.favoriteShift?.newFavorite?.playCount);
+  const total = oldPlays + newPlays;
+  const share = total > 0 ? newPlays / total : 0.5;
+  const intensity: NarrativeIntensity = share >= 0.6 ? "high" : share >= 0.2 ? "mid" : "low";
+  // Both anchors being heavy means the year really had two centres of gravity.
+  const secondaryType = total >= 54 ? "deep" : "light";
+  if (share >= 0.6) return { archetype: "handover", intensity, secondaryType };
+  if (share >= 0.2) return { archetype: "transition", intensity, secondaryType };
+  return { archetype: "flicker", intensity, secondaryType };
+};
+
+/** How much of the year has a representative song: a few months, some phases, many, or nearly all. */
+const monthlyArchetype = (summary: VersionSummaryViewModel): Archetype => {
+  const count = (summary.monthlyFavorites || []).filter((item) => String(item?.song?.name || "").trim()).length;
+  if (count >= 9) return { archetype: "year_round", intensity: "high" };
+  if (count >= 6) return { archetype: "recurring", intensity: "mid" };
+  if (count >= 3) return { archetype: "seasonal", intensity: "mid" };
+  return { archetype: "brief", intensity: "low" };
+};
+
+/**
+ * The shape of a week, read from the seven real counts: one weekday that clearly
+ * dominates, a weekend-heavy week, a week that leans on the working days, or a
+ * week that is spread evenly. The concrete weekday stays an interpolation value.
+ */
+const weekdayArchetype = (summary: VersionSummaryViewModel): Archetype => {
+  const counts = (summary.weekdayActivity?.counts || []).map((value) => finite(value));
+  const total = counts.reduce((sum, value) => sum + value, 0);
+  if (!(total > 0)) return { archetype: "balanced", intensity: "low" };
+  const ranked = [...counts].sort((a, b) => b - a);
+  const top = ranked[0] || 0;
+  const second = ranked[1] || 0;
+  const weekend = (counts[5] || 0) + (counts[6] || 0);
+  const workday = total - weekend;
+  // The thresholds come from the real distribution: a single day owning 50% of the
+  // week (or 25pp more than the runner-up) is the top decile, weekend above 45%
+  // (flat week: 28.6%) is the top third, working days above 80% (flat: 71.4%) the
+  // top sixth.
+  if (top / total >= 0.5 || (top - second) / total >= 0.25) return { archetype: "anchored", intensity: "high" };
+  if (weekend / total >= 0.45) return { archetype: "weekend", intensity: "mid" };
+  if (workday / total >= 0.8) return { archetype: "workday", intensity: "mid" };
+  return { archetype: "balanced", intensity: "low" };
+};
+
+/** How often the year reached into the small hours: a few nights, a habit, many, or a signature. */
+const lateNightArchetype = (summary: VersionSummaryViewModel): Archetype => {
+  const days = finite(summary.lateNight?.activeDays);
+  if (days >= 25) return { archetype: "nocturnal", intensity: "extreme" };
+  if (days >= 12) return { archetype: "frequent", intensity: "high" };
+  if (days >= 4) return { archetype: "familiar", intensity: "mid" };
+  return { archetype: "occasional", intensity: "low" };
+};
+
 const resolveArchetype = (page: NarrativePageKey, summary: VersionSummaryViewModel): Archetype => {
   switch (page) {
     case "timeOfDay": return timeOfDayArchetype(summary);
@@ -117,6 +196,11 @@ const resolveArchetype = (page: NarrativePageKey, summary: VersionSummaryViewMod
     case "speedProfile": return speedProfileArchetype(summary);
     case "challenge": return challengeArchetype(summary);
     case "nearDondaful": return nearDondafulArchetype(summary);
+    case "obsession": return obsessionArchetype(summary);
+    case "favoriteShift": return favoriteShiftArchetype(summary);
+    case "monthly": return monthlyArchetype(summary);
+    case "weekday": return weekdayArchetype(summary);
+    case "lateNight": return lateNightArchetype(summary);
   }
 };
 
@@ -126,7 +210,12 @@ export const NARRATIVE_VARIANTS: Record<NarrativePageKey, number> = {
   calendar: 2,
   speedProfile: 2,
   challenge: 2,
-  nearDondaful: 2
+  nearDondaful: 2,
+  obsession: 2,
+  favoriteShift: 2,
+  monthly: 2,
+  weekday: 2,
+  lateNight: 2
 };
 
 export const selectNarrative = (page: NarrativePageKey, summary: VersionSummaryViewModel): NarrativeSelection => {

@@ -13,6 +13,17 @@ const props = defineProps<{
   oldPlayCountText: string;
   newSongName: string;
   newPlayCountText: string;
+  line1: string;
+  line2: string;
+  labels: {
+    oldLabel: string;
+    newLabel: string;
+    timesColon: string;
+    timesUnit: string;
+    newTimesPrefix: string;
+    newTimesSuffix: string;
+    sceneLabel: string;
+  };
 }>();
 
 defineSlots<{ oldCover(): unknown; newCover(): unknown }>();
@@ -78,7 +89,7 @@ onAnnualMotionActive(() => {
     :reduced-motion="motionReduced"
     mood="ginkgo-memory"
     intensity="low"
-    aria-label="新旧偏爱"
+    :aria-label="labels.sceneLabel"
   >
     <template #background>
       <div class="annual-favorite-shift-ginkgo__background" data-favorite-shift-stage="background">
@@ -101,7 +112,7 @@ onAnnualMotionActive(() => {
         <div class="annual-favorite-shift-ginkgo__copy" data-favorite-shift-stage="old-copy">
           <p class="annual-favorite-shift-ginkgo__song" :class="songLengthClass(oldSongLength)">《{{ oldSongName }}》</p>
           <p class="annual-favorite-shift-ginkgo__line">
-            放不下的旧爱<span v-if="oldPlayCountText">：<strong>{{ oldPlayCountText }}</strong> 次</span>
+            {{ labels.oldLabel }}<span v-if="oldPlayCountText">{{ labels.timesColon }}<strong>{{ oldPlayCountText }}</strong> {{ labels.timesUnit }}</span>
           </p>
         </div>
       </section>
@@ -115,15 +126,15 @@ onAnnualMotionActive(() => {
         <div class="annual-favorite-shift-ginkgo__copy" data-favorite-shift-stage="new-copy">
           <p class="annual-favorite-shift-ginkgo__song" :class="songLengthClass(newSongLength)">《{{ newSongName }}》</p>
           <p class="annual-favorite-shift-ginkgo__line">
-            <template v-if="newPlayCountText">相遇 <strong>{{ newPlayCountText }}</strong> 次：刚邂逅的新欢</template>
-            <template v-else>刚邂逅的新欢</template>
+            <template v-if="newPlayCountText">{{ labels.newTimesPrefix }}<strong>{{ newPlayCountText }}</strong>{{ labels.newTimesSuffix }}{{ labels.newLabel }}</template>
+            <template v-else>{{ labels.newLabel }}</template>
           </p>
         </div>
       </section>
 
       <div class="annual-favorite-shift-ginkgo__summary" data-favorite-shift-stage="summary">
-        <p>旧爱没有退场</p>
-        <p>新欢已经熟稔</p>
+        <p>{{ line1 }}</p>
+        <p>{{ line2 }}</p>
       </div>
     </div>
   </AnnualScene>

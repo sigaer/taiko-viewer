@@ -9,8 +9,14 @@ import { segmentAnnualTitle } from "~/utils/annualPresentation";
 const props = defineProps<{
   active: boolean;
   reducedMotion: boolean;
-  activeDaysText: string;
+  headlineDaysText: string;
+  headlineDaysSuffix: string;
+  headlinePlaysBefore: string;
+  headlinePlaysAfter: string;
   playCountText: string;
+  closing1: string;
+  closing2: string;
+  sceneLabel: string;
   songName: string;
   coverUrl: string;
 }>();
@@ -24,10 +30,6 @@ const songNameLength = computed(() => segmentAnnualTitle(props.songName).length)
 const songNameClass = computed(() => songNameLength.value > 30
   ? "is-very-long"
   : songNameLength.value > 18 ? "is-long" : "");
-const sceneLabel = computed(() =>
-  `${props.activeDaysText} 个不同的日子里，你与它重逢 ${props.playCountText} 次。《${props.songName}》`
-);
-
 const { onAnnualMotionActive } = useAnnualTimeline(
   rootRef,
   toRef(props, "active"),
@@ -98,10 +100,10 @@ onAnnualMotionActive(() => {
     <div class="annual-obsession-green-echo__content">
       <header class="annual-obsession-green-echo__headline">
         <p data-obsession-stage="headline">
-          <strong data-obsession-stage="number">{{ activeDaysText }}</strong> 个不同的日子里
+          <strong data-obsession-stage="number">{{ headlineDaysText }}</strong> {{ headlineDaysSuffix }}
         </p>
         <p data-obsession-stage="headline">
-          你与它重逢 <strong data-obsession-stage="number">{{ playCountText }}</strong> 次
+          {{ headlinePlaysBefore }} <strong data-obsession-stage="number">{{ playCountText }}</strong> {{ headlinePlaysAfter }}
         </p>
       </header>
 
@@ -113,8 +115,8 @@ onAnnualMotionActive(() => {
       </section>
 
       <div class="annual-obsession-green-echo__closing">
-        <p data-obsession-stage="closing">有些歌不是打过就结束</p>
-        <p data-obsession-stage="closing">一次次重逢，把喜欢敲成了回响</p>
+        <p data-obsession-stage="closing">{{ closing1 }}</p>
+        <p data-obsession-stage="closing">{{ closing2 }}</p>
       </div>
     </div>
   </AnnualScene>

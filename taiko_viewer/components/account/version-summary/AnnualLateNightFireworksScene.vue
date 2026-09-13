@@ -9,6 +9,11 @@ const props = defineProps<{
   latestLabel: string;
   songName: string;
   activeDaysText: string;
+  line: string;
+  nightsBefore: string;
+  nightsAfter: string;
+  playsBefore: string;
+  playsAfter: string;
   playCountText: string;
 } >();
 
@@ -64,15 +69,15 @@ useAnnualTimeline(rootRef, toRef(props, "active"), motionReduced, { reenter: "re
       <div class="annual-late-night-fireworks__copy">
         <p class="annual-late-night-fireworks__time" data-annual-stage="visual">{{ latestLabel }}</p>
         <p class="annual-late-night-fireworks__song" data-annual-stage="visual">《{{ songName }}》</p>
-        <p class="annual-late-night-fireworks__with" data-annual-stage="visual">陪你到深夜</p>
+        <p class="annual-late-night-fireworks__with" data-annual-stage="visual">{{ line }}</p>
       </div>
 
       <div v-if="activeDaysText || playCountText" class="annual-late-night-fireworks__stats">
         <p v-if="activeDaysText" data-annual-stage="data">
-          你在 <strong>{{ activeDaysText }}</strong> 个深夜
+          {{ nightsBefore }} <strong>{{ activeDaysText }}</strong> {{ nightsAfter }}
         </p>
         <p v-if="playCountText" data-annual-stage="data">
-          共计留下 <strong>{{ playCountText }}</strong> 次鼓点
+          {{ playsBefore }} <strong>{{ playCountText }}</strong> {{ playsAfter }}
         </p>
       </div>
     </div>
