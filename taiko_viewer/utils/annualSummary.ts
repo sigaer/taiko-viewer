@@ -91,6 +91,94 @@ const formatDanGrade = (value: unknown, locale: "zh" | "ja") => {
   return locale === "ja" ? raw.replaceAll("级", "級").replaceAll("达人", "達人") : raw.replaceAll("級", "级").replaceAll("達人", "达人");
 };
 
+// Strong Dan results switch the FinalTitle *presentation* only (same titleKey).
+// The mapping is derived from the frozen evidence key set, so identical data always
+// renders an identical title (no randomness, no hidden state).
+const DAN_PRESENTATION_EVIDENCE = new Set([
+  "dan_kanzui_gold",
+  "dan_kanzui_red",
+  "dan_fullgood_gold",
+  "dan_fullgood_red",
+  "dan_gold_pass",
+  "dan_major_progress"
+]);
+
+type FinalEvidenceContext = {
+  t: (key: string, params?: Record<string, unknown>) => string;
+  locale: "zh" | "ja";
+  breakthroughTitle: string;
+  keywordTitle?: string;
+  finalTitleLabel: string;
+};
+
+const formatIntegerFor = (locale: "zh" | "ja", value: number) =>
+  new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "zh-CN").format(value);
+
+const completionLabel = (value: unknown, t: FinalEvidenceContext["t"]) => {
+  const code = numberValue(value);
+  if (!Number.isFinite(code) || code < 0 || code > 6) return "";
+  return t(`annualSummary.danCompletion.${Math.trunc(code)}`);
+};
+
+/** Render the Finale evidence line for a generator-provided evidenceKey. */
+const renderFinalEvidence = (
+  key: string,
+  value: unknown,
+  context: FinalEvidenceContext
+): { label: string; text: string } | null => {
+  const { t, locale } = context;
+  if (key === "observed_play_count") {
+    return { label: t("annualSummary.slides.final.firstSteps"), text: t("annualSummary.slides.final.times", { count: formatIntegerFor(locale, numberValue(value)) }) };
+  }
+  if (key === "breakthrough") {
+    return { label: t("annualSummary.slides.final.fromBreakthrough"), text: context.breakthroughTitle };
+  }
+  if (key === "speed") {
+    return { label: t("annualSummary.slides.final.fromSpeed"), text: `${numberValue(value)}×` };
+  }
+  if (key === "keyword") {
+    return { label: t("annualSummary.slides.final.fromKeyword"), text: context.keywordTitle || context.finalTitleLabel };
+  }
+  const payload = record(value);
+  const isDan = key.startsWith("dan_");
+  const evidenceKey = (() => {
+    if (key === "sparse_basic" || key === "endurance_volume") {
+      const days = numberValue(payload.days);
+      return days > 0 ? key : `${key}_no_days`;
+    }
+    return key;
+  })();
+  const templateKey = `annualSummary.finalEvidence.templates.${evidenceKey}`;
+  const template = t(templateKey);
+  if (!template || template === templateKey) return null;
+  const params: Record<string, string> = {
+    dan: formatDanGrade(String(numberValue(payload.dan)), locale),
+    danBefore: formatDanGrade(String(numberValue(payload.danBefore)), locale),
+    danAfter: formatDanGrade(String(numberValue(payload.danAfter)), locale),
+    levels: formatIntegerFor(locale, Math.max(0, numberValue(payload.danAfter) - numberValue(payload.danBefore))),
+    mark: completionLabel(payload.mark, t),
+    markBefore: completionLabel(payload.markBefore, t),
+    markAfter: completionLabel(payload.markAfter, t),
+    milestones: formatIntegerFor(locale, numberValue(payload.milestones)),
+    fullCombo: formatIntegerFor(locale, numberValue(payload.fullCombo)),
+    dondaful: formatIntegerFor(locale, numberValue(payload.dondaful)),
+    clears: formatIntegerFor(locale, numberValue(payload.clears)),
+    speed: numberValue(payload.speed).toFixed(1),
+    charts: formatIntegerFor(locale, numberValue(payload.charts)),
+    plays: formatIntegerFor(locale, numberValue(payload.plays)),
+    days: formatIntegerFor(locale, numberValue(payload.days)),
+    songs: formatIntegerFor(locale, numberValue(payload.songs)),
+    song: stringValue(payload.song),
+    lateDays: formatIntegerFor(locale, numberValue(payload.lateDays))
+  };
+  // vue-i18n performs the named interpolation itself: `{dan}` / `{milestones}` / ...
+  const text = t(templateKey, params);
+  const labelKey = isDan
+    ? (key.startsWith("dan_standing_") ? "danHistory" : "dan")
+    : (key === "sparse_basic" ? "sparse" : "personality");
+  return { label: t(`annualSummary.finalEvidence.labels.${labelKey}`), text };
+};
+
 const unwrapMetric = (value: unknown) => {
   const metric = record(value);
   return {
@@ -99,6 +187,7 @@ const unwrapMetric = (value: unknown) => {
     reason: stringValue(metric.reason) || null
   };
 };
+
 
 const makeSongMapper = (locale: "zh" | "ja") => (value: unknown): VersionSummarySongCard | null => {
   const song = record(value);
@@ -422,7 +511,7 @@ export const normalizeAnnualSummary = (
   const breakthrough = {
     type: breakthroughType || "none", occurredAt: stringValue(breakthroughRaw.occurredAt) || null, song: breakthroughSong,
     scoreDelta: numberValue(breakthroughRaw.ratingDelta ?? breakthroughRaw.scoreDelta), playDelta: numberValue(breakthroughRaw.playCount),
-    title: t(`annualSummary.titles.${breakthroughTitleKey}.title`), body: t(`annualSummary.titles.${breakthroughTitleKey}.body`),
+    title: t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.title`), body: t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.body`),
     happenedLabel: breakthroughRaw.occurredAt ? formatDateTime(breakthroughRaw.occurredAt, locale) : t("annualSummary.common.observed"),
     evidence: breakthroughEvidence
   };
@@ -431,24 +520,23 @@ export const normalizeAnnualSummary = (
   const finalTitleKey = stringValue(finalRaw.titleKey, "encouragement");
   const finalEvidenceKey = stringValue(finalRaw.evidenceKey, "mode");
   const finalEvidenceValue = finalRaw.evidenceValue;
-  const finalEvidence = (() => {
-    if (finalEvidenceKey === "observed_play_count") {
-      return { label: t("annualSummary.slides.final.firstSteps"), text: t("annualSummary.slides.final.times", { count: localizedInteger.format(numberValue(finalEvidenceValue)) }) };
-    }
-    if (finalEvidenceKey === "breakthrough") {
-      return { label: t("annualSummary.slides.final.fromBreakthrough"), text: breakthrough.title };
-    }
-    if (finalEvidenceKey === "speed") {
-      return { label: t("annualSummary.slides.final.fromSpeed"), text: `${numberValue(finalEvidenceValue)}×` };
-    }
-    if (finalEvidenceKey === "keyword") {
-      return { label: t("annualSummary.slides.final.fromKeyword"), text: keyword?.title || t(`annualSummary.titles.${finalTitleKey}.title`) };
-    }
-    return { label: t("annualSummary.slides.final.fromJourney"), text: t(raw.mode === "current_archive" ? "annualSummary.common.archive" : "annualSummary.common.observed") };
-  })();
+  // Copy-3B: the Finale reads the curated `finalTitles` dictionary. Strong Dan results
+  // additionally switch the *presentation* title (same titleKey, deterministic mapping
+  // from the evidence key) -- the Poster consumes the resolved title so both stay equal.
+  const finalPresentationKey = DAN_PRESENTATION_EVIDENCE.has(finalEvidenceKey)
+    ? `annualSummary.danPresentation.${finalEvidenceKey}.title`
+    : `annualSummary.finalTitles.${finalTitleKey}.title`;
+  const finalTitleLabel = t(finalPresentationKey) || t(`annualSummary.finalTitles.${finalTitleKey}.title`);
+  const finalEvidence = renderFinalEvidence(finalEvidenceKey, finalEvidenceValue, {
+    t, locale, breakthroughTitle: breakthrough.title, keywordTitle: keyword?.title, finalTitleLabel
+  }) ?? { label: t("annualSummary.slides.final.fromJourney"), text: t(raw.mode === "current_archive" ? "annualSummary.common.archive" : "annualSummary.common.observed") };
   const finalTitle = {
-    title: t(`annualSummary.titles.${finalTitleKey}.title`), eyebrow: t("annualSummary.copy.final.eyebrow"),
-    body: t(`annualSummary.titles.${finalTitleKey}.body`), themeKey: finalTitleKey,
+    title: finalTitleLabel, eyebrow: t("annualSummary.copy.final.eyebrow"),
+    // Curated zh body; the ja dictionary intentionally ships titles only until a ja body
+    // pass lands, so ja keeps the existing localised closing line (never the zh text).
+    // (`copy` is built below, so the ja branch is filled in there.)
+    body: locale === "ja" ? "" : t(`annualSummary.finalTitles.${finalTitleKey}.body`),
+    themeKey: finalTitleKey,
     evidenceKey: finalEvidenceKey, evidenceValue: finalEvidenceValue,
     evidenceLabel: finalEvidence.label, evidenceText: finalEvidence.text
   };
@@ -552,7 +640,13 @@ export const normalizeAnnualSummary = (
   };
   const copy = makeCopy(t, narrativeContext);
   breakthrough.body = copy.breakthrough.body;
-  finalTitle.body = copy.finalTitle.body;
+  // FinalTitle body = curated per-key copy (Copy-3B). The ja dictionary intentionally
+  // ships titles only until a ja body pass lands, so ja keeps the existing localised
+  // closing line; the zh copy is never overwritten.
+  const narrativeBody = locale === "ja" ? copy.finalTitle.body : finalTitle.body;
+  // The Finale has no dedicated evidence node (and Copy-3B must not add DOM), so the
+  // evidence is composed into the existing body slot: "<evidence>｜<narrative>".
+  finalTitle.body = finalEvidence.text ? `${finalEvidence.text}｜${narrativeBody}` : narrativeBody;
   if (keyword) keyword.body = copy.keyword.body;
 
   return {

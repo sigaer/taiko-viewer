@@ -1174,6 +1174,238 @@
       "poster": { "finalTitle": "年間称号", "favorite": "最愛曲", "keyword": "キーワード", "scan": "スキャンして振り返りを見る", "expires": "共有期限 {date}" }
     },
     "keywords": { "dimensions": {"big_song": "大音符力", "stamina": "体力", "speed": "高速処理", "accuracy": "精度力", "rhythm": "リズム処理", "complex": "複合処理"}, "titles": {"wall_breaker": "巨壁の突破者", "endless_drummer": "不休の太鼓打ち", "speed_runner": "疾風の走者", "precision_tuner": "精度の調律師", "rhythm_resonator": "リズムの共鳴者", "complex_hunter": "複合ハンター"}, "body": "{dimension} が鼓面の輪郭でいちばん明るく、今年のサインになりました。", "eyebrow": "鼓面キーワード", "lead": "この一年、鼓面はあなたの打ち方を覚えています。", "tagsLabel": "もっとも鮮やかな三つの鼓面軸", "beaconPrefix": "最初に灯ったのは", "closing": "これがあなたの一年の鼓面の印です。" },
+      "finalTitles": {
+        "final_archive_collector": {
+          "title": "音を綴る"
+        },
+        "final_archive_dan": {
+          "title": "積年の段位"
+        },
+        "final_archive_explorer": {
+          "title": "音を尋ねて"
+        },
+        "final_archive_regular": {
+          "title": "譜面の足跡"
+        },
+        "final_devotion": {
+          "title": "残響のしらべ"
+        },
+        "final_devotion_endurance": {
+          "title": "古い夢は止まない"
+        },
+        "final_devotion_growth": {
+          "title": "響きの向こうへ"
+        },
+        "final_devotion_precision": {
+          "title": "夢に刻んだ拍"
+        },
+        "final_devotion_speed": {
+          "title": "残響を連れて"
+        },
+        "final_early": {
+          "title": "はじまりの一打"
+        },
+        "final_endurance": {
+          "title": "鳴りやまぬ"
+        },
+        "final_endurance_devotion": {
+          "title": "鳴り終えてなお"
+        },
+        "final_endurance_exploration": {
+          "title": "道々に音を拾う"
+        },
+        "final_endurance_growth": {
+          "title": "夜明けまで止まらず"
+        },
+        "final_endurance_nocturnal": {
+          "title": "夜はまだ長い"
+        },
+        "final_endurance_precision": {
+          "title": "ぶれない刻み"
+        },
+        "final_endurance_speed": {
+          "title": "息の続く速さ"
+        },
+        "final_exploration": {
+          "title": "虹の渡り"
+        },
+        "final_exploration_endurance": {
+          "title": "旅は止まらない"
+        },
+        "final_exploration_growth": {
+          "title": "虹を越えて"
+        },
+        "final_growth": {
+          "title": "暁に登る"
+        },
+        "final_growth_devotion": {
+          "title": "待ち続けた先に"
+        },
+        "final_growth_endurance": {
+          "title": "上り続ける"
+        },
+        "final_growth_exploration": {
+          "title": "見晴らしの星"
+        },
+        "final_growth_precision": {
+          "title": "澄んだまま上へ"
+        },
+        "final_growth_speed": {
+          "title": "嶺を駆けて"
+        },
+        "final_keeper": {
+          "title": "余白の章"
+        },
+        "final_nocturnal": {
+          "title": "星を頼りに"
+        },
+        "final_nocturnal_devotion": {
+          "title": "月明かりの一音"
+        },
+        "final_nocturnal_endurance": {
+          "title": "月の下、鳴り止まず"
+        },
+        "final_nocturnal_exploration": {
+          "title": "藍のさすらい"
+        },
+        "final_nocturnal_growth": {
+          "title": "夜を越えた先に"
+        },
+        "final_nocturnal_precision": {
+          "title": "夜更けの刻み"
+        },
+        "final_nocturnal_speed": {
+          "title": "夜を駆ける"
+        },
+        "final_precision": {
+          "title": "澄んだ刻み"
+        },
+        "final_precision_devotion": {
+          "title": "語らずに刻む"
+        },
+        "final_precision_endurance": {
+          "title": "ぶれない線"
+        },
+        "final_precision_growth": {
+          "title": "刻んで登る"
+        },
+        "final_precision_speed": {
+          "title": "寸分の狂いもなく"
+        },
+        "final_speed": {
+          "title": "風より速く"
+        },
+        "final_speed_devotion": {
+          "title": "一瞬の再会"
+        },
+        "final_speed_endurance": {
+          "title": "疾風は続く"
+        },
+        "final_speed_exploration": {
+          "title": "次々と駆け抜けて"
+        },
+        "final_speed_growth": {
+          "title": "雷を追い越す"
+        },
+        "final_speed_precision": {
+          "title": "急がば崩さず"
+        }
+      },
+      "danPresentation": {
+        "dan_kanzui_gold": {
+          "title": "高みで途切れず"
+        },
+        "dan_kanzui_red": {
+          "title": "一打も外さず"
+        },
+        "dan_fullgood_gold": {
+          "title": "曇りのない極み"
+        },
+        "dan_fullgood_red": {
+          "title": "濁りのない音"
+        },
+        "dan_gold_pass": {
+          "title": "難所を抜けて"
+        },
+        "dan_major_progress": {
+          "title": "一気に駆け上がる"
+        }
+      },
+      "danCompletion": {
+        "0": "不合格",
+        "1": "赤合格",
+        "2": "赤合格フルコンボ",
+        "3": "赤合格全良",
+        "4": "金合格",
+        "5": "金合格フルコンボ",
+        "6": "金合格全良"
+      },
+      "finalEvidence": {
+        "labels": {
+          "dan": "年間の段位成果",
+          "danHistory": "これまでの段位成果",
+          "personality": "年間のしるし",
+          "sparse": "年間の記録"
+        },
+        "templates": {
+          "dan_kanzui_gold": "{dan}・金合格フルコンボ",
+          "dan_kanzui_red": "{dan}・赤合格フルコンボ",
+          "dan_fullgood_gold": "{dan}・金合格全良",
+          "dan_fullgood_red": "{dan}・赤合格全良",
+          "dan_gold_pass": "{dan}・金合格",
+          "dan_major_progress": "{danBefore} → {danAfter}（年間 +{levels} 段）",
+          "dan_mark_progress": "{dan}・{markBefore} → {markAfter}",
+          "dan_standing_kanzui_gold": "これまでの段位成果・{dan} 金合格フルコンボ",
+          "dan_standing_kanzui_red": "これまでの段位成果・{dan} 赤合格フルコンボ",
+          "dan_standing_fullgood_gold": "これまでの段位成果・{dan} 金合格全良",
+          "dan_standing_fullgood_red": "これまでの段位成果・{dan} 赤合格全良",
+          "dan_standing_gold_pass": "これまでの段位成果・{dan} 金合格",
+          "growth_breakthrough": "年間の新しいハイライト {milestones} 件",
+          "precision_full_combo": "フルコンボ {fullCombo} 譜・全良 {dondaful} 譜",
+          "speed_high": "常用速度 {speed}×",
+          "endurance_volume": "年間 {plays} 回・アクティブ {days} 日",
+          "endurance_volume_no_days": "年間 {plays} 回",
+          "exploration_breadth": "{songs} 曲・{charts} 譜面",
+          "devotion_song": "{song}・{plays} 回",
+          "nocturnal_days": "深夜のプレイ {lateDays} 日",
+          "sparse_basic": "{plays} 回プレイ・アクティブ {days} 日",
+          "sparse_basic_no_days": "{plays} 回プレイ"
+        }
+      },
+      "breakthroughTitles": {
+        "breakthrough_dan": {
+          "title": "段位を登る人",
+          "body": "段位が一段上がり、あなたも少し高い鼓面の前に立ちました。"
+        },
+        "breakthrough_dondaful": {
+          "title": "ドンダフルの灯し手",
+          "body": "新しいドンダフルが灯り、鼓面全体が一瞬きらめきました。"
+        },
+        "breakthrough_extreme": {
+          "title": "極を追う人",
+          "body": "新しい極が灯り、今年のハイライトにも形が生まれました。"
+        },
+        "breakthrough_ten_star_full_combo": {
+          "title": "十星の連撃者",
+          "body": "十星フルコンボの最後の一打。高い壁にも、あなたの余韻が残りました。"
+        },
+        "breakthrough_full_combo": {
+          "title": "連撃の開拓者",
+          "body": "新しいフルコンボが道を先へ延ばし、連撃は最後まで手を離しませんでした。"
+        },
+        "breakthrough_ten_star_clear": {
+          "title": "十星の突破者",
+          "body": "十星クリアが灯り、目の前にあった壁へついに亀裂が入りました。"
+        },
+        "breakthrough_clear": {
+          "title": "クリアの開拓者",
+          "body": "新しいクリアが境界を一歩動かし、次の一曲もあなたを待っています。"
+        },
+        "breakthrough_rating_gain": {
+          "title": "RT を伸ばす人",
+          "body": "TAIKOB20 が一目盛り上がり、毎日の積み重ねに数字がつきました。"
+        }
+      },
     "titles": {
       "newcomer": { "title": "初響の鼓", "body": "物語は始まったばかり。最初の一打が、もう今年に名前をつけました。" },
       "archive_keeper": { "title": "記録の守り手", "body": "積み上げた成績をこの一枚へ。静かでも、ずっしりと重い足あとです。" },

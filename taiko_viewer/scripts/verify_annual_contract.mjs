@@ -436,7 +436,16 @@ assert.equal(annualPageSource.includes("重新生成"), false, "successful annua
 const annualConstantsSource = await read("server/services/account/annual-summary/constants.ts");
 assert.equal(annualConstantsSource.includes('ANNUAL_END_DATE = "2026-09-11"'), true, "annual end date is not fixed");
 assert.equal(annualConstantsSource.includes('ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00"'), true, "annual public opening is not configured");
-assert.equal(annualConstantsSource.includes('ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.3.0"'), true, "annual producer version is stale");
+const viewerAlgorithmVersion = /ANNUAL_ALGORITHM_VERSION = "([^"]+)"/.exec(annualConstantsSource)?.[1];
+assert.ok(viewerAlgorithmVersion, "annual producer version is missing from the viewer constants");
+let generatorConstantsSource = "";
+for (const candidate of ["../../../plugins/utils/annual_summary/constants.py", "../../plugins/utils/annual_summary/constants.py"]) {
+  try { generatorConstantsSource = await read(candidate); break; } catch {}
+}
+assert.ok(generatorConstantsSource, "annual generator constants are unavailable for the version contract");
+const generatorAlgorithmVersion = /ALGORITHM_VERSION = "([^"]+)"/.exec(generatorConstantsSource)?.[1];
+assert.equal(viewerAlgorithmVersion, generatorAlgorithmVersion, "annual producer version drifted between viewer and generator");
+assert.equal(viewerAlgorithmVersion, "annual-observation-v4.4.0", "unexpected annual producer version for this release");
 const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
 const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
 const annualServiceSource = await read("server/services/account/annual-summary/index.ts");
@@ -461,5 +470,73 @@ const deprecatedSources = [
   registry
 ].join("\n");
 assert.equal(/schemaVersion\s*[:=]\s*3\b/.test(deprecatedSources), false, "schema 3 compatibility remains");
+
+// ---------------------------------------------------------------- Copy-3B FinalTitle
+const finalTitleKeys = [
+  "final_archive_collector", "final_archive_dan", "final_archive_explorer", "final_archive_regular",
+  "final_devotion", "final_devotion_endurance", "final_devotion_growth", "final_devotion_precision",
+  "final_devotion_speed", "final_early", "final_endurance", "final_endurance_devotion",
+  "final_endurance_exploration", "final_endurance_growth", "final_endurance_nocturnal",
+  "final_endurance_precision", "final_endurance_speed", "final_exploration",
+  "final_exploration_endurance", "final_exploration_growth", "final_growth", "final_growth_devotion",
+  "final_growth_endurance", "final_growth_exploration", "final_growth_precision", "final_growth_speed",
+  "final_keeper", "final_nocturnal", "final_nocturnal_devotion", "final_nocturnal_endurance",
+  "final_nocturnal_exploration", "final_nocturnal_growth", "final_nocturnal_precision",
+  "final_nocturnal_speed", "final_precision", "final_precision_devotion", "final_precision_endurance",
+  "final_precision_growth", "final_precision_speed", "final_speed", "final_speed_devotion",
+  "final_speed_endurance", "final_speed_exploration", "final_speed_growth", "final_speed_precision"
+];
+const danPresentationKeys = ["dan_kanzui_gold", "dan_kanzui_red", "dan_fullgood_gold", "dan_fullgood_red", "dan_gold_pass", "dan_major_progress"];
+const requiredEvidenceKeys = [
+  ...danPresentationKeys, "dan_mark_progress", "dan_standing_gold_pass", "dan_standing_kanzui_gold",
+  "growth_breakthrough", "precision_full_combo", "speed_high", "endurance_volume", "exploration_breadth",
+  "devotion_song", "nocturnal_days", "sparse_basic"
+];
+const annualLocales = {};
+for (const locale of ["zh", "ja"]) {
+  const bundle = JSON.parse(await read(`locales/${locale}.json`));
+  const annual = bundle.annualSummary;
+  annualLocales[locale] = annual;
+  assert.deepEqual(Object.keys(annual.finalTitles).sort(), [...finalTitleKeys].sort(), `${locale}: finalTitles dictionary drifted from the 45-key whitelist`);
+  for (const key of danPresentationKeys) assert.ok(annual.danPresentation[key]?.title, `${locale}: missing dan presentation ${key}`);
+  for (const key of requiredEvidenceKeys) assert.ok(annual.finalEvidence.templates[key], `${locale}: missing evidence template ${key}`);
+  for (const key of ["sparse_basic_no_days", "endurance_volume_no_days"]) assert.ok(annual.finalEvidence.templates[key], `${locale}: missing no-days evidence template ${key}`);
+  // the Finale must not be able to fall back to the raw key or to an empty body
+  for (const key of finalTitleKeys) assert.ok(annual.finalTitles[key].title && annual.finalTitles[key].title.length >= 2, `${locale}: empty title for ${key}`);
+  // legacy alias block stays until every consumer is migrated
+  assert.ok(Object.keys(annual.titles).length >= 8, `${locale}: legacy titles alias block disappeared`);
+  for (const key of Object.keys(annual.titles).filter((item) => item.startsWith("breakthrough_"))) {
+    assert.ok(annual.breakthroughTitles[key]?.title, `${locale}: breakthrough title ${key} is missing from breakthroughTitles`);
+  }
+}
+assert.ok(Object.keys(annualLocales.zh.finalTitles).every((key) => annualLocales.zh.finalTitles[key].body), "zh FinalTitle bodies are incomplete");
+for (const key of finalTitleKeys) {
+  assert.equal("body" in annualLocales.ja.finalTitles[key], false, `ja FinalTitle ${key} must not ship the zh body`);
+  assert.notEqual(annualLocales.ja.finalTitles[key].title, annualLocales.zh.finalTitles[key].title, `ja FinalTitle ${key} is untranslated`);
+}
+assert.equal(annualLocales.zh.finalTitles.final_keeper.title, "留白待成章");
+assert.equal(annualLocales.ja.finalTitles.final_keeper.title, "余白の章");
+assert.equal(annualLocales.zh.danPresentation.dan_kanzui_gold.title, "凌霄贯律");
+assert.equal(annualLocales.zh.danPresentation.dan_kanzui_red.title, "澄境执律");
+
+const finalTitleSource = await read("utils/annualSummary.ts");
+assert.ok(finalTitleSource.includes("annualSummary.finalTitles."), "FinalTitle no longer reads the curated dictionary");
+assert.ok(finalTitleSource.includes("annualSummary.danPresentation."), "strong Dan presentation is not wired");
+assert.ok(finalTitleSource.includes("annualSummary.breakthroughTitles."), "breakthrough dictionary is not decoupled");
+assert.equal(/annualSummary\.titles\.\$\{finalTitleKey\}/.test(finalTitleSource), false, "FinalTitle still reads the shared titles namespace");
+assert.ok(finalTitleSource.includes("DAN_PRESENTATION_EVIDENCE"), "presentation evidence set is missing");
+
+const pluginCandidates = ["../../../plugins/utils/annual_summary", "../../plugins/utils/annual_summary"];
+let pluginRoot = "";
+for (const candidate of pluginCandidates) {
+  try { await read(`${candidate}/finaltitle_model.py`); pluginRoot = candidate; break; } catch {}
+}
+assert.ok(pluginRoot, "annual_summary package is unavailable for the cross-language contract");
+const danModelSource = await read(`${pluginRoot}/finaltitle_model.py`);
+const whitelistBlock = danModelSource.slice(danModelSource.indexOf("FINAL_TITLE_KEYS"), danModelSource.indexOf("EVIDENCE_DAN_STRONG"));
+for (const key of finalTitleKeys) assert.ok(whitelistBlock.includes(`"${key}"`), `generator whitelist is missing ${key}`);
+assert.ok(danModelSource.includes('return mark in (2, 5)') === false, "kanzui helper must live in dan_state");
+const danStateSource = await read(`${pluginRoot}/dan_state.py`);
+assert.ok(danStateSource.includes("return mark in (2, 5)"), "kanzui is not defined as mark 2 or 5");
 
 process.stdout.write(JSON.stringify({ ok: true, pageCount: actualPages.length, locales: ["zh", "ja"], schemaVersion: 4 }) + "\n");

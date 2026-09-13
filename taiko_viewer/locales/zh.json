@@ -1228,6 +1228,283 @@
       "poster": { "finalTitle": "年度称号", "favorite": "最爱歌曲", "keyword": "关键词", "scan": "扫码查看这份回顾", "expires": "分享有效期至 {date}" }
     },
     "keywords": { "dimensions": {"big_song": "大歌力", "stamina": "体力", "speed": "高速处理", "accuracy": "精度力", "rhythm": "节奏处理", "complex": "复合处理"}, "titles": {"wall_breaker": "巨壁破阵者", "endless_drummer": "不息鼓手", "speed_runner": "疾速行者", "precision_tuner": "精度调律师", "rhythm_resonator": "节奏共鸣者", "complex_hunter": "复合猎手"}, "body": "{dimension} 是你的鼓面轮廓里最亮的一角，也成了这一年的个人签名。", "eyebrow": "鼓面关键词", "lead": "这一年，鼓面记住了你的出手方式。", "tagsLabel": "最鲜明的三个鼓面维度", "beaconPrefix": "最先亮起的是", "closing": "这就是你的年度鼓面印记。" },
+      "finalTitles": {
+        "final_archive_collector": {
+          "title": "拾音成册",
+          "body": "册子一页页变厚，每一首都只占一行。"
+        },
+        "final_archive_dan": {
+          "title": "藏锋于旧卷",
+          "body": "卷子早已合上，里面的成绩不会因为今年而变旧。"
+        },
+        "final_archive_explorer": {
+          "title": "寻声于四方",
+          "body": "很少有歌能让你停留太久——你只是还没听够。"
+        },
+        "final_archive_regular": {
+          "title": "谱路留痕",
+          "body": "走过很多次的路不会标在地图上，脚知道。"
+        },
+        "final_devotion": {
+          "title": "旧梦回响",
+          "body": "有一首歌，今年又被你听了很多遍。"
+        },
+        "final_devotion_endurance": {
+          "title": "旧梦未曾停",
+          "body": "那首歌从头陪到尾。"
+        },
+        "final_devotion_growth": {
+          "title": "回响越境",
+          "body": "歌没有换，是它被你推到了从前到不了的地方。"
+        },
+        "final_devotion_precision": {
+          "title": "旧梦刻痕",
+          "body": "一首歌被磨到没有毛边，靠的是次数。"
+        },
+        "final_devotion_speed": {
+          "title": "余音疾行",
+          "body": "没有丢下那首歌，你带着它一起变快。"
+        },
+        "final_early": {
+          "title": "初响启程",
+          "body": "第一下敲响之后，故事才有了第一行。"
+        },
+        "final_endurance": {
+          "title": "长鸣不息",
+          "body": "几乎每一天都在，这件事本身就很难。"
+        },
+        "final_endurance_devotion": {
+          "title": "长守余音",
+          "body": "留下来的东西比记录更久——是习惯。"
+        },
+        "final_endurance_exploration": {
+          "title": "沿途寻声",
+          "body": "耐心被你用在了「听更多」这件事上。"
+        },
+        "final_endurance_growth": {
+          "title": "未歇直至破晓",
+          "body": "熬到天亮的人才看得见天色是怎么变的。"
+        },
+        "final_endurance_nocturnal": {
+          "title": "长夜未央",
+          "body": "坚持没有固定时段。"
+        },
+        "final_endurance_precision": {
+          "title": "长路守准",
+          "body": "稳的地方不在某一次准，在一直准。"
+        },
+        "final_endurance_speed": {
+          "title": "绵延疾行",
+          "body": "快一次不难，难的是每一次都快。"
+        },
+        "final_exploration": {
+          "title": "虹境漫游",
+          "body": "换过太多风景，顺序已经不重要了。"
+        },
+        "final_exploration_endurance": {
+          "title": "远行而不息",
+          "body": "去过很多地方，而且一次都没停下。"
+        },
+        "final_exploration_growth": {
+          "title": "虹境越界",
+          "body": "进步发生在陌生的谱面上——这是你自找的。"
+        },
+        "final_growth": {
+          "title": "破晓登临",
+          "body": "天亮之前有一段没人看见的灰，突破就发生在那里。"
+        },
+        "final_growth_devotion": {
+          "title": "破晓守候",
+          "body": "等回报的人很多，等到的人不多。"
+        },
+        "final_growth_endurance": {
+          "title": "登临不歇",
+          "body": "上山之后没有坐下，你继续往上走。"
+        },
+        "final_growth_exploration": {
+          "title": "越境观星",
+          "body": "走得比别人杂，才看见了别人没看见的那片天。"
+        },
+        "final_growth_precision": {
+          "title": "澄明上行",
+          "body": "变强的方式有很多种，你选了最慢也最干净的那种。"
+        },
+        "final_growth_speed": {
+          "title": "越岭而疾行",
+          "body": "进步是用速度换来的。"
+        },
+        "final_keeper": {
+          "title": "留白待成章",
+          "body": "纸已经在桌上，落笔只是时间问题。"
+        },
+        "final_nocturnal": {
+          "title": "夜航星图",
+          "body": "你的鼓声大多响在别人睡着之后。"
+        },
+        "final_nocturnal_devotion": {
+          "title": "月下心音",
+          "body": "有一段旋律，只属于你的夜晚。"
+        },
+        "final_nocturnal_endurance": {
+          "title": "月下长鸣不息",
+          "body": "日夜交替里，你的声音没有断过。"
+        },
+        "final_nocturnal_exploration": {
+          "title": "深蓝漫游",
+          "body": "夜晚并不安静，只是别人听不见。"
+        },
+        "final_nocturnal_growth": {
+          "title": "夜航破晓",
+          "body": "成长刻度是按夜色计算的。"
+        },
+        "final_nocturnal_precision": {
+          "title": "星夜校律",
+          "body": "夜里的你，比白天更挑剔。"
+        },
+        "final_nocturnal_speed": {
+          "title": "夜航掠影",
+          "body": "速度是不出声的。"
+        },
+        "final_precision": {
+          "title": "澄律之心",
+          "body": "把不该有的杂音一个个拿掉，剩下的就是你的声音。"
+        },
+        "final_precision_devotion": {
+          "title": "刻衡不语",
+          "body": "没说过要打到什么程度，只是继续打。"
+        },
+        "final_precision_endurance": {
+          "title": "守衡不移",
+          "body": "维持住的水准，比任何一次高分都难得。"
+        },
+        "final_precision_growth": {
+          "title": "刻衡再登临",
+          "body": "每一步都量过，所以每一步都算数。"
+        },
+        "final_precision_speed": {
+          "title": "毫厘掠影",
+          "body": "快，且精确到毫厘。"
+        },
+        "final_speed": {
+          "title": "疾风掠影",
+          "body": "别人在数拍子，拍子在你身后。"
+        },
+        "final_speed_devotion": {
+          "title": "一闪重逢",
+          "body": "反复回到同一首歌，一次比一次快。"
+        },
+        "final_speed_endurance": {
+          "title": "疾风长行",
+          "body": "没有冲刺，只有一直在跑。"
+        },
+        "final_speed_exploration": {
+          "title": "掠过千景",
+          "body": "换歌的速度和打歌一样快。"
+        },
+        "final_speed_growth": {
+          "title": "迅雷越岭",
+          "body": "今年的天花板，是被速度顶开的。"
+        },
+        "final_speed_precision": {
+          "title": "疾行守衡",
+          "body": "快已经很难，你还留住了准。"
+        }
+      },
+      "danPresentation": {
+        "dan_kanzui_gold": {
+          "title": "凌霄贯律"
+        },
+        "dan_kanzui_red": {
+          "title": "澄境执律"
+        },
+        "dan_fullgood_gold": {
+          "title": "极境无瑕"
+        },
+        "dan_fullgood_red": {
+          "title": "澄澈之律"
+        },
+        "dan_gold_pass": {
+          "title": "天衡破阵"
+        },
+        "dan_major_progress": {
+          "title": "越境凌云"
+        }
+      },
+      "danCompletion": {
+        "0": "未合格",
+        "1": "赤合格",
+        "2": "赤合格金粹",
+        "3": "赤全良",
+        "4": "金合格",
+        "5": "金合格金粹",
+        "6": "金合格全良"
+      },
+      "finalEvidence": {
+        "labels": {
+          "dan": "年度段位成果",
+          "danHistory": "已有段位成果",
+          "personality": "年度印记",
+          "sparse": "年度记录"
+        },
+        "templates": {
+          "dan_kanzui_gold": "{dan} · 金合格金粹",
+          "dan_kanzui_red": "{dan} · 赤合格金粹",
+          "dan_fullgood_gold": "{dan} · 金合格全良",
+          "dan_fullgood_red": "{dan} · 赤全良",
+          "dan_gold_pass": "{dan} · 金合格",
+          "dan_major_progress": "{danBefore} → {danAfter}（年内 +{levels} 段）",
+          "dan_mark_progress": "{dan} · {markBefore} → {markAfter}",
+          "dan_standing_kanzui_gold": "已有段位成果 · {dan} 金合格金粹",
+          "dan_standing_kanzui_red": "已有段位成果 · {dan} 赤合格金粹",
+          "dan_standing_fullgood_gold": "已有段位成果 · {dan} 金合格全良",
+          "dan_standing_fullgood_red": "已有段位成果 · {dan} 赤全良",
+          "dan_standing_gold_pass": "已有段位成果 · {dan} 金合格",
+          "growth_breakthrough": "年内新的高光 {milestones} 处",
+          "precision_full_combo": "全连 {fullCombo} 谱 · 全良 {dondaful} 谱",
+          "speed_high": "常用速度 {speed}×",
+          "endurance_volume": "全年 {plays} 次游玩 · {days} 个活跃日",
+          "endurance_volume_no_days": "全年 {plays} 次游玩",
+          "exploration_breadth": "{songs} 首曲目 · {charts} 张谱面",
+          "devotion_song": "{song} · {plays} 次",
+          "nocturnal_days": "深夜活跃 {lateDays} 天",
+          "sparse_basic": "游玩 {plays} 次 · 活跃 {days} 天",
+          "sparse_basic_no_days": "游玩 {plays} 次"
+        }
+      },
+      "breakthroughTitles": {
+        "breakthrough_dan": {
+          "title": "段位攀登者",
+          "body": "段位向上攀了一阶，你也站到了更高的鼓面前。"
+        },
+        "breakthrough_dondaful": {
+          "title": "全良点灯人",
+          "body": "一枚新的全良亮起，整张鼓面都替你闪了一下。"
+        },
+        "breakthrough_extreme": {
+          "title": "极境追光者",
+          "body": "一枚新的极被点亮，这一年的高光也有了形状。"
+        },
+        "breakthrough_ten_star_full_combo": {
+          "title": "十星连击者",
+          "body": "十星全连落下最后一槌，最难的墙也留下了你的回声。"
+        },
+        "breakthrough_full_combo": {
+          "title": "连击拓路人",
+          "body": "新的全连把路往前铺了一段，连击没有在终点前松手。"
+        },
+        "breakthrough_ten_star_clear": {
+          "title": "十星破壁者",
+          "body": "十星通关亮起，曾经挡在面前的墙终于有了裂缝。"
+        },
+        "breakthrough_clear": {
+          "title": "通关开拓者",
+          "body": "新的通关把边界向前推了一步，下一首也已经在等你。"
+        },
+        "breakthrough_rating_gain": {
+          "title": "RT 上升者",
+          "body": "TAIKOB20 向上跳了一格，日复一日的积累终于有了刻度。"
+        }
+      },
     "titles": {
       "newcomer": { "title": "初响之鼓", "body": "故事才刚刚开始，第一声鼓点已经让这一年有了名字。" },
       "archive_keeper": { "title": "记录收藏家", "body": "一路累积的成绩被你收进这一页，安静，却很有分量。" },
