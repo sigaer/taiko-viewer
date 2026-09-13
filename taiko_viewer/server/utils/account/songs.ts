@@ -15,6 +15,7 @@ import {
   rebuildUserdataAchievement,
   sanitizeBinding,
   toSongRow,
+  withUserdataWriteLock,
   writeUserdataWithHistory
 } from "../../internal/account/shared";
 
@@ -305,6 +306,86 @@ export const createAccountSong = async (
 
   const lockedKeys = await getLockMap(userId, binding.taiko_id);
   return toSongRow(newSong, meta, lockedKeys);
+};
+
+/** Import the scoreInfo payload produced by userdata/songscore.json. */
+export const importAccountSongs = async (userId: number, payload: unknown) => {
+  const binding = await getCurrentBindingRow(userId);
+  if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+
+  const root = payload && typeof payload === "object" ? payload as Record<string, any> : {};
+  const data = root.data && typeof root.data === "object" ? root.data : root;
+  const rawItems = Array.isArray(data.scoreInfo) ? data.scoreInfo : Array.isArray(data.songs) ? data.songs : Array.isArray(payload) ? payload : [];
+  if (!rawItems.length) throw createError({ statusCode: 400, statusMessage: "未找到 scoreInfo 成绩记录" });
+  if (rawItems.length > 20000) throw createError({ statusCode: 413, statusMessage: "成绩记录过多，单次最多导入 20000 条" });
+
+  const catalog = await getSongCatalog();
+  const normalized = new Map<string, { songNo: number; level: number; values: EditableSongFields; title?: string; titleJp?: string }>();
+  for (const item of rawItems) {
+    if (!item || typeof item !== "object") continue;
+    const songNo = Number((item as any).song_no ?? (item as any).songNo);
+    const level = Number((item as any).level);
+    if (!Number.isInteger(songNo) || songNo <= 0 || !Number.isInteger(level) || level < 1 || level > 5) continue;
+    const values: EditableSongFields = {};
+    for (const key of SONG_MUTABLE_KEYS) {
+      if ((item as any)[key] !== undefined) (values as any)[key] = (item as any)[key];
+    }
+    const detail = (item as any).song_detail || {};
+    normalized.set(`${songNo}:${level}`, {
+      songNo,
+      level,
+      values,
+      title: String((item as any).song_name || detail.song_name || "").trim() || undefined,
+      titleJp: String((item as any).song_name_jp || detail.song_name_jp || "").trim() || undefined
+    });
+  }
+  if (!normalized.size) throw createError({ statusCode: 400, statusMessage: "没有可导入的有效成绩记录" });
+
+  return withUserdataWriteLock(binding.taiko_id, async () => {
+    const userdata = await readUserdata(binding.taiko_id);
+    const songs = (userdata.songs ||= []);
+    let created = 0;
+    let updated = 0;
+    for (const entry of normalized.values()) {
+      const sanitized = sanitizeSongValues(entry.values);
+      const existing = songs.find((row) => Number(row.song_no) === entry.songNo && Number(row.level) === entry.level);
+      const stamp = formatLocalTimestamp();
+      if (existing) {
+        Object.assign(existing, sanitized, { update_datetime: stamp });
+        if (sanitized.high_score !== undefined) existing.highscore_datetime = stamp;
+        updated += 1;
+      } else {
+        const meta = catalog.map.get(entry.songNo);
+        const song: UserdataSong = {
+          song_no: entry.songNo,
+          level: entry.level,
+          option_flg: [1, 0, 0, "00"],
+          highscore_mode: 0,
+          update_datetime: stamp,
+          highscore_datetime: stamp,
+          ...sanitized
+        };
+        if (!meta && entry.title) song.song_name = entry.title;
+        if (!meta && entry.titleJp) song.song_name_jp = entry.titleJp;
+        songs.push(song);
+        created += 1;
+      }
+    }
+    if (binding.source === "manual") rebuildUserdataAchievement(userdata);
+    await writeUserdataWithHistory(binding.taiko_id, userdata, "web-score-import");
+    if (binding.source !== "manual") {
+      await ensureAccountSchema();
+      const db = getAccountDb();
+      for (const entry of normalized.values()) {
+        await db.execute(
+          `INSERT INTO web_song_locks (user_id, taiko_id, song_no, level, is_locked) VALUES (?, ?, ?, ?, 1)
+           ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
+          [userId, binding.taiko_id, entry.songNo, entry.level]
+        );
+      }
+    }
+    return { ok: true, total: normalized.size, created, updated, taikoId: binding.taiko_id };
+  });
 };
 
 export const setAccountSongLock = async (

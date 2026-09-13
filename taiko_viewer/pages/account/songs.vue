@@ -104,6 +104,7 @@ const copy = computed(() =>
         filterDifficulty: "難易度で絞り込み",
         search: "検索",
         create: "記録を追加",
+        importScores: "成績をインポート",
         total: "総件数",
         switched: "現在の連携 ID を切り替えました",
         switchFailed: "連携切り替えに失敗しました",
@@ -144,6 +145,7 @@ const copy = computed(() =>
         filterDifficulty: "按难度筛选",
         search: "搜索",
         create: "新增成绩",
+        importScores: "导入成绩",
         total: "总记录数",
         switched: "当前绑定 ID 已切换",
         switchFailed: "切换绑定失败",
@@ -247,6 +249,12 @@ const openCreator = () => {
   editorVisible.value = true;
 };
 
+const importVisible = ref(false);
+const handleImported = async () => {
+  page.value = 1;
+  await refreshSongs();
+};
+
 const openEditor = (row: SongRow) => {
   editorMode.value = "edit";
   editingSong.value = { ...row };
@@ -346,6 +354,7 @@ const deleteScore = async (row: SongRow) => {
               </el-select>
               <el-button type="primary" @click="applyFilters">{{ copy.search }}</el-button>
               <el-button type="success" plain @click="openCreator">{{ copy.create }}</el-button>
+              <el-button type="warning" plain @click="importVisible = true">{{ copy.importScores }}</el-button>
             </div>
           </div>
           <div class="toolbar-meta">
@@ -422,6 +431,7 @@ const deleteScore = async (row: SongRow) => {
     :is-manual="currentBinding?.isManual"
     @saved="handleEditorSaved"
   />
+  <AccountScoreImportDialog v-model="importVisible" @imported="handleImported" />
 </template>
 
 <style scoped>
