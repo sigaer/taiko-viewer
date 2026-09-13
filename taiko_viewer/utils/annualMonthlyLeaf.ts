@@ -2,24 +2,25 @@
  * Geometry for the monthly-favourites vine.
  *
  * The leaf length is the only mark that encodes a month's play volume, so the
- * song title must never decide which leaf looks longest. A title therefore only
- * raises its own *readable minimum*, and the final widths are forced to stay
- * monotone in the metric, with the busiest month kept strictly longest.
+ * busiest month must own the strictly longest leaf. A song title therefore never
+ * decides the ordering: it only raises *its own* leaf to the width that title
+ * needs to stay readable, and never past the busiest month.
  *
  * Everything here is computed analytically: no canvas, no client-only measuring,
  * so the server render and the hydrated client render agree and the leaves never
- * shift after hydration.
+ * shift after hydration. Estimates use the widest font and the widest text insets
+ * the stylesheet can apply, which keeps them valid on every viewport.
  */
 
 export type MonthlyLeafFontSpec = { max: number; css: string };
 
-type LeafMetrics = { minWidth: number; maxWidth: number; padding: number; peakBonus: number };
+type LeafMetrics = { minWidth: number; maxWidth: number; insets: number; peakBonus: number };
 
 export const monthlyLeafMetrics = (compact: boolean): LeafMetrics => compact
-  ? { minWidth: 88, maxWidth: 224, padding: 34, peakBonus: 16 }
-  : { minWidth: 98, maxWidth: 260, padding: 46, peakBonus: 16 };
+  ? { minWidth: 88, maxWidth: 224, insets: 39, peakBonus: 12 }
+  : { minWidth: 98, maxWidth: 260, insets: 46, peakBonus: 12 };
 
-/** Font tier for one title; the same tier is used for measuring and for rendering. */
+/** Font tier for one title; measuring and rendering share the same tier. */
 export const monthlyLeafFontSpec = (nameLength: number, compact: boolean): MonthlyLeafFontSpec => {
   if (compact) {
     if (nameLength > 16) return { max: 8, css: "clamp(7px, 1.8vw, 8px)" };
@@ -33,11 +34,11 @@ export const monthlyLeafFontSpec = (nameLength: number, compact: boolean): Month
   return { max: 14, css: "clamp(12px, 3vw, 14px)" };
 };
 
-/** Rendered width of `《title》` at a given font size (full-width CJK, half-width latin). */
+/** Rendered width of `《title》` at a given font size (full-width glyphs 1em, latin 0.8em). */
 export const estimateMonthlyLeafNameWidth = (name: string, fontPx: number) => {
   let width = fontPx * 2;
   for (const character of String(name || "")) {
-    width += (character.codePointAt(0) ?? 0) > 0xff ? fontPx : fontPx * 0.58;
+    width += (character.codePointAt(0) ?? 0) > 0xff ? fontPx : fontPx * 0.8;
   }
   return width;
 };
@@ -49,34 +50,29 @@ export type MonthlyLeafWidthInput = { name: string; metric: number };
  *
  * 1. each leaf starts at its data width (metric / busiest metric),
  * 2. never below the width its own title needs to stay readable,
- * 3. then a running maximum keeps the widths monotone in the metric, so a month
- *    with fewer plays can never look longer than a month with more,
- * 4. and the busiest month is pushed past the cap when a long title elsewhere
- *    saturated the widths, so it always reads as the longest leaf.
+ * 3. never past `maxWidth`, so a quiet month with an over-long title cannot grow
+ *    beyond the busiest month,
+ * 4. and when such a title does saturate the cap, the busiest month is pushed
+ *    `peakBonus` past it so it still reads as the longest leaf.
  */
 export const monthlyLeafWidths = (items: MonthlyLeafWidthInput[], compact: boolean): number[] => {
   if (!items.length) return [];
-  const { minWidth, maxWidth, padding, peakBonus } = monthlyLeafMetrics(compact);
+  const { minWidth, maxWidth, insets, peakBonus } = monthlyLeafMetrics(compact);
   const metrics = items.map((item) => (Number.isFinite(Number(item.metric)) ? Math.max(0, Number(item.metric)) : 0));
   const peakMetric = Math.max(...metrics);
   if (!(peakMetric > 0)) return items.map(() => minWidth);
 
-  const raw = items.map((item, index) => {
+  const widths = items.map((item, index) => {
     const dataWidth = Math.round(minWidth + (maxWidth - minWidth) * (metrics[index] / peakMetric));
     const font = monthlyLeafFontSpec([...String(item.name || "")].length, compact);
-    const readableWidth = Math.round(estimateMonthlyLeafNameWidth(item.name, font.max) + padding);
+    const readableWidth = Math.round(estimateMonthlyLeafNameWidth(item.name, font.max) + insets);
     return Math.min(maxWidth, Math.max(dataWidth, readableWidth));
   });
 
-  const widths = items.map(() => minWidth);
-  let running = minWidth;
-  for (const index of metrics.map((_, index) => index).sort((a, b) => metrics[a] - metrics[b] || a - b)) {
-    running = Math.max(running, raw[index]);
-    widths[index] = running;
-  }
-
   const peak = metrics.indexOf(peakMetric);
-  const busiestOthers = Math.max(...widths.filter((_, index) => index !== peak), 0);
-  if (widths[peak] <= busiestOthers) widths[peak] = Math.min(maxWidth + peakBonus, busiestOthers + peakBonus);
+  const longest = Math.max(...widths);
+  if (widths.filter((width) => width === longest).length > 1) {
+    widths[peak] = Math.min(maxWidth + peakBonus, longest + peakBonus);
+  }
   return widths;
 };

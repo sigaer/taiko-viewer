@@ -600,7 +600,7 @@ assert.equal(monthlyLeafSceneSource.includes("sharedLeafWidth"), false, "monthly
 assert.equal(monthlyLeafSceneSource.includes("measureText"), false, "monthly vine still measures titles on the client");
 assert.equal(monthlyLeafItemSource.includes("leafWidth: number"), true, "monthly leaf does not take its length as a prop");
 assert.equal(monthlyLeafItemSource.includes("monthlyLeafFontSpec"), true, "monthly leaf does not share the title font tiers");
-const { monthlyLeafWidths, monthlyLeafFontSpec } = await import(new URL("../utils/annualMonthlyLeaf.ts", import.meta.url).href);
+const { monthlyLeafWidths, monthlyLeafFontSpec, estimateMonthlyLeafNameWidth } = await import(new URL("../utils/annualMonthlyLeaf.ts", import.meta.url).href);
 for (const compact of [false, true]) {
   const probes = [
     { name: "短歌", metric: 12 },
@@ -616,11 +616,12 @@ for (const compact of [false, true]) {
     if (index !== 3) assert.ok(width <= busiest, "a quieter month got a longer leaf than the busiest month");
   }
   assert.ok(busiest > Math.max(widths[0], widths[1], widths[2]), "the busiest month does not own the longest leaf");
-  for (let index = 1; index < widths.length; index += 1) {
-    assert.ok(widths[index] >= widths[index - 1], "monthly leaf widths are not monotone in play volume");
-  }
+  // a title long enough to saturate the cap still must not outgrow the busiest month
+  const saturated = monthlyLeafWidths([{ name: "很长的歌名".repeat(12), metric: 900 }, { name: "短", metric: 5 }], compact);
+  assert.ok(saturated[0] > saturated[1], "the busiest month loses to a long title");
   assert.equal(monthlyLeafWidths([], compact).length, 0, "monthly leaf helper does not handle an empty month list");
   assert.equal(monthlyLeafFontSpec(30, compact).max > 0, true, "monthly leaf font tiers are missing");
+  assert.ok(estimateMonthlyLeafNameWidth("ABCDEFGHIJ", 10) > 10 * 8, "monthly leaf width estimate is too optimistic");
 }
 
 const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");
