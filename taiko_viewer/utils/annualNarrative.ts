@@ -81,9 +81,11 @@ const calendarArchetype = (summary: VersionSummaryViewModel): Archetype => {
 
 const speedProfileArchetype = (summary: VersionSummaryViewModel): Archetype => {
   const speed = finite(summary.speedProfile?.speed);
-  // 1.25 / 1.45 / 1.60 split the observed range into four bands; a missing or
-  // zero value stays in the original-speed band.
-  if (speed <= 1.25) return { archetype: "original", intensity: "low" };
+  // 1.25 / 1.45 / 1.60 split the observed range into four bands; a missing or zero
+  // value stays in the lowest band. The lowest band is *not* called "original
+  // speed": the values that land here are 1.1x-1.2x, so the wording talks about
+  // keeping the speed low instead of claiming the default speed.
+  if (speed <= 1.25) return { archetype: "mild", intensity: "low" };
   if (speed <= 1.45) return { archetype: "cruise", intensity: "mid" };
   if (speed <= 1.6) return { archetype: "fast", intensity: "high" };
   return { archetype: "extreme", intensity: "extreme" };

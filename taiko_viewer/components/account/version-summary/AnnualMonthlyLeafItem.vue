@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
+import { monthlyLeafFontSpec } from "~/utils/annualMonthlyLeaf";
 import type { VersionSummaryMonthlyFavorite } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -8,57 +9,20 @@ const props = defineProps<{
   index: number;
   compact?: boolean;
   motionDisabled?: boolean;
-  density?: number;
-  sharedLongestName?: number;
-  sharedWidth?: number;
+  /** Leaf length in px; the scene derives it from the month's play metric. */
+  leafWidth: number;
   isTop?: boolean;
 }>();
 
 const coverFailed = ref(false);
 const leafSrc = computed(() => props.index % 2 === 0 ? "/monthly/leaf_1_11.png" : "/monthly/leaf_2_11.png");
 
-// 歌名严格单行：先按长度选字号档，再据此估算歌名渲染宽度，
-// 让叶片在“数据密度宽度”与“容纳歌名所需宽度”之间取较大值（不超过最高月份上限），
-// 从而在不牺牲可读性的前提下完整呈现长歌名。
+// 歌名严格单行：字号按长度分档；叶片长度只由月度游玩量决定，
+// 歌名仅决定自己这条叶片“至少要有多宽才读得全”（见 utils/annualMonthlyLeaf.ts）。
 const nameChars = computed(() => [...String(props.item.song?.name || "")]);
 const nameLength = computed(() => nameChars.value.length);
-
-// 估算歌名（含《》两个全角括号）在指定字号下的渲染宽度。
-const estimateNameWidth = (fontSize: number) => {
-  let width = fontSize * 2; // 《》
-  for (const ch of nameChars.value) {
-    const code = ch.codePointAt(0) ?? 0;
-    width += code > 0xff ? fontSize : fontSize * 0.58;
-  }
-  return width;
-};
-
-// 字号档：css 为实际 clamp 字号，max 为该档上限（用于估算叶片保底宽度）。
-const fontSpec = computed(() => {
-  const length = nameLength.value;
-  if (props.compact) {
-    if (length > 16) return { max: 8, css: "clamp(7px, 1.8vw, 8px)" };
-    if (length > 11) return { max: 9, css: "clamp(8px, 2vw, 9px)" };
-    if (length > 7) return { max: 10.5, css: "clamp(9px, 2.3vw, 10.5px)" };
-    return { max: 12, css: "clamp(10px, 2.6vw, 12px)" };
-  }
-  if (length > 20) return { max: 9, css: "clamp(8px, 1.9vw, 9px)" };
-  if (length > 13) return { max: 10.5, css: "clamp(9px, 2.2vw, 10.5px)" };
-  if (length > 8) return { max: 12, css: "clamp(10.5px, 2.6vw, 12px)" };
-  return { max: 14, css: "clamp(12px, 3vw, 14px)" };
-});
+const fontSpec = computed(() => monthlyLeafFontSpec(nameLength.value, Boolean(props.compact)));
 const leafFontSize = computed(() => fontSpec.value.css);
-
-const leafWidth = computed(() => {
-  const density = Math.min(1, Math.max(0, props.density ?? 0.45));
-  const minWidth = props.compact ? 88 : 98;
-  const maxWidth = props.compact ? 224 : 260;
-  const dataWidth = Math.round(minWidth + (maxWidth - minWidth) * density);
-  const padding = props.compact ? 34 : 46;
-  const sharedLength = Math.max(nameLength.value, props.sharedLongestName || 0);
-  const nameMinWidth = Math.round(estimateNameWidth(fontSpec.value.max) + padding + Math.max(0, sharedLength - nameLength.value) * fontSpec.value.max * 0.35);
-  return `${Math.min(maxWidth, Math.max(dataWidth, nameMinWidth, props.sharedWidth || 0))}px`;
-});
 
 const handleCoverError = () => {
   coverFailed.value = true;
@@ -69,7 +33,7 @@ const handleCoverError = () => {
   <article
     class="monthly-leaf-item"
     :class="{ 'is-compact': compact, 'is-motion-disabled': motionDisabled, 'is-top': isTop }"
-    :style="{ '--leaf-delay': `${Math.min(index * 70, 700)}ms`, '--leaf-width': leafWidth, '--leaf-font': leafFontSize }"
+    :style="{ '--leaf-delay': `${Math.min(index * 70, 700)}ms`, '--leaf-width': `${leafWidth}px`, '--leaf-font': leafFontSize }"
     :aria-label="`${item.monthLabel} ${item.song.name}`"
   >
     <div class="monthly-leaf-item__month" data-annual-stage="visual">

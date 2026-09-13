@@ -318,7 +318,7 @@ assert.equal(narrativeSource.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, "").include
 const narrativePages = {
   timeOfDay: { archetypes: ["morning", "daytime", "evening", "late_night"], fields: ["theme"] },
   calendar: { archetypes: ["occasional", "sprint", "steady", "persistent"], fields: ["primary", "longest", "emotion1", "emotion2"] },
-  speedProfile: { archetypes: ["original", "cruise", "fast", "extreme"], fields: ["title", "lead", "detail"] },
+  speedProfile: { archetypes: ["mild", "cruise", "fast", "extreme"], fields: ["title", "lead", "detail"] },
   challenge: { archetypes: ["tap", "push", "siege", "vow"], fields: ["title", "lead"] },
   nearDondaful: { archetypes: ["razor_standard", "razor_ten_star", "near_standard", "near_ten_star", "distant_standard", "distant_ten_star"], fields: ["title", "lead"] }
 };
@@ -592,6 +592,36 @@ assert.equal(
   false,
   "monthly vine orders months by number across the year boundary"
 );
+// The leaf length is the only mark that encodes a month's play volume, so the
+// busiest month must own the longest leaf, and a long song title elsewhere may
+// only raise that leaf's own readable minimum.
+assert.equal(monthlyLeafSceneSource.includes("monthlyLeafWidths"), true, "monthly vine does not derive leaf widths from the shared helper");
+assert.equal(monthlyLeafSceneSource.includes("sharedLeafWidth"), false, "monthly vine still sizes leaves from the longest song title");
+assert.equal(monthlyLeafSceneSource.includes("measureText"), false, "monthly vine still measures titles on the client");
+assert.equal(monthlyLeafItemSource.includes("leafWidth: number"), true, "monthly leaf does not take its length as a prop");
+assert.equal(monthlyLeafItemSource.includes("monthlyLeafFontSpec"), true, "monthly leaf does not share the title font tiers");
+const { monthlyLeafWidths, monthlyLeafFontSpec } = await import(new URL("../utils/annualMonthlyLeaf.ts", import.meta.url).href);
+for (const compact of [false, true]) {
+  const probes = [
+    { name: "短歌", metric: 12 },
+    { name: "这是一个非常非常非常非常长的歌曲标题用来测试叶片宽度上限", metric: 40 },
+    { name: "中等长度的歌名", metric: 300 },
+    { name: "最忙的一个月", metric: 900 }
+  ];
+  const widths = monthlyLeafWidths(probes, compact);
+  assert.equal(widths.length, probes.length, "monthly leaf helper dropped an item");
+  const busiest = widths[3];
+  for (const [index, width] of widths.entries()) {
+    assert.ok(Number.isFinite(width) && width > 0, `monthly leaf width is not usable: ${width}`);
+    if (index !== 3) assert.ok(width <= busiest, "a quieter month got a longer leaf than the busiest month");
+  }
+  assert.ok(busiest > Math.max(widths[0], widths[1], widths[2]), "the busiest month does not own the longest leaf");
+  for (let index = 1; index < widths.length; index += 1) {
+    assert.ok(widths[index] >= widths[index - 1], "monthly leaf widths are not monotone in play volume");
+  }
+  assert.equal(monthlyLeafWidths([], compact).length, 0, "monthly leaf helper does not handle an empty month list");
+  assert.equal(monthlyLeafFontSpec(30, compact).max > 0, true, "monthly leaf font tiers are missing");
+}
 
 const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");
 assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");

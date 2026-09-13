@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, toRef, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, toRef } from "vue";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 import AnnualMonthlyLeafItem from "./AnnualMonthlyLeafItem.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
+import { monthlyLeafWidths } from "~/utils/annualMonthlyLeaf";
 import type { VersionSummaryMonthlyFavorite, VersionSummaryViewModel } from "~/types/account-version-summary";
 
 const props = defineProps<{
@@ -54,47 +55,24 @@ const items = computed(() => props.summary.monthlyFavorites
   .map((item) => ({ ...item, monthLabel: compactMonthLabel(item) }))
   .sort((a, b) => monthOrderKey(a).localeCompare(monthOrderKey(b))));
 
+// 叶片长度与页脚“游玩最多的月份”必须来自同一个口径：优先月度游玩时长，
+// 只有整页都拿不到时长时才退回游玩次数（逐月混用会让两个口径指向不同的月份）。
+const usePlayTime = computed(() => items.value.length > 0 && items.value.every((item) => finite(item.estimatedSeconds) > 0));
+const leafMetric = (item: VersionSummaryMonthlyFavorite) => usePlayTime.value ? finite(item.estimatedSeconds) : finite(item.playCount);
 const topMonth = computed(() => {
   if (!items.value.length) return null;
-  const withTime = items.value.filter((item) => finite(item.estimatedSeconds) > 0);
-  if (withTime.length) return withTime.reduce((best, item) => finite(item.estimatedSeconds) > finite(best.estimatedSeconds) ? item : best);
-  const withPlays = items.value.filter((item) => finite(item.playCount) > 0);
-  if (withPlays.length) return withPlays.reduce((best, item) => finite(item.playCount) > finite(best.playCount) ? item : best);
-  return items.value[0];
+  return items.value.reduce((best, item) => leafMetric(item) > leafMetric(best) ? item : best);
 });
 
 const itemDensity = computed(() => items.value.length > 9 ? "ultra-dense" : items.value.length > 6 ? "dense" : "standard");
 const topMonthLabel = computed(() => topMonth.value?.monthLabel || "—");
 const motionDisabled = computed(() => props.reducedMotion || saveData.value);
 
-// 叶片长度的数据依据：优先用游玩时长，退化为游玩次数。
-const leafMetric = (item: VersionSummaryMonthlyFavorite) => {
-  const seconds = finite(item.estimatedSeconds);
-  return seconds > 0 ? seconds : finite(item.playCount);
-};
-const maxMetric = computed(() => Math.max(...items.value.map(leafMetric), 0));
-const leafDensity = (item: VersionSummaryMonthlyFavorite) => {
-  const max = maxMetric.value;
-  if (!(max > 0)) return 0.5;
-  return leafMetric(item) / max;
-};
-const longestName = computed(() => items.value.reduce((max, item) => Math.max(max, [...String(item.song.name || "")].length), 0));
-const sharedLeafWidth = ref(0);
-let leafResizeObserver: ResizeObserver | null = null;
-const measureLeafWidth = () => {
-  if (!process.client || !rootRef.value) return;
-  const host = rootRef.value.$el?.querySelector<HTMLElement>(".annual-monthly-leaf-scene__timeline");
-  if (!host) return;
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  if (!context) return;
-  context.font = "700 12px var(--viewer-font-family, sans-serif)";
-  const maxText = items.value.reduce((max, item) => Math.max(max, context.measureText(`《${item.song.name}》`).width), 0);
-  const available = Math.max(120, host.clientWidth - 76);
-  sharedLeafWidth.value = Math.min(available, Math.max(98, Math.ceil(maxText + 54)));
-};
-onMounted(() => { measureLeafWidth(); leafResizeObserver = new ResizeObserver(measureLeafWidth); const host = rootRef.value?.$el?.querySelector<HTMLElement>(".annual-monthly-leaf-scene__timeline"); if (host) leafResizeObserver.observe(host); });
-onBeforeUnmount(() => leafResizeObserver?.disconnect());
+// 叶片长度：完全由月度游玩量决定，并保证“游玩最多的月份叶片最长”。
+const leafWidths = computed(() => monthlyLeafWidths(
+  items.value.map((item) => ({ name: String(item.song.name || ""), metric: leafMetric(item) })),
+  itemDensity.value !== "standard"
+));
 const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
   topMonth.value && topMonth.value.month === item.month && topMonth.value.song.songNo === item.song.songNo
 );
@@ -133,9 +111,7 @@ const isTopMonth = (item: VersionSummaryMonthlyFavorite) => Boolean(
           :index="index"
           :compact="itemDensity !== 'standard'"
           :motion-disabled="motionDisabled"
-          :density="leafDensity(item)"
-          :shared-longest-name="longestName"
-          :shared-width="sharedLeafWidth || undefined"
+          :leaf-width="leafWidths[index] || 0"
           :is-top="isTopMonth(item)"
         />
       </main>
