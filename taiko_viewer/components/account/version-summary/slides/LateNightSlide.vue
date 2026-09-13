@@ -39,6 +39,9 @@ const activeDaysText = computed(() => isUsableMetric(lateNight.value?.activeDays
 const playCountText = computed(() => isUsableMetric(lateNight.value?.playCount)
   ? formatter.format(Math.round(lateNight.value!.playCount))
   : "");
+// How often the year reached into the small hours picks the closing line.
+const narrative = computed(() => selectNarrative("lateNight", props.summary));
+const narrativeLine = computed(() => t(narrativeKey("lateNight", narrative.value, "line")));
 </script>
 
 <template>
