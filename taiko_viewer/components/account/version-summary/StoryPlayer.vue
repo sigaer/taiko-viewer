@@ -47,7 +47,6 @@ let updateMotionHandler: (() => void) | null = null;
 let scrollFrame = 0;
 let coverClockFrame = 0;
 let coverClockTimestamp = 0;
-let drumAudio: HTMLAudioElement | null = null;
 let bgmSession: AnnualBgmSession | null = null;
 let audioDisposed = false;
 let routeLeaving = false;
@@ -83,22 +82,6 @@ const progressItems = computed(() => slides.value.map((page) => ({
   chapter: page.chapter,
   chapterLabel: page.chapterLabel
 })));
-
-const ensureAudio = () => {
-  if (!drumAudio) {
-    drumAudio = new Audio(DRUM_SOUND);
-    drumAudio.preload = "auto";
-    drumAudio.volume = 0.28;
-  }
-  return drumAudio;
-};
-
-const playDrum = async () => {
-  if (!soundEnabled.value) return;
-  const audio = ensureAudio();
-  audio.currentTime = 0;
-  await audio.play().catch(() => undefined);
-};
 
 const acquireBgmSession = () => {
   if (!bgmSession) bgmSession = createAnnualBgmSession((playing) => { bgmPlaying.value = playing; });
@@ -144,8 +127,6 @@ const disposeAudio = (releaseDelay = 0) => {
   if (audioDisposed) return;
   audioDisposed = true;
   clearAutoplayRetry();
-  drumAudio?.pause();
-  drumAudio = null;
   const session = bgmSession;
   bgmSession = null;
   bgmPlaying.value = false;
@@ -156,11 +137,10 @@ const disposeAudio = (releaseDelay = 0) => {
 const toggleSound = async () => {
   if (!soundEnabled.value) {
     soundEnabled.value = true;
-    await Promise.all([playDrum(), playBgm()]);
+    await playBgm();
   } else {
     soundEnabled.value = false;
     clearAutoplayRetry();
-    drumAudio?.pause();
     pauseBgm();
   }
 };
@@ -416,7 +396,6 @@ watch(activeIndex, (value, oldValue) => {
     navigationMotion.direction = value > oldValue ? "forward" : "backward";
     navigationMotion.visited.add(oldValue);
   }
-  if (value !== oldValue) void playDrum();
   preloadNextArtwork();
 });
 

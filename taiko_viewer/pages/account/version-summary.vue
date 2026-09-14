@@ -7,6 +7,7 @@ import AnnualBuildPrelude from "~/components/account/version-summary/AnnualBuild
 import type { AnnualSummaryV4, VersionSummaryBinding, VersionSummaryPayload } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 import { preloadAnnualOpeningCovers } from "~/utils/annualCoverFlow";
+import { preloadAnnualOpeningArtwork } from "~/utils/annualOpeningAssets.client";
 import { ANNUAL_BGM_SRC, preloadAnnualBgm } from "~/utils/annualBgm.client";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError } from "~/utils/viewerError";
@@ -40,7 +41,10 @@ useHead({
   ]
 });
 
-if (import.meta.client) void preloadAnnualBgm();
+if (import.meta.client) {
+  void preloadAnnualBgm();
+  void preloadAnnualOpeningArtwork();
+}
 
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
@@ -48,7 +52,7 @@ const building = ref(false);
 const switchingBindingId = ref<number | null>(null);
 const selectedBindingId = ref<number | null>(null);
 const jobStatus = ref<AnnualJob | null>(null);
-const openingArtworkReadyId = ref("");
+const openingCriticalAssetsReadyId = ref("");
 const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 let pollGeneration = 0;
 let pollingJobId = "";
@@ -201,10 +205,17 @@ onMounted(() => {
   let generation = 0;
   stopArtworkPreload = watch(summary, async (value) => {
     const currentGeneration = ++generation;
-    openingArtworkReadyId.value = "";
+    openingCriticalAssetsReadyId.value = "";
     if (!value) return;
-    await preloadAnnualOpeningCovers(value);
-    if (currentGeneration === generation) openingArtworkReadyId.value = value.summaryId;
+    const [artworkReady, bgmReady] = await Promise.all([
+      preloadAnnualOpeningArtwork(),
+      preloadAnnualBgm(),
+      preloadAnnualOpeningCovers(value)
+    ]).then(([artwork, bgm]) => [artwork, bgm] as const);
+    if (!artworkReady || !bgmReady) {
+      console.warn("[annual] opening critical asset preload failed", { artworkReady, bgmReady });
+    }
+    if (currentGeneration === generation) openingCriticalAssetsReadyId.value = value.summaryId;
   }, { immediate: true });
 });
 
@@ -240,7 +251,7 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
       <small v-if="jobStatusLabel">{{ jobStatusLabel }}</small>
     </div>
 
-    <div v-else-if="openingArtworkReadyId !== summary.summaryId" class="annual-state annual-state--loading">
+    <div v-else-if="openingCriticalAssetsReadyId !== summary.summaryId" class="annual-state annual-state--loading">
       <div class="annual-state__drum" aria-hidden="true"><i></i></div>
       <p>{{ t("annualSummary.state.loading") }}</p>
     </div>

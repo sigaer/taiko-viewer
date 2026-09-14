@@ -529,6 +529,19 @@ const finalTitleSource = await read("utils/annualSummary.ts");
 assert.ok(finalTitleSource.includes("annualSummary.finalTitles."), "FinalTitle no longer reads the curated dictionary");
 assert.ok(finalTitleSource.includes("annualSummary.danPresentation."), "strong Dan presentation is not wired");
 assert.ok(finalTitleSource.includes("annualSummary.breakthroughTitles."), "breakthrough dictionary is not decoupled");
+
+// Annual UX Detail P1: page transitions no longer emit the one-shot drum SFX;
+// Opening critical assets are decoded/primed before the story is shown, and the
+// share poster uses the versioned background URL so stale CDN bytes cannot win.
+const storyPlayerSource = await read("components/account/version-summary/StoryPlayer.vue");
+assert.equal(storyPlayerSource.includes("playDrum"), false, "annual page-turn SFX is still wired");
+const annualOpeningPageSource = await read("pages/account/version-summary.vue");
+assert.equal(annualOpeningPageSource.includes("preloadAnnualOpeningArtwork"), true, "Opening artwork preload is missing");
+assert.equal(annualOpeningPageSource.includes("openingCriticalAssetsReadyId"), true, "Opening critical asset gate is missing");
+const openingAssetsSource = await read("utils/annualOpeningAssets.client.ts");
+assert.equal(openingAssetsSource.includes("image.decode"), true, "Opening artwork preload does not await decode");
+const shareGridSource = await read("components/account/version-summary/AnnualShareGrid.vue");
+assert.equal(shareGridSource.includes("square_bg_v2.png"), true, "Poster background is not versioned");
 assert.equal(/annualSummary\.titles\.\$\{finalTitleKey\}/.test(finalTitleSource), false, "FinalTitle still reads the shared titles namespace");
 assert.ok(finalTitleSource.includes("DAN_PRESENTATION_EVIDENCE"), "presentation evidence set is missing");
 

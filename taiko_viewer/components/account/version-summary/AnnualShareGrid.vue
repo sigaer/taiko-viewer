@@ -76,7 +76,7 @@ const stats = computed(() => {
 </template>
 
 <style scoped>
-.annual-share-grid{aspect-ratio:363/554;container-type:inline-size;background:url('/annual/poster/square_bg.png') center/100% 100% no-repeat;border-radius:12px;overflow:hidden;color:#101921;font-family:var(--viewer-font-family,sans-serif)}
+.annual-share-grid{aspect-ratio:363/554;container-type:inline-size;background:url('/annual/poster/square_bg_v2.png') center/100% 100% no-repeat;border-radius:12px;overflow:hidden;color:#101921;font-family:var(--viewer-font-family,sans-serif)}
 .annual-share-grid__visual{height:75.27%;position:relative}
 .annual-share-grid__labels{position:absolute;left:0;right:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));text-align:center}
 .annual-share-grid__labels--top{top:3cqw}
