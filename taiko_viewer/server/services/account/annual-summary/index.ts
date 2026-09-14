@@ -947,7 +947,20 @@ export const getAdminAnnualTargets = async (targetInput: unknown) => {
     let nickname = "";
     try { const userdata = await readUserdata(taikoId); const profile = userdata.profile as Record<string, unknown> | undefined; const costume = profile?.gameCostume as Record<string, unknown> | undefined; nickname = String(profile?.mydon_name || costume?.mydon_name || "").trim(); } catch { /* malformed or concurrently removed data */ }
     const haystack = [taikoId, row?.username || "", nickname].join(" ").toLowerCase();
-    return haystack.includes(target.toLowerCase()) ? { userId: row?.user_id ?? null, bindingId: row?.id ?? null, taikoId, username: row?.username || "", nickname, hasViewerAccount: Boolean(row) } : null;
+    if (!haystack.includes(target.toLowerCase())) return null;
+    const summary = row
+      ? await findLatestAnnualSummary(row.user_id, row.id, ANNUAL_VERSION_KEY)
+      : null;
+    return {
+      userId: row?.user_id ?? null,
+      bindingId: row?.id ?? null,
+      taikoId,
+      username: row?.username || "",
+      nickname,
+      hasViewerAccount: Boolean(row),
+      summaryId: summary?.id || null,
+      summaryGeneratedAt: summary ? new Date(summary.generated_at).toISOString() : null
+    };
   }));
   return items.filter(Boolean);
 };
@@ -989,6 +1002,18 @@ export const getAdminAnnualSummaryById = async (summaryId: string, localeInput?:
   const summary = await safeReadSummary(row);
   if (!summary) throw createError({ statusCode: 410, statusMessage: "年度总结文件不可用" });
   return withAdminAssets(summary, normalizeAnnualLocale(localeInput));
+};
+
+export const getAdminAnnualJob = async (jobId: string, localeInput?: unknown) => {
+  const job = await findAnnualJobById(String(jobId || ""));
+  if (!job || job.job_type !== "build") throw createError({ statusCode: 404, statusMessage: "任务不存在" });
+  const response: Record<string, unknown> = { job: serializeAnnualJob(job) };
+  if (job.status === "completed" && job.summary_id) {
+    const row = await findAnnualSummaryById(job.summary_id);
+    const summary = await safeReadSummary(row);
+    if (summary) response.summary = await withAdminAssets(summary, normalizeAnnualLocale(localeInput));
+  }
+  return response;
 };
 
 export const removeAdminAnnualSummary = async (summaryId: string) => {
