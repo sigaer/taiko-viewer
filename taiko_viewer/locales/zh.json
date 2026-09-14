@@ -1239,7 +1239,7 @@
         },
         "final_archive_explorer": {
           "title": "寻声于四方",
-          "body": "很少有歌能让你停留太久——你只是还没听够。"
+          "body": "风景不断换页，耳朵总有下一处想去的地方。"
         },
         "final_archive_regular": {
           "title": "谱路留痕",
@@ -1247,11 +1247,11 @@
         },
         "final_devotion": {
           "title": "旧梦回响",
-          "body": "有一首歌，今年又被你听了很多遍。"
+          "body": "熟悉的前奏一响，手已经先替你回到了鼓面。"
         },
         "final_devotion_endurance": {
           "title": "旧梦未曾停",
-          "body": "那首歌从头陪到尾。"
+          "body": "同一段旋律反复亮起，陪你把每次相遇都留了下来。"
         },
         "final_devotion_growth": {
           "title": "回响越境",
@@ -1259,7 +1259,7 @@
         },
         "final_devotion_precision": {
           "title": "旧梦刻痕",
-          "body": "一首歌被磨到没有毛边，靠的是次数。"
+          "body": "细节一遍遍沉下来，熟悉便有了清晰的轮廓。"
         },
         "final_devotion_speed": {
           "title": "余音疾行",
@@ -1271,7 +1271,7 @@
         },
         "final_endurance": {
           "title": "长鸣不息",
-          "body": "几乎每一天都在，这件事本身就很难。"
+          "body": "日历翻过许多页，鼓声总在其中找到落点。"
         },
         "final_endurance_devotion": {
           "title": "长守余音",
@@ -1279,7 +1279,7 @@
         },
         "final_endurance_exploration": {
           "title": "沿途寻声",
-          "body": "耐心被你用在了「听更多」这件事上。"
+          "body": "脚步走得很远，也把更多声音带回了身边。"
         },
         "final_endurance_growth": {
           "title": "未歇直至破晓",
@@ -1287,7 +1287,7 @@
         },
         "final_endurance_nocturnal": {
           "title": "长夜未央",
-          "body": "坚持没有固定时段。"
+          "body": "夜色换了几轮，熟悉的节拍仍在灯下亮着。"
         },
         "final_endurance_precision": {
           "title": "长路守准",
@@ -1303,7 +1303,7 @@
         },
         "final_exploration_endurance": {
           "title": "远行而不息",
-          "body": "去过很多地方，而且一次都没停下。"
+          "body": "沿途换了许多风景，留下的是同一串脚步。"
         },
         "final_exploration_growth": {
           "title": "虹境越界",
@@ -1331,7 +1331,7 @@
         },
         "final_growth_speed": {
           "title": "越岭而疾行",
-          "body": "进步是用速度换来的。"
+          "body": "新的高度打开以后，脚下的节奏也跟着变轻。"
         },
         "final_keeper": {
           "title": "留白待成章",
@@ -1383,7 +1383,7 @@
         },
         "final_precision_speed": {
           "title": "毫厘掠影",
-          "body": "快，且精确到毫厘。"
+          "body": "每一次出手都很快，落点却始终清楚。"
         },
         "final_speed": {
           "title": "疾风掠影",
@@ -1395,15 +1395,15 @@
         },
         "final_speed_endurance": {
           "title": "疾风长行",
-          "body": "没有冲刺，只有一直在跑。"
+          "body": "风一直在耳边，步子也一直保持着自己的节拍。"
         },
         "final_speed_exploration": {
           "title": "掠过千景",
-          "body": "换歌的速度和打歌一样快。"
+          "body": "视线掠过一站又一站，新的声音总能及时接上。"
         },
         "final_speed_growth": {
           "title": "迅雷越岭",
-          "body": "今年的天花板，是被速度顶开的。"
+          "body": "节奏提起来之后，原先的边界便有了缝隙。"
         },
         "final_speed_precision": {
           "title": "疾行守衡",
@@ -1412,22 +1412,28 @@
       },
       "danPresentation": {
         "dan_kanzui_gold": {
-          "title": "凌霄贯律"
+          "title": "凌霄贯律",
+          "body": "走到高处以后，整段节奏没有留下一个缺口。"
         },
         "dan_kanzui_red": {
-          "title": "澄境执律"
+          "title": "澄境执律",
+          "body": "一口气走完整条路径，声音始终保持清澈。"
         },
         "dan_fullgood_gold": {
-          "title": "极境无瑕"
+          "title": "极境无瑕",
+          "body": "每个落点都被照亮，整面鼓只剩下干净的回声。"
         },
         "dan_fullgood_red": {
-          "title": "澄澈之律"
+          "title": "澄澈之律",
+          "body": "杂音一层层退开，留下的是一条清楚的线。"
         },
         "dan_gold_pass": {
-          "title": "天衡破阵"
+          "title": "天衡破阵",
+          "body": "门槛被稳稳跨过，手上的分寸没有松开。"
         },
         "dan_major_progress": {
-          "title": "越境凌云"
+          "title": "越境凌云",
+          "body": "前后相隔的高度，最终被一步步接成了路。"
         }
       },
       "danCompletion": {

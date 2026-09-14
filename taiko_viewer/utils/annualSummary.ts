@@ -526,16 +526,22 @@ export const normalizeAnnualSummary = (
   const finalPresentationKey = DAN_PRESENTATION_EVIDENCE.has(finalEvidenceKey)
     ? `annualSummary.danPresentation.${finalEvidenceKey}.title`
     : `annualSummary.finalTitles.${finalTitleKey}.title`;
+  const finalPresentationBodyKey = DAN_PRESENTATION_EVIDENCE.has(finalEvidenceKey)
+    ? `annualSummary.danPresentation.${finalEvidenceKey}.body`
+    : `annualSummary.finalTitles.${finalTitleKey}.body`;
   const finalTitleLabel = t(finalPresentationKey) || t(`annualSummary.finalTitles.${finalTitleKey}.title`);
+  const translatedFinalBody = t(finalPresentationBodyKey);
+  const finalTitleBody = translatedFinalBody === finalPresentationBodyKey
+    ? t("annualSummary.copy.final.body")
+    : translatedFinalBody;
   const finalEvidence = renderFinalEvidence(finalEvidenceKey, finalEvidenceValue, {
     t, locale, breakthroughTitle: breakthrough.title, keywordTitle: keyword?.title, finalTitleLabel
   }) ?? { label: t("annualSummary.slides.final.fromJourney"), text: t(raw.mode === "current_archive" ? "annualSummary.common.archive" : "annualSummary.common.observed") };
   const finalTitle = {
     title: finalTitleLabel, eyebrow: t("annualSummary.copy.final.eyebrow"),
-    // Curated zh body; the ja dictionary intentionally ships titles only until a ja body
-    // pass lands, so ja keeps the existing localised closing line (never the zh text).
-    // (`copy` is built below, so the ja branch is filled in there.)
-    body: locale === "ja" ? "" : t(`annualSummary.finalTitles.${finalTitleKey}.body`),
+    // Curated per-key body. Strong Dan presentation keys use their matching
+    // danPresentation body; ordinary titles use finalTitles bodies in both locales.
+    body: finalTitleBody,
     themeKey: finalTitleKey,
     evidenceKey: finalEvidenceKey, evidenceValue: finalEvidenceValue,
     evidenceLabel: finalEvidence.label, evidenceText: finalEvidence.text
@@ -640,10 +646,9 @@ export const normalizeAnnualSummary = (
   };
   const copy = makeCopy(t, narrativeContext);
   breakthrough.body = copy.breakthrough.body;
-  // FinalTitle body = curated per-key copy (Copy-3B). The ja dictionary intentionally
-  // ships titles only until a ja body pass lands, so ja keeps the existing localised
-  // closing line; the zh copy is never overwritten.
-  const narrativeBody = locale === "ja" ? copy.finalTitle.body : finalTitle.body;
+  // FinalTitle body is curated per-key copy in both locales. Keep the existing
+  // evidence composition so Poster and Finale continue to consume one resolved body.
+  const narrativeBody = finalTitle.body;
   // The Finale has no dedicated evidence node (and Copy-3B must not add DOM), so the
   // evidence is composed into the existing body slot: "<evidence>｜<narrative>".
   finalTitle.body = finalEvidence.text ? `${finalEvidence.text}｜${narrativeBody}` : narrativeBody;

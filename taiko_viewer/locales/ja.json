@@ -1176,159 +1176,210 @@
     "keywords": { "dimensions": {"big_song": "大音符力", "stamina": "体力", "speed": "高速処理", "accuracy": "精度力", "rhythm": "リズム処理", "complex": "複合処理"}, "titles": {"wall_breaker": "巨壁の突破者", "endless_drummer": "不休の太鼓打ち", "speed_runner": "疾風の走者", "precision_tuner": "精度の調律師", "rhythm_resonator": "リズムの共鳴者", "complex_hunter": "複合ハンター"}, "body": "{dimension} が鼓面の輪郭でいちばん明るく、今年のサインになりました。", "eyebrow": "鼓面キーワード", "lead": "この一年、鼓面はあなたの打ち方を覚えています。", "tagsLabel": "もっとも鮮やかな三つの鼓面軸", "beaconPrefix": "最初に灯ったのは", "closing": "これがあなたの一年の鼓面の印です。" },
       "finalTitles": {
         "final_archive_collector": {
-          "title": "音を綴る"
+          "title": "音を綴る",
+          "body": "譜面を重ねるたび、記録のページが静かに増えていく。"
         },
         "final_archive_dan": {
-          "title": "積年の段位"
+          "title": "積年の段位",
+          "body": "閉じた記録の中にも、色あせない手応えが残っている。"
         },
         "final_archive_explorer": {
-          "title": "音を尋ねて"
+          "title": "音を尋ねて",
+          "body": "景色が変わるたび、耳は次の響きを探していた。"
         },
         "final_archive_regular": {
-          "title": "譜面の足跡"
+          "title": "譜面の足跡",
+          "body": "何度も通った道は、地図より先に手が覚えている。"
         },
         "final_devotion": {
-          "title": "残響のしらべ"
+          "title": "残響のしらべ",
+          "body": "前奏が聞こえると、手は先にいつもの場所へ戻っていく。"
         },
         "final_devotion_endurance": {
-          "title": "古い夢は止まない"
+          "title": "古い夢は止まない",
+          "body": "同じ旋律との再会が、ひとつずつ記憶になっていく。"
         },
         "final_devotion_growth": {
-          "title": "響きの向こうへ"
+          "title": "響きの向こうへ",
+          "body": "曲は変わらなくても、届く場所は前より遠くなった。"
         },
         "final_devotion_precision": {
-          "title": "夢に刻んだ拍"
+          "title": "夢に刻んだ拍",
+          "body": "細部が落ち着くほど、好きな一曲の輪郭が澄んでいく。"
         },
         "final_devotion_speed": {
-          "title": "残響を連れて"
+          "title": "残響を連れて",
+          "body": "大切な曲を手放さず、その響きごと歩みを軽くした。"
         },
         "final_early": {
-          "title": "はじまりの一打"
+          "title": "はじまりの一打",
+          "body": "最初の一音が鳴って、物語に書き出しが生まれた。"
         },
         "final_endurance": {
-          "title": "鳴りやまぬ"
+          "title": "鳴りやまぬ",
+          "body": "めくった日々のあいだに、いつも太鼓の居場所があった。"
         },
         "final_endurance_devotion": {
-          "title": "鳴り終えてなお"
+          "title": "鳴り終えてなお",
+          "body": "長く残ったのは数字より、いつもの手つきだった。"
         },
         "final_endurance_exploration": {
-          "title": "道々に音を拾う"
+          "title": "道々に音を拾う",
+          "body": "歩みを重ねながら、まだ知らない響きも連れてきた。"
         },
         "final_endurance_growth": {
-          "title": "夜明けまで止まらず"
+          "title": "夜明けまで止まらず",
+          "body": "空の色が変わるころ、積み重ねの形が見えてくる。"
         },
         "final_endurance_nocturnal": {
-          "title": "夜はまだ長い"
+          "title": "夜はまだ長い",
+          "body": "夜の灯りが変わっても、慣れた刻みはそこにある。"
         },
         "final_endurance_precision": {
-          "title": "ぶれない刻み"
+          "title": "ぶれない刻み",
+          "body": "ひとつの正確さより、続く安定が線を描いていく。"
         },
         "final_endurance_speed": {
-          "title": "息の続く速さ"
+          "title": "息の続く速さ",
+          "body": "一度の勢いではなく、自分のリズムが速さを支えている。"
         },
         "final_exploration": {
-          "title": "虹の渡り"
+          "title": "虹の渡り",
+          "body": "色を渡るたび、耳の中の景色も少しずつ広がった。"
         },
         "final_exploration_endurance": {
-          "title": "旅は止まらない"
+          "title": "旅は止まらない",
+          "body": "道の先々で景色を替えながら、同じ足音を重ねてきた。"
         },
         "final_exploration_growth": {
-          "title": "虹を越えて"
+          "title": "虹を越えて",
+          "body": "知らない譜面に向かった先で、新しい手応えが見つかった。"
         },
         "final_growth": {
-          "title": "暁に登る"
+          "title": "暁に登る",
+          "body": "見えない時間の積み重ねが、境目をそっと押し開けた。"
         },
         "final_growth_devotion": {
-          "title": "待ち続けた先に"
+          "title": "待ち続けた先に",
+          "body": "静かな反復の先で、ようやく景色が動きはじめる。"
         },
         "final_growth_endurance": {
-          "title": "上り続ける"
+          "title": "上り続ける",
+          "body": "ひとつ越えたあとも、足元には次の段差が続いていた。"
         },
         "final_growth_exploration": {
-          "title": "見晴らしの星"
+          "title": "見晴らしの星",
+          "body": "遠くまで見渡せたのは、歩く道を一つに決めなかったから。"
         },
         "final_growth_precision": {
-          "title": "澄んだまま上へ"
+          "title": "澄んだまま上へ",
+          "body": "急がず整えた一歩一歩が、静かな高さにつながっている。"
         },
         "final_growth_speed": {
-          "title": "嶺を駆けて"
+          "title": "嶺を駆けて",
+          "body": "新しい景色に届くたび、足取りまで軽くなっていった。"
         },
         "final_keeper": {
-          "title": "余白の章"
+          "title": "余白の章",
+          "body": "書きかけのページには、次の一音を置く場所が残っている。"
         },
         "final_nocturnal": {
-          "title": "星を頼りに"
+          "title": "星を頼りに",
+          "body": "静かな時間ほど、響きの行き先がよく見えていた。"
         },
         "final_nocturnal_devotion": {
-          "title": "月明かりの一音"
+          "title": "月明かりの一音",
+          "body": "夜にだけ帰れる旋律が、そっと灯り続けている。"
         },
         "final_nocturnal_endurance": {
-          "title": "月の下、鳴り止まず"
+          "title": "月の下、鳴り止まず",
+          "body": "夜と朝の境目にも、手の記憶は途切れなかった。"
         },
         "final_nocturnal_exploration": {
-          "title": "藍のさすらい"
+          "title": "藍のさすらい",
+          "body": "眠らない街の向こうから、まだ知らない音が届いてくる。"
         },
         "final_nocturnal_growth": {
-          "title": "夜を越えた先に"
+          "title": "夜を越えた先に",
+          "body": "暗がりで重ねた一打が、朝の輪郭を少しずつ変えた。"
         },
         "final_nocturnal_precision": {
-          "title": "夜更けの刻み"
+          "title": "夜更けの刻み",
+          "body": "静かなぶんだけ、ひとつのずれにも耳が気づいていた。"
         },
         "final_nocturnal_speed": {
-          "title": "夜を駆ける"
+          "title": "夜を駆ける",
+          "body": "速さは音を立てず、夜のページだけを先へ送っていく。"
         },
         "final_precision": {
-          "title": "澄んだ刻み"
+          "title": "澄んだ刻み",
+          "body": "余分な響きを手放すほど、自分の音がはっきりしていく。"
         },
         "final_precision_devotion": {
-          "title": "語らずに刻む"
+          "title": "語らずに刻む",
+          "body": "言葉にしないまま、手は決めた場所へ戻り続けた。"
         },
         "final_precision_endurance": {
-          "title": "ぶれない線"
+          "title": "ぶれない線",
+          "body": "一度の輝きより、崩れない手応えが長く残る。"
         },
         "final_precision_growth": {
-          "title": "刻んで登る"
+          "title": "刻んで登る",
+          "body": "測った一歩が重なるたび、進んだ距離が確かなものになる。"
         },
         "final_precision_speed": {
-          "title": "寸分の狂いもなく"
+          "title": "寸分の狂いもなく",
+          "body": "速い流れの中でも、置きたい場所は見失わなかった。"
         },
         "final_speed": {
-          "title": "風より速く"
+          "title": "風より速く",
+          "body": "拍を追うはずの足元が、いつの間にか先を走っていた。"
         },
         "final_speed_devotion": {
-          "title": "一瞬の再会"
+          "title": "一瞬の再会",
+          "body": "戻るたびに手が馴染み、同じ曲の景色が速く開いていく。"
         },
         "final_speed_endurance": {
-          "title": "疾風は続く"
+          "title": "疾風は続く",
+          "body": "風向きが変わっても、歩幅は自分のリズムを保っていた。"
         },
         "final_speed_exploration": {
-          "title": "次々と駆け抜けて"
+          "title": "次々と駆け抜けて",
+          "body": "ひとつの景色を抜けるころには、もう次の音が待っている。"
         },
         "final_speed_growth": {
-          "title": "雷を追い越す"
+          "title": "雷を追い越す",
+          "body": "速さが伸びたぶんだけ、前にあった境目も遠ざかった。"
         },
         "final_speed_precision": {
-          "title": "急がば崩さず"
+          "title": "急がば崩さず",
+          "body": "流れを速めても、置くべき一打は静かに残った。"
         }
       },
       "danPresentation": {
         "dan_kanzui_gold": {
-          "title": "高みで途切れず"
+          "title": "高みで途切れず",
+          "body": "高い場所まで進んでも、流れにはひとつの綻びもなかった。"
         },
         "dan_kanzui_red": {
-          "title": "一打も外さず"
+          "title": "一打も外さず",
+          "body": "長い道のりを通して、澄んだ音の輪郭を守り抜いた。"
         },
         "dan_fullgood_gold": {
-          "title": "曇りのない極み"
+          "title": "曇りのない極み",
+          "body": "どの一打にも余計な影がなく、鼓面がまっすぐ応えた。"
         },
         "dan_fullgood_red": {
-          "title": "濁りのない音"
+          "title": "濁りのない音",
+          "body": "雑味のない響きが重なり、静かな線を描いている。"
         },
         "dan_gold_pass": {
-          "title": "難所を抜けて"
+          "title": "難所を抜けて",
+      "body": "高い壁を越えたあとも、手の感覚は揺らがなかった。"
         },
         "dan_major_progress": {
-          "title": "一気に駆け上がる"
+          "title": "一気に駆け上がる",
+          "body": "離れていた高さが、重ねた一歩の先でひとつにつながった。"
         }
       },
       "danCompletion": {
