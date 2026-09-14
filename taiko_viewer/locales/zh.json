@@ -1235,7 +1235,7 @@
         },
         "final_archive_dan": {
           "title": "藏锋于旧卷",
-          "body": "卷子早已合上，里面的成绩不会因为今年而变旧。"
+          "body": "卷页已经合上，那一笔成绩仍清楚地留在里面。"
         },
         "final_archive_explorer": {
           "title": "寻声于四方",
@@ -1283,7 +1283,7 @@
         },
         "final_endurance_growth": {
           "title": "未歇直至破晓",
-          "body": "熬到天亮的人才看得见天色是怎么变的。"
+          "body": "时间把天色慢慢推亮，积累也终于显出了轮廓。"
         },
         "final_endurance_nocturnal": {
           "title": "长夜未央",
@@ -1323,11 +1323,11 @@
         },
         "final_growth_exploration": {
           "title": "越境观星",
-          "body": "走得比别人杂，才看见了别人没看见的那片天。"
+          "body": "路线没有收成一条线，视野却一点点铺开了。"
         },
         "final_growth_precision": {
           "title": "澄明上行",
-          "body": "变强的方式有很多种，你选了最慢也最干净的那种。"
+          "body": "把每一步放稳以后，向上的路也渐渐清晰。"
         },
         "final_growth_speed": {
           "title": "越岭而疾行",
@@ -1335,7 +1335,7 @@
         },
         "final_keeper": {
           "title": "留白待成章",
-          "body": "纸已经在桌上，落笔只是时间问题。"
+          "body": "这一页没有写满，正好还留着下一笔的位置。"
         },
         "final_nocturnal": {
           "title": "夜航星图",
@@ -1359,7 +1359,7 @@
         },
         "final_nocturnal_precision": {
           "title": "星夜校律",
-          "body": "夜里的你，比白天更挑剔。"
+          "body": "夜深以后，细小的偏差反而更容易被听见。"
         },
         "final_nocturnal_speed": {
           "title": "夜航掠影",
@@ -1387,11 +1387,11 @@
         },
         "final_speed": {
           "title": "疾风掠影",
-          "body": "别人在数拍子，拍子在你身后。"
+          "body": "拍子刚落下，下一步已经在前面等着。"
         },
         "final_speed_devotion": {
           "title": "一闪重逢",
-          "body": "反复回到同一首歌，一次比一次快。"
+          "body": "一次次回到同一首歌，熟悉的旋律也越来越轻快。"
         },
         "final_speed_endurance": {
           "title": "疾风长行",

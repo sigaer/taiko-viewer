@@ -91,3 +91,10 @@
 ## 审阅备注
 
 本报告面向人工审阅，表中每个 key 均列出 Title、Evidence type、旧/新中文 body、决策、日文 body、中文语义回译及两类重叠风险。未进行部署或缓存清理。
+
+## Copy-3C.1 修订
+
+- 更新 `verify_annual_contract.mjs`：契约现要求 45 个 zh、45 个 ja ordinary body，以及 6 个 zh/ja Dan body 全部存在，locale key 仍按 Python whitelist 校验。
+- 仅重写 8 条中文 ordinary body及其 8 条自然日文同步：`final_archive_dan`、`final_keeper`、`final_endurance_growth`、`final_growth_exploration`、`final_growth_precision`、`final_nocturnal_precision`、`final_speed`、`final_speed_devotion`。其它 37 条 ordinary 与 6 条 strongDan 未改。
+- 390×844 与 1440×900 静态 Chromium 复核：102/102 无横向或纵向溢出。
+- `npm run test:annual`、`npm run test:annual:period`、`npm run test:version`、`npm run build` 均通过；未 bump version、未部署。无关 dirty 文件保持原状。

@@ -510,9 +510,15 @@ for (const locale of ["zh", "ja"]) {
   }
 }
 assert.ok(Object.keys(annualLocales.zh.finalTitles).every((key) => annualLocales.zh.finalTitles[key].body), "zh FinalTitle bodies are incomplete");
+assert.ok(Object.keys(annualLocales.ja.finalTitles).every((key) => annualLocales.ja.finalTitles[key].body), "ja FinalTitle bodies are incomplete");
 for (const key of finalTitleKeys) {
-  assert.equal("body" in annualLocales.ja.finalTitles[key], false, `ja FinalTitle ${key} must not ship the zh body`);
+  assert.ok(annualLocales.zh.finalTitles[key].body, `zh FinalTitle ${key} is missing body`);
+  assert.ok(annualLocales.ja.finalTitles[key].body, `ja FinalTitle ${key} is missing body`);
   assert.notEqual(annualLocales.ja.finalTitles[key].title, annualLocales.zh.finalTitles[key].title, `ja FinalTitle ${key} is untranslated`);
+}
+for (const key of danPresentationKeys) {
+  assert.ok(annualLocales.zh.danPresentation[key].body, `zh Dan presentation ${key} is missing body`);
+  assert.ok(annualLocales.ja.danPresentation[key].body, `ja Dan presentation ${key} is missing body`);
 }
 assert.equal(annualLocales.zh.finalTitles.final_keeper.title, "留白待成章");
 assert.equal(annualLocales.ja.finalTitles.final_keeper.title, "余白の章");
