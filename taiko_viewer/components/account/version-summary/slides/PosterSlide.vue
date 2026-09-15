@@ -5,7 +5,7 @@ import type { AnnualReaction } from '~/types/annual-reaction';
 import AnnualPosterDanmaku from '../AnnualPosterDanmaku.vue';
 import AnnualShareGrid from '../AnnualShareGrid.vue';
 const LegacyPosterShare = defineAsyncComponent(() => import('./LegacyPosterShare.vue'));
-const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
+const props = withDefaults(defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean; profileFallback?: 'viewer' | 'summary' }>(), { profileFallback: 'viewer' });
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
 const reactionSync = ref(true);
@@ -126,7 +126,7 @@ const saveShareCard = async () => {
         <div class="poster-scene__send"><label class="poster-scene__sync"><input v-model="reactionSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label><button type="button" :disabled="sending || !reflection.trim()" @click="sendReaction">{{ sending ? localized('发送中…', '送信中…') : t('annualSummary.staticPoster.send') }}</button></div>
         <p v-if="reactionError || imageError || loadError || sendNotice || imageNotice" class="poster-scene__error" role="status">{{ reactionError || imageError || loadError || sendNotice || imageNotice }}</p>
       </div>
-      <AnnualShareGrid class="poster-scene__grid" :summary="summary" :locale="locale" />
+      <AnnualShareGrid class="poster-scene__grid" :summary="summary" :locale="locale" :profile-fallback="props.profileFallback" />
       <div class="poster-scene__actions"><button type="button" :disabled="savingImage" @click="saveShareCard">{{ savingImage ? localized('生成中…', '生成中…') : t('annualSummary.staticPoster.save') }}</button><label class="poster-scene__sync"><input v-model="imageSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label><button type="button" class="poster-scene__legacy" @click="openLegacy">{{ t('annualSummary.staticPoster.legacy') }}</button></div>
     </div>
     <dialog ref="legacyDialog" class="poster-scene__dialog"><button class="poster-scene__close" type="button" @click="legacyDialog?.close()">{{ t('annualSummary.staticPoster.close') }}</button><LegacyPosterShare v-if="legacyOpened" v-bind="props" /></dialog>

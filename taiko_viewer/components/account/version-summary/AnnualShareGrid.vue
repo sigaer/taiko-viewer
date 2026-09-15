@@ -2,11 +2,17 @@
 import { computed, reactive, ref, watch } from 'vue';
 import type { VersionSummaryViewModel } from '~/types/account-version-summary';
 import AnnualArtworkFallback from './AnnualArtworkFallback.vue';
-const props = defineProps<{ summary: VersionSummaryViewModel; locale: string; exportMode?: boolean }>();
+const props = defineProps<{ summary: VersionSummaryViewModel; locale: string; exportMode?: boolean; profileFallback?: 'viewer' | 'summary' }>();
 const failed = reactive<Record<string, boolean>>({});
 const profileLiveFallbackTried = ref(false);
+// `viewer` retries the signed-in person's own MyDon (the owner page and its export);
+// `summary` retries the summary's own route, so an operator previewing someone else's
+// report can never fall back to the operator's own profile card.
+const profileFallbackUrl = computed(() => props.profileFallback === 'summary' && props.summary.summaryId
+  ? `/api/admin/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/my-don`
+  : '/api/account/my-don');
 const profileImageUrl = computed(() => {
-  if (profileLiveFallbackTried.value && props.summary.profileCard?.myDonUrl?.startsWith('/api/account/annual-summaries/')) return '/api/account/my-don';
+  if (profileLiveFallbackTried.value && props.summary.profileCard?.myDonUrl?.startsWith('/api/')) return profileFallbackUrl.value;
   return props.summary.profileCard?.myDonUrl || '';
 });
 watch(() => props.summary, () => { Object.keys(failed).forEach(key => delete failed[key]); });
@@ -51,7 +57,7 @@ const stats = computed(() => {
         <div v-for="cell in cells" :key="cell.key" class="annual-share-grid__tile" :class="`annual-share-grid__tile--${cell.key}`" :aria-label="cell.label">
           <template v-if="cell.key === 'profile'">
             <div class="annual-share-grid__don">
-              <img v-if="profileImageUrl && !failed.profile" :src="profileImageUrl" alt="MyDon" @error="(event) => { if (summary.profileCard?.myDonUrl?.startsWith('/api/account/annual-summaries/') && !profileLiveFallbackTried) { profileLiveFallbackTried = true; } else { failed.profile = true; } }">
+              <img v-if="profileImageUrl && !failed.profile" :src="profileImageUrl" alt="MyDon" @error="() => { if (summary.profileCard?.myDonUrl?.startsWith('/api/') && !profileLiveFallbackTried) { profileLiveFallbackTried = true; } else { failed.profile = true; } }">
               <AnnualArtworkFallback v-else kind="don" label="MyDon" mark="" />
             </div>
             <div class="annual-share-grid__profile-caption">
