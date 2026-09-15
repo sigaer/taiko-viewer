@@ -104,6 +104,7 @@ const stats = computed(() => {
 .annual-share-grid__don>img{width:100%;height:100%;min-height:0;object-fit:contain}
 .annual-share-grid__profile-caption{position:absolute;inset:auto 0 0;background:#f7fbffed;display:flex;flex-direction:column;gap:.5cqw;padding:1cqw 1.2cqw;text-align:center;font-size:2.9cqw;line-height:1.2}
 .annual-share-grid__profile-caption strong,.annual-share-grid__profile-caption span{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow-wrap:anywhere}
-/* Two rows of three; the six items stretch to the grid's full usable width. */
-.annual-share-grid__stats{height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 1.5cqw;display:flex;flex-wrap:wrap;column-gap:5cqw;row-gap:2cqw;align-content:start}.annual-share-grid__stats div{flex:1 1 calc((100% - 10cqw)/3);max-width:calc((100% - 10cqw)/3);min-width:0}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
+/* Two rows of three tracks that span the full width; the outer tracks are anchored to the
+   card edges and the middle track takes the centre, so the row reads as space-between. */
+.annual-share-grid__stats{width:100%;height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 5cqw;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:min-content;column-gap:1cqw;row-gap:2cqw;align-content:start}.annual-share-grid__stats div{min-width:0}.annual-share-grid__stats div:nth-child(3n+2){justify-self:center;text-align:center}.annual-share-grid__stats div:nth-child(3n){justify-self:end;text-align:right}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
 </style>

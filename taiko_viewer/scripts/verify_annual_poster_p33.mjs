@@ -110,9 +110,15 @@ try {
     return {
       grid: rect(grid), stats: rect(stats), items,
       rowCount: rows.length, rowMembers: rows.map(y => items.filter(item => item.box.y === y).length),
-      columnWidth: items[0].box.w, columnGaps: [items[1].box.x - items[0].box.right, items[2].box.x - items[1].box.right].map(v => +v.toFixed(2)),
+      columnWidth: items[0].box.w,
+      // Column membership: the first item of each row anchors left, the second centres, the third right.
+      trackLefts: [items[0], items[3]].map(i => i.box.x),
+      trackRights: [items[2], items[5]].map(i => i.box.right),
+      centredOffsets: [items[1], items[4]].map(i => +(i.inkLeft + i.inkRight - 2 * (grid.getBoundingClientRect().x + grid.getBoundingClientRect().width / 2)).toFixed(2)),
+      alignments: [...stats.querySelectorAll(':scope > div')].map(node => getComputedStyle(node).textAlign),
       inkInsets: { left: +(Math.min(...items.map(i => i.inkLeft)) - grid.getBoundingClientRect().x).toFixed(2), right: +(grid.getBoundingClientRect().right - Math.max(...items.map(i => i.inkRight))).toFixed(2) },
       statsOverflow: stats.scrollWidth > stats.clientWidth + 1 || stats.scrollHeight > stats.clientHeight + 1,
+      statsDebug: { display: getComputedStyle(stats).display, padding: getComputedStyle(stats).padding, cols: getComputedStyle(stats).gridTemplateColumns, statsX: +stats.getBoundingClientRect().x.toFixed(2), gridX: +grid.getBoundingClientRect().x.toFixed(2), statsW: +stats.getBoundingClientRect().width.toFixed(2) },
       clipped: items.filter(item => item.clipped).map(item => item.label),
       docOverflow: document.documentElement.scrollWidth > window.innerWidth,
       titleValue: document.querySelector('.annual-share-grid__label--profile p')?.textContent?.trim(),
@@ -133,21 +139,28 @@ try {
     assert.deepEqual(m.rowMembers, [3, 3], `${width}x${height}: statistics must stay three columns per row`);
     assert.equal(m.items.length, 6, `${width}x${height}: six statistics`);
     assert.equal(m.statsOverflow, false, `${width}x${height}: stats wrapper overflow`);
+    assert.equal(m.statsDebug.display, 'grid', `${width}x${height}: the statistics must use a grid, not flex-wrap`);
+    assert.match(m.statsDebug.cols, /^(\S+\s+){2}\S+$/, `${width}x${height}: three equal tracks expected, got ${m.statsDebug.cols}`);
     assert.deepEqual(m.clipped, [], `${width}x${height}: clipped statistic`);
     assert.equal(m.docOverflow, false, `${width}x${height}: document overflow`);
     assert.equal(m.titleLabel, '称号展示', `${width}x${height}: label copy changed`);
     assert.equal(m.titleValue, BREAKTHROUGH_TITLE, `${width}x${height}: 称号展示 must show the breakthrough title`);
     assert.notEqual(m.titleValue, '八段', `${width}x${height}: 称号展示 must not show the dan grade`);
-    // Spread: the statistics must reach much further out than the previous 5.5cqw inset and
-    // must stay inside the card.
-    const expectedInset = +(0.015 * 363).toFixed(2);
-    assert.ok(m.inkInsets.left <= expectedInset + 1.5 && m.inkInsets.left >= 0, `${width}x${height}: left inset ${m.inkInsets.left}`);
-    assert.ok(m.inkInsets.right <= expectedInset + 1.5 && m.inkInsets.right >= 0, `${width}x${height}: right inset ${m.inkInsets.right}`);
-    assert.ok(m.columnGaps.every(gap => gap >= 10), `${width}x${height}: column gaps too tight: ${m.columnGaps}`);
-    // Every column is wider than the previous 3-track layout, which inset both sides by 5.5cqw
-    // and separated the tracks by 4cqw.
-    const previousTrack = (m.grid.w * (1 - 0.11) - 2 * 0.04 * m.grid.w) / 3;
-    assert.ok(m.columnWidth > previousTrack, `${width}x${height}: column width ${m.columnWidth} must exceed the previous ${previousTrack.toFixed(2)}px track`);
+    // The rows must span the full track width: track one starts at the card inset, track three
+    // ends at the opposite inset, and the middle track sits on the card centre.
+    // The three tracks span the card's usable width: the outer tracks reach the insets and the
+    // rows read as space-between.
+    const expectedInset = +(0.05 * m.grid.w).toFixed(2);
+    for (const [side, value] of [['left', m.inkInsets.left], ['right', m.inkInsets.right]]) {
+      assert.ok(value <= expectedInset + 1.5 && value >= expectedInset - 1.5, `${width}x${height}: ${side} inset ${value} (expected ~${expectedInset})`);
+    }
+    for (const left of m.trackLefts) assert.ok(Math.abs(left - (m.grid.x + expectedInset)) < 1.5, `${width}x${height}: first track must anchor left (${left})`);
+    for (const right of m.trackRights) assert.ok(Math.abs(right - (m.grid.right - expectedInset)) < 1.5, `${width}x${height}: third track must anchor right (${right})`);
+    assert.deepEqual(m.alignments, ['start', 'center', 'right', 'start', 'center', 'right'], `${width}x${height}: column alignment`);
+    for (const offset of m.centredOffsets) assert.ok(Math.abs(offset) < 2, `${width}x${height}: middle column must sit on the row centre (offset ${offset})`);
+    // Each track fills a third of the card's usable width (the gap between tracks is 1cqw).
+    const usable = m.grid.w - 2 * expectedInset;
+    assert.ok(m.columnWidth > (usable / 3) * 0.97, `${width}x${height}: track width ${m.columnWidth} must fill a third of ${usable.toFixed(2)}px`);
   }
 
   // 2. Japanese locale keeps the same geometry and the same resolved title.

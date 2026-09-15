@@ -423,15 +423,14 @@ for (const [file, token] of [
   assert.equal(source.includes("narrativeKey("), true, `${file} does not render typed narrative copy`);
 }
 
-const posterSlideSource = await read("components/account/version-summary/slides/LegacyPosterShare.vue");
-assert.equal(posterSlideSource.includes("createShareAndPoster"), false, "share creation and poster rendering are still one action");
-assert.equal(posterSlideSource.includes("const createShare ="), true, "share creation action is missing");
-assert.equal(posterSlideSource.includes("const generatePoster ="), true, "poster generation action is missing");
-assert.equal(/downloadPoster\(\).*downloadFallback|downloadPoster\(\)\) ElMessage\.success\(t\("annualSummary\.share\.downloadFallback"\)\)/s.test(posterSlideSource), true, "Web Share has no PNG download fallback");
-assert.equal(posterSlideSource.includes('v-if="posterUrl" type="button" @click="downloadPoster"'), true, "generated PNG has no independent save action");
-for (const match of posterSlideSource.matchAll(/min-height:\s*([0-9.]+)px/gi)) {
-  assert.ok(Number(match[1]) >= 44, `poster action is shorter than 44px: ${match[0]}`);
-}
+// The legacy "更多分享方式 · 30 天链接" entry was removed: the Poster saves the share card
+// directly and keeps no secondary share dialog.
+const posterSlideSource = await read("components/account/version-summary/slides/PosterSlide.vue");
+assert.equal(posterSlideSource.includes("LegacyPosterShare"), false, "the legacy share dialog is still mounted");
+assert.equal(posterSlideSource.includes("poster-scene__legacy"), false, "the legacy share entry is still rendered");
+assert.equal(posterSlideSource.includes("annualSummary.staticPoster.legacy"), false, "the legacy share label is still referenced");
+assert.equal(await exists("components/account/version-summary/slides/LegacyPosterShare.vue"), false, "the legacy share component still exists");
+assert.equal(posterSlideSource.includes("saveShareCard"), true, "the share-card save action is missing");
 
 const annualPageSource = await read("pages/account/version-summary.vue");
 assert.equal(annualPageSource.includes("jobStatus.status"), false, "raw annual job status is exposed to users");

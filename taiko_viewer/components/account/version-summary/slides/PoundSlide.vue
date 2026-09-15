@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import StorySlideShell from "../StorySlideShell.vue";
+import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
 import { getPoundSpeedCopy } from "~/utils/annualCopy";
 
 const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number; pageTotal: number; active: boolean; reducedMotion: boolean }>();
@@ -12,6 +13,10 @@ const song = computed(() => props.summary.pound?.topSong);
 const cityLoaded = ref(false);
 const noiseLoaded = ref(false);
 const recordLoaded = ref(false);
+// The top-song cover can be absent (or its remote thumbnail can fail); either way the
+// record centre must fall back to the designed placeholder instead of a broken image.
+const coverLoaded = ref(false);
+const coverFailed = ref(false);
 const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && recordLoaded.value);
 </script>
 
@@ -40,8 +45,21 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
         <div class="vinyl-stack__record">
           <img class="vinyl-stack__record-image" src="/annual/pound/record-player.png" alt="" @load="recordLoaded = true">
           <div class="pound-poster__center">
-            <img v-if="song?.coverUrl" :src="song.coverUrl" :alt="song.name || ''" loading="lazy">
-            <span v-else>♪</span>
+            <img
+              v-if="song?.coverUrl && !coverFailed"
+              :src="song.coverUrl"
+              :alt="song.name || ''"
+              :class="{ 'is-loaded': coverLoaded }"
+              loading="lazy"
+              @load="coverLoaded = true"
+              @error="coverFailed = true"
+            >
+            <AnnualArtworkFallback
+              v-if="!song?.coverUrl || coverFailed"
+              class="pound-poster__center-fallback"
+              :label="t('annualSummary.common.defaultCover')"
+              mark="2026"
+            />
           </div>
         </div>
       </div>
@@ -71,6 +89,7 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 .pound-poster__center { position: absolute; left: 50%; top: 31.5%; transform: translate(-50%, -50%); width: 43.5vw; aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #111; box-shadow: 0 0 0 7px rgba(10, 8, 12, 0.55), 0 0 0 9px rgba(255, 255, 255, 0.16), 0 12px 26px rgba(0, 0, 0, 0.4); }
 .pound-poster__center img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pound-poster__center span { font: 800 clamp(1.6rem, 6vw, 2.4rem) / 1 var(--viewer-display-font); color: #fff; }
+.pound-poster__center-fallback { position: absolute; inset: 0; }
 
 .is-empty .pound-poster__speed strong { color: #ffffffb8; }
 @media (max-height: 720px) {
