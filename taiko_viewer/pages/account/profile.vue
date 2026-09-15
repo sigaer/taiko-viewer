@@ -14,6 +14,7 @@ definePageMeta({
   middleware: "account-auth",
   pageTitleKey: "account.profile",
   pageDescKey: "page.account.profile.desc",
+  hidePageDescription: true,
   navKey: "/account/profile",
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
@@ -161,12 +162,14 @@ const copy = computed(() =>
   locale.value === "ja"
     ? {
         uploadAvatar: "アバターをアップロード",
+        changeAvatar: "アバターを変更",
         resetAvatar: "デフォルトに戻す",
         emailVerified: "メール認証",
         taikoVerified: "ドンダーひろば ID 認証",
         verified: "認証済み",
         unverified: "未認証",
         currentBinding: "現在の連携 ID",
+        taikoIdLabel: "ドンダー ID",
         currentTitle: "現在の称号",
         createdAt: "登録日時",
         unbound: "未連携",
@@ -277,12 +280,14 @@ const copy = computed(() =>
       }
     : {
         uploadAvatar: "上传头像",
+        changeAvatar: "更换头像",
         resetAvatar: "恢复默认",
         emailVerified: "邮箱认证",
         taikoVerified: "鼓众 ID 认证",
         verified: "已验证",
         unverified: "未验证",
         currentBinding: "当前绑定 ID",
+        taikoIdLabel: "鼓众 ID",
         currentTitle: "当前称号",
         createdAt: "注册时间",
         unbound: "未绑定",
@@ -1002,9 +1007,14 @@ const removeQqBinding = async () => {
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   :on-change="handleAvatarSelect"
                 >
-                  <el-button :loading="uploading">{{ copy.uploadAvatar }}</el-button>
+                  <el-button class="avatar-upload-button" :loading="uploading">
+                    <span class="avatar-upload-label avatar-upload-label--desktop">{{ copy.uploadAvatar }}</span>
+                    <span class="avatar-upload-label avatar-upload-label--mobile">{{ copy.changeAvatar }}</span>
+                  </el-button>
                 </el-upload>
-                <el-button plain :loading="removingAvatar" @click="removeAvatar">{{ copy.resetAvatar }}</el-button>
+                <el-button class="avatar-reset-button" plain :loading="removingAvatar" @click="removeAvatar">
+                  {{ copy.resetAvatar }}
+                </el-button>
               </div>
             </div>
             <div class="profile-info">
@@ -1021,15 +1031,19 @@ const removeQqBinding = async () => {
                 </div>
               </div>
               <div class="meta-grid">
-                <div>
-                  <span>{{ copy.currentBinding }}</span>
-                  <strong>{{ profile.currentBinding?.displayName || profile.currentBinding?.taikoId || copy.unbound }}</strong>
+                <div class="meta-item meta-item--binding">
+                  <span class="binding-label binding-label--desktop">{{ copy.currentBinding }}</span>
+                  <span class="binding-label binding-label--mobile">{{ copy.taikoIdLabel }}</span>
+                  <strong>
+                    <span class="binding-value binding-value--desktop">{{ profile.currentBinding?.displayName || profile.currentBinding?.taikoId || copy.unbound }}</span>
+                    <span class="binding-value binding-value--mobile">{{ profile.currentBinding?.taikoId || profile.currentBinding?.displayName || copy.unbound }}</span>
+                  </strong>
                 </div>
-                <div>
+                <div class="meta-item meta-item--title">
                   <span>{{ copy.currentTitle }}</span>
                   <strong>{{ profile.currentBinding?.currentTitle || "-" }}</strong>
                 </div>
-                <div>
+                <div class="meta-item meta-item--created">
                   <span>{{ copy.createdAt }}</span>
                   <strong>{{ formatDateTime(profile.user.createdAt) }}</strong>
                 </div>
@@ -1370,6 +1384,12 @@ const removeQqBinding = async () => {
 .avatar-actions {
   display: grid;
   gap: 10px;
+}
+
+.avatar-upload-label--mobile,
+.binding-value--mobile,
+.binding-label--mobile {
+  display: none;
 }
 
 .profile-info h2 {
@@ -1751,7 +1771,150 @@ const removeQqBinding = async () => {
 
 @media (max-width: 720px) {
   .profile-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: 84px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+  }
+
+  .profile-avatar {
+    width: 84px !important;
+    height: 84px !important;
+    line-height: 84px !important;
+    font-size: 28px;
+  }
+
+  .avatar-block {
+    gap: 8px;
+    justify-items: stretch;
+  }
+
+  .avatar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 8px;
+  }
+
+  .avatar-actions :deep(.el-upload) {
+    display: inline-flex;
+  }
+
+  .avatar-upload-button {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .avatar-reset-button {
+    min-height: 32px;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: var(--el-text-color-secondary);
+    font-size: 12px;
+  }
+
+  .avatar-upload-label--desktop,
+  .binding-value--desktop,
+  .binding-label--desktop {
+    display: none;
+  }
+
+  .avatar-upload-label--mobile,
+  .binding-value--mobile,
+  .binding-label--mobile {
+    display: inline;
+  }
+
+  .profile-info h2 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .profile-info p {
+    margin: 4px 0 9px;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .status-list {
+    gap: 6px;
+    margin-bottom: 9px;
+  }
+
+  .status-chip {
+    min-width: 0;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .status-chip.ok {
+    border-color: rgba(77, 154, 95, 0.35);
+    background: rgba(121, 197, 135, 0.08);
+  }
+
+  .status-chip.ok::before {
+    content: "✓";
+    color: #3f8e50;
+    font-weight: 800;
+  }
+
+  .status-chip.pending {
+    border-color: rgba(196, 132, 32, 0.45);
+    background: rgba(233, 174, 77, 0.1);
+  }
+
+  .status-chip.pending::before {
+    content: "!";
+    color: #a86c16;
+    font-weight: 800;
+  }
+
+  .status-chip span,
+  .status-chip strong {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .meta-grid {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .meta-grid .meta-item--title,
+  .meta-grid .meta-item--created {
+    display: none;
+  }
+
+  .meta-grid .meta-item--binding {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .meta-grid .meta-item--binding > span {
+    font-size: 12px;
+  }
+
+  .meta-grid .meta-item--binding > strong {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .binding-card,
+  .qq-card {
+    scroll-margin-top: 16px;
   }
 
   .meta-grid {
