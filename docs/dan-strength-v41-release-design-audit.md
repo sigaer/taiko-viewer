@@ -78,7 +78,7 @@ strongDan = currentVersionBest exists AND currentVersionBest.strength >= thresho
 | 超人 | gold, red | 12 |
 | 达人 | gold_rainbow | 1 |
 
-与产品预期一致：七/八段只有 gold_rainbow 能进（八段金虹 strength 1.89 < 1.90，实测 0 人）；九段 gold / gold_rainbow；十段及以上任意有效合格。
+与产品预期一致：七/八段只有 gold_rainbow 能进（V4 八段金虹约 **2.76**，理论上可进入 gate；当前 corpus 为 0 人只是尚无实际 bucket population，与阈值无关）；九段 gold / gold_rainbow；十段及以上任意有效合格。
 
 ## 7. Title bucket（dan × family，dan 不合并）
 
@@ -104,7 +104,7 @@ strongDan = currentVersionBest exists AND currentVersionBest.strength >= thresho
 ## 10. Overlay 影响（45-key ordinary FinalTitle 不改）
 
 - 旧 strongDan 覆盖：26；新覆盖：124；交集 **10**；**新增 114**；**退出 16**
-- 退出的 16 人全部是「八段 金合格/金粹金合格」型（八段最高 strength 1.73 < 1.90），他们在旧规则下靠 observed event 拿到 presentation，在新 gate 下不再达标：
+- 退出的 16 人**主要为八段金系**（八段 金合格 / 金粹金合格），**也包含九段赤系**（如 `61767489` 九段 · 赤合格金粹 1.69、`73920246` 九段 · 赤合格金粹）；共同特征是 **currentVersionBest strength < 1.90**。他们在旧规则下靠 observed event 拿到 presentation，在新 gate 下不再达标：
 
 | uid | V4 currentVersionBest | strength |
 |---|---|---|
