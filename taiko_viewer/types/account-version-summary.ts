@@ -124,6 +124,12 @@ export type VersionSummaryFinalTitle = {
   evidenceKey: string;
   evidenceValue: unknown;
   evidenceLabel: string;
+  /** V4.1 strongDan overlay is active (current-version standing presentation) */
+  standing?: boolean;
+  /** Resolved standing bucket identity, e.g. `standing_19_gold_rainbow` */
+  standingKey?: string;
+  /** `current_version` for the standing overlay */
+  standingProvenance?: string;
 };
 
 export type VersionSummaryPoster = {

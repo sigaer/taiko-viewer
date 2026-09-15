@@ -103,6 +103,40 @@ const DAN_PRESENTATION_EVIDENCE = new Set([
   "dan_major_progress"
 ]);
 
+// V4.1 strongDan standing overlay: the generator resolves dan x family from the
+// current-version levelList and emits `standingPresentation`. When it is present the
+// Finale / Poster / share card all render this one resolved presentation; the ordinary
+// 45-key FinalTitle stays untouched for accounts below the gate.
+type StandingPresentationPayload = {
+  danId: number;
+  mark: number;
+  family: string;
+  titleKey?: string;
+  evidenceText?: string;
+  provenance?: string;
+  strength?: number;
+  threshold?: number;
+};
+
+const resolveStandingPresentation = (
+  value: unknown,
+  t: (key: string, params?: Record<string, unknown>) => string
+): { title: string; body: string; evidenceText: string; evidenceKey: string; themeKey: string; source: StandingPresentationPayload } | null => {
+  const payload = record(value) as unknown as StandingPresentationPayload;
+  const danId = Number(payload?.danId);
+  const family = stringValue(payload?.family);
+  if (!Number.isInteger(danId) || danId < 12 || danId > 19 || !family) return null;
+  const fallbackKey = `annualSummary.danPresentation.standing.${danId}.${family}`;
+  const key = stringValue(payload?.titleKey) || `standing_${danId}_${family}`;
+  const title = t(`${fallbackKey}.title`);
+  const body = t(`${fallbackKey}.body`);
+  // A missing locale bucket must surface loudly instead of silently reusing legacy copy.
+  if (!title || title === `${fallbackKey}.title` || !body || body === `${fallbackKey}.body`) return null;
+  const evidenceText = stringValue(payload?.evidenceText);
+  if (!evidenceText) return null;
+  return { title, body, evidenceText, evidenceKey: key, themeKey: family, source: payload };
+};
+
 type FinalEvidenceContext = {
   t: (key: string, params?: Record<string, unknown>) => string;
   locale: "zh" | "ja";
@@ -174,7 +208,7 @@ const renderFinalEvidence = (
   // vue-i18n performs the named interpolation itself: `{dan}` / `{milestones}` / ...
   const text = t(templateKey, params);
   const labelKey = isDan
-    ? (key.startsWith("dan_standing_") ? "danHistory" : "dan")
+    ? (key.startsWith("dan_standing_") || key.startsWith("standing_") ? "danHistory" : "dan")
     : (key === "sparse_basic" ? "sparse" : "personality");
   return { label: t(`annualSummary.finalEvidence.labels.${labelKey}`), text };
 };
@@ -520,6 +554,9 @@ export const normalizeAnnualSummary = (
   const finalTitleKey = stringValue(finalRaw.titleKey, "encouragement");
   const finalEvidenceKey = stringValue(finalRaw.evidenceKey, "mode");
   const finalEvidenceValue = finalRaw.evidenceValue;
+  // strongDan overlay (V4.1): when the generator resolved a current-version standing at
+  // or above the frozen gate, it replaces title / evidence / body for the display surfaces.
+  const standingPresentation = resolveStandingPresentation(finalRaw.standingPresentation, t);
   // Copy-3B: the Finale reads the curated `finalTitles` dictionary. Strong Dan results
   // additionally switch the *presentation* title (same titleKey, deterministic mapping
   // from the evidence key) -- the Poster consumes the resolved title so both stay equal.
@@ -657,6 +694,19 @@ export const normalizeAnnualSummary = (
   finalTitle.evidenceText = finalEvidence.text || "";
   finalTitle.narrativeBody = narrativeBody;
   finalTitle.body = finalEvidence.text ? `${finalEvidence.text}｜${narrativeBody}` : narrativeBody;
+  if (standingPresentation) {
+    finalTitle.standing = true;
+    finalTitle.standingKey = standingPresentation.evidenceKey;
+    finalTitle.standingProvenance = stringValue(standingPresentation.source.provenance, "current_version");
+    finalTitle.title = standingPresentation.title;
+    finalTitle.evidenceKey = standingPresentation.evidenceKey;
+    finalTitle.evidenceValue = standingPresentation.source;
+    finalTitle.evidenceLabel = t("annualSummary.finalEvidence.labels.danHistory");
+    finalTitle.evidenceText = standingPresentation.evidenceText;
+    finalTitle.narrativeBody = standingPresentation.body;
+    finalTitle.body = standingPresentation.body;
+    finalTitle.themeKey = standingPresentation.themeKey;
+  }
   if (keyword) keyword.body = copy.keyword.body;
 
   return {
