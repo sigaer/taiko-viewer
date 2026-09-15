@@ -81,7 +81,9 @@ const stats = computed(() => {
 .annual-share-grid__labels{position:absolute;left:0;right:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));text-align:center}
 .annual-share-grid__labels--top{top:3cqw}
 .annual-share-grid__labels--bottom{top:102.3cqw}
-.annual-share-grid__label{min-width:0;padding:0 3cqw}
+.annual-share-grid__label{min-width:0;padding-inline:5cqw;display:flex;flex-direction:column}
+.annual-share-grid__label:nth-child(odd){align-items:flex-start;text-align:left}
+.annual-share-grid__label:nth-child(even){align-items:flex-end;text-align:right}
 .annual-share-grid__label h2{margin:0;font-size:5.8cqw;line-height:1.2;font-weight:900;letter-spacing:-.04em}
 .annual-share-grid__label p{margin:1.5cqw 0 0;font-size:3.5cqw;line-height:1.3;font-weight:700;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .annual-share-grid__labels--bottom p{margin-top:1cqw;-webkit-line-clamp:1}
@@ -94,5 +96,5 @@ const stats = computed(() => {
 .annual-share-grid__don>img{width:100%;height:100%;min-height:0;object-fit:contain}
 .annual-share-grid__profile-caption{position:absolute;inset:auto 0 0;background:#f7fbffed;display:flex;flex-direction:column;gap:.5cqw;padding:1cqw 1.2cqw;text-align:center;font-size:2.9cqw;line-height:1.2}
 .annual-share-grid__profile-caption strong,.annual-share-grid__profile-caption span{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow-wrap:anywhere}
-.annual-share-grid__stats{height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 4.5cqw;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2cqw 3cqw;align-items:start}.annual-share-grid__stats div{min-width:0}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
+.annual-share-grid__stats{height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 5.5cqw;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:4cqw;row-gap:2cqw;align-items:start}.annual-share-grid__stats div{min-width:0}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
 </style>
