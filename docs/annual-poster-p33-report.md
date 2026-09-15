@@ -135,3 +135,53 @@
 新增 `tests/fixtures/annual-summary.sample.json`：真实线上 summary 载荷（昵称等身份信息已脱敏），作为三个页面校验脚本的共用夹具，避免再用人工拼装的假数据。
 
 发布：`8219438 0.65.0 后台年度报告改为站内预览打开`，标准部署脚本 exit 0，线上 appVersion `0.65.0`；无关的 `title_song_relations.json` 依旧可逆隔离并原样恢复（SHA-256 一致）。
+
+## 8. P3.4：统计栅格 / Pound 曲绘回退 / 移除「更多分享方式」（`0.66.0`）
+
+### 8.1 Poster 六项统计改为真正的 Grid
+
+上一版用 `flex-wrap` + 计算宽度，DevTools 里仍是 flex 路径。本轮按产品目标改为 Grid：
+
+```css
+.annual-share-grid__stats{
+  width:100%; height:24.73%; box-sizing:border-box; padding:4cqw 5cqw;
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:min-content; column-gap:1cqw; row-gap:2cqw; align-content:start;
+}
+.annual-share-grid__stats div:nth-child(3n+2){ justify-self:center; text-align:center }
+.annual-share-grid__stats div:nth-child(3n){ justify-self:end; text-align:right }
+```
+
+三列明确占满可用宽度：第一列 `start`、第二列 `center`、第三列 `right`，形成 space-between 观感；结构仍是 2 行 × 3 列，统计文本与数据来源未改。实测（`scripts/verify_annual_p34.mjs`）：
+
+| 视口 | 卡片宽 | 列宽 | 左右 inset | 列对齐 | 行结构 |
+|---|---|---|---|---|---|
+| 414×896 | 363 | 106.48 | 18.14 / 18.14 | start / center / right | 2×3 |
+| 360×740 | 320 | 93.88 | 16 / 16 | start / center / right | 2×3 |
+| 导出 1080×1648 | 1080 | 316.80 | 54 / 54 | start / center / right | 2×3 |
+
+全部无溢出、无裁切、无横向滚动。
+
+### 8.2 Pound 页默认曲绘加载失败
+
+`PoundSlide.vue` 的唱片中心此前只写了 `v-if="song?.coverUrl"` / `v-else ♪`：远程缩略图不存在时（`/cover/thumb/400/{id}.webp` 有大量曲目返回 404，例如 300/600/800/1000/1405）就是一个破图，而没有曲目时只有一个 `♪`。
+
+现在与全站其它年度页面一致：`coverUrl` 存在时渲染真实封面并带 `@error` 回退，缺失或加载失败时渲染 `AnnualArtworkFallback`（设计占位图，2026 标记）。实测：封面 404 → 占位图出现且无破图；无封面 → 占位图出现；封面正常 → 真实封面显示且不显示占位图。
+
+### 8.3 移除 Poster 页「更多分享方式 · 30 天链接」
+
+- `PosterSlide.vue` 删除该按钮、`<dialog>` 弹层、`openLegacy`/`legacyOpened`/`legacyDialog` 状态、`poster-scene__legacy` 与 `poster-scene__dialog`/`poster-scene__close` 样式，以及 `LegacyPosterShare` 的异步引入
+- 删除组件 `components/account/version-summary/slides/LegacyPosterShare.vue`
+- 删除仅被该弹层使用的文案键 `annualSummary.staticPoster.legacy` / `.close`（zh、ja）
+- 保留：`保存图片` + `同步分享到社区`，以及公开分享页 `/annual/share/[token]` 与其服务端路由（仍有 `annualSummary.share.*` 文案在用）
+
+`scripts/verify_annual_contract.mjs` 中原先针对 `LegacyPosterShare.vue` 的断言已替换为「该组件与入口必须不存在」，`npm run test:annual` 通过。页面实测：`.poster-scene__actions` 仅剩 `保存图片`，无 legacy 按钮、无 dialog、页面文本不含「更多分享方式」。
+
+### 8.4 上一轮两项复核
+
+- 「称号展示」仍取自突破页主标题：同一份视图模型下，breakthrough 页标题与 Poster 该字段完全一致（默认 `疾行守衡`，替换为 `一年一鼓，一路同行` 后两者同步变化），且不等于 `八度` 之类的段位值
+- HighScore 页分数 `1,002,340` 保留，页面文本不含 `SCORE`
+
+### 8.5 发布
+
+`4204eb2 0.66.0 修正年度海报统计栅格、Pound 曲绘回退并移除更多分享方式`，标准部署脚本 exit 0，线上 appVersion `0.66.0`；产物核验：`annual-share-grid__stats` 为 grid 规则、`pound-poster__center-fallback` 已进入客户端包、构建产物中不再有 `LegacyPosterShare` 与「更多分享方式」文案。无关的 `title_song_relations.json` 照例可逆隔离并原样恢复（SHA-256 一致）。
