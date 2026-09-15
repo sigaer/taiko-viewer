@@ -117,3 +117,21 @@
 
 说明：报告页自身能渲染这点已用真实数据离线复现；用户描述的「空白错误页」对应的是接口失败时的错误态，本次已让该状态可读、可重试、可退出。若线上仍出现空白，请提供该次点击的时间点，我可以按 nginx 日志继续定位具体是 404（总结不存在）还是文件缺失（410）。
 
+
+## 7. 追加：后台年度报告入口改为站内预览（`0.65.0`）
+
+用户在 `0.64.1` 上线后反馈问题依旧，并明确要求：不必跳转导航，做成和「无 viewer 账号」一样的预览也可以。
+
+处理：`pages/admin/taiko/annual-summaries.vue` 不再对任何报告做路由跳转。
+
+- 「查看报告」：`openPreview(summaryId)` 直接拉取 `GET /api/admin/annual-summaries/:summaryId` 并把结果放进 `preview`，由页内同一套 `StoryPlayer` 预览渲染——与「仅预览」路径完全一致，不经过任何路由分包，因此弱网下不会再出现「点了没反应」。
+- 「生成报告 / 强制重建」：任务完成后同样走 `openPreview`，不再跳转。
+- 预览层补回缺失的样式：固定全屏覆盖（`position: fixed; z-index: 2000`），左上角固定「返回管理」按钮，关闭时把 `previewStarted` 复位。此前页内预览（taiko ID 预览路径）只是页面流里的一个裸 `div`，既没有覆盖层样式也没有可靠的关闭入口。
+- 预览使用 `profile-fallback="summary"`，操作者不会看到自己的资料卡头像。
+- `pages/admin/taiko/annual-summaries/[summaryId].vue` 予以保留：直接访问该 URL 时仍可打开报告，失败时显示错误文案 + `重新加载` / `返回管理`。
+
+验证：`scripts/verify_admin_annual_report.mjs` 现为 5 个离线渲染用例 + 入口源码断言，其中断言「列表页源码不得出现 `navigateTo`」「必须通过 `openPreview` 打开报告」「预览必须带 `profile-fallback="summary"`」；`P3.3 poster layout verification PASS (9 cases)` 同时通过。
+
+新增 `tests/fixtures/annual-summary.sample.json`：真实线上 summary 载荷（昵称等身份信息已脱敏），作为三个页面校验脚本的共用夹具，避免再用人工拼装的假数据。
+
+发布：`8219438 0.65.0 后台年度报告改为站内预览打开`，标准部署脚本 exit 0，线上 appVersion `0.65.0`；无关的 `title_song_relations.json` 依旧可逆隔离并原样恢复（SHA-256 一致）。
