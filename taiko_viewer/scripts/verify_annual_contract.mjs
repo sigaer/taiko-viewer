@@ -337,7 +337,17 @@ for (const locale of [zh, ja]) {
       for (const [variant, copy] of entries) {
         for (const field of fields) {
           assert.equal(typeof copy[field], "string", `missing narrative copy: ${page}/${archetype}/${variant}/${field}`);
-          assert.ok(copy[field].length > 3, `placeholder narrative copy: ${page}/${archetype}/${variant}/${field}`);
+          // Copy-3B P2: the weekday headline is "one conclusion on one line", so its
+          // trailing clause is intentionally empty; every other narrative field must
+          // stay substantive.
+          const mayBeEmpty = page === "weekday" && (field === "titleAfter" || field === "titleBefore");
+          assert.ok(mayBeEmpty || copy[field].length > 3, `placeholder narrative copy: ${page}/${archetype}/${variant}/${field}`);
+          if (page === "weekday" && field === "titleBefore") {
+            // P2.1: the day is interpolated between titleBefore/titleAfter, so the
+            // headline only has to carry text on one of the two sides.
+            const headline = `${copy.titleBefore}${copy.titleAfter}`.trim();
+            assert.ok(headline.length > 0, `weekday headline is empty: ${archetype}/${variant}`);
+          }
         }
       }
     }
@@ -557,5 +567,54 @@ for (const key of finalTitleKeys) assert.ok(whitelistBlock.includes(`"${key}"`),
 assert.ok(danModelSource.includes('return mark in (2, 5)') === false, "kanzui helper must live in dan_state");
 const danStateSource = await read(`${pluginRoot}/dan_state.py`);
 assert.ok(danStateSource.includes("return mark in (2, 5)"), "kanzui is not defined as mark 2 or 5");
+
+// ---------------------------------------------------------------- Copy-3B UX P2
+for (const [locale, bundle] of Object.entries({ zh, ja })) {
+  // D: 主 Header 只表达一个结论 → titleAfter 为空，titleBefore 足够短（390px 单行）
+  const weekday = bundle.narrative.weekday;
+  for (const archetype of Object.keys(weekday)) {
+    for (const [variant, copy] of Object.entries(weekday[archetype])) {
+      // P2/P2.1: 主 Header 只表达一个结论 → 日期两侧最多只有一侧带文字（另一侧为空），
+      // 且带文字的一侧必须短到能在 390px 单行显示。
+      const before = copy.titleBefore.trim();
+      const after = copy.titleAfter.trim();
+      assert.ok(before.length > 0 || after.length > 0, `${locale}: weekday headline is empty (${archetype}/${variant})`);
+      // 日期（2 字）插在中间，因此整句长度 = before + day + after，必须能单行显示；
+      // 尾句只能是短修饰，不能重新变成第二个分句（P2 的问题就是尾句过长）。
+      const tailLimit = locale === "zh" ? 6 : 8;
+      const totalLimit = locale === "zh" ? 14 : 15;
+      if (before.length > 0 && after.length > 0) {
+        assert.ok(after.length <= tailLimit, `${locale}: weekday headline tail is too long (${archetype}/${variant}: ${after})`);
+      }
+      assert.ok(before.length + 2 + after.length <= totalLimit, `${locale}: weekday headline too long for one line (${archetype}/${variant})`);
+    }
+  }
+}
+// P2.1: "工作日" 文案断言该天是工作日，因此 workday archetype 不能显示周六/周日。
+const { weekdayHeadlineIndex } = await import(resolve(root, "utils/annualNarrative.ts"));
+const workdayMixed = [4, 4, 4, 4, 4, 5, 0]; // 周六单日最高，但工作日占比 80% → workday archetype
+assert.equal(weekdayHeadlineIndex("workday", workdayMixed, 5), 0, "workday headline must fall back to the busiest working day");
+assert.equal(weekdayHeadlineIndex("workday", [0, 0, 3, 0, 1, 6, 6], 5), 2, "workday headline must pick the busiest Mon-Fri day");
+assert.equal(weekdayHeadlineIndex("workday", [0, 0, 0, 0, 0, 3, 3], 5), 5, "workday without working-day plays keeps the real top day");
+assert.equal(weekdayHeadlineIndex("weekend", workdayMixed, 5), 5, "non-workday archetypes keep the real top day");
+assert.equal(weekdayHeadlineIndex("balanced", workdayMixed, 5), 5, "non-workday archetypes keep the real top day");
+assert.equal(weekdayHeadlineIndex("anchored", workdayMixed, 5), 5, "non-workday archetypes keep the real top day");
+const weekdayScene = await read("components/account/version-summary/AnnualWeekdayForestScene.vue");
+assert.ok(weekdayScene.includes("weekdayHeadlineIndex(narrative.value.archetype"), "weekday scene does not apply the workday headline rule");
+
+const profilePage = await read("pages/account/profile.vue");
+assert.ok(profilePage.includes("needsBindingOnboarding"), "unbound first-screen CTA is missing");
+assert.ok(profilePage.includes("onboarding-card"), "unbound first-screen CTA markup is missing");
+assert.ok(profilePage.includes("focusBindingForm"), "binding CTA does not reveal the real binding form");
+assert.ok(profilePage.includes("pendingBoxRef"), "challenge confirmation scroll target is missing");
+assert.ok(profilePage.includes("revealElement("), "state-change scroll helper is missing");
+assert.equal(/scrollTo\(\s*\d/.test(profilePage), false, "hard-coded pixel scrolling is not allowed");
+const finaleSlide = await read("components/account/version-summary/slides/AnnualFinaleSlide.vue");
+assert.ok(finaleSlide.includes("annual-finale-scene__evidence"), "Finale evidence line is missing");
+assert.ok(finaleSlide.includes("finalTitle.narrativeBody"), "Finale narrative body is not separated from evidence");
+assert.equal(finaleSlide.includes("｜"), false, "Finale must not join evidence and body with a separator");
+const annualSource = await read("utils/annualSummary.ts");
+assert.ok(annualSource.includes("finalTitle.narrativeBody = narrativeBody"), "resolver does not expose the narrative body");
+assert.ok(annualSource.includes("finalTitle.evidenceText = finalEvidence.text"), "resolver does not expose the evidence text");
 
 process.stdout.write(JSON.stringify({ ok: true, pageCount: actualPages.length, locales: ["zh", "ja"], schemaVersion: 4 }) + "\n");

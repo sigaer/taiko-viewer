@@ -1045,47 +1045,47 @@
         }
       }
       },
-      "weekday": {
-      "anchored": {
-        "v1": {
-          "titleBefore": "一週間でいちばん決まっているのは",
-          "titleAfter": "、ほぼ約束みたいに"
+            "weekday": {
+        "anchored": {
+          "v1": {
+            "titleBefore": "決まった曜日は",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "会いに行く日は",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "会いに行く日は",
-          "titleAfter": "、ほかの日は偶然です"
-        }
-      },
-      "weekend": {
-        "v1": {
-          "titleBefore": "一週間でいちばん賑わうのは",
-          "titleAfter": "、週末が先に鳴る"
+        "weekend": {
+          "v1": {
+            "titleBefore": "いちばん賑わうのは",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "週末に鳴るのは",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "週末にいちばん鳴るのは",
-          "titleAfter": "、土日はいつも濃い"
-        }
-      },
-      "workday": {
-        "v1": {
-          "titleBefore": "平日でいちばん集中するのは",
-          "titleAfter": "、仕事のあとの一息"
+        "workday": {
+          "v1": {
+            "titleBefore": "平日に鳴るのは",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "一週間の重心は",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "一週間の重心は",
-          "titleAfter": "、平日にあります"
+        "balanced": {
+          "v1": {
+            "titleBefore": "",
+            "titleAfter": "だけ少し賑やか"
+          },
+          "v2": {
+            "titleBefore": "ほぼ平均、",
+            "titleAfter": "が少し前"
+          }
         }
-      },
-      "balanced": {
-        "v1": {
-          "titleBefore": "一週間でいちばん鳴るのは",
-          "titleAfter": "、七日ほぼ同じくらい"
-        },
-        "v2": {
-          "titleBefore": "七日でいちばん多い日でも",
-          "titleAfter": "、差は大きくありません"
-        }
-      }
       },
       "lateNight": {
       "occasional": {

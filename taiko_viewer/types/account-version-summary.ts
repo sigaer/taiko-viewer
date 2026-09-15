@@ -114,12 +114,16 @@ export type VersionSummaryBreakthrough = {
 export type VersionSummaryFinalTitle = {
   title: string;
   eyebrow: string;
+  /** 组合文案（Poster closing line 沿用）：evidence｜narrative */
   body: string;
+  /** Finale 独立一行显示的证据行（Copy-3B evidence 语义） */
+  evidenceText: string;
+  /** Finale 独立一行显示的叙事行（Copy-3B body 语义） */
+  narrativeBody: string;
   themeKey: string;
   evidenceKey: string;
   evidenceValue: unknown;
   evidenceLabel: string;
-  evidenceText: string;
 };
 
 export type VersionSummaryPoster = {

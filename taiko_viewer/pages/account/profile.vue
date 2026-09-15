@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { UploadFile, UploadInstance, UploadRawFile } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
@@ -116,6 +116,26 @@ const myDonErrored = ref(false);
 const bindingInput = ref("");
 const preparing = ref(false);
 const confirming = ref(false);
+const bindingCardRef = ref<HTMLElement | null>(null);
+const bindingInputRef = ref<{ focus?: () => void } | null>(null);
+const pendingBoxRef = ref<HTMLElement | null>(null);
+const qqVerifyBoxRef = ref<HTMLElement | null>(null);
+
+const revealElement = (element: HTMLElement | null, focusTarget?: HTMLElement | null) => {
+  if (!element) return;
+  element.scrollIntoView({ behavior: "smooth", block: "center" });
+  // 可访问性：滚动后把焦点交给真实操作区，键盘/读屏用户不会停在原处。
+  const focusable = focusTarget || element;
+  window.setTimeout(() => {
+    focusable.setAttribute("tabindex", focusable.getAttribute("tabindex") || "-1");
+    focusable.focus({ preventScroll: true });
+  }, 320);
+};
+
+const focusBindingForm = () => {
+  revealElement(bindingCardRef.value, bindingCardRef.value);
+  window.setTimeout(() => bindingInputRef.value?.focus?.(), 360);
+};
 const switchingId = ref<number | null>(null);
 const deletingId = ref<number | null>(null);
 const manualLoading = ref(false);
@@ -170,6 +190,9 @@ const copy = computed(() =>
         manualClaimed: "手動アカウントを引き継ぎました",
         manualCodeReady: "引き継ぎコード（10 分・1 回のみ）",
         manualActionFailed: "手動アカウントの操作に失敗しました",
+        onboardTitle: "鼓衆広場 ID がまだ未登録です",
+        onboardDesc: "登録すると成績・年間まとめ・称号が同期されます。",
+        onboardCta: "今すぐ登録",
         startVerify: "認証開始",
         pendingId: "確認待ち ID",
         pendingTitle: "記録した称号",
@@ -283,6 +306,9 @@ const copy = computed(() =>
         manualClaimed: "手动账号已认领",
         manualCodeReady: "认领码（10 分钟内一次有效）",
         manualActionFailed: "手动账号操作失败",
+        onboardTitle: "还没有绑定鼓众广场 ID",
+        onboardDesc: "绑定后即可同步成绩、年度总结与称号。",
+        onboardCta: "立即绑定",
         startVerify: "开始验证",
         pendingId: "待确认 ID",
         pendingTitle: "记录称号",
@@ -393,6 +419,30 @@ const { data, pending, refresh } = useAsyncData<ProfilePayload>(
 );
 
 const profile = computed(() => data.value);
+
+// P2: 未绑定用户首屏要能直接看到「绑定鼓众广场 ID」这一步。
+const needsBindingOnboarding = computed(
+  () => Boolean(profile.value) && !profile.value?.currentBinding && !profile.value?.pendingBinding
+);
+
+// P2-B: 用户完成上一步后，下一步的主操作必须自动进入视野。
+watch(
+  () => profile.value?.pendingBinding?.taikoId || "",
+  async (next, previous) => {
+    if (!next || next === previous) return;
+    await nextTick();
+    revealElement(pendingBoxRef.value, pendingBoxRef.value?.querySelector("button") as HTMLElement | null);
+  }
+);
+
+watch(
+  () => qqVerifyCodeResult.value?.expiresAt || "",
+  async (next, previous) => {
+    if (!next || next === previous) return;
+    await nextTick();
+    revealElement(qqVerifyBoxRef.value, qqVerifyBoxRef.value?.querySelector("input") as HTMLElement | null);
+  }
+);
 // The two payloads are independent, so they must not suspend the route in
 // sequence: awaiting them one after another doubles the time the page spends
 // with nothing on screen after a navigation.
@@ -930,6 +980,14 @@ const removeQqBinding = async () => {
 
     <template v-else-if="profile">
       <section class="profile-grid">
+        <el-card v-if="needsBindingOnboarding" class="panel-card onboarding-card" role="region" :aria-label="copy.onboardTitle">
+          <div class="onboarding-copy">
+            <h3>{{ copy.onboardTitle }}</h3>
+            <p>{{ copy.onboardDesc }}</p>
+          </div>
+          <el-button type="primary" size="large" @click="focusBindingForm">{{ copy.onboardCta }}</el-button>
+        </el-card>
+
         <el-card class="panel-card profile-main-card">
           <div class="profile-main">
             <div class="avatar-block">
@@ -980,13 +1038,13 @@ const removeQqBinding = async () => {
           </div>
         </el-card>
 
-        <el-card class="panel-card binding-card">
+        <el-card ref="bindingCardRef" class="panel-card binding-card">
           <div class="section-title">
             <h3>{{ copy.bindTitle }}</h3>
             <p>{{ copy.bindDesc }}</p>
           </div>
           <div class="bind-input-row">
-            <el-input v-model="bindingInput" :placeholder="copy.bindPlaceholder" />
+            <el-input ref="bindingInputRef" v-model="bindingInput" :placeholder="copy.bindPlaceholder" />
             <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
           </div>
           <div class="manual-account-panel">
@@ -1026,7 +1084,7 @@ const removeQqBinding = async () => {
               </el-button>
             </div>
           </div>
-          <div v-if="profile.pendingBinding" class="pending-box">
+          <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
             <div>
               <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
             </div>
@@ -1115,7 +1173,7 @@ const removeQqBinding = async () => {
             </div>
           </template>
           <template v-else>
-            <div v-if="qqVerifyCodeResult" class="qq-code-result">
+            <div v-if="qqVerifyCodeResult" ref="qqVerifyBoxRef" class="qq-code-result" tabindex="-1">
               <p>{{ copy.qqCodeReady }}</p>
               <p class="qq-code-hint">{{ copy.qqCodeHint }}</p>
               <div class="qq-verify-row">
@@ -1259,6 +1317,21 @@ const removeQqBinding = async () => {
   gap: 18px;
 }
 
+.onboarding-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid rgba(64, 158, 255, 0.35);
+}
+.onboarding-card .onboarding-copy { min-width: 0; }
+.onboarding-card h3 { margin: 0 0 6px; font-size: 16px; }
+.onboarding-card p { margin: 0; color: var(--el-text-color-secondary); font-size: 13px; line-height: 1.6; }
+@media (max-width: 520px) {
+  .onboarding-card { flex-direction: column; align-items: stretch; text-align: left; }
+  .onboarding-card .el-button { width: 100%; }
+}
 .profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from "vue";
 import AnnualScene from "./AnnualScene.vue";
-import { narrativeKey, selectNarrative } from "~/utils/annualNarrative";
+import { narrativeKey, selectNarrative, weekdayHeadlineIndex } from "~/utils/annualNarrative";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 
@@ -55,7 +55,15 @@ const safeLabel = (value: unknown, fallback: string) => {
   const text = String(value ?? "").trim();
   return text && text !== "undefined" && text !== "null" ? text : fallback;
 };
-const topLabel = computed(() => safeLabel(activity.value?.topLabel, labels.value[activity.value?.topWeekday ?? -1] || "—"));
+// P2.1: workday 文案断言「工作日」，因此该 archetype 下必须显示周一~周五中最忙的一天。
+const headlineDayIndex = computed(() =>
+  weekdayHeadlineIndex(narrative.value.archetype, counts.value, activity.value?.topWeekday ?? 0)
+);
+const topLabel = computed(() => {
+  const index = headlineDayIndex.value;
+  const provided = activity.value?.topWeekday === index ? activity.value?.topLabel : "";
+  return safeLabel(provided, labels.value[index] || "—");
+});
 const bottomLabel = computed(() => safeLabel(activity.value?.bottomLabel, labels.value[activity.value?.bottomWeekday ?? -1] || "—"));
 const workdayTraits = computed(() => rows.value.slice(0, 5).filter((row) => row.count > 0).sort((a, b) => b.count - a.count).slice(0, 3).map((row) => row.mood));
 const weekendTraits = computed(() => rows.value.slice(5).filter((row) => row.count > 0).map((row) => row.mood));

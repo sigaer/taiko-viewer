@@ -218,6 +218,28 @@ export const NARRATIVE_VARIANTS: Record<NarrativePageKey, number> = {
   lateNight: 2
 };
 
+/**
+ * P2.1: the weekday headline interpolates the busiest day, but the `workday` archetype
+ * *asserts* that the day is a working day (Mon–Fri). A week can be workday-dominated
+ * (>=80% of plays) while Saturday still holds the single highest count, which would
+ * render "工作日里最投入的是周六". For that archetype the headline therefore uses the
+ * busiest working day; every other archetype keeps the real top day.
+ */
+export const weekdayHeadlineIndex = (archetype: string, counts: Array<number | null | undefined>, topWeekday: number): number => {
+  const safeTop = Number.isInteger(topWeekday) && topWeekday >= 0 && topWeekday <= 6 ? topWeekday : 0;
+  if (archetype !== "workday") return safeTop;
+  let best = -1;
+  let bestCount = 0;
+  for (let index = 0; index < 5; index += 1) {
+    const value = Number(counts?.[index] ?? 0);
+    if (Number.isFinite(value) && value > bestCount) {
+      bestCount = value;
+      best = index;
+    }
+  }
+  return best >= 0 ? best : safeTop;
+};
+
 export const selectNarrative = (page: NarrativePageKey, summary: VersionSummaryViewModel): NarrativeSelection => {
   const { archetype, intensity, secondaryType } = resolveArchetype(page, summary);
   const variants = Math.max(1, NARRATIVE_VARIANTS[page]);

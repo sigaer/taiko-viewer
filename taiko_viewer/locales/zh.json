@@ -1099,47 +1099,47 @@
         }
       }
       },
-      "weekday": {
-      "anchored": {
-        "v1": {
-          "titleBefore": "一周里最固定的那天是",
-          "titleAfter": "，几乎成了约定"
+          "weekday": {
+        "anchored": {
+          "v1": {
+            "titleBefore": "一周最固定的是",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "说好要见的那天是",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "说好要见的那天是",
-          "titleAfter": "，别的日子都算偶然"
-        }
-      },
-      "weekend": {
-        "v1": {
-          "titleBefore": "一周里最热闹的是",
-          "titleAfter": "，周末总是先响起"
+        "weekend": {
+          "v1": {
+            "titleBefore": "一周最热闹的是",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "周末最常响起的是",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "到了周末，最常响起的是",
-          "titleAfter": "，两天都比平时热闹"
-        }
-      },
-      "workday": {
-        "v1": {
-          "titleBefore": "工作日里最投入的是",
-          "titleAfter": "，忙完才有这一会儿"
+        "workday": {
+          "v1": {
+            "titleBefore": "工作日里最投入的是",
+            "titleAfter": ""
+          },
+          "v2": {
+            "titleBefore": "一周的重心落在",
+            "titleAfter": ""
+          }
         },
-        "v2": {
-          "titleBefore": "一周的重心落在",
-          "titleAfter": "，工作日里它最响"
+        "balanced": {
+          "v1": {
+            "titleBefore": "",
+            "titleAfter": "只是稍微热闹一点"
+          },
+          "v2": {
+            "titleBefore": "各天都很平均，",
+            "titleAfter": "略微靠前"
+          }
         }
-      },
-      "balanced": {
-        "v1": {
-          "titleBefore": "一周里分得最匀的是",
-          "titleAfter": "，七天几乎一样多"
-        },
-        "v2": {
-          "titleBefore": "七天里最响的也只是",
-          "titleAfter": "，差距并不明显"
-        }
-      }
       },
       "lateNight": {
       "occasional": {

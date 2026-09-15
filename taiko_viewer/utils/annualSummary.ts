@@ -544,7 +544,9 @@ export const normalizeAnnualSummary = (
     body: finalTitleBody,
     themeKey: finalTitleKey,
     evidenceKey: finalEvidenceKey, evidenceValue: finalEvidenceValue,
-    evidenceLabel: finalEvidence.label, evidenceText: finalEvidence.text
+    evidenceLabel: finalEvidence.label,
+    evidenceText: finalEvidence.text || "",
+    narrativeBody: ""
   };
   const nickname = stringValue(profile.nickname, locale === "ja" ? "太鼓プレイヤー" : "太鼓玩家");
   const mode = raw.mode === "current_archive" ? "current_archive" : "version_observed";
@@ -649,8 +651,11 @@ export const normalizeAnnualSummary = (
   // FinalTitle body is curated per-key copy in both locales. Keep the existing
   // evidence composition so Poster and Finale continue to consume one resolved body.
   const narrativeBody = finalTitle.body;
-  // The Finale has no dedicated evidence node (and Copy-3B must not add DOM), so the
-  // evidence is composed into the existing body slot: "<evidence>｜<narrative>".
+  // Copy-3B P2: the Finale renders Evidence and narrative as two visual lines, so the
+  // resolver exposes them separately. The composed string stays as the Poster closing
+  // line — all three fields are Viewer-derived, the annual schema is untouched.
+  finalTitle.evidenceText = finalEvidence.text || "";
+  finalTitle.narrativeBody = narrativeBody;
   finalTitle.body = finalEvidence.text ? `${finalEvidence.text}｜${narrativeBody}` : narrativeBody;
   if (keyword) keyword.body = copy.keyword.body;
 

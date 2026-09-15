@@ -28,9 +28,12 @@ const titleText = computed(() =>
   || t("annualSummary.slides.finale.missingTitle")
 );
 const bodyText = computed(() =>
-  props.summary.finalTitle.body
+  props.summary.finalTitle.narrativeBody
+  || props.summary.finalTitle.body
   || (hasBreakthrough.value ? props.summary.breakthrough.body : t("annualSummary.slides.finale.missingBody"))
 );
+// Copy-3B P2: evidence and narrative render as two separate lines (no inline join).
+const evidenceText = computed(() => props.summary.finalTitle.evidenceText || "");
 const titleSegments = computed(() => segmentAnnualTitle(titleText.value));
 
 const breakthroughTime = computed(() => props.summary.breakthrough.happenedLabel || "");
@@ -87,6 +90,7 @@ const metricEntries = computed(() => [
       <h2 class="annual-finale-scene__title" :aria-label="titleText">
         <span v-for="(segment, index) in titleSegments" :key="`${segment}-${index}`" class="annual-finale-scene__char" :style="{ '--char-index': index }">{{ segment }}</span>
       </h2>
+      <p v-if="evidenceText" class="annual-finale-scene__evidence">{{ evidenceText }}</p>
       <p class="annual-finale-scene__body">{{ bodyText }}</p>
 
       <div v-if="metricEntries.length" class="annual-finale-scene__stats">
@@ -241,6 +245,16 @@ const metricEntries = computed(() => [
 }
 .annual-finale-scene.is-reduced .annual-finale-scene__char { animation: none; }
 
+.annual-finale-scene__evidence {
+  margin: 0;
+  max-width: 30rem;
+  color: rgba(255, 239, 199, 0.62);
+  font-size: clamp(11px, 3vw, 13px);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  animation: annual-finale-rise 0.6s ease-out both;
+  animation-delay: 1.95s;
+}
 .annual-finale-scene__body {
   margin: 0;
   max-width: 30rem;
