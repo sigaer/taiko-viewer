@@ -1061,6 +1061,18 @@ const removeQqBinding = async () => {
             <el-input ref="bindingInputRef" v-model="bindingInput" :placeholder="copy.bindPlaceholder" />
             <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
           </div>
+          <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
+            <div>
+              <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
+            </div>
+            <div>
+              <strong>{{ copy.pendingTitle }}：</strong>{{ profile.pendingBinding.originalTitle || copy.emptyTitle }}
+            </div>
+            <div>
+              <strong>{{ copy.expiresAt }}：</strong>{{ formatDateTime(profile.pendingBinding.expiresAt) }}
+            </div>
+            <el-button type="success" :loading="confirming" @click="confirmBinding()">{{ copy.confirmBinding }}</el-button>
+          </div>
           <div class="manual-account-panel">
             <div class="manual-drum" aria-hidden="true"><span /></div>
             <div class="manual-account-copy">
@@ -1097,18 +1109,6 @@ const removeQqBinding = async () => {
                 {{ copy.manualClaim }}
               </el-button>
             </div>
-          </div>
-          <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
-            <div>
-              <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
-            </div>
-            <div>
-              <strong>{{ copy.pendingTitle }}：</strong>{{ profile.pendingBinding.originalTitle || copy.emptyTitle }}
-            </div>
-            <div>
-              <strong>{{ copy.expiresAt }}：</strong>{{ formatDateTime(profile.pendingBinding.expiresAt) }}
-            </div>
-            <el-button type="success" :loading="confirming" @click="confirmBinding()">{{ copy.confirmBinding }}</el-button>
           </div>
           <el-empty v-if="!profile.bindings.length" :description="copy.noBindings" />
           <div v-else class="binding-list">

@@ -609,6 +609,9 @@ assert.ok(profilePage.includes("focusBindingForm"), "binding CTA does not reveal
 assert.ok(profilePage.includes("pendingBoxRef"), "challenge confirmation scroll target is missing");
 assert.ok(profilePage.includes("revealElement("), "state-change scroll helper is missing");
 assert.equal(/scrollTo\(\s*\d/.test(profilePage), false, "hard-coded pixel scrolling is not allowed");
+const pendingMarkupIndex = profilePage.indexOf('class="pending-box"');
+const manualMarkupIndex = profilePage.indexOf('class="manual-account-panel"');
+assert.ok(pendingMarkupIndex >= 0 && manualMarkupIndex >= 0 && pendingMarkupIndex < manualMarkupIndex, "pending confirmation must appear before manual account panel");
 const finaleSlide = await read("components/account/version-summary/slides/AnnualFinaleSlide.vue");
 assert.ok(finaleSlide.includes("annual-finale-scene__evidence"), "Finale evidence line is missing");
 assert.ok(finaleSlide.includes("finalTitle.narrativeBody"), "Finale narrative body is not separated from evidence");
