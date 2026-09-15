@@ -13,6 +13,8 @@ watch(() => props.summary, () => { Object.keys(failed).forEach(key => delete fai
 watch(() => props.summary.profileCard?.myDonUrl, () => { profileLiveFallbackTried.value = false; });
 const ja = computed(() => props.locale === 'ja');
 const missing = computed(() => ja.value ? '記録なし' : '暂无记录');
+// The Poster shows the same resolved title the breakthrough (finale) page renders as its heading.
+const profileTitle = computed(() => props.summary.finalTitle.title || props.summary.profileCard?.danName || '—');
 const number = (value: number | null | undefined) => value != null && Number.isFinite(value) ? new Intl.NumberFormat(props.locale === 'ja' ? 'ja-JP' : 'zh-CN', { maximumFractionDigits: 2 }).format(value) : '—';
 const cells = computed(() => [
   { key: 'favorite', label: ja.value ? '今年の一曲' : '年度歌曲', song: props.summary.favoriteSong, value: props.summary.favoriteSong?.name || missing.value },
@@ -25,12 +27,12 @@ const stats = computed(() => {
   const time = s.timeOfDay;
   const range = time?.periods.find(period => period.key === time.topPeriod)?.range;
   return [
-    [ja.value ? 'プレイ記録' : '游玩记录', number(s.overview.playCount)],
-    [ja.value ? '楽曲記録' : '鼓点记录', number(s.overview.uniqueSongs)],
-    [ja.value ? 'クリア譜面' : '已经通关', number(s.overview.currentClearCharts)],
-    [ja.value ? '遊んだ日数' : '陪伴天数', `${number(s.period.activeDays)} ${ja.value ? '日' : '天'}`],
-    [ja.value ? '活動時間帯' : '活跃时段', time?.topLabel ? [time.topLabel, range].filter(Boolean).join(' ') : time?.favoriteHourLabel || '—'],
-    [ja.value ? 'ドンだー座標' : '鼓众坐标', s.ratingRank ? [s.ratingRank.rankLabel, number(s.ratingRank.rating)].filter(Boolean).join(' · ') : '—']
+    { key: 'plays', label: ja.value ? 'プレイ記録' : '游玩记录', value: number(s.overview.playCount) },
+    { key: 'songs', label: ja.value ? '楽曲記録' : '鼓点记录', value: number(s.overview.uniqueSongs) },
+    { key: 'clears', label: ja.value ? 'クリア譜面' : '已经通关', value: number(s.overview.currentClearCharts) },
+    { key: 'days', label: ja.value ? '遊んだ日数' : '陪伴天数', value: `${number(s.period.activeDays)} ${ja.value ? '日' : '天'}` },
+    { key: 'period', label: ja.value ? '活動時間帯' : '活跃时段', value: time?.topLabel ? [time.topLabel, range].filter(Boolean).join(' ') : time?.favoriteHourLabel || '—' },
+    { key: 'coordinate', label: ja.value ? 'ドンだー座標' : '鼓众坐标', value: s.ratingRank ? [s.ratingRank.rankLabel, number(s.ratingRank.rating)].filter(Boolean).join(' · ') : '—' }
   ];
 });
 </script>
@@ -67,11 +69,11 @@ const stats = computed(() => {
       <div class="annual-share-grid__labels annual-share-grid__labels--bottom">
         <div v-for="cell in cells.slice(2)" :key="cell.key" class="annual-share-grid__label" :class="`annual-share-grid__label--${cell.key}`">
           <h2>{{ cell.label }}</h2>
-          <p>{{ cell.key === 'profile' ? summary.profileCard?.danName : cell.value }}</p>
+          <p>{{ cell.key === 'profile' ? profileTitle : cell.value }}</p>
         </div>
       </div>
     </div>
-    <dl class="annual-share-grid__stats"><div v-for="[label, value] in stats" :key="label"><dt>{{ label }}</dt><dd>{{ value }}</dd></div></dl>
+    <dl class="annual-share-grid__stats"><div v-for="stat in stats" :key="stat.key"><dt>{{ stat.label }}</dt><dd>{{ stat.value }}</dd></div></dl>
   </section>
 </template>
 
@@ -96,5 +98,6 @@ const stats = computed(() => {
 .annual-share-grid__don>img{width:100%;height:100%;min-height:0;object-fit:contain}
 .annual-share-grid__profile-caption{position:absolute;inset:auto 0 0;background:#f7fbffed;display:flex;flex-direction:column;gap:.5cqw;padding:1cqw 1.2cqw;text-align:center;font-size:2.9cqw;line-height:1.2}
 .annual-share-grid__profile-caption strong,.annual-share-grid__profile-caption span{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow-wrap:anywhere}
-.annual-share-grid__stats{height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 5.5cqw;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:4cqw;row-gap:2cqw;align-items:start}.annual-share-grid__stats div{min-width:0}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
+/* Two rows of three; the six items stretch to the grid's full usable width. */
+.annual-share-grid__stats{height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 1.5cqw;display:flex;flex-wrap:wrap;column-gap:5cqw;row-gap:2cqw;align-content:start}.annual-share-grid__stats div{flex:1 1 calc((100% - 10cqw)/3);max-width:calc((100% - 10cqw)/3);min-width:0}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
 </style>
