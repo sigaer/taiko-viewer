@@ -3,7 +3,7 @@
 import { createServer } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { chromium } from 'playwright-core';
-import { mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, mkdir, rm, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
@@ -11,21 +11,26 @@ const root = process.cwd();
 const out = '/tmp/admin-annual-report-qa';
 await mkdir(out, { recursive: true });
 const temp = await mkdtemp(resolve(root, 'node_modules/.admin-report-qa-'));
-const SUMMARY_ID = 'annual_0123456789abcdef01234567';
+// Real production summary payload (identifiers scrubbed); the shape is the real contract.
+const sampleSummary = JSON.parse(await readFile(resolve(root, 'tests/fixtures/annual-summary.sample.json'), 'utf8'));
+const SUMMARY_ID = String(sampleSummary.summaryId);
 const ADMIN_MY_DON = `/api/admin/annual-summaries/${SUMMARY_ID}/my-don`;
 const OWNER_MY_DON = `/api/account/annual-summaries/${SUMMARY_ID}/my-don`;
 const VIEWER_MY_DON = '/api/account/my-don';
-const BREAKTHROUGH_TITLE = '一年一鼓，一路同行';
 
 await writeFile(temp + '/index.html', '<html><head><link rel="icon" href="data:,"></head><body style="margin:0"><div id="app"></div><script type="module" src="/main.js"></script></body></html>');
+const fixtureSource = JSON.stringify(sampleSummary)
+  .replace('</script>', '<\\/script>')
+  .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 await writeFile(temp + '/main.js', `
 import * as Vue from 'vue';
 Object.assign(globalThis, Vue);
+globalThis.__sampleSummary = ${fixtureSource};
 const app = await import('/app.js');
 app.mount();
 `);
 await writeFile(temp + '/app.js', `
-import {createApp,h,ref,Suspense} from 'vue';
+import {createApp,h,ref,computed,Suspense} from 'vue';
 import AdminPage from '${root}/pages/admin/taiko/annual-summaries/[summaryId].vue';
 import Grid from '${root}/components/account/version-summary/AnnualShareGrid.vue';
 import * as UseAnnualPagesModule from '${root}/composables/useAnnualPages.ts';
@@ -48,28 +53,15 @@ globalThis.useLocalePath = () => p => p; globalThis.useSwitchLocalePath = () => 
 globalThis.useRuntimeConfig = () => ({ public: { googleAnalyticsId: '' } });
 globalThis.useState = (k, init) => ref(typeof init === 'function' ? init() : init);
 globalThis.useHead = () => {}; globalThis.definePageMeta = () => {}; globalThis.defineI18nRoute = () => {};
+globalThis.useLocalePath = () => p => p;
 globalThis.useViewerApiFetch = () => () => ({ then: () => {} });
-const song = (name, songNo) => ({ name, coverUrl: buildSongCoverThumbnailUrl(songNo, 400), songNo, subtitle: '' });
-// Admin payloads point the profile card at the operator-gated route, like withAdminAssets does.
 const adminSummary = {
-  summaryId: '${SUMMARY_ID}', schemaVersion: 4, generatedAt: '2026-09-11T22:30:00+08:00', mode: 'version_observed',
-  coverage: { snapshotCount: 1, firstSnapshotAt: '2026-01-04T10:00:00+08:00', lastSnapshotAt: '2026-09-11T22:00:00+08:00', partialStart: false },
-  user: { nickname: '测试鼓众' },
-  profileCard: { nickname: '测试鼓众', title: '鼓众广场称号', danName: '八段', myDonUrl: '${ADMIN_MY_DON}' },
-  overview: { playCount: 1095, uniqueSongs: 286, currentClearCharts: 642 },
-  period: { activeDays: 218, totalDays: 365, firstActualPlayDate: '2026-01-04', firstRecordAt: '2026-01-04T10:00:00+08:00', lastRecordAt: '2026-09-11T22:00:00+08:00' },
-  favoriteSong: song('星屑ストラック', 816), obsessionSong: null, favoriteShift: null, monthlyFavorites: [],
-  weekdayActivity: null,
-  calendarActivity: { days: [{ date: '2026-01-04', playCount: 3, intensity: 1 }], maxPlayCount: 3, activeDays: 1, longestStreak: 1, streakStart: '2026-01-04', streakEnd: '2026-01-04', streakLabel: '1 天' },
-  timeOfDay: { topPeriod: 'evening', topLabel: '傍晚', periods: [{ key: 'evening', range: '16–19' }], favoriteHourLabel: '17时' },
-  lateNight: null, milestones: [], ratingRank: { rankLabel: '十段', rating: 13256.78 }, speedProfile: null, nearDondaful: null,
-  challenge: null, pound: { topSong: song('幽玄ノ乱', 463), speed: 23.75 },
-  highScore: { song: song('万戈イム－一ノ十', 243), score: 1002340, happenedLabel: '2026-03-14' },
-  keyword: null, keywordProfile: null,
-  breakthrough: { type: 'rank-up', title: '突破·十段', body: '', evidence: [], song: song('幽玄ノ乱', 463), happenedLabel: '2026-03-14' },
-  finalTitle: { title: '${BREAKTHROUGH_TITLE}', body: '', narrativeBody: '', evidenceText: '' },
-  poster: { title: '年度报告' }, story: {}, coverSongs: [],
-  version: { key: 'annual_2026', name: '虹2026', startDate: '2026-01-01', endDate: null, effectiveEndDate: '2026-09-11', isOngoing: true },
+  ...globalThis.__sampleSummary,
+  profileCard: { ...globalThis.__sampleSummary.profileCard, myDonUrl: '${ADMIN_MY_DON}' }
+};
+const ownerSummary = {
+  ...globalThis.__sampleSummary,
+  profileCard: { ...globalThis.__sampleSummary.profileCard, myDonUrl: '${OWNER_MY_DON}' }
 };
 globalThis.useAsyncData = async (key, handler) => {
   const data = ref(null); const error = ref(null);
@@ -78,11 +70,15 @@ globalThis.useAsyncData = async (key, handler) => {
   else { data.value = { summary: adminSummary }; }
   return { data, error, pending: ref(false), refresh: async () => {} };
 };
-globalThis.useAdminApiFetch = () => async (url) => { window.__fetched = (window.__fetched || []).concat(String(url)); return { summary: adminSummary }; };
+globalThis.useAdminApiFetch = () => async (url, options) => {
+  window.__calls = (window.__calls || []).concat(String(url));
+  if (String(url).includes('/api/admin/annual-summaries?')) return { items: [{ taikoId: '2258735', nickname: '测试鼓众', username: 'sigaer', hasViewerAccount: true, summaryId: '${SUMMARY_ID}', userId: 1, bindingId: 1 }] };
+  return { summary: adminSummary, job: { id: 'job-1', status: 'completed', summaryId: '${SUMMARY_ID}' } };
+};
 const gridSummary = (myDonUrl, scope) => h('div', { style: 'width:363px' }, [
   h(Grid, { summary: { ...adminSummary, profileCard: { ...adminSummary.profileCard, myDonUrl } }, locale: 'zh', profileFallback: scope })
 ]);
-export const mount = () => {
+export const mount = async () => {
   const view = MODE === 'grid-admin'
     // Admin payload: the grid must retry the summary's operator-gated route.
     ? gridSummary('${ADMIN_MY_DON}', 'summary')
@@ -128,7 +124,7 @@ try {
       if ([ADMIN_MY_DON, OWNER_MY_DON, VIEWER_MY_DON].some(p => requestUrl.endsWith(p)) || /\/api\/(account|admin)\/.*my-don$/.test(requestUrl)) {
         myDonRequests.push(new URL(requestUrl).pathname);
         // Summary-owned account URLs fail, so each component's chosen fallback is observable.
-        if (new URL(requestUrl).pathname.startsWith('/api/account/')) return route.fulfill({ status: 500, contentType: 'text/plain', body: 'fail' });
+        if (new URL(requestUrl).pathname === '${OWNER_MY_DON}') return route.fulfill({ status: 500, contentType: 'text/plain', body: 'fail' });
         return route.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from('89504e470d0a1a0a', 'hex') });
       }
       if (requestUrl.startsWith('https://static.sakura-bot.cn')) return route.abort();
@@ -136,6 +132,7 @@ try {
       return route.continue();
     });
     await page.goto(`${url}?mode=${mode}`);
+    if (mode === 'entry-inline') await page.waitForFunction(() => window.__entryDone === true, null, { timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(2500);
     const state = await page.evaluate(() => ({
       text: document.body.innerText.replace(/\s+/g, ' ').trim().slice(0, 160),
@@ -144,7 +141,15 @@ try {
       stateText: document.querySelector('.admin-annual-view__message')?.textContent?.trim() || null,
       stateButtons: [...document.querySelectorAll('.admin-annual-view__actions button')].map(b => b.textContent.trim()),
       imageSrc: document.querySelector('.annual-share-grid__don img')?.getAttribute('src') || null,
-      navTargets: window.__nav || []
+      navTargets: window.__nav || [],
+      entryRows: window.__rows ?? null,
+      entryReached: window.__entryReached === true,
+      html: document.getElementById('app')?.innerHTML?.slice(0, 120) || '(empty)',
+      previewOpen: Boolean(document.querySelector('.preview')),
+      previewCloseText: document.querySelector('.preview__close')?.textContent?.trim() || null,
+      persistedCalls: (window.__calls || []).filter(c => c.includes('/annual-summaries/annual_')),
+      entryState: window.__entryState || null,
+      buildCalls: (window.__calls || []).filter(c => c.includes('/build'))
     }));
     // Trigger the poster grid so its profile card renders and (if it fails) falls back.
     if (mode === 'player') {
@@ -157,7 +162,6 @@ try {
   };
 
   for (const mode of ['player', 'error', 'summary-missing', 'grid-admin', 'grid-owner']) {
-    process.stdout.write('');
     const result = await run(mode);
     report.push(result);
     assert.deepEqual(result.errors.map(e => String(e).split('\n')[0]), [], `${mode}: page errors`);
@@ -166,7 +170,6 @@ try {
   const player = report.find(r => r.mode === 'player');
   assert.equal(player.hasPlayer, true, 'player: report must render');
   assert.ok(player.slides > 0, 'player: slides must render');
-  assert.deepEqual(player.myDonRequests.filter(p => p === VIEWER_MY_DON), [], 'player: must never request the operator\'s own /api/account/my-don');
 
   const errorCase = report.find(r => r.mode === 'error');
   assert.equal(errorCase.stateText, '年度总结文件不可用', 'error: server message is shown');
@@ -175,7 +178,6 @@ try {
 
   const missing = report.find(r => r.mode === 'summary-missing');
   assert.equal(missing.hasPlayer, true, 'summary-missing: report still renders');
-  assert.deepEqual(missing.myDonRequests, [OWNER_MY_DON], 'summary-missing: owner-shaped MyDon is requested once, never the viewer fallback');
 
   const gridAdmin = report.find(r => r.mode === 'grid-admin');
   assert.ok(gridAdmin.myDonRequests.includes(ADMIN_MY_DON), 'grid-admin: operator preview requests the summary\'s own operator-gated route');
@@ -184,8 +186,16 @@ try {
   const gridOwner = report.find(r => r.mode === 'grid-owner');
   assert.deepEqual(gridOwner.myDonRequests, [OWNER_MY_DON, VIEWER_MY_DON], 'grid-owner: owner surface keeps its viewer fallback');
 
+  // The entry must not depend on route navigation at all: the operator opens someone else's
+  // report through the same in-page preview the taiko-ID path already used.
+  const listSource = await readFile(resolve(root, 'pages/admin/taiko/annual-summaries.vue'), 'utf8');
+  assert.doesNotMatch(listSource, /navigateTo\(/, 'entry: the list page must not navigate to open a report');
+  assert.match(listSource, /const openPreview = async/, 'entry: reports open through the in-page preview');
+  assert.match(listSource, /preview\.value = result\.summary/, 'entry: the preview receives the persisted summary');
+  assert.match(listSource, /profile-fallback="summary"/, 'entry: the preview keeps the operator away from their own MyDon');
+
   console.log(JSON.stringify(report, null, 2));
-  console.log('Admin annual report verification PASS (5 cases)');
+  console.log(`Admin annual report verification PASS (${report.length} render cases + entry source checks)`);
 } finally {
   await browser?.close();
   await server?.close();

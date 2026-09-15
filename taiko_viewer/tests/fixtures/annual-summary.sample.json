@@ -1,0 +1,4313 @@
+{
+ "schemaVersion": 4,
+ "summaryId": "annual_35a25203a011597698ef23ea",
+ "generatedAt": "2026-09-15T11:54:38.000Z",
+ "mode": "version_observed",
+ "version": {
+  "key": "annual_2026",
+  "name": "2026 太鼓年度回顾",
+  "startDate": "2025-10-09",
+  "endDate": "2026-09-11",
+  "effectiveEndDate": "2026-09-11",
+  "isOngoing": false,
+  "timezone": "Asia/Shanghai"
+ },
+ "coverage": {
+  "snapshotCount": 3,
+  "comparableSnapshotCount": 3,
+  "firstSnapshotAt": "2026-01-31T22:46:18+08:00",
+  "lastSnapshotAt": "2026-06-28T14:23:48+08:00",
+  "partialStart": true,
+  "hasBaselineBeforeStart": false,
+  "sourceBreakdown": [
+   {
+    "source": "wahlap",
+    "snapshotCount": 3
+   }
+  ],
+  "time": {
+   "status": "proxy",
+   "totalObservedPlayCount": 501,
+   "trustedProxyPlayCount": 501,
+   "ratio": 1,
+   "trustedEventCount": 84,
+   "activeDays": 24,
+   "threshold": 0.8,
+   "minimumEventCount": 5,
+   "minimumActiveDays": 2,
+   "eligible": true
+  },
+  "warnings": [
+   "first_seen_chart",
+   "lineage_source_inferred:wahlap"
+  ]
+ },
+ "profileCard": {
+  "nickname": "测试鼓众",
+  "title": "勇者の力を継承せし者",
+  "titleplateId": 2,
+  "province": "上海市",
+  "displayDan": true,
+  "danName": "玄人",
+  "danLevel": 4,
+  "danMax": 16,
+  "myDonUrl": "/api/account/annual-summaries/annual_35a25203a011597698ef23ea/my-don",
+  "costume": {
+   "costume_1": 0,
+   "costume_2": 25,
+   "costume_3": 22,
+   "costume_4": 19,
+   "costume_5": 127,
+   "color_limb": 3,
+   "color_body": 3,
+   "color_face": 25
+  }
+ },
+ "period": {
+  "status": "proxy",
+  "firstActualPlayDate": "2026-01-31",
+  "firstRecordAt": "2026-01-31T22:46:18+08:00",
+  "lastRecordAt": "2026-06-27T17:55:55+08:00",
+  "totalDays": 338,
+  "activeDays": 24
+ },
+ "overview": {
+  "status": "lower_bound",
+  "data": {
+   "playCount": 501,
+   "uniqueSongs": 79,
+   "uniqueCharts": 80,
+   "estimatedSeconds": 90180,
+   "estimatedTimeText": "",
+   "currentClearCharts": 628,
+   "currentFullComboCharts": 524,
+   "currentDondafulCharts": 156,
+   "currentKiwamiCharts": 335,
+   "coverSongs": [
+    {
+     "songNo": 851,
+     "level": 4,
+     "songName": "气焰万丈神乐",
+     "songNameJa": "気焔万丈神楽",
+     "stars": 10,
+     "playCount": 1
+    },
+    {
+     "songNo": 138,
+     "level": 4,
+     "songName": "Scars of FAUNA",
+     "songNameJa": "Scars of FAUNA",
+     "stars": 9,
+     "playCount": 8
+    },
+    {
+     "songNo": 154,
+     "level": 4,
+     "songName": "Garakuta Doll Play",
+     "songNameJa": "Garakuta Doll Play",
+     "stars": 9,
+     "playCount": 6
+    },
+    {
+     "songNo": 1308,
+     "level": 5,
+     "songName": "GIGALODOON",
+     "songNameJa": "GIGALODOON",
+     "stars": 10,
+     "playCount": 78
+    },
+    {
+     "songNo": 484,
+     "level": 4,
+     "songName": "Magic day...!?",
+     "songNameJa": "マジで…！？",
+     "stars": 8,
+     "playCount": 1
+    },
+    {
+     "songNo": 1060,
+     "level": 4,
+     "songName": "YONA YONA DANCE",
+     "songNameJa": "YONA YONA DANCE",
+     "stars": 8,
+     "playCount": 3
+    },
+    {
+     "songNo": 816,
+     "level": 5,
+     "songName": "Struck Stardust",
+     "songNameJa": "星屑ストラック",
+     "stars": 10,
+     "playCount": 62
+    },
+    {
+     "songNo": 118,
+     "level": 5,
+     "songName": "さちさちにしてあげる♪",
+     "songNameJa": "さちさちにしてあげる♪",
+     "stars": 10,
+     "playCount": 9
+    },
+    {
+     "songNo": 1197,
+     "level": 5,
+     "songName": "Re ： End of a Dream",
+     "songNameJa": "Re ： End of a Dream",
+     "stars": 10,
+     "playCount": 10
+    },
+    {
+     "songNo": 1351,
+     "level": 4,
+     "songName": "蛇铁",
+     "songNameJa": "蛇鉄",
+     "stars": 10,
+     "playCount": 17
+    },
+    {
+     "songNo": 1053,
+     "level": 4,
+     "songName": "平等院凤凰咚 vs 鸟兽戏咔",
+     "songNameJa": "平等院鳳凰ドン vs 鳥獣戯カッ",
+     "stars": 7,
+     "playCount": 3
+    },
+    {
+     "songNo": 10,
+     "level": 4,
+     "songName": "3piece-JazzParty!",
+     "songNameJa": "3piece-JazzParty！",
+     "stars": 9,
+     "playCount": 1
+    },
+    {
+     "songNo": 1104,
+     "level": 4,
+     "songName": "Aragami",
+     "songNameJa": "Aragami",
+     "stars": 10,
+     "playCount": 2
+    },
+    {
+     "songNo": 410,
+     "level": 4,
+     "songName": "天妖ノ舞",
+     "songNameJa": "天妖ノ舞",
+     "stars": 9,
+     "playCount": 4
+    },
+    {
+     "songNo": 766,
+     "level": 4,
+     "songName": "Synchronicity",
+     "songNameJa": "シンクロニシティ",
+     "stars": 7,
+     "playCount": 5
+    },
+    {
+     "songNo": 514,
+     "level": 4,
+     "songName": "圣德太鼓的「日出为止飞鸟」",
+     "songNameJa": "聖徳たいこの「日いずるまで飛鳥」",
+     "stars": 9,
+     "playCount": 1
+    },
+    {
+     "songNo": 438,
+     "level": 4,
+     "songName": "银河奥特曼之歌",
+     "songNameJa": "ウルトラマンギンガの歌",
+     "stars": 9,
+     "playCount": 43
+    },
+    {
+     "songNo": 1188,
+     "level": 4,
+     "songName": "逆战",
+     "songNameJa": "逆戦 NI ZHAN",
+     "stars": 7,
+     "playCount": 6
+    },
+    {
+     "songNo": 231,
+     "level": 4,
+     "songName": "限界突破×Survivor",
+     "songNameJa": "限界突破×サバイバー",
+     "stars": 3,
+     "playCount": 6
+    },
+    {
+     "songNo": 857,
+     "level": 4,
+     "songName": "Sakura Secret",
+     "songNameJa": "サクラ・シークレット",
+     "stars": 9,
+     "playCount": 8
+    },
+    {
+     "songNo": 413,
+     "level": 4,
+     "songName": "Bad Apple!! feat.nomico",
+     "songNameJa": "Bad Apple!! feat.nomico",
+     "stars": 8,
+     "playCount": 4
+    },
+    {
+     "songNo": 971,
+     "level": 4,
+     "songName": "星河一天",
+     "songNameJa": "星河一天",
+     "stars": 10,
+     "playCount": 31
+    },
+    {
+     "songNo": 360,
+     "level": 4,
+     "songName": "Angel Halo",
+     "songNameJa": "Angel Halo",
+     "stars": 10,
+     "playCount": 28
+    },
+    {
+     "songNo": 402,
+     "level": 5,
+     "songName": "Rotter Tarmination",
+     "songNameJa": "Rotter Tarmination",
+     "stars": 10,
+     "playCount": 1
+    },
+    {
+     "songNo": 106,
+     "level": 4,
+     "songName": "Day by Day!",
+     "songNameJa": "Day by Day！",
+     "stars": 8,
+     "playCount": 1
+    },
+    {
+     "songNo": 179,
+     "level": 4,
+     "songName": "工作2000",
+     "songNameJa": "はたラク2000",
+     "stars": 10,
+     "playCount": 23
+    },
+    {
+     "songNo": 396,
+     "level": 4,
+     "songName": "super star shooter",
+     "songNameJa": "super star shooter",
+     "stars": 8,
+     "playCount": 4
+    },
+    {
+     "songNo": 615,
+     "level": 4,
+     "songName": "天狗配乐",
+     "songNameJa": "天狗囃子",
+     "stars": 9,
+     "playCount": 52
+    },
+    {
+     "songNo": 566,
+     "level": 4,
+     "songName": "凛",
+     "songNameJa": "凛",
+     "stars": 9,
+     "playCount": 3
+    },
+    {
+     "songNo": 635,
+     "level": 4,
+     "songName": "须佐之男",
+     "songNameJa": "須佐之男",
+     "stars": 10,
+     "playCount": 4
+    },
+    {
+     "songNo": 1057,
+     "level": 4,
+     "songName": "USATEI",
+     "songNameJa": "ウサテイ",
+     "stars": 9,
+     "playCount": 13
+    },
+    {
+     "songNo": 1379,
+     "level": 4,
+     "songName": "Valsqotch",
+     "songNameJa": "Valsqotch",
+     "stars": 10,
+     "playCount": 22
+    },
+    {
+     "songNo": 716,
+     "level": 5,
+     "songName": "KAHATAREDOKI NO YUUWAKU",
+     "songNameJa": "彼は誰時の誘惑",
+     "stars": 10,
+     "playCount": 4
+    },
+    {
+     "songNo": 1102,
+     "level": 4,
+     "songName": "Orekoso Only One",
+     "songNameJa": "俺こそオンリーワン",
+     "stars": 6,
+     "playCount": 6
+    },
+    {
+     "songNo": 833,
+     "level": 4,
+     "songName": "Goldfish City",
+     "songNameJa": "Goldfish City",
+     "stars": 10,
+     "playCount": 30
+    },
+    {
+     "songNo": 751,
+     "level": 4,
+     "songName": "SHINING☆ABRACADABRA",
+     "songNameJa": "シャイニング☆アブラカタブラ",
+     "stars": 9,
+     "playCount": 15
+    }
+   ]
+  }
+ },
+ "sections": {
+  "favoriteSong": {
+   "status": "lower_bound",
+   "data": {
+    "songNo": 1255,
+    "level": 4,
+    "songName": "电脑幻夜之星言咏唱",
+    "songNameJa": "電脳幻夜の星言詠",
+    "stars": 10,
+    "playCount": 69,
+    "activeDays": 1,
+    "favoriteLevel": 4
+   }
+  },
+  "obsessionSong": {
+   "status": "proxy",
+   "data": {
+    "songNo": 914,
+    "level": 4,
+    "songName": "Synchronica Airline",
+    "songNameJa": "シンクロニカ・エアライン",
+    "stars": 9,
+    "activeDays": 2,
+    "playCount": 20
+   }
+  },
+  "favoriteShift": {
+   "status": "proxy",
+   "data": {
+    "oldFavorite": {
+     "songNo": 1412,
+     "level": 5,
+     "songName": "Kakashi-Hime: Princess Scarecrow",
+     "songNameJa": "案山子姫 -Princess Scarecrow-",
+     "stars": 10,
+     "playCount": 51
+    },
+    "newFavorite": {
+     "songNo": 971,
+     "level": 4,
+     "songName": "星河一天",
+     "songNameJa": "星河一天",
+     "stars": 10,
+     "playCount": 30
+    }
+   }
+  },
+  "monthlyFavorites": {
+   "status": "proxy",
+   "data": [
+    {
+     "month": "2026-02",
+     "playCount": 8,
+     "estimatedSeconds": 1440,
+     "song": {
+      "songNo": 345,
+      "level": 4,
+      "songName": "拉面 德 呦-面!!",
+      "songNameJa": "ラーメン de Yo‐Men!!",
+      "stars": 7,
+      "playCount": 1
+     }
+    },
+    {
+     "month": "2026-03",
+     "playCount": 154,
+     "estimatedSeconds": 27720,
+     "song": {
+      "songNo": 1413,
+      "level": 5,
+      "songName": "pitchfader",
+      "songNameJa": "ピッチフェイダ",
+      "stars": 10,
+      "playCount": 60
+     }
+    },
+    {
+     "month": "2026-04",
+     "playCount": 50,
+     "estimatedSeconds": 9000,
+     "song": {
+      "songNo": 32,
+      "level": 4,
+      "songName": "亚历山大 主题曲",
+      "songNameJa": "アレキサンダーのテーマ",
+      "stars": 8,
+      "playCount": 16
+     }
+    },
+    {
+     "month": "2026-05",
+     "playCount": 156,
+     "estimatedSeconds": 28080,
+     "song": {
+      "songNo": 1255,
+      "level": 4,
+      "songName": "电脑幻夜之星言咏唱",
+      "songNameJa": "電脳幻夜の星言詠",
+      "stars": 10,
+      "playCount": 69
+     }
+    },
+    {
+     "month": "2026-06",
+     "playCount": 133,
+     "estimatedSeconds": 23940,
+     "song": {
+      "songNo": 971,
+      "level": 4,
+      "songName": "星河一天",
+      "songNameJa": "星河一天",
+      "stars": 10,
+      "playCount": 30
+     }
+    }
+   ]
+  },
+  "weekdayActivity": {
+   "status": "proxy",
+   "data": {
+    "counts": [
+     4,
+     0,
+     2,
+     0,
+     46,
+     269,
+     180
+    ],
+    "topWeekday": 5,
+    "bottomWeekday": 2,
+    "totalPlays": 501
+   }
+  },
+  "calendarActivity": {
+   "status": "proxy",
+   "data": {
+    "days": [
+     {
+      "date": "2026-02-18",
+      "playCount": 2
+     },
+     {
+      "date": "2026-02-20",
+      "playCount": 1
+     },
+     {
+      "date": "2026-02-21",
+      "playCount": 1
+     },
+     {
+      "date": "2026-02-28",
+      "playCount": 4
+     },
+     {
+      "date": "2026-03-07",
+      "playCount": 83
+     },
+     {
+      "date": "2026-03-08",
+      "playCount": 7
+     },
+     {
+      "date": "2026-03-14",
+      "playCount": 1
+     },
+     {
+      "date": "2026-03-21",
+      "playCount": 2
+     },
+     {
+      "date": "2026-03-22",
+      "playCount": 61
+     },
+     {
+      "date": "2026-04-04",
+      "playCount": 3
+     },
+     {
+      "date": "2026-04-05",
+      "playCount": 15
+     },
+     {
+      "date": "2026-04-06",
+      "playCount": 4
+     },
+     {
+      "date": "2026-04-11",
+      "playCount": 12
+     },
+     {
+      "date": "2026-04-25",
+      "playCount": 16
+     },
+     {
+      "date": "2026-05-02",
+      "playCount": 22
+     },
+     {
+      "date": "2026-05-03",
+      "playCount": 3
+     },
+     {
+      "date": "2026-05-09",
+      "playCount": 1
+     },
+     {
+      "date": "2026-05-16",
+      "playCount": 36
+     },
+     {
+      "date": "2026-05-17",
+      "playCount": 94
+     },
+     {
+      "date": "2026-06-06",
+      "playCount": 6
+     },
+     {
+      "date": "2026-06-13",
+      "playCount": 31
+     },
+     {
+      "date": "2026-06-19",
+      "playCount": 45
+     },
+     {
+      "date": "2026-06-20",
+      "playCount": 14
+     },
+     {
+      "date": "2026-06-27",
+      "playCount": 37
+     }
+    ],
+    "maxPlayCount": 94,
+    "activeDays": 24,
+    "longestStreak": 3,
+    "streakStart": "2026-04-04",
+    "streakEnd": "2026-04-06"
+   }
+  },
+  "timeOfDay": {
+   "status": "proxy",
+   "data": {
+    "periods": {
+     "early_morning": 0,
+     "morning": 0,
+     "noon": 36,
+     "afternoon": 324,
+     "evening": 141,
+     "late_night": 0
+    },
+    "hourlyCounts": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     12,
+     24,
+     0,
+     39,
+     172,
+     113,
+     135,
+     2,
+     4,
+     0,
+     0,
+     0
+    ],
+    "topPeriod": "afternoon",
+    "favoriteHour": 16,
+    "favoriteSong": {
+     "songNo": 1413,
+     "level": 5,
+     "songName": "pitchfader",
+     "songNameJa": "ピッチフェイダ",
+     "stars": 10,
+     "playCount": 60
+    },
+    "totalPlays": 501
+   }
+  },
+  "lateNight": {
+   "status": "unavailable",
+   "data": null,
+   "reason": "no_late_night_records"
+  },
+  "keyword": {
+   "status": "exact",
+   "data": {
+    "dimensionKey": "accuracy",
+    "titleKey": "precision_tuner",
+    "score": 12.6992,
+    "radarValues": {
+     "big_song": 12.295,
+     "stamina": 11.7746,
+     "speed": 11.6841,
+     "accuracy": 12.6992,
+     "rhythm": 12.3312,
+     "complex": 12.4938
+    },
+    "candidateCount": 575
+   }
+  },
+  "ratingRank": {
+   "status": "exact",
+   "data": {
+    "rating": 11.9653,
+    "rank": 70,
+    "rankMin": 70,
+    "rankMax": 70,
+    "sampleSize": 1526,
+    "percentile": 95.41,
+    "tier": "top5",
+    "midRank": 70,
+    "topPercent": 4.59,
+    "rankKey": "grade_16",
+    "rankLabel": "玄人",
+    "distribution": {
+     "ratingMin": 0,
+     "ratingMax": 16,
+     "ratingStep": 0.5,
+     "ranks": [
+      {
+       "key": "grade_1",
+       "label": "五级",
+       "order": 1,
+       "colorGroup": "low",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_2",
+       "label": "四级",
+       "order": 2,
+       "colorGroup": "low",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_3",
+       "label": "三级",
+       "order": 3,
+       "colorGroup": "low",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_4",
+       "label": "二级",
+       "order": 4,
+       "colorGroup": "low",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.224138
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_5",
+       "label": "一级",
+       "order": 5,
+       "colorGroup": "low",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.241379
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.206897
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_6",
+       "label": "初段",
+       "order": 6,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.189655
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0.258621
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.293103
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0.344828
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0.189655
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_7",
+       "label": "二段",
+       "order": 7,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0.258621
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.224138
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.086207
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_8",
+       "label": "三段",
+       "order": 8,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0.396552
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.241379
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0.517241
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.396552
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.344828
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.172414
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.12069
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_9",
+       "label": "四段",
+       "order": 9,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0.086207
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0.189655
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.465517
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.258621
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.310345
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.086207
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_10",
+       "label": "五段",
+       "order": 10,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.086207
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.241379
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.241379
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_11",
+       "label": "六段",
+       "order": 11,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.275862
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.37931
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.172414
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.137931
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_12",
+       "label": "七段",
+       "order": 12,
+       "colorGroup": "mid",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0.224138
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0.275862
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.551724
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 1
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.637931
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.310345
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.189655
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_13",
+       "label": "八段",
+       "order": 13,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.224138
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.62069
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.327586
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.482759
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.12069
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.12069
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_14",
+       "label": "九段",
+       "order": 14,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.172414
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.448276
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.568966
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.413793
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.413793
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_15",
+       "label": "十段",
+       "order": 15,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.189655
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.258621
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.206897
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_16",
+       "label": "玄人",
+       "order": 16,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.206897
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_17",
+       "label": "名人",
+       "order": 17,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.155172
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0.086207
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0.068966
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_18",
+       "label": "超人",
+       "order": 18,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0.034483
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0.051724
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0.103448
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      },
+      {
+       "key": "grade_19",
+       "label": "达人",
+       "order": 19,
+       "colorGroup": "high",
+       "bins": [
+        {
+         "ratingMin": 0,
+         "ratingMax": 0.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 0.5,
+         "ratingMax": 1,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1,
+         "ratingMax": 1.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 1.5,
+         "ratingMax": 2,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2,
+         "ratingMax": 2.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 2.5,
+         "ratingMax": 3,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3,
+         "ratingMax": 3.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 3.5,
+         "ratingMax": 4,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4,
+         "ratingMax": 4.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 4.5,
+         "ratingMax": 5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5,
+         "ratingMax": 5.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 5.5,
+         "ratingMax": 6,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6,
+         "ratingMax": 6.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 6.5,
+         "ratingMax": 7,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7,
+         "ratingMax": 7.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 7.5,
+         "ratingMax": 8,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8,
+         "ratingMax": 8.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 8.5,
+         "ratingMax": 9,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9,
+         "ratingMax": 9.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 9.5,
+         "ratingMax": 10,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10,
+         "ratingMax": 10.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 10.5,
+         "ratingMax": 11,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11,
+         "ratingMax": 11.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 11.5,
+         "ratingMax": 12,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12,
+         "ratingMax": 12.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 12.5,
+         "ratingMax": 13,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13,
+         "ratingMax": 13.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 13.5,
+         "ratingMax": 14,
+         "relative": 0
+        },
+        {
+         "ratingMin": 14,
+         "ratingMax": 14.5,
+         "relative": 0.017241
+        },
+        {
+         "ratingMin": 14.5,
+         "ratingMax": 15,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15,
+         "ratingMax": 15.5,
+         "relative": 0
+        },
+        {
+         "ratingMin": 15.5,
+         "ratingMax": 16,
+         "relative": 0
+        }
+       ]
+      }
+     ]
+    },
+    "asOf": "2026-09-15T11:40:52.000Z"
+   }
+  },
+  "speedProfile": {
+   "status": "exact",
+   "data": {
+    "speed": 2,
+    "chartCount": 9,
+    "eligibleChartCount": 22,
+    "distribution": {
+     "1.3": 4,
+     "1.5": 8,
+     "2.0": 9,
+     "4.0": 1
+    }
+   }
+  },
+  "nearDondaful": {
+   "status": "exact",
+   "data": {
+    "songNo": 997,
+    "level": 5,
+    "songName": "twinkle night (feat. somunia)",
+    "songNameJa": "twinkle night (feat. somunia)",
+    "stars": 9,
+    "okCount": 1,
+    "highScore": 1004290
+   }
+  },
+  "challenge": {
+   "status": "observed",
+   "data": {
+    "songNo": 971,
+    "level": 4,
+    "songName": "星河一天",
+    "songNameJa": "星河一天",
+    "stars": 10,
+    "playCount": 31,
+    "observedPlayCount": 30
+   }
+  },
+  "pound": {
+   "status": "exact",
+   "data": {
+    "totalPoundCount": 83808,
+    "topSong": {
+     "songNo": 231,
+     "level": 5,
+     "songName": "限界突破×Survivor",
+     "songNameJa": "限界突破×サバイバー",
+     "stars": 8
+    },
+    "topPoundCount": 32,
+    "speed": 50.74,
+    "speedDefinition": "(pound_cnt - fixed_balloon_hits) / variable_roll_seconds",
+    "copyKey": "pound_speed"
+   }
+  },
+  "highScore": {
+   "status": "proxy",
+   "data": {
+    "songNo": 504,
+    "level": 5,
+    "songName": "Abyss of hell",
+    "songNameJa": "Abyss of hell",
+    "stars": 10,
+    "highScore": 1027950,
+    "scoreDelta": 2800,
+    "recordedAt": "2026-04-06T16:22:31+08:00",
+    "timePrecision": "source_highscore_time"
+   }
+  },
+  "milestones": {
+   "status": "observed",
+   "data": [
+    {
+     "type": "full_combo",
+     "scope": "observation_window",
+     "observedAt": "2026-03-22T16:47:31+08:00",
+     "observedBetween": {
+      "from": "2026-01-31T22:46:18+08:00",
+      "to": "2026-06-20T13:19:17+08:00"
+     },
+     "song": {
+      "songNo": 1413,
+      "level": 5,
+      "songName": "pitchfader",
+      "songNameJa": "ピッチフェイダ",
+      "stars": 10,
+      "playCount": 75
+     },
+     "playCount": 75,
+     "observedPlayCount": 60,
+     "achievementCount": 4,
+     "hardshipScore": 191.25
+    },
+    {
+     "type": "dondaful",
+     "scope": "observation_window",
+     "observedAt": "2026-03-07T17:48:06+08:00",
+     "observedBetween": {
+      "from": "2026-01-31T22:46:18+08:00",
+      "to": "2026-06-20T13:19:17+08:00"
+     },
+     "song": {
+      "songNo": 1323,
+      "level": 4,
+      "songName": "女神的世界 III",
+      "songNameJa": "女神な世界 Ⅲ",
+      "stars": 8,
+      "playCount": 18
+     },
+     "playCount": 18,
+     "observedPlayCount": 2,
+     "achievementCount": 1,
+     "hardshipScore": 151.9
+    }
+   ]
+  },
+  "breakthrough": {
+   "status": "observed",
+   "data": {
+    "type": "extreme",
+    "songNo": 1412,
+    "level": 5,
+    "songName": "Kakashi-Hime: Princess Scarecrow",
+    "songNameJa": "案山子姫 -Princess Scarecrow-",
+    "stars": 10,
+    "occurredAt": "2026-03-07T16:07:58+08:00",
+    "observedBetween": {
+     "from": "2026-01-31T22:46:18+08:00",
+     "to": "2026-06-20T13:19:17+08:00"
+    },
+    "playCount": 83,
+    "observedPlayCount": 51,
+    "achievementCount": 0,
+    "hardshipScore": 238.6
+   }
+  }
+ },
+ "achievements": {
+  "status": "observed",
+  "current": {
+   "clearCharts": 628,
+   "fullComboCharts": 524,
+   "dondafulCharts": 156,
+   "extremeCharts": 335
+  },
+  "observedUnlocks": {
+   "clear": {
+    "count": 0,
+    "charts": []
+   },
+   "full_combo": {
+    "count": 7,
+    "charts": [
+     {
+      "songNo": 1413,
+      "level": 5,
+      "songName": "pitchfader",
+      "songNameJa": "ピッチフェイダ",
+      "stars": 10,
+      "playCount": 75,
+      "observedAt": "2026-03-22T16:47:31+08:00",
+      "observedBetween": {
+       "from": "2026-01-31T22:46:18+08:00",
+       "to": "2026-06-20T13:19:17+08:00"
+      },
+      "achievementCount": 4,
+      "hardshipScore": 191.25
+     },
+     {
+      "songNo": 395,
+      "level": 4,
+      "songName": "junction",
+      "songNameJa": "junction",
+      "stars": 9,
+      "playCount": 4,
+      "observedAt": "2026-04-11T18:04:47+08:00",
+      "observedBetween": {
+       "from": "2026-01-31T22:46:18+08:00",
+       "to": "2026-06-20T13:19:17+08:00"
+      },
+      "achievementCount": 1,
+      "hardshipScore": 153.4
+     },
+     {
+      "songNo": 1324,
+      "level": 4,
+      "songName": "IOSYS Autumn Voracious Festival 2024",
+      "songNameJa": "イオシス秋の爆食祭2024",
+      "stars": 10,
+      "playCount": 23,
+      "observedAt": "2026-05-16T13:02:28+08:00",
+      "observedBetween": {
+       "from": "2026-01-31T22:46:18+08:00",
+       "to": "2026-06-20T13:19:17+08:00"
+      },
+      "achievementCount": 5,
+      "hardshipScore": 143.45
+     },
+     {
+      "songNo": 1085,
+      "level": 4,
+      "songName": "弧",
+      "songNameJa": "弧",
+      "stars": 10,
+      "playCount": 57,
+      "observedAt": "2026-05-17T17:41:25+08:00",
+      "observedBetween": {
+       "from": "2026-01-31T22:46:18+08:00",
+       "to": "2026-06-20T13:19:17+08:00"
+      },
+      "achievementCount": 3,
+      "hardshipScore": 170.55
+     },
+     {
+      "songNo": 1351,
+      "level": 4,
+      "songName": "蛇铁",
+      "songNameJa": "蛇鉄",
+      "stars": 10,
+      "playCount": 17,
+      "observedAt": "2026-06-20T16:27:21+08:00",
+      "observedBetween": {
+       "from": "2026-06-20T13:19:17+08:00",
+       "to": "2026-06-28T14:23:48+08:00"
+      },
+      "achievementCount": 1,
+      "hardshipScore": 177.95
+     },
+     {
+      "songNo": 714,
+      "level": 4,
+      "songName": "OK I'm blue rat",
+      "songNameJa": "OK I’m blue rat",
+      "stars": 10,
+      "playCount": 12,
+      "observedAt": "2026-06-27T15:55:23+08:00",
+      "observedBetween": {
+       "from": "2026-06-20T13:19:17+08:00",
+       "to": "2026-06-28T14:23:48+08:00"
+      },
+      "achievementCount": 2,
+      "hardshipScore": 136.6
+     },
+     {
+      "songNo": 702,
+      "level": 4,
+      "songName": "拥有手中庭园的少女",
+      "songNameJa": "懐中庭園を持つ少女",
+      "stars": 10,
+      "playCount": 23,
+      "observedAt": "2026-06-27T17:27:34+08:00",
+      "observedBetween": {
+       "from": "2026-06-20T13:19:17+08:00",
+       "to": "2026-06-28T14:23:48+08:00"
+      },
+      "achievementCount": 1,
+      "hardshipScore": 180.85
+     }
+    ]
+   },
+   "dondaful": {
+    "count": 1,
+    "charts": [
+     {
+      "songNo": 1323,
+      "level": 4,
+      "songName": "女神的世界 III",
+      "songNameJa": "女神な世界 Ⅲ",
+      "stars": 8,
+      "playCount": 18,
+      "observedAt": "2026-03-07T17:48:06+08:00",
+      "observedBetween": {
+       "from": "2026-01-31T22:46:18+08:00",
+       "to": "2026-06-20T13:19:17+08:00"
+      },
+      "achievementCount": 1,
+      "hardshipScore": 151.9
+     }
+    ]
+   }
+  },
+  "observedFirsts": [
+   {
+    "type": "full_combo",
+    "scope": "observation_window",
+    "observedAt": "2026-03-22T16:47:31+08:00",
+    "observedBetween": {
+     "from": "2026-01-31T22:46:18+08:00",
+     "to": "2026-06-20T13:19:17+08:00"
+    },
+    "song": {
+     "songNo": 1413,
+     "level": 5,
+     "songName": "pitchfader",
+     "songNameJa": "ピッチフェイダ",
+     "stars": 10,
+     "playCount": 75
+    },
+    "playCount": 75,
+    "observedPlayCount": 60,
+    "achievementCount": 4,
+    "hardshipScore": 191.25
+   },
+   {
+    "type": "dondaful",
+    "scope": "observation_window",
+    "observedAt": "2026-03-07T17:48:06+08:00",
+    "observedBetween": {
+     "from": "2026-01-31T22:46:18+08:00",
+     "to": "2026-06-20T13:19:17+08:00"
+    },
+    "song": {
+     "songNo": 1323,
+     "level": 4,
+     "songName": "女神的世界 III",
+     "songNameJa": "女神な世界 Ⅲ",
+     "stars": 8,
+     "playCount": 18
+    },
+    "playCount": 18,
+    "observedPlayCount": 2,
+    "achievementCount": 1,
+    "hardshipScore": 151.9
+   }
+  ],
+  "highlights": [
+   {
+    "type": "full_combo",
+    "scope": "observation_window",
+    "observedAt": "2026-03-22T16:47:31+08:00",
+    "observedBetween": {
+     "from": "2026-01-31T22:46:18+08:00",
+     "to": "2026-06-20T13:19:17+08:00"
+    },
+    "song": {
+     "songNo": 1413,
+     "level": 5,
+     "songName": "pitchfader",
+     "songNameJa": "ピッチフェイダ",
+     "stars": 10,
+     "playCount": 75
+    },
+    "playCount": 75,
+    "observedPlayCount": 60,
+    "achievementCount": 4,
+    "hardshipScore": 191.25
+   },
+   {
+    "type": "dondaful",
+    "scope": "observation_window",
+    "observedAt": "2026-03-07T17:48:06+08:00",
+    "observedBetween": {
+     "from": "2026-01-31T22:46:18+08:00",
+     "to": "2026-06-20T13:19:17+08:00"
+    },
+    "song": {
+     "songNo": 1323,
+     "level": 4,
+     "songName": "女神的世界 III",
+     "songNameJa": "女神な世界 Ⅲ",
+     "stars": 8,
+     "playCount": 18
+    },
+    "playCount": 18,
+    "observedPlayCount": 2,
+    "achievementCount": 1,
+    "hardshipScore": 151.9
+   }
+  ]
+ },
+ "poster": {
+  "status": "ready_for_render",
+  "summaryId": "annual_35a25203a011597698ef23ea",
+  "defaultLocale": "zh-CN",
+  "supportedLocales": [
+   "zh-CN",
+   "ja-JP"
+  ],
+  "width": 1080,
+  "height": 1440
+ },
+ "provenance": {
+  "algorithmVersion": "annual-observation-v4.4.0",
+  "inputFingerprint": "13e85ab62578301aac392de010636ec8dd51ac81978467897247a8d9de3aa69c",
+  "eventCount": 108,
+  "playEventCount": 84,
+  "sourceSnapshotRange": {
+   "first": "data_20260131_224618_626323.json",
+   "last": "data_20260628_142348_155739.json"
+  },
+  "inputSnapshotCount": 3,
+  "ignoredSnapshotCount": 0,
+  "warnings": [
+   "first_seen_chart",
+   "lineage_source_inferred:wahlap"
+  ]
+ },
+ "finalTitle": {
+  "titleKey": "final_speed_precision",
+  "evidenceKey": "speed_high",
+  "evidenceValue": {
+   "speed": 2,
+   "charts": 9
+  }
+ }
+}
