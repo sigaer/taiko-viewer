@@ -82,3 +82,38 @@
 
 - `scripts/verify_annual_poster_static.mjs` 在修改前的 `HEAD` 上即已失败：第 59 行 `button:disabled` 计数断言（`0 !== 2`）与随后的 `poster-scene__compose` overflow 判定都不成立，属于既有测试夹具与现状不一致，与本轮改动无关（已用 pristine `HEAD` 复现确认）。本轮未扩大范围修改它。
 - 线上 Poster 页需要登录态，本轮未使用任何账号凭据；线上核验以部署产物为准：`annual-share-grid__stats` 的 flex/`1.5cqw` 样式、`profileTitle` 取值表达式均已出现在 `.output` 中，且构建产物内已无 `SCORE` 标签。
+
+## 6. 追加：后台年度报告页（`0.64.0`）
+
+用户反馈：后台点已有 viewer 账号的「生成报告」后进入一个空白/错误页，只有搜索框可用、其余什么都做不了。
+
+只读取证（未使用任何管理员凭据，未改动业务数据）：
+
+- 线上 nginx 访问日志（来源 IP `112.22.86.67`，Referer `https://viewer.sakura-bot.cn/admin/taiko/annual-summaries`，Android 手机 UA）显示 19:56:35 查询 `Saki` → 19:56:41 `POST /api/admin/annual-summaries/build` 200 → 19:56:41 起报告资源（`/title.png`、`/to_end.png`、`/Loop/0..48.png`、年度 BGM）立即加载 → 19:56:59 资料卡请求 → 19:57:26–19:57:58 逐页加载 timeOfDay / speedProfile / pound / highScore / milestones。即报告本身确实打开并可翻页。
+- 同一窗口的三次 `GET /api/account/my-don`（19:51:06 / 19:53:03 / 19:56:59）都返回操作者本人 580631 字节的 MyDon，而管理员专用路由 `GET /api/admin/annual-summaries/:summaryId/my-don` 全时段调用次数为 0。
+- 只读核对 `web_annual_summaries` / `web_annual_summary_jobs`：19:50–19:57 三次操作中只有 19:54:36 的任务（user 598，咕咕）成功落库并生成 summary 行，文件存在；当天没有其它 summary 行。因此「点了生成报告却没有报告」的情形是真实存在的。
+- 用真实页面组件 + 真实落库 summary（`annual_35a25203a011597698ef23ea`）离线复现：报告页可以正常渲染开场与 20 页幻灯片，报错路径只会渲染一句错误文本且没有任何可用操作。
+- 线上路由存在性核验：`GET /api/admin/annual-summaries/:summaryId` 在本地部署实例返回 401「请先登录太鼓管理后台」（说明路由已注册），错误页状态来自接口失败而不是路由缺失。
+
+修改内容（`0.64.0`）：
+
+- `AnnualShareGrid.vue`：资料卡重试地址不再写死 `/api/account/my-don`。新增 `profileFallback: 'viewer' | 'summary'`，`viewer` 保持所有者页面与导出的既有行为，`summary` 改用该年度总结自己的 `GET /api/admin/annual-summaries/:summaryId/my-don`，因此管理员预览他人报告时不可能再回退到自己的头像。
+- `PosterSlide.vue` / `StoryPlayer.vue`：新增同名可选 prop（默认 `viewer`）并向下传递，所有者页面行为不变。
+- `pages/admin/taiko/annual-summaries/[summaryId].vue`：加载失败时不再只剩一句白字——改为站内场景样式的错误态，固定显示服务端错误信息与两个操作（重新加载、返回管理）；报告正常时保留固定「返回管理」按钮；`StoryPlayer` 使用 `profile-fallback="summary"`。
+
+新增 `taiko_viewer/scripts/verify_admin_annual_report.mjs`（5 个用例，离线渲染真实页面与真实 grid，不连后端/数据库）：
+
+| 用例 | 断言 |
+|---|---|
+| player | 报告渲染并有幻灯片；只请求 `/api/admin/annual-summaries/:id/my-don`，绝不请求 `/api/account/my-don` |
+| error | 显示服务端错误文案，且始终提供 `重新加载` / `返回管理` |
+| summary-missing | 所有者形状的 MyDon 只请求一次，不回退到 viewer 地址 |
+| grid-admin | 管理员作用域下不会请求操作者本人的 MyDon |
+| grid-owner | 所有者作用域仍保留 `/api/account/my-don` 回退 |
+
+结果：`Admin annual report verification PASS (5 cases)`；同时 `P3.3 poster layout verification PASS (9 cases)`、`npm run test:annual` 均通过。
+
+发布：`0e6ea2 0.64.0 修正后台年度报告资料卡回退与管理端恢复操作`，标准部署脚本 exit 0，本地与线上 appVersion 均为 `0.64.0`；无关的 `title_song_relations.json` 同样可逆隔离并在部署后原样恢复（SHA-256 一致）。
+
+说明：报告页自身能渲染这点已用真实数据离线复现；用户描述的「空白错误页」对应的是接口失败时的错误态，本次已让该状态可读、可重试、可退出。若线上仍出现空白，请提供该次点击的时间点，我可以按 nginx 日志继续定位具体是 404（总结不存在）还是文件缺失（410）。
+
