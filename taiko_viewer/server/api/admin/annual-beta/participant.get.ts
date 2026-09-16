@@ -1,0 +1,4 @@
+import {getQuery,createError,setHeader} from 'h3';
+import {requireBetaAdmin} from '~/server/services/annual-beta/admin';
+import {getAccountDb} from '~/server/utils/account-db';
+export default defineEventHandler(async event=>{await requireBetaAdmin(event);setHeader(event,'Cache-Control','private, no-store');const id=String(getQuery(event).id||'');if(!/^[a-f0-9-]{36}$/.test(id))throw createError({statusCode:400,statusMessage:'Invalid participant'});const [events]=await getAccountDb().execute('SELECT event_name,occurred_at,locale,device_class,route,metadata_json FROM web_beta_events WHERE participant_id=? ORDER BY occurred_at LIMIT 1000',[id]);const [feedback]=await getAccountDb().execute('SELECT kind,category,context_json,answers_json,created_at FROM web_beta_feedback WHERE participant_id=? ORDER BY created_at',[id]);return {events,feedback};});

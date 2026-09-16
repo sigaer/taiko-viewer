@@ -4,6 +4,8 @@ import { readdir, readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import mysql from "mysql2/promise";
+import { randomBytes } from "node:crypto";
 
 const projectRoot = new URL("../", import.meta.url);
 const readProjectFile = (path) => readFile(new URL(path, projectRoot), "utf8");
@@ -53,12 +55,15 @@ test("Taiko Admin authorization delegates authenticity to the trusted backend", 
   assert.doesNotMatch(authSource, /decodeJwtSegment|parseTaikoAdminToken/);
   assert.match(authSource, /\/taiko\/manage\/auth\/me/);
   assert.match(ugcSource, /requireModerator/);
+  const betaSource = await readProjectFile("server/services/annual-beta/admin.ts");
+  assert.match(betaSource, /await requireTaikoAdminSession\(event\)/);
+  assert.match(betaSource, /isAnnualReportOperator\(session.user.username\)/);
   const adminRoutes = (await readdir(new URL("server/api/admin", projectRoot), { recursive: true }))
     .filter((path) => path.endsWith(".ts"));
   for (const route of adminRoutes) {
     const source = await readProjectFile(`server/api/admin/${route}`);
     if (!route.startsWith("auth/login") && !route.startsWith("auth/logout")) {
-      assert.match(source, /requireTaikoAdminSession|withTaikoAdminToken|requireUgcModerator/);
+      assert.match(source, /requireTaikoAdminSession|withTaikoAdminToken|requireUgcModerator|requireBetaAdmin/);
     }
   }
 
@@ -88,19 +93,29 @@ test("Taiko Admin authorization delegates authenticity to the trusted backend", 
   t.after(() => remote.close());
 
   const viewerPort = await getFreePort();
-  const testEnv = await readEnvFile("/etc/taiko-viewer.env");
+  const testEnv = await readEnvFile(process.env.TAIKO_TEST_ENV_FILE || ".env.test.local");
+  assert.ok(String(testEnv.TAIKO_DB_NAME || "").endsWith("_test"), "Admin regression requires isolated test DB");
+  assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, "1");
+  const db = await mysql.createConnection({host:testEnv.TAIKO_DB_HOST,port:Number(testEnv.TAIKO_DB_PORT||3306),user:testEnv.TAIKO_DB_USER,password:testEnv.TAIKO_DB_PASSWORD,database:testEnv.TAIKO_DB_NAME});
+  try { const [[identity]] = await db.query("SELECT DATABASE() AS name"); assert.ok(identity.name.endsWith("_test")); }
+  finally { await db.end(); }
   const child = spawn(process.execPath, [".output/server/index.mjs"], {
     cwd: fileURLToPath(new URL("..", import.meta.url)),
     env: {
       ...process.env,
       ...testEnv,
       NODE_ENV: "test",
+      TAIKO_ANNUAL_SHARE_SECRET: randomBytes(32).toString("hex"),
+      TAIKO_ANNUAL_RENDER_SECRET: randomBytes(32).toString("hex"),
       PORT: String(viewerPort),
       TAIKO_ADMIN_API_BASE: `http://127.0.0.1:${remote.address().port}`,
       NUXT_TAIKO_ADMIN_API_BASE: `http://127.0.0.1:${remote.address().port}`
     },
-    stdio: "ignore"
+    stdio: ["ignore", "ignore", "pipe"]
   });
+  let startupError = "";
+  child.stderr.on("data", chunk => { startupError += String(chunk); });
+  child.on("exit", code => { if (code) console.error(startupError); });
   t.after(() => child.kill("SIGTERM"));
 
   const endpoint = `http://127.0.0.1:${viewerPort}/api/admin/auth/me`;

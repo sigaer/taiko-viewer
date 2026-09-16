@@ -11,6 +11,7 @@ const navItems = [
   { to: "/admin/taiko/covers", label: "封面管理", short: "封" },
   { to: "/admin/taiko/draw-guess", label: "你画我猜", short: "猜" },
   { to: "/admin/taiko/audit", label: "审计日志", short: "审" }
+  ,{ to: "/admin/taiko/annual-beta", label: "封闭测试", short: "β" }
   ,{ to: "/admin/taiko/annual-summaries", label: "年度报告", short: "年" }
 ];
 </script>
