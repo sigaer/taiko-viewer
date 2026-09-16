@@ -1,3 +1,4 @@
+import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/services/annual-beta/schema";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
 let pool: Pool | null = null;
@@ -641,10 +642,10 @@ export const ensureAccountSchema = async () => {
   if (!schemaReady) {
     schemaReady = (async () => {
       const db = getAccountDb();
-      for (const statement of CREATE_TABLES) {
+      for (const statement of [...CREATE_TABLES, ...BETA_TABLES]) {
         await db.execute(statement);
       }
-      for (const statement of MIGRATIONS) {
+      for (const statement of [...MIGRATIONS, ...BETA_MIGRATIONS]) {
         await runMigration(statement);
       }
       await ensureBindTableSchema();
