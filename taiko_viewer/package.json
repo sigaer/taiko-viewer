@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.67.1",
+  "version": "0.67.2",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -16,7 +16,7 @@
     "perf:route-assets": "node ./scripts/performance/route-assets.mjs",
     "cleanup:forum-mock": "node ./scripts/cleanup_forum_mock.mjs",
     "generate:annual-types": "node ./scripts/generate_annual_types.mjs",
-    "test:annual": "node ./scripts/verify_annual_contract.mjs",
+    "test:annual": "node ./scripts/verify_annual_contract.mjs && node --experimental-strip-types --test tests/annualFinalPresentation.test.mjs",
     "test:annual:db": "node --env-file=.env.test.local ./scripts/test_annual_db_isolation.mjs",
     "test:annual:e2e": "node ./scripts/verify_annual_e2e.mjs",
     "test:annual:period": "node --test tests/annualPeriodDays.test.mjs && node --experimental-strip-types --test tests/annualPeriodNormalize.test.mjs",

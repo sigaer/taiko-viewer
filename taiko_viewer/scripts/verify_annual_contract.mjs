@@ -552,7 +552,7 @@ assert.equal(openingAssetsSource.includes("image.decode"), true, "Opening artwor
 const shareGridSource = await read("components/account/version-summary/AnnualShareGrid.vue");
 assert.equal(shareGridSource.includes("square_bg_v2.png"), true, "Poster background is not versioned");
 assert.equal(/annualSummary\.titles\.\$\{finalTitleKey\}/.test(finalTitleSource), false, "FinalTitle still reads the shared titles namespace");
-assert.ok(finalTitleSource.includes("DAN_PRESENTATION_EVIDENCE"), "presentation evidence set is missing");
+assert.equal(finalTitleSource.includes("DAN_PRESENTATION_EVIDENCE"), false, "legacy evidence keys must not select the main presentation");
 
 const pluginCandidates = ["../../../plugins/utils/annual_summary", "../../plugins/utils/annual_summary"];
 let pluginRoot = "";

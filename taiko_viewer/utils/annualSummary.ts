@@ -91,17 +91,11 @@ const formatDanGrade = (value: unknown, locale: "zh" | "ja") => {
   return locale === "ja" ? raw.replaceAll("级", "級").replaceAll("达人", "達人") : raw.replaceAll("級", "级").replaceAll("達人", "达人");
 };
 
-// Strong Dan results switch the FinalTitle *presentation* only (same titleKey).
-// The mapping is derived from the frozen evidence key set, so identical data always
-// renders an identical title (no randomness, no hidden state).
-const DAN_PRESENTATION_EVIDENCE = new Set([
-  "dan_kanzui_gold",
-  "dan_kanzui_red",
-  "dan_fullgood_gold",
-  "dan_fullgood_red",
-  "dan_gold_pass",
-  "dan_major_progress"
-]);
+const evidenceInteger = (value: unknown, min: number, max: number): number | null => {
+  if (typeof value !== "number" && (typeof value !== "string" || !value.trim())) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : null;
+};
 
 // V4.1 strongDan standing overlay: the generator resolves dan x family from the
 // current-version levelList and emits `standingPresentation`. When it is present the
@@ -120,20 +114,24 @@ type StandingPresentationPayload = {
 
 const resolveStandingPresentation = (
   value: unknown,
+  locale: "zh" | "ja",
   t: (key: string, params?: Record<string, unknown>) => string
 ): { title: string; body: string; evidenceText: string; evidenceKey: string; themeKey: string; source: StandingPresentationPayload } | null => {
   const payload = record(value) as unknown as StandingPresentationPayload;
-  const danId = Number(payload?.danId);
+  const danId = evidenceInteger(payload?.danId, 12, 19);
+  const mark = evidenceInteger(payload?.mark, 1, 6);
   const family = stringValue(payload?.family);
-  if (!Number.isInteger(danId) || danId < 12 || danId > 19 || !family) return null;
+  if (danId === null || mark === null || !family) return null;
   const fallbackKey = `annualSummary.danPresentation.standing.${danId}.${family}`;
   const key = stringValue(payload?.titleKey) || `standing_${danId}_${family}`;
   const title = t(`${fallbackKey}.title`);
   const body = t(`${fallbackKey}.body`);
   // A missing locale bucket must surface loudly instead of silently reusing legacy copy.
   if (!title || title === `${fallbackKey}.title` || !body || body === `${fallbackKey}.body`) return null;
-  const evidenceText = stringValue(payload?.evidenceText);
-  if (!evidenceText) return null;
+  const completionKey = `annualSummary.standingCompletion.${mark}`;
+  const completion = t(completionKey);
+  if (!completion || completion === completionKey) return null;
+  const evidenceText = `${formatDanGrade(String(danId), locale)} · ${completion}`;
   return { title, body, evidenceText, evidenceKey: key, themeKey: family, source: payload };
 };
 
@@ -149,9 +147,8 @@ const formatIntegerFor = (locale: "zh" | "ja", value: number) =>
   new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "zh-CN").format(value);
 
 const completionLabel = (value: unknown, t: FinalEvidenceContext["t"]) => {
-  const code = numberValue(value);
-  if (!Number.isFinite(code) || code < 0 || code > 6) return "";
-  return t(`annualSummary.danCompletion.${Math.trunc(code)}`);
+  const code = evidenceInteger(value, 0, 6);
+  return code === null ? "" : t(`annualSummary.danCompletion.${code}`);
 };
 
 /** Render the Finale evidence line for a generator-provided evidenceKey. */
@@ -175,6 +172,14 @@ const renderFinalEvidence = (
   }
   const payload = record(value);
   const isDan = key.startsWith("dan_");
+  const dan = evidenceInteger(payload.dan, 1, 19);
+  const danBefore = evidenceInteger(payload.danBefore, 0, 19);
+  // Grade evidence uses the producer's canonical `dan` endpoint, not danAfter.
+  if (isDan && dan === null) return null;
+  if (key === "dan_major_progress" && (danBefore === null || dan === null || dan <= danBefore)) return null;
+  if (key === "dan_mark_progress" && (
+    evidenceInteger(payload.markBefore, 0, 6) === null || evidenceInteger(payload.markAfter, 0, 6) === null
+  )) return null;
   const evidenceKey = (() => {
     if (key === "sparse_basic" || key === "endurance_volume") {
       const days = numberValue(payload.days);
@@ -186,10 +191,10 @@ const renderFinalEvidence = (
   const template = t(templateKey);
   if (!template || template === templateKey) return null;
   const params: Record<string, string> = {
-    dan: formatDanGrade(String(numberValue(payload.dan)), locale),
-    danBefore: formatDanGrade(String(numberValue(payload.danBefore)), locale),
-    danAfter: formatDanGrade(String(numberValue(payload.danAfter)), locale),
-    levels: formatIntegerFor(locale, Math.max(0, numberValue(payload.danAfter) - numberValue(payload.danBefore))),
+    dan: dan === null ? "" : formatDanGrade(String(dan), locale),
+    danBefore: danBefore === null ? "" : formatDanGrade(String(danBefore), locale),
+    danAfter: dan === null ? "" : formatDanGrade(String(dan), locale),
+    levels: dan === null || danBefore === null ? "" : formatIntegerFor(locale, dan - danBefore),
     mark: completionLabel(payload.mark, t),
     markBefore: completionLabel(payload.markBefore, t),
     markAfter: completionLabel(payload.markAfter, t),
@@ -507,7 +512,7 @@ export const normalizeAnnualSummary = (
   const breakthroughRaw = record(breakthroughMetric.data);
   const breakthroughType = stringValue(breakthroughRaw.type);
   const breakthroughSong = mapSong(breakthroughRaw);
-  const breakthroughTitleKey = breakthroughType ? `breakthrough_${breakthroughType}` : "encouragement";
+  const breakthroughTitleKey = breakthroughType ? `breakthrough_${breakthroughType}` : null;
   const localizedInteger = new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "zh-CN");
   const localizedRating = new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "zh-CN", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
   const breakthroughEvidence: VersionSummaryBreakthrough["evidence"] = [];
@@ -545,7 +550,8 @@ export const normalizeAnnualSummary = (
   const breakthrough = {
     type: breakthroughType || "none", occurredAt: stringValue(breakthroughRaw.occurredAt) || null, song: breakthroughSong,
     scoreDelta: numberValue(breakthroughRaw.ratingDelta ?? breakthroughRaw.scoreDelta), playDelta: numberValue(breakthroughRaw.playCount),
-    title: t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.title`), body: t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.body`),
+    title: breakthroughTitleKey ? t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.title`) : "",
+    body: breakthroughTitleKey ? t(`annualSummary.breakthroughTitles.${breakthroughTitleKey}.body`) : "",
     happenedLabel: breakthroughRaw.occurredAt ? formatDateTime(breakthroughRaw.occurredAt, locale) : t("annualSummary.common.observed"),
     evidence: breakthroughEvidence
   };
@@ -556,16 +562,13 @@ export const normalizeAnnualSummary = (
   const finalEvidenceValue = finalRaw.evidenceValue;
   // strongDan overlay (V4.1): when the generator resolved a current-version standing at
   // or above the frozen gate, it replaces title / evidence / body for the display surfaces.
-  const standingPresentation = resolveStandingPresentation(finalRaw.standingPresentation, t);
-  // Copy-3B: the Finale reads the curated `finalTitles` dictionary. Strong Dan results
-  // additionally switch the *presentation* title (same titleKey, deterministic mapping
-  // from the evidence key) -- the Poster consumes the resolved title so both stay equal.
-  const finalPresentationKey = DAN_PRESENTATION_EVIDENCE.has(finalEvidenceKey)
-    ? `annualSummary.danPresentation.${finalEvidenceKey}.title`
-    : `annualSummary.finalTitles.${finalTitleKey}.title`;
-  const finalPresentationBodyKey = DAN_PRESENTATION_EVIDENCE.has(finalEvidenceKey)
-    ? `annualSummary.danPresentation.${finalEvidenceKey}.body`
-    : `annualSummary.finalTitles.${finalTitleKey}.body`;
+  const standingPresentation = finalRaw.strongDan === true
+    ? resolveStandingPresentation(finalRaw.standingPresentation, locale, t)
+    : null;
+  // Event evidence never selects the main title/body. Only a strong standing
+  // presentation can replace the ordinary model's display below.
+  const finalPresentationKey = `annualSummary.finalTitles.${finalTitleKey}.title`;
+  const finalPresentationBodyKey = `annualSummary.finalTitles.${finalTitleKey}.body`;
   const finalTitleLabel = t(finalPresentationKey) || t(`annualSummary.finalTitles.${finalTitleKey}.title`);
   const translatedFinalBody = t(finalPresentationBodyKey);
   const finalTitleBody = translatedFinalBody === finalPresentationBodyKey
@@ -684,7 +687,7 @@ export const normalizeAnnualSummary = (
     finalTitle: finalTitle.title
   };
   const copy = makeCopy(t, narrativeContext);
-  breakthrough.body = copy.breakthrough.body;
+  breakthrough.body = breakthroughType ? copy.breakthrough.body : "";
   // FinalTitle body is curated per-key copy in both locales. Keep the existing
   // evidence composition so Poster and Finale continue to consume one resolved body.
   const narrativeBody = finalTitle.body;

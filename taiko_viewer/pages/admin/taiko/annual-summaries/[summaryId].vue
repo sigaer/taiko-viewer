@@ -4,11 +4,11 @@ import AnnualScene from "~/components/account/version-summary/AnnualScene.vue";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
 defineI18nRoute(false); definePageMeta({ layout: "story", middleware: "admin-auth", mobileNav: false });
-const route = useRoute(); const apiFetch = useAdminApiFetch(); const started = ref(false); const { t } = useI18n();
+const route = useRoute(); const apiFetch = useAdminApiFetch(); const started = ref(false); const { t, locale } = useI18n();
 const summaryId = String(route.params.summaryId || "");
 const backToAdmin = () => navigateTo('/admin/taiko/annual-summaries');
 const { data, error, refresh, pending } = await useAsyncData(`admin-annual-${summaryId}`, () => apiFetch<{summary:AnnualSummaryV4}>(`/api/admin/annual-summaries/${encodeURIComponent(summaryId)}`));
-const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data.value.summary, "zh", (key, params) => t(key, params || {})) : null);
+const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data.value.summary, locale.value === "ja" ? "ja" : "zh", (key, params) => t(key, params || {})) : null);
 const loadErrorText = computed(() => {
   const value = error.value as { data?: { statusMessage?: string }; statusMessage?: string; message?: string } | null;
   return value?.data?.statusMessage || value?.statusMessage || value?.message || t("annualSummary.state.loadFailed");
