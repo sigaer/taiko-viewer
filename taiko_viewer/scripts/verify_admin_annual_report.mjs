@@ -46,6 +46,7 @@ const t = (key, opts) => { let v = String(key).split('.').reduce((o,k)=>o?.[k], 
 globalThis.useI18n = () => ({ locale: LOCALE, t, n });
 globalThis.useRoute = () => ({ params: { summaryId: '${SUMMARY_ID}' }, path: '/admin/taiko/annual-summaries/${SUMMARY_ID}' });
 globalThis.navigateTo = to => { window.__nav = (window.__nav || []).concat(typeof to === 'string' ? to : JSON.stringify(to)); };
+globalThis.useAnnualBeta = () => ({ track: () => {} });
 globalThis.useAnnualPages = (...args) => UseAnnualPagesModule.useAnnualPages(...args);
 globalThis.useViewerDateTime = (...args) => UseViewerDateTimeModule.useViewerDateTime(...args);
 globalThis.useAnnualTimeline = (...args) => UseAnnualTimelineModule.useAnnualTimeline(...args);
@@ -114,8 +115,8 @@ try {
 
   // myDonRequests: every profile-card image request the browser makes; the first one is
   // forced to fail so the component's fallback path runs.
-  const run = async (mode) => {
-    const page = await browser.newPage({ viewport: { width: 414, height: 896 }, reducedMotion: 'reduce' });
+  const run = async (mode, width = 414, motion = "reduce", navigate = false) => {
+    const page = await browser.newPage({ viewport: { width, height: 896 }, reducedMotion: motion });
     const errors = []; const myDonRequests = [];
     page.on('pageerror', e => errors.push(e.stack || e.message));
     await page.route('**/*', route => {
@@ -156,7 +157,16 @@ try {
       await page.evaluate(() => { const trigger = document.querySelector('.story-player__drawer-trigger'); if (trigger) trigger.click(); });
       await page.waitForTimeout(300);
     }
-    await page.screenshot({ path: `${out}/${mode}.png` });
+    if(navigate){
+      const started=Date.now();await page.locator('.annual-opening__direct').click();
+      await page.locator('.story-player__slide[data-page-key="poster"][aria-hidden="false"]').waitFor({timeout:10000});
+      state.navigationMs=Date.now()-started;
+      if(motion==='no-preference')assert.ok(state.navigationMs>=600,'normal opening keeps its animation');
+      await page.waitForTimeout(500);await page.locator('.story-player__viewport').focus();await page.keyboard.press('ArrowUp');await page.waitForTimeout(1200);
+      await page.waitForFunction(()=>document.querySelector('.story-player__slide[data-page-key="final"]')?.getAttribute('aria-hidden')==='false');
+      state.navigation='PASS';state.motion=motion;state.width=width;
+    }
+    await page.screenshot({ path: `${out}/${mode}-${width}-${motion}-${navigate}.png`, animations:'disabled' });
     await page.close();
     return { mode, errors, myDonRequests, ...state };
   };
@@ -167,6 +177,9 @@ try {
     assert.deepEqual(result.errors.map(e => String(e).split('\n')[0]), [], `${mode}: page errors`);
   }
 
+  for(const width of [390,1280])for(const motion of ['reduce','no-preference']){
+    const r=await run('player',width,motion,true);assert.deepEqual(r.errors,[]);report.push(r);
+  }
   const player = report.find(r => r.mode === 'player');
   assert.equal(player.hasPlayer, true, 'player: report must render');
   assert.ok(player.slides > 0, 'player: slides must render');

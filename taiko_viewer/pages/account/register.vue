@@ -5,11 +5,14 @@ import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const route = useRoute();
+const redirectAfterAuth = computed(() => { const value=String(route.query.redirect||""); return value.startsWith("/")&&!value.startsWith("//")&&!/[\\\r\n]/.test(value)?value:localePath("/account/profile"); });
 const apiFetch = useViewerApiFetch();
 const { fetchCurrentUser } = useAccountState();
 const { saveRememberedCredentials } = useRememberedAccountCredentials();
 const sendingCode = ref(false);
 const submitting = ref(false);
+const beta = useAnnualBeta();
 const cooldown = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -130,6 +133,7 @@ const submit = async () => {
     ElMessage.error(copy.value.passwordMismatch);
     return;
   }
+  beta.track("auth_start",{auth_method:"register"});
   submitting.value = true;
   try {
     await apiFetch("/api/account/auth/register", {
@@ -151,7 +155,7 @@ const submit = async () => {
     saveRememberedCredentials(form.username.trim(), form.password, true);
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
-    await navigateTo(localePath("/account/profile"));
+    await navigateTo(redirectAfterAuth.value);
   } catch (error: any) {
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
   } finally {
@@ -219,7 +223,7 @@ const submit = async () => {
         >
       </el-form>
       <div class="auth-links single-link">
-        <NuxtLink :to="localePath('/account/login')">{{ copy.login }}</NuxtLink>
+        <NuxtLink :to="{path:localePath('/account/login'),query:{redirect:redirectAfterAuth}}">{{ copy.login }}</NuxtLink>
       </div>
     </el-card>
   </div>

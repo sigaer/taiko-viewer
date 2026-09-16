@@ -22,8 +22,9 @@ type AnnualNetworkConnection = {
 // Pre-rendered, locally owned PCM one-shot; no runtime oscillator or background loop.
 const DRUM_SOUND = "data:audio/wav;base64,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";
 
-const props = withDefaults(defineProps<{ summary: VersionSummaryViewModel; started: boolean; profileFallback?: 'viewer' | 'summary' }>(), { profileFallback: 'viewer' });
-const emit = defineEmits<{ "open-drawer": []; start: [] }>();
+const props = withDefaults(defineProps<{ summary: VersionSummaryViewModel; started: boolean; profileFallback?: 'viewer' | 'summary'; betaTracking?: boolean }>(), { profileFallback: 'viewer' });
+const beta = useAnnualBeta();
+const emit = defineEmits<{ "open-drawer": []; start: []; "slide-change": [key: string] }>();
 const { t, locale } = useI18n();
 const route = useRoute();
 const { pages: slides } = useAnnualPages(toRef(props, "summary"), locale);
@@ -391,12 +392,23 @@ const startCoverClock = () => {
   coverClockFrame = requestAnimationFrame(updateCoverClock);
 };
 
+let betaViewTimer: ReturnType<typeof setTimeout> | null = null;
+onBeforeUnmount(() => { if(betaViewTimer)clearTimeout(betaViewTimer); });
 watch(activeIndex, (value, oldValue) => {
   if (value !== oldValue) {
     navigationMotion.direction = value > oldValue ? "forward" : "backward";
     navigationMotion.visited.add(oldValue);
   }
   preloadNextArtwork();
+  const key=slides.value[value]?.key;
+  emit("slide-change",key||"opening");
+  if(betaViewTimer)clearTimeout(betaViewTimer);
+  if(props.betaTracking && key) betaViewTimer=setTimeout(()=>{
+    if(!props.started || !documentVisible.value || activeIndex.value!==value || getViewportIndex()!==value)return;
+    beta.track("annual_slide_view",{slide_key:key});
+    if(key==="final")beta.track("annual_report_complete");
+    if(key==="poster")beta.track("annual_poster_open");
+  },350);
 });
 
 watch(() => props.summary.summaryId, async () => {

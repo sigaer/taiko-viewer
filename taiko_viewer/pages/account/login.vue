@@ -14,6 +14,7 @@ const {
   clearRememberedCredentials,
 } = useRememberedAccountCredentials();
 const submitting = ref(false);
+const beta = useAnnualBeta();
 const form = reactive({
   identifier: "",
   password: "",
@@ -88,6 +89,7 @@ onMounted(() => {
 
 const submit = async () => {
   if (submitting.value) return;
+  beta.track("auth_start",{auth_method:"login"});
   submitting.value = true;
   try {
     await apiFetch("/api/account/auth/login", {
@@ -141,7 +143,7 @@ const submit = async () => {
         >
       </el-form>
       <div class="auth-links">
-        <NuxtLink :to="localePath('/account/register')">{{ copy.register }}</NuxtLink>
+        <NuxtLink :to="{path:localePath('/account/register'),query:{redirect:redirectAfterLogin}}">{{ copy.register }}</NuxtLink>
         <NuxtLink :to="localePath('/account/forgot-password')">{{ copy.forgot }}</NuxtLink>
       </div>
     </el-card>

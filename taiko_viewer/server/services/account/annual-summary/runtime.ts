@@ -616,10 +616,10 @@ export const runAnnualSummaryCli = async (
     return await validateCliEnvelope(JSON.parse(trimmed));
   } catch (error) {
     const message = safeMessage(error);
-    console.error("[annual-summary] CLI build failed", message || "unknown error");
     if (isMissingHistoryError(message)) {
       throw createError({ statusCode: 422, statusMessage: "现有数据不足以生成年度总结，请先同步更多记录" });
     }
+    console.error("[annual-summary] CLI build failed", message || "unknown error");
     throw createError({ statusCode: 500, statusMessage: "年度总结生成失败，请稍后重试" });
   }
 };

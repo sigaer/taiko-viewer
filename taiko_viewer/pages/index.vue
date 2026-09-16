@@ -49,6 +49,7 @@ useViewerSeo(() => ({
     :data-home-state-status="homeStateStatus"
     :data-home-presentation="homePresentation"
   >
+    <AnnualHero />
     <HomeGuestHome
       v-if="homePresentation === 'guest' || homePresentation === 'public_error'"
       :latest-songs="latestSongs"

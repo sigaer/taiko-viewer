@@ -1,3 +1,4 @@
+import { trackBetaUser } from "~/server/services/annual-beta/events";
 import { createHash, randomUUID } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -42,6 +43,7 @@ import {
   expireAnnualShare,
   expireAnnualShares,
   findActiveAnnualJob,
+  findLatestFailedAnnualBuild,
   findActiveAnnualShare,
   findAnnualBinding,
   findAnnualJobById,
@@ -223,7 +225,10 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     inputFingerprint: latestRow?.input_fingerprint || "",
     summary: payload?.summary || null,
     share: payload?.share || null,
-    buildJob: activeJob ? serializeAnnualJob(activeJob) : null
+    buildJob: activeJob ? serializeAnnualJob(activeJob) : (!payload ? await (async () => {
+      const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
+      return failed ? serializeAnnualJob(failed) : null;
+    })() : null)
   };
 };
 
@@ -238,6 +243,7 @@ export const getAccountAnnualSummaryById = async (userId: number, summaryId: str
 const normalizeJobError = (type: AnnualJobType, error: unknown) => {
   const value = error as { statusCode?: number; statusMessage?: string } | null;
   const statusCode = Number(value?.statusCode || 0);
+  if (type === "build" && statusCode === 422) return { code: "INSUFFICIENT_DATA", message: "当前年度记录不足，暂时无法生成年度报告。" };
   if ([400, 404, 409, 422, 429, 503].includes(statusCode) && value?.statusMessage) {
     return { code: `HTTP_${statusCode}`, message: String(value.statusMessage) };
   }
@@ -382,6 +388,8 @@ const executeAnnualJob = async (jobId: string) => {
   const job = await findAnnualJobById(jobId);
   if (!job || job.status !== "queued") return;
   if (!(await markAnnualJobRunning(job.id))) return;
+  const betaStartedAt = Date.now();
+  if (job.job_type === "build") await trackBetaUser(job.user_id,"annual_build_start",{job_id:job.id},"build_start:"+job.id);
   let parameters: AnnualJobParameters = {};
   try {
     parameters = job.parameters_json ? (JSON.parse(job.parameters_json) as AnnualJobParameters) : {};
@@ -390,14 +398,16 @@ const executeAnnualJob = async (jobId: string) => {
     if (job.job_type === "build") {
       const summary = await buildAnnualSummaryJob(job);
       await markAnnualJobCompleted(job.id, { summaryId: summary.id });
+      await trackBetaUser(job.user_id,"annual_build_success",{job_id:job.id,duration_ms:Date.now()-betaStartedAt},"build_success:"+job.id);
     } else {
       const poster = await buildAnnualPosterJob(job, parameters);
       await markAnnualJobCompleted(job.id, { posterId: poster.id, summaryId: poster.summary_id });
     }
   } catch (error) {
-    console.error(`[annual-summary] ${job.job_type} job failed`, job.id, error);
     const safe = normalizeJobError(job.job_type, error);
+    if (safe.code !== "INSUFFICIENT_DATA") console.error(`[annual-summary] ${job.job_type} job failed`, job.id, error);
     await markAnnualJobFailed(job.id, safe.code, safe.message);
+    if (job.job_type === "build") await trackBetaUser(job.user_id,safe.code === "INSUFFICIENT_DATA"?"annual_unavailable":"annual_build_failure",{job_id:job.id,reason:safe.code === "INSUFFICIENT_DATA"?"insufficient_data":safe.code,duration_ms:Date.now()-betaStartedAt},"build_result:"+job.id);
   }
 };
 

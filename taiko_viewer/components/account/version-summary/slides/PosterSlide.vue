@@ -72,7 +72,9 @@ const imageError = ref('');
 const imageNotice = ref('');
 // Saving the share card is the primary operation. The community checkbox only asks
 // the server for an optional Forum side effect, and never creates a public share.
+const beta = useAnnualBeta();
 const saveShareCard = async () => {
+  beta.track("annual_share_action",{action:"save_image"});
   if (savingImage.value) return;
   savingImage.value = true; imageError.value = ''; imageNotice.value = '';
   try {

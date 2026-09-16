@@ -30,7 +30,7 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 
-definePageMeta({ layout: "story", middleware: ["account-auth", "annual-summary-access"], keepalive: false, mobileNav: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
+definePageMeta({ layout: "story", middleware: ["annual-summary-access"], keepalive: false, mobileNav: false, pageTitleKey: "account.versionSummary", pageDescKey: "page.account.versionSummary.desc" });
 useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPageDescription(t("page.account.versionSummary.desc")), path: "/account/version-summary" }));
 useHead({
   link: [
@@ -46,6 +46,8 @@ if (import.meta.client) {
   void preloadAnnualOpeningArtwork();
 }
 
+const beta = useAnnualBeta();
+const betaSlide = ref("opening");
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
 const building = ref(false);
@@ -215,7 +217,7 @@ onMounted(() => {
     if (!artworkReady || !bgmReady) {
       console.warn("[annual] opening critical asset preload failed", { artworkReady, bgmReady });
     }
-    if (currentGeneration === generation) openingCriticalAssetsReadyId.value = value.summaryId;
+    if (currentGeneration === generation) { openingCriticalAssetsReadyId.value = value.summaryId; beta.track("annual_report_open"); beta.track("annual_slide_view",{slide_key:"opening"}); }
   }, { immediate: true });
 });
 
@@ -229,6 +231,7 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
       <p>{{ t("annualSummary.state.loading") }}</p>
     </div>
 
+    <div v-else-if="jobStatus?.error?.code === 'INSUFFICIENT_DATA'" class="annual-state"><h1>{{t('account.versionSummary')}}</h1><p>{{locale==='ja'?'この年度の記録が不足しているため、まだレポートを作成できません。':'当前年度记录不足，暂时无法生成年度报告。'}}</p><NuxtLink :to="localePath('/account/sync')">{{t('annualSummary.state.openSync')}}</NuxtLink><el-button :loading="building" @click="buildSummary">{{locale==='ja'?'更新後に再試行':'更新数据后重试'}}</el-button></div>
     <AnnualBuildPrelude
       v-else-if="!summary && (building || jobStatus)"
       :status="jobStatus?.status || 'queued'"
@@ -266,9 +269,12 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
       <StoryPlayer
         :summary="summary"
         :started="storyStarted"
+        beta-tracking
+        @slide-change="betaSlide = $event"
         @start="storyStarted = true"
         @open-drawer="drawerOpen = true"
       />
+      <AnnualBetaFeedback :summary-id="summary.summaryId" :slide-key="betaSlide" />
     </template>
   </div>
 </template>

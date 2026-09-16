@@ -3,6 +3,6 @@ export default defineNuxtRouteMiddleware(async () => {
   const localePath = useLocalePath();
   const user = await fetchCurrentUser();
   if (!user?.annualSummaryAccess) {
-    return navigateTo(localePath("/account/profile"));
+    return navigateTo(localePath("/annual"));
   }
 });

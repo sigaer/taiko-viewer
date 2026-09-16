@@ -568,3 +568,14 @@ export const deleteOldAnnualJobs = async () => {
     "DELETE FROM web_annual_summary_jobs WHERE status IN ('completed', 'failed') AND created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)"
   );
 };
+
+// Preserve a terminal failure across reloads; the entry UI must not auto-loop builds.
+export const findLatestFailedAnnualBuild = async (userId: number, bindingId: number, versionKey: string) => {
+  await ensureAccountSchema();
+  const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
+    `SELECT * FROM web_annual_summary_jobs WHERE user_id = ? AND binding_id = ?
+     AND version_key = ? AND job_type = 'build' ORDER BY created_at DESC LIMIT 1`,
+    [userId, bindingId, versionKey]
+  );
+  return rows[0]?.status === "failed" ? rows[0] : null;
+};

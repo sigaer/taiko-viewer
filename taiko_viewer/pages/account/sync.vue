@@ -459,6 +459,7 @@ const copyIssuedScoreToken = async () => {
 
 <template>
   <div class="sync-page">
+    <AnnualBetaContinue />
     <el-card v-if="pending" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
