@@ -79,13 +79,13 @@ const completeStoryStart = (direct: boolean) => {
 const requestStart = (direct: boolean) => {
   if (!props.active || startPending.value || navigationSent.value) return;
   startPending.value = true;
-  drumPulse.value = true;
-  if (props.reducedMotion) {
-    motionScope?.setTimeout(() => { drumPulse.value = false; }, 160);
-    motionScope?.setTimeout(() => completeStoryStart(direct), 180);
+  if (props.reducedMotion || !motionScope) {
+    // Navigation is a business action, independent of animation availability.
+    completeStoryStart(direct);
     return;
   }
-  motionScope?.setTimeout(() => { drumPulse.value = false; }, 430);
+  drumPulse.value = true;
+  motionScope.setTimeout(() => { drumPulse.value = false; }, 430);
   motionScope?.setTimeout(() => completeStoryStart(direct), 960);
 };
 
