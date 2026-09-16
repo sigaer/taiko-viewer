@@ -1,6 +1,6 @@
 # Annual First-Run Closed Beta runbook
 
-Viewer 0.68.0；Annual algorithm 固定 annual-observation-v4.5.0。本轮只验证首次体验，不调整冻结的年度模型、场景、Poster 或 Performance P2。
+Viewer 0.68.1（0.68.0 功能发布后的恢复补丁）；Annual algorithm 固定 annual-observation-v4.5.0。本轮只验证首次体验，不调整冻结的年度模型、场景、Poster 或 Performance P2。
 
 ## 招募与波次
 
