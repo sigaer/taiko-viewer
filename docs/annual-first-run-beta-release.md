@@ -324,3 +324,75 @@ User clarified that invitations are distributed manually from the pre-generated 
 - Reserve: `/var/tmp/annual-beta-invites-20260916-wave1-reserve.csv` (replacement / recruitment / recovery).
 
 Hand off the ready file for the user to distribute 8–10 invitations. Codes are not printed in this report or committed to Git. No claim that recipients have already received/redeemed them. Wave 2 remains untouched. Optional actual email delivery remains unverified as noted above; no synthetic email success claim.
+
+## Invite uniqueness final check
+
+2026-09-16: requested bearer-code contract review. Production **0.68.2** audited before implementation changes. Current uniqueness sign-off: **pending 0.68.3 deployment verification**; no formal invite used for testing.
+
+### Production audit before changes
+
+Read-only transaction at **22:55:48 CST**. No raw codes, tokens or sessions in audit output.
+
+| Scope | Invites | Consumed | Users consuming >1 invite | Invites with >1 owner | Attribution anomalies | used_count / grant mismatch | Redeemed pending on unused invite |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Formal | 44 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Including internal/smoke | 49 | 4 | 0 | 0 | 0 | 0 | 0 |
+
+Audit correlates retained redeemed pending rows, grant ownership and successful redemption events, checks participant attribution against grants/event history, and checks used_count against actual grant owners. No historical data correction is required; no records deleted or silently rewritten.
+
+Formal files were matched privately by code hash to DB rows: **Wave 1 ready 10/10 unused**, **reserve 2/2 unused**, **Wave 2 32/32 unused**. Snapshot includes IDs, counters/status and private file SHA-256 for post-release comparison; raw codes are not exported to the report.
+
+### Existing contract and minimal correction
+
+0.68.2 already locked the user row before checking/inserting its grant, so the existing transaction prevented a second actual consumption in the reviewed path. No production duplicate consumption was found. It did **not** fully meet the requested result/attribution/event contract:
+
+- It locked and validated pending/invite before checking the user's grant, so an already-entitled user could get an invite validity error instead of an idempotent result.
+- It marked a different, unused invite's pending row as redeemed even when an existing grant skipped consumption.
+- The HTTP route attempted another `beta_invite_redeemed` event on reuse; session-scoped dedup could not prevent another session's false success event.
+- An HTTP retry after clearing the pending cookie returned a pending error rather than already entitled.
+
+0.68.3 changes only invitation redemption/ownership and related operational counts. Annual algorithm, FinalTitle/strongDan, Hero/onboarding, Binding/Sync, funnel stages and 24-bucket copy are untouched. No formal code regenerated or replaced.
+
+Transaction order:
+
+1. BEGIN; `SELECT web_user_accounts ... FOR UPDATE` serializes all redeem attempts for that user, including when no entitlement row exists.
+2. The first consistent read after this lock checks the existing `web_annual_summary_access` grant. Enabled `annual_first_run_beta` returns HTTP 200 **ALREADY_ENTITLED**, `reused=true`, original invite ID (null for internal grants), before touching the submitted pending/invite. Disabled grants remain denied and cannot consume replacement codes.
+3. Otherwise lock session-bound pending, then invite; recheck expiry/disable and unused single-use capacity.
+4. Atomically increment from `used_count=0`, insert grant, set participant attribution only when previously null, and mark that pending redeemed. Any attribution conflict rolls back the entire consumption.
+5. COMMIT; HTTP 200 **REDEEMED**, `reused=false`.
+
+Using an existing user row as the mutex avoids locking a missing entitlement index gap; different users competing for one invite therefore do not introduce a gap-lock/insert deadlock. The grant read occurs after acquiring the user lock and sees the previous same-user transaction's commit. Anonymous validate remains unchanged: it creates expiring session-bound pending only, never reserves, consumes or assigns an owner.
+
+DB constraints:
+
+- Existing `web_annual_summary_access.PRIMARY KEY(user_id)` is retained: one grant per user, stronger than user+feature uniqueness for this existing table.
+- Add nullable **UNIQUE `uniq_annual_beta_invite_owner(invite_id)`** on that same entitlement table: at most one grant owner per invite; multiple null internal grants remain valid. No parallel entitlement table.
+- Existing participant UNIQUE(user_id), invite PRIMARY(id)/UNIQUE(code_hash), pending PRIMARY(token_hash) remain intact.
+- Invite row lock plus `used_count=0` conditional update enforce single consumption independently of entitlement insertion; grant uniqueness is an additional safeguard, not the only guard.
+
+### Telemetry and Dashboard
+
+Only first consumption emits `beta_invite_redeemed`. Reuse emits server-only `beta_invite_redeem_skipped`, reason **already_entitled**, retaining original attribution and no raw code. No second redeemed event, including a second browser session.
+
+Dashboard Redeemed counts distinct consumed invite rows (`used_count>0`), including codes subsequently disabled/expired. Entitled users counts distinct historical invited grant owners, not retry events; internal grants have no invite and are excluded. This is cumulative invite allocation, not a count of currently enabled access. Existing formal/internal exclusion remains in effect; raw operational events retained.
+
+### Required tests
+
+Real isolated database, actual `SELECT DATABASE()` ending `_test`, explicit mutation opt-in; no production data copied. New test users/participants and retained fixture invites are internal; fixture invites disabled on completion. Tests do not access any of the 44 formal codes.
+
+| Test | Result |
+| --- | --- |
+| T1 first authenticated redeem consumes once, grants entitlement | PASS |
+| T2 same user/same invite retry; also after pending cookie cleared | PASS; ALREADY_ENTITLED, used_count unchanged |
+| T3 same user/fresh invite | PASS; unused and pending unclaimed, original participant attribution retained |
+| T4 same user/two different invites concurrently | PASS; one REDEEMED, one ALREADY_ENTITLED, exactly one consumed |
+| T5 two users/one invite concurrently | PASS; one winner, one used_invite rejection |
+| T6 existing internal enabled entitlement/fresh invite | PASS; invite unused, returned original null attribution |
+| T7 six concurrent anonymous validations | PASS; zero usage/owner |
+| T8 pending A resumes after successful qualification via B | PASS; A unused/unclaimed, B remains original attribution |
+
+Additional checks: disabled submitted invite cannot defeat existing entitlement; disabled entitlement cannot allocate replacement; unique index rejects a second invite owner; participant conflict cannot overwrite attribution and rolls back consumption. `npm run test:annual:beta`: **14 tests PASS**, including the existing race/expiry/session regression. Same-user race is held behind a real user-row lock before releasing both attempts.
+
+Real authenticated isolated HTTP: first redeem, cookie-cleared retry, second-session fresh invite, simultaneous same-user two-session redemption, one successful redeemed event per user, skipped telemetry, and Dashboard consumption surviving later disable: **PASS**. Annual regression **9 PASS**, admin trust-boundary regression **PASS**. No full corpus, anchors, Binding/Sync or broader first-run retest.
+
+Private evidence: `/var/tmp/annual-beta-invite-uniqueness/`. Deployment and final production audit follow below.

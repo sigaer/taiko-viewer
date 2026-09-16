@@ -42,5 +42,16 @@ export const betaDashboard = async (includeInternal = false) => {
     FROM web_beta_participants p WHERE ${filter} AND p.invite_id IS NOT NULL
     AND EXISTS(SELECT 1 FROM web_beta_events e WHERE e.participant_id=p.id AND e.event_name='annual_entry_click'
     AND JSON_UNQUOTE(JSON_EXTRACT(e.metadata_json,'$.source'))='home_hero')`);
-  return { analysisMode: includeInternal ? 'operational' : 'beta', funnel, invites, participants, times, feedback, activation: activation[0] };
+  // Consumption survives later expiry/disable; count owners from grants rather
+  // than retry telemetry or the paginated participant list.
+  const [inviteTotals]: any = await db.query(`SELECT
+    (SELECT COUNT(*) FROM web_beta_invites WHERE used_count>0
+      AND ${includeInternal ? '1=1' : 'analysis_excluded=0'}) AS consumedInvites,
+    (SELECT COUNT(DISTINCT a.user_id)
+    FROM web_annual_summary_access a JOIN web_beta_invites i ON i.id=a.invite_id
+    LEFT JOIN web_beta_participants p ON p.user_id=a.user_id
+    WHERE a.feature='annual_first_run_beta'
+    AND ${includeInternal ? '1=1' : `i.analysis_excluded=0 AND (p.id IS NULL OR (${eligible}))`}) AS entitledUsers`);
+  return { analysisMode: includeInternal ? 'operational' : 'beta', funnel, invites, participants, times, feedback,
+    activation: activation[0], inviteTotals: inviteTotals[0] };
 };

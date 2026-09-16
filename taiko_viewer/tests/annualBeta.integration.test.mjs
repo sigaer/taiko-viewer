@@ -6,7 +6,7 @@ test('real MySQL: validate is free, pending survives auth, concurrent single-use
  try{
   const [identity]=await db.query('SELECT DATABASE() AS databaseName');assert.ok(identity[0].databaseName.endsWith('_test'));assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');allowed=true;
   for(const sql of BETA_TABLES)await db.execute(sql);
-  for(const sql of BETA_MIGRATIONS){try{await db.execute(sql);}catch(e){if(e.code!=='ER_DUP_FIELDNAME')throw e;}}
+  for(const sql of BETA_MIGRATIONS){try{await db.execute(sql);}catch(e){if(!['ER_DUP_FIELDNAME','ER_DUP_KEYNAME'].includes(e.code))throw e;}}
   for(let n=0;n<3;n++){const [r]=await db.execute('INSERT INTO web_user_accounts (username,email,password_hash,email_verified) VALUES (?,?,?,1)',['annual_beta_'+randomUUID(),'beta-'+randomUUID()+'@example.invalid','synthetic-not-a-login']);ids.push(r.insertId);await db.execute('INSERT INTO web_beta_participants (id,user_id) VALUES (?,?)',[randomUUID(),r.insertId]);}
   const create=async()=>{const i=await createBetaInvite(db,'wave1',new Date(Date.now()+60000));invites.push(i.id);return i;};
   const i=await create();const a=await validateBetaInvite(db,i.code,'test-session-a');const b=await validateBetaInvite(db,i.code,'test-session-b');

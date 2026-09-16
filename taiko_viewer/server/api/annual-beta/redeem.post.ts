@@ -8,7 +8,8 @@ export default defineEventHandler(async event=>{
  try{
   const result=await redeemBetaInvite(getAccountDb(),getCookie(event,'annual_beta_pending')||'',ctx.sessionId,user.id);
   deleteCookie(event,'annual_beta_pending',{path:'/'});
-  await recordBetaEventSafely({...ctx,inviteId:result.inviteId},'beta_invite_redeemed',{},'redeemed:'+user.id);
-  return {ok:true,entitled:true};
+  if(result.reused)await recordBetaEventSafely({...ctx,inviteId:result.inviteId},'beta_invite_redeem_skipped',{reason:'already_entitled'},'redeem-skipped:'+user.id);
+  else await recordBetaEventSafely({...ctx,inviteId:result.inviteId},'beta_invite_redeemed',{},'redeemed:'+user.id);
+  return {ok:true,entitled:true,status:result.status,reused:result.reused};
  }catch(error){if(error instanceof BetaError)throw createError({statusCode:error.status,statusMessage:'邀请码兑换失败，请重新验证',data:{code:error.code}});throw error;}
 });
