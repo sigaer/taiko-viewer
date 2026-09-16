@@ -2,9 +2,9 @@
 
 ## Current gate
 
-Implementation and production first-run smoke PASS. Remaining verification: three anchor accounts need a refreshed administrator session. Do not claim the complete five-anchor gate yet.
+**READY FOR WAVE 1 — 2026-09-16 22:23 CST.** The malu first-run incident is closed, remaining anchors and latest-patch production smoke PASS, no unresolved P0/P1. Keep production 0.68.2 running. Stop internal expansion; hand off Wave 1 codes for manual distribution.
 
-Viewer **0.68.1** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Viewer **0.68.2** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
 
 ## Repository and title relations
 
@@ -86,9 +86,9 @@ Invite batch (all unused, single-use, 0600 verified):
 - Wave 1: 12, `/var/tmp/annual-beta-invites-20260916-wave1.csv`.
 - Wave 2: 32, `/var/tmp/annual-beta-invites-20260916-wave2.csv`.
 
-Five separate smoke invites (four redeemed, one deliberately disabled) are not part of those 44 distributable codes. Smoke accounts 767/768/769 and the replacement-flow account (ID in private recovery evidence) are marked T3 to exclude them from self-service activation; raw funnel counts retain their test events as the operational baseline. Private evidence: `/var/tmp/annual-first-run-beta/production-*.json` and screenshots.
+Five separate smoke invites (four redeemed, one deliberately disabled) are not part of those 44 distributable codes. At 0.68.1, smoke accounts 767/768/769/770 were marked T3, which excluded self-service activation but still polluted general funnel counts. 0.68.2 corrects default formal analysis as documented below; raw operational events remain available. Private evidence: `/var/tmp/annual-first-run-beta/production-*.json` and screenshots.
 
-Final gate pending refreshed admin authentication for anchors 66792598 / 47279977 / 84813650. 0.68.1 deployment verification is complete. Recommendation: keep the deployed production release; hold Wave 1 sign-off until these three requested checks are finished. No unresolved product P0/P1 established; READY is not asserted while required verification remains incomplete.
+Historical 0.68.1 gate: held pending refreshed admin authentication for anchors 66792598 / 47279977 / 84813650. The newly reported malu incident and final disposition are documented below; that investigation supersedes the earlier assessment.
 
 ## Changed files
 
@@ -147,7 +147,7 @@ Final gate pending refreshed admin authentication for anchors 66792598 / 4727997
 
 ## Final Wave 1 Sign-off
 
-Status during patch preparation: **HOLD — P1 failed-job recovery**. The following investigation supersedes the earlier “no unresolved product P0/P1” statement. No full-corpus rerun; Annual core and algorithm remain frozen.
+Final status: **READY FOR WAVE 1**. The confirmed **P1 CASE D** was fixed and closed on production 0.68.2. The following investigation supersedes the earlier assessment. No full-corpus rerun; Annual core and algorithm remain frozen.
 
 ### Admin auth
 
@@ -155,7 +155,7 @@ Refreshed session verified at **2026-09-16 21:52:50 CST**, production `/api/admi
 
 ### Remaining anchors
 
-Pre-patch production 0.68.1: all three passed real browser/API checks in zh and ja. Latest-patch verification remains required below.
+Pre-patch production 0.68.1 and final production **0.68.2**: all three **PASS**, real browser/API checks in zh and ja.
 
 | Taiko ID | Standing key | zh evidence | zh Finale = Poster | ja Finale = Poster |
 | --- | --- | --- | --- | --- |
@@ -163,7 +163,7 @@ Pre-patch production 0.68.1: all three passed real browser/API checks in zh and 
 | 47279977 | standing_15_gold | 十段 · 金合格 | 天衡破阵 | 天衡破陣 |
 | 84813650 | standing_16_gold_rainbow | 玄人 · 金虹合格 | 玄钢无瑕 | 玄鋼無瑕 |
 
-ja evidence resolved from Japanese dictionaries; generator/API finalTitle equality passed. Previously completed 40500773/49557999 were not rerun before the patch. All five will receive the requested post-patch regression.
+ja evidence resolved from Japanese dictionaries; generator/API finalTitle equality passed. Previously completed 40500773/49557999 were not rerun before the patch. All five also passed the requested post-patch regression below.
 
 ### Real First-Run Incident
 
@@ -261,7 +261,7 @@ Operator state endpoint reads the same owner envelope through the existing admin
 - Add synthetic annual observations → envelope no longer reuses failure → two concurrent normal POSTs deduplicate to one cold build → completed v4.5 summary. Telemetry unavailable + build_success, no build_failure.
 - Dashboard default excludes marked participant across funnel/times/feedback/invites; raw operational counts unchanged. A real invited T3 tester remains in the funnel; T3 alone is not treated as internal. Anonymous operator state request returns 401.
 
-Private evidence: `/var/tmp/annual-beta-final-signoff/` (auth excluded from reports). Fix commit/deploy and post-patch production results will be recorded after release.
+Private evidence: `/var/tmp/annual-beta-final-signoff/` (auth excluded from reports). Fix commit/deploy and final production results are recorded below.
 
 ### Email smoke
 
@@ -269,4 +269,58 @@ Private evidence: `/var/tmp/annual-beta-final-signoff/` (auth excluded from repo
 
 ### Dashboard isolation
 
-Predeployment PASS. Formal analysis defaults to excluding explicitly marked internal/smoke participants and existing pre-Beta internal grants. Raw events remain available with the operator toggle. Postdeploy classification of the four known production smoke accounts and four anonymous viewport QA participants remains pending; T3 hint alone will no longer be relied on to filter general funnel counts.
+**PASS on production 0.68.2.** Formal analysis defaults to excluding explicitly marked internal/smoke participants and existing pre-Beta internal grants. Raw events remain available with the operator toggle. Four known production smoke accounts and four anonymous viewport QA participants have been classified; T3 hint alone is not relied on to filter general funnel counts.
+
+### Patch deployment and production closure
+
+- Release commit **`8f617f9`**, Viewer **0.68.2**. Standard `bash scripts/deploy_forum_web.sh "<HEAD subject>"` exited **0**, production health checks passed around **2026-09-16 22:16 CST**. No manual deployment action. Optional Baidu submission reported daily quota, not a deployment failure.
+- Algorithm remains **annual-observation-v4.5.0**. Title-relations canonical tracked SHA remains `52a02e6d9d6e2f10ae58fe4d701291ca3894af1c858ff97fb53e6edfe748cf47`; no special restore/stash rules.
+- At 22:16:15.395, authorized operator state GET returned **HTTP 200 / missing / buildJob null** for user 31, current binding 552/99408699. This invokes the real owner-envelope service without impersonation; the legacy failed job was correctly no longer terminal.
+- Normal operator build POST **force=false** created **`bb21363c-ad36-4133-97c9-517d1891dfe8`**, started 22:16:15, completed 22:16:21, error null. End-to-end observed cold completion **6.373s**. Job parameters now record algorithm and input revision.
+- Real summary API returned **HTTP 200**, schema 4 / algorithm v4.5.0, summary **`annual_73c77d3717c14be70cca3873`**, ordinary `final_exploration_endurance`, strongDan false / standing null, matching isolated runtime output.
+- Three subsequent state reads: **ready**, no buildJob, same summary ID, **51 / 63 / 50 ms**. Another normal force=false POST reused cached summary in **58 ms**; the existing queue creates a completed cache-reuse receipt, not another generator run.
+- Read-only comparison: all six historical user-31 jobs, including all four failed jobs, remain byte-for-byte unchanged in selected DB fields. Latest-failed-build population is now **0**. Production telemetry records the normal recovery build start/success; no job-status manipulation.
+- Dashboard **PASS**: operator action marked four known smoke accounts (767/768/769/770) and four known anonymous viewport QA participants. Same existing entitlement permissions; no event deletion. Formal analysis has **44 available invites** (Wave 1 12 / Wave 2 32); raw operational view retains **49** including the five smoke invites. Raw funnel/timing/feedback counts unchanged by exclusion.
+- One newly arriving non-smoke visitor remains in formal analysis intentionally; it was not one of our QA accounts and has no internal grant. Invalid invitation attempts are retained as real funnel behavior. Do not “clean” real users to force zero baseline metrics.
+
+### Final production browser regression
+
+**12 / 12 PASS**: five required anchors plus malu, each zh and ja. Actual production summary API → opening → Poster → Finale. Generator/API finalTitle exact equality, v4.5 algorithm, localized evidence, and Finale/Poster title equality all passed. No full-corpus rerun. Malu used legitimate operator rendering and the real owner-envelope service; no claim of logging in as malu or of malu personally revisiting the page.
+
+| UID | Ordinary semantic titleKey | Standing key | zh title (Finale = Poster) | ja title (Finale = Poster) |
+| --- | --- | --- | --- | --- |
+| 40500773 | final_growth | standing_19_gold_rainbow | 天极回响 | 天極の響 |
+| 49557999 | final_speed_precision | standing_16_gold | 玄之静谧 | 玄の静謐 |
+| 66792598 | final_endurance_precision | standing_12_gold_rainbow | 初虹 | 初虹 |
+| 47279977 | final_growth | standing_15_gold | 天衡破阵 | 天衡破陣 |
+| 84813650 | final_growth | standing_16_gold_rainbow | 玄钢无瑕 | 玄鋼無瑕 |
+| 99408699 | final_exploration_endurance | null; strongDan false | 远行而不息 | 旅は止まらない |
+
+Remaining-anchor ja evidence: **七段 · 金合格全良**, **十段 · 金合格**, **玄人 · 金合格全良**. Malu's evidence: **665 首曲目 · 753 张谱面** / **665 曲・753 譜面**. No generic failed branch when rendering its completed report.
+
+One automation attempt clicked admin search before locale/hydration settled, sending an empty search and receiving 400. Screenshot showed the empty input. Fixed only the private script's readiness wait, retained the five already-passed zh cases, and completed the missing cases; no product patch or hidden retry of a generator failure. Evidence: `e2e-results-postpatch.json`, `e2e-postpatch/*`.
+
+### Production stability
+
+Observed **22:16:00–22:22:26 CST**. Annual API responses: **125 × 200**, **2 × 400** (invalid invite / empty admin search), **0 × 5xx**. Generator/schema exception matches 0; service active throughout, NRestarts 0. No repeated generator execution on ready reloads.
+
+11 scheduled service samples plus final sample: memory 869.8 MiB at start, sampled peak **3451.4 MiB**, end **2361.2 MiB**. Memory rose under build/browser work then fell; prior v4.5 production validation saw a 4191.5 MiB peak under E2E. This is bounded release observation, not a same-load benchmark or a long-term no-leak claim. No clear severe performance regression established; Performance P2 remains unopened. Real generator duration telemetry **5432 ms**, end-to-end polling completion **6373 ms**, cached read **50–63 ms**.
+
+### Final gate and Wave 1 handoff
+
+| Required gate | Result |
+| --- | --- |
+| 66792598 / 47279977 / 84813650 on latest production, zh + ja | PASS |
+| malu 99408699 incident explained, recovered through normal build, closed | PASS — CASE D |
+| Unresolved P0/P1 | None |
+| 0.68.2 production API/browser/stability smoke | PASS |
+| Default Beta analysis excludes smoke/internal accounts; raw retained | PASS |
+
+**READY FOR WAVE 1.** Recommend continuing production Viewer **0.68.2** with frozen **annual-observation-v4.5.0**. No further internal expansion.
+
+User clarified that invitations are distributed manually from the pre-generated batch. Existing Wave 1 12-code batch split into **10 ready for manual distribution + 2 reserve**, no extra codes created, all files mode **0600**:
+
+- Ready: `/var/tmp/annual-beta-invites-20260916-wave1-ready.csv`.
+- Reserve: `/var/tmp/annual-beta-invites-20260916-wave1-reserve.csv` (replacement / recruitment / recovery).
+
+Hand off the ready file for the user to distribute 8–10 invitations. Codes are not printed in this report or committed to Git. No claim that recipients have already received/redeemed them. Wave 2 remains untouched. Optional actual email delivery remains unverified as noted above; no synthetic email success claim.
