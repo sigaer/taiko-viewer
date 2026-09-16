@@ -106,6 +106,8 @@ export type AnnualPosterRow = {
 export type AnnualJobParameters = {
   locale?: AnnualLocale;
   shareId?: string;
+  inputRevision?: string;
+  algorithmVersion?: string;
 };
 
 export type AnnualShareCardRow = {

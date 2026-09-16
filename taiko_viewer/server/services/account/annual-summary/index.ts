@@ -1,4 +1,5 @@
 import { trackBetaUser } from "~/server/services/annual-beta/events";
+import { annualBuildInputRevision, canReuseAnnualFailure } from "./build-recovery";
 import { createHash, randomUUID } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -217,6 +218,14 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     versionKey: version.key,
     type: "build"
   });
+  let terminalJob = null;
+  if (!payload && !activeJob) {
+    const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
+    if (failed) {
+      const revision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_ALGORITHM_VERSION);
+      if (canReuseAnnualFailure(failed, revision)) terminalJob = failed;
+    }
+  }
   return {
     availableVersions: [version],
     selectedVersion: version,
@@ -225,10 +234,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     inputFingerprint: latestRow?.input_fingerprint || "",
     summary: payload?.summary || null,
     share: payload?.share || null,
-    buildJob: activeJob ? serializeAnnualJob(activeJob) : (!payload ? await (async () => {
-      const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
-      return failed ? serializeAnnualJob(failed) : null;
-    })() : null)
+    buildJob: activeJob ? serializeAnnualJob(activeJob) : terminalJob ? serializeAnnualJob(terminalJob) : null
   };
 };
 
@@ -454,7 +460,7 @@ export const recoverAnnualJobs = async () => {
 export const queueAccountAnnualSummaryBuild = async (
   userId: number,
   versionInput: unknown,
-  options: { locale?: unknown; bindingId?: number } = {}
+  options: { locale?: unknown; bindingId?: number; retryFailed?: boolean } = {}
 ) => {
   const version = resolveAnnualVersion(versionInput);
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
@@ -482,13 +488,18 @@ export const queueAccountAnnualSummaryBuild = async (
       }
     }
 
+    const inputRevision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_ALGORITHM_VERSION);
+    const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
+    if (!options.retryFailed && canReuseAnnualFailure(failed, inputRevision)) {
+      return { job: serializeAnnualJob(failed!), summary: null };
+    }
     const job = await insertAnnualJob({
       id: randomUUID(),
       userId,
       bindingId: binding.id,
       versionKey: version.key,
       type: "build",
-      parameters: {}
+      parameters: { inputRevision, algorithmVersion: ANNUAL_ALGORITHM_VERSION }
     });
     if (!job) throw createError({ statusCode: 500, statusMessage: "无法创建年度总结任务" });
     enqueueAnnualJob(job);
@@ -983,7 +994,7 @@ export const queueAdminAnnualSummaryBuild = async (userId: number, versionInput:
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
   }
-  return queueAccountAnnualSummaryBuild(userId, version.key, { ...options, bindingId });
+  return queueAccountAnnualSummaryBuild(userId, version.key, { ...options, bindingId: binding.id, retryFailed: options.force });
 };
 
 export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bindingId: number, versionInput: unknown, options: { locale?: unknown; force?: boolean } = {}) => {
@@ -995,7 +1006,7 @@ export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bin
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
   }
-  return queueAccountAnnualSummaryBuild(userId, version.key, options);
+  return queueAccountAnnualSummaryBuild(userId, version.key, { ...options, bindingId, retryFailed: options.force });
 };
 
 export const buildAdminAnnualPreview = async (taikoIdInput: unknown) => {

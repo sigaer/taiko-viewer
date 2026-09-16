@@ -41,5 +41,7 @@ export const BETA_TABLES = [
 export const BETA_MIGRATIONS = [
  "ALTER TABLE web_annual_summary_access ADD COLUMN enabled TINYINT(1) NOT NULL DEFAULT 1",
  "ALTER TABLE web_annual_summary_access ADD COLUMN invite_id CHAR(36) NULL",
- "ALTER TABLE web_annual_summary_access ADD COLUMN feature VARCHAR(64) NOT NULL DEFAULT 'annual_first_run_beta'"
+ "ALTER TABLE web_annual_summary_access ADD COLUMN feature VARCHAR(64) NOT NULL DEFAULT 'annual_first_run_beta'",
+ "ALTER TABLE web_beta_participants ADD COLUMN analysis_excluded TINYINT(1) NOT NULL DEFAULT 0",
+ "ALTER TABLE web_beta_invites ADD COLUMN analysis_excluded TINYINT(1) NOT NULL DEFAULT 0"
 ];

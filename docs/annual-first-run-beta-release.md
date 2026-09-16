@@ -144,3 +144,129 @@ Final gate pending refreshed admin authentication for anchors 66792598 / 4727997
 - `taiko_viewer/server/utils/account-db.ts`
 - `taiko_viewer/tests/adminAuthTrustBoundary.test.mjs`
 - `taiko_viewer/tests/annualBeta.integration.test.mjs`
+
+## Final Wave 1 Sign-off
+
+Status during patch preparation: **HOLD — P1 failed-job recovery**. The following investigation supersedes the earlier “no unresolved product P0/P1” statement. No full-corpus rerun; Annual core and algorithm remain frozen.
+
+### Admin auth
+
+Refreshed session verified at **2026-09-16 21:52:50 CST**, production `/api/admin/annual-beta` HTTP 200. Operator authentication uses the existing trusted backend. Supplied Viewer owner session belongs to user 1, not malu; investigation uses authorized operator routes, never owner impersonation. Credentials are private, excluded from Git/report/log output.
+
+### Remaining anchors
+
+Pre-patch production 0.68.1: all three passed real browser/API checks in zh and ja. Latest-patch verification remains required below.
+
+| Taiko ID | Standing key | zh evidence | zh Finale = Poster | ja Finale = Poster |
+| --- | --- | --- | --- | --- |
+| 66792598 | standing_12_gold_rainbow | 七段 · 金虹合格 | 初虹 | 初虹 |
+| 47279977 | standing_15_gold | 十段 · 金合格 | 天衡破阵 | 天衡破陣 |
+| 84813650 | standing_16_gold_rainbow | 玄人 · 金虹合格 | 玄钢无瑕 | 玄鋼無瑕 |
+
+ja evidence resolved from Japanese dictionaries; generator/API finalTitle equality passed. Previously completed 40500773/49557999 were not rerun before the patch. All five will receive the requested post-patch regression.
+
+### Real First-Run Incident
+
+**Classification: CASE D — Failed-job terminal trap, P1.** Historical failures were Viewer schema validation errors. They were retained after that schema problem had been fixed, and 0.68.1 reused the last failed task indefinitely. Current data is sufficient and the production-source generator succeeds. This is not a new generator exception, insufficient-data condition, auth failure, ownership mix-up, or demonstrated sync race.
+
+#### Identity / binding / entitlement
+
+Viewer `malu` = internal user **31**, current binding **552**, Taiko **99408699**, source `wahlap`. Binding created 2026-09-14 22:58:53 CST and current by 23:00:58. The only current owner of 99408699 is user 31. An older manual binding belongs to the same user and is not current; its summary is correctly not served for binding 552. No cross-user data / P0.
+
+Entitlement `annual_first_run_beta` enabled, existing internal grant from 2026-08-03, no invite required. Participant `b660f0f2-2c66-48ff-bcaa-4aea5814c940`, hint T0; no pending invite or entitlement mismatch established.
+
+#### Lifecycle timeline
+
+All times below are **CST (UTC+8)**. Missing pre-telemetry events are explicitly unknown, not reconstructed as synthetic success events.
+
+| Time | Evidence / event |
+| --- | --- |
+| Sep 14 22:58:53–23:00:58 | Binding 552 created and made current; predates Beta binding telemetry |
+| Sep 14 23:02:15–23:02:20 | Historical completed build for binding 552; no summary currently linked |
+| Sep 15 13:51:48 | Existing authenticated session created; no new `auth_success` in today's entry |
+| Sep 16 00:31:57–00:32:06 | Failed build #1, schema rejects v4.5 finalTitle fields |
+| Sep 16 00:32:10–00:32:15 | Failed build #2, same validation failure |
+| Sep 16 00:32:39 | Sync log 188 success, `sakura-bot`; current userdata/history updated |
+| Sep 16 00:32:45–00:32:49 | Failed build #3, same validation failure despite completed sync |
+| Sep 16 00:32:59–00:33:04 | Failed build #4; retained terminal task |
+| Sep 16 21:35:34.753 | `home_view` |
+| Sep 16 21:35:34.759 | `annual_entry_impression`, home_hero |
+| Sep 16 21:36:07.304 | `annual_entry_click` |
+| Sep 16 21:36:07.477 | `annual_entry_ready` |
+| Sep 16 21:36:17.767 / 21:36:24.106 | Repeated entry clicks; no additional build jobs |
+
+At today's click binding was already successful and last sync had completed ~21h 3m 28s earlier. No new invite validate/redeem, auth, binding start/pending/verify, data_sync_start/success/failure, annual_build_start/success/failure, annual_unavailable, or annual_report_open was recorded during this entry. Old failed task reuse explains the missing new build events.
+
+Historical build starts were 42s and 29s before the last recorded sync success, then 6s and 20s after it. All had sufficient history and the same schema error. There were four serial attempts, no overlapping build intervals. Existing records do not establish which old attempts were user clicks versus old client retries; today's three clicks created zero jobs.
+
+#### Sync and snapshots
+
+- Current userdata exists; mtime **2026-09-16 00:32:39.396 CST**. Last successful sync log 188: 00:32:39, transport `sakura-bot`, 1519 songs, message confirms userdata/history refresh.
+- Last sync duration/start timestamp was not recorded by this historical transport; no duration inferred from identical created/updated timestamps. No failure reason on that successful sync.
+- History directory exists, not a symlink. 936 raw files; 881 reconstructed snapshots; ignored files 0, symlink snapshots 0, alias-named snapshots 0.
+- Exact frozen Annual interval: **2025-10-09 06:00 → 2026-09-11 04:00 CST**. Raw filename timestamps inside interval: 366. Reconstructed observed snapshots in interval: **312**, plus one preceding baseline (313 selected).
+- Earliest reconstructed timestamp 2023-10-27 22:18:47; latest 2026-09-16 00:32:39.351496. This account has substantial annual history, not current-only data.
+
+#### Build jobs and cache
+
+All four failed jobs belong to user 31 / binding 552 / annual_2026. Each has error `BUILD_FAILED`, safe message “年度总结生成失败，请稍后重试”, summary ID null, parameters `{}`. Historical jobs did not record algorithm version; do not invent that field. Their logs show generation reached 312 annual observations / 1802 changes, then Viewer schema validation rejected `/finalTitle` additional properties `strongDan` and `standingPresentation`.
+
+| job_id | Created = started CST | Finished CST | State |
+| --- | --- | --- | --- |
+| 82b146c3-96a8-4d65-962e-d7ebf4fda42d | Sep 16 00:31:57 | 00:32:06 | failed |
+| 69bd8e08-820e-43d5-9a18-20577c85334e | Sep 16 00:32:10 | 00:32:15 | failed |
+| 3614ea01-077b-42e6-90f2-83ef5f1b235a | Sep 16 00:32:45 | 00:32:49 | failed |
+| 1c504ae3-c719-4ef9-953c-44d8428246d8 | Sep 16 00:32:59 | 00:33:04 | failed; reused by 0.68.1 |
+
+Binding 552 has no current summary row, hence no reusable/stale summary to serve. The old manual binding's completed summary is unrelated to current binding. No active job. Production admin job GET returned **HTTP 200 / business failed / BUILD_FAILED**; search correctly returned binding 552 and no summary. This was not 401/403.
+
+0.68.1 envelope returned latest failed task whenever no payload/active job existed. Reload normalized it to `jobStatus=failed`, which prevented the automatic normal build POST. A direct old normal POST could have retried, but entry/reload never reached it. The new revision guard makes normal force=false behavior consistent on both envelope and queue.
+
+#### Isolated production-source generator
+
+`plugins.utils.annual_summary` CLI used real current userdata/history, current song/rating files, disabled normalized cache and Python bytecode writes, and wrote only a private `/var/tmp` output. No production DB/cache write.
+
+**SUCCESS**: schema 4, algorithm `annual-observation-v4.5.0`, summary ID `annual_73c77d3717c14be70cca3873`, 17 sections / 1802 events, ordinary title `final_exploration_endurance`, strongDan false, standing presentation null. No Python exception. No input or generator changes.
+
+#### API → UI contract
+
+```text
+0.68.1: no current summary + last failed task
+  → envelope.buildJob.status=failed, error.code=BUILD_FAILED
+  → version-summary.vue watcher sets jobStatus, skips automatic build
+  → AnnualBuildPrelude failed branch
+  → “生成报告失败” / “本次装订停留在了半路”
+
+INSUFFICIENT_DATA
+  → explicit earlier unavailable branch in version-summary.vue
+  → “当前年度记录不足，暂时无法生成年度报告。”
+  → annual_unavailable reason=insufficient_data
+```
+
+The insufficient-data branch already existed and is correct for its error code. The patch also suppresses the generic error toast after polling a legitimate insufficient-data result. No unused locale keys or Annual narrative changes.
+
+#### Affected scope and minimal fix
+
+Read-only production query: **1 account** whose latest build is failed (99408699); **0 accounts** with current userdata modified after that latest failed completion. Malu's problem is recovery after the Viewer schema contract was fixed, not a data update after its last failure. The previously measured 23 insufficient-history accounts are not the affected population for this incident.
+
+0.68.2 records a source revision (current userdata + snapshot file metadata, algorithm, independent Viewer build-state revision) at job creation. Same revision + failed job remains terminal for normal requests, including repeated POSTs. Changed data revision permits a new normal build. Legacy jobs without a revision get one fresh attempt; its outcome records the revision, preventing a reload loop. Explicit retry remains available. Frozen algorithm version is unchanged.
+
+Operator state endpoint reads the same owner envelope through the existing admin/operator boundary. Selected-binding forwarding in admin build now preserves the validated binding. No summary injection, cache clearing, job-status rewrite, failed-job deletion, snapshot fabrication, or special case for 99408699.
+
+#### Predeployment regression
+
+- `npm run test:annual` (including source-revision recovery test), annual period regression, admin trust-boundary regression: PASS.
+- Real isolated DB identity `_test` + explicit mutation opt-in; real HTTP/generator with entirely synthetic userdata, no production data copied into test DB.
+- No-history build → INSUFFICIENT_DATA; browser friendly unavailable, no generic failure / API 500; repeated reload/normal POST reuse the same failed task, total build count 1.
+- Add synthetic annual observations → envelope no longer reuses failure → two concurrent normal POSTs deduplicate to one cold build → completed v4.5 summary. Telemetry unavailable + build_success, no build_failure.
+- Dashboard default excludes marked participant across funnel/times/feedback/invites; raw operational counts unchanged. A real invited T3 tester remains in the funnel; T3 alone is not treated as internal. Anonymous operator state request returns 401.
+
+Private evidence: `/var/tmp/annual-beta-final-signoff/` (auth excluded from reports). Fix commit/deploy and post-patch production results will be recorded after release.
+
+### Email smoke
+
+**N/A for this execution — optional live delivery not completed.** Production registration requires email verification, so this is not a claim that email is unnecessary. Earlier synthetic verification fixtures did not prove actual email receipt. No authorized readable smoke mailbox was supplied; requested separately. This optional item is not a root-cause or sign-off prerequisite under the requested gate.
+
+### Dashboard isolation
+
+Predeployment PASS. Formal analysis defaults to excluding explicitly marked internal/smoke participants and existing pre-Beta internal grants. Raw events remain available with the operator toggle. Postdeploy classification of the four known production smoke accounts and four anonymous viewport QA participants remains pending; T3 hint alone will no longer be relied on to filter general funnel counts.

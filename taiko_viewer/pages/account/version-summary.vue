@@ -150,13 +150,13 @@ const resumeJob = async (job: AnnualJob) => {
   }
 };
 
-const buildSummary = async () => {
+const buildSummary = async (retryFailed = false) => {
   if (building.value) return;
   const generation = ++pollGeneration;
   building.value = true;
   try {
     const payload = await apiFetch<{ job: AnnualJob; summary?: AnnualSummaryV4 }>("/api/account/annual-summaries/annual_2026/build", {
-      method: "POST", body: { locale: locale.value === "ja" ? "ja" : "zh" }
+      method: "POST", body: { locale: locale.value === "ja" ? "ja" : "zh", retryFailed }
     });
     jobStatus.value = payload.job;
     if (payload.summary || payload.job.status === "completed") await reloadAnnual();
@@ -165,7 +165,7 @@ const buildSummary = async () => {
     drawerOpen.value = false;
     ElMessage.success(t("annualSummary.state.buildReady"));
   } catch (error) {
-    ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
+    if (jobStatus.value?.error?.code !== "INSUFFICIENT_DATA") ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
   } finally {
     pollingJobId = "";
     if (generation === pollGeneration) building.value = false;
@@ -231,7 +231,7 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
       <p>{{ t("annualSummary.state.loading") }}</p>
     </div>
 
-    <div v-else-if="jobStatus?.error?.code === 'INSUFFICIENT_DATA'" class="annual-state"><h1>{{t('account.versionSummary')}}</h1><p>{{locale==='ja'?'この年度の記録が不足しているため、まだレポートを作成できません。':'当前年度记录不足，暂时无法生成年度报告。'}}</p><NuxtLink :to="localePath('/account/sync')">{{t('annualSummary.state.openSync')}}</NuxtLink><el-button :loading="building" @click="buildSummary">{{locale==='ja'?'更新後に再試行':'更新数据后重试'}}</el-button></div>
+    <div v-else-if="jobStatus?.error?.code === 'INSUFFICIENT_DATA'" class="annual-state"><h1>{{t('account.versionSummary')}}</h1><p>{{locale==='ja'?'この年度の記録が不足しているため、まだレポートを作成できません。':'当前年度记录不足，暂时无法生成年度报告。'}}</p><NuxtLink :to="localePath('/account/sync')">{{t('annualSummary.state.openSync')}}</NuxtLink><el-button :loading="building" @click="buildSummary(true)">{{locale==='ja'?'更新後に再試行':'更新数据后重试'}}</el-button></div>
     <AnnualBuildPrelude
       v-else-if="!summary && (building || jobStatus)"
       :status="jobStatus?.status || 'queued'"
@@ -239,7 +239,7 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
       :percent="jobStatus?.progressPercent"
       :detail="jobStatus?.progressDetail"
       :error="jobStatus?.error?.message || ''"
-      @retry="buildSummary"
+      @retry="buildSummary(true)"
       @sync="navigateTo(localePath('/account/sync'))"
     />
 
