@@ -2,9 +2,9 @@
 
 ## Current gate
 
-**READY FOR WAVE 1 — 2026-09-16 22:23 CST.** The malu first-run incident is closed, remaining anchors and latest-patch production smoke PASS, no unresolved P0/P1. Keep production 0.68.2 running. Stop internal expansion; hand off Wave 1 codes for manual distribution.
+**READY FOR WAVE 1 — invite uniqueness confirmed — 2026-09-16 23:10 CST.** Viewer 0.68.3 production uniqueness smoke and audit PASS. The earlier malu/anchor sign-off remains intact; no unresolved invite allocation blocker. Continue manual Wave 1 distribution from the unchanged batch, without further internal expansion.
 
-Viewer **0.68.2** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Viewer **0.68.3** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
 
 ## Repository and title relations
 
@@ -327,7 +327,7 @@ Hand off the ready file for the user to distribute 8–10 invitations. Codes are
 
 ## Invite uniqueness final check
 
-2026-09-16: requested bearer-code contract review. Production **0.68.2** audited before implementation changes. Current uniqueness sign-off: **pending 0.68.3 deployment verification**; no formal invite used for testing.
+2026-09-16: requested bearer-code contract review. Production **0.68.2** audited before implementation changes. Final uniqueness sign-off: **READY FOR WAVE 1 — invite uniqueness confirmed**; no formal invite used for testing.
 
 ### Production audit before changes
 
@@ -396,3 +396,39 @@ Additional checks: disabled submitted invite cannot defeat existing entitlement;
 Real authenticated isolated HTTP: first redeem, cookie-cleared retry, second-session fresh invite, simultaneous same-user two-session redemption, one successful redeemed event per user, skipped telemetry, and Dashboard consumption surviving later disable: **PASS**. Annual regression **9 PASS**, admin trust-boundary regression **PASS**. No full corpus, anchors, Binding/Sync or broader first-run retest.
 
 Private evidence: `/var/tmp/annual-beta-invite-uniqueness/`. Deployment and final production audit follow below.
+
+### Deployment and final verification
+
+Release **`2e2d359`**, Viewer **0.68.3**, standard `bash scripts/deploy_forum_web.sh "<HEAD subject>"` exited **0** at approximately **23:09 CST**. Production homepage/version and normal health checks passed, service active / NRestarts 0. Optional Baidu daily quota response did not affect deployment. Algorithm remains **annual-observation-v4.5.0**. No manual push, restart, output replacement or formal batch regeneration.
+
+Production smoke at **23:09:37 CST** used exactly one newly created, immediately internal-marked invite (`b92fb782-480b-46a4-89d3-7218f4d79282`), separate from the 44 formal codes. Existing internal user 1 and previously invited smoke user 767 each authenticated, validated that new code and called redeem twice (including after pending cookie deletion). All four redeems returned **HTTP 200 / ALREADY_ENTITLED / reused=true**.
+
+- New smoke invite usage remained **0**; no pending record was falsely marked redeemed.
+- Both users' entitlement and participant/invite attribution were unchanged.
+- Additional `beta_invite_redeemed` events **0**; skipped events **2**, reason `already_entitled` (one per session).
+- New invite was disabled at completion and remains analysis_excluded. No historical invite/job/event deletion or correction.
+- Production unique owner index confirmed present and unique.
+- Dashboard formal consumed invites / invited users = **0 / 0**; operational including prior smoke = **4 / 4**. New smoke and internal events remain excluded from formal analysis.
+
+Final read-only audit at **23:09:47 CST**:
+
+| Audit | Formal | Including internal/smoke |
+| --- | ---: | ---: |
+| Duplicate-consumption users | **0** | **0** |
+| Multi-owner invites | **0** | **0** |
+| Participant attribution anomalies | **0** | **0** |
+| used_count vs actual grant mismatch | **0** | **0** |
+| Redeemed pending linked to unused invite | **0** | **0** |
+
+The only invite-count change is the one new disabled internal smoke code: operational 49 → 50, formal remains **44**. Exact before/after comparison of the formal IDs, used_count, max_uses, expiry, disabled/internal flags and private CSV SHA-256 passed. **10 ready + 2 reserve + 32 Wave 2 remain entirely unused**, unchanged and unreplaced.
+
+| Contract | Final result |
+| --- | --- |
+| 1 invite → ≤1 authenticated owner | PASS — row lock, single-use conditional update, unique invite owner index |
+| 1 user → ≤1 consumed invite | PASS — user serialization before invite consumption, retained unique user grant |
+| Existing enabled entitlement → no fresh invite consumption | PASS — invited and internal grants |
+| Same-user retry idempotent | PASS — including cleared pending cookie, no generic error |
+| Same-user / two-invite race | PASS — isolated MySQL and real authenticated two-session HTTP |
+| Two-user / one-invite race | PASS — existing and added isolated MySQL regressions |
+
+**READY FOR WAVE 1 — invite uniqueness confirmed.** Keep production **0.68.3**. No further internal testing added; existing Wave 1 ready/reserve files remain the manual-distribution handoff.
