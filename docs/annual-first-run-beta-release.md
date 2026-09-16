@@ -4,7 +4,7 @@
 
 Implementation and production first-run smoke PASS. Remaining verification: three anchor accounts need a refreshed administrator session. Do not claim the complete five-anchor gate yet.
 
-Viewer 0.68.0 released; 0.68.1 recovery patch prepared. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Viewer **0.68.1** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
 
 ## Repository and title relations
 
@@ -12,7 +12,8 @@ Viewer 0.68.0 released; 0.68.1 recovery patch prepared. Algorithm remains annual
 - `b298389`: reduced-motion fix and minor version bump.
 - `0943414`: atomic invitation/entitlement and lightweight event storage.
 - `0ebf784`: Hero, entry and first-run lifecycle.
-- `df342de`: feedback, operations Dashboard and runbook.
+- `df342de`: feedback, operations Dashboard and runbook (0.68.0 release).
+- `e996a89`: replacement-invite recovery and 0.68.1 patch release.
 
 Found exact 34291… backup `/var/tmp/annual-v45-unrelated-before-fix.json`. Compared against actual tracked HEAD: 71 added / 20 removed / 67 changed, not formatting/sort-only; duplicate references 0; title names unresolved 0; song names unresolved 19 HEAD / 24 candidate. The file has names rather than numeric IDs. Candidate incorrectly turns generic play conditions/series into song references. Rejected candidate; restored exact tracked HEAD. See [full semantic audit](annual-beta-title-relations-audit.md).
 
@@ -58,6 +59,7 @@ Low-interference data issue button plus Poster survey; seven issue categories se
 - Real isolated browser anonymous-to-auth continuation PASS.
 - Real isolated HTTP binding unchanged/changed and sync success PASS; external upstream simulated only in private preload, no production bypass added.
 - Real runtime generator with synthetic no-history data → INSUFFICIENT_DATA, telemetry and terminal reload reuse PASS.
+- Real runtime generator with entirely synthetic, sufficient snapshot fixture → completed cold build, annual_build_success event, valid v4.5 summary and cached ready envelope PASS. No production data copied into test DB.
 - Vue SFC compilation and git diff whitespace check PASS.
 
 All pre-release mutation tests used actual SELECT DATABASE() `_test` and explicit opt-in. Test credentials/evidence stay private in `/var/tmp/annual-first-run-beta/`. Production account/binding smoke will use user-authorized test creation and ID 2258735, expected-state validation only; no title change or binding transfer.
@@ -77,13 +79,68 @@ Production results:
 - Anchors 40500773 and 49557999: generator/API final title equality, Finale/Poster and standing evidence PASS. At 66792598 the admin build API returned 401 when the provided session expired at 21:19 CST; 47279977/84813650 not yet run. This is an authentication prerequisite, not evidence of a report crash. Prior v4.5 full validation remains unchanged.
 - Initial five-minute soak: unexpected annual 5xx 0, error/job-exception log lines 0, service restarts 0; memory declined from ~1.78 GB to ~1.21 GB. No smoke invitation found in access/journal logs.
 
-One additional recovery issue found during review: a code consumed/disabled during auth left no direct way to enter a replacement. 0.68.1 adds that recovery action without changing invite/generator semantics. Lightweight real-component fixture verifies error → new code → redeem → binding.
+One additional recovery issue found during review: a code consumed/disabled during auth left no direct way to enter a replacement. 0.68.1 adds that recovery action without changing invite/generator semantics. Lightweight real-component fixture verifies error → new code → redeem → binding. Standard deployment of `e996a89` exited 0; production homepage and image 200, version 0.68.1, service active/NRestarts=0. A fourth dedicated production test account then passed the real disabled-during-auth → re-enter → replacement-code redeem → binding flow.
 
 Invite batch (all unused, single-use, 0600 verified):
 
 - Wave 1: 12, `/var/tmp/annual-beta-invites-20260916-wave1.csv`.
 - Wave 2: 32, `/var/tmp/annual-beta-invites-20260916-wave2.csv`.
 
-Three separate smoke invites are not part of those 44 distributable codes. Smoke participants are marked T3 to exclude them from self-service activation; raw funnel counts retain their test events as the operational baseline. Private evidence: `/var/tmp/annual-first-run-beta/production-*.json` and screenshots.
+Five separate smoke invites (four redeemed, one deliberately disabled) are not part of those 44 distributable codes. Smoke accounts 767/768/769 and the replacement-flow account (ID in private recovery evidence) are marked T3 to exclude them from self-service activation; raw funnel counts retain their test events as the operational baseline. Private evidence: `/var/tmp/annual-first-run-beta/production-*.json` and screenshots.
 
-Final gate pending refreshed admin authentication for remaining anchors and 0.68.1 deployment verification. No unresolved product P0/P1 established; READY is not asserted while required verification remains incomplete.
+Final gate pending refreshed admin authentication for anchors 66792598 / 47279977 / 84813650. 0.68.1 deployment verification is complete. Recommendation: keep the deployed production release; hold Wave 1 sign-off until these three requested checks are finished. No unresolved product P0/P1 established; READY is not asserted while required verification remains incomplete.
+
+## Changed files
+
+- `docs/annual-beta-title-relations-audit.md`
+- `docs/annual-first-run-beta-plan.md`
+- `docs/annual-first-run-beta-release.md`
+- `taiko_viewer/components/AnnualBetaContinue.vue`
+- `taiko_viewer/components/AnnualBetaFeedback.vue`
+- `taiko_viewer/components/AnnualHero.vue`
+- `taiko_viewer/components/account/version-summary/StoryPlayer.vue`
+- `taiko_viewer/components/account/version-summary/slides/OpeningSlide.vue`
+- `taiko_viewer/components/account/version-summary/slides/PosterSlide.vue`
+- `taiko_viewer/components/admin/AdminShellNav.vue`
+- `taiko_viewer/composables/useAnnualBeta.ts`
+- `taiko_viewer/middleware/annual-summary-access.ts`
+- `taiko_viewer/package-lock.json`
+- `taiko_viewer/package.json`
+- `taiko_viewer/pages/account/login.vue`
+- `taiko_viewer/pages/account/profile.vue`
+- `taiko_viewer/pages/account/register.vue`
+- `taiko_viewer/pages/account/sync.vue`
+- `taiko_viewer/pages/account/version-summary.vue`
+- `taiko_viewer/pages/admin/taiko/annual-beta.vue`
+- `taiko_viewer/pages/annual.vue`
+- `taiko_viewer/pages/index.vue`
+- `taiko_viewer/public/hero.png`
+- `taiko_viewer/scripts/create_annual_beta_invites.mjs`
+- `taiko_viewer/scripts/verify_admin_annual_report.mjs`
+- `taiko_viewer/scripts/verify_annual_beta_http.mjs`
+- `taiko_viewer/server/api/account/auth/login.post.ts`
+- `taiko_viewer/server/api/account/auth/register.post.ts`
+- `taiko_viewer/server/api/account/bindings/confirm.post.ts`
+- `taiko_viewer/server/api/account/bindings/prepare.post.ts`
+- `taiko_viewer/server/api/account/sync.post.ts`
+- `taiko_viewer/server/api/account/sync/kinoko-history-import.post.ts`
+- `taiko_viewer/server/api/account/sync/kinoko-import.post.ts`
+- `taiko_viewer/server/api/admin/annual-beta/index.get.ts`
+- `taiko_viewer/server/api/admin/annual-beta/manage.post.ts`
+- `taiko_viewer/server/api/admin/annual-beta/participant.get.ts`
+- `taiko_viewer/server/api/annual-beta/events.post.ts`
+- `taiko_viewer/server/api/annual-beta/feedback.post.ts`
+- `taiko_viewer/server/api/annual-beta/redeem.post.ts`
+- `taiko_viewer/server/api/annual-beta/status.get.ts`
+- `taiko_viewer/server/api/annual-beta/validate.post.ts`
+- `taiko_viewer/server/services/account/annual-summary/access.ts`
+- `taiko_viewer/server/services/account/annual-summary/index.ts`
+- `taiko_viewer/server/services/account/annual-summary/repository.ts`
+- `taiko_viewer/server/services/account/annual-summary/runtime.ts`
+- `taiko_viewer/server/services/annual-beta/admin.ts`
+- `taiko_viewer/server/services/annual-beta/core.ts`
+- `taiko_viewer/server/services/annual-beta/events.ts`
+- `taiko_viewer/server/services/annual-beta/schema.ts`
+- `taiko_viewer/server/utils/account-db.ts`
+- `taiko_viewer/tests/adminAuthTrustBoundary.test.mjs`
+- `taiko_viewer/tests/annualBeta.integration.test.mjs`
