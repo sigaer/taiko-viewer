@@ -457,3 +457,9 @@ Before mutation, all existing formal codes were confirmed unused: ready 10, rese
 Private evidence: `/var/tmp/annual-beta-invite-uniqueness/short-code-tests.log`, `short-code-deploy.log`, `short-code-smoke-results.json`, `short-code-batch.json`, `short-code-before.json`, `short-code-after.json`. The initial private batch-script CSV date guard stopped before any write due to a CRLF parse issue; trimming that field resolved it, with no partial inventory mutation.
 
 **READY FOR WAVE 1 — 40 short codes ready for manual distribution.**
+
+## Desktop Annual entry restriction
+
+Viewer 0.68.5 adds a browser-device guard to `/annual` and `/account/version-summary`, including Japanese routes. Desktop entry returns to the homepage and opens the existing dialog with “请使用移动端打开年度报告。” / “年間レポートはモバイル端末で開いてください。”. The guard runs before report setup so blocked entry does not request/build a report. Mobile browsers, including desktop-mode iPadOS, can continue. Operator previews, public share cards and internal poster rendering retain their routes.
+
+Validation: `npm run test:annual` 11 PASS; isolated browser matrix 9 PASS covering zh/ja direct entry, direct report, homepage Hero, narrow desktop, Escape/confirm dismissal, iPhone, Android and desktop-mode iPad. Blocked browser requests to Annual summary/build and invite validation/redemption: 0. No Annual algorithm or invite allocation changes. Production verification pending deployment. Private evidence: `/var/tmp/annual-mobile-gate/`.

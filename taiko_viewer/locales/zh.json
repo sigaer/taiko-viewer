@@ -665,6 +665,7 @@
       "opening": "开场", "profile": "身份", "period": "时间", "overview": "总览", "favorite": "最爱", "obsession": "回响", "favoriteShift": "新旧", "keyword": "关键词", "ratingRank": "RT", "monthly": "月度", "weekday": "星期", "calendar": "日历", "timeOfDay": "时段", "lateNight": "深夜", "speedProfile": "倍速", "nearDondaful": "近全良", "challenge": "挑战", "pound": "连打", "highScore": "高分", "milestones": "时刻", "breakthrough": "突破", "final": "称号", "poster": "海报"
     },
     "state": {
+      "mobileOnly": "请使用移动端打开年度报告。",
       "loading": "正在整理你的 2026 太鼓记录…",
       "missing": "还没有可以整理的太鼓记录。请先同步当前绑定，再回来生成年度回顾。",
       "loadFailed": "年度回顾加载失败，请稍后重试。",
