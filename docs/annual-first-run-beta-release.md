@@ -2,9 +2,9 @@
 
 ## Current gate
 
-**READY FOR WAVE 1 — invite uniqueness confirmed.** Production Viewer **0.68.5**, verified 2026-09-17. Current manual-distribution handoff is **40 new eight-character codes**; the old ready list of 10 unused long codes is retired by user instruction. Reserve 2 and Wave 2 32 remain unchanged. Prior Annual sign-off remains intact.
+**CONTINUE WAVE 1 / HOLD WAVE 2.** Production Viewer **0.68.8**, verified 2026-09-17 23:16–23:18 CST. Mobile/Poster reliability patch and online smoke passed; real iOS Safari and Android device confirmation remains open. Existing Wave 1 proceeds; no new internal cohort is requested.
 
-Viewer **0.68.5** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets and invitation/binding/sync contracts unchanged. The prior 40-short-code handoff remains in use; this patch did not consume or replace formal invitations.
 
 ## Repository and title relations
 
@@ -487,4 +487,17 @@ Viewer target **0.68.8** (production baseline was 0.68.7; the request's 0.68.3 b
 
 ### Release and gate
 
-Deployment and online smoke results follow below. Until these complete, production verification remains pending. Continue the existing Wave 1 cohort after successful release smoke; **HOLD WAVE 2** pending mobile-device confirmation. No additional internal cohort or invitation consumption is part of this patch.
+Deployment and online smoke passed as recorded below. **CONTINUE WAVE 1 / HOLD WAVE 2** pending mobile-device confirmation. No additional internal cohort or invitation consumption is part of this patch.
+
+
+### Production verification — 0.68.8
+
+- Release **`cb99451`**, standard `scripts/deploy_forum_web.sh` exited **0** on 2026-09-17 around 23:16 CST. Homepage serves **0.68.8**. Service active, NRestarts **0** before and after smoke. Baidu daily push quota was exhausted; deployment itself succeeded.
+- Existing internal owner authenticated Annual envelope: **HTTP 200 / ready**, algorithm **annual-observation-v4.5.0**.
+- Actual share-card save: **HTTP 200**, **cached=false** (new renderer revision exercised), community synchronization **skipped / not requested**. Generated PNG fetch **200**, **959,595 bytes**, **1080 × 1648**; visually inspected with all three cover images and profile artwork present.
+- Production mobile Chromium emulation: Annual → Poster opens; stage matches visual viewport; three covers loaded; broken images **0**, browser exceptions **0**.
+- Production keyboard simulation: Poster input and feedback textarea both retain stage **844** and grid height **507.97** when visible height becomes **430**. Feedback dialog stays inside the visible rectangle. No feedback or community post was submitted.
+- Production evidence: `production.json`, `production.log`, `production-keyboard.log`, `production-card.png`, `production-mobile.png`, `production-feedback.png` in the private evidence directory above. Five-anchor checks remain the isolated zh/ja payload regression described above; expired admin authentication was not treated as fresh production anchor PASS.
+- No formal invites consumed, no generator rebuild/cache purge, no user history altered. The unrelated corpus audit document remains outside this release.
+
+**Final: CONTINUE WAVE 1 / HOLD WAVE 2.** This closes the implemented reliability patch and production smoke, not the outstanding real-device Safari/Android acceptance.
