@@ -2,9 +2,9 @@
 
 ## Current gate
 
-**READY FOR WAVE 1 — invite uniqueness confirmed — 2026-09-16 23:10 CST.** Viewer 0.68.3 production uniqueness smoke and audit PASS. The earlier malu/anchor sign-off remains intact; no unresolved invite allocation blocker. Continue manual Wave 1 distribution from the unchanged batch, without further internal expansion.
+**READY FOR WAVE 1 — invite uniqueness confirmed.** Production Viewer **0.68.4**, verified 2026-09-17. Current manual-distribution handoff is **40 new eight-character codes**; the old ready list of 10 unused long codes is retired by user instruction. Reserve 2 and Wave 2 32 remain unchanged. Prior Annual sign-off remains intact.
 
-Viewer **0.68.3** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Viewer **0.68.4** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
 
 ## Repository and title relations
 
@@ -439,6 +439,21 @@ The only invite-count change is the one new disabled internal smoke code: operat
 
 New codes use cryptographically random eight-character uppercase strings from 32 symbols (`A–Z` excluding I/O, `2–9`), with no required separators. Input is case-insensitive and accepts an optional separator. Existing 32-hex-character codes remain compatible unless an individual unused code is explicitly retired as part of the batch handoff. SHA-256-only DB storage, current expiry/rate limits and single-user consumption guards remain unchanged. Unique-hash collision retries are bounded at five attempts.
 
-Before mutation, all existing formal codes were confirmed unused: ready 10, reserve 2, Wave 2 32. Inventory scope/old-ready retirement is being clarified; no existing formal code has been changed during implementation.
+Before mutation, all existing formal codes were confirmed unused: ready 10, reserve 2, Wave 2 32. User explicitly confirmed replacement of the old ready list with **40 entirely new short codes**, retiring only unused old-ready codes and preserving reserve/Wave 2 and existing entitlements.
 
 `test:annual:beta`: **17 PASS**, including short-code input, legacy normalization and real DB lookup, collision handling, T1–T8 and both concurrency contracts. Deployment and final inventory are recorded after production verification below. Private evidence remains outside Git.
+
+### Eight-character release and batch handoff — PASS
+
+- Release commit **`5dbe43c`**, Viewer **0.68.4**. Standard deploy script exited **0** around **2026-09-17 08:49 CST**. Service active / NRestarts 0; no manual deployment operations. Annual algorithm remains `annual-observation-v4.5.0`.
+- Real production API accepted a dedicated internal eight-character smoke code using lowercase and an optional hyphen. Existing-entitlement redeem returned **ALREADY_ENTITLED**, code usage remained zero. The smoke code was marked internal and disabled afterward; formal codes were not used for testing.
+- User-authorized batch replacement used a transaction: lock the ten old-ready rows, create forty random short-code rows, durably write a private CSV, disable only unconsumed old-ready rows, then commit. Old records retained; no entitlement/owner/participant changes. All ten old-ready codes were still unused, so ten were retired; no consumed qualification was affected.
+- New handoff: **40 / 40 unused, enabled and unexpired**, eight characters each, no duplicates. Expiry unchanged: **2026-10-16 23:59:59 CST**.
+- Current ready file: **`/var/tmp/annual-beta-invites-20260917-wave1-ready.csv`**, mode **0600**. Raw codes are not committed to Git or printed in this report.
+- The previous `/var/tmp/annual-beta-invites-20260916-wave1-ready.csv` remains an audit artifact; **do not distribute it**, its ten codes are disabled.
+- Reserve **2** and Wave 2 **32**: exact DB fields and private CSV hashes unchanged, all unused. These are separate from the current 40-code ready handoff. The formal table now retains 84 rows: 40 current ready + 2 reserve + 32 Wave 2 + 10 retired historical rows.
+- Post-operation formal and operational audits: duplicate-consumption users **0**, multi-owner invites **0**, attribution anomalies **0**, usage/grant mismatches **0**, falsely redeemed pending on unused invites **0**.
+
+Private evidence: `/var/tmp/annual-beta-invite-uniqueness/short-code-tests.log`, `short-code-deploy.log`, `short-code-smoke-results.json`, `short-code-batch.json`, `short-code-before.json`, `short-code-after.json`. The initial private batch-script CSV date guard stopped before any write due to a CRLF parse issue; trimming that field resolved it, with no partial inventory mutation.
+
+**READY FOR WAVE 1 — 40 short codes ready for manual distribution.**
