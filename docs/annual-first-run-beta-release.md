@@ -2,9 +2,9 @@
 
 ## Current gate
 
-**READY FOR WAVE 1 — invite uniqueness confirmed.** Production Viewer **0.68.4**, verified 2026-09-17. Current manual-distribution handoff is **40 new eight-character codes**; the old ready list of 10 unused long codes is retired by user instruction. Reserve 2 and Wave 2 32 remain unchanged. Prior Annual sign-off remains intact.
+**READY FOR WAVE 1 — invite uniqueness confirmed.** Production Viewer **0.68.5**, verified 2026-09-17. Current manual-distribution handoff is **40 new eight-character codes**; the old ready list of 10 unused long codes is retired by user instruction. Reserve 2 and Wave 2 32 remain unchanged. Prior Annual sign-off remains intact.
 
-Viewer **0.68.4** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
+Viewer **0.68.5** deployed. Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets, scene and Poster design unchanged.
 
 ## Repository and title relations
 
@@ -462,4 +462,4 @@ Private evidence: `/var/tmp/annual-beta-invite-uniqueness/short-code-tests.log`,
 
 Viewer 0.68.5 adds a browser-device guard to `/annual` and `/account/version-summary`, including Japanese routes. Desktop entry returns to the homepage and opens the existing dialog with “请使用移动端打开年度报告。” / “年間レポートはモバイル端末で開いてください。”. The guard runs before report setup so blocked entry does not request/build a report. Mobile browsers, including desktop-mode iPadOS, can continue. Operator previews, public share cards and internal poster rendering retain their routes.
 
-Validation: `npm run test:annual` 11 PASS; isolated browser matrix 9 PASS covering zh/ja direct entry, direct report, homepage Hero, narrow desktop, Escape/confirm dismissal, iPhone, Android and desktop-mode iPad. Blocked browser requests to Annual summary/build and invite validation/redemption: 0. No Annual algorithm or invite allocation changes. Production verification pending deployment. Private evidence: `/var/tmp/annual-mobile-gate/`.
+Validation: `npm run test:annual` 11 PASS; isolated browser matrix 9 PASS covering zh/ja direct entry, direct report, homepage Hero, narrow desktop, Escape/confirm dismissal, iPhone, Android and desktop-mode iPad. Blocked browser requests to Annual summary/build and invite validation/redemption: 0. No Annual algorithm or invite allocation changes. Release `400317d` deployed using the standard script on 2026-09-17. Production checks 8 PASS: zh/ja desktop direct entry/report and Hero popup/dismissal; iPhone/Android HTTP entry allowed. Production desktop smoke used the existing internal owner session to preserve funnel exclusion. No blocked build/redeem requests or browser exceptions; service active, NRestarts=0; homepage version 0.68.5 verified. Canonical title relations hash unchanged. Private evidence: `/var/tmp/annual-mobile-gate/`.
