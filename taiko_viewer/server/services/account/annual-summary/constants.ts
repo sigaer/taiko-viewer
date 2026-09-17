@@ -18,7 +18,7 @@ export const ANNUAL_POSTER_HEIGHT = 1440;
 export const ANNUAL_SHARE_CARD_WIDTH = 1080;
 export const ANNUAL_SHARE_CARD_HEIGHT = 1648;
 // Bump when the rendered share-card markup or CSS changes so cached files are re-rendered.
-export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v1";
+export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v2-assets";
 export const ANNUAL_MAX_EVENT_PAGE_SIZE = 200;
 
 export const getAnnualVersion = (): AnnualVersion => ({

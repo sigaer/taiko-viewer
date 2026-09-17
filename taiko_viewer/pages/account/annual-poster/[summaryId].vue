@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { prepareAnnualAssets } from "~/utils/annualAssets.client";
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import AnnualPoster from "~/components/account/version-summary/AnnualPoster.vue";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
@@ -35,12 +36,10 @@ const markReady = async () => {
   const serverQr = String((data.value?.summary.poster as Record<string, unknown> | undefined)?.qrCodeDataUrl || "");
   qrCodeUrl.value = serverQr || await createQrCode(shareUrl.value);
   await nextTick();
-  await document.fonts.ready;
-  await Promise.all(Array.from(document.images).map((image) => image.complete ? Promise.resolve() : new Promise<void>((resolve) => {
-    image.addEventListener("load", () => resolve(), { once: true }); image.addEventListener("error", () => resolve(), { once: true });
-  })));
-  await nextTick();
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  window.__ANNUAL_POSTER_READY__ = false;
+  const root = document.querySelector<HTMLElement>('.poster-render-page');
+  if (!root) return;
+  await prepareAnnualAssets(root);
   window.__ANNUAL_POSTER_READY__ = true;
 };
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import AnnualArtworkFallback from "../AnnualArtworkFallback.vue";
+import AnnualCover from "../AnnualCover.vue";
+import { selectAnnualHighlights } from "~/utils/annualMilestones";
 import AnnualScene from "../AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
 import { computed, ref, toRef } from "vue";
@@ -9,7 +10,7 @@ const props = defineProps<{ summary: VersionSummaryViewModel; pageIndex: number;
 const { n, t } = useI18n();
 const sceneRef = ref<{ rootEl?: HTMLElement | null } | null>(null);
 useAnnualTimeline(sceneRef, toRef(props, "active"), toRef(props, "reducedMotion"), { reenter: "final" });
-const milestoneOrder = ["clear", "full_combo", "dondaful"];
+
 // Crown artwork ships with the viewer so the browser never reaches into the
 // server filesystem. One badge per unlock type, exactly like the game's medal set.
 const milestoneCrownAssets: Record<string, string> = {
@@ -18,7 +19,7 @@ const milestoneCrownAssets: Record<string, string> = {
   dondaful: "/annual/milestones/crown/dondaful.png"
 };
 const crownFor = (type: string) => milestoneCrownAssets[type] || "";
-const orderedMilestones = computed(() => milestoneOrder.flatMap((type) => props.summary.milestones.filter((item) => item.type === type)));
+const orderedMilestones = computed(() => selectAnnualHighlights(props.summary.milestones));
 </script>
 
 <template>
@@ -28,7 +29,7 @@ const orderedMilestones = computed(() => milestoneOrder.flatMap((type) => props.
       <h1 data-annual-stage="title">{{ summary.copy.milestones.title }}</h1>
       <div class="milestones-list" :class="`milestones-list--${Math.min(orderedMilestones.length, 3)}`">
         <article v-for="(item, index) in orderedMilestones" :key="`${item.type}-${item.song.songNo}-${item.level}`" class="milestone-event" :style="{ '--index': index }" data-animate>
-          <div class="milestone-event__cover"><el-image :src="item.song.coverUrl" fit="cover"><template #error><AnnualArtworkFallback :label="t('annualSummary.common.defaultCover')" /></template></el-image><i class="milestone-event__sweep" /><img v-if="crownFor(item.type)" class="milestone-event__crown" :src="crownFor(item.type)" alt="" aria-hidden="true"></div>
+          <div class="milestone-event__cover"><AnnualCover :src="item.song.coverUrl" :alt="item.song.name" /><i class="milestone-event__sweep" /><img v-if="crownFor(item.type)" class="milestone-event__crown" :src="crownFor(item.type)" alt="" aria-hidden="true"></div>
           <div class="milestone-event__copy"><b>{{ t(`annualSummary.milestoneTypeLabels.${item.type}`) }}</b><strong>{{ item.song.name }}</strong><span>{{ item.happenedLabel }}</span><small>{{ t('annualSummary.slides.milestones.effort', { plays: n(item.playCount), stars: item.song.stars ?? '—' }) }}</small></div>
         </article>
       </div>

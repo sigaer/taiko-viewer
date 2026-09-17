@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
+import AnnualCover from "./AnnualCover.vue";
 import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
 import { isUsableMetric } from "~/utils/annualPresentation";
 
@@ -14,13 +15,10 @@ const props = withDefaults(defineProps<{
 
 const { t, locale, n } = useI18n();
 const myDonFailed = ref(false);
-const coverFailed = ref(false);
 const qrFailed = ref(false);
 const myDonLoaded = ref(false);
-const coverLoaded = ref(false);
 const qrLoaded = ref(false);
 const myDonImage = ref<HTMLImageElement | null>(null);
-const coverImage = ref<HTMLImageElement | null>(null);
 const qrImage = ref<HTMLImageElement | null>(null);
 const posterStats = computed(() => [
   { key: "plays", label: t("annualSummary.slides.overview.plays"), value: props.summary.overview.playCount },
@@ -33,17 +31,12 @@ const inspectLoadedImages = async () => {
     myDonFailed.value = myDonImage.value.naturalWidth === 0;
     myDonLoaded.value = myDonImage.value.naturalWidth > 0;
   }
-  if (coverImage.value?.complete) {
-    coverFailed.value = coverImage.value.naturalWidth === 0;
-    coverLoaded.value = coverImage.value.naturalWidth > 0;
-  }
   if (qrImage.value?.complete) {
     qrFailed.value = qrImage.value.naturalWidth === 0;
     qrLoaded.value = qrImage.value.naturalWidth > 0;
   }
 };
 watch(() => props.summary.profileCard?.myDonUrl, () => { myDonFailed.value = false; myDonLoaded.value = false; void inspectLoadedImages(); });
-watch(() => props.summary.favoriteSong?.coverUrl, () => { coverFailed.value = false; coverLoaded.value = false; void inspectLoadedImages(); });
 watch(() => props.qrCodeUrl, () => { qrFailed.value = false; qrLoaded.value = false; void inspectLoadedImages(); });
 onMounted(() => { void inspectLoadedImages(); });
 const formatDate = (value: string | null) => {
@@ -87,8 +80,7 @@ const formatDate = (value: string | null) => {
     <section class="annual-poster__memory">
       <div class="annual-poster__song">
         <div class="annual-poster__song-art">
-          <img v-if="summary.favoriteSong?.coverUrl && !coverFailed" v-show="coverLoaded" ref="coverImage" :src="summary.favoriteSong.coverUrl" :alt="summary.favoriteSong.name" @load="coverLoaded = true" @error="coverFailed = true" />
-          <AnnualArtworkFallback v-if="!summary.favoriteSong?.coverUrl || coverFailed || !coverLoaded" :label="t('annualSummary.common.defaultCover')" />
+          <AnnualCover :src="summary.favoriteSong?.coverUrl" :alt="summary.favoriteSong?.name || t('annualSummary.common.defaultCover')" />
         </div>
         <p><span>{{ t("annualSummary.slides.poster.favorite") }}</span><strong>{{ summary.favoriteSong?.name || t("annualSummary.common.songWaiting") }}</strong></p>
       </div>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import type { VersionSummaryViewModel } from '~/types/account-version-summary';
+import AnnualCover from './AnnualCover.vue';
+import { resolvePosterCover } from '~/utils/annualCover';
 import AnnualArtworkFallback from './AnnualArtworkFallback.vue';
 const props = defineProps<{ summary: VersionSummaryViewModel; locale: string; exportMode?: boolean; profileFallback?: 'viewer' | 'summary' }>();
 const failed = reactive<Record<string, boolean>>({});
@@ -66,8 +68,7 @@ const stats = computed(() => {
             </div>
           </template>
           <template v-else>
-            <img v-if="cell.song?.coverUrl && !failed[cell.key]" :src="cell.song.coverUrl" :alt="cell.song.name" @error="failed[cell.key] = true">
-            <AnnualArtworkFallback v-else :label="missing" mark="♪" />
+            <AnnualCover :src="resolvePosterCover(cell.song)" :alt="cell.song?.name || missing" />
           </template>
         </div>
       </div>

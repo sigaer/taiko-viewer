@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { prepareAnnualAssets } from "~/utils/annualAssets.client";
 import { computed, nextTick, watch } from "vue";
 import AnnualShareGrid from "~/components/account/version-summary/AnnualShareGrid.vue";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
@@ -25,12 +26,10 @@ const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data
 const markReady = async () => {
   if (!process.client || !summary.value) return;
   await nextTick();
-  await document.fonts.ready;
-  await Promise.all(Array.from(document.images).map((image) => image.complete ? Promise.resolve() : new Promise<void>((resolve) => {
-    image.addEventListener("load", () => resolve(), { once: true }); image.addEventListener("error", () => resolve(), { once: true });
-  })));
-  await nextTick();
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  window.__ANNUAL_SHARE_CARD_READY__ = false;
+  const root = document.querySelector<HTMLElement>('.share-card-render-page');
+  if (!root) return;
+  await prepareAnnualAssets(root);
   window.__ANNUAL_SHARE_CARD_READY__ = true;
 };
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import AnnualArtworkFallback from "./AnnualArtworkFallback.vue";
+import AnnualCover from "./AnnualCover.vue";
 
 const props = withDefaults(defineProps<{
   coverUrl?: string | null;
@@ -32,12 +32,7 @@ const fragmentStyle = computed(() => props.coverUrl
     </div>
     <div class="song-cover-hero__float">
       <div class="song-cover-hero__frame">
-        <el-image v-if="coverUrl" :src="coverUrl" :alt="alt" fit="cover" class="song-cover-hero__artwork">
-          <template #error>
-            <AnnualArtworkFallback :label="fallbackLabel" />
-          </template>
-        </el-image>
-        <AnnualArtworkFallback v-else :label="fallbackLabel" class="song-cover-hero__artwork" />
+        <AnnualCover :src="coverUrl" :alt="alt || fallbackLabel" class="song-cover-hero__artwork" />
         <span class="song-cover-hero__edge" aria-hidden="true" />
         <span class="song-cover-hero__shine" aria-hidden="true" />
       </div>

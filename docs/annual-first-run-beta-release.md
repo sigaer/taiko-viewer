@@ -463,3 +463,28 @@ Private evidence: `/var/tmp/annual-beta-invite-uniqueness/short-code-tests.log`,
 Viewer 0.68.5 adds a browser-device guard to `/annual` and `/account/version-summary`, including Japanese routes. Desktop entry returns to the homepage and opens the existing dialog with “请使用移动端打开年度报告。” / “年間レポートはモバイル端末で開いてください。”. The guard runs before report setup so blocked entry does not request/build a report. Mobile browsers, including desktop-mode iPadOS, can continue. Operator previews, public share cards and internal poster rendering retain their routes.
 
 Validation: `npm run test:annual` 11 PASS; isolated browser matrix 9 PASS covering zh/ja direct entry, direct report, homepage Hero, narrow desktop, Escape/confirm dismissal, iPhone, Android and desktop-mode iPad. Blocked browser requests to Annual summary/build and invite validation/redemption: 0. No Annual algorithm or invite allocation changes. Release `400317d` deployed using the standard script on 2026-09-17. Production checks 8 PASS: zh/ja desktop direct entry/report and Hero popup/dismissal; iPhone/Android HTTP entry allowed. Production desktop smoke used the existing internal owner session to preserve funnel exclusion. No blocked build/redeem requests or browser exceptions; service active, NRestarts=0; homepage version 0.68.5 verified. Canonical title relations hash unchanged. Private evidence: `/var/tmp/annual-mobile-gate/`.
+
+
+## Wave 1 Mobile / Poster reliability patch
+
+Viewer target **0.68.8** (production baseline was 0.68.7; the request's 0.68.3 baseline predates intervening releases). Annual algorithm remains **annual-observation-v4.5.0**. No generator events, title/standing rules, invitation inventory, binding/sync or funnel definitions changed. Approved independent title/song data was committed separately as `cf85f7b`.
+
+### Findings and changes
+
+- Mobile viewport: visual viewport height now drives the stage and bottom controls, with existing safe-area spacing. Focused input freezes stage geometry; composer is portaled above the keyboard. Feedback dialog uses the visible rectangle. Poster compact layout uses the stage container height, avoiding Android keyboard-triggered media-query resizing.
+- Reload/lifecycle: reproduced returning to the opening after reload. The current page is restored per summary in session storage; resize, pageshow and visibility events realign the active slide without replaying navigation.
+- Highlight: previous type grouping could display several achievement levels for one chart. Display selects the strongest event by song ID plus difficulty (`dondaful > full_combo > clear`), retaining that original event's date/count and leaving raw generator events untouched.
+- Covers: normalized Annual cover URLs and Poster share one resolver. Existing default song artwork and existing inline artwork handle missing URL, load error and failed fallback; no broken image glyph or alt text is rendered in place of a cover.
+- Capture: both capture routes share bounded font/background/image readiness and image decoding. Error alone is no longer sufficient readiness. Failed assets resolve to fallback before capture; readiness does not remain pending forever. Share-card renderer revision is `share-card-v2-assets`, so subsequent saves use this pipeline. Existing shared images and community records remain intact.
+
+### Validation evidence
+
+- `npm run test:annual`: **13 PASS**, including chart deduplication, original-event preservation, different difficulties and shared cover fallback. Existing annual period regressions passed.
+- Five archived real anchor summaries (`40500773`, `49557999`, `66792598`, `47279977`, `84813650`), zh and ja: **10 PASS** for normalized title/standing contracts. These are isolated payload checks, not fresh authenticated admin E2E; no full corpus was run.
+- Chromium iPhone viewport and Android-style window resize simulations: keyboard changes visible height 844 → 430 while stage remains 844 and Poster remains 332.84 × 507.97. Toolbar height 700 realigns the stage; pageshow retains Poster; reload restores Poster at the original dimensions. Reduced-motion and normal-motion flows passed.
+- Synthetic same-chart clear/FC/dondaful renders one highest-level card. Controlled missing/aborted cover loads resolve all three grid covers to inline fallback. A never-completing image plus failed CSS background resolves within bounded waits to decoded local fallback and no broken background. No fixture is deployed.
+- Private scripts, logs and screenshots: `/var/tmp/annual-mobile-reliability/`. Real iOS/Android devices were unavailable; Chromium device emulation does **not** establish real Safari compatibility. Downloaded WebKit could not run due to missing host libraries; production OS libraries were not altered.
+
+### Release and gate
+
+Deployment and online smoke results follow below. Until these complete, production verification remains pending. Continue the existing Wave 1 cohort after successful release smoke; **HOLD WAVE 2** pending mobile-device confirmation. No additional internal cohort or invitation consumption is part of this patch.

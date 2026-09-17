@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAnnualViewport } from "~/composables/useAnnualViewport";
 import { gsap } from "gsap";
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, readonly, ref, toRef, watch, type ComponentPublicInstance } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
@@ -65,6 +66,12 @@ const transitionForward = ref(true);
 const navigationMotion: AnnualNavigationMotion = { visited: new Set<number>(), direction: "initial" };
 provide(ANNUAL_NAVIGATION_MOTION_KEY, navigationMotion);
 provide(ANNUAL_COVER_PHASE_KEY, readonly(coverStreamPhase));
+
+useAnnualViewport(() => {
+  if (!transitionRunning.value && containerRef.value) {
+    containerRef.value.scrollTop = slideRefs.value[activeIndex.value]?.offsetTop || 0;
+  }
+});
 
 const periodIndex = computed(() => slides.value.findIndex((page) => page.key === "period"));
 const overviewIndex = computed(() => slides.value.findIndex((page) => page.key === "overview"));
@@ -401,6 +408,9 @@ watch(activeIndex, (value, oldValue) => {
   }
   preloadNextArtwork();
   const key=slides.value[value]?.key;
+  if (import.meta.client && props.started && key) {
+    try { sessionStorage.setItem(`annual-active-page:${props.summary.summaryId}`, key); } catch { /* storage can be disabled */ }
+  }
   emit("slide-change",key||"opening");
   if(betaViewTimer)clearTimeout(betaViewTimer);
   if(props.betaTracking && key) betaViewTimer=setTimeout(()=>{
@@ -463,7 +473,13 @@ onMounted(async () => {
   activeIndex.value = 0;
   await nextTick();
   containerRef.value?.focus({ preventScroll: true });
-  await goToPage(debugTransitionTime.value === null ? 0 : periodIndex.value, true);
+  let restoredIndex = 0;
+  try {
+    const key = sessionStorage.getItem(`annual-active-page:${props.summary.summaryId}`);
+    restoredIndex = Math.max(0, slides.value.findIndex(page => page.key === key));
+  } catch { /* private browsing may disable storage */ }
+  if (restoredIndex > 0) { emit("start"); await nextTick(); }
+  await goToPage(debugTransitionTime.value === null ? restoredIndex : periodIndex.value, true);
   preloadNextArtwork();
   document.addEventListener("visibilitychange", handleVisibilityChange);
   documentVisible.value = !document.hidden;
@@ -615,6 +631,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.story-player{position:relative;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:100dvh}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player__viewport.is-pair-endpoint{touch-action:none}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{min-height:100vh;min-height:100svh;min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__transition-overlay{position:absolute;z-index:20;inset:0;overflow:hidden;pointer-events:none}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media(orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
+.story-player{position:relative;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:var(--annual-stage-height,100dvh)}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player__viewport.is-pair-endpoint{touch-action:none}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{container-type:size;container-name:annual-stage;min-height:100vh;min-height:100svh;min-height:var(--annual-stage-height,100dvh);scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__transition-overlay{position:absolute;z-index:20;inset:0;overflow:hidden;pointer-events:none}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:absolute;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media(orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
 .story-player__slide[data-bg-mood="rainbow-stage"]{--annual-scene-bg:linear-gradient(155deg,#0d396e,#326aa5 48%,#97c8e8)}.story-player__slide[data-bg-mood="stage-blue"],.story-player__slide[data-bg-mood="profile-stage"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#dcecff)}.story-player__slide[data-bg-mood="bright-impact"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#d6eaff 58%,#fff3cf)}.story-player__slide[data-bg-mood="cover-spectrum"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#e8e7ff 52%,#dff6ff)}.story-player__slide[data-bg-mood="time-blue"]{--annual-scene-bg:linear-gradient(155deg,#f7fbff,#dbeaff 58%,#e8e4ff)}.story-player__slide[data-bg-mood="midnight"]{--annual-scene-bg:linear-gradient(155deg,#101d47,#223870 56%,#492e70)}.story-player__slide[data-bg-mood="award-purple"]{--annual-scene-bg:linear-gradient(155deg,#f7f4ff,#e7e2ff 52%,#e9f3ff)}.story-player__slide[data-bg-mood="award-stage"]{--annual-scene-bg:radial-gradient(circle at 50% 18%,#60512e 0,#1c2547 35%,#0b1028 78%)}
 </style>
