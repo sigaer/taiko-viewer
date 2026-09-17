@@ -116,24 +116,33 @@
         "afternoon": "こんにちは、{name}",
         "evening": "こんばんは、{name}"
       },
-      "limitedTitle": "成績をもう少し集める",
-      "nextFocus": "次の一歩",
-      "nextFocusValue": "次は{dimension}を練習",
-      "tieHint": "2つの力が同率です",
+      "limitedTitle": "記録が増えると、おすすめも選びやすくなります",
+      "nextFocusValue": "最近は{dimension}を意識してみてもよさそう",
       "skillOverview": "6つの力の概要",
-      "limitedBody": "成績が増えると、練習の方向が見えてきます。",
-      "planTitle": "この3曲を練習",
-      "planReasonDimension": "{dimension}を意識した譜面",
-      "planReasonGeneral": "総合おすすめから選曲",
+      "planTitle": "この3曲はいかが？",
       "noRecommendation": "条件に合う練習譜面がありません。",
       "progressTitle": "今日",
       "noPlay": "今日はまだプレイしていません",
       "progressUnavailable": "確認できるプレイ記録がまだありません",
-      "uniqueCharts": "プレイした譜面",
-      "newBest": "自己ベスト更新",
-      "crownChanges": "クリア状態の変化",
-      "recentBreakthrough": "最近の突破",
-      "loadFailed": "成長提案を利用できません。他のホーム機能は利用できます"
+      "loadFailed": "成長提案を利用できません。他のホーム機能は利用できます",
+      "balanced": "最近は全体のバランスがよさそう",
+      "playedSummary": "今日は{count}譜面をプレイ",
+      "events": {
+        "played": "今日のプレイ",
+        "score-pb": "自己ベスト更新",
+        "ng-reduced": "不可が減りました",
+        "combo-improved": "コンボが伸びました",
+        "clear-upgrade": "初クリア",
+        "fc": "フルコンボ達成",
+        "df": "ドンダフルコンボ達成",
+        "rank-upgrade": "スコアランク更新"
+      },
+      "factLabels": {
+        "score-pb": "自己ベスト",
+        "ng-reduced": "不可",
+        "combo-improved": "コンボ",
+        "rank-upgrade": "スコアランク"
+      }
     }
   },
   "songs": {

@@ -16,7 +16,6 @@ const visibleKeys = [
   "community.chartActivity.viewChart",
   "home.growth.limitedTitle",
   "home.growth.greeting.morning",
-  "home.growth.nextFocus",
   "home.growth.nextFocusValue",
   "home.growth.planTitle",
   "home.growth.progressTitle",
@@ -51,7 +50,7 @@ for (const locale of ["zh", "ja"]) {
     assert.equal(growth.focusTitle, undefined);
     assert.equal(growth.todayPlan, undefined);
     assert.equal(growth.dailyProgress, undefined);
-    assert.equal(growth.planTitle, locale === "zh" ? "练这三首" : "この3曲を練習");
+    assert.equal(growth.planTitle, locale === "zh" ? "可以试试这三首" : "この3曲はいかが？");
     assert.equal(growth.progressTitle, locale === "zh" ? "今天" : "今日");
   });
 }

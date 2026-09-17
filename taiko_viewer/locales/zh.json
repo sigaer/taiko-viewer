@@ -117,24 +117,33 @@
         "afternoon": "下午好，{name}",
         "evening": "晚上好，{name}"
       },
-      "limitedTitle": "还需要更多成绩",
-      "nextFocus": "下一步",
-      "nextFocusValue": "接下来先练{dimension}",
-      "tieHint": "两个维度并列",
+      "limitedTitle": "再积累一些成绩，推荐会更贴合",
+      "nextFocusValue": "最近可以从{dimension}入手",
       "skillOverview": "六维概览",
-      "limitedBody": "成绩增加后，练习方向会更清晰。",
-      "planTitle": "练这三首",
-      "planReasonDimension": "围绕{dimension}挑选的谱面",
-      "planReasonGeneral": "从综合推荐开始",
+      "planTitle": "可以试试这三首",
       "noRecommendation": "暂时没有合适的练习谱面。",
       "progressTitle": "今天",
       "noPlay": "今天还没开打",
       "progressUnavailable": "最近还没有可确认的游玩记录",
-      "uniqueCharts": "涉及谱面",
-      "newBest": "刷新最高分",
-      "crownChanges": "段位变化",
-      "recentBreakthrough": "最近突破",
-      "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用"
+      "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用",
+      "balanced": "最近状态挺均衡",
+      "playedSummary": "今天打了 {count} 张谱",
+      "events": {
+        "played": "今天打过",
+        "score-pb": "刷新最好成绩",
+        "ng-reduced": "打得更稳了",
+        "combo-improved": "连击更长了",
+        "clear-upgrade": "新通关",
+        "fc": "新全连",
+        "df": "拿到全良",
+        "rank-upgrade": "评价提升"
+      },
+      "factLabels": {
+        "score-pb": "最好成绩",
+        "ng-reduced": "不可",
+        "combo-improved": "连击",
+        "rank-upgrade": "评价"
+      }
     }
   },
   "songs": {

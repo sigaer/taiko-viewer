@@ -25,25 +25,27 @@ export type GrowthPlanItem = {
   currentBestRank: number | null;
 };
 
+export type GrowthEventFact = {
+  type: "played" | "score-pb" | "ng-reduced" | "combo-improved" | "clear-upgrade" | "fc" | "df" | "rank-upgrade";
+  before: number | null;
+  after: number | null;
+  delta: number | null;
+};
+export type GrowthDailyEvent = {
+  songId: number;
+  level: number;
+  title: string;
+  occurredAt: string;
+  evidence: "history" | "delta-snapshot" | "full-snapshot";
+  importance: number;
+  facts: GrowthEventFact[];
+};
 export type GrowthDailyProgress = {
   calendarDay: string;
   dataMode: GrowthDataMode;
   attendance: "played" | "not_played" | "unknown";
   uniqueCharts: number | null;
-  scoreImprovements: number | null;
-  newBestCount: number | null;
-  crownChanges: number | null;
-  breakthrough: {
-    songId: number;
-    title: string;
-    level: number;
-    kind: "score" | "crown" | "first-play";
-    scoreBefore: number | null;
-    scoreAfter: number | null;
-    scoreDelta: number | null;
-    crownBefore: number | null;
-    crownAfter: number | null;
-  } | null;
+  events: GrowthDailyEvent[];
 };
 
 export type PlayerGrowthOverview = {

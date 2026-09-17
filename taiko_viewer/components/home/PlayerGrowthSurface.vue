@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
-import type { PlayerGrowthOverview } from "~/types/player-growth";
+import { formatScoreRank } from "~/utils/scoreRank";
+import type { GrowthEventFact, PlayerGrowthOverview } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_SHORT_LABELS, growthGreetingPeriod } from "~/utils/playerGrowth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { trackViewerEvent } from "~/utils/analytics";
@@ -12,14 +13,11 @@ const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSIO
 const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_LABELS[key][locale.value === "ja" ? "ja" : "zh"];
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
 const focusLabel = computed(() => props.overview.playerState.dataSufficiency === "ready" ? dimensionLabel(props.overview.playerState.priorityDimension) : "");
-const planReason = computed(() => props.overview.todayPlan.usedFallback ? t("home.growth.planReasonGeneral") : t("home.growth.planReasonDimension", { dimension: focusLabel.value }));
+const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
 const progress = computed(() => props.overview.dailyProgress);
 const hasProgress = computed(() => progress.value.attendance === "played");
-const summaryMetrics = computed(() => [
-  progress.value.uniqueCharts === null ? null : { value: progress.value.uniqueCharts, label: t("home.growth.uniqueCharts") },
-  progress.value.newBestCount === null ? null : { value: progress.value.newBestCount, label: t("home.growth.newBest") },
-  progress.value.crownChanges === null ? null : { value: progress.value.crownChanges, label: t("home.growth.crownChanges") }
-].filter(Boolean) as Array<{ value: number; label: string }>);
+const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
+const factualChange = (fact: GrowthEventFact) => ["score-pb", "ng-reduced", "combo-improved", "rank-upgrade"].includes(fact.type);
 const skillItems = computed(() => props.overview.playerState.skills.filter((item) => Number(item.value) > 0));
 const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionLabel(key)} ${Number(value).toFixed(2)}`;
 
@@ -56,17 +54,14 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
           </div>
         </div>
-        <div v-if="focusLabel" class="growth-focus__next">
-          <span>{{ t("home.growth.nextFocus") }}</span>
+        <div v-if="focusLabel && !balanced" class="growth-focus__next">
           <strong>{{ t("home.growth.nextFocusValue", { dimension: dimensionShortLabel(props.overview.playerState.priorityDimension!) }) }}</strong>
-          <small v-if="overview.playerState.tiedDimensions.length > 1">{{ t("home.growth.tieHint") }}</small>
         </div>
         <div v-else class="growth-focus__limited">
-          <strong>{{ t("home.growth.limitedTitle") }}</strong>
-          <span>{{ t("home.growth.limitedBody") }}</span>
+          <strong>{{ t(balanced ? "home.growth.balanced" : "home.growth.limitedTitle") }}</strong>
         </div>
         <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
-          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
+          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
             <span :title="dimensionLabel(item.key)">{{ dimensionShortLabel(item.key) }}</span>
             <strong>{{ Number(item.value).toFixed(2) }}</strong>
           </div>
@@ -79,7 +74,6 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             <h2 id="growth-plan-title">{{ t("home.growth.planTitle") }}</h2>
           </div>
         </div>
-        <p class="growth-reason">{{ planReason }}</p>
         <div v-if="overview.todayPlan.items.length" class="growth-plan__items">
           <NuxtLink
             v-for="item in overview.todayPlan.items"
@@ -109,14 +103,17 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <div class="growth-progress__card panel-card">
           <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
           <template v-else>
-            <div class="growth-metrics">
-              <div v-for="metric in summaryMetrics" :key="metric.label" class="growth-metric"><strong>{{ metric.value }}</strong><span>{{ metric.label }}</span></div>
-            </div>
-            <div v-if="progress.breakthrough" class="growth-breakthrough">
-              <span>{{ t("home.growth.recentBreakthrough") }}</span>
-              <strong>{{ progress.breakthrough.title }}</strong>
-              <small v-if="progress.breakthrough.scoreDelta">+{{ progress.breakthrough.scoreDelta.toLocaleString() }}</small>
-            </div>
+            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
+              <h3>{{ t(`home.growth.events.${event.facts[0].type}`) }}</h3>
+              <strong class="growth-event__song">{{ event.title }}</strong>
+              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
+              <p v-for="fact in event.facts.filter(factualChange)" :key="fact.type" class="growth-event__change">
+                <span>{{ t(`home.growth.factLabels.${fact.type}`) }} </span>
+                {{ eventValue(fact, fact.before) }} → {{ eventValue(fact, fact.after) }}
+                <span v-if="fact.type === 'score-pb'"> (+{{ eventValue(fact, fact.delta) }})</span>
+              </p>
+            </article>
+            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
           </template>
         </div>
       </section>
@@ -163,17 +160,19 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-plan__arrow { color: #b84d37; font-size: 20px; }
 .growth-empty { margin: 0; color: #806b5c; font-size: 13px; }
 .growth-progress__card { display: grid; gap: 18px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
-.growth-metrics { display: flex; flex-wrap: wrap; gap: 10px; }
-.growth-metric { min-width: 92px; display: grid; gap: 2px; padding-right: 16px; border-right: 1px solid rgba(151,105,73,.18); }
-.growth-metric strong { color: #342922; font: 800 24px/1 var(--viewer-display-font); }
-.growth-metric span, .growth-breakthrough span { color: #806b5c; font-size: 11px; }
-.growth-breakthrough { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(151,105,73,.16); }
-.growth-breakthrough strong { min-width: 0; overflow: hidden; color: #49382d; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-.growth-breakthrough small { color: #b84d37; font-size: 13px; font-weight: 800; }
+.growth-event { display: grid; gap: 6px; min-width: 0; color: #49382d; }
+.growth-event + .growth-event { border-top: 1px solid rgba(151,105,73,.2); padding-top: 16px; }
+.growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color: #a04430; }
+.growth-event__song { font-size: 18px; overflow-wrap: anywhere; }
+.growth-event__change { margin: 0; font-size: 16px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.growth-summary { margin: 0; color: #735f50; font-size: 14px; }
+:global(body.theme-dark .growth-event) { color: #f5e7dc; }
+:global(body.theme-dark .growth-event h3) { color: #eaa58c; }
+:global(body.theme-dark .growth-summary), :global(body.theme-dark .growth-empty) { color: #cbb8aa; }
 :global(body.theme-dark .growth-focus) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
 :global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); }
-:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong), :global(body.theme-dark .growth-metric strong), :global(body.theme-dark .growth-breakthrough strong) { color: #f5e7dc; }
-:global(body.theme-dark .growth-focus__next strong), :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-breakthrough small) { color: #e58b6e; }
+:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color: #f5e7dc; }
+:global(body.theme-dark .growth-focus__next strong), :global(body.theme-dark .growth-plan__arrow) { color: #e58b6e; }
 :global(body.theme-dark .growth-focus__next), :global(body.theme-dark .growth-focus__limited) { border-color: rgba(255,255,255,.14); }
 :global(body.theme-dark .growth-focus__limited strong) { color: #f5e7dc; }
 :global(body.theme-dark .growth-skill--priority) { border-top-color: rgba(229,139,110,.65); }
@@ -192,6 +191,6 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-skeleton__line--progress { width: 78%; height: 58px; margin-top: 10px; }
 .growth-skeleton__row { width: 100%; height: 58px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-breakthrough { grid-template-columns: 1fr auto; } .growth-breakthrough span { grid-column: 1 / -1; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
+@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>

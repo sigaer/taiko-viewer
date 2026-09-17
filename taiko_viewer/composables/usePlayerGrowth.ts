@@ -3,7 +3,7 @@ import type { PlayerGrowthOverview } from "~/types/player-growth";
 const emptyGrowth = (): PlayerGrowthOverview => ({
   playerState: { overallRating: null, skills: [], priorityDimension: null, tiedDimensions: [], dataSufficiency: "insufficient", basis: "insufficient-evidence", sampleCount: 0 },
   todayPlan: { targetDimension: null, items: [], usedFallback: false },
-  dailyProgress: { calendarDay: "", dataMode: "INSUFFICIENT", attendance: "unknown", uniqueCharts: null, scoreImprovements: null, newBestCount: null, crownChanges: null, breakthrough: null },
+  dailyProgress: { calendarDay: "", dataMode: "INSUFFICIENT", attendance: "unknown", uniqueCharts: null, events: [] },
   dataStatus: { mode: "INSUFFICIENT", timezone: "Asia/Shanghai" }
 });
 
