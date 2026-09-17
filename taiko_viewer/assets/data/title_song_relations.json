@@ -1,19 +1,75 @@
 {
-  "generated_at": "2026-07-03T01:27:35.281729+00:00",
+  "generated_at": "2026-09-17T02:04:47.126507+00:00",
   "stats": {
     "rows_total": 866,
-    "api_relations_total": 535,
-    "relations_total": 623,
-    "songs_total": 423,
-    "titles_total": 497
+    "api_relations_total": 582,
+    "relations_total": 674,
+    "songs_total": 439,
+    "titles_total": 520
   },
   "relations": [
     {
-      "song_name": "恋的処方箋",
+      "song_name": "1プレイ中全曲でオプション「ばいそく」",
+      "title_name": "ばいそくドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「ばいそく」を付けてクリア",
+      "source_row_index": 52
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「さんばい」",
+      "title_name": "さんばいドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「さんばい」を付けてクリア",
+      "source_row_index": 53
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「よんばい」",
+      "title_name": "よんばいドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「よんばい」を付けてクリア",
+      "source_row_index": 54
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「あべこべ」",
+      "title_name": "あべこべドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「あべこべ」を付けてクリア",
+      "source_row_index": 55
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「ドロン」",
+      "title_name": "ドロンドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「ドロン」を付けてクリア",
+      "source_row_index": 56
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「きまぐれ」",
+      "title_name": "きまぐれドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「きまぐれ」を付けてクリア",
+      "source_row_index": 57
+    },
+    {
+      "song_name": "1プレイ中全曲でオプション「でたらめ」",
+      "title_name": "でたらめドンだー",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "1プレイ中全曲でオプション「でたらめ」を付けてクリア",
+      "source_row_index": 58
+    },
+    {
+      "song_name": "恋の処方箋",
       "title_name": "恋の病治療中",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "恋的処方箋通关",
+      "condition_text": "恋の処方箋をクリア",
       "source_row_index": 59
     },
     {
@@ -21,7 +77,7 @@
       "title_name": "漢の生き様",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "和蘭撫子通关",
+      "condition_text": "和蘭撫子をクリア",
       "source_row_index": 60
     },
     {
@@ -29,7 +85,7 @@
       "title_name": "多次元干渉者",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "DIMENSIONS通关",
+      "condition_text": "DIMENSIONSをクリア",
       "source_row_index": 61
     },
     {
@@ -37,7 +93,7 @@
       "title_name": "愛ヲ詠イシ花",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "花オト裏拍子通关",
+      "condition_text": "花オト裏拍子をクリア",
       "source_row_index": 62
     },
     {
@@ -45,15 +101,15 @@
       "title_name": "ドキがムネムネしちゃうの",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "ドキドキ胸きゅん おまつりタイム通关",
+      "condition_text": "ドキドキ胸きゅん おまつりタイムをクリア",
       "source_row_index": 63
     },
     {
-      "song_name": "風的国的龍与騎士",
+      "song_name": "風の国の龍と騎士",
       "title_name": "風を翔る騎士",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "風的国的龍与騎士通关",
+      "condition_text": "風の国の龍と騎士をクリア",
       "source_row_index": 64
     },
     {
@@ -61,7 +117,7 @@
       "title_name": "ENDLESS PARTY TIME",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "3piece-JazzParty!通关",
+      "condition_text": "3piece-JazzParty!をクリア",
       "source_row_index": 65
     },
     {
@@ -69,15 +125,15 @@
       "title_name": "リミットブレイカー",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "RAGE v.self通关",
+      "condition_text": "RAGE v.selfをクリア",
       "source_row_index": 66
     },
     {
-      "song_name": "アイドルマスター的楽曲",
+      "song_name": "アイドルマスターの楽曲",
       "title_name": "プロデューサーさん",
       "requirement_type": "clear",
       "difficulty_scope": "unspecified",
-      "condition_text": "1游玩内全て特定的曲(アイドルマスター的楽曲)選ん在通关",
+      "condition_text": "1プレイ内全て特定の曲(アイドルマスターの楽曲)を選んでクリア",
       "source_row_index": 70
     },
     {
@@ -85,7 +141,7 @@
       "title_name": "きたさいたまの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "きたさいたま2000在魔王难度下全连",
+      "condition_text": "きたさいたま2000を難易度おにでフルコンボ",
       "source_row_index": 74
     },
     {
@@ -93,7 +149,7 @@
       "title_name": "〆ドレーの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "〆ドレー2000在魔王难度下全连",
+      "condition_text": "〆ドレー2000を難易度おにでフルコンボ",
       "source_row_index": 75
     },
     {
@@ -101,7 +157,7 @@
       "title_name": "またさいたまの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "またさいたま2000在魔王难度下全连",
+      "condition_text": "またさいたま2000を難易度おにでフルコンボ",
       "source_row_index": 76
     },
     {
@@ -109,7 +165,7 @@
       "title_name": "スーハーの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "スーハー2000在魔王难度下全连",
+      "condition_text": "スーハー2000を難易度おにでフルコンボ",
       "source_row_index": 77
     },
     {
@@ -117,15 +173,15 @@
       "title_name": "燎原の覇王",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "燎原ノ舞在魔王难度下全连",
+      "condition_text": "燎原ノ舞を難易度おにでフルコンボ",
       "source_row_index": 78
     },
     {
-      "song_name": "初音ミク的消失‐劇場版‐(裏)",
+      "song_name": "初音ミクの消失‐劇場版‐(裏)",
       "title_name": "最高速の歌姫",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "初音ミク的消失‐劇場版‐(裏)全连",
+      "condition_text": "初音ミクの消失‐劇場版‐(裏)をフルコンボ",
       "source_row_index": 79
     },
     {
@@ -133,7 +189,7 @@
       "title_name": "さんぽの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "さんぽ(裏)全连",
+      "condition_text": "さんぽ(裏)をフルコンボ",
       "source_row_index": 80
     },
     {
@@ -141,7 +197,7 @@
       "title_name": "戦車の達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "やわらか戦車(裏)全连",
+      "condition_text": "やわらか戦車(裏)をフルコンボ",
       "source_row_index": 81
     },
     {
@@ -149,7 +205,7 @@
       "title_name": "たつじんコース",
       "requirement_type": "full_combo",
       "difficulty_scope": "unspecified",
-      "condition_text": "十露盤2000全连",
+      "condition_text": "十露盤2000をフルコンボ",
       "source_row_index": 83
     },
     {
@@ -157,7 +213,7 @@
       "title_name": "で、できましたぁ…",
       "requirement_type": "full_combo",
       "difficulty_scope": "unspecified",
-      "condition_text": "ケチャドン2000全连",
+      "condition_text": "ケチャドン2000をフルコンボ",
       "source_row_index": 86
     },
     {
@@ -165,7 +221,7 @@
       "title_name": "わさびの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Wasabi Body Blow在魔王难度下全连",
+      "condition_text": "Wasabi Body Blowを難易度おにでフルコンボ",
       "source_row_index": 87
     },
     {
@@ -173,7 +229,7 @@
       "title_name": "百獣王者どんちゃん",
       "requirement_type": "full_combo",
       "difficulty_scope": "unspecified",
-      "condition_text": "グレート！アニマルカイザー!!全连",
+      "condition_text": "グレート！アニマルカイザー!!をフルコンボ",
       "source_row_index": 88
     },
     {
@@ -181,7 +237,7 @@
       "title_name": "悪夢からの生還者",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "ナイトメア・サバイバー(裏)全连",
+      "condition_text": "ナイトメア・サバイバー(裏)をフルコンボ",
       "source_row_index": 90
     },
     {
@@ -189,7 +245,7 @@
       "title_name": "なんじゃこりゃああ！",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "Rotter Tarmination(裏)全连",
+      "condition_text": "Rotter Tarmination(裏)をフルコンボ",
       "source_row_index": 91
     },
     {
@@ -197,7 +253,7 @@
       "title_name": "百カーニバル",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "夜桜謝肉祭(裏)全连",
+      "condition_text": "夜桜謝肉祭(裏)をフルコンボ",
       "source_row_index": 92
     },
     {
@@ -205,7 +261,7 @@
       "title_name": "揺り篭から墓場まで",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "恋文2000在魔王难度下全连",
+      "condition_text": "恋文2000を難易度おにでフルコンボ",
       "source_row_index": 93
     },
     {
@@ -213,7 +269,7 @@
       "title_name": "黒薔薇の使徒",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Black Rose Apostle在魔王难度下全连",
+      "condition_text": "Black Rose Apostleを難易度おにでフルコンボ",
       "source_row_index": 94
     },
     {
@@ -221,7 +277,7 @@
       "title_name": "白薔薇の狂気",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "White Rose Insanity在魔王难度下全连",
+      "condition_text": "White Rose Insanityを難易度おにでフルコンボ",
       "source_row_index": 95
     },
     {
@@ -229,7 +285,7 @@
       "title_name": "赤薔薇の福音",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Red Rose Evangel在魔王难度下全连",
+      "condition_text": "Red Rose Evangelを難易度おにでフルコンボ",
       "source_row_index": 96
     },
     {
@@ -237,7 +293,7 @@
       "title_name": "青薔薇の破滅",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Blue Rose Ruin在魔王难度下全连",
+      "condition_text": "Blue Rose Ruinを難易度おにでフルコンボ",
       "source_row_index": 97
     },
     {
@@ -245,7 +301,7 @@
       "title_name": "薔薇を統べし者",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Purple Rose Fusion在魔王难度下全连",
+      "condition_text": "Purple Rose Fusionを難易度おにでフルコンボ",
       "source_row_index": 99
     },
     {
@@ -253,7 +309,7 @@
       "title_name": "常世人",
       "requirement_type": "full_combo",
       "difficulty_scope": "unspecified",
-      "condition_text": "万戈イム－一ノ十全连",
+      "condition_text": "万戈イム－一ノ十をフルコンボ",
       "source_row_index": 100
     },
     {
@@ -261,7 +317,7 @@
       "title_name": "永遠の絆",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Eternal bond在魔王难度下全连",
+      "condition_text": "Eternal bondを難易度おにでフルコンボ",
       "source_row_index": 101
     },
     {
@@ -269,7 +325,7 @@
       "title_name": "仮面の下の真実",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "愛想笑い在魔王难度下全连",
+      "condition_text": "愛想笑いを難易度おにでフルコンボ",
       "source_row_index": 102
     },
     {
@@ -277,7 +333,7 @@
       "title_name": "妖異幻怪",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "化物月夜在魔王难度下全连",
+      "condition_text": "化物月夜を難易度おにでフルコンボ",
       "source_row_index": 103
     },
     {
@@ -285,15 +341,15 @@
       "title_name": "ピアノ弾きの冒険者",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "D's Adventure Note在魔王难度下全连",
+      "condition_text": "D's Adventure Noteを難易度おにでフルコンボ",
       "source_row_index": 104
     },
     {
-      "song_name": "大空与太鼓的踊り",
+      "song_name": "大空と太鼓の踊り",
       "title_name": "アイリッシュドンだー",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "大空与太鼓的踊り在魔王难度下全连",
+      "condition_text": "大空と太鼓の踊りを難易度おにでフルコンボ",
       "source_row_index": 105
     },
     {
@@ -301,7 +357,7 @@
       "title_name": "ツンデレCafeの常連",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "ツンデレCafeへようこそ☆在魔王难度下全连",
+      "condition_text": "ツンデレCafeへようこそ☆を難易度おにでフルコンボ",
       "source_row_index": 106
     },
     {
@@ -309,7 +365,7 @@
       "title_name": "重量級ステッパー",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "DEBSTEP!在魔王难度下全连",
+      "condition_text": "DEBSTEP!を難易度おにでフルコンボ",
       "source_row_index": 107
     },
     {
@@ -317,7 +373,7 @@
       "title_name": "参りますッ！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "夜櫻ブレヰダアズ在魔王难度下全连",
+      "condition_text": "夜櫻ブレヰダアズを難易度おにでフルコンボ",
       "source_row_index": 108
     },
     {
@@ -325,7 +381,7 @@
       "title_name": "天使の光輪",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Angel Halo在魔王难度下全连",
+      "condition_text": "Angel Haloを難易度おにでフルコンボ",
       "source_row_index": 109
     },
     {
@@ -333,7 +389,7 @@
       "title_name": "猪突猛進ボーイズ",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Hurtling Boys在魔王难度下全连",
+      "condition_text": "Hurtling Boysを難易度おにでフルコンボ",
       "source_row_index": 110
     },
     {
@@ -341,15 +397,15 @@
       "title_name": "電算ドンだー",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Calculator在魔王难度下全连",
+      "condition_text": "Calculatorを難易度おにでフルコンボ",
       "source_row_index": 111
     },
     {
-      "song_name": "カラ鞠的花",
+      "song_name": "カラ鞠の花",
       "title_name": "カラ鞠のユカリ",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "カラ鞠的花在魔王难度下全连",
+      "condition_text": "カラ鞠の花を難易度おにでフルコンボ",
       "source_row_index": 112
     },
     {
@@ -357,7 +413,7 @@
       "title_name": "幽玄を極めし者",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "幽玄ノ乱在魔王难度下全连",
+      "condition_text": "幽玄ノ乱を難易度おにでフルコンボ",
       "source_row_index": 113
     },
     {
@@ -365,7 +421,7 @@
       "title_name": "ちょっと休憩",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "てんぢく2000在魔王难度下全连",
+      "condition_text": "てんぢく2000を難易度おにでフルコンボ",
       "source_row_index": 114
     },
     {
@@ -373,7 +429,7 @@
       "title_name": "卒業してもずっとトモダチ",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "そつおめしき在魔王难度下全连",
+      "condition_text": "そつおめしきを難易度おにでフルコンボ",
       "source_row_index": 115
     },
     {
@@ -381,15 +437,15 @@
       "title_name": "ガマンならんのです！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "EkiBEN2000在魔王难度下全连",
+      "condition_text": "EkiBEN2000を難易度おにでフルコンボ",
       "source_row_index": 116
     },
     {
-      "song_name": "よく在る2000",
+      "song_name": "よくでる2000",
       "title_name": "今日も定時で帰ります",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "よく在る2000在魔王难度下全连",
+      "condition_text": "よくでる2000を難易度おにでフルコンボ",
       "source_row_index": 118
     },
     {
@@ -397,7 +453,7 @@
       "title_name": "ドンカマの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "ドンカマ2000在魔王难度下全连",
+      "condition_text": "ドンカマ2000を難易度おにでフルコンボ",
       "source_row_index": 119
     },
     {
@@ -405,7 +461,7 @@
       "title_name": "戦神",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "Xa(裏)オプション「あべこべ」在全连",
+      "condition_text": "Xa(裏)をオプション「あべこべ」でフルコンボ",
       "source_row_index": 121
     },
     {
@@ -413,7 +469,7 @@
       "title_name": "鈍行に乗るドン！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
       "source_row_index": 126
     },
     {
@@ -421,7 +477,7 @@
       "title_name": "鈍行に乗るドン！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
       "source_row_index": 126
     },
     {
@@ -429,7 +485,7 @@
       "title_name": "鈍行に乗るドン！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
       "source_row_index": 126
     },
     {
@@ -437,7 +493,7 @@
       "title_name": "鈍行に乗るドン！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+      "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
       "source_row_index": 126
     },
     {
@@ -445,7 +501,7 @@
       "title_name": "きたさいたまのたちゅじん",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "きたさいたま200在魔王难度下全连",
+      "condition_text": "きたさいたま200を難易度おにでフルコンボ",
       "source_row_index": 130
     },
     {
@@ -453,7 +509,7 @@
       "title_name": "ラリルレランの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "ノるどん2000在魔王难度下全连",
+      "condition_text": "ノるどん2000を難易度おにでフルコンボ",
       "source_row_index": 131
     },
     {
@@ -461,7 +517,7 @@
       "title_name": "食っちゃ寝の達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "タベルナ2000在魔王难度下全连",
+      "condition_text": "タベルナ2000を難易度おにでフルコンボ",
       "source_row_index": 132
     },
     {
@@ -469,7 +525,7 @@
       "title_name": "はやさいたまの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "はやさいたま2000在魔王难度下全连",
+      "condition_text": "はやさいたま2000を難易度おにでフルコンボ",
       "source_row_index": 133
     },
     {
@@ -477,7 +533,7 @@
       "title_name": "さいたまの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "さいたま2000在魔王难度下全连",
+      "condition_text": "さいたま2000を難易度おにでフルコンボ",
       "source_row_index": 134
     },
     {
@@ -485,7 +541,7 @@
       "title_name": "お仕事の達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "はたラク2000在魔王难度下全连",
+      "condition_text": "はたラク2000を難易度おにでフルコンボ",
       "source_row_index": 135
     },
     {
@@ -493,7 +549,7 @@
       "title_name": "リンリンズのファン",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "黄ダルマ2000在魔王难度下全连",
+      "condition_text": "黄ダルマ2000を難易度おにでフルコンボ",
       "source_row_index": 137
     },
     {
@@ -501,7 +557,7 @@
       "title_name": "〆切の達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "ケチャドン2000在魔王难度下全连",
+      "condition_text": "ケチャドン2000を難易度おにでフルコンボ",
       "source_row_index": 138
     },
     {
@@ -509,7 +565,7 @@
       "title_name": "ご名答！",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "十露盤2000在魔王难度下全连",
+      "condition_text": "十露盤2000を難易度おにでフルコンボ",
       "source_row_index": 139
     },
     {
@@ -517,7 +573,7 @@
       "title_name": "The end of your love",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "X-DAY2000在魔王难度下全连",
+      "condition_text": "X-DAY2000を難易度おにでフルコンボ",
       "source_row_index": 140
     },
     {
@@ -525,7 +581,7 @@
       "title_name": "万戈イムの達人",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "万戈イム－一ノ十在魔王难度下全连",
+      "condition_text": "万戈イム－一ノ十を難易度おにでフルコンボ",
       "source_row_index": 141
     },
     {
@@ -533,7 +589,7 @@
       "title_name": "天狗の仕業",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "天狗囃子在魔王难度下全连",
+      "condition_text": "天狗囃子を難易度おにでフルコンボ",
       "source_row_index": 144
     },
     {
@@ -645,7 +701,7 @@
       "title_name": "外ノ世界に顕れシ者",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "彁在魔王难度下全连",
+      "condition_text": "彁を難易度おにでフルコンボ",
       "source_row_index": 325
     },
     {
@@ -949,7 +1005,7 @@
       "title_name": "たのしかったね",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "彁(裏)全连",
+      "condition_text": "彁(裏)をフルコンボ",
       "source_row_index": 379
     },
     {
@@ -1669,7 +1725,7 @@
       "title_name": "ダークカオスタイム",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "†††カオスタイム the DARK†††在魔王难度下全连",
+      "condition_text": "†††カオスタイム the DARK†††を難易度おにでフルコンボ",
       "source_row_index": 479
     },
     {
@@ -1853,7 +1909,7 @@
       "title_name": "心の底から「だだだ脱出！」",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
-      "condition_text": "ココドコ？多分ドッカ島(裏)全连",
+      "condition_text": "ココドコ？多分ドッカ島(裏)をフルコンボ",
       "source_row_index": 501
     },
     {
@@ -2325,7 +2381,7 @@
       "title_name": "ダーク・エクス・マキナ♡",
       "requirement_type": "all_perfect",
       "difficulty_scope": "oni",
-      "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全良",
+      "condition_text": "ダーク・エクス・マキナ♡を難易度おにでドンダフルコンボ",
       "source_row_index": 561
     },
     {
@@ -2333,7 +2389,7 @@
       "title_name": "ダーク・エクス・マキナ♡",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全连",
+      "condition_text": "ダーク・エクス・マキナ♡を難易度おにでフルコンボ",
       "source_row_index": 562
     },
     {
@@ -2349,7 +2405,7 @@
       "title_name": "ダーク・エクス・マキナ♡",
       "requirement_type": "clear",
       "difficulty_scope": "oni",
-      "condition_text": "ダーク・エクス・マキナ♡在魔王难度下通关",
+      "condition_text": "ダーク・エクス・マキナ♡を難易度おにでクリア",
       "source_row_index": 563
     },
     {
@@ -2361,11 +2417,11 @@
       "source_row_index": 563
     },
     {
-      "song_name": "よく在る15300",
+      "song_name": "よくでる15300",
       "title_name": "とても短い曲です(20秒)",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "よく在る15300在魔王难度下全连",
+      "condition_text": "よくでる15300を難易度おにでフルコンボ",
       "source_row_index": 564
     },
     {
@@ -2381,7 +2437,7 @@
       "title_name": "Nijustat on Amatias",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
-      "condition_text": "Nesin Amatias在魔王难度下全连",
+      "condition_text": "Nesin Amatiasを難易度おにでフルコンボ",
       "source_row_index": 565
     },
     {
@@ -3604,24 +3660,24 @@
       "song_name": "Ka.Ma.Se(裏)",
       "title_name": "Ka.Ma.Se",
       "requirement_type": "all_perfect",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Ka.Ma.Se(裏)在魔王难度下全良",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "Ka.Ma.Se(裏)を難易度おにでドンダフルコンボ",
       "source_row_index": 730
     },
     {
       "song_name": "Ka.Ma.Se(裏)",
       "title_name": "Ka.Ma.Se",
       "requirement_type": "full_combo",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Ka.Ma.Se(裏)在魔王难度下全连",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "Ka.Ma.Se(裏)を難易度おにでフルコンボ",
       "source_row_index": 731
     },
     {
       "song_name": "Ka.Ma.Se(裏)",
       "title_name": "Ka.Ma.Se",
       "requirement_type": "clear",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Ka.Ma.Se(裏)在魔王难度下通关",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "Ka.Ma.Se(裏)を難易度おにでクリア",
       "source_row_index": 732
     },
     {
@@ -3641,28 +3697,12 @@
       "source_row_index": 733
     },
     {
-      "song_name": "Extreme End(裏)",
-      "title_name": "Extreme End",
-      "requirement_type": "all_perfect",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Extreme End(裏)全良",
-      "source_row_index": 734
-    },
-    {
       "song_name": "魔法式逃走奇谭☆ミ",
       "title_name": "てってっとーと逃走☆ミ",
       "requirement_type": "full_combo",
       "difficulty_scope": "oni",
       "condition_text": "在《魔法式逃走奇谭☆ミ》的“魔王”难度下达成全连吧",
       "source_row_index": 734
-    },
-    {
-      "song_name": "Extreme End(裏)",
-      "title_name": "Extreme End",
-      "requirement_type": "full_combo",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Extreme End(裏)全连",
-      "source_row_index": 735
     },
     {
       "song_name": "勿忘草",
@@ -3678,14 +3718,6 @@
       "requirement_type": "all_perfect",
       "difficulty_scope": "oni",
       "condition_text": "在《CRUXNAUT》的“魔王”难度下达成全良连段吧",
-      "source_row_index": 736
-    },
-    {
-      "song_name": "Extreme End(裏)",
-      "title_name": "Extreme End",
-      "requirement_type": "clear",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "Extreme End(裏)通关",
       "source_row_index": 736
     },
     {
@@ -3705,22 +3737,6 @@
       "source_row_index": 738
     },
     {
-      "song_name": "EXRiXiS(裏)",
-      "title_name": "EXRiXiS",
-      "requirement_type": "all_perfect",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "EXRiXiS(裏)全良",
-      "source_row_index": 738
-    },
-    {
-      "song_name": "EXRiXiS(裏)",
-      "title_name": "EXRiXiS",
-      "requirement_type": "full_combo",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "EXRiXiS(裏)全连",
-      "source_row_index": 739
-    },
-    {
       "song_name": "蛇铁",
       "title_name": "鋼鉄の蛇使い",
       "requirement_type": "full_combo",
@@ -3729,28 +3745,12 @@
       "source_row_index": 739
     },
     {
-      "song_name": "EXRiXiS(裏)",
-      "title_name": "EXRiXiS",
-      "requirement_type": "clear",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "EXRiXiS(裏)通关",
-      "source_row_index": 740
-    },
-    {
       "song_name": "歌剧「Recollect Blue」",
       "title_name": "歌劇「リコレクトブルー」",
       "requirement_type": "all_perfect",
       "difficulty_scope": "oni",
       "condition_text": "在《歌剧「Recollect Blue」》的“魔王”难度下达成全良连段吧",
       "source_row_index": 741
-    },
-    {
-      "song_name": "RAGING FIRE(裏)",
-      "title_name": "RAGING FIRE",
-      "requirement_type": "all_perfect",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "RAGING FIRE(裏)全良",
-      "source_row_index": 742
     },
     {
       "song_name": "歌剧「Recollect Blue」",
@@ -3764,8 +3764,8 @@
       "song_name": "RAGING FIRE(裏)",
       "title_name": "RAGING FIRE",
       "requirement_type": "full_combo",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "RAGING FIRE(裏)在魔王难度下全连",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "RAGING FIRE(裏)を難易度おにでフルコンボ",
       "source_row_index": 743
     },
     {
@@ -3780,8 +3780,8 @@
       "song_name": "RAGING FIRE(裏)",
       "title_name": "RAGING FIRE",
       "requirement_type": "clear",
-      "difficulty_scope": "inner_oni",
-      "condition_text": "RAGING FIRE(裏)在魔王难度下通关",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "RAGING FIRE(裏)を難易度おにでクリア",
       "source_row_index": 744
     },
     {
@@ -4121,12 +4121,36 @@
       "source_row_index": 815
     },
     {
+      "song_name": "IA曲",
+      "title_name": "みつあみ好き",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "IA曲をクリア",
+      "source_row_index": 815
+    },
+    {
       "song_name": "SoulStone -噬暗马戏团-",
       "title_name": "SoulStone -闇喰イサァカス団-",
       "requirement_type": "clear",
       "difficulty_scope": "oni",
       "condition_text": "在《SoulStone -噬暗马戏团-》的“魔王”难度下达成通关吧",
       "source_row_index": 816
+    },
+    {
+      "song_name": "公式の初音ミク曲",
+      "title_name": "ねぎ好き",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "公式の初音ミク曲をクリア",
+      "source_row_index": 816
+    },
+    {
+      "song_name": "GUMI曲",
+      "title_name": "にんじん好き",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "GUMI曲をクリア",
+      "source_row_index": 817
     },
     {
       "song_name": "MINNA NO KAKIGOORI",
@@ -4199,6 +4223,14 @@
       "difficulty_scope": "inner_oni",
       "condition_text": "在《Taiko Session》的“魔王（隐藏）”难度下达成通关吧",
       "source_row_index": 825
+    },
+    {
+      "song_name": "東方Projectアレンジ楽曲",
+      "title_name": "普通の魔法使い",
+      "requirement_type": "clear",
+      "difficulty_scope": "unspecified",
+      "condition_text": "東方Projectアレンジ楽曲をクリア",
+      "source_row_index": 827
     },
     {
       "song_name": "刻龙 ～Kokuryu～",
@@ -4953,6 +4985,382 @@
       "source_row_index": 928
     },
     {
+      "song_name": "SORA-VIII Nebula Trail",
+      "title_name": "SORA-VIII ネビュラトレイル",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 929
+    },
+    {
+      "song_name": "SORA-VIII Nebula Trail",
+      "title_name": "SORA-VIII ネビュラトレイル",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全连吧",
+      "source_row_index": 930
+    },
+    {
+      "song_name": "SORA-VIII Nebula Trail",
+      "title_name": "SORA-VIII ネビュラトレイル",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成通关吧",
+      "source_row_index": 931
+    },
+    {
+      "song_name": "Dimpy Dimper",
+      "title_name": "でぃんぴーでぃんぱー！",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 949
+    },
+    {
+      "song_name": "Dimpy Dimper",
+      "title_name": "でぃんぴーでぃんぱー！",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全连吧",
+      "source_row_index": 950
+    },
+    {
+      "song_name": "Dimpy Dimper",
+      "title_name": "でぃんぴーでぃんぱー！",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成通关吧",
+      "source_row_index": 951
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 952
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全连吧",
+      "source_row_index": 953
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成通关吧",
+      "source_row_index": 954
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 955
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 956
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM150篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 957
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 958
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全连吧",
+      "source_row_index": 959
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成通关吧",
+      "source_row_index": 960
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 961
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 962
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM180篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 963
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 964
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全连吧",
+      "source_row_index": 965
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成通关吧",
+      "source_row_index": 966
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 967
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 968
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 969
+    },
+    {
+      "song_name": "午马的二千锤百炼 【BPM240篇】",
+      "title_name": "トレーニ千グの達人",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 970
+    },
+    {
+      "song_name": "Ka.Ma.Se",
+      "title_name": "Ka.Ma.Se",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 971
+    },
+    {
+      "song_name": "Ka.Ma.Se",
+      "title_name": "Ka.Ma.Se",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 972
+    },
+    {
+      "song_name": "Ka.Ma.Se",
+      "title_name": "Ka.Ma.Se",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 973
+    },
+    {
+      "song_name": "Ka.Ma.Se",
+      "title_name": "Beast on the beats",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 974
+    },
+    {
+      "song_name": "Extreme End",
+      "title_name": "Extreme End",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 975
+    },
+    {
+      "song_name": "Extreme End",
+      "title_name": "Extreme End",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 976
+    },
+    {
+      "song_name": "Extreme End",
+      "title_name": "Extreme End",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 977
+    },
+    {
+      "song_name": "Extreme End",
+      "title_name": "終焉の覇者",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 978
+    },
+    {
+      "song_name": "EXRiXiS",
+      "title_name": "EXRiXiS",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 979
+    },
+    {
+      "song_name": "EXRiXiS",
+      "title_name": "EXRiXiS",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 980
+    },
+    {
+      "song_name": "EXRiXiS",
+      "title_name": "EXRiXiS",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 981
+    },
+    {
+      "song_name": "EXRiXiS",
+      "title_name": "EXRiXiS\"T\"",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 982
+    },
+    {
+      "song_name": "RAGING FIRE",
+      "title_name": "RAGING FIRE",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 983
+    },
+    {
+      "song_name": "RAGING FIRE",
+      "title_name": "RAGING FIRE",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 984
+    },
+    {
+      "song_name": "RAGING FIRE",
+      "title_name": "RAGING FIRE",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 985
+    },
+    {
+      "song_name": "RAGING FIRE",
+      "title_name": "ミ(＃ﾟДﾟ)ミRAGING!!彡(ﾟДﾟ＃)彡",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 986
+    },
+    {
+      "song_name": "World Keeps Turning",
+      "title_name": "World Keeps Turning",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 988
+    },
+    {
+      "song_name": "World Keeps Turning",
+      "title_name": "World Keeps Turning",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全连吧",
+      "source_row_index": 989
+    },
+    {
+      "song_name": "World Keeps Turning",
+      "title_name": "World Keeps Turning",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《World Keeps Turning》的“魔王”难度下达成通关吧",
+      "source_row_index": 990
+    },
+    {
+      "song_name": "Tsunaga-rhythm",
+      "title_name": "ツナガリズム",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 991
+    },
+    {
+      "song_name": "Tsunaga-rhythm",
+      "title_name": "ツナガリズム",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全连吧",
+      "source_row_index": 992
+    },
+    {
+      "song_name": "Tsunaga-rhythm",
+      "title_name": "ツナガリズム",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成通关吧",
+      "source_row_index": 993
+    },
+    {
       "song_name": "Purple Rose Fusion",
       "title_name": "紫薔薇の融合",
       "requirement_type": "full_combo",
@@ -5019,6 +5427,69 @@
         "source_row_index": 669
       }
     ],
+    "1プレイ中全曲でオプション「あべこべ」": [
+      {
+        "title_name": "あべこべドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「あべこべ」を付けてクリア",
+        "source_row_index": 55
+      }
+    ],
+    "1プレイ中全曲でオプション「きまぐれ」": [
+      {
+        "title_name": "きまぐれドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「きまぐれ」を付けてクリア",
+        "source_row_index": 57
+      }
+    ],
+    "1プレイ中全曲でオプション「さんばい」": [
+      {
+        "title_name": "さんばいドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「さんばい」を付けてクリア",
+        "source_row_index": 53
+      }
+    ],
+    "1プレイ中全曲でオプション「でたらめ」": [
+      {
+        "title_name": "でたらめドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「でたらめ」を付けてクリア",
+        "source_row_index": 58
+      }
+    ],
+    "1プレイ中全曲でオプション「ばいそく」": [
+      {
+        "title_name": "ばいそくドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「ばいそく」を付けてクリア",
+        "source_row_index": 52
+      }
+    ],
+    "1プレイ中全曲でオプション「よんばい」": [
+      {
+        "title_name": "よんばいドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「よんばい」を付けてクリア",
+        "source_row_index": 54
+      }
+    ],
+    "1プレイ中全曲でオプション「ドロン」": [
+      {
+        "title_name": "ドロンドンだー",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「ドロン」を付けてクリア",
+        "source_row_index": 56
+      }
+    ],
     "23点54分，通往阳光旅途的前奏": [
       {
         "title_name": "真夜中のプレリュード",
@@ -5040,7 +5511,7 @@
         "title_name": "ENDLESS PARTY TIME",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "3piece-JazzParty!通关",
+        "condition_text": "3piece-JazzParty!をクリア",
         "source_row_index": 65
       }
     ],
@@ -5104,7 +5575,7 @@
         "title_name": "鈍行に乗るドン！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       },
       {
@@ -5215,7 +5686,7 @@
         "title_name": "天使の光輪",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Angel Halo在魔王难度下全连",
+        "condition_text": "Angel Haloを難易度おにでフルコンボ",
         "source_row_index": 109
       }
     ],
@@ -5328,7 +5799,7 @@
         "title_name": "黒薔薇の使徒",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Black Rose Apostle在魔王难度下全连",
+        "condition_text": "Black Rose Apostleを難易度おにでフルコンボ",
         "source_row_index": 94
       }
     ],
@@ -5346,7 +5817,7 @@
         "title_name": "青薔薇の破滅",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Blue Rose Ruin在魔王难度下全连",
+        "condition_text": "Blue Rose Ruinを難易度おにでフルコンボ",
         "source_row_index": 97
       }
     ],
@@ -5380,7 +5851,7 @@
         "title_name": "電算ドンだー",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Calculator在魔王难度下全连",
+        "condition_text": "Calculatorを難易度おにでフルコンボ",
         "source_row_index": 111
       }
     ],
@@ -5568,7 +6039,7 @@
         "title_name": "ピアノ弾きの冒険者",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "D's Adventure Note在魔王难度下全连",
+        "condition_text": "D's Adventure Noteを難易度おにでフルコンボ",
         "source_row_index": 104
       }
     ],
@@ -5602,7 +6073,7 @@
         "title_name": "重量級ステッパー",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "DEBSTEP!在魔王难度下全连",
+        "condition_text": "DEBSTEP!を難易度おにでフルコンボ",
         "source_row_index": 107
       }
     ],
@@ -5661,8 +6132,31 @@
         "title_name": "多次元干渉者",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "DIMENSIONS通关",
+        "condition_text": "DIMENSIONSをクリア",
         "source_row_index": 61
+      }
+    ],
+    "Dimpy Dimper": [
+      {
+        "title_name": "でぃんぴーでぃんぱー！",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 949
+      },
+      {
+        "title_name": "でぃんぴーでぃんぱー！",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全连吧",
+        "source_row_index": 950
+      },
+      {
+        "title_name": "でぃんぴーでぃんぱー！",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成通关吧",
+        "source_row_index": 951
       }
     ],
     "Diving Drive": [
@@ -5760,7 +6254,7 @@
         "title_name": "ガマンならんのです！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "EkiBEN2000在魔王难度下全连",
+        "condition_text": "EkiBEN2000を難易度おにでフルコンボ",
         "source_row_index": 116
       }
     ],
@@ -5794,7 +6288,7 @@
         "title_name": "永遠の絆",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Eternal bond在魔王难度下全连",
+        "condition_text": "Eternal bondを難易度おにでフルコンボ",
         "source_row_index": 101
       }
     ],
@@ -5831,33 +6325,38 @@
       },
       {
         "title_name": "EXRiXiS",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《EXRiXiS》的“魔王”难度下达成通关吧",
-        "source_row_index": 844
-      }
-    ],
-    "EXRiXiS(裏)": [
-      {
-        "title_name": "EXRiXiS",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)全良",
-        "source_row_index": 738
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 979
       },
       {
         "title_name": "EXRiXiS",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)全连",
-        "source_row_index": 739
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 980
+      },
+      {
+        "title_name": "EXRiXiS\"T\"",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 982
+      },
+      {
+        "title_name": "EXRiXiS",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《EXRiXiS》的“魔王”难度下达成通关吧",
+        "source_row_index": 844
       },
       {
         "title_name": "EXRiXiS",
         "requirement_type": "clear",
         "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)通关",
-        "source_row_index": 740
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 981
       }
     ],
     "Extreme End": [
@@ -5884,33 +6383,38 @@
       },
       {
         "title_name": "Extreme End",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《Extreme End》的“魔王”难度下达成通关吧",
-        "source_row_index": 779
-      }
-    ],
-    "Extreme End(裏)": [
-      {
-        "title_name": "Extreme End",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)全良",
-        "source_row_index": 734
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 975
       },
       {
         "title_name": "Extreme End",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)全连",
-        "source_row_index": 735
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 976
+      },
+      {
+        "title_name": "終焉の覇者",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 978
+      },
+      {
+        "title_name": "Extreme End",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Extreme End》的“魔王”难度下达成通关吧",
+        "source_row_index": 779
       },
       {
         "title_name": "Extreme End",
         "requirement_type": "clear",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)通关",
-        "source_row_index": 736
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 977
       }
     ],
     "ex寅 Trap!!": [
@@ -6090,6 +6594,15 @@
         "source_row_index": 515
       }
     ],
+    "GUMI曲": [
+      {
+        "title_name": "にんじん好き",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "GUMI曲をクリア",
+        "source_row_index": 817
+      }
+    ],
     "HARDCOREノ心得": [
       {
         "title_name": "I LOVE HARDCORE",
@@ -6181,7 +6694,7 @@
         "title_name": "猪突猛進ボーイズ",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Hurtling Boys在魔王难度下全连",
+        "condition_text": "Hurtling Boysを難易度おにでフルコンボ",
         "source_row_index": 110
       }
     ],
@@ -6206,6 +6719,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Hyper☆Memorizing Show!》的“魔王”难度下达成通关吧",
         "source_row_index": 790
+      }
+    ],
+    "IA曲": [
+      {
+        "title_name": "みつあみ好き",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "IA曲をクリア",
+        "source_row_index": 815
       }
     ],
     "Illusion Flare": [
@@ -6297,6 +6819,27 @@
       },
       {
         "title_name": "Ka.Ma.Se",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 971
+      },
+      {
+        "title_name": "Ka.Ma.Se",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 972
+      },
+      {
+        "title_name": "Beast on the beats",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 974
+      },
+      {
+        "title_name": "Ka.Ma.Se",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《Ka.Ma.Se》的“魔王”难度下达成全连吧",
@@ -6315,28 +6858,35 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Ka.Ma.Se》的“魔王”难度下达成全连吧",
         "source_row_index": 853
+      },
+      {
+        "title_name": "Ka.Ma.Se",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 973
       }
     ],
     "Ka.Ma.Se(裏)": [
       {
         "title_name": "Ka.Ma.Se",
         "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下全良",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでドンダフルコンボ",
         "source_row_index": 730
       },
       {
         "title_name": "Ka.Ma.Se",
         "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下全连",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでフルコンボ",
         "source_row_index": 731
       },
       {
         "title_name": "Ka.Ma.Se",
         "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下通关",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでクリア",
         "source_row_index": 732
       }
     ],
@@ -6832,7 +7382,7 @@
         "title_name": "Nijustat on Amatias",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Nesin Amatias在魔王难度下全连",
+        "condition_text": "Nesin Amatiasを難易度おにでフルコンボ",
         "source_row_index": 565
       }
     ],
@@ -7089,7 +7639,7 @@
         "title_name": "薔薇を統べし者",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Purple Rose Fusion在魔王难度下全连",
+        "condition_text": "Purple Rose Fusionを難易度おにでフルコンボ",
         "source_row_index": 99
       },
       {
@@ -7130,7 +7680,7 @@
         "title_name": "リミットブレイカー",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "RAGE v.self通关",
+        "condition_text": "RAGE v.selfをクリア",
         "source_row_index": 66
       }
     ],
@@ -7141,6 +7691,27 @@
         "difficulty_scope": "oni",
         "condition_text": "在《RAGING FIRE》的“魔王”难度下达成全良连段吧",
         "source_row_index": 846
+      },
+      {
+        "title_name": "RAGING FIRE",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 983
+      },
+      {
+        "title_name": "RAGING FIRE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 984
+      },
+      {
+        "title_name": "ミ(＃ﾟДﾟ)ミRAGING!!彡(ﾟДﾟ＃)彡",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 986
       },
       {
         "title_name": "RAGING FIRE",
@@ -7162,28 +7733,28 @@
         "difficulty_scope": "oni",
         "condition_text": "在《RAGING FIRE》的“魔王”难度下达成全连吧",
         "source_row_index": 849
-      }
-    ],
-    "RAGING FIRE(裏)": [
-      {
-        "title_name": "RAGING FIRE",
-        "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)全良",
-        "source_row_index": 742
-      },
-      {
-        "title_name": "RAGING FIRE",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)在魔王难度下全连",
-        "source_row_index": 743
       },
       {
         "title_name": "RAGING FIRE",
         "requirement_type": "clear",
         "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)在魔王难度下通关",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 985
+      }
+    ],
+    "RAGING FIRE(裏)": [
+      {
+        "title_name": "RAGING FIRE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "RAGING FIRE(裏)を難易度おにでフルコンボ",
+        "source_row_index": 743
+      },
+      {
+        "title_name": "RAGING FIRE",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "RAGING FIRE(裏)を難易度おにでクリア",
         "source_row_index": 744
       }
     ],
@@ -7263,7 +7834,7 @@
         "title_name": "赤薔薇の福音",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Red Rose Evangel在魔王难度下全连",
+        "condition_text": "Red Rose Evangelを難易度おにでフルコンボ",
         "source_row_index": 96
       }
     ],
@@ -7306,7 +7877,7 @@
         "title_name": "なんじゃこりゃああ！",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Rotter Tarmination(裏)全连",
+        "condition_text": "Rotter Tarmination(裏)をフルコンボ",
         "source_row_index": 91
       }
     ],
@@ -7481,6 +8052,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《SORA-VII Cygnus Wall》的“魔王”难度下达成全连吧",
         "source_row_index": 382
+      }
+    ],
+    "SORA-VIII Nebula Trail": [
+      {
+        "title_name": "SORA-VIII ネビュラトレイル",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 929
+      },
+      {
+        "title_name": "SORA-VIII ネビュラトレイル",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全连吧",
+        "source_row_index": 930
+      },
+      {
+        "title_name": "SORA-VIII ネビュラトレイル",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成通关吧",
+        "source_row_index": 931
       }
     ],
     "SoulStone -噬暗马戏团-": [
@@ -7891,6 +8485,29 @@
         "source_row_index": 423
       }
     ],
+    "Tsunaga-rhythm": [
+      {
+        "title_name": "ツナガリズム",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 991
+      },
+      {
+        "title_name": "ツナガリズム",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全连吧",
+        "source_row_index": 992
+      },
+      {
+        "title_name": "ツナガリズム",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成通关吧",
+        "source_row_index": 993
+      }
+    ],
     "Uchuhikoushi Boukentan": [
       {
         "title_name": "1人と1台の大冒険",
@@ -8074,7 +8691,7 @@
         "title_name": "わさびの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Wasabi Body Blow在魔王难度下全连",
+        "condition_text": "Wasabi Body Blowを難易度おにでフルコンボ",
         "source_row_index": 87
       }
     ],
@@ -8092,7 +8709,7 @@
         "title_name": "白薔薇の狂気",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "White Rose Insanity在魔王难度下全连",
+        "condition_text": "White Rose Insanityを難易度おにでフルコンボ",
         "source_row_index": 95
       }
     ],
@@ -8121,12 +8738,35 @@
         "source_row_index": 489
       }
     ],
+    "World Keeps Turning": [
+      {
+        "title_name": "World Keeps Turning",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 988
+      },
+      {
+        "title_name": "World Keeps Turning",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全连吧",
+        "source_row_index": 989
+      },
+      {
+        "title_name": "World Keeps Turning",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成通关吧",
+        "source_row_index": 990
+      }
+    ],
     "X-DAY2000": [
       {
         "title_name": "The end of your love",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "X-DAY2000在魔王难度下全连",
+        "condition_text": "X-DAY2000を難易度おにでフルコンボ",
         "source_row_index": 140
       }
     ],
@@ -8151,7 +8791,7 @@
         "title_name": "戦神",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Xa(裏)オプション「あべこべ」在全连",
+        "condition_text": "Xa(裏)をオプション「あべこべ」でフルコンボ",
         "source_row_index": 121
       }
     ],
@@ -8269,7 +8909,7 @@
         "title_name": "ダークカオスタイム",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "†††カオスタイム the DARK†††在魔王难度下全连",
+        "condition_text": "†††カオスタイム the DARK†††を難易度おにでフルコンボ",
         "source_row_index": 479
       }
     ],
@@ -8287,7 +8927,7 @@
         "title_name": "〆ドレーの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "〆ドレー2000在魔王难度下全连",
+        "condition_text": "〆ドレー2000を難易度おにでフルコンボ",
         "source_row_index": 75
       }
     ],
@@ -8305,7 +8945,7 @@
         "title_name": "きたさいたまのたちゅじん",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "きたさいたま200在魔王难度下全连",
+        "condition_text": "きたさいたま200を難易度おにでフルコンボ",
         "source_row_index": 130
       }
     ],
@@ -8314,7 +8954,7 @@
         "title_name": "きたさいたまの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "きたさいたま2000在魔王难度下全连",
+        "condition_text": "きたさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 74
       }
     ],
@@ -8323,7 +8963,7 @@
         "title_name": "さいたまの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "さいたま2000在魔王难度下全连",
+        "condition_text": "さいたま2000を難易度おにでフルコンボ",
         "source_row_index": 134
       }
     ],
@@ -8332,7 +8972,7 @@
         "title_name": "さんぽの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "さんぽ(裏)全连",
+        "condition_text": "さんぽ(裏)をフルコンボ",
         "source_row_index": 80
       }
     ],
@@ -8350,7 +8990,7 @@
         "title_name": "卒業してもずっとトモダチ",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "そつおめしき在魔王难度下全连",
+        "condition_text": "そつおめしきを難易度おにでフルコンボ",
         "source_row_index": 115
       }
     ],
@@ -8359,7 +8999,7 @@
         "title_name": "ちょっと休憩",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "てんぢく2000在魔王难度下全连",
+        "condition_text": "てんぢく2000を難易度おにでフルコンボ",
         "source_row_index": 114
       }
     ],
@@ -8368,7 +9008,7 @@
         "title_name": "お仕事の達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "はたラク2000在魔王难度下全连",
+        "condition_text": "はたラク2000を難易度おにでフルコンボ",
         "source_row_index": 135
       }
     ],
@@ -8377,7 +9017,7 @@
         "title_name": "はやさいたまの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "はやさいたま2000在魔王难度下全连",
+        "condition_text": "はやさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 133
       }
     ],
@@ -8386,7 +9026,7 @@
         "title_name": "またさいたまの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "またさいたま2000在魔王难度下全连",
+        "condition_text": "またさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 76
       }
     ],
@@ -8395,43 +9035,43 @@
         "title_name": "戦車の達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "やわらか戦車(裏)全连",
+        "condition_text": "やわらか戦車(裏)をフルコンボ",
         "source_row_index": 81
       }
     ],
-    "よく在る15300": [
+    "よくでる15300": [
       {
         "title_name": "とても短い曲です(20秒)",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "よく在る15300在魔王难度下全连",
+        "condition_text": "よくでる15300を難易度おにでフルコンボ",
         "source_row_index": 564
       }
     ],
-    "よく在る2000": [
+    "よくでる2000": [
       {
         "title_name": "今日も定時で帰ります",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "よく在る2000在魔王难度下全连",
+        "condition_text": "よくでる2000を難易度おにでフルコンボ",
         "source_row_index": 118
       }
     ],
-    "アイドルマスター的楽曲": [
+    "アイドルマスターの楽曲": [
       {
         "title_name": "プロデューサーさん",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "1游玩内全て特定的曲(アイドルマスター的楽曲)選ん在通关",
+        "condition_text": "1プレイ内全て特定の曲(アイドルマスターの楽曲)を選んでクリア",
         "source_row_index": 70
       }
     ],
-    "カラ鞠的花": [
+    "カラ鞠の花": [
       {
         "title_name": "カラ鞠のユカリ",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "カラ鞠的花在魔王难度下全连",
+        "condition_text": "カラ鞠の花を難易度おにでフルコンボ",
         "source_row_index": 112
       }
     ],
@@ -8440,7 +9080,7 @@
         "title_name": "鈍行に乗るドン！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       }
     ],
@@ -8449,7 +9089,7 @@
         "title_name": "百獣王者どんちゃん",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "グレート！アニマルカイザー!!全连",
+        "condition_text": "グレート！アニマルカイザー!!をフルコンボ",
         "source_row_index": 88
       }
     ],
@@ -8458,14 +9098,14 @@
         "title_name": "で、できましたぁ…",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "ケチャドン2000全连",
+        "condition_text": "ケチャドン2000をフルコンボ",
         "source_row_index": 86
       },
       {
         "title_name": "〆切の達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ケチャドン2000在魔王难度下全连",
+        "condition_text": "ケチャドン2000を難易度おにでフルコンボ",
         "source_row_index": 138
       }
     ],
@@ -8474,7 +9114,7 @@
         "title_name": "心の底から「だだだ脱出！」",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "ココドコ？多分ドッカ島(裏)全连",
+        "condition_text": "ココドコ？多分ドッカ島(裏)をフルコンボ",
         "source_row_index": 501
       }
     ],
@@ -8483,7 +9123,7 @@
         "title_name": "スーハーの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "スーハー2000在魔王难度下全连",
+        "condition_text": "スーハー2000を難易度おにでフルコンボ",
         "source_row_index": 77
       }
     ],
@@ -8501,7 +9141,7 @@
         "title_name": "食っちゃ寝の達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "タベルナ2000在魔王难度下全连",
+        "condition_text": "タベルナ2000を難易度おにでフルコンボ",
         "source_row_index": 132
       }
     ],
@@ -8510,21 +9150,21 @@
         "title_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全良",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでドンダフルコンボ",
         "source_row_index": 561
       },
       {
         "title_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全连",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでフルコンボ",
         "source_row_index": 562
       },
       {
         "title_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下通关",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでクリア",
         "source_row_index": 563
       }
     ],
@@ -8533,7 +9173,7 @@
         "title_name": "鈍行に乗るドン！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       }
     ],
@@ -8542,7 +9182,7 @@
         "title_name": "ツンデレCafeの常連",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ツンデレCafeへようこそ☆在魔王难度下全连",
+        "condition_text": "ツンデレCafeへようこそ☆を難易度おにでフルコンボ",
         "source_row_index": 106
       }
     ],
@@ -8551,7 +9191,7 @@
         "title_name": "ドキがムネムネしちゃうの",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "ドキドキ胸きゅん おまつりタイム通关",
+        "condition_text": "ドキドキ胸きゅん おまつりタイムをクリア",
         "source_row_index": 63
       }
     ],
@@ -8560,7 +9200,7 @@
         "title_name": "ドンカマの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ドンカマ2000在魔王难度下全连",
+        "condition_text": "ドンカマ2000を難易度おにでフルコンボ",
         "source_row_index": 119
       }
     ],
@@ -8569,7 +9209,7 @@
         "title_name": "悪夢からの生還者",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "ナイトメア・サバイバー(裏)全连",
+        "condition_text": "ナイトメア・サバイバー(裏)をフルコンボ",
         "source_row_index": 90
       }
     ],
@@ -8578,7 +9218,7 @@
         "title_name": "ラリルレランの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ノるどん2000在魔王难度下全连",
+        "condition_text": "ノるどん2000を難易度おにでフルコンボ",
         "source_row_index": 131
       }
     ],
@@ -8605,14 +9245,14 @@
         "title_name": "常世人",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "万戈イム－一ノ十全连",
+        "condition_text": "万戈イム－一ノ十をフルコンボ",
         "source_row_index": 100
       },
       {
         "title_name": "万戈イムの達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "万戈イム－一ノ十在魔王难度下全连",
+        "condition_text": "万戈イム－一ノ十を難易度おにでフルコンボ",
         "source_row_index": 141
       }
     ],
@@ -8684,6 +9324,15 @@
         "source_row_index": 638
       }
     ],
+    "公式の初音ミク曲": [
+      {
+        "title_name": "ねぎ好き",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "公式の初音ミク曲をクリア",
+        "source_row_index": 816
+      }
+    ],
     "六华之舞": [
       {
         "title_name": "六華の舞の達人",
@@ -8743,12 +9392,12 @@
         "source_row_index": 462
       }
     ],
-    "初音ミク的消失‐劇場版‐(裏)": [
+    "初音ミクの消失‐劇場版‐(裏)": [
       {
         "title_name": "最高速の歌姫",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "初音ミク的消失‐劇場版‐(裏)全连",
+        "condition_text": "初音ミクの消失‐劇場版‐(裏)をフルコンボ",
         "source_row_index": 79
       }
     ],
@@ -8796,7 +9445,7 @@
         "title_name": "妖異幻怪",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "化物月夜在魔王难度下全连",
+        "condition_text": "化物月夜を難易度おにでフルコンボ",
         "source_row_index": 103
       }
     ],
@@ -8805,15 +9454,154 @@
         "title_name": "たつじんコース",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "十露盤2000全连",
+        "condition_text": "十露盤2000をフルコンボ",
         "source_row_index": 83
       },
       {
         "title_name": "ご名答！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "十露盤2000在魔王难度下全连",
+        "condition_text": "十露盤2000を難易度おにでフルコンボ",
         "source_row_index": 139
+      }
+    ],
+    "午马的二千锤百炼 【BPM150篇】": [
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 952
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 955
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 956
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 953
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 954
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 957
+      }
+    ],
+    "午马的二千锤百炼 【BPM180篇】": [
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 958
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 961
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 959
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 960
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 962
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 963
+      }
+    ],
+    "午马的二千锤百炼 【BPM240篇】": [
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 964
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 967
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 968
+      },
+      {
+        "title_name": "トレーニ千グの達人",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 970
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 965
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 966
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 969
       }
     ],
     "卓球de脱臼": [
@@ -8857,7 +9645,7 @@
         "title_name": "漢の生き様",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "和蘭撫子通关",
+        "condition_text": "和蘭撫子をクリア",
         "source_row_index": 60
       }
     ],
@@ -8902,7 +9690,7 @@
         "title_name": "百カーニバル",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "夜桜謝肉祭(裏)全连",
+        "condition_text": "夜桜謝肉祭(裏)をフルコンボ",
         "source_row_index": 92
       }
     ],
@@ -8911,7 +9699,7 @@
         "title_name": "参りますッ！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "夜櫻ブレヰダアズ在魔王难度下全连",
+        "condition_text": "夜櫻ブレヰダアズを難易度おにでフルコンボ",
         "source_row_index": 108
       }
     ],
@@ -8951,12 +9739,12 @@
         "source_row_index": 862
       }
     ],
-    "大空与太鼓的踊り": [
+    "大空と太鼓の踊り": [
       {
         "title_name": "アイリッシュドンだー",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "大空与太鼓的踊り在魔王难度下全连",
+        "condition_text": "大空と太鼓の踊りを難易度おにでフルコンボ",
         "source_row_index": 105
       }
     ],
@@ -8983,7 +9771,7 @@
         "title_name": "天狗の仕業",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "天狗囃子在魔王难度下全连",
+        "condition_text": "天狗囃子を難易度おにでフルコンボ",
         "source_row_index": 144
       }
     ],
@@ -9024,7 +9812,7 @@
         "title_name": "鈍行に乗るドン！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       }
     ],
@@ -9213,7 +10001,7 @@
         "title_name": "幽玄を極めし者",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "幽玄ノ乱在魔王难度下全连",
+        "condition_text": "幽玄ノ乱を難易度おにでフルコンボ",
         "source_row_index": 113
       }
     ],
@@ -9240,7 +10028,7 @@
         "title_name": "外ノ世界に顕れシ者",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "彁在魔王难度下全连",
+        "condition_text": "彁を難易度おにでフルコンボ",
         "source_row_index": 325
       }
     ],
@@ -9249,8 +10037,17 @@
         "title_name": "たのしかったね",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "彁(裏)全连",
+        "condition_text": "彁(裏)をフルコンボ",
         "source_row_index": 379
+      }
+    ],
+    "恋の処方箋": [
+      {
+        "title_name": "恋の病治療中",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "恋の処方箋をクリア",
+        "source_row_index": 59
       }
     ],
     "恋文2000": [
@@ -9258,17 +10055,8 @@
         "title_name": "揺り篭から墓場まで",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "恋文2000在魔王难度下全连",
+        "condition_text": "恋文2000を難易度おにでフルコンボ",
         "source_row_index": 93
-      }
-    ],
-    "恋的処方箋": [
-      {
-        "title_name": "恋の病治療中",
-        "requirement_type": "clear",
-        "difficulty_scope": "unspecified",
-        "condition_text": "恋的処方箋通关",
-        "source_row_index": 59
       }
     ],
     "恭喜毕业典礼・2BAN": [
@@ -9285,7 +10073,7 @@
         "title_name": "仮面の下の真実",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "愛想笑い在魔王难度下全连",
+        "condition_text": "愛想笑いを難易度おにでフルコンボ",
         "source_row_index": 102
       }
     ],
@@ -9382,6 +10170,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《朦胧的净化》的“魔王”难度下达成全连吧",
         "source_row_index": 636
+      }
+    ],
+    "東方Projectアレンジ楽曲": [
+      {
+        "title_name": "普通の魔法使い",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "東方Projectアレンジ楽曲をクリア",
+        "source_row_index": 827
       }
     ],
     "极限创作者加油歌": [
@@ -9641,24 +10438,24 @@
         "title_name": "燎原の覇王",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "燎原ノ舞在魔王难度下全连",
+        "condition_text": "燎原ノ舞を難易度おにでフルコンボ",
         "source_row_index": 78
       }
     ],
     "狂澜怒涛": [
-      {
-        "title_name": "バチよ荒れ狂え",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "oni",
-        "condition_text": "在《狂澜怒涛》的“魔王”难度下达成全连吧",
-        "source_row_index": 589
-      },
       {
         "title_name": "狂瀾怒涛のバチ捌き",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《狂澜怒涛》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 590
+      },
+      {
+        "title_name": "バチよ荒れ狂え",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《狂澜怒涛》的“魔王”难度下达成全连吧",
+        "source_row_index": 589
       }
     ],
     "电脑幻夜之星言咏唱": [
@@ -9834,7 +10631,7 @@
         "title_name": "愛ヲ詠イシ花",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "花オト裏拍子通关",
+        "condition_text": "花オト裏拍子をクリア",
         "source_row_index": 62
       }
     ],
@@ -10102,12 +10899,12 @@
         "source_row_index": 381
       }
     ],
-    "風的国的龍与騎士": [
+    "風の国の龍と騎士": [
       {
         "title_name": "風を翔る騎士",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "風的国的龍与騎士通关",
+        "condition_text": "風の国の龍と騎士をクリア",
         "source_row_index": 64
       }
     ],
@@ -10161,7 +10958,7 @@
         "title_name": "リンリンズのファン",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "黄ダルマ2000在魔王难度下全连",
+        "condition_text": "黄ダルマ2000を難易度おにでフルコンボ",
         "source_row_index": 137
       }
     ],
@@ -10325,6 +11122,15 @@
         "source_row_index": 443
       }
     ],
+    "Beast on the beats": [
+      {
+        "song_name": "Ka.Ma.Se",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 974
+      }
+    ],
     "Cat or Dog！": [
       {
         "song_name": "宠物店大战",
@@ -10425,7 +11231,7 @@
         "song_name": "3piece-JazzParty!",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "3piece-JazzParty!通关",
+        "condition_text": "3piece-JazzParty!をクリア",
         "source_row_index": 65
       }
     ],
@@ -10449,27 +11255,6 @@
     ],
     "EXRiXiS": [
       {
-        "song_name": "EXRiXiS(裏)",
-        "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)全良",
-        "source_row_index": 738
-      },
-      {
-        "song_name": "EXRiXiS(裏)",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)全连",
-        "source_row_index": 739
-      },
-      {
-        "song_name": "EXRiXiS(裏)",
-        "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "EXRiXiS(裏)通关",
-        "source_row_index": 740
-      },
-      {
         "song_name": "EXRiXiS",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
@@ -10485,34 +11270,43 @@
       },
       {
         "song_name": "EXRiXiS",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 979
+      },
+      {
+        "song_name": "EXRiXiS",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 980
+      },
+      {
+        "song_name": "EXRiXiS",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
         "condition_text": "在《EXRiXiS》的“魔王”难度下达成通关吧",
         "source_row_index": 844
+      },
+      {
+        "song_name": "EXRiXiS",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 981
+      }
+    ],
+    "EXRiXiS\"T\"": [
+      {
+        "song_name": "EXRiXiS",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《EXRiXiS》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 982
       }
     ],
     "Extreme End": [
-      {
-        "song_name": "Extreme End(裏)",
-        "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)全良",
-        "source_row_index": 734
-      },
-      {
-        "song_name": "Extreme End(裏)",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)全连",
-        "source_row_index": 735
-      },
-      {
-        "song_name": "Extreme End(裏)",
-        "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Extreme End(裏)通关",
-        "source_row_index": 736
-      },
       {
         "song_name": "Extreme End",
         "requirement_type": "all_perfect",
@@ -10529,10 +11323,31 @@
       },
       {
         "song_name": "Extreme End",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 975
+      },
+      {
+        "song_name": "Extreme End",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 976
+      },
+      {
+        "song_name": "Extreme End",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
         "condition_text": "在《Extreme End》的“魔王”难度下达成通关吧",
         "source_row_index": 779
+      },
+      {
+        "song_name": "Extreme End",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 977
       }
     ],
     "FREEDOM DiVER↓↓↓": [
@@ -10656,22 +11471,22 @@
       {
         "song_name": "Ka.Ma.Se(裏)",
         "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下全良",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでドンダフルコンボ",
         "source_row_index": 730
       },
       {
         "song_name": "Ka.Ma.Se(裏)",
         "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下全连",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでフルコンボ",
         "source_row_index": 731
       },
       {
         "song_name": "Ka.Ma.Se(裏)",
         "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "Ka.Ma.Se(裏)在魔王难度下通关",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "Ka.Ma.Se(裏)を難易度おにでクリア",
         "source_row_index": 732
       },
       {
@@ -10680,6 +11495,20 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Ka.Ma.Se》的“魔王”难度下达成全良连段吧",
         "source_row_index": 850
+      },
+      {
+        "song_name": "Ka.Ma.Se",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 971
+      },
+      {
+        "song_name": "Ka.Ma.Se",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 972
       },
       {
         "song_name": "Ka.Ma.Se",
@@ -10694,6 +11523,13 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Ka.Ma.Se》的“魔王”难度下达成通关吧",
         "source_row_index": 852
+      },
+      {
+        "song_name": "Ka.Ma.Se",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Ka.Ma.Se》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 973
       }
     ],
     "Ka.Ma.Se.Ta.Yo!": [
@@ -10790,7 +11626,7 @@
         "song_name": "Nesin Amatias",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Nesin Amatias在魔王难度下全连",
+        "condition_text": "Nesin Amatiasを難易度おにでフルコンボ",
         "source_row_index": 565
       }
     ],
@@ -10838,23 +11674,16 @@
     "RAGING FIRE": [
       {
         "song_name": "RAGING FIRE(裏)",
-        "requirement_type": "all_perfect",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)全良",
-        "source_row_index": 742
-      },
-      {
-        "song_name": "RAGING FIRE(裏)",
         "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)在魔王难度下全连",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "RAGING FIRE(裏)を難易度おにでフルコンボ",
         "source_row_index": 743
       },
       {
         "song_name": "RAGING FIRE(裏)",
         "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "RAGING FIRE(裏)在魔王难度下通关",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "RAGING FIRE(裏)を難易度おにでクリア",
         "source_row_index": 744
       },
       {
@@ -10863,6 +11692,20 @@
         "difficulty_scope": "oni",
         "condition_text": "在《RAGING FIRE》的“魔王”难度下达成全良连段吧",
         "source_row_index": 846
+      },
+      {
+        "song_name": "RAGING FIRE",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 983
+      },
+      {
+        "song_name": "RAGING FIRE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 984
       },
       {
         "song_name": "RAGING FIRE",
@@ -10877,6 +11720,13 @@
         "difficulty_scope": "oni",
         "condition_text": "在《RAGING FIRE》的“魔王”难度下达成通关吧",
         "source_row_index": 848
+      },
+      {
+        "song_name": "RAGING FIRE",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 985
       }
     ],
     "Re:Play!!": [
@@ -11014,6 +11864,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《SORA-III Heliopause》的“魔王”难度下达成通关吧",
         "source_row_index": 910
+      }
+    ],
+    "SORA-VIII ネビュラトレイル": [
+      {
+        "song_name": "SORA-VIII Nebula Trail",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 929
+      },
+      {
+        "song_name": "SORA-VIII Nebula Trail",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成全连吧",
+        "source_row_index": 930
+      },
+      {
+        "song_name": "SORA-VIII Nebula Trail",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《SORA-VIII Nebula Trail》的“魔王”难度下达成通关吧",
+        "source_row_index": 931
       }
     ],
     "SoulStone -闇喰イサァカス団-": [
@@ -11188,7 +12061,7 @@
         "song_name": "X-DAY2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "X-DAY2000在魔王难度下全连",
+        "condition_text": "X-DAY2000を難易度おにでフルコンボ",
         "source_row_index": 140
       }
     ],
@@ -11226,6 +12099,138 @@
         "difficulty_scope": "oni",
         "condition_text": "在《UFO Swingin'》的“魔王”难度下达成全连吧",
         "source_row_index": 460
+      }
+    ],
+    "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】": [
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 952
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 955
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 956
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 953
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 954
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 957
+      }
+    ],
+    "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM180編】": [
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 958
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 961
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 959
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 960
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 962
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM180篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM180篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 963
+      }
+    ],
+    "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM240編】": [
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 964
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 967
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 968
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成全连吧",
+        "source_row_index": 965
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王”难度下达成通关吧",
+        "source_row_index": 966
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 969
       }
     ],
     "UNBIAS": [
@@ -11340,6 +12345,29 @@
         "source_row_index": 710
       }
     ],
+    "World Keeps Turning": [
+      {
+        "song_name": "World Keeps Turning",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 988
+      },
+      {
+        "song_name": "World Keeps Turning",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成全连吧",
+        "source_row_index": 989
+      },
+      {
+        "song_name": "World Keeps Turning",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《World Keeps Turning》的“魔王”难度下达成通关吧",
+        "source_row_index": 990
+      }
+    ],
     "YOU're our HEROES": [
       {
         "song_name": "YOU're our HEROES",
@@ -11409,7 +12437,7 @@
         "song_name": "〆ドレー2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "〆ドレー2000在魔王难度下全连",
+        "condition_text": "〆ドレー2000を難易度おにでフルコンボ",
         "source_row_index": 75
       }
     ],
@@ -11418,7 +12446,7 @@
         "song_name": "ケチャドン2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ケチャドン2000在魔王难度下全连",
+        "condition_text": "ケチャドン2000を難易度おにでフルコンボ",
         "source_row_index": 138
       }
     ],
@@ -11503,6 +12531,15 @@
         "source_row_index": 424
       }
     ],
+    "あべこべドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「あべこべ」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「あべこべ」を付けてクリア",
+        "source_row_index": 55
+      }
+    ],
     "いとかしこし太鼓の遊び": [
       {
         "song_name": "平等院凤凰咚 vs 鸟兽戏咔",
@@ -11517,7 +12554,7 @@
         "song_name": "はたラク2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "はたラク2000在魔王难度下全连",
+        "condition_text": "はたラク2000を難易度おにでフルコンボ",
         "source_row_index": 135
       }
     ],
@@ -11535,7 +12572,7 @@
         "song_name": "きたさいたま200",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "きたさいたま200在魔王难度下全连",
+        "condition_text": "きたさいたま200を難易度おにでフルコンボ",
         "source_row_index": 130
       }
     ],
@@ -11544,8 +12581,17 @@
         "song_name": "きたさいたま2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "きたさいたま2000在魔王难度下全连",
+        "condition_text": "きたさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 74
+      }
+    ],
+    "きまぐれドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「きまぐれ」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「きまぐれ」を付けてクリア",
+        "source_row_index": 57
       }
     ],
     "きれいさっぱりサラえました！": [
@@ -11580,7 +12626,7 @@
         "song_name": "十露盤2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "十露盤2000在魔王难度下全连",
+        "condition_text": "十露盤2000を難易度おにでフルコンボ",
         "source_row_index": 139
       }
     ],
@@ -11589,7 +12635,7 @@
         "song_name": "さいたま2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "さいたま2000在魔王难度下全连",
+        "condition_text": "さいたま2000を難易度おにでフルコンボ",
         "source_row_index": 134
       }
     ],
@@ -11602,12 +12648,21 @@
         "source_row_index": 581
       }
     ],
+    "さんばいドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「さんばい」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「さんばい」を付けてクリア",
+        "source_row_index": 53
+      }
+    ],
     "さんぽの達人": [
       {
         "song_name": "さんぽ(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "さんぽ(裏)全连",
+        "condition_text": "さんぽ(裏)をフルコンボ",
         "source_row_index": 80
       }
     ],
@@ -11670,7 +12725,7 @@
         "song_name": "十露盤2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "十露盤2000全连",
+        "condition_text": "十露盤2000をフルコンボ",
         "source_row_index": 83
       }
     ],
@@ -11679,7 +12734,7 @@
         "song_name": "彁(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "彁(裏)全连",
+        "condition_text": "彁(裏)をフルコンボ",
         "source_row_index": 379
       }
     ],
@@ -11688,7 +12743,7 @@
         "song_name": "てんぢく2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "てんぢく2000在魔王难度下全连",
+        "condition_text": "てんぢく2000を難易度おにでフルコンボ",
         "source_row_index": 114
       }
     ],
@@ -11724,8 +12779,40 @@
         "song_name": "ケチャドン2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "ケチャドン2000全连",
+        "condition_text": "ケチャドン2000をフルコンボ",
         "source_row_index": 86
+      }
+    ],
+    "でぃんぴーでぃんぱー！": [
+      {
+        "song_name": "Dimpy Dimper",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 949
+      },
+      {
+        "song_name": "Dimpy Dimper",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成全连吧",
+        "source_row_index": 950
+      },
+      {
+        "song_name": "Dimpy Dimper",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Dimpy Dimper》的“魔王”难度下达成通关吧",
+        "source_row_index": 951
+      }
+    ],
+    "でたらめドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「でたらめ」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「でたらめ」を付けてクリア",
+        "source_row_index": 58
       }
     ],
     "とけた": [
@@ -11739,10 +12826,10 @@
     ],
     "とても短い曲です(20秒)": [
       {
-        "song_name": "よく在る15300",
+        "song_name": "よくでる15300",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "よく在る15300在魔王难度下全连",
+        "condition_text": "よくでる15300を難易度おにでフルコンボ",
         "source_row_index": 564
       }
     ],
@@ -11769,7 +12856,7 @@
         "song_name": "Rotter Tarmination(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Rotter Tarmination(裏)全连",
+        "condition_text": "Rotter Tarmination(裏)をフルコンボ",
         "source_row_index": 91
       }
     ],
@@ -11780,6 +12867,24 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Nya-Nya-Nya-》的“魔王”难度下达成全连吧",
         "source_row_index": 455
+      }
+    ],
+    "にんじん好き": [
+      {
+        "song_name": "GUMI曲",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "GUMI曲をクリア",
+        "source_row_index": 817
+      }
+    ],
+    "ねぎ好き": [
+      {
+        "song_name": "公式の初音ミク曲",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "公式の初音ミク曲をクリア",
+        "source_row_index": 816
       }
     ],
     "はい、論破！": [
@@ -11796,8 +12901,17 @@
         "song_name": "はやさいたま2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "はやさいたま2000在魔王难度下全连",
+        "condition_text": "はやさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 133
+      }
+    ],
+    "ばいそくドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「ばいそく」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「ばいそく」を付けてクリア",
+        "source_row_index": 52
       }
     ],
     "ほんの少し 惑星欲しい": [
@@ -11814,7 +12928,7 @@
         "song_name": "またさいたま2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "またさいたま2000在魔王难度下全连",
+        "condition_text": "またさいたま2000を難易度おにでフルコンボ",
         "source_row_index": 76
       }
     ],
@@ -11843,6 +12957,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《ERINGI NO EKUBO》的“魔王”难度下达成全连吧",
         "source_row_index": 478
+      }
+    ],
+    "みつあみ好き": [
+      {
+        "song_name": "IA曲",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "IA曲をクリア",
+        "source_row_index": 815
       }
     ],
     "みんなで繋ぐ、太鼓色。": [
@@ -11926,12 +13049,21 @@
         "source_row_index": 264
       }
     ],
+    "よんばいドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「よんばい」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「よんばい」を付けてクリア",
+        "source_row_index": 54
+      }
+    ],
     "わさびの達人": [
       {
         "song_name": "Wasabi Body Blow",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Wasabi Body Blow在魔王难度下全连",
+        "condition_text": "Wasabi Body Blowを難易度おにでフルコンボ",
         "source_row_index": 87
       }
     ],
@@ -11964,10 +13096,10 @@
     ],
     "アイリッシュドンだー": [
       {
-        "song_name": "大空与太鼓的踊り",
+        "song_name": "大空と太鼓の踊り",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "大空与太鼓的踊り在魔王难度下全连",
+        "condition_text": "大空と太鼓の踊りを難易度おにでフルコンボ",
         "source_row_index": 105
       }
     ],
@@ -12036,10 +13168,10 @@
     ],
     "カラ鞠のユカリ": [
       {
-        "song_name": "カラ鞠的花",
+        "song_name": "カラ鞠の花",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "カラ鞠的花在魔王难度下全连",
+        "condition_text": "カラ鞠の花を難易度おにでフルコンボ",
         "source_row_index": 112
       }
     ],
@@ -12066,7 +13198,7 @@
         "song_name": "EkiBEN2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "EkiBEN2000在魔王难度下全连",
+        "condition_text": "EkiBEN2000を難易度おにでフルコンボ",
         "source_row_index": 116
       }
     ],
@@ -12219,7 +13351,7 @@
         "song_name": "スーハー2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "スーハー2000在魔王难度下全连",
+        "condition_text": "スーハー2000を難易度おにでフルコンボ",
         "source_row_index": 77
       }
     ],
@@ -12246,7 +13378,7 @@
         "song_name": "†††カオスタイム the DARK†††",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "†††カオスタイム the DARK†††在魔王难度下全连",
+        "condition_text": "†††カオスタイム the DARK†††を難易度おにでフルコンボ",
         "source_row_index": 479
       }
     ],
@@ -12255,22 +13387,45 @@
         "song_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全良",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでドンダフルコンボ",
         "source_row_index": 561
       },
       {
         "song_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下全连",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでフルコンボ",
         "source_row_index": 562
       },
       {
         "song_name": "ダーク・エクス・マキナ♡",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
-        "condition_text": "ダーク・エクス・マキナ♡在魔王难度下通关",
+        "condition_text": "ダーク・エクス・マキナ♡を難易度おにでクリア",
         "source_row_index": 563
+      }
+    ],
+    "ツナガリズム": [
+      {
+        "song_name": "Tsunaga-rhythm",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 991
+      },
+      {
+        "song_name": "Tsunaga-rhythm",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成全连吧",
+        "source_row_index": 992
+      },
+      {
+        "song_name": "Tsunaga-rhythm",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Tsunaga-rhythm》的“魔王”难度下达成通关吧",
+        "source_row_index": 993
       }
     ],
     "ツンデレCafeの常連": [
@@ -12278,7 +13433,7 @@
         "song_name": "ツンデレCafeへようこそ☆",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ツンデレCafeへようこそ☆在魔王难度下全连",
+        "condition_text": "ツンデレCafeへようこそ☆を難易度おにでフルコンボ",
         "source_row_index": 106
       }
     ],
@@ -12289,6 +13444,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《超幸运！七福快乐团组员》的“魔王”难度下达成全连吧",
         "source_row_index": 359
+      }
+    ],
+    "トレーニ千グの達人": [
+      {
+        "song_name": "午马的二千锤百炼 【BPM240篇】",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM240篇】》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 970
       }
     ],
     "トロいか2000": [
@@ -12337,7 +13501,7 @@
         "song_name": "ドキドキ胸きゅん おまつりタイム",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "ドキドキ胸きゅん おまつりタイム通关",
+        "condition_text": "ドキドキ胸きゅん おまつりタイムをクリア",
         "source_row_index": 63
       }
     ],
@@ -12366,6 +13530,15 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《全力咚咚咚咚咚！》的“魔王（隐藏）”难度下达成全良连段吧",
         "source_row_index": 640
+      }
+    ],
+    "ドロンドンだー": [
+      {
+        "song_name": "1プレイ中全曲でオプション「ドロン」",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "1プレイ中全曲でオプション「ドロン」を付けてクリア",
+        "source_row_index": 56
       }
     ],
     "ドンだーの素質を持つ者": [
@@ -12400,7 +13573,7 @@
         "song_name": "ドンカマ2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ドンカマ2000在魔王难度下全连",
+        "condition_text": "ドンカマ2000を難易度おにでフルコンボ",
         "source_row_index": 119
       }
     ],
@@ -12504,7 +13677,7 @@
         "song_name": "D's Adventure Note",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "D's Adventure Note在魔王难度下全连",
+        "condition_text": "D's Adventure Noteを難易度おにでフルコンボ",
         "source_row_index": 104
       }
     ],
@@ -12581,10 +13754,10 @@
     ],
     "プロデューサーさん": [
       {
-        "song_name": "アイドルマスター的楽曲",
+        "song_name": "アイドルマスターの楽曲",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "1游玩内全て特定的曲(アイドルマスター的楽曲)選ん在通关",
+        "condition_text": "1プレイ内全て特定の曲(アイドルマスターの楽曲)を選んでクリア",
         "source_row_index": 70
       }
     ],
@@ -12631,6 +13804,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《RAGING FIRE》的“魔王”难度下达成全连吧",
         "source_row_index": 849
+      }
+    ],
+    "ミ(＃ﾟДﾟ)ミRAGING!!彡(ﾟДﾟ＃)彡": [
+      {
+        "song_name": "RAGING FIRE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《RAGING FIRE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 986
       }
     ],
     "ミコシスしか勝たんじゃん！": [
@@ -12697,7 +13879,7 @@
         "song_name": "ノるどん2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "ノるどん2000在魔王难度下全连",
+        "condition_text": "ノるどん2000を難易度おにでフルコンボ",
         "source_row_index": 131
       }
     ],
@@ -12733,7 +13915,7 @@
         "song_name": "RAGE v.self",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "RAGE v.self通关",
+        "condition_text": "RAGE v.selfをクリア",
         "source_row_index": 66
       }
     ],
@@ -12742,7 +13924,7 @@
         "song_name": "黄ダルマ2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "黄ダルマ2000在魔王难度下全连",
+        "condition_text": "黄ダルマ2000を難易度おにでフルコンボ",
         "source_row_index": 137
       }
     ],
@@ -12805,7 +13987,7 @@
         "song_name": "万戈イム－一ノ十",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "万戈イム－一ノ十在魔王难度下全连",
+        "condition_text": "万戈イム－一ノ十を難易度おにでフルコンボ",
         "source_row_index": 141
       }
     ],
@@ -12933,10 +14115,10 @@
     ],
     "今日も定時で帰ります": [
       {
-        "song_name": "よく在る2000",
+        "song_name": "よくでる2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "よく在る2000在魔王难度下全连",
+        "condition_text": "よくでる2000を難易度おにでフルコンボ",
         "source_row_index": 118
       }
     ],
@@ -12954,7 +14136,7 @@
         "song_name": "愛想笑い",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "愛想笑い在魔王难度下全连",
+        "condition_text": "愛想笑いを難易度おにでフルコンボ",
         "source_row_index": 102
       }
     ],
@@ -13175,7 +14357,7 @@
         "song_name": "そつおめしき",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "そつおめしき在魔王难度下全连",
+        "condition_text": "そつおめしきを難易度おにでフルコンボ",
         "source_row_index": 115
       }
     ],
@@ -13220,7 +14402,7 @@
         "song_name": "夜櫻ブレヰダアズ",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "夜櫻ブレヰダアズ在魔王难度下全连",
+        "condition_text": "夜櫻ブレヰダアズを難易度おにでフルコンボ",
         "source_row_index": 108
       }
     ],
@@ -13328,7 +14510,7 @@
         "song_name": "彁",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "彁在魔王难度下全连",
+        "condition_text": "彁を難易度おにでフルコンボ",
         "source_row_index": 325
       }
     ],
@@ -13337,7 +14519,7 @@
         "song_name": "DIMENSIONS",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "DIMENSIONS通关",
+        "condition_text": "DIMENSIONSをクリア",
         "source_row_index": 61
       }
     ],
@@ -13418,7 +14600,7 @@
         "song_name": "Angel Halo",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Angel Halo在魔王难度下全连",
+        "condition_text": "Angel Haloを難易度おにでフルコンボ",
         "source_row_index": 109
       }
     ],
@@ -13427,7 +14609,7 @@
         "song_name": "天狗囃子",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "天狗囃子在魔王难度下全连",
+        "condition_text": "天狗囃子を難易度おにでフルコンボ",
         "source_row_index": 144
       }
     ],
@@ -13517,7 +14699,7 @@
         "song_name": "化物月夜",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "化物月夜在魔王难度下全连",
+        "condition_text": "化物月夜を難易度おにでフルコンボ",
         "source_row_index": 103
       }
     ],
@@ -13624,7 +14806,7 @@
         "song_name": "万戈イム－一ノ十",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "万戈イム－一ノ十全连",
+        "condition_text": "万戈イム－一ノ十をフルコンボ",
         "source_row_index": 100
       }
     ],
@@ -13674,7 +14856,7 @@
         "song_name": "幽玄ノ乱",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "幽玄ノ乱在魔王难度下全连",
+        "condition_text": "幽玄ノ乱を難易度おにでフルコンボ",
         "source_row_index": 113
       }
     ],
@@ -13728,7 +14910,7 @@
         "song_name": "ココドコ？多分ドッカ島(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "ココドコ？多分ドッカ島(裏)全连",
+        "condition_text": "ココドコ？多分ドッカ島(裏)をフルコンボ",
         "source_row_index": 501
       },
       {
@@ -13759,10 +14941,10 @@
     ],
     "恋の病治療中": [
       {
-        "song_name": "恋的処方箋",
+        "song_name": "恋の処方箋",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "恋的処方箋通关",
+        "condition_text": "恋の処方箋をクリア",
         "source_row_index": 59
       }
     ],
@@ -13789,7 +14971,7 @@
         "song_name": "ナイトメア・サバイバー(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "ナイトメア・サバイバー(裏)全连",
+        "condition_text": "ナイトメア・サバイバー(裏)をフルコンボ",
         "source_row_index": 90
       }
     ],
@@ -13807,7 +14989,7 @@
         "song_name": "花オト裏拍子",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "花オト裏拍子通关",
+        "condition_text": "花オト裏拍子をクリア",
         "source_row_index": 62
       }
     ],
@@ -13825,7 +15007,7 @@
         "song_name": "Xa(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "Xa(裏)オプション「あべこべ」在全连",
+        "condition_text": "Xa(裏)をオプション「あべこべ」でフルコンボ",
         "source_row_index": 121
       }
     ],
@@ -13834,7 +15016,7 @@
         "song_name": "やわらか戦車(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "やわらか戦車(裏)全连",
+        "condition_text": "やわらか戦車(裏)をフルコンボ",
         "source_row_index": 81
       }
     ],
@@ -13861,7 +15043,7 @@
         "song_name": "恋文2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "恋文2000在魔王难度下全连",
+        "condition_text": "恋文2000を難易度おにでフルコンボ",
         "source_row_index": 93
       }
     ],
@@ -14008,6 +15190,15 @@
         "source_row_index": 363
       }
     ],
+    "普通の魔法使い": [
+      {
+        "song_name": "東方Projectアレンジ楽曲",
+        "requirement_type": "clear",
+        "difficulty_scope": "unspecified",
+        "condition_text": "東方Projectアレンジ楽曲をクリア",
+        "source_row_index": 827
+      }
+    ],
     "暗憺を斥けし解放の光芒": [
       {
         "song_name": "Libera Ray",
@@ -14046,10 +15237,10 @@
     ],
     "最高速の歌姫": [
       {
-        "song_name": "初音ミク的消失‐劇場版‐(裏)",
+        "song_name": "初音ミクの消失‐劇場版‐(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "初音ミク的消失‐劇場版‐(裏)全连",
+        "condition_text": "初音ミクの消失‐劇場版‐(裏)をフルコンボ",
         "source_row_index": 79
       }
     ],
@@ -14322,7 +15513,7 @@
         "song_name": "Eternal bond",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Eternal bond在魔王难度下全连",
+        "condition_text": "Eternal bondを難易度おにでフルコンボ",
         "source_row_index": 101
       }
     ],
@@ -14429,7 +15620,7 @@
         "song_name": "和蘭撫子",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "和蘭撫子通关",
+        "condition_text": "和蘭撫子をクリア",
         "source_row_index": 60
       }
     ],
@@ -14542,7 +15733,7 @@
         "song_name": "燎原ノ舞",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "燎原ノ舞在魔王难度下全连",
+        "condition_text": "燎原ノ舞を難易度おにでフルコンボ",
         "source_row_index": 78
       }
     ],
@@ -14605,7 +15796,7 @@
         "song_name": "Hurtling Boys",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Hurtling Boys在魔王难度下全连",
+        "condition_text": "Hurtling Boysを難易度おにでフルコンボ",
         "source_row_index": 110
       }
     ],
@@ -14650,7 +15841,7 @@
         "song_name": "White Rose Insanity",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "White Rose Insanity在魔王难度下全连",
+        "condition_text": "White Rose Insanityを難易度おにでフルコンボ",
         "source_row_index": 95
       }
     ],
@@ -14659,7 +15850,7 @@
         "song_name": "夜桜謝肉祭(裏)",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
-        "condition_text": "夜桜謝肉祭(裏)全连",
+        "condition_text": "夜桜謝肉祭(裏)をフルコンボ",
         "source_row_index": 92
       }
     ],
@@ -14668,7 +15859,7 @@
         "song_name": "グレート！アニマルカイザー!!",
         "requirement_type": "full_combo",
         "difficulty_scope": "unspecified",
-        "condition_text": "グレート！アニマルカイザー!!全连",
+        "condition_text": "グレート！アニマルカイザー!!をフルコンボ",
         "source_row_index": 88
       }
     ],
@@ -14805,6 +15996,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Genesis Ray》的“魔王”难度下达成全连吧",
         "source_row_index": 697
+      }
+    ],
+    "終焉の覇者": [
+      {
+        "song_name": "Extreme End",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Extreme End》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 978
       }
     ],
     "終焉を斥けし創生の光芒": [
@@ -14991,7 +16191,7 @@
         "song_name": "Purple Rose Fusion",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Purple Rose Fusion在魔王难度下全连",
+        "condition_text": "Purple Rose Fusionを難易度おにでフルコンボ",
         "source_row_index": 99
       }
     ],
@@ -15063,7 +16263,7 @@
         "song_name": "Red Rose Evangel",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Red Rose Evangel在魔王难度下全连",
+        "condition_text": "Red Rose Evangelを難易度おにでフルコンボ",
         "source_row_index": 96
       }
     ],
@@ -15180,7 +16380,7 @@
         "song_name": "DEBSTEP!",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "DEBSTEP!在魔王难度下全连",
+        "condition_text": "DEBSTEP!を難易度おにでフルコンボ",
         "source_row_index": 107
       }
     ],
@@ -15189,28 +16389,28 @@
         "song_name": "クロス・ブルー",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       },
       {
         "song_name": "女帝 ～インバラトゥーラ～",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       },
       {
         "song_name": "チャーリー ダッシュ！",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       },
       {
         "song_name": "Abyss of hell",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hell魔王难度在すべて全连",
+        "condition_text": "クロス・ブルー、女帝 ～インバラトゥーラ～、チャーリー ダッシュ！、Abyss of hellを難易度おにですべてフルコンボ",
         "source_row_index": 126
       },
       {
@@ -15365,7 +16565,7 @@
         "song_name": "Calculator",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Calculator在魔王难度下全连",
+        "condition_text": "Calculatorを難易度おにでフルコンボ",
         "source_row_index": 111
       }
     ],
@@ -15401,7 +16601,7 @@
         "song_name": "Blue Rose Ruin",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Blue Rose Ruin在魔王难度下全连",
+        "condition_text": "Blue Rose Ruinを難易度おにでフルコンボ",
         "source_row_index": 97
       }
     ],
@@ -15461,10 +16661,10 @@
     ],
     "風を翔る騎士": [
       {
-        "song_name": "風的国的龍与騎士",
+        "song_name": "風の国の龍と騎士",
         "requirement_type": "clear",
         "difficulty_scope": "unspecified",
-        "condition_text": "風的国的龍与騎士通关",
+        "condition_text": "風の国の龍と騎士をクリア",
         "source_row_index": 64
       }
     ],
@@ -15473,7 +16673,7 @@
         "song_name": "タベルナ2000",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "タベルナ2000在魔王难度下全连",
+        "condition_text": "タベルナ2000を難易度おにでフルコンボ",
         "source_row_index": 132
       }
     ],
@@ -15536,7 +16736,7 @@
         "song_name": "Black Rose Apostle",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
-        "condition_text": "Black Rose Apostle在魔王难度下全连",
+        "condition_text": "Black Rose Apostleを難易度おにでフルコンボ",
         "source_row_index": 94
       }
     ],
