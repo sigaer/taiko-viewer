@@ -6,7 +6,7 @@ import gradeDojoData from "~/assets/data/grade_dojo_nijiiro_2026.json";
 
 const pageMeta = {
   title: "虹段位道场 2026",
-  desc: buildPageDescription("太鼓达人虹段位道场 2026，按级位与段位查看课题曲、合格条件与攻略。")
+  desc: buildPageDescription("太鼓达人虹段位道场 2026，按级位、段位与达人位查看课题曲、合格条件与攻略。")
 };
 
 definePageMeta({
@@ -20,7 +20,8 @@ const route = useRoute();
 
 const gradeGroups = [
   { label: "级位", items: ["五級", "四級", "三級", "二級", "一級"] },
-  { label: "段位", items: ["初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段"] }
+  { label: "段位", items: ["初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段"] },
+  { label: "达人位", items: ["玄人", "名人", "超人", "達人"] }
 ] as const;
 
 const pages = gradeDojoData.grades;

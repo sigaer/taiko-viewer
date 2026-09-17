@@ -41,13 +41,27 @@ SLUGS = [
     "八段",
     "九段",
     "十段",
+    "玄人",
+    "名人",
+    "超人",
+    "達人",
 ]
 KYU_SLUGS = {"五級", "四級", "三級", "二級", "一級"}
-DAN_SLUGS = {"初段", "二段", "三段", "四段", "五段", "六段", "七段", "八段", "九段", "十段"}
-GOLD_CONDITION_OVERRIDES = {
-    # Confirmed gold ok-count limits that are not yet fully reflected in the source table.
-    "七段": {"okCountLessThan": 200},
-    "八段": {"okCountLessThan": 136},
+DAN_SLUGS = {
+    "初段",
+    "二段",
+    "三段",
+    "四段",
+    "五段",
+    "六段",
+    "七段",
+    "八段",
+    "九段",
+    "十段",
+    "玄人",
+    "名人",
+    "超人",
+    "達人",
 }
 
 REMOVE_SELECTORS = [
@@ -481,10 +495,6 @@ def resolved_gold_conditions(slug: str, pass_cond: Dict[str, Any], gold_cond: Di
     pass_bad = pass_cond.get("badCountLessThan")
     if resolved.get("badCountLessThan") is None and isinstance(pass_bad, int) and pass_bad > 0:
         resolved["badCountLessThan"] = pass_bad // 2
-
-    override = GOLD_CONDITION_OVERRIDES.get(slug)
-    if override:
-        resolved.update(override)
 
     return resolved
 
