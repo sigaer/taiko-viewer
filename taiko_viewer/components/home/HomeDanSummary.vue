@@ -11,25 +11,41 @@ const localePath = useLocalePath();
       <span>NIJIIRO 2026</span>
       <h2 id="guest-dan-title">{{ t("page.home.guest.danTitle") }}</h2>
       <p>{{ t("page.home.guest.danDescription") }}</p>
-      <NuxtLink
-        :to="localePath('/grade/2026')"
-        class="guest-dan__link"
-        @click="trackViewerEvent('home_dan_click', { home_state: 'guest', source: 'dan_summary' })"
-      >
-        {{ t("page.home.guest.danCta") }}
-      </NuxtLink>
+      <div class="guest-dan__actions">
+        <NuxtLink
+          :to="localePath('/grade/2026')"
+          class="guest-dan__link"
+          @click="trackViewerEvent('home_dan_click', { home_state: 'guest', source: 'dan_summary' })"
+        >
+          {{ t("page.home.guest.danCta") }}
+        </NuxtLink>
+        <NuxtLink
+          to="/nijiiro_2026_dan_overview.png"
+          external
+          target="_blank"
+          rel="noopener"
+          class="guest-dan__overview-link"
+          :aria-label="t('page.home.guest.danOverviewAria')"
+          @click="trackViewerEvent('home_dan_overview_click', { home_state: 'guest', source: 'dan_summary' })"
+        >
+          {{ t("page.home.guest.danOverviewCta") }}
+        </NuxtLink>
+      </div>
     </div>
     <NuxtLink
-      :to="localePath('/grade/2026')"
+      to="/nijiiro_2026_dan_overview.png"
+      external
+      target="_blank"
+      rel="noopener"
       class="guest-dan__visual"
-      :aria-label="t('page.home.guest.danCta')"
-      @click="trackViewerEvent('home_dan_click', { home_state: 'guest', source: 'dan_visual' })"
+      :aria-label="t('page.home.guest.danOverviewAria')"
+      @click="trackViewerEvent('home_dan_overview_click', { home_state: 'guest', source: 'dan_visual' })"
     >
       <img
         src="/optimized/nijiiro-2026-640.webp"
         :alt="t('page.home.guest.danImageAlt')"
         width="640"
-        height="1831"
+        height="2287"
         loading="lazy"
         decoding="async"
       />
@@ -90,6 +106,23 @@ const localePath = useLocalePath();
   font-weight: 700;
 }
 
+.guest-dan__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.guest-dan__overview-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: #8c4d31;
+  text-underline-offset: 3px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .guest-dan__visual {
   height: 280px;
   display: block;
@@ -108,6 +141,7 @@ const localePath = useLocalePath();
 }
 
 .guest-dan__link:focus-visible,
+.guest-dan__overview-link:focus-visible,
 .guest-dan__visual:focus-visible {
   outline: 3px solid #a85f3e;
   outline-offset: 3px;
@@ -123,6 +157,10 @@ const localePath = useLocalePath();
 :global(body.theme-dark .guest-dan__visual) {
   border-color: rgba(255, 255, 255, 0.12);
   background: #241e1a;
+}
+
+:global(body.theme-dark .guest-dan__overview-link) {
+  color: #f0b28f;
 }
 
 @media (max-width: 720px) {

@@ -63,6 +63,13 @@ DAN_SLUGS = {
     "超人",
     "達人",
 }
+GOLD_SOUL_GAUGE_BY_GRADE = {
+    "五級": 95,
+    "四級": 95,
+    "三級": 97,
+    "二級": 97,
+    "一級": 100,
+}
 
 REMOVE_SELECTORS = [
     "script",
@@ -487,10 +494,12 @@ def build_condition_payload(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 def resolved_gold_conditions(slug: str, pass_cond: Dict[str, Any], gold_cond: Dict[str, Any]) -> Dict[str, Any]:
     resolved = dict(gold_cond)
 
-    if slug in DAN_SLUGS and resolved.get("soulGaugePercent") is None:
-        resolved["soulGaugePercent"] = 100
-    if slug == "一級" and resolved.get("soulGaugePercent") is None:
-        resolved["soulGaugePercent"] = 100
+    if resolved.get("soulGaugePercent") is None:
+        known_gold_gauge = GOLD_SOUL_GAUGE_BY_GRADE.get(slug)
+        if known_gold_gauge is not None:
+            resolved["soulGaugePercent"] = known_gold_gauge
+        elif slug in DAN_SLUGS:
+            resolved["soulGaugePercent"] = 100
 
     pass_bad = pass_cond.get("badCountLessThan")
     if resolved.get("badCountLessThan") is None and isinstance(pass_bad, int) and pass_bad > 0:
