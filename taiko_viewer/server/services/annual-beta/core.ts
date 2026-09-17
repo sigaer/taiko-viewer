@@ -4,12 +4,14 @@ import type { Pool } from "mysql2/promise";
 export const BETA_FEATURE = "annual_first_run_beta";
 export const hashBetaToken = (value: string) => createHash("sha256").update(value).digest("hex");
 export const newBetaToken = () => randomBytes(32).toString("base64url");
+const INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export class BetaError extends Error {
   constructor(public code: string, public status = 400) { super(code); }
 }
 export const normalizeInvite = (input: unknown) => {
   const value = String(input || "").trim().toUpperCase().replace(/-/g, "");
-  if (!/^[0-9A-F]{32}$/.test(value)) throw new BetaError("invalid_invite");
+  // Keep previously issued long codes valid; new codes omit I/O/0/1 for typing.
+  if (!/^(?:[A-HJ-NP-Z2-9]{8}|[0-9A-F]{32})$/.test(value)) throw new BetaError("invalid_invite");
   return value;
 };
 const checkInvite = (row: any) => {
@@ -21,9 +23,19 @@ const checkInvite = (row: any) => {
 export const createBetaInvite = async (db: Pool, cohort: string, expiresAt: Date, source = "other") => {
   if (!["wave1", "wave2"].includes(cohort) || !["qq", "friend", "community", "other"].includes(source)
     || !Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) throw new BetaError("invalid_invite_options");
-  const raw = randomBytes(16).toString("hex").toUpperCase(); const id = randomUUID();
-  await db.execute("INSERT INTO web_beta_invites (id,code_hash,cohort,recruitment_source,expires_at) VALUES (?,?,?,?,?)", [id,hashBetaToken(raw),cohort,source,expiresAt]);
-  return { id, code: raw.match(/.{1,4}/g)!.join("-"), cohort, expires_at: expiresAt.toISOString() };
+  for (let attempt = 0; attempt < 5; attempt++) {
+    // 32 symbols divide 256 exactly: eight independent bytes give 40 random bits
+    // without modulo bias. The DB unique hash rejects any collision.
+    const code = Array.from(randomBytes(8), byte => INVITE_ALPHABET[byte & 31]).join("");
+    const id = randomUUID();
+    try {
+      await db.execute("INSERT INTO web_beta_invites (id,code_hash,cohort,recruitment_source,expires_at) VALUES (?,?,?,?,?)", [id,hashBetaToken(code),cohort,source,expiresAt]);
+      return { id, code, cohort, expires_at: expiresAt.toISOString() };
+    } catch (error: any) {
+      if (error.code !== "ER_DUP_ENTRY") throw error;
+    }
+  }
+  throw new BetaError("invite_generation_failed", 503);
 };
 // Validation never reserves or consumes a use. Pending is browser-session bound.
 export const validateBetaInvite = async (db: Pool, input: unknown, sessionId: string) => {

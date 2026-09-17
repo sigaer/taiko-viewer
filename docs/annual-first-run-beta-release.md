@@ -432,3 +432,13 @@ The only invite-count change is the one new disabled internal smoke code: operat
 | Two-user / one-invite race | PASS — existing and added isolated MySQL regressions |
 
 **READY FOR WAVE 1 — invite uniqueness confirmed.** Keep production **0.68.3**. No further internal testing added; existing Wave 1 ready/reserve files remain the manual-distribution handoff.
+
+## Eight-character invite update
+
+2026-09-17: user requested eight-character random invitations and 40 available codes. Viewer **0.68.4** changes only newly generated bearer codes; internal UUID record IDs, entitlement uniqueness, redemption transaction and Annual algorithm remain unchanged.
+
+New codes use cryptographically random eight-character uppercase strings from 32 symbols (`A–Z` excluding I/O, `2–9`), with no required separators. Input is case-insensitive and accepts an optional separator. Existing 32-hex-character codes remain compatible unless an individual unused code is explicitly retired as part of the batch handoff. SHA-256-only DB storage, current expiry/rate limits and single-user consumption guards remain unchanged. Unique-hash collision retries are bounded at five attempts.
+
+Before mutation, all existing formal codes were confirmed unused: ready 10, reserve 2, Wave 2 32. Inventory scope/old-ready retirement is being clarified; no existing formal code has been changed during implementation.
+
+`test:annual:beta`: **17 PASS**, including short-code input, legacy normalization and real DB lookup, collision handling, T1–T8 and both concurrency contracts. Deployment and final inventory are recorded after production verification below. Private evidence remains outside Git.
