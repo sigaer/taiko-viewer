@@ -46,7 +46,7 @@ const stats = computed(() => {
 </script>
 
 <template>
-  <section class="annual-share-grid" :class="{ 'is-export': exportMode }" :aria-label="ja ? '年間レポート' : '年度报告'">
+  <section class="annual-share-grid" :class="{ 'is-export': exportMode, 'is-preview': !exportMode }" :aria-label="ja ? '年間レポート' : '年度报告'">
     <div class="annual-share-grid__visual">
       <div class="annual-share-grid__labels annual-share-grid__labels--top">
         <div v-for="cell in cells.slice(0, 2)" :key="cell.key" class="annual-share-grid__label" :class="`annual-share-grid__label--${cell.key}`">
@@ -108,4 +108,16 @@ const stats = computed(() => {
 /* Two rows of three tracks that span the full width; the outer tracks are anchored to the
    card edges and the middle track takes the centre, so the row reads as space-between. */
 .annual-share-grid__stats{width:100%;height:24.73%;margin:0;box-sizing:border-box;padding:4cqw 5cqw;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:min-content;column-gap:1cqw;row-gap:2cqw;align-content:start}.annual-share-grid__stats div{min-width:0}.annual-share-grid__stats div:nth-child(3n+2){justify-self:center;text-align:center}.annual-share-grid__stats div:nth-child(3n){justify-self:end;text-align:right}.annual-share-grid__stats dt{font-size:4cqw;font-weight:800;line-height:1.2}.annual-share-grid__stats dd{margin:1cqw 0 0;font-size:3.5cqw;line-height:1.2;overflow-wrap:anywhere}
+/* Preview has its own flowing layout. Export keeps the canonical rules above. */
+.annual-share-grid.is-preview{aspect-ratio:auto;background:#fff}
+.is-preview .annual-share-grid__visual{height:auto;display:flex;flex-direction:column;gap:14px;padding-block:14px;background:url('/annual/poster/square_bg_v2.png') top/100% 132.85% no-repeat}
+.is-preview .annual-share-grid__labels{position:static}
+.is-preview .annual-share-grid__label{padding-inline:12px}
+.is-preview .annual-share-grid__label h2{font-size:clamp(17px,5cqw,26px)}
+.is-preview .annual-share-grid__label p{display:block;overflow:visible;font-size:clamp(14px,4cqw,20px);margin-top:6px}
+.is-preview .annual-share-grid__mosaic{position:relative;top:auto;left:auto;transform:none;width:72%;margin-inline:auto;flex-shrink:0}
+.is-preview .annual-share-grid__profile-caption{font-size:clamp(11px,3cqw,16px)}
+.is-preview .annual-share-grid__stats{height:auto;padding:14px 12px 18px;gap:14px 8px;background:#fff}
+.is-preview .annual-share-grid__stats dt{font-size:clamp(13px,3.8cqw,20px)}
+.is-preview .annual-share-grid__stats dd{font-size:clamp(14px,4cqw,20px);margin-top:6px}
 </style>

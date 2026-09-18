@@ -501,3 +501,36 @@ Deployment and online smoke passed as recorded below. **CONTINUE WAVE 1 / HOLD W
 - No formal invites consumed, no generator rebuild/cache purge, no user history altered. The unrelated corpus audit document remains outside this release.
 
 **Final: CONTINUE WAVE 1 / HOLD WAVE 2.** This closes the implemented reliability patch and production smoke, not the outstanding real-device Safari/Android acceptance.
+
+
+## Poster Preview / Export Decoupling
+
+### Cause and architecture
+
+Production baseline **0.68.9** constrained screen width to `min(87.68cqw, 363px, remaining-height × 363/554)`. The shared card additionally used the export aspect ratio. Consequently, shorter mobile viewports narrowed the whole preview to fit alongside page controls.
+
+Viewer target **0.68.10** keeps one `AnnualShareGrid` data/presentation component with explicit preview/export CSS contexts. Preview is a responsive card, **viewport width − 20px**, capped at **540px** on desktop. Labels, square 2×2 artwork and 3×2 statistics flow vertically; typography and spacing use preview-only selectors. No scaleX, stretching of media or preview screenshot resizing is used. The page scrolls vertically when necessary, with bottom space for fixed feedback/navigation. Composer and save/share controls remain outside the card; keyboard stage freeze and portaled input are retained.
+
+Export still uses the existing dedicated share-card page and server renderer, not the preview DOM. The existing canonical constants remain **1080 × 1648**, and the original export geometry, font sizing, spacing, cover resolver and `share-card-v2-assets` readiness pipeline are unchanged. Save and optional community image synchronization still consume the same canonical renderer output. No server, capture-page, resolver, algorithm or funnel code changed.
+
+### Mobile validation
+
+| Viewport | Preview before → after | Artwork mosaic before → after |
+| --- | --- | --- |
+| 360 × 780 | 300.09 → **340px** | 193.55 → **244.80px** |
+| 390 × 844 | 332.84 → **370px** | 214.67 → **266.39px** |
+| 430 × 932 | 363 → **410px** | 234.13 → **295.19px** |
+| 390 × 664 | 224.08 → **370px** | 144.52 → **266.39px** |
+| 1440 × 900 | 363 → **540px** | 234.13 → **388.80px** |
+
+Isolated Chromium browser checks passed for all five viewports: normal 10px mobile gutters, no horizontal overflow, transform `none`, content-driven height, scroll-accessible save control, keyboard-open dimensions unchanged, reload restoring Poster, and previous-page navigation. Reduced motion was enabled. Short screens deliberately scroll instead of shrinking or cropping the card; the entire Poster need not fit in one viewport.
+
+Preview/export data comparison passed for annual song, maximum speed, title, high score, six statistics and four artwork slots. A separately mounted pre-change export component was compared with the patched export at canonical 1080 × 1648: **all measured content and label/mosaic/stat geometry equal**, `document.fonts.status=loaded`, broken images **0**. Controlled image failures used the unchanged fallback. Screenshots are visual evidence; byte-identical PNG encoding is not the acceptance criterion.
+
+`npm run test:annual`: **13 PASS**. No full corpus or new test framework. Private reproducible fixture/browser scripts, measurements and screenshots are under **`/var/tmp/annual-preview-decoupling/`**: `before.json`, `after.json`, `export.json`, `after-360x780.png`, `after-390x844.png`, `after-430x932.png`, `export-0.png` (canonical patched PNG) and `export-1.png` (baseline). Temporary fixture pages/components are removed before deployment.
+
+### Deployment and production smoke
+
+Pending standard deployment and online verification. Target **0.68.10**. Read-only JSON comparison confirmed the unrelated data change was only `generated_at`; all relation content equals the previously approved version. The metadata refresh was committed separately under the earlier authorization for the approved data.
+
+**Preview: responsive / wide. Export: fixed / canonical. Annual algorithm unchanged (`annual-observation-v4.5.0`).** Gate remains **CONTINUE WAVE 1 / HOLD WAVE 2**; browser simulation does not close real iOS/Android acceptance.
