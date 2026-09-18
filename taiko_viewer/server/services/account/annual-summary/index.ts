@@ -1,3 +1,6 @@
+import { expireQueuedAnnualJobs } from './repository';
+import { annualAdmission } from './admission';
+import { annualGeneratorKey } from './runtime';
 import { trackBetaUser } from "~/server/services/annual-beta/events";
 import { annualBuildInputRevision, canReuseAnnualFailure } from "./build-recovery";
 import { createHash, randomUUID } from "node:crypto";
@@ -247,6 +250,10 @@ export const getAccountAnnualSummaryById = async (userId: number, summaryId: str
 };
 
 const normalizeJobError = (type: AnnualJobType, error: unknown) => {
+  const capacity = error as { code?: string; statusMessage?: string };
+  if (/^ANNUAL_(QUEUE|RUN|ADMISSION)/.test(String(capacity?.code || ''))) return {
+    code: String(capacity.code), message: capacity.statusMessage || '年度服务繁忙，请稍后重试'
+  };
   const value = error as { statusCode?: number; statusMessage?: string } | null;
   const statusCode = Number(value?.statusCode || 0);
   if (type === "build" && statusCode === 422) return { code: "INSUFFICIENT_DATA", message: "当前年度记录不足，暂时无法生成年度报告。" };
@@ -259,7 +266,8 @@ const normalizeJobError = (type: AnnualJobType, error: unknown) => {
   };
 };
 
-const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
+const buildAnnualSummaryJob = async (job: AnnualJobRow, onRunning: () => Promise<void>) => {
+  const admission = JSON.parse(job.parameters_json || "{}") as AnnualJobParameters;
   const binding = await findAnnualBinding(job.binding_id, job.user_id);
   if (!binding) throw createError({ statusCode: 404, statusMessage: "当前绑定已不存在" });
   if (Number(binding.is_current) !== 1) {
@@ -267,7 +275,11 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
   }
   return withAnnualFileLock(`build:${job.user_id}:${job.binding_id}:${job.version_key}`, async () => {
     const existing = await findLatestAnnualSummary(job.user_id, job.binding_id, job.version_key);
-    if (existing && (await safeReadSummary(existing))) return existing;
+    if (existing && (await safeReadSummary(existing))) {
+      await onRunning();
+      if (admission.admissionTicket) await annualAdmission.cancel('generator', admission.admissionTicket);
+      return existing;
+    }
     if (existing) {
       // Stale or schema-drifted cached summary: clear the row and its files so
       // the rebuild can insert a fresh summary without hitting the unique
@@ -282,7 +294,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
         detail?.eventCount ? `${detail.eventCount} 条变化` : ""
       ].filter(Boolean);
       await updateAnnualJobProgress(job.id, stage, percent, parts.join(" · ") || null);
-    });
+    }, { key: admission.admissionKey, ticket: admission.admissionTicket, onRunning });
     await updateAnnualJobProgress(job.id, "rating", 84, "读取全站排名缓存");
     const fingerprint = String(envelope.summary.provenance?.inputFingerprint || "");
     const summaryId = String(envelope.summary.summaryId);
@@ -346,7 +358,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow) => {
   });
 };
 
-const buildAnnualPosterJob = async (job: AnnualJobRow, parameters: AnnualJobParameters) => {
+const buildAnnualPosterJob = async (job: AnnualJobRow, parameters: AnnualJobParameters, onRunning: () => Promise<void>) => {
   const summaryId = String(job.summary_id || "");
   const shareId = String(parameters.shareId || "");
   const locale = normalizeAnnualLocale(parameters.locale);
@@ -360,15 +372,14 @@ const buildAnnualPosterJob = async (job: AnnualJobRow, parameters: AnnualJobPara
     .update(`${summary.input_fingerprint}:${share.id}:${locale}:${ANNUAL_POSTER_WIDTH}x${ANNUAL_POSTER_HEIGHT}`)
     .digest("hex");
   const existing = await findAnnualPosterForShare(share.id, locale);
-  if (existing?.fingerprint === fingerprint) {
-    try {
-      await access(existing.file_path);
-      return existing;
-    } catch {}
+  if (existing?.fingerprint === fingerprint && await access(existing.file_path).then(() => true, () => false)) {
+    await onRunning();
+    if (parameters.admissionTicket) await annualAdmission.cancel('renderer', parameters.admissionTicket);
+    return existing;
   }
   const outputPath = getAnnualPosterPath(share.id, posterId, locale);
   try {
-    const dimensions = await renderAnnualPoster({ summaryId, posterId, shareId: share.id, locale, outputPath });
+    const dimensions = await renderAnnualPoster({ summaryId, posterId, shareId: share.id, locale, outputPath, admissionTicket: parameters.admissionTicket, onRunning });
     const poster = await upsertAnnualPoster({
       id: posterId,
       summaryId,
@@ -390,32 +401,38 @@ const buildAnnualPosterJob = async (job: AnnualJobRow, parameters: AnnualJobPara
   }
 };
 
-const executeAnnualJob = async (jobId: string) => {
+const executeAnnualJob = async (jobId: string) => withAnnualFileLock(`execute:${jobId}`, async () => {
   const job = await findAnnualJobById(jobId);
   if (!job || job.status !== "queued") return;
-  if (!(await markAnnualJobRunning(job.id))) return;
-  const betaStartedAt = Date.now();
-  if (job.job_type === "build") await trackBetaUser(job.user_id,"annual_build_start",{job_id:job.id},"build_start:"+job.id);
+  let betaStartedAt = Date.now();
+  const onRunning = async () => {
+    if (!(await markAnnualJobRunning(job.id))) throw new Error('annual job was already claimed');
+    betaStartedAt = Date.now();
+    if (job.job_type === 'build') await trackBetaUser(job.user_id, 'annual_build_start', {job_id:job.id}, 'build_start:'+job.id);
+  };
   let parameters: AnnualJobParameters = {};
   try {
     parameters = job.parameters_json ? (JSON.parse(job.parameters_json) as AnnualJobParameters) : {};
   } catch {}
   try {
     if (job.job_type === "build") {
-      const summary = await buildAnnualSummaryJob(job);
+      const summary = await buildAnnualSummaryJob(job, onRunning);
       await markAnnualJobCompleted(job.id, { summaryId: summary.id });
       await trackBetaUser(job.user_id,"annual_build_success",{job_id:job.id,duration_ms:Date.now()-betaStartedAt},"build_success:"+job.id);
     } else {
-      const poster = await buildAnnualPosterJob(job, parameters);
+      const poster = await buildAnnualPosterJob(job, parameters, onRunning);
       await markAnnualJobCompleted(job.id, { posterId: poster.id, summaryId: poster.summary_id });
     }
   } catch (error) {
+    if (parameters.admissionTicket) await annualAdmission.cancel(job.job_type === 'build' ? 'generator' : 'renderer', parameters.admissionTicket);
+    const current = await findAnnualJobById(job.id);
+    if (current?.status === 'failed' && current.error_code === 'ANNUAL_QUEUE_TIMEOUT') return;
     const safe = normalizeJobError(job.job_type, error);
     if (safe.code !== "INSUFFICIENT_DATA") console.error(`[annual-summary] ${job.job_type} job failed`, job.id, error);
     await markAnnualJobFailed(job.id, safe.code, safe.message);
     if (job.job_type === "build") await trackBetaUser(job.user_id,safe.code === "INSUFFICIENT_DATA"?"annual_unavailable":"annual_build_failure",{job_id:job.id,reason:safe.code === "INSUFFICIENT_DATA"?"insufficient_data":safe.code,duration_ms:Date.now()-betaStartedAt},"build_result:"+job.id);
   }
-};
+});
 
 const pumpQueue = (type: AnnualJobType) => {
   const state = queueState[type];
@@ -423,7 +440,7 @@ const pumpQueue = (type: AnnualJobType) => {
     const jobId = state.pending.shift()!;
     state.queued.delete(jobId);
     state.running += 1;
-    void executeAnnualJob(jobId).finally(() => {
+    void executeAnnualJob(jobId).catch(() => console.error("[annual-summary] job dispatch failed", jobId)).finally(() => {
       state.running -= 1;
       queueMicrotask(() => pumpQueue(type));
     });
@@ -451,7 +468,27 @@ export const maintainAnnualStorage = async () => {
   await deleteOldAnnualJobs();
 };
 
+let queueExpiryTimer: ReturnType<typeof setInterval> | null = null;
+let queueExpiryRunning = false;
+const expireAnnualQueue = async () => {
+  if (queueExpiryRunning) return;
+  queueExpiryRunning = true;
+  try {
+    for (const job of await expireQueuedAnnualJobs()) {
+      const parameters = JSON.parse(job.parameters_json || '{}') as AnnualJobParameters;
+      if (parameters.admissionTicket) await annualAdmission.cancel(job.job_type === 'build' ? 'generator' : 'renderer', parameters.admissionTicket);
+      console.info('[annual-admission]', JSON.stringify({ resource: job.job_type, state: 'timeout', code: 'ANNUAL_QUEUE_TIMEOUT', id: job.id }));
+      if (job.job_type === 'build') await trackBetaUser(job.user_id, 'annual_build_failure', { job_id: job.id, reason: 'ANNUAL_QUEUE_TIMEOUT' }, 'build_result:'+job.id);
+    }
+  } catch { console.error('[annual-summary] queue expiration check failed'); }
+  finally { queueExpiryRunning = false; }
+};
+
 export const recoverAnnualJobs = async () => {
+  if (!queueExpiryTimer) {
+    queueExpiryTimer = setInterval(() => { void expireAnnualQueue(); }, 10_000);
+    queueExpiryTimer.unref();
+  }
   await maintainAnnualStorage();
   const jobs = await recoverInterruptedAnnualJobs();
   for (const job of jobs) enqueueAnnualJob(job);
@@ -493,14 +530,17 @@ export const queueAccountAnnualSummaryBuild = async (
     if (!options.retryFailed && canReuseAnnualFailure(failed, inputRevision)) {
       return { job: serializeAnnualJob(failed!), summary: null };
     }
+    const admissionKey = await annualGeneratorKey(binding.taiko_id);
+    const admissionTicket = await annualAdmission.reserve('generator', admissionKey);
     const job = await insertAnnualJob({
       id: randomUUID(),
       userId,
       bindingId: binding.id,
       versionKey: version.key,
       type: "build",
-      parameters: { inputRevision, algorithmVersion: ANNUAL_ALGORITHM_VERSION }
-    });
+      parameters: { inputRevision, algorithmVersion: ANNUAL_ALGORITHM_VERSION, admissionKey, admissionTicket }
+    }).catch(async error => { await annualAdmission.cancel('generator', admissionTicket); throw error; });
+    if (!job) await annualAdmission.cancel('generator', admissionTicket);
     if (!job) throw createError({ statusCode: 500, statusMessage: "无法创建年度总结任务" });
     enqueueAnnualJob(job);
     return { job: serializeAnnualJob(job), summary: null };
@@ -595,6 +635,10 @@ export const queueAccountAnnualPoster = async (
       since: new Date(Date.now() - ANNUAL_POSTER_COOLDOWN_MS)
     });
     if (recent > 0) throw createError({ statusCode: 429, statusMessage: "海报每分钟仅可生成一次" });
+    const posterId = randomUUID();
+    const locale = normalizeAnnualLocale(input.locale || share.locale);
+    const outputPath = getAnnualPosterPath(shareId, posterId, locale);
+    const admissionTicket = await annualAdmission.reserve('renderer', `legacy:${summaryId}:${locale}:${outputPath}`);
     const job = await insertAnnualJob({
       id: randomUUID(),
       userId,
@@ -602,9 +646,10 @@ export const queueAccountAnnualPoster = async (
       versionKey: summary.version_key,
       type: "poster",
       summaryId,
-      posterId: randomUUID(),
-      parameters: { shareId, locale: normalizeAnnualLocale(input.locale || share.locale) }
-    });
+      posterId,
+      parameters: { shareId, locale, admissionTicket }
+    }).catch(async error => { await annualAdmission.cancel('renderer', admissionTicket); throw error; });
+    if (!job) await annualAdmission.cancel('renderer', admissionTicket);
     if (!job) throw createError({ statusCode: 500, statusMessage: "无法创建海报任务" });
     enqueueAnnualJob(job);
     return { job: serializeAnnualJob(job) };

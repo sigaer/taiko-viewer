@@ -114,3 +114,7 @@ forum, tools, annual recap, developer, settings, mobile, and desktop screens.
 - Never deep-assert Buffers or large binary arrays. Use streaming file hashes or `Buffer.equals()` with a short boolean failure; no binary dump/diff/stringification.
 - Bound browser/page/worker concurrency, total runtime and logs; close pages/contexts/browser in finally. Temporary dev servers must be cleaned up at task end and child/listener exit verified.
 - Store large artifacts on disk-backed `/var/tmp`, not tmpfs `/tmp`. No unreviewed heap dumps, cache purges, swapoff or broad process killing.
+
+## Memory isolation — Phase 2
+
+New validation/dev/release-build tasks use `scripts/memory/run_qa.sh`, `run_dev.sh`, or `run_build.sh`; the build wrapper still invokes the standard Viewer deploy script. They share a maintenance lock and use child cgroups under `development.slice`. Do not move existing editor processes into a new cgroup while active. Annual generators and renderers must use their common persistent admission gate and isolated worker launchers; no direct Python/Chromium fallback if systemd admission fails. See `docs/memory-engineering-guidelines.md` for budgets and pressure guards.

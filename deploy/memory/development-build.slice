@@ -1,0 +1,7 @@
+[Unit]
+Description=Serial release build fault domain
+[Slice]
+MemoryHigh=4G
+MemoryMax=5G
+MemorySwapMax=512M
+TasksMax=512

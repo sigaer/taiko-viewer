@@ -1,3 +1,6 @@
+import { annualAdmission, AdmissionError, withHostFileLock } from './admission';
+import { spawnAnnualWorker, stopAnnualWorker } from './isolated-worker';
+import { annualBuildInputRevision } from './build-recovery';
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import {
@@ -16,11 +19,10 @@ import {
 } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { createError } from "h3";
-import { spawn } from "node:child_process";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import type { ValidateFunction } from "ajv";
-import { execFileAsync, getRuntimePaths } from "~/server/internal/account/shared";
+import { getRuntimePaths } from "~/server/internal/account/shared";
 import {
   ANNUAL_ALGORITHM_VERSION,
   ANNUAL_BUILD_TIMEOUT_MS,
@@ -69,7 +71,7 @@ export const getAnnualCacheRoot = () => {
   );
 };
 
-const ensureWithinAnnualCache = (filePath: string) => {
+export const ensureWithinAnnualCache = (filePath: string) => {
   const root = getAnnualCacheRoot();
   const normalized = resolve(filePath);
   if (normalized !== root && !normalized.startsWith(`${root}${sep}`)) {
@@ -123,38 +125,11 @@ export const removeAnnualPath = async (filePath: string) => {
   await rm(target, { recursive: true, force: true });
 };
 
-const wait = (milliseconds: number) => new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
-
 export const withAnnualFileLock = async <T>(lockKey: string, runner: () => Promise<T>): Promise<T> => {
-  const lockDir = resolve(getAnnualCacheRoot(), "locks");
+  const lockDir = resolve(getAnnualCacheRoot(), 'locks');
   await ensurePrivateDir(lockDir);
-  const safeKey = createHash("sha256").update(lockKey).digest("hex");
-  const lockPath = join(lockDir, `${safeKey}.lock`);
-  let handle: Awaited<ReturnType<typeof open>> | null = null;
-  const deadline = Date.now() + ANNUAL_BUILD_TIMEOUT_MS;
-  while (!handle && Date.now() < deadline) {
-    try {
-      handle = await open(lockPath, "wx", 0o600);
-      await handle.writeFile(`${process.pid}:${Date.now()}\n`);
-    } catch (error: any) {
-      if (String(error?.code || "") !== "EEXIST") throw error;
-      const lockStat = await stat(lockPath).catch(() => null);
-      if (lockStat && Date.now() - lockStat.mtimeMs > ANNUAL_BUILD_TIMEOUT_MS * 2) {
-        await unlink(lockPath).catch(() => undefined);
-        continue;
-      }
-      await wait(150);
-    }
-  }
-  if (!handle) {
-    throw createError({ statusCode: 503, statusMessage: "年度总结正在处理中，请稍后重试" });
-  }
-  try {
-    return await runner();
-  } finally {
-    await handle.close().catch(() => undefined);
-    await unlink(lockPath).catch(() => undefined);
-  }
+  const safeKey = createHash('sha256').update(lockKey).digest('hex');
+  return withHostFileLock(join(lockDir, `${safeKey}.lock`), runner, 25 * 60);
 };
 
 const addFileToHash = async (hash: ReturnType<typeof createHash>, filePath: string, label: string) => {
@@ -333,16 +308,15 @@ const getAnnualRatingInputFingerprint = async () => {
   return contentFingerprint;
 };
 
-const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fingerprint">> => {
+const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fingerprint">> => annualAdmission.run(
+  'generator', `ratings:${await getAnnualRatingInputFingerprint()}`, ANNUAL_RATING_TIMEOUT_MS, async admissionId => {
   const { repoRoot, userdataDir, configPath } = getRuntimePaths();
   const runtimeConfig = useRuntimeConfig();
-  const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, "songs", "song_data.json")));
-  const ratingPath = resolve(
-    String(runtimeConfig.ratingStructPath || resolve(repoRoot, "songs", "rating_structured_with_ids.json"))
-  );
-  const result = await execFileAsync(
-    "python3",
-    [
+  const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, 'songs', 'song_data.json')));
+  const ratingPath = resolve(String(runtimeConfig.ratingStructPath || resolve(repoRoot, 'songs', 'rating_structured_with_ids.json')));
+  const child = await spawnAnnualWorker('generator', admissionId, {
+    cwd: repoRoot,
+    args: [
       "-m",
       "plugins.utils.annual_summary",
       "ratings",
@@ -355,15 +329,20 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
       "--output",
       "-"
     ],
-    {
-      cwd: repoRoot,
-      env: { ...process.env, TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() },
-      encoding: "utf-8",
-      timeout: ANNUAL_RATING_TIMEOUT_MS,
-      maxBuffer: 16 * 1024 * 1024
-    }
-  );
-  const parsed = JSON.parse(String(result.stdout || "{}")) as Record<string, unknown>;
+    env: { ...process.env, TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
+  }, ANNUAL_RATING_TIMEOUT_MS);
+  const started = Date.now();
+  const stdout = await new Promise<string>((resolveRun, rejectRun) => {
+    let output = ''; let oversized = false;
+    child.stdout.setEncoding('utf8'); child.stderr.resume();
+    child.stdout.on('data', chunk => {
+      if (!oversized) output += chunk;
+      if (Buffer.byteLength(output) > 16 * 1024 * 1024) { oversized = true; output = ''; stopAnnualWorker('generator', admissionId); }
+    });
+    child.on('error', rejectRun);
+    child.on('close', code => code === 0 && !oversized ? resolveRun(output) : rejectRun(Date.now() - started >= ANNUAL_RATING_TIMEOUT_MS - 1000 ? new AdmissionError('ANNUAL_RUN_TIMEOUT') : new Error('annual rating worker failed')));
+  });
+  const parsed = JSON.parse(String(stdout || "{}")) as Record<string, unknown>;
   const ratings = Array.isArray(parsed.ratings)
     ? parsed.ratings
         .map(Number)
@@ -378,7 +357,7 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
     discardedCount: Math.max(0, Math.floor(Number(parsed.discardedCount) || 0)),
     distribution: normalizeRatingRankDistribution(parsed.distribution)
   };
-};
+});
 
 const normalizeRatingRankDistribution = (value: unknown): AnnualRatingRankDistribution | null => {
   if (!value || typeof value !== "object") return null;
@@ -533,9 +512,10 @@ const validateCliEnvelope = async (input: unknown): Promise<AnnualCliEnvelope> =
 
 export type AnnualProgressUpdate = { stage: string; percent: number; detail?: Record<string, unknown> };
 
-export const runAnnualSummaryCli = async (
+const runAnnualSummaryCliUnadmitted = async (
   taikoId: string,
-  onProgress?: (update: AnnualProgressUpdate) => void | Promise<void>
+  onProgress: ((update: AnnualProgressUpdate) => void | Promise<void>) | undefined,
+  admissionId: string
 ): Promise<AnnualCliEnvelope> => {
   const { repoRoot, userdataDir, configPath } = getRuntimePaths();
   const runtimeConfig = useRuntimeConfig();
@@ -563,28 +543,28 @@ export const runAnnualSummaryCli = async (
     "-"
   ];
   try {
+    const child = await spawnAnnualWorker('generator', admissionId, {
+      cwd: repoRoot, args,
+      env: { ...process.env, TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
+    }, ANNUAL_BUILD_TIMEOUT_MS);
+    const started = Date.now();
     const stdout = await new Promise<string>((resolveRun, rejectRun) => {
-      const child = spawn("python3", args, {
-        cwd: repoRoot,
-        env: { ...process.env, TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() },
-        stdio: ["ignore", "pipe", "pipe"]
-      });
       let output = "";
       let stderr = "";
       let pending = "";
       let progressWrites = Promise.resolve();
-      const timer = setTimeout(() => child.kill("SIGKILL"), ANNUAL_BUILD_TIMEOUT_MS);
+      let oversized = false;
       child.stdout.setEncoding("utf-8");
       child.stderr.setEncoding("utf-8");
       child.stdout.on("data", (chunk) => {
-        output += chunk;
-        if (Buffer.byteLength(output) > 64 * 1024 * 1024) child.kill("SIGKILL");
+        if (!oversized) output += chunk;
+        if (Buffer.byteLength(output) > 64 * 1024 * 1024) { oversized = true; output = ""; stopAnnualWorker("generator", admissionId); }
       });
       child.stderr.on("data", (chunk) => {
         stderr = `${stderr}${chunk}`.slice(-4000);
         pending += chunk;
         const lines = pending.split("\n");
-        pending = lines.pop() || "";
+        pending = (lines.pop() || "").slice(-65536);
         for (const line of lines) {
           try {
             const parsed = JSON.parse(line) as Record<string, unknown>;
@@ -601,11 +581,10 @@ export const runAnnualSummaryCli = async (
       });
       child.on("error", rejectRun);
       child.on("close", async (code) => {
-        clearTimeout(timer);
         try {
           await progressWrites;
-          if (code === 0) resolveRun(output);
-          else rejectRun(Object.assign(new Error(stderr || `annual CLI exited with ${code}`), { stderr }));
+          if (code === 0 && !oversized) resolveRun(output);
+          else rejectRun(Date.now() - started >= ANNUAL_BUILD_TIMEOUT_MS - 1000 ? new AdmissionError("ANNUAL_RUN_TIMEOUT") : Object.assign(new Error(stderr || `annual CLI exited with ${code}`), { stderr }));
         } catch (error) {
           rejectRun(error);
         }
@@ -615,6 +594,7 @@ export const runAnnualSummaryCli = async (
     if (!trimmed) throw new Error("CLI returned empty output");
     return await validateCliEnvelope(JSON.parse(trimmed));
   } catch (error) {
+    if (error instanceof AdmissionError) throw error;
     const message = safeMessage(error);
     if (isMissingHistoryError(message)) {
       throw createError({ statusCode: 422, statusMessage: "现有数据不足以生成年度总结，请先同步更多记录" });
@@ -623,6 +603,16 @@ export const runAnnualSummaryCli = async (
     throw createError({ statusCode: 500, statusMessage: "年度总结生成失败，请稍后重试" });
   }
 };
+
+export const annualGeneratorKey = async (taikoId: string) =>
+  `build:${taikoId}:${ANNUAL_VERSION_KEY}:${await annualBuildInputRevision(getRuntimePaths().userdataDir, taikoId, ANNUAL_ALGORITHM_VERSION)}`;
+
+export const runAnnualSummaryCli = async (
+  taikoId: string,
+  onProgress?: (update: AnnualProgressUpdate) => void | Promise<void>,
+  admission?: { key?: string; ticket?: string; onRunning?: () => Promise<void> }
+): Promise<AnnualCliEnvelope> => annualAdmission.run('generator', admission?.key || await annualGeneratorKey(taikoId),
+  ANNUAL_BUILD_TIMEOUT_MS, id => runAnnualSummaryCliUnadmitted(taikoId, onProgress, id), admission);
 
 export const readAnnualSummary = async (filePath: string) => validateAnnualSummaryV4(await readAnnualJson<unknown>(filePath));
 export const readAnnualEvents = async (filePath: string) => validateAnnualEvents(await readAnnualJson<unknown>(filePath));

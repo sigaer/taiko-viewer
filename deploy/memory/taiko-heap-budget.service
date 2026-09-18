@@ -1,0 +1,11 @@
+[Unit]
+Description=Bound future heap dumps on disk (forensic archive excluded)
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/taiko-heap-budget.py
+MemoryHigh=32M
+MemoryMax=64M
+MemorySwapMax=0
+TasksMax=8
+CPUQuota=10%
+UMask=0077

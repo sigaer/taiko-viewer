@@ -28,10 +28,13 @@ def sample(top):
     mem = values('/proc/meminfo'); vm = values('/proc/vmstat')
     cgroups = {}
     root = Path('/sys/fs/cgroup')
-    paths = [root / 'system.slice/taiko-viewer.service', root / 'system.slice/mysqld.service',
-             root / 'user.slice/user-0.slice', root / 'taiko-qa.slice']
+    paths = [root / 'system.slice', root / 'system.slice/taiko-viewer.service', root / 'system.slice/mysqld.service',
+             root / 'user.slice/user-0.slice', root / 'development.slice', root / 'development.slice/development-qa.slice', root / 'development.slice/development-build.slice']
     paths += list((root / 'system.slice').glob('annual-memory-*.service'))
     paths += list((root / 'system.slice').glob('taiko-qa-*.service'))
+    paths += list((root / 'system.slice').glob('taiko-annual-*.service'))
+    for domain in ('development.slice', 'development.slice/development-qa.slice', 'development.slice/development-build.slice'):
+        paths += list((root / domain).glob('*.service'))
     for path in paths:
         if path.exists():
             cgroups[str(path.relative_to(root))] = {k: read(path / k).strip() for k in

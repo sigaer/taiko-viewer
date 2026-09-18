@@ -107,6 +107,8 @@ export type AnnualJobParameters = {
   locale?: AnnualLocale;
   shareId?: string;
   inputRevision?: string;
+  admissionKey?: string;
+  admissionTicket?: string;
   algorithmVersion?: string;
 };
 

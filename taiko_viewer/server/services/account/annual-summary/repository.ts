@@ -262,11 +262,28 @@ export const updateAnnualJobProgress = async (
   );
 };
 
+// Expire queue wait atomically; never overwrite a job that acquired its slot.
+export const expireQueuedAnnualJobs = async () => {
+  await ensureAccountSchema();
+  const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
+    "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' AND started_at IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE) ORDER BY created_at LIMIT 64"
+  );
+  const expired: AnnualJobRow[] = [];
+  for (const row of rows) {
+    const [result] = await getAccountDb().execute<ResultSetHeader>(
+      "UPDATE web_annual_summary_jobs SET status = 'failed', error_code = 'ANNUAL_QUEUE_TIMEOUT', error_message = '年度任务等待超时，请稍后重试', completed_at = NOW(), progress_stage = 'failed' WHERE id = ? AND status = 'queued' AND started_at IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE)",
+      [row.id]
+    );
+    if (result.affectedRows) expired.push(row);
+  }
+  return expired;
+};
+
 export const recoverInterruptedAnnualJobs = async () => {
   await ensureAccountSchema();
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
-     SET status = 'queued', started_at = NULL
+     SET status = 'queued'
      WHERE status = 'running'`
   );
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(

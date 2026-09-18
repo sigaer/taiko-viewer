@@ -1,0 +1,7 @@
+[Unit]
+Description=Budget for newly started development tasks (old sessions excluded)
+[Slice]
+MemoryHigh=6G
+MemoryMax=8G
+MemorySwapMax=1G
+TasksMax=768

@@ -1,0 +1,7 @@
+[Unit]
+Description=Serial QA fault domain
+[Slice]
+MemoryHigh=2G
+MemoryMax=3G
+MemorySwapMax=256M
+TasksMax=256
