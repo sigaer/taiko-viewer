@@ -2,9 +2,9 @@
 
 范围：只读生产 `/proc`、源代码及已有日志；受限实例只读公开 master data。没有向运行中的 bot 注入 profiler，没有重启/减少业务 worker，没有迁移账号数据，没有修改 Annual 算法。私有证据位于 `/var/log/taiko-memory-phase2/`（0700）。
 
-## 全部 PSS > 500 MiB 的 Python 进程
+## PSS > 500 MiB 的 Python 进程：首次扫描及复查
 
-单位 MiB，主进程数据取同一次 smaps_rollup。PSS 是驻留量，VmSwap 单列，不把文件大小当成驻留量。
+首次扫描有下表四个；16:11复查新增第五个Taiko Bot，见末节，未遗漏越过阈值的新进程。单位 MiB，主进程数据取同一次 smaps_rollup。PSS 是驻留量，VmSwap 单列，不把文件大小当成驻留量。
 
 | 服务 / PID | PSS | VmSwap | Private Dirty | 线程 | 连同子进程 PSS | 决策 |
 |---|---:|---:|---:|---:|---:|---|

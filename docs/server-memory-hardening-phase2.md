@@ -2,7 +2,7 @@
 
 2026-09-18。生产基线见 `server-memory-baseline.md`；Python 逐服务分摊、数据表示实测及唯一 Go PoC 见 `python-resident-memory-triage.md`。不改 Annual generator、schema、strength、FinalTitle、strongDan 或 `annual-observation-v4.5.0`。
 
-**验收状态：进行中，暂不解除 NOT YET SAFE FOR WAVE 2。** 下方已经完成的证据与待完成的部署/迁移后测量分开记录；没有把设计当作生产已上线。
+**最终容量状态：MEMORY BASELINE ESTABLISHED / SAFE FOR WAVE 2（memory/capacity gate）。** Viewer0.68.11已标准部署；迁移、62样本基线、真实冷任务/1+1和两Node单卡复测完成，详见下方实际结果。独立移动端产品Gate不自动改变。
 
 ## Admission implementation
 
@@ -35,9 +35,9 @@ PSS/RSS/cgroup 不同口径：共享库 RSS 重复计算；共享页的 cgroup c
 
 最终限制：renderer **High 768 MiB / Max 1 GiB / SwapMax 128 MiB / TasksMax 256 / CPU 200%**。至多65s unit hard deadline 包含 renderer 的原 60s 整体截止，TimeoutStop 5s，KillMode control-group，OOMPolicy stop。生产不允许失败后回退到无界 Chromium。
 
-Generator 使用同类隔离：High 1 GiB / Max 1.5 GiB / SwapMax 128 MiB / TasksMax 256。参照上一轮 large cold build cgroup peak 488.55 MiB；本轮还需在最终配置下复测。两类 worker 分开故障域，最多允许 1 + 1。
+Generator 使用同类隔离：High 1 GiB / Max 1.5 GiB / SwapMax 128 MiB / TasksMax 256。参照上一轮 large cold build cgroup peak 488.55 MiB；本轮已在最终配置下复测，见后文。两类 worker 分开故障域，最多允许 1 + 1。
 
-新 launcher 发布前隔离执行：small generator SUCCESS、v4.5.0、92 events、2.117s；真实 renderer SUCCESS、1080×1648、2.320s。均未写 production summary/job。最终生产 smoke/组合峰值见后续记录。
+新 launcher 发布前隔离执行：small generator SUCCESS、v4.5.0、92 events、2.117s；真实 renderer SUCCESS、1080×1648、2.320s。均未写 production summary/job。部署后生产页面/组合峰值见后文。
 
 ## Tests
 
@@ -63,13 +63,101 @@ Generator 使用同类隔离：High 1 GiB / Max 1.5 GiB / SwapMax 128 MiB / Task
 
 新 dev/QA/build wrappers 共享维护锁；多进程开发验证（临时 dev server + browser）必须属于同一有界任务，结束全部关闭。新 dev 单任务2/3 GiB，runtime4h；QA15min；标准 deploy 最长30min。Build wrapper保留原deploy script，不改其flock/NODE_OPTIONS/发布逻辑；开始前还检查 25% RAM reserve + 5 GiB headroom。
 
-**没有 live 迁移/停止现有 VS Code/Codex/root session；production.slice 仍是后续服务维护设计。** 6/8 GiB 不是对所有历史编辑器工作流已完成峰值认证，现有 root resident 继续计入 admin reserve。真正 Nuxt release-build 峰值需要本次标准发布记录补充。迁移后 MemAvailable 约12.9 GiB，原6 GiB构建上限不满足25% reserve，因此在首次发布前将构建上限**收紧**到High4/Max5 GiB（既有Node heap4 GiB保持）；不是降低reserve或增大限制。构建前还确认没有Annual worker在运行。
+**没有 live 迁移/停止现有 VS Code/Codex/root session；production.slice 仍是后续服务维护设计。** 6/8 GiB 不是对所有历史编辑器工作流已完成峰值认证，现有 root resident 继续计入 admin reserve。真正 Nuxt release-build 峰值已由本次标准发布记录补充。迁移后 MemAvailable 约12.9 GiB，原6 GiB构建上限不满足25% reserve，因此在首次发布前将构建上限**收紧**到High4/Max5 GiB（既有Node heap4 GiB保持）；不是降低reserve或增大限制。构建前还确认没有Annual worker在运行。
 
 monitor 已覆盖新 slice/worker，磁盘日志原 rotation 不变。生产/MySQL 没有添加盲目的低 MemoryMax。
 
-## Pending final acceptance
+## Production release and completed capacity retest
 
-1. Heap migration/路径治理：PASS。
-2. 标准部署 0.68.11；不是手工 build/output replacement。
-3. 迁移和发布后 10 min baseline；逐次 cold Annual / cold renderer / sequential / permitted 1+1；记录 MemAvailable/PSS/swap/PSI/cgroup events。
-4. 按实际峰值重算 reserve，给出最终容量 Gate。Python 完整服务重写不是 Gate prerequisite。
+**Viewer 0.68.11**, source/release commit `8356dcd`。2026-09-18 16:27 CST 标准 `scripts/deploy_forum_web.sh "<HEAD subject>"` 完成，经 `run_build.sh` 隔离调用；未修改标准部署脚本、未手工替换 output。首页版本与 HTTP 200 已核实，service active、NRestarts=0。可选百度推送返回日配额耗尽，不影响部署。
+
+实际 Nuxt release workflow 179.3s，build cgroup sampled peak **4095.98 MiB**，最小 MemAvailable **9.058 GiB**。High=4 GiB 引发回收（父级统计含子域 high events=943），Max/OOM/oom_kill=0；最大 cgroup swap16.17 MiB。该峰值是在 High 限制下测得，不声称是无限制需求峰值。4/5 GiB 的发布预算已实际走通；development aggregate 6/8 GiB 未被本次工作流突破。
+
+### Post-migration baseline
+
+**16:27:50 → 16:38:35 CST，645.45s，62 samples**（61个10秒采样，另补结束确认）。无本轮 QA/cold job/build；保留真实业务、原有 editor/root sessions。沿用 Phase 1 的互斥归组，不把编辑器计入 business subtotal；未证实可停的 Other 保守计入业务。
+
+| 指标 GiB | min | median | max |
+|---|---:|---:|---:|
+| Production PSS | 10.480 | 10.542 | 10.880 |
+| Production RSS | 10.955 | 11.013 | 11.380 |
+| Production VmSwap | 6.918 | 6.919 | 6.920 |
+| Host swap | 10.496 | 10.498 | 10.498 |
+| MemAvailable | 12.780 | 13.092 | 13.165 |
+| VS Code + extensionHost + Codex PSS | 4.118 | 4.127 | 4.144 |
+
+- 整个窗口 memory PSI full **0.0021%**，IO PSI full **0.1169%**；memory full avg10 最大0.02%，无持续压力。
+- swap in **0.738 MiB**、out **0.145 MiB**，最大换入20.21 KiB/s。10.5 GiB swap以历史冷页为主，不是当前 thrashing。
+- Phase 1 business PSS median10.819/max11.361 GiB，本次10.542/10.880 GiB：业务驻留未恶化。Host MemAvailable 比旧窗口低，编辑器驻留已约4.13 GiB（此前约2.8 GiB）；没有把两次不同开发负载直接比较为业务回归。
+- heap迁移前 `/tmp`14.432 GiB、swap21.025 GiB；迁移后 `/tmp`3.774 GiB、swap10.474 GiB。回收主要反映在 swap，不能宣称释放了10.66 GiB resident RAM。
+
+### Cold runtime and renderer
+
+在已发布源码对应的 runtime 上调用同一 admission/launcher，使用真实 userdata、生产 internal render 页面及合法 render token；结果/normalized cache 写到私有独立目录，**未写生产 summary/job/cache**。每组 fresh application cache/browser；没有清 OS page cache，所以“cold”不是强造冷磁盘。采样200ms，分别记录整个 worker tree RSS/PSS、cgroup current/swap/tasks/limits/events、host MemAvailable/PSI。
+
+| 场景 | 任务耗时 | worker peak PSS MiB | worker peak cgroup current MiB | host最低可用 GiB |
+|---|---|---:|---:|---:|
+| large Annual（91899919） | 15.107s | 314.16 | 369.58 | 12.694 |
+| cold canonical renderer | 2.495s | 446.34 | 296.41 | 12.761 |
+| Annual → renderer | 14.576s + 2.181s | 456.92（同一时刻合计峰值） | 356.29 | 12.698 |
+| Annual + renderer，允许的1+1 | 15.384s / 2.366s | **596.08**（同一时刻合计峰值） | **407.23** | **12.604** |
+| 两个独立Node请求同一张card | 两个调用均成功 | 439.55 | 277.74 | 12.688 |
+
+- 单独 large worker RSS329.85 MiB、8 tasks；renderer RSS956.92 MiB、66 tasks。RSS含共享库重复页，不能与 cgroup Max直接等同。
+- 所有测得 worker **swap=0、high/max/oom/oom_kill=0**，实际 cgroup limits 与发布配置一致；每组结束 `remaining_units=[]`。生产其他业务 browser 保留，未 broad pkill。
+- 1+1真实时间重叠约2秒；这次实际重叠峰值不代表两类最大峰值必然同一时刻出现，预算仍采用硬上限合计。
+- 三次 large CLI 均2672 events、schema通过、`annual-observation-v4.5.0`。15.1–15.4s 与 Phase 1 large15.392s 接近，无明显生成性能回归；三个同账号样本不是全用户 P50/P95。
+- 每次 PNG **1080×1648**、4 images、broken=0、fonts=loaded；人工查看四宫格、文字、统计与原样图结构一致。保存 streamed SHA-256/size作artifact标识，没有用二进制 deep assertion，也没有声称不同时间截图逐字节相同。
+- same-card 两个**独立 Node processes**只产生 **1个 renderer unit / 1次 running / 1次 capture**，两个请求共享结果。跨进程不同key串行由专门进程测试覆盖；没有20用户破坏性压测。
+- 各测试短窗口 memory full stall约0.006–1.32%，均非持续；结束avg10=0。13:00以来 kernel OOM matches=0，生产 queue-expiry/dispatch/admission error新日志=0。
+- 额外真实2s hard-timeout fixture在2.188s结束，拥有的cgroup与子树消失。不能用只杀systemd-run客户端的方式提前释放slot。
+
+**认证范围说明**：历史 owner cookie 只读探测返回401，未把它当成generator失败，也没有重造登录会话。因此本轮没有声称完成 owner-authenticated Save POST E2E；上述实际capture通过生产合法internal render路径完成。API auth/entitlement代码未改动，容量Gate依据真实worker、生产页面、已部署调用链和跨进程测试；移动端/认证全链路验收仍属各自产品Gate。
+
+## Launch capacity model
+
+| 项目 | GiB | 依据 |
+|---|---:|---|
+| Physical RAM | 30.609 | /proc/meminfo |
+| Production budget | 12.000 | 本次max10.880，含约1.12 GiB业务波动余量 |
+| Kernel / page-cache reserve | 2.000 | 独立预留，PSS不含此项 |
+| Existing editors / admin reserve | 5.000 | 实测max4.144，保留活跃旧session |
+| Minimum safety reserve（25%） | 7.652 | 不用swap增加RAM预算 |
+| Available for Annual | **3.957** | 上述扣除后 |
+
+Annual预算：generator Max1.5 GiB + renderer Max1 GiB + Node/envelope0.5 GiB = **3 GiB**；再留0.957 GiB未分配。加上最低安全预留，约 **8.609 GiB / 28.1% RAM** 不分配给业务。Node0.5 GiB是规划余量，不是对整个旧Viewer服务新设的硬限制；整个Viewer仍计入12 GiB业务预算，保守多预留任务临时增长。
+
+**MAX_CONCURRENT_ANNUAL_BUILDS=1；MAX_CONCURRENT_ANNUAL_RENDERS=1。** 按保守硬预算 `floor((3.957 - 1 renderer - 0.5 Node) / 1.5 generator) = 1`。不按三次低实测峰值推导出8个worker。真正运行前仍要求 MemAvailable≥30% RAM+3 GiB（约12.183 GiB）、memory full avg10<2%；有压力就排队，active bounded build期间不新开Annual worker。
+
+规划取 **20s/生成槽**（实测最慢15.384s，额外留处理余量），headroom充足、无其他队列时：
+
+| 同时点击 Annual | running | queued | 平均启动等待 | 最后一人启动等待 |
+|---:|---:|---:|---:|---:|
+| 5 | 1 | 4 | ~40s | ~80s |
+| 10 | 1 | 9 | ~90s | ~180s |
+| 20 | 1 | 19 | ~190s | ~380s |
+
+这不是端到端SLA：enrichment、用户数据规模、生产业务I/O与headroom可能增加等待。queue20/TTL600s，超额明确reject，等待超时明确timeout；慢任务不能靠增加Python进程消化。Renderer独立queue8，正常单卡约2–3s，超过容量同样拒绝。公开1000用户只改变排队/缓存/磁盘规模，不允许1000个worker；需用真实到达率观察后再调整，**不因此现在提高并发**。
+
+## Final capacity gate
+
+| Gate | 结果 |
+|---|---|
+| Annual generator host-global1，含normal/admin/ratings | PASS：唯一launcher与持久ledger，跨进程测试 |
+| Same binding/version dedup before queue capacity | PASS：产品lock + persisted ticket，DB/rollback竞态测试 |
+| Canonical/legacy renderer host-global1 | PASS：共用gate/launcher，无server-side额外Chromium入口 |
+| Same-card single-flight | PASS：两Node真实请求，仅一个renderer |
+| Renderer独立cgroup | PASS：真实current/PSS/limits/tasks、hard-timeout、退出清理 |
+| tmpfs heap governance | PASS：13/13校验迁移，future路径磁盘化与retention guard；不是filesystem硬quota |
+| New dev/QA/build bounded | PASS：父子预算+共享维护锁，实际Nuxt发布走通；旧活跃session未live搬移 |
+| >10min baseline未明显恶化 | PASS：62样本，业务PSS稳定，无持续换页/PSI |
+| 1+1组合与安全reserve | PASS：最低MemAvailable12.604 GiB，保守硬预算仍留28.1% |
+| No OOM / sustained pressure / production error regression | PASS：worker事件/内核/服务检查 |
+
+**MEMORY BASELINE ESTABLISHED**
+
+**SAFE FOR WAVE 2 — memory/capacity gate。** 本结论不自动解除既有真实iOS/Android等独立产品验收HOLD，也不是不限流公开压测认证。旧root/editor任务在自然重启时按新规则迁移，Python完整服务重写不是本次放行前置条件。
+
+长期路线：先优化Python缓存/数据表示；五个>500 MiB服务的构成、unknown、worker/COW及节省假设见 `python-resident-memory-triage.md`。唯一Go PoC显示可行，但Python SQLite方案在该数据集更省内存，暂不支持整服务重写。继续积累7–14天正常流量曲线，再评估公开发布容量。
+
+私有证据：`/var/log/taiko-memory-phase2/` 下 `heap-migration.jsonl` / `heap-migration-final.json`、`deploy-summary.json` / `deploy-samples.json`、`baseline-after.jsonl` / `baseline-after-summary.json`、`retest/*/{profile,samples,result}.json` / `run.log`、`png-validation.json`。PNG均留在私有目录，不提交用户数据或凭据。

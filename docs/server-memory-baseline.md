@@ -1,6 +1,8 @@
 # Server memory baseline and low-memory hardening
 
-**MEMORY BASELINE ESTABLISHED — NOT YET SAFE FOR WAVE 2.**
+**Phase 1 历史结论：MEMORY BASELINE ESTABLISHED — NOT YET SAFE FOR WAVE 2.**
+
+**2026-09-18 Phase 2更新：容量blocker已关闭，Viewer0.68.11，SAFE FOR WAVE 2（memory/capacity gate）。** 13/13旧heap已校验迁出tmpfs，global generator/render各1，真实组合测试与645s基线完成；新测业务PSS中位数10.542 GiB。详见 [Phase 2完成报告](server-memory-hardening-phase2.md) 与 [Python triage](python-resident-memory-triage.md)。以下保留原始基线，不将旧时点数据改写为最新值；独立移动端产品Gate不自动改变。
 
 2026-09-18 审计；事故原因沿用 [既有 forensic](server-memory-incident-2026-09-18.md)，不重复 OOM 实验。Viewer 保持 **0.68.10**，Annual **annual-observation-v4.5.0**；本轮未修改业务/算法、没有清理生产缓存或手工写 summary。改动仅为开发规则、受限 QA runner 和独立只读监控。
 
