@@ -2,7 +2,7 @@
 
 ## Current gate
 
-**CONTINUE WAVE 1 / HOLD WAVE 2.** Production Viewer **0.68.8**, verified 2026-09-17 23:16–23:18 CST. Mobile/Poster reliability patch and online smoke passed; real iOS Safari and Android device confirmation remains open. Existing Wave 1 proceeds; no new internal cohort is requested.
+**CONTINUE WAVE 1 / HOLD WAVE 2.** Production Viewer **0.68.10**, verified 2026-09-18 11:45 CST. Poster preview/export decoupling and online smoke passed; real iOS Safari and Android device confirmation remains open. Existing Wave 1 proceeds; no new internal cohort is requested.
 
 Algorithm remains annual-observation-v4.5.0. Generator semantic model, 45-key titles, Dan V4/gate/24 buckets and invitation/binding/sync contracts unchanged. The prior 40-short-code handoff remains in use; this patch did not consume or replace formal invitations.
 
@@ -531,6 +531,18 @@ Preview/export data comparison passed for annual song, maximum speed, title, hig
 
 ### Deployment and production smoke
 
-Pending standard deployment and online verification. Target **0.68.10**. Read-only JSON comparison confirmed the unrelated data change was only `generated_at`; all relation content equals the previously approved version. The metadata refresh was committed separately under the earlier authorization for the approved data.
+**PASS — Viewer 0.68.10**, release **`435cb7e`**, deployed through the standard script (exit **0**) on **2026-09-18 11:45 CST**. Homepage version verified; service active and NRestarts **0** before/after smoke. Baidu URL push reported exhausted daily quota; this did not affect deployment. Read-only JSON comparison confirmed the unrelated data change was only `generated_at`; all relation content equals the previously approved version. The metadata refresh was committed separately under the earlier authorization for the approved data.
 
 **Preview: responsive / wide. Export: fixed / canonical. Annual algorithm unchanged (`annual-observation-v4.5.0`).** Gate remains **CONTINUE WAVE 1 / HOLD WAVE 2**; browser simulation does not close real iOS/Android acceptance.
+
+
+#### Production results
+
+- Real authenticated Annual → Poster, Chromium mobile viewport **390 × 844**: preview **370px**, left/right gutters **10px**, mosaic **266.39px**, horizontal overflow **false**. Three song covers loaded; profile image present; broken images **0**; browser exceptions **0**.
+- Clicked the real **保存图片** button after disabling optional community sync: **HTTP 200**, download **1080 × 1648**, **959,595 bytes**, `cached=true`, sync **skipped**. SHA-256 equals the original 0.68.8 canonical Chinese PNG exactly.
+- Japanese save through the same real product API: **HTTP 200**, `cached=false`; freshly exercised the unchanged canonical renderer/readiness pipeline. PNG **1080 × 1648**, **962,608 bytes**. Visually inspected all four artwork slots, titles and aligned statistics; no broken artwork.
+- Feedback dialog opens/closes; Previous → Finale → Next → Poster navigation passes. Save controls remain reachable by scrolling and are not part of export scaling. No feedback, reactions or community posts were submitted.
+- Optional public community posting was not exercised; code review confirms its unchanged path uploads the same canonical share-card file. No formal invitation, Annual build/cache purge or user-data mutation was performed.
+- Private production evidence: `production.json`, `production-390.png`, `production-save-visible.png`, `production-export.png`, `production-export-ja.png`, `production.log`, `deploy.log` under `/var/tmp/annual-preview-decoupling/`.
+
+**Final: Preview responsive / wide; Export fixed / canonical. Algorithm remains annual-observation-v4.5.0. CONTINUE WAVE 1 / HOLD WAVE 2.** Real iOS/Android device acceptance remains open.
