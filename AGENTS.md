@@ -106,3 +106,11 @@ section is and what action they can take, prefer removing it.
 
 This rule applies to all Viewer UI, including Home, Personal Home, song detail,
 forum, tools, annual recap, developer, settings, mobile, and desktop screens.
+
+## Memory safety for development and validation
+
+- Read `docs/memory-engineering-guidelines.md` before new browser/large-data QA.
+- Run ad-hoc QA through `bash scripts/memory/run_qa.sh <absolute-command> [args...]`; isolation failure is not permission to run unbounded. Keep standard deploy procedure unchanged and do not overlap QA with builds.
+- Never deep-assert Buffers or large binary arrays. Use streaming file hashes or `Buffer.equals()` with a short boolean failure; no binary dump/diff/stringification.
+- Bound browser/page/worker concurrency, total runtime and logs; close pages/contexts/browser in finally. Temporary dev servers must be cleaned up at task end and child/listener exit verified.
+- Store large artifacts on disk-backed `/var/tmp`, not tmpfs `/tmp`. No unreviewed heap dumps, cache purges, swapoff or broad process killing.

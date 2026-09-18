@@ -1,0 +1,24 @@
+[Unit]
+Description=Bounded host and cgroup memory telemetry
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/libexec/taiko-memory-monitor.py
+Restart=on-failure
+RestartSec=15
+MemoryHigh=64M
+MemoryMax=128M
+MemorySwapMax=0
+TasksMax=16
+CPUQuota=10%
+Nice=10
+IOSchedulingClass=idle
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/log/taiko-memory
+
+[Install]
+WantedBy=multi-user.target
