@@ -168,6 +168,7 @@
       "progressUnavailable": "確認できるプレイ記録がまだありません",
       "loadFailed": "成長提案を利用できません。他のホーム機能は利用できます",
       "balanced": "最近は全体のバランスがよさそう",
+      "weeklyEntry": "今週を振り返る",
       "playedSummary": "今日は{count}譜面をプレイ",
       "events": {
         "played": "今日のプレイ",
@@ -185,6 +186,70 @@
         "combo-improved": "コンボ",
         "rank-upgrade": "スコアランク"
       }
+    }
+  },
+  "weekly": {
+    "title": "この一週間",
+    "description": "この一週間に確認できたスコアの変化、成長の記録、次の練習方向を振り返ります。",
+    "currentWeek": "今週 · 今日まで",
+    "completeWeek": "この一週間",
+    "highlights": "覚えておきたい変化",
+    "guestTitle": "ログインして今週を振り返る",
+    "login": "ログイン",
+    "loading": "今週の記録をまとめています",
+    "loadFailed": "この一週間を表示できません",
+    "retry": "再試行",
+    "goalCompleted": "自分で選んだ練習目標を達成",
+    "theme": {
+      "stability": "今週いちばん目立ったのは、より安定したこと",
+      "score-breakthrough": "今週は自己ベストの更新が重なりました",
+      "new-crown": "今週いちばん覚えておきたいのは新しい王冠",
+      "rank-breakthrough": "今週はスコアランクに新しい前進がありました",
+      "goal-follow-through": "今週は自分で選んだ練習目標を達成しました",
+      "mixed-growth": "今週はいくつもの方向に変化がありました",
+      "broad-activity": "今週は幅広い譜面をプレイしました",
+      "focus-change": "今週は注目したい方向が変わりました",
+      "balanced": "今週は全体にバランスが取れています",
+      "quiet": "今週は譜面に慣れる時間が中心でした",
+      "no-play": "今週はまだ新しいプレイ記録がありません",
+      "limited-coverage": "今週は確認できる記録がまだ十分ではありません"
+    },
+    "fact": {
+      "played": "この譜面をプレイ",
+      "score-pb": "自己ベスト",
+      "ng-reduced": "不可",
+      "combo-improved": "コンボ",
+      "clear": "初クリア",
+      "fc": "新フルコンボ",
+      "df": "新ドンダフルコンボ",
+      "rank-upgrade": "スコアランク"
+    },
+    "coverage": {
+      "complete": "",
+      "partial": "一部の履歴を利用できないため、確認できた変化だけを表示しています",
+      "truncated": "古い記録の一部が残っていないため、確認できた変化だけを表示しています",
+      "unknown": "記録の範囲を確認できないため、確認できた変化だけを表示しています"
+    },
+    "measurement": {
+      "title": "力の変化",
+      "now": "週のはじめ → 現在",
+      "weekEnd": "週のはじめ → 週末",
+      "focusChanged": "いま注目したい方向は{from}から{to}へ移りました。",
+      "focusSame": "いま注目したい方向は引き続き{focus}です。",
+      "insufficient": "今週は連続した力の記録がまだ十分ではありません。",
+      "limited": "今週のスコア記録だけでは、安定した傾向をまだ判断できません。",
+      "algorithm-mismatch": "今週は測定方法が更新されたため、力の推移を直接比較しません。",
+      "model-mismatch": "今週は測定モデルが更新されたため、力の推移を直接比較しません。",
+      "measurement-version-mismatch": "今週は測定バージョンが更新されたため、力の推移を直接比較しません。"
+    },
+    "focus": {
+      "balanced": "全体のバランス",
+      "limited": "記録を増やすこと",
+      "insufficient-data": "記録を増やすこと"
+    },
+    "next": {
+      "title": "次は",
+      "focus": "最近は引き続き{focus}から取り組めそうです"
     }
   },
   "songs": {

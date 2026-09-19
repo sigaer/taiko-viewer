@@ -64,6 +64,7 @@ export async function readGrowthMeasurements(db: Pick<Pool, "execute">, userId: 
     WHERE m.user_id=? AND m.binding_id=? AND m.captured_at>=? AND m.captured_at<?
     ORDER BY m.captured_at,m.id`, [userId, bindingId, sqlTime(fromUtc), sqlTime(toExclusiveUtc)]);
   return rows.map(row => ({
+    id: String(row.id),
     ownerId: String(row.user_id),
     bindingId: String(row.binding_id),
     capturedAt: new Date(String(row.captured_at_iso)).toISOString(),

@@ -3,8 +3,10 @@ import { buildPageDescription } from "~/utils/seo";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
+const route = useRoute();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
+const isWeeklyRoute = computed(() => route.path === "/my/weekly" || route.path === "/ja/my/weekly");
 
 definePageMeta({
   pageTitleKey: "nav.myTaiko",
@@ -21,6 +23,7 @@ useViewerSeo(() => ({
 }));
 
 const personalLinks = [
+  { path: "/my/weekly", label: "weekly.title" },
   { path: "/account/songs", label: "account.songs" },
   { path: "/tools/b30", label: "tools.b30" },
   { path: "/tools/recommend", label: "tools.recommend" },
@@ -32,7 +35,8 @@ const personalLinks = [
 </script>
 
 <template>
-  <div class="my-page">
+  <NuxtPage v-if="isWeeklyRoute" />
+  <div v-else class="my-page">
     <section v-if="!accountUser" class="my-intro panel-card">
       <p class="my-intro__eyebrow">{{ t("nav.myTaiko") }}</p>
       <h2>{{ t("page.myTaiko.guestTitle") }}</h2>

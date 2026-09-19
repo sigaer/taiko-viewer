@@ -145,9 +145,12 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <header class="growth-focus panel-card">
         <div class="growth-focus__topline">
           <h1 id="growth-title">{{ greeting }}</h1>
-          <div v-if="overview.playerState.overallRating !== null" class="growth-rating">
-            <span>Rating</span>
-            <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
+          <div class="growth-focus__aside">
+            <div v-if="overview.playerState.overallRating !== null" class="growth-rating">
+              <span>Rating</span>
+              <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
+            </div>
+            <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }} <span aria-hidden="true">→</span></NuxtLink>
           </div>
         </div>
         <div v-if="focusLabel && !balanced" class="growth-focus__next">
@@ -280,6 +283,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
 .growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.growth-focus__aside { display: grid; justify-items: end; gap: 8px; }
+.growth-weekly-link { color: #b84d37; font-size: 13px; font-weight: 800; text-decoration: none; }
+.growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 .growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color: #342922; font-family: var(--viewer-display-font); line-height: 1.1; }
 .growth-focus h1 { font-size: clamp(24px, 3.4vw, 36px); }
 .growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
@@ -326,7 +332,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 :global(body.theme-dark .growth-focus) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
 :global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); }
 :global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color: #f5e7dc; }
-:global(body.theme-dark .growth-focus__next strong), :global(body.theme-dark .growth-plan__arrow) { color: #e58b6e; }
+:global(body.theme-dark .growth-focus__next strong), :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color: #e58b6e; }
 :global(body.theme-dark .growth-focus__next), :global(body.theme-dark .growth-focus__limited) { border-color: rgba(255,255,255,.14); }
 :global(body.theme-dark .growth-focus__limited strong) { color: #f5e7dc; }
 :global(body.theme-dark .growth-skill--priority) { border-top-color: rgba(229,139,110,.65); }
@@ -345,6 +351,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-skeleton__line--progress { width: 78%; height: 58px; margin-top: 10px; }
 .growth-skeleton__row { width: 100%; height: 58px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-rating { text-align: left; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
+@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-focus__aside { width: 100%; grid-template-columns: 1fr auto; align-items: end; } .growth-rating { text-align: left; justify-self: start; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>

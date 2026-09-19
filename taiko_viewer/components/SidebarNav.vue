@@ -131,6 +131,7 @@ const groups = computed(() => [
     icon: "user",
     items: [
       { key: "/my", label: t("nav.myTaiko"), icon: "user" },
+      { key: "/my/weekly", label: t("weekly.title"), icon: "history" },
       { key: "/account/songs", label: t("account.songs"), icon: "music" },
       { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
       { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },

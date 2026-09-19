@@ -169,6 +169,7 @@
       "progressUnavailable": "最近还没有可确认的游玩记录",
       "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用",
       "balanced": "最近状态挺均衡",
+      "weeklyEntry": "看看这一周",
       "playedSummary": "今天打了 {count} 张谱",
       "events": {
         "played": "今天打过",
@@ -186,6 +187,70 @@
         "combo-improved": "连击",
         "rank-upgrade": "评价"
       }
+    }
+  },
+  "weekly": {
+    "title": "这一周",
+    "description": "回看这一周可以确认的成绩变化、成长记录与下一步练习方向。",
+    "currentWeek": "本周 · 截至今天",
+    "completeWeek": "这一周",
+    "highlights": "值得记住的变化",
+    "guestTitle": "登录后查看这一周",
+    "login": "登录",
+    "loading": "正在整理这一周",
+    "loadFailed": "这一周暂时无法打开",
+    "retry": "重试",
+    "goalCompleted": "完成了自己选下的练习目标",
+    "theme": {
+      "stability": "这周最明显的是打得更稳了",
+      "score-breakthrough": "这周最好成绩刷新得最集中",
+      "new-crown": "这周最值得记住的是新的冠",
+      "rank-breakthrough": "这周有了新的评价突破",
+      "goal-follow-through": "这周完成了自己选下的练习目标",
+      "mixed-growth": "这周的变化落在了好几个方向",
+      "broad-activity": "这周打过的谱面更广了",
+      "focus-change": "这周更值得关注的方向变了",
+      "balanced": "这周整体比较均衡",
+      "quiet": "这周主要是在熟悉谱面",
+      "no-play": "这周还没有新的游玩记录",
+      "limited-coverage": "这周可确认的记录还不够完整"
+    },
+    "fact": {
+      "played": "打过这张谱",
+      "score-pb": "最好成绩",
+      "ng-reduced": "不可",
+      "combo-improved": "连击",
+      "clear": "首次通关",
+      "fc": "新全连",
+      "df": "新全良",
+      "rank-upgrade": "评价"
+    },
+    "coverage": {
+      "complete": "",
+      "partial": "部分历史记录不可用，下面只列出能确认的变化",
+      "truncated": "较早的部分记录未保留，下面只列出能确认的变化",
+      "unknown": "记录范围暂时无法确认，下面只列出能确认的变化"
+    },
+    "measurement": {
+      "title": "能力变化",
+      "now": "周初 → 现在",
+      "weekEnd": "周初 → 周末",
+      "focusChanged": "当前更值得关注的方向从{from}转到了{to}。",
+      "focusSame": "当前更值得关注的方向仍然是{focus}。",
+      "insufficient": "这周还没有足够的连续能力记录。",
+      "limited": "这周的成绩记录还不足以形成稳定的能力趋势。",
+      "algorithm-mismatch": "本周测量口径发生更新，能力趋势暂不直接比较。",
+      "model-mismatch": "本周测量模型发生更新，能力趋势暂不直接比较。",
+      "measurement-version-mismatch": "本周测量版本发生更新，能力趋势暂不直接比较。"
+    },
+    "focus": {
+      "balanced": "整体均衡",
+      "limited": "继续积累成绩",
+      "insufficient-data": "继续积累成绩"
+    },
+    "next": {
+      "title": "接下来",
+      "focus": "最近仍可以从{focus}入手"
     }
   },
   "songs": {

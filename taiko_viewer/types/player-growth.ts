@@ -92,12 +92,14 @@ export type GrowthFact = {
   ownerId: string;
   bindingId: string;
   type: GrowthFactType;
+  title?: string;
   songId?: number;
   difficultyType?: number;
   before?: number | null;
   after?: number | null;
   delta?: number | null;
   goalId?: string | null;
+  goalType?: GoalType | null;
   evidence: {
     source: "score-history" | "goal";
     sourceRevision?: string;
@@ -116,6 +118,7 @@ export type GrowthFact = {
 export type GrowthMeasurementDimensions = Record<RatingDimensionKey, number | null>;
 
 export type GrowthMeasurement = {
+  id: string;
   ownerId: string;
   bindingId: string;
   capturedAt: string;
@@ -145,4 +148,93 @@ export type GrowthHistoryResponse = {
     measurementTo: string | null;
     measurementState: GrowthCoverageState;
   };
+};
+
+export type WeeklyGrowthThemeType =
+  | "stability"
+  | "score-breakthrough"
+  | "new-crown"
+  | "rank-breakthrough"
+  | "goal-follow-through"
+  | "mixed-growth"
+  | "broad-activity"
+  | "focus-change"
+  | "balanced"
+  | "quiet"
+  | "no-play"
+  | "limited-coverage";
+
+export type WeeklyGrowthTheme = {
+  type: WeeklyGrowthThemeType;
+  evidenceFactKeys: string[];
+  evidenceMeasurementIds: string[];
+  confidence: "low" | "medium" | "high";
+};
+
+export type WeeklyGrowthHighlight = {
+  id: string;
+  primaryType: Exclude<GrowthFactType, "played" | "goal-completed"> | "played";
+  factKeys: string[];
+  songId: number;
+  difficultyType: number;
+  title: string;
+  before: number | null;
+  after: number | null;
+  delta: number | null;
+  goalCompleted: boolean;
+};
+
+export type WeeklyMeasurementChangeReason =
+  | "compatible"
+  | "insufficient"
+  | "limited"
+  | "algorithm-mismatch"
+  | "model-mismatch"
+  | "measurement-version-mismatch";
+
+export type WeeklyMeasurementPoint = Pick<GrowthMeasurement,
+  "id" | "capturedAt" | "scoreRevision" | "measurementVersion" | "algorithmVersion" | "modelRevision" | "rating" | "dimensions" | "focus" | "sampleCount" | "availabilityState"
+>;
+
+export type WeeklyMeasurementChange = {
+  start: WeeklyMeasurementPoint | null;
+  end: WeeklyMeasurementPoint | null;
+  compatible: boolean;
+  reason: WeeklyMeasurementChangeReason;
+  ratingDelta: number | null;
+  dimensionDeltas: GrowthMeasurementDimensions | null;
+  primaryDimension: {
+    key: RatingDimensionKey;
+    before: number;
+    after: number;
+    delta: number;
+  } | null;
+  focusFrom: GrowthMeasurement["focus"] | null;
+  focusTo: GrowthMeasurement["focus"] | null;
+};
+
+export type WeeklyGrowthResponse = {
+  profileId: string;
+  week: {
+    from: string;
+    to: string;
+    timezone: "Asia/Shanghai";
+    isCompleteWeek: boolean;
+  };
+  coverage: GrowthHistoryResponse["coverage"];
+  theme: WeeklyGrowthTheme;
+  highlights: WeeklyGrowthHighlight[];
+  measurementChange: WeeklyMeasurementChange;
+  totals: {
+    distinctCharts: number;
+    pb: number;
+    fc: number;
+    df: number;
+    rankUpgrade: number;
+    completedGoals: number;
+  };
+  currentNextAction: {
+    focus: GrowthMeasurement["focus"];
+    todayPlan: PlayerGrowthOverview["todayPlan"];
+  } | null;
 };
