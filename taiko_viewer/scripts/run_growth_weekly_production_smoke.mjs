@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { createHash, randomBytes, randomInt, scryptSync } from "node:crypto";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import mysql from "mysql2/promise";
+import { chromium } from "playwright-core";
 import { authoritativeFixture } from "../tests/fixtures/goalAuthoritative.mjs";
 import { deleteUserWithGoals } from "../server/services/goals/lifecycle.ts";
 import { auditGoalOrphans } from "../server/services/goals/audit.ts";
@@ -20,6 +21,7 @@ const report = { result: "FAIL", release: "0.70.1", scenarios: {} };
 let userId = 0;
 let currentPath = "";
 let historyDirectory = "";
+let browser;
 
 const dayMs = 86_400_000;
 const moveDay = (day, amount) => new Date(Date.parse(`${day}T00:00:00Z`) + amount * dayMs).toISOString().slice(0, 10);
@@ -76,7 +78,7 @@ try {
     for (const level of [4, 5]) {
       if (Number(song[`level_${level}`]) <= 0) continue;
       const notes = Number(song.max_combo?.[level - 1]) || 600;
-      songs.push({ song_no: Number(song.id), level, song_name: song.song_name, high_score: 900000, best_score_rank: 4, good_cnt: Math.max(0, notes - 28), ok_cnt: 20, ng_cnt: 8, combo_cnt: 100, stage_cnt: 1, clear_cnt: 1, full_combo_cnt: 0, dondaful_combo_cnt: 0, highscore_mode: 0, option_flg: [1, 0, 0, "00"] });
+      songs.push({ song_no: Number(song.id), level, song_name: song.song_name, high_score: 900000, best_score_rank: 4, good_cnt: Math.max(0, notes - 28), ok_cnt: 20, ng_cnt: 8, combo_cnt: 100, stage_cnt: 1, clear_cnt: 1, full_combo_cnt: 0, dondaful_combo_cnt: 0, highscore_datetime: `${priorSunday} 08:00:00`, update_datetime: `${priorSunday} 08:00:00`, highscore_mode: 0, option_flg: [1, 0, 0, "00"] });
     }
   }
   assert.ok(songs.length > 20 && songs.length < 10_000);
@@ -85,6 +87,7 @@ try {
     [priorSunday, "09", chart(songs[0], priorSunday, "09")],
     [monday, "10", chart(songs[0], monday, "10", { high_score: 910000 })],
     [middleDay, "11", chart(songs[0], middleDay, "11", { high_score: 915000, ng_cnt: 4, good_cnt: Number(songs[0].good_cnt) + 4 })],
+    [eventDay, "09", chart(songs[0], eventDay, "09", { high_score: 915000, ng_cnt: 4, good_cnt: Number(songs[0].good_cnt) + 4 })],
     [eventDay, "12", chart(songs[0], eventDay, "12", { high_score: 920000, full_combo_cnt: 1, ng_cnt: 0, good_cnt: Number(songs[0].good_cnt) + 8 })]
   ];
   let currentPayload;
@@ -130,6 +133,7 @@ try {
   assert.equal(nextOverview.body.scoreRevision, nextRevision);
 
   const rich = await request("/api/account/growth/weekly", token);
+  report.scenarios.rich = { totalMs: rich.totalMs, theme: rich.body.theme?.type, totals: rich.body.totals, highlights: rich.body.highlights?.map(item => ({ type: item.primaryType, songId: item.songId, goalCompleted: item.goalCompleted })), measurementReason: rich.body.measurementChange?.reason, coverage: rich.body.coverage?.scoreHistoryState };
   assert.equal(rich.response.status, 200);
   assert.equal(rich.body.profileId, String(bindingId));
   assert.deepEqual(rich.body.week, { from: monday, to: shanghaiDay, timezone: "Asia/Shanghai", isCompleteWeek: false });
@@ -140,7 +144,22 @@ try {
   assert.ok(rich.body.highlights.length >= 2 && rich.body.highlights.length <= 4);
   assert.equal(rich.body.measurementChange.compatible, true);
   assert.ok(rich.body.currentNextAction?.todayPlan?.items?.length > 0);
-  report.scenarios.rich = { totalMs: rich.totalMs, theme: rich.body.theme.type, facts: Object.values(rich.body.totals).reduce((sum, value) => sum + Number(value), 0), highlights: rich.body.highlights.length, measurements: [rich.body.measurementChange.start?.id, rich.body.measurementChange.end?.id].filter(Boolean).length, coverage: rich.body.coverage.scoreHistoryState };
+  report.scenarios.rich = { totalMs: rich.totalMs, theme: rich.body.theme.type, totals: rich.body.totals, highlights: rich.body.highlights.length, measurements: [rich.body.measurementChange.start?.id, rich.body.measurementChange.end?.id].filter(Boolean).length, coverage: rich.body.coverage.scoreHistoryState };
+
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium", args: ["--no-sandbox"] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
+  await context.addCookies([{ name: "stv_session", value: token, url: base }]);
+  const page = await context.newPage();
+  const browserErrors = [];
+  page.on("pageerror", error => browserErrors.push(error.message.slice(0, 180)));
+  page.on("console", message => { if (/hydration/i.test(message.text())) browserErrors.push(message.text().slice(0, 180)); });
+  await page.goto(`${base}/my/weekly`, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.locator(".weekly-hero").waitFor({ timeout: 90_000 });
+  assert.match(await page.locator(".weekly-hero").innerText(), /本周 · 截至今天/);
+  assert.ok(await page.locator(".weekly-highlight").count() >= 2 && await page.locator(".weekly-highlight").count() <= 4);
+  assert.equal(await page.locator(".weekly-metric").count(), 0);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  assert.deepEqual(browserErrors, []);
 
   await db.execute("UPDATE web_taiko_bindings SET is_current=0 WHERE user_id=?", [userId]);
   const manualId = String(randomInt(80_000_000, 89_999_999));
@@ -151,10 +170,22 @@ try {
   assert.equal(incomplete.body.theme.type, "limited-coverage");
   assert.deepEqual(incomplete.body.highlights, []);
   assert.ok(Object.values(incomplete.body.totals).every(value => Number(value) === 0));
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.locator(".weekly-hero").waitFor({ timeout: 90_000 });
+  const incompleteText = await page.locator(".weekly-page").innerText();
+  assert.match(incompleteText, /这周可确认的记录还不够完整/);
+  assert.match(incompleteText, /记录范围暂时无法确认/);
+  assert.equal(await page.locator(".weekly-highlight").count(), 0);
+  assert.deepEqual(browserErrors, []);
+  await context.close();
+  await browser.close();
+  browser = null;
   report.scenarios.incomplete = { totalMs: incomplete.totalMs, theme: incomplete.body.theme.type, highlights: incomplete.body.highlights.length, coverage: incomplete.body.coverage.scoreHistoryState };
+  report.browser = { locale: "zh", viewport: "390x844", rich: "PASS", incomplete: "PASS", errors: browserErrors };
   report.result = "PASS";
 } finally {
   try {
+    if (browser) await browser.close();
     if (userId) await deleteUserWithGoals(db, userId);
     if (currentPath) await rm(currentPath, { force: true });
     if (historyDirectory) await rm(historyDirectory, { recursive: true, force: true });

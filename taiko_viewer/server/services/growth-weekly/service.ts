@@ -10,7 +10,7 @@ export async function getWeeklyGrowthRecap(userId: number, window: WeeklyGrowthW
   const startedAt = performance.now();
   const overviewStartedAt = performance.now();
   const overview = await getPlayerGrowthOverview(userId).catch(error => {
-    console.error("[growth-weekly] current Growth unavailable", { userId, error: error instanceof Error ? error.message : String(error) });
+    console.error("[growth-weekly] current Growth unavailable", { error: error instanceof Error ? error.message : String(error) });
     return null;
   });
   const overviewDurationMs = performance.now() - overviewStartedAt;
