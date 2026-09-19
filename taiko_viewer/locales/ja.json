@@ -85,6 +85,9 @@
     "goal": {
       "evaluate": "進み具合を確認",
       "completed": "できるようになった",
+      "refreshing": "状態を更新しています…",
+      "refreshFailed": "成長データを更新できませんでした。もう一度お試しください。",
+      "retryRefresh": "再読み込み",
       "chooseNext": "次の曲を選ぶ",
       "inconclusive": "まだ確認できません。成績を更新してからお試しください。",
       "unchanged": "引き続き練習中",

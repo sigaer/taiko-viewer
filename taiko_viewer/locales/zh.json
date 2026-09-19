@@ -86,6 +86,9 @@
     "goal": {
       "evaluate": "确认进展",
       "completed": "这次练成了",
+      "refreshing": "正在更新状态…",
+      "refreshFailed": "成长状态刷新失败，请重新刷新。",
+      "retryRefresh": "重新刷新",
       "chooseNext": "再选一首",
       "inconclusive": "暂时无法确认，更新成绩后再试。",
       "unchanged": "还在练习中",

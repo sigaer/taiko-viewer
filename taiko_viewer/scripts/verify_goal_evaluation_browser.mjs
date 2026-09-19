@@ -8,7 +8,7 @@ import {randomBytes} from 'node:crypto';
 import {chromium} from 'playwright-core';
 import {monitorAcceptanceResources} from '../tests/fixtures/goalAcceptanceResources.mjs';
 import {goalServiceHarness} from '../tests/fixtures/goalServiceHarness.mjs';
-const out='/var/tmp/goal-evaluation';const base='http://127.0.0.1:3197';
+const out=process.env.GOAL_BROWSER_ARTIFACTS || '/var/tmp/growth-refresh';const base='http://127.0.0.1:3197';
 await mkdir(out,{recursive:true});
 const finishResources=await monitorAcceptanceResources(`${out}/browser-resources.json`);
 const log=await open(`${out}/server.log`,'w');let server,browser;const results=[];
@@ -24,16 +24,17 @@ try{
   // All charts have a played baseline; switch the authoritative selected record per mutation.
   state.fallback=false;state.basis='accuracy_power';
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message.slice(0,160)));page.on('console',m=>{if(/hydration/i.test(m.text()))errors.push('hydration')});
-  let reads=0,writes=0;let persisted=null,completed=null;let evalOutcome='completed';
+  let reads=0,writes=0;let persisted=null,completed=null;let evalOutcome='completed';let failRefresh=false;
   const bind=()=>({id:state.binding.id,taikoId:'fixture',source:'wahlap',isCurrent:true});
-  const overview=()=>({ ...state.overview(),activeGoal:persisted,recentCompletedGoal:completed,playerState:{overallRating:10.28,skills:['stamina','accuracy_power','rhythm','speed','complex','big_song'].map(key=>({key,value:10})),priorityDimension:state.basis,tiedDimensions:mode==='balanced'?['stamina','accuracy_power','rhythm','speed','complex','big_song']:[],dataSufficiency:mode==='limited'?'limited':'ready',sampleCount:30,basis:'lowest-valid-dimension'},dailyProgress:{calendarDay:'2026-09-19',dataMode:'FULL_HISTORY',attendance:'not_played',uniqueCharts:0,events:[]},dataStatus:{mode:'FULL_HISTORY',timezone:'Asia/Shanghai'}});
+  const dailyFacts=()=>{if(!completed)return [];const result=completed.completionEvidence.result;const type=mode==='clear'?'fc':mode==='fc'?'df':mode;const crown=['fc','df'].includes(type);return [{songId:completed.songId,level:completed.difficultyType,title:completed.title,evidence:'history',importance:1,occurredAt:'2026-09-19',facts:[{type,before:crown?-1:result.before,after:crown?(type==='fc'?1:2):result.after,delta:result.delta},{type:'combo-improved',before:100,after:110,delta:10}]}]};
+  const overview=()=>({ ...state.overview(),activeGoal:persisted,recentCompletedGoal:completed,playerState:{overallRating:10.28,skills:['stamina','accuracy_power','rhythm','speed','complex','big_song'].map(key=>({key,value:10})),priorityDimension:state.basis,tiedDimensions:mode==='balanced'?['stamina','accuracy_power','rhythm','speed','complex','big_song']:[],dataSufficiency:mode==='limited'?'limited':'ready',sampleCount:30,basis:'lowest-valid-dimension'},dailyProgress:{calendarDay:'2026-09-19',dataMode:'FULL_HISTORY',attendance:completed?'played':'not_played',uniqueCharts:completed?1:0,events:dailyFacts()},dataStatus:{mode:'FULL_HISTORY',timezone:'Asia/Shanghai'}});
   try{
    await page.route('**/api/account/auth/me',r=>r.fulfill({json:{authenticated:true,user:{id:990001,username:'Goal Player',emailVerified:true}}}));
    await page.route('**/api/account/bindings',r=>r.fulfill({json:{bindings:[bind()],currentBinding:bind()}}));
    await page.route('**/api/account/songs?*',r=>r.fulfill({json:{total:1,items:[state.row]}}));
-   await page.route('**/api/account/growth/overview',r=>{reads++;return r.fulfill({json:overview()})});
+   await page.route('**/api/account/growth/overview',r=>{reads++;return r.fulfill(failRefresh?{status:503,json:{statusCode:503}}:{json:overview()})});
    await page.route('**/api/account/growth/goal/evaluate',async r=>{
-    if(evalOutcome==='completed'){const before=mode==='ng-reduced'?8:mode==='rank-upgrade'?6:mode==='score-pb'?900000:0;const after=mode==='ng-reduced'?4:mode==='rank-upgrade'?7:mode==='score-pb'?900001:1;completed={...persisted,status:'completed',completedAt:new Date().toISOString(),completionEvidence:{evaluationVersion:1,result:{goalType:mode,before,after,delta:after-before,facts:{}}}};persisted=null;state.active=null;}
+    if(evalOutcome==='completed'){state.revision='revision-R2';state.row.high_score=900001;if(mode==='score-pb'){state.basis='rhythm';state.plan=[102,101,100]}const before=mode==='ng-reduced'?8:mode==='rank-upgrade'?6:mode==='score-pb'?900000:0;const after=mode==='ng-reduced'?4:mode==='rank-upgrade'?7:mode==='score-pb'?900001:1;completed={...persisted,status:'completed',completedAt:new Date().toISOString(),completionEvidence:{evaluationVersion:1,result:{goalType:mode,before,after,delta:after-before,facts:mode==='clear'?{clearCnt:0,fullComboCnt:1,dondafulComboCnt:0}:mode==='fc'?{fullComboCnt:0,dondafulComboCnt:1}:mode==='df'?{dondafulComboCnt:1}:{}}}};persisted=null;state.active=null;}
     await r.fulfill({json:{profileId:String(state.binding.id),outcome:evalOutcome,activeGoal:persisted,recentCompletedGoal:completed}});
    });
    await page.route('**/api/account/growth/goal',async r=>{
@@ -51,12 +52,14 @@ try{
    const choose=page.locator('.growth-plan__choose');await choose.first().click();const dialog=page.locator('dialog[open]');await dialog.locator(`input[value="${mode}"]`).check();await dialog.locator('.goal-actions button').last().click();await page.locator('.goal-evaluate').waitFor();
    assert.equal(await page.locator('.growth-goal--completed').count(),0);
    const readsBefore=reads;await page.locator('.goal-evaluate').scrollIntoViewIfNeeded();const scroll=await page.evaluate(()=>scrollY);
-   evalOutcome='inconclusive';await page.locator('.goal-evaluate').click();await page.locator('[role="status"]').waitFor();assert.equal(await page.locator('.goal-evaluate').count(),1);
-   evalOutcome='completed';await page.locator('.goal-evaluate').click();await page.locator('.growth-goal--completed').waitFor();assert.equal(reads,readsBefore);assert.equal(await page.evaluate(()=>scrollY),scroll);
+   for(const outcome of ['active','inconclusive']){evalOutcome=outcome;const n=reads;await page.locator('.goal-evaluate').click();await page.waitForFunction(()=>!document.querySelector('.goal-evaluate')?.disabled);assert.equal(reads,n+1);assert.equal(await page.locator('.goal-evaluate').count(),1);}
+   evalOutcome='completed';failRefresh=true;await page.locator('.goal-evaluate').click();await page.locator('.goal-actions[role="alert"]').waitFor();assert.equal(reads,readsBefore+3);assert.equal(await page.locator('.growth-goal--completed').count(),1);assert.equal(await page.locator('.growth-goal--completed button').isDisabled(),true);assert.equal(await choose.first().isDisabled(),true);assert.equal(await page.locator('.growth-loading').count(),0);failRefresh=false;await page.locator('.goal-actions[role="alert"] button').click();await page.waitForFunction(()=>!document.querySelector('.growth-goal--completed button')?.disabled);assert.equal(reads,readsBefore+4);assert.ok(await page.evaluate(()=>scrollY)>0);
+   assert.equal(await page.locator('.growth-plan__details > strong').first().innerText(),mode==='score-pb'?'Song 102':'Song 100');
+   assert.equal(await page.locator('.growth-event__change').count(),1,'Only nonduplicate combo fact remains');
    assert.equal(await page.locator('.growth-plan__choice').count(),3);assert.equal(await page.locator('.growth-progress').count(),1);
    assert.ok(!/home\.goal\./.test(await page.locator('.growth-surface').innerText()));assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    await page.locator('.growth-surface').screenshot({path:`${out}/${locale}-${width}-${mode}-${theme}.png`});
-   const saved=completed;state.binding.id=2;completed=null;await enter();assert.equal(await page.locator('.growth-goal').count(),0);
+   const saved=completed;await page.locator('.growth-goal--completed button').click();await choose.first().click();await dialog.locator('input[value="score-pb"]').check();await dialog.locator('.goal-actions button').last().click();await page.locator('.goal-evaluate').waitFor();assert.equal(persisted.sourceRevision,'revision-R2');persisted=null;state.active=null;completed=saved;state.binding.id=2;completed=null;await enter();assert.equal(await page.locator('.growth-goal').count(),0);
    state.binding.id=1;completed=saved;await enter();await page.locator('.growth-goal--completed').waitFor();
    await choose.nth(1).click();await dialog.locator('input[value="score-pb"]').check();await dialog.locator('.goal-actions button').last().click();await page.locator('.goal-evaluate').waitFor();assert.equal(await page.locator('.growth-goal--completed').count(),0);assert.deepEqual(errors,[]);
    results.push({locale,width,mode,theme,result:'PASS'});

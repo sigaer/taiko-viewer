@@ -11,13 +11,13 @@ import {deleteUserWithGoals} from '../server/services/goals/lifecycle.ts';
 import {auditGoalOrphans,inspectGoalSchema} from '../server/services/goals/audit.ts';
 assert.equal(process.env.TAIKO_ALLOW_GOAL_PRODUCTION_SMOKE,'1');
 assert.equal(process.env.TAIKO_DB_NAME,'taiko');
-const out='/var/tmp/goal-evaluation';await mkdir(out,{recursive:true});
+const out='/var/tmp/growth-refresh';await mkdir(out,{recursive:true});
 const db=mysql.createPool({host:process.env.TAIKO_DB_HOST,port:Number(process.env.TAIKO_DB_PORT||3306),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME,connectionLimit:3});
 let user=0,child;const ownedFiles=[];const authPath=`${out}/smoke-auth.json`;const report={result:'FAIL'};
 try{
  const [[identity]]=await db.query('SELECT DATABASE() AS name');assert.equal(identity.name,'taiko');
  const schema=await inspectGoalSchema(db);assert.ok(schema.exists);assert.deepEqual(schema.errors,[]);assert.deepEqual(await auditGoalOrphans(db),{userOrphans:0,bindingOrphans:0,ownerMismatches:0});
- const html=await (await fetch('https://viewer.sakura-bot.cn',{signal:AbortSignal.timeout(20000)})).text();assert.match(html,/0\.69\.1/,'Release must be online before smoke provisioning');
+ const html=await (await fetch('https://viewer.sakura-bot.cn',{signal:AbortSignal.timeout(20000)})).text();assert.match(html,/0\.69\.3/,'Release must be online before smoke provisioning');
  const tag=randomBytes(6).toString('hex');const username=`goal_smoke_${tag}`;const password=randomBytes(24).toString('hex');const salt=randomBytes(16).toString('hex');
  const hash=`${salt}:${scryptSync(password,salt,64).toString('hex')}`;
  const [account]=await db.execute('INSERT INTO web_user_accounts (username,email,password_hash,email_verified) VALUES (?,?,?,1)',[username,`${username}@example.test`,hash]);user=account.insertId;
@@ -43,6 +43,7 @@ try{
  child=spawn(process.execPath,['--experimental-strip-types',new URL('./verify_goal_evaluation_production.mjs',import.meta.url).pathname],{env:{...process.env,GOAL_AUTH_FILE:authPath},stdio:'inherit'});
  const deadline=setTimeout(()=>child.kill('SIGTERM'),300000);const [code]=await once(child,'exit');clearTimeout(deadline);assert.equal(code,0,'Production browser smoke failed');
  const [[history]]=await db.query("SELECT COUNT(*) AS n FROM web_player_goals WHERE user_id=? AND status='completed'",[user]);assert.equal(history.n,1,'Exactly one completed Goal retained');report.completedRowsBeforeCleanup=history.n;
+ const [[cancelled]]=await db.query("SELECT COUNT(*) AS n FROM web_player_goals WHERE user_id=? AND status='cancelled'",[user]);assert.equal(cancelled.n,1);report.cancelledRowsBeforeCleanup=cancelled.n;
  report.result='PASS';
 }finally{
  try{

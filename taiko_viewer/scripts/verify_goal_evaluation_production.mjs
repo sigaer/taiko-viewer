@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright-core';
+import {composeGrowthFeedback} from '../utils/composeGrowthFeedback.ts';
 import {authoritativeFixture} from '../tests/fixtures/goalAuthoritative.mjs';
 assert.equal(process.env.TAIKO_ALLOW_GOAL_PRODUCTION_SMOKE,'1');
 const auth=JSON.parse(await readFile(process.env.GOAL_AUTH_FILE,'utf8'));
-const base='https://viewer.sakura-bot.cn',out='/var/tmp/goal-evaluation';
+const base='https://viewer.sakura-bot.cn',out='/var/tmp/growth-refresh';
 const report={result:'FAIL'};const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+let processSampler;
 const timer=setTimeout(()=>process.exit(124),240000);
 try{
  await context.addCookies([{name:'stv_session',value:auth.owner,url:base}]);
@@ -13,20 +17,44 @@ try{
  const initial=await get();assert.equal(initial.activeGoal,null);assert.equal(initial.recentCompletedGoal,null);
  const page=await context.newPage();const errors=[];let goalGets=0;page.on('pageerror',e=>errors.push(e.name));page.on('console',m=>{if(/hydration/i.test(m.text()))errors.push('hydration')});page.on('request',r=>{if(r.method()==='GET'&&new URL(r.url()).pathname.includes('/growth/goal'))goalGets++});
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000});await page.locator('.growth-plan__choose').first().waitFor({timeout:60000});
- const create=async()=>{await page.locator('.growth-plan__choose').first().click();const dialog=page.locator('dialog[open]');await dialog.locator('input[value="score-pb"]').check();await dialog.locator('.goal-actions button').last().click();await page.locator('.goal-evaluate').waitFor({timeout:60000})};
+ const create=async()=>{const started=performance.now();await page.locator('.growth-plan__choose').first().click();const dialog=page.locator('dialog[open]');await dialog.locator('input[value="score-pb"]').check();await dialog.locator('.goal-actions button').last().click();await page.locator('.goal-evaluate').waitFor({timeout:60000});(report.createUiMs??=[]).push(Math.round(performance.now()-started))};
  await create();const goal=(await get()).activeGoal;assert.ok(goal.baseline.provenance,'Authoritative baseline required');
  const payload=JSON.parse(await readFile(auth.scorePath,'utf8'));assert.equal(payload._goalSmoke,true);assert.equal(payload.profile.mydon_name,'Goal Smoke');
  const row=payload.songs.find(r=>r.song_no===goal.songId&&r.level===goal.difficultyType);assert.ok(row);row.high_score=goal.baseline.highScore+1;
- await writeFile(auth.scorePath,JSON.stringify(authoritativeFixture(payload,payload.profile.userid)));
+ const encoded=JSON.stringify(authoritativeFixture(payload,payload.profile.userid));
+ const revisionR2=createHash('sha256').update(encoded).digest('hex');await writeFile(auth.scorePath,encoded);
  assert.equal((await get()).activeGoal.id,goal.id,'Overview remains read-only');
- const start=performance.now();const responsePromise=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/account/growth/goal/evaluate');await page.locator('.goal-evaluate').click();const response=await responsePromise;assert.equal(response.status(),200);assert.match(response.headers()['cache-control'],/private, no-store/);assert.match(response.headers()['vary'],/cookie/i);const result=await response.json();assert.equal(result.outcome,'completed');report.evaluationHttpMs=Math.round(performance.now()-start);await page.locator('.growth-goal--completed').waitFor();
- const completed=(await get()).recentCompletedGoal;assert.equal(completed.id,goal.id);assert.equal(completed.completionEvidence.result.delta,1);assert.notEqual(completed.completionEvidence.baselineRevision,completed.completionEvidence.observationRevision);
- await page.reload({waitUntil:'domcontentloaded'});await page.locator('.growth-goal--completed').waitFor({timeout:60000});
- await context.request.post(base+'/api/account/auth/logout');const login=await context.request.post(base+'/api/account/auth/login',{data:{identifier:auth.username,password:auth.password}});assert.equal(login.status(),200);auth.owner=(await login.json()).sessionToken;await context.addCookies([{name:'stv_session',value:auth.owner,url:base}]);assert.deepEqual((await get()).recentCompletedGoal.completionEvidence,completed.completionEvidence);
- const duplicate=await context.request.post(base+'/api/account/growth/goal/evaluate',{data:{profileId:initial.profileId,expectedActiveGoalId:goal.id}});assert.equal(duplicate.status(),200);assert.equal((await duplicate.json()).recentCompletedGoal.completedAt,completed.completedAt);
+ let evaluationPosts=0,overviewGets=0;const pythonPids=new Set();
+ page.on('request',r=>{const path=new URL(r.url()).pathname;if(path==='/api/account/growth/goal/evaluate')evaluationPosts++;if(path==='/api/account/growth/overview')overviewGets++});
+ const sample=()=>{const processes=execFileSync('/bin/ps',['-eo','pid,args'],{encoding:'utf8',maxBuffer:1024*1024});for(const line of processes.split('\n'))if(line.includes('-m growth_compute growth')&&line.includes('--user '+payload.profile.userid+' '))pythonPids.add(line.trim().split(/\s+/)[0])};
+ processSampler=setInterval(sample,50);
+ const start=performance.now();
+ const freshPromise=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/account/growth/overview');
+ const responsePromise=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/account/growth/goal/evaluate');
+ await page.locator('.goal-evaluate').click();const response=await responsePromise;assert.equal(response.status(),200);assert.match(response.headers()['cache-control'],/private, no-store/);assert.match(response.headers()['vary'],/cookie/i);const result=await response.json();assert.equal(result.outcome,'completed');report.evaluationHttpMs=Math.round(response.request().timing().responseEnd);
+ const freshResponse=await freshPromise;assert.equal(freshResponse.status(),200);assert.match(freshResponse.headers()['cache-control'],/private, no-store/);assert.match(freshResponse.headers()['vary'],/cookie/i);const fresh=await freshResponse.json();
+ await page.waitForFunction(()=>{const button=document.querySelector('.growth-goal--completed button');return button&&!button.disabled},{},{timeout:60000});
+ report.tapToFreshMs=Math.round(performance.now()-start);clearInterval(processSampler);processSampler=null;
+ const timing=freshResponse.request().timing();report.refresh={ttfbMs:Math.round(timing.responseStart),totalMs:Math.round(timing.responseEnd)};
+ assert.equal(fresh.scoreRevision,revisionR2);assert.equal(fresh.activeGoal,null);
+ assert.equal(evaluationPosts,1);assert.equal(overviewGets,1);assert.equal(pythonPids.size,1,'Exactly one real Growth Python process observed');
+ report.confirmation={evaluationPosts,overviewGets,pythonProcesses:pythonPids.size};
+ assert.equal(await page.locator('.growth-loading').count(),0);
+ const skills=fresh.playerState.skills.filter(s=>Number(s.value)>0);assert.equal(await page.locator('.growth-skill').count(),skills.length);
+ for(let index=0;index<skills.length;index++){const item=page.locator('.growth-skill').nth(index);assert.ok((await item.getAttribute('aria-label')).endsWith(' '+Number(skills[index].value).toFixed(2)));const priority=fresh.playerState.dataSufficiency==='ready'&&fresh.playerState.tiedDimensions.length!==6&&fresh.playerState.priorityDimension===skills[index].key;assert.equal((await item.getAttribute('class')).includes('growth-skill--priority'),priority)}
+ const presentation=composeGrowthFeedback(fresh.recentCompletedGoal,fresh.dailyProgress);assert.equal(await page.locator('.growth-event').count(),presentation.dailyProgress.attendance==='played'?presentation.dailyProgress.events.length:0);
+ report.currentState={revision:'R2',skills:'PASS',focus:'PASS',todayPlan:'PASS',dailyProgress:'PASS'};
+ const titles=await page.locator('.growth-plan__details > strong').allTextContents();assert.deepEqual(titles,fresh.todayPlan.items.map(i=>i.title));
+ const completed=fresh.recentCompletedGoal;assert.equal(completed.id,goal.id);assert.equal(completed.completionEvidence.result.delta,1);assert.notEqual(completed.completionEvidence.baselineRevision,completed.completionEvidence.observationRevision);
  await page.locator('.growth-goal--completed').screenshot({path:out+'/production-completed.png'});
- await create();const next=(await get()).activeGoal;assert.ok(next);assert.notEqual(next.id,goal.id);assert.equal((await get()).recentCompletedGoal,null);
- const cancel=await context.request.delete(base+'/api/account/growth/goal',{data:{profileId:initial.profileId,expectedActiveGoalId:next.id}});assert.equal(cancel.status(),200);
- assert.equal(goalGets,0);assert.deepEqual(errors,[]);assert.ok(!/home\.goal\./.test(await page.locator('body').innerText()));report.result='PASS';report.goalGets=goalGets;report.jsErrors=errors;report.relogin='PASS';report.nextGoal='PASS';report.idempotency='PASS';
-}finally{clearTimeout(timer);await context.close();await browser.close();await writeFile(out+'/production-evaluation.json',JSON.stringify(report,null,2))}
+ // Critical path: no navigation, reload or re-login between evaluation and next creation.
+ await page.locator('.growth-goal--completed button').click();await create();const next=(await get()).activeGoal;assert.ok(next);assert.notEqual(next.id,goal.id);assert.equal(next.baseline.sourceRevision,revisionR2);report.noReloadNextGoal='PASS';
+ const switched=await context.request.post(base+'/api/account/bindings/current',{data:{bindingId:auth.profileB}});assert.equal(switched.status(),200);const profileB=await get();assert.equal(profileB.activeGoal,null);assert.equal(profileB.recentCompletedGoal,null);assert.equal((await context.request.post(base+'/api/account/bindings/current',{data:{bindingId:auth.profileA}})).status(),200);assert.equal((await get()).activeGoal.id,next.id);report.profileIsolation='PASS';
+ await page.reload({waitUntil:'domcontentloaded'});await page.locator('.goal-evaluate').waitFor({timeout:60000});assert.equal((await get()).activeGoal.id,next.id);
+ await context.request.post(base+'/api/account/auth/logout');const login=await context.request.post(base+'/api/account/auth/login',{data:{identifier:auth.username,password:auth.password}});assert.equal(login.status(),200);auth.owner=(await login.json()).sessionToken;await context.addCookies([{name:'stv_session',value:auth.owner,url:base}]);assert.equal((await get()).activeGoal.id,next.id);
+ const stale=await context.request.post(base+'/api/account/growth/goal/evaluate',{data:{profileId:initial.profileId,expectedActiveGoalId:goal.id}});assert.equal(stale.status(),409);
+ const cancelStart=performance.now();const cancel=await context.request.delete(base+'/api/account/growth/goal',{data:{profileId:initial.profileId,expectedActiveGoalId:next.id}});assert.equal(cancel.status(),200);report.cancelMs=Math.round(performance.now()-cancelStart);
+ await page.reload({waitUntil:'domcontentloaded'});await page.locator('.growth-focus').waitFor({timeout:60000});assert.equal(await page.locator('.growth-goal').count(),0);assert.equal((await get()).activeGoal,null);
+ assert.equal((await page.locator('body').innerText()).includes(auth.owner),false);assert.equal(goalGets,0);assert.deepEqual(errors,[]);assert.ok(!/home\.goal\./.test(await page.locator('body').innerText()));report.result='PASS';report.goalGets=goalGets;report.jsErrors=errors;report.relogin='PASS';report.nextGoal='PASS';report.staleEvaluationConflict='PASS';
+}finally{if(processSampler)clearInterval(processSampler);clearTimeout(timer);await context.close();await browser.close();await writeFile(out+'/production-evaluation.json',JSON.stringify(report,null,2))}
 console.log(JSON.stringify(report));

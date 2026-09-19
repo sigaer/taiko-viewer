@@ -65,7 +65,10 @@ test('real session login/logout + SQL Goal HTTP lifecycle and all production bin
  await db.execute('DELETE FROM web_song_locks WHERE user_id=? AND taiko_id=?',[user,`gh-a-${tag}`]);
  // GET must not write completed even with a valid later observation present.
  assert.equal((await get()).activeGoal.id,evaluationGoal.id);
+ const pythonBefore=globalThis.__goalSqlRuntime.pythonCalls;
  r=await call('POST','/evaluate',evaluationBody);assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/private, no-store/);assert.match(r.headers.get('vary'),/cookie/i);const completed=await r.json();assert.equal(completed.outcome,'completed');assert.equal(completed.activeGoal,null);assert.equal(completed.recentCompletedGoal.completionEvidence.result.delta,1);
+ assert.equal(globalThis.__goalSqlRuntime.pythonCalls,pythonBefore,'Evaluation does not compute Growth');
+ const fresh=await get();assert.equal(globalThis.__goalSqlRuntime.pythonCalls,pythonBefore+1,'One Overview, one Python compute');assert.notEqual(fresh.scoreRevision,evaluationGoal.baseline.sourceRevision);assert.equal(fresh.recentCompletedGoal.id,evaluationGoal.id);
  const repeated=await Promise.all(Array.from({length:4},()=>call('POST','/evaluate',evaluationBody)));for(const r of repeated){assert.equal(r.status,200);assert.equal((await r.json()).recentCompletedGoal.completedAt,completed.recentCompletedGoal.completedAt);}
  await call('POST','/logout');await login();assert.equal((await get()).recentCompletedGoal.id,evaluationGoal.id);
  const next=await create(await get(),101);assert.equal((await get()).recentCompletedGoal,null);assert.equal((await call('POST','/evaluate',evaluationBody)).status,409);

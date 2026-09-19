@@ -17,7 +17,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
 const isReady = computed(() => props.state === "authenticated_ready");
-const { growth, pending: growthPending, error: growthError } = usePlayerGrowth(isReady, userId);
+const { growth, pending: growthPending, error: growthError, identity: growthIdentity, refresh: refreshGrowth } = usePlayerGrowth(isReady, userId);
 
 const displayName = computed(() => props.user?.username || t("account.title"));
 const stateCopy = computed(() => {
@@ -69,7 +69,7 @@ const trackClick = (event: string, source: string) => {
       </div>
     </section>
 
-    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :display-name="displayName" :pending="growthPending" :failed="!!growthError" />
+    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :display-name="displayName" :pending="growthPending" :failed="!!growthError" :identity="growthIdentity" :refresh-growth="refreshGrowth" />
 
     <section v-else class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">

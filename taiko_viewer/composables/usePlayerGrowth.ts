@@ -12,22 +12,27 @@ export const usePlayerGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
   const growth = ref<PlayerGrowthOverview>(emptyGrowth());
   const pending = ref(false);
   const error = shallowRef<unknown>(null);
+  const refreshing = ref(false);
+  const refreshError = shallowRef<unknown>(null);
+  let loaded = false;
   let generation = 0;
   const identity = computed(() => `${toValue(userId) || ''}:${currentBinding.value?.id || ''}:${toValue(enabled)}`);
-  const load = async () => {
+  const load = async (expectedIdentity = identity.value): Promise<boolean> => {
+    if (expectedIdentity !== identity.value) return false;
     const request = ++generation;
     const profile = String(currentBinding.value?.id || '');
-    if (!toValue(enabled) || !toValue(userId)) { growth.value = emptyGrowth(); pending.value = false; return; }
-    pending.value = true; error.value = null;
+    if (!toValue(enabled) || !toValue(userId)) { growth.value = emptyGrowth(); pending.value = false; refreshing.value = false; return false; }
+    pending.value = !loaded; refreshing.value = loaded; error.value = null; refreshError.value = null;
     try {
-      const result = await apiFetch<PlayerGrowthOverview>('/api/account/growth/overview');
-      if (request !== generation) return;
+      const result = await apiFetch<PlayerGrowthOverview>('/api/account/growth/overview', { retry: 0 });
+      if (request !== generation || expectedIdentity !== identity.value) return false;
       if (result.profileId && profile && result.profileId !== profile) throw new Error('profile-changed');
-      growth.value = result;
-    } catch (e) { if (request === generation) error.value = e; }
-    finally { if (request === generation) pending.value = false; }
+      growth.value = result; loaded = true;
+      return true;
+    } catch (e) { if (request === generation) { if (loaded) refreshError.value = e; else error.value = e; } return false; }
+    finally { if (request === generation) { pending.value = false; refreshing.value = false; } }
   };
-  watch(identity, () => { growth.value = emptyGrowth(); void load(); }, { immediate: true });
+  watch(identity, () => { loaded = false; growth.value = emptyGrowth(); void load(); }, { immediate: true, flush: 'sync' });
   onScopeDispose(() => { generation++; });
-  return { growth, pending, error, refresh: load };
+  return { growth, pending, error, refreshing, refreshError, identity, refresh: load };
 };

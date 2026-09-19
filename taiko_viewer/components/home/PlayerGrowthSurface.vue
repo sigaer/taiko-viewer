@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
+import { composeGrowthFeedback } from "~/utils/composeGrowthFeedback";
 import { formatScoreRank } from "~/utils/scoreRank";
 import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_SHORT_LABELS, growthGreetingPeriod } from "~/utils/playerGrowth";
@@ -8,7 +9,7 @@ import { trackViewerEvent } from "~/utils/analytics";
 
 import type { PlayerGoal, GoalType } from "~/types/player-goal";
 
-const props = defineProps<{ overview: PlayerGrowthOverview; displayName: string; pending?: boolean; failed?: boolean }>();
+const props = defineProps<{ overview: PlayerGrowthOverview; displayName: string; pending?: boolean; failed?: boolean; identity: string; refreshGrowth: (identity: string) => Promise<boolean> }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
@@ -16,7 +17,8 @@ const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
 const focusLabel = computed(() => props.overview.playerState.dataSufficiency === "ready" ? dimensionLabel(props.overview.playerState.priorityDimension) : "");
 const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
-const progress = computed(() => props.overview.dailyProgress);
+const feedback = computed(() => composeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value, props.overview.dailyProgress));
+const progress = computed(() => feedback.value.dailyProgress);
 const hasProgress = computed(() => progress.value.attendance === "played");
 const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
 const factualChange = (fact: GrowthEventFact) => ["score-pb", "ng-reduced", "combo-improved", "rank-upgrade"].includes(fact.type);
@@ -31,18 +33,29 @@ const selected = ref<GrowthPlanItem | null>(null);
 const selectedType = ref<GoalType | null>(null);
 const busy = ref(false);
 const goalError = ref('');
+const needsRefresh = ref(false);
+const refreshing = ref(false);
+const refreshFailed = ref(false);
+const choicesDisabled = computed(() => busy.value || needsRefresh.value);
 const selector = ref<HTMLDialogElement | null>(null);
 let expectedGoalId: string | null = null;
 let returnFocus: HTMLElement | null = null;
 let mutationGeneration = 0;
+let identityGeneration = 0;
+watch(() => props.identity, () => {
+  identityGeneration++; mutationGeneration++; evaluationNotice.value = ''; activeGoal.value = null; recentCompletedGoal.value = null;
+  needsRefresh.value = false; refreshing.value = false; refreshFailed.value = false;
+  busy.value = false; selector.value?.close(); selected.value = null;
+}, { flush: 'sync' });
 watch(() => props.overview, overview => {
   mutationGeneration++;
   activeGoal.value = overview.activeGoal || null;
-  recentCompletedGoal.value = overview.recentCompletedGoal || null; evaluationNotice.value = '';
+  recentCompletedGoal.value = overview.recentCompletedGoal || null;
   selector.value?.close(); selected.value = null; busy.value = false; goalError.value = '';
 }, { immediate: true });
-onBeforeUnmount(() => { mutationGeneration++; });
+onBeforeUnmount(() => { identityGeneration++; mutationGeneration++; });
 const openGoal = (item: GrowthPlanItem) => {
+  if (choicesDisabled.value) return;
   returnFocus = document.activeElement as HTMLElement;
   selected.value = item; selectedType.value = null; goalError.value = '';
   expectedGoalId = activeGoal.value?.id || null;
@@ -59,7 +72,7 @@ const trapGoalFocus = (event: KeyboardEvent) => {
 };
 const closeGoal = () => { selector.value?.close(); selected.value = null; returnFocus?.focus(); };
 const mutate = async (cancel = false) => {
-  if (busy.value || (!cancel && (!selected.value || !selectedType.value))) return;
+  if (choicesDisabled.value || (!cancel && (!selected.value || !selectedType.value))) return;
   const generation = mutationGeneration;
   busy.value = true; goalError.value = '';
   try {
@@ -74,14 +87,24 @@ const mutate = async (cancel = false) => {
     if (generation === mutationGeneration) goalError.value = t(Number((error as { statusCode?: number }).statusCode) === 409 ? 'home.goal.conflict' : 'home.goal.error');
   } finally { if (generation === mutationGeneration) busy.value = false; }
 };
+const refreshAfterEvaluation = async (identity: string) => {
+  if (identity !== props.identity || refreshing.value) return;
+  const identityRequest = identityGeneration;
+  refreshing.value = true; refreshFailed.value = false;
+  const succeeded = await props.refreshGrowth(identity);
+  if (identity !== props.identity || identityRequest !== identityGeneration) return;
+  refreshing.value = false; needsRefresh.value = !succeeded; refreshFailed.value = !succeeded;
+};
 const evaluate = async () => {
-  if (busy.value || !activeGoal.value) return;
-  const generation = mutationGeneration; busy.value = true; goalError.value = ''; evaluationNotice.value = '';
+  if (choicesDisabled.value || !activeGoal.value) return;
+  const generation = mutationGeneration; const identity = props.identity; busy.value = true; goalError.value = ''; evaluationNotice.value = '';
   try {
     const result = await apiFetch<{profileId:string;activeGoal:PlayerGoal|null;recentCompletedGoal:PlayerGoal|null;outcome:string}>('/api/account/growth/goal/evaluate', {method:'POST',body:{profileId:props.overview.profileId,expectedActiveGoalId:activeGoal.value.id}});
-    if (generation !== mutationGeneration || result.profileId !== props.overview.profileId) return;
+    if (generation !== mutationGeneration || identity !== props.identity || result.profileId !== props.overview.profileId) return;
     activeGoal.value = result.activeGoal; recentCompletedGoal.value = result.recentCompletedGoal;
+    needsRefresh.value = true;
     if (result.outcome !== 'completed') evaluationNotice.value = t(result.outcome === 'inconclusive' ? 'home.goal.inconclusive' : 'home.goal.unchanged');
+    await refreshAfterEvaluation(identity);
   } catch { if (generation === mutationGeneration) goalError.value = t('home.goal.error'); }
   finally { if (generation === mutationGeneration) busy.value = false; }
 };
@@ -162,7 +185,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             </div>
             <span class="growth-plan__arrow" aria-hidden="true">↗</span>
           </NuxtLink>
-          <button v-if="item.goalOptions?.length" class="growth-plan__choose" :disabled="busy" @click="openGoal(item)">{{ t(selectedChart(item) ? 'home.goal.selected' : 'home.goal.choose') }}</button>
+          <button v-if="item.goalOptions?.length" class="growth-plan__choose" :disabled="choicesDisabled" @click="openGoal(item)">{{ t(selectedChart(item) ? 'home.goal.selected' : 'home.goal.choose') }}</button>
           <span v-else class="growth-plan__unavailable">{{ t('home.goal.noOptions') }}</span>
           </div>
         </div>
@@ -178,16 +201,18 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
         <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
         <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
-        <div class="goal-actions"><button class="goal-evaluate" :disabled="busy" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="busy" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="busy" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
+        <div class="goal-actions"><button class="goal-evaluate" :disabled="choicesDisabled" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="choicesDisabled" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
       </section>
       <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
         <h2 id="goal-completed-title">{{ t('home.goal.completed') }}</h2>
         <strong>{{ recentCompletedGoal.title }}</strong>
         <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
-        <span>{{ t(`home.goal.completedTypes.${recentCompletedGoal.goalType}`) }}</span>
+        <span>{{ t(`home.goal.completedTypes.${feedback.goalType || recentCompletedGoal.goalType}`) }}</span>
         <strong v-if="completionChange">{{ completionChange }}</strong>
-        <div class="goal-actions"><button @click="chooseAnother">{{ t('home.goal.chooseNext') }}</button></div>
+        <div class="goal-actions"><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.chooseNext') }}</button></div>
       </section>
+      <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
+      <div v-else-if="refreshFailed" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button @click="refreshAfterEvaluation(identity)">{{ t('home.goal.retryRefresh') }}</button></div>
       <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
       <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
       <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="returnFocus?.focus()">
