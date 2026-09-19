@@ -51,3 +51,12 @@
 不记录 COMPLETE / PLAYER HOME DAILY FEEDBACK ACCEPTED，直到真实用户生产验收满足原方案。
 
 发布前：最终回归 68/68；本地合成浏览器矩阵 40/40（zh/ja × light/dark × 390×844/1440×900 × improvement/ordinary/no-play/balanced/limited）。浏览器矩阵不构成真实用户在线验收。
+
+## 2026-09-18 验收政策替代
+
+本节替代上文“直到真实用户生产验收满足原方案”中等待自然改善的要求。
+以 `Sakura_Taiko_Viewer_0.68.9_Final_Acceptance_Historical_Replay_Closure.md` 为准：
+Authoritative-format Historical Replay、Real Browser Fixture、Production Authenticated Smoke 三层均为 REQUIRED；
+自然发生的真实用户改善仅为 OPTIONAL OBSERVATION，不再阻塞 Closure。
+当前 canonical runtime 为 0.68.11，本轮仅改验收代码与文档，不回退版本。
+逐场景结果、生产读请求指标和最终 Gate 见 `daily-progress-historical-replay-closure.md`。

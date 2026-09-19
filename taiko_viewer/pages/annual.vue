@@ -21,18 +21,18 @@ const continueEntry=async()=>{
 const validate=async()=>{
  if(busy.value)return;busy.value=true;error.value='';beta.track('beta_invite_submit');
  try{await api('/api/annual-beta/validate',{method:'POST',body:{code:code.value}});code.value='';await continueEntry();}
- catch(e:any){error.value=e?.data?.statusMessage||copy.value.failed;}
+ catch(e:any){error.value=annualBetaInviteErrorMessage(e,locale.value)||copy.value.failed;}
  finally{busy.value=false;}
 };
 const authLink=(path:string)=>({path:localePath(path),query:{redirect:localePath('/annual')}});
 onActivated(continueEntry);
 </script>
 <template><main class="beta-entry"><el-card class="panel-card"><h1>{{copy.title}}</h1><p v-if="state==='loading'" role="status">{{locale==='ja'?'確認中…':'正在检查…'}}</p>
-<template v-else-if="state==='invite'"><p>{{copy.intro}}</p><form @submit.prevent="validate"><label for="beta-code">{{copy.label}}</label><el-input id="beta-code" v-model="code" :placeholder="copy.label" maxlength="48" autocomplete="off" :disabled="busy"/><el-button native-type="submit" type="primary" :loading="busy">{{copy.submit}}</el-button></form><small>{{copy.note}}</small></template>
+<template v-else-if="state==='invite'"><p>{{copy.intro}}</p><form @submit.prevent="validate"><label for="beta-code">{{copy.label}}</label><el-input id="beta-code" v-model="code" :placeholder="copy.label" maxlength="48" autocomplete="off" :disabled="busy" :aria-invalid="Boolean(error)" :aria-describedby="error?'beta-code-error':undefined"/><el-button native-type="submit" type="primary" :loading="busy">{{copy.submit}}</el-button></form><small>{{copy.note}}</small></template>
 <template v-else-if="state==='auth'"><p>{{copy.valid}}</p><div class="beta-actions"><NuxtLink :to="authLink('/account/register')" @click="beta.track('auth_start',{auth_method:'register'})">{{copy.register}}</NuxtLink><NuxtLink :to="authLink('/account/login')" @click="beta.track('auth_start',{auth_method:'login'})">{{copy.login}}</NuxtLink></div></template>
 <template v-else-if="state==='binding'"><p>{{copy.binding}}</p><NuxtLink :to="{path:localePath('/account/profile'),query:{annual:'1'}}" @click="beta.track('binding_entry_click')">{{copy.bind}}</NuxtLink></template>
 <template v-else-if="state==='sync'"><p>{{copy.sync}}</p><NuxtLink :to="{path:localePath('/account/sync'),query:{annual:'1'}}">{{copy.openSync}}</NuxtLink><el-button @click="continueEntry">{{copy.retry}}</el-button></template>
 <el-button v-if="state==='error'" @click="continueEntry">{{copy.retry}}</el-button>
 <el-button v-if="state==='error' && canReenterInvite" @click="restartInvite">{{locale==='ja'?'別の招待コードを入力':'重新输入邀请码'}}</el-button>
-<p v-if="error" role="alert" class="beta-error">{{error}}</p></el-card></main></template>
+<p v-if="error" id="beta-code-error" role="alert" class="beta-error">{{error}}</p></el-card></main></template>
 <style scoped>.beta-entry{max-width:560px;margin:24px auto}.beta-entry h1{font-size:26px;margin:0 0 16px}.beta-entry p{line-height:1.7}.beta-entry form{display:grid;gap:12px;margin:20px 0}.beta-entry small{display:block;color:var(--el-text-color-secondary);line-height:1.6}.beta-actions{display:flex;gap:20px}.beta-entry a{display:inline-flex;align-items:center;min-height:44px}.beta-entry :deep(.el-button){min-height:44px}.beta-error{color:var(--el-color-danger)}</style>
