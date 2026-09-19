@@ -1,0 +1,31 @@
+{
+    "_meta": {
+        "full": true,
+        "source": "wahlap",
+        "source_account": "12345678",
+        "merge_topology": [],
+        "schema_version": 2,
+        "ts": "20260919_080000_000000",
+        "synced_at": "2026-09-19T08:00:00",
+        "content_sha256": "0b0ad78dfab03e27317cf44b5910ed5f6aa0fa7dfca5c600e15445625284a865"
+    },
+    "profile": {
+        "userid": "12345678",
+        "rating": 1.0,
+        "name": "テスト \/ 测试"
+    },
+    "songs": [
+        {
+            "song_no": 100,
+            "level": 4,
+            "high_score": 900000,
+            "good_cnt": 590,
+            "ok_cnt": 2,
+            "ng_cnt": 8,
+            "clear_cnt": 0,
+            "full_combo_cnt": 0,
+            "dondaful_combo_cnt": 0,
+            "best_score_rank": 6
+        }
+    ]
+}

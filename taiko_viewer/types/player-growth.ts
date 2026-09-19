@@ -54,6 +54,7 @@ export type PlayerGrowthOverview = {
   profileId?: string;
   scoreRevision?: string;
   sourceGeneratedAt?: string;
+  recentCompletedGoal?: PlayerGoal | null;
   activeGoal?: PlayerGoal | null;
   playerState: PlayerGrowthState;
   todayPlan: {

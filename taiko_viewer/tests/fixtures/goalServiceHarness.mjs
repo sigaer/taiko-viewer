@@ -14,11 +14,11 @@ export async function goalServiceHarness(){
  globalThis[hook]=state;
  const get=`const s=globalThis.${hook};`;
  const shared=data(get+`export const getCurrentBindingRow=async()=>s.binding;`);
- const db=data(`export const getAccountDb=()=>null;`);
+ const db=data(`export const getAccountDb=()=>({execute:async()=>[[]]});`);
  const growth=data(get+`export const getPlayerGrowthOverview=async()=>s.overview();`);
  const catalog=data(get+`export const getSongCatalog=async()=>s.catalog;`);
  const snapshot=data(get+`export const readGoalSnapshot=async()=>({revision:s.revision,current:{songs:s.row?[s.row]:[]},capturedAt:new Date().toISOString()});`);
- const store=data(get+`export class GoalConflict extends Error{};export async function mutateGoal(db,user,profile,expected,prepare){if(String(s.binding.id)!==profile)throw new GoalConflict();if(expected!==null&&(s.active?.id||null)!==expected)throw new GoalConflict();const next=prepare?await prepare(s.active):null;if(s.active&&next&&s.active.songId===next.songId&&s.active.goalType===next.goalType)return s.active;if((s.active?.id||null)!==expected)throw new GoalConflict();s.active=next?{...next,id:String(++s.serial),createdAt:new Date().toISOString()}:null;return s.active}`);
+ const store=data(get+`export class GoalConflict extends Error{};export async function mutateGoal(db,user,profile,expected,prepare){if(String(s.binding.id)!==profile)throw new GoalConflict();if(expected!==null&&(s.active?.id||null)!==expected)throw new GoalConflict();const next=prepare?await prepare(s.active,db):null;if(s.active&&next&&s.active.songId===next.songId&&s.active.goalType===next.goalType)return s.active;if((s.active?.id||null)!==expected)throw new GoalConflict();s.active=next?{...next,id:String(++s.serial),createdAt:new Date().toISOString()}:null;return s.active}`);
  const imports={'../../internal/account/shared':shared,'../../utils/account-db':db,'../account/growth':growth,'../content':catalog,'../../../utils/playerGoal':new URL('utils/playerGoal.ts',root).href,'./store':store,'./snapshot':snapshot,'h3':import.meta.resolve('h3')};
  let code=ts.transpileModule(await readFile(new URL('server/services/goals/service.ts',root),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
  code=code.replace(/from ['"]([^'"]+)['"]/g,(_,name)=>{if(!imports[name])throw Error(`Unknown dependency ${name}`);return `from ${JSON.stringify(imports[name])}`});

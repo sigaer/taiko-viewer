@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.69.0",
+  "version": "0.69.1",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -39,9 +39,10 @@
     "ugc:verify-data": "node scripts/verify_ugc_data_quality.mjs",
     "test:home:e2e": "node ./scripts/verify_home_p0e.mjs",
     "postinstall": "nuxt prepare",
-    "test:goal": "node --experimental-strip-types --test tests/playerGoal.test.ts tests/playerGoalService.test.mjs tests/playerGoalHttp.test.mjs tests/goalProfileCache.test.mjs",
-    "test:goal:db": "node --experimental-strip-types --test tests/playerGoal.integration.test.ts tests/playerGoalSqlHttp.test.mjs",
-    "test:goal:browser": "node --experimental-strip-types scripts/verify_goal_browser.mjs"
+    "test:goal": "node --experimental-strip-types --test tests/goalEvaluation.test.ts tests/playerGoal.test.ts tests/playerGoalService.test.mjs tests/playerGoalHttp.test.mjs tests/goalProfileCache.test.mjs",
+    "test:goal:db": "node --experimental-strip-types --test --test-concurrency=1 tests/goalEvaluationSql.test.ts tests/playerGoal.integration.test.ts tests/playerGoalSqlHttp.test.mjs",
+    "test:goal:browser": "node --experimental-strip-types scripts/verify_goal_browser.mjs",
+    "test:goal:evaluation:browser": "node --experimental-strip-types scripts/verify_goal_evaluation_browser.mjs"
   },
   "dependencies": {
     "@alicloud/esa20240910": "^3.7.0",

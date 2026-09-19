@@ -84,6 +84,19 @@
   },
   "home": {
     "goal": {
+      "evaluate": "确认进展",
+      "completed": "这次练成了",
+      "chooseNext": "再选一首",
+      "inconclusive": "暂时无法确认，更新成绩后再试。",
+      "unchanged": "还在练习中",
+      "completedTypes": {
+        "score-pb": "刷新最好成绩",
+        "ng-reduced": "不可减少了",
+        "clear": "拿到通关",
+        "fc": "拿到全连",
+        "df": "拿到全良",
+        "rank-upgrade": "评价提升"
+      },
       "title": "这次想练",
       "choose": "选这首",
       "selected": "已选",

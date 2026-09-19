@@ -1,16 +1,17 @@
+import {authoritativeFixture} from './fixtures/goalAuthoritative.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import mysql from 'mysql2/promise';
 import {randomBytes} from 'node:crypto';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
-import {mkdir,mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {mkdir,mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
 import {createApp,createRouter,toNodeListener,defineEventHandler} from 'h3';
 import {installGoalSqlRuntime} from './fixtures/goalSqlRuntime.mjs';
 import {inspectGoalSchema,auditGoalOrphans} from '../server/services/goals/audit.ts';
 import {deleteUserWithGoals} from '../server/services/goals/lifecycle.ts';
 for(const key of ['TAIKO_DB_HOST','TAIKO_DB_USER','TAIKO_DB_NAME'])assert.ok(process.env[key]);
-const db=mysql.createPool({host:process.env.TAIKO_DB_HOST,port:Number(process.env.TAIKO_DB_PORT||3306),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME,connectionLimit:4});
+const db=mysql.createPool({host:process.env.TAIKO_DB_HOST,port:Number(process.env.TAIKO_DB_PORT||3306),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME,connectionLimit:1});
 try{const [[identity]]=await db.query('SELECT DATABASE() AS name');assert.ok(identity.name.endsWith('_test'));assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');const schema=await inspectGoalSchema(db);assert.ok(schema.exists);assert.deepEqual(schema.errors,[])}catch(e){await db.end();throw e}
 test('real session login/logout + SQL Goal HTTP lifecycle and all production binding cleanup paths',async()=>{
  const root=await mkdtemp('/var/tmp/goal-sql-http-');
@@ -30,12 +31,13 @@ test('real session login/logout + SQL Goal HTTP lifecycle and all production bin
  }
  const router=createRouter();
  for(const [method,path,file] of [
-  ['post','/login','auth/login.post'],['post','/logout','auth/logout.post'],['get','/overview','growth/overview.get'],['post','/goal','growth/goal.post'],['delete','/goal','growth/goal.delete'],['post','/switch','bindings/current.post'],['post','/unbind','bindings/remove.post']
+  ['post','/evaluate','growth/goal/evaluate.post'],['post','/login','auth/login.post'],['post','/logout','auth/logout.post'],['get','/overview','growth/overview.get'],['post','/goal','growth/goal.post'],['delete','/goal','growth/goal.delete'],['post','/switch','bindings/current.post'],['post','/unbind','bindings/remove.post']
  ])router[method](path,(await import(`../server/api/account/${file}.ts`)).default);
  server=createServer(toNodeListener(createApp().use(router)));server.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
  let cookie='';const call=async(method,path,body)=>fetch(base+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(15000)});
  const login=async()=>{const r=await call('POST','/login',{identifier:username,password});assert.equal(r.status,200);cookie=r.headers.get('set-cookie').split(';')[0];assert.match(cookie,/^stv_session=/);await r.json()};
  let r=await call('GET','/overview');assert.equal(r.status,401);assert.match(r.headers.get('cache-control'),/private, no-store/);
+ assert.equal((await call('POST','/evaluate',{profileId:'1',expectedActiveGoalId:'1'})).status,401);
  await login();
  const get=async()=>{const r=await call('GET','/overview');assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/private, no-store/);return r.json()};
  const create=async(overview,songId,expected=null)=>{const r=await call('POST','/goal',{profileId:overview.profileId,scoreRevision:overview.scoreRevision,expectedActiveGoalId:expected,songId,difficultyType:4,goalType:'score-pb'});assert.equal(r.status,200);return (await r.json()).activeGoal};
@@ -49,6 +51,25 @@ test('real session login/logout + SQL Goal HTTP lifecycle and all production bin
  r=await call('POST','/goal',{profileId:overview.profileId,scoreRevision:overview.scoreRevision,expectedActiveGoalId:a.id,songId:102,difficultyType:4,goalType:'score-pb'});assert.equal(r.status,409);
  r=await call('DELETE','/goal',{profileId:overview.profileId,expectedActiveGoalId:replacement.id});assert.equal(r.status,200);assert.equal((await get()).activeGoal,null);
  const [[history]]=await db.query("SELECT COUNT(*) AS n FROM web_player_goals WHERE binding_id=? AND status='cancelled'",[bindings[0]]);assert.equal(history.n,2);
+ const scorePath=`${root}/userdata/gh-a-${tag}data.json`;
+ let payload=JSON.parse(await readFile(scorePath,'utf8'));
+ await writeFile(scorePath,JSON.stringify(authoritativeFixture(payload,`gh-a-${tag}`,new Date(Date.now()-10000))));
+ overview=await get();const evaluationGoal=await create(overview,100);
+ const evaluationBody={profileId:overview.profileId,expectedActiveGoalId:evaluationGoal.id};
+ assert.equal((await call('POST','/evaluate',{...evaluationBody,observation:{highScore:999999}})).status,400);
+ r=await call('POST','/evaluate',evaluationBody);assert.equal(r.status,200);assert.equal((await r.json()).outcome,'inconclusive');
+ payload.songs[0].high_score++;
+ await writeFile(scorePath,JSON.stringify(authoritativeFixture(payload,`gh-a-${tag}`)));
+ await db.execute('INSERT INTO web_song_locks (user_id,taiko_id,song_no,level,is_locked) VALUES (?,?,100,4,1)',[user,`gh-a-${tag}`]);
+ r=await call('POST','/evaluate',evaluationBody);assert.equal((await r.json()).outcome,'inconclusive');
+ await db.execute('DELETE FROM web_song_locks WHERE user_id=? AND taiko_id=?',[user,`gh-a-${tag}`]);
+ // GET must not write completed even with a valid later observation present.
+ assert.equal((await get()).activeGoal.id,evaluationGoal.id);
+ r=await call('POST','/evaluate',evaluationBody);assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/private, no-store/);assert.match(r.headers.get('vary'),/cookie/i);const completed=await r.json();assert.equal(completed.outcome,'completed');assert.equal(completed.activeGoal,null);assert.equal(completed.recentCompletedGoal.completionEvidence.result.delta,1);
+ const repeated=await Promise.all(Array.from({length:4},()=>call('POST','/evaluate',evaluationBody)));for(const r of repeated){assert.equal(r.status,200);assert.equal((await r.json()).recentCompletedGoal.completedAt,completed.recentCompletedGoal.completedAt);}
+ await call('POST','/logout');await login();assert.equal((await get()).recentCompletedGoal.id,evaluationGoal.id);
+ const next=await create(await get(),101);assert.equal((await get()).recentCompletedGoal,null);assert.equal((await call('POST','/evaluate',evaluationBody)).status,409);
+ await call('DELETE','/goal',{profileId:overview.profileId,expectedActiveGoalId:next.id});
  r=await call('POST','/unbind',{bindingId:bindings[0],force:true});assert.equal(r.status,200);
  const [[clean]]=await db.query('SELECT COUNT(*) AS n FROM web_player_goals WHERE binding_id=?',[bindings[0]]);assert.equal(clean.n,0);
  overview=await get();assert.equal(overview.activeGoal.id,b.id);

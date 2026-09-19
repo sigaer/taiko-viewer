@@ -83,6 +83,19 @@
   },
   "home": {
     "goal": {
+      "evaluate": "進み具合を確認",
+      "completed": "できるようになった",
+      "chooseNext": "次の曲を選ぶ",
+      "inconclusive": "まだ確認できません。成績を更新してからお試しください。",
+      "unchanged": "引き続き練習中",
+      "completedTypes": {
+        "score-pb": "自己ベスト更新",
+        "ng-reduced": "不可が減った",
+        "clear": "クリア達成",
+        "fc": "フルコンボ達成",
+        "df": "ドンダフルコンボ達成",
+        "rank-upgrade": "評価アップ"
+      },
       "title": "今回練習したい曲",
       "choose": "この曲にする",
       "selected": "選択中",

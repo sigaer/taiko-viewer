@@ -1,3 +1,4 @@
+import { readRecentCompletedGoal } from '../goals/evaluation-store';
 import { readGoalSnapshot } from "../goals/snapshot";
 import { readActiveGoal } from "../goals/store";
 import { getAccountDb } from "~/server/utils/account-db";
@@ -102,5 +103,5 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   });
   const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
   if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
-  return { profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
+  return { recentCompletedGoal: activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id)), profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
 };

@@ -7,7 +7,7 @@ export async function readActiveGoal(db: Pick<Pool, 'execute'> | PoolConnection,
 }
 // The binding lock serializes writes and conflicts with switch/unbind updates.
 // No Python computation runs while this transaction holds a lock.
-export async function mutateGoal(db: Pool, userId: number, profileId: string, expectedId: string | null, prepare: null | ((active: PlayerGoal | null) => Promise<Omit<PlayerGoal, 'id'>>)): Promise<PlayerGoal | null> {
+export async function mutateGoal(db: Pool, userId: number, profileId: string, expectedId: string | null, prepare: null | ((active: PlayerGoal | null, connection: PoolConnection) => Promise<Omit<PlayerGoal, 'id'>>)): Promise<PlayerGoal | null> {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -17,7 +17,7 @@ export async function mutateGoal(db: Pool, userId: number, profileId: string, ex
     if (String(bindings[0]?.id) !== profileId) throw new GoalConflict('profile-changed');
     const active = await readActiveGoal(connection, userId, Number(profileId));
     if (expectedId !== null && (active?.id || null) !== expectedId) throw new GoalConflict('goal-changed');
-    const next = prepare ? await prepare(active) : null;
+    const next = prepare ? await prepare(active, connection) : null;
     if (next && active && active.songId === next.songId && active.difficultyType === next.difficultyType && active.goalType === next.goalType) {
       await connection.commit(); return active;
     }

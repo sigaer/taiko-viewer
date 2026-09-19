@@ -1,5 +1,7 @@
+import type { GoalProvenance, GoalEvaluation } from '../utils/goalEvaluation';
 export type GoalType = 'score-pb' | 'ng-reduced' | 'clear' | 'fc' | 'df' | 'rank-upgrade' | 'played';
 export type GoalBaseline = {
+  provenance?: GoalProvenance | null;
   recordPresent: boolean;
   highScore: number | null; goodCnt: number | null; okCnt: number | null; ngCnt: number | null;
   comboCnt: number | null; clearCnt: number | null; fullComboCnt: number | null;
@@ -14,5 +16,5 @@ export type PlayerGoal = {
   source: 'today-plan'; sourceBasis: string | null; sourceMode: 'dimension' | 'general-fallback';
   sourceRank: number; sourceRevision: string; sourceGeneratedAt: string;
   targetData: { comparison: 'greater' | 'less' | 'present'; field: string; value?: number };
-  status: 'active' | 'cancelled'; createdAt: string; cancelledAt: string | null; unavailable: boolean;
+  status: 'active' | 'cancelled' | 'completed'; completedAt?: string; completionEvidence?: {evaluationVersion: 1; evaluatedAt: string; observationCapturedAt: string; observationRevision: string; baselineRevision: string; source: string; provenance: GoalProvenance; result: NonNullable<GoalEvaluation['result']>}; createdAt: string; cancelledAt: string | null; unavailable: boolean;
 };

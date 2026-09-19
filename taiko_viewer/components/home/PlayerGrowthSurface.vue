@@ -25,6 +25,8 @@ const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionL
 
 const apiFetch = useViewerApiFetch();
 const activeGoal = ref<PlayerGoal | null>(null);
+const recentCompletedGoal = ref<PlayerGoal | null>(null);
+const evaluationNotice = ref('');
 const selected = ref<GrowthPlanItem | null>(null);
 const selectedType = ref<GoalType | null>(null);
 const busy = ref(false);
@@ -36,6 +38,7 @@ let mutationGeneration = 0;
 watch(() => props.overview, overview => {
   mutationGeneration++;
   activeGoal.value = overview.activeGoal || null;
+  recentCompletedGoal.value = overview.recentCompletedGoal || null; evaluationNotice.value = '';
   selector.value?.close(); selected.value = null; busy.value = false; goalError.value = '';
 }, { immediate: true });
 onBeforeUnmount(() => { mutationGeneration++; });
@@ -66,11 +69,28 @@ const mutate = async (cancel = false) => {
         ...(!cancel ? { songId: selected.value!.songId, difficultyType: selected.value!.difficultyType, goalType: selectedType.value, scoreRevision: props.overview.scoreRevision } : {}) }
     });
     if (generation !== mutationGeneration || result.profileId !== props.overview.profileId) return;
-    activeGoal.value = result.activeGoal; closeGoal();
+    activeGoal.value = result.activeGoal; recentCompletedGoal.value = null; evaluationNotice.value = ''; closeGoal();
   } catch (error) {
     if (generation === mutationGeneration) goalError.value = t(Number((error as { statusCode?: number }).statusCode) === 409 ? 'home.goal.conflict' : 'home.goal.error');
   } finally { if (generation === mutationGeneration) busy.value = false; }
 };
+const evaluate = async () => {
+  if (busy.value || !activeGoal.value) return;
+  const generation = mutationGeneration; busy.value = true; goalError.value = ''; evaluationNotice.value = '';
+  try {
+    const result = await apiFetch<{profileId:string;activeGoal:PlayerGoal|null;recentCompletedGoal:PlayerGoal|null;outcome:string}>('/api/account/growth/goal/evaluate', {method:'POST',body:{profileId:props.overview.profileId,expectedActiveGoalId:activeGoal.value.id}});
+    if (generation !== mutationGeneration || result.profileId !== props.overview.profileId) return;
+    activeGoal.value = result.activeGoal; recentCompletedGoal.value = result.recentCompletedGoal;
+    if (result.outcome !== 'completed') evaluationNotice.value = t(result.outcome === 'inconclusive' ? 'home.goal.inconclusive' : 'home.goal.unchanged');
+  } catch { if (generation === mutationGeneration) goalError.value = t('home.goal.error'); }
+  finally { if (generation === mutationGeneration) busy.value = false; }
+};
+const completionChange = computed(() => {
+  const result = recentCompletedGoal.value?.completionEvidence?.result;
+  if (!result || !['score-pb','ng-reduced','rank-upgrade'].includes(result.goalType)) return '';
+  const format = (value:number) => result.goalType === 'rank-upgrade' ? formatScoreRank(value,locale.value) : value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
+  return `${format(result.before)} → ${format(result.after)}`;
+});
 const chooseAnother = () => document.querySelector<HTMLButtonElement>('.growth-plan__choose:not(:disabled)')?.focus();
 const selectedChart = (item: GrowthPlanItem) => activeGoal.value?.songId === item.songId && activeGoal.value?.difficultyType === item.difficultyType;
 
@@ -158,8 +178,17 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
         <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
         <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
-        <div class="goal-actions"><button :disabled="busy" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="busy" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
+        <div class="goal-actions"><button class="goal-evaluate" :disabled="busy" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="busy" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="busy" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
       </section>
+      <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
+        <h2 id="goal-completed-title">{{ t('home.goal.completed') }}</h2>
+        <strong>{{ recentCompletedGoal.title }}</strong>
+        <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
+        <span>{{ t(`home.goal.completedTypes.${recentCompletedGoal.goalType}`) }}</span>
+        <strong v-if="completionChange">{{ completionChange }}</strong>
+        <div class="goal-actions"><button @click="chooseAnother">{{ t('home.goal.chooseNext') }}</button></div>
+      </section>
+      <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
       <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
       <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="returnFocus?.focus()">
         <template v-if="selected">
@@ -205,6 +234,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-plan__choose { justify-self: end; }
 .growth-plan__unavailable { padding: 8px; font-size: 12px; color: var(--el-text-color-secondary); }
 .growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color: var(--el-text-color-primary); }
+.growth-goal--completed { padding: 20px; box-sizing: border-box; }
 .growth-goal h2 { margin: 0 0 6px; font: 700 23px/1.2 var(--viewer-display-font); }
 .growth-goal > strong { font-size: 18px; overflow-wrap: anywhere; }
 .growth-goal > span { font-size: 14px; }
