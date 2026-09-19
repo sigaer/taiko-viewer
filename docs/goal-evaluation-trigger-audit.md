@@ -28,3 +28,5 @@
 ## 待实施 / 验证
 
 来源校验与连续性策略需要先通过真实 writer 格式 fixture（包括 ujson 编码差异、历史导入、网页编辑保留元数据）验证，再启用 completion。纯规则、真实 SQL 并发、UI matrix、生产 completion smoke 全部通过前不得声明 Evaluation enabled 或 COMPLETE。
+
+实施与生产验收现已完成，见 [0.69.1 最终状态及 28 项报告](goal-evaluation-implementation-status.md)。本审计保留编码前的边界与选择依据。
