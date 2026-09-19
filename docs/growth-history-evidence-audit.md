@@ -116,3 +116,29 @@ RSS/heap delta 是进程采样差值，不是峰值归因；首轮包含 JIT/分
 - 100k users：约 3.43 GiB/month
 
 若高活跃用户平均 3 个新 revision/day，则约为上述三倍。唯一键会吸收同 revision 的重复 Overview，但不会人为丢弃真实的新 revision；上线后应按实际 rows/user/month 校准 retention 决策。
+
+## 发布与生产 Gate
+
+- Viewer 0.70.0 使用标准 `scripts/deploy_forum_web.sh` 发布；构建、服务重载、Nginx 检查和健康检查通过。
+- 生产迁移先 inspect 后 apply；实际数据库为 `taiko`，schema errors=0，无外键，measurement user/binding orphan 与 owner mismatch 均为 0。
+- 隔离生产账号构造多日 authoritative history；History API 首次返回 4 facts、`complete` coverage，total 122 ms。完成 Goal 并产生新 revision 后返回 6 facts、1 条独立 Goal fact 和 2 条 measurement，total 105 ms。
+- 首次 Overview 709 ms；同 revision 重复 Overview 629 ms 且 measurement 保持 1 行；新 revision Overview 600 ms 并产生第 2 行。三次均复用每次请求原有 Growth compute，没有为 measurement 额外启动 Python。
+- smoke cleanup 后 users、bindings、sessions、goals、measurements、synthetic files 全为 0；Goal 与 measurement 两类 orphan/mismatch 全为 0。
+- 最终回归：Daily/Growth 44、Growth History 9、Goal 46、Growth refresh 8、version projection 1，共 108 tests PASS；隔离真实 SQL、幂等迁移、并发 upsert、生命周期清理 PASS。
+
+```text
+0.70.0 GROWTH HISTORY FOUNDATION COMPLETE
+
+CANONICAL GROWTH FACT MODEL ESTABLISHED
+MULTI-DAY AUTHORITATIVE HISTORY REPLAY ACCEPTED
+GOAL HISTORY MERGED INTO GROWTH TIMELINE
+LONGITUDINAL PLAYER STATE MEASUREMENTS ESTABLISHED
+MEASUREMENT VERSION BOUNDARY ESTABLISHED
+HISTORY COVERAGE EXPLICIT
+PRIVATE PROFILE ISOLATION ACCEPTED
+DAILY PROGRESS SEMANTICS UNCHANGED
+0.69.x GOAL LOOP REGRESSION ACCEPTED
+
+READY FOR 0.70.1 WEEKLY GROWTH RECAP
+READY FOR 0.70.2 SKILL PASSPORT DATA LAYER
+```

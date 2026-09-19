@@ -136,7 +136,7 @@ try {
 
   const candidate = firstOverview.body.todayPlan.items.find(item => item.goalOptions?.includes("score-pb"));
   assert.ok(candidate, "No score-pb Goal candidate");
-  const createGoal = await request("/api/account/growth/goal", token, { method: "POST", body: JSON.stringify({ profileId: firstOverview.body.profileId, songId: candidate.songId, difficultyType: candidate.difficultyType, goalType: "score-pb", scoreRevision: firstOverview.body.scoreRevision }) });
+  const createGoal = await request("/api/account/growth/goal", token, { method: "POST", body: JSON.stringify({ profileId: firstOverview.body.profileId, expectedActiveGoalId: null, songId: candidate.songId, difficultyType: candidate.difficultyType, goalType: "score-pb", scoreRevision: firstOverview.body.scoreRevision }) });
   assert.equal(createGoal.response.status, 200);
   const goal = createGoal.body.activeGoal;
   assert.ok(goal?.id);
@@ -147,7 +147,9 @@ try {
   updatedRow.high_score = Number(goal.baseline.highScore) + 1000;
   updatedRow.highscore_datetime = "2026-09-19 14:00:00";
   updatedRow.update_datetime = "2026-09-19 14:00:00";
-  const nextPayload = authoritativeFixture(updated, taikoId, localDate("2026-09-19", "14"));
+  // Goal completion requires a source observation strictly after the baseline
+  // was captured; the chart's business timestamp remains the synthetic day.
+  const nextPayload = authoritativeFixture(updated, taikoId, new Date());
   const nextEncoded = JSON.stringify(nextPayload);
   const nextRevision = hash(nextEncoded);
   await writeFile(currentPath, nextEncoded);
