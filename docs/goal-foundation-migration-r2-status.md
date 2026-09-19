@@ -1,6 +1,6 @@
 # 0.69.0 Goal Foundation — Migration R2
 
-2026-09-19。R2 取代 R1 的外键方案；不再要求 REFERENCES。当前状态：隔离 SQL / authenticated lifecycle PASS，生产发布 Gate 进行中。
+2026-09-19。R2 取代 R1 的外键方案；不再要求 REFERENCES。当前状态：全部生产 Gate PASS，0.69.0 GOAL FOUNDATION COMPLETE。发布提交 `b8a545e` 已推送 origin/main 并通过标准脚本部署。
 
 ## 实施结果
 
@@ -57,13 +57,13 @@
 - 回退约定：代码发布使用标准脚本的 previous output；新增表保留，不自动 DROP，不丢弃已产生的 Goal 历史。仅清理本次隔离 smoke 用户的数据。
 - 只读 preflight：`/var/tmp/goal-foundation-r2/production-preflight.json`。
 
-## 发布 Gate（待填最终证据）
+## 发布 Gate（最终结果）
 
-- 生产 migration：PENDING。
-- 标准 deploy：PENDING；版本保持 0.69.0。
-- production create/reload/cancel/cancelled-history/cleanup：PENDING。
-- production orphan audit：PENDING。
-- 没有写 COMPLETE 或 READY FOR 0.69.1。
+- 生产 migration：PASS；首次创建及第二次幂等执行均通过。
+- 标准 deploy：PASS；线上 canonical version 0.69.0。
+- production create/reload/login/switch/replace/stale/cancel/cancelled-history/cleanup：PASS。
+- production orphan audit：PASS，三类计数全部为 0。
+- 已满足 COMPLETE 与 READY FOR 0.69.1 条件；本次未开始 Evaluation。
 
 生产 smoke 使用独立临时 Web user 和两个 score profiles，成绩由公开歌曲目录构造 synthetic fixture，不复制真实用户数据。通过真实登录与线上页面操作验证 Goal；随后经正式 cleanup helper 清除账号/Goal，再删除该次自建 userdata。生产 smoke 不承担上游同步完整性验证。
 
@@ -72,7 +72,7 @@
 | # | 问题 | 当前证据 / 结论 |
 | --- | --- | --- |
 | 1 | 移除 REFERENCES | 是，DDL 无 REFERENCES |
-| 2 | SHOW CREATE TABLE | 下方为真实测试库输出；生产待迁移 |
+| 2 | SHOW CREATE TABLE | 下方为真实测试库输出；生产最终输出见下方 |
 | 3 | FK | 0 |
 | 4 | generated expression | CASE WHEN status = 'active' THEN binding_id ELSE NULL END，STORED |
 | 5 | UNIQUE | 直接重复 INSERT 返回 1062 |
@@ -87,9 +87,9 @@
 | 14 | User A/B | PASS |
 | 15 | unbind cleanup | PASS；含 create/unbind 并发、manual detach/permanent delete |
 | 16 | user cleanup | PASS；显式删除 Goal/session/binding/song locks |
-| 17 | user orphan | 测试库 0；生产待最终审计 |
-| 18 | binding orphan | 测试库 0；生产待最终审计 |
-| 19 | owner mismatch | 测试库 0；生产待最终审计 |
+| 17 | user orphan | 测试库 0；生产最终审计 0 |
+| 18 | binding orphan | 测试库 0；生产最终审计 0 |
+| 19 | owner mismatch | 测试库 0；生产最终审计 0 |
 | 20 | baseline revision | baseline v1 / SHA-256 保持 |
 | 21 | Today Plan revalidation | 保持，提交重新计算并核对当前文件 revision |
 | 22 | 六种类型 | score-pb / ng-reduced / clear / fc / df / rank-upgrade |
@@ -97,15 +97,15 @@
 | 24 | manual / accuracy | 仍关闭 |
 | 25 | activeGoal Overview | 是 |
 | 26 | 额外 Home GET | 未新增独立 Goal GET；mutation 本地更新 |
-| 27 | authenticated lifecycle | 真实 SQL/session/H3 PASS，线上待验 |
-| 28 | production migration | PENDING |
-| 29 | production smoke | PENDING |
-| 30 | production orphan audit | PENDING |
-| 31 | Viewer 版本 | 源码 0.69.0；线上仍 0.68.12 |
+| 27 | authenticated lifecycle | 真实 SQL/session/H3 与线上均 PASS |
+| 28 | production migration | PASS，二次幂等 PASS |
+| 29 | production smoke | PASS，含重新登录、替换与 stale conflict |
+| 30 | production orphan audit | PASS，0 / 0 / 0 |
+| 31 | Viewer 版本 | 源码与线上均 0.69.0 |
 | 32 | Evaluation | 未实现 |
 | 33 | Daily Progress | 未改变算法；用户既有修改不纳入发布 |
-| 34 | 正式关闭 | 否，需完成生产 Gate |
-| 35 | READY FOR 0.69.1 | 尚不能声明 |
+| 34 | 正式关闭 | 是，所有生产 Gate PASS |
+| 35 | READY FOR 0.69.1 | READY FOR 0.69.1 GOAL EVALUATION |
 
 54 项回归、2 项真实 SQL/authenticated integration、Goal 核心严格 TypeScript 检查均 PASS。12 个浏览器 fixture 场景已通过。
 
@@ -139,7 +139,7 @@ CREATE TABLE `web_player_goals` (
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
-### 发布资源 Gate
+### 发布资源 Gate（历史阻塞，现已解除）
 
 发布索引快照已准备，保留并排除用户现有无关工作区修改。`run_build.sh` 的内存余量保护连续拒绝启动构建：可用约 12908 MiB，要求约 12956 MiB。未绕过保护，未终止其他进程；生产 migration、release commit、标准 deploy 与线上 smoke 尚未执行。此处是资源准入阻塞，不是 REFERENCES 或 SQL blocker。
 
@@ -149,4 +149,79 @@ CREATE TABLE `web_player_goals` (
 - 标准 `run_build.sh` 构建既有 staged release snapshot：PASS，日志 `/var/tmp/goal-foundation-r2/build-staged.log`；构建期间 cgroup oom/oom_kill 为 0。
 - `git diff --check` 与 staged check PASS。源码 canonical version 0.69.0。
 - 仅补齐生产 smoke 验证脚本的 logout/login、replace、stale conflict、TTFB/total、取消耗时和残留检查。本轮没有 Goal 业务、schema、UI 或 Daily Progress 改动。
-- 生产 migration / deploy / smoke 仍待后续 Gate；以上资源阻塞记录保留为历史证据。
+- 此时生产 Gate 尚待执行；其后已全部 PASS，最终证据见下方。以上资源阻塞记录保留为历史证据。
+
+## Production Release Gate — 最终关闭
+
+- 发布提交：`b8a545e`（`0.69.0 新增自主练习目标与持久化基线`），已 push origin/main。
+- 顺序：staged snapshot 标准隔离构建 PASS → 提交/push → 生产只读 preflight → 显式 migration → 二次幂等 migration → 标准部署 → 生产 smoke → 正式 cleanup → 最终只读 orphan audit。
+- 部署命令：`bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh '0.69.0 新增自主练习目标与持久化基线'`，exit 0。未绕过 memory guard，未调整阈值，未清理无关进程。
+- Viewer / sync receiver：active；`/`、`/more`：200；真实浏览器 `/more` 可见 canonical version `0.69.0`。Growth Overview 未登录为 401，真实登录后为 200。
+- 生产 MySQL 8.0.24 / database `taiko`；迁移前无 Goal table；principal 已有 CREATE/ALTER/INDEX，无需 REFERENCES。首次 apply 与第二次 apply 均无 schema errors。生产 schema 验证没有写普通用户 Goal。
+- `SHOW CREATE TABLE` 验证 FK=0，生成列 STORED，唯一 active binding 索引及 owner/profile/status 索引完整，所有时间列 DATETIME(3)。
+- 临时独立用户初始 activeGoal=null；真实 Today Plan UI create、Overview/read/reload、logout/login、A→B→A 隔离、replace、stale replace/cancel 409、UI cancel、reload null 全部 PASS。清理前 SQL cancelled 历史为 2，未写 completed。
+- 正式 lifecycle helper 清理后：Web user / binding / session / Goal 残留均为 0；自建 userdata 文件残留 0，临时凭据文件已删除。最终 user orphan / binding orphan / owner mismatch = 0 / 0 / 0。
+- 性能（隔离 synthetic 用户单次 smoke，非负载测试）：Overview TTFB 512–756 ms，total 513–757 ms；create 到可见 709 ms；cancel HTTP 190 ms。
+- Cache-Control `private, no-store`、Vary `Cookie` 检查 PASS；extra Goal GET=0；create 未增加 Overview GET，滚动位置保持；无原始 Goal 翻译 key，无 JS/hydration error。
+- 用户原有跟踪文件临时收起后恢复，逐文件 SHA-256 与操作前一致；未跟踪文件未纳入发布。构建/QA 隔离进程均已退出。
+- 可选百度收录推送返回每日 quota 超额；标准部署脚本正常完成，不影响产品 Gate。
+
+### 生产最终 SHOW CREATE TABLE
+
+```sql
+CREATE TABLE `web_player_goals` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `binding_id` bigint unsigned NOT NULL,
+  `song_id` int unsigned NOT NULL,
+  `difficulty_type` tinyint unsigned NOT NULL,
+  `goal_type` varchar(24) NOT NULL,
+  `source` varchar(24) NOT NULL,
+  `source_basis` varchar(32) DEFAULT NULL,
+  `source_mode` varchar(24) NOT NULL,
+  `source_rank` tinyint unsigned NOT NULL,
+  `source_revision` char(64) NOT NULL,
+  `source_generated_at` datetime(3) NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'active',
+  `active_binding_id` bigint unsigned GENERATED ALWAYS AS ((case when (`status` = _utf8mb4'active') then `binding_id` else NULL end)) STORED,
+  `baseline_version` int unsigned NOT NULL DEFAULT '1',
+  `goal_data` longtext NOT NULL,
+  `created_at` datetime(3) NOT NULL,
+  `updated_at` datetime(3) NOT NULL,
+  `cancelled_at` datetime(3) DEFAULT NULL,
+  `completed_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_goal_active_binding` (`active_binding_id`),
+  KEY `idx_goal_owner_profile` (`user_id`,`binding_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+```
+
+### 证据文件（本机，不含凭据）
+
+`/var/tmp/goal-foundation-r2/` 下：
+
+- `release-resource-preflight.json` / `release-resource-recheck.json` / `release-resource-final.json` / `release-memory-consumers.txt`
+- `build-staged.log` / `deploy.log`
+- `production-preflight.json` / `migration-production.json` / `migration-production-second.json` / `production-final-audit.json`
+- `production-goal.json` / `production-lifecycle.json` / `production-smoke.log`
+- `health-final.json` / `production-goal.png` / `production-more.png`
+
+### 最终状态
+
+```text
+0.69.0 GOAL FOUNDATION COMPLETE
+NO-REFERENCES GOAL SCHEMA ACCEPTED
+APPLICATION-OWNED GOAL LIFECYCLE ESTABLISHED
+ONE ACTIVE GOAL PER BINDING ENFORCED
+REAL SQL PERSISTENCE / CONCURRENCY ACCEPTED
+PRODUCTION GOAL MIGRATION ACCEPTED
+PRODUCTION CREATE / RELOAD / CANCEL SMOKE PASSED
+GOAL OWNERSHIP / CLEANUP ACCEPTED
+TODAY PLAN → GOAL SOURCE ATTRIBUTION ACCEPTED
+AUTHORITATIVE GOAL BASELINE PERSISTED
+GOAL SURVIVES RELOAD / LOGIN / DEVICE
+GOAL EVALUATION NOT YET ENABLED
+READY FOR 0.69.1 GOAL EVALUATION
+```
+
+“DEVICE”证据指服务端持久化、新 SQL 连接、新 session 的可恢复性；未宣称测试第二台实体设备。未游玩目标仍未在 runtime 开放，因为尚无服务端 complete source coverage 证明；manual / accuracy / probability / arbitrary numeric targets 均未开放。下一阶段授权前不启动 Evaluation。

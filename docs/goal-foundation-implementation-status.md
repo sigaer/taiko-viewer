@@ -1,8 +1,10 @@
 # 0.69.0 Goal Foundation — Implementation status
 
+**当前：0.69.0 已发布，生产 Gate 全部 PASS，Goal Foundation COMPLETE；Evaluation 尚未启用。**
+
 最新进度：[Migration R2 status](goal-foundation-migration-r2-status.md)。R1 REFERENCES 阻塞已由获批的无外键 R2 方案解决，以下 R1 记录保留历史背景。
 
-2026-09-19。审计 R1、迁移与六种 V1 类型已获用户批准。本文件记录实施证据，不代表发布完成。
+2026-09-19。审计 R1、迁移与六种 V1 类型已获用户批准。下方为 R1 实施历史；最终发布完成证据以 R2 status 为准。
 
 ## 已实现
 
