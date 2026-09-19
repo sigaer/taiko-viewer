@@ -41,6 +41,10 @@ export type GrowthDailyEvent = {
   evidence: "history" | "delta-snapshot" | "full-snapshot";
   importance: number;
   facts: GrowthEventFact[];
+  /** Internal replay evidence retained for canonical history projection. */
+  evidenceRevision?: string;
+  observedAt?: string | null;
+  factOccurredAt?: Partial<Record<GrowthEventFact["type"], string>>;
 };
 export type GrowthDailyProgress = {
   calendarDay: string;
@@ -66,5 +70,79 @@ export type PlayerGrowthOverview = {
   dataStatus: {
     mode: GrowthDataMode;
     timezone: "Asia/Shanghai";
+  };
+};
+
+export type GrowthFactType =
+  | "played"
+  | "score-pb"
+  | "ng-reduced"
+  | "combo-improved"
+  | "clear"
+  | "fc"
+  | "df"
+  | "rank-upgrade"
+  | "goal-completed";
+
+export type GrowthTemporalPrecision = "instant" | "day" | "observation" | "unknown";
+
+export type GrowthFact = {
+  id: string;
+  factKey: string;
+  ownerId: string;
+  bindingId: string;
+  type: GrowthFactType;
+  songId?: number;
+  difficultyType?: number;
+  before?: number | null;
+  after?: number | null;
+  delta?: number | null;
+  goalId?: string | null;
+  evidence: {
+    source: "score-history" | "goal";
+    sourceRevision?: string;
+    evidenceVersion: number;
+    provenance?: unknown;
+  };
+  temporal: {
+    attributedDay?: string | null;
+    occurredAt?: string | null;
+    observedAt?: string | null;
+    confirmedAt?: string | null;
+    precision: GrowthTemporalPrecision;
+  };
+};
+
+export type GrowthMeasurementDimensions = Record<RatingDimensionKey, number | null>;
+
+export type GrowthMeasurement = {
+  ownerId: string;
+  bindingId: string;
+  capturedAt: string;
+  scoreRevision: string;
+  measurementVersion: number;
+  algorithmVersion: string;
+  modelRevision: string | null;
+  rating: number | null;
+  dimensions: GrowthMeasurementDimensions;
+  focus: RatingDimensionKey | "balanced" | "limited" | "insufficient-data";
+  sampleCount: number;
+  availabilityState: GrowthDataSufficiency;
+};
+
+export type GrowthCoverageState = "complete" | "partial" | "truncated" | "unknown";
+
+export type GrowthHistoryResponse = {
+  profileId: string;
+  range: { from: string; to: string; timezone: "Asia/Shanghai"; maxDays: number };
+  facts: GrowthFact[];
+  measurements: GrowthMeasurement[];
+  coverage: {
+    scoreHistoryFrom: string | null;
+    scoreHistoryTo: string | null;
+    scoreHistoryState: GrowthCoverageState;
+    measurementFrom: string | null;
+    measurementTo: string | null;
+    measurementState: GrowthCoverageState;
   };
 };

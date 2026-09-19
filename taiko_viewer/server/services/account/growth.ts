@@ -3,16 +3,18 @@ import { readGoalSnapshot } from "../goals/snapshot";
 import { readActiveGoal } from "../goals/store";
 import { getAccountDb } from "~/server/utils/account-db";
 import { goalBaseline, goalOptions, goalChartAvailable } from "~/utils/playerGoal";
-import { access, constants as fsConstants, readFile, readdir } from "node:fs/promises";
-import { resolve } from "node:path";
+import { access, constants as fsConstants } from "node:fs/promises";
 import { createError } from "h3";
 import type { GrowthDailyProgress, GrowthDataMode, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
 import { buildPlayerGrowthState, growthCalendarDay } from "~/utils/playerGrowth";
 import { deriveDailyProgress } from "~/utils/dailyProgress";
 import { resolveDifficultyPresentation } from "~/utils/difficulty";
 import { getSongCatalog } from "~/server/services/content";
-import { getCurrentBindingRow, getRuntimePaths, getUserdataPath, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
+import { getCurrentBindingRow, getUserdataPath, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
 import { runGrowthPythonJson } from "./personal";
+import { loadGrowthScoreEvidence } from "../growth-history/evidence";
+import { getGrowthModelRevision } from "../growth-history/model-revision";
+import { upsertGrowthMeasurement } from "../growth-history/measurements";
 
 const TIMEZONE = "Asia/Shanghai" as const;
 
@@ -23,30 +25,7 @@ const numberValue = (value: unknown) => {
 
 const chartKey = (song: Pick<UserdataSong, "song_no" | "level">) => `${numberValue(song.song_no)}:${numberValue(song.level)}`;
 const scoreValue = (song?: UserdataSong) => numberValue(song?.high_score);
-type Snapshot = { full: boolean; timestamp: string; songs: UserdataSong[] };
-
-const isFullPayload = (payload: UserdataPayload) => payload._meta?.full === true || (!payload._meta && Boolean(payload.profile && payload.achievement && Array.isArray(payload.songs)));
-
-const loadHistory = async (taikoId: string): Promise<Snapshot[]> => {
-  const { userdataDir } = getRuntimePaths();
-  const directory = resolve(userdataDir, taikoId);
-  const names = (await readdir(directory).catch(() => [] as string[])).filter((name) => name.startsWith("data_") && name.endsWith(".json")).sort();
-  const snapshots: Snapshot[] = [];
-  for (const name of names.slice(-2000)) {
-    try {
-      const payload = JSON.parse(await readFile(resolve(directory, name), "utf-8")) as UserdataPayload;
-      if (!Array.isArray(payload.songs)) continue;
-      const compact = name.match(/^data_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
-      const fileTime = compact ? `${compact[1]}-${compact[2]}-${compact[3]} ${compact[4]}:${compact[5]}:${compact[6]}` : "";
-      snapshots.push({ full: isFullPayload(payload), timestamp: String(payload._meta?.observed_at || payload._meta?.observedAt || payload._meta?.synced_at || payload._meta?.ts || fileTime), songs: payload.songs });
-    } catch {
-      continue;
-    }
-  }
-  return snapshots;
-};
-
-const buildDailyProgress = (current: UserdataPayload, catalog: Awaited<ReturnType<typeof getSongCatalog>>, history: Snapshot[]): GrowthDailyProgress => {
+const buildDailyProgress = (current: UserdataPayload, catalog: Awaited<ReturnType<typeof getSongCatalog>>, history: Awaited<ReturnType<typeof loadGrowthScoreEvidence>>["snapshots"]): GrowthDailyProgress => {
   const titles = new Map(catalog.map(song => [Number(song.id), song.song_name]));
   return deriveDailyProgress(current.songs || [], history, growthCalendarDay(new Date(), TIMEZONE), song => titles.get(Number(song.song_no)) || song.song_name || `#${song.song_no}`);
 };
@@ -59,7 +38,8 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   try { await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK); } catch { throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" }); }
   const scoreStartedAt = performance.now();
-  const [snapshot, catalog, history] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), loadHistory(binding.taiko_id)]);
+  const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), loadGrowthScoreEvidence(binding.taiko_id)]);
+  const history = scoreEvidence.snapshots;
   const { current } = snapshot;
   const scoreDurationMs = performance.now() - scoreStartedAt;
   const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
@@ -67,6 +47,10 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   const computed = await computePromise;
   const stateAggregationStartedAt = performance.now();
   const playerState = buildPlayerGrowthState(computed.playerState.dimensions, computed.playerState.sampleCount, mode, computed.playerState.overallRating);
+  const measurementPromise = getGrowthModelRevision()
+    .then(modelRevision => upsertGrowthMeasurement(getAccountDb(), { userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision, capturedAt: snapshot.capturedAt, modelRevision, playerState, rawDimensions: computed.playerState.dimensions }))
+    .then(result => console.info("[growth-history] measurement upsert", { userId, bindingId: Number(binding.id), result: result.created ? "create" : "hit" }))
+    .catch(error => console.error("[growth-history] measurement persistence failed", { userId, bindingId: Number(binding.id), error: error instanceof Error ? error.message : String(error) }));
   const stateAggregationDurationMs = performance.now() - stateAggregationStartedAt;
   const stateDurationMs = stateAggregationDurationMs;
   const progressStartedAt = performance.now();
@@ -75,7 +59,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   const recommendations = computed.todayPlan.items;
   const usedFallback = Boolean(computed.todayPlan.usedFallback);
   const scoreMap = new Map((current.songs || []).map((song) => [chartKey(song), song]));
-  const items = recommendations.slice(0, 3).map((item) => {
+  const items = recommendations.slice(0, 3).map((item: { songId: number; level: number; title: string; isUnplayed: boolean }) => {
     const song = scoreMap.get(`${item.songId}:${item.level}`);
     const catalogSong = catalog.find((entry) => Number(entry.id) === item.songId) || null;
     const difficulty = resolveDifficultyPresentation(catalogSong, item.level);
@@ -84,6 +68,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   }).filter(Boolean) as GrowthPlanItem[];
   const planDurationMs = performance.now() - planStartedAt;
   const dailyProgress = await dailyProgressPromise;
+  await measurementPromise;
   const progressDurationMs = performance.now() - progressStartedAt;
   console.info("[player-growth] overview timing", {
     userId,
@@ -98,6 +83,8 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
     totalDurationMs: Math.round(performance.now() - requestStartedAt),
     recommendationCount: items.length,
     historyFileCount: history.length,
+    historyTotalFileCount: scoreEvidence.totalFiles,
+    historyTruncated: scoreEvidence.truncated,
     dataMode: mode,
     recommendationFallback: usedFallback
   });

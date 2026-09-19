@@ -6,7 +6,7 @@ import ts from 'typescript';
 import {catalog} from './dailyProgressReplay.mjs';
 const root = new URL('../../',import.meta.url);
 const dataModule = code => `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
-export async function replayOverview(fixture,style='ready') {
+export async function replayOverview(fixture,style='ready',measurementStyle='success') {
  const dir=await mkdtemp('/var/tmp/growth-replay-');
  try {
   await mkdir(resolve(dir,'fixture'));
@@ -28,12 +28,15 @@ export async function replayOverview(fixture,style='ready') {
   const goalEvaluationStore=dataModule(`export const readRecentCompletedGoal=async()=>null;`);
   const goalDb=dataModule(`export const getAccountDb=()=>null;`);
   const content=dataModule(`export const getSongCatalog=async()=>{globalThis[${JSON.stringify(hook)}].counters.catalog++;return ${JSON.stringify(catalog)}}`);
+  const evidence=dataModule(`export const loadGrowthScoreEvidence=async()=>{globalThis[${JSON.stringify(hook)}].counters.historyLoads++;const snapshots=${JSON.stringify(fixture.snapshots)}.map(payload=>({full:payload._meta.full,timestamp:payload._meta.ts||'',songs:payload.songs,revision:payload._meta.ts||'fixture'}));return {snapshots,totalFiles:snapshots.length,filesRead:snapshots.length,invalidFiles:0,truncated:false,fromDay:'2026-09-17',toDay:'2026-09-17'}};`);
+  const modelRevision=dataModule(`export const getGrowthModelRevision=async()=> 'fixture-model';`);
+  const measurements=dataModule(`export const upsertGrowthMeasurement=async()=>{${measurementStyle === 'fail' ? `throw new Error('fixture write failure')` : `return {created:true}`}};`);
   const dimensions=['big_song','stamina','speed','accuracy_power','rhythm','complex'].map(key=>({key,value:style==='balanced'?10:key==='accuracy_power'?9:10}));
   const computed={playerState:{dimensions,sampleCount:style==='limited'?2:30,overallRating:10.28},todayPlan:{items:catalog.map(s=>({songId:s.id,level:4,title:s.song_name,isUnplayed:false})),usedFallback:false}};
   const personal=dataModule(`export const runGrowthPythonJson=async()=>{globalThis[${JSON.stringify(hook)}].counters.compute++;return ${JSON.stringify(computed)}}`);
   let code=ts.transpileModule(await readFile(new URL('server/services/account/growth.ts',root),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
   code=code.replace(/from (["'])([^"']+)\1/g,(_,quote,specifier)=>{
-   const url=specifier==='../goals/snapshot'?goalSnapshot:specifier==='../goals/store'?goalStore:specifier==='../goals/evaluation-store'?goalEvaluationStore:specifier==='~/server/utils/account-db'?goalDb:specifier==='node:fs/promises'?fsModule:specifier==='~/utils/dailyProgress'?dailyModule:specifier.startsWith('node:')?specifier:specifier==='~/server/internal/account/shared'?shared:specifier==='~/server/services/content'?content:specifier==='./personal'?personal:specifier==='h3'?import.meta.resolve('h3'):new URL(specifier.replace('~/','')+'.ts',root).href;
+   const url=specifier==='../goals/snapshot'?goalSnapshot:specifier==='../goals/store'?goalStore:specifier==='../goals/evaluation-store'?goalEvaluationStore:specifier==='../growth-history/evidence'?evidence:specifier==='../growth-history/model-revision'?modelRevision:specifier==='../growth-history/measurements'?measurements:specifier==='~/server/utils/account-db'?goalDb:specifier==='node:fs/promises'?fsModule:specifier==='~/utils/dailyProgress'?dailyModule:specifier.startsWith('node:')?specifier:specifier==='~/server/internal/account/shared'?shared:specifier==='~/server/services/content'?content:specifier==='./personal'?personal:specifier==='h3'?import.meta.resolve('h3'):new URL(specifier.replace('~/','')+'.ts',root).href;
    return `from ${JSON.stringify(url)}`;
   });
   code=`const Date=class extends globalThis.Date {constructor(...args){super(...(args.length?args:[${JSON.stringify(fixture.clock)}]))}};\n`+code;
