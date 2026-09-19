@@ -1,0 +1,25 @@
+// Account-schema convention; no schema side effects on import.
+export const GOAL_TABLE_SQL = `CREATE TABLE IF NOT EXISTS web_player_goals (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ binding_id BIGINT UNSIGNED NOT NULL,
+ song_id INT UNSIGNED NOT NULL,
+ difficulty_type TINYINT UNSIGNED NOT NULL,
+ goal_type VARCHAR(24) NOT NULL,
+ source VARCHAR(24) NOT NULL,
+ source_basis VARCHAR(32) NULL,
+ source_mode VARCHAR(24) NOT NULL,
+ source_rank TINYINT UNSIGNED NOT NULL,
+ source_revision CHAR(64) NOT NULL,
+ source_generated_at DATETIME(3) NOT NULL,
+ status VARCHAR(16) NOT NULL DEFAULT 'active',
+ active_binding_id BIGINT UNSIGNED GENERATED ALWAYS AS (CASE WHEN status = 'active' THEN binding_id ELSE NULL END) STORED,
+ baseline_version INT UNSIGNED NOT NULL DEFAULT 1,
+ goal_data LONGTEXT NOT NULL,
+ created_at DATETIME(3) NOT NULL,
+ updated_at DATETIME(3) NOT NULL,
+ cancelled_at DATETIME(3) NULL,
+ completed_at DATETIME(3) NULL,
+ UNIQUE KEY uniq_goal_active_binding (active_binding_id),
+ KEY idx_goal_owner_profile (user_id, binding_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;

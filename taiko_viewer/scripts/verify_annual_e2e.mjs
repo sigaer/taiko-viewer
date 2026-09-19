@@ -8,6 +8,7 @@ import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 import mysql from "mysql2/promise";
+import { deleteUserWithGoalsConnection } from "../server/services/goals/lifecycle.ts";
 import { chromium } from "playwright-core";
 
 const parseEnvironmentFile = async (path) => {
@@ -1629,10 +1630,11 @@ let publicToken = "";
 const summaryDirs = new Set();
 
 try {
-  const [staleFixtureResult] = await db.execute(
-    "DELETE FROM web_user_accounts WHERE password_hash = 'annual-e2e' AND LEFT(username, 11) = 'annual_e2e_'"
+  const [staleFixtures] = await db.execute(
+    "SELECT id FROM web_user_accounts WHERE password_hash = 'annual-e2e' AND LEFT(username, 11) = 'annual_e2e_' ORDER BY id"
   );
-  if (staleFixtureResult.affectedRows) reportProgress(`removed ${staleFixtureResult.affectedRows} stale fixture accounts`);
+  for (const { id } of staleFixtures) await deleteUserWithGoalsConnection(db, id);
+  if (staleFixtures.length) reportProgress(`removed ${staleFixtures.length} stale fixture accounts`);
   await request("/api/account/auth/me", { expected: 200 });
   const [boundRows] = await db.query("SELECT taiko_id FROM web_taiko_bindings");
   const bound = new Set(boundRows.map((row) => String(row.taiko_id)));
@@ -1936,9 +1938,9 @@ try {
       if (path.includes("annual-summary-v4")) await rm(path, { force: true }).catch(() => undefined);
     }
   }
-  if (firstUserId) await db.execute("DELETE FROM web_user_accounts WHERE id = ?", [firstUserId]).catch(() => undefined);
-  if (secondUserId) await db.execute("DELETE FROM web_user_accounts WHERE id = ?", [secondUserId]).catch(() => undefined);
-  if (thirdUserId) await db.execute("DELETE FROM web_user_accounts WHERE id = ?", [thirdUserId]).catch(() => undefined);
+  if (firstUserId) await deleteUserWithGoalsConnection(db, firstUserId).catch(() => undefined);
+  if (secondUserId) await deleteUserWithGoalsConnection(db, secondUserId).catch(() => undefined);
+  if (thirdUserId) await deleteUserWithGoalsConnection(db, thirdUserId).catch(() => undefined);
   for (const path of summaryDirs) {
     if (path.includes("annual-summary-v4")) await rm(path, { recursive: true, force: true }).catch(() => undefined);
   }

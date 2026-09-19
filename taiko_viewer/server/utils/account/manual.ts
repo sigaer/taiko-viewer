@@ -1,3 +1,4 @@
+import { deleteBindingsWithGoals } from "../../services/goals/lifecycle";
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 import { mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
@@ -397,10 +398,7 @@ export const detachManualAccount = async (owner: ManualOwner, requestedTaikoId?:
     throw createError({ statusCode: 409, statusMessage: "这是最后一个持有端，请使用永久删除并二次确认" });
   }
   if (owner.kind === "viewer") {
-    await db.execute(
-      "DELETE FROM web_taiko_bindings WHERE user_id = ? AND taiko_id = ? AND source = 'manual'",
-      [owner.userId, taikoId]
-    );
+    await deleteBindingsWithGoals(db, owner.userId, { taikoId, source: "manual" });
     const [rows] = await db.execute<DbRow<{ id: number }>[]>(
       "SELECT id FROM web_taiko_bindings WHERE user_id = ? ORDER BY id LIMIT 1",
       [owner.userId]
@@ -448,7 +446,9 @@ export const permanentlyDeleteManualAccount = async (
   await rename(join(userdataDir, `${taikoId}data.json`), join(backupDir, `${taikoId}data.json`)).catch(() => undefined);
   await rename(join(userdataDir, taikoId), join(backupDir, taikoId)).catch(() => undefined);
   await db.execute("DELETE FROM web_song_locks WHERE taiko_id = ?", [taikoId]);
-  await db.execute("DELETE FROM web_taiko_bindings WHERE taiko_id = ?", [taikoId]);
+  for (const { user_id: userId } of viewerOwners) {
+    await deleteBindingsWithGoals(db, userId, { taikoId, source: "manual" });
+  }
   await db.execute("DELETE FROM bind WHERE id = ? AND source = 'manual'", [taikoId]);
   await db.execute("DELETE FROM taiko_manual_accounts WHERE taiko_id = ?", [taikoId]);
   for (const { user_id: userId } of viewerOwners) {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import { formatScoreRank } from "~/utils/scoreRank";
-import type { GrowthEventFact, PlayerGrowthOverview } from "~/types/player-growth";
+import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_SHORT_LABELS, growthGreetingPeriod } from "~/utils/playerGrowth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { trackViewerEvent } from "~/utils/analytics";
+
+import type { PlayerGoal, GoalType } from "~/types/player-goal";
 
 const props = defineProps<{ overview: PlayerGrowthOverview; displayName: string; pending?: boolean; failed?: boolean }>();
 const { t, locale } = useI18n();
@@ -20,6 +22,57 @@ const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type ==
 const factualChange = (fact: GrowthEventFact) => ["score-pb", "ng-reduced", "combo-improved", "rank-upgrade"].includes(fact.type);
 const skillItems = computed(() => props.overview.playerState.skills.filter((item) => Number(item.value) > 0));
 const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionLabel(key)} ${Number(value).toFixed(2)}`;
+
+const apiFetch = useViewerApiFetch();
+const activeGoal = ref<PlayerGoal | null>(null);
+const selected = ref<GrowthPlanItem | null>(null);
+const selectedType = ref<GoalType | null>(null);
+const busy = ref(false);
+const goalError = ref('');
+const selector = ref<HTMLDialogElement | null>(null);
+let expectedGoalId: string | null = null;
+let returnFocus: HTMLElement | null = null;
+let mutationGeneration = 0;
+watch(() => props.overview, overview => {
+  mutationGeneration++;
+  activeGoal.value = overview.activeGoal || null;
+  selector.value?.close(); selected.value = null; busy.value = false; goalError.value = '';
+}, { immediate: true });
+onBeforeUnmount(() => { mutationGeneration++; });
+const openGoal = (item: GrowthPlanItem) => {
+  returnFocus = document.activeElement as HTMLElement;
+  selected.value = item; selectedType.value = null; goalError.value = '';
+  expectedGoalId = activeGoal.value?.id || null;
+  nextTick(() => selector.value?.showModal());
+};
+const trapGoalFocus = (event: KeyboardEvent) => {
+  if (event.key !== 'Tab' || !selector.value) return;
+  const controls = [...selector.value.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)')]
+    .filter(el => !(el instanceof HTMLInputElement) || el.type !== 'radio' || el.checked || (!selectedType.value && el === selector.value?.querySelector('input')));
+  const first = controls[0], last = controls.at(-1);
+  if (!first || !last) return;
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+};
+const closeGoal = () => { selector.value?.close(); selected.value = null; returnFocus?.focus(); };
+const mutate = async (cancel = false) => {
+  if (busy.value || (!cancel && (!selected.value || !selectedType.value))) return;
+  const generation = mutationGeneration;
+  busy.value = true; goalError.value = '';
+  try {
+    const result = await apiFetch<{ activeGoal: PlayerGoal | null; profileId: string }>('/api/account/growth/goal', {
+      method: cancel ? 'DELETE' : 'POST',
+      body: { profileId: props.overview.profileId, expectedActiveGoalId: cancel ? activeGoal.value?.id || null : expectedGoalId,
+        ...(!cancel ? { songId: selected.value!.songId, difficultyType: selected.value!.difficultyType, goalType: selectedType.value, scoreRevision: props.overview.scoreRevision } : {}) }
+    });
+    if (generation !== mutationGeneration || result.profileId !== props.overview.profileId) return;
+    activeGoal.value = result.activeGoal; closeGoal();
+  } catch (error) {
+    if (generation === mutationGeneration) goalError.value = t(Number((error as { statusCode?: number }).statusCode) === 409 ? 'home.goal.conflict' : 'home.goal.error');
+  } finally { if (generation === mutationGeneration) busy.value = false; }
+};
+const chooseAnother = () => document.querySelector<HTMLButtonElement>('.growth-plan__choose:not(:disabled)')?.focus();
+const selectedChart = (item: GrowthPlanItem) => activeGoal.value?.songId === item.songId && activeGoal.value?.difficultyType === item.difficultyType;
 
 const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_click", { song_id: songId, source: "growth_overview" });
 </script>
@@ -75,9 +128,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           </div>
         </div>
         <div v-if="overview.todayPlan.items.length" class="growth-plan__items">
+          <div v-for="item in overview.todayPlan.items" :key="`${item.songId}-${item.difficultyType}`" class="growth-plan__choice">
           <NuxtLink
-            v-for="item in overview.todayPlan.items"
-            :key="`${item.songId}-${item.difficultyType}`"
             :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.difficultyType) } })"
             class="growth-plan__item"
             @click="trackPlanClick(item.songId)"
@@ -90,10 +142,37 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             </div>
             <span class="growth-plan__arrow" aria-hidden="true">↗</span>
           </NuxtLink>
+          <button v-if="item.goalOptions?.length" class="growth-plan__choose" :disabled="busy" @click="openGoal(item)">{{ t(selectedChart(item) ? 'home.goal.selected' : 'home.goal.choose') }}</button>
+          <span v-else class="growth-plan__unavailable">{{ t('home.goal.noOptions') }}</span>
+          </div>
         </div>
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
+      <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
+        <h2 id="growth-goal-title">{{ t('home.goal.title') }}</h2>
+        <strong>{{ activeGoal.title }}</strong>
+        <span>{{ t(difficultyLabelKey(activeGoal.difficultyType)) }}<template v-if="activeGoal.starLevel"> · {{ activeGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
+        <span>{{ t(`home.goal.types.${activeGoal.goalType}`) }}</span>
+        <span v-if="activeGoal.goalType === 'score-pb' && activeGoal.baseline.highScore !== null">{{ t('home.goal.baseline', { value: activeGoal.baseline.highScore.toLocaleString() }) }}</span>
+        <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
+        <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
+        <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
+        <div class="goal-actions"><button :disabled="busy" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="busy" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
+      </section>
+      <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
+      <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="returnFocus?.focus()">
+        <template v-if="selected">
+          <h2 id="goal-dialog-title">{{ t(expectedGoalId ? 'home.goal.replaceConfirm' : 'home.goal.question') }}</h2>
+          <strong>{{ selected.title }}</strong>
+          <p>{{ t(difficultyLabelKey(selected.difficultyType)) }}<template v-if="selected.starLevel"> · {{ selected.starLevel }}{{ t('guide.starSuffix') }}</template></p>
+          <fieldset :disabled="busy" aria-labelledby="goal-dialog-title"><legend v-if="expectedGoalId">{{ t('home.goal.question') }}</legend>
+            <label v-for="option in selected.goalOptions" :key="option"><input v-model="selectedType" type="radio" name="goal-type" :value="option">{{ t(`home.goal.types.${option}`) }}</label>
+          </fieldset>
+          <p v-if="goalError" role="alert" class="goal-error">{{ goalError }}</p>
+          <div class="goal-actions"><button @click="closeGoal">{{ t('home.goal.cancel') }}</button><button :disabled="busy || !selectedType" :aria-busy="busy" @click="mutate()">{{ t(busy ? 'home.goal.saving' : 'home.goal.confirm') }}</button></div>
+        </template>
+      </dialog>
       <section class="growth-progress" aria-labelledby="growth-progress-title">
         <div class="growth-section-head">
           <div>
@@ -122,6 +201,26 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 </template>
 
 <style scoped>
+.growth-plan__choice { min-width: 0; display: grid; gap: 4px; }
+.growth-plan__choose { justify-self: end; }
+.growth-plan__unavailable { padding: 8px; font-size: 12px; color: var(--el-text-color-secondary); }
+.growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color: var(--el-text-color-primary); }
+.growth-goal h2 { margin: 0 0 6px; font: 700 23px/1.2 var(--viewer-display-font); }
+.growth-goal > strong { font-size: 18px; overflow-wrap: anywhere; }
+.growth-goal > span { font-size: 14px; }
+.goal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.growth-plan__choose, .goal-actions button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background: var(--el-bg-color); color: var(--el-text-color-primary); cursor: pointer; font: inherit; }
+button:disabled { opacity: .55; cursor: default; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
+.goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color: var(--el-text-color-primary); background: var(--el-bg-color); }
+.goal-dialog::backdrop { background: rgb(0 0 0 / 40%); }
+.goal-dialog h2 { margin: 0 0 16px; font-size: 21px; }
+.goal-dialog fieldset { border: 0; padding: 0; margin: 12px 0; }
+.goal-dialog legend { font-size: 14px; margin-bottom: 8px; }
+.goal-dialog label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.goal-dialog input { accent-color: var(--el-color-primary); }
+.goal-error { color: var(--el-color-danger); font-size: 14px; }
+
 .growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; gap: var(--growth-section-gap); }
 .growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
 .growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }

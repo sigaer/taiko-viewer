@@ -1,3 +1,4 @@
+import { deleteBindingsWithGoals } from "../../services/goals/lifecycle";
 import { createError } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import {
@@ -160,8 +161,7 @@ export const removeBinding = async (userId: number, bindingIdInput: unknown, for
     throw createError({ statusCode: 409, statusMessage: "这是最后一个绑定 ID，请再次确认后再删除" });
   }
 
-  await db.execute("DELETE FROM web_song_locks WHERE user_id = ? AND taiko_id = ?", [userId, binding.taiko_id]);
-  await db.execute("DELETE FROM web_taiko_bindings WHERE id = ? AND user_id = ?", [bindingId, userId]);
+  await deleteBindingsWithGoals(db, userId, { bindingId });
 
   if (binding.is_current && total > 1) {
     const [nextRows] = await db.execute<DbRow<BindingRow>[]>(

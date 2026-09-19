@@ -83,6 +83,32 @@
     "comingSoon": "敬请期待"
   },
   "home": {
+    "goal": {
+      "title": "这次想练",
+      "choose": "选这首",
+      "selected": "已选",
+      "question": "这次想练到哪一步？",
+      "replaceConfirm": "换成这首？",
+      "replace": "换一首",
+      "cancel": "取消",
+      "confirm": "就选这个",
+      "saving": "保存中…",
+      "baseline": "选择时 {value}",
+      "baselineNg": "选择时不可 {value}",
+      "unavailable": "这张谱目前不可用",
+      "noOptions": "这首暂时还不能选择",
+      "conflict": "成绩或选择已更新，请刷新后再试。",
+      "error": "没能保存，请稍后再试。",
+      "types": {
+        "score-pb": "刷新最好成绩",
+        "ng-reduced": "把不可再压低一点",
+        "clear": "先拿到通关",
+        "fc": "试试全连",
+        "df": "试试全良",
+        "rank-upgrade": "把评价再提一级",
+        "played": "先打一次"
+      }
+    },
     "betaNotice": "内测中：当前页面与功能仍在持续迭代，数据与样式可能随版本更新。",
     "tagline": "太鼓达人国行数据看板 · 歌曲列表 · 谱面攻略 · 查谱工具",
     "latestActivities": "最新活动",

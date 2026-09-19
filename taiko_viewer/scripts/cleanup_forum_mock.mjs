@@ -1,3 +1,4 @@
+import { deleteUserAndGoalsInTransaction } from "../server/services/goals/lifecycle.ts";
 import mysql from "mysql2/promise";
 
 const MOCK_EMAIL_LIKE = "%\\_mock@sakura-bot.cn";
@@ -127,7 +128,7 @@ const main = async () => {
 
     const mockUserIds = await selectNumericColumn(
       db,
-      "SELECT id FROM web_user_accounts WHERE email LIKE ? ESCAPE '\\\\'",
+      "SELECT id FROM web_user_accounts WHERE email LIKE ? ESCAPE '\\\\' ORDER BY id FOR UPDATE",
       [MOCK_EMAIL_LIKE]
     );
     const mockThreadIds = mockUserIds.length
@@ -152,12 +153,10 @@ const main = async () => {
 
     let deletedUsers = 0;
     if (mockUserIds.length) {
-      const [result] = await db.execute(
-        `DELETE FROM web_user_accounts
-         WHERE id IN (${buildInClause(mockUserIds)})`,
-        mockUserIds
-      );
-      deletedUsers = Number(result.affectedRows || 0);
+      for (const userId of mockUserIds) {
+        await deleteUserAndGoalsInTransaction(db, userId);
+        deletedUsers++;
+      }
     }
 
     await db.commit();

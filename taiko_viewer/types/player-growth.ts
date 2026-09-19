@@ -1,3 +1,4 @@
+import type { GoalType, PlayerGoal } from "./player-goal";
 import type { PlayerRatingDimension, RatingDimensionKey } from "./recommendation-intelligence";
 
 export type GrowthDataMode = "FULL_HISTORY" | "SNAPSHOT_LIMITED" | "INSUFFICIENT";
@@ -14,6 +15,7 @@ export type PlayerGrowthState = {
 };
 
 export type GrowthPlanItem = {
+  goalOptions?: GoalType[];
   songId: number;
   difficultyType: 1 | 2 | 3 | 4 | 5;
   starLevel: number | null;
@@ -49,6 +51,10 @@ export type GrowthDailyProgress = {
 };
 
 export type PlayerGrowthOverview = {
+  profileId?: string;
+  scoreRevision?: string;
+  sourceGeneratedAt?: string;
+  activeGoal?: PlayerGoal | null;
   playerState: PlayerGrowthState;
   todayPlan: {
     targetDimension: RatingDimensionKey | null;

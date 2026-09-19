@@ -10,9 +10,17 @@ export const useViewerApiFetch = () => {
   const { locale } = useI18n();
   const requestHeaders = import.meta.server ? useRequestHeaders(["cookie", "accept-language"]) : undefined;
 
-  return <T>(request: Parameters<typeof $fetch<T>>[0], options: ViewerApiFetchOptions = {}) =>
-    $fetch<T>(request, {
+  // Binding mutations invalidate the Home resolver without adding a Goal GET.
+  // Capture Nuxt state during setup; do not call composables after the await.
+  const homeResolvedUserId = useState<number | null>("home-state-resolved-user-id", () => null);
+  return async <T>(request: Parameters<typeof $fetch<T>>[0], options: ViewerApiFetchOptions = {}) => {
+    const result = await $fetch<T>(request, {
       ...options,
       headers: createLocaleHeaders(options.headers || requestHeaders, locale.value)
     });
+    if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && /^\/api\/account\/(bindings|manual|qq)(?:\/|$)/.test(request)) {
+      homeResolvedUserId.value = null;
+    }
+    return result;
+  };
 };

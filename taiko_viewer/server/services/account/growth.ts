@@ -1,3 +1,7 @@
+import { readGoalSnapshot } from "../goals/snapshot";
+import { readActiveGoal } from "../goals/store";
+import { getAccountDb } from "~/server/utils/account-db";
+import { goalBaseline, goalOptions, goalChartAvailable } from "~/utils/playerGoal";
 import { access, constants as fsConstants, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createError } from "h3";
@@ -6,7 +10,7 @@ import { buildPlayerGrowthState, growthCalendarDay } from "~/utils/playerGrowth"
 import { deriveDailyProgress } from "~/utils/dailyProgress";
 import { resolveDifficultyPresentation } from "~/utils/difficulty";
 import { getSongCatalog } from "~/server/services/content";
-import { getCurrentBindingRow, getRuntimePaths, getUserdataPath, readUserdata, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
+import { getCurrentBindingRow, getRuntimePaths, getUserdataPath, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
 import { runGrowthPythonJson } from "./personal";
 
 const TIMEZONE = "Asia/Shanghai" as const;
@@ -54,7 +58,8 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   try { await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK); } catch { throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" }); }
   const scoreStartedAt = performance.now();
-  const [current, catalog, history] = await Promise.all([readUserdata(binding.taiko_id), getSongCatalog(), loadHistory(binding.taiko_id)]);
+  const [snapshot, catalog, history] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), loadHistory(binding.taiko_id)]);
+  const { current } = snapshot;
   const scoreDurationMs = performance.now() - scoreStartedAt;
   const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
   const computePromise = runGrowthPythonJson(binding.taiko_id, mode, 3);
@@ -74,7 +79,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
     const catalogSong = catalog.find((entry) => Number(entry.id) === item.songId) || null;
     const difficulty = resolveDifficultyPresentation(catalogSong, item.level);
     if (!difficulty.difficultyType) return null;
-    return { songId: item.songId, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.isUnplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
+    return { goalOptions: goalOptions(goalBaseline(song, snapshot.revision, snapshot.capturedAt), binding.source, goalChartAvailable(catalogSong || undefined, item.level)), songId: item.songId, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.isUnplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
   }).filter(Boolean) as GrowthPlanItem[];
   const planDurationMs = performance.now() - planStartedAt;
   const dailyProgress = await dailyProgressPromise;
@@ -95,5 +100,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
     dataMode: mode,
     recommendationFallback: usedFallback
   });
-  return { playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
+  const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
+  if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
+  return { profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
 };

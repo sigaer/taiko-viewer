@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { deleteGoalsForUser } from "../server/services/goals/lifecycle.ts";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import mysql from "mysql2/promise";
@@ -52,6 +53,11 @@ try {
     }
     await connection.execute("UPDATE ugc_tags SET status = 'active' WHERE slug IN ('stamina', 'high-speed', 'long-compounds', 'backloaded')");
     await connection.execute("DELETE FROM web_user_sessions");
+    const [goalTables] = await connection.query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='web_player_goals'");
+    if (goalTables.length) {
+      const [owners] = await connection.query("SELECT id FROM web_user_accounts ORDER BY id FOR UPDATE");
+      for (const { id } of owners) await deleteGoalsForUser(connection, id);
+    }
     await connection.execute("DELETE FROM web_user_accounts");
     await connection.execute(
       `INSERT INTO web_user_accounts (id, username, email, password_hash, avatar_url) VALUES
@@ -133,6 +139,7 @@ try {
           [oni, oni, oni, oni, ura]
         );
         await connection.execute("INSERT INTO chart_tip_helpful (tip_id, user_id) VALUES (9001, 102), (9001, 103), (9002, 101), (9003, 101), (9010, 101)");
+        if (goalTables.length) await deleteGoalsForUser(connection, 105);
         await connection.execute("DELETE FROM web_user_accounts WHERE id = 105");
       }
     }
