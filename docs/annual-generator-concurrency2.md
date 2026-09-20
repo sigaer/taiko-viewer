@@ -77,6 +77,76 @@ Focused admission tests verify:
 
 ## Production rollout
 
-Pending standard Viewer deployment and the required 30-minute production observation window.
+The production release itself completed successfully, but the requested 30-minute
+observation gate was stopped early at the operator's direction. Therefore the formal
+decision above remains `ANNUAL GENERATOR CONCURRENCY 2 — CERTIFIED`; this report does
+not claim the requested `— DEPLOYED` closeout state.
+
+- Deployed commit: `e4ca8d290f00fff13bb4b0a7e2fb175d4eb5c80e`
+- Deployed Viewer version: `0.71.0`
+- Service activation: 2026-09-20 13:55:55 CST
+- Standard deploy result: success. `scripts/deploy_forum_web.sh` performed validation,
+  push, isolated build, output switch, restart and health checks. The optional Baidu URL
+  submission reported its daily quota exhausted; it did not affect the deployment.
+- Post-deploy checks: local and public homepages returned HTTP 200 and exposed version
+  `0.71.0`; `taiko-viewer.service` was active/running with `NRestarts=0`.
+- Live configuration: generator 2, renderer 1, generator queue cap 20, renderer queue cap
+  8, queue TTL 600 seconds, unchanged generator/renderer cgroup limits and
+  `annual-observation-v4.5.1`.
+
+The pre-existing dirty workspace was protected with the scoped stash
+`pre-concurrency2-deploy-20260920`. The only two paths were
+`taiko_viewer/assets/data/title_song_relations.json` and
+`docs/python-memory-phase4-attribution.md`. After deployment, `git stash apply` completed
+without conflict. The tracked binary patch and untracked file were byte-identical to the
+private backup, with restored SHA-256 values
+`a4c174288e6bdbf7e00d0f7d7344beb9955848ebf37391e2bf2cdca21576afbe` and
+`d13a9f0e3b311fc9fc7cf8e281d4dad9a78d118426d3b4d7506d76796dc7cd5b`.
+Only after this verification was the temporary stash dropped.
+
+The production-admission smoke used private output/cache paths and did not write or
+delete production summary, job or normalized-cache data:
+
+- two real generator workers (`1322664` and `40500773`) overlapped for 1.840 s;
+- generator running peaked at 2, while the third distinct ticket remained queued until
+  a slot was released;
+- both serialized outputs matched their frozen SHA-256 values, schema 4 and
+  `annual-observation-v4.5.1`;
+- both worker cgroups reported `high/max/oom/oom_kill = 0/0/0/0`;
+- two renderer admission tickets peaked at one running, with the second queued;
+- the second generator was admitted only after the unchanged headroom check passed:
+  MemAvailable 15,717,612 KiB versus a 12,774,405.6 KiB threshold, memory PSI full
+  avg10 0% and no active development build.
+
+An initial instrumentation attempt used the repository root instead of the Viewer root,
+so its private launcher could not resolve `scripts/annual_python_worker.py`. Its queued
+probe ticket was cancelled through the admission API and its orphan running ticket was
+allowed to reach the normal hard timeout; no production job or user data was involved.
+The clean observation window began only after the corrected smoke succeeded.
+
+### Incomplete production observation
+
+- Window: 2026-09-20 14:01:48–14:19:51 CST
+- Observed duration: 1,083.813 seconds (18 minutes 3.813 seconds)
+- Stop reason: monitoring was explicitly stopped before the requested 30 minutes
+- New Annual tickets during the clean window: 0
+- Sampled generator/renderer running and queue depth: 0 throughout
+- Minimum MemAvailable: 15,465,512 KiB (approximately 14.75 GiB)
+- Memory PSI full avg10 maximum: 0.18%
+- IO PSI some/full avg10 maximum: 0.82% / 0.82%
+- Kernel OOM log delta: 0; `oom_kill` remained 56 from the first interim counter check
+  through the end
+- From the first interim counter check to the end, swap paging changed by
+  `pswpin +197` and `pswpout +6` pages; no swap-allocation anomaly was observed, but the
+  interrupted monitor did not persist a full-window swap baseline
+- Viewer ended active/running with the same PID, `NRestarts=0`; final local/public probes
+  were HTTP 200 at 23 ms / 167 ms
+- No Annual admission rejection, timeout or error appeared in the clean-window Viewer
+  journal. Six unrelated H3 `statusMessage` compatibility warnings were logged without
+  restart or health impact.
+
+No rollback condition was observed during the shortened window. The production runtime
+remains at generator 2 and renderer 1, but the formal 30-minute observation prerequisite
+was not completed; concurrency 3 was neither tested nor enabled.
 
 Private certification evidence is retained under `/var/tmp/annual-concurrency2-20260920/`. It is not committed and contains no production summary/job/cache mutation.
