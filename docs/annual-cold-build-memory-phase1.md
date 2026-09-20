@@ -2,13 +2,13 @@
 
 ## Decision
 
-**ANNUAL STREAMING PHASE 1 — READY FOR ROLLOUT**
+**ANNUAL STREAMING PHASE 1 — COMPLETE**
 
 The two-pass snapshot plan removes the retained raw-payload set without changing Annual output. On the required large numeric account (`91899919`), median generator max RSS fell from **333.2 MiB** to **182.6 MiB** (45.2%), while median wall time moved from **14.06 s** to **14.89 s** (+5.9%). The largest input directory found by the fresh stat-only scan fell from **883.7 MiB** to **182.3 MiB** (79.4%), with wall time moving from **48.85 s** to **51.70 s** (+5.8%). Both are below the 250 MiB target and below the 15% runtime regression gate.
 
 The request described the current algorithm as `annual-observation-v4.5.0`. Canonical repository HEAD was already `annual-observation-v4.5.1` before this work because commit `18893a7` had shipped a lineage correctness fix. This phase preserves the actual current algorithm and version; it does not downgrade to v4.5.0 or introduce a new algorithm version.
 
-No production runtime was replaced or restarted. All generation used private output and normalized-cache directories inside the bounded QA cgroup, concurrency 1, and no OS page-cache clearing.
+The measurements below were completed before rollout. Production runtime was synchronized and accepted on 2026-09-20 as recorded in [Production Rollout](#production-rollout). The rollout did not modify Viewer source, publish a Viewer release, change the Annual algorithm, or start Phase 2.
 
 Canonical source commit: `1b54d3a` (`9.61.11 年度快照改为两遍流式回放降低峰值内存`), pushed to `origin/main`.
 
@@ -236,6 +236,55 @@ This phase does **not** claim the whole algorithm is O(1). History, events, sele
 
 Phase 2 history compaction or online aggregation may still be useful for lowering the fixed/history/event/serialization remainder, but it is not required to pass Phase 1.
 
+## Production Rollout
+
+Final status: **ANNUAL STREAMING PHASE 1 — COMPLETE**.
+
+### Source synchronization
+
+- Rollout began at 2026-09-20 10:50 CST. Canonical `HEAD` and `origin/main` both resolved to `1b54d3a41bb8fd660ae6f39be459b00f06269f6d`; the commit contains version `9.61.11` and only the expected Annual streaming/profiling implementation plus its focused test.
+- The pre-rollout production `snapshots.py` SHA-256 was `046536453b32d41b5ee98872955490602c34f8a7ef952bd23ff43147418d27df`; `profiling.py` was absent. A recoverable whole-package backup was created at `/home/sigaer/annual-streaming-runtime-backup-20260920-1050`.
+- The entire canonical `taiko/plugins/utils/annual_summary/` package was synchronized with the existing safe `rsync -a --delete` procedure while excluding generated `__pycache__`, rather than selecting files manually.
+- All 23 non-generated package files, including all 22 Python files, compare byte-for-byte equal after synchronization. The deterministic aggregate SHA-256 manifest for the Python files is `26456c25c6adb0b298c4ce9dc87054b08e35f8760a36d0a1119edd08dd54328e` on both sides. Final `rsync --dry-run` output was empty. Representative post-rollout hashes are `be1223b5ded4a26fbde7ccd74c56353a52085be010c2dab8d29fded797aa9093` for `snapshots.py` and `aa2dca3a04039138234f0713f3c2493c72a38df1644f93174ad1f5e00d47b161` for `profiling.py`.
+- Runtime compile/import checks passed and reported `annual-observation-v4.5.1`. The focused production-path suite passed `30` tests. The canonical commit's updated normalized-cache test was then run separately while forcing imports from the production runtime and also passed. Only the deleted/re-added first-record assertion remains excluded as the already documented pre-existing conflict.
+
+### Frozen-input smoke and equivalence
+
+All runs were serial (`concurrency = 1`) through the bounded QA launcher, with separate 0700 output and cold normalized-cache directories under `/var/tmp/annual-streaming-phase1/rollout-20260920/`. No production summary, job, or normalized cache was written or deleted.
+
+| Frozen input | Runtime wall s | Runtime `ru_maxrss` MiB | Sampled process-tree RSS MiB | Serialized SHA-256 |
+| --- | ---: | ---: | ---: | --- |
+| small (`1322664`) | 2.253 | 167.0 | 173.0 | `36551f548285cc6f2538f0b239498517048db2ed956f05edbbc8a15827b325ea` |
+| median-like (`27214979`) | 2.320 | 174.0 | 183.5 | `4f0058f81556381a8fb9b638354a7ea41003358eec0110aaa45910e7bd1b09a0` |
+| `91899919` | 15.902 | 186.6 | 194.1 | `fc18feff4cf9fc66611ca790e5f0f5cb758e7ffaadff324d051c2071816bde1a` |
+| fresh largest input | 52.611 | 185.0 | 197.2 | `7f298ef1df934eb2f6ca7a1efa50bc90aedcd65e9fcdf222bdc4d930e48e8093` |
+| anchor `40500773` | 2.098 | 170.4 | 177.2 | `8626c7f5b9da16e204868f1efdefaa2b0d3d827bca5eaa7fa9d4b038cf6de4fc` |
+| anchor `49557999` | 2.033 | 170.1 | 176.4 | `3a85720654f212a0bcd7aa455b3cf7a5e309cedfa52bf26a114373605d7e3d85` |
+
+Each runtime output was compared with a fresh canonical build from the same frozen input and generated timestamp. All six serialized hashes match exactly. Schema version `4`, algorithm version `annual-observation-v4.5.1`, event count/provenance count, `titleKey`, `strongDan`, `evidenceKey`/`evidenceValue`, and provenance structure were also checked explicitly. `91899919` remains in the expected 15-second and 180–200 MiB process-RSS class; the largest input remains far below the former approximately 884 MiB peak. No run used swap or timed out.
+
+### Production worker integration
+
+- A private `91899919` smoke traversed the deployed host-global generator admission and Viewer worker launcher. Admission moved one ticket through `queued -> running -> completed`; the real transient unit was `taiko-annual-generator-931f1ce3-d63b-4f55-a4c5-ca62071d2b0e.service`.
+- The unit used the unchanged production bounds: generator `MemoryHigh=1G`, `MemoryMax=1536M`, `MemorySwapMax=128M`, `TasksMax=256`, `CPUQuota=200%`, hard runtime deadline, `KillMode=control-group`, and `OOMPolicy=stop`. It completed in 15.788 s, sampled cgroup current peaked at 217,362,432 bytes (207.3 MiB), and `memory.events` ended with `high=0`, `max=0`, `oom=0`, and `oom_kill=0`. Systemd recorded successful deactivation and 14.897 s CPU time.
+- The output hash was the same `fc18fe...de1a`, with schema `4`, algorithm `annual-observation-v4.5.1`, and 2,672 events. Output and normalized cache were private `/var/tmp` paths; the production Annual cache root content mtime remained 2026-09-09.
+- Generator admission remains host-global with one running generator and queue capacity 20; renderer admission and its queue were untouched. The input fingerprint continues to include every Annual Python source file, so the synchronized source participates in source/cache invalidation. Cache root/revision semantics, build-state revision, job schema, and API schema were not changed.
+- The production NoneBot screen was restarted after synchronization so long-lived imports could not retain old code. Old PIDs `829841/829877` exited and new PIDs `866266/866299` started; OneBot/QQ WebSocket adapters reconnected and resumed event handling. Viewer stayed on PID `566152` with `NRestarts=0` because no Viewer source changed and no Viewer release was warranted.
+
+### 30-minute observation
+
+The post-rollout window ran from 2026-09-20 11:00:06 to 11:30:08 CST (1,801.655 s, 61 samples at 30-second intervals):
+
+- MemAvailable ranged from 15,067.3 to 15,477.2 MiB.
+- Memory PSI full reached at most `avg10=0.13` and `avg60=0.05`, well below the admission threshold, and returned to zero.
+- The host `oom_kill` counter remained `56 -> 56`; kernel and Annual-worker journals contain no new OOM, timeout, failure, or kill entry.
+- Viewer remained active on the same PID with zero restarts. Both new NoneBot PIDs remained alive for every sample.
+- No Annual unit was left running, and admission observed no queued, running, or failed ticket during the observation window. The completed smoke ticket remained healthy.
+
+The required gates are therefore closed: canonical/runtime sources are exact, production smoke succeeded, frozen outputs are exact-equivalent, the bounded worker and cgroup are healthy, and no new OOM occurred.
+
+The remaining approximately 150 MiB fixed import/base cost plus history/events/serialization retention is recorded only as a **Phase 2 candidate**. Phase 2 was not started.
+
 ## Validation artifacts
 
-Private evidence is retained under `/var/tmp/annual-streaming-phase1/` (0700 inputs/caches/outputs, stage JSONL, 100 ms samples and manifests). It is not committed. The canonical implementation remains only in `/home/sigaer/git/Sakura_bot/taiko/plugins/utils/annual_summary/`; production `/home/sigaer/taiko/plugins/utils/annual_summary/` was not replaced.
+Private evidence is retained under `/var/tmp/annual-streaming-phase1/` (0700 inputs/caches/outputs, stage JSONL, 100 ms samples, rollout monitor and manifests). It is not committed. Canonical `/home/sigaer/git/Sakura_bot/taiko/plugins/utils/annual_summary/` and production `/home/sigaer/taiko/plugins/utils/annual_summary/` are now exact matches for this rollout.
