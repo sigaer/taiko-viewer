@@ -314,11 +314,11 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
   const runtimeConfig = useRuntimeConfig();
   const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, 'songs', 'song_data.json')));
   const ratingPath = resolve(String(runtimeConfig.ratingStructPath || resolve(repoRoot, 'songs', 'rating_structured_with_ids.json')));
+  const annualCliPath = resolve(repoRoot, 'plugins', 'utils', 'annual_summary', 'standalone.py');
   const child = await spawnAnnualWorker('generator', admissionId, {
     cwd: repoRoot,
     args: [
-      "-m",
-      "plugins.utils.annual_summary",
+      annualCliPath,
       "ratings",
       "--userdata-dir",
       userdataDir,
@@ -523,9 +523,9 @@ const runAnnualSummaryCliUnadmitted = async (
   const ratingPath = resolve(
     String(runtimeConfig.ratingStructPath || resolve(repoRoot, "songs", "rating_structured_with_ids.json"))
   );
+  const annualCliPath = resolve(repoRoot, "plugins", "utils", "annual_summary", "standalone.py");
   const args = [
-    "-m",
-    "plugins.utils.annual_summary",
+    annualCliPath,
     "build",
     "--taiko-id",
     taikoId,
