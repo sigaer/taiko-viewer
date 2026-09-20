@@ -1,6 +1,6 @@
 # Python Resident Memory Hardening — Phase 3
 
-状态：**IN PROGRESS**。2026-09-18。严格按 pjskClient → miku-bot → taikobot → maibot 顺序；pjskClient 已通过 30 分钟观察并提交；miku-core 已通过 30 分钟观察；taikobot 已通过 30 分钟观察；maibot 已通过 30 分钟观察并提交。没有改 Annual 算法、generator/render concurrency（均仍为 1），没有触碰 BT-Task。
+最新状态（2026-09-20）：**36h REVIEWED — FURTHER WORK REQUIRED；不能签署 PHASE 3 COMPLETE**。详见末尾回测章节。以下为 2026-09-18 分阶段记录。严格按 pjskClient → miku-bot → taikobot → maibot 顺序；pjskClient 已通过 30 分钟观察并提交；miku-core 已通过 30 分钟观察；taikobot 已通过 30 分钟观察；maibot 已通过 30 分钟观察并提交。没有改 Annual 算法、generator/render concurrency（均仍为 1），没有触碰 BT-Task。
 
 ## Before
 
@@ -214,3 +214,53 @@ pjsk card episode 的两个索引仍可能引用分别加载的 row；未取得�
 最终只读 HTTP 检查：pjsk login 200；miku core/taiko/mai core 的既有 docs 路由 404；miku gateway healthz 与 mai gateway health 均 200；Milky 既有 docs 404。状态均与实际路由预期一致，404 不作为业务生成失败。所有阶段有对应真实运行 cache activity；不将 HTTP 存活替代业务输出验证。最终 maibot rollout 后内核新 OOM markers=0，maibot NRestarts=0。
 
 **当前 Gate：四服务 rollout + focused/output regression + 5/15/30 min + normal 30 min 已完成；24h+ REVIEW PENDING。不得签署 `PYTHON MEMORY HARDENING PHASE 3 COMPLETE`。** Annual generator/render concurrency 继续各 1，不因本轮驻留下降提高；容量优先留作余量。无需新建 Go 数据服务，miku 剩余 heap/native/业务引用归因继续观察。
+
+## 2026-09-20 — 36h 回测
+
+本节为最新结论，替代前文“等待 24h”的时效状态。回测约 2026-09-20 08:36–08:44 +08:00；冻结分析到 08:37 左右：最终 rollout 后约 **36.0h / 2107 个分钟级样本**，无 >180s 全局采样间断，四服务 worker metrics 均存在。证据：私有 `review-sep20.json`、`rotated-logs-sep20.json`、`health-sep20.json`。
+
+### 采集质量与修正
+
+- 旧 24h timer 的 `LastTriggerUSec` 为空，旧 summary 仍停留在约 0.93h；本次实际重算原始 JSONL，不能把 timer active 当作摘要已经执行。已停止本任务的失效待执行 timer，保留日志、继续原有限 48h collector。未查明 timer 未触发的底层原因，不伪造自动执行成功。
+- taiko 旧 worker 3890046 在 9 月 18 日 22:52 左右换为 3982155，parent=3982136。紧邻 22:50:56 的 `18893a7` / 9.61.9 年度血缘修复提交；其 diff 仅涉及年度 constants/snapshots 和对应测试，未改 memory caches。仅凭时间关系不能确定操作原因，也不能认定是内存崩溃。
+- tree collector 仍指向旧 root 3890004，造成 **1976 个 taiko 完整树样本缺失**。worker telemetry 自动发现新 PID，保留了新进程约 33.75h 的 1976 个样本。原 summary 的“collector_errors”主要是 root identity 缺失，不是 1976 次 Python exception。**不能拿旧树的最后值 603.87 MiB 当作当前值，不能把新 worker 当完整树。** 本次验证新 parent/cwd/start_ticks 后，只修正 observer identity；不回填历史、不重启业务。
+- core.log 已轮转，旧 offset 直接用于当前小文件会扫描 0 bytes。本次按 `.2.gz` 解压后原 offset → `.1` → 当前日志流式复核；没有把空扫描当零异常。
+
+### 长期 PSS（MiB）
+
+| 同口径对象 | 0–6h median | 6–12h median | 12–24h median | 24–36h median | 全窗口 max |
+|---|---:|---:|---:|---:|---:|
+| pjsk 完整树 | 1209.43 | 1337.51 | 1347.27 | 1375.38 | 1788.08 |
+| miku-core 完整树 | 2104.42 | 2115.21 | 2440.13 | 2520.00 | 2948.29 |
+| mai-main 完整树 | 487.42 | 506.78 | 673.50 | 584.64 | 729.23 |
+| taiko 新 worker 3982155，仅工作进程 | 462.12（该段较晚开始） | 459.12 | 502.77 | 657.84 | 683.05 |
+
+对应 rollout 前完整树单点 pjsk/miku/mai 分别 1840.38/2164.65/682.34 MiB。24–36h 窗口观察差额分别 **降低 465.00 MiB / 增加 355.35 MiB / 降低 97.70 MiB**。taiko 因完整树缺口与中途 release，不合并入净收益。**没有可签署的四服务 total confirmed reduction；撤回将短窗约 974 MiB 或整机约 1.07 GiB 外推为长期收益的任何解读。** 原短窗测量仍是有效历史证据。
+
+miku 的后半段驻留回升在同一 worker/root 身份下发生，不能用重启换 PID 解释；缓存预算有效并不等于全部 heap/native/业务引用有界。现有证据尚不能区分持续泄漏、正常业务预热和 allocator 高水位，因此需要进一步归因，不为追求数字清缓存或减 worker。
+
+### 缓存与功能回归
+
+- 全部有效样本 **0 cache entry/estimated-byte 超限**。估算预算并非 native 内存硬限制。
+- miku：master 58119 hits / 407 misses / 368 evictions；font 29667/649/602；resource 30375/21829/20275，resource 累计命中约 58.2%。已发生大量逐项淘汰，不能据此推断无 decode/延迟成本；缺少同期端到端 latency 分布，不宣称生产 P95 无退化。
+- taiko 新 worker：V2 entries 37320，estimate 67107557 bytes，1134433 hits / 72907 misses / 35587 evictions，严格低于 64 MiB；验证了真实流量下 byte cap / incremental eviction。worker PSS 回升超过这一 cache 的变化，尚未归因。
+- mai：font 27 entries / estimate 110.86 MiB，124193 hits / 27 misses；static 128 entries / 20.72 MiB，98610/270/141，缓存边界生效。
+- pjsk：last-good metadata 21 entries / 5366 bytes；resourceBoxes ID hits 3159 / misses 0，未重新保留完整 JSON backup tree。此为运行指标，不替代主动故障注入。
+- 本次通过 bounded QA runner 重跑 **43 PASS**：mai 26、taiko memory cache 4、miku memory cache + shared runtime 13。没有运行全用户 Annual corpus、修改用户数据、再次部署或重启业务。
+- 七项本机只读 HTTP 检查均符合既有路由预期：pjsk login 200；miku/mai gateway health 200；core/Milky 的 docs 404。HTTP 存活不替代真实语义回归；此前公开输出 hash 对照保留，本次定向 tests 与真实运行 cache activity 补充验证。
+
+### 异常与压力
+
+- 最终 rollout 至本次检查的可用内核日志 **0 新 OOM markers**；mai NRestarts=0。pjsk/miku/mai worker 身份未变；taiko 的身份切换单列如上。
+- 流式日志复核：miku traceback markers 4992，包含上游 AuthenticationError 1991、KeyError 1548、QQ/event validation 650、Playwright TimeoutError 8 等；mai traceback markers 95，主要 QQ ActionFailed 64，另含 4 个 AttributeError 等。marker 不等于唯一失败请求数，不据此声称已建立错误率。扫描到的 traceback 中 **本轮 runtime_memory / memory_runtime / resource_cache / image helper 文件帧为 0**；这不证明所有现有插件错误均已解决，也不能据此排除间接内存影响。没有输出聊天、凭据或 raw 用户数据。
+- 36h host MemAvailable min/median/max **8.70 / 13.36 / 14.22 GiB**。分钟采样捕获 memory full PSI avg10 >2% 共 **9 个样本**，最大 **30.78%**（9 月 19 日 12:42 左右，当时 available 10.29 GiB）。这些是离散采样，不能当精确持续时长；无证据把该峰值单独归因于 miku。不能因没有 OOM 就声称无容量压力，亦不能把末尾低 PSI 代替全窗口。
+
+### 回测结论 / 下一步
+
+**回测已完成；Phase 3 总体内存验收未通过，状态为 FURTHER WORK REQUIRED。** 时长已足够，未通过原因不再是单纯“等 24h”：miku 尚无持续驻留下降证据；taiko 完整树历史缺失且新 worker 有回升；整机出现过较高短暂 PSI，缺少与业务延迟的对应证据。
+
+- pjsk：OPTIMIZED PYTHON，仍保留峰值/热状态归因限制。
+- miku：FURTHER PYTHON WORK；优先对实际高内存 render/业务路径进行受限的前后 PSS/anon/耗时采样，区分缓存外对象、native 和 allocator，不做全服务重写。
+- taiko：FURTHER PYTHON WORK / 验证补齐；从已修正 identity 的完整树重新观察，保留 worker cohort，不能伪补历史。
+- mai：OPTIMIZED PYTHON，font/static 边界通过；完整树包含额外业务子进程，持续观察。
+- shared Go data service：仍无新增证据支持；继续使用共享 SQLite。Annual concurrency 保持既有设置，不因本轮回测放宽。没有改 Annual 算法或业务版本。
