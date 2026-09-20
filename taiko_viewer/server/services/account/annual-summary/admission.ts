@@ -6,6 +6,8 @@ import { join } from 'node:path';
 // One host-wide ledger, deliberately independent of cache/version/Node instance.
 // flock is kernel-owned: a crashed caller cannot leave the metadata mutex held.
 export type Resource = 'generator' | 'renderer';
+export const MAX_CONCURRENT_ANNUAL_BUILDS = 2;
+export const MAX_CONCURRENT_ANNUAL_RENDERS = 1;
 type Ticket = { id: string; key: string; state: 'queued' | 'running' | 'completed' | 'failed'; created: number; until: number; ready?: boolean; reservations?: number; error?: { statusCode: number; statusMessage: string; code: string } };
 type Ledger = Ticket[];
 export class AdmissionError extends Error {
@@ -103,7 +105,9 @@ export class AnnualAdmission {
         const row = rows.find(row => row.id === id && row.key === hash(key));
         if (!row) throw new AdmissionError('ANNUAL_QUEUE_TIMEOUT');
         if (row.state === 'queued') row.ready = true;
-        if (row.state === 'queued' && !rows.some(item => item.state === 'running') && rows.find(item => item.state === 'queued' && item.ready)?.id === id && await this.hasHeadroom()) {
+        const runningLimit = resource === 'generator' ? MAX_CONCURRENT_ANNUAL_BUILDS : MAX_CONCURRENT_ANNUAL_RENDERS;
+        const runningCount = rows.filter(item => item.state === 'running').length;
+        if (row.state === 'queued' && runningCount < runningLimit && rows.find(item => item.state === 'queued' && item.ready)?.id === id && await this.hasHeadroom()) {
           row.state = 'running';
           // Worker MUST have a shorter hard cgroup lifetime, including cleanup.
           row.until = Date.now() + runtimeMs + 30_000;
@@ -150,8 +154,8 @@ const hasAnnualHeadroom = async () => {
   const value = (name: string) => Number(mem.match(new RegExp(`^${name}:\\s+(\\d+)`, 'm'))?.[1] || 0);
   const psi = await readFile('/proc/pressure/memory', 'utf8');
   const full = Number(psi.match(/full avg10=([\d.]+)/)?.[1] ?? Infinity);
-  // Reserve 30% physical RAM plus both worker maxima and Node overhead before
-  // starting either domain. Distinct domain locks may admit 1 + 1 together.
+  // Keep the existing host reserve before every admission. With distinct
+  // domains and a 2 + 1 cap, this is rechecked per slot rather than bypassed.
   return value('MemTotal') > 0 && value('MemAvailable') >= value('MemTotal') * 0.30 + 3 * 1024 * 1024 && full < 2;
 };
 export const annualAdmission = new AnnualAdmission(process.env.TAIKO_ANNUAL_ADMISSION_DIR || '/var/lib/taiko/annual-admission', 600_000, 500, 600_000, hasAnnualHeadroom);

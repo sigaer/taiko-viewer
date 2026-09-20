@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { AnnualAdmission } from '../server/services/account/annual-summary/admission.ts';
+import {
+  AnnualAdmission,
+  MAX_CONCURRENT_ANNUAL_BUILDS,
+  MAX_CONCURRENT_ANNUAL_RENDERS
+} from '../server/services/account/annual-summary/admission.ts';
 const base = '/var/tmp/annual-admission-test-';
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const worker = new URL('./fixtures/annualAdmissionWorker.mjs', import.meta.url);
@@ -21,8 +25,29 @@ test('cross-process global limit, same-card flight, distinct cards FIFO, both do
     const gate=new AnnualAdmission(root,1000,10);
     let active=0,peak=0;
     await Promise.all(['a','b','c'].map(key=>gate.run('generator',key,1000,async()=>{peak=Math.max(peak,++active);await wait(30);active--;return {key};})));
-    assert.equal(peak,1);
+    assert.equal(peak,2);
+    assert.equal(MAX_CONCURRENT_ANNUAL_BUILDS,2);
+    assert.equal(MAX_CONCURRENT_ANNUAL_RENDERS,1);
   } finally {await rm(root,{recursive:true,force:true});}
+});
+
+test('headroom is rechecked before the second generator starts',async()=>{
+ const root=await mkdtemp(base);let releaseFirst;try{
+ let headroom=true,calls=0;
+ const firstBlocked=new Promise(resolve=>{releaseFirst=resolve;});
+ const gate=new AnnualAdmission(root,2000,10,1000,async()=>headroom);
+ const first=gate.run('generator','first',1000,async()=>{calls++;await firstBlocked;return 1;});
+ while(calls===0)await wait(10);
+ headroom=false;
+ const second=gate.run('generator','second',1000,async()=>{calls++;return 2;});
+ await wait(80);assert.equal(calls,1);
+ const rows=JSON.parse(await readFile(root+'/generator.json','utf8'));
+ assert.equal(rows.filter(row=>row.state==='running').length,1);
+ assert.equal(rows.filter(row=>row.state==='queued').length,1);
+ releaseFirst();assert.equal(await first,1);
+ await wait(30);assert.equal(calls,1);
+ headroom=true;assert.equal(await second,2);assert.equal(calls,2);
+ }finally{releaseFirst?.();await rm(root,{recursive:true,force:true});}
 });
 test('dedup before queue cap, explicit rejection, expiration, no runner on timed-out reservation', async()=>{
   const root=await mkdtemp(base);

@@ -1,5 +1,7 @@
 # Memory Hardening Phase 2 — Capacity blockers
 
+> 2026-09-20 superseding capacity decision: after the two-pass streaming rollout and a separate 2-generator plus renderer capacity certification, the current operational limits are `MAX_CONCURRENT_ANNUAL_BUILDS=2` and `MAX_CONCURRENT_ANNUAL_RENDERS=1`. Queue caps, TTL, cgroup limits and the per-slot headroom guard remain unchanged. The 2026-09-18 one-generator budget below is retained as historical evidence; see `annual-generator-concurrency2.md` for the new measurements and decision.
+
 2026-09-18。生产基线见 `server-memory-baseline.md`；Python 逐服务分摊、数据表示实测及唯一 Go PoC 见 `python-resident-memory-triage.md`。不改 Annual generator、schema、strength、FinalTitle、strongDan 或 `annual-observation-v4.5.0`。
 
 **最终容量状态：MEMORY BASELINE ESTABLISHED / SAFE FOR WAVE 2（memory/capacity gate）。** Viewer0.68.11已标准部署；迁移、62样本基线、真实冷任务/1+1和两Node单卡复测完成，详见下方实际结果。独立移动端产品Gate不自动改变。
