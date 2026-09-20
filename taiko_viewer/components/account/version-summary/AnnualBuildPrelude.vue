@@ -2,7 +2,7 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  status: "queued" | "running" | "completed" | "failed";
+  status: "queued" | "running" | "completed" | "failed" | "expired" | "cancelled";
   stage?: string | null;
   percent?: number | null;
   detail?: string | null;
@@ -12,16 +12,17 @@ const emit = defineEmits<{ retry: []; sync: [] }>();
 const { t } = useI18n();
 const safePercent = computed(() => props.status === "queued" ? 0 : Math.max(0, Math.min(100, Number(props.percent || 0))));
 const stageText = computed(() => t(`annualSummary.buildStages.${props.stage || props.status}`));
+const terminalFailure = computed(() => ["failed", "expired", "cancelled"].includes(props.status));
 </script>
 
 <template>
   <main class="annual-prelude" aria-live="polite">
     <section class="annual-prelude__card">
       <p class="annual-prelude__eyebrow">{{ t("annualSummary.buildPrelude.eyebrow") }}</p>
-      <h1>{{ status === "failed" ? t("annualSummary.buildPrelude.failedTitle") : t("annualSummary.buildPrelude.title") }}</h1>
+      <h1>{{ terminalFailure ? t("annualSummary.buildPrelude.failedTitle") : t("annualSummary.buildPrelude.title") }}</h1>
       <p class="annual-prelude__lead">{{ error || t("annualSummary.buildPrelude.lead") }}</p>
 
-      <div v-if="status !== 'failed'" class="annual-prelude__route">
+      <div v-if="!terminalFailure" class="annual-prelude__route">
         <div class="annual-prelude__track">
           <span class="annual-prelude__fill" :style="{ width: `${safePercent}%` }"></span>
           <img class="annual-prelude__don" src="/don.gif" alt="" :style="{ left: `${safePercent}%` }" />

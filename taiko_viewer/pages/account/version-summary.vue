@@ -14,7 +14,7 @@ import { resolveViewerError } from "~/utils/viewerError";
 
 type AnnualJob = {
   id: string;
-  status: "queued" | "running" | "completed" | "failed";
+  status: "queued" | "running" | "completed" | "failed" | "expired" | "cancelled";
   error?: { code: string; message: string } | null;
   progressStage?: string | null;
   progressPercent?: number;
@@ -112,14 +112,16 @@ const jobStatusLabel = computed(() => {
     queued: "annualSummary.state.jobQueued",
     running: "annualSummary.state.jobRunning",
     completed: "annualSummary.state.jobCompleted",
-    failed: "annualSummary.state.jobFailed"
+    failed: "annualSummary.state.jobFailed",
+    expired: "annualSummary.state.jobFailed",
+    cancelled: "annualSummary.state.jobFailed"
   };
   return t(key[jobStatus.value.status]);
 });
 
 const sleep = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 const pollJob = async (jobId: string, generation: number) => {
-  const deadline = Date.now() + 4 * 60 * 1000;
+  const deadline = Date.now() + 15 * 60 * 1000;
   while (Date.now() < deadline && generation === pollGeneration) {
     const payload = await apiFetch<{ job: AnnualJob; summary?: AnnualSummaryV4 }>(`/api/account/annual-summary-jobs/${encodeURIComponent(jobId)}`);
     jobStatus.value = payload.job;
@@ -127,7 +129,9 @@ const pollJob = async (jobId: string, generation: number) => {
       await reloadAnnual();
       return;
     }
-    if (payload.job.status === "failed") throw new Error(payload.job.error?.message || "ANNUAL_BUILD_FAILED");
+    if (["failed", "expired", "cancelled"].includes(payload.job.status)) {
+      throw new Error(payload.job.error?.message || "ANNUAL_BUILD_FAILED");
+    }
     await sleep(1200);
   }
   throw new Error("ANNUAL_BUILD_TIMEOUT");
@@ -141,7 +145,7 @@ const resumeJob = async (job: AnnualJob) => {
   try {
     await pollJob(job.id, generation);
   } catch (error) {
-    if (generation === pollGeneration && jobStatus.value?.status !== "failed") {
+    if (generation === pollGeneration && !["failed", "expired", "cancelled"].includes(jobStatus.value?.status || "")) {
       ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
     }
   } finally {

@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir, rm, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { annualAdmission, type Resource } from './admission';
 
@@ -43,4 +43,31 @@ export const stopAnnualWorker = (kind: Resource, id: string) => {
   const control = spawn('/usr/bin/systemctl', ['kill', '--kill-who=all', '--signal=SIGKILL', `taiko-annual-${kind}-${id}.service`], { stdio: 'ignore', timeout: 10_000 });
   // Still await the worker's close event in the caller before releasing its slot.
   control.on('error', () => undefined);
+};
+
+export const cleanupAnnualWorkerTemps = async () => {
+  const root = '/var/tmp/taiko-annual-workers';
+  const activeIds = new Set<string>();
+  for (const resource of ['generator', 'renderer'] as const) {
+    const ledger = await readFile(resolve(annualAdmission.root, `${resource}.json`), 'utf8')
+      .then((raw) => JSON.parse(raw) as Array<{ id?: string; state?: string }>).catch(() => []);
+    for (const row of ledger) {
+      if (row.id && ['queued', 'running'].includes(String(row.state))) activeIds.add(row.id);
+    }
+  }
+  let removed = 0;
+  for (const entry of await readdir(root, { withFileTypes: true }).catch(() => [])) {
+    if (!entry.isDirectory() || !/^[0-9a-f-]{36}$/i.test(entry.name) || activeIds.has(entry.name)) continue;
+    const path = resolve(root, entry.name);
+    const info = await stat(path).catch(() => null);
+    if (!info || Date.now() - info.mtimeMs < 30 * 60 * 1000) continue;
+    const units = [
+      `/sys/fs/cgroup/system.slice/taiko-annual-generator-${entry.name}.service`,
+      `/sys/fs/cgroup/system.slice/taiko-annual-renderer-${entry.name}.service`
+    ];
+    if (await Promise.any(units.map((unit) => access(unit))).then(() => true, () => false)) continue;
+    await rm(path, { recursive: true, force: true });
+    removed += 1;
+  }
+  return removed;
 };

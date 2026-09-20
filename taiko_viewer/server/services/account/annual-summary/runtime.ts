@@ -14,8 +14,7 @@ import {
   rm,
   stat,
   statfs,
-  unlink,
-  writeFile
+  unlink
 } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { createError } from "h3";
@@ -32,12 +31,13 @@ import {
   getAnnualVersion
 } from "./constants";
 import type { AnnualCliEnvelope, AnnualObservationEvent, AnnualSummaryV4 } from "./types";
+import { ANNUAL_DISK_LOW_BYTES, getAnnualDiskState } from "./hardening";
 
 const CACHE_ROOT_SEGMENT = "annual-summary-v4";
 const NORMALIZED_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const NORMALIZED_CACHE_HIGH_BYTES = 8 * 1024 * 1024 * 1024;
-const NORMALIZED_CACHE_TARGET_BYTES = 6 * 1024 * 1024 * 1024;
-const MIN_CACHE_FREE_BYTES = 20 * 1024 * 1024 * 1024;
+const NORMALIZED_CACHE_HIGH_BYTES = 6 * 1024 * 1024 * 1024;
+const NORMALIZED_CACHE_TARGET_BYTES = 5 * 1024 * 1024 * 1024;
+const MIN_CACHE_FREE_BYTES = ANNUAL_DISK_LOW_BYTES;
 let annualCacheCleanupPromise: Promise<AnnualCacheCleanupStats> | null = null;
 
 export type AnnualCacheCleanupStats = {
@@ -102,14 +102,24 @@ export const atomicWriteFile = async (filePath: string, content: string | Buffer
   const target = ensureWithinAnnualCache(filePath);
   await ensurePrivateDir(dirname(target));
   const temp = join(dirname(target), `.${basename(target)}.${process.pid}.${randomUUID()}.tmp`);
+  let handle: Awaited<ReturnType<typeof open>> | null = null;
   try {
-    await writeFile(temp, content, { mode: 0o600, flag: "wx" });
+    handle = await open(temp, "wx", 0o600);
+    await handle.writeFile(content);
+    await handle.sync();
+    await handle.close();
+    handle = null;
     await rename(temp, target);
     await chmod(target, 0o600).catch(() => undefined);
+    const directory = await open(dirname(target), "r");
+    try { await directory.sync(); } finally { await directory.close(); }
   } finally {
+    await handle?.close().catch(() => undefined);
     await unlink(temp).catch(() => undefined);
   }
 };
+
+export const readAnnualDiskState = () => getAnnualDiskState(getAnnualCacheRoot());
 
 export const atomicWriteJson = (filePath: string, value: unknown) =>
   atomicWriteFile(filePath, `${JSON.stringify(value)}\n`);
@@ -599,6 +609,16 @@ const runAnnualSummaryCliUnadmitted = async (
     if (isMissingHistoryError(message)) {
       throw createError({ statusCode: 422, statusMessage: "现有数据不足以生成年度总结，请先同步更多记录" });
     }
+    if (/oom|out of memory|memory pressure/i.test(message)) {
+      throw Object.assign(createError({ statusCode: 503, statusMessage: "年度服务内存压力较高，请稍后重试" }), {
+        code: "ANNUAL_WORKER_OOM"
+      });
+    }
+    if (/failed to (?:start|connect)|systemd|dbus|transient unit/i.test(message)) {
+      throw Object.assign(createError({ statusCode: 503, statusMessage: "年度任务暂时无法启动，请稍后重试" }), {
+        code: "ANNUAL_LAUNCH_FAILED"
+      });
+    }
     console.error("[annual-summary] CLI build failed", message || "unknown error");
     throw createError({ statusCode: 500, statusMessage: "年度总结生成失败，请稍后重试" });
   }
@@ -656,7 +676,7 @@ const cleanupAnnualCacheUnlocked = async (): Promise<AnnualCacheCleanupStats> =>
   const normalizedRoot = resolve(root, "normalized");
   const referencedSnapshotHashes = await collectReferencedSnapshotHashes(root);
   const normalizedCutoff = Date.now() - NORMALIZED_CACHE_TTL_MS;
-  type Candidate = { path: string; size: number; mtimeMs: number };
+  type Candidate = { path: string; size: number; mtimeMs: number; staleRevision: boolean };
   const candidates: Candidate[] = [];
   let scannedFiles = 0;
   let errors = 0;
@@ -679,7 +699,22 @@ const cleanupAnnualCacheUnlocked = async (): Promise<AnnualCacheCleanupStats> =>
         const itemStat = await stat(path).catch(() => null);
         if (itemStat) {
           beforeBytes += itemStat.size;
-          candidates.push({ path, size: itemStat.size, mtimeMs: itemStat.mtimeMs });
+          const descriptor = await open(path, "r").catch(() => null);
+          let prefix = "";
+          if (descriptor) {
+            try {
+              const buffer = Buffer.allocUnsafe(Math.min(1024, itemStat.size));
+              const read = await descriptor.read(buffer, 0, buffer.length, 0);
+              prefix = buffer.subarray(0, read.bytesRead).toString("utf8");
+            } catch { errors += 1; }
+            finally { await descriptor.close().catch(() => undefined); }
+          }
+          candidates.push({
+            path,
+            size: itemStat.size,
+            mtimeMs: itemStat.mtimeMs,
+            staleRevision: !prefix.includes(ANNUAL_ALGORITHM_VERSION)
+          });
         }
       }
     }
@@ -691,7 +726,9 @@ const cleanupAnnualCacheUnlocked = async (): Promise<AnnualCacheCleanupStats> =>
   let currentFreeBytes = freeBytesBefore;
   let removedFiles = 0;
   let releasedBytes = 0;
-  const ordered = candidates.sort((left, right) => left.mtimeMs - right.mtimeMs);
+  const ordered = candidates.sort((left, right) =>
+    Number(right.staleRevision) - Number(left.staleRevision) || left.mtimeMs - right.mtimeMs
+  );
   const isReferenced = async (candidate: Candidate) => {
     const cached = await readAnnualJson<{ contentHash?: string }>(candidate.path).catch(() => null);
     const contentHash = String(cached?.contentHash || "").toLowerCase();

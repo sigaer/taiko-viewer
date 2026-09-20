@@ -12,6 +12,12 @@ import type {
   AnnualShareCardRow,
   AnnualSummaryRow
 } from "./types";
+import {
+  ANNUAL_BUILD_LEASE_SECONDS,
+  ANNUAL_BUILD_MAX_ATTEMPTS,
+  ANNUAL_DURABLE_QUEUE_TTL_SECONDS,
+  durableQueueWouldAccept
+} from "./hardening";
 
 const parseJobParameters = (value: string | null): AnnualJobParameters => {
   try {
@@ -29,7 +35,9 @@ export const serializeAnnualJob = (row: AnnualJobRow) => ({
   summaryId: row.summary_id,
   posterId: row.poster_id,
   parameters: parseJobParameters(row.parameters_json),
-  error: row.status === "failed" ? { code: row.error_code || "BUILD_FAILED", message: row.error_message || "处理失败" } : null,
+  error: ["failed", "expired", "cancelled"].includes(row.status)
+    ? { code: row.error_code || "BUILD_FAILED", message: row.error_message || "处理失败" }
+    : null,
   progressStage: row.progress_stage || row.status,
   progressPercent: Number(row.progress_percent || 0),
   progressDetail: row.progress_detail || null,
@@ -38,6 +46,22 @@ export const serializeAnnualJob = (row: AnnualJobRow) => ({
   createdAt: new Date(row.created_at).toISOString(),
   updatedAt: new Date(row.updated_at).toISOString()
 });
+
+export type AnnualQueueMetrics = {
+  queuedCount: number;
+  queuedWorkSeconds: number;
+  oldestQueuedAt: string | null;
+};
+
+export class AnnualQueueCapacityError extends Error {
+  code = "ANNUAL_CAPACITY_RETRY";
+  statusCode = 429;
+  statusMessage = "年度服务繁忙，请稍后重试";
+  retryAfter = 30;
+  constructor(readonly metrics: AnnualQueueMetrics) {
+    super("annual durable queue work budget is exhausted");
+  }
+}
 
 export const findAnnualSummaryById = async (summaryId: string) => {
   await ensureAccountSchema();
@@ -99,10 +123,10 @@ export const findLatestAnnualSummary = async (
   const sql = fingerprint
     ? `SELECT * FROM web_annual_summaries
        WHERE user_id = ? AND binding_id = ? AND version_key = ? AND input_fingerprint = ?
-       ORDER BY created_at DESC LIMIT 1`
+       ORDER BY created_at DESC, generated_at DESC, id DESC LIMIT 1`
     : `SELECT * FROM web_annual_summaries
        WHERE user_id = ? AND binding_id = ? AND version_key = ?
-       ORDER BY created_at DESC LIMIT 1`;
+       ORDER BY created_at DESC, generated_at DESC, id DESC LIMIT 1`;
   const params = fingerprint
     ? [userId, bindingId, versionKey, fingerprint]
     : [userId, bindingId, versionKey];
@@ -142,6 +166,28 @@ export const insertAnnualSummary = async (input: {
     ]
   );
   return findAnnualSummaryById(input.id);
+};
+
+export const pruneSupersededAnnualSummaries = async (userId: number, bindingId: number, versionKey: string) => {
+  await ensureAccountSchema();
+  const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
+    `SELECT s.* FROM web_annual_summaries s
+     WHERE s.user_id=? AND s.binding_id=? AND s.version_key=?
+       AND NOT EXISTS (
+         SELECT 1 FROM web_annual_shares sh
+         WHERE sh.summary_id=s.id AND sh.status='active' AND sh.expires_at > NOW()
+       )
+     ORDER BY s.created_at DESC`,
+    [userId, bindingId, versionKey]
+  );
+  const removed: AnnualSummaryRow[] = [];
+  for (const row of rows.slice(2)) {
+    const [result] = await getAccountDb().execute<ResultSetHeader>(
+      "DELETE FROM web_annual_summaries WHERE id=?", [row.id]
+    );
+    if (result.affectedRows) removed.push(row);
+  }
+  return removed;
 };
 
 export const findAnnualJobById = async (jobId: string) => {
@@ -192,13 +238,20 @@ export const insertAnnualJob = async (input: {
   posterId?: string | null;
   parameters?: AnnualJobParameters;
   completed?: boolean;
+  jobKey?: string | null;
+  activeKey?: string | null;
+  algorithmVersion?: string | null;
+  inputFingerprint?: string | null;
+  sourceRevision?: string | null;
+  estimatedServiceSeconds?: number;
 }) => {
   await ensureAccountSchema();
   await getAccountDb().execute(
     `INSERT INTO web_annual_summary_jobs
       (id, user_id, binding_id, version_key, job_type, status, summary_id, poster_id,
-       parameters_json, started_at, completed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       parameters_json, job_key, active_key, algorithm_version, input_fingerprint,
+       source_revision, estimated_service_seconds, queued_at, started_at, completed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)`,
     [
       input.id,
       input.userId,
@@ -209,11 +262,238 @@ export const insertAnnualJob = async (input: {
       input.summaryId || null,
       input.posterId || null,
       JSON.stringify(input.parameters || {}),
+      input.jobKey || null,
+      input.completed ? null : input.activeKey || null,
+      input.algorithmVersion || null,
+      input.inputFingerprint || null,
+      input.sourceRevision || null,
+      Math.max(0.1, Number(input.estimatedServiceSeconds || 1)),
       input.completed ? new Date() : null,
       input.completed ? new Date() : null
     ]
   );
   return findAnnualJobById(input.id);
+};
+
+const withAnnualAdmissionLock = async <T>(runner: (connection: any) => Promise<T>): Promise<T> => {
+  await ensureAccountSchema();
+  const connection = await getAccountDb().getConnection();
+  let locked = false;
+  let lockName = "annual-build-durable-admission";
+  try {
+    const [identityRows] = await connection.query("SELECT DATABASE() AS database_name");
+    const databaseName = String((identityRows as Array<{ database_name: string }>)[0]?.database_name || "unknown");
+    lockName = `annual-build:${databaseName}`.slice(0, 64);
+    const [rows] = await connection.query("SELECT GET_LOCK(?, 5) AS acquired", [lockName]);
+    locked = Number((rows as Array<{ acquired: number }>)[0]?.acquired || 0) === 1;
+    if (!locked) throw new Error("annual durable admission lock unavailable");
+    return await runner(connection);
+  } finally {
+    if (locked) await connection.query("SELECT RELEASE_LOCK(?)", [lockName]).catch(() => undefined);
+    connection.release();
+  }
+};
+
+const selectAnnualQueueMetrics = async (connection: any): Promise<AnnualQueueMetrics> => {
+  const [rows] = await connection.query(
+    `SELECT COUNT(*) AS queued_count,
+            COALESCE(SUM(estimated_service_seconds), 0) AS queued_work_seconds,
+            MIN(queued_at) AS oldest_queued_at
+     FROM web_annual_summary_jobs WHERE job_type = 'build' AND status = 'queued'`
+  );
+  const row = rows[0] || {};
+  return {
+    queuedCount: Number(row.queued_count || 0),
+    queuedWorkSeconds: Number(row.queued_work_seconds || 0),
+    oldestQueuedAt: row.oldest_queued_at ? new Date(row.oldest_queued_at).toISOString() : null
+  };
+};
+
+export const admitAnnualBuildJob = async (input: {
+  id: string;
+  userId: number;
+  bindingId: number;
+  versionKey: string;
+  jobKey: string;
+  algorithmVersion: string;
+  inputFingerprint: string;
+  sourceRevision: string;
+  estimatedServiceSeconds: number;
+  parameters: AnnualJobParameters;
+}) => withAnnualAdmissionLock(async (connection) => {
+  await connection.beginTransaction();
+  try {
+    const [ownerActiveRows] = await connection.execute(
+      `SELECT * FROM web_annual_summary_jobs
+       WHERE user_id=? AND binding_id=? AND version_key=? AND job_type='build'
+         AND status IN ('queued','running')
+       ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+      [input.userId, input.bindingId, input.versionKey]
+    );
+    const ownerActive = ownerActiveRows[0] as AnnualJobRow | undefined;
+    if (ownerActive && ownerActive.active_key === input.jobKey) {
+      await connection.commit();
+      return { job: ownerActive, joined: true, metrics: await selectAnnualQueueMetrics(connection) };
+    }
+    if (ownerActive?.status === 'running') {
+      await connection.commit();
+      return { job: ownerActive, joined: true, metrics: await selectAnnualQueueMetrics(connection) };
+    }
+    if (ownerActive?.status === 'queued') {
+      await connection.execute(
+        `UPDATE web_annual_summary_jobs
+         SET status='expired', active_key=NULL, error_code='ANNUAL_INPUT_SUPERSEDED',
+             error_message='数据已更新，请重新生成年度总结', completed_at=NOW(), progress_stage='expired'
+         WHERE id=? AND status='queued'`,
+        [ownerActive.id]
+      );
+    }
+    const [activeRows] = await connection.execute(
+      "SELECT * FROM web_annual_summary_jobs WHERE active_key = ? AND status IN ('queued','running') LIMIT 1 FOR UPDATE",
+      [input.jobKey]
+    );
+    if (activeRows[0]) {
+      await connection.commit();
+      return { job: activeRows[0] as AnnualJobRow, joined: true, metrics: await selectAnnualQueueMetrics(connection) };
+    }
+    const metrics = await selectAnnualQueueMetrics(connection);
+    if (!durableQueueWouldAccept({
+      queuedCount: metrics.queuedCount,
+      queuedWorkSeconds: metrics.queuedWorkSeconds,
+      estimatedServiceSeconds: input.estimatedServiceSeconds
+    })) {
+      await connection.rollback();
+      throw new AnnualQueueCapacityError(metrics);
+    }
+    await connection.execute(
+      `INSERT INTO web_annual_summary_jobs
+       (id,user_id,binding_id,version_key,job_type,status,parameters_json,job_key,active_key,
+        algorithm_version,input_fingerprint,source_revision,estimated_service_seconds,queued_at)
+       VALUES (?,?,?,?,?,'queued',?,?,?,?,?,?,?,NOW())`,
+      [input.id, input.userId, input.bindingId, input.versionKey, "build", JSON.stringify(input.parameters),
+        input.jobKey, input.jobKey, input.algorithmVersion, input.inputFingerprint, input.sourceRevision,
+        input.estimatedServiceSeconds]
+    );
+    const [createdRows] = await connection.execute("SELECT * FROM web_annual_summary_jobs WHERE id = ?", [input.id]);
+    await connection.commit();
+    return {
+      job: createdRows[0] as AnnualJobRow,
+      joined: false,
+      metrics: {
+        ...metrics,
+        queuedCount: metrics.queuedCount + 1,
+        queuedWorkSeconds: metrics.queuedWorkSeconds + input.estimatedServiceSeconds,
+        oldestQueuedAt: metrics.oldestQueuedAt || new Date().toISOString()
+      }
+    };
+  } catch (error) {
+    await connection.rollback().catch(() => undefined);
+    throw error;
+  }
+});
+
+export const getAnnualQueueMetrics = async () => {
+  await ensureAccountSchema();
+  return selectAnnualQueueMetrics(getAccountDb());
+};
+
+export const claimNextAnnualBuild = async (leaseOwner: string) => withAnnualAdmissionLock(async (connection) => {
+  await connection.beginTransaction();
+  try {
+    await connection.execute(
+      `UPDATE web_annual_summary_jobs
+       SET status = 'failed', active_key = NULL, lease_owner = NULL, lease_until = NULL,
+           error_code = 'ANNUAL_LEASE_EXHAUSTED', error_message = '年度任务执行中断，请稍后重试',
+           completed_at = NOW(), progress_stage = 'failed'
+       WHERE job_type = 'build' AND status = 'running' AND (lease_until IS NULL OR lease_until < NOW()) AND attempt >= ?`,
+      [ANNUAL_BUILD_MAX_ATTEMPTS]
+    );
+    await connection.execute(
+      `UPDATE web_annual_summary_jobs
+       SET status = 'queued', lease_owner = NULL, lease_until = NULL, heartbeat_at = NULL,
+           progress_stage = 'queued', progress_percent = 0
+       WHERE job_type = 'build' AND status = 'running' AND (lease_until IS NULL OR lease_until < NOW()) AND attempt < ?`,
+      [ANNUAL_BUILD_MAX_ATTEMPTS]
+    );
+    const [countRows] = await connection.query(
+      "SELECT COUNT(*) AS count FROM web_annual_summary_jobs WHERE job_type='build' AND status='running' AND lease_until >= NOW()"
+    );
+    if (Number(countRows[0]?.count || 0) >= 2) {
+      await connection.commit();
+      return null;
+    }
+    const [rows] = await connection.query(
+      `SELECT * FROM web_annual_summary_jobs
+       WHERE job_type='build' AND status='queued'
+         AND queued_at > DATE_SUB(NOW(), INTERVAL ? SECOND)
+       ORDER BY queued_at ASC, created_at ASC LIMIT 1 FOR UPDATE`,
+      [ANNUAL_DURABLE_QUEUE_TTL_SECONDS]
+    );
+    const job = rows[0] as AnnualJobRow | undefined;
+    if (!job) {
+      await connection.commit();
+      return null;
+    }
+    const [result] = await connection.execute(
+      `UPDATE web_annual_summary_jobs
+       SET status='running', lease_owner=?, lease_until=DATE_ADD(NOW(), INTERVAL ? SECOND), heartbeat_at=NOW(),
+           attempt=attempt+1, started_at=COALESCE(started_at,NOW()), progress_stage='preparing', progress_percent=5,
+           error_code=NULL, error_message=NULL
+       WHERE id=? AND status='queued'`,
+      [leaseOwner, ANNUAL_BUILD_LEASE_SECONDS, job.id]
+    );
+    if (!(result as ResultSetHeader).affectedRows) {
+      await connection.rollback();
+      return null;
+    }
+    const [claimedRows] = await connection.execute("SELECT * FROM web_annual_summary_jobs WHERE id=?", [job.id]);
+    await connection.commit();
+    return claimedRows[0] as AnnualJobRow;
+  } catch (error) {
+    await connection.rollback().catch(() => undefined);
+    throw error;
+  }
+});
+
+export const heartbeatAnnualBuild = async (jobId: string, leaseOwner: string) => {
+  await ensureAccountSchema();
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE web_annual_summary_jobs SET heartbeat_at=NOW(), lease_until=DATE_ADD(NOW(), INTERVAL ? SECOND)
+     WHERE id=? AND job_type='build' AND status='running' AND lease_owner=? AND lease_until >= NOW()`,
+    [ANNUAL_BUILD_LEASE_SECONDS, jobId, leaseOwner]
+  );
+  return result.affectedRows > 0;
+};
+
+export const completeLeasedAnnualBuild = async (jobId: string, leaseOwner: string, summaryId: string) => {
+  await ensureAccountSchema();
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE web_annual_summary_jobs
+     SET status='completed', summary_id=?, active_key=NULL, lease_owner=NULL, lease_until=NULL, heartbeat_at=NULL,
+         completed_at=NOW(), error_code=NULL, error_message=NULL, progress_stage='completed', progress_percent=100,
+         progress_detail=NULL
+     WHERE id=? AND status='running' AND lease_owner=?`,
+    [summaryId, jobId, leaseOwner]
+  );
+  return result.affectedRows > 0;
+};
+
+export const failLeasedAnnualBuild = async (
+  jobId: string,
+  leaseOwner: string,
+  code: string,
+  message: string,
+  status: "failed" | "expired" = "failed"
+) => {
+  await ensureAccountSchema();
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE web_annual_summary_jobs
+     SET status=?, active_key=NULL, lease_owner=NULL, lease_until=NULL, heartbeat_at=NULL,
+         error_code=?, error_message=?, completed_at=NOW(), progress_stage=?
+     WHERE id=? AND status='running' AND lease_owner=?`,
+    [status, code.slice(0, 64), message.slice(0, 255), status, jobId, leaseOwner]
+  );
+  return result.affectedRows > 0;
 };
 
 export const markAnnualJobRunning = async (jobId: string) => {
@@ -230,6 +510,7 @@ export const markAnnualJobCompleted = async (jobId: string, result: { summaryId?
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'completed', summary_id = COALESCE(?, summary_id), poster_id = COALESCE(?, poster_id),
+         active_key = NULL, lease_owner = NULL, lease_until = NULL, heartbeat_at = NULL,
          completed_at = NOW(), error_code = NULL, error_message = NULL,
          progress_stage = 'completed', progress_percent = 100, progress_detail = NULL
      WHERE id = ?`,
@@ -242,6 +523,7 @@ export const markAnnualJobFailed = async (jobId: string, code: string, message: 
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'failed', error_code = ?, error_message = ?, completed_at = NOW(), progress_stage = 'failed'
+         , active_key = NULL, lease_owner = NULL, lease_until = NULL, heartbeat_at = NULL
      WHERE id = ?`,
     [code.slice(0, 64), message.slice(0, 255), jobId]
   );
@@ -266,12 +548,16 @@ export const updateAnnualJobProgress = async (
 export const expireQueuedAnnualJobs = async () => {
   await ensureAccountSchema();
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
-    "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' AND started_at IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE) ORDER BY created_at LIMIT 64"
+    "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' AND queued_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE) ORDER BY queued_at LIMIT 64"
   );
   const expired: AnnualJobRow[] = [];
   for (const row of rows) {
     const [result] = await getAccountDb().execute<ResultSetHeader>(
-      "UPDATE web_annual_summary_jobs SET status = 'failed', error_code = 'ANNUAL_QUEUE_TIMEOUT', error_message = '年度任务等待超时，请稍后重试', completed_at = NOW(), progress_stage = 'failed' WHERE id = ? AND status = 'queued' AND started_at IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE)",
+      `UPDATE web_annual_summary_jobs
+       SET status = IF(job_type='build','expired','failed'), active_key = NULL,
+           error_code = 'ANNUAL_QUEUE_TIMEOUT', error_message = '年度任务等待超时，请稍后重试',
+           completed_at = NOW(), progress_stage = IF(job_type='build','expired','failed')
+       WHERE id = ? AND status = 'queued' AND queued_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE)`,
       [row.id]
     );
     if (result.affectedRows) expired.push(row);
@@ -284,10 +570,10 @@ export const recoverInterruptedAnnualJobs = async () => {
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'queued'
-     WHERE status = 'running'`
+     WHERE status = 'running' AND job_type = 'poster'`
   );
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
-    "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' ORDER BY created_at ASC LIMIT 100"
+    "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' AND job_type = 'poster' ORDER BY created_at ASC LIMIT 100"
   );
   return rows;
 };
@@ -582,7 +868,7 @@ export const deleteAnnualSummaryForAdmin = async (summaryId: string) => {
 export const deleteOldAnnualJobs = async () => {
   await ensureAccountSchema();
   await getAccountDb().execute(
-    "DELETE FROM web_annual_summary_jobs WHERE status IN ('completed', 'failed') AND created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)"
+    "DELETE FROM web_annual_summary_jobs WHERE status IN ('completed', 'failed', 'expired', 'cancelled') AND created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)"
   );
 };
 

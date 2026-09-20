@@ -53,7 +53,7 @@ export type AnnualSummaryRow = {
 };
 
 export type AnnualJobType = "build" | "poster";
-export type AnnualJobStatus = "queued" | "running" | "completed" | "failed";
+export type AnnualJobStatus = "queued" | "running" | "completed" | "failed" | "expired" | "cancelled";
 
 export type AnnualJobRow = {
   id: string;
@@ -70,6 +70,17 @@ export type AnnualJobRow = {
   progress_stage: string;
   progress_percent: number;
   progress_detail: string | null;
+  job_key: string | null;
+  active_key: string | null;
+  algorithm_version: string | null;
+  input_fingerprint: string | null;
+  source_revision: string | null;
+  estimated_service_seconds: number;
+  queued_at: Date | string | null;
+  lease_owner: string | null;
+  lease_until: Date | string | null;
+  heartbeat_at: Date | string | null;
+  attempt: number;
   started_at: Date | string | null;
   completed_at: Date | string | null;
   created_at: Date | string;
@@ -110,6 +121,9 @@ export type AnnualJobParameters = {
   admissionKey?: string;
   admissionTicket?: string;
   algorithmVersion?: string;
+  inputFingerprint?: string;
+  sourceRevision?: string;
+  estimatedServiceSeconds?: number;
 };
 
 export type AnnualShareCardRow = {

@@ -365,7 +365,6 @@ const CREATE_TABLES = [
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_web_annual_summaries_owner_version (user_id, binding_id, version_key, created_at),
     KEY idx_web_annual_summaries_fingerprint (input_fingerprint),
-    UNIQUE KEY uniq_web_annual_summaries_owner_version (user_id, binding_id, version_key),
     CONSTRAINT fk_web_annual_summaries_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE,
     CONSTRAINT fk_web_annual_summaries_binding_id FOREIGN KEY (binding_id)
@@ -427,12 +426,26 @@ const CREATE_TABLES = [
     progress_stage VARCHAR(32) NOT NULL DEFAULT 'queued',
     progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0,
     progress_detail VARCHAR(255) DEFAULT NULL,
+    job_key CHAR(64) DEFAULT NULL,
+    active_key CHAR(64) DEFAULT NULL,
+    algorithm_version VARCHAR(64) DEFAULT NULL,
+    input_fingerprint CHAR(64) DEFAULT NULL,
+    source_revision CHAR(64) DEFAULT NULL,
+    estimated_service_seconds DECIMAL(8,2) NOT NULL DEFAULT 1.00,
+    queued_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    lease_owner VARCHAR(96) DEFAULT NULL,
+    lease_until DATETIME DEFAULT NULL,
+    heartbeat_at DATETIME DEFAULT NULL,
+    attempt INT UNSIGNED NOT NULL DEFAULT 0,
     started_at DATETIME DEFAULT NULL,
     completed_at DATETIME DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_web_annual_summary_jobs_owner_created (user_id, created_at),
     KEY idx_web_annual_summary_jobs_status (status, job_type, created_at),
+    UNIQUE KEY uniq_web_annual_summary_jobs_active_key (active_key),
+    KEY idx_web_annual_summary_jobs_claim (job_type, status, queued_at),
+    KEY idx_web_annual_summary_jobs_lease (status, lease_until),
     KEY idx_web_annual_summary_jobs_summary (summary_id),
     CONSTRAINT fk_web_annual_summary_jobs_user_id FOREIGN KEY (user_id)
       REFERENCES web_user_accounts(id) ON DELETE CASCADE,
@@ -518,7 +531,23 @@ const MIGRATIONS = [
   "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_stage VARCHAR(32) NOT NULL DEFAULT 'queued' AFTER error_message",
   "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER progress_stage",
   "ALTER TABLE web_annual_summary_jobs ADD COLUMN progress_detail VARCHAR(255) DEFAULT NULL AFTER progress_percent",
-  "ALTER TABLE web_annual_summaries ADD UNIQUE KEY uniq_web_annual_summaries_owner_version (user_id, binding_id, version_key)"
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN job_key CHAR(64) DEFAULT NULL AFTER progress_detail",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN active_key CHAR(64) DEFAULT NULL AFTER job_key",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN algorithm_version VARCHAR(64) DEFAULT NULL AFTER active_key",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN input_fingerprint CHAR(64) DEFAULT NULL AFTER algorithm_version",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN source_revision CHAR(64) DEFAULT NULL AFTER input_fingerprint",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN estimated_service_seconds DECIMAL(8,2) NOT NULL DEFAULT 1.00 AFTER source_revision",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN queued_at DATETIME DEFAULT CURRENT_TIMESTAMP AFTER estimated_service_seconds",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN lease_owner VARCHAR(96) DEFAULT NULL AFTER queued_at",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN lease_until DATETIME DEFAULT NULL AFTER lease_owner",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN heartbeat_at DATETIME DEFAULT NULL AFTER lease_until",
+  "ALTER TABLE web_annual_summary_jobs ADD COLUMN attempt INT UNSIGNED NOT NULL DEFAULT 0 AFTER heartbeat_at",
+  "ALTER TABLE web_annual_summary_jobs ADD UNIQUE KEY uniq_web_annual_summary_jobs_active_key (active_key)",
+  "ALTER TABLE web_annual_summary_jobs ADD KEY idx_web_annual_summary_jobs_claim (job_type, status, queued_at)",
+  "ALTER TABLE web_annual_summary_jobs ADD KEY idx_web_annual_summary_jobs_lease (status, lease_until)",
+  "ALTER TABLE web_annual_summaries ADD KEY idx_web_annual_summaries_owner_version (user_id, binding_id, version_key, created_at)",
+  "ALTER TABLE web_annual_summaries ADD KEY idx_web_annual_summaries_fingerprint (input_fingerprint)",
+  "ALTER TABLE web_annual_summaries DROP INDEX uniq_web_annual_summaries_owner_version"
 ];
 
 const BIND_TABLE_CREATE_SQL = `CREATE TABLE IF NOT EXISTS bind (
@@ -539,9 +568,11 @@ const runMigration = async (statement: string) => {
       code === "ER_DUP_FIELDNAME" ||
       code === "ER_DUP_KEYNAME" ||
       code === "ER_TABLE_EXISTS_ERROR" ||
+      code === "ER_CANT_DROP_FIELD_OR_KEY" ||
       errno === 1060 ||
       errno === 1061 ||
-      errno === 1050
+      errno === 1050 ||
+      errno === 1091
     ) {
       return;
     }
@@ -638,6 +669,25 @@ const ensureBindTableSchema = async () => {
   }
 };
 
+const ensureAnnualSummaryRetentionSchema = async () => {
+  const db = getAccountDb();
+  const [rows] = await db.query<IndexRow[]>("SHOW INDEX FROM web_annual_summaries");
+  const indexes = new Map<string, { nonUnique: number; columns: Array<{ sequence: number; name: string }> }>();
+  for (const row of rows) {
+    const key = String(row.Key_name || "");
+    const entry = indexes.get(key) || { nonUnique: Number(row.Non_unique), columns: [] };
+    entry.columns.push({ sequence: Number(row.Seq_in_index), name: String(row.Column_name || "") });
+    indexes.set(key, entry);
+  }
+  for (const [name, index] of indexes) {
+    const columns = index.columns.sort((left, right) => left.sequence - right.sequence).map((item) => item.name);
+    if (name !== "PRIMARY" && index.nonUnique === 0 && columns.join(",") === "user_id,binding_id,version_key") {
+      const safeName = name.replace(/`/g, "``");
+      await db.execute(`ALTER TABLE web_annual_summaries DROP INDEX \`${safeName}\``);
+    }
+  }
+};
+
 export const ensureAccountSchema = async () => {
   if (!schemaReady) {
     schemaReady = (async () => {
@@ -648,6 +698,7 @@ export const ensureAccountSchema = async () => {
       for (const statement of [...MIGRATIONS, ...BETA_MIGRATIONS]) {
         await runMigration(statement);
       }
+      await ensureAnnualSummaryRetentionSchema();
       await ensureBindTableSchema();
     })();
   }

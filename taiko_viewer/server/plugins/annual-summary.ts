@@ -4,6 +4,8 @@ import {
   refreshAnnualRatingDistribution
 } from "~/server/services/account/annual-summary/runtime";
 import { maintainAnnualStorage, recoverAnnualJobs } from "~/server/services/account/annual-summary";
+import { cleanupAnnualWorkerTemps } from "~/server/services/account/annual-summary/isolated-worker";
+import { collectAnnualOperationalMetrics } from "~/server/services/account/annual-summary/operations";
 import { assertAnnualSecurityConfiguration } from "~/server/services/account/annual-summary/security";
 import { assertAccountDbConfiguration, closeAccountDb } from "~/server/utils/account-db";
 
@@ -14,9 +16,14 @@ export default defineNitroPlugin((nitroApp) => {
   assertAnnualSecurityConfiguration();
   void cleanupAnnualCache().catch((error) => {
     console.error("[annual-summary] cache cleanup failed", error);
-  });
+  }).finally(() => collectAnnualOperationalMetrics().catch((error) => {
+    console.error("[annual-summary] operational metrics failed", error);
+  }));
   void recoverAnnualJobs().catch((error) => {
     console.error("[annual-summary] persisted job recovery failed", error);
+  });
+  void cleanupAnnualWorkerTemps().catch((error) => {
+    console.error("[annual-summary] orphan worker cleanup failed", error);
   });
   let lastRatingRefreshDate = "";
   const refreshRatingsIfDue = async () => {
@@ -41,8 +48,17 @@ export default defineNitroPlugin((nitroApp) => {
     void maintainAnnualStorage().catch((error) => {
       console.error("[annual-summary] periodic maintenance failed", error);
     });
+    void cleanupAnnualWorkerTemps().catch((error) => {
+      console.error("[annual-summary] orphan worker cleanup failed", error);
+    });
     void refreshRatingsIfDue();
   }, 15 * 60 * 1000);
   maintenanceTimer.unref();
-  nitroApp.hooks.hook("close", () => clearInterval(maintenanceTimer));
+  const metricsTimer = setInterval(() => {
+    void collectAnnualOperationalMetrics().catch((error) => {
+      console.error("[annual-summary] operational metrics failed", error);
+    });
+  }, 60 * 1000);
+  metricsTimer.unref();
+  nitroApp.hooks.hook("close", () => { clearInterval(maintenanceTimer); clearInterval(metricsTimer); });
 });
