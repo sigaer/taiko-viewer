@@ -1,11 +1,11 @@
 # Annual Algorithmic CPU Optimization — Phase 4
 
-Status: **ANNUAL ALGORITHMIC CPU PHASE 4 — READY**
+Status: **ANNUAL ALGORITHMIC CPU PHASE 4 — COMPLETE**
 
 - Canonical baseline: `17ba810` (`9.61.12`)
 - Canonical final: `c6d1cb7` (`9.61.13`)
 - Algorithm: `annual-observation-v4.5.1`（未变）
-- Production runtime: 未同步；仍保持 Phase 4 前版本
+- Production runtime: 已同步至 `c6d1cb7` / `9.61.13`
 - Viewer: 无源码变更、无版本升级、无部署
 - Evidence root: `/var/tmp/annual-performance-phase4/`
 
@@ -179,8 +179,32 @@ Largest PSS/RssAnon 增加约 8.9%，低于 15% soft gate；ru_maxrss 仅 +0.8%�
 
 未实施：stdlib JSON parser replacement、persistent pass-1 metadata contract、history compaction、Rust/native production integration、sorted-key metadata、online-only event aggregation。这些要么超出 Phase 4 scope，要么没有 profiler 证据支持复杂度。
 
+## Production Runtime Rollout
+
+Phase 4 于 2026-09-20 20:31 CST 同步到 `/home/sigaer/taiko/plugins/utils/annual_summary/`。同步前 canonical `HEAD` 为 `c6d1cb7` 且工作区 clean；完整 Python manifest 确认 23 个文件中严格只有 `events.py` 和 `snapshots.py` 与 production runtime 不同。旧 runtime 两个文件的 SHA-256 分别为 `f2fdf1f…c4c4` 与 `be1223b5…9093`，与 `17ba810` 相同。
+
+- 同步前完整 runtime 包、Python manifest 和双文件哈希保存在 `/var/tmp/annual-phase4-runtime-pre-sync-20260920-203129/`。全包 tar SHA-256 为 `0b9cd44500ba701227a2ac28c64ce86072a68b469789cafe39578d45f568637e`。
+- 使用 `rsync -a --delete` 全包同步，并排除 `__pycache__/` 与 `*.pyc`。同步后的 dry-run 为空；canonical/runtime 的 23 行 Python manifest 完全相同，manifest SHA-256 均为 `56073e96e36ba681cae7dfd24c65a1a9204fbce97fd7a3e96d82e4ad87fbcddc`。最终 `events.py` 为 `f0c46ea1…b847`，`snapshots.py` 为 `d5535c44…199f`。
+- `compileall` 通过；production 路径 import 明确加载 `/home/sigaer/taiko/plugins/utils/annual_summary/{events,snapshots}.py` 并报告 `annual-observation-v4.5.1`。focused suite 为 30 pass / 1 个已记录的 delete/re-add 断言 deselected；未过滤运行为同样的 30 pass / 1 known failure。Phase 4 的 9 类 synthetic replay/signature/event fixture 与 canonical 逐字节相同，SHA-256 为 `90a969b6ec6adb19c48bb68674041ee402e1290b986a85f8e6644eee525a9c9d`。
+
+### Production worker smoke
+
+私有 `91899919` smoke 经真实 host-global production admission 和现有 bounded generator launcher 完成 `queued -> running -> completed`。Transient unit 为 `taiko-annual-generator-196c99ed-c5cf-4b74-b95f-2e32a2d3086b.service`；输出与 normalized cache 均位于私有 `/var/tmp` evidence root，没有写入 production summary/job/cache。
+
+- Wall `13.388s`，unit CPU `11.761s`；sampled process RSS `62.7 MiB`、PSS `54.9 MiB`、process/cgroup swap 均为 0。
+- Cgroup current peak `249.7 MiB`；`memory.events` 的 `high/max/oom/oom_kill` 均为 0。
+- Serialized SHA-256 为 `fc18feff4cf9fc66611ca790e5f0f5cb758e7ffaadff324d051c2071816bde1a`，schema `4`、algorithm `annual-observation-v4.5.1`、event count `2,672`，与 frozen canonical 结果完全相同。
+
+本次重输入 wall 未复现先前 6–7 秒 benchmark class。检查确认 runtime 源码与 `c6d1cb7` 精确相同，新 `events.py` / `snapshots.py` 已由 worker 实际加载并生成新 pyc；相同时间的 canonical control 也为 `12.326s`，runtime direct control 为 `12.825s`，而 small control 仍为 `0.503s`。Stage probe 将额外时间定位在当前主机的 heavy-input raw snapshot Pass 1，而不是 replay/event 路径漂移；输出、CPU 优化源码、内存和 cgroup gate 均正常。largest-input optional smoke 因此未追加，避免在当前主机状态下增加无必要负载。
+
+### Integration and health
+
+- Viewer deployed bundle 未改变：generator `2`、renderer `1`、durable queue work budget `270` worker-seconds，disk `NORMAL/LOW/CRITICAL/EMERGENCY` 阈值仍为 `28/22/20 GiB`；circuit breaker、worker cgroup 和 algorithm version 均未修改。
+- 仓库中不存在 Annual package 外的 production NoneBot import；Annual 由短生命周期 worker 的 `standalone.py` 加载。因此未重启 NoneBot。Viewer 源码也未改变，保持 `0.72.0`，没有发布新版本或重启 Viewer。
+- 2026-09-20 20:40:32–20:45:33 CST 共 11 个健康样本：Viewer HTTP 11/11 为 200、`NRestarts=0`、OOM kill `56 -> 56`、MemAvailable 最低 `13,242,104 KiB`、memory/IO PSI full avg10 最大均为 `0%`。队列保持空，worker OOM/launcher/DB queue failure counters 均为 0，磁盘保持 `NORMAL`，alerts 为空。
+
 ## Decision
 
-**ANNUAL ALGORITHMIC CPU PHASE 4 — READY**
+**ANNUAL ALGORITHMIC CPU PHASE 4 — COMPLETE**
 
-依据：exact equivalence、signature CPU gate、event CPU gate、overall CPU target、memory guard、raw payload streaming invariant 与 N=2 bounded retest 全部通过。Canonical 已提交并推送；production runtime 未同步，等待独立 rollout review。Phase 2 history compaction、native integration 与 concurrency 3 均未开始。
+依据：exact equivalence、signature CPU gate、event CPU gate、overall CPU target、memory guard、raw payload streaming invariant 与 N=2 bounded retest 全部通过；production runtime 已与 canonical `c6d1cb7` 精确同步，bounded production smoke 与短健康观察均通过。Phase 2 history compaction、native integration 与 concurrency 3 均未开始。
