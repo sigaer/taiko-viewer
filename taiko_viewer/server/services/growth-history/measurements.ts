@@ -80,6 +80,24 @@ export async function readGrowthMeasurements(db: Pick<Pool, "execute">, userId: 
   }));
 }
 
+export async function readGrowthMeasurementCoverage(db: Pick<Pool, "execute">, userId: number, bindingId: number) {
+  const [rows] = await db.execute<RowDataPacket[]>(`SELECT
+      DATE_FORMAT(MIN(m.captured_at),'%Y-%m-%dT%H:%i:%s.%fZ') AS measurement_from,
+      DATE_FORMAT(MAX(m.captured_at),'%Y-%m-%dT%H:%i:%s.%fZ') AS measurement_to,
+      COUNT(DISTINCT DATE(DATE_ADD(m.captured_at, INTERVAL 8 HOUR))) AS measurement_days
+    FROM web_growth_measurements m
+    JOIN web_taiko_bindings b ON b.id=m.binding_id AND b.user_id=m.user_id
+    JOIN web_user_accounts u ON u.id=m.user_id
+    WHERE m.user_id=? AND m.binding_id=?`, [userId, bindingId]);
+  const row = rows[0] || {};
+  const iso = (value: unknown) => value ? new Date(String(value)).toISOString() : null;
+  return {
+    measurementFrom: iso(row.measurement_from),
+    measurementTo: iso(row.measurement_to),
+    measurementDays: Number(row.measurement_days || 0)
+  };
+}
+
 export async function deleteMeasurementsForBinding(db: Pick<Pool, "execute">, bindingId: number) {
   await db.execute("DELETE FROM web_growth_measurements WHERE binding_id=?", [bindingId]);
 }

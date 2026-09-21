@@ -30,7 +30,9 @@ test("Weekly page presents the server DTO with localized state copy and light na
   assert.match(page, /\/api\/account\/growth\/weekly/);
   assert.doesNotMatch(page, /score-pb[^\n]*(?:filter|reduce)|goal-completed[^\n]*(?:filter|reduce)/);
   assert.match(page, /weekly-rhythm/);
-  assert.match(myPage, /<NuxtPage v-if="isWeeklyRoute"/);
+  assert.match(myPage, /<NuxtPage v-if="isGrowthChildRoute"/);
+  assert.match(myPage, /\/my\/weekly/);
+  assert.match(myPage, /\/my\/growth/);
   assert.doesNotMatch(page, /grid-template-columns:\s*repeat\(3/);
   assert.match(home, /\/my\/weekly/);
   assert.match(sidebar, /\/my\/weekly/);

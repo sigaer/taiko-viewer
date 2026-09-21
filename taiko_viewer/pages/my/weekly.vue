@@ -100,6 +100,7 @@ const next = computed(() => weekly.value?.currentNextAction || null);
         </div>
         <h1>{{ themeText }}</h1>
         <p v-if="coverageIncomplete" class="weekly-coverage">{{ t(`weekly.coverage.${weekly.coverage.scoreHistoryState}`) }}</p>
+        <NuxtLink :to="localePath('/my/growth')" class="weekly-passport-link">{{ t("weekly.passportEntry") }} <span aria-hidden="true">→</span></NuxtLink>
       </header>
 
       <section v-if="weekly.highlights.length" class="weekly-section" aria-labelledby="weekly-highlights-title">
@@ -170,6 +171,8 @@ const next = computed(() => weekly.value?.currentNextAction || null);
 .weekly-hero time, .weekly-section__head span { color: var(--viewer-text-muted); font-size: 12px; }
 .weekly-hero h1 { position: relative; z-index: 1; max-width: 650px; margin: 36px 0 10px; color: var(--viewer-text); font: 800 clamp(30px, 5vw, 50px)/1.16 var(--viewer-display-font); letter-spacing: -.035em; }
 .weekly-coverage { position: relative; z-index: 1; margin: 20px 0 0; color: var(--viewer-text-muted); font-size: 12px; }
+.weekly-passport-link { position: relative; z-index: 1; display: inline-flex; margin-top: 20px; color: var(--viewer-accent-strong); font-size: 13px; font-weight: 800; text-decoration: none; }
+.weekly-passport-link:hover, .weekly-passport-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 .weekly-section { padding: 0 clamp(4px, 3vw, 26px); }
 .weekly-section h2 { margin: 0 0 18px; color: var(--viewer-text); font: 800 21px/1.25 var(--viewer-display-font); }
 .weekly-rhythm { position: relative; display: grid; gap: 0; }

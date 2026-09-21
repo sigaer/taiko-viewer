@@ -150,7 +150,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
               <span>Rating</span>
               <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
             </div>
-            <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }} <span aria-hidden="true">→</span></NuxtLink>
+            <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
+              <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
+              <NuxtLink :to="localePath('/my/growth')" class="growth-weekly-link">{{ t('home.growth.passportEntry') }} <span aria-hidden="true">→</span></NuxtLink>
+            </nav>
           </div>
         </div>
         <div v-if="focusLabel && !balanced" class="growth-focus__next">
@@ -285,6 +288,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .growth-focus__aside { display: grid; justify-items: end; gap: 8px; }
 .growth-weekly-link { color: #b84d37; font-size: 13px; font-weight: 800; text-decoration: none; }
+.growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 .growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color: #342922; font-family: var(--viewer-display-font); line-height: 1.1; }
 .growth-focus h1 { font-size: clamp(24px, 3.4vw, 36px); }

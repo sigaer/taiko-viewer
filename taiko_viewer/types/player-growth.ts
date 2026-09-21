@@ -238,3 +238,98 @@ export type WeeklyGrowthResponse = {
     todayPlan: PlayerGrowthOverview["todayPlan"];
   } | null;
 };
+
+export type SkillPassportRangeDays = 30 | 90 | 180 | 365;
+export type SkillPassportTrendDimension = "rating" | RatingDimensionKey;
+
+export type SkillPassportPoint = WeeklyMeasurementPoint & {
+  day: string;
+};
+
+export type SkillPassportSegment = {
+  id: string;
+  measurementVersion: number;
+  algorithmVersion: string;
+  modelRevision: string | null;
+  from: string;
+  to: string;
+  points: SkillPassportPoint[];
+};
+
+export type SkillPassportSegmentChange = {
+  start: SkillPassportPoint | null;
+  end: SkillPassportPoint | null;
+  compatible: boolean;
+  reason: "compatible" | "insufficient" | "limited";
+  ratingDelta: number | null;
+  dimensionDeltas: GrowthMeasurementDimensions | null;
+  primaryDimensionChange: {
+    key: RatingDimensionKey;
+    before: number;
+    after: number;
+    delta: number;
+  } | null;
+  focusFrom: GrowthMeasurement["focus"] | null;
+  focusTo: GrowthMeasurement["focus"] | null;
+};
+
+export type SkillPassportFocusRun = {
+  id: string;
+  segmentId: string;
+  focus: GrowthMeasurement["focus"];
+  startedAt: string;
+  endedAt: string;
+  current: boolean;
+};
+
+export type SkillPassportMilestone = {
+  id: string;
+  primaryType: Exclude<GrowthFactType, "played">;
+  factKeys: string[];
+  day: string | null;
+  observedAt: string | null;
+  timeSemantics: "played" | "observed";
+  title: string;
+  songId: number | null;
+  difficultyType: number | null;
+  before: number | null;
+  after: number | null;
+  delta: number | null;
+  goalCompleted: boolean;
+  observationOnly: boolean;
+};
+
+export type SkillPassportResponse = {
+  profileId: string;
+  coverage: {
+    measurementFrom: string | null;
+    measurementTo: string | null;
+    measurementDays: number;
+    recentFactsFrom: string;
+    recentFactsTo: string;
+    recentFactsState: GrowthCoverageState;
+  };
+  current: {
+    rating: number | null;
+    dimensions: GrowthMeasurementDimensions;
+    focus: GrowthMeasurement["focus"];
+    readiness: GrowthDataSufficiency;
+  } | null;
+  range: {
+    requestedDays: SkillPassportRangeDays;
+    actualFrom: string | null;
+    actualTo: string | null;
+    timezone: "Asia/Shanghai";
+    selectedDimension: SkillPassportTrendDimension;
+  };
+  segments: SkillPassportSegment[];
+  currentSegmentChange: SkillPassportSegmentChange;
+  focusTimeline: SkillPassportFocusRun[];
+  milestones: SkillPassportMilestone[];
+  activeGoal: PlayerGoal | null;
+  recentCompletedGoal: PlayerGoal | null;
+  currentNextAction: {
+    focus: GrowthMeasurement["focus"];
+    todayPlan: PlayerGrowthOverview["todayPlan"];
+  } | null;
+};

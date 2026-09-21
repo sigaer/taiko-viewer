@@ -170,6 +170,8 @@
       "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用",
       "balanced": "最近状态挺均衡",
       "weeklyEntry": "看看这一周",
+      "passportEntry": "成长档案",
+      "storyLinks": "成长记录",
       "playedSummary": "今天打了 {count} 张谱",
       "events": {
         "played": "今天打过",
@@ -189,6 +191,76 @@
       }
     }
   },
+  "passport": {
+    "title": "成长档案",
+    "description": "查看 Viewer 开始可靠记录以来的能力结构、关注方向与最近成长节点。",
+    "guestTitle": "登录后查看成长档案",
+    "login": "登录",
+    "loading": "正在整理成长档案",
+    "loadFailed": "成长档案暂时无法打开",
+    "retry": "重试",
+    "currentTitle": "现在的我",
+    "recordedSince": "记录自 {date}",
+    "focusLead": "最近可以从{focus}入手",
+    "skillOverview": "当前六维",
+    "limited": "目前的成绩记录还不足以形成稳定的能力轨迹。",
+    "newRecordTitle": "成长记录刚刚开始",
+    "newRecord": "再积累一些成绩后，这里会慢慢出现你的能力轨迹。",
+    "rangeLabel": "查看范围",
+    "rangeDays": "{days} 天",
+    "rangeActual": "已记录 {days} 天",
+    "dimensionLabel": "趋势维度",
+    "current": "现在",
+    "weeklyEntry": "看看这一周",
+    "trend": {
+      "title": "这段时间",
+      "noPoints": "所选维度还没有可用的测量点。",
+      "onePoint": "{day} 记录到{dimension} {value}。",
+      "summary": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。",
+      "summaryBreak": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。不同计算口径之间不直接连线。",
+      "pointLabel": "{day}，{dimension} {value}，关注方向{focus}"
+    },
+    "change": {
+      "up": "本轮记录以来，{dimension}从 {from} 到 {to}。",
+      "down": "近期测量略有回落：{dimension}从 {from} 到 {to}。",
+      "stable": "最近能力结构整体比较稳定。",
+      "insufficient": "当前计算口径下还需要更多记录才能比较变化。",
+      "limited": "当前记录不足以形成稳定的能力变化。"
+    },
+    "segmentUpdated": "计算口径曾更新",
+    "segmentExplanation": "不同阶段的测量不会直接连接，也不会跨阶段计算变化量。",
+    "focusTitle": "关注方向",
+    "focus": {
+      "balanced": "整体均衡",
+      "limited": "继续积累成绩",
+      "insufficient-data": "继续积累成绩"
+    },
+    "milestonesTitle": "最近的节点",
+    "recent90": "最近 90 天",
+    "noMilestones": "最近还没有可确认的成长节点。",
+    "goalCompleted": "同时完成了自己选下的练习目标",
+    "goalObserved": "这次练习目标已确认完成",
+    "fact": {
+      "score-pb": "最好成绩",
+      "ng-reduced": "不可",
+      "combo-improved": "连击",
+      "clear": "首次通关",
+      "fc": "新全连",
+      "df": "新全良",
+      "rank-upgrade": "评价",
+      "goal-completed": "完成练习目标"
+    },
+    "coverage": {
+      "complete": "最近 90 天记录完整。",
+      "partial": "最近记录存在缺口，节点只列出可以确认的部分。",
+      "truncated": "部分较早记录未保留，节点只列出可以确认的部分。",
+      "unknown": "最近记录范围暂时无法确认，节点只列出可以确认的部分。"
+    },
+    "nextTitle": "接下来",
+    "nextFocus": "最近仍可以从{focus}入手",
+    "activeGoalTitle": "这次想练",
+    "completedGoalTitle": "最近练成"
+  },
   "weekly": {
     "title": "这一周",
     "description": "回看这一周可以确认的成绩变化、成长记录与下一步练习方向。",
@@ -201,6 +273,7 @@
     "loadFailed": "这一周暂时无法打开",
     "retry": "重试",
     "goalCompleted": "完成了自己选下的练习目标",
+    "passportEntry": "查看成长档案",
     "theme": {
       "stability": "这周最明显的是打得更稳了",
       "score-breakthrough": "这周最好成绩刷新得最集中",

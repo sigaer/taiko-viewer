@@ -6,7 +6,7 @@ const localePath = useLocalePath();
 const route = useRoute();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
-const isWeeklyRoute = computed(() => route.path === "/my/weekly" || route.path === "/ja/my/weekly");
+const isGrowthChildRoute = computed(() => ["/my/weekly", "/my/growth", "/ja/my/weekly", "/ja/my/growth"].includes(route.path));
 
 definePageMeta({
   pageTitleKey: "nav.myTaiko",
@@ -23,6 +23,7 @@ useViewerSeo(() => ({
 }));
 
 const personalLinks = [
+  { path: "/my/growth", label: "passport.title" },
   { path: "/my/weekly", label: "weekly.title" },
   { path: "/account/songs", label: "account.songs" },
   { path: "/tools/b30", label: "tools.b30" },
@@ -35,7 +36,7 @@ const personalLinks = [
 </script>
 
 <template>
-  <NuxtPage v-if="isWeeklyRoute" />
+  <NuxtPage v-if="isGrowthChildRoute" />
   <div v-else class="my-page">
     <section v-if="!accountUser" class="my-intro panel-card">
       <p class="my-intro__eyebrow">{{ t("nav.myTaiko") }}</p>

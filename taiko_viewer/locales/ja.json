@@ -169,6 +169,8 @@
       "loadFailed": "成長提案を利用できません。他のホーム機能は利用できます",
       "balanced": "最近は全体のバランスがよさそう",
       "weeklyEntry": "今週を振り返る",
+      "passportEntry": "成長の記録",
+      "storyLinks": "成長の記録",
       "playedSummary": "今日は{count}譜面をプレイ",
       "events": {
         "played": "今日のプレイ",
@@ -188,6 +190,76 @@
       }
     }
   },
+  "passport": {
+    "title": "成長の記録",
+    "description": "Viewer が確かに記録できるようになってからの力の構成、注目方向、最近の節目を振り返ります。",
+    "guestTitle": "ログインして成長の記録を見る",
+    "login": "ログイン",
+    "loading": "成長の記録をまとめています",
+    "loadFailed": "成長の記録を表示できません",
+    "retry": "再試行",
+    "currentTitle": "いまの自分",
+    "recordedSince": "{date} から記録",
+    "focusLead": "最近は{focus}から取り組めそうです",
+    "skillOverview": "現在の6つの力",
+    "limited": "現在のスコア記録だけでは、安定した力の軌跡をまだ描けません。",
+    "newRecordTitle": "成長の記録が始まったばかりです",
+    "newRecord": "スコアが増えるにつれて、ここに力の軌跡が少しずつ現れます。",
+    "rangeLabel": "表示期間",
+    "rangeDays": "{days}日",
+    "rangeActual": "記録のある日：{days}日",
+    "dimensionLabel": "推移する項目",
+    "current": "現在",
+    "weeklyEntry": "今週を振り返る",
+    "trend": {
+      "title": "この期間の変化",
+      "noPoints": "選んだ項目には利用できる測定点がありません。",
+      "onePoint": "{day}に{dimension} {value}を記録しました。",
+      "summary": "{dimension}は{fromDay}の{from}から{toDay}の{to}へ。",
+      "summaryBreak": "{dimension}は{fromDay}の{from}から{toDay}の{to}へ。計算基準が異なる区間は線で結んでいません。",
+      "pointLabel": "{day}、{dimension} {value}、注目方向は{focus}"
+    },
+    "change": {
+      "up": "今回の記録では、{dimension}が{from}から{to}になりました。",
+      "down": "最近の測定はやや低めです。{dimension}は{from}から{to}になりました。",
+      "stable": "最近の力の構成は全体に安定しています。",
+      "insufficient": "現在の計算基準では、変化を比べるための記録がまだ必要です。",
+      "limited": "現在の記録だけでは、安定した力の変化を判断できません。"
+    },
+    "segmentUpdated": "計算基準が更新されました",
+    "segmentExplanation": "異なる期間の測定は直接つながず、期間をまたいだ変化量も計算しません。",
+    "focusTitle": "注目方向",
+    "focus": {
+      "balanced": "全体のバランス",
+      "limited": "記録を増やすこと",
+      "insufficient-data": "記録を増やすこと"
+    },
+    "milestonesTitle": "最近の節目",
+    "recent90": "最近90日",
+    "noMilestones": "最近は確認できる成長の節目がまだありません。",
+    "goalCompleted": "自分で選んだ練習目標も達成",
+    "goalObserved": "この練習目標の達成を確認",
+    "fact": {
+      "score-pb": "自己ベスト",
+      "ng-reduced": "不可",
+      "combo-improved": "コンボ",
+      "clear": "初クリア",
+      "fc": "新フルコンボ",
+      "df": "新ドンダフルコンボ",
+      "rank-upgrade": "スコアランク",
+      "goal-completed": "練習目標を達成"
+    },
+    "coverage": {
+      "complete": "最近90日の記録はそろっています。",
+      "partial": "最近の記録には一部欠けがあるため、確認できた節目だけを表示しています。",
+      "truncated": "古い記録の一部が残っていないため、確認できた節目だけを表示しています。",
+      "unknown": "最近の記録範囲を確認できないため、確認できた節目だけを表示しています。"
+    },
+    "nextTitle": "次は",
+    "nextFocus": "最近は引き続き{focus}から取り組めそうです",
+    "activeGoalTitle": "今回取り組むこと",
+    "completedGoalTitle": "最近できたこと"
+  },
   "weekly": {
     "title": "この一週間",
     "description": "この一週間に確認できたスコアの変化、成長の記録、次の練習方向を振り返ります。",
@@ -200,6 +272,7 @@
     "loadFailed": "この一週間を表示できません",
     "retry": "再試行",
     "goalCompleted": "自分で選んだ練習目標を達成",
+    "passportEntry": "成長の記録を見る",
     "theme": {
       "stability": "今週いちばん目立ったのは、より安定したこと",
       "score-breakthrough": "今週は自己ベストの更新が重なりました",

@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.72.0",
+  "version": "0.73.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -48,6 +48,8 @@
     "test:growth:history": "node --experimental-strip-types --test tests/growthHistory.test.ts tests/growthMeasurements.test.ts tests/growthHistoryHttp.test.mjs",
     "test:growth:weekly": "node --experimental-strip-types --test tests/growthWeekly.test.ts tests/growthWeeklyHttp.test.mjs",
     "test:growth:weekly:browser": "node scripts/verify_growth_weekly_browser.mjs",
+    "test:growth:passport": "node --experimental-strip-types --test tests/growthPassport.test.ts tests/growthPassportHttp.test.mjs",
+    "test:growth:passport:browser": "node scripts/verify_growth_passport_browser.mjs",
     "test:growth:history:db": "node --experimental-strip-types --test --test-concurrency=1 tests/growthHistorySql.test.ts",
     "growth:history:migrate": "node --experimental-strip-types scripts/migrate_growth_history_schema.ts",
     "test:growth:browser": "node --experimental-strip-types scripts/verify_growth_closure.mjs",
