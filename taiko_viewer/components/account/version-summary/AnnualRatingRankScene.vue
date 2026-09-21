@@ -95,10 +95,13 @@ const copyLine = computed(() => {
 
 <style scoped>
 .annual-rating-rank-scene {
+  position: relative;
   width: 100%;
   height: 100vh;
   height: 100svh;
-  height: 100dvh;
+  height: var(--annual-stage-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
   color: #5e4833;
   background: #f5eddc;
 }
@@ -107,9 +110,11 @@ const copyLine = computed(() => {
   position: absolute;
   inset: 0;
   width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
 }
 .annual-rating-rank-scene__paper {
-  height: 100%;
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(249, 243, 229, 0.9), rgba(241, 225, 199, 0.92)),
@@ -117,13 +122,11 @@ const copyLine = computed(() => {
     linear-gradient(180deg, #f8f1e2 0%, #f1e1c7 100%);
 }
 .annual-rating-rank-scene__content {
-  position: relative;
   z-index: 1;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(5px, 0.8vh, 9px);
   padding: max(44px, calc(env(safe-area-inset-top) + 30px)) clamp(16px, 3.4vw, 30px) max(34px, calc(env(safe-area-inset-bottom) + 26px));
-  box-sizing: border-box;
 }
 .annual-rating-rank-scene__header {
   display: grid;

@@ -328,3 +328,11 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Save and Forum sync reuse the same new artifact. Do not add a separate community renderer or stitch a screenshot onto the old PNG.
 - Local evidence and commands are recorded in `docs/annual-poster-export-promo-footer-status.md`.
 - Release `07ed51b` / Viewer `0.73.1` deployed through the standard script with exit 0. Authenticated production preview/export acceptance, repeat-cache identity, zh/ja visual inspection and PNG/JPEG QR decoding all PASS; community synchronization was disabled throughout. **POSTER EXPORT PROMO FOOTER — COMPLETE.**
+
+## 2026-09-21 / RatingRank mobile layout hotfix handoff
+
+- Treat this as an independent `0.73.2` compatibility patch. Do not reopen Annual Poster Community phases or redesign the waterfall chart.
+- Only the scene sizing contract changed: RatingRank now follows `--annual-stage-height`, and paper/content remain absolute 100%-height layers with no relative-position override.
+- Anomaly telemetry runs only for the active account RatingRank slide and sends only viewport/geometry/UA diagnostics when a mismatch exists. It is locally and server-side deduplicated.
+- Annual tests, isolated build and 18 Chromium-emulation scenarios at 360/390/430 widths PASS. Real Android Edge has not been tested and must not be claimed as PASS.
+- Evidence and exact limits are in `docs/annual-rating-rank-layout-hotfix-status.md`; production deploy/smoke pending.

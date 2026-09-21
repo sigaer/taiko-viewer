@@ -59,6 +59,9 @@ let transitionResolve: (() => void) | null = null;
 let transitionGeneration = 0;
 let transitionTargetTime: number | null = null;
 let touchStart: { x: number; y: number } | null = null;
+let ratingRankLayoutFrame = 0;
+let ratingRankLayoutTimer: ReturnType<typeof setTimeout> | null = null;
+let ratingRankAnomalyReported = false;
 const transitionClock = { value: 0 };
 const transitionForward = ref(true);
 // Annual number motion is one-shot: once a slide has been left, returning to it
@@ -67,10 +70,97 @@ const navigationMotion: AnnualNavigationMotion = { visited: new Set<number>(), d
 provide(ANNUAL_NAVIGATION_MOTION_KEY, navigationMotion);
 provide(ANNUAL_COVER_PHASE_KEY, readonly(coverStreamPhase));
 
+const roundedLayoutValue = (value: number) => Math.round(value * 100) / 100;
+const rectOutside = (inner: DOMRect, outer: DOMRect, tolerance: number) =>
+  inner.top < outer.top - tolerance || inner.bottom > outer.bottom + tolerance;
+
+const checkRatingRankLayout = () => {
+  ratingRankLayoutFrame = 0;
+  if (
+    ratingRankAnomalyReported
+    || !props.betaTracking
+    || !props.started
+    || !documentVisible.value
+    || slides.value[activeIndex.value]?.key !== "ratingRank"
+  ) return;
+
+  const stage = slideRefs.value[activeIndex.value];
+  const scene = stage?.querySelector<HTMLElement>(".annual-rating-rank-scene");
+  const content = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__content");
+  const chart = scene?.querySelector<HTMLElement>(".annual-rating-waterfall-chart");
+  const header = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__header");
+  const summary = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__summary");
+  if (!stage || !scene || !content || !chart || !header || !summary) return;
+
+  const viewport = window.visualViewport;
+  if (viewport && Math.abs(viewport.scale - 1) > 0.05) return;
+  const annualStageHeight = Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--annual-stage-height")
+  );
+  if (!Number.isFinite(annualStageHeight) || annualStageHeight <= 0) return;
+
+  const tolerance = 2;
+  const stageRect = stage.getBoundingClientRect();
+  const sceneRect = scene.getBoundingClientRect();
+  const contentRect = content.getBoundingClientRect();
+  const chartRect = chart.getBoundingClientRect();
+  const headerRect = header.getBoundingClientRect();
+  const summaryRect = summary.getBoundingClientRect();
+  const nextSlideTop = (stage.nextElementSibling as HTMLElement | null)?.getBoundingClientRect().top;
+  const documentOverflow = document.documentElement.scrollHeight > window.innerHeight + tolerance;
+  const mismatch =
+    Math.abs(sceneRect.height - annualStageHeight) > tolerance
+    || Math.abs(stageRect.height - annualStageHeight) > tolerance
+    || rectOutside(sceneRect, stageRect, tolerance)
+    || Math.abs(contentRect.top - sceneRect.top) > tolerance
+    || Math.abs(contentRect.bottom - sceneRect.bottom) > tolerance
+    || rectOutside(chartRect, sceneRect, tolerance)
+    || rectOutside(headerRect, sceneRect, tolerance)
+    || rectOutside(summaryRect, sceneRect, tolerance)
+    || (typeof nextSlideTop === "number" && nextSlideTop < stageRect.bottom - tolerance)
+    || Math.abs(window.scrollY) > tolerance
+    || documentOverflow;
+  if (!mismatch) return;
+
+  ratingRankAnomalyReported = true;
+  beta.track("annual_rating_rank_layout_anomaly", {
+    inner_height: roundedLayoutValue(window.innerHeight),
+    visual_viewport_height: roundedLayoutValue(viewport?.height || window.innerHeight),
+    visual_viewport_offset_top: roundedLayoutValue(viewport?.offsetTop || 0),
+    visual_viewport_scale: roundedLayoutValue(viewport?.scale || 1),
+    annual_stage_height: roundedLayoutValue(annualStageHeight),
+    scene_top: roundedLayoutValue(sceneRect.top),
+    scene_bottom: roundedLayoutValue(sceneRect.bottom),
+    scene_height: roundedLayoutValue(sceneRect.height),
+    content_top: roundedLayoutValue(contentRect.top),
+    content_bottom: roundedLayoutValue(contentRect.bottom),
+    content_height: roundedLayoutValue(contentRect.height),
+    chart_top: roundedLayoutValue(chartRect.top),
+    chart_bottom: roundedLayoutValue(chartRect.bottom),
+    chart_height: roundedLayoutValue(chartRect.height),
+    scroll_y: roundedLayoutValue(window.scrollY),
+    ua: navigator.userAgent
+  });
+};
+
+const scheduleRatingRankLayoutCheck = () => {
+  if (!import.meta.client || ratingRankLayoutFrame) return;
+  ratingRankLayoutFrame = requestAnimationFrame(() => {
+    ratingRankLayoutFrame = requestAnimationFrame(checkRatingRankLayout);
+  });
+};
+
+const settleRatingRankLayoutCheck = () => {
+  scheduleRatingRankLayoutCheck();
+  if (ratingRankLayoutTimer) clearTimeout(ratingRankLayoutTimer);
+  ratingRankLayoutTimer = setTimeout(scheduleRatingRankLayoutCheck, 240);
+};
+
 useAnnualViewport(() => {
   if (!transitionRunning.value && containerRef.value) {
     containerRef.value.scrollTop = slideRefs.value[activeIndex.value]?.offsetTop || 0;
   }
+  settleRatingRankLayoutCheck();
 });
 
 const periodIndex = computed(() => slides.value.findIndex((page) => page.key === "period"));
@@ -412,6 +502,7 @@ watch(activeIndex, (value, oldValue) => {
     try { sessionStorage.setItem(`annual-active-page:${props.summary.summaryId}`, key); } catch { /* storage can be disabled */ }
   }
   emit("slide-change",key||"opening");
+  if (key === "ratingRank") settleRatingRankLayoutCheck();
   if(betaViewTimer)clearTimeout(betaViewTimer);
   if(props.betaTracking && key) betaViewTimer=setTimeout(()=>{
     if(!props.started || !documentVisible.value || activeIndex.value!==value || getViewportIndex()!==value)return;
@@ -515,6 +606,7 @@ const handlePageShow = () => {
     acquireBgmSession();
     void playBgm();
   }
+  settleRatingRankLayoutCheck();
 };
 
 onBeforeRouteLeave(() => {
@@ -528,6 +620,8 @@ onBeforeRouteLeave(() => {
 
 onBeforeUnmount(() => {
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  if (ratingRankLayoutFrame) cancelAnimationFrame(ratingRankLayoutFrame);
+  if (ratingRankLayoutTimer) clearTimeout(ratingRankLayoutTimer);
   stopCoverClock();
   cancelPeriodOverviewTransition();
   if (motionMedia && updateMotionHandler) motionMedia.removeEventListener("change", updateMotionHandler);

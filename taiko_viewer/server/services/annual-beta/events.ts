@@ -13,16 +13,18 @@ export const CLIENT_EVENTS = new Set([
  "auth_start","binding_entry_impression","binding_entry_click","binding_start","binding_id_submitted",
  "binding_verification_instruction_view","binding_pending","binding_verify_start",
  "annual_entry_ready","annual_report_open","annual_slide_view","annual_report_complete",
- "annual_poster_open","annual_share_action","annual_feedback_open"
+ "annual_poster_open","annual_share_action","annual_feedback_open","annual_rating_rank_layout_anomaly"
 ]);
-const ONCE = new Set(["home_view","annual_entry_impression","beta_invite_gate_view","binding_entry_impression","binding_verification_instruction_view","annual_entry_ready","annual_report_open","annual_report_complete","annual_poster_open"]);
-const META_KEYS = new Set(["source","slide_key","action","reason","duration_ms","sync_duration_ms","data_updated_at","songs_count","charts_count","plays_count","job_id","cached","auth_method"]);
+const ONCE = new Set(["home_view","annual_entry_impression","beta_invite_gate_view","binding_entry_impression","binding_verification_instruction_view","annual_entry_ready","annual_report_open","annual_report_complete","annual_poster_open","annual_rating_rank_layout_anomaly"]);
+const LAYOUT_NUMBER_KEYS = new Set(["inner_height","visual_viewport_height","visual_viewport_offset_top","visual_viewport_scale","annual_stage_height","scene_top","scene_bottom","scene_height","content_top","content_bottom","content_height","chart_top","chart_bottom","chart_height","scroll_y"]);
+const META_KEYS = new Set(["source","slide_key","action","reason","duration_ms","sync_duration_ms","data_updated_at","songs_count","charts_count","plays_count","job_id","cached","auth_method",...LAYOUT_NUMBER_KEYS,"ua"]);
 export const safeBetaMetadata = (input: unknown) => {
  const value: Record<string,unknown>={};
  if (!input || typeof input!=="object" || Array.isArray(input))return value;
  for (const [key,item] of Object.entries(input)) {
   if(!META_KEYS.has(key))continue;
-  if(typeof item==='number' && Number.isFinite(item))value[key]=Math.max(0,Math.min(item,1e12));
+  if(key==='ua' && typeof item==='string')value[key]=item.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,300);
+  else if(typeof item==='number' && Number.isFinite(item))value[key]=LAYOUT_NUMBER_KEYS.has(key)?Math.max(-1e6,Math.min(item,1e6)):Math.max(0,Math.min(item,1e12));
   else if(typeof item==='boolean')value[key]=item;
   else if(typeof item==='string' && /^[\w .:TZ/+\-]{1,100}$/.test(item))value[key]=item;
  }

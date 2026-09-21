@@ -383,3 +383,11 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Authenticated production acceptance PASS: 390×844 preview remains 370px wide with no promo-footer DOM, overflow, broken image or browser error; Chinese and Japanese exports are real 1080×1872 PNGs; immediate Chinese retry is cache-hit and byte-identical; all production writes used `syncCommunity=false` and returned `communitySync.status=skipped`.
 - Production zh/ja PNGs and a full-resolution quality-55 JPEG decode the QR to the exact public target. Visual inspection of both localized footers PASS. Detailed evidence remains in `docs/annual-poster-export-promo-footer-status.md` and `/var/tmp/annual-export-promo/`.
 - **POSTER EXPORT PROMO FOOTER — COMPLETE.** Historical A–F gates remain COMPLETE / PASS.
+
+## 2026-09-21 / RatingRank mobile layout hotfix
+
+- Independent `0.73.2` viewport/layout patch; historical Annual Poster Community A–F gates and the export promo footer remain closed and are not reopened.
+- RatingRank now consumes `--annual-stage-height`; its paper/content layers have a definite absolute 100% containing block. Waterfall chart geometry, rating data, Annual algorithm, navigation model and other slide UI are unchanged.
+- Added anomaly-only, active-RatingRank telemetry with allowlisted viewport/rectangle/UA fields and no report/user payload. Admin previews and adjacent pre-mounted slides do not emit it.
+- Annual contracts **20 PASS**, isolated build PASS, and 18 Chromium-emulation geometry cases PASS across 360/390/430 widths, visual-height contraction/restoration, `pageshow`, resize, page-08 reload, next→back and reduced motion. This is not a real Android Edge PASS.
+- Detailed record: `docs/annual-rating-rank-layout-hotfix-status.md`. Target Viewer `0.73.2`; standard deployment and production smoke pending.
