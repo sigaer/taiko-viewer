@@ -49,5 +49,20 @@ Evidence is stored outside Git at `/var/tmp/annual-export-promo/`, including `ex
 
 ## Release
 
-- Target version: `0.73.1` (patch).
-- Production deployment and authenticated export smoke are pending the standard release commit and `scripts/deploy_forum_web.sh`.
+- Released version: `0.73.1` (patch), commit `07ed51b 0.73.1 年度分享图增加传播落款`.
+- `scripts/memory/run_build.sh` invoked the standard `scripts/deploy_forum_web.sh` with the HEAD subject and exited 0 on 2026-09-21. The script pushed the release, built and switched the output, reloaded the service and passed local/online health checks. The optional Baidu push reported the existing daily quota condition and remained non-blocking.
+- Online homepage reports `0.73.1`; `taiko-viewer.service` and `taiko-sync-receiver.service` are active, and Viewer `NRestarts=0` after deployment.
+
+## Production acceptance
+
+- Authenticated mobile Poster at 390×844: preview grid width 370px, no horizontal overflow, promo-footer DOM count 0, all four artwork slots loaded, broken images 0 and browser exceptions 0.
+- Authenticated Chinese export with `syncCommunity=false`: HTTP 200, `cached=false`, `communitySync.status=skipped`, real PNG 1080×1872. An immediate repeat returned `cached=true`, the same card id and byte-identical image.
+- Authenticated Japanese export with `syncCommunity=false`: HTTP 200, `cached=false`, `communitySync.status=skipped`, real PNG 1080×1872.
+- Chinese and Japanese production images were visually inspected. The appended footer has the intended hierarchy, spacing and localized CTA; it does not alter the live mobile preview.
+- Production Chinese PNG, Japanese PNG and a full-resolution Chinese JPEG recompressed at quality 55 all decode to exactly `https://viewer.sakura-bot.cn/annual?from=poster`.
+- Community synchronization was explicitly disabled in every production mutation; no Forum post path was invoked.
+- The old production artifact and the new top 1648px are not byte-identical because the stored annual data/render environment has evolved since the historical artifact. Preservation of the content implementation is instead established by the pre-release same-runtime raw-pixel comparison above, which is byte-for-byte identical.
+
+Production evidence is stored outside Git at `/var/tmp/annual-export-promo/production.json`, `production-preview.png`, `production-export-zh.png`, `production-export-ja.png` and `production-export-zh-q55.jpg`.
+
+**POSTER EXPORT PROMO FOOTER — COMPLETE**

@@ -379,4 +379,7 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Renderer revision is `share-card-v3-promo-footer`; dimensions and revision remain part of the fingerprint, preventing collision with the prior `v2` cache.
 - Save-image and community sync keep one canonical renderer/artifact. Mobile Annual Poster layout and Forum synchronization semantics are unchanged.
 - Local contracts, pixel-identity QA, zh/ja screenshots, missing-QR fallback and original/JPEG-compressed QR decode are PASS. Detailed record: `docs/annual-poster-export-promo-footer-status.md`.
-- Target Viewer: `0.73.1`; standard deployment and production export smoke pending.
+- Viewer `0.73.1`, release `07ed51b`, deployed through the standard script under the memory build wrapper; exit 0, online health/version PASS, Viewer service active with `NRestarts=0`.
+- Authenticated production acceptance PASS: 390×844 preview remains 370px wide with no promo-footer DOM, overflow, broken image or browser error; Chinese and Japanese exports are real 1080×1872 PNGs; immediate Chinese retry is cache-hit and byte-identical; all production writes used `syncCommunity=false` and returned `communitySync.status=skipped`.
+- Production zh/ja PNGs and a full-resolution quality-55 JPEG decode the QR to the exact public target. Visual inspection of both localized footers PASS. Detailed evidence remains in `docs/annual-poster-export-promo-footer-status.md` and `/var/tmp/annual-export-promo/`.
+- **POSTER EXPORT PROMO FOOTER — COMPLETE.** Historical A–F gates remain COMPLETE / PASS.

@@ -326,4 +326,5 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Canonical export dimensions are 1080×1872 and renderer identity is `share-card-v3-promo-footer`.
 - QR URL is the public, identifier-free `https://viewer.sakura-bot.cn/annual?from=poster`. QR generation is high-contrast with a four-module quiet zone; server failure is explicit and the component has a no-broken-image fallback.
 - Save and Forum sync reuse the same new artifact. Do not add a separate community renderer or stitch a screenshot onto the old PNG.
-- Local evidence and commands are recorded in `docs/annual-poster-export-promo-footer-status.md`; production deploy/smoke is pending.
+- Local evidence and commands are recorded in `docs/annual-poster-export-promo-footer-status.md`.
+- Release `07ed51b` / Viewer `0.73.1` deployed through the standard script with exit 0. Authenticated production preview/export acceptance, repeat-cache identity, zh/ja visual inspection and PNG/JPEG QR decoding all PASS; community synchronization was disabled throughout. **POSTER EXPORT PROMO FOOTER — COMPLETE.**
