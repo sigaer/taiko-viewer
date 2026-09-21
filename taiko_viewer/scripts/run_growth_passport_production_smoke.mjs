@@ -86,6 +86,7 @@ try {
     [moveDay(shanghaiDay, -8), "09", chart(songs[0], moveDay(shanghaiDay, -8), "09")],
     [moveDay(shanghaiDay, -6), "10", chart(songs[0], moveDay(shanghaiDay, -6), "10", { high_score: 910000 })],
     [moveDay(shanghaiDay, -3), "11", chart(songs[0], moveDay(shanghaiDay, -3), "11", { high_score: 915000, ng_cnt: 4, good_cnt: Number(songs[0].good_cnt) + 4 })],
+    [moveDay(shanghaiDay, -1), "09", chart(songs[0], moveDay(shanghaiDay, -1), "09", { high_score: 915000, ng_cnt: 4, good_cnt: Number(songs[0].good_cnt) + 4 })],
     [moveDay(shanghaiDay, -1), "12", chart(songs[0], moveDay(shanghaiDay, -1), "12", { high_score: 920000, full_combo_cnt: 1, ng_cnt: 0, good_cnt: Number(songs[0].good_cnt) + 8 })]
   ];
   let currentPayload;
@@ -127,6 +128,7 @@ try {
   assert.equal(evaluation.body.outcome, "completed");
   const latestOverview = await request("/api/account/growth/overview", token);
   assert.equal(latestOverview.response.status, 200);
+  assert.ok(latestOverview.body.recentCompletedGoal?.id);
   const activeCandidate = latestOverview.body.todayPlan.items.find(item => item.goalOptions?.includes("score-pb"));
   assert.ok(activeCandidate);
   const activeGoalResult = await request("/api/account/growth/goal", token, { method: "POST", body: JSON.stringify({ profileId: latestOverview.body.profileId, expectedActiveGoalId: null, songId: activeCandidate.songId, difficultyType: activeCandidate.difficultyType, goalType: "score-pb", scoreRevision: latestOverview.body.scoreRevision }) });
@@ -145,11 +147,23 @@ try {
   await insertMeasurement({ day: moveDay(shanghaiDay, -5), hour: "08", model: String(latestMeasurement.model_revision), rating: Number(latestMeasurement.rating) - 4, focus: "complex", dimensions: shifted("accuracy", -4) });
   await insertMeasurement({ day: moveDay(shanghaiDay, -4), hour: "08", model: String(latestMeasurement.model_revision), rating: Number(latestMeasurement.rating) - 2, focus: "accuracy", dimensions: shifted("accuracy", -2) });
   await insertMeasurement({ targetBinding: isolatedBindingId, day: moveDay(shanghaiDay, -2), hour: "08", model: "passport-smoke-isolated", rating: 999, focus: "stamina", dimensions: shifted("stamina", 500) });
+  const [[rawCoverage]] = await db.execute("SELECT COUNT(*) AS rows_count,COUNT(DISTINCT DATE(DATE_ADD(captured_at,INTERVAL 8 HOUR))) AS days_count FROM web_growth_measurements WHERE user_id=? AND binding_id=?", [userId, bindingId]);
 
   const passport = await request("/api/account/growth/passport?range=365&dimension=rating", token);
   assert.equal(passport.response.status, 200);
   assert.equal(passport.body.profileId, String(bindingId));
+  report.api = {
+    totalMs: passport.totalMs,
+    segments: passport.body.segments.length,
+    points: passport.body.segments.reduce((sum, segment) => sum + segment.points.length, 0),
+    focusRuns: passport.body.focusTimeline.length,
+    milestoneTypes: passport.body.milestones.map(item => ({ type: item.primaryType, goalCompleted: item.goalCompleted, observationOnly: item.observationOnly })),
+    recentFactsState: passport.body.coverage.recentFactsState,
+    measurementDays: passport.body.coverage.measurementDays
+  };
   assert.ok(passport.body.segments.length >= 2);
+  assert.ok(Number(rawCoverage.rows_count) > passport.body.segments.reduce((sum, segment) => sum + segment.points.length, 0));
+  assert.equal(Number(rawCoverage.days_count), passport.body.segments.reduce((sum, segment) => sum + segment.points.length, 0));
   assert.ok(passport.body.segments.every(segment => segment.points.every(point => point.bindingId === String(bindingId) && point.rating !== 999)));
   assert.equal(passport.body.currentSegmentChange.compatible, true);
   assert.ok(passport.body.focusTimeline.some(run => run.focus === "complex"));
@@ -158,10 +172,12 @@ try {
   assert.ok(passport.body.milestones.some(item => item.goalCompleted));
   assert.ok(passport.body.milestones.length <= 8);
   assert.ok(passport.body.activeGoal?.id);
-  assert.ok(passport.body.recentCompletedGoal?.id);
+  assert.equal(passport.body.recentCompletedGoal, null);
   assert.ok(passport.body.currentNextAction?.todayPlan?.items?.length);
   assert.ok(passport.body.coverage.measurementDays >= 5);
-  report.api = { totalMs: passport.totalMs, segments: passport.body.segments.length, points: passport.body.segments.reduce((sum, segment) => sum + segment.points.length, 0), focusRuns: passport.body.focusTimeline.length, milestones: passport.body.milestones.length, measurementDays: passport.body.coverage.measurementDays, profileIsolation: "PASS" };
+  report.api.milestones = passport.body.milestones.length;
+  report.api.rawMeasurements = Number(rawCoverage.rows_count);
+  report.api.profileIsolation = "PASS";
 
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium", args: ["--no-sandbox"] });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
