@@ -390,4 +390,6 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - RatingRank now consumes `--annual-stage-height`; its paper/content layers have a definite absolute 100% containing block. Waterfall chart geometry, rating data, Annual algorithm, navigation model and other slide UI are unchanged.
 - Added anomaly-only, active-RatingRank telemetry with allowlisted viewport/rectangle/UA fields and no report/user payload. Admin previews and adjacent pre-mounted slides do not emit it.
 - Annual contracts **20 PASS**, isolated build PASS, and 18 Chromium-emulation geometry cases PASS across 360/390/430 widths, visual-height contraction/restoration, `pageshow`, resize, page-08 reload, next→back and reduced motion. This is not a real Android Edge PASS.
-- Detailed record: `docs/annual-rating-rank-layout-hotfix-status.md`. Target Viewer `0.73.2`; standard deployment and production smoke pending.
+- Viewer `0.73.2`, release `f4fba5e`, deployed through the standard script under the memory build wrapper; exit 0, online health/version PASS, both services active and Viewer `NRestarts=0`.
+- Authenticated production Chromium emulation repeated all 18 cases at 360/390/430 widths with an Android Edge UA: every geometry/visibility/overflow/navigation invariant PASS, browser errors 0, and healthy-layout anomaly events 0. This is explicitly not a real Android Edge PASS; production telemetry and user feedback remain the device signal.
+- Detailed record: `docs/annual-rating-rank-layout-hotfix-status.md`. **RATINGRANK MOBILE LAYOUT HOTFIX — COMPLETE.**

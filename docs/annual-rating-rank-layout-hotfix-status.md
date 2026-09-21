@@ -34,5 +34,18 @@ This environment does not provide a real Android Edge device. The browser result
 
 ## Release
 
-- Target Viewer: `0.73.2` (patch).
-- Standard deployment and authenticated production smoke are pending.
+- Released Viewer: `0.73.2` (patch), commit `f4fba5e 0.73.2 修复年度RatingRank移动端高度错位`.
+- The memory build wrapper invoked `scripts/deploy_forum_web.sh` with the exact HEAD subject and exited 0. Push, install, build, output switch, service reload and local/online health checks all completed through the standard script. The optional Baidu push reached the daily quota and remained non-blocking.
+- Online homepage reports `0.73.2`; Viewer and sync-receiver services are active, with Viewer `NRestarts=0` after deployment.
+
+## Production acceptance
+
+- Authenticated account Annual smoke repeated the same 18 cases at 360×780, 390×844 and 430×932, using Chromium mobile emulation with an Android Edge UA and reduced motion.
+- Initial RatingRank, 120px toolbar-height contraction, restored height, `pageshow`, reload directly on page 08 and next→back→08 all PASS.
+- Every case had exact stage/scene height equality, scene top 0 and bottom equal to the active stage, content filling the scene, positive chart height, header/title and summary inside the scene, next slide invisible, document vertical overflow false and document scroll Y 0.
+- Browser page errors: 0. Captured normal Annual report/slide events; captured `annual_rating_rank_layout_anomaly` events: **0**, confirming the healthy layout does not false-positive.
+- Production evidence: `/var/tmp/annual-rating-rank-layout/production-report.json` and `production-390x844.png`.
+
+This remains Chromium emulation, not a real Android Edge PASS. The deployed anomaly event and ongoing user feedback provide the real-device follow-up path.
+
+**RATINGRANK MOBILE LAYOUT HOTFIX — COMPLETE**
