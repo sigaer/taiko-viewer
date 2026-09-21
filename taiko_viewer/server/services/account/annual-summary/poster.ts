@@ -54,6 +54,20 @@ export const createAnnualQrCodeDataUrl = async (url: string) => {
   }
 };
 
+export const createAnnualShareCardPromoQrCodeDataUrl = async (url: string) => {
+  try {
+    return await QRCode.toDataURL(url, {
+      errorCorrectionLevel: "H",
+      margin: 4,
+      width: 544,
+      color: { dark: "#101921", light: "#FFFFFF" }
+    });
+  } catch (error) {
+    console.warn("[annual-share-card] failed to generate promo QR code", error);
+    return null;
+  }
+};
+
 const screenshotAnnualPage = async (input: {
   url: URL;
   locale: AnnualLocale;

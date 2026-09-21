@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { prepareAnnualAssets } from "~/utils/annualAssets.client";
 import { computed, nextTick, watch } from "vue";
-import AnnualShareGrid from "~/components/account/version-summary/AnnualShareGrid.vue";
+import AnnualShareCardExport from "~/components/account/version-summary/AnnualShareCardExport.vue";
 import type { AnnualSummaryV4 } from "~/types/account-version-summary";
 import { normalizeAnnualSummary } from "~/utils/annualSummary";
 
@@ -18,7 +18,7 @@ const summaryId = String(route.params.summaryId || "");
 const translate = (key: string, params?: Record<string, unknown>) => t(key, params || {}, { locale: desiredLocale });
 
 const { data, error } = await useAsyncData(`annual-share-card-${summaryId}-${desiredLocale}`, () =>
-  apiFetch<{ summary: AnnualSummaryV4 }>(`/api/internal/annual-share-cards/${encodeURIComponent(summaryId)}`, { query: { token: renderToken, locale: desiredLocale } })
+  apiFetch<{ summary: AnnualSummaryV4; promoQrCodeDataUrl: string; promoUrl: string }>(`/api/internal/annual-share-cards/${encodeURIComponent(summaryId)}`, { query: { token: renderToken, locale: desiredLocale } })
 );
 
 const summary = computed(() => data.value?.summary ? normalizeAnnualSummary(data.value.summary, desiredLocale, translate) : null);
@@ -38,13 +38,18 @@ watch(summary, () => { if (process.client && summary.value) void markReady(); },
 
 <template>
   <main class="share-card-render-page">
-    <AnnualShareGrid v-if="summary" :summary="summary" :locale="desiredLocale" export-mode />
+    <AnnualShareCardExport
+      v-if="summary"
+      :summary="summary"
+      :locale="desiredLocale"
+      :qr-code-data-url="data?.promoQrCodeDataUrl"
+      :qr-target-url="data?.promoUrl || ''"
+    />
     <p v-else>{{ error ? translate("annualSummary.state.loadFailed") : translate("annualSummary.state.loading") }}</p>
   </main>
 </template>
 
 <style scoped>
-.share-card-render-page{width:1080px;height:1648px;overflow:hidden;background:#fff}
-.share-card-render-page>:deep(.annual-share-grid){width:1080px;height:1648px;aspect-ratio:auto}
+.share-card-render-page{width:1080px;height:1872px;overflow:hidden;background:#fff}
 .share-card-render-page>p{margin:0;width:100%;height:100%;display:grid;place-items:center;color:#17365d;background:#fff;font-size:28px}
 </style>

@@ -370,3 +370,13 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - **Phase E job/polling deviation: accepted as intentional.** The master plan sketched a job queue plus polling; `0.56.0+` renders the share card synchronously through Playwright, and thirteen days of real production use show stable generation with no timeout evidence. No queue, worker, polling layer or job table will be added.
 - Already-fixed items remain recorded above and are unchanged by this round: the Nitro `[summaryId]`/`[key]` route collision that shadowed `my-don`, `shares`, `posters` and `build` (fixed in `0.56.0`), and the Phase F concurrent-upsert id clobbering that lost the `forum_thread_id` linkage (fixed in `0.57.0`).
 - Version `0.57.1` (patch: admin preview asset fix). `scripts/deploy_forum_web.sh` with the release subject exited 0. No further phases, features or polish are planned.
+
+## 2026-09-21 / Post-closeout export promo footer
+
+- This is an independent post-closeout Viewer patch. The historical A–F gates remain COMPLETE / PASS and are not reopened.
+- Poster preview remains unchanged and contains no promo-footer DOM. The canonical export keeps the original `AnnualShareGrid` at 1080×1648 and appends a separate 224px signature area, producing 1080×1872.
+- The QR target is exactly `https://viewer.sakura-bot.cn/annual?from=poster`; it contains no account, summary, token, invite or other private identifier.
+- Renderer revision is `share-card-v3-promo-footer`; dimensions and revision remain part of the fingerprint, preventing collision with the prior `v2` cache.
+- Save-image and community sync keep one canonical renderer/artifact. Mobile Annual Poster layout and Forum synchronization semantics are unchanged.
+- Local contracts, pixel-identity QA, zh/ja screenshots, missing-QR fallback and original/JPEG-compressed QR decode are PASS. Detailed record: `docs/annual-poster-export-promo-footer-status.md`.
+- Target Viewer: `0.73.1`; standard deployment and production export smoke pending.

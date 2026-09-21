@@ -546,3 +546,9 @@ Preview/export data comparison passed for annual song, maximum speed, title, hig
 - Private production evidence: `production.json`, `production-390.png`, `production-save-visible.png`, `production-export.png`, `production-export-ja.png`, `production.log`, `deploy.log` under `/var/tmp/annual-preview-decoupling/`.
 
 **Final: Preview responsive / wide; Export fixed / canonical. Algorithm remains annual-observation-v4.5.0. CONTINUE WAVE 1 / HOLD WAVE 2.** Real iOS/Android device acceptance remains open.
+
+## Export promo footer patch — 0.73.1
+
+The closed-beta gate remains **CONTINUE WAVE 1 / HOLD WAVE 2**; invitation inventory, algorithm, generator, funnel and mobile Poster preview are unchanged. This patch affects only the saved/community Annual image: the canonical 1080×1648 grid remains pixel-identical and receives a 224px public promotional signature, yielding 1080×1872.
+
+The export renderer is `share-card-v3-promo-footer`; the fingerprint includes the new dimensions and revision. Its QR resolves only to `https://viewer.sakura-bot.cn/annual?from=poster`. Local zh/ja visual QA, missing-QR fallback, pixel identity and QR decoding after full-resolution JPEG quality-55 compression passed. See `annual-poster-export-promo-footer-status.md`. Standard production deployment and authenticated export smoke are pending.

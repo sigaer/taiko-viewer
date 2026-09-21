@@ -25,6 +25,7 @@ import {
   ANNUAL_POSTER_WIDTH,
   ANNUAL_SCHEMA_VERSION,
   ANNUAL_SHARE_CARD_HEIGHT,
+  ANNUAL_SHARE_CARD_PROMO_URL,
   ANNUAL_SHARE_CARD_RENDERER_REVISION,
   ANNUAL_SHARE_CARD_WIDTH,
   ANNUAL_SHARE_TTL_MS,
@@ -32,7 +33,7 @@ import {
   getAnnualVersion,
   resolveAnnualVersion
 } from "./constants";
-import { createAnnualQrCodeDataUrl, renderAnnualPoster, renderAnnualShareCard } from "./poster";
+import { createAnnualQrCodeDataUrl, createAnnualShareCardPromoQrCodeDataUrl, renderAnnualPoster, renderAnnualShareCard } from "./poster";
 import { enrichAnnualSummary } from "./presentation";
 import { enrichAnnualRatingDistributionAtRead, enrichAnnualRatingRank } from "./ratings";
 import {
@@ -1080,8 +1081,14 @@ export const getInternalAnnualShareCardPayload = async (summaryId: string, token
   const row = await findAnnualSummaryById(summaryId);
   const summary = await safeReadSummary(row);
   if (!row || !summary) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const promoQrCodeDataUrl = await createAnnualShareCardPromoQrCodeDataUrl(ANNUAL_SHARE_CARD_PROMO_URL);
+  if (!promoQrCodeDataUrl) {
+    throw createError({ statusCode: 500, statusMessage: "年度分享图片二维码生成失败" });
+  }
   const enriched = await withOwnerAssets(summary, normalizeAnnualLocale(localeInput));
   return {
+    promoQrCodeDataUrl,
+    promoUrl: ANNUAL_SHARE_CARD_PROMO_URL,
     summary: {
       ...enriched,
       profileCard: {

@@ -16,9 +16,12 @@ export const ANNUAL_POSTER_WIDTH = 1080;
 export const ANNUAL_POSTER_HEIGHT = 1440;
 // The share card keeps the square_bg 363x554 ratio instead of the legacy poster frame.
 export const ANNUAL_SHARE_CARD_WIDTH = 1080;
-export const ANNUAL_SHARE_CARD_HEIGHT = 1648;
+export const ANNUAL_SHARE_CARD_CONTENT_HEIGHT = 1648;
+export const ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT = 224;
+export const ANNUAL_SHARE_CARD_HEIGHT = ANNUAL_SHARE_CARD_CONTENT_HEIGHT + ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT;
+export const ANNUAL_SHARE_CARD_PROMO_URL = "https://viewer.sakura-bot.cn/annual?from=poster";
 // Bump when the rendered share-card markup or CSS changes so cached files are re-rendered.
-export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v2-assets";
+export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v3-promo-footer";
 export const ANNUAL_MAX_EVENT_PAGE_SIZE = 200;
 
 export const getAnnualVersion = (): AnnualVersion => ({

@@ -318,3 +318,12 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Acceptance threads: `53` (zh) and `55` (ja) are referenced by share-card rows and stay. `54` is referenced by no row, has zero replies and zero likes, and is a pre-fix race artifact — suitable for hiding or deletion, but **not deleted here** because production deletion needs explicit approval.
 - The synchronous Playwright renderer (no job/polling layer) is now formally accepted; the plan's job sketch will not be implemented, and no timeout problems have appeared in production.
 - Release: `0.57.1` (patch) deployed with the standard script, exit 0. This closes the annual poster community work: A–F complete, production baseline `0.57.1`, no further phases planned.
+
+## 2026-09-21 / Export promo footer handoff
+
+- Treat this as a post-closeout `0.73.1` patch; do not reopen Annual Poster Community phases A–F.
+- Preview remains `AnnualShareGrid` only. Export uses `AnnualShareCardExport` to append a 224px footer beneath the pixel-stable 1080×1648 grid.
+- Canonical export dimensions are 1080×1872 and renderer identity is `share-card-v3-promo-footer`.
+- QR URL is the public, identifier-free `https://viewer.sakura-bot.cn/annual?from=poster`. QR generation is high-contrast with a four-module quiet zone; server failure is explicit and the component has a no-broken-image fallback.
+- Save and Forum sync reuse the same new artifact. Do not add a separate community renderer or stitch a screenshot onto the old PNG.
+- Local evidence and commands are recorded in `docs/annual-poster-export-promo-footer-status.md`; production deploy/smoke is pending.
