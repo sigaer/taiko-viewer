@@ -36,6 +36,8 @@ test('RatingRank anomaly telemetry is active-only, bounded, and geometry-only', 
   assert.match(player, /window\.visualViewport/);
   assert.match(player, /--annual-stage-height/);
   assert.match(player, /sceneRect\.height - annualStageHeight/);
+  assert.match(player, /axisLabelsRect\.bottom > visualRect\.bottom - axisSafeMargin/);
+  assert.match(player, /axis_safe_margin:/);
   assert.match(player, /nextSlideTop < stageRect\.bottom - tolerance/);
   assert.match(player, /document\.documentElement\.scrollHeight > window\.innerHeight/);
   assert.match(player, /settleRatingRankLayoutCheck\(\)/);
@@ -44,8 +46,17 @@ test('RatingRank anomaly telemetry is active-only, bounded, and geometry-only', 
   assert.match(events, /LAYOUT_NUMBER_KEYS/);
 });
 
-test('RatingRank hotfix leaves waterfall geometry and navigation code untouched by contract', async () => {
-  const scene = await read('components/account/version-summary/AnnualRatingRankScene.vue');
+test('RatingRank waterfall reserves an explicit bottom safe area without changing its 19-rank contract', async () => {
+  const [scene, chart] = await Promise.all([
+    read('components/account/version-summary/AnnualRatingRankScene.vue'),
+    read('components/account/version-summary/AnnualRatingWaterfallChart.vue')
+  ]);
   assert.match(scene, /<AnnualRatingWaterfallChart/);
   assert.doesNotMatch(scene, /viewBox|createLayerPath|chartLeft|chartRight/);
+  assert.match(chart, /const RANK_COUNT = 19/);
+  assert.match(chart, /const chartBottom = 1550/);
+  assert.match(chart, /const axisY = 1590/);
+  assert.match(chart, /const axisBottomSafeArea = 56/);
+  assert.match(chart, /:data-axis-safe-area="axisBottomSafeArea"/);
+  assert.doesNotMatch(chart, /transform="translate\(0 -55\)"/);
 });

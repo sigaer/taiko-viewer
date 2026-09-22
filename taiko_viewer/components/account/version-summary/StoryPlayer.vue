@@ -88,9 +88,12 @@ const checkRatingRankLayout = () => {
   const scene = stage?.querySelector<HTMLElement>(".annual-rating-rank-scene");
   const content = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__content");
   const chart = scene?.querySelector<HTMLElement>(".annual-rating-waterfall-chart");
+  const visual = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__visual");
+  const svg = chart?.querySelector<SVGSVGElement>(".annual-rating-waterfall-chart__svg");
+  const axisLabels = svg?.querySelector<SVGGElement>(".annual-rating-waterfall-chart__labels");
   const header = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__header");
   const summary = scene?.querySelector<HTMLElement>(".annual-rating-rank-scene__summary");
-  if (!stage || !scene || !content || !chart || !header || !summary) return;
+  if (!stage || !scene || !content || !chart || !visual || !svg || !axisLabels || !header || !summary) return;
 
   const viewport = window.visualViewport;
   if (viewport && Math.abs(viewport.scale - 1) > 0.05) return;
@@ -104,8 +107,17 @@ const checkRatingRankLayout = () => {
   const sceneRect = scene.getBoundingClientRect();
   const contentRect = content.getBoundingClientRect();
   const chartRect = chart.getBoundingClientRect();
+  const visualRect = visual.getBoundingClientRect();
+  const svgRect = svg.getBoundingClientRect();
+  const axisLabelsRect = axisLabels.getBoundingClientRect();
   const headerRect = header.getBoundingClientRect();
   const summaryRect = summary.getBoundingClientRect();
+  const axisSafeArea = Number.parseFloat(svg.dataset.axisSafeArea || "0");
+  const viewBoxHeight = svg.viewBox.baseVal.height;
+  const renderedAxisScale = Math.abs(svg.getScreenCTM()?.d || 0);
+  const axisSafeMargin = Number.isFinite(axisSafeArea) && viewBoxHeight > 0
+    ? axisSafeArea * (renderedAxisScale || svgRect.height / viewBoxHeight)
+    : 0;
   const nextSlideTop = (stage.nextElementSibling as HTMLElement | null)?.getBoundingClientRect().top;
   const documentOverflow = document.documentElement.scrollHeight > window.innerHeight + tolerance;
   const mismatch =
@@ -115,6 +127,8 @@ const checkRatingRankLayout = () => {
     || Math.abs(contentRect.top - sceneRect.top) > tolerance
     || Math.abs(contentRect.bottom - sceneRect.bottom) > tolerance
     || rectOutside(chartRect, sceneRect, tolerance)
+    || rectOutside(visualRect, sceneRect, tolerance)
+    || axisLabelsRect.bottom > visualRect.bottom - axisSafeMargin + tolerance
     || rectOutside(headerRect, sceneRect, tolerance)
     || rectOutside(summaryRect, sceneRect, tolerance)
     || (typeof nextSlideTop === "number" && nextSlideTop < stageRect.bottom - tolerance)
@@ -138,6 +152,13 @@ const checkRatingRankLayout = () => {
     chart_top: roundedLayoutValue(chartRect.top),
     chart_bottom: roundedLayoutValue(chartRect.bottom),
     chart_height: roundedLayoutValue(chartRect.height),
+    visual_top: roundedLayoutValue(visualRect.top),
+    visual_bottom: roundedLayoutValue(visualRect.bottom),
+    visual_height: roundedLayoutValue(visualRect.height),
+    axis_labels_top: roundedLayoutValue(axisLabelsRect.top),
+    axis_labels_bottom: roundedLayoutValue(axisLabelsRect.bottom),
+    axis_labels_height: roundedLayoutValue(axisLabelsRect.height),
+    axis_safe_margin: roundedLayoutValue(axisSafeMargin),
     scroll_y: roundedLayoutValue(window.scrollY),
     ua: navigator.userAgent
   });

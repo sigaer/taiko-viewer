@@ -6,7 +6,7 @@ import { createServer } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 const root = process.cwd();
-const outputDir = '/var/tmp/annual-rating-rank-layout';
+const outputDir = '/var/tmp/annual-rating-rank-axis';
 const temp = await mkdtemp('/var/tmp/annual-rating-rank-fixture-');
 await mkdir(outputDir, { recursive: true });
 await writeFile(`${temp}/index.html`, '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"></head><body><div id="app"></div><script type="module" src="/main.js"></script></body></html>');
@@ -77,17 +77,40 @@ try {
     const scene = rect('.annual-rating-rank-scene');
     const content = rect('.annual-rating-rank-scene__content');
     const chart = rect('.annual-rating-waterfall-chart');
+    const visual = rect('.annual-rating-rank-scene__visual');
+    const svg = rect('.annual-rating-waterfall-chart__svg');
+    const axis = rect('.annual-rating-waterfall-chart__axis');
+    const axisLabels = rect('.annual-rating-waterfall-chart__labels');
+    const marker = rect('.annual-rating-waterfall-chart__marker');
     const header = rect('.annual-rating-rank-scene__header');
     const title = rect('.annual-rating-rank-scene__title');
     const summary = rect('.annual-rating-rank-scene__summary');
     const viewport = rect('.story-player__viewport');
     const next = rect('.story-player__slide[data-page-key="monthly"]');
+    const svgElement = document.querySelector('.annual-rating-waterfall-chart__svg');
+    const axisSafeArea = Number.parseFloat(svgElement.dataset.axisSafeArea || '0');
+    const viewBoxHeight = svgElement.viewBox.baseVal.height;
+    const renderedAxisScale = Math.abs(svgElement.getScreenCTM()?.d || 0);
+    const axisSafeMargin = +(axisSafeArea * (renderedAxisScale || svg.height / viewBoxHeight)).toFixed(2);
+    const tickLabels = [...document.querySelectorAll('.annual-rating-waterfall-chart__labels text')].map((item) => item.textContent.trim());
+    const rankTags = [...document.querySelectorAll('.annual-rating-waterfall-chart__rank-tags text')].map((item) => {
+      const value = item.getBoundingClientRect();
+      return { text: item.textContent.trim(), top: +value.top.toFixed(2), bottom: +value.bottom.toFixed(2) };
+    });
+    const bottomRank = rankTags.reduce((lowest, item) => !lowest || item.bottom > lowest.bottom ? item : lowest, null);
     return {
       label: caseLabel,
       innerHeight: window.innerHeight,
       visualViewport: window.visualViewport ? { height: +window.visualViewport.height.toFixed(2), offsetTop: +window.visualViewport.offsetTop.toFixed(2), scale: window.visualViewport.scale } : null,
       annualStageHeight: +Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--annual-stage-height')).toFixed(2),
-      stage, scene, content, chart, header, title, summary, viewport, next,
+      stage, scene, content, chart, visual, svg, axis, axisLabels, marker, header, title, summary, viewport, next,
+      axisSafeArea,
+      axisSafeMargin,
+      axisClearance: +(visual.bottom - axisLabels.bottom).toFixed(2),
+      tickLabels,
+      rankTagCount: rankTags.length,
+      bottomRank,
+      layerCount: document.querySelectorAll('.annual-rating-waterfall-chart__layer').length,
       nextVisible: next.top < viewport.bottom - 1,
       documentOverflow: document.documentElement.scrollHeight > window.innerHeight + 1,
       scrollY: window.scrollY,
@@ -102,6 +125,17 @@ try {
     assert.ok(metrics.scene.top >= metrics.stage.top - tolerance && metrics.scene.bottom <= metrics.stage.bottom + tolerance, `${metrics.label}: scene within stage`);
     assert.ok(Math.abs(metrics.content.top - metrics.scene.top) <= tolerance && Math.abs(metrics.content.bottom - metrics.scene.bottom) <= tolerance, `${metrics.label}: content fills scene`);
     assert.ok(metrics.chart.height > 0 && metrics.chart.top >= metrics.scene.top - tolerance && metrics.chart.bottom <= metrics.scene.bottom + tolerance, `${metrics.label}: chart within scene`);
+    assert.ok(
+      metrics.visual.height > 0 && metrics.svg.top >= metrics.visual.top - tolerance && metrics.svg.bottom <= metrics.visual.bottom + tolerance,
+      `${metrics.label}: svg within visual (${JSON.stringify({ visual: metrics.visual, chart: metrics.chart, svg: metrics.svg })})`
+    );
+    assert.ok(metrics.axis.top >= metrics.visual.top - tolerance && metrics.axis.bottom <= metrics.visual.bottom - metrics.axisSafeMargin + tolerance, `${metrics.label}: axis line safe area`);
+    assert.ok(metrics.axisLabels.bottom <= metrics.visual.bottom - metrics.axisSafeMargin + tolerance, `${metrics.label}: axis labels safe area (${metrics.axisClearance}px >= ${metrics.axisSafeMargin}px)`);
+    assert.deepEqual(metrics.tickLabels, ['0', '4', '8', '12', '16'], `${metrics.label}: all x-axis labels`);
+    assert.equal(metrics.rankTagCount, 19, `${metrics.label}: all 19 rank labels`);
+    assert.equal(metrics.layerCount, 19, `${metrics.label}: all 19 waterfall layers`);
+    assert.ok(metrics.bottomRank && metrics.bottomRank.bottom <= metrics.visual.bottom - tolerance, `${metrics.label}: lowest rank visible`);
+    assert.ok(metrics.marker.top >= metrics.visual.top - tolerance && metrics.marker.bottom <= metrics.visual.bottom - tolerance, `${metrics.label}: marker visible`);
     assert.ok(metrics.header.top >= metrics.scene.top - tolerance && metrics.title.bottom <= metrics.scene.bottom + tolerance, `${metrics.label}: header/title within scene`);
     assert.ok(metrics.summary.top >= metrics.scene.top - tolerance && metrics.summary.bottom <= metrics.scene.bottom + tolerance, `${metrics.label}: summary within scene`);
     assert.equal(metrics.nextVisible, false, `${metrics.label}: next slide must not be visible`);
@@ -111,7 +145,14 @@ try {
   };
 
   for (const [width, height] of [[360, 780], [390, 844], [430, 932]]) {
-    const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
+    const context = await browser.newContext({
+      viewport: { width, height },
+      reducedMotion: 'reduce',
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 3,
+      userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 EdgA/140.0.0.0'
+    });
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -123,10 +164,10 @@ try {
       const metrics = await measure(page, `${width}x${page.viewportSize().height}-${label}`);
       assertRatingRank(metrics);
       report.push(metrics);
+      await page.screenshot({ path: `${outputDir}/${width}x${page.viewportSize().height}-${label}.png` });
     };
 
     await capture('initial');
-    await page.screenshot({ path: `${outputDir}/${width}x${height}.png` });
 
     await page.setViewportSize({ width, height: height - 120 });
     await page.waitForTimeout(300);

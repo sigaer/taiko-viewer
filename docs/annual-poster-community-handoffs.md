@@ -336,3 +336,11 @@ Recovery audit: nonce lookup precedes the limiter, but concurrent in-flight retr
 - Anomaly telemetry runs only for the active account RatingRank slide and sends only viewport/geometry/UA diagnostics when a mismatch exists. It is locally and server-side deduplicated.
 - Annual tests, isolated build and 18 Chromium-emulation scenarios at 360/390/430 widths PASS. Real Android Edge has not been tested and must not be claimed as PASS.
 - Release `f4fba5e` / Viewer `0.73.2` deployed through the standard script with exit 0. Authenticated production Chromium emulation repeated all 18 cases with browser errors 0 and no false-positive anomaly event. This is not a real Android Edge PASS; keep collecting device feedback through the deployed telemetry. **RATINGRANK MOBILE LAYOUT HOTFIX — COMPLETE.**
+
+## 2026-09-22 / RatingRank waterfall x-axis hotfix handoff
+
+- Treat this as an independent `0.73.3` chart-internal compatibility patch. Do not roll back the `0.73.2` stage-height contract or change RatingRank data, layer count, Annual calculations, navigation or other slides.
+- The plot-wide `translate(0 -55)` is removed. Formal coordinates preserve 19 layers and reserve a declared 56-viewBox-unit bottom safe area; the SVG is inset into its definite chart wrapper while visual overflow stays hidden.
+- The existing active-only anomaly event is extended with visual/axis-label rectangles and scale-adjusted safe margin. Healthy layouts remain silent; no user data is added.
+- Annual tests and 18 Chromium mobile-emulation scenarios at 360/390/430 widths PASS, including toolbar contraction/restoration, `pageshow`, page-08 reload, next→back and reduced motion. This is not a real Android Edge PASS.
+- Detailed local evidence is in `docs/annual-rating-rank-waterfall-axis-hotfix-status.md` and `/var/tmp/annual-rating-rank-axis/`. Release and production acceptance are pending.

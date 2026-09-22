@@ -28,9 +28,10 @@ const viewBoxHeight = 1700;
 const chartLeft = 90;
 const chartRight = 1010;
 const chartTop = 70;
-const chartBottom = 1600;
-const axisY = 1630;
-const layerGap = 76;
+const chartBottom = 1550;
+const axisY = 1590;
+const axisBottomSafeArea = 56;
+const layerGap = 74;
 const layerDepth = 3;
 const maxPeakHeight = 162;
 const fallbackRatingMax = 16;
@@ -175,7 +176,12 @@ const isEmpty = computed(() => props.ranks.length === 0);
     role="img"
     :aria-label="`rating b20 ${ratingB20.toFixed(4)}，超过 ${percentileLabel} 的鼓手`"
   >
-    <svg class="annual-rating-waterfall-chart__svg" :viewBox="`0 0 ${viewBoxWidth} ${viewBoxHeight}`" aria-hidden="true">
+    <svg
+      class="annual-rating-waterfall-chart__svg"
+      :viewBox="`0 0 ${viewBoxWidth} ${viewBoxHeight}`"
+      :data-axis-safe-area="axisBottomSafeArea"
+      aria-hidden="true"
+    >
       <defs>
         <linearGradient id="rating-waterfall-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#fdf7ea" />
@@ -209,7 +215,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
       <rect x="0" y="0" :width="viewBoxWidth" :height="viewBoxHeight" fill="url(#rating-waterfall-bg)" />
       <rect x="0" y="0" :width="viewBoxWidth" :height="viewBoxHeight" fill="url(#rating-waterfall-horizon)" />
 
-      <g class="annual-rating-waterfall-chart__plot" transform="translate(0 -55)">
+      <g class="annual-rating-waterfall-chart__plot">
 
       <g class="annual-rating-waterfall-chart__grid">
         <path
@@ -272,7 +278,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
         </text>
       </g>
 
-      <path :d="`M ${chartLeft} ${axisY} L ${chartRight} ${axisY}`" stroke="#8d7d69" stroke-opacity=".6" stroke-width="1.6" fill="none" />
+      <path class="annual-rating-waterfall-chart__axis" :d="`M ${chartLeft} ${axisY} L ${chartRight} ${axisY}`" stroke="#8d7d69" stroke-opacity=".6" stroke-width="1.6" fill="none" />
 
       <g v-if="hasMarker" class="annual-rating-waterfall-chart__marker">
         <line :x1="markerX" :y1="axisY" :x2="markerX" :y2="chartBottom" stroke="#c2513c" stroke-opacity=".3" stroke-width="1.4" stroke-dasharray="3 5" />
@@ -298,6 +304,7 @@ const isEmpty = computed(() => props.ranks.length === 0);
 
 <style scoped>
 .annual-rating-waterfall-chart {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -306,6 +313,8 @@ const isEmpty = computed(() => props.ranks.length === 0);
   contain: layout paint;
 }
 .annual-rating-waterfall-chart__svg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;

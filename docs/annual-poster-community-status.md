@@ -393,3 +393,11 @@ The earlier Data Contract Audit remains valid; earlier visual evidence does not 
 - Viewer `0.73.2`, release `f4fba5e`, deployed through the standard script under the memory build wrapper; exit 0, online health/version PASS, both services active and Viewer `NRestarts=0`.
 - Authenticated production Chromium emulation repeated all 18 cases at 360/390/430 widths with an Android Edge UA: every geometry/visibility/overflow/navigation invariant PASS, browser errors 0, and healthy-layout anomaly events 0. This is explicitly not a real Android Edge PASS; production telemetry and user feedback remain the device signal.
 - Detailed record: `docs/annual-rating-rank-layout-hotfix-status.md`. **RATINGRANK MOBILE LAYOUT HOTFIX — COMPLETE.**
+
+## 2026-09-22 / RatingRank waterfall x-axis hotfix
+
+- Independent `0.73.3` chart-internal patch; the `0.73.2` `--annual-stage-height` and visualViewport contract remains intact.
+- Removed the waterfall-wide `translate(0 -55)`, formalized 19-layer/axis coordinates and reserved a declared 56-unit bottom safe area for axis labels. The SVG is constrained to the chart wrapper's definite box; visual overflow remains hidden.
+- Existing anomaly-only telemetry now also detects an axis-label bbox crossing the visual safe boundary and emits only allowlisted geometry diagnostics.
+- Annual contracts **20 PASS** and 18 Android Edge-style Chromium-emulation cases PASS across 360/390/430 widths, toolbar height changes, `pageshow`, page-08 reload, next→back and reduced motion. All 19 layers/rank labels and `0 / 4 / 8 / 12 / 16` are present. Real Android Edge has not been tested.
+- Detailed record: `docs/annual-rating-rank-waterfall-axis-hotfix-status.md`. Release and production acceptance are pending.
