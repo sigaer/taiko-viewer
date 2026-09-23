@@ -554,3 +554,13 @@ The closed-beta gate remains **CONTINUE WAVE 1 / HOLD WAVE 2**; invitation inven
 The export renderer is `share-card-v3-promo-footer`; the fingerprint includes the new dimensions and revision. Its QR resolves only to `https://viewer.sakura-bot.cn/annual?from=poster`. Local zh/ja visual QA, missing-QR fallback, pixel identity and QR decoding after full-resolution JPEG quality-55 compression passed. See `annual-poster-export-promo-footer-status.md`.
 
 Viewer `0.73.1`, release `07ed51b`, was deployed through the standard script with exit 0. Authenticated production acceptance passed: mobile preview stayed unchanged with no footer DOM; zh/ja saved images are 1080×1872; a repeated Chinese save reused the same byte-identical artifact; community sync was disabled and reported skipped; both PNGs and a quality-55 JPEG decoded the exact target URL. **POSTER EXPORT PROMO FOOTER — COMPLETE.**
+
+## 2026-09-24 — Chinese beta administration and Wave 2 distribution
+
+User explicitly authorized Wave 2 distribution, superseding the earlier operational hold. Release target **0.75.0**. No claim of retroactive real-device acceptance or increased generation/render capacity.
+
+- Admin labels, states, funnel, hints and event names are Chinese. Users appear by account username; record UUIDs are confined to labeled technical details. Feedback answers have Chinese field labels.
+- Dedicated 发放邀请码 section defaults to 第二批 and reveals/copies actual bearer codes. Code originals remain in a private 0600 runtime vault outside Git; database hashes, current availability and cohort must match. The operator-only same-origin POST is non-cacheable and logs only batch/count. General dashboard responses never carry raw codes.
+- Read-only production inventory: current first batch **6/40 available**, second batch **32/32 available**. Existing 32-character second-batch invitations remain valid; no replacement, redemption, expiry extension or entitlement mutation occurred. Original expiry is preserved. Release authorization concerns making these codes available to distribute, not automatically messaging invitees.
+- Eight focused unit tests PASS (short/legacy code compatibility, collision bounds, localized errors, file restrictions and live-invitation filtering). Real Vue/Element Plus browser fixture PASS for reveal, clipboard copy, batch change, hiding, participant details and 1440/390px layout, with zero page errors. Fixture APIs are synthetic; this is not authenticated production acceptance.
+- Runtime vault provisioned from the existing current-ready Wave 1 and Wave 2 private CSVs; reserve/internal/retired batches remain excluded. No raw code appears in Git, test output or screenshots.

@@ -24,10 +24,11 @@ export const betaDashboard = async (includeInternal = false) => {
     WHEN expires_at<=NOW() THEN 'expired' ELSE 'available' END AS status
     FROM web_beta_invites WHERE ${includeInternal ? '1=1' : 'analysis_excluded=0'} ORDER BY created_at DESC LIMIT 500`);
   const [participants]: any = await db.query(`SELECT p.*,NOT (${eligible}) AS analysis_excluded_effective,
-    MAX(e.occurred_at) AS last_seen,COUNT(DISTINCT e.event_name) AS event_types,
+    MAX(u.username) AS username,MAX(e.occurred_at) AS last_seen,COUNT(DISTINCT e.event_name) AS event_types,
     GROUP_CONCAT(DISTINCT e.event_name) AS completed_events,MAX(a.enabled) AS entitlement_enabled,
     MAX(i.expires_at) AS invite_expires_at,MAX(i.disabled_at) AS invite_disabled_at
     FROM web_beta_participants p JOIN web_beta_events e ON e.participant_id=p.id
+    LEFT JOIN web_user_accounts u ON u.id=p.user_id
     LEFT JOIN web_annual_summary_access a ON a.user_id=p.user_id LEFT JOIN web_beta_invites i ON i.id=p.invite_id
     WHERE ${filter} GROUP BY p.id ORDER BY (p.invite_id IS NOT NULL) DESC,last_seen DESC LIMIT 200`);
   const [times]: any = await db.query(`SELECT e.participant_id,e.event_name,MIN(e.occurred_at) AS first_at,MAX(e.occurred_at) AS last_at

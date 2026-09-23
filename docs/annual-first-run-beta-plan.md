@@ -54,3 +54,11 @@ Wave 2 前确认 Wave 1 全路径有实际记录且无未解决 P0/P1，数据�
 唯一部署入口 `bash scripts/deploy_forum_web.sh "<HEAD subject>"`，失败即停，不手动替换输出或重启绕过。称号关联文件已按 `annual-beta-title-relations-audit.md` 收敛到 Git HEAD；历史固定 SHA、stash/restore 例外不再适用。
 
 邀请码、私有认证文件和测试证据保留在 /var/tmp，禁止纳入 Git。封闭测试结束后由运营决定反馈保留时间，并清理过期 pending/session 与未归属匿名数据；不把原始邀请码加入分析系统。
+
+## 2026-09-24 — Wave 2 distribution authorized
+
+The user explicitly requested opening Wave 2 and a usable Chinese admin interface. This supersedes the previous operational **HOLD WAVE 2** instruction for invitation distribution. Wave 2 uses the existing 32 invitations, with no new entitlement, generator-concurrency or algorithm change. Historical real-device acceptance remains historical; opening distribution does not retroactively mark it PASS.
+
+The admin page defaults to 第二批 under 发放邀请码. Operators explicitly reveal current unused, enabled, unexpired formal codes and copy them individually. The existing annual-report operator restriction still applies. Revealing or copying does not redeem a code or prove that it was delivered; invitation disable also retains its existing meaning.
+
+Original codes are provisioned in `/var/lib/taiko/annual-beta/invites.csv` (directory 0700, file 0600), outside Git and public assets. This private runtime vault contains the current Wave 1 ready batch and Wave 2 batch; reserve and retired/internal batches are not included. The server matches each original code's SHA-256 and cohort to the live invitation row before revealing it. Missing originals are reported explicitly, never replaced by record IDs. The reveal endpoint requires trusted administrator authentication, annual operator authorization and same-origin POST; its response is `private, no-store`. Audit records contain batch/count only, never codes. The UI keeps revealed values only in component memory and clears them on batch switch, hide and unmount. New future batches require explicit provisioning into this vault as well as DB generation; the CSV generation CLI does not automatically publish new codes into the dashboard.
