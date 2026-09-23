@@ -1,0 +1,235 @@
+timestamp,source,pid,scope,rss_kib,pss_kib,rss_anon_kib,rss_file_kib,swap_kib,threads,cpu_percent,timestamp_precision
+2026-09-23T16:00:27.451275+08:00,host_monitor,3222811,process,988176,944929,,,0,,,collector_time_not_atomic
+2026-09-23T16:00:27.451275+08:00,host_monitor,3222718,process,237796,210198,,,0,,,collector_time_not_atomic
+2026-09-23T16:00:53+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,1546308,1363364,1260452,,0,101,,collector_time_not_atomic
+2026-09-23T16:00:53+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,45602,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:01:27.347621+08:00,host_monitor,3222811,process,987916,944703,,,0,,,collector_time_not_atomic
+2026-09-23T16:01:27.347621+08:00,host_monitor,3222718,process,237748,210181,,,0,,,collector_time_not_atomic
+2026-09-23T16:02:27.652865+08:00,host_monitor,3222811,process,996696,953957,,,0,,,collector_time_not_atomic
+2026-09-23T16:02:27.652865+08:00,host_monitor,3222718,process,236932,209835,,,0,,,collector_time_not_atomic
+2026-09-23T16:02:59+08:00,existing_gc_trim_before,3222811 (inferred),process,1031564,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:02:59+08:00,existing_gc_trim_after,3222811 (inferred),process,965388,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:03:00+08:00,native_path_a_metric,3222811 (inferred),process,971368,930798,908588,,0,41,,minute_only_last_write
+2026-09-23T16:03:27.144993+08:00,host_monitor,3222811,process,984752,943494,,,0,,,collector_time_not_atomic
+2026-09-23T16:03:27.144993+08:00,host_monitor,3222718,process,236760,209753,,,0,,,collector_time_not_atomic
+2026-09-23T16:04:27.250855+08:00,host_monitor,3222811,process,1067424,1026066,,,0,,,collector_time_not_atomic
+2026-09-23T16:04:27.250855+08:00,host_monitor,3222718,process,236736,209745,,,0,,,collector_time_not_atomic
+2026-09-23T16:04:31+08:00,existing_gc_trim_before,3222811 (inferred),process,1088720,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:04:31+08:00,existing_gc_trim_after,3222811 (inferred),process,983204,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:05:27.648743+08:00,host_monitor,3222811,process,992044,950709,,,0,,,collector_time_not_atomic
+2026-09-23T16:05:27.648743+08:00,host_monitor,3222718,process,236736,209747,,,0,,,collector_time_not_atomic
+2026-09-23T16:05:53+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,1544180,1365862,1269908,,0,118,,collector_time_not_atomic
+2026-09-23T16:05:53+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,45606,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:06:26.953459+08:00,host_monitor,3222811,process,992756,951423,,,0,,,collector_time_not_atomic
+2026-09-23T16:06:26.953459+08:00,host_monitor,3222718,process,236736,209749,,,0,,,collector_time_not_atomic
+2026-09-23T16:07:27.152090+08:00,host_monitor,3222811,process,993804,952470,,,0,,,collector_time_not_atomic
+2026-09-23T16:07:27.152090+08:00,host_monitor,3222718,process,236736,209748,,,0,,,collector_time_not_atomic
+2026-09-23T16:08:02+08:00,existing_gc_trim_before,3222811 (inferred),process,1077432,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:08:02+08:00,existing_gc_trim_after,3222811 (inferred),process,984100,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:08:27.446935+08:00,host_monitor,3222811,process,1008072,966678,,,0,,,collector_time_not_atomic
+2026-09-23T16:08:27.446935+08:00,host_monitor,3222718,process,236736,209748,,,0,,,collector_time_not_atomic
+2026-09-23T16:09:27.346444+08:00,host_monitor,3222811,process,1031948,990555,,,0,,,collector_time_not_atomic
+2026-09-23T16:09:27.346444+08:00,host_monitor,3222718,process,236736,209749,,,0,,,collector_time_not_atomic
+2026-09-23T16:10:27.450170+08:00,host_monitor,3222811,process,1068392,1026999,,,0,,,collector_time_not_atomic
+2026-09-23T16:10:27.450170+08:00,host_monitor,3222718,process,236736,209749,,,0,,,collector_time_not_atomic
+2026-09-23T16:10:54+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,1606832,1428101,1332532,,0,101,,collector_time_not_atomic
+2026-09-23T16:10:54+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,45609,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:11:27.450831+08:00,host_monitor,3222811,process,1068444,1027051,,,0,,,collector_time_not_atomic
+2026-09-23T16:11:27.450831+08:00,host_monitor,3222718,process,236736,209749,,,0,,,collector_time_not_atomic
+2026-09-23T16:12:27.153112+08:00,host_monitor,3222811,process,1068904,1026009,,,0,,,collector_time_not_atomic
+2026-09-23T16:12:27.153112+08:00,host_monitor,3222718,process,236736,209368,,,0,,,collector_time_not_atomic
+2026-09-23T16:13:27.647045+08:00,host_monitor,3222811,process,1101388,1058493,,,0,,,collector_time_not_atomic
+2026-09-23T16:13:27.647045+08:00,host_monitor,3222718,process,236736,209368,,,0,,,collector_time_not_atomic
+2026-09-23T16:14:27.153109+08:00,host_monitor,3222811,process,1111084,1068189,,,0,,,collector_time_not_atomic
+2026-09-23T16:14:27.153109+08:00,host_monitor,3222718,process,236736,209368,,,0,,,collector_time_not_atomic
+2026-09-23T16:15:27.548807+08:00,host_monitor,3222811,process,1109068,1066172,,,0,,,collector_time_not_atomic
+2026-09-23T16:15:27.548807+08:00,host_monitor,3222718,process,236736,209367,,,0,,,collector_time_not_atomic
+2026-09-23T16:15:56+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,1647772,1466721,1373624,,0,106,,collector_time_not_atomic
+2026-09-23T16:15:56+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44972,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:16:27.252272+08:00,host_monitor,3222811,process,1109180,1066285,,,0,,,collector_time_not_atomic
+2026-09-23T16:16:27.252272+08:00,host_monitor,3222718,process,236736,209368,,,0,,,collector_time_not_atomic
+2026-09-23T16:17:27.045419+08:00,host_monitor,3222811,process,1108076,1066683,,,0,,,collector_time_not_atomic
+2026-09-23T16:17:27.045419+08:00,host_monitor,3222718,process,236736,209749,,,0,,,collector_time_not_atomic
+2026-09-23T16:18:27.749214+08:00,host_monitor,3222811,process,1108576,1065685,,,0,,,collector_time_not_atomic
+2026-09-23T16:18:27.749214+08:00,host_monitor,3222718,process,236736,209382,,,0,,,collector_time_not_atomic
+2026-09-23T16:19:27.646443+08:00,host_monitor,3222811,process,1168388,1125483,,,0,,,collector_time_not_atomic
+2026-09-23T16:19:27.646443+08:00,host_monitor,3222718,process,236736,209382,,,0,,,collector_time_not_atomic
+2026-09-23T16:20:27.847115+08:00,host_monitor,3222811,process,1333160,1290255,,,0,,,collector_time_not_atomic
+2026-09-23T16:20:27.847115+08:00,host_monitor,3222718,process,236736,209380,,,0,,,collector_time_not_atomic
+2026-09-23T16:20:57+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,1915728,1734838,1641844,,0,111,,collector_time_not_atomic
+2026-09-23T16:20:57+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44443,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:21:28.249408+08:00,host_monitor,3222811,process,1384168,1341263,,,0,,,collector_time_not_atomic
+2026-09-23T16:21:28.249408+08:00,host_monitor,3222718,process,236736,209382,,,0,,,collector_time_not_atomic
+2026-09-23T16:22:27.653550+08:00,host_monitor,3222811,process,1577520,1534617,,,0,,,collector_time_not_atomic
+2026-09-23T16:22:27.653550+08:00,host_monitor,3222718,process,236736,209382,,,0,,,collector_time_not_atomic
+2026-09-23T16:23:27.550858+08:00,host_monitor,3222811,process,1752260,1709337,,,0,,,collector_time_not_atomic
+2026-09-23T16:23:27.550858+08:00,host_monitor,3222718,process,236736,209384,,,0,,,collector_time_not_atomic
+2026-09-23T16:24:28.051730+08:00,host_monitor,3222811,process,1909120,1866197,,,0,,,collector_time_not_atomic
+2026-09-23T16:24:28.051730+08:00,host_monitor,3222718,process,236736,209384,,,0,,,collector_time_not_atomic
+2026-09-23T16:25:27.753700+08:00,host_monitor,3222811,process,2059388,2016584,,,0,,,collector_time_not_atomic
+2026-09-23T16:25:27.753700+08:00,host_monitor,3222718,process,236556,209324,,,0,,,collector_time_not_atomic
+2026-09-23T16:25:58+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,2643856,2463426,2371440,,0,111,,collector_time_not_atomic
+2026-09-23T16:25:58+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44438,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:26:27.751236+08:00,host_monitor,3222811,process,2122432,2079629,,,0,,,collector_time_not_atomic
+2026-09-23T16:26:27.751236+08:00,host_monitor,3222718,process,236556,209324,,,0,,,collector_time_not_atomic
+2026-09-23T16:27:27.746610+08:00,host_monitor,3222811,process,2200716,2157913,,,0,,,collector_time_not_atomic
+2026-09-23T16:27:27.746610+08:00,host_monitor,3222718,process,236556,209324,,,0,,,collector_time_not_atomic
+2026-09-23T16:28:15+08:00,existing_gc_trim_before,3222811 (inferred),process,2308920,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:28:15+08:00,existing_gc_trim_after,3222811 (inferred),process,2235040,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:28:28.250074+08:00,host_monitor,3222811,process,2269888,2228603,,,0,,,collector_time_not_atomic
+2026-09-23T16:28:28.250074+08:00,host_monitor,3222718,process,236556,209689,,,0,,,collector_time_not_atomic
+2026-09-23T16:29:27.847546+08:00,host_monitor,3222811,process,2369496,2327339,,,0,,,collector_time_not_atomic
+2026-09-23T16:29:27.847546+08:00,host_monitor,3222718,process,236556,209325,,,0,,,collector_time_not_atomic
+2026-09-23T16:29:36+08:00,existing_gc_trim_before,3222811 (inferred),process,2400064,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:29:36+08:00,existing_gc_trim_after,3222811 (inferred),process,2296092,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:30:27.848424+08:00,host_monitor,3222811,process,2416668,2374511,,,0,,,collector_time_not_atomic
+2026-09-23T16:30:27.848424+08:00,host_monitor,3222718,process,236556,209325,,,0,,,collector_time_not_atomic
+2026-09-23T16:31:00+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,3011400,2831377,2738356,,0,118,,collector_time_not_atomic
+2026-09-23T16:31:00+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44448,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:31:27.851181+08:00,host_monitor,3222811,process,2547100,2504975,,,0,,,collector_time_not_atomic
+2026-09-23T16:31:27.851181+08:00,host_monitor,3222718,process,236508,209309,,,0,,,collector_time_not_atomic
+2026-09-23T16:32:28+08:00,existing_gc_trim_before,3222811 (inferred),process,2757624,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:32:28+08:00,existing_gc_trim_after,3222811 (inferred),process,2681076,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:32:29.345682+08:00,host_monitor,3222811,process,2741132,2699114,,,0,,,collector_time_not_atomic
+2026-09-23T16:32:29.345682+08:00,host_monitor,3222718,process,236368,209263,,,0,,,collector_time_not_atomic
+2026-09-23T16:33:27.753560+08:00,host_monitor,3222811,process,2795076,2753702,,,0,,,collector_time_not_atomic
+2026-09-23T16:33:27.753560+08:00,host_monitor,3222718,process,236264,209592,,,0,,,collector_time_not_atomic
+2026-09-23T16:34:05+08:00,existing_gc_trim_before,3222811 (inferred),process,3034608,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:34:05+08:00,existing_gc_trim_after,3222811 (inferred),process,2858168,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:34:27.649357+08:00,host_monitor,3222811,process,2912216,2868845,,,0,,,collector_time_not_atomic
+2026-09-23T16:34:27.649357+08:00,host_monitor,3222718,process,236008,209139,,,0,,,collector_time_not_atomic
+2026-09-23T16:34:38+08:00,existing_gc_trim_before,3222811 (inferred),process,3024672,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:34:38+08:00,existing_gc_trim_after,3222811 (inferred),process,2928052,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:35:27.749039+08:00,host_monitor,3222811,process,3048260,3004820,,,0,,,collector_time_not_atomic
+2026-09-23T16:35:27.749039+08:00,host_monitor,3222718,process,235968,209125,,,0,,,collector_time_not_atomic
+2026-09-23T16:35:50+08:00,existing_gc_trim_before,3222811 (inferred),process,3155404,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:35:50+08:00,existing_gc_trim_after,3222811 (inferred),process,3059548,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:36:01+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,3691860,3510740,3419200,,0,118,,collector_time_not_atomic
+2026-09-23T16:36:01+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44988,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:36:27.947303+08:00,host_monitor,3222811,process,3094140,3050735,,,0,,,collector_time_not_atomic
+2026-09-23T16:36:27.947303+08:00,host_monitor,3222718,process,235792,209065,,,0,,,collector_time_not_atomic
+2026-09-23T16:37:28.351013+08:00,host_monitor,3222811,process,3212760,3169404,,,0,,,collector_time_not_atomic
+2026-09-23T16:37:28.351013+08:00,host_monitor,3222718,process,235720,209042,,,0,,,collector_time_not_atomic
+2026-09-23T16:38:28.850558+08:00,host_monitor,3222811,process,3304908,3261672,,,0,,,collector_time_not_atomic
+2026-09-23T16:38:28.850558+08:00,host_monitor,3222718,process,235536,208977,,,0,,,collector_time_not_atomic
+2026-09-23T16:39:28.552246+08:00,host_monitor,3222811,process,3367776,3324618,,,0,,,collector_time_not_atomic
+2026-09-23T16:39:28.552246+08:00,host_monitor,3222718,process,235472,208911,,,0,,,collector_time_not_atomic
+2026-09-23T16:40:28.352126+08:00,host_monitor,3222811,process,3571520,3528361,,,0,,,collector_time_not_atomic
+2026-09-23T16:40:28.352126+08:00,host_monitor,3222718,process,235472,208910,,,0,,,collector_time_not_atomic
+2026-09-23T16:41:02+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4104576,3924540,3833532,,0,118,,collector_time_not_atomic
+2026-09-23T16:41:02+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44457,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:41:28.051480+08:00,host_monitor,3222811,process,3605492,3562347,,,0,,,collector_time_not_atomic
+2026-09-23T16:41:28.051480+08:00,host_monitor,3222718,process,235452,208904,,,0,,,collector_time_not_atomic
+2026-09-23T16:42:28.150719+08:00,host_monitor,3222811,process,3638940,3595872,,,0,,,collector_time_not_atomic
+2026-09-23T16:42:28.150719+08:00,host_monitor,3222718,process,235452,208903,,,0,,,collector_time_not_atomic
+2026-09-23T16:43:28.148635+08:00,host_monitor,3222811,process,3645656,3602613,,,0,,,collector_time_not_atomic
+2026-09-23T16:43:28.148635+08:00,host_monitor,3222718,process,235404,208880,,,0,,,collector_time_not_atomic
+2026-09-23T16:44:27.951887+08:00,host_monitor,3222811,process,3755804,3712836,,,0,,,collector_time_not_atomic
+2026-09-23T16:44:27.951887+08:00,host_monitor,3222718,process,235252,208838,,,0,,,collector_time_not_atomic
+2026-09-23T16:45:28.449270+08:00,host_monitor,3222811,process,3784072,3741104,,,0,,,collector_time_not_atomic
+2026-09-23T16:45:28.449270+08:00,host_monitor,3222718,process,235252,208837,,,0,,,collector_time_not_atomic
+2026-09-23T16:46:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4330524,4151047,4061316,,0,109,,collector_time_not_atomic
+2026-09-23T16:46:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44442,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:46:28.446058+08:00,host_monitor,3222811,process,3808784,3765817,,,0,,,collector_time_not_atomic
+2026-09-23T16:46:28.446058+08:00,host_monitor,3222718,process,235252,208838,,,0,,,collector_time_not_atomic
+2026-09-23T16:47:28.053349+08:00,host_monitor,3222811,process,3980656,3937689,,,0,,,collector_time_not_atomic
+2026-09-23T16:47:28.053349+08:00,host_monitor,3222718,process,235252,208838,,,0,,,collector_time_not_atomic
+2026-09-23T16:48:27.848184+08:00,host_monitor,3222811,process,4027396,3985958,,,0,,,collector_time_not_atomic
+2026-09-23T16:48:27.848184+08:00,host_monitor,3222718,process,235252,209242,,,0,,,collector_time_not_atomic
+2026-09-23T16:49:29.049932+08:00,host_monitor,3222811,process,4027396,3985381,,,0,,,collector_time_not_atomic
+2026-09-23T16:49:29.049932+08:00,host_monitor,3222718,process,235252,208863,,,0,,,collector_time_not_atomic
+2026-09-23T16:50:28.350023+08:00,host_monitor,3222811,process,4020400,3978385,,,0,,,collector_time_not_atomic
+2026-09-23T16:50:28.350023+08:00,host_monitor,3222718,process,235252,208862,,,0,,,collector_time_not_atomic
+2026-09-23T16:51:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4597004,4418464,4328660,,0,118,,collector_time_not_atomic
+2026-09-23T16:51:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44476,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:51:28.945088+08:00,host_monitor,3222811,process,4079960,4037945,,,0,,,collector_time_not_atomic
+2026-09-23T16:51:28.945088+08:00,host_monitor,3222718,process,235252,208863,,,0,,,collector_time_not_atomic
+2026-09-23T16:52:27.652175+08:00,host_monitor,3222811,process,4081572,4040134,,,0,,,collector_time_not_atomic
+2026-09-23T16:52:27.652175+08:00,host_monitor,3222718,process,235252,209242,,,0,,,collector_time_not_atomic
+2026-09-23T16:53:00+08:00,native_path_a_metric,3222811 (inferred),process,4080036,4038525,4019748,,0,57,,minute_only_last_write
+2026-09-23T16:53:26+08:00,existing_gc_trim_before,3222811 (inferred),process,4096560,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:53:26+08:00,existing_gc_trim_after,3222811 (inferred),process,4036668,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:53:28.448985+08:00,host_monitor,3222811,process,4096576,4053412,,,0,,,collector_time_not_atomic
+2026-09-23T16:53:28.448985+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T16:54:28.246225+08:00,host_monitor,3222811,process,4048928,4005764,,,0,,,collector_time_not_atomic
+2026-09-23T16:54:28.246225+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T16:55:28.046928+08:00,host_monitor,3222811,process,4049684,4006520,,,0,,,collector_time_not_atomic
+2026-09-23T16:55:28.046928+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T16:56:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4580060,4400487,4312528,,0,100,,collector_time_not_atomic
+2026-09-23T16:56:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44434,43496,,0,5,,collector_time_not_atomic
+2026-09-23T16:56:28.052752+08:00,host_monitor,3222811,process,4068332,4025168,,,0,,,collector_time_not_atomic
+2026-09-23T16:56:28.052752+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T16:56:41+08:00,existing_gc_trim_before,3222811 (inferred),process,4070424,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:56:41+08:00,existing_gc_trim_after,3222811 (inferred),process,4043632,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T16:57:28.251802+08:00,host_monitor,3222811,process,4057156,4013992,,,0,,,collector_time_not_atomic
+2026-09-23T16:57:28.251802+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T16:58:28.046103+08:00,host_monitor,3222811,process,4064604,4021438,,,0,,,collector_time_not_atomic
+2026-09-23T16:58:28.046103+08:00,host_monitor,3222718,process,235100,208822,,,0,,,collector_time_not_atomic
+2026-09-23T16:59:28.547973+08:00,host_monitor,3222811,process,4077228,4034062,,,0,,,collector_time_not_atomic
+2026-09-23T16:59:28.547973+08:00,host_monitor,3222718,process,235100,208822,,,0,,,collector_time_not_atomic
+2026-09-23T17:00:28.250113+08:00,host_monitor,3222811,process,4077276,4034110,,,0,,,collector_time_not_atomic
+2026-09-23T17:00:28.250113+08:00,host_monitor,3222718,process,235100,208822,,,0,,,collector_time_not_atomic
+2026-09-23T17:01:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4642212,4463103,4374920,,0,118,,collector_time_not_atomic
+2026-09-23T17:01:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44433,43496,,0,5,,collector_time_not_atomic
+2026-09-23T17:01:15+08:00,existing_gc_trim_before,3222811 (inferred),process,4112284,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:01:15+08:00,existing_gc_trim_after,3222811 (inferred),process,4055608,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:01:28.052324+08:00,host_monitor,3222811,process,4113884,4070720,,,0,,,collector_time_not_atomic
+2026-09-23T17:01:28.052324+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T17:02:28.051073+08:00,host_monitor,3222811,process,4072984,4029819,,,0,,,collector_time_not_atomic
+2026-09-23T17:02:28.051073+08:00,host_monitor,3222718,process,235100,208823,,,0,,,collector_time_not_atomic
+2026-09-23T17:03:28.145195+08:00,host_monitor,3222811,process,4073008,4029842,,,0,,,collector_time_not_atomic
+2026-09-23T17:03:28.145195+08:00,host_monitor,3222718,process,235100,208823,,,0,,,collector_time_not_atomic
+2026-09-23T17:04:09+08:00,existing_gc_trim_before,3222811 (inferred),process,4132584,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:04:09+08:00,existing_gc_trim_after,3222811 (inferred),process,4043244,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:04:28.150448+08:00,host_monitor,3222811,process,4052808,4010893,,,0,,,collector_time_not_atomic
+2026-09-23T17:04:28.150448+08:00,host_monitor,3222718,process,235100,209189,,,0,,,collector_time_not_atomic
+2026-09-23T17:05:28.148005+08:00,host_monitor,3222811,process,4056368,4012954,,,0,,,collector_time_not_atomic
+2026-09-23T17:05:28.148005+08:00,host_monitor,3222718,process,235100,208822,,,0,,,collector_time_not_atomic
+2026-09-23T17:06:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4586860,4407071,4319032,,0,118,,collector_time_not_atomic
+2026-09-23T17:06:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44423,43496,,0,5,,collector_time_not_atomic
+2026-09-23T17:06:27.852854+08:00,host_monitor,3222811,process,4056684,4013273,,,0,,,collector_time_not_atomic
+2026-09-23T17:06:27.852854+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T17:07:16+08:00,existing_gc_trim_before,3222811 (inferred),process,4142440,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:07:16+08:00,existing_gc_trim_after,3222811 (inferred),process,4048520,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:07:28.045237+08:00,host_monitor,3222811,process,4143888,4100302,,,0,,,collector_time_not_atomic
+2026-09-23T17:07:28.045237+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T17:07:54+08:00,existing_gc_trim_before,3222811 (inferred),process,4107752,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:07:54+08:00,existing_gc_trim_after,3222811 (inferred),process,4027436,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:08:29.047938+08:00,host_monitor,3222811,process,4040176,3996591,,,0,,,collector_time_not_atomic
+2026-09-23T17:08:29.047938+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T17:09:28.447910+08:00,host_monitor,3222811,process,4111620,4067954,,,0,,,collector_time_not_atomic
+2026-09-23T17:09:28.447910+08:00,host_monitor,3222718,process,235100,208824,,,0,,,collector_time_not_atomic
+2026-09-23T17:09:36+08:00,existing_gc_trim_before,3222811 (inferred),process,4143056,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:09:36+08:00,existing_gc_trim_after,3222811 (inferred),process,4021508,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:10:28.447173+08:00,host_monitor,3222811,process,4134320,4090653,,,0,,,collector_time_not_atomic
+2026-09-23T17:10:28.447173+08:00,host_monitor,3222718,process,235100,208823,,,0,,,collector_time_not_atomic
+2026-09-23T17:11:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4758868,4579526,4491504,,0,115,,collector_time_not_atomic
+2026-09-23T17:11:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,44436,43496,,0,5,,collector_time_not_atomic
+2026-09-23T17:11:05+08:00,existing_gc_trim_before,3222811 (inferred),process,4356156,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:11:05+08:00,existing_gc_trim_after,3222811 (inferred),process,4103640,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:11:28.053142+08:00,host_monitor,3222811,process,4110068,4067777,,,0,,,collector_time_not_atomic
+2026-09-23T17:11:28.053142+08:00,host_monitor,3222718,process,234540,208636,,,0,,,collector_time_not_atomic
+2026-09-23T17:12:29.045252+08:00,host_monitor,3222811,process,4111316,4069025,,,0,,,collector_time_not_atomic
+2026-09-23T17:12:29.045252+08:00,host_monitor,3222718,process,234540,208636,,,0,,,collector_time_not_atomic
+2026-09-23T17:13:28.251938+08:00,host_monitor,3222811,process,4201360,4159071,,,0,,,collector_time_not_atomic
+2026-09-23T17:13:28.251938+08:00,host_monitor,3222718,process,234540,208637,,,0,,,collector_time_not_atomic
+2026-09-23T17:13:59+08:00,existing_gc_trim_before,3222811 (inferred),process,4417844,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:13:59+08:00,existing_gc_trim_after,3222811 (inferred),process,4108932,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:14:28.444801+08:00,host_monitor,3222811,process,4117516,4076655,,,0,,,collector_time_not_atomic
+2026-09-23T17:14:28.444801+08:00,host_monitor,3222718,process,234540,209004,,,0,,,collector_time_not_atomic
+2026-09-23T17:15:27.845954+08:00,host_monitor,3222811,process,4124440,4083576,,,0,,,collector_time_not_atomic
+2026-09-23T17:15:27.845954+08:00,host_monitor,3222718,process,234540,209003,,,0,,,collector_time_not_atomic
+2026-09-23T17:16:03+0800,render_observer,"3222718,3222810,3222811,3222848,3222914,3222916,3222917,3222933",mikuCore_tree,4652840,4477057,4387952,,0,118,,collector_time_not_atomic
+2026-09-23T17:16:03+0800,render_observer,"3179988,3180080,3180082",rustService_tree,55752,45606,43496,,0,5,,collector_time_not_atomic
+2026-09-23T17:16:27.749227+08:00,host_monitor,3222811,process,4124916,4084054,,,0,,,collector_time_not_atomic
+2026-09-23T17:16:27.749227+08:00,host_monitor,3222718,process,234540,209004,,,0,,,collector_time_not_atomic
+2026-09-23T17:17:27.951302+08:00,host_monitor,3222811,process,4122036,4082940,,,0,,,collector_time_not_atomic
+2026-09-23T17:17:27.951302+08:00,host_monitor,3222718,process,231872,208046,,,0,,,collector_time_not_atomic
+2026-09-23T17:18:27.953748+08:00,host_monitor,3222811,process,4143240,4103641,,,0,,,collector_time_not_atomic
+2026-09-23T17:18:27.953748+08:00,host_monitor,3222718,process,231868,208045,,,0,,,collector_time_not_atomic
+2026-09-23T17:18:28+08:00,existing_gc_trim_before,3222811 (inferred),process,4142552,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:18:28+08:00,existing_gc_trim_after,3222811 (inferred),process,4107168,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:19:16+08:00,existing_gc_trim_before,3222811 (inferred),process,4159900,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:19:16+08:00,existing_gc_trim_after,3222811 (inferred),process,4108472,,,,,,,preceding_log_timestamp_print_may_be_buffered
+2026-09-23T17:19:27.647429+08:00,host_monitor,3222811,process,4161460,4122368,,,0,,,collector_time_not_atomic
+2026-09-23T17:19:27.647429+08:00,host_monitor,3222718,process,231868,208046,,,0,,,collector_time_not_atomic
