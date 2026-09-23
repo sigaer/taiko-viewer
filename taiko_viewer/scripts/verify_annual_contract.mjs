@@ -37,7 +37,7 @@ assert.equal(await exists("server/api/account/version-summary.get.ts"), false, "
 
 const registry = await read("composables/useAnnualPages.ts");
 const actualPages = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map((match) => match[1]);
-assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 22-page contract");
+assert.deepEqual(actualPages, expectedPages, "annual page registry order differs from the 21-page contract");
 const registryEntries = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"[^\n]*\}/g)];
 assert.equal(registryEntries.length, expectedPages.length, "annual page registry entries are not statically inspectable");
 for (const [entry, page] of registryEntries) {
@@ -443,7 +443,12 @@ assert.equal(annualPageSource.includes("void buildSummary()"), true, "missing an
 assert.equal(annualPageSource.includes("重新生成"), false, "successful annual summary still exposes rebuild copy");
 
 const annualConstantsSource = await read("server/services/account/annual-summary/constants.ts");
-assert.equal(annualConstantsSource.includes('ANNUAL_END_DATE = "2026-09-11"'), true, "annual end date is not fixed");
+const annualPeriodSource = await read("utils/annualPeriod.ts");
+assert.equal(annualPeriodSource.includes('endInclusive: "2026-09-30"'), true, "annual inclusive end date is not fixed");
+assert.equal(annualPeriodSource.includes('endExclusive: "2026-10-01"'), true, "annual exclusive end date is not fixed");
+assert.equal(annualPeriodSource.includes('calendarDays: 357'), true, "annual calendar-day count is not fixed");
+assert.equal(annualPeriodSource.includes('revision: "annual-report-2026-r2-final-window"'), true, "annual report revision is missing");
+assert.equal(annualConstantsSource.includes('from "~/utils/annualPeriod"'), true, "server does not consume the canonical reporting window");
 assert.equal(annualConstantsSource.includes('ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00"'), true, "annual public opening is not configured");
 const viewerAlgorithmVersion = /ANNUAL_ALGORITHM_VERSION = "([^"]+)"/.exec(annualConstantsSource)?.[1];
 assert.ok(viewerAlgorithmVersion, "annual producer version is missing from the viewer constants");

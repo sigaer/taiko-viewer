@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 // Viewer build-state contract, not the frozen generator algorithm version.
 // A legacy failure without an input revision is retried once; the new job
 // records this revision before execution, so a repeated failure stays terminal.
-export const ANNUAL_BUILD_STATE_REVISION = "annual-build-state-v1";
+export const ANNUAL_BUILD_STATE_REVISION = "annual-build-state-v2-report-window";
 
 export const annualBuildInputRevision = async (userdataDir: string, taikoId: string, algorithmVersion: string) => {
   const historyDir = resolve(userdataDir, taikoId);

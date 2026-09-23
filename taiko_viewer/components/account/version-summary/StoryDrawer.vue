@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { VersionSummaryAvailableVersion, VersionSummaryBinding, VersionSummaryViewModel } from "~/types/account-version-summary";
+import { formatAnnualPeriodRange } from "~/utils/annualPeriod";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -36,8 +37,8 @@ const uiText = computed(() => ({
 
 const versionRangeText = computed(() =>
   props.summary.version.isOngoing
-    ? `${props.summary.version.startDate} - ${props.summary.version.effectiveEndDate}`
-    : `${props.summary.version.startDate} - ${props.summary.version.endDate || props.summary.version.effectiveEndDate}`
+    ? formatAnnualPeriodRange(props.summary.version.startDate, props.summary.version.effectiveEndDate)
+    : formatAnnualPeriodRange(props.summary.version.startDate, props.summary.version.endDate || props.summary.version.effectiveEndDate)
 );
 
 const bindingOptionLabel = (binding: VersionSummaryBinding) => {

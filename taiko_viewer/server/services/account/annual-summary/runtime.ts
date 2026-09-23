@@ -28,6 +28,9 @@ import {
   ANNUAL_RATING_TIMEOUT_MS,
   ANNUAL_SCHEMA_VERSION,
   ANNUAL_VERSION_KEY,
+  ANNUAL_PRODUCER_REVISION,
+  ANNUAL_REPORTING_WINDOW,
+  getAnnualGeneratorVersion,
   getAnnualVersion
 } from "./constants";
 import type { AnnualCliEnvelope, AnnualObservationEvent, AnnualSummaryV4 } from "./types";
@@ -192,7 +195,12 @@ export const getAnnualInputFingerprint = async (taikoId: string) => {
   }
 
   const hash = createHash("sha256");
-  hash.update(`${ANNUAL_ALGORITHM_VERSION}:${ANNUAL_SCHEMA_VERSION}:${ANNUAL_VERSION_KEY}`);
+  hash.update(JSON.stringify({
+    producer: ANNUAL_PRODUCER_REVISION,
+    schema: ANNUAL_SCHEMA_VERSION,
+    version: ANNUAL_VERSION_KEY,
+    reportingWindow: ANNUAL_REPORTING_WINDOW
+  }));
   await addFileToHash(hash, currentPath, "current-userdata");
 
   const historyDir = resolve(userdataDir, taikoId);
@@ -542,7 +550,7 @@ const runAnnualSummaryCliUnadmitted = async (
     "--version",
     ANNUAL_VERSION_KEY,
     "--version-json",
-    JSON.stringify(getAnnualVersion()),
+    JSON.stringify(getAnnualGeneratorVersion()),
     "--userdata-dir",
     userdataDir,
     "--song-data",
@@ -625,7 +633,7 @@ const runAnnualSummaryCliUnadmitted = async (
 };
 
 export const annualGeneratorKey = async (taikoId: string) =>
-  `build:${taikoId}:${ANNUAL_VERSION_KEY}:${await annualBuildInputRevision(getRuntimePaths().userdataDir, taikoId, ANNUAL_ALGORITHM_VERSION)}`;
+  `build:${taikoId}:${ANNUAL_VERSION_KEY}:${await annualBuildInputRevision(getRuntimePaths().userdataDir, taikoId, ANNUAL_PRODUCER_REVISION)}`;
 
 export const runAnnualSummaryCli = async (
   taikoId: string,

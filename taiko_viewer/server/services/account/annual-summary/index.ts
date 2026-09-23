@@ -23,6 +23,7 @@ import {
   ANNUAL_POSTER_COOLDOWN_MS,
   ANNUAL_POSTER_HEIGHT,
   ANNUAL_POSTER_WIDTH,
+  ANNUAL_PRODUCER_REVISION,
   ANNUAL_SCHEMA_VERSION,
   ANNUAL_SHARE_CARD_HEIGHT,
   ANNUAL_SHARE_CARD_PROMO_URL,
@@ -153,6 +154,14 @@ const safeReadSummary = async (row: AnnualSummaryRow | null) => {
   try {
     const summary = await readAnnualSummary(row.summary_path);
     if (summary.provenance?.algorithmVersion !== ANNUAL_ALGORITHM_VERSION) return null;
+    const version = summary.version as Record<string, unknown>;
+    const canonical = getAnnualVersion();
+    if (
+      version.startDate !== canonical.startDate
+      || version.endDate !== canonical.endDate
+      || version.effectiveEndDate !== canonical.effectiveEndDate
+      || version.timezone !== canonical.timezone
+    ) return null;
     return summary;
   } catch (error) {
     console.warn("[annual-summary] cached summary is unavailable", row?.id, error);
@@ -240,7 +249,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
   if (!payload && !activeJob) {
     const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
     if (failed) {
-      const revision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_ALGORITHM_VERSION);
+      const revision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION);
       if (canReuseAnnualFailure(failed, revision)) terminalJob = failed;
     }
   }
@@ -672,7 +681,7 @@ export const queueAccountAnnualSummaryBuild = async (
         { retryAfter: 120 });
     }
     const [inputRevision, inputFingerprint, cost] = await Promise.all([
-      annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_ALGORITHM_VERSION),
+      annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION),
       getAnnualInputFingerprint(binding.taiko_id),
       estimateAnnualBuildCost(getRuntimePaths().userdataDir, binding.taiko_id)
     ]);
@@ -681,7 +690,7 @@ export const queueAccountAnnualSummaryBuild = async (
       return { job: serializeAnnualJob(failed!), summary: null };
     }
     const jobKey = createHash('sha256').update(JSON.stringify([
-      userId, binding.id, version.key, ANNUAL_ALGORITHM_VERSION, inputFingerprint, inputRevision
+      userId, binding.id, version.key, ANNUAL_PRODUCER_REVISION, inputFingerprint, inputRevision
     ])).digest('hex');
     try {
       const admitted = await admitAnnualBuildJob({

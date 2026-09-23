@@ -7,6 +7,7 @@ import AnnualOpeningBeatLane from "../AnnualOpeningBeatLane.vue";
 import AnnualOpeningCarousel from "../AnnualOpeningCarousel.vue";
 import AnnualOpeningFireworks from "../AnnualOpeningFireworks.vue";
 import AnnualScene from "../AnnualScene.vue";
+import { formatAnnualPeriodRange } from "~/utils/annualPeriod";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
@@ -17,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ start: []; "jump-to-end": [] }>();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const startPending = ref(false);
 const navigationSent = ref(false);
 const drumPulse = ref(false);
@@ -54,18 +55,10 @@ const reportTitleLines = computed(() => {
   const lines = t("annualSummary.openingCover.reportTitle").split("\n");
   return lines.length > 1 ? lines.slice(1) : lines;
 });
-const formatDate = (value: string | null | undefined) => {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", {
-    year: "numeric", month: "2-digit", day: "2-digit"
-  }).format(date);
-};
 const periodLabel = computed(() => {
-  const start = formatDate(props.summary.version.startDate) || reportYear.value;
-  const end = formatDate(props.summary.version.effectiveEndDate) || formatDate(props.summary.version.endDate) || start;
-  return `${start} — ${end}`;
+  const start = props.summary.version.startDate || reportYear.value;
+  const end = props.summary.version.effectiveEndDate || props.summary.version.endDate || start;
+  return formatAnnualPeriodRange(start, end);
 });
 
 const completeStoryStart = (direct: boolean) => {

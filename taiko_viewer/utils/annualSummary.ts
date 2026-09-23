@@ -8,6 +8,7 @@ import type {
   VersionSummarySongCard,
   VersionSummaryViewModel
 } from "~/types/account-version-summary";
+import { ANNUAL_REPORTING_WINDOW, formatAnnualPeriodRange } from "~/utils/annualPeriod";
 import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
 
 type UnknownRecord = Record<string, unknown>;
@@ -719,7 +720,7 @@ export const normalizeAnnualSummary = (
     version: {
       key: stringValue(version.key, "annual_2026"),
       name: t("annualSummary.name"),
-      startDate: stringValue(version.startDate, "2026-01-01"),
+      startDate: stringValue(version.startDate, ANNUAL_REPORTING_WINDOW.start),
       endDate: stringValue(version.endDate) || null,
       effectiveEndDate: stringValue(version.effectiveEndDate, raw.generatedAt.slice(0, 10)),
       isOngoing: version.isOngoing !== false
@@ -732,7 +733,7 @@ export const normalizeAnnualSummary = (
     favoriteSong, obsessionSong, favoriteShift, monthlyFavorites, weekdayActivity, calendarActivity, timeOfDay, lateNight,
     milestones, ratingRank, speedProfile, nearDondaful, challenge, pound, highScore, keyword, keywordProfile: keyword,
     breakthrough, finalTitle,
-    poster: { title: copy.poster.title, subtitle: copy.poster.subtitle, finalTitle: finalTitle.title, periodLabel: `${stringValue(version.startDate, "2026-01-01")} — ${stringValue(version.effectiveEndDate, raw.generatedAt.slice(0, 10))}`, favoriteSong: favoriteSong?.name || "", keyword: keyword?.title || "", closingLine: finalTitle.body, shareCopy: `${nickname} · ${finalTitle.title}`, stats: [{ label: t("annualSummary.slides.overview.plays"), value: String(playCount) }, { label: t("annualSummary.slides.overview.songs"), value: String(uniqueSongs) }, { label: t("annualSummary.slides.overview.clear"), value: String(numberValue(overview.currentClearCharts)) }] },
+    poster: { title: copy.poster.title, subtitle: copy.poster.subtitle, finalTitle: finalTitle.title, periodLabel: formatAnnualPeriodRange(stringValue(version.startDate, ANNUAL_REPORTING_WINDOW.start), stringValue(version.effectiveEndDate, raw.generatedAt.slice(0, 10))), favoriteSong: favoriteSong?.name || "", keyword: keyword?.title || "", closingLine: finalTitle.body, shareCopy: `${nickname} · ${finalTitle.title}`, stats: [{ label: t("annualSummary.slides.overview.plays"), value: String(playCount) }, { label: t("annualSummary.slides.overview.songs"), value: String(uniqueSongs) }, { label: t("annualSummary.slides.overview.clear"), value: String(numberValue(overview.currentClearCharts)) }] },
     story: { pageCount: 0, pageKeys: [] },
     sectionStatus: { profile: "exact", period: stringValue(period.status, raw.mode === "version_observed" ? "observed" : "exact") as AnnualMetricStatus, overview: overviewMetric.status, favoriteSong: favoriteMetric.status, obsessionSong: obsessionMetric.status, favoriteShift: shiftMetric.status, keyword: keywordMetric.status, ratingRank: ratingMetric.status, monthlyFavorites: monthlyMetric.status, weekdayActivity: weekdayMetric.status, calendarActivity: calendarMetric.status, timeOfDay: timeMetric.status, lateNight: lateMetric.status, speedProfile: speedMetric.status, nearDondaful: nearMetric.status, challenge: challengeMetric.status, pound: poundMetric.status, highScore: highScoreMetric.status, milestones: milestonesMetric.status, breakthrough: breakthroughMetric.status, finalTitle: "exact", poster: "exact" },
     copy,

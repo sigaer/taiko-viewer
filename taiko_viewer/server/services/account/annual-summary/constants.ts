@@ -1,12 +1,16 @@
 import type { AnnualVersion } from "./types";
+import { ANNUAL_REPORTING_WINDOW } from "~/utils/annualPeriod";
 
 export const ANNUAL_SCHEMA_VERSION = 4 as const;
 export const ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.5.1";
 export const ANNUAL_VERSION_KEY = "annual_2026" as const;
-export const ANNUAL_TIME_ZONE = "Asia/Shanghai" as const;
+export const ANNUAL_TIME_ZONE = ANNUAL_REPORTING_WINDOW.timezone;
 export const ANNUAL_SHARE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-export const ANNUAL_START_DATE = "2025-10-09" as const;
-export const ANNUAL_END_DATE = "2026-09-11" as const;
+export { ANNUAL_REPORTING_WINDOW };
+export const ANNUAL_START_DATE = ANNUAL_REPORTING_WINDOW.start;
+export const ANNUAL_END_DATE = ANNUAL_REPORTING_WINDOW.endInclusive;
+export const ANNUAL_REPORT_REVISION = ANNUAL_REPORTING_WINDOW.revision;
+export const ANNUAL_PRODUCER_REVISION = `${ANNUAL_ALGORITHM_VERSION}:${ANNUAL_REPORT_REVISION}`;
 export const ANNUAL_PUBLIC_OPEN_AT = "2026-10-02T00:00:00+08:00" as const;
 export const ANNUAL_POSTER_COOLDOWN_MS = 60 * 1000;
 export const ANNUAL_BUILD_TIMEOUT_MS = 4 * 60 * 1000;
@@ -32,6 +36,13 @@ export const getAnnualVersion = (): AnnualVersion => ({
   effectiveEndDate: ANNUAL_END_DATE,
   isOngoing: false,
   timezone: ANNUAL_TIME_ZONE
+});
+
+export const getAnnualGeneratorVersion = () => ({
+  ...getAnnualVersion(),
+  endExclusive: ANNUAL_REPORTING_WINDOW.endExclusive,
+  calendarDays: ANNUAL_REPORTING_WINDOW.calendarDays,
+  reportRevision: ANNUAL_REPORT_REVISION
 });
 
 export const resolveAnnualVersion = (input: unknown) => {

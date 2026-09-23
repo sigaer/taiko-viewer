@@ -9,6 +9,7 @@ import { normalizeAnnualSummary } from "~/utils/annualSummary";
 import { preloadAnnualOpeningCovers } from "~/utils/annualCoverFlow";
 import { preloadAnnualOpeningArtwork } from "~/utils/annualOpeningAssets.client";
 import { ANNUAL_BGM_SRC, preloadAnnualBgm } from "~/utils/annualBgm.client";
+import { ANNUAL_REPORTING_WINDOW } from "~/utils/annualPeriod";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError } from "~/utils/viewerError";
 
@@ -103,7 +104,7 @@ const summary = computed(() => {
 const currentBinding = computed(() => envelope.value?.currentBinding || bindingState.value?.currentBinding || null);
 const bindings = computed(() => bindingState.value?.bindings?.length ? bindingState.value.bindings : currentBinding.value ? [currentBinding.value] : []);
 const selectedVersion = computed(() => envelope.value?.selectedVersion || {
-  key: "annual_2026", name: t("annualSummary.name"), startDate: "2026-01-01", endDate: "2026-10-01"
+  key: "annual_2026", name: t("annualSummary.name"), startDate: ANNUAL_REPORTING_WINDOW.start, endDate: ANNUAL_REPORTING_WINDOW.endInclusive
 });
 const pageError = computed(() => schemaMismatch.value ? t("annualSummary.state.schemaMismatch") : annualState.value?.error || bindingState.value?.error || "");
 const jobStatusLabel = computed(() => {
