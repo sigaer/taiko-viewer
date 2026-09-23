@@ -728,13 +728,16 @@ export const writeUserdataWithHistory = async (taikoId: string, payload: Userdat
   await writeFile(tempPath, serialized, "utf-8");
   await rename(tempPath, filePath);
   const timestamp = formatLocalTimestamp().replace(/[: ]/g, "_");
+  const payloadMeta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
   const historyPayload = {
+    ...payload,
     _meta: {
+      ...payloadMeta,
       full: true,
       ts: formatLocalTimestamp(),
-      source
-    },
-    ...payload
+      source,
+      writer_source: source
+    }
   };
   await writeFile(join(historyDir, `data_${timestamp}_${source}.json`), JSON.stringify(historyPayload, null, 4), "utf-8");
 };

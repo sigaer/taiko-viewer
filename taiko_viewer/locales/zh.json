@@ -153,6 +153,26 @@
       "openRecommendationTool": "打开推荐工具"
     },
     "growth": {
+      "recent": {
+        "eyebrow": "最近",
+        "title": "最近同步的变化",
+        "caughtUp": "最新变化都看过了",
+        "noChanges": "最新同步中没有可确认的新变化",
+        "failed": "暂时无法读取最近变化",
+        "retry": "重试",
+      "more": "另有 {count} 项变化",
+      "score": "最好成绩 {value}",
+      "ngReduced": "不可减少至 {value}",
+      "combo": "最大连段 {value}",
+      "rank": "评价提升至 {value}",
+        "goal": "练习目标",
+        "types": {
+          "clear": "新通关",
+          "fc": "新全连",
+          "df": "拿到全良",
+          "goal-completed": "目标达成"
+        }
+      },
       "greeting": {
         "morning": "早上好，{name}",
         "noon": "中午好，{name}",

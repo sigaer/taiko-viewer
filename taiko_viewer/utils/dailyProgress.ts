@@ -34,11 +34,18 @@ const normalizedInstant = (value: unknown) => {
 };
 
 export function deriveProgressForRange(current: UserdataSong[], history: GrowthSnapshot[], fromDay: string, toDay: string, title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
+  return deriveProgressForCalendarDays(current, history, daysBetween(fromDay, toDay), title, currentRevision);
+}
+
+/** Replays the same canonical transitions as the range API without materializing intervening calendar days. */
+export function deriveProgressForCalendarDays(current: UserdataSong[], history: GrowthSnapshot[], requestedDays: string[], title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
+  const calendarDays = [...new Set(requestedDays.filter(Boolean))].sort();
+  const requested = new Set(calendarDays);
   const charts = new Map<string, GrowthDailyEvent>();
   const bestScores = new Map<string, number>();
   let state = new Map<string, UserdataSong>();
   let observed = new Map<string, string>();
-  const inRange = (day: string) => Boolean(day) && day >= fromDay && day <= toDay;
+  const inRange = (day: string) => requested.has(day);
   const visit = (after: UserdataSong, before: UserdataSong | undefined, evidence: GrowthDailyEvent['evidence'], observedBefore: string | undefined, snapshot: GrowthSnapshot) => {
     const scoreDay = growthCalendarDay(after.highscore_datetime);
     const playDay = growthCalendarDay(after.update_datetime);
@@ -104,7 +111,7 @@ export function deriveProgressForRange(current: UserdataSong[], history: GrowthS
   for (const song of current) visit(song, undefined, 'full-snapshot', undefined, currentSnapshot);
   const dataMode = history.some(s => s.full) ? 'FULL_HISTORY' : current.length || history.length ? 'SNAPSHOT_LIMITED' : 'INSUFFICIENT';
   const known = current.some(s => s.update_datetime || s.highscore_datetime) || history.some(s => s.songs.some(row => row.update_datetime || row.highscore_datetime));
-  return daysBetween(fromDay, toDay).map(calendarDay => {
+  return calendarDays.map(calendarDay => {
     const events = [...charts.entries()].filter(([mapKey]) => mapKey.startsWith(`${calendarDay}:`)).map(([, chart]) => {
       if (!chart.facts.length) {
         chart.facts.push({ type: 'played', before: null, after: null, delta: null });

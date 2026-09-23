@@ -150,6 +150,29 @@ export type GrowthHistoryResponse = {
   };
 };
 
+export type RecentGrowthState = "new" | "caught-up" | "unavailable";
+
+export type RecentGrowthResponse = {
+  profileId: string;
+  state: RecentGrowthState;
+  observedAt: string | null;
+  facts: GrowthFact[];
+  totalFacts: number;
+  boundary: {
+    acknowledgedToken: string | null;
+    currentToken: string | null;
+    acknowledgeRequired: boolean;
+    recovered: boolean;
+  };
+};
+
+export type RecentGrowthAcknowledgeResponse = {
+  profileId: string;
+  acknowledgedToken: string;
+  acknowledgedAt: string;
+  unchanged: boolean;
+};
+
 export type WeeklyGrowthThemeType =
   | "stability"
   | "score-breakthrough"

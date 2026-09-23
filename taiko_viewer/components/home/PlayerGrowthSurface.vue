@@ -2,14 +2,26 @@
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import { composeGrowthFeedback } from "~/utils/composeGrowthFeedback";
 import { formatScoreRank } from "~/utils/scoreRank";
-import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
+import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview, RecentGrowthResponse } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_SHORT_LABELS, growthGreetingPeriod } from "~/utils/playerGrowth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { trackViewerEvent } from "~/utils/analytics";
 
 import type { PlayerGoal, GoalType } from "~/types/player-goal";
 
-const props = defineProps<{ overview: PlayerGrowthOverview; displayName: string; pending?: boolean; failed?: boolean; identity: string; refreshGrowth: (identity: string) => Promise<boolean> }>();
+const props = defineProps<{
+  overview: PlayerGrowthOverview;
+  displayName: string;
+  pending?: boolean;
+  failed?: boolean;
+  identity: string;
+  refreshGrowth: (identity: string) => Promise<boolean>;
+  recent: RecentGrowthResponse;
+  recentPending?: boolean;
+  recentFailed?: boolean;
+  refreshRecent: () => Promise<boolean>;
+  acknowledgeRecent: (token: string) => Promise<void>;
+}>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
@@ -70,7 +82,8 @@ const trapGoalFocus = (event: KeyboardEvent) => {
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 };
-const closeGoal = () => { selector.value?.close(); selected.value = null; returnFocus?.focus(); };
+const restoreGoalFocus = () => returnFocus?.focus();
+const closeGoal = () => { selector.value?.close(); selected.value = null; restoreGoalFocus(); };
 const mutate = async (cancel = false) => {
   if (choicesDisabled.value || (!cancel && (!selected.value || !selectedType.value))) return;
   const generation = mutationGeneration;
@@ -169,7 +182,17 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           </div>
         </div>
       </header>
+    </template>
 
+    <HomeRecentGrowth
+      :recent="recent"
+      :pending="recentPending"
+      :failed="recentFailed"
+      @presented="acknowledgeRecent"
+      @retry="refreshRecent"
+    />
+
+    <template v-if="!pending && !failed">
       <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
@@ -221,7 +244,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <div v-else-if="refreshFailed" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button @click="refreshAfterEvaluation(identity)">{{ t('home.goal.retryRefresh') }}</button></div>
       <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
       <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
-      <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="returnFocus?.focus()">
+      <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="restoreGoalFocus">
         <template v-if="selected">
           <h2 id="goal-dialog-title">{{ t(expectedGoalId ? 'home.goal.replaceConfirm' : 'home.goal.question') }}</h2>
           <strong>{{ selected.title }}</strong>

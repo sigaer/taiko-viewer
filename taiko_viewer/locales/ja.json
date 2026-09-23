@@ -152,6 +152,26 @@
       "openRecommendationTool": "おすすめツールを開く"
     },
     "growth": {
+      "recent": {
+        "eyebrow": "最近",
+        "title": "最近同期した変化",
+        "caughtUp": "最新の変化は確認済みです",
+        "noChanges": "最新の同期で確認できる新しい変化はありません",
+        "failed": "最近の変化を読み込めませんでした",
+        "retry": "再試行",
+      "more": "ほか {count} 件の変化",
+      "score": "自己ベスト {value}",
+      "ngReduced": "不可 {value}",
+      "combo": "最大コンボ {value}",
+      "rank": "スコアランク {value}",
+        "goal": "練習目標",
+        "types": {
+          "clear": "初クリア",
+          "fc": "フルコンボ達成",
+          "df": "ドンダフルコンボ達成",
+          "goal-completed": "目標達成"
+        }
+      },
       "greeting": {
         "morning": "おはよう、{name}",
         "noon": "こんにちは、{name}",

@@ -1,5 +1,6 @@
 import type { Pool, PoolConnection, Connection, RowDataPacket } from 'mysql2/promise';
 import { deleteMeasurementsForBinding, deleteMeasurementsForUser } from '../growth-history/measurements.ts';
+import { deleteRecentCursorsForBinding, deleteRecentCursorsForUser } from '../growth-recent/store.ts';
 type ConnectionLike = PoolConnection | Connection;
 
 // Call within the owner's transaction, after locking its user/bindings.
@@ -15,6 +16,7 @@ export async function deleteUserAndGoalsInTransaction(connection: ConnectionLike
   await connection.execute('SELECT id FROM web_taiko_bindings WHERE user_id=? ORDER BY id FOR UPDATE', [userId]);
   await deleteGoalsForUser(connection, userId);
   await deleteMeasurementsForUser(connection, userId);
+  await deleteRecentCursorsForUser(connection, userId);
   await connection.execute('DELETE FROM web_song_locks WHERE user_id=?', [userId]);
   await connection.execute('DELETE FROM web_user_sessions WHERE user_id=?', [userId]);
   await connection.execute('DELETE FROM web_taiko_bindings WHERE user_id=?', [userId]);
@@ -50,6 +52,7 @@ export async function deleteBindingsWithGoals(db: Pool, userId: number, filter: 
       if (filter.source && binding.source !== filter.source) continue;
       await deleteGoalsForBinding(connection, Number(binding.id));
       await deleteMeasurementsForBinding(connection, Number(binding.id));
+      await deleteRecentCursorsForBinding(connection, Number(binding.id));
       await connection.execute('DELETE FROM web_song_locks WHERE user_id=? AND taiko_id=?', [userId, binding.taiko_id]);
       await connection.execute('DELETE FROM web_taiko_bindings WHERE id=? AND user_id=?', [binding.id, userId]);
     }

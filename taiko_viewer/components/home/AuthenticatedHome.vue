@@ -18,6 +18,7 @@ const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
 const isReady = computed(() => props.state === "authenticated_ready");
 const { growth, pending: growthPending, error: growthError, identity: growthIdentity, refresh: refreshGrowth } = usePlayerGrowth(isReady, userId);
+const { recent, pending: recentPending, error: recentError, refresh: refreshRecent, acknowledge: acknowledgeRecent } = useRecentGrowth(isReady, userId);
 
 const displayName = computed(() => props.user?.username || t("account.title"));
 const stateCopy = computed(() => {
@@ -69,7 +70,20 @@ const trackClick = (event: string, source: string) => {
       </div>
     </section>
 
-    <HomePlayerGrowthSurface v-if="isReady" :overview="growth" :display-name="displayName" :pending="growthPending" :failed="!!growthError" :identity="growthIdentity" :refresh-growth="refreshGrowth" />
+    <HomePlayerGrowthSurface
+      v-if="isReady"
+      :overview="growth"
+      :display-name="displayName"
+      :pending="growthPending"
+      :failed="!!growthError"
+      :identity="growthIdentity"
+      :refresh-growth="refreshGrowth"
+      :recent="recent"
+      :recent-pending="recentPending"
+      :recent-failed="!!recentError"
+      :refresh-recent="refreshRecent"
+      :acknowledge-recent="acknowledgeRecent"
+    />
 
     <section v-else class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">

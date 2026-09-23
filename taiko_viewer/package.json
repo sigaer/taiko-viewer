@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.73.4",
+  "version": "0.74.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -49,6 +49,13 @@
     "test:growth:weekly": "node --experimental-strip-types --test tests/growthWeekly.test.ts tests/growthWeeklyHttp.test.mjs",
     "test:growth:weekly:browser": "node scripts/verify_growth_weekly_browser.mjs",
     "test:growth:passport": "node --experimental-strip-types --test tests/growthPassport.test.ts tests/growthPassportHttp.test.mjs",
+    "test:growth:session-audit": "node --experimental-strip-types --test tests/growthSessionIdentifiability.test.ts",
+    "audit:growth:session": "node scripts/audit_recent_growth_session.mjs",
+    "audit:growth:session:performance": "node --experimental-strip-types scripts/benchmark_recent_growth_session.mjs",
+    "test:growth:recent": "node --experimental-strip-types --test tests/growthRecent.test.ts tests/growthRecentHttp.test.mjs",
+    "test:growth:recent:db": "node --experimental-strip-types --test --test-concurrency=1 tests/growthRecentSql.test.ts tests/growthRecentSqlHttp.test.mjs",
+    "test:growth:recent:browser": "node scripts/verify_growth_recent_browser.mjs",
+    "growth:recent:migrate": "node --experimental-strip-types scripts/migrate_growth_recent_schema.ts",
     "test:growth:passport:browser": "node scripts/verify_growth_passport_browser.mjs",
     "test:growth:history:db": "node --experimental-strip-types --test --test-concurrency=1 tests/growthHistorySql.test.ts",
     "growth:history:migrate": "node --experimental-strip-types scripts/migrate_growth_history_schema.ts",
