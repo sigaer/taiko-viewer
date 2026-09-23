@@ -409,15 +409,6 @@ onBeforeUnmount(() => {
   isolation: isolate;
 }
 
-.period-overview-scene__overview-copy::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: -14% -8%;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 48%, rgba(255, 255, 255, .62), rgba(255, 255, 255, .2) 54%, transparent 74%);
-}
-
 .period-overview-scene__overview-copy > * { position: relative; z-index: 1; }
 
 .period-overview-scene__overview-heading {
