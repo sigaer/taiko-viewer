@@ -34,9 +34,9 @@ test('the local plane rotation settles at rectangle and diamond endpoints', () =
 
 test('cover fronts stay facing the camera throughout their vertical path', () => {
   for (const upper of [true, false]) for (const height of [667, 844, 1080]) {
-    const pitch = coverPitch(upper);
     for (let travel=0; travel<=1; travel+=.01) {
       const z=-380*(1-travel), y=(upper?1:-1)*height*(.23+travel*.4)*(900-z)/900;
+      const pitch = coverPitch(upper, height*(.23+travel*.4), travel);
       const dot = Math.sin(pitch)*y + Math.cos(pitch)*(900-z);
       assert.ok(dot>0,'a visible plane must never cross edge-on or expose its reverse side');
     }

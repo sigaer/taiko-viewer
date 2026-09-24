@@ -57,7 +57,7 @@ export const createAnnualCoverRenderer = (
     }
     lastFrame = now;
     const landscape = width > height && height <= 460;
-    const size = Math.min(landscape ? height * .75 : width * .84, 352);
+    const size = Math.min(landscape ? height * .78 : width * .78, 330);
     for (const slot of slots) {
       const motion = coverMotion(state.elapsed, slot.index, slot.upper);
       if (!slot.applied && (firstFrame || motion.opacity < .001) && textures.has(slot.url)) {
@@ -71,8 +71,8 @@ export const createAnnualCoverRenderer = (
       const perspectiveScale = (900 - z) / 900;
       const axis = (landscape ? width : height) * (.23 + distance * .4) * perspectiveScale;
       slot.mesh.position.set(landscape ? (slot.upper ? -axis : axis) : 0, landscape ? 0 : (slot.upper ? axis : -axis), z);
-      slot.mesh.scale.setScalar(size);
-      slot.mesh.rotation.set(coverPitch(slot.upper), 0, coverRotation(state.transitionTime));
+      slot.mesh.scale.setScalar(size * (.52 + .22 * distance));
+      slot.mesh.rotation.set(coverPitch(slot.upper, landscape ? 0 : axis / perspectiveScale, distance), 0, coverRotation(state.transitionTime));
       if (landscape) slot.mesh.rotation.y = Math.PI * .12;
       slot.mesh.visible = motion.opacity > .001;
       slot.material.opacity = motion.opacity;

@@ -18,6 +18,7 @@ export const coverRotation = (time: number) => {
 };
 export type AnnualCoverState = { transitionTime: number; elapsed: number };
 
-// World Y points upward (opposite to CSS Y): both planes face the camera,
-// rather than turning edge-on/backwards as they approach the outer edge.
-export const coverPitch = (upper: boolean) => (upper ? 1 : -1) * Math.PI * .36;
+// Compensate for the off-axis camera view so the apparent inclination matches
+// the former 72–78 degree CSS stream rather than presenting a stack of faces.
+export const coverPitch = (upper: boolean, axis = 0, travel = 1) =>
+  (upper ? 1 : -1) * ((78 - 6 * travel) * Math.PI / 180 + Math.atan(axis / 900));
