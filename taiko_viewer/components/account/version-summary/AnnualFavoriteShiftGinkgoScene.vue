@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from "vue";
 import { gsap } from "gsap";
+import { createAnnualTimeline, setAnnualTargets, requireAnnualTargets } from "~/utils/annualGsap";
 import AnnualFavoriteShiftCoverBlock from "./AnnualFavoriteShiftCoverBlock.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
@@ -46,27 +47,25 @@ const { onAnnualMotionActive } = useAnnualTimeline(
 
 onAnnualMotionActive(() => {
   const root = rootRef.value?.rootEl;
-  if (!root) return;
+  if (!root || !requireAnnualTargets(root, ['[data-favorite-shift-stage="old-cover"]', '[data-favorite-shift-stage="old-copy"]', '[data-favorite-shift-stage="new-cover"]', '[data-favorite-shift-stage="new-copy"]'])) return;
 
   let timeline: gsap.core.Timeline | null = null;
   const context = gsap.context(() => {
-    const background = root.querySelector<HTMLElement>('[data-favorite-shift-stage="background"]');
     const oldCover = root.querySelector<HTMLElement>('[data-favorite-shift-stage="old-cover"]');
     const oldCopy = root.querySelector<HTMLElement>('[data-favorite-shift-stage="old-copy"]');
     const newCover = root.querySelector<HTMLElement>('[data-favorite-shift-stage="new-cover"]');
     const newCopy = root.querySelector<HTMLElement>('[data-favorite-shift-stage="new-copy"]');
     const summary = root.querySelector<HTMLElement>('[data-favorite-shift-stage="summary"]');
 
-    gsap.set(background, { autoAlpha: 0 });
-    gsap.set(oldCover, { autoAlpha: 0, x: -10, y: 14, scale: .94, rotate: -1.2 });
-    gsap.set(oldCopy, { autoAlpha: 0, x: -8, y: 12 });
-    gsap.set(newCover, { autoAlpha: 0, x: 12, y: 16, scale: .94, rotate: 1.2 });
-    gsap.set(newCopy, { autoAlpha: 0, x: 8, y: 12 });
-    gsap.set(summary, { autoAlpha: 0, y: 18 });
+    // Background stays painted while foreground stages enter.
+    setAnnualTargets(oldCover, { autoAlpha: 0, x: -10, y: 14, scale: .94, rotate: -1.2 });
+    setAnnualTargets(oldCopy, { autoAlpha: 0, x: -8, y: 12 });
+    setAnnualTargets(newCover, { autoAlpha: 0, x: 12, y: 16, scale: .94, rotate: 1.2 });
+    setAnnualTargets(newCopy, { autoAlpha: 0, x: 8, y: 12 });
+    setAnnualTargets(summary, { autoAlpha: 0, y: 18 });
 
-    timeline = gsap.timeline();
+    timeline = createAnnualTimeline();
     timeline
-      .to(background, { autoAlpha: 1, duration: .62, ease: "power1.out" }, 0)
       .to(oldCover, { autoAlpha: 1, x: 0, y: 0, scale: 1, rotate: 0, duration: .62, ease: "power2.out" }, .25)
       .to(oldCopy, { autoAlpha: 1, x: 0, y: 0, duration: .52, ease: "power2.out" }, .45)
       .to(newCover, { autoAlpha: 1, x: 0, y: 0, scale: 1, rotate: 0, duration: .62, ease: "power2.out" }, .75)

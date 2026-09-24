@@ -1,26 +1,2 @@
-<script setup lang="ts">
-import type { VersionSummaryViewModel } from "~/types/account-version-summary";
-import AnnualPeriodOverviewScene from "../AnnualPeriodOverviewScene.vue";
-
-defineProps<{
-  summary: VersionSummaryViewModel;
-  pageIndex: number;
-  pageTotal: number;
-  active: boolean;
-  reducedMotion: boolean;
-  /** Forwarded so the ambient cover flow keeps running during the pair transition. */
-  flowing?: boolean;
-}>();
-</script>
-
-<template>
-  <AnnualPeriodOverviewScene
-    :summary="summary"
-    :period-page-index="pageIndex"
-    :page-total="pageTotal"
-    :active="active"
-    :flowing="flowing ?? active"
-    :reduced-motion="reducedMotion"
-    :transition-time="0"
-  />
-</template>
+<!-- Logical page anchor. StoryPlayer owns the persistent Period/Overview scene. -->
+<template><div aria-hidden="true" /></template>

@@ -1,4 +1,5 @@
 import { gsap } from "gsap";
+import { createAnnualTimeline, setAnnualTargets } from "~/utils/annualGsap";
 import { nextTick, onBeforeUnmount, onMounted, watch, type Ref } from "vue";
 
 type AnnualRoot = HTMLElement | { rootEl?: HTMLElement | null } | null;
@@ -152,7 +153,7 @@ export const useAnnualTimeline = (
 
   const showStableState = (root: HTMLElement) => {
     const elements = root.querySelectorAll<HTMLElement>("[data-animate], [data-annual-stage]");
-    gsap.set(elements, { clearProps: "all", autoAlpha: 1, y: 0, scale: 1 });
+    setAnnualTargets(elements, { clearProps: "all", autoAlpha: 1, y: 0, scale: 1 });
   };
 
   const syncTimeline = () => {
@@ -202,8 +203,8 @@ export const useAnnualTimeline = (
       const group = (stage: string) => root.querySelectorAll<HTMLElement>(`[data-annual-stage="${stage}"]`);
       const staged = ["title", "visual", "data", "copy"].flatMap((stage) => [...group(stage)]);
       const fallback = unique.filter((element) => !staged.includes(element));
-      gsap.set(unique, { autoAlpha: 0, y: 18 });
-      timeline = gsap.timeline({
+      setAnnualTargets(unique, { autoAlpha: 0, y: 18 });
+      timeline = createAnnualTimeline({
         paused: true,
         onComplete: () => { timelineCompleted = true; }
       });

@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { gsap } from "gsap";
+import { createAnnualTimeline } from "~/utils/annualGsap";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { PERIOD_OVERVIEW_DURATION_MS } from "~/utils/annualTransition";
 import AnimatedNumber from "./AnimatedNumber.vue";
-import AnnualVerticalCoverStream from "./AnnualVerticalCoverStream.vue";
+import AnnualCoverBackground from "./AnnualCoverBackground.vue";
+import type { AnnualCoverState } from "~/utils/annualCoverMotion";
+import { requireAnnualTargets } from "~/utils/annualGsap";
 import ParticleLayer from "./ParticleLayer.vue";
 import { isUsableMetric } from "~/utils/annualPresentation";
 
 const props = defineProps<{
   summary: VersionSummaryViewModel;
+  motionState: AnnualCoverState;
+  countSettled?: boolean;
   periodPageIndex: number;
   pageTotal: number;
   active: boolean;
@@ -26,10 +31,12 @@ const rootRef = ref<HTMLElement | null>(null);
 const mascotUrl = "/dance.gif";
 let context: gsap.Context | null = null;
 let timeline: gsap.core.Timeline | null = null;
+let generation = 0;
+let disposed = false;
 
 const safeTime = computed(() => Math.max(0, Math.min(PERIOD_OVERVIEW_DURATION_MS, props.transitionTime)));
 
-const overviewProgress = computed(() => props.reverseTransition
+const overviewProgress = computed(() => (props.reverseTransition || props.countSettled)
   ? 1
   : Math.max(0, Math.min(1, (safeTime.value - 520) / (PERIOD_OVERVIEW_DURATION_MS - 520))));
 const stateClass = computed(() => safeTime.value <= 0
@@ -59,20 +66,19 @@ const centerText = computed(() => locale.value === "ja"
     }
 );
 
-const setTimelineTime = () => timeline?.pause(safeTime.value / 1000, false);
+const setTimelineTime = () => {
+  props.motionState.transitionTime = safeTime.value;
+  timeline?.pause(safeTime.value / 1000, false);
+};
 
 const buildTimeline = async () => {
-  if (!rootRef.value) return;
+  const token = ++generation;
   await nextTick();
+  const root = rootRef.value;
+  if (disposed || token !== generation || !root?.isConnected) return;
   context?.revert();
+  if (!requireAnnualTargets(root, ['.period-overview-scene__period-copy', '.period-overview-scene__overview-copy'])) return;
   context = gsap.context(() => {
-    // 0.57.3 semantics: every cover plane rotates about its OWN centre, so the
-    // Period state is the rectangular stream and the Overview state is the same
-    // stream in the diamond pose. The rotation is a state transition, not a
-    // temporary accent, so it is never reversed.
-    const coverPlanes = rootRef.value!.querySelector(".period-overview-scene__cover-planes");
-    const upperPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-upper .vertical-cover-stream__plane");
-    const lowerPlanes = coverPlanes?.querySelectorAll(".vertical-cover-stream__zone.is-lower .vertical-cover-stream__plane");
     const previousCopy = rootRef.value!.querySelector(".period-overview-scene__period-copy");
     const nextCopy = rootRef.value!.querySelector(".period-overview-scene__overview-copy");
     const previousPage = rootRef.value!.querySelector(".period-overview-scene__page--period");
@@ -85,25 +91,22 @@ const buildTimeline = async () => {
     const nextAnchor = rootRef.value!.querySelector(".period-overview-scene__overview-anchor");
     const nextDuration = rootRef.value!.querySelector(".period-overview-scene__overview-duration");
 
-    timeline = gsap.timeline({ paused: true });
+    timeline = createAnnualTimeline({ paused: true });
     if (props.reducedMotion) {
       timeline
         .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
-        .to([previousCopy, previousPage], { autoAlpha: 0, duration: 1.6, ease: "none" }, 0)
+        .fromTo([previousCopy, previousPage], { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.6, ease: "none" }, 0)
         .to([nextCopy, nextPage], { autoAlpha: 1, duration: 1.6, ease: "none" }, 0);
       return;
     }
 
     timeline
       .set([nextCopy, nextPage], { autoAlpha: 0 }, 0)
-      .set([upperPlanes, lowerPlanes], { rotationZ: 0 }, 0)
       .to(previousIntro, { y: -12, autoAlpha: 0, duration: .3, ease: "power2.in" }, 0)
       .to(previousStory, { y: -9, autoAlpha: 0, duration: .32, ease: "power1.in" }, .04)
       .to(previousFacts, { y: -7, autoAlpha: 0, duration: .24, ease: "power1.in" }, .12)
       .to(previousLatest, { autoAlpha: 0, duration: .2, ease: "power1.in" }, .16)
       .to(previousPage, { autoAlpha: 0, duration: .24, ease: "power1.in" }, .08)
-      .to(upperPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
-      .to(lowerPlanes, { rotationZ: 45, duration: .9, ease: "power2.inOut" }, .08)
       .to(nextPage, { autoAlpha: 1, duration: .3, ease: "power2.out" }, .48)
       .to(nextCopy, { autoAlpha: 1, duration: .16, ease: "power1.out" }, .52)
       .fromTo(nextHeading, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .4, ease: "power2.out" }, .52)
@@ -117,6 +120,7 @@ watch(() => props.transitionTime, setTimelineTime);
 watch(() => props.reducedMotion, () => void buildTimeline());
 onMounted(() => void buildTimeline());
 onBeforeUnmount(() => {
+  disposed = true; generation++;
   timeline?.kill();
   context?.revert();
 });
@@ -131,9 +135,9 @@ onBeforeUnmount(() => {
     data-visual-style="light-memory-tunnel"
   >
     <div class="period-overview-scene__cover-planes" aria-hidden="true">
-      <AnnualVerticalCoverStream :summary="summary" :active="active" :flowing="flowing ?? active" :reduced-motion="reducedMotion" />
+      <AnnualCoverBackground :summary="summary" :state="motionState" :active="flowing ?? active" :reduced-motion="reducedMotion" />
     </div>
-    <ParticleLayer class="period-overview-scene__particles" :active="active && overviewProgress > 0" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
+    <ParticleLayer class="period-overview-scene__particles" :active="active" :reduced-motion="reducedMotion" density="medium" palette="rainbow" />
 
     <span class="period-overview-scene__page period-overview-scene__page--period">
       {{ String(periodPageIndex + 1).padStart(2, "0") }} / {{ String(pageTotal).padStart(2, "0") }}
@@ -151,7 +155,7 @@ onBeforeUnmount(() => {
         <p>{{ summary.copy.period.body }}</p>
       </div>
       <div class="period-overview-scene__period-facts">
-        <img :src="mascotUrl" alt="" aria-hidden="true" />
+        <img :src="mascotUrl" width="64" height="64" alt="" aria-hidden="true" />
         <span>{{ centerText.elapsedPrefix }} <b>{{ n(summary.period.totalDays) }}</b> {{ centerText.elapsedUnit }}</span>
         <span v-if="monthCount > 0">{{ centerText.monthPrefix }} <b>{{ n(monthCount) }}</b> {{ centerText.monthUnit }}</span>
       </div>
@@ -165,10 +169,10 @@ onBeforeUnmount(() => {
         <small>{{ summary.copy.overview.body }}</small>
       </div>
       <div class="period-overview-scene__overview-play-count" data-overview-play-count>
-        <strong><AnimatedNumber :value="summary.overview.playCount" :active="active" :reduced-motion="reducedMotion" :progress="overviewProgress" /></strong>
+        <strong><AnimatedNumber :value="summary.overview.playCount" :active="true" :reduced-motion="reducedMotion" :progress="overviewProgress" /></strong>
         <span>{{ t("annualSummary.slides.overview.plays") }}</span>
       </div>
-      <img class="period-overview-scene__overview-anchor" :src="mascotUrl" alt="" aria-hidden="true" />
+      <img class="period-overview-scene__overview-anchor" :src="mascotUrl" width="64" height="64" alt="" aria-hidden="true" />
       <div class="period-overview-scene__overview-duration">
         <span>{{ t("annualSummary.slides.overview.estimated") }}</span>
         <strong v-if="isUsableMetric(summary.overview.estimatedSeconds)">{{ summary.overview.estimatedTimeText }}</strong>
@@ -186,9 +190,8 @@ onBeforeUnmount(() => {
   --memory-ink: #245f96;
   position: relative;
   width: 100%;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: 100%;
+  container-type: size;
   overflow: hidden;
   color: var(--memory-ink);
   background:
@@ -229,57 +232,6 @@ onBeforeUnmount(() => {
   transform-style: preserve-3d;
 }
 
-
-.period-overview-scene__cover-planes :deep(.vertical-cover-stream__plane img) {
-  box-shadow: 0 24px 38px rgba(43, 104, 166, .22), 0 0 0 1px rgba(255, 255, 255, .72);
-  filter: saturate(.94) contrast(.94) brightness(1.08);
-}
-
-.period-overview-scene__cover-planes :deep(.vertical-cover-stream__slot) {
-  width: min(84vw, 352px);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__slot) { display: none; }
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper) { height: 29%; }
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower) { height: 25%; }
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(1)) {
-  display: block;
-  opacity: .8;
-  transform: translate3d(-50%, -50%, 0) rotateX(-76deg) scale(.9);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(2)) {
-  display: block;
-  opacity: .88;
-  transform: translate3d(-50%, -14%, -24px) rotateX(-78deg) scale(1);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-upper .vertical-cover-stream__slot:nth-child(3)) {
-  display: block;
-  opacity: .7;
-  transform: translate3d(-50%, 14%, -72px) rotateX(-80deg) scale(1);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(1)) {
-  display: block;
-  opacity: .62;
-  transform: translate3d(-50%, -45%, -76px) rotateX(80deg) scale(.92);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(2)) {
-  display: block;
-  opacity: .82;
-  transform: translate3d(-50%, -22%, -28px) rotateX(78deg) scale(.98);
-}
-
-.period-overview-scene.is-reduced :deep(.vertical-cover-stream__zone.is-lower .vertical-cover-stream__slot:nth-child(3)) {
-  display: block;
-  opacity: .9;
-  transform: translate3d(-50%, 4%, 0) rotateX(76deg) scale(1);
-}
 
 .period-overview-scene__particles {
   z-index: 2;
@@ -382,7 +334,9 @@ onBeforeUnmount(() => {
 .period-overview-scene__period-facts img,
 .period-overview-scene__overview-anchor {
   display: block;
-  width: clamp(48px, 8.3vh, 68px);
+  width: clamp(48px, 8.3cqh, 68px);
+  height: auto;
+  aspect-ratio: 1;
   image-rendering: pixelated;
   filter: drop-shadow(0 8px 10px rgba(57, 120, 200, .18));
 }
@@ -460,7 +414,7 @@ onBeforeUnmount(() => {
 }
 
 .period-overview-scene__overview-anchor {
-  width: clamp(36px, 6.5vh, 52px);
+  width: clamp(36px, 6.5cqh, 52px);
   margin-block: 13px 8px;
 }
 

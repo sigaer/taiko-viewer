@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useAnnualViewport } from "~/composables/useAnnualViewport";
 import { gsap } from "gsap";
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, readonly, ref, toRef, watch, type ComponentPublicInstance } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, toRef, watch, type ComponentPublicInstance } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import type { VersionSummaryViewModel } from "~/types/account-version-summary";
 import { createAnnualBgmSession, type AnnualBgmSession } from "~/utils/annualBgm.client";
-import { ANNUAL_COVER_PHASE_KEY, ANNUAL_COVER_STREAM_DURATION_MS } from "~/utils/annualCoverClock";
+import { prepareAnnualArtwork } from "~/utils/annualArtworkReady";
+import type { AnnualCoverState } from "~/utils/annualCoverMotion";
 import {
   PERIOD_OVERVIEW_DURATION_MS,
   clampPeriodOverviewTime
@@ -38,8 +39,12 @@ const reducedData = ref(false);
 const soundEnabled = ref(true);
 const bgmPlaying = ref(false);
 const periodOverviewTime = ref(0);
-const coverStreamPhase = ref(0);
-const transitionOverlayVisible = ref(false);
+const coverState: AnnualCoverState = { transitionTime: 0, elapsed: 0 };
+const pairStageRef = ref<HTMLElement | null>(null);
+const overviewVisited = ref(false);
+const departingIndex = ref<number | null>(null);
+const preparingIndex = ref<number | null>(null);
+let pageGeneration = 0;
 const transitionRunning = ref(false);
 const pairEndpoint = ref(false);
 const documentVisible = ref(true);
@@ -47,8 +52,6 @@ let motionMedia: MediaQueryList | null = null;
 let dataConnection: AnnualNetworkConnection | null = null;
 let updateMotionHandler: (() => void) | null = null;
 let scrollFrame = 0;
-let coverClockFrame = 0;
-let coverClockTimestamp = 0;
 let bgmSession: AnnualBgmSession | null = null;
 let audioDisposed = false;
 let routeLeaving = false;
@@ -68,7 +71,6 @@ const transitionForward = ref(true);
 // must render the settled value instead of replaying count-up/count-down.
 const navigationMotion: AnnualNavigationMotion = { visited: new Set<number>(), direction: "initial" };
 provide(ANNUAL_NAVIGATION_MOTION_KEY, navigationMotion);
-provide(ANNUAL_COVER_PHASE_KEY, readonly(coverStreamPhase));
 
 const roundedLayoutValue = (value: number) => Math.round(value * 100) / 100;
 const rectOutside = (inner: DOMRect, outer: DOMRect, tolerance: number) =>
@@ -180,6 +182,7 @@ const settleRatingRankLayoutCheck = () => {
 useAnnualViewport(() => {
   if (!transitionRunning.value && containerRef.value) {
     containerRef.value.scrollTop = slideRefs.value[activeIndex.value]?.offsetTop || 0;
+    syncPairStage();
   }
   settleRatingRankLayoutCheck();
 });
@@ -277,7 +280,23 @@ const getViewportIndex = () => {
   ));
 };
 
+// One permanent stage follows the two logical scroll anchors, including entry/exit.
+const syncPairStage = () => {
+  const container = containerRef.value, stage = pairStageRef.value;
+  const first = slideRefs.value[periodIndex.value], last = slideRefs.value[overviewIndex.value];
+  if (!container || !stage || !first || !last) return;
+  const y = Math.max(first.offsetTop - container.scrollTop, Math.min(0, last.offsetTop - container.scrollTop));
+  stage.style.transform = `translate3d(0,${y}px,0)`;
+  stage.style.visibility = Math.abs(y) >= container.clientHeight ? 'hidden' : 'visible';
+  if (!transitionRunning.value) {
+    const time = debugTransitionTime.value ?? (activeIndex.value >= overviewIndex.value ? PERIOD_OVERVIEW_DURATION_MS : 0);
+    periodOverviewTime.value = time; coverState.transitionTime = time;
+    if (activeIndex.value === overviewIndex.value) overviewVisited.value = true;
+  }
+};
+
 const syncPairEndpoint = () => {
+  syncPairStage();
   const container = containerRef.value;
   const index = activeIndex.value;
   const target = slideRefs.value[index];
@@ -291,22 +310,40 @@ const syncPairEndpoint = () => {
 
 const syncActiveIndex = () => {
   if (!containerRef.value || transitionRunning.value) return;
+  syncPairStage();
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   scrollFrame = requestAnimationFrame(() => {
     const container = containerRef.value;
-    if (!container) return;
+    if (!container || transitionRunning.value) return;
     activeIndex.value = getViewportIndex();
     syncPairEndpoint();
   });
 };
 
 const commitPage = async (index: number, behavior: ScrollBehavior = "auto") => {
-  activeIndex.value = index;
-  await nextTick();
-  const target = slideRefs.value[index];
-  if (!containerRef.value || !target) return;
-  containerRef.value.scrollTo({ top: target.offsetTop, behavior });
-  if (behavior === "auto") syncPairEndpoint();
+  const token = ++pageGeneration;
+  const distant = Math.abs(activeIndex.value - index) > 1;
+  departingIndex.value = activeIndex.value;
+  preparingIndex.value = index;
+  try {
+    await nextTick();
+    const target = slideRefs.value[index];
+    if (routeLeaving || !containerRef.value || !target) return;
+    if (distant) await prepareAnnualArtwork(target);
+    if (token !== pageGeneration || routeLeaving) return;
+    if (!transitionRunning.value) {
+      const time = debugTransitionTime.value ?? (index >= overviewIndex.value ? PERIOD_OVERVIEW_DURATION_MS : 0);
+      coverState.transitionTime = time; periodOverviewTime.value = time;
+    }
+    activeIndex.value = index;
+    await nextTick();
+    if (token !== pageGeneration || routeLeaving || !containerRef.value) return;
+    containerRef.value.scrollTo({ top: target.offsetTop, behavior });
+    if (behavior === "auto") syncPairEndpoint();
+    await nextTick();
+  } finally {
+    if (token === pageGeneration) { departingIndex.value = null; preparingIndex.value = null; }
+  }
 };
 
 const clearTransitionWatchdog = () => {
@@ -322,6 +359,7 @@ const settleTransitionMotion = (writeTarget = true) => {
   if (writeTarget && transitionTargetTime !== null) {
     transitionClock.value = transitionTargetTime;
     periodOverviewTime.value = transitionTargetTime;
+    coverState.transitionTime = transitionTargetTime;
   }
   const resolve = transitionResolve;
   transitionResolve = null;
@@ -333,7 +371,6 @@ const cancelPeriodOverviewTransition = () => {
   settleTransitionMotion(false);
   transitionTargetTime = null;
   transitionRunning.value = false;
-  transitionOverlayVisible.value = false;
 };
 
 const runPeriodOverviewTransition = async (targetIndex: number) => {
@@ -348,6 +385,7 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   if (reducedMotion.value || !documentVisible.value) {
     transitionClock.value = targetTime;
     periodOverviewTime.value = targetTime;
+    coverState.transitionTime = targetTime;
     await commitPage(targetIndex);
     transitionTargetTime = null;
     return;
@@ -356,9 +394,10 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   transitionRunning.value = true;
   pairEndpoint.value = false;
   periodOverviewTime.value = sourceTime;
+  coverState.transitionTime = sourceTime;
   transitionClock.value = sourceTime;
-  transitionOverlayVisible.value = true;
   await nextTick();
+  if (generation !== transitionGeneration || routeLeaving) return;
 
   await new Promise<void>((resolve) => {
     transitionResolve = resolve;
@@ -366,7 +405,7 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
       value: targetTime,
       duration: PERIOD_OVERVIEW_DURATION_MS / 1000,
       ease: "none",
-      onUpdate: () => { periodOverviewTime.value = transitionClock.value; },
+      onUpdate: () => { coverState.transitionTime = transitionClock.value; periodOverviewTime.value = transitionClock.value; },
       onComplete: () => settleTransitionMotion()
     });
     transitionWatchdog = window.setTimeout(
@@ -376,10 +415,10 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
   });
 
   if (generation !== transitionGeneration || routeLeaving) return;
+  if (forward) overviewVisited.value = true;
   await commitPage(targetIndex);
   if (generation !== transitionGeneration || routeLeaving) return;
   await nextTick();
-  transitionOverlayVisible.value = false;
   transitionRunning.value = false;
   transitionTargetTime = null;
   syncPairEndpoint();
@@ -387,7 +426,7 @@ const runPeriodOverviewTransition = async (targetIndex: number) => {
 
 const goToPage = async (index: number, instant = false) => {
   const safeIndex = Math.max(0, Math.min(slides.value.length - 1, index));
-  if (transitionRunning.value) return;
+  if (transitionRunning.value || preparingIndex.value !== null) return;
   const viewportIndex = getViewportIndex();
   if (
     !instant
@@ -397,7 +436,7 @@ const goToPage = async (index: number, instant = false) => {
     await runPeriodOverviewTransition(safeIndex);
     return;
   }
-  await commitPage(safeIndex, instant || reducedMotion.value ? "auto" : "smooth");
+  await commitPage(safeIndex, instant || reducedMotion.value || Math.abs(viewportIndex - safeIndex) > 1 ? "auto" : "smooth");
 };
 
 const navigateFromPair = (direction: -1 | 1) => {
@@ -408,6 +447,7 @@ const navigateFromPair = (direction: -1 | 1) => {
 };
 
 const handleWheel = (event: WheelEvent) => {
+  if (transitionRunning.value) { event.preventDefault(); return; }
   if (!pairEndpoint.value || Math.abs(event.deltaY) < 8) return;
   event.preventDefault();
   navigateFromPair(event.deltaY > 0 ? 1 : -1);
@@ -485,31 +525,6 @@ const preloadNextArtwork = () => {
   if (urls[index]) new Image().src = urls[index];
 };
 
-const updateCoverClock = (timestamp: number) => {
-  coverClockFrame = 0;
-  if (!documentVisible.value || reducedMotion.value || routeLeaving) return;
-  // The shared cover phase must keep advancing during the Period <-> Overview
-  // transition. The original implementation skipped it whenever the transition
-  // was running, which is why the covers froze while the rotation played: the
-  // slots' CSS animation is paused and their position comes from this phase.
-  if (coverClockTimestamp) {
-    coverStreamPhase.value = (coverStreamPhase.value + timestamp - coverClockTimestamp) % ANNUAL_COVER_STREAM_DURATION_MS;
-  }
-  coverClockTimestamp = timestamp;
-  coverClockFrame = requestAnimationFrame(updateCoverClock);
-};
-
-const stopCoverClock = () => {
-  if (coverClockFrame) cancelAnimationFrame(coverClockFrame);
-  coverClockFrame = 0;
-  coverClockTimestamp = 0;
-};
-
-const startCoverClock = () => {
-  if (coverClockFrame || !documentVisible.value || reducedMotion.value || routeLeaving) return;
-  coverClockFrame = requestAnimationFrame(updateCoverClock);
-};
-
 let betaViewTimer: ReturnType<typeof setTimeout> | null = null;
 onBeforeUnmount(() => { if(betaViewTimer)clearTimeout(betaViewTimer); });
 watch(activeIndex, (value, oldValue) => {
@@ -534,14 +549,17 @@ watch(activeIndex, (value, oldValue) => {
 });
 
 watch(() => props.summary.summaryId, async () => {
+  pageGeneration++; preparingIndex.value = null; departingIndex.value = null;
   cancelPeriodOverviewTransition();
   navigationMotion.visited.clear();
   navigationMotion.direction = "initial";
-  periodOverviewTime.value = 0;
+  periodOverviewTime.value = 0; coverState.transitionTime = 0; coverState.elapsed = 0;
+  overviewVisited.value = false;
   activeIndex.value = 0;
   slideRefs.value = [];
   await nextTick();
   containerRef.value?.scrollTo({ top: 0, behavior: "auto" });
+  syncPairStage();
 });
 
 // A page can drop out of the registry when a section becomes unavailable, which
@@ -556,12 +574,7 @@ watch(slides, async (next, previous) => {
 });
 
 watch(reducedMotion, (isReduced) => {
-  if (isReduced) {
-    stopCoverClock();
-    if (transitionRunning.value) settleTransitionMotion();
-  } else {
-    startCoverClock();
-  }
+  if (isReduced && transitionRunning.value) settleTransitionMotion();
 });
 
 const syncMotionPreference = () => {
@@ -584,6 +597,7 @@ onMounted(async () => {
   soundEnabled.value = true;
   activeIndex.value = 0;
   await nextTick();
+  if (routeLeaving) return;
   containerRef.value?.focus({ preventScroll: true });
   let restoredIndex = 0;
   try {
@@ -592,10 +606,11 @@ onMounted(async () => {
   } catch { /* private browsing may disable storage */ }
   if (restoredIndex > 0) { emit("start"); await nextTick(); }
   await goToPage(debugTransitionTime.value === null ? restoredIndex : periodIndex.value, true);
+  if (routeLeaving) return;
   preloadNextArtwork();
   document.addEventListener("visibilitychange", handleVisibilityChange);
   documentVisible.value = !document.hidden;
-  startCoverClock();
+
   void playBgm();
 });
 
@@ -604,25 +619,25 @@ const handleVisibilityChange = () => {
   if (!documentVisible.value) {
     if (scrollFrame) cancelAnimationFrame(scrollFrame);
     scrollFrame = 0;
-    stopCoverClock();
+
     if (transitionRunning.value) settleTransitionMotion();
     pauseBgm();
   } else {
-    startCoverClock();
+
     void playBgm();
   }
 };
 
 const handlePageHide = () => {
   documentVisible.value = false;
-  stopCoverClock();
+
   if (transitionRunning.value) settleTransitionMotion();
   disposeAudio();
 };
 const handlePageShow = () => {
   audioDisposed = false;
   documentVisible.value = !document.hidden;
-  startCoverClock();
+
   if (soundEnabled.value) {
     acquireBgmSession();
     void playBgm();
@@ -634,16 +649,19 @@ onBeforeRouteLeave(() => {
   routeLeaving = true;
   documentVisible.value = false;
   soundEnabled.value = false;
-  stopCoverClock();
+
   cancelPeriodOverviewTransition();
   disposeAudio();
 });
 
 onBeforeUnmount(() => {
+  pageGeneration++;
+  const wasLeaving = routeLeaving;
+  routeLeaving = true;
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   if (ratingRankLayoutFrame) cancelAnimationFrame(ratingRankLayoutFrame);
   if (ratingRankLayoutTimer) clearTimeout(ratingRankLayoutTimer);
-  stopCoverClock();
+
   cancelPeriodOverviewTransition();
   if (motionMedia && updateMotionHandler) motionMedia.removeEventListener("change", updateMotionHandler);
   if (dataConnection?.removeEventListener && updateMotionHandler) dataConnection.removeEventListener("change", updateMotionHandler);
@@ -651,7 +669,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("pagehide", handlePageHide);
   window.removeEventListener("pageshow", handlePageShow);
   document.removeEventListener("visibilitychange", handleVisibilityChange);
-  const remountingAnnual = !routeLeaving && window.location.pathname.includes("/account/version-summary");
+  const remountingAnnual = !wasLeaving && window.location.pathname.includes("/account/version-summary");
   disposeAudio(remountingAnnual ? 50 : 0);
 });
 </script>
@@ -684,7 +702,7 @@ onBeforeUnmount(() => {
     <div
       ref="containerRef"
       class="story-player__viewport"
-      :class="{ 'is-pair-endpoint': pairEndpoint }"
+      :class="{ 'is-pair-endpoint': pairEndpoint, 'is-transitioning': transitionRunning }"
       tabindex="0"
       @scroll.passive="syncActiveIndex"
       @wheel="handleWheel"
@@ -709,7 +727,7 @@ onBeforeUnmount(() => {
       >
         <component
           :is="slide.component"
-          v-if="Math.abs(activeIndex - index) <= 1"
+          v-if="slide.key !== 'period' && slide.key !== 'overview' && (Math.abs(activeIndex - index) <= 1 || departingIndex === index || preparingIndex === index)"
           :summary="summary" :page-index="index" :page-total="slides.length"
           :profile-fallback="props.profileFallback"
           :active="documentVisible && activeIndex === index" :reduced-motion="reducedMotion" :save-data="reducedData"
@@ -722,15 +740,18 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="transitionOverlayVisible || debugTransitionTime !== null"
-      class="story-player__transition-overlay"
+      ref="pairStageRef"
+      :aria-hidden="activeIndex !== periodIndex && activeIndex !== overviewIndex"
+      class="story-player__pair-stage"
       :class="{ 'is-debug': debugTransitionTime !== null }"
     >
       <AnnualPeriodOverviewScene
         :summary="summary"
+        :motion-state="coverState"
+        :count-settled="overviewVisited"
         :period-page-index="periodIndex"
         :page-total="slides.length"
-        :active="documentVisible"
+        :active="documentVisible && (activeIndex === periodIndex || activeIndex === overviewIndex)"
         :flowing="documentVisible && (activeIndex === periodIndex || activeIndex === overviewIndex)"
         :reduced-motion="reducedMotion"
         :transition-time="visibleTransitionTime"
@@ -746,6 +767,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.story-player{position:relative;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:var(--annual-stage-height,100dvh)}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player__viewport.is-pair-endpoint{touch-action:none}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{container-type:size;container-name:annual-stage;min-height:100vh;min-height:100svh;min-height:var(--annual-stage-height,100dvh);scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__transition-overlay{position:absolute;z-index:20;inset:0;overflow:hidden;pointer-events:none}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:absolute;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media(orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
+.story-player{position:relative;overflow:hidden;--story-slide-top-padding:4.7rem;--story-slide-bottom-padding:3.8rem;color:#17365d;background:#f7fbff}.story-player,.story-player__viewport,.story-player__slide{height:100vh;height:100svh;height:var(--annual-stage-height,100dvh)}.story-player__viewport{position:relative;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-y}.story-player__viewport.is-pair-endpoint{touch-action:none}.story-player__viewport.is-transitioning{overflow-y:hidden;touch-action:none}.story-player:not(.is-live) .story-player__viewport{overflow-y:hidden;touch-action:none}.story-player__viewport::-webkit-scrollbar{display:none}.story-player__slide{container-type:size;container-name:annual-stage;min-height:100vh;min-height:100svh;min-height:var(--annual-stage-height,100dvh);scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#f7fbff}.story-player__pair-stage{position:absolute;z-index:2;inset:0;overflow:hidden;visibility:hidden;pointer-events:none}.story-player__drawer-trigger,.story-player__sound-trigger{position:fixed;top:max(16px,env(safe-area-inset-top));z-index:30;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#17365d;background:#f7fbffed;border:1px solid #3978c829;box-shadow:0 10px 30px #17365d1f;cursor:pointer}.story-player__drawer-trigger{right:18px;gap:3px}.story-player__sound-trigger{right:68px;font-weight:700}.story-player__drawer-trigger span{display:block;width:16px;height:2px;border-radius:99px;background:#3978c8}.story-player__drawer-trigger:focus-visible,.story-player__sound-trigger:focus-visible,.story-player__nav button:focus-visible{outline:3px solid #3978c8;outline-offset:3px}.story-player__nav{position:absolute;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:7px}.story-player__nav button{width:42px;height:42px;border-radius:50%;border:1px solid #3978c829;background:#f7fbffed;color:#17365d;font-size:18px;box-shadow:0 10px 30px #17365d1a;cursor:pointer}.story-player__nav button:disabled{opacity:.3;cursor:default}@media(max-width:720px){.story-player{--story-slide-top-padding:3.3rem;--story-slide-bottom-padding:3.5rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:max(8px,env(safe-area-inset-top));width:36px;height:36px}.story-player__drawer-trigger{right:8px}.story-player__sound-trigger{right:49px}.story-player__nav{right:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:5px}.story-player__nav button{width:36px;height:36px}}@media(orientation:landscape) and (min-width:721px) and (max-height:460px){.story-player{--story-slide-top-padding:3.25rem;--story-slide-bottom-padding:2.65rem}.story-player__drawer-trigger,.story-player__sound-trigger{top:10px;width:34px;height:34px}.story-player__drawer-trigger{right:10px}.story-player__sound-trigger{right:50px}.story-player__nav{right:10px;bottom:8px;gap:5px}.story-player__nav button{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.story-player__viewport{scroll-behavior:auto}}
 .story-player__slide[data-bg-mood="rainbow-stage"]{--annual-scene-bg:linear-gradient(155deg,#0d396e,#326aa5 48%,#97c8e8)}.story-player__slide[data-bg-mood="stage-blue"],.story-player__slide[data-bg-mood="profile-stage"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#dcecff)}.story-player__slide[data-bg-mood="bright-impact"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#d6eaff 58%,#fff3cf)}.story-player__slide[data-bg-mood="cover-spectrum"]{--annual-scene-bg:linear-gradient(145deg,#f7fbff,#e8e7ff 52%,#dff6ff)}.story-player__slide[data-bg-mood="time-blue"]{--annual-scene-bg:linear-gradient(155deg,#f7fbff,#dbeaff 58%,#e8e4ff)}.story-player__slide[data-bg-mood="midnight"]{--annual-scene-bg:linear-gradient(155deg,#101d47,#223870 56%,#492e70)}.story-player__slide[data-bg-mood="award-purple"]{--annual-scene-bg:linear-gradient(155deg,#f7f4ff,#e7e2ff 52%,#e9f3ff)}.story-player__slide[data-bg-mood="award-stage"]{--annual-scene-bg:radial-gradient(circle at 50% 18%,#60512e 0,#1c2547 35%,#0b1028 78%)}
 </style>

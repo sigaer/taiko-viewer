@@ -100,7 +100,7 @@ assert.equal(storyPlayer.includes("transitionWatchdog"), true, "period-to-overvi
 assert.equal(clickLoveSource.includes('closest(".story-player, .annual-page")'), true, "global click hearts still leak celebration effects into annual story scenes");
 assert.equal(storyPlayer.includes("settleTransitionMotion"), true, "period-to-overview transition has no deterministic settle path");
 assert.equal(storyPlayer.includes(":active=\"documentVisible && activeIndex === index\""), true, "background scenes remain active while the document is hidden");
-assert.equal(storyPlayer.includes("stopCoverClock()"), true, "the annual cover RAF has no shared stop path");
+assert.equal((await read("components/account/version-summary/AnnualCoverBackground.vue")).includes("gsap.ticker.remove(tick)"), true, "cover renderer has no ticker cleanup");
 assert.equal(storyPlayer.includes("PERIOD_OVERVIEW_DURATION_MS / 1000"), true, "period-to-overview no longer uses the transitionTime duration contract");
 
 const openingSource = await read("components/account/version-summary/slides/OpeningSlide.vue");
@@ -172,65 +172,20 @@ assert.equal(openingBeatLaneSource.includes("is-still"), true, "opening beat lan
 const periodMotionSource = await read("components/account/version-summary/slides/PeriodSlide.vue");
 const overviewMotionSource = await read("components/account/version-summary/slides/OverviewSlide.vue");
 const periodOverviewSceneSource = await read("components/account/version-summary/AnnualPeriodOverviewScene.vue");
-const verticalCoverSource = await read("components/account/version-summary/AnnualVerticalCoverStream.vue");
-assert.equal(periodMotionSource.includes("AnnualPeriodOverviewScene"), true, "period page does not use the shared transition scene");
-assert.equal(overviewMotionSource.includes("AnnualPeriodOverviewScene"), true, "overview page does not use the shared transition scene");
-assert.equal(overviewMotionSource.includes("StorySlideShell"), false, "overview page still uses the generic slide shell");
-assert.equal(periodOverviewSceneSource.includes("AnnualVerticalCoverStream"), true, "shared period scene has no cover stream");
-assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueSongs"), false, "overview scene still renders the song count");
-assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueCharts"), false, "overview scene still renders the chart count");
-assert.equal(periodOverviewSceneSource.includes("summary.overview.estimatedTimeText"), true, "overview scene is missing total play time");
-assert.equal(/currentClearCharts|currentFullComboCharts|currentDondafulCharts|currentKiwamiCharts/.test(periodOverviewSceneSource), false, "overview scene still exposes the old achievement grid");
-assert.equal(verticalCoverSource.includes("linear infinite"), true, "period cover stream is not continuous and linear");
-assert.equal(verticalCoverSource.includes("ZONE_SLOT_COUNT = 6"), true, "period cover stream does not use a gap-free fixed cadence");
-assert.equal(verticalCoverSource.includes("49.95%"), true, "period cover stream no longer keeps the 0.46.11 three-plane cadence");
-assert.equal((verticalCoverSource.match(/50%, 100%/g) || []).length, 2, "upper and lower cover streams do not remain visible for half a cycle");
-assert.equal(verticalCoverSource.includes("vertical-cover-stream__fallback"), true, "period cover stream has no visual fallback plane");
-assert.equal(verticalCoverSource.includes("ANNUAL_COVER_PHASE_KEY"), true, "period cover instances do not share one animation phase");
-assert.equal(verticalCoverSource.includes("rotateX(72deg) scale(.74)"), true, "lower cover corridor lost its inward perspective");
-assert.equal(verticalCoverSource.includes("rotateX(-72deg) scale(.74)"), true, "upper cover corridor lost its inward perspective");
-// UX-2 corrective: the transition rotates every cover plane about its own centre
-// (0.57.3 semantics) as a one-way state change led by Period -> Overview. It must
-// never yoyo back, and no whole-stream rotation wrapper may come back.
-assert.equal(/upperPlanes|lowerPlanes/.test(periodOverviewSceneSource), true, "period transition no longer rotates the cover planes themselves");
-assert.equal(/\.set\(\[upperPlanes, lowerPlanes\], \{ rotationZ: 0 \}/.test(periodOverviewSceneSource), true, "period state is not reset to the rectangular pose");
-assert.equal((periodOverviewSceneSource.match(/rotationZ: 45/g) || []).length, 2, "cover planes do not both rotate to the diamond pose");
-assert.equal(/rotationZ: 0[^\n]*\}[^\n]*\.08/.test(periodOverviewSceneSource), false, "transition still reverses the rotation");
-assert.equal(periodOverviewSceneSource.includes("period-overview-scene__cover-rotation"), false, "the rejected whole-stream rotation wrapper is back");
-assert.equal(periodOverviewSceneSource.includes("--cover-rotation"), false, "rotation is still driven by a CSS variable instead of the timeline");
-assert.equal(/\.to\([^)]*,\s*\{[^}]*rotationX/.test(periodOverviewSceneSource), false, "transition still compresses cover height with an X-axis rotation");
-assert.equal(/\.pause\(\)/.test(periodOverviewSceneSource), false, "period transition still pauses the cover stream");
-// The shared cover phase must keep advancing while the transition plays, because
-// the slot animation is paused and the visible cover position comes from it.
-assert.equal(
-  /if \(coverClockTimestamp\) \{\s*coverStreamPhase\.value = \(coverStreamPhase\.value \+ timestamp - coverClockTimestamp\)/.test(storyPlayer),
-  true,
-  "cover phase is still frozen while the period transition runs"
-);
-assert.equal(/!transitionRunning\.value\) \{\s*coverStreamPhase/.test(storyPlayer), false, "cover phase still checks transitionRunning");
-const coverStreamSource = verticalCoverSource;
-assert.equal(coverStreamSource.includes("vertical-cover-stream__rotation"), false, "the rejected per-cover rotation layer is back");
-assert.equal(coverStreamSource.includes("__plane"), true, "cover stream lost its plane element");
-// UX-2: the ambient flow must not be gated on the scene's active flag.
-assert.equal(verticalCoverSource.includes("is-flowing"), true, "cover stream has no independent flow state");
-assert.equal(verticalCoverSource.includes("is-running"), false, "cover stream still ties its flow to the active flag");
-assert.equal(verticalCoverSource.includes("flowing?: boolean"), true, "cover stream does not accept an independent flow flag");
-assert.equal(storyPlayer.includes(":flowing="), true, "story player does not drive the independent cover flow");
-// Both slide wrappers must forward the flow flag, otherwise the covers freeze
-// whenever the pair transition takes over.
-for (const [wrapper, name] of [[periodMotionSource, "PeriodSlide"], [overviewMotionSource, "OverviewSlide"]]) {
-  assert.equal(wrapper.includes("flowing?: boolean"), true, `${name} does not accept the cover flow flag`);
-  assert.equal(wrapper.includes(":flowing="), true, `${name} does not forward the cover flow flag`);
-}
-assert.equal(periodOverviewSceneSource.includes("period-overview-scene__previous-planes"), false, "period transition still mounts a separate outgoing cover stream");
-assert.equal(periodOverviewSceneSource.includes("period-overview-scene__next-planes"), false, "period transition still mounts a separate incoming cover stream");
-assert.equal((periodOverviewSceneSource.match(/<AnnualVerticalCoverStream/g) || []).length, 1, "period transition does not preserve a single cover plane set");
+const coverRendererSource = await read("utils/annualCoverRenderer.client.ts");
+assert.equal((storyPlayer.match(/<AnnualPeriodOverviewScene/g) || []).length, 1, "player must own one persistent pair scene");
+assert.equal(periodOverviewSceneSource.includes("AnnualCoverBackground"), true, "pair scene must use the shared WebGL background");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueSongs"), false, "overview still renders song count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.uniqueCharts"), false, "overview still renders chart count");
+assert.equal(periodOverviewSceneSource.includes("summary.overview.estimatedTimeText"), true, "overview missing play time");
+assert.equal(coverRendererSource.includes("coverMotion(state.elapsed"), true, "cover motion must retain its independent phase");
+assert.equal(coverRendererSource.includes("coverRotation(state.transitionTime)"), true, "cover planes must rotate locally");
 assert.equal(periodOverviewSceneSource.includes('/蓝色白色背景图.png'), true, "period scene is missing the provided blue-white backdrop");
 assert.equal(periodOverviewSceneSource.includes('data-visual-style="light-memory-tunnel"'), true, "period scene does not declare the light memory tunnel style");
 assert.equal(periodOverviewSceneSource.includes('const mascotUrl = "/dance.gif"'), true, "period scene is missing the dancing pixel mascot");
-assert.equal(periodOverviewSceneSource.includes("width: min(84vw, 352px)"), true, "period reduced state lost the reference cover width");
-assert.equal(periodOverviewSceneSource.includes("rotateX(-80deg)"), true, "period reduced state lost the upper reference pitch");
-assert.equal(periodOverviewSceneSource.includes("rotateX(80deg)"), true, "period reduced state lost the lower reference pitch");
+const coverBackgroundSource = await read("components/account/version-summary/AnnualCoverBackground.vue");
+assert.ok(coverBackgroundSource.includes('annual-cover-background__still'), "static cover fallback missing");
+assert.ok(coverBackgroundSource.includes('props.reducedMotion'), "reduced motion must disable the renderer");
 for (const stageToken of ["--memory-white", "--memory-blue", "--memory-violet", "--memory-ink"]) {
   assert.equal(periodOverviewSceneSource.includes(stageToken), true, `period scene is missing memory tunnel token: ${stageToken}`);
 }

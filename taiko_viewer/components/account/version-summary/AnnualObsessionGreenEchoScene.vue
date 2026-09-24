@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from "vue";
 import { gsap } from "gsap";
+import { createAnnualTimeline, setAnnualTargets, requireAnnualTargets } from "~/utils/annualGsap";
 import AnnualObsessionCoverBlock from "./AnnualObsessionCoverBlock.vue";
 import AnnualScene from "./AnnualScene.vue";
 import { useAnnualTimeline } from "~/composables/useAnnualTimeline";
@@ -39,27 +40,25 @@ const { onAnnualMotionActive } = useAnnualTimeline(
 
 onAnnualMotionActive(() => {
   const root = rootRef.value?.rootEl;
-  if (!root) return;
+  if (!root || !requireAnnualTargets(root, ['[data-obsession-stage="headline"]', '[data-obsession-stage="cover"]', '[data-obsession-stage="song"]'])) return;
 
   let timeline: gsap.core.Timeline | null = null;
   const context = gsap.context(() => {
-    const background = root.querySelector<HTMLElement>('[data-obsession-stage="background"]');
     const headline = root.querySelectorAll<HTMLElement>('[data-obsession-stage="headline"]');
     const numbers = root.querySelectorAll<HTMLElement>('[data-obsession-stage="number"]');
     const cover = root.querySelector<HTMLElement>('[data-obsession-stage="cover"]');
     const songTitle = root.querySelector<HTMLElement>('[data-obsession-stage="song"]');
     const closing = root.querySelectorAll<HTMLElement>('[data-obsession-stage="closing"]');
 
-    gsap.set(background, { autoAlpha: 0 });
-    gsap.set(headline, { autoAlpha: 0, y: 16 });
-    gsap.set(numbers, { scale: .88, transformOrigin: "50% 70%" });
-    gsap.set(cover, { autoAlpha: 0, y: 16, scale: .92 });
-    gsap.set(songTitle, { autoAlpha: 0, y: 10 });
-    gsap.set(closing, { autoAlpha: 0, y: 14 });
+    // Background stays painted while foreground stages enter.
+    setAnnualTargets(headline, { autoAlpha: 0, y: 16 });
+    setAnnualTargets(numbers, { scale: .88, transformOrigin: "50% 70%" });
+    setAnnualTargets(cover, { autoAlpha: 0, y: 16, scale: .92 });
+    setAnnualTargets(songTitle, { autoAlpha: 0, y: 10 });
+    setAnnualTargets(closing, { autoAlpha: 0, y: 14 });
 
-    timeline = gsap.timeline();
+    timeline = createAnnualTimeline();
     timeline
-      .to(background, { autoAlpha: 1, duration: .72, ease: "power1.out" }, 0)
       .to(headline, { autoAlpha: 1, y: 0, duration: .56, stagger: .1, ease: "power2.out" }, .25)
       .to(numbers, { scale: 1.07, duration: .24, ease: "power2.out" }, .48)
       .to(numbers, { scale: 1, duration: .34, ease: "power1.out" }, .72)
