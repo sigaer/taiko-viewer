@@ -1,4 +1,4 @@
-const OPENING_TITLE_ART_SRC = "/title.png";
+const OPENING_TITLE_ART_SRC = "/title_resize.png";
 
 let artworkPromise: Promise<boolean> | null = null;
 

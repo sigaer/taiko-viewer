@@ -55,6 +55,7 @@ const annualSceneSource = await read("components/account/version-summary/AnnualS
 const storySlideShellSource = await read("components/account/version-summary/StorySlideShell.vue");
 const annualTimelineSource = await read("composables/useAnnualTimeline.ts");
 const annualBgmSource = await read("utils/annualBgm.client.ts");
+const annualOpeningAssetsSource = await read("utils/annualOpeningAssets.client.ts");
 const sidebarSource = await read("components/SidebarNav.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
@@ -72,9 +73,12 @@ assert.equal(annualBgmSource.includes("pendingPlay"), true, "annual BGM play req
 assert.equal(annualBgmSource.includes("PRIMED_OWNER"), true, "annual BGM cannot be adopted from the navigation gesture");
 assert.equal(annualBgmSource.includes("preloadAnnualBgm"), true, "annual BGM has no route-level preload helper");
 assert.equal(annualPage.includes('rel: "preload"'), true, "annual opening assets are not declared as route preloads");
-for (const asset of ["/title.png", "/to_end.png", "/icon.png"]) {
+for (const asset of ["/title_resize.png", "/to_end.png", "/icon.png"]) {
   assert.equal(annualPage.includes(`href: "${asset}"`), true, `annual opening asset is not preloaded: ${asset}`);
 }
+assert.equal(await exists("public/title_resize.png"), true, "resized opening title art is missing");
+assert.equal(annualOpeningAssetsSource.includes('"/title_resize.png"'), true, "opening artwork warmup uses the wrong title art");
+assert.equal(annualPage.includes('href: "/title.png"'), false, "retired opening title art is still preloaded");
 assert.equal(annualPage.includes("/friend.png"), false, "removed opening utility asset is still preloaded");
 assert.equal(annualPage.includes("preloadAnnualBgm()"), true, "annual route does not warm the BGM resource");
 assert.equal(sidebarSource.includes("primeAnnualBgm()"), true, "annual navigation does not start BGM inside its user gesture");
@@ -111,6 +115,8 @@ const openingBeatLaneSource = await read("components/account/version-summary/Ann
 assert.equal(openingSource.includes("AnnualOpeningCarousel"), true, "opening cover carousel is missing");
 assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fireworks are missing");
 assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
+assert.equal(openingSource.includes('src="/title_resize.png"'), true, "opening does not use the resized title art");
+assert.equal(openingSource.includes('src="/title.png"'), false, "opening still renders the retired title art");
 assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
 assert.equal(openingSource.includes("friendReport"), false, "opening still offers the removed friend report entry");
 assert.equal(openingSource.includes("/friend.png"), false, "opening still references the removed friend report artwork");

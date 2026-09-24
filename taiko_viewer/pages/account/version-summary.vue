@@ -36,7 +36,7 @@ useViewerSeo(() => ({ title: t("account.versionSummary"), description: buildPage
 useHead({
   link: [
     { rel: "preload", as: "audio", href: ANNUAL_BGM_SRC, type: "audio/ogg" },
-    { rel: "preload", as: "image", href: "/title.png", fetchpriority: "high" },
+    { rel: "preload", as: "image", href: "/title_resize.png", fetchpriority: "high" },
     { rel: "preload", as: "image", href: "/to_end.png" },
     { rel: "preload", as: "image", href: "/icon.png" }
   ]
