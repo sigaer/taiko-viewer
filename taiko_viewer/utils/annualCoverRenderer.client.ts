@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createCoverQuality } from './annualCoverQuality';
+import { configureCoverSampling, softenCoverEdges } from './annualCoverSampling.client';
 import { annualCoverTexturePath } from './annualCoverTexture';
 import { coverMotion, coverPitch, coverRotation, type AnnualCoverState } from './annualCoverMotion';
 
@@ -14,12 +14,13 @@ export type AnnualCoverRenderer = {
 export const createAnnualCoverRenderer = (
   canvas: HTMLCanvasElement, covers: Cover[], state: AnnualCoverState, failed: () => void
 ): AnnualCoverRenderer => {
-  const context = canvas.getContext('webgl2', { alpha: true, antialias: false });
+  const context = canvas.getContext('webgl2', { alpha: true, antialias: true });
   if (!context) throw new Error('WebGL2 unavailable');
-  const renderer = new THREE.WebGLRenderer({ canvas, context, alpha: true, antialias: false });
-  const quality = createCoverQuality(window.devicePixelRatio || 1);
-  renderer.setPixelRatio(quality.ratio);
-  canvas.dataset.pixelRatio = String(quality.ratio);
+  const renderer = new THREE.WebGLRenderer({ canvas, context, alpha: true, antialias: true });
+  // Keep the drawing buffer sharp on Retina phones. Never trade clarity for
+  // frame timing: the former adaptive floor of 0.5 enlarged every pixel.
+  renderer.setPixelRatio(Math.max(1, Math.min(3, window.devicePixelRatio || 1)));
+  canvas.dataset.pixelRatio = String(renderer.getPixelRatio());
   renderer.setClearColor(0x000000, 0);
   // Unlit artwork is composited in its original display RGB, like the HTML
   // images. No lighting/HDR operation requires a linear-light round trip.
@@ -33,29 +34,20 @@ export const createAnnualCoverRenderer = (
   const textures = new Map<string, THREE.Texture>();
   const controllers = new Set<AbortController>();
   const bitmaps = new Set<ImageBitmap>();
-  let disposed = false, firstFrame = true, width = 1, height = 1, lastFrame = 0;
+  let disposed = false, firstFrame = true, width = 1, height = 1;
   const slots = Array.from({ length: covers.length ? 12 : 0 }, (_, i) => {
     const upper = i < 6, index = i % 6;
     const pool = covers.filter((_, j) => j % 2 === (upper ? 0 : 1));
     const song = (pool.length ? pool : covers)[index % (pool.length || covers.length)];
     const material = new THREE.MeshBasicMaterial({ map: placeholder, color: 0xc3e2ff, transparent: true, opacity: 0, depthWrite: false });
     material.color.convertLinearToSRGB();
+    softenCoverEdges(material);
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     return { mesh, material, upper, index, url: annualCoverTexturePath(song), applied: false };
   });
   const render = () => {
     if (disposed) return;
-    const now = performance.now();
-    if (state.transitionTime > 0 && state.transitionTime < 1600) quality.reset();
-    else if (lastFrame) {
-      const ratio = quality.sample(now - lastFrame);
-      if (ratio !== renderer.getPixelRatio()) {
-        // Resize and draw in this same callback: never expose a cleared canvas.
-        renderer.setPixelRatio(ratio); canvas.dataset.pixelRatio = String(ratio);
-      }
-    }
-    lastFrame = now;
     const landscape = width > height && height <= 460;
     const size = Math.min(landscape ? height * .78 : width * .78, 330);
     for (const slot of slots) {
@@ -104,9 +96,10 @@ export const createAnnualCoverRenderer = (
         if (total > 8 * 1024 * 1024) { await reader.cancel(); return; }
         chunks.push(value);
       }
-      bitmap = await createImageBitmap(new Blob(chunks as BlobPart[]), { resizeWidth: 400, resizeHeight: 400, imageOrientation: 'flipY' });
+      bitmap = await createImageBitmap(new Blob(chunks as BlobPart[]), { imageOrientation: 'flipY' });
       if (disposed || controller.signal.aborted) { bitmap.close(); return; }
       const texture = new THREE.Texture(bitmap);
+      configureCoverSampling(texture, renderer.capabilities.getMaxAnisotropy());
       texture.colorSpace = THREE.NoColorSpace; texture.flipY = false; texture.needsUpdate = true;
       textures.set(url, texture); bitmaps.add(bitmap);
     } catch { bitmap?.close(); /* A failed cover keeps its neutral plane. */ }

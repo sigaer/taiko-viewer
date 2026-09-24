@@ -1,4 +1,3 @@
-import { createCoverQuality } from '../utils/annualCoverQuality.ts';
 import { annualCoverTexturePath } from '../utils/annualCoverTexture.ts';
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -43,18 +42,6 @@ test('cover fronts stay facing the camera throughout their vertical path', () =>
   }
 });
 
-test('sustained frame pressure lowers only background resolution, bounded and without oscillation', () => {
-  const quality=createCoverQuality(3);
-  assert.equal(quality.ratio,1.5);
-  for(let i=0;i<90;i++)quality.sample(i%30===0?60:16.7);
-  assert.equal(quality.ratio,1.5,'isolated stalls must not degrade quality');
-  quality.sample(10000);
-  assert.equal(quality.ratio,1.5,'resuming a paused scene must not degrade quality');
-  for(let i=0;i<180;i++)quality.sample(50);
-  assert.equal(quality.ratio,.5);
-  for(let i=0;i<180;i++)quality.sample(16.7);
-  assert.equal(quality.ratio,.5,'do not oscillate between quality levels');
-});
 test('WebGL cover URLs retain the shared fallback and never proxy arbitrary external URLs', () => {
   assert.equal(annualCoverTexturePath({songNo:1405,coverUrl:'https://static.sakura-bot.cn/cover/1384.png'}),'/api/content/covers/1384/texture');
   assert.equal(annualCoverTexturePath({songNo:1,coverUrl:'//other.test/image'}),'/api/content/covers/1/texture');
