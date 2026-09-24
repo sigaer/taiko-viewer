@@ -117,6 +117,8 @@ assert.equal(openingSource.includes("AnnualOpeningFireworks"), true, "opening fi
 assert.equal(openingSource.includes("AnnualOpeningBeatLane"), true, "opening beat lane is missing");
 assert.equal(openingSource.includes('src="/title_resize.png"'), true, "opening does not use the resized title art");
 assert.equal(openingSource.includes('src="/title.png"'), false, "opening still renders the retired title art");
+assert.equal(openingSource.includes("bottom: calc(100% - var(--opening-carousel-top))"), true, "opening title is not anchored to the carousel boundary");
+assert.equal(openingSource.includes("top: var(--opening-carousel-top)"), true, "opening carousel does not share its boundary token with the title");
 assert.equal(/emit\(["']start["']\)/.test(openingSource), true, "opening start button is missing");
 assert.equal(openingSource.includes("friendReport"), false, "opening still offers the removed friend report entry");
 assert.equal(openingSource.includes("/friend.png"), false, "opening still references the removed friend report artwork");
