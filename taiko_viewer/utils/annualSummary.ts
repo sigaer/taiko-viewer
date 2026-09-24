@@ -17,9 +17,9 @@ type Translate = (key: string, params?: Record<string, unknown>) => string;
 const record = (value: unknown): UnknownRecord =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : {};
 
-// The annual recap reports every day boundary in the season time zone, so the
-// "how many days has this story been running" figure must be anchored to the
-// same calendar day the player actually saw.
+// The annual recap reports every day boundary in the season time zone. Period
+// copy is scoped to the reporting window, even when account observation began
+// before that window opened.
 const ANNUAL_CALENDAR_TIME_ZONE = "Asia/Shanghai";
 const MONTH_DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -62,8 +62,7 @@ const earliestCalendarDay = (values: unknown[]): string => {
   return earliest;
 };
 
-// Inclusive span in calendar days, counted from the first real play day to the
-// current day in the season time zone.
+// Inclusive span in calendar days.
 const calendarDaySpan = (startDay: string, endDay: string): number | null => {
   const start = calendarDayNumber(startDay);
   const end = calendarDayNumber(endDay);
@@ -617,27 +616,22 @@ export const normalizeAnnualSummary = (
     : ratingRankMin
       ? `#${formatNumber(ratingRankMin)}`
       : "—";
-  // The Period page reports how long the player's own story has been running, so
-  // it counts from the first record the backend actually observed for this
-  // account up to the moment that report was generated. `firstActualPlayDate` is
-  // that anchor as published by the generator; the window-scoped fields remain
-  // only as a fallback for summaries generated before the anchor existed.
+  // Keep the account-observation anchor as provenance, but never use it for the
+  // Period page: a pre-window snapshot must not make an annual recap display a
+  // date or duration outside its reporting window.
   const firstActualPlayDay = calendarParts(period.firstActualPlayDate);
-  const earliestPlayDay = firstActualPlayDay
-    || earliestCalendarDay([
-      calendarParts(period.firstRecordAt),
-      ...(calendarActivity?.days.map((day) => day.date) || [])
-    ]);
-  // "Now" is the backend generation timestamp, never the visitor's clock: the
-  // figure has to be identical on the server render, on hydration and on a later
-  // reopen, and must not depend on a local time zone.
+  const reportingStartDay = calendarParts(version.startDate) || calendarParts(ANNUAL_REPORTING_WINDOW.start);
+  // End at the earlier of report generation and the declared window end. This
+  // keeps an in-progress report honest and prevents a later reopen from growing
+  // beyond the closed reporting period.
   const generatedDay = calendarParts(raw.generatedAt);
-  const periodTotalDays = (() => {
-    const storySpan = earliestPlayDay && generatedDay ? calendarDaySpan(earliestPlayDay, generatedDay) : null;
-    // Without a provable first record the only honest figure left is what the
-    // algorithm reported for its own window.
-    return storySpan ?? numberValue(period.totalDays);
-  })();
+  const reportingEndDay = earliestCalendarDay([
+    generatedDay,
+    calendarParts(version.effectiveEndDate),
+    calendarParts(version.endDate)
+  ]);
+  const periodTotalDays = calendarDaySpan(reportingStartDay, reportingEndDay)
+    ?? numberValue(period.totalDays);
   const narrativeContext: AnnualNarrativeContext = {
     mode,
     profileBodyKey,

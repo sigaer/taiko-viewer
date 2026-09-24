@@ -10,9 +10,8 @@ register("./support/nuxtAliasHooks.mjs", import.meta.url);
 const { normalizeAnnualSummary } = await import("../utils/annualSummary.ts");
 
 // Only summaries produced by the current algorithm may be audited; older cached
-// files still carry the previous (wrong) anchor.
-const CURRENT_ALGORITHM = "annual-observation-v4.2.0";
-const ACCEPTANCE_OWNER = "d6b5915c46057bcb005f46f6";
+// files can legitimately carry earlier presentation contracts.
+const CURRENT_ALGORITHM = "annual-observation-v4.5.1";
 
 const listSummaryFiles = async () => {
   const found = [];
@@ -47,6 +46,10 @@ const expectedDays = (firstDay, generatedDay) => dayNumber(generatedDay) - dayNu
 const loadSummary = async (path) => JSON.parse(await readFile(path, "utf8").catch(() => "null") ?? "null");
 
 const normalize = (raw) => normalizeAnnualSummary(raw, "zh", (key) => key);
+const periodSceneSource = await readFile(
+  resolve(import.meta.dirname, "../components/account/version-summary/AnnualPeriodOverviewScene.vue"),
+  "utf8"
+);
 
 // The acceptance account (taiko id 2258735) is the case that shipped the wrong
 // number online. Its game archive reaches back to 2023-11-18, while the sync
@@ -85,11 +88,11 @@ const ACCEPTANCE_FIXTURE = {
   sections: {}
 };
 
-test("period days run from the first observed record to the generation moment", () => {
+test("period days run from the version start to the generation moment", () => {
   const vm = normalize(ACCEPTANCE_FIXTURE);
   assert.equal(vm.period.firstActualPlayDate, "2026-01-16");
-  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
-  assert.equal(vm.period.totalDays, 239);
+  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
+  assert.equal(vm.period.totalDays, 338);
 });
 
 test("the game's own historical score timestamp can never become the period anchor", () => {
@@ -99,54 +102,75 @@ test("the game's own historical score timestamp can never become the period anch
   const legacyScoreAnchor = expectedDays("2023-11-18", "2026-09-11");
   assert.equal(legacyScoreAnchor, 1029);
   assert.notEqual(vm.period.totalDays, legacyScoreAnchor);
-  // The anchor may never precede the system's own first record of the account.
-  const anchorDay = dayNumber(vm.period.firstActualPlayDate);
-  assert.ok(
-    anchorDay >= dayNumber(shanghaiDay(ACCEPTANCE_FIXTURE.period.firstRecordAt)),
-    "period anchor precedes the first observed record"
-  );
+  assert.equal(vm.period.totalDays, expectedDays(ACCEPTANCE_FIXTURE.version.startDate, "2026-09-11"));
 });
 
-test("period days follow the report generation moment, not the visitor clock", () => {
+test("period days follow report generation but stop at the declared window end", () => {
   const later = { ...ACCEPTANCE_FIXTURE, generatedAt: "2026-09-21T20:48:00+08:00" };
   const earlier = { ...ACCEPTANCE_FIXTURE, generatedAt: "2026-09-01T20:48:00+08:00" };
-  assert.equal(normalize(later).period.totalDays, expectedDays("2026-01-16", "2026-09-21"));
-  assert.equal(normalize(earlier).period.totalDays, expectedDays("2026-01-16", "2026-09-01"));
-  assert.equal(normalize(later).period.totalDays - normalize(earlier).period.totalDays, 20);
+  assert.equal(normalize(later).period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
+  assert.equal(normalize(earlier).period.totalDays, expectedDays("2025-10-09", "2026-09-01"));
+  assert.equal(normalize(later).period.totalDays - normalize(earlier).period.totalDays, 10);
 });
 
-test("a summary without the observed anchor keeps a sane window fallback", () => {
+test("a summary without the observed anchor keeps the same window duration", () => {
   const legacy = { ...ACCEPTANCE_FIXTURE, period: { ...ACCEPTANCE_FIXTURE.period } };
   delete legacy.period.firstActualPlayDate;
   const vm = normalize(legacy);
   assert.equal(vm.period.firstActualPlayDate, null);
-  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
+  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
   assert.ok(Number.isFinite(vm.period.totalDays) && vm.period.totalDays > 0);
 });
 
 test("period days stay on Shanghai calendar days regardless of the host time zone", () => {
-  // 2026-09-11T20:48:00+08:00 already belongs to the next UTC day, so a naive
-  // UTC split would shorten the span by one.
+  // Changing the historical observation anchor must not affect the version span.
   const anchor = { ...ACCEPTANCE_FIXTURE, period: { ...ACCEPTANCE_FIXTURE.period, firstActualPlayDate: "2026-01-01" } };
   const vm = normalize(anchor);
-  assert.equal(vm.period.totalDays, expectedDays("2026-01-01", "2026-09-11"));
+  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
 });
 
-test("the acceptance account cache keeps the observed anchor once regenerated", async () => {
+test("a pre-window observation never leaks into the Period page", () => {
+  const regression = {
+    ...ACCEPTANCE_FIXTURE,
+    generatedAt: "2026-09-23T17:00:15+08:00",
+    version: {
+      ...ACCEPTANCE_FIXTURE.version,
+      endDate: "2026-09-30",
+      effectiveEndDate: "2026-09-30"
+    },
+    period: {
+      ...ACCEPTANCE_FIXTURE.period,
+      firstActualPlayDate: "2025-10-06",
+      firstRecordAt: "2025-10-06T16:38:43+08:00",
+      totalDays: 350
+    }
+  };
+  const vm = normalize(regression);
+  assert.equal(vm.period.firstActualPlayDate, "2025-10-06", "provenance remains available");
+  assert.equal(vm.period.totalDays, 350);
+  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-23"));
+});
+
+test("the Period scene uses the version start and the requested copy", () => {
+  assert.match(periodSceneSource, /anchorDate = computed\(\(\) => props\.summary\.version\.startDate\)/);
+  assert.match(periodSceneSource, /first: "这个版本的第一天"/);
+  assert.match(periodSceneSource, /first: "このバージョンの初日"/);
+  assert.doesNotMatch(periodSceneSource, /我们第一次相遇|私たちが初めて出会った日/);
+});
+
+test("current cached summaries render a reporting-window duration", async () => {
   // Opportunistic audit: the cached file is a local artifact and may still hold
-  // a summary produced by an older algorithm, so only current-version files are
-  // inspected. The fixture cases above carry the contract itself.
-  const candidates = (await listSummaryFiles()).filter((path) => path.includes(ACCEPTANCE_OWNER));
+  // a summary produced by an older algorithm, so only current-version files are inspected.
+  const candidates = await listSummaryFiles();
   for (const path of candidates) {
     const raw = await loadSummary(path);
     if (!raw || raw.provenance?.algorithmVersion !== CURRENT_ALGORITHM) continue;
     const vm = normalize(raw);
-    assert.equal(
-      vm.period.firstActualPlayDate,
-      shanghaiDay(raw.coverage.firstSnapshotAt),
-      `${path} no longer anchors on its first observed record`
-    );
-    assert.equal(vm.period.totalDays, expectedDays(vm.period.firstActualPlayDate, shanghaiDay(raw.generatedAt)));
-    assert.ok(vm.period.totalDays < 1029, `${path} regressed to the game's historical score anchor`);
+    const endDay = [
+      shanghaiDay(raw.generatedAt),
+      raw.version?.effectiveEndDate,
+      raw.version?.endDate
+    ].filter(Boolean).sort()[0];
+    assert.equal(vm.period.totalDays, expectedDays(raw.version.startDate, endDay), `${path} escaped its reporting window`);
   }
 });

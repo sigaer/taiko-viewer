@@ -37,12 +37,12 @@ const stateClass = computed(() => safeTime.value <= 0
   : safeTime.value >= PERIOD_OVERVIEW_DURATION_MS
     ? "is-overview-state"
     : "is-transition-state");
-const anchorDate = computed(() => props.summary.period.firstRecordAt || props.summary.version.startDate);
+const anchorDate = computed(() => props.summary.version.startDate);
 const latestDate = computed(() => props.summary.period.lastRecordAt || props.summary.version.effectiveEndDate);
 const monthCount = computed(() => Math.max(0, Math.round(props.summary.period.totalDays / 30.4375)));
 const centerText = computed(() => locale.value === "ja"
   ? {
-      first: props.summary.period.firstRecordAt ? "私たちが初めて出会った日" : "この物語が始まった日",
+      first: "このバージョンの初日",
       elapsedPrefix: "あれから",
       elapsedUnit: "日",
       monthPrefix: "もうすぐ",
@@ -50,7 +50,7 @@ const centerText = computed(() => locale.value === "ja"
       latest: "ここまで記録された日",
     }
   : {
-      first: props.summary.period.firstRecordAt ? "我们第一次相遇" : "这一版故事开始",
+      first: "这个版本的第一天",
       elapsedPrefix: "转眼过去",
       elapsedUnit: "天",
       monthPrefix: "已经快",

@@ -262,11 +262,15 @@ assert.equal(
 const annualSummarySource = await read("utils/annualSummary.ts");
 assert.equal(annualSummarySource.includes('ANNUAL_CALENDAR_TIME_ZONE = "Asia/Shanghai"'), true, "annual day counting lost its season time zone");
 assert.equal(annualSummarySource.includes("calendarDaySpan"), true, "annual day counting has no calendar span helper");
-assert.equal(annualSummarySource.includes("firstActualPlayDate"), true, "annual day counting ignores the proven first play day");
-assert.equal(annualSummarySource.includes("earliestPlayDay"), true, "annual day counting is not anchored to a first play day");
+assert.equal(annualSummarySource.includes("firstActualPlayDate"), true, "annual summary lost first-observation provenance");
+assert.equal(annualSummarySource.includes("reportingStartDay"), true, "annual day counting is not anchored to the version start");
+assert.equal(annualSummarySource.includes("reportingEndDay"), true, "annual day counting does not cap itself at the reporting end");
+assert.equal(annualSummarySource.includes("earliestPlayDay"), false, "annual day counting still uses a pre-window account observation");
 assert.equal(annualSummarySource.includes("periodTotalDays"), true, "annual day counting does not resolve a period total");
-assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days still pass through from upstream");
-assert.equal(annualSummarySource.includes("seasonSpan"), false, "period total days is still capped by the season window");
+assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days do not use the resolved reporting span");
+assert.equal(periodOverviewSceneSource.includes("props.summary.version.startDate"), true, "Period scene does not display the version start");
+assert.equal(periodOverviewSceneSource.includes('first: "这个版本的第一天"'), true, "Period scene is missing the approved Chinese version-start copy");
+assert.equal(periodOverviewSceneSource.includes("我们第一次相遇"), false, "Period scene still presents the account observation as a first encounter");
 const annualPeriodSchema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
 assert.equal(
   Object.prototype.hasOwnProperty.call(annualPeriodSchema.properties.period.properties, "firstActualPlayDate"),

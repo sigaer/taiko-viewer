@@ -61,10 +61,9 @@ test("the inclusive span counts both the first and the last day", () => {
   assert.equal(span("2026-09-10", "2026-04-20"), null);
 });
 
-// The upstream `period.totalDays` stays the season window length, which is
-// exactly why the viewer re-anchors it instead of rendering it directly. The
-// story anchor itself is checked separately below, because a first observed
-// record legitimately predates the season window for long-synced accounts.
+// The upstream `period.totalDays` stays the season-window length. The Viewer
+// independently derives the same reporting span and never substitutes the
+// account's earlier observation history.
 test("cached summaries keep a season-window length upstream", async () => {
   const cacheRoot = resolve(process.cwd(), ".data/account-cache/annual-summary-v4/summaries");
   const summaryFiles = [];
@@ -88,16 +87,12 @@ test("cached summaries keep a season-window length upstream", async () => {
   }
 });
 
-// The real acceptance account (taiko id 2258735) is the one that reported 1029
-// days: its game archive reaches back to 2023-11-18, but the sync pipeline only
-// observed the account from 2026-01-16 on. The story anchor has to be the
-// system's own first record, so `firstActualPlayDate` is exactly the calendar
-// day of `firstRecordAt`, and neither may postdate the first observed snapshot.
-// A long-synced account may legitimately start its story before the season
-// window opens, so the anchor is not compared against the season start.
+// `firstActualPlayDate` remains account-observation provenance for the generator
+// and may predate the reporting window. It is deliberately not the Period-page
+// display anchor; that presentation contract is covered by the normalizer test.
 // Only summaries produced by the current algorithm are audited; older cached
 // files still carry the previous anchor.
-test("current summaries anchor the story on the first observed record", async () => {
+test("current summaries preserve their first observed record as provenance", async () => {
   const CURRENT_ALGORITHM = "annual-observation-v4.2.0";
   const cacheRoot = resolve(process.cwd(), ".data/account-cache/annual-summary-v4/summaries");
   const summaryFiles = [];
@@ -122,7 +117,7 @@ test("current summaries anchor the story on the first observed record", async ()
     assert.equal(
       firstActualPlayDay,
       firstRecordDay,
-      `${file} anchors its story on a different day than the first observed record`
+      `${file} stores different first-observation dates`
     );
     assert.ok(
       firstRecordDay <= firstSnapshotDay,
