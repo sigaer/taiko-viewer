@@ -35,6 +35,7 @@ import {
 } from "./constants";
 import type { AnnualCliEnvelope, AnnualObservationEvent, AnnualSummaryV4 } from "./types";
 import { ANNUAL_DISK_LOW_BYTES, getAnnualDiskState } from "./hardening";
+import { collectSnapshotHashesFromJsonFile } from "./snapshot-references";
 
 const CACHE_ROOT_SEGMENT = "annual-summary-v4";
 const NORMALIZED_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -651,28 +652,8 @@ const collectReferencedSnapshotHashes = async (root: string) => {
     resolve(root, "summaries"),
     (path) => path.endsWith(`${sep}summary.json`) || path.endsWith(`${sep}events.json`)
   );
-  const visit = (value: unknown, key = ""): void => {
-    if (Array.isArray(value)) {
-      value.forEach((item) => visit(item, key));
-      return;
-    }
-    if (!value || typeof value !== "object") {
-      if (
-        typeof value === "string"
-        && /^(?:sha256|contentHash)$/i.test(key)
-        && /^[0-9a-f]{64}$/i.test(value)
-      ) {
-        referenced.add(value.toLowerCase());
-      }
-      return;
-    }
-    for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
-      visit(childValue, childKey);
-    }
-  };
   for (const path of files) {
-    const payload = await readAnnualJson<unknown>(path).catch(() => null);
-    if (payload) visit(payload);
+    await collectSnapshotHashesFromJsonFile(path, referenced).catch(() => undefined);
   }
   return referenced;
 };

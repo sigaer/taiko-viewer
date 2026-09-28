@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 WorkingDirectory=/home/sigaer/taiko/taiko-forum/taiko_viewer
 Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=1280
 Environment=NITRO_PORT=3100
 Environment=NITRO_HOST=127.0.0.1
 EnvironmentFile=-/etc/taiko-viewer.env
@@ -22,6 +23,9 @@ Environment=BILIBILI_SESSDATA_FILE=/home/sigaer/bilisess.txt
 ExecStart=/www/server/nvm/versions/node/v24.13.0/bin/node /home/sigaer/taiko/taiko-forum/taiko_viewer/.output/server/index.mjs
 Restart=always
 RestartSec=5
+MemoryHigh=1536M
+MemoryMax=2048M
+MemorySwapMax=256M
 User=root
 Group=root
 
