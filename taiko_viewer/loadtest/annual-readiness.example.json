@@ -1,0 +1,17 @@
+{
+  "base": "http://127.0.0.1:REPLACE_PORT",
+  "serverPid": 0,
+  "isolationEvidence": "",
+  "accountsFile": "/private/synthetic-accounts.json",
+  "output": "/var/tmp/annual-test-release/results",
+  "minAvailableMiB": 12000,
+  "maxMemoryPsiFull": 2,
+  "maxServerRssMiB": 1400,
+  "scenario": "warm",
+  "rate": 1,
+  "previousResult": null,
+  "seconds": 120,
+  "maxVus": 5,
+  "coldDeadlineSeconds": 180,
+  "shareDeadlineSeconds": 90
+}

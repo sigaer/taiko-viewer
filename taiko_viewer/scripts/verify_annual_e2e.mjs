@@ -8,6 +8,8 @@ import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 import mysql from "mysql2/promise";
+import { assertTestDatabaseMutationAllowed } from "./annual_test_db_guard.mjs";
+import { assertAnnualE2eEnvironment } from "./annual_e2e_safety.mjs";
 import { deleteUserWithGoalsConnection } from "../server/services/goals/lifecycle.ts";
 import { chromium } from "playwright-core";
 
@@ -25,8 +27,9 @@ const parseEnvironmentFile = async (path) => {
   return values;
 };
 
+assert.ok(process.env.TAIKO_VIEWER_ENV_FILE, "Set TAIKO_VIEWER_ENV_FILE to an isolated test environment; production defaults are forbidden");
 const environment = {
-  ...(await parseEnvironmentFile(process.env.TAIKO_VIEWER_ENV_FILE || "/etc/taiko-viewer.env")),
+  ...(await parseEnvironmentFile(process.env.TAIKO_VIEWER_ENV_FILE)),
   ...process.env
 };
 const userdataDir = String(environment.TAIKO_USERDATA_DIR || "/home/sigaer/taiko/userdata");
@@ -42,6 +45,21 @@ const reservePort = () => new Promise((resolvePort, rejectPort) => {
     server.close((error) => error ? rejectPort(error) : resolvePort(port));
   });
 });
+
+await assertAnnualE2eEnvironment(environment);
+const db = await mysql.createConnection({
+  host: environment.TAIKO_DB_HOST,
+  port: Number(environment.TAIKO_DB_PORT || 3306),
+  user: environment.TAIKO_DB_USER,
+  password: environment.TAIKO_DB_PASSWORD,
+  database: environment.TAIKO_DB_NAME || "taiko"
+});
+try {
+  await assertTestDatabaseMutationAllowed(db);
+} catch (error) {
+  await db.end();
+  throw error;
+}
 
 let e2eServer = null;
 let e2eServerOutput = "";
@@ -74,23 +92,21 @@ if (!baseUrl) {
   let ready = false;
   while (!ready && Date.now() < deadline) {
     if (e2eServer.exitCode !== null) break;
-    ready = await fetch(`${baseUrl}/api/account/auth/me`, { redirect: "manual" })
+    ready = await fetch(`${baseUrl}/api/account/auth/me`, { redirect: "manual", signal: AbortSignal.timeout(2000) })
       .then((response) => response.status > 0)
       .catch(() => false);
     if (!ready) await wait(200);
   }
-  assert.ok(ready, `annual E2E server did not start:\n${e2eServerOutput}`);
+  if (!ready) {
+    e2eServer.kill("SIGTERM");
+    await db.end();
+    throw new Error("annual E2E server did not start (see isolated server logs)");
+  }
 }
 const nonce = randomBytes(7).toString("hex");
 const implementationCopyPattern = /尚未全良|无不可且良数|读取当前最佳记录|最佳记[录錄]选项画像|站内样本中的参考位置|信赖? Wahlap|可信 Wahlap|固定优先级选择|現在のベスト記録|ベスト記録オプション|サイト内サンプルでの参考位置|信頼できる Wahlap|stage_delta|option_flg|record_updated_at|observed_at|highscore_datetime|MetricStatus|current_archive|version_observed|batch_last_play_proxy|source_highscore_time|schema\s*v?4|快照|排序规则|スナップショット/;
 
-const db = await mysql.createConnection({
-  host: environment.TAIKO_DB_HOST,
-  port: Number(environment.TAIKO_DB_PORT || 3306),
-  user: environment.TAIKO_DB_USER,
-  password: environment.TAIKO_DB_PASSWORD,
-  database: environment.TAIKO_DB_NAME || "taiko"
-});
+
 
 const request = async (path, options = {}) => {
   const headers = { accept: "application/json", ...(options.headers || {}) };
@@ -98,6 +114,7 @@ const request = async (path, options = {}) => {
   if (options.body !== undefined) headers["content-type"] = "application/json";
   const response = await fetch(`${baseUrl}${path}`, {
     method: options.method || "GET",
+    signal: AbortSignal.timeout(options.timeoutMs || 60_000),
     headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     redirect: "manual"
@@ -105,7 +122,7 @@ const request = async (path, options = {}) => {
   const type = response.headers.get("content-type") || "";
   const body = type.includes("json") ? await response.json() : Buffer.from(await response.arrayBuffer());
   if (options.expected !== undefined) assert.equal(response.status, options.expected, `${options.method || "GET"} ${path}`);
-  else assert.ok(response.ok, `${options.method || "GET"} ${path} returned ${response.status}: ${JSON.stringify(body).slice(0, 300)}`);
+  else assert.ok(response.ok, `${options.method || "GET"} ${path} returned ${response.status}: ${Buffer.isBuffer(body) ? `binary body (${body.length} bytes)` : String(body?.statusMessage || body?.message || "request failed").slice(0, 300)}`);
   return { status: response.status, body, headers: response.headers };
 };
 
@@ -228,7 +245,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
   await page.locator(".annual-cover-flow").waitFor({ state: "attached", timeout: 30_000 });
   assert.equal(await page.locator(".story-player__drawer-trigger, .story-player__sound-trigger, .story-player__nav").count(), 0);
   if (viewport.width === 390 && viewport.height === 844) {
-    await page.screenshot({ path: `/tmp/annual-e2e-${locale}-opening.png`, fullPage: false });
+    await page.screenshot({ path: `/var/tmp/annual-e2e-${locale}-opening.png`, fullPage: false });
   }
   await page.locator(".annual-opening__start").click();
   await page.locator(".story-player__sound-trigger").waitFor({ state: "visible", timeout: 10_000 });
@@ -288,7 +305,7 @@ const auditStory = async (browser, cookie, viewport, locale, screenshotPath) => 
     const hasImplementationCopy = implementationCopyPattern.test(audit.visibleCopy);
     const hasPlaceholder = /\{[A-Za-z][^}]*\}/.test(audit.visibleCopy);
     if (viewport.width === 390 && viewport.height === 844 && ["opening", "final", "poster"].includes(audit.pageKey)) {
-      await page.screenshot({ path: `/tmp/annual-e2e-${locale}-${audit.pageKey}.png`, fullPage: false });
+      await page.screenshot({ path: `/var/tmp/annual-e2e-${locale}-${audit.pageKey}.png`, fullPage: false });
     }
     if (audit.pageOverflow > 1 || audit.storyOverflow > 1 || audit.finalLayoutOverlap || audit.tooSmall.length || audit.clippedText.length || audit.brokenImages.length || hasImplementationCopy || hasPlaceholder) {
       storyIssues.push({
@@ -555,7 +572,7 @@ const auditOpeningMotion = async (browser, cookie) => {
   assert.ok(transitionPlaneAuditAfter.lowerFace.rotationZ > transitionPlaneAudit.lowerFace.rotationZ, "lower nested cover face did not rotate within its plane");
   assert.ok(transitionPlaneAuditAfter.upperFace.xAxisTilt < .001, "upper nested face still rotates around the X axis");
   assert.ok(transitionPlaneAuditAfter.lowerFace.xAxisTilt < .001, "lower nested face still rotates around the X axis");
-  await page.screenshot({ path: "/tmp/annual-phase2b0-transition-390x844.png", fullPage: false });
+  await page.screenshot({ path: "/var/tmp/annual-phase2b0-transition-390x844.png", fullPage: false });
   await page.waitForFunction(
     () => {
       const slide = document.querySelector(".story-player__slide[data-page-key='overview']");
@@ -579,7 +596,7 @@ const auditOpeningMotion = async (browser, cookie) => {
     undefined,
     { timeout: 4_000 }
   );
-  await page.screenshot({ path: "/tmp/annual-e2e-period-motion.png", fullPage: false });
+  await page.screenshot({ path: "/var/tmp/annual-e2e-period-motion.png", fullPage: false });
   const finalIndex = await page.locator(".story-player__slide").evaluateAll((slides) =>
     slides.findIndex((slide) => slide.getAttribute("data-page-key") === "final")
   );
@@ -661,7 +678,7 @@ const auditOpeningPeriodFlow = async (browser, cookie, viewport) => {
   assert.deepEqual(openingAudit.layers, ["background", "atmosphere", "visual", "data", "copy", "transition"]);
   assert.deepEqual(openingAudit.overflowingText, []);
   assert.equal(openingAudit.fillsViewport, true);
-  await page.screenshot({ path: `/tmp/annual-phase2a-opening-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-phase2a-opening-${viewport.width}x${viewport.height}.png`, fullPage: false });
 
   await page.locator(".annual-opening__start").click();
   await page.waitForFunction(() => document.querySelector(".story-player__slide[data-page-key='period']")?.getAttribute("aria-hidden") === "false");
@@ -770,7 +787,7 @@ const auditGrowthSongScenes = async (browser, cookie, viewport) => {
     assert.equal(audit.hasImpactResidue, key === "challenge", `${key} static impact residue semantics are incorrect`);
     assert.equal(audit.hasDoorLight, key === "challenge", `${key} door-slit pressure semantics are incorrect`);
     assert.equal(await page.locator(".click-heart").count(), 0, `${key} received an unrelated global celebration heart`);
-    await page.screenshot({ path: `/tmp/annual-growth-${key}-${viewport.width}x${viewport.height}.png`, fullPage: false });
+    await page.screenshot({ path: `/var/tmp/annual-growth-${key}-${viewport.width}x${viewport.height}.png`, fullPage: false });
   }
   await context.close();
   reportProgress(`growth song scenes ${viewport.width}x${viewport.height}: passed`);
@@ -932,7 +949,7 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
   assert.equal(periodAudit.mascotSrc, "/dance.gif", "period stage does not use the dancing pixel mascot");
   assert.equal(periodAudit.visibleCovers, 6, "period stable state does not match the six-plane reference corridor");
   assert.deepEqual(periodAudit.overflowingText, []);
-  await page.screenshot({ path: `/tmp/annual-phase2b1-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-phase2b1-period-${viewport.width}x${viewport.height}.png`, fullPage: false });
 
   await showPage(overviewIndex, "overview");
   const overviewAudit = await inspectScene("overview", "is-overview-state");
@@ -949,7 +966,7 @@ const auditPhase2B1ProtectedOverview = async (browser, cookie, viewport) => {
   assert.ok(overviewAudit.overviewHierarchy.playCountSize >= overviewAudit.overviewHierarchy.durationSize * 2.75, "estimated duration competes with play count");
   assert.ok(overviewAudit.overviewHierarchy.anchorWidth <= 52, "overview drum anchor is too prominent");
   assert.equal(overviewAudit.overviewHierarchy.particleCount, 0, "reduced-motion overview still rendered particles");
-  await page.screenshot({ path: `/tmp/annual-phase2b1-overview-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-phase2b1-overview-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`phase 2B-1 protected overview ${viewport.width}x${viewport.height}: passed`);
 };
@@ -1038,7 +1055,7 @@ const auditPhase2B2FavoriteScene = async (browser, cookie, viewport) => {
   assert.equal(await page.locator(".story-player__slide[data-page-key='favorite'] .song-slide__panel, .story-player__slide[data-page-key='favorite'] .song-slide__metric").count(), 0);
   const favoriteNumber = page.locator(".story-player__slide[data-page-key='favorite'] .favorite-song-scene__play-count .animated-number");
   if (await favoriteNumber.count()) assert.equal(await favoriteNumber.innerText(), await favoriteNumber.getAttribute("aria-label"));
-  await page.screenshot({ path: `/tmp/annual-phase2b2-favorite-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-phase2b2-favorite-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`phase 2B-2 favorite scene ${viewport.width}x${viewport.height}: passed`);
 };
@@ -1122,7 +1139,7 @@ const auditCalendarScene = async (browser, cookie, viewport, locale = "zh") => {
   assert.equal(audit.unresolvedCopy, false);
   assert.equal(audit.wrongLocale, false);
   assert.equal(audit.runningAnimations, 0);
-  await page.screenshot({ path: `/tmp/annual-calendar-${locale}-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-calendar-${locale}-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`calendar scene ${locale} ${viewport.width}x${viewport.height}: passed`);
 };
@@ -1223,7 +1240,7 @@ const auditLateNightScene = async (browser, cookie, viewport) => {
   assert.equal(audit.unsafeCopy, false);
   assert.deepEqual(audit.overflowingText, []);
   assert.equal(audit.runningAnimations, 0);
-  await page.screenshot({ path: `/tmp/annual-late-night-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-late-night-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`late-night scene ${viewport.width}x${viewport.height}: passed`);
 };
@@ -1323,7 +1340,7 @@ const auditObsessionScene = async (browser, cookie, viewport) => {
   assert.deepEqual(audit.overflowingText, []);
   assert.deepEqual(audit.brokenImages, []);
   assert.equal(audit.runningAnimations, 0);
-  await page.screenshot({ path: `/tmp/annual-obsession-${viewport.width}x${viewport.height}.png`, fullPage: false });
+  await page.screenshot({ path: `/var/tmp/annual-obsession-${viewport.width}x${viewport.height}.png`, fullPage: false });
   await context.close();
   reportProgress(`obsession scene ${viewport.width}x${viewport.height}: passed`);
 };
@@ -1451,7 +1468,7 @@ const auditTransitionFrames = async (browser, cookie) => {
         assert.equal(await playCount.innerText(), await playCount.getAttribute("aria-label"), "frozen overview frame did not reach the final play count");
       }
     }
-    await page.screenshot({ path: `/tmp/annual-transition-${String(time).padStart(4, "0")}.png`, fullPage: false });
+    await page.screenshot({ path: `/var/tmp/annual-transition-${String(time).padStart(4, "0")}.png`, fullPage: false });
   }
   await context.close();
   reportProgress("period transition frames: passed");
@@ -1863,9 +1880,9 @@ try {
       { width: 390, height: 844 }, { width: 844, height: 390 }
     ];
     for (const viewport of viewports) {
-      await auditStory(browser, firstSession, viewport, "zh", `/tmp/annual-e2e-${viewport.width}x${viewport.height}.png`);
+      await auditStory(browser, firstSession, viewport, "zh", `/var/tmp/annual-e2e-${viewport.width}x${viewport.height}.png`);
     }
-    await auditStory(browser, firstSession, { width: 390, height: 844 }, "ja", "/tmp/annual-e2e-ja.png");
+    await auditStory(browser, firstSession, { width: 390, height: 844 }, "ja", "/var/tmp/annual-e2e-ja.png");
     const archiveContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai", reducedMotion: "reduce" });
     await archiveContext.addCookies([{ name: "stv_session", value: thirdSession, url: baseUrl, httpOnly: true, sameSite: "Lax" }]);
     const archivePage = await archiveContext.newPage();
@@ -1885,10 +1902,10 @@ try {
     await archivePage.waitForFunction((target) => Boolean(document.querySelectorAll(".story-player__slide")[target]?.querySelector(".period-overview-scene")), archivePeriodIndex);
     const archivePeriodLines = (await archivePage.locator(".story-player__slide").nth(archivePeriodIndex).innerText()).split(/\n/).map((line) => line.trim());
     assert.equal(archivePeriodLines.includes("-"), false, "archive period page exposed a raw missing-time placeholder");
-    await archivePage.screenshot({ path: "/tmp/annual-e2e-archive-period.png" });
+    await archivePage.screenshot({ path: "/var/tmp/annual-e2e-archive-period.png" });
     await archivePage.locator(".story-player__viewport").evaluate((node) => { node.scrollTop = 0; node.dispatchEvent(new Event("scroll")); });
     await wait(80);
-    await archivePage.screenshot({ path: "/tmp/annual-e2e-archive.png" });
+    await archivePage.screenshot({ path: "/var/tmp/annual-e2e-archive.png" });
     await archiveContext.close();
 
     const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai" });
@@ -1898,7 +1915,7 @@ try {
     await emptyPage.locator(".annual-state").waitFor({ state: "visible", timeout: 30_000 });
     assert.equal(await emptyPage.locator(".story-player").count(), 0);
     assert.ok(await emptyPage.locator('a[href*="/account/sync"], button').count());
-    await emptyPage.screenshot({ path: "/tmp/annual-e2e-empty.png" });
+    await emptyPage.screenshot({ path: "/var/tmp/annual-e2e-empty.png" });
     await emptyContext.close();
 
     const publicContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "zh-CN", timezoneId: "Asia/Shanghai" });
@@ -1910,7 +1927,7 @@ try {
       .filter((image) => image.complete && image.naturalWidth === 0 && getComputedStyle(image).display !== "none" && image.getBoundingClientRect().width > 0)
       .map((image) => image.alt || image.getAttribute("src") || "unlabelled"));
     assert.deepEqual(publicBrokenImages, [], "public annual page contains a broken image");
-      await publicPage.screenshot({ path: "/tmp/annual-e2e-public.png" });
+      await publicPage.screenshot({ path: "/var/tmp/annual-e2e-public.png" });
       await publicContext.close();
     }
   } finally {

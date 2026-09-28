@@ -84,5 +84,8 @@ const assetsReady = computed(() => cityLoaded.value && noiseLoaded.value && reco
 @media (max-height: 740px) {
   .profile-poster__headline > strong { font-size: clamp(3.4rem, 16vw, 6rem); }
   .profile-poster { --split-y: calc(47% + 4px); }
+  .profile-poster__headline { z-index:6; }
+  .profile-poster__headline > p { background:rgba(229,239,173,.96); border-radius:6px; }
+  .profile-poster__footer { top:auto; bottom:0; padding:6px 8px; border-radius:8px; background:rgba(229,239,173,.96); }
 }
 </style>

@@ -48,6 +48,10 @@ try {
 
   const capture = async (view, locale, width, height, name) => {
     const page = await browser.newPage({ viewport: { width, height }, locale: locale === 'ja' ? 'ja-JP' : 'zh-CN' });
+    await page.route('**/*', route => {
+      const url = new URL(route.request().url());
+      return ['127.0.0.1', 'localhost'].includes(url.hostname) ? route.continue() : route.abort('blockedbyclient');
+    });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`${baseUrl}?view=${view}&lang=${locale}`);
