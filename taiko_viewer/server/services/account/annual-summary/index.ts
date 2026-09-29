@@ -672,8 +672,6 @@ export const queueAccountAnnualSummaryBuild = async (
       }
     }
 
-    const active = await findActiveAnnualJob({ userId, bindingId: binding.id, versionKey: version.key, type: 'build' });
-    if (active) return { job: serializeAnnualJob(active), summary: null };
     await assertAnnualTaskAllowed('generation');
     if (circuitOpenUntil > Date.now()) {
       void recordAnnualOperationalEvent('rejected');
