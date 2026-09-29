@@ -1,4 +1,7 @@
+import { isAnnualCapturePath } from "~/utils/annualCaptureRoute";
+
 export default defineNuxtPlugin(() => {
+  if (isAnnualCapturePath(window.location.pathname)) return;
   if (window.__clickLoveInitialized) return;
   window.__clickLoveInitialized = true;
 

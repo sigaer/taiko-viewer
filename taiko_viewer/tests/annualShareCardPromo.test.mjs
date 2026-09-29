@@ -68,7 +68,7 @@ test('renderer dimensions and cache identity advance together', async () => {
   assert.match(constants, /ANNUAL_SHARE_CARD_CONTENT_HEIGHT = 1648/);
   assert.match(constants, /ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT = 224/);
   assert.match(constants, /ANNUAL_SHARE_CARD_HEIGHT = ANNUAL_SHARE_CARD_CONTENT_HEIGHT \+ ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT/);
-  assert.match(constants, /ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v3-promo-footer"/);
+  assert.match(constants, /ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v4-static-capture"/);
   assert.match(service, /ANNUAL_SHARE_CARD_WIDTH}x\$\{ANNUAL_SHARE_CARD_HEIGHT}:\$\{ANNUAL_SHARE_CARD_RENDERER_REVISION}/);
   assert.match(renderer, /width: ANNUAL_SHARE_CARD_WIDTH/);
   assert.match(renderer, /height: ANNUAL_SHARE_CARD_HEIGHT/);

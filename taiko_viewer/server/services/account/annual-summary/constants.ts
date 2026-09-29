@@ -25,7 +25,7 @@ export const ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT = 224;
 export const ANNUAL_SHARE_CARD_HEIGHT = ANNUAL_SHARE_CARD_CONTENT_HEIGHT + ANNUAL_SHARE_CARD_PROMO_FOOTER_HEIGHT;
 export const ANNUAL_SHARE_CARD_PROMO_URL = "https://viewer.sakura-bot.cn/annual?from=poster";
 // Bump when the rendered share-card markup or CSS changes so cached files are re-rendered.
-export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v3-promo-footer";
+export const ANNUAL_SHARE_CARD_RENDERER_REVISION = "share-card-v4-static-capture";
 export const ANNUAL_MAX_EVENT_PAGE_SIZE = 200;
 
 export const getAnnualVersion = (): AnnualVersion => ({
