@@ -210,3 +210,39 @@ bash ../scripts/memory/run_build.sh /bin/bash /var/tmp/annual-readiness-20260929
 真机仍为 **NOT_RUN**。测试服务只在回环，不修改生产反代。可由操作者通过既有 SSH 授权做私有端口转发访问该候选，验证 build ID 后手测：iPhone Safari 工具栏展开 → weekday 七行/底部文案 → 翻页返回 → 工具栏展开收起 → FavoriteSong 末句 → speedProfile → final → poster 实际保存 → 后台/锁屏返回。需记录设备/系统版本、录像和保存 PNG；本轮未建立真机入口，也未把 Chromium 或 WebGL 降级当作 iPhone/GPU 通过。
 
 真实用户代表性、真实 CDN/装扮、线上流量分布仍未验证。`TARGET_LOAD_UNSPECIFIED`：实测档位不等于目标峰值或冷生成总体容量。未部署、未重启生产、未扩大入口；正式发布和回滚仍走仓库标准部署入口，发布切换及回滚演练 NOT_RUN。
+
+## 2026-09-29 公开测试发布（独立于完整容量验收）
+
+本轮按新授权开放免邀请码公开测试，不重新执行5/s、10/s矩阵。冻结算法保持 `annual-observation-v4.5.2`；统计窗口仍为上海时区 `[2025-10-09 00:00:00, 2026-10-01 00:00:00)`，即包含9月30日全天。`ANNUAL_PUBLIC_OPEN_AT` 旧常量不是当前实际开关，公开时间由服务端运行策略控制；不为上线改动统计口径。
+
+当前版本只接受 `annual_2026`，跨截止日期仍可按该窗口生成、读取已有报告；未知版本404。应用换版不主动全员生成、不清缓存，已有同算法/窗口有效报告继续复用，旧算法按原有按需校验处理。在截止前生成的固定缓存不会在10月1日自动全量刷新，本轮不引入定时重建。
+
+### 操作控制
+
+唯一服务端策略文件默认 `/var/lib/taiko/annual-policy.json`（可由 `TAIKO_ANNUAL_POLICY_FILE` 明确指定一处替代路径）；每次准入读取，无需重启。原子CLI保留未指定字段，邀请码记录和资格表不改写。公开模式只跳过邀请资格，登录、会话有效期、绑定流程、owner资源判断和独立管理员检查保持原实现。公开访问/status/埋点不创建beta participant或伪造兑换、内测事件，缺participant不阻断生成与分享。
+
+从 `taiko_viewer` 目录执行：
+
+```bash
+python3 scripts/annual-policy.py                     # 核对实际文件内容
+python3 scripts/annual-policy.py --mode invite       # 入口模式回退，保留暂停状态
+python3 scripts/annual-policy.py --mode public       # 开放，保留暂停状态
+python3 scripts/annual-policy.py --pause-generation yes
+python3 scripts/annual-policy.py --pause-rendering yes
+python3 scripts/annual-policy.py --pause-generation no --pause-rendering no
+```
+
+暂停仅拒绝新的计算/渲染准入，返回503及明确原因；已接收任务继续收尾，任务查询、已有报告及缓存图片读取保留。管理员强制重建在删除旧缓存之前也检查暂停。没有提高2个generator/1个renderer、队列、内存预算、限流或改动既有输入指纹去重。客户端生成/分享POST明确不自动重试，429/503后至少60秒才能手动再提交。压测的PSI监督器不是生产自动降级功能；这里是可操作的服务端手动准入控制，既有worker资源保护继续工作。
+
+代码版本回滚走新revert提交及标准发布脚本，不手动替换线上输出：先把模式回到invite，按逆序回退本轮三个功能提交 `fb48fa9 a5c50e6 2d17f2a`，在审查工作区后递增应用patch版本并提交，然后执行 `bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh "<HEAD完整提交信息>"`。不要回退用户原有修改。标准脚本自带健康检查失败时恢复 `.output.previous` 的流程；本轮不演练生产版本回滚。
+
+### 针对性记录
+
+- 私密凭据与现网原始证据保存在 `/var/tmp/annual-public-20260929`，未提交cookie/私人报告；用户明确授权自行筛选现有有效会话。只选择一个旧内测和一个未获邀、已验证绑定且尚无报告的账号；没有注册测试账号、批量授权、兑换邀请码或社区同步。
+- 初始0.76.0暂停API正确返回503，但页面异步错误处理调用setup-only的 `useI18n()`，导致文案缺失；已修复为传入setup阶段捕获的翻译函数。保留失败日志和截图，不把首次失败计通过。
+- 0.76.1目标链路和暂停页面通过；一轮浏览器测量被生成成功toast暂时遮挡导航按钮，已保留记录并在toast结束后复测通过，没有用CSS隐藏通知。最后审查去掉额外的active-job短路，保持原输入指纹/去重流程，最终功能候选0.76.2。
+- 隔离环境通过既有bootstrap准备全新独立MySQL/目录/会话，worker外发及资源边界沿用已验证机制。没有把localhost本身当隔离证明；测试只执行针对性用例，没有重复负载矩阵。原有准入测试7/7通过，包含renderer第9个/generator第21个排队键拒绝；单元回归包含配置切换、两类暂停、错误配置拒绝、截止后版本解析、异步错误处理。
+
+最终构建、部署、模式切换与现网结果在完成后追加；在此之前不能将候选验证标记为已发布。完整容量、真机、生产回滚仍未验证，发布结论保留LIMITED。
+
+最终部署前候选验证：`fb48fa94a97c8d430a7268ef3451523e3194e17a` / `0.76.2`，独立构建 ID `21aa7c32-8b1b-4ce1-a9c3-668835ddb06d`。`/var/tmp/annual-test-public-release-20260929` 保存完整输入、产物指纹和隔离证据；`public-smoke.done`、`public-browser.done` 均 exit 0。普通中文 18 页、稀疏日文 10 页实际浏览，关键几何断言零问题、页面异常零；两份 1080×1872 PNG 完整解码，匿名公开入口显示登录且不显示邀请码。合成 MyDon 缺资源导致 404/500 并走回退，不能作为现网真实资源通过；现网另验。此次构建没有出现预渲染鉴权错误。随后提交仅包含脚本及本记录，不修改候选应用实现。

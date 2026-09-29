@@ -1,4 +1,4 @@
-import subprocess,tarfile,io,shutil,json,hashlib,sys
+import subprocess,tarfile,io,shutil,json,hashlib,sys,re
 from pathlib import Path
 repo=Path(__file__).resolve().parents[2];r=Path(sys.argv[1]).resolve();assert str(r).startswith('/var/tmp/annual-test-');r.mkdir(parents=True,exist_ok=True,mode=0o700);(r/'evidence').mkdir(exist_ok=True);target=r/'source';target.mkdir(exist_ok=False)
 commit=subprocess.check_output(['git','rev-parse',sys.argv[2]],cwd=repo,text=True).strip()

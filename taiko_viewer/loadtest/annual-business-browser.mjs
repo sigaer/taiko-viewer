@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import {measureAnnualPage} from '../scripts/annual_readiness_browser_checks.mjs';
 const c=JSON.parse(await readFile(process.argv[2],'utf8'));
 const accounts=JSON.parse(await readFile(c.accountsFile,'utf8'));
+if(c.publicSmoke){await (await import('./annual-public-smoke.mjs')).checkPublicMode(c,accounts);process.exit(0);}
 if(c.publicAuth){await (await import('./annual-public-auth.mjs')).checkPublicAuth(c,accounts);process.exit(0);}
 if(c.renderDiagnostics){await (await import('./annual-render-diagnostics.mjs')).diagnoseRender(c,accounts);process.exit(0);}
 if(c.protocolOnly){await (await import('./annual-protocol-assertions.mjs')).checkProtocol(c,accounts);process.exit(0);}
@@ -14,12 +15,14 @@ try{
  for(const [a,locale] of (c.browserCases||[['normal','zh'],['sparse','ja']]).map(([kind,locale])=>[accounts.find(a=>a.kind===kind),locale])){
  const context=await browser.newContext({viewport:{width:375,height:567},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',reducedMotion:'reduce',acceptDownloads:true});
  await context.addCookies([{name:'stv_session',value:a.cookie,url:c.base,httpOnly:true}]);
- const page=await context.newPage();const errors=[],requests=[];
+ const page=await context.newPage();const errors=[],requests=[],resourceFailures=[];
+ page.on('response',r=>{if(r.status()>=400)resourceFailures.push({path:new URL(r.url()).pathname,status:r.status()});});
  page.on('pageerror',e=>errors.push(e.message.slice(0,180)));
- await context.route('**/*',async route=>{const url=new URL(route.request().url());if(url.origin!==c.base&&!['data:','blob:'].includes(url.protocol))await route.abort();else await route.continue();});
+ await context.route('**/*',async route=>{const url=new URL(route.request().url());if(url.origin!==c.base&&!['data:','blob:'].includes(url.protocol)&&!(c.liveReadOnlyAssets&&route.request().method()==='GET'&&['image','font','stylesheet'].includes(route.request().resourceType())&&url.protocol==='https:'&&(url.hostname==='sakura-bot.cn'||url.hostname.endsWith('.sakura-bot.cn'))))await route.abort();else await route.continue();});
  page.on('request',r=>{if(r.url().endsWith('/share-card')){const data=r.postDataJSON();assert.equal(data.syncCommunity,false);requests.push({locale:data.locale,syncCommunity:data.syncCommunity});}});
- await page.goto(`${c.base}${locale==='ja'?'/ja':''}/account/version-summary`,{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(`${c.base}${locale==='ja'?'/ja':''}${c.entryPath||'/account/version-summary'}`,{waitUntil:'domcontentloaded',timeout:30000});
  await page.locator('.annual-opening__start').waitFor({timeout:45000}).catch(async e=>{await page.screenshot({path:`${c.output}/entry-failure-${a.kind}.png`});await writeFile(`${c.output}/entry-failure-${a.kind}.json`,JSON.stringify({url:page.url(),text:(await page.locator('body').innerText()).slice(0,5000),errors},null,2));throw e});
+ await page.waitForFunction(()=>!document.querySelector('.el-message'),null,{timeout:10000});
  await page.screenshot({path:`${c.output}/business-${a.kind}-${locale}-opening.png`});
  await page.locator('.annual-opening__start').click();
  const geometry=[];
@@ -53,8 +56,14 @@ try{
  assert.equal(metadata.width,1080);assert.equal(metadata.height,1872);
  const repeat=await context.request.post(`${c.base}/api/account/annual-summaries/${encodeURIComponent((await context.request.get(`${c.base}/api/account/annual-summaries/annual_2026`).then(r=>r.json())).summary.summaryId)}/share-card`,{data:{locale,syncCommunity:false},timeout:90000});
  assert.equal(repeat.status(),200);const reused=await repeat.json();assert.equal(reused.cached,true);assert.equal(reused.shareCard.id,result.shareCard.id);
- results.push({kind:a.kind,locale,pages:keys,errors,shareRequests:requests,png:path,width:metadata.width,height:metadata.height,cachedRepeat:true,rapidNavigationAndReplays:c.browserCases?2:0});
+ results.push({kind:a.kind,locale,pages:keys,errors,resourceFailures,shareRequests:requests,png:path,width:metadata.width,height:metadata.height,cachedRepeat:true,rapidNavigationAndReplays:c.browserCases?2:0});
  await writeFile(`${c.output}/${c.browserCases?'high-':''}business-browser.json`,JSON.stringify(results,null,2));await context.close();
+ }
+ if(c.checkPublicLanding){
+  const ctx=await browser.newContext({viewport:{width:375,height:567},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36'});
+  await ctx.route('**/*',r=>new URL(r.request().url()).origin===c.base?r.continue():r.abort());const page=await ctx.newPage();
+  await page.goto(c.base+'/annual',{waitUntil:'domcontentloaded'});await page.getByRole('heading',{name:'年度报告公开测试',exact:true}).waitFor();await page.locator('.beta-entry').getByRole('link',{name:'登录',exact:true}).waitFor();assert.equal(await page.locator('#beta-code').count(),0);
+  await page.screenshot({path:`${c.output}/public-anonymous-entry.png`});await writeFile(`${c.output}/public-landing.json`,JSON.stringify({publicTitle:true,loginRequired:true,inviteInput:false}));await ctx.close();
  }
 } finally{await browser.close();}
 console.log(JSON.stringify(results));
