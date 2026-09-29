@@ -88,11 +88,12 @@ const ACCEPTANCE_FIXTURE = {
   sections: {}
 };
 
-test("period days run from the version start to the generation moment", () => {
+test("period days run from the user's first observable day inside the version window", () => {
   const vm = normalize(ACCEPTANCE_FIXTURE);
+  assert.equal(vm.period.firstObservedDate, "2026-01-16");
   assert.equal(vm.period.firstActualPlayDate, "2026-01-16");
-  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
-  assert.equal(vm.period.totalDays, 338);
+  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
+  assert.equal(vm.period.totalDays, 239);
 });
 
 test("the game's own historical score timestamp can never become the period anchor", () => {
@@ -102,31 +103,33 @@ test("the game's own historical score timestamp can never become the period anch
   const legacyScoreAnchor = expectedDays("2023-11-18", "2026-09-11");
   assert.equal(legacyScoreAnchor, 1029);
   assert.notEqual(vm.period.totalDays, legacyScoreAnchor);
-  assert.equal(vm.period.totalDays, expectedDays(ACCEPTANCE_FIXTURE.version.startDate, "2026-09-11"));
+  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
 });
 
 test("period days follow report generation but stop at the declared window end", () => {
   const later = { ...ACCEPTANCE_FIXTURE, generatedAt: "2026-09-21T20:48:00+08:00" };
   const earlier = { ...ACCEPTANCE_FIXTURE, generatedAt: "2026-09-01T20:48:00+08:00" };
-  assert.equal(normalize(later).period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
-  assert.equal(normalize(earlier).period.totalDays, expectedDays("2025-10-09", "2026-09-01"));
+  assert.equal(normalize(later).period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
+  assert.equal(normalize(earlier).period.totalDays, expectedDays("2026-01-16", "2026-09-01"));
   assert.equal(normalize(later).period.totalDays - normalize(earlier).period.totalDays, 10);
 });
 
-test("a summary without the observed anchor keeps the same window duration", () => {
+test("coverage remains the display anchor when first-play provenance is absent", () => {
   const legacy = { ...ACCEPTANCE_FIXTURE, period: { ...ACCEPTANCE_FIXTURE.period } };
   delete legacy.period.firstActualPlayDate;
   const vm = normalize(legacy);
+  assert.equal(vm.period.firstObservedDate, "2026-01-16");
   assert.equal(vm.period.firstActualPlayDate, null);
-  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
+  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
   assert.ok(Number.isFinite(vm.period.totalDays) && vm.period.totalDays > 0);
 });
 
 test("period days stay on Shanghai calendar days regardless of the host time zone", () => {
-  // Changing the historical observation anchor must not affect the version span.
+  // Changing older provenance must not override the stronger coverage timestamp.
   const anchor = { ...ACCEPTANCE_FIXTURE, period: { ...ACCEPTANCE_FIXTURE.period, firstActualPlayDate: "2026-01-01" } };
   const vm = normalize(anchor);
-  assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-11"));
+  assert.equal(vm.period.firstObservedDate, "2026-01-16");
+  assert.equal(vm.period.totalDays, expectedDays("2026-01-16", "2026-09-11"));
 });
 
 test("a pre-window observation never leaks into the Period page", () => {
@@ -138,6 +141,10 @@ test("a pre-window observation never leaks into the Period page", () => {
       endDate: "2026-09-30",
       effectiveEndDate: "2026-09-30"
     },
+    coverage: {
+      ...ACCEPTANCE_FIXTURE.coverage,
+      firstSnapshotAt: "2025-10-09T13:00:53+08:00"
+    },
     period: {
       ...ACCEPTANCE_FIXTURE.period,
       firstActualPlayDate: "2025-10-06",
@@ -147,14 +154,16 @@ test("a pre-window observation never leaks into the Period page", () => {
   };
   const vm = normalize(regression);
   assert.equal(vm.period.firstActualPlayDate, "2025-10-06", "provenance remains available");
+  assert.equal(vm.period.firstObservedDate, "2025-10-09");
   assert.equal(vm.period.totalDays, 350);
   assert.equal(vm.period.totalDays, expectedDays("2025-10-09", "2026-09-23"));
 });
 
-test("the Period scene uses the version start and the requested copy", () => {
-  assert.match(periodSceneSource, /anchorDate = computed\(\(\) => props\.summary\.version\.startDate\)/);
-  assert.match(periodSceneSource, /first: "这个版本的第一天"/);
-  assert.match(periodSceneSource, /first: "このバージョンの初日"/);
+test("the Period scene uses the first in-window observation and accurate copy", () => {
+  assert.match(periodSceneSource, /anchorDate = computed\(\(\) => props\.summary\.period\.firstObservedDate \|\| props\.summary\.version\.startDate\)/);
+  assert.match(periodSceneSource, /first: "这个版本里首次留下记录"/);
+  assert.match(periodSceneSource, /first: "このバージョンで最初に記録された日"/);
+  assert.doesNotMatch(periodSceneSource, /这个版本的第一天|このバージョンの初日/);
   assert.doesNotMatch(periodSceneSource, /我们第一次相遇|私たちが初めて出会った日/);
 });
 
@@ -166,11 +175,16 @@ test("current cached summaries render a reporting-window duration", async () => 
     const raw = await loadSummary(path);
     if (!raw || raw.provenance?.algorithmVersion !== CURRENT_ALGORITHM) continue;
     const vm = normalize(raw);
+    const firstObservedSource = raw.coverage?.firstSnapshotAt
+      ? shanghaiDay(raw.coverage.firstSnapshotAt)
+      : raw.period?.firstActualPlayDate || shanghaiDay(raw.period?.firstRecordAt);
+    const firstObservedDate = [raw.version.startDate, firstObservedSource].filter(Boolean).sort().at(-1);
     const endDay = [
       shanghaiDay(raw.generatedAt),
       raw.version?.effectiveEndDate,
       raw.version?.endDate
     ].filter(Boolean).sort()[0];
-    assert.equal(vm.period.totalDays, expectedDays(raw.version.startDate, endDay), `${path} escaped its reporting window`);
+    assert.equal(vm.period.firstObservedDate, firstObservedDate, `${path} resolved the wrong first observable day`);
+    assert.equal(vm.period.totalDays, expectedDays(firstObservedDate, endDay), `${path} escaped its observable window`);
   }
 });

@@ -228,11 +228,14 @@ assert.equal(annualSummarySource.includes("calendarDaySpan"), true, "annual day 
 assert.equal(annualSummarySource.includes("firstActualPlayDate"), true, "annual summary lost first-observation provenance");
 assert.equal(annualSummarySource.includes("reportingStartDay"), true, "annual day counting is not anchored to the version start");
 assert.equal(annualSummarySource.includes("reportingEndDay"), true, "annual day counting does not cap itself at the reporting end");
+assert.equal(annualSummarySource.includes("firstObservedSourceDay"), true, "annual day counting ignores the user's first observable day");
+assert.equal(annualSummarySource.includes("firstObservedDate"), true, "annual day counting does not expose its bounded observation anchor");
 assert.equal(annualSummarySource.includes("earliestPlayDay"), false, "annual day counting still uses a pre-window account observation");
 assert.equal(annualSummarySource.includes("periodTotalDays"), true, "annual day counting does not resolve a period total");
 assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days do not use the resolved reporting span");
-assert.equal(periodOverviewSceneSource.includes("props.summary.version.startDate"), true, "Period scene does not display the version start");
-assert.equal(periodOverviewSceneSource.includes('first: "这个版本的第一天"'), true, "Period scene is missing the approved Chinese version-start copy");
+assert.equal(periodOverviewSceneSource.includes("props.summary.period.firstObservedDate"), true, "Period scene does not display the first in-window observation");
+assert.equal(periodOverviewSceneSource.includes('first: "这个版本里首次留下记录"'), true, "Period scene is missing the approved first-observation copy");
+assert.equal(periodOverviewSceneSource.includes("这个版本的第一天"), false, "Period scene still claims every user starts on the version boundary");
 assert.equal(periodOverviewSceneSource.includes("我们第一次相遇"), false, "Period scene still presents the account observation as a first encounter");
 const annualPeriodSchema = JSON.parse(await read("../../schemas/annual-summary-v4.schema.json"));
 assert.equal(

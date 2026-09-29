@@ -616,9 +616,10 @@ export const normalizeAnnualSummary = (
     : ratingRankMin
       ? `#${formatNumber(ratingRankMin)}`
       : "—";
-  // Keep the account-observation anchor as provenance, but never use it for the
-  // Period page: a pre-window snapshot must not make an annual recap display a
-  // date or duration outside its reporting window.
+  // Keep the account-observation anchor as provenance. The Period page starts
+  // at the first snapshot where this user is observable inside the reporting
+  // window, falling back to older provenance only when coverage metadata is
+  // unavailable. A pre-window snapshot is clamped to the version start.
   const firstActualPlayDay = calendarParts(period.firstActualPlayDate);
   const reportingStartDay = calendarParts(version.startDate) || calendarParts(ANNUAL_REPORTING_WINDOW.start);
   // End at the earlier of report generation and the declared window end. This
@@ -630,7 +631,14 @@ export const normalizeAnnualSummary = (
     calendarParts(version.effectiveEndDate),
     calendarParts(version.endDate)
   ]);
-  const periodTotalDays = calendarDaySpan(reportingStartDay, reportingEndDay)
+  const firstObservedSourceDay = calendarParts(coverage.firstSnapshotAt)
+    || firstActualPlayDay
+    || calendarParts(period.firstRecordAt)
+    || earliestCalendarDay(calendarActivity?.days.map((day) => day.date) || []);
+  const firstObservedDate = firstObservedSourceDay && firstObservedSourceDay > reportingStartDay
+    ? firstObservedSourceDay
+    : reportingStartDay;
+  const periodTotalDays = calendarDaySpan(firstObservedDate, reportingEndDay)
     ?? numberValue(period.totalDays);
   const narrativeContext: AnnualNarrativeContext = {
     mode,
@@ -721,7 +729,7 @@ export const normalizeAnnualSummary = (
     },
     coverage: { snapshotCount: numberValue(coverage.snapshotCount), firstSnapshotAt: stringValue(coverage.firstSnapshotAt) || null, lastSnapshotAt: stringValue(coverage.lastSnapshotAt) || null, partialStart: Boolean(coverage.partialStart) },
     timeCoverage: { status: stringValue(timeCoverage.status, "unavailable") as AnnualMetricStatus, ratio: numberValue(timeCoverage.ratio), trustedPlayCount: numberValue(timeCoverage.trustedProxyPlayCount), totalPlayCount: numberValue(timeCoverage.totalObservedPlayCount), precision: timeCoverage.eligible ? "batch_last_play_proxy" : "none", note: null },
-    period: { firstActualPlayDate: firstActualPlayDay || null, firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: periodTotalDays, activeDays },
+    period: { firstObservedDate: firstObservedDate || null, firstActualPlayDate: firstActualPlayDay || null, firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: periodTotalDays, activeDays },
     overview: { playCount, uniqueSongs, uniqueCharts: numberValue(overview.uniqueCharts), estimatedSeconds: numberValue(overview.estimatedSeconds), estimatedTimeText: stringValue(overview.estimatedTimeText) || (numberValue(overview.estimatedSeconds) >= 3600 ? `${(numberValue(overview.estimatedSeconds) / 3600).toFixed(1)} h` : `${Math.round(numberValue(overview.estimatedSeconds) / 60)} min`), currentClearCharts: numberValue(overview.currentClearCharts), currentFullComboCharts: numberValue(overview.currentFullComboCharts), currentDondafulCharts: numberValue(overview.currentDondafulCharts), currentKiwamiCharts: numberValue(overview.currentKiwamiCharts) },
     coverSongs,
     favoriteSong, obsessionSong, favoriteShift, monthlyFavorites, weekdayActivity, calendarActivity, timeOfDay, lateNight,

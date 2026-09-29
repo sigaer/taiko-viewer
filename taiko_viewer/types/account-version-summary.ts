@@ -237,6 +237,8 @@ export type VersionSummaryViewModel = {
     partialStart: boolean;
   };
   period: {
+    // First day this user is observable inside the current reporting window.
+    firstObservedDate: string | null;
     // Earliest real play moment the account's own data can prove, independent of
     // the annual observation window. Produced by the upstream generator.
     firstActualPlayDate: string | null;
