@@ -1,3 +1,4 @@
+import { readAnnualPolicy } from '~/server/services/account/annual-summary/policy';
 import { randomUUID } from "node:crypto";
 import type { H3Event } from "h3";
 import { createError, getCookie, getHeader, getRequestURL, getRequestIP, setCookie } from "h3";
@@ -77,10 +78,11 @@ export const recordBetaEvent = async(ctx:BetaContext,name:string,metadata:unknow
 export const trackBetaServer = async(event:H3Event,userId:number|null,name:string,meta:unknown={})=> {
  // Hooks never break auth, binding or sync if telemetry is unavailable.
  if(!getCookie(event,'annual_beta_session'))return;
- try{await recordBetaEvent(await betaContext(event,userId),name,meta);}catch{console.warn('[annual-beta] event write failed',name);}
+ try{if((await readAnnualPolicy()).mode==='public')return;await recordBetaEvent(await betaContext(event,userId),name,meta);}catch{console.warn('[annual-beta] event write failed',name);}
 };
 export const trackBetaUser = async(userId:number,name:string,meta:unknown={},dedup?:string)=> {
  try{
+  if((await readAnnualPolicy()).mode==='public')return;
   await ensureAccountSchema();const [rows]:any=await getAccountDb().execute(`SELECT p.id,p.invite_id,s.id AS session_id FROM web_beta_participants p JOIN web_beta_sessions s ON s.participant_id=p.id WHERE p.user_id=? ORDER BY s.created_at DESC LIMIT 1`,[userId]);
   if(!rows.length)return;const r=rows[0];
   const [context]:any=await getAccountDb().execute('SELECT locale,device_class,route FROM web_beta_events WHERE session_id=? ORDER BY occurred_at DESC LIMIT 1',[r.session_id]);

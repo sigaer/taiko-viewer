@@ -1,3 +1,4 @@
+import { assertAnnualTaskAllowed } from './policy';
 import { annualAdmission, MAX_CONCURRENT_ANNUAL_BUILDS } from './admission';
 import { trackBetaUser } from "~/server/services/annual-beta/events";
 import { annualBuildInputRevision, canReuseAnnualFailure, canReuseAnnualSummary } from "./build-recovery";
@@ -671,6 +672,9 @@ export const queueAccountAnnualSummaryBuild = async (
       }
     }
 
+    const active = await findActiveAnnualJob({ userId, bindingId: binding.id, versionKey: version.key, type: 'build' });
+    if (active) return { job: serializeAnnualJob(active), summary: null };
+    await assertAnnualTaskAllowed('generation');
     if (circuitOpenUntil > Date.now()) {
       void recordAnnualOperationalEvent('rejected');
       throw Object.assign(createError({ statusCode: 503, statusMessage: '年度服务暂时降级，请稍后重试' }),
@@ -814,6 +818,7 @@ export const queueAccountAnnualPoster = async (
     const posterId = randomUUID();
     const locale = normalizeAnnualLocale(input.locale || share.locale);
     const outputPath = getAnnualPosterPath(shareId, posterId, locale);
+    await assertAnnualTaskAllowed('rendering');
     const admissionTicket = await annualAdmission.reserve('renderer', `legacy:${summaryId}:${locale}:${outputPath}`);
     const job = await insertAnnualJob({
       id: randomUUID(),
@@ -1218,6 +1223,7 @@ export const queueAdminAnnualSummaryBuild = async (userId: number, versionInput:
   if (!version) throw createError({ statusCode: 404, statusMessage: "年度总结版本不存在" });
   const binding = await requireCurrentAnnualBinding(userId);
   if (options.force) {
+    await assertAnnualTaskAllowed('generation');
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
   }
@@ -1230,6 +1236,7 @@ export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bin
   const binding = await findAnnualBinding(bindingId, userId);
   if (!binding) throw createError({ statusCode: 404, statusMessage: "目标绑定不存在" });
   if (options.force) {
+    await assertAnnualTaskAllowed('generation');
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) { await deleteAnnualSummaryForAdmin(existing.id); await removeAnnualPath(dirname(existing.summary_path)).catch(() => undefined); }
   }
@@ -1237,6 +1244,7 @@ export const queueAdminAnnualSummaryBuildForBinding = async (userId: number, bin
 };
 
 export const buildAdminAnnualPreview = async (taikoIdInput: unknown) => {
+  await assertAnnualTaskAllowed('generation');
   const taikoId = String(taikoIdInput || "").trim();
   if (!/^\d+$/.test(taikoId)) throw createError({ statusCode: 400, statusMessage: "目标鼓众 ID 无效" });
   const envelope = await runAnnualSummaryCli(taikoId);

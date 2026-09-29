@@ -78,6 +78,9 @@ const openComposer = async () => {
 const closeComposer = () => { (document.activeElement as HTMLElement | null)?.blur(); composerOpen.value = false; };
 watch(() => props.active, active => { if (!active) closeComposer(); });
 const savingImage = ref(false);
+const imageRetryCooling = ref(false);
+let imageRetryTimer: ReturnType<typeof setTimeout> | undefined;
+onBeforeUnmount(() => clearTimeout(imageRetryTimer));
 const imageError = ref('');
 const imageNotice = ref('');
 // Saving the share card is the primary operation. The community checkbox only asks
@@ -85,7 +88,7 @@ const imageNotice = ref('');
 const beta = useAnnualBeta();
 const saveShareCard = async () => {
   beta.track("annual_share_action",{action:"save_image"});
-  if (savingImage.value) return;
+  if (savingImage.value || imageRetryCooling.value) return;
   savingImage.value = true; imageError.value = ''; imageNotice.value = '';
   try {
     const result = await apiFetch<{
@@ -93,7 +96,7 @@ const saveShareCard = async () => {
       communitySync?: { requested?: boolean; status?: string; reason?: string; threadId?: number | null };
     }>(
       `/api/account/annual-summaries/${encodeURIComponent(props.summary.summaryId)}/share-card`,
-      { method: 'POST', body: { locale: locale.value.startsWith('ja') ? 'ja' : 'zh', syncCommunity: imageSync.value } }
+      { method: 'POST', retry: 0, body: { locale: locale.value.startsWith('ja') ? 'ja' : 'zh', syncCommunity: imageSync.value } }
     );
     const imageUrl = result?.shareCard?.imageUrl;
     if (!imageUrl) throw new Error('share card image missing');
@@ -117,6 +120,10 @@ const saveShareCard = async () => {
           ? localized('分享图片已保存；社区同步过于频繁，本次未同步社区', '共有画像は保存しました。共有が集中しているため、今回はコミュニティに共有していません')
           : localized('分享图片已保存', '共有画像を保存しました');
   } catch (error: any) {
+    if ([429, 503].includes(Number(error?.statusCode || error?.status))) {
+      imageRetryCooling.value = true; clearTimeout(imageRetryTimer);
+      imageRetryTimer = setTimeout(() => { imageRetryCooling.value = false; }, 60_000);
+    }
     imageError.value = error?.data?.statusMessage || localized('分享图片保存失败，请稍后再试', '共有画像を保存できませんでした。もう一度お試しください');
   } finally { savingImage.value = false; }
 };
@@ -139,7 +146,7 @@ const saveShareCard = async () => {
       </div>
       </Teleport>
       <AnnualShareGrid class="poster-scene__grid" :summary="summary" :locale="locale" :profile-fallback="props.profileFallback" />
-      <div class="poster-scene__actions"><button type="button" :disabled="savingImage" @click="saveShareCard">{{ savingImage ? localized('生成中…', '生成中…') : t('annualSummary.staticPoster.save') }}</button><label class="poster-scene__sync"><input v-model="imageSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label></div>
+      <div class="poster-scene__actions"><button type="button" :disabled="savingImage || imageRetryCooling" @click="saveShareCard">{{ savingImage ? localized('生成中…', '生成中…') : t('annualSummary.staticPoster.save') }}</button><label class="poster-scene__sync"><input v-model="imageSync" type="checkbox">{{ t('annualSummary.staticPoster.sync') }}</label></div>
     </div>
   </section>
 </template>

@@ -1,3 +1,4 @@
+import { assertAnnualTaskAllowed } from './policy';
 import QRCode from "qrcode";
 import { ensureWithinAnnualCache } from "./runtime";
 import { access } from "node:fs/promises";
@@ -110,6 +111,7 @@ const renderOnce = async (key: string, outputPath: string, width: number, height
     if (options?.ticket) await annualAdmission.cancel('renderer', options.ticket);
     return { width, height };
   }
+  await assertAnnualTaskAllowed('rendering');
   return annualAdmission.run('renderer', key, ANNUAL_POSTER_TIMEOUT_MS + 5_000, async id => {
     if (await access(outputPath).then(() => true, () => false)) return { width, height };
     return render(id);

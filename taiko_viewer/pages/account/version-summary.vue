@@ -52,6 +52,9 @@ const betaSlide = ref("opening");
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
 const building = ref(false);
+const submissionError = ref("");
+const retryCooling = ref(false);
+let retryTimer: ReturnType<typeof setTimeout> | undefined;
 const switchingBindingId = ref<number | null>(null);
 const selectedBindingId = ref<number | null>(null);
 const jobStatus = ref<AnnualJob | null>(null);
@@ -156,12 +159,13 @@ const resumeJob = async (job: AnnualJob) => {
 };
 
 const buildSummary = async (retryFailed = false) => {
-  if (building.value) return;
+  if (building.value || retryCooling.value) return;
+  submissionError.value = "";
   const generation = ++pollGeneration;
   building.value = true;
   try {
     const payload = await apiFetch<{ job: AnnualJob; summary?: AnnualSummaryV4 }>("/api/account/annual-summaries/annual_2026/build", {
-      method: "POST", body: { locale: locale.value === "ja" ? "ja" : "zh", retryFailed }
+      method: "POST", retry: 0, body: { locale: locale.value === "ja" ? "ja" : "zh", retryFailed }
     });
     jobStatus.value = payload.job;
     if (payload.summary || payload.job.status === "completed") await reloadAnnual();
@@ -170,7 +174,14 @@ const buildSummary = async (retryFailed = false) => {
     drawerOpen.value = false;
     ElMessage.success(t("annualSummary.state.buildReady"));
   } catch (error) {
-    if (jobStatus.value?.error?.code !== "INSUFFICIENT_DATA") ElMessage.error(await resolveViewerError(error, t("annualSummary.state.buildFailed")));
+    submissionError.value = await resolveViewerError(error, t("annualSummary.state.buildFailed"));
+    const status = Number((error as { statusCode?: number; status?: number }).statusCode || (error as { status?: number }).status);
+    if (status === 429 || status === 503) {
+      retryCooling.value = true;
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(() => { retryCooling.value = false; }, 60_000);
+    }
+    if (jobStatus.value?.error?.code !== "INSUFFICIENT_DATA") ElMessage.error(submissionError.value);
   } finally {
     pollingJobId = "";
     if (generation === pollGeneration) building.value = false;
@@ -201,7 +212,7 @@ watch(envelope, (value) => {
     if (value.buildJob.status === "queued" || value.buildJob.status === "running") {
       void resumeJob(value.buildJob);
     }
-  } else if (value?.state === "missing" && !summary.value && !pageError.value && !building.value) {
+  } else if (value?.state === "missing" && !summary.value && !pageError.value && !submissionError.value && !building.value) {
     void buildSummary();
   }
 }, { immediate: true });
@@ -226,7 +237,7 @@ onMounted(() => {
   }, { immediate: true });
 });
 
-onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopArtworkPreload?.(); });
+onBeforeUnmount(() => { clearTimeout(retryTimer); immersiveStory.value = false; pollGeneration += 1; stopArtworkPreload?.(); });
 </script>
 
 <template>
@@ -251,8 +262,9 @@ onBeforeUnmount(() => { immersiveStory.value = false; pollGeneration += 1; stopA
     <div v-else-if="!summary" class="annual-state">
       <p class="annual-state__eyebrow">{{ t("annualSummary.entry.eyebrow") }}</p>
       <h1>{{ t("account.versionSummary") }}</h1>
-      <p>{{ pageError || t("annualSummary.state.missing") }}</p>
+      <p>{{ submissionError || pageError || t("annualSummary.state.missing") }}</p>
       <div class="annual-state__actions">
+        <el-button v-if="submissionError" :disabled="retryCooling" :loading="building" @click="buildSummary(true)">{{locale==='ja'?'再試行':'重试'}}</el-button>
         <el-button @click="navigateTo(localePath('/account/profile'))">{{ t("annualSummary.state.openProfile") }}</el-button>
         <el-button @click="navigateTo(localePath('/account/sync'))">{{ t("annualSummary.state.openSync") }}</el-button>
       </div>

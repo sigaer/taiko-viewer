@@ -1,3 +1,4 @@
+import { readAnnualPolicy } from './policy';
 import type { H3Event } from "h3";
 import { createError } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
@@ -13,6 +14,8 @@ export const hasAccountAnnualSummaryAccess = async (userId: number) => {
      WHERE a.id = ?`,
     [userId]
   );
+  const policy = await readAnnualPolicy();
+  if (policy.mode === 'public') return rows.length > 0;
   const e2eMode = process.env.NODE_ENV !== "production" && process.env.TAIKO_ANNUAL_E2E_MODE === "1" && String(process.env.TAIKO_DB_NAME || "").endsWith("_test");
   return rows.some((row) => (
     e2eMode && /^annual_e2e_[0-9a-z_]+$/i.test(row.username)
