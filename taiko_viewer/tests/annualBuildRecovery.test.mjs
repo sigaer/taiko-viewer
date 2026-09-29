@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm, utimes } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { annualBuildInputRevision, canReuseAnnualFailure } from '../server/services/account/annual-summary/build-recovery.ts';
+import { annualBuildInputRevision, canReuseAnnualFailure, canReuseAnnualSummary } from '../server/services/account/annual-summary/build-recovery.ts';
 
 test('failure revision: legacy, same input, updated userdata, new history and runtime change', async () => {
   const root = await mkdtemp(join(tmpdir(), 'annual-build-recovery-'));
@@ -26,4 +26,12 @@ test('failure revision: legacy, same input, updated userdata, new history and ru
     assert.notEqual(await revision(), updated);
     assert.notEqual(await annualBuildInputRevision(root, '123', 'future-runtime-test'), await revision());
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('completed summary is reusable only for the current annual algorithm', () => {
+  assert.equal(canReuseAnnualSummary({ provenance: { algorithmVersion: 'v2' } }, 'v2'), true);
+  assert.equal(canReuseAnnualSummary({ provenance: { algorithmVersion: 'v1' } }, 'v2'), false);
+  assert.equal(canReuseAnnualSummary({ provenance: null }, 'v2'), false);
+  assert.equal(canReuseAnnualSummary(null, 'v2'), false);
+  assert.equal(canReuseAnnualSummary({ provenance: { algorithmVersion: 'v2' } }, ''), false);
 });

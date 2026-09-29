@@ -1,6 +1,6 @@
 import { annualAdmission, MAX_CONCURRENT_ANNUAL_BUILDS } from './admission';
 import { trackBetaUser } from "~/server/services/annual-beta/events";
-import { annualBuildInputRevision, canReuseAnnualFailure } from "./build-recovery";
+import { annualBuildInputRevision, canReuseAnnualFailure, canReuseAnnualSummary } from "./build-recovery";
 import { createHash, randomUUID } from "node:crypto";
 import { hostname } from "node:os";
 import { access, readFile } from "node:fs/promises";
@@ -238,7 +238,10 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
   const binding = await requireCurrentAnnualBinding(userId);
   const latestRow = await findLatestAnnualSummary(userId, binding.id, version.key);
   const locale = normalizeAnnualLocale(localeInput);
-  const payload = latestRow ? await getOwnerSummaryPayload(latestRow, locale) : null;
+  const cachedSummary = latestRow ? await safeReadSummary(latestRow) : null;
+  const payload = latestRow && canReuseAnnualSummary(cachedSummary, ANNUAL_ALGORITHM_VERSION)
+    ? await getOwnerSummaryPayload(latestRow, locale)
+    : null;
   const activeJob = await findActiveAnnualJob({
     userId,
     bindingId: binding.id,
@@ -258,7 +261,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     selectedVersion: version,
     currentBinding: await enrichBindingWithCurrentTitle(sanitizeBinding(binding)),
     state: payload ? "ready" : "missing",
-    inputFingerprint: latestRow?.input_fingerprint || "",
+    inputFingerprint: payload ? latestRow?.input_fingerprint || "" : "",
     summary: payload?.summary || null,
     share: payload?.share || null,
     buildJob: activeJob ? serializeAnnualJob(activeJob) : terminalJob ? serializeAnnualJob(terminalJob) : null
@@ -653,7 +656,7 @@ export const queueAccountAnnualSummaryBuild = async (
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) {
       const cached = await safeReadSummary(existing);
-      if (cached) {
+      if (canReuseAnnualSummary(cached, ANNUAL_ALGORITHM_VERSION)) {
         const completed = await insertAnnualJob({
           id: randomUUID(),
           userId,

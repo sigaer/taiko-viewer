@@ -14,4 +14,4 @@ for name in ['plugins/utils/annual_summary','plugins/utils/snapshot_history.py',
  if src.is_dir():shutil.copytree(src,dst,ignore=shutil.ignore_patterns('__pycache__'),dirs_exist_ok=True)
  elif src.exists():shutil.copy2(src,dst)
 files={str(p.relative_to(target)):hashlib.file_digest(p.open('rb'),'sha256').hexdigest() for p in target.rglob('*') if p.is_file() and 'node_modules' not in p.parts}
-(r/'evidence/input-manifest.json').write_text(json.dumps({'commit':commit,'version':json.loads((target/'taiko-forum/taiko_viewer/package.json').read_text())['version'],'algorithm':'annual-observation-v4.5.1','source':'git archive; no dirty overlays','externalInputs':['schemas','plugins/utils','songs','node_modules symlink (existing locked install)'],'files':files},indent=2))
+(r/'evidence/input-manifest.json').write_text(json.dumps({'commit':commit,'version':json.loads((target/'taiko-forum/taiko_viewer/package.json').read_text())['version'],'algorithm':'annual-observation-v4.5.2','source':'git archive; no dirty overlays','externalInputs':['schemas','plugins/utils','songs','node_modules symlink (existing locked install)'],'files':files},indent=2))

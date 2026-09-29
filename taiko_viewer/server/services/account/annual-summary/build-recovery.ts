@@ -34,3 +34,11 @@ export const canReuseAnnualFailure = (job: { status: string; parameters_json: st
     return false;
   }
 };
+
+export const canReuseAnnualSummary = (
+  summary: { provenance?: { algorithmVersion?: string | null } | null } | null,
+  currentAlgorithmVersion: string
+) => Boolean(
+  currentAlgorithmVersion
+  && summary?.provenance?.algorithmVersion === currentAlgorithmVersion
+);

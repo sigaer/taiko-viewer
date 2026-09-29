@@ -65,7 +65,7 @@ async function request(path,a,method='GET',body,timeout=10000){
   if(r.headers.get('content-type')?.includes('image/'))return Buffer.from(await r.arrayBuffer());
   return r.json();
 }
-function verify(s,a){if(!s||s.schemaVersion!==4||s.provenance?.algorithmVersion!=='annual-observation-v4.5.1'||s.version?.key!=='annual_2026'||s.profileCard?.nickname!==a.nickname||s.overview?.data?.playCount!==a.playCount||(a.expectedHighScore!=null&&s.sections?.highScore?.data?.highScore!==a.expectedHighScore)||(a.snapshots!=null&&s.coverage?.comparableSnapshotCount!==a.snapshots)){stop('identity-or-fixture-mismatch');throw Error('identity-or-fixture-mismatch');}}
+function verify(s,a){if(!s||s.schemaVersion!==4||s.provenance?.algorithmVersion!=='annual-observation-v4.5.2'||s.version?.key!=='annual_2026'||s.profileCard?.nickname!==a.nickname||s.overview?.data?.playCount!==a.playCount||(a.expectedHighScore!=null&&s.sections?.highScore?.data?.highScore!==a.expectedHighScore)||(a.snapshots!=null&&s.coverage?.comparableSnapshotCount!==a.snapshots)){stop('identity-or-fixture-mismatch');throw Error('identity-or-fixture-mismatch');}}
 async function transaction(a,operation){
   const buildCold=cold||same||smoke||parallel||operation==='cold', createShare=share||shareRace||operation==='share';
   const auth=await request('/api/account/auth/me',a);

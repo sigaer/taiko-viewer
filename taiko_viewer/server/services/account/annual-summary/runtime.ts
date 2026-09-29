@@ -213,6 +213,11 @@ export const getAnnualInputFingerprint = async (taikoId: string) => {
   }
   await addFileToHash(hash, songDataPath, "song-data");
   await addFileToHash(hash, ratingPath, "rating-data");
+  await addFileToHash(
+    hash,
+    resolve(repoRoot, "plugins", "utils", "chart_roll_metadata.py"),
+    "chart-roll-metadata-overrides"
+  );
   await addDirectoryToHash(
     hash,
     resolve(repoRoot, "plugins", "utils", "annual_summary"),
