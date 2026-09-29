@@ -26,3 +26,13 @@ test('the frozen reporting period remains readable after cutoff and rejects unkn
   try{Date.now=()=>Date.parse('2027-01-01T00:00:00Z');assert.equal(m.resolveAnnualVersion('annual_2026').endDate,'2026-09-30');assert.equal(m.getAnnualGeneratorVersion().endExclusive,'2026-10-01');assert.equal(m.getAnnualGeneratorVersion().timezone,'Asia/Shanghai');assert.equal(m.resolveAnnualVersion('annual_2027'),null);assert.equal(m.ANNUAL_ALGORITHM_VERSION,'annual-observation-v4.5.2');}finally{Date.now=before;}
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('annual async errors use the captured translator without calling setup composables',async()=>{
+ const {transform}=await import('esbuild');const {readFile}=await import('node:fs/promises');
+ const {code}=await transform(await readFile('utils/viewerError.ts','utf8'),{loader:'ts',format:'esm'});
+ const {resolveViewerError}=await import('data:text/javascript,'+encodeURIComponent(code));
+ const t=(key,fallback)=>fallback||key;
+ await Promise.resolve();
+ assert.equal(await resolveViewerError({statusCode:503,data:{statusMessage:'年度报告新生成已暂停，请稍后重试'}},'fallback',t),'年度报告新生成已暂停，请稍后重试');
+ assert.equal(await resolveViewerError({statusCode:403},'fallback',t),'暂无权限查看该数据');
+});

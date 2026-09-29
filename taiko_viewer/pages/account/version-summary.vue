@@ -11,7 +11,7 @@ import { preloadAnnualOpeningArtwork } from "~/utils/annualOpeningAssets.client"
 import { ANNUAL_BGM_SRC, preloadAnnualBgm } from "~/utils/annualBgm.client";
 import { ANNUAL_REPORTING_WINDOW } from "~/utils/annualPeriod";
 import { buildPageDescription } from "~/utils/seo";
-import { resolveViewerError } from "~/utils/viewerError";
+import { resolveViewerError as resolveViewerErrorWithTranslator } from "~/utils/viewerError";
 
 type AnnualJob = {
   id: string;
@@ -28,6 +28,7 @@ type AnnualEnvelope = Omit<VersionSummaryPayload, "summary"> & {
 };
 
 const { t, locale } = useI18n();
+const resolveViewerError = (error: unknown, fallback: string) => resolveViewerErrorWithTranslator(error, fallback, t);
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 

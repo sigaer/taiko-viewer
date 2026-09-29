@@ -40,8 +40,9 @@ const messageFromPayload = (payload: { statusMessage?: string; message?: string 
   return isTechnicalMessage(text) ? "" : text;
 };
 
-const messageFromStatus = (status: number | undefined, fallback: string) => {
-  const { t } = useI18n();
+type ErrorTranslator = (key: string, fallback?: string) => string;
+
+const messageFromStatus = (status: number | undefined, fallback: string, t: ErrorTranslator) => {
   if (status === 401) {
     return t("errors.pleaseLogin");
   }
@@ -60,8 +61,8 @@ const messageFromStatus = (status: number | undefined, fallback: string) => {
   return fallback;
 };
 
-export const resolveViewerError = async (error: unknown, fallback: string) => {
-  const { t } = useI18n();
+export const resolveViewerError = async (error: unknown, fallback: string, translate?: ErrorTranslator) => {
+  const t = translate || useI18n().t;
   const err = error as FetchLikeError;
   const status = err.statusCode ?? err.status;
 
@@ -111,7 +112,7 @@ export const resolveViewerError = async (error: unknown, fallback: string) => {
     return translateKnownMessage(message);
   }
 
-  return messageFromStatus(status, fallback);
+  return messageFromStatus(status, fallback, t);
 };
 
 export const viewerErrorAlertType = (message: string): "warning" | "error" => {
