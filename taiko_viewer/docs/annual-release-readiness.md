@@ -1,6 +1,8 @@
 # 年度报告发布验收 — 2026-09-29
 
-**结论：BLOCKED。** 已复现并修复三处低高度移动端裁剪；前端隔离回归与后端真实业务验收必须分开。尚不能批准正式上线：没有三类真实测试账户的鉴权→生成→完整浏览→实际分享闭环，没有已核实全部边界的负载环境，也没有真实 iPhone 证据和发布流量目标。
+**续轮当前结论：LIMITED（受控合成业务及有界并发已执行，非无条件发布 PASS）。** 最终候选与续轮证据见文末“2026-09-29 续轮”。
+
+**以下为 0.75.8 首轮历史结论：BLOCKED。** 已复现并修复三处低高度移动端裁剪；前端隔离回归与后端真实业务验收必须分开。尚不能批准正式上线：没有三类真实测试账户的鉴权→生成→完整浏览→实际分享闭环，没有已核实全部边界的负载环境，也没有真实 iPhone 证据和发布流量目标。
 
 ## 工作区、版本与证据
 
@@ -116,3 +118,95 @@ bash ../scripts/memory/run_build.sh /bin/bash /var/tmp/annual-readiness-20260929
 ```
 
 此次不是生产发布：用户明确要求不默认部署，因此没有执行会切换输出/重启的部署脚本。下一次正式发布仍须走仓库规定的标准入口。
+
+
+## 2026-09-29 续轮：独立实例、真实链路与有界并发
+
+本节保留上轮 BLOCKED 记录，单独记录续轮，旧组件测试不作为本轮协议/容量证据。运行原始资料：`/var/tmp/annual-test-continuation-20260929`（0.75.9）与 `/var/tmp/annual-test-final-20260929`（0.75.10）。
+
+### 候选与输入一致性
+
+- 最终候选：`f48a63b08e69060a8af60c1abe36d879f01283ca`，应用 `0.75.10`，build ID `e60ee0ac-0822-432c-99f2-4b52afd4659d`。从纯 Git archive 构建，无工作区覆盖。后续测试脚本/文档提交不会改变此候选应用产物。
+- `assets/data/title_song_relations.json` 使用提交版本，SHA256 `a1b304a2370c3ec4c18be5553d2b85f93d548edd1337f3d30cac065339a17985`；用户原有未提交修改保留且排除。原有未跟踪审计/执行文档未提交。
+- `evidence/input-manifest.json` 列出源码、锁文件、public、schema、独立复制的公开 Python 计算代码及曲库文件哈希；`artifact-manifest.json` 列出完整 `.output` 文件哈希；`dependency-versions.json` 记录现有安装锁哈希与依赖/worker 版本。Python 3.11.4、Chromium 113.0.5672.126、MySQL 8.0.24；没有升级依赖。
+- 年度算法保持 `annual-observation-v4.5.1`，窗口保持 2025-10-09～2026-09-30。分享 renderer revision 更新为 `share-card-v4-static-capture`。负载结果包含候选 commit/build ID，并通过实际 HTTP build metadata 核对；脚本哈希按任务配置记录。
+- 旧候选 `11ee876 / 0.75.9` 的普通/稀疏/高量生成、2/3 冷并发、2/5 去重、分享并发、1/s 与 3/s 结果保留在 continuation 目录，**不冒充最终构建复测**。
+
+### 环境隔离与实际副作用边界
+
+原共享测试库仍有 48 个账号和一个 queued job；候选启动会自动恢复任务和清理过期数据，因此没有使用它启动服务。现有受限账号无法另建库，本机生产 MySQL root 免密连接也被拒绝。随后复用现有 MySQL 可执行文件，以 `--no-defaults` 和全新 datadir 建立独立实例，解决了第一组并发的实际环境阻塞，无需生产凭据或管理员追加权限。
+
+- 独立实例仅绑定 `127.0.0.1:33179`，候选仅绑定 `127.0.0.1:33180`。实际 `@@datadir`、`@@port`、`SELECT DATABASE()`、`CURRENT_USER()`、`SHOW GRANTS` 均核验，应用账号仅有 `taiko_annual_readiness_test.*` 权限。新库初始 schema 需要 REFERENCES，已只给此库补足；复用候选 `ensureAccountSchema` 和显式 growth cursor migration，不复制生产表数据。
+- 每轮独立 userdata、cache、admission、account-cache、tmp、会话和签名秘密；秘密 0600、目录在 `/var/tmp/annual-test-*`。42 个账号全部合成，访问资格由真实授权表提供，`NODE_ENV=production`，没有 E2E 鉴权旁路。
+- 候选与独立 systemd Python/Chromium worker 设置 `IPAddressDeny=any` / `IPAddressAllow=localhost`、只读系统及仅测试根目录可写，并屏蔽生产 userdata/config/env。实际 cgroup BPF attachment、worker PID/命令、MemoryMax、读写目录和队列由 observations 保存。对外连接探测返回 EAGAIN，单独不能证明阻断；内核 BPF_PROG_QUERY 返回实际 ingress/egress 程序 ID，不能只靠环境变量声明。
+- Python generator 保持 2 active、renderer 保持 1 active，共用现有持久 admission。资源预算未提高；测试由 `run_qa.sh` 的 15 分钟/2 核/3GiB 任务分批执行，worker 保留原独立内存/寿命上限。新会话服务器与 QA unit 绑定且有 850 秒硬寿命。
+- 分享请求全部 `syncCommunity:false`；未触发社区写入、邮件、生产队列、真实用户同步。对象存储/外部队列为 NOT_APPLICABLE，真实生成结果写到本轮本地缓存。测试使用独立 MySQL，生产共享数据库不承载本轮压力。
+- 曲绘及装扮在隔离环境中使用现有降级图形。缺少 MyDon 依赖产生资源接口错误并进入 fallback，不能把页面无 JS 异常或 PNG 成功解释为真实 CDN/装扮通过。
+
+### 修复和失败记录
+
+1. **匿名预渲染鉴权**：原调用链为公开页 layout → `useAccountAuthStatus` → `auth/me` → `getAccountUserFromEvent` → 无 cookie 也先 `ensureAccountSchema`。将无 token 返回提前，保留有会话时的正式数据库校验及错误。三个行为回归验证无 cookie 不触库、有会话数据库异常仍抛出、有效/过期会话行为不变。新构建未注入数据库凭据，8 路预渲染阶段不再出现原鉴权拒绝，原公开页/SSR入口保留。
+2. **真实导出 PNG 缺字**：0.75.9 的日文服务端图片出现随机缺字，但 DOM 文本/几何完整。相同页面、截图参数下去掉 `#dynamic-line` 后恢复；单独变更字体或截图参数不能稳定解决。内部导出路由现在跳过全站动态连线与点击爱心初始化，并提升缓存 revision，防止复用旧导出。没有改字号、主体宽度、文案或强制全屏。最终候选真实保存 PNG 重新检查。
+3. **测试适配失败保留**：初始浏览器只有手机视口、未设移动 UA，触发既有移动入口重定向；其次开始按钮已进入第 2 页，旧循环多翻一页；均修正脚本后独立重跑。监控模块曾有语法错误，未发送业务流量的该轮标失败。数据不足 fixture 最初完全缺文件导致 404，随后改为受控 partial 当前记录，不能将初次失败记为通过。
+4. 0.75.10 的 8 项鉴权/导出回归与 `verify_annual_contract.mjs` 通过；后者确认 21 页定义、zh/ja、schema 4。运行态实际可见页数由真实生成 sections 决定，不强行注入缺失页面。
+
+### 公开页运行态保留问题
+
+匿名访问 8 路均 HTTP 200 且 `auth/me.authenticated=false`；持有效合成会话访问同样 8 路，接口均识别 user 1。`/grade/2023`、`/grade/2024`、`/settings`、`/about` 的侧栏仍显示匿名状态，**公开页登录展示验收未通过**。静态 HTML 的 `__NUXT_DATA__` 含 `account-user=null`、`account-user-loaded=true`；现有 `useAccountAuthStatus.resolveAccountUser()` 命中 loaded 后不重取会话。该 composable 与 `SidebarNav` 不在本轮修复中，历史提交为 `d7f8ffe / 0.49.1`。这是缓存 hydration 状态的展示缺陷，未观察到鉴权绕过或账户数据串用；实际年度入口、受保护 API 和越权拒绝另有成功证据。按本轮只修发布阻断/高风险的范围保留为 P2，不扩改全站会话状态。构建期鉴权错误已解除，不能因此把整个公共登录体验标 PASS。
+
+### 最终候选的实际执行结果
+
+| 场景 | started / completed / failed / unfinished | HTTP | P95 / P99（ms） | 结果 |
+|---|---:|---:|---:|---|
+| cold | 30 / 30 / 0 / 0 | 150 | 1188.14 / 1196.17 | PASS |
+| mixed | 32 / 32 / 0 / 0 | 70 | 2339.70 / 2440.37 | PASS |
+| parallel2 | 2 / 2 / 0 / 0 | 10 | 1259.80 / 1259.80 | PASS |
+| parallel3 | 3 / 3 / 0 / 0 | 18 | 2312.12 / 2312.12 | PASS |
+| recovery 1/s | 180 / 180 / 0 / 0 | 360 | 25.36 / 33.50 | PASS |
+| same2 | 2 / 2 / 0 / 0 | 11 | 1261.65 / 1261.65 | PASS |
+| same5 | 5 / 5 / 0 / 0 | 26 | 1503.77 / 1503.77 | PASS |
+| share | 4 / 4 / 0 / 0 | 16 | 279.07 / 279.07 | PASS |
+| share2 | 2 / 2 / 0 / 0 | 8 | 4215.81 / 4215.81 | PASS |
+| smoke 普通 | 1 / 1 / 0 / 0 | 5 | 1284.44 / 1284.44 | PASS |
+| smoke 高量 | 1 / 1 / 0 / 0 | 10 | 7767.59 / 7767.59 | PASS |
+| warm 1/s | 120 / 120 / 0 / 0 | 240 | 20.79 / 29.89 | PASS |
+| warm 3/s | 540 / 540 / 0 / 0 | 1080 | 22.18 / 27.84 | PASS |
+| warm 5/s | 1161 / 1161 / 0 / 0 | 2322 | 18.15 / 22.70 | STOPPED，未完成计划 |
+| burst 10/s ×60s | 0 / 0 / 0 / 0 | 0 | N/A | BLOCKED：5/s 未完成，未越级 |
+
+各档 `droppedSlots=0`。分位数只包含成功事务；两三人的 P95/P99 只是小样本最大值附近，不用于外推容量。HTTP 列是业务请求，另有每档一次 build metadata GET；不含页面静态资源、浏览器和独立协议断言的请求。逐笔耗时、真实发起窗口、请求量和资源详见 [result-summary.json](../test-results/annual-continuation-20260929/evidence/result-summary.json) 及对应原始 results JSON。
+
+- warm 1/s×120s、3/s×180s 完成；5/s×300s 实际仅运行约232.27s，计划1500，启动并成功1161，未发起339。PSI full avg10=6.63% 触发保护，exit=1，停止原因 SIGTERM；不能用该段零请求失败宣称 5/s 通过。`observedStartsPerSecond=3.87` 按原300秒配置窗口计，实际232秒发起窗口另存，不能混成成功维持5/s全程。
+- 停止后首先观察约40秒恢复（PSI降至0；完整记录包含开始恢复请求后的后续点），随后 recovery 1/s×180s 全部通过。主服务 RSS 从216.13MiB回到148.77MiB，独立MySQL约380MiB，队列/worker均归零。全局压力尖峰的来源未完全归因；测试服务和development cgroup没有新增OOM/high事件，不能据此断言与测试无关。未自动重试5/s或提高保护阈值。
+- 同用户 same2/same5 分别独立新身份，各只有1条 completed job、attempt=1及1个实际 `standalone.py build` 进程。不同用户 parallel2/parallel3 分别启动2/3次实际计算，最大同时2个；第三人 queued→started 约1秒，其余该组为0秒（DB DATETIME秒级精度）。逐用户job与时间见 [computation-map.json](../test-results/annual-continuation-20260929/evidence/computation-map.json)（user→job→admission→实际worker）及 [jobs-final.tsv](../test-results/annual-continuation-20260929/evidence/jobs-final.tsv)，200ms观测保留admission状态及worker命令；不把进程观测间隔冒充精确CPU计算时长。
+- 30冷身份均为全新账户，30条 completed job、attempt=1、30个实际Python计算，串行最大1个；没有宣称恒定1/s或冷生成总体容量。
+- share2 两个不同summary均 `cached:false`，实际渲染2次、最大同时1个，返回并完整解码两张1080×1872 PNG；随后四次顺序share均真实POST+图片GET，验证缓存复用，不当作额外4次渲染。mixed叠加1个新冷生成和1个未命中分享，实际generator/renderer各1个；30次热读P95=21.93ms/P99=31.80ms，冷事务约2.34s、分享约2.44s，三类不混算SLA。
+- 200ms采样的单generator cgroup最大94.90MiB、renderer最大254.95MiB，短时真实峰值可能漏采。每档末尾10秒观察中worker均退出、无running/queued项，未清除缓存或队列来制造恢复。资源JSON包含宿主机CPU/换页/网络累计计数、测试MySQL IO/RSS和生产PID监测；这些不是生产流量/线上延迟SLA证明。
+
+### 浏览器、真实产物与最终判定
+
+普通12份历史快照×4谱面=48条记录，独立预期44次演奏；稀疏2×1=2条记录，预期1次；高量120×40=4800条记录，预期4760次、最高分811900，含窗口前baseline。高量窗口内119个可用快照，截止2026-06-03，不宣称覆盖每一天。API验证身份、schema4、算法、已知演奏值；后续30冷及4次share还核对最高分和可比较快照数。未修改生成后的summary以满足断言。
+
+三个真实账号从移动入口遍历当前有效页面：普通18页、稀疏10页、高量18页，最终到final/poster并实际点击保存，重复分享命中同一结果。375×567下关键文字、祖先裁剪、按钮命中、weekday主体宽度及独立区块重叠均检查；普通4页、稀疏3页、高量4页关键几何记录均0问题，页面遍历每步核对当前active页。高量额外两次重播、快速上下翻页后保存，0未处理JS异常。21页是定义总数，缺少所需sections的页面自然不展示，不注入mock补页。
+
+数据不足账号终态 `INSUFFICIENT_DATA`，刷新3次不新增build POST且job不变；拥有者summary/job为200，他人summary/job/share image均404。协议适配阶段的失败日志保留，最终独立复测PASS。
+
+关键实际文件（原图未经后处理）：
+
+- [普通中文服务端PNG](../test-results/annual-continuation-20260929/results/business-normal-zh.png)、[稀疏日文服务端PNG](../test-results/annual-continuation-20260929/results/business-sparse-ja.png)、[高量中文服务端PNG](../test-results/annual-continuation-20260929/results/business-high-zh.png)
+- [低高度weekday](../test-results/annual-continuation-20260929/results/business-high-zh-weekday.png)、[final](../test-results/annual-continuation-20260929/results/business-high-zh-final.png)、[保存按钮可达](../test-results/annual-continuation-20260929/results/business-high-zh-save-visible.png)
+- [0.75.9缺字原图](../test-results/annual-continuation-20260929/results/before-0.75.9-sparse-ja.png)、[原始构建日志](../test-results/annual-continuation-20260929/evidence/build.log)、[运行态公开页检查](../test-results/annual-continuation-20260929/results/public-auth.json)
+
+**续轮结论：LIMITED。** 候选一致性、实际隔离环境、合成账号鉴权/生成/分享闭环、不同用户冷并发、同用户去重、分享竞争、混合负载、1/s和3/s热读及恢复均有实测证据。原环境阻塞已解除；5/s完整档未通过且10/s未执行，公开静态页登录展示仍有P2缺陷，真机、真实用户代表性和目标流量覆盖不足。不能据此无条件公开放量。
+
+最终收尾：新增脚本语法检查、8项鉴权/导出回归和契约检查再次通过，见 `evidence/final-checks.log`。测试33179/33180监听、独立candidate unit及年度worker已退出；生产PID仍3542853、NRestarts=0，见 `evidence/cleanup.json`。应用修复提交为11ee876和f48a63b；本轮后续提交仅含测试与报告，不改被测应用产物。未执行部署。
+
+可审阅证据已筛除凭据复制到 [annual-continuation-20260929](../test-results/annual-continuation-20260929)，共124个文件的哈希清单见 [SHA256.json](../test-results/annual-continuation-20260929/SHA256.json)，另有 [完整证据压缩包](../test-results/annual-continuation-20260929.tar.gz)。原始目录保留，不把含账号cookie的配置打包；生成产物遵守仓库规则不进Git。浏览器任务输入哈希、各次任务退出码和最终脚本哈希随包保存。报告及可执行脚本提交到独立viewer仓库。
+
+### 运行入口与未验证边界
+
+完整命令和小样本/完整模式定义见 [loadtest/annual-readiness.md](../loadtest/annual-readiness.md)。新增的最小 fixture、bootstrap、任务排队工具复用既有年度负载入口和浏览器几何检查，没有替换原 30 冷身份专项。任务、首次失败、复测日志分别保存；不自动重试掩盖失败。
+
+真机仍为 **NOT_RUN**。测试服务只在回环，不修改生产反代。可由操作者通过既有 SSH 授权做私有端口转发访问该候选，验证 build ID 后手测：iPhone Safari 工具栏展开 → weekday 七行/底部文案 → 翻页返回 → 工具栏展开收起 → FavoriteSong 末句 → speedProfile → final → poster 实际保存 → 后台/锁屏返回。需记录设备/系统版本、录像和保存 PNG；本轮未建立真机入口，也未把 Chromium 或 WebGL 降级当作 iPhone/GPU 通过。
+
+真实用户代表性、真实 CDN/装扮、线上流量分布仍未验证。`TARGET_LOAD_UNSPECIFIED`：实测档位不等于目标峰值或冷生成总体容量。未部署、未重启生产、未扩大入口；正式发布和回滚仍走仓库标准部署入口，发布切换及回滚演练 NOT_RUN。

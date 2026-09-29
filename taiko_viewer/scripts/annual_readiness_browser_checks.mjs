@@ -1,18 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 
-// Runs inside the existing isolated StoryPlayer fixture harness, never an API server.
-export async function verifyReadiness(page, output) {
-  const results = [];
-  const active = () => page.locator('.story-player__slide[aria-hidden="false"]').getAttribute('data-page-key');
-  const go = async key => {
-    const index = await page.locator('.story-player__slide').evaluateAll((els, key) => els.findIndex(el => el.dataset.pageKey === key), key);
-    if (index < 0) throw Error(`Missing page ${key}`);
-    await page.locator('.story-player__viewport').evaluate((el, index) => { el.scrollTo({top: el.clientHeight * index, behavior: 'instant'}); el.dispatchEvent(new Event('scroll')); }, index);
-    await page.waitForTimeout(2100);
-    if (await active() !== key) throw Error(`Navigation did not settle on ${key}`);
-  };
-  const measure = async label => {
-    const value = await page.evaluate(label => {
+export async function measureAnnualPage(page, label) {
+  return page.evaluate(label => {
       const slide = document.querySelector('.story-player__slide[aria-hidden="false"]');
       const visible = el => {
         for(let p=el;p;p=p.parentElement) { const s=getComputedStyle(p); if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)<.05||p.getAttribute('aria-hidden')==='true')return false; }
@@ -53,6 +42,21 @@ export async function verifyReadiness(page, output) {
       }
       return {label,page:slide.dataset.pageKey,viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},text,buttons,scrollable,intentionalEllipsis,issues};
     },label);
+}
+
+// Runs inside the existing isolated StoryPlayer fixture harness, never an API server.
+export async function verifyReadiness(page, output) {
+  const results = [];
+  const active = () => page.locator('.story-player__slide[aria-hidden="false"]').getAttribute('data-page-key');
+  const go = async key => {
+    const index = await page.locator('.story-player__slide').evaluateAll((els, key) => els.findIndex(el => el.dataset.pageKey === key), key);
+    if (index < 0) throw Error(`Missing page ${key}`);
+    await page.locator('.story-player__viewport').evaluate((el, index) => { el.scrollTo({top: el.clientHeight * index, behavior: 'instant'}); el.dispatchEvent(new Event('scroll')); }, index);
+    await page.waitForTimeout(2100);
+    if (await active() !== key) throw Error(`Navigation did not settle on ${key}`);
+  };
+  const measure = async label => {
+    const value = await measureAnnualPage(page, label);
     await page.screenshot({path:`${output}/${label}.png`});
     results.push(value);
     if(value.page==='poster'){const save=page.locator('.poster-scene__actions>button').first();await save.scrollIntoViewIfNeeded();await save.click({trial:true,timeout:5000});await page.screenshot({path:`${output}/${label}-save-visible.png`});await page.locator('.poster-scene').evaluate(el=>el.scrollTo(0,0));}
