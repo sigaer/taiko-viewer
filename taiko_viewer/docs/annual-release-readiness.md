@@ -243,6 +243,36 @@ python3 scripts/annual-policy.py --pause-generation no --pause-rendering no
 - 0.76.1目标链路和暂停页面通过；一轮浏览器测量被生成成功toast暂时遮挡导航按钮，已保留记录并在toast结束后复测通过，没有用CSS隐藏通知。最后审查去掉额外的active-job短路，保持原输入指纹/去重流程，最终功能候选0.76.2。
 - 隔离环境通过既有bootstrap准备全新独立MySQL/目录/会话，worker外发及资源边界沿用已验证机制。没有把localhost本身当隔离证明；测试只执行针对性用例，没有重复负载矩阵。原有准入测试7/7通过，包含renderer第9个/generator第21个排队键拒绝；单元回归包含配置切换、两类暂停、错误配置拒绝、截止后版本解析、异步错误处理。
 
-最终构建、部署、模式切换与现网结果在完成后追加；在此之前不能将候选验证标记为已发布。完整容量、真机、生产回滚仍未验证，发布结论保留LIMITED。
+最终构建、部署、模式切换与现网结果见下方实测记录；候选验证与实际发布分别记录。完整容量、真机、生产回滚仍未验证，发布结论保留LIMITED。
 
 最终部署前候选验证：`fb48fa94a97c8d430a7268ef3451523e3194e17a` / `0.76.2`，独立构建 ID `21aa7c32-8b1b-4ce1-a9c3-668835ddb06d`。`/var/tmp/annual-test-public-release-20260929` 保存完整输入、产物指纹和隔离证据；`public-smoke.done`、`public-browser.done` 均 exit 0。普通中文 18 页、稀疏日文 10 页实际浏览，关键几何断言零问题、页面异常零；两份 1080×1872 PNG 完整解码，匿名公开入口显示登录且不显示邀请码。合成 MyDon 缺资源导致 404/500 并走回退，不能作为现网真实资源通过；现网另验。此次构建没有出现预渲染鉴权错误。随后提交仅包含脚本及本记录，不修改候选应用实现。
+
+### 已部署并切换公开模式：2026-09-29 21:40–21:43 Asia/Shanghai
+
+发布结论 **LIMITED（公开测试已上线；不是完整容量 PASS）**。
+
+- 实际运行版本 **0.76.2**，发布 commit `0b373a21868afef0a4726382b22b13de55f6c41c`，现网 build ID **`ed8d9830-8310-4815-8185-9e4d9aba8d34`**。标准 `run_build.sh → deploy_forum_web.sh` exit 0，已推送，站点与接收器健康检查通过；生产预渲染未出现鉴权错误。部署前保持 invite，部署后先完成旧内测现网协议及浏览器冒烟，再切 public。
+- 当前 `/var/lib/taiko/annual-policy.json` 为 `public / pauseGeneration=false / pauseRendering=false`；匿名入口显示“年度报告公开测试”与登录，隐藏邀请码；匿名报告接口仍 401。
+- 邀请模式现网：未获邀账号 403；旧内测账号实际冷生成、服务端新渲染及 PNG GET 完成，事务约 **23.95s**，分享 POST **2.481s**。20 页全部浏览，375×567 关键文本/祖先裁剪/按钮检查通过，2 次连续重播及快速翻页、页面保存下载、缓存复用通过；页面异常及 HTTP 资源失败均 0。
+- 公开模式现网：未获邀已验证绑定账号实际冷生成、服务端新渲染与 PNG GET 完成，含暂停/恢复检查的事务约 **8.56s**，首次成功分享 POST **2.369s**。19 页全部浏览、2 次重播/快速翻页、保存下载及缓存复用通过，页面异常 0。两阶段均保留完整解码的 **1080×1872 PNG**；单次小样本耗时不代表 SLA 或吞吐能力。
+- 现网暂停/恢复：新生成关闭返回 **503 + Retry-After:60**；恢复后完成。新渲染关闭返回 **503**；恢复后完成。两者同时暂停时，已有报告 GET、图片 GET、已缓存 share-card POST 仍 200。最终已恢复两项。其他账号读取报告及图片 404。没有取消已接受任务或改变并发/资源限额。
+- 未获邀现网账号原本存在历史 participant=1/events=14，切公开后仍为 **1/14**；授权记录始终 **0**。只新增自身 **1 个 job / 1 个 summary**，未兑换邀请码或补授权。完全没有 participant 的正常账号、未绑定、过期会话、数据不足、非管理员拒绝等覆盖来自最终隔离候选，而不是伪称真实用户现场造数。
+- 现网浏览器首次失败保留于 `browser-invite-initial-failure.log` 和同名目录：通用几何检查将移动弹幕的正常进出裁剪误报为静态正文越界。核对现有组件的 translate3d 移动/overflow:hidden 后，只对该明确选择器分类记录 `intentionalMarquee`，增加实际位置变化断言；正文、按钮、weekday 宽度和重叠检查不放宽。复测在**同一现网 build**通过；后续仅提交测试脚本/证据，无应用代码变化。
+- 真实资源限制：未获邀账号访问 `/cover/thumb/400/43.webp` 与 `/cover/thumb/400/72.webp` 返回 404（7 次请求）；现有组件有曲绘回退，浏览/分享仍完成，但**原始资源缺失未修复**，不能写“全部资源通过”。旧内测账号未出现 HTTP 资源失败。浏览器仅允许站内及 sakura-bot.cn 域的只读图像/字体/样式请求，外部分析请求被阻断，未验证那些外部服务。
+- 恢复观察：最后生产 `NRestarts=0`，服务 cgroup 约 **972 MiB**，本轮 generator/renderer 已退出，内存 PSI avg10/avg60 为 0；这是一次有限恢复观察，**不是生产自动降级或容量保证**。隔离临时服务与 33179/33180 监听已关闭。
+- 用户原有 title_song_relations 未提交内容已恢复并验证 SHA256；额外保留命名 stash 与仓库外备份。未提交到候选，不覆盖其他未跟踪文件。
+
+证据（私人真实账户数据不得放入 Git）：`/var/tmp/annual-public-20260929/` 权限 0700，凭据文件 0600；`deploy.log`、`deploy-result.json`、`live-invite.json/png`、`live-public.json/png`、`browser-invite/`、`browser-public/`、`public-db-before.json`、`public-db-after.json`、`release-result.json`。截图包括 opening/weekday/final/poster、匿名公开入口及实际保存按钮。凭据由用户授权自行选取现有有效会话，没有在日志/文档输出 token。
+
+本轮现网实际运行命令（viewer 目录；公开阶段会改变模式，请勿当只读命令重复执行）：
+
+```bash
+bash ../scripts/memory/run_qa.sh /usr/bin/env ANNUAL_LIVE_SMOKE_AUTHORIZED=1 /www/server/nvm/versions/node/v24.13.0/bin/node loadtest/annual-live-smoke.mjs /var/tmp/annual-public-20260929/live-config.json invite
+bash ../scripts/memory/run_qa.sh /www/server/nvm/versions/node/v24.13.0/bin/node loadtest/annual-business-browser.mjs /var/tmp/annual-public-20260929/browser-invite.json
+bash ../scripts/memory/run_qa.sh /usr/bin/env ANNUAL_LIVE_SMOKE_AUTHORIZED=1 /www/server/nvm/versions/node/v24.13.0/bin/node loadtest/annual-live-smoke.mjs /var/tmp/annual-public-20260929/live-config.json public
+bash ../scripts/memory/run_qa.sh /www/server/nvm/versions/node/v24.13.0/bin/node loadtest/annual-business-browser.mjs /var/tmp/annual-public-20260929/browser-public.json
+```
+
+`public` 协议脚本要求从未生成报告的新账号；当前账号已经生成，不可把重复运行失败解释为产品回归。脚本失败时会收回 invite 并关闭两个新任务开关，需核对私有失败记录再恢复。现网本次两个协议阶段均 exit 0。
+
+未执行：真实 iPhone / iOS 工具栏真机验证、完整 5/s/10/s 容量矩阵、生产高负载、跨统计截止时间的实际时钟验证、手动版本回滚。版本结束后可读为代码/单测证据；截止前生成的报告不会自动补齐剩余日期。并发仍为 generator 2 / renderer 1，队列预算未提高。没有群发公告。标准部署附带百度收录推送返回当日配额耗尽（HTTP 400，成功 0 条），不影响站点上线，未额外重试。

@@ -8,12 +8,18 @@ export async function measureAnnualPage(page, label) {
         return true;
       };
       const rect = r => ({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height});
-      const issues=[], text=[], scrollable=[], intentionalEllipsis=[];
+      const issues=[], text=[], scrollable=[], intentionalEllipsis=[], intentionalMarquee=[];
       const canScrollIntoView=el=>{const sc=el.closest('.poster-scene');return sc&&sc.scrollHeight>sc.clientHeight&&getComputedStyle(sc).overflowY==='auto'};
       const walker=document.createTreeWalker(slide,NodeFilter.SHOW_TEXT);
       for(let n; n=walker.nextNode();) {
         const el=n.parentElement;
         if(!n.textContent.trim()||!visible(el)||el.closest('svg,script,style,[class*="__sr"]'))continue;
+        // Moving community bubbles enter and leave their clipped viewport by design.
+        // Keep them in evidence; stationary report text and controls remain checked.
+        const bubble=el.closest('.annual-danmaku__bubble');
+        if(bubble&&getComputedStyle(bubble).transform!=='none'&&getComputedStyle(bubble.parentElement).overflow==='hidden'){
+          intentionalMarquee.push({text:n.textContent.trim().slice(0,100),...rect(bubble.getBoundingClientRect())});continue;
+        }
         const style=getComputedStyle(el);
         if(el.hasAttribute('title')&&Number(style.webkitLineClamp)>0&&el.getAttribute('title')===el.textContent.trim()){intentionalEllipsis.push({text:el.textContent.trim(),lines:Number(style.webkitLineClamp)});continue;}
         const range=document.createRange();range.selectNodeContents(n);
@@ -40,7 +46,7 @@ export async function measureAnnualPage(page, label) {
         const blocks=[...slide.querySelectorAll('.annual-weekday-forest-scene__header,.annual-weekday-forest-scene__row,.annual-weekday-forest-scene__summary')];
         for(let i=0;i<blocks.length;i++)for(let j=i+1;j<blocks.length;j++){const a=blocks[i].getBoundingClientRect(),b=blocks[j].getBoundingClientRect();if(Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>2&&Math.min(a.right,b.right)-Math.max(a.left,b.left)>2)issues.push({type:'block-overlap',a:blocks[i].className,b:blocks[j].className});}
       }
-      return {label,page:slide.dataset.pageKey,viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},text,buttons,scrollable,intentionalEllipsis,issues};
+      return {label,page:slide.dataset.pageKey,viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},text,buttons,scrollable,intentionalEllipsis,intentionalMarquee,issues};
     },label);
 }
 
