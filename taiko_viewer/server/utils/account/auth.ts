@@ -245,11 +245,11 @@ export const resetPassword = async (payload: { email: unknown; code: unknown; pa
 };
 
 export const getAccountUserFromEvent = async (event: H3Event) => {
-  await ensureAccountSchema();
   const token = readSessionTokenFromEvent(event);
   if (!token) {
     return null;
   }
+  await ensureAccountSchema();
   const db = getAccountDb();
   const [rows] = await db.execute<DbRow<AccountRow & SessionRow>[]>(
     `SELECT a.*, s.session_token, s.user_id, s.expires_at

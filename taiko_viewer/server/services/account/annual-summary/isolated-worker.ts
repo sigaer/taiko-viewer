@@ -1,3 +1,4 @@
+import { annualTestIsolation } from './test-isolation';
 import { spawn } from 'node:child_process';
 import { access, mkdir, readFile, readdir, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -11,7 +12,8 @@ export const spawnAnnualWorker = async (kind: Resource, id: string, config: Reco
   const unit = `taiko-annual-${kind}-${id}`;
   const renderer = kind === 'renderer';
   const deadline = await annualAdmission.deadline(kind, id);
-  const workerTmp = resolve('/var/tmp/taiko-annual-workers', id);
+  const isolation = annualTestIsolation();
+  const workerTmp = resolve(isolation?.tmp || '/var/tmp/taiko-annual-workers', id);
   await mkdir(workerTmp, { recursive: true, mode: 0o700 });
   const workerDeadline = Math.min(deadline, Date.now() + timeoutMs);
   await writeFile(path, JSON.stringify({ ...config, ...(config.env ? { env: { ...config.env as Record<string, string>, TMPDIR: workerTmp } } : {}), deadlineMs: workerDeadline }), { flag: 'wx', mode: 0o600 });
@@ -22,7 +24,7 @@ export const spawnAnnualWorker = async (kind: Resource, id: string, config: Reco
     '-p', `MemoryHigh=${renderer ? '768M' : '1G'}`, '-p', `MemoryMax=${renderer ? '1G' : '1536M'}`,
     '-p', 'MemorySwapMax=128M', '-p', 'TasksMax=256', '-p', 'CPUQuota=200%',
     '-p', `RuntimeMaxSec=${Math.max(1, Math.floor(remainingMs / 1000))}`, '-p', 'TimeoutStopSec=5',
-    '-p', 'KillMode=control-group', '-p', 'OOMPolicy=stop', '-p', 'UMask=0077', '--',
+    '-p', 'KillMode=control-group', '-p', 'OOMPolicy=stop', '-p', 'UMask=0077', ...(isolation?.properties || []), '--',
     renderer ? process.execPath : '/usr/bin/python3',
     resolve(process.cwd(), 'scripts', renderer ? 'annual_render_worker.mjs' : 'annual_python_worker.py'), path];
   const child = spawn('/usr/bin/systemd-run', args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -46,7 +48,7 @@ export const stopAnnualWorker = (kind: Resource, id: string) => {
 };
 
 export const cleanupAnnualWorkerTemps = async () => {
-  const root = '/var/tmp/taiko-annual-workers';
+  const root = annualTestIsolation()?.tmp || '/var/tmp/taiko-annual-workers';
   const activeIds = new Set<string>();
   for (const resource of ['generator', 'renderer'] as const) {
     const ledger = await readFile(resolve(annualAdmission.root, `${resource}.json`), 'utf8')
