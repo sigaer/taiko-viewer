@@ -429,7 +429,7 @@ for (const candidate of ["../../../plugins/utils/annual_summary/constants.py", "
 assert.ok(generatorConstantsSource, "annual generator constants are unavailable for the version contract");
 const generatorAlgorithmVersion = /ALGORITHM_VERSION = "([^"]+)"/.exec(generatorConstantsSource)?.[1];
 assert.equal(viewerAlgorithmVersion, generatorAlgorithmVersion, "annual producer version drifted between viewer and generator");
-assert.equal(viewerAlgorithmVersion, "annual-observation-v4.5.2", "unexpected annual producer version for this release");
+assert.equal(viewerAlgorithmVersion, "annual-observation-v4.5.3", "unexpected annual producer version for this release");
 const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
 const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
 const annualServiceSource = await read("server/services/account/annual-summary/index.ts");

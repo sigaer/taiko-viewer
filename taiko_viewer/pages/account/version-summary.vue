@@ -49,7 +49,6 @@ if (import.meta.client) {
 }
 
 const beta = useAnnualBeta();
-const betaSlide = ref("opening");
 const storyStarted = ref(false);
 const drawerOpen = ref(false);
 const building = ref(false);
@@ -288,11 +287,9 @@ onBeforeUnmount(() => { clearTimeout(retryTimer); immersiveStory.value = false; 
         :summary="summary"
         :started="storyStarted"
         beta-tracking
-        @slide-change="betaSlide = $event"
         @start="storyStarted = true"
         @open-drawer="drawerOpen = true"
       />
-      <AnnualBetaFeedback :summary-id="summary.summaryId" :slide-key="betaSlide" />
     </template>
   </div>
 </template>

@@ -37,7 +37,7 @@ export async function checkPublicMode(c,accounts){
    assert.ok(submissions<=1,'No automatic or immediate build retry');assert.equal(await page.getByRole('button',{name:'重试',exact:true}).isDisabled(),true);await page.screenshot({path:`${c.output}/public-paused.png`});checks.push({case:'paused-browser-no-loop',submissions,retryDisabled:true});
   }finally{await browser.close();}
   policy('public',false,true);const job=await build(owner);assert.equal(job.status,'completed');
-  const envelope=await json(owner,'/api/account/annual-summaries/annual_2026');const s=envelope.summary;assert.equal(s.profileCard.nickname,owner.nickname);assert.equal(s.overview.data.playCount,owner.playCount);assert.equal(s.provenance.algorithmVersion,'annual-observation-v4.5.2');assert.equal(s.version.endDate,'2026-09-30');
+  const envelope=await json(owner,'/api/account/annual-summaries/annual_2026');const s=envelope.summary;assert.equal(s.profileCard.nickname,owner.nickname);assert.equal(s.overview.data.playCount,owner.playCount);assert.equal(s.provenance.algorithmVersion,'annual-observation-v4.5.3');assert.equal(s.version.endDate,'2026-09-30');
   const route=`/api/account/annual-summaries/${s.summaryId}/share-card`;
   await req(owner,route,'POST',{locale:'zh',syncCommunity:false},503);
   policy('public');const card=await json(owner,route,'POST',{locale:'zh',syncCommunity:false});assert.equal(card.cached,false);

@@ -40,5 +40,7 @@ export const canReuseAnnualSummary = (
   currentAlgorithmVersion: string
 ) => Boolean(
   currentAlgorithmVersion
-  && summary?.provenance?.algorithmVersion === currentAlgorithmVersion
+  && (summary?.provenance?.algorithmVersion === currentAlgorithmVersion
+    || (currentAlgorithmVersion === 'annual-observation-v4.5.3'
+      && summary?.provenance?.algorithmVersion === 'annual-observation-v4.5.2'))
 );

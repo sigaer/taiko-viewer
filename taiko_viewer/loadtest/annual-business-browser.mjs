@@ -33,6 +33,7 @@ try{
    if(['weekday','favorite','speedProfile','final','poster'].includes(keys[i])){await page.screenshot({path:`${c.output}/business-${a.kind}-${locale}-${keys[i]}.png`});const measured=await measureAnnualPage(page,`${a.kind}-${locale}-${keys[i]}`);geometry.push(measured);await writeFile(`${c.output}/business-${a.kind}-${locale}-geometry.json`,JSON.stringify(geometry,null,2));assert.equal(measured.issues.length,0,JSON.stringify(measured.issues));}
  }
  assert.equal(keys.at(-1),'poster');assert.ok(keys.includes('final'));
+ assert.equal(await page.locator('.beta-feedback').count(),0,'Retired beta feedback buttons must not render');
  const marquee=await page.locator('.annual-danmaku__bubble').evaluateAll(els=>els.map(e=>({id:e.dataset.reactionId,x:e.getBoundingClientRect().x})));
  if(marquee.length){await page.waitForTimeout(400);const moved=await page.locator('.annual-danmaku__bubble').evaluateAll((els,old)=>els.some(e=>old.some(o=>o.id===e.dataset.reactionId&&e.getBoundingClientRect().x<o.x-2)),marquee);assert.ok(moved,'Community marquee must actually move');}
 

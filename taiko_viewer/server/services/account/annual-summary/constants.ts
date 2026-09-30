@@ -2,7 +2,7 @@ import type { AnnualVersion } from "./types";
 import { ANNUAL_REPORTING_WINDOW } from "~/utils/annualPeriod";
 
 export const ANNUAL_SCHEMA_VERSION = 4 as const;
-export const ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.5.2";
+export const ANNUAL_ALGORITHM_VERSION = "annual-observation-v4.5.3";
 export const ANNUAL_VERSION_KEY = "annual_2026" as const;
 export const ANNUAL_TIME_ZONE = ANNUAL_REPORTING_WINDOW.timezone;
 export const ANNUAL_SHARE_TTL_MS = 30 * 24 * 60 * 60 * 1000;

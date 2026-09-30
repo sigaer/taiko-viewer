@@ -1,3 +1,4 @@
+import { annualManualEditTime, annualCorrectionsAreCurrent } from './manual-corrections';
 import { assertAnnualTaskAllowed } from './policy';
 import { annualAdmission, MAX_CONCURRENT_ANNUAL_BUILDS } from './admission';
 import { trackBetaUser } from "~/server/services/annual-beta/events";
@@ -154,7 +155,11 @@ const safeReadSummary = async (row: AnnualSummaryRow | null) => {
   if (!row || Number(row.schema_version) !== ANNUAL_SCHEMA_VERSION) return null;
   try {
     const summary = await readAnnualSummary(row.summary_path);
-    if (summary.provenance?.algorithmVersion !== ANNUAL_ALGORITHM_VERSION) return null;
+    if (!canReuseAnnualSummary(summary, ANNUAL_ALGORITHM_VERSION)) return null;
+    const binding = await findAnnualBinding(row.binding_id, row.user_id);
+    if (!binding) return null;
+    const latestEdit = await annualManualEditTime(getRuntimePaths().userdataDir, binding.taiko_id);
+    if (!annualCorrectionsAreCurrent(summary.provenance?.algorithmVersion, summary.generatedAt, latestEdit)) return null;
     const version = summary.version as Record<string, unknown>;
     const canonical = getAnnualVersion();
     if (

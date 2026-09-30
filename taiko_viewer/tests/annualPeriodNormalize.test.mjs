@@ -11,7 +11,7 @@ const { normalizeAnnualSummary } = await import("../utils/annualSummary.ts");
 
 // Only summaries produced by the current algorithm may be audited; older cached
 // files can legitimately carry earlier presentation contracts.
-const CURRENT_ALGORITHM = "annual-observation-v4.5.2";
+const CURRENT_ALGORITHM = "annual-observation-v4.5.3";
 
 const listSummaryFiles = async () => {
   const found = [];
