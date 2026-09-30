@@ -9,8 +9,9 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const router = useRouter();
+const localePath = useLocalePath();
 
-const threadPath = computed(() => `/forum/thread/${props.thread.id}`);
+const threadPath = computed(() => localePath(`/forum/thread/${props.thread.id}`));
 
 const threadTypeLabelMap: Record<ForumThreadCard["threadType"], string> = {
   discussion: t("forum.types.discussion"),
@@ -71,7 +72,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
     <div class="forum-thread-card__main">
       <div class="forum-thread-card__badges">
         <NuxtLink
-          :to="`/forum/section/${thread.section.slug}`"
+          :to="localePath(`/forum/section/${thread.section.slug}`)"
           class="section-pill"
           :style="{ '--accent': thread.section.accentColor }"
         >
@@ -85,7 +86,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
         <span v-if="thread.isLocked" class="state-pill state-pill--muted">{{ t("forum.states.locked") }}</span>
       </div>
       <NuxtLink
-        :to="`/forum/thread/${thread.id}`"
+        :to="threadPath"
         class="forum-thread-card__title"
       >
         {{ thread.title }}
@@ -123,7 +124,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 
     <NuxtLink
       v-if="thread.coverImageUrl"
-      :to="`/forum/thread/${thread.id}`"
+      :to="threadPath"
       class="forum-thread-card__cover"
     >
       <ForumSafeImage :src="thread.coverImageUrl" :alt="thread.title" />
