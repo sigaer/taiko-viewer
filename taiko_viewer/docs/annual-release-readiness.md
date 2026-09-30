@@ -301,3 +301,10 @@ bash ../scripts/memory/run_qa.sh /www/server/nvm/versions/node/v24.13.0/bin/node
 改分发生在统计截止后时，仅修正已有期末谱面的明确改动字段；不导入截止后的游玩，游玩总数不会被截止后的人工上调扩大。新算法 v4.5.3；v4.5.2 且没有人工改分历史的报告继续复用，受影响账号下次进入按原队列生成，新人工改分再次使其缓存失效。没有清缓存或预生成全体用户报告。旧分享图片是不可变历史产物，不批量重写；新报告分享使用新 summary ID。历史邀请码/反馈记录和接口保留，仅移除页面左下角 AnnualBetaFeedback 两个按钮。
 
 Kassel 在原报告同一输入下复算：4,228 事件→4,182；移除 46 个被人工修正否定的事件，92 个事件的成就标记被修正。年度高分 桂月 1,018,930→潮音205号SSS线 977,200；全连解锁 64→63，全良 1→0；游玩 3,351→3,333。源成绩未写入修改，证据在 `/var/tmp/annual-correction-20261001/kassel-replay.json`。生产发布及实际生成/浏览/分享结果完成后另记，以上不是已部署声明。
+
+
+本轮补充发现并修复：人工修改历史文件继承了 `_meta.observed_at/synced_at`，此前会按上次同步时间排序。人工来源现优先自己的 `_meta.ts`，否则解析自身文件名；不改写历史文件。Python 候选已同步提交 Sakura_bot `f36ae12`（前置 `131eb0d`），生产文件在最终发布前尚未切换。年度包只由短生命周期 CLI 使用，无 NoneBot 调用，因此不重启无关 Bot 服务。
+
+候选应用 `0dfbd01` / 0.76.4，隔离 build `e1ae8a53-98e6-41fd-8206-5b310edf2a16`；Python 外部输入指纹记录于 `/var/tmp/annual-test-correction-20261001/evidence/input-manifest.json`。新增 Python 8/8、缓存 Node 3/3、策略/窗口 11/11、21 页契约通过。扩展 Python 测试 35 通过、4 失败；生产原代码复跑同样 35/4，失败为 3 项 first_seen_play 与 1 项 finaltitle mark progression，保留在 `/var/tmp/annual-correction-20261001/python-{regression,baseline}.log`，不声称全部测试通过。
+
+`public-smoke` 与 `correction-smoke` 均 exit 0：实际测试库、独立缓存/worker 的正常鉴权/拒绝、暂停/恢复、生成/分享，以及旧 v4.5.2 无改分缓存复用、单纯锁定不失效、真实改分 POST 后缓存失效/重建、再次改分再次更新。合成游玩数 44→33，旧高分排除；生成并完整解码 `results/corrected-share.png`（1080×1872）。第二次改分发生在固定统计截止之后，未引入新的窗口外游玩。测试只写合成账号，未修改 Kassel 成绩。

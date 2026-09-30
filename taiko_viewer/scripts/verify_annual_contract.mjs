@@ -433,7 +433,7 @@ assert.equal(viewerAlgorithmVersion, "annual-observation-v4.5.3", "unexpected an
 const annualRuntimeSource = await read("server/services/account/annual-summary/runtime.ts");
 const annualRatingsSource = await read("server/services/account/annual-summary/ratings.ts");
 const annualServiceSource = await read("server/services/account/annual-summary/index.ts");
-assert.equal(annualServiceSource.includes("summary.provenance?.algorithmVersion !== ANNUAL_ALGORITHM_VERSION"), true, "stale annual summaries are still served");
+assert.equal(annualServiceSource.includes("if (!canReuseAnnualSummary(summary, ANNUAL_ALGORITHM_VERSION)) return null;") && annualServiceSource.includes("if (!annualCorrectionsAreCurrent(summary.provenance?.algorithmVersion, summary.generatedAt, latestEdit)) return null;"), true, "stale annual summaries are still served");
 assert.equal(annualRatingsSource.includes("getAnnualRatingDistribution"), true, "annual rating enrichment does not use the cache reader");
 assert.equal(annualRuntimeSource.includes("export const getAnnualRatingDistribution = readCachedAnnualRatingDistribution"), true, "user rating lookup can rebuild the distribution");
 
