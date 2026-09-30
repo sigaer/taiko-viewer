@@ -65,7 +65,7 @@ try{
  if(c.checkPublicLanding){
   const ctx=await browser.newContext({viewport:{width:375,height:567},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36'});
   await ctx.route('**/*',r=>new URL(r.request().url()).origin===c.base?r.continue():r.abort());const page=await ctx.newPage();
-  await page.goto(c.base+'/annual',{waitUntil:'domcontentloaded'});await page.getByRole('heading',{name:'年度报告公开测试',exact:true}).waitFor();await page.locator('.beta-entry').getByRole('link',{name:'登录',exact:true}).waitFor();assert.equal(await page.locator('#beta-code').count(),0);
+  await page.goto(c.base+'/annual',{waitUntil:'domcontentloaded'});await page.getByRole('heading',{name:'虹2025版本总结',exact:true}).waitFor();await page.locator('.beta-entry').getByRole('link',{name:'登录',exact:true}).waitFor();assert.equal(await page.locator('#beta-code').count(),0);
   await page.screenshot({path:`${c.output}/public-anonymous-entry.png`});await writeFile(`${c.output}/public-landing.json`,JSON.stringify({publicTitle:true,loginRequired:true,inviteInput:false}));await ctx.close();
  }
 } finally{await browser.close();}
