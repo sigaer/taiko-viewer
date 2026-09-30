@@ -308,3 +308,22 @@ Kassel 在原报告同一输入下复算：4,228 事件→4,182；移除 46 个�
 候选应用 `0dfbd01` / 0.76.4，隔离 build `e1ae8a53-98e6-41fd-8206-5b310edf2a16`；Python 外部输入指纹记录于 `/var/tmp/annual-test-correction-20261001/evidence/input-manifest.json`。新增 Python 8/8、缓存 Node 3/3、策略/窗口 11/11、21 页契约通过。扩展 Python 测试 35 通过、4 失败；生产原代码复跑同样 35/4，失败为 3 项 first_seen_play 与 1 项 finaltitle mark progression，保留在 `/var/tmp/annual-correction-20261001/python-{regression,baseline}.log`，不声称全部测试通过。
 
 `public-smoke` 与 `correction-smoke` 均 exit 0：实际测试库、独立缓存/worker 的正常鉴权/拒绝、暂停/恢复、生成/分享，以及旧 v4.5.2 无改分缓存复用、单纯锁定不失效、真实改分 POST 后缓存失效/重建、再次改分再次更新。合成游玩数 44→33，旧高分排除；生成并完整解码 `results/corrected-share.png`（1080×1872）。第二次改分发生在固定统计截止之后，未引入新的窗口外游玩。测试只写合成账号，未修改 Kassel 成绩。
+
+### 0.76.4 实际上线与现网复测（2026-10-01 Asia/Shanghai）
+
+结论 **LIMITED：修复已上线，公开模式持续生效；不代表完整容量验收通过**。
+
+- 实际部署 commit `c96dedacbfc26a0f01c44836d00d9378e3beffa5`，build ID `b78c8b07-aa4d-4911-8195-6014f97fe73d`，应用版本 0.76.4。标准部署脚本 exit 0，已推送；Python 源码对应 Sakura_bot `f36ae12`，5 个运行文件与隔离候选逐一校验一致。后续证据文档提交不改变实际部署 commit。
+- 部署期间保持 public，先暂停新生成与新渲染、确认在途任务清空，再标准部署并切换已验证 Python 输入，最后恢复两个开关。最终 `public / pauseGeneration=false / pauseRendering=false`。generator 2 / renderer 1 及队列、资源预算不变；没有改用户成绩、清缓存或批量生成。
+- Kassel 真实生成→浏览→服务端分享→图片下载通过。现网报告使用 v4.5.3，已撤销的桂月 1,018,930 不再成为年度高分；当前有效最高为 **永远同在 985,200**，来源时间 2026-09-29 19:48:25+08:00。游玩 3,379；移除 47 个事件、修正 92 个成就标记。该输入包含后续真实同步，与上方固定旧输入回放不同，不能直接比较两组总数。分享 POST 约 2.463s，真实 PNG 1080×1872 完整解码。
+- 未获邀正常账号继续读取原 v4.5.2 报告，证实无人工改分者无需全员重建；匿名接口仍 401，他人图片仍拒绝。单纯锁定仍不触发重建；受人工改分影响的旧报告在下次进入时按原队列重新生成。已有下载及旧分享图片不追溯重写。
+- 现网浏览器 exit 0：Kassel 全部 21 页、未获邀账号全部 19 页，均完成快速翻页、连续重播两次、保存下载及分享缓存复用，页面异常 0。两个测试反馈按钮均不存在。匿名公开入口显示公开标题及登录，不显示邀请码。隔离候选另覆盖普通中文 18 页和稀疏日文 10 页，页面异常及几何断言问题均 0。
+- 生成等待期间宿主机内存 PSI full avg10 一度 15.28、avg60 11.24，既有准入保护使任务等待；没有绕过保护或重复提交。压力自然恢复后原任务完成。最终观察 full avg10=0、avg60=0.09，Viewer active / NRestarts=0 / MemoryCurrent=413,044,736 字节，接收器 active。有限观察不能证明容量充足或生产自动降级；高峰仍可能有等待。
+- 原有曲绘 `/cover/thumb/400/43.webp`、`72.webp` 缺失仍存在（第二账号 7 次 404，组件回退，分享完成）；未修复这两个资源。真实 iPhone、完整 5/s/10/s 容量、生产版本回滚未执行。扩展 Python 的 4 项既有失败仍保留，不写为全量测试通过。
+- 隔离服务已停止，33179/33180 无监听。用户原有 title_song_relations 未提交修改已恢复并核对 SHA256，其他未跟踪文件保留。百度推送当日配额 400 为标准脚本非阻断结果，没有追加重试。
+
+私密证据保存在 `/var/tmp/annual-correction-20261001`（0700）：`deploy.log`、`deploy-result.json`、`python-release.json`、`live-smoke.json`、`kassel-corrected-live.png`、`browser-live/high-business-browser.json`、`browser-live/public-landing.json`、两账号截图与实际 PNG。私人报告及会话未提交 Git。
+
+操作仍使用 viewer 目录的 `python3 scripts/annual-policy.py`：`--pause-generation yes` 暂停新生成，`--pause-rendering yes` 暂停新分享渲染，`--pause-generation no --pause-rendering no` 恢复，`--mode invite` 回退入口。暂停保留已有报告及缓存图片读取，已接收任务继续收尾。
+
+本版代码回滚需同时协调 Viewer 与外部 Python：先暂停两类新任务并等在途完成；在干净审查工作区创建 Viewer 功能提交 `0dfbd01` 的 revert（`c96deda` 主要为验收脚本，不要求回退证据），递增 patch 并通过标准发布脚本部署；Python 回退 `f36ae12`、`131eb0d` 对应改动并同步 Sakura_bot 与运行路径，校验后再恢复准入。不要直接替换 `.output`，不要覆盖用户未提交文件。本轮未执行此回滚。
