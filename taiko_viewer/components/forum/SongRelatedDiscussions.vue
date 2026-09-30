@@ -16,7 +16,7 @@ const composeQuery = computed(() => ({ songId: String(props.songId), ...(props.d
 
 <template>
   <section class="related-discussions" :aria-labelledby="`related-discussions-${songId}`">
-    <div class="related-discussions__head"><h3 :id="`related-discussions-${songId}`">{{ t("community.relatedDiscussions") }}</h3><NuxtLink :to="localePath({ path: '/forum/section/score-guides', query: { songId: String(songId), ...(difficultyType ? { difficultyType: String(difficultyType) } : {}) } })">{{ t("community.viewAllDiscussions") }}</NuxtLink></div>
+    <div class="related-discussions__head"><h3 :id="`related-discussions-${songId}`">{{ t("community.relatedDiscussions") }}</h3><NuxtLink :to="localePath({ path: '/forum/discussions', query: { songId: String(songId), ...(difficultyType ? { difficultyType: String(difficultyType) } : {}) } })">{{ t("community.viewAllDiscussions") }}</NuxtLink></div>
     <div v-if="pending" class="related-discussions__loading">{{ t("layout.loading") }}</div>
     <ul v-else-if="items.length" class="related-discussions__list">
       <li v-for="thread in items" :key="thread.id"><NuxtLink :to="localePath(`/forum/thread/${thread.id}`)"><span>{{ thread.title }}</span><small>{{ thread.replyCount }} {{ t("forum.stats.reply") }}<template v-if="thread.song?.difficultyType"> · {{ thread.song.difficultyLabel }}</template></small></NuxtLink></li>

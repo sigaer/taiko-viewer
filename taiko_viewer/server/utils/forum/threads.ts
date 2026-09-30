@@ -64,6 +64,7 @@ export const listForumThreads = async (
     keyword?: unknown;
     threadType?: unknown;
     songId?: unknown;
+    difficultyType?: unknown;
     scope?: unknown;
     includeHidden?: unknown;
   }
