@@ -327,3 +327,9 @@ Kassel 在原报告同一输入下复算：4,228 事件→4,182；移除 46 个�
 操作仍使用 viewer 目录的 `python3 scripts/annual-policy.py`：`--pause-generation yes` 暂停新生成，`--pause-rendering yes` 暂停新分享渲染，`--pause-generation no --pause-rendering no` 恢复，`--mode invite` 回退入口。暂停保留已有报告及缓存图片读取，已接收任务继续收尾。
 
 本版代码回滚需同时协调 Viewer 与外部 Python：先暂停两类新任务并等在途完成；在干净审查工作区创建 Viewer 功能提交 `0dfbd01` 的 revert（`c96deda` 主要为验收脚本，不要求回退证据），递增 patch 并通过标准发布脚本部署；Python 回退 `f36ae12`、`131eb0d` 对应改动并同步 Sakura_bot 与运行路径，校验后再恢复准入。不要直接替换 `.output`，不要覆盖用户未提交文件。本轮未执行此回滚。
+
+### 2026-10-01 后续公开状态复核（0.76.6）
+
+后续歌曲讨论修复已标准部署：commit `0c5abf9`，build `f3cab57d-548c-418c-aae1-370e3f660c21`。版本总结策略未改，现网 status 为 public，两类新任务暂停均 false；旧内测和未获邀账号实际报告 GET 均 200、有报告。所有符合登录、账号状态与绑定要求的用户无需邀请码；数据不足、资源归属等既有检查保留。这次只读复核不替代此前的容量与真机限制。
+
+歌曲“查看所有讨论”由固定 score-guides 板块改为 `/forum/discussions`，复用同一列表组件，保留 songId/difficultyType/排序/分页。原板块入口仍按板块过滤；发帖保留歌曲与难度。0.76.5 首轮中文通过，日文发现既有帖子卡片丢失语言前缀，0.76.6 已一并修复。最终中日文实际点击幽玄之乱入口，预览及完整列表都包含 achievements 帖子；排序、返回、刷新、发帖目标参数、原板块入口通过，页面异常均 0；没有写入任何帖子。样本仅一页，未现场验证多页数据翻页。论坛文案单测 6/6。证据 `/var/tmp/song-discussions-20261001`：最终 `browser-final/result.json`、中日文截图、`annual-access.json`、部署日志及首次失败日志。标准 npm install 的工作区 lock 重排另存证据后恢复已提交 lock；用户原有 title_song_relations 修改完整恢复、SHA256 一致。此证据提交不改变已部署代码。
