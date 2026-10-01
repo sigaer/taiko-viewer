@@ -9,6 +9,8 @@ import { listAdminActionLogs } from "./audit";
 import { listAdminBackups } from "./backup";
 import { getAdminManagedPaths, getAdminRuntimeConfig, sha1 } from "./shared";
 
+import { dashboardDayKey as formatDayKey, dashboardBucketStart as getBucketStart, dashboardRollupTime, parseNginxLogTime } from "./dashboard-time";
+
 type RollupRow = {
   id: number;
   source_key: string;
@@ -51,20 +53,6 @@ const TAIKO_COMMAND_PLATFORM_SOURCE_QQ = "taiko_commands_v2:platform:qq_official
 const TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT = "taiko_commands_v2:platform:onebot_v11";
 const TAIKO_COMMAND_COMMAND_SOURCE_PREFIX = "taiko_commands_v2:command:";
 const TAIKO_COMMAND_META_STATE_KEY = "taiko_commands_v2_meta";
-const MONTH_INDEX: Record<string, number> = {
-  Jan: 0,
-  Feb: 1,
-  Mar: 2,
-  Apr: 3,
-  May: 4,
-  Jun: 5,
-  Jul: 6,
-  Aug: 7,
-  Sep: 8,
-  Oct: 9,
-  Nov: 10,
-  Dec: 11
-};
 const STATIC_PATH_PATTERN =
   /^\/(?:_nuxt\/|qqbot-cache\/|favicon|icon\.png|apple-touch-icon|manifest\.webmanifest|robots\.txt|sitemap\.xml)/i;
 const STATIC_EXT_PATTERN =
@@ -76,47 +64,8 @@ let dashboardCache: { expiresAt: number; data: Awaited<ReturnType<typeof buildDa
   null;
 let uploadStatsCache: UploadStatsCache | null = null;
 
-const toDate = (value: unknown) => {
-  const date = value instanceof Date ? value : new Date(String(value || ""));
-  return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const toDayKey = (value: unknown) => {
-  const date = toDate(value);
-  return date ? formatDayKey(date) : String(value || "").slice(0, 10);
-};
-
-const toDateTimeText = (value: unknown) => {
-  const date = toDate(value);
-  return date ? date.toISOString().slice(0, 19).replace("T", " ") : String(value || "");
-};
-
-const getBucketStart = (date: Date, granularity: "hour" | "day") => {
-  const bucket = new Date(date);
-  bucket.setMinutes(0, 0, 0);
-  if (granularity === "day") {
-    bucket.setHours(0, 0, 0, 0);
-  }
-  return bucket;
-};
-
-const formatBucketKey = (date: Date, granularity: "hour" | "day") => {
-  const bucket = getBucketStart(date, granularity);
-  return `${granularity}:${bucket.toISOString()}`;
-};
-
-const formatDayKey = (date: Date) => date.toISOString().slice(0, 10);
-
-const parseNginxLogTime = (raw: string) => {
-  const match = raw.match(/^(\d{2})\/([A-Za-z]{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2}) [+-]\d{4}$/);
-  if (!match) return null;
-  const [, day, month, year, hour, minute, second] = match;
-  const monthIndex = MONTH_INDEX[month];
-  if (monthIndex === undefined) return null;
-  const date = new Date(Number(year), monthIndex, Number(day), Number(hour), Number(minute), Number(second));
-  if (Number.isNaN(date.getTime())) return null;
-  return date;
-};
+const formatBucketKey = (date: Date, granularity: "hour" | "day") =>
+  `${granularity}:${getBucketStart(date, granularity).toISOString()}`;
 
 const parseViewerAccessLine = (line: string) => {
   const match = line.match(
@@ -368,7 +317,8 @@ const getRollupSeries = async (sourceKey: string, granularity: "hour" | "day", l
   const db = getAccountDb();
   const safeLimit = Math.min(720, Math.max(1, Math.floor(Number(limit) || 1)));
   const [rows] = await db.execute<DbRow<RollupRow>[]>(
-    `SELECT *
+    `SELECT DATE_FORMAT(bucket_start, '%Y-%m-%d %H:%i:%s') AS bucket_start,
+       pv_count, uv_count, home_pv_count, metric_count
      FROM web_admin_access_rollups
      WHERE source_key = ? AND granularity = ?
      ORDER BY bucket_start DESC
@@ -470,7 +420,7 @@ const buildDashboardPayload = async () => {
        WHERE b.user_id IS NULL`
     ),
     db.execute<DbRow<{ day_key: string; total: number }>[]>(
-      `SELECT DATE(created_at) AS day_key, COUNT(*) AS total
+      `SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day_key, COUNT(*) AS total
        FROM web_user_accounts
        WHERE created_at >= NOW() - INTERVAL 30 DAY
        GROUP BY day_key
@@ -479,15 +429,15 @@ const buildDashboardPayload = async () => {
     db.execute<DbRow<{ day_key: string; total: number }>[]>(
       `SELECT day_key, SUM(total) AS total
        FROM (
-         SELECT DATE(created_at) AS day_key, COUNT(*) AS total
+         SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day_key, COUNT(*) AS total
          FROM web_taiko_bindings
          WHERE created_at >= NOW() - INTERVAL 30 DAY
-         GROUP BY DATE(created_at)
+         GROUP BY day_key
          UNION ALL
-         SELECT DATE(created_at) AS day_key, COUNT(*) AS total
+         SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day_key, COUNT(*) AS total
          FROM bind
          WHERE created_at >= NOW() - INTERVAL 30 DAY
-         GROUP BY DATE(created_at)
+         GROUP BY day_key
        ) AS binding_growth
        GROUP BY day_key
        ORDER BY day_key ASC`
@@ -524,36 +474,34 @@ const buildDashboardPayload = async () => {
 
   const dailyKeyList = Array.from(
     new Set([
-      ...newUserRows[0].map((row) => toDayKey(row.day_key)),
-      ...newBindingRows[0].map((row) => toDayKey(row.day_key)),
+      ...newUserRows[0].map((row) => row.day_key),
+      ...newBindingRows[0].map((row) => row.day_key),
       ...uploadStats.dailyUploads.map((row) => row.day),
-      ...accessDaily.map((row) => toDayKey(row.bucket_start))
+      ...accessDaily.map((row) => dashboardRollupTime(row.bucket_start, "viewer").day)
     ])
   ).sort((a, b) => a.localeCompare(b));
 
-  const newUsersMap = new Map(newUserRows[0].map((row) => [toDayKey(row.day_key), Number(row.total || 0)]));
-  const newBindingsMap = new Map(newBindingRows[0].map((row) => [toDayKey(row.day_key), Number(row.total || 0)]));
+  const newUsersMap = new Map(newUserRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
+  const newBindingsMap = new Map(newBindingRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
   const uploadMap = new Map(uploadStats.dailyUploads.map((row) => [row.day, row.count]));
-  const accessDailyMap = new Map(accessDaily.map((row) => [toDayKey(row.bucket_start), row]));
+  const accessDailyMap = new Map(accessDaily.map((row) => [dashboardRollupTime(row.bucket_start, "viewer").day, row]));
 
   const accessHourlySeries = accessHourly.map((row) => ({
-    bucket: toDateTimeText(row.bucket_start),
-    label: toDateTimeText(row.bucket_start).slice(5, 16),
+    ...dashboardRollupTime(row.bucket_start, "viewer"),
     pv: Number(row.pv_count || 0),
     uv: Number(row.uv_count || 0),
     homePv: Number(row.home_pv_count || 0)
   }));
   const botHourlySeries = botHourly.map((row) => ({
-    bucket: toDateTimeText(row.bucket_start),
-    label: toDateTimeText(row.bucket_start).slice(5, 16),
+    ...dashboardRollupTime(row.bucket_start, "bot"),
     count: Number(row.metric_count || 0)
   }));
   const botHourlyQqSeries = botHourlyQq.map((row) => ({
-    bucket: toDateTimeText(row.bucket_start),
+    bucket: dashboardRollupTime(row.bucket_start, "bot").bucket,
     count: Number(row.metric_count || 0)
   }));
   const botHourlyOnebotSeries = botHourlyOnebot.map((row) => ({
-    bucket: toDateTimeText(row.bucket_start),
+    bucket: dashboardRollupTime(row.bucket_start, "bot").bucket,
     count: Number(row.metric_count || 0)
   }));
   const dailySeries = dailyKeyList.map((day) => ({
