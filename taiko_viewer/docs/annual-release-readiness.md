@@ -347,3 +347,20 @@ Kassel 在原报告同一输入下复算：4,228 事件→4,182；移除 46 个�
 浏览器 exit 0：正常中文 18 页、新用户中文及日文各 10 页，低高度 375×567、关键几何检查、快速翻页、连续重播、下载及缓存复用通过，页面异常 0。合成 MyDon 没有真实形象素材，404/500 及回退保留，不将其计为真实资源全通过。未做真机及全容量矩阵。证据 `/var/tmp/annual-test-refresh-20261001`、`/var/tmp/annual-refresh-20261001`；测试实例及 33179/33180 已停止。
 
 部署只走标准发布脚本；最终上线版本、开关与现网结果另记。回退开关（viewer 目录）：`python3 scripts/annual-policy.py --refresh-imports no --archive-fallback no`。暂停/恢复新任务仍使用原 `--pause-generation`、`--pause-rendering` 参数。Python 是独立短生命周期 worker 输入，不涉及运行中 NoneBot 进程，不重启无关 Bot。
+
+### 0.77.0 实际上线与现网复测（2026-10-01 13:43–13:47 Asia/Shanghai）
+
+结论 **LIMITED：两项功能已开启，实际生成、浏览、分享通过；不是完整容量验收**。
+
+- 实际部署 commit `fd1d68c47fe4e8b41b229157841e32f4e43b4910`，build **`54994094-fc9f-4794-96ca-ece9058947e7`**。标准 `run_build.sh → deploy_forum_web.sh` exit 0，已推送；对应 Python 为 Sakura_bot `a183d0f`，3 个运行文件与隔离测试输入逐一核对后原子替换。服务 stop/start 均记录在 13:43:37；这不是完整请求无中断证明。无关 Bot 不重启。
+- 切换前暂停新生成与新渲染、确认队列和 worker 清空；构建期间原站运行。部署后先以两项功能关闭状态读取原报告 200，再开启。最终策略 `mode=public, pauseGeneration=false, pauseRendering=false, refreshImports=true, archiveFallback=true`。并发、资源保护及限流未调整，没有清缓存、修改成绩或批量生成。
+- 真实已导入账号：开关关闭时仍读取原报告；开启后 `refreshAvailable=true`，原队列成功生成新 ID，224→1817 次；新报告不再提示刷新，旧 ID 仍 200。该账号当前输入按既有算法落在 `current_archive`（无新用户降级标记），因此不应将差值解释成新发生的年度游玩。没有为了测试重新调用菌菌第三方导入。
+- 真实此前数据不足账号：现网生成成功，单快照 1493 次，实际同步日期 2026-10-01，冻结版本窗口仍为 2025-10-09 至 2026-09-30（Asia/Shanghai，右开截止 2026-10-01）。沿用正常标题、入口和布局，不标“当前成绩档案”，缺乏依据的历史页面不展示。
+- 两账号真实服务端分享 POST 分别约 2.422s / 2.403s，PNG 1080×1872 完整解码。现网浏览器两账号各 9 页全部浏览、低高度几何检查、快速翻页、连续重播两次、保存下载和分享缓存复用通过；页面异常 0，资源失败 0。匿名入口仍要求登录，匿名报告 API 401。隔离样本页数 18/10 与真实样本 9 不同，取决于有依据的内容。
+- 收尾队列 queued/running=0，Viewer/接收器 active、NRestarts=0；宿主机 memory PSI full avg10/60/300 均 0。Viewer MemoryCurrent 约 1.23 GB，接收器约 139 MB；磁盘使用 90%、可用 31 GiB。有限观察不能证明峰值容量。
+- 实际日志另见新绑定但无 userdata 的 `/api/account/my-don` ENOENT 500，本轮两个测试账号未出现，未将全站写为无错误，也未扩大修复范围。既有 SMTP、部分缺失曲绘问题不因这次测试而宣称解决。真机 iPhone、完整负载、生产版本回滚未执行。
+- 首次私有准备脚本误用 `/usr/bin/node` 的旧版本，顶层 await 语法失败，未连接数据库；改用项目 Node v24 后成功。隔离测试记录中的历史失败继续保留。标准部署百度推送配额 HTTP 400、成功 0 条是非阻断结果，没有额外重试。
+
+私密证据 `/var/tmp/annual-refresh-20261001`（0700）：`deploy-result.json`、`deploy.log`、`python-release.json`、`live-flags-off.json`、`before/after-{imported,fresh}.json`、`live-smoke.json`、`live-{imported,fresh}.png`、`browser-live/high-business-browser.json`、关键截图与实际下载。会话保存为仓库外 0600；不提交私人报告。原有 title_song_relations 修改已恢复且 SHA256 一致，其他工作区修改保留。隔离实例仍已停止。
+
+操作（viewer 目录）：`python3 scripts/annual-policy.py --refresh-imports no --archive-fallback no` 关闭两项新行为，已生成报告仍可读；`--pause-generation yes --pause-rendering yes` 暂停新任务，改为 `no` 恢复。必要代码回滚需先暂停并排空任务，审查后回退 Viewer 功能提交 `4801279`，递增 patch 后用标准部署脚本；同时回退 Sakura_bot `a183d0f` 的 Python 改动并同步运行路径，核对后恢复准入。不得手动替换 `.output` 或覆盖用户修改。本轮没有执行生产代码回滚。
