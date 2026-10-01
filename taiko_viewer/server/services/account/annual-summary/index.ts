@@ -1,3 +1,5 @@
+import { readAnnualPolicy } from './policy';
+import { annualImportState, annualImportNeedsRefresh } from './import-refresh';
 import { annualManualEditTime, annualCorrectionsAreCurrent } from './manual-corrections';
 import { assertAnnualTaskAllowed } from './policy';
 import { annualAdmission, MAX_CONCURRENT_ANNUAL_BUILDS } from './admission';
@@ -254,11 +256,14 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     versionKey: version.key,
     type: "build"
   });
+  const policy = await readAnnualPolicy();
+  const importState = await annualImportState(getRuntimePaths().userdataDir, binding.taiko_id);
+  const refreshAvailable = Boolean(payload && policy.refreshImports && cachedSummary && annualImportNeedsRefresh(cachedSummary, importState));
   let terminalJob = null;
-  if (!payload && !activeJob) {
+  if ((!payload || refreshAvailable) && !activeJob) {
     const failed = await findLatestFailedAnnualBuild(userId, binding.id, version.key);
     if (failed) {
-      const revision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION);
+      const revision = await annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION + (policy.archiveFallback ? ":archive-v1" : ""));
       if (canReuseAnnualFailure(failed, revision)) terminalJob = failed;
     }
   }
@@ -267,6 +272,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
     selectedVersion: version,
     currentBinding: await enrichBindingWithCurrentTitle(sanitizeBinding(binding)),
     state: payload ? "ready" : "missing",
+    refreshAvailable,
     inputFingerprint: payload ? latestRow?.input_fingerprint || "" : "",
     summary: payload?.summary || null,
     share: payload?.share || null,
@@ -319,7 +325,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow, onRunning: () => Promise
         detail?.eventCount ? `${detail.eventCount} 条变化` : ""
       ].filter(Boolean);
       await updateAnnualJobProgress(job.id, stage, percent, parts.join(" · ") || null);
-    }, { key: admission.admissionKey, ticket: admission.admissionTicket, onRunning });
+    }, { key: admission.admissionKey, ticket: admission.admissionTicket, onRunning }, Boolean(admission.allowCurrentArchive));
     await updateAnnualJobProgress(job.id, "rating", 84, "读取全站排名缓存");
     const fingerprint = String(envelope.summary.provenance?.inputFingerprint || "");
     const summaryId = String(envelope.summary.summaryId);
@@ -355,6 +361,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow, onRunning: () => Promise
       profileCard: { ...(envelope.summary.profileCard || {}) }
     };
     const summary = await enrichAnnualRatingRank(rawSummary);
+    summary.provenance.warnings = [...(summary.provenance.warnings || []).filter(w => !w.startsWith("kinoko_revision:")), `kinoko_revision:${admission.kinokoRevision || ""}`];
     await updateAnnualJobProgress(job.id, "assets", 90, "保存年度故事与小咚形象");
 
     let row: AnnualSummaryRow | null = null;
@@ -388,7 +395,7 @@ const buildAnnualSummaryJob = async (job: AnnualJobRow, onRunning: () => Promise
       if (!row) await removeAnnualPath(paths.dir).catch(() => undefined);
       throw error;
     }
-    const pruned = await pruneSupersededAnnualSummaries(job.user_id, job.binding_id, job.version_key)
+    const pruned = admission.refreshExisting ? [] : await pruneSupersededAnnualSummaries(job.user_id, job.binding_id, job.version_key)
       .catch((error) => { console.error('[annual-summary] superseded summary cleanup failed', error); return []; });
     for (const stale of pruned) {
       await removeAnnualPath(dirname(stale.summary_path)).catch(() => undefined);
@@ -659,10 +666,12 @@ export const queueAccountAnnualSummaryBuild = async (
   const binding = options.bindingId ? await findAnnualBinding(options.bindingId, userId) : await requireCurrentAnnualBinding(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "目标绑定不存在" });
   return withAnnualFileLock(`queue:build:${userId}:${binding.id}:${version.key}`, async () => {
+    const policy = await readAnnualPolicy();
+    const importState = await annualImportState(getRuntimePaths().userdataDir, binding.taiko_id);
     const existing = await findLatestAnnualSummary(userId, binding.id, version.key);
     if (existing) {
       const cached = await safeReadSummary(existing);
-      if (canReuseAnnualSummary(cached, ANNUAL_ALGORITHM_VERSION)) {
+      if (canReuseAnnualSummary(cached, ANNUAL_ALGORITHM_VERSION) && !(policy.refreshImports && cached && annualImportNeedsRefresh(cached, importState))) {
         const completed = await insertAnnualJob({
           id: randomUUID(),
           userId,
@@ -691,7 +700,7 @@ export const queueAccountAnnualSummaryBuild = async (
         { retryAfter: 120 });
     }
     const [inputRevision, inputFingerprint, cost] = await Promise.all([
-      annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION),
+      annualBuildInputRevision(getRuntimePaths().userdataDir, binding.taiko_id, ANNUAL_PRODUCER_REVISION + (policy.archiveFallback ? ":archive-v1" : "")),
       getAnnualInputFingerprint(binding.taiko_id),
       estimateAnnualBuildCost(getRuntimePaths().userdataDir, binding.taiko_id)
     ]);
@@ -711,6 +720,9 @@ export const queueAccountAnnualSummaryBuild = async (
         estimatedServiceSeconds: cost.estimatedServiceSeconds,
         parameters: {
           inputRevision,
+          allowCurrentArchive: policy.archiveFallback,
+          kinokoRevision: importState.revision,
+          refreshExisting: Boolean(existing),
           sourceRevision: inputRevision,
           inputFingerprint,
           estimatedServiceSeconds: cost.estimatedServiceSeconds,

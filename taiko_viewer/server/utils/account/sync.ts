@@ -204,7 +204,7 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
       : { profile: { userid: taikoId }, songs: [] };
     const result = mergeKinokoScores(userdata, fetched.songs);
     rebuildUserdataAchievement(userdata);
-    await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
+    if (result.added || result.updated) await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
     return result;
   });
 

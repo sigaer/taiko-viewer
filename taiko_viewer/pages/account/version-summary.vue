@@ -25,6 +25,7 @@ type AnnualEnvelope = Omit<VersionSummaryPayload, "summary"> & {
   summary: AnnualSummaryV4 | null;
   state: "ready" | "missing";
   buildJob: AnnualJob | null;
+  refreshAvailable?: boolean;
 };
 
 const { t, locale } = useI18n();
@@ -62,6 +63,7 @@ const openingCriticalAssetsReadyId = ref("");
 const immersiveStory = useState<boolean>("story-layout-immersive", () => false);
 let pollGeneration = 0;
 let pollingJobId = "";
+let refreshAttemptedFor = "";
 let stopArtworkPreload: WatchStopHandle | null = null;
 
 const fetchAnnual = async () => {
@@ -207,11 +209,14 @@ const handleBindingChange = async (bindingId: number | null) => {
 watch(storyStarted, (value) => { immersiveStory.value = value; }, { immediate: true });
 watch(currentBinding, (value) => { selectedBindingId.value = value?.id ?? null; }, { immediate: true });
 watch(envelope, (value) => {
-  if (value?.buildJob && !summary.value && !building.value) {
+  if (value?.buildJob && !building.value) {
     jobStatus.value = value.buildJob;
     if (value.buildJob.status === "queued" || value.buildJob.status === "running") {
       void resumeJob(value.buildJob);
     }
+  } else if (summary.value && value?.refreshAvailable && !building.value && refreshAttemptedFor !== summary.value.summaryId) {
+    refreshAttemptedFor = summary.value.summaryId;
+    void buildSummary();
   } else if (value?.state === "missing" && !summary.value && !pageError.value && !submissionError.value && !building.value) {
     void buildSummary();
   }
@@ -247,7 +252,7 @@ onBeforeUnmount(() => { clearTimeout(retryTimer); immersiveStory.value = false; 
       <p>{{ t("annualSummary.state.loading") }}</p>
     </div>
 
-    <div v-else-if="jobStatus?.error?.code === 'INSUFFICIENT_DATA'" class="annual-state"><h1>{{t('account.versionSummary')}}</h1><p>{{locale==='ja'?'この年度の記録が不足しているため、まだレポートを作成できません。':'当前年度记录不足，暂时无法生成年度报告。'}}</p><NuxtLink :to="localePath('/account/sync')">{{t('annualSummary.state.openSync')}}</NuxtLink><el-button :loading="building" @click="buildSummary(true)">{{locale==='ja'?'更新後に再試行':'更新数据后重试'}}</el-button></div>
+    <div v-else-if="!summary && jobStatus?.error?.code === 'INSUFFICIENT_DATA'" class="annual-state"><h1>{{t('account.versionSummary')}}</h1><p>{{locale==='ja'?'この年度の記録が不足しているため、まだレポートを作成できません。':'当前年度记录不足，暂时无法生成年度报告。'}}</p><NuxtLink :to="localePath('/account/sync')">{{t('annualSummary.state.openSync')}}</NuxtLink><el-button :loading="building" @click="buildSummary(true)">{{locale==='ja'?'更新後に再試行':'更新数据后重试'}}</el-button></div>
     <AnnualBuildPrelude
       v-else-if="!summary && (building || jobStatus)"
       :status="jobStatus?.status || 'queued'"

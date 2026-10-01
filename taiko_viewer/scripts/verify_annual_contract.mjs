@@ -232,7 +232,7 @@ assert.equal(annualSummarySource.includes("firstObservedSourceDay"), true, "annu
 assert.equal(annualSummarySource.includes("firstObservedDate"), true, "annual day counting does not expose its bounded observation anchor");
 assert.equal(annualSummarySource.includes("earliestPlayDay"), false, "annual day counting still uses a pre-window account observation");
 assert.equal(annualSummarySource.includes("periodTotalDays"), true, "annual day counting does not resolve a period total");
-assert.equal(annualSummarySource.includes("totalDays: periodTotalDays"), true, "period total days do not use the resolved reporting span");
+assert.equal(annualSummarySource.includes("totalDays: snapshotAsOf ? 1 : periodTotalDays"), true, "period total days do not use the resolved reporting span");
 assert.equal(periodOverviewSceneSource.includes("props.summary.period.firstObservedDate"), true, "Period scene does not display the first in-window observation");
 assert.equal(periodOverviewSceneSource.includes('first: "这个版本里首次留下记录"'), true, "Period scene is missing the approved first-observation copy");
 assert.equal(periodOverviewSceneSource.includes("这个版本的第一天"), false, "Period scene still claims every user starts on the version boundary");

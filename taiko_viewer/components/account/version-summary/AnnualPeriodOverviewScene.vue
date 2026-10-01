@@ -45,7 +45,7 @@ const stateClass = computed(() => safeTime.value <= 0
     ? "is-overview-state"
     : "is-transition-state");
 const anchorDate = computed(() => props.summary.period.firstObservedDate || props.summary.version.startDate);
-const latestDate = computed(() => props.summary.period.lastRecordAt || props.summary.version.effectiveEndDate);
+const latestDate = computed(() => props.summary.snapshotAsOf || props.summary.period.lastRecordAt || props.summary.version.effectiveEndDate);
 const monthCount = computed(() => Math.max(0, Math.round(props.summary.period.totalDays / 30.4375)));
 const centerText = computed(() => locale.value === "ja"
   ? {
@@ -149,12 +149,12 @@ onBeforeUnmount(() => {
     <div class="period-overview-scene__period-copy">
       <div class="period-overview-scene__period-intro">
         <time :datetime="anchorDate">{{ formatDate(anchorDate) }}</time>
-        <h2>{{ centerText.first }}</h2>
+        <h2>{{ summary.snapshotAsOf ? (locale === "ja" ? "同期された日" : "本次同步日期") : centerText.first }}</h2>
       </div>
       <div class="period-overview-scene__period-story">
         <p>{{ summary.copy.period.body }}</p>
       </div>
-      <div class="period-overview-scene__period-facts">
+      <div v-if="!summary.snapshotAsOf" class="period-overview-scene__period-facts">
         <img :src="mascotUrl" width="64" height="64" alt="" aria-hidden="true" />
         <span>{{ centerText.elapsedPrefix }} <b>{{ n(summary.period.totalDays) }}</b> {{ centerText.elapsedUnit }}</span>
         <span v-if="monthCount > 0">{{ centerText.monthPrefix }} <b>{{ n(monthCount) }}</b> {{ centerText.monthUnit }}</span>

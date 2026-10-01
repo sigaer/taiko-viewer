@@ -590,6 +590,7 @@ export const normalizeAnnualSummary = (
     narrativeBody: ""
   };
   const nickname = stringValue(profile.nickname, locale === "ja" ? "太鼓プレイヤー" : "太鼓玩家");
+  const snapshotAsOf = raw.provenance?.warnings?.find(w => w.startsWith("current_archive_fallback:"))?.slice("current_archive_fallback:".length);
   const mode = raw.mode === "current_archive" ? "current_archive" : "version_observed";
   const playCount = numberValue(overview.playCount);
   const activeDays = period.activeDays === null || period.activeDays === undefined ? 0 : numberValue(period.activeDays);
@@ -691,6 +692,12 @@ export const normalizeAnnualSummary = (
     finalTitle: finalTitle.title
   };
   const copy = makeCopy(t, narrativeContext);
+  if (snapshotAsOf) {
+    copy.period.body = locale === 'ja' ? 'この日に同期された成績です。' : '这是本次同步保存的成绩。';
+    copy.overview.eyebrow = locale === 'ja' ? 'これまでのプレイ' : '一路走来的积累';
+    copy.overview.title = locale === 'ja' ? '積み重ねた記録' : '累计游玩记录';
+    copy.overview.body = locale === 'ja' ? '同期時点の累計成績' : '截至本次同步的累计成绩';
+  }
   breakthrough.body = breakthroughType ? copy.breakthrough.body : "";
   // FinalTitle body is curated per-key copy in both locales. Keep the existing
   // evidence composition so Poster and Finale continue to consume one resolved body.
@@ -717,6 +724,7 @@ export const normalizeAnnualSummary = (
   if (keyword) keyword.body = copy.keyword.body;
 
   return {
+    snapshotAsOf,
     schemaVersion: 4, summaryId: raw.summaryId, generatedAt: raw.generatedAt, mode, user: { nickname },
     profileCard: { nickname, title: stringValue(profile.title) || null, titleplateId: nullableNumber(profile.titleplateId), danName: profileDan || null, danLevel: nullableNumber(profile.danLevel), myDonUrl: stringValue(profile.myDonUrl) || null },
     version: {
@@ -729,7 +737,7 @@ export const normalizeAnnualSummary = (
     },
     coverage: { snapshotCount: numberValue(coverage.snapshotCount), firstSnapshotAt: stringValue(coverage.firstSnapshotAt) || null, lastSnapshotAt: stringValue(coverage.lastSnapshotAt) || null, partialStart: Boolean(coverage.partialStart) },
     timeCoverage: { status: stringValue(timeCoverage.status, "unavailable") as AnnualMetricStatus, ratio: numberValue(timeCoverage.ratio), trustedPlayCount: numberValue(timeCoverage.trustedProxyPlayCount), totalPlayCount: numberValue(timeCoverage.totalObservedPlayCount), precision: timeCoverage.eligible ? "batch_last_play_proxy" : "none", note: null },
-    period: { firstObservedDate: firstObservedDate || null, firstActualPlayDate: firstActualPlayDay || null, firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: periodTotalDays, activeDays },
+    period: { firstObservedDate: firstObservedDate || null, firstActualPlayDate: firstActualPlayDay || null, firstRecordAt: stringValue(period.firstRecordAt) || null, lastRecordAt: stringValue(period.lastRecordAt) || null, totalDays: snapshotAsOf ? 1 : periodTotalDays, activeDays },
     overview: { playCount, uniqueSongs, uniqueCharts: numberValue(overview.uniqueCharts), estimatedSeconds: numberValue(overview.estimatedSeconds), estimatedTimeText: stringValue(overview.estimatedTimeText) || (numberValue(overview.estimatedSeconds) >= 3600 ? `${(numberValue(overview.estimatedSeconds) / 3600).toFixed(1)} h` : `${Math.round(numberValue(overview.estimatedSeconds) / 60)} min`), currentClearCharts: numberValue(overview.currentClearCharts), currentFullComboCharts: numberValue(overview.currentFullComboCharts), currentDondafulCharts: numberValue(overview.currentDondafulCharts), currentKiwamiCharts: numberValue(overview.currentKiwamiCharts) },
     coverSongs,
     favoriteSong, obsessionSong, favoriteShift, monthlyFavorites, weekdayActivity, calendarActivity, timeOfDay, lateNight,

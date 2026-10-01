@@ -115,6 +115,9 @@ export type AnnualPosterRow = {
 };
 
 export type AnnualJobParameters = {
+  allowCurrentArchive?: boolean;
+  kinokoRevision?: string;
+  refreshExisting?: boolean;
   locale?: AnnualLocale;
   shareId?: string;
   inputRevision?: string;

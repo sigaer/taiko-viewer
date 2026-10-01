@@ -539,7 +539,8 @@ export type AnnualProgressUpdate = { stage: string; percent: number; detail?: Re
 const runAnnualSummaryCliUnadmitted = async (
   taikoId: string,
   onProgress: ((update: AnnualProgressUpdate) => void | Promise<void>) | undefined,
-  admissionId: string
+  admissionId: string,
+  allowCurrentArchive = false
 ): Promise<AnnualCliEnvelope> => {
   const { repoRoot, userdataDir, configPath } = getRuntimePaths();
   const runtimeConfig = useRuntimeConfig();
@@ -551,6 +552,7 @@ const runAnnualSummaryCliUnadmitted = async (
   const args = [
     annualCliPath,
     "build",
+    ...(allowCurrentArchive ? ["--allow-current-archive"] : []),
     "--taiko-id",
     taikoId,
     "--version",
@@ -644,9 +646,10 @@ export const annualGeneratorKey = async (taikoId: string) =>
 export const runAnnualSummaryCli = async (
   taikoId: string,
   onProgress?: (update: AnnualProgressUpdate) => void | Promise<void>,
-  admission?: { key?: string; ticket?: string; onRunning?: () => Promise<void> }
+  admission?: { key?: string; ticket?: string; onRunning?: () => Promise<void> },
+  allowCurrentArchive = false
 ): Promise<AnnualCliEnvelope> => annualAdmission.run('generator', admission?.key || await annualGeneratorKey(taikoId),
-  ANNUAL_BUILD_TIMEOUT_MS, id => runAnnualSummaryCliUnadmitted(taikoId, onProgress, id), admission);
+  ANNUAL_BUILD_TIMEOUT_MS, id => runAnnualSummaryCliUnadmitted(taikoId, onProgress, id, allowCurrentArchive), admission);
 
 export const readAnnualSummary = async (filePath: string) => validateAnnualSummaryV4(await readAnnualJson<unknown>(filePath));
 export const readAnnualEvents = async (filePath: string) => validateAnnualEvents(await readAnnualJson<unknown>(filePath));

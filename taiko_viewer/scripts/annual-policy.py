@@ -2,12 +2,12 @@
 """Atomic local operator control. Does not touch users, caches or worker budgets."""
 import argparse,json,os,tempfile
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--file',default='/var/lib/taiko/annual-policy.json');p.add_argument('--mode',choices=['invite','public']);p.add_argument('--pause-generation',choices=['yes','no']);p.add_argument('--pause-rendering',choices=['yes','no']);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--file',default='/var/lib/taiko/annual-policy.json');p.add_argument('--mode',choices=['invite','public']);p.add_argument('--pause-generation',choices=['yes','no']);p.add_argument('--pause-rendering',choices=['yes','no']);p.add_argument('--refresh-imports',choices=['yes','no']);p.add_argument('--archive-fallback',choices=['yes','no']);a=p.parse_args()
 path=Path(a.file);value=json.loads(path.read_text()) if path.exists() else dict(mode='invite',pauseGeneration=False,pauseRendering=False)
 assert value.get('mode') in ['invite','public'] and all(type(value.get(k)) is bool for k in ['pauseGeneration','pauseRendering']),'Invalid existing policy; inspect instead of overwriting'
-if any([a.mode,a.pause_generation,a.pause_rendering]):
+if any([a.mode,a.pause_generation,a.pause_rendering,a.refresh_imports,a.archive_fallback]):
  if a.mode:value['mode']=a.mode
- for arg,key in [(a.pause_generation,'pauseGeneration'),(a.pause_rendering,'pauseRendering')]:
+ for arg,key in [(a.pause_generation,'pauseGeneration'),(a.pause_rendering,'pauseRendering'),(a.refresh_imports,'refreshImports'),(a.archive_fallback,'archiveFallback')]:
   if arg is not None:value[key]=arg=='yes'
  path.parent.mkdir(parents=True,exist_ok=True,mode=0o750)
  fd,name=tempfile.mkstemp(prefix='.annual-policy-',dir=path.parent)

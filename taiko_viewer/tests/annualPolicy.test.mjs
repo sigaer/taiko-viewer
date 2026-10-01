@@ -10,11 +10,13 @@ test('operator policy switches live, fails closed, and separates generation/rend
   await symlink(resolve('node_modules'),root+'/node_modules');
   await build({entryPoints:['server/services/account/annual-summary/policy.ts'],outfile:root+'/policy.mjs',bundle:true,platform:'node',format:'esm',packages:'external',external:['h3']});
   const m=await import(root+'/policy.mjs');process.env.TAIKO_ANNUAL_POLICY_FILE=root+'/control.json';
-  assert.deepEqual(await m.readAnnualPolicy(),{mode:'invite',pauseGeneration:false,pauseRendering:false});
+  assert.deepEqual(await m.readAnnualPolicy(),{mode:'invite',pauseGeneration:false,pauseRendering:false,refreshImports:false,archiveFallback:false});
   execFileSync('/usr/bin/python3',['scripts/annual-policy.py','--file',process.env.TAIKO_ANNUAL_POLICY_FILE,'--mode','public','--pause-generation','yes']);
   assert.equal((await m.readAnnualPolicy()).mode,'public');await assert.rejects(m.assertAnnualTaskAllowed('generation'),e=>e.statusCode===503&&e.data.code==='ANNUAL_GENERATION_PAUSED');await m.assertAnnualTaskAllowed('rendering');
   execFileSync('/usr/bin/python3',['scripts/annual-policy.py','--file',process.env.TAIKO_ANNUAL_POLICY_FILE,'--pause-generation','no','--pause-rendering','yes']);
   await m.assertAnnualTaskAllowed('generation');await assert.rejects(m.assertAnnualTaskAllowed('rendering'),e=>e.statusCode===503&&e.data.code==='ANNUAL_RENDERING_PAUSED');
+  execFileSync('/usr/bin/python3',['scripts/annual-policy.py','--file',process.env.TAIKO_ANNUAL_POLICY_FILE,'--refresh-imports','yes','--archive-fallback','yes']);
+  assert.equal((await m.readAnnualPolicy()).refreshImports,true);assert.equal((await m.readAnnualPolicy()).archiveFallback,true);
   await writeFile(process.env.TAIKO_ANNUAL_POLICY_FILE,'{"mode":"public"}');await assert.rejects(m.readAnnualPolicy(),e=>e.statusCode===503);
  }finally{if(previous===undefined)delete process.env.TAIKO_ANNUAL_POLICY_FILE;else process.env.TAIKO_ANNUAL_POLICY_FILE=previous;await rm(root,{recursive:true,force:true});}
 });

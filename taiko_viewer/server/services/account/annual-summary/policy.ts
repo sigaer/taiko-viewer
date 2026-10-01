@@ -2,14 +2,17 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createError } from 'h3';
 
-export type AnnualPolicy = { mode: 'invite' | 'public'; pauseGeneration: boolean; pauseRendering: boolean };
-export const DEFAULT_ANNUAL_POLICY: AnnualPolicy = { mode: 'invite', pauseGeneration: false, pauseRendering: false };
+export type AnnualPolicy = { mode: 'invite' | 'public'; pauseGeneration: boolean; pauseRendering: boolean; refreshImports: boolean; archiveFallback: boolean };
+export const DEFAULT_ANNUAL_POLICY: AnnualPolicy = { mode: 'invite', pauseGeneration: false, pauseRendering: false, refreshImports: false, archiveFallback: false };
 export const parseAnnualPolicy = (input: unknown): AnnualPolicy => {
   const p = input as AnnualPolicy;
   if (!p || !['invite', 'public'].includes(p.mode) || typeof p.pauseGeneration !== 'boolean' || typeof p.pauseRendering !== 'boolean') {
     throw new Error('Invalid annual policy');
   }
-  return { mode: p.mode, pauseGeneration: p.pauseGeneration, pauseRendering: p.pauseRendering };
+  for (const key of ['refreshImports', 'archiveFallback'] as const) {
+    if (p[key] !== undefined && typeof p[key] !== 'boolean') throw new Error('Invalid annual policy');
+  }
+  return { mode: p.mode, pauseGeneration: p.pauseGeneration, pauseRendering: p.pauseRendering, refreshImports: p.refreshImports ?? false, archiveFallback: p.archiveFallback ?? false };
 };
 export const readAnnualPolicy = async (): Promise<AnnualPolicy> => {
   const path = process.env.TAIKO_ANNUAL_POLICY_FILE || join(process.env.ANNUAL_E2E_ISOLATED_ROOT || '/var/lib/taiko', 'annual-policy.json');

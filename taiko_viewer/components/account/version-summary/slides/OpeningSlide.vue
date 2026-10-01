@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ start: []; "jump-to-end": [] }>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const startPending = ref(false);
 const navigationSent = ref(false);
 const drumPulse = ref(false);
@@ -56,6 +56,7 @@ const reportTitleLines = computed(() => {
   return lines.length > 1 ? lines.slice(1) : lines;
 });
 const periodLabel = computed(() => {
+  if (props.summary.snapshotAsOf) return (locale.value === "ja" ? "同期日 " : "同步于 ") + props.summary.snapshotAsOf.slice(0, 10);
   const start = props.summary.version.startDate || reportYear.value;
   const end = props.summary.version.effectiveEndDate || props.summary.version.endDate || start;
   return formatAnnualPeriodRange(start, end);

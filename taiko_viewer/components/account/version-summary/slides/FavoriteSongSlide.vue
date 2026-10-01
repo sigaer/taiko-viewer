@@ -43,8 +43,8 @@ const uiText = computed(() => locale.value === "ja"
       cue: "通り過ぎるだけではなく、何度も戻ってしまう曲がある。",
       cueLine1: "",
       cueLine2: "",
-      reveal: "年間シングル",
-      playLabel: "この一年、戻ってきた",
+      reveal: props.summary.snapshotAsOf ? "お気に入りの曲" : "年間シングル",
+      playLabel: props.summary.snapshotAsOf ? "これまでにプレイした" : "この一年、戻ってきた",
       playUnit: "回",
       fallback: "2026"
     }
@@ -52,8 +52,8 @@ const uiText = computed(() => locale.value === "ja"
       cue: "",
       cueLine1: "有些歌不是路过，",
       cueLine2: "是你一次次回头。",
-      reveal: "年度单曲",
-      playLabel: "这一年，你回来过",
+      reveal: props.summary.snapshotAsOf ? "最常玩的歌" : "年度单曲",
+      playLabel: props.summary.snapshotAsOf ? "累计回来过" : "这一年，你回来过",
       playUnit: "次",
       fallback: "2026"
     });

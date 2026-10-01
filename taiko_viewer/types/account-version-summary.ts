@@ -214,6 +214,7 @@ export type VersionSummaryCopyBlock = {
 };
 
 export type VersionSummaryViewModel = {
+  snapshotAsOf?: string;
   schemaVersion?: 4;
   summaryId: string;
   generatedAt: string;

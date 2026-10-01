@@ -25,7 +25,7 @@ const missing = computed(() => ja.value ? '記録なし' : '暂无记录');
 const profileTitle = computed(() => props.summary.finalTitle.title || props.summary.profileCard?.danName || '—');
 const number = (value: number | null | undefined) => value != null && Number.isFinite(value) ? new Intl.NumberFormat(props.locale === 'ja' ? 'ja-JP' : 'zh-CN', { maximumFractionDigits: 2 }).format(value) : '—';
 const cells = computed(() => [
-  { key: 'favorite', label: ja.value ? '今年の一曲' : '年度歌曲', song: props.summary.favoriteSong, value: props.summary.favoriteSong?.name || missing.value },
+  { key: 'favorite', label: props.summary.snapshotAsOf ? (ja.value ? 'お気に入りの曲' : '最常玩的歌') : (ja.value ? '今年の一曲' : '年度歌曲'), song: props.summary.favoriteSong, value: props.summary.favoriteSong?.name || missing.value },
   { key: 'pound', label: ja.value ? '最高秒速' : '最高秒速', song: props.summary.pound?.topSong, value: props.summary.pound?.speed != null ? `${number(props.summary.pound.speed)} ${ja.value ? '打/秒' : '打/秒'}` : missing.value },
   { key: 'profile', label: ja.value ? '称号' : '称号展示', song: null, value: '' },
   { key: 'score', label: ja.value ? '年間ハイスコア' : '年度高分', song: props.summary.highScore?.song, value: props.summary.highScore ? number(props.summary.highScore.score) : missing.value }
@@ -35,10 +35,10 @@ const stats = computed(() => {
   const time = s.timeOfDay;
   const range = time?.periods.find(period => period.key === time.topPeriod)?.range;
   return [
-    { key: 'plays', label: ja.value ? 'プレイ記録' : '游玩记录', value: number(s.overview.playCount) },
+    { key: 'plays', label: s.snapshotAsOf ? (ja.value ? '累計プレイ' : '累计游玩') : (ja.value ? 'プレイ記録' : '游玩记录'), value: number(s.overview.playCount) },
     { key: 'songs', label: ja.value ? '楽曲記録' : '鼓点记录', value: number(s.overview.uniqueSongs) },
     { key: 'clears', label: ja.value ? 'クリア譜面' : '已经通关', value: number(s.overview.currentClearCharts) },
-    { key: 'days', label: ja.value ? '遊んだ日数' : '陪伴天数', value: `${number(s.period.activeDays)} ${ja.value ? '日' : '天'}` },
+    { key: 'days', label: s.snapshotAsOf ? (ja.value ? '同期日' : '同步日期') : (ja.value ? '遊んだ日数' : '陪伴天数'), value: s.snapshotAsOf ? s.snapshotAsOf.slice(0, 10) : `${number(s.period.activeDays)} ${ja.value ? '日' : '天'}` },
     { key: 'period', label: ja.value ? '活動時間帯' : '活跃时段', value: time?.topLabel ? [time.topLabel, range].filter(Boolean).join(' ') : time?.favoriteHourLabel || '—' },
     { key: 'coordinate', label: ja.value ? 'ドンだー座標' : '鼓众坐标', value: s.ratingRank ? [s.ratingRank.rankLabel, number(s.ratingRank.rating)].filter(Boolean).join(' · ') : '—' }
   ];
