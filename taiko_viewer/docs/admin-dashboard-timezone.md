@@ -15,3 +15,9 @@ bash ../scripts/memory/run_qa.sh /www/server/nvm/versions/node/v24.13.0/bin/node
 私有只读复核 `/var/tmp/admin-time-20261002/verify.mjs` 对实际 dashboard 模块进行依赖注入：所有 DB 操作只允许 SELECT，事务 READ ONLY；禁用日志摄取、schema 初始化和审计写入，备份/审计列表为空；上传目录只读扫描。实际 SQL 的注册日期/计数逐项核对成功。修复后末桶为 `10-02 01:00`，10 月 1/2 日新增用户分别 358/8，上传 2426/749（当时快照，后续会变化）。不将此项称为管理员鉴权或全页面浏览验证。证据 `readonly-dashboard.json` 留仓库外。
 
 初次运行测试时工作目录多拼一层，文件未创建且测试未执行；更正路径后测试通过。生产发布结果另记。
+
+## 实际发布
+
+标准部署 exit 0，部署 commit `d060429c8341e1c067a1aa211bde8fca4a605afd`，build `168961e7-414a-44f2-a903-9305098f19c9`，应用 0.77.1。工作区原 title_song_relations 修改已恢复并核对 SHA256。Viewer 与接收器 active、NRestarts=0；公网 /titles 200，未登录后台 API 401，已有真实年度报告 200。公开模式与 refreshImports/archiveFallback 均保持开启，两类新任务暂停已恢复 false。没有修改数据库历史记录或日志摄取游标。标准部署附带百度收录推送因配额 HTTP 400 未成功，不影响站点发布。
+
+本轮没有管理员登录会话，未执行真实登录后的图表点击/截图验收；生产数据的实际 SQL、后台聚合模块和时区边界验证见上文。文档提交不改变部署产物，无需再次部署。
