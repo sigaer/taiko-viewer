@@ -86,7 +86,7 @@ const produceBotCard = async (event: H3Event, taikoId: string) => {
       await assertAnnualTaskAllowed('generation');
       const result = await runAnnualSummaryCli(taikoId, undefined, undefined, policy.archiveFallback);
       if (fingerprint !== await getAnnualInputFingerprint(taikoId)) throw createError({ statusCode: 409, statusMessage: '数据已更新，请稍后重新查询' });
-      const summary = await enrichAnnualRatingRank({ ...result.summary, summaryId: id, version: getAnnualVersion() });
+      const summary = await enrichAnnualRatingRank({ ...result.summary, version: getAnnualVersion() });
       await atomicWriteJson(paths.summary, summary);
     } else await readBotAnnualSummary(id);
     // Use the same MyDon CLI, confined to the same generator budget; no Bot-side renderer.
