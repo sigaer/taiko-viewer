@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir, stat, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import { createError, type H3Event } from 'h3';
 import { getAccountDb, ensureAccountSchema, type DbRow } from '~/server/utils/account-db';
 import { getRuntimePaths } from '~/server/internal/account/shared';
@@ -27,6 +28,18 @@ export const resolveBotAnnualBinding = async (identity: string) => {
   if (rows.length !== 1) throw createError({ statusCode: 400, statusMessage: '请先绑定鼓众 ID' });
   if (Number(rows[0].current_virtual)) throw createError({ statusCode: 400, statusMessage: '请先切换到一个真实绑定账号，再生成版本总结' });
   return String(rows[0].id);
+};
+
+// Only run-owned Bot cache revisions; retain the previous successful image.
+const pruneBotRevisions = async (dir: string, currentImage: string) => {
+  const names = (await readdir(dir)).filter(n => /^[a-f0-9]{32}\.png$/.test(n));
+  const entries = [];
+  for (const name of names) entries.push({name,mtime:(await stat(join(dir,name))).mtimeMs});
+  const previous = entries.filter(e => join(dir,e.name) !== currentImage).sort((a,b)=>b.mtime-a.mtime);
+  for (const entry of previous.slice(1)) {
+    const prefix = entry.name.slice(0,-4);
+    for (const suffix of ['.png','.json','.my-don.png']) await unlink(join(dir,prefix+suffix)).catch(()=>undefined);
+  }
 };
 
 const buildMyDon = async (taikoId: string, path: string) => {
@@ -83,6 +96,7 @@ const produceBotCard = async (event: H3Event, taikoId: string) => {
     }
     await renderAnnualShareCard({ summaryId: id, locale: 'zh', outputPath: paths.image });
     if (fingerprint !== await getAnnualInputFingerprint(taikoId)) throw createError({ statusCode: 409, statusMessage: '数据已更新，请稍后重新查询' });
+    await pruneBotRevisions(paths.dir, paths.image).catch(() => undefined);
     return readFile(paths.image);
   });
 };
