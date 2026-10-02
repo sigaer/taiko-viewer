@@ -17,3 +17,9 @@ Bot 缓存按输入指纹与渲染版本隔离，每目标保留当前和前一�
 标准候选构建被 `scripts/memory/run_build.sh` 拦截：要求 MemAvailable ≥ RAM×25% + 5 GiB，约 12956 MiB；多次观察只有 12500–12630 MiB，缺约 330–450 MiB。没有绕过保护、停止其他人的开发进程或重启生产。**尚未部署 Viewer 0.78.0，尚未重启 Bot，新指令未启用。** 必须待资源恢复后完成候选 build、真实隔离导出、标准部署、内部现网冒烟，再重启 Bot 并核验两适配器连接。真实 QQ 客户端收图及按钮点击仍需实际触发，不冒充已发送消息。
 
 运行：Viewer Node tests 从 viewer 目录执行 `bash ../scripts/memory/run_qa.sh /bin/bash -c 'node --test tests/annualBot.test.mjs tests/annualPolicy.test.mjs'`；Bot tests 从 forum 根执行 `bash scripts/memory/run_qa.sh /bin/bash -c 'cd /home/sigaer/taiko && PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -p test_annual_report_command.py'`。真实隔离测试复用现有 bootstrap 与 browser 任务入口，在配置加 `botSmoke:true`；不连接生产数据库。
+
+## 隔离复测已完成
+
+2026-10-02：资源恢复后完成候选构建。首轮真实请求发现 bind 与 taiko_bind_identity_state 的排序规则不一致导致 500，已在 `cd2fa0b` 将身份 JOIN 改为 BINARY 精确比较，不迁移/修改生产表。修复后重新构建 `76835b11-cc32-4fc9-9fca-d1d01e270556` 并复测，`bot-smoke-fixed.done` exit 0：未带有效令牌 401、OneBot 403、未绑定 400、暂停生成与渲染 503；两同目标请求各约 4.14 秒返回同一 PNG；暂停期间缓存读取 200（118ms）；复用已有网页 PNG 200（13ms），字节完全一致；无新增 Viewer 用户。两个真实 PNG 均 1080×1872，完整解码通过；合成素材/禁止外网时的图绘占位不是现网资源验证。
+
+实际服务端日志中 Bot 路径只有一次报告生成、一次 MyDon 生成、一次分享渲染；另一组是网页生成/分享。私密证据 `/var/tmp/annual-test-bot-20261002/results/bot-smoke.json`、`bot-only.png`、`bot-web-reused.png` 和 `evidence/server.log`。测试实例停止后才进入正式部署；不运行生产高负载。以上替代“尚未执行隔离冒烟”的旧状态，实际部署记录随后补充。
