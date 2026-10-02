@@ -1,3 +1,5 @@
+import { getAccountDb, type DbRow } from "~/server/utils/account-db";
+import { botAnnualPaths, readBotAnnualSummary } from "./bot-store";
 import { readAnnualPolicy } from './policy';
 import { annualImportState, annualImportNeedsRefresh } from './import-refresh';
 import { annualManualEditTime, annualCorrectionsAreCurrent } from './manual-corrections';
@@ -1110,9 +1112,9 @@ export const getInternalAnnualShareCardPayload = async (summaryId: string, token
   if (!verifyAnnualShareCardRenderToken(tokenInput, summaryId)) {
     throw createError({ statusCode: 403, statusMessage: "分享图片渲染凭据无效" });
   }
-  const row = await findAnnualSummaryById(summaryId);
-  const summary = await safeReadSummary(row);
-  if (!row || !summary) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
+  const row = summaryId.startsWith("bot_") ? null : await findAnnualSummaryById(summaryId);
+  const summary = summaryId.startsWith("bot_") ? await readBotAnnualSummary(summaryId) : await safeReadSummary(row);
+  if (!summary) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
   const promoQrCodeDataUrl = await createAnnualShareCardPromoQrCodeDataUrl(ANNUAL_SHARE_CARD_PROMO_URL);
   if (!promoQrCodeDataUrl) {
     throw createError({ statusCode: 500, statusMessage: "年度分享图片二维码生成失败" });
@@ -1150,6 +1152,9 @@ const resolveSummaryMyDon = async (row: AnnualSummaryRow, summaryId: string) => 
 export const getInternalAnnualShareCardMyDon = async (summaryId: string, tokenInput: unknown) => {
   if (!verifyAnnualShareCardRenderToken(tokenInput, summaryId)) {
     throw createError({ statusCode: 403, statusMessage: "分享图片渲染凭据无效" });
+  }
+  if (summaryId.startsWith("bot_")) {
+    return { kind: "snapshot" as const, path: botAnnualPaths(summaryId).myDon };
   }
   const row = await findAnnualSummaryById(summaryId);
   if (!row) throw createError({ statusCode: 404, statusMessage: "年度总结不存在" });
@@ -1296,3 +1301,16 @@ export const removeAdminAnnualSummary = async (summaryId: string) => {
 };
 
 export const readAnnualImage = (filePath: string) => readFile(filePath);
+
+export const getReusableBotAnnualSummary = async (taikoId: string) => {
+  const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
+    `SELECT s.* FROM web_annual_summaries s JOIN web_taiko_bindings b ON b.id=s.binding_id
+     WHERE b.taiko_id=? AND s.version_key=? ORDER BY s.created_at DESC LIMIT 1`, [taikoId, ANNUAL_VERSION_KEY]);
+  const row = rows[0];
+  const summary = await safeReadSummary(row || null);
+  if (!row || !summary) return null;
+  const policy = await readAnnualPolicy();
+  const imports = await annualImportState(getRuntimePaths().userdataDir, taikoId);
+  if (policy.refreshImports && annualImportNeedsRefresh(summary, imports)) return null;
+  return { row, summary };
+};
