@@ -23,7 +23,7 @@ export async function checkBotFlow(c,accounts){
  }
  const current=JSON.parse(await readFile(root+'/userdata/'+normal.taikoId+'data.json','utf8'));current._meta.source_account=fresh;
  await writeFile(root+'/userdata/'+fresh+'data.json',JSON.stringify(current));
- for(const [identity,id] of [['qq_official:botonly',fresh],['qq_official:botonly2',fresh],['qq_official:web',normal.taikoId]])await db.execute('INSERT INTO bind (qq,id,is_current,slot_index) VALUES (?,?,1,1)',[identity,id]);
+ for(const [identity,id] of [['qq_official:botonly',fresh],['qq_official:botonly2',fresh],['qq_official:web',normal.taikoId]])await db.execute('INSERT INTO bind (qq,id,is_current,slot_index) VALUES (?,?,1,1) ON DUPLICATE KEY UPDATE is_current=1',[identity,id]);
  await bot('qq_official:botonly',401,'wrong-token');await bot('onebot_v11:123',403);await bot('qq_official:unbound',400);
  await policy(true,false);await bot('qq_official:botonly',503);await policy(false,true);await bot('qq_official:botonly',503);
  await policy();const [a,b]=await Promise.all([bot('qq_official:botonly2'),bot('qq_official:botonly')]);assert.ok(a.equals(b),'deduplicated PNG must match');await writeFile(c.output+'/bot-only.png',a);

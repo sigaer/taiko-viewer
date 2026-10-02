@@ -23,7 +23,7 @@ export const resolveBotAnnualBinding = async (identity: string) => {
   await ensureAccountSchema();
   const [rows] = await getAccountDb().execute<DbRow<{ id: string; current_virtual: number }>[]>(
     `SELECT b.id, COALESCE(s.current_virtual,0) AS current_virtual FROM bind b
-     LEFT JOIN taiko_bind_identity_state s ON s.identity_key=b.qq
+     LEFT JOIN taiko_bind_identity_state s ON BINARY s.identity_key=BINARY b.qq
      WHERE b.qq=? AND b.is_current=1 LIMIT 2`, [identity]);
   if (rows.length !== 1) throw createError({ statusCode: 400, statusMessage: '请先绑定鼓众 ID' });
   if (Number(rows[0].current_virtual)) throw createError({ statusCode: 400, statusMessage: '请先切换到一个真实绑定账号，再生成版本总结' });
