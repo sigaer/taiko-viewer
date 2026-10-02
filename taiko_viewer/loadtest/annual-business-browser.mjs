@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import {measureAnnualPage} from '../scripts/annual_readiness_browser_checks.mjs';
 const c=JSON.parse(await readFile(process.argv[2],'utf8'));
 const accounts=JSON.parse(await readFile(c.accountsFile,'utf8'));
+if(c.botSmoke){await (await import('./annual-bot-smoke.mjs')).checkBotFlow(c,accounts);process.exit(0);}
 if(c.refreshSmoke){await (await import('./annual-refresh-smoke.mjs')).checkRefreshFlow(c,accounts);process.exit(0);}
 if(c.correctionSmoke){await (await import('./annual-correction-smoke.mjs')).checkCorrectionFlow(c,accounts);process.exit(0);}
 if(c.publicSmoke){await (await import('./annual-public-smoke.mjs')).checkPublicMode(c,accounts);process.exit(0);}
