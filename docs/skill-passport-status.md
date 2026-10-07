@@ -92,3 +92,7 @@ PersonalGrowthLayout 不进入全站 KeepAlive 缓存，避免语言切换后重
 ## 0.79.3 线上向前修复（2026-10-07）
 
 0.79.2 线上直接访问已登录 Home 的烟测发现 SSR 与客户端各启动一次 Growth compute。两个 composable 的本地 ref 不进入 SSR payload，故服务端只保留一致的 pending 状态，Growth Overview 和 Recent 首次加载统一在客户端发生；刷新、账号/绑定切换与证据提取规则保持原有行为。修正验收的 journal 计数，仅匹配 overview timing / replay / compose 完整消息，避免 measurement upsert 的单行日志被算作 History replay。失败轮次的一次性账号和合成 userdata 均已清理。
+
+## 0.79.4 手机长昵称修补（2026-10-07）
+
+真实手机截图复核发现连续英文昵称会形成过大的 min-content 宽度，撑宽整段成长内容。为成长容器补充 min-width: 0，并允许问候标题在长昵称内换行。加入 --critical --long-name 浏览器回归入口和真实线上 Home 宽度检查。线上验收用独立的第二页，在选择新 Goal 前检查已完成 Goal 与 Recent/Daily 的同一事实；原页完成与下一目标保持无需重新加载。最多同时两页，结束后全部关闭和清理。

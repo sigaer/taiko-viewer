@@ -309,7 +309,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .goal-dialog input { accent-color: var(--el-color-primary); }
 .goal-error { color: var(--el-color-danger); font-size: 14px; }
 
-.growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; gap: var(--growth-section-gap); }
+.growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; min-width: 0; gap: var(--growth-section-gap); }
 .growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
 .growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
@@ -318,7 +318,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 .growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color: #342922; font-family: var(--viewer-display-font); line-height: 1.1; }
-.growth-focus h1 { font-size: clamp(24px, 3.4vw, 36px); }
+.growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 3.4vw, 36px); }
 .growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
 .growth-rating { display: grid; gap: 2px; text-align: right; }
 .growth-rating span { color: #806b5c; font-size: 11px; font-weight: 700; }

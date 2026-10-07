@@ -13,7 +13,8 @@ const build = process.env.GROWTH_EXPERIENCE_BUILD_ROOT || `${out}/source/taiko-f
 const base = 'http://127.0.0.1:3197';
 const critical = process.argv.includes('--critical');
 const passportOnly = process.argv.includes('--passport-only');
-const suite = critical ? 'critical' : passportOnly ? 'passport' : 'browser';
+const longName = process.argv.includes('--long-name');
+const suite = longName ? 'critical-long-name' : critical ? 'critical' : passportOnly ? 'passport' : 'browser';
 const homeScenarios = ['goal-completed', 'goal-unrelated', 'goal-recent', 'goal-daily', 'recent-daily', 'no-goal', 'rich-daily', 'quiet-daily', 'active-goal', 'recent-only', 'profile-switch', 'goal-recent-different-baseline'];
 if (critical) homeScenarios.splice(0, homeScenarios.length, 'goal-recent', 'goal-unrelated', 'goal-recent-different-baseline');
 const passportScenarios = ['4-day', '42-day', '120-day', '250-day', '365-day', 'model-break', 'one-point', 'limited', 'stable', 'focus-change'];
@@ -47,7 +48,7 @@ try {
       page.on('console', message => { if (/hydration/i.test(message.text())) errors.push('hydration'); });
       page.on('request', request => { const url = new URL(request.url()); if (/\/api\/account\/growth\//.test(url.pathname)) requests.push(url.pathname + url.search); });
       await page.addInitScript(d => localStorage.setItem('taiko_theme', d ? 'dark' : 'light'), dark);
-      await page.route('**/api/account/auth/me', r => r.fulfill({ json: { authenticated: true, user: { id: 990092, username: 'Growth Player', emailVerified: true } } }));
+      await page.route('**/api/account/auth/me', r => r.fulfill({ json: { authenticated: true, user: { id: 990092, username: longName ? 'growth_closure_12345678901234567890' : 'Growth Player', emailVerified: true } } }));
       const binding = { id: 1, taikoId: 'fixture', source: 'wahlap', isCurrent: true };
       await page.route('**/api/account/bindings', r => r.fulfill({ json: { bindings: [binding], currentBinding: binding } }));
       await page.route('**/api/account/songs?*', r => r.fulfill({ json: { total: 1, items: [{ song_no: 101, level: 4, high_score: 995440 }] } }));

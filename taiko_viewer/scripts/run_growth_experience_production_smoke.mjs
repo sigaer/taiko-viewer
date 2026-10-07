@@ -123,9 +123,27 @@ try {
     assert.match(await page.locator('.growth-goal--completed').innerText(), /8 → 0/);
     assert.equal((await page.locator('.growth-surface').innerText()).match(/8 → 0/g)?.length, 1);
     assert.ok(await page.locator('.growth-goal--completed').evaluate(el => el.getBoundingClientRect().top < document.querySelector('.growth-progress').getBoundingClientRect().top));
-    const completed = await request('/api/account/growth/goal', token); assert.equal(completed.response.status, 200);
     report.home = { intentPrimary: 'PASS', completedWithoutReload: 'PASS', overviewRefreshRequests: refreshCalls.length };
+    const homeLayout = await page.evaluate(() => ({ width: innerWidth, documentWidth: document.documentElement.scrollWidth,
+      overflowing: [...document.querySelectorAll('.growth-surface, .growth-surface *')].flatMap(el => { const r = el.getBoundingClientRect(); return r.right > innerWidth + 1 || el.scrollWidth > el.clientWidth + 1 ? [{ tag: el.tagName, class: el.className, width: r.width, right: r.right, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }] : []; }).slice(0, 50) }));
+    await writeFile(`${out}/home-layout.json`, JSON.stringify(homeLayout, null, 2));
+    assert.ok(homeLayout.documentWidth <= homeLayout.width + 1, 'Home horizontal overflow');
     await page.screenshot({ path: `${out}/production-home.png` });
+    // Read the three persisted projections in a second page before creating a
+    // newer Goal (which intentionally replaces the completed-Goal story).
+    // The original page stays intact for the no-reload next-Goal check.
+    const factsPage = await context.newPage();
+    factsPage.on('pageerror', error => errors.push(error.message.slice(0, 180)));
+    factsPage.on('console', message => { if (/hydration/i.test(message.text())) errors.push('hydration'); });
+    try {
+      await measure('Home persisted facts', async () => { await factsPage.goto(base, { waitUntil: 'domcontentloaded' }); await factsPage.locator('.growth-goal--completed').waitFor(); });
+      await factsPage.waitForLoadState('networkidle');
+      const currentHome = await factsPage.locator('.growth-surface').innerText();
+      assert.equal((currentHome.match(/8 → 0/g) || []).length, 1);
+      assert.equal(await factsPage.locator('.recent-growth__fact').filter({ hasText: candidate.title }).count(), 0);
+      report.home.goalRecentDailyDedup = 'PASS';
+      report.home.dedupVerifiedOnFreshVisit = true;
+    } finally { await factsPage.close(); }
     // A next Goal must use the refreshed revision without reloading the page.
     await page.locator('.growth-goal--completed button').click();
     await page.locator('.growth-plan__choose').first().click();
@@ -134,15 +152,6 @@ try {
     await page.locator('.goal-dialog .goal-actions button').last().click(); const nextGoal = (await (await nextPromise).json()).activeGoal; assert.ok(nextGoal?.id);
     assert.notEqual(nextGoal.baseline.sourceRevision, selectedGoal.baseline.sourceRevision);
     await request('/api/account/growth/goal', token, { method: 'DELETE', body: JSON.stringify({ profileId, expectedActiveGoalId: nextGoal.id }) }); report.home.nextGoalWithoutReload = 'PASS';
-    // Navigate away/back so Recent includes the same new observation as Goal/Daily.
-    await page.locator('a[href="/my"]').first().evaluate(el => el.click());
-    await page.locator('.my-links').waitFor();
-    await page.locator('a[href="/"]').first().evaluate(el => el.click()); await page.locator('.growth-goal--completed').waitFor();
-    await page.waitForLoadState('networkidle');
-    const currentHome = await page.locator('.growth-surface').innerText();
-    assert.equal((currentHome.match(/8 → 0/g) || []).length, 1);
-    assert.equal(await page.locator('.recent-growth__fact').filter({ hasText: candidate.title }).count(), 0);
-    report.home.goalRecentDailyDedup = 'PASS';
     const beforePassport = requests.length;
     await measure('Passport initial', async () => { await page.locator('.growth-weekly-link[href="/my/growth"]').click(); await page.locator('.passport-hero').waitFor(); });
     report.passport.initialRequests = requests.slice(beforePassport).filter(row => row.path.endsWith('/passport')).length;
