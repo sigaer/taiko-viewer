@@ -19,6 +19,9 @@ export const usePlayerGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
   const identity = computed(() => `${toValue(userId) || ''}:${currentBinding.value?.id || ''}:${toValue(enabled)}`);
   const load = async (expectedIdentity = identity.value): Promise<boolean> => {
     if (expectedIdentity !== identity.value) return false;
+    // This local ref is not transferred in the SSR payload. Start its load
+    // on the client so hydration does not repeat a discarded server compute.
+    if (import.meta.server) { pending.value = Boolean(toValue(enabled) && toValue(userId)); return false; }
     const request = ++generation;
     const profile = String(currentBinding.value?.id || '');
     if (!toValue(enabled) || !toValue(userId)) { growth.value = emptyGrowth(); pending.value = false; refreshing.value = false; return false; }

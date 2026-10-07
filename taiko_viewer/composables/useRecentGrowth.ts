@@ -22,6 +22,7 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
 
   const load = async (expectedIdentity = identity.value) => {
     if (expectedIdentity !== identity.value) return false;
+    if (import.meta.server) { pending.value = Boolean(toValue(enabled) && toValue(userId)); return false; }
     const request = ++generation;
     if (!toValue(enabled) || !toValue(userId)) { recent.value = emptyRecent(); pending.value = false; return false; }
     pending.value = true;

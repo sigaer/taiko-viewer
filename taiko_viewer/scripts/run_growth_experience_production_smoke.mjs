@@ -45,10 +45,10 @@ const measure = async (label, action) => {
     const stamp = date => date.toISOString().replace('T', ' ').replace('Z', ' UTC');
     await new Promise(resolve => setTimeout(resolve, 200));
     const { stdout } = await exec('/usr/bin/journalctl', ['-u', 'taiko-viewer', '--since', stamp(since), '--until', stamp(until), '-o', 'cat', '--no-pager'], { timeout: 5000, maxBuffer: 1024 * 1024 });
-    const blocks = title => [...stdout.matchAll(new RegExp('\\[' + title + '\\][^\\n]*\\{([\\s\\S]*?)^\\}', 'gm'))].map(match => match[1]);
+    const blocks = (title, operation) => [...stdout.matchAll(new RegExp('\\[' + title + '\\] ' + operation + ' \\{\\n([\\s\\S]*?)^\\}', 'gm'))].map(match => match[1]);
     const owns = block => new RegExp('userId: ' + userId + '(?:,|\\s)').test(block);
-    const overviews = blocks('player-growth').filter(owns), replays = blocks('growth-history').filter(owns);
-    const compose = blocks('growth-passport');
+    const overviews = blocks('player-growth', 'overview timing').filter(owns), replays = blocks('growth-history', 'replay').filter(owns);
+    const compose = blocks('growth-passport', 'compose');
     const metric = (block, key) => Number(block?.match(new RegExp(key + ': (\\d+)'))?.[1] || 0);
     const row = { label, elapsedMs, observedGrowthPythonProcesses: seen.size, growthComputeCalls: overviews.length, canonicalHistoryReplays: replays.length };
     if (compose.length === 1 && replays.length === 1) for (const key of ['measurementQueryMs', 'recentHistoryMs', 'dailySamplingMs', 'segmentBuildMs', 'milestoneComposeMs']) row[key] = metric(compose[0], key);

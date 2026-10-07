@@ -88,3 +88,7 @@ NO KPI DASHBOARD REGRESSION
 PersonalGrowthLayout 不进入全站 KeepAlive 缓存，避免语言切换后重新激活旧父页时仍保留旧的子页路由。其他页面继续使用原有缓存行为。
 
 可重复验证入口：`tests/growthExperience.test.ts`、`scripts/verify_growth_experience_browser.mjs`、`scripts/benchmark_growth_experience.mjs`、`scripts/run_growth_experience_production_smoke.mjs`。本次验收与性能产物独立保存在 `/var/tmp/growth-experience-0792`，线上烟测仅在对应版本发布后通过显式开关运行，并清理一次性账号、绑定、Goal、measurement、Recent cursor 和合成 userdata。
+
+## 0.79.3 线上向前修复（2026-10-07）
+
+0.79.2 线上直接访问已登录 Home 的烟测发现 SSR 与客户端各启动一次 Growth compute。两个 composable 的本地 ref 不进入 SSR payload，故服务端只保留一致的 pending 状态，Growth Overview 和 Recent 首次加载统一在客户端发生；刷新、账号/绑定切换与证据提取规则保持原有行为。修正验收的 journal 计数，仅匹配 overview timing / replay / compose 完整消息，避免 measurement upsert 的单行日志被算作 History replay。失败轮次的一次性账号和合成 userdata 均已清理。

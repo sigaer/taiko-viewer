@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.79.2",
+  "version": "0.79.3",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -43,7 +43,7 @@
     "test:goal:db": "node --experimental-strip-types --test --test-concurrency=1 tests/goalEvaluationSql.test.ts tests/playerGoal.integration.test.ts tests/playerGoalSqlHttp.test.mjs",
     "test:goal:evaluation:browser": "node --experimental-strip-types scripts/verify_goal_evaluation_browser.mjs",
     "test:goal:browser": "node --experimental-strip-types scripts/verify_goal_browser.mjs",
-    "test:growth:refresh": "node --experimental-strip-types --test tests/growthRefresh.test.mjs tests/growthEvaluationRefresh.test.mjs tests/growthFeedback.test.ts",
+    "test:growth:refresh": "node --experimental-strip-types --test tests/growthRefresh.test.mjs tests/growthEvaluationRefresh.test.mjs tests/growthFeedback.test.ts tests/growthClientLoading.test.mjs",
     "test:growth": "node --experimental-strip-types --test tests/dailyProgress.test.ts tests/playerGrowth.test.ts tests/dailyProgressReplay.test.mjs",
     "test:growth:history": "node --experimental-strip-types --test tests/growthHistory.test.ts tests/growthMeasurements.test.ts tests/growthHistoryHttp.test.mjs",
     "test:growth:weekly": "node --experimental-strip-types --test tests/growthWeekly.test.ts tests/growthWeeklyHttp.test.mjs",
