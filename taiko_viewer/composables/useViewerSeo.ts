@@ -67,17 +67,17 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
   });
   const languageTag = computed(() => (locale.value === "ja" ? "ja-JP" : "zh-CN"));
 
-  useSeoMeta(() => ({
-    title: pageTitle.value,
-    description: payload.value.description,
-    keywords: keywordsContent.value,
-    ogTitle: pageTitle.value,
-    ogDescription: payload.value.description,
-    ogImage: imageUrl.value,
-    ogUrl: canonicalUrl.value,
+  useSeoMeta({
+    title: () => pageTitle.value,
+    description: () => payload.value.description,
+    keywords: () => keywordsContent.value,
+    ogTitle: () => pageTitle.value,
+    ogDescription: () => payload.value.description,
+    ogImage: () => imageUrl.value,
+    ogUrl: () => canonicalUrl.value,
     ogSiteName: SITE_TITLE,
-    ogLocale: locale.value === "ja" ? "ja_JP" : "zh_CN"
-  }));
+    ogLocale: () => locale.value === "ja" ? "ja_JP" : "zh_CN"
+  });
 
   useHead(() => {
     const scripts: Array<{ type: string; children: string }> = [];
