@@ -102,6 +102,8 @@ export function buildFocusTimeline(segments: SkillPassportSegment[]): SkillPassp
 }
 
 type RankedMilestone = { milestone: SkillPassportMilestone; priority: number; magnitude: number; sortTime: string };
+const milestoneDay = (milestone: SkillPassportMilestone) => milestone.day
+  || (milestone.observedAt ? growthCalendarDay(new Date(milestone.observedAt)) : "");
 
 const primaryScoreFact = (facts: GrowthFact[]) => {
   const crown = facts.filter(fact => crownRank[fact.type]).sort((left, right) => crownRank[right.type]! - crownRank[left.type]! || left.factKey.localeCompare(right.factKey))[0];
@@ -169,9 +171,11 @@ export function buildSkillPassportMilestones(facts: GrowthFact[]): SkillPassport
     sortTime: factTime(goal)
   });
   return ranked
-    .sort((left, right) => right.priority - left.priority || right.magnitude - left.magnitude || right.sortTime.localeCompare(left.sortTime) || left.milestone.id.localeCompare(right.milestone.id))
+    // A recent life log must admit new days before older, larger breakthroughs.
+    // Significance still decides which same-day chart changes lead the story.
+    .sort((left, right) => milestoneDay(right.milestone).localeCompare(milestoneDay(left.milestone))
+      || right.priority - left.priority || right.magnitude - left.magnitude || right.sortTime.localeCompare(left.sortTime) || left.milestone.id.localeCompare(right.milestone.id))
     .slice(0, 8)
-    .sort((left, right) => (right.milestone.day || right.milestone.observedAt || "").localeCompare(left.milestone.day || left.milestone.observedAt || "") || right.priority - left.priority || left.milestone.id.localeCompare(right.milestone.id))
     .map(item => item.milestone);
 }
 

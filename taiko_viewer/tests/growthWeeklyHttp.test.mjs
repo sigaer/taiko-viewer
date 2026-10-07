@@ -21,7 +21,7 @@ test("Weekly service composes one canonical History result and at most one Growt
 test("Weekly page presents the server DTO with localized state copy and light navigation entries", async () => {
   const [page, myPage, home, sidebar, zh, ja] = await Promise.all([
     readFile(new URL("../pages/my/weekly.vue", import.meta.url), "utf8"),
-    readFile(new URL("../pages/my.vue", import.meta.url), "utf8"),
+    readFile(new URL("../pages/my/index.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/home/PlayerGrowthSurface.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/SidebarNav.vue", import.meta.url), "utf8"),
     readFile(new URL("../locales/zh.json", import.meta.url), "utf8").then(JSON.parse),
@@ -30,7 +30,6 @@ test("Weekly page presents the server DTO with localized state copy and light na
   assert.match(page, /\/api\/account\/growth\/weekly/);
   assert.doesNotMatch(page, /score-pb[^\n]*(?:filter|reduce)|goal-completed[^\n]*(?:filter|reduce)/);
   assert.match(page, /weekly-rhythm/);
-  assert.match(myPage, /<NuxtPage v-if="isGrowthChildRoute"/);
   assert.match(myPage, /\/my\/weekly/);
   assert.match(myPage, /\/my\/growth/);
   assert.doesNotMatch(page, /grid-template-columns:\s*repeat\(3/);

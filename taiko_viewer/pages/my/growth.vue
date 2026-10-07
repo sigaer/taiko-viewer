@@ -4,12 +4,14 @@ import type { SkillPassportMilestone, SkillPassportPoint, SkillPassportRangeDays
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_ORDER } from "~/utils/playerGrowth";
 import { formatScoreRank } from "~/utils/scoreRank";
+import { passportCoverageSpan, passportRangeChoices, passportTrendStory } from "~/utils/passportPresentation";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const apiFetch = useViewerApiFetch();
+const nuxtApp = useNuxtApp();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
@@ -31,25 +33,33 @@ const dimensions: SkillPassportTrendDimension[] = ["rating", ...GROWTH_DIMENSION
 const requestedRange = computed(() => ranges.includes(Number(route.query.range) as SkillPassportRangeDays) ? Number(route.query.range) as SkillPassportRangeDays : 90);
 const requestedDimension = computed(() => dimensions.includes(String(route.query.dimension) as SkillPassportTrendDimension) ? String(route.query.dimension) as SkillPassportTrendDimension : "rating");
 
+const passportKey = `growth-passport:${accountUser.value?.id || 'guest'}:${useRouter().currentRoute.value.path}`;
 const fetchPassport = async () => {
   if (!accountUser.value) return { payload: null, error: "" };
   try {
+    const range = requestedRange.value;
+    const payload = await apiFetch<SkillPassportResponse>("/api/account/growth/passport", { query: { range, dimension: requestedDimension.value }, retry: 0 });
+    if (payload.range.requestedDays !== range) throw new Error("passport-range-mismatch");
     return {
-      payload: await apiFetch<SkillPassportResponse>("/api/account/growth/passport", { query: { range: requestedRange.value, dimension: requestedDimension.value } }),
+      payload,
       error: ""
     };
   } catch {
-    return { payload: null, error: t("passport.loadFailed") };
+    return { payload: (nuxtApp.payload.data[passportKey]?.payload || null) as SkillPassportResponse | null, error: t("passport.loadFailed") };
   }
 };
 
-const { data: passportState, pending, refresh } = await useAsyncData("growth-passport", fetchPassport, {
+const { data: passportState, pending, refresh, clear } = await useAsyncData(passportKey, fetchPassport, {
   default: () => ({ payload: null, error: "" }),
-  watch: [requestedRange]
+  watch: [requestedRange, () => accountUser.value?.id],
+  dedupe: "cancel"
 });
+onUnmounted(clear);
+watch(() => accountUser.value?.id, clear, { flush: "sync" });
 const passport = computed(() => passportState.value?.payload || null);
 const pageError = computed(() => passportState.value?.error || "");
 const selectedDimension = ref<SkillPassportTrendDimension>(requestedDimension.value);
+watch(requestedDimension, dimension => { selectedDimension.value = dimension; });
 const selectedPointId = ref("");
 
 const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
@@ -62,10 +72,12 @@ const trendLabel = (key: SkillPassportTrendDimension) => key === "rating" ? "Rat
 const focusLabel = (focus: SkillPassportPoint["focus"] | null) => focus && focus in GROWTH_DIMENSION_LABELS
   ? dimensionLabel(focus as RatingDimensionKey)
   : t(`passport.focus.${focus || "insufficient-data"}`);
-const signed = (value: number) => `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
+const rangeChoices = computed(() => passportRangeChoices(passportCoverageSpan(passport.value?.coverage)));
+const activeRange = computed(() => rangeChoices.value.find(choice => choice.days === (pending.value ? requestedRange.value : passport.value?.range.requestedDays))?.days
+  || rangeChoices.value.at(-1)?.days);
 
 const changeRange = async (range: SkillPassportRangeDays) => {
-  if (range === requestedRange.value) return;
+  if (range === requestedRange.value) { if (pageError.value) await refresh(); return; }
   await navigateTo(localePath({ path: "/my/growth", query: { range: String(range), dimension: selectedDimension.value } }));
 };
 const chooseDimension = (dimension: SkillPassportTrendDimension) => { selectedDimension.value = dimension; };
@@ -119,11 +131,19 @@ const currentSkills = computed(() => GROWTH_DIMENSION_ORDER.flatMap(key => {
 }));
 const skillMax = computed(() => Math.max(1, ...currentSkills.value.map(item => item.value)));
 const primaryChangeText = computed(() => {
-  const change = passport.value?.currentSegmentChange.primaryDimensionChange;
-  if (!change) return t("passport.change.stable");
-  return t(change.delta < 0 ? "passport.change.down" : "passport.change.up", {
-    dimension: dimensionLabel(change.key), from: change.before.toFixed(2), to: change.after.toFixed(2)
+  const story = passportTrendStory(passport.value, selectedDimension.value);
+  if (story.state === "limited") return t("passport.change.limited");
+  if (story.state === "accumulating") return t("passport.change.insufficient");
+  const dimension = trendLabel(selectedDimension.value);
+  if (story.state === "stable") return t("passport.change.stableValue", { dimension, value: story.last.value.toFixed(2) });
+  return t(story.last.value < story.first.value ? "passport.change.down" : "passport.change.up", {
+    dimension, from: story.first.value.toFixed(2), to: story.last.value.toFixed(2)
   });
+});
+const focusChangeText = computed(() => {
+  const change = passport.value?.currentSegmentChange;
+  if (!change?.compatible || !change.focusFrom || !change.focusTo || !(change.focusTo in GROWTH_DIMENSION_LABELS)) return "";
+  return t(change.focusFrom === change.focusTo ? "passport.focusContinuing" : "passport.focusChanged", { focus: focusLabel(change.focusTo) });
 });
 const actualRangeText = computed(() => {
   if (!passport.value?.range.actualFrom || !passport.value.range.actualTo) return "";
@@ -154,11 +174,11 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
       <NuxtLink :to="localePath('/account/login')" class="passport-button">{{ t("passport.login") }}</NuxtLink>
     </section>
 
-    <section v-else-if="pending" class="passport-loading" aria-busy="true" :aria-label="t('passport.loading')">
+    <section v-else-if="pending && !passport" class="passport-loading" aria-busy="true" :aria-label="t('passport.loading')">
       <span v-for="index in 4" :key="index" class="passport-loading__line shimmer-card"></span>
     </section>
 
-    <section v-else-if="pageError || !passport" class="passport-state panel-card" role="alert">
+    <section v-else-if="!passport" class="passport-state panel-card" role="alert">
       <h1>{{ t("passport.loadFailed") }}</h1>
       <button class="passport-button" type="button" @click="retry">{{ t("passport.retry") }}</button>
     </section>
@@ -175,7 +195,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <p v-if="passport.coverage.measurementFrom" class="passport-recorded">{{ t("passport.recordedSince", { date: formatCaptured(passport.coverage.measurementFrom) }) }}</p>
         <div v-if="passport.current" class="passport-now">
           <div v-if="passport.current.rating !== null" class="passport-rating"><span>Rating</span><strong>{{ passport.current.rating.toFixed(2) }}</strong></div>
-          <p class="passport-focus">{{ t("passport.focusLead", { focus: focusLabel(passport.current.focus) }) }}</p>
+          <p class="passport-focus">{{ passport.current.focus in GROWTH_DIMENSION_LABELS ? t("passport.focusLead", { focus: focusLabel(passport.current.focus) }) : focusLabel(passport.current.focus) }}</p>
         </div>
         <p v-if="currentLimited" class="passport-limited">{{ t("passport.limited") }}</p>
         <div v-if="currentSkills.length" class="passport-skills" :aria-label="t('passport.skillOverview')">
@@ -187,20 +207,25 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         </div>
       </header>
 
-      <section class="passport-section passport-trend" aria-labelledby="passport-trend-title">
+      <section class="passport-section passport-trend" aria-labelledby="passport-trend-title" :aria-busy="pending || undefined">
         <div class="passport-section__head">
           <div><p class="passport-kicker">{{ actualRangeText }}</p><h2 id="passport-trend-title">{{ t("passport.trend.title") }}</h2></div>
-          <div class="passport-range" :aria-label="t('passport.rangeLabel')">
-            <button v-for="range in ranges" :key="range" type="button" :aria-pressed="requestedRange === range" @click="changeRange(range)">{{ t("passport.rangeDays", { days: range }) }}</button>
+        </div>
+        <p class="passport-change">{{ primaryChangeText }}</p>
+        <p v-if="focusChangeText" class="passport-focus-note">{{ focusChangeText }}</p>
+        <div class="passport-controls">
+          <div v-if="rangeChoices.length" class="passport-range" role="group" :aria-label="t('passport.rangeLabel')">
+            <button v-for="choice in rangeChoices" :key="choice.days" type="button" :data-range="choice.days" :aria-pressed="activeRange === choice.days" @click="changeRange(choice.days)">{{ choice.all ? t('passport.rangeAll') : t("passport.rangeDays", { days: choice.days }) }}</button>
+          </div>
+          <div class="passport-dimensions" role="group" :aria-label="t('passport.dimensionLabel')">
+            <button v-for="dimension in dimensions" :key="dimension" type="button" :aria-pressed="selectedDimension === dimension" @click="chooseDimension(dimension)">{{ trendLabel(dimension) }}</button>
           </div>
         </div>
-        <div class="passport-dimensions" :aria-label="t('passport.dimensionLabel')">
-          <button v-for="dimension in dimensions" :key="dimension" type="button" :aria-pressed="selectedDimension === dimension" @click="chooseDimension(dimension)">{{ trendLabel(dimension) }}</button>
-        </div>
+        <p v-if="pending" class="passport-updating" role="status">{{ t('passport.updating') }}</p>
+        <div v-else-if="pageError" class="passport-refresh-error" role="alert"><span>{{ pageError }}</span><button type="button" @click="retry">{{ t('passport.retry') }}</button></div>
 
-        <p v-if="currentLimited" class="passport-empty">{{ t("passport.limited") }}</p>
-        <p v-else-if="chartPoints.length <= 1" class="passport-empty"><strong>{{ t("passport.newRecordTitle") }}</strong><span>{{ t("passport.newRecord") }}</span></p>
-        <div v-else class="passport-chart-wrap">
+        <p v-if="!currentLimited && chartPoints.length <= 1" class="passport-empty">{{ chartSummary }}</p>
+        <div v-else-if="!currentLimited" class="passport-chart-wrap">
           <p id="passport-chart-summary" class="passport-chart-summary">{{ chartSummary }}</p>
           <svg class="passport-chart" viewBox="0 0 720 260" role="img" aria-labelledby="passport-trend-title passport-chart-summary">
             <line x1="46" y1="224" x2="674" y2="224" class="passport-chart__axis" />
@@ -231,8 +256,6 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
           </div>
         </div>
 
-        <p v-if="passport.currentSegmentChange.compatible" class="passport-change">{{ primaryChangeText }}</p>
-        <p v-else class="passport-change">{{ t(`passport.change.${passport.currentSegmentChange.reason}`) }}</p>
         <details v-if="hasSegmentBreak" class="passport-segment-note">
           <summary>{{ t("passport.segmentUpdated") }}</summary>
           <p>{{ t("passport.segmentExplanation") }}</p>
@@ -250,7 +273,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
       </section>
 
       <section class="passport-section passport-milestones" aria-labelledby="passport-milestones-title">
-        <div class="passport-section__head"><h2 id="passport-milestones-title">{{ t("passport.milestonesTitle") }}</h2><span>{{ t("passport.recent90") }}</span></div>
+        <div class="passport-section__head"><h2 id="passport-milestones-title">{{ t("passport.milestonesTitle") }}</h2><span v-if="passport.milestones.length">{{ t("passport.latestMilestones", { count: passport.milestones.length }) }}</span></div>
         <div v-if="passport.milestones.length" class="passport-milestone-list">
           <article v-for="milestone in passport.milestones" :key="milestone.id" class="passport-milestone">
             <time>{{ milestoneDate(milestone) }}</time>
@@ -264,7 +287,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
           </article>
         </div>
         <p v-else class="passport-empty">{{ t("passport.noMilestones") }}</p>
-        <p v-if="coverageText" class="passport-coverage">{{ coverageText }}</p>
+        <details class="passport-segment-note passport-milestone-coverage"><summary>{{ t('passport.recordsRange') }}</summary><p>{{ t('passport.recent90') }} · {{ coverageText }}</p></details>
       </section>
 
       <section v-if="passport.activeGoal || passport.recentCompletedGoal || passport.currentNextAction" class="passport-section passport-next" aria-labelledby="passport-next-title">
@@ -275,7 +298,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <div v-else-if="passport.recentCompletedGoal" class="passport-goal">
           <span>{{ t("passport.completedGoalTitle") }}</span><strong>{{ passport.recentCompletedGoal.title }}</strong><small>{{ t(`home.goal.types.${passport.recentCompletedGoal.goalType}`) }}</small>
         </div>
-        <p v-if="passport.currentNextAction" class="passport-next__focus">{{ t("passport.nextFocus", { focus: focusLabel(passport.currentNextAction.focus) }) }}</p>
+        <p v-if="passport.currentNextAction" class="passport-next__focus">{{ passport.currentNextAction.focus in GROWTH_DIMENSION_LABELS ? t("passport.nextFocus", { focus: focusLabel(passport.currentNextAction.focus) }) : focusLabel(passport.currentNextAction.focus) }}</p>
         <div v-if="passport.currentNextAction?.todayPlan.items.length" class="passport-next__songs">
           <NuxtLink v-for="item in passport.currentNextAction.todayPlan.items" :key="`${item.songId}-${item.difficultyType}`" :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.difficultyType) } })">
             <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="46px" />
@@ -314,10 +337,17 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-section h2 { font-size: clamp(22px, 3vw, 30px); line-height: 1.2; }
 .passport-section__head > span { color: var(--viewer-text-muted); font-size: 12px; }
 .passport-range, .passport-dimensions { display: flex; flex-wrap: wrap; gap: 7px; }
-.passport-range button, .passport-dimensions button { min-height: 44px; padding: 0 13px; border: 1px solid var(--viewer-border); border-radius: 999px; color: var(--viewer-text-muted); background: transparent; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
-.passport-range button[aria-pressed="true"], .passport-dimensions button[aria-pressed="true"] { border-color: var(--viewer-accent-strong); color: var(--viewer-accent-strong); background: rgba(184,77,55,.08); }
+.passport-controls { display: grid; gap: 8px; margin: 18px 0 14px; }
+.passport-range button, .passport-dimensions button { min-height: 44px; padding: 0 11px; border: 0; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; color: var(--viewer-text-muted); background: transparent; cursor: pointer; font: inherit; font-size: 12px; }
+.passport-range button[aria-pressed="true"], .passport-dimensions button[aria-pressed="true"] { border-bottom-color: var(--viewer-accent-strong); color: var(--viewer-accent-strong); font-weight: 700; background: rgba(184,77,55,.04); }
 .passport-range button:focus-visible, .passport-dimensions button:focus-visible, .passport-chart circle:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-dimensions { margin: 22px 0 14px; }
+.passport-dimensions { gap: 3px; }
+.passport-dimensions button { padding-inline: 9px; }
+.passport-focus-note, .passport-updating { margin: 8px 0 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.6; }
+.passport-updating { min-height: 24px; }
+.passport-refresh-error { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--viewer-text-muted); }
+.passport-refresh-error button { min-height: 44px; padding: 0 12px; background: transparent; border: 1px solid var(--viewer-border); border-radius: 8px; color: var(--viewer-accent-strong); cursor: pointer; }
+.passport-refresh-error button:focus-visible, .passport-segment-note summary:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
 .passport-chart-wrap { position: relative; overflow: hidden; border-block: 1px solid var(--viewer-border); }
 .passport-chart-summary { margin: 16px 0 0; color: var(--viewer-text-muted); font-size: 13px; line-height: 1.55; }
 .passport-chart { display: block; width: 100%; min-height: 230px; overflow: visible; }
@@ -386,7 +416,9 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
   .passport-hero { padding: 24px 20px 30px; border-radius: 21px; }
   .passport-hero__topline, .passport-section__head { align-items: flex-start; flex-direction: column; }
   .passport-now { align-items: flex-start; flex-direction: column; gap: 14px; }
-  .passport-skills { grid-template-columns: 1fr; gap: 9px; }
+  .passport-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+  .passport-skill { grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
+  .passport-skill i { grid-column: 1 / -1; grid-row: 2; }
   .passport-section { padding-inline: 2px; }
   .passport-range { width: 100%; }
   .passport-range button { flex: 1; padding-inline: 8px; }

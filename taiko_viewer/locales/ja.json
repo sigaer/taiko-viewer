@@ -84,7 +84,7 @@
   "home": {
     "goal": {
       "evaluate": "進み具合を確認",
-      "completed": "できるようになった",
+      "completed": "今回の目標を達成",
       "refreshing": "状態を更新しています…",
       "refreshFailed": "成長データを更新できませんでした。もう一度お試しください。",
       "retryRefresh": "再読み込み",
@@ -159,11 +159,11 @@
         "noChanges": "最新の同期で確認できる新しい変化はありません",
         "failed": "最近の変化を読み込めませんでした",
         "retry": "再試行",
-      "more": "ほか {count} 件の変化",
-      "score": "自己ベスト {value}",
-      "ngReduced": "不可 {value}",
-      "combo": "最大コンボ {value}",
-      "rank": "スコアランク {value}",
+        "more": "ほか {count} 件の変化",
+        "score": "自己ベスト {value}",
+        "ngReduced": "不可 {value}",
+        "combo": "最大コンボ {value}",
+        "rank": "スコアランク {value}",
         "goal": "練習目標",
         "types": {
           "clear": "初クリア",
@@ -207,12 +207,25 @@
         "ng-reduced": "不可",
         "combo-improved": "コンボ",
         "rank-upgrade": "スコアランク"
+      },
+      "additionalPb": "今日はほかにも{count}曲でベストを更新",
+      "goalScore": "ベストも{value}に",
+      "logSeparator": "。",
+      "log": {
+        "played": "今日はこの曲もプレイ",
+        "score-pb": "ベストを{delta}伸ばして{value}に",
+        "ng-reduced": "不可を{value}まで減らせた",
+        "combo-improved": "最大コンボも{value}に",
+        "rank-upgrade": "評価は{value}に",
+        "clear-upgrade": "クリアできた",
+        "fc": "フルコンボを達成",
+        "df": "ドンダフルコンボを達成"
       }
     }
   },
   "passport": {
     "title": "成長の記録",
-    "description": "Viewer が確かに記録できるようになってからの力の構成、注目方向、最近の節目を振り返ります。",
+    "description": "スコアや練習で意識したこと、これまでの変化を振り返る。",
     "guestTitle": "ログインして成長の記録を見る",
     "login": "ログイン",
     "loading": "成長の記録をまとめています",
@@ -222,32 +235,35 @@
     "recordedSince": "{date} から記録",
     "focusLead": "最近は{focus}から取り組めそうです",
     "skillOverview": "現在の6つの力",
-    "limited": "現在のスコア記録だけでは、安定した力の軌跡をまだ描けません。",
+    "limited": "まだ記録が少ないので、もう少し増えると変化が見えてきます。",
     "newRecordTitle": "成長の記録が始まったばかりです",
     "newRecord": "スコアが増えるにつれて、ここに力の軌跡が少しずつ現れます。",
-    "rangeLabel": "表示期間",
+    "rangeLabel": "推移の期間",
+    "latestMilestones": "最新{count}件",
+    "recordsRange": "記録の期間",
     "rangeDays": "{days}日",
-    "rangeActual": "記録のある日：{days}日",
+    "rangeActual": "{days}日分の記録",
     "dimensionLabel": "推移する項目",
     "current": "現在",
     "weeklyEntry": "今週を振り返る",
     "trend": {
       "title": "この期間の変化",
-      "noPoints": "選んだ項目には利用できる測定点がありません。",
+      "noPoints": "この項目にはまだ記録がありません。",
       "onePoint": "{day}に{dimension} {value}を記録しました。",
       "summary": "{dimension}は{fromDay}の{from}から{toDay}の{to}へ。",
-      "summaryBreak": "{dimension}は{fromDay}の{from}から{toDay}の{to}へ。計算基準が異なる区間は線で結んでいません。",
+      "summaryBreak": "{fromDay}から{toDay}までの{dimension}の記録。",
       "pointLabel": "{day}、{dimension} {value}、注目方向は{focus}"
     },
     "change": {
-      "up": "今回の記録では、{dimension}が{from}から{to}になりました。",
-      "down": "最近の測定はやや低めです。{dimension}は{from}から{to}になりました。",
-      "stable": "最近の力の構成は全体に安定しています。",
-      "insufficient": "現在の計算基準では、変化を比べるための記録がまだ必要です。",
-      "limited": "現在の記録だけでは、安定した力の変化を判断できません。"
+      "up": "この間、{dimension}は{from}から{to}に。",
+      "down": "最近の記録では、{dimension}は{from}から{to}に。",
+      "stable": "最近の記録では、全体のバランスはほぼ変わっていません。",
+      "insufficient": "記録はまだ増えている途中。あと何回か同期すると、変化が見えてきます。",
+      "limited": "まだ記録が少ないので、もう少し増えると変化が見えてきます。",
+      "stableValue": "最近の記録では、{dimension}は{value}前後で落ち着いています。"
     },
-    "segmentUpdated": "計算基準が更新されました",
-    "segmentExplanation": "異なる期間の測定は直接つながず、期間をまたいだ変化量も計算しません。",
+    "segmentUpdated": "記録方法が変わりました",
+    "segmentExplanation": "更新前後の数値は直接比較していません。",
     "focusTitle": "注目方向",
     "focus": {
       "balanced": "全体のバランス",
@@ -278,7 +294,11 @@
     "nextTitle": "次は",
     "nextFocus": "最近は引き続き{focus}から取り組めそうです",
     "activeGoalTitle": "今回取り組むこと",
-    "completedGoalTitle": "最近できたこと"
+    "completedGoalTitle": "最近できたこと",
+    "rangeAll": "すべての記録",
+    "updating": "記録を更新しています…",
+    "focusContinuing": "引き続き、{focus}を意識したいところ。",
+    "focusChanged": "最近は{focus}に注目。"
   },
   "weekly": {
     "title": "この一週間",

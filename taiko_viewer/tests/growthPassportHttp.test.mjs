@@ -26,7 +26,7 @@ test("Passport page is localized, single-series, accessible and connected to Wee
     readFile(new URL("../pages/my/growth.vue", import.meta.url), "utf8"),
     readFile(new URL("../pages/my/weekly.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/home/PlayerGrowthSurface.vue", import.meta.url), "utf8"),
-    readFile(new URL("../pages/my.vue", import.meta.url), "utf8"),
+    readFile(new URL("../pages/my/index.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/SidebarNav.vue", import.meta.url), "utf8"),
     readFile(new URL("../locales/zh.json", import.meta.url), "utf8"),
     readFile(new URL("../locales/ja.json", import.meta.url), "utf8")

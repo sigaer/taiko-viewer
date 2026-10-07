@@ -172,3 +172,21 @@ test("365 realistic daily rows remain bounded and deterministic", () => {
   assert.ok(Buffer.byteLength(JSON.stringify(segments)) < 1_000_000);
   assert.ok(elapsed < 250, `365-row projection took ${elapsed.toFixed(1)}ms`);
 });
+
+test('new growth days enter recent milestones before eight older large breakthroughs', () => {
+  const older = Array.from({ length: 8 }, (_, index) => fact(`old-${index}`, 'df', '2026-09-12', { songId: 200 + index, before: 1, after: 2, delta: 1 }));
+  const latest = fact('new-small-pb', 'score-pb', '2026-10-06', { songId: 101, before: 900000, after: 900001, delta: 1 });
+  const milestones = buildSkillPassportMilestones([...older, latest]);
+  assert.equal(milestones.length, 8);
+  assert.equal(milestones[0]?.day, '2026-10-06');
+  assert.equal(milestones[0]?.songId, 101);
+  assert.equal(milestones[0]?.after, 900001);
+});
+test('observation-only Goal milestone orders by Shanghai day without inventing play attribution', () => {
+  const played = fact('played-day', 'df', '2026-10-06', { songId: 100, before: 1, after: 2 });
+  const observed = fact('observed-new', 'goal-completed', null, { songId: 101, goalId: 'new-goal', goalType: 'score-pb', evidence: { source: 'goal', sourceRevision: 'unmatched', evidenceVersion: 1 }, temporal: { attributedDay: null, occurredAt: null, observedAt: '2026-10-06T17:00:00Z', precision: 'observation' } });
+  const milestones = buildSkillPassportMilestones([played, observed]);
+  assert.equal(milestones[0]?.primaryType, 'goal-completed');
+  assert.equal(milestones[0]?.day, null);
+  assert.equal(milestones[0]?.observationOnly, true);
+});

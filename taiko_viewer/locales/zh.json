@@ -160,11 +160,11 @@
         "noChanges": "最新同步中没有可确认的新变化",
         "failed": "暂时无法读取最近变化",
         "retry": "重试",
-      "more": "另有 {count} 项变化",
-      "score": "最好成绩 {value}",
-      "ngReduced": "不可减少至 {value}",
-      "combo": "最大连段 {value}",
-      "rank": "评价提升至 {value}",
+        "more": "另有 {count} 项变化",
+        "score": "最好成绩 {value}",
+        "ngReduced": "不可减少至 {value}",
+        "combo": "最大连段 {value}",
+        "rank": "评价提升至 {value}",
         "goal": "练习目标",
         "types": {
           "clear": "新通关",
@@ -208,12 +208,25 @@
         "ng-reduced": "不可",
         "combo-improved": "连击",
         "rank-upgrade": "评价"
+      },
+      "additionalPb": "今天另外还有 {count} 首刷新了最好成绩",
+      "goalScore": "最好成绩也到了 {value}",
+      "logSeparator": "，",
+      "log": {
+        "played": "今天也打了这首",
+        "score-pb": "最好成绩又往前走了 {delta}，到了 {value}",
+        "ng-reduced": "不可压到了 {value}",
+        "combo-improved": "连击也到了 {value}",
+        "rank-upgrade": "评价到了 {value}",
+        "clear-upgrade": "拿到通关了",
+        "fc": "拿到全连了",
+        "df": "拿到全良了"
       }
     }
   },
   "passport": {
     "title": "成长档案",
-    "description": "查看 Viewer 开始可靠记录以来的能力结构、关注方向与最近成长节点。",
+    "description": "记录自己的成绩、关注方向与一路走来的变化。",
     "guestTitle": "登录后查看成长档案",
     "login": "登录",
     "loading": "正在整理成长档案",
@@ -223,10 +236,12 @@
     "recordedSince": "记录自 {date}",
     "focusLead": "最近可以从{focus}入手",
     "skillOverview": "当前六维",
-    "limited": "目前的成绩记录还不足以形成稳定的能力轨迹。",
+    "limited": "成绩记录还不多，再积累一些后趋势会更清楚。",
     "newRecordTitle": "成长记录刚刚开始",
     "newRecord": "再积累一些成绩后，这里会慢慢出现你的能力轨迹。",
-    "rangeLabel": "查看范围",
+    "rangeLabel": "趋势范围",
+    "latestMilestones": "最近 {count} 项",
+    "recordsRange": "记录范围",
     "rangeDays": "{days} 天",
     "rangeActual": "已记录 {days} 天",
     "dimensionLabel": "趋势维度",
@@ -234,21 +249,22 @@
     "weeklyEntry": "看看这一周",
     "trend": {
       "title": "这段时间",
-      "noPoints": "所选维度还没有可用的测量点。",
+      "noPoints": "这个方向还没有记录。",
       "onePoint": "{day} 记录到{dimension} {value}。",
       "summary": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。",
-      "summaryBreak": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。不同计算口径之间不直接连线。",
+      "summaryBreak": "{dimension}的记录，{fromDay}至{toDay}。",
       "pointLabel": "{day}，{dimension} {value}，关注方向{focus}"
     },
     "change": {
-      "up": "本轮记录以来，{dimension}从 {from} 到 {to}。",
-      "down": "近期测量略有回落：{dimension}从 {from} 到 {to}。",
-      "stable": "最近能力结构整体比较稳定。",
-      "insufficient": "当前计算口径下还需要更多记录才能比较变化。",
-      "limited": "当前记录不足以形成稳定的能力变化。"
+      "up": "这段时间，{dimension}从 {from} 到了 {to}。",
+      "down": "最近几次记录里，{dimension}从 {from} 到了 {to}。",
+      "stable": "最近几次记录里，能力结构基本没变。",
+      "insufficient": "记录还在积累，再多几次同步后趋势会更清楚。",
+      "limited": "成绩记录还不多，再积累一些后趋势会更清楚。",
+      "stableValue": "最近几次记录里，{dimension}基本保持在 {value}。"
     },
-    "segmentUpdated": "计算口径曾更新",
-    "segmentExplanation": "不同阶段的测量不会直接连接，也不会跨阶段计算变化量。",
+    "segmentUpdated": "记录方式更新过",
+    "segmentExplanation": "更新前后的数值不直接比较。",
     "focusTitle": "关注方向",
     "focus": {
       "balanced": "整体均衡",
@@ -279,7 +295,11 @@
     "nextTitle": "接下来",
     "nextFocus": "最近仍可以从{focus}入手",
     "activeGoalTitle": "这次想练",
-    "completedGoalTitle": "最近练成"
+    "completedGoalTitle": "最近练成",
+    "rangeAll": "全部记录",
+    "updating": "正在更新这段记录…",
+    "focusContinuing": "{focus}仍然是现在最值得关注的方向。",
+    "focusChanged": "最近关注的方向转到了{focus}。"
   },
   "weekly": {
     "title": "这一周",

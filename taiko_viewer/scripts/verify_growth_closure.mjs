@@ -90,10 +90,10 @@ try {
     assert.equal(await surface.locator('.growth-metric').count(),0);
     assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('theme-dark')),dark);
     assert.ok(!/涉及谱面|段位变化|接下来先练|练这三首|次は.*を練習|推荐歌曲取得进步|home\.growth\.|difficulty\.\d/.test(text));
-    if(state==='improvement')assert.match(daily,/8 → 4/);
-    if(state==='pb'||state==='merged')assert.match(daily,/900,000 → 907,130 \(\+7,130\)/);
-    if(state==='merged'){assert.match(daily,/8 → 0/);assert.equal(await surface.locator('.growth-event').count(),1);}
-    if(state==='crown'||state==='merged')assert.match(daily,locale==='zh'?/新全连/:/フルコンボ達成/);
+    if(state==='improvement')assert.match(daily,locale==='zh'?/不可压到了 4/:/不可を4/);
+    if(state==='pb'||state==='merged'){assert.match(daily,/907,130/);assert.match(daily,/7,130/);}
+    if(state==='merged'){assert.match(daily,locale==='zh'?/不可压到了 0/:/不可を0/);assert.equal(await surface.locator('.growth-event').count(),1);}
+    if(state==='crown'||state==='merged')assert.match(daily,locale==='zh'?/拿到全连/:/フルコンボを達成/);
     if(state==='no-play'){assert.match(daily,locale==='zh'?/今天还没开打/:/今日はまだプレイ/);assert.equal(await surface.locator('.growth-event').count(),0);}
     else {assert.match(daily,/Replay Song Alpha/);assert.match(daily,locale==='zh'?/魔王/:/おに/);}
     assert.match(await surface.locator('.growth-plan').innerText(),/9星/);

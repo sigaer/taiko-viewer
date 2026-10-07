@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.79.1",
+  "version": "0.79.2",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -60,7 +60,11 @@
     "test:growth:history:db": "node --experimental-strip-types --test --test-concurrency=1 tests/growthHistorySql.test.ts",
     "growth:history:migrate": "node --experimental-strip-types scripts/migrate_growth_history_schema.ts",
     "test:growth:browser": "node --experimental-strip-types scripts/verify_growth_closure.mjs",
-    "test:growth:production": "node --experimental-strip-types scripts/verify_growth_closure.mjs --production"
+    "test:growth:production": "node --experimental-strip-types scripts/verify_growth_closure.mjs --production",
+    "test:growth:experience": "node --experimental-strip-types --test tests/growthExperience.test.ts tests/growthFeedback.test.ts tests/growthPassport.test.ts",
+    "test:growth:experience:browser": "node scripts/verify_growth_experience_browser.mjs",
+    "audit:growth:experience:performance": "node --experimental-strip-types scripts/benchmark_growth_experience.mjs",
+    "test:growth:experience:production": "node --experimental-strip-types scripts/run_growth_experience_production_smoke.mjs"
   },
   "dependencies": {
     "@alicloud/esa20240910": "^3.7.0",

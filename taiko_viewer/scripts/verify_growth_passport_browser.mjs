@@ -153,9 +153,9 @@ try {
         await chartPoint.press('Enter');
         assert.ok(await root.locator('.passport-chart-detail').isVisible());
       }
-      if (scenario === "model-break") assert.match(text, locale === "zh" ? /计算口径曾更新/ : /計算基準が更新/);
-      if (scenario === "limited") assert.match(text, locale === "zh" ? /不足以形成稳定/ : /安定した力の軌跡/);
-      if (scenario === "new") assert.match(text, locale === "zh" ? /刚刚开始/ : /始まったばかり/);
+      if (scenario === "model-break") assert.match(text, locale === "zh" ? /记录方式更新过/ : /記録方法が変わり/);
+      if (scenario === "limited") assert.match(text, locale === "zh" ? /成绩记录还不多/ : /まだ記録が少ない/);
+      if (scenario === "new") assert.match(text, locale === "zh" ? /记录还在积累/ : /記録はまだ増えて/);
       if (scenario === "active-goal") assert.match(text, /Current Practice/);
       if (scenario === "recent-goal") assert.match(text, /Finished Practice/);
       if (scenario === "profile-switch") assert.equal(buildPayload(scenario).profileId, "2");

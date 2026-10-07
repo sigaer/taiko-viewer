@@ -3,12 +3,13 @@ import type { GrowthFact, RecentGrowthResponse } from "~/types/player-growth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { formatScoreRank } from "~/utils/scoreRank";
 
-const props = defineProps<{ recent: RecentGrowthResponse; pending?: boolean; failed?: boolean }>();
+const props = defineProps<{ recent: RecentGrowthResponse; facts?: GrowthFact[]; suppressedCount?: number; pending?: boolean; failed?: boolean }>();
 const emit = defineEmits<{ presented: [token: string]; retry: [] }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
-const visibleFacts = computed(() => props.recent.facts.slice(0, 5));
-const hiddenCount = computed(() => Math.max(0, props.recent.totalFacts - visibleFacts.value.length));
+const visibleFacts = computed(() => (props.facts || props.recent.facts).slice(0, 5));
+const hiddenCount = computed(() => Math.max(0, props.recent.totalFacts - (props.suppressedCount || 0) - visibleFacts.value.length));
+const shownElsewhere = computed(() => !visibleFacts.value.length && !hiddenCount.value && (props.suppressedCount || 0) > 0);
 const observedLabel = computed(() => {
   const parsed = Date.parse(props.recent.observedAt || "");
   return Number.isFinite(parsed) ? new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(parsed) : "";
@@ -31,7 +32,7 @@ watch(() => props.recent.boundary.currentToken, async token => {
 </script>
 
 <template>
-  <section v-if="pending || failed || recent.state !== 'unavailable'" class="recent-growth" aria-labelledby="recent-growth-title" :aria-busy="pending || undefined">
+  <section v-if="pending || failed || (recent.state !== 'unavailable' && !shownElsewhere)" class="recent-growth" aria-labelledby="recent-growth-title" :aria-busy="pending || undefined">
     <div class="recent-growth__head">
       <div>
         <p class="recent-growth__eyebrow">{{ t("home.growth.recent.eyebrow") }}</p>

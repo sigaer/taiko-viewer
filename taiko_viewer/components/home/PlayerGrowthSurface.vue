@@ -29,11 +29,12 @@ const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
 const focusLabel = computed(() => props.overview.playerState.dataSufficiency === "ready" ? dimensionLabel(props.overview.playerState.priorityDimension) : "");
 const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
-const feedback = computed(() => composeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value, props.overview.dailyProgress));
+const feedback = computed(() => composeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value, props.overview.dailyProgress, props.recent, activeGoal.value));
 const progress = computed(() => feedback.value.dailyProgress);
 const hasProgress = computed(() => progress.value.attendance === "played");
 const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
-const factualChange = (fact: GrowthEventFact) => ["score-pb", "ng-reduced", "combo-improved", "rank-upgrade"].includes(fact.type);
+const factText = (fact: GrowthEventFact) => t(`home.growth.log.${fact.type}`, { value: eventValue(fact, fact.after), delta: eventValue(fact, fact.delta) });
+const goalSupportText = (fact: GrowthEventFact) => fact.type === 'score-pb' ? t('home.growth.goalScore', { value: eventValue(fact, fact.after) }) : factText(fact);
 const skillItems = computed(() => props.overview.playerState.skills.filter((item) => Number(item.value) > 0));
 const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionLabel(key)} ${Number(value).toFixed(2)}`;
 
@@ -125,7 +126,7 @@ const completionChange = computed(() => {
   const result = recentCompletedGoal.value?.completionEvidence?.result;
   if (!result || !['score-pb','ng-reduced','rank-upgrade'].includes(result.goalType)) return '';
   const format = (value:number) => result.goalType === 'rank-upgrade' ? formatScoreRank(value,locale.value) : value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
-  return `${format(result.before)} → ${format(result.after)}`;
+  return `${t(`home.growth.factLabels.${result.goalType}`)} ${format(result.before)} → ${format(result.after)}`;
 });
 const chooseAnother = () => document.querySelector<HTMLButtonElement>('.growth-plan__choose:not(:disabled)')?.focus();
 const selectedChart = (item: GrowthPlanItem) => activeGoal.value?.songId === item.songId && activeGoal.value?.difficultyType === item.difficultyType;
@@ -155,6 +156,58 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
     </div>
     <el-alert v-else-if="failed" :title="t('home.growth.loadFailed')" type="warning" :closable="false" show-icon />
     <template v-else>
+      <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
+        <h2 id="growth-goal-title">{{ t('home.goal.title') }}</h2>
+        <strong>{{ activeGoal.title }}</strong>
+        <span>{{ t(difficultyLabelKey(activeGoal.difficultyType)) }}<template v-if="activeGoal.starLevel"> · {{ activeGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
+        <span>{{ t(`home.goal.types.${activeGoal.goalType}`) }}</span>
+        <span v-if="activeGoal.goalType === 'score-pb' && activeGoal.baseline.highScore !== null">{{ t('home.goal.baseline', { value: activeGoal.baseline.highScore.toLocaleString() }) }}</span>
+        <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
+        <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
+        <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
+        <div class="goal-actions"><button class="goal-evaluate" :disabled="choicesDisabled" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="choicesDisabled" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
+      </section>
+      <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
+        <h2 id="goal-completed-title">{{ t('home.goal.completed') }}</h2>
+        <strong>{{ recentCompletedGoal.title }}</strong>
+        <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
+        <span v-if="!completionChange">{{ t(`home.goal.completedTypes.${feedback.goalType || recentCompletedGoal.goalType}`) }}</span>
+        <strong v-if="completionChange">{{ completionChange }}</strong>
+        <p v-for="fact in feedback.goalFacts.slice(1)" :key="fact.type" class="growth-goal__support">{{ goalSupportText(fact) }}</p>
+        <div class="goal-actions"><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.chooseNext') }}</button></div>
+      </section>
+    </template>
+
+    <HomeRecentGrowth
+      :recent="recent"
+      :facts="feedback.recentFacts"
+      :suppressed-count="feedback.recentSuppressedCount"
+      :pending="recentPending"
+      :failed="recentFailed"
+      @presented="acknowledgeRecent"
+      @retry="refreshRecent"
+    />
+
+    <template v-if="!pending && !failed">
+      <section class="growth-progress" aria-labelledby="growth-progress-title">
+        <div class="growth-section-head">
+          <div>
+            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
+          </div>
+        </div>
+        <div class="growth-progress__card panel-card">
+          <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
+          <template v-else>
+            <p v-if="feedback.additionalPbCount" class="growth-progress__lead">{{ t('home.growth.additionalPb', { count: feedback.additionalPbCount }) }}</p>
+            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
+              <strong class="growth-event__song">{{ event.title }}</strong>
+              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
+              <p class="growth-event__change">{{ event.facts.map(factText).join(t('home.growth.logSeparator')) }}</p>
+            </article>
+            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
+          </template>
+        </div>
+      </section>
       <header class="growth-focus panel-card">
         <div class="growth-focus__topline">
           <h1 id="growth-title">{{ greeting }}</h1>
@@ -182,17 +235,6 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           </div>
         </div>
       </header>
-    </template>
-
-    <HomeRecentGrowth
-      :recent="recent"
-      :pending="recentPending"
-      :failed="recentFailed"
-      @presented="acknowledgeRecent"
-      @retry="refreshRecent"
-    />
-
-    <template v-if="!pending && !failed">
       <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
@@ -221,25 +263,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
-      <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
-        <h2 id="growth-goal-title">{{ t('home.goal.title') }}</h2>
-        <strong>{{ activeGoal.title }}</strong>
-        <span>{{ t(difficultyLabelKey(activeGoal.difficultyType)) }}<template v-if="activeGoal.starLevel"> · {{ activeGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
-        <span>{{ t(`home.goal.types.${activeGoal.goalType}`) }}</span>
-        <span v-if="activeGoal.goalType === 'score-pb' && activeGoal.baseline.highScore !== null">{{ t('home.goal.baseline', { value: activeGoal.baseline.highScore.toLocaleString() }) }}</span>
-        <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
-        <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
-        <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
-        <div class="goal-actions"><button class="goal-evaluate" :disabled="choicesDisabled" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="choicesDisabled" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
-      </section>
-      <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
-        <h2 id="goal-completed-title">{{ t('home.goal.completed') }}</h2>
-        <strong>{{ recentCompletedGoal.title }}</strong>
-        <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
-        <span>{{ t(`home.goal.completedTypes.${feedback.goalType || recentCompletedGoal.goalType}`) }}</span>
-        <strong v-if="completionChange">{{ completionChange }}</strong>
-        <div class="goal-actions"><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.chooseNext') }}</button></div>
-      </section>
+
+
       <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
       <div v-else-if="refreshFailed" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button @click="refreshAfterEvaluation(identity)">{{ t('home.goal.retryRefresh') }}</button></div>
       <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
@@ -256,29 +281,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           <div class="goal-actions"><button @click="closeGoal">{{ t('home.goal.cancel') }}</button><button :disabled="busy || !selectedType" :aria-busy="busy" @click="mutate()">{{ t(busy ? 'home.goal.saving' : 'home.goal.confirm') }}</button></div>
         </template>
       </dialog>
-      <section class="growth-progress" aria-labelledby="growth-progress-title">
-        <div class="growth-section-head">
-          <div>
-            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
-          </div>
-        </div>
-        <div class="growth-progress__card panel-card">
-          <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
-          <template v-else>
-            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
-              <h3>{{ t(`home.growth.events.${event.facts[0].type}`) }}</h3>
-              <strong class="growth-event__song">{{ event.title }}</strong>
-              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
-              <p v-for="fact in event.facts.filter(factualChange)" :key="fact.type" class="growth-event__change">
-                <span>{{ t(`home.growth.factLabels.${fact.type}`) }} </span>
-                {{ eventValue(fact, fact.before) }} → {{ eventValue(fact, fact.after) }}
-                <span v-if="fact.type === 'score-pb'"> (+{{ eventValue(fact, fact.delta) }})</span>
-              </p>
-            </article>
-            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
-          </template>
-        </div>
-      </section>
+
     </template>
   </section>
 </template>
@@ -288,7 +291,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-plan__choose { justify-self: end; }
 .growth-plan__unavailable { padding: 8px; font-size: 12px; color: var(--el-text-color-secondary); }
 .growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color: var(--el-text-color-primary); }
-.growth-goal--completed { padding: 20px; box-sizing: border-box; }
+.growth-goal--completed { max-width: none; padding: 20px 24px; border-left: 3px solid var(--viewer-accent-strong); box-sizing: border-box; }
+.growth-goal__support { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
 .growth-goal h2 { margin: 0 0 6px; font: 700 23px/1.2 var(--viewer-display-font); }
 .growth-goal > strong { font-size: 18px; overflow-wrap: anywhere; }
 .growth-goal > span { font-size: 14px; }
@@ -346,12 +350,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-plan__details small { color: #806b5c; font-variant-numeric: tabular-nums; }
 .growth-plan__arrow { color: #b84d37; font-size: 20px; }
 .growth-empty { margin: 0; color: #806b5c; font-size: 13px; }
-.growth-progress__card { display: grid; gap: 18px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
-.growth-event { display: grid; gap: 6px; min-width: 0; color: #49382d; }
+.growth-progress__lead { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
+.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
+.growth-event { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; min-width: 0; color: #49382d; }
 .growth-event + .growth-event { border-top: 1px solid rgba(151,105,73,.2); padding-top: 16px; }
 .growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color: #a04430; }
-.growth-event__song { font-size: 18px; overflow-wrap: anywhere; }
-.growth-event__change { margin: 0; font-size: 16px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.growth-event__song { font-size: 16px; overflow-wrap: anywhere; }
+.growth-event__change { grid-column: 1 / -1; margin: 0; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; }
 .growth-summary { margin: 0; color: #735f50; font-size: 14px; }
 :global(body.theme-dark .growth-event) { color: #f5e7dc; }
 :global(body.theme-dark .growth-event h3) { color: #eaa58c; }

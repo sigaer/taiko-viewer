@@ -16,7 +16,7 @@ for(const [target,actual,counts,evidence] of [['clear','fc',[0,0,0],{clearCnt:0,
  const before=target==='clear'?-1:0,after=actual==='fc'?1:2;
  const d=daily([fact(actual,before,after),fact('score-pb',900000,907130),fact('ng-reduced',8,0)]);
  const p=composeGrowthFeedback(goal(target,0,1,evidence,[...counts]),d);
- assert.equal(p.goalType,actual);assert.deepEqual(p.dailyProgress.events[0].facts.map(f=>f.type),['score-pb','ng-reduced']);
+ assert.equal(p.goalType,actual);assert.deepEqual(p.dailyProgress.events[0].facts.map(f=>f.type),['ng-reduced','score-pb']);
  assert.equal(composeGrowthFeedback(goal(target,0,1,evidence,[...counts]),daily([fact(actual,before+1,after)])).dailyProgress.events.length,1);
 });
 test('no evidence never invents higher crowns or today attribution',()=>{

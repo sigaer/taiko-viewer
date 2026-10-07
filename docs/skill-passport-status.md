@@ -72,3 +72,19 @@ NO KPI DASHBOARD REGRESSION
 
 0.70.x GROWTH STORY FOUNDATION COMPLETE
 ```
+
+## 0.79.2 呈现修补（2026-10-07）
+
+范围请求审计未复现“始终取 90 天”：原版 30/90/180/365 点击各产生一次对应请求，响应 requestedDays 与选中状态正确；短测量历史会使四档返回同样的点。本次按全生命周期的上海日历跨度收敛曲线控件，distinct measurementDays 继续作为实际记录天数。少于 30 天隐藏；42 天显示 30/全部（请求 90）；120 天显示 30/90/全部（请求 180）；250 天显示 30/90/180/全部（请求 365）；365 天起保留四档。曲线始终使用返回点的实际范围，切换保留内容，失败不自动重试。
+
+“最近的节点”属于独立的最近 90 天事实投影。sigaer 只读审计发现最新事实日期为 2026-10-06，但旧投影在按日期展示之前先按意义/幅度截取八项，最新可见节点只到 2026-09-12。本次先选最新日期，同一天内再按意义/幅度选取，仍最多八项。上海日历日用于 observation-only Goal 的排序，Goal 的 day 仍保持 null，不伪造游玩归因。90 天读取边界保留在“记录范围”披露中，曲线控制的 accessible name 为“趋势范围”。
+
+主叙事改用最近记录、实际变化和关注方向；记录方式更新只作可展开的二级说明。Current segment 的可比规则、历史事实、measurements、Weekly、Goal Evaluation 与推荐算法不变，无迁移。
+
+账号与语言页面各自使用缓存 key；离开档案后清理自身缓存，并在账号变化时立即清空。避免中日文子页共用 key 时，旧页卸载会清空新页数据。范围不进入 key，切换仍只有一次 watch 刷新。浏览器验收包含返回“我的太鼓”并重新打开，以及中日文切换保留当前趋势范围。
+
+“我的太鼓”使用标准嵌套页面：父页保留 NuxtPage，原索引内容移至 my/index.vue，页面地址和内容不变。避免本次账号缓存清理与依赖延后 route 的子页条件挂载冲突，连续验收覆盖带 range 查询的档案返回父页和重新进入。
+
+PersonalGrowthLayout 不进入全站 KeepAlive 缓存，避免语言切换后重新激活旧父页时仍保留旧的子页路由。其他页面继续使用原有缓存行为。
+
+可重复验证入口：`tests/growthExperience.test.ts`、`scripts/verify_growth_experience_browser.mjs`、`scripts/benchmark_growth_experience.mjs`、`scripts/run_growth_experience_production_smoke.mjs`。本次验收与性能产物独立保存在 `/var/tmp/growth-experience-0792`，线上烟测仅在对应版本发布后通过显式开关运行，并清理一次性账号、绑定、Goal、measurement、Recent cursor 和合成 userdata。
