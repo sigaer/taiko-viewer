@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OurTaikoView</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171717;color:white;font-family:system-ui}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#overlay{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:16px;background:#171717e8}
+#overlay[hidden]{display:none}button{padding:12px 24px;border:0;border-radius:12px;background:#0071e3;color:white;font:inherit;cursor:pointer}
+progress{width:min(70vw,360px)}
+</style></head><body>
+<canvas id="canvas" tabindex="0"></canvas>
+<div id="overlay"><strong>OurTaikoView</strong><progress id="progress" max="1" value="0"></progress>
+<div id="message" role="status">正在加载 / Loading…</div><button id="start" hidden>点击开始 / Start</button></div>
+<script type="module">
+import { createBundleFetch } from './bundle-fetch.mjs';
+const canvas = document.getElementById('canvas'), overlay = document.getElementById('overlay');
+const progress = document.getElementById('progress'), message = document.getElementById('message'), start = document.getElementById('start');
+const origin = location.origin, nativeFetch = window.fetch.bind(window);
+let instance, requestId = '', loaded = false;
+const post = data => parent.postMessage(data, origin);
+const command = type => instance?.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({channel:'ourtaiko-view',version:1,type,requestId}));
+const releaseAudio = () => { window.fetch = nativeFetch; loaded = false; };
+const fail = () => {
+  releaseAudio();
+  message.textContent = '加载失败 / Load failed'; start.hidden = true; overlay.hidden = false;
+  post({channel:'ourtaiko-view',version:1,type:'error',requestId,payload:{code:'PLAYER_LOAD_FAILED'}});
+};
+window.ourTaikoViewEmit = json => {
+  const data = JSON.parse(json);
+  if (data.type === 'ready' && !instance) return;
+  if (data.type === 'loading') { overlay.hidden = false; start.hidden = true; progress.hidden = true; }
+  if (data.type === 'loaded') {
+    loaded = true; overlay.hidden = false; progress.hidden = true; start.hidden = false;
+    message.textContent = '点击开始以启用声音和键盘 / Click to enable audio and keyboard';
+  }
+  if (data.type === 'error' || data.type === 'exit') releaseAudio();
+  post(data);
+};
+window.addEventListener('message', event => {
+  if (event.source !== parent || event.origin !== origin) return;
+  const data = event.data;
+  if (!instance || data?.channel !== 'ourtaiko-view' || data.version !== 1 || typeof data.type !== 'string') return;
+  if (data.type === 'unload') releaseAudio();
+  if (data.type === 'load') {
+    requestId = data.requestId;
+    const { audioBlob, ...payload } = data.payload || {};
+    if (!(audioBlob instanceof Blob) || !audioBlob.size || audioBlob.size > 128 * 1024 * 1024) { fail(); return; }
+    releaseAudio();
+    const audioUrl = new URL(`./audio/${encodeURIComponent(requestId)}`, location.href).href;
+    window.fetch = createBundleFetch(audioUrl, audioBlob, nativeFetch);
+    instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({...data, payload: {...payload, audioUrl}}));
+  } else instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify(data));
+});
+start.addEventListener('click', () => { canvas.focus(); overlay.hidden = true; });
+window.addEventListener('blur', () => { if (loaded) command('pause'); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && loaded) command('pause'); });
+window.addEventListener('pagehide', () => { command('unload'); releaseAudio(); });
+try {
+  const response = await fetch(`/ourtaikoview-manifest.json?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(30000) });
+  if (!response.ok) throw new Error('Player manifest unavailable');
+  const manifest = await response.json();
+  if (typeof manifest.path !== 'string' || !/^\/player\/[a-f0-9]{16}\/index\.html$/.test(manifest.path)) throw new Error('Invalid player manifest');
+  const root = manifest.path.replace('/player/', '/ourtaikoview-runtime/').replace('index.html', '');
+  const build = root + 'Build/';
+  await new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = build + 'Web.loader.js';
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  instance = await createUnityInstance(canvas, {
+    dataUrl:build+'Web.data.unityweb',frameworkUrl:build+'Web.framework.js.unityweb',codeUrl:build+'Web.wasm.unityweb',
+    streamingAssetsUrl:root+'StreamingAssets',companyName:'OurTaiko',productName:'OurTaikoView_Web',
+    productVersion:'1.0',autoSyncPersistentDataPath:false
+  }, value => { progress.value = value; });
+  progress.hidden = true;
+  command('hello');
+} catch { fail(); }
+</script></body></html>

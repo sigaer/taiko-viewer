@@ -163,6 +163,8 @@ const copy = computed(() =>
         unmute: "ミュート解除",
         mute: "ミュート",
         charts: "譜面プレビュー",
+        practice: "プレイ練習",
+        openPractice: "練習する",
         maxNotes: "最大ノーツ",
         openChart: "新しいタブで開く",
         downloadTjaBundle: "TJA+OGG をダウンロード"
@@ -193,6 +195,8 @@ const copy = computed(() =>
         unmute: "取消静音",
         mute: "静音",
         charts: "谱面预览",
+        practice: "游玩练习",
+        openPractice: "开始练习",
         maxNotes: "最大物量",
         openChart: "打开新页面预览",
         downloadTjaBundle: "下载 TJA+OGG"
@@ -309,6 +313,7 @@ const fumenDefs = computed(() => {
 });
 
 const getFumenUrl = (folder: string) => `${apiBase}/fumen/${folder}/${songId.value}.png`;
+const practiceDifficulty: Record<string, number> = { easy: 1, normal: 2, hard: 3, oni: 4, inner: 5 };
 
 const setDrumAudioRef = (key: string, el: Element | null) => {
   if (el instanceof HTMLAudioElement) {
@@ -821,6 +826,24 @@ useViewerSeo(() => ({
                 >
                   {{ copy.openChart }}
                 </a>
+              </div>
+            </div>
+          </div>
+          <div v-if="tjaBundleUrl" class="fumen-block">
+            <div class="fumen-head">
+              <div class="section-title">{{ copy.practice }}</div>
+            </div>
+            <div class="fumen-grid">
+              <div v-for="item in fumenDefs" :key="item.key" :class="['fumen-card', `fumen-${item.key}`]">
+                <span class="fumen-label">{{ item.label }}</span>
+                <span class="fumen-star">{{ getFumenStarLabel(item.key) }}</span>
+                <span class="fumen-combo">{{ copy.maxNotes }} {{ getFumenComboLabel(item.key) }}</span>
+                <NuxtLink
+                  class="fumen-link-btn"
+                  :to="localePath(`/ourtaikoview/${songId}/${practiceDifficulty[item.key]}`)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >{{ copy.openPractice }}</NuxtLink>
               </div>
             </div>
           </div>

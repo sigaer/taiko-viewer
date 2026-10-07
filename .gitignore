@@ -42,3 +42,5 @@ taiko_viewer/首页Viewer_files/
 
 # Local DB backups
 backups/
+pnpm-lock.yaml
+pnpm-workspace.yaml

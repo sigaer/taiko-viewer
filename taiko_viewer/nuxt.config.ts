@@ -211,6 +211,13 @@ export default defineNuxtConfig({
   },
   nitro: {
     routeRules: {
+      "/ourtaikoview-runtime/**": {
+        proxy: "https://fanmade.ourtaiko.org/player/**"
+      },
+      "/ourtaikoview-manifest.json": {
+        proxy: "https://fanmade.ourtaiko.org/player-build.json",
+        headers: { "cache-control": "no-store" }
+      },
       "/": { prerender: false },
       "/ja": { prerender: false },
       "/ja/**": { prerender: false },
