@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T02:13:20.723499+00:00",
+  "generated_at": "2026-10-06T01:54:02.861191+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 593,
@@ -7629,13 +7629,6 @@
       },
       {
         "title_name": "ピッチフェイダ",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《pitchfader》的“魔王”难度下达成通关吧",
-        "source_row_index": 890
-      },
-      {
-        "title_name": "ピッチフェイダ",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《pitchfader》的“魔王（隐藏）”难度下达成全良连段吧",
@@ -7654,6 +7647,13 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《pitchfader》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 894
+      },
+      {
+        "title_name": "ピッチフェイダ",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《pitchfader》的“魔王”难度下达成通关吧",
+        "source_row_index": 890
       },
       {
         "title_name": "ピッチフェイダ",
@@ -10370,13 +10370,6 @@
       {
         "title_name": "桂月",
         "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《桂月》的“魔王（隐藏）”难度下达成全连吧",
-        "source_row_index": 920
-      },
-      {
-        "title_name": "桂月",
-        "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《桂月》的“魔王”难度下达成全连吧",
         "source_row_index": 916
@@ -10394,6 +10387,13 @@
         "difficulty_scope": "oni",
         "condition_text": "在《桂月》的“魔王”难度下达成全连吧",
         "source_row_index": 918
+      },
+      {
+        "title_name": "桂月",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《桂月》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 920
       },
       {
         "title_name": "桂月",
@@ -13910,13 +13910,6 @@
       },
       {
         "song_name": "pitchfader",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《pitchfader》的“魔王”难度下达成通关吧",
-        "source_row_index": 890
-      },
-      {
-        "song_name": "pitchfader",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《pitchfader》的“魔王（隐藏）”难度下达成全良连段吧",
@@ -13928,6 +13921,13 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《pitchfader》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 892
+      },
+      {
+        "song_name": "pitchfader",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《pitchfader》的“魔王”难度下达成通关吧",
+        "source_row_index": 890
       },
       {
         "song_name": "pitchfader",
@@ -15533,13 +15533,6 @@
       {
         "song_name": "桂月",
         "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《桂月》的“魔王（隐藏）”难度下达成全连吧",
-        "source_row_index": 920
-      },
-      {
-        "song_name": "桂月",
-        "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《桂月》的“魔王”难度下达成全连吧",
         "source_row_index": 916
@@ -15550,6 +15543,13 @@
         "difficulty_scope": "oni",
         "condition_text": "在《桂月》的“魔王”难度下达成通关吧",
         "source_row_index": 917
+      },
+      {
+        "song_name": "桂月",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《桂月》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 920
       },
       {
         "song_name": "桂月",
