@@ -3,6 +3,7 @@ import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import type { SkillPassportMilestone, SkillPassportPoint, SkillPassportRangeDays, SkillPassportResponse, SkillPassportTrendDimension } from "~/types/player-growth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_ORDER } from "~/utils/playerGrowth";
+import { composePassportNarrative, composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { formatScoreRank } from "~/utils/scoreRank";
 import { passportCoverageSpan, passportRangeChoices, passportTrendStory } from "~/utils/passportPresentation";
 import { buildPageDescription } from "~/utils/seo";
@@ -132,18 +133,17 @@ const currentSkills = computed(() => GROWTH_DIMENSION_ORDER.flatMap(key => {
 const skillMax = computed(() => Math.max(1, ...currentSkills.value.map(item => item.value)));
 const primaryChangeText = computed(() => {
   const story = passportTrendStory(passport.value, selectedDimension.value);
-  if (story.state === "limited") return t("passport.change.limited");
-  if (story.state === "accumulating") return t("passport.change.insufficient");
   const dimension = trendLabel(selectedDimension.value);
-  if (story.state === "stable") return t("passport.change.stableValue", { dimension, value: story.last.value.toFixed(2) });
-  return t(story.last.value < story.first.value ? "passport.change.down" : "passport.change.up", {
-    dimension, from: story.first.value.toFixed(2), to: story.last.value.toFixed(2)
-  });
+  const state = !passport.value?.current ? 'new' : story.state === 'accumulating' && (passport.value?.segments.length || 0) > 1 ? 'updated' : story.state === 'changed' ? (story.last.value < story.first.value ? 'down' : 'up') : story.state;
+  const line = composePassportNarrative(state, story.state === 'stable' || story.state === 'changed' ? { dimension, value: story.last.value.toFixed(2), from: story.first.value.toFixed(2), to: story.last.value.toFixed(2) } : {});
+  return t(line.key, line.params || {});
 });
+const businessDate = useState('growth-voice-business-date', () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
+const passportCopy = computed(() => composeRecommendationCopy({ profileId: `${accountUser.value?.id}:${passport.value?.profileId}`, businessDate: businessDate.value, focus: passport.value?.current?.focus || null, readiness: passport.value?.current?.readiness || 'insufficient', goalState: passport.value?.activeGoal ? 'active' : passport.value?.recentCompletedGoal ? 'completed' : 'none', activity: 'unknown' } as GrowthVoiceContext));
 const focusChangeText = computed(() => {
   const change = passport.value?.currentSegmentChange;
   if (!change?.compatible || !change.focusFrom || !change.focusTo || !(change.focusTo in GROWTH_DIMENSION_LABELS)) return "";
-  return t(change.focusFrom === change.focusTo ? "passport.focusContinuing" : "passport.focusChanged", { focus: focusLabel(change.focusTo) });
+  return t(change.focusFrom === change.focusTo ? "passport.focusContinuing" : "passport.focusChanged", { from: focusLabel(change.focusFrom), focus: focusLabel(change.focusTo) });
 });
 const actualRangeText = computed(() => {
   if (!passport.value?.range.actualFrom || !passport.value.range.actualTo) return "";
@@ -195,9 +195,8 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <p v-if="passport.coverage.measurementFrom" class="passport-recorded">{{ t("passport.recordedSince", { date: formatCaptured(passport.coverage.measurementFrom) }) }}</p>
         <div v-if="passport.current" class="passport-now">
           <div v-if="passport.current.rating !== null" class="passport-rating"><span>Rating</span><strong>{{ passport.current.rating.toFixed(2) }}</strong></div>
-          <p class="passport-focus">{{ passport.current.focus in GROWTH_DIMENSION_LABELS ? t("passport.focusLead", { focus: focusLabel(passport.current.focus) }) : focusLabel(passport.current.focus) }}</p>
+          <p class="passport-focus">{{ t(passportCopy.observation.key) }}</p>
         </div>
-        <p v-if="currentLimited" class="passport-limited">{{ t("passport.limited") }}</p>
         <div v-if="currentSkills.length" class="passport-skills" :aria-label="t('passport.skillOverview')">
           <div v-for="skill in currentSkills" :key="skill.key" class="passport-skill">
             <span>{{ dimensionLabel(skill.key) }}</span>
@@ -257,7 +256,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         </div>
 
         <details v-if="hasSegmentBreak" class="passport-segment-note">
-          <summary>{{ t("passport.segmentUpdated") }}</summary>
+          <summary>{{ t(primaryChangeText === t("passport.segmentUpdated") ? "passport.learnMore" : "passport.segmentUpdated") }}</summary>
           <p>{{ t("passport.segmentExplanation") }}</p>
         </details>
       </section>
@@ -296,9 +295,9 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
           <span>{{ t("passport.activeGoalTitle") }}</span><strong>{{ passport.activeGoal.title }}</strong><small>{{ t(`home.goal.types.${passport.activeGoal.goalType}`) }}</small>
         </div>
         <div v-else-if="passport.recentCompletedGoal" class="passport-goal">
-          <span>{{ t("passport.completedGoalTitle") }}</span><strong>{{ passport.recentCompletedGoal.title }}</strong><small>{{ t(`home.goal.types.${passport.recentCompletedGoal.goalType}`) }}</small>
+          <span>{{ t("passport.completedGoalTitle") }}</span><strong>{{ passport.recentCompletedGoal.title }}</strong><small>{{ t(`home.goal.completedTypes.${passport.recentCompletedGoal.goalType}`) }}</small>
         </div>
-        <p v-if="passport.currentNextAction" class="passport-next__focus">{{ passport.currentNextAction.focus in GROWTH_DIMENSION_LABELS ? t("passport.nextFocus", { focus: focusLabel(passport.currentNextAction.focus) }) : focusLabel(passport.currentNextAction.focus) }}</p>
+        <p v-if="passport.currentNextAction" class="passport-next__focus">{{ t(passportCopy.invitation.key) }}</p>
         <div v-if="passport.currentNextAction?.todayPlan.items.length" class="passport-next__songs">
           <NuxtLink v-for="item in passport.currentNextAction.todayPlan.items" :key="`${item.songId}-${item.difficultyType}`" :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.difficultyType) } })">
             <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="46px" />

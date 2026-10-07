@@ -13,7 +13,8 @@ import { deleteUserWithGoals } from '../server/services/goals/lifecycle.ts';
 import { monitorAcceptanceResources } from '../tests/fixtures/goalAcceptanceResources.mjs';
 
 assert.equal(process.env.TAIKO_ALLOW_GROWTH_EXPERIENCE_PRODUCTION_SMOKE, '1');
-const base = 'https://viewer.sakura-bot.cn', out = '/var/tmp/growth-experience-0792', userdata = '/home/sigaer/taiko/userdata';
+const voice = process.argv.includes('--voice');
+const base = 'https://viewer.sakura-bot.cn', out = voice ? '/var/tmp/growth-voice-0800' : '/var/tmp/growth-experience-0792', userdata = '/home/sigaer/taiko/userdata';
 const release = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 await mkdir(out, { recursive: true });
 const finishResources = await monitorAcceptanceResources(`${out}/production-resources.json`);
@@ -22,7 +23,10 @@ for (const line of (await readFile('/etc/taiko-viewer.env', 'utf8')).split('\n')
 const option = (key, fallback) => env[`NUXT_${key}`] || env[`TAIKO_${key}`] || fallback;
 const db = mysql.createPool({ host: option('DB_HOST', '127.0.0.1'), port: Number(option('DB_PORT', 3306)), user: option('DB_USER'), password: option('DB_PASSWORD'), database: option('DB_NAME', 'taiko'), connectionLimit: 2 });
 const exec = promisify(execFile);
-const report = { release, result: 'FAIL', home: {}, passport: {}, performance: [] };
+const report = { release, result: 'FAIL', home: {}, passport: {}, performance: [], ...(voice ? { voice: {} } : {}) };
+const verifyVoice = text => {
+  assert.doesNotMatch(text, /home\.growth|home\.goal|weekly\.|passport\.|当前计算口径|根据数据分析|系统建议|当前优先提升项|下一步先练|任务完成|modelRevision|algorithmVersion|[a-f0-9]{48,}/);
+};
 let userId = 0, currentPath = '', historyDirectory = '', browser, taikoId = '';
 const deadline = setTimeout(() => { console.error('Production smoke deadline'); process.exit(124); }, 600000);
 const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -103,6 +107,12 @@ try {
     await measure('Home initial', async () => { await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 90000 }); await page.locator('.growth-focus').waitFor({ timeout: 90000 }); });
     assert.equal(requests.filter(row => row.path.endsWith('/overview')).length, 1);
     const overview = await (responses.find(r => new URL(r.url()).pathname.endsWith('/overview'))).json();
+    if (voice) {
+      const copy = await page.locator('.growth-focus__observation').innerText(); verifyVoice(copy);
+      const messages = JSON.parse(await readFile(new URL('../locales/zh.json', import.meta.url), 'utf8'));
+      assert.ok(Object.values(messages.home.growth.voice).flatMap(pool => Object.values(pool)).includes(copy));
+      report.voice.recommendation = copy;
+    }
     const candidate = overview.todayPlan.items.find(item => item.goalOptions?.includes('ng-reduced')); assert.ok(candidate);
     const chosenIndex = overview.todayPlan.items.indexOf(candidate);
     await page.locator('.growth-plan__choose').nth(chosenIndex).click(); await page.locator('.goal-dialog input[value="ng-reduced"]').check();
@@ -123,6 +133,17 @@ try {
     assert.match(await page.locator('.growth-goal--completed').innerText(), /8 → 0/);
     assert.equal((await page.locator('.growth-surface').innerText()).match(/8 → 0/g)?.length, 1);
     assert.ok(await page.locator('.growth-goal--completed').evaluate(el => el.getBoundingClientRect().top < document.querySelector('.growth-progress').getBoundingClientRect().top));
+    if (voice) {
+      const completed = await page.locator('.growth-goal--completed').innerText(); assert.match(completed, /这次练成了/); verifyVoice(completed);
+      const daily = await page.locator('.growth-progress').innerText(); verifyVoice(daily); assert.match(daily, /977,000|978,000/);
+      report.voice.goal = 'PASS'; report.voice.dailyRich = 'PASS';
+      const recent = await request('/api/account/growth/recent', token); assert.equal(recent.response.status, 200); report.voice.recentFacts = recent.body.totalFacts;
+      const weekly = await request('/api/account/growth/weekly', token); assert.equal(weekly.response.status, 200);
+      await page.locator('.growth-weekly-link[href="/my/weekly"]').click(); await page.locator('.weekly-hero').waitFor(); verifyVoice(await page.locator('.weekly-page').innerText());
+      report.voice.weekly = 'PASS'; await page.screenshot({ path: `${out}/production-weekly.png` });
+      await page.locator('a[href="/"]').first().evaluate(el => el.click()); await page.locator('.growth-focus').waitFor();
+      if (await page.locator('.recent-growth').count()) { verifyVoice(await page.locator('.recent-growth').innerText()); report.voice.recent = 'PASS'; }
+    }
     report.home = { intentPrimary: 'PASS', completedWithoutReload: 'PASS', overviewRefreshRequests: refreshCalls.length };
     const homeLayout = await page.evaluate(() => ({ width: innerWidth, documentWidth: document.documentElement.scrollWidth,
       overflowing: [...document.querySelectorAll('.growth-surface, .growth-surface *')].flatMap(el => { const r = el.getBoundingClientRect(); return r.right > innerWidth + 1 || el.scrollWidth > el.clientWidth + 1 ? [{ tag: el.tagName, class: el.className, width: r.width, right: r.right, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }] : []; }).slice(0, 50) }));
@@ -186,6 +207,32 @@ try {
     assert.equal(await page.locator('.passport-segment-note').first().innerText(), '记录方式更新过');
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); assert.deepEqual(errors, []);
     await page.screenshot({ path: `${out}/production-passport.png` });
+    if (voice) {
+      assert.match(await page.locator('.passport-change').innerText(), /基本保持/); report.voice.passportStable = 'PASS';
+      const originalCurrent = await readFile(currentPath, 'utf8');
+      try {
+        const limitedPayload = JSON.parse(originalCurrent); limitedPayload.songs = limitedPayload.songs.slice(0, 3);
+        await writeFile(currentPath, JSON.stringify(authoritativeFixture(limitedPayload, taikoId, new Date())));
+        await page.locator('a[href="/my"]').first().evaluate(el => el.click()); await page.locator('.my-links').waitFor();
+        await page.locator('.my-links a[href="/my/growth"]').click(); await page.locator('.passport-hero').waitFor();
+        verifyVoice(await page.locator('.passport-page').innerText()); assert.match(await page.locator('.passport-change').innerText(), /记录还不多/);
+        assert.equal(await page.locator('.passport-chart').count(), 0); report.voice.passportLimited = 'PASS';
+        await page.screenshot({ path: `${out}/production-passport-limited.png` });
+      } finally { await writeFile(currentPath, originalCurrent); }
+      report.voice.passportModelBreak = 'PASS';
+      const checkJapanese = async selector => {
+        const text = await page.locator(selector).innerText(); verifyVoice(text);
+        assert.doesNotMatch(text, /这次|今天|最好成绩|暂时|记录还|这周|从这里|不可压|练成|想继续|刷新|进展/);
+      };
+      await page.goto(`${base}/ja`, { waitUntil: 'domcontentloaded', timeout: 90000 }); await page.locator('.growth-focus').waitFor({ timeout: 90000 });
+      await checkJapanese('.growth-surface'); report.voice.jaHome = 'PASS';
+      await page.screenshot({ path: `${out}/production-home-ja.png`, fullPage: true });
+      await page.locator('.growth-weekly-link[href="/ja/my/weekly"]').click(); await page.locator('.weekly-hero').waitFor();
+      await checkJapanese('.weekly-page'); report.voice.jaWeekly = 'PASS';
+      await page.locator('.weekly-passport-link[href="/ja/my/growth"]').click(); await page.locator('.passport-hero').waitFor();
+      await checkJapanese('.passport-page'); report.voice.jaPassport = 'PASS';
+      await page.screenshot({ path: `${out}/production-passport-ja.png`, fullPage: true });
+    }
     report.passport.browser = 'PASS'; report.passport.modelBreak = 'PASS';
     assert.ok(report.performance.every(row => row.observedGrowthPythonProcesses <= 1), 'duplicate Growth Python');
     report.result = 'PASS';

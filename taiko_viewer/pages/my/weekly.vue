@@ -3,6 +3,7 @@ import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import type { WeeklyGrowthHighlight, WeeklyGrowthResponse } from "~/types/player-growth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { GROWTH_DIMENSION_LABELS } from "~/utils/playerGrowth";
+import { composeWeeklyNarrative, composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { formatScoreRank } from "~/utils/scoreRank";
 import { buildPageDescription } from "~/utils/seo";
 
@@ -69,10 +70,14 @@ const highlightChange = (highlight: WeeklyGrowthHighlight) => {
 };
 const themeText = computed(() => {
   if (!weekly.value) return "";
-  return t(`weekly.theme.${weekly.value.theme.type}`, weekly.value.totals);
+  return t(composeWeeklyNarrative(weekly.value.theme).key);
 });
 const measurement = computed(() => weekly.value?.measurementChange || null);
 const next = computed(() => weekly.value?.currentNextAction || null);
+const businessDate = useState('growth-voice-business-date', () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
+const nextCopy = computed(() => composeRecommendationCopy({ profileId: `${accountUser.value?.id}:${weekly.value?.profileId}`, businessDate: businessDate.value, focus: next.value?.focus || null, readiness: !next.value || ['limited', 'insufficient-data'].includes(next.value.focus) ? 'limited' : 'ready', goalState: 'none', activity: 'unknown' } as GrowthVoiceContext));
+const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatch', 'measurement-version-mismatch'].includes(measurement.value?.reason || ''));
+
 </script>
 
 <template>
@@ -99,7 +104,7 @@ const next = computed(() => weekly.value?.currentNextAction || null);
           <time>{{ formatDay(weekly.week.from) }} — {{ formatDay(weekly.week.to) }}</time>
         </div>
         <h1>{{ themeText }}</h1>
-        <p v-if="coverageIncomplete" class="weekly-coverage">{{ t(`weekly.coverage.${weekly.coverage.scoreHistoryState}`) }}</p>
+        <details v-if="coverageIncomplete" class="weekly-coverage"><summary>{{ t("weekly.recordsRange") }}</summary><p>{{ t(`weekly.coverage.${weekly.coverage.scoreHistoryState}`) }}</p></details>
         <NuxtLink :to="localePath('/my/growth')" class="weekly-passport-link">{{ t("weekly.passportEntry") }} <span aria-hidden="true">→</span></NuxtLink>
       </header>
 
@@ -140,12 +145,13 @@ const next = computed(() => weekly.value?.currentNextAction || null);
           </p>
           <p v-else-if="measurement.focusTo">{{ t("weekly.measurement.focusSame", { focus: focusLabel(measurement.focusTo) }) }}</p>
         </template>
+        <details v-else-if="recordMethodChanged" class="weekly-coverage"><summary>{{ t('weekly.segmentUpdated') }}</summary><p>{{ t('weekly.segmentExplanation') }}</p></details>
         <p v-else class="weekly-muted">{{ t(`weekly.measurement.${measurement?.reason || 'insufficient'}`) }}</p>
       </section>
 
       <section v-if="next" class="weekly-section weekly-next" aria-labelledby="weekly-next-title">
         <h2 id="weekly-next-title">{{ t("weekly.next.title") }}</h2>
-        <p class="weekly-next__focus">{{ t("weekly.next.focus", { focus: focusLabel(next.focus) }) }}</p>
+        <p class="weekly-next__focus">{{ t(nextCopy.observation.key) }}</p>
         <div v-if="next.todayPlan.items.length" class="weekly-next__songs">
           <NuxtLink
             v-for="item in next.todayPlan.items"
@@ -169,7 +175,9 @@ const next = computed(() => weekly.value?.currentNextAction || null);
 .weekly-hero__meta, .weekly-section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .weekly-kicker { margin: 0; color: var(--viewer-accent-strong); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .weekly-hero time, .weekly-section__head span { color: var(--viewer-text-muted); font-size: 12px; }
-.weekly-hero h1 { position: relative; z-index: 1; max-width: 650px; margin: 36px 0 10px; color: var(--viewer-text); font: 800 clamp(30px, 5vw, 50px)/1.16 var(--viewer-display-font); letter-spacing: -.035em; }
+.weekly-hero h1 { text-wrap: balance; position: relative; z-index: 1; max-width: 650px; margin: 36px 0 10px; color: var(--viewer-text); font: 800 clamp(30px, 5vw, 50px)/1.16 var(--viewer-display-font); letter-spacing: -.035em; }
+.weekly-coverage summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }
+.weekly-coverage summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 3px; }
 .weekly-coverage { position: relative; z-index: 1; margin: 20px 0 0; color: var(--viewer-text-muted); font-size: 12px; }
 .weekly-passport-link { position: relative; z-index: 1; display: inline-flex; margin-top: 20px; color: var(--viewer-accent-strong); font-size: 13px; font-weight: 800; text-decoration: none; }
 .weekly-passport-link:hover, .weekly-passport-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }

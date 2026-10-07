@@ -4,12 +4,13 @@ import {readFile} from 'node:fs/promises';
 import {parse,compileScript} from '@vue/compiler-sfc';
 import ts from 'typescript';
 import * as vue from 'vue';
+import * as growthVoice from '../utils/growthVoice.ts';
 const data=code=>`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 const deferred=()=>{let resolve;const promise=new Promise(r=>{resolve=r});return {promise,resolve}};
 test('actual Surface setup: all outcomes refresh once; failure retains completion and blocks next; fresh Overview wins; POST profile race discarded',async()=>{
  const source=await readFile(new URL('../components/home/PlayerGrowthSurface.vue',import.meta.url),'utf8');
  const {descriptor}=parse(source);let code=ts.transpileModule(compileScript(descriptor,{id:'growth-test'}).content,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
- const stubs={formatScoreRank:n=>String(n),composeGrowthFeedback:(g,d)=>({goalType:g?.goalType,dailyProgress:d}),GROWTH_DIMENSION_LABELS:{},GROWTH_DIMENSION_SHORT_LABELS:{},growthGreetingPeriod:()=>'',difficultyLabelKey:()=>'',trackViewerEvent:()=>{}};
+ const stubs={...growthVoice,formatScoreRank:n=>String(n),composeGrowthFeedback:(g,d)=>({goalType:g?.goalType,dailyProgress:d}),GROWTH_DIMENSION_LABELS:{},GROWTH_DIMENSION_SHORT_LABELS:{},growthGreetingPeriod:()=>'',difficultyLabelKey:()=>'',trackViewerEvent:()=>{}};
  globalThis.__growthTestStubs=stubs;
  code=code.replace(/import \{([^}]+)\} from ["']([^"']+)["'];/g,(_,names,path)=>path==='vue'?`import {${names}} from ${JSON.stringify(import.meta.resolve('vue'))};`:`const {${names}}=globalThis.__growthTestStubs;`);
  const component=(await import(data(code))).default;

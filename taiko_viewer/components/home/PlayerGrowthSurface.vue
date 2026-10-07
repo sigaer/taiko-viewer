@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
+import { composeRecommendationCopy, composeGoalCopy, composeDailyNarrative, composeDailyFactCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { composeGrowthFeedback } from "~/utils/composeGrowthFeedback";
 import { formatScoreRank } from "~/utils/scoreRank";
 import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview, RecentGrowthResponse } from "~/types/player-growth";
@@ -27,13 +28,25 @@ const localePath = useLocalePath();
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
 const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_LABELS[key][locale.value === "ja" ? "ja" : "zh"];
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
-const focusLabel = computed(() => props.overview.playerState.dataSufficiency === "ready" ? dimensionLabel(props.overview.playerState.priorityDimension) : "");
 const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
 const feedback = computed(() => composeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value, props.overview.dailyProgress, props.recent, activeGoal.value));
 const progress = computed(() => feedback.value.dailyProgress);
 const hasProgress = computed(() => progress.value.attendance === "played");
 const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
-const factText = (fact: GrowthEventFact) => t(`home.growth.log.${fact.type}`, { value: eventValue(fact, fact.after), delta: eventValue(fact, fact.delta) });
+const voiceContext = computed<GrowthVoiceContext>(() => ({
+  profileId: props.identity,
+  businessDate: props.overview.dailyProgress.calendarDay,
+  focus: balanced.value ? 'balanced' : props.overview.playerState.priorityDimension,
+  readiness: props.overview.playerState.dataSufficiency,
+  goalState: activeGoal.value ? 'active' : recentCompletedGoal.value ? 'completed' : 'none',
+  activity: 'unknown'
+}));
+const recommendationCopy = computed(() => composeRecommendationCopy(voiceContext.value));
+const dailyCopy = computed(() => composeDailyNarrative(progress.value, props.overview.dailyProgress));
+const factText = (fact: GrowthEventFact, songId = 0) => {
+  const line = composeDailyFactCopy(fact, { ...voiceContext.value, profileId: `${voiceContext.value.profileId}:${songId}` }, eventValue(fact, fact.after), eventValue(fact, fact.delta));
+  return t(line.key, line.params || {});
+};
 const goalSupportText = (fact: GrowthEventFact) => fact.type === 'score-pb' ? t('home.growth.goalScore', { value: eventValue(fact, fact.after) }) : factText(fact);
 const skillItems = computed(() => props.overview.playerState.skills.filter((item) => Number(item.value) > 0));
 const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionLabel(key)} ${Number(value).toFixed(2)}`;
@@ -117,7 +130,7 @@ const evaluate = async () => {
     if (generation !== mutationGeneration || identity !== props.identity || result.profileId !== props.overview.profileId) return;
     activeGoal.value = result.activeGoal; recentCompletedGoal.value = result.recentCompletedGoal;
     needsRefresh.value = true;
-    if (result.outcome !== 'completed') evaluationNotice.value = t(result.outcome === 'inconclusive' ? 'home.goal.inconclusive' : 'home.goal.unchanged');
+    if (result.outcome !== 'completed') evaluationNotice.value = t(composeGoalCopy(result.outcome === 'inconclusive' ? 'inconclusive' : 'unchanged').key);
     await refreshAfterEvaluation(identity);
   } catch { if (generation === mutationGeneration) goalError.value = t('home.goal.error'); }
   finally { if (generation === mutationGeneration) busy.value = false; }
@@ -157,7 +170,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
     <el-alert v-else-if="failed" :title="t('home.growth.loadFailed')" type="warning" :closable="false" show-icon />
     <template v-else>
       <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
-        <h2 id="growth-goal-title">{{ t('home.goal.title') }}</h2>
+        <h2 id="growth-goal-title">{{ t(composeGoalCopy('active').key) }}</h2>
         <strong>{{ activeGoal.title }}</strong>
         <span>{{ t(difficultyLabelKey(activeGoal.difficultyType)) }}<template v-if="activeGoal.starLevel"> · {{ activeGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
         <span>{{ t(`home.goal.types.${activeGoal.goalType}`) }}</span>
@@ -168,7 +181,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <div class="goal-actions"><button class="goal-evaluate" :disabled="choicesDisabled" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="choicesDisabled" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
       </section>
       <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
-        <h2 id="goal-completed-title">{{ t('home.goal.completed') }}</h2>
+        <h2 id="goal-completed-title">{{ t(composeGoalCopy('completed').key) }}</h2>
         <strong>{{ recentCompletedGoal.title }}</strong>
         <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
         <span v-if="!completionChange">{{ t(`home.goal.completedTypes.${feedback.goalType || recentCompletedGoal.goalType}`) }}</span>
@@ -196,13 +209,13 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           </div>
         </div>
         <div class="growth-progress__card panel-card">
-          <p v-if="!hasProgress" class="growth-empty">{{ progress.attendance === "not_played" ? t("home.growth.noPlay") : t("home.growth.progressUnavailable") }}</p>
+          <p v-if="!hasProgress" class="growth-empty">{{ t(dailyCopy.key) }}</p>
           <template v-else>
-            <p v-if="feedback.additionalPbCount" class="growth-progress__lead">{{ t('home.growth.additionalPb', { count: feedback.additionalPbCount }) }}</p>
+            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
             <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
               <strong class="growth-event__song">{{ event.title }}</strong>
               <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
-              <p class="growth-event__change">{{ event.facts.map(factText).join(t('home.growth.logSeparator')) }}</p>
+              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
             </article>
             <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
           </template>
@@ -222,11 +235,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             </nav>
           </div>
         </div>
-        <div v-if="focusLabel && !balanced" class="growth-focus__next">
-          <strong>{{ t("home.growth.nextFocusValue", { dimension: dimensionShortLabel(props.overview.playerState.priorityDimension!) }) }}</strong>
-        </div>
-        <div v-else class="growth-focus__limited">
-          <strong>{{ t(balanced ? "home.growth.balanced" : "home.growth.limitedTitle") }}</strong>
+        <div class="growth-focus__observation">
+          <p>{{ t(recommendationCopy.observation.key) }}</p>
         </div>
         <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
           <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
@@ -238,7 +248,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
-            <h2 id="growth-plan-title">{{ t("home.growth.planTitle") }}</h2>
+            <h2 id="growth-plan-title">{{ t(recommendationCopy.invitation.key) }}</h2>
           </div>
         </div>
         <div v-if="overview.todayPlan.items.length" class="growth-plan__items">
@@ -323,13 +333,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-rating { display: grid; gap: 2px; text-align: right; }
 .growth-rating span { color: #806b5c; font-size: 11px; font-weight: 700; }
 .growth-rating strong { color: #342922; font: 800 28px/1 var(--viewer-display-font); }
-.growth-focus__next { display: grid; gap: 5px; padding: 14px 0 2px; border-top: 1px solid rgba(151,105,73,.2); }
-.growth-focus__next span { color: #806b5c; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
-.growth-focus__next strong { color: #b84d37; font: 800 clamp(22px, 3vw, 30px)/1.15 var(--viewer-display-font); }
-.growth-focus__next small { color: #806b5c; font-size: 12px; }
-.growth-focus__limited { display: grid; gap: 5px; padding: 14px 0 2px; border-top: 1px solid rgba(151,105,73,.2); color: #806b5c; }
-.growth-focus__limited strong { color: #49382d; font-size: 17px; }
-.growth-focus__limited span { max-width: 42ch; font-size: 14px; line-height: 1.55; }
+.growth-focus__observation p { margin: 0; color: var(--viewer-text); font-size: clamp(16px, 2vw, 19px); line-height: 1.6; overflow-wrap: anywhere; }
+.growth-focus__observation { padding-top: 14px; border-top: 1px solid var(--viewer-border); }
 .growth-skills { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .growth-skill { position: relative; display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid rgba(151,105,73,.2); }
 .growth-skill span { color: #806b5c; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -364,9 +369,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 :global(body.theme-dark .growth-focus) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
 :global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); }
 :global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color: #f5e7dc; }
-:global(body.theme-dark .growth-focus__next strong), :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color: #e58b6e; }
-:global(body.theme-dark .growth-focus__next), :global(body.theme-dark .growth-focus__limited) { border-color: rgba(255,255,255,.14); }
-:global(body.theme-dark .growth-focus__limited strong) { color: #f5e7dc; }
+:global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color: #e58b6e; }
 :global(body.theme-dark .growth-skill--priority) { border-top-color: rgba(229,139,110,.65); }
 :global(body.theme-dark .growth-skill--priority::after) { background: #e58b6e; }
 :global(body.theme-dark .growth-plan__item) { border-color: rgba(255,255,255,.1); background: rgba(48,36,30,.65); }

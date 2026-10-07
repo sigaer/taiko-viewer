@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GrowthFact, RecentGrowthResponse } from "~/types/player-growth";
+import { composeRecentGrowthCopy } from "~/utils/growthVoice";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { formatScoreRank } from "~/utils/scoreRank";
 
@@ -7,12 +8,13 @@ const props = defineProps<{ recent: RecentGrowthResponse; facts?: GrowthFact[]; 
 const emit = defineEmits<{ presented: [token: string]; retry: [] }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const narrative = computed(() => composeRecentGrowthCopy({ ...props.recent, facts: visibleFacts.value }));
 const visibleFacts = computed(() => (props.facts || props.recent.facts).slice(0, 5));
 const hiddenCount = computed(() => Math.max(0, props.recent.totalFacts - (props.suppressedCount || 0) - visibleFacts.value.length));
 const shownElsewhere = computed(() => !visibleFacts.value.length && !hiddenCount.value && (props.suppressedCount || 0) > 0);
 const observedLabel = computed(() => {
   const parsed = Date.parse(props.recent.observedAt || "");
-  return Number.isFinite(parsed) ? new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(parsed) : "";
+  return Number.isFinite(parsed) ? new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Shanghai" }).format(parsed) : "";
 });
 const value = (fact: GrowthFact, raw: number | null | undefined) => fact.type === "rank-upgrade" ? formatScoreRank(raw ?? null, locale.value) : Number(raw || 0).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
 const factText = (fact: GrowthFact) => {
@@ -35,7 +37,6 @@ watch(() => props.recent.boundary.currentToken, async token => {
   <section v-if="pending || failed || (recent.state !== 'unavailable' && !shownElsewhere)" class="recent-growth" aria-labelledby="recent-growth-title" :aria-busy="pending || undefined">
     <div class="recent-growth__head">
       <div>
-        <p class="recent-growth__eyebrow">{{ t("home.growth.recent.eyebrow") }}</p>
         <h2 id="recent-growth-title">{{ t("home.growth.recent.title") }}</h2>
       </div>
       <time v-if="observedLabel" :datetime="recent.observedAt || undefined">{{ observedLabel }}</time>
@@ -48,6 +49,7 @@ watch(() => props.recent.boundary.currentToken, async token => {
       <button type="button" @click="emit('retry')">{{ t("home.growth.recent.retry") }}</button>
     </div>
     <div v-else-if="visibleFacts.length" class="recent-growth__list">
+      <p v-if="recent.boundary.recovered" class="recent-growth__more">{{ t(narrative.key) }}</p>
       <NuxtLink
         v-for="fact in visibleFacts"
         :key="fact.factKey"
@@ -63,7 +65,7 @@ watch(() => props.recent.boundary.currentToken, async token => {
       </NuxtLink>
       <p v-if="hiddenCount" class="recent-growth__more">{{ t("home.growth.recent.more", { count: hiddenCount }) }}</p>
     </div>
-    <p v-else class="recent-growth__empty">{{ t(recent.state === "new" ? "home.growth.recent.noChanges" : "home.growth.recent.caughtUp") }}</p>
+    <p v-else class="recent-growth__empty">{{ t(narrative.key) }}</p>
   </section>
 </template>
 

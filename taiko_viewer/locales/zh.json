@@ -86,12 +86,12 @@
     "goal": {
       "evaluate": "确认进展",
       "completed": "这次练成了",
-      "refreshing": "正在更新状态…",
-      "refreshFailed": "成长状态刷新失败，请重新刷新。",
-      "retryRefresh": "重新刷新",
+      "refreshing": "正在更新记录…",
+      "refreshFailed": "这次更新没有成功，稍后可以再试一次。",
+      "retryRefresh": "再试一次",
       "chooseNext": "再选一首",
-      "inconclusive": "暂时无法确认，更新成绩后再试。",
-      "unchanged": "还在练习中",
+      "inconclusive": "暂时还确认不了这次进展。更新成绩后可以再试一次。",
+      "unchanged": "还没有看到这次想练的新变化。",
       "completedTypes": {
         "score-pb": "刷新最好成绩",
         "ng-reduced": "不可减少了",
@@ -113,16 +113,16 @@
       "baselineNg": "选择时不可 {value}",
       "unavailable": "这张谱目前不可用",
       "noOptions": "这首暂时还不能选择",
-      "conflict": "成绩或选择已更新，请刷新后再试。",
+      "conflict": "成绩或选择已更新，更新一下后可以再试。",
       "error": "没能保存，请稍后再试。",
       "types": {
         "score-pb": "刷新最好成绩",
         "ng-reduced": "把不可再压低一点",
-        "clear": "先拿到通关",
+        "clear": "试试通关",
         "fc": "试试全连",
         "df": "试试全良",
         "rank-upgrade": "把评价再提一级",
-        "played": "先打一次"
+        "played": "打一次看看"
       }
     },
     "betaNotice": "内测中：当前页面与功能仍在持续迭代，数据与样式可能随版本更新。",
@@ -156,22 +156,25 @@
       "recent": {
         "eyebrow": "最近",
         "title": "最近同步的变化",
-        "caughtUp": "最新变化都看过了",
-        "noChanges": "最新同步中没有可确认的新变化",
-        "failed": "暂时无法读取最近变化",
+        "caughtUp": "最近同步的变化已经看过了。",
+        "noChanges": "这次同步还没有新的变化。",
+        "failed": "这次没能读到最近的变化，稍后可以再试一次。",
         "retry": "重试",
         "more": "另有 {count} 项变化",
-        "score": "最好成绩 {value}",
-        "ngReduced": "不可减少至 {value}",
-        "combo": "最大连段 {value}",
-        "rank": "评价提升至 {value}",
-        "goal": "练习目标",
+        "score": "最好成绩到了 {value}",
+        "ngReduced": "不可压到了 {value}",
+        "combo": "连击到了 {value}",
+        "rank": "评价到了 {value}",
+        "goal": "这次想练",
         "types": {
           "clear": "新通关",
           "fc": "新全连",
           "df": "拿到全良",
-          "goal-completed": "目标达成"
-        }
+          "goal-completed": "这次练成了"
+        },
+        "rich": "最近一次同步里，留下了这些变化。",
+        "firstUse": "这里会记下之后同步到的新变化。",
+        "boundaryRecovered": "上次看到哪儿暂时还确认不了，这里先记下最近同步的变化。"
       },
       "greeting": {
         "morning": "早上好，{name}",
@@ -179,20 +182,20 @@
         "afternoon": "下午好，{name}",
         "evening": "晚上好，{name}"
       },
-      "limitedTitle": "再积累一些成绩，推荐会更贴合",
-      "nextFocusValue": "最近可以从{dimension}入手",
+      "limitedTitle": "记录还不多，暂时看不出特别明显的方向。",
+      "nextFocusValue": "想练的话，可以多留意{dimension}。",
       "skillOverview": "六维概览",
-      "planTitle": "可以试试这三首",
+      "planTitle": "今天想练的话，可以看看这几首",
       "noRecommendation": "暂时没有合适的练习谱面。",
       "progressTitle": "今天",
-      "noPlay": "今天还没开打",
-      "progressUnavailable": "最近还没有可确认的游玩记录",
-      "loadFailed": "成长建议暂时不可用，其他首页内容仍可使用",
-      "balanced": "最近状态挺均衡",
+      "noPlay": "今天还没有新的游玩记录。",
+      "progressUnavailable": "今天的游玩记录暂时还确认不了。",
+      "loadFailed": "这次没能读到成长记录，稍后可以再试一次。",
+      "balanced": "现在各方面挺匀，可以按喜欢的来。",
       "weeklyEntry": "看看这一周",
       "passportEntry": "成长档案",
       "storyLinks": "成长记录",
-      "playedSummary": "今天打了 {count} 张谱",
+      "playedSummary": "今天一共碰了 {count} 张谱。",
       "events": {
         "played": "今天打过",
         "score-pb": "刷新最好成绩",
@@ -214,17 +217,103 @@
       "logSeparator": "，",
       "log": {
         "played": "今天也打了这首",
-        "score-pb": "最好成绩又往前走了 {delta}，到了 {value}",
+        "score-pb": "最好成绩到了 {value}，提高了 {delta}",
         "ng-reduced": "不可压到了 {value}",
         "combo-improved": "连击也到了 {value}",
         "rank-upgrade": "评价到了 {value}",
         "clear-upgrade": "拿到通关了",
         "fc": "拿到全连了",
         "df": "拿到全良了"
+      },
+      "dailyRich": "今天留下了新的变化。",
+      "dailyQuiet": "今天有新的游玩记录，还没有特别明显的变化。",
+      "dailyElsewhere": "今天的变化已经记在上面了。",
+      "scoreRecorded": "最好成绩到了 {value}",
+      "voice": {
+        "big_song": {
+          "0": "想试试难一点的谱，可以留意大歌。",
+          "1": "最近可以给难一点的谱留点时间。",
+          "2": "想探探上限的话，大歌这边可以看看。",
+          "3": "最近可以从稍有挑战的谱里找找手感。"
+        },
+        "stamina": {
+          "0": "想多撑一会儿的话，可以留意体力。",
+          "1": "最近可以找几首需要连续打下来的谱。",
+          "2": "体力这边，可以慢慢试着多撑一段。",
+          "3": "想把手热起来的话，可以从体力谱开始。"
+        },
+        "speed": {
+          "0": "想让高速再顺一点，可以多碰些快谱。",
+          "1": "最近可以给高速留一点练习时间。",
+          "2": "想试试速度的话，高速这边可以看看。",
+          "3": "最近可以从快一点的谱里找找手感。"
+        },
+        "accuracy_power": {
+          "0": "想把手再收稳一点，可以磨磨精度。",
+          "1": "最近可以给精度留一点时间。",
+          "2": "想打得更干净一些，可以留意精度。",
+          "3": "精度这边，可以慢慢磨一磨。"
+        },
+        "rhythm": {
+          "0": "想换换手感，可以看看节奏有变化的谱。",
+          "1": "最近可以多留意不同的拍点。",
+          "2": "想让节奏更顺一点，可以从拍点开始。",
+          "3": "最近可以给节奏处理留一点时间。"
+        },
+        "complex": {
+          "0": "想让复合再顺一点，可以理理手顺。",
+          "1": "最近可以多碰一点手顺有变化的谱。",
+          "2": "复合这边，可以慢慢找更顺手的打法。",
+          "3": "想换点挑战的话，可以看看复杂一些的手顺。"
+        },
+        "balanced": {
+          "0": "各方面的记录比较接近，想练什么可以随心一点。",
+          "1": "现在各方面挺匀，可以按喜欢的来。",
+          "2": "各方面比较均衡，今天可以换换手感。",
+          "3": "暂时没有特别突出的方向，挑喜欢的谱也挺好。"
+        },
+        "limited": {
+          "0": "记录还不多，暂时看不出特别明显的方向。",
+          "1": "现在留下的成绩还不多，先挑喜欢的谱也挺好。",
+          "2": "暂时看不出明显的方向，想打的话可以按喜欢的来。",
+          "3": "记录还在积累，暂时可以找顺手的谱玩起来。"
+        },
+        "quiet": {
+          "0": "有阵子没留下新成绩了，想开手的话可以慢慢来。",
+          "1": "最近没有新的游玩记录，想找找手感的话可以试一首。",
+          "2": "最近的记录比较安静，今天想打的话可以轻松一点。",
+          "3": "有一段时间没留下新记录了，想重新开手的话可以看看。"
+        },
+        "active": {
+          "0": "想换一首的话，这里还有几首",
+          "1": "想换换手感的话，这里还有几首",
+          "2": "想换个方向，可以从这里再挑一首",
+          "3": "这次想练的之外，也可以看看这些"
+        },
+        "completed": {
+          "0": "还想继续的话，可以再挑一首",
+          "1": "想换个方向的话，可以看看这些",
+          "2": "想再试一首，可以从这里挑",
+          "3": "想继续磨磨手的话，这几首也可以看看"
+        },
+        "invitation": {
+          "0": "今天想练的话，可以看看这几首",
+          "1": "不知道打什么的话，从这里挑一首",
+          "2": "想换换手感，可以试试这些",
+          "3": "有空的话，挑一首试试",
+          "4": "想打几首的话，可以从这里开始"
+        },
+        "score": {
+          "0": "分数到了 {value}，比之前多了 {delta}",
+          "1": "最好成绩往前走了 {delta}，到了 {value}",
+          "2": "这首多打出了 {delta} 分，最好成绩到了 {value}",
+          "3": "最好成绩到了 {value}，提高了 {delta}"
+        }
       }
     }
   },
   "passport": {
+    "learnMore": "了解更多",
     "title": "成长档案",
     "description": "记录自己的成绩、关注方向与一路走来的变化。",
     "guestTitle": "登录后查看成长档案",
@@ -234,11 +323,11 @@
     "retry": "重试",
     "currentTitle": "现在的我",
     "recordedSince": "记录自 {date}",
-    "focusLead": "最近可以从{focus}入手",
+    "focusLead": "最近可以多留意{focus}。",
     "skillOverview": "当前六维",
-    "limited": "成绩记录还不多，再积累一些后趋势会更清楚。",
+    "limited": "记录还不多，再多几次同步后趋势会更清楚。",
     "newRecordTitle": "成长记录刚刚开始",
-    "newRecord": "再积累一些成绩后，这里会慢慢出现你的能力轨迹。",
+    "newRecord": "这里会慢慢留下你的成绩与能力记录。",
     "rangeLabel": "趋势范围",
     "latestMilestones": "最近 {count} 项",
     "recordsRange": "记录范围",
@@ -260,7 +349,7 @@
       "down": "最近几次记录里，{dimension}从 {from} 到了 {to}。",
       "stable": "最近几次记录里，能力结构基本没变。",
       "insufficient": "记录还在积累，再多几次同步后趋势会更清楚。",
-      "limited": "成绩记录还不多，再积累一些后趋势会更清楚。",
+      "limited": "记录还不多，再多几次同步后趋势会更清楚。",
       "stableValue": "最近几次记录里，{dimension}基本保持在 {value}。"
     },
     "segmentUpdated": "记录方式更新过",
@@ -268,14 +357,14 @@
     "focusTitle": "关注方向",
     "focus": {
       "balanced": "整体均衡",
-      "limited": "继续积累成绩",
-      "insufficient-data": "继续积累成绩"
+      "limited": "记录还在积累",
+      "insufficient-data": "记录还在积累"
     },
     "milestonesTitle": "最近的节点",
     "recent90": "最近 90 天",
-    "noMilestones": "最近还没有可确认的成长节点。",
-    "goalCompleted": "同时完成了自己选下的练习目标",
-    "goalObserved": "这次练习目标已确认完成",
+    "noMilestones": "最近还没有新的成长节点。",
+    "goalCompleted": "这次想练的也练成了",
+    "goalObserved": "这次练成了",
     "fact": {
       "score-pb": "最好成绩",
       "ng-reduced": "不可",
@@ -284,7 +373,7 @@
       "fc": "新全连",
       "df": "新全良",
       "rank-upgrade": "评价",
-      "goal-completed": "完成练习目标"
+      "goal-completed": "这次练成了"
     },
     "coverage": {
       "complete": "最近 90 天记录完整。",
@@ -292,18 +381,18 @@
       "truncated": "部分较早记录未保留，节点只列出可以确认的部分。",
       "unknown": "最近记录范围暂时无法确认，节点只列出可以确认的部分。"
     },
-    "nextTitle": "接下来",
-    "nextFocus": "最近仍可以从{focus}入手",
+    "nextTitle": "想继续的话",
+    "nextFocus": "想练的话，可以多留意{focus}。",
     "activeGoalTitle": "这次想练",
-    "completedGoalTitle": "最近练成",
+    "completedGoalTitle": "这次练成了",
     "rangeAll": "全部记录",
     "updating": "正在更新这段记录…",
-    "focusContinuing": "{focus}仍然是现在最值得关注的方向。",
-    "focusChanged": "最近关注的方向转到了{focus}。"
+    "focusContinuing": "最近仍可以多留意{focus}。",
+    "focusChanged": "最近更值得关注的方向，从{from}转到了{focus}。"
   },
   "weekly": {
     "title": "这一周",
-    "description": "回看这一周可以确认的成绩变化、成长记录与下一步练习方向。",
+    "description": "回看这一周的成绩与练习记录。",
     "currentWeek": "本周 · 截至今天",
     "completeWeek": "这一周",
     "highlights": "值得记住的变化",
@@ -312,21 +401,21 @@
     "loading": "正在整理这一周",
     "loadFailed": "这一周暂时无法打开",
     "retry": "重试",
-    "goalCompleted": "完成了自己选下的练习目标",
+    "goalCompleted": "这次想练的也练成了",
     "passportEntry": "查看成长档案",
     "theme": {
-      "stability": "这周最明显的是打得更稳了",
-      "score-breakthrough": "这周最好成绩刷新得最集中",
-      "new-crown": "这周最值得记住的是新的冠",
-      "rank-breakthrough": "这周有了新的评价突破",
-      "goal-follow-through": "这周完成了自己选下的练习目标",
+      "stability": "这一周打得更稳了",
+      "score-breakthrough": "这一周留下了更高的最好成绩。",
+      "new-crown": "这一周留下了新的冠。",
+      "rank-breakthrough": "这一周留下了更高的评价。",
+      "goal-follow-through": "这一周，自己选下的练习有了结果。",
       "mixed-growth": "这周的变化落在了好几个方向",
-      "broad-activity": "这周打过的谱面更广了",
+      "broad-activity": "这一周碰了不少不同的谱。",
       "focus-change": "这周更值得关注的方向变了",
       "balanced": "这周整体比较均衡",
-      "quiet": "这周主要是在熟悉谱面",
+      "quiet": "这周还没有特别集中的变化。",
       "no-play": "这周还没有新的游玩记录",
-      "limited-coverage": "这周可确认的记录还不够完整"
+      "limited-coverage": "这周暂时还看不全，先看看已经记下的变化。"
     },
     "fact": {
       "played": "打过这张谱",
@@ -348,22 +437,36 @@
       "title": "能力变化",
       "now": "周初 → 现在",
       "weekEnd": "周初 → 周末",
-      "focusChanged": "当前更值得关注的方向从{from}转到了{to}。",
-      "focusSame": "当前更值得关注的方向仍然是{focus}。",
-      "insufficient": "这周还没有足够的连续能力记录。",
-      "limited": "这周的成绩记录还不足以形成稳定的能力趋势。",
-      "algorithm-mismatch": "本周测量口径发生更新，能力趋势暂不直接比较。",
-      "model-mismatch": "本周测量模型发生更新，能力趋势暂不直接比较。",
-      "measurement-version-mismatch": "本周测量版本发生更新，能力趋势暂不直接比较。"
+      "focusChanged": "最近更值得关注的方向，从{from}转到了{to}。",
+      "focusSame": "最近仍可以多留意{focus}。",
+      "insufficient": "这周的能力记录还在积累，多几次同步后会更清楚。",
+      "limited": "这周留下的成绩还不多，暂时看不出明显的趋势。",
+      "algorithm-mismatch": "记录方式更新过",
+      "model-mismatch": "记录方式更新过",
+      "measurement-version-mismatch": "记录方式更新过"
     },
     "focus": {
       "balanced": "整体均衡",
-      "limited": "继续积累成绩",
-      "insufficient-data": "继续积累成绩"
+      "limited": "记录还在积累",
+      "insufficient-data": "记录还在积累"
     },
     "next": {
-      "title": "接下来",
-      "focus": "最近仍可以从{focus}入手"
+      "title": "想继续的话",
+      "focus": "想练的话，可以多留意{focus}。"
+    },
+    "recordsRange": "记录范围",
+    "segmentUpdated": "记录方式更新过",
+    "segmentExplanation": "更新前后的能力值使用了不同计算版本，因此不会直接比较。",
+    "observedTheme": {
+      "stability": "这周记下的变化里，不可少了一些。",
+      "score-breakthrough": "这周留下的记录里，有新的最好成绩。",
+      "new-crown": "这周留下的记录里，有新的冠。",
+      "rank-breakthrough": "这周留下的记录里，有评价往上走了。",
+      "goal-follow-through": "这周留下的记录里，自己选下的练习有了结果。",
+      "mixed-growth": "这周留下的记录里，几个方向都有变化。",
+      "broad-activity": "这周留下了不同谱面的游玩记录。",
+      "focus-change": "最近的记录里，值得关注的方向有了变化。",
+      "balanced": "这周留下的能力记录，各方面比较接近。"
     }
   },
   "songs": {
