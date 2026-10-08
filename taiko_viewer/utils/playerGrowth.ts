@@ -75,11 +75,17 @@ export const buildPlayerGrowthState = (dimensions: PlayerRatingDimension[], samp
   };
 };
 
+// One fixed-zone formatter; arbitrary caller timezones are deliberately not cached.
+let shanghaiCalendarFormatter: Intl.DateTimeFormat | undefined;
+
 export const growthCalendarDay = (value: unknown, timezone = "Asia/Shanghai") => {
   const text = String(value || "").trim();
   const direct = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T]\d{2}:\d{2}:\d{2})?$/);
   if (direct) return `${direct[1]}-${String(Number(direct[2])).padStart(2, "0")}-${String(Number(direct[3])).padStart(2, "0")}`;
   const date = value instanceof Date ? value : new Date(String(value || ""));
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  const formatter = timezone === "Asia/Shanghai"
+    ? shanghaiCalendarFormatter ??= new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" })
+    : new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" });
+  return formatter.format(date);
 };

@@ -1,0 +1,15 @@
+{
+  "approvedBy": "user in task conversation, 2026-10-08 Asia/Shanghai, before full benchmark",
+  "historyPipelineMs": 3000,
+  "initialPassportMs": 5000,
+  "compositionMs": 30,
+  "processMaxRssBytes": 536870912,
+  "cgroupPeakBytes": 1073741824,
+  "selectedFileBytes": 314572800,
+  "newHighEvents": 0,
+  "newOomEvents": 0,
+  "newOomKillEvents": 0,
+  "psiFullAvg10Percent": 2,
+  "psiSustainedMs": 10000,
+  "watchdogTimeoutMs": 60000
+}

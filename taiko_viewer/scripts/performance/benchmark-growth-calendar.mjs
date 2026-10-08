@@ -1,0 +1,11 @@
+import { performance } from "node:perf_hooks";
+import { writeFile } from "node:fs/promises";
+import { growthCalendarDay } from "../../utils/playerGrowth.ts";
+import { growthCalendarDayBefore } from "../../tests/fixtures/growthCalendarBefore0800.mjs";
+const [variant, out] = process.argv.slice(2);
+if (!["before", "after"].includes(variant) || !out?.startsWith("/var/tmp/")) throw new Error("Require before|after and /var/tmp output");
+const fn = variant === "before" ? growthCalendarDayBefore : growthCalendarDay;
+const start = performance.now(); let correct = true;
+for (let i = 0; i < 10000; i++) correct &&= fn("2026-10-07T16:00:00.000Z") === "2026-10-08";
+const result = { variant, iterations: 10000, wallMs: +(performance.now() - start).toFixed(2), processMaxRssBytes: process.resourceUsage().maxRSS * 1024, correct, scope: "microbenchmark only; not end-to-end" };
+await writeFile(out, JSON.stringify(result) + "\n", { mode: 0o600 }); console.log(JSON.stringify(result));

@@ -1,0 +1,153 @@
+{
+  "baseline": "85859c4",
+  "calendar": {
+    "before-shanghai-midnight": {
+      "value": "2026-10-07"
+    },
+    "at-shanghai-midnight": {
+      "value": "2026-10-08"
+    },
+    "milliseconds": {
+      "value": "2026-10-08"
+    },
+    "offset-eight": {
+      "value": "2026-10-08"
+    },
+    "offset-negative": {
+      "value": "2026-10-08"
+    },
+    "offset-half-hour": {
+      "value": "2026-10-08"
+    },
+    "local-space": {
+      "value": "2026-10-07"
+    },
+    "local-T": {
+      "value": "2026-10-07"
+    },
+    "local-slashes": {
+      "value": "2026-02-09"
+    },
+    "date-only": {
+      "value": "2026-02-09"
+    },
+    "trim": {
+      "value": "2026-10-07"
+    },
+    "Date-instance": {
+      "value": "2026-10-08"
+    },
+    "invalid-Date": {
+      "value": ""
+    },
+    "invalid-string": {
+      "value": ""
+    },
+    "invalid-local-legacy": {
+      "value": "2026-99-99"
+    },
+    "invalid-ISO": {
+      "value": ""
+    },
+    "missing": {
+      "value": ""
+    },
+    "null": {
+      "value": ""
+    },
+    "empty": {
+      "value": ""
+    },
+    "whitespace": {
+      "value": ""
+    },
+    "zero": {
+      "value": ""
+    },
+    "number": {
+      "value": "2026-01-01"
+    },
+    "timestamp-number": {
+      "value": ""
+    },
+    "false": {
+      "value": ""
+    },
+    "true": {
+      "value": ""
+    },
+    "object": {
+      "value": ""
+    },
+    "array": {
+      "value": ""
+    },
+    "stringifiable": {
+      "value": "2026-10-08"
+    },
+    "Symbol": {
+      "value": ""
+    },
+    "bigint": {
+      "value": "2026-01-01"
+    },
+    "leap-day": {
+      "value": "2024-02-29"
+    },
+    "month-end": {
+      "value": "2026-05-01"
+    },
+    "year-end": {
+      "value": "2027-01-01"
+    },
+    "UTC": {
+      "value": "2026-10-07"
+    },
+    "New-York-before-DST": {
+      "value": "2026-03-08"
+    },
+    "New-York-after-DST": {
+      "value": "2026-03-08"
+    },
+    "New-York-fall-first": {
+      "value": "2026-11-01"
+    },
+    "New-York-fall-second": {
+      "value": "2026-11-01"
+    },
+    "London-midnight": {
+      "value": "2026-07-01"
+    },
+    "Tokyo": {
+      "value": "2026-10-08"
+    },
+    "invalid-timezone": {
+      "error": "RangeError"
+    },
+    "local-invalid-timezone-fast-path": {
+      "value": "2026-10-07"
+    },
+    "invalid-date-invalid-timezone": {
+      "value": ""
+    }
+  },
+  "replay": {
+    "no-play": "c6edc150b7632c399198e642f438dd16ea5a548f8df92148bb4141811149c250",
+    "ordinary": "5a05e2b51dabdb49634f4b3870889126ac5e05b28f0e4b6ff1c3e335cdba200a",
+    "pb": "0f87da6b6b7f95e6c0ce593e513f8bc7a268b2d653c60dccd08360038e348874",
+    "old-pb-restore": "85a00d382c8d6c1bbbdc22d09c6586e05145ef9436a517922e4edaace030956e",
+    "improvement": "9690c44fd463de9232b610e91f42c6eb909c7c3b4846e66e33368e62f97a13a8",
+    "combo": "702cbdda6c47630f352cd00327addb3a0507386ebc5693ec353ea3322a426c68",
+    "clear": "53e1f1d028161cb7299979e32f0c580b8a17011165d732585c1f7377f1ef4ae5",
+    "crown": "66aca7496f2f306db1c4e48d83b915c577b4462f56a706f1811077bffe4f341d",
+    "df": "dc7353011debefd57d7532e04dc6357971091a41b2b946a2702bdec4d794d1d2",
+    "rank": "260193190e88c61688be448bb456956ffa0eac327d154178f33c1147e7e8fcfa",
+    "merged": "5ff406a3fac523f498f016449c90e61a49830173d10f0799e07218f77a1bd40c",
+    "multiple": "e54ba7823a030eb3cd7ce7750e7676e0bbec7762ce20ee2a927057f7c65ddaa1",
+    "duplicate": "f214d72d07978460acd7c12b086a17b6ad28b51a495342b53f3e77e16d35dc66",
+    "midnight": "c4a9c7c14f3bbd6ec707b88e2919833b2011a2b7f86f9ea7eba7b705c51bd3cd",
+    "missing-before": "138df19d19f3c4625f1b18a958850c4885e22157dd491000c4f4772d7d696515",
+    "truncated": "73d02b76f08e0042aab2384e867adf8c464fa6d003f43347cb27428a1cb4ce68",
+    "crown-midnight": "b88ed8ccf8c83d111238fc09270a95d86302617e591edb3320943e712acedb17"
+  }
+}
