@@ -3,9 +3,10 @@ import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
 import type { SkillPassportMilestone, SkillPassportPoint, SkillPassportRangeDays, SkillPassportResponse, SkillPassportTrendDimension } from "~/types/player-growth";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_ORDER } from "~/utils/playerGrowth";
-import { composePassportNarrative, composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
+import { composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { formatScoreRank } from "~/utils/scoreRank";
-import { passportRangeChoices, passportTrendStory, selectPassportPeriod } from "~/utils/passportPresentation";
+import { passportRangeChoices, selectPassportPeriod } from "~/utils/passportPresentation";
+import { composePassportMilestoneNarrative } from "~/utils/passportNarrative";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
@@ -61,8 +62,7 @@ onUnmounted(clear);
 watch([() => accountUser.value?.id, bindingGeneration], clear, { flush: "sync" });
 const passport = computed(() => selectPassportPeriod(passportState.value?.payload || null, requestedRange.value));
 const pageError = computed(() => passportState.value?.error || "");
-const selectedDimension = requestedDimension;
-const selectedPointId = ref("");
+const selectedDimension = computed(() => requestedDimension.value === "rating" ? "accuracy_power" : requestedDimension.value);
 
 const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
 const fullDateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
@@ -79,66 +79,16 @@ const activeRange = requestedRange;
 
 const changeRange = async (range: SkillPassportRangeDays) => {
   if (range === requestedRange.value) { if (pageError.value) await refresh(); return; }
-  await navigateTo(localePath({ path: "/my/growth", query: { range: String(range), dimension: selectedDimension.value } }));
+  await navigateTo(localePath({ path: "/my/growth", query: { range: String(range), dimension: requestedDimension.value } }));
 };
 const chooseDimension = (dimension: SkillPassportTrendDimension) => navigateTo(localePath({ path: "/my/growth", query: { ...route.query, dimension } }));
 const retry = () => refresh();
 
-type ChartPoint = SkillPassportPoint & { segmentId: string; segmentIndex: number; value: number };
-const pointValue = (point: SkillPassportPoint, dimension: SkillPassportTrendDimension) => dimension === "rating" ? point.rating : point.dimensions[dimension];
-const chartSegments = computed(() => (passport.value?.segments || []).map((segment, segmentIndex) => ({
-  id: segment.id,
-  index: segmentIndex,
-  points: segment.points.flatMap(point => {
-    const value = pointValue(point, selectedDimension.value);
-    return typeof value === "number" && Number.isFinite(value) ? [{ ...point, segmentId: segment.id, segmentIndex, value }] : [];
-  })
-})).filter(segment => segment.points.length));
-const chartPoints = computed(() => chartSegments.value.flatMap(segment => segment.points));
-const chartBounds = computed(() => {
-  const points = chartPoints.value;
-  if (!points.length) return null;
-  const values = points.map(point => point.value);
-  const to = passport.value?.range.to || passport.value?.coverage.recentFactsTo || points.at(-1)!.day;
-  const from = passport.value?.range.from || new Date(Date.parse(to) - (requestedRange.value - 1) * 86400000).toISOString().slice(0, 10);
-  const rawMin = Math.min(...values), rawMax = Math.max(...values);
-  const padding = rawMin === rawMax ? Math.max(Math.abs(rawMin) * .04, .25) : (rawMax - rawMin) * .12;
-  return { min: rawMin - padding, max: rawMax + padding, first: Date.parse(from), last: Date.parse(to), rawMin, rawMax };
-});
-const xFor = (day: string) => {
-  const bounds = chartBounds.value;
-  if (!bounds || bounds.first === bounds.last) return 360;
-  return 46 + ((Date.parse(`${day}T00:00:00Z`) - bounds.first) / (bounds.last - bounds.first)) * 628;
-};
-const yFor = (value: number) => {
-  const bounds = chartBounds.value;
-  if (!bounds || bounds.min === bounds.max) return 130;
-  return 224 - ((value - bounds.min) / (bounds.max - bounds.min)) * 182;
-};
-const pathFor = (points: ChartPoint[]) => points.map((point, index) => `${index ? "L" : "M"}${xFor(point.day).toFixed(1)},${yFor(point.value).toFixed(1)}`).join(" ");
-const selectPoint = (point: ChartPoint) => { selectedPointId.value = `${point.segmentId}:${point.id}`; };
-const selectedPoint = computed(() => chartPoints.value.find(point => `${point.segmentId}:${point.id}` === selectedPointId.value) || chartPoints.value.at(-1) || null);
-watch([selectedDimension, passport], () => { selectedPointId.value = ""; });
-
-const chartSummary = computed(() => {
-  const points = chartPoints.value;
-  if (!points.length) return t("passport.trend.noPoints");
-  if (points.length === 1) return t("passport.trend.onePoint", { dimension: trendLabel(selectedDimension.value), day: formatDay(points[0]!.day), value: points[0]!.value.toFixed(2) });
-  const first = points[0]!, last = points.at(-1)!;
-  return t((passport.value?.segments.length || 0) > 1 ? "passport.trend.summaryBreak" : "passport.trend.summary", { dimension: trendLabel(selectedDimension.value), fromDay: formatDay(first.day), from: first.value.toFixed(2), toDay: formatDay(last.day), to: last.value.toFixed(2) });
-});
 const currentSkills = computed(() => GROWTH_DIMENSION_ORDER.flatMap(key => {
   const value = passport.value?.current?.dimensions[key];
   return typeof value === "number" && Number.isFinite(value) ? [{ key, value }] : [];
 }));
 const skillMax = computed(() => Math.max(1, ...currentSkills.value.map(item => item.value)));
-const primaryChangeText = computed(() => {
-  const story = passportTrendStory(passport.value, selectedDimension.value);
-  const dimension = trendLabel(selectedDimension.value);
-  const state = !passport.value?.current ? 'new' : story.state === 'accumulating' && (passport.value?.segments.length || 0) > 1 ? 'updated' : story.state === 'changed' ? (story.last.value < story.first.value ? 'down' : 'up') : story.state;
-  const line = composePassportNarrative(state, story.state === 'stable' || story.state === 'changed' ? { dimension, value: story.last.value.toFixed(2), from: story.first.value.toFixed(2), to: story.last.value.toFixed(2) } : {});
-  return t(line.key, line.params || {});
-});
 const businessDate = useState('growth-voice-business-date', () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
 const passportCopy = computed(() => composeRecommendationCopy({ profileId: `${accountUser.value?.id}:${passport.value?.profileId}`, businessDate: businessDate.value, focus: passport.value?.current?.focus || null, readiness: passport.value?.current?.readiness || 'insufficient', goalState: passport.value?.activeGoal ? 'active' : passport.value?.recentCompletedGoal ? 'completed' : 'none', activity: 'unknown' } as GrowthVoiceContext));
 const focusChangeText = computed(() => {
@@ -152,34 +102,14 @@ const actualRangeText = computed(() => {
 });
 const coverageText = computed(() => passport.value ? t(`passport.coverage.${passport.value.coverage.recentFactsState}`) : "");
 const segmentBreaks = computed(() => (passport.value?.segments || []).slice(1).map(segment => ({ id: segment.id, day: segment.from })));
-const openBreaks = ref<string[]>([]);
-const updateBreak = (id: string, open: boolean) => {
-  if (open === openBreaks.value.includes(id)) return;
-  openBreaks.value = open ? [...openBreaks.value, id] : openBreaks.value.filter(value => value !== id);
-};
-const toggleBreak = (id: string) => updateBreak(id, !openBreaks.value.includes(id));
-watch(requestedRange, () => { openBreaks.value = []; });
-const scatteredOnly = computed(() => chartPoints.value.length > 0 && chartSegments.value.every(segment => segment.points.length < 2));
 const expandedMilestones = ref(false);
 watch(requestedRange, () => { expandedMilestones.value = false; });
 const initialMilestones = computed(() => new Set(passport.value?.initialMilestoneIds || passport.value?.milestones.slice(0, 8).map(node => node.id)));
 const visibleMilestones = computed(() => passport.value?.milestones.filter(node => expandedMilestones.value || initialMilestones.value.has(node.id)) || []);
 const moreMilestones = computed(() => (passport.value?.milestones.length || 0) > initialMilestones.value.size);
-const factDays = computed(() => requestedRange.value === 30 ? 30 : 90);
-
-const milestoneValue = (milestone: SkillPassportMilestone, value: number | null) => {
-  if (value === null) return "—";
-  if (milestone.primaryType === "rank-upgrade") return formatScoreRank(value, locale.value);
-  return Number(value).toLocaleString(numberLocale.value);
-};
-const milestoneChange = (milestone: SkillPassportMilestone) => {
-  if (milestone.improvements?.length) return milestone.improvements.map(item => {
-    const typed = { ...milestone, primaryType: item.type };
-    return item.before === null || item.after === null || ["clear", "fc", "df"].includes(item.type) ? t(`passport.fact.${item.type}`) : `${t(`passport.fact.${item.type}`)} ${milestoneValue(typed, item.before)} → ${milestoneValue(typed, item.after)}`;
-  }).join(" · ");
-  if (milestone.primaryType === "goal-completed" || milestone.before === null || milestone.after === null) return t(`passport.fact.${milestone.primaryType}`);
-  return `${t(`passport.fact.${milestone.primaryType}`)} ${milestoneValue(milestone, milestone.before)} → ${milestoneValue(milestone, milestone.after)}`;
-};
+const narratives = computed(() => new Map((passport.value?.milestones || []).map(node => [node.id, composePassportMilestoneNarrative(node, (type, value) => type === 'rank-upgrade' ? formatScoreRank(value, locale.value) : value.toLocaleString(numberLocale.value))])));
+const narrative = (node: SkillPassportMilestone) => narratives.value.get(node.id)!;
+const evidenceText = (line: ReturnType<typeof composePassportMilestoneNarrative>['support'][number]) => t(line.key, { ...line.params, label: t(`passport.fact.${line.params.type}`) });
 const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? formatDay(milestone.day) : milestone.observedAt ? formatCaptured(milestone.observedAt) : "";
 </script>
 
@@ -227,72 +157,31 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <div class="passport-section__head">
           <div><p class="passport-kicker">{{ actualRangeText }}</p><h2 id="passport-trend-title">{{ t("passport.trend.title") }}</h2></div>
         </div>
-        <p class="passport-change">{{ primaryChangeText }}</p>
         <div class="passport-controls">
           <div class="passport-range" role="group" :aria-label="t('passport.rangeLabel')">
             <button v-for="choice in rangeChoices" :key="choice.days" type="button" :data-range="choice.days" :aria-pressed="activeRange === choice.days" @click="changeRange(choice.days)">{{ t("passport.rangeDays", { days: choice.days }) }}</button>
-          </div>
-          <div class="passport-dimensions" role="group" :aria-label="t('passport.dimensionLabel')">
-            <button v-for="dimension in dimensions" :key="dimension" type="button" :aria-pressed="selectedDimension === dimension" @click="chooseDimension(dimension)">{{ trendLabel(dimension) }}</button>
           </div>
         </div>
         <p v-if="pending" class="passport-updating" role="status">{{ t('passport.updating') }}</p>
         <div v-else-if="pageError" class="passport-refresh-error" role="alert"><span>{{ pageError }}</span><button type="button" @click="retry">{{ t('passport.retry') }}</button></div>
 
-        <p v-if="!chartPoints.length" class="passport-empty">{{ chartSummary }}</p>
-        <div v-else class="passport-chart-wrap">
-          <p id="passport-chart-summary" class="passport-chart-summary">{{ chartSummary }}</p>
-          <svg class="passport-chart" viewBox="0 0 720 260" role="img" aria-labelledby="passport-trend-title passport-chart-summary">
-            <line x1="46" y1="224" x2="674" y2="224" class="passport-chart__axis" />
-            <line x1="46" y1="42" x2="674" y2="42" class="passport-chart__guide" />
-            <g v-for="segment in chartSegments" :key="segment.id" :class="`passport-chart__segment passport-chart__segment--${segment.index % 3}`">
-              <path v-if="segment.points.length >= 2" :d="pathFor(segment.points)" />
-              <g v-for="point in segment.points" :key="point.id">
-              <circle :cx="xFor(point.day)" :cy="yFor(point.value)" r="7" aria-hidden="true" />
-              <circle
-                class="passport-chart__hit"
-                :cx="xFor(point.day)"
-                :cy="yFor(point.value)"
-                r="26"
-                tabindex="0"
-                role="button"
-                :aria-label="t('passport.trend.pointLabel', { day: formatDay(point.day), dimension: trendLabel(selectedDimension), value: point.value.toFixed(2) })"
-                @click="selectPoint(point)"
-                @focus="selectPoint(point)"
-                @keydown.enter.prevent="selectPoint(point)"
-                @keydown.space.prevent="selectPoint(point)"
-              />
-              </g>
-            </g>
-            <text x="46" y="22">{{ chartBounds?.rawMax.toFixed(2) }}</text>
-            <g v-for="boundary in segmentBreaks" :key="boundary.id" class="passport-chart__break" aria-hidden="true">
-              <line :x1="xFor(boundary.day)" y1="42" :x2="xFor(boundary.day)" y2="224" />
-            </g>
-            <g v-for="boundary in segmentBreaks" :key="`control-${boundary.id}`" class="passport-break-control" role="button" tabindex="0"
-              :aria-label="`${formatDay(boundary.day)} · ${t('passport.breakQuestion')}`" :aria-expanded="openBreaks.includes(boundary.id)"
-              :aria-controls="`passport-break-${boundary.id}`" @click="toggleBreak(boundary.id)"
-              @keydown.enter.prevent="toggleBreak(boundary.id)" @keydown.space.prevent="toggleBreak(boundary.id)">
-              <circle :cx="xFor(boundary.day)" cy="24" r="12" aria-hidden="true" />
-              <circle :cx="xFor(boundary.day)" cy="24" r="26" class="passport-chart__hit" aria-hidden="true" />
-              <text :x="xFor(boundary.day)" y="28" text-anchor="middle" aria-hidden="true">?</text>
-            </g>
-            <text x="46" y="252">{{ formatDay(passport.range.from || passport.coverage.recentFactsFrom) }}</text>
-            <text x="674" y="252" text-anchor="end">{{ formatDay(passport.range.to || passport.coverage.recentFactsTo) }}</text>
-          </svg>
-          <div v-if="selectedPoint" class="passport-chart-detail" role="status">
-            <strong>{{ formatDay(selectedPoint.day) }}</strong>
-            <span>{{ trendLabel(selectedDimension) }} · {{ selectedPoint.value.toFixed(2) }}</span>
-          </div>
+        <div class="passport-metrics">
+          <section aria-labelledby="passport-rating-trend">
+            <h3 id="passport-rating-trend">{{ t('passport.ratingTrend') }}</h3>
+            <PassportMetricChart :segments="passport.segments" dimension="rating" label="Rating" :from="passport.range.from || passport.coverage.recentFactsFrom" :to="passport.range.to || passport.coverage.recentFactsTo" />
+          </section>
+          <section aria-labelledby="passport-skills-trend">
+            <h3 id="passport-skills-trend">{{ t('passport.skillTrend') }}</h3>
+            <div class="passport-dimensions" role="group" :aria-label="t('passport.dimensionLabel')">
+              <button v-for="dimension in GROWTH_DIMENSION_ORDER" :key="dimension" type="button" :aria-pressed="selectedDimension === dimension" @click="chooseDimension(dimension)">{{ dimensionLabel(dimension) }}</button>
+            </div>
+            <PassportMetricChart :segments="passport.segments" :dimension="selectedDimension" :label="trendLabel(selectedDimension)" :from="passport.range.from || passport.coverage.recentFactsFrom" :to="passport.range.to || passport.coverage.recentFactsTo" />
+          </section>
         </div>
-
-        <p v-if="scatteredOnly" class="passport-coverage">{{ t('passport.trend.scattered') }}</p>
-        <div v-if="segmentBreaks.length" class="passport-breaks">
-          <details v-for="boundary in segmentBreaks" :key="boundary.id" :id="`passport-break-${boundary.id}`" class="passport-segment-note" :data-break-day="boundary.day"
-            :open="openBreaks.includes(boundary.id)" @toggle="updateBreak(boundary.id, ($event.target as HTMLDetailsElement).open)">
-            <summary>{{ formatDay(boundary.day) }} · {{ t('passport.breakQuestion') }}</summary>
-            <p>{{ t('passport.segmentExplanation') }}</p>
-          </details>
-        </div>
+        <details v-if="segmentBreaks.length" class="passport-segment-note passport-breaks">
+          <summary>{{ t('passport.breakQuestion') }}</summary>
+          <p>{{ t('passport.segmentExplanation') }}</p>
+        </details>
       </section>
 
       <section v-if="passport.focusTimeline.length" class="passport-section passport-focus-history" aria-labelledby="passport-focus-title">
@@ -308,8 +197,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
       </section>
 
       <section class="passport-section passport-milestones" aria-labelledby="passport-milestones-title">
-        <div class="passport-section__head"><h2 id="passport-milestones-title">{{ t("passport.milestonesTitle") }}</h2><span v-if="passport.milestones.length">{{ t("passport.latestMilestones", { count: visibleMilestones.length }) }}</span></div>
-        <p class="passport-coverage">{{ t("passport.factWindow", { days: factDays }) }}</p>
+        <div class="passport-section__head"><h2 id="passport-milestones-title">{{ t("passport.milestonesTitle") }}</h2></div>
         <p v-if="requestedRange > 90" class="passport-coverage">{{ t("passport.factCap") }}</p>
         <div v-if="passport.milestones.length" id="passport-milestone-list" class="passport-milestone-list">
           <article v-for="milestone in visibleMilestones" :key="milestone.id" class="passport-milestone">
@@ -318,14 +206,16 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
               <NuxtLink v-if="milestone.songId" :to="localePath({ path: `/songs/${milestone.songId}`, query: milestone.difficultyType ? { difficulty: String(milestone.difficultyType) } : undefined })"><strong>{{ milestone.title }}</strong></NuxtLink>
               <strong v-else>{{ milestone.title }}</strong>
               <span v-if="milestone.difficultyType">{{ t(difficultyLabelKey(milestone.difficultyType)) }}</span>
-              <p>{{ milestoneChange(milestone) }}</p>
-              <small v-if="milestone.goalCompleted">{{ t(milestone.observationOnly ? "passport.goalObserved" : "passport.goalCompleted") }}</small>
+              <p class="passport-milestone-headline">{{ t(narrative(milestone).headline.key, narrative(milestone).headline.params) }}</p>
+              <p v-if="narrative(milestone).support.length" class="passport-milestone-evidence">{{ narrative(milestone).support.map(evidenceText).join(' · ') }}</p>
+              <details v-if="narrative(milestone).detail.length" class="passport-fact-details"><summary>{{ t('passport.moreEvidence') }}</summary><p>{{ narrative(milestone).detail.map(evidenceText).join(' · ') }}</p></details>
+              <small v-if="milestone.goalCompleted && !milestone.observationOnly">{{ t(milestone.observationOnly ? "passport.goalObserved" : "passport.goalCompleted") }}</small>
             </div>
           </article>
         </div>
         <p v-else class="passport-empty">{{ t("passport.noMilestones") }}</p>
         <button v-if="moreMilestones" type="button" class="passport-more" :aria-expanded="expandedMilestones" aria-controls="passport-milestone-list" @click="expandedMilestones = !expandedMilestones">{{ t(expandedMilestones ? "passport.fewerMilestones" : "passport.moreMilestones") }}</button>
-        <p class="passport-coverage">{{ coverageText }}</p>
+        <p v-if="passport.coverage.recentFactsState !== 'complete'" class="passport-coverage">{{ coverageText }}</p>
       </section>
 
       <section v-if="passport.activeGoal || passport.recentCompletedGoal || passport.currentNextAction" class="passport-section passport-next" aria-labelledby="passport-next-title">
@@ -349,6 +239,18 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 </template>
 
 <style scoped>
+:global(body.theme-dark .passport-page) { --viewer-text: #f2e7dc; --viewer-text-muted: #bfaea0; --viewer-surface: #241d19; --viewer-border: #493b32; --viewer-accent-strong: #e5a184; }
+:global(body.theme-dark .passport-milestone .passport-milestone-evidence) { color: #bfaea0; }
+
+.passport-metrics { display: grid; gap: 28px; }
+.passport-metrics section + section { padding-top: 20px; border-top: 1px solid var(--viewer-border); }
+.passport-metrics h3 { margin: 6px 0 12px; color: var(--viewer-text); font-size: 18px; }
+.passport-milestone .passport-milestone-headline { font-size: 17px; line-height: 1.55; }
+.passport-milestone .passport-milestone-evidence, .passport-fact-details { color: var(--viewer-text-muted); font-size: 12px; line-height: 1.7; font-weight: 400; }
+.passport-fact-details summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+.passport-fact-details summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); }
+.passport-milestone > div > a, .passport-milestone > div > strong { font-size: 13px; overflow-wrap: anywhere; }
+
 .passport-page { width: min(100%, 1040px); margin: 0 auto; display: grid; gap: clamp(30px, 5vw, 54px); padding-bottom: 52px; }
 .passport-hero { position: relative; overflow: hidden; display: grid; gap: 20px; padding: clamp(24px, 5vw, 54px); border-radius: 28px; }
 .passport-hero::after { content: ""; position: absolute; right: -90px; top: -100px; width: 270px; height: 270px; border: 1px solid rgba(184,77,55,.19); border-radius: 50%; box-shadow: 0 0 0 28px rgba(184,77,55,.04), 0 0 0 64px rgba(184,77,55,.025); pointer-events: none; }
@@ -386,27 +288,8 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-refresh-error { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--viewer-text-muted); }
 .passport-refresh-error button { min-height: 44px; padding: 0 12px; background: transparent; border: 1px solid var(--viewer-border); border-radius: 8px; color: var(--viewer-accent-strong); cursor: pointer; }
 .passport-refresh-error button:focus-visible, .passport-segment-note summary:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-chart-wrap { position: relative; overflow: hidden; border-block: 1px solid var(--viewer-border); }
-.passport-chart-summary { margin: 16px 0 0; color: var(--viewer-text-muted); font-size: 13px; line-height: 1.55; }
-.passport-chart { display: block; width: 100%; min-height: 230px; overflow: visible; }
-.passport-chart__axis { stroke: rgba(151,105,73,.28); }
-.passport-chart__guide { stroke: rgba(151,105,73,.1); stroke-dasharray: 4 7; }
-.passport-chart__segment path { fill: none; stroke: var(--viewer-accent-strong); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.passport-chart__segment--1 path { stroke-dasharray: 9 6; }
-.passport-chart__segment--2 path { stroke-dasharray: 2 6; }
-.passport-chart circle:focus-visible { outline: 3px solid var(--viewer-text); outline-offset: 4px; }
-.passport-chart__break line { stroke: var(--viewer-text-muted); stroke-width: 1; stroke-dasharray: 3 5; }
-.passport-break-control { cursor: pointer; }
-.passport-break-control:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-break-control text { fill: var(--viewer-text); font-weight: 800; }
 .passport-more { min-height: 44px; padding: 0 16px; margin-top: 16px; border: 1px solid var(--viewer-border); border-radius: 12px; background: var(--viewer-surface); color: var(--viewer-accent-strong); font: inherit; font-weight: 700; cursor: pointer; }
-.passport-breaks { display: grid; gap: 8px; }
 .passport-range button:focus-visible, .passport-dimensions button:focus-visible, .passport-more:focus-visible, .passport-segment-note summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-chart circle { fill: var(--viewer-surface); stroke: var(--viewer-accent-strong); stroke-width: 3; cursor: pointer; }
-.passport-chart circle.passport-chart__hit { fill: transparent; stroke: transparent; stroke-width: 0; }
-.passport-chart text { fill: var(--viewer-text-muted); font-size: 11px; }
-.passport-chart-detail { position: static; width: fit-content; margin: 8px 0 0 auto; display: grid; gap: 2px; padding: 9px 12px; border: 1px solid var(--viewer-border); border-radius: 12px; color: var(--viewer-text); background: var(--viewer-surface); box-shadow: 0 8px 24px rgba(69,44,30,.08); font-size: 12px; pointer-events: none; }
-.passport-chart-detail span { color: var(--viewer-text-muted); }
 .passport-change { margin: 18px 0 0; color: var(--viewer-text); font: 700 17px/1.55 var(--viewer-display-font); }
 .passport-segment-note { margin-top: 14px; color: var(--viewer-text-muted); font-size: 12px; }
 .passport-segment-note summary { min-height: 44px; display: flex; align-items: center; color: var(--viewer-accent-strong); cursor: pointer; font-weight: 800; }
@@ -427,7 +310,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-milestone::before { content: ""; position: absolute; left: 87px; top: 20px; width: 11px; height: 11px; border: 3px solid var(--viewer-surface); border-radius: 50%; background: var(--viewer-accent-strong); box-shadow: 0 0 0 1px var(--viewer-border); }
 .passport-milestone time { color: var(--viewer-text-muted); font-size: 11px; text-align: right; }
 .passport-milestone > div { min-width: 0; display: grid; gap: 3px; }
-.passport-milestone a { min-width: 0; overflow: hidden; color: var(--viewer-text); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.passport-milestone a { min-width: 0; color: var(--viewer-text); text-decoration: none; overflow-wrap: anywhere; }
 .passport-milestone a:hover, .passport-milestone a:focus-visible { color: var(--viewer-accent-strong); }
 .passport-milestone span, .passport-milestone small { color: var(--viewer-text-muted); font-size: 12px; }
 .passport-milestone p { margin: 3px 0 0; color: var(--viewer-text); font-weight: 700; }

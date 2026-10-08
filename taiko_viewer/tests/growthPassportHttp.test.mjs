@@ -21,7 +21,7 @@ test("Passport service uses persisted measurements, one canonical History call a
   assert.match(service, /profile-changed/);
 });
 
-test("Passport page is localized, single-series, accessible and connected to Weekly/Home/My", async () => {
+test("Passport page is localized, separated single-series charts, accessible and connected to Weekly/Home/My", async () => {
   const [page, weekly, home, my, sidebar, zh, ja] = await Promise.all([
     readFile(new URL("../pages/my/growth.vue", import.meta.url), "utf8"),
     readFile(new URL("../pages/my/weekly.vue", import.meta.url), "utf8"),
@@ -32,12 +32,13 @@ test("Passport page is localized, single-series, accessible and connected to Wee
     readFile(new URL("../locales/ja.json", import.meta.url), "utf8")
   ]);
   assert.match(page, /\/api\/account\/growth\/passport/);
-  assert.match(page, /role="img"/);
-  assert.match(page, /tabindex="0"/);
+  const chart = await readFile(new URL("../components/PassportMetricChart.vue", import.meta.url), "utf8");
+  assert.match(chart, /role="group"/);
+  assert.match(chart, /tabindex="0"/);
   assert.match(page, /aria-pressed/);
-  assert.match(page, /passport-chart__segment/);
+  assert.match(chart, /passport-chart__segment/);
   assert.doesNotMatch(page, /modelRevision|algorithmVersion|scoreRevision/);
-  assert.doesNotMatch(page, /passport-metric|kpi-grid/i);
+  assert.doesNotMatch(page, /kpi-grid/i);
   for (const source of [weekly, home, my, sidebar]) assert.match(source, /\/my\/growth/);
   for (const locale of [JSON.parse(zh), JSON.parse(ja)]) {
     assert.equal(typeof locale.passport.title, "string");

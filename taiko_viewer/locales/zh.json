@@ -343,7 +343,9 @@
       "summary": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。",
       "summaryBreak": "{dimension}的记录，{fromDay}至{toDay}。",
       "pointLabel": "{day} · {dimension} {value}",
-      "scattered": "这段记录还不够多，暂时连不出连续走势"
+      "scattered": "这段记录还不够多，暂时连不出连续走势",
+      "independent": "这些天留下了 {count} 次{dimension}记录。",
+      "groups": "分为 {count} 段可比较记录，部分记录独立显示。"
     },
     "change": {
       "up": "这段时间，{dimension}从 {from} 到了 {to}。",
@@ -354,18 +356,18 @@
       "stableValue": "最近几次记录里，{dimension}基本保持在 {value}。"
     },
     "segmentUpdated": "记录方式更新过",
-    "segmentExplanation": "前后记录的计算方式不同，数值不能直接比较；每段内保留真实走势。",
+    "segmentExplanation": "部分记录的能力值计算方式不同，所以没有直接连成一条线。",
     "focusTitle": "关注方向",
     "focus": {
       "balanced": "整体均衡",
       "limited": "记录还在积累",
       "insufficient-data": "记录还在积累"
     },
-    "milestonesTitle": "值得留下的节点",
+    "milestonesTitle": "这段时间，留下了什么",
     "recent90": "最近 90 天",
-    "noMilestones": "在现有可确认的记录里，暂时还没有值得单独列出的节点",
-    "goalCompleted": "这次想练的也练成了",
-    "goalObserved": "这次练成了",
+    "noMilestones": "这段时间暂时没有可单独回顾的成绩变化。",
+    "goalCompleted": "之前选下的目标，也确认完成了",
+    "goalObserved": "确认到所选目标已完成",
     "fact": {
       "score-pb": "最好成绩",
       "ng-reduced": "不可",
@@ -378,9 +380,9 @@
     },
     "coverage": {
       "complete": "最近 90 天记录完整。",
-      "partial": "最近记录存在缺口，节点只列出可以确认的部分。",
-      "truncated": "部分较早记录未保留，节点只列出可以确认的部分。",
-      "unknown": "最近记录范围暂时无法确认，节点只列出可以确认的部分。"
+      "partial": "有一部分记录存在缺口，这里只列出能确认的变化。",
+      "truncated": "部分较早记录未能保留，这里只列出能确认的变化。",
+      "unknown": "记录的覆盖范围暂时无法确认，这里只列出能确认的变化。"
     },
     "nextTitle": "想继续的话",
     "nextFocus": "想练的话，可以多留意{focus}。",
@@ -391,12 +393,35 @@
     "focusContinuing": "最近仍可以多留意{focus}。",
     "focusChanged": "最近更值得关注的方向，从{from}转到了{focus}。",
     "factWindow": "本次可查看的成绩节点：最近 {days} 天",
-    "factCap": "成长节点目前仅整理到最近 90 天可确认的记录",
+    "factCap": "能力记录按所选时间展示；成绩回顾目前只整理近 90 天可确认的变化。",
     "moreMilestones": "查看更多精选",
     "fewerMilestones": "收起精选",
     "observedDay": "确认日",
-    "breakQuestion": "为什么这里断开？",
-    "focusMeaning": "这是当时更值得留意的方向，不代表某项数值下降。"
+    "breakQuestion": "为什么有些点没连起来？",
+    "focusMeaning": "这是当时更值得留意的方向，不代表某项数值下降。",
+    "ratingTrend": "Rating 的走势",
+    "skillTrend": "六维变化",
+    "skillScale": "量纲 0–15",
+    "moreEvidence": "其他变化",
+    "narrative": {
+      "updated": "这首多了一条更新记录",
+      "goalObserved": "确认到之前选下的目标已完成",
+      "df": "这首留下了一个全良",
+      "fc": "这首拿到了全连",
+      "clear": "这首留下了通关记录",
+      "rankUp": "评价从{before}升到了{after}",
+      "rankAt": "评价来到了{after}",
+      "ngDown": "不可从{before}降到了{after}",
+      "ngAt": "不可记录为{after}",
+      "pbGain": "最好成绩提高了 {delta} 分",
+      "pbAt": "最好成绩来到了 {after}",
+      "comboAt": "最长连击来到了 {after}"
+    },
+    "evidence": {
+      "change": "{label} {before} → {after}",
+      "value": "{label} {after}",
+      "label": "{label}"
+    }
   },
   "weekly": {
     "title": "这一周",
