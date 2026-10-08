@@ -329,10 +329,10 @@
     "newRecordTitle": "成长记录刚刚开始",
     "newRecord": "这里会慢慢留下你的成绩与能力记录。",
     "rangeLabel": "趋势范围",
-    "latestMilestones": "最近 {count} 项",
+    "latestMilestones": "精选 {count} 个",
     "recordsRange": "记录范围",
     "rangeDays": "{days} 天",
-    "rangeActual": "已记录 {days} 天",
+    "rangeActual": "过去 {range} 天 · 已有 {days} 个记录日",
     "dimensionLabel": "趋势维度",
     "current": "现在",
     "weeklyEntry": "看看这一周",
@@ -342,7 +342,8 @@
       "onePoint": "{day} 记录到{dimension} {value}。",
       "summary": "{dimension} 从 {fromDay} 的 {from} 到 {toDay} 的 {to}。",
       "summaryBreak": "{dimension}的记录，{fromDay}至{toDay}。",
-      "pointLabel": "{day}，{dimension} {value}，关注方向{focus}"
+      "pointLabel": "{day} · {dimension} {value}",
+      "scattered": "这段记录还不够多，暂时连不出连续走势"
     },
     "change": {
       "up": "这段时间，{dimension}从 {from} 到了 {to}。",
@@ -353,16 +354,16 @@
       "stableValue": "最近几次记录里，{dimension}基本保持在 {value}。"
     },
     "segmentUpdated": "记录方式更新过",
-    "segmentExplanation": "更新前后的数值不直接比较。",
+    "segmentExplanation": "前后记录的计算方式不同，数值不能直接比较；每段内保留真实走势。",
     "focusTitle": "关注方向",
     "focus": {
       "balanced": "整体均衡",
       "limited": "记录还在积累",
       "insufficient-data": "记录还在积累"
     },
-    "milestonesTitle": "最近的节点",
+    "milestonesTitle": "值得留下的节点",
     "recent90": "最近 90 天",
-    "noMilestones": "最近还没有新的成长节点。",
+    "noMilestones": "在现有可确认的记录里，暂时还没有值得单独列出的节点",
     "goalCompleted": "这次想练的也练成了",
     "goalObserved": "这次练成了",
     "fact": {
@@ -388,7 +389,14 @@
     "rangeAll": "全部记录",
     "updating": "正在更新这段记录…",
     "focusContinuing": "最近仍可以多留意{focus}。",
-    "focusChanged": "最近更值得关注的方向，从{from}转到了{focus}。"
+    "focusChanged": "最近更值得关注的方向，从{from}转到了{focus}。",
+    "factWindow": "本次可查看的成绩节点：最近 {days} 天",
+    "factCap": "成长节点目前仅整理到最近 90 天可确认的记录",
+    "moreMilestones": "查看更多精选",
+    "fewerMilestones": "收起精选",
+    "observedDay": "确认日",
+    "breakQuestion": "为什么这里断开？",
+    "focusMeaning": "这是当时更值得留意的方向，不代表某项数值下降。"
   },
   "weekly": {
     "title": "这一周",

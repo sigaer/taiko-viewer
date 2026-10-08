@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import ts from 'typescript';
 test('successful binding mutations invalidate Home identity; Goal writes do not add a resolver waterfall',async()=>{
- const state={value:7};let reject=false;
+ const state={value:7},generation={value:0};let reject=false;
  globalThis.useI18n=()=>({locale:{value:'zh'}});
- globalThis.useState=(key)=>{assert.equal(key,'home-state-resolved-user-id');return state};
+ globalThis.useState=(key)=>{assert.ok(['home-state-resolved-user-id','account-binding-generation'].includes(key));return key==='home-state-resolved-user-id'?state:generation};
  globalThis.$fetch=async()=>{if(reject)throw Error('failed');return {ok:true}};
  try{
  const source=await readFile(new URL('../composables/useViewerApiFetch.ts',import.meta.url),'utf8');
@@ -14,9 +14,11 @@ test('successful binding mutations invalidate Home identity; Goal writes do not 
  const fetch=useViewerApiFetch();
  await fetch('/api/account/growth/goal',{method:'POST'});assert.equal(state.value,7);
  await fetch('/api/account/bindings');assert.equal(state.value,7);
+ assert.equal(generation.value,0);
  for(const path of ['/api/account/bindings/current','/api/account/bindings/remove','/api/account/manual','/api/account/qq/confirm']){
- state.value=7;await fetch(path,{method:'POST'});assert.equal(state.value,null);
+ state.value=7;const before=generation.value;await fetch(path,{method:'POST'});assert.equal(state.value,null);assert.equal(generation.value,before+1);
  }
  state.value=7;reject=true;await assert.rejects(fetch('/api/account/bindings/current',{method:'POST'}));assert.equal(state.value,7);
+ assert.equal(generation.value,4);
  }finally{delete globalThis.useI18n;delete globalThis.useState;delete globalThis.$fetch}
 });

@@ -16,7 +16,7 @@ test("Passport service uses persisted measurements, one canonical History call a
   const service = await readFile(new URL("../server/services/growth-passport/service.ts", import.meta.url), "utf8");
   assert.equal((service.match(/getPlayerGrowthOverview\(/g) || []).length, 1);
   assert.equal((service.match(/getGrowthHistory\(/g) || []).length, 1);
-  assert.equal((service.match(/readGrowthMeasurements\(/g) || []).length, 1);
+  assert.equal((service.match(/readDailyGrowthMeasurements\(/g) || []).length, 1);
   assert.doesNotMatch(service, /runGrowthPythonJson|web_skill_passport|CREATE TABLE|ALTER TABLE/);
   assert.match(service, /profile-changed/);
 });

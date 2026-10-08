@@ -63,7 +63,25 @@ export async function readGrowthMeasurements(db: Pick<Pool, "execute">, userId: 
     JOIN web_user_accounts u ON u.id=m.user_id
     WHERE m.user_id=? AND m.binding_id=? AND m.captured_at>=? AND m.captured_at<?
     ORDER BY m.captured_at,m.id`, [userId, bindingId, sqlTime(fromUtc), sqlTime(toExclusiveUtc)]);
-  return rows.map(row => ({
+  return rows.map(measurementFromRow);
+}
+
+// Passport's shared corpus needs one representative per Shanghai day. Sample
+// in SQL so a busy account does not materialize every measurement in Node.
+// The existing History reader and its public contract remain unchanged.
+export async function readDailyGrowthMeasurements(db: Pick<Pool, "execute">, userId: number, bindingId: number, fromUtc: string, toExclusiveUtc: string): Promise<GrowthMeasurement[]> {
+  const [rows] = await db.execute<RowDataPacket[]>(`SELECT daily.* FROM (
+    SELECT m.*,DATE_FORMAT(m.captured_at,'%Y-%m-%dT%H:%i:%s.%fZ') AS captured_at_iso,
+      ROW_NUMBER() OVER (PARTITION BY DATE(DATE_ADD(m.captured_at, INTERVAL 8 HOUR)) ORDER BY m.captured_at DESC,m.id DESC) AS daily_rank
+    FROM web_growth_measurements m
+    JOIN web_taiko_bindings b ON b.id=m.binding_id AND b.user_id=m.user_id
+    JOIN web_user_accounts u ON u.id=m.user_id
+    WHERE m.user_id=? AND m.binding_id=? AND m.captured_at>=? AND m.captured_at<?
+  ) daily WHERE daily.daily_rank=1 ORDER BY daily.captured_at,daily.id LIMIT 365`, [userId, bindingId, sqlTime(fromUtc), sqlTime(toExclusiveUtc)]);
+  return rows.map(measurementFromRow);
+}
+
+const measurementFromRow = (row: RowDataPacket): GrowthMeasurement => ({
     id: String(row.id),
     ownerId: String(row.user_id),
     bindingId: String(row.binding_id),
@@ -77,8 +95,7 @@ export async function readGrowthMeasurements(db: Pick<Pool, "execute">, userId: 
     focus: String(row.focus) as GrowthMeasurement["focus"],
     sampleCount: Number(row.sample_count || 0),
     availabilityState: String(row.availability_state) as GrowthMeasurement["availabilityState"]
-  }));
-}
+  });
 
 export async function readGrowthMeasurementCoverage(db: Pick<Pool, "execute">, userId: number, bindingId: number) {
   const [rows] = await db.execute<RowDataPacket[]>(`SELECT
@@ -89,7 +106,7 @@ export async function readGrowthMeasurementCoverage(db: Pick<Pool, "execute">, u
     JOIN web_taiko_bindings b ON b.id=m.binding_id AND b.user_id=m.user_id
     JOIN web_user_accounts u ON u.id=m.user_id
     WHERE m.user_id=? AND m.binding_id=?`, [userId, bindingId]);
-  const row = rows[0] || {};
+  const row: Record<string, unknown> = rows[0] || {};
   const iso = (value: unknown) => value ? new Date(String(value)).toISOString() : null;
   return {
     measurementFrom: iso(row.measurement_from),

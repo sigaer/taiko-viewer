@@ -320,6 +320,19 @@ export type SkillPassportMilestone = {
   delta: number | null;
   goalCompleted: boolean;
   observationOnly: boolean;
+  improvements?: { type: Exclude<GrowthFactType, "played">; before: number | null; after: number | null; delta: number | null; factKey: string }[];
+  evidenceRefs?: { factKey: string; source: GrowthFact["evidence"]["source"]; sourceRevision?: string; evidenceVersion: number }[];
+};
+
+export type SkillPassportPeriodView = {
+  range: SkillPassportResponse["range"];
+  recentFactsFrom: string;
+  recentFactsTo: string;
+  pointIds: string[];
+  milestoneIds: string[];
+  initialMilestoneIds: string[];
+  currentSegmentChange: SkillPassportSegmentChange;
+  focusTimeline: SkillPassportFocusRun[];
 };
 
 export type SkillPassportResponse = {
@@ -344,11 +357,21 @@ export type SkillPassportResponse = {
     actualTo: string | null;
     timezone: "Asia/Shanghai";
     selectedDimension: SkillPassportTrendDimension;
+    from?: string;
+    to?: string;
+    measurementDays?: number;
+    factDays?: 30 | 90;
   };
   segments: SkillPassportSegment[];
   currentSegmentChange: SkillPassportSegmentChange;
   focusTimeline: SkillPassportFocusRun[];
   milestones: SkillPassportMilestone[];
+  initialMilestoneIds?: string[];
+  shared?: {
+    segments: SkillPassportSegment[];
+    milestones: SkillPassportMilestone[];
+    views: Record<SkillPassportRangeDays, SkillPassportPeriodView>;
+  };
   activeGoal: PlayerGoal | null;
   recentCompletedGoal: PlayerGoal | null;
   currentNextAction: {

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T01:54:02.861191+00:00",
+  "generated_at": "2026-10-08T02:49:44.020226+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 593,
@@ -9557,13 +9557,6 @@
       {
         "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
         "requirement_type": "all_perfect",
-        "difficulty_scope": "oni",
-        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
-        "source_row_index": 952
-      },
-      {
-        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
-        "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全良连段吧",
         "source_row_index": 955
@@ -9574,6 +9567,13 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 956
+      },
+      {
+        "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 952
       },
       {
         "title_name": "UMAのﾌｫｰｽﾄﾚｰﾆ千ｸﾞ 【BPM150編】",
@@ -12285,13 +12285,6 @@
       {
         "song_name": "午马的二千锤百炼 【BPM150篇】",
         "requirement_type": "all_perfect",
-        "difficulty_scope": "oni",
-        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
-        "source_row_index": 952
-      },
-      {
-        "song_name": "午马的二千锤百炼 【BPM150篇】",
-        "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全良连段吧",
         "source_row_index": 955
@@ -12302,6 +12295,13 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 956
+      },
+      {
+        "song_name": "午马的二千锤百炼 【BPM150篇】",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《午马的二千锤百炼 【BPM150篇】》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 952
       },
       {
         "song_name": "午马的二千锤百炼 【BPM150篇】",

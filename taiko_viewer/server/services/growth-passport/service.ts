@@ -4,9 +4,9 @@ import { getAccountDb } from "../../utils/account-db.ts";
 import { getCurrentBindingRow } from "../../internal/account/shared.ts";
 import { getPlayerGrowthOverview } from "../account/growth.ts";
 import { getGrowthHistory } from "../growth-history/service.ts";
-import { readGrowthMeasurementCoverage, readGrowthMeasurements } from "../growth-history/measurements.ts";
+import { readGrowthMeasurementCoverage, readDailyGrowthMeasurements } from "../growth-history/measurements.ts";
 import { buildSkillPassport } from "./composer.ts";
-import { passportHistoryRange, type SkillPassportRange } from "./range.ts";
+import { passportHistoryRange, resolveSkillPassportRange, type SkillPassportRange } from "./range.ts";
 
 export async function getSkillPassport(userId: number, range: SkillPassportRange) {
   const startedAt = performance.now();
@@ -23,11 +23,12 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   if (overview?.profileId && String(overview.profileId) !== profileId) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
 
   const db = getAccountDb();
+  const sharedRange = resolveSkillPassportRange({ range: 365 }, new Date(`${range.to}T12:00:00+08:00`));
   let measurementQueryMs = 0;
   let recentHistoryMs = 0;
   const measurementStartedAt = performance.now();
   const measurementsPromise = Promise.all([
-    readGrowthMeasurements(db, userId, Number(initialBinding.id), range.fromUtc, range.toExclusiveUtc),
+    readDailyGrowthMeasurements(db, userId, Number(initialBinding.id), sharedRange.fromUtc, sharedRange.toExclusiveUtc),
     readGrowthMeasurementCoverage(db, userId, Number(initialBinding.id))
   ]).then(result => {
     measurementQueryMs = performance.now() - measurementStartedAt;
@@ -46,6 +47,7 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   const recap = buildSkillPassport({ profileId, range, measurements, measurementCoverage, history, overview }, timing => { composeTiming = timing; });
   const serializedBytes = Buffer.byteLength(JSON.stringify(recap));
   console.info("[growth-passport] compose", {
+    userId,
     requestedDays: range.requestedDays,
     measurementQueryMs: Math.round(measurementQueryMs),
     recentHistoryMs: Math.round(recentHistoryMs),

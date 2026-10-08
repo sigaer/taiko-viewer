@@ -132,12 +132,12 @@ test("milestones rank relative magnitude, collapse same chart facts, link Goal a
   assert.deepEqual(buildSkillPassportMilestones([pbSmall, pbLarge, fc, duplicate, rank, scoreForGoal, matchedGoal, observedGoal]), milestones);
 });
 
-test("milestones cap at eight without inventing an absolute PB threshold", () => {
+test("milestones curate across time without inventing an absolute PB threshold", () => {
   const facts = Array.from({ length: 12 }, (_, index) => fact(`pb-${index}`, "score-pb", `2026-09-${String(9 + index).padStart(2, "0")}`, { songId: 200 + index, delta: index + 1 }));
   const milestones = buildSkillPassportMilestones(facts);
-  assert.equal(milestones.length, 8);
+  assert.equal(milestones.length, 12);
   assert.ok(milestones.some(item => item.songId === 211));
-  assert.ok(!milestones.some(item => item.songId === 200));
+  assert.ok(milestones.some(item => item.songId === 200));
 });
 
 test("range accepts only 30/90/180/365 and keeps recent facts at 90 days", () => {
@@ -177,7 +177,7 @@ test('new growth days enter recent milestones before eight older large breakthro
   const older = Array.from({ length: 8 }, (_, index) => fact(`old-${index}`, 'df', '2026-09-12', { songId: 200 + index, before: 1, after: 2, delta: 1 }));
   const latest = fact('new-small-pb', 'score-pb', '2026-10-06', { songId: 101, before: 900000, after: 900001, delta: 1 });
   const milestones = buildSkillPassportMilestones([...older, latest]);
-  assert.equal(milestones.length, 8);
+  assert.equal(milestones.length, 3);
   assert.equal(milestones[0]?.day, '2026-10-06');
   assert.equal(milestones[0]?.songId, 101);
   assert.equal(milestones[0]?.after, 900001);

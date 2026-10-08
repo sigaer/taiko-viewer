@@ -328,10 +328,10 @@
     "newRecordTitle": "成長の記録が始まったばかりです",
     "newRecord": "スコアや力の記録が、ここに少しずつ残っていきます。",
     "rangeLabel": "推移の期間",
-    "latestMilestones": "最新{count}件",
+    "latestMilestones": "厳選 {count} 件",
     "recordsRange": "記録の期間",
     "rangeDays": "{days}日",
-    "rangeActual": "{days}日分の記録",
+    "rangeActual": "過去 {range} 日 · 記録のある日 {days} 日",
     "dimensionLabel": "推移する項目",
     "current": "現在",
     "weeklyEntry": "今週を振り返る",
@@ -341,7 +341,8 @@
       "onePoint": "{day}に{dimension} {value}を記録しました。",
       "summary": "{dimension}は{fromDay}の{from}から{toDay}の{to}へ。",
       "summaryBreak": "{fromDay}から{toDay}までの{dimension}の記録。",
-      "pointLabel": "{day}、{dimension} {value}、注目方向は{focus}"
+      "pointLabel": "{day} · {dimension} {value}",
+      "scattered": "この区間は記録がまだ少ないため、連続した推移は表示できません"
     },
     "change": {
       "up": "この間、{dimension}は{from}から{to}に。",
@@ -352,16 +353,16 @@
       "stableValue": "最近の記録では、{dimension}は{value}前後で落ち着いています。"
     },
     "segmentUpdated": "記録方法が変わりました",
-    "segmentExplanation": "更新前後の数値は直接比較していません。",
+    "segmentExplanation": "前後の記録は計算方法が異なるため、数値を直接比較できません。各区間の推移を表示しています。",
     "focusTitle": "注目方向",
     "focus": {
       "balanced": "全体のバランス",
       "limited": "記録はまだ増えている途中",
       "insufficient-data": "記録はまだ増えている途中"
     },
-    "milestonesTitle": "最近の節目",
+    "milestonesTitle": "残しておきたい節目",
     "recent90": "最近90日",
-    "noMilestones": "最近は、新しい節目がまだありません。",
+    "noMilestones": "確認できる記録には、個別に残しておきたい節目がまだありません",
     "goalCompleted": "今回目指していたこともできました",
     "goalObserved": "今回目指していたことができました",
     "fact": {
@@ -387,7 +388,14 @@
     "rangeAll": "すべての記録",
     "updating": "記録を更新しています…",
     "focusContinuing": "最近は引き続き、{focus}を意識してみてもよさそう。",
-    "focusChanged": "最近意識したい方向は、{from}から{focus}へ移りました。"
+    "focusChanged": "最近意識したい方向は、{from}から{focus}へ移りました。",
+    "factWindow": "今回確認できる成績の節目：直近 {days} 日",
+    "factCap": "成長の節目は、現在、直近90日間の確認できる記録から選んでいます",
+    "moreMilestones": "厳選した節目をもっと見る",
+    "fewerMilestones": "節目を折りたたむ",
+    "observedDay": "確認日",
+    "breakQuestion": "なぜここで途切れる？",
+    "focusMeaning": "当時、気にかけておきたい方向です。数値の低下を示すものではありません。"
   },
   "weekly": {
     "title": "この一週間",

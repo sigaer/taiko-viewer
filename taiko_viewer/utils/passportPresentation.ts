@@ -13,12 +13,28 @@ export function passportCoverageSpan(coverage: SkillPassportResponse['coverage']
   return from === null || to === null ? 0 : Math.max(0, to - from + 1);
 }
 
-export function passportRangeChoices(span: number): { days: SkillPassportRangeDays; all: boolean }[] {
-  if (span < 30) return [];
-  const ranges: SkillPassportRangeDays[] = [30, 90, 180, 365];
-  if (span >= 365) return ranges.map(days => ({ days, all: false }));
-  const last = ranges.findIndex(days => days > span);
-  return ranges.slice(0, last + 1).map((days, index) => ({ days, all: index === last }));
+export function passportRangeChoices(_span?: number): { days: SkillPassportRangeDays; all: boolean }[] {
+  return ([30, 90, 180, 365] as const).map(days => ({ days, all: false }));
+}
+
+export function selectPassportPeriod(payload: SkillPassportResponse | null, days: SkillPassportRangeDays): SkillPassportResponse | null {
+  if (!payload?.shared) return payload;
+  const view = payload.shared.views[days];
+  if (!view) return null;
+  const points = new Set(view.pointIds), nodes = new Map(payload.shared.milestones.map(node => [node.id, node]));
+  return {
+    ...payload,
+    range: view.range,
+    coverage: { ...payload.coverage, recentFactsFrom: view.recentFactsFrom, recentFactsTo: view.recentFactsTo },
+    segments: payload.shared.segments.flatMap(segment => {
+      const rows = segment.points.filter(point => points.has(point.id));
+      return rows.length ? [{ ...segment, from: rows[0]!.day, to: rows.at(-1)!.day, points: rows }] : [];
+    }),
+    milestones: view.milestoneIds.flatMap(id => nodes.has(id) ? [nodes.get(id)!] : []),
+    initialMilestoneIds: view.initialMilestoneIds,
+    currentSegmentChange: view.currentSegmentChange,
+    focusTimeline: view.focusTimeline
+  };
 }
 
 export function passportTrendStory(passport: SkillPassportResponse | null, dimension: SkillPassportTrendDimension) {

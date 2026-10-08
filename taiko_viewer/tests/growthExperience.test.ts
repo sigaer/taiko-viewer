@@ -60,8 +60,8 @@ test('different profiles never bridge a Goal and Recent fact', () => {
   const r = recent([recentFact('ng-reduced', 1, 0, { bindingId: '2' })]); r.profileId = '2';
   assert.equal(composeGrowthFeedback(goal, daily(), r).recentFacts.length, 1);
 });
-for (const [span, expected] of [[4, []], [42, [[30, false], [90, true]]], [120, [[30, false], [90, false], [180, true]]], [250, [[30, false], [90, false], [180, false], [365, true]]], [365, [[30, false], [90, false], [180, false], [365, false]]]] as const) {
-  test(`${span}-day coverage offers only meaningful ranges`, () => assert.deepEqual(passportRangeChoices(span).map(item => [item.days, item.all]), expected));
+for (const span of [0, 4, 42, 120, 250, 365]) {
+  test(`${span}-day coverage retains all four range controls`, () => assert.deepEqual(passportRangeChoices(span).map(item => item.days), [30, 90, 180, 365]));
 }
 test('calendar span uses Shanghai days and does not confuse sparse measurement count with elapsed coverage', () => {
   const coverage = { measurementFrom: '2026-09-30T16:30:00Z', measurementTo: '2026-10-04T14:00:00Z', measurementDays: 2 } as SkillPassportResponse['coverage'];
