@@ -1,0 +1,42 @@
+{
+  "Constants": {
+    "repository": "OurTaiko/Constants",
+    "tree": "62a3a59708a03d6d0b3cb463a1ad6fa33c8b1026",
+    "files": {
+      "src/algorithms/__init__.py": "8efbb4c7f989c29f64688b14d23a9806fa57c958",
+      "src/algorithms/体力.py": "17be55acee3a953d02f47a0543aa8611215465c2",
+      "src/algorithms/复合.py": "270bd368957f234933b5d2364776b63f97e7adcf",
+      "src/algorithms/手速.py": "7af4af349f54cc579cf98fccf29d7ceb3fc90664",
+      "src/algorithms/滚奏等效.py": "de4fb4ae1b3732dc6a871431da390708d5e0b0ea",
+      "src/algorithms/爆发.py": "c86aeac06163c380b8c661707c2da441b3d503ec",
+      "src/algorithms/节奏.py": "7d396f35738efabb7cd99dcc845403a2ff99ca2b",
+      "src/batch_workflow.py": "c08502a46fcfe6ca7c3576c517ed84b7665a4e1a",
+      "src/computing_parameters.py": "52b12ff93976a4300ef14951b41b336051d7648f",
+      "src/extract_song_constants.py": "2cebfbeb190f081e5a6997ac20d7c4a1f6b66912",
+      "src/rating.py": "0c0c07c46dabe8129cd61c164db0821a30d0d67c",
+      "src/single_workflow.py": "524a681205f2a537c5c30fd2ae3d76d84f566818",
+      "src/tja_analysis.py": "983163d3985466f25d1a071e3cd319b202a0c6c2",
+      "LICENSE": "d2bc8c3488f1c1d91c3dd1bb19a76ebd9350569d",
+      "cached_computing_parameters.json": "44033b88c04ec4e7378a0f64b1395c8bb435c577",
+      "constants.json": "d178c8ba9f0e6c58a3c6373f9be4cc3f6b5a38a0"
+    }
+  },
+  "TJAAnalyzer": {
+    "repository": "OurTaiko/TJAAnalyzer",
+    "tree": "4caafa982fda1d51a97a93f3f8cf9dadb3592fd7",
+    "files": {
+      "LICENSE": "4e3e72dc82c5d2e9017bde73e92aaea79d35c2a8",
+      "offline-analysis/tja-gaps.ts": "cb64181dfc72312c2f30f6a261c426db50b5e719",
+      "src/utils/note-gap.ts": "d5c1271c62539e365c5959cc7923a528c959a3ce"
+    }
+  },
+  "TJARenderer": {
+    "repository": "OurTaiko/TJARenderer",
+    "tree": "e63b1ee63c2d83a1395064fb89ff5275c5baac7f",
+    "files": {
+      "LICENSE": "4e3e72dc82c5d2e9017bde73e92aaea79d35c2a8",
+      "src/primitives.ts": "7e1bf58a43c388e61248ea7b7552944bd929e7b2",
+      "src/tja-parser.ts": "d789953be3d885c68d58487e87974d59fdb03bee"
+    }
+  }
+}

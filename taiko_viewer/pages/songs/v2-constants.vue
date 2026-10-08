@@ -192,7 +192,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
       <el-alert
         v-if="payload.stale"
-        :title="t('page.songs.v2Constants.stale')"
+        :title="t(payload.fetchedAt ? 'page.songs.v2Constants.stale' : 'page.songs.v2Constants.partial')"
         type="warning"
         show-icon
         :closable="false"

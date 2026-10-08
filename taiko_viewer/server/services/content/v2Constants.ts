@@ -1,5 +1,4 @@
 import type {
-  SongCatalogItem,
   V2ConstantsDifficulty,
   V2ConstantsItem,
   V2ConstantsPayload,
@@ -8,21 +7,9 @@ import type {
 import { getSongCatalog } from "./songs";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
-type RemoteChart = {
-  totalNotes?: unknown;
-  sub_constant_1?: unknown;
-  main_constant?: unknown;
-  sub_constant_2?: unknown;
-  stamina?: unknown;
-  handspeed?: unknown;
-  burst?: unknown;
-  complex?: unknown;
-  rhythm?: unknown;
-};
-
-type RemoteDifficultyMap = Record<string, RemoteChart>;
-
-type RemoteConstantsPayload = Record<string, RemoteDifficultyMap>;
+import consoleSupplement from "~/assets/data/v2_console_constants.json";
+import { buildV2ConstantsRows, DIFFICULTY_ORDER, isRecord, type RemoteConstantsPayload } from "./v2ConstantsModel";
+export { buildV2ConstantsRows } from "./v2ConstantsModel";
 
 type SourceSnapshot = {
   payload: RemoteConstantsPayload;
@@ -54,14 +41,7 @@ const SOURCE_MAX_STALE_MS = 7 * 24 * 60 * 60 * 1000;
 const SOURCE_CACHE_KEY = "v2-constants";
 const DEFAULT_PAGE_SIZE = 50;
 const PAGE_SIZE_OPTIONS = new Set([25, 50, 100]);
-const ALLOWED_BRANCH_TYPES = new Set(["master", "unbranched"]);
-const DIFFICULTY_ORDER: V2ConstantsDifficulty[] = ["hard", "oni", "edit"];
 const DIFFICULTY_RANK = new Map(DIFFICULTY_ORDER.map((difficulty, index) => [difficulty, index]));
-const COURSE_PRIORITY: Record<V2ConstantsDifficulty, string[]> = {
-  hard: ["hard", "hard_single", "hard_p1"],
-  oni: ["oni", "oni_single", "oni_p1"],
-  edit: ["edit", "edit_single", "edit_p1"]
-};
 const SORT_KEYS = new Set<V2ConstantsSortKey>([
   "id",
   "songName",
@@ -81,103 +61,6 @@ let sourceCache: SourceSnapshot | null = null;
 let sourceRefreshPromise: Promise<SourceSnapshot> | null = null;
 let sourceCacheLoadPromise: Promise<void> | null = null;
 let sourceRetryAt = 0;
-
-const toPositiveInteger = (value: unknown) => {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
-
-const toFiniteNumber = (value: unknown) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  Boolean(value) && typeof value === "object" && !Array.isArray(value);
-
-const normalizeChart = (
-  id: number,
-  songName: string,
-  difficulty: V2ConstantsDifficulty,
-  chart: RemoteChart
-): V2ConstantsItem | null => {
-  const totalNotes = toPositiveInteger(chart.totalNotes);
-  const subConstant1 = toFiniteNumber(chart.sub_constant_1);
-  const mainConstant = toFiniteNumber(chart.main_constant);
-  const subConstant2 = toFiniteNumber(chart.sub_constant_2);
-  const stamina = toFiniteNumber(chart.stamina);
-  const handspeed = toFiniteNumber(chart.handspeed);
-  const burst = toFiniteNumber(chart.burst);
-  const complex = toFiniteNumber(chart.complex);
-  const rhythm = toFiniteNumber(chart.rhythm);
-  if (
-    totalNotes === null ||
-    subConstant1 === null ||
-    mainConstant === null ||
-    subConstant2 === null ||
-    stamina === null ||
-    handspeed === null ||
-    burst === null ||
-    complex === null ||
-    rhythm === null
-  ) {
-    return null;
-  }
-  return {
-    id,
-    songName,
-    difficulty,
-    totalNotes,
-    subConstant1,
-    mainConstant,
-    subConstant2,
-    stamina,
-    handspeed,
-    burst,
-    complex,
-    rhythm
-  };
-};
-
-export const buildV2ConstantsRows = (
-  payload: RemoteConstantsPayload,
-  localSongs: SongCatalogItem[]
-): V2ConstantsItem[] => {
-  if (!isRecord(payload)) {
-    throw new Error("V2 constants payload is not a valid object");
-  }
-  const songMap = new Map(
-    localSongs
-      .map((song) => [toPositiveInteger(song.id), song] as const)
-      .filter((entry): entry is readonly [number, SongCatalogItem] => entry[0] !== null)
-  );
-  const rows: V2ConstantsItem[] = [];
-
-  for (const [rawId, difficultyMap] of Object.entries(payload)) {
-    const id = toPositiveInteger(rawId);
-    const localSong = id === null ? null : songMap.get(id);
-    if (!id || !localSong || !isRecord(difficultyMap)) {
-      continue;
-    }
-    const songName = String(localSong.song_name || "").trim();
-    if (songName.startsWith("【双打】")) {
-      continue;
-    }
-
-    for (const difficulty of DIFFICULTY_ORDER) {
-      const chart = (difficultyMap[difficulty] ?? difficultyMap[`${difficulty}_single`] ?? difficultyMap[`${difficulty}_p1`]) as RemoteChart | undefined;
-      if (!chart || !isRecord(chart)) {
-        continue;
-      }
-      const row = normalizeChart(id, songName, difficulty, chart);
-      if (row) {
-        rows.push(row);
-      }
-    }
-  }
-
-  return rows;
-};
 
 const fetchSourceSnapshot = async (): Promise<SourceSnapshot> => {
   const runtimeConfig = useRuntimeConfig();
@@ -244,6 +127,9 @@ const getSourceSnapshot = async () => {
     }
     return { snapshot: sourceCache, stale: true };
   }
+  if (sourceRetryAt > now) {
+    throw createError({ statusCode: 502, statusMessage: "V2 定数数据源暂不可用" });
+  }
 
   try {
     const snapshot = await refreshSourceSnapshot();
@@ -264,16 +150,21 @@ const parsePositiveInteger = (value: unknown, fallback: number) => {
 };
 
 const getV2ConstantsRowsSnapshot = async () => {
-  const [{ snapshot, stale }, localSongs] = await Promise.all([
-    getSourceSnapshot(),
+  const [source, localSongs] = await Promise.all([
+    getSourceSnapshot().catch(() => null),
     getSongCatalog()
   ]);
   return {
-    rows: buildV2ConstantsRows(snapshot.payload, localSongs),
-    generatedAt: snapshot.fetchedAt,
-    fetchedAt: snapshot.fetchedAt,
-    stale
+    rows: buildV2ConstantsRows(source?.snapshot.payload || {}, localSongs, consoleSupplement),
+    generatedAt: source?.snapshot.fetchedAt || consoleSupplement.generatedAt,
+    fetchedAt: source?.snapshot.fetchedAt || "",
+    stale: source?.stale ?? true
   };
+};
+
+export const getSongV2ConstantsPayload = async (songId: number) => {
+  const snapshot = await getV2ConstantsRowsSnapshot();
+  return { items: snapshot.rows.filter((row) => row.id === songId) };
 };
 
 const escapeCsvCell = (value: unknown) => {

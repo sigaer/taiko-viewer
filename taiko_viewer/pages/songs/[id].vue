@@ -581,7 +581,8 @@ useViewerSeo(() => ({
         </section>
 
         <section class="detail-middle">
-          <div class="radar-card">
+          <SongV2Constants v-if="normalizedShelfStatus(song.shelf_status) === 2" :key="songId" :song-id="songId" :track="selectedTrack" />
+          <div v-if="normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData" class="radar-card">
             <div class="section-title">
               <span class="title-icon radar-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
