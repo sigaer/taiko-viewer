@@ -123,6 +123,18 @@ async function run() {
   assert.ok(requests.get('/practice-player/release.json') > before);
   results.push({ scenario: 'manual-retry', loaded: true, ...(remote ? {} : { playerReadyBeforeBundle: true }) });
   console.log('Manual reload passed');
+  await page.getByRole('link', { name: '返回歌曲', exact: true }).click();
+  await page.waitForURL(`${base}/songs/463`, { waitUntil: 'domcontentloaded' });
+  // Nuxt may update history before the destination's async data finishes loading.
+  await page.locator('.practice-page').waitFor({ state: 'detached' });
+  assert.equal(page.frames().filter(frame => frame.url().includes('/practice-player/')).length, 0);
+  results.push({ scenario: 'navigation-cleanup', passed: true });
+  scenario = 'healthy';
+  await page.goBack({ waitUntil: 'domcontentloaded' });
+  await page.frameLocator('.practice-page iframe').locator('#start').waitFor({ state: 'visible', timeout: 120_000 });
+  assert.equal(await page.locator('.practice-page input[type="range"]').inputValue(), '100');
+  results.push({ scenario: 'back-navigation', freshPlayerLoaded: true });
+  console.log('Navigation cleanup and returning to practice passed');
   if (!remote) {
     for (const [name, expected, difficulty] of [
       ['bundle-failure', '谱面与音乐下载失败', 4],
@@ -136,10 +148,6 @@ async function run() {
       results.push({ scenario, passed: true });
     }
   }
-  await page.getByRole('link', { name: '返回歌曲', exact: true }).click();
-  await page.waitForURL(`${base}/songs/463`, { waitUntil: 'domcontentloaded' });
-  assert.equal(page.frames().filter(frame => frame.url().includes('/practice-player/')).length, 0);
-  results.push({ scenario: 'navigation-cleanup', passed: true });
   await writeFile(`${output}/${remote ? 'online' : 'local'}-result.json`, JSON.stringify({ results, errors, upstreamRequests }, null, 2));
   console.log(JSON.stringify({ results, errors, upstreamRequests }));
 }

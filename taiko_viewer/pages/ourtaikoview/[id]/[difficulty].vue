@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { hasPracticeCourse, isPracticeMessage, playerMessage, PRACTICE_COURSES } from "~/utils/ourTaikoView";
 import { downloadPracticeBundle } from "~/utils/practiceBundle";
 
+defineOptions({ name: 'PracticePlayerPage' });
 definePageMeta({
   key: route => route.fullPath,
   validate: route => /^[1-9]\d*$/.test(String(route.params.id)) &&

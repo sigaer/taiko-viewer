@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout>
-    <NuxtPage :keepalive="{ exclude: ['PersonalGrowthLayout'] }" />
+    <NuxtPage :keepalive="{ exclude: ['PersonalGrowthLayout', 'PracticePlayerPage'] }" />
   </NuxtLayout>
   <AnnualMobileNotice />
 </template>
