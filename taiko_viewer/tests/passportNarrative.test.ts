@@ -10,34 +10,34 @@ const segments = (rows: ReturnType<typeof measurement>[]) => buildMeasurementSeg
 const rows = () => ['20','28','29'].map((day,i)=>measurement(String(i),`2026-09-${day}`)).concat(measurement('4','2026-10-07'));
 const period={from:'2026-07-11',to:'2026-10-08'};
 const compose=(facts: ReturnType<typeof fact>[])=>curateSkillPassportMilestones(facts,period).milestones.map(n=>composePassportMilestoneNarrative(n,(_type,value)=>String(value)));
-test('four same-version points connect; four revisions and A B A remain independent',()=>{
+test('frozen daily values connect across four revisions and A B A without recalculation',()=>{
  assert.equal(passportMetricRuns(segments(rows()),'rating')[0]!.points.length,4);
- assert.deepEqual(passportMetricRuns(segments(rows().map((p,i)=>({...p,modelRevision:String(i)}))),'rating').map(r=>r.points.length),[1,1,1,1]);
- assert.deepEqual(passportMetricRuns(segments(rows().slice(0,3).map((p,i)=>({...p,modelRevision:i===1?'b':'a'}))),'speed').map(r=>r.points.length),[1,1,1]);
+ assert.deepEqual(passportMetricRuns(segments(rows().map((p,i)=>({...p,modelRevision:String(i)}))),'rating').map(r=>r.points.length),[4]);
+ assert.deepEqual(passportMetricRuns(segments(rows().slice(0,3).map((p,i)=>({...p,modelRevision:i===1?'b':'a'}))),'speed').map(r=>r.points.length),[3]);
 });
-test('missing dimension, limited and unknown provenance never bridge gaps or invent zeros',()=>{
+test('missing dimension breaks a metric, version or availability metadata never erases a saved value',()=>{
  const data=rows();data[1]!.dimensions.speed=null;
  assert.deepEqual(passportMetricRuns(segments(data),'speed').map(r=>r.points.length),[1,2]);
  data[1]!.availabilityState='limited';
- assert.deepEqual(passportMetricRuns(segments(data),'rating').map(r=>r.points.length),[1,1,2]);
- assert.deepEqual(passportMetricRuns(segments(rows().map(p=>({...p,modelRevision:null}))),'rating').map(r=>r.points.length),[1,1,1,1]);
+ assert.deepEqual(passportMetricRuns(segments(data),'rating').map(r=>r.points.length),[4]);
+ assert.deepEqual(passportMetricRuns(segments(rows().map(p=>({...p,modelRevision:null}))),'rating').map(r=>r.points.length),[4]);
  assert.equal(passportMetricRuns([],'rating').length,0);
 });
-test('multi-fact headline follows curator, NG zero is not FC and PB unknown baseline has no delta',()=>{
+test('multi-fact headline follows curator, NG zero is FC and PB unknown baseline is excluded',()=>{
  const ng=fact('ng','ng-reduced','2026-10-06',{before:14,after:0,delta:-14});
- const pb=fact('pb','score-pb','2026-10-06');const combo=fact('combo','combo-improved','2026-10-06',{before:266,after:617});
- const [n]=compose([pb,ng,combo]);assert.equal(n!.headline.key,'passport.narrative.ngDown');assert.equal(n!.support.length,2);assert.equal(n!.factKeys.length,3);
+ const pb=fact('pb','score-pb','2026-10-06');const combo=fact('combo','combo-improved','2026-10-06',{before:266,after:617,delta:351});
+ const [n]=compose([pb,ng,combo]);assert.equal(n!.headline.key,'passport.narrative.fc');assert.equal(n!.support.length,2);assert.equal(n!.factKeys.length,3);
  assert.deepEqual(compose([combo,ng,pb]),compose([pb,ng,combo]));
- const [unknown]=compose([{...pb,before:null}]);assert.equal(unknown!.headline.key,'passport.narrative.pbAt');assert.equal(unknown!.headline.params.delta,undefined);
- for(const type of ['fc','df'] as const)assert.equal(compose([fact(type,type,'2026-10-06')])[0]!.headline.key,`passport.narrative.${type}`);
- assert.equal(compose([fact('rank','rank-upgrade','2026-10-06',{before:7,after:8})])[0]!.headline.key,'passport.narrative.rankUp');
+ assert.deepEqual(compose([{...pb,before:null}]),[]);
+ for(const type of ['fc','df'] as const)assert.equal(compose([fact(type,type,'2026-10-06',{before:type==='df'?1:0,after:type==='df'?2:1,delta:1})])[0]!.headline.key,`passport.narrative.${type}`);
+ assert.equal(compose([fact('rank','rank-upgrade','2026-10-06',{before:7,after:8,delta:1})])[0]!.headline.key,'passport.narrative.rankUp');
 });
 test('Goal observation stays undated; curated flood identity/order/evidence survives presentation',()=>{
  const nodes=curateSkillPassportMilestones(recoveryFlood(),period).milestones;
  const before=JSON.stringify(nodes);
  for(const n of nodes){const line=composePassportMilestoneNarrative(n,(_t,v)=>String(v));assert.deepEqual(line.factKeys,n.factKeys);assert.equal(line.id,n.id);}
  assert.equal(JSON.stringify(nodes),before);
- const n=compose([fact('goal','goal-completed',null)])[0]!;
+ const n=compose([fact('goal','goal-completed',null,{goalId:'g',goalType:'fc'})])[0]!;
  assert.equal(n.timePrecision,'observation');assert.equal(n.headline.key,'passport.narrative.goalObserved');
  assert.deepEqual(compose([]),[]);
 });

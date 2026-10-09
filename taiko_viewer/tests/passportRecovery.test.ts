@@ -42,18 +42,18 @@ test('one-day PB only, one-type dates, empty and expired facts do not fabricate 
   const facts = recoveryFlood().filter(fact => fact.type === 'score-pb');
   assert.equal(curateSkillPassportMilestones(facts, period).milestones.length, 2);
   const varied = facts.map((fact, i) => ({ ...fact, temporal: { ...fact.temporal, attributedDay: `2026-09-${String(i + 10).padStart(2, '0')}` } }));
-  assert.equal(curateSkillPassportMilestones(varied, period).milestones.length, 8);
+  assert.equal(curateSkillPassportMilestones(varied, period).milestones.length, 2);
   assert.deepEqual(curateSkillPassportMilestones([], period).milestones, []);
   assert.deepEqual(curateSkillPassportMilestones([fact('expired', 'df', '2026-07-10')], period).milestones, []);
   assert.deepEqual(curateSkillPassportMilestones([fact('played', 'played', '2026-10-06')], period).milestones, []);
 });
-test('selection and expansion enforce day/chart/type caps, preserve temporal prefix and natural ordering', () => {
+test('selection and expansion preserve capacity and traceable soft-cap exceptions', () => {
   const types = ['df', 'fc', 'clear', 'rank-upgrade', 'ng-reduced', 'score-pb', 'combo-improved'] as const;
-  const facts = Array.from({ length: 84 }, (_, i) => fact(`many-${i}`, types[i % 7]!, `2026-${i < 28 ? '07' : i < 56 ? '08' : '09'}-${String(12 + i % 14).padStart(2, '0')}`, { songId: i + 100 }));
+  const facts = Array.from({ length: 84 }, (_, i) => fact(`many-${i}`, types[i % 7]!, `2026-${i < 28 ? '07' : i < 56 ? '08' : '09'}-${String(12 + i % 14).padStart(2, '0')}`, { songId: i + 100, ...(['df','fc','clear','rank-upgrade'].includes(types[i%7]!) ? {before:types[i%7]==='clear'?-1:types[i%7]==='rank-upgrade'?7:types[i%7]==='df'?1:0,after:types[i%7]==='clear'?0:types[i%7]==='rank-upgrade'?8:types[i%7]==='df'?2:1,delta:1}:types[i%7]==='ng-reduced'?{before:14,after:2,delta:-12}:{}) }));
   const curated = curateSkillPassportMilestones(facts, period);
   assert.equal(curated.initialIds.length, 8); assert.ok(curated.milestones.length > 8 && curated.milestones.length <= 24);
-  for (const day of new Set(curated.milestones.map(node => node.day))) assert.ok(curated.milestones.filter(node => node.day === day).length <= 2);
-  for (const type of types) assert.ok(curated.milestones.filter(node => node.primaryType === type).length <= 3);
+  assert.ok(curated.milestones.every(node => node.primaryType !== 'combo-improved'));
+  assert.deepEqual(curateSkillPassportMilestones([...facts].reverse(),period),curated);
   assert.equal(new Set(curated.milestones.map(node => node.songId)).size, curated.milestones.length);
   const initial = curated.milestones.filter(node => curated.initialIds.includes(node.id));
   assert.equal(new Set(initial.map(node => node.day!.slice(0, 7))).size, 3);

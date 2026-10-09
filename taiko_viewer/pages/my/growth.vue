@@ -101,7 +101,6 @@ const actualRangeText = computed(() => {
   return t("passport.rangeActual", { range: requestedRange.value, days });
 });
 const coverageText = computed(() => passport.value ? t(`passport.coverage.${passport.value.coverage.recentFactsState}`) : "");
-const segmentBreaks = computed(() => (passport.value?.segments || []).slice(1).map(segment => ({ id: segment.id, day: segment.from })));
 const expandedMilestones = ref(false);
 watch(requestedRange, () => { expandedMilestones.value = false; });
 const initialMilestones = computed(() => new Set(passport.value?.initialMilestoneIds || passport.value?.milestones.slice(0, 8).map(node => node.id)));
@@ -178,10 +177,6 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
             <PassportMetricChart :segments="passport.segments" :dimension="selectedDimension" :label="trendLabel(selectedDimension)" :from="passport.range.from || passport.coverage.recentFactsFrom" :to="passport.range.to || passport.coverage.recentFactsTo" />
           </section>
         </div>
-        <details v-if="segmentBreaks.length" class="passport-segment-note passport-breaks">
-          <summary>{{ t('passport.breakQuestion') }}</summary>
-          <p>{{ t('passport.segmentExplanation') }}</p>
-        </details>
       </section>
 
       <section v-if="passport.focusTimeline.length" class="passport-section passport-focus-history" aria-labelledby="passport-focus-title">
@@ -208,8 +203,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
               <span v-if="milestone.difficultyType">{{ t(difficultyLabelKey(milestone.difficultyType)) }}</span>
               <p class="passport-milestone-headline">{{ t(narrative(milestone).headline.key, narrative(milestone).headline.params) }}</p>
               <p v-if="narrative(milestone).support.length" class="passport-milestone-evidence">{{ narrative(milestone).support.map(evidenceText).join(' · ') }}</p>
-              <details v-if="narrative(milestone).detail.length" class="passport-fact-details"><summary>{{ t('passport.moreEvidence') }}</summary><p>{{ narrative(milestone).detail.map(evidenceText).join(' · ') }}</p></details>
-              <small v-if="milestone.goalCompleted && !milestone.observationOnly">{{ t(milestone.observationOnly ? "passport.goalObserved" : "passport.goalCompleted") }}</small>
+              <small v-if="milestone.goalCompleted && !milestone.observationOnly && milestone.primaryType !== 'goal-completed'">{{ t('passport.goalCompleted') }}</small>
             </div>
           </article>
         </div>

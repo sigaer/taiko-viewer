@@ -115,8 +115,8 @@ test("focus timeline uses consecutive run compression and preserves model breaks
 });
 
 test("milestones rank relative magnitude, collapse same chart facts, link Goal and keep observation semantics", () => {
-  const pbSmall = fact("pb-small", "score-pb", "2026-09-18", { songId: 101, delta: 1000 });
-  const pbLarge = fact("pb-large", "score-pb", "2026-09-19", { songId: 102, delta: 20000 });
+  const pbSmall = fact("pb-small", "score-pb", "2026-09-18", { songId: 101, after: 901000, delta: 1000 });
+  const pbLarge = fact("pb-large", "score-pb", "2026-09-19", { songId: 102, after: 920000, delta: 20000 });
   const fc = fact("fc", "fc", "2026-09-20", { songId: 103, before: 0, after: 1, delta: 1 });
   const duplicate = { ...fc };
   const rank = fact("rank", "rank-upgrade", "2026-09-17", { songId: 104, before: 4, after: 5, delta: 1 });
@@ -124,7 +124,7 @@ test("milestones rank relative magnitude, collapse same chart facts, link Goal a
   const matchedGoal = fact("goal-matched", "goal-completed", null, { songId: 105, before: 8, after: 4, delta: -4, goalId: "g1", goalType: "ng-reduced", evidence: { source: "goal", sourceRevision: "matched", evidenceVersion: 1 }, temporal: { attributedDay: null, occurredAt: null, observedAt: "2026-09-21T05:00:00.000Z", confirmedAt: "2026-09-21T06:00:00.000Z", precision: "observation" } });
   const observedGoal = fact("goal-observed", "goal-completed", null, { songId: 106, goalId: "g2", goalType: "fc", evidence: { source: "goal", sourceRevision: "unmatched", evidenceVersion: 1 }, temporal: { attributedDay: null, occurredAt: null, observedAt: "2026-09-16T05:00:00.000Z", confirmedAt: "2026-09-16T06:00:00.000Z", precision: "observation" } });
   const milestones = buildSkillPassportMilestones([pbSmall, pbLarge, fc, duplicate, rank, scoreForGoal, matchedGoal, observedGoal]);
-  assert.equal(milestones.length, 6);
+  assert.equal(milestones.length, 5);
   assert.equal(milestones.find(item => item.songId === 105)?.goalCompleted, true);
   assert.equal(milestones.find(item => item.songId === 106)?.observationOnly, true);
   assert.equal(milestones.find(item => item.songId === 106)?.day, null);
@@ -132,12 +132,9 @@ test("milestones rank relative magnitude, collapse same chart facts, link Goal a
   assert.deepEqual(buildSkillPassportMilestones([pbSmall, pbLarge, fc, duplicate, rank, scoreForGoal, matchedGoal, observedGoal]), milestones);
 });
 
-test("milestones curate across time without inventing an absolute PB threshold", () => {
-  const facts = Array.from({ length: 12 }, (_, index) => fact(`pb-${index}`, "score-pb", `2026-09-${String(9 + index).padStart(2, "0")}`, { songId: 200 + index, delta: index + 1 }));
-  const milestones = buildSkillPassportMilestones(facts);
-  assert.equal(milestones.length, 12);
-  assert.ok(milestones.some(item => item.songId === 211));
-  assert.ok(milestones.some(item => item.songId === 200));
+test("tiny PBs never become highlights just by covering dates", () => {
+  const facts = Array.from({ length: 12 }, (_, index) => fact(`pb-${index}`, "score-pb", `2026-09-${String(9 + index).padStart(2, "0")}`, { songId: 200 + index, after: 900001 + index, delta: index + 1 }));
+  assert.equal(buildSkillPassportMilestones(facts).length, 0);
 });
 
 test("range accepts only 30/90/180/365 and keeps recent facts at 90 days", () => {
@@ -173,17 +170,15 @@ test("365 realistic daily rows remain bounded and deterministic", () => {
   assert.ok(elapsed < 250, `365-row projection took ${elapsed.toFixed(1)}ms`);
 });
 
-test('new growth days enter recent milestones before eight older large breakthroughs', () => {
+test('recent tiny PB cannot displace eight older independent DF achievements', () => {
   const older = Array.from({ length: 8 }, (_, index) => fact(`old-${index}`, 'df', '2026-09-12', { songId: 200 + index, before: 1, after: 2, delta: 1 }));
   const latest = fact('new-small-pb', 'score-pb', '2026-10-06', { songId: 101, before: 900000, after: 900001, delta: 1 });
   const milestones = buildSkillPassportMilestones([...older, latest]);
-  assert.equal(milestones.length, 3);
-  assert.equal(milestones[0]?.day, '2026-10-06');
-  assert.equal(milestones[0]?.songId, 101);
-  assert.equal(milestones[0]?.after, 900001);
+  assert.equal(milestones.length, 8);
+  assert.ok(milestones.every(node => node.day === '2026-09-12' && node.primaryType === 'df'));
 });
 test('observation-only Goal milestone orders by Shanghai day without inventing play attribution', () => {
-  const played = fact('played-day', 'df', '2026-10-06', { songId: 100, before: 1, after: 2 });
+  const played = fact('played-day', 'df', '2026-10-06', { songId: 100, before: 1, after: 2, delta: 1 });
   const observed = fact('observed-new', 'goal-completed', null, { songId: 101, goalId: 'new-goal', goalType: 'score-pb', evidence: { source: 'goal', sourceRevision: 'unmatched', evidenceVersion: 1 }, temporal: { attributedDay: null, occurredAt: null, observedAt: '2026-10-06T17:00:00Z', precision: 'observation' } });
   const milestones = buildSkillPassportMilestones([played, observed]);
   assert.equal(milestones[0]?.primaryType, 'goal-completed');

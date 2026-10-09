@@ -3,20 +3,18 @@ import type { SkillPassportMilestone, SkillPassportPoint, SkillPassportSegment, 
 const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 export type PassportChartPoint = SkillPassportPoint & { value: number };
 
-// Preserve contiguous server segments and split again at missing/limited values.
-// Never reconnect A→B→A, or infer equivalence from equal numeric values.
+// Display frozen daily record values, as requested in the final UX follow-up.
+// Version metadata remains on the records but is not a line boundary. Missing
+// numeric values still break a metric's line; no history is recalculated.
 export function passportMetricRuns(segments: SkillPassportSegment[], dimension: SkillPassportTrendDimension) {
   const runs: { id: string; points: PassportChartPoint[] }[] = [];
+  let run: PassportChartPoint[] | null = null;
   for (const segment of segments) {
-    let run: PassportChartPoint[] | null = null;
     for (const point of segment.points) {
       const value = dimension === 'rating' ? point.rating : point.dimensions[dimension];
       if (!finite(value)) { run = null; continue; }
-      const comparable = point.availabilityState === 'ready' && Boolean(point.modelRevision);
-      if (!comparable) run = null;
       if (!run) { run = []; runs.push({ id: `${segment.id}:${point.id}`, points: run }); }
       run.push({ ...point, value });
-      if (!comparable) run = null;
     }
   }
   return runs;
@@ -35,10 +33,11 @@ export function composePassportMilestoneNarrative(node: SkillPassportMilestone, 
   const params: Line['params'] = {};
   if (finite(primary.after)) params.after = format(primary.type, primary.after);
   if (finite(primary.before)) params.before = format(primary.type, primary.before);
-  if (node.observationOnly || primary.type === 'goal-completed') slot = 'goalObserved';
+  if (node.observationOnly) slot = 'goalObserved';
+  else if (primary.type === 'goal-completed') slot = 'goalCompleted';
   else if (['df', 'fc', 'clear'].includes(primary.type)) slot = primary.type;
   else if (primary.type === 'rank-upgrade' && finite(primary.after)) slot = finite(primary.before) && primary.after > primary.before ? 'rankUp' : 'rankAt';
-  else if (primary.type === 'ng-reduced' && finite(primary.after)) slot = finite(primary.before) && primary.after < primary.before ? 'ngDown' : 'ngAt';
+  else if (primary.type === 'ng-reduced' && finite(primary.after)) slot = primary.after === 0 ? 'fc' : finite(primary.before) && primary.after < primary.before ? 'ngDown' : 'ngAt';
   else if (primary.type === 'score-pb' && finite(primary.after)) {
     slot = finite(primary.before) && primary.after > primary.before ? 'pbGain' : 'pbAt';
     if (slot === 'pbGain') params.delta = format(primary.type, primary.after - primary.before!);
@@ -49,7 +48,7 @@ export function composePassportMilestoneNarrative(node: SkillPassportMilestone, 
     factKeys: [fact.factKey]
   });
   const support = facts.slice(1).map(evidence);
-  if (slot === 'pbGain') support.unshift(evidence(primary));
+  if (slot === 'pbGain' || slot === 'fc' && primary.type === 'ng-reduced') support.unshift(evidence(primary));
   return {
     id: node.id, primaryFactKey: primary.factKey, factKeys: [...node.factKeys],
     headline: { key: `passport.narrative.${slot}`, params, factKeys: [primary.factKey] } as Line,
