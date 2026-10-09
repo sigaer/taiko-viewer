@@ -13,17 +13,21 @@ progress{width:min(70vw,360px)}
 <div id="message" role="status">正在加载 / Loading…</div><button id="start" hidden>点击开始 / Start</button></div>
 <script type="module">
 import { createBundleFetch } from './bundle-fetch.mjs';
+import { createPlayerFetch, loadPlayerScript } from './runtime.mjs';
 const canvas = document.getElementById('canvas'), overlay = document.getElementById('overlay');
 const progress = document.getElementById('progress'), message = document.getElementById('message'), start = document.getElementById('start');
 const origin = location.origin, nativeFetch = window.fetch.bind(window);
-let instance, requestId = '', loaded = false;
+const lifetime = new AbortController();
+const playerFetch = createPlayerFetch(nativeFetch, origin, lifetime.signal);
+window.fetch = playerFetch;
+let instance, requestId = new URLSearchParams(location.search).get('requestId') || '', loaded = false;
 const post = data => parent.postMessage(data, origin);
 const command = type => instance?.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({channel:'ourtaiko-view',version:1,type,requestId}));
-const releaseAudio = () => { window.fetch = nativeFetch; loaded = false; };
-const fail = () => {
+const releaseAudio = () => { window.fetch = playerFetch; loaded = false; };
+const fail = (code = 'CHART_LOAD_FAILED') => {
   releaseAudio();
   message.textContent = '加载失败 / Load failed'; start.hidden = true; overlay.hidden = false;
-  post({channel:'ourtaiko-view',version:1,type:'error',requestId,payload:{code:'PLAYER_LOAD_FAILED'}});
+  post({channel:'ourtaiko-view',version:1,type:'error',requestId,payload:{code}});
 };
 window.ourTaikoViewEmit = json => {
   const data = JSON.parse(json);
@@ -47,28 +51,25 @@ window.addEventListener('message', event => {
     if (!(audioBlob instanceof Blob) || !audioBlob.size || audioBlob.size > 128 * 1024 * 1024) { fail(); return; }
     releaseAudio();
     const audioUrl = new URL(`./audio/${encodeURIComponent(requestId)}`, location.href).href;
-    window.fetch = createBundleFetch(audioUrl, audioBlob, nativeFetch);
+    window.fetch = createBundleFetch(audioUrl, audioBlob, playerFetch);
     instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({...data, payload: {...payload, audioUrl}}));
   } else instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify(data));
 });
 start.addEventListener('click', () => { canvas.focus(); overlay.hidden = true; });
 window.addEventListener('blur', () => { if (loaded) command('pause'); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && loaded) command('pause'); });
-window.addEventListener('pagehide', () => { command('unload'); releaseAudio(); });
+window.addEventListener('pagehide', () => { lifetime.abort(); command('unload'); releaseAudio(); });
+let bootFailure = 'PLAYER_RELEASE_FAILED';
 try {
-  const response = await fetch(`/ourtaikoview-manifest.json?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(30000) });
+  const response = await playerFetch('/practice-player/release.json', { cache: 'no-cache' });
   if (!response.ok) throw new Error('Player manifest unavailable');
   const manifest = await response.json();
   if (typeof manifest.path !== 'string' || !/^\/player\/[a-f0-9]{16}\/index\.html$/.test(manifest.path)) throw new Error('Invalid player manifest');
   const root = manifest.path.replace('/player/', '/ourtaikoview-runtime/').replace('index.html', '');
   const build = root + 'Build/';
-  await new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = build + 'Web.loader.js';
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+  bootFailure = 'PLAYER_DOWNLOAD_FAILED';
+  await loadPlayerScript(build + 'Web.loader.js', document, lifetime.signal);
+  bootFailure = 'PLAYER_BOOT_FAILED';
   instance = await createUnityInstance(canvas, {
     dataUrl:build+'Web.data.unityweb',frameworkUrl:build+'Web.framework.js.unityweb',codeUrl:build+'Web.wasm.unityweb',
     streamingAssetsUrl:root+'StreamingAssets',companyName:'OurTaiko',productName:'OurTaikoView_Web',
@@ -76,5 +77,10 @@ try {
   }, value => { progress.value = value; });
   progress.hidden = true;
   command('hello');
-} catch { fail(); }
+} catch (error) {
+  if (!lifetime.signal.aborted) {
+    console.warn('[practice-player]', bootFailure, (typeof error?.message === 'string' ? error.message : typeof error === 'string' ? error : 'Unknown player error').slice(0, 240));
+    fail(bootFailure);
+  }
+}
 </script></body></html>

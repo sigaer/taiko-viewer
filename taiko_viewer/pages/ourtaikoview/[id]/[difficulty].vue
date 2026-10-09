@@ -15,11 +15,23 @@ const id = Number(route.params.id);
 const difficulty = Number(route.params.difficulty);
 const copy = computed(() => locale.value === "ja" ? {
   title: "プレイ練習", back: "楽曲に戻る", loading: "プレイヤーを読み込み中…",
+  loadingBundle: "譜面と音源をダウンロード中…", loadingChart: "譜面と音源を準備中…",
+  bundleFailed: "譜面と音源をダウンロードできませんでした。再読み込みしてください。",
+  playerFailed: "プレイヤーを読み込めませんでした。再読み込みしてください。",
+  playerDownloadFailed: "プレイヤーをダウンロードできませんでした。再読み込みしてください。",
+  playerBootFailed: "プレイヤーを起動できませんでした。再読み込みしてください。",
+  chartFailed: "譜面または音源を読み込めませんでした。再読み込みしてください。",
   failed: "読み込めませんでした。再試行してください。", missing: "この難易度の譜面はありません。",
   retry: "再読み込み", volume: "打音の音量", fullscreen: "全画面", fullscreenFailed: "全画面に切り替えられませんでした。",
   finished: "練習が終了しました。", exited: "練習を終了しました。", ready: "プレイヤー内で開始してください。"
 } : {
   title: "游玩练习", back: "返回歌曲", loading: "正在加载播放器…",
+  loadingBundle: "正在下载谱面与音乐…", loadingChart: "正在准备谱面与音乐…",
+  bundleFailed: "谱面与音乐下载失败，请重新加载。",
+  playerFailed: "播放器加载失败，请重新加载。",
+  playerDownloadFailed: "播放器下载失败，请重新加载。",
+  playerBootFailed: "播放器启动失败，请重新加载。",
+  chartFailed: "谱面或音乐读取失败，请重新加载。",
   failed: "加载失败，请重试。", missing: "此难度暂无可用谱面。",
   retry: "重新加载", volume: "鼓音音量", fullscreen: "全屏", fullscreenFailed: "无法进入全屏，请重试。",
   finished: "练习已结束。", exited: "已退出练习。", ready: "请在播放器中点击开始。"
@@ -37,6 +49,8 @@ let controller: AbortController | undefined;
 let timer: ReturnType<typeof setTimeout> | undefined;
 let resources: Awaited<ReturnType<typeof downloadPracticeBundle>> | undefined;
 let ready = false;
+let loadSent = false;
+const loadingLabel = ref('');
 
 function send(type: string, payload?: unknown) {
   if (origin) iframe.value?.contentWindow?.postMessage(playerMessage(type, requestId, payload), origin);
@@ -49,6 +63,7 @@ function stop() {
   playerUrl.value = "";
   resources = undefined;
   ready = false;
+  loadSent = false;
 }
 function fail(message: string) {
   stop();
@@ -58,22 +73,33 @@ function fail(message: string) {
 function sendVolume() {
   if (ready) send("setDrumVolume", { volume: Number(volume.value) });
 }
+function startCourse() {
+  if (!ready || !resources || loadSent || !playerUrl.value) return;
+  loadSent = true;
+  loadingLabel.value = copy.value.loadingChart;
+  sendVolume();
+  send("load", {
+    ...resources,
+    course: PRACTICE_COURSES[difficulty - 1],
+    practice: true, autoPlay: false, replay: false
+  });
+}
 function receive(event: MessageEvent) {
   if (!isPracticeMessage(event, iframe.value?.contentWindow ?? null, origin)) return;
   const data = event.data;
+  if (data.requestId && data.requestId !== requestId) return;
   if (data.type === "ready") {
-    if (ready || !resources || !playerUrl.value) return;
+    if (ready || !playerUrl.value) return;
     ready = true;
-    sendVolume();
-    send("load", {
-      ...resources,
-      course: PRACTICE_COURSES[difficulty - 1],
-      practice: true, autoPlay: false, replay: false
-    });
+    startCourse();
     return;
   }
-  if (data.requestId && data.requestId !== requestId) return;
-  if (data.type === "error") fail(copy.value.failed);
+  if (data.type === "error") {
+    const code = String(data.payload?.code || '');
+    fail(code === 'PLAYER_BOOT_FAILED' ? copy.value.playerBootFailed :
+      code === 'PLAYER_DOWNLOAD_FAILED' ? copy.value.playerDownloadFailed :
+      code.startsWith('PLAYER_') ? copy.value.playerFailed : copy.value.chartFailed);
+  }
   else if (data.type === "loaded" || data.type === "finished") {
     clearTimer();
     status.value = data.type;
@@ -88,20 +114,23 @@ async function load() {
   failure.value = "";
   fullscreenError.value = false;
   status.value = "loading";
+  loadingLabel.value = copy.value.loadingBundle;
   requestId = crypto.randomUUID();
   const current = new AbortController();
   controller = current;
-  timer = setTimeout(() => fail(copy.value.failed), 180_000);
+  timer = setTimeout(() => fail(!resources ? copy.value.bundleFailed : !ready ? copy.value.playerFailed : copy.value.chartFailed), 180_000);
+  const url = new URL("/practice-player/index.html", origin);
+  url.searchParams.set("requestId", requestId);
+  playerUrl.value = url.href;
   try {
     const result = await downloadPracticeBundle(id, current.signal);
     if (current.signal.aborted) return;
     if (!hasPracticeCourse(result.chartText, difficulty)) { fail(copy.value.missing); return; }
     resources = result;
-    const url = new URL("/practice-player/index.html", origin);
-    url.searchParams.set("parentOrigin", origin);
-    playerUrl.value = url.href;
+    loadingLabel.value = copy.value.loading;
+    startCourse();
   } catch {
-    if (!current.signal.aborted) fail(copy.value.failed);
+    if (!current.signal.aborted) fail(copy.value.bundleFailed);
   }
 }
 async function fullscreen() {
@@ -134,7 +163,7 @@ onBeforeUnmount(() => {
       <button type="button" @click="load">{{ copy.retry }}</button>
     </div>
     <p v-if="failure" role="alert">{{ failure }}</p>
-    <p v-else role="status">{{ status === 'loading' ? copy.loading : status === 'finished' ? copy.finished : status === 'exit' ? copy.exited : copy.ready }}</p>
+    <p v-else role="status">{{ status === 'loading' ? loadingLabel : status === 'finished' ? copy.finished : status === 'exit' ? copy.exited : copy.ready }}</p>
     <p v-if="fullscreenError" role="alert">{{ copy.fullscreenFailed }}</p>
     <iframe v-if="playerUrl" :key="requestId" ref="iframe" :src="playerUrl" :title="copy.title"
       allow="autoplay; fullscreen" allowfullscreen @load="send('hello')" />

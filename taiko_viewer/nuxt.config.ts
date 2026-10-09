@@ -211,12 +211,11 @@ export default defineNuxtConfig({
   },
   nitro: {
     routeRules: {
-      "/ourtaikoview-runtime/**": {
-        proxy: "https://fanmade.ourtaiko.org/player/**"
-      },
       "/ourtaikoview-manifest.json": {
-        proxy: "https://fanmade.ourtaiko.org/player-build.json",
-        headers: { "cache-control": "no-store" }
+        redirect: "/practice-player/release.json"
+      },
+      "/practice-player/**": {
+        headers: { "cache-control": "no-cache" }
       },
       "/": { prerender: false },
       "/ja": { prerender: false },

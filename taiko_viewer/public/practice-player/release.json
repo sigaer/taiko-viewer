@@ -1,0 +1,10 @@
+{
+  "path": "/player/3028457b06b7f563/index.html",
+  "files": {
+    "Build/Web.data.unityweb": "2509a68e2cbd328d4bee55d5d40c16de1beb87b4e5dbc1202e23fafe83feb745",
+    "Build/Web.framework.js.unityweb": "0eccf1dc94bf31f728dd7f0e0db6c210ceee24095a90565f862ab63677a1f885",
+    "Build/Web.loader.js": "215997939720a6647c41e34783cb55d6d8a6d486c05f7f49726f9027ad38f6e1",
+    "Build/Web.wasm.unityweb": "75c449a6c0b4736e3ec37a19506a659fa13fa91362f5895ef8d9bd40f7da70d2",
+    "index.html": "0b2e3fd050ab856a9111988c3b78113dd5aff22c9174990142fa44d10b4d3941"
+  }
+}
