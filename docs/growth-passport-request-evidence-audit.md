@@ -1,13 +1,13 @@
-# Passport 历史证据重复装载审计（草案，验证受阻）
+# Passport 历史证据重复装载审计（离线验证完成，共享默认关闭）
 
 - 审计日期：2026-10-10。
 - 固定基线：`a5aaf456a22bfcdab3ff634c0f84ae856ceee9bb`，main / 0.81.9。
-- 状态：**静态审计完成；补丁、离线计数基准及回归测试已准备；未运行；不能合入或部署。**
+- 状态：**静态审计与离线验证完成；123项回归通过，7类样本/42个独立进程样本完成；请求共享默认关闭，不能据此启用或部署。**
 - 未连接生产 DB、读取真实用户目录或部署服务。
 
 ## 计数结论与适用范围
 
-以下为正常、非 manual、Overview 与 History 都成功、请求期间历史文件不变且没有其他请求碰巧触发全局 single-flight 时的源码推导。不是动态测量。
+以下适用于正常、非 manual、Overview 与 History 都成功、请求期间历史文件不变且没有其他请求碰巧触发全局 single-flight 的路径。计数已通过匿名服务级测试与基准验证；不能外推为所有错误/并发分支的恒等式。
 
 令 N = min(历史目录中 data_*.json 文件数, 2000)，R = 成功读取原文的文件数，P = 成功解析 JSON 的文件数。一次装载有 N 次 readFile 调用、R 次 JSON.parse 调用、P 次成功解析。`filesRead` 实际是选中的文件数，不能当作成功读取数；`invalidFiles` 同时包含读取异常、坏 JSON 和缺少 songs 数组。
 
@@ -45,7 +45,7 @@ Overview 调用 `deriveDailyProgress`，内部调用 range/calendar 投影，然
 
 提供 `getSkillPassport` 的内部 `shareScoreEvidence` 选项，**默认关闭，HTTP入口不传入且不暴露该选项**。离线测试/基准显式启用时，才创建绑定初始 taikoId 的请求局部 loader，经可选内部参数传给 Overview 与 History。它复用已经成功装载的 evidence Promise；拒绝后允许重试；账号不匹配走原加载器；独立接口继续走原 loader。没有 TTL/常驻已完成缓存，持有最多一个账号的证据，生命周期随请求结束。保留 Overview 顺序执行、绑定检查、当前成绩读取、能力冻结规则及独立投影。生产默认仍独立处理，未批准或未经证明的复用不生效。
 
-**重要限制：稳定输入的等价性尚待执行测试证明；并发同步场景存在明确语义差异。** 原路径允许 History 看到 Overview 完成后新增/修改的历史文件；请求共享固定首次装载的历史证据，而 History 当前成绩仍会重新读取。本草案没有实现文件代际校验/同步锁，不能保证这类场景事实与基线完全一致。必须先确定产品是否允许请求内固定历史证据边界，或增加有依据的写入代际校验并测试失效重装；否则保留两次独立装载，不应启用这份接线。代码因此仅作为 draft candidate，不是已证明安全的优化。
+**重要限制：匿名稳定输入的完整DTO等价性已通过；并发同步场景存在明确语义差异。** 原路径允许 History 看到 Overview 完成后新增/修改的历史文件；请求共享固定首次装载的历史证据，而 History 当前成绩仍会重新读取。新增测试明确验证首次请求证据固定、新请求能看到新增文件。本草案没有实现文件代际校验/同步锁，不能保证这类场景事实与基线完全一致。必须先确定产品是否允许请求内固定历史证据边界，或增加有依据的写入代际校验并测试失效重装；否则保留两次独立装载，不应启用这份接线。代码因此仅作为默认关闭的 draft candidate，不是对全部并发输入已证明安全的优化。
 
 共享后的 Daily/History 仍各自遍历 snapshots；本草案目标是单次装载和单次 evidence normalization，不是单次业务回放。若进一步共享原始 transition 索引，需要证明 bestScores、full/delta 删除/重置、observedBefore、事件日、当前 attendance 与 revision 语义一致，再分别保留 Daily 展示截断和 History 完整投影。
 
@@ -64,8 +64,28 @@ bash scripts/memory/run_qa.sh /bin/bash -c 'cd taiko_viewer && node --experiment
 bash scripts/memory/run_qa.sh /bin/bash -c 'cd taiko_viewer && node scripts/performance/benchmark-growth-request.mjs /var/tmp/growth-request-audit mixed invalid boundary truncated iso-full local-full no-baseline'
 ```
 
-## 当前验证阻断
+## 实际验证与结果
 
 已尝试 `bash scripts/memory/run_qa.sh /usr/bin/true`，退出1：`System has not been booted with systemd as init system (PID 1)` / `Failed to connect to bus: Host is down`。
 
-遵守 `AGENTS.md` 与 `docs/memory-engineering-guidelines.md`：隔离失败不能无界回退。因此没有执行Node测试/基准、没有测得ms/RSS、没有重跑旧365天样本。旧12,834.76ms只作为旧管线记录，不作为本补丁的基线。本草案代码/测试未经运行，仍可能需要修正；没有修改版本或部署，也没有修改隔离脚本。
+遵守 `AGENTS.md` 与 `docs/memory-engineering-guidelines.md`，未在本地无界回退。随后在此PR专用分支的 GitHub Actions Ubuntu 24.04 临时主机使用**同一个未修改的**QA启动器完成测试及基准。没有注入生产配置或真实账号目录。Node 24.21.0；固定时钟；DB/Python/catalog为离线依赖；实际services、磁盘loader及业务投影运行。
+
+验证记录：[GitHub Actions run 38046701729](https://github.com/sigaer/taiko-viewer/actions/runs/38046701729)。123项测试通过，0失败；7类样本各3个before/after独立进程样本，共42个。全部样本最终Passport DTO hash一致。首次CI暴露adapter误把Node fs namespace的default导出当变量导出的语法问题，已修正，以下均来自修正后的成功运行。
+
+| 匿名样本 | before 中位数 ms | 共享候选中位数 ms | 减少 |
+| --- | ---: | ---: | ---: |
+| mixed | 65.01 | 47.41 | 27.1% |
+| invalid | 55.12 | 39.92 | 27.6% |
+| boundary | 34.10 | 31.12 | 8.7% |
+| truncated（2000选中文件） | 1230.24 | 657.09 | 46.6% |
+| ISO/full（2000文件 × 500谱面） | 14370.51 | 11472.59 | 20.2% |
+| local/full（2000文件 × 500谱面） | 8299.77 | 5486.18 | 33.9% |
+| no-baseline | 54.69 | 39.63 | 27.5% |
+
+ISO/full：历史装载中位数5810.25→2972.52ms；两次日历投影合计8482.13→8458.90ms，基本没有改善。local/full：装载5767.54→2934.08ms；日历投影2550.43→2533.72ms。**消除重复装载有效，但独立业务投影已成为主要瓶颈；不能认为达到3000ms历史管线预算。** 两个full样本的候选离线请求也仍超过5000ms初始Passport预算。源数据字节ISO/full候选282,969,992，before为其2倍；local/full候选273,964,000，before为其2倍。
+
+动态计数：truncated/ISO-full/local-full历史读取和JSON.parse调用4000→2000；normalization两轮→一轮；Daily一次、范围投影两次、History score事实投影一次均不变。坏JSON样本候选40次解析调用、39次成功解析，不能把成功解析数或selected files数混为一谈。
+
+独立进程的最大RSS在这些42个样本中约166–483MiB（含转译/adapter）；ISO/full候选419–454MiB，before474–477MiB。QA启动器配置High 2GiB / Max 3GiB / Swap 256MiB / 两CPU / 15分钟；本probe没有采样cgroup peak/事件及PSI，不据此宣称容量Gate通过或全树内存节省。完整样本、计数、分阶段计时及hash见 `docs/growth-passport-request-evidence-results.json`。
+
+这些是当前90天事实服务链路的匿名离线成本，不是生产延迟，SQL/Python/真实能力序列成本未包含；与旧12,834.76ms不是同一实验。没有修改版本、main或部署，也没有修改隔离启动器。共享仍默认关闭；继续优化需要首先建立并发写入代际一致性契约，然后证明一次transition replay可分别产生Daily展示和History完整事实。
