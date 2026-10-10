@@ -1,0 +1,30 @@
+{
+  "phase": 5,
+  "step": "5.4",
+  "status": "DEFERRED_MEMORY_ADMISSION",
+  "date": "2026-10-11T02:46:30.142982+08:00",
+  "release_commit": "cd4be76bc21d3cbf5fa8697d9cf23b25e0fb83b0",
+  "remote_head": "060dc05f42bc4d6ea87ed16a41621f3ca182e0cf",
+  "wrapper": "scripts/memory/run_build.sh",
+  "exit_code": 1,
+  "message": "Insufficient headroom for bounded build; retry in a maintenance window",
+  "standard_deploy_script_started": false,
+  "git_push_started": false,
+  "production_switch_started": false,
+  "memory": {
+    "total_kib": 32095592,
+    "available_kib": 12442960,
+    "required_kib": 13266778.0,
+    "formula": "MemAvailable >= 0.25 * MemTotal + 5 GiB",
+    "psi": "some avg10=0.00 avg60=0.00 avg300=0.00 total=34768213883\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=27486619743"
+  },
+  "runtime": {
+    "viewer_pid": 646789,
+    "sync_receiver_pid": 829176,
+    "deployed_version": "0.81.10 (unchanged)"
+  },
+  "log_sha256": "ccf01a6106b5a78e9434a50c333354d6df1fa6a52817a9103ce09e11c450cf07",
+  "gate_5": "IN_PROGRESS",
+  "phase_6": "NOT_STARTED",
+  "action": "Keep wrapper/limits/services intact; defer to a maintenance window, no direct deploy or manual push"
+}

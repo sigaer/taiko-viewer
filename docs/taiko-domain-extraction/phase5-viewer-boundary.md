@@ -29,3 +29,9 @@
 - 百万记录直接对比 `060dc05 / 0.81.10`：三对交替 fresh-process 样本全部 DTO digest 相等，均只加载/规范化历史一次、读取 2,000 文件。中位数 4.627 → 4.767 秒（+3.02%）；最大 OS RSS 442.65 MiB；cgroup High/Max/OOM/OOM kill events 均为 0。主机无 `memory.peak`，774.15 MiB 为最高采样值，不标作峰值。一次 5.318 秒高于历史 initial Passport 5 秒目标，未宣称 P0 性能 PASS；Phase 6 Read Model 仍需改善大历史 request latency。另一个旧 0.81.9 oracle 的 19.018 → 4.671 秒反映已有 request reuse 优化，不算本次迁移收益。
 - [整阶段实现证据](evidence/phase5-validation.json) 保存完整合成 benchmark 和源码 hash。fixture/临时文件已清理，无遗留 QA unit/监听器，无生产 DB、个人 userdata 读取或 mutation。首次性能命令误选旧 `/usr/bin/node`、一次采集不存在的 `memory.peak` 均记录为失败尝试；改为 Node 24.13.0 与明确的 unavailable metric 后重新完成，未绕过 memory runner。
 - 版本按兼容重构 patch 为 0.81.11；package/lock 同步，无其他可见文案或 fallback 版本字符串。最终发布提交须由标准 memory build wrapper 调用 deploy script，随后验线上版本、服务进程与只读 HTTP/auth smoke。Gate 5 当前仍待生产验收。
+
+## 5.4 发布准入暂缓
+
+发布实现提交 `cd4be76`。通过 `scripts/memory/run_build.sh` 调用标准脚本的尝试 exit 1，wrapper 在启动部署前拒绝：`Insufficient headroom for bounded build; retry in a maintenance window`。现有规则要求 MemAvailable ≥ 25% MemTotal + 5 GiB（本机约 12.65 GiB）；观察约 11.82 GiB，短缺约 0.83 GiB，Memory PSI 为 0。
+
+标准 `deploy_forum_web.sh` 尚未运行，未 git push、构建、切换 output 或重启；origin/main 仍 `060dc05`，线上仍 0.81.10 / Viewer PID 646789 / receiver PID 829176。未清缓存、终止其他服务或降低内存阈值。代码与步骤提交本地保留，等待符合准入的维护窗口继续同一标准流程。 [失败尝试证据](evidence/phase5-publication-attempt.json) 已留档。Gate 5 不提前 PASS，Phase 6 不开始。
