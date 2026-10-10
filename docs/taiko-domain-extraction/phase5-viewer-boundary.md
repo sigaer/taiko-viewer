@@ -19,3 +19,6 @@
 - 219 项离线 regression 全通过；新增读取测试覆盖原文 hash、缺失值、再次读取、非法路径、历史重写、daily archive missing/corrupt/8 MiB 上限；read contract/file adapter/test 的 TypeScript check 通过。保留 frozen oracle 与真实磁盘 adapter，未用最终 DTO mock 代替新边界。
 - 首轮一个测试连续重写落在同一毫秒，ctime 相同；测试明确跨过文件系统时钟精度。当前 stat 校验仍不是发布事务，精度限制如实保留，Phase 6 使用 publication version 完善识别。
 - [5.1 验证](evidence/phase5-read-validation.json) 保存 source/JUnit hash。回退至 `060dc05` 可恢复旧读取；无存储迁移。步骤提交用于后续整阶段 review，Web 尚未发布，Gate 5 尚未 PASS。
+- 5.1 提交 `8288bfe`，仅本地步骤提交，等待本 Phase 发布脚本统一提交/推送。
+- 5.2 CANONICAL_FACT_PASS：GrowthFact / temporal / observation 改为 Contract v1.0 类型引用，保留 Viewer GoalType 和非 nullable chart ID 的产品 refinement；删除本地重复模型。History 与 Recent 消费 owner/binding 校验后的 Canonical GrowthProjection，返回原有 facts 字段，不重建或复制事实树。Weekly/Passport 继续消费 History 的同一事实来源。
+- [5.2 验证](evidence/phase5-fact-validation.json)：冻结 schema 与旧 fact Golden 一致，跨 owner/binding 拒绝，Goal occurred/observed/confirmed 时间保持；离线完整链路和局部 TypeScript PASS。没有 Writer/SQL/schema 迁移或新对外字段。回退至 `8288bfe` 恢复 5.1；Gate 5 尚未 PASS。

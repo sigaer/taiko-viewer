@@ -8,6 +8,7 @@ import { getSongCatalog } from "~/server/services/content";
 import { deriveProgressForRange } from "~/utils/dailyProgress";
 import { projectScoreFacts, sortGrowthFacts } from "~/utils/growthHistory";
 import { growthCalendarDay } from "~/utils/playerGrowth";
+import { canonicalGrowthProjection } from "~/utils/canonicalGrowth.ts";
 import { loadGrowthScoreEvidence } from "./evidence";
 import { loadGoalFacts } from "./goals";
 import { readGrowthMeasurements } from "./measurements";
@@ -42,7 +43,7 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
   const replayStartedAt = performance.now();
   const days = current ? deriveProgressForRange(current.current.songs || [], evidence.snapshots, range.from, range.to, song => titles.get(Number(song.song_no)) || song.song_name || `#${song.song_no}`, current.revision) : [];
   const scoreFacts = manual ? [] : projectScoreFacts(userId, Number(binding.id), days);
-  const facts = sortGrowthFacts([...scoreFacts, ...goalFacts]);
+  const { facts } = canonicalGrowthProjection(String(userId), String(binding.id), sortGrowthFacts([...scoreFacts, ...goalFacts]));
   const coverage = {
     scoreHistoryFrom: evidence.fromDay,
     scoreHistoryTo: evidence.toDay,

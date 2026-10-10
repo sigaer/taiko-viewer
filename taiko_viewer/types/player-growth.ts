@@ -1,5 +1,6 @@
 import type { GoalType, PlayerGoal } from "./player-goal";
 import type { PlayerRatingDimension, RatingDimensionKey } from "./recommendation-intelligence";
+import type { CanonicalFact, GrowthTemporal } from "../../packages/sakura-taiko-contract/src/index";
 
 export type GrowthDataMode = "FULL_HISTORY" | "SNAPSHOT_LIMITED" | "INSUFFICIENT";
 export type GrowthDataSufficiency = "ready" | "limited" | "insufficient";
@@ -73,46 +74,14 @@ export type PlayerGrowthOverview = {
   };
 };
 
-export type GrowthFactType =
-  | "played"
-  | "score-pb"
-  | "ng-reduced"
-  | "combo-improved"
-  | "clear"
-  | "fc"
-  | "df"
-  | "rank-upgrade"
-  | "goal-completed";
+export type GrowthFactType = CanonicalFact["type"];
+export type GrowthTemporalPrecision = GrowthTemporal["precision"];
 
-export type GrowthTemporalPrecision = "instant" | "day" | "observation" | "unknown";
-
-export type GrowthFact = {
-  id: string;
-  factKey: string;
-  ownerId: string;
-  bindingId: string;
-  type: GrowthFactType;
-  title?: string;
+/** Viewer product refinements of Contract v1.0; evidence and time have one definition. */
+export type GrowthFact = Omit<CanonicalFact, "songId" | "difficultyType" | "goalType"> & {
   songId?: number;
   difficultyType?: number;
-  before?: number | null;
-  after?: number | null;
-  delta?: number | null;
-  goalId?: string | null;
   goalType?: GoalType | null;
-  evidence: {
-    source: "score-history" | "goal";
-    sourceRevision?: string;
-    evidenceVersion: number;
-    provenance?: unknown;
-  };
-  temporal: {
-    attributedDay?: string | null;
-    occurredAt?: string | null;
-    observedAt?: string | null;
-    confirmedAt?: string | null;
-    precision: GrowthTemporalPrecision;
-  };
 };
 
 export type GrowthMeasurementDimensions = Record<RatingDimensionKey, number | null>;

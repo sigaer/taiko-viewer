@@ -13,6 +13,9 @@
   "files": [
     "../../server/domain/file-score-reader.ts",
     "../../server/domain/score-read-contract.ts",
-    "../domainScoreRead.test.ts"
+    "../domainScoreRead.test.ts",
+    "../../utils/canonicalGrowth.ts",
+    "../../utils/growthHistory.ts",
+    "../../types/player-growth.ts"
   ]
 }

@@ -40,3 +40,4 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 
 - 2026-10-11 / 4.4：客户端 `d501343` / 0.2.0 push 成功；两个私有 Git pin 安装并核对实际 commit/source；最终 48 regression、installed-client 14 模块 / real command import PASS。Gate 4 PASS；开始 Phase 5。Viewer 和中心线上依赖未改。
 - 2026-10-11 / 5.1：当前/历史/daily archive 读取端口完成，原文 revision/provenance、历史排序/预取/stat 语义保留；219 regression 与局部 TypeScript PASS。Writer block 无变更；Phase 5 全步骤完成后统一版本化发布。
+- 2026-10-11 / 5.2：Contract CanonicalFact / GrowthObservation 单一类型来源，History/Recent scope 验证；冻结 Golden、schema、Growth/Goal 兼容与 TypeScript PASS，证据单独归档。继续 5.3。

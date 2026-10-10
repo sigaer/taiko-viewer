@@ -5,6 +5,8 @@ import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as Userda
 import { getDomainScoreReader } from "../taiko-domain/read.ts";
 import { memoizeGrowthString } from "~/utils/growthRequestMemo";
 import { GROWTH_HISTORY_FILE_LIMIT } from "./constants";
+import type { GrowthObservation } from "../../../../packages/sakura-taiko-contract/src/index";
+export type { GrowthObservation } from "../../../../packages/sakura-taiko-contract/src/index";
 
 export type GrowthScoreEvidence = {
   snapshots: GrowthSnapshot[];
@@ -17,19 +19,7 @@ export type GrowthScoreEvidence = {
   toDay: string | null;
 };
 
-export type GrowthObservationExclusion = "import" | "manual" | "repair" | "content-edit" | "dispatcher-transfer" | "counter-regression" | "unknown-source" | "source-switch" | "discontinuity-baseline";
-
-export type GrowthObservation = {
-  token: string;
-  orderKey: string;
-  revision: string;
-  contentRevision: string | null;
-  observedAt: string;
-  source: string;
-  eventDays: string[];
-  evidenceLevel: "L0" | "L1";
-  excludedReason: GrowthObservationExclusion | null;
-};
+export type GrowthObservationExclusion = NonNullable<GrowthObservation["excludedReason"]>;
 
 const isFullPayload = (payload: UserdataPayload) => payload._meta?.full === true || (!payload._meta && Boolean(payload.profile && payload.achievement && Array.isArray(payload.songs)));
 const fileTimestamp = (name: string) => {

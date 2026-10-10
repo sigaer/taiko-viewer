@@ -1,0 +1,51 @@
+{
+  "step": "5.2",
+  "status": "CANONICAL_FACT_PASS",
+  "production_gate": "PENDING_PHASE5_RELEASE",
+  "baseline": "8288bfe",
+  "schema": "urn:sakura-taiko:contract:1.0",
+  "schema_sha256": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+  "tests": {
+    "passed": 114,
+    "failures": 0,
+    "typescript": "PASS (Viewer Bundler resolution)",
+    "junit_sha256": "1a65bd8e9721c2b342d53170cc1d1ac8703e06a48b61ef03b886dcd6128b8620"
+  },
+  "semantics": {
+    "frozen_fact_golden": true,
+    "cross_owner_binding_rejected": true,
+    "no_fact_clone": true,
+    "goal_observation_time_preserved": true,
+    "api_envelope_unchanged": true
+  },
+  "files": [
+    {
+      "path": "taiko_viewer/types/player-growth.ts",
+      "sha256": "dea30d28b8bb58f2c40b3aba692779a8dec7713b61cded38637d9fb5f9485e5b"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-history/evidence.ts",
+      "sha256": "943d3ef121477ead3f2c803ec6388b3f976fbb55dc97d49486357f4e8a53a17b"
+    },
+    {
+      "path": "taiko_viewer/utils/canonicalGrowth.ts",
+      "sha256": "e87fd9917158ee2a7edc0a4af6dfde5df85c96bb91f257174a53ffed649a6166"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-history/service.ts",
+      "sha256": "f3003680e63e87ad06d064e54ec99dc3fe8fbad0d4dfe284122e4742533259d5"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-recent/service.ts",
+      "sha256": "1d1cb044e53e99cb6bd98a520efe655edc621dde68a60d000ebc49713031a4b1"
+    },
+    {
+      "path": "taiko_viewer/tests/canonicalGrowth.test.mjs",
+      "sha256": "438b3a324a53bf8b151e24d2831d5c3537295507621c31cc52ed4c965e18b190"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/domainRead.tsconfig.json",
+      "sha256": "fb4203ed2c01eb53d5e6ff8731eefd8ab1d17b96145fa7b0415c7a5e0c65759a"
+    }
+  ]
+}

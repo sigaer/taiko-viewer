@@ -9,6 +9,7 @@ import { loadGoalFacts } from "~/server/services/growth-history/goals";
 import { loadGrowthScoreEvidence, type GrowthObservation } from "~/server/services/growth-history/evidence";
 import { deriveProgressForCalendarDays } from "~/utils/dailyProgress";
 import { projectScoreFacts, sortGrowthFacts } from "~/utils/growthHistory";
+import { canonicalGrowthProjection } from "~/utils/canonicalGrowth.ts";
 import { GROWTH_RECENT_ALGORITHM_VERSION, readRecentCursor, readRecentCursorForUpdate, writeRecentCursor } from "./store";
 import { recentEligibleObservations, selectRecentObservationWindow } from "./boundary";
 
@@ -38,7 +39,7 @@ const factsForObservations = async (
     : [];
   const scoreFacts = projectScoreFacts(userId, bindingId, days).filter(fact => RECENT_SCORE_TYPES.has(fact.type) && Boolean(fact.evidence.sourceRevision && revisions.has(fact.evidence.sourceRevision)));
   const completed = goalFacts.filter(fact => Boolean(fact.evidence.sourceRevision && revisions.has(fact.evidence.sourceRevision)));
-  return sortGrowthFacts([...scoreFacts, ...completed]);
+  return canonicalGrowthProjection(String(userId), String(bindingId), sortGrowthFacts([...scoreFacts, ...completed])).facts;
 };
 
 export async function getRecentGrowth(userId: number): Promise<RecentGrowthResponse> {
