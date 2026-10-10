@@ -6,11 +6,12 @@ import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:
 import { join } from 'node:path';
 import { createApp, defineEventHandler, toNodeListener } from 'h3';
 import { validatePlayerRelease } from '../server/services/practice-player/release.mjs';
-import { syncPlayer } from '../scripts/sync_practice_player.mjs';
+import { gzipSync } from 'node:zlib';
+import { syncPlayer, fetchPlayerArchive } from '../scripts/sync_practice_player.mjs';
 import { servePracticeAsset } from '../server/utils/practice-player.mjs';
 import { createPlayerFetch } from '../public/practice-player/runtime.mjs';
 
-const names = ['Build/Web.loader.js', 'Build/Web.data.unityweb', 'Build/Web.framework.js.unityweb', 'Build/Web.wasm.unityweb', 'index.html', 'StreamingAssets/sub/config.json'];
+const names = ['Build/Web.loader.js', 'Build/Web.data.unityweb', 'Build/Web.framework.js.unityweb', 'Build/Web.wasm.unityweb', 'index.html', 'StreamingAssets/sub/config.json', 'audio/decode.js', 'audio/vendor/decoder.min.js'];
 const fixture = version => ({ path: `/player/${version}/index.html`, files: Object.fromEntries(names.map(name => [name, createHash('sha256').update(`test ${name}`).digest('hex')])) });
 const version = '0123456789abcdef';
 const fetcher = async url => new Response(`test ${url.pathname.split('/').slice(3).join('/')}`);
@@ -114,4 +115,15 @@ test('browser retries transient local resource failures once, respects abort and
   controller.abort();
   await assert.rejects(broken('/practice-player/release.json'));
   assert.equal(count, 1);
+});
+
+ test('sync transport preserves publisher gzip bytes rather than transparently decoding', async () => {
+  const bytes = gzipSync('Unity compressed fixture');
+  const server = createServer((req, res) => { res.writeHead(200, { 'Content-Encoding': 'gzip' }); res.end(bytes); });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const response = await fetchPlayerArchive(new URL(`http://127.0.0.1:${server.address().port}/asset`), { signal: AbortSignal.timeout(5000) });
+    const body = Buffer.from(await new Response(response.body).arrayBuffer());
+    assert.ok(body.equals(bytes), 'Compressed archive bytes must match');
+  } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });

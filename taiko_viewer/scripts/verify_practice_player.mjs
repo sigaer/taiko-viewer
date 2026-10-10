@@ -9,7 +9,7 @@ import { chromium } from 'playwright-core';
 import { zipSync, strToU8 } from 'fflate';
 
 const remote = process.argv[2]?.startsWith('http') ? process.argv[2] : undefined;
-const compatibility = process.argv.includes('--wav');
+const compatibility = process.argv.includes('--software');
 const base = remote || 'http://127.0.0.1:3197';
 const output = '/var/tmp/practice-player-qa';
 await mkdir(output, { recursive: true });
@@ -39,6 +39,13 @@ async function run() {
   context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' });
   await context.addInitScript(() => {
     window.__practiceReadyCount = 0;
+    window.__practiceAudioModes = [];
+    window.__practiceDecodeErrors = [];
+    window.addEventListener('message', event => {
+      if (event.data?.channel !== 'ourtaiko-view') return;
+      if (event.data.type === 'load') window.__practiceAudioModes.push(event.data.payload.audioDecode);
+      if (event.data.type === 'error') window.__practiceDecodeErrors.push(event.data.payload?.code);
+    });
     window.addEventListener('message', event => {
       if (event.origin === location.origin && event.data?.channel === 'ourtaiko-view' && event.data.type === 'ready') window.__practiceReadyCount++;
     });
@@ -79,6 +86,7 @@ async function run() {
     if (scenario === 'transient' && (url.pathname === '/practice-player/release.json' || url.pathname.endsWith('/Web.loader.js') || url.pathname.endsWith('/Web.data.unityweb')) && requests.get(url.pathname) === 1) {
       return route.fulfill({ status: 503, body: 'Temporary QA failure' });
     }
+    if (scenario === 'software-failure' && url.pathname.endsWith('/audio/ogg-worker.js')) return route.fulfill({ status: 503, body: 'Unavailable' });
     if (scenario === 'player-failure' && url.pathname === '/practice-player/release.json') return route.fulfill({ status: 503, body: 'Unavailable' });
     if (url.pathname.endsWith('/tja-package')) {
       if (scenario === 'held-bundle') await new Promise(resolve => {
@@ -92,7 +100,7 @@ async function run() {
       }
     }
     if (compatibility && url.pathname.endsWith('/tja-package')) {
-      assert.equal(url.searchParams.get('audio'), 'wav');
+      assert.equal(url.searchParams.has('audio'), false, 'Software decoding uses original bundle');
       return route.continue();
     }
     if (!remote && url.pathname.startsWith('/api/')) {
@@ -106,6 +114,14 @@ async function run() {
   console.log('Practice page opened');
   await page.waitForFunction(() => document.querySelector('.practice-page [role="alert"]') || document.querySelector('.practice-page [role="status"]')?.textContent?.includes('请在播放器中点击开始'), { }, { timeout: 180_000 });
   assert.equal(await page.locator('.practice-page [role="alert"]').count(), 0, await page.locator('.practice-page').innerText());
+  if (compatibility) {
+    const inner = page.frames().find(frame => frame.url().includes('/practice-player/index.html'));
+    assert.deepEqual(await inner.evaluate(() => window.__practiceAudioModes), ['native', 'software']);
+    assert.equal(requests.get('/api/content/songs/1357/tja-package'), 1, 'Decode retry must not download audio again');
+    assert.equal(await page.evaluate(() => window.__practiceDecodeErrors.filter(code => code === 'AUDIO_DECODE_FAILED').length), 1);
+    assert.ok([...requests.keys()].some(path => path.endsWith('/audio/ogg-worker.js')), 'Local software decoder worker loaded');
+    results.push({ scenario: 'software-decode', modes: ['native', 'software'], bundleDownloads: 1 });
+  }
   const frame = page.frameLocator('.practice-page iframe');
   await frame.locator('#start').click();
   await page.waitForTimeout(1500);
@@ -177,7 +193,8 @@ async function run() {
     for (const [name, expected, difficulty] of [
       ['bundle-failure', '谱面与音乐下载失败', 4],
       ['player-failure', '播放器加载失败', 4],
-      ['missing-course', '此难度暂无可用谱面', 5]
+      ['missing-course', '此难度暂无可用谱面', 5],
+      ...(compatibility ? [['software-failure', '谱面或音乐读取失败', 1]] : [])
     ]) {
       scenario = name;
       await page.goto(`${base}/ourtaikoview/${compatibility ? 1357 : 463}/${difficulty}`, { waitUntil: 'domcontentloaded' });

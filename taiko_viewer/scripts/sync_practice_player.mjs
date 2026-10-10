@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // Download only at operator request. Playback never contacts the upstream.
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
@@ -20,7 +22,26 @@ async function hashFile(path) {
   return hash.digest('hex');
 }
 
-export async function syncPlayer({ manifest, directory = DEFAULT_PLAYER_DIR, source = 'https://fanmade.ourtaiko.org', fetcher = fetch }) {
+// CDN Content-Encoding describes the stored .unityweb bytes. Native fetch
+// transparently decompresses them, invalidating the publisher's SHA-256.
+export function fetchPlayerArchive(url, { signal }) {
+  return new Promise((resolve, reject) => {
+    const transport = url.protocol === 'https:' ? httpsRequest : url.protocol === 'http:' ? httpRequest : null;
+    if (!transport) { reject(new Error('Unsupported player source')); return; }
+    const request = transport(url, { signal }, response => {
+      resolve({
+        ok: response.statusCode >= 200 && response.statusCode < 300,
+        status: response.statusCode,
+        headers: { get: name => response.headers[name.toLowerCase()] || null },
+        body: Readable.toWeb(response)
+      });
+    });
+    request.on('error', reject);
+    request.end();
+  });
+}
+
+export async function syncPlayer({ manifest, directory = DEFAULT_PLAYER_DIR, source = 'https://d2mguycu233w0q.cloudfront.net', fetcher = fetchPlayerArchive }) {
   const release = await readRelease(manifest);
   await mkdir(directory, { recursive: true });
   const lock = join(directory, '.sync-lock');

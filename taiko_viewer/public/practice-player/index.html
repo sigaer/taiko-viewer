@@ -12,7 +12,6 @@ progress{width:min(70vw,360px)}
 <div id="overlay"><strong>OurTaikoView</strong><progress id="progress" max="1" value="0"></progress>
 <div id="message" role="status">正在加载 / Loading…</div><button id="start" hidden>点击开始 / Start</button></div>
 <script type="module">
-import { createBundleFetch } from './bundle-fetch.mjs';
 import { createPlayerFetch, loadPlayerScript } from './runtime.mjs';
 const canvas = document.getElementById('canvas'), overlay = document.getElementById('overlay');
 const progress = document.getElementById('progress'), message = document.getElementById('message'), start = document.getElementById('start');
@@ -21,9 +20,9 @@ const lifetime = new AbortController();
 const playerFetch = createPlayerFetch(nativeFetch, origin, lifetime.signal);
 window.fetch = playerFetch;
 let instance, requestId = new URLSearchParams(location.search).get('requestId') || '', loaded = false;
-const post = data => parent.postMessage(data, origin);
+const post = data => parent.postMessage({...data, version:1}, origin);
 const command = type => instance?.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({channel:'ourtaiko-view',version:1,type,requestId}));
-const releaseAudio = () => { window.fetch = playerFetch; loaded = false; };
+const releaseAudio = () => { window.ourTaikoPendingAudio = null; loaded = false; };
 const fail = (code = 'CHART_LOAD_FAILED') => {
   releaseAudio();
   message.textContent = '加载失败 / Load failed'; start.hidden = true; overlay.hidden = false;
@@ -37,7 +36,7 @@ window.ourTaikoViewEmit = json => {
     loaded = true; overlay.hidden = false; progress.hidden = true; start.hidden = false;
     message.textContent = '点击开始以启用声音和键盘 / Click to enable audio and keyboard';
   }
-  if (data.type === 'error' || data.type === 'exit') releaseAudio();
+  if ((data.type === 'error' && data.requestId === requestId) || data.type === 'exit') releaseAudio();
   post(data);
 };
 window.addEventListener('message', event => {
@@ -47,18 +46,17 @@ window.addEventListener('message', event => {
   if (data.type === 'unload') releaseAudio();
   if (data.type === 'load') {
     requestId = data.requestId;
-    const { audioBlob, ...payload } = data.payload || {};
-    if (!(audioBlob instanceof Blob) || !audioBlob.size || audioBlob.size > 128 * 1024 * 1024) { fail(); return; }
+    const { audioBytes, ...payload } = data.payload || {};
+    if (!(audioBytes instanceof ArrayBuffer) || !audioBytes.byteLength || audioBytes.byteLength > 100 * 1024 * 1024 || !['native', 'software'].includes(payload.audioDecode)) { fail('INVALID_AUDIO_TRANSFER'); return; }
     releaseAudio();
-    const audioUrl = new URL(`./audio/${encodeURIComponent(requestId)}`, location.href).href;
-    window.fetch = createBundleFetch(audioUrl, audioBlob, playerFetch);
-    instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({...data, payload: {...payload, audioUrl}}));
+    window.ourTaikoPendingAudio = {requestId, bytes: audioBytes};
+    instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify({...data, payload: {...payload, audioTransferred:true}}));
   } else instance.SendMessage('WebPlayerBridge', 'Receive', JSON.stringify(data));
 });
 start.addEventListener('click', () => { canvas.focus(); overlay.hidden = true; });
 window.addEventListener('blur', () => { if (loaded) command('pause'); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && loaded) command('pause'); });
-window.addEventListener('pagehide', () => { lifetime.abort(); command('unload'); releaseAudio(); });
+window.addEventListener('pagehide', () => { lifetime.abort(); command('unload'); releaseAudio(); window.ourTaikoAudioDecoder?.dispose(); });
 let bootFailure = 'PLAYER_RELEASE_FAILED';
 try {
   const response = await playerFetch('/practice-player/release.json', { cache: 'no-cache' });
@@ -68,6 +66,7 @@ try {
   const root = manifest.path.replace('/player/', '/ourtaikoview-runtime/').replace('index.html', '');
   const build = root + 'Build/';
   bootFailure = 'PLAYER_DOWNLOAD_FAILED';
+  await loadPlayerScript(root + 'audio/decode.js', document, lifetime.signal);
   await loadPlayerScript(build + 'Web.loader.js', document, lifetime.signal);
   bootFailure = 'PLAYER_BOOT_FAILED';
   instance = await createUnityInstance(canvas, {

@@ -72,6 +72,7 @@ let timer: ReturnType<typeof setTimeout> | undefined;
 let resources: Awaited<ReturnType<typeof downloadPracticeBundle>> | undefined;
 let ready = false;
 let loadSent = false;
+let audioDecode: "native" | "software" = "native";
 const loadingLabel = ref('');
 
 function send(type: string, payload?: unknown) {
@@ -98,16 +99,25 @@ function fail(message: string) {
 function sendVolume() {
   if (ready) send("setDrumVolume", { volume: Number(volume.value) });
 }
-function startCourse() {
+async function startCourse() {
   if (!ready || !resources || loadSent || !playerUrl.value) return;
   loadSent = true;
   loadingLabel.value = copy.value.loadingChart;
   sendVolume();
-  send("load", {
-    ...resources,
-    course: PRACTICE_COURSES[difficulty - 1],
-    practice: true, autoPlay: false, replay: false
-  });
+  const activeId = requestId;
+  const activeResources = resources;
+  try {
+    const audioBytes = await activeResources.audioBlob.arrayBuffer();
+    if (requestId !== activeId || controller?.signal.aborted || !iframe.value) return;
+    iframe.value.contentWindow?.postMessage(playerMessage("load", activeId, {
+      chartText: activeResources.chartText, audioType: activeResources.audioType,
+      audioBytes, audioDecode,
+      course: PRACTICE_COURSES[difficulty - 1],
+      practice: true, autoPlay: false, replay: false
+    }), origin, [audioBytes]);
+  } catch {
+    if (requestId === activeId && !controller?.signal.aborted) fail(copy.value.chartFailed);
+  }
 }
 function receive(event: MessageEvent) {
   if (!isPracticeMessage(event, iframe.value?.contentWindow ?? null, origin)) return;
@@ -121,12 +131,20 @@ function receive(event: MessageEvent) {
   }
   if (data.type === "error") {
     const code = String(data.payload?.code || '');
+    if (code === 'AUDIO_DECODE_FAILED' && audioDecode === 'native' && resources && data.requestId === requestId) {
+      audioDecode = 'software';
+      requestId = crypto.randomUUID();
+      loadSent = false;
+      void startCourse();
+      return;
+    }
     fail(code === 'PLAYER_BOOT_FAILED' ? copy.value.playerBootFailed :
       code === 'PLAYER_DOWNLOAD_FAILED' ? copy.value.playerDownloadFailed :
       code.startsWith('PLAYER_') ? copy.value.playerFailed : copy.value.chartFailed);
   }
   else if (data.type === "loaded" || data.type === "finished") {
     clearTimer();
+    resources = undefined;
     status.value = data.type;
   } else if (data.type === "exit") {
     stop();
@@ -137,6 +155,7 @@ async function load() {
   stop();
   resources = undefined;
   failure.value = "";
+  audioDecode = "native";
   status.value = "loading";
   loadingLabel.value = copy.value.loadingBundle;
   requestId = crypto.randomUUID();
@@ -202,7 +221,7 @@ onBeforeUnmount(() => {
       <div v-if="expanded" class="expanded-controls">
         <button ref="exitButton" type="button" @click="exitExpanded()">{{ copy.exitFullscreen }}</button>
       </div>
-    <iframe v-if="playerUrl" :key="requestId" ref="iframe" :src="playerUrl" :title="copy.title"
+    <iframe v-if="playerUrl" :key="playerUrl" ref="iframe" :src="playerUrl" :title="copy.title"
       allow="autoplay; fullscreen" allowfullscreen @load="frameLoaded" />
     </div>
   </main>

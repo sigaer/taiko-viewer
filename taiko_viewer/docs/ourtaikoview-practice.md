@@ -36,3 +36,13 @@ Practice feature-detects `audio/ogg; codecs="vorbis"`. Unsupported browsers (inc
 The server requires `/usr/bin/ffmpeg`. Conversion uses one thread, a 60-second deadline, 128 MiB input and 120 MiB output limits. Each Node process admits one conversion/stream at a time (busy requests receive 503), with no waiting queue or retained cache. Temporary directories under `/var/tmp/taiko-practice-audio-*` are removed on completion, cancellation or failure. Abrupt host/process termination can leave a directory for operational cleanup.
 
 Run `verify_practice_player.mjs --wav` through the memory QA wrapper to test real song 1357 with Ogg capability disabled and Ogg decoding rejected. This exercises the fallback in Chromium; it does not replace physical iPhone verification.
+
+### Software audio decoding (0.81.8)
+
+The practice page now sends transferable encoded audio bytes to the pinned player `2ec933fb07d8bd7b`. It first requests native decoding, then retries `AUDIO_DECODE_FAILED` exactly once with a new request ID and `audioDecode: software`, using the retained Blob without downloading another bundle. The iframe stays mounted throughout the retry. Retry data is released after loading or on exit, cancellation and errors.
+
+The new player's `audio/` Worker, decoder libraries, source maps and license notices are included in the SHA-256 manifest and served from the same local versioned runtime as Unity. The sync tool preserves raw CDN gzip bytes for hash verification; the local runtime leaves Unity's decompressor responsible for `.unityweb`. Browsers do not contact CloudFront during practice.
+
+The `?audio=wav` endpoint remains available for rollback while physical iPhone acceptance is pending; ordinary practice no longer requests it. Run `verify_practice_player.mjs --software` (with `TAIKO_REPO_ROOT` pointing at the content repository for local QA) via the memory wrapper. It forces native Ogg rejection and checks native → software, one bundle download, local Worker loading, fullscreen fallback and lifecycle recovery. Software PCM still consumes device memory; no streaming-audio or physical-device performance guarantee is implied.
+
+`verify_practice_audio_decode.mjs` checks 5-minute stereo Vorbis through the actual pinned native/software adapters, including sample-aligned onset and complete duration. The test host Chromium adds about 15 ms of native tail padding; software decoding returns the exact 300-second source. This host result is not an iPhone latency/memory measurement.

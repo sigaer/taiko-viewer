@@ -6,7 +6,7 @@ const required = ['Build/Web.loader.js', 'Build/Web.data.unityweb', 'Build/Web.f
 
 export function validPlayerFile(name) {
   return typeof name === 'string' && name.length <= 240 &&
-    /^(?:index\.html|(?:Build|StreamingAssets)\/[A-Za-z0-9_./-]+)$/.test(name) &&
+    /^(?:index\.html|(?:Build|StreamingAssets|audio)\/[A-Za-z0-9_./-]+)$/.test(name) &&
     name.split('/').every(part => part && part !== '.' && part !== '..' && !part.startsWith('.'));
 }
 
