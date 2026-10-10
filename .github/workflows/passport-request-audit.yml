@@ -1,0 +1,37 @@
+name: Isolated Passport request audit
+on:
+  push:
+    branches: [codex/passport-history-request-audit-20261010]
+permissions:
+  contents: read
+concurrency:
+  group: passport-request-audit
+  cancel-in-progress: false
+jobs:
+  offline-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install only offline test dependencies
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/passport-audit-deps"
+          npm install --prefix "$RUNNER_TEMP/passport-audit-deps" --ignore-scripts --no-audit --no-fund typescript@5.6.3 h3@1.15.4 mysql2@3.19.0
+          ln -s "$RUNNER_TEMP/passport-audit-deps/node_modules" taiko_viewer/node_modules
+      - name: Regression through approved bounded QA launcher
+        shell: bash
+        run: |
+          sudo --preserve-env=PATH bash scripts/memory/run_qa.sh /bin/bash -c 'cd taiko_viewer && node --experimental-strip-types --test --test-concurrency=1 tests/growthRequestEvidence.test.mjs tests/growthPipelineParity.test.mjs tests/growthCalendarParity.test.mjs tests/dailyProgress.test.ts tests/growthHistory.test.ts tests/growthMeasurements.test.ts tests/growthPassport.test.ts tests/growthRecent.test.ts'
+      - name: Current Passport before/after anonymous cost probe
+        shell: bash
+        run: |
+          sudo --preserve-env=PATH bash scripts/memory/run_qa.sh /bin/bash -c 'cd taiko_viewer && node scripts/performance/benchmark-growth-request.mjs /var/tmp/growth-request-audit mixed invalid boundary truncated iso-full local-full no-baseline'
+      - name: Read anonymous aggregate results
+        if: always()
+        shell: bash
+        run: |
+          if sudo test -f /var/tmp/growth-request-audit/summary.json; then sudo cat /var/tmp/growth-request-audit/summary.json; fi
