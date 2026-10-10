@@ -1,0 +1,209 @@
+{
+  "phase": 3,
+  "release": "95d71d57d109d756cb129610051af40a989f016f",
+  "baseline": "5ac44b36e2e170e84641adf124d77f1e998f4039",
+  "coreVersion": "0.1.1",
+  "contractVersion": "0.1.0",
+  "allExistingRuntimeFilesMatchedBaseline": true,
+  "files": [
+    {
+      "path": "docs/domain-migration-phase3.md",
+      "existed": false,
+      "oldSha256": null,
+      "newSha256": "904c80c3ed9fcd38c837abfa7a54e372078da0b9d8a8d5114dee85ef05814d52"
+    },
+    {
+      "path": "plugins/utils/__init__.py",
+      "existed": true,
+      "oldSha256": "d79adb455e94b7a3594b28442c02b1de8f92e785c9a2ea06bd0fd60d15883bce",
+      "newSha256": "4fb6276fe35d1e7291bdbf58033cdd3d3539b0a0d4ed60f3a9767944449d4c58"
+    },
+    {
+      "path": "plugins/utils/b30_single.py",
+      "existed": true,
+      "oldSha256": "763ae7620fbd4875774e533dded82d77bb917375f91839884bae0067f4afceca",
+      "newSha256": "7248b14aab7279e7ae18fd4f0b6d9c5a4ec7b4bd7180f35ea6f47bbec4e63753"
+    },
+    {
+      "path": "plugins/utils/chart_availability.py",
+      "existed": true,
+      "oldSha256": "7a46d5292d02a11c48a029a35b10707b68fd2734b5b957b6ba749c5cd600404f",
+      "newSha256": "dad01624e649d23aa5735d7bb21a6684d075b71d0808d251e4bcb759f5786c40"
+    },
+    {
+      "path": "plugins/utils/chart_roll_metadata.py",
+      "existed": true,
+      "oldSha256": "a76d9b41ed6327ac7ed0c057c20087484233a9eb0f36ad46b19f4ef1e4f4e6bf",
+      "newSha256": "92a6856bf541cbe40af02efdfe8d24a2a4ef4c641d03be689521f324c1deb7b5"
+    },
+    {
+      "path": "plugins/utils/dojo_score.py",
+      "existed": true,
+      "oldSha256": "55477d055aad4b3a43b1072662dc2466f630a23d5d8670f03a7c48883e9df2c2",
+      "newSha256": "f2da76b7bd901dff066884e2ee3dee9f976e2ae47446ba80b2975715e302dc22"
+    },
+    {
+      "path": "plugins/utils/duplicate_versions.py",
+      "existed": true,
+      "oldSha256": "1f6abb88fd1b87d53547ec9576a453a870a9e4ad820282e85f8d093babc5ad26",
+      "newSha256": "bc0ff6c665be3c22eabaf85d8281bf8663ee15fc9606780daabdc13c4fb86109"
+    },
+    {
+      "path": "plugins/utils/evaluation_roll.py",
+      "existed": true,
+      "oldSha256": "3afee8ebe9b944b7a37d95f8d3a157e27659894382aba9a765c54f03031fedb1",
+      "newSha256": "80384b20773ab120df56e1744362b6f968004084e59accd5701b088cfaa618a5"
+    },
+    {
+      "path": "plugins/utils/hiroba/normalize.py",
+      "existed": true,
+      "oldSha256": "4590815313b91c5a0a5811ab7c77220207df5b60a70934ff7252f74422f061f4",
+      "newSha256": "ab856a680ac858789635683a89a67d6ba1933b09bb4103e9d7662001f26eb041"
+    },
+    {
+      "path": "plugins/utils/hiroba/parser.py",
+      "existed": true,
+      "oldSha256": "260652e5c603c89058f1041395bbaad797925cbfc5c9925d339c9a6af397208e",
+      "newSha256": "d8fc9160be15323eb313b8be507e5206fe98f3ae4da2761e2b28d523437b8414"
+    },
+    {
+      "path": "plugins/utils/merge_index.py",
+      "existed": true,
+      "oldSha256": "2b02ec5be97c5635027e2a7dcd2fd3eefa0289786cec03a74e8e340ae9fca4db",
+      "newSha256": "f39e50eb50952d72419f9fd95e840773648c3b7cadf60fb491b6efa02fcaa987"
+    },
+    {
+      "path": "plugins/utils/performance_forecast.py",
+      "existed": true,
+      "oldSha256": "d3f87b532f79a7445b1aeb2c78a69c38e578421daf8170a5def4bfc494ce7da6",
+      "newSha256": "cfdf48fbd7d9905ade0dea907f3f84c4dabbc070ead4b63e48c104cb93aca1ba"
+    },
+    {
+      "path": "plugins/utils/progress_catalog.py",
+      "existed": true,
+      "oldSha256": "b6808167b9797352188bdcdf68de0baad35914b0254a803c8be9eca889db7fc6",
+      "newSha256": "1aa395f4e7a696d6baf5daa90e8b7d2de1a839c6b1e0a3b08bbe614315664890"
+    },
+    {
+      "path": "plugins/utils/progress_star.py",
+      "existed": true,
+      "oldSha256": "7f9a04b4a2c3a0c54320342c34a74be603c3f9fc699b48923b43d7e19de87764",
+      "newSha256": "a3e5a48c323a67185ff7bba2101411b1fcf23e69de8f47c9b06b6ac3cf2b321b"
+    },
+    {
+      "path": "plugins/utils/score_calculator.py",
+      "existed": true,
+      "oldSha256": "558baa3865346ecec2c49207720e54a151d5d6ac3d264350e58c7269775bdbb3",
+      "newSha256": "2805f6d961ffccc8d996e5567a05ce200ee5f49d603c481518229ca42b4675e0"
+    },
+    {
+      "path": "plugins/utils/score_estimator.py",
+      "existed": true,
+      "oldSha256": "3e9b56823adb9c4f2ccc14888b0bd05129463249faf1cdacdebd2a7c8e1c263e",
+      "newSha256": "63016543e3370473c2eacd1cac32a5176fbe71e24e27c564e4af4f784f15c6d3"
+    },
+    {
+      "path": "plugins/utils/score_line.py",
+      "existed": true,
+      "oldSha256": "649ae9591f3369ed895dc7ea1579f4f10f3b8fd7b52f89c8bb7b790fcb3dc78c",
+      "newSha256": "4bd660d467089b8007b2e4a13f9c6e43372a5dcb4596f5c4b508f868cb5ccb60"
+    },
+    {
+      "path": "plugins/utils/score_prediction_support.py",
+      "existed": true,
+      "oldSha256": "06404ddc9334f3b4cc4132daefc1f64fb69df3a202d90f5eaace351c2e703c23",
+      "newSha256": "587110b4c30c9a6507061d0c5346a35c5a121f32509b9be8c12021acb3636fc5"
+    },
+    {
+      "path": "plugins/utils/song_position.py",
+      "existed": true,
+      "oldSha256": "44013c429af5b0058f8857e98e9ee822eaad9c19570d0374b29faeee2e16c5d5",
+      "newSha256": "2281942396a3b08bbd1ae911028004179fe22fe5a04e98665cdb8b3aa7358482"
+    },
+    {
+      "path": "plugins/utils/song_rating_target.py",
+      "existed": true,
+      "oldSha256": "dfcb28bc2fc1b03f082024642d28baf85a7a9431dc84840d80c08cef62c04dfd",
+      "newSha256": "18feb3db9a32f2daec0b9890c1ea1140dd52920825e637c7cd2a2082f23ac4de"
+    },
+    {
+      "path": "plugins/utils/song_tja_mapping.py",
+      "existed": true,
+      "oldSha256": "2fb94ecf1d199846cd9aa7a197800326911354c1c82e7938161e0229cf449b1d",
+      "newSha256": "10b38bfe55df90744ca418ea3d422aed6406dd822c58b936e6ea802270fb0a85"
+    },
+    {
+      "path": "plugins/utils/taiko_domain_adapter.py",
+      "existed": false,
+      "oldSha256": null,
+      "newSha256": "f1c75208969141febc9d5b76d3e18f5cc02fac8dfc5e381b2bcbdb739e1b523a"
+    },
+    {
+      "path": "plugins/utils/taikob_v2.py",
+      "existed": true,
+      "oldSha256": "6066c9a6d23225b5bfcde932add2cba7d2effbffe41f586f9367c19a8e656438",
+      "newSha256": "2ac0130b1faca6e58417c634af858fd8aa50c87b1fa39e1b36f16b6022e96fbf"
+    },
+    {
+      "path": "plugins/utils/taikob_v2_data.py",
+      "existed": true,
+      "oldSha256": "b739a3fe452b738b11ac481cc02e05a3e0e456c5548cd131f6abfa905a0a9837",
+      "newSha256": "593127324c817fb2a30a73d1ada0d8ff47d47d2682fb8e9d164434cff12aafd8"
+    },
+    {
+      "path": "plugins/utils/target_recommend.py",
+      "existed": true,
+      "oldSha256": "8656575d7579bc43a268b97eef045830610c2f5121d5d1ddae7f50a1afc9a7d2",
+      "newSha256": "080f3e34fc8ad0594bba220263100900ad15f8d14b3ef490d51d67bac0858415"
+    },
+    {
+      "path": "plugins/utils/target_score_core.py",
+      "existed": true,
+      "oldSha256": "074f85ac397600392caa638d367959c24193c2a6a3bd35090f467eb058bec596",
+      "newSha256": "fb3f1508a24d7cbeebfb43c8ea1c8b353a1595c55967cbc01b9cc3cdb9058d39"
+    },
+    {
+      "path": "plugins/utils/title_catalog.py",
+      "existed": true,
+      "oldSha256": "a4ae6cb21c090a35d0d29d73989a31c87fc315d21404c62f7100c45625fee5e4",
+      "newSha256": "51654aa880a33155a82eac9a3f0d5d665c519feb740048ffab3ef87d18eece57"
+    },
+    {
+      "path": "plugins/utils/tja_roll_parser.py",
+      "existed": true,
+      "oldSha256": "62257eafe8b66c61465c8f9178169302fdd1e7d4ae8dda3e1c5a3bf51a0486d4",
+      "newSha256": "f8d85c34a41d6fcb10fa08e8d47432827bf18e41408e26abdd3d14d25f8ef3ac"
+    },
+    {
+      "path": "pyproject.toml",
+      "existed": true,
+      "oldSha256": "2ea95ae6eab5e42e6657e3aa33a453246ed460ad6d7e809f94e5c650a72f1ba2",
+      "newSha256": "e4c263b8281edb9593e68d18b7f87bd9992e73e7b8eaca2ca0607b3d0e3f381c"
+    },
+    {
+      "path": "requirements-domain.txt",
+      "existed": false,
+      "oldSha256": null,
+      "newSha256": "5cc6d705744a3c8d8987b278b3f22955e92ea7f420a92e33f759c9081545c7a6"
+    },
+    {
+      "path": "scripts/validate_domain_migration.py",
+      "existed": false,
+      "oldSha256": null,
+      "newSha256": "f4c2f0719de2abdaaa56854c62412ff9ecc0626a70585c8e39e061f2d861f536"
+    },
+    {
+      "path": "tests/test_domain_adapter.py",
+      "existed": false,
+      "oldSha256": null,
+      "newSha256": "74193e3517ccb84605f897612433959cefd2f16edf1cb67669bf5e24acbd8a0b"
+    },
+    {
+      "path": "tjaAnalyzer.py",
+      "existed": true,
+      "oldSha256": "b9f3d5414e67a284d329f181194abef77b7200c45b2a695ecf221ef3ea477087",
+      "newSha256": "18656e5c541963dbaad2b14e580fce7850a9d191aecf6c9cb5264f7afc37df32"
+    }
+  ],
+  "dataOrSecretsCopied": false
+}

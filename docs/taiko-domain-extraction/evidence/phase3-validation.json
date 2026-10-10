@@ -1,0 +1,115 @@
+{
+  "phase": 3,
+  "gate": "PASS",
+  "sourceRelease": "95d71d57d109d756cb129610051af40a989f016f",
+  "coreRelease": "9fc0731358f6863c1e1efd9f1930a608850786f7",
+  "coreTag": "v0.1.1",
+  "runtimeChecks": {
+    "oldProcessesExited": true,
+    "startupCompleted": true,
+    "taikoPluginLoaded": true,
+    "qqConnected": true,
+    "onebotConnected": true,
+    "noImportOrStartupErrors": true
+  },
+  "oldPids": {
+    "nb": 374046,
+    "bot": 374061,
+    "publicApi": 3263424,
+    "dispatcher": 646803
+  },
+  "newPids": {
+    "nb": 829369,
+    "bot": 829379,
+    "publicApi": 829173,
+    "dispatcher": 829176
+  },
+  "sourceFilesSynced": 33,
+  "pythonEnvironmentsValidated": [
+    "system-user-site",
+    "taiko-venv"
+  ],
+  "productionInstalledCoreTests": 23,
+  "productionDbMutation": false,
+  "personalInputsArchived": false,
+  "viewerDeployed": false,
+  "corePackage": {
+    "phase": 3,
+    "packageVersion": "0.1.1",
+    "gate": "CORE_PACKAGE_PASS",
+    "tests": 23,
+    "failures": 0,
+    "errors": 0,
+    "wheelHashes": {
+      "sakura_taiko_contract-0.1.0-py3-none-any.whl": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7",
+      "sakura_taiko_core-0.1.1-py3-none-any.whl": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+    },
+    "installationIsolated": true,
+    "productionConsumersChanged": false,
+    "goldenCases": {
+      "ratingV1Aggregation": 252,
+      "ratingV2Formula": 168,
+      "ratingV2Aggregation": 144,
+      "recommendationCandidates": 126,
+      "recommendationTargets": 60,
+      "rollTargetTolerance": 96,
+      "tja": 7
+    },
+    "dependencyBoundary": "PASS",
+    "inputs": "synthetic; no production userdata or DB access",
+    "wheelCodeMatchesSource": true,
+    "runtimeModules": 47,
+    "centerServiceCases": {
+      "estimatorCases": 5,
+      "selectionCases": 54,
+      "scorelineCases": 24,
+      "scorelineRequests": 5,
+      "chartAnalysisCases": 7,
+      "mappingCases": 7,
+      "dojoCases": 3,
+      "scorePointCases": 9,
+      "matching": 4,
+      "customLookup": 5,
+      "datasetLookup": 4,
+      "progressCatalog": 8
+    }
+  },
+  "sakuraRegression": {
+    "passed": 132,
+    "failures": 0,
+    "errors": 0,
+    "deselectedOnlineTests": 9,
+    "seconds": 4.273,
+    "productionPersonalReadGuard": true,
+    "productionRuntimeWriteGuard": true,
+    "httpSendGuard": true
+  },
+  "commandParity": {
+    "commandModuleByteParity": true,
+    "sha256": "cc851b37bc20906e7fa01b0044592cec32d2308a3fafb816e269c8a332b4519c"
+  },
+  "syntheticCatalogBenchmark": {
+    "syntheticRecords": 200,
+    "catalogCharts": 1348,
+    "profileSamples": 200,
+    "profileParity": true,
+    "estimateParityCases": 5,
+    "legacyProfileSeconds": 0.447,
+    "adapterProfileSeconds": 0.4779,
+    "productionUserdataRead": false,
+    "productionMutation": false,
+    "databaseAccess": false
+  },
+  "httpSmoke": {
+    "dispatcherHealth": true,
+    "publicCatalogStatus": 200,
+    "publicCatalogBytes": 1447033,
+    "publicCatalogSha256": "76809c26253d20c3a197708863b4be9e5887e65e1365b8b6494e0e037557af86"
+  },
+  "initialHistoricalTestAudit": {
+    "twoStaleProductionAssertions": true,
+    "readOnlyParityCases": 4,
+    "allEqual": true,
+    "privateInputsPersisted": false
+  }
+}
