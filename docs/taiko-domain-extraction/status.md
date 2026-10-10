@@ -9,7 +9,7 @@
 | 2 Core v0.1 | PASS | 四步依序提交；独立 repo/tag，15 项 installed-wheel tests | [验收](phase2-core-v0.1.md)、[证据](evidence/phase2-validation.json) |
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
-| 5 Viewer boundary | IN_PROGRESS | 5.1 读取端口 / 219 regression PASS；继续 Canonical Fact → 删除重复领域解释 | [步骤](phase5-viewer-boundary.md)、[读取证据](evidence/phase5-read-validation.json) |
+| 5 Viewer boundary | IN_PROGRESS | 5.1–5.3 实现 / 230 Node + 5 Python PASS；待 0.81.11 发布与生产 smoke | [步骤](phase5-viewer-boundary.md)、[证据](evidence/phase5-validation.json) |
 | 6 Writer/storage | NOT_STARTED | ownership、P1a、read model、DB 决策、publication/recovery | — |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
@@ -41,3 +41,4 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 4.4：客户端 `d501343` / 0.2.0 push 成功；两个私有 Git pin 安装并核对实际 commit/source；最终 48 regression、installed-client 14 模块 / real command import PASS。Gate 4 PASS；开始 Phase 5。Viewer 和中心线上依赖未改。
 - 2026-10-11 / 5.1：当前/历史/daily archive 读取端口完成，原文 revision/provenance、历史排序/预取/stat 语义保留；219 regression 与局部 TypeScript PASS。Writer block 无变更；Phase 5 全步骤完成后统一版本化发布。
 - 2026-10-11 / 5.2：Contract CanonicalFact / GrowthObservation 单一类型来源，History/Recent scope 验证；冻结 Golden、schema、Growth/Goal 兼容与 TypeScript PASS，证据单独归档。继续 5.3。
+- 2026-10-11 / 5.3：Contract JS 0.1.1 只读 profiles；230 Node / 5 Python 全通过，百万合成记录 exact baseline DTO 一致 / 无 OOM。Writer/strict schema/Python mapper 不变；0.81.11 patch，进入标准发布验收，未提前 PASS Gate 5。

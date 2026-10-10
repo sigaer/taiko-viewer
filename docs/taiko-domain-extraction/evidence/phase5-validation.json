@@ -1,0 +1,396 @@
+{
+  "phase": 5,
+  "step": "5.3",
+  "status": "IMPLEMENTATION_PASS_PENDING_RELEASE",
+  "baseline": "060dc05",
+  "steps": {
+    "read": "8288bfe",
+    "canonical_fact": "556abb7"
+  },
+  "viewer_version": "0.81.11",
+  "js_contract_version": "0.1.1",
+  "schema_version": "1.0",
+  "python_contract_version": "0.1.0 (unchanged)",
+  "tests": {
+    "node": 230,
+    "python": 5,
+    "failures": 0,
+    "typescript": "PASS",
+    "bindings": "PASS",
+    "junit_sha256": "bbc7f06ad4cbea2623ab79b071a142d8c889cdbafac4ed46f5937796063f5afe"
+  },
+  "compatibility": {
+    "numeric_goldens": 85,
+    "timestamp_inputs_per_timezone": 10,
+    "timezones": [
+      "UTC",
+      "Asia/Shanghai"
+    ],
+    "crown_judgment_inputs": 8,
+    "schema_python_mapper_unchanged": true,
+    "writer_block_unchanged": true,
+    "profile_bind_outside_replay": true,
+    "visible_copy_changes": false
+  },
+  "benchmark": {
+    "baseline": "060dc05 / 0.81.10",
+    "fixture": "iso-full / 2,001 available, 2,000 selected x 500 charts",
+    "dtoParity": true,
+    "samples": [
+      {
+        "variant": "before",
+        "milliseconds": 4735.334191,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 456220672,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 803184640,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3166.3081060000004,
+          "readMs": 5030.3211559999645,
+          "readBatchMs": 664.909088999997,
+          "parseMs": 1066.5243899999875,
+          "dailyMs": 781.3052610000004,
+          "rangeMs": 1374.8377789999995,
+          "scoreFactsMs": 1.5507189999998445
+        }
+      },
+      {
+        "variant": "after",
+        "milliseconds": 4667.552208,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 460922880,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 808128512,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3122.0035350000003,
+          "readMs": 4966.191292999991,
+          "readBatchMs": 656.7629129999996,
+          "parseMs": 987.8457349999892,
+          "dailyMs": 591.425279,
+          "rangeMs": 1353.0917879999997,
+          "scoreFactsMs": 1.662782000000334
+        }
+      },
+      {
+        "variant": "after",
+        "milliseconds": 5318.165514,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 460779520,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 807841792,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3693.25253,
+          "readMs": 6093.099589999988,
+          "readBatchMs": 805.258924999994,
+          "parseMs": 1186.0643409999946,
+          "dailyMs": 806.5260329999992,
+          "rangeMs": 1402.6728549999998,
+          "scoreFactsMs": 1.6572530000003098
+        }
+      },
+      {
+        "variant": "before",
+        "milliseconds": 4547.103107000001,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 457486336,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 804990976,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3100.3885579999996,
+          "readMs": 5152.273904000002,
+          "readBatchMs": 677.7579320000061,
+          "parseMs": 1011.6728920000103,
+          "dailyMs": 651.3246910000007,
+          "rangeMs": 1259.7492850000008,
+          "scoreFactsMs": 1.6707960000003368
+        }
+      },
+      {
+        "variant": "before",
+        "milliseconds": 4627.084826,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 458162176,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 805076992,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3249.60193,
+          "readMs": 5160.037545999999,
+          "readBatchMs": 680.1053390000047,
+          "parseMs": 1013.3321619999906,
+          "dailyMs": 581.5738519999995,
+          "rangeMs": 1190.1200129999997,
+          "scoreFactsMs": 1.6179180000008273
+        }
+      },
+      {
+        "variant": "after",
+        "milliseconds": 4766.848812,
+        "sha256": "531af1086787b16ab8f8357bc5d1f1c9e2e36e1ec09ac648026f94159a52d94b",
+        "responseBytes": 3144,
+        "maxRssBytes": 464150528,
+        "cgroup": {
+          "path": "/development.slice/development-qa.slice/taiko-qa-1791657632-887843.service",
+          "memoryPeakBytes": null,
+          "peakAvailability": "kernel counter unavailable",
+          "memoryCurrentSampleBytes": 811757568,
+          "memoryMaxBytes": 3221225472,
+          "events": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0
+          }
+        },
+        "counters": {
+          "enumeration": 4,
+          "reads": 2000,
+          "parseAttempts": 2000,
+          "parses": 2000,
+          "bytes": 282969992,
+          "normalization": 1,
+          "daily": 1,
+          "range": 2,
+          "scoreFacts": 1,
+          "currentReads": 2,
+          "archiveReads": 2,
+          "measurementWrites": 1,
+          "loaderMs": 3338.4883170000003,
+          "readMs": 5198.951196000002,
+          "readBatchMs": 686.8962039999963,
+          "parseMs": 1068.5293569999994,
+          "dailyMs": 594.9565210000001,
+          "rangeMs": 1241.0654970000005,
+          "scoreFactsMs": 1.7140119999994567
+        }
+      }
+    ],
+    "beforeMedianMs": 4627.084826,
+    "afterMedianMs": 4766.848812,
+    "scope": "Offline real service orchestration; mocked DB/Python/catalog; warm disk, fresh process. Not production latency."
+  },
+  "latency_note": "Exact baseline median 4.627 s, migration 4.767 s (+3.02%); one sample 5.318 s exceeds historical 5s initial Passport target. No P0 performance PASS is claimed; Phase 6 read model still required. All DTO digests match, one history read/normalization, no OOM. Kernel memory.peak unavailable; cgroup values are samples, OS max RSS is high-water mark.",
+  "files": [
+    {
+      "path": "packages/sakura-taiko-contract/README.md",
+      "sha256": "f79e1d999cf970413105fc3a504f6b2cce96a45cf28dc7fc61a3e14c0bf8d2f0"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/fixtures/viewer-read-shanghai.json",
+      "sha256": "c3807d1cb165f674d545c478576cbb62418163e4b40e80b9921cfecfb50c9c37"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/fixtures/viewer-read-utc.json",
+      "sha256": "e8c7ed13924db4a2bbb36c33da3657da996e913de6f8f18badb571fa8f6b339e"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/package.json",
+      "sha256": "f8ed3351bb6e9a003922ccb0c82879293bb3b21578d33b8609351a8bb496c20c"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/index.ts",
+      "sha256": "d0eac2c1da9d8551d6e8bbe8d7fbc1653339704ac68af1bcfabfe79192df4c9a"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/legacy.mjs",
+      "sha256": "0617cb98bcd79111e3e068558c0444faa80912eb0d6b4127bfa23f6dee756df4"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/read-values.d.mts",
+      "sha256": "968552346ace2b39f6e40f6984d99c6853014ba1a7e123fdf08af20486df073b"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/read-values.mjs",
+      "sha256": "6820d1a2e6645e978b9b4c50dd4d2ad88ba21c8e1f05ddb5ed86895c5dfdc96c"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/score-read.ts",
+      "sha256": "af04c4cf13d7c5d2597822a6401a83cef64331cf27a152e73f9a0363f54febbd"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/tests/viewer-read.test.mjs",
+      "sha256": "9ee792a7259a7c8a6f7570ae55a181fe147f487131ab7e9ab7fa5fef8caaca31"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/tools/generate_bindings.py",
+      "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/tools/generate_viewer_read_goldens.mjs",
+      "sha256": "75c7a7a48974a87d08ea651fb108a53ead121aa7541d724b96080a0aff1be2eb"
+    },
+    {
+      "path": "taiko_viewer/package-lock.json",
+      "sha256": "497d0fd51107c0453fbe1c52628cbf47038e66478c5af01c548c220ce6e16f4b"
+    },
+    {
+      "path": "taiko_viewer/package.json",
+      "sha256": "a375d1bdc708965e886a6b76ea07196011d65b1762c4188518bb63be91128eb7"
+    },
+    {
+      "path": "taiko_viewer/scripts/validate_viewer_domain_migration.mjs",
+      "sha256": "9d6de229d0e9068fda92d509b263b8f24fd2b46f146db30f34d72b7c9dc40c2b"
+    },
+    {
+      "path": "taiko_viewer/server/domain/score-read-contract.ts",
+      "sha256": "1fe6796cd997ef48e8b366e83f3c5362e8120cf9b59db49c81cd9c8c36574b00"
+    },
+    {
+      "path": "taiko_viewer/server/services/account/growth.ts",
+      "sha256": "4e95337941c42108d52ad81e30e07636c15aecc7e58f7ced5cfaa28ed49ee27c"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-history/evidence.ts",
+      "sha256": "1ff1d13347f12724a9d2b32210de593b6478601b170bf61903afb00c8deb4246"
+    },
+    {
+      "path": "taiko_viewer/server/services/ugc/verified-play.ts",
+      "sha256": "be2bb8908c1608a1b04368d2e66a0896445003b7a07b9883da9344d988749304"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/songs.ts",
+      "sha256": "e8b177734f6f146f3c2ca8e652d6540d47945492646f0c3cea4917bae15c4e94"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/growthReplayHarness.mjs",
+      "sha256": "1a3df9dfc3717cafa7ea7ce47e4327579625b310408e5507d221f07de89507e7"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/growthRequestHarness.mjs",
+      "sha256": "720a8a55f0804eb152a31e6aba1acf84d6b95558a2bc40ee5ce9a3978a0e0011"
+    },
+    {
+      "path": "taiko_viewer/utils/dailyProgress.ts",
+      "sha256": "07304937794c0acb42f53356a76e5181aa110fce000cfe4b6743b11f0091ddde"
+    },
+    {
+      "path": "taiko_viewer/utils/playerGoal.ts",
+      "sha256": "40e1a6054260f24f19f1062cc3a7bd12f2dc05ede04eb4f5e88b205fa21fb829"
+    }
+  ]
+}

@@ -117,3 +117,4 @@ export type CalculationProfile = {
   availabilityRevision: string;
 };
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
+export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";

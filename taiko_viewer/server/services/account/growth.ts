@@ -10,19 +10,18 @@ import { buildPlayerGrowthState, growthCalendarDay } from "~/utils/playerGrowth"
 import { deriveDailyProgress } from "~/utils/dailyProgress";
 import { resolveDifficultyPresentation } from "~/utils/difficulty";
 import { getSongCatalog } from "~/server/services/content";
-import { getCurrentBindingRow, getRuntimePaths, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
+import { getCurrentBindingRow, getRuntimePaths } from "~/server/internal/account/shared";
+import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as UserdataSong } from "../../domain/score-read-contract.ts";
 import { runGrowthPythonJson } from "./personal";
 import { loadGrowthScoreEvidence } from "../growth-history/evidence";
 import { getGrowthModelRevision } from "../growth-history/model-revision";
 import { readDailyAbilityArchive } from "../growth-history/daily-archive";
 import { upsertGrowthMeasurement } from "../growth-history/measurements";
+import { legacyScoreReader } from "@sakura-taiko/contract";
 
 const TIMEZONE = "Asia/Shanghai" as const;
 
-const numberValue = (value: unknown) => {
-  const parsed = Number(value || 0);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
+const numberValue = legacyScoreReader("viewer-overview-v1");
 
 const chartKey = (song: Pick<UserdataSong, "song_no" | "level">) => `${numberValue(song.song_no)}:${numberValue(song.level)}`;
 const scoreValue = (song?: UserdataSong) => numberValue(song?.high_score);

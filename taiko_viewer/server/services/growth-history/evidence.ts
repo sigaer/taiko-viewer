@@ -5,6 +5,7 @@ import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as Userda
 import { getDomainScoreReader } from "../taiko-domain/read.ts";
 import { memoizeGrowthString } from "~/utils/growthRequestMemo";
 import { GROWTH_HISTORY_FILE_LIMIT } from "./constants";
+import { legacyScoreReader, legacyScoreInstant } from "@sakura-taiko/contract";
 import type { GrowthObservation } from "../../../../packages/sakura-taiko-contract/src/index";
 export type { GrowthObservation } from "../../../../packages/sakura-taiko-contract/src/index";
 
@@ -32,13 +33,8 @@ const fileOrder = (name: string) => `${fileTimestamp(name).replace(/\D/g, "").pa
 const normalizeSource = (value: unknown) => String(value || "unknown").trim().toLowerCase().replaceAll("_", "-");
 const viewerWriterSources = ["kinoko-history-current", "manual-score-delete", "web-score-import", "kinoko-import", "manual-create", "manual-rename", "manual-score", "web-account"];
 const sourceFromName = (name: string) => viewerWriterSources.find(source => name.includes(`_${source}.json`)) || "";
-const normalizedInstant = (value: unknown) => {
-  const text = String(value || "").trim();
-  if (!text) return "";
-  const parsed = Date.parse(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(text) ? `${text.replace(" ", "T")}+08:00` : text);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : "";
-};
-const numberValue = (value: unknown) => value === null || value === undefined || value === "" || !Number.isFinite(Number(value)) ? null : Number(value);
+const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-evidence-v1") || "";
+const numberValue = legacyScoreReader("viewer-evidence-v1");
 const chartKey = (song: UserdataSong) => `${Number(song?.song_no || 0)}:${Number(song?.level || 0)}`;
 // Direct field access keeps million-row full histories off dynamic-key hot loops.
 const transitionChanged = (before: UserdataSong, after: UserdataSong) =>

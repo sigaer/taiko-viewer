@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.81.10",
+  "version": "0.81.11",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -70,6 +70,7 @@
     "test:growth:experience:production": "node --experimental-strip-types scripts/run_growth_experience_production_smoke.mjs"
   },
   "dependencies": {
+    "@sakura-taiko/contract": "file:../packages/sakura-taiko-contract",
     "@alicloud/esa20240910": "^3.7.0",
     "@alicloud/openapi-core": "^1.0.8",
     "@element-plus/nuxt": "^1.0.5",

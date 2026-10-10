@@ -4,9 +4,10 @@ import * as fs from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { execFileSync } from 'node:child_process';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const url = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-export async function importGrowthRequest(fixture, { baseline = false, binding = null, failPython = false, onPython = null, onHistoryRead = null, onHistoryStat = null, onHistoryEnumerate = null } = {}) {
+export async function importGrowthRequest(fixture, { baseline = false, migrationBaseline = false, binding = null, failPython = false, onPython = null, onHistoryRead = null, onHistoryStat = null, onHistoryEnumerate = null } = {}) {
   const counters = { enumeration: 0, reads: 0, parseAttempts: 0, parses: 0, bytes: 0, normalization: 0, daily: 0, range: 0, scoreFacts: 0, currentReads: 0, archiveReads: 0, measurementWrites: 0,
     loaderMs: 0, readMs: 0, readBatchMs: 0, parseMs: 0, dailyMs: 0, rangeMs: 0, scoreFactsMs: 0 };
   const key = `growth_request_${crypto.randomUUID().replaceAll('-', '_')}`;
@@ -65,6 +66,9 @@ export async function importGrowthRequest(fixture, { baseline = false, binding =
     if (cache.has(path)) return cache.get(path);
     let source = await fs.readFile(path, 'utf8');
     const relative = path.slice(root.length);
+    if (migrationBaseline) {
+      source = execFileSync('git', ['show', `060dc05:taiko_viewer/${relative}`], { cwd: root, encoding: 'utf8', maxBuffer: 1024 * 1024 });
+    }
     const frozen = { 'utils/dailyProgress.ts': 'dailyProgress', 'server/services/growth-history/evidence.ts': 'evidence', 'server/services/growth-passport/service.ts': 'service' };
     if (baseline && frozen[relative]) source = await fs.readFile(resolve(root, 'tests/fixtures/passport0819', `${frozen[relative]}.ts.txt`), 'utf8');
     const insert = (anchor, replacement) => {
@@ -106,7 +110,8 @@ export async function importGrowthRequest(fixture, { baseline = false, binding =
         let target = specifier.startsWith('~/') ? resolve(root, specifier.slice(2)) : resolve(dirname(path), specifier);
         if (!/\.(ts|mjs|js)$/.test(target)) target += '.ts';
         dependency = await load(target);
-      } else if (!specifier.startsWith('node:')) throw new Error(`Unexpected offline dependency: ${specifier}`);
+      } else if (specifier === '@sakura-taiko/contract') dependency = import.meta.resolve(specifier);
+      else if (!specifier.startsWith('node:')) throw new Error(`Unexpected offline dependency: ${specifier}`);
       code = code.replace(match[0], `from ${JSON.stringify(dependency)}`);
     }
     const result = url(code); cache.set(path, result); return result;

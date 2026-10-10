@@ -1,12 +1,9 @@
 import type { GoalBaseline, GoalType, PlayerGoal } from '../types/player-goal.ts';
-const integer = (v: unknown): number | null => v === null || v === undefined || v === '' || typeof v === 'boolean' ? null : Number.isSafeInteger(Number(v)) && Number(v) >= 0 ? Number(v) : null;
+import { legacyScoreReader, legacyScoreInstant } from '@sakura-taiko/contract';
+const integer = legacyScoreReader('viewer-goal-v1');
 export function goalBaseline(record: Record<string, unknown> | undefined, revision: string, capturedAt: string, completeness: GoalBaseline['sourceCompleteness'] = 'unknown'): GoalBaseline {
   const r = record || {};
-  const date = (v: unknown) => {
-    if (typeof v !== 'string' || !v) return null;
-    const normalized = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(v) ? v.replace(' ', 'T') + '+08:00' : v;
-    return Number.isFinite(Date.parse(normalized)) ? new Date(normalized).toISOString() : null;
-  };
+  const date = (v: unknown) => legacyScoreInstant(v, 'viewer-goal-v1');
   return { recordPresent: !!record, highScore: integer(r.high_score), goodCnt: integer(r.good_cnt), okCnt: integer(r.ok_cnt), ngCnt: integer(r.ng_cnt), comboCnt: integer(r.combo_cnt), clearCnt: integer(r.clear_cnt), fullComboCnt: integer(r.full_combo_cnt), dondafulComboCnt: integer(r.dondaful_combo_cnt), bestScoreRank: integer(r.best_score_rank), highscoreDatetime: date(r.highscore_datetime), updateDatetime: date(r.update_datetime), scoreObservedAt: null, capturedAt, sourceRevision: revision, sourceCompleteness: completeness };
 }
 export function goalOptions(b: GoalBaseline, source: string, available = true): GoalType[] {

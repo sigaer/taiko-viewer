@@ -1,24 +1,18 @@
 import type { GrowthDailyEvent, GrowthDailyProgress, GrowthEventFact } from "../types/player-growth";
-import type { UserdataSong } from "../server/internal/account/shared";
+import type { LegacyScoreRecord as UserdataSong } from "../server/domain/score-read-contract";
+import { legacyScoreReader, legacyCrown, legacyJudgmentTotal, legacyScoreInstant } from "@sakura-taiko/contract";
 import { growthCalendarDay } from "./playerGrowth.ts";
 import { memoizeGrowthString } from "./growthRequestMemo.ts";
 
 export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string };
-const num = (v: unknown): number | null => v === null || v === undefined || v === "" ? null : Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : null;
+const num = legacyScoreReader("viewer-daily-v1");
 const key = (s: UserdataSong) => `${s.song_no}:${s.level}`;
 const epoch = (v: unknown) => {
   const s = String(v || "");
   return Date.parse(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(s) ? s.replace(" ", "T") + "+08:00" : s);
 };
-const crown = (s: UserdataSong): number | null => {
-  const values = [s.clear_cnt, s.full_combo_cnt, s.dondaful_combo_cnt].map(num);
-  if (values.some(v => v === null)) return null;
-  return values[2]! > 0 ? 2 : values[1]! > 0 ? 1 : values[0]! > 0 ? 0 : -1;
-};
-const judgments = (s: UserdataSong) => {
-  const values = [s.good_cnt, s.ok_cnt, s.ng_cnt].map(num);
-  return values.some(v => v === null) ? null : values.reduce<number>((sum, v) => sum + v!, 0);
-};
+const crown = (s: UserdataSong) => legacyCrown(s, "viewer-daily-v1");
+const judgments = (s: UserdataSong) => legacyJudgmentTotal(s, "viewer-daily-v1");
 const importance: Record<GrowthEventFact['type'], number> = { df: 100, fc: 90, 'clear-upgrade': 80, 'rank-upgrade': 70, 'score-pb': 60, 'ng-reduced': 50, 'combo-improved': 40, played: 0 };
 
 const dayEpoch = (day: string) => Date.parse(`${day}T00:00:00Z`);
@@ -27,12 +21,7 @@ const daysBetween = (fromDay: string, toDay: string) => {
   for (let cursor = dayEpoch(fromDay), end = dayEpoch(toDay); Number.isFinite(cursor) && cursor <= end; cursor += 86_400_000) days.push(new Date(cursor).toISOString().slice(0, 10));
   return days;
 };
-const normalizedInstant = (value: unknown) => {
-  const text = String(value || '').trim();
-  if (!text) return '';
-  const parsed = Date.parse(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(text) ? text.replace(' ', 'T') + '+08:00' : text);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : '';
-};
+const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-daily-v1") || '';
 
 export function deriveProgressForRange(current: UserdataSong[], history: GrowthSnapshot[], fromDay: string, toDay: string, title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
   return deriveProgressForCalendarDays(current, history, daysBetween(fromDay, toDay), title, currentRevision);

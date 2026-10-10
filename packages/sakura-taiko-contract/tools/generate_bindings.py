@@ -39,6 +39,7 @@ def generate():
             py.append(f'    {key}: {typ if key in required else "NotRequired["+typ+"]"}')
         ts.append('};')
     ts.append('export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";')
+    ts.append('export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";')
     return {'src/index.ts':'\n'.join(ts)+'\n','sakura_taiko_contract/types.py':'\n'.join(py)+'\n'}
 
 if __name__=='__main__':

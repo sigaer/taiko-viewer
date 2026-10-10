@@ -1,6 +1,6 @@
-import type { UserdataSong } from "../../internal/account/shared";
+import type { LegacyScoreRecord as UserdataSong } from "../../domain/score-read-contract.ts";
 import { getCurrentBindingRow, readUserdata } from "../../internal/account/shared";
-import { hasEffectiveScoreRecord } from "../../utils/account/songs";
+import { hasLegacyScoreEvidence } from "@sakura-taiko/contract";
 import type { ResolvedUgcChart } from "./chart";
 import { hasVerifiedPlayRecord } from "./verified-play-predicate";
 
@@ -12,7 +12,7 @@ export const hasVerifiedPlayInUserdata = (
   difficultyCode: number
 ) => {
   return hasVerifiedPlayRecord(source, isCurrent, songs, songId, difficultyCode, (song) =>
-    hasEffectiveScoreRecord(song as UserdataSong)
+    hasLegacyScoreEvidence(song)
   );
 };
 

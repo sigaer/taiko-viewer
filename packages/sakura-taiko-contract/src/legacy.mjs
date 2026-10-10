@@ -1,4 +1,5 @@
 /** Value-only lossless read adapter. Host adapters supply source, clock and catalog. */
+export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from './read-values.mjs';
 const MAX = Number.MAX_SAFE_INTEGER;
 export const CONTRACT_VERSION = '1.0';
 const secretKeys = new Set(['cookie', 'password', 'token', 'authorization', 'secret', 'credentials', 'accesskeysecret']);

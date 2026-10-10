@@ -1,4 +1,5 @@
 import { createError } from "h3";
+import { hasLegacyScoreEvidence } from "@sakura-taiko/contract";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
 import {
@@ -33,22 +34,7 @@ const SONG_MUTABLE_KEYS = [
   "combo_cnt"
 ] as const;
 
-const SCORE_FIELDS = [
-  "high_score",
-  "best_score_rank",
-  "good_cnt",
-  "ok_cnt",
-  "ng_cnt",
-  "pound_cnt",
-  "stage_cnt",
-  "clear_cnt",
-  "full_combo_cnt",
-  "dondaful_combo_cnt",
-  "combo_cnt"
-] as const;
-
-export const hasEffectiveScoreRecord = (song: UserdataSong) =>
-  SCORE_FIELDS.some((field) => parsePositiveInt(song[field]) > 0);
+export const hasEffectiveScoreRecord = hasLegacyScoreEvidence;
 
 const sanitizeSongValues = (values: EditableSongFields) => {
   const sanitized: Partial<UserdataSong> = {};

@@ -1,8 +1,12 @@
 {
   "name": "@sakura-taiko/contract",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
-  "exports": {".": {"types": "./src/index.ts", "default": "./src/legacy.mjs"}, "./schema": "./schema/contract-v1.json"},
+  "exports": {
+    ".": {"types": "./src/index.ts", "default": "./src/legacy.mjs"},
+    "./score-read": {"types": "./src/score-read.ts", "default": "./src/read-values.mjs"},
+    "./schema": "./schema/contract-v1.json"
+  },
   "files": ["src", "schema", "README.md"]
 }
