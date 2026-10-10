@@ -43,7 +43,7 @@ export async function importGrowthRequest(fixture, { baseline = false, binding =
       open: async (...args) => { if (String(args[0]).endsWith('daily-ability-v1-top20.json')) counters.archiveReads++; return fs.open(...args); } }
   };
   globalThis[key] = state;
-  const stub = name => url(Object.keys(state[name]).map(exportName => `export const ${exportName}=globalThis[${JSON.stringify(key)}][${JSON.stringify(name)}][${JSON.stringify(exportName)}];`).join('\n'));
+  const stub = name => url(Object.keys(state[name]).filter(exportName => exportName !== 'default').map(exportName => `export const ${exportName}=globalThis[${JSON.stringify(key)}][${JSON.stringify(name)}][${JSON.stringify(exportName)}];`).join('\n'));
   const overrides = new Map([
     ['server/internal/account/shared.ts', 'shared'], ['server/utils/account-db.ts', 'safeDb'], ['server/services/content.ts', 'content'],
     ['server/services/account/personal.ts', 'personal'], ['server/services/goals/store.ts', 'goalStore'],
