@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-10 Asia/Shanghai",
+  "contract_version": "1.0",
+  "package_version": "0.1.0",
+  "gate": "PASS",
+  "python_tests": 5,
+  "javascript_tests": 5,
+  "score_golden_cases": 5,
+  "legacy_hiroba_oracles": 2,
+  "viewer_score_fact_golden_cases": 1,
+  "generated_bindings_check": "PASS",
+  "typescript_check": "PASS",
+  "sha256": {
+    "schema/contract-v1.json": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+    "src/index.ts": "8da38e165f9c8adeafe28ed0044b2e010efc93f2195e235b3311b15cb9800f71",
+    "src/legacy.mjs": "d14c3582bf5bdeccf119f20a050f64a4f41f4d735e722e0cfe11a1b53ebff2a9",
+    "sakura_taiko_contract/types.py": "a23f0f37dbbd8ae2f7c9467d6d18bc9ef2e5ed22a989841f11322a577c16fbab",
+    "sakura_taiko_contract/legacy.py": "66fce2b4d944f4406a700683a033a79d391c845fc6e7a0ef74a6a709da023137",
+    "fixtures/scores.json": "59224c009066ac71d1e407f9f3ea1ab0c02e538c1d0d229b7b4dc041342dcc40",
+    "fixtures/growth.json": "5006e8b767ac5e68f30a35ace2a5b56c578c5e1b745abbe403573a17e5098e77",
+    "fixtures/legacy_hiroba.py": "ab69065e301bd824c63099fb38b829ef1b7ecfdfd510368f63c7819458e303c3"
+  },
+  "fixtures": "synthetic only",
+  "business_http_calls": false,
+  "database_connections": false,
+  "production_mutations": false,
+  "consumer_switches": false
+}

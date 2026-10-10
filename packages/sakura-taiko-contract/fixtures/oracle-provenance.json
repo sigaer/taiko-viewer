@@ -1,0 +1,22 @@
+[
+  {
+    "repo": "Sakura_bot",
+    "symbol": "score_detail_to_userdata_record",
+    "path": "plugins/utils/hiroba/normalize.py",
+    "source_sha256": "4590815313b91c5a0a5811ab7c77220207df5b60a70934ff7252f74422f061f4",
+    "function_sha256": "54218f5d74b1e4aae8098d918f367720838d2270da07e11df320a300ff306df1",
+    "fixture": "legacy_hiroba.py",
+    "input": "synthetic HirobaScoreDetail",
+    "time": "2026-10-10 12:00:00"
+  },
+  {
+    "repo": "taiko-bot",
+    "symbol": "score_detail_to_userdata_record",
+    "path": "plugins/utils/hiroba/normalize.py",
+    "source_sha256": "4590815313b91c5a0a5811ab7c77220207df5b60a70934ff7252f74422f061f4",
+    "function_sha256": "54218f5d74b1e4aae8098d918f367720838d2270da07e11df320a300ff306df1",
+    "fixture": "legacy_hiroba.py",
+    "input": "synthetic HirobaScoreDetail",
+    "time": "2026-10-10 12:00:00"
+  }
+]

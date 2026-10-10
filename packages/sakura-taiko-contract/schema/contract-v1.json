@@ -1,0 +1,693 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:sakura-taiko:contract:1.0",
+  "title": "Sakura Taiko Contract v1.0",
+  "$defs": {
+    "ExternalIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "enum": [
+            "wahlap",
+            "hiroba",
+            "qq",
+            "onebot",
+            "manual",
+            "legacy-content"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "namespace",
+        "id"
+      ]
+    },
+    "User": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "namespace": {
+          "type": "string",
+          "enum": [
+            "viewer"
+          ]
+        },
+        "displayName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "namespace",
+        "displayName"
+      ]
+    },
+    "Binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "userId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "externalIdentity": {
+          "$ref": "#/$defs/ExternalIdentity"
+        },
+        "isCurrent": {
+          "type": "boolean"
+        },
+        "verifiedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "externalIdentity",
+        "isCurrent",
+        "verifiedAt"
+      ]
+    },
+    "DeveloperIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerUserId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ownerUserId",
+        "scopes"
+      ]
+    },
+    "Song": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "songId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "catalogRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "songId",
+        "title",
+        "catalogRevision"
+      ]
+    },
+    "Chart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "songId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chartId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "level": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "single",
+            "double",
+            "unknown"
+          ]
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "catalogRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "songId",
+        "chartId",
+        "difficulty",
+        "level",
+        "type",
+        "variant",
+        "catalogRevision"
+      ]
+    },
+    "ScoreCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clear": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullCombo": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dondafulCombo": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stage": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "roll": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "clear",
+        "fullCombo",
+        "dondafulCombo",
+        "stage",
+        "roll"
+      ]
+    },
+    "Score": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "song": {
+          "$ref": "#/$defs/Song"
+        },
+        "chart": {
+          "$ref": "#/$defs/Chart"
+        },
+        "score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "good": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ok": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ng": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "combo": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clear": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "fullCombo": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "dondafulCombo": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "rank": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "capturedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "counts": {
+          "$ref": "#/$defs/ScoreCounts"
+        },
+        "highscoreAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "updatedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "legacy": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "song",
+        "chart",
+        "score",
+        "good",
+        "ok",
+        "ng",
+        "combo",
+        "clear",
+        "fullCombo",
+        "dondafulCombo",
+        "rank",
+        "capturedAt",
+        "source",
+        "counts",
+        "highscoreAt",
+        "updatedAt"
+      ]
+    },
+    "GrowthObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 1
+        },
+        "orderKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contentRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observedAt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventDays": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "evidenceLevel": {
+          "type": "string",
+          "enum": [
+            "L0",
+            "L1"
+          ]
+        },
+        "excludedReason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "import",
+            "manual",
+            "repair",
+            "content-edit",
+            "dispatcher-transfer",
+            "counter-regression",
+            "unknown-source",
+            "source-switch",
+            "discontinuity-baseline"
+          ]
+        }
+      },
+      "required": [
+        "token",
+        "orderKey",
+        "revision",
+        "contentRevision",
+        "observedAt",
+        "source",
+        "eventDays",
+        "evidenceLevel",
+        "excludedReason"
+      ]
+    },
+    "GrowthTemporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attributedDay": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "occurredAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "precision": {
+          "type": "string",
+          "enum": [
+            "instant",
+            "day",
+            "observation",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "precision"
+      ]
+    },
+    "GrowthEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "score-history",
+            "goal"
+          ]
+        },
+        "sourceRevision": {
+          "type": "string"
+        },
+        "evidenceVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "provenance": {}
+      },
+      "required": [
+        "source",
+        "evidenceVersion"
+      ]
+    },
+    "CanonicalFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "factKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "played",
+            "score-pb",
+            "ng-reduced",
+            "combo-improved",
+            "clear",
+            "fc",
+            "df",
+            "rank-upgrade",
+            "goal-completed"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "songId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "difficultyType": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "before": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "after": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "delta": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "goalId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "goalType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/GrowthEvidence"
+        },
+        "temporal": {
+          "$ref": "#/$defs/GrowthTemporal"
+        }
+      },
+      "required": [
+        "id",
+        "factKey",
+        "ownerId",
+        "bindingId",
+        "type",
+        "evidence",
+        "temporal"
+      ]
+    },
+    "GrowthProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timezone": {
+          "type": "string",
+          "enum": [
+            "Asia/Shanghai"
+          ]
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CanonicalFact"
+          }
+        },
+        "projectionVersion": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "ownerId",
+        "bindingId",
+        "timezone",
+        "facts",
+        "projectionVersion"
+      ]
+    },
+    "CalculationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "algorithmVersion": {
+          "type": "string",
+          "enum": [
+            "v1-great-only",
+            "v1-comprehensive",
+            "v2-center-20261010",
+            "v2-client-20261010"
+          ]
+        },
+        "modelRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalogRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "topN": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "availabilityRevision": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "algorithmVersion",
+        "modelRevision",
+        "catalogRevision",
+        "topN",
+        "availabilityRevision"
+      ]
+    }
+  }
+}

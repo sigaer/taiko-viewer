@@ -1,0 +1,439 @@
+[
+  {
+    "name": "wahlap-cumulative",
+    "legacy": {
+      "song_no": 1,
+      "level": 4,
+      "high_score": 950000,
+      "good_cnt": 95,
+      "ok_cnt": 4,
+      "ng_cnt": 1,
+      "combo_cnt": 90,
+      "best_score_rank": 5,
+      "clear_cnt": 3,
+      "full_combo_cnt": 0,
+      "dondaful_combo_cnt": 0,
+      "stage_cnt": 4,
+      "pound_cnt": 10,
+      "highscore_datetime": "2026-10-09 12:00:00",
+      "update_datetime": "2026-10-10 12:00:00",
+      "option_flg": [
+        1,
+        0,
+        0,
+        "00"
+      ]
+    },
+    "options": {
+      "source": "wahlap",
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "chartLevel": 10,
+      "chartType": "single",
+      "catalogRevision": null
+    },
+    "pythonOptions": {
+      "source": "wahlap",
+      "captured_at": "2026-10-10T04:00:00Z",
+      "chart_level": 10,
+      "chart_type": "single",
+      "catalog_revision": null
+    },
+    "canonical": {
+      "song": {
+        "songId": "1",
+        "title": null,
+        "catalogRevision": null
+      },
+      "chart": {
+        "songId": "1",
+        "chartId": "1:4:single",
+        "difficulty": 4,
+        "level": 10,
+        "type": "single",
+        "variant": null,
+        "catalogRevision": null
+      },
+      "score": 950000,
+      "good": 95,
+      "ok": 4,
+      "ng": 1,
+      "combo": 90,
+      "clear": true,
+      "fullCombo": false,
+      "dondafulCombo": false,
+      "rank": 5,
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "source": "wahlap",
+      "counts": {
+        "clear": 3,
+        "fullCombo": 0,
+        "dondafulCombo": 0,
+        "stage": 4,
+        "roll": 10
+      },
+      "highscoreAt": "2026-10-09 12:00:00",
+      "updatedAt": "2026-10-10 12:00:00",
+      "legacy": {
+        "song_no": 1,
+        "level": 4,
+        "high_score": 950000,
+        "good_cnt": 95,
+        "ok_cnt": 4,
+        "ng_cnt": 1,
+        "combo_cnt": 90,
+        "best_score_rank": 5,
+        "clear_cnt": 3,
+        "full_combo_cnt": 0,
+        "dondaful_combo_cnt": 0,
+        "stage_cnt": 4,
+        "pound_cnt": 10,
+        "highscore_datetime": "2026-10-09 12:00:00",
+        "update_datetime": "2026-10-10 12:00:00",
+        "option_flg": [
+          1,
+          0,
+          0,
+          "00"
+        ]
+      }
+    }
+  },
+  {
+    "name": "hiroba-df",
+    "legacy": {
+      "song_no": 2,
+      "level": 5,
+      "high_score": 1000000,
+      "best_score_rank": 8,
+      "good_cnt": 100,
+      "ok_cnt": 0,
+      "ng_cnt": 0,
+      "pound_cnt": 30,
+      "combo_cnt": 100,
+      "option_flg": [
+        1,
+        0,
+        0,
+        "00"
+      ],
+      "stage_cnt": 3,
+      "clear_cnt": 3,
+      "full_combo_cnt": 2,
+      "dondaful_combo_cnt": 1,
+      "highscore_datetime": "2026-10-10 12:00:00",
+      "highscore_mode": 0,
+      "update_datetime": "2026-10-10 12:00:00",
+      "_hiroba_crown": "dondaful",
+      "_hiroba_badge": "rainbow"
+    },
+    "options": {
+      "source": "hiroba",
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "chartLevel": null,
+      "chartType": "unknown",
+      "catalogRevision": null
+    },
+    "pythonOptions": {
+      "source": "hiroba",
+      "captured_at": "2026-10-10T04:00:00Z",
+      "chart_level": null,
+      "chart_type": "unknown",
+      "catalog_revision": null
+    },
+    "canonical": {
+      "song": {
+        "songId": "2",
+        "title": null,
+        "catalogRevision": null
+      },
+      "chart": {
+        "songId": "2",
+        "chartId": "2:5:unknown",
+        "difficulty": 5,
+        "level": null,
+        "type": "unknown",
+        "variant": null,
+        "catalogRevision": null
+      },
+      "score": 1000000,
+      "good": 100,
+      "ok": 0,
+      "ng": 0,
+      "combo": 100,
+      "clear": true,
+      "fullCombo": true,
+      "dondafulCombo": true,
+      "rank": 8,
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "source": "hiroba",
+      "counts": {
+        "clear": 3,
+        "fullCombo": 2,
+        "dondafulCombo": 1,
+        "stage": 3,
+        "roll": 30
+      },
+      "highscoreAt": "2026-10-10 12:00:00",
+      "updatedAt": "2026-10-10 12:00:00",
+      "legacy": {
+        "song_no": 2,
+        "level": 5,
+        "high_score": 1000000,
+        "best_score_rank": 8,
+        "good_cnt": 100,
+        "ok_cnt": 0,
+        "ng_cnt": 0,
+        "pound_cnt": 30,
+        "combo_cnt": 100,
+        "option_flg": [
+          1,
+          0,
+          0,
+          "00"
+        ],
+        "stage_cnt": 3,
+        "clear_cnt": 3,
+        "full_combo_cnt": 2,
+        "dondaful_combo_cnt": 1,
+        "highscore_datetime": "2026-10-10 12:00:00",
+        "highscore_mode": 0,
+        "update_datetime": "2026-10-10 12:00:00",
+        "_hiroba_crown": "dondaful",
+        "_hiroba_badge": "rainbow"
+      }
+    }
+  },
+  {
+    "name": "manual-missing",
+    "legacy": {
+      "song_no": 3,
+      "level": 1
+    },
+    "options": {
+      "source": "manual",
+      "capturedAt": null,
+      "chartLevel": null,
+      "chartType": "unknown",
+      "catalogRevision": null
+    },
+    "pythonOptions": {
+      "source": "manual",
+      "captured_at": null,
+      "chart_level": null,
+      "chart_type": "unknown",
+      "catalog_revision": null
+    },
+    "canonical": {
+      "song": {
+        "songId": "3",
+        "title": null,
+        "catalogRevision": null
+      },
+      "chart": {
+        "songId": "3",
+        "chartId": "3:1:unknown",
+        "difficulty": 1,
+        "level": null,
+        "type": "unknown",
+        "variant": null,
+        "catalogRevision": null
+      },
+      "score": null,
+      "good": null,
+      "ok": null,
+      "ng": null,
+      "combo": null,
+      "clear": null,
+      "fullCombo": null,
+      "dondafulCombo": null,
+      "rank": null,
+      "capturedAt": null,
+      "source": "manual",
+      "counts": {
+        "clear": null,
+        "fullCombo": null,
+        "dondafulCombo": null,
+        "stage": null,
+        "roll": null
+      },
+      "highscoreAt": null,
+      "updatedAt": null,
+      "legacy": {
+        "song_no": 3,
+        "level": 1
+      }
+    }
+  },
+  {
+    "name": "numeric-types-and-extension",
+    "legacy": {
+      "song_no": "0004",
+      "level": "2",
+      "high_score": "100",
+      "good_cnt": "90",
+      "ok_cnt": "1",
+      "ng_cnt": null,
+      "combo_cnt": "",
+      "best_score_rank": "2",
+      "clear_cnt": "1",
+      "full_combo_cnt": "0",
+      "dondaful_combo_cnt": 0,
+      "stage_cnt": "1e2",
+      "pound_cnt": "10.0",
+      "extension": {
+        "origin": "synthetic"
+      }
+    },
+    "options": {
+      "source": "unknown",
+      "capturedAt": null,
+      "chartLevel": null,
+      "chartType": "unknown",
+      "catalogRevision": null
+    },
+    "pythonOptions": {
+      "source": "unknown",
+      "captured_at": null,
+      "chart_level": null,
+      "chart_type": "unknown",
+      "catalog_revision": null
+    },
+    "canonical": {
+      "song": {
+        "songId": "0004",
+        "title": null,
+        "catalogRevision": null
+      },
+      "chart": {
+        "songId": "0004",
+        "chartId": "0004:2:unknown",
+        "difficulty": 2,
+        "level": null,
+        "type": "unknown",
+        "variant": null,
+        "catalogRevision": null
+      },
+      "score": 100,
+      "good": 90,
+      "ok": 1,
+      "ng": null,
+      "combo": null,
+      "clear": true,
+      "fullCombo": false,
+      "dondafulCombo": false,
+      "rank": 2,
+      "capturedAt": null,
+      "source": "unknown",
+      "counts": {
+        "clear": 1,
+        "fullCombo": 0,
+        "dondafulCombo": 0,
+        "stage": 100,
+        "roll": 10
+      },
+      "highscoreAt": null,
+      "updatedAt": null,
+      "legacy": {
+        "song_no": "0004",
+        "level": "2",
+        "high_score": "100",
+        "good_cnt": "90",
+        "ok_cnt": "1",
+        "ng_cnt": null,
+        "combo_cnt": "",
+        "best_score_rank": "2",
+        "clear_cnt": "1",
+        "full_combo_cnt": "0",
+        "dondaful_combo_cnt": 0,
+        "stage_cnt": "1e2",
+        "pound_cnt": "10.0",
+        "extension": {
+          "origin": "synthetic"
+        }
+      }
+    }
+  },
+  {
+    "name": "double-hard",
+    "legacy": {
+      "song_no": 5.0,
+      "level": 3,
+      "high_score": 0,
+      "good_cnt": 0,
+      "ok_cnt": 0,
+      "ng_cnt": 0,
+      "combo_cnt": 0,
+      "best_score_rank": 0,
+      "clear_cnt": 0,
+      "full_combo_cnt": 0,
+      "dondaful_combo_cnt": 0,
+      "stage_cnt": 0,
+      "pound_cnt": 0
+    },
+    "options": {
+      "source": "wahlap",
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "chartLevel": 8,
+      "chartType": "double",
+      "catalogRevision": null
+    },
+    "pythonOptions": {
+      "source": "wahlap",
+      "captured_at": "2026-10-10T04:00:00Z",
+      "chart_level": 8,
+      "chart_type": "double",
+      "catalog_revision": null
+    },
+    "canonical": {
+      "song": {
+        "songId": "5",
+        "title": null,
+        "catalogRevision": null
+      },
+      "chart": {
+        "songId": "5",
+        "chartId": "5:3:double",
+        "difficulty": 3,
+        "level": 8,
+        "type": "double",
+        "variant": null,
+        "catalogRevision": null
+      },
+      "score": 0,
+      "good": 0,
+      "ok": 0,
+      "ng": 0,
+      "combo": 0,
+      "clear": false,
+      "fullCombo": false,
+      "dondafulCombo": false,
+      "rank": 0,
+      "capturedAt": "2026-10-10T04:00:00Z",
+      "source": "wahlap",
+      "counts": {
+        "clear": 0,
+        "fullCombo": 0,
+        "dondafulCombo": 0,
+        "stage": 0,
+        "roll": 0
+      },
+      "highscoreAt": null,
+      "updatedAt": null,
+      "legacy": {
+        "song_no": 5.0,
+        "level": 3,
+        "high_score": 0,
+        "good_cnt": 0,
+        "ok_cnt": 0,
+        "ng_cnt": 0,
+        "combo_cnt": 0,
+        "best_score_rank": 0,
+        "clear_cnt": 0,
+        "full_combo_cnt": 0,
+        "dondaful_combo_cnt": 0,
+        "stage_cnt": 0,
+        "pound_cnt": 0
+      }
+    }
+  }
+]

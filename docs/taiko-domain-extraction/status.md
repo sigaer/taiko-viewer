@@ -5,8 +5,8 @@
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
 | 0 Extraction Audit | PASS | 清单、分类、重复、数据流；无实现变更 | [审计](../taiko-domain-current-state-audit.md)、[复核](evidence/phase0-validation.json) |
-| 1 Contract Freeze | IN_PROGRESS | 冻结身份/Chart/Score/Growth；Golden roundtrip | 后续 phase1 文档 |
-| 2 Core v0.1 | NOT_STARTED | Models → Parsers → Rating/Dimensions → Recommendation；独立 repo/Golden | — |
+| 1 Contract Freeze | PASS | 身份/Chart/Score/Growth + CalculationProfile 冻结，10 项 Golden/validation | [验收](phase1-contract-freeze.md)、[证据](evidence/phase1-validation.json) |
+| 2 Core v0.1 | IN_PROGRESS | Models → Parsers → Rating/Dimensions → Recommendation；独立 repo/Golden | 后续 phase2 文档 |
 | 3 Sakura adapter | NOT_STARTED | 纯领域委托，command/output parity、发布与回退 | — |
 | 4 taiko-bot client | NOT_STARTED | versioned Domain client，保持算法 profile、cache-only | — |
 | 5 Viewer boundary | NOT_STARTED | contract read → Canonical Fact → 删除重复领域解释 | — |
@@ -21,6 +21,8 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-10 / 0.3：确认 bot v1 重复、v2 accuracy/aggregation 分叉、target 推荐分叉及 Viewer normalization/fact overlap。
 - 2026-10-10 / 0.4：明确 current/history/userdata 多 Writer 与消费者、cache/measurement/fact 区别。Gate 0 PASS。
 - 2026-10-10 / decision：Python core；语言无关 contract；明确算法 profiles；保持 JSON/现有部署，storage 只在 Phase 6 决策。后续逐阶段生成验证和回退证据。
+- 2026-10-10 / release-0：Phase 0 文档提交 `eabc6f7`，origin/main push 成功。历史审计证据随本阶段归档；其他原有报告保留未跟踪。
+- 2026-10-10 / 1.1–1.5：Contract v1.0/package 0.1.0，Python/JS Golden 10/10，generated bindings 与 TypeScript check PASS；旧 Hiroba Oracle 固定 source hash。Gate 1 PASS，无生产 consumer 切换。
 
 ## 发布约束
 
