@@ -165,6 +165,8 @@ async function run() {
   console.log('Real Unity player loaded and started');
   scenario = remote ? 'healthy' : 'held-bundle';
   const before = requests.get('/practice-player/release.json');
+  const binaryRequests = () => [...requests].filter(([path]) => /Web\.(data|wasm)\.unityweb$/.test(path)).reduce((sum, [, count]) => sum + count, 0);
+  const beforeBinary = binaryRequests();
   const beforeReady = await page.evaluate(() => window.__practiceReadyCount);
   await page.getByRole('button', { name: '重新加载', exact: true }).click();
   if (!remote) {
@@ -175,7 +177,8 @@ async function run() {
   }
   await page.waitForFunction(() => document.querySelector('.practice-page [role="status"]')?.textContent?.includes('请在播放器中点击开始'), {}, { timeout: 180_000 });
   assert.ok(requests.get('/practice-player/release.json') > before);
-  results.push({ scenario: 'manual-retry', loaded: true, ...(remote ? {} : { playerReadyBeforeBundle: true }) });
+  assert.equal(binaryRequests(), beforeBinary, 'Warm reload must reuse immutable Unity data and WASM');
+  results.push({ scenario: 'manual-retry', loaded: true, binariesFromCache: true, ...(remote ? {} : { playerReadyBeforeBundle: true }) });
   console.log('Manual reload passed');
   await page.getByRole('link', { name: '返回歌曲', exact: true }).click();
   await page.waitForURL(`${base}/songs/${compatibility ? 1357 : 463}`, { waitUntil: 'domcontentloaded' });

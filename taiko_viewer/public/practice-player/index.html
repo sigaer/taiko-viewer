@@ -72,7 +72,10 @@ try {
   instance = await createUnityInstance(canvas, {
     dataUrl:build+'Web.data.unityweb',frameworkUrl:build+'Web.framework.js.unityweb',codeUrl:build+'Web.wasm.unityweb',
     streamingAssetsUrl:root+'StreamingAssets',companyName:'OurTaiko',productName:'OurTaikoView_Web',
-    productVersion:'1.0',autoSyncPersistentDataPath:false
+    productVersion:'1.0',autoSyncPersistentDataPath:false,
+    // Versioned resources are SHA-256 verified and never replaced in place.
+    // Unity defaults to no-store for WASM; opt it into its persistent cache too.
+    cacheControl:url => new URL(url, location.href).pathname.startsWith(root) ? 'immutable' : 'no-store'
   }, value => { progress.value = value; });
   progress.hidden = true;
   command('hello');
