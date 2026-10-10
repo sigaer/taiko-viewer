@@ -53,7 +53,10 @@ export async function decodePracticeBundle(bytes: Uint8Array, signal: AbortSigna
 }
 
 export async function downloadPracticeBundle(songId: number, signal: AbortSignal) {
-  const response = await fetch(`/api/content/songs/${songId}/tja-package`, { signal });
+  // Feature detection also covers iPad desktop mode and embedded WebKit browsers.
+  const needsWav = typeof document !== "undefined"
+    && !document.createElement("audio").canPlayType('audio/ogg; codecs="vorbis"');
+  const response = await fetch(`/api/content/songs/${songId}/tja-package${needsWav ? "?audio=wav" : ""}`, { signal });
   if (!response.ok || !response.body) throw new Error("Bundle download failed");
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];

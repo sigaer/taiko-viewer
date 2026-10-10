@@ -28,3 +28,11 @@ Unity build outputs stay outside Git and the Viewer build. Only the small releas
 4. To roll back a player update, restore the prior inventory, bump the Viewer patch version and release normally. Retain previous version directories so active sessions and rollbacks continue to work. No background auto-update or automatic deletion runs.
 
 The sync lock is `<storage-directory>/.sync-lock`. If a process was killed, inspect that no sync is running before removing the stale lock and its abandoned `.staging-*` directory. Never remove published version directories as part of lock cleanup.
+
+### Safari Ogg compatibility (0.81.5)
+
+Practice feature-detects `audio/ogg; codecs="vorbis"`. Unsupported browsers (including iOS 18.3.2 Safari) request `tja-package?audio=wav`. Only that variant converts Ogg to stereo 44.1 kHz PCM WAV and rewrites the ZIP's WAVE field; source files and ordinary downloads are unchanged. WAV avoids MP3 encoder delay in rhythm timing.
+
+The server requires `/usr/bin/ffmpeg`. Conversion uses one thread, a 60-second deadline, 128 MiB input and 120 MiB output limits. Each Node process admits one conversion/stream at a time (busy requests receive 503), with no waiting queue or retained cache. Temporary directories under `/var/tmp/taiko-practice-audio-*` are removed on completion, cancellation or failure. Abrupt host/process termination can leave a directory for operational cleanup.
+
+Run `verify_practice_player.mjs --wav` through the memory QA wrapper to test real song 1357 with Ogg capability disabled and Ogg decoding rejected. This exercises the fallback in Chromium; it does not replace physical iPhone verification.

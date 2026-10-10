@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import { zipSync, strToU8 } from 'fflate';
 
-const remote = process.argv[2];
+const remote = process.argv[2]?.startsWith('http') ? process.argv[2] : undefined;
+const compatibility = process.argv.includes('--wav');
 const base = remote || 'http://127.0.0.1:3197';
 const output = '/var/tmp/practice-player-qa';
 await mkdir(output, { recursive: true });
@@ -41,6 +42,17 @@ async function run() {
     window.addEventListener('message', event => {
       if (event.origin === location.origin && event.data?.channel === 'ourtaiko-view' && event.data.type === 'ready') window.__practiceReadyCount++;
     });
+  });
+  if (compatibility) await context.addInitScript(() => {
+    const original = HTMLMediaElement.prototype.canPlayType;
+    HTMLMediaElement.prototype.canPlayType = function(type) {
+      return type.includes('ogg') ? '' : original.call(this, type);
+    };
+    const decode = AudioContext.prototype.decodeAudioData;
+    AudioContext.prototype.decodeAudioData = function(bytes, ...args) {
+      if (new DataView(bytes).getUint32(0) === 0x4f676753) throw new Error('Ogg unsupported in compatibility QA');
+      return decode.call(this, bytes, ...args);
+    };
   });
   page = await context.newPage();
   assert.ok(await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2')), 'QA browser must support WebGL 2');
@@ -79,13 +91,17 @@ async function run() {
         return route.fulfill({ status: 200, contentType: 'application/zip', body });
       }
     }
+    if (compatibility && url.pathname.endsWith('/tja-package')) {
+      assert.equal(url.searchParams.get('audio'), 'wav');
+      return route.continue();
+    }
     if (!remote && url.pathname.startsWith('/api/')) {
       const response = await route.fetch({ url: `http://127.0.0.1:3100${url.pathname}${url.search}`, timeout: 45_000 });
       return route.fulfill({ response });
     }
     return route.continue();
   });
-  const navigation = await page.goto(`${base}/ourtaikoview/463/4`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+  const navigation = await page.goto(`${base}/ourtaikoview/${compatibility ? 1357 : 463}/${compatibility ? 1 : 4}`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
   assert.equal(navigation.status(), 200, (await page.locator('body').innerText()).slice(0, 1200));
   console.log('Practice page opened');
   await page.waitForFunction(() => document.querySelector('.practice-page [role="alert"]') || document.querySelector('.practice-page [role="status"]')?.textContent?.includes('请在播放器中点击开始'), { }, { timeout: 180_000 });
@@ -124,7 +140,7 @@ async function run() {
   results.push({ scenario: 'manual-retry', loaded: true, ...(remote ? {} : { playerReadyBeforeBundle: true }) });
   console.log('Manual reload passed');
   await page.getByRole('link', { name: '返回歌曲', exact: true }).click();
-  await page.waitForURL(`${base}/songs/463`, { waitUntil: 'domcontentloaded' });
+  await page.waitForURL(`${base}/songs/${compatibility ? 1357 : 463}`, { waitUntil: 'domcontentloaded' });
   // Nuxt may update history before the destination's async data finishes loading.
   await page.locator('.practice-page').waitFor({ state: 'detached' });
   assert.equal(page.frames().filter(frame => frame.url().includes('/practice-player/')).length, 0);
@@ -142,7 +158,7 @@ async function run() {
       ['missing-course', '此难度暂无可用谱面', 5]
     ]) {
       scenario = name;
-      await page.goto(`${base}/ourtaikoview/463/${difficulty}`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${base}/ourtaikoview/${compatibility ? 1357 : 463}/${difficulty}`, { waitUntil: 'domcontentloaded' });
       await page.getByRole('alert').filter({ hasText: expected }).waitFor();
       assert.equal(await page.locator('.practice-page iframe').count(), 0);
       results.push({ scenario, passed: true });
