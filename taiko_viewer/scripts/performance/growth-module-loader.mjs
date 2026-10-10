@@ -29,7 +29,8 @@ export async function importGrowthModule(relative, { userdataDir, before = false
         source = source.replace(anchor, code);
       };
       replace("const snapshots: GrowthSnapshot[] = [];", "__bench.enumerated(allNames.length, names.length);\n  const snapshots: GrowthSnapshot[] = [];");
-      const loop = source.includes('for await (const { name, raw } of readHistoryFiles(directory, names)) {')
+      const loop = source.includes('for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {')
+        ? 'for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {' : source.includes('for await (const { name, raw } of readHistoryFiles(directory, names)) {')
         ? 'for await (const { name, raw } of readHistoryFiles(directory, names)) {' : 'for (const name of names) {';
       replace(loop, `${loop}\n    __bench.fileStart();`);
       if (source.includes('async function* readHistoryFiles')) {

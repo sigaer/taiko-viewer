@@ -12,6 +12,9 @@ import { createError, getCookie, getHeader, readMultipartFormData } from "h3";
 import { getRatingEntries, getSongCatalog as loadSongCatalog } from "~/server/services/content";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
+import { createFileScoreReader } from "../../domain/file-score-reader.ts";
+import type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
+export type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 
 const scryptAsync = promisify(nodeScrypt);
 export const execFileAsync = promisify(execFile);
@@ -140,37 +143,6 @@ export type SongMeta = {
   level_3?: number | string;
   level_4?: number | string;
   level_5?: number | string;
-};
-
-export type UserdataSong = {
-  song_no: number;
-  level: number;
-  song_name?: string;
-  song_name_jp?: string;
-  high_score?: number;
-  best_score_rank?: number;
-  good_cnt?: number;
-  ok_cnt?: number;
-  ng_cnt?: number;
-  pound_cnt?: number;
-  combo_cnt?: number;
-  option_flg?: unknown;
-  stage_cnt?: number;
-  clear_cnt?: number;
-  full_combo_cnt?: number;
-  dondaful_combo_cnt?: number;
-  highscore_datetime?: string;
-  highscore_mode?: number;
-  update_datetime?: string;
-  [key: string]: unknown;
-};
-
-export type UserdataPayload = {
-  _meta?: Record<string, unknown>;
-  profile?: Record<string, unknown>;
-  songs?: UserdataSong[];
-  achievement?: Record<string, unknown>;
-  dojo?: Record<string, unknown>;
 };
 
 export type AccountPublicUser = {
@@ -642,15 +614,8 @@ export const getUserdataPath = (taikoId: string) => {
   return resolve(userdataDir, `${taikoId}data.json`);
 };
 
-export const userdataFileExists = async (taikoId: string) => {
-  const filePath = getUserdataPath(taikoId);
-  try {
-    await access(filePath, fsConstants.R_OK);
-    return true;
-  } catch {
-    return false;
-  }
-};
+const domainScoreReader = () => createFileScoreReader(getRuntimePaths().userdataDir, () => new Date().toISOString());
+export const userdataFileExists = (taikoId: string) => domainScoreReader().currentExists(taikoId);
 
 const getUserdataHistoryDir = (taikoId: string) => {
   const { userdataDir } = getRuntimePaths();
@@ -658,25 +623,19 @@ const getUserdataHistoryDir = (taikoId: string) => {
 };
 
 export const readUserdata = async (taikoId: string) => {
-  const filePath = getUserdataPath(taikoId);
-  try {
-    await access(filePath, fsConstants.R_OK);
-  } catch {
+  if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
-  const payload = await loadJsonFile<UserdataPayload>(filePath);
+  const { current: payload } = await domainScoreReader().readCurrent(taikoId);
   if (!Array.isArray(payload.songs)) payload.songs = [];
   return payload;
 };
 
 export const readRawUserdataText = async (taikoId: string) => {
-  const filePath = getUserdataPath(taikoId);
-  try {
-    await access(filePath, fsConstants.R_OK);
-  } catch {
+  if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
-  return readFile(filePath, "utf-8");
+  return domainScoreReader().readRawCurrent(taikoId);
 };
 
 const userdataWriteQueues = new Map<string, Promise<unknown>>();

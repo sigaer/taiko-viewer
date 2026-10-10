@@ -1,0 +1,84 @@
+{
+  "step": "5.1",
+  "status": "READ_BOUNDARY_PASS",
+  "production_gate": "PENDING_PHASE5_RELEASE",
+  "baseline": "060dc05",
+  "tests": {
+    "baseline": 202,
+    "after": 219,
+    "failures": 0,
+    "suite": "viewer-phase5-read-final.xml",
+    "junit_sha256": "879b0c04dc52eedf17273d7c216216d4a9616f956ecab88474c52f031fd5834a",
+    "typescript": "PASS (Bundler resolution, Viewer alias)"
+  },
+  "writer_block": {
+    "unchanged": true,
+    "sha256": "b67bd0ae52593d311ee2a0c724131a0cc7b3294d21ee7638518d7966ca33fdfb"
+  },
+  "files": [
+    {
+      "path": "taiko_viewer/server/domain/score-read-contract.ts",
+      "sha256": "ddda22ab93746ac9c8d7f359090b40058dd75e15efc1f09b7827cdf5e1940b1d"
+    },
+    {
+      "path": "taiko_viewer/server/domain/file-score-reader.ts",
+      "sha256": "5dac3fba61bd6e7d62d1104637a4fb9eeb58baf4960cda16c6307d91c859181b"
+    },
+    {
+      "path": "taiko_viewer/server/services/taiko-domain/read.ts",
+      "sha256": "7713c2282784ddeef2b4182d91c6018100076f28ed74b6a5216097b4ad088019"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/shared.ts",
+      "sha256": "9606c01d589919b513493f10b536770da2d44f44dd1f2c8360973db720abe885"
+    },
+    {
+      "path": "taiko_viewer/server/services/goals/snapshot.ts",
+      "sha256": "44099236b17fc810b4cf6816f9547c598c596b002f27aab90d069654c5dbd658"
+    },
+    {
+      "path": "taiko_viewer/server/services/account/personal.ts",
+      "sha256": "7144ab42e13f801e411db75b2a8cf40f3d368124dfcc350935d7fe5836cdd3d5"
+    },
+    {
+      "path": "taiko_viewer/server/services/account/growth.ts",
+      "sha256": "10026b4cdc2e8ad1a8adf65b75cf26bfca82387c3df397e8938a31ff1fb0c4d7"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-history/evidence.ts",
+      "sha256": "28cdbdb7b7d937cfe76edff07dd651aca72bd3cd84aad8320d314a65ae723d4b"
+    },
+    {
+      "path": "taiko_viewer/server/services/growth-history/daily-archive.ts",
+      "sha256": "b622d1747925d36f5ea3c466ca904c6425d78ec5cf5a3d67f2c8894117d5fb57"
+    },
+    {
+      "path": "taiko_viewer/scripts/performance/growth-module-loader.mjs",
+      "sha256": "60fe97cc92d01594ea0e8b4916deef19e439d88596706f8044855ec323116275"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/growthRequestHarness.mjs",
+      "sha256": "36bf1fbac0a7a447c115dcad7ab9051bf691ad88595ce6e97ab2370738dc25b3"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/growthReplayHarness.mjs",
+      "sha256": "e68413a0e74ccd61db0b210655074016d7a964c14fccfad5ce78231e5a4704e5"
+    },
+    {
+      "path": "taiko_viewer/tests/domainScoreRead.test.ts",
+      "sha256": "5da2fec8d4d86c8c9d195fda3698cba900b0edfad81c03559f873c153c267029"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/domainRead.tsconfig.json",
+      "sha256": "cbff19168f2b04d5ed2e8a9887a551dc1283dd64496f65589a945ddbcec50e15"
+    }
+  ],
+  "limits": {
+    "runner": "scripts/memory/run_qa.sh",
+    "memory_max_gib": 3,
+    "concurrency": 1,
+    "production_db": false,
+    "production_user_reads": false
+  },
+  "known_limit": "ctime version checks retain filesystem timestamp granularity; publication generations are Phase 6"
+}

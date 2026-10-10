@@ -1,7 +1,6 @@
-import { access } from "node:fs/promises";
-import { constants as fsConstants } from "node:fs";
 import { createError } from "h3";
-import { execFileAsync, getCurrentBindingRow, getRuntimePaths, getUserdataPath } from "~/server/internal/account/shared";
+import { execFileAsync, getCurrentBindingRow, getRuntimePaths } from "~/server/internal/account/shared";
+import { getDomainScoreReader } from "../taiko-domain/read.ts";
 import type { OrdinaryRecommendationsPayload, PlayerRatingIntelligence, TargetRecommendationKey, TargetRecommendationsPayload } from "~/types/recommendation-intelligence";
 
 type PersonalRecommendationPayload = OrdinaryRecommendationsPayload & {
@@ -11,9 +10,7 @@ type PersonalRecommendationPayload = OrdinaryRecommendationsPayload & {
 const ensureBindingWithUserdata = async (userId: number) => {
   const binding = await getCurrentBindingRow(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
-  try {
-    await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK);
-  } catch {
+  if (!await getDomainScoreReader().currentExists(binding.taiko_id)) {
     throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" });
   }
   return binding;

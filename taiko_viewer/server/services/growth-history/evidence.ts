@@ -1,9 +1,8 @@
 import { createHash } from "node:crypto";
-import { readFile, readdir, stat } from "node:fs/promises";
-import { resolve } from "node:path";
 import type { GrowthSnapshot } from "~/utils/dailyProgress";
 import { growthCalendarDay } from "~/utils/playerGrowth";
-import { getRuntimePaths, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
+import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as UserdataSong, ScoreReadPort } from "../../domain/score-read-contract.ts";
+import { getDomainScoreReader } from "../taiko-domain/read.ts";
 import { memoizeGrowthString } from "~/utils/growthRequestMemo";
 import { GROWTH_HISTORY_FILE_LIMIT } from "./constants";
 
@@ -73,11 +72,11 @@ const observationToken = (observedAt: string, orderKey: string, revision: string
 const inFlightEvidence = new Map<string, Promise<GrowthScoreEvidence>>();
 
 /** Prefetch only eight raw files; parsing and provenance replay stay in file order. */
-async function* readHistoryFiles(directory: string, names: string[]) {
+async function* readHistoryFiles(reader: ScoreReadPort, taikoId: string, names: string[]) {
   for (let offset = 0; offset < names.length; offset += 8) {
     const batch = await Promise.all(names.slice(offset, offset + 8).map(async name => {
       try {
-        const raw = await readFile(resolve(directory, name), "utf-8");
+        const raw = await reader.readHistory(taikoId, name);
         return { name, raw };
       } catch { return { name, raw: null }; }
     }));
@@ -87,9 +86,8 @@ async function* readHistoryFiles(directory: string, names: string[]) {
 
 async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvidence> {
   const calendarDayFor = memoizeGrowthString(growthCalendarDay);
-  const { userdataDir } = getRuntimePaths();
-  const directory = resolve(userdataDir, taikoId);
-  const allNames = (await readdir(directory).catch(() => [] as string[])).filter(name => name.startsWith("data_") && name.endsWith(".json")).sort((left, right) => fileOrder(left).localeCompare(fileOrder(right)));
+  const reader = getDomainScoreReader();
+  const allNames = (await reader.listHistory(taikoId).catch(() => [] as string[])).filter(name => name.startsWith("data_") && name.endsWith(".json")).sort((left, right) => fileOrder(left).localeCompare(fileOrder(right)));
   const names = allNames.slice(-GROWTH_HISTORY_FILE_LIMIT);
   const snapshots: GrowthSnapshot[] = [];
   const observations: GrowthObservation[] = [];
@@ -97,7 +95,7 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
   let lastAuthoritativeSource = "";
   let needsAuthoritativeBaseline = false;
   let invalidFiles = 0;
-  for await (const { name, raw } of readHistoryFiles(directory, names)) {
+  for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
     try {
       if (raw === null) { invalidFiles += 1; continue; }
       const payload = JSON.parse(raw) as UserdataPayload;
@@ -198,10 +196,9 @@ export function loadGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvi
  */
 async function historyVersion(taikoId: string): Promise<string | null> {
   try {
-    const directory = resolve(getRuntimePaths().userdataDir, taikoId);
-    const directoryBefore = await stat(directory, { bigint: true });
-    const directoryIdentity = (info: typeof directoryBefore) => `${info.dev}:${info.ino}:${info.mtimeNs}:${info.ctimeNs}`;
-    const allNames = (await readdir(directory)).filter(name => name.startsWith("data_") && name.endsWith(".json"));
+    const reader = getDomainScoreReader();
+    const directoryBefore = await reader.historyDirectoryVersion(taikoId);
+    const allNames = (await reader.listHistory(taikoId)).filter(name => name.startsWith("data_") && name.endsWith(".json"));
     allNames.sort((left, right) => fileOrder(left).localeCompare(fileOrder(right)));
     const names = allNames.slice(-GROWTH_HISTORY_FILE_LIMIT);
     const versions: string[] = new Array(names.length);
@@ -210,14 +207,13 @@ async function historyVersion(taikoId: string): Promise<string | null> {
     const results = await Promise.allSettled(Array.from({ length: Math.min(8, names.length) }, async () => {
       while (cursor < names.length) {
         const index = cursor++;
-        const info = await stat(resolve(directory, names[index]), { bigint: true });
-        versions[index] = `${names[index]}:${info.dev}:${info.ino}:${info.size}:${info.mtimeNs}:${info.ctimeNs}`;
+        versions[index] = await reader.historyFileVersion(taikoId, names[index]);
       }
     }));
     if (results.some(result => result.status === "rejected")) return null;
-    const directoryAfter = await stat(directory, { bigint: true });
-    if (directoryIdentity(directoryBefore) !== directoryIdentity(directoryAfter)) return null;
-    return createHash("sha256").update(`${directoryIdentity(directoryAfter)}\n${allNames.length}\n${versions.join("\n")}`).digest("hex");
+    const directoryAfter = await reader.historyDirectoryVersion(taikoId);
+    if (directoryBefore !== directoryAfter) return null;
+    return createHash("sha256").update(`${directoryAfter}\n${allNames.length}\n${versions.join("\n")}`).digest("hex");
   } catch {
     // Unreadable/missing history may become available later in this request.
     return null;

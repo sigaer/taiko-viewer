@@ -3,14 +3,14 @@ import { readGoalSnapshot } from "../goals/snapshot";
 import { readActiveGoal } from "../goals/store";
 import { getAccountDb } from "~/server/utils/account-db";
 import { goalBaseline, goalOptions, goalChartAvailable } from "~/utils/playerGoal";
-import { access, constants as fsConstants } from "node:fs/promises";
+import { getDomainScoreReader } from "../taiko-domain/read.ts";
 import { createError } from "h3";
 import type { GrowthDailyProgress, GrowthDataMode, GrowthPlanItem, PlayerGrowthOverview } from "~/types/player-growth";
 import { buildPlayerGrowthState, growthCalendarDay } from "~/utils/playerGrowth";
 import { deriveDailyProgress } from "~/utils/dailyProgress";
 import { resolveDifficultyPresentation } from "~/utils/difficulty";
 import { getSongCatalog } from "~/server/services/content";
-import { getCurrentBindingRow, getRuntimePaths, getUserdataPath, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
+import { getCurrentBindingRow, getRuntimePaths, type UserdataPayload, type UserdataSong } from "~/server/internal/account/shared";
 import { runGrowthPythonJson } from "./personal";
 import { loadGrowthScoreEvidence } from "../growth-history/evidence";
 import { getGrowthModelRevision } from "../growth-history/model-revision";
@@ -37,7 +37,7 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
   const binding = await getCurrentBindingRow(userId);
   const authDurationMs = performance.now() - authStartedAt;
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
-  try { await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK); } catch { throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" }); }
+  if (!await getDomainScoreReader().currentExists(binding.taiko_id)) throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" });
   const scoreStartedAt = performance.now();
   const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id)]);
   const history = scoreEvidence.snapshots;

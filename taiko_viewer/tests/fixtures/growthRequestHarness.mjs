@@ -72,7 +72,8 @@ export async function importGrowthRequest(fixture, { baseline = false, binding =
       source = source.replace(anchor, replacement);
     };
     if (relative === 'server/services/growth-history/evidence.ts') {
-      insert('const raw = await readFile(resolve(directory, name), "utf-8");', 'const readStarted = performance.now(); const raw = await readFile(resolve(directory, name), "utf-8"); __counts.readMs += performance.now() - readStarted;');
+      const readAnchor = source.includes('const raw = await reader.readHistory') ? 'const raw = await reader.readHistory(taikoId, name);' : 'const raw = await readFile(resolve(directory, name), "utf-8");';
+      insert(readAnchor, `const readStarted = performance.now(); ${readAnchor} __counts.readMs += performance.now() - readStarted;`);
       insert('const payload = JSON.parse(raw) as UserdataPayload;', '__counts.parseAttempts++; __counts.bytes += Buffer.byteLength(raw); const parseStarted = performance.now(); let payload: UserdataPayload; try { payload = JSON.parse(raw) as UserdataPayload; __counts.parses++; } finally { __counts.parseMs += performance.now() - parseStarted; }');
       insert('const snapshots: GrowthSnapshot[] = [];', '__counts.normalization++; const snapshots: GrowthSnapshot[] = [];');
       if (source.includes('async function* readHistoryFiles')) {
