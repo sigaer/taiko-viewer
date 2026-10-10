@@ -1,0 +1,24 @@
+{
+  "phase": 2,
+  "gate": "PASS",
+  "tests": 15,
+  "failures": 0,
+  "errors": 0,
+  "wheelHashes": {
+    "sakura_taiko_contract-0.1.0-py3-none-any.whl": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7",
+    "sakura_taiko_core-0.1.0-py3-none-any.whl": "31432a341800462f5b8c8bb124652d2079e06ef1035d89c0b51225ad8bcb55d8"
+  },
+  "installationIsolated": true,
+  "productionConsumersChanged": false,
+  "goldenCases": {
+    "ratingV1Aggregation": 252,
+    "ratingV2Formula": 168,
+    "ratingV2Aggregation": 144,
+    "recommendationCandidates": 126,
+    "recommendationTargets": 60,
+    "rollTargetTolerance": 96,
+    "tja": 7
+  },
+  "dependencyBoundary": "PASS",
+  "inputs": "synthetic; no production userdata or DB access"
+}
