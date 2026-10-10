@@ -113,6 +113,28 @@ async function run() {
   await page.getByRole('button', { name: '全屏', exact: true }).click();
   await page.waitForFunction(() => document.fullscreenElement?.tagName === 'IFRAME');
   await page.evaluate(() => document.exitFullscreen());
+  const playerBefore = await page.locator('.practice-page iframe').getAttribute('src');
+  await page.evaluate(() => {
+    window.__savedOverflow = document.body.style.overflow;
+    document.querySelector('.practice-page iframe').requestFullscreen = undefined;
+  });
+  await page.getByRole('button', { name: '全屏', exact: true }).click();
+  await page.getByRole('button', { name: '退出全屏', exact: true }).waitFor();
+  await page.setViewportSize({ width: 844, height: 390 });
+  const bounds = await page.locator('.player-stage').boundingBox();
+  assert.ok(bounds && bounds.x === 0 && bounds.y === 0 && bounds.width === 844 && bounds.height === 390, 'Fallback fills landscape viewport');
+  assert.equal(await page.locator('.practice-page iframe').getAttribute('src'), playerBefore);
+  assert.equal(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight - 8)?.tagName), 'IFRAME', 'Mobile navigation must not cover expanded player');
+  await page.screenshot({ path: `${output}/fullscreen-fallback.png` });
+  await page.getByRole('button', { name: '退出全屏', exact: true }).click();
+  assert.equal(await page.evaluate(() => document.body.style.overflow === window.__savedOverflow), true);
+  await page.evaluate(() => { document.querySelector('.practice-page iframe').requestFullscreen = () => Promise.reject(new Error('Denied')); });
+  await page.getByRole('button', { name: '全屏', exact: true }).click();
+  await page.getByRole('button', { name: '退出全屏', exact: true }).waitFor();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: '退出全屏', exact: true }).waitFor({ state: 'hidden' });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  results.push({ scenario: 'fullscreen-fallback', unsupported: true, rejected: true, exit: true, landscape: true });
   await page.locator('.practice-page input[type="range"]').fill('35');
   await page.locator('.practice-page input[type="range"]').dispatchEvent('input');
   await page.screenshot({ path: `${output}/${remote ? 'online' : 'local'}-playing.png` });

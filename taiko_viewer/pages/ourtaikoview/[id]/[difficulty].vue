@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { hasPracticeCourse, isPracticeMessage, playerMessage, PRACTICE_COURSES } from "~/utils/ourTaikoView";
 import { downloadPracticeBundle } from "~/utils/practiceBundle";
 
@@ -23,7 +23,7 @@ const copy = computed(() => locale.value === "ja" ? {
   playerBootFailed: "プレイヤーを起動できませんでした。再読み込みしてください。",
   chartFailed: "譜面または音源を読み込めませんでした。再読み込みしてください。",
   failed: "読み込めませんでした。再試行してください。", missing: "この難易度の譜面はありません。",
-  retry: "再読み込み", volume: "打音の音量", fullscreen: "全画面", fullscreenFailed: "全画面に切り替えられませんでした。",
+  retry: "再読み込み", volume: "打音の音量", fullscreen: "全画面", exitFullscreen: "全画面を終了",
   finished: "練習が終了しました。", exited: "練習を終了しました。", ready: "プレイヤー内で開始してください。"
 } : {
   title: "游玩练习", back: "返回歌曲", loading: "正在加载播放器…",
@@ -34,7 +34,7 @@ const copy = computed(() => locale.value === "ja" ? {
   playerBootFailed: "播放器启动失败，请重新加载。",
   chartFailed: "谱面或音乐读取失败，请重新加载。",
   failed: "加载失败，请重试。", missing: "此难度暂无可用谱面。",
-  retry: "重新加载", volume: "鼓音音量", fullscreen: "全屏", fullscreenFailed: "无法进入全屏，请重试。",
+  retry: "重新加载", volume: "鼓音音量", fullscreen: "全屏", exitFullscreen: "退出全屏",
   finished: "练习已结束。", exited: "已退出练习。", ready: "请在播放器中点击开始。"
 });
 useHead(() => ({ title: `${copy.value.title} · ${id}`, meta: [{ name: "robots", content: "noindex" }] }));
@@ -43,7 +43,28 @@ const playerUrl = ref("");
 const volume = ref(100);
 const status = ref("loading");
 const failure = ref("");
-const fullscreenError = ref(false);
+const expanded = ref(false);
+const fullscreenButton = ref<HTMLButtonElement | null>(null);
+const exitButton = ref<HTMLButtonElement | null>(null);
+let savedOverflow: [string, string] | undefined;
+let frameDocument: Document | null = null;
+function exitExpanded(restoreFocus = true) {
+  expanded.value = false;
+  if (savedOverflow) {
+    [document.documentElement.style.overflow, document.body.style.overflow] = savedOverflow;
+    savedOverflow = undefined;
+    if (restoreFocus) fullscreenButton.value?.focus();
+  }
+}
+function escapeExpanded(event: KeyboardEvent) {
+  if (event.key === "Escape" && expanded.value) exitExpanded();
+}
+function frameLoaded() {
+  frameDocument?.removeEventListener("keydown", escapeExpanded);
+  frameDocument = iframe.value?.contentDocument || null;
+  frameDocument?.addEventListener("keydown", escapeExpanded);
+  send("hello");
+}
 let origin = "";
 let requestId = "";
 let controller: AbortController | undefined;
@@ -58,6 +79,9 @@ function send(type: string, payload?: unknown) {
 }
 function clearTimer() { clearTimeout(timer); }
 function stop() {
+  exitExpanded(false);
+  frameDocument?.removeEventListener("keydown", escapeExpanded);
+  frameDocument = null;
   clearTimer();
   controller?.abort();
   send("unload");
@@ -113,7 +137,6 @@ async function load() {
   stop();
   resources = undefined;
   failure.value = "";
-  fullscreenError.value = false;
   status.value = "loading";
   loadingLabel.value = copy.value.loadingBundle;
   requestId = crypto.randomUUID();
@@ -135,18 +158,28 @@ async function load() {
   }
 }
 async function fullscreen() {
-  try {
-    await iframe.value?.requestFullscreen();
-    fullscreenError.value = false;
-  } catch { fullscreenError.value = true; }
+  const target = iframe.value;
+  if (!target || expanded.value) return;
+  if (typeof target.requestFullscreen === "function" && document.fullscreenEnabled) {
+    try { await target.requestFullscreen(); return; }
+    catch { /* Fall back when native fullscreen is unavailable or denied. */ }
+  }
+  if (iframe.value !== target || expanded.value) return;
+  savedOverflow = [document.documentElement.style.overflow, document.body.style.overflow];
+  document.documentElement.style.overflow = document.body.style.overflow = "hidden";
+  expanded.value = true;
+  await nextTick();
+  exitButton.value?.focus();
 }
 onMounted(() => {
   origin = window.location.origin;
   window.addEventListener("message", receive);
+  window.addEventListener("keydown", escapeExpanded);
   void load();
 });
 onBeforeUnmount(() => {
   window.removeEventListener("message", receive);
+  window.removeEventListener("keydown", escapeExpanded);
   stop();
 });
 </script>
@@ -160,14 +193,18 @@ onBeforeUnmount(() => {
         <input v-model.number="volume" type="range" min="0" max="100" step="1" @input="sendVolume" />
         <output>{{ volume }}</output>
       </label>
-      <button v-if="playerUrl" type="button" @click="fullscreen">{{ copy.fullscreen }}</button>
+      <button v-if="playerUrl" ref="fullscreenButton" type="button" @click="fullscreen">{{ copy.fullscreen }}</button>
       <button type="button" @click="load">{{ copy.retry }}</button>
     </div>
     <p v-if="failure" role="alert">{{ failure }}</p>
     <p v-else role="status">{{ status === 'loading' ? loadingLabel : status === 'finished' ? copy.finished : status === 'exit' ? copy.exited : copy.ready }}</p>
-    <p v-if="fullscreenError" role="alert">{{ copy.fullscreenFailed }}</p>
+    <div class="player-stage" :class="{ 'is-expanded': expanded }">
+      <div v-if="expanded" class="expanded-controls">
+        <button ref="exitButton" type="button" @click="exitExpanded()">{{ copy.exitFullscreen }}</button>
+      </div>
     <iframe v-if="playerUrl" :key="requestId" ref="iframe" :src="playerUrl" :title="copy.title"
-      allow="autoplay; fullscreen" allowfullscreen @load="send('hello')" />
+      allow="autoplay; fullscreen" allowfullscreen @load="frameLoaded" />
+    </div>
   </main>
 </template>
 
@@ -180,4 +217,12 @@ output { min-width: 3ch; font-variant-numeric: tabular-nums; }
 button { padding: 8px 16px; border: 1px solid currentColor; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
 iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #171717; }
 iframe:fullscreen { width: 100vw; height: 100vh; border-radius: 0; }
+</style>
+
+<style scoped>
+:global(.app-content:has(.player-stage.is-expanded)) { z-index: 10000; }
+.player-stage.is-expanded { position: fixed; inset: 0; z-index: 10000; width: 100%; height: 100dvh; display: flex; flex-direction: column; box-sizing: border-box; background: #171717; color: white; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); overscroll-behavior: none; }
+.expanded-controls { display: flex; justify-content: flex-end; flex: 0 0 auto; padding: 4px 8px; }
+.expanded-controls button { min-height: 44px; }
+.is-expanded iframe { flex: 1 1 0; min-height: 0; height: 100%; aspect-ratio: auto; border-radius: 0; }
 </style>
