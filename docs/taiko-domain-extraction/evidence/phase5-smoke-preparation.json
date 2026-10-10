@@ -1,0 +1,92 @@
+{
+  "phase": 5,
+  "step": "5.4-preparation",
+  "status": "ONLINE_VERIFIER_BASELINE_PASS",
+  "deployed_baseline": "0.81.10",
+  "release_gate": "PENDING_DEPLOY_0.81.11",
+  "checks": [
+    {
+      "url": "http://127.0.0.1:3100/more",
+      "status": 200,
+      "bytes": 98712,
+      "sha256": "cde23a98d0c1523e4fe35489758d00295a68e1bf65b6f042ee521d14b50da6d4",
+      "milliseconds": 68,
+      "cacheControl": "",
+      "vary": "",
+      "versionBadge": true
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/more",
+      "status": 200,
+      "bytes": 98712,
+      "sha256": "cde23a98d0c1523e4fe35489758d00295a68e1bf65b6f042ee521d14b50da6d4",
+      "milliseconds": 68,
+      "cacheControl": "",
+      "vary": "Accept-Encoding",
+      "versionBadge": true
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/titles",
+      "status": 200,
+      "bytes": 476205,
+      "sha256": "721b98a9740b5261da36074d7a9cac800c10fc8cd28cd857bff033c730f1eaac",
+      "milliseconds": 334,
+      "cacheControl": "",
+      "vary": "Accept-Encoding"
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/api/account/growth/overview",
+      "status": 401,
+      "bytes": 173,
+      "sha256": "1cc7d6df34fbfb66fb7913e6b18cf30bec5da131dc137d405b617fd128153f11",
+      "milliseconds": 5,
+      "cacheControl": "private, no-store",
+      "vary": "Cookie"
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/api/account/growth/history",
+      "status": 401,
+      "bytes": 172,
+      "sha256": "f41a97099739a3e324b3b4900a19c266a0cc64d34070f102055b1ffa4b792ace",
+      "milliseconds": 22,
+      "cacheControl": "private, no-store",
+      "vary": "Cookie"
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/api/account/growth/recent",
+      "status": 401,
+      "bytes": 171,
+      "sha256": "f9d45ae0dcf8a4fdee0d7b6614ba1727828b6eefd951082015d431bdb6009ae4",
+      "milliseconds": 4,
+      "cacheControl": "private, no-store",
+      "vary": "Cookie"
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/api/account/growth/passport",
+      "status": 401,
+      "bytes": 173,
+      "sha256": "78f444f8411d1c4aa8bcd717208ee88fe9d576fc8a30ae92777214d4a90e5ead",
+      "milliseconds": 4,
+      "cacheControl": "private, no-store",
+      "vary": "Cookie"
+    },
+    {
+      "url": "https://viewer.sakura-bot.cn/api/account/songs",
+      "status": 401,
+      "bytes": 163,
+      "sha256": "91c234569d923ae08e1dc5965f765baba558b8dae5d564997fda4f5040c1d9a8",
+      "milliseconds": 4,
+      "cacheControl": "private, no-store",
+      "vary": ""
+    }
+  ],
+  "script": "scripts/verify_taiko_domain_release.mjs",
+  "script_sha256": "a0e5de265ab36b36feab69466337c0372703984906ec42644616dbc8e10802be",
+  "junit_baseline_not_replaced": true,
+  "scope": "public SSR and anonymous GET; no cookies/login/DB client/private files; validates endpoint import and auth denial, not authenticated score correctness",
+  "known_headers": {
+    "growth": "private, no-store + Vary Cookie",
+    "songs": "global private, no-store; no existing Vary promise"
+  },
+  "invocation_after_successful_deploy": "bash scripts/memory/run_qa.sh /bin/bash -c \"node scripts/verify_taiko_domain_release.mjs 0.81.11 /var/tmp/taiko-domain-extraction/phase5-publication-smoke.json\""
+}

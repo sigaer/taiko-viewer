@@ -35,3 +35,7 @@
 发布实现提交 `cd4be76`。通过 `scripts/memory/run_build.sh` 调用标准脚本的尝试 exit 1，wrapper 在启动部署前拒绝：`Insufficient headroom for bounded build; retry in a maintenance window`。现有规则要求 MemAvailable ≥ 25% MemTotal + 5 GiB（本机约 12.65 GiB）；观察约 11.82 GiB，短缺约 0.83 GiB，Memory PSI 为 0。
 
 标准 `deploy_forum_web.sh` 尚未运行，未 git push、构建、切换 output 或重启；origin/main 仍 `060dc05`，线上仍 0.81.10 / Viewer PID 646789 / receiver PID 829176。未清缓存、终止其他服务或降低内存阈值。代码与步骤提交本地保留，等待符合准入的维护窗口继续同一标准流程。 [失败尝试证据](evidence/phase5-publication-attempt.json) 已留档。Gate 5 不提前 PASS，Phase 6 不开始。
+
+续行准备：`scripts/verify_taiko_domain_release.mjs` 已经由 memory runner 对当前 0.81.10 验证，8 项 public SSR / anonymous GET 通过。只访问 `/more`、`/titles` 与 5 个未登录私有 GET；没有 Cookie、账号创建、DB client 或个人文件读取。Growth 四接口核验既有 private/no-store + Vary Cookie；Songs 核验全局 no-store 与 401，其旧接口没有 Vary 承诺，首次检查器过度要求的 Vary 已按基线契约修正，未修改运行接口来迁就测试。
+
+此为检查器基线，**不能**作为 0.81.11 已发布或真实 authenticated score correctness 的证据。后者由真实合成文件服务回归另证；发布成功后必须用期望版本 0.81.11 再跑检查器，并独立记录服务 PID/HEAD。 [准备证据](evidence/phase5-smoke-preparation.json) 保存脚本 hash 和各 HTTP 结果。部署仍暂缓，Gate 5 未 PASS。
