@@ -18,3 +18,11 @@ test("measurement persistence failure never fails Overview", async () => {
   assert.equal(overview.playerState.dataSufficiency, "ready");
   assert.equal(counters.compute, 1);
 });
+
+
+test("Overview does not persist a recalculation over a frozen daily archive", async () => {
+  const { overview, counters } = await replayOverview(fixtures[1], "ready", "archived");
+  assert.equal(overview.playerState.overallRating, 10.28, "current status still uses current computation");
+  assert.equal(counters.compute, 1);
+  assert.equal(counters.measurements, 0, "no replacement measurement is inserted for an archived day");
+});

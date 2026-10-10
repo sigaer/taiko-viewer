@@ -1,10 +1,11 @@
 import { performance } from "node:perf_hooks";
 import { createError } from "h3";
 import { getAccountDb } from "../../utils/account-db.ts";
-import { getCurrentBindingRow } from "../../internal/account/shared.ts";
+import { getCurrentBindingRow, getRuntimePaths } from "../../internal/account/shared.ts";
 import { getPlayerGrowthOverview } from "../account/growth.ts";
 import { getGrowthHistory } from "../growth-history/service.ts";
 import { readGrowthMeasurementCoverage, readDailyGrowthMeasurements } from "../growth-history/measurements.ts";
+import { readDailyAbilityArchive, mergeDailyAbilityMeasurements } from "../growth-history/daily-archive.ts";
 import { buildSkillPassport } from "./composer.ts";
 import { passportHistoryRange, resolveSkillPassportRange, type SkillPassportRange } from "./range.ts";
 
@@ -29,7 +30,8 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   const measurementStartedAt = performance.now();
   const measurementsPromise = Promise.all([
     readDailyGrowthMeasurements(db, userId, Number(initialBinding.id), sharedRange.fromUtc, sharedRange.toExclusiveUtc),
-    readGrowthMeasurementCoverage(db, userId, Number(initialBinding.id))
+    readGrowthMeasurementCoverage(db, userId, Number(initialBinding.id)),
+    readDailyAbilityArchive(getRuntimePaths().userdataDir, initialBinding.taiko_id, userId, Number(initialBinding.id), sharedRange.from, sharedRange.to)
   ]).then(result => {
     measurementQueryMs = performance.now() - measurementStartedAt;
     return result;
@@ -39,10 +41,17 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
     recentHistoryMs = performance.now() - historyStartedAt;
     return result;
   });
-  const [[measurements, measurementCoverage], history] = await Promise.all([measurementsPromise, historyPromise]);
+  const [[storedMeasurements, measurementCoverage, archivedMeasurements], history] = await Promise.all([measurementsPromise, historyPromise]);
   const finalBinding = await getCurrentBindingRow(userId);
   if (!finalBinding || String(finalBinding.id) !== profileId || history.profileId !== profileId) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
 
+  const measurements = mergeDailyAbilityMeasurements(storedMeasurements, archivedMeasurements, range.to);
+  if (measurements.length) {
+    const first = measurements[0]!.capturedAt, last = measurements.at(-1)!.capturedAt;
+    if (!measurementCoverage.measurementFrom || first < measurementCoverage.measurementFrom) measurementCoverage.measurementFrom = first;
+    if (!measurementCoverage.measurementTo || last > measurementCoverage.measurementTo) measurementCoverage.measurementTo = last;
+    measurementCoverage.measurementDays += measurements.length - storedMeasurements.length;
+  }
   let composeTiming = { dailySamplingMs: 0, segmentBuildMs: 0, milestoneComposeMs: 0 };
   const recap = buildSkillPassport({ profileId, range, measurements, measurementCoverage, history, overview }, timing => { composeTiming = timing; });
   const serializedBytes = Buffer.byteLength(JSON.stringify(recap));

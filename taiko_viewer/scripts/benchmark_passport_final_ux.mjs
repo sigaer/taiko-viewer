@@ -6,7 +6,7 @@ import { auditSkillPassportMilestones, curateSkillPassportMilestones } from '../
 import { recoveryBenchmarkFacts, recoveryInput, recoveryMeasurement } from '../tests/fixtures/passportRecovery.ts';
 import { monitorPassportResources } from '../tests/fixtures/passportRecoveryResources.mjs';
 import {finalCases,finalPeriod} from '../tests/fixtures/passportFinalUx.ts';
-const out = '/var/tmp/passport-final-ux-0814';
+const out = process.env.PASSPORT_BROWSER_OUT || '/var/tmp/passport-final-ux-0814';
 await mkdir(out, { recursive: true });
 const finish = await monitorPassportResources(`${out}/curation-resources.json`);
 try {

@@ -88,3 +88,16 @@ test('four frozen daily values connect identically regardless of historical algo
   assert.deepEqual(runs(false).map(run=>run.points.length),[4]);assert.deepEqual(runs(true).map(run=>run.points.length),[4]);
   assert.deepEqual(runs(false)[0]!.points.map(point=>point.value),[10.42,10.42,10.44,10.48]);
 });
+
+test('FC flood leaves initial room for qualified rank, NG and PB without admitting weak records', () => {
+  const input = Array.from({length:30}, (_,i) => fact(`fc-flood-${i}`, 'fc', '2026-10-06', {songId:2000+i,before:0,after:1,delta:1}));
+  input.push(fact('mixed-rank','rank-upgrade','2026-09-20',{songId:3001,before:5,after:6,delta:1}),
+    fact('mixed-ng','ng-reduced','2026-09-21',{songId:3002,before:21,after:5,delta:-16}),
+    fact('mixed-pb','score-pb','2026-09-22',{songId:3003,before:965680,after:1005060,delta:39380}),
+    fact('weak-extra','score-pb','2026-09-23',{songId:3004,before:950000,after:950001,delta:1}));
+  const result = audit(input,period);
+  const initial = result.milestones.filter(node => result.initialIds.includes(node.id));
+  for (const key of ['mixed-rank','mixed-ng','mixed-pb']) assert.ok(initial.some(node => node.factKeys.includes(key)),key);
+  assert.ok(!result.milestones.some(node => node.factKeys.includes('weak-extra')));
+  assert.deepEqual(audit([...input].reverse(),period), result);
+});

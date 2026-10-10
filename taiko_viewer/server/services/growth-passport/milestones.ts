@@ -144,21 +144,36 @@ function curate(facts: GrowthFact[], period: { from: string; to: string }, limit
   const chosen: typeof candidates = [];
   const cap = Math.min(24,Math.max(0,Math.floor(limit)));
   const diversityPenalty = (item: typeof candidates[number]) => (charts.has(item.chart) ? 8 : 0) + ((dayCounts.get(item.day) || 0) >= 2 ? 4 : 0) + ((typeCounts.get(item.kind) || 0) >= 3 ? 2 : 0) + (buckets.has(item.bucket) ? 1 : 0);
+  const typePools = new Map<string, typeof candidates>();
+  for (const item of candidates) {
+    if (!typePools.has(item.kind)) typePools.set(item.kind, []);
+    typePools.get(item.kind)!.push(item);
+  }
+  const isAvailable = (item: typeof candidates[number]) => !selected.has(item.node.id) &&
+    (!charts.has(item.chart) || item.quality.tier === 'A' && !charts.get(item.chart)!.has(item.kind));
   while(chosen.length < cap) {
     let best: typeof candidates[number] | undefined;
     let bestPenalty = Infinity;
-    for(const item of candidates) {
-      if(best && rankQuality(item.quality,best.quality) > 0)break;
-      if(selected.has(item.node.id))continue;
-      const previous = charts.get(item.chart);
-      if(previous && (item.quality.tier !== 'A' || previous.has(item.kind))) { if(item.trace)item.trace.reason='same-chart';continue; }
-      const penalty = diversityPenalty(item);
-      if(!best || penalty < bestPenalty || penalty === bestPenalty && (item.quality.magnitude > best.quality.magnitude || item.quality.magnitude === best.quality.magnitude && qualityOrder(item,best) < 0)) { best=item; bestPenalty=penalty; }
+    // After three of one achievement, give other already-qualified A/B
+    // events a turn. C never enters this pool. With no alternative, relax the
+    // cap so a window containing only FC still shows its real achievements.
+    const preferDiverse = [...typePools].some(([kind, pool]) => (typeCounts.get(kind) || 0) < 3 && pool.some(isAvailable));
+    for (const [kind, pool] of typePools) {
+      if (preferDiverse && (typeCounts.get(kind) || 0) >= 3) continue;
+      for (const item of pool) {
+        if (best && rankQuality(item.quality, best.quality) > 0) break;
+        if (selected.has(item.node.id)) continue;
+        const previous = charts.get(item.chart);
+        if (previous && (item.quality.tier !== 'A' || previous.has(item.kind))) { if(item.trace)item.trace.reason='same-chart'; continue; }
+        const penalty = diversityPenalty(item);
+        const quality = best ? rankQuality(item.quality, best.quality) : -1;
+        if (!best || quality < 0 || quality === 0 && (penalty < bestPenalty || penalty === bestPenalty && (item.quality.magnitude > best.quality.magnitude || item.quality.magnitude === best.quality.magnitude && qualityOrder(item,best) < 0))) { best=item; bestPenalty=penalty; }
+      }
     }
     if(!best)break;
     const exceptions = [(dayCounts.get(best.day) || 0) >= 2 ? 'soft-day-exception' : '', (typeCounts.get(best.kind) || 0) >= 3 ? 'soft-type-exception' : '', charts.has(best.chart) ? 'distinct-achievement-chart-exception' : ''].filter(Boolean);
     chosen.push(best);selected.add(best.node.id);
-    if(best.trace){best.trace.selected=true;best.trace.selectionRank=chosen.length;best.trace.reason=['selected:quality-first',...exceptions].join(';');}
+    if(best.trace){best.trace.selected=true;best.trace.selectionRank=chosen.length;best.trace.reason=['selected:quality-first', ...(preferDiverse && candidates.some(item => !selected.has(item.node.id) && (typeCounts.get(item.kind) || 0) >= 3 && rankQuality(item.quality,best!.quality) < 0) ? ['qualified-type-coverage'] : []), ...exceptions].join(';');}
     if(!charts.has(best.chart))charts.set(best.chart,new Set());charts.get(best.chart)!.add(best.kind);
     dayCounts.set(best.day,(dayCounts.get(best.day)||0)+1);typeCounts.set(best.kind,(typeCounts.get(best.kind)||0)+1);buckets.add(best.bucket);
   }

@@ -27,3 +27,16 @@ test('delta transitions use the preceding delta and merge score gains', () => { 
 test('cumulative crown across an unobserved midnight is not attributed to today', () => { const r=deriveDailyProgress([], [{full:true,timestamp:'2026-09-16 12:00:00',songs:[before]},{full:false,timestamp:'2026-09-17 12:00:00',songs:[{...after,full_combo_cnt:1}]}],day,()=> 'Song'); assert.deepEqual(types(r),['played']); });
 
 test('a recovery below a historical maximum is not a PB', () => { const r=deriveDailyProgress([], [{full:true,timestamp:'',songs:[{...before,high_score:990000}]},{full:false,timestamp:'',songs:[{...before,highscore_datetime:'2026-09-16 19:00:00'}]},{full:false,timestamp:'',songs:[{...after,high_score:950000}]}],day,()=> 'Song'); assert.ok(!types(r).includes('score-pb')); });
+
+
+test('new DF is dated by its complete best-score judgments across a snapshot gap', () => {
+  const previous = {...before,high_score:998670,good_cnt:207,ok_cnt:1,ng_cnt:0,combo_cnt:208,clear_cnt:1,full_combo_cnt:1};
+  const next = {...previous,high_score:1001280,good_cnt:208,ok_cnt:0,dondaful_combo_cnt:1,highscore_datetime:after.highscore_datetime,update_datetime:after.update_datetime};
+  const derive = (row: any) => deriveDailyProgress([], [{full:true,timestamp:'2026-09-16 12:00:00',songs:[previous]},{full:false,timestamp:'2026-09-17 20:00:00',songs:[row]}],day,()=> 'Song');
+  const result = derive(next);
+  assert.equal(result.events[0].facts[0].type,'df');
+  assert.equal(result.events[0].factOccurredAt?.df,'2026-09-17T04:00:00.000Z');
+  for (const changed of [{ok_cnt:1,good_cnt:207},{ok_cnt:undefined},{highscore_datetime:before.highscore_datetime},{dondaful_combo_cnt:0}]) {
+    assert.ok(!types(derive({...next,...changed})).includes('df'));
+  }
+});

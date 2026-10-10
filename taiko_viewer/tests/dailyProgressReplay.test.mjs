@@ -12,7 +12,7 @@ for(const fixture of fixtures)test(`authoritative replay: ${fixture.id}`,async()
  report.push({fixture:fixture.id,inputSnapshots:fixture.snapshots,expected:fixture.expected,actual,result:pass?'PASS':'FAIL'});
  assert.deepEqual(actual,fixture.expected);
  assert.equal(p.calendarDay,'2026-09-17');
- assert.deepEqual(counters,{compute:1,current:1,catalog:1,historyLoads:1,replays:1});
+ assert.deepEqual(counters,{compute:1,current:1,catalog:1,historyLoads:1,replays:1,measurements:1});
  for(const event of p.events)assert.match(event.title,/^Replay Song (Alpha|Beta)$/);
 });
 test.after(async()=>{await mkdir('/var/tmp/growth-closure',{recursive:true});await writeFile('/var/tmp/growth-closure/replay.json',JSON.stringify(report,null,2));});

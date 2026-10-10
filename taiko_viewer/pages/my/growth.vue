@@ -96,10 +96,6 @@ const focusChangeText = computed(() => {
   if (!change?.compatible || !change.focusFrom || !change.focusTo || !(change.focusTo in GROWTH_DIMENSION_LABELS)) return "";
   return t(change.focusFrom === change.focusTo ? "passport.focusContinuing" : "passport.focusChanged", { from: focusLabel(change.focusFrom), focus: focusLabel(change.focusTo) });
 });
-const actualRangeText = computed(() => {
-  const days = passport.value?.segments.reduce((sum, segment) => sum + segment.points.length, 0) || 0;
-  return t("passport.rangeActual", { range: requestedRange.value, days });
-});
 const coverageText = computed(() => passport.value ? t(`passport.coverage.${passport.value.coverage.recentFactsState}`) : "");
 const expandedMilestones = ref(false);
 watch(requestedRange, () => { expandedMilestones.value = false; });
@@ -154,7 +150,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 
       <section class="passport-section passport-trend" aria-labelledby="passport-trend-title" :aria-busy="pending || undefined">
         <div class="passport-section__head">
-          <div><p class="passport-kicker">{{ actualRangeText }}</p><h2 id="passport-trend-title">{{ t("passport.trend.title") }}</h2></div>
+          <h2 id="passport-trend-title">{{ t("passport.trend.title") }}</h2>
         </div>
         <div class="passport-controls">
           <div class="passport-range" role="group" :aria-label="t('passport.rangeLabel')">

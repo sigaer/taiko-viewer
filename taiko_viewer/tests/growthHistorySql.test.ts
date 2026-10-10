@@ -60,6 +60,9 @@ test("real SQL measurement migration, uniqueness, isolation, audit and cleanup",
     assert.equal((await readGrowthMeasurements(db, user, binding, "2026-09-18T16:00:00.000Z", "2026-09-19T16:00:00.000Z")).length, 1);
     assert.equal((await readGrowthMeasurements(db, other, binding, "2026-09-18T16:00:00.000Z", "2026-09-19T16:00:00.000Z")).length, 0);
     assert.deepEqual(await upsertGrowthMeasurement(db, { ...input, userId: other }), { created: false });
+    assert.deepEqual(await upsertGrowthMeasurement(db, { ...input, scoreRevision: "d".repeat(64), capturedAt: "2026-09-19T02:00:00.000Z" }), { created: false }, "past recorded day is frozen even for a later-discovered snapshot");
+    await db.execute("UPDATE web_growth_measurements SET algorithm_version='growth-old' WHERE binding_id=?", [binding]);
+    assert.deepEqual(await upsertGrowthMeasurement(db, input), { created: false }, "algorithm updates do not recalculate the same snapshot");
     await db.execute(`INSERT INTO web_growth_measurements
       (user_id,binding_id,score_revision,measurement_version,algorithm_version,model_revision,rating,dimensions_json,focus,sample_count,availability_state,captured_at)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, [user, binding, input.scoreRevision, 1, "growth-v2", input.modelRevision, 10.28, "{}", "balanced", 30, "ready", "2026-09-19 01:00:00.000"]);

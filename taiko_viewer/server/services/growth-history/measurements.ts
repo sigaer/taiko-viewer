@@ -33,7 +33,12 @@ export async function upsertGrowthMeasurement(db: Pick<Pool, "execute">, input: 
     SELECT ?,b.id,?,?,?,?,?,?,?,?,?,?
       FROM web_taiko_bindings b
       JOIN web_user_accounts u ON u.id=b.user_id
-     WHERE b.id=? AND b.user_id=?`, [
+     WHERE b.id=? AND b.user_id=?
+       AND NOT EXISTS (SELECT 1 FROM web_growth_measurements existing
+         WHERE existing.binding_id=b.id AND (existing.score_revision=? OR (
+           DATE(DATE_ADD(?, INTERVAL 8 HOUR)) < DATE(DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR))
+           AND DATE(DATE_ADD(existing.captured_at, INTERVAL 8 HOUR))=DATE(DATE_ADD(?, INTERVAL 8 HOUR))
+         )))`, [
     input.userId,
     input.scoreRevision,
     GROWTH_MEASUREMENT_VERSION,
@@ -46,7 +51,10 @@ export async function upsertGrowthMeasurement(db: Pick<Pool, "execute">, input: 
     input.playerState.dataSufficiency,
     sqlTime(input.capturedAt),
     input.bindingId,
-    input.userId
+    input.userId,
+    input.scoreRevision,
+    sqlTime(input.capturedAt),
+    sqlTime(input.capturedAt)
   ]);
   return { created: Number(result.affectedRows || 0) === 1 };
 }

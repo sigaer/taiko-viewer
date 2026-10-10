@@ -14,7 +14,7 @@ const baseline=process.argv.includes('--before');
 const extras=process.argv.includes('--extras');
 import { finalBrowserInput } from '../tests/fixtures/passportFinalUx.ts';
 const dev=process.argv.includes('--dev');
-const out='/var/tmp/passport-final-ux-0814', base='http://127.0.0.1:3197';
+const out=process.env.PASSPORT_BROWSER_OUT || '/var/tmp/passport-final-ux-0814', base='http://127.0.0.1:3197';
 const projectArg=process.argv.indexOf('--project');
 const build=projectArg>=0?process.argv[projectArg+1]:new URL('..',import.meta.url).pathname;
 const compose=buildSkillPassport;
@@ -67,9 +67,12 @@ try{
    if(baseline){row.rangeButtons=await root.locator('.passport-range button').count();row.selectedMilestoneDays=fixture(scenario).milestones.map(node=>node.day);}
    else{
     assert.equal(await root.locator('.passport-range button').count(),4);
+    assert.equal(await root.locator('.passport-trend .passport-kicker').count(),0);
     assert.equal(await root.locator('[data-range="90"]').getAttribute('aria-pressed'),'true');
     if(scenario==='ceiling'){
      assert.equal(await root.locator('.passport-milestone').count(),8);
+     const highlights=await root.locator('.passport-milestone-list').innerText();
+     assert.match(highlights,/early-df/);assert.match(highlights,/large-pb/);
 
      const more=root.locator('.passport-more');await more.click();assert.ok(await root.locator('.passport-milestone').count()>8);assert.equal(await more.getAttribute('aria-expanded'),'true');await more.click();
     }
@@ -116,7 +119,7 @@ try{
      if(days>90)assert.match(await root.locator('.passport-milestones').innerText(),layout.locale==='zh'?/近 90 天/:/直近90日/);
      if(days===30&&scenario==='rich')assert.doesNotMatch(await root.locator('.passport-milestone-list').innerText(),/7月|8月/);
      if(scenario==='sparse'){
-      assert.match(await root.locator('.passport-trend .passport-kicker').innerText(),new RegExp(`${days}`));
+      assert.equal(await root.locator('.passport-trend .passport-kicker').count(),0);
       const x=Number(await root.locator('[data-metric="rating"] .passport-chart circle[role="button"]').first().getAttribute('cx'));
       if(days===30)x30=x;if(days===365)x365=x;
      }
