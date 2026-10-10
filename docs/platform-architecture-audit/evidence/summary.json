@@ -1,0 +1,25 @@
+{
+  "files": {
+    "Sakura_bot": 372,
+    "taiko-bot": 68,
+    "Viewer": 740
+  },
+  "functions": {
+    "Sakura_bot": 3049,
+    "taiko-bot": 1168,
+    "Viewer": 2246
+  },
+  "function_methods": {
+    "Python AST": 3728,
+    "JS/TS line-pattern estimate": 2667,
+    "Java declaration pattern": 68
+  },
+  "imports": 5039,
+  "paired_files": 53,
+  "exact_files": 10,
+  "same_ast_functions": 718,
+  "unique_same_function_lines_B": 11365,
+  "parse_errors": [],
+  "viewer_routes": 211,
+  "public_data_files_hashed": 24
+}

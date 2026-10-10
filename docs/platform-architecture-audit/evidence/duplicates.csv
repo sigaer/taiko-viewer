@@ -1,0 +1,54 @@
+path,identical_file,A_lines,B_lines,same_AST_functions,unique_same_function_lines_B,common_functions,changed_functions
+bot.py,False,41,47,0,0,0,
+bot_core.py,True,4,4,0,0,0,
+bot_gateway.py,True,7,7,0,0,0,
+feature_handler/__init__.py,True,34,34,2,4,2,
+feature_handler/bot_group_whitelist.py,False,137,136,7,95,8,should_block_group_event
+feature_handler/feature_handler.py,False,296,295,15,198,19,_get_data_dir; feature_on; feature_on._checker; resolve_feature_group_key
+feature_handler/feature_switch_handler.py,False,90,54,0,0,1,_
+onebot_runtime/__init__.py,True,1,1,0,0,0,
+onebot_runtime/adapter.py,False,149,163,4,122,4,
+onebot_runtime/gateway.py,True,598,598,36,475,36,
+plugins/__init__.py,False,13,11,0,0,0,
+plugins/config.py,True,5,5,0,0,0,
+plugins/taiko.py,False,9294,7707,147,2121,237,_; _build_bind_auto_update_tip; _build_bind_profile_from_hiroba_public_profile; _build_song_title_map; _collect_song_metric_matches; _create_hiroba_progress_reporter; _create_hiroba_progress_reporter.report; _draw_guess_group_session_key; _draw_guess_user_session_key; _execute_hiroba_update; _execute_taiko_update; _extract_uploader_group_name; _extract_uploader_nickname; _fetch_bind_player_profile; _fetch_hiroba_public_profile_via_service_account; _finalize_bind_verification; _finalize_bind_without_verification; _finalize_hiroba_direct_bind; _finish_fuzzy_query_with_fumen; _finish_hiroba_update_success_reply; _finish_image_reply; _finish_song_position_by_id; _finish_song_position_by_name; _finish_text_reply; _finish_with_image_fallback; _format_multi_bind_summary; _get_current_bind_entry; _has_virtual_bind_slot; _infer_bind_source; _load_multi_bind_store; _load_progress_name_set; _migrate_bind_from_legacy_qq; _parse_manual_score_lookup; _parse_playtrend_args; _parse_taikob_dim_arg; _parse_trend_args; _parse_update_command; _query_music_with_mode; _remove_bind_record; _render_song_metric_list_image; _resolve_bound_taiko_id; _resolve_draw_song_selection; _resolve_guess_with_query_music_detail; _resolve_read_bind_target; _resolve_read_bind_target_safe; _resolve_taikob_dim_arg; _resolve_trend_dim; _save_multi_bind_store; _send_fumen_or_hint; _send_text_reply_without_finish; _set_taiko_bind_visibility; _should_handle_what_song; _switch_bind_record; _taiko_bind_usage_message; _upsert_bind_record; bind_confirm_handle; bind_handle; bind_hiroba_handle; bind_qq_handle; const_query_handle; extract_plain_text; find_aliases_by_song_id; handle_cover; hiroba_update_handle; load_song_data; manual_claim_code_handle; manual_claim_handle; manual_create_handle; manual_delete_confirm_handle; manual_detach_handle; manual_rename_handle; manual_score_delete_confirm_handle; manual_score_delete_handle; manual_score_get_handle; manual_score_upsert_handle; my_don_handle; note_count_handle; playtrend_handle; public_score_token_handle; render_ranking_image; show_bind_handle; song_metric_query_handle; song_rank_handle; summary_handle; taikob_handle; taikorec_handle; tcloud_handle; trend_handle; unshow_bind_handle; update_handle
+plugins/utils/__init__.py,False,2075,1782,28,923,37,_build_progress_rows; _load_note_count_map; _load_score_json; _render_dimension_table_image; generate_dim_top_image; render_pass_progress_image_bytes; render_progress_image_bytes; render_progress_image_bytes_by_list; render_star_progress_image_bytes
+plugins/utils/arcade_map.py,False,1134,543,20,236,25,_parse_float_coordinate; format_taiko_city_shop_reply; format_taiko_city_shop_summary; query_taiko_shops_by_city; resolve_city_entry
+plugins/utils/b30_render.py,False,1207,920,17,298,24,_build_best_entry_map; _load_trend_ranges; _pick_top_entries; _render_radar_image; _render_trend_image; compute_b30_update_diff; render_b30_image
+plugins/utils/b30_single.py,False,788,726,23,273,27,_compute_rating_for_entry; _pick_crown_path; render_b30_single_card; render_b30_single_cards_from_user_data
+plugins/utils/const_query.py,False,615,526,15,163,17,query_charts_by_const; render_const_query_image
+plugins/utils/dani_progress.py,False,3775,2115,52,859,64,_build_dojo_runtime; _build_primary_metric; _build_song_runtime; _derive_song_targets; _draw_card; _footer_rows; _footer_value_text; _load_grade_index; _load_grade_payload; _rate_target_list; parse_dani_progress_request; render_dani_progress_image_bytes
+plugins/utils/dojo_score.py,False,169,170,11,125,11,
+plugins/utils/draw_dress.py,False,2582,2094,57,1090,73,_collect_change_sections; _collect_dojo_change_sections; _collect_dojo_change_sections.make_grade_item; _collect_dojo_change_sections.make_song_item; _draw_text; _draw_text_center; _is_current_playable_song; _load_song_display_map; _render_change_column; _render_my_don_base_panel; _text_bbox; _truncate_text; _wrap_text_lines; draw_player_info; render_my_don_image; render_update_changes_image
+plugins/utils/draw_summary.py,False,1045,1039,30,513,33,import_score_calculator; load_userdata; render_taiko_2025_summary
+plugins/utils/drawinfo.py,False,1453,1064,20,460,26,_available_chart_levels; _collect_entries_for_song; _compose_with_side_radar; _pick_crown_path; generate_score_image; get_score_by_id_and_level
+plugins/utils/duplicate_versions.py,False,374,299,14,204,16,alias_entry_for_song_id; group_ids_for_query
+plugins/utils/evaluation_roll.py,False,137,117,5,69,5,
+plugins/utils/hiroba/__init__.py,False,7,3,0,0,0,
+plugins/utils/hiroba/client.py,False,682,584,21,396,27,HirobaClient.__init__; HirobaClient._login_to_bandainamco; HirobaClient.fetch_score_detail; HirobaClient.fetch_score_list; HirobaClient.set_token; _session_proxies
+plugins/utils/hiroba/cooldown.py,False,138,111,0,0,5,_format_cooldown_message; _load_cooldowns; _save_cooldowns; acquire_hiroba_sync_slot; peek_hiroba_sync_cooldown
+plugins/utils/hiroba/credentials.py,False,188,167,9,90,12,_fernet; ensure_hiroba_credentials_table; save_hiroba_credentials
+plugins/utils/hiroba/normalize.py,True,116,116,5,100,5,
+plugins/utils/hiroba/parser.py,False,359,337,8,98,14,_crown_from_src; filter_song_refs_by_levels; merge_song_refs; parse_mypage_achievement; parse_profile; parse_score_list_page
+plugins/utils/hiroba/sync.py,False,523,300,11,140,12,sync_hiroba_userdata
+plugins/utils/merged_bind.py,False,697,502,16,232,20,_merge_payloads; _merge_snapshot_histories; _reconstruct_full_snapshots; materialize_merged_bind_userdata
+plugins/utils/progress_catalog.py,False,288,275,12,152,16,available_star_progress_values; is_song_on_shelf; load_active_song_ids; query_progress_items_by_star
+plugins/utils/progress_star.py,False,81,81,1,5,2,build_star_progress_summary
+plugins/utils/public_score_token.py,False,380,199,4,11,9,_load_local_userdata; _resolve_token_binding; ensure_public_score_token_table; fetch_latest_userdata_by_token; issue_public_score_token_for_taiko_id
+plugins/utils/score_calculator.py,False,2698,2833,42,896,58,_build_song_index_by_identity; _compute_results_from_userdata_records; _get_recommend_identity_key; aggregate_topN_value; build_all_stats_for_user; build_daily_rating_points; build_playcount_rating_points; compute_all_from_userdata; compute_all_from_userdata_records; generate_rating_playcount_image; generate_rating_trend_image; generate_recommend_image; getUtime; get_topN_by_rating; load_user_snapshots; recommend_songs
+plugins/utils/score_line.py,False,711,480,8,99,16,_build_chart_index; _load_scoreline_data; _normalize_title; available_levels_for_song; format_scoreline_message; get_scoreline_entry; parse_scoreline_request; rebuild_scoreline_dataset
+plugins/utils/snapshot_history.py,True,38,38,2,25,2,
+plugins/utils/song_position.py,False,138,134,6,63,8,_is_on_shelf; get_song_position_by_id
+plugins/utils/taiko_db.py,False,29,3,0,0,0,
+plugins/utils/taikob_v2.py,False,591,425,6,23,14,_build_result_from_entry; _calc_single_rating; _calculate_v2_from_chart; _load_userdata_payload; _load_v2_song_map; compute_all_v2_from_userdata_records; render_b20_v2_dim_image; render_b20_v2_image
+plugins/utils/target_recommend.py,False,2084,594,7,70,10,_build_best_entry_map; _build_user_profile; compute_target_recommendations_for_user
+plugins/utils/tcloud.py,False,138,142,4,52,6,_load_user_play_counts; render_tcloud_image
+plugins/utils/twso.py,False,56,63,0,0,2,find_player; update_twso_data
+plugins/utils/userdata_storage.py,False,259,190,4,53,6,_load_locked_song_keys; save_userdata
+scripts/clear_nb_inherited_proxy_env.sh,True,6,6,0,0,0,
+scripts/start_taiko_gateway_core.sh,False,177,191,0,0,0,
+taiko_runtime/__init__.py,True,51,51,0,0,0,
+taiko_runtime/platform_adapter.py,False,643,573,33,330,39,_build_qq_markdown_reply_message; _build_qq_quick_action_keyboard; _send_reply; get_group_key; is_qq_official_group_event; send_text_reply
+taiko_runtime/qq_markdown_media.py,False,143,145,8,91,8,
+taiko_runtime/startup_migration.py,False,271,248,8,211,8,
+taiko_runtime_init.py,False,60,49,0,0,0,

@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-10 Asia/Shanghai",
+  "source_files_rehashed": 1180,
+  "source_changes": [
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/plugins/utils/twso.py"
+    }
+  ],
+  "tracked_paths_classified": 1840,
+  "classification_counts": {
+    "Sakura_bot:Infrastructure": 373,
+    "Sakura_bot:Adapter": 22,
+    "Sakura_bot:Presentation": 194,
+    "Sakura_bot:Domain": 41,
+    "taiko-bot:Infrastructure": 60,
+    "taiko-bot:Adapter": 7,
+    "taiko-bot:Presentation": 8,
+    "taiko-bot:Domain": 12,
+    "Viewer:Infrastructure": 580,
+    "Viewer:Presentation": 306,
+    "Viewer:Adapter": 223,
+    "Viewer:Domain": 14
+  },
+  "baselines_after_fetch": {
+    "Sakura_bot": {
+      "head": "5ac44b36e2e170e84641adf124d77f1e998f4039",
+      "origin_main": "5ac44b36e2e170e84641adf124d77f1e998f4039"
+    },
+    "taiko-bot": {
+      "head": "46c8646847f8d642b53043b6123d8763e26c0a16",
+      "origin_main": "46c8646847f8d642b53043b6123d8763e26c0a16"
+    },
+    "Viewer": {
+      "head": "8d70df213bfcbc4409654313b50951365898985a",
+      "origin_main": "8d70df213bfcbc4409654313b50951365898985a"
+    }
+  },
+  "unknown_classifications": 0,
+  "private_data_read": false,
+  "business_http_calls": false,
+  "database_connections": false,
+  "application_imports": false,
+  "reviewed_stale_evidence": {
+    "path": "taiko/plugins/utils/twso.py",
+    "working_matches_git_head": true,
+    "affects_domain_calculation": false,
+    "action": "current inventory supersedes old source hash; historical evidence retained"
+  }
+}

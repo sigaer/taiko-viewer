@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-10 Asia/Shanghai",
+  "method": "isolated static checks and extracted pure functions on synthetic inputs",
+  "markdown_files": 10,
+  "counts": {
+    "files": 1180,
+    "functions": 6463,
+    "imports": 5039,
+    "duplicates": 53,
+    "identical-functions": 718,
+    "viewer-routes": 211,
+    "runtime-source-comparison": 146,
+    "public-data-copies": 24
+  },
+  "broken_links": [],
+  "source_changes_since_scan": [],
+  "runtime_source_changes_since_scan": [],
+  "synthetic_v2_accuracy": {
+    "rating": 10,
+    "accuracy": 12,
+    "Sakura_bot": 11.098612,
+    "taiko_bot": 10.954451
+  },
+  "application_imports": false,
+  "business_http_calls": false,
+  "database_connections": false
+}
