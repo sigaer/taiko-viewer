@@ -162,3 +162,23 @@ export function loadGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvi
   inFlightEvidence.set(taikoId, pending);
   return pending;
 }
+
+/** Retain evidence only for one Passport request and its initial account.
+ * Consumers must treat snapshots/observations as read-only. A different binding
+ * never receives this account's evidence; rejected loads can be retried.
+ */
+export function createGrowthScoreEvidenceRequest(taikoId: string): typeof loadGrowthScoreEvidence {
+  let pending: Promise<GrowthScoreEvidence> | undefined;
+  return requestedId => {
+    if (requestedId !== taikoId) return loadGrowthScoreEvidence(requestedId);
+    if (!pending) {
+      const attempt = loadGrowthScoreEvidence(requestedId).catch(error => {
+        if (pending === attempt) pending = undefined;
+        throw error;
+      });
+      pending = attempt;
+    }
+    return pending;
+  };
+}
+

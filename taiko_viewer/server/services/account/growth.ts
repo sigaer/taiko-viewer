@@ -31,7 +31,7 @@ const buildDailyProgress = (current: UserdataPayload, catalog: Awaited<ReturnTyp
   return deriveDailyProgress(current.songs || [], history, growthCalendarDay(new Date(), TIMEZONE), song => titles.get(Number(song.song_no)) || song.song_name || `#${song.song_no}`);
 };
 
-export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGrowthOverview> => {
+export const getPlayerGrowthOverview = async (userId: number, options: { loadScoreEvidence?: typeof loadGrowthScoreEvidence } = {}): Promise<PlayerGrowthOverview> => {
   const requestStartedAt = performance.now();
   const authStartedAt = performance.now();
   const binding = await getCurrentBindingRow(userId);
@@ -39,7 +39,7 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   try { await access(getUserdataPath(binding.taiko_id), fsConstants.R_OK); } catch { throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" }); }
   const scoreStartedAt = performance.now();
-  const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), loadGrowthScoreEvidence(binding.taiko_id)]);
+  const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id)]);
   const history = scoreEvidence.snapshots;
   const { current } = snapshot;
   const scoreDurationMs = performance.now() - scoreStartedAt;
@@ -96,3 +96,4 @@ export const getPlayerGrowthOverview = async (userId: number): Promise<PlayerGro
   if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
   return { recentCompletedGoal: activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id)), profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
 };
+

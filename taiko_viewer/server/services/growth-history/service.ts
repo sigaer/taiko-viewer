@@ -24,7 +24,7 @@ const scoreCoverage = (manual: boolean, fromDay: string, evidence: Awaited<Retur
   return baseline && evidence.invalidFiles === 0 ? "complete" : "partial";
 };
 
-export async function getGrowthHistory(userId: number, range: GrowthHistoryRange, options: { includeMeasurements?: boolean } = {}): Promise<GrowthHistoryResponse> {
+export async function getGrowthHistory(userId: number, range: GrowthHistoryRange, options: { includeMeasurements?: boolean; loadScoreEvidence?: typeof loadGrowthScoreEvidence } = {}): Promise<GrowthHistoryResponse> {
   const startedAt = performance.now();
   const binding = await getCurrentBindingRow(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
@@ -34,7 +34,7 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
     : readGrowthMeasurements(db, userId, Number(binding.id), range.fromUtc, range.toExclusiveUtc);
   const goalPromise = loadGoalFacts(db, userId, Number(binding.id), range.fromUtc, range.toExclusiveUtc);
   const manual = binding.source === "manual";
-  const evidencePromise = manual ? Promise.resolve({ snapshots: [], totalFiles: 0, filesRead: 0, invalidFiles: 0, truncated: false, fromDay: null, toDay: null }) : loadGrowthScoreEvidence(binding.taiko_id);
+  const evidencePromise = manual ? Promise.resolve({ snapshots: [], totalFiles: 0, filesRead: 0, invalidFiles: 0, truncated: false, fromDay: null, toDay: null }) : (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id);
   const currentPromise = manual ? Promise.resolve(null) : readGoalSnapshot(binding.taiko_id).catch(() => null);
   const catalogPromise = manual ? Promise.resolve([]) : getSongCatalog();
   const [measurements, goalFacts, evidence, current, catalog] = await Promise.all([measurementPromise, goalPromise, evidencePromise, currentPromise, catalogPromise]);
@@ -71,3 +71,4 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
     coverage
   };
 }
+

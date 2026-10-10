@@ -4,19 +4,25 @@ import { getAccountDb } from "../../utils/account-db.ts";
 import { getCurrentBindingRow, getRuntimePaths } from "../../internal/account/shared.ts";
 import { getPlayerGrowthOverview } from "../account/growth.ts";
 import { getGrowthHistory } from "../growth-history/service.ts";
+import { createGrowthScoreEvidenceRequest, loadGrowthScoreEvidence } from "../growth-history/evidence.ts";
 import { readGrowthMeasurementCoverage, readDailyGrowthMeasurements } from "../growth-history/measurements.ts";
 import { readDailyAbilityArchive, mergeDailyAbilityMeasurements } from "../growth-history/daily-archive.ts";
 import { buildSkillPassport } from "./composer.ts";
 import { passportHistoryRange, resolveSkillPassportRange, type SkillPassportRange } from "./range.ts";
 
-export async function getSkillPassport(userId: number, range: SkillPassportRange) {
+export async function getSkillPassport(userId: number, range: SkillPassportRange, options: { shareScoreEvidence?: boolean } = {}) {
   const startedAt = performance.now();
   const initialBinding = await getCurrentBindingRow(userId);
   if (!initialBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   const profileId = String(initialBinding.id);
+  // Offline opt-in candidate. Keep the live path unchanged until input-generation
+  // consistency during concurrent sync and the regression/performance gates pass.
+  const loadScoreEvidence = options.shareScoreEvidence
+    ? createGrowthScoreEvidenceRequest(initialBinding.taiko_id)
+    : loadGrowthScoreEvidence;
 
   const overviewStartedAt = performance.now();
-  const overview = await getPlayerGrowthOverview(userId).catch(error => {
+  const overview = await getPlayerGrowthOverview(userId, { loadScoreEvidence }).catch(error => {
     console.info("[growth-passport] current Growth unavailable", { error: error instanceof Error ? error.message : String(error) });
     return null;
   });
@@ -37,7 +43,7 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
     return result;
   });
   const historyStartedAt = performance.now();
-  const historyPromise = getGrowthHistory(userId, passportHistoryRange(range), { includeMeasurements: false }).then(result => {
+  const historyPromise = getGrowthHistory(userId, passportHistoryRange(range), { includeMeasurements: false, loadScoreEvidence }).then(result => {
     recentHistoryMs = performance.now() - historyStartedAt;
     return result;
   });
@@ -75,3 +81,4 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   });
   return recap;
 }
+
