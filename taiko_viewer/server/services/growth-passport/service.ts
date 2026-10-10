@@ -15,9 +15,8 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   const initialBinding = await getCurrentBindingRow(userId);
   if (!initialBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   const profileId = String(initialBinding.id);
-  // Offline opt-in candidate. Keep the live path unchanged until input-generation
-  // consistency during concurrent sync and the regression/performance gates pass.
-  const loadScoreEvidence = options.shareScoreEvidence
+  // Request-local reuse revalidates history files before the History read.
+  const loadScoreEvidence = options.shareScoreEvidence !== false
     ? createGrowthScoreEvidenceRequest(initialBinding.taiko_id)
     : loadGrowthScoreEvidence;
 

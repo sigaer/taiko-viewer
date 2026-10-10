@@ -25,8 +25,10 @@ let fixture;
 try {
   fixture = await prepareFixture(mode, out);
   emit("fixture-preparation", "complete", performance.now() - started, { privateData: mode === "real" ? "readonly; aggregate metrics only" : "synthetic" });
-  let fileStart = 0, parsedAt = 0, enumerationStarted = 0, enumerationMs = 0, loadMs = 0, normalizeMs = 0, attempted = 0, observationsSeen = 0;
+  let batchStart = 0, fileStart = 0, parsedAt = 0, enumerationStarted = 0, enumerationMs = 0, loadMs = 0, normalizeMs = 0, attempted = 0, observationsSeen = 0;
   const hooks = {
+    batchStart() { batchStart = performance.now(); },
+    batchDone() { loadMs += performance.now() - batchStart; },
     enumerated(available, selected) {
       metadata.availableFiles = available; metadata.selectedFiles = selected; metadata.truncated = available > selected;
       enumerationMs = performance.now() - enumerationStarted;

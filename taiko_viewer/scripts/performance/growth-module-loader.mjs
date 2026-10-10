@@ -29,7 +29,13 @@ export async function importGrowthModule(relative, { userdataDir, before = false
         source = source.replace(anchor, code);
       };
       replace("const snapshots: GrowthSnapshot[] = [];", "__bench.enumerated(allNames.length, names.length);\n  const snapshots: GrowthSnapshot[] = [];");
-      replace("for (const name of names) {", "for (const name of names) {\n    __bench.fileStart();");
+      const loop = source.includes('for await (const { name, raw } of readHistoryFiles(directory, names)) {')
+        ? 'for await (const { name, raw } of readHistoryFiles(directory, names)) {' : 'for (const name of names) {';
+      replace(loop, `${loop}\n    __bench.fileStart();`);
+      if (source.includes('async function* readHistoryFiles')) {
+        replace('    const batch = await Promise.all', '    __bench.batchStart(); const batch = await Promise.all');
+        replace('    for (const file of batch) yield file;', '    __bench.batchDone(); for (const file of batch) yield file;');
+      }
       replace("const payload = JSON.parse(raw) as UserdataPayload;", "__bench.rawRead(Buffer.byteLength(raw));\n      const payload = JSON.parse(raw) as UserdataPayload;\n      __bench.parsed(payload.songs?.length || 0);");
       replace("const days = snapshots.map", "__bench.loaded(snapshots.length, invalidFiles);\n  const days = snapshots.map");
       replace("  }\n  __bench.loaded", "    finally { __bench.fileDone(snapshots.length, invalidFiles, observations.length, observations.at(-1)?.evidenceLevel); }\n  }\n  __bench.loaded");

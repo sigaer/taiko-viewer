@@ -1,6 +1,7 @@
 import type { GrowthDailyEvent, GrowthDailyProgress, GrowthEventFact } from "../types/player-growth";
 import type { UserdataSong } from "../server/internal/account/shared";
 import { growthCalendarDay } from "./playerGrowth.ts";
+import { memoizeGrowthString } from "./growthRequestMemo.ts";
 
 export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string };
 const num = (v: unknown): number | null => v === null || v === undefined || v === "" ? null : Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : null;
@@ -39,28 +40,39 @@ export function deriveProgressForRange(current: UserdataSong[], history: GrowthS
 
 /** Replays the same canonical transitions as the range API without materializing intervening calendar days. */
 export function deriveProgressForCalendarDays(current: UserdataSong[], history: GrowthSnapshot[], requestedDays: string[], title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
+  const calendarDayFor = memoizeGrowthString(growthCalendarDay);
+  const epochFor = memoizeGrowthString(epoch);
+  const instantFor = memoizeGrowthString(normalizedInstant);
   const calendarDays = [...new Set(requestedDays.filter(Boolean))].sort();
   const requested = new Set(calendarDays);
   const charts = new Map<string, GrowthDailyEvent>();
+  const chartsByDay = new Map<string, GrowthDailyEvent[]>();
   const bestScores = new Map<string, number>();
   let state = new Map<string, UserdataSong>();
   let observed = new Map<string, string>();
   const inRange = (day: string) => requested.has(day);
-  const visit = (after: UserdataSong, before: UserdataSong | undefined, evidence: GrowthDailyEvent['evidence'], observedBefore: string | undefined, snapshot: GrowthSnapshot) => {
-    const scoreDay = growthCalendarDay(after.highscore_datetime);
-    const playDay = growthCalendarDay(after.update_datetime);
-    const candidateDays = [...new Set([scoreDay, playDay].filter(inRange))];
-    if (!candidateDays.length) return;
+  const visit = (after: UserdataSong, before: UserdataSong | undefined, evidence: GrowthDailyEvent['evidence'], observedBefore: string | undefined, snapshot: GrowthSnapshot, songKey: string, snapshotInstant: string) => {
+    const scoreDay = calendarDayFor(after.highscore_datetime);
+    const playDay = calendarDayFor(after.update_datetime);
+    const includeScore = inRange(scoreDay), includePlay = inRange(playDay);
+    if (!includeScore && !includePlay) return;
     const getChart = (day: string) => {
-      const mapKey = `${day}:${key(after)}`;
-      const chart = charts.get(mapKey) || { songId: after.song_no, level: after.level, title: title(after), evidence, occurredAt: String(after.update_datetime || after.highscore_datetime || ''), importance: 0, facts: [], evidenceRevision: snapshot.revision || snapshot.timestamp || undefined, observedAt: normalizedInstant(snapshot.timestamp) || null, factOccurredAt: {} };
+      const mapKey = `${day}:${songKey}`;
+      const existing = charts.get(mapKey);
+      const chart = existing || { songId: after.song_no, level: after.level, title: title(after), evidence, occurredAt: String(after.update_datetime || after.highscore_datetime || ''), importance: 0, facts: [], evidenceRevision: snapshot.revision || snapshot.timestamp || undefined, observedAt: snapshotInstant || null, factOccurredAt: {} };
       chart.evidence = evidence;
       chart.evidenceRevision = snapshot.revision || snapshot.timestamp || chart.evidenceRevision;
-      chart.observedAt = normalizedInstant(snapshot.timestamp) || chart.observedAt;
-      charts.set(mapKey, chart);
+      chart.observedAt = snapshotInstant || chart.observedAt;
+      if (!existing) {
+        charts.set(mapKey, chart);
+        const dayCharts = chartsByDay.get(day);
+        if (dayCharts) dayCharts.push(chart);
+        else chartsByDay.set(day, [chart]);
+      }
       return chart;
     };
-    for (const day of candidateDays) getChart(day);
+    if (includeScore) getChart(scoreDay);
+    if (includePlay && (!includeScore || playDay !== scoreDay)) getChart(playDay);
     const add = (day: string, type: GrowthEventFact['type'], a: number | null, b: number | null, occurredAt: unknown, decreased = false) => {
       if (a === null || b === null || (decreased ? b >= a : b <= a)) return;
       const chart = getChart(day);
@@ -69,15 +81,15 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       else chart.facts.push({ type, before: a, after: b, delta: b - a });
       chart.importance = Math.max(chart.importance, importance[type]);
       chart.evidence = evidence;
-      const instant = normalizedInstant(occurredAt);
+      const instant = instantFor(occurredAt);
       if (instant) chart.factOccurredAt![type] = instant;
     };
     if (before) {
       let bestScoreDf = false;
-      const scoreTime = inRange(scoreDay) && epoch(after.highscore_datetime) > epoch(before.highscore_datetime);
-      const playTime = inRange(playDay) && epoch(after.update_datetime) > epoch(before.update_datetime);
+      const scoreTime = includeScore && after.highscore_datetime !== before.highscore_datetime && epochFor(after.highscore_datetime) > epochFor(before.highscore_datetime);
+      const playTime = includePlay && after.update_datetime !== before.update_datetime && epochFor(after.update_datetime) > epochFor(before.update_datetime);
       if (scoreTime) {
-        add(scoreDay, 'score-pb', num(before.high_score) === null ? null : bestScores.get(key(after)) ?? num(before.high_score), num(after.high_score), after.highscore_datetime);
+        add(scoreDay, 'score-pb', num(before.high_score) === null ? null : bestScores.get(songKey) ?? num(before.high_score), num(after.high_score), after.highscore_datetime);
         const total = judgments(before);
         if (total !== null && total > 0 && total === judgments(after)) {
           add(scoreDay, 'ng-reduced', num(before.ng_cnt), num(after.ng_cnt), after.highscore_datetime, true);
@@ -95,7 +107,7 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
           }
         }
       }
-      if (playTime && (growthCalendarDay(before.update_datetime) === playDay || (growthCalendarDay(observedBefore) === playDay && epoch(observedBefore) < epoch(after.update_datetime)))) {
+      if (playTime && (calendarDayFor(before.update_datetime) === playDay || (calendarDayFor(observedBefore) === playDay && epochFor(observedBefore) < epochFor(after.update_datetime)))) {
         const a = crown(before), b = crown(after);
         if (a !== null && b !== null && b > a && !(b === 2 && bestScoreDf)) add(playDay, b === 2 ? 'df' : b === 1 ? 'fc' : 'clear-upgrade', a, b, after.update_datetime);
         const aRank = num(before.best_score_rank), bRank = num(after.best_score_rank);
@@ -104,30 +116,32 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
     }
   };
   for (const snapshot of history) {
+    const snapshotInstant = instantFor(snapshot.timestamp);
     const next = snapshot.full ? new Map<string, UserdataSong>() : new Map(state);
     const nextObserved = snapshot.full ? new Map<string, string>() : new Map(observed);
     for (const song of snapshot.songs) {
-      const before = state.get(key(song));
+      const songKey = key(song);
+      const before = state.get(songKey);
       // Delta rows are chart records, not field patches: absent evidence stays absent.
-      visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', observed.get(key(song)), snapshot);
+      visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', observed.get(songKey), snapshot, songKey, snapshotInstant);
       const score = num(song.high_score);
-      if (score !== null) bestScores.set(key(song), Math.max(bestScores.get(key(song)) ?? score, score));
-      next.set(key(song), song);
-      nextObserved.set(key(song), snapshot.timestamp);
+      if (score !== null) bestScores.set(songKey, Math.max(bestScores.get(songKey) ?? score, score));
+      next.set(songKey, song);
+      nextObserved.set(songKey, snapshot.timestamp);
     }
     state = next;
     observed = nextObserved;
   }
   // Current data proves attendance only; it is not an additional historical transition.
   const currentSnapshot: GrowthSnapshot = { full: true, timestamp: '', songs: current, revision: currentRevision };
-  for (const song of current) visit(song, undefined, 'full-snapshot', undefined, currentSnapshot);
+  for (const song of current) visit(song, undefined, 'full-snapshot', undefined, currentSnapshot, key(song), '');
   const dataMode = history.some(s => s.full) ? 'FULL_HISTORY' : current.length || history.length ? 'SNAPSHOT_LIMITED' : 'INSUFFICIENT';
   const known = current.some(s => s.update_datetime || s.highscore_datetime) || history.some(s => s.songs.some(row => row.update_datetime || row.highscore_datetime));
   return calendarDays.map(calendarDay => {
-    const events = [...charts.entries()].filter(([mapKey]) => mapKey.startsWith(`${calendarDay}:`)).map(([, chart]) => {
+    const events = (chartsByDay.get(calendarDay) || []).map(chart => {
       if (!chart.facts.length) {
         chart.facts.push({ type: 'played', before: null, after: null, delta: null });
-        const instant = normalizedInstant(chart.occurredAt);
+        const instant = instantFor(chart.occurredAt);
         if (instant) chart.factOccurredAt!.played = instant;
       }
       chart.facts.sort((a, b) => importance[b.type] - importance[a.type] || a.type.localeCompare(b.type));
