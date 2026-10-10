@@ -39,3 +39,11 @@
 续行准备：`scripts/verify_taiko_domain_release.mjs` 已经由 memory runner 对当前 0.81.10 验证，8 项 public SSR / anonymous GET 通过。只访问 `/more`、`/titles` 与 5 个未登录私有 GET；没有 Cookie、账号创建、DB client 或个人文件读取。Growth 四接口核验既有 private/no-store + Vary Cookie；Songs 核验全局 no-store 与 401，其旧接口没有 Vary 承诺，首次检查器过度要求的 Vary 已按基线契约修正，未修改运行接口来迁就测试。
 
 此为检查器基线，**不能**作为 0.81.11 已发布或真实 authenticated score correctness 的证据。后者由真实合成文件服务回归另证；发布成功后必须用期望版本 0.81.11 再跑检查器，并独立记录服务 PID/HEAD。 [准备证据](evidence/phase5-smoke-preparation.json) 保存脚本 hash 和各 HTTP 结果。部署仍暂缓，Gate 5 未 PASS。
+
+## Goal blocked audit
+
+同一内存准入条件已连续出现在三个 Goal turn：首次发布尝试、补齐只读在线检查的续行、当前再次复核。前两轮完成实现/检查器准备；当前准入仍失败（约 11.81 GiB 可用，要求 12.65 GiB），PSI=0、无 Annual/QA/build 活动 unit，线上 PIDs 不变。`git ls-remote` 复核远端 main 仍 `060dc05`。不存在已启动而可等待的部署 job。
+
+Phase 5 必要独立准备已完成，下一步是被现行 memory guard 拒绝的实际发布；Gate 5 未 PASS 禁止开始 Phase 6。无需新增权限选择，但需要外部资源状态变化/维护窗口，故 Goal 标记 `blocked`，不标完成、不降阈值、不终止其他常驻服务、不手动 push 或部署。 [三轮阻碍审计](evidence/phase5-blocked-audit.json) 已记录。
+
+恢复后先重新核对 worktree/remote/memory；使用当前 HEAD subject 调用 `bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh "$(git log -1 --pretty=%s)"`。成功后用 `scripts/verify_taiko_domain_release.mjs 0.81.11` 验线上版本/匿名授权边界，核对旧 PID 退出/新 PID 和相关运行服务，再保存 Gate 5 证据与进入 Phase 6。此前离线 PASS 不替代这些未完成步骤。

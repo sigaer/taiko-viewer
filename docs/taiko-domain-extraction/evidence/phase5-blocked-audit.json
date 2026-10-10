@@ -1,0 +1,47 @@
+{
+  "goal_status_decision": "BLOCKED",
+  "phase": 5,
+  "step": "5.4",
+  "same_condition_consecutive_goal_turns": 3,
+  "condition": "Memory admission: MemAvailable < 25% MemTotal + 5 GiB",
+  "date": "2026-10-11T02:56:58.727116+08:00",
+  "memory": {
+    "total_kib": 32095592,
+    "available_kib": 12578832,
+    "required_kib": 13266778.0,
+    "available_gib": 11.996,
+    "required_gib": 12.652,
+    "psi": "some avg10=0.00 avg60=0.00 avg300=0.00 total=34768281970\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=27486677670"
+  },
+  "candidate_head": "fbf4087b0afa06a866147ca97a944d0a9a34783d",
+  "live_remote_head": "060dc05f42bc4d6ea87ed16a41621f3ca182e0cf",
+  "remote_verified": "git ls-remote origin refs/heads/main",
+  "runtime": {
+    "viewer_pid": 646789,
+    "receiver_pid": 829176,
+    "deployed_version": "0.81.10"
+  },
+  "turn_audit": [
+    {
+      "turn": 1,
+      "result": "Phase 5 implementation/archive completed; release wrapper rejected headroom",
+      "evidence": "phase5-publication-attempt.json"
+    },
+    {
+      "turn": 2,
+      "result": "Same resource condition; prepared and validated online read-only verifier",
+      "evidence": "phase5-smoke-preparation.json"
+    },
+    {
+      "turn": 3,
+      "result": "Fresh memory/PSI/active unit/remote/worktree inspection; same blocker; no required independent Phase 5 work remains before publication"
+    }
+  ],
+  "remaining": [
+    "standard wrapper admission",
+    "push/build/deploy Phase 5",
+    "0.81.11 production smoke and Gate 5",
+    "Phase 6 ownership/P1a/read model/database/publication/recovery"
+  ],
+  "next_action": "Once external headroom is available, resume goal; recheck latest state, invoke standard run_build.sh + deploy_forum_web.sh with HEAD subject, then production verifier. Never bypass limits or enter Phase 6 before Gate 5 PASS."
+}
