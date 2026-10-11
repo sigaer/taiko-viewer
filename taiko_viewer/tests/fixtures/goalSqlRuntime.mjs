@@ -9,13 +9,17 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
  const overrides=new Map([
-  [new URL('server/utils/account-db.ts',root).href,`export const getAccountDb=()=>globalThis.__goalSqlRuntime.db; export const ensureAccountSchema=async()=>{};`],
+  [new URL('server/utils/account-db.ts',root).href,`export const getAccountDb=()=>globalThis.__goalSqlRuntime.db; export const getAccountDbNativeConfig=()=>({host:process.env.TAIKO_DB_HOST,port:Number(process.env.TAIKO_DB_PORT||3306),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME}); export const ensureAccountSchema=async()=>{};`],
   [new URL('server/utils/account.ts',root).href,`export * from '${new URL('server/utils/account/auth.ts',root).href}';export * from '${new URL('server/utils/account/bindings.ts',root).href}';${withProfile || withAccountSource ? `export * from '${new URL('server/utils/account/profile.ts',root).href}';` : ''}${withAccountSource ? `export * from '${new URL('server/utils/account/sync.ts',root).href}';export * from '${new URL('server/utils/account/score-token.ts',root).href}';` : ''}`],
   [new URL('server/services/content.ts',root).href,`export const getSongCatalog=async()=>[100,101,102].map(id=>({id,song_name:'SQL Song '+id,level_4:9,shelf_status:0}));export const getRatingEntries=async()=>[];`],
   [new URL('server/services/account/personal.ts',root).href,`export const runGrowthPythonJson=async()=>{globalThis.__goalSqlRuntime.pythonCalls++;await globalThis.__goalSqlRuntime.onPython?.();return ({playerState:{dimensions:['accuracy_power','stamina','rhythm','speed','complex','big_song'].map(key=>({key,value:key==='accuracy_power'?9:10})),sampleCount:30,overallRating:10},todayPlan:{items:[100,101,102].map(songId=>({songId,level:4,title:'SQL Song '+songId,isUnplayed:false})),usedFallback:false}});};`],
   [new URL('server/services/growth-history/model-revision.ts',root).href,`export const getGrowthModelRevision=async()=> 'synthetic-domain-source';`],
   [new URL('server/services/annual-beta/events.ts',root).href,`export const trackBetaServer=async()=>{};`]
  ]);
+ if (withAccountSource) overrides.set(new URL('server/infrastructure/account/sync-worker.ts',root).href,`
+  import {createAccountSyncWorkerRunner} from '${new URL('server/infrastructure/account/sync-worker-runner.ts',root).href}';
+  export const runAccountSyncWorker=(request,db)=>createAccountSyncWorkerRunner(globalThis.__goalSqlRuntime.syncLaunch)(request,db);
+ `);
  if (withPersonal) {
   overrides.delete(new URL('server/services/account/personal.ts',root).href);
   if (!withRealPython) overrides.set(new URL('server/services/account/python-compute.ts',root).href,`

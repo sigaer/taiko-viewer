@@ -5,7 +5,6 @@ import {
   getSyncCooldownState,
   insertSyncLog,
   loadSyncTargets,
-  requestSyncDispatch,
   toPublicSyncLog,
   toPublicSyncTargets
 } from "~/server/internal/account/sync";
@@ -22,6 +21,7 @@ import {
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
 import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
 import { requireAccountUser } from "./auth";
+import { captureAccountSyncOwner, dispatchOwnedAccountSync } from "../../services/account/sync-authority.ts";
 import { withViewerCurrentSource } from "../../services/account/current-source.ts";
 import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
@@ -57,32 +57,13 @@ export const getAccountSyncOverview = async (event: H3Event) => {
 
 export const submitAccountSync = async (event: H3Event, payload: Record<string, unknown>) => {
   const user = await requireAccountUser(event);
-  const currentBinding = await getCurrentBindingRow(user.id);
-  if (!currentBinding) {
-    throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID 后再同步" });
-  }
-  if (currentBinding.source === "manual") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "手动账号不关联外部平台，手录内容已经保存在中心，无需拉取同步"
-    });
-  }
+  const userId = user.id;
+  const { db, binding: currentBinding } = await captureAccountSyncOwner(userId);
   const wahlapCookie = await loadWahlapCookie().catch(() => "");
   if (!String(wahlapCookie || "").trim()) {
     throw createError({
       statusCode: 503,
       statusMessage: "服务端暂未配置鼓众广场访问凭据，暂时无法拉取成绩，请联系管理员"
-    });
-  }
-  const cooldown = await getSyncCooldownState(user.id);
-  if (cooldown.remainingSeconds > 0) {
-    throw createError({
-      statusCode: 429,
-      statusMessage: `同步冷却中，请在 ${cooldown.remainingSeconds} 秒后重试`,
-      data: {
-        remainingSeconds: cooldown.remainingSeconds,
-        availableAt: cooldown.availableAt
-      }
     });
   }
   const requestedIds = Array.from(
@@ -102,19 +83,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
     throw createError({ statusCode: 400, statusMessage: "存在无效的同步目标，请刷新页面后重试" });
   }
 
-  const taikoId = currentBinding.taiko_id;
-  const dispatchPayload = await requestSyncDispatch(taikoId, requestedIds);
-  const results = dispatchPayload.results;
-  const status = results.every((item) => item.ok) ? "success" : results.some((item) => item.ok) ? "partial" : "failed";
-  const logRow = await insertSyncLog({
-    userId: user.id,
-    taikoId: currentBinding.taiko_id,
-    status,
-    targetIds: requestedIds,
-    results,
-    originalBytes: dispatchPayload.originalBytes,
-    compressedBytes: dispatchPayload.compressedBytes
-  });
+  const logRow = await dispatchOwnedAccountSync(userId, db, currentBinding, requestedIds, payload.requestId);
   return {
     ok: true,
     currentBinding: sanitizeBinding(currentBinding),

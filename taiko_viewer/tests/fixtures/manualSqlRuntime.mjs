@@ -10,6 +10,7 @@ import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from '../../server/infrastructure/taik
 import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/creation-schema.ts';
 import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-confirmation-schema.ts';
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
+import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
@@ -19,7 +20,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
-  SCORE_TOKEN_TABLE_SQL,
+  SCORE_TOKEN_TABLE_SQL, ACCOUNT_SYNC_RECEIPT_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_data_sync_logs (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
     taiko_id VARCHAR(25) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'success',
@@ -154,7 +155,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     }
     if (user) {
       await pool.execute('DELETE t FROM web_taiko_binding_mydon_showcase_titles t JOIN web_taiko_bindings b ON b.id=t.binding_id WHERE b.user_id=?', [user]);
-      for (const table of ['web_data_sync_logs', 'web_taiko_binding_confirmations', 'web_taiko_binding_verifications', 'web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
+      for (const table of ['web_data_sync_receipts', 'web_data_sync_logs', 'web_taiko_binding_confirmations', 'web_taiko_binding_verifications', 'web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
         const [tables] = await pool.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?', [table]);
         if (tables.length) await pool.execute(`DELETE FROM ${table} WHERE user_id=?`, [user]);
       }

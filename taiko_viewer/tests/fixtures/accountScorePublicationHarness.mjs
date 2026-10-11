@@ -49,7 +49,7 @@ export async function accountPublicationFixture(task) {
         b.onResolve({ filter: /account-db$/ }, () => ({ path: 'db', namespace: 'synthetic' }));
         b.onResolve({ filter: /services\/content$/ }, () => ({ path: 'catalog', namespace: 'synthetic' }));
         b.onLoad({ filter: /.*/, namespace: 'synthetic' }, args => ({ contents: args.path === 'db'
-          ? `export const ensureAccountSchema=async()=>{};export const getAccountDb=()=>globalThis.${key}.db;`
+          ? `export const getAccountDbNativeConfig=()=>{throw new Error("Native sync unavailable in offline fixture");};export const ensureAccountSchema=async()=>{};export const getAccountDb=()=>globalThis.${key}.db;`
           : `export const getSongCatalog=async()=>globalThis.${key}.catalog;export const getRatingEntries=async()=>[1,2,3].map(id=>({id,level:4,combo:1000}));` }));
         b.onResolve({ filter: /^~\// }, args => ({ path: resolve(viewer, args.path.slice(2)) + '.ts' }));
         b.onResolve({ filter: /^[^./~]/ }, args => args.path.startsWith('node:') ? undefined : { path: import.meta.resolve(args.path), external: true });

@@ -5,10 +5,12 @@ import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/c
 import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-confirmation-schema";
 import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
 import { SCORE_TOKEN_TABLE_SQL } from "../infrastructure/account/score-token";
+import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from "../infrastructure/account/sync-request";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
 let pool: Pool | null = null;
 let schemaReady: Promise<void> | null = null;
+const nativeConfigs = new WeakMap<Pool, Readonly<ReturnType<typeof getDbConfig>>>();
 
 const getDbConfig = () => {
   const runtimeConfig = useRuntimeConfig();
@@ -47,8 +49,17 @@ export const getAccountDb = () => {
       namedPlaceholders: true,
       charset: "utf8mb4"
     });
+    nativeConfigs.set(pool, Object.freeze({ ...config }));
   }
   return pool;
+};
+
+/** Private worker composition uses the captured pool's credentials. Never
+ * re-read globals or expose this configuration in an API response. */
+export const getAccountDbNativeConfig = (captured: Pool) => {
+  const config = nativeConfigs.get(captured);
+  if (!config) throw new Error("Account database is unavailable");
+  return config;
 };
 
 export const closeAccountDb = async () => {
@@ -60,6 +71,7 @@ export const closeAccountDb = async () => {
 
 const CREATE_TABLES = [
   SCORE_TOKEN_TABLE_SQL,
+  ACCOUNT_SYNC_RECEIPT_TABLE_SQL,
   SOURCE_LIFECYCLE_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
   MANUAL_CREATION_TABLE_SQL,

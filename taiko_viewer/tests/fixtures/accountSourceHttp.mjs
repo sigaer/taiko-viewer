@@ -63,7 +63,7 @@ export async function accountSourceFixture(task,{manual=false}={}){
    };
    const router=createRouter();
    c.route=(method,path,handler)=>router[method](path,defineEventHandler(handler));
-   for(const [method,path,file] of [['post','/login','auth/login.post.ts'],['post','/logout','auth/logout.post.ts'],['get','/profile','profile.get.ts'],['get','/bindings','bindings.get.ts'],['get','/sync','sync/targets.get.ts'],['post','/token','score-token.post.ts'],['post','/current','bindings/current.post.ts'],['post','/remove','bindings/remove.post.ts']])router[method](path,(await import(new URL('../../server/api/account/'+file,import.meta.url).href)).default);
+   for(const [method,path,file] of [['post','/login','auth/login.post.ts'],['post','/logout','auth/logout.post.ts'],['get','/profile','profile.get.ts'],['get','/bindings','bindings.get.ts'],['get','/sync','sync/targets.get.ts'],['post','/sync-submit','sync.post.ts'],['post','/token','score-token.post.ts'],['post','/current','bindings/current.post.ts'],['post','/remove','bindings/remove.post.ts']])router[method](path,(await import(new URL('../../server/api/account/'+file,import.meta.url).href)).default);
    api=createServer(toNodeListener(createApp().use(router)));api.listen(0,'127.0.0.1');await once(api,'listening');
    const apiBase=`http://127.0.0.1:${api.address().port}`;
    c.request=(method,path,body,cookie=c.cookie)=>nativeFetch(apiBase+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie||''},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
