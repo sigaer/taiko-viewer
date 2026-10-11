@@ -75,7 +75,11 @@ const TEST_MANUAL_TABLES = [
     slot_index INT NOT NULL DEFAULT 1, is_current TINYINT(1) NOT NULL DEFAULT 1,
     source VARCHAR(16) NOT NULL DEFAULT 'wahlap', created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_bind_identity_slot (qq,slot_index), UNIQUE KEY uniq_bind_identity_taiko (qq,id)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS taiko_bind_identity_state (
+    identity_key VARCHAR(191) NOT NULL PRIMARY KEY, current_virtual TINYINT(1) NOT NULL DEFAULT 0,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
 ];
 
 export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false } = {}) {
