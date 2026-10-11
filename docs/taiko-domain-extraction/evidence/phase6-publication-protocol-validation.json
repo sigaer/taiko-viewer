@@ -1,0 +1,78 @@
+{
+  "phase": 6,
+  "step": "6.2-isolated-publication",
+  "status": "ISOLATED_PROTOCOL_PASS",
+  "date": "2026-10-11T08:55:34.957490+08:00",
+  "sakura_head": "85c4251ffbe9e9166b0b3a794d05f30dcf9bd8a3",
+  "sakura_version": "9.81.0",
+  "test_count": 19,
+  "test_pass": true,
+  "test_log": "/var/tmp/taiko-domain-extraction/phase6-publication-tests-final.log",
+  "test_log_sha256": "b9521e4b087ce5250aaa294e2d2b1af121cd338d4cecd3693aeb05b2b7d295f1",
+  "resources": {
+    "tests": 19,
+    "pass": true,
+    "self_maxrss_kib": 25516,
+    "largest_child_maxrss_kib": 25504,
+    "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791680035-1073892.service",
+    "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "memory_current_bytes": 25337856,
+    "tree_peak": "not measured"
+  },
+  "source_files": [
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/__init__.py",
+      "sha256": "879eed5405e22be6f2fac878df47597f37aaf281bc71628e74647fa2b890bdda"
+    },
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/publication.py",
+      "sha256": "c011e2e44b31208e21926a6d5bc0aae99267db61cdd5f6170bc2f92f2222ebf4"
+    },
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/bridge.py",
+      "sha256": "424cafbc8926262a1bdb4d7c12a1baeb99ee5e54b8877c676ec6626aae993b15"
+    },
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/README.md",
+      "sha256": "ab9989a2dcced454d4cd8d81107f0ca0ecbb9652f0d564323f713743e3bf8481"
+    },
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/tests/test_publication_store.py",
+      "sha256": "353d76d19923111611a161e67534a5ebef7c2208580e643b067bea107c2aa5c2"
+    },
+    {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/docs/domain-extraction-phase6-publication.md",
+      "sha256": "f2dadb06d0ba3140cf5567c5aab1fb46b43aaf4eeb92e851d310b86dffcc51dd"
+    }
+  ],
+  "coverage": [
+    "two real RMW processes with barrier",
+    "five real process deaths across publication checkpoints",
+    "staging/projection ENOSPC rollback",
+    "immutable prior view",
+    "replace history batch preserves daily archive",
+    "immediate transaction retry idempotence",
+    "same-second distinct history identities",
+    "object and pointer corruption / FIFO rejection",
+    "identity/path/symlink and object size guard",
+    "concurrent readers and exclusive collection fence",
+    "collection ownership and current/previous retention",
+    "real local pipe batch / EOF release / read-only mutation refusal",
+    "synthetic canonical backup restore and interrupted recovery"
+  ],
+  "failed_harness_attempts": [
+    "/usr/bin/time absent: exit 127",
+    "stdin main incompatible with multiprocessing spawn; replaced by disk runner guarded by __main__"
+  ],
+  "post_test_cosmetic_changes": [
+    "module docstring clarifies score timestamps",
+    "remove extra blank line at EOF"
+  ],
+  "production_writers_migrated": false,
+  "runtime_synced": false,
+  "private_userdata_read": false,
+  "db_connected": false,
+  "physical_power_loss_tested": false,
+  "full_size_cost_gate": "NOT_RUN",
+  "phase6_gate": "IN_PROGRESS"
+}
