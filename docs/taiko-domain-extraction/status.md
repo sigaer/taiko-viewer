@@ -12,7 +12,7 @@ Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS�
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
 | 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
-| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–3 已留档；独立备份恢复/手动 owner 与补偿 fence 验证 PASS（40 Python、120 offline + 15 SQL）；待永久删除/outbox、其余 Writer/grant、Read Model、全量资源/恢复与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
+| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–4 已留档；永久删除单 SQL 事务/回执/worker/真实进程死亡恢复 PASS（43 Python、127 offline + 27 SQL）；待联动恢复、其余 Writer/grant、Read Model、全量资源与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -68,3 +68,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.3d.2：A `69c4cac` / 9.81.2 已 push；独立 inode 的 verified C/H/daily 备份、五个 backup 与三个恢复真实死亡点、无旧对象库 portable restore、旧备份不能删除新代。40 Python + 43 Node、TS PASS，约 247.5 MiB sampled/OOM=0。Viewer 本地步骤，未同步/部署；SQL 生命周期/outbox 尚待接入，Gate 6 IN_PROGRESS。
 
 - 2026-10-11 / 6.3d.3：Manual 成绩读写在 Source EX/SH 内重查 owner，visibility/claim/detach 同 fence；rename SQL rollback/lost ack 保留正确 nickname。提交前补偿保留原 ALS/EX，rollback proof 与补偿在同一重新取得的 EX 内。120 offline + 15 actual `_test` SQL、TS PASS，约 276.07 MiB sampled/OOM=0；日数据仅 generation timestamp 刷新，关系/索引未变。Viewer 本地提交，继续永久删除/receipt/worker，Gate 6 IN_PROGRESS。
+
+- 2026-10-11 / 6.3d.4：A `8e3a48a` / 9.81.3；manual 永久删除一次 SQL transaction + 私有 backup/receipt、canonical/daily forward cleanup、bounded worker；43 Python + 127 offline + 27 actual `_test` SQL、两组局部 TS PASS，真实进程 commit 前/后/source 发布后退出与重试通过。约 316.875 MiB sampled/OOM=0；回滚失败销毁连接。未同步/部署，继续联动恢复、全 Writer/grant 和 Read Model；Gate 6 IN_PROGRESS。

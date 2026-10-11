@@ -9,6 +9,7 @@ type SourceScope = {
   root: string; repoRoot: string;
   identity: string; lease: PublicationLease; reader: ScoreReadPort; mode: "read" | "write";
   staged: Map<string, PublicationReference | null>; rollback: Array<() => Promise<void>>;
+  replaceHistory: boolean;
   active: boolean;
 };
 const scopes = new AsyncLocalStorage<SourceScope>();
@@ -33,6 +34,17 @@ export async function createScoreBackup(identity: string, backupKey: string) {
   }
   return receipt;
 }
+export async function purgeScoreBackupArchives(identity: string, backupKey: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write") throw new PublicationUnavailableError();
+  await scope.lease.purgeBackupArchives(backupKey);
+}
+export async function clearScoreSource(identity: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write" || scope.staged.size) throw new PublicationUnavailableError();
+  await removeScoreProjection(identity, "current");
+  scope.replaceHistory = true;
+}
 
 async function runScope<T>(options: SourceOptions, mode: "read" | "write", task: () => Promise<T>): Promise<T> {
   const current = currentScoreScope(options.identity);
@@ -55,14 +67,14 @@ async function runScope<T>(options: SourceOptions, mode: "read" | "write", task:
     return await withPublicationLease({ ...options, mode }, async lease => {
       baseSequence = lease.view?.sequence || 0;
       const staged = new Map<string, PublicationReference | null>();
-      scope = { root: options.root, repoRoot: options.repoRoot, identity: options.identity, lease, staged, rollback: [], mode, active: true, reader: undefined as unknown as ScoreReadPort };
-      scope.reader = createPublicationScoreReader({ ...options, assertActive: () => assertScope(scope!), staged, view: () => lease.view });
+      scope = { root: options.root, repoRoot: options.repoRoot, identity: options.identity, lease, staged, rollback: [], replaceHistory: false, mode, active: true, reader: undefined as unknown as ScoreReadPort };
+      scope.reader = createPublicationScoreReader({ ...options, assertActive: () => assertScope(scope!), staged, view: () => lease.view, historyReplaced: () => scope!.replaceHistory });
       try {
         result = await scopes.run(scope, task);
         assertScope(scope);
         prepared = true;
         if (mode === "write" && staged.size) {
-          await lease.publish({ transactionId });
+          await lease.publish({ transactionId, replaceHistory: scope.replaceHistory });
           confirmed = true;
         }
         return result;

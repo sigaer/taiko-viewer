@@ -121,3 +121,18 @@ Manual rename/upsert/delete/get score 在 Source EX/SH 内重新查询 owner。V
 日更新 `title_song_relations.json` JSON/全部 business fields 已验证；866 rows、685 relations、442 songs、525 titles，relations/by_song/by_title 与原版全相同，仅 generated_at 更新，纳入本步骤 release 范围。Viewer/sync receiver 仍 active/PID 1063394/1063408，未同步/部署。
 
 这是 MANUAL_OWNER_RECHECK_PASS，不是完整 grant/lifecycle PASS：永久删除仍待单 SQL 事务 + durable receipt/outbox + canonical/daily cleanup + bounded recovery worker；create/claim/detach 的 SQL failure recovery、通用解绑/注销与其他非 Source 锁入口还需统一复核。下一步先完成真实永久删除，再推进 dispatcher/u0、全资源 grant 与 Read Model；Gate 6 IN_PROGRESS。
+
+
+## 6.3d.4 永久删除的一次 SQL 事务、持久回执与恢复 worker
+
+Manual 永久删除在 source EX 内先核验 owner、创建独立 verified C/H/daily 备份，再以一条 SQL transaction 锁定全部 Viewer owner/binding、bot binding 和 source account，保存有界私有 SQL backup 与 pending lifecycle receipt，清理 source 的 identity/Goal/measurement/cursor/showcase/song lock/claim 并重排 remaining binding/slot。失败整体 rollback；rollback 本身失败会销毁连接，不把 uncertain transaction 放回 pool。COMMIT 回执丢失仅凭 matching durable receipt 判断已生效。SQL backup 按 object keys canonical JSON + SHA 保存，兼容 MySQL JSON key 重排，数组/raw strings/timestamps 保留；8 MiB/10,000 rows/128 owners 上限在撤销前核验。
+
+授权撤销后清除 canonical C/H，verified daily purge 再逐 namespace unlink/fsync，形成新 empty publication。旧 backup source、不同活动 generation 或变更后的 daily 均拒绝覆盖/删除。原 actor 可在 binding 已删除后用既存 operation 重试；其他 actor 403。成功 API 返回 opaque backup/operation UUID，不泄露磁盘路径或 SQL recovery payload。永久 manual id 不重用。新 Infrastructure lifecycle table/outbox 不成为 score authority。
+
+启动/60 秒 tick 的 bounded worker 每次只恢复一个 pending source，single flight，close 取消后等待 owned work；failed item 更新 attempt 时间以避免队列饿死。它只向前完成已撤销 grant 的 cleanup，不重新授权；日志只含固定通用提示。Source→SQL 锁顺序贯穿 cleanup，不持 SQL lock 等待 source。Source clear 使用一个 replace-history staged RPC，不为 50,000 个 H 各开请求；读本请求立即观察 empty C/H。
+
+最终 43 Python + 127 offline Node + 27 real `_test` SQL（新增 12 manual deletion）、domainRead/publicationLifecycle 两组局部 TypeScript 全 PASS。覆盖一次 SQL commit、多 legacy owner、晚发生 SQL failure、失败 rollback 销毁连接、丢失 COMMIT 回执、source failure 后 fresh forward recovery、两个独立 delete 并发、不同 source/daily 拒绝、坏 receipt 不触碰文件和真实 Node 进程在 SQL commit 前/后/source publication 后退出；actual TCP 断开前态 rollback/后态 receipt 向前恢复均证明。SQL checksum 经实际 MySQL JSON round-trip 验证。现有 frozen manual/Goal/acquisition/publication 回归保持。[证据](evidence/phase6-manual-lifecycle-validation.json)。
+
+QA 84.824 秒，250 ms sampled cgroup peak 332,267,520 bytes（约 316.875 MiB），high/max/OOM=0，owned systemd unit success/exit 0。真实 SELECT DATABASE() 为 `taiko_annual_poster_test`，显式 opt-in=1，only owned synthetic rows/finally cleanup；fixture 不含 production FK，**不是生产 migration/FK enforcement PASS**，不重开 B-0/DB Isolation。未读取生产私有数据/DB，禁止网络，无新 listener。初始 Goal fixture 缺 source_mode、JSON key 顺序与 TS args 类型问题均修正后完成最终全部验证。
+
+A `8e3a48a` / 9.81.3 完成标准 commit/push；仅 A Infrastructure，未同步 R/未影响现有 NoneBot，因此此步不重启。Viewer 0.82.0 本地步骤留档，等待完整 Phase 6 标准发布 push/deploy；线上仍 0.81.11。这是 MANUAL_DELETE_RECOVERY_PASS，不是完整恢复或 Phase 6 PASS。下一步继续 SQL/source/daily 联动恢复，manual create/claim/detach SQL failure atomicity、通用解绑/注销/grant、dispatcher/u0/daily 的全部 Writer/reader convergence、Read Model/百万记录与最终统一激活发布。

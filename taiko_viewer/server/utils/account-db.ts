@@ -1,4 +1,5 @@
 import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/services/annual-beta/schema";
+import { SOURCE_LIFECYCLE_TABLE_SQL } from "../infrastructure/taiko-publication/lifecycle-schema";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
 let pool: Pool | null = null;
@@ -53,6 +54,7 @@ export const closeAccountDb = async () => {
 };
 
 const CREATE_TABLES = [
+  SOURCE_LIFECYCLE_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_user_accounts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(64) NOT NULL,

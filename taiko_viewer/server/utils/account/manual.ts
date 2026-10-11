@@ -1,14 +1,13 @@
 import { deleteBindingsWithGoals } from "../../services/goals/lifecycle";
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
-import { mkdir, rename } from "node:fs/promises";
-import { join } from "node:path";
 import type { H3Event } from "h3";
 import { createError, getHeader } from "h3";
 import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
+import { getManualAccount, compactManualBotSlots, assertManualOwner as assertOwner, normalizeManualIdentityKey as normalizeIdentityKey, type ManualOwner } from "../../internal/account/manual-ownership";
+import { permanentlyDeleteManualSource } from "../../services/account/manual-lifecycle";
 import { onScoreRollback, withDomainScoreRead } from "../../services/taiko-domain/publication";
 import {
   formatLocalTimestamp,
-  getRuntimePaths,
   readUserdata,
   rebuildUserdataAchievement,
   type EditableSongFields,
@@ -18,14 +17,6 @@ import {
   writeUserdataWithHistory
 } from "~/server/internal/account/shared";
 
-type ManualAccountRow = {
-  taiko_id: string;
-  nickname: string;
-  bot_identity_key: string | null;
-  created_by: "viewer" | "bot";
-};
-
-type ManualOwner = { kind: "viewer"; userId: number } | { kind: "bot"; identityKey: string };
 type ManualScoreInput = {
   songNo?: unknown;
   level?: unknown;
@@ -59,14 +50,6 @@ const normalizeNickname = (value: unknown) => {
   return nickname;
 };
 
-const normalizeIdentityKey = (value: unknown) => {
-  const identityKey = String(value || "").trim();
-  if (!identityKey || identityKey.length > 191 || !identityKey.includes(":")) {
-    throw createError({ statusCode: 400, statusMessage: "身份标识无效" });
-  }
-  return identityKey;
-};
-
 const normalizeClaimCode = (value: unknown) =>
   String(value || "").trim().toUpperCase().replace(/[\s-]+/g, "");
 
@@ -95,8 +78,11 @@ const createManualTaikoId = async () => {
     for (let index = 0; index < 16; index += 1) suffix += randomInt(0, 10);
     const taikoId = `98${suffix}`;
     const [rows] = await db.execute<DbRow<{ total: number }>[]>(
-      "SELECT COUNT(*) AS total FROM taiko_manual_accounts WHERE taiko_id = ?",
-      [taikoId]
+      `SELECT COUNT(*) AS total FROM (
+        SELECT taiko_id FROM taiko_manual_accounts WHERE taiko_id = ?
+        UNION ALL SELECT taiko_id FROM taiko_source_lifecycle WHERE taiko_id = ?
+      ) identities`,
+      [taikoId, taikoId]
     );
     if (!Number(rows[0]?.total || 0)) return taikoId;
   }
@@ -142,42 +128,6 @@ const buildBlankUserdata = (taikoId: string, nickname: string): UserdataPayload 
   }
 });
 
-const getManualAccount = async (taikoId: string) => {
-  await ensureAccountSchema();
-  const [rows] = await getAccountDb().execute<DbRow<ManualAccountRow>[]>(
-    "SELECT * FROM taiko_manual_accounts WHERE taiko_id = ? LIMIT 1",
-    [taikoId]
-  );
-  const row = rows[0];
-  if (!row) throw createError({ statusCode: 404, statusMessage: "未找到该手动账号" });
-  return row;
-};
-
-const assertOwner = async (owner: ManualOwner, taikoId: string) => {
-  const db = getAccountDb();
-  if (owner.kind === "viewer") {
-    const [rows] = await db.execute<DbRow<{ total: number }>[]>(
-      `SELECT COUNT(*) AS total FROM web_taiko_bindings
-        WHERE user_id = ? AND taiko_id = ? AND source = 'manual'`,
-      [owner.userId, taikoId]
-    );
-    if (!Number(rows[0]?.total || 0)) {
-      throw createError({ statusCode: 403, statusMessage: "该手动账号不属于当前用户" });
-    }
-  } else {
-    const identityKey = normalizeIdentityKey(owner.identityKey);
-    const [rows] = await db.execute<DbRow<{ total: number }>[]>(
-      `SELECT COUNT(*) AS total FROM bind
-        WHERE qq = ? AND id = ? AND source = 'manual'`,
-      [identityKey, taikoId]
-    );
-    if (!Number(rows[0]?.total || 0)) {
-      throw createError({ statusCode: 403, statusMessage: "该手动账号不属于当前身份" });
-    }
-  }
-  return getManualAccount(taikoId);
-};
-
 const setViewerCurrent = async (userId: number, taikoId: string) => {
   const db = getAccountDb();
   await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
@@ -187,26 +137,8 @@ const setViewerCurrent = async (userId: number, taikoId: string) => {
   );
 };
 
-const compactBotSlots = async (identityKey: string, preferredTaikoId?: string) => {
-  const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<{ row_id: number; id: string; is_current: number }>[]>(
-    "SELECT row_id, id, is_current FROM bind WHERE qq = ? ORDER BY slot_index, row_id",
-    [identityKey]
-  );
-  if (!rows.length) return;
-  const current =
-    rows.find((row) => row.id === preferredTaikoId) ||
-    rows.find((row) => Number(row.is_current) === 1) ||
-    rows[0];
-  await db.execute("UPDATE bind SET is_current = 0 WHERE qq = ?", [identityKey]);
-  for (const [index, row] of rows.entries()) {
-    await db.execute("UPDATE bind SET slot_index = ?, is_current = ? WHERE row_id = ?", [
-      index + 1,
-      row.row_id === current.row_id ? 1 : 0,
-      row.row_id
-    ]);
-  }
-};
+const compactBotSlots = (identityKey: string, preferredTaikoId?: string) =>
+  compactManualBotSlots(getAccountDb(), identityKey, preferredTaikoId);
 
 const attachViewer = async (userId: number, taikoId: string) => {
   const db = getAccountDb();
@@ -444,39 +376,9 @@ export const permanentlyDeleteManualAccount = async (
   if (confirmed !== true) {
     throw createError({ statusCode: 409, statusMessage: "永久删除需要二次确认" });
   }
-  const taikoId = await getOwnerTaikoId(owner, requestedTaikoId);
-  await assertOwner(owner, taikoId);
-  const account = await getManualAccount(taikoId);
-  const db = getAccountDb();
-  const botIdentity = account.bot_identity_key;
-  const [viewerOwners] = await db.execute<DbRow<{ user_id: number }>[]>(
-    "SELECT DISTINCT user_id FROM web_taiko_bindings WHERE taiko_id = ? AND source = 'manual'",
-    [taikoId]
-  );
-  const { userdataDir } = getRuntimePaths();
-  const backupRoot = join(userdataDir, ".manual_deleted");
-  const backupDir = join(backupRoot, `${taikoId}-${Date.now()}`);
-  await mkdir(backupDir, { recursive: true });
-  await rename(join(userdataDir, `${taikoId}data.json`), join(backupDir, `${taikoId}data.json`)).catch(() => undefined);
-  await rename(join(userdataDir, taikoId), join(backupDir, taikoId)).catch(() => undefined);
-  await db.execute("DELETE FROM web_song_locks WHERE taiko_id = ?", [taikoId]);
-  for (const { user_id: userId } of viewerOwners) {
-    await deleteBindingsWithGoals(db, userId, { taikoId, source: "manual" });
-  }
-  await db.execute("DELETE FROM bind WHERE id = ? AND source = 'manual'", [taikoId]);
-  await db.execute("DELETE FROM taiko_manual_accounts WHERE taiko_id = ?", [taikoId]);
-  for (const { user_id: userId } of viewerOwners) {
-    await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
-    const [remaining] = await db.execute<DbRow<{ id: number }>[]>(
-      "SELECT id FROM web_taiko_bindings WHERE user_id = ? ORDER BY id LIMIT 1",
-      [userId]
-    );
-    if (remaining[0]) {
-      await db.execute("UPDATE web_taiko_bindings SET is_current = 1 WHERE id = ?", [remaining[0].id]);
-    }
-  }
-  if (botIdentity) await compactBotSlots(botIdentity);
-  return { ok: true, backup: backupDir };
+  const requestedId = String(requestedTaikoId || "").trim();
+  const taikoId = requestedId || await getOwnerTaikoId(owner);
+  return permanentlyDeleteManualSource(owner, taikoId);
 };
 
 const normalizeScoreIdentity = (songNoInput: unknown, levelInput: unknown) => {

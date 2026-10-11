@@ -10,6 +10,7 @@ type Input = {
   root: string; identity: string; now: () => string; assertActive: () => void;
   view: () => PublicationManifest | null;
   staged: Map<string, PublicationReference | null>;
+  historyReplaced?: () => boolean;
 };
 const absent = () => Object.assign(new Error("Score object is absent"), { code: "ENOENT" });
 const historyKey = (name: string) => {
@@ -25,7 +26,8 @@ export function createPublicationScoreReader(input: Input): ScoreReadPort {
     input.assertActive();
     if (identity !== input.identity) throw new PublicationUnavailableError();
   };
-  const referenceFor = (key: string) => input.staged.has(key) ? input.staged.get(key) : input.view()?.files[key];
+  const referenceFor = (key: string) => input.staged.has(key) ? input.staged.get(key)
+    : key.startsWith("history/") && input.historyReplaced?.() ? undefined : input.view()?.files[key];
   const rawObject = async (reference: PublicationReference) => {
     let file;
     try {
@@ -73,7 +75,7 @@ export function createPublicationScoreReader(input: Input): ScoreReadPort {
     async listHistory(identity) {
       check(identity);
       const view = input.view();
-      const names = new Set(view === null ? await legacy.listHistory(identity).catch(error => {
+      const names = new Set(input.historyReplaced?.() ? [] : view === null ? await legacy.listHistory(identity).catch(error => {
         if (error.code === "ENOENT") return [];
         throw error;
       }) : Object.keys(view.files).filter(key => key.startsWith("history/")).map(key => key.slice(8)));
@@ -87,14 +89,14 @@ export function createPublicationScoreReader(input: Input): ScoreReadPort {
       check(identity);
       const key = historyKey(name), reference = referenceFor(key);
       if (reference) return rawObject(reference);
-      if (input.view() !== null || input.staged.has(key)) throw absent();
+      if (input.view() !== null || input.staged.has(key) || input.historyReplaced?.()) throw absent();
       return legacy.readHistory(identity, name);
     },
     async historyFileVersion(identity, name) {
       check(identity);
       const key = historyKey(name), reference = referenceFor(key);
       if (reference) return `${name}:${reference.sha256}:${reference.bytes}`;
-      if (input.view() !== null || input.staged.has(key)) throw absent();
+      if (input.view() !== null || input.staged.has(key) || input.historyReplaced?.()) throw absent();
       return legacy.historyFileVersion(identity, name);
     },
     async historyDirectoryVersion(identity) {

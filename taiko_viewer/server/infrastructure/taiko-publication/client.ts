@@ -26,6 +26,7 @@ export type PublicationLease = {
   put: (key: string, body: string) => Promise<PublicationReference>;
   remove: (key: string) => Promise<void>;
   backup: (backupKey: string) => Promise<SourceBackupReceipt>;
+  purgeBackupArchives: (backupKey: string) => Promise<void>;
   publish: (options?: { replaceHistory?: boolean; transactionId?: string }) => Promise<PublicationManifest>;
   close: () => Promise<void>;
 };
@@ -144,6 +145,14 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
         // reader must switch to that canonical view while retaining its EX.
         lease.view = response.view;
         return { backupKey, source };
+      },
+      async purgeBackupArchives(backupKey) {
+        if (!/^[a-f0-9]{32}$/.test(backupKey)) throw new PublicationUnavailableError();
+        const response = await send({ method: "purge-archives", backupKey });
+        const result = response.purged as { removed?: number } | undefined;
+        if (!result || !Number.isSafeInteger(result.removed) || result.removed! < 0 || result.removed! > 32) {
+          throw new PublicationUnavailableError();
+        }
       },
       async publish(publicationOptions = {}) {
         const response = await send({ method: "publish", ...publicationOptions });

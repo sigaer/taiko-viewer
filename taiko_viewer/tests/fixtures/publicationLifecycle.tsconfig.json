@@ -1,0 +1,14 @@
+{
+  "extends": "./domainRead.tsconfig.json",
+  "files": [
+    "./publicationLifecycle.globals.d.ts",
+    "../../server/services/account/manual-lifecycle.ts",
+    "../../server/internal/account/manual-ownership.ts",
+    "../../server/plugins/source-lifecycle.ts",
+    "../../server/infrastructure/taiko-publication/lifecycle-schema.ts",
+    "../../server/infrastructure/taiko-publication/sql-backup.ts",
+    "../../server/infrastructure/taiko-publication/recovery-worker.ts",
+    "../publicationSqlBackup.test.ts",
+    "../publicationRecoveryWorker.test.ts"
+  ]
+}

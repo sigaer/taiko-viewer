@@ -38,24 +38,30 @@ export async function deleteUserWithGoals(db: Pool, userId: number) {
   } catch (error) { await connection.rollback(); throw error; }
   finally { connection.release(); }
 }
-export async function deleteBindingsWithGoals(db: Pool, userId: number, filter: { bindingId?: number; taikoId?: string; source?: string }) {
+type BindingDeletionFilter = { bindingId?: number; taikoId?: string; source?: string };
+export async function deleteBindingsAndGoalsInTransaction(connection: ConnectionLike, userId: number, filter: BindingDeletionFilter) {
+  if (!filter.bindingId && !filter.taikoId) throw new Error('Scoped binding identity required');
+  // The caller owns the transaction. All manual owners can be cleaned by one
+  // SQL commit instead of committing a separate transaction for each owner.
+  await connection.execute('SELECT id FROM web_user_accounts WHERE id=? FOR UPDATE', [userId]);
+  const [bindings] = await connection.execute<RowDataPacket[]>('SELECT id,taiko_id,source FROM web_taiko_bindings WHERE user_id=? ORDER BY id FOR UPDATE', [userId]);
+  for (const binding of bindings) {
+    if (filter.bindingId && Number(binding.id) !== filter.bindingId) continue;
+    if (filter.taikoId && binding.taiko_id !== filter.taikoId) continue;
+    if (filter.source && binding.source !== filter.source) continue;
+    await deleteGoalsForBinding(connection, Number(binding.id));
+    await deleteMeasurementsForBinding(connection, Number(binding.id));
+    await deleteRecentCursorsForBinding(connection, Number(binding.id));
+    await connection.execute('DELETE FROM web_song_locks WHERE user_id=? AND taiko_id=?', [userId, binding.taiko_id]);
+    await connection.execute('DELETE FROM web_taiko_bindings WHERE id=? AND user_id=?', [binding.id, userId]);
+  }
+}
+export async function deleteBindingsWithGoals(db: Pool, userId: number, filter: BindingDeletionFilter) {
   if (!filter.bindingId && !filter.taikoId) throw new Error('Scoped binding identity required');
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-    // Same lock order as Goal mutation and account cleanup.
-    await connection.execute('SELECT id FROM web_user_accounts WHERE id=? FOR UPDATE', [userId]);
-    const [bindings] = await connection.execute<RowDataPacket[]>('SELECT id,taiko_id,source FROM web_taiko_bindings WHERE user_id=? ORDER BY id FOR UPDATE', [userId]);
-    for (const binding of bindings) {
-      if (filter.bindingId && Number(binding.id) !== filter.bindingId) continue;
-      if (filter.taikoId && binding.taiko_id !== filter.taikoId) continue;
-      if (filter.source && binding.source !== filter.source) continue;
-      await deleteGoalsForBinding(connection, Number(binding.id));
-      await deleteMeasurementsForBinding(connection, Number(binding.id));
-      await deleteRecentCursorsForBinding(connection, Number(binding.id));
-      await connection.execute('DELETE FROM web_song_locks WHERE user_id=? AND taiko_id=?', [userId, binding.taiko_id]);
-      await connection.execute('DELETE FROM web_taiko_bindings WHERE id=? AND user_id=?', [binding.id, userId]);
-    }
+    await deleteBindingsAndGoalsInTransaction(connection, userId, filter);
     await connection.commit();
   } catch (error) { await connection.rollback(); throw error; }
   finally { connection.release(); }

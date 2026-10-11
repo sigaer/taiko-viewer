@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup } from "../server/infrastructure/taiko-publication/scope.ts";
+import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, clearScoreSource, purgeScoreBackupArchives } from "../server/infrastructure/taiko-publication/scope.ts";
 import { PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 import type { ScoreReadPort } from "../server/domain/score-read-contract.ts";
 const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko";
@@ -275,4 +275,42 @@ test("rollback proof and SQL compensation retain EX against the next independent
     assert.equal(protectedRollback, true);
     await withScoreRead(options, async () => assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 3));
   } finally { releaseWriter!(); await writer.catch(() => undefined); }
+}));
+
+test("actual source clear uses one publication batch, hides history immediately, and purges only backed daily files", async () => fixture(async options => {
+  await seed(options);
+  const daily = join(options.root, identity, "daily-ability-v1-top20.json");
+  await writeFile(daily, '{"days":{"2026-10-10":123}}');
+  const key = "a".repeat(32);
+  await withScoreWrite(options, async () => {
+    await createScoreBackup(identity, key);
+    await clearScoreSource(identity);
+    const scope = currentScoreScope(identity)!;
+    assert.deepEqual(await scope.reader.listHistory(identity), []);
+    await assert.rejects(scope.reader.readHistory(identity, history), { code: "ENOENT" });
+    assert.equal(await scope.reader.currentExists(identity), false);
+    assert.equal(scope.staged.size, 1, "clearing H must not enqueue one pipe request per history");
+    await purgeScoreBackupArchives(identity, key);
+  });
+  await withScoreRead(options, async () => {
+    assert.equal(scorePublication(identity)?.sequence, 2);
+    assert.deepEqual(scorePublication(identity)?.files, {});
+  });
+  await assert.rejects(readFile(daily), { code: "ENOENT" });
+  assert.equal(await readFile(join(options.root, ".manual_deleted", `${identity}-${key}`, identity, "daily-ability-v1-top20.json"), "utf8"), '{"days":{"2026-10-10":123}}');
+}));
+
+test("clear cannot mix with prior stages and a failed clear callback keeps canonical current/history", async () => fixture(async options => {
+  await seed(options);
+  await assert.rejects(withScoreWrite(options, async () => {
+    await stageScoreText(identity, "current", '{"songs":[],"counter":1}');
+    await clearScoreSource(identity);
+  }), PublicationUnavailableError);
+  const expected = new Error("Synthetic failure before SQL revocation");
+  await assert.rejects(withScoreWrite(options, async () => { await clearScoreSource(identity); throw expected; }), error => error === expected);
+  await withScoreRead(options, async () => {
+    assert.equal(scorePublication(identity)?.sequence, 1);
+    assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 0);
+    assert.deepEqual(await currentScoreScope(identity)!.reader.listHistory(identity), [history]);
+  });
 }));
