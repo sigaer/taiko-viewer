@@ -1,0 +1,31 @@
+{
+  "phase": 6,
+  "step": "6.3a-node-bridge",
+  "status": "CLIENT_BOUNDARY_PASS",
+  "date": "2026-10-11T09:01:44.547556+08:00",
+  "tests": 6,
+  "pass": true,
+  "typescript": "PASS",
+  "source_files": [
+    {
+      "path": "taiko_viewer/server/infrastructure/taiko-publication/client.ts",
+      "sha256": "5314a3cfa051912b666e6456a6b2e85f55f9a6bb153b530452c172c68a2fab78"
+    },
+    {
+      "path": "taiko_viewer/tests/publicationClient.test.ts",
+      "sha256": "1b8db4407b9484af16bf51aa58472eb820f1cb9cf269c355f24bc80c736ad00e"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/domainRead.tsconfig.json",
+      "sha256": "a18006a8b874a304351e66e6768437160a02ceb8a86caf183cfcb883f8407b5c"
+    }
+  ],
+  "log": "/var/tmp/taiko-domain-extraction/phase6-node-publication-client.log",
+  "log_sha256": "f6934ab62e7efc1db67225790bc6f0637fe2b5f1329a97fba57a5d4709f0c695",
+  "uses_real_center_python_bridge": true,
+  "synthetic_root": "/var/tmp/domain-publication-client-*",
+  "live_entrypoints_connected": false,
+  "production_mutation": false,
+  "publication": "LOCAL_STEP_COMMIT_PENDING_PHASE_RELEASE",
+  "phase6_gate": "IN_PROGRESS"
+}

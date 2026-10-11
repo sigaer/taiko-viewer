@@ -16,6 +16,8 @@
     "../domainScoreRead.test.ts",
     "../../utils/canonicalGrowth.ts",
     "../../utils/growthHistory.ts",
-    "../../types/player-growth.ts"
+    "../../types/player-growth.ts",
+    "../../server/infrastructure/taiko-publication/client.ts",
+    "../publicationClient.test.ts"
   ]
 }

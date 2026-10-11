@@ -54,3 +54,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.1：复核真实中心/Viewer/派生 cache Writer 和 R/A dispatcher 差异；选择单一 Infrastructure JSON publication + immutable read view、私有 file read model，现有身份/Goal/measurement DB 保留。开始合成协议实现；Gate 6 IN_PROGRESS，未部署 Writer。
 
 - 2026-10-11 / 6.2：A `85c4251` / 9.81.0 已 push，单一 Infrastructure publication foundation / local bridge 的 19 项合成磁盘/进程验证 PASS；尚无运行入口引用，不同步/重启 R。开始 6.3 真实接入；Gate 6 IN_PROGRESS。
+
+- 2026-10-11 / 6.3a：Viewer 有界本地 pipe 客户端的 6 个实际跨语言合成用例 + TypeScript PASS；原入口尚未接入。步骤本地提交，待 Phase 6 标准发布一并 push；继续 score read view / 真正 Writer convergence。
