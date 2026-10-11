@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6e",
+  "status": "NATIVE_HIROBA_BINDING_AND_SYNC_AUTHORITY_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "9befec4209e8ef48db953a99fc41e723c76eb253",
+  "sourceCommit": "3e1d76e5ef953c3e8f968049f2cd84ba92b011c0",
+  "sourceVersion": "9.81.22",
+  "sourceRemote": "3e1d76e5ef953c3e8f968049f2cd84ba92b011c0",
+  "sourcePushVerified": true,
+  "sourcePushSession": 67790,
+  "sourcePushExit": 0,
+  "viewerPreparedParent": "9511e471fc34b9d63af916d8bf55fe671438827e",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "clientCommit": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+  "clientVersion": "0.2.6",
+  "clientChanged": false,
+  "coreVersion": "Source 0.1.1, client 0.1.2 unchanged",
+  "tests": {
+    "sourceOffline": {
+      "passed": 208,
+      "existingPassed": 132,
+      "metadataPassed": 21,
+      "mutationPassed": 29,
+      "sharedCredentialPassed": 8,
+      "nativeHirobaPassed": 18,
+      "productionOrRealDeselected": 9,
+      "warnings": 1,
+      "wrapperSession": 24123,
+      "wrapperExit": 0,
+      "log": "/var/tmp/phase6-native-hiroba-qa.log"
+    },
+    "actualMysqlNativeChild": {
+      "passed": 38,
+      "existingComposites": 13,
+      "newHirobaComposites": 25,
+      "database": "taiko_annual_poster_test",
+      "eachConnectionActualSelectDatabase": true,
+      "explicitMutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+      "coverage": [
+        "card order/target/preferred/native manual profile/hidden",
+        "single credential+binding commit/128 union cap",
+        "late SQL/credential errors and uncertain COMMIT before/after",
+        "own vs foreign public fallback and corrupt own cipher",
+        "current/u0/full target row and credential proof",
+        "before publication and after publication/render revocation",
+        "captured canonical reader and text-only rendering fallback",
+        "real process exits before/after bind COMMIT and Source publication",
+        "5s center-held identical principal named gate",
+        "owned connection/child/root/row cleanup"
+      ]
+    },
+    "retainedTests": {
+      "selected": [
+        "test_bind_hiroba_handle_keeps_running_after_initial_notice",
+        "test_hiroba_update_returns_actionable_error_for_unreadable_credentials"
+      ],
+      "execution": "Actual selected retained test and command/adapter AST functions; module namespace patched consistently. No full NoneBot registration. Existing selected u0 regression remains in 29 mutation cases."
+    },
+    "fullNoneBotRun": false,
+    "realHirobaUpstreamRun": false,
+    "realRendererPngRun": false,
+    "syntheticRenderBoundaryBytes": true,
+    "onlineAuthenticatedRun": false,
+    "millionRecordCostRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 10.987
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 61.5
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 72.488,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791754427-1931821.service",
+    "sampledPeakBytes": 227680256,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 216204
+  },
+  "resourceCaveat": "250ms cgroup sample is not an absolute peak; child OS maxRSS measured separately, no million-record or production peak claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791754427-1931821.service",
+    "result": "success",
+    "loadState": "not-found after collection",
+    "activeState": "inactive",
+    "execMainStatus": 0,
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T05:33:47+08:00",
+    "ended": "2026-10-12T05:35:00+08:00"
+  },
+  "failureHistory": [
+    {
+      "passed": 199,
+      "failed": 3,
+      "sqlRun": false,
+      "cause": "AST fixture omitted RegexMatched default parameter factory",
+      "log": "/var/tmp/phase6-native-hiroba-ast-fixture-failure.log"
+    },
+    {
+      "passed": 204,
+      "failed": 1,
+      "sqlRun": false,
+      "cause": "Retained test monkeypatch changed copied SimpleNamespace, not actual AST function globals; fixed to shared ModuleType namespace",
+      "log": "/var/tmp/phase6-native-hiroba-namespace-fixture-failure.log"
+    }
+  ],
+  "earlierPass": {
+    "sourcePassed": 205,
+    "sqlPassed": 37,
+    "log": "/var/tmp/phase6-native-hiroba-first-pass.log",
+    "followup": "Accurate partial binding copy, retained actionable corrupt credential message, authenticated update sender/image/all regression; rerun final implementation."
+  },
+  "decisions": [
+    "Discovery is pure; all credentials and ordered native bindings/preferred selection share one SQL COMMIT.",
+    "Native binding SQL gate matches center; sync uses Source EX then principal gate then full SQL proof.",
+    "Credentials used only for exact configured_by_qq owner; foreign/legacy bindings use public upstream without plaintext credentials.",
+    "Every publication and render/response is fenced by captured binding/current/credential tuple; rendering uses captured canonical view.",
+    "Legitimate committed C/H observations survive later SQL proof failure; response fails, no cross-system atomicity claim.",
+    "Unknown native binding COMMIT never automatically replays; query binding then retry, no native durable request receipt.",
+    "Dead standalone credential save/delete writers removed after caller search; existing decrypt/Fernet remains unchanged.",
+    "Partial sync clearly preserves committed binding and suggests switching to failed account; corrupt own cipher has fixed rebind action."
+  ],
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/taiko.py": "cf50547f306d97619369269e8f3145a3c97ae0eac544db21326daa1d494cad0d",
+      "taiko/plugins/utils/bot_binding_mutation.py": "d6ddb482eb12eaa747b3dbe1cb9b16982afe266103b23dacdf440c738ecd6d8e",
+      "taiko/plugins/utils/hiroba/credentials.py": "b310b346830a85c361703bdea407ba79864b954d3d6a514d43e81879d5612851",
+      "taiko/plugins/utils/hiroba/native_binding.py": "24379ccb85e82f897e63d44eb21063d7bea11686106532d2dee8e1b55066a996",
+      "taiko/tests/test_hiroba_bind_flow.py": "9777f4a9a3d8dcb9b7dd64b5870ffd87ec44188f2af34fc5a3af313b1718998b",
+      "taiko/tests/test_hiroba_update_mode.py": "8a34083001f5e1a4d901efa0cfe9f2203a3707e00ca17e56a436436b2ae19620",
+      "taiko/tests/test_native_hiroba_binding.py": "0e22672e6b35ee5962dc9d5b992ac7bfb676e3d7c1edcb5b992fba9cfbc4dec8",
+      "taiko/tests/native_hiroba_sql_child.py": "c7507d2a4bd72ea24e2380dc5f2f8d51d64007649cc5a17efbfb8922804f1135",
+      "taiko/docs/domain-extraction-phase6-publication.md": "1abeeade7f123d64d28624857eb3fd374e7bb296c51f01b732e69555a64ecea1"
+    },
+    "viewer": {
+      "taiko_viewer/tests/nativeHirobaBindingSql.test.mjs": "e5a36680e60113619ed9ec1516804cf0fde9b398ead2448b28bef59e8263dcd9"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-native-hiroba-qa.py": "4657bfbc94472a5b7bddcef2701d29bcd7051709f2aa7ed1cbe5f815b0d75595",
+      "/var/tmp/phase6-native-hiroba-qa.log": "ba6fa386e5e3473e493d9cf29d0ebeac8424150469adbeb3e8edd90edfcf52a3",
+      "/var/tmp/phase6-native-hiroba-resource.json": "2c23e0c5a5007b7c3e1d4b1689da0282b402d73db65d7694415d8b9b8d3a2354",
+      "/var/tmp/phase6-native-hiroba-ast-fixture-failure.log": "d022fd3ad7c8476542644810a513e983f850038d99e28f957ef8eada0e98f08f",
+      "/var/tmp/phase6-native-hiroba-ast-fixture-failure-resource.json": "db65d5606264f25be031866bf4974ba24a57fec597cf5cb9bade023a8b366baf",
+      "/var/tmp/phase6-native-hiroba-namespace-fixture-failure.log": "c2f177473541740ba41296653a9a8f04f801b9e1d54e09a4e6f5879936435912",
+      "/var/tmp/phase6-native-hiroba-namespace-fixture-failure-resource.json": "c9a9822035c52cb1b97da6b3f88d69048fc8955c80aa07f6d3399900f39bde13",
+      "/var/tmp/phase6-native-hiroba-first-pass.log": "0c06b578e5bcb99adf51636a1af08b7905744bfcd78e8da22b9057cb91504b68",
+      "/var/tmp/phase6-native-hiroba-first-pass-resource.json": "89b58f80a30a1a4c7fd083ab443c77fc5421e789a2b41fb981e37736857aff7f"
+    }
+  },
+  "runtime": {
+    "sourceCopiedToR": false,
+    "servicesRestarted": false,
+    "deploymentRun": false,
+    "productionSqlMutated": false,
+    "productionDataCopied": false,
+    "liveViewerVersion": "0.81.11",
+    "preparedViewerVersion": "0.82.0",
+    "services": {
+      "taiko-viewer.service": {
+        "active": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "active": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "active": "active",
+        "pid": 829173
+      }
+    },
+    "rHasNewCode": false
+  },
+  "rollback": {
+    "source": "9befec4209e8ef48db953a99fc41e723c76eb253",
+    "viewerPreparation": "9511e471fc34b9d63af916d8bf55fe671438827e",
+    "activation": "None this step; preserve frozen implementation in Git, do not reintroduce ownerless writer."
+  },
+  "remaining": [
+    "authenticated native QQ join and client QQ migration",
+    "remaining private native readers and ordinary updates",
+    "all u0/daily/maintenance writers and P1a adoption after legacy writers quiesced",
+    "complete private Read Model with exact invalidation dependencies and fail-closed parity",
+    "actual million-record cold/warm IO/RSS and limits reconciliation",
+    "trusted recovery/cleanup/runbook/fixed R dependencies",
+    "coordinated standard Viewer deploy/R sync-restarts/real authenticated online product Gate"
+  ]
+}

@@ -443,3 +443,16 @@ ACK 丢失只在仍持 EX、捕获 pool 新连接精确证明 token hash/mask/ca
 195 guarded client（171保留+24中心token用例，替代10旧local-authority用例）、既有绑定66 SQL、最终新token24实际SQL/HTTP+1纯provisioning policy及TS PASS。合计90实际SQL/HTTP和1策略检查，分属两轮，不冒称同一次全通过。实际Python SDK→owned H3、命令AST群聊/空/manual/u0/denied/private sender验证，late撤权/rollback/lease loss、Source/principal队列、exact ACK/captured pool与config替换、两个COMMIT前后真进程退出。原parity保留NoneBot module import，不宣称完整Bot启动/真实upstream/online。26.613s/471056384byte cgroup250ms采样、child361936KiB/high-max-OOM0，wrapper exit0/journal成功/MainPID0/cgroup gone。初轮150pass/3import fail与新Node文件注册失败（旧66pass）已修正、失败证据保留，无生产私有数据复制/写入。
 
 B0.2.6/e275995源码与6ade2e1文档校准已标准push及实际remote核对，完整[证据](evidence/phase6-client-score-token-validation.json)。A9.81.21/12文件hash未变，沿用182 Source前轮结果未重跑。Viewer0.82仍本地预备，线上0.81.11/PIDs不变，R未同步、服务未重启、client未启动。native authority/Gate6 IN_PROGRESS；继续native Hiroba/QQ、client QQ迁移、全Writer/P1a、Read Model/成本/运维/fixed R deps/旧Writer停用后统一发布与真实online Gate。
+
+
+## 6.3e.8.6e 原生 Hiroba 绑定事务与同步所属（STEP_PASS）
+
+2026-10-12。Native纯discovery/Fernet加密之后，principal named gate→最多128行bind/state→按Source排序credential locks，全部凭据、绑定和首个发现账号current一次COMMIT。保留原生card顺序、target过滤、hidden及manual/u0 profile；删除无调用者的独立credential save/delete Writer。COMMIT未知仅固定查询后重试，不自动重放，不宣称native durable exactly-once。
+
+同步单独捕获root、完整binding row/current与credential tuple，Source EX→同principal gate→SQL复核，publication和同canonical view的渲染/返回逐次证明。只有configured_by_qq精确sender才解密；其他owner/legacy凭据走公开同步，不借用密码。图片16MiB边界，保留渲染失败文字成功。合法C/H提交后发生晚owner/SQL失败保留观察但拒绝成功回复，未声称跨系统事务。绑定后同步失败明确账号已绑定、完成数量和切换失败账号重试；自有损坏密文保留固定重绑命令。
+
+208 Source（132旧+21 metadata+29 mutation+8共享credential+18新）、38真实_test SQL复合用例（13旧+25新）PASS；9旧production例排除/1warning。两个选定旧绑定提示/损坏凭据测试运行实际AST adapter，实际update handler证明sender/image/all mode；无完整NoneBot注册。SQL覆盖single COMMIT、cap/late error/ACK loss、own/foreign/corrupt credentials、current/u0/Source拒绝、发布前后及render撤权、四个真实COMMIT/publication前后进程退出、5s同gate和资源清理。每个native连接实际SELECT DATABASE()=_test+explicit opt-in1，官方获取及render输出合成（非真实PNG/上游），无生产数据复制/SQL写入。
+
+两次AST fixture适配失败（199/3及204/1，无SQL运行）已保留；205 Source/37 SQL中间PASS后补partial文案/credential行动提示/sender回归，最终完整重跑。72.488s、250ms sampled227680256bytes、child216204KiB，high/max/OOM0；wrapper24123 exit0、unit1791754427-1931821 success/ExecMainStatus0/inactive/MainPID0/cgroup gone，owned child/row/root清理。[完整证据](evidence/phase6-native-hiroba-authority-validation.json)。
+
+A3e1d76e/9.81.22已标准commit/push和actual remote一致，仅本步9文件，不包含miku用户改动。Viewer SQL测试/证据本地提交准备0.82.0，B6ade2e1/0.2.6不变；R没有新代码，未同步/重启/部署，live0.81.11与三个active PID1063394/1063408/829173不变。回退Source9befec4、Viewer准备9511e47。native authority整轮/Gate6 IN_PROGRESS，继续认证QQ联接和客户端QQ迁移、其余private native readers/updates、全部u0/daily/maintenance Writers、P1a全部Writer停止后接管、Read Model准确依赖/失效、百万冷暖IO-RSS/限额、trusted恢复/清理/runbook/固定R依赖、统一标准Viewer发布及R同步重启/真实在线产品验收。
