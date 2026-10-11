@@ -192,7 +192,7 @@ export const updateAccountSong = async (
 
   return withUserdataWriteLock(binding.taiko_id, async () => {
     const liveBinding = await getCurrentBindingRow(userId);
-    if (!liveBinding || liveBinding.id !== binding.id) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
     const userdata = await readUserdata(binding.taiko_id);
     const songs = userdata.songs || [];
     const target = songs.find((item) => Number(item.song_no) === songNo && Number(item.level) === level);
@@ -244,7 +244,7 @@ export const createAccountSong = async (
 
   return withUserdataWriteLock(binding.taiko_id, async () => {
     const liveBinding = await getCurrentBindingRow(userId);
-    if (!liveBinding || liveBinding.id !== binding.id) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
     const userdata = await readUserdata(binding.taiko_id);
     const songs = userdata.songs || [];
     const exists = songs.some((item) => Number(item.song_no) === songNo && Number(item.level) === level);
@@ -331,7 +331,7 @@ export const importAccountSongs = async (userId: number, payload: unknown) => {
 
   return withUserdataWriteLock(binding.taiko_id, async () => {
     const liveBinding = await getCurrentBindingRow(userId);
-    if (!liveBinding || liveBinding.id !== binding.id) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
     const previouslyLocked = binding.source === "manual" ? new Set<string>() : await getLockMap(userId, binding.taiko_id);
     const userdata = await readUserdata(binding.taiko_id);
     const songs = (userdata.songs ||= []);
@@ -397,19 +397,23 @@ export const setAccountSongLock = async (
   }
   const locked = Boolean(payload.locked);
 
-  const db = getAccountDb();
-  if (locked) {
-    await db.execute(
-      `INSERT INTO web_song_locks (user_id, taiko_id, song_no, level, is_locked)
-       VALUES (?, ?, ?, ?, 1)
-       ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
-      [userId, binding.taiko_id, songNo, level]
-    );
-  } else {
-    await db.execute(
-      "DELETE FROM web_song_locks WHERE user_id = ? AND taiko_id = ? AND song_no = ? AND level = ?",
-      [userId, binding.taiko_id, songNo, level]
-    );
-  }
-  return { locked };
+  return withUserdataWriteLock(binding.taiko_id, async () => {
+    const liveBinding = await getCurrentBindingRow(userId);
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    const db = getAccountDb();
+    if (locked) {
+      await db.execute(
+        `INSERT INTO web_song_locks (user_id, taiko_id, song_no, level, is_locked)
+         VALUES (?, ?, ?, ?, 1)
+         ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
+        [userId, binding.taiko_id, songNo, level]
+      );
+    } else {
+      await db.execute(
+        "DELETE FROM web_song_locks WHERE user_id = ? AND taiko_id = ? AND song_no = ? AND level = ?",
+        [userId, binding.taiko_id, songNo, level]
+      );
+    }
+    return { locked };
+  });
 };

@@ -1,0 +1,68 @@
+{
+  "phase": 6,
+  "step": "6.3c-kinoko-batch-and-song-lock-fence",
+  "status": "ADAPTER_SLICE_PASS_PENDING_ALL_WRITERS_AND_RELEASE",
+  "date": "2026-10-11T09:40:50.314409+08:00",
+  "viewer_version": "0.82.0 (local unreleased)",
+  "legacy_kinoko_oracle": "d337527:taiko_viewer/server/internal/account/kinoko-history.ts",
+  "tests": {
+    "node": 17,
+    "actual_account": 9,
+    "actual_kinoko": 8,
+    "failures": 0,
+    "golden": "complete history filenames and raw SHA, full/delta payload, summary",
+    "typescript": "Actual runtime helpers bundled/executed; no whole-server tsc claim"
+  },
+  "resources": {
+    "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791682619-1099316.service",
+    "durationMs": 7678,
+    "sampledMemoryPeakBytes": 100519936,
+    "sampleIntervalMs": 250,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "processes": [
+      {
+        "Name": "MainThread",
+        "VmHWM": "45276 kB",
+        "VmRSS": "45276 kB"
+      }
+    ]
+  },
+  "source_files": [
+    {
+      "path": "taiko_viewer/server/internal/account/kinoko-history.ts",
+      "sha256": "5ffa537a6594ed1c7e1eec7812ae954ecb42a37c935c258aa7b8c923f39f6240"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/sync.ts",
+      "sha256": "f40221d04d980566455f6a6c94ca05f9989c9d3537fe97d5d1107e461d53a444"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/songs.ts",
+      "sha256": "e024993e16b4cb384c77d62be45c12f0d8b53a09523f077c36f39ce1e23b1d38"
+    },
+    {
+      "path": "taiko_viewer/tests/accountScorePublication.test.mjs",
+      "sha256": "0637d591246c0c9fec1bc200d19f41fa5803aa246b8ff5ccd2566bb707937f5d"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/accountScorePublicationHarness.mjs",
+      "sha256": "9ed04efd0a5936af1afa29194101dbd1d7492e51713e5791164648ffb69085b2"
+    },
+    {
+      "path": "taiko_viewer/tests/kinokoPublication.test.mjs",
+      "sha256": "aa0cbe69d84465dadc07118e8e3a3dbaf72668d10874529ee1827ee22d1cbab4"
+    }
+  ],
+  "log": "/var/tmp/phase6-kinoko-final-qa.log",
+  "log_sha256": "e3813f48d7d6b51e0e5fc91e6e53e6390bf6783f1b2e4f899737b1385bda3016",
+  "boundaries": {
+    "production_userdata_read": false,
+    "production_db_access": false,
+    "db_adapter": "allowlisted in-memory stub",
+    "kinoko_network": "forbidden; synthetic fetched records",
+    "authenticated_http_entrypoint_test": "pending final integration",
+    "actual_sync_source_guard": "reviewed; services fixture tests cover the same account source recheck",
+    "runtime_sync_or_deploy": false,
+    "phase6_gate": "IN_PROGRESS"
+  }
+}

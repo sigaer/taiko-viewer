@@ -199,6 +199,8 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     });
   }
   const summary = await withUserdataWriteLock(taikoId, async () => {
+    const binding = await getCurrentBindingRow(user.id);
+    if (!binding || binding.id !== currentBinding.id || binding.taiko_id !== currentBinding.taiko_id || binding.source !== currentBinding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
     const userdata = (await userdataFileExists(taikoId))
       ? await readUserdata(taikoId)
       : { profile: { userid: taikoId }, songs: [] };
@@ -265,6 +267,8 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   }
 
   const summary = await withUserdataWriteLock(taikoId, async () => {
+    const binding = await getCurrentBindingRow(user.id);
+    if (!binding || binding.id !== currentBinding.id || binding.taiko_id !== currentBinding.taiko_id || binding.source !== currentBinding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
     const existed = await userdataFileExists(taikoId);
     const userdata = existed
       ? await readUserdata(taikoId)

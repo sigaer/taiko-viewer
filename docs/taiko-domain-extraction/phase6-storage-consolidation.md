@@ -62,3 +62,14 @@ Growth Overview/History/Passport/Recent 多文件产品读取及 request-local e
 最终综合 Python 24 + Node 66、TypeScript，以及版本 projection 1 项均 PASS。250 ms sampled cgroup peak 293,720,064 bytes（约 280.11 MiB），42.213 秒，high/max/OOM events=0；非完整百万记录容量证明。早期一次旧 QA data URL loader 的累计模块字符串触发 Node 1536 MiB heap limit；改为磁盘临时 ESM 并清理后，在原限额重跑全套通过。两个 fixture 问题（继承同一个读 context、跨编译模块的 Error constructor identity）与一个 TS fixture 类型问题已纠正并记录；未绕过隔离。[证据](evidence/phase6-source-adapter-validation.json)。
 
 Viewer 预备 minor 0.82.0，本步骤本地提交，待完整 Phase 6 标准发布 push/deploy。A/R 运行目录尚未同步，新 Writer 未激活；线上保持 Viewer 0.81.11 与旧中心 Writer。剩余 Kinoko 批次、manual 永久删除、实际 dispatcher、u0 与其他多文件 reader、私有资源授权、Read Model、全量成本/恢复及统一上线验收均继续执行；Gate 6 IN_PROGRESS，不把此子步骤当成全阶段完成。
+
+
+## 6.3c Kinoko 历史批次与谱面 lock fence
+
+Kinoko helper 通过同一 source EX scope 读取已有 H、识别 baseline/duplicate、逐对象暂存并提交。已有真实 import service 外层 current 合并复用同一个 scope，因此全历史与当前成绩只增加一次 source sequence；后续 merge/current/bridge failure 不会留下半批 H。Full/delta、同 timestamp 多 lane、原 filename/hash、import 排除、10,000 上限与 invalid legacy JSON 留存语义保留。Managed object corruption 明确停止 import。当前/历史两个 import 在获取 fence 后重查 binding id/source identity。
+
+另把 SQL `setAccountSongLock` 放进 source fence；Python acquisition 在同一 EX lease 内读取的 lock 集合不再被该端点中途修改。Lock flag 单独变化不生成 score observation。账户 writer 获取 fence 后检查 binding id、taiko id 与 source，防止相同 row id 下目标身份变化。
+
+最终 17 项 actual service/helper 回归通过（9 account、8 Kinoko），Golden 固定旧 `d337527` Kinoko 实现，比较全部 H 名称与 raw SHA/summary。综合 7.678 秒，250 ms sampled cgroup peak 100,519,936 bytes，high/max/OOM events=0。真实跨语言 bridge、实际导入算法与文件系统，DB 使用 allowlisted 内存 adapter；禁止网络，不是生产凭据/远程 Kinoko 或认证 HTTP 验收，也不冒称完整 server tsc。拆出复用磁盘 bundle fixture，临时文件清理。[证据](evidence/phase6-kinoko-adapter-validation.json)。
+
+本步骤仍为 Viewer 0.82.0 的本地阶段提交，不提前标准部署；manual 永久删除、dispatcher/u0、其余跨文件 reader、私有 grant、Read Model 与最终恢复/发布仍未完成。线上版本/Writer 未切换，Gate 6 IN_PROGRESS。
