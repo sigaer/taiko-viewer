@@ -385,3 +385,15 @@ B provider改为序列化LRU，64项/32MiB总量/4MiB单项/30s，key包含中�
 Source按9.81.16标准源码commit/push；Viewer0.82.0本地步骤commit，全部Phase6完成后才标准部署/push。运行R没有新module/entrypoint，未同步/重启；线上0.81.11与PID1063394/1063408/829173不变。B仍0.2.3、缓存轮未完成且代码未发布：下一步历史磁盘loaders与renderer current/H joins/public bearer fallback，随后完整回归/版本提交/push。Source native u0物化Writer、credential/QQ/daily全部Writer/P1a、Read Model/invalidation/百万IO-RSS、trusted ops/fixed R deps及旧Writer停用后的统一激活与真实产品smoke继续待做，Gate6 IN_PROGRESS。
 
 同轮追加校准（Source9.81.17）：公开combo表会改变同chart的最佳记录选择，故合并标识还须包含公开参考与明确merge/history/clock profile的 `ruleRevision`。worker ready前载入并固定map，Node验证SHA并纳入整个digest。新增真实A/B选择反转样例，private Source head相同而ruleRevision及输出改变；禁止仅凭private heads把两次不同规则结果配成一代。追加后最终13 Source（9新+4旧）/120 B/140 SQL/局部TS全部通过，最终资源、代码hash、两个Source提交/push和Viewer本地提交以[证据](evidence/phase6-merged-read-validation.json)为准。缓存轮及Gate6继续IN_PROGRESS，下一步历史loader/joins/fallback与完整Read Model输入版本收敛。
+
+## 6.3e.8.5b 客户端历史与缓存源码轮（CODE_ROUND_PASS）
+
+2026-10-12。默认私有历史 DTO 保持兼容；可选 `?format=raw-v1` 返回原文件名与canonical manifest捕获的mtime/ctime。readonly bridge在原lease内验证字节并读取metadata，拒绝invalid key/corruption/staging；projection丢失不改变结果。u0返回带微秒的合并配方filename，不伪造文件stat，C/H版本向量与profile/规则依赖仍由中心统一证明。实际serialized output包含重复timestamp/metadata预算，不截断健康历史以掩盖容量失败。
+
+B所有隐式private current/history loader每次fresh中心授权；原disk/stale fallback和本地u0物化删除。新history adapter纯解码与host profile保留旧trend full/delta/removed、filename+mtime排序、previous歌曲/dojo状态和Dani reverse-filename选择；趋势逐点计算，不保留所有重建状态。Update/B30/current Dani使用一组verified C/H，变化最多重试一次；Summary计算使用其同一current歌曲集合。默认SDK旧DTO与explicit trend旧DTO仍兼容，新private loader拒绝缺少ordering metadata的非空历史。local bearer在实际center fetch前后复核，本地token删除/轮换/映射变化和中心错误均不返回私有数据。旧native Hiroba/scores Writer在IO前410，旧函数保留作未激活阶段回退；不宣称native token issuer/credentials/QQ最终迁移完成。
+
+最终 guarded B153（既有warning2、无skip）、Source62+5subtests、Node/Python pipe12、真实SQL/HTTP143、局部TS通过。B冻结adae96e的原filesystem函数，用owned files分别对照trend/update/dojo/Dani；daily/playcount聚合用确定性非空计算值验证流程，Core算法Golden沿用既有Phase4范围。实际Update以小PIL panel输出PNG，B30/Dani准备函数捕获输入直到渲染边界，不冒称完整assets或NoneBot/上游真实authQA。SQL实际SELECT DATABASE()=_test、explicit opt-in1；SQLite实际PRAGMA database_list验证owned路径。无production数据复制、SQL mutation、service grant登记或私有storage读取。
+
+跨仓库unit172.261s/采样peak504815616 bytes（481.43MiB），high/max/OOM0，journal successful/inactive、cgroup退出；该unit测client150，其后仅B变更禁用旧Writer/移除unused常量/版本0.2.4，再独立完整跑153，无理由不重复未变的Source/Viewer。所有代码hash、日志hash、unit/session与范围见[新证据](evidence/phase6-client-history-validation.json)，先前8.5a证据不覆盖。Source e87722b /9.81.18及B47bf5c1 /0.2.4已commit/push，实际远端HEAD相同；仅Bweb.conf/v1_test_report.md用户工作保留，Source miku与Viewer原growth/release报告保留。
+
+Viewer0.82.0本步本地预备提交，待统一标准脚本部署/push；线上0.81.11、PID1063394/1063408/829173未变化，R无taiko_store且未同步/重启。本源码轮完成不等于Phase6 Gate PASS。继续native Bot credentials/QQ/token issuer与Source全部Writer/u0/daily/P1a、Read Model/Goal-measurement merge/invalidation、百万cold-warm IO/RSS和bridge容量复核、trusted restore/cleanup/runbook、R固定依赖与旧Writer停用后的统一激活/真实产品在线验收。

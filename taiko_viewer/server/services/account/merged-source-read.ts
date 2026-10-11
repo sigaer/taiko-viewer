@@ -20,7 +20,7 @@ function composition(data:BotBindingData){
   return {sources:official.map(row=>row.id),profileSource:official[Math.min(index,official.length-1)]!.id};
 }
 /** All Source SH -> principal gate -> SQL. SQL never waits for a Source lease. */
-export async function readAuthorizedMergedSource(event:H3Event,input:unknown,kind:'current'|'history'){
+export async function readAuthorizedMergedSource(event:H3Event,input:unknown,kind:'current'|'history',rawHistory=false){
   let worker:MergedWorker|undefined,connection:PoolConnection|undefined,discard=false,admitted=false,gateHeld=false;
   let lockName='';
   try{
@@ -40,7 +40,7 @@ export async function readAuthorizedMergedSource(event:H3Event,input:unknown,kin
       if(kind==='history')grants.push(await captureSourceReadForActor(db,paths,actor,row.id,'source_read'));
     }
     await enterPrivateWorker();admitted=true;
-    worker=await openMergedReadWorker(paths,sources,profileSource,kind);
+    worker=await openMergedReadWorker(paths,sources,profileSource,kind,rawHistory);
     const alive=()=>{if(!worker!.alive())throw unavailable();};
     alive();connection=await db.getConnection();lockName='taiko-bind-'+hash(principal).slice(0,52);
     const [[gate]]=await connection.execute<RowDataPacket[]>('SELECT GET_LOCK(?,5) AS acquired',[lockName]);

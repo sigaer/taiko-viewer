@@ -2,7 +2,7 @@ import {randomUUID,createHash} from 'node:crypto';
 import {open,unlink} from 'node:fs/promises';
 import {constants} from 'node:fs';
 import {resolve} from 'node:path';
-import {isError,type H3Event} from 'h3';
+import {getQuery,isError,type H3Event} from 'h3';
 import {enforceTaikoOpenQuota} from '../../utils/taiko-open.ts';
 import {captureAuthorizedSourceMutation,withCapturedSourceRead,withAuthorizedSourceRead} from './source-access.ts';
 import {runSourceMutationWorker} from '../../infrastructure/account/source-mutation-worker.ts';
@@ -11,6 +11,7 @@ import {PublicationUnavailableError} from '../../infrastructure/taiko-publicatio
 import {recordPrivateSourceView} from '../../infrastructure/account/private-source-response.ts';
 import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
 import {readAuthorizedMergedSource} from './merged-source-read.ts';
+import {principalFailure} from './principal-access.ts';
 export async function sourceProxyRequest<T>(event:H3Event,apiName:string,task:()=>Promise<T>){
   try{await enforceTaikoOpenQuota(event,apiName);return await task();}
   catch(error){if(isError(error)||error instanceof PublicationUnavailableError)throw error;throw new PublicationUnavailableError();}
@@ -40,18 +41,33 @@ export async function updateAuthorizedSource(event:H3Event,sourceInput:unknown,p
   }finally{await unlink(path).catch(()=>{});}
 }
 export async function readAuthorizedSourceHistory(event:H3Event,sourceInput:unknown){
-  if(isMergedSource(sourceInput))return readAuthorizedMergedSource(event,sourceInput,'history');
+  const requested=getQuery(event).format;
+  if(requested!==undefined&&requested!=='raw-v1')throw principalFailure(400,'历史格式无效。');
+  const rawFormat=requested==='raw-v1';
+  if(isMergedSource(sourceInput))return readAuthorizedMergedSource(event,sourceInput,'history',rawFormat);
   return withAuthorizedSourceRead(event,sourceInput,'history_read',async()=>{
     const source=String(sourceInput).trim(),scope=currentScoreScope(source)!,names=(await scope.reader.listHistory(source)).filter(name=>name.startsWith('data_')&&name.endsWith('.json')).sort();
-    const snapshots:Array<{capturedAt:string;payload:Record<string,unknown>}>=[];let bytes=0;
+    if(rawFormat&&!scope.lease.view)throw new PublicationUnavailableError();
+    const snapshots:Array<{capturedAt:string;payload:Record<string,unknown>;fileName?:string;fileMtime?:number;fileCtime?:number}>=[];let bytes=0;
     for(const name of names){
       const raw=await scope.reader.readHistory(source,name);bytes+=Buffer.byteLength(raw)+Buffer.byteLength(name)+128;
       if(bytes>32*1024*1024)throw new PublicationUnavailableError();
-      try{const payload=JSON.parse(raw);if(!payload||typeof payload!=='object')continue;
-        const capturedAt=String(payload._meta?.ts||name).trim();snapshots.push({capturedAt,payload});
-      }catch{/* Invalid legacy/historical JSON is preserved but not returned as a parsed snapshot. */}
+      let payload:Record<string,any>;
+      try{payload=JSON.parse(raw);if(!payload||typeof payload!=='object')continue;
+      }catch{continue;}
+      const capturedAt=String(payload._meta?.ts||name).trim();
+      let item:{capturedAt:string;payload:Record<string,unknown>;fileName?:string;fileMtime?:number;fileCtime?:number};
+      if(rawFormat){if(Array.isArray(payload))continue;const times=await scope.lease.fileTimes('history/'+name);
+        item={capturedAt,payload,fileName:name,fileMtime:times.mtime,fileCtime:times.ctime};}
+      else item={capturedAt,payload};
+      // Include repeated timestamps and metadata in the actual serialized
+      // envelope budget, not only the source JSON bytes.
+      const outputBytes=Buffer.byteLength(JSON.stringify(item))+1;
+      bytes+=Math.max(0,outputBytes-Buffer.byteLength(raw)-Buffer.byteLength(name)-128);
+      if(bytes>32*1024*1024-512)throw new PublicationUnavailableError();
+      snapshots.push(item);
     }
     recordPrivateSourceView(event,scope.lease.view);
-    return {ok:true,taikoId:source,snapshots};
+    return {ok:true,taikoId:source,snapshots,...(rawFormat?{historyFormat:'raw-v1'}:{})};
   });
 }

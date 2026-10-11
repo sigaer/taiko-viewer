@@ -5,7 +5,7 @@ export type MergedView={identity:string;commitId:string;sequence:number};
 export type MergedWorker={views:MergedView[];ruleRevision:string;alive:()=>boolean;derive:()=>Promise<Record<string,unknown>>;close:()=>Promise<void>};
 const MAX_BYTES=32*1024*1024;
 /** One process holds all SH leases. No SQL credential enters this worker. */
-export async function openMergedReadWorker(paths:ReturnType<typeof getRuntimePaths>,sources:string[],profileSource:string,kind:'current'|'history'):Promise<MergedWorker>{
+export async function openMergedReadWorker(paths:ReturnType<typeof getRuntimePaths>,sources:string[],profileSource:string,kind:'current'|'history',rawHistory=false):Promise<MergedWorker>{
   const env:NodeJS.ProcessEnv={PYTHONDONTWRITEBYTECODE:'1'};
   for(const key of ['PATH','LANG','LC_ALL','TZ'])if(process.env[key]!==undefined)env[key]=process.env[key];
   const child:ChildProcessWithoutNullStreams=spawn('python3',['-m','scripts.merged_read_cli'],{cwd:paths.repoRoot,env,stdio:['pipe','pipe','pipe']});
@@ -36,7 +36,7 @@ export async function openMergedReadWorker(paths:ReturnType<typeof getRuntimePat
     }finally{clearTimeout(timer);chunks=[];bytes=0;}
   };
   try{
-    const ready=await send({root:paths.userdataDir,sources,profileSource,kind});
+    const ready=await send({root:paths.userdataDir,sources,profileSource,kind,rawHistory});
     if(ready?.ready!==true||ready.schema!==1||typeof ready.ruleRevision!=='string'||!/^[a-f0-9]{64}$/.test(ready.ruleRevision)||!Array.isArray(ready.views)||ready.views.length!==sources.length||ready.views.some((view:MergedView,i:number)=>view?.identity!==sources[i]||!/^[a-f0-9]{32}$/.test(view.commitId)||!Number.isSafeInteger(view.sequence)||view.sequence<0))throw new PublicationUnavailableError();
     return {views:ready.views,ruleRevision:ready.ruleRevision,alive:()=>!closed&&!failed&&!closing,
       async derive(){const result=await send({method:'derive'},90000);if(result?.ok!==true||!result.payload||typeof result.payload!=='object'||Array.isArray(result.payload))throw new PublicationUnavailableError();return result.payload;},

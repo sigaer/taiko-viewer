@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.5b",
+  "status": "CENTER_HISTORY_LOADERS_AND_PRIVATE_CACHE_CODE_ROUND_PASS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "cacheRoundStatus": "CODE_ROUND_PASS",
+  "releaseReady": false,
+  "sourceParent": "356cd1efb959eaea1cc2fb91dea179ebb80f3f7b",
+  "sourceCommit": "e87722b9054aeab34eaaeb4ebceb3abcdef630cd",
+  "sourceVersion": "9.81.18",
+  "sourceRemote": "e87722b9054aeab34eaaeb4ebceb3abcdef630cd",
+  "sourcePushVerified": true,
+  "clientParent": "adae96ea2976347386d85b416cba9e385710b43d",
+  "clientCommit": "47bf5c174ceb2d791e0cf508502fcad39d771290",
+  "clientVersion": "0.2.4",
+  "clientRemote": "47bf5c174ceb2d791e0cf508502fcad39d771290",
+  "clientPushVerified": true,
+  "viewerPreparedParent": "834962b1fd9b28d691cc5681277eb60ce093a72e",
+  "viewerPreparedVersion": "0.82.0",
+  "liveViewerVersion": "0.81.11",
+  "viewerPushedOrDeployed": false,
+  "runtimeSourceSyncedOrRestarted": false,
+  "corePins": {
+    "source": "0.1.1",
+    "client": "0.1.2 / 0b7319d"
+  },
+  "tests": {
+    "clientFinal": {
+      "passed": 153,
+      "warnings": 2,
+      "skip": 0,
+      "log": "/var/tmp/phase6-history-client-release-qa.log",
+      "wrapperSession": 61490,
+      "wrapperExit": 0,
+      "pytestSeconds": 4.92,
+      "peakCaptured": false
+    },
+    "clientIntermediate": {
+      "passed": 145,
+      "log": "/var/tmp/phase6-history-client-qa.log"
+    },
+    "source": {
+      "passed": 62,
+      "subtestsPassed": 5,
+      "log": "/var/tmp/phase6-history-round-qa.log"
+    },
+    "nodePythonPipe": {
+      "passed": 12,
+      "log": "/var/tmp/phase6-history-round-qa.log"
+    },
+    "realSqlHttp": {
+      "passed": 143,
+      "log": "/var/tmp/phase6-history-round-qa.log"
+    },
+    "typescript": {
+      "projects": [
+        "tests/fixtures/publicationLifecycle.tsconfig.json"
+      ],
+      "passed": true,
+      "log": "/var/tmp/phase6-history-round-qa.log"
+    }
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "client",
+        "exitCode": 0,
+        "seconds": 5.849
+      },
+      {
+        "name": "source",
+        "exitCode": 0,
+        "seconds": 9.508
+      },
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.59
+      },
+      {
+        "name": "node-pipe",
+        "exitCode": 0,
+        "seconds": 3.522
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 149.792
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 172.261,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791742647-1795678.service",
+    "sampledPeakBytes": 504815616,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 455276
+  },
+  "resourceScope": "Cross-repository unit measured client150/Source62+5/pipe12/SQL143/TS. Last client-only change disabled native writers, removed unused constants and bumped version; client153 reran separately. No production/million-record peak claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791742647-1795678.service",
+    "wrapperSession": 99691,
+    "wrapperExit": 0,
+    "result": "success",
+    "activeState": "inactive",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T02:17:27+08:00",
+    "ended": "2026-10-12T02:20:20+08:00"
+  },
+  "fileHashes": {
+    "source": {
+      "taiko/docs/domain-extraction-phase6-publication.md": "ced6bf002cac4ce95776fba3b00808e64c12ea390e950ee4d57e076705d88382",
+      "taiko/scripts/merged_read_cli.py": "11908c583e00b14d55a31cad6dcb0e3243de9ad7275caf4bd86d4ba1e04b2699",
+      "taiko/taiko_store/bridge.py": "91096c7c7d192e64c5f1a951a63100dc8da08adc17457719a8712797252c76f9",
+      "taiko/taiko_store/merged_read.py": "2b6d95013549d84c823628a2c24b21e5836ffd6bc7e7d72daeaf07d3677b207b",
+      "taiko/tests/test_merged_private_read.py": "6ea1abedb65ee22531992d5d51101e80b52fcc2845a3238bde0a1eea18b473a9",
+      "taiko/tests/test_publication_metadata_bridge.py": "efc92dbb277fdbe2341fa9e66ee871aa4e9520d8b7cbb793d38a15b0701c8baa",
+      "taiko/taiko_store/reader.py": "eed520e0616a3cd590abf46349d117182220fd318f89596e6ca2931ea698ed9a",
+      "taiko/taiko_store/publication.py": "f5cc402b0163933ce92aef167224c2e42759db25d15aa9a0b17b2d648a99a017",
+      "taiko/plugins/utils/merged_bind.py": "fa6934a453b5d6a94867cfe768144154fbcc07f6edbc9bf089827c2b58d7b0dc",
+      "taiko/tests/test_merged_bind.py": "0454b625902887cffcf75d950763e5e5efa083233c5d4ff63a220a29db780f75",
+      "taiko/tests/test_publication_history.py": "efef157841706213fe8a994c56e4f952d7a9e374c70ba11a0a38babd2116d114",
+      "taiko/tests/test_publication_store.py": "270c4e8b6dc6a0d3642f84fe04c2696052c407be54d1eb9becce2a4882b2f592"
+    },
+    "client": {
+      ".env.example": "2487444d17c9b5a2fd44e73a3b7526dab49d6995b6173f14642ea33d2f6ea58b",
+      "README.md": "f4502df9fe7a62a003934c5c1abe96a472be4d9a958a0f17225d40994cb48131",
+      "docs/taiko-domain-extraction/phase6-private-read-client.md": "b0490956f38e2945de56054d87e5519c5fbf4b4f7e856e506f9654a6d0b84648",
+      "plugins/taiko.py": "62a77e3faa86280035925b7ff9c46155cd1075f87aebfbb2793a436ce93ca392",
+      "plugins/utils/b30_render.py": "09510421559ee88cbb642871b7cd2f3997537459900aaa034fb353cc209390d0",
+      "plugins/utils/dani_progress.py": "936847fc877852e9f2d8f5b3d1cc535cb0c2ad0ef817dabe85167aa6e5befab6",
+      "plugins/utils/draw_dress.py": "9e3cca330629dcc8937e5b321faa4e70d47711c678117a88365822a3704f33b6",
+      "plugins/utils/draw_summary.py": "3e760b82f625d16c8b5f4df4fae214da09798acd1261a96c5f3e8786dbf53607",
+      "plugins/utils/drawinfo.py": "27fc700ae95ba9b762c9d889ca4276238415bd76ae52e823279d73fcb5a93881",
+      "plugins/utils/hiroba/sync.py": "adc3497c9939f232ca8fdee6c75d07a8c9d83e5e79ff58ed507969ef4eaf4e55",
+      "plugins/utils/merged_bind.py": null,
+      "plugins/utils/public_score_token.py": "2add11afacc423550f8563d81a9d0add929ccc5bd194c155b9802aecc03f2d65",
+      "plugins/utils/score_calculator.py": "213c87b7806fe8f346682b50ad70d2424f6ea8ae434babe603f478aa464ead37",
+      "plugins/utils/snapshot_history.py": "dcf394026c4d43c90d390d9458836f60b10e315bc35536d226c21b3e28478b55",
+      "plugins/utils/taikob_v2.py": "0b8d3328203db00f08d624e1babcebbf23346c020175804ac6af68f700f5bde4",
+      "plugins/utils/target_recommend.py": "2b8cbf5e2bbdaeeb2021886e7508878ed1a5f74476f0389bb4fe58b8814d8d31",
+      "plugins/utils/tcloud.py": "3a609e896e97e4530c9e8aa5457040ba293e194cbedaae6cf73c1e89868c0bef",
+      "plugins/utils/userdata_storage.py": "dfc0e0f19f6231a4ae40553b1e794be492573087ddc55a72009c10b99d5ad545",
+      "pyproject.toml": "4ba23111a93d147bc8769c6e47c902044ea40032efbe768b532506d5af8ce857",
+      "taiko_bot/history_adapter.py": "6f7c8167d32281867da8aa571dbff21630b8af8179c5e891b5d588f2de8eecdd",
+      "taiko_bot/local_api.py": "9695ded3808e2adea7c2cd7293c7a524324bf0950609ae299bda91c81427b5f0",
+      "taiko_bot/merged_source_id.py": "cf1490d3b2b296224a6308f4e9d1fc81599c17870065f9930e3ddc149dbcfbb1",
+      "taiko_bot/private_read_cache.py": "af24b0138544ae5d0862fd0c0241ed61fe9cd431d0a5b25b989cc25977d4b843",
+      "taiko_bot/private_read_client.py": "ba63347006ef6554769004aea22b81e96ef6e2cbbc43344b77de49d468ae5ba8",
+      "taiko_bot/storage.py": "18096bf1625406f67d21ea5f3e1459c7ca465a7c0ae42e3cb1d35d57202ec266",
+      "taiko_bot/userdata_provider.py": "df49cd0156e02bf9ab0c3a8210779fa4feeaa53990275b604718a2c7d05a6dc8",
+      "taiko_bot/viewer_client.py": "f50c946d27dd90def19f903d788df66c1b659a3313946c69bf16069392291592",
+      "tests/test_center_history_loaders.py": "17e710494d83fbea80a1df796127830a5605ccaea834fff65fe3664d367439d2",
+      "tests/test_merged_private_read.py": "e0d52b63698cb4827d59ff6cfe2fd804f537f14a47888b2afc2949d1ec0a107b",
+      "tests/test_private_local_api.py": "209d7dc6017ccd82fd528a97f35c3cc169b4e1133323397285000e95ac22ab9a",
+      "tests/test_private_read_cache.py": "aed7b67f0dea972623c66be41ee5417dc872f2ff59d9191c165233266af4b2ee",
+      "tests/test_private_renderer_reads.py": "ab935123869479a0e124044917238bbc9cd087c85716cbd27e630f15410cbd23",
+      "tests/test_public_token_center_read.py": "14f03cd20d49374e12598f7495df9dccd6626bc0281af2669a7f613e0f62cb12",
+      "tests/test_viewer_access.py": "333a0ce8bea2721f0f2f100397aef4960cc7e5138f11792471e3855645277ef1",
+      "scripts/validate_domain_migration.py": "56675a7cdbb10391cb19db708822fb70ff1ee6725a27aababb0eb0b2e2e08286"
+    },
+    "viewer": {
+      "server/infrastructure/account/merged-read-worker.ts": "7d3b2a62b33fbb944c22485aac2850cd20e8f4d12c000962d8aa237157bb2d4b",
+      "server/infrastructure/taiko-publication/client.ts": "c657385279067dae5031445cb1b795b1baca1cd4438642041efa706c7288b6a6",
+      "server/services/account/merged-source-read.ts": "c06e37c602d3d1407f23880bdec52d91d9f92c6721c08b10075c310797e2855a",
+      "server/services/account/source-proxy.ts": "acb3457d8bc58199ec7ba529e6d314d7b3e6875850cfe0e8d1491c0bbfce34f6",
+      "tests/mergedSourceSql.test.mjs": "9ea3032bffc9faa87898770ccad0ee85f26a6c0ffeaa45843b7a935aeb66e144",
+      "tests/publicationClient.test.ts": "63a7b5e5d48474776c9691772e95b1fe1e82c3d468eccd5ce586545cff242dab",
+      "tests/sourceProxySql.test.mjs": "ad2062ec68dae229e6b7dd5537e36d3a509a38bd31a306565b14fddbdb966f98",
+      "server/infrastructure/account/private-source-response.ts": "c17326389b764702ee3af271c4bf50f390b45d5692db9ed5e22b69b8434446c9",
+      "server/services/account/source-access.ts": "8db22918121b4d3fdb412b2d963fa97f61e17d1b31e9b2d9f6ee9578c1854061",
+      "tests/privateSourceConditionalSql.test.mjs": "34aef11fd19be7423f11113d1257063e362c7a0d1f9415a60673012974ac7ff7",
+      "tests/sourceAccessSql.test.mjs": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305",
+      "tests/botBindingProxySql.test.mjs": "d5d7a009ad39a4a5e62c1fc661b37a1d3f29823feaf75ba456002452929e6c10",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "3953643274cfd27a78d06d3d716e35043da1d45563f5ffebf0a7ee52fbd81d30",
+      "tests/fixtures/manualSqlRuntime.mjs": "f7960061c301f37196c9db232d8345cbfed920f0d864cfc9ee1dc3bd2404d80e",
+      "tests/fixtures/accountSourceHttp.mjs": "a3fa5cbf9e8bd0a439ec04daa8c48377c82c964e6bc5b78e66153e1e3778f7e6"
+    }
+  },
+  "hashCaptureNote": "Captured after successful QA and Source/client commits. Source/client working content agrees with their commit; Viewer implementation remained unchanged after cross-repo checks. Null hash denotes deleted obsolete merged_bind.py, recoverable from frozen client parent.",
+  "logHashes": {
+    "/var/tmp/phase6-history-client-qa.log": "7a092aa2661490368ec42b89e96a4d0098780699f7935900d87e5a460e67ee2c",
+    "/var/tmp/phase6-history-round-qa.log": "48299af6afdd68865e9a32721b99ec92be92af32cf3cbb9e56b239c5c0ee8643",
+    "/var/tmp/phase6-history-client-release-qa.log": "53f7b806802a81fa65fea088baf33c4a1a2305c1b4d89071a46bdb3841e59982"
+  },
+  "implemented": [
+    "Optional raw-v1 history DTO retains filename and captured mtime/ctime; default healthy DTO unchanged",
+    "Metadata RPC holds canonical lease, verifies bytes, rejects invalid key/corruption/staging, tolerates missing projection",
+    "u0 raw history retains recipe microseconds without filesystem stat claims; same current/history vector",
+    "Private history loader fails closed on old nonempty DTO without ordering metadata; default legacy SDK stays compatible",
+    "Frozen client filesystem oracle covers trend/full/delta/removal/previous state, filename sorting and mtime fallback",
+    "Trend metrics stream reconstructed states; update/B30/current Dani join one fresh verified C/H pair",
+    "Public local bearer rechecked after center read; no private payload on token deletion/rotation/mapping change or center denial",
+    "Local native scores/Hiroba writers return410 before any IO; existing command center proxy unchanged",
+    "Private authorized LRU, no stale/offline/disk fallback, local GET caller bearer only; u0 no local materialization"
+  ],
+  "safety": {
+    "privateFiles": "owned synthetic only",
+    "sqlite": "actual PRAGMA database_list verifies owned fixture path",
+    "mysql": "actual SELECT DATABASE() ends _test, explicit TAIKO_ALLOW_TEST_DB_MUTATION=1 inside child",
+    "productionDataCopied": false,
+    "productionSqlMutated": false,
+    "qaNetwork": "MockTransport plus owned HTTP loopback and isolated test MySQL only",
+    "secrets": "private env file, no secret values in argv/Git/evidence",
+    "unrelatedWorkPreserved": [
+      "Viewer existing untracked growth/release reports/tests",
+      "Source unrelated miku changes",
+      "client web.conf/v1_test_report.md"
+    ]
+  },
+  "limitations": [
+    "No full Nuxt/NoneBot/real upstream auth or full assets image QA claimed",
+    "B30/Dani actual preparation functions captured at render boundary; Update PNG uses small owned PIL panels",
+    "New trend aggregation comparison isolates flow using deterministic nonempty calculation values; existing Core algorithm Goldens unchanged",
+    "Local token issuer/native credentials/QQ/u0/daily and all center Writer activation still pending",
+    "Read Model/invalidation, cold/warm million-record IO/RSS, bridge budget reconciliation and trusted ops still pending",
+    "No production service grant registered, runtime adoption or deployments performed"
+  ],
+  "next": [
+    "Native Bot credential/QQ/token issuer read and mutation authority",
+    "All Source writers, u0/daily, canonical adoption and legacy Writer quiesce plan",
+    "Read Model, measurement/Goal merge, exact input versions and invalidation",
+    "Million cold/warm IO/RSS, trusted restore/cleanup/runbook",
+    "Fixed runtime dependencies, authorized activation, standard Viewer deployment and real online product smoke"
+  ]
+}

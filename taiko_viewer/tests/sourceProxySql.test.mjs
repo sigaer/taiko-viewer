@@ -24,10 +24,10 @@ async function fixture(task,{hiroba=false,manual=false}={}){
    const child=spawn('/usr/bin/python3',[center+'/tests/source_mutation_sql_child.py',file],{...options,env:{...options.env,PYTHONPATH:center+':'+center+'/tests',TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});c.children.push(child);return child;
   };
   for(const [method,path,file] of [['post','/update/:taikoId','update.post.ts'],['post','/hiroba/:taikoId','sync-hiroba.post.ts'],['get','/history/:taikoId','history.get.ts']])c.route(method,path,(await import('../server/api/taiko/proxy/userdata/[taikoId]/'+file)).default);
-  c.ask=async({kind=hiroba?'hiroba':'update',body={includeImage:false},token,cookie=c.cookie}={})=>{
-   const response=await c.request(kind==='history'?'GET':'POST',`/${kind}/${c.taikoId}`,kind==='history'?undefined:body,cookie,{'x-forwarded-for':ip,...(token?{authorization:'Bearer '+token}:{})});
-   const result=await response.json();if(!response.ok)assert.ok(!JSON.stringify(result).includes('/password/hash')&&!JSON.stringify(result).includes('synthetic-password'));
-   return {status:response.status,body:result};
+  c.ask=async({kind=hiroba?'hiroba':'update',body={includeImage:false},token,cookie=c.cookie,format,etag}={})=>{
+   const response=await c.request(kind==='history'?'GET':'POST',`/${kind}/${c.taikoId}`+(format?'?format='+encodeURIComponent(format):''),kind==='history'?undefined:body,cookie,{'x-forwarded-for':ip,...(token?{authorization:'Bearer '+token}:{}),...(etag?{'if-none-match':etag}:{})});
+   const raw=await response.text(),result=raw?JSON.parse(raw):null;if(!response.ok)assert.ok(!JSON.stringify(result).includes('/password/hash')&&!JSON.stringify(result).includes('synthetic-password'));
+   return {status:response.status,body:result,headers:response.headers};
   };
   try{await task(c);}finally{
    for(const child of c.children){if(child.exitCode===null&&child.signalCode===null){child.kill('SIGTERM');await bounded(new Promise(r=>child.once('close',r)));}assert.ok(child.exitCode!==null||child.signalCode!==null,'Owned proxy worker remains');}
@@ -126,6 +126,30 @@ test('history keeps exact filename order/meta timestamp/unknown payload and skip
 test('history service scope is separate from raw source scope',{timeout:20000},()=>fixture(async c=>{
  await c.pool.execute('DELETE FROM web_taiko_bindings WHERE id=?',[c.bindingId]);await c.register(['source_read']);assert.equal((await c.ask({kind:'history',token:c.rawToken,cookie:''})).status,403);
  await c.register(['history_read']);assert.equal((await c.ask({kind:'history',token:c.rawToken,cookie:''})).status,200);
+}));
+test('raw-v1 history preserves canonical filename/times and default DTO, validates before 304',{timeout:25000},()=>fixture(async c=>{
+ const {openPublicationLease}=await import('../server/infrastructure/taiko-publication/client.ts');
+ const held=await openPublicationLease({root:c.config.userdataDir,repoRoot:c.config.repoRoot,identity:c.taikoId,mode:'write'});
+ let manifest;
+ try{await held.put('history/data_unknown.json','{"_meta":{"ts":" "},"unknown":1}');manifest=await held.publish();}finally{await held.close();}
+ const normal=await c.ask({kind:'history'}),raw=await c.ask({kind:'history',format:'raw-v1'});
+ assert.equal(normal.status,200);assert.equal(raw.status,200);assert.equal(raw.body.historyFormat,'raw-v1');assert.equal(normal.body.historyFormat,undefined);
+ assert.deepEqual(raw.body.snapshots.map(({capturedAt,payload})=>({capturedAt,payload})),normal.body.snapshots);
+ const item=raw.body.snapshots.find(item=>item.fileName==='data_unknown.json');assert.equal(item.capturedAt,'');assert.equal(item.fileMtime,manifest.fileMtimes['history/data_unknown.json']);assert.equal(item.fileCtime,manifest.fileCtimes['history/data_unknown.json']);
+ assert.equal(raw.headers.get('x-taiko-source-view'),normal.headers.get('x-taiko-source-view'));assert.notEqual(raw.headers.get('etag'),normal.headers.get('etag'));
+ await unlink(resolve(c.config.userdataDir,c.taikoId,'data_unknown.json'));
+ assert.deepEqual((await c.ask({kind:'history',format:'raw-v1'})).body,raw.body);
+ assert.equal((await c.ask({kind:'history',format:'raw-v1',etag:raw.headers.get('etag')})).status,304);
+ await c.pool.execute('DELETE FROM web_taiko_bindings WHERE id=?',[c.bindingId]);
+ const denied=await c.ask({kind:'history',format:'raw-v1',etag:raw.headers.get('etag')});assert.equal(denied.status,403);assert.equal(denied.headers.get('etag'),null);
+}));
+test('unknown history format is rejected and raw metadata corruption never returns a partial history',{timeout:25000},()=>fixture(async c=>{
+ assert.equal((await c.ask({kind:'history',format:'unknown'})).status,400);
+ const raw=await c.ask({kind:'history',format:'raw-v1'});assert.equal(raw.status,200);
+ const manifest=JSON.parse(await readFile(resolve(c.config.userdataDir,'.taiko-publications',c.taikoId,'committed.json'),'utf8'));
+ const key=Object.keys(manifest.files).find(key=>key.startsWith('history/'));
+ await writeFile(resolve(c.config.userdataDir,'.taiko-publications',c.taikoId,'objects',manifest.files[key].sha256),'corrupt');
+ const failed=await c.ask({kind:'history',format:'raw-v1',etag:raw.headers.get('etag')});assert.equal(failed.status,503);assert.equal(failed.headers.get('etag'),null);
 }));
 test('manual source cannot be externally acquired even by registered service',{timeout:20000},()=>fixture(async c=>{
  await c.register();const before=await sourceSnapshot(c);assert.equal((await c.ask({token:c.rawToken,cookie:''})).status,400);assert.deepEqual(await sourceSnapshot(c),before);

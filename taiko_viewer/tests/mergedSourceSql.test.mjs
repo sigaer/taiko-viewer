@@ -28,8 +28,8 @@ async function fixture(task,{service=false,manual=false}={}){
   c.route('get','/merged-current/:userid',(await import('../server/api/developer/userdata/[userid].get.ts')).default);
   c.route('get','/merged-history/:taikoId',(await import('../server/api/taiko/proxy/userdata/[taikoId]/history.get.ts')).default);
   const ip='fd01:'+nonce().slice(0,4)+':'+nonce().slice(0,4)+'::1';
-  c.ask=async(kind='current',{etag,cookie=service?'':c.cookie,token=service?c.rawToken:undefined,identity=c.identity}={})=>{
-   const response=await c.request('GET','/merged-'+kind+'/'+identity,null,cookie,{'x-forwarded-for':ip,...(etag?{'if-none-match':etag}:{}),...(token?{authorization:'Bearer '+token}:{})});
+  c.ask=async(kind='current',{etag,cookie=service?'':c.cookie,token=service?c.rawToken:undefined,identity=c.identity,format}={})=>{
+   const response=await c.request('GET','/merged-'+kind+'/'+identity+(format?'?format='+encodeURIComponent(format):''),null,cookie,{'x-forwarded-for':ip,...(etag?{'if-none-match':etag}:{}),...(token?{authorization:'Bearer '+token}:{})});
    const raw=await response.text();return {status:response.status,headers:response.headers,etag:response.headers.get('etag'),raw,body:raw?JSON.parse(raw):null};
   };
   c.heads=async()=>Promise.all([c.taikoId,c.second].map(async id=>JSON.parse(await readFile(resolve(c.config.userdataDir,'.taiko-publications',id,'committed.json'),'utf8'))));
@@ -80,6 +80,15 @@ test('current and history identify the same vector and an H-only new head refres
  const {openPublicationLease}=await import('../server/infrastructure/taiko-publication/client.ts');const lease=await openPublicationLease({root:c.config.userdataDir,repoRoot:c.config.repoRoot,identity:c.second,mode:'write'});
  try{await lease.put('history/data_9999.json','{"_meta":{"full":false},"songs":[]}');await lease.publish();}finally{await lease.close();}
  const hit=await c.ask('current',{etag:first.etag});assert.equal(hit.status,304);assert.notEqual(hit.headers.get('x-taiko-source-view'),first.headers.get('x-taiko-source-view'));
+}));
+test('raw merged history keeps recipe microseconds and pairs with the same current vector',{timeout:25000},()=>fixture(async c=>{
+ const current=await c.ask(),normal=await c.ask('history'),raw=await c.ask('history',{format:'raw-v1'});
+ assert.equal(raw.status,200);assert.equal(raw.body.historyFormat,'raw-v1');assert.equal(raw.headers.get('x-taiko-source-view'),current.headers.get('x-taiko-source-view'));
+ assert.deepEqual(raw.body.snapshots.map(({capturedAt,payload})=>({capturedAt,payload})),normal.body.snapshots);
+ for(const item of raw.body.snapshots){assert.match(item.fileName,/^data_\d{8}_\d{6}_\d{6}_merged-bind\.json$/);assert.equal(item.fileMtime,undefined);assert.equal(item.fileCtime,undefined);}
+ assert.notEqual(raw.etag,normal.etag);assert.equal((await c.ask('history',{format:'raw-v1',etag:raw.etag})).status,304);
+ await c.pool.execute('DELETE FROM web_taiko_bindings WHERE id=?',[c.secondBinding]);
+ assert.equal((await c.ask('history',{format:'raw-v1',etag:raw.etag})).status,403);
 }));
 test('membership change while queued for SH cannot derive from old members',{timeout:25000},()=>fixture(async c=>{
  const {openPublicationLease}=await import('../server/infrastructure/taiko-publication/client.ts');const held=await openPublicationLease({root:c.config.userdataDir,repoRoot:c.config.repoRoot,identity:c.second,mode:'write'});

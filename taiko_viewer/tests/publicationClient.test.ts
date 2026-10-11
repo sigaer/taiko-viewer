@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, readFile, rm, mkdir, writeFile, utimes, stat } from "node:fs/promises";
+import { mkdtemp, readFile, rm, mkdir, writeFile, utimes, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { openPublicationLease, withPublicationLease, PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 
@@ -55,6 +55,25 @@ test("actual pipe retains distinct legacy times for equal-content history object
     assert.equal(manifest.fileMtimes!["history/data_legacy_b.json"], 1737086400.375);
     assert.ok(Math.abs(manifest.fileCtimes!.current - before.ctimeMs / 1000) < .001);
   });
+  await unlink(join(root, "synthetic", "data_legacy_a.json"));
+  await unlink(join(root, "synthetic", "data_legacy_b.json"));
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "read" }, async lease => {
+    assert.equal((await lease.fileTimes("history/data_legacy_a.json")).mtime, 1737000000.125);
+    assert.equal((await lease.fileTimes("history/data_legacy_b.json")).mtime, 1737086400.375);
+  });
+}));
+
+test("metadata RPC fails closed for absent keys, canonical corruption and staged bytes", async () => fixture(async root => {
+  let hash = "";
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    await lease.put("current", "{}"); hash = (await lease.publish()).files.current.sha256;
+  });
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "read" }, lease => lease.fileTimes("history/data_absent.json")), PublicationUnavailableError);
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    await lease.put("current", "{}"); await lease.fileTimes("current");
+  }), PublicationUnavailableError);
+  await writeFile(join(root, ".taiko-publications", "synthetic", "objects", hash), "corrupt");
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "read" }, lease => lease.fileTimes("current")), PublicationUnavailableError);
 }));
 
 test("actual pipe backup/delete/restore keeps the captured source filesystem times", async () => fixture(async root => {

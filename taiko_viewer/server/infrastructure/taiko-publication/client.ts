@@ -25,6 +25,7 @@ export class PublicationUnavailableError extends Error {
 export type PublicationLease = {
   view: PublicationManifest | null;
   alive: () => boolean;
+  fileTimes: (key:string) => Promise<{mtime:number;ctime:number}>;
   put: (key: string, body: string) => Promise<PublicationReference>;
   remove: (key: string) => Promise<void>;
   backup: (backupKey: string) => Promise<SourceBackupReceipt>;
@@ -128,6 +129,11 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
     const lease: PublicationLease = {
       view: ready.view,
       alive: () => !failed && !closed && !closing,
+      async fileTimes(key){
+        const response=await send({method:'file-times',key}),times=response.times as {mtime:number;ctime:number}|undefined;
+        if(!times||!Number.isFinite(times.mtime)||!Number.isFinite(times.ctime))throw new PublicationUnavailableError();
+        return times;
+      },
       async put(key, body) {
         const response = await send({ method: "put", key, body });
         const reference = response.reference as PublicationReference | undefined;

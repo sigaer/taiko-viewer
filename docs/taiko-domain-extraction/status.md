@@ -4,7 +4,7 @@
 
 Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS；开始 Phase 6 ownership、publication、Read Model 与 storage 决策。先前内存准入阻碍已解除，历史记录保留。
 
-当前6.3e.8.5a STEP_PASS：中心u0同时持有所有成员SH并证明principal/全部Source，合并版本含公开规则参考；13 Source、120 client、140真实SQL/HTTP及局部TS通过。[证据](evidence/phase6-merged-read-validation.json)。6.3e.8.5缓存轮仍IN_PROGRESS，历史loader/渲染joins/其余fallback与最终回归尚未完成，未部署。
+当前6.3e.8.5b CODE_ROUND_PASS：私有条件缓存/u0/中心历史loaders与同版本渲染joins完成；最终153 client、62 Source+5subtests、12 pipe、143真实SQL/HTTP及TS通过。[证据](evidence/phase6-client-history-validation.json)。Source9.81.18与client0.2.4已标准commit/push；Viewer0.82.0仍为本地预备版本，线上0.81.11。继续native Bot credentials/QQ/token issuer、全部Writer/P1a、Read Model与成本/运维/统一激活，Gate6 IN_PROGRESS。
 
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
@@ -14,7 +14,7 @@ Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS�
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
 | 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
-| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–9、6.3e.1–7、6.3e.8.1–4及8.5a已留档；私有条件读取/u0中心多成员视图通过13 Source/120 client/140 SQL及TS；待历史消费者、缓存轮最终回归、其余Writer、Read Model、成本/运维及统一发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json)、[最新验证](evidence/phase6-merged-read-validation.json) |
+| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–9、6.3e.1–7、6.3e.8.1–4及8.5a/b已留档；缓存/历史读取源码轮通过153 client、62 Source+5subtests、12 pipe、143 SQL及TS；待native Bot credentials/QQ/token issuer、全部Writer/P1a、Read Model、成本/运维及统一发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json)、[最新验证](evidence/phase6-client-history-validation.json) |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -108,3 +108,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.3e.8.4：Hiroba status/bind私有授权、兼容Fernet纯discovery worker/stdin、credential+QQ+receipt单次事务、keyed intent nonce与fresh ACK proof完成；134/170 Source、59 client、158 offline/477 guarded SQL及两组TS PASS，旧ownerless adapter410。Source5c99dbd/9.81.13与clientadae96e/0.2.3已push、实际远端与14/5受测哈希一致；Viewer0.82.0本地留档，R/live unchanged。缓存/Native Bot writer/全Writer/P1a/Read Model/成本/ops/发布及在线Gate仍待，Gate6 IN_PROGRESS。
 
 - 2026-10-12 / 6.3e.8.5a：中心u0私有current/history同时SH→principal gate→SQL完整证明，冻结旧merge/history/profile/append语义；Source9.81.16/fb8f3a2及公开规则参考revision追加9.81.17/356cd1e已标准push。13 Source/120 B/140 actual _test SQL及TS PASS，最终159.063s/490.070MiB sampled/high-max-OOM0，wrapper exit0/journal成功/cgroup gone。Viewer0.82.0本地预备提交，B缓存轮仍未完成/未提交，运行R/线上0.81.11/PIDs不变；下一步历史磁盘loaders、renderer joins/public bearer fallback及完整Read Model/Writer/成本/ops/最终发布，Gate6 IN_PROGRESS。
+
+- 2026-10-12 / 6.3e.8.5b：中心raw-v1排序元数据、冻结历史loaders/current-H joins与private cache源码轮完成；153 client、62 Source+5subtests、12 pipe、143 SQL及TS PASS。跨仓库172.261s/481.43MiB sampled/high-max-OOM0；最后client-only153另跑。A e87722b /9.81.18与B47bf5c1 /0.2.4 commit/push远端核验；Viewer0.82本地预备，R/live0.81.11不变。Gate6仍IN_PROGRESS，继续native Bot authority、全Writer/P1a/Read Model/成本-运维和统一激活/在线验收。
