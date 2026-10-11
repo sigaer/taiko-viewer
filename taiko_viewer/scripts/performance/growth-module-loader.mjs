@@ -18,7 +18,7 @@ export async function importGrowthModule(relative, { userdataDir, before = false
   if (hooks) globalThis[hookKey] = hooks;
   const load = async path => {
     if (cache.has(path)) return cache.get(path);
-    if (path === resolve(root, "server/internal/account/shared.ts")) {
+    if (path === resolve(root, "server/internal/account/shared.ts") || path === resolve(root, "server/infrastructure/runtime-paths.ts")) {
       if (!userdataDir) throw new Error("Offline evidence requires injected paths");
       return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)},repoRoot:${JSON.stringify(process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko")}});`);
     }

@@ -1,3 +1,5 @@
+import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
+export { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants, readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
@@ -191,14 +193,7 @@ export type EditableSongFields = {
   combo_cnt?: number;
 };
 
-export const getRuntimePaths = () => {
-  const runtimeConfig = useRuntimeConfig();
-  const repoRoot = String(runtimeConfig.repoRoot || process.env.TAIKO_REPO_ROOT || resolve(process.cwd(), ".."));
-  const userdataDir = String(runtimeConfig.userdataDir || process.env.TAIKO_USERDATA_DIR || resolve(repoRoot, "userdata"));
-  const configPath = String(runtimeConfig.taikoConfigPath || process.env.TAIKO_CONFIG_PATH || resolve(repoRoot, "config.json"));
-  const cacheDir = String(runtimeConfig.accountCacheDir || process.env.TAIKO_ACCOUNT_CACHE_DIR || resolve(process.cwd(), ".data", "account-cache"));
-  return { repoRoot, userdataDir, configPath, cacheDir };
-};
+
 
 const getIniValue = (content: string, key: string) => {
   const match = content.match(new RegExp(`^${key}\\s*=\\s*(.+)$`, "m"));
@@ -634,7 +629,7 @@ export const readRawUserdataText = async (taikoId: string) => withDomainScoreRea
   return domainScoreReader().readRawCurrent(taikoId);
 });
 
-export const withUserdataWriteLock = withDomainScoreWrite;
+export const withUserdataWriteLock = <T>(identity: string, task: () => Promise<T>) => withDomainScoreWrite(identity, task);
 
 export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   const rankCounts = Array.from({ length: 7 }, () => 0);

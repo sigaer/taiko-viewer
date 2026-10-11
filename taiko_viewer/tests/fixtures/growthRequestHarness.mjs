@@ -60,7 +60,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
   globalThis[key] = state;
   const stub = name => url(Object.keys(state[name]).filter(exportName => exportName !== 'default').map(exportName => `export const ${exportName}=globalThis[${JSON.stringify(key)}][${JSON.stringify(name)}][${JSON.stringify(exportName)}];`).join('\n'));
   const overrideEntries = [
-    ['server/internal/account/shared.ts', 'shared'], ['server/utils/account-db.ts', 'safeDb'], ['server/services/content.ts', 'content'],
+    ['server/internal/account/shared.ts', 'shared'], ['server/infrastructure/runtime-paths.ts', 'shared'], ['server/utils/account-db.ts', 'safeDb'], ['server/services/content.ts', 'content'],
     ['server/services/account/personal.ts', 'personal'], ['server/services/goals/store.ts', 'goalStore'],
     ['server/services/goals/evaluation-store.ts', 'goalEvaluation'], ['server/services/growth-history/goals.ts', 'goalFacts'],
     ['server/services/growth-history/model-revision.ts', 'model'], ['server/services/growth-history/measurements.ts', 'measurements'],

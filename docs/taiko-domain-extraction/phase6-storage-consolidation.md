@@ -84,3 +84,16 @@ Manual 永久删除当前直接 rename C 与整个历史目录、吞掉 rename �
 选型：保留 identity/product SQL 权威；manual lifecycle 以一次 SQL owner 清理事务配合可恢复 source tombstone 和 durable operation receipt/outbox，明确跨系统恢复方向，不冒称 SQL+FS 联合事务。Source EX → SQL owner/bindings 的顺序须统一，owner 撤销后所有普通读写 grant 拒绝，再完成/恢复 canonical C/H 清理。备份保持有界、私有、verified current/H，并覆盖独立 daily archive；错误不能吞掉。新 SQL receipt 是 Infrastructure lifecycle 记录，不是把 score facts 改成 DB authority；具体 schema/恢复 worker 要在 synthetic 与实际 `_test` DB guard 下验证后才采用。此处为已完成源码审阅与自主技术选择，**实现、故障验证与生产激活均待执行**；不能 PASS 6.3d/Gate 6。
 
 服务复核：Viewer PID 1063394、sync receiver PID 1063408 仍 active。实际单位名是 `taiko-sync-receiver.service`，不要把脚本文件名猜成 `taiko-sync-dispatch.service`；本步骤没有部署/重启。日更新服务由原任务运行，不能终止或排除其经验证的 title/song relation 变更。
+
+
+## 6.3d.1 Goal source/SQL 锁顺序完成
+
+Goal create/evaluate 先持有 source SH view，再进入 user/binding SQL `FOR UPDATE`；Python Overview 仍在 SQL 事务外。SQL store 锁定 binding 后核对 id、taiko id、source，same-row 身份变化会在读取 snapshot 之前冲突。原 expected active Goal / score revision、幂等 baseline、completion、cancellation 规则保留；cancel 不读取 score，无需新增 source 锁。
+
+实际 native ESM 测试暴露此前 esbuild bundle 未暴露的 shared/publication 初始化顺序问题：`withUserdataWriteLock` 的 eager alias 可访问尚未初始化的函数。将唯一 `getRuntimePaths` 抽到 Infrastructure 独立模块、shared 继续 re-export，publication 不再导入 shared，并保留延迟 Writer wrapper，消除循环依赖。运行配置含义/默认值无变；Growth 离线 loader 注入同步适配。
+
+最终 114 offline Node + 5 real SQL tests、局部 TypeScript PASS。新 3 SQL/bridge 用例执行实际 Goal service/store、实际账户 score Writer、kernel lease 与 MySQL owner/binding locks，核对进入 SQL connection 前 SH 已取得，Goal owner 锁持有时独立 Writer 未进入 EX，完成后 Writer 正常提交；eval 不额外调用 Growth Python，same binding row source substitution 被拒绝。真实 `SELECT DATABASE()` 返回 `taiko_annual_poster_test`，显式 mutation opt-in=1，仅本次合成 owner rows，finally 清理；未连/复制生产 DB。旧 SQL Goal completion/并发/隐私 cleanup 回归保持。
+
+此测试库的 song lock FK 不存在（历史独立 test bootstrap），因此**不是实际 FK enforcement 验证**，不重新要求 REFERENCES/full staging/B-0；通过实际 source lease/owner lock 顺序与独立 Writer 无法进入 EX，验证已消除这条反向锁依赖。生产 FK 的定义已经源码审阅，后续 lifecycle 仍需保持相同 Source→SQL 顺序。综合 49.426 秒，250 ms sampled cgroup peak 299,700,224 bytes（约 285.82 MiB），high/max/OOM events=0。[证据](evidence/phase6-goal-lock-order-validation.json)。
+
+本步骤本地提交，未 sync/deploy；继续 6.3d.2 manual owner/recovery 与 pending operation 实现，不提前 PASS 全 6.3d/Gate 6。

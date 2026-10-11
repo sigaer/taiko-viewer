@@ -1,0 +1,110 @@
+{
+  "phase": 6,
+  "step": "6.3d.1-goal-source-sql-order",
+  "status": "LOCK_ORDER_SLICE_PASS_PENDING_LIFECYCLE_AND_PHASE_RELEASE",
+  "date": "2026-10-11T09:54:31.246715+08:00",
+  "viewer_version": "0.82.0 (local unreleased)",
+  "tests": {
+    "offline_node": 114,
+    "real_sql_node": 5,
+    "new_goal_source_sql_cases": 3,
+    "failures": 0,
+    "typescript": "PASS"
+  },
+  "test_database": {
+    "actual_select_database": "taiko_annual_poster_test",
+    "explicit_mutation_opt_in": true,
+    "production_connection": false,
+    "production_data_copy": false,
+    "synthetic_owned_rows_cleanup": true,
+    "song_lock_foreign_key_present": false,
+    "claim": "Real Goal owner row locks, real kernel leases, actual account Writer, binding identity rejection and SQL compatibility. No real FK enforcement proof in this test DB."
+  },
+  "resources": {
+    "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791683523-1107161.service",
+    "durationMs": 49426,
+    "sampledMemoryPeakBytes": 299700224,
+    "sampleIntervalMs": 250,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "processes": [
+      {
+        "Name": "MainThread",
+        "VmHWM": "49012 kB",
+        "VmRSS": "48960 kB"
+      }
+    ]
+  },
+  "source_files": [
+    {
+      "path": "taiko_viewer/server/infrastructure/runtime-paths.ts",
+      "sha256": "67061c1d2da705f797bc855e9576c7b5a5ad481e224621966cc786f64788af11"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/shared.ts",
+      "sha256": "6c2245021c18f3c1ac3201fb52eecf5d9878d27cf4324a12900c3452dc1db43c"
+    },
+    {
+      "path": "taiko_viewer/server/services/taiko-domain/publication.ts",
+      "sha256": "d15ee7604c7fba0304b588eb863893afaef0c52e83dbe25eb20322c8211fa1c7"
+    },
+    {
+      "path": "taiko_viewer/server/services/goals/store.ts",
+      "sha256": "64ab38e7cc249a85e5dd3e94493672b9bb6f2dc686a6936bdf5971837ad7af82"
+    },
+    {
+      "path": "taiko_viewer/server/services/goals/evaluation-store.ts",
+      "sha256": "5987ac0e45d8beb7239732f57c561c118e860a08e8c4ebb31a2d5f955d871d69"
+    },
+    {
+      "path": "taiko_viewer/server/services/goals/service.ts",
+      "sha256": "936b76e81016391ee8cae14926e0dcd00b8d87f35dc3ba366a9165368bca81d6"
+    },
+    {
+      "path": "taiko_viewer/server/services/goals/evaluation.ts",
+      "sha256": "64a778ef3676ea9502ef7cabb325044dea9af23277d569f0927c8904c27e0d02"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/goalServiceHarness.mjs",
+      "sha256": "c3ce3c791e12765c60a7468a2e6e2f57b1347375299235d5b6d14af06895e1b1"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs",
+      "sha256": "8600675c27da681bcb8e9b9a81aedf6f25b5e7643f75ceae852dc9f6e0144c44"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/growthRequestHarness.mjs",
+      "sha256": "12ad4bb5d430f87edfb043d5b84b6ebdb9f1a5172fff6be5fed82a1a583a1ede"
+    },
+    {
+      "path": "taiko_viewer/scripts/performance/growth-module-loader.mjs",
+      "sha256": "79acef14208d4086da9d0e3c10ffb492f414f8643dc18fc27f76160b4737036a"
+    },
+    {
+      "path": "taiko_viewer/tests/goalPublicationSql.test.mjs",
+      "sha256": "959d6ee873eb09f8773b1e24d2eea9c82163434a2ff1e3d524a499c5eb190b8a"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/var/tmp/phase6-goal-final-qa.log",
+      "sha256": "a52b1d3c60ca2ffbba3971dad28000fa9d451f44d4eda4556bc98ef4960890f2"
+    },
+    {
+      "path": "/var/tmp/phase6-sql-preflight.log",
+      "sha256": "4929891e36a19523287fa29f091e5d8555c62c8f706eb883479e82dfd7d120e1"
+    }
+  ],
+  "initial_failure": {
+    "kind": "ESM_TEMPORAL_DEAD_ZONE",
+    "finding": "actual native ESM import order publication -> shared read eager alias before initialization; bundled-only tests had hidden this failure",
+    "resolution": "runtime path factory moved to independent Infrastructure module, lazy Writer wrapper; reran native ESM SQL and all affected reader fixtures"
+  },
+  "boundaries": {
+    "catalog_and_growth_python": "synthetic; no production calc or private records",
+    "whole_server_typecheck_claim": false,
+    "runtime_sync_or_deploy": false,
+    "manual_lifecycle": "pending",
+    "all_writers_ready": false,
+    "phase6_gate": "IN_PROGRESS"
+  }
+}

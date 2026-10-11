@@ -6,6 +6,7 @@ import { getSongCatalog } from '../content';
 import { goalBaseline, goalOptions, goalTarget, goalChartAvailable } from '../../../utils/playerGoal';
 import { GoalConflict, mutateGoal } from './store';
 import { readGoalSnapshot } from './snapshot';
+import { withDomainScoreRead } from '../taiko-domain/publication.ts';
 import type { GoalType } from '../../../types/player-goal';
 
 export async function writePlayerGoal(userId: number, body: Record<string, unknown>, cancel = false) {
@@ -22,7 +23,8 @@ export async function writePlayerGoal(userId: number, body: Record<string, unkno
     if (overview.profileId !== body.profileId) throw new GoalConflict('profile-changed');
     const index = overview.todayPlan.items.findIndex(item => item.songId === body.songId && item.difficultyType === body.difficultyType);
 
-    const activeGoal = await mutateGoal(getAccountDb(), userId, body.profileId, body.expectedActiveGoalId as string | null, async (active, connection) => {
+    // Source leases precede SQL owner/FK locks for every score-consuming mutation.
+    const activeGoal = await withDomainScoreRead(binding.taiko_id, () => mutateGoal(getAccountDb(), userId, body.profileId as string, body.expectedActiveGoalId as string | null, async (active, connection) => {
       if (active && active.songId === body.songId && active.difficultyType === body.difficultyType && active.goalType === body.goalType) return active;
       if (index < 0 || overview.scoreRevision !== body.scoreRevision) throw new GoalConflict('stale-plan');
       const item = overview.todayPlan.items[index];
@@ -35,7 +37,7 @@ export async function writePlayerGoal(userId: number, body: Record<string, unkno
       const type = body.goalType as GoalType;
       if (!goalOptions(baseline, binding.source, available).includes(type)) throw createError({ statusCode: 400, statusMessage: 'goal-unavailable' });
       return { profileId: String(binding.id), songId: item.songId, difficultyType: item.difficultyType, title: item.title, starLevel: item.starLevel, goalType: type, baselineVersion: 1, baseline, source: 'today-plan', sourceBasis: item.targetDimension, sourceMode: item.reason === 'general-fallback' ? 'general-fallback' : 'dimension', sourceRank: index + 1, sourceRevision: overview.scoreRevision!, sourceGeneratedAt: overview.sourceGeneratedAt!, targetData: goalTarget(type), status: 'active', createdAt: '', cancelledAt: null, unavailable: false };
-    });
+    }, { taikoId: binding.taiko_id, source: binding.source }));
     return { activeGoal, profileId: String(binding.id) };
   } catch (error) {
     if (error instanceof GoalConflict || (error as { code?: string })?.code === 'ER_DUP_ENTRY') throw createError({ statusCode: 409, statusMessage: 'goal-conflict' });

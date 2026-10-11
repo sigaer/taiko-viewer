@@ -1,20 +1,22 @@
 import type { Pool, PoolConnection, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import type { PlayerGoal } from '../../../types/player-goal.ts';
 export class GoalConflict extends Error {}
+export type GoalBindingIdentity = { taikoId: string; source: string };
 export async function readActiveGoal(db: Pick<Pool, 'execute'> | PoolConnection, userId: number, bindingId: number): Promise<PlayerGoal | null> {
   const [rows] = await db.execute<RowDataPacket[]>('SELECT g.id, g.goal_data FROM web_player_goals g JOIN web_taiko_bindings b ON b.id=g.binding_id AND b.user_id=g.user_id JOIN web_user_accounts u ON u.id=g.user_id WHERE g.user_id=? AND g.binding_id=? AND g.status=\'active\' LIMIT 1', [userId, bindingId]);
   return rows[0] ? { ...JSON.parse(rows[0].goal_data), id: String(rows[0].id) } : null;
 }
 // The binding lock serializes writes and conflicts with switch/unbind updates.
 // No Python computation runs while this transaction holds a lock.
-export async function mutateGoal(db: Pool, userId: number, profileId: string, expectedId: string | null, prepare: null | ((active: PlayerGoal | null, connection: PoolConnection) => Promise<Omit<PlayerGoal, 'id'>>)): Promise<PlayerGoal | null> {
+export async function mutateGoal(db: Pool, userId: number, profileId: string, expectedId: string | null, prepare: null | ((active: PlayerGoal | null, connection: PoolConnection) => Promise<Omit<PlayerGoal, 'id'>>), sourceIdentity?: GoalBindingIdentity): Promise<PlayerGoal | null> {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
     const [owners] = await connection.execute<RowDataPacket[]>('SELECT id FROM web_user_accounts WHERE id=? FOR UPDATE', [userId]);
     if (!owners.length) throw new GoalConflict('owner-deleted');
-    const [bindings] = await connection.execute<RowDataPacket[]>('SELECT id FROM web_taiko_bindings WHERE user_id=? ORDER BY is_current DESC, id ASC FOR UPDATE', [userId]);
+    const [bindings] = await connection.execute<RowDataPacket[]>('SELECT id,taiko_id,source FROM web_taiko_bindings WHERE user_id=? ORDER BY is_current DESC, id ASC FOR UPDATE', [userId]);
     if (String(bindings[0]?.id) !== profileId) throw new GoalConflict('profile-changed');
+    if (sourceIdentity && (bindings[0]?.taiko_id !== sourceIdentity.taikoId || bindings[0]?.source !== sourceIdentity.source)) throw new GoalConflict('profile-changed');
     const active = await readActiveGoal(connection, userId, Number(profileId));
     if (expectedId !== null && (active?.id || null) !== expectedId) throw new GoalConflict('goal-changed');
     const next = prepare ? await prepare(active, connection) : null;

@@ -1,4 +1,4 @@
-import { getRuntimePaths } from "../../internal/account/shared.ts";
+import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication } from "../../infrastructure/taiko-publication/scope.ts";
 
 const options = (identity: string) => {
