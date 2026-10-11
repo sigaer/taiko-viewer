@@ -19,18 +19,19 @@ const publicErrors = new WeakSet<Error>();
 const failure = (status:number, message:string) => {const e=createError({statusCode:status,statusMessage:message});publicErrors.add(e);return e;};
 const denied = () => failure(403,'没有访问该账号成绩的权限');
 const unauthorized = () => failure(401,'请登录或使用已授权的访问凭据');
-const safe = (error:unknown) => error instanceof Error && publicErrors.has(error) ? error : new PublicationUnavailableError();
+export const safeSourceError = (error:unknown) => error instanceof Error && publicErrors.has(error) ? error : new PublicationUnavailableError();
+const safe=safeSourceError;
 const same = (a:unknown,b:unknown) => JSON.stringify(a) === JSON.stringify(b);
 
-async function readActor(db:Pool,kind:Actor['kind'],credential:string):Promise<Actor> {
+export async function readActor(db:Pick<Pool,'execute'>,kind:Actor['kind'],credential:string,locked=false):Promise<Actor> {
   const sql=kind==='session' ? `SELECT a.id AS user_id FROM web_user_sessions s JOIN web_user_accounts a ON a.id=s.user_id
     WHERE s.session_token=? AND s.expires_at>NOW() LIMIT 1` : `SELECT CAST(t.id AS CHAR) AS token_id,t.user_id FROM web_developer_tokens t
     JOIN web_user_accounts a ON a.id=t.user_id WHERE t.token_hash=? AND t.status='active' AND t.revoked_at IS NULL LIMIT 1`;
-  const [rows]=await db.execute<RowDataPacket[]>(sql,[credential]);const row=rows[0];
+  const [rows]=await db.execute<RowDataPacket[]>(sql+(locked?' FOR UPDATE':''),[credential]);const row=rows[0];
   if(!row || !Number.isSafeInteger(Number(row.user_id)) || Number(row.user_id)<=0) throw unauthorized();
   return Object.freeze({kind,credential,userId:Number(row.user_id),...(kind==='developer'?{tokenId:String(row.token_id)}:{})});
 }
-async function captureActor(event:H3Event,db:Pool) {
+export async function captureActor(event:H3Event,db:Pool) {
   const header=getHeader(event,'authorization');
   if(header!==undefined){const match=/^Bearer ([A-Za-z0-9_-]{16,256})$/i.exec(header.trim());if(!match)throw unauthorized();
     return readActor(db,'developer',createHash('sha256').update(match[1]).digest('hex'));}

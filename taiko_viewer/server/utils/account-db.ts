@@ -5,7 +5,8 @@ import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/c
 import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-confirmation-schema";
 import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
 import { SCORE_TOKEN_TABLE_SQL } from "../infrastructure/account/score-token";
-import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL } from "../infrastructure/account/source-service-schema";
+import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL, SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from "../infrastructure/account/source-service-schema";
+import { BOT_BINDING_OPERATION_TABLE_SQL } from "../infrastructure/account/bot-binding-schema";
 import { HIROBA_CREDENTIAL_TABLE_SQL } from "../infrastructure/account/hiroba-credential-schema";
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from "../infrastructure/account/sync-request";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
@@ -75,6 +76,7 @@ const CREATE_TABLES = [
   SCORE_TOKEN_TABLE_SQL,
   ACCOUNT_SYNC_RECEIPT_TABLE_SQL,
   SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
+  BOT_BINDING_OPERATION_TABLE_SQL,
   HIROBA_CREDENTIAL_TABLE_SQL,
   SOURCE_LIFECYCLE_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
@@ -545,6 +547,7 @@ const CREATE_TABLES = [
 ];
 
 const MIGRATIONS = [
+  ...SOURCE_SERVICE_PRINCIPAL_MIGRATIONS,
   "ALTER TABLE web_taiko_bindings ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER taiko_id",
   "ALTER TABLE web_taiko_bindings ADD COLUMN manual_account_id CHAR(18) DEFAULT NULL AFTER source",
   "ALTER TABLE web_taiko_bindings ADD COLUMN mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname' AFTER verified_titleplate_id",

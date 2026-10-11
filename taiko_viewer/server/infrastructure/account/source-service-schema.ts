@@ -6,6 +6,7 @@ export const SOURCE_SERVICE_GRANT_TABLE_SQL = `CREATE TABLE IF NOT EXISTS taiko_
   service_name VARCHAR(64) NOT NULL,
   scopes_json TEXT NOT NULL,
   sources_json TEXT NOT NULL,
+  principals_json TEXT DEFAULT NULL,
   revision_nonce CHAR(32) NOT NULL,
   status VARCHAR(16) NOT NULL DEFAULT 'active',
   issued_by_user_id BIGINT UNSIGNED NOT NULL,
@@ -24,6 +25,7 @@ export const SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL = `CREATE TABLE IF NOT EXISTS 
   status VARCHAR(16) NOT NULL,
   scopes_json TEXT NOT NULL,
   sources_json TEXT NOT NULL,
+  principals_json TEXT DEFAULT NULL,
   expires_at DATETIME DEFAULT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_source_service_audit_token(developer_token_id)
@@ -34,6 +36,10 @@ export const SOURCE_SERVICE_SCOPES = [
   'hiroba_credential_status', 'hiroba_bind', 'bind_read', 'bind_write', 'bind_current'
 ] as const;
 export type SourceServiceScope = typeof SOURCE_SERVICE_SCOPES[number];
+export const SOURCE_SERVICE_PRINCIPAL_MIGRATIONS = [
+  'ALTER TABLE taiko_source_service_grants ADD COLUMN principals_json TEXT DEFAULT NULL AFTER sources_json',
+  'ALTER TABLE taiko_source_service_grant_audit ADD COLUMN principals_json TEXT DEFAULT NULL AFTER sources_json'
+];
 export const validSourceIdentity = (value: unknown): value is string =>
   typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 

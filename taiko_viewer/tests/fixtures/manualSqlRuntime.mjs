@@ -11,7 +11,8 @@ import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-pub
 import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-confirmation-schema.ts';
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
-import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL } from '../../server/infrastructure/account/source-service-schema.ts';
+import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from '../../server/infrastructure/account/source-service-schema.ts';
+import { BOT_BINDING_OPERATION_TABLE_SQL } from '../../server/infrastructure/account/bot-binding-schema.ts';
 import { HIROBA_CREDENTIAL_TABLE_SQL } from '../../server/infrastructure/account/hiroba-credential-schema.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
@@ -24,6 +25,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 const TEST_MANUAL_TABLES = [
   HIROBA_CREDENTIAL_TABLE_SQL,
   SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
+  BOT_BINDING_OPERATION_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_developer_tokens (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
     application_id BIGINT UNSIGNED DEFAULT NULL, token_hash CHAR(64) NOT NULL, token_mask VARCHAR(32) NOT NULL,
@@ -119,10 +121,12 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     assert.match(identity.name, /_test$/);
     assert.equal(identity.name, process.env.TAIKO_DB_NAME);
     for (const statement of TEST_MANUAL_TABLES) await pool.execute(statement);
+    for(const sql of SOURCE_SERVICE_PRINCIPAL_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
     root = await mkdtemp('/var/tmp/manual-source-sql-');
     const config = { repoRoot, userdataDir: resolve(root, 'userdata'), accountCacheDir: resolve(root, 'cache'), manualClaimSecret: 'synthetic-claim-only' };
     const db = { query: (...args) => pool.query(...args), async execute(sql, args) {
-      const result = await pool.execute(sql, args);
+      let result;
+      try{result=await pool.execute(sql,args);}catch(error){state.sqlFaultCode=error.code||'unknown';throw error;}
       if (sql.includes('COUNT(*) AS total') && (sql.includes('FROM web_taiko_bindings') || sql.includes('FROM bind')) && !scopeModule.currentScoreScope()) {
         state.optimisticChecks++;
         state.onOptimisticChecks?.();
@@ -136,8 +140,9 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
         query: (...args) => connection.query(...args),
         async execute(sql, args) {
           if (state.beforeSqlStatement) await state.beforeSqlStatement(sql, args);
-          const result = await connection.execute(sql, args);
-          if (state.afterSqlStatement) await state.afterSqlStatement(sql, args, result);
+          let result;
+          try{result=await connection.execute(sql,args);}catch(error){state.sqlFaultCode=error.code||'unknown';throw error;}
+          if (state.afterSqlStatement) await state.afterSqlStatement(sql, args, result,connection);
           return result;
         },
         async beginTransaction() { state.transactions++; return connection.beginTransaction(); },
@@ -173,6 +178,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
       await pool.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?', [ownedId]);
     }
     if (user) {
+      await pool.execute('DELETE FROM taiko_bot_binding_operations WHERE actor_user_id=?',[user]);
       await pool.execute('DELETE a FROM taiko_source_service_grant_audit a JOIN web_developer_tokens t ON t.id=a.developer_token_id WHERE t.user_id=?', [user]);
       await pool.execute('DELETE FROM taiko_source_service_grants WHERE developer_user_id=?', [user]);
       await pool.execute("DELETE q FROM web_taiko_open_api_daily_usage q JOIN web_developer_tokens t ON q.ip_address=CONCAT('token:',t.id) WHERE t.user_id=?", [user]);

@@ -1,6 +1,6 @@
 # 私有成绩服务授权配置
 
-适用范围：Phase 6 / 6.3e.8.1–2 的 Developer userdata、历史与 Wahlap/Hiroba 更新代理。Hiroba 凭据管理、QQ bind 和客户端缓存授权仍待迁移，不能据此激活整个 Phase 6。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有成绩授权是两个独立检查。
+适用范围：Phase 6 / 6.3e.8.1–3 的 Developer userdata、历史、Wahlap/Hiroba 更新及 QQ 绑定代理。Hiroba 凭据管理和客户端缓存授权仍待迁移，不能据此激活整个 Phase 6。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有授权是两个独立检查。
 
 `GET /api/developer/userdata/:userid` 接受有效登录 Cookie 或有效开发者 Bearer token。普通凭据只能读取其账号自有绑定，允许自有非 current 绑定；完整 binding id/taiko_id/source/manual_account_id 在 Source SH 前后复核。绑定本身沿用现有产品的 SQL 授权含义，不额外声称已证明上游账号归属。跨账号中心服务需要按 **token id** 单独登记，不能以开发者申请获批、每日额度、HTTP userid/userId/QQ、同一用户的另一枚 token 推导授权。
 
@@ -27,7 +27,19 @@
 }
 ```
 
-已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`。schema 预留 `hiroba_credential_status`、`hiroba_bind`、`bind_read`、`bind_write`、`bind_current`；预留名称不表示相关调用迁移已完成。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`、`bind_read`、`bind_write`、`bind_current`。schema 预留 `hiroba_credential_status`、`hiroba_bind`，预留名称不表示相关调用迁移已完成。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+
+含 `bind_*` scope 的登记另须明确 `principals`：1–128 项身份列表，或显式 `"*"`。身份支持 1–128 位裸数字、`onebot_v11:` 加 1–128 位数字、`qq_official:` 加 1–128 位 ASCII 字母/数字/下划线/短横线。大小写及不同格式分别授权，不自动合并别名。遗漏或 null 拒绝登记；仅含 Source scopes 的旧配置可保持 null。新 nullable `principals_json` 同时存入 grant 与审计表，升级只忽略已存在列的 ER_DUP_FIELDNAME，其余 SQL 错误停止。
+
+QQ 代理配置可在上述请求中改为 `"scopes": ["bind_read", "bind_write", "bind_current"]`，并增加 `"principals": ["onebot_v11:12345"]`。Source allowlist 须包括该身份已绑定的全部 Source 与本次添加的 Source；不能通过空绑定绕过添加目标检查。生产真实 principal/token 登记继续留到最终激活。
+
+`GET/POST /api/taiko/proxy/bind` 与 `POST /api/taiko/proxy/bind/current` 现在要求有效 Cookie/token。普通凭据须有当前已验证、active 的 Viewer QQ 绑定，与裸 QQ 或 `onebot_v11:QQ` 精确匹配；添加外部账号另须完整自有、同平台 Viewer binding，manual 通过既有创建/认领入口。服务凭据同时证明 exact grant/revision/expiry/principals/sources/scope，选中服务授权后不降级为 owner 授权。
+
+QQ metadata 只触及 SQL，不读写 C/H，也不在 SQL 事务后申请 Source 锁。共用 2 active/8 queued/30s admission，以 63 字符 SHA 身份名的 MySQL GET_LOCK 串行化，等待上限 5 秒。account→credential→principal grant/目标 owner binding→bind rows→selection state→最小 receipt，完整返回前再次证明；每身份最多 128 绑定，slot 小于一百万，旧 healthy visibility/manual/u0 DTO 保留。GET 只读，旧缺失 current 在内存中选择首项，不保存修正。失败回滚，rollback 或 RELEASE_LOCK 无法证明时销毁连接。
+
+两种 mutation 接受可选 `requestId`（32 位小写 hex 或小写 UUID）；省略时服务生成。持久回执仅保存操作/actor/grant/principal/action/intent/outcome 哈希及时间，无原始 Cookie/token/完整 DTO。相同凭据、完整 grant 和意图重试只返回当前 DTO，不重复变更、覆盖后来 selection；相同 ID 不同意图 409。COMMIT ACK 不明时，捕获 pool 的新连接必须证明 exact 回执和当前 outcome，不能把未提交当成功。
+
+每日 quota 改为单条 INSERT…ON DUPLICATE KEY UPDATE，在 unique daily key 上原子决定递增或拒绝；首次 insert 的自增主键与 duplicate increment 的 LAST_INSERT_ID(count) 分别解释，capped no-op 为 0。实际并发 IP/token 边界与同 nonce 请求已验证。SQL 行数语义参考 [MySQL 官方文档](https://dev.mysql.com/doc/refman/8.4/en/insert-on-duplicate.html)，QA 以实际驱动返回头为准。
 
 普通 Cookie/token 可以更新完整自有 binding 对应的平台，Wahlap/Hiroba 不互换，manual 不允许外部 acquisition。中心服务仍须逐项配置 scope 与 Source 范围。private worker 独占 Source EX，再锁定 SQL 凭据与授权，每次成绩发布前及最终 COMMIT 前复核；Node 返回前取得 fresh SH，验证原 produced commit/sequence 与完整授权，不能返回另一代成绩。晚 SQL/transport/撤权失败不自动撤销已经授权提交的成绩；该更新代理未增加跨请求 nonce 重放。
 
@@ -53,4 +65,4 @@ bash /home/sigaer/taiko/taiko-forum/scripts/memory/run_qa.sh \
 
 验证范围包括真实 Cookie 登录与正式 Developer route、实际开发者 quota、实际 `_test` SQL、Source SH、实际私有 CLI、排队/返回期间身份与能力替换、撤销/expiry、exact replay、单 COMMIT、late failure/rollback destroy/ACK loss、完整 JSON 与 canonical corruption。上游网络、完整 Nuxt build、真实跨用户服务注册和生产烟测留在最终激活验收。
 
-Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步通过私有 stdin 传递凭据；Hiroba bind 仍有 credentials argv，须完成其授权与事务迁移。客户端四项成绩SDK已要求有效token；permission-aware bounded cache、QQ bind authority、剩余私有SDK，以及全部 Writer/Read Model/P1a仍须完成。运行中的 R 未复制这些预备变更，此子步无需重启 NoneBot。
+Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步通过私有 stdin 传递凭据；Hiroba bind 仍有 credentials argv，须完成其授权与事务迁移。客户端四项成绩和三项 QQ 绑定 SDK 已要求有效 token；permission-aware bounded cache、Hiroba 凭据 SDK，以及全部 Writer/Read Model/P1a仍须完成。运行中的 R 未复制这些预备变更，此子步无需重启 NoneBot。

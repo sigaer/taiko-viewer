@@ -332,3 +332,15 @@ Account/source 两类 worker 共用单 Viewer 进程 2 active/8 queued/30s queue
 回归分两段：Source126/170先已通过，随后客户端因QA驱动错误选择系统Core0.1.1而在收集阶段停止；改为原guarded validator与固定Git安装Core0.1.2/Contract0.1.0后，client/TS/Node/SQL完整通过。两段受测产品哈希完全相同。最终后一段533.993s/502.090MiB sampled、high/max/OOM0，实际wrapper exit0+journal success/MainPID0/collected cgroup gone。客户端四个私有成绩 SDK 调用现在要求token，Hiroba等待900s；缓存授权与其余私有SDK未冒称完成。
 
 本子步 PRIVATE_CENTER_UPDATE_HISTORY_AND_RENDER_VIEW_PASS，Gate6 IN_PROGRESS。A9.81.12与client0.2.1标准源码提交/推送的完整OID以中央证据为准；R没有复制这些预备代码，所以running Bot/API未加载，无本子步重启。Viewer0.82.0本地阶段提交，待完整Phase6标准部署统一push，live0.81.11/PIDs1063394、1063408、829173不变，未登记生产service能力。继续Hiroba credential/bind、QQ bind、permission-aware bounded cache、u0/daily/all Writer/P1a、完整Read Model/invalidation/百万IO/RSS成本、trusted ops与fixed deps/R sync/统一发布/真实在线产品验收。
+
+## 6.3e.8.3 QQ 私有 metadata、一次事务与 nonce 恢复
+
+三个正式 bind 路由保留实际每日 quota，改用 active Cookie/Developer token 的 verified QQ authority，或按 token 显式登记 principal+Source+bind scope。principal 与成绩 Source 是独立能力对象；nullable principals_json 同时迁移 grant/audit，Source-only 旧配置兼容，bind_* 缺少明确身份范围拒绝。普通 upsert 须有完整自有同平台 Viewer binding，manual 仍走创建/认领入口；服务返回/修改均检查全部成员 Source。selected service 不静默切 owner，大小写/格式不合并，完整授权在排队后/事务中/返回前复核。运维细节：[source-service-operations.md](source-service-operations.md)。
+
+此 metadata 仅 SQL，Source C/H/sequence 不变，不在 SQL 后申请 Source 锁。共享 2 active/8 queued/30s admission，SHA identity GET_LOCK 等待 5s；account→credential→principal/target grant→bind rows→selection→receipt，一次 COMMIT。GET 不写 current/state，在内存恢复原 healthy 首项选择及 manual/u0 DTO。每身份最多128绑定、slot小于一百万；legacy表不一致/缺失manual authority固定503。两种 mutation 支持 requestId；最小 receipt 没有 raw Cookie/token/完整 DTO，same credential+grant+intent replay返回当前结果，不重复写入或覆盖后续选择。ACK不明由捕获pool新连接证明 exact receipt+outcome，未COMMIT不能报成功；rollback/release-lock不明销毁连接。
+
+定向79 SQL与局部TS PASS，最终56 client/153 offline Node/443 actual guarded SQL（409 existing+34 new）及两组TS PASS；两个真实Node COMMIT前后退出、实际5s锁等待、同nonce并发、撤权/expiry/完整target替换/返回前session和QQ损失、failed rollback与ACK loss/captured pool、真实operator principal配置/audit replay、原DTO与no GET writes均覆盖。旧quota SELECT/INSERT并发导致第二请求503，修复为单条unique-key原子increment/cap；初稿误解auto-increment OK packet已依据实际数字头纠正，实际IP1/token2并发边界与重试通过。失败驱动缺opt-in在连接前拒绝、TS narrowing和destroy数量断言纠正均留档，不冒称初轮全通过。
+
+最终567.064s/477.078MiB sampled，high/max/OOM0，actual wrapper exit0/journal success/MainPID0/collected cgroup gone。Source A未变9文件SHA与6.3e.8.2一致，沿用126 publication/170 domain Python PASS；本轮没有Source修改、push或R同步。SQL测试DB实际SELECT DATABASE()=_test且显式mutation opt-in，未复制生产数据或做生产mutation，测试库无production FK证明，owned rows/roots/children/listeners finally关闭。完整证据：[phase6-bot-binding-validation.json](evidence/phase6-bot-binding-validation.json)。
+
+本子步PRIVATE_QQ_BINDING_TRANSACTION_AND_REPLAY_PASS，Gate6 IN_PROGRESS。client0.2.2三个SDK增加token要求与可选request_id，固定Core0.1.2/Contract0.1.0不变，源码标准commit/push；Viewer沿用Phase6预备0.82.0本地步骤，统一标准部署负责push/build/restart。live0.81.11及三个服务PID不变，没有生产service登记或线上授权烟测。Hiroba credential status/bind的旧argv/多次credential与QQ autocommit、B旧缓存fallback，以及全Writer/u0/P1a、完整Read Model/invalidation/百万IO-RSS成本、trusted ops/fixed R deps/停止旧Writer后sync/标准发布与在线Gate继续处理。

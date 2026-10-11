@@ -1,13 +1,14 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise';
 import { isSiteOperator } from './operator.ts';
 import { validateSourceServicePolicy } from './source-service-schema.ts';
+import { validateServicePrincipals } from './principal-policy.ts';
 
 export class SourceServiceProvisionError extends Error {
   readonly statusCode: number;
   constructor(statusCode = 503) { super('Source service configuration unavailable'); this.statusCode = statusCode; }
 }
 type Request = Readonly<{ operationId: string; operatorUserId: string; tokenId: string;
-  serviceName: string; status: 'active' | 'revoked'; scopesJson: string; sourcesJson: string; expiresAt: string | null }>;
+  serviceName: string; status: 'active' | 'revoked'; scopesJson: string; sourcesJson: string; principalsJson:string|null; expiresAt: string | null }>;
 const id = (value: unknown) => {
   const text = typeof value === 'string' ? value : Number.isSafeInteger(value) ? String(value) : '';
   if (!/^[1-9][0-9]{0,19}$/.test(text) || BigInt(text) > 18446744073709551615n) throw new SourceServiceProvisionError(400);
@@ -21,23 +22,27 @@ export function parseSourceServiceRequest(input: unknown): Request {
     !['active', 'revoked'].includes(String(body.status))) throw new SourceServiceProvisionError(400);
   let policy;
   try { policy = validateSourceServicePolicy(body.scopes, body.sources); } catch { throw new SourceServiceProvisionError(400); }
+  let principalsJson:string|null=null;
+  try{if(body.principals!==undefined&&body.principals!==null)principalsJson=JSON.stringify(validateServicePrincipals(body.principals));}
+  catch{throw new SourceServiceProvisionError(400);}
+  if(policy.scopes.some(scope=>scope.startsWith('bind_'))&&principalsJson===null)throw new SourceServiceProvisionError(400);
   const expiresAt = body.expiresAt === undefined || body.expiresAt === null ? null : body.expiresAt;
   if (expiresAt !== null && (typeof expiresAt !== 'string' || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(expiresAt) ||
     !Number.isFinite(Date.parse(expiresAt.replace(' ', 'T') + 'Z')) ||
     new Date(expiresAt.replace(' ', 'T') + 'Z').toISOString().slice(0, 19).replace('T', ' ') !== expiresAt)) throw new SourceServiceProvisionError(400);
   return Object.freeze({ operationId: body.operationId, operatorUserId: id(body.operatorUserId), tokenId: id(body.tokenId),
     serviceName: body.serviceName, status: body.status as Request['status'], scopesJson: JSON.stringify(policy.scopes),
-    sourcesJson: JSON.stringify(policy.sources), expiresAt: expiresAt as string | null });
+    sourcesJson: JSON.stringify(policy.sources),principalsJson, expiresAt: expiresAt as string | null });
 }
 type Executor = Pick<Pool | PoolConnection, 'execute'>;
 const AUDIT_SELECT = `SELECT operation_id,CAST(developer_token_id AS CHAR) AS token_id,CAST(operator_user_id AS CHAR) AS operator_id,
-  service_name,status,scopes_json,sources_json,DATE_FORMAT(expires_at,'%Y-%m-%d %H:%i:%s') AS expires_at
+  service_name,status,scopes_json,sources_json,principals_json,DATE_FORMAT(expires_at,'%Y-%m-%d %H:%i:%s') AS expires_at
   FROM taiko_source_service_grant_audit WHERE operation_id=?`;
 const TOKEN_SELECT = `SELECT CAST(id AS CHAR) AS id,CAST(user_id AS CHAR) AS user_id,token_hash,status,revoked_at
   FROM web_developer_tokens WHERE id=?`;
 const auditMatches = (row: RowDataPacket, request: Request) => row.operation_id === request.operationId &&
   row.token_id === request.tokenId && row.operator_id === request.operatorUserId && row.service_name === request.serviceName &&
-  row.status === request.status && row.scopes_json === request.scopesJson && row.sources_json === request.sourcesJson && row.expires_at === request.expiresAt;
+  row.status === request.status && row.scopes_json === request.scopesJson && row.sources_json === request.sourcesJson && row.principals_json===request.principalsJson && row.expires_at === request.expiresAt;
 const receipt = (request: Request, replayed: boolean) => Object.freeze({ operationId: request.operationId,
   tokenId: request.tokenId, serviceName: request.serviceName, status: request.status, replayed });
 async function proveOperator(db: Executor, request: Request, tokenUser: string, locked: boolean) {
@@ -75,13 +80,13 @@ export async function provisionSourceService(db: Pool, input: unknown, { apply =
       const [[clock]] = await connection.execute<RowDataPacket[]>('SELECT CAST(? AS DATETIME)>NOW() AS future', [request.expiresAt]);
       if (!clock?.future) throw new SourceServiceProvisionError(400);
     }
-    await connection.execute(`INSERT INTO taiko_source_service_grants(developer_token_id,developer_user_id,service_name,scopes_json,sources_json,
-      revision_nonce,status,issued_by_user_id,expires_at) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE
+    await connection.execute(`INSERT INTO taiko_source_service_grants(developer_token_id,developer_user_id,service_name,scopes_json,sources_json,principals_json,
+      revision_nonce,status,issued_by_user_id,expires_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE
       developer_user_id=VALUES(developer_user_id),service_name=VALUES(service_name),scopes_json=VALUES(scopes_json),sources_json=VALUES(sources_json),
-      revision_nonce=VALUES(revision_nonce),status=VALUES(status),issued_by_user_id=VALUES(issued_by_user_id),expires_at=VALUES(expires_at)`,
-    [request.tokenId, token.user_id, request.serviceName, request.scopesJson, request.sourcesJson, request.operationId, request.status, request.operatorUserId, request.expiresAt]);
-    await connection.execute(`INSERT INTO taiko_source_service_grant_audit(operation_id,developer_token_id,operator_user_id,service_name,status,scopes_json,sources_json,expires_at)
-      VALUES (?,?,?,?,?,?,?,?)`, [request.operationId, request.tokenId, request.operatorUserId, request.serviceName, request.status, request.scopesJson, request.sourcesJson, request.expiresAt]);
+      principals_json=VALUES(principals_json),revision_nonce=VALUES(revision_nonce),status=VALUES(status),issued_by_user_id=VALUES(issued_by_user_id),expires_at=VALUES(expires_at)`,
+    [request.tokenId, token.user_id, request.serviceName, request.scopesJson, request.sourcesJson,request.principalsJson, request.operationId, request.status, request.operatorUserId, request.expiresAt]);
+    await connection.execute(`INSERT INTO taiko_source_service_grant_audit(operation_id,developer_token_id,operator_user_id,service_name,status,scopes_json,sources_json,principals_json,expires_at)
+      VALUES (?,?,?,?,?,?,?,?,?)`, [request.operationId, request.tokenId, request.operatorUserId, request.serviceName, request.status, request.scopesJson, request.sourcesJson,request.principalsJson, request.expiresAt]);
     committedAttempt = true; await connection.commit(); return receipt(request, false);
   } catch (error) {
     if (connection) { try { await connection.rollback(); } catch { discard = true; connection.destroy(); } }

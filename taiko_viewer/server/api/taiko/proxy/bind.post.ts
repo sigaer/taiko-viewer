@@ -1,12 +1,8 @@
 import { readBody } from "h3";
-import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
-import { proxyTaikoCenterBindUpsert } from "~/server/utils/taiko-center";
+import {sourceProxyRequest} from '~/server/services/account/source-proxy';
+import {runBotBindingOperation} from '~/server/services/account/bot-binding-proxy';
 
-export default defineEventHandler(async (event) => {
-  await enforceTaikoOpenQuota(event, "taiko_proxy_bind_upsert");
+export default defineEventHandler(async (event) => sourceProxyRequest(event,"taiko_proxy_bind_upsert",async()=>{
   const body = await readBody(event);
-  return proxyTaikoCenterBindUpsert(body?.identityKey, body?.taikoId, {
-    visible: body?.visible,
-    source: body?.source
-  });
-});
+  return runBotBindingOperation(event,'upsert',body||{});
+}));

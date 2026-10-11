@@ -1,9 +1,8 @@
 import { getQuery } from "h3";
-import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
-import { proxyTaikoCenterBindLookup } from "~/server/utils/taiko-center";
+import {sourceProxyRequest} from '~/server/services/account/source-proxy';
+import {runBotBindingOperation} from '~/server/services/account/bot-binding-proxy';
 
-export default defineEventHandler(async (event) => {
-  await enforceTaikoOpenQuota(event, "taiko_proxy_bind_lookup");
+export default defineEventHandler(async (event) => sourceProxyRequest(event,"taiko_proxy_bind_lookup",async()=>{
   const query = getQuery(event);
-  return proxyTaikoCenterBindLookup(query.identityKey);
-});
+  return runBotBindingOperation(event,'read',{identityKey:query.identityKey});
+}));

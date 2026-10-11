@@ -1,6 +1,6 @@
 // Private operator CLI: bounded stdin JSON, no raw token/credentials in argv.
 import mysql from 'mysql2/promise';
-import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL } from '../server/infrastructure/account/source-service-schema.ts';
+import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from '../server/infrastructure/account/source-service-schema.ts';
 import { provisionSourceService, SourceServiceProvisionError } from '../server/infrastructure/account/source-service-provision.ts';
 const apply = process.argv.includes('--apply'), production = process.argv.includes('--production');
 const deadline = setTimeout(() => { process.stderr.write('Source service operation timed out\n'); process.exit(1); }, 45000);
@@ -18,7 +18,10 @@ try {
   } else if (!actual.name?.endsWith('_test') || actual.name !== process.env.TAIKO_DB_NAME || (apply && process.env.TAIKO_ALLOW_TEST_DB_MUTATION !== '1')) throw new SourceServiceProvisionError(403);
   // The normal schema bootstrap creates these tables. This also supports an
   // explicit isolated migration before a Viewer process has bootstrapped them.
-  if (apply) { await db.execute(SOURCE_SERVICE_GRANT_TABLE_SQL); await db.execute(SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL); }
+  if (apply) {
+    await db.execute(SOURCE_SERVICE_GRANT_TABLE_SQL); await db.execute(SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL);
+    for(const sql of SOURCE_SERVICE_PRINCIPAL_MIGRATIONS)try{await db.execute(sql);}catch(error){if((error as {code?:string}).code!=='ER_DUP_FIELDNAME')throw error;}
+  }
   let input: unknown;
   try { input = JSON.parse(body); } catch { throw new SourceServiceProvisionError(400); }
   const result = await provisionSourceService(db, input, { apply });
