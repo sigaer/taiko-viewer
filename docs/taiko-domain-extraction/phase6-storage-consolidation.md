@@ -419,3 +419,17 @@ A331314d/9.81.19与458ceae/9.81.20标准commit/push，实际remote已核对；B4
 32.845s，250ms sampled peak216309760 bytes（非绝对峰）；largest child OS maxRSS219420KiB，high/max/OOM均0，wrapper44228实际exit0、unit1791746555-1846060 successful/inactive/MainPID0/collected cgroup gone。中间177/181 Source与13 SQL通过后分别补确认/摘要问题，再跑最终完整轮；hash为最后轮后且实现无后续改动。[完整证据](evidence/phase6-native-binding-mutation-validation.json)。
 
 A `9befec4209e8ef48db953a99fc41e723c76eb253` /9.81.21标准push且实际remote一致；仅本步6文件，无无关miku改动。Viewer SQL测试和文档本地提交，预备0.82.0待统一标准发布；B0.2.4未改。运行R未复制、新模块未加载，三个服务active且PID1063394/1063408/829173，线上Viewer0.81.11。不在native authority与旧Writer/P1a门禁未完成时同步重启。Source回退458ceaee；native整轮及Gate6仍IN_PROGRESS。继续原生Hiroba credential bind/sync/认证QQ联接、客户端token issuer/绑定删除、native读取与返回proof、全部Writer/daily/u0/P1a、Read Model/依赖失效/百万冷暖成本、trusted restore/cleanup/runbook/固定R依赖/停止旧Writer后的统一部署与真实在线产品验收。
+
+## 6.3e.8.6c 客户端删除与可见性中心事务（STEP_PASS）
+
+2026-10-12。B 删除解绑移除本地 SQL/JSON authority，使用中心 authenticated GET 解析具体账号和 remove POST。最后一个账号的确认保存中心返回的具体 ID/TTL，强制确认拒绝位置/空目标。可见性改为整个 principal 的 visibility POST，不通过 upsert 重建选择。手动账号删除仍走专用生命周期。删除当前账号保留冻结客户端后继选择规则；原生 Bot profile 与含 manual 的全局 u0 不被重写。
+
+中心两项操作要求显式 bind_remove / bind_visibility scopes、principal 和全部成员 Source。共享 principal gate、完整 SQL 证明和一次 COMMIT；精确所属 Hiroba credential 与 binding 同事务删除，其他所属保留。小型 effect/hash receipt 固定原操作结果，重试返回当前绑定，不删除后来重新绑定的 Source、不覆盖后来可见性/选择。未知 COMMIT 在释放旧连接/gate 后用 captured pool 新连接证明。新增 nullable receipt 列兼容旧 upsert/current intent hash。
+
+B SDK 最多两次相同 nonce 请求，响应流式 256KiB；90s 分块检查加最长 10s socket 等待，不宣称严格 90s 进程期限。401/403/404/409/429 等保持错误、重定向拒绝，无本地权限 fallback。framework message identity 固定 nonce，删除位置解析后只提交具体 ID，确认操作使用新的消息 nonce。
+
+最终181 guarded B、局部 TS、66真实_test SQL/HTTP PASS；同轮此前未变的33 Hiroba+45 access PASS，共144项分属两轮。覆盖5个 frozen client 删除选择 Golden、actual Python SDK/命令AST到owned H3、确认/重绑重试、全成员授权、late撤权/SQL/rollback/ACK loss、四个 COMMIT 前后真进程退出。上游synthetic，非full NoneBot/Nuxt、线上authenticated或百万性能。72.334s/533839872byte cgroup250ms采样、child399568KiB、高压/OOM0，systemd success/ExecMainStatus0/MainPID0/cgroup gone。
+
+初轮 fixture/TS/SDK guard 失败如实留档；初始化失败遗留66测试QQ行通过失败时间窗/生成QQ/缺失parent/状态与连续user ID逐条证明，同事务精确删除、remaining0，actual SELECT DATABASE()=_test及双显式opt-in，无production mutation。fixture setup现在受finally清理。完整[证据](evidence/phase6-client-binding-mutation-validation.json)。
+
+B0.2.5/a8f1b38标准commit/push和实际remote SHA核对。Source A9.81.21代码/hash未变，182 Source之前证据沿用而未重跑。Viewer0.82本地预备，线上0.81.11及三个PID不变，无R同步/重启/部署、无启动客户端。该版本依赖中心0.82协议与显式生产grant，独立源码push不代表已激活。native authority整轮/Gate6 IN_PROGRESS，继续native Hiroba/QQ、client QQ/token issuer、全部Writer/P1a、Read Model/invalidation/百万冷暖IO-RSS、trusted ops/fixed R deps/旧Writer停用后的统一发布与真实产品验收。

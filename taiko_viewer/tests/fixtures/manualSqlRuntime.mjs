@@ -12,7 +12,7 @@ import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taik
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
 import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from '../../server/infrastructure/account/source-service-schema.ts';
-import { BOT_BINDING_OPERATION_TABLE_SQL } from '../../server/infrastructure/account/bot-binding-schema.ts';
+import { BOT_BINDING_OPERATION_TABLE_SQL,BOT_BINDING_OPERATION_MIGRATIONS } from '../../server/infrastructure/account/bot-binding-schema.ts';
 import { HIROBA_CREDENTIAL_TABLE_SQL,HIROBA_CREDENTIAL_MIGRATIONS,HIROBA_BINDING_OPERATION_TABLE_SQL } from '../../server/infrastructure/account/hiroba-credential-schema.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
@@ -122,6 +122,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     assert.match(identity.name, /_test$/);
     assert.equal(identity.name, process.env.TAIKO_DB_NAME);
     for (const statement of TEST_MANUAL_TABLES) await pool.execute(statement);
+    for(const sql of BOT_BINDING_OPERATION_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
     for(const sql of SOURCE_SERVICE_PRINCIPAL_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
     for(const sql of HIROBA_CREDENTIAL_MIGRATIONS)await pool.execute(sql);
     root = await mkdtemp('/var/tmp/manual-source-sql-');

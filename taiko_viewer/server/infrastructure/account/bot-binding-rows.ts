@@ -1,6 +1,7 @@
 import type {Pool,PoolConnection,RowDataPacket} from 'mysql2/promise';
 import {MANUAL_SOURCE_ID} from '../../internal/account/source-lifecycle.ts';
 import {principalFailure,requirePrincipalSources,type PrincipalTicket} from '../../services/account/principal-access.ts';
+import type {BotBindingEffect} from './bot-binding-effect.ts';
 export type BotBindingRow={row_id:string;qq:string;id:string;visible:number;slot_index:number;is_current:number;source:'wahlap'|'hiroba'|'manual';display_name?:string};
 export type BotBindingData={rows:BotBindingRow[];virtual:boolean};
 const sourceFailure=()=>{throw new Error('Invalid private binding state');};
@@ -16,6 +17,7 @@ export async function readBotBindingData(db:Pick<Pool,'execute'>,ticket:Principa
     !['wahlap','hiroba','manual'].includes(row.source)||(row.source==='manual')!==MANUAL_SOURCE_ID.test(row.id))sourceFailure();
   return {row_id:row.row_id,qq:row.qq,id:row.id,visible:row.visible,slot_index:row.slot_index,is_current:row.is_current,source:row.source};
  });
+ if(rows.filter(row=>row.is_current===1).length>1||new Set(rows.map(row=>row.id)).size!==rows.length||new Set(rows.map(row=>row.slot_index)).size!==rows.length)sourceFailure();
  requirePrincipalSources(ticket,rows.map(row=>row.id));
  for(const row of rows)if(row.source==='manual'){
   // Plain consistent reads avoid a bind->manual-account row lock inversion.
@@ -35,8 +37,8 @@ export function botBindingPayload(principal:string,data:BotBindingData){
  return {ok:true,found:true,identityKey:principal,taikoId:current.taikoId,visible:current.visible,currentTaikoId:current.taikoId,
   currentSlot:currentVirtual?0:current.slot,currentVirtual,currentSource:current.source,bindings};
 }
-export type BotBindingIntent=Readonly<{action:'read'|'upsert'|'current';principal:string;sourceId:string|null;platform:'wahlap'|'hiroba'|null;visible:number|null;slot:number|null}>;
-export async function applyBotBindingIntent(db:PoolConnection,ticket:PrincipalTicket,intent:BotBindingIntent,data:BotBindingData){
+export type BotBindingIntent=Readonly<{action:'read'|'upsert'|'current'|'remove'|'visibility';principal:string;sourceId:string|null;platform:'wahlap'|'hiroba'|null;visible:number|null;slot:number|null;forceLast?:boolean}>;
+export async function applyBotBindingIntent(db:PoolConnection,ticket:PrincipalTicket,intent:BotBindingIntent,data:BotBindingData):Promise<BotBindingEffect|undefined>{
  const predicate='CAST(qq AS BINARY)=CAST(? AS BINARY)';
  if(intent.action==='upsert'){
   const existing=data.rows.find(row=>row.id===intent.sourceId);
@@ -53,7 +55,30 @@ export async function applyBotBindingIntent(db:PoolConnection,ticket:PrincipalTi
   if(intent.slot===0){if(data.rows.filter(row=>row.source!=='manual').length<2)throw principalFailure(409,'至少需要 2 个 CN/JP 账号才能使用 u0。');}
   else{const target=data.rows.find(row=>row.slot_index===intent.slot);if(!target)throw principalFailure(404,'未找到该槽位。');
    await db.execute('UPDATE bind SET is_current=0 WHERE '+predicate,[ticket.principal]);await db.execute('UPDATE bind SET is_current=1 WHERE row_id=?',[target.row_id]);}
+ }else if(intent.action==='visibility'){
+  await db.execute('UPDATE bind SET visible=? WHERE qq=? AND '+predicate,[intent.visible,ticket.principal,ticket.principal]);
+  return {kind:'visibility',matched:data.rows.length};
+ }else if(intent.action==='remove'){
+  const index=data.rows.findIndex(row=>row.id===intent.sourceId),target=data.rows[index];
+  if(!target)throw principalFailure(404,'当前未绑定该鼓众广场ID。');
+  if(target.source==='manual')throw principalFailure(403,'手动账号请使用“解绑空白账号”或“永久删除空白账号”。');
+  if(data.rows.length===1&&!intent.forceLast)return {kind:'remove',removed:false,needsConfirmation:true};
+  if(target.source==='hiroba')await db.execute(`DELETE FROM web_hiroba_credentials WHERE taiko_no=?
+   AND configured_by_qq=? AND CAST(configured_by_qq AS BINARY)=CAST(? AS BINARY)`,[target.id,ticket.principal,ticket.principal]);
+  await db.execute('DELETE FROM bind WHERE row_id=?',[target.row_id]);
+  const remaining=data.rows.filter(row=>row!==target);
+  if(remaining.length){
+   const selected=remaining.find(row=>row.is_current===1)||remaining[Math.min(index,remaining.length-1)];
+   const offset=Math.max(...remaining.map(row=>row.slot_index))+remaining.length+1;
+   await db.execute('UPDATE bind SET slot_index=slot_index+? WHERE qq=? AND '+predicate,[offset,ticket.principal,ticket.principal]);
+   for(const [slot,row] of remaining.entries())await db.execute('UPDATE bind SET slot_index=?,is_current=? WHERE row_id=?',[slot+1,row===selected?1:0,row.row_id]);
+   // Shared native selection permits manual members. The client payload still
+   // applies its external-only virtual profile without destroying that state.
+   await db.execute(`INSERT INTO taiko_bind_identity_state(identity_key,current_virtual) VALUES (?,?)
+    ON DUPLICATE KEY UPDATE current_virtual=VALUES(current_virtual)`,[ticket.principal,data.virtual&&remaining.length>=2?1:0]);
+  }else await db.execute('DELETE FROM taiko_bind_identity_state WHERE identity_key=? AND CAST(identity_key AS BINARY)=CAST(? AS BINARY)',[ticket.principal,ticket.principal]);
+  return {kind:'remove',removed:true,needsConfirmation:false};
  }
- if(intent.action!=='read')await db.execute(`INSERT INTO taiko_bind_identity_state(identity_key,current_virtual) VALUES (?,?)
+ if(intent.action==='upsert'||intent.action==='current')await db.execute(`INSERT INTO taiko_bind_identity_state(identity_key,current_virtual) VALUES (?,?)
   ON DUPLICATE KEY UPDATE current_virtual=VALUES(current_virtual)`,[ticket.principal,intent.action==='current'&&intent.slot===0?1:0]);
 }

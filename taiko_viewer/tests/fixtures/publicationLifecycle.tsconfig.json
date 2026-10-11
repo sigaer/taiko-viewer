@@ -29,6 +29,8 @@
     "../../server/infrastructure/taiko-publication/sql-backup.ts",
     "../../server/infrastructure/taiko-publication/recovery-worker.ts",
     "../publicationSqlBackup.test.ts",
-    "../publicationRecoveryWorker.test.ts"
+    "../publicationRecoveryWorker.test.ts",
+    "../../server/api/taiko/proxy/bind/remove.post.ts",
+    "../../server/api/taiko/proxy/bind/visibility.post.ts"
   ]
 }

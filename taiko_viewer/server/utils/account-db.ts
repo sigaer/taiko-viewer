@@ -6,7 +6,7 @@ import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publicat
 import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
 import { SCORE_TOKEN_TABLE_SQL } from "../infrastructure/account/score-token";
 import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL, SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from "../infrastructure/account/source-service-schema";
-import { BOT_BINDING_OPERATION_TABLE_SQL } from "../infrastructure/account/bot-binding-schema";
+import { BOT_BINDING_OPERATION_TABLE_SQL, BOT_BINDING_OPERATION_MIGRATIONS } from "../infrastructure/account/bot-binding-schema";
 import { HIROBA_CREDENTIAL_TABLE_SQL, HIROBA_CREDENTIAL_MIGRATIONS, HIROBA_BINDING_OPERATION_TABLE_SQL } from "../infrastructure/account/hiroba-credential-schema";
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from "../infrastructure/account/sync-request";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
@@ -548,6 +548,7 @@ const CREATE_TABLES = [
 ];
 
 const MIGRATIONS = [
+  ...BOT_BINDING_OPERATION_MIGRATIONS,
   ...SOURCE_SERVICE_PRINCIPAL_MIGRATIONS,
   ...HIROBA_CREDENTIAL_MIGRATIONS,
   "ALTER TABLE web_taiko_bindings ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER taiko_id",
