@@ -1,0 +1,143 @@
+{
+  "phase": 6,
+  "step": "6.1-ownership",
+  "status": "AUDIT_DECISION_COMPLETE",
+  "date": "2026-10-11T08:44:13.970457+08:00",
+  "viewer_head": "539d274fa01831462e56ebeb99a9641526dd03df",
+  "files": [
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/userdata_storage.py",
+      "bytes": 8543,
+      "sha256": "c8e83ec98b28ba17069478361d725c430074f2e86ea031a1874c00d14558bcc0"
+    },
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/merged_bind.py",
+      "bytes": 24507,
+      "sha256": "fa6934a453b5d6a94867cfe768144154fbcc07f6edbc9bf089827c2b58d7b0dc"
+    },
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/daily_ability.py",
+      "bytes": 4889,
+      "sha256": "6d775763da200a323e3563b826450fa5b17b8755cc05548f1b3b01022a8cb94c"
+    },
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/scripts/sync_dispatch_server.py",
+      "bytes": 22091,
+      "sha256": "5593c36c8378734bb3c54dec13ed36b8d5f0de5fb064d55a92f05ecd9e77af63"
+    },
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/scripts/storage_maintenance.py",
+      "bytes": 6260,
+      "sha256": "d8e3670ddf644c85c6cf6b64c733a03a29ab431e0ee02a0544f0719fb97d5d48"
+    },
+    {
+      "repo": "A",
+      "path": "/home/sigaer/git/Sakura_bot/taiko/scripts/taiko_admin_backup.py",
+      "bytes": 11912,
+      "sha256": "06e89387f5ebec4e109f32715f4168fcb97912dfd34a4fe778374a19e1063d0a"
+    },
+    {
+      "repo": "R",
+      "path": "/home/sigaer/taiko/plugins/utils/userdata_storage.py",
+      "bytes": 8543,
+      "sha256": "c8e83ec98b28ba17069478361d725c430074f2e86ea031a1874c00d14558bcc0"
+    },
+    {
+      "repo": "R",
+      "path": "/home/sigaer/taiko/plugins/utils/merged_bind.py",
+      "bytes": 24507,
+      "sha256": "fa6934a453b5d6a94867cfe768144154fbcc07f6edbc9bf089827c2b58d7b0dc"
+    },
+    {
+      "repo": "R",
+      "path": "/home/sigaer/taiko/plugins/utils/daily_ability.py",
+      "bytes": 4889,
+      "sha256": "6d775763da200a323e3563b826450fa5b17b8755cc05548f1b3b01022a8cb94c"
+    },
+    {
+      "repo": "R",
+      "path": "/home/sigaer/taiko/scripts/sync_dispatch_server.py",
+      "bytes": 25261,
+      "sha256": "fdec5275a7326f953c96ee461b640a94344fe7782b65662d0c0e11361f8f8af2"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/internal/account/shared.ts",
+      "bytes": 27732,
+      "sha256": "9606c01d589919b513493f10b536770da2d44f44dd1f2c8360973db720abe885"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/internal/account/kinoko-history.ts",
+      "bytes": 9101,
+      "sha256": "3d09189da3e2a0fe7a3d45acd0766446dfc49c39d8c745f8e95199a91c7236a2"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/utils/account/songs.ts",
+      "bytes": 15269,
+      "sha256": "e8b177734f6f146f3c2ca8e652d6540d47945492646f0c3cea4917bae15c4e94"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/utils/account/manual.ts",
+      "bytes": 22367,
+      "sha256": "6c0d8f2af05aa4aa16c722840620f111615f84a1f90a6e286f185fc145a528cd"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/utils/account/sync.ts",
+      "bytes": 11354,
+      "sha256": "1c10bce520c0bd9c9f0cf2b8477e31746c5df556b5abbe61844aff935a12532e"
+    },
+    {
+      "repo": "Viewer",
+      "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/deploy/taiko-sync-receiver.service",
+      "bytes": 547,
+      "sha256": "8222f1939ddf543be1b9afcb371f900961c20e9ed801d2e61ec547d995e75bc3"
+    },
+    {
+      "repo": "B",
+      "path": "/home/sigaer/taiko-bot/taiko_bot/userdata_provider.py",
+      "bytes": 4911,
+      "sha256": "b60757e82c4f2a29549569ee54529a9ff1899ccf53133b9e266fddd4efc24a2e"
+    },
+    {
+      "repo": "B",
+      "path": "/home/sigaer/taiko-bot/plugins/utils/merged_bind.py",
+      "bytes": 17210,
+      "sha256": "48f0d21d8c87197aece1c19e175feec3200f561d1009ec6c107f907af4aa10ff"
+    }
+  ],
+  "runtime_differences": [
+    {
+      "path": "plugins/utils/userdata_storage.py",
+      "same": true
+    },
+    {
+      "path": "plugins/utils/merged_bind.py",
+      "same": true
+    },
+    {
+      "path": "plugins/utils/daily_ability.py",
+      "same": true
+    },
+    {
+      "path": "scripts/sync_dispatch_server.py",
+      "same": false
+    }
+  ],
+  "private_userdata_read": false,
+  "db_connected": false,
+  "decision": {
+    "publication": "JSON + cross-process flock + pending recovery + immutable committed view",
+    "read_model": "private rebuildable file projection; existing product window",
+    "database": "retain identity/Goal/measurement SQL; defer score canonical migration pending measured need"
+  },
+  "production_gate": "IN_PROGRESS"
+}
