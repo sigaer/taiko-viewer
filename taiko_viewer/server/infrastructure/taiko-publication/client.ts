@@ -26,6 +26,8 @@ export type PublicationLease = {
   put: (key: string, body: string) => Promise<PublicationReference>;
   remove: (key: string) => Promise<void>;
   backup: (backupKey: string) => Promise<SourceBackupReceipt>;
+  verifyBackup: (backupKey: string) => Promise<SourceBackupReceipt>;
+  restoreBackup: (backupKey: string, transactionId: string) => Promise<PublicationManifest>;
   purgeBackupArchives: (backupKey: string) => Promise<void>;
   publish: (options?: { replaceHistory?: boolean; transactionId?: string }) => Promise<PublicationManifest>;
   close: () => Promise<void>;
@@ -153,6 +155,24 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
         if (!result || !Number.isSafeInteger(result.removed) || result.removed! < 0 || result.removed! > 32) {
           throw new PublicationUnavailableError();
         }
+      },
+      async verifyBackup(backupKey) {
+        if (!/^[a-f0-9]{32}$/.test(backupKey)) throw new PublicationUnavailableError();
+        const response = await send({ method: "verify-backup", backupKey });
+        const source = response.source as SourceBackupReceipt["source"] | undefined;
+        if (response.verified !== true || response.backupKey !== backupKey || !source ||
+          !Number.isSafeInteger(source.sequence) || source.sequence < 0 || !/^[a-f0-9]{32}$/.test(source.commitId)) {
+          throw new PublicationUnavailableError();
+        }
+        return { backupKey, source };
+      },
+      async restoreBackup(backupKey, transactionId) {
+        if (![backupKey, transactionId].every(key => /^[a-f0-9]{32}$/.test(key))) throw new PublicationUnavailableError();
+        const response = await send({ method: "restore-backup", backupKey, transactionId });
+        if (response.restored !== true || response.backupKey !== backupKey || !response.view ||
+          response.view.identity !== options.identity) throw new PublicationUnavailableError();
+        lease.view = response.view;
+        return response.view;
       },
       async publish(publicationOptions = {}) {
         const response = await send({ method: "publish", ...publicationOptions });

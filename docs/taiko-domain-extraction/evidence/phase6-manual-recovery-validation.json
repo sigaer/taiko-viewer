@@ -1,0 +1,100 @@
+{
+  "step": "6.3d.5",
+  "status": "MANUAL_COORDINATED_RECOVERY_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "fd7b52e",
+  "sakuraVersion": "9.81.4",
+  "validation": {
+    "pythonTests": 43,
+    "offlineNodeTests": 128,
+    "realTestDbSqlTests": 48,
+    "newManualRestorationSqlTests": 21,
+    "typescript": "domainRead + publicationLifecycle configs PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "exitStatus": 0,
+    "systemdUnit": "taiko-qa-1791688229-1160456.service",
+    "logPath": "/var/tmp/phase6-restore-final-qa.log",
+    "logSha256": "2b31d845e8dd86557f4df8051ef6e4a312248fcf303be82603bbbb1d512c6743",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791688229-1160456.service",
+      "durationMs": 113322,
+      "sampledMemoryPeakBytes": 326217728,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "49736 kB",
+          "VmRSS": "49736 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "verify and restore RPC reuse single center Infrastructure implementation, reject SH/staged mutation, omit paths/private payloads",
+    "complete actual SQL/source/daily round-trip matches all original C/H bytes and SQL authority field/id/hash; old claim capabilities stay revoked",
+    "trusted coordinator admits durable restoring before file recovery; ordinary published deletion is never auto-restored",
+    "source EX held across file recovery and one SQL owner/product authority COMMIT; no grant published before all files finish",
+    "new current Viewer selection and existing bot slots preserved; multiple legacy bot grants restored without overwriting newer ones",
+    "late SQL restore failure/failed rollback destroy connection and keep all authority revoked; worker resumes",
+    "lost actual restoration COMMIT acknowledgement proves matching restored receipt without duplicate INSERT",
+    "independent simultaneous restores share EX and one SQL commit",
+    "actual Node process exits after reservation, after all files, before authority COMMIT, after authority COMMIT; TCP rollback and forward retry verified",
+    "SQL/file checksum, cross-source data, new active source, new daily measurement, reused primary key, deleted owner reject without overwrite/reauthorization",
+    "private backup alone restores into fresh configured root without original object store",
+    "restored nonce/idempotency does not rewind later normal score edits; new deletion receipt supersedes old restore",
+    "one due lifecycle job across pending/restoring queues, captured pool survives shutdown-style global replacement",
+    "SQL driver diagnostics containing private payload are sanitized after actual rollback; no sql/cause propagated",
+    "existing manual/delete/Goal/acquisition/Growth/publication parity and failure regressions retained"
+  ],
+  "limits": [
+    "Synthetic directories and owned actual test rows only; no production private data/DB/network QA",
+    "Manual test schema omits production FKs; not a production migration/FK enforcement PASS",
+    "Only the internal trusted restore service is added; no public restore API, no automatic admission from published deletion, production operator runbook still pending",
+    "Owners must still exist; no restoration of deleted Viewer login accounts or full-database disaster backup",
+    "SQL/filesystem/daily are coordinated forward steps, not one joint transaction or clock rollback",
+    "Whole grant/Writer convergence, manual create/claim/detach transactions, generic unbind/delete, dispatcher/u0/daily, Read Model and million-record costs remain pending",
+    "Portable root test uses synthetic retired root; actual root cutover must retire all old writers/readers before restoring SQL authority",
+    "No R runtime sync, Viewer push/deploy or service restart; pending unified Phase 6 release",
+    "250 ms sampled memory peak is not exact OS/process-tree maximum or full million-record resource gate"
+  ],
+  "harnessCorrections": [
+    "Initial new SQL test statically imported service before native runtime resolver/config installation; moved to deferred imports then reran",
+    "Empty source snapshot fixture previously unconditionally read absent current; now checks currentExists before reading; product reader unchanged",
+    "Final review added private SQL driver error sanitization and captured-pool dispatch regression; repeated final 43+128+48 and both TypeScript checks"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/client.ts": "637eead17eaad83bd5cf54370d890dbb5e5be91aa1a62d0b77dab60f328fc7fb",
+    "taiko_viewer/server/infrastructure/taiko-publication/scope.ts": "2d73f9d08af7d484b9fd2102976c7e1fb6d8cdf93ee605c8061c730bad49706c",
+    "taiko_viewer/server/internal/account/source-lifecycle.ts": "f2cc720df51286b317c4ac23f139b6f43dc911fb5a1c91f8327311df2a0e648c",
+    "taiko_viewer/server/internal/account/manual-recovery-data.ts": "85017244c5312d733f5c6abf63fe34b2790367e960be2897f32b26cb100a5f50",
+    "taiko_viewer/server/internal/account/manual-recovery-sql.ts": "63a9e88e6b7772138b0757b8c23a57cc0193110a938463338295f5b1575e303e",
+    "taiko_viewer/server/services/account/manual-lifecycle.ts": "473b2a98c951d93894f9d7a01a580d6f6cea623eaafc7d131ea79522ec43d2cb",
+    "taiko_viewer/server/services/account/manual-recovery.ts": "01036adbeaaa7c6905bdbea04c9e1479f910a3e93b6a3f7514bd039a4ee87745",
+    "taiko_viewer/server/services/account/source-lifecycle-recovery.ts": "91af91d065741af305fd9e65b1e702fbf68c4d8cc36b26381f1790196fb8d822",
+    "taiko_viewer/server/plugins/source-lifecycle.ts": "8dd39c910b05c41d585bd569140311fffff5519da6c40dedbe6c3ac62dcf5b95",
+    "taiko_viewer/server/services/taiko-domain/publication.ts": "e625d5ab0ffc15d88597c70a69b688944bd00610752c8bd2452ec498a199be3a",
+    "taiko_viewer/tests/publicationClient.test.ts": "809526a8996072cbfa33822fddb8dc25a4a8342e4d31124c45927712726a0d39",
+    "taiko_viewer/tests/manualRecoverySql.test.mjs": "ec7376f8e306a96a04af799c14826a26065b5e157a3fb9bd2fa60aa6d85c64f5",
+    "taiko_viewer/tests/manualLifecycleSql.test.mjs": "839854063127a0f8a1c2bd0e97403c24a3e8bc5b04710d0ab9ce6d1ec7e3a873",
+    "taiko_viewer/tests/fixtures/manualLifecycleRuntime.mjs": "62afe08fe74555abe148a3478d2709098da046e2faaadf925f3f77fc204a98e4",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "236265983561e71bf7a7b097891afa8ec222a7a199ed062f6f4075d910cb51cc",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "3a31016e50143c2fa7c3666738c4b359490c7cd3e32737ce7ed46e3a3d4e8f03"
+  },
+  "sakuraSourceSha256": {
+    "taiko/taiko_store/bridge.py": "5fa80b5dd11ae365bb5b32f4bdbd20b46e702c27d845343e49d403de733fb2c2"
+  }
+}

@@ -108,3 +108,27 @@ test("actual backup RPC rejects SH and uncommitted score stages", async () => fi
   }), PublicationUnavailableError);
   await assert.rejects(readFile(join(root, ".manual_deleted", `synthetic-${key}`, "backup.json")), { code: "ENOENT" });
 }));
+
+test("actual recovery pipe verifies independent copies and restores C/H/daily in one owned EX", async () => fixture(async root => {
+  const key = "d".repeat(32), transactionId = "e".repeat(32);
+  const raw = '{ "songs": [] }\n', daily = '{"days":{"2026-10-10":123}}';
+  await mkdir(join(root, "synthetic"));
+  await writeFile(join(root, "syntheticdata.json"), raw);
+  await writeFile(join(root, "synthetic", "daily-ability-v1-top20.json"), daily);
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    const original = await lease.backup(key);
+    assert.deepEqual(await lease.verifyBackup(key), original);
+    await lease.remove("current");
+    await lease.purgeBackupArchives(key);
+    await lease.publish({ replaceHistory: true });
+    const restored = await lease.restoreBackup(key, transactionId);
+    assert.equal(restored.commitId, transactionId);
+    assert.equal(lease.view?.commitId, transactionId);
+    assert.equal(await readFile(join(root, "syntheticdata.json"), "utf8"), raw);
+    assert.equal(await readFile(join(root, "synthetic", "daily-ability-v1-top20.json"), "utf8"), daily);
+    assert.equal((await lease.restoreBackup(key, transactionId)).sequence, restored.sequence);
+    await lease.put("current", "new uncommitted");
+    await assert.rejects(lease.restoreBackup(key, transactionId), PublicationUnavailableError);
+  });
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "read" }, lease => lease.restoreBackup(key, transactionId)), PublicationUnavailableError);
+}));

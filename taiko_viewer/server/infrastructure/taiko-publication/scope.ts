@@ -39,6 +39,16 @@ export async function purgeScoreBackupArchives(identity: string, backupKey: stri
   if (!scope || scope.mode !== "write") throw new PublicationUnavailableError();
   await scope.lease.purgeBackupArchives(backupKey);
 }
+export async function verifyScoreBackup(identity: string, backupKey: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write" || scope.staged.size) throw new PublicationUnavailableError();
+  return scope.lease.verifyBackup(backupKey);
+}
+export async function restoreScoreBackup(identity: string, backupKey: string, transactionId: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write" || scope.staged.size || scope.rollback.length) throw new PublicationUnavailableError();
+  return scope.lease.restoreBackup(backupKey, transactionId);
+}
 export async function clearScoreSource(identity: string) {
   const scope = currentScoreScope(identity);
   if (!scope || scope.mode !== "write" || scope.staged.size) throw new PublicationUnavailableError();

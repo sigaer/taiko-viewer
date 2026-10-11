@@ -129,7 +129,7 @@ export async function manualSourceSnapshot(c) {
     const reader = c.scopeModule.currentScoreScope(c.taikoId).reader;
     const history = [];
     for (const name of await reader.listHistory(c.taikoId)) history.push(createHash('sha256').update(await reader.readHistory(c.taikoId, name)).digest('hex'));
-    return { current: await reader.readRawCurrent(c.taikoId), history };
+    return { current: await reader.currentExists(c.taikoId) ? await reader.readRawCurrent(c.taikoId) : null, history };
   });
 }
 export const manualScoreInput = { songNo: 100, level: 4, title: 'Synthetic chart', titleJp: 'Synthetic JP', values: { high_score: 800000, good_cnt: 500, ok_cnt: 20, ng_cnt: 5, combo_cnt: 100, stage_cnt: 1 } };

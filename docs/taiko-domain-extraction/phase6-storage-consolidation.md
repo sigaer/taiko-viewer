@@ -136,3 +136,18 @@ Manual 永久删除在 source EX 内先核验 owner、创建独立 verified C/H/
 QA 84.824 秒，250 ms sampled cgroup peak 332,267,520 bytes（约 316.875 MiB），high/max/OOM=0，owned systemd unit success/exit 0。真实 SELECT DATABASE() 为 `taiko_annual_poster_test`，显式 opt-in=1，only owned synthetic rows/finally cleanup；fixture 不含 production FK，**不是生产 migration/FK enforcement PASS**，不重开 B-0/DB Isolation。未读取生产私有数据/DB，禁止网络，无新 listener。初始 Goal fixture 缺 source_mode、JSON key 顺序与 TS args 类型问题均修正后完成最终全部验证。
 
 A `8e3a48a` / 9.81.3 完成标准 commit/push；仅 A Infrastructure，未同步 R/未影响现有 NoneBot，因此此步不重启。Viewer 0.82.0 本地步骤留档，等待完整 Phase 6 标准发布 push/deploy；线上仍 0.81.11。这是 MANUAL_DELETE_RECOVERY_PASS，不是完整恢复或 Phase 6 PASS。下一步继续 SQL/source/daily 联动恢复，manual create/claim/detach SQL failure atomicity、通用解绑/注销/grant、dispatcher/u0/daily 的全部 Writer/reader convergence、Read Model/百万记录与最终统一激活发布。
+
+
+## 6.3d.5 SQL/source/daily 联动恢复协调器
+
+Trusted internal `restoreDeletedManualSource` 读取原 lifecycle receipt，核验 SQL backup canonical checksum、固定表/column allowlists、source/owner/product scope、原 source backup commit/sequence 与全部独立文件。旧 source 必须是 receipt 对应的精确 tombstone；续做只接受本 operation 的固定 restore nonce。新的活动 source、daily namespace/measurement、冲突 SQL primary key/owner 或已注销 Viewer user 均停止。Portable test 允许配置的全新 root 只有私有备份，不依赖原 canonical object store；实际切 root 时必须先停用全部旧 Writer/reader，不能同时跑两个 root。
+
+在恢复文件前持久设 `restoring`，删除 worker 不再选择它，同 actor 的永久删除重试也拒绝。保持原 Source EX → SQL 锁顺序，在 EX 内通过中心唯一 Python implementation 构建新的 C/H commit、逐 daily namespace 恢复并核验，再以一条 SQL transaction 恢复原 owner/binding id、Goal、measurement、cursor、showcase 与 song locks。旧一次性 claim 不恢复。用户已经新选中的其他 binding 不覆盖；bot 恢复追加到现有 slots，保留其 current selection。文件或 SQL failure 期间 SQL grant 保持不可用，已经准入的 `restoring` 可以自动向前完成；普通 `published` 用户删除不能被自动重新授权。
+
+同一 worker 每 tick 从 pending/restoring 的 due operation 选择一个，沿途保留一个 captured SQL pool，不在 shutdown 中解析/重开 pool。SQL/文件都确认后状态 `restored` 与 authority 在同一次 COMMIT 生效；失去 SQL ack 只凭相同 operation/nonce 的 durable receipt 判断成功。重试是 operation acknowledgement，不把更晚的正常成绩修改回退；再次实际删除会新建 receipt，旧 operation 不能复活它。mysql2 的 code/sql/sqlState/sqlMessage diagnostics 可能含整个私有 SQL INSERT，入口现替换为 generic 503，不传 sql/cause；正常 owner/确认错误保留。
+
+最终 43 Python + 128 offline Node + 48 actual `_test` SQL（新增 21 restore）、domainRead/publicationLifecycle 两组局部 TypeScript 全 PASS。完整往返的 current/all H 原文、daily 原文及全部 SQL fields/id 的 canonical SHA 相同；正常修改、重复恢复和再次删除正确。实际 owned Node 进程在 reservation 后、文件恢复后、authority COMMIT 前/后退出，未 commit 的 TCP transaction 回滚、partial file recovery 不赋予 grant、worker fresh resume/idempotent 均验证。并发两个恢复仅一个 SQL commit、丢失 COMMIT ack、失败 rollback 销毁连接、新 current/slot、multi-bot、错备份/跨 source/PK conflict/deleted owner、private driver diagnostics、captured pool 关闭复核及不自动恢复普通删除通过。[证据](evidence/phase6-manual-recovery-validation.json)。
+
+综合 113.322 秒，250 ms sampled cgroup peak 326,217,728 bytes（约 311.106 MiB），high/max/OOM=0、unit success/exit 0；所有 synthetic rows/temporary trees/owned children 清理。实际 SELECT DATABASE()=`taiko_annual_poster_test`、opt-in=1；不含生产 FK、不是生产 migration/full DB disaster recovery。初始 native import ordering 与 empty fixture 两个 harness 问题修正；最终增加 driver 脱敏和 shutdown pool 回归后重新完整验证。未用 production DB、个人数据或网络 QA，无新 listener。
+
+A `fd7b52e` / 9.81.4 的两个本地 RPC 已标准 commit/push，仍只在 A 未同步 R，因此本步骤不重启 NoneBot；Viewer 本地步骤，统一标准部署时 push，live 仍 0.81.11。当前没有新增公网 restore API，提供内部 trusted coordination 和已准入自动续做；最终运维入口/生产恢复 runbook 随全授权收敛归档。MANUAL_COORDINATED_RECOVERY_PASS 不等于 Gate 6 PASS。下一步继续 create/claim/detach SQL failure atomicity、通用解绑/注销/grant、dispatcher/u0/daily 的全部入口、一致 Read Model/P1a、百万成本、统一 runtime sync/发布与在线验收。

@@ -7,38 +7,18 @@ import { deleteBindingsAndGoalsInTransaction } from "../goals/lifecycle";
 import { clearScoreSource, createScoreBackup, currentScoreScope, purgeScoreBackupArchives, scorePublication, withDomainScoreWrite } from "../taiko-domain/publication";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client";
 import { encodeSqlRecoveryBackup } from "../../infrastructure/taiko-publication/sql-backup";
+import { assertSourceGrantsRevoked as assertRevoked, latestSourceLifecycleReceipt as latestReceipt, validateSourceLifecycleReceipt as validateReceipt,
+  LIFECYCLE_UUID as UUID, MANUAL_SOURCE_ID as MANUAL_ID, LIFECYCLE_RECEIPT_COLUMNS as RECEIPT_COLUMNS, sourceLifecycleFailure, type SourceLifecycleReceipt as Receipt } from "../../internal/account/source-lifecycle";
 
-type Receipt = RowDataPacket & {
-  operation_id: string; taiko_id: string; kind: "manual-delete";
-  actor_kind: "viewer" | "bot"; actor_key: string; backup_key: string;
-  source_commit_id: string; source_sequence: number; status: "pending" | "published" | "restored";
-  published_commit_id: string | null;
-};
-const RECEIPT_COLUMNS = "operation_id,taiko_id,kind,actor_kind,actor_key,backup_key,source_commit_id,source_sequence,status,published_commit_id";
-const UUID = /^[a-f0-9]{32}$/;
-const MANUAL_ID = /^98[0-9]{16}$/;
 const MAX_OWNERS = 128;
 const MAX_BACKUP_ROWS = 10_000;
 const MAX_SQL_BACKUP_BYTES = 8 * 1024 * 1024;
 
-function validateReceipt(value: Receipt) {
-  if (!UUID.test(value.operation_id) || !UUID.test(value.backup_key) || !UUID.test(value.source_commit_id) ||
-      !MANUAL_ID.test(value.taiko_id) || value.kind !== "manual-delete" ||
-      !["viewer", "bot"].includes(value.actor_kind) || !value.actor_key || value.actor_key.length > 191 ||
-      !Number.isSafeInteger(Number(value.source_sequence)) || Number(value.source_sequence) < 0 ||
-      !["pending", "published", "restored"].includes(value.status)) throw new PublicationUnavailableError();
-  return value;
-}
 const actorKey = (owner: ManualOwner) => {
   if (owner.kind === "bot") return normalizeManualIdentityKey(owner.identityKey);
   if (!Number.isSafeInteger(owner.userId) || owner.userId <= 0) throw createError({ statusCode: 403, statusMessage: "账号归属无效" });
   return String(owner.userId);
 };
-async function latestReceipt(db: Pool, taikoId: string) {
-  const [rows] = await db.execute<Receipt[]>(
-    `SELECT ${RECEIPT_COLUMNS} FROM taiko_source_lifecycle WHERE taiko_id=? ORDER BY created_at DESC,operation_id DESC LIMIT 1`, [taikoId]);
-  return rows[0] ? validateReceipt(rows[0]) : undefined;
-}
 
 // Row/byte limits are checked before revoking authority. Private recovery data
 // stays in SQL and never appears in API responses, worker queries or logs.
@@ -114,14 +94,6 @@ async function revokeInOneTransaction(db: Pool, owner: ManualOwner, taikoId: str
   } finally { connection.release(); }
 }
 
-async function assertRevoked(db: Pool, receipt: Receipt) {
-  const [[state]] = await db.execute<RowDataPacket[]>(
-    `SELECT (SELECT COUNT(*) FROM taiko_manual_accounts WHERE taiko_id=?) +
-      (SELECT COUNT(*) FROM web_taiko_bindings WHERE taiko_id=?) +
-      (SELECT COUNT(*) FROM bind WHERE id=? AND source='manual') AS grants`,
-    [receipt.taiko_id, receipt.taiko_id, receipt.taiko_id]);
-  if (Number(state.grants)) throw new PublicationUnavailableError();
-}
 async function prepareSourceCleanup(db: Pool, receipt: Receipt) {
   validateReceipt(receipt);
   await assertRevoked(db, receipt);
@@ -144,13 +116,14 @@ async function markPublished(db: Pool, receipt: Receipt) {
   });
 }
 
-export async function permanentlyDeleteManualSource(owner: ManualOwner, taikoId: string) {
+async function deleteManualSource(owner: ManualOwner, taikoId: string) {
   if (!MANUAL_ID.test(taikoId)) throw createError({ statusCode: 400, statusMessage: "手动账号标识无效" });
   const key = actorKey(owner);
   await ensureAccountSchema();
   const db = getAccountDb();
   const receipt = await withDomainScoreWrite(taikoId, async () => {
     let previous = await latestReceipt(db, taikoId);
+    if (previous?.status === "restoring") throw new PublicationUnavailableError();
     if (previous && previous.status !== "restored") {
       if (previous.actor_kind !== owner.kind || previous.actor_key !== key) throw createError({ statusCode: 403, statusMessage: "该删除操作不属于当前身份" });
       await prepareSourceCleanup(db, previous);
@@ -175,13 +148,18 @@ export async function permanentlyDeleteManualSource(owner: ManualOwner, taikoId:
   return { ok: true, backup: receipt.backup_key, operationId: receipt.operation_id };
 }
 
+export async function permanentlyDeleteManualSource(owner: ManualOwner, taikoId: string) {
+  try { return await deleteManualSource(owner, taikoId); }
+  catch (error) { throw sourceLifecycleFailure(error); }
+}
+
 /** One source per tick; concurrent processes are fenced again by source EX. */
-export async function recoverOneManualSourceDeletion(signal?: AbortSignal, operationId?: string) {
+export async function recoverOneManualSourceDeletion(signal?: AbortSignal, operationId?: string, existingDb?: Pool) {
   if (operationId && !UUID.test(operationId)) throw new PublicationUnavailableError();
   signal?.throwIfAborted();
-  await ensureAccountSchema();
+  if (!existingDb) await ensureAccountSchema();
   signal?.throwIfAborted();
-  const db = getAccountDb();
+  const db = existingDb || getAccountDb();
   const [rows] = await db.execute<Receipt[]>(
     `SELECT ${RECEIPT_COLUMNS} FROM taiko_source_lifecycle WHERE status='pending'
       AND ${operationId ? "operation_id=?" : "(last_attempt_at IS NULL OR last_attempt_at < DATE_SUB(NOW(3),INTERVAL 60 SECOND))"}
