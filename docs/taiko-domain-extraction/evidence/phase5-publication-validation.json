@@ -1,0 +1,122 @@
+{
+  "phase": 5,
+  "step": "5.4-publication",
+  "status": "PASS",
+  "date": "2026-10-11T08:40:16.663564+08:00",
+  "source_head": "eca1b0851e5cc554b72629037ff3c869fc69454a",
+  "remote_main": "eca1b0851e5cc554b72629037ff3c869fc69454a",
+  "viewer_version": "0.81.11",
+  "standard_command": "bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh <HEAD subject>",
+  "deploy_exit_code": 0,
+  "deploy_log": "/var/tmp/taiko-domain-extraction/phase5-deploy-resumed.log",
+  "deploy_log_sha256": "5f6bf36dd8daa4de28a6a0330b593c7708f1827e6b2ce687d3b0731a1a7ac859",
+  "smoke": {
+    "phase": 5,
+    "expectedVersion": "0.81.11",
+    "result": "PUBLICATION_SMOKE_PASS",
+    "method": "anonymous GET only",
+    "checks": [
+      {
+        "url": "http://127.0.0.1:3100/more",
+        "status": 200,
+        "bytes": 98712,
+        "sha256": "7e85b74f886b44b68c53fa6a9197e1eefb988f90e7fc3e6b3244f621578a5168",
+        "milliseconds": 86,
+        "cacheControl": "",
+        "vary": "",
+        "versionBadge": true
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/more",
+        "status": 200,
+        "bytes": 98712,
+        "sha256": "7e85b74f886b44b68c53fa6a9197e1eefb988f90e7fc3e6b3244f621578a5168",
+        "milliseconds": 75,
+        "cacheControl": "",
+        "vary": "Accept-Encoding",
+        "versionBadge": true
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/titles",
+        "status": 200,
+        "bytes": 476205,
+        "sha256": "d7d9177ce98419c8df3bfbbdda8e407c540930d4e4e525e9153f07f584d6ff07",
+        "milliseconds": 368,
+        "cacheControl": "",
+        "vary": "Accept-Encoding"
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/api/account/growth/overview",
+        "status": 401,
+        "bytes": 173,
+        "sha256": "1cc7d6df34fbfb66fb7913e6b18cf30bec5da131dc137d405b617fd128153f11",
+        "milliseconds": 6,
+        "cacheControl": "private, no-store",
+        "vary": "Cookie"
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/api/account/growth/history",
+        "status": 401,
+        "bytes": 172,
+        "sha256": "f41a97099739a3e324b3b4900a19c266a0cc64d34070f102055b1ffa4b792ace",
+        "milliseconds": 26,
+        "cacheControl": "private, no-store",
+        "vary": "Cookie"
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/api/account/growth/recent",
+        "status": 401,
+        "bytes": 171,
+        "sha256": "f9d45ae0dcf8a4fdee0d7b6614ba1727828b6eefd951082015d431bdb6009ae4",
+        "milliseconds": 5,
+        "cacheControl": "private, no-store",
+        "vary": "Cookie"
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/api/account/growth/passport",
+        "status": 401,
+        "bytes": 173,
+        "sha256": "78f444f8411d1c4aa8bcd717208ee88fe9d576fc8a30ae92777214d4a90e5ead",
+        "milliseconds": 11,
+        "cacheControl": "private, no-store",
+        "vary": "Cookie"
+      },
+      {
+        "url": "https://viewer.sakura-bot.cn/api/account/songs",
+        "status": 401,
+        "bytes": 163,
+        "sha256": "91c234569d923ae08e1dc5965f765baba558b8dae5d564997fda4f5040c1d9a8",
+        "milliseconds": 5,
+        "cacheControl": "private, no-store",
+        "vary": ""
+      }
+    ]
+  },
+  "processes": {
+    "viewer": {
+      "old_pid": 646789,
+      "old_exited": true,
+      "new_pid": 1063394,
+      "active": true
+    },
+    "sync_receiver": {
+      "old_pid": 829176,
+      "old_exited": true,
+      "new_pid": 1063408,
+      "active": true
+    },
+    "nonebot": {
+      "nb_pid": 829369,
+      "bot_pid": 829379,
+      "unchanged": true
+    },
+    "public_api": {
+      "pid": 829173,
+      "unchanged": true
+    }
+  },
+  "limitations": [
+    "Anonymous GET smoke verifies release version and existing authentication/cache boundary; synthetic service regression supplies score correctness evidence, not authenticated production data.",
+    "Baidu optional push returned HTTP 400 over quota; standard deployment completed successfully."
+  ]
+}

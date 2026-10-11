@@ -2,7 +2,7 @@
 
 执行依据：[Execution Plan v2](../Sakura_Taiko_Domain_Extraction_Execution_Plan_v2.md)。用户已授权依序执行 Phase 0–6、逐步留档、阶段提交/推送，技术选择自行决定。日期均为 Asia/Shanghai。此台账不沿用 Annual Poster Phase 字母 Gate。
 
-Goal：`active`。先前连续三轮内存准入不足的阻碍已在恢复时解除；继续同一 Phase 5 标准发布/生产验收，随后 Phase 6。Phase 5 Gate 仍为 IN_PROGRESS，不用恢复准入替代上线结果。详见 [阻碍审计](evidence/phase5-blocked-audit.json)、[恢复复核](evidence/phase5-resume-admission.json)。
+Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS；开始 Phase 6 ownership、publication、Read Model 与 storage 决策。先前内存准入阻碍已解除，历史记录保留。
 
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
@@ -11,8 +11,8 @@ Goal：`active`。先前连续三轮内存准入不足的阻碍已在恢复时�
 | 2 Core v0.1 | PASS | 四步依序提交；独立 repo/tag，15 项 installed-wheel tests | [验收](phase2-core-v0.1.md)、[证据](evidence/phase2-validation.json) |
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
-| 5 Viewer boundary | IN_PROGRESS | 5.1–5.3 / 230 Node + 5 Python PASS；发布内存准入暂缓，待 push / deploy / smoke | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[准入](evidence/phase5-publication-attempt.json) |
-| 6 Writer/storage | NOT_STARTED | ownership、P1a、read model、DB 决策、publication/recovery | — |
+| 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
+| 6 Writer/storage | IN_PROGRESS | 开始全 Writer 复核；随后 publication/recovery、P1a/Read Model 与 DB 决策及验证 | — |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -48,3 +48,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 5.4-preparation：续行复核内存仍不足；补齐只读在线验收脚本，当前 0.81.10 的 8 项 SSR / anonymous GET 基线通过并留档，未冒称新版本已发布，生产无需账号/成绩写入。
 - 2026-10-11 / 5.4-blocked-audit：第三轮复核同一 memory headroom 阻碍，约 11.81 < 12.65 GiB；无活动部署/QA/Annual job，live remote `060dc05`，线上 PIDs 不变。独立准备完成后无其他合规推进动作，Goal 标 blocked 并留恢复步骤；不提前 PASS 或进入 Phase 6。
 - 2026-10-11 / 5.4-resume：Goal 恢复 active；可用约 16.88 > 12.65 GiB、PSI < 2、无 Annual worker。实现文件 hash 与 230 Node / 5 Python 验证时相同，JS contract 安装为 0.1.1，线上尚未切换；继续标准发布。
+
+- 2026-10-11 / 5.4-PASS：标准脚本 exit 0，`eca1b08` 已 push 并发布 0.81.11；8 项 local/online SSR、401/cache GET 通过，旧 Viewer/receiver PID 退出，新 PID 1063394/1063408 active，NoneBot/public API 未变。Gate 5 PASS，开始 Phase 6；未把匿名 smoke 称为真实用户成绩验收。
