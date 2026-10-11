@@ -405,3 +405,17 @@ Viewer0.82.0本步本地预备提交，待统一标准脚本部署/push；线上
 最终Source153（132既有+21新，9旧production/real例排除，warning1）、真实MySQL子进程1个复合用例PASS。实际changed getter/loader AST及真实SQL验证hidden/u0/current/case alias，非完整NoneBot注册；旧u0测试只更新mock接口，未计入执行。首轮误用compute-only导致旧recommend renderer缺符号（150pass/1fail），QA环境修正后151通过；追加getter与old-id fallback校准后153最终通过。日志及失败轮均保留。最终9.845s，sampled peak201609216 bytes，child OS maxRSS215416KiB另列，high/max/OOM0，unit success/inactive/no cgroup。SELECT DATABASE()为_test、explicit opt-in1，仅owned synthetic行/root/child，无生产数据或SQL变更。[完整证据](evidence/phase6-native-binding-metadata-validation.json)。
 
 A331314d/9.81.19与458ceae/9.81.20标准commit/push，实际remote已核对；B47bf5c1/0.2.4未变，Viewer0.82此步测试/文档本地待统一标准部署push。live0.81.11与三个PID不变，R未同步/重启。native authority整轮/Gate6仍IN_PROGRESS，继续binding mutations/visibility/migration named gates与credential/token issuer、全部Source/daily/u0 Writer/P1a、Read Model/invalidation/成本/ops、固定R deps/旧Writer停止后的统一激活及真实online产品验收。
+
+## 6.3e.8.6b 原生 Bot 绑定事务与所属凭据撤销（子步 PASS）
+
+2026-10-12。四个真实原生入口 `_upsert_bind_record` / `_switch_bind_record` / `_remove_bind_record` / `_set_taiko_bind_visibility` 收敛到独立 SQL-only mutation 模块。锁名精确复用中心 `sha256(JSON.stringify(principal))`、5s named gate，再完整锁定/验证最多128条bind及selection state；明确顺序principal→bind→state→credential，不在SQL后取得Source。所有连接为请求独占，异常/rollback失败也finally关闭。索引候选中遇到case-colliding principal或state拒绝，避免旧CI unique key把另一个官方身份的state覆盖；重复、双current、非法Source/manual类型、槽位与超容量拒绝。
+
+旧删除先用另一条连接删全局Hiroba凭据、再COMMIT bind，现以同一cursor删除精确 `configured_by_qq=sender principal` 的凭据和bind，外部/旧raw-QQ owner保留，不凭公共Source-ID清理别人凭据。删除保持原顺序/current，临时槽位高于已证明max，规避固定+1000/gapped slot碰撞；单成员时持久u0归0，空成员时删state。原生u0继续支持manual成员，保留与客户端external-only profile的产品差异；manual attach/remove仍须专用authority。新增使用空槽，可见性失败按服务暂不可用处理。
+
+结果DTO在同一事务内复读/校验后COMMIT；回复无需另一连接重构。最后绑定确认直接保存已证明的ID/TTL，空值或槽位不能作forced target；confirmation handler无二次metadata选择。已完成的动作在manual nickname/摘要读取失败时仍回复成功和固定重试提示，无私有SQL日志或错误泄漏。native COMMIT响应不确定只报unavailable，不自动重放位置删除；本子步没有durable native nonce receipt，不声明exactly-once，也没有把metadata DTO当Source permission。
+
+最终182 Source（132旧offline+21 metadata+29 mutation）、13真实guarded MySQL复合用例全PASS，9旧production/real例排除、warning1。新复合测试通过实际AST adapter运行保留u0文件中3个选定command regression；其余u0/QQ和NoneBot全注册未运行。冻结458ceae删除参数10输入一致；实际SQL覆盖hidden/new/existing/u0/manual/visibility、foreign凭据、slot/cap、case/state、Node持相同锁5s timeout、late SQL error/rollback失败、COMMIT前后error与两次真实进程退出的凭据-bind原子性/锁清理。每条native连接实际SELECT DATABASE()=_test且opt-in1，全部数据/行/root/子进程由fixture拥有，无production private data复制/SQL mutation。
+
+32.845s，250ms sampled peak216309760 bytes（非绝对峰）；largest child OS maxRSS219420KiB，high/max/OOM均0，wrapper44228实际exit0、unit1791746555-1846060 successful/inactive/MainPID0/collected cgroup gone。中间177/181 Source与13 SQL通过后分别补确认/摘要问题，再跑最终完整轮；hash为最后轮后且实现无后续改动。[完整证据](evidence/phase6-native-binding-mutation-validation.json)。
+
+A `9befec4209e8ef48db953a99fc41e723c76eb253` /9.81.21标准push且实际remote一致；仅本步6文件，无无关miku改动。Viewer SQL测试和文档本地提交，预备0.82.0待统一标准发布；B0.2.4未改。运行R未复制、新模块未加载，三个服务active且PID1063394/1063408/829173，线上Viewer0.81.11。不在native authority与旧Writer/P1a门禁未完成时同步重启。Source回退458ceaee；native整轮及Gate6仍IN_PROGRESS。继续原生Hiroba credential bind/sync/认证QQ联接、客户端token issuer/绑定删除、native读取与返回proof、全部Writer/daily/u0/P1a、Read Model/依赖失效/百万冷暖成本、trusted restore/cleanup/runbook/固定R依赖/停止旧Writer后的统一部署与真实在线产品验收。

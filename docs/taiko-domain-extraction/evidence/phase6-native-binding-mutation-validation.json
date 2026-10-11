@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6b",
+  "status": "NATIVE_BINDING_MUTATION_TRANSACTION_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "458ceaee0d197fcdf164100ae49b2ca6c379ad45",
+  "sourceCommit": "9befec4209e8ef48db953a99fc41e723c76eb253",
+  "sourceVersion": "9.81.21",
+  "sourceRemote": "9befec4209e8ef48db953a99fc41e723c76eb253",
+  "sourcePushVerified": true,
+  "sourcePushSession": 52356,
+  "sourcePushExit": 0,
+  "viewerPreparedParent": "17ac7d9bebcd8173b4a861537cd068bb7ddad2f8",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "clientCommit": "47bf5c174ceb2d791e0cf508502fcad39d771290",
+  "clientVersion": "0.2.4",
+  "clientChanged": false,
+  "coreVersion": "Source 0.1.1 unchanged",
+  "tests": {
+    "sourceOffline": {
+      "passed": 182,
+      "existingPassed": 132,
+      "metadataPassed": 21,
+      "mutationPassed": 29,
+      "productionOrRealDeselected": 9,
+      "warnings": 1,
+      "wrapperSession": 44228,
+      "wrapperExit": 0,
+      "log": "/var/tmp/phase6-native-mutation-qa.log"
+    },
+    "actualMysqlNativeChild": {
+      "passed": 13,
+      "metadataComposite": 1,
+      "mutationComposites": 12,
+      "coverage": [
+        "native command wrappers/new/existing/visibility/hidden/u0",
+        "preserved native manual u0 profile; dedicated manual mutation restriction",
+        "owned vs foreign credential deletion and binding atomicity",
+        "last ID confirmation/no positional or empty forced confirmation",
+        "gapped slot collision-free renumbering; 128 cap",
+        "exact-case principal and malformed state rejection",
+        "Node JSON principal gate held for actual 5s native timeout",
+        "late SQL error and failed rollback closes owned connection",
+        "COMMIT before/after response failure returns fixed unavailable",
+        "real process exit before/after COMMIT keeps credential and binding atomic",
+        "named locks and owned children cleaned"
+      ]
+    },
+    "frozenOracle": "458ceae:taiko/plugins/taiko.py resolve_remove_target, 10 input cases",
+    "retainedU0Tests": {
+      "selectedExecuted": [
+        "test_switch_bind_record_supports_u0_and_real_slots",
+        "test_remove_bind_record_disables_u0_after_falling_back_to_single_bind",
+        "test_manual_binding_also_enables_virtual_slot"
+      ],
+      "execution": "3 selected functions from retained file through actual AST adapter namespace within one composite test; no full NoneBot registration",
+      "otherExistingU0OrQQTestsRun": false
+    },
+    "fullNoneBotRun": false,
+    "onlineAuthenticatedRun": false,
+    "sourceCodeNewSyntax": "Changed actual command AST compiled/executed; whole command module parsed, framework decorators/boot not executed"
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 9.424
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 23.42
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 32.845,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791746555-1846060.service",
+    "sampledPeakBytes": 216309760,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 219420
+  },
+  "resourceCaveat": "250ms sample is not an absolute peak. Child OS maxRSS is separate; no million-record or production peak claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791746555-1846060.service",
+    "result": "success",
+    "loadState": "not-found after transient collection",
+    "activeState": "inactive",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T03:22:35+08:00",
+    "ended": "2026-10-12T03:23:08+08:00"
+  },
+  "earlierPasses": [
+    {
+      "sourcePassed": 177,
+      "sqlPassed": 13,
+      "log": "/var/tmp/phase6-native-mutation-initial-pass.log",
+      "followup": "Capture last-confirmation ID from locked transaction and require numeric forced target; update and execute retained command regressions."
+    },
+    {
+      "sourcePassed": 181,
+      "sqlPassed": 13,
+      "log": "/var/tmp/phase6-native-mutation-confirm-pass.log",
+      "followup": "Committed action summary failures retain success and omit private SQL diagnostics; final full rerun."
+    }
+  ],
+  "decisions": [
+    "Native SQL-only principal gate matches center hash and 5s wait; never acquire Source after SQL.",
+    "Native u0 permits manual members as frozen product profile; client external-only profile remains distinct.",
+    "Conditional exact configured_by_qq credential deletion shares one bind transaction; foreign/legacy owners are not inferred.",
+    "Result metadata is validated before one COMMIT; replies use that transaction DTO.",
+    "Last-binding confirmation records proven ID directly, not a fresh metadata selection.",
+    "Unknown COMMIT fails closed and is not automatically replayed; no native durable request receipt in this step.",
+    "Source connection is dedicated and closed even after failed rollback; it is not returned to a pool."
+  ],
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/taiko.py": "a357c2ce51c9b602527c8bbf5b2caf3820248fa4be835a0bb0c9525af1ef668c",
+      "taiko/plugins/utils/bot_binding_mutation.py": "67eb078626aa1d6258f6df3dc722d4d4190d62711d7158fd67b6cb19bfd54e48",
+      "taiko/plugins/utils/bot_binding_metadata.py": "4c012efd2ef3755df5b5975688b8a10e4c7784bb2ac420aec3ac44fcd5b3c8b8",
+      "taiko/plugins/utils/bot_binding_authority.py": "5d6dd9dda36a066103082d0addf88e4e0b78ee35146dfe912ae37879643a4850",
+      "taiko/taiko_runtime/platform_adapter.py": "18dc084ead004f533cbb6c4c352d2e54085c147691b0d92603d3a579e544ff8b",
+      "taiko/tests/test_native_binding_mutation.py": "49cecf68381e7ddf3491e751160ef0bcf38507d4718b6db9722759e4e2f691eb",
+      "taiko/tests/native_binding_mutation_sql_child.py": "739a3e0714db5f901476b02b34585bf643c612277dad6f01c85e38b7331164fd",
+      "taiko/tests/test_native_binding_metadata.py": "f3913a5279c18cdcc3c663705c879c636ac12fd74764371d901cf9d0bdaeae0d",
+      "taiko/tests/native_binding_metadata_sql_child.py": "42ea4a4ff8961e86ef0983c393b8031560301c41f2d7e143c41f16972081d6a2",
+      "taiko/tests/test_u0_bind_slots.py": "5d4e933b806d8f4e1b60d11a1a7eb0cd4c2b70f1f45d19dabb37dee6d0ab47b0",
+      "taiko/scripts/validate_domain_migration.py": "e4c3c8b811224a956963e2aa08cdc7eea5ac242b772b37c141b1b11a8b27462f",
+      "taiko/docs/domain-extraction-phase6-publication.md": "40e04a9aed86d710a78fcb7409bf354fd1ddc8239945b69aaf477b08a6e4a1d7"
+    },
+    "viewer": {
+      "tests/nativeBindingMutationSql.test.mjs": "91f5b7731735607ae38b0e42c1c8c30f61e157344a3b15febeae061d133fd38e",
+      "tests/nativeBindingMetadataSql.test.mjs": "942a2af70418c22a16abb3d7320bcc6983eee4429b4be6332c9e7bb0bf8f0dac",
+      "tests/fixtures/manualSqlRuntime.mjs": "f7960061c301f37196c9db232d8345cbfed920f0d864cfc9ee1dc3bd2404d80e",
+      "server/services/account/bot-binding-proxy.ts": "06c5f366bc713c8fc43865b9d1ecf899928e7c80db205b71ee04a79f63a181eb",
+      "server/infrastructure/account/bot-binding-rows.ts": "2d27e66dca0dccf9cb085bf78d46f182b2a79c0550a848f6d45731419d7579d4",
+      "server/services/account/hiroba-credentials.ts": "6cbde72b165924619c063ef87ccc3242aaefa65db82779cd9b3f7dbc8194ed55",
+      "server/infrastructure/account/hiroba-binding-rows.ts": "cadfe487e8c7d8e57d9b3080c786eb12503ca56ce17bdb287f68de01b428df37"
+    }
+  },
+  "hashCaptureNote": "Post-final-QA/post-Source-commit hashes. No implementation edits after final QA; Source documentation appended afterwards. Intermediate passes are archived separately and not claimed to cover final code.",
+  "artifactHashes": {
+    "/var/tmp/phase6-native-mutation-qa.log": "dfc705f6c4aabeb039f76418f6dac49c092e874e07551ff5ad77b5ac9217879e",
+    "/var/tmp/phase6-native-mutation-resource.json": "ee28401f2bb2de5aea6a27eea7f244215e95559db6bc7ff7396841bc8e183b18",
+    "/var/tmp/phase6-native-mutation-qa.py": "791ff4aac9b07822d83f1add95d90466d028a59c6b2e5b55e0e9f878afdf50a2",
+    "/var/tmp/phase6-native-mutation-initial-pass.log": "45201cdfe4ce7baebec7db23527e200d3035ffd2cd038d556688e2431daad75e",
+    "/var/tmp/phase6-native-mutation-initial-resource.json": "d57ad2d26a6b26c1179659034c0634e733bf3a2874851046a8bd4ebd28e609ab",
+    "/var/tmp/phase6-native-mutation-confirm-pass.log": "9217f9d2292937ed9bb71b58b263a01e8dc1c4be7e5333bd24c888989ec359ee",
+    "/var/tmp/phase6-native-mutation-confirm-resource.json": "216082eeba02ccf4b1678256a384b6dd5f2092e1b78ecfe8447d66cb8cece815"
+  },
+  "safety": {
+    "testDb": "taiko_annual_poster_test",
+    "explicitMutationOptIn": "1",
+    "eachNativeConnectionActualSelectDatabaseGuard": true,
+    "productionPrivateDataCopied": false,
+    "productionSqlMutated": false,
+    "ownedRowsRootsChildrenCleaned": true,
+    "noSourceLocksOrFileNetworkIoInMutationModule": true,
+    "unrelatedSourceAndViewerAndClientUserWorkPreserved": true
+  },
+  "runtime": {
+    "sourceCopiedToR": false,
+    "servicesRestarted": false,
+    "viewerOnlineVersion": "0.81.11",
+    "servicePids": {
+      "taiko-viewer.service": 1063394,
+      "taiko-sync-receiver.service": 1063408,
+      "taiko-public-api.service": 829173
+    },
+    "allListedServicesActive": true,
+    "activationReason": "Phase 6 full native authority/P1a Writer convergence prerequisites are unfinished; source-only commits do not alter running R."
+  },
+  "remaining": [
+    "Native Hiroba credential binding/sync authority and verified QQ joins",
+    "Client binding removal/token issuer and native read/return permission fences",
+    "Every native/u0/daily/maintenance Writer and P1a activation",
+    "Complete Read Model/fact/measurement/Goal dependencies and invalidation",
+    "Million-record cold/warm actual IO/RSS and bounded history cost",
+    "Trusted restore/cleanup/runbook and fixed R dependencies",
+    "Stop old writers, sync R, standard Viewer deployment and real authenticated online product smoke"
+  ],
+  "rollback": {
+    "sourceCommit": "458ceaee0d197fcdf164100ae49b2ca6c379ad45",
+    "strategy": "Frozen Git implementation retained; deploy rollback only as a reviewed coordinated scope, do not restore old credential deletion as a new call path."
+  }
+}
