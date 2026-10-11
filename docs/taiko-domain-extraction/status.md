@@ -4,6 +4,8 @@
 
 Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS；开始 Phase 6 ownership、publication、Read Model 与 storage 决策。先前内存准入阻碍已解除，历史记录保留。
 
+当前6.3e.8.5 IN_PROGRESS：缓存条件读取、常规current loader与本地API caller隔离已通过113 client/90 SQL及局部TS；u0中心迁移、历史loader与最终回归尚未完成，源码未发布。[进度证据](evidence/phase6-private-cache-progress.json)。
+
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
 | 0 Extraction Audit | PASS | 清单、分类、重复、数据流；无实现变更 | [审计](../taiko-domain-current-state-audit.md)、[复核](evidence/phase0-validation.json) |

@@ -359,3 +359,13 @@ native worker只运行原playable-card discovery、兼容Fernet加解密和keyed
 最终QA 728.739s/513.129MiB sampled/high-max-OOM0；systemd journal成功终止，MainPID0/collected cgroup gone。每个native SQL连接实际SELECT DATABASE()=_test且显式mutation opt-in，未复制生产个人数据、凭据或做production mutation；owned rows/root/listener/child清理。上游回复synthetic，测试库缺production FK，不冒称official network/full Nuxt/full NoneBot/线上authenticated或全Writer Gate。完整证据：[phase6-hiroba-credential-validation.json](evidence/phase6-hiroba-credential-validation.json)。
 
 本子步PRIVATE_HIROBA_CREDENTIAL_TRANSACTION_AND_REPLAY_PASS，Gate6 IN_PROGRESS。Source9.81.13与client0.2.3标准提交/推送OID以证据为准；Viewer0.82.0本地步骤，待完整Phase6标准部署统一push。运行R未复制、NoneBot/API未加载本步代码，不在源码步骤重启；live0.81.11及三个service PID不变。继续permission-aware bounded cache/native Bot凭据及QQ Writer/u0/daily/all Writer/P1a、完整Read Model/invalidation/百万冷暖IO-RSS成本、trusted restore/cleanup/runbook/fixed R deps/停止旧Writer后sync/统一发布与真实在线产品验收。
+
+## 6.3e.8.5 私有读取缓存与 u0 客户端迁移（IN_PROGRESS）
+
+2026-10-12 checkpoint。私有current/history每次到中心完成实际quota、完整actor/resource proof、SH/content读取和返回前复核，才允许精确ETag 304；private/no-cache/must-revalidate和Vary Authorization/Cookie。SQL资源查询后的会话失效窗口已补凭据复核。已验证的Source publication header用于current/history同代读取，变化时最多重试一次，无verified header不冒称同代。
+
+B provider改为序列化LRU，64项/32MiB总量/4MiB单项/30s，key包含中心地址及token哈希、Source和类型。每次lookup仍请求中心，401/403/429/503、超期、网络失败均无旧数据fallback，返回对象为caller副本。取消普通Source-ID磁盘填充和Hiroba状态TTL；常规隐式current loaders统一provider。本地FastAPI成绩/历史GET必须带caller自己的Bearer，不把配置的Bot token借给匿名HTTP请求，真实401/403保持。
+
+当前113项guarded client（含15个实际loader/命令函数和4个真实ASGI权限用例）、90项真实SQL（16 conditional+45 access+29 proxy）及局部TS通过；SQL101.815s/467.340MiB sampled/high-max-OOM0，wrapper实际exit0/journal成功/collected cgroup gone。初轮网络guard拒绝MockTransport、89 SQL中的两个晚会话失效和一个quota测试错误均如实记录。[进度证据](evidence/phase6-private-cache-progress.json)的hash为checkpoint后采集，不是完整最终验收。Source新增外部提交至9.81.15/2a27f09，整个taiko树相对本任务5c99dbd未变，保留其他项目改动；126+8/170 Source结果沿用原证据，未冒称重跑。
+
+缓存步骤未完成、不得发布：u0仍依赖本地读取/合并/文件写入，而新provider已经不再填充这些文件。选择将u0迁到中心，统一证明principal、全部成员Source和同时持有的SH input views；B仅消费中心结果。还需历史loader/public bearer fallback、渲染current/history joins、u0/完整full-delta/未知字段Golden和最终回归，再版本化提交/push客户端与Viewer步骤。当前implementation未提交，client仍0.2.3、Viewer预备0.82.0，线上0.81.11及三个PID不变，无R同步/生产grant/部署。Gate6继续IN_PROGRESS，全Writer/P1a/Read Model/成本/运维及最终激活要求保持。
