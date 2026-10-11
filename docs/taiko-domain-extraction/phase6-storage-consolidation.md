@@ -261,3 +261,18 @@ Schema 1 增加可选 fileMtimes/fileCtimes（有限 JSON number 秒值），接
 最终 QA 298.819 秒、250 ms sampled peak 441589760 bytes（421.133 MiB）、high/max/OOM=0；actual wrapper exit0/journal success/collected MainPID0/无 cgroup。实际 SELECT DATABASE() 为 taiko_annual_poster_test，并检查 _test 后缀与显式 mutation opt-in；owned SQL rows/Source tree/child/两个 HTTP listener 由 fixture finally 清理。测试 schema 缺其他生产 FK，不冒称 full Nuxt/full Bot/生产迁移/百万成本/线上 authenticated smoke。
 
 本步 VIEWER_TOKEN_SINGLE_AUTHORITY_SQL_TRANSACTION_PASS，Gate 6 仍 IN_PROGRESS。Viewer 0.82.0 阶段源码本地提交，随统一标准部署推送；live 0.81.11/PIDs 1063394、1063408、829173 unchanged。A 6a90c7e/9.81.7 unchanged，无 R sync/restart/deploy。剩余 direct Python bot/gateway token ownership 与 bearer read/refresh grant、arbitrary-source/QQ/Hiroba API grant、Viewer sync dispatch、ops cleanup、all Writer/daily/P1a/Read Model/百万成本/运维恢复与最终激活继续执行。
+
+
+## 6.3e.5 Python bearer grant、canonical DTO 与 acquisition lease 复用
+
+原 public-score bearer 只在请求入口解析一次 token，提前提交 last_used_at 后读取 projection、调用 refresh，再次直接读取文件。现在捕获一个 SQL connection，完成无 private file 访问的 optimistic token snapshot；Source EX 后通过 FOR UPDATE 锁定精确 token row id/hash/Source，在同一 EX 内读取 canonical current、刷新、再次构建 canonical DTO、复核 grant、提交使用时间。等待中 row id/Source/hash/revoke 替换拒绝，Body userid/taikoId 不改变资源。已有 bearer 是独立的显式 Source capability，沿用旋转/撤销之前存活的语义，不依赖后来选中的 current binding；Bot/gateway 的实际签发 owner proof 尚待下一步。
+
+Wahlap getUserData 与 Hiroba private/public/bound 和两个实际 save 分支显式传递已有 publication_store；save_userdata 验证相同 identity/live EX 后复用，不获取 child EX、不升级 SH。默认无 store 的 Writer 继续自行获取 EX，TAIKO_USERDATA_DIR 优先旧 root；可选 TAIKO_WAHLAP_CONFIG_PATH 保留旧 cookie JSON/default path。Wahlap 四请求增加 5s connect/30s read timeout，bearer POST 保持正常接口/CORS 并增加 16KiB body/15s read bound。
+
+Healthy full DTO 对照 frozen 6a90c7e；projection loss/tamper 不改变输出，managed corruption/missing object 503 且不触发刷新回退，legacy invalid/missing 仍可按原规则刷新。保留已有 Hiroba 有本地数据时的 upstream failure fallback，但 publication failure 不回退并不泄露私人路径/SQL/凭据。Canonical publication 与 SQL last_used_at 独立提交：已授权 acquisition 可能在晚 SQL failure/进程退出后保持已提交的新 C/H；fresh retry 沿用旧 observation 行为，不冒称跨 DB/file transaction、跨请求 nonce 或整次联合 rollback。Usage COMMIT ACK loss 返回脱敏 unavailable，未把它当作 score/grant joint ACK。
+
+最终 95 publication Python（新增20 bearer/lease/实际 Hiroba routes）、166 domain/trend/daily Python（9 production+3 untouched full Bot routes excluded）、138 offline Node、267 actual _test SQL（新增17 native bearer，含实际 owned HTTP、真实 PyMySQL/SQL song lock、四个 native process deaths）和两组局部 TS 全 PASS。Frozen healthy DTO、四字段 token 排队替换/撤销、SQL pin/Publisher wait、actual Wahlap/current-history、Hiroba routing/save 两分支、failed rollback close/captured connection/late metric failure 全覆盖。Native transport/credentials/daily capture 为 synthetic，未复制生产个人数据/凭据或访问 official network；真实 SELECT DATABASE()=_test+显式 mutation opt-in。证据：[phase6-bearer-canonical-validation.json](evidence/phase6-bearer-canonical-validation.json)。
+
+QA 420.048s/450.320MiB sampled、472195072 bytes/250ms sample/high-max-OOM=0，actual wrapper exit0/journal success/collected MainPID0/无 cgroup。首次 dataclass fixture 注册缺失在测试/DB前停止；missing canonical 404/503 缺口修复后定向与最终整套通过。所有 owned rows/root/HTTP listener/child finally 清理；不声称 production FK/full Nuxt/full NoneBot registration/百万成本/线上 authenticated smoke。
+
+本步 PYTHON_BEARER_SOURCE_GRANT_AND_ACQUISITION_LEASE_REUSE_PASS，Gate 6 IN_PROGRESS。A 408d2f8 / 9.81.8 已标准 commit/push（HEAD==origin/main）；未复制 R，所以现有 NoneBot/public API 未加载本步变更、不在此源码步骤重启。Viewer 0.82.0 本地留档随标准部署统一推送；live 0.81.11/PIDs 1063394、1063408、829173 unchanged。继续 native Bot/gateway 签发 owner/current proof、arbitrary-source/QQ/Hiroba service grants、Viewer sync dispatch、ops cleanup、actual dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复与最终激活验收。
