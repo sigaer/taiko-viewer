@@ -3,7 +3,6 @@ import { constants as fsConstants } from "node:fs";
 import { resolve } from "node:path";
 import { createError } from "h3";
 import {
-  execFileAsync,
   fetchBindPlayerProfile,
   getRuntimePaths,
   loadWahlapCookie,
@@ -53,14 +52,6 @@ export type TaikoCenterHirobaCard = {
   hasPlayData: boolean;
 };
 
-const PYTHON_STDOUT_HELPERS = [
-  "from contextlib import redirect_stdout",
-  "from io import StringIO",
-  "_taiko_center_log = StringIO()",
-  "def _taiko_center_image_bytes(image):",
-  "    return image.getvalue() if hasattr(image, 'getvalue') else image"
-].join("\n");
-
 const buildWahlapHeaders = (authorization: string) => ({
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf2541020) XWEB/16459",
@@ -68,23 +59,6 @@ const buildWahlapHeaders = (authorization: string) => ({
   Referer: "https://servicewechat.com/wxeafab0667490cd23/21/page-frame.html",
   Authorization: authorization
 });
-
-const extractExecErrorMessage = (error: unknown, fallback: string) => {
-  if (!error || typeof error !== "object") return fallback;
-  const payload = error as { stderr?: Buffer | string; stdout?: Buffer | string; message?: string };
-  const stderr = Buffer.isBuffer(payload.stderr) ? payload.stderr.toString("utf-8") : String(payload.stderr || "");
-  const stdout = Buffer.isBuffer(payload.stdout) ? payload.stdout.toString("utf-8") : String(payload.stdout || "");
-  const message = String(payload.message || "").trim();
-  return stderr.trim() || stdout.trim() || message || fallback;
-};
-
-const parseJsonText = (rawText: string, fallbackMessage: string) => {
-  try {
-    return JSON.parse(rawText) as JsonObject;
-  } catch {
-    throw createError({ statusCode: 500, statusMessage: fallbackMessage });
-  }
-};
 
 const normalizeBotBindSource = (rawSource: unknown): BotBindSource => {
   const source = String(rawSource || "").trim().toLowerCase();
@@ -283,32 +257,6 @@ const switchCurrentBotBindSlot = async (identityKeyInput: unknown, slotInput: un
   return buildBotBindLookupPayload(identityKey);
 };
 
-const runPythonBuffer = async (pythonCode: string, args: string[] = []) => {
-  const { repoRoot } = getRuntimePaths();
-  try {
-    const result = await execFileAsync("python3", ["-c", pythonCode, ...args], {
-      cwd: repoRoot,
-      encoding: "buffer",
-      maxBuffer: 64 * 1024 * 1024
-    });
-    return result.stdout as Buffer;
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: extractExecErrorMessage(error, "中心 Python 任务执行失败")
-    });
-  }
-};
-
-const runPythonJson = async (pythonCode: string, args: string[] = []) => {
-  const buffer = await runPythonBuffer(pythonCode, args);
-  const rawText = buffer.toString("utf-8").trim();
-  if (!rawText) {
-    throw createError({ statusCode: 500, statusMessage: "中心 Python 任务未返回 JSON" });
-  }
-  return parseJsonText(rawText, "中心 Python 任务返回的 JSON 无法解析");
-};
-
 const resolveArcadeSnapshotPaths = () => {
   const { repoRoot } = getRuntimePaths();
   return {
@@ -364,95 +312,13 @@ const fetchWahlapJson = async (
   return payload;
 };
 
+// The former ownerless Python adapters are retired. Their frozen implementation
+// remains in the Phase 6 parent commit; formal routes carry authenticated tickets.
 export const proxyTaikoCenterHirobaBind = async (
-  options: {
-    email?: unknown;
-    password?: unknown;
-    targetTaikoNo?: unknown;
-    configuredByQq?: unknown;
-  } = {}
-) => {
-  const email = String(options.email || "").trim();
-  const password = String(options.password || "").trim();
-  const targetTaikoNo = String(options.targetTaikoNo || "").trim();
-  const configuredByQq = String(options.configuredByQq || "").trim();
-  if (!email || !password) {
-    throw createError({ statusCode: 400, statusMessage: "缺少 Hiroba 邮箱或密码" });
-  }
-  const code = [
-    PYTHON_STDOUT_HELPERS,
-    "from plugins.utils.hiroba.credentials import save_hiroba_credentials",
-    "from plugins.utils.hiroba.sync import discover_hiroba_playable_cards",
-    "import json, sys",
-    "email = sys.argv[1].strip()",
-    "password = sys.argv[2].strip()",
-    "target_taiko_no = sys.argv[3].strip()",
-    "configured_by_qq = sys.argv[4].strip()",
-    "with redirect_stdout(_taiko_center_log):",
-    "    cards = discover_hiroba_playable_cards(email, password)",
-    "selected = []",
-    "for card in cards:",
-    "    taiko_no = str(card.taiko_no or '').strip()",
-    "    if not taiko_no:",
-    "        continue",
-    "    if target_taiko_no and taiko_no != target_taiko_no:",
-    "        continue",
-    "    save_hiroba_credentials(",
-    "        taiko_no,",
-    "        email,",
-    "        password,",
-    "        configured_by_qq=(configured_by_qq or None),",
-    "    )",
-    "    selected.append(taiko_no)",
-    "print(json.dumps({'taikoIds': selected}, ensure_ascii=False))"
-  ].join("\n");
-  const payload = (await runPythonJson(code, [email, password, targetTaikoNo, configuredByQq])) as {
-    taikoIds?: string[];
-  };
-  const taikoIds = Array.isArray(payload.taikoIds)
-    ? payload.taikoIds.map((item) => String(item || "").trim()).filter(Boolean)
-    : [];
-  let bindInfo: JsonObject | null = null;
-  if (configuredByQq && taikoIds.length) {
-    for (const taikoId of taikoIds) {
-      await upsertBotBindRecord(configuredByQq, taikoId, {
-        source: "hiroba",
-        makeCurrent: false
-      });
-    }
-    const preferredTaikoId =
-      (targetTaikoNo && taikoIds.includes(targetTaikoNo) ? targetTaikoNo : taikoIds[0]) || taikoIds[0];
-    bindInfo = await upsertBotBindRecord(configuredByQq, preferredTaikoId, {
-      source: "hiroba",
-      makeCurrent: true
-    });
-  }
-  return {
-    ok: true,
-    taikoIds,
-    bind: bindInfo
-  };
-};
-
-export const proxyTaikoCenterHirobaCredentialStatus = async (taikoIdInput: unknown) => {
-  const taikoId = normalizeTaikoId(taikoIdInput);
-  if (!taikoId) {
-    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
-  }
-  const code = [
-    PYTHON_STDOUT_HELPERS,
-    "from plugins.utils.hiroba.credentials import has_hiroba_credentials",
-    "import json, sys",
-    "print(json.dumps({'hasCredentials': bool(has_hiroba_credentials(sys.argv[1].strip()))}, ensure_ascii=False))"
-  ].join("\n");
-  const payload = (await runPythonJson(code, [taikoId])) as {
-    hasCredentials?: boolean;
-  };
-  return {
-    ok: true,
-    taikoId,
-    hasCredentials: Boolean(payload.hasCredentials)
-  };
+  _options: {email?:unknown;password?:unknown;targetTaikoNo?:unknown;configuredByQq?:unknown} = {}
+) => {throw createError({statusCode:410,statusMessage:"请使用已授权的 Hiroba 绑定接口。"});};
+export const proxyTaikoCenterHirobaCredentialStatus = async (_taikoId:unknown) => {
+  throw createError({statusCode:410,statusMessage:"请使用已授权的 Hiroba 凭据接口。"});
 };
 
 export const proxyTaikoCenterBindLookup = async (identityKeyInput: unknown) => {

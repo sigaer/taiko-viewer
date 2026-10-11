@@ -5,7 +5,7 @@ import {captureActor,readActor,safeSourceError,type SourceActor} from './source-
 import {validBotPrincipal,validateServicePrincipals} from '../../infrastructure/account/principal-policy.ts';
 import {validateSourceServicePolicy} from '../../infrastructure/account/source-service-schema.ts';
 type Db=Pick<Pool,'execute'>;
-export type PrincipalScope='bind_read'|'bind_write'|'bind_current';
+export type PrincipalScope='bind_read'|'bind_write'|'bind_current'|'hiroba_bind';
 type Target=Readonly<{id:string;taiko_id:string;source:string;manual_account_id:null}>;
 type Grant=Readonly<{kind:'owner';tuple:readonly unknown[];target:Target|null}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
 export type PrincipalTicket=Readonly<{db:Pool;actor:SourceActor;principal:string;scope:PrincipalScope;grant:Grant;targetSource:string|null;targetPlatform:string|null}>;
@@ -46,9 +46,14 @@ async function grantFor(db:Db,actor:SourceActor,principal:string,scope:Principal
 export async function capturePrincipalAccess(event:H3Event,input:unknown,scope:PrincipalScope,targetSource:string|null=null,targetPlatform:string|null=null):Promise<PrincipalTicket>{
  try{
   const principal=typeof input==='string'?input.trim():'';if(!validBotPrincipal(principal))throw principalFailure(400,'身份标识无效。');
-  await ensureAccountSchema();const db=getAccountDb(),actor=await captureActor(event,db),grant=await grantFor(db,actor,principal,scope,targetSource,targetPlatform);
-  return Object.freeze({db,actor,principal,scope,grant,targetSource,targetPlatform});
+  await ensureAccountSchema();const db=getAccountDb(),actor=await captureActor(event,db);
+  return await capturePrincipalForActor(db,actor,principal,scope,targetSource,targetPlatform);
  }catch(error){throw safePrincipalError(error);}
+}
+export async function capturePrincipalForActor(db:Pool,actor:SourceActor,input:unknown,scope:PrincipalScope,targetSource:string|null=null,targetPlatform:string|null=null):Promise<PrincipalTicket>{
+ const principal=typeof input==='string'?input.trim():'';if(!validBotPrincipal(principal))throw principalFailure(400,'身份标识无效。');
+ const grant=await grantFor(db,actor,principal,scope,targetSource,targetPlatform);
+ return Object.freeze({db,actor,principal,scope,grant,targetSource,targetPlatform});
 }
 export async function provePrincipalAccess(db:Db,ticket:PrincipalTicket,locked=false){
  const {actor,principal,scope,grant,targetSource,targetPlatform}=ticket;

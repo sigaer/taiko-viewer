@@ -13,7 +13,7 @@ import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
 import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from '../../server/infrastructure/account/source-service-schema.ts';
 import { BOT_BINDING_OPERATION_TABLE_SQL } from '../../server/infrastructure/account/bot-binding-schema.ts';
-import { HIROBA_CREDENTIAL_TABLE_SQL } from '../../server/infrastructure/account/hiroba-credential-schema.ts';
+import { HIROBA_CREDENTIAL_TABLE_SQL,HIROBA_CREDENTIAL_MIGRATIONS,HIROBA_BINDING_OPERATION_TABLE_SQL } from '../../server/infrastructure/account/hiroba-credential-schema.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
@@ -24,6 +24,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
   HIROBA_CREDENTIAL_TABLE_SQL,
+  HIROBA_BINDING_OPERATION_TABLE_SQL,
   SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
   BOT_BINDING_OPERATION_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_developer_tokens (
@@ -122,6 +123,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     assert.equal(identity.name, process.env.TAIKO_DB_NAME);
     for (const statement of TEST_MANUAL_TABLES) await pool.execute(statement);
     for(const sql of SOURCE_SERVICE_PRINCIPAL_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
+    for(const sql of HIROBA_CREDENTIAL_MIGRATIONS)await pool.execute(sql);
     root = await mkdtemp('/var/tmp/manual-source-sql-');
     const config = { repoRoot, userdataDir: resolve(root, 'userdata'), accountCacheDir: resolve(root, 'cache'), manualClaimSecret: 'synthetic-claim-only' };
     const db = { query: (...args) => pool.query(...args), async execute(sql, args) {
@@ -179,6 +181,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     }
     if (user) {
       await pool.execute('DELETE FROM taiko_bot_binding_operations WHERE actor_user_id=?',[user]);
+      await pool.execute('DELETE FROM taiko_hiroba_binding_operations WHERE actor_user_id=?',[user]);
       await pool.execute('DELETE a FROM taiko_source_service_grant_audit a JOIN web_developer_tokens t ON t.id=a.developer_token_id WHERE t.user_id=?', [user]);
       await pool.execute('DELETE FROM taiko_source_service_grants WHERE developer_user_id=?', [user]);
       await pool.execute("DELETE q FROM web_taiko_open_api_daily_usage q JOIN web_developer_tokens t ON q.ip_address=CONCAT('token:',t.id) WHERE t.user_id=?", [user]);

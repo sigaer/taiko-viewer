@@ -163,3 +163,7 @@ test('principal operation retains its captured pool through late global shutdown
  try{assert.equal((await c.ask({action:'upsert',body:{taikoId:c.taikoId}})).status,200);assert.equal(replaced,true);assert.equal((await c.snapshot()).receipts.length,1);}
  finally{globalThis.__goalSqlRuntime.db=captured;}
 }));
+test('QQ service expiry after receipt INSERT denies before COMMIT and rolls back selection',{timeout:20000},()=>fixture(async c=>{
+ await c.register();const before=await c.snapshot();c.state.afterSqlStatement=async(sql,args,result,db)=>{if(sql.startsWith('INSERT INTO taiko_bot_binding_operations'))await db.execute('UPDATE taiko_source_service_grants SET expires_at=NOW()-INTERVAL 1 SECOND WHERE developer_token_id=?',[c.tokenId]);};
+ assert.equal((await c.ask({action:'upsert',body:{taikoId:c.taikoId},token:c.rawToken,cookie:''})).status,403);assert.deepEqual(await c.snapshot(),before);
+}));

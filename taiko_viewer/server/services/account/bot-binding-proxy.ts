@@ -49,6 +49,7 @@ export async function runBotBindingOperation(event:H3Event,action:BotBindingInte
    await provePrincipalAccess(connection,ticket,true);
    if(id&&!replay){producedHash=hash(result);await connection.execute(`INSERT INTO taiko_bot_binding_operations(operation_id,actor_user_id,actor_hash,grant_hash,principal,action,intent_hash,outcome_hash)
      VALUES (?,?,?,?,?,?,?,?)`,[id,ticket.actor.userId,hash(ticket.actor),hash(ticket.grant),ticket.principal,action,hash(intent),producedHash]);}
+   await provePrincipalAccess(connection,ticket,true);
    attempted=true;await connection.commit();return result;
   }catch(error){
    if(connection)try{await connection.rollback();}catch{discard=true;connection.destroy();}

@@ -11,6 +11,7 @@
     "../../server/services/account/source-access.ts",
     "../../server/services/account/source-proxy.ts",
     "../../server/services/account/bot-binding-proxy.ts",
+    "../../server/services/account/hiroba-credentials.ts",
     "../../server/infrastructure/account/source-service-provision.ts",
     "../../scripts/configure_source_service.ts",
     "../../server/services/account/profile-source.ts",

@@ -25,6 +25,10 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   export const runSourceMutationWorker=(request,ticket)=>createSourceMutationWorker(globalThis.__goalSqlRuntime.sourceMutationLaunch)(request,ticket);
  `);
  if (withDeveloper) {
+  overrides.set(new URL('server/infrastructure/account/hiroba-credential-worker.ts',root).href,`
+   import {createHirobaCredentialWorker} from '${new URL('server/infrastructure/account/hiroba-credential-worker-runner.ts',root).href}';
+   export const runHirobaCredentialWorker=(request,ticket)=>createHirobaCredentialWorker(globalThis.__goalSqlRuntime.hirobaCredentialLaunch)(request,ticket);
+  `);
   // Keep actual developer/quota/credential/source services. The unused public
   // catalog module imports JSON and remote constants outside this test's scope.
   overrides.set(new URL('server/services/content/v2Constants.ts',root).href,`export const getV2ConstantsCsvDataset=async()=>{throw new Error('Public catalog not exercised by source authority QA');};`);

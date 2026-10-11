@@ -1,6 +1,6 @@
 # 私有成绩服务授权配置
 
-适用范围：Phase 6 / 6.3e.8.1–3 的 Developer userdata、历史、Wahlap/Hiroba 更新及 QQ 绑定代理。Hiroba 凭据管理和客户端缓存授权仍待迁移，不能据此激活整个 Phase 6。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有授权是两个独立检查。
+适用范围：Phase 6 / 6.3e.8.1–4 的 Developer userdata、历史、Wahlap/Hiroba 更新、QQ 绑定及 Hiroba 凭据代理。客户端缓存授权和其余 Phase 6 Gate 仍待完成，不能据此激活整个阶段。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有授权是两个独立检查。
 
 `GET /api/developer/userdata/:userid` 接受有效登录 Cookie 或有效开发者 Bearer token。普通凭据只能读取其账号自有绑定，允许自有非 current 绑定；完整 binding id/taiko_id/source/manual_account_id 在 Source SH 前后复核。绑定本身沿用现有产品的 SQL 授权含义，不额外声称已证明上游账号归属。跨账号中心服务需要按 **token id** 单独登记，不能以开发者申请获批、每日额度、HTTP userid/userId/QQ、同一用户的另一枚 token 推导授权。
 
@@ -27,9 +27,9 @@
 }
 ```
 
-已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`、`bind_read`、`bind_write`、`bind_current`。schema 预留 `hiroba_credential_status`、`hiroba_bind`，预留名称不表示相关调用迁移已完成。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`、`bind_read`、`bind_write`、`bind_current`、`hiroba_credential_status`、`hiroba_bind`。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
 
-含 `bind_*` scope 的登记另须明确 `principals`：1–128 项身份列表，或显式 `"*"`。身份支持 1–128 位裸数字、`onebot_v11:` 加 1–128 位数字、`qq_official:` 加 1–128 位 ASCII 字母/数字/下划线/短横线。大小写及不同格式分别授权，不自动合并别名。遗漏或 null 拒绝登记；仅含 Source scopes 的旧配置可保持 null。新 nullable `principals_json` 同时存入 grant 与审计表，升级只忽略已存在列的 ER_DUP_FIELDNAME，其余 SQL 错误停止。
+含 `bind_*` 或 `hiroba_bind` scope 的登记另须明确 `principals`：1–128 项身份列表，或显式 `"*"`。身份支持 1–128 位裸数字、`onebot_v11:` 加 1–128 位数字、`qq_official:` 加 1–128 位 ASCII 字母/数字/下划线/短横线。大小写及不同格式分别授权，不自动合并别名。遗漏或 null 拒绝登记；仅含 Source scopes 的旧配置可保持 null。新 nullable `principals_json` 同时存入 grant 与审计表，升级只忽略已存在列的 ER_DUP_FIELDNAME，其余 SQL 错误停止。
 
 QQ 代理配置可在上述请求中改为 `"scopes": ["bind_read", "bind_write", "bind_current"]`，并增加 `"principals": ["onebot_v11:12345"]`。Source allowlist 须包括该身份已绑定的全部 Source 与本次添加的 Source；不能通过空绑定绕过添加目标检查。生产真实 principal/token 登记继续留到最终激活。
 
@@ -40,6 +40,14 @@ QQ metadata 只触及 SQL，不读写 C/H，也不在 SQL 事务后申请 Source
 两种 mutation 接受可选 `requestId`（32 位小写 hex 或小写 UUID）；省略时服务生成。持久回执仅保存操作/actor/grant/principal/action/intent/outcome 哈希及时间，无原始 Cookie/token/完整 DTO。相同凭据、完整 grant 和意图重试只返回当前 DTO，不重复变更、覆盖后来 selection；相同 ID 不同意图 409。COMMIT ACK 不明时，捕获 pool 的新连接必须证明 exact 回执和当前 outcome，不能把未提交当成功。
 
 每日 quota 改为单条 INSERT…ON DUPLICATE KEY UPDATE，在 unique daily key 上原子决定递增或拒绝；首次 insert 的自增主键与 duplicate increment 的 LAST_INSERT_ID(count) 分别解释，capped no-op 为 0。实际并发 IP/token 边界与同 nonce 请求已验证。SQL 行数语义参考 [MySQL 官方文档](https://dev.mysql.com/doc/refman/8.4/en/insert-on-duplicate.html)，QA 以实际驱动返回头为准。
+
+`GET /api/taiko/proxy/hiroba/credentials/:taikoId` 要求有效 Cookie/token 的完整自有外部 binding，或明确 `hiroba_credential_status` 与目标 Source。manual 拒绝；凭据不存在返回原 `hasCredentials:false`，存在则以兼容的原 Fernet key 解密验证，损坏固定 503。状态不要求 current 成绩文件存在，不改变凭据、绑定或 C/H；路由仍执行正常每日 quota。
+
+`POST /api/taiko/proxy/hiroba/bind` 保留邮箱、密码、可选 `targetTaikoNo`、`configuredByQq`，增加可选 `requestId`。普通凭据只授权预先存在的完整自有 Hiroba bindings；服务需明确 `hiroba_bind`、Source 与 principals。发现的全部目标卡片、可选 QQ 的全部已有成员及写入目标都须被授权，QQ 字段、密码或上游登录成功不能代替该证明。卡片顺序与目标过滤沿用原 playable-card helper；没有匹配卡片仍返回原空结果，不创建 binding。原 helper 的发现范围不在此改为实际所有官方卡片的额外查询。
+
+Viewer 首次 actor SQL 前捕获 pool、root/cwd 和 worker key 环境。native worker 只发现可玩卡片、兼容加解密或计算 keyed HMAC 意图，不连接 SQL、不写凭据/token/成绩文件。密码仅经 HTTP body 与私有 stdin；旧无授权 Hiroba adapter 返回 410，旧 password argv 路径已退出。SQL 按 account→credential→Source/principal grant→credential/bind rows→selection→receipt 顺序，在一个事务内保存全部卡片凭据、可选 QQ metadata、current state 和最小回执；receipt INSERT 后再次完整复核才 COMMIT。credential-only 不保存 QQ metadata。`configured_by_qq` 列扩为191，覆盖合法官方身份长度。
+
+凭据绑定与其他私有 worker 共用单进程 2 active/8 queued/30s admission；operation nonce 的 GET_LOCK 等待5s，非空 QQ 结果另用原 principal gate。stdin32KiB/stdout16KiB/stderr8KiB，fingerprint/decode30s、discovery180s；native SIGALRM 独立生效，parent TERM后1.5s KILL并等待close。客户端 bind timeout300s。回执仅保存 actor/grant、keyed HMAC意图、最多128个有序Source IDs及credential/outcome hash，不保存原密码或完整DTO。已提交的同凭据/授权/意图重试跳过登录和重写，返回当前QQ结果，不覆盖后来selection；不相关自有binding新增不使完成回执失效，已选binding撤销则拒绝。COMMIT ACK不明须在捕获pool的新连接证明exact回执、凭据及当前outcome，未COMMIT不能报成功。rollback/named-lock释放无法证明则销毁连接。这是纯SQL metadata事务，不纳入C/H发布，也不在SQL后申请Source锁。
 
 普通 Cookie/token 可以更新完整自有 binding 对应的平台，Wahlap/Hiroba 不互换，manual 不允许外部 acquisition。中心服务仍须逐项配置 scope 与 Source 范围。private worker 独占 Source EX，再锁定 SQL 凭据与授权，每次成绩发布前及最终 COMMIT 前复核；Node 返回前取得 fresh SH，验证原 produced commit/sequence 与完整授权，不能返回另一代成绩。晚 SQL/transport/撤权失败不自动撤销已经授权提交的成绩；该更新代理未增加跨请求 nonce 重放。
 
@@ -65,4 +73,4 @@ bash /home/sigaer/taiko/taiko-forum/scripts/memory/run_qa.sh \
 
 验证范围包括真实 Cookie 登录与正式 Developer route、实际开发者 quota、实际 `_test` SQL、Source SH、实际私有 CLI、排队/返回期间身份与能力替换、撤销/expiry、exact replay、单 COMMIT、late failure/rollback destroy/ACK loss、完整 JSON 与 canonical corruption。上游网络、完整 Nuxt build、真实跨用户服务注册和生产烟测留在最终激活验收。
 
-Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步通过私有 stdin 传递凭据；Hiroba bind 仍有 credentials argv，须完成其授权与事务迁移。客户端四项成绩和三项 QQ 绑定 SDK 已要求有效 token；permission-aware bounded cache、Hiroba 凭据 SDK，以及全部 Writer/Read Model/P1a仍须完成。运行中的 R 未复制这些预备变更，此子步无需重启 NoneBot。
+Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步与凭据发现使用私有stdin；客户端四项成绩、三项QQ绑定与两项Hiroba凭据SDK都已要求有效token。permission-aware bounded cache、native Bot凭据/QQ Writer、全部Writer/Read Model/P1a仍须完成。运行中的R未复制这些预备变更，此子步无需重启NoneBot。

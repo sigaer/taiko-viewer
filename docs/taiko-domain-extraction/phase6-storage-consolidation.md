@@ -344,3 +344,18 @@ Account/source 两类 worker 共用单 Viewer 进程 2 active/8 queued/30s queue
 最终567.064s/477.078MiB sampled，high/max/OOM0，actual wrapper exit0/journal success/MainPID0/collected cgroup gone。Source A未变9文件SHA与6.3e.8.2一致，沿用126 publication/170 domain Python PASS；本轮没有Source修改、push或R同步。SQL测试DB实际SELECT DATABASE()=_test且显式mutation opt-in，未复制生产数据或做生产mutation，测试库无production FK证明，owned rows/roots/children/listeners finally关闭。完整证据：[phase6-bot-binding-validation.json](evidence/phase6-bot-binding-validation.json)。
 
 本子步PRIVATE_QQ_BINDING_TRANSACTION_AND_REPLAY_PASS，Gate6 IN_PROGRESS。client0.2.2三个SDK增加token要求与可选request_id，固定Core0.1.2/Contract0.1.0不变，源码标准commit/push；Viewer沿用Phase6预备0.82.0本地步骤，统一标准部署负责push/build/restart。live0.81.11及三个服务PID不变，没有生产service登记或线上授权烟测。Hiroba credential status/bind的旧argv/多次credential与QQ autocommit、B旧缓存fallback，以及全Writer/u0/P1a、完整Read Model/invalidation/百万IO-RSS成本、trusted ops/fixed R deps/停止旧Writer后sync/标准发布与在线Gate继续处理。
+
+
+## 6.3e.8.4 Hiroba 凭据授权、纯 discovery worker 与 SQL 一次提交
+
+两个正式Hiroba凭据路由保留真实每日quota，要求有效Cookie/Developer token的完整自有外部binding，或显式token级Source/scope；普通绑定必须预先拥有同平台Hiroba binding，服务绑定另须明确principals。发现的目标卡片和返回QQ全部成员逐项授权，manual拒绝，selected service不降级为owner。首次actor SQL前捕获pool/root/cwd及worker key，等待/事务/receipt INSERT后完整复核；另补QQ回执INSERT后的expiry proof。详见[source-service-operations.md](source-service-operations.md)。
+
+native worker只运行原playable-card discovery、兼容Fernet加解密和keyed HMAC意图，不连接SQL、不写credential/token/成绩文件。密码仅经私有stdin，旧无授权Hiroba adapter返回410，原password argv machinery退出。状态保留无凭据false，损坏密文固定503；卡片顺序、target过滤、空结果、manual/current完整DTO及legacy Fernet oracle保持。SQL一次事务保存全部凭据、可选QQ metadata/current state和最小receipt，C/H/sequence不变。操作nonce先GET_LOCK5s，有卡片的QQ另用原principal gate；共享2 active/8 queued/30s admission。stdin32KiB/stdout16KiB/stderr8KiB，crypto30s/discovery180s/native独立SIGALRM/TERM后1.5sKILL等待close，客户端timeout300s；configured_by_qq扩至191。
+
+已提交同actor/grant/keyed intent nonce跳过登录与重写，返回当前QQ选择，不重置后来selection；不相关自有binding新增不使回执失效，已选binding撤销拒绝。ACK不明仅在捕获pool的新连接证明exact回执、credential及当前outcome才成功；no-COMMIT仍503，rollback或named release无法证明销毁连接。receipt不保存raw密码、token或完整DTO。
+
+最终134 Source publication/credential（126+8）、170 domain、59 client、158 offline Node、477 actual guarded SQL（443 existing+1 QQ receipt proof+33 Hiroba）和两组局部TS全部PASS；14 Source/43 Viewer/5 client受测文件最终SHA未变。真实Cookie/token/SQL/native CLI、三个discovery等待撤权、receipt后expiry、captured pool/root/key替换、failed rollback/ACK loss、并发nonce/5s锁、两次实际Node COMMIT前后死亡、native失败/死亡/独立alarm、long official principal、旧adapter410和完整healthy DTO覆盖。最初SQL fixture遗漏Source sys.path导致106项中22项启动失败，修正后focused110及hardening38通过；final使用最终IO禁止guard再完整重跑，不冒称初轮通过。
+
+最终QA 728.739s/513.129MiB sampled/high-max-OOM0；systemd journal成功终止，MainPID0/collected cgroup gone。每个native SQL连接实际SELECT DATABASE()=_test且显式mutation opt-in，未复制生产个人数据、凭据或做production mutation；owned rows/root/listener/child清理。上游回复synthetic，测试库缺production FK，不冒称official network/full Nuxt/full NoneBot/线上authenticated或全Writer Gate。完整证据：[phase6-hiroba-credential-validation.json](evidence/phase6-hiroba-credential-validation.json)。
+
+本子步PRIVATE_HIROBA_CREDENTIAL_TRANSACTION_AND_REPLAY_PASS，Gate6 IN_PROGRESS。Source9.81.13与client0.2.3标准提交/推送OID以证据为准；Viewer0.82.0本地步骤，待完整Phase6标准部署统一push。运行R未复制、NoneBot/API未加载本步代码，不在源码步骤重启；live0.81.11及三个service PID不变。继续permission-aware bounded cache/native Bot凭据及QQ Writer/u0/daily/all Writer/P1a、完整Read Model/invalidation/百万冷暖IO-RSS成本、trusted restore/cleanup/runbook/fixed R deps/停止旧Writer后sync/统一发布与真实在线产品验收。
