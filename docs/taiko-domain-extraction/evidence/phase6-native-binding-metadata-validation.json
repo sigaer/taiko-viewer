@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6a",
+  "status": "NATIVE_BINDING_METADATA_SCOPE_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "e87722b9054aeab34eaaeb4ebceb3abcdef630cd",
+  "sourceCommits": [
+    "331314d5e93490c5f2a178e18228cf52d0fb71ef",
+    "458ceaee0d197fcdf164100ae49b2ca6c379ad45"
+  ],
+  "sourceVersions": [
+    "9.81.19",
+    "9.81.20"
+  ],
+  "sourceRemote": "458ceaee0d197fcdf164100ae49b2ca6c379ad45",
+  "sourcePushVerified": true,
+  "viewerPreparedParent": "5ff3e754f8d211de180283eff8c2def2bb131384",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "clientCommit": "47bf5c174ceb2d791e0cf508502fcad39d771290",
+  "clientVersion": "0.2.4",
+  "clientChanged": false,
+  "coreVersion": "Source 0.1.1 unchanged",
+  "tests": {
+    "sourceOffline": {
+      "passed": 153,
+      "existingPassed": 132,
+      "newPassed": 21,
+      "productionOrRealDeselected": 9,
+      "warnings": 1,
+      "wrapperSession": 43957,
+      "wrapperExit": 0,
+      "log": "/var/tmp/phase6-native-metadata-qa.log"
+    },
+    "actualMysqlNativeChild": {
+      "passed": 1,
+      "assertions": "Real hidden/u0/current selection, exact-case principal, actual native getter AST and case alias returns None",
+      "log": "/var/tmp/phase6-native-metadata-qa.log"
+    },
+    "frozenOracle": "e87722b:taiko/plugins/taiko.py metadata DTO",
+    "fullNoneBotOrExistingU0TestsRun": false,
+    "sourceCodeNewSyntax": "Actual changed command function AST compiled/executed; not full framework registration"
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 6.924
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 2.92
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 9.845,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791744935-1826078.service",
+    "sampledPeakBytes": 201609216,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 215416
+  },
+  "resourceCaveat": "250ms sample is not absolute peak. Child OS maxRSS recorded separately; no million/production maximum claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791744935-1826078.service",
+    "result": "success",
+    "activeState": "inactive",
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T02:55:35+08:00",
+    "ended": "2026-10-12T02:55:45+08:00"
+  },
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/taiko.py": "2c8adda7ec2b045942717c203af7d5c9f13b700380d3b5c9e9bdb7899e3231d4",
+      "taiko/plugins/utils/bot_binding_metadata.py": "4c012efd2ef3755df5b5975688b8a10e4c7784bb2ac420aec3ac44fcd5b3c8b8",
+      "taiko/plugins/utils/bot_binding_authority.py": "5d6dd9dda36a066103082d0addf88e4e0b78ee35146dfe912ae37879643a4850",
+      "taiko/taiko_runtime/platform_adapter.py": "18dc084ead004f533cbb6c4c352d2e54085c147691b0d92603d3a579e544ff8b",
+      "taiko/tests/test_native_binding_metadata.py": "f3913a5279c18cdcc3c663705c879c636ac12fd74764371d901cf9d0bdaeae0d",
+      "taiko/tests/native_binding_metadata_sql_child.py": "42ea4a4ff8961e86ef0983c393b8031560301c41f2d7e143c41f16972081d6a2",
+      "taiko/tests/test_u0_bind_slots.py": "f8cfc19547f9b5b7231674c62b8845c9af728c28b23f1473acda53223ffe4c14",
+      "taiko/scripts/validate_domain_migration.py": "e4c3c8b811224a956963e2aa08cdc7eea5ac242b772b37c141b1b11a8b27462f",
+      "taiko/docs/domain-extraction-phase6-publication.md": "d90eed2afb68297ffabc3b198c4f4ccf0416d874da94a137192bd9e40a176345"
+    },
+    "viewer": {
+      "tests/nativeBindingMetadataSql.test.mjs": "942a2af70418c22a16abb3d7320bcc6983eee4429b4be6332c9e7bb0bf8f0dac"
+    }
+  },
+  "hashCaptureNote": "Post-QA/post-Source-commit hashes. Final Source/Viewer implementation unchanged after successful rerun. Existing test_u0_bind_slots.py mocks updated for explicit scope/deleted unused writer, not counted as executed.",
+  "logHashes": {
+    "/var/tmp/phase6-native-metadata-compute-only-failure.log": "fef14fb58af2d3c1696dd946772398c8f388352e55670379edefe4b5b972324f",
+    "/var/tmp/phase6-native-metadata-initial-pass.log": "68a82e3e2b1b2cb06be72f2f61b1feb8fddcf19620c12f9aeddc07e58f9daa6d",
+    "/var/tmp/phase6-native-metadata-qa.log": "cf74072f54f99c1638ba0607214545bb1c07e8ed6557ab314eac74c7c8625ca0"
+  },
+  "previousRounds": [
+    {
+      "log": "/var/tmp/phase6-native-metadata-compute-only-failure.log",
+      "status": "FAILED_QA_CONFIGURATION",
+      "sourcePassed": 150,
+      "sourceFailed": 1,
+      "sourceDeselected": 9,
+      "reason": "Compute-only mode omitted the existing recommend renderer; SQL child was not run. Corrected QA env to normal render mode and absent owned runtime env, no renderer implementation edit."
+    },
+    {
+      "log": "/var/tmp/phase6-native-metadata-initial-pass.log",
+      "status": "INTERMEDIATE_PASS",
+      "sourcePassed": 151,
+      "sourceDeselected": 9,
+      "sqlPassed": 1,
+      "resource": {
+        "results": [
+          {
+            "name": "source-offline",
+            "exitCode": 0,
+            "seconds": 7.392
+          },
+          {
+            "name": "sql-http",
+            "exitCode": 0,
+            "seconds": 2.169
+          }
+        ],
+        "exitCode": 0,
+        "seconds": 9.561,
+        "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791744501-1820678.service",
+        "sampledPeakBytes": 176078848,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "selfMaxRssKiB": 15852,
+        "largestChildMaxRssKiB": 219376
+      }
+    }
+  ],
+  "implemented": [
+    "Native binding metadata requires1-3 explicit principal keys and bounds128 rows per normalized principal",
+    "Indexed candidate lookup plus exact binary principal filtering; official case and trailing underscore retained",
+    "Ordinary requests do not infer bareQQ aliases; only explicit legacy migration passes raw QQ key",
+    "Frozen healthy ids/current_index/current_slot/sources DTO parity, current real and u0 preserved",
+    "Malformed/foreign/duplicate/current-conflicting/oversized rows fail closed and DB errors are fixed safe",
+    "Unused global metadata rewrite removed; all actual native loader callers specify identity keys",
+    "Native current entry uses one metadata result and cannot rebuild removed/outdated selection from earlier bind info",
+    "Actual native bind-info getter excludes opposite-case principal on old MySQL collation"
+  ],
+  "safety": {
+    "mysql": "Guarded actual SELECT DATABASE() ends _test and explicit TAIKO_ALLOW_TEST_DB_MUTATION=1",
+    "privateData": "Only owned synthetic rows/files, no production personal copy/read or SQL mutation",
+    "nativeChild": "Minimal environment with owned test DB config inherited, no secrets in argv/stdout/evidence",
+    "finalOfflineEnv": "Absent owned runtime env; empty DB credentials, requests send blocked and production personal file guard",
+    "cleanup": "Owned child/rows/root closed, cgroup removed",
+    "livePids": {
+      "viewer": 1063394,
+      "receiver": 1063408,
+      "publicApi": 829173
+    },
+    "liveVersion": "0.81.11",
+    "runtimeSyncedOrRestarted": false,
+    "unrelatedWorkPreserved": true
+  },
+  "limitations": [
+    "This DTO is metadata, not Source grant or authority proof",
+    "Actual upsert/current/remove/visibility/QQ migration atomicity, native credential/token issuer joins remain pending",
+    "Case/fallback corrected at these helpers; remaining higher-level native read/mutation proof will be audited in the authority round",
+    "No full NoneBot/official upstream auth/production migration or native all-business acceptance claimed",
+    "All Writer/P1a/daily/u0, Read Model/invalidation/cost/trusted ops and final activation still pending"
+  ],
+  "next": [
+    "Native metadata mutation principal gates and exact snapshots, credential acquisition and issuer authority",
+    "Complete all center Source/daily/u0 Writer coverage and legacy quiesce",
+    "Read Model/Goal-measurement merge, bounded cost and trusted operations",
+    "Runtime fixed dependencies/sync, standard Viewer release and real online smoke"
+  ]
+}

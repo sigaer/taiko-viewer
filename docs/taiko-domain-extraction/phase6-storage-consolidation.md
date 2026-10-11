@@ -397,3 +397,11 @@ B所有隐式private current/history loader每次fresh中心授权；原disk/sta
 跨仓库unit172.261s/采样peak504815616 bytes（481.43MiB），high/max/OOM0，journal successful/inactive、cgroup退出；该unit测client150，其后仅B变更禁用旧Writer/移除unused常量/版本0.2.4，再独立完整跑153，无理由不重复未变的Source/Viewer。所有代码hash、日志hash、unit/session与范围见[新证据](evidence/phase6-client-history-validation.json)，先前8.5a证据不覆盖。Source e87722b /9.81.18及B47bf5c1 /0.2.4已commit/push，实际远端HEAD相同；仅Bweb.conf/v1_test_report.md用户工作保留，Source miku与Viewer原growth/release报告保留。
 
 Viewer0.82.0本步本地预备提交，待统一标准脚本部署/push；线上0.81.11、PID1063394/1063408/829173未变化，R无taiko_store且未同步/重启。本源码轮完成不等于Phase6 Gate PASS。继续native Bot credentials/QQ/token issuer与Source全部Writer/u0/daily/P1a、Read Model/Goal-measurement merge/invalidation、百万cold-warm IO/RSS和bridge容量复核、trusted restore/cleanup/runbook、R固定依赖与旧Writer停用后的统一激活/真实产品在线验收。
+
+## 6.3e.8.6a 原生 Bot 绑定元数据范围（子步 PASS，authority轮 IN_PROGRESS）
+
+2026-10-12。Native Bot的整张bind表加载改为明确1–3身份键、每个normalized principal128行上限；索引候选+BINARY精确比较保留官方case/尾部下划线，不从普通请求推测bareQQ别名。QQ迁移明确source/target/rawQQ键。原ids/current_index/current_slot/sources DTO冻结e87722b一致，u0/真实current保留。非法/混淆/重复/多current/超容量拒绝，DB错误固定且连接关闭。无人调用的全表回写入口删除。普通getter同样精确比较，current entry只用一次metadata，不借旧info的id重建删除绑定或覆盖新选择。此metadata不是Source授权；其余Native操作/高层fallback继续逐个收敛。
+
+最终Source153（132既有+21新，9旧production/real例排除，warning1）、真实MySQL子进程1个复合用例PASS。实际changed getter/loader AST及真实SQL验证hidden/u0/current/case alias，非完整NoneBot注册；旧u0测试只更新mock接口，未计入执行。首轮误用compute-only导致旧recommend renderer缺符号（150pass/1fail），QA环境修正后151通过；追加getter与old-id fallback校准后153最终通过。日志及失败轮均保留。最终9.845s，sampled peak201609216 bytes，child OS maxRSS215416KiB另列，high/max/OOM0，unit success/inactive/no cgroup。SELECT DATABASE()为_test、explicit opt-in1，仅owned synthetic行/root/child，无生产数据或SQL变更。[完整证据](evidence/phase6-native-binding-metadata-validation.json)。
+
+A331314d/9.81.19与458ceae/9.81.20标准commit/push，实际remote已核对；B47bf5c1/0.2.4未变，Viewer0.82此步测试/文档本地待统一标准部署push。live0.81.11与三个PID不变，R未同步/重启。native authority整轮/Gate6仍IN_PROGRESS，继续binding mutations/visibility/migration named gates与credential/token issuer、全部Source/daily/u0 Writer/P1a、Read Model/invalidation/成本/ops、固定R deps/旧Writer停止后的统一激活及真实online产品验收。
