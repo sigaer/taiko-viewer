@@ -12,6 +12,7 @@ import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taik
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
 import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL } from '../../server/infrastructure/account/source-service-schema.ts';
+import { HIROBA_CREDENTIAL_TABLE_SQL } from '../../server/infrastructure/account/hiroba-credential-schema.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
@@ -21,6 +22,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
+  HIROBA_CREDENTIAL_TABLE_SQL,
   SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_developer_tokens (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
@@ -162,6 +164,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     const [births] = user ? await pool.query("SELECT taiko_id FROM taiko_manual_creations WHERE (actor_kind='viewer' AND actor_key=?) OR (actor_kind='bot' AND actor_key=?)", [String(user),botKey]) : [[]];
     const ownedIds = [...new Set([taikoId,...births.map(row=>row.taiko_id)].filter(Boolean))];
     for (const ownedId of ownedIds) {
+      await pool.execute('DELETE FROM web_hiroba_credentials WHERE taiko_no=?', [ownedId]);
       await pool.execute('DELETE FROM taiko_manual_creations WHERE taiko_id=?', [ownedId]);
       await pool.execute('DELETE FROM taiko_manual_grant_receipts WHERE taiko_id=?', [ownedId]);
       await pool.execute('DELETE FROM taiko_source_lifecycle WHERE taiko_id=?', [ownedId]);

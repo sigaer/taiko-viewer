@@ -20,6 +20,7 @@ const initial={dbHost:'127.0.0.1',dbPort:3306,dbUser:'synthetic-only',dbPassword
 let config={...initial};globalThis.useRuntimeConfig=()=>config;
 const dbModule=await import('../server/utils/account-db.ts');
 const {createAccountSyncWorkerRunner}=await import('../server/infrastructure/account/sync-worker-runner.ts');
+const {createSourceMutationWorker}=await import('../server/infrastructure/account/source-mutation-worker-runner.ts');
 const request={requestId:'a'.repeat(32),requestHash:'b'.repeat(64),userId:1,binding:{id:'1',taiko_id:'7123456',source:'wahlap',manual_account_id:null},targetIds:['sakura-bot']};
 const reply={ok:true,result:{requestId:request.requestId,userId:1,taikoId:'7123456',logId:1,logHash:'c'.repeat(64)}};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
@@ -96,4 +97,31 @@ test('oversize private request is refused before process admission',{timeout:300
  let launched=false;const run=createAccountSyncWorkerRunner(()=>{launched=true;return new Child();});
  await assert.rejects(run({...request,binding:{...request.binding,taiko_id:'x'.repeat(16384)}},dbModule.getAccountDb()),error=>error.statusCode===503);
  assert.equal(launched,false);
+});
+const mutation={operationId:'d'.repeat(32),source:'7123456',scope:'wahlap_update',actor:{kind:'session',userId:1,credential:'e'.repeat(64)},grant:{kind:'owner',binding:request.binding},showAll:false,includeImage:false,email:'',password:''};
+const mutationReply={ok:true,result:{operationId:mutation.operationId,source:mutation.source,commitId:'f'.repeat(32),sequence:2,imageBytes:0,imageHash:null}};
+const ticket=()=>({db:dbModule.getAccountDb(),paths:{repoRoot:initial.repoRoot,userdataDir:initial.userdataDir,configPath:initial.taikoConfigPath,cacheDir:initial.repoRoot+'/cache'}});
+test('account sync and source mutation share the same two-worker admission',{timeout:4000},async()=>{
+ const children=[],launch=()=>{const c=new Child();children.push(c);return c;};
+ const account=createAccountSyncWorkerRunner(launch),source=createSourceMutationWorker(launch),t=ticket();
+ const a=account(request,t.db),b=source(mutation,t),c=source(mutation,t);await tick();assert.equal(children.length,2);
+ children[0].finish();await a;await tick();assert.equal(children.length,3);children[1].finish(mutationReply);children[2].finish(mutationReply);await Promise.all([b,c]);
+});
+test('source worker captures paths/config and sends private actor/credentials only over stdin',{timeout:3000},async()=>{
+ const t=ticket();let child,actualInput='';const run=createSourceMutationWorker((executable,args,options)=>{
+  assert.deepEqual(args,['-m','scripts.source_mutation_cli']);assert.equal(options.cwd,t.paths.repoRoot);assert.equal(options.env.TAIKO_ACCOUNT_CACHE_DIR,t.paths.cacheDir);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
+  child=new Child();child.stdin.on('data',bytes=>{actualInput+=bytes.toString();});return child;
+ });const pending=run({...mutation,email:'synthetic@example.test',password:'private-password'},t);await tick();
+ assert.equal(JSON.parse(actualInput).password,'private-password');child.finish(mutationReply);assert.deepEqual(await pending,mutationReply.result);
+});
+test('Hiroba worker uses its own 900-second deadline and closes before freeing capacity',{timeout:3000},async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});let child;const run=createSourceMutationWorker(()=>child=new Child()),pending=run({...mutation,scope:'hiroba_sync'},ticket());pending.catch(()=>{});
+ try{await tick();t.mock.timers.tick(180000);assert.deepEqual(child.kills,[]);t.mock.timers.tick(720000);assert.deepEqual(child.kills,['SIGTERM']);t.mock.timers.tick(1500);assert.deepEqual(child.kills,['SIGTERM','SIGKILL']);child.finish(mutationReply,1);await assert.rejects(pending,error=>error.statusCode===503);}
+ finally{t.mock.timers.reset();}
+});
+test('source worker rejects mismatched commit/actor output and bounded stdout failure',{timeout:3000},async()=>{
+ for(const result of [{...mutationReply.result,source:'foreign'},{...mutationReply.result,imageBytes:1,imageHash:null},{...mutationReply.result,commitId:'unsafe'}]){
+  let child;const pending=createSourceMutationWorker(()=>child=new Child())(mutation,ticket());await tick();child.finish({ok:true,result});await assert.rejects(pending,error=>error.statusCode===503);
+ }
+ let child;const pending=createSourceMutationWorker(()=>child=new Child())(mutation,ticket());await tick();child.stdout.write(Buffer.alloc(65537));assert.equal(child.kills[0],'SIGTERM');child.finish(mutationReply);await assert.rejects(pending,error=>error.statusCode===503);
 });

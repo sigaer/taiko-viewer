@@ -1,8 +1,9 @@
 import { spawn } from "node:child_process";
+import { enterPrivateWorker, leavePrivateWorker } from "./private-worker-admission.ts";
 import { StringDecoder } from "node:string_decoder";
 import { createError } from "h3";
 import type { Pool } from "mysql2/promise";
-import { getAccountDbNativeConfig } from "../../utils/account-db";
+import { capturedWorkerEnvironment } from "./private-worker-environment.ts";
 import { getRuntimePaths } from "../runtime-paths.ts";
 
 export type SyncWorkerRequest = {
@@ -14,35 +15,13 @@ export type SyncWorkerResult = { requestId: string; userId: number; taikoId: str
 const unavailable = () => createError({ statusCode: 503, statusMessage: "同步服务暂不可用，请稍后重试。" });
 // One current Viewer process. All account-sync requests share this bounded
 // admission; a multi-replica rollout requires a host admission gate first.
-let active = 0;
-const queue: Array<() => void> = [];
-async function enter() {
-  if (active < 2) { active++; return; }
-  if (queue.length >= 8) throw unavailable();
-  await new Promise<void>((resolve, reject) => {
-    const ready = () => { clearTimeout(timer); resolve(); };
-    const timer = setTimeout(() => { const index = queue.indexOf(ready); if (index >= 0) queue.splice(index, 1); reject(unavailable()); }, 30_000);
-    queue.push(ready);
-  });
-}
-function leave() { const next = queue.shift(); if (next) next(); else active--; }
 
 export function createAccountSyncWorkerRunner(launch: typeof spawn = spawn) {
   return async (request: SyncWorkerRequest, db: Pool): Promise<SyncWorkerResult> => {
     const input = JSON.stringify(request);
     if (Buffer.byteLength(input) > 16_384) throw unavailable();
-    const config = getAccountDbNativeConfig(db), paths = getRuntimePaths();
-    // Only the worker's required environment crosses this private boundary.
-    // /proc/self cannot contain this user-created pathname; the existing loader
-    // marks explicit absent input as loaded without consulting global secrets.
-    const env: NodeJS.ProcessEnv = {};
-    for (const key of ["PATH", "HOME", "LANG", "LC_ALL", "TZ", "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "TAIKO_SYNC_RECEIVER_NAME"]) {
-      if (process.env[key] !== undefined) env[key] = process.env[key];
-    }
-    Object.assign(env, { TAIKO_DB_HOST: config.host, TAIKO_DB_PORT: String(config.port), TAIKO_DB_USER: config.user,
-      TAIKO_DB_PASSWORD: config.password, TAIKO_DB_NAME: config.database, TAIKO_RUNTIME_ENV_FILE: "/proc/self/taiko-account-sync-no-env",
-      TAIKO_USERDATA_DIR: paths.userdataDir, TAIKO_WAHLAP_CONFIG_PATH: paths.configPath, PYTHONDONTWRITEBYTECODE: "1" });
-    await enter();
+    const paths=getRuntimePaths(),env=capturedWorkerEnvironment(db,paths);
+    await enterPrivateWorker();
     try {
       return await new Promise<SyncWorkerResult>((resolve, reject) => {
         let child: ReturnType<typeof spawn>;
@@ -89,6 +68,6 @@ export function createAccountSyncWorkerRunner(launch: typeof spawn = spawn) {
         });
         child.stdin!.end(input);
       });
-    } finally { leave(); }
+    } finally { leavePrivateWorker(); }
   };
 }

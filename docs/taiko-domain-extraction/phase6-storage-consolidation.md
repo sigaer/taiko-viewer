@@ -317,3 +317,18 @@ Native issue/status/revoke 统一 Source EX→owner/current→token SQL 单次�
 Broad 473.66s/430.598MiB sampled，最终 40.326s/341.367MiB；high/max/OOM=0，实际 wrapper exit0/journal deactivated success/MainPID0/collected cgroup gone，owned children/listeners/roots/rows finally 清理。完整证据：[phase6-source-access-validation.json](evidence/phase6-source-access-validation.json)。不冒称上游真实网络、production FK、完整 Nuxt/NoneBot 或在线 authenticated验收。
 
 本子步 PRIVATE_SOURCE_READ_AND_EXPLICIT_SERVICE_PROVISION_PASS；Gate6 IN_PROGRESS。A code/9.81.11/R/runtime unchanged，无 Source修改或同步，所以本步不重启 NoneBot/API；Viewer0.82.0本地步骤，按标准统一发布推送，live0.81.11/PIDs1063394、1063408、829173 unchanged。尚未为生产 token登记能力。继续 Wahlap旧 dispatcher caller、Hiroba private stdin/QQ bind grant/native writer、SDK/cache、u0/daily/all Writer/P1a、完整 Read Model/invalidation/百万成本与IO/RSS、ops restore/cleanup、fixed dependencies/R sync/统一发布与真实线上产品验收。
+
+
+## 6.3e.8.2 中心更新代理、历史与 renderer 同一视图
+
+正式 Wahlap 更新/Hiroba 同步/历史代理继续真实 quota，使用有效 Cookie 或 active Developer token 的完整自有 binding，或按 token 登记的 Source/scopes/revision/expiry。更新要求 owner binding 的平台匹配；manual 不允许外部 acquisition。parent 首次 actor SQL 前捕获 pool/root/cwd，不持 EX 等待 child；私有 stdin worker 在 Source EX 后锁定并复核实际凭据和完整 owner/service tuple，每次 C/H 发布前及最终只读 SQL COMMIT 前再次证明。Wahlap 原真实 refresh/local snapshot 保留两次独立观察，Hiroba 原真实同步保留一次 C/H；晚 SQL/transport/返回权限失败保留已经授权的成绩，不冒称跨文件/SQL 联合回滚或新增 nonce 重放。旧 requestSyncDispatch 现已无正式 caller；Hiroba 凭据 bind 仍待迁移，不能把同步 stdin 改造说成全部密码 argv 已移除。
+
+返回在 fresh SH 内核对 exact produced commit/sequence、捕获的凭据/grant 和存活 lease。历史从 canonical raw 读取，保留原文件名顺序、_meta.ts、完整 full/delta/未知字段与无效 JSON 跳过；累计 32MiB 超限固定 503，不截断。renderer 的 current/H 使用同一 EX view 或默认 SH，七个冻结 AST 函数与实际未改 R 一致；previous song/dojo、两种 showAll 的 PNG 哈希用 synthetic PIL panels/columns 对照，不冒称全素材视觉验收。
+
+Account/source 两类 worker 共用单 Viewer 进程 2 active/8 queued/30s queue；32KiB stdin/64KiB stdout/8KiB stderr，Wahlap 180s、Hiroba 900s，native 独立 SIGALRM，child close 后释放槽。凭据只经 stdin/捕获连接，不进入 argv；存储的 Fernet 密码在同一 SQL connection 读取解密，不在事务中调用隐式 DDL COMMIT。图片为 16MiB 以内的私有随机 nonce 文件，目录最多16个、1800s过期清理，Node 验证大小/普通单链接文件/SHA后保留原 DTO base64，并在成功/失败后清理。多副本 host admission 与总体容量继续后续审阅。
+
+最终 Source 126 publication（新增6 renderer）/170 domain、client52（新增4 missing-token）、153 offline Node（15 worker transport）、409 actual guarded SQL（335 existing+45 source access+29 proxy）及两组局部 TS PASS。实际 Cookie/active token/service 与 native PyMySQL/Source/real worker 跑通；五个真实 child退出、排队/返回 binding/session/service替换、fetch后expiry、只读 COMMIT ACK loss、stored encrypted credentials、Hiroba resolved-id拒绝、private PNG暂存/超限/清理、history累计容量与projection loss均覆盖。所有 native connection 实际 SELECT DATABASE()=_test且opt-in1，上游/图片 panels 为 synthetic，测试库无生产 FK，owned child/listener/root/rows 清理。证据：[phase6-source-proxy-validation.json](evidence/phase6-source-proxy-validation.json)。
+
+回归分两段：Source126/170先已通过，随后客户端因QA驱动错误选择系统Core0.1.1而在收集阶段停止；改为原guarded validator与固定Git安装Core0.1.2/Contract0.1.0后，client/TS/Node/SQL完整通过。两段受测产品哈希完全相同。最终后一段533.993s/502.090MiB sampled、high/max/OOM0，实际wrapper exit0+journal success/MainPID0/collected cgroup gone。客户端四个私有成绩 SDK 调用现在要求token，Hiroba等待900s；缓存授权与其余私有SDK未冒称完成。
+
+本子步 PRIVATE_CENTER_UPDATE_HISTORY_AND_RENDER_VIEW_PASS，Gate6 IN_PROGRESS。A9.81.12与client0.2.1标准源码提交/推送的完整OID以中央证据为准；R没有复制这些预备代码，所以running Bot/API未加载，无本子步重启。Viewer0.82.0本地阶段提交，待完整Phase6标准部署统一push，live0.81.11/PIDs1063394、1063408、829173不变，未登记生产service能力。继续Hiroba credential/bind、QQ bind、permission-aware bounded cache、u0/daily/all Writer/P1a、完整Read Model/invalidation/百万IO/RSS成本、trusted ops与fixed deps/R sync/统一发布/真实在线产品验收。

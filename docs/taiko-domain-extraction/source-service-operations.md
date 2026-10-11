@@ -1,6 +1,6 @@
 # 私有成绩服务授权配置
 
-适用范围：Phase 6 / 6.3e.8.1 的 Developer userdata 读取。此时其余中心代理、Hiroba、QQ bind 写操作尚待迁移，不能据此激活整个 Phase 6。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有成绩授权是两个独立检查。
+适用范围：Phase 6 / 6.3e.8.1–2 的 Developer userdata、历史与 Wahlap/Hiroba 更新代理。Hiroba 凭据管理、QQ bind 和客户端缓存授权仍待迁移，不能据此激活整个 Phase 6。公共曲库、公开玩家资料与排行榜继续使用原协议。开发者每日额度与私有成绩授权是两个独立检查。
 
 `GET /api/developer/userdata/:userid` 接受有效登录 Cookie 或有效开发者 Bearer token。普通凭据只能读取其账号自有绑定，允许自有非 current 绑定；完整 binding id/taiko_id/source/manual_account_id 在 Source SH 前后复核。绑定本身沿用现有产品的 SQL 授权含义，不额外声称已证明上游账号归属。跨账号中心服务需要按 **token id** 单独登记，不能以开发者申请获批、每日额度、HTTP userid/userId/QQ、同一用户的另一枚 token 推导授权。
 
@@ -27,7 +27,11 @@
 }
 ```
 
-当前生效的正式读取 scope 为 `source_read`。`history_read` helper 已具备边界，但正式 history 代理尚待接入。schema 预留 `wahlap_update`、`hiroba_sync`、`hiroba_credential_status`、`hiroba_bind`、`bind_read`、`bind_write`、`bind_current`；预留名称不表示相关调用迁移已完成。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`。schema 预留 `hiroba_credential_status`、`hiroba_bind`、`bind_read`、`bind_write`、`bind_current`；预留名称不表示相关调用迁移已完成。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+
+普通 Cookie/token 可以更新完整自有 binding 对应的平台，Wahlap/Hiroba 不互换，manual 不允许外部 acquisition。中心服务仍须逐项配置 scope 与 Source 范围。private worker 独占 Source EX，再锁定 SQL 凭据与授权，每次成绩发布前及最终 COMMIT 前复核；Node 返回前取得 fresh SH，验证原 produced commit/sequence 与完整授权，不能返回另一代成绩。晚 SQL/transport/撤权失败不自动撤销已经授权提交的成绩；该更新代理未增加跨请求 nonce 重放。
+
+历史返回保留完整 raw full/delta/未知字段与原文件名顺序，累计 32MiB 超限返回 503，不截断。图片 current/history 使用同一 publication view，PNG 上限16MiB，私有目录最多16个暂存文件、1800秒过期清理，响应成功或失败后删除本请求图片。账户同步与更新代理共用单 Viewer 进程2个 active/8个 queued/30秒排队；Wahlap 180秒、Hiroba 900秒执行上限，native worker 有独立 signal deadline。多副本发布前仍需 host admission 审阅。
 
 工具从 SQL 验证 operator 的 **username 与 email 同时匹配现有站点运维身份**，然后按 account→token→grant→audit 锁序提交一次 SQL transaction。token owner 必须存活，active 登记要求 token 有效且未撤销。最小 audit 只保存此次能力配置；不会复制成绩。相同 operationId/配置重试确认已有记录，不会覆盖后续新配置或撤销；相同 operationId 携带不同配置返回 409。丢失 COMMIT ACK 只根据同一捕获 pool 的新连接和 exact audit 确认；未提交不能报成功，rollback 失败销毁连接。
 
@@ -49,4 +53,4 @@ bash /home/sigaer/taiko/taiko-forum/scripts/memory/run_qa.sh \
 
 验证范围包括真实 Cookie 登录与正式 Developer route、实际开发者 quota、实际 `_test` SQL、Source SH、实际私有 CLI、排队/返回期间身份与能力替换、撤销/expiry、exact replay、单 COMMIT、late failure/rollback destroy/ACK loss、完整 JSON 与 canonical corruption。上游网络、完整 Nuxt build、真实跨用户服务注册和生产烟测留在最终激活验收。
 
-Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。发布前必须完成 Wahlap 旧 dispatcher caller、Hiroba credentials argv、QQ bind authority、SDK 权限与缓存处理，以及剩余全部 Writer/Read Model/P1a 工作。运行中的 R 未复制这些预备变更，此子步无需重启 NoneBot。
+Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步通过私有 stdin 传递凭据；Hiroba bind 仍有 credentials argv，须完成其授权与事务迁移。客户端四项成绩SDK已要求有效token；permission-aware bounded cache、QQ bind authority、剩余私有SDK，以及全部 Writer/Read Model/P1a仍须完成。运行中的 R 未复制这些预备变更，此子步无需重启 NoneBot。

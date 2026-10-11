@@ -20,6 +20,10 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   import {createAccountSyncWorkerRunner} from '${new URL('server/infrastructure/account/sync-worker-runner.ts',root).href}';
   export const runAccountSyncWorker=(request,db)=>createAccountSyncWorkerRunner(globalThis.__goalSqlRuntime.syncLaunch)(request,db);
  `);
+ if (withAccountSource) overrides.set(new URL('server/infrastructure/account/source-mutation-worker.ts',root).href,`
+  import {createSourceMutationWorker} from '${new URL('server/infrastructure/account/source-mutation-worker-runner.ts',root).href}';
+  export const runSourceMutationWorker=(request,ticket)=>createSourceMutationWorker(globalThis.__goalSqlRuntime.sourceMutationLaunch)(request,ticket);
+ `);
  if (withDeveloper) {
   // Keep actual developer/quota/credential/source services. The unused public
   // catalog module imports JSON and remote constants outside this test's scope.

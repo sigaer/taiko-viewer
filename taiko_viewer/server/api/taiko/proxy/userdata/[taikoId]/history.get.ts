@@ -1,7 +1,5 @@
-import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
-import { proxyTaikoCenterUserdataHistory } from "~/server/utils/taiko-center";
+import { readAuthorizedSourceHistory, sourceProxyRequest } from "~/server/services/account/source-proxy";
 
-export default defineEventHandler(async (event) => {
-  await enforceTaikoOpenQuota(event, "taiko_proxy_userdata_history");
-  return proxyTaikoCenterUserdataHistory(event.context.params?.taikoId);
-});
+export default defineEventHandler(async (event) => sourceProxyRequest(event, "taiko_proxy_userdata_history", async () => {
+  return readAuthorizedSourceHistory(event, event.context.params?.taikoId);
+}));

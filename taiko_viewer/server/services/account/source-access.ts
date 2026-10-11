@@ -10,8 +10,11 @@ import {getRuntimePaths} from '../../infrastructure/runtime-paths.ts';
 import {PublicationUnavailableError} from '../../infrastructure/taiko-publication/client.ts';
 import {validSourceIdentity, validateSourceServicePolicy, type SourceServiceScope} from '../../infrastructure/account/source-service-schema.ts';
 
-type Actor = Readonly<{kind:'session'|'developer'; userId:number; credential:string; tokenId?:string}>;
-type Grant = Readonly<{kind:'owner'; binding:BindingIdentity}|{kind:'service'; tuple:readonly unknown[]}>;
+export type SourceActor = Readonly<{kind:'session'|'developer'; userId:number; credential:string; tokenId?:string}>;
+export type SourceGrant = Readonly<{kind:'owner'; binding:BindingIdentity}|{kind:'service'; tuple:readonly unknown[]}>;
+type Actor = SourceActor;
+type Grant = SourceGrant;
+export type SourceAccessTicket = Readonly<{db:Pool;paths:ReturnType<typeof getRuntimePaths>;actor:Actor;grant:Grant;source:string;scope:SourceServiceScope}>;
 const publicErrors = new WeakSet<Error>();
 const failure = (status:number, message:string) => {const e=createError({statusCode:status,statusMessage:message});publicErrors.add(e);return e;};
 const denied = () => failure(403,'没有访问该账号成绩的权限');
@@ -68,21 +71,33 @@ async function prove(db:Pool,actor:Actor,grant:Grant,source:string,scope:SourceS
 
 /** Private source read: live credential + owned binding or explicit service
  * capability. Never infer authority from a quota result or HTTP owner fields. */
-export async function withAuthorizedSourceRead<T>(event:H3Event,sourceInput:unknown,scope:SourceServiceScope,task:()=>Promise<T>):Promise<T> {
+async function captureAccess(event:H3Event,sourceInput:unknown,scope:SourceServiceScope,mutation=false):Promise<SourceAccessTicket> {
   try {
     const source=typeof sourceInput==='string'?sourceInput.trim():'';if(!validSourceIdentity(source))throw failure(400,'成绩账号标识无效');
-    await ensureAccountSchema();const db=getAccountDb(),{userdataDir,repoRoot}=getRuntimePaths();
+    await ensureAccountSchema();const db=getAccountDb(),paths=Object.freeze(getRuntimePaths());
     const actor=await captureActor(event,db);
     const grant=await serviceGrant(db,actor,source,scope) || await ownerGrant(db,actor,source);
-    // Owner source reads cannot be reused as a mutation/service delegation grant.
-    if(grant.kind==='owner'&&!['source_read','history_read'].includes(scope))throw denied();
+    if(grant.kind==='owner'&&!['source_read','history_read'].includes(scope)){
+      const platform=scope==='wahlap_update'?'wahlap':scope==='hiroba_sync'?'hiroba':null;
+      if(!mutation||!platform||grant.binding.source!==platform||grant.binding.manual_account_id||MANUAL_SOURCE_ID.test(source))throw denied();
+    }
     await prove(db,actor,grant,source,scope);
+    return Object.freeze({db,paths,actor,grant,source,scope});
+  }catch(error){throw safe(error);}
+}
+export const captureAuthorizedSourceMutation=(event:H3Event,sourceInput:unknown,scope:'wahlap_update'|'hiroba_sync')=>captureAccess(event,sourceInput,scope,true);
+export async function withCapturedSourceRead<T>(ticket:SourceAccessTicket,task:()=>Promise<T>):Promise<T>{
+  try{
+    const {db,paths:{userdataDir,repoRoot},actor,grant,source,scope}=ticket;
     return await withScoreRead({root:userdataDir,repoRoot,identity:source,now:()=>new Date().toISOString()},async()=>{
       const alive=()=>{if(!currentScoreScope(source)?.lease.alive())throw new PublicationUnavailableError();};
       alive();await prove(db,actor,grant,source,scope);alive();const result=await task();
       await prove(db,actor,grant,source,scope);alive();return result;
     });
   }catch(error){throw safe(error);}
+}
+export async function withAuthorizedSourceRead<T>(event:H3Event,sourceInput:unknown,scope:SourceServiceScope,task:()=>Promise<T>):Promise<T> {
+  return withCapturedSourceRead(await captureAccess(event,sourceInput,scope),task);
 }
 
 export async function readAuthorizedSourceUserdata(event:H3Event,sourceInput:unknown) {

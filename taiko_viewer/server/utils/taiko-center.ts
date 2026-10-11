@@ -1,16 +1,14 @@
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { createError } from "h3";
 import {
   execFileAsync,
   fetchBindPlayerProfile,
   getRuntimePaths,
   loadWahlapCookie,
-  normalizeTaikoId,
-  readRawUserdataText
+  normalizeTaikoId
 } from "~/server/internal/account/shared";
-import { requestSyncDispatch } from "~/server/internal/account/sync";
 import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
 
 type JsonObject = Record<string, unknown>;
@@ -86,13 +84,6 @@ const parseJsonText = (rawText: string, fallbackMessage: string) => {
   } catch {
     throw createError({ statusCode: 500, statusMessage: fallbackMessage });
   }
-};
-
-const readCenterUserdata = async (taikoId: string) => parseJsonText(await readRawUserdataText(taikoId), "权威成绩 JSON 已损坏");
-
-const getCenterUserdataHistoryDir = (taikoId: string) => {
-  const { userdataDir } = getRuntimePaths();
-  return resolve(userdataDir, taikoId);
 };
 
 const normalizeBotBindSource = (rawSource: unknown): BotBindSource => {
@@ -292,38 +283,6 @@ const switchCurrentBotBindSlot = async (identityKeyInput: unknown, slotInput: un
   return buildBotBindLookupPayload(identityKey);
 };
 
-const readCenterUserdataHistory = async (taikoIdInput: unknown) => {
-  const taikoId = normalizeTaikoId(taikoIdInput);
-  if (!taikoId) {
-    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
-  }
-  const historyDir = getCenterUserdataHistoryDir(taikoId);
-  let fileNames: string[] = [];
-  try {
-    fileNames = await readdir(historyDir);
-  } catch {
-    return { ok: true, taikoId, snapshots: [] };
-  }
-
-  const snapshotNames = fileNames
-    .filter((name) => name.startsWith("data_") && name.endsWith(".json"))
-    .sort();
-  const snapshots: Array<{ capturedAt: string; payload: JsonObject }> = [];
-  for (const fileName of snapshotNames) {
-    const filePath = join(historyDir, fileName);
-    try {
-      const rawText = await readFile(filePath, "utf-8");
-      const payload = parseJsonText(rawText, "中心历史快照 JSON 已损坏");
-      const meta = (payload._meta || {}) as JsonObject;
-      const capturedAt = String(meta.ts || fileName).trim();
-      snapshots.push({ capturedAt, payload });
-    } catch {
-      continue;
-    }
-  }
-  return { ok: true, taikoId, snapshots };
-};
-
 const runPythonBuffer = async (pythonCode: string, args: string[] = []) => {
   const { repoRoot } = getRuntimePaths();
   try {
@@ -348,28 +307,6 @@ const runPythonJson = async (pythonCode: string, args: string[] = []) => {
     throw createError({ statusCode: 500, statusMessage: "中心 Python 任务未返回 JSON" });
   }
   return parseJsonText(rawText, "中心 Python 任务返回的 JSON 无法解析");
-};
-
-const renderUpdateImage = async (taikoId: string, showAll: boolean) => {
-  const code = [
-    PYTHON_STDOUT_HELPERS,
-    "from plugins.utils.draw_dress import render_update_changes_image",
-    "import sys",
-    "with redirect_stdout(_taiko_center_log):",
-    "    buf = render_update_changes_image(int(sys.argv[1]), show_all=(sys.argv[2] == '1'))",
-    "sys.stdout.buffer.write(_taiko_center_image_bytes(buf))"
-  ].join("\n");
-  return runPythonBuffer(code, [taikoId, showAll ? "1" : "0"]);
-};
-
-const ensureDispatchSucceeded = (message: string, results: Array<Record<string, unknown>>) => {
-  const failed = results.find((item) => !Boolean(item?.ok));
-  if (!failed) return;
-  const failedMessage = String(failed.message || failed.statusMessage || "").trim();
-  throw createError({
-    statusCode: Number(failed.statusCode || 502) || 502,
-    statusMessage: failedMessage || message || "中心同步失败"
-  });
 };
 
 const resolveArcadeSnapshotPaths = () => {
@@ -425,80 +362,6 @@ const fetchWahlapJson = async (
     throw createError({ statusCode: 503, statusMessage: "当前中心的鼓众 cookie 已失效" });
   }
   return payload;
-};
-
-export const proxyTaikoCenterUserdataUpdate = async (
-  taikoIdInput: unknown,
-  options: { showAll?: boolean; includeImage?: boolean } = {}
-): Promise<TaikoCenterSyncResponse> => {
-  const taikoId = normalizeTaikoId(taikoIdInput);
-  if (!taikoId) {
-    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
-  }
-  const dispatch = await requestSyncDispatch(taikoId, ["sakura-bot"]);
-  ensureDispatchSucceeded(dispatch.message, dispatch.results as Array<Record<string, unknown>>);
-  const userdata = await readCenterUserdata(taikoId);
-  let imageBase64: string | null = null;
-  if (options.includeImage !== false) {
-    const image = await renderUpdateImage(taikoId, Boolean(options.showAll));
-    imageBase64 = image.length ? image.toString("base64") : null;
-  }
-  return {
-    ok: true,
-    taikoId,
-    source: "wahlap",
-    message: "更新成功，成绩已写入中心设备。",
-    userdata,
-    imageBase64,
-    imageMimeType: imageBase64 ? "image/png" : null,
-    imageFilename: imageBase64 ? `taiko-update-${taikoId}.png` : null
-  };
-};
-
-export const proxyTaikoCenterHirobaSync = async (
-  taikoIdInput: unknown,
-  options: { email?: unknown; password?: unknown; showAll?: boolean; includeImage?: boolean } = {}
-): Promise<TaikoCenterSyncResponse> => {
-  const taikoId = normalizeTaikoId(taikoIdInput);
-  const email = String(options.email || "").trim();
-  const password = String(options.password || "").trim();
-  if (!taikoId) {
-    throw createError({ statusCode: 400, statusMessage: "缺少鼓众 ID" });
-  }
-  const code = [
-    PYTHON_STDOUT_HELPERS,
-    "from plugins.utils.hiroba.credentials import load_hiroba_credentials",
-    "from plugins.utils.hiroba.sync import sync_hiroba_userdata",
-    "import json, sys",
-    "email = sys.argv[1].strip()",
-    "password = sys.argv[2].strip()",
-    "taiko_id = sys.argv[3].strip()",
-    "if not email or not password:",
-    "    creds = load_hiroba_credentials(taiko_id)",
-    "    if not creds:",
-    "        raise RuntimeError('当前中心未配置该 Hiroba 账号凭据')",
-    "    email, password = creds",
-    "with redirect_stdout(_taiko_center_log):",
-    "    resolved = sync_hiroba_userdata(email, password, taiko_no=taiko_id)",
-    "print(json.dumps({'taikoId': resolved}, ensure_ascii=False))"
-  ].join("\n");
-  await runPythonJson(code, [email, password, taikoId]);
-  const userdata = await readCenterUserdata(taikoId);
-  let imageBase64: string | null = null;
-  if (options.includeImage !== false) {
-    const image = await renderUpdateImage(taikoId, Boolean(options.showAll));
-    imageBase64 = image.length ? image.toString("base64") : null;
-  }
-  return {
-    ok: true,
-    taikoId,
-    source: "hiroba",
-    message: "Hiroba 更新成功，成绩已写入中心设备。",
-    userdata,
-    imageBase64,
-    imageMimeType: imageBase64 ? "image/png" : null,
-    imageFilename: imageBase64 ? `taiko-hiroba-update-${taikoId}.png` : null
-  };
 };
 
 export const proxyTaikoCenterHirobaBind = async (
@@ -617,9 +480,6 @@ export const proxyTaikoCenterBindSwitchCurrent = async (
   identityKeyInput: unknown,
   slotInput: unknown
 ) => switchCurrentBotBindSlot(identityKeyInput, slotInput);
-
-export const proxyTaikoCenterUserdataHistory = async (taikoIdInput: unknown) =>
-  readCenterUserdataHistory(taikoIdInput);
 
 export const proxyTaikoWahlapPlayer = async (taikoIdInput: unknown) => fetchBindPlayerProfile(taikoIdInput);
 
