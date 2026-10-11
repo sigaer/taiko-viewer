@@ -1,0 +1,147 @@
+{
+  "step": "6.3e.4",
+  "status": "VIEWER_TOKEN_SINGLE_AUTHORITY_SQL_TRANSACTION_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "recordedAt": "2026-10-11T07:34:03.994Z",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "viewerBaseCommit": "5ef4f6f4d4089e97034fb88a3aac460aff5201ed",
+  "sakuraCommit": "6a90c7eb3a29de9d81edaa66db4256fbb53682a2",
+  "sakuraVersion": "9.81.7",
+  "sakuraChanged": false,
+  "validation": {
+    "offlineNode": {
+      "passed": 138
+    },
+    "actualIsolatedSql": {
+      "passed": 250,
+      "accountSourcePassed": 51,
+      "addedTokenAtomic": 14,
+      "actualPythonPersonal": 2
+    },
+    "localTypeScriptGroups": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "unchangedPythonSuites": {
+      "publicationPassedPreviously": 75,
+      "domainPassedPreviously": 156,
+      "rerunThisStep": false,
+      "previousEvidence": "phase6-history-reader-validation.json"
+    },
+    "focused": {
+      "unit": "taiko-qa-1791703628-1326231.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791703628-1326231.service",
+        "durationMs": 51561,
+        "sampledMemoryPeakBytes": 462147584,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48944 kB",
+            "VmRSS": "48944 kB"
+          }
+        ]
+      },
+      "resourceSha256": "0a650065dc47be615b2327e875f73e004bc6ffd52b9ca501322de981c5f00e69",
+      "log": "/var/tmp/phase6-token-atomic-focused-qa.log",
+      "logSha256": "ad67abd310acd06d19ee9dd541291f99b8293310c83bf7f2237dc5013e01c6ff",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "final": {
+      "unit": "taiko-qa-1791703714-1327393.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791703714-1327393.service",
+        "durationMs": 298819,
+        "sampledMemoryPeakBytes": 441589760,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "50444 kB",
+            "VmRSS": "50444 kB"
+          }
+        ]
+      },
+      "resourceSha256": "9a4e6fa30da65b0e8b381863191b447aaa0765b379eecb2b347bad842a0fdd32",
+      "log": "/var/tmp/phase6-token-atomic-final-qa.log",
+      "logSha256": "80c48af2a50f10fa7eb1722f5b0749aeed906a8635d0d396daea0e04135d2ecd",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "pythonIssuerSchemaExactWhitespaceNormalized": true
+  },
+  "sources": [
+    {
+      "path": "taiko_viewer/server/infrastructure/account/score-token.ts",
+      "sha256": "f717e58368f6d8f5476734d9f3b0282fc4721f5b1aaad4661e37e6854d7bec8c"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/score-token.ts",
+      "sha256": "0d2ea60d399dd052e208832fb333b317409a4643ac7c5f89cbc1f1092ab884da"
+    },
+    {
+      "path": "taiko_viewer/server/services/account/score-token-authority.ts",
+      "sha256": "0ca3ec971b8e2f1345073e7dda418fd6fceb2689637c2013a3e02cd96aec1c15"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account-db.ts",
+      "sha256": "1c1b1ffd6a1b3b988e26c5def2fc65aae18bfa9f6ea15044b94b01ded1a89062"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/sync.ts",
+      "sha256": "fa72b3aeedf123066eb04cde2a3c5f84eb9c327f1f02039928332050bdbb0720"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs",
+      "sha256": "83f54598e3dec6e5eb2f4830fc6c5774a55bc265e3add1985969c64507c2c258"
+    },
+    {
+      "path": "taiko_viewer/tests/accountSourcePublicationSql.test.mjs",
+      "sha256": "d4b84cd21df395fd0d68f5edfbd24e69b83009d36a16b113cf052445115fbdb0"
+    }
+  ],
+  "coverage": [
+    "Source EX -> live full current identity -> SQL owner/all bindings -> token mutation/proof -> one SQL COMMIT; status within Source SH and captured pool",
+    "Existing 48-hex token, SHA256-only storage, eight...eight mask, row id/created date retention, last-used reset, fresh rotation and idempotent revoke",
+    "Real authenticated cookie issue/status/revoke/reload/logout/re-login and frozen 7bf9a56 complete healthy profile/sync DTO parity",
+    "Sixteen queued full identity replacements, final proof changes, long SH/EX/SQL owner lock and waiting score publisher; no score observation created",
+    "Pre-COMMIT issue/revoke failure, late failure/failed rollback destruction, exact mutating lost ACK proof, uncertain mismatch/current replacement/lease death and captured pool",
+    "Four actual issue/revoke Node deaths immediately before/after SQL COMMIT with fresh retry preserving existing rotation semantics",
+    "Current Viewer does not request /score-token; original gateway adapter remains only for frozen rollback/regression; five bounded reply validations retained"
+  ],
+  "boundaries": {
+    "database": "taiko_annual_poster_test",
+    "actualSelectDatabaseSuffixGuard": true,
+    "explicitMutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+    "productionDb": false,
+    "productionPersonalFiles": false,
+    "externalNetwork": false,
+    "testSchemaForeignKeys": false,
+    "fullNuxtTypecheck": false,
+    "fullNoneBotRegistration": false,
+    "millionRecordCost": false,
+    "onlineAuthenticatedSmoke": false,
+    "allPythonGrantWritersConverged": false,
+    "scoreReadModelComplete": false
+  },
+  "runtime": {
+    "viewerVersion": "0.81.11",
+    "viewerPid": 1063394,
+    "receiverPid": 1063408,
+    "publicApiPid": 829173,
+    "sourceOnly": true,
+    "noRuntimeSync": true,
+    "noDeploy": true
+  }
+}

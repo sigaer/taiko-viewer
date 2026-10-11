@@ -10,6 +10,7 @@ import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from '../../server/infrastructure/taik
 import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/creation-schema.ts';
 import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-confirmation-schema.ts';
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
+import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
@@ -18,14 +19,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
-  `CREATE TABLE IF NOT EXISTS public_score_tokens (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, taiko_id VARCHAR(25) NOT NULL,
-    token_hash CHAR(64) NOT NULL, token_mask VARCHAR(32) NOT NULL,
-    last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_public_score_tokens_taiko_id (taiko_id), UNIQUE KEY uniq_public_score_tokens_token_hash (token_hash),
-    KEY idx_public_score_tokens_last_used_at (last_used_at)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  SCORE_TOKEN_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_data_sync_logs (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
     taiko_id VARCHAR(25) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'success',
@@ -96,7 +90,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
   let fixedAt = RealDate.now();
   const priorFetch = globalThis.fetch;
   let scopeModule;
-  const state = { expectedSourceMode: 'write', afterExecute: null, optimisticChecks: 0, onOptimisticChecks: null, beforeSqlStatement: null, afterSqlStatement: null, afterSqlCommit: null, transactions: 0, commits: 0, failRollback: false, discardedConnections: 0 };
+  const state = { expectedSourceMode: 'write', afterExecute: null, optimisticChecks: 0, onOptimisticChecks: null, beforeSqlStatement: null, afterSqlStatement: null, beforeSqlCommit: null, afterSqlCommit: null, transactions: 0, commits: 0, failRollback: false, discardedConnections: 0 };
   try {
     const [[identity]] = await pool.query('SELECT DATABASE() AS name');
     assert.match(identity.name, /_test$/);
@@ -124,7 +118,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
           return result;
         },
         async beginTransaction() { state.transactions++; return connection.beginTransaction(); },
-        async commit() { await connection.commit(); state.commits++; if (state.afterSqlCommit) await state.afterSqlCommit(); },
+        async commit() { if (state.beforeSqlCommit) await state.beforeSqlCommit(); await connection.commit(); state.commits++; if (state.afterSqlCommit) await state.afterSqlCommit(); },
         rollback: () => state.failRollback ? Promise.reject(new Error('Synthetic failed rollback')) : connection.rollback(),
         destroy: () => { state.discardedConnections++; connection.destroy(); }, release: () => connection.release()
       };

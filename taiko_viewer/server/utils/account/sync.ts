@@ -21,10 +21,9 @@ import {
 } from "~/server/internal/account/shared";
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
 import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
-import { requestScoreTokenManagement } from "~/server/internal/account/score-token";
 import { requireAccountUser } from "./auth";
 import { withViewerCurrentSource } from "../../services/account/current-source.ts";
-import { canManageExternalScoreToken, proveViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
+import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
   const user = await requireAccountUser(event);
@@ -40,14 +39,14 @@ export const getAccountSyncOverview = async (event: H3Event) => {
     const canSyncFromWahlap =
       currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
     const scoreTokenResult = canManageExternalScoreToken(currentBinding)
-      ? await requestScoreTokenManagement(taikoId, "status").then(result => proveViewerScoreTokenStatus(db, taikoId, result)).catch(() => null)
+      ? await readViewerScoreTokenStatus(db, taikoId).catch(() => null)
       : null;
     return {
       currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
       hasUserdata,
       canSyncFromWahlap,
       scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
-      scoreToken: scoreTokenResult?.status || null,
+      scoreToken: scoreTokenResult,
       targets: toPublicSyncTargets(targets),
       cooldownRemainingSeconds: cooldown.remainingSeconds,
       cooldownUntil: cooldown.availableAt,

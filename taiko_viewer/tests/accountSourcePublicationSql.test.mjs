@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {createHash} from 'node:crypto';
-import {execFileSync} from 'node:child_process';
+import {execFile,execFileSync} from 'node:child_process';
+import {promisify} from 'node:util';
 import {readFile,writeFile,unlink,rm} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -10,6 +11,7 @@ import ts from 'typescript';
 import {accountSourceFixture as fixture,sourceSnapshot,deferred,bounded,queuedAccountSource,replaceIdentity} from './fixtures/accountSourceHttp.mjs';
 import {openPublicationLease} from '../server/infrastructure/taiko-publication/client.ts';
 const digest=token=>createHash('sha256').update(token).digest('hex');
+const execFileAsync=promisify(execFile);
 async function http(c,method,path,body){const response=await c.request(method,path,body);const result=await response.json();if(!response.ok)throw Object.assign(new Error('Owned account request failed'),{statusCode:response.status});return result;}
 const operations={profile:c=>c.profile.getAccountProfile(c.user),sync:c=>http(c,'GET','/sync'),issue:c=>c.tokens.manageViewerScoreToken(c.user,'issue'),revoke:c=>c.tokens.manageViewerScoreToken(c.user,'revoke')};
 async function frozen(c,name){
@@ -40,6 +42,101 @@ test('real cookie issue/status/revoke/reload/re-login preserve existing healthy 
  assert.ok(c.gate.requests.every(request=>request.action==='targets'||request.userid===c.taikoId));
 }));
 
+for(const action of ['issue','revoke'])test(`${action} failure before SQL COMMIT preserves the previous token`,{timeout:20000},()=>fixture(async c=>{
+ const previous=await operations.issue(c),before=await sourceSnapshot(c);
+ c.state.beforeSqlCommit=()=>{throw Object.assign(new Error('Synthetic private COMMIT /driver/password'),{code:'ER_SYNTHETIC'});};
+ await assert.rejects(operations[action](c),e=>e.statusCode===503&&!e.message.includes('password'));
+ const [[row]]=await c.pool.query('SELECT token_hash,token_mask FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ assert.equal(row.token_hash,digest(previous.token));assert.equal(row.token_mask,previous.status.tokenMask);
+ assert.deepEqual(await sourceSnapshot(c),before);
+}));
+
+test('revoke COMMIT acknowledgement loss preserves the actual affected-row outcome',{timeout:20000},()=>fixture(async c=>{
+ await operations.issue(c);let deletes=0;c.state.afterSqlStatement=sql=>{if(sql.includes('DELETE FROM public_score_tokens'))deletes++;};
+ c.state.afterSqlCommit=()=>{throw new Error('Synthetic lost mutating acknowledgement');};
+ assert.equal((await operations.revoke(c)).revoked,true);assert.equal(deletes,1);
+ assert.equal((await operations.revoke(c)).revoked,false);assert.equal(deletes,2);
+ const [[row]]=await c.pool.query('SELECT COUNT(*) AS n FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(row.n,0);
+}));
+
+test('uncertain COMMIT with a subsequently replaced SQL token cannot acknowledge the previous plaintext',{timeout:20000},()=>fixture(async c=>{
+ c.state.afterSqlCommit=async()=>{
+  await c.pool.execute('UPDATE public_score_tokens SET token_hash=? WHERE taiko_id=?',['0'.repeat(64),c.taikoId]);
+  throw new Error('Synthetic lost mutating acknowledgement');
+ };
+ await assert.rejects(operations.issue(c),e=>e.statusCode===503);
+ const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(row.token_hash,'0'.repeat(64));
+ c.state.afterSqlCommit=null;const fresh=await operations.issue(c);assert.notEqual(digest(fresh.token),row.token_hash);
+}));
+
+test('uncertain COMMIT cannot return a token after the current identity changes',{timeout:20000},()=>fixture(async c=>{
+ c.state.afterSqlCommit=async()=>{await replaceIdentity(c,'source');throw new Error('Synthetic lost mutating acknowledgement');};
+ await assert.rejects(operations.issue(c),e=>e.statusCode===409);
+}));
+
+for(const point of ['before-commit','after-commit'])test(`token lease death ${point} cannot return a private result`,{timeout:20000},()=>fixture(async c=>{
+ const previous=await operations.issue(c);
+ if(point==='before-commit')c.state.afterSqlStatement=async sql=>{if(sql.includes('SELECT token_hash'))await c.scopeModule.currentScoreScope(c.taikoId).lease.close();};
+ else c.state.afterSqlCommit=async()=>{await c.scopeModule.currentScoreScope(c.taikoId).lease.close();throw new Error('Synthetic late lease death');};
+ await assert.rejects(operations.issue(c),e=>e.statusCode===503);
+ const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ if(point==='before-commit')assert.equal(row.token_hash,digest(previous.token));else assert.notEqual(row.token_hash,digest(previous.token));
+}));
+
+test('direct SQL token dates/mask match the existing Python gateway and rotation keeps row identity',{timeout:20000},()=>fixture(async c=>{
+ const first=await operations.issue(c);
+ await c.pool.execute("UPDATE public_score_tokens SET last_used_at='2026-08-05 10:20:30',created_at='2026-08-01 09:00:00',updated_at='2026-08-05 10:20:30' WHERE taiko_id=?",[c.taikoId]);
+ const {requestScoreTokenManagement}=await import('../server/internal/account/score-token.ts');
+ assert.deepEqual((await c.read('/sync')).scoreToken,(await requestScoreTokenManagement(c.taikoId,'status')).status);
+ const [[old]]=await c.pool.query('SELECT id,created_at FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ const next=await operations.issue(c),[[row]]=await c.pool.query('SELECT id,created_at,last_used_at,token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ assert.notEqual(first.token,next.token);assert.equal(row.id,old.id);assert.equal(row.created_at.getTime(),old.created_at.getTime());
+ assert.equal(row.last_used_at,null);assert.equal(row.token_hash,digest(next.token));
+}));
+
+test('two concurrent fresh issues serialize and preserve the original rotation semantics',{timeout:20000},()=>fixture(async c=>{
+ const before=await sourceSnapshot(c),[first,next]=await Promise.all([operations.issue(c),operations.issue(c)]);
+ assert.notEqual(first.token,next.token);
+ const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ assert.ok([digest(first.token),digest(next.token)].includes(row.token_hash));assert.deepEqual(await sourceSnapshot(c),before);
+ assert.equal(c.gate.requests.length,0);
+}));
+
+test('private SQL status failures retain the unavailable overview state',{timeout:20000},()=>fixture(async c=>{
+ await operations.issue(c);
+ c.state.afterExecute=sql=>{if(sql.includes('DATE_FORMAT(last_used_at'))throw Object.assign(new Error('Private SELECT /password/hash'),{code:'ER_SYNTHETIC',sql});};
+ const overview=await c.read('/sync');assert.equal(overview.scoreTokenAvailable,false);assert.equal(overview.scoreToken,null);
+}));
+
+for(const action of ['issue','revoke'])for(const point of ['before-commit','after-commit'])test(`actual token ${action} process death ${point} has an atomic token outcome`,{timeout:25000},()=>fixture(async c=>{
+ const previous=await operations.issue(c),beforeSource=await sourceSnapshot(c);
+ const options=resolve(c.root,'token-crash-options.json'),childFile=resolve(c.root,'token-crash-child.mjs');
+ await writeFile(options,JSON.stringify({point,action,user:c.user,taikoId:c.taikoId,config:c.config}),{mode:0o600});
+ await writeFile(childFile,`
+import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+import mysql from ${JSON.stringify(import.meta.resolve('mysql2/promise'))};
+import {installGoalSqlRuntime} from ${JSON.stringify(new URL('./fixtures/goalSqlRuntime.mjs',import.meta.url).href)};
+assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');assert.match(String(process.env.TAIKO_DB_NAME||''),/_test$/);
+const o=JSON.parse(await readFile(process.argv[2],'utf8'));
+const pool=mysql.createPool({host:process.env.TAIKO_DB_HOST,port:Number(process.env.TAIKO_DB_PORT||3306),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME,connectionLimit:2});
+const [[identity]]=await pool.query('SELECT DATABASE() AS name');assert.match(identity.name,/_test$/);assert.equal(identity.name,process.env.TAIKO_DB_NAME);
+let scope;const db={query:(...a)=>pool.query(...a),execute:(...a)=>pool.execute(...a),async getConnection(){
+assert.equal(scope.currentScoreScope(o.taikoId)?.mode,'write');const connection=await pool.getConnection();
+return {beginTransaction:()=>connection.beginTransaction(),rollback:()=>connection.rollback(),destroy:()=>connection.destroy(),release:()=>connection.release(),execute:(...a)=>connection.execute(...a),
+async commit(){if(o.point==='before-commit')process.exit(73);await connection.commit();if(o.point==='after-commit')process.exit(73);}};}};
+installGoalSqlRuntime(db,o.config);globalThis.fetch=async()=>{throw new Error('Owned test network forbidden');};
+scope=await import(${JSON.stringify(new URL('../server/services/taiko-domain/publication.ts',import.meta.url).href)});
+const service=await import(${JSON.stringify(new URL('../server/services/account/score-token-authority.ts',import.meta.url).href)});
+await service.manageViewerScoreToken(o.user,o.action);process.exit(74);
+`,{mode:0o600});
+ await assert.rejects(execFileAsync(process.execPath,['--experimental-strip-types',childFile,options],{cwd:new URL('../',import.meta.url),timeout:15000,maxBuffer:8192}),e=>e.code===73);
+ const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);
+ if(point==='before-commit')assert.equal(row.token_hash,digest(previous.token));else if(action==='issue')assert.notEqual(row.token_hash,digest(previous.token));else assert.equal(row,undefined);
+ if(action==='issue'){const next=await operations.issue(c);assert.equal(next.status.exists,true);if(row)assert.notEqual(digest(next.token),row.token_hash);}
+ else assert.equal((await operations.revoke(c)).revoked,point==='before-commit');
+ assert.deepEqual(await sourceSnapshot(c),beforeSource);
+}));
+
 for(const [name,operation] of Object.entries(operations))for(const field of ['id','taiko_id','source','manual_account_id'])test(`${name} refuses queued ${field} replacement before private reads or gateway`,{timeout:20000},()=>fixture(async c=>{
  const before=await sourceSnapshot(c);c.gate.requests.length=0;
  await assert.rejects(queuedAccountSource(c,()=>operation(c),()=>replaceIdentity(c,field)),e=>e.statusCode===409);
@@ -50,8 +147,8 @@ test('profile proves the full identity again after its private title and pending
  let changed=false;c.state.afterExecute=async sql=>{if(!changed&&sql.includes('FROM web_taiko_binding_verifications')){changed=true;await replaceIdentity(c,'source');}};
  await assert.rejects(operations.profile(c),e=>e.statusCode===409);assert.equal(changed,true);
 }));
-test('sync overview proves the identity after receiving token status',{timeout:20000},()=>fixture(async c=>{
- c.gate.afterMutation=async action=>{if(action==='status')await replaceIdentity(c,'source');};
+test('sync overview proves the identity after reading token SQL status',{timeout:20000},()=>fixture(async c=>{
+ c.state.afterExecute=async sql=>{if(sql.includes('DATE_FORMAT(last_used_at'))await replaceIdentity(c,'source');};
  await assert.rejects(operations.sync(c),e=>e.statusCode===409);
 }));
 
@@ -65,7 +162,7 @@ test('lease loss during the last SQL proof cannot return a private profile',{tim
 
 test('a long sync SH view holds off token EX and a score publisher',{timeout:20000},()=>fixture(async c=>{
  const entered=deferred(),finish=deferred();let published=false,issued=false;
- c.gate.beforeRequest=async action=>{if(action==='status'){entered.resolve();await bounded(finish.promise);}};
+ c.state.afterExecute=async sql=>{if(sql.includes('DATE_FORMAT(last_used_at')){entered.resolve();await bounded(finish.promise);}};
  const reading=operations.sync(c);reading.catch(()=>{});let writing,issuing;
  try{
   await bounded(entered.promise);
@@ -76,12 +173,13 @@ test('a long sync SH view holds off token EX and a score publisher',{timeout:200
  }finally{finish.resolve();await reading.catch(()=>{});await issuing?.catch(()=>{});await writing?.catch(()=>{});}
 }));
 
-test('token EX keeps SQL owner/current locks while the gateway commits its independent token',{timeout:20000},()=>fixture(async c=>{
+test('token EX holds SQL owner/current locks and the uncommitted token until one COMMIT',{timeout:20000},()=>fixture(async c=>{
  const entered=deferred(),finish=deferred();let changed=false,published=false;
- c.gate.beforeRequest=async action=>{if(action==='issue'){entered.resolve();await bounded(finish.promise);}};
+ c.state.afterSqlStatement=async sql=>{if(sql.includes('INSERT INTO public_score_tokens')){entered.resolve();await bounded(finish.promise);}};
  const issuing=operations.issue(c);issuing.catch(()=>{});let changing,writing;
  try{
   await bounded(entered.promise);
+  const [[token]]=await c.pool.query('SELECT COUNT(*) AS n FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(token.n,0);
   changing=c.pool.execute("UPDATE web_taiko_bindings SET source='hiroba' WHERE id=?",[c.bindingId]).then(()=>{changed=true;});changing.catch(()=>{});
   writing=c.shared.writeUserdataWithHistory(c.taikoId,{profile:{userid:c.taikoId},songs:[]},'wahlap').then(()=>{published=true;});writing.catch(()=>{});
   await new Promise(resolve=>setTimeout(resolve,100));assert.equal(changed,false);assert.equal(published,false);finish.resolve();
@@ -134,30 +232,34 @@ test('oversized sync target metadata uses the existing bounded default',{timeout
  assert.deepEqual(await loadSyncTargets(),fallback);
 }));
 
-for(const [name,alter] of Object.entries({foreignId:p=>({...p,status:{...p.status,taiko_id:'123'}}),numericId:p=>({...p,status:{...p.status,taiko_id:123}}),badExists:p=>({...p,status:{...p.status,exists:'true'}}),badToken:p=>({...p,token:'private-path-token'}),oversize:p=>({...p,message:'x'.repeat(20*1024)})}))test(`token rejects ${name} gateway replies with bounded public error`,{timeout:20000},()=>fixture(async c=>{
- c.gate.reply=alter;await assert.rejects(operations.issue(c),e=>e.statusCode===502&&e.statusMessage==='网页成绩 token 操作失败');
+for(const [name,alter] of Object.entries({foreignId:p=>({...p,status:{...p.status,taiko_id:'123'}}),numericId:p=>({...p,status:{...p.status,taiko_id:123}}),badExists:p=>({...p,status:{...p.status,exists:'true'}}),badToken:p=>({...p,token:'private-path-token'}),oversize:p=>({...p,message:'x'.repeat(20*1024)})}))test(`retained legacy adapter rejects ${name} gateway replies with bounded public error`,{timeout:20000},()=>fixture(async c=>{
+ const {requestScoreTokenManagement}=await import('../server/internal/account/score-token.ts');
+ c.gate.reply=alter;await assert.rejects(requestScoreTokenManagement(c.taikoId,'issue'),e=>e.statusCode===502&&e.statusMessage==='网页成绩 token 操作失败');
 }));
 
-test('gateway private errors are redacted and mismatched status becomes unavailable',{timeout:20000},()=>fixture(async c=>{
+test('Viewer token issue/status/revoke are independent of an unavailable legacy token gateway',{timeout:20000},()=>fixture(async c=>{
  c.gate.failure={status:500,message:'SELECT secret_hash FROM /private/source/path'};
- await assert.rejects(operations.issue(c),e=>e.statusCode===500&&e.statusMessage==='网页成绩 token 操作失败'&&!e.message.includes('secret_hash'));
- c.gate.failure=null;c.gate.reply=p=>({...p,status:{...p.status,exists:true,token_mask:'wrong'}});
- const overview=await c.read('/sync');assert.equal(overview.scoreTokenAvailable,false);assert.equal(overview.scoreToken,null);
+ const issued=await operations.issue(c);assert.equal(issued.status.exists,true);
+ const overview=await c.read('/sync');assert.equal(overview.scoreTokenAvailable,true);assert.equal(overview.scoreToken.tokenMask,issued.status.tokenMask);
+ assert.equal((await operations.revoke(c)).revoked,true);
+ assert.ok(c.gate.requests.every(request=>request.action==='targets'));
 }));
 
-test('actual token SQL hash mismatch prevents issue acknowledgement',{timeout:20000},()=>fixture(async c=>{
- c.gate.afterMutation=async action=>{if(action==='issue')await c.pool.execute('UPDATE public_score_tokens SET token_hash=? WHERE taiko_id=?',['0'.repeat(64),c.taikoId]);};
+test('a mismatched SQL outcome proof rolls back the pending token mutation',{timeout:20000},()=>fixture(async c=>{
+ c.state.afterSqlStatement=(sql,args,result)=>{if(sql.includes('SELECT token_hash'))result[0][0].token_hash='0'.repeat(64);};
  await assert.rejects(operations.issue(c),e=>e.statusCode===503);
+ const [[row]]=await c.pool.query('SELECT COUNT(*) AS n FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(row.n,0);
 }));
 
-test('readonly COMMIT acknowledgement loss proves the exact token without a second gateway issue',{timeout:20000},()=>fixture(async c=>{
+test('mutating COMMIT acknowledgement loss proves the exact token without a second issue',{timeout:20000},()=>fixture(async c=>{
+ let writes=0;c.state.afterSqlStatement=sql=>{if(sql.includes('INSERT INTO public_score_tokens'))writes++;};
  c.state.afterSqlCommit=()=>{throw new Error('Synthetic lost COMMIT acknowledgement');};
- const result=await operations.issue(c);assert.equal(result.status.exists,true);assert.equal(c.gate.requests.filter(r=>r.action==='issue').length,1);
+ const result=await operations.issue(c);assert.equal(result.status.exists,true);assert.equal(writes,1);assert.equal(c.gate.requests.length,0);
  const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(row.token_hash,digest(result.token));
 }));
 
-test('late SQL failure discards failed rollback; a fresh issue rotates an already committed gateway token',{timeout:20000},()=>fixture(async c=>{
- let previousHash;c.gate.afterMutation=async(action,token)=>{if(action==='issue')previousHash=digest(token);};
+test('late SQL failure discards failed rollback and preserves the previous committed token',{timeout:20000},()=>fixture(async c=>{
+ const previous=await operations.issue(c),previousHash=digest(previous.token);
  c.state.failRollback=true;c.state.beforeSqlStatement=sql=>{if(sql.includes('SELECT token_hash'))throw Object.assign(new Error('Synthetic private SQL /driver/password'),{code:'ER_SYNTHETIC',sql});};
  await assert.rejects(operations.issue(c),e=>e.statusCode===503&&!e.message.includes('password'));assert.equal(c.state.discardedConnections,1);
  const [[row]]=await c.pool.query('SELECT token_hash FROM public_score_tokens WHERE taiko_id=?',[c.taikoId]);assert.equal(row.token_hash,previousHash);
@@ -171,7 +273,7 @@ test('profile subqueries and token COMMIT recovery retain the captured pool',{ti
   c.state.afterExecute=sql=>{if(sql.includes('SELECT * FROM web_user_accounts'))runtime.db=unavailable;};
   assert.equal((await operations.profile(c)).currentBinding.currentTitle,'Synthetic current title');
   runtime.db=original;c.state.afterExecute=null;
-  c.state.afterSqlCommit=()=>{runtime.db=unavailable;throw new Error('Lost readonly ACK after pool replacement');};
+  c.state.afterSqlCommit=()=>{runtime.db=unavailable;throw new Error('Lost mutating ACK after pool replacement');};
   assert.equal((await operations.issue(c)).status.exists,true);
  }finally{runtime.db=original;c.state.afterExecute=null;c.state.afterSqlCommit=null;}
 }));

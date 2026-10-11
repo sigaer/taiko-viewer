@@ -248,3 +248,16 @@ Schema 1 增加可选 fileMtimes/fileCtimes（有限 JSON number 秒值），接
 验证分段保留：75 publication 在首 unit 已通过，后续扩大 domain fixture 缺完整 Bot routes 而停止，不把首 unit 记为整体通过。补齐真实趋势纯解析器的 AST 载入，仅排除 3 个未修改、需要完整 NoneBot 注册的 route tests；另 9 个既有 production cases 仍排除，最终 scoped domain/TS/Node/SQL 完整 exit 0。Final unit 311.970s/250ms sampled peak 388325376 bytes（370.336 MiB），high/max/OOM=0；早段 64.066s/236072960 bytes。以实际 wrapper exit/journal success 证明完成，collected 后 MainPID=0/cgroup gone。首次 dir_fd guard/legacy skip expectation 已修正并定向通过；只删除确属本次失败 fixture 的临时目录，非 force 清理。SQL 真实 DATABASE/opt-in、owned roots/children/listeners 清理；不称为 production FK/full Nuxt/full Bot/百万容量验收。
 
 本步 PYTHON_HISTORY_AND_FILESYSTEM_METADATA_READER_PASS；Gate 6 IN_PROGRESS。A 6a90c7e / 9.81.7 已标准 commit/push，未复制运行 R 因此不需要此步重启；Viewer 0.82.0 本地提交随最终标准发布统一 push。运行 Viewer/receiver/public API PIDs 1063394/1063408/829173 未变。继续 private grant/sync dispatch、ops cleanup、actual dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及统一激活验收。
+
+
+## 6.3e.4 Viewer token 的单次授权 SQL transaction
+
+6.3e.2 的 Viewer EX → independent token gateway 会在实际 Python gateway 也获取同一 Source EX 后形成跨进程等待，而且晚失败不能撤销已经由网关独立提交的 token。现在 Viewer 在自己的 Source EX 内捕获 pool、锁 owner/全部 bindings、证明完整 current identity，直接在同一个 SQL transaction 签发/撤销并核验 hash/mask，只有一次 COMMIT；status 在既有 SH 内直接查询同一 captured pool。没有调用 child gateway 获取第二个 EX。表、48 位 hex token、SHA256 storage、mask、日期秒精度、row id/created_at 保留、last_used reset、fresh rotation 与 revoke affected-row 语义保持；Schema 的规范化 DDL 与 A 6a90c7e 现有 Python issuer 完全一致，账户初始化与测试使用同一声明。旧 gateway adapter 留作 frozen rollback/有界 response 回归，不作为当前 Viewer grant 路径。
+
+提交前失败完整 rollback；失败 rollback 销毁连接并保留旧 token。只有已经尝试 COMMIT 且同一 lease/owner/current 仍可证明、实际持久 token outcome 完全匹配，才确认丢失 ACK；不再称作 readonly transaction。实际进程在 COMMIT 前退出保留旧状态，COMMIT 后退出保留新状态；fresh issue 重试按原产品语义再次旋转，没有新增跨请求 nonce 或永久保存明文 token。晚失去 lease/owner/current 不向调用方返回 private token，即使 SQL 已提交；后续请求按现有行为处理。纯 token/grant 不变更 C/H bytes、commit 或 sequence。
+
+两组局部 TypeScript、51 account source 定向用例及最终 138 offline Node / 250 guarded _test SQL 全 PASS，新增 14 token transaction 用例。保留真实 cookie/frozen 7bf9a56 full DTO、16 queued 四字段 identity races、long SH/EX/SQL owner lock、captured pool/错误脱敏及全部旧 lifecycle/Goal/Growth/Python personal 回归；新增 issue/revoke COMMIT 前失败、两种 mutating ACK、实际存储 hash 替换拒绝、lease death、原日期/row retention、两个 concurrent fresh issue、status unavailable 和四个 actual Node process deaths。A 未改：75 publication/156 domain Python 沿用上一份 evidence，未冒称本步重跑。证据：[phase6-token-atomic-validation.json](evidence/phase6-token-atomic-validation.json)。
+
+最终 QA 298.819 秒、250 ms sampled peak 441589760 bytes（421.133 MiB）、high/max/OOM=0；actual wrapper exit0/journal success/collected MainPID0/无 cgroup。实际 SELECT DATABASE() 为 taiko_annual_poster_test，并检查 _test 后缀与显式 mutation opt-in；owned SQL rows/Source tree/child/两个 HTTP listener 由 fixture finally 清理。测试 schema 缺其他生产 FK，不冒称 full Nuxt/full Bot/生产迁移/百万成本/线上 authenticated smoke。
+
+本步 VIEWER_TOKEN_SINGLE_AUTHORITY_SQL_TRANSACTION_PASS，Gate 6 仍 IN_PROGRESS。Viewer 0.82.0 阶段源码本地提交，随统一标准部署推送；live 0.81.11/PIDs 1063394、1063408、829173 unchanged。A 6a90c7e/9.81.7 unchanged，无 R sync/restart/deploy。剩余 direct Python bot/gateway token ownership 与 bearer read/refresh grant、arbitrary-source/QQ/Hiroba API grant、Viewer sync dispatch、ops cleanup、all Writer/daily/P1a/Read Model/百万成本/运维恢复与最终激活继续执行。

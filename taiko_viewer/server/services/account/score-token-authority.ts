@@ -1,9 +1,7 @@
 import { createError } from "h3";
-import { createHash } from "node:crypto";
-import type { RowDataPacket } from "mysql2/promise";
 import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity.ts";
 import { lockViewerBindingAuthority, rollbackViewerBindingTransaction } from "../../internal/account/binding-authority.ts";
-import { requestScoreTokenManagement } from "../../internal/account/score-token.ts";
+import { mutateScoreToken, proveScoreTokenResult, readScoreTokenStatus, type ScoreTokenResult } from "../../infrastructure/account/score-token.ts";
 import { MANUAL_SOURCE_ID } from "../../internal/account/source-lifecycle.ts";
 import { readViewerCurrentBinding, requireViewerBindingOwner } from "../../internal/account/binding-read.ts";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
@@ -16,11 +14,9 @@ export const canManageExternalScoreToken = (binding: BindingRow | null) => Boole
   ["wahlap", "hiroba"].includes(binding.source) && !binding.manual_account_id &&
   !MANUAL_SOURCE_ID.test(binding.taiko_id) && /^[0-9]{1,25}$/.test(binding.taiko_id));
 
-/** The loopback token gateway commits its own token SQL. The caller keeps
- * Source EX and SQL owner/current locks until that bounded gateway completes.
- * Gateway side effects are not rolled back by this read-only authority txn;
- * a fresh issue intentionally rotates again after an unacknowledged operation.
- * The gateway must not attempt to acquire this caller's Source lease.
+/** Source EX -> SQL owner/current -> token mutation in one SQL transaction.
+ * No independent gateway can commit a token outside this authority transaction
+ * or attempt a second Source EX underneath the caller's lease.
  */
 export function manageViewerScoreToken(userId: number, action: "issue" | "revoke") {
   return withViewerCurrentSource(userId, "write", async (binding, db) => {
@@ -35,29 +31,36 @@ export function manageViewerScoreToken(userId: number, action: "issue" | "revoke
     };
     external();
     const connection = await db.getConnection();
-    let prepared: Awaited<ReturnType<typeof requestScoreTokenManagement>> | undefined;
+    let prepared: ScoreTokenResult | undefined;
+    let commitAttempted = false;
+    const live = () => {
+      const scope = currentScoreScope(binding!.taiko_id);
+      if (!scope || scope.mode !== "write" || scope.staged.size || !scope.lease.alive()) throw new PublicationUnavailableError();
+    };
     try {
       await connection.beginTransaction();
       const rows = await lockViewerBindingAuthority(connection, userId);
       const selected = rows.find(row => Number(row.is_current)) || rows[0];
       assertBindingIdentity(expected, selected);
       external();
-      const result = await requestScoreTokenManagement(binding!.taiko_id, action);
-      await proveTokenResult(connection, binding!.taiko_id, action, result);
-      const scope = currentScoreScope(binding!.taiko_id);
-      if (!scope || scope.mode !== "write" || scope.staged.size || !scope.lease.alive()) throw new PublicationUnavailableError();
+      live();
+      const result = await mutateScoreToken(connection, binding!.taiko_id, action);
+      await proveScoreTokenResult(connection, binding!.taiko_id, action, result);
+      live();
       prepared = result;
+      commitAttempted = true;
       await connection.commit();
       return result;
     } catch (error) {
       await rollbackViewerBindingTransaction(connection);
-      // No SQL mutation belongs to this authority transaction. A lost readonly
-      // COMMIT ack can acknowledge the already-proven gateway result only while
-      // the same owner/current identity and exact token outcome remain live.
-      if (prepared && currentScoreScope(binding!.taiko_id)?.lease.alive()) {
+      // A pre-COMMIT failure must roll back. An uncertain COMMIT is acknowledged
+      // only by the exact persisted token outcome and still-live owner/current.
+      if (commitAttempted && prepared && currentScoreScope(binding!.taiko_id)?.lease.alive()) {
+        live();
         await requireViewerBindingOwner(db, userId);
         assertBindingIdentity(expected, await readViewerCurrentBinding(db, userId));
-        await proveTokenResult(db, binding!.taiko_id, action, prepared);
+        await proveScoreTokenResult(db, binding!.taiko_id, action, prepared);
+        live();
         return prepared;
       }
       throw error;
@@ -66,19 +69,12 @@ export function manageViewerScoreToken(userId: number, action: "issue" | "revoke
   });
 }
 
-async function proveTokenResult(connection: BindingReadDb, taikoId: string, action: "issue" | "revoke",
-  result: Awaited<ReturnType<typeof requestScoreTokenManagement>>) {
-  const [rows] = await connection.execute<RowDataPacket[]>("SELECT token_hash,token_mask FROM public_score_tokens WHERE taiko_id=? LIMIT 1", [taikoId]);
-  const token = rows[0];
-  if (action === "issue") {
-    if (!token || !result.status.exists || token.token_hash !== createHash("sha256").update(result.token!).digest("hex") ||
-        token.token_mask !== result.status.tokenMask) throw new PublicationUnavailableError();
-  } else if (token || result.status.exists) throw new PublicationUnavailableError();
-}
-
-export async function proveViewerScoreTokenStatus(db: BindingReadDb, taikoId: string,
-  result: Awaited<ReturnType<typeof requestScoreTokenManagement>>) {
-  const [rows] = await db.execute<RowDataPacket[]>("SELECT token_mask FROM public_score_tokens WHERE taiko_id=? LIMIT 1", [taikoId]);
-  if (Boolean(rows[0]) !== result.status.exists || (rows[0] && rows[0].token_mask !== result.status.tokenMask)) throw new PublicationUnavailableError();
-  return result;
+export async function readViewerScoreTokenStatus(db: BindingReadDb, taikoId: string) {
+  const live = () => {
+    if (!currentScoreScope(taikoId)?.lease.alive()) throw new PublicationUnavailableError();
+  };
+  live();
+  const status = await readScoreTokenStatus(db, taikoId);
+  live();
+  return status;
 }

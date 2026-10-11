@@ -4,6 +4,7 @@ import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from "../infrastructure/taiko-publicat
 import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/creation-schema";
 import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-confirmation-schema";
 import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
+import { SCORE_TOKEN_TABLE_SQL } from "../infrastructure/account/score-token";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
 let pool: Pool | null = null;
@@ -58,6 +59,7 @@ export const closeAccountDb = async () => {
 };
 
 const CREATE_TABLES = [
+  SCORE_TOKEN_TABLE_SQL,
   SOURCE_LIFECYCLE_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
   MANUAL_CREATION_TABLE_SQL,

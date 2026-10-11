@@ -1,14 +1,8 @@
 import { createError } from "h3";
 import { readBoundedGatewayJson } from "../../infrastructure/local-gateway/json.ts";
 
-export type ScoreTokenStatus = {
-  taikoId: string;
-  exists: boolean;
-  tokenMask: string | null;
-  lastUsedAt: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-};
+import type { ScoreTokenStatus } from "../../infrastructure/account/score-token.ts";
+export type { ScoreTokenStatus } from "../../infrastructure/account/score-token.ts";
 
 type ScoreTokenGatewayResponse = {
   ok?: boolean;
@@ -44,6 +38,8 @@ const normalizeStatus = (payload: ScoreTokenGatewayResponse["status"], taikoId: 
   updatedAt: payload?.updated_at ? String(payload.updated_at) : null
 });
 
+// Retained compatibility adapter for frozen rollback tests. Current Viewer
+// authority/status paths use the captured SQL connection instead of this gateway.
 export const requestScoreTokenManagement = async (
   taikoId: string,
   action: "status" | "issue" | "revoke"
