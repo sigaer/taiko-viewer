@@ -456,3 +456,18 @@ B0.2.6/e275995源码与6ade2e1文档校准已标准push及实际remote核对，�
 两次AST fixture适配失败（199/3及204/1，无SQL运行）已保留；205 Source/37 SQL中间PASS后补partial文案/credential行动提示/sender回归，最终完整重跑。72.488s、250ms sampled227680256bytes、child216204KiB，high/max/OOM0；wrapper24123 exit0、unit1791754427-1931821 success/ExecMainStatus0/inactive/MainPID0/cgroup gone，owned child/row/root清理。[完整证据](evidence/phase6-native-hiroba-authority-validation.json)。
 
 A3e1d76e/9.81.22已标准commit/push和actual remote一致，仅本步9文件，不包含miku用户改动。Viewer SQL测试/证据本地提交准备0.82.0，B6ade2e1/0.2.6不变；R没有新代码，未同步/重启/部署，live0.81.11与三个active PID1063394/1063408/829173不变。回退Source9befec4、Viewer准备9511e47。native authority整轮/Gate6 IN_PROGRESS，继续认证QQ联接和客户端QQ迁移、其余private native readers/updates、全部u0/daily/maintenance Writers、P1a全部Writer停止后接管、Read Model准确依赖/失效、百万冷暖IO-RSS/限额、trusted恢复/清理/runbook/固定R依赖、统一标准Viewer发布及R同步重启/真实在线产品验收。
+
+
+## 6.3e.8.6f 原生 QQ 验证码迁移事务（STEP_PASS）
+
+2026-10-12。旧“输入QQ号即复制绑定”缺所属证明；原OneBot实际sender私聊申请128bit随机码，仅存SHA256、10min UTC TTL、60s申请间隔及canonical/bare完整绑定与state fingerprint。目标私聊提交“绑定QQ QQ号 验证码”，不同QQ/官方openid不能自述所属；OneBot自己对应bare QQ可直接迁移。所有source/bare/target principal gates及SQL reads固定排序，单条principal最多128行；无Source/文件/网络锁，业务请求无DDL。Viewer统一schema新增表，须在最终R激活前创建。
+
+一次COMMIT处理绑定合并、源真实is_current选择、精确source/bare所属Hiroba credential转移、验证码消费和小型hash-bound effect。保留canonical优先/bare fallback、源顺序后目标去重、目标首行visibility或源默认、源绑定记录保留；目标manual保留，源manual须专用认领。拒绝来源冲突、容量/case/过期/错误码及任何source binding/state变化。修正旧未排序首行替代真实current的选择缺陷；不改变native u0含manual定义。凭据owner迁至目标，原source不能借用新owner密码，仍可公开同步/重新登录。
+
+同码同target消费后只读现在target绑定，晚解绑/选择不重放或复活，首次自动更新不重复；新码申请替换旧proof/receipt，非无限期exactly-once。未知COMMIT固定查询后重试，申请丢失明文响应不自动重放。摘要或首次自动更新错误不把已提交绑定误报回滚；其余普通Native更新authority仍待后续。私聊命令/usage/QQ按钮一致，码不进action log。
+
+231 Source（208既有+23新）、70实际_test SQL复合用例（38旧+32新）和局部TS PASS，9旧production排除/warning1；另1保留QQ键盘/真实Bot payload序列化在现有Bot venv通过，无安装依赖、NoneBot启动或发消息。SQL覆盖hash-only/snapshot/TTL/cooldown/current/visibility/canonical/bare、manual/cap/case、own/foreign credential、late error/rollback/ACK、消费与申请COMMIT前后四个真实退出点、双目标并发、exact retry/损坏effect/两组5s同锁。每连接实际SELECT DATABASE()=_test+explicit opt-in1、owned rows/root/child清理，无production SQL/数据复制/HTTP。
+
+主轮121.298s/250ms sampled331796480bytes/child354164KiB/high-max-OOM0，wrapper72487 exit0，unit1791755796-1948775 success/ExecMainStatus0/inactive/MainPID0/cgroup gone；独立keyboard0.816s/57143296sample bytes/child53088KiB成功清理。两次69 SQL pass/1 fail分别为故障注入双次抵消和旧os._exit QA GET_LOCK(0)与MySQL异步断连清理竞态；改一次注入及1s有界释放证明，未放宽运行锁。系统PythonQQ/pydantic冲突、Bot venv缺pytest均留档，最后直接执行保留AST+实际SDK。完整[证据](evidence/phase6-native-qq-migration-validation.json)。
+
+Af04b320/9.81.23仅本步9文件标准push，remote一致；Viewer0.82.0源码/DDL/测试/档案本地准备，B6ade2e1/0.2.6不变，客户端QQ仍待同一中心事务接口。R未复制或重启，无部署，live0.81.11/三个active PID1063394/1063408/829173不变。回退Source3e1d76e、Viewer准备3d9c6d7；激活后不得回退开放不验证QQ号的路径。Native整轮/Gate6 IN_PROGRESS，继续client QQ私有接口/transport/grants/命令、其余Native private读写和startup SQL Writer、全u0/daily/maintenance Writers、P1a停止旧Writer后纳管、Read Model/精确失效/百万冷暖IO-RSS与限额、trusted恢复/清理/runbook/固定R依赖及统一标准Viewer发布/R同步重启/真实在线验收。

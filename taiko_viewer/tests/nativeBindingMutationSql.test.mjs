@@ -44,7 +44,9 @@ async function fixture(task){return manualSqlFixture(async c=>{
  c.credentials=async id=>(await c.pool.execute('SELECT taiko_no,configured_by_qq FROM web_hiroba_credentials WHERE taiko_no=?',[id]))[0];
  c.virtual=async principal=>(await c.pool.execute('SELECT current_virtual FROM taiko_bind_identity_state WHERE identity_key=?',[principal]))[0][0]?.current_virtual??null;
  c.assertGateFree=async principal=>{
-  const db=await c.pool.getConnection();try{const [[lock]]=await db.execute('SELECT GET_LOCK(?,0) AS acquired',[gate(principal)]);assert.equal(lock.acquired,1);
+  // os._exit closes the client immediately; MySQL finishes connection cleanup
+  // asynchronously. Prove bounded release rather than assume a zero-time probe.
+  const db=await c.pool.getConnection();try{const [[lock]]=await db.execute('SELECT GET_LOCK(?,1) AS acquired',[gate(principal)]);assert.equal(lock.acquired,1);
    const [[release]]=await db.execute('SELECT RELEASE_LOCK(?) AS released',[gate(principal)]);assert.equal(release.released,1);}finally{db.release();}
  };
  try{await task(c);}finally{

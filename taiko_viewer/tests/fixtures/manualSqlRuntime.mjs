@@ -18,11 +18,13 @@ import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
+import { QQ_MIGRATION_CODE_TABLE_SQL } from '../../server/infrastructure/account/qq-migration-schema.ts';
 const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/git/Sakura_bot/taiko';
 
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
+  QQ_MIGRATION_CODE_TABLE_SQL,
   HIROBA_CREDENTIAL_TABLE_SQL,
   HIROBA_BINDING_OPERATION_TABLE_SQL,
   SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
