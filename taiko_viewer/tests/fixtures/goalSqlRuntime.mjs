@@ -4,7 +4,7 @@ import {registerHooks} from 'node:module';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
-export function installGoalSqlRuntime(db, runtime, { withProfile = false } = {}) {
+export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false } = {}) {
  const root=new URL('../../',import.meta.url);
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
@@ -16,6 +16,18 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false } = {})
   [new URL('server/services/growth-history/model-revision.ts',root).href,`export const getGrowthModelRevision=async()=> 'synthetic-domain-source';`],
   [new URL('server/services/annual-beta/events.ts',root).href,`export const trackBetaServer=async()=>{};`]
  ]);
+ if (withPersonal) {
+  overrides.delete(new URL('server/services/account/personal.ts',root).href);
+  if (!withRealPython) overrides.set(new URL('server/services/account/python-compute.ts',root).href,`
+   export const runPythonJson=async args=>{
+    const runtime=globalThis.__goalSqlRuntime;runtime.pythonCalls++;runtime.pythonArgs=args;
+    await runtime.onPython?.(args);
+    if(runtime.pythonFailure)throw runtime.pythonFailure;
+    return runtime.pythonPayload || (args[0]==='rating'?{overallRating:10,sampleCount:30}:args[0]==='target'?{target:args[args.indexOf('--target')+1],items:[]}:{basis:args[args.indexOf('--basis')+1],items:[{songId:100,isUnplayed:false}]});
+   };
+   export const runGrowthPythonJson=async()=>{throw new Error('Growth compute not mocked in personal fixture');};
+  `);
+ }
  const hook=registerHooks({
   resolve(specifier,context,next){
    let target;

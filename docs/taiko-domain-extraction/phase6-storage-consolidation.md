@@ -206,3 +206,15 @@ QA 198.253 秒，250 ms sampled cgroup peak 367,939,584 bytes（约 350.895 MiB�
 QA 224.135 秒，250 ms sampled peak 386,424,832 bytes（约 368.523 MiB），high/max/OOM=0；unit success/exit 0、inactive/MainPID 0、无残留 cgroup。实际 SELECT DATABASE()=`taiko_annual_poster_test`，显式 mutation opt-in=1，owned rows/tree/HTTP listener/children 清理；无 production DB/私人文件/official network QA。测试库不带生产 FK，不冒称 migration/FK enforcement/full server tsc/百万容量。首轮不合规的 synthetic manual ID 触发现有 CHECK，未放松约束；第二轮错用删除 helper 名称修正，随后定向与最终整套通过。
 
 这是 BINDING_VERIFICATION_TRANSACTION_PASS；Gate 6 仍 IN_PROGRESS。个人 rating/recommendation/Growth Python CLI 的直接 compatibility reads 已定位，必须连同 canonical Reader 接入验证，不能仅给 Node 外层加锁即当成完成。其余 private profile/token/QQ/Hiroba/source grant、ops cleanup、actual dispatcher/u0/daily 全入口、P1a/Read Model/百万成本/运维恢复与最终统一 sync/release/在线验收继续。A `f3146cf` / 9.81.5 unchanged；Viewer 0.82.0 本地步骤，live 0.81.11/PIDs 1063394、1063408 unchanged，无 R sync/NoneBot 重启/Viewer 部署。
+
+## 6.3e.1 Python current Reader 与个人产品读取 fence 完成
+
+Rating/普通推荐的两个 current 入口、目标/预测共用 loader 统一到 `taiko_store.reader.read_current_json`，在 SH 内验证 immutable current 后解码；managed 缺失/损坏/无效 JSON 不回退 projection，legacy sequence-zero 保留原值形态而不冒称 ready。显式 root 优先，Viewer 向子进程传自己的 userdata root 与 compute-only 环境。真实 Growth CLI 发现并修复独立 loader 的 domain adapter alias 缺失。两个 CLI 的 publication error 统一 code 75/固定诊断；Node 映射为脱敏 503，其余计算失败保持 502，120 秒 deadline/12 MiB stdout 上限。
+
+四个个人产品在一个 Source SH 内完成存在检查和 Python 计算；等待 SH 后及返回前复核完整 id/taiko_id/source/manual_account_id。纯读不变更 C/H 字节、commit 或 sequence；后续 selection 替换返回 409，撤权/独立发布等待读取完成。实际 SQL 的 16 个等待中四字段替换、返回前替换、当前选择和长读 fence 均覆盖。
+
+最终 53 publication Python（新增 8）、132 既有领域 Python（排除 9 线上用例）、132 offline Node、199 actual `_test` SQL（新增 28 personal fence + 2 real Python）及两组局部 TypeScript PASS。六条 actual CLI 的非 timing 完整 DTO 对照冻结 `f3146cf`，oracle 只重定向个人 root 与补齐已知 alias；使用完整公开谱库和合成成绩，不读取生产个人文件/DB。实际 Node→Python 跑通四产品及 Growth，projection 删除/改写保持完整输出，canonical corruption 503/其他 child failure 502 且不泄露 stderr/路径。测试 guard 禁止 Python 网络和 owned root 外写入；SQL guard 实际 SELECT DATABASE/显式 opt-in。
+
+验证分两段：53/132 Python 在首 unit 已通过，之后 scoped TS 因缺少 Nuxt test declarations 中止；补齐后 TS 通过。中间运行器把 Python 搜索路径传给 Node 模块缺失 fixture，按所有权清理该失败 unit；只给 Python 命令设置搜索路径，最终两组 TS/132 Node/199 SQL 全部完成、runner exit 0。Node unit 254.409 秒/250 ms sampled peak 376,492,032 bytes（约 359.051 MiB）；Python unit 62.537 秒/337,477,632 bytes；两段 high/max/OOM=0。Final unit journal deactivated successfully，collected 后 MainPID=0/cgroup 已不存在；不把 collected unit 的默认 Result/ExecMainStatus 当退出证明。证据：[phase6-personal-canonical-validation.json](evidence/phase6-personal-canonical-validation.json)。
+
+A `5b61502` / 9.81.6 已 push；未复制 R/未重启任何 live service，Viewer 0.82.0 保持本地阶段提交、随统一标准发布推送。接下来处理 profile/token/sync 与其他私有 grant、剩余 Python history/ctime Reader、dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及最终激活；Gate 6 IN_PROGRESS。

@@ -4,6 +4,8 @@
     "./publicationLifecycle.globals.d.ts",
     "../../server/services/account/binding-lifecycle.ts",
     "../../server/services/account/binding-verification.ts",
+    "../../server/services/account/personal.ts",
+    "../../server/services/account/python-compute.ts",
     "../../server/services/account/manual-lifecycle.ts",
     "../../server/services/account/manual-grants.ts",
     "../../server/services/account/manual-creation.ts",

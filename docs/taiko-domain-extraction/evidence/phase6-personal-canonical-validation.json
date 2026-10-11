@@ -1,0 +1,151 @@
+{
+  "step": "6.3e.1",
+  "status": "PERSONAL_CANONICAL_READER_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "recordedAt": "2026-10-11T05:39:58.593252+00:00",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "5b61502c5a335b2b740055e858bf5e6c99452ad7",
+  "sakuraVersion": "9.81.6",
+  "sakuraPushed": true,
+  "validation": {
+    "publicationPython": {
+      "passed": 53,
+      "new": 8
+    },
+    "existingDomainPython": {
+      "passed": 132,
+      "excludedOnline": 9
+    },
+    "offlineNode": {
+      "passed": 132
+    },
+    "actualIsolatedSql": {
+      "passed": 199,
+      "newPersonal": 30,
+      "newPersonalMockCompute": 28,
+      "newActualPython": 2
+    },
+    "localTypeScriptGroups": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "pythonAcceptedPortion": {
+      "unit": "taiko-qa-1791696303-1251992.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791696303-1251992.service",
+        "durationMs": 62537,
+        "sampledMemoryPeakBytes": 337477632,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48864 kB",
+            "VmRSS": "48864 kB"
+          }
+        ]
+      },
+      "resourceSha256": "d7e5f1a5dff08ebb357658c2a33def73692729837c8f1fea0954fb9045d3054b",
+      "log": "/var/tmp/phase6-personal-python-qa.log",
+      "logSha256": "73bb359c06a429119b62231a0753fce0ca89080ef3edd06ffd716e2fa408d196",
+      "wholeUnitExit": 2,
+      "wholeUnitNote": "Python suites passed; later scoped TS failed for incomplete Nuxt test declarations. Accepted portion is Python only."
+    },
+    "remainingFinalChecks": {
+      "unit": "taiko-qa-1791696687-1256166.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791696687-1256166.service",
+        "durationMs": 254409,
+        "sampledMemoryPeakBytes": 376492032,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "51316 kB",
+            "VmRSS": "51316 kB"
+          }
+        ]
+      },
+      "resourceSha256": "46b77ebd094a9fa12a6d423ea50e90e3254be72112fa48d1c3e995f8930e9aa7",
+      "log": "/var/tmp/phase6-personal-final-qa.log",
+      "logSha256": "fc77f9c2735e30cd50dea37fbd8afe1f3ef95e043bd72b1b410fb011397dff7b",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "stoppedHarnessFailure": {
+      "unit": "taiko-qa-1791696531-1254357.service",
+      "log": "/var/tmp/phase6-personal-runner-path-failure.log",
+      "logSha256": "d710cf0424d0882910d6195e18fef27d5a771b493675d7db521394736e24960b",
+      "reason": "Runner leaked Python module search path into intentionally empty-repository Node fixture. Stopped only its owned cgroup after failure; no completed-suite PASS claimed."
+    }
+  },
+  "cases": [
+    "One SH current reader; managed current is immutable/verified and never falls back to absent/tampered compatibility projection; legacy JSON value shapes and no-publication status retained",
+    "Absent/corrupt managed object and invalid JSON fail closed; legacy symlink and unsafe identity reject; tombstone does not resurrect projection",
+    "Six actual CLI invocations: rating, ordinary rating/stamina, target full_combo/goku, Growth; full non-timing DTO equality against frozen f3146cf adapter on synthetic scores and full public catalogs",
+    "Frozen oracle changes only personal root and missing Growth import bootstrap alias, not calculation, filtering or projection; real current CLI and malformed/missing source paths covered",
+    "Actual configured-root Node/Python computes all four personal products and Growth despite absent/tampered projection; DTO aliases and scoreCount/current fields remain compatible; read leaves C/H raw, commit and sequence unchanged",
+    "Sixteen Source-wait races across four products and id/taiko_id/source/manual_account_id; computation never starts for replaced identity",
+    "Full identity recheck before private DTO return, current selection changes, revocation waiting for personal SH and independent publication waiting for compute completion",
+    "Both CLI publication failures use code 75 and constant diagnostic; Viewer maps to sanitized 503, other child failures 502; child deadline 120 seconds and stdout limit 12 MiB",
+    "Python audit guards reject production score access, real network and writes outside owned roots; test DB actual SELECT DATABASE and explicit mutation opt-in retained; pools/children/roots and cgroups cleaned"
+  ],
+  "limits": [
+    "Source/SQL/CLI isolated acceptance only; no R sync, live NoneBot/public API restart, Viewer push/deploy or authenticated production smoke",
+    "SQL test tables omit production FK enforcement; local TypeScript groups are not a full Nuxt/server typecheck",
+    "CLI DTO parity excludes performance timing; frozen Growth oracle bootstrap alias repaired because legacy raw CLI was broken",
+    "Personal records synthetic and owned; public runtime catalog data read-only, not a fully synthetic catalog fixture or proof of production user behavior",
+    "Current compute Reader converged; remaining Python history/ctime readers, private profile/token/sync/QQ/Hiroba grants, ops cleanup, actual dispatcher/u0/daily, P1a/Read Model/million costs/operational restore/final activation pending",
+    "250 ms sampled cgroup peaks are not exact maxima; systemctl defaults after --collect are not authoritative Result/ExecMainStatus evidence"
+  ],
+  "harnessCorrections": [
+    "Initial domain runner lacked source PYTHONPATH and stopped before collecting tests; corrected within QA wrapper; 132/132 passed",
+    "First actual Growth CLI exposed missing taiko_domain_adapter source-loader alias; fixed actual entrypoint, not mocked away",
+    "Frozen CLI fixture needed source fallback for host runtime helpers; six full DTO parity cases passed after correction",
+    "Focused real Node test overconstrained h3 cause absence; h3 stores only the supplied public statusCode/statusMessage as cause. Retained exact public-only assertion, no raw child error retained",
+    "First full unit passed Python 53/132, then scoped TS exposed missing Nuxt createError/public config fixture declarations; corrected exact declarations and both TS groups passed",
+    "Intermediate remaining-check runner passed Python search path to Node empty-root fixture, causing a leaked owned bridge; stopped only that QA cgroup, restricted env to Python commands and final TS/132 Node/199 SQL completed with runner exit 0"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    },
+    "nonebotPids": [
+      829369,
+      829379
+    ],
+    "publicApiPid": 829173
+  },
+  "sourceSha256": {
+    "viewer": {
+      "taiko_viewer/server/services/account/personal.ts": "5a3fb7a312c21d3c866bc842c4720a12818ecd42c5efffa6e13866f5a101cbee",
+      "taiko_viewer/server/services/account/python-compute.ts": "d20eb68237f7a6c0616bfd54f29aee4d0c16312e5566d18889870d794491a492",
+      "taiko_viewer/tests/personalPublicationSql.test.mjs": "449925e9d68dae5d01e20209ff8e702a52b05853486779c23be14aff31372c05",
+      "taiko_viewer/tests/personalCanonicalPythonSql.test.mjs": "e9badae953def4b198468f09835e1c3157f4dae2f9a64d18e4e1f3da5157b540",
+      "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "e5733f564375067d498c9c9f8035c83019962ced59786962e9d2f864509532f7",
+      "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "3667d681a336fa7d37d19294eef76f179b32488a20b00114b478789fa4239991",
+      "taiko_viewer/tests/fixtures/publicationLifecycle.globals.d.ts": "126eb37792bd8edf4378557b0e4fb162dcd87a465d8672f48b13de06f5a70763",
+      "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "ba554fa1a30515eda39a9ef9c069a304476d04c6893e691190807d099087be9d"
+    },
+    "sakura": {
+      "taiko/growth_compute/__main__.py": "e8b3f1911e2213bf8838fd529ae94f9dd9506d3bd432764f041df688f12df4bb",
+      "taiko/plugins/utils/recommendation_intelligence.py": "0aa66d8b74bbb93ec305157a54f725576d07df77a769c437c3492513f8a96100",
+      "taiko/plugins/utils/score_calculator.py": "b4f6cbeda24f34594d797ae365b2178aaf0716e9df18cb6d82fd06a79833c698",
+      "taiko/plugins/utils/score_prediction_support.py": "17a828903ac0b8d7c44c0b7d4b024d6469e2dacef6031594ce1f9eb7a37312da",
+      "taiko/plugins/utils/target_recommend.py": "d90263c5b300213ead114a38c937dee2aa882ac7526516d2c34333c00b3b3a8b",
+      "taiko/taiko_store/reader.py": "cb29e208da44ee07a961acaf0cdc981458a290f1920655056663676533d00806",
+      "taiko/tests/test_publication_compute.py": "679be2a882c193e48e3b4207edfb2e8cdca7235a725e9b41b7e58d9da462216c",
+      "taiko/tests/test_score_calculator.py": "ab41869a916dfdc1c698fbafd682ac57eda57cc7dae4d7960b95f4ba2fd0e2c7"
+    }
+  }
+}

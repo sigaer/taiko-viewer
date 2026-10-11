@@ -67,7 +67,7 @@ const TEST_MANUAL_TABLES = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 
-export async function manualSqlFixture(task, { withProfile = false } = {}) {
+export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false } = {}) {
   assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, '1');
   assert.match(String(process.env.TAIKO_DB_NAME || ''), /_test$/);
   const pool = mysql.createPool({ host: process.env.TAIKO_DB_HOST, port: Number(process.env.TAIKO_DB_PORT || 3306),
@@ -112,7 +112,7 @@ export async function manualSqlFixture(task, { withProfile = false } = {}) {
         destroy: () => { state.discardedConnections++; connection.destroy(); }, release: () => connection.release()
       };
     } };
-    uninstall = installGoalSqlRuntime(db, config, { withProfile });
+    uninstall = installGoalSqlRuntime(db, config, { withProfile, withPersonal, withRealPython });
     globalThis.fetch = async () => { throw new Error('Network forbidden during manual source SQL QA'); };
     globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [fixedAt])); } static now() { return fixedAt; } };
     scopeModule = await import('../../server/services/taiko-domain/publication.ts');
