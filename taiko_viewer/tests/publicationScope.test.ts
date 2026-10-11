@@ -238,3 +238,41 @@ test("a stale completed backup cannot authorize deletion of a newer source gener
   }), PublicationUnavailableError);
   await withScoreRead(options, async () => assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 1));
 }));
+
+test("callback failure completes SQL compensation while the original source EX is alive", async () => fixture(async options => {
+  await seed(options);
+  let protectedRollback = false;
+  const expected = new Error("Synthetic callback failure before publication");
+  await assert.rejects(withScoreWrite(options, async () => {
+    onScoreRollback(identity, async () => { protectedRollback = currentScoreScope(identity)?.mode === "write"; });
+    await stageScoreText(identity, "current", '{"songs":[],"counter":2}');
+    throw expected;
+  }), error => error === expected);
+  assert.equal(protectedRollback, true);
+}));
+
+test("rollback proof and SQL compensation retain EX against the next independent writer", async () => fixture(async options => {
+  await seed(options);
+  let releaseWriter: () => void;
+  let writerEntered = false;
+  let protectedRollback = false;
+  const gate = new Promise<void>(resolve => { releaseWriter = resolve; });
+  const writer = gate.then(() => withScoreWrite(options, async () => {
+    writerEntered = true;
+    await stageScoreText(identity, "current", '{"songs":[],"counter":3}');
+  }));
+  try {
+    await assert.rejects(withScoreWrite(options, async () => {
+      onScoreRollback(identity, async () => {
+        releaseWriter!();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        protectedRollback = !writerEntered;
+      });
+      await stageScoreText(identity, "current", '{"songs":[],"counter":2}');
+      currentScoreScope(identity)!.lease.publish = async () => { throw new PublicationUnavailableError(); };
+    }), PublicationUnavailableError);
+    await writer;
+    assert.equal(protectedRollback, true);
+    await withScoreRead(options, async () => assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 3));
+  } finally { releaseWriter!(); await writer.catch(() => undefined); }
+}));

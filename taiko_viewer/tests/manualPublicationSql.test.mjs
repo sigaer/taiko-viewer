@@ -1,0 +1,255 @@
+// Real manual services, MySQL and center bridge; synthetic identity/source only.
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import mysql from 'mysql2/promise';
+import ts from 'typescript';
+import { createHash, randomUUID } from 'node:crypto';
+import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { installGoalSqlRuntime } from './fixtures/goalSqlRuntime.mjs';
+import { openPublicationLease } from '../server/infrastructure/taiko-publication/client.ts';
+const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/git/Sakura_bot/taiko';
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// The isolated DB lacks REFERENCES grants. These are business-compatible test
+// tables without FK enforcement; they do not replace production migrations.
+const TEST_MANUAL_TABLES = [
+  `CREATE TABLE IF NOT EXISTS taiko_manual_accounts (
+    taiko_id CHAR(18) NOT NULL PRIMARY KEY, nickname VARCHAR(64) NOT NULL,
+    bot_identity_key VARCHAR(191) DEFAULT NULL, created_by VARCHAR(16) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+  `CREATE TABLE IF NOT EXISTS taiko_manual_claim_codes (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, taiko_id CHAR(18) NOT NULL,
+    code_hash CHAR(64) NOT NULL, issued_by VARCHAR(16) NOT NULL, expires_at DATETIME NOT NULL,
+    consumed_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_taiko_manual_claim_codes_hash (code_hash)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+  `CREATE TABLE IF NOT EXISTS bind (
+    row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, qq VARCHAR(191) NOT NULL,
+    id VARCHAR(25) NOT NULL, visible TINYINT(1) NOT NULL DEFAULT 0,
+    slot_index INT NOT NULL DEFAULT 1, is_current TINYINT(1) NOT NULL DEFAULT 1,
+    source VARCHAR(16) NOT NULL DEFAULT 'wahlap', created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_bind_identity_slot (qq,slot_index), UNIQUE KEY uniq_bind_identity_taiko (qq,id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+];
+
+async function fixture(task) {
+  assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, '1');
+  assert.match(String(process.env.TAIKO_DB_NAME || ''), /_test$/);
+  const pool = mysql.createPool({ host: process.env.TAIKO_DB_HOST, port: Number(process.env.TAIKO_DB_PORT || 3306),
+    user: process.env.TAIKO_DB_USER, password: process.env.TAIKO_DB_PASSWORD, database: process.env.TAIKO_DB_NAME, connectionLimit: 4 });
+  let root, uninstall, user = 0, taikoId;
+  const tag = 'mp-' + randomUUID().slice(0, 8);
+  const botKey = 'test:' + tag;
+  const RealDate = globalThis.Date;
+  let fixedAt = RealDate.now();
+  const priorFetch = globalThis.fetch;
+  let scopeModule;
+  const state = { afterExecute: null, optimisticChecks: 0, onOptimisticChecks: null };
+  try {
+    const [[identity]] = await pool.query('SELECT DATABASE() AS name');
+    assert.match(identity.name, /_test$/);
+    assert.equal(identity.name, process.env.TAIKO_DB_NAME);
+    for (const statement of TEST_MANUAL_TABLES) await pool.execute(statement);
+    root = await mkdtemp('/var/tmp/manual-source-sql-');
+    const config = { repoRoot, userdataDir: resolve(root, 'userdata'), accountCacheDir: resolve(root, 'cache'), manualClaimSecret: 'synthetic-claim-only' };
+    const db = { query: (...args) => pool.query(...args), async execute(sql, args) {
+      const result = await pool.execute(sql, args);
+      if (sql.includes('COUNT(*) AS total') && (sql.includes('FROM web_taiko_bindings') || sql.includes('FROM bind')) && !scopeModule.currentScoreScope()) {
+        state.optimisticChecks++;
+        state.onOptimisticChecks?.();
+      }
+      if (state.afterExecute) await state.afterExecute(sql, args, result);
+      return result;
+    }, async getConnection() {
+      assert.equal(scopeModule.currentScoreScope()?.mode, 'write', 'manual detach must enter source EX before SQL owner locks');
+      return pool.getConnection();
+    } };
+    uninstall = installGoalSqlRuntime(db, config);
+    globalThis.fetch = async () => { throw new Error('Network forbidden during manual source SQL QA'); };
+    globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [fixedAt])); } static now() { return fixedAt; } };
+    scopeModule = await import('../server/services/taiko-domain/publication.ts');
+    const manual = await import('../server/utils/account/manual.ts');
+    const shared = await import('../server/internal/account/shared.ts');
+    const [created] = await pool.execute('INSERT INTO web_user_accounts (username,email,password_hash) VALUES (?,?,?)', [tag, tag + '@example.test', 'no-login']);
+    user = created.insertId;
+    const owner = { kind: 'viewer', userId: user };
+    ({ taikoId } = await manual.createManualAccount(owner, 'Synthetic manual'));
+    await task({ pool, state, scopeModule, manual, shared, owner, user, taikoId, botKey, root, config,
+      tick: () => { fixedAt += 1000; } });
+  } finally {
+    globalThis.Date = RealDate;
+    globalThis.fetch = priorFetch;
+    if (taikoId) {
+      await pool.execute('DELETE FROM taiko_manual_claim_codes WHERE taiko_id=?', [taikoId]);
+      await pool.execute('DELETE FROM bind WHERE id=? OR qq=?', [taikoId, botKey]);
+    }
+    if (user) {
+      for (const table of ['web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
+        const [tables] = await pool.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?', [table]);
+        if (tables.length) await pool.execute(`DELETE FROM ${table} WHERE user_id=?`, [user]);
+      }
+      await pool.execute('DELETE FROM web_user_accounts WHERE id=?', [user]);
+    }
+    if (taikoId) await pool.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?', [taikoId]);
+    uninstall?.();
+    await pool.end();
+    if (root) await rm(root, { recursive: true, force: true });
+  }
+}
+
+async function snapshot(c) {
+  return c.scopeModule.withDomainScoreRead(c.taikoId, async () => {
+    const reader = c.scopeModule.currentScoreScope(c.taikoId).reader;
+    const history = [];
+    for (const name of await reader.listHistory(c.taikoId)) history.push(createHash('sha256').update(await reader.readHistory(c.taikoId, name)).digest('hex'));
+    return { current: await reader.readRawCurrent(c.taikoId), history };
+  });
+}
+const input = { songNo: 100, level: 4, title: 'Synthetic chart', titleJp: 'Synthetic JP', values: { high_score: 800000, good_cnt: 500, ok_cnt: 20, ng_cnt: 5, combo_cnt: 100, stage_cnt: 1 } };
+
+test('actual manual create/read/rename/edit/delete preserve the frozen legacy payload and all historical bytes', { timeout: 20000 }, async () => fixture(async c => {
+  const originalRoot = c.config.userdataDir;
+  const legacyRoot = resolve(c.root, 'legacy-userdata');
+  await cp(originalRoot, legacyRoot, { recursive: true });
+  const frozen = execFileSync('git', ['show', 'fbfd43e:taiko_viewer/server/utils/account/manual.ts'], { cwd: new URL('../../', import.meta.url), encoding: 'utf8', maxBuffer: 1024 * 1024 });
+  const originalUrl = new URL('../server/utils/account/manual.ts', import.meta.url);
+  const resolved = frozen.replace(/from "([^"]+)"/g, (full, name) => {
+    if (name.startsWith('.')) return `from "${new URL(name.endsWith('.ts') ? name : name + '.ts', originalUrl).href}"`;
+    if (!name.startsWith('~/') && !name.startsWith('node:')) return `from "${import.meta.resolve(name)}"`;
+    return full;
+  });
+  const file = resolve(c.root, 'frozen-manual.mjs');
+  await writeFile(file, ts.transpileModule(resolved, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText);
+  const legacy = await import(pathToFileURL(file).href);
+  const run = async service => {
+    const results = [];
+    results.push(await service.upsertManualScore(c.owner, c.taikoId, input));
+    results.push(await snapshot(c));
+    results.push(await service.getManualScore(c.owner, c.taikoId, 100, 4));
+    results.push(await service.renameManualAccount(c.owner, c.taikoId, 'Renamed synthetic'));
+    results.push(await snapshot(c));
+    results.push(await service.upsertManualScore(c.owner, c.taikoId, { ...input, values: { high_score: 900000, combo_cnt: 200 } }));
+    results.push(await snapshot(c));
+    results.push(await service.deleteManualScore(c.owner, c.taikoId, 100, 4, true));
+    results.push(await snapshot(c));
+    return results;
+  };
+  const actual = await run(c.manual);
+  await c.pool.execute('UPDATE taiko_manual_accounts SET nickname=? WHERE taiko_id=?', ['Synthetic manual', c.taikoId]);
+  c.config.userdataDir = legacyRoot;
+  const expected = await run(legacy);
+  assert.deepEqual(actual, expected);
+  c.config.userdataDir = originalRoot;
+  const current = JSON.parse((await snapshot(c)).current);
+  assert.equal(current.profile.mydon_name, 'Renamed synthetic');
+  assert.equal(current._meta.source, 'manual');
+  assert.equal(current.songs.length, 0);
+}));
+
+const revokedOperations = {
+  rename: c => c.manual.renameManualAccount(c.owner, c.taikoId, 'Revoked rename'),
+  upsert: c => c.manual.upsertManualScore(c.owner, c.taikoId, input),
+  delete: c => c.manual.deleteManualScore(c.owner, c.taikoId, 100, 4, true),
+  read: c => c.manual.getManualScore(c.owner, c.taikoId, 100, 4)
+};
+for (const [name, operation] of Object.entries(revokedOperations)) {
+  test(`actual manual ${name} rechecks the SQL owner after waiting for the source fence`, { timeout: 15000 }, async () => fixture(async c => {
+    await c.manual.upsertManualScore(c.owner, c.taikoId, input);
+    const before = await snapshot(c);
+    const baselineChecks = c.state.optimisticChecks;
+    const blocker = await openPublicationLease({ root: c.config.userdataDir, repoRoot, identity: c.taikoId, mode: 'write' });
+    let ready;
+    const gate = new Promise(resolve => { ready = resolve; });
+    c.state.onOptimisticChecks = () => { if (c.state.optimisticChecks >= baselineChecks + (name === 'rename' ? 1 : 2)) ready(); };
+    const result = operation(c).then(value => ({ value }), error => ({ error }));
+    let failure;
+    let timer;
+    try {
+      await Promise.race([gate, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Owner precheck was not reached')), 2000); })]);
+      await c.pool.execute("UPDATE web_taiko_bindings SET source='wahlap' WHERE user_id=? AND taiko_id=?", [c.user, c.taikoId]);
+    } catch (error) { failure = error; }
+    finally { clearTimeout(timer); c.state.onOptimisticChecks = null; await blocker.close(); }
+    const outcome = await result;
+    if (failure) throw failure;
+    assert.equal(outcome.error?.statusCode, 403);
+    assert.deepEqual(await snapshot(c), before);
+    const [[account]] = await c.pool.query('SELECT nickname FROM taiko_manual_accounts WHERE taiko_id=?', [c.taikoId]);
+    assert.equal(account.nickname, 'Synthetic manual');
+  }));
+}
+
+test('actual manual rename compensates SQL nickname after a proven pre-publication failure', { timeout: 15000 }, async () => fixture(async c => {
+  const before = await snapshot(c);
+  let compensatedUnderFence = false;
+  c.state.afterExecute = async (sql, args) => {
+    if (sql.startsWith('UPDATE taiko_manual_accounts SET nickname')) {
+      if (args[0] === 'Renamed synthetic') c.scopeModule.currentScoreScope(c.taikoId).lease.publish = async () => { throw new Error('Synthetic pre-publication failure'); };
+      else compensatedUnderFence = true;
+    }
+  };
+  await assert.rejects(c.manual.renameManualAccount(c.owner, c.taikoId, 'Renamed synthetic'));
+  assert.equal(compensatedUnderFence, true);
+  const [[account]] = await c.pool.query('SELECT nickname FROM taiko_manual_accounts WHERE taiko_id=?', [c.taikoId]);
+  assert.equal(account.nickname, 'Synthetic manual');
+  assert.deepEqual(await snapshot(c), before);
+}));
+
+test('actual manual rename lost source acknowledgement retains the committed nickname and scores', { timeout: 15000 }, async () => fixture(async c => {
+  c.state.afterExecute = async (sql, args) => {
+    if (sql.startsWith('UPDATE taiko_manual_accounts SET nickname') && args[0] === 'Renamed synthetic') {
+      const lease = c.scopeModule.currentScoreScope(c.taikoId).lease;
+      const publish = lease.publish;
+      lease.publish = async options => { await publish(options); throw new Error('Synthetic lost acknowledgement'); };
+    }
+  };
+  assert.deepEqual(await c.manual.renameManualAccount(c.owner, c.taikoId, 'Renamed synthetic'), { ok: true, nickname: 'Renamed synthetic' });
+  const [[account]] = await c.pool.query('SELECT nickname FROM taiko_manual_accounts WHERE taiko_id=?', [c.taikoId]);
+  assert.equal(account.nickname, 'Renamed synthetic');
+  assert.equal(JSON.parse((await snapshot(c)).current).profile.mydon_name, account.nickname);
+}));
+
+test('actual bot visibility and claim mutations hold source EX without producing score observations', { timeout: 15000 }, async () => fixture(async c => {
+  const bot = { kind: 'bot', identityKey: c.botKey };
+  await c.pool.execute("INSERT INTO bind (qq,id,source,slot_index,is_current) VALUES (?,?,'manual',1,1)", [c.botKey, c.taikoId]);
+  await c.pool.execute('UPDATE taiko_manual_accounts SET bot_identity_key=? WHERE taiko_id=?', [c.botKey, c.taikoId]);
+  const before = await snapshot(c);
+  let checked = 0;
+  c.state.afterExecute = async sql => {
+    if (sql.startsWith('UPDATE bind SET visible') || sql.includes('INSERT INTO taiko_manual_claim_codes')) {
+      assert.equal(c.scopeModule.currentScoreScope(c.taikoId)?.mode, 'write'); checked++;
+    }
+  };
+  assert.deepEqual(await c.manual.setManualAccountVisibility(bot, c.taikoId, 1), { ok: true, visible: 1 });
+  const claim = await c.manual.issueManualClaimCode(c.owner, c.taikoId);
+  assert.match(claim.code, /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/);
+  assert.equal(checked, 2);
+  await c.manual.claimManualAccount(bot, claim.code);
+  await assert.rejects(c.manual.claimManualAccount(bot, claim.code), error => error.statusCode === 400);
+  assert.deepEqual(await snapshot(c), before);
+}));
+
+test('actual viewer detach takes source EX before the owner cleanup SQL transaction', { timeout: 15000 }, async () => fixture(async c => {
+  await c.pool.execute("INSERT INTO bind (qq,id,source,slot_index,is_current) VALUES (?,?,'manual',1,1)", [c.botKey, c.taikoId]);
+  await c.pool.execute('UPDATE taiko_manual_accounts SET bot_identity_key=? WHERE taiko_id=?', [c.botKey, c.taikoId]);
+  const before = await snapshot(c);
+  assert.deepEqual(await c.manual.detachManualAccount(c.owner, c.taikoId), { ok: true });
+  const [[binding]] = await c.pool.query('SELECT COUNT(*) AS n FROM web_taiko_bindings WHERE user_id=? AND taiko_id=?', [c.user, c.taikoId]);
+  assert.equal(binding.n, 0);
+  await assert.rejects(c.manual.upsertManualScore(c.owner, c.taikoId, input), error => error.statusCode === 403);
+  assert.deepEqual(await snapshot(c), before);
+}));
+
+test('actual manual ownership and confirmation errors preserve the existing API status and source bytes', { timeout: 15000 }, async () => fixture(async c => {
+  const before = await snapshot(c);
+  await assert.rejects(c.manual.deleteManualScore(c.owner, c.taikoId, 100, 4, false), error => error.statusCode === 409);
+  await assert.rejects(c.manual.detachManualAccount(c.owner, c.taikoId), error => error.statusCode === 409);
+  await assert.rejects(c.manual.upsertManualScore(c.owner, c.taikoId, { ...input, values: { high_score: -1 } }), error => error.statusCode === 400);
+  await assert.rejects(c.manual.renameManualAccount({ kind: 'viewer', userId: c.user + 1 }, c.taikoId, 'Other owner'), error => error.statusCode === 403);
+  await assert.rejects(c.manual.setManualAccountVisibility(c.owner, c.taikoId, 1), error => error.statusCode === 400);
+  assert.deepEqual(await snapshot(c), before);
+}));

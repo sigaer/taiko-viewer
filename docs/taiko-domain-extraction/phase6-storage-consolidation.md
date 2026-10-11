@@ -107,3 +107,17 @@ A `69c4cac` / 9.81.2 已 push。新 Infrastructure backup 从 source EX view 验
 最终 40 Python（新增 16）+ 43 Node、局部 TypeScript PASS；五个 backup 的真实进程死亡点、restore 提交前/提交后/部分 archive 完成的死亡、独立 inode 与旧根删除、原文/非法 H/daily、ENOSPC、锁期限、磁盘余量、symlink/FIFO/超限/损坏拒绝及 stale-backup grant 均覆盖。综合 26.004 秒，250 ms sampled peak 259,522,560 bytes（约 247.5 MiB），high/max/OOM=0。最初 QA runner 误用了系统旧 Node，在 tests 前语法失败；改为当前 Node 24.13.0 绝对路径后原限额重新通过。[证据](evidence/phase6-source-backup-validation.json)。
 
 无生产数据/DB/network QA，无新 listener，测试树与 children 已清理；仍未 sync R/部署。Viewer 客户端步骤本地提交，待 Phase 6 标准发布统一 push。本节为 BACKUP_RECOVERY_FOUNDATION_PASS；manual lifecycle、全 Writer/grant、Read Model、百万记录与最终发布仍待完成，Gate 6 IN_PROGRESS。
+
+## 6.3d.3 手动账号等待后 owner 复核与补偿 fence
+
+Manual rename/upsert/delete/get score 在 Source EX/SH 内重新查询 owner。Visibility、claim issuance/consumption 与 detach 也采用同一 Source EX；Viewer detach 保持 Source→SQL owner/binding 的顺序，纯 grant 变化不额外生成成绩 observation。Rename 的 SQL nickname 更新处在 EX 内，publication 已证明回滚时恢复旧 nickname；回执丢失但 nonce 已提交时保留新 SQL nickname 与成绩。
+
+进一步修复 source scope 的补偿竞争窗口：callback 在提交前失败时，在原 EX 与原 request ALS 内完成补偿；需要重新证明 rollback 时，probe 改用 EX，并在同一 EX 内完成破坏性 SQL cleanup。新的独立 Writer 不能在 proof 与补偿之间进入；更晚、不同的 source head 仍不代表本请求回滚，未知 outcome 不撤销 SQL side effect。
+
+最终 120 offline Node + 15 real SQL（新增 10 manual）与局部 TypeScript PASS。Actual manual service、真实 MySQL 和中心 bridge；正常 create/read/rename/upsert/edit/delete 的完整 current 与全部 H SHA/返回 DTO 对 frozen `fbfd43e` 保持一致。真实 SQL owner 在请求排队期间撤销后，rename/upsert/delete/read 均 403 且 C/H 完全未变。Nickname rollback/lost ack、bot visibility/claim、detach/Goal SQL 顺序和旧错误/确认契约通过。`SELECT DATABASE()` 实际为 `taiko_annual_poster_test` 且显式 opt-in=1；只创建/清理本次 synthetic rows。Manual test bootstrap 不带 FK，**不是 production migration/FK enforcement 验证**。[证据](evidence/phase6-manual-owner-validation.json)。
+
+综合 60.002 秒，250 ms sampled peak 289,484,800 bytes（约 276.07 MiB），high/max/OOM=0。最初 SQL invocation 缺少 mutation opt-in，guard 在连接前拒绝；frozen temp module 的 package resolution 和 rename precheck 次数修正后重跑。一次完整回归揭示补偿 callback 仍持有 kernel EX 但 request ALS 已离开，已修复并完成 16 focused、随后全部 120+15 验证。没有绕过隔离或调整预算，无生产 DB/私有数据/network QA，无新 listener。
+
+日更新 `title_song_relations.json` JSON/全部 business fields 已验证；866 rows、685 relations、442 songs、525 titles，relations/by_song/by_title 与原版全相同，仅 generated_at 更新，纳入本步骤 release 范围。Viewer/sync receiver 仍 active/PID 1063394/1063408，未同步/部署。
+
+这是 MANUAL_OWNER_RECHECK_PASS，不是完整 grant/lifecycle PASS：永久删除仍待单 SQL 事务 + durable receipt/outbox + canonical/daily cleanup + bounded recovery worker；create/claim/detach 的 SQL failure recovery、通用解绑/注销与其他非 Source 锁入口还需统一复核。下一步先完成真实永久删除，再推进 dispatcher/u0、全资源 grant 与 Read Model；Gate 6 IN_PROGRESS。

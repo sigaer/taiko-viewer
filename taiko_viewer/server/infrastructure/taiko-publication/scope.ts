@@ -47,7 +47,10 @@ async function runScope<T>(options: SourceOptions, mode: "read" | "write", task:
   let prepared = false;
   let confirmed = false;
   let baseSequence = 0;
-  let verifiedRollback = false;
+  const compensate = async () => {
+    const actions = scope?.rollback.splice(0).reverse() || [];
+    for (const rollback of actions) await rollback().catch(() => console.error("[score-publication] compensating action failed"));
+  };
   try {
     return await withPublicationLease({ ...options, mode }, async lease => {
       baseSequence = lease.view?.sequence || 0;
@@ -63,27 +66,27 @@ async function runScope<T>(options: SourceOptions, mode: "read" | "write", task:
           confirmed = true;
         }
         return result;
+      } catch (error) {
+        // Before publication we still own EX. Finish this request's SQL
+        // compensation before a queued writer can observe those side effects.
+        if (!prepared && mode === "write" && lease.alive()) await scopes.run(scope, compensate);
+        throw error;
       } finally { scope.active = false; }
     });
   } catch (error) {
     // The child can die after the durable commit but before its response. Probe
     // our unique transaction only after the original lease has been closed.
-    if (!confirmed && prepared && mode === "write" && scope?.staged.size) {
+    if (!confirmed && mode === "write" && scope && ((prepared && scope.staged.size) || scope.rollback.length)) {
       try {
-        await withPublicationLease({ ...options, mode: "read" }, async lease => {
-          confirmed = lease.view?.commitId === transactionId || lease.view?.previousCommitId === transactionId;
-          verifiedRollback = !confirmed && (lease.view?.sequence || 0) <= baseSequence;
+        await withPublicationLease({ ...options, mode: "write" }, async lease => {
+          confirmed = prepared && (lease.view?.commitId === transactionId || lease.view?.previousCommitId === transactionId);
+          // Verification and compensation share EX. A newer writer must not
+          // slip between the proof of rollback and destructive SQL cleanup.
+          if (!confirmed && (lease.view?.sequence || 0) <= baseSequence) await compensate();
         });
       } catch { /* Unknown outcome stays an error; do not undo DB locks. */ }
     }
     if (confirmed) return result as T;
-    if (scope && (!prepared || scope.staged.size === 0)) {
-      for (const rollback of scope.rollback.reverse()) await rollback().catch(() => console.error("[score-publication] compensating action failed"));
-    } else if (scope && verifiedRollback) {
-      // Merely seeing a newer, different head cannot prove rollback: this
-      // transaction may already be an ancestor. Never undo locks on ambiguity.
-      for (const rollback of scope.rollback.reverse()) await rollback().catch(() => console.error("[score-publication] compensating action failed"));
-    }
     throw error;
   }
 }
