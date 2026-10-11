@@ -1,0 +1,220 @@
+{
+  "phase": 6,
+  "step": "6.3e.8.1",
+  "status": "PRIVATE_SOURCE_READ_AND_EXPLICIT_SERVICE_PROVISION_PASS",
+  "phaseGate": "IN_PROGRESS",
+  "validatedAt": "2026-10-11T11:00:59.381Z",
+  "viewerVersion": "0.82.0",
+  "viewerStepParent": "b7cafed7985952b64f612c7bfebb670185b9c8ae",
+  "viewerStandardReleaseAndPushPending": true,
+  "sourceUnchanged": true,
+  "sourceHead": "59c3569fccdeac93e1d633f4643da5fcbfaa4003",
+  "sourceVersion": "9.81.11",
+  "testedFiles": {
+    "source": {
+      "plugins/utils/account_sync.py": "84b094f2e1b99673c00f0b8ce338fcfb2155292c8200a13362e695589dc41042",
+      "plugins/utils/viewer_binding_authority.py": "b2832bd21f962ee0f804758a310158706d47115b1ebf95bc6007b70488d4e86c",
+      "scripts/account_sync_cli.py": "5f23dfc118714a0154a0682e47abadf315088f90a143856a5e9b071c03b14276",
+      "scripts/sync_dispatch_server.py": "1c96e26c0f305cc308c7b5c6fcff7f1de6603b3f3ec21920f8153348a6914500",
+      "scripts/sync_dispatch_targets.py": "3d4723ccb697a68755fe8a64722081354170c99bb65b9db8459ac3d0ce22c385",
+      "tests/account_sync_sql_child.py": "e9b4acfb48cc122f879dcb52a85797bb75decc6227120030e2d35f5cfb6668f6",
+      "tests/test_publication_sync.py": "f1fc4b523e145d3d8ec025eed9f3a24f4dfebbc1c18516ec4d58365de991b525",
+      "tests/fixtures/sync_dispatch_runtime_legacy.py": "fdec5275a7326f953c96ee461b640a94344fe7782b65662d0c0e11361f8f8af2",
+      "tests/fixtures/sync_dispatch_targets_runtime_legacy.py": "3d4723ccb697a68755fe8a64722081354170c99bb65b9db8459ac3d0ce22c385"
+    },
+    "viewer": {
+      "server/utils/account-db.ts": "1f0895d52dfcc10ce48c0e81e979d3d5b493beb5ab5248c45a093146043820b0",
+      "server/utils/account/developer.ts": "308f38ed48d068319da1b0a25ecedd978b7fd879c81d61bd752003b446227fbe",
+      "server/internal/account/shared.ts": "81c39745b1419404de18640434e0ae65d2494d737ea8b1636a1e816f032e50db",
+      "server/infrastructure/account/operator.ts": "0f11023af10a78857313e8bf9dc9b13e34f6e4606ab8cb74aa4a8246acd7a925",
+      "server/infrastructure/account/source-service-schema.ts": "e787288e9a27e78d2d224f6376ca59c2cd23e2c9e545824b1d171f1f882899d7",
+      "server/infrastructure/account/source-service-provision.ts": "73212192f9ed3c82cc4d9208cc2efef06b6e5c68b832245abd09bbcdd952085e",
+      "server/services/account/source-access.ts": "c941aadf272cac44757fd08ccbca89c2042b98c76a7094f9d0059918c6607e39",
+      "scripts/configure_source_service.ts": "0c7d5ee77854fbf5f8e271eed4e5909ae69bfee20e823a7480a3fefc07045525",
+      "tests/sourceAccessSql.test.mjs": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305",
+      "tests/fixtures/accountSourceHttp.mjs": "a3fa5cbf9e8bd0a439ec04daa8c48377c82c964e6bc5b78e66153e1e3778f7e6",
+      "tests/fixtures/goalSqlRuntime.mjs": "2fece6de585a8f8f1a8bffe155fd0451a35a9305d272328a37b7b5f72d15352f",
+      "tests/fixtures/manualSqlRuntime.mjs": "89969d7e6d47db03e00c19ea5401f55f37f7c6b8b42c4391e117329127d0d051",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "14810b341e5ba5c256f3c932a50604bc3e6a082bdace37fef3762418f631df2b"
+    }
+  },
+  "sourceHashesMatchPreviouslyValidated120PublicationAnd170DomainPython": true,
+  "sourcePythonResultReusedFrom": "phase6-account-sync-validation.json",
+  "qa": {
+    "initial": {
+      "logPath": "/var/tmp/phase6-source-access-focused-qa.log",
+      "passed": 37,
+      "total": 38,
+      "failure": "Changed manual_account_id returned 503; fixed expected-binding comparison now returns 403."
+    },
+    "focused": {
+      "unit": "taiko-qa-1791715617-1476146.service",
+      "logPath": "/var/tmp/phase6-source-access-focused2-qa.log",
+      "resourcePath": "/var/tmp/phase6-source-access-focused2-resources.json",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791715617-1476146.service",
+        "durationMs": 36628,
+        "sampledMemoryPeakBytes": 377548800,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48960 kB",
+            "VmRSS": "48896 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true
+    },
+    "broadRegressionBeforeRootHardening": {
+      "unit": "taiko-qa-1791715746-1477549.service",
+      "logPath": "/var/tmp/phase6-source-access-final-qa.log",
+      "resourcePath": "/var/tmp/phase6-source-access-final-resources.json",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791715746-1477549.service",
+        "durationMs": 473660,
+        "sampledMemoryPeakBytes": 451514368,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "56228 kB",
+            "VmRSS": "55940 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true
+    },
+    "finalSourceReadRootAndLeaseHardening": {
+      "unit": "taiko-qa-1791716277-1485724.service",
+      "logPath": "/var/tmp/phase6-source-access-hardening-qa.log",
+      "resourcePath": "/var/tmp/phase6-source-access-hardening-resources.json",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791716277-1485724.service",
+        "durationMs": 40326,
+        "sampledMemoryPeakBytes": 357949440,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "52336 kB",
+            "VmRSS": "52336 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true
+    }
+  },
+  "counts": {
+    "broadOfflineNode": 149,
+    "broadActualSql": 378,
+    "broadNewSourceSql": 43,
+    "finalSourceSql": 45,
+    "unchangedExistingSqlCoveredInBroad": 335,
+    "typeScriptConfigs": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "sourcePythonNotRepeatedBecauseSourceHashesUnchanged": {
+      "publication": 120,
+      "domain": 170
+    }
+  },
+  "authority": {
+    "formalRoute": "/api/developer/userdata/:userid",
+    "actualCookieLogin": true,
+    "actualDeveloperQuota": true,
+    "ordinaryCredentials": "owned full binding tuple; noncurrent owned binding allowed",
+    "service": "live per-token explicit Source/scopes/revision/expiry; no quota-derived authority",
+    "credential": "live session or active token plus account; invalid Authorization cannot fall back to Cookie",
+    "capturedBeforeActorSql": [
+      "pool",
+      "userdataDir",
+      "repoRoot"
+    ],
+    "checks": "optimistic, within SH entry and before return, live lease",
+    "manualSqlAuthorityRequired": true,
+    "bodyIdentityDoesNotGrantAccess": true,
+    "healthyRawDtoUnknownFieldsPreserved": true,
+    "noSourceMutationByPureGrant": true
+  },
+  "operations": {
+    "privateCli": "taiko_viewer/scripts/configure_source_service.ts",
+    "actualOsChildTested": true,
+    "httpProvisionRoute": false,
+    "stdinBytes": 16384,
+    "lifetimeSeconds": 45,
+    "poolConnections": 2,
+    "operator": "complete existing username+email from SQL; no body-only operator identity",
+    "oneSqlCommit": true,
+    "durableMinimalAudit": true,
+    "exactReplayDoesNotOverwriteLaterRevocation": true,
+    "concurrentExactReplay": true,
+    "lateFailureRollbackAndConnectionDiscard": true,
+    "lostCommitAckDurableProof": true,
+    "noCommitIsNotSuccess": true,
+    "productionGrantsActivated": false
+  },
+  "isolation": {
+    "database": "taiko_annual_poster_test",
+    "actualSelectDatabaseRequired": true,
+    "explicitMutationOptInRequired": true,
+    "eachFixturePoolAndOpsCliVerified": true,
+    "existingNativeWorkersVerifyEveryConnection": true,
+    "productionDataCopied": false,
+    "productionMutatingQa": false,
+    "productionFkValidationClaimed": false,
+    "upstreamNetworkSyntheticOrForbidden": true,
+    "ownedRowsRootsProcessesListenersClosed": true
+  },
+  "limits": {
+    "fullNuxtBuild": false,
+    "productionAuthenticatedSmoke": false,
+    "serviceRuntimeActivation": false,
+    "historyProxyMigrated": false,
+    "wahlapProxyMigrated": false,
+    "hirobaProxyMigrated": false,
+    "bindProxyMigrated": false,
+    "taikoBotSdkAndCacheMigrated": false,
+    "allWritersComplete": false,
+    "readModelComplete": false,
+    "millionCostComplete": false
+  },
+  "runtimeUnchanged": {
+    "viewer": {
+      "service": "taiko-viewer.service",
+      "pid": 1063394,
+      "version": "0.81.11"
+    },
+    "syncReceiver": {
+      "service": "taiko-sync-receiver.service",
+      "pid": 1063408
+    },
+    "publicApi": {
+      "service": "taiko-public-api.service",
+      "pid": 829173
+    },
+    "rSynced": false,
+    "noneBotRestarted": false
+  },
+  "remaining": [
+    "Wahlap proxy old dispatcher caller + Hiroba private stdin/native writer and credential/bind authority",
+    "taiko-bot private SDK protocol and permission-aware bounded cache",
+    "u0 membership/all Source/daily writers/P1a",
+    "full Fact Read Model + complete invalidation/cold-warm million IO/RSS cost",
+    "trusted restore/cleanup/runbook and pinned R dependencies",
+    "quiesce legacy writers, R sync/restart/adapter proof, standard Viewer release and authorized online product smoke"
+  ]
+}

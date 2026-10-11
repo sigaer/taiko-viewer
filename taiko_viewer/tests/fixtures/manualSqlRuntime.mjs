@@ -11,6 +11,7 @@ import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-pub
 import { BINDING_CONFIRMATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-confirmation-schema.ts';
 import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
 import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from '../../server/infrastructure/account/sync-request.ts';
+import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL } from '../../server/infrastructure/account/source-service-schema.ts';
 import { SCORE_TOKEN_TABLE_SQL } from '../../server/infrastructure/account/score-token.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
@@ -20,6 +21,21 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
+  SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
+  `CREATE TABLE IF NOT EXISTS web_developer_tokens (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
+    application_id BIGINT UNSIGNED DEFAULT NULL, token_hash CHAR(64) NOT NULL, token_mask VARCHAR(32) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'active', issued_by_user_id BIGINT UNSIGNED DEFAULT NULL,
+    issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, last_used_at DATETIME DEFAULT NULL, revoked_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_developer_tokens_token_hash(token_hash), KEY idx_web_developer_tokens_user_id_status(user_id,status,issued_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_taiko_open_api_daily_usage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, ip_address VARCHAR(64) NOT NULL, api_name VARCHAR(128) NOT NULL,
+    day_key DATE NOT NULL, request_count INT UNSIGNED NOT NULL DEFAULT 0, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_web_taiko_open_api_daily_usage_ip_api_day(ip_address,api_name,day_key)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   SCORE_TOKEN_TABLE_SQL, ACCOUNT_SYNC_RECEIPT_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_data_sync_logs (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
@@ -83,7 +99,7 @@ const TEST_MANUAL_TABLES = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`
 ];
 
-export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false } = {}) {
+export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false } = {}) {
   assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, '1');
   assert.match(String(process.env.TAIKO_DB_NAME || ''), /_test$/);
   const pool = mysql.createPool({ host: process.env.TAIKO_DB_HOST, port: Number(process.env.TAIKO_DB_PORT || 3306),
@@ -128,7 +144,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
         destroy: () => { state.discardedConnections++; connection.destroy(); }, release: () => connection.release()
       };
     } };
-    uninstall = installGoalSqlRuntime(db, config, { withProfile, withPersonal, withRealPython, withAccountSource });
+    uninstall = installGoalSqlRuntime(db, config, { withProfile, withPersonal, withRealPython, withAccountSource, withDeveloper });
     globalThis.fetch = async () => { throw new Error('Network forbidden during manual source SQL QA'); };
     globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [fixedAt])); } static now() { return fixedAt; } };
     scopeModule = await import('../../server/services/taiko-domain/publication.ts');
@@ -154,6 +170,10 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
       await pool.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?', [ownedId]);
     }
     if (user) {
+      await pool.execute('DELETE a FROM taiko_source_service_grant_audit a JOIN web_developer_tokens t ON t.id=a.developer_token_id WHERE t.user_id=?', [user]);
+      await pool.execute('DELETE FROM taiko_source_service_grants WHERE developer_user_id=?', [user]);
+      await pool.execute("DELETE q FROM web_taiko_open_api_daily_usage q JOIN web_developer_tokens t ON q.ip_address=CONCAT('token:',t.id) WHERE t.user_id=?", [user]);
+      await pool.execute('DELETE FROM web_developer_tokens WHERE user_id=?', [user]);
       await pool.execute('DELETE t FROM web_taiko_binding_mydon_showcase_titles t JOIN web_taiko_bindings b ON b.id=t.binding_id WHERE b.user_id=?', [user]);
       for (const table of ['web_data_sync_receipts', 'web_data_sync_logs', 'web_taiko_binding_confirmations', 'web_taiko_binding_verifications', 'web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
         const [tables] = await pool.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?', [table]);

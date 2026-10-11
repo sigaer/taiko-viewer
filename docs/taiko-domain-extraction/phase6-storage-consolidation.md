@@ -304,3 +304,16 @@ Native issue/status/revoke 统一 Source EX→owner/current→token SQL 单次�
 最终 QA 492.871s/435.266MiB sampled、high/max/OOM=0；actual wrapper exit0+journal success+collected MainPID0/cgroup gone。第一次 /dev/null secret-loader 拒绝已定位改正；静态审计补保留 R target description 与 native lifetime 后，定向/最终整套均重跑。证据：Viewer docs/taiko-domain-extraction/evidence/phase6-account-sync-validation.json，含全部受测源码哈希与四轮独立 QA artifact/unit。A 565a7da138b57d7e460e632372920e4191d99b90 / 9.81.10 已标准 Source commit/push，实际远端 main 一致，9个受测代码/fixture 的 commit hashes 全匹配；R 未复制，running Bot/API 没有加载本步变更，本源码子步不重启。Viewer 0.82.0 本地留档随统一标准部署 push；live 0.81.11/PIDs 1063394、1063408、829173 unchanged。
 
 本子步 VIEWER_AUTHENTICATED_SYNC_AND_RUNTIME_DISPATCHER_PASS；Gate 6 IN_PROGRESS。继续其余 private/arbitrary Source/QQ/Hiroba/developer/proxy service grant、u0/daily/B cache/all Writer、P1a/完整 Read Model/invalidation/百万冷暖成本与 IO/RSS、trusted ops restore/cleanup/runbook、fixed deps/R sync/统一发布与真实线上产品验收。
+
+
+## 6.3e.8.1 私有成绩读取与显式中心服务授权
+
+正式 Developer userdata route 继续真实 quota，但 quota/开发者申请/HTTP userid 不构成 Source grant。有效 Cookie 或 active Developer token 仅访问其自有完整绑定，非 current/自有隐藏 binding 保留；跨账号由私有运维按 token id 登记明确 Source allowlist/scopes。没有默认全源权限，中心服务的 '*' 需要显式配置；同一用户的其他 token 与 Cookie 不能借用该能力。有效 session/token/account、完整 binding 或 service tuple/revision/expiry 在 Source SH 前后复核，不能在同一次读取中静默 fallback；manual SQL authority 删除后即拒绝尚未 outbox cleanup 的 canonical bytes。首次 actor SQL 前捕获 pool/Source root/kernel cwd，managed corruption/lease loss/SQL 故障固定 503，权限失效 401/403，健康完整 raw JSON/未知字段保持。
+
+新增私有 stdin 配置 CLI：实际 SQL username+email 完整站点 operator proof，account→token→grant→audit 顺序、一次 COMMIT 与最小 durable audit；inspect 不变更权限，exact/concurrent replay 不覆盖后续撤销，late failure/rollback destroy/ACK loss/no-commit 验证。16KiB stdin/45s lifetime/2 DB connections，实际 SELECT DATABASE 与 mutation opt-in；无 HTTP grant 配置入口、无 raw token/secret argv、无 Source 成绩写入。详细选择、协议与运维：[source-service-operations.md](source-service-operations.md)。预留 mutation scopes 不表示代理已迁移。
+
+先定向 41 SQL/两组 TS PASS，再 broad regression 149 offline +378 actual guarded SQL（新增43）/两组 TS PASS；审计后增加首次 SQL 前 Source paths capture 与 lease loss，最终定向 45 SQL/两组 TS PASS。现有335 SQL与149 offline所涉及的产品/fixture文件未再改变，只有新 Source helper 与其专用 tests 增加 hardening；两轮受测文件 SHA独立保存，不能把前一轮的文件哈希当最终哈希。Source9个 code/fixture SHA 与6.3e.7证据完全一致，因此120 publication/170 domain Python沿用此前实际结果，不冒称本轮重跑。初轮 manual_account_id 变更的错误分类失败已修复重跑。
+
+Broad 473.66s/430.598MiB sampled，最终 40.326s/341.367MiB；high/max/OOM=0，实际 wrapper exit0/journal deactivated success/MainPID0/collected cgroup gone，owned children/listeners/roots/rows finally 清理。完整证据：[phase6-source-access-validation.json](evidence/phase6-source-access-validation.json)。不冒称上游真实网络、production FK、完整 Nuxt/NoneBot 或在线 authenticated验收。
+
+本子步 PRIVATE_SOURCE_READ_AND_EXPLICIT_SERVICE_PROVISION_PASS；Gate6 IN_PROGRESS。A code/9.81.11/R/runtime unchanged，无 Source修改或同步，所以本步不重启 NoneBot/API；Viewer0.82.0本地步骤，按标准统一发布推送，live0.81.11/PIDs1063394、1063408、829173 unchanged。尚未为生产 token登记能力。继续 Wahlap旧 dispatcher caller、Hiroba private stdin/QQ bind grant/native writer、SDK/cache、u0/daily/all Writer/P1a、完整 Read Model/invalidation/百万成本与IO/RSS、ops restore/cleanup、fixed dependencies/R sync/统一发布与真实线上产品验收。

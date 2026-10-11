@@ -4,7 +4,7 @@ import {registerHooks} from 'node:module';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
-export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false } = {}) {
+export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false } = {}) {
  const root=new URL('../../',import.meta.url);
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
@@ -20,6 +20,13 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   import {createAccountSyncWorkerRunner} from '${new URL('server/infrastructure/account/sync-worker-runner.ts',root).href}';
   export const runAccountSyncWorker=(request,db)=>createAccountSyncWorkerRunner(globalThis.__goalSqlRuntime.syncLaunch)(request,db);
  `);
+ if (withDeveloper) {
+  // Keep actual developer/quota/credential/source services. The unused public
+  // catalog module imports JSON and remote constants outside this test's scope.
+  overrides.set(new URL('server/services/content/v2Constants.ts',root).href,`export const getV2ConstantsCsvDataset=async()=>{throw new Error('Public catalog not exercised by source authority QA');};`);
+  const accountUrl=new URL('server/utils/account.ts',root).href;
+  overrides.set(accountUrl,overrides.get(accountUrl)+`export * from '${new URL('server/utils/account/developer.ts',root).href}';`);
+ }
  if (withPersonal) {
   overrides.delete(new URL('server/services/account/personal.ts',root).href);
   if (!withRealPython) overrides.set(new URL('server/services/account/python-compute.ts',root).href,`

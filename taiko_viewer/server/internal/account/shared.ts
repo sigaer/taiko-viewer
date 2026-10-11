@@ -32,15 +32,7 @@ export const BIND_VERIFY_TTL_MS = 1000 * 60 * 30;
 export const SYNC_COOLDOWN_MS = 1000 * 60 * 30;
 export const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
 export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
-export const DEVELOPER_REVIEWER_USERNAME = "sigaer";
-export const DEVELOPER_REVIEWER_EMAIL = "1106865024@qq.com";
-
-export const isSiteOperator = (user: Pick<AccountRow, "username" | "email"> | null | undefined) =>
-  Boolean(
-    user &&
-      String(user.username || "").trim() === DEVELOPER_REVIEWER_USERNAME &&
-      normalizeEmail(user.email) === DEVELOPER_REVIEWER_EMAIL
-  );
+export { DEVELOPER_REVIEWER_USERNAME, DEVELOPER_REVIEWER_EMAIL, isSiteOperator } from '../../infrastructure/account/operator.ts';
 
 export type AccountRow = {
   id: number;
