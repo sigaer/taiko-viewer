@@ -151,3 +151,15 @@ Trusted internal `restoreDeletedManualSource` 读取原 lifecycle receipt，核�
 综合 113.322 秒，250 ms sampled cgroup peak 326,217,728 bytes（约 311.106 MiB），high/max/OOM=0、unit success/exit 0；所有 synthetic rows/temporary trees/owned children 清理。实际 SELECT DATABASE()=`taiko_annual_poster_test`、opt-in=1；不含生产 FK、不是生产 migration/full DB disaster recovery。初始 native import ordering 与 empty fixture 两个 harness 问题修正；最终增加 driver 脱敏和 shutdown pool 回归后重新完整验证。未用 production DB、个人数据或网络 QA，无新 listener。
 
 A `fd7b52e` / 9.81.4 的两个本地 RPC 已标准 commit/push，仍只在 A 未同步 R，因此本步骤不重启 NoneBot；Viewer 本地步骤，统一标准部署时 push，live 仍 0.81.11。当前没有新增公网 restore API，提供内部 trusted coordination 和已准入自动续做；最终运维入口/生产恢复 runbook 随全授权收敛归档。MANUAL_COORDINATED_RECOVERY_PASS 不等于 Gate 6 PASS。下一步继续 create/claim/detach SQL failure atomicity、通用解绑/注销/grant、dispatcher/u0/daily 的全部入口、一致 Read Model/P1a、百万成本、统一 runtime sync/发布与在线验收。
+
+## 6.3d.6 认领、发码与解绑事务收敛
+
+三类授权操作在 Source EX 内捕获同一个 SQL pool，先锁 actor/全部相关 binding，再以一次 transaction 完成 capability、binding、current/slot、Goal/measurement/cursor/showcase 清理与最小持久 receipt。Receipt 只保存 operation/source/actor/kind 与认领 hash，不保存明文码或私有成绩，不成为 score authority。发新码晚失败保留旧码；认领晚失败保留未消费 capability 与旧 owner/current；解绑晚失败保留全部原授权及产品事实。rollback 失败销毁 connection；COMMIT ack 丢失只有精确 operation receipt 才确认成功。SQL driver diagnostics 统一脱敏。
+
+排队取得 EX 后重查 claim row id/source/hash/expiry，拒绝同 row 目标替换、过期/撤销与其他 actor 重放。同 actor 已提交认领可凭 receipt + 实际 consumed row + 当前 owner 重试，零额外 COMMIT、不重置后来选中的 current；已提交显式解绑只确认原操作，不重新授权。多 legacy bot 解绑保留仍存活的旧 principal，否则选择存活 holder；只有 receipt 而无当前 ownership 不能认领。创建/认领共用同一 attachment implementation，但创建尚待下一步骤持久协调，不能据此视为完成。
+
+最终 43 Python + 128 offline Node + 73 actual `_test` SQL（新增 25 grant）和 domainRead/publicationLifecycle 两组局部 TypeScript 全 PASS。实际 owned Node 对发码/认领/解绑分别在 COMMIT 前与后退出，TCP transaction 回滚/持久 receipt 重试均验证。覆盖全部晚 SQL failure、failed rollback destroy、ack loss、同/不同 actor 并发、排队 capability 变化、旧 current 保留、三类 captured-pool shutdown-style replacement、真实 driver 私有诊断脱敏；纯 grant 的 C/H 原文、commit ID 与 sequence 全不变。旧 delete/restore/Goal/acquisition/manual Golden 回归保留。既有测试相对 setup COMMIT 计数、transaction connection hook 与同 actor 重试预期同步更新。[证据](evidence/phase6-manual-grant-validation.json)。
+
+综合 137.912 秒，250 ms sampled peak 341,823,488 bytes（约 325.988 MiB），high/max/OOM=0，unit success/exit 0。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 mutation opt-in=1，只使用 own synthetic rows/temporary trees/children 并清理；测试 schema 缺生产 FK，不冒称 production migration/FK enforcement、HTTP authentication 或百万容量验收。初始 legacy hook 和重试预期修正，最终复核发现 detach 预检未显式传 captured pool，已修复并新增三类 shutdown 回归后完整重跑。
+
+这是 MANUAL_GRANT_TRANSACTION_PASS，Gate 6 仍 IN_PROGRESS。A `fd7b52e` / 9.81.4 unchanged，无 R sync/NoneBot 重启/Viewer push/deploy；live 0.81.11、Viewer/sync receiver PID 1063394/1063408 active。Viewer 步骤本地提交，待完整 Phase 6 标准发布统一推送。下一步创建持久恢复，然后通用解绑/注销与 private resource grants、实际 dispatcher/u0/daily 全入口、Read Model/P1a/百万成本、运维恢复入口与最终统一激活/在线验收。

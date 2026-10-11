@@ -122,12 +122,16 @@ test('actual bot visibility and claim mutations hold source EX without producing
       assert.equal(c.scopeModule.currentScoreScope(c.taikoId)?.mode, 'write'); checked++;
     }
   };
+  c.state.afterSqlStatement = c.state.afterExecute;
   assert.deepEqual(await c.manual.setManualAccountVisibility(bot, c.taikoId, 1), { ok: true, visible: 1 });
   const claim = await c.manual.issueManualClaimCode(c.owner, c.taikoId);
   assert.match(claim.code, /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/);
   assert.equal(checked, 2);
-  await c.manual.claimManualAccount(bot, claim.code);
-  await assert.rejects(c.manual.claimManualAccount(bot, claim.code), error => error.statusCode === 400);
+  const consumed = await c.manual.claimManualAccount(bot, claim.code);
+  const commits = c.state.commits;
+  assert.deepEqual(await c.manual.claimManualAccount(bot, claim.code), consumed);
+  assert.equal(c.state.commits, commits);
+  await assert.rejects(c.manual.claimManualAccount({ kind: 'bot', identityKey: c.botKey + '-other' }, claim.code), error => error.statusCode === 400);
   assert.deepEqual(await snapshot(c), before);
 }));
 

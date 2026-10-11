@@ -27,7 +27,7 @@ export async function populate(c) {
   const daily = resolve(c.config.userdataDir, c.taikoId, 'daily-ability-v1-top20.json');
   const dailyRaw = '{"days":{"2026-10-10":{"rating":123,"origin":"snapshot"}}}\n';
   await writeFile(daily, dailyRaw);
-  return { id, daily, dailyRaw, before: await snapshot(c) };
+  return { id, daily, dailyRaw, before: await snapshot(c), initialCommits: c.state.commits };
 }
 export async function receipt(c) {
   const [[row]] = await c.pool.query('SELECT * FROM taiko_source_lifecycle WHERE taiko_id=? ORDER BY created_at DESC,operation_id DESC LIMIT 1', [c.taikoId]);

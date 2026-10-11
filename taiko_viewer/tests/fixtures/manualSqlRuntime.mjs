@@ -6,6 +6,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { installGoalSqlRuntime } from './goalSqlRuntime.mjs';
 import { SOURCE_LIFECYCLE_TABLE_SQL } from '../../server/infrastructure/taiko-publication/lifecycle-schema.ts';
+import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from '../../server/infrastructure/taiko-publication/grant-schema.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
@@ -15,6 +16,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
   SOURCE_LIFECYCLE_TABLE_SQL,
+  MANUAL_GRANT_RECEIPT_TABLE_SQL,
   GOAL_TABLE_SQL, GROWTH_MEASUREMENT_TABLE_SQL, GROWTH_RECENT_CURSOR_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_mydon_showcase_titles (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, binding_id BIGINT UNSIGNED NOT NULL,
@@ -105,6 +107,7 @@ export async function manualSqlFixture(task) {
     globalThis.Date = RealDate;
     globalThis.fetch = priorFetch;
     if (taikoId) {
+      await pool.execute('DELETE FROM taiko_manual_grant_receipts WHERE taiko_id=?', [taikoId]);
       await pool.execute('DELETE FROM taiko_source_lifecycle WHERE taiko_id=?', [taikoId]);
       await pool.execute('DELETE FROM taiko_manual_claim_codes WHERE taiko_id=?', [taikoId]);
       await pool.execute('DELETE FROM bind WHERE id=? OR qq=?', [taikoId, botKey]);

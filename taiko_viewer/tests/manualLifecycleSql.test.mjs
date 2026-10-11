@@ -16,7 +16,7 @@ test('actual permanent deletion commits all identities/products once, keeps veri
   const result = await c.manual.permanentlyDeleteManualAccount(c.owner, c.taikoId, true);
   assert.equal(result.ok, true);
   assert.equal(c.state.transactions - beforeTransactions, 1);
-  assert.equal(c.state.commits, 1);
+  assert.equal(c.state.commits - f.initialCommits, 1);
   const row = await assertDeleted(c, f);
   const sqlBackup = decodeSqlRecoveryBackup(row.sql_backup, row.sql_backup_sha256);
   assert.equal(sqlBackup.schema, 1);
@@ -38,7 +38,7 @@ test('late actual SQL failure rolls back the entire manual cleanup and receipt, 
   assert.equal(await receipt(c), undefined);
   assert.deepEqual(await snapshot(c), f.before);
   assert.equal(await readFile(f.daily, 'utf8'), f.dailyRaw);
-  assert.equal(c.state.commits, 0);
+  assert.equal(c.state.commits - f.initialCommits, 0);
 }));
 
 test('a failed rollback discards its real connection so an uncommitted cleanup cannot escape through the pool', { timeout: 20000 }, async () => fixture(async c => {
@@ -60,7 +60,7 @@ test('lost actual SQL COMMIT acknowledgement probes its durable receipt and comp
   c.state.afterSqlCommit = () => { throw new Error('Synthetic lost COMMIT acknowledgement'); };
   assert.equal((await c.manual.permanentlyDeleteManualAccount(c.owner, c.taikoId, true)).ok, true);
   await assertDeleted(c, f);
-  assert.equal(c.state.commits, 1);
+  assert.equal(c.state.commits - f.initialCommits, 1);
 }));
 
 test('source publication failure after SQL revocation stays pending and a fresh recovery invocation completes it', { timeout: 20000 }, async () => fixture(async c => {
@@ -106,7 +106,7 @@ test('two independent permanent-delete requests share one durable operation and 
     c.manual.permanentlyDeleteManualAccount(c.owner, c.taikoId, true)
   ]);
   assert.deepEqual(first, second);
-  assert.equal(c.state.commits, 1);
+  assert.equal(c.state.commits - f.initialCommits, 1);
   const [[rows]] = await c.pool.query('SELECT COUNT(*) AS n FROM taiko_source_lifecycle WHERE taiko_id=?', [c.taikoId]);
   assert.equal(rows.n, 1);
   await assertDeleted(c, f);
@@ -132,7 +132,7 @@ test('manual cleanup handles legacy additional bot owners in one transaction and
     assert.equal(slot.slot_index, 1);
     assert.equal(slot.is_current, 1);
     assert.equal(decodeSqlRecoveryBackup((await receipt(c)).sql_backup, (await receipt(c)).sql_backup_sha256).botBindings.length, 2);
-    assert.equal(c.state.commits, 1);
+    assert.equal(c.state.commits - f.initialCommits, 1);
   } finally { await c.pool.execute('DELETE FROM bind WHERE qq=?', [otherBot]); }
 }));
 

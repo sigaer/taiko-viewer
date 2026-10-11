@@ -3,6 +3,7 @@
   "files": [
     "./publicationLifecycle.globals.d.ts",
     "../../server/services/account/manual-lifecycle.ts",
+    "../../server/services/account/manual-grants.ts",
     "../../server/services/account/manual-recovery.ts",
     "../../server/services/account/source-lifecycle-recovery.ts",
     "../../server/internal/account/manual-ownership.ts",
