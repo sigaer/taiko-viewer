@@ -369,3 +369,19 @@ B provider改为序列化LRU，64项/32MiB总量/4MiB单项/30s，key包含中�
 当前113项guarded client（含15个实际loader/命令函数和4个真实ASGI权限用例）、90项真实SQL（16 conditional+45 access+29 proxy）及局部TS通过；SQL101.815s/467.340MiB sampled/high-max-OOM0，wrapper实际exit0/journal成功/collected cgroup gone。初轮网络guard拒绝MockTransport、89 SQL中的两个晚会话失效和一个quota测试错误均如实记录。[进度证据](evidence/phase6-private-cache-progress.json)的hash为checkpoint后采集，不是完整最终验收。Source新增外部提交至9.81.15/2a27f09，整个taiko树相对本任务5c99dbd未变，保留其他项目改动；126+8/170 Source结果沿用原证据，未冒称重跑。
 
 缓存步骤未完成、不得发布：u0仍依赖本地读取/合并/文件写入，而新provider已经不再填充这些文件。选择将u0迁到中心，统一证明principal、全部成员Source和同时持有的SH input views；B仅消费中心结果。还需历史loader/public bearer fallback、渲染current/history joins、u0/完整full-delta/未知字段Golden和最终回归，再版本化提交/push客户端与Viewer步骤。当前implementation未提交，client仍0.2.3、Viewer预备0.82.0，线上0.81.11及三个PID不变，无R同步/生产grant/部署。Gate6继续IN_PROGRESS，全Writer/P1a/Read Model/成本/运维及最终激活要求保持。
+
+## 6.3e.8.5a 中心 u0 多成员私有读取（STEP_PASS；缓存轮仍 IN_PROGRESS）
+
+2026-10-12。u0 current/history正式路由现在由中心授权、合并；B resolver不再获取各成员写本地文件或调用materializer。内部 `u0v1_` 为principal的严格base64url编码，完整保留官方身份尾部/大小写，拒绝非canonical编码；不依赖旧sanitize字符串的逆推。u0要求当前virtual状态、至少两名official成员，manual排除，profile保留旧客户端排除manual后的index clamp。所有绑定行包括manual仍在principal capability/membership proof内。
+
+一个native worker按Source排序取得全部canonical SH；所有lease ready后才允许Node获取principal gate并开始SQL，派生前后锁内完整证明actor、principal policy、membership/current state及每名Source的授权。ordinary须verified QQ和完整自有同平台Source；service须明确bind_read/principals与所有成员的source_read，合并history因追加当前观察还须history_read。worker没有SQL连接/secret，也不写u0文件；只消费同时捕获的canonical views及公开combo参考，legacy member不冒称同代。
+
+复用旧中心合并规则，冻结2a27f09的full/delta、removed、无效JSON、equal timestamps、current早于末H的append顺序、profile/dojo、stage totals与未知字段Golden。history两遍扫描，只保留紧凑timeline与每成员相邻状态，扩展输出有32MiB累计上限；manifest向量/输入也分别32MiB，最多128成员，一个worker；stdin32KiB/stdout32MiB/stderr8KiB，ready45s/derive90s/native180s alarm/TERM-KILL/child close；共享既有2 active/8 queued/30s admission。current采用原incremental materializer的最大current file mtime，不将请求时间伪装为新成绩，也不把mtime当play/ready evidence。
+
+普通Source条件GET与u0都必须先真实quota、授权及原文/对象证明，随后才可精确304；single header为v1 commit/sequence，merged header为覆盖完整member vector、profile及binding state的SHA digest，两种语法明确区分。current字节未变/H-only新head时，304仍携带新的验证向量。B同代current/history最多一次fresh重试，合法adopted sequence0也可核验，不对legacy header缺失作可信声明。
+
+12 Source（8新+4旧）、最终120 guarded B、140 actual SQL/HTTP（15 merged+35 QQ+90现有私有读）和局部TS PASS。最终SQL157.239s/463.133MiB sampled/high/max/OOM0，wrapper exit0、systemd journal successful、owned cgroup/listener/worker清理；实际_test DB/opt-in guard，无生产复制或mutation。失败轮分别为AST fixture缺lineno、Source被误放到B的Core0.1.2 pin及Node identity module不必要引入service导致fixture注册前收集失败；修正后完整范围通过，[证据](evidence/phase6-merged-read-validation.json)记录实际范围/文件hash/日志，未冒称全Phase6或线上验收。
+
+Source按9.81.16标准源码commit/push；Viewer0.82.0本地步骤commit，全部Phase6完成后才标准部署/push。运行R没有新module/entrypoint，未同步/重启；线上0.81.11与PID1063394/1063408/829173不变。B仍0.2.3、缓存轮未完成且代码未发布：下一步历史磁盘loaders与renderer current/H joins/public bearer fallback，随后完整回归/版本提交/push。Source native u0物化Writer、credential/QQ/daily全部Writer/P1a、Read Model/invalidation/百万IO-RSS、trusted ops/fixed R deps及旧Writer停用后的统一激活与真实产品smoke继续待做，Gate6 IN_PROGRESS。
+
+同轮追加校准（Source9.81.17）：公开combo表会改变同chart的最佳记录选择，故合并标识还须包含公开参考与明确merge/history/clock profile的 `ruleRevision`。worker ready前载入并固定map，Node验证SHA并纳入整个digest。新增真实A/B选择反转样例，private Source head相同而ruleRevision及输出改变；禁止仅凭private heads把两次不同规则结果配成一代。追加后最终13 Source（9新+4旧）/120 B/140 SQL/局部TS全部通过，最终资源、代码hash、两个Source提交/push和Viewer本地提交以[证据](evidence/phase6-merged-read-validation.json)为准。缓存轮及Gate6继续IN_PROGRESS，下一步历史loader/joins/fallback与完整Read Model输入版本收敛。

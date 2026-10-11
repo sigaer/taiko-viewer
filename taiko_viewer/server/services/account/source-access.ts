@@ -7,6 +7,7 @@ import {captureBindingIdentity, type BindingIdentity} from '../../internal/accou
 import {MANUAL_SOURCE_ID} from '../../internal/account/source-lifecycle.ts';
 import {withScoreRead, currentScoreScope} from '../../infrastructure/taiko-publication/scope.ts';
 import {getRuntimePaths} from '../../infrastructure/runtime-paths.ts';
+import {recordPrivateSourceView} from '../../infrastructure/account/private-source-response.ts';
 import {PublicationUnavailableError} from '../../infrastructure/taiko-publication/client.ts';
 import {validSourceIdentity, validateSourceServicePolicy, type SourceServiceScope} from '../../infrastructure/account/source-service-schema.ts';
 
@@ -15,6 +16,7 @@ export type SourceGrant = Readonly<{kind:'owner'; binding:BindingIdentity}|{kind
 type Actor = SourceActor;
 type Grant = SourceGrant;
 export type SourceAccessTicket = Readonly<{db:Pool;paths:ReturnType<typeof getRuntimePaths>;actor:Actor;grant:Grant;source:string;scope:SourceServiceScope}>;
+type ProofDb=Pick<Pool,'execute'>;
 const publicErrors = new WeakSet<Error>();
 const failure = (status:number, message:string) => {const e=createError({statusCode:status,statusMessage:message});publicErrors.add(e);return e;};
 const denied = () => failure(403,'没有访问该账号成绩的权限');
@@ -38,20 +40,20 @@ export async function captureActor(event:H3Event,db:Pool) {
   const cookie=getCookie(event,SESSION_COOKIE_NAME);if(!cookie || !/^[a-f0-9]{64}$/.test(cookie))throw unauthorized();
   return readActor(db,'session',cookie);
 }
-async function serviceGrant(db:Pool,actor:Actor,source:string,scope:SourceServiceScope):Promise<Grant|null> {
+async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceServiceScope,locked=false):Promise<Grant|null> {
   if(actor.kind!=='developer')return null;
   const [rows]=await db.execute<RowDataPacket[]>(`SELECT CAST(id AS CHAR) AS id,developer_user_id,service_name,scopes_json,sources_json,
     revision_nonce,status,DATE_FORMAT(expires_at,'%Y-%m-%dT%H:%i:%s') AS expires_at,issued_by_user_id
-    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`,[actor.tokenId]);
+    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`+(locked?' FOR UPDATE':''),[actor.tokenId]);
   const row=rows[0];if(!row)return null;
   if(Number(row.developer_user_id)!==actor.userId || !/^[A-Za-z0-9_-]{1,64}$/.test(row.service_name) || !/^[a-f0-9]{32}$/.test(row.revision_nonce))throw new PublicationUnavailableError();
   const policy=validateSourceServicePolicy(JSON.parse(row.scopes_json),JSON.parse(row.sources_json));
   if(!policy.scopes.includes(scope) || (policy.sources!=='*'&&!policy.sources.includes(source)))return null;
   return Object.freeze({kind:'service',tuple:Object.freeze([row.id,row.developer_user_id,row.service_name,row.scopes_json,row.sources_json,row.revision_nonce,row.status,row.expires_at,row.issued_by_user_id])});
 }
-async function ownerGrant(db:Pool,actor:Actor,source:string,expected?:BindingIdentity):Promise<Grant> {
+async function ownerGrant(db:ProofDb,actor:Actor,source:string,expected?:BindingIdentity,locked=false):Promise<Grant> {
   const [rows]=await db.execute<(RowDataPacket & BindingIdentity)[]>(`SELECT CAST(id AS CHAR) AS id,taiko_id,source,manual_account_id
-    FROM web_taiko_bindings WHERE user_id=? AND CAST(taiko_id AS BINARY)=CAST(? AS BINARY) ORDER BY id LIMIT 2`,[actor.userId,source]);
+    FROM web_taiko_bindings WHERE user_id=? AND CAST(taiko_id AS BINARY)=CAST(? AS BINARY) ORDER BY id LIMIT 2`+(locked?' FOR UPDATE':''),[actor.userId,source]);
   if(rows.length!==1)throw denied();const row=rows[0];
   if(expected&&!same(captureBindingIdentity(row),expected))throw denied();
   if(!['wahlap','hiroba','manual'].includes(row.source))throw new PublicationUnavailableError();
@@ -59,16 +61,28 @@ async function ownerGrant(db:Pool,actor:Actor,source:string,expected?:BindingIde
   if(!MANUAL_SOURCE_ID.test(source)&&(row.source==='manual'||row.manual_account_id))throw new PublicationUnavailableError();
   return Object.freeze({kind:'owner',binding:captureBindingIdentity(row)});
 }
-async function requireManualAlive(db:Pool,source:string) {
+async function requireManualAlive(db:ProofDb,source:string) {
   if(!MANUAL_SOURCE_ID.test(source))return;
   const [rows]=await db.execute<RowDataPacket[]>('SELECT taiko_id FROM taiko_manual_accounts WHERE CAST(taiko_id AS BINARY)=CAST(? AS BINARY) LIMIT 1',[source]);
   if(!rows[0])throw denied();
 }
-async function prove(db:Pool,actor:Actor,grant:Grant,source:string,scope:SourceServiceScope) {
-  if(!same(actor,await readActor(db,actor.kind,actor.credential)))throw unauthorized();
-  const actual=grant.kind==='service'?await serviceGrant(db,actor,source,scope):await ownerGrant(db,actor,source,grant.binding);
+async function prove(db:ProofDb,actor:Actor,grant:Grant,source:string,scope:SourceServiceScope,locked=false) {
+  if(!same(actor,await readActor(db,actor.kind,actor.credential,locked)))throw unauthorized();
+  const actual=grant.kind==='service'?await serviceGrant(db,actor,source,scope,locked):await ownerGrant(db,actor,source,grant.binding,locked);
   if(!same(grant,actual))throw denied();await requireManualAlive(db,source);
+  // Resource checks may wait on SQL. A credential that expires or is revoked
+  // during those checks cannot authorize the completed proof.
+  if(!same(actor,await readActor(db,actor.kind,actor.credential,locked)))throw unauthorized();
 }
+
+/** Compose several private Sources using the same captured host and actor. */
+export async function captureSourceReadForActor(db:Pool,paths:SourceAccessTicket['paths'],actor:SourceActor,source:string,scope:'source_read'|'history_read'):Promise<SourceAccessTicket>{
+  if(!validSourceIdentity(source))throw failure(400,'成绩账号标识无效');
+  const grant=await serviceGrant(db,actor,source,scope)||await ownerGrant(db,actor,source);
+  await prove(db,actor,grant,source,scope);
+  return Object.freeze({db,paths,actor,grant,source,scope});
+}
+export const proveCapturedSourceAccess=(db:ProofDb,ticket:SourceAccessTicket,locked=false)=>prove(db,ticket.actor,ticket.grant,ticket.source,ticket.scope,locked);
 
 /** Private source read: live credential + owned binding or explicit service
  * capability. Never infer authority from a quota result or HTTP owner fields. */
@@ -106,6 +120,7 @@ export async function readAuthorizedSourceUserdata(event:H3Event,sourceInput:unk
     const source=String(sourceInput).trim(),scope=currentScoreScope(source)!;
     if(!await scope.reader.currentExists(source))throw failure(404,'未找到该账号的成绩');
     const raw=await scope.reader.readRawCurrent(source);
+    recordPrivateSourceView(event,scope.lease.view);
     try{const data=JSON.parse(raw);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid score object');return data as Record<string,unknown>;}
     catch{if(scope.lease.view)throw new PublicationUnavailableError();throw failure(500,'目标用户的本地 JSON 已损坏');}
   });

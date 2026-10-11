@@ -1,13 +1,13 @@
-import type {PoolConnection,RowDataPacket} from 'mysql2/promise';
+import type {Pool,PoolConnection,RowDataPacket} from 'mysql2/promise';
 import {MANUAL_SOURCE_ID} from '../../internal/account/source-lifecycle.ts';
 import {principalFailure,requirePrincipalSources,type PrincipalTicket} from '../../services/account/principal-access.ts';
 export type BotBindingRow={row_id:string;qq:string;id:string;visible:number;slot_index:number;is_current:number;source:'wahlap'|'hiroba'|'manual';display_name?:string};
 export type BotBindingData={rows:BotBindingRow[];virtual:boolean};
 const sourceFailure=()=>{throw new Error('Invalid private binding state');};
-export async function readBotBindingData(db:PoolConnection,ticket:PrincipalTicket):Promise<BotBindingData>{
+export async function readBotBindingData(db:Pick<Pool,'execute'>,ticket:PrincipalTicket,locked=true):Promise<BotBindingData>{
  const [records]=await db.execute<RowDataPacket[]>(`SELECT CAST(row_id AS CHAR) AS row_id,qq,id,COALESCE(visible,0) AS visible,
   COALESCE(slot_index,1) AS slot_index,COALESCE(is_current,0) AS is_current,COALESCE(source,'wahlap') AS source
-  FROM bind WHERE qq=? ORDER BY slot_index,row_id LIMIT 129 FOR UPDATE`,[ticket.principal]);
+  FROM bind WHERE qq=? ORDER BY slot_index,row_id LIMIT 129`+(locked?' FOR UPDATE':''),[ticket.principal]);
  if(records.length>128)sourceFailure();
  const rows:BotBindingRow[]=records.map(row=>{
   if(row.qq!==ticket.principal)throw principalFailure(403,'没有访问该绑定的权限。');
@@ -22,7 +22,7 @@ export async function readBotBindingData(db:PoolConnection,ticket:PrincipalTicke
   const [[manual]]=await db.execute<RowDataPacket[]>('SELECT nickname FROM taiko_manual_accounts WHERE taiko_id=? LIMIT 1',[row.id]);
   if(!manual||typeof manual.nickname!=='string')sourceFailure();row.display_name=manual.nickname;
  }
- const [[state]]=await db.execute<RowDataPacket[]>('SELECT identity_key,current_virtual FROM taiko_bind_identity_state WHERE identity_key=? LIMIT 1 FOR UPDATE',[ticket.principal]);
+ const [[state]]=await db.execute<RowDataPacket[]>('SELECT identity_key,current_virtual FROM taiko_bind_identity_state WHERE identity_key=? LIMIT 1'+(locked?' FOR UPDATE':''),[ticket.principal]);
  if(state&&(state.identity_key!==ticket.principal||![0,1].includes(state.current_virtual)))sourceFailure();
  return {rows,virtual:state?.current_virtual===1};
 }

@@ -1,4 +1,7 @@
 import { readAuthorizedSourceUserdata } from "../../services/account/source-access.ts";
+import { privateSourceResponse } from "../../infrastructure/account/private-source-response.ts";
+import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
+import {readAuthorizedMergedSource} from '../../services/account/merged-source-read.ts';
 import type { H3Event, MultiPartData } from "h3";
 import { createError, isError } from "h3";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
@@ -290,7 +293,7 @@ export const getDeveloperUserdataByUserid = async (event: H3Event, useridInput: 
     await enforceTaikoOpenQuota(event, "developer_userdata");
     const userid = String(useridInput || "").trim();
     ensureNonEmpty(userid, "缺少 userid");
-    return await readAuthorizedSourceUserdata(event, userid);
+    return await privateSourceResponse(event, 'current', () => isMergedSource(userid)?readAuthorizedMergedSource(event,userid,'current'):readAuthorizedSourceUserdata(event, userid));
   } catch (error) {
     if (isError(error) || error instanceof PublicationUnavailableError) throw error;
     throw new PublicationUnavailableError();

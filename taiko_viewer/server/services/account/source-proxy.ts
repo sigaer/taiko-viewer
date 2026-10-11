@@ -8,6 +8,9 @@ import {captureAuthorizedSourceMutation,withCapturedSourceRead,withAuthorizedSou
 import {runSourceMutationWorker} from '../../infrastructure/account/source-mutation-worker.ts';
 import {currentScoreScope} from '../../infrastructure/taiko-publication/scope.ts';
 import {PublicationUnavailableError} from '../../infrastructure/taiko-publication/client.ts';
+import {recordPrivateSourceView} from '../../infrastructure/account/private-source-response.ts';
+import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
+import {readAuthorizedMergedSource} from './merged-source-read.ts';
 export async function sourceProxyRequest<T>(event:H3Event,apiName:string,task:()=>Promise<T>){
   try{await enforceTaikoOpenQuota(event,apiName);return await task();}
   catch(error){if(isError(error)||error instanceof PublicationUnavailableError)throw error;throw new PublicationUnavailableError();}
@@ -37,6 +40,7 @@ export async function updateAuthorizedSource(event:H3Event,sourceInput:unknown,p
   }finally{await unlink(path).catch(()=>{});}
 }
 export async function readAuthorizedSourceHistory(event:H3Event,sourceInput:unknown){
+  if(isMergedSource(sourceInput))return readAuthorizedMergedSource(event,sourceInput,'history');
   return withAuthorizedSourceRead(event,sourceInput,'history_read',async()=>{
     const source=String(sourceInput).trim(),scope=currentScoreScope(source)!,names=(await scope.reader.listHistory(source)).filter(name=>name.startsWith('data_')&&name.endsWith('.json')).sort();
     const snapshots:Array<{capturedAt:string;payload:Record<string,unknown>}>=[];let bytes=0;
@@ -47,6 +51,7 @@ export async function readAuthorizedSourceHistory(event:H3Event,sourceInput:unkn
         const capturedAt=String(payload._meta?.ts||name).trim();snapshots.push({capturedAt,payload});
       }catch{/* Invalid legacy/historical JSON is preserved but not returned as a parsed snapshot. */}
     }
+    recordPrivateSourceView(event,scope.lease.view);
     return {ok:true,taikoId:source,snapshots};
   });
 }
