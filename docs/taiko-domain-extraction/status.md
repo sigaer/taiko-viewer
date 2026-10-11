@@ -4,7 +4,7 @@
 
 Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS；开始 Phase 6 ownership、publication、Read Model 与 storage 决策。先前内存准入阻碍已解除，历史记录保留。
 
-当前6.3e.8.6c子步PASS：客户端删除/可见性改用中心一次SQL事务与显式scope，确认保存具体ID，回执重试不删除重新绑定的数据；181 client/66最终SQL/TS通过，同轮未变凭据与access78通过。B0.2.5/a8f1b38已标准push并核对远端。[证据](evidence/phase6-client-binding-mutation-validation.json)。native authority整轮及Gate6仍IN_PROGRESS，继续native Hiroba/QQ、client QQ/token issuer、全部Writer/P1a、Read Model/成本/运维和统一激活。Viewer0.82本地预备、线上0.81.11，A9.81.21未变。
+当前6.3e.8.6d子步PASS：客户端网页成绩token由中心核验发送者当前实账号后一次SQL签发，显式scope/完整所属、Source EX/未知COMMIT精确证明，旧本地bearer helper410；195 client/90跨两轮实际SQL-HTTP+1策略/TS通过。B0.2.6/e275995（文档6ade2e1）已标准push并核对远端。[证据](evidence/phase6-client-score-token-validation.json)。native authority整轮及Gate6仍IN_PROGRESS，继续native Hiroba/QQ、client QQ迁移、全部Writer/P1a、Read Model/成本/运维和统一激活。Viewer0.82本地预备、线上0.81.11，A9.81.21未变。
 
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
@@ -14,7 +14,7 @@ Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS�
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
 | 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
-| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–9、6.3e.1–7、6.3e.8.1–4、8.5a/b及8.6a/b/c已留档；缓存/历史153 client/62 Source+5subtests/12 pipe/143 SQL/TS；native mutation182 Source/13 SQL复合用例；client mutation181/66最终SQL+78先前未变SQL；待native Hiroba/QQ/client QQ/token issuer、全部Writer/P1a、Read Model、成本/运维及统一发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json)、[最新验证](evidence/phase6-client-binding-mutation-validation.json) |
+| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–9、6.3e.1–7、6.3e.8.1–4、8.5a/b及8.6a/b/c/d已留档；缓存/历史153 client/62 Source+5subtests/12 pipe/143 SQL/TS；native mutation182 Source/13 SQL复合用例；client mutation181/66最终SQL+78先前未变SQL；token195/90 SQL+1 policy；待native Hiroba/QQ/client QQ、全部Writer/P1a、Read Model、成本/运维及统一发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json)、[最新验证](evidence/phase6-client-score-token-validation.json) |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -116,3 +116,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-12 / 6.3e.8.6b：A9.81.21/9befec4已标准push；原生绑定4写入同principal gate/SQL TX、精确所属credential删除同COMMIT、确认固定ID与摘要失败安全回复。182 Source（132旧+21 metadata+29 mutation）、13真实_test SQL复合用例PASS，含3选定旧u0命令回归、5s同锁和实际COMMIT前后死亡。32.845s/216309760byte sampled/high-max-OOM0、wrapper exit0、unit successful/inactive/cgroup gone。未复制R/重启/部署；native authority整轮/Gate6 IN_PROGRESS，继续其余授权与全Writer/P1a/Read Model/成本/运维/统一激活。
 
 - 2026-10-12 / 6.3e.8.6c：B0.2.5/a8f1b38已标准push，remote SHA核对；中心删除/visibility一次SQL事务、显式新scope、durable effect/确认固定ID、重绑后exact retry不重放。最终181 client/66实际SQL/TS PASS，同轮此前凭据33+access45 PASS，合计144跨两轮。72.334s/533839872byte sampled/high-max-OOM0，journal success/ExecMainStatus0/cgroup gone。fixture初始化失败遗留66测试QQ行已逐条证明并清理、remaining0，失败历史留档；上游/full Bot/online未覆盖。A9.81.21及R/live0.81.11/PIDs不变，Viewer0.82本地预备；native authority/Gate6继续IN_PROGRESS。
+
+- 2026-10-12 / 6.3e.8.6d：B0.2.6/e275995源码及6ade2e1文档已push核对remote；网页成绩token私聊sender/current real中心签发、显式score_token_issue/完整owner、Source EX→principal gate→SQL、exact ACK/一请求不自动重试，未使用local bearer410。195 client/既有66 SQL+最终24 SQL-HTTP和1纯policy/TS PASS（分轮），26.613s/471056384byte sampled/high-max-OOM0，wrapper exit0/journal successful/cgroup gone。初轮transitive import与新test注册失败如实留档。A9.81.21、R/live0.81.11/PIDs不变，Viewer0.82本地预备；native authority/Gate6 IN_PROGRESS。

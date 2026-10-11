@@ -26,7 +26,7 @@ try{
  uninstall=installGoalSqlRuntime(db,options.config,{withDeveloper:true});
  globalThis.defineEventHandler=defineEventHandler;
  const action=options.action||'upsert';
- const handler=(await import(action==='remove'?'../../server/api/taiko/proxy/bind/remove.post.ts':action==='visibility'?'../../server/api/taiko/proxy/bind/visibility.post.ts':'../../server/api/taiko/proxy/bind.post.ts')).default;
+ const handler=(await import(action==='score-token'?'../../server/api/taiko/proxy/bind/score-token.post.ts':action==='remove'?'../../server/api/taiko/proxy/bind/remove.post.ts':action==='visibility'?'../../server/api/taiko/proxy/bind/visibility.post.ts':'../../server/api/taiko/proxy/bind.post.ts')).default;
  server=createServer(toNodeListener(createApp().use(handler)));server.listen(0,'127.0.0.1');await once(server,'listening');
  const response=await fetch('http://127.0.0.1:'+server.address().port,{method:'POST',headers:{'Content-Type':'application/json',Cookie:options.cookie,'x-forwarded-for':options.ip},
   body:JSON.stringify({identityKey:options.principal,taikoId:options.taikoId,requestId:options.requestId,...(options.body||{})}),signal:AbortSignal.timeout(10000)});

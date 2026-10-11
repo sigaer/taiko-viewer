@@ -25,7 +25,7 @@ export function parseSourceServiceRequest(input: unknown): Request {
   let principalsJson:string|null=null;
   try{if(body.principals!==undefined&&body.principals!==null)principalsJson=JSON.stringify(validateServicePrincipals(body.principals));}
   catch{throw new SourceServiceProvisionError(400);}
-  if(policy.scopes.some(scope=>scope.startsWith('bind_')||scope==='hiroba_bind')&&principalsJson===null)throw new SourceServiceProvisionError(400);
+  if(policy.scopes.some(scope=>scope.startsWith('bind_')||scope==='hiroba_bind'||scope==='score_token_issue')&&principalsJson===null)throw new SourceServiceProvisionError(400);
   const expiresAt = body.expiresAt === undefined || body.expiresAt === null ? null : body.expiresAt;
   if (expiresAt !== null && (typeof expiresAt !== 'string' || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(expiresAt) ||
     !Number.isFinite(Date.parse(expiresAt.replace(' ', 'T') + 'Z')) ||

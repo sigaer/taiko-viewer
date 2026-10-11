@@ -5,7 +5,7 @@ import {captureActor,readActor,safeSourceError,type SourceActor} from './source-
 import {validBotPrincipal,validateServicePrincipals} from '../../infrastructure/account/principal-policy.ts';
 import {validateSourceServicePolicy} from '../../infrastructure/account/source-service-schema.ts';
 type Db=Pick<Pool,'execute'>;
-export type PrincipalScope='bind_read'|'bind_write'|'bind_current'|'bind_remove'|'bind_visibility'|'hiroba_bind';
+export type PrincipalScope='bind_read'|'bind_write'|'bind_current'|'bind_remove'|'bind_visibility'|'hiroba_bind'|'score_token_issue';
 type Target=Readonly<{id:string;taiko_id:string;source:string;manual_account_id:null}>;
 type Grant=Readonly<{kind:'owner';tuple:readonly unknown[];target:Target|null}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
 export type PrincipalTicket=Readonly<{db:Pool;actor:SourceActor;principal:string;scope:PrincipalScope;grant:Grant;targetSource:string|null;targetPlatform:string|null}>;

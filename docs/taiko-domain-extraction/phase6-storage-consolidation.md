@@ -433,3 +433,13 @@ B SDK 最多两次相同 nonce 请求，响应流式 256KiB；90s 分块检查�
 初轮 fixture/TS/SDK guard 失败如实留档；初始化失败遗留66测试QQ行通过失败时间窗/生成QQ/缺失parent/状态与连续user ID逐条证明，同事务精确删除、remaining0，actual SELECT DATABASE()=_test及双显式opt-in，无production mutation。fixture setup现在受finally清理。完整[证据](evidence/phase6-client-binding-mutation-validation.json)。
 
 B0.2.5/a8f1b38标准commit/push和实际remote SHA核对。Source A9.81.21代码/hash未变，182 Source之前证据沿用而未重跑。Viewer0.82本地预备，线上0.81.11及三个PID不变，无R同步/重启/部署、无启动客户端。该版本依赖中心0.82协议与显式生产grant，独立源码push不代表已激活。native authority整轮/Gate6 IN_PROGRESS，继续native Hiroba/QQ、client QQ/token issuer、全部Writer/P1a、Read Model/invalidation/百万冷暖IO-RSS、trusted ops/fixed R deps/旧Writer停用后的统一发布与真实产品验收。
+
+## 6.3e.8.6d 客户端网页成绩 token 中心所属签发（STEP_PASS）
+
+2026-10-12。私聊命令只使用发送者 principal 的中心当前实账号，不借用提及/可见他人绑定或本地 SQLite 的 ID 查询。隐藏自有实账号可用，u0/manual/他人/失效授权拒绝。Node 捕获 pool/runtime paths，Source EX→principal gate→SQL，前后证明 caller/grant、完整 Bot bindings/选择与普通 owner 的对应 web Source/platform，再用既有中心 token 表/48hex mask 一次 COMMIT 旋转。service 另须显式 score_token_issue、principal 与全部绑定 Source，provisioning 缺 principal 拒绝。响应 private,no-store 和 Vary credentials。
+
+ACK 丢失只在仍持 EX、捕获 pool 新连接精确证明 token hash/mask/caller/current 后成功。客户端签发单次请求、不自动重试、不持久化含 token 的回执；再次用户命令明确旋转。通用绑定 transport 保持256KiB/90s分块检查/10s socket，旧删除/visibility两次nonce retry不变。旧无业务调用者的local bearer helper任何IO前410，历史未使用SQLite token schema保留待统一清理。
+
+195 guarded client（171保留+24中心token用例，替代10旧local-authority用例）、既有绑定66 SQL、最终新token24实际SQL/HTTP+1纯provisioning policy及TS PASS。合计90实际SQL/HTTP和1策略检查，分属两轮，不冒称同一次全通过。实际Python SDK→owned H3、命令AST群聊/空/manual/u0/denied/private sender验证，late撤权/rollback/lease loss、Source/principal队列、exact ACK/captured pool与config替换、两个COMMIT前后真进程退出。原parity保留NoneBot module import，不宣称完整Bot启动/真实upstream/online。26.613s/471056384byte cgroup250ms采样、child361936KiB/high-max-OOM0，wrapper exit0/journal成功/MainPID0/cgroup gone。初轮150pass/3import fail与新Node文件注册失败（旧66pass）已修正、失败证据保留，无生产私有数据复制/写入。
+
+B0.2.6/e275995源码与6ade2e1文档校准已标准push及实际remote核对，完整[证据](evidence/phase6-client-score-token-validation.json)。A9.81.21/12文件hash未变，沿用182 Source前轮结果未重跑。Viewer0.82仍本地预备，线上0.81.11/PIDs不变，R未同步、服务未重启、client未启动。native authority/Gate6 IN_PROGRESS；继续native Hiroba/QQ、client QQ迁移、全Writer/P1a、Read Model/成本/运维/fixed R deps/旧Writer停用后统一发布与真实online Gate。
