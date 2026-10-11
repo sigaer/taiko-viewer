@@ -60,3 +60,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.3b：A `2d7bd9a` / 9.81.1 已 push，acquisition kernel RMW / lease reader；Viewer 0.82.0 预备版本，shared/account writer + Growth 单 view 本地步骤。24 Python、66 Node、TS 与 version test 1 全 PASS；约 280.11 MiB sampled cgroup peak，最终 OOM=0。早期测试 loader heap failure 已修复并重跑。未同步 R/未部署，继续剩余 Writer、授权与 Read Model，Gate 6 IN_PROGRESS。
 
 - 2026-10-11 / 6.3c：Kinoko full/delta 与 current 同批次暂存/提交；SQL song lock 纳入 kernel fence、获取后复查完整 source identity。17 actual account/Kinoko 回归 PASS，约 95.86 MiB sampled cgroup peak、OOM=0；完整旧 H bytes/name/summary Golden 一致。Viewer 本地步骤，继续 manual 删除、dispatcher/u0、grant 与 Read Model；Gate 6 IN_PROGRESS。
+
+- 2026-10-11 / 6.3d-audit：发现 Goal SQL→source 与新 Writer source→SQL/FK 反向依赖，及 manual rename 后 canonical manifest 仍存、多 owner 多事务与等待后 owner 检查缺口。锁顺序/生命周期收敛方案已留档；具体实现与故障/隔离 SQL 验证待执行，未提前 PASS。
