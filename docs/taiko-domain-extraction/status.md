@@ -12,7 +12,7 @@ Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS�
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
 | 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
-| 6 Writer/storage | IN_PROGRESS | 6.1 ownership/选型、6.2 隔离协议 19 tests PASS；待真实接入、Read Model、全量资源/恢复与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
+| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a/b 首批实际接入 PASS（24 Python + 66 Node）；待其余 Writer/授权、Read Model、全量资源/恢复与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -56,3 +56,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.2：A `85c4251` / 9.81.0 已 push，单一 Infrastructure publication foundation / local bridge 的 19 项合成磁盘/进程验证 PASS；尚无运行入口引用，不同步/重启 R。开始 6.3 真实接入；Gate 6 IN_PROGRESS。
 
 - 2026-10-11 / 6.3a：Viewer 有界本地 pipe 客户端的 6 个实际跨语言合成用例 + TypeScript PASS；原入口尚未接入。步骤本地提交，待 Phase 6 标准发布一并 push；继续 score read view / 真正 Writer convergence。
+
+- 2026-10-11 / 6.3b：A `2d7bd9a` / 9.81.1 已 push，acquisition kernel RMW / lease reader；Viewer 0.82.0 预备版本，shared/account writer + Growth 单 view 本地步骤。24 Python、66 Node、TS 与 version test 1 全 PASS；约 280.11 MiB sampled cgroup peak，最终 OOM=0。早期测试 loader heap failure 已修复并重跑。未同步 R/未部署，继续剩余 Writer、授权与 Read Model，Gate 6 IN_PROGRESS。

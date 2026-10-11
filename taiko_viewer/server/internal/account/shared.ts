@@ -1,8 +1,8 @@
-import { access, mkdir, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants, readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { createHash, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from "node:crypto";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { promisify } from "node:util";
 import nodemailer from "nodemailer";
 import OSS from "ali-oss";
@@ -12,7 +12,8 @@ import { createError, getCookie, getHeader, readMultipartFormData } from "h3";
 import { getRatingEntries, getSongCatalog as loadSongCatalog } from "~/server/services/content";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
-import { createFileScoreReader } from "../../domain/file-score-reader.ts";
+import { getDomainScoreReader } from "../../services/taiko-domain/read.ts";
+import { withDomainScoreRead, withDomainScoreWrite, stageScoreText, currentScoreScope } from "../../services/taiko-domain/publication.ts";
 import type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 export type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 
@@ -614,48 +615,26 @@ export const getUserdataPath = (taikoId: string) => {
   return resolve(userdataDir, `${taikoId}data.json`);
 };
 
-const domainScoreReader = () => createFileScoreReader(getRuntimePaths().userdataDir, () => new Date().toISOString());
+const domainScoreReader = getDomainScoreReader;
 export const userdataFileExists = (taikoId: string) => domainScoreReader().currentExists(taikoId);
 
-const getUserdataHistoryDir = (taikoId: string) => {
-  const { userdataDir } = getRuntimePaths();
-  return resolve(userdataDir, taikoId);
-};
-
-export const readUserdata = async (taikoId: string) => {
+export const readUserdata = async (taikoId: string) => withDomainScoreRead(taikoId, async () => {
   if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
   const { current: payload } = await domainScoreReader().readCurrent(taikoId);
   if (!Array.isArray(payload.songs)) payload.songs = [];
   return payload;
-};
+});
 
-export const readRawUserdataText = async (taikoId: string) => {
+export const readRawUserdataText = async (taikoId: string) => withDomainScoreRead(taikoId, async () => {
   if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
   return domainScoreReader().readRawCurrent(taikoId);
-};
+});
 
-const userdataWriteQueues = new Map<string, Promise<unknown>>();
-
-export const withUserdataWriteLock = async <T>(taikoId: string, task: () => Promise<T>): Promise<T> => {
-  const previous = userdataWriteQueues.get(taikoId) || Promise.resolve();
-  let release!: () => void;
-  const current = new Promise<void>((resolveLock) => {
-    release = resolveLock;
-  });
-  const chained = previous.catch(() => undefined).then(() => current);
-  userdataWriteQueues.set(taikoId, chained);
-  await previous.catch(() => undefined);
-  try {
-    return await task();
-  } finally {
-    release();
-    if (userdataWriteQueues.get(taikoId) === chained) userdataWriteQueues.delete(taikoId);
-  }
-};
+export const withUserdataWriteLock = withDomainScoreWrite;
 
 export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   const rankCounts = Array.from({ length: 7 }, () => 0);
@@ -678,28 +657,28 @@ export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   return payload;
 };
 
-export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => {
-  const filePath = getUserdataPath(taikoId);
-  const historyDir = getUserdataHistoryDir(taikoId);
-  await mkdir(historyDir, { recursive: true });
+export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => withDomainScoreWrite(taikoId, async () => {
+  if (!/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
   const serialized = JSON.stringify(payload, null, 4);
-  const tempPath = `${filePath}.tmp-${Date.now()}`;
-  await writeFile(tempPath, serialized, "utf-8");
-  await rename(tempPath, filePath);
-  const timestamp = formatLocalTimestamp().replace(/[: ]/g, "_");
+  await stageScoreText(taikoId, "current", serialized);
+  const observedAt = now();
+  const stamp = formatLocalTimestamp(observedAt);
+  const timestamp = stamp.replace(/[-: ]/g, "").replace(/^(\d{8})(\d{6})$/, "$1_$2");
+  const micros = String(observedAt.getMilliseconds() * 1000).padStart(6, "0");
+  const sequence = String((currentScoreScope(taikoId)!.lease.view?.sequence || 0) + 1).padStart(20, "0");
   const payloadMeta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
   const historyPayload = {
     ...payload,
     _meta: {
       ...payloadMeta,
       full: true,
-      ts: formatLocalTimestamp(),
+      ts: stamp,
       source,
       writer_source: source
     }
   };
-  await writeFile(join(historyDir, `data_${timestamp}_${source}.json`), JSON.stringify(historyPayload, null, 4), "utf-8");
-};
+  await stageScoreText(taikoId, `history/data_${timestamp}_${micros}_${sequence}_${randomBytes(16).toString("hex")}_${source}.json`, JSON.stringify(historyPayload, null, 4));
+});
 
 export const getLockMap = async (userId: number, taikoId: string) => {
   await ensureAccountSchema();

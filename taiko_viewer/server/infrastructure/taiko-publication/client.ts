@@ -11,12 +11,15 @@ type Message = Record<string, unknown> & { view?: PublicationManifest | null };
 type Deferred = { resolve: (value: Message) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
 
 export class PublicationUnavailableError extends Error {
+  readonly statusCode = 503;
+  readonly statusMessage = "成绩数据暂不可用，请稍后重试";
   constructor() { super("Score publication is unavailable"); this.name = "PublicationUnavailableError"; }
 }
 
 export type PublicationLease = {
   view: PublicationManifest | null;
-  put: (key: string, body: string) => Promise<void>;
+  alive: () => boolean;
+  put: (key: string, body: string) => Promise<PublicationReference>;
   remove: (key: string) => Promise<void>;
   publish: (options?: { replaceHistory?: boolean; transactionId?: string }) => Promise<PublicationManifest>;
   close: () => Promise<void>;
@@ -114,7 +117,16 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
     if (ready.ready !== true || ready.schema !== 1 || ready.view === undefined) throw new PublicationUnavailableError();
     const lease: PublicationLease = {
       view: ready.view,
-      async put(key, body) { await send({ method: "put", key, body }); },
+      alive: () => !failed && !closed && !closing,
+      async put(key, body) {
+        const response = await send({ method: "put", key, body });
+        const reference = response.reference as PublicationReference | undefined;
+        if (!reference || !/^[a-f0-9]{64}$/.test(reference.sha256) ||
+          !Number.isSafeInteger(reference.bytes) || reference.bytes < 0 || reference.bytes > 64 * 1024 * 1024) {
+          throw new PublicationUnavailableError();
+        }
+        return reference;
+      },
       async remove(key) { await send({ method: "remove", key }); },
       async publish(publicationOptions = {}) {
         const response = await send({ method: "publish", ...publicationOptions });

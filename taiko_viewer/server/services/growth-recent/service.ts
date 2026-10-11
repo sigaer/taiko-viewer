@@ -1,3 +1,5 @@
+import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
+import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { createError } from "h3";
 import type { RowDataPacket } from "mysql2/promise";
 import type { GrowthFact, RecentGrowthAcknowledgeResponse, RecentGrowthResponse } from "~/types/player-growth";
@@ -29,7 +31,7 @@ const factsForObservations = async (
   const eventDays = [...new Set(observations.flatMap(item => item.eventDays))];
   const db = getAccountDb();
   const [current, catalog, goalFacts] = await Promise.all([
-    readGoalSnapshot(taikoId).catch(() => null),
+    readGoalSnapshot(taikoId).catch(error => { if (error instanceof PublicationUnavailableError) throw error; return null; }),
     getSongCatalog(),
     loadGoalFacts(db, userId, bindingId, "1970-01-01T00:00:00.000Z", "2100-01-01T00:00:00.000Z").catch(() => [])
   ]);
@@ -49,31 +51,34 @@ export async function getRecentGrowth(userId: number): Promise<RecentGrowthRespo
   if (binding.source === "manual") {
     return { profileId: String(bindingId), state: "unavailable", observedAt: null, facts: [], totalFacts: 0, boundary: { acknowledgedToken: null, currentToken: null, acknowledgeRequired: false, recovered: false } };
   }
-  const [evidence, cursor] = await Promise.all([
-    loadGrowthScoreEvidence(binding.taiko_id),
-    readRecentCursor(getAccountDb(), userId, bindingId)
-  ]);
-  const window = selectRecentObservationWindow(evidence.observations, cursor);
-  const current = window.current;
-  if (!current) {
-    return { profileId: String(bindingId), state: "unavailable", observedAt: null, facts: [], totalFacts: 0, boundary: { acknowledgedToken: cursor?.token || null, currentToken: null, acknowledgeRequired: false, recovered: false } };
-  }
-  const allFacts = await factsForObservations(userId, bindingId, binding.taiko_id, evidence, window.selected);
-  const facts = allFacts.slice(-RECENT_FACT_LIMIT).reverse();
-  const acknowledgeRequired = window.acknowledgeRequired;
-  return {
-    profileId: String(bindingId),
-    state: acknowledgeRequired ? "new" : "caught-up",
-    observedAt: current.observedAt,
-    facts,
-    totalFacts: allFacts.length,
-    boundary: {
-      acknowledgedToken: cursor?.token || null,
-      currentToken: current.token,
-      acknowledgeRequired,
-      recovered: window.recovered
+  return withDomainScoreRead(binding.taiko_id, async () => {
+    const [evidence, cursor] = await Promise.all([
+      loadGrowthScoreEvidence(binding.taiko_id),
+      readRecentCursor(getAccountDb(), userId, bindingId)
+    ]);
+    const window = selectRecentObservationWindow(evidence.observations, cursor);
+    const current = window.current;
+    if (!current) {
+      return { profileId: String(bindingId), state: "unavailable", observedAt: null, facts: [], totalFacts: 0, boundary: { acknowledgedToken: cursor?.token || null, currentToken: null, acknowledgeRequired: false, recovered: false } };
     }
-  };
+    const allFacts = await factsForObservations(userId, bindingId, binding.taiko_id, evidence, window.selected);
+    const facts = allFacts.slice(-RECENT_FACT_LIMIT).reverse();
+    const acknowledgeRequired = window.acknowledgeRequired;
+    return {
+      profileId: String(bindingId),
+      state: acknowledgeRequired ? "new" : "caught-up",
+      observedAt: current.observedAt,
+      facts,
+      totalFacts: allFacts.length,
+      boundary: {
+        acknowledgedToken: cursor?.token || null,
+        currentToken: current.token,
+        acknowledgeRequired,
+        recovered: window.recovered
+      }
+    };
+  });
+
 }
 
 type AcknowledgeInput = { profileId?: unknown; expectedBoundary?: unknown; acknowledgeToken?: unknown };

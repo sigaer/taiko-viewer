@@ -1,0 +1,193 @@
+{
+  "phase": 6,
+  "step": "6.3b-source-and-account-adapters",
+  "status": "ADAPTER_SLICE_PASS_PENDING_ALL_WRITERS_AND_RELEASE",
+  "date": "2026-10-11T09:32:20.892808+08:00",
+  "center_commit": "2d7bd9a8f2ca5cc3559f20b0413d9ecb5fe997a3",
+  "center_version": "9.81.1",
+  "center_pushed": true,
+  "viewer_version": "0.82.0 (local unreleased)",
+  "production_version": "0.81.11",
+  "tests": {
+    "python": 24,
+    "node": 66,
+    "version": 1,
+    "failures": 0,
+    "typescript": "PASS",
+    "actual_acquisition_legacy_oracle": "85c4251",
+    "actual_account_service_cases": 7,
+    "managed_growth_cases": 4
+  },
+  "resources": {
+    "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791682176-1094257.service",
+    "durationMs": 42213,
+    "sampledMemoryPeakBytes": 293720064,
+    "sampleIntervalMs": 250,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "processes": [
+      {
+        "Name": "MainThread",
+        "VmHWM": "48784 kB",
+        "VmRSS": "48784 kB"
+      }
+    ]
+  },
+  "source_files": {
+    "center": [
+      {
+        "path": "taiko/plugins/utils/userdata_storage.py",
+        "sha256": "5bbe752b6c1c7e5ff9e1294227ae57b4c6f3c476eeb8f2d476cc17203cea89c3"
+      },
+      {
+        "path": "taiko/taiko_store/bridge.py",
+        "sha256": "af3bc99482ae248d2e51ddb3e633f051740c420b65cf2a4c87011172a1430aeb"
+      },
+      {
+        "path": "taiko/taiko_store/publication.py",
+        "sha256": "c74998ce4503ea17935aa6bde29c78608c7e5021c36215df4d14ec25d7d68834"
+      },
+      {
+        "path": "taiko/taiko_store/reader.py",
+        "sha256": "f336d1dfaa9afe17e36b514b44f70cc41bd68b41521be2e3ab1c3d8eaf6f0e59"
+      },
+      {
+        "path": "taiko/tests/test_publication_adapters.py",
+        "sha256": "d4545628c4c9cf34b5743637b978172da23b7ee653400e92cd09d285d41383cf"
+      }
+    ],
+    "viewer": [
+      {
+        "path": "taiko_viewer/package-lock.json",
+        "sha256": "05d3051bbd444ebd5cd8a6c7365e5fc4410c8dc504ba5cc32a67ff83665c7580"
+      },
+      {
+        "path": "taiko_viewer/package.json",
+        "sha256": "90f8cb1d8c2afe3796f81624c2a6de4e2c1d040c7835d82581f61c4ac4421aac"
+      },
+      {
+        "path": "taiko_viewer/scripts/performance/growth-module-loader.mjs",
+        "sha256": "5365bef6fe8cb60e436bdecf88c11db9e27b5465b1f610443854ce68a11f805b"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/client.ts",
+        "sha256": "369ebb75c74bfc1e6730194788579a3c3884615f9c6ebfa3b19111d6d53ad978"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/reader.ts",
+        "sha256": "40500432842749b351fa948ef3f0946c09b146a40a3c778563d4f1ebb61e1da4"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/scope.ts",
+        "sha256": "dd604140bf05849c984327bdfe4f4953cb9064d6a5da0fe94b2780301e2a2d4c"
+      },
+      {
+        "path": "taiko_viewer/server/internal/account/shared.ts",
+        "sha256": "7c8a369e8ea687afa9dd60784d2383f61d1d5b471572def2c480425e9eabe0a6"
+      },
+      {
+        "path": "taiko_viewer/server/services/account/growth.ts",
+        "sha256": "cc042e89a053c11cb3a97a8f1115fa785edc4454ae8ee8f40848d09a4fa48365"
+      },
+      {
+        "path": "taiko_viewer/server/services/growth-history/evidence.ts",
+        "sha256": "ad6c61b72771abfe14eb8030d8786616770abb6ecaaa36110b081d0bcf97d4ea"
+      },
+      {
+        "path": "taiko_viewer/server/services/growth-history/service.ts",
+        "sha256": "56ead40c50b021acca23a5a8f3180c1cb5543e90779f801ab1c51dc8dd2ddbfb"
+      },
+      {
+        "path": "taiko_viewer/server/services/growth-passport/service.ts",
+        "sha256": "2b4d93113af0b8894f31128cfd0d6e3fd2404826f0ec20c819c7af0cd2965be1"
+      },
+      {
+        "path": "taiko_viewer/server/services/growth-recent/service.ts",
+        "sha256": "14c134b6e634250fc7cf29c9fa215a5df53904c647371ded6384b98059065cf4"
+      },
+      {
+        "path": "taiko_viewer/server/services/taiko-domain/publication.ts",
+        "sha256": "018efcb09d267850bbf89046e3403c04ab061685b51ccfb7c9a007e123c85b0c"
+      },
+      {
+        "path": "taiko_viewer/server/services/taiko-domain/read.ts",
+        "sha256": "300f15bbe77bbc940bcb7b0e308d598a788fde0b3e1723d68f2af82dd9ccfea6"
+      },
+      {
+        "path": "taiko_viewer/server/utils/account/songs.ts",
+        "sha256": "6e792a6a5f26a8c8877a98c8f302eee4444aaf79e47500d76263d17665d4eff4"
+      },
+      {
+        "path": "taiko_viewer/tests/accountScorePublication.test.mjs",
+        "sha256": "13d5af99d1e1c794306aeff0251346584b68a0b93679bfc02d84579679bda84f"
+      },
+      {
+        "path": "taiko_viewer/tests/fixtures/domainRead.tsconfig.json",
+        "sha256": "4e4e5db9ccda28d407d0c2d1327071b3c8c88c3b4ffea70f6f2eade83554a699"
+      },
+      {
+        "path": "taiko_viewer/tests/fixtures/growthReplayHarness.mjs",
+        "sha256": "1c707969f26887e52cf1d43016fab9b0fb1bb0804ad29f483d084f442d4567ad"
+      },
+      {
+        "path": "taiko_viewer/tests/fixtures/growthRequestHarness.mjs",
+        "sha256": "23f5658fd3a83ae19454b713a134809657201eb61bfae93c9b3ba2f5d050bcda"
+      },
+      {
+        "path": "taiko_viewer/tests/growthPublicationView.test.mjs",
+        "sha256": "7ea964f2311d96ae3abec9e69d7b610793148128d4a8dc5a65eb1bbf6d13674c"
+      },
+      {
+        "path": "taiko_viewer/tests/publicationScope.test.ts",
+        "sha256": "a6d1fe13cb8dc229811bb02a411de0cc88ba9ef55e777e0b9d423e436a9077a4"
+      }
+    ]
+  },
+  "logs": [
+    {
+      "path": "/var/tmp/phase6-source-final-qa.log",
+      "sha256": "d7d5b106223250bc3d5e6fead5f29b20b6fbf9e7dcc3d1c57a216c29634ecf70"
+    },
+    {
+      "path": "/var/tmp/phase6-version-qa.log",
+      "sha256": "042e1b77176edabd12317e9f8ef6cf1ec5f73c7d86952f5f57cce609b9173bfc"
+    },
+    {
+      "path": "/var/tmp/phase6-growth-source-qa.log",
+      "sha256": "f26d161a1c4f40928c27e324f523e87a799dffd0b710b7848d2612e85fd85ce4"
+    }
+  ],
+  "previous_failures": [
+    {
+      "kind": "TEST_ASYNC_CONTEXT",
+      "resolution": "Independent writer registered outside the reader AsyncLocalStorage context; mutation inside a shared request remains rejected."
+    },
+    {
+      "kind": "TEST_TYPESCRIPT",
+      "resolution": "Synthetic counter assertion reads raw fixture JSON, rather than extending the public score payload."
+    },
+    {
+      "kind": "QA_NODE_HEAP_LIMIT",
+      "limit_bytes": 1610612736,
+      "resolution": "Replaced recursively embedded data URLs with disk-backed temporary ESM modules; reran final full suite within unchanged limits."
+    },
+    {
+      "kind": "TEST_MODULE_CLASS_IDENTITY",
+      "resolution": "Checks serialized error name/status across a separately compiled production module instead of constructor identity."
+    }
+  ],
+  "boundaries": {
+    "production_userdata_read": false,
+    "production_db_access": false,
+    "db_adapter": "allowlisted in-memory stub; no DB connection",
+    "growth_python": "fixture calculator; no production Python query",
+    "real_python_publication": true,
+    "r_source_sync": false,
+    "runtime_restarted": false,
+    "viewer_standard_deploy": false,
+    "new_listener": false,
+    "all_writers_converged": false,
+    "read_model_ready": false,
+    "sql_filesystem_joint_atomicity_claim": false,
+    "phase6_gate": "IN_PROGRESS"
+  }
+}
