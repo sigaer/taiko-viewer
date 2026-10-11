@@ -26,18 +26,17 @@ export async function setManualViewerCurrent(db: Executor, userId: number, taiko
   await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
   await db.execute("UPDATE web_taiko_bindings SET is_current = 1 WHERE user_id = ? AND taiko_id = ?", [userId, taikoId]);
 }
-// One attachment implementation shared by creation and claim. The current
-// legacy creation caller still needs its own coordinated source/SQL migration.
-export async function attachManualViewer(db: Executor, userId: number, taikoId: string) {
+// One attachment implementation shared by coordinated creation and claim.
+export async function attachManualViewer(db: Executor, userId: number, taikoId: string, preserveCurrent?: string) {
   const [owners] = await db.execute<RowDataPacket[]>("SELECT user_id FROM web_taiko_bindings WHERE taiko_id = ? LIMIT 1 FOR UPDATE", [taikoId]);
   if (owners[0] && Number(owners[0].user_id) !== userId) throw createError({ statusCode: 409, statusMessage: "该账号已被其他 viewer 用户持有" });
   await db.execute(`INSERT INTO web_taiko_bindings
     (user_id, taiko_id, source, manual_account_id, is_current, verified_title)
     VALUES (?, ?, 'manual', ?, 1, '手动录入')
     ON DUPLICATE KEY UPDATE source = 'manual', manual_account_id = VALUES(manual_account_id)`, [userId, taikoId, taikoId]);
-  await setManualViewerCurrent(db, userId, taikoId);
+  await setManualViewerCurrent(db, userId, preserveCurrent || taikoId);
 }
-export async function attachManualBot(db: Executor, identityKeyInput: unknown, taikoId: string) {
+export async function attachManualBot(db: Executor, identityKeyInput: unknown, taikoId: string, preserveCurrent?: string) {
   const identityKey = normalizeManualIdentityKey(identityKeyInput);
   const account = await getManualAccount(taikoId, db);
   if (account.bot_identity_key && account.bot_identity_key !== identityKey) throw createError({ statusCode: 409, statusMessage: "该账号已被其他 bot 身份持有" });
@@ -52,7 +51,7 @@ export async function attachManualBot(db: Executor, identityKeyInput: unknown, t
   await db.execute(`INSERT INTO bind (qq, id, visible, slot_index, is_current, source)
     VALUES (?, ?, 0, ?, 1, 'manual') ON DUPLICATE KEY UPDATE source = 'manual'`, [identityKey, taikoId, nextSlot]);
   await db.execute("UPDATE taiko_manual_accounts SET bot_identity_key = ? WHERE taiko_id = ?", [identityKey, taikoId]);
-  await compactManualBotSlots(db, identityKey, taikoId);
+  await compactManualBotSlots(db, identityKey, preserveCurrent || taikoId);
 }
-export const attachManualOwner = (db: Executor, owner: ManualOwner, taikoId: string) => owner.kind === "viewer"
-  ? attachManualViewer(db, owner.userId, taikoId) : attachManualBot(db, owner.identityKey, taikoId);
+export const attachManualOwner = (db: Executor, owner: ManualOwner, taikoId: string, preserveCurrent?: string) => owner.kind === "viewer"
+  ? attachManualViewer(db, owner.userId, taikoId, preserveCurrent) : attachManualBot(db, owner.identityKey, taikoId, preserveCurrent);

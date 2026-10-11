@@ -12,7 +12,7 @@ Goal：`active`。Phase 5 标准发布与只读线上验收完成，Gate 5 PASS�
 | 3 Sakura adapter | PASS | Core 0.1.1 / Sakura 9.80.7；132 regression、生产重启/adapter/HTTP smoke | [验收](phase3-sakura-adapter.md)、[证据](evidence/phase3-validation.json) |
 | 4 taiko-bot client | PASS | Core 0.1.2 / client 0.2.0；188 委托、48 回归、固定 Git pin / wheel 安装 / command smoke | [验收](phase4-taiko-client.md)、[证据](evidence/phase4-validation.json) |
 | 5 Viewer boundary | PASS | 5.1–5.3 / 230 Node + 5 Python PASS；0.81.11 标准 push/deploy、8 项线上 smoke、旧进程退出/新进程 active | [步骤](phase5-viewer-boundary.md)、[验证](evidence/phase5-validation.json)、[发布](evidence/phase5-publication-validation.json) |
-| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–6 已留档；永久删除/联动恢复/认领解绑事务及真实进程退出 PASS（43 Python、128 offline + 73 SQL）；待创建恢复、其余 Writer/grant、Read Model、全量成本/运维恢复与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
+| 6 Writer/storage | IN_PROGRESS | 6.1/6.2、6.3a–c、6.3d.1–7 已留档；创建/删除/恢复/授权事务及实际 Node/Python 退出 PASS（45 Python、131 offline + 106 SQL）；待其余 Writer/grant、Read Model、全量成本/运维恢复与发布 | [步骤](phase6-storage-consolidation.md)、[审计](evidence/phase6-ownership-audit.json) |
 
 Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push 不能代替未完成的生产验证。ROADMAP 版本作为阶段里程碑；Phase 0 禁止代码/package 变更，因此只提交文档，不为编号修改 package 或部署。
 
@@ -74,3 +74,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.3d.5：A `fd7b52e` / 9.81.4；trusted SQL/source/daily 协调恢复、持久 restoring、authority 一次 COMMIT、已准入 worker 续做，普通删除不自动撤销。43 Python + 128 offline + 48 actual `_test` SQL（新增 21 restore）、两组局部 TS PASS，四个实际进程退出点/完整字节与 SQL fields-id-hash/new-binding-conflict/portable root/captured pool/driver 脱敏通过，约 311.106 MiB sampled/OOM=0。未 sync/deploy；继续 lifecycle/grant、全 Writer、Read Model 与最终发布，Gate 6 IN_PROGRESS。
 
 - 2026-10-11 / 6.3d.6：认领/发码/解绑一次 SQL transaction 与最小持久授权回执；同 actor 已提交重试不重复授权/改变 current，legacy 多 bot 解绑保留存活 principal。43 Python + 128 offline + 73 actual `_test` SQL（新增 25 grant）、两组局部 TS PASS，六个 actual Node COMMIT 前后退出、晚 SQL failure/rollback destroy/ack loss/排队后 capability 替换/捕获 pool/SQL 脱敏验证；纯 grant 不改变 C/H commit/sequence，约 325.988 MiB sampled/OOM=0。Viewer 本地步骤，A unchanged `fd7b52e`，未 sync/deploy；继续创建持久恢复、通用解绑/注销/资源 grant、全 Writer/Read Model 与发布，Gate 6 IN_PROGRESS。
+
+- 2026-10-11 / 6.3d.7：A `f3146cf` / 9.81.5 已 push；创建 durable reservation→固定初始 C/H→一次 SQL authority、bounded forward worker/optional request UUID；修复未提交 manifest 同输入 unchanged-parent retry。45 Python + 131 offline + 106 actual `_test` SQL（新增 33 creation）、两组局部 TS PASS，五个 Node/五个 Python 退出、完整冻结 raw parity、ack loss/concurrent/deleted owner/new selection/private diagnostics/oversize/archive 拒绝通过，约 339.645 MiB sampled/OOM=0。未 sync/deploy；Viewer 本地留档，继续通用解绑/注销/grant、全 Writer/P1a/Read Model、百万成本/运维恢复与统一发布，Gate 6 IN_PROGRESS。

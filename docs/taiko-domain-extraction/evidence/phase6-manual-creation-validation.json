@@ -1,0 +1,111 @@
+{
+  "step": "6.3d.7",
+  "status": "MANUAL_CREATION_RECOVERY_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "f3146cf",
+  "sakuraVersion": "9.81.5",
+  "sakuraPushed": true,
+  "validation": {
+    "pythonTests": 45,
+    "offlineNodeTests": 131,
+    "realTestDbSqlTests": 106,
+    "newManualCreationSqlTests": 33,
+    "typescript": "domainRead + publicationLifecycle configs PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "exitStatus": 0,
+    "systemdUnit": "taiko-qa-1791691646-1199486.service",
+    "logPath": "/var/tmp/phase6-creation-final3-qa.log",
+    "logSha256": "7037224c8a368b35f8c400590fbffbee02cddf12e308b2bd2369168ec6f261f5",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791691646-1199486.service",
+      "durationMs": 172201,
+      "sampledMemoryPeakBytes": 356143104,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "51040 kB",
+          "VmRSS": "51040 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "durable reservation with no account/grant; fixed initial C/H publication under EX; one final SQL transaction grants account/binding/current/slots and ready receipt",
+    "actual frozen fbfd43e blank current/history raw SHA and existing response fields unchanged; ordinary shared writer serialization/clock/lifetime retained in one Infrastructure module",
+    "five owned Node exits before/after reservation, after files, before/after authority COMMIT; actual TCP rollback, fresh worker and idempotent acknowledgement",
+    "five actual Python exits at objects-staged/intent-durable/projection/projections-durable/commit-durable; identical prepared C/H resumes safely from empty adopted parent",
+    "single center publication exact-input retry resumes orphan uncommitted manifest only on unchanged parent; different input/newer head rejected",
+    "late SQL/source failures and rollback destroy never publish partial authority; exact matching reservation/ready receipt proves lost SQL COMMIT ack",
+    "concurrent same UUID selects one identity and two total SQL COMMITs; legacy request resumes matching pending actor/nickname",
+    "completed request UUID acknowledges original operation after later edits/deletion without reauthorizing or rewinding source",
+    "new Viewer/bot current selection preserved during delayed recovery; deleted Viewer login owner cannot acquire pending source",
+    "checksummed strict blank payload and bounded SQL selection reject malformed/oversize receipt, newer source, SQL grant collision and legacy daily archive without overwrite",
+    "source identity remains reserved by creation receipt; pre-existing C/H/manifest/archive directory is not adopted by new creation",
+    "captured pool through service and unified creation/delete/restoration worker, generic private SQL diagnostic errors, no public recovery payload",
+    "explicit publication scope keeps live EX, rejects SH/empty/rollback scope, clears staged batch to avoid duplicate outer commit",
+    "existing manual grant/deletion/restoration/Goal/Growth/acquisition/publication regressions retained"
+  ],
+  "limits": [
+    "Owned synthetic files and actual guarded _test SQL only; no production DB/private data/external service QA",
+    "Manual test schema omits production FKs; not a production migration/FK enforcement or authenticated HTTP Gate",
+    "Optional requestId forwarded by both existing HTTP adapters; no authenticated HTTP verification or frontend retry integration claimed",
+    "Legacy no-UUID requests resume pending creation only; replay after completed lost HTTP acknowledgement requires the explicit request UUID",
+    "SQL reservation, source publication and SQL authority are coordinated forward steps, not a joint SQL/filesystem transaction",
+    "Only admitted pending creation resumes automatically; a ready operation cannot resurrect later deletion or detachment",
+    "Generic unbind/login deletion/full private grants, actual dispatcher/u0/daily Writer convergence, P1a/Read Model/million-record costs/operational restore/final release remain pending",
+    "No R runtime sync or service restart; Viewer source steps remain local until the unified standard Phase 6 deployment/push",
+    "250ms sampled peak is not exact process-tree maximum or million-record resource gate"
+  ],
+  "harnessCorrections": [
+    "Initial relative wrapper path failed before QA; corrected to absolute wrapper without fallback",
+    "Wrapper intentionally filters inherited mutation env: first SQL guard rejected before connection; moved explicit opt-in into bounded command via env/runner",
+    "New shared import exposed unrelated Nuxt auto-import typings; extracted existing timestamp/serializer into narrow Infrastructure dependency, preserved shared re-export",
+    "First comprehensive QA 102/104 SQL: combined worker query changed to UNION, two old replacement hooks failed to trigger; corrected hooks",
+    "Final review preserved ordinary writer clock/serialization allocation sequence, bounded orphan staging scan and added oversize/archive rejection cases",
+    "Second comprehensive QA 105/106 SQL: snapshot helper treated legacy daily file as H; filtered actual data_*.json and asserted untouched daily raw; repeated final whole suite"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/creation-schema.ts": "093b1ba1a06b5d1c73ce42cecc920331b13e1fe37e167673b262cd61e1ca7215",
+    "taiko_viewer/server/infrastructure/taiko-publication/writer.ts": "d4426777833ec361a99319aaea10490ea489179546f052e99bbcbb73100f12b6",
+    "taiko_viewer/server/infrastructure/taiko-publication/scope.ts": "6535805c90ff60a9b5cbd6c09eb260c80c0e128775f9976ba9398d068a6ac889",
+    "taiko_viewer/server/internal/account/manual-creation-data.ts": "d14f4e39b87d4b6dfa0dd245084422c89e2a190cbddb72af23aef77f8cf2b62a",
+    "taiko_viewer/server/internal/account/manual-grants.ts": "d39ac746930a63039684c98bd9ff3e9695d2fad546b6d801697a3ea00dd70f73",
+    "taiko_viewer/server/internal/account/shared.ts": "8a1dd4823470e4d515af47c905b30740fc847bee51b69728b2e6fd523ce2a795",
+    "taiko_viewer/server/services/account/manual-creation.ts": "f5ed311a9a3dc369e00fc2abaa5ad02d9fd3e0d0e79f050c9dceb1e904e821e2",
+    "taiko_viewer/server/services/account/source-lifecycle-recovery.ts": "46461ca8cf0aa8561d2371ffd84f8e665dcce490c469b0ed242861c9e82a44dd",
+    "taiko_viewer/server/services/taiko-domain/publication.ts": "47b878ccf918dee7d2a11899108d9ca569dddbcc0b9616040a0637e6bf0e8973",
+    "taiko_viewer/server/utils/account-db.ts": "e76aab7289b66260ce0b35d8b54c7afda1bd7e29abac42baaa382992535e8c70",
+    "taiko_viewer/server/utils/account/manual.ts": "0f1e0f02fa3bbf1d73a8f91dd719e63c8bc10122d1cc89f79486c6d9f993db78",
+    "taiko_viewer/server/api/account/manual.post.ts": "0455d50e63830018223ee786527573327f81a4cb8847c40d89dd65eaba5749b2",
+    "taiko_viewer/server/api/taiko/internal/manual.post.ts": "6aa136f5d8634c093b525ab3a460a8e9be2697bc43af6919926fb828f428fd54",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "a323e47c2455bec9372db6479a6778be75e59598b88c18f823c3c570b5b99688",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "8aff95e55ec7f6da30883c1a79ba698466365dd9e219ed48f56e84eb0037ab06",
+    "taiko_viewer/tests/publicationScope.test.ts": "931332ae422941dc9fa15ddd59c00462600045789e44fe379f632929d15b2501",
+    "taiko_viewer/tests/manualCreationSql.test.mjs": "3e90de3e39f6c455135b9df998c7d9ca073bdfd85aeaa9516f07ff55031a4725",
+    "taiko_viewer/tests/manualRecoverySql.test.mjs": "1735adfbe8b2199af6de4130ea31229e497e165759a457fc772f37054e8e4607"
+  },
+  "sakuraSourceSha256": {
+    "taiko/taiko_store/publication.py": "8e9a115e091e2cae5f6d445ed10290d2ec37b573037d1f66616ab7baf1a59083",
+    "taiko/tests/test_publication_store.py": "270c4e8b6dc6a0d3642f84fe04c2696052c407be54d1eb9becce2a4882b2f592"
+  },
+  "postValidationFormatting": {
+    "path": "taiko_viewer/server/infrastructure/taiko-publication/writer.ts",
+    "change": "Removed one surplus blank line at EOF; no executable/type/comment change, no repeat QA needed",
+    "validatedSha256": "e1c3b8bd7635c55db9746e5f9bd85c8ae6d76e78c7cbe50c33b0fe130d2f6e3f"
+  }
+}

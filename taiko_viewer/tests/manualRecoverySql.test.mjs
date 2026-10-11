@@ -168,7 +168,7 @@ for(const kind of ['pending','restoring']) {
     }
     const r=await receipt(c),captured=globalThis.__goalSqlRuntime.db;
     let replaced=false;
-    c.state.afterExecute=sql=>{if(sql.startsWith('SELECT operation_id,status FROM taiko_source_lifecycle')){
+    c.state.afterExecute=sql=>{if(sql.startsWith('SELECT operation_id,status,work_kind FROM')){
       replaced=true;
       globalThis.__goalSqlRuntime.db={execute:()=>{throw new Error('Must not resolve a fresh pool after shutdown');},getConnection:()=>{throw new Error('Must not resolve a fresh pool after shutdown');}};
     }};

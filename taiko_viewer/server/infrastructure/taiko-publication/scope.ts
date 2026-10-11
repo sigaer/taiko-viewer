@@ -49,6 +49,19 @@ export async function restoreScoreBackup(identity: string, backupKey: string, tr
   if (!scope || scope.mode !== "write" || scope.staged.size || scope.rollback.length) throw new PublicationUnavailableError();
   return scope.lease.restoreBackup(backupKey, transactionId);
 }
+/** Explicit durable publication for Infrastructure outbox coordinators. SQL
+ * authority is committed afterwards while this same EX lease remains alive.
+ * Ordinary score mutations retain the existing outer-scope batch behavior.
+ */
+export async function publishScoreBatch(identity: string, transactionId: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write" || !scope.staged.size || scope.rollback.length ||
+    !/^[a-f0-9]{32}$/.test(transactionId)) throw new PublicationUnavailableError();
+  const view = await scope.lease.publish({ transactionId, replaceHistory: scope.replaceHistory });
+  scope.staged.clear();
+  scope.replaceHistory = false;
+  return view;
+}
 export async function clearScoreSource(identity: string) {
   const scope = currentScoreScope(identity);
   if (!scope || scope.mode !== "write" || scope.staged.size) throw new PublicationUnavailableError();

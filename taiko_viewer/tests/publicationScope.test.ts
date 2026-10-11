@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, clearScoreSource, purgeScoreBackupArchives } from "../server/infrastructure/taiko-publication/scope.ts";
+import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, clearScoreSource, purgeScoreBackupArchives, publishScoreBatch } from "../server/infrastructure/taiko-publication/scope.ts";
 import { PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 import type { ScoreReadPort } from "../server/domain/score-read-contract.ts";
 const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko";
@@ -20,6 +20,39 @@ async function seed(options: Parameters<typeof withScoreRead>[0]) {
     await stageScoreText(identity, `history/${history}`, '{"songs":[],"_meta":{"full":true}}');
   });
 }
+
+test("explicit outbox publication commits once inside the live EX scope and survives a later callback failure", async () => fixture(async options => {
+  const nonce = "a".repeat(32), expected = new Error("Synthetic authority step failure");
+  await assert.rejects(withScoreWrite(options, async () => {
+    await stageScoreText(identity, "current", '{"songs":[]}');
+    await stageScoreText(identity, `history/${history}`, '{"songs":[]}');
+    const result = await publishScoreBatch(identity, nonce);
+    assert.equal(result.sequence, 1);
+    assert.equal(currentScoreScope(identity)!.staged.size, 0);
+    assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).songs.length, 0);
+    throw expected;
+  }), error => error === expected);
+  await withScoreRead(options, async () => { assert.equal(scorePublication(identity)?.commitId, nonce); assert.equal(scorePublication(identity)?.sequence, 1); });
+}));
+
+test("explicit outbox publication rejects read/empty/rollback scopes without publishing", async () => fixture(async options => {
+  await withScoreRead(options, async () => { await assert.rejects(publishScoreBatch(identity, "a".repeat(32)), { statusCode: 503 }); });
+  await withScoreWrite(options, async () => {
+    await assert.rejects(publishScoreBatch(identity, "a".repeat(32)), { statusCode: 503 });
+    await stageScoreText(identity, "current", '{}');
+    await assert.rejects(publishScoreBatch(identity, "invalid"), { statusCode: 503 });
+    onScoreRollback(identity, async () => {});
+    await assert.rejects(publishScoreBatch(identity, "a".repeat(32)), { statusCode: 503 });
+  });
+}));
+
+test("explicit outbox publication clears its batch so successful callback does not commit twice", async () => fixture(async options => {
+  await withScoreWrite(options, async () => {
+    await stageScoreText(identity, "current", '{}');
+    await publishScoreBatch(identity, "b".repeat(32));
+  });
+  await withScoreRead(options, async () => { assert.equal(scorePublication(identity)?.sequence, 1); assert.equal(scorePublication(identity)?.commitId, "b".repeat(32)); });
+}));
 
 test("one real source scope stages current/history and reads its writes before atomic publication", async () => fixture(async options => {
   await withScoreWrite(options, async () => {

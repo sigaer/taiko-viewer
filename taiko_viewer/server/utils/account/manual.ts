@@ -1,9 +1,10 @@
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 import type { H3Event } from "h3";
 import { createError, getHeader } from "h3";
-import { ensureAccountSchema, getAccountDb, type DbRow } from "~/server/utils/account-db";
+import { getAccountDb, type DbRow } from "~/server/utils/account-db";
 import { getManualAccount, assertManualOwner as assertOwner, normalizeManualIdentityKey as normalizeIdentityKey, type ManualOwner } from "../../internal/account/manual-ownership";
-import { attachManualViewer, attachManualBot } from "../../internal/account/manual-grants";
+import { normalizeManualNickname as normalizeNickname } from "../../internal/account/manual-creation-data";
+import { createManualSource } from "../../services/account/manual-creation";
 import { issueManualGrantCode, consumeManualGrantCode, detachManualGrant } from "../../services/account/manual-grants";
 import { permanentlyDeleteManualSource } from "../../services/account/manual-lifecycle";
 import { onScoreRollback, withDomainScoreRead } from "../../services/taiko-domain/publication";
@@ -42,15 +43,6 @@ const MUTABLE_SCORE_KEYS = [
   "dondaful_combo_cnt"
 ] as const;
 
-const normalizeNickname = (value: unknown) => {
-  const nickname = String(value || "").trim();
-  if (!nickname) throw createError({ statusCode: 400, statusMessage: "请输入账号昵称" });
-  if ([...nickname].length > 24) {
-    throw createError({ statusCode: 400, statusMessage: "昵称最多 24 个字符" });
-  }
-  return nickname;
-};
-
 const normalizeClaimCode = (value: unknown) =>
   String(value || "").trim().toUpperCase().replace(/[\s-]+/g, "");
 
@@ -72,85 +64,8 @@ const hashClaimCode = (code: string) =>
 const generateClaimCode = () =>
   Array.from({ length: 8 }, () => CLAIM_ALPHABET[randomInt(0, CLAIM_ALPHABET.length)]).join("");
 
-const createManualTaikoId = async () => {
-  const db = getAccountDb();
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    let suffix = "";
-    for (let index = 0; index < 16; index += 1) suffix += randomInt(0, 10);
-    const taikoId = `98${suffix}`;
-    const [rows] = await db.execute<DbRow<{ total: number }>[]>(
-      `SELECT COUNT(*) AS total FROM (
-        SELECT taiko_id FROM taiko_manual_accounts WHERE taiko_id = ?
-        UNION ALL SELECT taiko_id FROM taiko_source_lifecycle WHERE taiko_id = ?
-      ) identities`,
-      [taikoId, taikoId]
-    );
-    if (!Number(rows[0]?.total || 0)) return taikoId;
-  }
-  throw createError({ statusCode: 500, statusMessage: "生成手动账号失败，请重试" });
-};
-
-const buildBlankUserdata = (taikoId: string, nickname: string): UserdataPayload => ({
-  _meta: {
-    full: true,
-    source: "manual",
-    schema_version: 2,
-    manual: true,
-    ts: formatLocalTimestamp()
-  },
-  profile: {
-    mydon_name: nickname,
-    userid: taikoId,
-    province: "手动录入",
-    is_disp_dan_on: false,
-    gameCostume: {
-      titleplate_id: 0,
-      title: "手动录入",
-      mydon_name: nickname,
-      costume_1: 0,
-      costume_2: 0,
-      costume_3: 0,
-      costume_4: 0,
-      costume_5: 0,
-      color_limb: 0,
-      color_body: 0,
-      color_face: 0,
-      got_dan_max: 0,
-      is_disp_dan_on: false,
-      is_disp_tojiru_on: 0,
-      dan_name: { grade: "00", level: 0 }
-    }
-  },
-  songs: [],
-  achievement: {
-    count_level: 1,
-    ary_crown_count: [0, 0, 0],
-    ary_score_rank_count: [0, 0, 0, 0, 0, 0, 0]
-  }
-});
-
-const attachViewer = (userId: number, taikoId: string) => attachManualViewer(getAccountDb(), userId, taikoId);
-const attachBot = (identityKey: unknown, taikoId: string) => attachManualBot(getAccountDb(), identityKey, taikoId);
-
-export const createManualAccount = async (owner: ManualOwner, nicknameInput: unknown) => {
-  await ensureAccountSchema();
-  const nickname = normalizeNickname(nicknameInput);
-  const taikoId = await createManualTaikoId();
-  const db = getAccountDb();
-  await db.execute(
-    "INSERT INTO taiko_manual_accounts (taiko_id, nickname, created_by) VALUES (?, ?, ?)",
-    [taikoId, nickname, owner.kind]
-  );
-  try {
-    await writeUserdataWithHistory(taikoId, buildBlankUserdata(taikoId, nickname), "manual-create");
-    if (owner.kind === "viewer") await attachViewer(owner.userId, taikoId);
-    else await attachBot(owner.identityKey, taikoId);
-  } catch (error) {
-    await db.execute("DELETE FROM taiko_manual_accounts WHERE taiko_id = ?", [taikoId]);
-    throw error;
-  }
-  return { ok: true, taikoId, nickname, source: "manual", displayName: nickname, isManual: true };
-};
+export const createManualAccount = (owner: ManualOwner, nicknameInput: unknown, requestId?: unknown) =>
+  createManualSource(owner, nicknameInput, requestId);
 
 export const renameManualAccount = async (
   owner: ManualOwner,

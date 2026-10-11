@@ -163,3 +163,18 @@ A `fd7b52e` / 9.81.4 的两个本地 RPC 已标准 commit/push，仍只在 A 未
 综合 137.912 秒，250 ms sampled peak 341,823,488 bytes（约 325.988 MiB），high/max/OOM=0，unit success/exit 0。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 mutation opt-in=1，只使用 own synthetic rows/temporary trees/children 并清理；测试 schema 缺生产 FK，不冒称 production migration/FK enforcement、HTTP authentication 或百万容量验收。初始 legacy hook 和重试预期修正，最终复核发现 detach 预检未显式传 captured pool，已修复并新增三类 shutdown 回归后完整重跑。
 
 这是 MANUAL_GRANT_TRANSACTION_PASS，Gate 6 仍 IN_PROGRESS。A `fd7b52e` / 9.81.4 unchanged，无 R sync/NoneBot 重启/Viewer push/deploy；live 0.81.11、Viewer/sync receiver PID 1063394/1063408 active。Viewer 步骤本地提交，待完整 Phase 6 标准发布统一推送。下一步创建持久恢复，然后通用解绑/注销与 private resource grants、实际 dispatcher/u0/daily 全入口、Read Model/P1a/百万成本、运维恢复入口与最终统一激活/在线验收。
+
+
+## 6.3d.7 创建的持久登记、初始发布与授权恢复
+
+创建先在 Source EX 内以一次 SQL transaction 登记唯一 operation/source/actor、32 KiB 上限且 hash/结构验证的空档案与原 current selection；此时无 account/binding/claim grant。随后保持同一个 EX，通过单一中心 publication 发布固定 nonce 的初始 C/H，核验原文/hash/history identity/sequence=1，再在一次 SQL transaction 添加 manual account、owner binding、current/slot 并把 receipt 设为 ready。SQL/文件失败只保留已登记 pending，由同一个有界 worker 向前续做；rollback 失败销毁连接，丢失 SQL COMMIT ack 只认精确 immutable receipt。不同 source head、SQL authority collision、已注销 Viewer owner、坏/超限 receipt 与原有 archive 拒绝覆盖或重新授权。
+
+初始 H 身份和字节由原 shared serializer 生成，创建用 operation UUID 与登记时刻固定输入。实际 Python 在 objects-staged 后、pending journal 前退出，会留下未提交 manifest；中心现在仅允许相同 requestHash 在 unchanged parent 上重新提交，并拒绝旧 nonce 覆盖 newer head。intent/projection 未提交回滚产生的 empty sequence-0 parent 只供原已登记 creation 续做；新 ID 不能占用任何既存 manifest/C/H/archive directory。既有 shared timestamp/serializer 抽出为单一 Infrastructure module并 re-export，正常 Writer 的时间采集点、序列化顺序与分配寿命保留，不导入 content/product/SQL，未把 filesystem 放入 Core。
+
+两条既有 HTTP adapter 可接收可选 requestId。相同 UUID/actor/nickname 并发只有一个 source；完成后的重试仅确认原 result，不覆盖后来的成绩、不复活已删除/解绑的账号。无 UUID 的旧请求只续做同 actor/nickname 的 pending；完整成功后丢失 HTTP ack 的重放需要明确 UUID，未声称前端已接重试 nonce。延迟恢复保留用户后来新选中的 Viewer/bot current。统一队列每 tick 仍只处理一个 due creation/delete/restoring，captured pool/abort/attempt fairness 保持；ready birth receipt 不会被 worker 自动重新授权。永久 source ID 不重用。
+
+最终 45 Python + 131 offline Node + 106 actual `_test` SQL（新增 33 creation）、两组局部 TypeScript 全 PASS。五个实际 Node 创建退出点、五个实际 Python 底层 publication 退出点、两类丢失 SQL COMMIT ack、source ack loss、晚失败/failed rollback、concurrent UUID、旧 pending 重试、frozen blank C/H raw SHA/返回 DTO、later selection、删除后 acknowledge、坏/超限 SQL payload、source/grant/daily conflict 与 captured pool/private diagnostics 均覆盖。旧 manual/grant/delete/restore/Goal/Growth/acquisition 回归保持。[证据](evidence/phase6-manual-creation-validation.json)。
+
+QA 172.201 秒，250 ms sampled cgroup peak 356,143,104 bytes（约 339.645 MiB），high/max/OOM=0、unit success/exit 0。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 opt-in=1，所有 owned rows/tree/children 清理；无生产 DB/个人文件/外部服务 QA，无新 listener。测试 schema 缺生产 FK，不冒称 production migration/FK enforcement/authenticated HTTP/full server tsc/百万容量。初始 wrapper 路径与 opt-in 传递问题在连接前停止；完整回归的两个旧 SQL query hook、一个把 legacy daily 当 H 的 snapshot helper 问题修复，并在相同预算重新全套通过。
+
+A `f3146cf` / 9.81.5 已标准 commit/push；仅 A Infrastructure 未同步 R，因此现有 NoneBot 无需在此步骤重启。Viewer 0.82.0 本地步骤，待 Phase 6 完整标准部署统一 push；live 0.81.11、Viewer/receiver PID 1063394/1063408 active。MANUAL_CREATION_RECOVERY_PASS，Gate 6 仍 IN_PROGRESS。继续通用解绑/登录账号注销与 private grants、actual dispatcher/u0/daily 全入口和 reader identity fence、Read Model/P1a/百万成本、运维恢复入口与最终统一 runtime sync/发布/线上验收。

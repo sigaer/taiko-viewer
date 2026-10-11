@@ -1,5 +1,5 @@
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
-import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, purgeScoreBackupArchives, clearScoreSource, verifyScoreBackup, restoreScoreBackup } from "../../infrastructure/taiko-publication/scope.ts";
+import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, purgeScoreBackupArchives, clearScoreSource, verifyScoreBackup, restoreScoreBackup, publishScoreBatch } from "../../infrastructure/taiko-publication/scope.ts";
 
 const options = (identity: string) => {
   const { userdataDir, repoRoot } = getRuntimePaths();
@@ -7,4 +7,4 @@ const options = (identity: string) => {
 };
 export const withDomainScoreRead = <T>(identity: string, task: () => Promise<T>) => withScoreRead(options(identity), task);
 export const withDomainScoreWrite = <T>(identity: string, task: () => Promise<T>) => withScoreWrite(options(identity), task);
-export { currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, purgeScoreBackupArchives, clearScoreSource, verifyScoreBackup, restoreScoreBackup };
+export { currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup, purgeScoreBackupArchives, clearScoreSource, verifyScoreBackup, restoreScoreBackup, publishScoreBatch };

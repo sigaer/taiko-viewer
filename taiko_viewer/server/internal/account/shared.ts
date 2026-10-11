@@ -1,3 +1,4 @@
+export { formatLocalTimestamp, writeUserdataWithHistory } from "../../infrastructure/taiko-publication/writer.ts";
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 export { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { access, readFile } from "node:fs/promises";
@@ -15,7 +16,7 @@ import { getRatingEntries, getSongCatalog as loadSongCatalog } from "~/server/se
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
 import { getDomainScoreReader } from "../../services/taiko-domain/read.ts";
-import { withDomainScoreRead, withDomainScoreWrite, stageScoreText, currentScoreScope } from "../../services/taiko-domain/publication.ts";
+import { withDomainScoreRead, withDomainScoreWrite } from "../../services/taiko-domain/publication.ts";
 import type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 export type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 
@@ -244,18 +245,11 @@ const getSmtpConfig = () => {
   };
 };
 
-const now = () => new Date();
-
 export const toIso = (value: Date | string | number | null | undefined) => {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString();
-};
-
-export const formatLocalTimestamp = (date = now()) => {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
 export const sha256 = (input: string | Buffer) => createHash("sha256").update(input).digest("hex");
@@ -651,29 +645,6 @@ export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   };
   return payload;
 };
-
-export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => withDomainScoreWrite(taikoId, async () => {
-  if (!/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
-  const serialized = JSON.stringify(payload, null, 4);
-  await stageScoreText(taikoId, "current", serialized);
-  const observedAt = now();
-  const stamp = formatLocalTimestamp(observedAt);
-  const timestamp = stamp.replace(/[-: ]/g, "").replace(/^(\d{8})(\d{6})$/, "$1_$2");
-  const micros = String(observedAt.getMilliseconds() * 1000).padStart(6, "0");
-  const sequence = String((currentScoreScope(taikoId)!.lease.view?.sequence || 0) + 1).padStart(20, "0");
-  const payloadMeta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
-  const historyPayload = {
-    ...payload,
-    _meta: {
-      ...payloadMeta,
-      full: true,
-      ts: stamp,
-      source,
-      writer_source: source
-    }
-  };
-  await stageScoreText(taikoId, `history/data_${timestamp}_${micros}_${sequence}_${randomBytes(16).toString("hex")}_${source}.json`, JSON.stringify(historyPayload, null, 4));
-});
 
 export const getLockMap = async (userId: number, taikoId: string) => {
   await ensureAccountSchema();

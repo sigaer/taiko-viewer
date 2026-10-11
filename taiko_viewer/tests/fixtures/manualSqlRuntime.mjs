@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { installGoalSqlRuntime } from './goalSqlRuntime.mjs';
 import { SOURCE_LIFECYCLE_TABLE_SQL } from '../../server/infrastructure/taiko-publication/lifecycle-schema.ts';
 import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from '../../server/infrastructure/taiko-publication/grant-schema.ts';
+import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/creation-schema.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
@@ -17,6 +18,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 const TEST_MANUAL_TABLES = [
   SOURCE_LIFECYCLE_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
+  MANUAL_CREATION_TABLE_SQL,
   GOAL_TABLE_SQL, GROWTH_MEASUREMENT_TABLE_SQL, GROWTH_RECENT_CURSOR_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_taiko_binding_mydon_showcase_titles (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, binding_id BIGINT UNSIGNED NOT NULL,
@@ -106,11 +108,15 @@ export async function manualSqlFixture(task) {
   } finally {
     globalThis.Date = RealDate;
     globalThis.fetch = priorFetch;
-    if (taikoId) {
-      await pool.execute('DELETE FROM taiko_manual_grant_receipts WHERE taiko_id=?', [taikoId]);
-      await pool.execute('DELETE FROM taiko_source_lifecycle WHERE taiko_id=?', [taikoId]);
-      await pool.execute('DELETE FROM taiko_manual_claim_codes WHERE taiko_id=?', [taikoId]);
-      await pool.execute('DELETE FROM bind WHERE id=? OR qq=?', [taikoId, botKey]);
+    const [births] = user ? await pool.query("SELECT taiko_id FROM taiko_manual_creations WHERE (actor_kind='viewer' AND actor_key=?) OR (actor_kind='bot' AND actor_key=?)", [String(user),botKey]) : [[]];
+    const ownedIds = [...new Set([taikoId,...births.map(row=>row.taiko_id)].filter(Boolean))];
+    for (const ownedId of ownedIds) {
+      await pool.execute('DELETE FROM taiko_manual_creations WHERE taiko_id=?', [ownedId]);
+      await pool.execute('DELETE FROM taiko_manual_grant_receipts WHERE taiko_id=?', [ownedId]);
+      await pool.execute('DELETE FROM taiko_source_lifecycle WHERE taiko_id=?', [ownedId]);
+      await pool.execute('DELETE FROM taiko_manual_claim_codes WHERE taiko_id=?', [ownedId]);
+      await pool.execute('DELETE FROM bind WHERE id=? OR qq=?', [ownedId, botKey]);
+      await pool.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?', [ownedId]);
     }
     if (user) {
       await pool.execute('DELETE t FROM web_taiko_binding_mydon_showcase_titles t JOIN web_taiko_bindings b ON b.id=t.binding_id WHERE b.user_id=?', [user]);
@@ -131,7 +137,9 @@ export async function manualSourceSnapshot(c) {
   return c.scopeModule.withDomainScoreRead(c.taikoId, async () => {
     const reader = c.scopeModule.currentScoreScope(c.taikoId).reader;
     const history = [];
-    for (const name of await reader.listHistory(c.taikoId)) history.push(createHash('sha256').update(await reader.readHistory(c.taikoId, name)).digest('hex'));
+    for (const name of await reader.listHistory(c.taikoId)) {
+      if (name.startsWith('data_') && name.endsWith('.json')) history.push(createHash('sha256').update(await reader.readHistory(c.taikoId, name)).digest('hex'));
+    }
     return { current: await reader.currentExists(c.taikoId) ? await reader.readRawCurrent(c.taikoId) : null, history };
   });
 }
