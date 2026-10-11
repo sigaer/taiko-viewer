@@ -250,5 +250,15 @@
     "Pinned deps, R sync, standard 0.82 Viewer release, required Bot/API restart/adapters and online product smoke"
   ],
   "sourceRemoteMain": "565a7da138b57d7e460e632372920e4191d99b90",
-  "sourceCommittedTestedHashesMatch": true
+  "sourceCommittedTestedHashesMatch": true,
+  "callerAuditCorrection": {
+    "accountSyncMigrated": true,
+    "remainingFormalAdapterCaller": "server/utils/taiko-center.ts:proxyTaikoCenterUserdataUpdate (Wahlap update)",
+    "releaseForbiddenUntilMigrated": true,
+    "sourceCodeUnchanged": true,
+    "independentPendingProxy": "proxyTaikoCenterHirobaSync uses a separate Python task; service grant/Writer/credential transport migration pending",
+    "sourceDocumentationCommit": "59c3569fccdeac93e1d633f4643da5fcbfaa4003",
+    "sourceDocumentationPushed": true,
+    "sourceDocumentationRemoteMainVerified": "59c3569fccdeac93e1d633f4643da5fcbfaa4003"
+  }
 }
