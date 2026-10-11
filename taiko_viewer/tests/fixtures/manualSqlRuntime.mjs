@@ -18,6 +18,23 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
+  `CREATE TABLE IF NOT EXISTS public_score_tokens (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, taiko_id VARCHAR(25) NOT NULL,
+    token_hash CHAR(64) NOT NULL, token_mask VARCHAR(32) NOT NULL,
+    last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_public_score_tokens_taiko_id (taiko_id), UNIQUE KEY uniq_public_score_tokens_token_hash (token_hash),
+    KEY idx_public_score_tokens_last_used_at (last_used_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS web_data_sync_logs (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id BIGINT UNSIGNED NOT NULL,
+    taiko_id VARCHAR(25) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'success',
+    target_ids_json LONGTEXT NOT NULL, result_json LONGTEXT NOT NULL,
+    original_bytes INT UNSIGNED NOT NULL DEFAULT 0, compressed_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_web_data_sync_logs_user_id_created_at(user_id,created_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   SOURCE_LIFECYCLE_TABLE_SQL, BINDING_REVOCATION_TABLE_SQL, BINDING_CONFIRMATION_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
   MANUAL_CREATION_TABLE_SQL,
@@ -67,7 +84,7 @@ const TEST_MANUAL_TABLES = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];
 
-export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false } = {}) {
+export async function manualSqlFixture(task, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false } = {}) {
   assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, '1');
   assert.match(String(process.env.TAIKO_DB_NAME || ''), /_test$/);
   const pool = mysql.createPool({ host: process.env.TAIKO_DB_HOST, port: Number(process.env.TAIKO_DB_PORT || 3306),
@@ -112,7 +129,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
         destroy: () => { state.discardedConnections++; connection.destroy(); }, release: () => connection.release()
       };
     } };
-    uninstall = installGoalSqlRuntime(db, config, { withProfile, withPersonal, withRealPython });
+    uninstall = installGoalSqlRuntime(db, config, { withProfile, withPersonal, withRealPython, withAccountSource });
     globalThis.fetch = async () => { throw new Error('Network forbidden during manual source SQL QA'); };
     globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [fixedAt])); } static now() { return fixedAt; } };
     scopeModule = await import('../../server/services/taiko-domain/publication.ts');
@@ -139,7 +156,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     }
     if (user) {
       await pool.execute('DELETE t FROM web_taiko_binding_mydon_showcase_titles t JOIN web_taiko_bindings b ON b.id=t.binding_id WHERE b.user_id=?', [user]);
-      for (const table of ['web_taiko_binding_confirmations', 'web_taiko_binding_verifications', 'web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
+      for (const table of ['web_data_sync_logs', 'web_taiko_binding_confirmations', 'web_taiko_binding_verifications', 'web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
         const [tables] = await pool.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?', [table]);
         if (tables.length) await pool.execute(`DELETE FROM ${table} WHERE user_id=?`, [user]);
       }

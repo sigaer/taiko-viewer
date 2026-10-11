@@ -1,4 +1,5 @@
 import { createError } from "h3";
+import { readBoundedGatewayJson } from "../../infrastructure/local-gateway/json.ts";
 
 export type ScoreTokenStatus = {
   taikoId: string;
@@ -35,7 +36,7 @@ const getScoreTokenGatewayUrl = () => {
 };
 
 const normalizeStatus = (payload: ScoreTokenGatewayResponse["status"], taikoId: string): ScoreTokenStatus => ({
-  taikoId: String(payload?.taiko_id || taikoId).trim(),
+  taikoId,
   exists: Boolean(payload?.exists),
   tokenMask: payload?.token_mask ? String(payload.token_mask) : null,
   lastUsedAt: payload?.last_used_at ? String(payload.last_used_at) : null,
@@ -55,23 +56,32 @@ export const requestScoreTokenManagement = async (
         "Content-Type": "application/json",
         Accept: "application/json"
       },
-      body: JSON.stringify({ userid: taikoId, action })
+      body: JSON.stringify({ userid: taikoId, action }),
+      signal: AbortSignal.timeout(15_000)
     });
-  } catch (error) {
-    console.error("[score-token] 无法连接 Sakura bot token 管理网关", error);
+  } catch {
     throw createError({ statusCode: 502, statusMessage: "网页成绩 token 服务暂时不可用" });
   }
 
-  const payload = (await response.json().catch(() => null)) as ScoreTokenGatewayResponse | null;
-  if (!response.ok || !payload?.ok) {
+  const payload = (await readBoundedGatewayJson(response).catch(() => null)) as ScoreTokenGatewayResponse | null;
+  if (!response.ok || payload?.ok !== true) {
     throw createError({
-      statusCode: response.status || 502,
-      statusMessage: String(payload?.message || payload?.statusMessage || "网页成绩 token 操作失败")
+      statusCode: response.status >= 400 && response.status <= 599 ? response.status : 502,
+      statusMessage: "网页成绩 token 操作失败"
     });
   }
+  const status = payload.status;
+  const validText = (value: unknown) => value == null || (typeof value === "string" && value.length <= 128);
+  if (!status || typeof status.taiko_id !== "string" || status.taiko_id.trim() !== taikoId ||
+      typeof status.exists !== "boolean" || ![status.token_mask, status.last_used_at, status.created_at, status.updated_at].every(validText) ||
+      (typeof status.token_mask === "string" && status.token_mask.length > 32) ||
+      (action === "issue" && (typeof payload.token !== "string" || !/^[a-f0-9]{48}$/.test(payload.token))) ||
+      (action === "revoke" && typeof payload.revoked !== "boolean")) {
+    throw createError({ statusCode: 502, statusMessage: "网页成绩 token 操作失败" });
+  }
   return {
-    token: payload.token ? String(payload.token) : null,
-    revoked: Boolean(payload.revoked),
-    status: normalizeStatus(payload.status, taikoId)
+    token: action === "issue" ? payload.token! : null,
+    revoked: action === "revoke" && payload.revoked === true,
+    status: normalizeStatus(status, taikoId)
   };
 };

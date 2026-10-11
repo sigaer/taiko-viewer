@@ -218,3 +218,18 @@ Rating/普通推荐的两个 current 入口、目标/预测共用 loader 统一�
 验证分两段：53/132 Python 在首 unit 已通过，之后 scoped TS 因缺少 Nuxt test declarations 中止；补齐后 TS 通过。中间运行器把 Python 搜索路径传给 Node 模块缺失 fixture，按所有权清理该失败 unit；只给 Python 命令设置搜索路径，最终两组 TS/132 Node/199 SQL 全部完成、runner exit 0。Node unit 254.409 秒/250 ms sampled peak 376,492,032 bytes（约 359.051 MiB）；Python unit 62.537 秒/337,477,632 bytes；两段 high/max/OOM=0。Final unit journal deactivated successfully，collected 后 MainPID=0/cgroup 已不存在；不把 collected unit 的默认 Result/ExecMainStatus 当退出证明。证据：[phase6-personal-canonical-validation.json](evidence/phase6-personal-canonical-validation.json)。
 
 A `5b61502` / 9.81.6 已 push；未复制 R/未重启任何 live service，Viewer 0.82.0 保持本地阶段提交、随统一标准发布推送。接下来处理 profile/token/sync 与其他私有 grant、剩余 Python history/ctime Reader、dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及最终激活；Gate 6 IN_PROGRESS。
+
+
+## 6.3e.2 账号档案、同步概览和 Viewer token 授权
+
+账号档案与只读同步概览现在捕获同一 SQL pool 和完整绑定 identity，在 Source SH 后及返回前复核 owner/current；SQL proof 前后检查 lease 存活，等待期间替换 id/taiko_id/source/manual_account_id 或读取中更换绑定不能带出旧 private DTO。Title 从 canonical current 读取，projection 删除/改写不改变结果；managed corruption/non-object 返回脱敏 503，legacy missing/invalid 保留 verified title。Binding DAO 保留原排序与字段，list 有 128 条上限；pending/QQ/cooldown/log subqueries 使用捕获 pool。移除原 account sync 遗留本地调试上报。
+
+Viewer token 签发/撤销采用 Source EX→SQL owner/current locks→有界 loopback gateway→实际 SQL token hash/mask/existence proof，手动/98/异常 external source 拒绝；body 不能改用其他 Source。15 秒 fetch/body deadline、16 KiB body、exact string taiko echo 与固定公开错误防止私人网关诊断外泄。状态查询失败保留原 unavailable 行为，targets 限制响应、64 条与文本长度并保留默认 fallback。纯 token/grant 不产生 score observation；C/H bytes、commit/sequence 不变。
+
+网关 token SQL 独立提交，外层 authority transaction 只持锁、不写 token，不能冒称跨 gateway/SQL atomic rollback。Readonly COMMIT ack loss 在同 lease、owner/current 与精确 token outcome 下直接确认一次网关结果；晚 SQL failure 可能留下已提交 token，新的 issue 按原语义旋转，failed rollback 销毁连接。后续实际 gateway Writer 收敛必须重用/重构同一 grant 边界，禁止 parent EX 下 child 再取 Source EX。Sync dispatch mutation、直接 bot/gateway token grant 和 arbitrary-source API 授权继续下一步。
+
+最终两组局部 TypeScript、136 offline Node（新增 4 gateway stream）与 236 actual _test SQL（新增 37 account source，包含 2 既有 actual Python personal）全部 PASS；未改 A Python，53 publication/132 domain Python 沿用上一份证据，不称本步重跑。真实 cookie 的 profile/sync/issue/status/revoke/reload/logout/re-login 和冻结 7bf9a56 healthy full DTO 一致，外部网关用两个 owned loopback servers/实际 token SQL 合成。16 排队替换、返回前替换、lease loss、长 SH/EX/publisher/SQL current lock、hash mismatch、非法/过大/私密错误、COMMIT ACK/failed rollback/captured pool 均通过。[证据](evidence/phase6-account-source-validation.json)。
+
+QA 287.916 秒，250 ms sampled peak 390651904 bytes（372.555 MiB），high/max/OOM=0；实际 wrapper exit 0/journal deactivated successfully，collected 后 MainPID=0/无 cgroup，不以 collected unit 默认状态证明退出。首次注入异常缺少真实 mysql2 code/sql 属性，只修正 test driver shape，失败 unit 不记整体 PASS；定向与最终完整回归通过。实际 SELECT DATABASE()=taiko_annual_poster_test、显式 opt-in，owned rows/root/HTTP listeners/lease children 清理，测试 schema 不含生产 FK，局部 tsc 不等于 full Nuxt。
+
+这是 ACCOUNT_PROFILE_SYNC_OVERVIEW_TOKEN_AUTHORITY_PASS；Gate 6 IN_PROGRESS。A 5b61502/9.81.6 unchanged，Viewer 0.82.0 本地提交待最终标准部署统一 push；live 0.81.11/PIDs 1063394、1063408、829173 unchanged，无 R sync/restart/deploy。继续剩余 history/ctime Reader、private grant/sync dispatch、ops cleanup、actual dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及最终激活。

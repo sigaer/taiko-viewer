@@ -11,8 +11,6 @@ import {
 } from "~/server/internal/account/sync";
 import {
   getCurrentBindingRow,
-  getRuntimePaths,
-  getUserdataPath,
   loadWahlapCookie,
   readUserdata,
   rebuildUserdataAchievement,
@@ -25,61 +23,37 @@ import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-hi
 import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
 import { requestScoreTokenManagement } from "~/server/internal/account/score-token";
 import { requireAccountUser } from "./auth";
+import { withViewerCurrentSource } from "../../services/account/current-source.ts";
+import { canManageExternalScoreToken, proveViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
   const user = await requireAccountUser(event);
-  const [currentBinding, cooldown, lastLogRow, wahlapCookie] = await Promise.all([
-    getCurrentBindingRow(user.id),
-    getSyncCooldownState(user.id),
-    getLastSyncLogRow(user.id),
-    loadWahlapCookie().catch(() => "")
-  ]);
-  const targets = await loadSyncTargets();
-  const taikoId = currentBinding?.taiko_id || "";
-  const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
-  const canSyncFromWahlap =
-    currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
-  const userdataPath = taikoId ? getUserdataPath(taikoId) : "";
-  const scoreTokenResult = currentBinding && currentBinding.source !== "manual"
-    ? await requestScoreTokenManagement(taikoId, "status").catch((error) => {
-        console.error("[account-sync] 读取网页成绩 token 状态失败", error);
-        return null;
-      })
-    : null;
-  const { userdataDir } = getRuntimePaths();
-  // #region agent log
-  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
-    body: JSON.stringify({
-      sessionId: "b6e9de",
-      runId: "post-fix",
-      hypothesisId: "H-cn",
-      location: "server/utils/account/sync.ts:getAccountSyncOverview",
-      message: "sync_overview_wahlap_state",
-      data: {
-        userId: user.id,
-        taikoId,
-        hasUserdata,
-        canSyncFromWahlap,
-        userdataPath,
-        userdataDir
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-  // #endregion
-  return {
-    currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
-    hasUserdata,
-    canSyncFromWahlap,
-    scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
-    scoreToken: scoreTokenResult?.status || null,
-    targets: toPublicSyncTargets(targets),
-    cooldownRemainingSeconds: cooldown.remainingSeconds,
-    cooldownUntil: cooldown.availableAt,
-    lastSync: toPublicSyncLog(lastLogRow)
-  };
+  return withViewerCurrentSource(user.id, "read", async (currentBinding, db) => {
+    const [cooldown, lastLogRow, wahlapCookie] = await Promise.all([
+      getSyncCooldownState(user.id, db),
+      getLastSyncLogRow(user.id, db),
+      loadWahlapCookie().catch(() => "")
+    ]);
+    const targets = await loadSyncTargets();
+    const taikoId = currentBinding?.taiko_id || "";
+    const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
+    const canSyncFromWahlap =
+      currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
+    const scoreTokenResult = canManageExternalScoreToken(currentBinding)
+      ? await requestScoreTokenManagement(taikoId, "status").then(result => proveViewerScoreTokenStatus(db, taikoId, result)).catch(() => null)
+      : null;
+    return {
+      currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
+      hasUserdata,
+      canSyncFromWahlap,
+      scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
+      scoreToken: scoreTokenResult?.status || null,
+      targets: toPublicSyncTargets(targets),
+      cooldownRemainingSeconds: cooldown.remainingSeconds,
+      cooldownUntil: cooldown.availableAt,
+      lastSync: toPublicSyncLog(lastLogRow)
+    };
+  }, { bindingRequired: false });
 };
 
 export const submitAccountSync = async (event: H3Event, payload: Record<string, unknown>) => {
@@ -130,29 +104,6 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   }
 
   const taikoId = currentBinding.taiko_id;
-  const hasUserdata = await userdataFileExists(taikoId);
-  // #region agent log
-  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
-    body: JSON.stringify({
-      sessionId: "b6e9de",
-      runId: "post-fix",
-      hypothesisId: "H-cn",
-      location: "server/utils/account/sync.ts:submitAccountSync",
-      message: "sync_submit_before_dispatch",
-      data: {
-        userId: user.id,
-        taikoId,
-        hasUserdata,
-        userdataPath: getUserdataPath(taikoId),
-        targetIds: requestedIds
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-  // #endregion
-
   const dispatchPayload = await requestSyncDispatch(taikoId, requestedIds);
   const results = dispatchPayload.results;
   const status = results.every((item) => item.ok) ? "success" : results.some((item) => item.ok) ? "partial" : "failed";

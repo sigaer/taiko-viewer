@@ -4,13 +4,13 @@ import {registerHooks} from 'node:module';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
-export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false } = {}) {
+export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false } = {}) {
  const root=new URL('../../',import.meta.url);
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
  const overrides=new Map([
   [new URL('server/utils/account-db.ts',root).href,`export const getAccountDb=()=>globalThis.__goalSqlRuntime.db; export const ensureAccountSchema=async()=>{};`],
-  [new URL('server/utils/account.ts',root).href,`export * from '${new URL('server/utils/account/auth.ts',root).href}';export * from '${new URL('server/utils/account/bindings.ts',root).href}';${withProfile ? `export * from '${new URL('server/utils/account/profile.ts',root).href}';` : ''}`],
+  [new URL('server/utils/account.ts',root).href,`export * from '${new URL('server/utils/account/auth.ts',root).href}';export * from '${new URL('server/utils/account/bindings.ts',root).href}';${withProfile || withAccountSource ? `export * from '${new URL('server/utils/account/profile.ts',root).href}';` : ''}${withAccountSource ? `export * from '${new URL('server/utils/account/sync.ts',root).href}';export * from '${new URL('server/utils/account/score-token.ts',root).href}';` : ''}`],
   [new URL('server/services/content.ts',root).href,`export const getSongCatalog=async()=>[100,101,102].map(id=>({id,song_name:'SQL Song '+id,level_4:9,shelf_status:0}));export const getRatingEntries=async()=>[];`],
   [new URL('server/services/account/personal.ts',root).href,`export const runGrowthPythonJson=async()=>{globalThis.__goalSqlRuntime.pythonCalls++;await globalThis.__goalSqlRuntime.onPython?.();return ({playerState:{dimensions:['accuracy_power','stamina','rhythm','speed','complex','big_song'].map(key=>({key,value:key==='accuracy_power'?9:10})),sampleCount:30,overallRating:10},todayPlan:{items:[100,101,102].map(songId=>({songId,level:4,title:'SQL Song '+songId,isUnplayed:false})),usedFallback:false}});};`],
   [new URL('server/services/growth-history/model-revision.ts',root).href,`export const getGrowthModelRevision=async()=> 'synthetic-domain-source';`],

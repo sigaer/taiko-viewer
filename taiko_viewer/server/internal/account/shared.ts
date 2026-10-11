@@ -1,5 +1,7 @@
 export { formatLocalTimestamp, writeUserdataWithHistory } from "../../infrastructure/taiko-publication/writer.ts";
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
+import { readViewerCurrentBinding, type BindingRow, type BindingReadDb } from "./binding-read.ts";
+export type { BindingRow } from "./binding-read.ts";
 export { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants, readFileSync } from "node:fs";
@@ -56,21 +58,6 @@ export type SessionRow = {
   session_token: string;
   user_id: number;
   expires_at: Date | string;
-};
-
-export type BindingRow = {
-  id: number;
-  user_id: number;
-  taiko_id: string;
-  source: "wahlap" | "hiroba" | "manual";
-  manual_account_id: string | null;
-  display_name?: string | null;
-  is_current: number;
-  verified_title: string | null;
-  verified_titleplate_id: number | null;
-  mydon_showcase_layout: string;
-  created_at: string;
-  updated_at: string;
 };
 
 export type VerifyRow = {
@@ -544,9 +531,9 @@ export const enrichBindingWithCurrentTitle = async (binding: BindingSummary) => 
   }
 };
 
-export const getPendingBinding = async (userId: number) => {
+export const getPendingBinding = async (userId: number, suppliedDb?: BindingReadDb) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
+  const db = suppliedDb || getAccountDb();
   const [rows] = await db.execute<DbRow<VerifyRow>[]>(
     "SELECT * FROM web_taiko_binding_verifications WHERE user_id = ? AND expires_at > NOW() LIMIT 1",
     [userId]
@@ -566,17 +553,7 @@ export const setCurrentBindingById = async (userId: number, bindingId: number) =
 
 export const getCurrentBindingRow = async (userId: number) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    `SELECT b.*, m.nickname AS display_name
-       FROM web_taiko_bindings b
-       LEFT JOIN taiko_manual_accounts m
-         ON CAST(m.taiko_id AS BINARY) = CAST(b.manual_account_id AS BINARY)
-      WHERE b.user_id = ?
-      ORDER BY b.is_current DESC, b.id ASC LIMIT 1`,
-    [userId]
-  );
-  return rows[0] || null;
+  return readViewerCurrentBinding(getAccountDb(), userId);
 };
 
 export const getSongCatalog = async () => {

@@ -2,6 +2,8 @@ import { createError } from "h3";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { type SyncLogRow, SYNC_COOLDOWN_MS, toIso } from "./shared";
+import type { BindingReadDb } from "./binding-read.ts";
+import { readBoundedGatewayJson } from "../../infrastructure/local-gateway/json.ts";
 
 export type SyncTargetConfig = {
   id: string;
@@ -95,21 +97,19 @@ export const loadSyncTargets = async () => {
     const response = await fetch(endpoint, {
       headers: {
         Accept: "application/json"
-      }
+      },
+      signal: AbortSignal.timeout(15_000)
     });
-    const payload = await readResponseJson(response);
-    if (!response.ok) {
-      throw new Error(String(payload?.message || payload?.statusMessage || (await readResponseText(response)) || `HTTP ${response.status}`));
-    }
-    const targets = Array.isArray(payload?.targets)
-      ? payload!.targets.map(parseSyncTarget).filter(Boolean) as SyncTargetConfig[]
+    const payload = await readBoundedGatewayJson(response) as Record<string, unknown> | null;
+    if (!response.ok) throw new Error("Sync targets unavailable");
+    const targets = Array.isArray(payload?.targets) && payload.targets.length <= 64
+      ? payload.targets.map(parseSyncTarget).filter(Boolean) as SyncTargetConfig[]
       : [];
-    if (!targets.length) {
+    if (!targets.length || targets.some(target => target.id.length > 128 || target.label.length > 256 || target.description.length > 1024)) {
       throw new Error("同步网关未返回可用目标");
     }
     return targets;
-  } catch (error) {
-    console.error("[account-sync] 读取 Sakura bot 同步目标失败，已回退到默认目标", error);
+  } catch {
     return DEFAULT_SYNC_TARGETS;
   }
 };
@@ -135,27 +135,6 @@ export const requestSyncDispatch = async (taikoId: string, targetIds: string[]) 
   }
 
   const payload = await readResponseJson(response);
-  // #region agent log
-  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
-    body: JSON.stringify({
-      sessionId: "b6e9de",
-      runId: "pre-fix",
-      hypothesisId: "H4",
-      location: "server/internal/account/sync.ts:requestSyncDispatch",
-      message: "sync_dispatch_response",
-      data: {
-        taikoId,
-        targetIds,
-        httpStatus: response.status,
-        ok: Boolean(payload?.ok),
-        gatewayMessage: String(payload?.message || "").trim()
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-  // #endregion
   if (!response.ok) {
     const message =
       String(payload?.message || payload?.statusMessage || "").trim() ||
@@ -235,9 +214,9 @@ export const toPublicSyncLog = (row: SyncLogRow | null | undefined): PublicSyncL
   };
 };
 
-export const getLastSyncLogRow = async (userId: number) => {
+export const getLastSyncLogRow = async (userId: number, suppliedDb?: BindingReadDb) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
+  const db = suppliedDb || getAccountDb();
   const [rows] = await db.execute<DbRow<SyncLogRow>[]>(
     "SELECT * FROM web_data_sync_logs WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 1",
     [userId]
@@ -245,8 +224,8 @@ export const getLastSyncLogRow = async (userId: number) => {
   return rows[0] || null;
 };
 
-export const getSyncCooldownState = async (userId: number) => {
-  const lastRow = await getLastSyncLogRow(userId);
+export const getSyncCooldownState = async (userId: number, suppliedDb?: BindingReadDb) => {
+  const lastRow = await getLastSyncLogRow(userId, suppliedDb);
   if (!lastRow) {
     return {
       remainingSeconds: 0,

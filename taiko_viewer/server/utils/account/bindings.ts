@@ -1,8 +1,8 @@
 import { prepareViewerBindingVerification, confirmViewerBindingVerification } from "../../services/account/binding-verification";
 import { removeViewerBinding, switchViewerBinding } from "../../services/account/binding-lifecycle";
-import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { readViewerBindings } from "../../internal/account/binding-read.ts";
 import {
-  type BindingRow,
   extractBindTitleInfo,
   fetchBindPlayerProfile,
   normalizeTaikoId,
@@ -14,14 +14,7 @@ import {
 export const listBindings = async (userId: number) => {
   await ensureAccountSchema();
   const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    `SELECT b.*, m.nickname AS display_name
-       FROM web_taiko_bindings b
-       LEFT JOIN taiko_manual_accounts m
-         ON CAST(m.taiko_id AS BINARY) = CAST(b.manual_account_id AS BINARY)
-      WHERE b.user_id = ? ORDER BY b.is_current DESC, b.id ASC`,
-    [userId]
-  );
+  const rows = await readViewerBindings(db, userId);
   return rows.map(sanitizeBinding);
 };
 
