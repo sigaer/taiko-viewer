@@ -12,7 +12,7 @@ export const formatLocalTimestamp = (date = new Date()) => {
 
 function prepareUserdataHistory(payload: UserdataPayload, source: string, sourceSequence: number,
   observedAt = new Date(), observationId = randomBytes(16).toString("hex")) {
-  if (!/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
+  if (typeof source !== "string" || !/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
   if (!Number.isSafeInteger(sourceSequence) || sourceSequence < 1 || !/^[a-f0-9]{32}$/.test(observationId) ||
     !Number.isFinite(observedAt.getTime())) throw createError({ statusCode: 400, statusMessage: "成绩观察标识无效" });
   const stamp = formatLocalTimestamp(observedAt);
@@ -39,7 +39,7 @@ export function prepareUserdataPublication(payload: UserdataPayload, source: str
 }
 
 export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => withDomainScoreWrite(taikoId, async () => {
-  if (!/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
+  if (typeof source !== "string" || !/^[a-z0-9-]{1,64}$/.test(source)) throw createError({ statusCode: 400, statusMessage: "成绩来源无效" });
   const current = JSON.stringify(payload, null, 4);
   await stageScoreText(taikoId, "current", current);
   // Keep the existing clock point and allocation lifetime: serialize H only

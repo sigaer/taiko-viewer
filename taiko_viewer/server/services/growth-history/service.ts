@@ -1,3 +1,4 @@
+import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
 import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { performance } from "node:perf_hooks";
@@ -31,7 +32,9 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
   const startedAt = performance.now();
   const binding = await getCurrentBindingRow(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+  const expected = captureBindingIdentity(binding);
   return withDomainScoreRead(binding.taiko_id, async () => {
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
     const db = getAccountDb();
     const measurementPromise = options.includeMeasurements === false
       ? Promise.resolve([])
@@ -67,6 +70,7 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
       measurementsReturned: measurements.length,
       coverageState: coverage.scoreHistoryState
     });
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
     return {
       profileId: String(binding.id),
       range: { from: range.from, to: range.to, timezone: GROWTH_HISTORY_TIMEZONE, maxDays: GROWTH_HISTORY_MAX_DAYS },

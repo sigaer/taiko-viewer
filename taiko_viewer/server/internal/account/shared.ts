@@ -555,11 +555,8 @@ export const getPendingBinding = async (userId: number) => {
   } satisfies PendingBindingSummary;
 };
 
-export const setCurrentBindingById = async (userId: number, bindingId: number) => {
-  const db = getAccountDb();
-  await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
-  await db.execute("UPDATE web_taiko_bindings SET is_current = 1 WHERE id = ? AND user_id = ?", [bindingId, userId]);
-};
+export const setCurrentBindingById = async (userId: number, bindingId: number) =>
+  (await import("../../services/account/binding-lifecycle.ts")).switchViewerBinding(userId, bindingId);
 
 export const getCurrentBindingRow = async (userId: number) => {
   await ensureAccountSchema();

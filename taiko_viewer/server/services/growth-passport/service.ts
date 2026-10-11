@@ -1,3 +1,4 @@
+import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
 import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { performance } from "node:perf_hooks";
@@ -16,7 +17,9 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
   const startedAt = performance.now();
   const initialBinding = await getCurrentBindingRow(userId);
   if (!initialBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+  const expected = captureBindingIdentity(initialBinding);
   return withDomainScoreRead(initialBinding.taiko_id, async () => {
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
     const profileId = String(initialBinding.id);
     // Request-local reuse revalidates history files before the History read.
     const loadScoreEvidence = options.shareScoreEvidence !== false
@@ -52,7 +55,8 @@ export async function getSkillPassport(userId: number, range: SkillPassportRange
     });
     const [[storedMeasurements, measurementCoverage, archivedMeasurements], history] = await Promise.all([measurementsPromise, historyPromise]);
     const finalBinding = await getCurrentBindingRow(userId);
-    if (!finalBinding || String(finalBinding.id) !== profileId || history.profileId !== profileId) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
+    assertBindingIdentity(expected, finalBinding);
+    if (history.profileId !== profileId) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
 
     const measurements = mergeDailyAbilityMeasurements(storedMeasurements, archivedMeasurements, range.to);
     if (measurements.length) {

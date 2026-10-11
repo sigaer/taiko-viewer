@@ -1,4 +1,4 @@
-import { deleteBindingsWithGoals } from "../../services/goals/lifecycle";
+import { removeViewerBinding, switchViewerBinding } from "../../services/account/binding-lifecycle";
 import { createError } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import {
@@ -8,7 +8,6 @@ import {
   getPendingBinding,
   normalizeTaikoId,
   sanitizeBinding,
-  setCurrentBindingById,
   toIso,
   type VerifyRow,
   BIND_VERIFY_TTL_MS,
@@ -108,75 +107,8 @@ export const confirmBindingVerification = async (userId: number, taikoIdInput: u
   return { ok: true };
 };
 
-export const switchCurrentBinding = async (userId: number, bindingIdInput: unknown) => {
-  await ensureAccountSchema();
-  const bindingId = Number(bindingIdInput || 0);
-  if (!Number.isInteger(bindingId) || bindingId <= 0) {
-    throw createError({ statusCode: 400, statusMessage: "绑定记录无效" });
-  }
+export const switchCurrentBinding = (userId: number, bindingIdInput: unknown) =>
+  switchViewerBinding(userId, bindingIdInput);
 
-  const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    "SELECT * FROM web_taiko_bindings WHERE id = ? AND user_id = ? LIMIT 1",
-    [bindingId, userId]
-  );
-  if (!rows.length) {
-    throw createError({ statusCode: 404, statusMessage: "未找到该绑定记录" });
-  }
-  await setCurrentBindingById(userId, bindingId);
-  return { ok: true };
-};
-
-export const removeBinding = async (userId: number, bindingIdInput: unknown, forceInput?: unknown) => {
-  await ensureAccountSchema();
-  const bindingId = Number(bindingIdInput || 0);
-  if (!Number.isInteger(bindingId) || bindingId <= 0) {
-    throw createError({ statusCode: 400, statusMessage: "绑定记录无效" });
-  }
-
-  const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    "SELECT * FROM web_taiko_bindings WHERE id = ? AND user_id = ? LIMIT 1",
-    [bindingId, userId]
-  );
-  const binding = rows[0];
-  if (!binding) {
-    throw createError({ statusCode: 404, statusMessage: "未找到该绑定记录" });
-  }
-  if (binding.source === "manual") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "手动账号请使用“从 viewer 解绑”或“永久删除”"
-    });
-  }
-
-  const [countRows] = await db.execute<Array<{ total: number }>>(
-    "SELECT COUNT(*) AS total FROM web_taiko_bindings WHERE user_id = ?",
-    [userId]
-  );
-  const total = Number(countRows[0]?.total || 0);
-  const force = Boolean(forceInput);
-
-  if (total <= 1 && !force) {
-    throw createError({ statusCode: 409, statusMessage: "这是最后一个绑定 ID，请再次确认后再删除" });
-  }
-
-  await deleteBindingsWithGoals(db, userId, { bindingId });
-
-  if (binding.is_current && total > 1) {
-    const [nextRows] = await db.execute<DbRow<BindingRow>[]>(
-      "SELECT * FROM web_taiko_bindings WHERE user_id = ? ORDER BY id ASC LIMIT 1",
-      [userId]
-    );
-    const nextBinding = nextRows[0];
-    if (nextBinding) {
-      await setCurrentBindingById(userId, nextBinding.id);
-    }
-  }
-
-  return {
-    ok: true,
-    removedTaikoId: binding.taiko_id,
-    remainingCount: Math.max(0, total - 1)
-  };
-};
+export const removeBinding = (userId: number, bindingIdInput: unknown, forceInput?: unknown) =>
+  removeViewerBinding(userId, bindingIdInput, forceInput);

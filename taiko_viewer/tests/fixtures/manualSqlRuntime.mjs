@@ -8,6 +8,7 @@ import { installGoalSqlRuntime } from './goalSqlRuntime.mjs';
 import { SOURCE_LIFECYCLE_TABLE_SQL } from '../../server/infrastructure/taiko-publication/lifecycle-schema.ts';
 import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from '../../server/infrastructure/taiko-publication/grant-schema.ts';
 import { MANUAL_CREATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/creation-schema.ts';
+import { BINDING_REVOCATION_TABLE_SQL } from '../../server/infrastructure/taiko-publication/binding-revocation-schema.ts';
 import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
@@ -16,7 +17,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
 const TEST_MANUAL_TABLES = [
-  SOURCE_LIFECYCLE_TABLE_SQL,
+  SOURCE_LIFECYCLE_TABLE_SQL, BINDING_REVOCATION_TABLE_SQL,
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
   MANUAL_CREATION_TABLE_SQL,
   GOAL_TABLE_SQL, GROWTH_MEASUREMENT_TABLE_SQL, GROWTH_RECENT_CURSOR_TABLE_SQL,
@@ -60,7 +61,7 @@ export async function manualSqlFixture(task) {
   let fixedAt = RealDate.now();
   const priorFetch = globalThis.fetch;
   let scopeModule;
-  const state = { afterExecute: null, optimisticChecks: 0, onOptimisticChecks: null, beforeSqlStatement: null, afterSqlStatement: null, afterSqlCommit: null, transactions: 0, commits: 0, failRollback: false, discardedConnections: 0 };
+  const state = { expectedSourceMode: 'write', afterExecute: null, optimisticChecks: 0, onOptimisticChecks: null, beforeSqlStatement: null, afterSqlStatement: null, afterSqlCommit: null, transactions: 0, commits: 0, failRollback: false, discardedConnections: 0 };
   try {
     const [[identity]] = await pool.query('SELECT DATABASE() AS name');
     assert.match(identity.name, /_test$/);
@@ -77,7 +78,7 @@ export async function manualSqlFixture(task) {
       if (state.afterExecute) await state.afterExecute(sql, args, result);
       return result;
     }, async getConnection() {
-      assert.equal(scopeModule.currentScoreScope()?.mode, 'write', 'manual detach must enter source EX before SQL owner locks');
+      assert.equal(scopeModule.currentScoreScope()?.mode || 'none', state.expectedSourceMode, 'Expected source lease before SQL owner locks');
       const connection = await pool.getConnection();
       return {
         query: (...args) => connection.query(...args),
@@ -120,7 +121,7 @@ export async function manualSqlFixture(task) {
     }
     if (user) {
       await pool.execute('DELETE t FROM web_taiko_binding_mydon_showcase_titles t JOIN web_taiko_bindings b ON b.id=t.binding_id WHERE b.user_id=?', [user]);
-      for (const table of ['web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
+      for (const table of ['web_taiko_binding_revocations', 'web_player_goals', 'web_growth_measurements', 'web_growth_recent_cursors', 'web_song_locks', 'web_user_sessions', 'web_taiko_bindings']) {
         const [tables] = await pool.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?', [table]);
         if (tables.length) await pool.execute(`DELETE FROM ${table} WHERE user_id=?`, [user]);
       }

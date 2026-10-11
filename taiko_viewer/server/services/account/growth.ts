@@ -1,3 +1,4 @@
+import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity";
 import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { readRecentCompletedGoal } from '../goals/evaluation-store';
 import { readGoalSnapshot } from "../goals/snapshot";
@@ -37,7 +38,9 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
   const binding = await getCurrentBindingRow(userId);
   const authDurationMs = performance.now() - authStartedAt;
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
+  const expected = captureBindingIdentity(binding);
   return withDomainScoreRead(binding.taiko_id, async () => {
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
     if (!await getDomainScoreReader().currentExists(binding.taiko_id)) throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" });
     const scoreStartedAt = performance.now();
     const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id)]);
@@ -95,7 +98,9 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
     });
     const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
     if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
-    return { recentCompletedGoal: activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id)), profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
+    const recentCompletedGoal = activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id));
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
+    return { recentCompletedGoal, profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
   });
 
 };

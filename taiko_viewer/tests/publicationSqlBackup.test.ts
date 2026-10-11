@@ -1,3 +1,4 @@
+import { prepareUserdataPublication } from "../server/infrastructure/taiko-publication/writer.ts";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
@@ -24,4 +25,10 @@ test("SQL recovery rejects malformed, changed and oversized data without payload
   }
   assert.throws(() => encodeSqlRecoveryBackup({ huge: "x".repeat(8 * 1024 * 1024) }), PublicationUnavailableError);
   assert.throws(() => decodeSqlRecoveryBackup(raw, "invalid"), PublicationUnavailableError);
+});
+
+test("publication provenance rejects coercible non-string writer sources", () => {
+  for (const value of [undefined, null, { toString: () => "wahlap" }]) {
+    assert.throws(() => prepareUserdataPublication({ songs: [] }, value as never, 1), { statusCode: 400 });
+  }
 });

@@ -178,3 +178,16 @@ A `fd7b52e` / 9.81.4 的两个本地 RPC 已标准 commit/push，仍只在 A 未
 QA 172.201 秒，250 ms sampled cgroup peak 356,143,104 bytes（约 339.645 MiB），high/max/OOM=0、unit success/exit 0。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 opt-in=1，所有 owned rows/tree/children 清理；无生产 DB/个人文件/外部服务 QA，无新 listener。测试 schema 缺生产 FK，不冒称 production migration/FK enforcement/authenticated HTTP/full server tsc/百万容量。初始 wrapper 路径与 opt-in 传递问题在连接前停止；完整回归的两个旧 SQL query hook、一个把 legacy daily 当 H 的 snapshot helper 问题修复，并在相同预算重新全套通过。
 
 A `f3146cf` / 9.81.5 已标准 commit/push；仅 A Infrastructure 未同步 R，因此现有 NoneBot 无需在此步骤重启。Viewer 0.82.0 本地步骤，待 Phase 6 完整标准部署统一 push；live 0.81.11、Viewer/receiver PID 1063394/1063408 active。MANUAL_CREATION_RECOVERY_PASS，Gate 6 仍 IN_PROGRESS。继续通用解绑/登录账号注销与 private grants、actual dispatcher/u0/daily 全入口和 reader identity fence、Read Model/P1a/百万成本、运维恢复入口与最终统一 runtime sync/发布/线上验收。
+
+
+## 6.3d.8 通用解绑事务与 Growth 完整身份复核
+
+通用绑定解绑现在先持有 Source EX，再在同一次 SQL transaction 锁定 owner 与其全部 bindings，复核捕获的 id/taiko id/source/manual account identity。实际 last-binding count、Goal/measurement/cursor/song-lock/showcase cleanup、remaining current selection 和最小私有 operation receipt 只做一次 COMMIT；任一晚失败不留下部分授权或丢失 current，rollback 失败销毁连接。精确 UUID receipt 证明丢失 COMMIT ack，同 owner 并发只撤权一次，完成后的 retry 仅确认原返回结果，不重复改变 selection/成绩。manual 仍使用既有专门入口，foreign binding、坏 receipt、已注销 owner 拒绝。普通 successful DTO 字段保留，纯撤权不生成 score observation。
+
+默认绑定切换属于 SQL metadata，不读取成绩；锁定 owner/all bindings 后两次 current 更新在一个 SQL transaction 完成，不在 SQL 后请求 Source lease。shared 旧入口延迟委托同一实现，避免新循环依赖。Overview/History/Passport/Recent 在获得 SH 后及返回 DTO 前复核完整四字段身份；排队期间同 row id 的 taiko/source/manual account 替换不能带出旧 profile 产品。Recent ACK 的整个 evidence→owner/cursor transaction→COMMIT 共用一个 SH view，完整身份在 SQL 锁内再次证明，保留 boundary CAS/idempotency。原 shared Writer 来源校验补上实际 string type，拒绝 undefined/null/coercible object，正常字节/时钟语义不变。
+
+最终 45 Python + 132 offline Node + 139 actual `_test` SQL（新增 33 binding/source 用例）、两组局部 TypeScript 全 PASS。包含 late cleanup/current/receipt/driver failure、failed rollback、lost ack/concurrent retry、actual queued identity substitution/last-binding change、captured pool、corrupt receipt/deleted owner、long Growth SH 与撤权 EX、Recent cursor COMMIT 与新 publisher fence、两个 actual Node COMMIT 前后退出点。C/H raw SHA、commit ID、sequence 在纯 SQL 操作前后不变，原 manual/acquisition/Goal/Growth 完整 Golden 回归保留。[证据](evidence/phase6-binding-revocation-validation.json)。
+
+QA 198.253 秒，250 ms sampled cgroup peak 367,939,584 bytes（约 350.895 MiB），high/max/OOM=0；unit success/exit 0、inactive/MainPID 0/无残留 cgroup。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 mutation opt-in=1，owned rows/tree/children 清理。测试 schema 无生产 FK，未把这些 service/bridge 测试称为 production migration/FK enforcement/authenticated HTTP/full server tsc/百万容量。首轮 fixture 的重复 ID/范围/来源参数修正；新 provenance test 引入 runtime globals 导致窄 tsc 停止，移入已有正确类型环境后原限额整套重跑通过。
+
+这是 BINDING_REVOCATION_AND_GROWTH_IDENTITY_PASS，Gate 6 仍 IN_PROGRESS。无公开登录账号删除业务路由，不新增此产品；现有 ops/test cleanup helpers 与 binding verification confirmation 尚需授权/fence 审阅收敛。个人 rating/recommendation 等其余 reader、private source/QQ/Hiroba grants、actual dispatcher/u0/daily 全入口、P1a/Read Model/百万成本、运维恢复入口与最终 runtime sync/发布/线上验收继续执行。A `f3146cf` / 9.81.5 unchanged；Viewer 0.82.0 本地步骤待统一标准部署 push，live 0.81.11/PID 1063394、receiver PID 1063408 unchanged，无 R sync/NoneBot 重启。
