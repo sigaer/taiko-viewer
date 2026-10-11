@@ -47,3 +47,7 @@
 Phase 5 必要独立准备已完成，下一步是被现行 memory guard 拒绝的实际发布；Gate 5 未 PASS 禁止开始 Phase 6。无需新增权限选择，但需要外部资源状态变化/维护窗口，故 Goal 标记 `blocked`，不标完成、不降阈值、不终止其他常驻服务、不手动 push 或部署。 [三轮阻碍审计](evidence/phase5-blocked-audit.json) 已记录。
 
 恢复后先重新核对 worktree/remote/memory；使用当前 HEAD subject 调用 `bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh "$(git log -1 --pretty=%s)"`。成功后用 `scripts/verify_taiko_domain_release.mjs 0.81.11` 验线上版本/匿名授权边界，核对旧 PID 退出/新 PID 和相关运行服务，再保存 Gate 5 证据与进入 Phase 6。此前离线 PASS 不替代这些未完成步骤。
+
+## 恢复发布
+
+恢复 Goal 时，可用内存约 16.88 GiB，超过同一 12.65 GiB 准入；PSI full avg10 < 2，无 Annual/QA/build worker。已复核实现文件 hash 与最终 230 Node / 5 Python 验证完全相同，安装的 JS contract=0.1.1、Viewer package=0.81.11；没有新增实现需要重复运行整套测试。工作树无 tracked diff，线上旧 PID 未变。 [恢复证据](evidence/phase5-resume-admission.json) 留档；接下来执行原定标准脚本，Gate 5 仍待部署和生产检查。

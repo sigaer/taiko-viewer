@@ -2,7 +2,7 @@
 
 执行依据：[Execution Plan v2](../Sakura_Taiko_Domain_Extraction_Execution_Plan_v2.md)。用户已授权依序执行 Phase 0–6、逐步留档、阶段提交/推送，技术选择自行决定。日期均为 Asia/Shanghai。此台账不沿用 Annual Poster Phase 字母 Gate。
 
-Goal：`blocked`（连续三轮构建内存准入不足，外部资源状态待变化）。Phase 5 Gate 仍为 IN_PROGRESS；目标未完成，恢复后继续同一 Phase 5 发布/验收，随后 Phase 6。详见 [阻碍审计](evidence/phase5-blocked-audit.json)。
+Goal：`active`。先前连续三轮内存准入不足的阻碍已在恢复时解除；继续同一 Phase 5 标准发布/生产验收，随后 Phase 6。Phase 5 Gate 仍为 IN_PROGRESS，不用恢复准入替代上线结果。详见 [阻碍审计](evidence/phase5-blocked-audit.json)、[恢复复核](evidence/phase5-resume-admission.json)。
 
 | Phase | Gate | 已完成 / 待完成 | 证据 |
 | --- | --- | --- | --- |
@@ -47,3 +47,4 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 5.4：实现提交 `cd4be76`；memory build wrapper 因可用内存低于约 12.65 GiB 拒绝，标准部署脚本未启动，尚未 push 或切换线上。准入失败已留档；等待维护窗口，不改限制、不手动发布、不进入 Phase 6。
 - 2026-10-11 / 5.4-preparation：续行复核内存仍不足；补齐只读在线验收脚本，当前 0.81.10 的 8 项 SSR / anonymous GET 基线通过并留档，未冒称新版本已发布，生产无需账号/成绩写入。
 - 2026-10-11 / 5.4-blocked-audit：第三轮复核同一 memory headroom 阻碍，约 11.81 < 12.65 GiB；无活动部署/QA/Annual job，live remote `060dc05`，线上 PIDs 不变。独立准备完成后无其他合规推进动作，Goal 标 blocked 并留恢复步骤；不提前 PASS 或进入 Phase 6。
+- 2026-10-11 / 5.4-resume：Goal 恢复 active；可用约 16.88 > 12.65 GiB、PSI < 2、无 Annual worker。实现文件 hash 与 230 Node / 5 Python 验证时相同，JS contract 安装为 0.1.1，线上尚未切换；继续标准发布。

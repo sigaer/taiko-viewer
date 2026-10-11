@@ -1,0 +1,20 @@
+{
+  "phase": 5,
+  "step": "5.4-resume",
+  "status": "ADMISSION_READY",
+  "date": "2026-10-11T08:35:11.869434+08:00",
+  "source_head": "63fac384c184a53ce359e7d37be28f1f3d0e5f95",
+  "memory": {
+    "available_kib": 17625252,
+    "required_kib": 13266778.0,
+    "available_gib": 16.809,
+    "required_gib": 12.652,
+    "psi_full_avg10": 0.0
+  },
+  "implementation_hash_revalidation": "PASS",
+  "viewer_version": "0.81.11",
+  "js_contract_version": "0.1.1",
+  "code_changes_since_final_230_node_5_python_tests": false,
+  "deployment_started": false,
+  "gate_5": "IN_PROGRESS"
+}
