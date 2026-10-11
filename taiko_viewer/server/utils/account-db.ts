@@ -2,6 +2,7 @@ import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/services/annual-beta/sche
 import { SOURCE_LIFECYCLE_TABLE_SQL } from "../infrastructure/taiko-publication/lifecycle-schema";
 import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from "../infrastructure/taiko-publication/grant-schema";
 import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/creation-schema";
+import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-confirmation-schema";
 import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
@@ -61,6 +62,7 @@ const CREATE_TABLES = [
   MANUAL_GRANT_RECEIPT_TABLE_SQL,
   MANUAL_CREATION_TABLE_SQL,
   BINDING_REVOCATION_TABLE_SQL,
+  BINDING_CONFIRMATION_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_user_accounts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(64) NOT NULL,

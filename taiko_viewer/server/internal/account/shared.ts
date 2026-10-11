@@ -480,6 +480,7 @@ export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
       Referer: "https://servicewechat.com/wxeafab0667490cd23/21/page-frame.html",
       Authorization: auth
     },
+    signal: AbortSignal.timeout(15000),
     body: JSON.stringify({ keyword: taikoId, page: 1, pageSize: 10 })
   });
 
@@ -501,8 +502,13 @@ export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
     });
   }
   const players = Array.isArray(data?.data?.players) ? data.data.players : [];
-  const exact = players.find((item: Record<string, unknown>) => String(item.userid || "").trim() === taikoId);
-  const player = exact || players[0];
+  const exact = players.find((item: unknown) => {
+    if (!item || typeof item !== "object") return false;
+    const id = (item as Record<string, unknown>).userid;
+    return typeof id === "string" ? id.trim() === taikoId
+      : typeof id === "number" && Number.isSafeInteger(id) && String(id) === taikoId;
+  });
+  const player = exact;
   if (!player) {
     throw createError({ statusCode: 404, statusMessage: "未找到该鼓众ID，请确认输入是否正确" });
   }

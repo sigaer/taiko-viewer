@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Pool, PoolConnection, RowDataPacket } from "mysql2/promise";
+import type { Pool, RowDataPacket } from "mysql2/promise";
 import { createError } from "h3";
 import { ensureAccountSchema, getAccountDb } from "../../utils/account-db";
 import { assertBindingIdentity, captureBindingIdentity, type BindingIdentity } from "../../internal/account/binding-identity";
@@ -8,10 +8,10 @@ import { PublicationUnavailableError } from "../../infrastructure/taiko-publicat
 import { currentScoreScope, withDomainScoreWrite } from "../taiko-domain/publication";
 import { deleteBindingsAndGoalsInTransaction } from "../goals/lifecycle";
 
-type Binding = RowDataPacket & BindingIdentity & { user_id: number; is_current: number };
+import { BINDING_AUTHORITY_COLUMNS, lockViewerBindingAuthority as lockOwner, rollbackViewerBindingTransaction as rollback, selectViewerCurrentBinding as selectCurrent, type ViewerBindingAuthority as Binding } from "../../internal/account/binding-authority";
 type Receipt = RowDataPacket & { operation_id: string; user_id: number; binding_id: number;
   taiko_id: string; source: string | null; remaining_count: number };
-const bindingColumns = "id,user_id,taiko_id,source,manual_account_id,is_current";
+const bindingColumns = BINDING_AUTHORITY_COLUMNS;
 const removed = (row: Receipt) => ({ ok: true, removedTaikoId: row.taiko_id, remainingCount: Number(row.remaining_count) });
 const missing = () => createError({ statusCode: 404, statusMessage: "未找到该绑定记录" });
 function ids(userId: number, bindingIdInput: unknown) {
@@ -37,24 +37,9 @@ async function receipt(db: Pool, userId: number, bindingId: number, operationId?
     ORDER BY created_at DESC,operation_id DESC LIMIT 1`, operationId ? [userId,bindingId,operationId] : [userId,bindingId]);
   return rows[0] ? validateReceipt(rows[0], userId, bindingId) : undefined;
 }
-async function lockOwner(connection: PoolConnection, userId: number) {
-  const [users] = await connection.execute<RowDataPacket[]>("SELECT id FROM web_user_accounts WHERE id=? FOR UPDATE", [userId]);
-  if (!users[0]) throw missing();
-  const [rows] = await connection.execute<Binding[]>(`SELECT ${bindingColumns} FROM web_taiko_bindings
-    WHERE user_id=? ORDER BY id LIMIT 129 FOR UPDATE`, [userId]);
-  if (rows.length > 128) throw new PublicationUnavailableError();
-  return rows;
-}
-async function rollback(connection: PoolConnection) {
-  try { await connection.rollback(); } catch { connection.destroy(); }
-}
 function assertRevocationScope(taikoId: string) {
   const scope = currentScoreScope(taikoId);
   if (!scope || scope.mode !== "write" || scope.staged.size || scope.rollback.length) throw new PublicationUnavailableError();
-}
-async function selectCurrent(connection: PoolConnection, userId: number, bindingId: number) {
-  await connection.execute("UPDATE web_taiko_bindings SET is_current=0 WHERE user_id=?", [userId]);
-  await connection.execute("UPDATE web_taiko_bindings SET is_current=1 WHERE id=? AND user_id=?", [bindingId,userId]);
 }
 
 export async function removeViewerBinding(userId: number, bindingIdInput: unknown, forceInput?: unknown) {

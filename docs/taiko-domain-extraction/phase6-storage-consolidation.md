@@ -191,3 +191,18 @@ A `f3146cf` / 9.81.5 已标准 commit/push；仅 A Infrastructure 未同步 R，
 QA 198.253 秒，250 ms sampled cgroup peak 367,939,584 bytes（约 350.895 MiB），high/max/OOM=0；unit success/exit 0、inactive/MainPID 0/无残留 cgroup。实际 SELECT DATABASE()=`taiko_annual_poster_test`、显式 mutation opt-in=1，owned rows/tree/children 清理。测试 schema 无生产 FK，未把这些 service/bridge 测试称为 production migration/FK enforcement/authenticated HTTP/full server tsc/百万容量。首轮 fixture 的重复 ID/范围/来源参数修正；新 provenance test 引入 runtime globals 导致窄 tsc 停止，移入已有正确类型环境后原限额整套重跑通过。
 
 这是 BINDING_REVOCATION_AND_GROWTH_IDENTITY_PASS，Gate 6 仍 IN_PROGRESS。无公开登录账号删除业务路由，不新增此产品；现有 ops/test cleanup helpers 与 binding verification confirmation 尚需授权/fence 审阅收敛。个人 rating/recommendation 等其余 reader、private source/QQ/Hiroba grants、actual dispatcher/u0/daily 全入口、P1a/Read Model/百万成本、运维恢复入口与最终 runtime sync/发布/线上验收继续执行。A `f3146cf` / 9.81.5 unchanged；Viewer 0.82.0 本地步骤待统一标准部署 push，live 0.81.11/PID 1063394、receiver PID 1063408 unchanged，无 R sync/NoneBot 重启。
+
+
+## 6.3d.9 绑定验证的身份与事务收敛
+
+原确认流程分开提交 current reset、binding/title grant 和验证记录删除；等待或晚失败可丢失默认绑定、重复操作，且只使用 fence 外的挑战。现在公开 profile/title 观察在 SQL 外完成，随后 Source EX→SQL owner/all bindings，复核原 verification id/hash/expiry 和 existing binding 的完整身份，一次 SQL COMMIT 写入 grant/title/current、消费匹配挑战、登记私有最小确认回执。晚失败完整 rollback，失败 rollback 销毁连接；丢失 COMMIT ack 只认精确 operation/verification proof，捕获 pool 不在续做时更换。纯 grant 不生成 score observation。
+
+准备验证只涉及公开资料与 SQL metadata，无 score grant；其 challenge replace 也改为 owner-locked 一次 transaction，不在 SQL 后获取 Source。确认回执只保留 actor/binding/source/verification id 与 title/challenge hash，不保存原文、密码、成绩或凭据。原 body 仍只需要 taikoId；同 actor 已完成重试必须还有 matching owned binding/title proof，确认原结果，不覆盖 later current/unrelated pending，也不复活移除或替换后的绑定。新挑战必须重新验证；prepare 无 client UUID，process/HTTP ack loss 后重新 prepare 可以按旧语义替换 baseline，不承诺无限请求重放。
+
+绑定查询仅认 exact official userid；删除 first-player fallback，拒绝会丢精度的 unsafe numeric ID，设置 15 秒 HTTP deadline。保持原“称号/称号牌变化”产品规则，不声称建立新的更强身份挑战协议。手动账号走专门 claim：bot-only/deleted SQL reservations 和已定义的 98 namespace 均拒绝普通 external verification，覆盖没有 SQL authority 的 legacy orphan。公共原图/排行榜搜索语义未借此扩展。SQL owner/current/rollback helpers 与通用解绑共用单一实现。
+
+最终 45 Python + 132 offline Node + 169 actual `_test` SQL（新增 30 verification）、两组局部 TypeScript PASS。冻结 `7d67edc` successful prepare/confirm DTO 与 source/current/verified fields 一致；C/H raw SHA、commit ID、sequence 保持。覆盖 late grant/current/consume/receipt/driver failure、rollback destroy、lost ack/concurrent actor、排队期间 challenge identity/expiry/baseline/source 替换/foreign owner、existing binding refresh、captured pool、腐坏 receipt/deleted owner、手动 namespace/删除后/孤立档案拒绝、两个 actual Node COMMIT 前后退出。真实 login cookie 与实际 HTTP prepare/confirm/current/GET adapters 验证 401、pending→complete、reload、later selection、replay、logout/re-login；official profile 响应为 synthetic，不调用真实 Wahlap。[证据](evidence/phase6-binding-verification-validation.json)。
+
+QA 224.135 秒，250 ms sampled peak 386,424,832 bytes（约 368.523 MiB），high/max/OOM=0；unit success/exit 0、inactive/MainPID 0、无残留 cgroup。实际 SELECT DATABASE()=`taiko_annual_poster_test`，显式 mutation opt-in=1，owned rows/tree/HTTP listener/children 清理；无 production DB/私人文件/official network QA。测试库不带生产 FK，不冒称 migration/FK enforcement/full server tsc/百万容量。首轮不合规的 synthetic manual ID 触发现有 CHECK，未放松约束；第二轮错用删除 helper 名称修正，随后定向与最终整套通过。
+
+这是 BINDING_VERIFICATION_TRANSACTION_PASS；Gate 6 仍 IN_PROGRESS。个人 rating/recommendation/Growth Python CLI 的直接 compatibility reads 已定位，必须连同 canonical Reader 接入验证，不能仅给 Node 外层加锁即当成完成。其余 private profile/token/QQ/Hiroba/source grant、ops cleanup、actual dispatcher/u0/daily 全入口、P1a/Read Model/百万成本/运维恢复与最终统一 sync/release/在线验收继续。A `f3146cf` / 9.81.5 unchanged；Viewer 0.82.0 本地步骤，live 0.81.11/PIDs 1063394、1063408 unchanged，无 R sync/NoneBot 重启/Viewer 部署。
