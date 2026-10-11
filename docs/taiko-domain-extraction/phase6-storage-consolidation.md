@@ -233,3 +233,18 @@ Viewer token 签发/撤销采用 Source EX→SQL owner/current locks→有界 lo
 QA 287.916 秒，250 ms sampled peak 390651904 bytes（372.555 MiB），high/max/OOM=0；实际 wrapper exit 0/journal deactivated successfully，collected 后 MainPID=0/无 cgroup，不以 collected unit 默认状态证明退出。首次注入异常缺少真实 mysql2 code/sql 属性，只修正 test driver shape，失败 unit 不记整体 PASS；定向与最终完整回归通过。实际 SELECT DATABASE()=taiko_annual_poster_test、显式 opt-in，owned rows/root/HTTP listeners/lease children 清理，测试 schema 不含生产 FK，局部 tsc 不等于 full Nuxt。
 
 这是 ACCOUNT_PROFILE_SYNC_OVERVIEW_TOKEN_AUTHORITY_PASS；Gate 6 IN_PROGRESS。A 5b61502/9.81.6 unchanged，Viewer 0.82.0 本地提交待最终标准部署统一 push；live 0.81.11/PIDs 1063394、1063408、829173 unchanged，无 R sync/restart/deploy。继续剩余 history/ctime Reader、private grant/sync dispatch、ops cleanup、actual dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及最终激活。
+
+
+## 6.3e.3 Python 历史、文件时间兼容与 daily root
+
+load_user_snapshots 从一个 canonical SH view 枚举、排序和消费 H，完整重建结束才释放；full/delta、基线前忽略、profile/achievement 替换、removed songs、未知字段与旧异常 JSON 排除语义不变。parse_snapshot_time 保留两类时间文件名与 suffix/tie 顺序，异常文件名使用被捕获的原 filesystem mtime。getUtime 在同一受保护视图验证 current，使用捕获的旧 ctime 展示值；managed 缺失/损坏不降为 partial/空，tombstone 不读取旧 projection，legacy 空目录/缺失 current 保持 []/None。
+
+Schema 1 增加可选 fileMtimes/fileCtimes（有限 JSON number 秒值），接管原文件即捕获；相同 raw hash 不合并不同旧文件的 metadata，未改引用保持旧值。恢复在同一批次带回这些值，显式 restore overrides 纳入 nonce request hash，晚失败/portable restore 不把存储操作显示成新成绩更新。文件时钟不作为 play/observation time 或 P1a ready proof；旧 manifest 没有这些值时只能兼容读取 object metadata，不能声称找回已丢失原 legacy 时钟。增加 32 MiB serialized manifest 提交前上限，避免合法但超长 H 名称加 metadata 后产生无法再读的已提交代。
+
+真实趋势调用的 audit guard 发现 daily archive 曾越过配置 root 指向硬编码生产目录，guard 在写入前阻断。daily archive/capture 提供显式 root > TAIKO_USERDATA_DIR > 旧 ROOT；acquisition 把 store.root 传给现有两个日模型。只修正 root，不修改 namespace/flock/既往日冻结/当日代表规则；chart/backfill/daily 的共同 lifecycle Source fence 继续随后收敛。
+
+75 publication Python（新增 21 history + 1 acquisition root）、156 domain/trend/daily Python（132 既有 + 24 扩展）、138 offline Node（新增 2 actual metadata pipe）、236 actual _test SQL、两组局部 TypeScript PASS。冻结 5b61502 完整 snapshots、日趋势/曲数趋势 Rating 和六维 DTO 一致；oracle 只重定向个人 root，公开完整谱库与算法没有 mock。Projection loss/tamper、坏/缺对象、legacy invalid/non-object/unsafe exclusion、相同 raw 不同 mtime、失效 view、实际独立 writer 等待 SH、portable backup/restore、迟失败 old caption、nonce/metadata byte bounds 均覆盖。[证据](evidence/phase6-history-reader-validation.json)。
+
+验证分段保留：75 publication 在首 unit 已通过，后续扩大 domain fixture 缺完整 Bot routes 而停止，不把首 unit 记为整体通过。补齐真实趋势纯解析器的 AST 载入，仅排除 3 个未修改、需要完整 NoneBot 注册的 route tests；另 9 个既有 production cases 仍排除，最终 scoped domain/TS/Node/SQL 完整 exit 0。Final unit 311.970s/250ms sampled peak 388325376 bytes（370.336 MiB），high/max/OOM=0；早段 64.066s/236072960 bytes。以实际 wrapper exit/journal success 证明完成，collected 后 MainPID=0/cgroup gone。首次 dir_fd guard/legacy skip expectation 已修正并定向通过；只删除确属本次失败 fixture 的临时目录，非 force 清理。SQL 真实 DATABASE/opt-in、owned roots/children/listeners 清理；不称为 production FK/full Nuxt/full Bot/百万容量验收。
+
+本步 PYTHON_HISTORY_AND_FILESYSTEM_METADATA_READER_PASS；Gate 6 IN_PROGRESS。A 6a90c7e / 9.81.7 已标准 commit/push，未复制运行 R 因此不需要此步重启；Viewer 0.82.0 本地提交随最终标准发布统一 push。运行 Viewer/receiver/public API PIDs 1063394/1063408/829173 未变。继续 private grant/sync dispatch、ops cleanup、actual dispatcher/u0/daily/all Writer、P1a/Read Model/百万成本/运维恢复及统一激活验收。

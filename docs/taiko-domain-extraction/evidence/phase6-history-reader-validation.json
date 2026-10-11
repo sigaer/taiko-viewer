@@ -1,0 +1,156 @@
+{
+  "step": "6.3e.3",
+  "status": "PYTHON_HISTORY_AND_FILESYSTEM_METADATA_READER_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "recordedAt": "2026-10-11T07:06:39.989Z",
+  "viewerPreparedVersion": "0.82.0",
+  "sakuraBaseCommit": "5b61502c5a335b2b740055e858bf5e6c99452ad7",
+  "runtimeActivated": false,
+  "validation": {
+    "publicationPython": {
+      "passed": 75,
+      "newHistory": 21,
+      "newAcquisitionRoot": 1
+    },
+    "domainPython": {
+      "passed": 156,
+      "previousDomain": 132,
+      "additionalTrendDaily": 24,
+      "excludedProductionCases": 9,
+      "excludedUnchangedFullBotRoutes": 3
+    },
+    "offlineNode": {
+      "passed": 138,
+      "newFilesystemBridge": 2
+    },
+    "actualIsolatedSql": {
+      "passed": 236,
+      "actualPythonPersonal": 2
+    },
+    "localTypeScriptGroups": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "publicationAcceptedPortion": {
+      "unit": "taiko-qa-1791701558-1303926.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791701558-1303926.service",
+        "durationMs": 64066,
+        "sampledMemoryPeakBytes": 236072960,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48776 kB",
+            "VmRSS": "48768 kB"
+          }
+        ]
+      },
+      "resourceSha256": "66eef713c85899f78a883811189cb84cc9422898072b808ea11531e0bc238006",
+      "log": "/var/tmp/phase6-history-python-accepted-qa.log",
+      "logSha256": "1c9b18d7e9411ef5fc3c372fea384a4933cad3c0bf1838ef3d3e6f8894467d5c",
+      "wholeUnitExit": 1,
+      "acceptedScope": "75 publication Python only; later broader domain command fixture lacked full NoneBot routes, so no whole-unit PASS claimed"
+    },
+    "remainingFinal": {
+      "unit": "taiko-qa-1791702011-1308296.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791702011-1308296.service",
+        "durationMs": 311970,
+        "sampledMemoryPeakBytes": 388325376,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "51176 kB",
+            "VmRSS": "51112 kB"
+          }
+        ]
+      },
+      "resourceSha256": "c0e3c83cecf1068655ea91560ff95c0c63e52f95167a9358e6cbb78efb465bb5",
+      "log": "/var/tmp/phase6-history-final-qa.log",
+      "logSha256": "ac10c09a0e4954371beba37d8dd725fc8e9730b719ddf082fd4884cdc0c69a73",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "harnessFailures": [
+      {
+        "log": "/var/tmp/phase6-history-harness-failure.log",
+        "sha256": "35e9fc9559fc93227d6a2d05e7e8e7a9c6015c8444ff0fce807bed90548d7031",
+        "reason": "Audit cleanup did not resolve dir_fd paths and unsafe legacy H should retain exclusion semantics. Fixed guard/finally, corrected expectation, removed only its owned remaining root via non-force removal."
+      },
+      {
+        "log": "/var/tmp/phase6-history-root-guard-failure.log",
+        "sha256": "c859fdcadc17b2292ed2b0aa35487165d4ae7b0ae354ecfa3e414bac74ebb508",
+        "reason": "Guard blocked attempted daily archive access to the production score root before mutation. Actual daily root configuration/caller forwarding fixed; no production write occurred."
+      },
+      {
+        "log": "/var/tmp/phase6-history-trend-bootstrap-failure.log",
+        "sha256": "9cd94568c1263848d274e77269edc0b0abac25175293c04100af8ff2a90af0fc",
+        "reason": "Broader unchanged parser tests were absent from the minimal command AST fixture. Added real pure parser/constants to the verifier; excluded only three unchanged handlers requiring full framework registration."
+      }
+    ]
+  },
+  "cases": [
+    "One kernel SH view spans Python H enumeration, sorting, raw consumption and full/delta/removed reconstruction; actual independent writer waits until all inputs are rebuilt",
+    "Full snapshot DTO and daily/playcount rating plus six-dimension outputs equal frozen 5b61502 adapter; only frozen personal root is redirected, actual public catalogs and pure algorithms retained",
+    "Standard/compact/suffixed name ordering, equal timestamp name tie, before-baseline delta, old full shape, profile/achievement replacement, removed charts and unknown song fields preserved",
+    "Managed H/C projection loss and tamper cannot alter reconstructed state or captured old ctime caption; managed missing/corrupt objects fail closed and tombstones do not resurrect projection",
+    "Invalid historical JSON remains excluded, legacy unsafe files are never followed and retain unreadable-file exclusion; old non-object JSON errors are not normalized into a new state",
+    "Optional schema-1 fileMtimes/fileCtimes preserve original filesystem seconds through adoption, equal-content deduplication, precommit rollback and portable backup/restore; unchanged references retain values",
+    "Filesystem times are not play/observation time or P1a readiness; metadata finite/type/key validation and 32 MiB prepublication/read budgets reject oversized legal-name maps without durable unreadable publication",
+    "Restore filesystem overrides validated and included in nonce request hash; old schema without captured times remains readable with object metadata fallback and no guarantee of original legacy times",
+    "Explicit reader/daily root precedes configured env then legacy default; acquisition forwards actual store.root to both existing daily model families; daily namespace/flock/past freeze rules unchanged",
+    "Actual Node/Python pipe validates distinct times for identical H bytes, backup/delete/restore time preservation, existing binding/token/Goal/manual receipt/recovery/real Python service regressions",
+    "Python audit guards refuse production score access, network and owned-root-external writes; real SQL tests require SELECT DATABASE()=taiko_annual_poster_test and explicit mutation opt-in; owned roots/listeners/processes/cgroups cleaned"
+  ],
+  "limits": [
+    "Filesystem metadata is a compatibility presentation/sorting value, never proof of actual play time or ready P1a input. Old manifests without captured metadata cannot recover original lost legacy times and are not a full historical provenance claim",
+    "Daily root forwarding completed; common lifecycle Source fencing for chart/backfill/daily other entrypoints, private grants, actual dispatcher/u0/all Writers still pending before activation",
+    "Three unchanged trend command route tests require full NoneBot registration and are explicitly excluded, alongside nine preexisting production cases. Real pure parsers, calculations and daily rules tested; not full Bot startup/online acceptance",
+    "SQL test schema omits production FK enforcement; scoped TS not full server/Nuxt; public catalogs are read-only business data with synthetic owned scores",
+    "Accepted publication Python was completed in an earlier unit whose later domain fixture failed. Final remaining unit completed all scoped domain/TS/Node/SQL checks with actual wrapper exit 0; sampled 250 ms peaks are not exact maxima",
+    "No R source sync, live service restart, Viewer push/deploy or authenticated production smoke. Gate 6 remains IN_PROGRESS; grants/Writer/P1a/Read Model/million costs/operational restore/final activation pending"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    },
+    "publicApi": {
+      "active": true,
+      "pid": 829173
+    }
+  },
+  "sourceSha256": {
+    "sakura": {
+      "taiko/taiko_store/publication.py": "f5cc402b0163933ce92aef167224c2e42759db25d15aa9a0b17b2d648a99a017",
+      "taiko/taiko_store/reader.py": "eed520e0616a3cd590abf46349d117182220fd318f89596e6ca2931ea698ed9a",
+      "taiko/taiko_store/backup.py": "f049e2a0b1cf1455d0d79cd258f8a87b4741d542303cee4ac1ed3b2d13d00268",
+      "taiko/taiko_store/README.md": "57bafa6ddf2337fee982ba180177fe5b7f619ca649c591b2a97fcd1532bf7e82",
+      "taiko/plugins/utils/score_calculator.py": "729c7a0a9aecd0a7f8d20a27dd181d32d96ee4b7916c5feebab10cd8303a1200",
+      "taiko/plugins/utils/snapshot_history.py": "741535379c92b6d5a992e64ac501a906fc75a48df17121fcefc67ec90515e278",
+      "taiko/plugins/utils/daily_ability.py": "f29c9310b825a7363cf485dee80b77428ec8e25fc3044b436468b85688a139a9",
+      "taiko/plugins/utils/userdata_storage.py": "a6906c9e3556a8afc1dfd774b0859bef982e673b155fc759fa17c79696f51433",
+      "taiko/scripts/validate_domain_migration.py": "e4c3c8b811224a956963e2aa08cdc7eea5ac242b772b37c141b1b11a8b27462f",
+      "taiko/tests/test_publication_adapters.py": "5ede52361b80930d837d2473560be76b7a50c5c68132a00ac5fde4e44b07a80d",
+      "taiko/tests/test_publication_history.py": "efef157841706213fe8a994c56e4f952d7a9e374c70ba11a0a38babd2116d114"
+    },
+    "viewer": {
+      "taiko_viewer/server/infrastructure/taiko-publication/client.ts": "99515de4623f4593f08e4dbeec7247a40087151600a1bcce5869b268ac5eb9bc",
+      "taiko_viewer/tests/publicationClient.test.ts": "81503740be925045ac92d8894002eebe6aa441ce8f6c4498028ba9178c79765f"
+    }
+  },
+  "sakuraCommit": "6a90c7eb3a29de9d81edaa66db4256fbb53682a2",
+  "sakuraPushed": true,
+  "sakuraVersion": "9.81.7"
+}

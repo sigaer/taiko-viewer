@@ -6,6 +6,8 @@ export type PublicationManifest = {
   schema: 1; identity: string; sequence: number; commitId: string;
   previousCommitId?: string; requestHash?: string;
   files: Record<string, PublicationReference>;
+  fileMtimes?: Record<string, number>;
+  fileCtimes?: Record<string, number>;
 };
 export type SourceBackupReceipt = {
   backupKey: string;

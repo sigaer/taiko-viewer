@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, readFile, rm, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, mkdir, writeFile, utimes, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { openPublicationLease, withPublicationLease, PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 
@@ -37,6 +37,33 @@ test("read pipe refuses writes and releases its lease on failure", async () => f
   await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
     await lease.put("current", '{"songs":[]}');
     await lease.publish();
+  });
+}));
+
+test("actual pipe retains distinct legacy times for equal-content history objects", async () => fixture(async root => {
+  await mkdir(join(root, "synthetic"));
+  await writeFile(join(root, "syntheticdata.json"), "{}");
+  for (const [name, time] of [["a", 1737000000.125], ["b", 1737086400.375]] as const) {
+    const file = join(root, "synthetic", `data_legacy_${name}.json`);
+    await writeFile(file, "{}"); await utimes(file, time, time);
+  }
+  const before = await stat(join(root, "syntheticdata.json"));
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    await lease.put("current", "{}"); const manifest = await lease.publish();
+    assert.deepEqual(manifest.files["history/data_legacy_a.json"], manifest.files["history/data_legacy_b.json"]);
+    assert.equal(manifest.fileMtimes!["history/data_legacy_a.json"], 1737000000.125);
+    assert.equal(manifest.fileMtimes!["history/data_legacy_b.json"], 1737086400.375);
+    assert.ok(Math.abs(manifest.fileCtimes!.current - before.ctimeMs / 1000) < .001);
+  });
+}));
+
+test("actual pipe backup/delete/restore keeps the captured source filesystem times", async () => fixture(async root => {
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    await lease.put("current", "{}"); await lease.put("history/data_legacy.json", "{}");
+    const original = await lease.publish(); await lease.backup("b".repeat(32));
+    await lease.remove("current"); await lease.remove("history/data_legacy.json"); await lease.publish();
+    const restored = await lease.restoreBackup("b".repeat(32), "c".repeat(32));
+    assert.deepEqual(restored.fileMtimes, original.fileMtimes); assert.deepEqual(restored.fileCtimes, original.fileCtimes);
   });
 }));
 
