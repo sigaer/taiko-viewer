@@ -1,0 +1,66 @@
+{
+  "step": "6.3d.2",
+  "status": "ISOLATED_BACKUP_RECOVERY_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "centerCommit": "69c4cac",
+  "centerVersion": "9.81.2",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "validation": {
+    "pythonTests": 40,
+    "newBackupTests": 16,
+    "nodeTests": 43,
+    "typescript": "PASS",
+    "logPath": "/var/tmp/phase6-backup-qa.log",
+    "logSha256": "f316e0c44611020c8ff9111058c56e5cfec08ec090bbb1c41adeae66ec64d54a",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791684422-1117729.service",
+      "durationMs": 26004,
+      "sampledMemoryPeakBytes": 259522560,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "48160 kB",
+          "VmRSS": "48160 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "legacy exact C/H including malformed H",
+    "independent backup inode protects against compatibility in-place writes",
+    "missing compatibility projections recover from canonical objects",
+    "immutable nonce retry and stale-generation deletion denial",
+    "portable restore without old object store",
+    "real os._exit at five backup boundaries",
+    "real os._exit before source commit, after source commit and partial daily restore",
+    "ENOSPC and disk headroom fail before completed backup receipt",
+    "daily namespace flock deadline",
+    "strict private file modes, hash/size verification, symlink/FIFO/size rejection",
+    "reject different active/legacy source and daily measurements",
+    "real bounded Node/Python bridge, no payload/path diagnostics"
+  ],
+  "limits": [
+    "Synthetic directories only; no production private data, SQL connection or network QA",
+    "C/H publication is atomic; daily namespace restore is independent; no SQL/filesystem/daily joint transaction claim",
+    "Restore coordinator must keep SQL grants unavailable until all source/daily recovery completes",
+    "New recovery publication has new source sequence; original raw payloads and frozen daily archive bytes preserved",
+    "250 ms sampling is not an exact process-tree peak; million-record/resource gate not yet run",
+    "No R source sync, deployment or service restart; manual SQL receipt/outbox integration pending"
+  ],
+  "harnessCorrections": [
+    "Initial runner mistakenly used old /usr/bin/node and failed on top-level await before tests; rerun under current Node 24.13.0 absolute path with same isolation budgets passed"
+  ],
+  "sourceSha256": {
+    "/home/sigaer/git/Sakura_bot/taiko/taiko_store/backup.py": "996e3c3d1d6bd307d1d4d2cad2a3ee94b470ea35ef3a538d60904f3a24afb092",
+    "/home/sigaer/git/Sakura_bot/taiko/taiko_store/bridge.py": "83d7931619e6022b0d978bab4f33359aaaf6784fe235856189f960285b939c9f",
+    "/home/sigaer/git/Sakura_bot/taiko/tests/test_publication_backup.py": "109a5523d3a60d863dc035e4355f8a3d98c1e2cdf82f9c6b800590ff79332f9c",
+    "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/infrastructure/taiko-publication/client.ts": "b0d10816b8307761d7eccdc8095959560dc3dccb42c489d811b9d3d154793703",
+    "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/infrastructure/taiko-publication/scope.ts": "1a8d72e6c648a734297caf8079def79b3f01a5b777e5e81b5c811d50ed4adaeb",
+    "/home/sigaer/taiko/taiko-forum/taiko_viewer/server/services/taiko-domain/publication.ts": "429adbd44152b1fbe48358083dd1223c41c824e3278c86afa68a59064b4373d9",
+    "/home/sigaer/taiko/taiko-forum/taiko_viewer/tests/publicationClient.test.ts": "01928be2026fa967b51b9e7a7cf9bf0c41aff3bb749823b3c27ff249b2643621",
+    "/home/sigaer/taiko/taiko-forum/taiko_viewer/tests/publicationScope.test.ts": "86708bd46c7d8cef0d834781d009b5e9d063ce7c3c38ee4794292b2078d7742d"
+  }
+}

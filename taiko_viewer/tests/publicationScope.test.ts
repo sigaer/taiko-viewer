@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication } from "../server/infrastructure/taiko-publication/scope.ts";
+import { withScoreRead, withScoreWrite, currentScoreScope, stageScoreText, removeScoreProjection, onScoreRollback, scorePublication, createScoreBackup } from "../server/infrastructure/taiko-publication/scope.ts";
 import { PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 import type { ScoreReadPort } from "../server/domain/score-read-contract.ts";
 const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko";
@@ -201,4 +201,40 @@ test("managed current JSON and object-integrity failures are explicit availabili
   await withScoreRead(options, async () => {
     await assert.rejects(currentScoreScope(identity)!.reader.readHistory(identity, history), error => error instanceof PublicationUnavailableError && error.statusCode === 503);
   });
+}));
+
+test("source backup adopts legacy view under EX and protects current/history/daily before tombstones", async () => fixture(async options => {
+  const key = "b".repeat(32);
+  const raw = '{ "songs": [] }\n';
+  await mkdir(join(options.root, identity));
+  await writeFile(join(options.root, `${identity}data.json`), raw);
+  await writeFile(join(options.root, identity, history), "invalid historical evidence");
+  await writeFile(join(options.root, identity, "daily-ability-v1-top20.json"), '{"days":{}}');
+  await withScoreWrite(options, async () => {
+    const before = await createScoreBackup(identity, key);
+    assert.equal(before.source.commitId, scorePublication(identity)?.commitId);
+    assert.equal(await currentScoreScope(identity)!.reader.readRawCurrent(identity), raw);
+    await removeScoreProjection(identity, "current");
+    await removeScoreProjection(identity, `history/${history}`);
+  });
+  const path = join(options.root, ".manual_deleted", `${identity}-${key}`);
+  assert.equal(await readFile(join(path, `${identity}data.json`), "utf8"), raw);
+  assert.equal(await readFile(join(path, identity, history), "utf8"), "invalid historical evidence");
+  assert.equal(await readFile(join(path, identity, "daily-ability-v1-top20.json"), "utf8"), '{"days":{}}');
+  await withScoreRead(options, async () => assert.equal(await currentScoreScope(identity)!.reader.currentExists(identity), false));
+}));
+
+test("a stale completed backup cannot authorize deletion of a newer source generation", async () => fixture(async options => {
+  const key = "d".repeat(32);
+  await seed(options);
+  await withScoreWrite(options, () => createScoreBackup(identity, key));
+  await withScoreWrite(options, () => stageScoreText(identity, "current", '{"songs":[],"counter":1}'));
+  await assert.rejects(withScoreWrite(options, () => createScoreBackup(identity, key)), PublicationUnavailableError);
+  await withScoreRead(options, async () => assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 1));
+  await assert.rejects(withScoreRead(options, () => createScoreBackup(identity, "e".repeat(32))), PublicationUnavailableError);
+  await assert.rejects(withScoreWrite(options, async () => {
+    await stageScoreText(identity, "current", '{"songs":[],"counter":2}');
+    await createScoreBackup(identity, "e".repeat(32));
+  }), PublicationUnavailableError);
+  await withScoreRead(options, async () => assert.equal(JSON.parse(await currentScoreScope(identity)!.reader.readRawCurrent(identity)).counter, 1));
 }));

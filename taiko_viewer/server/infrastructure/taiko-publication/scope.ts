@@ -22,6 +22,18 @@ export const currentScoreScope = (identity?: string) => {
 };
 export const scorePublication = (identity: string) => currentScoreScope(identity)?.lease.view || null;
 
+export async function createScoreBackup(identity: string, backupKey: string) {
+  const scope = currentScoreScope(identity);
+  if (!scope || scope.mode !== "write" || scope.staged.size) throw new PublicationUnavailableError();
+  const receipt = await scope.lease.backup(backupKey);
+  // A completed backup key is immutable. It may be retried after the source
+  // changes, but it cannot authorize deleting a newer generation.
+  if (receipt.source.commitId !== scope.lease.view?.commitId || receipt.source.sequence !== scope.lease.view.sequence) {
+    throw new PublicationUnavailableError();
+  }
+  return receipt;
+}
+
 async function runScope<T>(options: SourceOptions, mode: "read" | "write", task: () => Promise<T>): Promise<T> {
   const current = currentScoreScope(options.identity);
   if (current) {

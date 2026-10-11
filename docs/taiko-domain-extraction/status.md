@@ -64,3 +64,5 @@ Gate 未 PASS 不进入下一阶段。代码存在、离线 test 或 Git push �
 - 2026-10-11 / 6.3d-audit：发现 Goal SQL→source 与新 Writer source→SQL/FK 反向依赖，及 manual rename 后 canonical manifest 仍存、多 owner 多事务与等待后 owner 检查缺口。锁顺序/生命周期收敛方案已留档；具体实现与故障/隔离 SQL 验证待执行，未提前 PASS。
 
 - 2026-10-11 / 6.3d.1：Goal create/eval Source SH→SQL owner/binding；SQL 锁内完整 identity proof。消除 shared/publication native ESM 初始化循环。114 offline + 5 actual `_test` SQL、TS PASS；约 285.82 MiB sampled peak/OOM=0。测试库 FK 缺失明确留档，不重开 B-0/REFERENCES。未发布，继续 manual lifecycle 与全 Writer/Read Model。
+
+- 2026-10-11 / 6.3d.2：A `69c4cac` / 9.81.2 已 push；独立 inode 的 verified C/H/daily 备份、五个 backup 与三个恢复真实死亡点、无旧对象库 portable restore、旧备份不能删除新代。40 Python + 43 Node、TS PASS，约 247.5 MiB sampled/OOM=0。Viewer 本地步骤，未同步/部署；SQL 生命周期/outbox 尚待接入，Gate 6 IN_PROGRESS。

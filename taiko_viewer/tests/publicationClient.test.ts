@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { openPublicationLease, withPublicationLease, PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 
@@ -77,4 +77,34 @@ test("pipe lifetime expires and then a fresh writer can acquire the kernel lease
   await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async next => {
     assert.equal(next.view, null);
   });
+}));
+
+test("actual backup RPC adopts legacy source and returns a stable receipt without a path", async () => fixture(async root => {
+  const key = "b".repeat(32);
+  await mkdir(join(root, "synthetic"));
+  await writeFile(join(root, "syntheticdata.json"), '{ "songs": [] }\n');
+  await writeFile(join(root, "synthetic", "daily-ability-v1-top20.json"), '{"days":{"2026-10-10":123}}');
+  await withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    const first = await lease.backup(key);
+    assert.deepEqual(Object.keys(first), ["backupKey", "source"]);
+    assert.equal(first.source.commitId, lease.view?.commitId);
+    assert.equal(first.source.sequence, 0);
+    assert.equal(await readFile(join(root, ".manual_deleted", `synthetic-${key}`, "syntheticdata.json"), "utf8"), '{ "songs": [] }\n');
+    await lease.put("current", '{"songs":[],"changed":true}');
+    const next = await lease.publish();
+    const retry = await lease.backup(key);
+    assert.deepEqual(retry, first);
+    assert.equal(lease.view?.commitId, next.commitId);
+    assert.notEqual(retry.source.commitId, next.commitId);
+  });
+}));
+
+test("actual backup RPC rejects SH and uncommitted score stages", async () => fixture(async root => {
+  const key = "a".repeat(32);
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "read" }, lease => lease.backup(key)), PublicationUnavailableError);
+  await assert.rejects(withPublicationLease({ root, repoRoot, identity: "synthetic", mode: "write" }, async lease => {
+    await lease.put("current", '{"songs":[]}');
+    await lease.backup(key);
+  }), PublicationUnavailableError);
+  await assert.rejects(readFile(join(root, ".manual_deleted", `synthetic-${key}`, "backup.json")), { code: "ENOENT" });
 }));

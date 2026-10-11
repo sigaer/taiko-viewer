@@ -97,3 +97,13 @@ Goal create/evaluate 先持有 source SH view，再进入 user/binding SQL `FOR 
 此测试库的 song lock FK 不存在（历史独立 test bootstrap），因此**不是实际 FK enforcement 验证**，不重新要求 REFERENCES/full staging/B-0；通过实际 source lease/owner lock 顺序与独立 Writer 无法进入 EX，验证已消除这条反向锁依赖。生产 FK 的定义已经源码审阅，后续 lifecycle 仍需保持相同 Source→SQL 顺序。综合 49.426 秒，250 ms sampled cgroup peak 299,700,224 bytes（约 285.82 MiB），high/max/OOM events=0。[证据](evidence/phase6-goal-lock-order-validation.json)。
 
 本步骤本地提交，未 sync/deploy；继续 6.3d.2 manual owner/recovery 与 pending operation 实现，不提前 PASS 全 6.3d/Gate 6。
+
+## 6.3d.2 独立备份与可移植恢复基础完成
+
+A `69c4cac` / 9.81.2 已 push。新 Infrastructure backup 从 source EX view 验证、流式复制独立 C/H inode；daily namespaces 保持各自 `.lock` 冻结边界。私有目录/文件、原文 SHA/size、磁盘余量与限额、fsync 和最终目录 promotion；半批 staging 不作完成 receipt。非法 H 也按原文保留。不可变 backup UUID 重试返回原 source；Viewer scope 另外核对仍是当前代，拒绝用旧备份删除新成绩。
+
+可移植恢复无需旧对象库，只接受空或匹配的 source。先验证整个备份，再构建新的 canonical C/H publication，逐 namespace 恢复 daily；不同的活动 score/legacy 残留/measurement 会拒绝覆盖。恢复协调器必须在整个过程保持 SQL grant 不可用。保持 payload/measurement 原文字节，source sequence 是新的；不把恢复当成回退时钟，不承诺 SQL、C/H 和 daily 的共同事务。SQL/identity 联动恢复、durable operation/outbox 仍待下一步骤。
+
+最终 40 Python（新增 16）+ 43 Node、局部 TypeScript PASS；五个 backup 的真实进程死亡点、restore 提交前/提交后/部分 archive 完成的死亡、独立 inode 与旧根删除、原文/非法 H/daily、ENOSPC、锁期限、磁盘余量、symlink/FIFO/超限/损坏拒绝及 stale-backup grant 均覆盖。综合 26.004 秒，250 ms sampled peak 259,522,560 bytes（约 247.5 MiB），high/max/OOM=0。最初 QA runner 误用了系统旧 Node，在 tests 前语法失败；改为当前 Node 24.13.0 绝对路径后原限额重新通过。[证据](evidence/phase6-source-backup-validation.json)。
+
+无生产数据/DB/network QA，无新 listener，测试树与 children 已清理；仍未 sync R/部署。Viewer 客户端步骤本地提交，待 Phase 6 标准发布统一 push。本节为 BACKUP_RECOVERY_FOUNDATION_PASS；manual lifecycle、全 Writer/grant、Read Model、百万记录与最终发布仍待完成，Gate 6 IN_PROGRESS。

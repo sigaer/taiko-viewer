@@ -7,6 +7,10 @@ export type PublicationManifest = {
   previousCommitId?: string; requestHash?: string;
   files: Record<string, PublicationReference>;
 };
+export type SourceBackupReceipt = {
+  backupKey: string;
+  source: { sequence: number; commitId: string };
+};
 type Message = Record<string, unknown> & { view?: PublicationManifest | null };
 type Deferred = { resolve: (value: Message) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
 
@@ -21,6 +25,7 @@ export type PublicationLease = {
   alive: () => boolean;
   put: (key: string, body: string) => Promise<PublicationReference>;
   remove: (key: string) => Promise<void>;
+  backup: (backupKey: string) => Promise<SourceBackupReceipt>;
   publish: (options?: { replaceHistory?: boolean; transactionId?: string }) => Promise<PublicationManifest>;
   close: () => Promise<void>;
 };
@@ -128,6 +133,18 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
         return reference;
       },
       async remove(key) { await send({ method: "remove", key }); },
+      async backup(backupKey) {
+        if (!/^[a-f0-9]{32}$/.test(backupKey)) throw new PublicationUnavailableError();
+        const response = await send({ method: "backup", backupKey });
+        const source = response.source as SourceBackupReceipt["source"] | undefined;
+        if (response.backedUp !== true || response.backupKey !== backupKey || !source ||
+          !Number.isSafeInteger(source.sequence) || source.sequence < 0 || !/^[a-f0-9]{32}$/.test(source.commitId) ||
+          !response.view || response.view.identity !== options.identity) throw new PublicationUnavailableError();
+        // Export may adopt exact legacy bytes as sequence zero. The scope's
+        // reader must switch to that canonical view while retaining its EX.
+        lease.view = response.view;
+        return { backupKey, source };
+      },
       async publish(publicationOptions = {}) {
         const response = await send({ method: "publish", ...publicationOptions });
         if (response.published !== true || !response.view) throw new PublicationUnavailableError();
