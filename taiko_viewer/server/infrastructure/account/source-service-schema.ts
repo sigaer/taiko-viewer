@@ -34,7 +34,7 @@ export const SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL = `CREATE TABLE IF NOT EXISTS 
 export const SOURCE_SERVICE_SCOPES = [
   'source_read', 'history_read', 'wahlap_update', 'hiroba_sync',
   'hiroba_credential_status', 'hiroba_bind', 'bind_read', 'bind_write', 'bind_current',
-  'bind_remove', 'bind_visibility', 'score_token_issue'
+  'bind_remove', 'bind_visibility', 'score_token_issue', 'bind_migrate'
 ] as const;
 export type SourceServiceScope = typeof SOURCE_SERVICE_SCOPES[number];
 export const SOURCE_SERVICE_PRINCIPAL_MIGRATIONS = [

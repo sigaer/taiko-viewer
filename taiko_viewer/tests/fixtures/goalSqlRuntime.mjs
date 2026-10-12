@@ -25,6 +25,10 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   export const runSourceMutationWorker=(request,ticket)=>createSourceMutationWorker(globalThis.__goalSqlRuntime.sourceMutationLaunch)(request,ticket);
  `);
  if (withDeveloper) {
+  overrides.set(new URL('server/infrastructure/account/qq-migration-worker.ts',root).href,`
+   import {createQqMigrationWorker} from '${new URL('server/infrastructure/account/qq-migration-worker-runner.ts',root).href}';
+   export const runQqMigrationWorker=(request,host)=>createQqMigrationWorker(globalThis.__goalSqlRuntime.qqMigrationLaunch)(request,host);
+  `);
   overrides.set(new URL('server/infrastructure/account/hiroba-credential-worker.ts',root).href,`
    import {createHirobaCredentialWorker} from '${new URL('server/infrastructure/account/hiroba-credential-worker-runner.ts',root).href}';
    export const runHirobaCredentialWorker=(request,ticket)=>createHirobaCredentialWorker(globalThis.__goalSqlRuntime.hirobaCredentialLaunch)(request,ticket);

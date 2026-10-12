@@ -66,6 +66,7 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    for(const [method,path,file] of [['post','/login','auth/login.post.ts'],['post','/logout','auth/logout.post.ts'],['get','/profile','profile.get.ts'],['get','/bindings','bindings.get.ts'],['get','/sync','sync/targets.get.ts'],['post','/sync-submit','sync.post.ts'],['post','/token','score-token.post.ts'],['post','/current','bindings/current.post.ts'],['post','/remove','bindings/remove.post.ts']])router[method](path,(await import(new URL('../../server/api/account/'+file,import.meta.url).href)).default);
    api=createServer(toNodeListener(createApp().use(router)));api.listen(0,'127.0.0.1');await once(api,'listening');
    const apiBase=`http://127.0.0.1:${api.address().port}`;
+   c.baseUrl=apiBase;
    c.request=(method,path,body,cookie=c.cookie,headers={})=>nativeFetch(apiBase+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie||'',...headers},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
    c.read=async path=>{const response=await c.request('GET',path);const body=await response.json();assert.equal(response.status,200);return body;};
    const password=randomBytes(16).toString('hex'),[[account]]=await c.pool.query('SELECT username FROM web_user_accounts WHERE id=?',[c.user]);

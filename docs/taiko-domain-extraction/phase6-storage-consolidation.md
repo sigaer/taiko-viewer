@@ -471,3 +471,18 @@ A3e1d76e/9.81.22已标准commit/push和actual remote一致，仅本步9文件，
 主轮121.298s/250ms sampled331796480bytes/child354164KiB/high-max-OOM0，wrapper72487 exit0，unit1791755796-1948775 success/ExecMainStatus0/inactive/MainPID0/cgroup gone；独立keyboard0.816s/57143296sample bytes/child53088KiB成功清理。两次69 SQL pass/1 fail分别为故障注入双次抵消和旧os._exit QA GET_LOCK(0)与MySQL异步断连清理竞态；改一次注入及1s有界释放证明，未放宽运行锁。系统PythonQQ/pydantic冲突、Bot venv缺pytest均留档，最后直接执行保留AST+实际SDK。完整[证据](evidence/phase6-native-qq-migration-validation.json)。
 
 Af04b320/9.81.23仅本步9文件标准push，remote一致；Viewer0.82.0源码/DDL/测试/档案本地准备，B6ade2e1/0.2.6不变，客户端QQ仍待同一中心事务接口。R未复制或重启，无部署，live0.81.11/三个active PID1063394/1063408/829173不变。回退Source3e1d76e、Viewer准备3d9c6d7；激活后不得回退开放不验证QQ号的路径。Native整轮/Gate6 IN_PROGRESS，继续client QQ私有接口/transport/grants/命令、其余Native private读写和startup SQL Writer、全u0/daily/maintenance Writers、P1a停止旧Writer后纳管、Read Model/精确失效/百万冷暖IO-RSS与限额、trusted恢复/清理/runbook/固定R依赖及统一标准Viewer发布/R同步重启/真实在线验收。
+
+
+## 6.3e.8.6g 客户端 QQ 中心所属事务（STEP_PASS）
+
+2026-10-12。B旧路径根据输入QQ查local SQLite/JSON，再多次upsert中心绑定，现统一private qq-code/qq-migrate接口→捕获pool/paths/env→有界stdin CLI→同一native SQL merge。新增明确bind_migrate service scope和principal；事务固定多principal gates→actor locks→bounded bindings/state，开始、读取后和COMMIT前证明live session/token、精确QQ owner或service十字段tuple及source canonical/bare/target现有全部Source。ordinary owner限已验证对应OneBot QQ，official目标需明确service subject，不推断QQ所属。credential转移/绑定/current/code消费同一COMMIT，Node响应前再用捕获pool复核grant。
+
+申请单请求、不保存明文code重放；消费同码同target两次network/503 retry，self migration一次。不重置later selection/u0、不复活解绑、不重复自动更新；未确认COMMIT固定提示查询后重试。B退出local authority reader/merge/逐次upsert，保留历史table待统一cleanup。源顺序/explicit SQL current/target visibility（包括0）与manual专用origin lifecycle保持，target manual和既有native/client u0差异不改。命令/usage/QQ按钮一致私聊流程。
+
+CLI64KiB输入/256KiB输出/8KiB stderr、45s独立SIGALRM、parent50s和1500ms SIGKILL grace；slot保持至close。严格operation/principal/QQ/bound/current/source/manual/Unicode响应，错误固定枚举与private,no-store/Vary。SDK继承256KiB streaming/90s分块检查/10s socket，无严格90s进程期限宣称；no redirect/token必需和无local fallback。policy Source排序与Node现有normalization一致。
+
+最终241 Source（231旧+10 private frame）、223 client（195旧+28新）、TS和23实际SQL-HTTP+10纯worker transport PASS。之前未变的160实际SQL+1 provisioning policy另轮通过，共183实际SQL、11纯检查，不能合成一轮全green。实际Python SDK/command AST→owned H3/actual CLI/MySQL；session/self/bare/service/scope/subject/all Source、late actor/grant/QQ/rollback/未知ACK、四个COMMIT退出/独立期限信号、credential-bind-code原子、exact retry、unsorted allowlist/runtime replacement/private headers/quota/protocol/frame/Unicode回归。后追加同一retry composite u0保留再删除current不复活，1补充actual test PASS，非增加新unique case。无真实上游、完整NoneBot/Nuxt/online产品或百万性能。
+
+61.846s/250ms sampled445947904bytes/child362448KiB/high-max-OOM0，wrapper25873 exit0/unit1791772648-2099982 successful/ExecMainStatus0/inactive/MainPID0/cgroup gone。补充3.522s/276811776bytes/child286960KiB、unit1791773091-2105724同样成功清理。每个private QA连接实际SELECT DATABASE()=_test+opt-in1，owned行/root/child/两loopback listeners清理。初轮161pass/21启动fail、focused21/22和pure worker23pass/1注册fail为fixture sys.path/base URL/Nuxt resolver缺失，修正并保存历史，没有修改生产依赖/绕过权限。[完整证据](evidence/phase6-client-qq-migration-validation.json)。
+
+A926ad23/9.81.24与Bfa0983d/0.2.7仅本步6/11文件标准push、actual remote一致，不包含miku/web.conf用户改动。Viewer0.82源码/测试/证据本地准备，R未复制/重启、B无业务进程启动、live0.81.11和active PID1063394/1063408/829173不变；显式生产grant仍须统一激活。Core Source0.1.1/B0.1.2 pin未变。回退Sourcef04b320/B6ade2e1/Viewer准备afb3b0d；上线后不重开旧QQ自述复制路径。Native authority整轮/Gate6 IN_PROGRESS，继续其余Native private reads/ordinary updates/startup SQL Writer、全u0/daily/maintenance Writers与P1a停止legacy Writers后接管、完整Read Model/精确失效/百万冷暖成本、trusted恢复/cleanup/runbook/fixed R deps、最终标准Viewer发布/R同步重启/真实authenticated online Gate。

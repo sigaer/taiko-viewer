@@ -32,6 +32,8 @@
     "../publicationRecoveryWorker.test.ts",
     "../../server/api/taiko/proxy/bind/remove.post.ts",
     "../../server/api/taiko/proxy/bind/visibility.post.ts",
-    "../../server/api/taiko/proxy/bind/score-token.post.ts"
+    "../../server/api/taiko/proxy/bind/score-token.post.ts",
+    "../../server/api/taiko/proxy/bind/qq-code.post.ts",
+    "../../server/api/taiko/proxy/bind/qq-migrate.post.ts"
   ]
 }
