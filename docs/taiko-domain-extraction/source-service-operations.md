@@ -27,11 +27,13 @@
 }
 ```
 
-已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`、`bind_read`、`bind_write`、`bind_current`、`hiroba_credential_status`、`hiroba_bind`。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
+已接入的正式 scope 为 `source_read`、`history_read`、`wahlap_update`、`hiroba_sync`、`bind_read`、`bind_write`、`bind_current`、`bind_remove`、`bind_visibility`、`score_token_issue`、`bind_migrate`、`hiroba_credential_status`、`hiroba_bind`。Source 列表 1–128 项，ID 为 1–128 位 ASCII 字母、数字、下划线或短横线；必须同时满足 stdin 总长度。`expiresAt` 为 DB DATETIME 格式 `YYYY-MM-DD HH:mm:ss`，使用数据库的时间语义；active 登记要求未来时间或 null。
 
-含 `bind_*` 或 `hiroba_bind` scope 的登记另须明确 `principals`：1–128 项身份列表，或显式 `"*"`。身份支持 1–128 位裸数字、`onebot_v11:` 加 1–128 位数字、`qq_official:` 加 1–128 位 ASCII 字母/数字/下划线/短横线。大小写及不同格式分别授权，不自动合并别名。遗漏或 null 拒绝登记；仅含 Source scopes 的旧配置可保持 null。新 nullable `principals_json` 同时存入 grant 与审计表，升级只忽略已存在列的 ER_DUP_FIELDNAME，其余 SQL 错误停止。
+含 `bind_*`、`hiroba_bind` 或 `score_token_issue` scope 的登记另须明确 `principals`：1–128 项身份列表，或显式 `"*"`。身份支持 1–128 位裸数字、`onebot_v11:` 加 1–128 位数字、`qq_official:` 加 1–128 位 ASCII 字母/数字/下划线/短横线。大小写及不同格式分别授权，不自动合并别名。遗漏或 null 拒绝登记；仅含 Source scopes 的旧配置可保持 null。新 nullable `principals_json` 同时存入 grant 与审计表，升级只忽略已存在列的 ER_DUP_FIELDNAME，其余 SQL 错误停止。
 
 QQ 代理配置可在上述请求中改为 `"scopes": ["bind_read", "bind_write", "bind_current"]`，并增加 `"principals": ["onebot_v11:12345"]`。Source allowlist 须包括该身份已绑定的全部 Source 与本次添加的 Source；不能通过空绑定绕过添加目标检查。生产真实 principal/token 登记继续留到最终激活。
+
+QQ 历史迁移需另列 `bind_migrate`，原QQ私聊申请code和目标私聊消费均使用该scope及各自canonical subject；支持多个bot的同一服务须显式覆盖这些subject。Source allowlist覆盖source canonical/bare及target现有全部绑定。普通已验证QQ owner可访问其对应OneBot；official身份不能通过输入QQ号推断。新接口只收canonical身份，码hash-only/10min TTL/60s申请间隔，绑定/所属credential/code消费同一SQL COMMIT。申请一次请求，消费同码/target重试不重放后来解绑或选择。Native和center使用同一源码实现；须先由Viewer schema准备 `taiko_qq_migration_codes`，再在完整Phase 6门禁通过后激活R私有CLI。中心private task45s独立期限、parent50s/1500ms grace；64KiB输入/256KiB输出/8KiB stderr。详细证据见[QQ客户端中心验证](evidence/phase6-client-qq-migration-validation.json)。本次仍未登记生产grant或部署。
 
 `GET/POST /api/taiko/proxy/bind` 与 `POST /api/taiko/proxy/bind/current` 现在要求有效 Cookie/token。普通凭据须有当前已验证、active 的 Viewer QQ 绑定，与裸 QQ 或 `onebot_v11:QQ` 精确匹配；添加外部账号另须完整自有、同平台 Viewer binding，manual 通过既有创建/认领入口。服务凭据同时证明 exact grant/revision/expiry/principals/sources/scope，选中服务授权后不降级为 owner 授权。
 
