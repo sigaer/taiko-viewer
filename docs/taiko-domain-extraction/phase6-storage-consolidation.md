@@ -486,3 +486,18 @@ CLI64KiB输入/256KiB输出/8KiB stderr、45s独立SIGALRM、parent50s和1500ms 
 61.846s/250ms sampled445947904bytes/child362448KiB/high-max-OOM0，wrapper25873 exit0/unit1791772648-2099982 successful/ExecMainStatus0/inactive/MainPID0/cgroup gone。补充3.522s/276811776bytes/child286960KiB、unit1791773091-2105724同样成功清理。每个private QA连接实际SELECT DATABASE()=_test+opt-in1，owned行/root/child/两loopback listeners清理。初轮161pass/21启动fail、focused21/22和pure worker23pass/1注册fail为fixture sys.path/base URL/Nuxt resolver缺失，修正并保存历史，没有修改生产依赖/绕过权限。[完整证据](evidence/phase6-client-qq-migration-validation.json)。
 
 A926ad23/9.81.24与Bfa0983d/0.2.7仅本步6/11文件标准push、actual remote一致，不包含miku/web.conf用户改动。Viewer0.82源码/测试/证据本地准备，R未复制/重启、B无业务进程启动、live0.81.11和active PID1063394/1063408/829173不变；显式生产grant仍须统一激活。Core Source0.1.1/B0.1.2 pin未变。回退Sourcef04b320/B6ade2e1/Viewer准备afb3b0d；上线后不重开旧QQ自述复制路径。Native authority整轮/Gate6 IN_PROGRESS，继续其余Native private reads/ordinary updates/startup SQL Writer、全u0/daily/maintenance Writers与P1a停止legacy Writers后接管、完整Read Model/精确失效/百万冷暖成本、trusted恢复/cleanup/runbook/fixed R deps、最终标准Viewer发布/R同步重启/真实authenticated online Gate。
+
+
+## 6.3e.8.6h 原生国服所属更新与同视图渲染（STEP_PASS）
+
+2026-10-12。一次bounded current DTO确定账号/槽位，实际framework sender传入Native update和first-bind自动更新，userid-only helper在IO前拒绝。独立模块捕获完整current row/state→Source EX→同principal gate→SQL证明，每publication、同canonical view渲染前后与返回前证明row_id/principal/ID/source/slot/current/visibility/u0。拒绝foreign/bare/manual/non-Wahlap/virtual/过期current。silent ID cooldown、原四请求getUserData与common C/H writer保持，所有Native国服更新共用process内2线程准入/30s等待（非host全局准入声明）。首次绑定也走同一路径。
+
+managed getUserData要求精确profile.userid，阻止原search fallback首玩家写入错误Source，未受管旧public selector不改但不宣称已verified。render使用同EX捕获reader，16MiB界限/错误保留text-only成功；图片后无第二text回复，原all/default5/404/-1/成功文案保持。metadata/driver失败固定状态回复，不再写本handler旧ad-hoc diagnostics。合法C/H observation在后续SQL/owner失败保留而失败返回，不冒称SQL/files原子事务。
+
+258 Source（241旧+17 input/admission/actual command与profile）、28新actual_test SQL复合用例PASS；9production/real排除/warning1。原70 native metadata/mutation/Hiroba/QQ SQL在旧fixture失败轮先通过，分轮合计98；B0.2.7/223/TS前轮证据沿用。真实SQL、实际getUserData四合成HTTP与common writer、actual daily capture/compute（空合成成绩，不宣称daily数值全验收）、captured-view synthetic小render，非真实PNG/官方上游/完整NoneBot或online/百万性能。两条保留official/cooldown及旧bind-image test通过实际AST namespace。验证own hidden、完整owner/state、5s同lock、late revoke/rollback/ACK、四个before/after publish/readonly COMMIT进程退出、Source等待visible/row-id/source/u0替换/next retry清理。
+
+Frozen926ad23 acquisition在同Source/SQL/clock、两个独立owned根各观察两次，current/full-delta H内容SHA256严格相等；filename时间/序号/结构一致，随机nonce正常不同。tracked公开V2 catalog预置fresh避免QA background网络/共享文件写入，actual daily计算不stub；所有native及song-lock连接实际SELECT DATABASE()=_test+opt-in1，owned行/root/children/leases清理，无production私有data复制/SQL mutation。
+
+67.602s/250ms sampled308043776bytes/child217192KiB/high-max-OOM0，wrapper21484 exit0，unit1791776870-2153889 successful/ExecMainStatus0/inactive/MainPID0/cgroup gone。AST fixture符号遗漏、wrong cwd/daily公开catalog refresh、Golden假定旧投影/随机filename相等均完整保留；256/28通过后补固定metadata/driver错误反馈再最终258/28。详见[证据](evidence/phase6-native-wahlap-authority-validation.json)。
+
+Source539f6e5/9.81.26标准push且remote一致。本步7个taiko文件，用户期间Milky ff1778f/8c877ee与926ad23无taiko差异，parent保留且无miku用户改动混入；回退8c877ee保持用户提交。Viewer0.82 SQL测试/证据本地準备，Bfa0983d/0.2.7和Core0.1.1/0.1.2未变；R未复制/重启/部署，live0.81.11与三个active PID1063394/1063408/829173不变。Native authority整轮/Gate6 IN_PROGRESS，继续其他private Native readers/startup SQL writer、全u0/daily/maintenance Writer/共享persistent准入/P1a停止legacy writer后接管、完整Read Model/精确失效/百万冷暖IO-RSS/trusted恢复cleanup/runbook/fixed R deps/生产grant/标准Viewer发布与R同步重启/真实online Gate。
