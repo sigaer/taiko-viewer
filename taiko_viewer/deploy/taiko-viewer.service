@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/sigaer/taiko/taiko-forum/taiko_viewer
+WorkingDirectory=/home/sigaer/taiko/releases/p0-0.81.12/taiko-forum/taiko_viewer
 Environment=NODE_ENV=production
 Environment=NODE_OPTIONS=--max-old-space-size=1280
 Environment=NITRO_PORT=3100
@@ -20,7 +20,7 @@ Environment=TAIKO_SUPPORT_INBOX=1106865024@qq.com
 Environment=NUXT_PUBLIC_BAIDU_SITE_VERIFICATION=codeva-IokhumYAJv
 Environment=BILIBILI_HTTP_PROXY=http://127.0.0.1:18888
 Environment=BILIBILI_SESSDATA_FILE=/home/sigaer/bilisess.txt
-ExecStart=/www/server/nvm/versions/node/v24.13.0/bin/node /home/sigaer/taiko/taiko-forum/taiko_viewer/.output/server/index.mjs
+ExecStart=/www/server/nvm/versions/node/v24.13.0/bin/node /home/sigaer/taiko/releases/p0-0.81.12/taiko-forum/taiko_viewer/.output/server/index.mjs
 Restart=always
 RestartSec=5
 MemoryHigh=1536M

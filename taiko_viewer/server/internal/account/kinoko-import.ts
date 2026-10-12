@@ -1,4 +1,5 @@
 import { createError } from "h3";
+import { filterKinokoEvents, scoreTimeIssue, scoreEventEpoch, type TimeSummary } from "./kinoko-time";
 import type { UserdataPayload, UserdataSong } from "./shared";
 
 const KINOKO_SCORE_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/hiroba";
@@ -43,6 +44,7 @@ type KinokoFetchResult = {
   playerId: string;
   songs: UserdataSong[];
   receivedBytes: number;
+  timeSummary: TimeSummary;
 };
 
 export type KinokoHistoryFetchResult = {
@@ -50,6 +52,7 @@ export type KinokoHistoryFetchResult = {
   records: UserdataSong[];
   latestSongs: UserdataSong[];
   receivedBytes: number;
+  timeSummary: TimeSummary;
 };
 
 const toNonNegativeInteger = (value: unknown) => {
@@ -69,8 +72,7 @@ export const sanitizeKinokoSong = (value: unknown): UserdataSong | null => {
     song[field] = toNonNegativeInteger(input[field]);
   }
   for (const field of ["highscore_datetime", "update_datetime"] as const) {
-    const text = String(input[field] || "").trim();
-    if (text) song[field] = text.slice(0, 64);
+    if (input[field] !== undefined && input[field] !== null) song[field] = (typeof input[field] === "string" ? input[field].trim() : input[field]) as never;
   }
   if (Array.isArray(input.option_flg)) song.option_flg = input.option_flg.slice(0, 8);
   if (Array.isArray(input.tone_flg)) song.tone_flg = input.tone_flg.slice(0, 8);
@@ -112,9 +114,9 @@ const readLimitedResponse = async (response: Response) => {
 
 const mapKinokoError = (status: number, detail: string) => {
   if (status === 401) return createError({ statusCode: 400, statusMessage: "API 密钥无效或已失效" });
-  if (status === 403) return createError({ statusCode: 403, statusMessage: detail || "该密钥无权读取指定玩家" });
-  if (status === 404) return createError({ statusCode: 404, statusMessage: detail || "菌菌控制台中未找到可用账号或成绩" });
-  return createError({ statusCode: 502, statusMessage: detail || `菌菌控制台请求失败（HTTP ${status}）` });
+  if (status === 403) return createError({ statusCode: 403, statusMessage: "该密钥无权读取指定玩家" });
+  if (status === 404) return createError({ statusCode: 404, statusMessage: "菌菌控制台中未找到可用账号或成绩" });
+  return createError({ statusCode: 502, statusMessage: `菌菌控制台请求失败（HTTP ${status}）` });
 };
 
 const fetchKinokoPayload = async (apiKey: string, endpoint: string) => {
@@ -142,7 +144,7 @@ const fetchKinokoPayload = async (apiKey: string, endpoint: string) => {
   return { payload, receivedBytes: Buffer.byteLength(text) };
 };
 
-export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResult> => {
+export const fetchKinokoScores = async (apiKey: string, now = new Date()): Promise<KinokoFetchResult> => {
   const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_SCORE_ENDPOINT);
 
   const playedRecords = payload?.data?.playedRecords;
@@ -152,14 +154,15 @@ export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResu
   }
   const rawSongs = Array.isArray(playedRecords?.scoreInfo) ? playedRecords.scoreInfo : null;
   if (!rawSongs) throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的成绩结构不正确" });
-  const songs = rawSongs.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
+  const songs = rawSongs.map(song => sanitizeKinokoSong(song)).filter(Boolean) as UserdataSong[];
   if (songs.length !== rawSongs.length) {
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的成绩记录" });
   }
-  return { playerId: returnedPlayerId, songs, receivedBytes };
+  const filtered = filterKinokoEvents(songs, now);
+  return { playerId: returnedPlayerId, songs: filtered.records, receivedBytes, timeSummary: filtered.timeSummary };
 };
 
-export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryFetchResult> => {
+export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Promise<KinokoHistoryFetchResult> => {
   const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_HISTORY_ENDPOINT);
   const playedRecords = payload?.data?.playedRecords;
   const returnedPlayerId = String(playedRecords?.player_id || "").trim();
@@ -182,7 +185,7 @@ export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryF
     if (songNo <= 0 || level < 1 || level > 5 || !rawRecords?.length) {
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史分组" });
     }
-    const songs = rawRecords.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
+    const songs = rawRecords.map(song => sanitizeKinokoSong(song)).filter(Boolean) as UserdataSong[];
     if (
       songs.length !== rawRecords.length ||
       songs.some((song) => song.song_no !== songNo || song.level !== level)
@@ -190,53 +193,80 @@ export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryF
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史成绩记录" });
     }
     records.push(...songs);
-    latestSongs.push(
-      [...songs].sort((left, right) =>
-        String(left.update_datetime || "").localeCompare(String(right.update_datetime || ""))
-      ).at(-1) as UserdataSong
-    );
     if (records.length > MAX_HISTORY_RECORDS) {
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的历史记录过多，已停止迁移" });
     }
   }
-  return { playerId: returnedPlayerId, records, latestSongs, receivedBytes };
+  const filtered = filterKinokoEvents(records, now);
+  // Select latest only after admission, across all groups for the same chart.
+  const latest = new Map<string, UserdataSong>();
+  for (const song of filtered.records) {
+    const key = `${song.song_no}:${song.level}`, previous = latest.get(key);
+    if (!previous || scoreEventEpoch(song) >= scoreEventEpoch(previous)) latest.set(key, song);
+  }
+  latestSongs.push(...latest.values());
+  return { playerId: returnedPlayerId, records: filtered.records, latestSongs, receivedBytes, timeSummary: filtered.timeSummary };
 };
 
 const maxField = (local: UserdataSong, remote: UserdataSong, field: (typeof CUMULATIVE_FIELDS)[number]) => {
   local[field] = Math.max(toNonNegativeInteger(local[field]), toNonNegativeInteger(remote[field]));
 };
 
-export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[]) => {
+export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[], now = new Date()) => {
+  const filtered = filterKinokoEvents(remoteSongs, now);
   const songs = Array.isArray(userdata.songs) ? userdata.songs : [];
   const songMap = new Map(songs.map((song) => [`${song.song_no}:${song.level}`, song]));
   let added = 0;
   let updated = 0;
   let unchanged = 0;
 
-  for (const remote of remoteSongs) {
+  let conflictRecords = 0;
+  let duplicateRecords = 0;
+  const known = new Set(songs.map(getKinokoScoreFingerprint));
+  const changedSongs: UserdataSong[] = [];
+  for (const remote of filtered.records) {
     const key = `${remote.song_no}:${remote.level}`;
     const local = songMap.get(key);
+    if (local && scoreTimeIssue(local, now, false)) { conflictRecords++; continue; }
+    const fingerprint = getKinokoScoreFingerprint(remote);
+    if (known.has(fingerprint)) { duplicateRecords++; unchanged++; continue; }
+    known.add(fingerprint);
     if (!local) {
       const inserted = { ...remote };
       songs.push(inserted);
       songMap.set(key, inserted);
       added += 1;
+      changedSongs.push(inserted);
       continue;
     }
     const before = JSON.stringify(local);
+    const localEpoch = local.update_datetime || local.highscore_datetime ? scoreEventEpoch(local) : -Infinity;
     const remoteScore = toNonNegativeInteger(remote.high_score);
     const localScore = toNonNegativeInteger(local.high_score);
-    if (remoteScore > localScore || (remoteScore === localScore && String(remote.update_datetime || "") > String(local.update_datetime || ""))) {
+    if (remoteScore > localScore || (remoteScore === localScore && scoreEventEpoch(remote) > localEpoch)) {
       for (const field of PERFORMANCE_FIELDS) {
         if (remote[field] !== undefined) local[field] = remote[field] as never;
       }
     }
     for (const field of CUMULATIVE_FIELDS) maxField(local, remote, field);
     const remoteUpdatedAt = String(remote.update_datetime || "");
-    if (remoteUpdatedAt > String(local.update_datetime || "")) local.update_datetime = remoteUpdatedAt;
+    if (remoteUpdatedAt && scoreEventEpoch(remote) > localEpoch) local.update_datetime = remoteUpdatedAt;
     if (JSON.stringify(local) === before) unchanged += 1;
-    else updated += 1;
+    else { updated += 1; changedSongs.push(local); }
   }
   userdata.songs = songs;
-  return { added, updated, unchanged, total: remoteSongs.length };
+  const uniqueChanged = [...new Map(changedSongs.map(row => [`${row.song_no}:${row.level}`, row])).values()];
+  return { added, updated, unchanged, total: remoteSongs.length, conflictRecords, duplicateRecords, writtenRecords: uniqueChanged.length, changedSongs: uniqueChanged, timeSummary: filtered.timeSummary };
+};
+
+// Existing pollution is an R0 conflict, never a fatal whole-account validation.
+export const excludeKinokoConflicts = (userdata: UserdataPayload, records: UserdataSong[], now: Date) => {
+  const polluted = new Set((userdata.songs || []).filter(row => scoreTimeIssue(row, now, false)).map(row => `${row.song_no}:${row.level}`));
+  const accepted: UserdataSong[] = [], conflicts: { position: number; reason: string }[] = [];
+  let conflictRecords = 0;
+  records.forEach((row, position) => {
+    if (polluted.has(`${row.song_no}:${row.level}`)) { conflictRecords++; if (conflicts.length < 20) conflicts.push({ position, reason: "existing-time-contamination-requires-R0" }); }
+    else accepted.push(row);
+  });
+  return { records: accepted, conflictRecords, conflicts, conflictDetailsTruncated: conflictRecords > conflicts.length };
 };

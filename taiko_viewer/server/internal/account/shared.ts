@@ -678,7 +678,7 @@ export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   return payload;
 };
 
-export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string) => {
+export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string, historySongs?: UserdataSong[]) => {
   const filePath = getUserdataPath(taikoId);
   const historyDir = getUserdataHistoryDir(taikoId);
   await mkdir(historyDir, { recursive: true });
@@ -689,10 +689,10 @@ export const writeUserdataWithHistory = async (taikoId: string, payload: Userdat
   const timestamp = formatLocalTimestamp().replace(/[: ]/g, "_");
   const payloadMeta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
   const historyPayload = {
-    ...payload,
+    ...(historySongs ? { songs: historySongs } : payload),
     _meta: {
-      ...payloadMeta,
-      full: true,
+      ...(historySongs ? {} : payloadMeta),
+      full: !historySongs,
       ts: formatLocalTimestamp(),
       source,
       writer_source: source

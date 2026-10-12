@@ -21,8 +21,9 @@ import {
   withUserdataWriteLock,
   writeUserdataWithHistory
 } from "~/server/internal/account/shared";
+import { scoreTimeIssue } from "~/server/internal/account/kinoko-time";
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
-import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
+import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores, excludeKinokoConflicts } from "~/server/internal/account/kinoko-import";
 import { requestScoreTokenManagement } from "~/server/internal/account/score-token";
 import { requireAccountUser } from "./auth";
 
@@ -172,7 +173,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   };
 };
 
-export const importKinokoScores = async (event: H3Event, payload: Record<string, unknown>) => {
+export const importKinokoScores = async (event: H3Event, payload: Record<string, unknown>, now = new Date()) => {
   const user = await requireAccountUser(event);
   const currentBinding = await getCurrentBindingRow(user.id);
   if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定导入目标账号" });
@@ -191,24 +192,31 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   }
 
   const taikoId = currentBinding.taiko_id;
-  const fetched = await fetchKinokoScores(apiKey);
+  const fetched = await fetchKinokoScores(apiKey, now);
   if (fetched.playerId !== taikoId) {
     throw createError({
       statusCode: 409,
       statusMessage: `密钥默认账号（${fetched.playerId}）与当前绑定账号（${taikoId}）不一致，已停止迁移`
     });
   }
+  if (!fetched.songs.length) throwNoKinokoRecords(fetched.timeSummary);
   const summary = await withUserdataWriteLock(taikoId, async () => {
     const userdata = (await userdataFileExists(taikoId))
       ? await readUserdata(taikoId)
       : { profile: { userid: taikoId }, songs: [] };
-    const result = mergeKinokoScores(userdata, fetched.songs);
-    rebuildUserdataAchievement(userdata);
-    if (result.added || result.updated) await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
-    return result;
+    const admitted = excludeKinokoConflicts(userdata, fetched.songs, now);
+    if (!admitted.records.length) throwNoKinokoRecords({ ...fetched.timeSummary, ...conflictSummary(admitted) });
+    const polluted = (userdata.songs || []).some(row => scoreTimeIssue(row, now, false));
+    const { changedSongs, timeSummary: _time, ...result } = mergeKinokoScores(userdata, admitted.records, now);
+    if (result.added || result.updated) {
+      rebuildUserdataAchievement(userdata);
+      await writeUserdataWithHistory(taikoId, userdata, "kinoko-import", polluted ? changedSongs : undefined);
+    }
+    return { ...result, ...fetched.timeSummary, ...conflictSummary(admitted),
+      duplicateRecords: result.duplicateRecords, writtenRecords: result.writtenRecords };
   });
-
-  const message = `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
+  const partial = summary.skippedTimeRecords > 0 || summary.conflictRecords > 0;
+  const message = kinokoImportMessage(summary);
   const result = {
     targetId: "kinoko-import",
     label: "菌菌控制台迁移",
@@ -230,6 +238,8 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   });
   return {
     ok: true,
+    partial,
+    message,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
@@ -237,7 +247,7 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   };
 };
 
-export const importKinokoScoreHistory = async (event: H3Event, payload: Record<string, unknown>) => {
+export const importKinokoScoreHistory = async (event: H3Event, payload: Record<string, unknown>, now = new Date()) => {
   const user = await requireAccountUser(event);
   const currentBinding = await getCurrentBindingRow(user.id);
   if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定迁移目标账号" });
@@ -256,7 +266,7 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   }
 
   const taikoId = currentBinding.taiko_id;
-  const fetched = await fetchKinokoHistory(apiKey);
+  const fetched = await fetchKinokoHistory(apiKey, now);
   if (fetched.playerId !== taikoId) {
     throw createError({
       statusCode: 409,
@@ -264,21 +274,30 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
     });
   }
 
+  if (!fetched.records.length) throwNoKinokoRecords(fetched.timeSummary);
   const summary = await withUserdataWriteLock(taikoId, async () => {
     const existed = await userdataFileExists(taikoId);
     const userdata = existed
       ? await readUserdata(taikoId)
       : { _meta: { full: true, source: "wahlap", source_account: taikoId }, profile: { userid: taikoId }, songs: [] };
-    const history = await writeKinokoHistorySnapshots(taikoId, fetched.records, userdata);
-    const current = mergeKinokoScores(userdata, fetched.latestSongs);
+    const admitted = excludeKinokoConflicts(userdata, fetched.records, now);
+    if (!admitted.records.length) throwNoKinokoRecords({ ...fetched.timeSummary, ...conflictSummary(admitted) });
+    // Apply the same chart conflict set to history and latest current inputs.
+    const latest = excludeKinokoConflicts(userdata, fetched.latestSongs, now).records;
+    const polluted = (userdata.songs || []).some(row => scoreTimeIssue(row, now, false));
+    const { changedSongs, timeSummary: _time, ...current } = mergeKinokoScores(userdata, latest, now);
+    const history = await writeKinokoHistorySnapshots(taikoId, admitted.records, userdata, now);
     if (!existed || current.added > 0 || current.updated > 0) {
       rebuildUserdataAchievement(userdata);
-      await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current");
+      await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current", polluted ? changedSongs : undefined);
     }
-    return { history, current };
+    return { history, current, ...fetched.timeSummary, ...conflictSummary(admitted),
+      duplicateRecords: admitted.records.length - history.importedRecords,
+      existingDuplicateRecords: history.skippedRecords, batchDuplicateRecords: admitted.records.length - history.uniqueRecords,
+      writtenRecords: history.importedRecords, currentWrittenRecords: current.writtenRecords };
   });
-
-  const message = `历史 ${summary.history.importedRecords} 条新增、${summary.history.skippedRecords} 条已存在，写入 ${summary.history.snapshotFiles} 个兼容快照`;
+  const partial = summary.skippedTimeRecords > 0 || summary.conflictRecords > 0;
+  const message = kinokoImportMessage(summary);
   const result = {
     targetId: "kinoko-history-import",
     label: "菌菌控制台完整历史迁移",
@@ -300,9 +319,22 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   });
   return {
     ok: true,
+    partial,
+    message,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
     log: toPublicSyncLog(logRow)
   };
 };
+
+const conflictSummary = (value: ReturnType<typeof excludeKinokoConflicts>) => ({
+  conflictRecords: value.conflictRecords, conflicts: value.conflicts, conflictDetailsTruncated: value.conflictDetailsTruncated
+});
+const throwNoKinokoRecords = (summary: object): never => {
+  throw createError({ statusCode: 422, statusMessage: "No eligible Kinoko records",
+    message: "没有可导入的有效记录；异常时间或已有冲突记录已跳过，现有成绩未改动。",
+    data: { code: "KINOKO_NO_ELIGIBLE_RECORDS", summary: { duplicateRecords: 0, writtenRecords: 0, currentWrittenRecords: 0, conflictRecords: 0, ...summary } } });
+};
+const kinokoImportMessage = (s: { sourceRecords: number; validRecords: number; skippedTimeRecords: number; conflictRecords: number; duplicateRecords: number; writtenRecords: number }) =>
+  `${s.skippedTimeRecords || s.conflictRecords ? "部分导入" : "导入完成"}：来源 ${s.sourceRecords} 条，有效 ${s.validRecords} 条，跳过异常时间 ${s.skippedTimeRecords} 条，已有冲突 ${s.conflictRecords} 条，重复 ${s.duplicateRecords} 条，写入 ${s.writtenRecords} 条。`;

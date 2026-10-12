@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { parseKinokoTimestamp, parseKinokoMetadataTime, filterKinokoEvents } from "./kinoko-time";
 import { access, mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { createError } from "h3";
@@ -30,30 +31,15 @@ export type KinokoHistoryWriteSummary = {
   baselineCreated: boolean;
 };
 
-const normalizeTimestamp = (value: unknown) => {
-  const text = String(value || "").trim();
-  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
-  if (!match) return null;
-  const parts = match.slice(1).map(Number);
-  const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
-  if (
-    date.getFullYear() !== parts[0] ||
-    date.getMonth() !== parts[1] - 1 ||
-    date.getDate() !== parts[2] ||
-    date.getHours() !== parts[3] ||
-    date.getMinutes() !== parts[4] ||
-    date.getSeconds() !== parts[5]
-  ) {
-    return null;
-  }
-  const normalized = `${match[1]}-${match[2]}-${match[3]} ${match[4]}:${match[5]}:${match[6]}`;
-  return { text: normalized, epochMs: date.getTime() };
+const normalizeTimestamp = (value: unknown, now = new Date()) => {
+  try { return parseKinokoTimestamp(value, now); } catch { return null; }
 };
 
-const normalizeHistoryRecords = (records: UserdataSong[]) => {
+const normalizeHistoryRecords = (records: UserdataSong[], now: Date) => {
+  records = filterKinokoEvents(records, now).records;
   const unique = new Map<string, NormalizedHistoryRecord>();
   for (const song of records) {
-    const timestamp = normalizeTimestamp(song.update_datetime || song.highscore_datetime);
+    const timestamp = normalizeTimestamp(song.update_datetime || song.highscore_datetime, now);
     if (!timestamp) {
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史成绩时间" });
     }
@@ -85,7 +71,7 @@ const isFullSnapshot = (payload: UserdataPayload) => {
 const snapshotObservedAt = (payload: UserdataPayload, fileName: string) => {
   const meta = payload._meta || {};
   for (const value of [meta.observed_at, meta.observedAt, meta.synced_at, meta.ts]) {
-    const normalized = normalizeTimestamp(value);
+    const normalized = parseKinokoMetadataTime(value);
     if (normalized) return normalized.epochMs;
   }
   const compact = fileName.match(/^data_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})_/);
@@ -161,9 +147,10 @@ const buildMeta = (taikoId: string, timestamp: string, full: boolean) => ({
 export const writeKinokoHistorySnapshots = async (
   taikoId: string,
   remoteRecords: UserdataSong[],
-  currentUserdata: UserdataPayload
+  currentUserdata: UserdataPayload,
+  now = new Date()
 ): Promise<KinokoHistoryWriteSummary> => {
-  const normalized = normalizeHistoryRecords(remoteRecords);
+  const normalized = normalizeHistoryRecords(remoteRecords, now);
   if (!normalized.length) {
     return {
       remoteRecords: remoteRecords.length,
@@ -190,9 +177,9 @@ export const writeKinokoHistorySnapshots = async (
   let snapshotFiles = 0;
   let baselineCreated = false;
   if (needsBaseline) {
-    const baselineDate = new Date(normalized[0].epochMs - 1000);
+    const baselineDate = new Date(normalized[0].epochMs - 1000 + 8 * 60 * 60 * 1000);
     const pad = (value: number) => String(value).padStart(2, "0");
-    const baselineTimestamp = `${baselineDate.getFullYear()}-${pad(baselineDate.getMonth() + 1)}-${pad(baselineDate.getDate())} ${pad(baselineDate.getHours())}:${pad(baselineDate.getMinutes())}:${pad(baselineDate.getSeconds())}`;
+    const baselineTimestamp = `${baselineDate.getUTCFullYear()}-${pad(baselineDate.getUTCMonth() + 1)}-${pad(baselineDate.getUTCDate())} ${pad(baselineDate.getUTCHours())}:${pad(baselineDate.getUTCMinutes())}:${pad(baselineDate.getUTCSeconds())}`;
     const baseline: UserdataPayload = {
       _meta: buildMeta(taikoId, baselineTimestamp, true),
       profile: { ...(currentUserdata.profile || {}), userid: taikoId },

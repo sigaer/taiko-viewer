@@ -356,6 +356,7 @@ const importFromKinoko = async () => {
   importingKinoko.value = true;
   try {
     const response = await apiFetch<{
+      partial: boolean; message: string;
       summary: { added: number; updated: number; unchanged: number; total: number };
     }>("/api/account/sync/kinoko-import", {
       method: "POST",
@@ -364,15 +365,10 @@ const importFromKinoko = async () => {
       }
     });
     kinokoApiKey.value = "";
-    ElMessage.success(
-      copy.value.kinokoDone
-        .replace("{added}", String(response.summary.added))
-        .replace("{updated}", String(response.summary.updated))
-        .replace("{unchanged}", String(response.summary.unchanged))
-    );
+    ElMessage({ type: response.partial ? "warning" : "success", message: response.message });
     await refresh();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
+    ElMessage.error(error?.data?.message || error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
     importingKinoko.value = false;
@@ -388,6 +384,7 @@ const importHistoryFromKinoko = async () => {
   importingKinokoHistory.value = true;
   try {
     const response = await apiFetch<{
+      partial: boolean; message: string;
       summary: {
         history: { importedRecords: number; skippedRecords: number; snapshotFiles: number };
       };
@@ -398,15 +395,10 @@ const importHistoryFromKinoko = async () => {
       }
     });
     kinokoApiKey.value = "";
-    ElMessage.success(
-      copy.value.kinokoHistoryDone
-        .replace("{imported}", String(response.summary.history.importedRecords))
-        .replace("{skipped}", String(response.summary.history.skippedRecords))
-        .replace("{files}", String(response.summary.history.snapshotFiles))
-    );
+    ElMessage({ type: response.partial ? "warning" : "success", message: response.message });
     await refresh();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
+    ElMessage.error(error?.data?.message || error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
     importingKinokoHistory.value = false;
