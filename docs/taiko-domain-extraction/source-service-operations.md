@@ -83,3 +83,10 @@ Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；
 Source9.81.27已准备canonical u0 publication。成员SH按Source排序后取得派生EX，同批发布C/H；读请求拒绝未纳管成员或已存在的未纳管u0。最终切换必须先停止全部旧Source/u0/daily/maintenance Writer，再显式纳管现有成员及u0、核对历史与daily冻结点，最后同步新Source并启动。不得让首次读取覆盖旧u0历史，不得将生产资料复制进测试库。这里记录激活要求，当前没有执行生产纳管/同步/重启。
 
 startup不再自动重写bind SQL或taiko_multi_bind.json；绑定所属与QQ联接使用已验证的显式中心事务。旧JSON只保留纯normalization兼容测试，不再作authority Writer。feature-switch迁移、Hiroba表初始化、telemetry、QQ cleanup仍保留。回退运行代码须同时停所有新Writer，不能在线并开旧startup绑定Writer。private Native return proof、daily/maintenance收敛、Read Model/成本和最终产品验收继续Phase6 Gate。
+
+
+## daily Writer 的 Source 与 namespace 锁
+
+Source9.81.28将采集、趋势补算和explicit backfill纳入Source SH→daily namespace锁；采集已有Source EX时复用，backup/restore/purge/collection取EX。活动测量写入必须有canonical current/history，legacy或tombstone拒绝新增。P1a纳管和切换前仍要停所有旧daily Writer；同root不能混跑旧namespace-only实现。
+
+显式backfill只处理单一Source，支持--userdata-dir与有界plain-file seed，读取canonical history，保留past frozen值和原origin，不将重算称为实际游玩。操作应通过既定memory wrapper，私有资料留在原授权root，不能复制生产数据到测试库。Source-tagged daily stage仅在Source EX collector中收集；不得删lock inode或另开无锁清理。Read Model必须包含实际daily内容依赖，不能只靠C/H commit判定measurement cache有效。本子步只准备源码/留档，未执行生产补算、纳管、同步或重启。

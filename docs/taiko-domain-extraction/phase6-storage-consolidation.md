@@ -514,3 +514,16 @@ manifest 可选 opaque dependencyHash 包含精确 principal、成员 commit 与
 最终两轮31.617s/285368320byte cgroup250ms采样与3.213s/143396864byte，largest child314404/178708KiB；high/max/OOM0，wrapper exit0/journal正常退出/cgroup删除。早期317pass/1fail的fixture对hardlink投影原地写入造成正确hash拒绝，修正为inode替换；297pass/6fail的spawn递归runner改为同memory wrapper内单独python -m pytest，生产协议不放宽。失败日志保留，完整[证据](evidence/phase6-native-u0-publication-validation.json)。
 
 A9.81.27/d4a9d22仅8个本步文件标准commit/push及actual remote核对，miku用户改动保留；Viewer0.82档案仅本地提交，B0.2.7/Core pins不变。R未复制或重启，无生产SQL/数据复制/部署，live0.81.11与三个active PID不变。已有u0与成员须停完旧Writer后显式纳管，不能首次read重建覆盖旧历史。回退Source539f6e5、Viewer档案f08abd0；协议激活后不能重新启用旧自动startup绑定Writer。Native整轮/Gate6 IN_PROGRESS；继续其余Native私有return proof、daily/backfill/maintenance Writer、P1a、Read Model精确依赖/失效、限额/百万冷暖IO-RSS、trusted ops/fixed R deps、统一标准发布与真实online验收。
+
+
+## 6.3e.8.6j daily 采集、趋势与 backfill Writer 收敛（STEP_PASS）
+
+2026-10-12。daily文件IO收敛到Source Infrastructure的daily.py。普通archive持Source SH→namespace EX，显式readonly用namespace SH；成绩Writer已有EX直接复用，不升级SH。v1/v2无显式store的采集也在同一SH下完成。backup/restore/purge在Source EX下共用同一namespace锁，因此删除/备份/收集不能越过活动daily Writer。namespace锁30s、directory/file/lock普通文件和O_NOFOLLOW、8MiB envelope、fsync原子替换及父目录持久化；变化仅允许活动canonical current/history，未纳管或tombstone不能新增测量。已冻结读取与旧past/today/capturedAt/computedAt/origin/namespace规则保持。daily文件仍独立于C/H commit，不宣称v1/v2或SQL/filesystem共同事务。
+
+趋势从history获取、计算至archive保存持Source SH。backfill改为同一SH下canonical raw history/metadata排序与streaming state，投影丢失仍可补算；保留10000文件/32MiB单文件，seed普通文件8MiB/10000条，root明确参数优先于env/default。新的daily atomic stage使用Source标记，由已有Source EX collector识别；SH Writer不抢先清理其他活跃namespace。实际进程退出后EX收集器可删除本Source draft，正常archive/历史/C/H保留。
+
+349 guarded Source+40 publication/backup+3旧趋势adapter=392检查及25故障子场景，在同一serial memory wrapper内PASS。冻结d4a9d22的v1/v2完整JSON字节，在stub计算及3条合成成绩/跟踪的公开catalog/实际Core公式下都相等；旧值不随后续公式变化。实际child在daily replace前退出保留完整旧文件，fsync后退出保留完整新文件；C/H head不变、dead draft收集/后续写成功。child持daily Source SH/namespace EX时竞争Source EX及namespace EX超时，退出后fence释放。覆盖EX复用、Root/Source/expired lease、tombstone/legacy拒绝、readonly/exception、symlink/caps、canonical projection loss和趋势history capture前即持SH。
+
+最终41.078s/267546624byte cgroup250ms采样、child max321568KiB、high/max/OOM0；wrapper exit0/journal正常退出/owned child reaped/cgroup gone。早期333pass/1fail为Golden fixture未先纳管canonical Source，改fixture不放松write要求；额外实际catalog测试起名test_real_被offline安全过滤，改成明确合成命名后补测及最终整轮均通过，不去掉生产隔离。完整[证据](evidence/phase6-daily-writer-validation.json)。没有SQL、生产私有数据/复制、真实upstream、PNG、完整NoneBot boot、百万或online验收。
+
+维护入口核对：storage_maintenance只清理host VSIX并明确保护userdata；taiko_admin_backup管理catalog/cover/admin日志表及其备份，不读写成绩。这两者未修改、未针对主机缓存执行。Source collector按EX保护新daily stage，独立portable backup/restore/purge的40+25验证保持。A9.81.28/cc66b22仅12个本步文件标准commit/push和actual remote一致，miku用户改动保留；Viewer0.82只档案本地提交，B/Core pins不变，R未同步/重启、无部署，live0.81.11/三个PID不变。回退Source d4a9d22、Viewer档案f33fbe3；激活后不得重新启用无Source fence的旧daily Writer。Native私有return proof、最终Writer范围核对、P1a停完旧Writer后纳管、Read Model精确daily等依赖/失效、百万冷暖IO-RSS/限额、trusted ops/fixed R deps及统一标准发布/真实产品验收继续，Gate6 IN_PROGRESS。
