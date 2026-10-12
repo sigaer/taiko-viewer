@@ -501,3 +501,16 @@ Frozen926ad23 acquisition在同Source/SQL/clock、两个独立owned根各观察�
 67.602s/250ms sampled308043776bytes/child217192KiB/high-max-OOM0，wrapper21484 exit0，unit1791776870-2153889 successful/ExecMainStatus0/inactive/MainPID0/cgroup gone。AST fixture符号遗漏、wrong cwd/daily公开catalog refresh、Golden假定旧投影/随机filename相等均完整保留；256/28通过后补固定metadata/driver错误反馈再最终258/28。详见[证据](evidence/phase6-native-wahlap-authority-validation.json)。
 
 Source539f6e5/9.81.26标准push且remote一致。本步7个taiko文件，用户期间Milky ff1778f/8c877ee与926ad23无taiko差异，parent保留且无miku用户改动混入；回退8c877ee保持用户提交。Viewer0.82 SQL测试/证据本地準备，Bfa0983d/0.2.7和Core0.1.1/0.1.2未变；R未复制/重启/部署，live0.81.11与三个active PID1063394/1063408/829173不变。Native authority整轮/Gate6 IN_PROGRESS，继续其他private Native readers/startup SQL writer、全u0/daily/maintenance Writer/共享persistent准入/P1a停止legacy writer后接管、完整Read Model/精确失效/百万冷暖IO-RSS/trusted恢复cleanup/runbook/fixed R deps/生产grant/标准Viewer发布与R同步重启/真实online Gate。
+
+
+## 6.3e.8.6i 原生 u0 发布与旧启动绑定 Writer 退出（STEP_PASS）
+
+2026-10-12。原生 u0 不再使用 stat/mtime 缓存、无界身份锁字典或逐文件覆盖。先按 Source 顺序持所有成员 SH，再取派生 u0 EX；成员必须已 canonical，读请求不能自动纳管成员，也不能覆盖未纳管的现有 u0。用户资料来源与 manual 成员保持原生定义，客户端 external-only 规则不变。configured userdata root 优先。current/history 同一 publication，初次与增量时钟保持冻结实现；增量不重写已有历史。旧自动 startup bind SQL/multi-bind JSON Writer 删除，保留纯 normalization 兼容函数及 feature-switch/credential initialization/telemetry/QQ cleanup。
+
+manifest 可选 opaque dependencyHash 包含精确 principal、成员 commit 与顺序、profile member、当前进程使用的 merge rule revision；进入 request hash 且其他 publish 不自动继承。来源仅改历史时保存新依赖回执，不捏造成绩观察；same-mtime 新 commit 仍失效。投影替换不能代替 canonical bytes，损坏对象失败。每进程2准入、30s准入/锁等待、32MiB aggregate input/derived encoded output是明确上限，未称为已通过大账号或全主机准入。active rule map仍沿用冻结进程内核，实际catalog刷新/Read Model失效继续后续处理。
+
+319 guarded Source、40 pure publication/backup tests、4新增边界检查分轮PASS，另25故障子场景。冻结539f6e5在两套合成root/固定clock下初次与增量current bytes及全部H filename/content SHA完全一致。两个实际u0 child提交前后退出分别恢复旧/新完整代；另一个child持Source111/222 SH与u0 EX时，三者的竞争EX均被拒绝，退出后都可取得。覆盖same-mtime source commit/profile切换、warm不重建、不制造新代、history-only不追加点、未纳管拒绝、corruption、不合法参数、长principal、aggregate cap/admission、manual/root、dependency nonce冲突与startup调用边界。没有SQL、真实上游、PNG、完整NoneBot boot或线上/百万验收。
+
+最终两轮31.617s/285368320byte cgroup250ms采样与3.213s/143396864byte，largest child314404/178708KiB；high/max/OOM0，wrapper exit0/journal正常退出/cgroup删除。早期317pass/1fail的fixture对hardlink投影原地写入造成正确hash拒绝，修正为inode替换；297pass/6fail的spawn递归runner改为同memory wrapper内单独python -m pytest，生产协议不放宽。失败日志保留，完整[证据](evidence/phase6-native-u0-publication-validation.json)。
+
+A9.81.27/d4a9d22仅8个本步文件标准commit/push及actual remote核对，miku用户改动保留；Viewer0.82档案仅本地提交，B0.2.7/Core pins不变。R未复制或重启，无生产SQL/数据复制/部署，live0.81.11与三个active PID不变。已有u0与成员须停完旧Writer后显式纳管，不能首次read重建覆盖旧历史。回退Source539f6e5、Viewer档案f08abd0；协议激活后不能重新启用旧自动startup绑定Writer。Native整轮/Gate6 IN_PROGRESS；继续其余Native私有return proof、daily/backfill/maintenance Writer、P1a、Read Model精确依赖/失效、限额/百万冷暖IO-RSS、trusted ops/fixed R deps、统一标准发布与真实online验收。

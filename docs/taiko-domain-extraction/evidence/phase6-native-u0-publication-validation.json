@@ -1,0 +1,201 @@
+{
+  "step": "6.3e.8.6i",
+  "date": "2026-10-12",
+  "timezone": "Asia/Shanghai",
+  "status": "NATIVE_U0_PUBLICATION_STARTUP_WRITER_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "goalStatus": "active",
+  "source": {
+    "version": "9.81.27",
+    "commit": "d4a9d22cbb0d9cf7e14116f487909aff9034d023",
+    "parent": "539f6e527171f788eb44ed93687d6d31fb3312c3",
+    "pushed": true,
+    "actualRemoteMainVerified": true,
+    "filesSha256": {
+      "taiko/plugins/utils/merged_bind.py": "4e9948d7eb697335688d81ed6c663f684ba42bbb47f8e04d5c33470f6115e4df",
+      "taiko/taiko_runtime/startup_migration.py": "f1a9eef22f3f01e60f50b2b73078d366ce9c327f721bb26986ef152c86f97929",
+      "taiko/taiko_runtime_init.py": "b22d8b5b52e8e126e0e9d1bad46f4d6353e2e70b732f9e15bedc7cab47f0f8af",
+      "taiko/taiko_store/README.md": "20493e711412667e8239545626e5f40d3f9d530a48eabf07d1b90c482b1bfa0d",
+      "taiko/taiko_store/merged_materialization.py": "24a9e7b1c0db1c5ebdbe218898f45c10e597282654c221ae5176a6928fd14c7f",
+      "taiko/taiko_store/publication.py": "efc1ce5e48150ab8693fb22fa9256492cf79cf9b027992ef3c51052e0587bcf3",
+      "taiko/tests/test_merged_bind.py": "8fc8df706e00f222393803c9e98032d69ca00d78ddda8eaea08ab0c968b7d3f4",
+      "taiko/tests/test_merged_materialization.py": "b3d06ca261dc580379fabd747779998d3e398e3d7209c1cd741baa4a8a1c3978"
+    }
+  },
+  "viewer": {
+    "preparedVersion": "0.82.0",
+    "liveVersion": "0.81.11",
+    "parentCommit": "f08abd0d1bf2d571ad8a6877415e4e4793b81d6a",
+    "standardReleasePending": true,
+    "manualPush": false
+  },
+  "implementation": [
+    "Sorted simultaneous member SH leases followed by derived EX; no source EX upgrade or per-principal unbounded lock/cache map.",
+    "Only canonical member generations; no automatic member or existing u0 adoption by reads.",
+    "One publication for current and history; frozen initial/incremental clocks and bytes; unchanged history bytes retained.",
+    "Opaque dependencyHash records exact principal, ordered member commits, profile member and active process merge-rule revision; included in request hash and not inherited by another publisher.",
+    "History-only changes record a new dependency without adding an observation; Source commit changes invalidate even with unchanged file mtime.",
+    "Native manual members and profile choice preserved; configured userdata root precedes default.",
+    "Two admitted materializations per process, 30-second admission/lease waits, 32MiB aggregate input/encoded output ceiling.",
+    "Automatic SQL bind-table and multi-bind JSON startup writers removed; pure legacy JSON normalization helpers retained.",
+    "Feature-switch migration, credential initialization, telemetry and QQ cleanup retained."
+  ],
+  "qa": {
+    "runs": [
+      {
+        "name": "source-offline",
+        "passed": 319,
+        "deselectedProductionCases": 9,
+        "warnings": 1,
+        "secondsPytest": 23.05
+      },
+      {
+        "name": "publication-process-backup",
+        "passed": 40,
+        "faultSubtestsPassed": 25,
+        "secondsPytest": 5.65
+      },
+      {
+        "name": "four-new-bounds",
+        "passed": 4,
+        "deselectedBySelection": 157,
+        "warnings": 1,
+        "secondsPytest": 0.73
+      }
+    ],
+    "passedAcrossRuns": 363,
+    "additionalFaultSubtests": 25,
+    "singleFullRunClaim": false,
+    "frozenOracle": "539f6e5:taiko/plugins/utils/merged_bind.py",
+    "golden": "Exact initial/incremental current bytes and history filename-to-content SHA256 equality on separate synthetic roots with a frozen clock.",
+    "actualProcesses": [
+      "u0 projection-0 death restores prior generation",
+      "u0 commit-durable death retains complete new generation",
+      "member 111/222 EX and u0 EX blocked while child holds captured member SH/derived EX; all leases released after owned child exits"
+    ],
+    "otherChecks": [
+      "same-mtime committed current update",
+      "profile switch",
+      "canonical projection replacement",
+      "warm no rebuild/no new sequence",
+      "history-only no observation",
+      "unmanaged member/output rejection",
+      "corrupt object fail closed",
+      "invalid identity/member/index bounds",
+      "long-principal distinct bounded ids",
+      "aggregate cap",
+      "admission refusal before IO",
+      "configured root/manual profile",
+      "dependency proof validation and nonce conflict",
+      "startup writers absent"
+    ],
+    "isolation": "Serial memory wrapper; no SQL used; owned synthetic filesystem only. Guarded Source runner blocks production personal files/runtime writes/HTTP. Pure publication/backup multiprocessing tests run separately through python -m pytest with owned /var/tmp roots to avoid recursive spawn of the offline runner.",
+    "resources": {
+      "final": {
+        "results": [
+          {
+            "name": "source-offline",
+            "exitCode": 0,
+            "seconds": 25.59
+          },
+          {
+            "name": "publication-process-backup",
+            "exitCode": 0,
+            "seconds": 6.027
+          }
+        ],
+        "exitCode": 0,
+        "seconds": 31.617,
+        "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791781568-2200925.service",
+        "sampledPeakBytes": 285368320,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "selfMaxRssKiB": 15852,
+        "largestChildMaxRssKiB": 314404
+      },
+      "supplemental": {
+        "results": [
+          {
+            "name": "four-new-bounds",
+            "exitCode": 0,
+            "seconds": 3.213
+          }
+        ],
+        "exitCode": 0,
+        "seconds": 3.213,
+        "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791781710-2202539.service",
+        "sampledPeakBytes": 143396864,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "selfMaxRssKiB": 15852,
+        "largestChildMaxRssKiB": 178708
+      }
+    },
+    "cleanup": {
+      "finalWrapperExit": 0,
+      "supplementalWrapperExit": 0,
+      "journalsDeactivatedSuccessfully": true,
+      "finalCgroupRemoved": true,
+      "supplementalCgroupRemoved": true,
+      "ownedChildrenReaped": true
+    },
+    "artifacts": [
+      "/var/tmp/phase6-native-u0-final-qa.py",
+      "/var/tmp/phase6-native-u0-final-qa.log",
+      "/var/tmp/phase6-native-u0-final-resource.json",
+      "/var/tmp/phase6-native-u0-supplemental-qa.py",
+      "/var/tmp/phase6-native-u0-supplemental-qa.log",
+      "/var/tmp/phase6-native-u0-supplemental-resource.json"
+    ],
+    "earlierFailures": [
+      {
+        "artifactPrefix": "/var/tmp/phase6-native-u0-first",
+        "passed": 317,
+        "failed": 1,
+        "reason": "Fixture modified a hardlinked projection in place, correctly corrupting the immutable object. Projection-only tamper fixture now replaces the inode; production hash checks unchanged."
+      },
+      {
+        "artifactPrefix": "/var/tmp/phase6-native-u0-spawn-runner-failure",
+        "passed": 297,
+        "failedIncludingSubtests": 6,
+        "reason": "Spawn re-entered the top-level guarded runner. Existing pure multiprocessing tests moved to separate python -m pytest; 40 tests plus 25 subtests then passed."
+      }
+    ]
+  },
+  "production": {
+    "sqlMutation": false,
+    "dataCopiedIntoTest": false,
+    "sourceRuntimeCopied": false,
+    "restart": false,
+    "deploy": false,
+    "clientStarted": false,
+    "services": {
+      "taiko-viewer.service": {
+        "state": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "state": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "state": "active",
+        "pid": 829173
+      }
+    }
+  },
+  "limitations": [
+    "Not native private-return authorization completion or complete NoneBot startup.",
+    "No real upstream/render PNG/online/million-record cost acceptance.",
+    "Existing member and u0 publications must be explicitly adopted after all old writers are quiesced.",
+    "Active merge-rule map remains the frozen process-local kernel; disk catalog refresh/invalidation is part of remaining Read Model work.",
+    "No host-global admission or SQL/filesystem distributed transaction claim."
+  ],
+  "remaining": [
+    "Remaining native private reader return proof",
+    "Daily/backfill/maintenance writer convergence",
+    "P1a coordinated adoption after old writer stop",
+    "Rebuildable private Read Model and precise dependencies/invalidation",
+    "Full-size limit reconciliation and million-record cold/warm IO/RSS acceptance",
+    "Trusted recovery/cleanup/runbook and fixed runtime dependencies",
+    "Standard Viewer release, coordinated runtime activation, explicit production service grants, real authenticated online acceptance"
+  ]
+}

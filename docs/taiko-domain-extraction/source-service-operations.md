@@ -76,3 +76,10 @@ bash /home/sigaer/taiko/taiko-forum/scripts/memory/run_qa.sh \
 验证范围包括真实 Cookie 登录与正式 Developer route、实际开发者 quota、实际 `_test` SQL、Source SH、实际私有 CLI、排队/返回期间身份与能力替换、撤销/expiry、exact replay、单 COMMIT、late failure/rollback destroy/ACK loss、完整 JSON 与 canonical corruption。上游网络、完整 Nuxt build、真实跨用户服务注册和生产烟测留在最终激活验收。
 
 Viewer 此子步只提交源码与证据，版本沿用 Phase 6 预备 0.82.0；统一标准部署负责构建、push 和服务重启。Wahlap 更新现已退出旧 HTTP dispatcher，Hiroba 同步与凭据发现使用私有stdin；客户端四项成绩、三项QQ绑定与两项Hiroba凭据SDK都已要求有效token。permission-aware bounded cache、native Bot凭据/QQ Writer、全部Writer/Read Model/P1a仍须完成。运行中的R未复制这些预备变更，此子步无需重启NoneBot。
+
+
+## 原生 u0 与启动绑定迁移的激活边界
+
+Source9.81.27已准备canonical u0 publication。成员SH按Source排序后取得派生EX，同批发布C/H；读请求拒绝未纳管成员或已存在的未纳管u0。最终切换必须先停止全部旧Source/u0/daily/maintenance Writer，再显式纳管现有成员及u0、核对历史与daily冻结点，最后同步新Source并启动。不得让首次读取覆盖旧u0历史，不得将生产资料复制进测试库。这里记录激活要求，当前没有执行生产纳管/同步/重启。
+
+startup不再自动重写bind SQL或taiko_multi_bind.json；绑定所属与QQ联接使用已验证的显式中心事务。旧JSON只保留纯normalization兼容测试，不再作authority Writer。feature-switch迁移、Hiroba表初始化、telemetry、QQ cleanup仍保留。回退运行代码须同时停所有新Writer，不能在线并开旧startup绑定Writer。private Native return proof、daily/maintenance收敛、Read Model/成本和最终产品验收继续Phase6 Gate。
