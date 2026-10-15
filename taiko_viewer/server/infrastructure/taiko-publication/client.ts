@@ -1,5 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { assertScoreIdentity } from "../../domain/file-score-reader.ts";
+import { getPublicationPython } from "./python.ts";
 
 export type PublicationReference = { sha256: string; bytes: number };
 export type PublicationManifest = {
@@ -45,8 +46,11 @@ export async function openPublicationLease(options: Options): Promise<Publicatio
   assertScoreIdentity(options.identity);
   const lifetime = options.lifetimeSeconds ?? 180;
   if (!Number.isInteger(lifetime) || lifetime < 1 || lifetime > 900) throw new PublicationUnavailableError();
-  const child: ChildProcessWithoutNullStreams = spawn(options.python || "python3", [
-    "-m", "taiko_store.bridge", "--root", options.root, "--identity", options.identity,
+  let python: string;
+  try { python = getPublicationPython(options.python); }
+  catch { throw new PublicationUnavailableError(); }
+  const child: ChildProcessWithoutNullStreams = spawn(python, [
+    "-I", "-m", "taiko_store.bridge", "--root", options.root, "--identity", options.identity,
     "--mode", options.mode, "--lifetime", String(lifetime)
   ], { cwd: options.repoRoot, stdio: ["pipe", "pipe", "pipe"] });
   let pending: Deferred | undefined;

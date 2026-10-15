@@ -2,9 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtemp, readFile, rm, mkdir, writeFile, utimes, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { getPublicationPython } from "../server/infrastructure/taiko-publication/python.ts";
 import { openPublicationLease, withPublicationLease, PublicationUnavailableError } from "../server/infrastructure/taiko-publication/client.ts";
 
-// Cross-repository integration uses the actual center infrastructure source.
+// The installed wheel is selected through TAIKO_PYTHON_EXECUTABLE. This root
+// remains a working directory only; Python isolated mode must not import it.
 const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko";
 
 async function fixture(task: (root: string) => Promise<void>) {
@@ -110,8 +114,52 @@ test("two actual pipe readers hold concurrent shared leases", async () => fixtur
 }));
 
 test("missing Python module fails closed and does not expose subprocess diagnostics", async () => fixture(async root => {
-  await assert.rejects(openPublicationLease({ root, repoRoot: root, identity: "synthetic", mode: "write" }),
+  const emptyVenv = join(root, "empty-venv");
+  await promisify(execFile)(getPublicationPython(), ["-I", "-m", "venv", "--without-pip", emptyVenv], { timeout: 30000, maxBuffer: 8192 });
+  await assert.rejects(openPublicationLease({ root, repoRoot, python: join(emptyVenv, "bin", "python"), identity: "synthetic", mode: "write" }),
     error => error instanceof PublicationUnavailableError && !error.message.includes(root));
+}));
+
+test("installed bridge ignores same-name packages in cwd and PYTHONPATH", async () => fixture(async root => {
+  const cwd = join(root, "hostile-cwd");
+  const injected = join(root, "hostile-pythonpath");
+  const marker = join(root, "unexpected-import");
+  for (const directory of [cwd, injected]) {
+    await mkdir(join(directory, "taiko_store"), { recursive: true });
+    await writeFile(join(directory, "taiko_store", "__init__.py"), `from pathlib import Path\nPath(${JSON.stringify(marker)}).write_text('executed')\nraise RuntimeError('shadow package executed')\n`);
+    await writeFile(join(directory, "taiko_store", "bridge.py"), "raise RuntimeError('shadow bridge executed')\n");
+  }
+  const previous = process.env.PYTHONPATH;
+  process.env.PYTHONPATH = injected;
+  try {
+    let commitId = "";
+    await withPublicationLease({ root, repoRoot: cwd, identity: "synthetic", mode: "write" }, async lease => {
+      await lease.put("current", '{"songs":[]}');
+      commitId = (await lease.publish()).commitId;
+    });
+    await withPublicationLease({ root, repoRoot: cwd, identity: "synthetic", mode: "read" }, async lease => {
+      assert.equal(lease.view?.commitId, commitId);
+    });
+    await assert.rejects(stat(marker), { code: "ENOENT" });
+  } finally {
+    if (previous === undefined) delete process.env.PYTHONPATH;
+    else process.env.PYTHONPATH = previous;
+  }
+}));
+
+test("relative interpreter configuration is rejected without exposing its value", async () => fixture(async root => {
+  const options = { root, repoRoot, identity: "synthetic", mode: "write" as const };
+  for (const python of ["python3", "relative/private-python", "/bad\0python"]) {
+    await assert.rejects(openPublicationLease({ ...options, python }),
+      error => error instanceof PublicationUnavailableError && !error.message.includes(python));
+  }
+  const previous = process.env.TAIKO_PYTHON_EXECUTABLE;
+  process.env.TAIKO_PYTHON_EXECUTABLE = "relative/private-python";
+  try { await assert.rejects(openPublicationLease(options), PublicationUnavailableError); }
+  finally {
+    if (previous === undefined) delete process.env.TAIKO_PYTHON_EXECUTABLE;
+    else process.env.TAIKO_PYTHON_EXECUTABLE = previous;
+  }
 }));
 
 test("pipe lifetime expires and then a fresh writer can acquire the kernel lease", async () => fixture(async root => {
