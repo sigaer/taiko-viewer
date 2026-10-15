@@ -1,5 +1,24 @@
 # Viewer 1.0 readiness — 2026-10-15
 
+## 2026-10-16 续行：独立 SQL 配置已解决
+
+无需用户提供测试配置：新增 `scripts/readiness/run-isolated-sql.mjs`，在 QA cgroup 内以 `--no-defaults` 初始化全新 MySQL 8.0.24 datadir，禁用数据库 TCP 监听，仅经本任务 loopback→私有 socket 代理访问。随机测试凭据自动生成到 Git 外 0600 文件；不读取生产配置、不复制生产数据。先核对实际 `@@datadir`，仅创建空 `viewer1_security_test`，再验证实际 `SELECT DATABASE()` 和 mutation opt-in 后执行测试写入。基础四表从生产 DDL 静态提取，保留其外键；其余表仍沿用现有 fixture，不能视为全量生产 migration 验收。
+
+- `sourceAccessSql.test.mjs` + `privateSourceConditionalSql.test.mjs`：**61 PASS**。
+- `sourceProxySql.test.mjs`：**31 PASS**。
+- 两轮均使用全新 datadir，MySQL 与临时代理结束后关闭，cgroup OOM/OOM-kill 为 0。首次测试用户协议握手失败已保留；仅将隔离测试用户改为 `mysql_native_password` 后通过，未修改生产认证配置。
+- Source proxy 测试运行真实 Node 服务及 Python/SQL 协议，但上游 HTTP/catalog 为合成替身，Python 测试程序来自 Sakura `63be19a`，不是已完成 installed worker 迁移。
+
+证据：[isolated-sql-20261016.json](evidence/isolated-sql-20261016.json)。对应四条路由的“SQL 未复验”阻断已从 API 矩阵移除；其他路由、生产 ACL、consumer grant/audience 与完整恢复 Gate 继续未通过。
+
+复验命令（无需自行准备数据库或密码，每次自动创建独立实例；总运行仍受原 memory wrapper 限制）：
+
+```bash
+bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/var/tmp/taiko-runtime-fresh-n6qxnwr3/center/bin/python /www/server/nvm/versions/node/v24.13.0/bin/node scripts/readiness/run-isolated-sql.mjs --allow-test-db-mutation taiko_viewer/tests/sourceAccessSql.test.mjs taiko_viewer/tests/privateSourceConditionalSql.test.mjs taiko_viewer/tests/sourceProxySql.test.mjs
+```
+
+以下 2026-10-15 记录保留为历史验收时点，关于当时测试库配置缺失的描述由本节取代。
+
 本轮为 `0.82.1` 隔离候选，基于 Viewer `56aa05a`，分支
 `feat/viewer-1-readiness-20261015`。**0.82 总 Gate 尚未通过，未进入 0.83 Contract Freeze。**
 未合并、推送、部署、重启、访问生产 API/SQL 或读取真实凭据。

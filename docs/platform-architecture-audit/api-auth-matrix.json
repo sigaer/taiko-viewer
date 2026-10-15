@@ -3,7 +3,7 @@
   "baselineCommit": "56aa05a",
   "status": "NOT_ACCEPTED",
   "scope": "All current Viewer developer/*, taiko/* (including proxy/internal), internal/* handlers. Other account/admin/forum routes are outside this incremental matrix.",
-  "evidence": "Source inspection only; privateCacheBoundary.test.ts is synthetic HTTP/cache coverage, not SQL authorization acceptance.",
+  "evidence": "Source inspection plus three synthetic private cache HTTP tests and 92 isolated SQL/HTTP tests for developer userdata and source history/update/Hiroba sync. Per-route evidence lists actual coverage; production ACL and overall authorization acceptance remain blocked.",
   "routes": [
     {
       "file": "taiko_viewer/server/api/developer/userdata/[userid].get.ts",
@@ -36,8 +36,12 @@
       "status": "NOT_ACCEPTED",
       "blockers": [
         "Production routing/ACL unverified",
-        "Isolated SQL authorization E2E not rerun in this readiness candidate"
-      ]
+        "Consumer grant/audience and deployed credential/network boundary remain outside these synthetic suites"
+      ],
+      "evidence": [
+        "source-auth-conditional-sql-20261016"
+      ],
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/internal/annual-posters/[summaryId]/my-don.get.ts",
@@ -768,8 +772,13 @@
       "status": "NOT_ACCEPTED",
       "blockers": [
         "Production routing/ACL unverified",
-        "Isolated SQL authorization E2E not rerun in this readiness candidate"
-      ]
+        "Consumer grant/audience and deployed credential/network boundary remain outside these synthetic suites"
+      ],
+      "evidence": [
+        "source-auth-conditional-sql-20261016",
+        "source-proxy-sql-20261016"
+      ],
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/sync-hiroba.post.ts",
@@ -802,8 +811,12 @@
       "status": "NOT_ACCEPTED",
       "blockers": [
         "Production routing/ACL unverified",
-        "Isolated SQL authorization E2E not rerun in this readiness candidate"
-      ]
+        "Consumer grant/audience and deployed credential/network boundary remain outside these synthetic suites"
+      ],
+      "evidence": [
+        "source-proxy-sql-20261016"
+      ],
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/update.post.ts",
@@ -836,8 +849,12 @@
       "status": "NOT_ACCEPTED",
       "blockers": [
         "Production routing/ACL unverified",
-        "Isolated SQL authorization E2E not rerun in this readiness candidate"
-      ]
+        "Consumer grant/audience and deployed credential/network boundary remain outside these synthetic suites"
+      ],
+      "evidence": [
+        "source-proxy-sql-20261016"
+      ],
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/taiko/proxy/wahlap/player/[taikoId].get.ts",
@@ -1121,7 +1138,7 @@
   "remainingSecurityGates": [
     "Explicit consumer user grant and audience model is not implemented by this patch; existing source service grants are not OAuth consent",
     "Atomic quota and trusted proxy configuration unverified",
-    "Negative SQL tests for revoked/expired/wrong scope/wrong binding/service failure are present but must run with verified *_test database and explicit mutation opt-in",
+    "Developer userdata and source history/update/Hiroba-sync isolated suites passed 92 tests; bot binding, credential bind/status, migration, internal render/service, consumer audience and remaining unlisted authorization paths are not accepted by that evidence",
     "Nginx/ACL, upstream private-field classification and credential-control-plane acceptance outstanding",
     "Publication bridge now uses configured absolute interpreter and -I installed module; this does not isolate all calculation/source workers. Merged read still launches python3 -m scripts.merged_read_cli from repoRoot; full worker/runtime ownership and trusted interpreter/site-packages provenance remain unaccepted."
   ],
@@ -1139,5 +1156,84 @@
       "Absolute path is trusted deployment configuration, not binary hash/signature verification; installed site-packages remain trusted",
       "Bridge isolation does not prove every calculation or credential worker uses the installed artifact"
     ]
-  }
+  },
+  "isolatedSqlEvidence": [
+    {
+      "id": "source-auth-conditional-sql-20261016",
+      "tests": [
+        "taiko_viewer/tests/sourceAccessSql.test.mjs",
+        "taiko_viewer/tests/privateSourceConditionalSql.test.mjs"
+      ],
+      "passed": 61,
+      "workspace": "/var/tmp/viewer1-sql-W82EJj",
+      "status": "PASS",
+      "failed": 0,
+      "skipped": 0,
+      "database": "viewer1_security_test",
+      "databaseProof": "Actual SELECT DATABASE() matched configured *_test; bootstrap also verified @@datadir before every DDL",
+      "isolation": "Fresh independent MySQL 8.0.24 datadir; no production data/credentials; explicit mutation opt-in; base four tables retain production foreign keys",
+      "daemonExited": true,
+      "scope": "Synthetic SQL + loopback HTTP + installed publication bridge; remote acquisition/catalog inputs mocked; not production ACL acceptance",
+      "artifacts": [
+        {
+          "file": "/var/tmp/viewer1-sql-W82EJj/tests.log",
+          "sha256": "bd61f74e11d658b977f699ccfb89f477002dad1b781b0ed9bfc2f5c654c7a0cb"
+        },
+        {
+          "file": "/var/tmp/viewer1-sql-W82EJj/bootstrap.log",
+          "sha256": "c6eb6748d602aabb5bcd193f252a82c50e326ba94de2bc600077aeb31fdea0e5"
+        },
+        {
+          "file": "/var/tmp/viewer1-sql-W82EJj/result.json",
+          "sha256": "54e77167fadb1989f2b3b110c67a3b0780d70ad1ae9adbe0a4591526dd0ea6d8"
+        }
+      ],
+      "testSources": [
+        {
+          "file": "taiko_viewer/tests/sourceAccessSql.test.mjs",
+          "sourceSha256": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305"
+        },
+        {
+          "file": "taiko_viewer/tests/privateSourceConditionalSql.test.mjs",
+          "sourceSha256": "34aef11fd19be7423f11113d1257063e362c7a0d1f9415a60673012974ac7ff7"
+        }
+      ]
+    },
+    {
+      "id": "source-proxy-sql-20261016",
+      "tests": [
+        "taiko_viewer/tests/sourceProxySql.test.mjs"
+      ],
+      "passed": 31,
+      "workspace": "/var/tmp/viewer1-sql-nysYWn",
+      "status": "PASS",
+      "failed": 0,
+      "skipped": 0,
+      "database": "viewer1_security_test",
+      "databaseProof": "Actual SELECT DATABASE() matched configured *_test; bootstrap also verified @@datadir before every DDL",
+      "isolation": "Fresh independent MySQL 8.0.24 datadir; no production data/credentials; explicit mutation opt-in; base four tables retain production foreign keys",
+      "daemonExited": true,
+      "scope": "Synthetic SQL + loopback HTTP + installed publication bridge; remote acquisition/catalog inputs mocked; not production ACL acceptance",
+      "artifacts": [
+        {
+          "file": "/var/tmp/viewer1-sql-nysYWn/tests.log",
+          "sha256": "65d997f691446e6ffbf7f60794c8ee0fcc6e5b29c9b1b663e3b2253271a4ca95"
+        },
+        {
+          "file": "/var/tmp/viewer1-sql-nysYWn/bootstrap.log",
+          "sha256": "c6eb6748d602aabb5bcd193f252a82c50e326ba94de2bc600077aeb31fdea0e5"
+        },
+        {
+          "file": "/var/tmp/viewer1-sql-nysYWn/result.json",
+          "sha256": "f03b7fffbacf7972e670ed99f5eac73a67a00cf6f226a52edc4b962f239f965d"
+        }
+      ],
+      "testSources": [
+        {
+          "file": "taiko_viewer/tests/sourceProxySql.test.mjs",
+          "sourceSha256": "ad2062ec68dae229e6b7dd5537e36d3a509a38bd31a306565b14fddbdb966f98"
+        }
+      ]
+    }
+  ]
 }

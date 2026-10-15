@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-16",
+  "status": "SCOPED_SQL_PASS",
+  "overallSecurityGate": "BLOCKED",
+  "runs": [
+    {
+      "workspace": "/var/tmp/viewer1-sql-W82EJj",
+      "database": "viewer1_security_test",
+      "status": "PASS",
+      "startedAt": "2026-10-15T16:11:41.479Z",
+      "tests": [
+        "taiko_viewer/tests/sourceAccessSql.test.mjs",
+        "taiko_viewer/tests/privateSourceConditionalSql.test.mjs"
+      ],
+      "productionAccess": false,
+      "databaseProof": "viewer1_security_test",
+      "port": 37599,
+      "result": {
+        "code": 0,
+        "signal": null
+      },
+      "daemonExited": true,
+      "finishedAt": "2026-10-15T16:12:44.733Z",
+      "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792080701-2067691.service",
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "label": "authorization_and_conditionals",
+      "passed": 61,
+      "failed": 0,
+      "testLogSha256": "bd61f74e11d658b977f699ccfb89f477002dad1b781b0ed9bfc2f5c654c7a0cb"
+    },
+    {
+      "workspace": "/var/tmp/viewer1-sql-nysYWn",
+      "database": "viewer1_security_test",
+      "status": "PASS",
+      "startedAt": "2026-10-15T16:13:10.605Z",
+      "tests": [
+        "taiko_viewer/tests/sourceProxySql.test.mjs"
+      ],
+      "productionAccess": false,
+      "databaseProof": "viewer1_security_test",
+      "port": 44865,
+      "result": {
+        "code": 0,
+        "signal": null
+      },
+      "daemonExited": true,
+      "finishedAt": "2026-10-15T16:14:07.641Z",
+      "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792080790-2070264.service",
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "label": "source_proxy",
+      "passed": 31,
+      "failed": 0,
+      "testLogSha256": "65d997f691446e6ffbf7f60794c8ee0fcc6e5b29c9b1b663e3b2253271a4ca95"
+    }
+  ],
+  "sourceHashes": {
+    "scripts/readiness/run-isolated-sql.mjs": "7d9962477f055563b4370add4b68372fa96d395c18cc76b573cb1b24a49b6c1b",
+    "taiko_viewer/scripts/bootstrap_source_security_test_db.mjs": "dadd27f1bab9122c2bce12f27851a27e25dbf92f7f1f0cb63b4e7de14fe11e12",
+    "taiko_viewer/tests/sourceAccessSql.test.mjs": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305",
+    "taiko_viewer/tests/privateSourceConditionalSql.test.mjs": "34aef11fd19be7423f11113d1257063e362c7a0d1f9415a60673012974ac7ff7",
+    "taiko_viewer/tests/sourceProxySql.test.mjs": "ad2062ec68dae229e6b7dd5537e36d3a509a38bd31a306565b14fddbdb966f98"
+  },
+  "initialAttempt": {
+    "status": "FAIL",
+    "reason": "Bootstrap returned ER_ACCESS_DENIED_ERROR through the disposable socket proxy; switching only the isolated test user to mysql_native_password resolved it. Transport mismatch is an inference.",
+    "workspace": "/var/tmp/viewer1-sql-6TZUmL"
+  },
+  "limitations": [
+    "Existing fixture creates most tables without foreign keys; four production base tables retain their declared foreign keys.",
+    "Source proxy uses current Sakura source helper at 63be19a rather than an installed worker; private remote data is synthetic.",
+    "No production ACL audit, browser E2E, consumer OAuth grant/audience or complete cross-writer restore acceptance."
+  ],
+  "sourceProxyHelper": {
+    "sakuraCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+    "file": "taiko/tests/source_mutation_sql_child.py",
+    "sha256": "31acddcc52d246ba1a71e53ed3f49a8fbd322af76a5c4d5cba1f531b940530b4"
+  }
+}
