@@ -4,15 +4,20 @@ Run only through memory/run_qa.sh. Never copies installed packages or reads data
 """
 import argparse
 import email
+import errno
 import zipfile
 import hashlib
 import json
 import os
+import re
+import selectors
 import signal
+import stat
 from pathlib import Path
 import subprocess
 import tempfile
 import time
+from urllib.parse import unquote, urlsplit
 
 WHEEL = Path('/var/tmp/taiko-final-ownership-20261015/wheels/taiko_bot-0.14.1-py3-none-any.whl')
 REPORTED_WHEELS = {
@@ -29,6 +34,74 @@ PINNED = {
     CORE_DIR / 'sakura_taiko_core-0.1.1-py3-none-any.whl': '76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273',
     CORE_DIR / 'sakura_taiko_core-0.1.2-py3-none-any.whl': 'f34c1d0a3e58f5a7ce232ca50741e3235260eb8dabaedd95b41d84e7d0d0d47f',
 }
+PROXY_KEYS = ('http_proxy', 'https_proxy', 'all_proxy', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'no_proxy', 'NO_PROXY')
+
+
+def proxy_environment(inherit=False, loopback_port=None, env_file=None):
+    if env_file is not None:
+        if not env_file.is_absolute() or any((parent / '.git').exists() for parent in env_file.resolve().parents):
+            raise ValueError('proxy environment file must be absolute and outside a Git worktree')
+        fd = os.open(env_file, os.O_RDONLY | os.O_NOFOLLOW)
+        with os.fdopen(fd, 'r') as source:
+            info = os.fstat(source.fileno())
+            if not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600 or info.st_uid != os.geteuid() or info.st_size > 16384:
+                raise ValueError('proxy environment file must be an owned regular 0600 file under 16 KiB')
+            try:
+                content = json.load(source)
+            except (ValueError, UnicodeError):
+                raise ValueError('invalid proxy environment file') from None
+        if not isinstance(content, dict) or any(key not in PROXY_KEYS or not isinstance(value, str)
+                                               or '\n' in value or '\r' in value or '\0' in value
+                                               for key, value in content.items()):
+            raise ValueError('proxy environment file contains unsupported entries')
+        return {key: value for key, value in content.items() if value}
+    if loopback_port is not None:
+        return {key: f'http://127.0.0.1:{loopback_port}' for key in ('HTTP_PROXY', 'HTTPS_PROXY')}
+    return {key: os.environ[key] for key in PROXY_KEYS if inherit and os.environ.get(key)}
+
+
+def log_redactor(proxy_env):
+    secrets = []
+    for key, value in proxy_env.items():
+        if key.lower() == 'no_proxy':
+            continue
+        secrets.append(value)
+        try:
+            parsed = urlsplit(value)
+            for part in (parsed.username, parsed.password):
+                if part:
+                    secrets.extend((part, unquote(part)))
+        except ValueError:
+            pass
+    def redact(text):
+        for secret in sorted(secrets, key=len, reverse=True):
+            text = text.replace(secret, '[redacted-proxy]')
+        return re.sub(r'(?i)(?:https?|socks[45]h?)://[^\s\x1b<>"\']+', '[redacted-url]', text)
+    return redact
+
+
+def workspace_bytes(root):
+    total = 0
+    def onerror(error):
+        if error.errno != errno.ENOENT:
+            raise error
+    for directory, _, files in os.walk(root, onerror=onerror, followlinks=False):
+        for name in files:
+            try:
+                info = os.lstat(Path(directory) / name)
+                if stat.S_ISREG(info.st_mode):
+                    total += info.st_size
+            except OSError as error:
+                onerror(error)
+    return total
+
+
+def download_stop_reason(total, raw_bytes, task_elapsed, elapsed, idle, maximum, idle_limit):
+    return ('DOWNLOAD_DISK_LIMIT' if total > 1500 * 1024**2 else
+            'DOWNLOAD_LOG_LIMIT' if raw_bytes > 1_000_000 else
+            'DOWNLOAD_TASK_DEADLINE' if task_elapsed > 780 else
+            'DOWNLOAD_TIME_LIMIT' if elapsed > maximum else
+            'DOWNLOAD_IDLE_LIMIT' if idle > idle_limit else None)
 
 def sha(path):
     digest = hashlib.sha256()
@@ -55,7 +128,44 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--online-third-party', action='store_true',
                         help='Allow PyPI binary dependencies, with local Taiko wheels pinned by SHA-256.')
+    proxy = parser.add_mutually_exclusive_group()
+    proxy.add_argument('--inherit-proxy-env', action='store_true', help='Inherit proxy variables without logging their values.')
+    proxy.add_argument('--loopback-proxy-port', type=int, help='Use a local HTTP proxy port; never accepts credentials or a remote URL.')
+    proxy.add_argument('--proxy-env-file', type=Path, help='Owned 0600 JSON file outside Git containing only proxy variables; values never logged.')
+    parser.add_argument('--download-idle-seconds', type=int, default=120)
+    parser.add_argument('--download-max-seconds', type=int, default=600)
+    parser.add_argument('--dependency-wheelhouse', type=Path,
+                        help='Read-only completed wheel directory from a previous attempt; validates metadata and records hashes.')
     args = parser.parse_args()
+    if args.output.exists():
+        parser.error('output already exists; retain prior evidence and choose a new filename')
+    if not 30 <= args.download_idle_seconds <= 180 or not 240 <= args.download_max_seconds <= 600:
+        parser.error('download idle must be 30..180 seconds; maximum must be 240..600 seconds')
+    if args.loopback_proxy_port is not None and not 1 <= args.loopback_proxy_port <= 65535:
+        parser.error('invalid loopback port')
+    try:
+        proxy_env = proxy_environment(args.inherit_proxy_env, args.loopback_proxy_port, args.proxy_env_file)
+    except (OSError, ValueError):
+        parser.error('could not read a valid owned 0600 proxy environment file')
+    if args.inherit_proxy_env and not any(key.lower() != 'no_proxy' for key in proxy_env):
+        parser.error('proxy inheritance requested but no proxy is configured in this process')
+    redact = log_redactor(proxy_env)
+    reusable = []
+    if args.dependency_wheelhouse:
+        source = args.dependency_wheelhouse
+        if not source.is_absolute() or not source.is_dir() or source.is_symlink():
+            parser.error('dependency wheelhouse must be an absolute regular directory')
+        reusable = sorted(source.glob('*.whl'))
+        if not reusable or len(reusable) > 1024 or any(p.is_symlink() or not p.is_file() for p in reusable):
+            parser.error('invalid completed wheel files')
+        if sum(p.stat().st_size for p in reusable) > 1500 * 1024**2:
+            parser.error('dependency wheelhouse exceeds 1.5 GiB limit')
+        pins_by_name = {p.name: expected for p, expected in PINNED.items()}
+        for candidate in reusable:
+            reject_direct_dependencies(candidate)
+            if candidate.name.startswith(('taiko_bot-', 'taiko_application-', 'sakura_taiko_contract-', 'sakura_taiko_core-')):
+                if candidate.name not in pins_by_name or sha(candidate) != pins_by_name[candidate.name]:
+                    parser.error('reused Taiko-family wheel does not match pinned artifact')
     workspace = Path(tempfile.mkdtemp(prefix='taiko-runtime-fresh-', dir='/var/tmp'))
     env = {'PATH': '/usr/bin:/bin', 'TMPDIR': str(workspace),
            'PIP_CONFIG_FILE': '/dev/null', 'PIP_NO_INDEX': '1',
@@ -80,9 +190,18 @@ def main():
               'offlineWheelHashesScope': 'Taiko candidate and pinned application/contract/core candidates only; not a complete dependency lock',
               'offlineWheelHashes': [{'file': p.name, 'sha256': sha(p)} for p in wheels if p.name in REPORTED_WHEELS],
               'roles': {}}
+    result['downloadPolicy'] = {'idleSeconds': args.download_idle_seconds, 'maximumSeconds': args.download_max_seconds,
+                                'overallDownloadDeadlineSeconds': 780, 'workspaceLimitBytes': 1500 * 1024**2,
+                                'proxyMode': 'file' if args.proxy_env_file else 'inherited' if args.inherit_proxy_env else 'loopback' if args.loopback_proxy_port else 'none',
+                                'proxyConfigured': bool(proxy_env),
+                                'progress': 'new workspace byte high-water mark or meaningful pip download/resolution lines; retries do not reset idle timer'}
+    if reusable:
+        result['reusedWheelHashes'] = [{'file': p.name, 'sha256': sha(p)} for p in reusable]
+        result['reusePolicy'] = 'Existing completed wheels are read-only resolver inputs; new role venvs and explicit Taiko-family pins remain authoritative.'
     if args.online_third_party:
         result['network'] = 'PyPI index binary dependency download only; Taiko/Application/Contract/Core exact local wheels plus hash pins; install from downloaded wheelhouse'
         result['downloadedWheelHashes'] = {}
+        result['cachePolicy'] = 'Pip HTTP cache retained inside this new workspace and shared by these two roles only; cache bytes are not accepted artifacts. Completed wheel files receive SHA-256 hashes.'
     def run(command, label, timeout=90, input=None):
         log = workspace / (label + '.log')
         with log.open('w') as output:
@@ -94,27 +213,69 @@ def main():
     def download(command, label):
         log = workspace / (label + '.log')
         started_download = time.monotonic()
+        last_progress = started_download
+        byte_high_water = workspace_bytes(workspace)
+        raw_bytes = 0
+        pending = b''
+        dropping_line = False
+        progress_lines = 0
+        seen_progress_lines = set()
         with log.open('w') as output:
-            child = subprocess.Popen(command, cwd=workspace, env={**env, 'PIP_NO_INDEX': '0'},
-                                     stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
+            child = subprocess.Popen(command, cwd=workspace, env={**env, **proxy_env, 'PIP_NO_INDEX': '0'},
+                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+            selector = selectors.DefaultSelector()
+            selector.register(child.stdout, selectors.EVENT_READ)
             try:
-                while child.poll() is None:
-                    total = sum(path.stat().st_size for path in workspace.rglob('*') if path.is_file() and not path.is_symlink())
+                while child.poll() is None or selector.get_map():
+                    for key, _ in selector.select(timeout=0.5):
+                        chunk = os.read(key.fileobj.fileno(), 8192)
+                        if not chunk:
+                            selector.unregister(key.fileobj)
+                            if pending and not dropping_line:
+                                output.write(redact(pending.decode('utf-8', errors='replace')) + '\n')
+                            pending = b''
+                            continue
+                        raw_bytes += len(chunk)
+                        pending += chunk
+                        while b'\n' in pending:
+                            line, pending = pending.split(b'\n', 1)
+                            if not dropping_line:
+                                clean = redact(line.decode('utf-8', errors='replace'))
+                                output.write(clean + '\n')
+                                if clean not in seen_progress_lines and re.match(r'^\s*(Downloading|Collecting|Processing|Saved |Successfully downloaded)', clean):
+                                    last_progress = time.monotonic()
+                                    progress_lines += 1
+                                    seen_progress_lines.add(clean)
+                            dropping_line = False
+                        if len(pending) > 16384:
+                            pending = b''
+                            dropping_line = True
+                            output.write('[overlong subprocess line omitted]\n')
+                        output.flush()
+                    total = workspace_bytes(workspace)
+                    if total > byte_high_water:
+                        # Exclude sanitized log growth: retry chatter is not download progress.
+                        if total - log.stat().st_size > byte_high_water:
+                            last_progress = time.monotonic()
+                        byte_high_water = max(byte_high_water, total - log.stat().st_size)
                     elapsed = time.monotonic() - started_download
-                    reason = ('DOWNLOAD_DISK_LIMIT' if total > 1500 * 1024**2 else
-                              'DOWNLOAD_LOG_LIMIT' if log.stat().st_size > 1_000_000 else
-                              'DOWNLOAD_TIME_LIMIT' if elapsed > 240 else None)
+                    reason = download_stop_reason(total, raw_bytes, time.monotonic() - started,
+                                                  elapsed, time.monotonic() - last_progress,
+                                                  args.download_max_seconds, args.download_idle_seconds)
                     if reason:
                         result['downloadFailure'] = {'reason': reason, 'elapsedSeconds': round(elapsed, 3),
                                                      'workspaceBytes': total, 'logBytes': log.stat().st_size,
+                                                     'idleSeconds': round(time.monotonic() - last_progress, 3),
+                                                     'progressLines': progress_lines,
                                                      'logSha256': sha(log)}
                         raise RuntimeError(reason)
-                    time.sleep(1)
                 return child.returncode, log
             finally:
                 if child.poll() is None:
                     os.killpg(child.pid, signal.SIGKILL)
                 child.wait(timeout=10)
+                selector.close()
+                child.stdout.close()
     try:
         for role in ('center', 'client'):
             venv = workspace / role
@@ -128,9 +289,11 @@ def main():
                 wheelhouse = workspace / (role + '-wheels')
                 wheelhouse.mkdir()
                 local_args = [str(p) + ('[' + role + ']' if p == WHEEL else '') for p in selected]
-                command = [python, '-I', '-m', 'pip', 'download', '--no-cache-dir', '--only-binary=:all:',
+                command = [python, '-I', '-m', 'pip', 'download', '--cache-dir', str(workspace / 'pip-cache'), '--only-binary=:all:',
                            '--index-url', 'https://pypi.org/simple', '--retries', '1', '--timeout', '20',
                            '--dest', str(wheelhouse), *local_args]
+                if reusable:
+                    command += ['--find-links', str(args.dependency_wheelhouse)]
                 code, log = download(command, role + '-resolve')
                 result['downloadedWheelHashes'][role] = [{'file': p.name, 'sha256': sha(p)} for p in sorted(wheelhouse.glob('*.whl'))]
                 if code == 0:

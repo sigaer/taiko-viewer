@@ -1,10 +1,72 @@
-# Runtime closeout — 2026-10-15 incremental evidence
+# Runtime closeout — 2026-10-16 incremental evidence
 
 Status: **BLOCKED_NOT_RELEASE_READY**. This extends the existing architecture audit;
-no production API/SQL, private credentials, runtime configuration, deploy, restart,
+no production API/SQL, private account credentials, runtime configuration, deploy, restart,
 push or merge was performed. Local `main` refs are observations, not proof that
 remote branches or deployed processes match. The master plan's original baseline
 is stale; preserve current main changes when integrating ownership work.
+
+## 2026-10-16: fresh role installation now verified
+
+The proxy-assisted retry completed in **348.986 seconds**, exit **0**, with
+`PARTIAL_FRESH_INSTALL_AND_BRIDGE_ONLY`. Both new, non-editable role environments
+passed dependency installation, `pip check`, isolated installed-module origin,
+synthetic current/history publication and read-lease write rejection. Evidence:
+`evidence/fresh-runtime-proxy-retry-20261016.json`; workspace:
+`/var/tmp/taiko-runtime-fresh-xgdwnr6l`.
+
+| Role | Taiko | Application | Contract | Core | Installed-version inventory SHA-256 |
+| --- | --- | --- | --- | --- | --- |
+| center | 0.14.1 | 0.8.0 | 0.1.0 | 0.1.1 | `b338ce9815481876112b2afa02069dac20759eee114ac6aaa5aee24e4d5336f5` |
+| client | 0.14.1 | 0.8.0 | 0.1.0 | 0.1.2 | `92c5a13bbe670776502ebd104c185fb5052a0a261d7cb065242a8e7d109aba44` |
+
+The evidence includes every downloaded wheel SHA-256, the exact local
+Taiko/Application/Contract/Core pins, installed versions, and hashes of install
+and dependency-check logs. The candidate Taiko wheel remains
+`4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529`.
+The installed-version inventory hashes summarize the realized environments;
+they are not themselves a pip requirements file. Full downloaded-wheel hashes
+provide the artifact identities needed for a future reproducible lock.
+
+The successful environments use fresh `/center/bin/python` and
+`/client/bin/python` under that workspace; `taiko_store.bridge` imports resolve
+inside their own `site-packages` with `sys.flags.isolated == 1`. No source-tree
+fallback was used. Own-cgroup memory events reported zero OOM/OOM-kill events;
+`memory.peak` remained unavailable, so no peak memory value is asserted.
+
+This supersedes the installation blocker from the prior attempts, **not** their
+historical FAIL results. `fresh-runtime-proxy-20261016.json` records the first
+proxy attempt failing after 206.63 seconds when pip removed a temporary unpack
+directory during the monitor's filesystem traversal. The monitor now uses
+`os.walk` and ignores only `ENOENT`; other IO/permission failures propagate.
+The synthetic policy suite passed **9 tests**, including this directory/file
+race, secret redaction, proxy-file restrictions and independent timeout limits.
+
+Proxy configuration was read only from an owned 0600 JSON file outside Git;
+values were passed only to the download child and never recorded in evidence.
+Logs redact URLs and proxy credentials before reaching disk. Useful download
+bytes or new progress lines reset the 120-second idle guard, with a 600-second
+per-download maximum, 780-second overall download deadline and unchanged
+15-minute memory wrapper. Retry chatter does not extend the idle guard.
+
+Completed wheels from the first proxy attempt were validated and offered as
+read-only `--find-links` inputs. This does **not** guarantee a cache hit: pip
+selected some same-version index artifacts again. The two roles also share only
+their new workspace's HTTP cache; cache bytes are not acceptance artifacts.
+An offline-first resolver would be needed to guarantee reuse on a future run.
+
+Separately, `evidence/isolated-sql-20261016.json` records **92 PASS** for scoped
+authorization, conditional responses and source proxy behavior against the
+isolated test database. These tests do not establish the complete authenticated
+login→binding→sync→Growth/Goal→annual chain. **O2 remains blocked on full role
+lifecycle/runtime integration; O4 remains partial.** Computation/annual worker
+migration, historical output parity, Source-switch failure, recovery and live
+configuration/ACL evidence still require their own acceptance.
+
+The manifest's `observedReadinessCheckout` identifies the current readiness
+branch and source hashes separately from the old `6331aea` ownership candidate.
+Its HEAD is the observed pre-documentation-commit value; implementation hashes
+remain the authority and the manifest never hashes itself.
 
 ## Baselines and integration risk
 

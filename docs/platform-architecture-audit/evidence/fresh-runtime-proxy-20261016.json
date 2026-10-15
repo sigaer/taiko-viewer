@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL_RUNTIME_VERIFICATION",
+  "workspace": "/var/tmp/taiko-runtime-fresh-_u7fvrvw",
+  "network": "PyPI index binary dependency download only; Taiko/Application/Contract/Core exact local wheels plus hash pins; install from downloaded wheelhouse",
+  "offlineWheelHashesScope": "Taiko candidate and pinned application/contract/core candidates only; not a complete dependency lock",
+  "offlineWheelHashes": [
+    {
+      "file": "taiko_bot-0.14.1-py3-none-any.whl",
+      "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+    },
+    {
+      "file": "taiko_application-0.8.0-py3-none-any.whl",
+      "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+      "sha256": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+      "sha256": "f34c1d0a3e58f5a7ce232ca50741e3235260eb8dabaedd95b41d84e7d0d0d47f"
+    }
+  ],
+  "roles": {},
+  "downloadPolicy": {
+    "idleSeconds": 120,
+    "maximumSeconds": 600,
+    "overallDownloadDeadlineSeconds": 780,
+    "workspaceLimitBytes": 1572864000,
+    "proxyMode": "file",
+    "proxyConfigured": true,
+    "progress": "new workspace byte high-water mark or meaningful pip download/resolution lines; retries do not reset idle timer"
+  },
+  "downloadedWheelHashes": {},
+  "cachePolicy": "Pip HTTP cache retained inside this new workspace and shared by these two roles only; cache bytes are not accepted artifacts. Completed wheel files receive SHA-256 hashes.",
+  "verificationFailure": "FileNotFoundError",
+  "durationSeconds": 206.63,
+  "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792080891-2073855.service",
+  "memory": {
+    "memory.peak": "UNAVAILABLE",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0"
+  }
+}

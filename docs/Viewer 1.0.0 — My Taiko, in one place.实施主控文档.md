@@ -1,5 +1,7 @@
 # Viewer 1.0.0 — My Taiko, in one place.
 
+> **2026-10-16 执行增量**：独立 MySQL 测试配置已自动化解决，实际 `SELECT DATABASE()`、datadir 与 mutation opt-in 验证后，私有成绩授权/条件读取/同步代理共 **92 项 SQL/HTTP 测试通过**；没有访问生产数据库。证据及复验命令见 [gate-evidence.md](platform-architecture-audit/gate-evidence.md) 的续行记录，整体 Gate 仍受未完成项约束。
+
 > **2026-10-15 执行增量**：已基于实际 Viewer main `56aa05a` 建立 `feat/viewer-1-readiness-20261015` 隔离候选，修复私有代理与失败响应缓存边界，候选版本 `0.82.1`。当前 main 与下文旧 ownership 候选存在分叉，禁止整树覆盖。实际测试、五份机器/人工验收材料与剩余阻断统一记录在 [gate-evidence.md](platform-architecture-audit/gate-evidence.md)。0.82 总 Gate、1.0 RC 仍未通过，未合并或部署；下文原始基线保留供追溯。
 
 > 2026-10-15 · 三仓库整合收尾 / 数据与 API 统一 / 开发者开放平台主控实施方案  

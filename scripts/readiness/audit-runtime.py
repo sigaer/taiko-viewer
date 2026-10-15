@@ -41,7 +41,7 @@ def main():
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     report = {
-        'schemaVersion': 1, 'auditDate': '2026-10-15',
+        'schemaVersion': 1, 'auditDate': '2026-10-16',
         'status': 'BLOCKED_NOT_RELEASE_READY',
         'scope': 'local refs and offline artifacts only; remote refs not fetched',
         'repositories': {}, 'artifacts': {},
@@ -58,6 +58,20 @@ def main():
             'reason': 'No live configuration, SQL, private data or restore access in this audit.',
             'policy': 'Retain current main and saved historical measurements; do not replace main with old candidate.',
         },
+    }
+    checkout = Path(__file__).resolve().parents[2]
+    readiness_sources = (
+        'taiko_viewer/server/infrastructure/taiko-publication/client.ts',
+        'taiko_viewer/server/infrastructure/taiko-publication/python.ts',
+        'taiko_viewer/server/middleware/private-cache.ts',
+        'taiko_viewer/server/utils/cache-policy.ts',
+        'taiko_viewer/server/infrastructure/account/private-source-response.ts',
+    )
+    report['observedReadinessCheckout'] = {
+        'branch': git(checkout, 'branch', '--show-current'),
+        'head': git(checkout, 'rev-parse', 'HEAD'),
+        'sourceHashes': {name: digest(checkout / name) for name in readiness_sources if (checkout / name).is_file()},
+        'identityNote': 'This is the current readiness checkout, distinct from historical 6331aea ownership candidate. HEAD is observed before any subsequent documentation commit; source hashes identify the audited implementation. Manifest excludes its own hash to avoid self-reference.',
     }
     for name, (path, base, candidate) in REPOS.items():
         main_sha = git(path, 'rev-parse', 'main')
@@ -160,6 +174,64 @@ def main():
             'failure': evidence.get('downloadFailure', evidence.get('failureReview', evidence.get('verificationFailure'))),
             'roles': evidence.get('roles', {}),
         }
+    proxy = args.output.parent / 'evidence/fresh-runtime-proxy-20261016.json'
+    if proxy.is_file() and proxy.stat().st_size < 1_000_000:
+        evidence = json.loads(proxy.read_text())
+        report['artifacts']['freshRuntimeProxyEvidence'] = {
+            'file': 'evidence/fresh-runtime-proxy-20261016.json',
+            'sha256': digest(proxy), 'status': evidence['status'],
+            'durationSeconds': evidence.get('durationSeconds'),
+            'failure': evidence.get('downloadFailure', evidence.get('verificationFailure')),
+            'roles': {role: {
+                'fullRoleInstall': value.get('fullRoleInstall', 'NOT_COMPLETED'),
+                'pipCheck': value.get('pipCheck', 'NOT_RUN'),
+                'installedLockSha256': value.get('installedLockSha256'),
+                'bridgeSynthetic': value.get('bridgeSynthetic', {'status': 'NOT_RUN'}),
+            } for role, value in evidence.get('roles', {}).items()},
+            'acceptanceLimit': 'Fresh installation and bridge only; full role lifecycle remains unaccepted.',
+        }
+        for role, field in (('center', 'freshCenterInstall'), ('client', 'freshClientInstall')):
+            value = evidence.get('roles', {}).get(role, {})
+            report['artifacts']['candidateWheel'][field] = (
+                'FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED'
+                if value.get('fullRoleInstall') == 'PASS' and value.get('pipCheck') == 'PASS'
+                else 'SEE_PROXY_EVIDENCE_FULL_ROLE_NOT_ACCEPTED')
+        report['gates']['O2'] = 'BLOCKED_FULL_ROLE_LIFECYCLE_NOT_ACCEPTED'
+    sql = args.output.parent / 'evidence/isolated-sql-20261016.json'
+    if sql.is_file() and sql.stat().st_size < 1_000_000:
+        evidence = json.loads(sql.read_text())
+        report['artifacts']['isolatedSqlEvidence'] = {
+            'file': 'evidence/isolated-sql-20261016.json',
+            'sha256': digest(sql), 'status': evidence['status'],
+            'passed': sum(run.get('passed', 0) for run in evidence.get('runs', [])),
+            'failed': sum(run.get('failed', 0) for run in evidence.get('runs', [])),
+            'limitations': evidence.get('limitations', []),
+            'acceptanceLimit': 'Scoped authorization/conditionals/proxy SQL only; complete login-to-annual authenticated chain not accepted.',
+        }
+        report['gates']['O4'] = 'PARTIAL_SQL_EVIDENCE_FULL_AUTH_CHAIN_NOT_ACCEPTED'
+    retry = args.output.parent / 'evidence/fresh-runtime-proxy-retry-20261016.json'
+    if retry.is_file() and retry.stat().st_size < 1_000_000:
+        evidence = json.loads(retry.read_text())
+        report['artifacts']['freshRuntimeProxyRetryEvidence'] = {
+            'file': 'evidence/fresh-runtime-proxy-retry-20261016.json',
+            'sha256': digest(retry), 'status': evidence['status'],
+            'durationSeconds': evidence.get('durationSeconds'),
+            'failure': evidence.get('downloadFailure', evidence.get('verificationFailure')),
+            'roles': {role: {
+                'fullRoleInstall': value.get('fullRoleInstall', 'NOT_COMPLETED'),
+                'pipCheck': value.get('pipCheck', 'NOT_RUN'),
+                'installedLockSha256': value.get('installedLockSha256'),
+                'bridgeSynthetic': value.get('bridgeSynthetic', {'status': 'NOT_RUN'}),
+            } for role, value in evidence.get('roles', {}).items()},
+            'acceptanceLimit': 'Retains prior failed attempts; full role lifecycle remains unaccepted.',
+        }
+        for role, field in (('center', 'freshCenterInstall'), ('client', 'freshClientInstall')):
+            value = evidence.get('roles', {}).get(role, {})
+            report['artifacts']['candidateWheel'][field] = (
+                'FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED'
+                if value.get('fullRoleInstall') == 'PASS' and value.get('pipCheck') == 'PASS'
+                else 'SEE_PROXY_RETRY_EVIDENCE_FULL_ROLE_NOT_ACCEPTED')
+        report['gates']['O2'] = 'BLOCKED_FULL_ROLE_LIFECYCLE_NOT_ACCEPTED'
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': report['status'], 'output': str(args.output),

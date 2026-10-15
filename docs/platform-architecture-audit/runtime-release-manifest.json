@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "auditDate": "2026-10-15",
+  "auditDate": "2026-10-16",
   "status": "BLOCKED_NOT_RELEASE_READY",
   "scope": "local refs and offline artifacts only; remote refs not fetched",
   "repositories": {
@@ -158,8 +158,8 @@
         "PyMySQL>=1.1.0; extra == \"center\"",
         "sakura-taiko-core[hiroba]==0.1.2; extra == \"client\""
       ],
-      "freshCenterInstall": "SEE_FRESH_RUNTIME_EVIDENCE_FULL_ROLE_BLOCKED",
-      "freshClientInstall": "SEE_FRESH_RUNTIME_EVIDENCE_FULL_ROLE_BLOCKED"
+      "freshCenterInstall": "FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED",
+      "freshClientInstall": "FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED"
     },
     "existingEnvironment": {
       "interpreter": "wheel-env/bin/python",
@@ -731,13 +731,69 @@
         "outcome": "center resolution interrupted; no full installation; client not started; budgets not expanded"
       },
       "roles": {}
+    },
+    "freshRuntimeProxyEvidence": {
+      "file": "evidence/fresh-runtime-proxy-20261016.json",
+      "sha256": "877a58e5cdccc78cb0445db006b3a49383dbf1194807965d4369b4a56f0d1a8e",
+      "status": "FAIL_RUNTIME_VERIFICATION",
+      "durationSeconds": 206.63,
+      "failure": "FileNotFoundError",
+      "roles": {},
+      "acceptanceLimit": "Fresh installation and bridge only; full role lifecycle remains unaccepted."
+    },
+    "isolatedSqlEvidence": {
+      "file": "evidence/isolated-sql-20261016.json",
+      "sha256": "147feb30401aa12a049cca084aacd9ff2d3b00c2b7eaca04f4bdb57b46b2b9aa",
+      "status": "SCOPED_SQL_PASS",
+      "passed": 92,
+      "failed": 0,
+      "limitations": [
+        "Existing fixture creates most tables without foreign keys; four production base tables retain their declared foreign keys.",
+        "Source proxy uses current Sakura source helper at 63be19a rather than an installed worker; private remote data is synthetic.",
+        "No production ACL audit, browser E2E, consumer OAuth grant/audience or complete cross-writer restore acceptance."
+      ],
+      "acceptanceLimit": "Scoped authorization/conditionals/proxy SQL only; complete login-to-annual authenticated chain not accepted."
+    },
+    "freshRuntimeProxyRetryEvidence": {
+      "file": "evidence/fresh-runtime-proxy-retry-20261016.json",
+      "sha256": "a15ef42118a67d2d8430b528849f1c85298c6e2a187ffa44f042d1b049d43182",
+      "status": "PARTIAL_FRESH_INSTALL_AND_BRIDGE_ONLY",
+      "durationSeconds": 348.986,
+      "failure": null,
+      "roles": {
+        "center": {
+          "fullRoleInstall": "PASS",
+          "pipCheck": "PASS",
+          "installedLockSha256": "b338ce9815481876112b2afa02069dac20759eee114ac6aaa5aee24e4d5336f5",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        },
+        "client": {
+          "fullRoleInstall": "PASS",
+          "pipCheck": "PASS",
+          "installedLockSha256": "92c5a13bbe670776502ebd104c185fb5052a0a261d7cb065242a8e7d109aba44",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        }
+      },
+      "acceptanceLimit": "Retains prior failed attempts; full role lifecycle remains unaccepted."
     }
   },
   "gates": {
     "O1": "PARTIAL_LOCAL_HOOKS_ONLY",
     "O2": "BLOCKED_FULL_ROLE_LIFECYCLE_NOT_ACCEPTED",
     "O3": "FAIL_SOURCE_SWITCH",
-    "O4": "NOT_RUN_ISOLATED_AUTH_SQL_E2E",
+    "O4": "PARTIAL_SQL_EVIDENCE_FULL_AUTH_CHAIN_NOT_ACCEPTED",
     "O5": "BLOCKED_OFF_HOST_BACKUP_AND_RIGHTS_REVIEW",
     "O7": "BLOCKED_RESTORE_DRILL_AND_LIVE_CONFIG_NOT_AUDITED",
     "O8": "NOT_RUN_NO_DEPLOYMENT"
@@ -749,6 +805,18 @@
     "productionDataHash": null,
     "reason": "No live configuration, SQL, private data or restore access in this audit.",
     "policy": "Retain current main and saved historical measurements; do not replace main with old candidate."
+  },
+  "observedReadinessCheckout": {
+    "branch": "feat/viewer-1-readiness-20261015",
+    "head": "a9bcbfa4117770a2b32a4fdc08b957dfca1aa6c9",
+    "sourceHashes": {
+      "taiko_viewer/server/infrastructure/taiko-publication/client.ts": "2739bd5202901547b1508eea6592f2445ddedcccaf58d21258748a4a06712467",
+      "taiko_viewer/server/infrastructure/taiko-publication/python.ts": "4efcc107e39d014b87af382c41fd16091948a65e5d18276ef47a991c22423a9a",
+      "taiko_viewer/server/middleware/private-cache.ts": "cc7f737ee14f37539f349890d181598128984146c21b488f595c914367e2d181",
+      "taiko_viewer/server/utils/cache-policy.ts": "f730834e3c8467f2c81687d2ff96d2cdcd2620ad5fb779d820a81ef6df8019dc",
+      "taiko_viewer/server/infrastructure/account/private-source-response.ts": "dde106e59e4d2470f643891a7dda5a74f4bd379e0073ab2e14884cf169d52649"
+    },
+    "identityNote": "This is the current readiness checkout, distinct from historical 6331aea ownership candidate. HEAD is observed before any subsequent documentation commit; source hashes identify the audited implementation. Manifest excludes its own hash to avoid self-reference."
   },
   "knownFailure": {
     "test": "test_source_switch_and_deleted_readded_chart_never_create_cross_epoch_delta",

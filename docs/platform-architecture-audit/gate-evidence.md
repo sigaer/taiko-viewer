@@ -19,9 +19,26 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/var/tmp/taik
 
 以下 2026-10-15 记录保留为历史验收时点，关于当时测试库配置缺失的描述由本节取代。
 
+## 2026-10-16 续行：代理下载与全新角色安装通过
+
+用户授权尝试代理并按进度调整超时后，使用 Git 外 0600 配置向下载子进程传入已有代理；没有把代理值或凭据写入命令、报告或日志。下载采用 120 秒停滞判断、每角色最多 600 秒、780 秒整体下载截止，原 QA wrapper 的 15 分钟/内存限制保持不变。目录扫描遇到 pip 删除临时目录的竞态后，修复为仅容忍 ENOENT，权限/I/O 错误继续失败；相关配置、脱敏、限时和竞态回归 **9 PASS**。
+
+最终重试用时 **348.986 秒**：
+
+| 全新角色环境 | Taiko / Application / Contract / Core | 完整安装 | pip check | `-I` bridge |
+| --- | --- | --- | --- | --- |
+| center | 0.14.1 / 0.8.0 / 0.1.0 / 0.1.1 | PASS | PASS | PASS |
+| client | 0.14.1 / 0.8.0 / 0.1.0 / 0.1.2 | PASS | PASS | PASS |
+
+两环境各 93 个发行包；本机四个 Taiko 家族构件使用精确 wheel/hash pin，第三方完整 wheel SHA-256 和已安装版本清单见 [fresh-runtime-proxy-retry-20261016.json](evidence/fresh-runtime-proxy-retry-20261016.json)。center 版本清单 hash 为 `b338ce9815481876112b2afa02069dac20759eee114ac6aaa5aee24e4d5336f5`，client 为 `92c5a13bbe670776502ebd104c185fb5052a0a261d7cb065242a8e7d109aba44`。真实模块来自各自新 venv 的 site-packages，非 editable，没有复制旧 site-packages。
+
+早先离线缺包、240 秒直连超时、[首次代理监控竞态失败](evidence/fresh-runtime-proxy-20261016.json) 均保留。`--find-links` 不保证同版本优先本地，不能宣称重试零重复下载；本次两角色共享的新 workspace HTTP cache 不作为已验收构件，只有完成的 wheel/hash 计入证据。
+
+完整依赖安装这一阻断已解决。**G-RUNTIME / O2 仍未整体 PASS**：center/client 的完整业务生命周期、Viewer compute/Annual/merged worker 迁移、算法/历史连续性和生产解释器配置仍待验收。测试数据库与 venv 均为独立本地资源，无生产部署或包环境变更。
+
 本轮为 `0.82.1` 隔离候选，基于 Viewer `56aa05a`，分支
 `feat/viewer-1-readiness-20261015`。**0.82 总 Gate 尚未通过，未进入 0.83 Contract Freeze。**
-未合并、推送、部署、重启、访问生产 API/SQL 或读取真实凭据。
+未合并、推送、部署、重启、访问生产 API/SQL 或读取真实业务凭据。
 主工作树的文档删除、未跟踪材料、称号关系业务数据均保持原状；本轮不是发布，未搬入这些未提交变更。
 
 实现分为两个本地提交：`03aeb43` 缓存边界修复、`22f7b0b` installed Publication bridge。Taiko/Sakura 没有新增提交；其精确 main/candidate hash 留在 runtime manifest。二者都不是发布记录。
@@ -76,9 +93,9 @@ fresh 安装任务另记录自身 cgroup 与 `memory.events`（OOM/OOM-kill 为 
 
 | Gate | 当前状态 | 下一必要证据 |
 | --- | --- | --- |
-| API authorization | BLOCKED | 当前集成候选的实际隔离 SQL 负面 E2E、生产路由/ACL 只读核验；当前测试 DB 连接配置未取得，未猜测连接参数 |
+| API authorization | BLOCKED | 2026-10-16 已通过私有成绩与同步代理 92 项 SQL/HTTP 复验，测试配置阻断已解决；其余入口和生产路由/ACL 仍待验收 |
 | Credential boundary | BLOCKED | Sakura upload/token、dispatcher 身份和 ACL；Wahlap 匿名 player/ranking 的公开字段界定 |
-| Runtime ownership | BLOCKED | 在保留 main 后续安全/Writer 代码的前提下统一 installed wheel 执行路径，验证 center/client 各自完整依赖及生命周期 |
+| Runtime ownership | BLOCKED | center/client 完整依赖安装已通过；仍需保留 main 后续安全/Writer 代码，统一 installed wheel 执行路径并验证各角色业务生命周期 |
 | Single publication | BLOCKED | 最终 installed bridge 的 52 合成通过不覆盖全部运行 Writer；跨 Writer 故障恢复与统一激活仍待验收 |
 | Contract freeze | PARTIAL | 原契约回归通过；consumer ResourceGrant/audience/consent 尚未实现，不能称 Developer API v1 可用 |
 | Historical continuity | PARTIAL | 历史 Source-switch `271 PASS / 7 SKIP / 1 FAIL` 原样保留，本轮未重跑或豁免；旧报告不能当当前组合通过 |
