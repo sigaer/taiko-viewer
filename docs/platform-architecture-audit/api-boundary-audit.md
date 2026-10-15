@@ -1,5 +1,7 @@
 # API / Token 边界审计
 
+> 2026-10-15 增量说明：下文保留原审计时点结论。当前 Viewer `56aa05a` 已引入 Source owner/service grant 与回程复核，不能再将下文“只有 quota”当作当前实现。当前 28 条入口与依赖 hash 见 [api-auth-matrix.json](api-auth-matrix.json)，本轮实际验证及未通过 Gate 见 [gate-evidence.md](gate-evidence.md)。旧候选分支与当前 main 分叉，未联合上线。
+
 **Developer Token 当前主要是开发者身份与高配额凭证，不是用户数据访问授权。** “有 token 检查函数”与“每条敏感路由要求它并校验 owner/scope”是两回事。
 
 路由盘点共 **211 个 Viewer handler 文件**：account 80、forum 22、taiko 18、developer 1、content 14、admin 54，其余见 [完整清单](evidence/viewer-routes.csv)。清单中的 direct_guard_names 只是直接语法标记，不是安全通过表；业务包装函数中的 guard 已针对关键链继续追踪。

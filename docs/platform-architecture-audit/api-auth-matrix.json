@@ -1,0 +1,1143 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "56aa05a",
+  "status": "NOT_ACCEPTED",
+  "scope": "All current Viewer developer/*, taiko/* (including proxy/internal), internal/* handlers. Other account/admin/forum routes are outside this incremental matrix.",
+  "evidence": "Source inspection only; privateCacheBoundary.test.ts is synthetic HTTP/cache coverage, not SQL authorization acceptance.",
+  "routes": [
+    {
+      "file": "taiko_viewer/server/api/developer/userdata/[userid].get.ts",
+      "method": "GET",
+      "route": "/api/developer/userdata/[userid]",
+      "sourceSha256": "ed81efdeadff1ecc2d665242f2674b0024894dbc68baa49712cb4231bbb8895c",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "source_read: exact live owner binding or explicit source service grant; mutation requires matching source platform; merged reads prove all constituent sources",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization"
+      ],
+      "cachePolicy": "Success: private, no-cache, must-revalidate; ETag only after live proof. Failure: private, no-store; no ETag",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/internal/annual-posters/[summaryId]/my-don.get.ts",
+      "method": "GET",
+      "route": "/api/internal/annual-posters/[summaryId]/my-don",
+      "sourceSha256": "d82347993b526268438574b9cb082650e2a5c265b8a6bc53de516bf066232b53",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Internal annual render token passed to annual payload service",
+      "grantScope": "Summary-bound render token; separate from developer quota identity",
+      "sideEffects": [
+        "Internal payload or my-don read"
+      ],
+      "cachePolicy": "no-store plus middleware private fallback",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Annual renderer"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Render-token expiration/summary binding negative suite not rerun"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/internal/annual-posters/[summaryId].get.ts",
+      "method": "GET",
+      "route": "/api/internal/annual-posters/[summaryId]",
+      "sourceSha256": "3c34264ab39fabeac1cb7d49c697cae6cd0d3abbcac5f40a80d4058a2a19e844",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Internal annual render token passed to annual payload service",
+      "grantScope": "Summary-bound render token; separate from developer quota identity",
+      "sideEffects": [
+        "Internal payload or my-don read"
+      ],
+      "cachePolicy": "no-store plus middleware private fallback",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Annual renderer"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Render-token expiration/summary binding negative suite not rerun"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/internal/annual-share-cards/[summaryId]/my-don.get.ts",
+      "method": "GET",
+      "route": "/api/internal/annual-share-cards/[summaryId]/my-don",
+      "sourceSha256": "d241b4aa737f746dfd541dbc07335baa17a5c3de89f3d9cb86ffc7c068e7675e",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Internal annual render token passed to annual payload service",
+      "grantScope": "Summary-bound render token; separate from developer quota identity",
+      "sideEffects": [
+        "Internal payload or my-don read"
+      ],
+      "cachePolicy": "no-store plus middleware private fallback",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Annual renderer"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Render-token expiration/summary binding negative suite not rerun"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/internal/annual-share-cards/[summaryId].get.ts",
+      "method": "GET",
+      "route": "/api/internal/annual-share-cards/[summaryId]",
+      "sourceSha256": "9ed04dac7e0a6de96562b6de4127494c11bd5fe1c105eb2a8a1ca0426aa2241c",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Internal annual render token passed to annual payload service",
+      "grantScope": "Summary-bound render token; separate from developer quota identity",
+      "sideEffects": [
+        "Internal payload or my-don read"
+      ],
+      "cachePolicy": "no-store plus middleware private fallback",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Annual renderer"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Render-token expiration/summary binding negative suite not rerun"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/arcades/snapshot.get.ts",
+      "method": "GET",
+      "route": "/api/taiko/arcades/snapshot",
+      "sourceSha256": "9482d870e29e9323e0079de9a74d498847d8718691dc377cc60b5992a884cc8f",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/assets/latest.get.ts",
+      "method": "GET",
+      "route": "/api/taiko/assets/latest",
+      "sourceSha256": "ab0e86cb5ff73b96914ada51ec6eab371eb03538763b397318794ec1db22c649",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/assets/latest.head.ts",
+      "method": "HEAD",
+      "route": "/api/taiko/assets/latest",
+      "sourceSha256": "78e772dd344146106a270c37d1851ccf891de6a315f429c8784a8a548a31517e",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/data/[name].get.ts",
+      "method": "GET",
+      "route": "/api/taiko/data/[name]",
+      "sourceSha256": "62d0bf1a73b2e3de9bb9cf71b6a890f3cefc765591aae97b9a9865fd3dc9258e",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/internal/annual-card.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/internal/annual-card",
+      "sourceSha256": "a0bcf5daf1a006f8827e75e486673afdb36b0fbe90ca8fae5664165b8f17c8a8",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "requireBotService: X-Taiko-Bot-Token constant-time comparison; absent configuration denies",
+      "grantScope": "Trusted bot service asserts identityKey; manual operations additionally resolve identity owner",
+      "sideEffects": [
+        "Annual card lookup/render plus per-identity memory rate limit"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Internal bot service"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Static service secret has no per-client scopes/audience; issuer/rotation and asserted-principal trust require acceptance"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/internal/manual.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/internal/manual",
+      "sourceSha256": "6aa136f5d8634c093b525ab3a460a8e9be2697bc43af6919926fb828f428fd54",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "requireBotService: X-Taiko-Bot-Token constant-time comparison; absent configuration denies",
+      "grantScope": "Trusted bot service asserts identityKey; manual operations additionally resolve identity owner",
+      "sideEffects": [
+        "Manual account/score/claim mutations by action"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Internal bot service"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Static service secret has no per-client scopes/audience; issuer/rotation and asserted-principal trust require acceptance"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/manifest.get.ts",
+      "method": "GET",
+      "route": "/api/taiko/manifest",
+      "sourceSha256": "91a086abd21bff9598654b36bb987908754bcdd98d3e9962e86b65a2999d65db",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/current.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/current",
+      "sourceSha256": "2186c62f9565bfff0aac7f0da9d32fde285e99d2c61cca7ff8561ed5b62fcd8b",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_current: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/qq-code.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/qq-code",
+      "sourceSha256": "24758492ecf670b323333ffe4f6457b523d156cc28cddd8d437891bdb8375c6c",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_migrate: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/qq-migrate.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/qq-migrate",
+      "sourceSha256": "94b2f049cc5e4cd1c5eb8bcdeea215a8405ae532d10861798822290faca0debb",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_migrate: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/remove.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/remove",
+      "sourceSha256": "b8737f648c1bd33ba13d094b944837e74e480a6d0197f5006903db11e78f8b8d",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_remove: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/score-token.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/score-token",
+      "sourceSha256": "89a31608a4cf8db3686e2bf506a595372fab6e72238973496168939b4a2dcaf4",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "score_token_issue: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind/visibility.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind/visibility",
+      "sourceSha256": "780c214b68e112b8ca22a511f5401a0be9f97c2e6758cf4c7d3e1b0ff827bcb0",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_visibility: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind.get.ts",
+      "method": "GET",
+      "route": "/api/taiko/proxy/bind",
+      "sourceSha256": "f69646c6d042d829850866182e7d4dbe53cec90e79d0a825c60ffcbb0deca618",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_read: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "SQL principal lock and live proof; read does not repair current binding"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/bind.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/bind",
+      "sourceSha256": "0e0d1350a7bb5811267bec7153180e416372809407da0455b65d895ee1388398",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "bind_write: verified QQ owner or explicit service principal/source allowlist; target binding checks where applicable",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized binding/token/migration mutation; score token issuance has no automatic replay"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/hiroba/bind.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/hiroba/bind",
+      "sourceSha256": "54f62144ff0cc5d3bb05f7fa354751bb371dc7a3bdf5b1714c3cd2ebaeede747",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "hiroba_bind: live owner binding or explicit service source grant; configuredByQq also requires principal authority",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Credential discovery via bounded worker; encrypted credential and optional binding SQL commit"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/hiroba/credentials/[taikoId].get.ts",
+      "method": "GET",
+      "route": "/api/taiko/proxy/hiroba/credentials/[taikoId]",
+      "sourceSha256": "eab2427228d407844912c70038e12c484b4347f59c0cfa52772ffb44dae26559",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "hiroba_credential_status: live owner binding or explicit service source grant; configuredByQq also requires principal authority",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Encrypted credential read/decode; status only returned"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/history.get.ts",
+      "method": "GET",
+      "route": "/api/taiko/proxy/userdata/[taikoId]/history",
+      "sourceSha256": "6e30b6d351a811bcb1acb5bd0a0ac6285594c26a18e657d650359ebe3d0debb8",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "history_read: exact live owner binding or explicit source service grant; mutation requires matching source platform; merged reads prove all constituent sources",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization"
+      ],
+      "cachePolicy": "Success: private, no-cache, must-revalidate; ETag only after live proof. Failure: private, no-store; no ETag",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/sync-hiroba.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/userdata/[taikoId]/sync-hiroba",
+      "sourceSha256": "02213978b9e7eac43cc54e5b6b57cef9693d40251a2950128d6d46d55b50dab4",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "hiroba_sync: exact live owner binding or explicit source service grant; mutation requires matching source platform; merged reads prove all constituent sources",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized isolated worker refreshes source and publishes current/history; optional image"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/update.post.ts",
+      "method": "POST",
+      "route": "/api/taiko/proxy/userdata/[taikoId]/update",
+      "sourceSha256": "ec2bb7a614ae523f8766e73c9985511d88911a9b7aa5fd37007103b813c9a6d8",
+      "owner": "Viewer account/platform",
+      "visibility": "private",
+      "authentication": "Live Viewer session or active developer credential; quota is not authorization",
+      "grantScope": "wahlap_update: exact live owner binding or explicit source service grant; mutation requires matching source platform; merged reads prove all constituent sources",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Authorized isolated worker refreshes source and publishes current/history; optional image"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot with authorized identity"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/wahlap/player/[taikoId].get.ts",
+      "method": "GET",
+      "route": "/api/taiko/proxy/wahlap/player/[taikoId]",
+      "sourceSha256": "66832adc11589879833d341f97f9e2517fae8cc600f8c5c741bf42d9abf09017",
+      "owner": "Viewer account/platform",
+      "visibility": "upstream-public-classification-unaccepted",
+      "authentication": "Anonymous quota; developer token only increases quota",
+      "grantScope": "No owner/grant check; upstream player search/ranking uses server-held Wahlap credential",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Server-authenticated upstream read"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Binding verification UI",
+        "taiko-bot",
+        "anonymous client"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Owner must sign off exposed profile/ranking fields and server-held credential boundary before classifying public"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/proxy/wahlap/ranking/[songId]/[diff].get.ts",
+      "method": "GET",
+      "route": "/api/taiko/proxy/wahlap/ranking/[songId]/[diff]",
+      "sourceSha256": "83d75331c340221c0eff625945f4659fb56710cee792ff0dc5e08270109ff525",
+      "owner": "Viewer account/platform",
+      "visibility": "upstream-public-classification-unaccepted",
+      "authentication": "Anonymous quota; developer token only increases quota",
+      "grantScope": "No owner/grant check; upstream player search/ranking uses server-held Wahlap credential",
+      "sideEffects": [
+        "Quota accounting and schema initialization may write SQL before resource authorization",
+        "Server-authenticated upstream read"
+      ],
+      "cachePolicy": "private, no-store (middleware; including errors)",
+      "statusCodes": [
+        200,
+        400,
+        401,
+        403,
+        404,
+        409,
+        429,
+        503
+      ],
+      "callers": [
+        "Binding verification UI",
+        "taiko-bot",
+        "anonymous client"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate",
+        "Owner must sign off exposed profile/ranking fields and server-held credential boundary before classifying public"
+      ]
+    },
+    {
+      "file": "taiko_viewer/server/api/taiko/resources/[name].get.ts",
+      "method": "GET",
+      "route": "/api/taiko/resources/[name]",
+      "sourceSha256": "6ad17724c5371ead20c3fa669f99974d99f138e53b4a82f0c7393f34abf55147",
+      "owner": "Viewer public data adapter",
+      "visibility": "public",
+      "authentication": "Anonymous quota; optional developer quota credential",
+      "grantScope": "Public catalog/resource allowlist; no private score authority",
+      "sideEffects": [
+        "Quota accounting; public resource reads"
+      ],
+      "cachePolicy": "Route-specific public caching/streaming; not forced private by this patch",
+      "statusCodes": [
+        200,
+        304,
+        400,
+        404,
+        429,
+        503
+      ],
+      "callers": [
+        "Viewer",
+        "taiko-bot",
+        "third-party public catalog clients"
+      ],
+      "status": "NOT_ACCEPTED",
+      "blockers": [
+        "Production routing/ACL unverified",
+        "Isolated SQL authorization E2E not rerun in this readiness candidate"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "file": "taiko_viewer/server/infrastructure/account/bot-binding-effect.ts",
+      "sourceSha256": "598b26f7270d8c787b12eefeec7c8fe0ca1c49ff3d5c79346c41b9fbe8b800f9"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/bot-binding-rows.ts",
+      "sourceSha256": "3708c8402563bc487e321a8f277db65fbe91e24f521191a3de49afda635be744"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/hiroba-binding-rows.ts",
+      "sourceSha256": "cadfe487e8c7d8e57d9b3080c786eb12503ca56ce17bdb287f68de01b428df37"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/hiroba-credential-worker.ts",
+      "sourceSha256": "b80e862e674c6180b3f1b2b39fbc9b39d5cd352b70e8268e461426ddf136009e"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/merged-read-worker.ts",
+      "sourceSha256": "7d3b2a62b33fbb944c22485aac2850cd20e8f4d12c000962d8aa237157bb2d4b"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/merged-source-id.ts",
+      "sourceSha256": "84287c436686d0744b1a7aad39fe11af5bedcf5d6c528710d1bf75c2e173aed9"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/principal-policy.ts",
+      "sourceSha256": "bb0a165896ad7285a640014089849324b2c2bbead543ef24ed9789cb143926e9"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/private-source-response.ts",
+      "sourceSha256": "dde106e59e4d2470f643891a7dda5a74f4bd379e0073ab2e14884cf169d52649"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/private-worker-admission.ts",
+      "sourceSha256": "042460fa75e4041e6f6176bfec12e5226f241cfc27a5131ac56610b25166da3e"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/private-worker-environment.ts",
+      "sourceSha256": "b89c0660dbcf126e8b6376857f1cc0d591f37287bfc31dc0f9d023fcc1146118"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/qq-migration-worker.ts",
+      "sourceSha256": "2b0cdff9a9b0a69858168c6e54888774c9d54c4c9c0b13a9292a215872b7fa04"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/score-token.ts",
+      "sourceSha256": "f717e58368f6d8f5476734d9f3b0282fc4721f5b1aaad4661e37e6854d7bec8c"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/source-mutation-worker.ts",
+      "sourceSha256": "c69e6f7e6a52271ad4215da46c94dad81b496ddb4f1109c4f155be46896b917e"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/account/source-service-schema.ts",
+      "sourceSha256": "95fac7c315bd057601160b111e8fd9b668f2df5203aa96861c218c904069f4cc"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/runtime-paths.ts",
+      "sourceSha256": "67061c1d2da705f797bc855e9576c7b5a5ad481e224621966cc786f64788af11"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/taiko-publication/client.ts",
+      "sourceSha256": "2739bd5202901547b1508eea6592f2445ddedcccaf58d21258748a4a06712467"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/taiko-publication/python.ts",
+      "sourceSha256": "4efcc107e39d014b87af382c41fd16091948a65e5d18276ef47a991c22423a9a"
+    },
+    {
+      "file": "taiko_viewer/server/infrastructure/taiko-publication/scope.ts",
+      "sourceSha256": "6535805c90ff60a9b5cbd6c09eb260c80c0e128775f9976ba9398d068a6ac889"
+    },
+    {
+      "file": "taiko_viewer/server/internal/account/binding-identity.ts",
+      "sourceSha256": "69ec9a30b00c788f127c2170879485f3661ae1391640b85fe20fafd67268afe6"
+    },
+    {
+      "file": "taiko_viewer/server/internal/account/developer.ts",
+      "sourceSha256": "742c55ba5334ac1f0cd183f41ce2dc0b0ca82651495fbb8fc1bbb8c63f4fa8a0"
+    },
+    {
+      "file": "taiko_viewer/server/internal/account/shared.ts",
+      "sourceSha256": "81c39745b1419404de18640434e0ae65d2494d737ea8b1636a1e816f032e50db"
+    },
+    {
+      "file": "taiko_viewer/server/internal/account/source-lifecycle.ts",
+      "sourceSha256": "f2cc720df51286b317c4ac23f139b6f43dc911fb5a1c91f8327311df2a0e648c"
+    },
+    {
+      "file": "taiko_viewer/server/middleware/private-cache.ts",
+      "sourceSha256": "cc7f737ee14f37539f349890d181598128984146c21b488f595c914367e2d181"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/bot-binding-proxy.ts",
+      "sourceSha256": "3f367e6bd8396ae51774c0f78eb32f82a48febdef2305794cb6453cfb6cc969f"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/bot-score-token.ts",
+      "sourceSha256": "eff1bba0579e71f7fa51c89637b5f653acf32d30b40340b180bc8b38952ee2d8"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/hiroba-authority.ts",
+      "sourceSha256": "83b0f479948167ef2674566120862f7dde4112098beb8c94b6022e1e62ac03c5"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/hiroba-credentials.ts",
+      "sourceSha256": "6cbde72b165924619c063ef87ccc3242aaefa65db82779cd9b3f7dbc8194ed55"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/merged-source-read.ts",
+      "sourceSha256": "c06e37c602d3d1407f23880bdec52d91d9f92c6721c08b10075c310797e2855a"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/principal-access.ts",
+      "sourceSha256": "c23056d00d20fccb373c9bd44b1d1a5637cbde1bce08eb464c8c65e3033756d8"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/qq-migration.ts",
+      "sourceSha256": "4073214fbd8fcc085fa88cc7fcc4dec48761107dfebbe9afc52e7550b0c79d7e"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/source-access.ts",
+      "sourceSha256": "8db22918121b4d3fdb412b2d963fa97f61e17d1b31e9b2d9f6ee9578c1854061"
+    },
+    {
+      "file": "taiko_viewer/server/services/account/source-proxy.ts",
+      "sourceSha256": "acb3457d8bc58199ec7ba529e6d314d7b3e6875850cfe0e8d1491c0bbfce34f6"
+    },
+    {
+      "file": "taiko_viewer/server/utils/account-db.ts",
+      "sourceSha256": "bb46b24921cbdffad222073f23e6c6c611510b2e3cb7cc58849beb43d284ff19"
+    },
+    {
+      "file": "taiko_viewer/server/utils/account/developer.ts",
+      "sourceSha256": "8a5a94d3d4b45028b684312bcf3396da23f49b71b0631a88f79ed3c794099e5e"
+    },
+    {
+      "file": "taiko_viewer/server/utils/account/manual.ts",
+      "sourceSha256": "0f1e0f02fa3bbf1d73a8f91dd719e63c8bc10122d1cc89f79486c6d9f993db78"
+    },
+    {
+      "file": "taiko_viewer/server/utils/cache-policy.ts",
+      "sourceSha256": "f730834e3c8467f2c81687d2ff96d2cdcd2620ad5fb779d820a81ef6df8019dc"
+    },
+    {
+      "file": "taiko_viewer/server/utils/taiko-center.ts",
+      "sourceSha256": "bc1c034ff14fb2d3b50ec784ee4bfd582d0d5613746ea1b03b51521d68abd4dc"
+    },
+    {
+      "file": "taiko_viewer/server/utils/taiko-open.ts",
+      "sourceSha256": "525289465a08f2cfe9fe3e6a6915d1485a4aca6942fb6561466c068d2178dbe8"
+    }
+  ],
+  "externalBoundaries": [
+    {
+      "route": "/api/token",
+      "owner": "Taiko center",
+      "status": "NOT_ACCEPTED",
+      "blocker": "Credential control plane caller authentication and deployed ACL require read-only acceptance; no production access performed"
+    },
+    {
+      "route": "/uploadTaikoLogin",
+      "owner": "Sakura upload host / Taiko credential adapter",
+      "status": "NOT_ACCEPTED",
+      "blocker": "Caller identity, JWT validation and migration ownership require acceptance; no credential read performed"
+    },
+    {
+      "route": "/dispatch and /score-token",
+      "owner": "Taiko local gateway",
+      "status": "NOT_ACCEPTED",
+      "blocker": "Actual listener and ACL plus service identity require acceptance; no request performed"
+    }
+  ],
+  "remainingSecurityGates": [
+    "Explicit consumer user grant and audience model is not implemented by this patch; existing source service grants are not OAuth consent",
+    "Atomic quota and trusted proxy configuration unverified",
+    "Negative SQL tests for revoked/expired/wrong scope/wrong binding/service failure are present but must run with verified *_test database and explicit mutation opt-in",
+    "Nginx/ACL, upstream private-field classification and credential-control-plane acceptance outstanding",
+    "Publication bridge now uses configured absolute interpreter and -I installed module; this does not isolate all calculation/source workers. Merged read still launches python3 -m scripts.merged_read_cli from repoRoot; full worker/runtime ownership and trusted interpreter/site-packages provenance remain unaccepted."
+  ],
+  "dependencyCoverage": "Fixed reviewed dependency inventory, not a transitive dependency closure. Covers primary actor/grant policies, merged source authorization, source/principal identity, binding/token/credential rows, worker launch/admission/environment and account/credential configuration. Includes the publication interpreter selector, bridge client and scope; other imported publication readers, annual/manual implementation subgraphs, external Python workers, runtime configuration and deployed ACL require separate acceptance; unchanged listed hashes do not establish authorization correctness.",
+  "publicationBridgeReview": {
+    "status": "SOURCE_REVIEWED_NOT_ACCEPTED",
+    "implementation": "Absolute interpreter path from internal override or TAIKO_PYTHON_EXECUTABLE; rejects relative paths and NUL; -I excludes cwd, PYTHONPATH and user site. No request-selected executable observed in server callers. Invalid selection and missing module fail closed with PublicationUnavailableError.",
+    "testsReviewed": [
+      "taiko_viewer/tests/publicationClient.test.ts: installed bridge ignores cwd/PYTHONPATH shadow packages",
+      "taiko_viewer/tests/publicationClient.test.ts: empty installed environment fails closed",
+      "taiko_viewer/tests/publicationClient.test.ts: relative/NUL interpreter config rejected without reflecting value"
+    ],
+    "limitations": [
+      "No QA executed by security reviewer; coordinator records actual run evidence",
+      "Absolute path is trusted deployment configuration, not binary hash/signature verification; installed site-packages remain trusted",
+      "Bridge isolation does not prove every calculation or credential worker uses the installed artifact"
+    ]
+  }
+}

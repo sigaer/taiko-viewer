@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "status": "BLOCKED_FULL_ROLE_INSTALL",
+  "workspace": "/var/tmp/taiko-runtime-fresh-n6qxnwr3",
+  "network": "pip no-index/no-build; all eligible wheel direct dependency references rejected; not OS network isolation",
+  "offlineWheelHashes": [
+    {
+      "file": "taiko_application-0.8.0-py3-none-any.whl",
+      "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+      "sha256": "c05088c0a5159f27abfb9529d78fd8e31565070807b68aacc091bfd0bdc44f4a"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+      "sha256": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+      "sha256": "f34c1d0a3e58f5a7ce232ca50741e3235260eb8dabaedd95b41d84e7d0d0d47f"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "7244c89aadb42a960c7ebf6cf1406e54a139a42109cbccd2b6892cb0cdf9b7b9"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+      "sha256": "ea0c2ff21ff67ba9fb6418fbeb03b1346e5bb6bbcb0f2d30dccbd5fb470971c3"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+      "sha256": "48143bae997d4d7d319609f0cc2da9d87b1aac7ef6f7fde47e21c366a7f3c8f1"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "8a7c1ab20aa9c10b4282d95d1fe9e2cec478f00bbad91002e24e739847975e68"
+    },
+    {
+      "file": "taiko_bot-0.14.1-py3-none-any.whl",
+      "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+    },
+    {
+      "file": "taiko_application-0.8.0-py3-none-any.whl",
+      "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+    }
+  ],
+  "roles": {
+    "center": {
+      "fullRoleInstall": "FAIL_OFFLINE_DEPENDENCY_RESOLUTION",
+      "resolverExit": 1,
+      "resolverLogSha256": "d21cc2c7bb5684be2ac86da0ac9fa9ddbc6b3ce2001399992d8af9a23cf48069",
+      "resolverLog": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/center-resolve.log",
+      "pipCheck": "FAIL_DEPENDENCIES_MISSING",
+      "pipCheckLogSha256": "aae4d6956ea353016d22c4fdfbc2ceb90ca6a6c4dd616e3e86a6aa2b71d50f88",
+      "installedOrigin": {
+        "version": "0.14.1",
+        "interpreter": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/center/bin/python",
+        "module": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/center/lib/python3.11/site-packages/taiko_store/bridge.py",
+        "isolated": 1,
+        "dependencies": [
+          {
+            "name": "setuptools",
+            "version": "65.5.0"
+          },
+          {
+            "name": "pip",
+            "version": "23.1.2"
+          },
+          {
+            "name": "taiko-bot",
+            "version": "0.14.1"
+          }
+        ]
+      },
+      "bridgeSynthetic": {
+        "status": "PASS",
+        "currentAndHistorySameCommit": true,
+        "readLeaseMutationDenied": true,
+        "isolatedImport": true,
+        "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+      },
+      "resolverBlocker": "No matching offline distribution for aiomysql>=0.2.0; resolver stopped before proving the remaining dependency closure."
+    },
+    "client": {
+      "fullRoleInstall": "FAIL_OFFLINE_DEPENDENCY_RESOLUTION",
+      "resolverExit": 1,
+      "resolverLogSha256": "28c8445e83e966111cba85e100da9abba315228717e4a2fc97b97a8ee419085c",
+      "resolverLog": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/client-resolve.log",
+      "pipCheck": "FAIL_DEPENDENCIES_MISSING",
+      "pipCheckLogSha256": "aae4d6956ea353016d22c4fdfbc2ceb90ca6a6c4dd616e3e86a6aa2b71d50f88",
+      "installedOrigin": {
+        "version": "0.14.1",
+        "interpreter": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/client/bin/python",
+        "module": "/var/tmp/taiko-runtime-fresh-n6qxnwr3/client/lib/python3.11/site-packages/taiko_store/bridge.py",
+        "isolated": 1,
+        "dependencies": [
+          {
+            "name": "setuptools",
+            "version": "65.5.0"
+          },
+          {
+            "name": "pip",
+            "version": "23.1.2"
+          },
+          {
+            "name": "taiko-bot",
+            "version": "0.14.1"
+          }
+        ]
+      },
+      "bridgeSynthetic": {
+        "status": "PASS",
+        "currentAndHistorySameCommit": true,
+        "readLeaseMutationDenied": true,
+        "isolatedImport": true,
+        "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+      },
+      "resolverBlocker": "No matching offline distribution for aiomysql>=0.2.0; resolver stopped before proving the remaining dependency closure."
+    }
+  },
+  "durationSeconds": 14.773,
+  "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792077527-2000814.service",
+  "memory": {
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE"
+  },
+  "offlineWheelHashesScope": "Taiko candidate and pinned application/contract/core candidates only; not a complete dependency lock",
+  "evidenceEditing": "Post-run reporting only: unrelated cached wheel names/hashes omitted; absent memory.peak explicitly UNAVAILABLE. Test outcomes unchanged."
+}

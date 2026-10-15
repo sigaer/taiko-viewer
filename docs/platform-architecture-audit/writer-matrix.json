@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-15",
+  "viewerBase": "56aa05a",
+  "taikoCandidate": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
+  "method": "Incremental source inspection and historical evidence review, followed by candidate-only publication interpreter isolation. Coordinator-run validation is tracked separately in gate-evidence.md; this audit agent ran no QA, SQL, private-data or production access.",
+  "ownerSignoff": "PENDING",
+  "releaseGate": "BLOCKED",
+  "historicalEvidencePolicy": "Referenced PASS records apply to their recorded commits and fixtures only; not a new candidate or production PASS.",
+  "writers": [
+    {
+      "id": "viewer-edit-import",
+      "owner": "Viewer Product + Publication Infrastructure",
+      "entrypoints": [
+        "taiko_viewer/server/utils/account/songs.ts",
+        "taiko_viewer/server/infrastructure/taiko-publication/writer.ts",
+        "taiko_viewer/server/infrastructure/taiko-publication/scope.ts"
+      ],
+      "commit": "Outer scope stages current and unique timestamp/sequence/random history then publishes once; callback reads staged state.",
+      "lock": "Source kernel EX covers RMW; SQL song locks inside source fence.",
+      "faultAndRepair": "Before commit compensate registered SQL changes under EX; lost ACK probes own current/previous commit; unknown outcome remains error.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-account-source-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-node-client-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-goal-lock-order-validation.json",
+        "docs/platform-architecture-audit/gate-evidence.md"
+      ],
+      "unverified": [
+        "Full integrated runtime identity: compute/Annual/merged-read-worker migration and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate",
+        "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
+      ],
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+    },
+    {
+      "id": "viewer-manual-edit",
+      "owner": "Viewer Account Product",
+      "entrypoints": [
+        "taiko_viewer/server/utils/account/manual.ts"
+      ],
+      "commit": "Rename/edit/delete reuse current+H batch.",
+      "lock": "withUserdataWriteLock delegates Source EX.",
+      "faultAndRepair": "Scope recovery and compensation; SQL and filesystem are not a single transaction.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-manual-owner-validation.json",
+        "docs/platform-architecture-audit/gate-evidence.md"
+      ],
+      "unverified": [
+        "Full integrated runtime identity: compute/Annual/merged-read-worker migration and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate",
+        "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
+      ],
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+    },
+    {
+      "id": "viewer-manual-create-delete-restore",
+      "owner": "Viewer Account lifecycle coordinator",
+      "entrypoints": [
+        "taiko_viewer/server/services/account/manual-creation.ts",
+        "taiko_viewer/server/services/account/manual-lifecycle.ts",
+        "taiko_viewer/server/services/account/manual-recovery.ts",
+        "taiko_viewer/server/infrastructure/taiko-publication/recovery-worker.ts"
+      ],
+      "commit": "Create uses explicit operation-id publication; delete uses verified immutable backup then tombstone; restore uses backup and lifecycle receipt.",
+      "lock": "Source EX plus SQL lifecycle/outbox coordination.",
+      "faultAndRepair": "Durable SQL receipts reconcile publication outcome; stale backup cannot authorize newer generation deletion; unknown outcome not falsely rolled back.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-manual-creation-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-manual-lifecycle-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-manual-recovery-validation.json",
+        "docs/platform-architecture-audit/gate-evidence.md"
+      ],
+      "unverified": [
+        "Full integrated runtime identity: compute/Annual/merged-read-worker migration and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate",
+        "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
+      ],
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+    },
+    {
+      "id": "viewer-kinoko",
+      "owner": "Viewer Account import adapter",
+      "entrypoints": [
+        "taiko_viewer/server/utils/account/sync.ts",
+        "taiko_viewer/server/internal/account/kinoko-history.ts"
+      ],
+      "commit": "Imported history and changed current staged in same outer batch.",
+      "lock": "Source EX around import and existing-state reads.",
+      "faultAndRepair": "Callback failure discards unpublished batch; canonical journal recovery shared with all writers.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-kinoko-adapter-validation.json",
+        "docs/platform-architecture-audit/gate-evidence.md"
+      ],
+      "unverified": [
+        "Full integrated runtime identity: compute/Annual/merged-read-worker migration and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate",
+        "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
+      ],
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+    },
+    {
+      "id": "center-wahlap",
+      "owner": "Taiko center acquisition adapter",
+      "entrypoints": [
+        "taiko_bot/runtime/player/center/update_user.py",
+        "taiko_bot/runtime/player/center/userdata_storage.py"
+      ],
+      "commit": "save_userdata commits current + full/delta H in one store.commit.",
+      "lock": "Existing supplied EX verified for identity or exclusive acquired locally.",
+      "faultAndRepair": "Pending journal/atomic head repair; daily capture failure does not roll back committed score.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-native-wahlap-authority-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-publication-protocol-validation.json"
+      ],
+      "unverified": [
+        "Installed runtime identity and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate"
+      ]
+    },
+    {
+      "id": "center-hiroba",
+      "owner": "Taiko center Hiroba adapter",
+      "entrypoints": [
+        "taiko_bot/runtime/player/center/hiroba/sync.py",
+        "taiko_bot/runtime/player/center/userdata_storage.py"
+      ],
+      "commit": "Normalized Hiroba payload delegates save_userdata.",
+      "lock": "Same source EX and store identity check as Wahlap.",
+      "faultAndRepair": "Common publication journal; credential lifecycle has separate authority and is not a score transaction.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-native-hiroba-authority-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-hiroba-credential-validation.json"
+      ],
+      "unverified": [
+        "Installed runtime identity and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate"
+      ]
+    },
+    {
+      "id": "dispatcher-local-target",
+      "owner": "Taiko sync dispatch adapter",
+      "entrypoints": [
+        "taiko_bot/services/sync_dispatch_server.py"
+      ],
+      "commit": "write_local_snapshot commits current and unique sequence+UUID delta H; refresh is a separate logical observation.",
+      "lock": "Supplied EX required or local store.exclusive.",
+      "faultAndRepair": "Common store recovery; transfer observation remains distinct from physical play.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-account-source-validation.json",
+        "docs/taiko-domain-extraction/evidence/phase6-publication-protocol-validation.json"
+      ],
+      "unverified": [
+        "Historical generic publication evidence is not a fresh dispatcher endpoint test",
+        "Remote target compatibility and live dispatcher provenance not verified"
+      ]
+    },
+    {
+      "id": "native-u0-materialization",
+      "owner": "Taiko Publication Infrastructure",
+      "entrypoints": [
+        "taiko_store/merged_materialization.py",
+        "taiko_bot/runtime/player/center/materialization.py"
+      ],
+      "commit": "Derived current/history published with dependency hash; history-only input changes do not manufacture score events.",
+      "lock": "Ordered member SH then derived source EX.",
+      "faultAndRepair": "Canonical-only members; refuses unmanaged existing derived state; recover complete old/new generation.",
+      "publicationStoreCompatibility": "SOURCE_COMPATIBLE_RUNTIME_UNVERIFIED",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-native-u0-publication-validation.json"
+      ],
+      "unverified": [
+        "Installed runtime identity and deployment coverage",
+        "Full cross-writer fault/recovery acceptance on integrated candidate"
+      ]
+    },
+    {
+      "id": "daily-trend-backfill",
+      "owner": "Taiko daily Infrastructure",
+      "entrypoints": [
+        "taiko_store/daily.py",
+        "taiko_bot/runtime/player/center/daily_ability.py"
+      ],
+      "commit": "Atomic durable daily archive, independent of C/H revision; frozen historical values preserved.",
+      "lock": "Source SH then namespace EX; existing source EX reused; backup/restore/purge share namespace locks.",
+      "faultAndRepair": "Replace-before/after process death preserves old/new archive; collector handles dead stage under Source EX.",
+      "publicationStoreCompatibility": "SEPARATE_MEASUREMENT_FENCED_NOT_CH_TRANSACTION",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-daily-writer-validation.json"
+      ],
+      "unverified": [
+        "No atomic C/H + daily + SQL transaction claimed",
+        "Integrated runtime, large-account cost and complete recovery not verified"
+      ]
+    },
+    {
+      "id": "client-derived-cache",
+      "owner": "Taiko client adapter",
+      "entrypoints": [
+        "taiko_bot/runtime/player/client"
+      ],
+      "commit": "Local derived data only; no center authority implied.",
+      "lock": "Client cache coordination is outside center publication.",
+      "faultAndRepair": "Refetch from authorized canonical API; cannot repair authority by writing center files.",
+      "publicationStoreCompatibility": "NOT_A_CENTER_WRITER",
+      "evidence": [
+        "docs/taiko-domain-extraction/evidence/phase6-client-history-validation.json"
+      ],
+      "unverified": [
+        "Client fresh candidate wheel and complete cache consumers not re-audited here"
+      ]
+    }
+  ],
+  "blockingActions": [
+    {
+      "id": "C-RUNTIME",
+      "owner": "Package A integration",
+      "action": "Candidate publication bridge uses absolute configured interpreter and -I; 52 installed-wheel synthetic client/scope/account/Kinoko regressions PASS. Main baseline source discovery is historical. Compute/Annual/merged-read-worker and full running-writer installed-runtime coverage remain unmigrated or unaccepted.",
+      "evidence": "docs/platform-architecture-audit/gate-evidence.md"
+    },
+    {
+      "id": "C-COVERAGE",
+      "owner": "Release coordinator",
+      "action": "Inventory actual running writers and stop legacy writers before controlled canonical adoption; source review cannot prove active coverage."
+    },
+    {
+      "id": "C-RESTORE",
+      "owner": "Infrastructure operations",
+      "action": "Run isolated integrated cross-writer failure/restore checks including daily archives, SQL lifecycle receipts and immutable history; record RPO/RTO."
+    },
+    {
+      "id": "C-LEGACY-READ",
+      "owner": "Reader adapters",
+      "action": "Keep legacy C/H projections explicitly non-snapshot-isolated; canonical immutable lease readers are required for coherent multi-file reads."
+    }
+  ],
+  "runtimeTransition": {
+    "baseline": "main 56aa05a publication bridge used python3 -m with source repo cwd and no isolated mode.",
+    "candidate": "Publication bridge now selects an absolute deployment-controlled TAIKO_PYTHON_EXECUTABLE (default /usr/bin/python3) and launches -I -m taiko_store.bridge. Protocol, source locks and lifecycle are unchanged.",
+    "validation": "ISOLATED_SYNTHETIC_PASS: coordinator reports 52 installed-wheel candidate tests PASS across publication client/scope and account/Kinoko regressions. Log: /var/tmp/taiko-viewer1-installed-publication-qa.log. This is not SQL, production, full-runtime or restore acceptance.",
+    "scopeLimit": "Publication bridge only. Compute/Annual and merged-read-worker remain on unmigrated runtime paths; actual running Writer coverage is unaccepted. No G-RUNTIME or production PASS.",
+    "evidence": "docs/platform-architecture-audit/gate-evidence.md"
+  },
+  "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md"
+}
