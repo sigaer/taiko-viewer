@@ -1,5 +1,7 @@
 # My Taiko 跨客户端读取准备 — 独立分支
 
+> 历史准备范围：49899d4。后续 I5 原型的真实 Catalog 字节 revision、并发 Writer 与当前待签状态见 [I5 报告](viewer1-readmodel-i5-report.md)；下文旧 legacy-projection 诊断不作为当前 raw revision 声明。
+
 分支 `prep/viewer1-consumer-readmodel-20261016`，基于 Owner 工程评审提交 `d0c6fea8f172c6bc39086f13eac6fe2113205046`，不是正式冻结批准。**contractFrozen=false；Gate P=DEPLOY_PENDING_AUTH。** 原候选 `feat/viewer083-contract-api-20261016` 仍指向 ac10427，评审修订单独留在 review 分支。这里准备 I1–I4 的消费者清单、适配设计、后端接入例和可运行隔离读链；没有把候选字段接到生产产品。
 
 ## I1 消费者选择

@@ -155,6 +155,29 @@
     },
     "production": {
       "status": "NOT_RUN_NOT_AUTHORIZED"
+    },
+    "i5IsolatedPrototype": {
+      "status": "PASS_SCOPED",
+      "httpObservations": 21,
+      "catalogSourceBytePath": "same developer-api-v1 catalog()",
+      "legacyCatalogRevision": "separate diagnostic, never equated to raw bytes SHA",
+      "measurementWrites": 0,
+      "v1GateEnabled": false,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-173c39e7551b/evidence/my-taiko-integration-observations.json",
+        "sha256": "f66af0a8256671e791b3f99fb4492bc09a527a46090cd75c783979f211445283"
+      }
+    },
+    "i5OpenApiBundleSdkExamples": {
+      "status": "PASS_SCOPED",
+      "operations": 11,
+      "schemaExamples": 95,
+      "internalRefs": 86,
+      "scope": "Synthetic loopback example transport; actual SQL auth evidence separately retained",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-2ac8e227698f/evidence/developer-examples.json",
+        "sha256": "8d607b23d620d2ad531d28d019964e4848b413c71457b9e89f997245cb6299fe"
+      }
     }
   },
   "reusedHistoricalEvidence": {
@@ -203,5 +226,17 @@
   },
   "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016",
   "reviewRecordedAt": "2026-10-16T19:22:40.648334+08:00",
-  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/review-evidence-index.json"
+  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/review-evidence-index.json",
+  "consumerPreparation": {
+    "branch": "prep/viewer1-consumer-readmodel-20261016",
+    "baseline": "49899d48a0ccff677d8506f59cea502b521758c4",
+    "reviewDeliveryCommit": "289094de74fa4872c7e43459ec57ce5c207ce36f",
+    "runtimeChangeFromReview": false,
+    "report": "docs/viewer1-readmodel-i5-report.md",
+    "productRouteRegistered": false,
+    "productPageChanged": false,
+    "fallbackImplemented": false,
+    "sourceSchemaOrAlgorithmsChanged": false
+  },
+  "i5EvidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/i5-evidence-index.json"
 }
