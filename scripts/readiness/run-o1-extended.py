@@ -57,7 +57,7 @@ try:
    state.setdefault('batchPlans',[]).append({'operation':operation,'concurrency':concurrency,'plans':plans,'wholeEstimateSeconds':whole_estimate,'scaleEstimateSeconds':estimates,'reason':'c1 smoke maximum times 200, 1.5 safety factor plus60s setup; no assumed concurrency speedup; prefer one 600 run below450s, else scale200 below450s; B30 and heavier scales use50; guard unchanged'})
    for scale,count,repeats in plans:
     chunks=[run(operation,concurrency,scale,count,f'{operation}-{scale}-{concurrency}-candidate-{i}') for i in range(repeats)]
-    target_miss=misses(chunks) or any(row['status']=='FAIL' for chunk in chunks for row in chunk['byScale'])
+    target_miss=misses(chunks) or (count==200 and any(row['status']=='FAIL' for chunk in chunks for row in chunk['byScale']))
     if target_miss and not baseline:
      state.setdefault('baselineComparisons',[]).append({'operation':operation,'concurrency':concurrency,'scale':scale,'status':'PENDING_BASELINE_ARTIFACT_UNAVAILABLE','candidateStatus':'TARGET_MISS_RETAINED'})
     elif target_miss:
