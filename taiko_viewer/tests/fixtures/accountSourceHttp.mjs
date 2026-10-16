@@ -11,7 +11,7 @@ export function deferred(){let resolve;const promise=new Promise(r=>{resolve=r;}
 export async function bounded(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Owned account source race deadline')),5000);})]);}finally{clearTimeout(timer);}}
 export async function sourceSnapshot(c){return c.scopeModule.withDomainScoreRead(c.taikoId,async()=>({raw:await manualSourceSnapshot(c),publication:c.scopeModule.scorePublication(c.taikoId)}));}
 
-export async function accountSourceFixture(task,{manual=false,withDeveloper=false,withRealPython=false,requestTimeoutMs=12000}={}){
+export async function accountSourceFixture(task,{manual=false,withDeveloper=false,withRealPython=false,requestTimeoutMs=12000,withRealCatalog=false}={}){
  return manualSqlFixture(async context=>{
   const c={...context,manualId:context.taikoId,ownedTokenIds:new Set([context.taikoId])};
   if(!manual){
@@ -81,7 +81,7 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    if(previousHandler===undefined)delete globalThis.defineEventHandler;else globalThis.defineEventHandler=previousHandler;
    for(const id of c.ownedTokenIds)await c.pool.execute('DELETE FROM public_score_tokens WHERE taiko_id=?',[id]);
   }
- },{withAccountSource:true,withDeveloper,withPersonal:withRealPython,withRealPython,withRealModel:withRealPython});
+ },{withAccountSource:true,withDeveloper,withPersonal:withRealPython,withRealPython,withRealModel:withRealPython,withRealCatalog});
 }
 
 export async function queuedAccountSource(c,operation,change){

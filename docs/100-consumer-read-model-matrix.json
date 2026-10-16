@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_ISOLATED_DEMO_PENDING_OWNER_FREEZE",
+  "baseReviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
+  "branch": "prep/viewer1-consumer-readmodel-20261016",
+  "contractFrozen": false,
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "productionAccess": false,
+  "rules": [
+    "One selected migration per consumer; no extra HTTP hop solely for uniformity",
+    "No second algorithm/Publication Writer/auth system",
+    "New candidate-field production wiring waits for signed exact candidate",
+    "Source Contract 0.1.2 is not installed 0.1.0; upgrade before new DTO use",
+    "No forced external Developer Token on Web/Bot internal domains"
+  ],
+  "consumers": [
+    {
+      "id": "viewer-my-profile",
+      "consumer": "Viewer 个人主页",
+      "data": "profile/current binding",
+      "owner": "Viewer account",
+      "readEntry": "taiko_viewer/pages/account/profile.vue",
+      "implementation": "taiko_viewer/server/utils/account/profile.ts",
+      "selectedMigration": "BFF_SERVICE",
+      "permission": "Viewer Session + withViewerCurrentSource owner/binding proof",
+      "source": "committed Publication + binding/account SQL",
+      "version": "legacy profile DTO; Contract ScoreReadPort 1.0",
+      "cache": "no new payload cache; existing profile title projection",
+      "rollback": "原 /api/account/profile",
+      "status": "ISOLATED_CHAIN_DEMO_PASS",
+      "readEntrySha256": "995d7c37bb6e21bb74a5b7c5968c2ef8bc3072565e140a55ea635c950e7e1b43",
+      "implementationSha256": "67c1e5e0b14e7e8c1b80fad67c061d6a102dd3cc78eb60e9b136c14a4fbd020b"
+    },
+    {
+      "id": "viewer-home-scores",
+      "consumer": "Viewer Home/成绩",
+      "data": "catalog/current scores",
+      "owner": "Viewer account + catalog",
+      "readEntry": "taiko_viewer/composables/useHomeState.ts",
+      "implementation": "taiko_viewer/server/api/account/songs.get.ts",
+      "selectedMigration": "BFF_SERVICE",
+      "permission": "Viewer Session + existing owner Source authority",
+      "source": "existing songs/ScoreReadPort + catalog file",
+      "version": "legacy songs page; version labeling pending signed integration",
+      "cache": "legacy UI/cache behavior retained; prototype request-local memo only",
+      "rollback": "原 /api/account/songs 与 content endpoints",
+      "status": "PREPARED_NOT_MIGRATED",
+      "readEntrySha256": "ac0f70c19918ab9c7a3aecf92969b143b0674e7ea1cd8982e3e2040df0914879",
+      "implementationSha256": "c38ac86fe790cdc1b4c885fdaf711b4888b0805ec2aaabbb7b2718b5fdd2d58a"
+    },
+    {
+      "id": "viewer-history",
+      "consumer": "Viewer History",
+      "data": "C/H observations / raw history",
+      "owner": "Viewer source owner",
+      "readEntry": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/history.get.ts",
+      "implementation": "taiko_viewer/server/services/growth-history/evidence.ts",
+      "selectedMigration": "CONTRACT_READ_PORT",
+      "permission": "existing owner/service history_read, not external Grant",
+      "source": "pinned Publication C/H full/delta",
+      "version": "raw-v1; per-chart continuity-v3 fact policy; not play event stream",
+      "cache": "in-flight evidence memo by identity+commit; no persistent authority cache",
+      "rollback": "原 history proxy/read port",
+      "status": "PREPARED_NOT_MIGRATED",
+      "readEntrySha256": "6e30b6d351a811bcb1acb5bd0a0ac6285594c26a18e657d650359ebe3d0debb8",
+      "implementationSha256": "5827899b00d1a04cafde55b0a803c71a55ce43a62a166ef41e32814965c0d052"
+    },
+    {
+      "id": "viewer-growth",
+      "consumer": "Viewer Growth",
+      "data": "Canonical Fact / frozen measurements",
+      "owner": "Viewer user+binding",
+      "readEntry": "taiko_viewer/pages/my/growth.vue",
+      "implementation": "taiko_viewer/server/services/growth-history/service.ts",
+      "selectedMigration": "BFF_SERVICE",
+      "permission": "Viewer Session / server-derived owner+binding",
+      "source": "same committed ReadView; existing goal facts/measurement SQL",
+      "version": "viewer-growth-v1 + existing factPolicyRevision; modelRevision for frozen measurements",
+      "cache": "request-scoped evidence only; frozen measurements not replaced",
+      "rollback": "原 Growth history/overview/recent/passport services",
+      "status": "ISOLATED_FACT_CHAIN_DEMO_PASS_MEASUREMENTS_NOT_REQUESTED",
+      "readEntrySha256": "7eb0bc89b3eabe52e1970f3ec6d5ca34ca539593b40c648fec2481fbf6038165",
+      "implementationSha256": "d7693fb65645951642be700c34f48a874ed33f1e52c00e0a3012ea8d444cae6c"
+    },
+    {
+      "id": "viewer-goal",
+      "consumer": "Viewer Goal",
+      "data": "baseline/evaluation/active Goal",
+      "owner": "Viewer user+binding",
+      "readEntry": "taiko_viewer/server/services/goals/snapshot.ts",
+      "implementation": "taiko_viewer/server/services/account/growth.ts",
+      "selectedMigration": "BFF_SERVICE",
+      "permission": "existing Viewer Session + owner/Goal lifecycle authority",
+      "source": "readGoalSnapshot + existing SQL Goal writer/evaluator",
+      "version": "existing frozen baseline/evaluationVersion/modelRevision; no formula changes",
+      "cache": "bypass display cache at snapshot boundary",
+      "rollback": "原 Goal services/evaluator/Writer",
+      "status": "PREPARED_NOT_MIGRATED",
+      "readEntrySha256": "44099236b17fc810b4cf6816f9547c598c596b002f27aab90d069654c5dbd658",
+      "implementationSha256": "c008c0256cbad5df7f1aa07f93458606a366da1c7f1b534db9a1c5c5e60f8052"
+    },
+    {
+      "id": "viewer-recommend",
+      "consumer": "Viewer Recommend",
+      "data": "Rating/dimensions/recommendation",
+      "owner": "Viewer binding / installed Core",
+      "readEntry": "taiko_viewer/pages/tools/recommend.vue",
+      "implementation": "taiko_viewer/server/services/account/personal.ts",
+      "selectedMigration": "INSTALLED_LOCAL_CORE",
+      "permission": "Viewer Session/BFF current owner; no external Grant for self",
+      "source": "existing installed -I recommendation_intelligence/growth_compute",
+      "version": "exact Core/calculation profile to label before integration; raw prototype null",
+      "cache": "existing response; no new algorithm/cache",
+      "rollback": "原 installed Python CLI/BFF",
+      "status": "ISOLATED_ENTRY_ONLY_NO_COMPUTE",
+      "readEntrySha256": "5a0e614d07bb8a69962c19d34731047949cfa19614b881f87619f46b82537e67",
+      "implementationSha256": "5a3fb7a312c21d3c866bc842c4720a12818ecd42c5efffa6e13866f5a101cbee"
+    },
+    {
+      "id": "sakura-bot-center",
+      "consumer": "Sakura Bot 命令（center adapter）",
+      "data": "tinfo / taikorec / scores",
+      "owner": "Bot platform principal + source authority",
+      "readEntry": "installed:taiko_bot/runtime/player/recommendation.py",
+      "implementation": "installed:taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+      "selectedMigration": "INSTALLED_LOCAL_CORE",
+      "permission": "existing bot principal/service capability; not Developer v1 Grant",
+      "source": "existing local Publication/private input preparation",
+      "version": "Taiko 0.14.2 / center Core 0.1.1 / installed Contract 0.1.0; live Sakura integration not inspected",
+      "cache": "existing bounded preparation/return-time verification; no new cache",
+      "rollback": "原 center command adapters",
+      "status": "STATIC_INSTALLED_SOURCE_ONLY_LIVE_CONSUMER_NOT_PROVEN"
+    },
+    {
+      "id": "taiko-bot-client",
+      "consumer": "taiko-bot 本地 Client",
+      "data": "remote current/history + rendering/recommendation",
+      "owner": "Client bot principal + center Source authority",
+      "readEntry": "installed:taiko_bot/runtime/player/client/provider.py",
+      "implementation": "installed:taiko_bot/private_read_client.py",
+      "selectedMigration": "CONTRACT_READ_PORT",
+      "permission": "existing platform principal/source_read/history_read; keep existing service credential",
+      "source": "existing remote Source view + PreparedPrivateInput; no additional HTTP hop",
+      "version": "Taiko 0.14.2 / client Core 0.1.2 / installed Contract 0.1.0; v1/v2 legal profile differences retained",
+      "cache": "bounded private cache requires live HTTP proof/304; current+history views must agree",
+      "rollback": "原 client provider/private_read_cache",
+      "status": "STATIC_INSTALLED_SOURCE_ONLY_NO_LIVE_REQUEST"
+    },
+    {
+      "id": "developer-v1",
+      "consumer": "Developer API v1",
+      "data": "public catalog / private profile, scores",
+      "owner": "resource owner authorizes stable client",
+      "readEntry": "taiko_viewer/lib/developer-api-v1.ts",
+      "implementation": "taiko_viewer/server/services/developer-api-v1/read.ts",
+      "selectedMigration": "DEVELOPER_API_V1",
+      "permission": "Key identity + explicit owner/binding/client/scope/audience live Grant",
+      "source": "public bounded bytes / private installed committed ReadView",
+      "version": "Schema 1.0, workspace package 0.1.2; raw calculationProfile null",
+      "cache": "private,no-store; SDK no payload cache; final proof before 304",
+      "rollback": "default-off v1 gate; legacy unchanged",
+      "status": "REVIEWED_PENDING_OWNER_FREEZE",
+      "readEntrySha256": "3f67f0b59b31866215bab3f0176bb8dd91940e3597fde21b18ca0213dc0726f1",
+      "implementationSha256": "605ad818017b2ffae00560ce8a7c46de53715c76f9a1f557b3600ec43d8ab61f"
+    },
+    {
+      "id": "public-score-token",
+      "consumer": "Legacy public-score-token consumer",
+      "data": "legacy score result / optional upstream refresh",
+      "owner": "existing taikoId token owner",
+      "readEntry": "external installed legacy service /api/public-score/by-token",
+      "implementation": "taiko_viewer/server/services/account/score-token-authority.ts",
+      "selectedMigration": "DEVELOPER_API_V1",
+      "permission": "future opt-in migration needs separately issued client + ResourceGrant; legacy token remains unchanged",
+      "source": "legacy refresh can publish; future v1 is pure GET",
+      "version": "legacy envelope is not canonical v1 equivalence",
+      "cache": "legacy semantics retained; no cache guarantee invented",
+      "rollback": "原 public-score-token API; no sunset scheduled",
+      "status": "MIGRATION_PLAN_ONLY_NOT_TESTED_LIVE",
+      "implementationSha256": "0ca3ec971b8e2f1345073e7dda418fd6fceb2689637c2013a3e02cd96aec1c15"
+    }
+  ],
+  "staticInstalledEvidence": [
+    {
+      "path": "/home/sigaer/taiko/qa-vault/role-client-agdzernd/venv/lib/python3.11/site-packages/taiko_bot/private_read_client.py",
+      "sha256": "ba63347006ef6554769004aea22b81e96ef6e2cbbc43344b77de49d468ae5ba8",
+      "scope": "static installed code only, no config/data import or service execution"
+    },
+    {
+      "path": "/home/sigaer/taiko/qa-vault/role-client-agdzernd/venv/lib/python3.11/site-packages/taiko_bot/userdata_provider.py",
+      "sha256": "df49cd0156e02bf9ab0c3a8210779fa4feeaa53990275b604718a2c7d05a6dc8",
+      "scope": "static installed code only, no config/data import or service execution"
+    },
+    {
+      "path": "/home/sigaer/taiko/qa-vault/role-client-agdzernd/venv/lib/python3.11/site-packages/taiko_bot/runtime/player/client/provider.py",
+      "sha256": "aefe07cf24eee1b44454c7411c3652b2ecb07308547aa23cc368c49774f1fc67",
+      "scope": "static installed code only, no config/data import or service execution"
+    },
+    {
+      "path": "/home/sigaer/taiko/qa-vault/role-client-agdzernd/venv/lib/python3.11/site-packages/taiko_bot/runtime/player/recommendation.py",
+      "sha256": "f7589121f2a6f21f60fc19e8fc683e059b65d55341fef29a77c172a0fd3a3526",
+      "scope": "static installed code only, no config/data import or service execution"
+    }
+  ],
+  "validation": {
+    "isolatedSqlHttp": {
+      "status": "PASS_SCOPED",
+      "observations": 9,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-4fd61589c58f/evidence/my-taiko-integration-observations.json",
+        "sha256": "725d220896c6508fb1199766bafc84f4a6f3cab5e8d1ebfe4affaaba40e1cf55"
+      }
+    },
+    "examples": {
+      "status": "PASS_SCOPED",
+      "openapiOperations": 11,
+      "schemaExamples": 93,
+      "internalReferences": 86,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-07778f7e5303/evidence/developer-examples.json",
+        "sha256": "25edb890dcf19173d3e42dffbef9437e26858c3eb41374d54449e7bc2f5ac125"
+      }
+    },
+    "runtimeSourceChangeFromReview": false,
+    "workspaceContractLink": "THIS_WORKTREE",
+    "productionAccess": false,
+    "historicalFailures": [
+      {
+        "run": "qa-65803327bb46",
+        "status": "FAIL_RETAINED_MISSING_SYNTHETIC_UPSTREAM_TIMES_AND_INITIAL_HISTORY"
+      },
+      {
+        "run": "qa-801c5528dbd1",
+        "status": "FAIL_RETAINED_ESBUILD_DESCENDANTS"
+      }
+    ],
+    "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/100-consumer-readmodel-prep-20261016/evidence-index.json"
+  }
+}
