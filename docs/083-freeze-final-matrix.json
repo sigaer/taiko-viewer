@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "OWNER_SIGNATURE_PENDING",
-  "contractFrozen": false,
+  "status": "CONTRACT_FROZEN_LOCAL",
+  "contractFrozen": true,
   "runtimeEnabled": false,
   "runtimeEnabledScope": "candidate source/default local runtime configuration; production state NOT_OBSERVED",
   "testFixtureRoutesAdmitted": true,
@@ -40,39 +40,39 @@
   },
   "ownerDecisions": {
     "F1": {
-      "ownerStatus": "OWNER_APPROVAL_PENDING",
-      "owner": null,
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
       "approvedAt": null,
-      "approvalId": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
       "recommendation": "ACCEPT_UNCHANGED_UNIQUE_SCHEMA_ADDITIVE_SCOPE"
     },
     "F2": {
-      "ownerStatus": "OWNER_APPROVAL_PENDING",
-      "owner": null,
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
       "approvedAt": null,
-      "approvalId": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
       "recommendation": "ACCEPT_EXISTING_SCOPED_GRANT_AUTHORITY"
     },
     "F3": {
-      "ownerStatus": "OWNER_APPROVAL_PENDING",
-      "owner": null,
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
       "approvedAt": null,
-      "approvalId": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
       "recommendation": "ACCEPT_AFTER_OWNER_REVIEW_OF_SCOPED_MANAGEABILITY_PASS_AND_PAGINATION_COMPATIBILITY"
     },
     "F4": {
-      "ownerStatus": "OWNER_APPROVAL_PENDING",
-      "owner": null,
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
       "approvedAt": null,
-      "approvalId": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
       "recommendation": "KEEP_LEGACY_AUTH_DOMAINS_WITHOUT_SUNSET"
     },
     "F5": {
-      "ownerStatus": "OWNER_APPROVAL_PENDING",
-      "owner": null,
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
       "approvedAt": null,
-      "approvalId": null,
-      "recommendation": "NO_FREEZE_RECORD_WITHOUT_EXPLICIT_OWNER_APPROVAL"
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "APPROVED_LOCAL_CONTRACT_FREEZE_ONLY"
     }
   },
   "manageability": {
@@ -147,11 +147,14 @@
       }
     },
     "freezeRecord": {
-      "status": "NOT_RUN_OWNER_F5_PENDING"
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/freeze-scoped-validation.json",
+        "sha256": "39d35d442eadbc59478ea724d7a5bc48b57f09e8bb7bd9a2d266ef59fe0801d5"
+      }
     },
     "i5ProductBffVueNuxt": {
-      "status": "NOT_RUN_OWNER_F1_F5_PENDING",
-      "allowedWork": "isolated design and prototype tests on independent prep branch"
+      "status": "IMPLEMENTATION_AUTHORIZED_NOT_YET_VERIFIED"
     },
     "production": {
       "status": "NOT_RUN_NOT_AUTHORIZED"
@@ -190,6 +193,16 @@
         "path": "/home/sigaer/taiko/qa-vault/runs/qa-de85a6689179/evidence/f3-manageability-sql-http.log",
         "sha256": "781b245299eed179a2691ebb7960c14aa5312b2459845b201659dfd972e269d5"
       }
+    },
+    {
+      "run": "qa-53c71cf57d55",
+      "status": "FAIL",
+      "reason": "Test SDK imported before TS transpiler fixture registration; no product failure"
+    },
+    {
+      "run": "qa-55b027bc13a8",
+      "status": "FAIL",
+      "reason": "SDK default fetch collided with fixture gateway-only guard; fixed by explicit owned native fetch"
     }
   ],
   "productionRisks": {
@@ -201,7 +214,250 @@
     "P-AUDIT": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
     "P-MIGRATION": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION"
   },
-  "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016",
+  "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016",
   "reviewRecordedAt": "2026-10-16T19:22:40.648334+08:00",
-  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/review-evidence-index.json"
+  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/evidence-index.json",
+  "publicApiEnabled": false,
+  "approvalSource": {
+    "id": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+    "approver": "Owner (chat approval)",
+    "quote": "尽快吧，我这边没什么需要确认的，都差不多了",
+    "source": "docs/Viewer_083_Owner_Approved_Freeze_and_MyTaiko_I5_Implementation_20261016.md (archived in qa-vault)",
+    "signatureKind": "contextual chat approval; no cryptographic or handwritten signature",
+    "exactUtteranceTime": null
+  },
+  "frozenOutput": {
+    "manifest": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016/docs/083-release-manifest.json",
+      "sha256": "463a090855f571ed72da184a7d1d4c01691e9f5013cf1c106ce99ec190e34b36"
+    },
+    "commit": "resolved in immutable qa-vault freeze-delivery-identity.json to avoid a self-referential commit hash"
+  },
+  "freezeScopedValidation": [
+    {
+      "name": "golden18",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-7217c1949d21/evidence/contract-summary.json",
+        "sha256": "fba2730dc1694f77ccb9ae4aa1a3c61aed0ab51cb07ac0061729a83ef41376d5"
+      },
+      "verifiedInputs": [
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/api-v1.json",
+          "sha256": "c2ebf3ec5311de9734880697a728caf440b6ae358e268386fd8457e0a2ab93dd"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/growth-chart-continuity-v3.json",
+          "sha256": "1b1b98a741db0e7a883ebd18f38d7036e9be8c6da65df0932bfefe84620b1b36"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+          "sha256": "8982c5dd2dda12f8337f6f43fda87c74b07d142fa7d0b3c2ae2717b458000927"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/catalog.d.mts",
+          "sha256": "65a925798c537df2085e3744e8ca18cb7150acdc4882f5cf17f2e7702632623c"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/catalog.mjs",
+          "sha256": "721faa66f6631cdd4c89de180102e1eb40b28a7f5c651d15ebb20e5a4bfda447"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/api-v1.test.mjs",
+          "sha256": "50448d6593ba17d432864d2ec05c661b7963d670c8e685bbe4d108aaf40ae02a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/test_api_v1.py",
+          "sha256": "fc55c237d02c2ee56fcc3c5d7ee1e8be66f26fd594e3a1277e08075bde34cc78"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/.gitignore",
+          "sha256": "d17600d717042c45f76ced332fba65f02a996c07c3974396f1c4ecc89370fd06"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/README.md",
+          "sha256": "18f2e8de6423bcc00fbff7d5521711ec8f91a4004c775f1eb7480fb2be6daf0a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/growth.json",
+          "sha256": "5006e8b767ac5e68f30a35ace2a5b56c578c5e1b745abbe403573a17e5098e77"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/legacy_hiroba.py",
+          "sha256": "ab69065e301bd824c63099fb38b829ef1b7ecfdfd510368f63c7819458e303c3"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/oracle-provenance.json",
+          "sha256": "8207643eb15ce1a9039555218c594f22c584fa93466aa495190408fb6020b998"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/scores.json",
+          "sha256": "59224c009066ac71d1e407f9f3ea1ab0c02e538c1d0d229b7b4dc041342dcc40"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/viewer-read-shanghai.json",
+          "sha256": "c3807d1cb165f674d545c478576cbb62418163e4b40e80b9921cfecfb50c9c37"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/viewer-read-utc.json",
+          "sha256": "e8c7ed13924db4a2bbb36c33da3657da996e913de6f8f18badb571fa8f6b339e"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/package.json",
+          "sha256": "004df181edab0289afac9e700d9d8615aa518f2d26630619b9338b1fddfc0aba"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/pyproject.toml",
+          "sha256": "e210aba3154fc0a592f73ecef76174acaec9a29d1604db5a995d4bee151fd25a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/__init__.py",
+          "sha256": "d118253e1c4d7be71622c096e4119b1a1f67da2319da426207daf763ff9a5cd6"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/legacy.py",
+          "sha256": "66fce2b4d944f4406a700683a033a79d391c845fc6e7a0ef74a6a709da023137"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
+          "sha256": "b3d58e459e2f070f4830a901b61b15a1a3bdb364370cf052e6b8fdc0bdda0a76"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/schema/contract-v1.json",
+          "sha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/index.ts",
+          "sha256": "a1e11721e36cf4914f8957748b82cb3570498ff129f0aa51b7a601ab4cb7698d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/legacy.mjs",
+          "sha256": "0617cb98bcd79111e3e068558c0444faa80912eb0d6b4127bfa23f6dee756df4"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/read-values.d.mts",
+          "sha256": "968552346ace2b39f6e40f6984d99c6853014ba1a7e123fdf08af20486df073b"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/read-values.mjs",
+          "sha256": "6820d1a2e6645e978b9b4c50dd4d2ad88ba21c8e1f05ddb5ed86895c5dfdc96c"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/score-read.ts",
+          "sha256": "af04c4cf13d7c5d2597822a6401a83cef64331cf27a152e73f9a0363f54febbd"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/contract.test.mjs",
+          "sha256": "04a9947968038e50e4c871be242d6b0bc22b8b976cfd0830a979aed9a636fe7d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/test_contract.py",
+          "sha256": "74d2519ff3c43abc28d4a938316ba948569db68617def5d629459c11f5a51d3f"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/viewer-read.test.mjs",
+          "sha256": "9ee792a7259a7c8a6f7570ae55a181fe147f487131ab7e9ab7fa5fef8caaca31"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tools/generate_bindings.py",
+          "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tools/generate_viewer_read_goldens.mjs",
+          "sha256": "75c7a7a48974a87d08ea651fb108a53ead121aa7541d724b96080a0aff1be2eb"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "f3_34",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/manageability-summary.json",
+        "sha256": "d52d4ae2c9bbf94e94b3e6968e3a86201051f7b95eba2d68430b4ee2d2562ba0"
+      },
+      "verifiedInputs": [
+        {
+          "file": "taiko_viewer/tests/developerApiV1ManageabilitySql.test.mjs",
+          "sha256": "47a835ae75e69024b440564a3e0f1eba65009e64ad9ab9ccd40904ec5ea8f3ce"
+        },
+        {
+          "file": "taiko_viewer/tests/fixtures/developerApiV1ManageabilityUi.mjs",
+          "sha256": "373d3c925cfe06d3792e47128dd549d39a99ed6629903f2c10eb1529eb7998a1"
+        },
+        {
+          "file": "taiko_viewer/pages/account/developer/grants.vue",
+          "sha256": "5978d06959480a6060423dedac1a780fe92d89492293673d93761fe2d59f10df"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/[clientId].delete.ts",
+          "sha256": "ca6b2f84c34b43bbf72fbda7859ea17b7017f7605a0532a7890f24ffa7267baf"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/index.get.ts",
+          "sha256": "2e002f64853f7a4e24ba08791068ac36040564291733037cb4916b3ec9f33996"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/index.post.ts",
+          "sha256": "16eb4eef7316beb794ed3d59fc20d93b0b944b6ab0b5714aeabd7a99be297bdc"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/[grantId].delete.ts",
+          "sha256": "7a32cf5cc2a2c85038f42ab344fe59cfe1fc1bb51053745807f128119e8267b9"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/index.get.ts",
+          "sha256": "1e6a4e5a2123ca48b79bae84ac816b7e0e284dcfcbefe619a4dcf72cc01bf1e9"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/index.post.ts",
+          "sha256": "c313340130be6c37b90c7c485cc7784c4432d724024e0be364d21c5b59ca518a"
+        },
+        {
+          "file": "taiko_viewer/server/infrastructure/developer-api-v1/schema.ts",
+          "sha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1"
+        },
+        {
+          "file": "taiko_viewer/server/services/developer-api-v1/authority.ts",
+          "sha256": "ee317e2cceeb3bbf7af3333447c402215fd4a9fcdf87496b6f504a02228bae18"
+        },
+        {
+          "file": "taiko_viewer/server/services/developer-api-v1/grants.ts",
+          "sha256": "3f017e6be0bf393dc9d6d378416904e82a4061d72bab31226d5124f113820a15"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "httpSdk74_sdk_scope",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-8b89a48bcfcd/evidence/sql-summary.json",
+        "sha256": "c993e0290fe1a08c2dab804ce23ce0508958f60c188f55418bc23740504275cf"
+      },
+      "verifiedInputs": [
+        {
+          "file": "taiko_viewer/lib/developer-api-v1.ts",
+          "sha256": "3f67f0b59b31866215bab3f0176bb8dd91940e3597fde21b18ca0213dc0726f1"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "frozen-sql-native",
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1d5d7afd3543/evidence/command.json",
+        "sha256": "f5c70fc8202a091054369a499626aeda2d0e7ced26c09b9f43b73ed79779c2b9"
+      }
+    },
+    {
+      "name": "frozen-openapi-final",
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-28fc183c32c2/evidence/command.json",
+        "sha256": "169cb983674aea9635bf1e7c65a0db510b905cfbc0378a44ab90dd56de5f6aa8"
+      }
+    }
+  ]
 }

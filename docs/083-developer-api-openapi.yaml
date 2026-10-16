@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Viewer Developer API v1 — local Freeze Candidate
+  title: Viewer Developer API v1 — locally frozen Contract v1.0
   version: 0.83.0-rc.3
-  description: "NOT FROZEN / NOT DEPLOYED. Explicit local opt-in required. External read surface has
+  description: "CONTRACT FROZEN LOCALLY / NOT DEPLOYED. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
     into ResourceGrants."
@@ -17,7 +17,7 @@ paths:
   /api/v1/taiko/meta:
     get:
       operationId: getMeta
-      description: Local Freeze Candidate only. Anonymous public metadata, same source catalog revision;
+      description: Locally frozen contract only. Anonymous public metadata, same source catalog revision;
         no production availability claim.
       security:
         - {}
@@ -120,10 +120,10 @@ paths:
                 unavailableScopes:
                   - history:read
                   - growth:read
-                status: FREEZE_CANDIDATE
+                status: CONTRACT_FROZEN
                 catalogProfile: source-catalog-explicit-v1
                 pagination: none-bounded-complete-response
-                contractFrozen: false
+                contractFrozen: true
                 runtimeEnabled: true
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
@@ -2359,9 +2359,9 @@ components:
       name: stv_session
       description: Existing verified owner session; Authorization headers are rejected for these operations.
 x-schema-source: packages/sakura-taiko-contract/schema/contract-v1.json
-x-freeze-status: FREEZE_CANDIDATE_NOT_FROZEN
+x-freeze-status: CONTRACT_FROZEN_LOCAL
 x-production-authorized: false
 x-lifecycle-policy:
-  contractFrozen: false
+  contractFrozen: true
   runtimeDefaultEnabled: false
-  ownerApproval: null
+  ownerApproval: CHAT_OWNER_APPROVAL_20261016_F1_F5

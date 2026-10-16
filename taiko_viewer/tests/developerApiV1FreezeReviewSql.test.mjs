@@ -17,7 +17,7 @@ test('Freeze review bounded HTTP, lifecycle, SDK and owner list completeness',{t
  const observations=[];
  async function ask(name,url,{method='GET',body,token,expected=200,code,etag}={}){const r=await c.request(method,url,body,c.cookie,{origin:c.baseUrl,...(token?{authorization:'Bearer '+token}:{}),...(etag?{'if-none-match':etag}:{})});const data=await r.json();assert.equal(r.status,expected,name);if(code){assert.equal(data.code,code,name);assert.equal(r.headers.get('cache-control'),'private, no-store');assert.equal(r.headers.get('etag'),null);assert.equal('items' in data,false);}observations.push({name,status:r.status,code:data.code||null});return {data,etag:r.headers.get('etag')};}
  c.config.developerApiV1=false;await ask('disabled-not-frozen','/api/v1/taiko/meta',{expected:404,code:'NOT_FOUND'});c.config.developerApiV1=true;
- const meta=await ask('candidate-lifecycle','/api/v1/taiko/meta');assert.equal(meta.data.status,'FREEZE_CANDIDATE');assert.equal(meta.data.contractFrozen,false);assert.equal(meta.data.runtimeEnabled,true);
+ const meta=await ask('frozen-lifecycle','/api/v1/taiko/meta');assert.equal(meta.data.status,'CONTRACT_FROZEN');assert.equal(meta.data.contractFrozen,true);assert.equal(meta.data.runtimeEnabled,true);
  const pub=await ask('catalog-small','/api/v1/taiko/catalog/songs');
  await writeFile(path,JSON.stringify(Array.from({length:10000},(_,i)=>({id:i+1}))));const max=await ask('catalog-10000-complete','/api/v1/taiko/catalog/songs');assert.equal(max.data.items.length,10000);
  await writeFile(path,JSON.stringify(Array.from({length:10001},(_,i)=>({id:i+1}))));await ask('catalog-10001-refused','/api/v1/taiko/catalog/songs',{expected:503,code:'CATALOG_LIMIT_EXCEEDED',etag:pub.etag});
