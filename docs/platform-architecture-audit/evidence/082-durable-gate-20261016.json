@@ -50,7 +50,9 @@
       "name": "passport-strict",
       "passed": 13,
       "status": "PASS_SCOPED",
-      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence"
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence",
+      "parentWrapperStatus": "FAIL_UNSAFE_SCRATCH_HARDLINK_RULE",
+      "scope": "Individual completed strict suite only; batch was interrupted later"
     },
     {
       "name": "installed-consumers-revision-fingerprint-annual-layout",
@@ -69,6 +71,27 @@
       "passed": 46,
       "status": "PASS_SCOPED",
       "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-abc55d05f04b/evidence"
+    },
+    {
+      "name": "source-reappearance",
+      "passed": 11,
+      "status": "PASS_SCOPED",
+      "parentWrapperStatus": "FAIL_UNSAFE_SCRATCH_HARDLINK_RULE",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence"
+    },
+    {
+      "name": "source-reappearance-installed",
+      "passed": 2,
+      "status": "PASS_SCOPED",
+      "parentWrapperStatus": "FAIL_UNSAFE_SCRATCH_HARDLINK_RULE",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence"
+    },
+    {
+      "name": "chart-continuity",
+      "passed": 11,
+      "status": "PASS_SCOPED",
+      "parentWrapperStatus": "FAIL_UNSAFE_SCRATCH_HARDLINK_RULE",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence"
     }
   ],
   "historicalHistoryC3": {
@@ -82,10 +105,10 @@
     "newDiagnosis": "PASS_SCOPED_METHOD_DIAGNOSTIC_HISTORICAL_FAIL_RETAINED",
     "historicalFailureFixedClaim": false
   },
-  "diskInventory": "/home/sigaer/taiko/qa-vault/runs/qa-d5709b0e543c/evidence/durable-qa-inventory.json",
+  "diskInventory": "/home/sigaer/taiko/qa-vault/runs/qa-b494a72a1631/evidence/durable-qa-inventory.json",
   "remaining": [
-    "O1 history diagnosis and incomplete cohorts",
-    "isolated consistency restore replacement evidence and full recovery readiness",
+    "Annual resource failure diagnosis; incomplete formal O1 cohorts and historical history resource failure attribution",
+    "continuous backup/PITR, full-scale recovery and restore orchestration readiness",
     "encrypted off-host backup and rights clearance",
     "authorized production read-only ingress/ACL/runtime audit",
     "owner signoff"
@@ -115,6 +138,100 @@
     "admissionUnitTests": 14,
     "admissionEvidenceRun": "qa-9b37dfa703ce",
     "productionRecoveryGate": "BLOCKED",
-    "httpReadiness": "IN_PROGRESS"
-  }
+    "httpReadiness": {
+      "status": "PASS_SCOPED_HTTP_RESTORE",
+      "rpoMs": 141,
+      "rtoMs": 7864.98,
+      "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-010859c89224/evidence/http-restore-IQQ5VK/evidence.json",
+      "rawSqlArchive": "SCRATCH_ONLY_CLEANED",
+      "durableSqlArchive": "REDACTED_NOT_RESTORABLE"
+    }
+  },
+  "annual": {
+    "warm": "PASS_SCOPED",
+    "requestsPerRate": 200,
+    "rates": [
+      1,
+      3,
+      5
+    ],
+    "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-287cb26197ae/evidence/annual-o1-WUpDqP/evidence.json",
+    "cold30": {
+      "status": "FAIL_RESOURCE",
+      "attempted": 1,
+      "completed": 0,
+      "failed": 1,
+      "notExecuted": 29,
+      "reason": "MEMORY_PSI_FULL",
+      "elapsedUntilStopMs": 52654,
+      "p95Ms": null,
+      "p99Ms": null,
+      "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-5593936cff4c/evidence/annual-o1-A3cg7j/evidence.json",
+      "parentWrapperExitCode": 0,
+      "wrapperExitCodeDoesNotOverrideBusinessFailure": true
+    },
+    "poster": "PREPARED_NOT_EXECUTED_RESOURCE_STOP"
+  },
+  "privateCurrentC1": {
+    "status": "PASS_SCOPED",
+    "success": 600,
+    "perScale": 200,
+    "aggregate": "/home/sigaer/taiko/qa-vault/evidence/o1-current-c1-20261016/phase-performance-aggregate.json"
+  },
+  "diskInventoryScope": "65 prior completed runs; inventory run itself also exited and removed owned scratch",
+  "passportExtreme": {
+    "status": "PASS_EXTREME_SCOPED",
+    "snapshots": 2000,
+    "chartsPerSnapshot": 500,
+    "wallMs": 8390,
+    "limitMs": 15000,
+    "aggregate": "/home/sigaer/taiko/qa-vault/evidence/o1-passport-extreme-20261016/phase-performance-aggregate.json",
+    "includedInNormalPercentiles": false
+  },
+  "o1Stage": {
+    "status": "BLOCKED_RESOURCE_ADMISSION",
+    "evidence": "/home/sigaer/taiko/qa-vault/evidence/o1-resource-stop-stage-20261016/fast-o1-performance-20261016.json",
+    "sha256": "463bb56617961c1052647a12c07f6b1fc7cb0dcf1118249cf57d532454de6578"
+  },
+  "historicalEvidenceReuse": {
+    "workerSql119": "HISTORICAL_ACCEPTED_RAW_LOST_CURRENT_ARTIFACT_REUSE_NOT_ESTABLISHED",
+    "minimalSqlReplacement": "8 named tests across accountSyncCanonicalSql/sourceProxySql/qqMigrationProxySql/hirobaCredentialSql; NOT_RUN_AFTER_RESOURCE_STOP",
+    "png12": "HISTORICAL_ACCEPTED_RAW_LOST; original resource hashes not recovered; synthetic B30 is not old pixel parity"
+  },
+  "oracleDisposition": "Strict Passport original DTO restored, chart-specific comparison and Annual identity targeted checks PASS; see oracle-arbitration-20261016.md and current keyGates",
+  "schemaRevision": "Pinned in runtime manifest, original frozen source digests and per-operation input/closure hashes; no legacy measurement or report rewrite",
+  "localRollbackReference": "Viewer 6e7f35b source comparison only; deployed revision/interpreter unknown",
+  "productDraft": {
+    "commit": "78ce858",
+    "status": "READY_FOR_FREEZE_REVIEW_NOT_FROZEN",
+    "worktree": "/home/sigaer/taiko/.worktrees/viewer1-draft-recovered-20261016",
+    "previousTests": "25 historical PASS; raw evidence lost, not rerun this task"
+  },
+  "diskInventorySha256": "d3718586d19ca61bde4a29783e75b7462978099d9947c1413fe874546fbe29e8",
+  "space": {
+    "before": {
+      "recordedAtEpoch": 1792121835.549275,
+      "path": "/home/sigaer/taiko/qa-vault",
+      "freeBytes": 41197596672,
+      "totalBytes": 338068033536,
+      "vaultAllocatedBytes": 20480,
+      "cleanup": "NONE; no existing files removed"
+    },
+    "after": {
+      "recordedAtEpoch": 1792125707.2391248,
+      "freeBytes": 39094525952,
+      "vaultAllocatedBytes": 1330135040,
+      "vaultMode": "0o700"
+    },
+    "unrelatedDeletion": false
+  },
+  "abortPropagation": {
+    "status": "PASS",
+    "newUnitTests": 5,
+    "realMaintenanceSmoke": "qa-4163edfc0fcf",
+    "expectedWrapperExitCode": 125,
+    "originalAnnualManifestUnmodified": true
+  },
+  "businessLoadState": "STOPPED_AFTER_ANNUAL_MEMORY_PSI_FULL",
+  "minimalInstalledPlan": "../minimal-installed-revalidation-20261016.md"
 }

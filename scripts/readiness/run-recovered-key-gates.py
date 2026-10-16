@@ -8,7 +8,7 @@ assert 'development-qa.slice' in Path('/proc/self/cgroup').read_text()
 out=Path(os.environ['QA_EVIDENCE_DIR']);scratch=Path(os.environ['QA_RUN_TMPDIR']);vault=Path('/home/sigaer/taiko/qa-vault')
 manifest_path=Path(os.environ['QA_ARTIFACT_MANIFEST']);m=json.loads(manifest_path.read_text());python=m['candidate']['python']
 assert Path(python).is_relative_to(vault)
-env={**os.environ,'TAIKO_PYTHON_EXECUTABLE':python,'TAIKO_PUBLICATION_TEST_REPO_ROOT':str(scratch),'TAIKO_COMPUTE_ONLY':'1','TAIKO_RUNTIME_ENV_FILE':str(scratch/'absent.env'),'MPLCONFIGDIR':str(scratch/'mpl'),'XDG_CACHE_HOME':str(scratch/'cache'),'TAIKO_OFFLINE_ROOT':str(scratch),'TAIKO_CENTER_ROOT':str(scratch),'TAIKO_RUNTIME_ROOT':str(scratch),'TAIKO_USERDATA_DIR':str(scratch/'userdata'),'QA_TEST_TOOLS_ROOT':str(vault/'tooling/pytest-8.4.2-proxy')}
+env={**os.environ,'TAIKO_PYTHON_EXECUTABLE':python,'TAIKO_PUBLICATION_TEST_REPO_ROOT':str(scratch),'TAIKO_COMPUTE_ONLY':'1','TAIKO_RUNTIME_ENV_FILE':str(scratch/'absent.env'),'MPLCONFIGDIR':str(scratch/'mpl'),'XDG_CACHE_HOME':str(scratch/'cache'),'TAIKO_OFFLINE_ROOT':str(scratch),'TAIKO_CENTER_ROOT':str(scratch),'TAIKO_RUNTIME_ROOT':str(scratch),'TAIKO_USERDATA_DIR':str(scratch/'userdata'),'QA_TEST_TOOLS_ROOT':str(vault/'tooling/pytest-8.4.2-proxy'),'PYTEST_ADDOPTS':'-p no:cacheprovider'}
 (scratch/'userdata').mkdir();(scratch/'songs').mkdir();(scratch/'songs/song_data.json').write_text('[]')
 node='/www/server/nvm/versions/node/v24.13.0/bin/node'
 cases=[]
@@ -18,7 +18,7 @@ if args.group=='node':
  # Only the replaced source-layout Oracle; don't rerun unrelated HTTP cases.
  cases.append(('layout',[node,'--experimental-transform-types','--test','--test-reporter=tap','--test-name-pattern=generic history writer',str(root/'taiko_viewer/tests/growthRecentHttp.test.mjs')]))
 else:
- cases=[('facts',[python,'-I',str(taiko/'scripts/readiness/run-installed-reappearance.py'),'--tests',str(taiko/'tests/offline/test_reappearance_facts.py'),'--output',str(out/'facts.json')]),('credential',[python,'-I',str(vault/'sources/credential-v2/installed_acceptance.py'),'--output',str(out/'credential.json')]),('annual-oracle',[python,'-I',str(taiko/'scripts/readiness/run-installed-annual-oracle.py'),'--tests',str(taiko/'tests/offline'),'--external-pytest',str(vault/'tooling/pytest-8.4.2-proxy/lib/python3.11/site-packages'),'--frozen',str(vault/'sources/frozen-original'),'--output',str(out/'annual-oracle.json')])]
+ cases=[('facts',[python,'-B','-I',str(taiko/'scripts/readiness/run-installed-reappearance.py'),'--tests',str(taiko/'tests/offline/test_reappearance_facts.py'),'--output',str(out/'facts.json')]),('credential',[python,'-B','-I',str(vault/'sources/credential-v2/installed_acceptance.py'),'--output',str(out/'credential.json')]),('annual-oracle',[python,'-B','-I',str(taiko/'scripts/readiness/run-installed-annual-oracle.py'),'--tests',str(taiko/'tests/offline'),'--external-pytest',str(vault/'tooling/pytest-8.4.2-proxy/lib/python3.11/site-packages'),'--frozen',str(vault/'sources/frozen-original'),'--output',str(out/'annual-oracle.json')])]
 if args.start_at:
  assert args.start_at in [label for label,_ in cases]
  cases=cases[[label for label,_ in cases].index(args.start_at):]
