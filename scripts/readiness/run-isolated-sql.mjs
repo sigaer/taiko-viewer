@@ -90,7 +90,7 @@ try{
   if(process.argv.includes('--o1-stream-check'))testEnv.TAIKO_O1_STREAM_CHECK='1';
   if(process.argv.includes('--o1-baseline')){testEnv.TAIKO_O1_BASELINE='1';evidence.o1.baseline='Taiko 0.14.1; unchanged other 93 locked wheels';}
  }
- await writeFile(resolve(workspace,'test-config.json'),JSON.stringify(testEnv),{mode:0o600});
+ await writeFile(resolve(scratch,'test-config.json'),JSON.stringify(testEnv),{mode:0o600});
  stage='bootstrap';
  assert.deepEqual(await run(process.execPath,['taiko_viewer/scripts/bootstrap_source_security_test_db.mjs'],'bootstrap',testEnv),{code:0,signal:null});
  const suites=process.argv.filter(arg=>/^taiko_viewer\/tests\/[A-Za-z0-9]+\.test\.mjs$/.test(arg));
