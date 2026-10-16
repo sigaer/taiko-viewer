@@ -101,11 +101,21 @@ class VaultTests(unittest.TestCase):
     def test_vault_root_symlink_rejected(self):
         (self.base/'link').symlink_to(self.run.root,target_is_directory=True)
         with self.assertRaises(qa.UnsafePath): qa.Run(self.base/'link')
-    def test_hardlink_rejected(self):
+    def test_scratch_hardlink_counted_cleanup_preserves_external_link(self):
         outside=self.base/'outside'; outside.write_text('safe')
         os.link(outside,self.run.scratch/'link')
-        with self.assertRaises(qa.UnsafePath): qa.sample(self.run,'during')
+        os.link(outside,self.run.scratch/'link2')
+        usage=qa.sample(self.run,'during')['scratch']
+        self.assertEqual(usage['hardlinkEntryCount'],2)
+        self.assertEqual(usage['logicalBytes'],8)
+        self.assertEqual(usage['allocatedBytes'],self.run.scratch.stat().st_blocks*512+outside.stat().st_blocks*512)
         self.run.clean_scratch(True)
+        self.assertEqual(outside.read_text(),'safe')
+    def test_evidence_hardlink_rejected(self):
+        outside=self.base/'outside'; outside.write_text('safe')
+        os.link(outside,self.run.evidence/'link')
+        with self.assertRaises(qa.UnsafePath): qa.sample(self.run,'during')
+        with self.assertRaises(qa.UnsafePath): qa.archive_evidence(self.run)
         self.assertEqual(outside.read_text(),'safe')
     def test_budget_output_and_directory_modes(self):
         for path in [self.run.root,self.run.path,self.run.scratch,self.run.evidence]: self.assertEqual(path.stat().st_mode & 0o777,0o700)

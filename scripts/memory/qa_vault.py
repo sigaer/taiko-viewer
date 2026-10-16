@@ -112,7 +112,8 @@ class Run:
 
 
 def tree_usage(path, reject_symlinks=False):
-    total = allocated = largest = entries = symlinks = 0
+    total = allocated = largest = entries = symlinks = hardlinks = 0
+    seen_inodes = set()
     base = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     allocated += os.fstat(base).st_blocks * 512
     stack = [base]
@@ -126,7 +127,10 @@ def tree_usage(path, reject_symlinks=False):
                         raise UnsafePath('run entry count exceeds monitoring bound')
                     try:
                         st = os.stat(name, dir_fd=directory, follow_symlinks=False)
-                        allocated += st.st_blocks * 512
+                        identity = (st.st_dev, st.st_ino)
+                        if identity not in seen_inodes:
+                            allocated += st.st_blocks * 512
+                            seen_inodes.add(identity)
                         if stat.S_ISLNK(st.st_mode):
                             if reject_symlinks:
                                 raise UnsafePath("symlink evidence cannot be archived")
@@ -136,7 +140,9 @@ def tree_usage(path, reject_symlinks=False):
                             stack.append(os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory))
                         elif stat.S_ISREG(st.st_mode):
                             if st.st_nlink != 1:
-                                raise UnsafePath('hardlinked run file is not allowed')
+                                if reject_symlinks:
+                                    raise UnsafePath('hardlinked evidence cannot be archived')
+                                hardlinks += 1
                             total += st.st_size
                             largest = max(largest, st.st_size)
                         elif not stat.S_ISSOCK(st.st_mode):
@@ -149,7 +155,7 @@ def tree_usage(path, reject_symlinks=False):
     finally:
         for directory in stack:
             os.close(directory)
-    return {'bytes': total, 'logicalBytes': total, 'allocatedBytes': allocated, 'symlinkCount': symlinks, 'largestFileBytes': largest, 'entries': entries}
+    return {'bytes': total, 'logicalBytes': total, 'allocatedBytes': allocated, 'symlinkCount': symlinks, 'hardlinkEntryCount': hardlinks, 'largestFileBytes': largest, 'entries': entries}
 
 
 def sample(run, phase):

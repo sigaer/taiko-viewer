@@ -1,6 +1,6 @@
 {
   "status": "PASS_SCOPED",
-  "tests": 15,
+  "tests": 16,
   "realSystemdSmoke": "PASS",
   "realSmokeChildPidsVerifiedAbsent": [
     2997833,
@@ -45,17 +45,29 @@
       "exitCode": 0,
       "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
       "childrenStopped": true
+    },
+    "qa-8dcbdd00a8d5": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-8dcbdd00a8d5/evidence/manifest.json",
+      "sha256": "c38613fd3a0159119d3dfe97eb55ed0c300dd342c1f2efc5055993cf19082d24",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
     }
   },
   "sourceHashes": {
     "scripts/memory/run_qa.sh": "6d4083e3e652612f25eec6e1e2057560e5b16881e56d196308339f59db14ab4e",
-    "scripts/memory/qa_vault.py": "16127fd6a52939576c5f7ebfeb06e32d462e67df397f21e142cb9ceada3e151d",
-    "scripts/memory/tests/test_qa_vault.py": "2d6528d48aee75916b0adc043351b4541ab7ad1a12f1e6a88e64753f10aa87ff",
+    "scripts/memory/qa_vault.py": "0dd68edaaa5094829a4cd6064aaeae6b9cf5622dc1e4ecde81271c63b9c66382",
+    "scripts/memory/tests/test_qa_vault.py": "0ee85447de3199eb614a23e3f7dd5aa8f9cd2f721d7dddfbcbe46af5b26bcff8",
     "scripts/memory/tests/qa_wrapper_smoke.py": "886bd7cad9ee683632799e42a247a00070362807fea15e5c695c729b31e7ba6a"
   },
   "limits": [
     "2-second disk sampling is not an instantaneous quota",
     "Files outside run are not inventoried or cleaned",
     "Caller output must not contain secrets; manifest omits command arguments/environment"
-  ]
+  ],
+  "hardlinkRegression": {
+    "priorFailure": "qa-e51b0af965bc: installed publication uses legitimate os.link within scratch; monitor falsely rejected it after 13 Passport PASS",
+    "resolution": "Scratch hardlink names counted; allocated bytes deduplicate dev/inode; evidence hardlinks still rejected; external link survives scratch cleanup",
+    "validation": "qa-8dcbdd00a8d5"
+  }
 }
