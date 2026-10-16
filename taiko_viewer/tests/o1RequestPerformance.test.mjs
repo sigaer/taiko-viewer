@@ -6,6 +6,7 @@ import {readFile,writeFile,mkdir,symlink,readdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {performance} from 'node:perf_hooks';
 import {execFileSync} from 'node:child_process';
+import {consumeO1Response,proveO1StreamingEquivalence} from './fixtures/o1ResponseStream.mjs';
 import {accountSourceFixture} from './fixtures/accountSourceHttp.mjs';
 const op=process.env.TAIKO_O1_OPERATION,concurrency=Number(process.env.TAIKO_O1_CONCURRENCY),n=Number(process.env.TAIKO_O1_SAMPLES),output=process.env.TAIKO_O1_OUTPUT;
 assert.ok(['private-current','private-history','private-merged-current','private-merged-history','growth-history','growth-overview','growth-passport','b30'].includes(op));assert.ok([1,3,5].includes(concurrency));assert.ok([1,3,50,200].includes(n));assert.ok(output?.startsWith('/var/tmp/viewer1-sql-'));
@@ -16,7 +17,7 @@ assert.ok(group?.includes('development-qa.slice/taiko-qa-'));
 const cg='/sys/fs/cgroup'+group;
 const read=path=>readFile(path,'utf8').catch(()=>null);
 const counters=text=>Object.fromEntries((text||'').trim().split('\n').filter(Boolean).map(v=>{const[k,n]=v.split(/\s+/);return[k,Number(n)]}));
-const evidence={schemaVersion:1,status:'RUNNING',operation:op,concurrency,requested:n*scales.length,samplesPerScale:n,scales:[],samples:[],resource:[],productionAccess:false,clock:'performance.now; HTTP send to fully consumed JSON body',sqlIsolation:'owned mysqld; actual SELECT DATABASE guard',loadModel:'closed loop, fixed concurrency; no arrival-rate or production claim',requestDeadlineMs:op==='b30'?30000:selectedScale==='extreme'?20000:12000,resourceScope:'cgroup includes descendants; PSS/RSS are Node process only, not process tree',queueWaitMs:null,queueWaitReason:'no application job queue for these reads; SQL/socket/source-lock wait included in lifecycle',baselineComparison:{status:'EVIDENCE_PENDING',reason:'same-input old artifact cohort not yet measured'},limitations:['synthetic catalog (100/101/102) and empty Goal/measurement rows; real SQL queries, HTTP auth, publication reader and replay','private modes use explicit service grant, no owner binding fallback; current/history are single-source, merged not measured','cold disk cache is not asserted; original page cache retained'],cgroup:group};
+const evidence={schemaVersion:1,status:'RUNNING',operation:op,concurrency,requested:n*scales.length,samplesPerScale:n,scales:[],samples:[],resource:[],productionAccess:false,clock:'performance.now; HTTP send to final body byte consumed and SHA updated',measurementRevision:'stream-consume-v2',sqlIsolation:'owned mysqld; actual SELECT DATABASE guard',loadModel:'closed loop, fixed concurrency; no arrival-rate or production claim',requestDeadlineMs:op==='b30'?30000:selectedScale==='extreme'?20000:12000,resourceScope:'cgroup includes descendants; PSS/RSS are Node process only, not process tree',queueWaitMs:null,queueWaitReason:'no application job queue for these reads; SQL/socket/source-lock wait included in lifecycle',baselineComparison:{status:'EVIDENCE_PENDING',reason:'same-input old artifact cohort not yet measured'},limitations:['synthetic catalog (100/101/102) and empty Goal/measurement rows; real SQL queries, HTTP auth, publication reader and replay','private modes use explicit service grant, no owner binding fallback; current/history are single-source, merged not measured','cold disk cache is not asserted; original page cache retained'],cgroup:group};
 const audit=new URL('../../docs/platform-architecture-audit/',import.meta.url);
 const baseline=process.env.TAIKO_O1_BASELINE==='1';
 const lockName=baseline?'runtime-role-locks-with-memory.json':'runtime-role-locks-0142.json';
@@ -33,6 +34,7 @@ assert.equal(await sha(wheel.file),wheel.sha256);
 const rebuild=JSON.parse(await readFile(new URL(originName,audit)));
 assert.equal(process.env.TAIKO_PYTHON_EXECUTABLE,rebuild.installed.interpreter);
 evidence.manifest={viewerBaseline:'6e7f35b',viewerVersion:'0.82.1',taikoWheelSha256:wheel.sha256,lockSha256:createHash('sha256').update(lockBytes).digest('hex'),interpreter:process.env.TAIKO_PYTHON_EXECUTABLE,centerRole:lock.roles.center.environmentIdentity,clientRole:lock.roles.client.environmentIdentity,comparisonAxis:baseline?'old Taiko artifact only; same Viewer service source':'candidate',installedOriginEvidence:originName,installedOriginEvidenceSha256:await sha(new URL(originName,audit)),testHarnessSha256:await sha(new URL(import.meta.url))};
+evidence.manifest.measurementRevision='stream-consume-v2';
 evidence.manifest.viewerWorktreeHead=execFileSync('git',['rev-parse','HEAD'],{cwd:new URL('../../',import.meta.url),encoding:'utf8'}).trim();
 evidence.manifest.runtimeClosure={};for(const file of ['utils/dailyProgress.ts','server/services/growth-history/evidence.ts','server/services/growth-history/service.ts','server/services/growth-passport/service.ts','server/services/account/growth.ts','server/services/account/charts.ts'])evidence.manifest.runtimeClosure[file]=await sha(new URL('../'+file,import.meta.url));
 const initial=counters(await read(cg+'/memory.events'));assert.ok(Number.isFinite(initial.oom)&&Number.isFinite(initial.oom_kill),'Cgroup OOM counters required');let stopped=null,busy=false;
@@ -103,14 +105,15 @@ test('O1 synthetic real HTTP request cohort',{timeout:570000},async()=>{
     }finally{await secondLease?.close();await lease.close();}
     if(op==='b30')await writeFile(resolve(c.config.userdataDir,c.taikoId+'data.json'),lastPayload);
     await writeFile(output,JSON.stringify(evidence,null,2)+'\n',{mode:0o600});
+    if(process.env.TAIKO_O1_STREAM_CHECK==='1'&&!evidence.streamValidation)evidence.streamValidation=await proveO1StreamingEquivalence(()=>c.request('GET',path,null,isAccount?c.cookie:'',headers));
     const count=n,end=nextIndex+count;
     let cursor=nextIndex;nextIndex=end;
     await Promise.all(Array.from({length:Math.min(concurrency,count)},async()=>{
      while(cursor<end&&!stopped){
-      const index=cursor++,started=performance.now();let status=null,bytes=0,error=null;
-      try{const response=await c.request('GET',path,null,isAccount?c.cookie:'',headers);status=response.status;if(op==='b30'){const body=await response.arrayBuffer();bytes=body.byteLength;if(status===200)assert.equal(response.headers.get('content-type'),'image/jpeg');}else{const body=await response.text();bytes=Buffer.byteLength(body);if(status===200)JSON.parse(body);}}
+      const index=cursor++,started=performance.now();let status=null,bytes=0,error=null,bodySha256=null;
+      try{const response=await c.request('GET',path,null,isAccount?c.cookie:'',headers);status=response.status;const body=await consumeO1Response(response,{jpeg:op==='b30'});bytes=body.bytes;bodySha256=body.sha256;}
       catch(e){error=e?.name==='TimeoutError'||e?.name==='AbortError'?'timeout':'request_error';}
-      const wallMs=performance.now()-started;evidence.samples.push({index,scale,charts,history,wallMs,status,bytes,error,hardCapExceeded:op==='private-history'||isMerged?wallMs>10000:op==='b30'?wallMs>30000:selectedScale==='extreme'?wallMs>15000:false});
+      const wallMs=performance.now()-started;evidence.samples.push({index,scale,charts,history,wallMs,status,bytes,bodySha256,error,hardCapExceeded:op==='private-history'||isMerged?wallMs>10000:op==='b30'?wallMs>30000:selectedScale==='extreme'?wallMs>15000:false});
      }
     }));
     await writeFile(output,JSON.stringify(evidence,null,2)+'\n',{mode:0o600});

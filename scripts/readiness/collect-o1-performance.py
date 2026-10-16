@@ -23,7 +23,7 @@ for log in sorted({f for root in a.logs for f in root.glob('*.log')}):
  if not paths:item.update(status='INCOMPLETE',reason='launcher did not finish');r['smokeAndInitialFailures'].append(item);continue
  work=Path(paths[-1]);assert work.resolve().is_relative_to('/var/tmp');result=work/'o1-performance.json'
  if not result.exists():item.update(status='HARNESS_FAIL',sqlResult=ref(work/'result.json'));r['smokeAndInitialFailures'].append(item);continue
- data=json.loads(result.read_text());item.update({key:data.get(key) for key in ['status','operation','concurrency','requested','samplesPerScale','summary','byScale','manifest','targets','failureDistribution','processResourceUsage','resourceScope','requestDeadlineMs','baselineComparison','error','syntheticDress','syntheticCatalogSha256','cgroup','limitations','clock','loadModel','queueWaitMs','queueWaitReason']})
+ data=json.loads(result.read_text());item.update({key:data.get(key) for key in ['status','operation','concurrency','requested','samplesPerScale','summary','byScale','manifest','targets','failureDistribution','processResourceUsage','resourceScope','requestDeadlineMs','baselineComparison','error','syntheticDress','syntheticCatalogSha256','cgroup','limitations','clock','measurementRevision','streamValidation','loadModel','queueWaitMs','queueWaitReason']})
  item['rawEvidence']=ref(result);item['sqlEvidence']=ref(work/'result.json');item['testLog']=ref(work/'tests.log')
  if (work/'owned-datadir-cleanup.json').exists():item['cleanup']=ref(work/'owned-datadir-cleanup.json')
  resource=data.get('resource',[])
@@ -33,8 +33,8 @@ for log in sorted({f for root in a.logs for f in root.glob('*.log')}):
  r['cohorts'].append(item)
  for scale in data.get('byScale',[]):
   manifest=data.get('manifest',{});runtime=manifest.get('runtimeClosure') or {'declaredBaseline':manifest.get('viewerBaseline')}
-  key=json.dumps([data['operation'],scale['scale'],data['concurrency'],manifest.get('taikoWheelSha256'),runtime,scale.get('inputSha256')],sort_keys=True)
-  group=groups[key];group['samples'] += [v for v in data.get('samples',[]) if v['scale']==scale['scale']];group['requested']+=data.get('samplesPerScale',scale['n']);group['refs'].append(ref(result));group['manifests'].append(manifest);group['targets']=data['targets'];group['scope']={'operation':data['operation'],'scale':scale['scale'],'concurrency':data['concurrency'],'inputSha256':scale.get('inputSha256'),'runtimeClosure':runtime,'wheelSha256':manifest.get('taikoWheelSha256')}
+  key=json.dumps([data['operation'],scale['scale'],data['concurrency'],manifest.get('taikoWheelSha256'),manifest.get('measurementRevision','full-json-consume-v1'),runtime,scale.get('inputSha256')],sort_keys=True)
+  group=groups[key];group['samples'] += [v for v in data.get('samples',[]) if v['scale']==scale['scale']];group['requested']+=data.get('samplesPerScale',scale['n']);group['refs'].append(ref(result));group['manifests'].append(manifest);group['targets']=data['targets'];group['scope']={'operation':data['operation'],'scale':scale['scale'],'concurrency':data['concurrency'],'inputSha256':scale.get('inputSha256'),'runtimeClosure':runtime,'wheelSha256':manifest.get('taikoWheelSha256'),'measurementRevision':manifest.get('measurementRevision','full-json-consume-v1')}
   if data.get('summary',{}).get('pressureStop') or data.get('summary',{}).get('oomDelta') or data.get('summary',{}).get('oomKillDelta'):group['resourceFailures'].append(item['resources'])
 for group in groups.values():
  summary=stats(group.pop('samples'),group.pop('requested'));target=group['targets'];group.update(summary)
@@ -45,7 +45,7 @@ for candidate in r['measuredGroups']:
  if candidate['scope']['wheelSha256']!='0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8':continue
  for old in r['measuredGroups']:
   if old['scope']['wheelSha256']==candidate['scope']['wheelSha256']:continue
-  keys=['operation','scale','concurrency','inputSha256','runtimeClosure']
+  keys=['operation','scale','concurrency','inputSha256','runtimeClosure','measurementRevision']
   if all(old['scope'][key]==candidate['scope'][key] for key in keys):
    r['baselineComparisons'].append({'scope':{key:candidate['scope'][key] for key in keys},'status':'MEASURED_DIAGNOSTIC' if min(old['success'],candidate['success'])>=200 else 'INSUFFICIENT_SAMPLE_DIAGNOSTIC','oldN':old['n'],'candidateN':candidate['n'],'oldP95Ms':old['p95Ms'],'candidateP95Ms':candidate['p95Ms'],'oldP99Ms':old['p99Ms'],'candidateP99Ms':candidate['p99Ms'],'oldFailures':old['failures'],'candidateFailures':candidate['failures'],'oldRaw':old['refs'],'candidateRaw':candidate['refs'],'remaining93Wheels':'runtime harness asserts exact name/version/SHA equality'})
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps({'output':str(a.output),'cohorts':len(r['cohorts']),'groups':len(r['measuredGroups']),'statuses':dict(Counter(x['status'] for x in r['measuredGroups']))}))
