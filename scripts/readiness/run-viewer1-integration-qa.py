@@ -7,11 +7,12 @@ env={**os.environ,'PATH':str(N)+':/usr/bin:/bin','TAIKO_PYTHON_EXECUTABLE':m['ca
 mode=sys.argv[1]
 if mode=='install':commands=[('locked-install',[str(N/'npm'),'ci','--ignore-scripts','--no-audit','--no-fund'],R/'taiko_viewer')]
 elif mode=='sql':commands=[('integration-sql-http',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^My Taiko isolated','taiko_viewer/tests/myTaikoIntegrationSql.test.mjs'],R)]
+elif mode=='product':commands=[('product-nuxt-sql-http',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^My Taiko product','taiko_viewer/tests/myTaikoProductNuxt.test.mjs'],R)]
 elif mode=='examples':commands=[('examples-and-bundle',[str(N/'node'),str(R/'scripts/readiness/verify-viewer1-developer-examples.mjs')],R)]
 else:raise SystemExit('unknown mode')
 records=[]
 for name,cmd,cwd in commands:
  row=b.run(cmd,E,env,name,cwd);records.append(row);print(json.dumps({'task':name,'status':row['status'],'log':row['log']}),flush=True)
  if row['status']!='PASS':break
-files=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','taiko_viewer/tests/prototypes','taiko_viewer/tests/myTaikoIntegrationSql.test.mjs','taiko_viewer/tests/fixtures/goalSqlRuntime.mjs','taiko_viewer/server/services/account/current-source.ts','taiko_viewer/server/services/growth-history','examples/developer-api-v1','scripts/readiness/verify-viewer1-developer-examples.mjs'],cwd=R,text=True).splitlines()
-report={'records':records,'inputs':[{'file':f,'sha256':hashlib.sha256((R/f).read_bytes()).hexdigest()} for f in files],'contractFrozen':False,'productionAccess':False,'installedPython':m['candidate']['python']};(E/(mode+'-summary.json')).write_text(json.dumps(report,indent=2)+'\n');sys.exit(0 if all(r['status']=='PASS' for r in records) else 1)
+files=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','taiko_viewer/server/services/my-taiko','taiko_viewer/server/api/account/my-taiko','taiko_viewer/types/my-taiko.ts','taiko_viewer/components/my-taiko','taiko_viewer/pages/my/index.vue','taiko_viewer/tests/myTaikoProductNuxt.test.mjs','scripts/readiness/check-my-taiko-types.mjs','taiko_viewer/tests/prototypes','taiko_viewer/tests/myTaikoIntegrationSql.test.mjs','taiko_viewer/tests/fixtures/goalSqlRuntime.mjs','taiko_viewer/server/services/account/current-source.ts','taiko_viewer/server/services/growth-history','examples/developer-api-v1','scripts/readiness/verify-viewer1-developer-examples.mjs'],cwd=R,text=True).splitlines()
+report={'records':records,'inputs':[{'file':f,'sha256':hashlib.sha256((R/f).read_bytes()).hexdigest()} for f in files],'contractFrozen':True,'productionAccess':False,'installedPython':m['candidate']['python']};(E/(mode+'-summary.json')).write_text(json.dumps(report,indent=2)+'\n');sys.exit(0 if all(r['status']=='PASS' for r in records) else 1)

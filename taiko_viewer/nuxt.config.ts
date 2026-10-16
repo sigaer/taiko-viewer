@@ -133,6 +133,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    myTaikoReadModelMode: "legacy",
     developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
     developerApiAnonymousDailyLimit: 300,
     developerApiClientDailyLimit: 5000,
@@ -204,6 +205,7 @@ export default defineNuxtConfig({
     bilibiliCookie: process.env.BILIBILI_COOKIE || "",
     bilibiliHttpProxy: process.env.BILIBILI_HTTP_PROXY || "http://127.0.0.1:18888",
     public: {
+      myTaikoReadModelMode: "legacy",
       developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
       appVersion,
       apiBase: "https://static.sakura-bot.cn",

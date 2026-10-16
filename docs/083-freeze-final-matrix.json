@@ -3,13 +3,13 @@
   "status": "CONTRACT_FROZEN_LOCAL",
   "contractFrozen": true,
   "runtimeEnabled": false,
-  "runtimeEnabledScope": "candidate source/default local runtime configuration; production state NOT_OBSERVED",
+  "runtimeEnabledScope": "Developer API runtime default in frozen local source; production state NOT_OBSERVED",
   "testFixtureRoutesAdmitted": true,
   "deployReady": false,
   "gateP": "DEPLOY_PENDING_AUTH",
   "publicApiState": "PUBLIC_API_NOT_ENABLED_BY_THIS_WORK",
   "productionAccess": false,
-  "viewerVersion": "0.83.0-rc.3",
+  "viewerVersion": "0.83.0-rc.4",
   "baseline": {
     "reviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
     "consumerPrepCommit": "49899d48a0ccff677d8506f59cea502b521758c4",
@@ -36,7 +36,7 @@
       "path": "docs/083-release-manifest.json",
       "sha256": "425e747960802284edb92af6ce2950d80e4c8a1e14c2fb7bc7cc51317fc3b6d5"
     },
-    "finalReportCommit": "resolve from persistent delivery-identity.json; reporting commits do not change runtime"
+    "finalReportCommit": "289094de74fa4872c7e43459ec57ce5c207ce36f"
   },
   "ownerDecisions": {
     "F1": {
@@ -135,16 +135,21 @@
       }
     },
     "formalBuild": {
-      "status": "PASS_SCOPED",
-      "sourceCommit": "46991b202b531fc18709bbfbdb453b880bd9920b",
-      "seconds": 149.759,
-      "sampledMemoryPeakBytes": 4229136384,
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/build-final/build.json",
+        "sha256": "e9ad73adb03f786477fe8b335b967fab2eaf689413fb2e1c4033c95aa9a28771"
+      },
+      "sourceInputs": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/build-final/source-inputs.json",
+        "sha256": "2c1ed3ebaf457b816e9b06dd8c380dbb9bd6059e1527933f759aa1956822d35c"
+      },
+      "elapsedSeconds": 154.29,
+      "sampledPeakBytes": 4248760320,
       "kernelPeakAvailable": false,
       "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
-      "evidence": {
-        "path": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/build.json",
-        "sha256": "2534c80d7f561a90c9a0f02d677ecae9d724590957aeae4768a910124b7e611f"
-      }
+      "dirtyBuildBaseCommit": "196be85a6216d1468f3b8182b2a017fe6cd08b37",
+      "finalCommitEquivalence": "Every listed source input verified against final local commit via external delivery identity; no commit hash fabricated for dirty build"
     },
     "freezeRecord": {
       "status": "RERUN_PASS",
@@ -154,10 +159,89 @@
       }
     },
     "i5ProductBffVueNuxt": {
-      "status": "IMPLEMENTATION_AUTHORIZED_NOT_YET_VERIFIED"
+      "status": "RERUN_PASS",
+      "host": "actual built Nuxt and native _test MySQL; no API/authority mocks",
+      "namedNonBrowserObservations": 26,
+      "observedBrowserHttpResponses": 14,
+      "browserFlows": [
+        {
+          "name": "actual Nuxt login refresh data tools and layout",
+          "width": 375,
+          "overflow": false
+        },
+        {
+          "name": "actual Nuxt login refresh data tools and layout",
+          "width": 1280,
+          "overflow": false
+        },
+        {
+          "name": "binding select A1 A2 A1 keyboard retry",
+          "pass": true
+        },
+        {
+          "name": "503 clears previous payload and retry recovers",
+          "pass": true
+        },
+        {
+          "name": "real SQL-stalled request times out and clears old body",
+          "pass": true
+        },
+        {
+          "name": "anonymous page login state",
+          "pass": true
+        },
+        {
+          "name": "unbound page binding entry",
+          "pass": true
+        }
+      ],
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-732c619e5434/evidence/my-taiko-product-observations.json",
+        "sha256": "6ab1ee818260a985a5c27ba675c3ad04634c5947955df75c32e7aad28dfc9fde"
+      },
+      "cleanup": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-732c619e5434/evidence/my-taiko-product-cleanup.json",
+        "sha256": "81fe7940a94ef91bdc0d9d5d0bf0d0abbd2acb5c2214c47404e3990960adaa36"
+      },
+      "measurements": "NOT_REQUESTED",
+      "measurementWrites": 0,
+      "goalWrites": 0,
+      "sessionWrites": "Existing last_seen_at touch; login/logout and fixture-owned mutations are separate actions",
+      "crossRequestPrivateResponseCache": false,
+      "readCurrentLoadsPerSuccess": 1,
+      "rangeDays": 90,
+      "historyBoundaryFixtureFiles": 2001,
+      "historyBoundaryScope": "Existing 2000-file canonical coverage boundary with tiny identical observations; no Annual/capacity load"
     },
     "production": {
       "status": "NOT_RUN_NOT_AUTHORIZED"
+    },
+    "i5Types": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-379f53c8a1be/evidence/my-taiko-types.json",
+        "sha256": "c30b36dcc4f5849d4bac2cbb4b5e63a98108a5d8293bbea1641722e767c7cf30"
+      },
+      "scope": "Changed server/types semantic TypeScript; SFC script/template compile. 131 transitive diagnostics outside changed files retained, not certified fixed."
+    },
+    "openapiFrozenI5": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-69383459c9db/evidence/freeze-openapi-review.json",
+        "sha256": "c6371fe5338d397828490a20fb7c6ac2720f34ca4db6d7a2e04adec3caed565c"
+      },
+      "operations": 11,
+      "examples": 95,
+      "paginationGolden": 6
+    },
+    "annualIsolation": {
+      "status": "PASS_DERIVED_ISOLATED_BUILD",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/nuxt-isolated-artifact-portable.json",
+        "sha256": "50806995f1f7e682f32247ab5018e119f56d946c6d5ea92444d0af9de8a17c97"
+      },
+      "productionPluginSourceChanged": false,
+      "scope": "One compiled Annual startup invocation only; account configuration guard and DB close hook preserved; all other output file bytes match formal build"
     }
   },
   "reusedHistoricalEvidence": {
@@ -231,7 +315,7 @@
       "path": "/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016/docs/083-release-manifest.json",
       "sha256": "463a090855f571ed72da184a7d1d4c01691e9f5013cf1c106ce99ec190e34b36"
     },
-    "commit": "resolved in immutable qa-vault freeze-delivery-identity.json to avoid a self-referential commit hash"
+    "commit": "5c68a13964cc8d8750709002485c11cf1ee239cb"
   },
   "freezeScopedValidation": [
     {
@@ -471,5 +555,147 @@
     "fallbackImplemented": false,
     "sourceSchemaOrAlgorithmsChanged": false
   },
-  "historicalI5EvidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/i5-evidence-index.json"
+  "historicalI5EvidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/i5-evidence-index.json",
+  "i5Status": "MY_TAIKO_I5_PRODUCT_CANDIDATE_READY_FOR_REVIEW",
+  "i5Release": {
+    "baseline": "1b06f7d7e7ab2c6c7c6bd66ebfa117512196fed3",
+    "freezeIntegrationCommit": "196be85a6216d1468f3b8182b2a017fe6cd08b37",
+    "commitIdentity": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/i5-delivery-identity.json",
+    "manifest": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer1-consumer-readmodel-20261016/docs/083-release-manifest.json",
+      "sha256": "7e40b26b5cd6c28e903f21ad2ebf720752b81b019f26edfea22cf68a08beaf04"
+    },
+    "modeDefault": "legacy",
+    "modeInOwnedQA": "read-model",
+    "modeKeys": [
+      "NUXT_MY_TAIKO_READ_MODEL_MODE",
+      "NUXT_PUBLIC_MY_TAIKO_READ_MODEL_MODE"
+    ],
+    "automaticFallback": false,
+    "productRoute": "GET /api/account/my-taiko/overview",
+    "page": "/my",
+    "thirdPartyKeyAuthorizesSelfRead": false,
+    "prototypeRoutesInProduct": false,
+    "runtimeEnabledScope": "Developer API default only; My Taiko explicitly enabled in owned QA. Production state NOT_OBSERVED"
+  },
+  "failuresRetainedThisOrder": [
+    {
+      "label": "frozen-sql-fixed",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-55b027bc13a8/evidence/command.json",
+        "sha256": "2c18207079d5b00f69e0c23fd40585afd310e4613a5074f5e14d78538705ebc2"
+      }
+    },
+    {
+      "label": "frozen-sql",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-53c71cf57d55/evidence/command.json",
+        "sha256": "d05c280ba84b614e2592ca08f073eb96b0b4cabb4a2747f86ceefe4c132eb521"
+      }
+    },
+    {
+      "label": "i5-product-browser-diagnostic",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-bd882b87b255/evidence/command.json",
+        "sha256": "ad01b4f6a792e80aeb3f49b3bb0c2aa30c8162e2efbc7d3990d25caa86d44b09"
+      }
+    },
+    {
+      "label": "i5-product-diagnostic",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-ec37a720dd4b/evidence/command.json",
+        "sha256": "399510c7199327389d0b4deb1606573374fc6493d5b6f43988462cec85aca555"
+      }
+    },
+    {
+      "label": "i5-product-fact-fixtures",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-667f0d470ac9/evidence/command.json",
+        "sha256": "6b04932991985c89a7d08fb41e9417ac49d2185766cf0db20f417921b5a12b0b"
+      }
+    },
+    {
+      "label": "i5-product-host",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-471fd69bbf9f/evidence/command.json",
+        "sha256": "35e2d173f81b2e7d045a181c33fbff4cf40f582abac453d8d9031a3086e388b6"
+      }
+    },
+    {
+      "label": "i5-product-hydrated-browser",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-fb6b27a539f8/evidence/command.json",
+        "sha256": "9654255d01235ef9f09f5e32ab1ee6422440292440648345fa427419d8939e3e"
+      }
+    },
+    {
+      "label": "i5-product-profile-probe",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-5b41f2a98efe/evidence/command.json",
+        "sha256": "b55788fd99a42c493404cfad8218eab3ad53ad6fbcb8e7ab28f8c05839c378a4"
+      }
+    },
+    {
+      "label": "i5-product-ready",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-c6d5a7aec636/evidence/command.json",
+        "sha256": "ef98e0591602ef208cff6d264c641d3c2114fb8480d4b6c18d7a61ee8e7c7892"
+      }
+    },
+    {
+      "label": "i5-product-schema-complete",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-e4ab2e099f7d/evidence/command.json",
+        "sha256": "f69fb730fa22723ea8708254ec44061d4e345fdc37024547316b2fc3440d52cd"
+      }
+    },
+    {
+      "label": "i5-types",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-d0ea35767e14/evidence/command.json",
+        "sha256": "03e8223e2f00cfc7946380f771230dd25804b81d88f108e0b5180d93c618efe7"
+      }
+    },
+    {
+      "status": "FAIL",
+      "run": "qa-f77e2f29a44f",
+      "reason": "Reuse proof rejected original74 read.ts mismatch; reuse explicitly narrowed to unchanged SDK. Not an approved-input mismatch.",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-f77e2f29a44f/evidence/output.log",
+        "sha256": "e7f58d13e56e9eab2ee59e0ac25d14215e4b76e4594a8475ef615d9b47d42b95"
+      }
+    }
+  ],
+  "nextViewer1": [
+    {
+      "priority": "P0 before activation",
+      "task": "Gate P identity/ingress/ACL/proxy/quota/key audit and restore/migration/runbook review",
+      "dependsOn": "local F/I5 delivery",
+      "productionAuthorizationRequired": true
+    },
+    {
+      "priority": "P1 local",
+      "task": "Choose next actual consumer owner/version and adopt read-model/CalculationProfile compatibility matrix",
+      "dependsOn": "this I5 candidate review; sole Contract remains unchanged",
+      "productionAuthorizationRequired": false
+    },
+    {
+      "priority": "P1 before release",
+      "task": "Controlled canary, enable approved mode, real post-migration read smoke and rollback rehearsal",
+      "dependsOn": "Gate P independent authorization and reviewed backups",
+      "productionAuthorizationRequired": true
+    }
+  ],
+  "testFixtureRoutesAdmittedScope": "Historical isolated F/SDK hosts only; /qa/* absent from built product routes."
 }

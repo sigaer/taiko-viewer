@@ -1,59 +1,49 @@
-# My Taiko I5 — 隔离候选，正式接线待冻结
+# My Taiko I5 产品候选实施报告
 
-2026-10-16，Asia/Shanghai。独立分支 `prep/viewer1-consumer-readmodel-20261016`，由准备提交 `49899d48a0ccff677d8506f59cea502b521758c4` 与本轮 review 收口 `289094de74fa4872c7e43459ec57ce5c207ce36f` 在本地整合而来。**contractFrozen=false；F1–F5 尚无 Owner 明确批准；Gate P=DEPLOY_PENDING_AUTH。** 本轮只交付隔离设计、可运行原型与合成端到端验证；不将测试路由或组件宿主称为产品接线。
+状态：`MY_TAIKO_I5_PRODUCT_CANDIDATE_READY_FOR_REVIEW`，Viewer `0.83.0-rc.4`；Contract `CONTRACT_FROZEN_LOCAL`。`Gate P=DEPLOY_PENDING_AUTH`、`deployReady=false`、`productionAccess=false`、`publicApiEnabled=false`。本报告替代前一轮本路径中的原型待签结论；原始报告保留在 Git `1b06f7d7e7ab2c6c7c6bd66ebfa117512196fed3` 及旧证据中。
 
-## 唯一首批产品入口设计
+## 交付与身份
 
-源文件核查选择现有 `taiko_viewer/pages/my/index.vue` 的已登录 My Taiko 概览作为后续唯一首批消费者。它当前用 useAccountState 取 Session，展示个人工具链接；本轮未改这个页面。拟定 BFF 为 `GET /api/account/my-taiko/overview`，**未注册**。正式冻结后才实现页面→BFF，承载 Profile、当前成绩摘要和最多 90 天事实简述；不连带重写 Home/History/Growth/Goal/Recommend/Forum。
+独立分支 `prep/viewer1-consumer-readmodel-20261016`，原准备头 `1b06f7d7e7ab2c6c7c6bd66ebfa117512196fed3`，以本地整合提交 `196be85a6216d1468f3b8182b2a017fe6cd08b37` 引入独立冻结提交 `5c68a13964cc8d8750709002485c11cf1ee239cb`。F1–F5 批准输入及聊天审批来源见 [冻结决议](083-freeze-final-review.md)。不再次请求 F1–F5 批准。冻结输出 manifest SHA `463a090855f571ed72da184a7d1d4c01691e9f5013cf1c106ce99ec190e34b36`；I5 输出 manifest SHA `7e40b26b5cd6c28e903f21ad2ebf720752b81b019f26edfea22cf68a08beaf04`。最终 I5 提交及所有交付文件精确身份写入 `/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/i5-delivery-identity.json`，避免提交自引用。
 
-权限仍由 requireAccountUser 和 withViewerCurrentSource 服务端推导 owner/current binding；URL/body 不接受 owner/binding 覆盖。Web 自读不经 Developer Key/ResourceGrant。平台 Bot/第三方/本地 Core 保持现有独立认证域、CalculationProfile 与安装版本，不为统一增加 HTTP 跳数。
+新增真实 `GET /api/account/my-taiko/overview` 与可维护的 `server/services/my-taiko/overview.ts`，现有 `pages/my/index.vue` 通过 `components/my-taiko/Overview.vue` 消费。共用原有 Session/owner/current binding、Publication ReadView、Score mapper 与 Growth 投影。没有引用 `/qa/*` 原型，没有第二套 Schema/算法/Writer/权限体系；Profile/成绩摘要/90 天事实摘要及现有推荐工具入口均来自实际读取。推荐只为入口，不是已计算结果。
 
-## 实际可运行的原型
+## 一致性与拒绝语义
 
-`taiko_viewer/tests/prototypes/myTaikoReadModel.ts` 只由受限测试宿主的 `/qa/my-taiko` 和 `/qa/my-taiko-90` 注册；没有生产 server/api 文件或 UI 引用它。
+一次请求内 current/history 共用 live SH 与 committed generation；current memo 只存于该请求 ALS reader，finally 还原。Growth 使用已有 createGrowthScoreEvidenceRequest，避开全局 in-flight 复用；读取结束关闭 SH Worker 后，再验证 Session、owner/current binding 与 Catalog。成功请求底层 current 装载一次。绑定/owner/来源/Catalog 变化、注销/过期、未绑定、Publication 缺失或损坏均整包拒绝，私有响应 `private, no-store`，无 ETag/304、跨请求授权载荷缓存或自动 fallback。URL owner/binding 覆盖与无 Session 的 Developer Key 被拒。
 
-- 单个 committed Publication ReadView、同一请求 ScoreReadPort；请求自己的 ALS reader memo 当前快照，在 finally 还原。Profile、成绩和 Growth 共享 current/history sequence/commit，A1/A2/B 不共用跨请求缓存。成功链针对 A/B 与并发 Writer 均验证底层 current 装载一次。
-- Profile 用 getAccountProfile，Score 用唯一 Contract fromLegacyScore；Growth 用 getGrowthHistory/canonicalGrowthProjection，不复制回放或算法。原型默认 90 天，测试保留原两日链作差异验证。
-- frozen measurement 未请求，明确 diagnostics.measurements=NOT_REQUESTED，不拿空列表声称“没有历史测量”；实测无新增 measurement 写入。Goal 事实仍走既有服务，没有第二套 Goal evaluator 或 Writer。
-- 推荐只给既有 `/tools/recommend` 入口及该响应的绑定/scoreRevision，state=ENTRY_ONLY，不冒充实时推荐结果。
-- 完整响应依然有记录/字节边界；权限变化、源版本变化或 Publication 不可用直接整包拒绝，未实现任何自动旧路径回落。
+release 使用唯一 v1 catalog() 的原始源 revision，另列 `legacyCatalogRevision=legacy-projection-sha256:…`。同源投影不等价、恢复 mtime 的旧缓存、读中原始字节改变均拒绝；空白变更可使 raw revision 不同而投影相同。`scoreRevision=publication-v1:sequence:commitId` 来自同一个 captured view；schemaRevision 来自唯一 Schema，calculationProfile=null，不用请求时钟/mtime 替代任何代际。
 
-## Catalog 原始 revision 与旧桥接
+Score 数字/unknown 只经已有 Contract mapper；BFF 仅计数，不重算 Rating/六维。canonical facts 使用既有投影；新页面只把真正 played+instant 标为游玩，其他事实按观测展示，摘要取既有排序中的最近 8 条并明示剩余入口。无可靠证据时显示 unknown/partial/truncated 和可靠记录不足。measurement 未读取，`NOT_REQUESTED`；GET 没有 measurement/Goal/Score/C/H/Grant Writer。既有 Session `last_seen_at` 触达保留；登录/登出及测试主动 Writer/解绑是独立动作。
 
-原型现在直接复用 `server/services/developer-api-v1/catalog.ts` 的同一个 catalog()：同样的受控文件路径、8 MiB/10,000 行边界、同次原始 bytes SHA 和唯一 Contract projectCatalog。`release.catalogRevision` 与 v1 的真实源字节身份一致，`catalogRevisionProfile=developer-api-v1-source-bytes`。
+## 实际完整宿主验证
 
-旧 `legacy-projection-sha256` 不再占据该字段，而保存在 `release.legacyCatalogRevision`。原型用同一个纯 canonical adapter 比较实际 legacy Catalog reader 的投影与本次原始源投影；两者不一致则 409，不用新 SHA 给旧缓存背书。请求结束再读取源作明确校验：raw revision 改变则拒绝。current 只装载一次，Catalog 的额外一次读取用于源校验，不能将其声称为“全部文件只读一次”。
+本次成功：`/home/sigaer/taiko/qa-vault/runs/qa-732c619e5434/evidence`，26 个非浏览器命名 HTTP 观察及 7 个真实浏览器流程。全新 `_test` MySQL，验证实际 SELECT DATABASE()/@@datadir 与显式 mutation opt-in；使用固定 Taiko 0.14.2 已安装 Python 的 `-I -m taiko_store.bridge`。没有运行时模块替换、模拟权限/API 或组件宿主。
 
-真实文件测试证明：仅增加空白时 raw revision 改变，legacy 投影 revision 可以不变；改动内容后恢复纳秒 mtime 时，旧 Catalog mtime 缓存仍可陈旧，但原型拒绝 409，不回退或冒充版本等价。恢复原字节后可再读。此保护只在隔离原型，不宣称已修复或切换所有旧消费者。
+覆盖真实登录→/my→BFF、刷新、A1→A2→A1/B、匿名与未绑定入口、读中切换/解绑/owner 变化/登出，真实 SQL 锁下 queued Writer 的旧响应/下一代一致性、Publication 缺失/对象损坏、Catalog mutation/stale cache、source mismatch，以及同步/来源切换/reappearance 不产生新增假游玩。首次 full 中有可靠时间的既有游玩仍被保留，不把它改成零来迎合测试。2001 个极小合成重复观察只触达既有 2000 文件 coverage 边界，不是 Annual 或新增容量测试。
 
-诊断信封包含 schemaRevision/catalogRevision/scoreRevision/calculationProfile/source，同时保留 legacyScoreRevision 和 bindingSource。Publication sequence+commitId 与旧 current raw SHA 是不同 revision profile，禁止比较字符串相等后推断数据相同。raw calculationProfile=null，原 v1/v2 算法 profile 不被改公式抹平。C/H 是观察，Canonical Fact 是既有规则投影，冻结 measurement 与真实游玩是各自语义，同步/reappearance 不计为游玩。
+375×812、1280×900 的实际 Nuxt 页面均无横向溢出；真实 selector、键盘焦点、重试、503 清除旧载荷、SQL 阻塞下 15 秒真实请求超时与恢复、匿名/绑定入口均通过。关键 hydration/console/pageerror 为零。外部资产请求在浏览器中阻断，仅使用隔离 loopback。最终 measurement/Goal 行数为零。默认 legacy 宿主的既有 /my 及关闭的 BFF/Developer API 均验证。
 
-## 受影响隔离验证
+正式 `npm run build` 成功：154.29 秒，采样峰值 4248760320 字节，memory.peak 不可用，memory.events high/max/oom/oom_kill 全零。源码输入清单在构建前后及收口逐项 hash 一致；构建时 Git base 为 196be85，未将 dirty build 冒称该提交本身的产物。最终交付提交通过外置身份复核同一源码清单。
 
-新 run `qa-173c39e7551b`：1 个实际 SQL/HTTP 套件、21 项观察，0 FAIL/0 SKIP。全新 `viewer1_security_test`，实际 SELECT DATABASE()/@@datadir 和 mutation opt-in；私有 loopback、真实登录 Cookie、固定 center `-I` installed Publication Worker、真实 Catalog 文件/reader、既有 owner authority/Profile/Growth 服务。
+正式构件没有启动。隔离测试副本仅替换编译后的 Annual 启动插件数组中的一次调用，保留 account DB guard/close hook；其余 5184 个输出文件字节与正式构件一致。生产 Annual 源码/入口/EOL 状态未变，未生成年度数据。所有自有 Nuxt/Chromium/SQL 子进程与 listener 退出，scratch 已按本轮 ownership 清理。
 
-覆盖 A1/A2/B 用户和绑定切换，匿名/owner 参数注入拒绝，读中切换/解绑，默认 90 天 partial coverage，queued Writer 下旧响应 body/revision 同代、下一次读新代，Catalog 读中变化及保留 mtime 的陈旧缓存拒绝，Publication 缺失 503，证据不足返回 unknown/空 facts，会话读中失效 401，未绑定 400。失败路径没有旧文件 fallback；`/api/v1/taiko/catalog/songs` 在此宿主仍默认 404，未打开 v1 gate。
+受影响 server/types 语义 TypeScript 和两个 Vue SFC script/template 编译通过；保留 131 条改动文件外依赖诊断，不宣称全仓 typecheck 通过。冻结 OpenAPI 11 operation/95 样例/6 分页 Golden 再验证通过；Schema/生成绑定/固定 wheel 和94包环境不变。原18 Golden、74 HTTP/SDK、34 F3 与21原型证据保留并限定 hash 复用，未把它们混算为完整产品新测。
 
-OpenAPI bundler/后端示例只因 rc.3 owner pagination 文档变化作定向再验证：`qa-2ac8e227698f`，11 操作、95 Schema 实例、86 内部引用，3 个合成 loopback SDK 场景通过，server/编译子进程退出。它不是另一轮真实授权测试，真实权限证据是 F3 本轮及保留的原 74 项。
+失败均保留：未安装既有 Goal/Growth DDL 的空库导致受控503；合成观察误含真实上游时间的错误零游玩预期；hydration 前填表与隐藏菜单登录链接的浏览器定位错误；一个新调用的 TS 参数推断错误，移除摘要不使用的可选 mapper 参数后通过。还修复了传取消信号时 fetch 库忽略 timeout 的问题，改用请求内计时器，真实阻塞下的超时/取消/恢复均通过；组合 deadline API 的浏览器不兼容失败也保留。原始失败日志/截图/清理和 scoped rerun 不覆盖，见合并矩阵与 evidence-index。既有年度 FAIL/性能失败/PNG证据缺口保持原样。
 
-复用 review rc.3 正式构建；本 I5 包只改 tests/prototypes 与测试文件，server/pages/lib/nuxt/package/Schema 相对 review 的运行源码不变，不为未接线原型另跑构建。没有重建两个 94 包 venv；installed Contract 0.1.0 不因 workspace 0.1.2 的原型存在就被宣称已升级。
+## 开关、回滚和下一阶段
 
-## 冻结后产品接线 Gate 与回滚设计
+默认两端 `myTaikoReadModelMode=legacy`，显式隔离宿主才设 `NUXT_MY_TAIKO_READ_MODEL_MODE=read-model` 与 `NUXT_PUBLIC_MY_TAIKO_READ_MODEL_MODE=read-model`。Developer API gate 独立保持 OFF。经后续生产批准的回滚只恢复这两个 mode 为 legacy，不删改任何成绩/事实/测量/Grant；新路径任何错误都没有自动旧数据回落。
 
-| 项目 | 当前状态 | 获正式冻结批准后必须完成 |
-| --- | --- | --- |
-| /my → 自有 BFF 真实接线 | NOT_RUN_OWNER_F1_F5_PENDING | 只改这一个入口，owner/绑定由服务端取；摘要由同一 port 读结果投影，不新增算法 |
-| 真实 Vue + 完整 Nuxt 宿主 | NOT_RUN_OWNER_F5_PENDING | 实际路由/DB/Worker，375 与桌面；不是模拟接口截图 |
-| 未登录/未绑定/不足/截断/加载错误 UI | DESIGN_ONLY | 登录入口、绑定入口、证据不足、partial/truncated 分别显示；加载错误可重试，不展示陈旧账号数据 |
-| Annual 启动插件隔离 | NOT_RUN_NOT_NEEDED_BEFORE_F5 | 若正式完整宿主被插件牵连，先证明独立禁用仅影响该插件；不生成 Annual 或改 EOL 入口 |
-| 旧路径兼容 fallback | DESIGN_ONLY_DISABLED | 显式模式开关，默认 legacy；仅授权通过且 allowlist 的非安全格式故障可尝试一次同等权限旧服务，仍同请求重新证明 Session/binding/Publication；不新增 HTTP 跳数 |
-| 需要 fail-closed 的故障 | PROTOTYPE_PASS_SCOPED | 401/403、owner/binding/source/revision 改变、Publication 缺失/损坏、未知或未分类错误均禁止 fallback |
-| 回滚评估 | DESIGN_ONLY | 切回既有入口，不迁/删除成绩、measurement、Goal 或授权表；更改生产开关仍需 Gate P 授权 |
+测试仅在新库安装原有 Account/Goal/Growth DDL；没有生产 DDL 或新 schema 迁移。正式环境既有表/解释器/身份/代理/ACL/配额/审计/恢复和上线后验证均未观察，继续 Gate P 待独立授权。
 
-正式 fallback 需使用已验证的旧 BFF service/ScoreReadPort；不能直接打开旧 JSON 文件、不以捕获异常为由绕过权限或 Publication，不能对所有 503 自动回落。当前产品路由原样，原型 fallback=NONE，故没有未经签收的自动兼容开关。
+| 优先级 | 下一阶段 Viewer 1.0 待办 | 依赖 | 需生产授权 |
+| --- | --- | --- | --- |
+| P0 启用前 | Gate P 只读 ingress/身份/代理与核心备份恢复、迁移/回滚审阅 | 本地 F/I5 交付 | 是 |
+| P1 本地 | 选择下一实际消费者 Owner/版本，按既有矩阵接 read model/CalculationProfile | 本候选评审 | 否 |
+| P1 发布前 | 受控 canary、批准后的开关启用和线上读链后验 | Gate P 与备份恢复签收 | 是 |
 
-## 交付身份和 Owner 待签
+复跑命令（在本 I5 工作树内，复用已封存的隔离构件，重新创建测试库）：`bash scripts/memory/run_qa.sh /usr/bin/python3 scripts/readiness/run-viewer1-integration-qa.py product`。
 
-完整状态与原始证据 SHA 见本分支 [最终矩阵](083-freeze-final-matrix.json)。原始索引与本分支提交/文件 SHA 存于 `/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/i5-evidence-index.json` 及 `i5-delivery-identity.json`。旧 49899d4、d0c6fea、原 FAIL 与 scoped PASS 的 SHA/适用范围保留；本轮未生成虚假冻结或产品上线结果。
-
-下一步仍是 Owner 对 `083-freeze-final-review.md` 指定的 rc.3 精确运行提交 + manifest SHA 批准 F1–F5，然后才做最小冻结记录与此单入口产品接线。P-ID/P-APP/P-PROXY/P-KEY/P-AUDIT/P-RESTORE/P-MIGRATION 独立待签。未 push、合 main、读取生产配置/SQL/业务数据、部署、重启、启用公共 API 或执行 Annual 负载。
+合并机器状态：[083-freeze-final-matrix.json](083-freeze-final-matrix.json)。最小必要原始证据索引：`/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/evidence-index.json`。没有 push、main 合入、生产配置/SQL/业务数据访问、部署、生产重启、公共 API 启用或 Annual 负载。

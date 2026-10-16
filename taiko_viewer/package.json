@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "0.83.0-rc.3",
+  "version": "0.83.0-rc.4",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
