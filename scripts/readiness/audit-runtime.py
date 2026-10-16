@@ -80,6 +80,10 @@ def main():
         'taiko_viewer/server/services/account/annual-summary/runtime.ts',
         'taiko_viewer/server/services/account/annual-summary/isolated-worker.ts',
         'taiko_viewer/server/services/growth-history/model-revision.ts',
+        'taiko_viewer/server/services/growth-history/evidence.ts',
+        'taiko_viewer/utils/dailyProgress.ts',
+        'taiko_viewer/utils/growthHistory.ts',
+        'taiko_viewer/server/services/account/annual-summary/constants.ts',
         'taiko_viewer/server/utils/account/my-don.ts',
         'taiko_viewer/server/infrastructure/account/sync-worker-runner.ts',
         'taiko_viewer/server/infrastructure/account/source-mutation-worker-runner.ts',
@@ -287,10 +291,11 @@ def main():
                 'scope': scope, 'evidencePath': str(logfile), 'sha256': digest(logfile),
                 'passed': int(passed[1]) if passed else None, 'failed': int(failed[1]) if failed else None,
             }
-    report['workerProtocol']['sourceCompatibility'] = {
-        'status': 'BLOCKED_INSTALLED_CUTOVER_NOT_ACCEPTED',
-        'modules': ['scripts.account_sync_cli', 'scripts.source_mutation_cli', 'scripts.qq_migration_cli', 'scripts.hiroba_credential_cli'],
-        'scope': 'Existing source-worker compatibility paths remain; production interpreter/activation unknown. Preserve authorization and transactions until separate installed-worker acceptance.'}
+    report['workerProtocol']['privateWorkers'] = {
+        'status': 'PASS_SCOPED_INSTALLED_CENTER',
+        'modules': ['taiko_bot.cli.account_sync_cli', 'taiko_bot.cli.source_mutation_cli', 'taiko_bot.cli.qq_migration_cli', 'taiko_bot.cli.hiroba_credential_cli'],
+        'evidence': 'evidence/r4-workers-20261016.json',
+        'scope': 'Four Viewer consumers migrated to absolute interpreter and isolated installed CLIs; 119 isolated SQL and 30 transport tests. Live activation and all service/reader paths remain unaccepted.'}
     if lock_data:
         report['roleEnvironmentIdentity'] = {role: value['environmentIdentity'] for role, value in lock_data['roles'].items()}
         report['artifacts']['roleLocks'] = {'file': 'runtime-role-locks.json', 'sha256': digest(role_lock)}
@@ -376,6 +381,28 @@ def main():
             'file': auth_matrix.name, 'sha256': digest(auth_matrix),
             'status': evidence.get('overallApiGate'), 'credentialControlPlaneNegativeProbe': credential_probe,
             'scope': 'P0 credential-control-plane failure blocks affected integration/deployment; isolated runtime passes do not override this result. Production reachability is unverified.'}
+    candidate = args.output.parent / 'evidence/candidate-0142-closeout-20261016.json'
+    if candidate.is_file():
+        evidence = json.loads(candidate.read_text())
+        report['activeLocalCandidate'] = {
+            'version': '0.14.2', 'authorization': 'Owner approved local candidate validation only',
+            'evidence': 'evidence/' + candidate.name, 'sha256': digest(candidate),
+            'status': evidence['status'], 'wheel': evidence['wheel'], 'roles': evidence['roles'],
+            'lockManifest': 'runtime-role-locks-0142.json',
+            'priorArtifactRecords': 'Historical 0.14.1 records above are retained, not current candidate proof',
+            'overallGate': 'BLOCKED', 'limitations': evidence['limitations']}
+        report['historicalGatesBeforeCloseout'] = report['gates']
+        gate = json.loads((args.output.parent / 'viewer082-gate.json').read_text())
+        report['gates'] = {item['name']: item['status'] for item in gate['gates']}
+        report['activeLocalCandidate']['repositories'] = {
+            name: {'path': str(path), 'head': git(path, 'rev-parse', 'HEAD'),
+                   'tree': git(path, 'rev-parse', 'HEAD^{tree}'),
+                   'status': git(path, 'status', '--short')}
+            for name, path in {
+                'viewer': checkout,
+                'taiko': Path('/var/tmp/taiko-082-closeout-20261016'),
+                'sakura': Path('/var/tmp/sakura-credential-control-plane-20261016')
+            }.items()}
     report['evidencePaths'] = sorted({value['file'] for value in report['artifacts'].values()
                                      if isinstance(value, dict) and isinstance(value.get('file'), str)} |
                                     {value['currentConsumerAcceptance']['evidencePath'] for value in report['workerProtocol'].values()

@@ -25,7 +25,7 @@ test('the frozen reporting period remains readable after cutoff and rejects unkn
  try{
   await build({entryPoints:['server/services/account/annual-summary/constants.ts'],outfile:root+'/constants.mjs',bundle:true,platform:'node',format:'esm',alias:{'~':process.cwd()}});
   const m=await import(root+'/constants.mjs');const before=Date.now;
-  try{Date.now=()=>Date.parse('2027-01-01T00:00:00Z');assert.equal(m.resolveAnnualVersion('annual_2026').endDate,'2026-09-30');assert.equal(m.getAnnualGeneratorVersion().endExclusive,'2026-10-01');assert.equal(m.getAnnualGeneratorVersion().timezone,'Asia/Shanghai');assert.equal(m.resolveAnnualVersion('annual_2027'),null);assert.equal(m.ANNUAL_ALGORITHM_VERSION,'annual-observation-v4.5.3');}finally{Date.now=before;}
+  try{Date.now=()=>Date.parse('2027-01-01T00:00:00Z');assert.equal(m.resolveAnnualVersion('annual_2026').endDate,'2026-09-30');assert.equal(m.getAnnualGeneratorVersion().endExclusive,'2026-10-01');assert.equal(m.getAnnualGeneratorVersion().timezone,'Asia/Shanghai');assert.equal(m.resolveAnnualVersion('annual_2027'),null);assert.equal(m.ANNUAL_ALGORITHM_VERSION,'annual-observation-v4.5.4');}finally{Date.now=before;}
  }finally{await rm(root,{recursive:true,force:true});}
 });
 

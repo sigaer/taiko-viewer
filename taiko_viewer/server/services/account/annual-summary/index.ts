@@ -6,7 +6,7 @@ import { annualManualEditTime, annualCorrectionsAreCurrent } from './manual-corr
 import { assertAnnualTaskAllowed } from './policy';
 import { annualAdmission, MAX_CONCURRENT_ANNUAL_BUILDS } from './admission';
 import { trackBetaUser } from "~/server/services/annual-beta/events";
-import { annualBuildInputRevision, canReuseAnnualFailure, canReuseAnnualSummary } from "./build-recovery";
+import { annualBuildInputRevision, canReuseAnnualFailure, canReuseAnnualSummary, canReadAnnualSummary } from "./build-recovery";
 import { createHash, randomUUID } from "node:crypto";
 import { hostname } from "node:os";
 import { access, readFile } from "node:fs/promises";
@@ -159,7 +159,7 @@ const safeReadSummary = async (row: AnnualSummaryRow | null) => {
   if (!row || Number(row.schema_version) !== ANNUAL_SCHEMA_VERSION) return null;
   try {
     const summary = await readAnnualSummary(row.summary_path);
-    if (!canReuseAnnualSummary(summary, ANNUAL_ALGORITHM_VERSION)) return null;
+    if (!canReadAnnualSummary(summary, ANNUAL_ALGORITHM_VERSION)) return null;
     const binding = await findAnnualBinding(row.binding_id, row.user_id);
     if (!binding) return null;
     const latestEdit = await annualManualEditTime(getRuntimePaths().userdataDir, binding.taiko_id);
@@ -249,7 +249,7 @@ export const getAccountAnnualSummaryEnvelope = async (userId: number, versionInp
   const latestRow = await findLatestAnnualSummary(userId, binding.id, version.key);
   const locale = normalizeAnnualLocale(localeInput);
   const cachedSummary = latestRow ? await safeReadSummary(latestRow) : null;
-  const payload = latestRow && canReuseAnnualSummary(cachedSummary, ANNUAL_ALGORITHM_VERSION)
+  const payload = latestRow && cachedSummary
     ? await getOwnerSummaryPayload(latestRow, locale)
     : null;
   const activeJob = await findActiveAnnualJob({

@@ -44,3 +44,13 @@ export const canReuseAnnualSummary = (
     || (currentAlgorithmVersion === 'annual-observation-v4.5.3'
       && summary?.provenance?.algorithmVersion === 'annual-observation-v4.5.2'))
 );
+
+// Reading a published artifact is distinct from selecting a current build cache.
+// A new algorithm must not relabel or hide an otherwise valid saved report.
+export const canReadAnnualSummary = (
+  summary: { provenance?: { algorithmVersion?: string | null } | null } | null,
+  currentAlgorithmVersion: string
+) => canReuseAnnualSummary(summary, currentAlgorithmVersion) || Boolean(
+  currentAlgorithmVersion === 'annual-observation-v4.5.4'
+  && ['annual-observation-v4.5.2', 'annual-observation-v4.5.3'].includes(summary?.provenance?.algorithmVersion || '')
+);
