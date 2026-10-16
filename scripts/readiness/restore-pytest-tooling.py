@@ -12,7 +12,7 @@ a.destination.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
 with (evidence/'pytest-tooling-install.log').open('x') as log:
  subprocess.run([sys.executable,'-I','-m','venv',str(a.destination)],stdout=log,stderr=log,check=True,timeout=60)
  python=a.destination/'bin/python'
- subprocess.run([str(python),'-I','-m','pip','install','--disable-pip-version-check','--no-cache-dir','--timeout','30','--retries','2','pytest=='+a.version],stdout=log,stderr=log,check=True,timeout=180)
+ subprocess.run([str(python),'-I','-m','pip','--isolated','install','--disable-pip-version-check','--no-cache-dir','--timeout','30','--retries','2','pytest=='+a.version],stdout=log,stderr=log,check=True,timeout=180,env={**os.environ,'PIP_CONFIG_FILE':os.devnull,'PYTHONNOUSERSITE':'1'})
 code="import importlib.metadata,json,pytest;print(json.dumps({'pytestPath':pytest.__file__,'version':pytest.__version__,'packages':{d.metadata['Name']:d.version for d in importlib.metadata.distributions()}}))"
 info=json.loads(subprocess.check_output([str(python),'-I','-c',code]));path=Path(info['pytestPath']);assert path.is_relative_to(a.destination)
 old=json.loads(a.annual_evidence.read_text())['pytestTool']['sha256'];actual=hashlib.sha256(path.read_bytes()).hexdigest()
