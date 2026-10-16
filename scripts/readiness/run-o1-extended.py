@@ -21,7 +21,7 @@ def run(operation,concurrency,scale,n,label,old=False):
  with log.open('x') as stream:code=subprocess.run(cmd,cwd=root,stdout=stream,stderr=subprocess.STDOUT).returncode
  paths=re.findall(r'"workspace":"([^"]+)"',log.read_text());data=None;work=Path(paths[-1]) if paths else None
  if work and (work/'o1-performance.json').exists():data=json.loads((work/'o1-performance.json').read_text())
- item={**state['current'],'exitCode':code,'finishedAt':time.time(),'workspace':str(work) if work else None,'status':data.get('status') if data else 'HARNESS_INCOMPLETE','summary':data.get('summary') if data else None};state['completed'].append(item);state['current']=None;(a.out/'progress.json').write_text(json.dumps(state,indent=2));print(json.dumps(item),flush=True)
+ item={**state['current'],'exitCode':code,'finishedAt':time.time(),'workspace':str(work) if work else None,'qaRunDir':str(work.parent.parent) if work else None,'qaRunManifest':str(work.parent.parent/'manifest.json') if work else None,'status':data.get('status') if data else 'HARNESS_INCOMPLETE','summary':data.get('summary') if data else None};state['completed'].append(item);state['current']=None;(a.out/'progress.json').write_text(json.dumps(state,indent=2));print(json.dumps(item),flush=True)
  if data and work and (sql_result:=json.loads((work/'result.json').read_text())).get('daemonExited') and Path(sql_result['datadir']).is_dir():
   cleaned=subprocess.run(['/usr/bin/python3',str(root/'scripts/readiness/cleanup-o1-owned-sql.py'),str(work)],capture_output=True,text=True,env={**os.environ,'QA_RUN_TMPDIR':sql_result['qaRunTmpdir']})
   if cleaned.returncode:raise RuntimeError('Owned data cleanup failed: '+str(work))

@@ -25,7 +25,7 @@ groups=defaultdict(lambda:{'samples':[],'requested':0,'refs':[],'manifests':[],'
 for log in sorted({f for root in a.logs for f in root.glob('*.log')}):
  item={'launcherLog':ref(log)};paths=re.findall(r'"workspace":"([^"]+)"',log.read_text())
  if not paths:item.update(status='INCOMPLETE',reason='launcher did not finish');r['smokeAndInitialFailures'].append(item);continue
- work=Path(paths[-1]);assert work.resolve().is_relative_to(evidence_root);result=work/'o1-performance.json'
+ work=Path(paths[-1]).resolve();assert re.fullmatch(r'qa-[0-9a-f]{12}',work.parent.parent.name) and work.parent.name=='evidence' and work.parent.parent.parent==vault/'runs' and work.name.startswith('viewer1-sql-');result=work/'o1-performance.json'
  if not result.exists():item.update(status='HARNESS_FAIL',sqlResult=ref(work/'result.json'));r['smokeAndInitialFailures'].append(item);continue
  data=json.loads(result.read_text());item.update({key:data.get(key) for key in ['status','operation','concurrency','requested','samplesPerScale','summary','byScale','manifest','targets','failureDistribution','processResourceUsage','resourceScope','requestDeadlineMs','baselineComparison','error','syntheticDress','syntheticCatalogSha256','cgroup','limitations','clock','measurementRevision','streamValidation','loadModel','queueWaitMs','queueWaitReason']})
  item['rawEvidence']=ref(result);item['sqlEvidence']=ref(work/'result.json');item['testLog']=ref(work/'tests.log')
