@@ -60,7 +60,7 @@ try{
  await rootConnection.changeUser({database});
  const [[identity]]=await rootConnection.query('SELECT DATABASE() AS name');
  assert.equal(identity.name,database);assert.match(identity.name,/_test$/);
- console.log('SELECT DATABASE(): '+identity.name);evidence.databaseProof=identity.name;
+ console.log('SELECT DATABASE(): '+identity.name);evidence.databaseProof=identity.name;evidence.actualDatadir=server.datadir;evidence.mutationOptIn=true;evidence.installedPython=python;
  const password=randomBytes(32).toString('hex');
  await rootConnection.query("ALTER USER 'root'@'localhost' IDENTIFIED BY ?",[randomBytes(32).toString('hex')]);
  await rootConnection.query("CREATE USER 'viewer1_test'@'localhost' IDENTIFIED WITH mysql_native_password BY ?",[password]);

@@ -133,6 +133,9 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
+    developerApiAnonymousDailyLimit: 300,
+    developerApiClientDailyLimit: 5000,
     dataDir: process.env.TAIKO_FRONTEND_DATA_DIR || "",
     repoRoot: process.env.TAIKO_REPO_ROOT || "",
     userdataDir: process.env.TAIKO_USERDATA_DIR || "",
@@ -201,6 +204,7 @@ export default defineNuxtConfig({
     bilibiliCookie: process.env.BILIBILI_COOKIE || "",
     bilibiliHttpProxy: process.env.BILIBILI_HTTP_PROXY || "http://127.0.0.1:18888",
     public: {
+      developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
       appVersion,
       apiBase: "https://static.sakura-bot.cn",
       guideApiBase: "https://viewer.sakura-bot.cn/taiko-api/guide",

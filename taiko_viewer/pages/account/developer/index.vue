@@ -198,6 +198,7 @@ const submitApplication = async () => {
 
 <template>
   <div class="developer-page">
+    <NuxtLink v-if="useRuntimeConfig().public.developerApiV1" :to="localePath('/account/developer/grants')">{{locale==='ja'?'アプリへのアクセス許可':'应用授权'}}</NuxtLink>
     <el-card v-if="pending" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
