@@ -1,0 +1,100 @@
+{
+  "status": "BLOCKED_EVIDENCE_LOSS",
+  "rawEvidence": "LOST_EXTERNAL_REMOVAL",
+  "source": "Agent/tool results recorded in this conversation; not reconstructed raw samples",
+  "measurementRevision": "original full response text+JSON parse; stream-consume-v2 unvalidated",
+  "cohorts": [
+    {
+      "operation": "private-current",
+      "concurrency": 1,
+      "requested": 600,
+      "success": 600,
+      "samplesPerScale": 200,
+      "p50Ms": 67.52,
+      "p95Ms": 85.91,
+      "p99Ms": 100.14,
+      "observedStatus": "PASS_SCOPED",
+      "currentVerifiability": "RAW_MISSING"
+    },
+    {
+      "operation": "private-current",
+      "concurrency": 3,
+      "requested": 600,
+      "success": 600,
+      "samplesPerScale": 200,
+      "p50Ms": 114.87,
+      "p95Ms": 160.41,
+      "p99Ms": 186.71,
+      "observedStatus": "PASS_SCOPED",
+      "currentVerifiability": "RAW_MISSING"
+    },
+    {
+      "operation": "private-current",
+      "concurrency": 5,
+      "requested": 600,
+      "success": 600,
+      "samplesPerScale": 200,
+      "p50Ms": 206.37,
+      "p95Ms": 279.36,
+      "p99Ms": 298.75,
+      "observedStatus": "PASS_SCOPED",
+      "currentVerifiability": "RAW_MISSING"
+    },
+    {
+      "operation": "private-history",
+      "concurrency": 1,
+      "requested": 600,
+      "success": 600,
+      "samplesPerScale": 200,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "observedStatus": "PASS_SCOPED",
+      "currentVerifiability": "RAW_MISSING",
+      "missingPercentiles": "Not retained in conversation; not invented"
+    },
+    {
+      "operation": "private-history",
+      "concurrency": 3,
+      "requested": 600,
+      "success": 474,
+      "dropped": 126,
+      "successRate": 0.79,
+      "http429": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "p50Ms": 179.06,
+      "p95Ms": 1506.67,
+      "p99Ms": 1587.44,
+      "observedStatus": "FAIL_RESOURCE_PRESSURE",
+      "currentVerifiability": "RAW_MISSING",
+      "resource": {
+        "memAvailableMinKB": 12720932,
+        "thresholdKB": 12774405.6,
+        "memoryCurrentSampleMaxBytes": 886312960,
+        "memoryPeak": "UNAVAILABLE",
+        "swap": 0,
+        "psiFullAvg10": 0
+      },
+      "scaleSuccess": {
+        "small": 200,
+        "medium": 200,
+        "large": 74
+      }
+    }
+  ],
+  "baselineComparison": "EVIDENCE_PENDING",
+  "unmeasured": [
+    "private history concurrency5",
+    "streaming history concurrency3 retry",
+    "private merged current/history",
+    "post-v3 Growth History/Overview/Passport formal cohorts",
+    "Passport 2000-file extreme",
+    "B30 formal cohorts",
+    "Annual cached cohorts",
+    "Annual 30 cold identities"
+  ],
+  "productionAccess": false
+}

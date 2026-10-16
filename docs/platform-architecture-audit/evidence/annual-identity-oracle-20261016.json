@@ -315,5 +315,13 @@
     "summary.provenance.inputFingerprint"
   ],
   "originalFailureRetained": "/var/tmp/taiko082-combined-offline.log",
-  "scope": "Version-aware independently-derived identity expectations; complete DTO and events remain strict, no product or Growth compatibility changes."
+  "scope": "Version-aware independently-derived identity expectations; complete DTO and events remain strict, no product or Growth compatibility changes.",
+  "evidenceOwner": {
+    "repository": "Taiko",
+    "originalCommit": "66bbb3e",
+    "recoveredCommit": "443f5cd",
+    "recoveredWorktree": "/home/sigaer/taiko/.worktrees/taiko082-recovered-20261016",
+    "relativePathsResolvedAgainst": "/home/sigaer/taiko/.worktrees/taiko082-recovered-20261016",
+    "externalArtifacts": "MISSING_AFTER_EXTERNAL_REMOVAL"
+  }
 }
