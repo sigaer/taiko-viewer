@@ -1,0 +1,47 @@
+{
+  "status": "PASS_SCOPED_ABORT_PROPAGATION",
+  "newUnitTests": 5,
+  "businessLoadResumed": false,
+  "prior16TestsRerun": false,
+  "annual600RequestsRerun": false,
+  "coldRerun": false,
+  "originalColdManifestUnchanged": true,
+  "runs": {
+    "qa-a4444846af31": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-a4444846af31/evidence/manifest.json",
+      "sha256": "6be605f81d2aa791bd91906ebb1750df4ef9aa84ef771e50c6a54c4d26464201",
+      "exitCode": 0,
+      "processExitCode": 0,
+      "wrapperExitCode": 0,
+      "stopReason": null,
+      "childrenStopped": true,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY"
+    },
+    "qa-4163edfc0fcf": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-4163edfc0fcf/evidence/manifest.json",
+      "sha256": "bef76c2a61912305254ac811171597ca151d4ab0fb9544349343e19116a228bf",
+      "exitCode": 125,
+      "processExitCode": 0,
+      "wrapperExitCode": 125,
+      "stopReason": "OWNER_ABORT_MAINTENANCE_SMOKE",
+      "childrenStopped": true,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY"
+    },
+    "qa-c2ff7d7f53b5": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-c2ff7d7f53b5/evidence/manifest.json",
+      "sha256": "4857914efe3771a4c934840288dd55edb2cd584a1094dbbbc9659206cf9fcecd",
+      "exitCode": 0,
+      "processExitCode": 0,
+      "wrapperExitCode": 0,
+      "stopReason": null,
+      "childrenStopped": true,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY"
+    }
+  },
+  "sourceHashes": {
+    "scripts/memory/qa_vault.py": "c862103192aa185ad256677c83f273cd837cf65d8a56e9278edee153dfa661cf",
+    "scripts/memory/tests/test_qa_abort.py": "9455c848f902d6359b6e6c671389fa0320cd362eaa947e87e1d2439c3fa275ca",
+    "scripts/memory/tests/qa_abort_marker_smoke.py": "16ad0d80ad98241cdd53d0e9158d6edead7468011000e513f06fcf33eea98f48"
+  },
+  "expectedAbortSmokeStatus": "Wrapper/task exit125 is the expected successful maintenance check of abort propagation; it is not a business PASS."
+}

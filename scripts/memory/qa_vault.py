@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import selectors
 import shutil
@@ -111,6 +112,65 @@ class Run:
             os.close(fd)
 
 
+def read_abort_marker(run):
+    run.verify()
+    path = run.evidence / 'abort.json'
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    except FileNotFoundError:
+        return None
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_nlink != 1 or st.st_uid != os.geteuid() or stat.S_IMODE(st.st_mode) != 0o600 or st.st_size > 4096:
+            raise UnsafePath('invalid abort marker file')
+        with os.fdopen(fd, 'r') as stream:
+            fd = None
+            value = json.load(stream)
+    except (ValueError, TypeError) as error:
+        raise UnsafePath('invalid abort marker JSON') from error
+    finally:
+        if fd is not None:
+            os.close(fd)
+    if (not isinstance(value, dict) or value.get('schema') != 1 or value.get('runId') != run.run_id
+            or value.get('runIdentity') != list(run.identities[run.path])
+            or not re.fullmatch(r'[A-Z][A-Z0-9_]{0,63}', str(value.get('reason', '')))):
+        raise UnsafePath('abort marker identity or reason mismatch')
+    return value
+
+
+def write_abort_marker(run, reason):
+    if not re.fullmatch(r'[A-Z][A-Z0-9_]{0,63}', reason):
+        raise UnsafePath('abort reason must be a fixed nonsecret identifier')
+    run.verify()
+    if (run.evidence / 'manifest.json').exists():
+        raise UnsafePath('completed run cannot be aborted')
+    run.atomic_json('abort.json', {'schema': 1, 'runId': run.run_id,
+        'runIdentity': list(run.identities[run.path]), 'reason': reason, 'requestedNs': time.time_ns()})
+
+
+def attach_active_run(path):
+    path = Path(path)
+    if path.parent != DEFAULT_ROOT / 'runs' or not re.fullmatch(r'qa-[0-9a-f]{12}', path.name):
+        raise UnsafePath('abort must name one owned vault run')
+    run = Run.__new__(Run)
+    run.root = private_directory(DEFAULT_ROOT)
+    run.path = private_directory(path)
+    run.run_id = path.name
+    run.scratch = private_directory(path / 'scratch')
+    run.evidence = private_directory(path / 'evidence')
+    run.identities = {p: identity(p) for p in [run.root, path.parent, path, run.scratch, run.evidence]}
+    state = subprocess.run(['systemctl', 'show', 'taiko-' + run.run_id + '.service', '-p', 'ActiveState', '--value'], capture_output=True, text=True, timeout=5)
+    if state.returncode or state.stdout.strip() not in {'active', 'activating'}:
+        raise UnsafePath('abort requires this run unit to be active')
+    return run
+
+
+def abort_run(path, reason):
+    run = attach_active_run(path)
+    write_abort_marker(run, reason)  # fsync and validated identity before any stop.
+    return stop_unit('taiko-' + run.run_id)
+
+
 def tree_usage(path, reject_symlinks=False):
     total = allocated = largest = entries = symlinks = hardlinks = 0
     seen_inodes = set()
@@ -203,6 +263,9 @@ def supervise(process, run, stop, scratch_limit, min_free, interval=2, timeout=9
                     samples.append(record)
                     reason = violation(record, scratch_limit, min_free)
                     next_sample = time.monotonic() + interval
+                marker = read_abort_marker(run)
+                if marker:
+                    reason = 'OWNER_ABORT_' + marker['reason']
                 if interrupted:
                     reason = 'INTERRUPTED'
                 if time.monotonic() - started > timeout:
@@ -251,8 +314,10 @@ def supervise(process, run, stop, scratch_limit, min_free, interval=2, timeout=9
     os.rename(partial, final)
     after = sample(run, 'after-child-exit')
     samples.append(after)
-    reason = reason or violation(after, scratch_limit, min_free)
-    return {'exitCode': process.returncode, 'stopReason': reason, 'childrenStopped': stopped,
+    marker = read_abort_marker(run)
+    reason = ('OWNER_ABORT_' + marker['reason']) if marker else reason or violation(after, scratch_limit, min_free)
+    exit_code = 125 if marker else process.returncode
+    return {'exitCode': exit_code, 'processExitCode': process.returncode, 'stopReason': reason, 'childrenStopped': stopped,
             'samples': samples, 'log': {'file': 'output.log', 'bytes': written, 'sha256': digest.hexdigest()}}
 
 
@@ -362,12 +427,18 @@ def stop_unit(unit):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--abort-run', type=Path)
+    parser.add_argument('--abort-reason')
     parser.add_argument('--vault-root', type=Path, default=DEFAULT_ROOT)
     parser.add_argument('--scratch-limit', type=int, default=DEFAULT_SCRATCH)
     parser.add_argument('--min-free', type=int, default=MIN_FREE)
     parser.add_argument('--budget-reason', default='default')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
+    if args.abort_run:
+        if args.command or not args.abort_reason:
+            parser.error('abort requires one run and fixed reason only')
+        return 0 if abort_run(args.abort_run, args.abort_reason) else 1
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
     if not command or args.scratch_limit < 1 or args.min_free < MIN_FREE:
         parser.error('command and positive scratch budget required; free-space floor cannot be lowered')

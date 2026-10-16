@@ -11,7 +11,7 @@ for(const spec of paths){
  const bytes=await readFile(actual),data=JSON.parse(bytes);assert.equal(data.productionAccess,false);
  sources.push({kind,path:actual,sha256:createHash('sha256').update(bytes).digest('hex'),status:data.status,manifestSha256:data.runtime?.manifestSha256,harnessSha256:data.runtime?.harnessSha256,viewerHead:data.runtime?.viewerHead});
  // Cold samples that prepared warm reports or smoke are listed separately, never pooled into formal cold.
- const formalCold=kind==='cold';if(formalCold)assert.equal(data.warm?.length,0,'Cold-only cohort required');
+ const formalCold=kind==='cold';if(formalCold){assert.equal(data.scope,'FORMAL_QUEUED_COLD_COHORT','Formal cold scope required; legacy failed cohort stays separately retained');assert.equal(data.warm?.length,0,'Cold-only cohort required');}
  if(formalCold)for(const item of data.cold||[])attempts.push({...item,scale:data.scale,user:data.input?.syntheticIdentity,inputSha256:data.input?.sha256,source:actual,resourceAlarm:data.resourceAlarm});
  if(formalCold&&!data.cold?.length)attempts.push({status:'failed-before-submission',scale:data.scale,source:actual});
  if(kind==='warm')assert.equal(data.scope,'CURRENT_454_WARM_COHORT');
@@ -19,7 +19,7 @@ for(const spec of paths){
 }
 assert.equal(new Set(sources.map(x=>x.manifestSha256)).size,1,'Mixed manifests require separate evidence cohorts');
 assert.ok(sources[0].manifestSha256,'Runtime identity required');
-assert.ok(sources[0].harnessSha256);assert.equal(new Set(sources.map(x=>x.harnessSha256)).size,1,'Mixed harness revisions require separate cohorts');
+assert.ok(sources[0].harnessSha256);for(const kind of ['cold','warm'])assert.ok(new Set(sources.filter(x=>x.kind===kind).map(x=>x.harnessSha256)).size<=1,'Mixed harness revisions within one cohort kind require separate cohorts');
 const successes=attempts.filter(x=>x.status==='completed'&&!x.resourceAlarm),values=successes.map(x=>x.totalWallMs).sort((a,b)=>a-b);
 const q=p=>values.length?values[Math.ceil(values.length*p)-1]:null;
 const scales=Object.fromEntries(['low','mid','high'].map(scale=>[scale,successes.filter(x=>x.scale===scale).length]));

@@ -43,3 +43,9 @@ Commands run only through `scripts/memory/run_qa.sh`:
 ```
 
 The cold command runs one bounded three-user round. The summary tool requires explicit `--warm=<evidence.json>` and `--cold=<evidence.json>` inputs; never include smoke in the formal input list. It rejects mixed runtime manifests/harness revisions and retains all submitted attempts. Individual cohorts are not an O1 or Freeze signoff.
+
+## Maintenance follow-up after the resource stop
+
+No business load resumed. Host full PSI avg10 returned to 0.00 and the original QA/generator units were inactive before lightweight maintenance checks. Abort propagation now uses a validated, atomically archived run marker before stopping the exact unit. Five new marker tests passed (`qa-a4444846af31`), and the real no-business abort smoke (`qa-4163edfc0fcf`) produced the expected nonzero 125 / `OWNER_ABORT_MAINTENANCE_SMOKE`, with child exit and scratch cleanup proved. The old cold manifest remains byte-for-byte unchanged.
+
+Future cold files explicitly identify `FORMAL_QUEUED_COLD_COHORT`; they run one scale per SQL child and stop on the first failed child. The prepared scope change passed syntax validation only (`qa-c2ff7d7f53b5`); no cold cohort or poster was rerun. A summary must preserve the separately retained failed legacy cohort, whose original scope label predates this correction. Historical warm evidence retains its exact prior harness hash; mixed revisions within a cohort kind are rejected.

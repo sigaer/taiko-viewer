@@ -11,12 +11,12 @@ import {accountSourceFixture} from './fixtures/accountSourceHttp.mjs';
 const RealDate=Date;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-export async function runAnnualO1({warmSamples=3,warmRates=[1,3,5],scale='low',formal=false}={}) {
+export async function runAnnualO1({warmSamples=3,warmRates=[1,3,5],scale='low',formal=false,formalCold=false}={}) {
  const python=assertQaPython();
  const manifestBytes=await readFile(process.env.QA_ARTIFACT_MANIFEST),manifest=JSON.parse(manifestBytes);
  const runtime={viewerHead:execFileSync('/usr/bin/git',['rev-parse','HEAD'],{cwd:new URL('../../',import.meta.url),encoding:'utf8'}).trim(),harnessSha256:createHash('sha256').update(await readFile(new URL('./annualO1Harness.mjs',import.meta.url))).digest('hex'),viewerVersion:JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version,python,manifestSha256:createHash('sha256').update(manifestBytes).digest('hex'),candidate:manifest.candidate};
  const root=await mkdtemp(qaTempPrefix('annual-test-o1-')),outputRoot=await mkdtemp(resolve(process.env.QA_EVIDENCE_DIR,'annual-o1-')),priorEnv={...process.env},priorCwd=process.cwd();
- const evidence={status:'RUNNING',scope:formal?'CURRENT_454_WARM_COHORT':'SMOKE_EVIDENCE_PENDING',root,outputRoot,scale,productionAccess:false,runtime,cold:[],warm:[],generatorLimit:2,rendererLimit:1,telemetry:'beta event sink synthetic; actual queue/worker/repository/read services retained'};
+ const evidence={status:'RUNNING',scope:formal?'CURRENT_454_WARM_COHORT':formalCold?'FORMAL_QUEUED_COLD_COHORT':'SMOKE_EVIDENCE_PENDING',root,outputRoot,scale,productionAccess:false,runtime,cold:[],warm:[],generatorLimit:2,rendererLimit:1,telemetry:'beta event sink synthetic; actual queue/worker/repository/read services retained'};
  let hook,sampler,sampling=false,resourceAlarm=null;const resourceSamples=[];
  const sampleResources=async()=>{if(sampling)return;sampling=true;try{const own=(await readFile('/proc/self/cgroup','utf8')).trim().split(':').at(-1);const ledger=await readFile(resolve(root,'admission/generator.json'),'utf8').then(JSON.parse,()=>[]);const groups=[own,...ledger.filter(x=>/^[0-9a-f-]{36}$/i.test(x.id)).map(x=>'/development.slice/development-qa.slice/taiko-annual-generator-'+x.id+'.service')];const rows=[];for(const group of groups){const data={group};for(const name of ['memory.current','memory.peak','memory.swap.current','memory.events','cpu.stat','io.stat'])data[name]=await readFile('/sys/fs/cgroup'+group+'/'+name,'utf8').catch(()=>null);if(Number(/^oom_kill (\d+)$/m.exec(data['memory.events']||'')?.[1]||0)>0||Number(/^oom (\d+)$/m.exec(data['memory.events']||'')?.[1]||0)>0)resourceAlarm='CGROUP_OOM';rows.push(data);}const memoryPsi=await readFile('/proc/pressure/memory','utf8');if(Number(/full avg10=([0-9.]+)/.exec(memoryPsi)?.[1]||0)>=2)resourceAlarm='MEMORY_PSI_FULL';resourceSamples.push({wallMs:performance.now(),groups:rows,memoryPsi});}finally{sampling=false;}};
  try{
@@ -88,7 +88,7 @@ export async function runAnnualO1({warmSamples=3,warmRates=[1,3,5],scale='low',f
    }
    const ledger=JSON.parse(await readFile(resolve(root,'admission/generator.json'),'utf8'));assert.ok(ledger.every(x=>!['queued','running'].includes(x.state)));evidence.workerLedger=ledger.map(x=>({state:x.state,id:x.id}));
    assert.equal(resourceAlarm,null,'resource guard must remain clear');
-   evidence.status=formal?'PASS_WARM_COHORT_COLD_SAMPLE_ONLY':'PASS_SMOKE_EVIDENCE_PENDING';
+   evidence.status=formal?'PASS_WARM_COHORT_COLD_SAMPLE_ONLY':formalCold?'PASS_COLD_SAMPLE_EVIDENCE_PENDING':'PASS_SMOKE_EVIDENCE_PENDING';
   },{withDeveloper:true,requestTimeoutMs:15000});
  }catch(e){evidence.status='FAIL';evidence.failure={name:e.name,message:String(e.message).slice(0,600)};throw e;}
  finally{clearInterval(sampler);while(sampling)await sleep(10);await sampleResources().catch(()=>{});evidence.resourceSamples=resourceSamples;evidence.resourceAlarm=resourceAlarm;delete globalThis.__annualO1Catalog;hook?.deregister();process.chdir(priorCwd);globalThis.Date=RealDate;for(const key of Object.keys(process.env))if(!(key in priorEnv))delete process.env[key];Object.assign(process.env,priorEnv);await writeFile(assertQaEvidencePath(resolve(outputRoot,'evidence.json')),JSON.stringify(evidence,null,2)+'\n',{mode:0o600});console.log('ANNUAL_O1_EVIDENCE '+resolve(outputRoot,'evidence.json'));}

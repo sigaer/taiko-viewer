@@ -13,3 +13,15 @@ Default scratch ceiling is 2 GiB (the larger of logical and allocated usage); mi
 After proving unit/cgroup exit, regular evidence files are fsynced and hashed, output is atomically finalized, and `manifest.json` is written atomically with status and metrics. Failed tasks retain evidence. Cleanup removes only this invocation's scratch directory after identity checks; if child exit or directory identity cannot be proved, it retains scratch and marks failure. Scratch symlinks (such as venv `lib64`) are counted without traversal; their outside targets survive cleanup. Scratch hardlinks are counted by name logically and by unique device/inode for allocated bytes; cleanup only unlinks owned names, preserving external links. Evidence symlinks, hardlinked files and symlink root/parent substitutions are rejected. The supervisor does not collect environment values or command arguments; task stdout itself must remain secret-free.
 
 Validation: `scripts/memory/tests/test_qa_vault.py` covers failure retention, overflow, low-water/per-file checks, outside-file survival, scratch symlinks, directory substitution, evidence archive hashing, hardlinks, unproven child exit and environment/budget construction. `qa_wrapper_smoke.py` verifies the real environment/cgroup and deliberately leaves a child process for systemd teardown; inspect the preserved record and confirm both PIDs and scratch are gone. Neither test connects to SQL/network or production.
+
+### Explicit owner aborts
+
+Before stopping an active owned QA unit, use the control helper (do not acquire a second QA lock):
+
+```sh
+/usr/bin/python3 scripts/memory/qa_vault.py --abort-run /home/sigaer/taiko/qa-vault/runs/qa-0123456789ab --abort-reason MEMORY_PSI_FULL
+```
+
+It accepts only an active unit derived from a private, non-symlink run under the fixed vault root. It atomically fsyncs a mode0600 `evidence/abort.json` containing the run identity and a fixed nonsecret reason code before stopping that exact unit. The supervisor validates the marker, archives it and emits `exitCode=125`, `wrapperExitCode=125`, `stopReason=OWNER_ABORT_<reason>`, retaining the raw `processExitCode` separately. The control helper itself may return0 because stopping succeeded; this is not the QA task result.
+
+No historical manifest is rewritten. In the earlier cold resource stop `qa-5593936cff4c`, systemd stop returned0 before this marker mechanism existed; its explicit Annual failure/abort record takes precedence over the old wrapper exit code. New abort-specific tests and a real no-business abort smoke are recorded separately; the original16 filesystem tests and600 warm requests were not rerun for this change.
