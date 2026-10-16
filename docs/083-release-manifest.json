@@ -209,7 +209,7 @@
     },
     {
       "path": "taiko_viewer/tests/viewer083IntegrationNuxt.test.mjs",
-      "sha256": "d936bb3346df4f7e7cef945cbfb098f38bba22ed91af587b80c1143a87cb51d6"
+      "sha256": "1c77b0140740a7d854c2ed60d403b2330c671f55ad85d5174e6e36bde459bbb6"
     },
     {
       "path": "taiko_viewer/tests/viewer083SchemaRecovery.test.mjs",

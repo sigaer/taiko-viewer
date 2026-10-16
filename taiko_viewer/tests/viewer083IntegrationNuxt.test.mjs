@@ -88,7 +88,7 @@ test('RC4 integration unmodified Nuxt SQL HTTP browser and generation isolation'
   await switchTo(cookieA,missing);await ask('missing committed Publication',cookieA,503);await switchTo(cookieA,corrupt);
   const object=resolve(userdata,'.taiko-publications','71000000006','objects',corruptView.files.current.sha256);await writeFile(object,'corrupt');await ask('corrupt committed object controlled',cookieA,503);
   await switchTo(cookieA,empty);const unknown=await ask('no history no reliable facts unknown',cookieA);assert.equal(unknown.growth.coverage.scoreHistoryState,'unknown');assert.equal(unknown.growth.totalFacts,0);assert.equal(unknown.scores.rows,0);
-  await switchTo(cookieA,A1);
+  await switchTo(cookieA,A2);
   await barrier(()=>ask('owner changes during read rejected',cookieA,409),()=>pool.execute('UPDATE web_taiko_bindings SET user_id=? WHERE id=?',[B,A2]));await pool.execute('UPDATE web_taiko_bindings SET user_id=? WHERE id=?',[A,A2]);await switchTo(cookieA,A1);
   await http('/api/account/my-taiko/overview',{headers:{authorization:'Bearer synthetic-developer-key'},expected:401});
   const [[measure]]=await pool.query('SELECT COUNT(*) n FROM web_growth_measurements');assert.equal(Number(measure.n),0);const [[goals]]=await pool.query('SELECT COUNT(*) n FROM web_player_goals');assert.equal(Number(goals.n),0);
