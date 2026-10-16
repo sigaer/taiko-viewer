@@ -1,0 +1,2102 @@
+openapi: 3.1.0
+info:
+  title: Viewer Developer API v1 — local Freeze Candidate
+  version: 0.83.0-rc.1
+  description: "NOT FROZEN / NOT DEPLOYED. Explicit local opt-in required. External read surface has
+    one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
+    scores:read are open. This document does not register production access or upgrade legacy tokens
+    into ResourceGrants."
+servers:
+  - url: http://127.0.0.1:{port}
+    description: Owned isolated local test listener only
+    variables:
+      port:
+        default: "43083"
+        description: Use the actual admitted run loopback port; no production default.
+paths:
+  /api/v1/taiko/meta:
+    get:
+      operationId: getMeta
+      description: Local Freeze Candidate only. Anonymous public metadata, same source catalog revision;
+        no production availability claim.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  apiVersion:
+                    const: v1
+                  contractVersion:
+                    const: "1.0"
+                  schemaRevision:
+                    type: string
+                  catalogRevision:
+                    type: string
+                  capabilities:
+                    type: array
+                    items:
+                      enum:
+                        - catalog:read
+                        - profile:read
+                        - scores:read
+                  unavailableScopes:
+                    type: array
+                    items:
+                      enum:
+                        - history:read
+                        - growth:read
+                  status:
+                    const: FREEZE_CANDIDATE
+                  catalogProfile:
+                    const: source-catalog-explicit-v1
+                  pagination:
+                    const: none-bounded-complete-response
+                required:
+                  - apiVersion
+                  - contractVersion
+                  - schemaRevision
+                  - catalogRevision
+                  - capabilities
+                  - unavailableScopes
+                  - status
+                  - catalogProfile
+                  - pagination
+              example:
+                apiVersion: v1
+                contractVersion: "1.0"
+                schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                capabilities:
+                  - catalog:read
+                  - profile:read
+                  - scores:read
+                unavailableScopes:
+                  - history:read
+                  - growth:read
+                status: FREEZE_CANDIDATE
+                catalogProfile: source-catalog-explicit-v1
+                pagination: none-bounded-complete-response
+        "304":
+          description: Revalidated representation. Private requests complete all live authority checks before
+            304.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAUTHENTICATED
+                message: UNAUTHENTICATED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "429":
+          description: Atomic shared daily quota exhausted
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: RATE_LIMITED
+                message: RATE_LIMITED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/v1/taiko/catalog/songs:
+    get:
+      operationId: getCatalogSongs
+      description: Anonymous public data. Optional Authorization is always validated; an invalid header
+        never falls back to Cookie/anonymous. Atomic shared daily quota. Complete bounded result; no
+        pagination. Region/mode remain unknown when not explicit. Duplicate source IDs fail closed.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogSongsResponse
+              example:
+                versions:
+                  contractVersion: "1.0"
+                  schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                  scoreRevision: null
+                  calculationProfile: null
+                  observationSource: null
+                  capturedAt: null
+                items:
+                  - songId: "1"
+                    title: Synthetic CN
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: CN
+                      status: active
+                  - songId: "2"
+                    title: Synthetic JP
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: JP
+                      status: removed
+                  - songId: "3"
+                    title: Unknown region/mode
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: UNKNOWN
+                      status: unknown
+        "304":
+          description: Revalidated representation. Private requests complete all live authority checks before
+            304.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAUTHENTICATED
+                message: UNAUTHENTICATED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "429":
+          description: Atomic shared daily quota exhausted
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: RATE_LIMITED
+                message: RATE_LIMITED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/v1/taiko/catalog/charts:
+    get:
+      operationId: getCatalogCharts
+      description: Anonymous public data. Optional Authorization is always validated; an invalid header
+        never falls back to Cookie/anonymous. Atomic shared daily quota. Complete bounded result; no
+        pagination. Region/mode remain unknown when not explicit. Duplicate source IDs fail closed.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogChartsResponse
+              example:
+                versions:
+                  contractVersion: "1.0"
+                  schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                  scoreRevision: null
+                  calculationProfile: null
+                  observationSource: null
+                  capturedAt: null
+                items:
+                  - songId: "1"
+                    chartId: 1:1:single
+                    difficulty: 1
+                    level: 1
+                    type: single
+                    variant: null
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: CN
+                      status: active
+                    tjaCourse: 0
+                  - songId: "1"
+                    chartId: 1:4:single
+                    difficulty: 4
+                    level: 9
+                    type: single
+                    variant: null
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: CN
+                      status: active
+                    tjaCourse: 3
+                  - songId: "2"
+                    chartId: 2:5:double
+                    difficulty: 5
+                    level: 10
+                    type: double
+                    variant: null
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: JP
+                      status: removed
+                    tjaCourse: 4
+                  - songId: "3"
+                    chartId: 3:2:unknown
+                    difficulty: 2
+                    level: 3
+                    type: unknown
+                    variant: null
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: UNKNOWN
+                      status: unknown
+                    tjaCourse: 1
+                  - songId: "3"
+                    chartId: 3:3:unknown
+                    difficulty: 3
+                    level: 4
+                    type: unknown
+                    variant: null
+                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    availability:
+                      region: UNKNOWN
+                      status: unknown
+                    tjaCourse: 2
+        "304":
+          description: Revalidated representation. Private requests complete all live authority checks before
+            304.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAUTHENTICATED
+                message: UNAUTHENTICATED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "429":
+          description: Atomic shared daily quota exhausted
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: RATE_LIMITED
+                message: RATE_LIMITED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/v1/taiko/players/{playerId}/profile:
+    get:
+      operationId: getPlayerProfile
+      description: Requires live profile:read ResourceGrant for this stable client and binding, audience
+        viewer:developer-api:v1, verified resource owner and active approved client/key. Client
+        ownership never grants data. Live checks occur before disk access and after pinned
+        Publication Worker teardown, including 304. No upstream fetch or C/H writes. Cache-Control
+        remains private, no-store.
+      security:
+        - ClientKey: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperProfileResponse
+              example:
+                versions:
+                  contractVersion: "1.0"
+                  schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                  scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                  calculationProfile: null
+                  observationSource: wahlap
+                  capturedAt: 2026-10-16T00:00:00Z
+                profile:
+                  playerId: plr_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  bindingId: "2"
+                  displayName: Synthetic player
+                  source: wahlap
+        "304":
+          description: Revalidated representation. Private requests complete all live authority checks before
+            304.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAUTHENTICATED
+                message: UNAUTHENTICATED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "429":
+          description: Atomic shared daily quota exhausted
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: RATE_LIMITED
+                message: RATE_LIMITED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^plr_[a-f0-9]{32}$
+          description: Opaque binding resource ID returned to its consenting owner. Never an external taikoId
+            or path.
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/v1/taiko/players/{playerId}/scores:
+    get:
+      operationId: getPlayerScores
+      description: Requires live scores:read ResourceGrant for this stable client and binding, audience
+        viewer:developer-api:v1, verified resource owner and active approved client/key. Client
+        ownership never grants data. Live checks occur before disk access and after pinned
+        Publication Worker teardown, including 304. No upstream fetch or C/H writes. Cache-Control
+        remains private, no-store.
+      security:
+        - ClientKey: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperScoresResponse
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          not:
+                            required:
+                              - legacy
+              example:
+                versions:
+                  contractVersion: "1.0"
+                  schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                  scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                  calculationProfile: null
+                  observationSource: wahlap
+                  capturedAt: 2026-10-16T00:00:00Z
+                playerId: plr_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                items:
+                  - song:
+                      songId: "1"
+                      title: null
+                      catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    chart:
+                      songId: "1"
+                      chartId: 1:4:single
+                      difficulty: 4
+                      level: 10
+                      type: single
+                      variant: null
+                      catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                    score: 950000
+                    good: 95
+                    ok: 4
+                    ng: 1
+                    combo: 90
+                    clear: true
+                    fullCombo: false
+                    dondafulCombo: false
+                    rank: 5
+                    capturedAt: 2026-10-16T00:00:00Z
+                    source: wahlap
+                    counts:
+                      clear: 3
+                      fullCombo: 0
+                      dondafulCombo: 0
+                      stage: 4
+                      roll: 10
+                    highscoreAt: 2026-10-09 12:00:00
+                    updatedAt: 2026-10-10 12:00:00
+        "304":
+          description: Revalidated representation. Private requests complete all live authority checks before
+            304.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAUTHENTICATED
+                message: UNAUTHENTICATED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "429":
+          description: Atomic shared daily quota exhausted
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: RATE_LIMITED
+                message: RATE_LIMITED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^plr_[a-f0-9]{32}$
+          description: Opaque binding resource ID returned to its consenting owner. Never an external taikoId
+            or path.
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/account/developer/grants:
+    get:
+      operationId: listOwnerGrants
+      description: Verified Viewer session only; Authorization header is rejected even when a Cookie is
+        valid. Lists at most 100 approved active clients, 100 verified owner bindings and 100 most
+        recent grant rows; no score read. Expired/revoked rows remain visible.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  consentVersion:
+                    const: viewer-resource-consent-v1
+                  audience:
+                    const: viewer:developer-api:v1
+                  availableScopes:
+                    type: array
+                    items:
+                      enum:
+                        - profile:read
+                        - scores:read
+                  clients:
+                    type: array
+                    items:
+                      $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperClient
+                  bindings:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        bindingId:
+                          type: string
+                        source:
+                          type: string
+                        displayName:
+                          type:
+                            - string
+                            - "null"
+                        playerId:
+                          type:
+                            - string
+                            - "null"
+                      required:
+                        - bindingId
+                        - source
+                        - displayName
+                        - playerId
+                  grants:
+                    type: array
+                    items:
+                      $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ResourceGrant
+                required:
+                  - consentVersion
+                  - audience
+                  - availableScopes
+                  - clients
+                  - bindings
+                  - grants
+              example:
+                consentVersion: viewer-resource-consent-v1
+                audience: viewer:developer-api:v1
+                availableScopes:
+                  - profile:read
+                  - scores:read
+                clients:
+                  - clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    displayName: Synthetic app
+                    status: active
+                bindings:
+                  - bindingId: "2"
+                    source: wahlap
+                    displayName: Synthetic binding
+                    playerId: plr_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                grants:
+                  - grantId: dddddddddddddddddddddddddddddddd
+                    ownerUserId: "1"
+                    bindingId: "2"
+                    playerId: plr_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    audience: viewer:developer-api:v1
+                    scopes:
+                      - scores:read
+                    consentVersion: viewer-resource-consent-v1
+                    consentedAt: 2026-10-16T00:00:00.000000Z
+                    issuedAt: 2026-10-16T00:00:00.000000Z
+                    expiresAt: 2026-11-15T00:00:00.000000Z
+                    revokedAt: null
+                    revision: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+    post:
+      operationId: consentResourceGrant
+      description: Explicit user consent to one immutable binding ID and stable client. Owner inferred
+        solely from session, never a developer key or request owner field. Native SQL transaction
+        records consent/audit; at most one current consent row per owner/binding/client. Reconsent
+        replaces grantId/revision, preserving audit and stable playerId.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  grant:
+                    $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ResourceGrant
+                required:
+                  - grant
+              example:
+                grant:
+                  grantId: dddddddddddddddddddddddddddddddd
+                  ownerUserId: "1"
+                  bindingId: "2"
+                  playerId: plr_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                  audience: viewer:developer-api:v1
+                  scopes:
+                    - scores:read
+                  consentVersion: viewer-resource-consent-v1
+                  consentedAt: 2026-10-16T00:00:00.000000Z
+                  issuedAt: 2026-10-16T00:00:00.000000Z
+                  expiresAt: 2026-11-15T00:00:00.000000Z
+                  revokedAt: null
+                  revision: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Exact same origin as the Viewer session request; cross-site consent/revoke denied.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                bindingId:
+                  type: string
+                  pattern: ^[1-9][0-9]{0,18}$
+                clientId:
+                  type: string
+                  pattern: ^clt_[a-f0-9]{32}$
+                scopes:
+                  type: array
+                  minItems: 1
+                  maxItems: 2
+                  uniqueItems: true
+                  items:
+                    enum:
+                      - profile:read
+                      - scores:read
+                expiresInDays:
+                  type: integer
+                  minimum: 1
+                  maximum: 90
+                consent:
+                  const: true
+                consentVersion:
+                  const: viewer-resource-consent-v1
+                audience:
+                  const: viewer:developer-api:v1
+              required:
+                - bindingId
+                - clientId
+                - scopes
+                - expiresInDays
+                - consent
+                - consentVersion
+                - audience
+            example:
+              bindingId: "2"
+              clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+              scopes:
+                - scores:read
+              expiresInDays: 30
+              consent: true
+              consentVersion: viewer-resource-consent-v1
+              audience: viewer:developer-api:v1
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/account/developer/grants/{grantId}:
+    delete:
+      operationId: revokeResourceGrant
+      description: Owner-only transactional revocation and audit. Idempotent for a retained revoked grant
+        ID. Cannot revoke another owner grant.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  ok:
+                    const: true
+                required:
+                  - ok
+              example:
+                ok: true
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+        - name: Origin
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Exact same origin as the Viewer session request; cross-site consent/revoke denied.
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/account/developer/clients:
+    get:
+      operationId: listOwnClients
+      description: Lists at most 100 client identities owned by this verified Viewer session; no secret
+        credentials.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  clients:
+                    type: array
+                    items:
+                      $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperClient
+                required:
+                  - clients
+              example:
+                clients:
+                  - clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    displayName: Synthetic app
+                    status: active
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+    post:
+      operationId: registerApprovedClient
+      description: Only a verified Viewer owner of an approved developer application may register its
+        stable client. Existing credential hashes remain in web_developer_tokens; rotation tied to
+        the same application preserves the client identity and never adds resource permission.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  client:
+                    $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperClient
+                required:
+                  - client
+              example:
+                client:
+                  clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                  displayName: Synthetic app
+                  status: active
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: Origin
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Exact same origin as the Viewer session request; cross-site consent/revoke denied.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                displayName:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+              required:
+                - displayName
+            example:
+              displayName: Synthetic app
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+  /api/account/developer/clients/{clientId}:
+    delete:
+      operationId: disableOwnClient
+      description: Disables only the session owner client. All v1 private reads fail live checks; does not
+        change any score or legacy service grant.
+      security:
+        - ViewerSession: []
+      responses:
+        "200":
+          description: Completed read
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  ok:
+                    const: true
+                required:
+                  - ok
+              example:
+                ok: true
+        "400":
+          description: Invalid request; unknown query/body fields rejected
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: INVALID_REQUEST
+                message: INVALID_REQUEST
+                requestId: 00000000-0000-4000-8000-000000000000
+        "401":
+          description: Missing/invalid initial client or Viewer session identity
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: SESSION_REQUIRED
+                message: SESSION_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "403":
+          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
+            origin
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: GRANT_REQUIRED
+                message: GRANT_REQUIRED
+                requestId: 00000000-0000-4000-8000-000000000000
+        "404":
+          description: Candidate disabled or route absent
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: NOT_FOUND
+                message: NOT_FOUND
+                requestId: 00000000-0000-4000-8000-000000000000
+        "503":
+          description: Unavailable schema/data/publication; no private diagnostic output
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            ETag:
+              schema:
+                type: string
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
+              example:
+                code: UNAVAILABLE
+                message: UNAVAILABLE
+                requestId: 00000000-0000-4000-8000-000000000000
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Origin
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Exact same origin as the Viewer session request; cross-site consent/revoke denied.
+      x-example-policy: Synthetic examples only; no live account/key/score bytes.
+components:
+  securitySchemes:
+    ClientKey:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque approved client key
+      description: Client identity only; user ResourceGrant is mandatory for private data. Never send app
+        keys to the owner consent endpoint.
+    ViewerSession:
+      type: apiKey
+      in: cookie
+      name: stv_session
+      description: Existing verified owner session; Authorization headers are rejected for these operations.
+x-schema-source: packages/sakura-taiko-contract/schema/contract-v1.json
+x-freeze-status: FREEZE_CANDIDATE_NOT_FROZEN
+x-production-authorized: false

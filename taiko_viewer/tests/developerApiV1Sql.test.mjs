@@ -114,12 +114,22 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
   tokenDb.execute=async function(sql,args){if(sql.includes('FROM web_developer_resource_grants g JOIN web_taiko_bindings')&&++tokenProofs===3)await c.pool.execute("UPDATE web_developer_tokens SET status='revoked',revoked_at=UTC_TIMESTAMP() WHERE token_hash=?",[digest(keyX)]);return tokenExecute.call(this,sql,args);};
   try{await ask('in-flight-token-revocation',scores(player),{token:keyX,expected:403});}finally{tokenDb.execute=tokenExecute;await c.pool.execute("UPDATE web_developer_tokens SET status='active',revoked_at=NULL WHERE token_hash=?",[digest(keyX)]);}
   const [saved]=await c.pool.query('SELECT * FROM web_taiko_bindings WHERE id=?',[c.bindingId]);await c.pool.execute('DELETE FROM web_taiko_bindings WHERE id=?',[c.bindingId]);await ask('unbound-no-304',scores(player),{token:keyX,headers:{'if-none-match':etag},expected:403});await c.pool.query('INSERT INTO web_taiko_bindings SET ?',saved[0]);
+  const [[manualBinding]]=await c.pool.query('SELECT id FROM web_taiko_bindings WHERE user_id=? AND taiko_id=?',[c.user,c.manualId]);
+  const manualGrant=(await ask('manual-owner-consent','/api/account/developer/grants',{method:'POST',body:{...issue,bindingId:String(manualBinding.id),scopes:['profile:read','scores:read']}})).body.grant;
+  await ask('manual-profile-read',profile(manualGrant.playerId),{token:keyX,schemaName:'DeveloperProfileResponse'});await ask('manual-scores-read',scores(manualGrant.playerId),{token:keyX,schemaName:'DeveloperScoresResponse'});
+  const hirobaId=c.taikoId+'3';const [hirobaBinding]=await c.pool.execute("INSERT INTO web_taiko_bindings(user_id,taiko_id,source,verified_title,is_current) VALUES (?,?,'hiroba','Synthetic Hiroba',0)",[c.user,hirobaId]);
+  await withPublicationLease({...paths,identity:hirobaId},async lease=>{await lease.put('current',JSON.stringify({...base,_meta:{...base._meta,source:'hiroba'}}));return lease.publish();});
+  const hirobaGrant=(await ask('hiroba-owner-consent','/api/account/developer/grants',{method:'POST',body:{...issue,bindingId:String(hirobaBinding.insertId),scopes:['profile:read','scores:read']}})).body.grant;
+  const hirobaScores=await ask('hiroba-scores-read',scores(hirobaGrant.playerId),{token:keyX,schemaName:'DeveloperScoresResponse'});assert.equal(hirobaScores.body.items[0].source,'hiroba');await ask('hiroba-profile-read',profile(hirobaGrant.playerId),{token:keyX,schemaName:'DeveloperProfileResponse'});
   c.config.developerApiClientDailyLimit=2;await c.pool.execute("DELETE FROM web_taiko_open_api_daily_usage WHERE ip_address=? AND api_name='developer-api-v1'",['v1:client:'+clientX]);
   const burst=await Promise.all(Array.from({length:5},(_,i)=>ask('atomic-quota-'+i,scores(player),{token:keyX,expected:[200,429]}).catch(e=>e)));
   // Requests are concurrent: assert aggregate accepted/capped counts, not launch order.
   const burstRows=observations.filter(x=>x.case.startsWith('atomic-quota-'));assert.equal(burstRows.filter(x=>x.status===200).length,2);assert.equal(burstRows.filter(x=>x.status===429).length,3);assert.equal(burst.filter(x=>!(x instanceof Error)).length,5);
   c.config.developerApiClientDailyLimit=5000;
   const {consentBrowser}=await import('./fixtures/developerApiV1Ui.mjs');await consentBrowser(c,{clientId:clientX,bindingId,key:keyX,ask});
+  await ask('cross-owner-client-disable-denied','/api/account/developer/clients/'+clientY,{method:'DELETE',expected:403});
+  await ask('owner-disables-client','/api/account/developer/clients/'+clientY,{method:'DELETE',cookie:cookieB});
+  await ask('disabled-client-key-read-denied',scores(otherGrant.playerId),{token:keyY,expected:401});
   await ask('legacy-session-profile','/profile');
   await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'developer-api-v1-observations.json'),JSON.stringify({status:'PASS_SCOPED',database:proof.name,datadir:proof.datadir,cases:observations,productionAccess:false,installedPython:process.env.TAIKO_PYTHON_EXECUTABLE},null,2)+'\n');
  }finally{

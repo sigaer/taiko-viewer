@@ -1,0 +1,1056 @@
+{
+  "schemaVersion": 1,
+  "status": "FREEZE_CANDIDATE_READY_FOR_OWNER_REVIEW",
+  "contractFrozen": false,
+  "deployReady": false,
+  "productionAccess": false,
+  "viewerVersion": "0.83.0-rc.1",
+  "branch": "feat/viewer083-contract-api-20261016",
+  "worktree": "/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016",
+  "baseline": {
+    "viewer082": "32729e86b070ed5bd40bc033a7d936114e5081ce",
+    "ownerAcceptanceCommit": "c9b87f4",
+    "viewer082GateC": "PASS_WITH_ACCEPTED_RISK",
+    "viewer082GateP": "DEPLOY_PENDING_AUTH",
+    "taikoSource": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+    "taikoVersion": "0.14.2",
+    "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+    "oldWheelEquivalenceClaim": false,
+    "installedRoles": {
+      "centerPackages": 94,
+      "clientPackages": 94,
+      "centerCore": "0.1.1",
+      "clientCore": "0.1.2",
+      "support": "1.1.0"
+    },
+    "installedContractPackage": "0.1.0",
+    "sourceContractPackage": "0.1.2",
+    "contractVersion": "1.0"
+  },
+  "commits": {
+    "A": "a6be4ea",
+    "B": [
+      "78b252d",
+      "fd4c669"
+    ],
+    "builtRuntimeCommit": "fd4c669e6492345802a3b2604bd7842715bd8420",
+    "draftReviewed": "78ce858",
+    "documentationAndFinalTests": "this local delivery commit; resolve with git log -1 -- docs/083-contract-freeze-candidate.md"
+  },
+  "featureGate": {
+    "default": false,
+    "developmentBuildOptIn": "TAIKO_DEVELOPER_API_V1_ENABLED=1",
+    "builtRuntimeOptIn": [
+      "NUXT_DEVELOPER_API_V1=1",
+      "NUXT_PUBLIC_DEVELOPER_API_V1=1"
+    ],
+    "productionAuthorized": false
+  },
+  "schema": {
+    "source": "packages/sakura-taiko-contract/schema/contract-v1.json",
+    "sha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d",
+    "generatedBindings": [
+      "src/index.ts",
+      "sakura_taiko_contract/types.py"
+    ],
+    "objects": {
+      "User": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "Binding": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "ExternalIdentity": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "DeveloperIdentity": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "Score": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "GrowthObservation": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "CanonicalFact": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "GrowthProjection": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "CalculationProfile": {
+        "owner": "sakura-taiko-contract/schema/contract-v1.json",
+        "change": "UNCHANGED",
+        "consumer": "existing Viewer/Taiko/Sakura adapters; public v1 uses minimum read projection",
+        "fallback": "existing compatibility adapters retained; no new import/storage fallback"
+      },
+      "Song": {
+        "owner": "same unique Schema",
+        "change": "OPTIONAL_ADDITIONS_ONLY",
+        "fields": [
+          "availability"
+        ],
+        "fallback": "missing region=UNKNOWN, mode=unknown; numeric shelf 0 active, 1 removed, other/missing unknown; no title merge"
+      },
+      "Chart": {
+        "owner": "same unique Schema",
+        "change": "OPTIONAL_ADDITIONS_ONLY",
+        "fields": [
+          "availability",
+          "tjaCourse"
+        ],
+        "fallback": "missing region=UNKNOWN, mode=unknown; numeric shelf 0 active, 1 removed, other/missing unknown; no title merge"
+      },
+      "ResourceGrant": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "DeveloperClient": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "DeveloperPlayerProfile": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "ApiReadVersions": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "DeveloperScoresResponse": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "DeveloperProfileResponse": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "CatalogSongsResponse": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "CatalogChartsResponse": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      },
+      "ApiError": {
+        "owner": "same unique Schema",
+        "change": "ADDITIVE_PLATFORM_DTO",
+        "fallback": "not an algorithm, table model or independent schema authority"
+      }
+    },
+    "privacyProjection": "OpenAPI references canonical Score, and forbids optional legacy on private score responses. Runtime copies only canonical allowlisted fields. No second domain model."
+  },
+  "identity": {
+    "viewerAccount": "session owner; not QQ or taikoId",
+    "externalIdentity": "namespace+id; same digits do not merge namespaces",
+    "clientId": "stable clt_ UUID per approved application; independent of rotating token IDs",
+    "playerId": "opaque plr_ UUID keyed to immutable SQL bindingId; no direct file lookup from URL",
+    "grant": "owner+binding+client+audience+scopes+consentVersion+UTC time+revocation+revision; binding snapshot includes source/taikoId/manual identity",
+    "currentBindingSwitch": "explicit A1 grant stays on A1; selecting A2 never grants A2",
+    "verifiedBinding": "legacy non-null verified_title for upstream bindings; manual source must match a live manual account"
+  },
+  "versions": {
+    "contractVersion": "1.0 compatible extensions",
+    "schemaRevision": "SHA256(JSON.stringify(unique schema)); content identity, not signature",
+    "catalogRevision": "SHA256 of exact bounded source song_data.json bytes",
+    "scoreRevision": "publication-v1:sequence:commitId captured under same live ReadView",
+    "capturedAt": "explicit valid RFC3339 _meta.ts or null; port request clock ignored",
+    "highscoreAtAndUpdatedAt": "verbatim upstream strings or null; never inferred as a play event",
+    "calculationProfile": "null in raw read APIs; no Rating/six-dimension recomputation",
+    "historicalModelRevision": "unchanged; frozen measurements/reports not rewritten"
+  },
+  "grantReadProtocol": {
+    "scopesOpen": [
+      "profile:read",
+      "scores:read"
+    ],
+    "scopesDesignedNotOpen": [
+      "history:read",
+      "growth:read"
+    ],
+    "syncOrCredentialScopes": [],
+    "beforeRead": "atomic SQL graph proof then wait for SH; prove again before data read",
+    "afterRead": "teardown Worker then atomic SQL graph proof of token/client/app/developer/owner/grant/binding/resource; verify captured grant revision, then ETag/304",
+    "decisionLinearization": "final authority SQL; completed revocation before it denies 200/304",
+    "cache": "private, no-store; SDK has no payload cache",
+    "writer": "existing installed taiko_store PublicationStore only; v1 GET has no new score Writer"
+  },
+  "quota": {
+    "implementation": "existing consumeOpenQuota unique daily SQL key + LAST_INSERT_ID capped atomic statement",
+    "defaultAnonymousPerDay": 300,
+    "defaultClientPerDay": 5000,
+    "anonymousSubject": "hash of direct peer IP; forwarded headers ignored",
+    "clientSubject": "stable clientId shared by credential rotations",
+    "clock": "UTC SQL date",
+    "scope": "origin requests, including conditional requests; denied private grants are checked before quota",
+    "productionProxyPolicy": "OWNER_REVIEW_REQUIRED"
+  },
+  "migration": {
+    "script": "taiko_viewer/scripts/migrate_developer_api_v1.ts",
+    "default": "DDL preview only",
+    "applyGuard": "admitted owned loopback non-3306 + fresh datadir under run scratch + actual SELECT DATABASE()/_test and @@datadir + explicit mutation opt-in",
+    "tables": [
+      "web_developer_api_clients",
+      "web_developer_api_resources",
+      "web_developer_resource_grants",
+      "web_developer_resource_grant_events"
+    ],
+    "scoreTablesChanged": false,
+    "productionApplied": false,
+    "restoreRequirement": "future approved production recovery must include all four auth tables with existing credentials/revocations and matching Publication checkpoint"
+  },
+  "routesAndConsumers": [
+    {
+      "entry": "GET /api/v1/taiko/meta",
+      "reader-or-writer": "reader",
+      "owner": "Viewer Contract / Catalog",
+      "auth": "anonymous; optional Bearer must identify approved active client",
+      "scope": "catalog:read",
+      "source": "bounded song_data.json; source-catalog-explicit-v1",
+      "contract-version": "1.0",
+      "side-effects": "atomic UTC daily quota only; no upstream/C/H",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_SCHEMA_GOLDEN",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/v1/taiko/catalog/songs",
+      "reader-or-writer": "reader",
+      "owner": "Viewer Contract / Catalog",
+      "auth": "anonymous; optional Bearer must identify approved active client",
+      "scope": "catalog:read",
+      "source": "bounded song_data.json; source-catalog-explicit-v1",
+      "contract-version": "1.0",
+      "side-effects": "atomic UTC daily quota only; no upstream/C/H",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_SCHEMA_GOLDEN",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/v1/taiko/catalog/charts",
+      "reader-or-writer": "reader",
+      "owner": "Viewer Contract / Catalog",
+      "auth": "anonymous; optional Bearer must identify approved active client",
+      "scope": "catalog:read",
+      "source": "bounded song_data.json; source-catalog-explicit-v1",
+      "contract-version": "1.0",
+      "side-effects": "atomic UTC daily quota only; no upstream/C/H",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_SCHEMA_GOLDEN",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/v1/taiko/players/{playerId}/profile",
+      "reader-or-writer": "reader",
+      "owner": "Viewer resource owner + Contract",
+      "auth": "approved stable client + active key + live ResourceGrant + verified binding snapshot",
+      "scope": "profile:read",
+      "source": "installed taiko_store pinned Publication ReadView / ScoreReadPort",
+      "contract-version": "1.0",
+      "side-effects": "atomic daily quota; no upstream, binding mutation, score writes or payload cache",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_WAHLAP_HIROBA_MANUAL_AND_NEGATIVES",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/v1/taiko/players/{playerId}/scores",
+      "reader-or-writer": "reader",
+      "owner": "Viewer resource owner + Contract",
+      "auth": "approved stable client + active key + live ResourceGrant + verified binding snapshot",
+      "scope": "scores:read",
+      "source": "installed taiko_store pinned Publication ReadView / ScoreReadPort",
+      "contract-version": "1.0",
+      "side-effects": "atomic daily quota; no upstream, binding mutation, score writes or payload cache",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_WAHLAP_HIROBA_MANUAL_AND_NEGATIVES",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/account/developer/grants",
+      "reader-or-writer": "reader",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "owner metadata only",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "POST /api/account/developer/grants",
+      "reader-or-writer": "authorization writer",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "SQL consent + resource identity + audit transaction; no C/H",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "DELETE /api/account/developer/grants/{grantId}",
+      "reader-or-writer": "authorization writer",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "SQL revoke + nonce + audit transaction; no C/H",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/account/developer/clients",
+      "reader-or-writer": "reader",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "owner client metadata only",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "POST /api/account/developer/clients",
+      "reader-or-writer": "authorization writer",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "approved application registration; no credential or score write",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "DELETE /api/account/developer/clients/{clientId}",
+      "reader-or-writer": "authorization writer",
+      "owner": "Viewer session owner; developer application owner for client registration",
+      "auth": "verified Cookie session only; Authorization denied; same Origin for mutations",
+      "scope": "owner consent management",
+      "source": "four additive authorization tables + existing account/application/token/binding tables",
+      "contract-version": "1.0 platform authorization DTO",
+      "side-effects": "owner client status only; no score write",
+      "migration": "IMPLEMENTED_CANDIDATE",
+      "regression": "PASS_SCOPED_HTTP_AND_UI",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "/api/account/profile; /api/account/recommendation; /api/account/growth/**",
+      "reader-or-writer": "reader / existing projection owner",
+      "owner": "Viewer account / Growth",
+      "auth": "existing Web session",
+      "scope": "existing owner binding",
+      "source": "Publication read port; existing Growth facts/measurements/Goal",
+      "contract-version": "legacy DTO; existing Contract read port 1.0",
+      "side-effects": "existing session touches/cache/projections; no new behavior",
+      "migration": "COMPAT_RETAINED",
+      "regression": "profile HTTP PASS; frozen Growth evidence reused, no rerun",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/developer/userdata/[userid]",
+      "reader-or-writer": "reader",
+      "owner": "Viewer Source authority",
+      "auth": "owner session/developer actor or explicit source service capability; quota never authorizes",
+      "scope": "source_read",
+      "source": "authorized current / merged ReadView",
+      "contract-version": "legacy raw DTO",
+      "side-effects": "quota / private revalidation; no new v1 grant implied",
+      "migration": "COMPAT_RETAINED",
+      "regression": "unchanged source; selected source-service allow/deny HTTP PASS",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "GET /api/taiko/proxy/userdata/{taikoId}/history",
+      "reader-or-writer": "reader",
+      "owner": "Viewer Source authority",
+      "auth": "owner or registered service capability",
+      "scope": "history_read (legacy service scope)",
+      "source": "Publication SH / full-delta history",
+      "contract-version": "legacy raw-v1, not play-event stream",
+      "side-effects": "existing quota/private validation",
+      "migration": "COMPAT_RETAINED",
+      "regression": "selected anonymous denial PASS; historical scoped evidence retained",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "POST /api/taiko/proxy/userdata/{taikoId}/update; sync-hiroba",
+      "reader-or-writer": "writer (existing only)",
+      "owner": "installed Taiko Source mutation owner",
+      "auth": "owner/platform proof or explicit service grant",
+      "scope": "wahlap_update / hiroba_sync (legacy)",
+      "source": "installed -I private CLI + existing PublicationStore",
+      "contract-version": "legacy mutation DTO",
+      "side-effects": "upstream acquisition + SQL receipt + existing C/H publication",
+      "migration": "COMPAT_RETAINED",
+      "regression": "explicit service Source/scope + missing scope PASS; 0.82 8-case evidence retained",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "/api/taiko/proxy/bind/*; qq-code; qq-migrate",
+      "reader-or-writer": "existing binding authority",
+      "owner": "Viewer QQ/bot principal authority",
+      "auth": "verified QQ/namespace mapping + existing owner/service policy",
+      "scope": "existing exact binding scopes/principal allowlist",
+      "source": "native installed QQ/binding CLI + SQL",
+      "contract-version": "legacy binding DTO",
+      "side-effects": "binding/QQ transaction and existing receipts; not exposed by v1",
+      "migration": "COMPAT_RETAINED",
+      "regression": "0.82 named QQ SQL scoped PASS reused; no new full rerun",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "POST /api/taiko/internal/manual",
+      "reader-or-writer": "existing score writer / lifecycle authority",
+      "owner": "Viewer internal manual Source owner",
+      "auth": "requireBotService; independent service credential; verified bot identity mapping",
+      "scope": "existing internal manual operations",
+      "source": "same installed PublicationStore / controlled adapters",
+      "contract-version": "legacy internal manual DTO",
+      "side-effects": "existing manual scores/binding lifecycle only",
+      "migration": "COMPAT_RETAINED",
+      "regression": "unchanged source; 0.82 accepted scoped lifecycle evidence reused",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "POST /api/public-score/by-token (outside Viewer route tree)",
+      "reader-or-writer": "existing read + upstream refresh",
+      "owner": "Taiko installed public-score service",
+      "auth": "legacy user-issued per-taikoId bearer token",
+      "scope": "legacy single-source token; not client credential or ResourceGrant",
+      "source": "legacy installed public-score service",
+      "contract-version": "legacy {ok,taikoId,fetchedAt,data}",
+      "side-effects": "may refresh upstream and publish score; unlike v1 pure GET",
+      "migration": "COMPAT_RETAINED",
+      "regression": "NOT_TESTED_THIS_TASK; documented scoped legacy boundary, no live request",
+      "sunset": "NONE_SCHEDULED"
+    },
+    {
+      "entry": "/api/account/score-token; /api/taiko/proxy/bind/score-token",
+      "reader-or-writer": "existing credential authority",
+      "owner": "Viewer owner / existing bot service policy",
+      "auth": "owner session or explicit legacy service permission",
+      "scope": "legacy token administration",
+      "source": "existing shared token SQL / local gateway",
+      "contract-version": "legacy token management DTO",
+      "side-effects": "issue/revoke rotates old per-source token; never creates v1 grant",
+      "migration": "COMPAT_RETAINED",
+      "regression": "unchanged source; no live gateway mutation this task",
+      "sunset": "NONE_SCHEDULED"
+    }
+  ],
+  "draftReuse": [
+    {
+      "file": "drafts/viewer1-api-v1/service.ts",
+      "decision": "selectively reuse separate actor/grant, audience/binding and return-time revalidation; replace ports with real SQL/installed ReadView"
+    },
+    {
+      "file": "service.test.ts",
+      "decision": "carry negative scenarios into real MySQL/HTTP; no history/cursor exposure"
+    },
+    {
+      "file": "mock.ts and My Taiko mock",
+      "decision": "not copied into runtime; no fake API or product redesign"
+    }
+  ],
+  "validation": {
+    "contract": {
+      "status": "PASS_SCOPED",
+      "js": 11,
+      "python": 7,
+      "generatedBindings": "PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-7217c1949d21/evidence/contract-summary.json",
+        "sha256": "fba2730dc1694f77ccb9ae4aa1a3c61aed0ab51cb07ac0061729a83ef41376d5"
+      }
+    },
+    "sqlHttp": {
+      "status": "PASS_SCOPED",
+      "selectedSuitesPassed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "apiObservations": 74,
+      "databaseProof": "viewer1_security_test",
+      "actualDatadir": "/home/sigaer/taiko/qa-vault/runs/qa-8b89a48bcfcd/scratch/sql-CFBjLy/mysql/",
+      "mysqlExited": true,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-8b89a48bcfcd/evidence/developer-api-v1-observations.json",
+        "sha256": "b224b296fde7e5ee5578385dc73123f5d73476f93b251a04f2245377eafedf65"
+      }
+    },
+    "browser": {
+      "status": "PASS_SCOPED",
+      "viewport": "375x812",
+      "actualComponent": true,
+      "actualSqlAndHttp": true,
+      "fullNuxtStartup": false,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-8b89a48bcfcd/evidence/083-consent-ui.json",
+        "sha256": "e6683e1cde663120cd8ddde9677f74118b7ab07dd80531dd2a8a5d842804340b"
+      }
+    },
+    "build": {
+      "status": "PASS_SCOPED",
+      "exitCode": 0,
+      "seconds": 151.038,
+      "sampledMemoryPeakBytes": 4189523968,
+      "kernelPeakAvailable": false,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-contract-api-20261016/build.json",
+        "sha256": "ea3877a37c84026e34fc4bf7834f024de41d20e7054baca7174d1782c5e30f16"
+      }
+    },
+    "openapi": {
+      "status": "PASS_SCOPED",
+      "operations": 11,
+      "exampleSchemas": 73,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-298caee1e2cb/evidence/final-validation.json",
+        "sha256": "e66c55ebfdba05d4c0e679c7c5387c4f3f279c099fc7b81e795dce0ea9899e1b"
+      }
+    },
+    "sourceSwitch": {
+      "status": "HISTORICAL_SCOPED_PASS_REUSED",
+      "currentSourceUnchanged": true,
+      "evidence": {
+        "run": "qa-e51b0af965bc",
+        "currentInputUnchanged": true,
+        "rawSha256": "4a7fdcef4dfe35d9a62f91b197b356e2bcb2c69010f5ab21314a30181a374215"
+      },
+      "parentWrapperStatus": "HISTORICAL_FAIL_UNSAFE_SCRATCH_HARDLINK_RULE_RETAINED"
+    },
+    "negativeMatrix": [
+      {
+        "case": "register-approved-client-X",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "register-approved-client-Y",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "default-off",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 404,
+        "expected": 404
+      },
+      {
+        "case": "anonymous-public-songs",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "anonymous-public-charts",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "public-304",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 304,
+        "expected": 304
+      },
+      {
+        "case": "public-meta",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "anonymous-private",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "developer-owner-without-grant",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "key-cannot-consent",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "cross-owner-cannot-consent",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "consent-required",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 400,
+        "expected": 400
+      },
+      {
+        "case": "history-scope-not-open",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 400,
+        "expected": 400
+      },
+      {
+        "case": "wrong-request-audience",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 400,
+        "expected": 400
+      },
+      {
+        "case": "csrf-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "owner-consents-A1-X-scores",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "typescript-sdk-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "grant-reads-scores-A1",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "authorized-private-304",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 304,
+        "expected": 304
+      },
+      {
+        "case": "wrong-client-Y",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "scope-profile-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "owner-consents-A2-Y",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "owner-B-consents-B1-Y",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "A2-not-granted-to-X",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "B1-not-granted-to-X",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "owner-B-explicitly-grants-client-X",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "client-owner-distinct-from-resource-owner",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "current-binding-switch-does-not-grant-A2",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "explicit-A1-remains-bound",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "invalid-key-no-cookie-fallback",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "invalid-header-no-cookie-fallback",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "session-no-authorization-fallback",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "unknown-query-owner-override",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 400,
+        "expected": 400
+      },
+      {
+        "case": "path-like-player",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "stored-wrong-audience",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "expired-grant-no-304",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "binding-owner-replaced",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "binding-source-replaced",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "owner-account-unverified",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "disabled-client",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "revoked-application",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "old-rotated-token-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "new-token-same-client-same-grant",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "rotated-token-no-extra-scope",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "publication-change-same-generation",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "owner-adds-profile-scope",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "authorized-minimal-profile",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "concurrent-writer-pinned-old-generation",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "concurrent-writer-new-generation",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "concurrent-owner-revocation",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "in-flight-revoke-refuses-response",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "typescript-sdk-revoked-no-cache",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "revoked-grant-old-etag-no-304",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "reconsent-after-revoke",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "in-flight-token-revocation",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "unbound-no-304",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "manual-owner-consent",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "manual-profile-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "manual-scores-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "hiroba-owner-consent",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "hiroba-scores-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "hiroba-profile-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "atomic-quota-4",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 429,
+        "expected": [
+          200,
+          429
+        ]
+      },
+      {
+        "case": "atomic-quota-1",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 429,
+        "expected": [
+          200,
+          429
+        ]
+      },
+      {
+        "case": "atomic-quota-3",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 429,
+        "expected": [
+          200,
+          429
+        ]
+      },
+      {
+        "case": "atomic-quota-0",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": [
+          200,
+          429
+        ]
+      },
+      {
+        "case": "atomic-quota-2",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": [
+          200,
+          429
+        ]
+      },
+      {
+        "case": "ui-list-authorized",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "ui-consent-then-third-party-read",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "ui-revoke-then-third-party-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "cross-owner-client-disable-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 403,
+        "expected": 403
+      },
+      {
+        "case": "owner-disables-client",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      },
+      {
+        "case": "disabled-client-key-read-denied",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 401,
+        "expected": 401
+      },
+      {
+        "case": "legacy-session-profile",
+        "status": "PASS_SCOPED",
+        "observedHttpStatus": 200,
+        "expected": 200
+      }
+    ],
+    "notExecuted": [
+      "production config/data/ingress/ACL/PITR/deploy/restart",
+      "full built Nuxt startup and full global theme regression",
+      "live external public-score-token/gateway calls",
+      "history/growth v1 routes; OAuth/PKCE; write/sync/credential scopes",
+      "0.82 full 119 SQL / 46x2 lifecycle / all PNG / Annual loads"
+    ]
+  },
+  "ownerSignoff": [
+    {
+      "item": "Contract v1 additive diff, optional catalog unknown/availability profile, private field projection",
+      "status": "OWNER_REVIEW_REQUIRED"
+    },
+    {
+      "item": "App identity/approval mapping, consent scopes/duration, same-client token rotation and final authorization boundary",
+      "status": "OWNER_REVIEW_REQUIRED"
+    },
+    {
+      "item": "Bulk limits (catalog 10000 source rows, scores 20000 records, output 8MiB) and owner lists capped at 100; quota/proxy and audit retention/timezone policy",
+      "status": "OWNER_REVIEW_REQUIRED"
+    },
+    {
+      "item": "Legacy COMPAT_RETAINED route/sunset strategy; no sunset scheduled",
+      "status": "OWNER_REVIEW_REQUIRED"
+    },
+    {
+      "item": "Formal 0.83 Contract Freeze / release and independent production Gate P",
+      "status": "NOT_AUTHORIZED"
+    }
+  ]
+}
