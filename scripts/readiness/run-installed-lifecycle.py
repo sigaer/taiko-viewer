@@ -95,7 +95,7 @@ def main():
     assert assertions(original)==assertions(adapted), 'business assertions changed'
     harness.write_text(adapted)
     os.environ.update(TAIKO_RUNTIME_ENV_FILE=str(work/'absent.env'),MPLCONFIGDIR=str(work/'mpl'),XDG_CACHE_HOME=str(work/'cache'))
-    report={'status':'FAIL','host':args.host,'interpreter':sys.executable,'manifest':str(manifest_path),'manifestSha256':sha(manifest_path),
+    report={'status':'FAIL','launcherSourceSha256':sha(Path(__file__)),'host':args.host,'interpreter':sys.executable,'manifest':str(manifest_path),'manifestSha256':sha(manifest_path),
             'baselineSourceRole':args.host,'baselineRestorationLabel':source_host,'baselineRoleCorrection':'Sakura 3b08986=center native; Taiko e37e07e=client proxy; original files unchanged',
             'testHelperHashes':helper_hashes,'adaptedHarnessSha256':sha(harness),'businessAssertionAstUnchanged':True,
             'pathAdaptation':'Only blanket /home guard permits exact run scratch/evidence, role sitepackages and synthetic assets; application IO and network guards unchanged.',
