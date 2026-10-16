@@ -4,7 +4,7 @@ import { legacyScoreReader, legacyCrown, legacyJudgmentTotal, legacyScoreInstant
 import { growthCalendarDay } from "./playerGrowth.ts";
 import { memoizeGrowthString } from "./growthRequestMemo.ts";
 
-export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string };
+export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; identity?: string };
 const num = legacyScoreReader("viewer-daily-v1");
 const key = (s: UserdataSong) => `${s.song_no}:${s.level}`;
 const epoch = (v: unknown) => {
@@ -39,11 +39,18 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
   const bestScores = new Map<string, number>();
   let state = new Map<string, UserdataSong>();
   let observed = new Map<string, string>();
+  const everSeen = new Set<string>();
+  const unconfirmed = new Set<string>();
+  const unconfirmedInstants = new Map<string, Set<string>>();
+  const unknownDays = new Set<string>();
+  let previousIdentity = '';
   const inRange = (day: string) => requested.has(day);
   const visit = (after: UserdataSong, before: UserdataSong | undefined, evidence: GrowthDailyEvent['evidence'], observedBefore: string | undefined, snapshot: GrowthSnapshot, songKey: string, snapshotInstant: string) => {
     const scoreDay = calendarDayFor(after.highscore_datetime);
     const playDay = calendarDayFor(after.update_datetime);
-    const includeScore = inRange(scoreDay), includePlay = inRange(playDay);
+    const blocked = unconfirmedInstants.get(songKey);
+    const includeScore = inRange(scoreDay) && !blocked?.has(instantFor(after.highscore_datetime));
+    const includePlay = inRange(playDay) && !blocked?.has(instantFor(after.update_datetime));
     if (!includeScore && !includePlay) return;
     const getChart = (day: string) => {
       const mapKey = `${day}:${songKey}`;
@@ -104,26 +111,60 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       }
     }
   };
-  for (const snapshot of history) {
+  const orderedHistory = history.every(snapshot => Number.isFinite(epochFor(snapshot.timestamp)))
+    ? [...history].sort((a,b) => epochFor(a.timestamp) - epochFor(b.timestamp)) : history;
+  for (const snapshot of orderedHistory) {
     const snapshotInstant = instantFor(snapshot.timestamp);
+    const identity = snapshot.identity || snapshot.source || '';
+    const identityChanged = Boolean(previousIdentity && identity && previousIdentity !== identity);
+    const discontinuity = Boolean(snapshot.excludedReason || identityChanged);
+    if (identityChanged) {
+      for (const songKey of state.keys()) unconfirmed.add(songKey);
+      state = new Map();
+      observed = new Map();
+      bestScores.clear();
+    }
+    if (identity) previousIdentity = identity;
     const next = snapshot.full ? new Map<string, UserdataSong>() : new Map(state);
     const nextObserved = snapshot.full ? new Map<string, string>() : new Map(observed);
     for (const song of snapshot.songs) {
       const songKey = key(song);
       const before = state.get(songKey);
+      const reappeared = !before && everSeen.has(songKey);
+      const changed = before && (before.high_score !== song.high_score || before.stage_cnt !== song.stage_cnt || before.update_datetime !== song.update_datetime || before.highscore_datetime !== song.highscore_datetime);
+      if (discontinuity || reappeared) {
+        unconfirmed.add(songKey);
+        const blocked = unconfirmedInstants.get(songKey) || new Set<string>();
+        for (const value of [song.update_datetime, song.highscore_datetime]) {
+          const instant = instantFor(value);
+          if (instant) blocked.add(instant);
+          const day = calendarDayFor(value);
+          if (day) unknownDays.add(day);
+        }
+        unconfirmedInstants.set(songKey, blocked);
+      }
+      else if (before && changed) unconfirmed.delete(songKey);
       // Delta rows are chart records, not field patches: absent evidence stays absent.
-      visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', observed.get(songKey), snapshot, songKey, snapshotInstant);
+      if (!unconfirmed.has(songKey)) visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', observed.get(songKey), snapshot, songKey, snapshotInstant);
+      everSeen.add(songKey);
       const score = num(song.high_score);
       if (score !== null) bestScores.set(songKey, Math.max(bestScores.get(songKey) ?? score, score));
       next.set(songKey, song);
       nextObserved.set(songKey, snapshot.timestamp);
     }
+    for (const songKey of snapshot.removed || []) {
+      next.delete(songKey);
+      nextObserved.delete(songKey);
+      everSeen.add(songKey);
+      unconfirmed.add(songKey);
+    }
+    if (snapshot.full) for (const songKey of state.keys()) if (!next.has(songKey)) unconfirmed.add(songKey);
     state = next;
     observed = nextObserved;
   }
   // Current data proves attendance only; it is not an additional historical transition.
   const currentSnapshot: GrowthSnapshot = { full: true, timestamp: '', songs: current, revision: currentRevision };
-  for (const song of current) visit(song, undefined, 'full-snapshot', undefined, currentSnapshot, key(song), '');
+  for (const song of current) if (!unconfirmed.has(key(song))) visit(song, undefined, 'full-snapshot', undefined, currentSnapshot, key(song), '');
   const dataMode = history.some(s => s.full) ? 'FULL_HISTORY' : current.length || history.length ? 'SNAPSHOT_LIMITED' : 'INSUFFICIENT';
   const known = current.some(s => s.update_datetime || s.highscore_datetime) || history.some(s => s.songs.some(row => row.update_datetime || row.highscore_datetime));
   return calendarDays.map(calendarDay => {
@@ -136,7 +177,7 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       chart.facts.sort((a, b) => importance[b.type] - importance[a.type] || a.type.localeCompare(b.type));
       return chart;
     }).sort((a, b) => b.importance - a.importance || a.songId - b.songId || a.level - b.level);
-    return { calendarDay, dataMode, attendance: events.length ? 'played' as const : known ? 'not_played' as const : 'unknown' as const, uniqueCharts: known || events.length ? events.length : null, events };
+    return { calendarDay, dataMode, attendance: events.length ? 'played' as const : unknownDays.has(calendarDay) ? 'unknown' as const : known ? 'not_played' as const : 'unknown' as const, uniqueCharts: unknownDays.has(calendarDay) && !events.length ? null : known || events.length ? events.length : null, events };
   });
 }
 

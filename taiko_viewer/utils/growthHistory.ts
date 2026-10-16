@@ -1,6 +1,7 @@
 import type { GrowthDailyProgress, GrowthFact, GrowthFactType } from "../types/player-growth";
 import type { PlayerGoal } from "../types/player-goal";
 import { growthCalendarDay } from "./playerGrowth.ts";
+export const GROWTH_FACT_POLICY_REVISION = 'observation-reappearance-v2';
 
 const scoreType = (type: string): GrowthFactType => type === "clear-upgrade" ? "clear" : type as GrowthFactType;
 const part = (value: unknown) => encodeURIComponent(value === null || value === undefined || value === "" ? "_" : String(value));
@@ -36,7 +37,7 @@ export function projectScoreFacts(ownerId: number, bindingId: number, days: Grow
             source: "score-history",
             sourceRevision: event.evidenceRevision,
             evidenceVersion: 1,
-            provenance: { snapshotKind: event.evidence }
+            provenance: { snapshotKind: event.evidence, factPolicyRevision: GROWTH_FACT_POLICY_REVISION }
           },
           temporal: {
             attributedDay: day.calendarDay,

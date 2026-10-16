@@ -1,0 +1,10 @@
+{
+  "extends": "./domainRead.tsconfig.json",
+  "files": [
+    "./publicationLifecycle.globals.d.ts",
+    "../../utils/dailyProgress.ts",
+    "../../utils/growthHistory.ts",
+    "../../server/services/growth-history/evidence.ts",
+    "../sourceReappearance.test.ts"
+  ]
+}

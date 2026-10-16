@@ -38,6 +38,15 @@ const sourceFromName = (name: string) => viewerWriterSources.find(source => name
 const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-evidence-v1") || "";
 const numberValue = legacyScoreReader("viewer-evidence-v1");
 const chartKey = (song: UserdataSong) => `${Number(song?.song_no || 0)}:${Number(song?.level || 0)}`;
+const topologyIdentity = (meta: Record<string, unknown>) => {
+  let raw = meta.merge_topology || meta.mergeTopology || meta.member_ids || meta.memberIds || [];
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const object = raw as Record<string, unknown>;
+    raw = object.members || object.ids || Object.keys(object);
+  }
+  if (typeof raw === 'string') raw = raw.split(',');
+  return Array.isArray(raw) ? [...new Set(raw.map(item => String(item).trim()).filter(Boolean))].sort() : [];
+};
 // Direct field access keeps million-row full histories off dynamic-key hot loops.
 const transitionChanged = (before: UserdataSong, after: UserdataSong) =>
   before.high_score !== after.high_score || before.best_score_rank !== after.best_score_rank ||
@@ -152,7 +161,10 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           timestamp,
           songs: payload.songs,
           revision,
-          source
+          source,
+          removed: Array.isArray(removed) ? removed.map(item => Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item)) : [],
+          excludedReason: excludedReason || (!observedAt ? 'unknown-source' : null),
+          identity: JSON.stringify([source, meta.source_account || meta.sourceAccount || meta.account_id || payload.profile?.userid || taikoId, topologyIdentity(meta)])
         });
         const declaredContentRevision = String(meta.content_sha256 || meta.contentRevision || meta.content_revision || meta.revision || "");
         const contentRevision = /^[a-f0-9]{64}$/i.test(declaredContentRevision) ? declaredContentRevision.toLowerCase() : null;
