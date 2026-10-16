@@ -39,7 +39,9 @@ try:
   for concurrency in [1,3,5]:
    for scale in ['small','medium','large']:
     chunks=[run(operation,concurrency,scale,50,f'{operation}-{scale}-{concurrency}-candidate-{i}') for i in range(4)]
-    if misses(chunks):
+    if misses(chunks) and not baseline:
+     state.setdefault('baselineComparisons',[]).append({'operation':operation,'concurrency':concurrency,'scale':scale,'status':'PENDING_BASELINE_ARTIFACT_UNAVAILABLE','candidateStatus':'TARGET_MISS_RETAINED'})
+    elif misses(chunks):
      for i in range(4):run(operation,concurrency,scale,50,f'{operation}-{scale}-{concurrency}-baseline-{i}',old=True)
  state['status']='COMPLETE_MEASUREMENTS_NOT_RELEASE_GATE'
 except BaseException as error:
