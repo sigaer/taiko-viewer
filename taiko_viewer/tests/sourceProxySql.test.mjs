@@ -23,7 +23,7 @@ async function fixture(task,{hiroba=false,manual=false}={}){
    assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.source_mutation_cli']);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
    assert.equal(options.env.PYTHONPATH,undefined);assert.equal(options.env.TAIKO_ACCOUNT_CACHE_DIR,c.config.accountCacheDir);
    const file=resolve(c.root,'proxy-options.json');writeFileSync(file,JSON.stringify({root:c.root,userId:c.user,taikoId:c.taikoId,payload,...c.proxyOptions}),{mode:0o600});
-   const child=spawn(executable,['-I',installedFixture,file],{...options,env:{...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});c.children.push(child);return child;
+   const child=spawn(executable,['-I',installedFixture,file],{...options,env:{...options.env,QA_RUN_DIR:process.env.QA_RUN_DIR,QA_RUN_TMPDIR:process.env.QA_RUN_TMPDIR,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});c.children.push(child);return child;
   };
   for(const [method,path,file] of [['post','/update/:taikoId','update.post.ts'],['post','/hiroba/:taikoId','sync-hiroba.post.ts'],['get','/history/:taikoId','history.get.ts']])c.route(method,path,(await import('../server/api/taiko/proxy/userdata/[taikoId]/'+file)).default);
   c.ask=async({kind=hiroba?'hiroba':'update',body={includeImage:false},token,cookie=c.cookie,format,etag}={})=>{

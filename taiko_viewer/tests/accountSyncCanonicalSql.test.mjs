@@ -25,7 +25,7 @@ async function fixture(task,options={}){return accountSourceFixture(async c=>{
   assert.equal(launchOptions.env.TAIKO_DB_NAME,process.env.TAIKO_DB_NAME);
   assert.equal(launchOptions.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');
   const child=spawn(executable,['-I',installedFixture,file],{...launchOptions,
-   env:{...launchOptions.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});
+   env:{...launchOptions.env,QA_RUN_DIR:process.env.QA_RUN_DIR,QA_RUN_TMPDIR:process.env.QA_RUN_TMPDIR,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});
   c.children.push(child);return child;
  };
  c.ask=async(body={})=>{const response=await c.request('POST','/sync-submit',{targetIds:['sakura-bot'],...body});const result=await response.json();

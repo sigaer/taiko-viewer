@@ -25,7 +25,7 @@ async function fixture(task){return accountSourceFixture(async c=>{
  c.options=resolve(c.root,'credential-native-options.json');c.setWorker=async({ids=c.ids,point=''}={})=>writeFile(c.options,JSON.stringify({root:c.root,ids,point}),{mode:0o600});await c.setWorker();
  c.launches=0;c.launch=(executable,args,options)=>{
   c.launches++;assert.deepEqual(args,['-I','-m','taiko_bot.cli.hiroba_credential_cli']);assert.equal(options.cwd,c.config.repoRoot);assert.ok(!args.some(arg=>arg.includes(c.password)||arg.includes(c.token)));assert.equal(options.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');
-  return spawn(executable,['-I',installedFixture,c.options],{...options,env:{...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root}});
+  return spawn(executable,['-I',installedFixture,c.options],{...options,env:{...options.env,QA_RUN_DIR:process.env.QA_RUN_DIR,QA_RUN_TMPDIR:process.env.QA_RUN_TMPDIR,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root}});
  };globalThis.__goalSqlRuntime.hirobaCredentialLaunch=c.launch;
  for(const [method,path,file] of [['post','/hiroba-bind','hiroba/bind.post.ts'],['get','/hiroba-status/:taikoId','hiroba/credentials/[taikoId].get.ts'],['post','/bot-current','bind/current.post.ts']])c.route(method,path,(await import('../server/api/taiko/proxy/'+file)).default);
  c.ask=async({status=false,id=c.taikoId,body={},cookie=c.cookie,token,header}={})=>{

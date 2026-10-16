@@ -12,7 +12,7 @@ async function fixture(task){return botBindingFixture(async c=>{
  const runtime=globalThis.__goalSqlRuntime;
  runtime.qqMigrationLaunch=(executable,args,options)=>{
   assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.qq_migration_cli']);c.launchCount++;
-  const env={...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1',TAIKO_QQ_TEST_ROOT:c.root,TAIKO_QQ_TEST_FAULT:c.fault||''};
+  const env={...options.env,QA_RUN_DIR:process.env.QA_RUN_DIR,QA_RUN_TMPDIR:process.env.QA_RUN_TMPDIR,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1',TAIKO_QQ_TEST_ROOT:c.root,TAIKO_QQ_TEST_FAULT:c.fault||''};
   const child=spawn(executable,['-I',installedFixture],{...options,env});c.children.push(child);
   let diagnostics='';child.stderr.on('data',data=>{if(diagnostics.length<8192)diagnostics+=data;});
   child.once('close',exit=>{c.lastWorker={exit};try{c.lastWorker.diagnostic=JSON.parse(diagnostics).ownedDiagnostic;}catch{c.lastWorker.diagnostic=diagnostics.split('\n').filter(line=>line.trim().startsWith('File ')).slice(-3);}});

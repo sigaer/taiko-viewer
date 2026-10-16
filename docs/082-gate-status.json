@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 1,
+  "workOrder": "Viewer_082_Final_Closeout_Annual_Offseason_20261016.md",
+  "recordedAt": "2026-10-16T06:56:40.446842+00:00",
+  "viewerVersion": "0.82.1",
+  "viewerCommit": "32729e86b070ed5bd40bc033a7d936114e5081ce",
+  "taikoSource": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+  "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+  "oldWheelSha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8",
+  "oldWheelEquivalenceClaim": false,
+  "runtimeManifest": {
+    "path": "/home/sigaer/taiko/qa-vault/artifacts/runtime-manifest.json",
+    "sha256": "407a3ad925ef2b22d96639153758e644e4723e33e5e6e56ccf800b0e95e217b4"
+  },
+  "codeReadiness": "PASS_WITH_ACCEPTED_RISK",
+  "recommendation": "CODE_READY_FOR_OWNER_REVIEW",
+  "deployReadiness": "DEPLOY_PENDING_AUTH",
+  "DEPLOY_READY": false,
+  "codeGate": {
+    "status": "PASS_WITH_ACCEPTED_RISK",
+    "reviewRecommendation": "CODE_READY_FOR_OWNER_REVIEW",
+    "signedPass": true,
+    "technicalChecks": "PASS_SCOPED",
+    "C1": {
+      "status": "PASS_SCOPED",
+      "scope": "Pinned rebuilt installed environments; current consumers and compatibility workers only; no source fallback",
+      "evidence": [
+        {
+          "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/review.json",
+          "sha256": "697c2b76e76ea71fdb307e7ac090e33178c91568178143a29a0d7b73592a4557"
+        },
+        {
+          "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/final-review.json",
+          "sha256": "d6eacf4262c7dd63e52519c1c2575ba41b364d53c9b1d8da9adb831b2c7a4e15"
+        }
+      ],
+      "priorLifecycleCounts": [
+        46,
+        46
+      ],
+      "rerunLifecycle": false
+    },
+    "C2": {
+      "status": "PASS_SCOPED",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        "real cookie sync preserves complete DTO and two C/H observations; nonce replay bypasses cooldown",
+        "worker pins owner and current binding until its one SQL commit",
+        "actual discovery and one COMMIT save all cards, hidden slots and frozen manual/current DTO",
+        "invalid Authorization never falls back to a valid Cookie",
+        "actual service issue and migration use shared Python SQL transaction with private responses",
+        "ordinary session self migration uses exact QQ authority and atomic bare fallback",
+        "formal update image uses the exact published current/history view and private file cleanup",
+        "real Hiroba sync receives credentials only over stdin and publishes one current/history observation"
+      ],
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/sql-eight-retry.json",
+        "sha256": "676f70770449d93df7b984d64fc20721d0d5555ec7c9832de985ecc199615ad4"
+      },
+      "firstAttempt": {
+        "status": "FAIL",
+        "passed": 1,
+        "failed": 7,
+        "cause": "Test-only worker launch omitted QA_RUN_DIR/QA_RUN_TMPDIR; production worker environment intentionally allowlisted",
+        "raw": "/home/sigaer/taiko/qa-vault/runs/qa-1bef9e06fe54/evidence"
+      },
+      "assertionsChanged": false,
+      "sql119Rerun": false
+    },
+    "C3": {
+      "status": "PASS_SCOPED",
+      "credential": 11,
+      "growthFacts": 28,
+      "passportStrictDto": 13,
+      "dtoDifferences": 0,
+      "chartContinuity": 11,
+      "existingEvidenceRehashed": true,
+      "rerun": false,
+      "scope": "Exact archived inputs/current installed wheel and approved per-chart repair; not production ingress proof",
+      "evidenceRuns": [
+        "qa-dc168789101e",
+        "qa-e51b0af965bc"
+      ]
+    },
+    "C4": {
+      "status": "PASS_SCOPED",
+      "build": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/build.json",
+        "sha256": "80417e2c4932860032a5817628928f8b2a2972418beb6c786da656cf7e832acd"
+      },
+      "buildExitCode": 0,
+      "httpWorkerSmoke": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-81764cf6ade1/evidence/nonannual-smoke.json",
+        "sha256": "825a43d418f7cf0a71cdacb2dd7dd6d05e4b880e4b560de83f2dcb74df96c9a2"
+      },
+      "runtimeScope": "Actual H3 account auth/session and chart routes, native isolated SQL, installed image/compute/Publication workers; synthetic catalog/assets; startup plugins not loaded; no Annual load",
+      "fullBuiltServerStartup": false,
+      "annualStartupPluginLoaded": false,
+      "schemaSnapshot": "Current bootstrap/source SQL SHA identities; test business tables omit FKs; not production schema observation",
+      "ownedSqlShutdownVerified": true,
+      "resourceLimits": {
+        "qa": "MemoryHigh 2GiB / Max 3GiB / swap 256MiB; 2 CPU; 15min",
+        "build": "MemoryHigh 4GiB / Max 5GiB / swap 512MiB; 2 CPU; 30min"
+      },
+      "firstBuild": "Nuxt Build complete marker retained; recorder failed on unavailable kernel memory.peak; successful confirmation build has explicit child exit=0"
+    },
+    "C5": {
+      "status": "PASS_WITH_ACCEPTED_RISK",
+      "cases": [
+        {
+          "case": "b30",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "substitute+owner acceptance",
+          "contemporaryEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-81764cf6ade1/evidence/nonannual-smoke.json",
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "dimension",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "substitute+owner acceptance",
+          "contemporaryEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-81764cf6ade1/evidence/nonannual-smoke.json",
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "radar",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "substitute+owner acceptance",
+          "contemporaryEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-81764cf6ade1/evidence/nonannual-smoke.json",
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "render_pass_progress_image_bytes",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "render_progress_image_bytes",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "render_star_progress_image_bytes",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "render_progress_image_bytes_by_list",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "dani",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "trend",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "recommendation",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "mydon",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        },
+        {
+          "case": "cloud",
+          "originalEvidence": "unavailable",
+          "legacyPixelParity": "LEGACY_PIXEL_PARITY_NOT_REESTABLISHED",
+          "disposition": "unavailable",
+          "contemporaryEvidence": null,
+          "ownerDecision": "OWNER_ACCEPTED_RISK",
+          "ownerAccepted": true,
+          "acceptedOn": "2026-10-16"
+        }
+      ],
+      "pixelEquivalenceClaim": false,
+      "contemporaryCheck": "Real installed B30/dimension/radar -> Sharp JPEG, owner HTTP, bounded output, repeat SHA equality; synthetic assets only",
+      "otherNineRerun": false,
+      "requestedDecision": "Accept retained legacy pixel oracle gap and contemporary scope, or identify the exact case as blocker"
+    },
+    "ownerAcceptance": {
+      "owner": "Owner",
+      "acceptedOn": "2026-10-16",
+      "source": "Viewer_083_Contract_and_Developer_API_Execution_Order_20261016.md §0.1; explicit user instruction",
+      "scope": "O1 legacy PNG pixel oracle gap; O2 history 474/126 unresolved cause and B30/merged-history preliminary performance risk",
+      "productionAuthorization": false
+    }
+  },
+  "productionGate": {
+    "status": "DEPLOY_PENDING_AUTH",
+    "deployReady": false,
+    "P1": {
+      "status": "DEPLOY_PENDING_AUTH",
+      "observationStatus": "NOT_EXECUTED",
+      "requiredAuthorization": "Named ingress/unit/interpreter/artifact/ACL allowlist; no production config/data read in this work order",
+      "preparedScript": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/production-observe.py",
+        "sha256": "2f814539423b2829316f69165affcda4990e73c30313432f3fa83e1626c3065b"
+      },
+      "scriptExecuted": false,
+      "limitations": "Static selected directives do not prove complete ACL inheritance or live auth; firewall/metadata/allowlisted probes require separate approval"
+    },
+    "P2": {
+      "status": "NOT_EXECUTED",
+      "planReady": true,
+      "syntheticRecovery": "PASS_SCOPED",
+      "syntheticEvidence": [
+        "/home/sigaer/taiko/qa-vault/runs/qa-518bbc2e2069/evidence/recovery-tnnAr7/evidence.json",
+        "/home/sigaer/taiko/qa-vault/runs/qa-010859c89224/evidence/http-restore-IQQ5VK/evidence.json"
+      ],
+      "productionPitr": "UNPROVEN",
+      "productionRpoMs": null,
+      "productionRtoMs": null,
+      "targetRpoMinutes": 15,
+      "targetRtoMinutes": 120,
+      "authorizedOffHostDestination": null,
+      "localVaultIsOffHostBackup": false
+    },
+    "P3": {
+      "status": "OWNER_DECISION_REQUIRED",
+      "resourceCount": 12,
+      "resourceIds": [
+        "private-resource-01",
+        "private-resource-02",
+        "private-resource-03",
+        "private-resource-04",
+        "private-resource-05",
+        "private-resource-06",
+        "private-resource-07",
+        "private-resource-08",
+        "private-resource-09",
+        "private-resource-10",
+        "private-resource-11",
+        "private-resource-12"
+      ],
+      "idsAreAuditPlaceholders": true,
+      "productionDependency": "UNKNOWN_NOT_INSPECTED",
+      "rights": "PENDING_AUTH",
+      "offHostRecovery": "UNPROVEN",
+      "retiredAssetClaim": false,
+      "codeGateBlockerAutomatically": false
+    },
+    "P4": {
+      "status": "DEPLOY_PENDING_AUTH",
+      "deployedCommit": "UNKNOWN",
+      "productionInterpreter": "UNKNOWN",
+      "productionRecoveryPoint": "UNKNOWN",
+      "executableProductionRollbackCommandsProvided": false,
+      "push": false,
+      "mergeMain": false,
+      "deploy": false,
+      "restartProduction": false
+    }
+  },
+  "historical": [
+    {
+      "case": "annual-cold30",
+      "status": "PARKED_ANNUAL_EOL",
+      "originalStatus": "FAIL_RESOURCE",
+      "attempted": 1,
+      "completed": 0,
+      "notExecuted": 29,
+      "reason": "MEMORY_PSI_FULL",
+      "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-5593936cff4c/evidence/annual-o1-A3cg7j/evidence.json",
+      "blockingC": false,
+      "newLoad": false
+    },
+    {
+      "case": "annual-warm",
+      "status": "HISTORICAL_SCOPED_PASS",
+      "success": 600,
+      "rerun": false
+    },
+    {
+      "case": "annual-identity-worker-frozen",
+      "status": "HISTORICAL_SCOPED_PASS",
+      "rerun": false
+    },
+    {
+      "case": "annual-high-tail-psi-poster-capacity",
+      "status": "PARKED_ANNUAL_EOL",
+      "blockingC": false,
+      "newLoad": false
+    },
+    {
+      "case": "history-c3",
+      "status": "HISTORICAL_FAIL_CAUSE_UNRESOLVED",
+      "success": 474,
+      "dropped": 126,
+      "planned": 600,
+      "fixedClaim": false,
+      "blockingCAutomatically": false,
+      "ownerResidualRiskAcceptance": true,
+      "acceptedOn": "2026-10-16"
+    },
+    {
+      "case": "b30-preflight",
+      "status": "PERF_P1_NOT_FORMAL_PERCENTILE",
+      "preflightP95Ms": 8014,
+      "formalPercentileClaim": false,
+      "blockingCAutomatically": false,
+      "ownerResidualRiskAcceptance": true,
+      "acceptedOn": "2026-10-16"
+    },
+    {
+      "case": "merged-history-preflight",
+      "status": "PERF_P1_NOT_FORMAL_PERCENTILE",
+      "preflightP95Ms": 6898,
+      "formalPercentileClaim": false,
+      "blockingCAutomatically": false,
+      "ownerResidualRiskAcceptance": true,
+      "acceptedOn": "2026-10-16"
+    }
+  ],
+  "ownerSignoff": [
+    {
+      "id": "O1",
+      "status": "OWNER_ACCEPTED_RISK",
+      "decision": "逐项接受12 PNG历史像素Oracle缺口及现有3类当代合成图片证据边界，或点名具体阻断项。",
+      "acceptedOn": "2026-10-16",
+      "approvalSource": "Viewer_083_Contract_and_Developer_API_Execution_Order_20261016.md §0.1; explicit user instruction"
+    },
+    {
+      "id": "O2",
+      "status": "OWNER_ACCEPTED_RISK",
+      "decision": "签收history 474/126未归因及B30/merged-history预检P1残余风险，不改写历史FAIL。",
+      "acceptedOn": "2026-10-16",
+      "approvalSource": "Viewer_083_Contract_and_Developer_API_Execution_Order_20261016.md §0.1; explicit user instruction"
+    },
+    {
+      "id": "O3",
+      "status": "DEPLOY_PENDING_AUTH",
+      "decision": "另行授权生产只读命名范围；批准前不执行production-observe.py、元数据/ACL/HTTP观察。"
+    },
+    {
+      "id": "O4",
+      "status": "DEPLOY_PENDING_AUTH",
+      "decision": "批准12私有资源权属/依赖清单、加密异地目的地与密钥托管、生产规模恢复/PITR演练。"
+    },
+    {
+      "id": "O5",
+      "status": "DEPLOY_PENDING_AUTH",
+      "decision": "Gate P证据完成后单独批准push/合入/发布/灰度/回滚；本轮没有该授权。"
+    }
+  ],
+  "newProductCodeChanged": false,
+  "testOnlyPatch": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016/qa-path-forwarding.patch",
+    "sha256": "e1fc56cc3eac8583bbf61a427d56c5dd279e05c9d295561ad617448e5e482918"
+  },
+  "qaEvidenceRoot": "/home/sigaer/taiko/qa-vault/evidence/082-final-offseason-20261016",
+  "productionAccess": false,
+  "contractFreeze": false,
+  "annualProductionEolChanged": false
+}
