@@ -1,6 +1,7 @@
 import {spawn,type ChildProcessWithoutNullStreams} from 'node:child_process';
 import {PublicationUnavailableError} from '../taiko-publication/client.ts';
 import type {getRuntimePaths} from '../runtime-paths.ts';
+import {getTaikoPython} from '../../utils/taiko-python.ts';
 export type MergedView={identity:string;commitId:string;sequence:number};
 export type MergedWorker={views:MergedView[];ruleRevision:string;alive:()=>boolean;derive:()=>Promise<Record<string,unknown>>;close:()=>Promise<void>};
 const MAX_BYTES=32*1024*1024;
@@ -8,7 +9,12 @@ const MAX_BYTES=32*1024*1024;
 export async function openMergedReadWorker(paths:ReturnType<typeof getRuntimePaths>,sources:string[],profileSource:string,kind:'current'|'history',rawHistory=false):Promise<MergedWorker>{
   const env:NodeJS.ProcessEnv={PYTHONDONTWRITEBYTECODE:'1'};
   for(const key of ['PATH','LANG','LC_ALL','TZ'])if(process.env[key]!==undefined)env[key]=process.env[key];
-  const child:ChildProcessWithoutNullStreams=spawn('python3',['-m','scripts.merged_read_cli'],{cwd:paths.repoRoot,env,stdio:['pipe','pipe','pipe']});
+  env.TAIKO_CENTER_ROOT=paths.repoRoot;
+  env.TAIKO_RUNTIME_ROOT=paths.repoRoot;
+  env.TAIKO_OFFLINE_ROOT=paths.repoRoot;
+  let python:string;
+  try{python=getTaikoPython();}catch{throw new PublicationUnavailableError();}
+  const child:ChildProcessWithoutNullStreams=spawn(python,['-I','-m','taiko_bot.cli.merged_read_cli'],{cwd:paths.repoRoot,env,stdio:['pipe','pipe','pipe']});
   let closed=false,failed=false,closing=false,chunks:Buffer[]=[],bytes=0,stderr=0;
   let pending:{resolve:(value:any)=>void;reject:(error:Error)=>void;timer:ReturnType<typeof setTimeout>}|undefined;
   const exit=new Promise<void>(resolve=>child.once('close',()=>{closed=true;resolve();}));

@@ -1,3 +1,4 @@
+import { getTaikoPython } from "~/server/utils/taiko-python";
 import { annualTestIsolation } from './test-isolation';
 import { spawn } from 'node:child_process';
 import { access, mkdir, readFile, readdir, rm, stat, unlink, writeFile } from 'node:fs/promises';
@@ -7,12 +8,13 @@ import { annualAdmission, type Resource } from './admission';
 // These processes never inherit an unbounded production cgroup. Failure to create
 // the transient unit is an error, not permission to spawn outside the boundary.
 export const spawnAnnualWorker = async (kind: Resource, id: string, config: Record<string, unknown>, timeoutMs: number) => {
+  const renderer = kind === 'renderer';
+  const executable = renderer ? process.execPath : getTaikoPython();
+  const isolation = annualTestIsolation();
   await mkdir(annualAdmission.root, { recursive: true, mode: 0o700 });
   const path = resolve(annualAdmission.root, `${id}.config`);
   const unit = `taiko-annual-${kind}-${id}`;
-  const renderer = kind === 'renderer';
   const deadline = await annualAdmission.deadline(kind, id);
-  const isolation = annualTestIsolation();
   const workerTmp = resolve(isolation?.tmp || '/var/tmp/taiko-annual-workers', id);
   await mkdir(workerTmp, { recursive: true, mode: 0o700 });
   const workerDeadline = Math.min(deadline, Date.now() + timeoutMs);
@@ -25,7 +27,7 @@ export const spawnAnnualWorker = async (kind: Resource, id: string, config: Reco
     '-p', 'MemorySwapMax=128M', '-p', 'TasksMax=256', '-p', 'CPUQuota=200%',
     '-p', `RuntimeMaxSec=${Math.max(1, Math.floor(remainingMs / 1000))}`, '-p', 'TimeoutStopSec=5',
     '-p', 'KillMode=control-group', '-p', 'OOMPolicy=stop', '-p', 'UMask=0077', ...(isolation?.properties || []), '--',
-    renderer ? process.execPath : '/usr/bin/python3',
+    executable, ...(!renderer ? ['-I'] : []),
     resolve(process.cwd(), 'scripts', renderer ? 'annual_render_worker.mjs' : 'annual_python_worker.py'), path];
   const child = spawn('/usr/bin/systemd-run', args, { stdio: ['ignore', 'pipe', 'pipe'] });
   // The cgroup hard lifetime remains effective even if Viewer dies. Do not kill

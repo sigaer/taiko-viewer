@@ -1,3 +1,4 @@
+import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import {
@@ -80,9 +81,11 @@ const ensureBindingWithUserdata = async (userId: number) => {
 };
 
 const runPythonImage = async (pythonCode: string, args: string[] = []) => {
-  const { repoRoot } = getRuntimePaths();
-  const result = await execFileAsync("python3", ["-c", pythonCode, ...args], {
+  const { repoRoot, userdataDir } = getRuntimePaths();
+  const result = await execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
     cwd: repoRoot,
+    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
+    timeout: 120_000, killSignal: "SIGKILL",
     encoding: "buffer",
     maxBuffer: 30 * 1024 * 1024
   });
@@ -113,7 +116,7 @@ export const getB30ImageBuffer = async (
   if (!options.dim && !dynamicOrigin) {
     const code = [
       PYTHON_CHART_HELPERS,
-      "from plugins.utils.b30_render import render_b30_image",
+      "from taiko_bot.offline.viewer import render_b30_image",
       "import sys",
       "with redirect_stdout(_chart_log):",
       "    buf = render_b30_image(int(sys.argv[1]), N=int(sys.argv[2]))",
@@ -125,7 +128,7 @@ export const getB30ImageBuffer = async (
 
   const code = [
     PYTHON_CHART_HELPERS,
-    "from plugins.utils.score_calculator import compute_all_from_userdata, generate_dim_top_image, generate_top_N_image",
+    "from taiko_bot.offline.viewer import compute_all_from_userdata, generate_dim_top_image, generate_top_N_image",
     "import sys",
     "taiko_id = int(sys.argv[1])",
     "N = int(sys.argv[2])",
@@ -171,7 +174,7 @@ export const getTrendImageBuffer = async (
 
   const code = [
     PYTHON_CHART_HELPERS,
-    "from plugins.utils.score_calculator import generate_rating_trend_image",
+    "from taiko_bot.offline.viewer import generate_rating_trend_image",
     "import sys, json",
     "kwargs = json.loads(sys.argv[2])",
     "with redirect_stdout(_chart_log):",
@@ -243,12 +246,12 @@ export const getRecommendImageBuffer = async (
     });
   }
 
-  const { repoRoot } = getRuntimePaths();
+  const { repoRoot, userdataDir } = getRuntimePaths();
   const jsonPath = `${repoRoot}/songs/rating_structured_with_ids.json`;
   const subtitle = `维度：${resolved.dimLabel}  数量：${limit}`;
   const code = [
     PYTHON_CHART_HELPERS,
-    "from plugins.utils.score_calculator import compute_recommendations_for_user, generate_recommend_image",
+    "from taiko_bot.offline.viewer import compute_recommendations_for_user, generate_recommend_image",
     "import sys, json",
     "payload = json.loads(sys.argv[2])",
     "with redirect_stdout(_chart_log):",
@@ -282,7 +285,7 @@ export const getRecommendImageBuffer = async (
 export const getWordCloudImageBuffer = async (userId: number) => {
   const binding = await ensureBindingWithUserdata(userId);
   const code = [
-    "from plugins.utils.tcloud import render_tcloud_image",
+    "from taiko_bot.offline.viewer import render_tcloud_image",
     "import sys",
     "sys.stdout.buffer.write(render_tcloud_image(int(sys.argv[1])))"
   ].join("; ");

@@ -9,4 +9,4 @@ if remaining <= 0:
 # alarm survives exec: a delayed systemd/DBus launch cannot outlive its lease.
 signal.alarm(max(1, math.ceil(remaining)))
 os.chdir(config['cwd'])
-os.execvpe('/usr/bin/python3', ['/usr/bin/python3', *config['args']], config['env'])
+os.execvpe(sys.executable, [sys.executable, *config['args']], config['env'])

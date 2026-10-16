@@ -1,10 +1,6 @@
-import { isAbsolute } from "node:path";
+import { getTaikoPython } from "../../utils/taiko-python.ts";
 
 /** Deployment/internal configuration only; never selected from request data. */
 export function getPublicationPython(override?: string) {
-  const executable = override ?? (process.env.TAIKO_PYTHON_EXECUTABLE || "/usr/bin/python3");
-  if (!isAbsolute(executable) || executable.includes("\0")) {
-    throw new Error("Invalid publication interpreter configuration");
-  }
-  return executable;
+  return getTaikoPython(override);
 }

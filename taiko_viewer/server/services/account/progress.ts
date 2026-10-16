@@ -1,3 +1,4 @@
+import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import {
@@ -38,9 +39,11 @@ export interface ProgressImageRequest {
 }
 
 const runPython = async (pythonCode: string, args: string[] = [], encoding: "buffer" | "utf8" = "buffer") => {
-  const { repoRoot } = getRuntimePaths();
-  return execFileAsync("python3", ["-c", pythonCode, ...args], {
+  const { repoRoot, userdataDir } = getRuntimePaths();
+  return execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
     cwd: repoRoot,
+    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
+    timeout: 120_000, killSignal: "SIGKILL",
     encoding,
     maxBuffer: 30 * 1024 * 1024
   });
@@ -70,8 +73,8 @@ export const getProgressOptions = async (): Promise<ProgressOptions> => {
   const code = [
     "import json",
     "from pathlib import Path",
-    "from plugins.utils.dani_progress import SUPPORTED_DANI_VERSIONS, _load_grade_index",
-    "from plugins.utils.progress_catalog import available_pass_progress_keys, available_const_progress_keys, available_star_progress_values, load_active_song_ids, query_progress_items_by_pass_const, query_progress_items_by_const, query_progress_items_by_star",
+    "from taiko_bot.offline.viewer import SUPPORTED_DANI_VERSIONS, _load_grade_index",
+    "from taiko_bot.offline.viewer_catalog import available_pass_progress_keys, available_const_progress_keys, available_star_progress_values, load_active_song_ids, query_progress_items_by_pass_const, query_progress_items_by_const, query_progress_items_by_star",
     "dani = []",
     "for version in sorted(SUPPORTED_DANI_VERSIONS, reverse=True):",
     "    grades = []",
@@ -141,7 +144,7 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
     assertChoice(Boolean(versionOptions?.grades.includes(grade)), "请选择有效的段位版本和段位");
     args.push(version, grade);
     rendererCode = [
-      "from plugins.utils.dani_progress import render_dani_progress_image_bytes",
+      "from taiko_bot.offline.viewer import render_dani_progress_image_bytes",
       "buf = render_dani_progress_image_bytes(int(sys.argv[1]), sys.argv[5], version=sys.argv[4], explicit_version=True)"
     ].join("\n");
   } else if (kind === "constant") {
@@ -151,7 +154,7 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
     assertChoice(options.constants[mode].includes(constant), "当前模式下没有这个定数进度表");
     args.push(mode, constant);
     rendererCode = [
-      "from plugins.utils import render_pass_progress_image_bytes, render_progress_image_bytes",
+      "from taiko_bot.offline.viewer import render_pass_progress_image_bytes, render_progress_image_bytes",
       "renderer = render_pass_progress_image_bytes if sys.argv[4] == 'pass' else render_progress_image_bytes",
       "buf = renderer(int(sys.argv[1]), sys.argv[5], page=int(sys.argv[3]))"
     ].join("\n");
@@ -160,7 +163,7 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
     assertChoice(options.stars.includes(star), "请选择有效的星级");
     args.push(String(star));
     rendererCode = [
-      "from plugins.utils import render_star_progress_image_bytes",
+      "from taiko_bot.offline.viewer import render_star_progress_image_bytes",
       "buf = render_star_progress_image_bytes(int(sys.argv[1]), int(sys.argv[4]), page=int(sys.argv[3]))"
     ].join("\n");
   } else if (kind === "named") {
@@ -168,7 +171,7 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
     assertChoice(options.named.includes(name), "请选择有效的全良难度进度");
     args.push(name);
     rendererCode = [
-      "from plugins.utils import render_progress_image_bytes_by_list",
+      "from taiko_bot.offline.viewer import render_progress_image_bytes_by_list",
       "buf = render_progress_image_bytes_by_list(int(sys.argv[1]), sys.argv[4], page=int(sys.argv[3]))"
     ].join("\n");
   } else {

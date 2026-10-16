@@ -3,15 +3,16 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
+import { getTaikoPython, getTaikoPythonEnv } from "../../utils/taiko-python.ts";
 
 const execFileAsync = promisify(execFile);
 const compute = async (module: string, args: string[], failure: string) => {
   const { repoRoot, userdataDir } = getRuntimePaths();
   try {
-    const result = await execFileAsync("python3", ["-m", module, ...args], {
+    const result = await execFileAsync(getTaikoPython(), ["-I", "-m", module, ...args], {
       cwd: repoRoot, encoding: "utf8", maxBuffer: 12 * 1024 * 1024,
       timeout: 120_000, killSignal: "SIGKILL",
-      env: { ...process.env, TAIKO_COMPUTE_ONLY: "1", TAIKO_USERDATA_DIR: userdataDir }
+      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_COMPUTE_ONLY: "1", TAIKO_USERDATA_DIR: userdataDir }
     });
     return JSON.parse(String(result.stdout || ""));
   } catch (error) {
@@ -20,6 +21,6 @@ const compute = async (module: string, args: string[], failure: string) => {
   }
 };
 
-export const runPythonJson = (args: string[]) => compute("plugins.utils.recommendation_intelligence", args, "个人数据计算结果无效");
+export const runPythonJson = (args: string[]) => compute("taiko_bot.offline.recommendation_intelligence", args, "个人数据计算结果无效");
 export const runGrowthPythonJson = (taikoId: string, dataMode: string, limit = 3) =>
-  compute("growth_compute", ["growth", "--user", taikoId, "--data-mode", dataMode, "--limit", String(limit)], "个人成长计算结果无效");
+  compute("taiko_bot.offline.growth_compute", ["growth", "--user", taikoId, "--data-mode", dataMode, "--limit", String(limit)], "个人成长计算结果无效");

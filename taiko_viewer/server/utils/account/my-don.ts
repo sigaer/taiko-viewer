@@ -1,3 +1,4 @@
+import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { createHash } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import { access, mkdir, readFile, readdir, stat, unlink, writeFile } from "node:fs/promises";
@@ -123,14 +124,16 @@ const replaceBindingMyDonShowcaseSettings = async (
 };
 
 const runMyDonPythonJson = async (repoRoot: string, userdataPath: string) => {
-  const result = await execFileAsync("python3", [
-    "-m",
-    "plugins.utils.my_don_cli",
+  const result = await execFileAsync(getTaikoPython(), [
+    "-I", "-m",
+    "taiko_bot.offline.my_don_cli",
     "candidates",
     "--userdata",
     userdataPath,
   ], {
     cwd: repoRoot,
+    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: getRuntimePaths().userdataDir },
+    timeout: 120_000, killSignal: "SIGKILL",
     encoding: "utf-8",
     maxBuffer: 8 * 1024 * 1024,
   });
@@ -278,8 +281,8 @@ export const getMyDonImageBuffer = async (userId: number) => {
   }
 
   const args = [
-    "-m",
-    "plugins.utils.my_don_cli",
+    "-I", "-m",
+    "taiko_bot.offline.my_don_cli",
     "render",
     "--taiko-id",
     binding.taiko_id,
@@ -289,8 +292,10 @@ export const getMyDonImageBuffer = async (userId: number) => {
   if (titleNames.length > 0) {
     args.push("--title-overrides-json", JSON.stringify(titleNames));
   }
-  const result = await execFileAsync("python3", args, {
+  const result = await execFileAsync(getTaikoPython(), args, {
     cwd: repoRoot,
+    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: getRuntimePaths().userdataDir },
+    timeout: 120_000, killSignal: "SIGKILL",
     encoding: "buffer",
     maxBuffer: 20 * 1024 * 1024,
   });

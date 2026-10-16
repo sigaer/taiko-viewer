@@ -1,3 +1,5 @@
+import { getTaikoArtifact } from "~/server/utils/taiko-artifact";
+import { getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { annualAdmission, AdmissionError, withHostFileLock } from './admission';
 import { spawnAnnualWorker, stopAnnualWorker } from './isolated-worker';
 import { annualBuildInputRevision } from './build-recovery';
@@ -213,18 +215,9 @@ export const getAnnualInputFingerprint = async (taikoId: string) => {
   }
   await addFileToHash(hash, songDataPath, "song-data");
   await addFileToHash(hash, ratingPath, "rating-data");
-  await addFileToHash(
-    hash,
-    resolve(repoRoot, "plugins", "utils", "chart_roll_metadata.py"),
-    "chart-roll-metadata-overrides"
-  );
-  await addDirectoryToHash(
-    hash,
-    resolve(repoRoot, "plugins", "utils", "annual_summary"),
-    "annual-algorithm",
-    (path) => path.endsWith(".py")
-  );
-  await addFileToHash(hash, resolve(repoRoot, "schemas", "annual-summary-v4.schema.json"), "annual-schema");
+  // v2 intentionally invalidates reusable input caches once. Persisted reports
+  // retain their stored provenance; no database row or normalized history is relabeled.
+  hash.update(`\0taiko-artifact-v2\0${(await getTaikoArtifact()).identity}\0`);
   await addFileToHash(hash, resolve(process.cwd(), "package.json"), "viewer-package");
   await addFileToHash(hash, resolve(process.cwd(), "public", "logo.png"), "viewer-logo");
   await addFileToHash(
@@ -297,18 +290,17 @@ const getAnnualRatingInputFingerprint = async () => {
     .sort((left, right) => left.localeCompare(right));
   for (const name of names) files.push({ path: resolve(userdataDir, name), label: `userdata/${name}` });
   files.push({ path: ratingPath, label: "rating-data" }, { path: songDataPath, label: "song-data" });
-  const algorithmRoot = resolve(repoRoot, "plugins", "utils", "annual_summary");
-  for (const path of await listDirectoryFiles(algorithmRoot, (item) => item.endsWith(".py"))) {
-    files.push({ path, label: `annual-algorithm/${relative(algorithmRoot, path)}` });
-  }
+  const artifact = await getTaikoArtifact();
   files.sort((left, right) => left.label.localeCompare(right.label));
 
   const manifestHash = createHash("sha256");
-  manifestHash.update(`${ANNUAL_ALGORITHM_VERSION}:rating-distribution-manifest-v1`);
+  manifestHash.update(`${ANNUAL_ALGORITHM_VERSION}:rating-distribution-manifest-v2:${artifact.identity}`);
   for (const file of files) {
     const fileStat = await stat(file.path, { bigint: true }).catch(() => null);
     if (!fileStat?.isFile()) continue;
-    manifestHash.update(`\0${file.label}\0${fileStat.size}\0${fileStat.mtimeNs}\0`);
+    manifestHash.update(`\0${file.label}\0${fileStat.size}\0`);
+    // Restores/imports may preserve mtime and size while changing Source.
+    for await (const chunk of createReadStream(file.path)) manifestHash.update(chunk);
   }
   const manifestFingerprint = manifestHash.digest("hex");
   if (ratingFingerprintMemo?.manifestFingerprint === manifestFingerprint) {
@@ -324,7 +316,7 @@ const getAnnualRatingInputFingerprint = async () => {
   }
 
   const contentHash = createHash("sha256");
-  contentHash.update(`${ANNUAL_ALGORITHM_VERSION}:rating-distribution-v1`);
+  contentHash.update(`${ANNUAL_ALGORITHM_VERSION}:rating-distribution-v2:${artifact.identity}`);
   for (const file of files) await addFileToHash(contentHash, file.path, file.label);
   const contentFingerprint = contentHash.digest("hex");
   ratingFingerprintMemo = { manifestFingerprint, contentFingerprint };
@@ -338,11 +330,10 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
   const runtimeConfig = useRuntimeConfig();
   const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, 'songs', 'song_data.json')));
   const ratingPath = resolve(String(runtimeConfig.ratingStructPath || resolve(repoRoot, 'songs', 'rating_structured_with_ids.json')));
-  const annualCliPath = resolve(repoRoot, 'plugins', 'utils', 'annual_summary', 'standalone.py');
   const child = await spawnAnnualWorker('generator', admissionId, {
     cwd: repoRoot,
     args: [
-      annualCliPath,
+      "-I", "-m", "taiko_bot.offline.annual_summary",
       "ratings",
       "--userdata-dir",
       userdataDir,
@@ -353,7 +344,7 @@ const runAnnualRatingsCli = async (): Promise<Omit<AnnualRatingDistribution, "fi
       "--output",
       "-"
     ],
-    env: { ...process.env, TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
+    env: { ...getTaikoPythonEnv(repoRoot), TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
   }, ANNUAL_RATING_TIMEOUT_MS);
   const started = Date.now();
   const stdout = await new Promise<string>((resolveRun, rejectRun) => {
@@ -463,7 +454,7 @@ const getSchemaValidators = () => {
   if (!schemaValidatorPromise) {
     schemaValidatorPromise = (async () => {
       const { repoRoot } = getRuntimePaths();
-      const schemaPath = resolve(repoRoot, "schemas", "annual-summary-v4.schema.json");
+      const { schemaPath } = await getTaikoArtifact();
       const schema = JSON.parse(await readFile(schemaPath, "utf-8")) as Record<string, unknown>;
       const ajv = new Ajv2020({ allErrors: true, strict: false, allowUnionTypes: true });
       addFormats(ajv);
@@ -548,9 +539,8 @@ const runAnnualSummaryCliUnadmitted = async (
   const ratingPath = resolve(
     String(runtimeConfig.ratingStructPath || resolve(repoRoot, "songs", "rating_structured_with_ids.json"))
   );
-  const annualCliPath = resolve(repoRoot, "plugins", "utils", "annual_summary", "standalone.py");
   const args = [
-    annualCliPath,
+    "-I", "-m", "taiko_bot.offline.annual_summary",
     "build",
     ...(allowCurrentArchive ? ["--allow-current-archive"] : []),
     "--taiko-id",
@@ -571,7 +561,7 @@ const runAnnualSummaryCliUnadmitted = async (
   try {
     const child = await spawnAnnualWorker('generator', admissionId, {
       cwd: repoRoot, args,
-      env: { ...process.env, TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
+      env: { ...getTaikoPythonEnv(repoRoot), TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }
     }, ANNUAL_BUILD_TIMEOUT_MS);
     const started = Date.now();
     const stdout = await new Promise<string>((resolveRun, rejectRun) => {
