@@ -1,0 +1,183 @@
+{
+  "status": "PASS_SCOPED",
+  "candidateVersion": "0.14.2",
+  "viewerVersion": "0.82.1",
+  "wheel": {
+    "wheel": "/var/tmp/taiko-0142-candidate-20261016/repack/wheels/taiko_bot-0.14.2-py3-none-any.whl",
+    "sha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8",
+    "bytes": 1020012,
+    "sourceCommit": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+    "version": "0.14.2",
+    "fileCount": 393,
+    "nonCodePackageData": [
+      "taiko_bot/offline/growth-compatibility.dat",
+      "taiko_bot/offline/annual_summary/data/finaltitle_reference_v1.json",
+      "taiko_bot/offline/schemas/annual-summary-v4.schema.json"
+    ],
+    "credentialControlIncluded": true,
+    "annualAlgorithmVersion": "annual-observation-v4.5.4",
+    "runtimeDataIncluded": false,
+    "editable": false,
+    "cgroup": "0::/development.slice/development-build.slice/taiko-build-1792116214-2809248.service"
+  },
+  "roles": {
+    "center": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+    "client": "/var/tmp/taiko-role-rebuild-347ik6hh/venv/bin/python"
+  },
+  "checks": [
+    {
+      "label": "facts",
+      "initialStatus": "FAIL",
+      "status": "PASS_INSTALLED_ORIGINAL_FACT_MATRIX",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/facts.log",
+        "sha256": "aac1d02907e07ab48881f2c0f44df529d03b1ec3225edf2aefc5e804886e2af7"
+      },
+      "retryEvidence": "facts-installed-0142-20261016.json"
+    },
+    {
+      "label": "original-reproduction",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/original-reproduction.log",
+        "sha256": "12a21c73f33fc22ab857711c037a3b3994101662926b069822e2a80cd214e53b"
+      }
+    },
+    {
+      "label": "credential",
+      "initialStatus": "FAIL",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/credential.log",
+        "sha256": "dc81266f2f647990e0f3212616c1ad866ac697a559591e267dfcbf1be42b28aa"
+      },
+      "retryEvidence": "credential-installed-0142-20261016.json"
+    },
+    {
+      "label": "annualManualCorrections.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/annualManualCorrections.test.mjs.log",
+        "sha256": "fa9fb3f6ef19040dadbd43a78d3eddbf43359a2db76c266326b413aae375c045"
+      }
+    },
+    {
+      "label": "annualPublishedRevision.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/annualPublishedRevision.test.mjs.log",
+        "sha256": "4680b985aa3be1ad3738932e6246dd08ac6a5ff7a126a5a54b92ef0d0a2c2659"
+      }
+    },
+    {
+      "label": "annualPolicy.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/annualPolicy.test.mjs.log",
+        "sha256": "b763b4cd00c69e83b18e9bda4e92930465dc7175b49fb14bbf719e65b99ffa47"
+      }
+    },
+    {
+      "label": "installedRuntimeConsumers.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/installedRuntimeConsumers.test.mjs.log",
+        "sha256": "b1f212c02a7862b58a46a73ede86c66dfb33343e415b863af32c9cb45c42c5c6"
+      }
+    },
+    {
+      "label": "installedGrowthRevision.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/installedGrowthRevision.test.mjs.log",
+        "sha256": "1cb2161f5d6a389d1f83f87d5b99311e84c9d2dcd67d7edc1b5bc59682dffbfc"
+      }
+    },
+    {
+      "label": "taikoFingerprint.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/taikoFingerprint.test.mjs.log",
+        "sha256": "9ffbba98872252905e6b34ee3802a5abe0f1de2d8e88213c4116fb9140b3901a"
+      }
+    },
+    {
+      "label": "annualWheelWorker.test.mjs",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/annualWheelWorker.test.mjs.log",
+        "sha256": "fd15648cd07ffa553506c580cc7706939876c663b462375347a39775545ce7d4"
+      }
+    },
+    {
+      "label": "crossWriterInstalled.test.ts",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/crossWriterInstalled.test.ts.log",
+        "sha256": "d36d1f2982b4172e4fbe3d8f3a08c9df47cfb86fe732dcf191573ec76972bc24"
+      }
+    },
+    {
+      "label": "center-lifecycle",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/center-lifecycle.log",
+        "sha256": "0ce13ff9c8ab260eda6f4bad34862864456bb8f19cdfc0ffdee66a9bf6fa1168"
+      }
+    },
+    {
+      "label": "client-lifecycle",
+      "initialStatus": "PASS",
+      "status": "PASS",
+      "log": {
+        "path": "/var/tmp/viewer0142-candidate-l8zif4a3/client-lifecycle.log",
+        "sha256": "a3dec1eb216b97ca451a56dc9f4abd772826f11e1cb8c7153a85ae5730e215eb"
+      }
+    }
+  ],
+  "sqlCounts": {
+    "tests": 119,
+    "pass": 119,
+    "fail": 0,
+    "skipped": 0
+  },
+  "imageEvidence": "image-goldens-0142-20261016.json",
+  "priorFailuresPreserved": true,
+  "buildAttempts": [
+    {
+      "path": "/var/tmp/taiko-0142-candidate-20261016/build.log",
+      "sha256": "198fdb6b5af0786528f8c6513c872bcca8a9fc79ffab7bf49cef2c53fc687b10"
+    },
+    {
+      "path": "/var/tmp/taiko-0142-candidate-20261016/build-retry.log",
+      "sha256": "77dd64bcb25e1cd566c9d44e50a42e7b393653a958b53c05b3f098e359426645"
+    },
+    {
+      "path": "/var/tmp/taiko-0142-candidate-20261016/repack/build.log",
+      "sha256": "2602d47daeaf37e3b3dbbc9b689951cf78c63eedc4adde4f2beeb666f62775fe"
+    }
+  ],
+  "setupFailures": [
+    "Old setuptools rejected SPDX metadata",
+    "Wheel audit caught bundled plugin tests; excluded in source packaging",
+    "Fact runner initially omitted compute-only switch",
+    "Credential installed test cleanup indentation/import error"
+  ],
+  "limitations": [
+    "No production manifest or ingress/ACL evidence",
+    "No complete RPO/RTO or off-host backup exercise",
+    "No SLO load campaign",
+    "Prior strict Annual identity oracle FAIL and Viewer legacy/static oracle FAILs retained",
+    "No release, deploy, push or 0.83 acceptance"
+  ]
+}

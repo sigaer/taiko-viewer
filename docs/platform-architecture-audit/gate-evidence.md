@@ -1,5 +1,9 @@
 # Viewer 1.0 readiness — 2026-10-15
 
+## 2026-10-16 最新续行：获批的本地 0.14.2 候选
+
+本轮已推进 S1/G1 修复、四 worker 安装态迁移与独立 94 包环境验证。最新结果、保留失败和未完成边界见 [本地候选收尾](local-0142-closeout-20261016.md) 与 [机器 Gate](viewer082-gate.json)。用户已批准本地 0.14.2 验证，并明确 O1 阈值；这不等于批准发布或目标已达成。**总 Gate 仍 BLOCKED，0.83 未开始。** 以下章节均保留其历史时点，旧 0.14.1 与旧 P0 复现不作为修复后候选的当前结论。
+
 ## 2026-10-16 最新续行：Runtime Integration
 
 按新工作令完成本轮隔离实现与验证，详见 [Runtime Integration 收尾](runtime-integration-20261016.md)。两个角色精确离线重建；补齐共享 `runtime_memory` 的独立 wheel 后，新候选为各 94 个发行包。compute、Growth、Annual、merged-read 已切到统一绝对解释器与 installed `-I` 模块；保留新版身份复核与 Publication/worker 协议。

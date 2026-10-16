@@ -1,0 +1,60 @@
+{
+  "status": "PASS_SCOPED",
+  "productionAccess": false,
+  "scope": "21 manual-source SQL/C/H/daily/Goal/measurement restore tests; not complete PITR or off-host backup",
+  "passed": 21,
+  "failed": 0,
+  "skipped": 0,
+  "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+  "roleLocks": {
+    "path": "/var/tmp/taiko-viewer-1-readiness-20261015/docs/platform-architecture-audit/runtime-role-locks-with-memory.json",
+    "sha256": "59fe2f2f67a1bdba7e96cc7ba7e9633822d1adc8d27496f71e0a0c4249477b75",
+    "bytes": 55990
+  },
+  "isolatedRun": {
+    "workspace": "/var/tmp/viewer1-sql-45SdX7",
+    "database": "viewer1_security_test",
+    "status": "PASS",
+    "startedAt": "2026-10-16T01:33:24.879Z",
+    "tests": [
+      "taiko_viewer/tests/manualRecoverySql.test.mjs"
+    ],
+    "productionAccess": false,
+    "databaseProof": "viewer1_security_test",
+    "port": 34655,
+    "result": {
+      "code": 0,
+      "signal": null
+    },
+    "daemonExited": true,
+    "finishedAt": "2026-10-16T01:34:03.000Z",
+    "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792114404-2735507.service",
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+  },
+  "logs": [
+    {
+      "path": "/var/tmp/viewer082-closeout-restore-sql.log",
+      "sha256": "d9d51dbdc073d7083396b878fbf460f2f61905dd895e1d1aac92e2c6c1040fce",
+      "bytes": 400
+    },
+    {
+      "path": "/var/tmp/viewer082-closeout-restore-sql-retry.log",
+      "sha256": "c322551f481db24bc308e632184c0c6187aec0afbc562a6c9d7332f9654f795d",
+      "bytes": 121
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-45SdX7/tests.log",
+      "sha256": "1deea085b4107e9a17cd3d506a538a69411aadeeb7248a2b5538606fc3720648",
+      "bytes": 3553
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-45SdX7/result.json",
+      "sha256": "562a1794f816cdf6d427e1ceb096a4d9374479bd2fe0a3dbd2de2d4fc149f0ef",
+      "bytes": 589
+    }
+  ],
+  "initialFailure": "Interpreter environment not forwarded by systemd; failed before SQL provisioning; preserved",
+  "rpo": null,
+  "rto": null,
+  "offHostBackup": "NOT_PERFORMED"
+}

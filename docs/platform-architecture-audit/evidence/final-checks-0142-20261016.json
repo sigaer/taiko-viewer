@@ -1,0 +1,24 @@
+{
+  "status": "PASS_SCOPED",
+  "jsonFilesParsed": 50,
+  "typecheck": [
+    "growthFacts.tsconfig.json",
+    "Annual build-recovery/manual-corrections"
+  ],
+  "apiFreshness": {
+    "routes": 28,
+    "dependencies": 39
+  },
+  "logs": [
+    {
+      "path": "/var/tmp/viewer0142-final-checks.log",
+      "sha256": "e310c79eb445bd42fd93c4c14eaae466fd1395aabd01059682bb109eeafebfeb"
+    },
+    {
+      "path": "/var/tmp/viewer0142-runtime-audit.log",
+      "sha256": "402b9a3d976c4ccc9d094d8647a3214e18edc92cdacff74dceb5f87e1a4676fc"
+    }
+  ],
+  "overallGate": "BLOCKED",
+  "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792116872-2831103.service"
+}

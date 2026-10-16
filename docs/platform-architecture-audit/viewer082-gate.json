@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-16",
+  "viewer": "0.82.1",
+  "taikoCandidate": "0.14.2",
+  "overall": "BLOCKED",
+  "ownerReleaseSignoff": false,
+  "contractFreeze083": "NOT_STARTED",
+  "authorization": "Local 0.14.2 build and fresh environment validation only",
+  "productionAccess": false,
+  "gates": [
+    {
+      "name": "Credential boundary",
+      "status": "PARTIAL",
+      "observed": "Both source endpoints repaired; installed Taiko handler/CLI 11 PASS",
+      "evidence": [
+        "evidence/credential-boundary-sakura-20261016.json",
+        "evidence/credential-installed-0142-20261016.json"
+      ],
+      "remaining": [
+        "Actual ingress/ACL and caller configuration",
+        "Consumer activation/rollback signoff"
+      ]
+    },
+    {
+      "name": "History facts",
+      "status": "PARTIAL",
+      "observed": "Installed original three cases zero false play; unchanged 28-case matrix PASS; Viewer focused replay PASS",
+      "evidence": [
+        "evidence/facts-installed-0142-20261016.json",
+        "evidence/viewer-source-reappearance-20261016.json"
+      ],
+      "remaining": [
+        "Review retained Viewer legacy Passport parity FAIL and obsolete source-layout FAIL",
+        "Review retained strict Annual identity FAIL; no oracle waiver assumed"
+      ]
+    },
+    {
+      "name": "Runtime ownership/cutover",
+      "status": "PARTIAL",
+      "observed": "Two fresh exact 94-package roles; 46 representative lifecycle cases each; four worker SQL suites and frozen PNG family checks",
+      "evidence": [
+        "evidence/candidate-0142-closeout-20261016.json"
+      ],
+      "remaining": [
+        "All active production consumer inventory and deployment mapping",
+        "QQ loopback helper remains an explicit source fixture, not full installed client E2E"
+      ]
+    },
+    {
+      "name": "Single publication",
+      "status": "PARTIAL",
+      "observed": "Installed bridge, worker SQL and scoped recovery tests",
+      "remaining": [
+        "All actual Writer inventory and complete joint recovery"
+      ]
+    },
+    {
+      "name": "API authorization",
+      "status": "PARTIAL",
+      "evidence": [
+        "api-auth-matrix.json"
+      ],
+      "remaining": [
+        "Full active-route authorization coverage and deployed ACL; Developer Token remains identity/quota only"
+      ]
+    },
+    {
+      "name": "Historical/Annual continuity",
+      "status": "PARTIAL",
+      "observed": "Versioned new builds; old synthetic saved reports remain readable and byte-identical",
+      "remaining": [
+        "Complete published/share/Goal continuity and retained oracle review"
+      ]
+    },
+    {
+      "name": "Restore/RPO-RTO",
+      "status": "TARGET_DEFINED_EVIDENCE_PENDING",
+      "targets": "o1-acceptance-targets.json",
+      "observed": "21 scoped manual recovery tests on old 0.14.1 environment",
+      "evidence": [
+        "evidence/final-closeout-restore-20261016.json"
+      ],
+      "remaining": [
+        "Complete SQL/file/measurement/archive/authorization/Annual recovery consistency",
+        "Encrypted off-host backup of all 12 resources",
+        "Measured RPO <=15 min and core RTO <=120 min"
+      ]
+    },
+    {
+      "name": "Performance/production manifest",
+      "status": "TARGET_DEFINED_EVIDENCE_PENDING",
+      "targets": "o1-acceptance-targets.json",
+      "remaining": [
+        "Full cold/warm and concurrency 1/3/5 load campaign under approved worker limits",
+        "Same environment/input/concurrency baseline comparisons",
+        "Actual production manifest and ingress read-only inspection requires separate authorization per work order section 7"
+      ]
+    }
+  ],
+  "preservedFailures": [
+    "Initial old credential anonymous writer reproduction",
+    "Old source reappearance play_delta=1 reproduction",
+    "Combined source suite: 300 PASS / 7 SKIP / 1 strict identity FAIL",
+    "Viewer product suite: 117 PASS / 2 FAIL",
+    "Initial packaging and installed harness setup failures retained alongside retries"
+  ]
+}

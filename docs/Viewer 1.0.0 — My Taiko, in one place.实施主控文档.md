@@ -1,5 +1,7 @@
 # Viewer 1.0.0 — My Taiko, in one place.
 
+> 2026-10-16 最新隔离候选续行：用户已批准本地 Taiko 0.14.2 验证；详见 [本轮收尾](platform-architecture-audit/local-0142-closeout-20261016.md) 和 [Gate 矩阵](platform-architecture-audit/viewer082-gate.json)。原时点记录保留。O1 目标已明确、实测未签收；0.82 仍 BLOCKED，未进入 0.83。
+
 > **2026-10-16 Runtime Integration 增量**：已完成精确角色重建、共享 memory wheel 补齐、compute/Annual/merged/Growth installed 入口，以及两个角色各 46 个代表生命周期和新增 16 项 merged SQL 验证。凭据控制面与 Source-switch 失败已离线复现并保留，0.82 仍 BLOCKED。详见 [本轮实现与 Gate](platform-architecture-audit/runtime-integration-20261016.md)；未升级版本、进入 0.83 或部署。
 
 > **2026-10-16 执行增量**：独立 MySQL 测试配置已自动化解决，实际 `SELECT DATABASE()`、datadir 与 mutation opt-in 验证后，私有成绩授权/条件读取/同步代理共 **92 项 SQL/HTTP 测试通过**；没有访问生产数据库。证据及复验命令见 [gate-evidence.md](platform-architecture-audit/gate-evidence.md) 的续行记录，整体 Gate 仍受未完成项约束。

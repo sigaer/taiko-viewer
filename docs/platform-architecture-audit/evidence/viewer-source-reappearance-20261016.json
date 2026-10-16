@@ -1,0 +1,58 @@
+{
+  "scope": "Viewer source replay and synthetic product fixtures with original installed Publication runtime",
+  "productionAccess": false,
+  "runs": [
+    {
+      "path": "/var/tmp/viewer082-g1-focused.log",
+      "sha256": "6df4b46a120286ba348bce7a7fe8b19596cce5c5142f597e60ecc2aa1b318266",
+      "bytes": 3407,
+      "counts": {
+        "tests": 37,
+        "pass": 37,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/var/tmp/viewer082-g1-products.log",
+      "sha256": "b338c727049509fbbd1053533fe0db3ba969a1880a411447a456f153f5ca1d2e",
+      "bytes": 50275,
+      "counts": {
+        "tests": 80,
+        "pass": 51,
+        "fail": 29,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/var/tmp/viewer082-g1-products-retry.log",
+      "sha256": "becb45b63efac8695f6d204ab0a9259c1af3f1b2f848ed9461efd487a12ff95b",
+      "bytes": 36647,
+      "counts": {
+        "tests": 82,
+        "pass": 70,
+        "fail": 12,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/var/tmp/viewer082-g1-products-final.log",
+      "sha256": "8b78e99436e295cc0d6fdb597d32f5ead5b07c0fafcb67e3d829347a690f9914",
+      "bytes": 64114,
+      "counts": {
+        "tests": 119,
+        "pass": 117,
+        "fail": 2,
+        "skipped": 0
+      }
+    }
+  ],
+  "policyRevision": "observation-reappearance-v2",
+  "unchanged": [
+    "package version 0.82.1",
+    "installed wheel",
+    "frozen oracle",
+    "persisted production measurements/reports/Goal"
+  ],
+  "oldFailuresPreserved": true
+}

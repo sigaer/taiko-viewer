@@ -1012,7 +1012,8 @@
     },
     {
       "file": "taiko_viewer/server/infrastructure/account/private-worker-environment.ts",
-      "sourceSha256": "b89c0660dbcf126e8b6376857f1cc0d591f37287bfc31dc0f9d023fcc1146118"
+      "sourceSha256": "41a3fd7d8f1b0c684a2ee59fed387f73797574a19420788aa1f815c16810bb90",
+      "review": "R4: explicit center/runtime/offline roots added for installed CLI; existing captured SQL pool, allowlisted env and denied ambient env-file retained. 119 isolated SQL candidate rerun recorded separately."
     },
     {
       "file": "taiko_viewer/server/infrastructure/account/qq-migration-worker.ts",
@@ -1367,5 +1368,12 @@
     ]
   },
   "resourceGrantDraft": "docs/platform-architecture-audit/resource-grant-threat-model-draft.md",
-  "overallApiGate": "BLOCKED: credential control-plane negative probe FAIL; production ingress/ACL, consumer grant/audience and uncovered paths remain unaccepted"
+  "overallApiGate": "BLOCKED: credential control-plane negative probe FAIL; production ingress/ACL, consumer grant/audience and uncovered paths remain unaccepted",
+  "candidateCloseout": {
+    "status": "PARTIAL_NOT_RELEASE_ACCEPTED",
+    "credentialEvidence": "evidence/credential-installed-0142-20261016.json",
+    "priorNegativeProbe": "Retained unchanged as old-source evidence; fixed candidate synthetic auth does not establish live ingress/ACL",
+    "workerEvidence": "evidence/workers-sql-0142-20261016.json",
+    "scope": "No route policy or developer token grant expansion"
+  }
 }

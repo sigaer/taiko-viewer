@@ -1,5 +1,7 @@
 # Viewer 0.82 Runtime Integration — 2026-10-16
 
+> 2026-10-16 最新隔离候选续行：用户已批准本地 Taiko 0.14.2 验证；详见 [本轮收尾](local-0142-closeout-20261016.md) 和 [Gate 矩阵](viewer082-gate.json)。原时点记录保留。O1 目标已明确、实测未签收；0.82 仍 BLOCKED，未进入 0.83。
+
 **0.82 remains BLOCKED. No 0.83 Freeze, release, production access, merge or push.**
 This implements the next work package in
 `docs/Viewer_0822_Runtime_Integration_and_API_Readiness_20261016.md` on the isolated

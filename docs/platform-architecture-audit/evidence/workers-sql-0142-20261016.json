@@ -1,0 +1,49 @@
+{
+  "scope": "Four installed workers with synthetic upstream and empty isolated SQL",
+  "result": {
+    "workspace": "/var/tmp/viewer1-sql-kZPMkc",
+    "database": "viewer1_security_test",
+    "status": "PASS",
+    "startedAt": "2026-10-16T02:06:27.586Z",
+    "tests": [
+      "taiko_viewer/tests/accountSyncCanonicalSql.test.mjs",
+      "taiko_viewer/tests/sourceProxySql.test.mjs",
+      "taiko_viewer/tests/qqMigrationProxySql.test.mjs",
+      "taiko_viewer/tests/hirobaCredentialSql.test.mjs"
+    ],
+    "productionAccess": false,
+    "databaseProof": "viewer1_security_test",
+    "port": 44565,
+    "testNamePattern": null,
+    "result": {
+      "code": 0,
+      "signal": null
+    },
+    "daemonExited": true,
+    "finishedAt": "2026-10-16T02:09:59.540Z",
+    "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792116387-2815997.service",
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+  },
+  "counts": {
+    "tests": 119,
+    "pass": 119,
+    "fail": 0,
+    "skipped": 0
+  },
+  "logs": [
+    {
+      "path": "/var/tmp/viewer1-sql-kZPMkc/tests.log",
+      "sha256": "9f80a9807925fcfa0916e810c1aab649e5ce6a42c6a3810f6c64d7df285ebd67"
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-kZPMkc/result.json",
+      "sha256": "d08c2015da3f3bf02629aa721613ff4ae7c61f2ca29a43b80c7259efd215dc7e"
+    },
+    {
+      "path": "/var/tmp/viewer0142-workers-sql.log",
+      "sha256": "b215094f3fdaca4aaca973b4639a7258be5437533f1a3f86e7b6325a850993ba"
+    }
+  ],
+  "interpreter": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+  "productionAccess": false
+}
