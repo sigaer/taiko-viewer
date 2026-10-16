@@ -1,0 +1,61 @@
+{
+  "status": "PASS_SCOPED",
+  "tests": 15,
+  "realSystemdSmoke": "PASS",
+  "realSmokeChildPidsVerifiedAbsent": [
+    2997833,
+    2997834
+  ],
+  "realSmokeCgroupVerifiedAbsent": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-511a321f82a1.service",
+  "scratchCleanupVerified": true,
+  "productionAccess": false,
+  "priorFailure": "qa-eff0894f69ed: one test budget did not include 4096-byte directory allocation; corrected fixture budget without changing guard",
+  "runs": {
+    "qa-19a5975e3f5b": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-19a5975e3f5b/evidence/manifest.json",
+      "sha256": "a55d49bf0f4eea50b5a295876b1003f04b18e6565483bd19738f5f4e90f7542e",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-eff0894f69ed": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-eff0894f69ed/evidence/manifest.json",
+      "sha256": "2e2cfca62f6d98e556abafce18f11398ce8c2d23be434dcef5b4d8b221e53569",
+      "exitCode": 1,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-047645aeab73": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-047645aeab73/evidence/manifest.json",
+      "sha256": "0ee0153096c7b14c3313eb9402d79e9c1260c94cffc58fa64c859b3323561717",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-511a321f82a1": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-511a321f82a1/evidence/manifest.json",
+      "sha256": "6b8a0be09cff520757ce0350dacf1f9d1b6d7a283e5f5ff75066e593b4f87f67",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-10a8cc25bb4c": {
+      "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-10a8cc25bb4c/evidence/manifest.json",
+      "sha256": "89c1aabc9406ed9ef7a89553029f843af6f259ae7966bde004f82c1f7c03ae6a",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    }
+  },
+  "sourceHashes": {
+    "scripts/memory/run_qa.sh": "6d4083e3e652612f25eec6e1e2057560e5b16881e56d196308339f59db14ab4e",
+    "scripts/memory/qa_vault.py": "16127fd6a52939576c5f7ebfeb06e32d462e67df397f21e142cb9ceada3e151d",
+    "scripts/memory/tests/test_qa_vault.py": "2d6528d48aee75916b0adc043351b4541ab7ad1a12f1e6a88e64753f10aa87ff",
+    "scripts/memory/tests/qa_wrapper_smoke.py": "886bd7cad9ee683632799e42a247a00070362807fea15e5c695c729b31e7ba6a"
+  },
+  "limits": [
+    "2-second disk sampling is not an instantaneous quota",
+    "Files outside run are not inventoried or cleaned",
+    "Caller output must not contain secrets; manifest omits command arguments/environment"
+  ]
+}
