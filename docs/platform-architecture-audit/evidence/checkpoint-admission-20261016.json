@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "status": "PASS_SCOPED_SYNTHETIC_TOOL",
+  "counts": {
+    "tests": 14,
+    "pass": 14,
+    "fail": 0,
+    "skip": 0
+  },
+  "productionOrchestrator": "NOT_IMPLEMENTED",
+  "atomicCheckpointCollector": "NOT_IMPLEMENTED",
+  "productionAccess": false,
+  "overallRecoveryGate": "BLOCKED",
+  "artifacts": [
+    {
+      "path": "/var/tmp/viewer082-checkpoint-admission.log",
+      "sha256": "ec4f0d59261464846408487d1717e05bff010fe56b0f181e02e041ff2abe4c75"
+    },
+    {
+      "path": "scripts/readiness/checkpoint-admission.mjs",
+      "sha256": "1a032cb7d638bd6e7125bad9f912906088af31a011919acf63a822e77d74b147"
+    },
+    {
+      "path": "taiko_viewer/tests/checkpointAdmission.test.mjs",
+      "sha256": "3de1926b2a5ed2a8392b366c61370409a40173c052099b85dc642ac443a65bde"
+    }
+  ],
+  "archivedRestoreTestSha256": "bde0694d00297bbd9e43d56773e82f4f99010ffd4f174dd8420e4ff591f8dec1",
+  "limitations": [
+    "Pure synthetic input/inventory verification; no actual in-flight SQL/filesystem fault injected.",
+    "Trusted manifest digest and checkpoint collector assertions remain external requirements.",
+    "Production recovery admission is not wired to this helper."
+  ]
+}
