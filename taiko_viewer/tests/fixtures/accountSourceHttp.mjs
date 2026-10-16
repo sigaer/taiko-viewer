@@ -11,7 +11,7 @@ export function deferred(){let resolve;const promise=new Promise(r=>{resolve=r;}
 export async function bounded(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Owned account source race deadline')),5000);})]);}finally{clearTimeout(timer);}}
 export async function sourceSnapshot(c){return c.scopeModule.withDomainScoreRead(c.taikoId,async()=>({raw:await manualSourceSnapshot(c),publication:c.scopeModule.scorePublication(c.taikoId)}));}
 
-export async function accountSourceFixture(task,{manual=false,withDeveloper=false}={}){
+export async function accountSourceFixture(task,{manual=false,withDeveloper=false,withRealPython=false,requestTimeoutMs=12000}={}){
  return manualSqlFixture(async context=>{
   const c={...context,manualId:context.taikoId,ownedTokenIds:new Set([context.taikoId])};
   if(!manual){
@@ -67,7 +67,7 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    api=createServer(toNodeListener(createApp().use(router)));api.listen(0,'127.0.0.1');await once(api,'listening');
    const apiBase=`http://127.0.0.1:${api.address().port}`;
    c.baseUrl=apiBase;
-   c.request=(method,path,body,cookie=c.cookie,headers={})=>nativeFetch(apiBase+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie||'',...headers},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
+   c.request=(method,path,body,cookie=c.cookie,headers={})=>nativeFetch(apiBase+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie||'',...headers},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(requestTimeoutMs)});
    c.read=async path=>{const response=await c.request('GET',path);const body=await response.json();assert.equal(response.status,200);return body;};
    const password=randomBytes(16).toString('hex'),[[account]]=await c.pool.query('SELECT username FROM web_user_accounts WHERE id=?',[c.user]);
    await c.pool.execute('UPDATE web_user_accounts SET password_hash=?,email_verified=1 WHERE id=?',[await c.shared.getPasswordHash(password),c.user]);
@@ -81,7 +81,7 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    if(previousHandler===undefined)delete globalThis.defineEventHandler;else globalThis.defineEventHandler=previousHandler;
    for(const id of c.ownedTokenIds)await c.pool.execute('DELETE FROM public_score_tokens WHERE taiko_id=?',[id]);
   }
- },{withAccountSource:true,withDeveloper});
+ },{withAccountSource:true,withDeveloper,withPersonal:withRealPython,withRealPython,withRealModel:withRealPython});
 }
 
 export async function queuedAccountSource(c,operation,change){

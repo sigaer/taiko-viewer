@@ -71,6 +71,14 @@ try{
   TAIKO_DB_USER:'viewer1_test',TAIKO_DB_PASSWORD:password,TAIKO_ALLOW_TEST_DB_MUTATION:'1',
   TAIKO_TEST_MYSQL_DATADIR:datadir,TAIKO_PYTHON_EXECUTABLE:python,
   TAIKO_PUBLICATION_TEST_REPO_ROOT:'/var/tmp/taiko-final-ownership-20261015/taiko'};
+ const o1 = process.argv.find(arg=>arg.startsWith('--o1='));
+ if (o1) {
+  const match=/^--o1=(private-current|private-history|growth-history|growth-overview|growth-passport|b30):(1|3|5):(1|3|50|200)$/.exec(o1);
+  assert.ok(match,'Explicit bounded O1 operation:concurrency:samples required');
+  Object.assign(testEnv,{TAIKO_O1_OPERATION:match[1],TAIKO_O1_CONCURRENCY:match[2],TAIKO_O1_SAMPLES:match[3],TAIKO_O1_OUTPUT:resolve(workspace,'o1-performance.json')});
+  evidence.o1={operation:match[1],concurrency:Number(match[2]),samples:Number(match[3])};
+  const scale=process.argv.find(arg=>arg.startsWith('--o1-scale='))?.slice(11)||'all';assert.ok(['all','small','medium','large','extreme'].includes(scale));assert.ok(scale!=='extreme'||match[1]==='growth-passport');testEnv.TAIKO_O1_SCALE=scale;evidence.o1.scale=scale;
+ }
  await writeFile(resolve(workspace,'test-config.json'),JSON.stringify(testEnv),{mode:0o600});
  stage='bootstrap';
  assert.deepEqual(await run(process.execPath,['taiko_viewer/scripts/bootstrap_source_security_test_db.mjs'],'bootstrap',testEnv),{code:0,signal:null});
@@ -82,6 +90,7 @@ try{
  evidence.testNamePattern=pattern?.slice('--test-name-pattern='.length)??null;
  const result=await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...(pattern?[pattern]:[]),...suites],'tests',testEnv,600000);
  evidence.tests=suites;evidence.result=result;evidence.status=result.code===0?'PASS':'FAIL';
+ if(o1){const measured=JSON.parse(await readFile(testEnv.TAIKO_O1_OUTPUT,'utf8'));evidence.o1.status=measured.status;evidence.o1.summary=measured.summary;console.log(JSON.stringify({o1Status:measured.status,pressureStop:measured.summary?.pressureStop,output:testEnv.TAIKO_O1_OUTPUT}));}
  if(result.code!==0)process.exitCode=1;
 }catch(error){evidence.status='FAIL';evidence.error={stage,code:typeof error.code==='string'&&/^[A-Z_0-9]+$/.test(error.code)?error.code:'OWNED_QA_FAILURE'};process.exitCode=1;}
 finally{

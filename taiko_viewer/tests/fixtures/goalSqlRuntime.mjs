@@ -4,7 +4,7 @@ import {registerHooks} from 'node:module';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
-export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false } = {}) {
+export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false, withRealModel = false } = {}) {
  const root=new URL('../../',import.meta.url);
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
@@ -39,6 +39,7 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   const accountUrl=new URL('server/utils/account.ts',root).href;
   overrides.set(accountUrl,overrides.get(accountUrl)+`export * from '${new URL('server/utils/account/developer.ts',root).href}';`);
  }
+ if (withRealModel) overrides.delete(new URL('server/services/growth-history/model-revision.ts',root).href);
  if (withPersonal) {
   overrides.delete(new URL('server/services/account/personal.ts',root).href);
   if (!withRealPython) overrides.set(new URL('server/services/account/python-compute.ts',root).href,`
