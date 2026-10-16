@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'node:url';
+const installedFixture=fileURLToPath(new URL('./fixtures/installed-workers/account_sync_sql_child.py',import.meta.url));
 // Actual cookie route -> actual bounded stdin runner -> real Python CLI/SQL/files.
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -18,12 +20,12 @@ async function fixture(task,options={}){return accountSourceFixture(async c=>{
  globalThis.__goalSqlRuntime.syncLaunch=(executable,args,launchOptions)=>{
   const file=resolve(c.root,'sync-current-options.json');
   writeFileSync(file,JSON.stringify({root:c.root,userId:c.user,taikoId:c.taikoId,payload,...c.syncOptions}),{mode:0o600});
-  assert.equal(executable,'python3');assert.deepEqual(args,['-m','scripts.account_sync_cli']);
+  assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.account_sync_cli']);
   assert.equal(launchOptions.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
   assert.equal(launchOptions.env.TAIKO_DB_NAME,process.env.TAIKO_DB_NAME);
   assert.equal(launchOptions.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');
-  const child=spawn('/usr/bin/python3',[center+'/tests/account_sync_sql_child.py',file],{...launchOptions,
-   env:{...launchOptions.env,PYTHONPATH:center+':'+center+'/tests',TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});
+  const child=spawn(executable,['-I',installedFixture,file],{...launchOptions,
+   env:{...launchOptions.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});
   c.children.push(child);return child;
  };
  c.ask=async(body={})=>{const response=await c.request('POST','/sync-submit',{targetIds:['sakura-bot'],...body});const result=await response.json();

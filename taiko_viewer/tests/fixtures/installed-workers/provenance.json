@@ -1,0 +1,31 @@
+{
+  "sourceRepository": "Sakura_bot",
+  "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+  "adaptation": "Product namespace imports only; removed source sys.path injection; assert -I and site-packages product origins. Inline original synthetic_wahlap helper only. Explicit empty synthetic dojo catalog for empty-dojo input; daily callback accepts existing publication_store keyword. SQL/permission/fault assertions preserved; source-image panels remain synthetic.",
+  "fixtures": [
+    {
+      "source": "taiko/tests/account_sync_sql_child.py",
+      "sourceSha256": "e9b4acfb48cc122f879dcb52a85797bb75decc6227120030e2d35f5cfb6668f6",
+      "adapted": "taiko_viewer/tests/fixtures/installed-workers/account_sync_sql_child.py",
+      "adaptedSha256": "f9dd9172fff40c91af5ade145050fa31be78832204c5a0b23f1aa8901238a027"
+    },
+    {
+      "source": "taiko/tests/source_mutation_sql_child.py",
+      "sourceSha256": "31acddcc52d246ba1a71e53ed3f49a8fbd322af76a5c4d5cba1f531b940530b4",
+      "adapted": "taiko_viewer/tests/fixtures/installed-workers/source_mutation_sql_child.py",
+      "adaptedSha256": "cf432056ffbeeb2a7eaa4d960c035ab959efbe29bcc9ebb63ba8c863aba5ac8b"
+    },
+    {
+      "source": "taiko/tests/qq_migration_private_fixture.py",
+      "sourceSha256": "64733901b090e63701bc36eaa2d33765279f41931149274e6b47a3ce6555263d",
+      "adapted": "taiko_viewer/tests/fixtures/installed-workers/qq_migration_private_fixture.py",
+      "adaptedSha256": "414efb9d5e624e8fc6e6f771305c717356823a0723a90038bb42d9a0ef87d1b4"
+    },
+    {
+      "source": "taiko/tests/hiroba_credential_child.py",
+      "sourceSha256": "82443101a317777fc76948501b78669302f170e5ebf8302b8d8a224964b7b026",
+      "adapted": "taiko_viewer/tests/fixtures/installed-workers/hiroba_credential_child.py",
+      "adaptedSha256": "8e8f26436679aa4bb3269078e653b6d2ee14803ef7a99561655a346646337f01"
+    }
+  ]
+}

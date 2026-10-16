@@ -15,7 +15,7 @@ function launchFor(make){return (...args)=>{
 const response=req=>({ok:true,result:{operationId:req.operationId,payload:{ok:true,identityKey:req.principal,qq:'12345',code:'c'.repeat(32),expiresInSeconds:600}}});
 test('private QQ task uses static argv/captured env and parses split response',async()=>{
  const runner=createQqMigrationWorker(launchFor((child,req,args)=>{
-  assert.equal(args[0],'python3');assert.deepEqual(args[1],['-m','scripts.qq_migration_cli']);assert.equal(args[2].cwd,host.paths.repoRoot);assert.equal(args[2].env,host.workerEnv);
+  assert.equal(args[0],(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args[1],['-I','-m','taiko_bot.cli.qq_migration_cli']);assert.equal(args[2].cwd,host.paths.repoRoot);assert.equal(args[2].env,host.workerEnv);
   const raw=Buffer.from(JSON.stringify(response(req)));child.stdout.write(raw.subarray(0,5));child.stdout.write(raw.subarray(5));queueMicrotask(()=>child.emit('close',0));
  }));
  assert.equal((await runner(request,host)).code,'c'.repeat(32));

@@ -77,7 +77,10 @@ try{
  const suites=process.argv.filter(arg=>/^taiko_viewer\/tests\/[A-Za-z0-9]+\.test\.mjs$/.test(arg));
  assert.ok(suites.length>0,'Explicit SQL suites required');
  stage='tests';
- const result=await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...suites],'tests',testEnv,600000);
+ const pattern=process.argv.find(arg=>arg.startsWith('--test-name-pattern='));
+ assert.ok(!pattern || pattern.length<=256,'Bounded test name pattern required');
+ evidence.testNamePattern=pattern?.slice('--test-name-pattern='.length)??null;
+ const result=await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...(pattern?[pattern]:[]),...suites],'tests',testEnv,600000);
  evidence.tests=suites;evidence.result=result;evidence.status=result.code===0?'PASS':'FAIL';
  if(result.code!==0)process.exitCode=1;
 }catch(error){evidence.status='FAIL';evidence.error={stage,code:typeof error.code==='string'&&/^[A-Z_0-9]+$/.test(error.code)?error.code:'OWNED_QA_FAILURE'};process.exitCode=1;}

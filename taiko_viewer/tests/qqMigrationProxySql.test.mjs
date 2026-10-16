@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'node:url';
+const installedFixture=fileURLToPath(new URL('./fixtures/installed-workers/qq_migration_private_fixture.py',import.meta.url));
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {spawn} from 'node:child_process';
@@ -9,9 +11,9 @@ async function fixture(task){return botBindingFixture(async c=>{
  c.origin=c.principal;c.target='qq_official:Target_'+randomUUID().replaceAll('-','');c.keys.push(c.qq,c.target);c.children=[];c.fault=null;c.launchCount=0;
  const runtime=globalThis.__goalSqlRuntime;
  runtime.qqMigrationLaunch=(executable,args,options)=>{
-  assert.equal(executable,'python3');assert.deepEqual(args,['-m','scripts.qq_migration_cli']);c.launchCount++;
-  const env={...options.env,TAIKO_ALLOW_TEST_DB_MUTATION:'1',TAIKO_QQ_TEST_ROOT:c.root,TAIKO_QQ_TEST_FAULT:c.fault||''};
-  const child=spawn('/usr/bin/python3',[c.config.repoRoot+'/tests/qq_migration_private_fixture.py'],{...options,env});c.children.push(child);
+  assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.qq_migration_cli']);c.launchCount++;
+  const env={...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1',TAIKO_QQ_TEST_ROOT:c.root,TAIKO_QQ_TEST_FAULT:c.fault||''};
+  const child=spawn(executable,['-I',installedFixture],{...options,env});c.children.push(child);
   let diagnostics='';child.stderr.on('data',data=>{if(diagnostics.length<8192)diagnostics+=data;});
   child.once('close',exit=>{c.lastWorker={exit};try{c.lastWorker.diagnostic=JSON.parse(diagnostics).ownedDiagnostic;}catch{c.lastWorker.diagnostic=diagnostics.split('\n').filter(line=>line.trim().startsWith('File ')).slice(-3);}});
   c.onLaunch?.();return child;

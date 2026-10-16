@@ -9,7 +9,7 @@ export function capturedWorkerEnvironment(db:Pool,paths:ReturnType<typeof getRun
     if(process.env[key]!==undefined)env[key]=process.env[key];
   }
   return Object.assign(env,{TAIKO_DB_HOST:config.host,TAIKO_DB_PORT:String(config.port),TAIKO_DB_USER:config.user,TAIKO_DB_PASSWORD:config.password,
-    TAIKO_DB_NAME:config.database,TAIKO_RUNTIME_ENV_FILE:'/proc/self/taiko-account-sync-no-env',TAIKO_USERDATA_DIR:paths.userdataDir,
+    TAIKO_DB_NAME:config.database,TAIKO_CENTER_ROOT:paths.repoRoot,TAIKO_RUNTIME_ROOT:paths.repoRoot,TAIKO_OFFLINE_ROOT:paths.repoRoot,TAIKO_RUNTIME_ENV_FILE:'/proc/self/taiko-account-sync-no-env',TAIKO_USERDATA_DIR:paths.userdataDir,
     TAIKO_WAHLAP_CONFIG_PATH:paths.configPath,TAIKO_ACCOUNT_CACHE_DIR:paths.cacheDir,
     TAIKO_HIROBA_TOKEN_DIR:resolve(paths.repoRoot,'secrets','hiroba_tokens'),TAIKO_HIROBA_COOLDOWN_PATH:resolve(paths.repoRoot,'data','hiroba_sync_cooldown.json'),PYTHONDONTWRITEBYTECODE:'1'});
 }

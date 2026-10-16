@@ -1,5 +1,7 @@
 // Owned whole-process COMMIT boundaries, actual test SQL/H3/credential worker.
 import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
+import {dirname} from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
@@ -16,7 +18,7 @@ try{
  const db={execute:(...args)=>pool.execute(...args),query:(...args)=>pool.query(...args),async getConnection(){const connection=await pool.getConnection();await guard(connection);
   return {execute:(...args)=>connection.execute(...args),query:(...args)=>connection.query(...args),beginTransaction:()=>connection.beginTransaction(),rollback:()=>connection.rollback(),release:()=>connection.release(),destroy:()=>connection.destroy(),async commit(){if(options.point==='before-commit')process.exit(73);await connection.commit();if(options.point==='after-commit')process.exit(73);}};}};
  uninstall=installGoalSqlRuntime(db,options.config,{withDeveloper:true});globalThis.defineEventHandler=defineEventHandler;
- globalThis.__goalSqlRuntime.hirobaCredentialLaunch=(executable,args,launchOptions)=>spawn('/usr/bin/python3',[options.config.repoRoot+'/tests/hiroba_credential_child.py',options.options],launchOptions);
+ globalThis.__goalSqlRuntime.hirobaCredentialLaunch=(executable,args,launchOptions)=>spawn(executable,['-I',fileURLToPath(new URL('./installed-workers/hiroba_credential_child.py',import.meta.url)),options.options],{...launchOptions,env:{...launchOptions.env,TAIKO_RUNTIME_ROOT:dirname(options.options),TAIKO_CENTER_ROOT:dirname(options.options),TAIKO_OFFLINE_ROOT:dirname(options.options)}});
  server=createServer(toNodeListener(createApp().use((await import('../../server/api/taiko/proxy/hiroba/bind.post.ts')).default)));server.listen(0,'127.0.0.1');await once(server,'listening');
  const response=await fetch('http://127.0.0.1:'+server.address().port,{method:'POST',headers:{'Content-Type':'application/json',Cookie:options.cookie,'x-forwarded-for':options.ip},body:JSON.stringify({email:options.email,password:options.password,configuredByQq:options.principal,requestId:options.requestId}),signal:AbortSignal.timeout(12000)});
  await response.arrayBuffer();throw new Error('Owned process did not reach SQL COMMIT boundary');

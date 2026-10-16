@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'node:url';
+const installedFixture=fileURLToPath(new URL('./fixtures/installed-workers/source_mutation_sql_child.py',import.meta.url));
 // Formal proxy routes -> actual bounded Node runner -> private Python CLI/SQL/kernel.
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -18,10 +20,10 @@ async function fixture(task,{hiroba=false,manual=false}={}){
     VALUES (?,?,'synthetic-center',?,?,?,'active',?) ON DUPLICATE KEY UPDATE scopes_json=VALUES(scopes_json),sources_json=VALUES(sources_json),revision_nonce=VALUES(revision_nonce)`,[c.tokenId,c.user,JSON.stringify(scopes),JSON.stringify(sources),randomUUID().replaceAll('-',''),c.user]);
   const payload={profile:{userid:c.taikoId,mydon_name:'合成用户',gameCostume:{title:'Synthetic refreshed title',titleplate_id:2}},songs:[{song_no:1,level:4,high_score:812345,stage_cnt:2}],achievement:{gold:3},dojo:{}};
   globalThis.__goalSqlRuntime.sourceMutationLaunch=(executable,args,options)=>{
-   assert.equal(executable,'python3');assert.deepEqual(args,['-m','scripts.source_mutation_cli']);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
+   assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.source_mutation_cli']);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
    assert.equal(options.env.PYTHONPATH,undefined);assert.equal(options.env.TAIKO_ACCOUNT_CACHE_DIR,c.config.accountCacheDir);
    const file=resolve(c.root,'proxy-options.json');writeFileSync(file,JSON.stringify({root:c.root,userId:c.user,taikoId:c.taikoId,payload,...c.proxyOptions}),{mode:0o600});
-   const child=spawn('/usr/bin/python3',[center+'/tests/source_mutation_sql_child.py',file],{...options,env:{...options.env,PYTHONPATH:center+':'+center+'/tests',TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});c.children.push(child);return child;
+   const child=spawn(executable,['-I',installedFixture,file],{...options,env:{...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root,TAIKO_ALLOW_TEST_DB_MUTATION:'1'}});c.children.push(child);return child;
   };
   for(const [method,path,file] of [['post','/update/:taikoId','update.post.ts'],['post','/hiroba/:taikoId','sync-hiroba.post.ts'],['get','/history/:taikoId','history.get.ts']])c.route(method,path,(await import('../server/api/taiko/proxy/userdata/[taikoId]/'+file)).default);
   c.ask=async({kind=hiroba?'hiroba':'update',body={includeImage:false},token,cookie=c.cookie,format,etag}={})=>{

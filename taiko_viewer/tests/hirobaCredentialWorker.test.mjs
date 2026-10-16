@@ -10,7 +10,7 @@ const request={operationId,mode:'discover',email:'demo@example.test',password:'p
 function fake(result,{stderr='',code=0,closeAfterKill=false}={}){
  const child=new EventEmitter();child.stdin=new PassThrough();child.stdout=new PassThrough();child.stderr=new PassThrough();child.signals=[];let input='';child.stdin.on('data',chunk=>{input+=chunk.toString();});
  child.kill=signal=>{child.signals.push(signal);if(closeAfterKill)setImmediate(()=>child.emit('close',null));return true;};
- const launch=(executable,args,options)=>{assert.equal(executable,'python3');assert.deepEqual(args,['-m','scripts.hiroba_credential_cli']);assert.equal(options.cwd,'/owned/core');assert.strictEqual(options.env,ticket.workerEnv);
+ const launch=(executable,args,options)=>{assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.hiroba_credential_cli']);assert.equal(options.cwd,'/owned/core');assert.strictEqual(options.env,ticket.workerEnv);
   child.stdin.on('finish',()=>setImmediate(()=>{assert.equal(JSON.parse(input).password,request.password);if(stderr)child.stderr.write(stderr);child.stdout.write(typeof result==='string'?result:JSON.stringify({ok:true,result}));if(!closeAfterKill)child.emit('close',code);}));return child;};
  return {child,run:()=>createHirobaCredentialWorker(launch)(request,ticket)};
 }

@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'node:url';
+const installedFixture=fileURLToPath(new URL('./fixtures/installed-workers/hiroba_credential_child.py',import.meta.url));
 // Actual Cookie/token routes and SQL transactions, real private Python crypto
 // and original discovery function. Only upstream cards are synthetic.
 import assert from 'node:assert/strict';
@@ -22,8 +24,8 @@ async function fixture(task){return accountSourceFixture(async c=>{
   VALUES (?,?,'synthetic-hiroba',?,?,?,?,'active',?) ON DUPLICATE KEY UPDATE scopes_json=VALUES(scopes_json),sources_json=VALUES(sources_json),principals_json=VALUES(principals_json),revision_nonce=VALUES(revision_nonce),status='active',expires_at=NULL`,[c.tokenId,c.user,JSON.stringify(scopes),JSON.stringify(sources),principals===null?null:JSON.stringify(principals),nonce(),c.user]);
  c.options=resolve(c.root,'credential-native-options.json');c.setWorker=async({ids=c.ids,point=''}={})=>writeFile(c.options,JSON.stringify({root:c.root,ids,point}),{mode:0o600});await c.setWorker();
  c.launches=0;c.launch=(executable,args,options)=>{
-  c.launches++;assert.deepEqual(args,['-m','scripts.hiroba_credential_cli']);assert.equal(options.cwd,center);assert.ok(!args.some(arg=>arg.includes(c.password)||arg.includes(c.token)));assert.equal(options.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');
-  return spawn('/usr/bin/python3',[center+'/tests/hiroba_credential_child.py',c.options],options);
+  c.launches++;assert.deepEqual(args,['-I','-m','taiko_bot.cli.hiroba_credential_cli']);assert.equal(options.cwd,c.config.repoRoot);assert.ok(!args.some(arg=>arg.includes(c.password)||arg.includes(c.token)));assert.equal(options.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');
+  return spawn(executable,['-I',installedFixture,c.options],{...options,env:{...options.env,TAIKO_RUNTIME_ROOT:c.root,TAIKO_CENTER_ROOT:c.root,TAIKO_OFFLINE_ROOT:c.root}});
  };globalThis.__goalSqlRuntime.hirobaCredentialLaunch=c.launch;
  for(const [method,path,file] of [['post','/hiroba-bind','hiroba/bind.post.ts'],['get','/hiroba-status/:taikoId','hiroba/credentials/[taikoId].get.ts'],['post','/bot-current','bind/current.post.ts']])c.route(method,path,(await import('../server/api/taiko/proxy/'+file)).default);
  c.ask=async({status=false,id=c.taikoId,body={},cookie=c.cookie,token,header}={})=>{

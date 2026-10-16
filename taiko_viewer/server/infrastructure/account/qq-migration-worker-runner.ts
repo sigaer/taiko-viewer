@@ -1,3 +1,4 @@
+import {getTaikoPython} from "../../utils/taiko-python.ts";
 import {spawn} from 'node:child_process';
 import {StringDecoder} from 'node:string_decoder';
 import type {getRuntimePaths} from '../runtime-paths.ts';
@@ -40,7 +41,7 @@ export function createQqMigrationWorker(launch:typeof spawn=spawn){return async(
  const input=JSON.stringify(request);if(Buffer.byteLength(input)>65536)throw unavailable();
  return new Promise((resolve,reject)=>{
   let child:ReturnType<typeof spawn>;
-  try{child=launch('python3',['-m','scripts.qq_migration_cli'],{cwd:host.paths.repoRoot,env:host.workerEnv,stdio:['pipe','pipe','pipe']});}catch{reject(unavailable());return;}
+  try{child=launch(getTaikoPython(),['-I','-m','taiko_bot.cli.qq_migration_cli'],{cwd:host.paths.repoRoot,env:host.workerEnv,stdio:['pipe','pipe','pipe']});}catch{reject(unavailable());return;}
   const decoder=new StringDecoder('utf8');let output='',bytes=0,stderr=0,failed=false,killTimer:ReturnType<typeof setTimeout>|undefined;
   const stop=()=>{failed=true;child.kill('SIGTERM');killTimer??=setTimeout(()=>child.kill('SIGKILL'),1500);};
   const timer=setTimeout(stop,50000);

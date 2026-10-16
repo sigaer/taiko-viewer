@@ -1,0 +1,358 @@
+{
+  "status": "PARTIAL_NOT_RELEASE_READY",
+  "viewerBase": "7fcaf67",
+  "workBranch": "feat/viewer-r4-ownership-20261016",
+  "lockManifest": "runtime-role-locks-with-memory.json",
+  "lockSha256": "59fe2f2f67a1bdba7e96cc7ba7e9633822d1adc8d27496f71e0a0c4249477b75",
+  "packageVersionChanged": false,
+  "wheelLockChanged": false,
+  "productionConfigurationRead": false,
+  "workers": [
+    {
+      "worker": "account-sync",
+      "decision": "MIGRATE",
+      "owner": "Taiko center account_sync / Viewer sync-authority",
+      "consumer": "taiko_viewer/server/services/account/sync-authority.ts",
+      "installedModule": "taiko_bot.cli.account_sync_cli",
+      "role": "center",
+      "coreVersion": "0.1.1",
+      "applicationPackage": "taiko-bot 0.14.1",
+      "taikoSourceCommit": "15722e8",
+      "transport": "absolute getTaikoPython(), -I -m; bounded stdin/stdout/stderr; captured private configuration; no source fallback",
+      "authority": "Viewer session/owner or explicit service grant before dispatch; installed SQL worker rechecks actor/resource for sync/source/QQ; Hiroba crypto/discovery has no SQL and caller controls grant/recheck/commit",
+      "acceptance": "PASS_SCOPED_119_ISOLATED_SQL_30_TRANSPORT_AND_MODULE_NEGATIVES",
+      "evidence": "evidence/r4-workers-20261016.json"
+    },
+    {
+      "worker": "source-mutation",
+      "decision": "MIGRATE",
+      "owner": "Taiko center source_mutation / Viewer source authority",
+      "consumer": "taiko_viewer/server/services/account/source-proxy.ts",
+      "installedModule": "taiko_bot.cli.source_mutation_cli",
+      "role": "center",
+      "coreVersion": "0.1.1",
+      "applicationPackage": "taiko-bot 0.14.1",
+      "taikoSourceCommit": "15722e8",
+      "transport": "absolute getTaikoPython(), -I -m; bounded stdin/stdout/stderr; captured private configuration; no source fallback",
+      "authority": "Viewer session/owner or explicit service grant before dispatch; installed SQL worker rechecks actor/resource for sync/source/QQ; Hiroba crypto/discovery has no SQL and caller controls grant/recheck/commit",
+      "acceptance": "PASS_SCOPED_119_ISOLATED_SQL_30_TRANSPORT_AND_MODULE_NEGATIVES",
+      "evidence": "evidence/r4-workers-20261016.json"
+    },
+    {
+      "worker": "QQ-migration",
+      "decision": "MIGRATE",
+      "owner": "Taiko center viewer_qq_migration / Viewer principal authority",
+      "consumer": "taiko_viewer/server/services/account/qq-migration.ts",
+      "installedModule": "taiko_bot.cli.qq_migration_cli",
+      "role": "center",
+      "coreVersion": "0.1.1",
+      "applicationPackage": "taiko-bot 0.14.1",
+      "taikoSourceCommit": "15722e8",
+      "transport": "absolute getTaikoPython(), -I -m; bounded stdin/stdout/stderr; captured private configuration; no source fallback",
+      "authority": "Viewer session/owner or explicit service grant before dispatch; installed SQL worker rechecks actor/resource for sync/source/QQ; Hiroba crypto/discovery has no SQL and caller controls grant/recheck/commit",
+      "acceptance": "PASS_SCOPED_119_ISOLATED_SQL_30_TRANSPORT_AND_MODULE_NEGATIVES",
+      "evidence": "evidence/r4-workers-20261016.json"
+    },
+    {
+      "worker": "Hiroba-credential",
+      "decision": "MIGRATE",
+      "owner": "Taiko center private_credentials / Viewer credential controller",
+      "consumer": "taiko_viewer/server/services/account/hiroba-credentials.ts",
+      "installedModule": "taiko_bot.cli.hiroba_credential_cli",
+      "role": "center",
+      "coreVersion": "0.1.1",
+      "applicationPackage": "taiko-bot 0.14.1",
+      "taikoSourceCommit": "15722e8",
+      "transport": "absolute getTaikoPython(), -I -m; bounded stdin/stdout/stderr; captured private configuration; no source fallback",
+      "authority": "Viewer session/owner or explicit service grant before dispatch; installed SQL worker rechecks actor/resource for sync/source/QQ; Hiroba crypto/discovery has no SQL and caller controls grant/recheck/commit",
+      "acceptance": "PASS_SCOPED_119_ISOLATED_SQL_30_TRANSPORT_AND_MODULE_NEGATIVES",
+      "evidence": "evidence/r4-workers-20261016.json"
+    }
+  ],
+  "imageConsumers": [
+    {
+      "family": "B30/dimension/radar",
+      "consumer": "taiko_viewer/server/services/account/charts.ts",
+      "consumerSha256": "18e10c20943702104b8ddd538f5f70875739689bfff01d689f51adf64d607a27",
+      "role": "center",
+      "status": "PRIOR_3_CALLSITE_PASS",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "MIGRATE_EXISTING_INSTALLED_CALLSITE",
+      "owner": "Taiko installed center rendering; Viewer actor authorization and transport",
+      "evidence": "evidence/installed-viewer-images-retry-20261016.json"
+    },
+    {
+      "family": "trend/recommendation/word-cloud",
+      "consumer": "taiko_viewer/server/services/account/charts.ts",
+      "consumerSha256": "18e10c20943702104b8ddd538f5f70875739689bfff01d689f51adf64d607a27",
+      "role": "center",
+      "status": "NOT_VERIFIED",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "MIGRATE_EXISTING_INSTALLED_CALLSITE",
+      "owner": "Taiko installed center rendering; Viewer actor authorization and transport"
+    },
+    {
+      "family": "dani/pass/comprehensive/star/named progress",
+      "consumer": "taiko_viewer/server/services/account/progress.ts",
+      "consumerSha256": "92356dce8fde2d28f0358c15606d4835ddd90b94ed38a7d8294c0e4ef88cf74d",
+      "role": "center",
+      "status": "NOT_VERIFIED",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "MIGRATE_EXISTING_INSTALLED_CALLSITE",
+      "owner": "Taiko installed center rendering; Viewer actor authorization and transport"
+    },
+    {
+      "family": "MyDon/showcase",
+      "consumer": "taiko_viewer/server/utils/account/my-don.ts",
+      "consumerSha256": "7dbbf5b62b0e31dec9e8eb251a51fee30b52a7755d4acce565c4fb8b60120f66",
+      "role": "center",
+      "status": "NOT_VERIFIED",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "MIGRATE_EXISTING_INSTALLED_CALLSITE",
+      "owner": "Taiko installed center rendering; Viewer actor authorization and transport"
+    },
+    {
+      "family": "source update change image",
+      "consumer": "taiko_viewer/server/services/account/source-proxy.ts",
+      "consumerSha256": "acb3457d8bc58199ec7ba529e6d314d7b3e6875850cfe0e8d1491c0bbfce34f6",
+      "role": "center",
+      "status": "SYNTHETIC_PANELS_ONLY",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "MIGRATE_EXISTING_INSTALLED_CALLSITE",
+      "owner": "Taiko installed center rendering; Viewer actor authorization and transport"
+    },
+    {
+      "family": "Annual rendered poster",
+      "consumer": "taiko_viewer/server/services/account/annual-summary/isolated-worker.ts",
+      "consumerSha256": "c4cc1c4e0c2cd7feae1c3e5121e73c957d812c883ba84c20aacb1095301a5d92",
+      "role": "Viewer Node renderer; center Python data generator separately",
+      "status": "GENERATOR_9_PASS_NOT_PNG_GOLDEN",
+      "frozenPngGolden": "NOT_ACCEPTED",
+      "decision": "RETAIN-OWNED",
+      "owner": "Viewer Node/Chromium renderer with shared admission"
+    }
+  ],
+  "remainingBlockers": [
+    "Remaining image families and fixed PNG Golden unaccepted",
+    "Production service identity/ACL/deployed interpreter unknown",
+    "Broader 0.82 Gates unchanged"
+  ],
+  "imageInventoryScope": "Viewer active image callsites plus source-enumerated installed Bot renderer families; no inference of complete PNG or upstream SDK behavior from module presence.",
+  "installedHostRendererInventory": {
+    "sourceCommit": "15722e8",
+    "selection": "Tracked runtime modules whose filenames start draw or contain render/image; source inventory only, not complete dynamic reachability proof. Public/player dispatch 18 and representative lifecycle46 do not replace each renderer Golden.",
+    "modules": [
+      {
+        "module": "taiko_bot/runtime/community/center/draw_guess.py",
+        "sha256": "6fd57cae584b3db91e88387f7ffc019680af2869ff6e4638e6ff247064c28460",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/community/client/draw_guess.py",
+        "sha256": "e20f316b6806a8895e3352feed1fe7e67fc231b255053a58134527de5baa7852",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/b30_support/b30_render.py",
+        "sha256": "e8a670e13ad6be9744bc2642261f1689ca4ae97a02e3de3536755155af7febe1",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/b30_support/draw_dress.py",
+        "sha256": "979ff0e95fd0c23e9a55132eb027cba1103b0f59e62ca8d0c04147cdc55d4910",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+        "sha256": "6aff7a11aa19bde494918db365317628dbb1e62f9b3c00f9256fb8c7440e5461",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/draw_dress.py",
+        "sha256": "9104f3282e921a8cc0c4fc0caae037334ac5dd3b783fa121663bc10d12acd223",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/progress_support/draw_dress.py",
+        "sha256": "3bf7404d1a1a4029f0c7903748784194f2ef3e06148a4cffc1bad596c7292530",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/progress_support/render.py",
+        "sha256": "a39adfdcd17b1216a6a61eacc477269ecb6b421ab9228b6a5509c869793c0273",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/recommendation_support/draw_dress.py",
+        "sha256": "c12cb62651e2f073106d5fcece0f1422d156425b828ed3a08fb799967c1d853b",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/recommendation_support/recommend_image.py",
+        "sha256": "fdb13ad5ac708f3a96ae23d74e100522771201e374f3e11eefc236fbb012079f",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/recommendation_support/target_render.py",
+        "sha256": "d6ea2db5b68de4dc0c6cadf3e112c35e8c6437aecf96cf84dc37c7f1d7087844",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/center/summary_render.py",
+        "sha256": "a991859c6f46751227dbbca5ae05ff2424bc90e79b8c8454b3456ac212dc491b",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/b30_support/b30_render.py",
+        "sha256": "620992d67def8e16739266ed23309b2603b2dfe757d45cb81727b6bc9f7b00c1",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/b30_support/draw_dress.py",
+        "sha256": "8741f7777edf01f2cf96d1b4c08d8af67fb4c9221fc92ce6006dd64a74ba3e99",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/display_support/draw_dress.py",
+        "sha256": "50dbb25872ab4a7f2f34fc4905e210ebf6e7f9e80ef5011b24ce5e33f242c971",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/progress_support/draw_dress.py",
+        "sha256": "593b59175882c592f71b0b77778fb2830ccf8168b579e1949728a03a8cf554bc",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/progress_support/render.py",
+        "sha256": "42b2e47bf385e04f9c9bf9c8beefacb609b234814cdee774e354fddb5d060230",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/recommendation_support/draw_dress.py",
+        "sha256": "f671ee7c1f6806c2486260362da0929c2defd2cf1ddced1aeec571d309ccfc98",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/recommendation_support/target_render.py",
+        "sha256": "a9383acaeccbd5b93a99635a2c688801416721417bae5e299208b88c3a3977ff",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/player/client/summary_render.py",
+        "sha256": "02edf49e313dd9220cc2dbe3c4e80c40426fd3fa3b5b68f1b7e0c6f8c9cccc8b",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/public/alias_renderer.py",
+        "sha256": "68ec896133b21864319576c45d23ac389532007f970606b370cd058d4926acf7",
+        "role": "public host adapter",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/public/constant_center_renderer.py",
+        "sha256": "e648a09162fd5e2dd784537875cb8f087956345d125a21316944a77330af9d16",
+        "role": "center",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      },
+      {
+        "module": "taiko_bot/runtime/public/constant_client_renderer.py",
+        "sha256": "232b74a650f462bfa2f9ec6368723504e98e51d4e722a861c8e3cbf98949788d",
+        "role": "client",
+        "owner": "Taiko installed Bot host",
+        "decision": "RETAIN-OWNED",
+        "acceptance": "UNVERIFIED_IMAGE_GOLDEN",
+        "viewerSourceImport": false
+      }
+    ]
+  },
+  "sqlScopeLimitations": [
+    "Four center worker subprocesses use installed CLI modules and guarded synthetic SQL; QQ suite retains an existing source-based loopback SDK command helper, which is not new installed-client lifecycle evidence.",
+    "Upstream Wahlap/Hiroba replies, daily calculation callback and source-update render panels are synthetic; no live external calls or fixed PNG Golden acceptance."
+  ]
+}

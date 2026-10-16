@@ -38,7 +38,7 @@ test('captured real pool configuration survives config changes and pool replacem
  assert.equal(dbModule.getAccountDbNativeConfig(next).database,'changed_transport_test');
  assert.equal(dbModule.getAccountDbNativeConfig(db).password,initial.dbPassword);
  let launched;const run=createAccountSyncWorkerRunner((executable,args,options)=>{
-  assert.equal(executable,'python3');assert.deepEqual(args,['-m','scripts.account_sync_cli']);assert.equal(options.env.TAIKO_DB_NAME,initial.dbName);assert.equal(options.env.TAIKO_DB_PASSWORD,initial.dbPassword);
+  assert.equal(executable,(process.env.TAIKO_PYTHON_EXECUTABLE || '/usr/bin/python3'));assert.deepEqual(args,['-I','-m','taiko_bot.cli.account_sync_cli']);assert.equal(options.env.TAIKO_DB_NAME,initial.dbName);assert.equal(options.env.TAIKO_DB_PASSWORD,initial.dbPassword);
   assert.equal(options.env.TAIKO_RUNTIME_ENV_FILE,'/proc/self/taiko-account-sync-no-env');assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);assert.equal(options.env.PYTHONPATH,undefined);
   launched=new Child();return launched;
  });const pending=run(request,db);await tick();launched.finish();assert.deepEqual(await pending,reply.result);
@@ -109,7 +109,7 @@ test('account sync and source mutation share the same two-worker admission',{tim
 });
 test('source worker captures paths/config and sends private actor/credentials only over stdin',{timeout:3000},async()=>{
  const t=ticket();let child,actualInput='';const run=createSourceMutationWorker((executable,args,options)=>{
-  assert.deepEqual(args,['-m','scripts.source_mutation_cli']);assert.equal(options.cwd,t.paths.repoRoot);assert.equal(options.env.TAIKO_ACCOUNT_CACHE_DIR,t.paths.cacheDir);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
+  assert.deepEqual(args,['-I','-m','taiko_bot.cli.source_mutation_cli']);assert.equal(options.cwd,t.paths.repoRoot);assert.equal(options.env.TAIKO_ACCOUNT_CACHE_DIR,t.paths.cacheDir);assert.equal(options.env.TAIKO_ALLOW_TEST_DB_MUTATION,undefined);
   child=new Child();child.stdin.on('data',bytes=>{actualInput+=bytes.toString();});return child;
  });const pending=run({...mutation,email:'synthetic@example.test',password:'private-password'},t);await tick();
  assert.equal(JSON.parse(actualInput).password,'private-password');child.finish(mutationReply);assert.deepEqual(await pending,mutationReply.result);

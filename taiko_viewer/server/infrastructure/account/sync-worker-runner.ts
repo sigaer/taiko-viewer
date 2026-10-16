@@ -1,3 +1,4 @@
+import {getTaikoPython} from "../../utils/taiko-python.ts";
 import { spawn } from "node:child_process";
 import { enterPrivateWorker, leavePrivateWorker } from "./private-worker-admission.ts";
 import { StringDecoder } from "node:string_decoder";
@@ -25,7 +26,7 @@ export function createAccountSyncWorkerRunner(launch: typeof spawn = spawn) {
     try {
       return await new Promise<SyncWorkerResult>((resolve, reject) => {
         let child: ReturnType<typeof spawn>;
-        try { child = launch("python3", ["-m", "scripts.account_sync_cli"], { cwd: paths.repoRoot, env, stdio: ["pipe", "pipe", "pipe"] }); }
+        try { child = launch(getTaikoPython(), ["-I", "-m", "taiko_bot.cli.account_sync_cli"], { cwd: paths.repoRoot, env, stdio: ["pipe", "pipe", "pipe"] }); }
         catch { reject(unavailable()); return; }
         let output = "", bytes = 0, stderrBytes = 0, failed = false;
         const decoder = new StringDecoder("utf8");

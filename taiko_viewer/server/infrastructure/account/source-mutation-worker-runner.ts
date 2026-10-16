@@ -1,3 +1,4 @@
+import {getTaikoPython} from "../../utils/taiko-python.ts";
 import {spawn} from 'node:child_process';
 import {StringDecoder} from 'node:string_decoder';
 import {createError} from 'h3';
@@ -15,7 +16,7 @@ export function createSourceMutationWorker(launch:typeof spawn=spawn){
     await enterPrivateWorker();
     try{return await new Promise((resolve,reject)=>{
       let child:ReturnType<typeof spawn>;
-      try{child=launch('python3',['-m','scripts.source_mutation_cli'],{cwd:ticket.paths.repoRoot,env,stdio:['pipe','pipe','pipe']});}catch{reject(unavailable());return;}
+      try{child=launch(getTaikoPython(),['-I','-m','taiko_bot.cli.source_mutation_cli'],{cwd:ticket.paths.repoRoot,env,stdio:['pipe','pipe','pipe']});}catch{reject(unavailable());return;}
       const decoder=new StringDecoder('utf8');let text='',bytes=0,stderr=0,failed=false,killTimer:ReturnType<typeof setTimeout>|undefined;
       const stop=()=>{failed=true;child.kill('SIGTERM');killTimer??=setTimeout(()=>child.kill('SIGKILL'),1500);};
       const timer=setTimeout(stop,lifetime*1000);
