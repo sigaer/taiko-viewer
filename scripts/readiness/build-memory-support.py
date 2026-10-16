@@ -2,6 +2,7 @@
 """Package fixed Sakura shared-memory source without modifying any source repo.
 Use scripts/memory/run_build.sh. This is local integration packaging, not release.
 """
+import argparse
 import hashlib
 import json
 import os
@@ -42,10 +43,22 @@ def git(*args):
     return result.stdout
 
 def main():
-    evidence_path=AUDIT/'evidence/runtime-memory-package-20261016.json'
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--vault', type=Path, required=True)
+    parser.add_argument('--builder-wheel', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args=parser.parse_args()
+    global BUILDER_WHEEL
+    BUILDER_WHEEL=args.builder_wheel.resolve()
+    if sha(BUILDER_WHEEL) != '51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670':
+        parser.error('exact builder wheel required')
+    vault=args.vault.resolve()
+    if str(vault).startswith(('/tmp/', '/var/tmp/')) or not vault.is_dir() or vault.stat().st_mode & 0o077:
+        parser.error('existing private persistent vault required')
+    evidence_path=args.output
     if evidence_path.exists():
         raise RuntimeError('packaging evidence already exists; do not overwrite prior run')
-    workspace=Path(tempfile.mkdtemp(prefix='taiko-shared-memory-wheel-',dir='/var/tmp'))
+    workspace=Path(tempfile.mkdtemp(prefix='taiko-shared-memory-wheel-',dir=vault))
     source=workspace/'source'
     package=source/'runtime_memory'
     package.mkdir(parents=True)
@@ -84,32 +97,14 @@ def main():
         for name in FILES:
             if hashlib.sha256(archive.read('runtime_memory/'+name)).hexdigest()!=origins['runtime_memory/'+name]['sha256']:
                 raise RuntimeError('packaging changed shared implementation bytes')
-    original=AUDIT/'runtime-role-locks.json'
-    supplement=json.loads(original.read_text())
-    supplement.update({'parentManifest':'runtime-role-locks.json','parentManifestSha256':sha(original),
-                       'packagingEvidence':'evidence/runtime-memory-package-20261016.json',
-                       'scope':'New 94-distribution integration candidate; original 93-distribution acceptance remains unchanged.'})
-    for role,value in supplement['roles'].items():
-        lock=AUDIT/value['requirements']
-        lines=lock.read_text().splitlines()
-        lines.append('python-memory-runtime==1.1.0 --hash=sha256:'+sha(wheel))
-        target=AUDIT/'runtime-locks'/(role+'-with-memory.requirements.txt')
-        target.write_text('\n'.join(lines)+'\n')
-        value['requirements']='runtime-locks/'+target.name
-        value['requirementsSha256']=sha(target)
-        value['environmentIdentity']='sha256:'+sha(target)
-        value['wheels'].append({'name':'python-memory-runtime','version':'1.1.0','file':str(wheel),'sha256':sha(wheel)})
-        value['qaInterpreter']=None
-        value['rebuildEvidence']=None
-    (AUDIT/'runtime-role-locks-with-memory.json').write_text(json.dumps(supplement,ensure_ascii=False,indent=2)+'\n')
-    evidence={'status':'PASS_LOCAL_INTEGRATION_PACKAGING','owner':'Sakura_bot shared infrastructure','upstreamReleaseClaim':False,
+    evidence={'status':'PASS_EXACT_REBUILD' if sha(wheel)=='1e6197b0c4298808e70038cc5de3fff8c2f6517888514c996648a140091f9724' else 'REBUILT_HASH_DIFF_SOURCE_PARITY','owner':'Sakura_bot shared infrastructure','upstreamReleaseClaim':False,
               'sourceCommit':REVISION,'sourceFiles':origins,'sourceByteParity':True,
               'versionMeaning':'1.1.0 is the pre-existing shared artifact version; distribution metadata was added only for this local integration build.',
               'packagingMetadata':METADATA,'packagingMetadataSha256':sha(source/'pyproject.toml'),
               'buildTool':{'file':BUILDER_WHEEL.name,'sha256':sha(BUILDER_WHEEL)},
               'wheel':{'file':str(wheel),'sha256':sha(wheel)},'logs':logs,'workspace':str(workspace)}
     evidence_path.write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n')
-    print(json.dumps({'status':evidence['status'],'wheel':str(wheel),'supplement':'runtime-role-locks-with-memory.json'}))
+    print(json.dumps({'status':evidence['status'],'wheel':str(wheel),'output':str(evidence_path)}))
 
 if __name__=='__main__':
     main()

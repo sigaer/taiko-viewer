@@ -21,6 +21,8 @@ def digest(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--vault', type=Path, required=True)
+    parser.add_argument('--artifact-catalog', type=Path, required=True)
     parser.add_argument('--role', choices=('center', 'client'), required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--lock-manifest', type=Path, default=AUDIT / 'runtime-role-locks.json')
@@ -31,18 +33,25 @@ def main():
     lockpath = args.lock_manifest
     locks = json.loads(lockpath.read_text())
     lock = locks['roles'][args.role]
-    requirements = AUDIT / lock['requirements']
+    requirements = lockpath.parent / lock['requirements']
     if digest(requirements) != lock['requirementsSha256']:
         raise RuntimeError('role requirements digest mismatch')
+    vault = args.vault.resolve()
+    if str(vault).startswith(('/tmp/', '/var/tmp/')) or not vault.is_dir() or vault.stat().st_mode & 0o077:
+        parser.error('existing private persistent vault required')
+    catalog = json.loads(args.artifact_catalog.read_text())['artifacts']
+    wheel_paths = []
     for wheel in lock['wheels']:
-        if digest(Path(wheel['file'])) != wheel['sha256']:
-            raise RuntimeError('role wheel digest mismatch')
-    workspace = Path(tempfile.mkdtemp(prefix='taiko-role-rebuild-', dir='/var/tmp'))
+        path = Path(catalog[wheel['sha256']]['file'])
+        if not path.resolve().is_relative_to(vault) or digest(path) != wheel['sha256']:
+            raise RuntimeError('role wheel digest or persistent location mismatch')
+        wheel_paths.append(path)
+    workspace = Path(tempfile.mkdtemp(prefix='role-' + args.role + '-', dir=vault))
     python = workspace / 'venv/bin/python'
     env = {'PATH': '/usr/bin:/bin', 'TMPDIR': str(workspace), 'PIP_CONFIG_FILE': '/dev/null',
            'PIP_NO_INDEX': '1', 'PIP_DISABLE_PIP_VERSION_CHECK': '1', 'PYTHONNOUSERSITE': '1'}
     report = {'role': args.role, 'status': 'FAIL', 'environmentIdentity': lock['environmentIdentity'],
-              'lockManifestSha256': digest(lockpath), 'workspace': str(workspace), 'network': 'no-index only-binary require-hashes no-deps',
+              'lockManifestSha256': digest(lockpath), 'artifactCatalog': str(args.artifact_catalog.resolve()), 'artifactCatalogSha256': digest(args.artifact_catalog), 'workspace': str(workspace), 'network': 'no-index only-binary require-hashes no-deps',
               'productionAccess': False, 'logs': {}}
     def run(command, label, timeout=180):
         path = workspace / (label + '.log')
@@ -58,7 +67,7 @@ def main():
     try:
         run(['/usr/bin/python3', '-m', 'venv', workspace / 'venv'], 'venv')
         command = [python, '-I', '-m', 'pip', 'install', '--no-index', '--no-cache-dir', '--no-deps', '--require-hashes', '--only-binary=:all:']
-        for directory in sorted({str(Path(wheel['file']).parent) for wheel in lock['wheels']}):
+        for directory in sorted({str(path.parent) for path in wheel_paths}):
             command += ['--find-links', directory]
         command += ['-r', requirements]
         run(command, 'install')
