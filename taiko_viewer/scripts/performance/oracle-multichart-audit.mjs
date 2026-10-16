@@ -61,7 +61,7 @@ try {
       const evidence = await reader.loadGrowthScoreEvidence(id);
       assert.equal(evidence.invalidFiles, 0); assert.equal(evidence.snapshots.length, index+1);
       const current = [a, index === 2 ? firstB : nextB];
-      const days = daily.deriveProgressForRange(current, evidence.snapshots, '2026-01-02', '2026-01-03', songId => `Synthetic ${songId}`);
+      const days = daily.deriveProgressForRange(current, evidence.snapshots, '2026-01-02', '2026-01-03', song => `Synthetic ${song.song_no}`);
       const facts = projection.projectScoreFacts(1,1,days);
       const day = index === 2 ? '2026-01-02' : '2026-01-03';
       // Earlier trusted baseline may already prove attendance on this day. Audit
