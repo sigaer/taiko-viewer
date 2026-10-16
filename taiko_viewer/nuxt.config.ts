@@ -133,6 +133,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    annualStartupMode: "normal",
     myTaikoReadModelMode: "legacy",
     developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
     developerApiAnonymousDailyLimit: 300,

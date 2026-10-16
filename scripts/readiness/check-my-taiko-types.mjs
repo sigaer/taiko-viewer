@@ -4,7 +4,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const R=fileURLToPath(new URL('../../',import.meta.url)),V=resolve(R,'taiko_viewer');
-const targets=['server/services/my-taiko/overview.ts','server/api/account/my-taiko/overview.get.ts','types/my-taiko.ts'].map(x=>resolve(V,x));
+const targets=['server/services/my-taiko/overview.ts','server/api/account/my-taiko/overview.get.ts','types/my-taiko.ts','server/infrastructure/qa-startup-isolation.ts','server/plugins/annual-summary.ts','server/plugins/source-lifecycle.ts','server/internal/account/kinoko-time.ts','server/internal/account/kinoko-history.ts','server/internal/account/kinoko-import.ts'].map(x=>resolve(V,x));
 const config=ts.readConfigFile(resolve(V,'.nuxt/tsconfig.server.json'),ts.sys.readFile);const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,resolve(V,'.nuxt'));
 const globals=resolve(V,'.nuxt/types/nitro-imports.d.ts');
 const options={...parsed.options,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true};

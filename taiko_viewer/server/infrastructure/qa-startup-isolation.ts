@@ -1,0 +1,43 @@
+import {readFileSync,realpathSync,statSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {pathToFileURL} from 'node:url';
+import {resolve,relative} from 'node:path';
+import {getRuntimePaths} from './runtime-paths';
+let admitted=false;
+/** Nitro 2 invokes startup plugins synchronously. Complete admission before any
+ * plugin can launch work or any listener can serve a request. Normal startup is
+ * unchanged; owned-qa is a guarded test context, not an Annual EOL switch.
+ */
+export function useOwnedQaStartupIsolation():boolean{
+ const config=useRuntimeConfig();if(config.annualStartupMode==='normal')return false;
+ if(admitted)return true;
+ try{
+  const check=(ok:unknown)=>{if(!ok)throw new Error('Invalid owned QA context');};
+  check(config.annualStartupMode==='owned-qa');
+  const env=process.env,id=env.QA_RUN_ID;
+  check(/^qa-[0-9a-f]{12}$/.test(id||'')&&env.TAIKO_ALLOW_TEST_DB_MUTATION==='1'&&env.NITRO_HOST==='127.0.0.1');
+  const run=resolve('/home/sigaer/taiko/qa-vault/runs',id!);
+  check(env.QA_RUN_DIR===run&&env.QA_RUN_TMPDIR===resolve(run,'scratch'));
+  const scratch=realpathSync(env.QA_RUN_TMPDIR!);check(scratch===env.QA_RUN_TMPDIR);
+  check(readFileSync('/proc/self/cgroup','utf8').includes('/development.slice/development-qa.slice/'));
+  const paths=getRuntimePaths();
+  for(const value of [paths.repoRoot,paths.userdataDir,paths.configPath,paths.cacheDir,String(config.annualCacheDir||''),String(config.viewerCacheDir||'')]){
+   check(value&&resolve(value).startsWith(scratch+'/'));check(realpathSync(value).startsWith(scratch+'/'));
+  }
+  check(!(statSync(run).mode&0o077));
+  check(String(config.dbHost)==='127.0.0.1'&&Number(config.dbPort)>1024&&Number(config.dbPort)!==3306&&/^\w+_test$/.test(String(config.dbName)));
+  const expected=realpathSync(env.TAIKO_TEST_MYSQL_DATADIR||'');check(/^sql-[a-zA-Z0-9]+\/mysql$/.test(relative(scratch,expected)));
+  // Private credentials travel on stdin; only DATABASE()/datadir are returned.
+  // One bounded native SQL probe avoids Nitro's non-awaited async plugin race.
+  const mysql=pathToFileURL(createRequire(import.meta.url).resolve('mysql2/promise')).href;
+  const code=`import fs from 'node:fs';import mysql from ${JSON.stringify(mysql)};let db;try{db=await mysql.createConnection(JSON.parse(fs.readFileSync(0,'utf8')));const [[row]]=await db.query('SELECT DATABASE() name,@@datadir datadir');process.stdout.write(JSON.stringify(row));}catch{process.exitCode=1;}finally{await db?.end();}`;
+  const probe=spawnSync(process.execPath,['--max-old-space-size=64','--input-type=module','-e',code],{cwd:paths.repoRoot,input:JSON.stringify({host:String(config.dbHost),port:Number(config.dbPort),user:String(config.dbUser),password:String(config.dbPassword),database:String(config.dbName),connectTimeout:2000}),encoding:'utf8',timeout:5000,maxBuffer:8192,killSignal:'SIGKILL',env:{PATH:env.PATH,NODE_ENV:'production'},stdio:['pipe','pipe','pipe']});
+  check(probe.status===0&&!probe.error);const proof=JSON.parse(probe.stdout);
+  check(proof.name===String(config.dbName)&&proof.name.endsWith('_test')&&realpathSync(proof.datadir)===expected);
+  admitted=true;console.info('[viewer-startup] owned QA isolation admitted');return true;
+ }catch{
+  console.error('[viewer-startup] owned QA isolation rejected');
+  process.exit(78);
+ }
+}

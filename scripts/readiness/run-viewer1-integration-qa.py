@@ -8,6 +8,11 @@ mode=sys.argv[1]
 if mode=='install':commands=[('locked-install',[str(N/'npm'),'ci','--ignore-scripts','--no-audit','--no-fund'],R/'taiko_viewer')]
 elif mode=='sql':commands=[('integration-sql-http',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^My Taiko isolated','taiko_viewer/tests/myTaikoIntegrationSql.test.mjs'],R)]
 elif mode=='product':commands=[('product-nuxt-sql-http',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^My Taiko product','taiko_viewer/tests/myTaikoProductNuxt.test.mjs'],R)]
+elif mode=='scoped-types':commands=[('prepare-scoped-types',[str(N/'node'),str(R/'taiko_viewer/node_modules/nuxt/bin/nuxt.mjs'),'prepare'],R/'taiko_viewer'),('scoped-typecheck',[str(N/'node'),str(R/'scripts/readiness/check-my-taiko-types.mjs')],R)]
+elif mode=='recovery':commands=[('schema-recovery-sql-http',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^RC4 schema','taiko_viewer/tests/viewer083SchemaRecovery.test.mjs'],R)]
+elif mode=='integration':
+ build=Path(sys.argv[2]).resolve();assert build.is_relative_to(V/'evidence');receipt=json.loads(build.read_text());assert receipt['status']=='PASS';(E/'integration-build.json').write_bytes(build.read_bytes())
+ commands=[('unmodified-integration-nuxt',[str(N/'node'),str(R/'scripts/readiness/run-isolated-sql.mjs'),'--allow-test-db-mutation','--test-name-pattern=^RC4 integration','taiko_viewer/tests/viewer083IntegrationNuxt.test.mjs'],R)]
 elif mode=='examples':commands=[('examples-and-bundle',[str(N/'node'),str(R/'scripts/readiness/verify-viewer1-developer-examples.mjs')],R)]
 else:raise SystemExit('unknown mode')
 records=[]
