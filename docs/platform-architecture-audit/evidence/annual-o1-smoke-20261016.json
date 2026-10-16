@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "status": "EVIDENCE_PENDING",
+  "admission": "BLOCKED_RESOURCE_ADMISSION",
+  "viewerBaseline": "6e7f35b",
+  "taikoVersion": "0.14.2",
+  "productionAccess": false,
+  "attempts": [
+    {
+      "attempt": "initial",
+      "status": "FAIL",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-3HdC4R/result.json",
+        "sha256": "89f1c9cff306a2897d7295e4069580850b91442a14c9b347f0f4b38cc2f8616c"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-3HdC4R/tests.log",
+        "sha256": "9054310833d2ca62618ae244047ea69ba1258257bf10754267356f30a3d5c7c8"
+      },
+      "caseEvidence": {
+        "path": "/var/tmp/annual-test-o1-EO6pCH/evidence.json",
+        "sha256": "ec50285e954640299dfcc7566ddcd730b394b5b38e8a4da36f35c0eafc78574d"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-annual-o1-smoke-first.log",
+        "sha256": "f869101f3b7c17c8607d0b1e660a16e2a53cab0b86c7d87148d4fb16b439353d"
+      },
+      "daemonExited": true,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+    },
+    {
+      "attempt": "retry",
+      "status": "FAIL",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-eY7IJl/result.json",
+        "sha256": "b3c0e456d8d6c5175a6efa09bb3e1b8b6601d7a20f0ab1376eebb4f0fcb9663d"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-eY7IJl/tests.log",
+        "sha256": "44ada1e0119192750fbbbfe2cfe7f4a4c327489480a40628621af26d03e28e2d"
+      },
+      "caseEvidence": {
+        "path": "/var/tmp/annual-test-o1-hPqQci/evidence.json",
+        "sha256": "dd3c3167b24187e3b0fae0c54b7fabef4e17835fc2e0853d36c659ff861d2209"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-annual-o1-smoke-retry.log",
+        "sha256": "8fccdd558d28db6bf84550766214dc797cbe50e57e0964bdcef5b319e12e4c5b"
+      },
+      "daemonExited": true,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+    },
+    {
+      "attempt": "third",
+      "status": "FAIL",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-S6DAIY/result.json",
+        "sha256": "08867f1e058d6d40497bb31d5d90ae6ba50141b39a5dcc57f29794ca573fefcf"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-S6DAIY/tests.log",
+        "sha256": "7cb71c88986cf09e025a7daff21314f2b18a6e726393292600574fca992efa0b"
+      },
+      "caseEvidence": {
+        "path": "/var/tmp/annual-test-o1-n1AV91/evidence.json",
+        "sha256": "0ccaf47aad5eb553b454730a96a60bc581d49c7311924dd1d27e22988b00650b"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-annual-o1-smoke-third.log",
+        "sha256": "9e2940bd1793eeefcfa9c8a93b1467df68d38cbfd59f0bc7f7e6cc86de14fbae"
+      },
+      "daemonExited": true,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+    }
+  ],
+  "observations": {
+    "anonymousGet": 401,
+    "authenticatedBuildPost": 503,
+    "completedColdTasks": 0,
+    "cachedReadSamples": 0,
+    "p50": null,
+    "p95": null,
+    "p99": null
+  },
+  "diskCause": "Inference from subsequent same-filesystem stat and unmodified 22GiB admission code; original HTTP error detail was not captured.",
+  "cleanup": {
+    "path": "docs/platform-architecture-audit/evidence/fast-owned-sql-cleanup-20261016.json",
+    "sha256": "548468cfbb3131c87337ad061354b846aae4600fb589345cffd7be4798bfdabe"
+  },
+  "thirdRunSource": {
+    "path": "/var/tmp/annual-test-o1-n1AV91/harness-third.mjs",
+    "sha256": "297f48c3824b355e9dc41a758379d06e637f49387633dd24c6e939cbe4be0304"
+  },
+  "nextRunSource": {
+    "path": "taiko_viewer/tests/annualO1SmokeSql.test.mjs",
+    "sha256": "647222f96c45e6956392189c76228e057dac9f00bd0a16eb94cc9e33221c10fa"
+  },
+  "nextRunChange": "Add direct pre-admission filesystem bytes and sanitized HTTP error detail; not yet executed.",
+  "limits": {
+    "generator": 2,
+    "renderer": 1,
+    "coldRequiredIdentities": 30,
+    "coldAttemptedIdentities": 1,
+    "warmRequiredStagesPerSecond": [
+      1,
+      3,
+      5
+    ]
+  },
+  "overallGate": "BLOCKED"
+}

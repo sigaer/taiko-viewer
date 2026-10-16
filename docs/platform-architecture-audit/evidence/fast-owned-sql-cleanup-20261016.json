@@ -1,0 +1,81 @@
+{
+  "scope": "only task-owned stopped disposable MySQL datadirs; logs/checkpoint/recovered files retained",
+  "beforeAvailableBytes": 21358727168,
+  "removed": [
+    {
+      "path": "/var/tmp/viewer1-sql-nXug3Z/mysql",
+      "logicalBytes": 154345546,
+      "evidence": "/var/tmp/viewer1-sql-nXug3Z/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-BAV2Cb/mysql",
+      "logicalBytes": 154527555,
+      "evidence": "/var/tmp/viewer1-sql-BAV2Cb/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-PQ5DjH/mysql",
+      "logicalBytes": 154527611,
+      "evidence": "/var/tmp/viewer1-sql-PQ5DjH/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-3HdC4R/mysql",
+      "logicalBytes": 155344191,
+      "evidence": "/var/tmp/viewer1-sql-3HdC4R/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-eY7IJl/mysql",
+      "logicalBytes": 155344202,
+      "evidence": "/var/tmp/viewer1-sql-eY7IJl/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer1-sql-S6DAIY/mysql",
+      "logicalBytes": 155344570,
+      "evidence": "/var/tmp/viewer1-sql-S6DAIY/result.json",
+      "exitProof": "daemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer082-recovery-KH7wHf/restored-mysql",
+      "logicalBytes": 152816258,
+      "evidence": "/var/tmp/viewer082-recovery-KH7wHf/evidence.json",
+      "exitProof": "restoredDaemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer082-recovery-Oq9IoI/restored-mysql",
+      "logicalBytes": 154518144,
+      "evidence": "/var/tmp/viewer082-recovery-Oq9IoI/evidence.json",
+      "exitProof": "restoredDaemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    },
+    {
+      "path": "/var/tmp/viewer082-recovery-ynczLb/restored-mysql",
+      "logicalBytes": 154520541,
+      "evidence": "/var/tmp/viewer082-recovery-ynczLb/evidence.json",
+      "exitProof": "restoredDaemonExited",
+      "pidFileAbsent": true,
+      "socketAbsent": true
+    }
+  ],
+  "afterAvailableBytes": 22750633984,
+  "annualCriticalBytes": 23622320128,
+  "thresholdSatisfied": false
+}
