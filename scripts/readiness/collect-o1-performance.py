@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Aggregate immutable synthetic HTTP raw samples; never average percentiles."""
-import argparse,hashlib,json,math,re
+import os,argparse,hashlib,json,math,re
 from collections import Counter,defaultdict
 from pathlib import Path
+vault=Path('/home/sigaer/taiko/qa-vault')
+evidence_root=Path(os.environ['QA_EVIDENCE_DIR']).resolve(strict=True)
+assert evidence_root.is_relative_to(vault) and evidence_root!=vault
 p=argparse.ArgumentParser();p.add_argument('--logs',type=Path,action='append',required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
-assert all(x.resolve().is_relative_to('/var/tmp') for x in a.logs) and not a.output.exists()
+assert all(x.resolve().is_relative_to(evidence_root) for x in a.logs) and not a.output.exists()
+assert a.output.resolve().is_relative_to(evidence_root),'Write summaries only within persistent QA evidence'
 def sha(path):
  h=hashlib.sha256()
  with path.open('rb') as f:
@@ -21,7 +25,7 @@ groups=defaultdict(lambda:{'samples':[],'requested':0,'refs':[],'manifests':[],'
 for log in sorted({f for root in a.logs for f in root.glob('*.log')}):
  item={'launcherLog':ref(log)};paths=re.findall(r'"workspace":"([^"]+)"',log.read_text())
  if not paths:item.update(status='INCOMPLETE',reason='launcher did not finish');r['smokeAndInitialFailures'].append(item);continue
- work=Path(paths[-1]);assert work.resolve().is_relative_to('/var/tmp');result=work/'o1-performance.json'
+ work=Path(paths[-1]);assert work.resolve().is_relative_to(evidence_root);result=work/'o1-performance.json'
  if not result.exists():item.update(status='HARNESS_FAIL',sqlResult=ref(work/'result.json'));r['smokeAndInitialFailures'].append(item);continue
  data=json.loads(result.read_text());item.update({key:data.get(key) for key in ['status','operation','concurrency','requested','samplesPerScale','summary','byScale','manifest','targets','failureDistribution','processResourceUsage','resourceScope','requestDeadlineMs','baselineComparison','error','syntheticDress','syntheticCatalogSha256','cgroup','limitations','clock','measurementRevision','streamValidation','loadModel','queueWaitMs','queueWaitReason']})
  item['rawEvidence']=ref(result);item['sqlEvidence']=ref(work/'result.json');item['testLog']=ref(work/'tests.log')

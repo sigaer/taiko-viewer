@@ -10,20 +10,27 @@ import mysql from '../../taiko_viewer/node_modules/mysql2/promise.js';
 
 assert.ok(process.argv.includes('--allow-test-db-mutation'), 'Explicit test mutation opt-in required');
 const repo=fileURLToPath(new URL('../../',import.meta.url));
-const workspace=await mkdtemp('/var/tmp/viewer1-sql-');
-const datadir=resolve(workspace,'mysql');await mkdir(datadir,{mode:0o700});
-const socket=resolve(workspace,'mysql.sock');
+const vault='/home/sigaer/taiko/qa-vault';
+const ownedPath=async value=>{assert.ok(value?.startsWith(vault+'/'),'Persistent QA path required');const actual=await realpath(value);assert.ok(actual.startsWith(vault+'/'),'QA path must remain within persistent vault');return actual;};
+const evidenceRoot=await ownedPath(process.env.QA_EVIDENCE_DIR);
+const runTmp=await ownedPath(process.env.QA_RUN_TMPDIR);
+const manifestPath=await ownedPath(process.env.QA_ARTIFACT_MANIFEST);
+const artifacts=JSON.parse(await readFile(manifestPath,'utf8'));assert.equal(artifacts.schemaVersion,1);
+const workspace=await mkdtemp(resolve(evidenceRoot,'viewer1-sql-'));
+const scratch=await mkdtemp(resolve(runTmp,'sql-'));
+const datadir=resolve(scratch,'mysql');await mkdir(datadir,{mode:0o700});
+const socket=resolve(scratch,'m.sock');assert.ok(Buffer.byteLength(socket)<104,'QA scratch path too long for MySQL Unix socket');
 const executable='/www/server/mysql/bin/mysqld';
 const database='viewer1_security_test';
 const python=process.env.TAIKO_PYTHON_EXECUTABLE;
 assert.ok(python?.startsWith('/'), 'An absolute installed Taiko Python is required');
-const env={PATH:process.env.PATH,TMPDIR:workspace,NODE_OPTIONS:'--max-old-space-size=1536'};
+const env={PATH:process.env.PATH,TMPDIR:runTmp,QA_RUN_TMPDIR:runTmp,QA_EVIDENCE_DIR:evidenceRoot,QA_ARTIFACT_MANIFEST:manifestPath,NODE_OPTIONS:'--max-old-space-size=1536'};
 const base=['--no-defaults','--user=root','--basedir=/www/server/mysql',`--datadir=${datadir}`,
  '--innodb-buffer-pool-size=128M','--innodb-log-file-size=32M','--performance-schema=OFF'];
 let daemon,daemonExit,proxy,rootConnection;
 let stage='initialize';
 const sockets=new Set();
-const evidence={workspace,database,status:'RUNNING',startedAt:new Date().toISOString(),tests:[],productionAccess:false};
+const evidence={workspace,scratch,datadir,qaRunTmpdir:runTmp,database,status:'RUNNING',startedAt:new Date().toISOString(),tests:[],productionAccess:false};
 async function run(command,args,name,childEnv=env,timeout=120000){
  const log=await open(resolve(workspace,name+'.log'),'w',0o600);
  const child=spawn(command,args,{cwd:repo,env:childEnv,detached:true,stdio:['ignore',log.fd,log.fd]});
@@ -36,7 +43,7 @@ async function run(command,args,name,childEnv=env,timeout=120000){
 try{
  assert.deepEqual(await run(executable,[...base,'--initialize-insecure'],'initialize'),{code:0,signal:null});
  const log=await open(resolve(workspace,'mysql.log'),'w',0o600);
- daemon=spawn(executable,[...base,'--skip-networking','--mysqlx=OFF',`--socket=${socket}`,`--pid-file=${workspace}/mysql.pid`,
+ daemon=spawn(executable,[...base,'--skip-networking','--mysqlx=OFF',`--socket=${socket}`,`--pid-file=${scratch}/mysql.pid`,
   '--max-connections=40','--table-open-cache=128','--log-error-verbosity=2'],{cwd:workspace,env,stdio:['ignore',log.fd,log.fd]});
  daemonExit=new Promise(accept=>{daemon.once('close',(code,signal)=>accept({code,signal}));daemon.once('error',()=>accept({code:null,signal:'SPAWN_ERROR'}));});await log.close();
  daemon.once('error',()=>{});
@@ -70,7 +77,7 @@ try{
  const testEnv={...env,TAIKO_DB_HOST:'127.0.0.1',TAIKO_DB_PORT:String(port),TAIKO_DB_NAME:database,
   TAIKO_DB_USER:'viewer1_test',TAIKO_DB_PASSWORD:password,TAIKO_ALLOW_TEST_DB_MUTATION:'1',
   TAIKO_TEST_MYSQL_DATADIR:datadir,TAIKO_PYTHON_EXECUTABLE:python,
-  TAIKO_PUBLICATION_TEST_REPO_ROOT:'/var/tmp/taiko-final-ownership-20261015/taiko'};
+  TAIKO_PUBLICATION_TEST_REPO_ROOT:runTmp};
  const o1 = process.argv.find(arg=>arg.startsWith('--o1='));
  if (o1) {
   const match=/^--o1=(private-current|private-history|private-merged-current|private-merged-history|growth-history|growth-overview|growth-passport|b30):(1|3|5):(1|3|50|200)$/.exec(o1);

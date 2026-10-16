@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {createHash,randomBytes} from 'node:crypto';
 import {readFile,writeFile,mkdir,symlink,readdir} from 'node:fs/promises';
-import {resolve} from 'node:path';
+import {resolve,relative,isAbsolute} from 'node:path';
 import {performance} from 'node:perf_hooks';
 import {execFileSync} from 'node:child_process';
 import {consumeO1Response,proveO1StreamingEquivalence} from './fixtures/o1ResponseStream.mjs';
 import {accountSourceFixture} from './fixtures/accountSourceHttp.mjs';
 const op=process.env.TAIKO_O1_OPERATION,concurrency=Number(process.env.TAIKO_O1_CONCURRENCY),n=Number(process.env.TAIKO_O1_SAMPLES),output=process.env.TAIKO_O1_OUTPUT;
-assert.ok(['private-current','private-history','private-merged-current','private-merged-history','growth-history','growth-overview','growth-passport','b30'].includes(op));assert.ok([1,3,5].includes(concurrency));assert.ok([1,3,50,200].includes(n));assert.ok(output?.startsWith('/var/tmp/viewer1-sql-'));
+assert.ok(['private-current','private-history','private-merged-current','private-merged-history','growth-history','growth-overview','growth-passport','b30'].includes(op));assert.ok([1,3,5].includes(concurrency));assert.ok([1,3,50,200].includes(n));assert.ok(process.env.QA_EVIDENCE_DIR?.startsWith('/home/sigaer/taiko/qa-vault/'));const outputRelative=relative(process.env.QA_EVIDENCE_DIR,output||'');assert.ok(outputRelative.startsWith('viewer1-sql-')&&!outputRelative.startsWith('..')&&!isAbsolute(outputRelative));
 const selectedScale=process.env.TAIKO_O1_SCALE||'all';
 const scales=selectedScale==='extreme'?[['extreme',500,2000]]:[['small',32,3],['medium',100,30],['large',500,90]].filter(v=>selectedScale==='all'||v[0]===selectedScale);assert.ok(scales.length);
 const group=(await readFile('/proc/self/cgroup','utf8')).split('\n').find(v=>v.startsWith('0::'))?.slice(3);
@@ -17,24 +17,26 @@ assert.ok(group?.includes('development-qa.slice/taiko-qa-'));
 const cg='/sys/fs/cgroup'+group;
 const read=path=>readFile(path,'utf8').catch(()=>null);
 const counters=text=>Object.fromEntries((text||'').trim().split('\n').filter(Boolean).map(v=>{const[k,n]=v.split(/\s+/);return[k,Number(n)]}));
-const evidence={schemaVersion:1,status:'RUNNING',operation:op,concurrency,requested:n*scales.length,samplesPerScale:n,scales:[],samples:[],resource:[],productionAccess:false,clock:'performance.now; HTTP send to final body byte consumed and SHA updated',measurementRevision:'stream-consume-v2',sqlIsolation:'owned mysqld; actual SELECT DATABASE guard',loadModel:'closed loop, fixed concurrency; no arrival-rate or production claim',requestDeadlineMs:op==='b30'?30000:selectedScale==='extreme'?20000:12000,resourceScope:'cgroup includes descendants; PSS/RSS are Node process only, not process tree',queueWaitMs:null,queueWaitReason:'no application job queue for these reads; SQL/socket/source-lock wait included in lifecycle',baselineComparison:{status:'EVIDENCE_PENDING',reason:'same-input old artifact cohort not yet measured'},limitations:['synthetic catalog (100/101/102) and empty Goal/measurement rows; real SQL queries, HTTP auth, publication reader and replay','private modes use explicit service grant, no owner binding fallback; current/history are single-source, merged not measured','cold disk cache is not asserted; original page cache retained'],cgroup:group};
+const evidence={schemaVersion:1,status:'RUNNING',operation:op,concurrency,requested:n*scales.length,samplesPerScale:n,scales:[],samples:[],resource:[],productionAccess:false,clock:'performance.now; HTTP send to final body byte consumed and SHA updated',measurementRevision:'stream-consume-v3-persistent-recovery',sqlIsolation:'owned mysqld; actual SELECT DATABASE guard',loadModel:'closed loop, fixed concurrency; no arrival-rate or production claim',requestDeadlineMs:op==='b30'?30000:selectedScale==='extreme'?20000:12000,resourceScope:'cgroup includes descendants; PSS/RSS are Node process only, not process tree',queueWaitMs:null,queueWaitReason:'no application job queue for these reads; SQL/socket/source-lock wait included in lifecycle',baselineComparison:{status:'EVIDENCE_PENDING',reason:'same-input old artifact cohort not yet measured'},limitations:['synthetic catalog (100/101/102) and empty Goal/measurement rows; real SQL queries, HTTP auth, publication reader and replay','private modes use explicit service grant, no owner binding fallback; current/history are single-source, merged not measured','cold disk cache is not asserted; original page cache retained'],cgroup:group};
 const audit=new URL('../../docs/platform-architecture-audit/',import.meta.url);
 const baseline=process.env.TAIKO_O1_BASELINE==='1';
-const lockName=baseline?'runtime-role-locks-with-memory.json':'runtime-role-locks-0142.json';
-const originName=baseline?'evidence/r1-rebuild-center-with-memory-20261016.json':'evidence/r1-rebuild-center-0142-20261016.json';
-const lockBytes=await readFile(new URL(lockName,audit));
-const lock=JSON.parse(lockBytes);
+const artifactManifestPath=process.env.QA_ARTIFACT_MANIFEST;assert.ok(artifactManifestPath?.startsWith('/home/sigaer/taiko/qa-vault/'));
+const artifacts=JSON.parse(await readFile(artifactManifestPath,'utf8'));assert.equal(artifacts.schemaVersion,1);
+const artifact=artifacts[baseline?'baseline':'candidate'];assert.ok(artifact,'Requested artifact is unavailable');
+const lockBytes=await readFile(artifact.lockFile);assert.equal(createHash('sha256').update(lockBytes).digest('hex'),artifact.lockSha256);
+const lock=JSON.parse(lockBytes);const originName=artifact.originEvidenceFile;
 const wheel=lock.roles.center.wheels.find(item=>item.name==='taiko-bot');
 assert.equal(wheel.version,baseline?'0.14.1':'0.14.2');
 if(!baseline)assert.equal(wheel.sha256,'0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8');
-if(baseline){const candidate=JSON.parse(await readFile(new URL('runtime-role-locks-0142.json',audit)));const remaining=role=>role.wheels.filter(v=>v.name!=='taiko-bot').map(({name,version,sha256})=>({name,version,sha256}));assert.deepEqual(remaining(lock.roles.center),remaining(candidate.roles.center));assert.equal(lock.roles.center.wheels.length,94);}
+if(baseline){const candidate=JSON.parse(await readFile(artifacts.candidate.lockFile));const remaining=role=>role.wheels.filter(v=>v.name!=='taiko-bot').map(({name,version,sha256})=>({name,version,sha256}));assert.deepEqual(remaining(lock.roles.center),remaining(candidate.roles.center));assert.equal(lock.roles.center.wheels.length,94);}
 const {createReadStream}=await import('node:fs');
 async function sha(path){const h=createHash('sha256');for await(const block of createReadStream(path))h.update(block);return h.digest('hex');}
-assert.equal(await sha(wheel.file),wheel.sha256);
-const rebuild=JSON.parse(await readFile(new URL(originName,audit)));
-assert.equal(process.env.TAIKO_PYTHON_EXECUTABLE,rebuild.installed.interpreter);
-evidence.manifest={viewerBaseline:'6e7f35b',viewerVersion:'0.82.1',taikoWheelSha256:wheel.sha256,lockSha256:createHash('sha256').update(lockBytes).digest('hex'),interpreter:process.env.TAIKO_PYTHON_EXECUTABLE,centerRole:lock.roles.center.environmentIdentity,clientRole:lock.roles.client.environmentIdentity,comparisonAxis:baseline?'old Taiko artifact only; same Viewer service source':'candidate',installedOriginEvidence:originName,installedOriginEvidenceSha256:await sha(new URL(originName,audit)),testHarnessSha256:await sha(new URL(import.meta.url))};
-evidence.manifest.measurementRevision='stream-consume-v2';
+assert.equal(await sha(artifact.wheelFile),wheel.sha256);
+const rebuild=JSON.parse(await readFile(originName));
+assert.equal(await sha(originName),artifact.originEvidenceSha256);assert.equal(process.env.TAIKO_PYTHON_EXECUTABLE,artifact.python);assert.equal(artifact.python,rebuild.installed.interpreter);
+evidence.manifest={viewerBaseline:'6e7f35b',viewerVersion:'0.82.1',taikoWheelSha256:wheel.sha256,lockSha256:createHash('sha256').update(lockBytes).digest('hex'),interpreter:process.env.TAIKO_PYTHON_EXECUTABLE,centerRole:lock.roles.center.environmentIdentity,clientRole:lock.roles.client.environmentIdentity,comparisonAxis:baseline?'old Taiko artifact only; same Viewer service source':'candidate',installedOriginEvidence:originName,installedOriginEvidenceSha256:await sha(originName),testHarnessSha256:await sha(new URL(import.meta.url))};
+evidence.manifest.artifactManifestSha256=await sha(artifactManifestPath);
+evidence.manifest.measurementRevision='stream-consume-v3-persistent-recovery';
 evidence.manifest.viewerWorktreeHead=execFileSync('git',['rev-parse','HEAD'],{cwd:new URL('../../',import.meta.url),encoding:'utf8'}).trim();
 evidence.manifest.runtimeClosure={};for(const file of ['utils/dailyProgress.ts','server/services/growth-history/evidence.ts','server/services/growth-history/service.ts','server/services/growth-passport/service.ts','server/services/account/growth.ts','server/services/account/charts.ts'])evidence.manifest.runtimeClosure[file]=await sha(new URL('../'+file,import.meta.url));
 const initial=counters(await read(cg+'/memory.events'));assert.ok(Number.isFinite(initial.oom)&&Number.isFinite(initial.oom_kill),'Cgroup OOM counters required');let stopped=null,busy=false;
@@ -57,7 +59,7 @@ test('O1 synthetic real HTTP request cohort',{timeout:570000},async()=>{
     c.config.repoRoot=c.root;process.env.TAIKO_RUNTIME_ENV_FILE=resolve(c.root,'absent.env');process.env.TAIKO_CONFIG_PATH=resolve(c.root,'absent.json');process.env.MPLCONFIGDIR=resolve(c.root,'mpl');
     if(op==='b30'){
      await mkdir(resolve(c.root,'assets'));
-     for(const name of await readdir('/var/tmp/taiko-phase2fe-20261014/assets'))if(name!=='dress')await symlink('/var/tmp/taiko-phase2fe-20261014/assets/'+name,resolve(c.root,'assets',name));
+     for(const name of await readdir(artifacts.assetsRoot))if(name!=='dress')await symlink(resolve(artifacts.assetsRoot,name),resolve(c.root,'assets',name));
      const sharp=(await import('sharp')).default;evidence.syntheticDress=[];
      for(const[name,color]of [['line/line_290.png',{r:30,g:40,b:50,alpha:160/255}],['body/body_290_000.png',{r:220,g:40,b:50,alpha:1}],['skin/skin_290_000.png',{r:40,g:180,b:200,alpha:1}],['face/face_290_000.png',{r:230,g:210,b:150,alpha:1}]]){
       const path=resolve(c.root,'assets/dress/common',name);await mkdir(resolve(path,'..'),{recursive:true});await sharp({create:{width:160,height:160,channels:4,background:color}}).png().toFile(path);evidence.syntheticDress.push({name,sha256:await sha(path)});

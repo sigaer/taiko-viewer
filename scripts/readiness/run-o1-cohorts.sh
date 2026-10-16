@@ -3,9 +3,9 @@
 # Invoke only when the coordinator grants the shared host QA slot.
 set -uo pipefail
 node=/www/server/nvm/versions/node/v24.13.0/bin/node
-python=/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python
-out=${1:?New /var/tmp output directory required}
-case "$out" in /var/tmp/*) ;; *) exit 2;; esac
+python=$(/usr/bin/python3 -c 'import json,os; print(json.load(open(os.environ["QA_ARTIFACT_MANIFEST"]))["candidate"]["python"])') || exit 2
+out=${1:?New persistent QA evidence output directory required}
+/usr/bin/python3 -c 'import os,sys; from pathlib import Path; base=Path(os.environ["QA_EVIDENCE_DIR"]).resolve(strict=True); assert base.is_relative_to("/home/sigaer/taiko/qa-vault") and base!=Path("/home/sigaer/taiko/qa-vault"); assert Path(sys.argv[1]).resolve().is_relative_to(base)' "$out" || exit 2
 [ ! -e "$out" ] || exit 2
 mkdir -m 700 "$out"
 for operation in private-current private-history growth-history; do
