@@ -7,7 +7,8 @@ import { projectScoreFacts } from '../../../taiko_viewer/utils/growthHistory.ts'
 
 const schema = JSON.parse(readFileSync(new URL('../schema/contract-v1.json', import.meta.url)));
 const fixtures = JSON.parse(readFileSync(new URL('../fixtures/scores.json', import.meta.url)));
-const growth = JSON.parse(readFileSync(new URL('../fixtures/growth.json', import.meta.url)));
+const legacyGrowth = JSON.parse(readFileSync(new URL('../fixtures/growth.json', import.meta.url)));
+const growth = JSON.parse(readFileSync(new URL('../fixtures/growth-chart-continuity-v3.json', import.meta.url)));
 const ajv = new Ajv({ strict: true, allowUnionTypes: true });
 ajv.addSchema(schema);
 const validate = name => ajv.compile({ $ref: `${schema.$id}#/$defs/${name}` });
@@ -33,6 +34,12 @@ test('source namespaces and scopes do not merge identities or contain secrets', 
 });
 
 test('Canonical Fact preserves existing Viewer output and temporal attribution', () => {
+  const predecessor = structuredClone(growth);
+  for (const fact of predecessor.canonical) {
+    assert.equal(fact.evidence.provenance.factPolicyRevision, 'observation-chart-continuity-v3');
+    delete fact.evidence.provenance.factPolicyRevision;
+  }
+  assert.deepEqual(predecessor, legacyGrowth, 'Only the approved v3 provenance marker may differ from the retained original Golden');
   const actual = projectScoreFacts(growth.ownerId, growth.bindingId, growth.days);
   assert.deepEqual(actual, growth.canonical);
   for (const fact of actual) assert.equal(validate('CanonicalFact')(fact), true);

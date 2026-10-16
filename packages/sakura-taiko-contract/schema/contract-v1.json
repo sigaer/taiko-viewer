@@ -133,6 +133,9 @@
             "string",
             "null"
           ]
+        },
+        "availability": {
+          "$ref": "#/$defs/CatalogAvailability"
         }
       },
       "required": [
@@ -184,6 +187,14 @@
             "string",
             "null"
           ]
+        },
+        "availability": {
+          "$ref": "#/$defs/CatalogAvailability"
+        },
+        "tjaCourse": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
         }
       },
       "required": [
@@ -687,6 +698,324 @@
         "catalogRevision",
         "topN",
         "availabilityRevision"
+      ]
+    },
+    "CatalogAvailability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "type": "string",
+          "enum": [
+            "CN",
+            "JP",
+            "UNKNOWN"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "removed",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "region",
+        "status"
+      ]
+    },
+    "ResourceGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "grantId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerUserId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "playerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clientId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "viewer:developer-api:v1"
+          ]
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "profile:read",
+              "scores:read",
+              "history:read",
+              "growth:read"
+            ]
+          }
+        },
+        "consentVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "consentedAt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issuedAt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expiresAt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revokedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "grantId",
+        "ownerUserId",
+        "bindingId",
+        "playerId",
+        "clientId",
+        "audience",
+        "scopes",
+        "consentVersion",
+        "consentedAt",
+        "issuedAt",
+        "expiresAt",
+        "revokedAt",
+        "revision"
+      ]
+    },
+    "DeveloperClient": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        }
+      },
+      "required": [
+        "clientId",
+        "displayName",
+        "status"
+      ]
+    },
+    "DeveloperPlayerProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "playerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "playerId",
+        "bindingId",
+        "displayName",
+        "source"
+      ]
+    },
+    "ApiReadVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "enum": [
+            "1.0"
+          ]
+        },
+        "schemaRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalogRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scoreRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "calculationProfile": {
+          "type": "null"
+        },
+        "observationSource": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "capturedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "schemaRevision",
+        "catalogRevision",
+        "scoreRevision",
+        "calculationProfile",
+        "observationSource",
+        "capturedAt"
+      ]
+    },
+    "DeveloperScoresResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/ApiReadVersions"
+        },
+        "playerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Score"
+          }
+        }
+      },
+      "required": [
+        "versions",
+        "playerId",
+        "items"
+      ]
+    },
+    "DeveloperProfileResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/ApiReadVersions"
+        },
+        "profile": {
+          "$ref": "#/$defs/DeveloperPlayerProfile"
+        }
+      },
+      "required": [
+        "versions",
+        "profile"
+      ]
+    },
+    "CatalogSongsResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/ApiReadVersions"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Song"
+          }
+        }
+      },
+      "required": [
+        "versions",
+        "items"
+      ]
+    },
+    "CatalogChartsResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/ApiReadVersions"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Chart"
+          }
+        }
+      },
+      "required": [
+        "versions",
+        "items"
+      ]
+    },
+    "ApiError": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "requestId"
       ]
     }
   }

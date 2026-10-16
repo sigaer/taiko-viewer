@@ -1,0 +1,62 @@
+{
+  "ownerId": 7,
+  "bindingId": 9,
+  "days": [
+    {
+      "calendarDay": "2026-10-10",
+      "events": [
+        {
+          "songId": 1,
+          "level": 4,
+          "title": "Synthetic Song",
+          "evidence": "delta",
+          "evidenceRevision": "fixture-revision",
+          "observedAt": "2026-10-10T04:01:00.000Z",
+          "factOccurredAt": {
+            "score-pb": "2026-10-10T04:00:00.000Z"
+          },
+          "facts": [
+            {
+              "type": "score-pb",
+              "before": 900000,
+              "after": 950000,
+              "delta": 50000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "canonical": [
+    {
+      "id": "score-history:v1:9:2026-10-10:1:4:score-pb:900000:950000",
+      "factKey": "score-history:v1:9:2026-10-10:1:4:score-pb:900000:950000",
+      "ownerId": "7",
+      "bindingId": "9",
+      "type": "score-pb",
+      "title": "Synthetic Song",
+      "songId": 1,
+      "difficultyType": 4,
+      "before": 900000,
+      "after": 950000,
+      "delta": 50000,
+      "goalId": null,
+      "evidence": {
+        "source": "score-history",
+        "sourceRevision": "fixture-revision",
+        "evidenceVersion": 1,
+        "provenance": {
+          "snapshotKind": "delta",
+          "factPolicyRevision": "observation-chart-continuity-v3"
+        }
+      },
+      "temporal": {
+        "attributedDay": "2026-10-10",
+        "occurredAt": "2026-10-10T04:00:00.000Z",
+        "observedAt": "2026-10-10T04:01:00.000Z",
+        "confirmedAt": null,
+        "precision": "instant"
+      }
+    }
+  ]
+}
