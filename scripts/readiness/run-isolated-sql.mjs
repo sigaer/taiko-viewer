@@ -86,6 +86,7 @@ try{
   Object.assign(testEnv,{PYTHONDONTWRITEBYTECODE:'1',TAIKO_O1_OPERATION:match[1],TAIKO_O1_CONCURRENCY:match[2],TAIKO_O1_SAMPLES:match[3],TAIKO_O1_OUTPUT:resolve(workspace,'o1-performance.json')});
   evidence.o1={operation:match[1],concurrency:Number(match[2]),samples:Number(match[3])};
   const scale=process.argv.find(arg=>arg.startsWith('--o1-scale='))?.slice(11)||'all';assert.ok(['all','small','medium','large','extreme'].includes(scale));assert.ok(scale!=='extreme'||match[1]==='growth-passport');testEnv.TAIKO_O1_SCALE=scale;evidence.o1.scale=scale;
+  const measurementMode=process.argv.find(arg=>arg.startsWith('--o1-measurement-mode='))?.split('=')[1]||'stream';assert.ok(['stream','buffered-original'].includes(measurementMode));assert.ok(measurementMode!=='buffered-original'||match[1]==='private-history','Buffered diagnostic is restricted to private history');testEnv.TAIKO_O1_MEASUREMENT_MODE=measurementMode;evidence.o1.measurementMode=measurementMode;
   if(process.argv.includes('--o1-stream-check'))testEnv.TAIKO_O1_STREAM_CHECK='1';
   if(process.argv.includes('--o1-baseline')){testEnv.TAIKO_O1_BASELINE='1';evidence.o1.baseline='Taiko 0.14.1; unchanged other 93 locked wheels';}
  }

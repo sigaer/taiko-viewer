@@ -14,3 +14,11 @@ export async function proveO1StreamingEquivalence(request){
  assert.equal(streamed.bytes,complete.bytes);assert.equal(streamed.sha256,complete.sha256);
  return {status:'PASS',requests:2,streamed,complete,scope:'same authenticated synthetic HTTP JSON route; full body SHA and bytes equal; validation separate from timed cohort'};
 }
+
+// Diagnostic replay of the original text + JSON.parse allocation pattern.
+// SHA is added symmetrically to the stream consumer for output equivalence proof.
+export async function consumeO1BufferedResponse(response){
+ const body=await response.text(),bytes=Buffer.byteLength(body);
+ if(response.status===200)JSON.parse(body);
+ return {status:response.status,bytes,sha256:createHash('sha256').update(body).digest('hex')};
+}
