@@ -169,7 +169,7 @@
     },
     {
       "path": "scripts/readiness/check-my-taiko-types.mjs",
-      "sha256": "3b921a1a4a1d10c61d923e7e4f59cc30d49e0db9d6575dbf93dee548446026e5"
+      "sha256": "96e7b151dba16444ae13cb1f4831efa637bf17ab31c0aef251cb7cf287fa1796"
     },
     {
       "path": "scripts/readiness/run-viewer1-integration-qa.py",
@@ -177,7 +177,7 @@
     },
     {
       "path": "taiko_viewer/server/infrastructure/qa-startup-isolation.ts",
-      "sha256": "45a26854655e48af38bdcf36ccb6b6c468513184f84f3e119655de9c433da85f"
+      "sha256": "ff5b93e3257ee695b6a07611b749c6634012488ebeda5725ab96bdd2f42b5f9c"
     },
     {
       "path": "taiko_viewer/server/plugins/annual-summary.ts",
