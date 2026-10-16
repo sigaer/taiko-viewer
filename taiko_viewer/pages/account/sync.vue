@@ -356,6 +356,7 @@ const importFromKinoko = async () => {
   importingKinoko.value = true;
   try {
     const response = await apiFetch<{
+      partial?: boolean; message?: string;
       summary: { added: number; updated: number; unchanged: number; total: number };
     }>("/api/account/sync/kinoko-import", {
       method: "POST",
@@ -364,7 +365,8 @@ const importFromKinoko = async () => {
       }
     });
     kinokoApiKey.value = "";
-    ElMessage.success(
+    if (response.partial) ElMessage.warning(response.message);
+    else ElMessage.success(
       copy.value.kinokoDone
         .replace("{added}", String(response.summary.added))
         .replace("{updated}", String(response.summary.updated))
@@ -388,6 +390,7 @@ const importHistoryFromKinoko = async () => {
   importingKinokoHistory.value = true;
   try {
     const response = await apiFetch<{
+      partial?: boolean; message?: string;
       summary: {
         history: { importedRecords: number; skippedRecords: number; snapshotFiles: number };
       };
@@ -398,7 +401,8 @@ const importHistoryFromKinoko = async () => {
       }
     });
     kinokoApiKey.value = "";
-    ElMessage.success(
+    if (response.partial) ElMessage.warning(response.message);
+    else ElMessage.success(
       copy.value.kinokoHistoryDone
         .replace("{imported}", String(response.summary.history.importedRecords))
         .replace("{skipped}", String(response.summary.history.skippedRecords))

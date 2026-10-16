@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import { filterKinokoEvents, scoreEventEpoch } from "./kinoko-time";
+import { filterKinokoEvents, scoreEventEpoch, scoreTimeIssue, type TimeSummary } from "./kinoko-time";
 import type { UserdataPayload, UserdataSong } from "./shared";
 
 const KINOKO_SCORE_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/hiroba";
@@ -44,6 +44,7 @@ type KinokoFetchResult = {
   playerId: string;
   songs: UserdataSong[];
   receivedBytes: number;
+  timeSummary: TimeSummary;
 };
 
 export type KinokoHistoryFetchResult = {
@@ -51,6 +52,7 @@ export type KinokoHistoryFetchResult = {
   records: UserdataSong[];
   latestSongs: UserdataSong[];
   receivedBytes: number;
+  timeSummary: TimeSummary;
 };
 
 const toNonNegativeInteger = (value: unknown) => {
@@ -70,8 +72,7 @@ export const sanitizeKinokoSong = (value: unknown): UserdataSong | null => {
     song[field] = toNonNegativeInteger(input[field]);
   }
   for (const field of ["highscore_datetime", "update_datetime"] as const) {
-    const text = String(input[field] || "").trim();
-    if (text) song[field] = text.slice(0, 64);
+    if (input[field] !== undefined && input[field] !== null) song[field] = (typeof input[field] === "string" ? input[field].trim() : input[field]) as never;
   }
   if (Array.isArray(input.option_flg)) song.option_flg = input.option_flg.slice(0, 8);
   if (Array.isArray(input.tone_flg)) song.tone_flg = input.tone_flg.slice(0, 8);
@@ -113,9 +114,9 @@ const readLimitedResponse = async (response: Response) => {
 
 const mapKinokoError = (status: number, detail: string) => {
   if (status === 401) return createError({ statusCode: 400, statusMessage: "API 密钥无效或已失效" });
-  if (status === 403) return createError({ statusCode: 403, statusMessage: detail || "该密钥无权读取指定玩家" });
-  if (status === 404) return createError({ statusCode: 404, statusMessage: detail || "菌菌控制台中未找到可用账号或成绩" });
-  return createError({ statusCode: 502, statusMessage: detail || `菌菌控制台请求失败（HTTP ${status}）` });
+  if (status === 403) return createError({ statusCode: 403, statusMessage: "该密钥无权读取指定玩家" });
+  if (status === 404) return createError({ statusCode: 404, statusMessage: "菌菌控制台中未找到可用账号或成绩" });
+  return createError({ statusCode: 502, statusMessage: `菌菌控制台请求失败（HTTP ${status}）` });
 };
 
 const fetchKinokoPayload = async (apiKey: string, endpoint: string) => {
@@ -157,7 +158,8 @@ export const fetchKinokoScores = async (apiKey: string, now = new Date()): Promi
   if (songs.length !== rawSongs.length) {
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的成绩记录" });
   }
-  return { playerId: returnedPlayerId, songs: filterKinokoEvents(songs, now).records, receivedBytes };
+  const admitted = filterKinokoEvents(songs, now);
+  return { playerId: returnedPlayerId, songs: admitted.records, receivedBytes, timeSummary: admitted.timeSummary };
 };
 
 export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Promise<KinokoHistoryFetchResult> => {
@@ -195,21 +197,33 @@ export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Prom
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的历史记录过多，已停止迁移" });
     }
   }
-  const admitted = filterKinokoEvents(records, now).records;
+  const filtered = filterKinokoEvents(records, now);
+  const admitted = filtered.records;
   const latest = new Map<string, UserdataSong>();
   for (const song of admitted) {
     const key = `${song.song_no}:${song.level}`, previous = latest.get(key);
     if (!previous || scoreEventEpoch(song) >= scoreEventEpoch(previous)) latest.set(key, song);
   }
   latestSongs.push(...latest.values());
-  return { playerId: returnedPlayerId, records: admitted, latestSongs, receivedBytes };
+  return { playerId: returnedPlayerId, records: admitted, latestSongs, receivedBytes, timeSummary: filtered.timeSummary };
 };
 
 const maxField = (local: UserdataSong, remote: UserdataSong, field: (typeof CUMULATIVE_FIELDS)[number]) => {
   local[field] = Math.max(toNonNegativeInteger(local[field]), toNonNegativeInteger(remote[field]));
 };
 
+/** Keep pre-existing polluted current out of every new full history snapshot.
+ * Reconcile through the existing Writer by refusing this import before staging;
+ * repair of historical data is a separate operation, never an import side effect.
+ */
+export const assertKinokoCurrentTime = (userdata: UserdataPayload, now: Date) => {
+  if ((userdata.songs || []).some(song => scoreTimeIssue(song, now, false))) {
+    throw createError({ statusCode: 409, statusMessage: "现有成绩时间异常，导入已停止，请联系管理员处理", data: { code: "KINOKO_CURRENT_TIME_CONFLICT", published: false } });
+  }
+};
+
 export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[], now = new Date()) => {
+  assertKinokoCurrentTime(userdata, now);
   remoteSongs = filterKinokoEvents(remoteSongs, now).records;
   const songs = Array.isArray(userdata.songs) ? userdata.songs : [];
   const songMap = new Map(songs.map((song) => [`${song.song_no}:${song.level}`, song]));
@@ -228,16 +242,17 @@ export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: Userda
       continue;
     }
     const before = JSON.stringify(local);
+    const localEpoch = local.update_datetime || local.highscore_datetime ? scoreEventEpoch(local) : -Infinity;
     const remoteScore = toNonNegativeInteger(remote.high_score);
     const localScore = toNonNegativeInteger(local.high_score);
-    if (remoteScore > localScore || (remoteScore === localScore && String(remote.update_datetime || "") > String(local.update_datetime || ""))) {
+    if (remoteScore > localScore || (remoteScore === localScore && scoreEventEpoch(remote) > localEpoch)) {
       for (const field of PERFORMANCE_FIELDS) {
         if (remote[field] !== undefined) local[field] = remote[field] as never;
       }
     }
     for (const field of CUMULATIVE_FIELDS) maxField(local, remote, field);
     const remoteUpdatedAt = String(remote.update_datetime || "");
-    if (remoteUpdatedAt > String(local.update_datetime || "")) local.update_datetime = remoteUpdatedAt;
+    if (remoteUpdatedAt && scoreEventEpoch(remote) > localEpoch) local.update_datetime = remoteUpdatedAt;
     if (JSON.stringify(local) === before) unchanged += 1;
     else updated += 1;
   }

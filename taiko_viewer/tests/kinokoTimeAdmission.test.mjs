@@ -17,3 +17,11 @@ test('Kinoko admitted time reaches existing Publication Writer; rejected time ne
  assert.equal((await service.writeKinokoHistorySnapshots('synthetic',[future],initial,now)).snapshotFiles,0);
  const after=await service.withDomainScoreRead('synthetic',async()=>service.scorePublication('synthetic'));assert.equal(after.commitId,before.commitId);assert.equal(initial.songs[0].high_score,800000);
 }));
+test('Kinoko same-score ordering compares instants across Shanghai and ISO offsets',()=>fixture(async service=>{
+ const local={song_no:1,level:4,high_score:900000,good_cnt:50,stage_cnt:1,update_datetime:'2026-10-10 09:00:00',highscore_datetime:'2026-10-10 09:00:00'};
+ const userdata={songs:[local]};
+ service.mergeKinokoScores(userdata,[{...local,good_cnt:5,update_datetime:'2026-10-10T00:30:00Z',highscore_datetime:'2026-10-10T00:30:00Z'}],now);
+ assert.equal(local.good_cnt,50);assert.equal(local.update_datetime,'2026-10-10 09:00:00');
+ service.mergeKinokoScores(userdata,[{...local,good_cnt:60,update_datetime:'2026-10-10T01:30:00Z',highscore_datetime:'2026-10-10T01:30:00Z'}],now);
+ assert.equal(local.good_cnt,60);assert.equal(local.update_datetime,'2026-10-10T01:30:00Z');
+}));

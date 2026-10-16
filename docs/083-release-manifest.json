@@ -53,11 +53,11 @@
     },
     {
       "path": "taiko_viewer/package.json",
-      "sha256": "9cda5fb095d71b19354093e4ea177b24c2632faf813a67d409786ad5b248ffd6"
+      "sha256": "45200efe29e37af7afd2f28d1352155e3602ef46add02140b74e07773a7cdc48"
     },
     {
       "path": "taiko_viewer/package-lock.json",
-      "sha256": "af08bca6d27e941b803b2ce3bc3b6daebb8eefe3dd74f99ee87cf631e5f013bd"
+      "sha256": "aedc0106fefa93601f43cb6dfba7d5e1d752144650c3ea814d17d9d463e49cc2"
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/authority.ts",
@@ -169,11 +169,11 @@
     },
     {
       "path": "scripts/readiness/check-my-taiko-types.mjs",
-      "sha256": "96e7b151dba16444ae13cb1f4831efa637bf17ab31c0aef251cb7cf287fa1796"
+      "sha256": "57beac9f5265be8605586740e0dd87552aa9cb3a1150030e992451965de015b6"
     },
     {
       "path": "scripts/readiness/run-viewer1-integration-qa.py",
-      "sha256": "29942bf2cfdff94adb07235982c094865b203078236c991f2f96c0cbbfa2fea8"
+      "sha256": "3395ec605ad32ec79d1564267f429f72c1a101aff693db3a3ba3cff60da3204c"
     },
     {
       "path": "taiko_viewer/server/infrastructure/qa-startup-isolation.ts",
@@ -193,7 +193,7 @@
     },
     {
       "path": "taiko_viewer/server/internal/account/kinoko-import.ts",
-      "sha256": "523ebdfc7ae9704b5f4c0521a1e5937fa590c86a4a5418f5ddd65f5d52ef1e6b"
+      "sha256": "d0d35e41b957a1104693cff2e0b12483bf7a2b2e5991d0d3e69f8e1ff8cbe6b3"
     },
     {
       "path": "taiko_viewer/server/internal/account/kinoko-time.ts",
@@ -201,7 +201,7 @@
     },
     {
       "path": "taiko_viewer/tests/kinokoTimeAdmission.test.mjs",
-      "sha256": "671eed7b59114d992d5d320c4e28c02bfa36fe5607a9679b5c0c254478b2c41c"
+      "sha256": "b2e99cfab458b281f0e0a394ca2de2544c4eaf51ffdceaff6ce7151776e358bb"
     },
     {
       "path": "taiko_viewer/tests/kinokoPublication.test.mjs",
@@ -214,10 +214,22 @@
     {
       "path": "taiko_viewer/tests/viewer083SchemaRecovery.test.mjs",
       "sha256": "ba97c9303ddee9dfbbb373aecaa7996032b1f1ee55634819d20bdc9a1bb89d8b"
+    },
+    {
+      "path": "taiko_viewer/pages/account/sync.vue",
+      "sha256": "2d97832d515acbca8e01c968190580299bba0f1b4f71222a98f7f29ea9d17119"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/sync.ts",
+      "sha256": "4b02679ffb0e3c34c6e7f58f393c17a6d9b70c9ebde20d23659134623059b9ed"
+    },
+    {
+      "path": "taiko_viewer/tests/kinokoImportBoundarySql.test.mjs",
+      "sha256": "61e8caa53b3d46927cee8aabb1c47ae9c5e327a09ac513e8547899d95135e668"
     }
   ],
   "baselineReviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
-  "viewerVersion": "0.83.0-rc.5",
+  "viewerVersion": "0.83.0-rc.6",
   "ownerManagementPagination": {
     "scope": "owner-only grants and own clients",
     "pageSize": 100,
@@ -255,5 +267,11 @@
     "qaMode": "owned-qa",
     "runtimeAdmission": "owned scratch, cgroup, explicit opt-in and actual loopback _test/datadir SQL proof",
     "compiledPatches": false
+  },
+  "mainReviewInputCommit": "35d473dfd350af5a6f40bcc00993a9fbdb1b3825",
+  "originReview": {
+    "commit": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "observedAt": "2026-10-16T14:02:28.816036+00:00",
+    "remoteHeadVerified": true
   }
 }

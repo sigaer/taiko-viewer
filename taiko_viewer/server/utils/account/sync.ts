@@ -15,12 +15,12 @@ import {
   rebuildUserdataAchievement,
   sanitizeBinding,
   userdataFileExists,
-  withUserdataWriteLock,
   writeUserdataWithHistory
 } from "~/server/internal/account/shared";
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
-import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores } from "~/server/internal/account/kinoko-import";
+import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores, assertKinokoCurrentTime } from "~/server/internal/account/kinoko-import";
 import { requireAccountUser } from "./auth";
+import { captureBindingIdentity, assertBindingIdentity } from "../../internal/account/binding-identity";
 import { captureAccountSyncOwner, dispatchOwnedAccountSync } from "../../services/account/sync-authority.ts";
 import { withViewerCurrentSource } from "../../services/account/current-source.ts";
 import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
@@ -91,7 +91,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   };
 };
 
-export const importKinokoScores = async (event: H3Event, payload: Record<string, unknown>) => {
+export const importKinokoScores = async (event: H3Event, payload: Record<string, unknown>, now = new Date()) => {
   const user = await requireAccountUser(event);
   const currentBinding = await getCurrentBindingRow(user.id);
   if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定导入目标账号" });
@@ -109,27 +109,32 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     });
   }
 
+  const expected = captureBindingIdentity(currentBinding);
   const taikoId = currentBinding.taiko_id;
-  const fetched = await fetchKinokoScores(apiKey);
+  const fetched = await fetchKinokoScores(apiKey, now);
   if (fetched.playerId !== taikoId) {
     throw createError({
       statusCode: 409,
       statusMessage: `密钥默认账号（${fetched.playerId}）与当前绑定账号（${taikoId}）不一致，已停止迁移`
     });
   }
-  const summary = await withUserdataWriteLock(taikoId, async () => {
-    const binding = await getCurrentBindingRow(user.id);
-    if (!binding || binding.id !== currentBinding.id || binding.taiko_id !== currentBinding.taiko_id || binding.source !== currentBinding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+  if (!fetched.songs.length) throwNoKinokoRecords(fetched.timeSummary);
+  const summary = await withViewerCurrentSource(user.id, "write", async binding => {
+    assertBindingIdentity(expected, binding);
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     const userdata = (await userdataFileExists(taikoId))
       ? await readUserdata(taikoId)
       : { profile: { userid: taikoId }, songs: [] };
-    const result = mergeKinokoScores(userdata, fetched.songs);
+    const result = mergeKinokoScores(userdata, fetched.songs, now);
+    if (!result.added && !result.updated) throwKinokoUnchanged();
     rebuildUserdataAchievement(userdata);
     if (result.added || result.updated) await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     return result;
   });
 
-  const message = `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
+  const partial = fetched.timeSummary.skippedTimeRecords > 0;
+  const message = partial ? `已更新成绩，跳过 ${fetched.timeSummary.skippedTimeRecords} 条异常时间记录` : `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
   const result = {
     targetId: "kinoko-import",
     label: "菌菌控制台迁移",
@@ -151,6 +156,10 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   });
   return {
     ok: true,
+    published: true,
+    partial,
+    message,
+    timeSummary: fetched.timeSummary,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
@@ -158,7 +167,7 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   };
 };
 
-export const importKinokoScoreHistory = async (event: H3Event, payload: Record<string, unknown>) => {
+export const importKinokoScoreHistory = async (event: H3Event, payload: Record<string, unknown>, now = new Date()) => {
   const user = await requireAccountUser(event);
   const currentBinding = await getCurrentBindingRow(user.id);
   if (!currentBinding) throw createError({ statusCode: 400, statusMessage: "请先绑定迁移目标账号" });
@@ -176,8 +185,9 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
     });
   }
 
+  const expected = captureBindingIdentity(currentBinding);
   const taikoId = currentBinding.taiko_id;
-  const fetched = await fetchKinokoHistory(apiKey);
+  const fetched = await fetchKinokoHistory(apiKey, now);
   if (fetched.playerId !== taikoId) {
     throw createError({
       statusCode: 409,
@@ -185,23 +195,28 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
     });
   }
 
-  const summary = await withUserdataWriteLock(taikoId, async () => {
-    const binding = await getCurrentBindingRow(user.id);
-    if (!binding || binding.id !== currentBinding.id || binding.taiko_id !== currentBinding.taiko_id || binding.source !== currentBinding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+  if (!fetched.records.length) throwNoKinokoRecords(fetched.timeSummary);
+  const summary = await withViewerCurrentSource(user.id, "write", async binding => {
+    assertBindingIdentity(expected, binding);
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     const existed = await userdataFileExists(taikoId);
     const userdata = existed
       ? await readUserdata(taikoId)
       : { _meta: { full: true, source: "wahlap", source_account: taikoId }, profile: { userid: taikoId }, songs: [] };
-    const history = await writeKinokoHistorySnapshots(taikoId, fetched.records, userdata);
-    const current = mergeKinokoScores(userdata, fetched.latestSongs);
+    assertKinokoCurrentTime(userdata, now);
+    const history = await writeKinokoHistorySnapshots(taikoId, fetched.records, userdata, now);
+    const current = mergeKinokoScores(userdata, fetched.latestSongs, now);
+    if (!history.snapshotFiles && !current.added && !current.updated) throwKinokoUnchanged();
     if (!existed || current.added > 0 || current.updated > 0) {
       rebuildUserdataAchievement(userdata);
       await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current");
     }
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     return { history, current };
   });
 
-  const message = `历史 ${summary.history.importedRecords} 条新增、${summary.history.skippedRecords} 条已存在，写入 ${summary.history.snapshotFiles} 个兼容快照`;
+  const partial = fetched.timeSummary.skippedTimeRecords > 0;
+  const message = partial ? `已导入有效历史，跳过 ${fetched.timeSummary.skippedTimeRecords} 条异常时间记录` : `历史 ${summary.history.importedRecords} 条新增、${summary.history.skippedRecords} 条已存在，写入 ${summary.history.snapshotFiles} 个兼容快照`;
   const result = {
     targetId: "kinoko-history-import",
     label: "菌菌控制台完整历史迁移",
@@ -223,9 +238,20 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   });
   return {
     ok: true,
+    published: true,
+    partial,
+    message,
+    timeSummary: fetched.timeSummary,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
     log: toPublicSyncLog(logRow)
   };
+};
+
+const throwNoKinokoRecords = (summary: object): never => {
+  throw createError({ statusCode: 422, statusMessage: "没有可导入的有效记录，现有成绩未改动", data: { code: "KINOKO_NO_ELIGIBLE_RECORDS", published: false, summary } });
+};
+const throwKinokoUnchanged = (): never => {
+  throw createError({ statusCode: 409, statusMessage: "记录已存在，没有新增成绩", data: { code: "KINOKO_UNCHANGED", published: false } });
 };
