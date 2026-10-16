@@ -17,6 +17,17 @@ for(const [path,methods] of Object.entries(doc.paths))for(const [method,op] of O
   const validate=ajv.compile(refs(c.schema));for(const example of [...(c.example===undefined?[]:[c.example]),...Object.values(c.examples||{}).map(x=>x.value)]){assert.equal(validate(example),true,method+' '+path+': '+JSON.stringify(validate.errors));examples++;}
  }
 }
+// Pre-freeze owner-only pagination: legacy-shaped responses remain valid in the
+// new schema; strict rc.2 validators must explicitly adopt the candidate change.
+let paginationGolden=0;
+for(const path of ['/api/account/developer/grants','/api/account/developer/clients']){
+ const op=doc.paths[path].get,c=op.responses['200'].content['application/json'];
+ const check=ajv.compile(refs(c.schema)),old=structuredClone(c.example);delete old.nextCursor;
+ assert.equal(check(old),true);paginationGolden++;
+ assert.equal(check({...c.example,nextCursor:path.endsWith('grants')?'a'.repeat(32):'clt_'+'a'.repeat(32)}),true);paginationGolden++;
+ assert.equal(check({...c.example,nextCursor:'bad'}),false);paginationGolden++;
+ assert.equal(op.parameters[0].name,'before');assert.equal(op.parameters[0].required,false);
+}
 assert.equal(operations,11);assert.equal(doc['x-lifecycle-policy'].contractFrozen,false);assert.equal(doc['x-lifecycle-policy'].runtimeDefaultEnabled,false);
 const meta=doc.paths['/api/v1/taiko/meta'].get.responses['200'].content['application/json'];assert.deepEqual(meta.schema.properties.status.enum,['FREEZE_CANDIDATE','CONTRACT_FROZEN']);assert.equal(meta.example.contractFrozen,false);
 const checkMeta=ajv.compile(refs(meta.schema));assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:false}),false);assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:true}),true);
@@ -25,4 +36,4 @@ async function sha(path){const h=createHash('sha256');for await(const b of creat
 const matrix=JSON.parse(await readFile(resolve(R,'docs/083-contract-and-api-matrix.json'),'utf8'));const reused=[];for(const name of ['contract','sqlHttp','browser','build','openapi']){const e=matrix.validation[name].evidence;assert.equal(await sha(e.path),e.sha256,name+' immutable evidence');reused.push({name,...e,scope:'historical ac10427 evidence; not a rerun or full revised runtime certification'});}
 assert.equal(await sha(resolve(R,'packages/sakura-taiko-contract/schema/contract-v1.json')),'c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d');
 const manifest=JSON.parse(await readFile(resolve(R,'docs/083-release-manifest.json'),'utf8'));assert.equal(createHash('sha256').update(JSON.stringify(schema)).digest('hex'),manifest.schemaSerializedRevision);for(const f of manifest.files)assert.equal(await sha(resolve(R,f.path)),f.sha256,'release input '+f.path);
-const report={status:'PASS_SCOPED',operations,examples,openapiSha256:await sha(path),manifestSha256:await sha(resolve(R,'docs/083-release-manifest.json')),reused,productionAccess:false};await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'freeze-openapi-review.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,operations,examples,reusedEvidence:reused.length}));
+const report={status:'PASS_SCOPED',operations,examples,paginationGolden,openapiSha256:await sha(path),manifestSha256:await sha(resolve(R,'docs/083-release-manifest.json')),reused,productionAccess:false};await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'freeze-openapi-review.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,operations,examples,paginationGolden,reusedEvidence:reused.length}));
