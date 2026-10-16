@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import type { UploadFile, UploadInstance, UploadRawFile } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
+const developerApiV1Enabled = Boolean(useRuntimeConfig().public.developerApiV1);
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
@@ -997,7 +998,7 @@ const removeQqBinding = async () => {
 
 <template>
   <div class="profile-page">
-    <NuxtLink v-if="useRuntimeConfig().public.developerApiV1" to="/account/developer/grants">{{locale==='ja'?'アプリへのアクセス許可':'应用授权'}}</NuxtLink>
+    <NuxtLink v-if="developerApiV1Enabled" to="/account/developer/grants">{{locale==='ja'?'アプリへのアクセス許可':'应用授权'}}</NuxtLink>
     <el-card v-if="pending" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
