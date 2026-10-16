@@ -57,3 +57,31 @@
 4. 另批生产迁移、灰度、回滚执行窗口后，才可讨论发布。初次只运行旧模式、Developer API OFF；My Taiko 和外部 v1 分别签收。
 
 所有实际生产值和观察证据留在批准的私有目录。代码 Gate、只读观察、生产 DDL、发布、My Taiko 开关和 v1 启用是独立决策；本文件没有合并这些权限。
+
+## RC.5 主线复核后的最小执行表（离线，全部待单独授权）
+
+一次性授权决定见 [gate-p-authorization-ready](gate-p-authorization-ready.md) 及同名 JSON；本计划继续作为字段和边界依据。UNKNOWN 不得替换成猜测的生产值。仓库 service 模板只提供候选名称 `taiko-viewer.service`，不证明该 unit 真实存在或正在运行。
+
+| 步骤 | 精确操作与前置条件 | 输出字段白名单 / 上限 |
+| --- | --- | --- |
+| P-ID-DISCOVERY | 仅在 Owner 单独批准后，对上述**一个候选名称**执行 `systemctl show`；不存在立即停止，不执行 list-units、端口扫描或目录搜索 | Id, LoadState, ActiveState, SubState, MainPID, User, Group, WorkingDirectory, FragmentPath, ControlGroup；≤16 字段，10 秒 |
+| P-ID-VERIFY | Owner 确认上一步得到的单 PID、Node/Nuxt 文件与两个 Python 路径后，仅读这些确切对象；流式 hash 与固定 receipt 对照；Python 只运行 `-I` metadata，不导入业务模块 | PID/start ticks/exe/cwd/cgroup、Node version、artifact/source hash、Python metadata origin/version；≤2 解释器，无 environ/原始 cmdline |
+| P-PROXY | 先单独批准**一个** vhost 文件和明确引用的片段路径，再由白名单解析器只输出路由结构；完整 Nginx 配置读取不在范围内 | server_name/listen/upstream、Host/Origin/method/path、可信 proxy CIDR、direct-peer 配额键；≤100 条结构记录、64 KiB、10 秒 |
+| P-KEY | 凭证路径和字段白名单仍 UNKNOWN；只能在单独确定文件与 parser hash 后检查存在性/脱敏配置，不输出值 | 字段存在性 boolean、redaction 配置、key lifecycle owner；禁止 Cookie/Authorization/JWT/Key、内容 hash、请求体 |
+| P-AUDIT | 只读批准的日志格式文件；合成 HTTP 产生的最多 20 行样例需另外批准精确文件/合成 requestId/≤5 分钟窗口 | timestamp、合成 requestId、method、固定 route、status、bytes、duration、redaction boolean；不得保存真实标识/headers/payload |
+| P-APP | 合成账号/应用/绑定/Key 的 ID 与 HTTP endpoint 尚 UNKNOWN；登录/授权/撤销会变更状态，不能并入只读观察授权 | 仅状态码、是否有私有正文/ETag、no-store、审计 ID；无 Grant、错 owner/source/scope、过期/撤销/旧 ETag 必须拒绝 |
+| P-SQL-OBSERVE | 连接身份、数据库名与只读 principal 尚 UNKNOWN；只批准对四张确切表的 INFORMATION_SCHEMA 结构观察，不读取业务行 | 目标 schema 名及 table/column/type/null/default/extra/collation、index name/uniqueness/order/column；≤512 行、128 KiB、10 秒 |
+
+任何命令执行前都要有独立授权 ID、有效期、操作者、exact scope 与私有 evidence 目的地。下例仅说明 fail-closed 模板，**本轮未执行**；未知或不匹配时在调用 systemctl 前退出，不能把空变量当作“观察全部”。
+
+```bash
+# OWNER_AUTHORIZATION_ID 和 APPROVED_UNIT 需来自另行明确批准。
+: "${OWNER_AUTHORIZATION_ID:?separate authorization required}"
+: "${APPROVED_UNIT:?exact unit required}"
+[ "$APPROVED_UNIT" = 'taiko-viewer.service' ] || exit 64
+timeout 10s systemctl show --no-pager \
+  --property=Id,LoadState,ActiveState,SubState,MainPID,User,Group,WorkingDirectory,FragmentPath,ControlGroup \
+  "$APPROVED_UNIT"
+```
+
+该候选名称以外的发现、路径解析、SQL 登录和 HTTP 测试均需各自授权；只读发现结果也不能自动扩大下一步 scope。真实授权/ACL 是否成立、日志是否无凭证、匿名 direct-peer 是否共享预算，都保持 UNPROVEN。

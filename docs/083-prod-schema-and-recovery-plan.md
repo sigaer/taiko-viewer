@@ -55,3 +55,39 @@ ALTER TABLE web_developer_resource_grants
 My Taiko 代码回滚同时把 **private 和 public** mode 设回 `legacy`；外部 v1 独立 OFF，并确保旧兼容开关 `TAIKO_DEVELOPER_API_V1_ENABLED` 没有重新开启它。使用标准部署流程和获批的不可变旧构件，不手工替换一份前端文件或单独重启来代替完整回滚。表、Grant 撤销、审计与合法新 Publication 保留，不能为了代码回滚回退用户数据。若确需数据恢复，执行前述已签一致检查点程序并重验证撤销安全；DDL 删除不是常规回滚。
 
 Owner 尚需签：真实身份/入口观察授权、origin 分叉差异、具体生产 schema diff 与 DDL、备份目的地/权属/PITR/RPO/RTO、受控名单实现、灰度窗口与回滚操作者，最后才是是否启用外部 API。当前状态不是 `DEPLOY_READY`。
+
+## RC.5 授权包的结构观察与执行责任
+
+精确 DDL 来源/hash 和授权分类写入 [gate-p-authorization-ready.json](gate-p-authorization-ready.json)，不另建 schema。当前数据库 owner、只读 principal、DDL executor、备份 key custodian、恢复操作者与回滚窗口均为 **UNKNOWN**。只有离线源文件身份已知；生产结构和执行成本均 UNPROVEN。
+
+未来 P-SQL-OBSERVE 获准后，仅可运行以下结构查询；连接目标必须先在批准范围内精确确定，所有查询应有 10 秒、512 行/128KiB 上限，超限停止，不改用全库 dump。
+
+```sql
+SELECT DATABASE() AS selected_schema;
+SELECT TABLE_NAME, ENGINE, TABLE_COLLATION
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN
+('web_developer_api_clients','web_developer_api_resources',
+ 'web_developer_resource_grants','web_developer_resource_grant_events');
+SELECT TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_TYPE,
+       IS_NULLABLE, COLUMN_DEFAULT, EXTRA, COLLATION_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN
+('web_developer_api_clients','web_developer_api_resources',
+ 'web_developer_resource_grants','web_developer_resource_grant_events')
+ORDER BY TABLE_NAME,ORDINAL_POSITION;
+SELECT TABLE_NAME, INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX, COLUMN_NAME
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN
+('web_developer_api_clients','web_developer_api_resources',
+ 'web_developer_resource_grants','web_developer_resource_grant_events')
+ORDER BY TABLE_NAME,INDEX_NAME,SEQ_IN_INDEX;
+```
+
+缺表才拟定对应 CREATE，已有表必须逐列/索引比较；结构完全一致才可 no-op，缺 F3 索引才拟定两条已列 ALTER。任何多余列、列类型/字符集/唯一约束不同、同名索引列序不同，停止并提交精确 diff。生产 `--apply` 仍不允许；测试 CLI guard 保持不变，只能对新建独占 `_test` 实例应用。
+
+P-MIGRATION-DDL 需独立批准最终 SQL hash、单库四表 scope、执行 principal、metadata lock/在线 DDL 能力、超时与监测窗口。即使 ADD INDEX 也可能等待 metadata lock、占用 IO/临时空间或回退到较重操作；本轮没有证明生产支持何种 ALGORITHM/LOCK，不硬编码为零锁。发现未知阻塞、锁超时、结构漂移即停止；不在同一授权内自动 DROP/改列/删 Grant。
+
+代码回滚仍保留四表和撤销审计；不能用删表或恢复旧 grant 状态回退代码。若将来需要撤销索引或恢复 schema，也必须另批具体语句，先关闭依赖新结构的路径并确认没有使用者；本轮不虚构生产可执行回滚命令。
+
+恢复验收必须同时覆盖 Grant/Key/Session 撤销、历史绑定验证/资源属主与 Publication committed vector 的同检查点。RPO/RTO、PITR、加密离机备份和十二项私有资产的恢复能力继续 UNPROVEN；不得以已有四表合成恢复 PASS 替代。授权包的备份恢复、DDL、灰度、v1 启用分别签收，不自动串联执行。

@@ -1,0 +1,585 @@
+{
+  "schemaVersion": 1,
+  "status": "AUTHORIZATION_PACKAGE_PREPARED_NOT_GRANTED",
+  "GateP": "DEPLOY_PENDING_AUTH",
+  "productionAccess": false,
+  "productionObservedValues": {
+    "unit": "UNKNOWN",
+    "pid": "UNKNOWN",
+    "vhost": "UNKNOWN",
+    "node": "UNKNOWN",
+    "pythonCenter": "UNKNOWN",
+    "pythonClient": "UNKNOWN",
+    "sql": "UNKNOWN",
+    "databaseOwner": "UNKNOWN"
+  },
+  "candidateSources": [
+    {
+      "path": "taiko_viewer/deploy/taiko-viewer.service",
+      "sha256": "9ec0bd95d11ac79e59946bd1a03bc92e91cd0e3b435c59e70b612753b96e3270",
+      "candidateUnit": "taiko-viewer.service",
+      "observedProduction": false
+    }
+  ],
+  "ddl": {
+    "source": "taiko_viewer/server/infrastructure/developer-api-v1/schema.ts",
+    "sourceSha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1",
+    "isolatedMigrationCli": "taiko_viewer/scripts/migrate_developer_api_v1.ts",
+    "cliSha256": "2940750d562f3e0752fc56401ff9ec3c9d051181a3ddf79d6dcd22dea861ce6b",
+    "createStatements": [
+      "CREATE TABLE IF NOT EXISTS web_developer_api_clients (\n  client_id CHAR(36) NOT NULL PRIMARY KEY, application_id BIGINT UNSIGNED NOT NULL,\n  owner_user_id BIGINT UNSIGNED NOT NULL, display_name VARCHAR(80) NOT NULL,\n  status VARCHAR(16) NOT NULL DEFAULT 'active', created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),\n  UNIQUE KEY uniq_api_client_application(application_id),\n  KEY idx_api_client_owner_page(owner_user_id,created_at,client_id)\n ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
+      "CREATE TABLE IF NOT EXISTS web_developer_api_resources (\n  player_id CHAR(36) NOT NULL PRIMARY KEY, binding_id BIGINT UNSIGNED NOT NULL,\n  UNIQUE KEY uniq_api_resource_binding(binding_id)\n ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
+      "CREATE TABLE IF NOT EXISTS web_developer_resource_grants (\n  grant_id CHAR(32) NOT NULL PRIMARY KEY, revision CHAR(32) NOT NULL,\n  owner_user_id BIGINT UNSIGNED NOT NULL, binding_id BIGINT UNSIGNED NOT NULL,\n  player_id CHAR(36) NOT NULL, client_id CHAR(36) NOT NULL, audience VARCHAR(64) NOT NULL,\n  taiko_id VARCHAR(25) NOT NULL, source VARCHAR(16) NOT NULL, manual_account_id VARCHAR(25) DEFAULT NULL,\n  scopes_json TEXT NOT NULL, consent_version VARCHAR(32) NOT NULL,\n  consented_at DATETIME(3) NOT NULL, issued_at DATETIME(3) NOT NULL,\n  expires_at DATETIME(3) NOT NULL, revoked_at DATETIME(3) DEFAULT NULL,\n  UNIQUE KEY uniq_api_grant_binding_client(owner_user_id,binding_id,client_id),\n  KEY idx_api_grant_player_client(player_id,client_id),\n  KEY idx_api_grant_owner_page(owner_user_id,issued_at,grant_id)\n ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
+      "CREATE TABLE IF NOT EXISTS web_developer_resource_grant_events (\n  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, grant_id CHAR(32) NOT NULL,\n  owner_user_id BIGINT UNSIGNED NOT NULL, binding_id BIGINT UNSIGNED NOT NULL, client_id CHAR(36) NOT NULL,\n  action VARCHAR(16) NOT NULL, scopes_json TEXT NOT NULL, consent_version VARCHAR(32) NOT NULL,\n  recorded_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3), KEY idx_api_grant_event(grant_id,id)\n ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"
+    ],
+    "conditionalF3Statements": [
+      "ALTER TABLE web_developer_api_clients ADD INDEX idx_api_client_owner_page(owner_user_id,created_at,client_id);",
+      "ALTER TABLE web_developer_resource_grants ADD INDEX idx_api_grant_owner_page(owner_user_id,issued_at,grant_id);"
+    ],
+    "productionApplied": false,
+    "createIfNotExistsRepairsExistingIndexes": false,
+    "databaseOwner": "UNKNOWN",
+    "metadataLockAndAlgorithmProof": "UNPROVEN",
+    "transactionalDdlRollbackClaimed": false
+  },
+  "decisions": [
+    {
+      "id": "P-ID-DISCOVERY",
+      "authorizationCategory": "READONLY_NAMED_DISCOVERY",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "确认真实 unit/PID，避免把历史模板当作已部署状态",
+      "EXACT_SCOPE": {
+        "candidateUnit": "taiko-viewer.service",
+        "candidateOnly": true,
+        "observedUnit": "UNKNOWN",
+        "operation": "systemctl show ONE candidate unit",
+        "fields": [
+          "Id",
+          "LoadState",
+          "ActiveState",
+          "SubState",
+          "MainPID",
+          "User",
+          "Group",
+          "WorkingDirectory",
+          "FragmentPath",
+          "ControlGroup"
+        ],
+        "maxSeconds": 10
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "tracked service template hash only; no production observation",
+      "STOP_CONDITION": "unit absent/mismatched: stop; no list-units, scan or automatic expansion",
+      "pendingFields": [
+        "approvalId",
+        "operator",
+        "expiresAt",
+        "privateEvidenceDestination"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-ID-VERIFY",
+      "authorizationCategory": "READONLY_EXACT_RUNTIME_FILES",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "证明部署构件/Node/两角色 Python 与 approved source 对应",
+      "EXACT_SCOPE": {
+        "unit": "UNKNOWN",
+        "pid": "UNKNOWN",
+        "nodeExecutable": "UNKNOWN",
+        "nuxtArtifactRoot": "UNKNOWN",
+        "nuxtEntry": "UNKNOWN",
+        "centerPython": "UNKNOWN",
+        "clientPython": "UNKNOWN",
+        "fields": [
+          "pid",
+          "startTicks",
+          "exe",
+          "cwd",
+          "cgroup",
+          "version",
+          "artifactHash",
+          "metadataOrigin",
+          "distributionVersion"
+        ],
+        "maxInterpreters": 2,
+        "maxArtifactFiles": 6000,
+        "maxArtifactBytes": 268435456
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "local rc.6 build and locked runtime identity; does not prove production",
+      "STOP_CONDITION": "path/PID/start identity/hash mismatch or cap exceeded; no environ/raw cmdline/business imports",
+      "pendingFields": [
+        "observedAndApprovedPid",
+        "allExactPaths",
+        "expectedArtifactManifest",
+        "privateEvidenceDestination"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-APP",
+      "authorizationCategory": "SYNTHETIC_MUTATING_HTTP_SEPARATE_AUTH",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "历史绑定/资源属主与 Grant/Key/Session 撤销不能靠可达性证明",
+      "EXACT_SCOPE": {
+        "origin": "UNKNOWN",
+        "syntheticUserIds": "UNKNOWN",
+        "bindingIds": "UNKNOWN",
+        "clientIds": "UNKNOWN",
+        "playerIds": "UNKNOWN",
+        "runtimeEnablementAuthorization": "UNKNOWN",
+        "routeTemplates": [
+          "GET /api/v1/taiko/players/{playerId}/profile",
+          "GET /api/v1/taiko/players/{playerId}/scores",
+          "POST /api/account/developer/grants",
+          "DELETE /api/account/developer/grants/{grantId}"
+        ],
+        "fields": [
+          "status",
+          "privateBodyPresent",
+          "etagPresent",
+          "cacheControl",
+          "syntheticAuditId"
+        ],
+        "maxRequests": 30
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "existing scoped SQL/H3 grant and revoked-ETag proof retained; production unknown",
+      "STOP_CONDITION": "any cross-owner/source body or successful revoked/expired/disabled read/304; OFF 404 alone is not auth PASS; no automatic feature enablement",
+      "pendingFields": [
+        "origin",
+        "syntheticIdentities",
+        "allowedMutationsAndCleanup",
+        "restrictedRuntimeState",
+        "timeWindow"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-PROXY",
+      "authorizationCategory": "READONLY_CONFIG_AND_SEPARATE_SYNTHETIC_HTTP",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "核实新旧反代、Host/Origin、可信转发头与匿名 direct-peer 日预算",
+      "EXACT_SCOPE": {
+        "vhostFile": "UNKNOWN",
+        "explicitIncludeFiles": "UNKNOWN",
+        "trustedProxyCidrs": "UNKNOWN",
+        "directPeerOrigins": "UNKNOWN",
+        "parserHash": "UNKNOWN",
+        "fields": [
+          "serverName",
+          "listen",
+          "upstream",
+          "path",
+          "method",
+          "hostRule",
+          "originRule",
+          "trustedPeerRule",
+          "quotaKey"
+        ],
+        "maxRecords": 100,
+        "maxBytes": 65536,
+        "maxSeconds": 10,
+        "syntheticRoute": "GET /api/v1/taiko/catalog/songs"
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "frozen direct-peer quota implementation/local evidence only; no production ACL observation",
+      "STOP_CONDITION": "untrusted forwarded-header bypass, shared budget contrary to policy, unknown include or need for nginx -T; stop",
+      "pendingFields": [
+        "allExactFiles",
+        "parserHash",
+        "probeSources",
+        "requestWindow"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-KEY",
+      "authorizationCategory": "READONLY_PRESENCE_AND_REDACTION",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "避免 Authorization/Cookie/JWT/Key 泄入 URL、日志、前端或异常",
+      "EXACT_SCOPE": {
+        "approvedFiles": "UNKNOWN",
+        "fieldNames": "UNKNOWN",
+        "parserHash": "UNKNOWN",
+        "keyLifecycleOwner": "UNKNOWN",
+        "fields": [
+          "fieldPresentBoolean",
+          "redactionEnabledBoolean",
+          "lifecycleOwner"
+        ],
+        "maxBytes": 4096
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "local sanitization/owner checks; no production secret values inspected",
+      "STOP_CONDITION": "any credential value or secret content hash would be emitted; do not read full Environment/environ",
+      "pendingFields": [
+        "allExactFiles",
+        "fieldAllowlist",
+        "parserHash",
+        "keyOwner"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-AUDIT",
+      "authorizationCategory": "READONLY_LOG_FORMAT_THEN_SCOPED_SYNTHETIC_SAMPLE",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "验证审计可追责且不泄漏真实用户/凭证",
+      "EXACT_SCOPE": {
+        "logFormatFile": "UNKNOWN",
+        "sampleLogFile": "UNKNOWN",
+        "syntheticRequestIds": "UNKNOWN",
+        "window": "UNKNOWN",
+        "fields": [
+          "timestamp",
+          "syntheticRequestId",
+          "method",
+          "fixedRoute",
+          "status",
+          "bytes",
+          "duration",
+          "redactionBoolean"
+        ],
+        "maxWindowMinutes": 5,
+        "maxSampleLines": 20
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "synthetic local logs only; production format/retention unobserved",
+      "STOP_CONDITION": "real user identifier/header/body or out-of-window line; no historical log tail",
+      "pendingFields": [
+        "exactFiles",
+        "parserHash",
+        "syntheticIds",
+        "window",
+        "retentionOwner"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-MIGRATION-OBSERVE",
+      "authorizationCategory": "READONLY_SQL_METADATA",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "在 DDL 前确定四表及 F3 owner-keyset 的真实结构",
+      "EXACT_SCOPE": {
+        "connectionIdentity": "UNKNOWN",
+        "database": "UNKNOWN",
+        "readonlyPrincipal": "UNKNOWN",
+        "tables": [
+          "web_developer_api_clients",
+          "web_developer_api_resources",
+          "web_developer_resource_grants",
+          "web_developer_resource_grant_events"
+        ],
+        "metadataSources": [
+          "INFORMATION_SCHEMA.TABLES",
+          "INFORMATION_SCHEMA.COLUMNS",
+          "INFORMATION_SCHEMA.STATISTICS"
+        ],
+        "fields": [
+          "selectedSchema",
+          "tableName",
+          "engine",
+          "tableCollation",
+          "columnName",
+          "ordinalPosition",
+          "columnType",
+          "isNullable",
+          "columnDefault",
+          "extra",
+          "collationName",
+          "indexName",
+          "nonUnique",
+          "seqInIndex",
+          "indexColumn"
+        ],
+        "maxRows": 512,
+        "maxBytes": 131072,
+        "maxSeconds": 10,
+        "businessRows": false
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "four-table synthetic dry-run/idempotence/index/restore PASS_SCOPED reused",
+      "STOP_CONDITION": "wrong database, extra scope, unexpected column/index/type/owner, or any need for business-row SELECT; stop",
+      "pendingFields": [
+        "exactConnection",
+        "databaseName",
+        "readonlyPrincipal",
+        "authorizationId"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-MIGRATION-DDL",
+      "authorizationCategory": "DDL_SEPARATE_AUTH",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "仅执行经观察后审阅的 additive schema/index diff",
+      "EXACT_SCOPE": {
+        "database": "UNKNOWN",
+        "databaseOwner": "UNKNOWN",
+        "executor": "UNKNOWN",
+        "finalSqlHash": "UNKNOWN",
+        "window": "UNKNOWN",
+        "maximumCreateTables": 4,
+        "maximumConditionalF3Indexes": 2,
+        "testCliProductionApplyAllowed": false
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "DDL source/hash and previous synthetic proof only; production locks/algorithm UNPROVEN",
+      "STOP_CONDITION": "metadata lock timeout, drift, unsupported online DDL or unknown blockers; no automatic DROP/ALTER columns/revoke rollback",
+      "pendingFields": [
+        "productionMetadataDiff",
+        "exactSqlHash",
+        "databaseOwner",
+        "executor",
+        "lockDiskBudget",
+        "window",
+        "rollbackReview"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-RESTORE",
+      "authorizationCategory": "BUSINESS_DATA_BACKUP_RESTORE_SEPARATE_AUTH",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "Grant/Key/Session 撤销与 Publication/measurement 必须同检查点恢复",
+      "EXACT_SCOPE": {
+        "database": "UNKNOWN",
+        "sqlTableAllowlist": "UNKNOWN",
+        "publicationIdentities": "UNKNOWN",
+        "checkpoint": "UNKNOWN",
+        "encryptedOffsiteDestination": "UNKNOWN",
+        "keyCustodian": "UNKNOWN",
+        "restoreSandbox": "UNKNOWN",
+        "businessDataReadAuthorized": false,
+        "rpoMinutesTarget": 15,
+        "rtoMinutesTarget": 120,
+        "realScaleProof": "UNPROVEN"
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "four synthetic tables restored; not PITR/offsite backup or production recovery",
+      "STOP_CONDITION": "inconsistent vector/checkpoint, missing post-checkpoint revocations, unknown rights/key/destination; keep private paths OFF",
+      "pendingFields": [
+        "dataOwner",
+        "exactDataAndFileScope",
+        "checkpointAndBinlog",
+        "offsiteDestination",
+        "keyCustodian",
+        "restoreTarget",
+        "12AssetMappings"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-CANARY",
+      "authorizationCategory": "DEPLOYMENT_AND_MYTAIKO_ROLLOUT_SEPARATE_AUTH",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "先旧模式确认，再受控名单 My Taiko，具备完整回滚",
+      "EXACT_SCOPE": {
+        "deploymentUnit": "UNKNOWN",
+        "artifactIdentity": "UNKNOWN",
+        "allowlistRoutingImplementation": "UNKNOWN",
+        "allowlist": "UNKNOWN",
+        "window": "UNKNOWN",
+        "operator": "UNKNOWN",
+        "initialMyTaikoPrivate": "legacy",
+        "initialMyTaikoPublic": "legacy",
+        "developerApi": "OFF",
+        "annualStartupMode": "normal",
+        "rollbackArtifact": "UNKNOWN",
+        "rollbackCommand": "NOT_PREPARED_WITHOUT_EXACT_SCOPE"
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "unmodified local dual-mode smoke only; no per-user allowlist implemented",
+      "STOP_CONDITION": "cross-user data, lost revocation, mixed revision, data error or severe resource/service impact; paired modes revert to legacy, v1 independently OFF",
+      "pendingFields": [
+        "deployApproval",
+        "runtimeIdentity",
+        "allowlistImplementation",
+        "approvedUsers",
+        "window",
+        "rollbackArtifact",
+        "operator"
+      ],
+      "approved": false,
+      "authorizationId": null
+    },
+    {
+      "id": "P-V1-ENABLE",
+      "authorizationCategory": "EXTERNAL_API_ENABLEMENT_SEPARATE_AUTH",
+      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "WHY": "冻结协议不等于允许外部读取",
+      "EXACT_SCOPE": {
+        "runtimeUnit": "UNKNOWN",
+        "enablementWindow": "UNKNOWN",
+        "externalIngressAllowlist": "UNKNOWN",
+        "publicPrivateBudgetDecision": "UNKNOWN",
+        "auditRetentionOwner": "UNKNOWN",
+        "featureGateAuthorized": false
+      },
+      "CAN_RUN_NOW": false,
+      "OWNER_APPROVAL_NEEDED": true,
+      "EVIDENCE": "Contract FROZEN_LOCAL and local negative tests; production state UNKNOWN",
+      "STOP_CONDITION": "any missing dependency or broad consent such as agree to launch; no automatic chain from MyTaiko PASS",
+      "pendingFields": [
+        "signedP-ID-APP-PROXY-KEY-AUDIT",
+        "schemaMigration",
+        "restoreReadiness",
+        "independentEnablementDecision"
+      ],
+      "approved": false,
+      "authorizationId": null
+    }
+  ],
+  "privateAssets": [
+    {
+      "id": "private-resource-01",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-02",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-03",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-04",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-05",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-06",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-07",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-08",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-09",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-10",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-11",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-12",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    }
+  ],
+  "privateAssetsAreLegacyPngGoldens": false,
+  "productionRpoRto": {
+    "rpoMinutesTarget": 15,
+    "rtoMinutesTarget": 120,
+    "pitr": "UNPROVEN",
+    "encryptedOffsite": "UNPROVEN",
+    "realScaleRestore": "UNPROVEN"
+  },
+  "permissionRule": "Each category requires a separate explicit decision; document acceptance is not authorization. UNKNOWN scopes require scoped discovery or Owner-provided exact scope; no execution now."
+}
