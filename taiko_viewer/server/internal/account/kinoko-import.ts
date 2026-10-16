@@ -1,4 +1,5 @@
 import { createError } from "h3";
+import { filterKinokoEvents, scoreEventEpoch } from "./kinoko-time";
 import type { UserdataPayload, UserdataSong } from "./shared";
 
 const KINOKO_SCORE_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/hiroba";
@@ -142,7 +143,7 @@ const fetchKinokoPayload = async (apiKey: string, endpoint: string) => {
   return { payload, receivedBytes: Buffer.byteLength(text) };
 };
 
-export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResult> => {
+export const fetchKinokoScores = async (apiKey: string, now = new Date()): Promise<KinokoFetchResult> => {
   const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_SCORE_ENDPOINT);
 
   const playedRecords = payload?.data?.playedRecords;
@@ -156,10 +157,10 @@ export const fetchKinokoScores = async (apiKey: string): Promise<KinokoFetchResu
   if (songs.length !== rawSongs.length) {
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的成绩记录" });
   }
-  return { playerId: returnedPlayerId, songs, receivedBytes };
+  return { playerId: returnedPlayerId, songs: filterKinokoEvents(songs, now).records, receivedBytes };
 };
 
-export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryFetchResult> => {
+export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Promise<KinokoHistoryFetchResult> => {
   const { payload, receivedBytes } = await fetchKinokoPayload(apiKey, KINOKO_HISTORY_ENDPOINT);
   const playedRecords = payload?.data?.playedRecords;
   const returnedPlayerId = String(playedRecords?.player_id || "").trim();
@@ -190,23 +191,26 @@ export const fetchKinokoHistory = async (apiKey: string): Promise<KinokoHistoryF
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史成绩记录" });
     }
     records.push(...songs);
-    latestSongs.push(
-      [...songs].sort((left, right) =>
-        String(left.update_datetime || "").localeCompare(String(right.update_datetime || ""))
-      ).at(-1) as UserdataSong
-    );
     if (records.length > MAX_HISTORY_RECORDS) {
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的历史记录过多，已停止迁移" });
     }
   }
-  return { playerId: returnedPlayerId, records, latestSongs, receivedBytes };
+  const admitted = filterKinokoEvents(records, now).records;
+  const latest = new Map<string, UserdataSong>();
+  for (const song of admitted) {
+    const key = `${song.song_no}:${song.level}`, previous = latest.get(key);
+    if (!previous || scoreEventEpoch(song) >= scoreEventEpoch(previous)) latest.set(key, song);
+  }
+  latestSongs.push(...latest.values());
+  return { playerId: returnedPlayerId, records: admitted, latestSongs, receivedBytes };
 };
 
 const maxField = (local: UserdataSong, remote: UserdataSong, field: (typeof CUMULATIVE_FIELDS)[number]) => {
   local[field] = Math.max(toNonNegativeInteger(local[field]), toNonNegativeInteger(remote[field]));
 };
 
-export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[]) => {
+export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[], now = new Date()) => {
+  remoteSongs = filterKinokoEvents(remoteSongs, now).records;
   const songs = Array.isArray(userdata.songs) ? userdata.songs : [];
   const songMap = new Map(songs.map((song) => [`${song.song_no}:${song.level}`, song]));
   let added = 0;

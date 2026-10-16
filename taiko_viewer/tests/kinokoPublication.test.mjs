@@ -102,9 +102,12 @@ test('real import preserves independent frozen archives and malformed old eviden
   assert.equal(await readFile(resolve(root, identity, 'data_bad.json'), 'utf8'), '{invalid');
 }));
 
-test('real import bounds and timestamp validation reject before publication', async () => fixture(async service => {
+test('real import filters invalid timestamps and rejects excessive bounds before publication', async () => fixture(async service => {
   const current = await service.readUserdata(identity);
-  await assert.rejects(service.writeKinokoHistorySnapshots(identity, [row(1, 1, 1, '2026-02-30 12:00:00')], current), error => error.statusCode === 502);
+  const rejected = await service.writeKinokoHistorySnapshots(identity, [row(1, 1, 1, '2026-02-30 12:00:00')], current);
+  assert.equal(rejected.importedRecords, 0);
+  assert.equal(rejected.snapshotFiles, 0);
+  assert.equal((await head(service)).sequence, 1);
   const large = Array.from({ length: 10001 }, (_, i) => row(i + 1, 1, 1));
   await assert.rejects(service.writeKinokoHistorySnapshots(identity, large, current), error => error.statusCode === 400);
   assert.equal((await head(service)).sequence, 1);
