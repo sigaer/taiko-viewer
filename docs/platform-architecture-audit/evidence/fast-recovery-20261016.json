@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "status": "PASS_SCOPED_SYNTHETIC_RESTORE",
+  "overallRecoveryGate": "BLOCKED",
+  "productionAccess": false,
+  "viewerBaseline": "6e7f35b",
+  "viewerVersion": "0.82.1",
+  "taikoVersion": "0.14.2",
+  "taikoWheel": {
+    "path": "/var/tmp/taiko-0142-candidate-20261016/repack/wheels/taiko_bot-0.14.2-py3-none-any.whl",
+    "sha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8"
+  },
+  "installedRole": {
+    "path": "docs/platform-architecture-audit/evidence/r1-rebuild-center-0142-20261016.json",
+    "sha256": "b5e78ce00e154166d9be52c901e6ecb7e38efa4a0d9f077b8f4180b5c86a2956"
+  },
+  "interpreter": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+  "testSource": {
+    "path": "taiko_viewer/tests/fastRecoveryCheckpointSql.test.mjs",
+    "sha256": "bde0694d00297bbd9e43d56773e82f4f99010ffd4f174dd8420e4ff591f8dec1"
+  },
+  "runnerSource": {
+    "path": "scripts/readiness/run-isolated-sql.mjs",
+    "sha256": "8e909dc097472442715e6555aec783a9614a172324e1ce96d42810d6019b8bd6"
+  },
+  "counts": {
+    "tests": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "attempts": [
+    {
+      "attempt": "initial",
+      "status": "FAIL",
+      "reason": "Harness attempted inserting a MySQL generated column; server correctly rejected it.",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-nXug3Z/result.json",
+        "sha256": "d31847ab04c675a2a73ff991f1e6264838ba5530c78db497dcc006b5a3b82436"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-nXug3Z/tests.log",
+        "sha256": "85c0d06931a680848bc583437c18d50311ba8dad1e7e90d98c1b03263ba43997"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-fast-recovery-first.log",
+        "sha256": "140095c173996458256d9f1a6694e2e330d59f6c43fdfdeec143b52c13d87918"
+      },
+      "recoveryEvidence": {
+        "path": "/var/tmp/viewer082-recovery-KH7wHf/evidence.json",
+        "sha256": "c8bf88aa48458469830d1a31c0f87920fe6d1fab68276536372bcc3494b65032"
+      },
+      "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792118701-2874981.service",
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "daemonExited": true,
+      "restoredDaemonExited": true
+    },
+    {
+      "attempt": "retry",
+      "status": "FAIL",
+      "reason": "Harness incorrectly omitted DEFAULT_GENERATED timestamps; full row hash parity detected the mismatch.",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-BAV2Cb/result.json",
+        "sha256": "38d71fe717d55070ec7f3e899c773d8bb1bf5f7723b16699d07de2f4f167015f"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-BAV2Cb/tests.log",
+        "sha256": "9d74e3fdc64cd01f09ac3a24d7bb230f966a8401092c778a654068a76a6d2ab6"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-fast-recovery-retry.log",
+        "sha256": "646562c62960ddb1998fa82bf9dde422541c0350a1203764f9c19c6de56faa20"
+      },
+      "recoveryEvidence": {
+        "path": "/var/tmp/viewer082-recovery-Oq9IoI/evidence.json",
+        "sha256": "b75c774a969ce07a1001cc40778fbf5e89e1473e72986b97eed11c59082b98f5"
+      },
+      "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792118788-2879525.service",
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "daemonExited": true,
+      "restoredDaemonExited": true
+    },
+    {
+      "attempt": "final",
+      "status": "PASS",
+      "reason": "Only VIRTUAL/STORED GENERATED columns omitted on insert; regenerated values and preserved timestamps pass complete row equality.",
+      "runner": {
+        "path": "/var/tmp/viewer1-sql-PQ5DjH/result.json",
+        "sha256": "fee2140cedd93feca39e9a089312ebba0d59ca96b9423e50d3bc9f4012efe487"
+      },
+      "testsLog": {
+        "path": "/var/tmp/viewer1-sql-PQ5DjH/tests.log",
+        "sha256": "d4f1458dbb5811e6d80b1f29221b38cba7482dca13dc762fbaf766096ec7961a"
+      },
+      "wrapperLog": {
+        "path": "/var/tmp/viewer082-fast-recovery-final.log",
+        "sha256": "f43defaf81ec6fd2207a270ebbaca443934808a3eed39152dcd918edd3c8c7a8"
+      },
+      "recoveryEvidence": {
+        "path": "/var/tmp/viewer082-recovery-ynczLb/evidence.json",
+        "sha256": "32b0470b1dda3ef8ae34e2f350bd41e037de5257439daaf9287a6624b2b7a6ff"
+      },
+      "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792118907-2884769.service",
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "daemonExited": true,
+      "restoredDaemonExited": true
+    }
+  ],
+  "result": {
+    "status": "PASS_SCOPED_SYNTHETIC_RESTORE",
+    "workspace": "/var/tmp/viewer082-recovery-ynczLb",
+    "scope": "synthetic independent SQL instance + actual publication bridge and authorization services; no HTTP listener",
+    "productionAccess": false,
+    "offHostBackup": "BLOCKED_NO_AUTHORIZED_DESTINATION",
+    "cases": [
+      "controlled incident disconnects original service graph before replacement initialization",
+      "all SQL tables and C/H/daily/Annual bytes identical after independent restore",
+      "actual authorization denies revoked token, revoked grant and expired grant; valid explicit grant reads current",
+      "restored owner core write succeeds with strictly increasing publication sequence",
+      "unknown revocation continuity fail-closed procedure invalidates all restored developer credentials before admission",
+      "corrupt SQL checkpoint rejected by the same pre-import checksum guard; production restore orchestrator remains unimplemented"
+    ],
+    "startedAt": "2026-10-16T02:48:37.553Z",
+    "checkpoint": {
+      "at": "2026-10-16T02:48:38.219Z",
+      "sqlSha256": "d7d09f8b62f9f321c22446a8f3cd3eb9b0e0061f42c7329d7e83cb07a38ed49f",
+      "publication": {
+        "sequence": 3,
+        "commitId": "9b86d91a8e9141d2b62a2b6d6023429d"
+      },
+      "userdataHashes": {
+        ".taiko-publications/986711960257476168/commits/98efe078b9934aa9a775256d9005c023.json": "f3a8815072fdd27767cb56a2f66f79987b0b2cb0d2d5d3514e06958dc68b1ffc",
+        ".taiko-publications/986711960257476168/commits/9b86d91a8e9141d2b62a2b6d6023429d.json": "781f3b1975ace490595921ea47a3803259b7500a51689919d18ca34d9ae3671a",
+        ".taiko-publications/986711960257476168/commits/ec9de3c151b948bf944101a14b6c8419.json": "59704935ca9b6e5dac5ecfe0e49de142f3f605103707fba72dc50ec50dc6092a",
+        ".taiko-publications/986711960257476168/committed.json": "781f3b1975ace490595921ea47a3803259b7500a51689919d18ca34d9ae3671a",
+        ".taiko-publications/986711960257476168/lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".taiko-publications/986711960257476168/objects/25c3c2b7839dd810848117e1bf9123c8a30a81e28f0b4ec877fef8a051d77943": "25c3c2b7839dd810848117e1bf9123c8a30a81e28f0b4ec877fef8a051d77943",
+        ".taiko-publications/986711960257476168/objects/35940569a7ca952d462a9b2c74331dd5e3b2b7ee05387579edb193e0029cf564": "35940569a7ca952d462a9b2c74331dd5e3b2b7ee05387579edb193e0029cf564",
+        ".taiko-publications/986711960257476168/objects/434b3a6127a454f19dc20eed1d1254f1e4e8c31adc6fcfc0ffe3a65954228240": "434b3a6127a454f19dc20eed1d1254f1e4e8c31adc6fcfc0ffe3a65954228240",
+        ".taiko-publications/986711960257476168/objects/928b50b6554d79cc36956a62c71f7dec0e67c5cbcba87e54c9cc64a423c7babf": "928b50b6554d79cc36956a62c71f7dec0e67c5cbcba87e54c9cc64a423c7babf",
+        ".taiko-publications/986711960257476168/objects/d0a9559941578a010a133c61b5e491b94e3194bb25f46dbc0ce37a82dbc24ace": "d0a9559941578a010a133c61b5e491b94e3194bb25f46dbc0ce37a82dbc24ace",
+        ".taiko-publications/986711960257476168/objects/ed534a267f688d1b1e0822b8689ce71e92818244ade654c88000c959ab62c14b": "ed534a267f688d1b1e0822b8689ce71e92818244ade654c88000c959ab62c14b",
+        "986711960257476168/daily-ability-v1-top20.json": "39ec5c28b32b0b2be8bd8a10aa77cf4d4d21492d3cc5814a74b7b2bf13fb0006",
+        "986711960257476168/data_20261016_104835_000000_00000000000000000001_98efe078b9934aa9a775256d9005c023_manual-create.json": "35940569a7ca952d462a9b2c74331dd5e3b2b7ee05387579edb193e0029cf564",
+        "986711960257476168/data_20261016_104835_458000_00000000000000000002_c5240f2fa40c80c14ba6a54955b4da71_manual-score.json": "928b50b6554d79cc36956a62c71f7dec0e67c5cbcba87e54c9cc64a423c7babf",
+        "986711960257476168/data_20261016_104836_458000_00000000000000000003_b70ff350efc6f80565a8b5ce45880bb0_manual-score.json": "25c3c2b7839dd810848117e1bf9123c8a30a81e28f0b4ec877fef8a051d77943",
+        "986711960257476168data.json": "434b3a6127a454f19dc20eed1d1254f1e4e8c31adc6fcfc0ffe3a65954228240"
+      },
+      "annualHashes": {
+        "report.json": "f6b7d09120fe4bc23b66d543415070698f6e8f2670364031839fbbc0c92833c5"
+      }
+    },
+    "databaseProof": {
+      "source": {
+        "name": "viewer1_security_test",
+        "datadir": "/var/tmp/viewer1-sql-PQ5DjH/mysql/"
+      },
+      "restored": {
+        "name": "viewer082_restore_test",
+        "datadir": "/var/tmp/viewer082-recovery-ynczLb/restored-mysql/"
+      },
+      "independentDatadirs": true
+    },
+    "nextPublication": {
+      "sequence": 4,
+      "commitId": "fa617f66f28a44a9bdaaf77ee4238de9"
+    },
+    "recovery": {
+      "checkpointAt": "2026-10-16T02:48:38.219Z",
+      "incidentAt": "2026-10-16T02:48:38.358Z",
+      "coreServiceReadyAt": "2026-10-16T02:48:46.965Z",
+      "rpoMs": 139,
+      "rtoMs": 8606.965387,
+      "definition": "incident before replacement initialization until actual auth/current/history and core write succeed; synthetic service graph, not production HTTP readiness",
+      "targetsMet": true
+    },
+    "restoredDaemonExited": true,
+    "finishedAt": "2026-10-16T02:48:48.300Z"
+  },
+  "sqlRowsByTable": {
+    "bind": 1,
+    "public_score_tokens": 0,
+    "taiko_bind_identity_state": 0,
+    "taiko_bot_binding_operations": 0,
+    "taiko_hiroba_binding_operations": 0,
+    "taiko_manual_accounts": 1,
+    "taiko_manual_claim_codes": 1,
+    "taiko_manual_creations": 1,
+    "taiko_manual_grant_receipts": 1,
+    "taiko_qq_migration_codes": 0,
+    "taiko_source_lifecycle": 0,
+    "taiko_source_service_grant_audit": 0,
+    "taiko_source_service_grants": 4,
+    "web_annual_shares": 1,
+    "web_annual_summaries": 1,
+    "web_data_sync_logs": 0,
+    "web_data_sync_receipts": 0,
+    "web_developer_tokens": 4,
+    "web_growth_measurements": 1,
+    "web_growth_recent_cursors": 1,
+    "web_hiroba_credentials": 0,
+    "web_player_goals": 1,
+    "web_song_locks": 1,
+    "web_taiko_binding_confirmations": 0,
+    "web_taiko_binding_mydon_showcase_titles": 1,
+    "web_taiko_binding_revocations": 0,
+    "web_taiko_binding_verifications": 0,
+    "web_taiko_bindings": 1,
+    "web_taiko_open_api_daily_usage": 0,
+    "web_user_accounts": 2,
+    "web_user_qq_bindings": 0,
+    "web_user_sessions": 0
+  },
+  "limitations": [
+    "Quiesced single-writer checkpoint; not online backup or PITR.",
+    "Small synthetic service graph; no full HTTP/session readiness or large production recovery timing.",
+    "Unknown revocation continuity invalidation is an exercised procedure, not automated product recovery.",
+    "No authorized off-host destination or rights clearance; no twelve quarantined resources read.",
+    "Production ingress/ACL/runtime audit PENDING_AUTHORIZATION."
+  ],
+  "reusedNotRerun": [
+    "21 manual source recovery tests",
+    "119 worker SQL tests",
+    "46 + 46 role lifecycle tests",
+    "12 PNG goldens"
+  ]
+}
