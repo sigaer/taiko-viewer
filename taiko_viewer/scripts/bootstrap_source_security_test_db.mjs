@@ -46,8 +46,11 @@ async function main(){
   const configured=process.env.TAIKO_TEST_MYSQL_DATADIR;
   assert.ok(configured&&isAbsolute(configured),'Explicit isolated datadir required');
   const datadir=await realpath(configured);
-  const beneath=relative('/var/tmp',datadir);
-  assert.ok(beneath&&!beneath.startsWith('..')&&!isAbsolute(beneath),'Datadir must be below disk-backed /var/tmp');
+  const run=await realpath(process.env.QA_RUN_DIR||'');const scratch=await realpath(process.env.QA_RUN_TMPDIR||'');
+  assert.match(run,/^\/home\/sigaer\/taiko\/qa-vault\/runs\/qa-[0-9a-f]{12}$/);
+  assert.equal(scratch,resolve(run,'scratch'),'Scratch must belong to the admitted QA run');
+  const beneath=relative(scratch,datadir);
+  assert.match(beneath,/^sql-[a-zA-Z0-9]+\/mysql$/,'Datadir must be this QA run own SQL scratch directory');
   const statements=productionStatements(await readFile(sourceUrl,'utf8'));
   const db=await mysql.createConnection({host:'127.0.0.1',port,user:process.env.TAIKO_DB_USER,
     password:process.env.TAIKO_DB_PASSWORD||'',database,connectTimeout:5000,multipleStatements:false});
