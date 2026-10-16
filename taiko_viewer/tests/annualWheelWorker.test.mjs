@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -14,7 +15,7 @@ registerHooks({resolve(specifier,context,next){
 }});
 
 test('installed annual consumers and failures retain admission and cgroup isolation', {timeout:120000}, async t=>{
- const root=await mkdtemp('/var/tmp/annual-test-wheel-');
+ const root=await mkdtemp(qaTempPrefix('annual-test-wheel-'));
  const old={...process.env};
  const outcomes=[];
  try{

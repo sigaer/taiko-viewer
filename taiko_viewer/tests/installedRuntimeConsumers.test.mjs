@@ -1,3 +1,4 @@
+import {qaTempPrefix, assertQaPython} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,unlink} from 'node:fs/promises';
@@ -13,9 +14,9 @@ import {getTaikoPython,getTaikoPythonEnv} from '../server/utils/taiko-python.ts'
 const fixture=JSON.parse(await readFile(new URL('./fixtures/installedRuntimeCatalog.json',import.meta.url),'utf8'));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function isolated(task){
- const root=await mkdtemp('/var/tmp/viewer-installed-consumers-'),old={...process.env},runtime=globalThis.useRuntimeConfig;
+ const root=await mkdtemp(qaTempPrefix('viewer-installed-consumers-')),old={...process.env},runtime=globalThis.useRuntimeConfig;
  try{
-  assert.ok(process.env.TAIKO_PYTHON_EXECUTABLE?.startsWith('/var/tmp/'),'Select a QA wheel interpreter');
+  assertQaPython();
   const userdataDir=join(root,'userdata');await mkdir(userdataDir);await mkdir(join(root,'songs'));
   const charts={},catalog=[],rolls=[],records=[];
   for(let i=0;i<80;i++){

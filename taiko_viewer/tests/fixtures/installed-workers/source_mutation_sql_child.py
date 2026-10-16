@@ -20,7 +20,10 @@ import pymysql
 
 options = json.loads(Path(sys.argv[1]).read_text())
 owned = Path(options["root"]).resolve()
-assert str(owned).startswith("/var/tmp/manual-source-sql-")
+scratch = Path(os.environ["QA_RUN_TMPDIR"]).resolve()
+assert scratch == Path(os.environ["QA_RUN_DIR"]).resolve() / "scratch"
+assert owned.parent == scratch and owned.name.startswith("manual-source-sql-")
+assert not Path(options["root"]).is_symlink()
 # Explicit synthetic catalog needed by installed center dojo normalization.
 (owned / "songs").mkdir(exist_ok=True)
 (owned / "songs" / "grade_dojo_nijiiro_2025_simple.json").write_text('{"grades":[]}')

@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
@@ -7,7 +8,7 @@ import {importGrowthModule} from '../scripts/performance/growth-module-loader.mj
 const digest = data => createHash('sha256').update(data).digest('hex');
 
 for (const removed of [false,true]) test(`actual installed read / evidence / fact projection preserves removed=${removed}`,async()=>{
-  const root=await mkdtemp('/var/tmp/viewer-g1-facts-'),id='990000000000000001';
+  const root=await mkdtemp(qaTempPrefix('viewer-g1-facts-')),id='990000000000000001';
   try {
     const directory=resolve(root,id);await mkdir(directory);
     const chart=day=>({song_no:1,level:4,high_score:900000+day*1000,stage_cnt:day,

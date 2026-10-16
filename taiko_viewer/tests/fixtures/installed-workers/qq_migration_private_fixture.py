@@ -11,7 +11,7 @@ import traceback
 import signal
 import time
 request=json.loads(sys.stdin.buffer.read(65537))
-root=Path(os.environ['TAIKO_QQ_TEST_ROOT']).resolve();assert str(root).startswith('/var/tmp/') and root.is_dir()
+root=Path(os.environ['TAIKO_QQ_TEST_ROOT']).resolve();assert root.is_relative_to(Path(os.environ['QA_RUN_TMPDIR']).resolve()) and root.is_dir()
 old_open=builtins.open;old_path_open=Path.open
 def guard(path,mode):
     if isinstance(path,(str,bytes,Path)):

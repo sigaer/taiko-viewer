@@ -1,11 +1,12 @@
 """Synthetic image root, installed modules only; no private input or frozen source."""
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
 from PIL import Image
 root=Path(sys.argv[1]).resolve()
-assert str(root).startswith('/var/tmp/viewer-installed-images-')
+assert root.parent == Path(os.environ['QA_RUN_TMPDIR']).resolve() and root.name.startswith('viewer-installed-images-')
 fixture=json.loads(Path(sys.argv[2]).read_text())
 for directory in ['songs','userdata','assets/templates','assets/fonts','assets/icons/diff','assets/name_plate','assets/dress/common']:
     (root/directory).mkdir(parents=True,exist_ok=True)

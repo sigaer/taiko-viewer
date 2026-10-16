@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -47,7 +48,7 @@ test("generic history writer preserves its actual writer provenance", async () =
   const {getPublicationPython} = await import('../server/infrastructure/taiko-publication/python.ts');
   const {withPublicationLease} = await import('../server/infrastructure/taiko-publication/client.ts');
   const {writeUserdataWithHistory} = await import('../server/infrastructure/taiko-publication/writer.ts');
-  const root = await mkdtemp('/var/tmp/history-writer-oracle-');
+  const root = await mkdtemp(qaTempPrefix('history-writer-oracle-'));
   const previous = globalThis.useRuntimeConfig;
   try {
     globalThis.useRuntimeConfig = () => ({repoRoot:root,userdataDir:root});

@@ -1,3 +1,4 @@
+import {qaTempPrefix} from '../../tests/fixtures/qaPaths.mjs';
 // Offline-only import adapter. Production algorithms run from their actual source;
 // only runtime paths, the frozen calendar oracle and benchmark hooks are injected.
 import { readFile, mkdtemp, writeFile, rm } from "node:fs/promises";
@@ -6,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 export async function importGrowthModule(relative, { userdataDir, before = false, hooks = null } = {}) {
-  const modules = await mkdtemp("/var/tmp/growth-loader-modules-");
+  const modules = await mkdtemp(qaTempPrefix('growth-loader-modules-'));
   let moduleIndex = 0;
   const dataUrl = async code => {
     const path = resolve(modules, `module-${moduleIndex++}.mjs`);
@@ -20,7 +21,7 @@ export async function importGrowthModule(relative, { userdataDir, before = false
     if (cache.has(path)) return cache.get(path);
     if (path === resolve(root, "server/internal/account/shared.ts") || path === resolve(root, "server/infrastructure/runtime-paths.ts")) {
       if (!userdataDir) throw new Error("Offline evidence requires injected paths");
-      return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)},repoRoot:${JSON.stringify(process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko")}});`);
+      return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)},repoRoot:${JSON.stringify(process.env.QA_RUN_TMPDIR)}});`);
     }
     let source = await readFile(path, "utf8");
     if (before && path === resolve(root, "utils/playerGrowth.ts")) {

@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Test-only dependency injection. Executes the unmodified production Growth service,
 // including its disk loader and replay; never mocks the final overview or daily DTO.
 import {readFile,mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
@@ -7,7 +8,7 @@ import {catalog} from './dailyProgressReplay.mjs';
 const root = new URL('../../',import.meta.url);
 const dataModule = code => `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 export async function replayOverview(fixture,style='ready',measurementStyle='success') {
- const dir=await mkdtemp('/var/tmp/growth-replay-');
+ const dir=await mkdtemp(qaTempPrefix('growth-replay-'));
  try {
   await mkdir(resolve(dir,'fixture'));
   let current=new Map();

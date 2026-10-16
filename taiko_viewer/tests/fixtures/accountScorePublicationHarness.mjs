@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Real account helpers and endpoints' service functions, real center bridge,
 // synthetic filesystem and an allowlisted in-memory DB adapter only.
 import { build } from 'esbuild';
@@ -10,7 +11,7 @@ const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/g
 const identity = 'synthetic';
 const key = '__accountScorePublicationFixture';
 export async function accountPublicationFixture(task) {
-  const root = await mkdtemp('/var/tmp/account-score-publication-');
+  const root = await mkdtemp(qaTempPrefix('account-score-publication-'));
   const priorConfig = globalThis.useRuntimeConfig;
   const priorFetch = globalThis.fetch;
   const state = { binding: { id: 1, user_id: 1, taiko_id: identity, source: 'wahlap' }, locks: new Set(), lockReads: 0, failLockReadAt: 0,

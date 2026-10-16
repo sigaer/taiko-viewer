@@ -1,3 +1,4 @@
+import {qaTempPrefix, assertQaPython} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
@@ -15,9 +16,9 @@ registerHooks({
  load(url,context,next){if(url==='fixture:paths')return {format:'module',source:'export const getRuntimePaths=()=>globalThis.__revisionPaths;',shortCircuit:true};return next(url,context);}
 });
 test('actual Viewer Growth revision uses installed identity and invalidates same-stat catalog changes',{timeout:30000},async()=>{
- const root=await mkdtemp('/var/tmp/viewer-growth-revision-');
+ const root=await mkdtemp(qaTempPrefix('viewer-growth-revision-'));
  try{
-  assert.ok(process.env.TAIKO_PYTHON_EXECUTABLE?.startsWith('/var/tmp/'));
+  assertQaPython();
   await mkdir(resolve(root,'songs'));
   for(const name of ['song_data.json','song_alias.json','rating_structured_with_ids.json'])await writeFile(resolve(root,'songs',name),'[]');
   const persisted=resolve(root,'old-measurement.json');await writeFile(persisted,'{"revision":"legacy","value":42}');

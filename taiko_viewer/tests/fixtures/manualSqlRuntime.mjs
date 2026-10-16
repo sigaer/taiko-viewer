@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Native real manual SQL/source runtime; synthetic configuration/catalog only.
 import assert from 'node:assert/strict';
 import mysql from 'mysql2/promise';
@@ -19,7 +20,7 @@ import { GOAL_TABLE_SQL } from '../../server/services/goals/schema.ts';
 import { GROWTH_MEASUREMENT_TABLE_SQL } from '../../server/services/growth-history/schema.ts';
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from '../../server/services/growth-recent/schema.ts';
 import { QQ_MIGRATION_CODE_TABLE_SQL } from '../../server/infrastructure/account/qq-migration-schema.ts';
-const repoRoot = process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || '/home/sigaer/git/Sakura_bot/taiko';
+const repoRoot = process.env.QA_RUN_TMPDIR;
 
 // The isolated DB lacks REFERENCES grants. These are business-compatible test
 // tables without FK enforcement; they do not replace production migrations.
@@ -127,7 +128,7 @@ export async function manualSqlFixture(task, { withProfile = false, withPersonal
     for(const sql of BOT_BINDING_OPERATION_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
     for(const sql of SOURCE_SERVICE_PRINCIPAL_MIGRATIONS)try{await pool.execute(sql);}catch(error){if(error.code!=='ER_DUP_FIELDNAME')throw error;}
     for(const sql of HIROBA_CREDENTIAL_MIGRATIONS)await pool.execute(sql);
-    root = await mkdtemp('/var/tmp/manual-source-sql-');
+    root = await mkdtemp(qaTempPrefix('manual-source-sql-'));
     const config = { repoRoot, userdataDir: resolve(root, 'userdata'), accountCacheDir: resolve(root, 'cache'), manualClaimSecret: 'synthetic-claim-only' };
     const db = { query: (...args) => pool.query(...args), async execute(sql, args) {
       let result;

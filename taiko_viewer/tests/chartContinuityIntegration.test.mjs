@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
@@ -5,7 +6,7 @@ import {resolve} from 'node:path';
 import {importGrowthModule} from '../scripts/performance/growth-module-loader.mjs';
 const row=(id,day,extra={})=>({song_no:id,level:4,high_score:900000+day*100,stage_cnt:day,update_datetime:`2026-01-0${day} 12:00:00`,highscore_datetime:`2026-01-0${day} 12:00:00`,...extra});
 async function replay(entries, check) {
-  const root=await mkdtemp('/var/tmp/chart-continuity-'),id='990000000000000003';
+  const root=await mkdtemp(qaTempPrefix('chart-continuity-')),id='990000000000000003';
   try {
     await mkdir(resolve(root,id));
     for(let i=0;i<entries.length;i++) {

@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {spawn} from 'node:child_process';
@@ -11,7 +12,7 @@ import {getPublicationPython} from '../server/infrastructure/taiko-publication/p
 const helper=fileURLToPath(new URL('./fixtures/crossWriterInstalled.py',import.meta.url));
 const identity='synthetic';
 async function fixture(task:(root:string)=>Promise<void>){
- const root=await mkdtemp('/var/tmp/installed-cross-writer-');
+ const root=await mkdtemp(qaTempPrefix('installed-cross-writer-'));
  try{await task(root);}finally{await rm(root,{recursive:true,force:true});}
 }
 function worker(root:string,writer:string,fault='none'){

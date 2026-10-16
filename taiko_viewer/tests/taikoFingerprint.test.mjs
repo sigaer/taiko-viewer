@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile, writeFile, mkdir, mkdtemp, rm, utimes } from 'node:fs/promises';
@@ -17,7 +18,7 @@ const executable = ts.transpileModule((inputSource+ratingSource).replaceAll('exp
 }).outputText;
 
 test('annual fingerprints detect Source and algorithm changes without rewriting reports', async () => {
-  const root = await mkdtemp('/var/tmp/taiko-fingerprint-');
+  const root = await mkdtemp(qaTempPrefix('taiko-fingerprint-'));
   try {
     const userdataDir=join(root,'userdata');await mkdir(userdataDir);
     await mkdir(join(root,'songs'));await mkdir(join(root,'ratings'));

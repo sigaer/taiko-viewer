@@ -1,3 +1,4 @@
+import {qaTempPrefix, assertQaEvidencePath} from '../../tests/fixtures/qaPaths.mjs';
 // Synthetic oracle comparison only; run through memory/run_qa.sh.
 import {mkdtemp,writeFile,readFile,rm,mkdir,readdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -9,8 +10,8 @@ import {prepareFixture} from './growth-benchmark-fixtures.mjs';
 import {importGrowthRequest} from '../../tests/fixtures/growthRequestHarness.mjs';
 import {projectGoalFact} from '../../utils/growthHistory.ts';
 import * as current from '../../utils/dailyProgress.ts';
-const output=process.argv[2];assert.ok(output?.startsWith('/var/tmp/'));
-const work=await mkdtemp('/var/tmp/oracle-arbitration-');
+const output=process.argv[2];assertQaEvidencePath(output);
+const work=await mkdtemp(qaTempPrefix('oracle-arbitration-'));
 const hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
 function differences(a,b,path='$',out=[]){
  if(JSON.stringify(a)===JSON.stringify(b))return out;

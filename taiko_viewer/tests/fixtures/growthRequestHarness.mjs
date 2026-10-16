@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Offline service adapter: real disk evidence, Daily/History/Passport algorithms;
 // no DB, Python subprocess, network, real account, or final-DTO replacement.
 import * as fs from 'node:fs/promises';
@@ -10,7 +11,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
   const counters = { enumeration: 0, reads: 0, parseAttempts: 0, parses: 0, bytes: 0, normalization: 0, daily: 0, range: 0, scoreFacts: 0, currentReads: 0, archiveReads: 0, measurementWrites: 0,
     loaderMs: 0, readMs: 0, readBatchMs: 0, parseMs: 0, dailyMs: 0, rangeMs: 0, scoreFactsMs: 0 };
   const key = `growth_request_${crypto.randomUUID().replaceAll('-', '_')}`;
-  const modules = await fs.mkdtemp('/var/tmp/growth-request-modules-');
+  const modules = await fs.mkdtemp(qaTempPrefix('growth-request-modules-'));
   let moduleIndex = 0;
   const url = async source => {
     const path = resolve(modules, `module-${moduleIndex++}.mjs`);
@@ -24,7 +25,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
   const state = {
     counters,
     shared: { getCurrentBindingRow: async () => binding ? binding() : defaultBinding,
-      getRuntimePaths: () => ({ userdataDir: fixture.userdataDir, repoRoot: process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT || "/home/sigaer/git/Sakura_bot/taiko" }), getUserdataPath: () => currentPath },
+      getRuntimePaths: () => ({ userdataDir: fixture.userdataDir, repoRoot: process.env.QA_RUN_TMPDIR }), getUserdataPath: () => currentPath },
     // Services pass this inert sentinel only to the explicitly replaced repositories.
     safeDb: { getAccountDb: () => null },
     content: { getSongCatalog: async () => fixture.current.map(row => ({ id: row.song_no, song_name: `synthetic-${row.song_no}`, level_4: 10, level_5: 10 })) },

@@ -1,3 +1,4 @@
+import {qaTempPrefix, assertQaPython, assertQaEvidencePath} from '../../tests/fixtures/qaPaths.mjs';
 // Diagnostic only: real evidence loader + installed Publication + fact projection.
 // No product mutation and no oracle replacement. Run with run_qa.sh and approved 0.14.2 interpreter.
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
@@ -6,13 +7,13 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { importGrowthModule } from './growth-module-loader.mjs';
 const output = process.argv[2], existing = process.argv[3];
-assert.ok(output?.startsWith('/var/tmp/'));
-assert.ok(existing?.startsWith('/var/tmp/'));
-assert.ok(process.env.TAIKO_PYTHON_EXECUTABLE?.startsWith('/var/tmp/'), 'explicit isolated installed interpreter required');
-assert.ok(process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT?.startsWith('/var/tmp/'), 'no legacy repo fallback');
+assertQaEvidencePath(output);
+assert.ok(existing && resolve(existing) === resolve(process.env.QA_BASELINE_ORACLE), 'explicit archived synthetic oracle required');
+assertQaPython();
+assert.equal(process.env.TAIKO_PUBLICATION_TEST_REPO_ROOT, process.env.QA_RUN_TMPDIR, 'no legacy repo fallback');
 const sha = raw => createHash('sha256').update(raw).digest('hex');
 const hash = value => sha(JSON.stringify(value));
-const work = await mkdtemp('/var/tmp/oracle-multichart-');
+const work = await mkdtemp(qaTempPrefix('oracle-multichart-'));
 const report = { status: 'DIAGNOSTIC_ONLY_OWNER_DECISION_PENDING', productionAccess: false, productChanges: false, sourceBase: '6e7f35b', scenarios: [] };
 const row = (id, step, instant) => ({ song_no: id, level: 4, high_score: 900000 + step * 100, stage_cnt: 1 + step,
   best_score_rank: 4 + step, clear_cnt: 1, full_combo_cnt: step > 0 ? 1 : 0, dondaful_combo_cnt: step > 1 ? 1 : 0,
