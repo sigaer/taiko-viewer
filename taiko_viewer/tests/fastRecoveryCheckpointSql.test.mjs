@@ -18,8 +18,18 @@ async function run(command,args,logPath){const log=await open(logPath,'w',0o600)
 
 test('independent MySQL checkpoint restores installed publications, historic identities and authorization continuity', {timeout:240000},async()=>manualSqlFixture(async c=>{
  const wallNow=()=>new Date(performance.timeOrigin+performance.now()).toISOString();
- const workspace=await mkdtemp('/var/tmp/viewer082-recovery-');
- const evidence={status:'RUNNING',workspace,scope:'synthetic independent SQL instance + actual publication bridge and authorization services; no HTTP listener',productionAccess:false,offHostBackup:'BLOCKED_NO_AUTHORIZED_DESTINATION',cases:[],startedAt:wallNow()};
+ const vault='/home/sigaer/taiko/qa-vault';
+ const evidenceRoot=await realpath(process.env.QA_EVIDENCE_DIR),scratchRoot=await realpath(process.env.QA_RUN_TMPDIR);
+ assert.ok(evidenceRoot.startsWith(vault+'/runs/')&&scratchRoot.startsWith(vault+'/runs/'),'owned durable QA paths required');
+ assert.equal(evidenceRoot,resolve(scratchRoot,'../evidence'));
+ const workspace=await mkdtemp(resolve(evidenceRoot,'recovery-'));
+ const restoredScratch=await mkdtemp(resolve(scratchRoot,'r-'));
+ const manifestPath=await realpath(process.env.QA_ARTIFACT_MANIFEST);assert.ok(manifestPath.startsWith(vault+'/'));
+ const manifestRaw=await readFile(manifestPath,'utf8'),artifacts=JSON.parse(manifestRaw);
+ assert.equal(process.env.TAIKO_PYTHON_EXECUTABLE,artifacts.candidate.python);
+ assert.equal(hash(await readFile(artifacts.candidate.wheelFile)),artifacts.candidate.wheelSha256);
+ assert.equal(hash(await readFile(artifacts.candidate.originEvidenceFile)),artifacts.candidate.originEvidenceSha256);
+ const evidence={status:'RUNNING',workspace,artifactManifestSha256:hash(manifestRaw),candidate:artifacts.candidate,testSourceSha256:hash(await readFile(new URL(import.meta.url))),restoredScratch,scope:'synthetic independent SQL instance + actual publication bridge and authorization services; no HTTP listener',productionAccess:false,offHostBackup:'BLOCKED_NO_AUTHORIZED_DESTINATION',cases:[],startedAt:wallNow()};
  let daemon,db,exit;const originalDb=globalThis.__goalSqlRuntime.db,originalRoot=c.config.userdataDir;
  try {
   const f=await populate(c);c.tick();await c.manual.upsertManualScore(c.owner,c.taikoId,{...manualScoreInput,values:{...manualScoreInput.values,high_score:810000}});
@@ -60,12 +70,13 @@ test('independent MySQL checkpoint restores installed publications, historic ide
   c.config.userdataDir=resolve(workspace,'unavailable-original');
   assert.throws(()=>globalThis.__goalSqlRuntime.db.execute('SELECT 1'),/original DB unavailable/);
   evidence.cases.push('controlled incident disconnects original service graph before replacement initialization');
-  const datadir=resolve(workspace,'restored-mysql');await mkdir(datadir,{mode:0o700});
+  const datadir=resolve(restoredScratch,'db');await mkdir(datadir,{mode:0o700});
   const args=['--no-defaults','--user=root','--basedir=/www/server/mysql',`--datadir=${datadir}`,'--innodb-buffer-pool-size=128M','--innodb-log-file-size=32M','--performance-schema=OFF'];
   const executable='/www/server/mysql/bin/mysqld';
   assert.equal(await run(executable,[...args,'--initialize-insecure'],resolve(workspace,'initialize.log')),0);
-  const socket=resolve(workspace,'restore.sock'),log=await open(resolve(workspace,'mysql.log'),'w',0o600);
-  daemon=spawn(executable,[...args,'--skip-networking','--mysqlx=OFF',`--socket=${socket}`,`--pid-file=${workspace}/mysql.pid`],{stdio:['ignore',log.fd,log.fd]});
+  const socket=resolve(restoredScratch,'r.sock'),log=await open(resolve(workspace,'mysql.log'),'w',0o600);
+  assert.ok(Buffer.byteLength(socket)<104,'Owned restore socket path too long');
+  daemon=spawn(executable,[...args,'--skip-networking','--mysqlx=OFF',`--socket=${socket}`,`--pid-file=${restoredScratch}/mysql.pid`],{stdio:['ignore',log.fd,log.fd]});
   exit=new Promise(res=>daemon.once('close',res));await log.close();
   for(let i=0;i<160;i++){try{db=await mysql.createConnection({socketPath:socket,user:'root',connectTimeout:500});break;}catch{await new Promise(r=>setTimeout(r,250));}}
   assert.ok(db);await db.query('CREATE DATABASE viewer082_restore_test');await db.changeUser({database:'viewer082_restore_test'});
@@ -78,10 +89,10 @@ test('independent MySQL checkpoint restores installed publications, historic ide
   for(const table of restored){await db.query(table.ddl);for(const row of table.rows)await db.query('INSERT INTO `'+table.name+'` SET ?',Object.fromEntries(Object.entries(row).filter(([key])=>!table.generated.includes(key))));}
   await db.query('SET FOREIGN_KEY_CHECKS=1');
   for(const table of backup){const [rows]=await db.query('SELECT * FROM `'+table.name+'`');assert.equal(hash(encode(rows)),hash(encode(table.rows)),table.name+' parity');}
-  await cp(resolve(workspace,'checkpoint-userdata'),resolve(workspace,'restored-userdata'),{recursive:true});await cp(resolve(workspace,'checkpoint-annual'),resolve(workspace,'restored-annual'),{recursive:true});
-  assert.deepEqual(await files(resolve(workspace,'restored-userdata')),beforeFiles);assert.deepEqual(await files(resolve(workspace,'restored-annual')),beforeAnnual);
+  await cp(resolve(workspace,'checkpoint-userdata'),resolve(restoredScratch,'restored-userdata'),{recursive:true});await cp(resolve(workspace,'checkpoint-annual'),resolve(restoredScratch,'restored-annual'),{recursive:true});
+  assert.deepEqual(await files(resolve(restoredScratch,'restored-userdata')),beforeFiles);assert.deepEqual(await files(resolve(restoredScratch,'restored-annual')),beforeAnnual);
   evidence.cases.push('all SQL tables and C/H/daily/Annual bytes identical after independent restore');
-  c.config.userdataDir=resolve(workspace,'restored-userdata');globalThis.__goalSqlRuntime.db={query:(...a)=>db.query(...a),execute:(...a)=>db.execute(...a),getConnection:async()=>({query:(...a)=>db.query(...a),execute:(...a)=>db.execute(...a),beginTransaction:()=>db.beginTransaction(),commit:()=>db.commit(),rollback:()=>db.rollback(),release(){}})};
+  c.config.userdataDir=resolve(restoredScratch,'restored-userdata');globalThis.__goalSqlRuntime.db={query:(...a)=>db.query(...a),execute:(...a)=>db.execute(...a),getConnection:async()=>({query:(...a)=>db.query(...a),execute:(...a)=>db.execute(...a),beginTransaction:()=>db.beginTransaction(),commit:()=>db.commit(),rollback:()=>db.rollback(),release(){}})};
   assert.deepEqual(await manualSourceSnapshot(c),sourceSnapshot);
   await c.scopeModule.withDomainScoreRead(c.taikoId,async()=>{assert.equal(c.scopeModule.scorePublication(c.taikoId).commitId,publication.commitId);});
   const {readActor,captureSourceReadForActor,withCapturedSourceRead}=await import('../server/services/account/source-access.ts');
@@ -103,6 +114,10 @@ test('independent MySQL checkpoint restores installed publications, historic ide
   evidence.cases.push('unknown revocation continuity fail-closed procedure invalidates all restored developer credentials before admission');
   // Corrupt checkpoint is rejected by the restore admission checksum guard.
   assert.throws(()=>verifyCheckpoint(backupRaw+'corruption',evidence.checkpoint.sqlSha256),/checkpoint integrity mismatch/);evidence.cases.push('corrupt SQL checkpoint rejected by the same pre-import checksum guard; production restore orchestrator remains unimplemented');
+  // Active publication hardlinks stay in scratch; archive independent copies only.
+  await cp(resolve(restoredScratch,'restored-userdata'),resolve(workspace,'post-recovery-userdata'),{recursive:true});
+  await cp(resolve(restoredScratch,'restored-annual'),resolve(workspace,'post-recovery-annual'),{recursive:true});
+  evidence.postRecoveryFileHashes=await files(resolve(workspace,'post-recovery-userdata'));
   evidence.status='PASS_SCOPED_SYNTHETIC_RESTORE';
  }catch(e){evidence.status='FAIL';evidence.failure={name:e.name,message:String(e.message).slice(0,500)};throw e;}
  finally{
