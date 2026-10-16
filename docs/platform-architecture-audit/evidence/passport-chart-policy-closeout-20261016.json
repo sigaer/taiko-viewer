@@ -1,0 +1,63 @@
+{
+  "status": "PASS_PASSPORT_AND_SOURCE_LAYOUT",
+  "priorDisposition": "fast-oracle-disposition-20261016.json",
+  "priorFailuresPreserved": true,
+  "ownerDecision": "按谱面定向修复，保留合法改善",
+  "policyRevision": "observation-chart-continuity-v3",
+  "implementationCommit": "91c1d71",
+  "sourceLayout": {
+    "status": "PASS",
+    "targetedTests": 3
+  },
+  "crossChartPolicy": {
+    "status": "PASS",
+    "evidence": "chart-continuity-v3-20261016.json",
+    "fullFactsCompared": [
+      "score-pb",
+      "ng-reduced",
+      "rank-upgrade",
+      "fc"
+    ],
+    "globalSafetyRetained": [
+      "source switch",
+      "account switch",
+      "topology switch",
+      "unknown/import/repair batches"
+    ],
+    "affectedChart": "First trusted observation establishes baseline; subsequent comparable change may establish fact"
+  },
+  "passport": {
+    "status": "PASS",
+    "tests": 13,
+    "fail": 0,
+    "skip": 0,
+    "frozenDtoDifferences": 0,
+    "specialExpectedExclusions": [],
+    "previousApprovedRemoval": "Superseded by owner-approved per-chart repair; original frozen full DTO equality restored",
+    "frozenInputUnchanged": true
+  },
+  "firstIntegratedAttempt": {
+    "status": "FAIL",
+    "cause": "Runner omitted explicit installed Python; bridge unavailable before business validation",
+    "retained": true
+  },
+  "artifacts": [
+    {
+      "path": "/var/tmp/passport-v3-strict-regression-20261016.log",
+      "sha256": "05b81363d0c533e4f8c150edf63e7800298ea168b7c65701310b3eef7a1394bb"
+    },
+    {
+      "path": "/var/tmp/passport-v3-strict-regression-retry-20261016.log",
+      "sha256": "695b052e2c14b0cf733fea164cfa3b49c3f34927338dad956558c0b12e372526"
+    },
+    {
+      "path": "taiko_viewer/tests/growthRequestEvidence.test.mjs",
+      "sha256": "0ec4dae10286f3a15239b4eb2a682cb3a1e8669d226bb6ad89765b2956e0bac7"
+    },
+    {
+      "path": "docs/platform-architecture-audit/evidence/chart-continuity-v3-20261016.json",
+      "sha256": "6f4ff2d336be69b41931c3cda274fbc56cd2063497b9c0d066fcc10414a16961"
+    }
+  ],
+  "productionAccess": false
+}

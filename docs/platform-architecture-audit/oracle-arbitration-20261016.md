@@ -45,3 +45,9 @@ verify exact values, IDs, time and provenance. Diagnostic execution PASS is not
 a semantic preservation PASS. The user-approved fixed-fixture change does not
 waive this finding. Keep History facts BLOCKED pending a narrower fix or an
 explicitly reviewed policy decision covering this loss.
+
+## Owner-approved per-chart repair closes Passport discrepancy
+
+Owner chose “按谱面定向修复，保留合法改善”. Implementation `91c1d71` keeps batch L0 metadata while isolating manual/regressed chart comparability. Unaffected PB/NG/rank/FC facts retain complete values, times and provenance. Source/account/topology switches and unknown/import/repair remain globally conservative. Edited high scores cannot poison the restored chart baseline. New generated fact provenance is `observation-chart-continuity-v3`; old persisted measurements/reports are not rewritten.
+
+The unchanged fixed Passport fixture now has **zero DTO differences against the frozen oracle**. The earlier approved milestone-removal exception is superseded and removed: full strict DTO comparison is restored. The affected suite is **13 PASS / 0 FAIL / 0 SKIP**. The integrated first invocation omitted the installed interpreter and failed with bridge unavailable; its log is preserved separately from the successful explicit installed-Python retry. Detailed hashes: `evidence/passport-chart-policy-closeout-20261016.json`. The earlier FAIL evidence remains historical evidence, not silently rewritten.
