@@ -1085,13 +1085,24 @@
         "operations": 11,
         "examples": 93,
         "evidence": {
-          "path": "/home/sigaer/taiko/qa-vault/runs/qa-1d00aaf10c12/evidence/freeze-openapi-review.json",
-          "sha256": "ec0ac54404008069686960ab703a208efba88854e547e4e2054d42f794bee217"
+          "path": "/home/sigaer/taiko/qa-vault/runs/qa-4e2bf409fbd9/evidence/freeze-openapi-review.json",
+          "sha256": "099160e39a10d83d051af5313b3f54dd50a35a4e450d5d71ca8c77b905e6e10b"
         }
       },
       "build": {
-        "status": "PENDING_LOCAL_BUILD"
+        "status": "PASS_SCOPED",
+        "sourceCommit": "2137e00b40bd32b0ad8db08630beb7aa99cf052d",
+        "seconds": 155.913,
+        "sampledMemoryPeakBytes": 4259008512,
+        "kernelPeakAvailable": false,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "evidence": {
+          "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016/build.json",
+          "sha256": "2865c72442f9fbb543e020f5a799b7821aca3439663d2023df39c1da63f37f92"
+        }
       }
-    }
+    },
+    "reusedGoldenInputsUnchanged": true,
+    "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016/evidence-index.json"
   }
 }

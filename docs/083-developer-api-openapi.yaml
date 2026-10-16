@@ -91,6 +91,23 @@ paths:
                   - pagination
                   - contractFrozen
                   - runtimeEnabled
+                allOf:
+                  - if:
+                      properties:
+                        status:
+                          const: FREEZE_CANDIDATE
+                    then:
+                      properties:
+                        contractFrozen:
+                          const: false
+                  - if:
+                      properties:
+                        status:
+                          const: CONTRACT_FROZEN
+                    then:
+                      properties:
+                        contractFrozen:
+                          const: true
               example:
                 apiVersion: v1
                 contractVersion: "1.0"

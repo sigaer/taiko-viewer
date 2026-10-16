@@ -39,7 +39,7 @@
     },
     {
       "path": "docs/083-developer-api-openapi.yaml",
-      "sha256": "044e68a5cd8441cc58a1e29ecff1b6203d63d00ec919b5b3e9fcb74fdf9e94df"
+      "sha256": "5379eaae9704dc2b3c325a0cbceaeb72e89e5b3671e34f5fcd12977f33e99070"
     },
     {
       "path": "taiko_viewer/lib/developer-api-v1.ts",

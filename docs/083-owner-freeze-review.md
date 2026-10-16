@@ -67,3 +67,7 @@ P-ID/P-EXP/P-PROXY 等仍是启用前待签风险，不被本次 Contract 工程
 - F5 正式冻结：□批准 □拒绝；Owner：________；时间（含时区）：________；精确提交/manifest SHA：________；附加条件：________。
 - Gate P：DEPLOY_PENDING_AUTH。该签字不授权 push、main 合入、生产读/迁移/部署/重启或 feature gate 启用。
 - 下一工作包：独立分支先交付消费者清单、read model 适配设计/可运行隔离演示与接入示例；依赖新冻结字段的生产接线须待明确批准后的精确组合，不代签。
+
+实测收口：20 项定向 HTTP/SDK 观察 PASS；修订 OpenAPI 11 操作/93 实例 PASS（含生命周期不一致组合拒绝与私有 legacy 注入拒绝）；正式构建 155.913 秒、采样峰值 4,259,008,512 字节，kernel peak 不可用，high/max/OOM/OOM-kill 均 0。证据索引：`/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016/evidence-index.json`。旧 Contract Golden 包内输入哈希逐项未变，复用 11 JS + 7 Python；未重复执行。
+
+封存检查的首轮 `qa-ec1202455761` 曾因 lifecycle.ts 的输入 SHA 变化失败：定向 SQL 加载后仅将宽泛 TS 类型收紧为状态/布尔配对联合类型。持久 reconciliation 逐字还原旧注解并核对原 SHA，运行记录常量未变；正式构建覆盖收紧后源码。该失败与后续 scoped PASS 均保留于索引，不称原封存轮 PASS。
