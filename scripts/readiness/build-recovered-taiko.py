@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build only fixed tracked Taiko source in a private persistent vault; wrapper required."""
-import argparse, hashlib, json, os, subprocess, tarfile, tempfile, time, zipfile
+import argparse, hashlib, json, os, subprocess, sys, tarfile, tempfile, time, zipfile
+sys.dont_write_bytecode=True
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
 helper=SourceFileLoader('recovery_helpers',str(Path(__file__).with_name('recover-runtime-artifacts.py'))).load_module()
