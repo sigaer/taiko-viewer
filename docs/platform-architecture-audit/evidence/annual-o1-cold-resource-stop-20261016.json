@@ -1,0 +1,1492 @@
+{
+  "status": "FAIL_RESOURCE_STOP",
+  "productionAccess": false,
+  "formalCold": {
+    "planned": 30,
+    "submitted": 1,
+    "completed": 0,
+    "failed": 1,
+    "notExecuted": 29,
+    "perScale": {
+      "high": {
+        "submitted": 1,
+        "completed": 0,
+        "failed": 1,
+        "remaining": 9
+      },
+      "mid": {
+        "submitted": 0,
+        "cancelledBeforeSubmissionThisRound": 1,
+        "remaining": 10
+      },
+      "low": {
+        "submitted": 0,
+        "cancelledBeforeSubmissionThisRound": 1,
+        "remaining": 10
+      }
+    }
+  },
+  "coldObservation": {
+    "jobId": "0ee22ebc-fa06-4916-99b5-e991634863d3",
+    "status": "resource-stop",
+    "totalWallMs": 52653.566698999995,
+    "firstRunningObservedMs": 633.1294790000002,
+    "queueWaitPrecision": "100ms polling upper bound; not pure generator time",
+    "errorCode": null
+  },
+  "resourceAlarmSource": "host /proc/pressure/memory full avg10 >= 2.0",
+  "psiInitialFullAvg10": 0.0,
+  "psiMaxFullAvg10": 5.99,
+  "psiRawSamples": [
+    {
+      "wallMs": 640.784765,
+      "raw": "some avg10=0.00 avg60=0.03 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.08 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 849.465583,
+      "raw": "some avg10=0.00 avg60=0.03 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.08 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 1042.808289,
+      "raw": "some avg10=0.00 avg60=0.03 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.08 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 1242.703368,
+      "raw": "some avg10=0.00 avg60=0.03 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.08 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 1442.952827,
+      "raw": "some avg10=0.00 avg60=0.02 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.07 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 1643.422234,
+      "raw": "some avg10=0.00 avg60=0.02 avg300=0.11 total=35095722231\nfull avg10=0.00 avg60=0.01 avg300=0.07 total=27728730086\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 2431.989953,
+      "raw": "some avg10=0.00 avg60=0.02 avg300=0.11 total=35095759502\nfull avg10=0.00 avg60=0.01 avg300=0.07 total=27728765589\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 2629.625178,
+      "raw": "some avg10=0.00 avg60=0.02 avg300=0.11 total=35095759502\nfull avg10=0.00 avg60=0.01 avg300=0.07 total=27728765589\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 3259.649946,
+      "raw": "some avg10=0.00 avg60=0.02 avg300=0.11 total=35095764136\nfull avg10=0.00 avg60=0.01 avg300=0.07 total=27728770059\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 3458.802684,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095764464\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728770372\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 3658.793562,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095764464\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728770372\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 3886.946446,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095764464\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728770372\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 4075.760848,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095764464\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728770372\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 4285.383265,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095764464\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728770372\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 4938.94143,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095771178\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728776909\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 5130.035622,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095772768\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728778461\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 5328.462198,
+      "raw": "some avg10=0.36 avg60=0.09 avg300=0.12 total=35095772768\nfull avg10=0.36 avg60=0.07 avg300=0.09 total=27728778461\n",
+      "fullAvg10": 0.36
+    },
+    {
+      "wallMs": 5531.978296,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095772768\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728778461\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 5731.552997,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095772768\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728778461\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 5934.699321,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095772768\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728778461\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 6133.399681,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095772896\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728778581\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 6334.470436,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095774601\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728779690\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 6533.49756,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095777789\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728782776\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 6734.430195,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095779080\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728783997\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 6934.699417,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095807620\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728811847\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 7135.511349,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095817832\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728821733\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 7335.614363,
+      "raw": "some avg10=0.29 avg60=0.09 avg300=0.12 total=35095817980\nfull avg10=0.29 avg60=0.07 avg300=0.09 total=27728821874\n",
+      "fullAvg10": 0.29
+    },
+    {
+      "wallMs": 7537.407894,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 7735.777828,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 7936.004388,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 8135.412928,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 8339.73595,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 8537.17488,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 8735.318162,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817980\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 8935.710675,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817981\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 9136.361346,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817981\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 9336.155714,
+      "raw": "some avg10=0.60 avg60=0.15 avg300=0.13 total=35095817981\nfull avg10=0.60 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.6
+    },
+    {
+      "wallMs": 9537.025473,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095817981\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821874\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 9736.752098,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818018\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 9936.637863,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818018\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 10141.653451,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818018\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 10337.154383,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818018\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 10538.116911,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818018\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 10738.220201,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 10938.517171,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 11139.014287,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 11340.311037,
+      "raw": "some avg10=0.49 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.49 avg60=0.13 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.49
+    },
+    {
+      "wallMs": 11539.654886,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 11739.645442,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 11939.611596,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 12140.292142,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 12339.704952,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 12539.907808,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 12740.308828,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 12944.750809,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 13140.829054,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 13344.233412,
+      "raw": "some avg10=0.40 avg60=0.14 avg300=0.13 total=35095818021\nfull avg10=0.40 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.4
+    },
+    {
+      "wallMs": 13541.008813,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 13742.487855,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 13943.301925,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 14143.015537,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 14354.605694,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 14544.613298,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 14745.331123,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 14946.49397,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 15146.589758,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 15346.330015,
+      "raw": "some avg10=0.33 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.33 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.33
+    },
+    {
+      "wallMs": 15548.406923,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 15746.028316,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 15949.124925,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 16147.446996,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 16346.415186,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 16547.248655,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 16746.914948,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 16946.964856,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 17146.656144,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 17350.653745,
+      "raw": "some avg10=0.27 avg60=0.13 avg300=0.13 total=35095818021\nfull avg10=0.27 avg60=0.12 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.27
+    },
+    {
+      "wallMs": 17548.084197,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 17746.884225,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 17949.446177,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 18148.02043,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 18348.012744,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 18547.7665,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 18748.359646,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 18949.596687,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 19149.151685,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 19350.461427,
+      "raw": "some avg10=0.22 avg60=0.12 avg300=0.13 total=35095818021\nfull avg10=0.22 avg60=0.11 avg300=0.10 total=27728821909\n",
+      "fullAvg10": 0.22
+    },
+    {
+      "wallMs": 19550.436709,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 19751.603131,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 19952.724867,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 20152.232343,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 20351.668403,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 20552.029184,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 20751.184726,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 20951.89803,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 21151.895381,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 21352.309712,
+      "raw": "some avg10=0.18 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.18 avg60=0.11 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.18
+    },
+    {
+      "wallMs": 21552.278928,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 21769.556795,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 21951.267597,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 22151.851274,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 22351.004304,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 22551.398313,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 22751.42108,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 22952.266225,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 23153.29496,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 23355.704848,
+      "raw": "some avg10=0.14 avg60=0.12 avg300=0.12 total=35095818021\nfull avg10=0.14 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.14
+    },
+    {
+      "wallMs": 23551.298078,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 23751.94718,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 23952.959297,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 24152.950779,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 24370.324492,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 24553.38782,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 24753.238723,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 24954.598901,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 25152.900111,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 25353.779735,
+      "raw": "some avg10=0.12 avg60=0.11 avg300=0.12 total=35095818021\nfull avg10=0.12 avg60=0.10 avg300=0.09 total=27728821909\n",
+      "fullAvg10": 0.12
+    },
+    {
+      "wallMs": 25552.923128,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 25753.148199,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 25953.502412,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 26154.330369,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 26353.213685,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 26554.216839,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 26756.192918,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 26953.874814,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 27153.207786,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 27354.059846,
+      "raw": "some avg10=0.09 avg60=0.11 avg300=0.12 total=35095818047\nfull avg10=0.09 avg60=0.10 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.09
+    },
+    {
+      "wallMs": 27554.175973,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095818047\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 27754.198214,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095818047\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 27953.031569,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095818047\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 28154.466567,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095818047\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 28355.478997,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095818363\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728821933\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 28554.955713,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095821077\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728822322\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 28757.160082,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095822847\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728822476\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 28955.367997,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095824947\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728822556\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 29156.106753,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095827355\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728822644\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 29356.799133,
+      "raw": "some avg10=0.08 avg60=0.10 avg300=0.12 total=35095829305\nfull avg10=0.08 avg60=0.09 avg300=0.09 total=27728823313\n",
+      "fullAvg10": 0.08
+    },
+    {
+      "wallMs": 29556.512487,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095830941\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823402\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 29758.309946,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095831880\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823402\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 29957.893563,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095834810\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823709\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 30158.026804,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095837511\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823709\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 30357.882044,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095840213\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823709\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 30558.900873,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095843365\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728823854\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 30758.803022,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095845963\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728824079\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 30958.600879,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095850101\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728824221\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 31159.20795,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095852662\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728824339\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 31378.054167,
+      "raw": "some avg10=0.06 avg60=0.10 avg300=0.12 total=35095854304\nfull avg10=0.06 avg60=0.09 avg300=0.09 total=27728824339\n",
+      "fullAvg10": 0.06
+    },
+    {
+      "wallMs": 31559.698932,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095854334\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824339\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 31759.073947,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095856025\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824480\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 31960.382746,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095857330\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824522\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 32159.149973,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095859935\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824707\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 32358.379049,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095862442\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824767\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 32560.715216,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095864998\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728824769\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 32763.168986,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095870682\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728828704\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 32960.12519,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095882046\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728837408\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 33158.284947,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095883801\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728837499\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 33358.758197,
+      "raw": "some avg10=0.23 avg60=0.13 avg300=0.13 total=35095887804\nfull avg10=0.05 avg60=0.09 avg300=0.09 total=27728838464\n",
+      "fullAvg10": 0.05
+    },
+    {
+      "wallMs": 33559.576766,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095890180\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728838646\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 33760.889268,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095892503\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728838955\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 33961.433508,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095894019\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839094\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 34161.701876,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095896269\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839157\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 34360.274191,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095899883\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839157\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 34560.951496,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095902795\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839397\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 34764.086072,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095904730\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839401\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 34962.544558,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095908628\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839597\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 35161.544129,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095915168\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 35360.915346,
+      "raw": "some avg10=0.37 avg60=0.16 avg300=0.13 total=35095915168\nfull avg10=0.04 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.04
+    },
+    {
+      "wallMs": 35561.820763,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 35762.573676,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 35970.171409,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 36162.850439,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 36362.873336,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 36562.621165,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 36764.314934,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 36962.792674,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 37162.497439,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 37362.750152,
+      "raw": "some avg10=0.48 avg60=0.19 avg300=0.14 total=35095915168\nfull avg10=0.03 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.03
+    },
+    {
+      "wallMs": 37562.751164,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915168\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 37762.489197,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915168\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 37963.025118,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915168\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 38163.373622,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915168\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 38366.368725,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915168\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839767\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 38562.619486,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 38765.053206,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 38964.002076,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 39163.587011,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 39363.887245,
+      "raw": "some avg10=0.39 avg60=0.18 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.08 avg300=0.09 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 39564.085413,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 39764.84361,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 39964.214003,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 40163.25689,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 40363.393681,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 40565.476064,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 40763.05085,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 40965.241215,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 41164.536203,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 41364.902846,
+      "raw": "some avg10=0.32 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.02 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.02
+    },
+    {
+      "wallMs": 41564.323728,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 41764.020301,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 41963.458359,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 42163.613256,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 42363.044617,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 42564.313201,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 42763.969268,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 42965.580405,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 43163.877342,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 43367.390484,
+      "raw": "some avg10=0.26 avg60=0.17 avg300=0.14 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 43564.529849,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 43764.699598,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 43964.353635,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 44164.858488,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 44365.968192,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 44566.320632,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 44766.804721,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 44965.729111,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 45170.700007,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 45365.861374,
+      "raw": "some avg10=0.21 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 45565.774527,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 45766.056334,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 45965.363285,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 46165.243741,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915329\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 46365.948048,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 46565.707437,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 46767.294691,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 46967.078265,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 47167.10336,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 47368.418761,
+      "raw": "some avg10=0.17 avg60=0.16 avg300=0.13 total=35095915330\nfull avg10=0.01 avg60=0.07 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.01
+    },
+    {
+      "wallMs": 47567.160508,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 47767.28052,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 47968.853752,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 48168.24126,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 48368.354262,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 48568.994779,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 48769.625923,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 48970.614263,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 49170.152786,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 49372.051559,
+      "raw": "some avg10=0.14 avg60=0.15 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 49571.595705,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 49772.161641,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 49972.523106,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 50171.135349,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 50371.507704,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 50571.442729,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 50771.989149,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 50971.935477,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095915330\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 51172.694312,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095919690\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839914\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 51372.451516,
+      "raw": "some avg10=0.11 avg60=0.14 avg300=0.13 total=35095925287\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728839940\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 51573.085161,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095930516\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728840097\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 51776.298641,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095935154\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728840569\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 51974.071179,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095938389\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728840621\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 52172.560945,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095943312\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728841171\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 52372.908283,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095948605\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728841399\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 52573.806922,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095956447\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728841678\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 52773.559904,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095960820\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728841859\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 52973.713947,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095967938\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728842804\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 53173.681782,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095971545\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728842968\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 53373.924574,
+      "raw": "some avg10=0.09 avg60=0.14 avg300=0.13 total=35095977022\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728843767\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 53573.792418,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35095986125\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728844923\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 53775.371043,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35095991399\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728845728\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 53977.848587,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35095994282\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728845819\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 54172.855787,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35095998756\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728845919\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 54374.026039,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096009982\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728846347\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 54573.681425,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096048613\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728858780\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 54774.492989,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096086358\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728885614\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 54998.822626,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096118440\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728907483\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 55174.643819,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096149440\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728929122\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 55375.21529,
+      "raw": "some avg10=0.44 avg60=0.20 avg300=0.14 total=35096168851\nfull avg10=0.00 avg60=0.06 avg300=0.08 total=27728943499\n",
+      "fullAvg10": 0.0
+    },
+    {
+      "wallMs": 55574.519688,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096196760\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27728967092\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 55774.445735,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096245751\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729014580\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 55973.695311,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096301873\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729066818\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 56174.567467,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096364729\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729129582\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 56373.49522,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096440305\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729201398\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 56572.882168,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096503749\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729264031\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 56775.003575,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096541999\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729300612\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 56973.632216,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096599604\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729355185\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 57174.692228,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096662448\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729418211\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 57376.790133,
+      "raw": "some avg10=1.99 avg60=0.49 avg300=0.20 total=35096729420\nfull avg10=0.91 avg60=0.22 avg300=0.11 total=27729484400\n",
+      "fullAvg10": 0.91
+    },
+    {
+      "wallMs": 57573.597204,
+      "raw": "some avg10=7.06 avg60=1.45 avg300=0.41 total=35096814357\nfull avg10=5.99 avg60=1.16 avg300=0.31 total=27729563285\n",
+      "fullAvg10": 5.99
+    },
+    {
+      "wallMs": 57703.405659,
+      "raw": "some avg10=7.06 avg60=1.45 avg300=0.41 total=35096852942\nfull avg10=5.99 avg60=1.16 avg300=0.31 total=27729602317\n",
+      "fullAvg10": 5.99
+    }
+  ],
+  "metrics": {
+    "qa": {
+      "samples": 279,
+      "memoryCurrentSampledMaxBytes": 639598592,
+      "memoryPeakFile": "UNAVAILABLE",
+      "swapCurrentSampledMaxBytes": 622592,
+      "memoryEventsObservedMax": {
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "ioStat": "UNAVAILABLE"
+    },
+    "worker": {
+      "samples": 259,
+      "memoryCurrentSampledMaxBytes": 1073774592,
+      "memoryPeakFile": "UNAVAILABLE",
+      "swapCurrentSampledMaxBytes": 134217728,
+      "memoryEventsObservedMax": {
+        "high": 387,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "ioStat": "UNAVAILABLE"
+    }
+  },
+  "causalConclusion": "Host-wide PSI crossed during the high cohort. Worker concurrently reached MemoryHigh and SwapMax with reclaim events. This is correlated pressure, not proof that no other host process contributed; no baseline/candidate regression conclusion is established.",
+  "ownerAbort": {
+    "unit": "taiko-qa-5593936cff4c.service",
+    "reason": "Stop remaining queued test files and active bound worker after MEMORY_PSI_FULL",
+    "originalWrapperExitCode": 0,
+    "originalWrapperStopReason": null,
+    "interpretation": "systemctl stop returned success through systemd-run; original wrapper exit 0 is NOT task PASS. Annual explicit FAIL and this abort record take precedence. Original manifest preserved unchanged.",
+    "childrenStopped": true,
+    "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+    "unitProof": {
+      "taiko-qa-5593936cff4c.service": "Id=taiko-qa-5593936cff4c.service\nLoadState=not-found\nActiveState=inactive\nSubState=dead",
+      "taiko-annual-generator-f39c0dcf-c9c5-433e-bd86-dd69f713dc0f.service": "Id=taiko-annual-generator-f39c0dcf-c9c5-433e-bd86-dd69f713dc0f.service\nLoadState=not-found\nActiveState=inactive\nSubState=dead"
+    }
+  },
+  "evidence": {
+    "annual": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-5593936cff4c/evidence/annual-o1-A3cg7j/evidence.json",
+      "sha256": "02be8c7b4bddc3367cdb22d3d666ade234abfba48cdeab56d413084c2cd2abd9"
+    },
+    "wrapper": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-5593936cff4c/evidence/manifest.json",
+      "sha256": "641531765bd3853c1721beb6bf420e656f746249b7a4724a98c9e2a999702c4f"
+    },
+    "tests": "/home/sigaer/taiko/qa-vault/runs/qa-5593936cff4c/evidence/viewer1-sql-51KPNc/tests.log"
+  },
+  "poster": "NOT_TESTED_AFTER_RESOURCE_STOP",
+  "nextRunChanges": "Cold launcher now stops after first individual SQL scale failure; not run after this stop."
+}

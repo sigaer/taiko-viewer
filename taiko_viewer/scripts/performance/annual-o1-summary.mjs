@@ -25,7 +25,7 @@ const q=p=>values.length?values[Math.ceil(values.length*p)-1]:null;
 const scales=Object.fromEntries(['low','mid','high'].map(scale=>[scale,successes.filter(x=>x.scale===scale).length]));
 const distinct=new Set(successes.map(x=>x.user)).size;
 const cold={attempts:attempts.length,successes:successes.length,failed:attempts.length-successes.length,distinctUsers:distinct,scales,p50Ms:q(.5),p95Ms:q(.95),p99Ms:q(.99),maxMs:values.at(-1)??null};
-cold.status=attempts.length<30||distinct<30||Object.values(scales).some(x=>x<10)?'EVIDENCE_PENDING':successes.length/attempts.length>=.995&&cold.p95Ms<=30000&&cold.p99Ms<=90000&&cold.maxMs<=180000?'PASS':'FAIL';
+cold.status=attempts.some(x=>x.status!=='completed'||x.resourceAlarm)?'FAIL':attempts.length<30||distinct<30||Object.values(scales).some(x=>x<10)?'EVIDENCE_PENDING':successes.length/attempts.length>=.995&&cold.p95Ms<=30000&&cold.p99Ms<=90000&&cold.maxMs<=180000?'PASS':'FAIL';
 const warmStatus=[1,3,5].every(rate=>warm.some(stage=>stage.requestsPerSecond===rate&&stage.planned>=200&&stage.status==='PASS'))&&!warm.some(stage=>stage.status==='FAIL')?'PASS':'EVIDENCE_PENDING';
 const output={scope:'ANNUAL_O1_REPORT_ONLY_POSTER_NOT_MEASURED',productionAccess:false,status:cold.status==='PASS'&&warmStatus==='PASS'?'PASS_SCOPED':cold.status==='FAIL'||warm.some(x=>x.status==='FAIL')?'FAIL':'EVIDENCE_PENDING',cold,warmStatus,attempts,warm,sources,limits:['200ms cgroup sampling may miss short worker peaks; pair with runner memory.events','Poster renderer remains unmeasured','No Gate or Freeze decision inferred']};
 const destination=resolve(process.env.QA_EVIDENCE_DIR,'annual-o1-summary.json');assert.ok(destination.startsWith(resolve(process.env.QA_RUN_DIR,'evidence')+'/'));

@@ -1,5 +1,5 @@
 {
-  "status": "PASS_WARM_COLD_PENDING",
+  "status": "WARM_PASS_COLD_FAIL_RESOURCE_STOP",
   "productionAccess": false,
   "runtime": {
     "viewerHead": "680a749f2e851fb94e16634f242d8efa24f8feea",
@@ -65,8 +65,8 @@
     }
   ],
   "resourceAlarm": null,
-  "formalCold": "EVIDENCE_PENDING",
-  "poster": "NOT_TESTED",
+  "formalCold": "FAIL_RESOURCE_STOP",
+  "poster": "NOT_TESTED_AFTER_RESOURCE_STOP",
   "runs": {
     "qa-48b66bfdda37": {
       "kind": "ISOLATION_GUARDS_PASS",
@@ -117,5 +117,6 @@
     "taiko_viewer/tests/annualO1WarmSql.test.mjs": "24842e0562966ab02d6ae90f3d9c3a58451a6e12d4997912616816a6fe8a8980",
     "taiko_viewer/scripts/performance/run-annual-o1.py": "8d87c820670c9e6fc88f592ab2ddd19a983c410a666ca867c448c20aedf72cb2",
     "taiko_viewer/scripts/performance/annual-o1-summary.mjs": "eccbc2734dbc8cbe8f8c4eda2d1420ce16f770d3adba1064e123f70a81705bf4"
-  }
+  },
+  "formalColdEvidence": "annual-o1-cold-resource-stop-20261016.json"
 }
