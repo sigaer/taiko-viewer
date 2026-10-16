@@ -45,3 +45,7 @@ All IDs below refer to `/home/sigaer/taiko/qa-vault/runs/<id>/evidence`; wrapper
 | Corrected runtime-root manifest | `qa-7165edd6a5b4` |
 
 Remaining: targeted business gates on the new installed candidate, independent tooling/assets recovery, O1 performance cohorts and recovery acceptance. Reconstruction alone does not close any of those gates or authorize 0.83 Freeze.
+
+## Subsequent synthetic asset attachment
+
+Performance-agent run `qa-e5969b4d06a8` created 14 synthetic asset files at `/home/sigaer/taiko/qa-vault/sources/o1-assets-v1`. Assets manifest SHA: `f8fe563fa8e90a36917e6e5949513635f7cd7281b31d3082b3181184772f5391`. Updated runtime manifest SHA: `ec60d1cb4d734936ae6223654678bb4481cd98a3da4cb6e1823c064c9a9a4a48`. The preceding version is retained as `runtime-manifest-before-assets.json`; role provenance fields are unchanged. Independent pytest 8.4.2 tooling has also been recovered outside the 94-package roles. These support the next targeted gate run and do not imply that gate passed.
