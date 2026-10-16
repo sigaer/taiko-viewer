@@ -14,6 +14,7 @@ const vault='/home/sigaer/taiko/qa-vault';
 const ownedPath=async value=>{assert.ok(value?.startsWith(vault+'/'),'Persistent QA path required');const actual=await realpath(value);assert.ok(actual.startsWith(vault+'/'),'QA path must remain within persistent vault');return actual;};
 const evidenceRoot=await ownedPath(process.env.QA_EVIDENCE_DIR);
 const runTmp=await ownedPath(process.env.QA_RUN_TMPDIR);
+const runDir=await ownedPath(process.env.QA_RUN_DIR);const runId=process.env.QA_RUN_ID;assert.match(runId||'',/^qa-[0-9a-f]{12}$/);assert.equal(runDir,resolve(vault,'runs',runId));assert.equal(evidenceRoot,resolve(runDir,'evidence'));assert.equal(runTmp,resolve(runDir,'scratch'));
 const manifestPath=await ownedPath(process.env.QA_ARTIFACT_MANIFEST);
 const artifacts=JSON.parse(await readFile(manifestPath,'utf8'));assert.equal(artifacts.schemaVersion,1);
 const workspace=await mkdtemp(resolve(evidenceRoot,'viewer1-sql-'));
@@ -24,7 +25,7 @@ const executable='/www/server/mysql/bin/mysqld';
 const database='viewer1_security_test';
 const python=process.env.TAIKO_PYTHON_EXECUTABLE;
 assert.ok(python?.startsWith('/'), 'An absolute installed Taiko Python is required');
-const env={PATH:process.env.PATH,TMPDIR:runTmp,QA_RUN_TMPDIR:runTmp,QA_EVIDENCE_DIR:evidenceRoot,QA_ARTIFACT_MANIFEST:manifestPath,NODE_OPTIONS:'--max-old-space-size=1536'};
+const env={PATH:process.env.PATH,TMPDIR:runTmp,QA_RUN_DIR:runDir,QA_RUN_ID:runId,QA_RUN_TMPDIR:runTmp,QA_EVIDENCE_DIR:evidenceRoot,QA_ARTIFACT_MANIFEST:manifestPath,TAIKO_QA_RUN_ID:runId,TAIKO_QA_SCRATCH_DIR:runTmp,TAIKO_QA_EVIDENCE_DIR:evidenceRoot,NODE_OPTIONS:'--max-old-space-size=1536'};
 const base=['--no-defaults','--user=root','--basedir=/www/server/mysql',`--datadir=${datadir}`,
  '--innodb-buffer-pool-size=128M','--innodb-log-file-size=32M','--performance-schema=OFF'];
 let daemon,daemonExit,proxy,rootConnection;
