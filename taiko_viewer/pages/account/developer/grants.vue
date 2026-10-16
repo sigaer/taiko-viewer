@@ -7,13 +7,13 @@ if(!config.public.developerApiV1)throw createError({statusCode:404,statusMessage
 const api=useViewerApiFetch();
 const {locale}=useI18n();
 const ja=computed(()=>locale.value==='ja');
-const copy=computed(()=>ja.value?{title:'アプリへのアクセス許可',app:'アプリ',binding:'連携アカウント',permission:'許可するデータ',profile:'プロフィール',scores:'ベスト記録',days:'有効期間',agree:'選択したアプリに、このアカウントの選択したデータへのアクセスを許可します。',allow:'アクセスを許可',revoke:'許可を取り消す',active:'許可中',revoked:'取り消し済み',expired:'期限切れ',empty:'アクセスを許可したアプリはありません',choose:'選択してください',loading:'読み込み中…',refresh:'再読み込み',failure:'操作できませんでした。ログイン状態と入力を確認してください。',clientTitle:'開発者アプリ',name:'アプリ名',register:'アプリを登録',saved:'許可を保存しました',removed:'許可を取り消しました'}:{title:'应用授权',app:'应用',binding:'绑定账号',permission:'允许读取',profile:'个人资料',scores:'最佳成绩',days:'有效期',agree:'允许所选应用读取此绑定账号的所选数据。',allow:'同意授权',revoke:'撤销授权',active:'已授权',revoked:'已撤销',expired:'已过期',empty:'暂无应用授权',choose:'请选择',loading:'加载中…',refresh:'重新加载',failure:'操作未完成，请检查登录状态和填写内容。',clientTitle:'开发者应用',name:'应用名称',register:'注册应用',saved:'授权已保存',removed:'授权已撤销'});
-type State={consentVersion:string;audience:string;clients:DeveloperClient[];bindings:Array<{bindingId:string;source:string;displayName:string|null}>;grants:ResourceGrant[]};
-const state=ref<State|null>(null),ownClients=ref<DeveloperClient[]>([]),pending=ref(true),busy=ref(false),error=ref(''),notice=ref('');
+const copy=computed(()=>ja.value?{title:'アプリへのアクセス許可',app:'アプリ',binding:'連携アカウント',permission:'許可するデータ',profile:'プロフィール',scores:'ベスト記録',days:'有効期間',agree:'選択したアプリに、このアカウントの選択したデータへのアクセスを許可します。',allow:'アクセスを許可',revoke:'許可を取り消す',active:'許可中',revoked:'取り消し済み',expired:'期限切れ',empty:'アクセスを許可したアプリはありません',choose:'選択してください',loading:'読み込み中…',refresh:'再読み込み',failure:'操作できませんでした。ログイン状態と入力を確認してください。',clientTitle:'開発者アプリ',name:'アプリ名',register:'アプリを登録',saved:'許可を保存しました',removed:'許可を取り消しました',limited:'先頭100件を表示しています。ほかの項目はサポートにお問い合わせください。'}:{title:'应用授权',app:'应用',binding:'绑定账号',permission:'允许读取',profile:'个人资料',scores:'最佳成绩',days:'有效期',agree:'允许所选应用读取此绑定账号的所选数据。',allow:'同意授权',revoke:'撤销授权',active:'已授权',revoked:'已撤销',expired:'已过期',empty:'暂无应用授权',choose:'请选择',loading:'加载中…',refresh:'重新加载',failure:'操作未完成，请检查登录状态和填写内容。',clientTitle:'开发者应用',name:'应用名称',register:'注册应用',saved:'授权已保存',removed:'授权已撤销',limited:'仅显示前100项，其他记录请联系支持。'});
+type State={consentVersion:string;audience:string;clients:DeveloperClient[];bindings:Array<{bindingId:string;source:string;displayName:string|null}>;grants:ResourceGrant[];hasMore:{clients:boolean;bindings:boolean;grants:boolean}};
+const state=ref<State|null>(null),ownClients=ref<DeveloperClient[]>([]),pending=ref(true),busy=ref(false),error=ref(''),notice=ref(''),ownClientsHasMore=ref(false);
 const bindingId=ref(''),clientId=ref(''),scopes=ref<string[]>([]),days=ref(30),consent=ref(false),clientName=ref('');
 watch([bindingId,clientId,scopes,days],()=>{consent.value=false;},{deep:true});
 const canSubmit=computed(()=>!!state.value&&!!bindingId.value&&!!clientId.value&&scopes.value.length>0&&consent.value&&!busy.value&&!pending.value);
-async function refresh(){pending.value=true;error.value='';try{state.value=await api<State>('/api/account/developer/grants');ownClients.value=(await api<{clients:DeveloperClient[]}>('/api/account/developer/clients')).clients;}catch{error.value=copy.value.failure;}finally{pending.value=false;}}
+async function refresh(){pending.value=true;error.value='';try{state.value=await api<State>('/api/account/developer/grants');const own=await api<{clients:DeveloperClient[];hasMore:boolean}>('/api/account/developer/clients');ownClients.value=own.clients;ownClientsHasMore.value=own.hasMore;}catch{error.value=copy.value.failure;}finally{pending.value=false;}}
 async function run(task:()=>Promise<unknown>,message:string){busy.value=true;error.value='';notice.value='';try{await task();notice.value=message;consent.value=false;await refresh();}catch{error.value=copy.value.failure;}finally{busy.value=false;}}
 function submit(){if(!canSubmit.value||!state.value)return;const data=state.value;void run(()=>api('/api/account/developer/grants',{method:'POST',body:{bindingId:bindingId.value,clientId:clientId.value,scopes:scopes.value,expiresInDays:days.value,consent:true,consentVersion:data.consentVersion,audience:data.audience}}),copy.value.saved);}
 function revoke(grantId:string){void run(()=>api('/api/account/developer/grants/'+grantId,{method:'DELETE'}),copy.value.removed);}
@@ -29,6 +29,7 @@ onMounted(refresh);
   <h1>{{copy.title}}</h1>
   <p v-if="error" role="alert" class="error">{{error}} <button type="button" :disabled="pending||busy" @click="refresh">{{copy.refresh}}</button></p>
   <p role="status" aria-live="polite">{{pending?copy.loading:notice}}</p>
+  <p v-if="state && Object.values(state.hasMore).some(Boolean)" role="status">{{copy.limited}}</p>
   <form v-if="state" class="panel" @submit.prevent="submit">
    <label for="grant-app">{{copy.app}}</label>
    <select id="grant-app" v-model="clientId" required :disabled="busy"><option value="" disabled>{{copy.choose}}</option><option v-for="client in state.clients" :key="client.clientId" :value="client.clientId">{{client.displayName}} · {{client.clientId}}</option></select>
@@ -49,6 +50,7 @@ onMounted(refresh);
   </section>
   <details class="panel"><summary>{{copy.clientTitle}}</summary>
    <form @submit.prevent="register"><label for="client-name">{{copy.name}}</label><input id="client-name" v-model="clientName" maxlength="80" required :disabled="busy"><button type="submit" :disabled="busy||!clientName.trim()">{{copy.register}}</button></form>
+   <p v-if="ownClientsHasMore" role="status">{{copy.limited}}</p>
    <p v-for="client in ownClients" :key="client.clientId">{{client.displayName}} · <code>{{client.clientId}}</code></p>
   </details>
  </main>

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "status": "FREEZE_CANDIDATE_READY_FOR_OWNER_REVIEW",
+  "status": "FREEZE_CANDIDATE_REVIEWED_PENDING_OWNER_SIGNATURE",
   "contractFrozen": false,
   "deployReady": false,
   "productionAccess": false,
-  "viewerVersion": "0.83.0-rc.1",
-  "branch": "feat/viewer083-contract-api-20261016",
+  "viewerVersion": "0.83.0-rc.2",
+  "branch": "review/viewer083-owner-freeze-20261016",
   "worktree": "/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016",
   "baseline": {
     "viewer082": "32729e86b070ed5bd40bc033a7d936114e5081ce",
@@ -1052,5 +1052,46 @@
       "item": "Formal 0.83 Contract Freeze / release and independent production Gate P",
       "status": "NOT_AUTHORIZED"
     }
-  ]
+  ],
+  "review": {
+    "inputHead": "ac1042791f76b82c9f11d2b9b5b7a1ca326a0112",
+    "inputBranch": "feat/viewer083-contract-api-20261016",
+    "ownerApproved": false,
+    "F1": "RECOMMEND_ACCEPT_PENDING_OWNER",
+    "F2": "RECOMMEND_ACCEPT_PENDING_OWNER",
+    "F3": "RECOMMEND_ACCEPT_PENDING_OWNER",
+    "F4": "RECOMMEND_ACCEPT_PENDING_OWNER",
+    "F5": "NOT_FROZEN_PENDING_EXPLICIT_OWNER_APPROVAL",
+    "F-A": "IMPLEMENTED_RELEASE_LIFECYCLE_SEPARATE_FROM_ENABLEMENT",
+    "F-B": "IMPLEMENTED_EXPLICIT_503_BOUNDS_AND_LIST_HAS_MORE",
+    "F-C": "DOCUMENTED_SOURCE_INSTALLED_CONSUMER_MATRIX_NO_VENV_UPGRADE",
+    "F-D": "PRODUCTION_SECURITY_RISKS_REGISTERED_PENDING_GATE_P",
+    "report": "docs/083-owner-freeze-review.md",
+    "diff": "docs/083-contract-freeze-diff.md",
+    "releaseManifest": "docs/083-release-manifest.json",
+    "historicalValidationScope": "validation below is immutable ac10427-era scoped evidence, not recertification of revised runtime",
+    "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016",
+    "validation": {
+      "sqlHttp": {
+        "status": "PASS_SCOPED",
+        "observations": 20,
+        "evidence": {
+          "path": "/home/sigaer/taiko/qa-vault/runs/qa-190c329df556/evidence/freeze-review-observations.json",
+          "sha256": "813be23f70b08a059d571188e41f38aa0c0a43b1e8bfed10c20c730c5a778401"
+        }
+      },
+      "openapi": {
+        "status": "PASS_SCOPED",
+        "operations": 11,
+        "examples": 93,
+        "evidence": {
+          "path": "/home/sigaer/taiko/qa-vault/runs/qa-1d00aaf10c12/evidence/freeze-openapi-review.json",
+          "sha256": "ec0ac54404008069686960ab703a208efba88854e547e4e2054d42f794bee217"
+        }
+      },
+      "build": {
+        "status": "PENDING_LOCAL_BUILD"
+      }
+    }
+  }
 }

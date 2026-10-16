@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "inputHead": "ac1042791f76b82c9f11d2b9b5b7a1ca326a0112",
+  "contractVersion": "1.0",
+  "sourcePackage": "0.1.2",
+  "installedPackage": "0.1.0",
+  "contractFrozen": false,
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "schemaSerializedRevision": "be89a7146265219ac6153ed3152f5cf76c46eae23bb262f3cc47ac9c9b9815f7",
+  "mappings": {
+    "schema": "packages/sakura-taiko-contract/schema/contract-v1.json",
+    "generatedTypescript": "packages/sakura-taiko-contract/src/index.ts",
+    "generatedPython": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
+    "publicCatalogAdapter": "packages/sakura-taiko-contract/src/catalog.mjs",
+    "scoreAdapter": "packages/sakura-taiko-contract/src/index.ts",
+    "httpProjection": "taiko_viewer/server/services/developer-api-v1/read.ts",
+    "openapi": "docs/083-developer-api-openapi.yaml"
+  },
+  "files": [
+    {
+      "path": "packages/sakura-taiko-contract/schema/contract-v1.json",
+      "sha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/index.ts",
+      "sha256": "a1e11721e36cf4914f8957748b82cb3570498ff129f0aa51b7a601ab4cb7698d"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
+      "sha256": "b3d58e459e2f070f4830a901b61b15a1a3bdb364370cf052e6b8fdc0bdda0a76"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/catalog.mjs",
+      "sha256": "721faa66f6631cdd4c89de180102e1eb40b28a7f5c651d15ebb20e5a4bfda447"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+      "sha256": "8982c5dd2dda12f8337f6f43fda87c74b07d142fa7d0b3c2ae2717b458000927"
+    },
+    {
+      "path": "docs/083-developer-api-openapi.yaml",
+      "sha256": "044e68a5cd8441cc58a1e29ecff1b6203d63d00ec919b5b3e9fcb74fdf9e94df"
+    },
+    {
+      "path": "taiko_viewer/lib/developer-api-v1.ts",
+      "sha256": "3f67f0b59b31866215bab3f0176bb8dd91940e3597fde21b18ca0213dc0726f1"
+    },
+    {
+      "path": "taiko_viewer/nuxt.config.ts",
+      "sha256": "f07144e56bb0e39defe9b701817c282e95aa7faabc816c0d40c09b9100069463"
+    },
+    {
+      "path": "taiko_viewer/package.json",
+      "sha256": "678e6b3fc4cb45d8233b9db7ee536151e2034138f80978b7105c11d459ebf748"
+    },
+    {
+      "path": "taiko_viewer/package-lock.json",
+      "sha256": "f373e924568cea9217a817ff8b43bc3d64e1e56b2b62078f57956def413e0d9c"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/authority.ts",
+      "sha256": "ee317e2cceeb3bbf7af3333447c402215fd4a9fcdf87496b6f504a02228bae18"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/catalog.ts",
+      "sha256": "0e9c450185e2c8c11fbd84e62dfc9b0d9ecc2fd194ee6f255c21782572387316"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/common.ts",
+      "sha256": "e1f92e6a7f0f4b9dead521ef06411344079aa532c651991afbe554db48084cf8"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/grants.ts",
+      "sha256": "9ee6e748aa3c22e1d15c5826a0d54122f820b73d106273fc1e6d5da8b9123210"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/lifecycle.ts",
+      "sha256": "d2898452619eef8e03b273959a7cf44c8862e65e865850a3153d35753b7dfddf"
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1/read.ts",
+      "sha256": "605ad818017b2ffae00560ce8a7c46de53715c76f9a1f557b3600ec43d8ab61f"
+    },
+    {
+      "path": "taiko_viewer/pages/account/developer/grants.vue",
+      "sha256": "7cc8b08247c7b7e0973db46828421150a54eb4c2c9f1cb10cd598084b9776ba5"
+    },
+    {
+      "path": "taiko_viewer/tests/developerApiV1FreezeReviewSql.test.mjs",
+      "sha256": "daf8bba2d8e3a607b4720126062aea9c11f3733cacd1718bfe9974bb18a94f33"
+    }
+  ]
+}

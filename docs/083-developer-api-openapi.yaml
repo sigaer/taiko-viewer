@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — local Freeze Candidate
-  version: 0.83.0-rc.1
+  version: 0.83.0-rc.2
   description: "NOT FROZEN / NOT DEPLOYED. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
@@ -63,11 +63,22 @@ paths:
                         - history:read
                         - growth:read
                   status:
-                    const: FREEZE_CANDIDATE
+                    enum:
+                      - FREEZE_CANDIDATE
+                      - CONTRACT_FROZEN
+                    description: Release-controlled contract lifecycle; independent of runtime enablement.
+                      CONTRACT_FROZEN requires separate recorded Owner approval; does not assert
+                      production activation.
                   catalogProfile:
                     const: source-catalog-explicit-v1
                   pagination:
                     const: none-bounded-complete-response
+                  contractFrozen:
+                    type: boolean
+                  runtimeEnabled:
+                    const: true
+                    description: This responding host only. Disabled hosts return 404; does not assert production
+                      enablement.
                 required:
                   - apiVersion
                   - contractVersion
@@ -78,6 +89,8 @@ paths:
                   - status
                   - catalogProfile
                   - pagination
+                  - contractFrozen
+                  - runtimeEnabled
               example:
                 apiVersion: v1
                 contractVersion: "1.0"
@@ -93,6 +106,8 @@ paths:
                 status: FREEZE_CANDIDATE
                 catalogProfile: source-catalog-explicit-v1
                 pagination: none-bounded-complete-response
+                contractFrozen: false
+                runtimeEnabled: true
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
             304.
@@ -208,7 +223,11 @@ paths:
                 message: RATE_LIMITED
                 requestId: 00000000-0000-4000-8000-000000000000
         "503":
-          description: Unavailable schema/data/publication; no private diagnostic output
+          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
+            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
+            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
+            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
+            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
           headers:
             Cache-Control:
               schema:
@@ -223,10 +242,32 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAVAILABLE
-                message: UNAVAILABLE
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                CATALOG_LIMIT_EXCEEDED:
+                  value:
+                    code: CATALOG_LIMIT_EXCEEDED
+                    message: CATALOG_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                SCORES_LIMIT_EXCEEDED:
+                  value:
+                    code: SCORES_LIMIT_EXCEEDED
+                    message: SCORES_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                RESPONSE_LIMIT_EXCEEDED:
+                  value:
+                    code: RESPONSE_LIMIT_EXCEEDED
+                    message: RESPONSE_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                PUBLICATION_REQUIRED:
+                  value:
+                    code: PUBLICATION_REQUIRED
+                    message: PUBLICATION_REQUIRED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                UNAVAILABLE:
+                  value:
+                    code: UNAVAILABLE
+                    message: UNAVAILABLE
+                    requestId: 00000000-0000-4000-8000-000000000000
       parameters:
         - name: If-None-Match
           in: header
@@ -403,7 +444,11 @@ paths:
                 message: RATE_LIMITED
                 requestId: 00000000-0000-4000-8000-000000000000
         "503":
-          description: Unavailable schema/data/publication; no private diagnostic output
+          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
+            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
+            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
+            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
+            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
           headers:
             Cache-Control:
               schema:
@@ -418,10 +463,32 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAVAILABLE
-                message: UNAVAILABLE
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                CATALOG_LIMIT_EXCEEDED:
+                  value:
+                    code: CATALOG_LIMIT_EXCEEDED
+                    message: CATALOG_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                SCORES_LIMIT_EXCEEDED:
+                  value:
+                    code: SCORES_LIMIT_EXCEEDED
+                    message: SCORES_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                RESPONSE_LIMIT_EXCEEDED:
+                  value:
+                    code: RESPONSE_LIMIT_EXCEEDED
+                    message: RESPONSE_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                PUBLICATION_REQUIRED:
+                  value:
+                    code: PUBLICATION_REQUIRED
+                    message: PUBLICATION_REQUIRED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                UNAVAILABLE:
+                  value:
+                    code: UNAVAILABLE
+                    message: UNAVAILABLE
+                    requestId: 00000000-0000-4000-8000-000000000000
       parameters:
         - name: If-None-Match
           in: header
@@ -635,7 +702,11 @@ paths:
                 message: RATE_LIMITED
                 requestId: 00000000-0000-4000-8000-000000000000
         "503":
-          description: Unavailable schema/data/publication; no private diagnostic output
+          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
+            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
+            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
+            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
+            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
           headers:
             Cache-Control:
               schema:
@@ -650,10 +721,32 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAVAILABLE
-                message: UNAVAILABLE
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                CATALOG_LIMIT_EXCEEDED:
+                  value:
+                    code: CATALOG_LIMIT_EXCEEDED
+                    message: CATALOG_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                SCORES_LIMIT_EXCEEDED:
+                  value:
+                    code: SCORES_LIMIT_EXCEEDED
+                    message: SCORES_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                RESPONSE_LIMIT_EXCEEDED:
+                  value:
+                    code: RESPONSE_LIMIT_EXCEEDED
+                    message: RESPONSE_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                PUBLICATION_REQUIRED:
+                  value:
+                    code: PUBLICATION_REQUIRED
+                    message: PUBLICATION_REQUIRED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                UNAVAILABLE:
+                  value:
+                    code: UNAVAILABLE
+                    message: UNAVAILABLE
+                    requestId: 00000000-0000-4000-8000-000000000000
       parameters:
         - name: If-None-Match
           in: header
@@ -817,7 +910,11 @@ paths:
                 message: RATE_LIMITED
                 requestId: 00000000-0000-4000-8000-000000000000
         "503":
-          description: Unavailable schema/data/publication; no private diagnostic output
+          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
+            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
+            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
+            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
+            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
           headers:
             Cache-Control:
               schema:
@@ -832,10 +929,32 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAVAILABLE
-                message: UNAVAILABLE
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                CATALOG_LIMIT_EXCEEDED:
+                  value:
+                    code: CATALOG_LIMIT_EXCEEDED
+                    message: CATALOG_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                SCORES_LIMIT_EXCEEDED:
+                  value:
+                    code: SCORES_LIMIT_EXCEEDED
+                    message: SCORES_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                RESPONSE_LIMIT_EXCEEDED:
+                  value:
+                    code: RESPONSE_LIMIT_EXCEEDED
+                    message: RESPONSE_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                PUBLICATION_REQUIRED:
+                  value:
+                    code: PUBLICATION_REQUIRED
+                    message: PUBLICATION_REQUIRED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                UNAVAILABLE:
+                  value:
+                    code: UNAVAILABLE
+                    message: UNAVAILABLE
+                    requestId: 00000000-0000-4000-8000-000000000000
       parameters:
         - name: playerId
           in: path
@@ -1045,7 +1164,11 @@ paths:
                 message: RATE_LIMITED
                 requestId: 00000000-0000-4000-8000-000000000000
         "503":
-          description: Unavailable schema/data/publication; no private diagnostic output
+          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
+            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
+            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
+            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
+            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
           headers:
             Cache-Control:
               schema:
@@ -1060,10 +1183,32 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAVAILABLE
-                message: UNAVAILABLE
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                CATALOG_LIMIT_EXCEEDED:
+                  value:
+                    code: CATALOG_LIMIT_EXCEEDED
+                    message: CATALOG_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                SCORES_LIMIT_EXCEEDED:
+                  value:
+                    code: SCORES_LIMIT_EXCEEDED
+                    message: SCORES_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                RESPONSE_LIMIT_EXCEEDED:
+                  value:
+                    code: RESPONSE_LIMIT_EXCEEDED
+                    message: RESPONSE_LIMIT_EXCEEDED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                PUBLICATION_REQUIRED:
+                  value:
+                    code: PUBLICATION_REQUIRED
+                    message: PUBLICATION_REQUIRED
+                    requestId: 00000000-0000-4000-8000-000000000000
+                UNAVAILABLE:
+                  value:
+                    code: UNAVAILABLE
+                    message: UNAVAILABLE
+                    requestId: 00000000-0000-4000-8000-000000000000
       parameters:
         - name: playerId
           in: path
@@ -1084,7 +1229,9 @@ paths:
       operationId: listOwnerGrants
       description: Verified Viewer session only; Authorization header is rejected even when a Cookie is
         valid. Lists at most 100 approved active clients, 100 verified owner bindings and 100 most
-        recent grant rows; no score read. Expired/revoked rows remain visible.
+        recent grant rows; no score read. Expired/revoked rows remain visible. Each list fetches 101
+        rows and emits at most 100, with per-list hasMore. No pagination or total count; omitted
+        records require support, not a claim of completeness.
       security:
         - ViewerSession: []
       responses:
@@ -1147,6 +1294,20 @@ paths:
                     type: array
                     items:
                       $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ResourceGrant
+                  hasMore:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      clients:
+                        type: boolean
+                      bindings:
+                        type: boolean
+                      grants:
+                        type: boolean
+                    required:
+                      - clients
+                      - bindings
+                      - grants
                 required:
                   - consentVersion
                   - audience
@@ -1154,6 +1315,7 @@ paths:
                   - clients
                   - bindings
                   - grants
+                  - hasMore
               example:
                 consentVersion: viewer-resource-consent-v1
                 audience: viewer:developer-api:v1
@@ -1184,6 +1346,10 @@ paths:
                     expiresAt: 2026-11-15T00:00:00.000000Z
                     revokedAt: null
                     revision: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+                hasMore:
+                  clients: false
+                  bindings: false
+                  grants: false
         "400":
           description: Invalid request; unknown query/body fields rejected
           headers:
@@ -1643,7 +1809,7 @@ paths:
     get:
       operationId: listOwnClients
       description: Lists at most 100 client identities owned by this verified Viewer session; no secret
-        credentials.
+        credentials. hasMore=true means further rows exist; no pagination or total count.
       security:
         - ViewerSession: []
       responses:
@@ -1669,13 +1835,17 @@ paths:
                     type: array
                     items:
                       $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperClient
+                  hasMore:
+                    type: boolean
                 required:
                   - clients
+                  - hasMore
               example:
                 clients:
                   - clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     displayName: Synthetic app
                     status: active
+                hasMore: false
         "400":
           description: Invalid request; unknown query/body fields rejected
           headers:
@@ -2100,3 +2270,7 @@ components:
 x-schema-source: packages/sakura-taiko-contract/schema/contract-v1.json
 x-freeze-status: FREEZE_CANDIDATE_NOT_FROZEN
 x-production-authorized: false
+x-lifecycle-policy:
+  contractFrozen: false
+  runtimeDefaultEnabled: false
+  ownerApproval: null

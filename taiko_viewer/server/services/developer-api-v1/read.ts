@@ -6,11 +6,12 @@ import {withScoreRead,currentScoreScope} from '../../infrastructure/taiko-public
 import {apiDb,apiClient,proveGrant,quota,publicIdentity} from './authority';
 import {catalog,versions,SCHEMA_REVISION} from './catalog';
 import {ApiFailure,conditional,exactKeys,hash} from './common';
+import {contractRelease} from './lifecycle';
 const observationSources=new Set(['wahlap','hiroba','manual','manual-score','cookie','import','repair','dispatcher-transfer','local-snapshot','content-edit','unknown']);
 const fields=['song_no','level','high_score','best_score_rank','good_cnt','ok_cnt','ng_cnt','pound_cnt','combo_cnt','stage_cnt','clear_cnt','full_combo_cnt','dondaful_combo_cnt','highscore_datetime','update_datetime'];
 export async function publicRead(event:H3Event,kind:'meta'|'songs'|'charts'){
  exactKeys(getQuery(event),[]);const db=await apiDb();await publicIdentity(event,db);const c=await catalog();
- const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read'],unavailableScopes:['history:read','growth:read'],status:'FREEZE_CANDIDATE',catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:c.charts};
+ const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:c.charts};
  return conditional(event,payload);
 }
 export async function privateRead(event:H3Event,kind:'profile'|'scores',playerId:string){
@@ -22,7 +23,8 @@ export async function privateRead(event:H3Event,kind:'profile'|'scores',playerId
   const before=await proveGrant(db,client,playerId,kind==='scores'?'scores:read':'profile:read');if(before.revision!==grant.revision||before.grantId!==grant.grantId)throw new ApiFailure(403,'GRANT_REQUIRED');
   const scope=currentScoreScope(grant.taikoId)!;if(!scope.lease.view)throw new ApiFailure(503,'PUBLICATION_REQUIRED');
   const snapshot=await scope.reader.readCurrent(grant.taikoId);const data=snapshot.current;
-  if(!data||typeof data!=='object'||!Array.isArray(data.songs)||data.songs.length>20000)throw new ApiFailure(503,'UNAVAILABLE');
+  if(!data||typeof data!=='object'||!Array.isArray(data.songs))throw new ApiFailure(503,'UNAVAILABLE');
+  if(data.songs.length>20000)throw new ApiFailure(503,'SCORES_LIMIT_EXCEEDED');
   const source=typeof data._meta?.source==='string'&&observationSources.has(data._meta.source)?data._meta.source:null;
   const ts=data._meta?.ts;const capturedAt=typeof ts==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(ts)&&Number.isFinite(Date.parse(ts))?ts:null;
   const revision=`publication-v1:${scope.lease.view.sequence}:${scope.lease.view.commitId}`;const v=versions(c.revision,revision,source,capturedAt);

@@ -1,5 +1,7 @@
 # Viewer 0.83 Contract / Developer API v1 Freeze Candidate
 
+> 历史交付记录：下文为 ac10427 / rc.1 的原范围；本次 rc.2 Owner 工程评审见 [待签评审](083-owner-freeze-review.md) 与 [冻结差异](083-contract-freeze-diff.md)。当前仍未 FROZEN，Gate P=DEPLOY_PENDING_AUTH。原测试数与构建仅指下述原版本。
+
 **状态：FREEZE_CANDIDATE_READY_FOR_OWNER_REVIEW。未正式 FROZEN，未达到 DEPLOY_READY。** 本地版本 `0.83.0-rc.1`，隔离分支 `feat/viewer083-contract-api-20261016`，工作树 `/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016`。首个真实授权闭环已完成，本轮到此收口，不扩展OAuth、全库迁移、Annual或Python ownership审计。
 
 0.82 Owner O1/O2接受已在 `c9b87f4` 落盘：Gate C=`PASS_WITH_ACCEPTED_RISK`，Gate P=`DEPLOY_PENDING_AUTH`。12旧PNG仍未重建像素等价；history474/126及两项性能预检原状态、原始SHA全部保留。0.82候选package仍0.82.1，main及生产均未变。

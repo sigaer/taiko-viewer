@@ -14,7 +14,7 @@ export function apiHandler(task:(event:H3Event)=>Promise<unknown>){return define
  try{requireEnabled();return await task(event);}catch(error){const e=error instanceof ApiFailure?error:new ApiFailure(503,'UNAVAILABLE');setResponseStatus(event,e.status);return {code:e.code,message:e.code,requestId};}
 });}
 export function conditional(event:H3Event,payload:unknown,privateRead=false){
- const text=JSON.stringify(payload);if(Buffer.byteLength(text)>8*1024*1024)throw new ApiFailure(503,'UNAVAILABLE');
+ const text=JSON.stringify(payload);if(Buffer.byteLength(text)>8*1024*1024)throw new ApiFailure(503,'RESPONSE_LIMIT_EXCEEDED');
  const etag='"v1-'+hash(text)+'"';setHeader(event,'etag',etag);
  setHeader(event,'cache-control',privateRead?'private, no-store':'public, max-age=60, must-revalidate');
  if(getHeader(event,'if-none-match')===etag){setResponseStatus(event,304);return null;}return payload;

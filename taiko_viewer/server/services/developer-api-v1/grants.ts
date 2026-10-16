@@ -23,14 +23,14 @@ export async function listGrants(event:H3Event){
  const db=await apiDb();const owner=await sessionOwner(event,db);
  const [clients]=await db.query<RowDataPacket[]>(`SELECT c.client_id clientId,c.display_name displayName,c.status FROM web_developer_api_clients c
  JOIN web_developer_applications a ON a.id=c.application_id AND a.user_id=c.owner_user_id
- JOIN web_user_accounts u ON u.id=c.owner_user_id WHERE c.status='active' AND a.status='approved' AND u.email_verified=1 ORDER BY c.client_id LIMIT 100`);
+ JOIN web_user_accounts u ON u.id=c.owner_user_id WHERE c.status='active' AND a.status='approved' AND u.email_verified=1 ORDER BY c.client_id LIMIT 101`);
  const [bindings]=await db.execute<RowDataPacket[]>(`SELECT CAST(b.id AS CHAR) bindingId,b.source,b.verified_title displayName,r.player_id playerId FROM web_taiko_bindings b
  LEFT JOIN web_developer_api_resources r ON r.binding_id=b.id WHERE b.user_id=?
  AND ((b.source IN ('wahlap','hiroba') AND b.verified_title IS NOT NULL AND b.manual_account_id IS NULL)
- OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) ORDER BY b.id LIMIT 100`,[owner]);
- const [rows]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE owner_user_id=? ORDER BY g.issued_at DESC LIMIT 100`,[owner]);
+ OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) ORDER BY b.id LIMIT 101`,[owner]);
+ const [rows]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE owner_user_id=? ORDER BY g.issued_at DESC LIMIT 101`,[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
- return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients,bindings,grants:rows.map(dto)};
+ return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:clients.slice(0,100),bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100}};
 }
 export async function issueGrant(event:H3Event){
  const body=await readBody(event);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiFailure(400,'INVALID_REQUEST');
@@ -76,5 +76,5 @@ export async function registerClient(event:H3Event){
   const [[row]]=await db.execute<RowDataPacket[]>('SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients WHERE application_id=?',[app.id]);return {client:row};
  });
 }
-export async function listOwnClients(event:H3Event){const db=await apiDb(),owner=await sessionOwner(event,db);const [clients]=await db.execute<RowDataPacket[]>('SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients WHERE owner_user_id=? ORDER BY created_at DESC LIMIT 100',[owner]);return {clients};}
+export async function listOwnClients(event:H3Event){const db=await apiDb(),owner=await sessionOwner(event,db);const [clients]=await db.execute<RowDataPacket[]>('SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients WHERE owner_user_id=? ORDER BY created_at DESC LIMIT 101',[owner]);if(owner!==await sessionOwner(event,db))throw deny();return {clients:clients.slice(0,100),hasMore:clients.length>100};}
 export async function disableClient(event:H3Event){const clientId=getRouterParam(event,'clientId')||'';return transaction(event,async(db,owner)=>{const [result]=await db.execute<any>('UPDATE web_developer_api_clients SET status=\'disabled\' WHERE client_id=? AND owner_user_id=?',[clientId,owner]);if(!result.affectedRows)throw deny();return {ok:true};});}
