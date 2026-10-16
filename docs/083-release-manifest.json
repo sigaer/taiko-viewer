@@ -12,9 +12,10 @@
     "generatedTypescript": "packages/sakura-taiko-contract/src/index.ts",
     "generatedPython": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
     "publicCatalogAdapter": "packages/sakura-taiko-contract/src/catalog.mjs",
-    "scoreAdapter": "packages/sakura-taiko-contract/src/index.ts",
+    "scoreAdapter": "packages/sakura-taiko-contract/src/legacy.mjs",
     "httpProjection": "taiko_viewer/server/services/developer-api-v1/read.ts",
-    "openapi": "docs/083-developer-api-openapi.yaml"
+    "openapi": "docs/083-developer-api-openapi.yaml",
+    "scoreTypesAndReexports": "packages/sakura-taiko-contract/src/index.ts"
   },
   "files": [
     {
@@ -88,6 +89,30 @@
     {
       "path": "taiko_viewer/tests/developerApiV1FreezeReviewSql.test.mjs",
       "sha256": "daf8bba2d8e3a607b4720126062aea9c11f3733cacd1718bfe9974bb18a94f33"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/legacy.mjs",
+      "sha256": "0617cb98bcd79111e3e068558c0444faa80912eb0d6b4127bfa23f6dee756df4"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/read-values.mjs",
+      "sha256": "6820d1a2e6645e978b9b4c50dd4d2ad88ba21c8e1f05ddb5ed86895c5dfdc96c"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/score-read.ts",
+      "sha256": "af04c4cf13d7c5d2597822a6401a83cef64331cf27a152e73f9a0363f54febbd"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/src/catalog.d.mts",
+      "sha256": "65a925798c537df2085e3744e8ca18cb7150acdc4882f5cf17f2e7702632623c"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/package.json",
+      "sha256": "004df181edab0289afac9e700d9d8615aa518f2d26630619b9338b1fddfc0aba"
+    },
+    {
+      "path": "packages/sakura-taiko-contract/tools/generate_bindings.py",
+      "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
     }
   ]
 }
