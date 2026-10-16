@@ -97,6 +97,8 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
     const observations: GrowthObservation[] = [];
     let state = new Map<string, UserdataSong>();
     let lastAuthoritativeSource = "";
+    let lastAuthoritativeIdentity = "";
+    const pendingChartBaselines = new Set<string>();
     let needsAuthoritativeBaseline = false;
     let invalidFiles = 0;
     for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
@@ -111,24 +113,61 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
         const filenameSource = normalizeSource(sourceFromName(name));
         const declaredWriter = normalizeSource(meta.writer_source);
         const source = declaredWriter !== "unknown" ? declaredWriter : filenameSource !== "unknown" ? filenameSource : normalizeSource(meta.source);
-        let excludedReason = exclusionFor(source, meta, filenameSource);
-        const eventDaySet = new Set<string>();
+        const writerExclusion = exclusionFor(source, meta, filenameSource);
         const full = isFullPayload(payload);
+        const previousIdentity = lastAuthoritativeIdentity ? JSON.parse(lastAuthoritativeIdentity) as [string, string, string[]] : null;
+        const manual = writerExclusion === "manual";
+        const hasTopology = ["merge_topology", "mergeTopology", "member_ids", "memberIds"].some(key => key in meta);
+        // Writer cause is not an account/source switch. A manual edit may inherit
+        // the known authority, but explicit changed account/topology still breaks it.
+        const identity = JSON.stringify([
+          manual ? lastAuthoritativeSource || source : source,
+          meta.source_account || meta.sourceAccount || meta.account_id || payload.profile?.userid || (manual ? previousIdentity?.[1] : null) || taikoId,
+          manual && !hasTopology ? previousIdentity?.[2] || [] : topologyIdentity(meta)
+        ]);
+        const localManual = manual && !!lastAuthoritativeIdentity && identity === lastAuthoritativeIdentity;
+        let excludedReason: GrowthObservationExclusion | null = localManual ? null : writerExclusion;
+        if (!observedAt) excludedReason = "unknown-source";
+        if (!excludedReason && lastAuthoritativeIdentity && identity !== lastAuthoritativeIdentity) {
+          excludedReason = "source-switch";
+          needsAuthoritativeBaseline = !full;
+        } else if (!excludedReason && needsAuthoritativeBaseline) {
+          excludedReason = "discontinuity-baseline";
+          // A manual write cannot establish authoritative recovery, even if full.
+          if (full && !manual) needsAuthoritativeBaseline = false;
+        }
+        if (!manual && (!excludedReason || ["source-switch", "discontinuity-baseline"].includes(excludedReason))) {
+          lastAuthoritativeSource = source;
+          lastAuthoritativeIdentity = identity;
+        }
+        if (excludedReason && !["dispatcher-transfer", "source-switch", "discontinuity-baseline"].includes(excludedReason)) needsAuthoritativeBaseline = true;
+        const chartExclusions: Record<string, GrowthObservationExclusion> = {};
+        const ignoredChartKeys: string[] = [];
+        const eventDaySet = new Set<string>();
         const next = full ? new Map<string, UserdataSong>() : new Map(state);
         for (const song of payload.songs) {
           const songKey = chartKey(song);
           const previous = state.get(songKey);
-          if (previous && transitionChanged(previous, song)) {
-            // Every regression field is a transition field; unchanged rows cannot regress.
-            if (!excludedReason) {
-              for (const field of regressionFields) {
-                const left = numberValue(previous[field]), right = numberValue(song[field]);
-                if (left !== null && right !== null && right < left) {
-                  excludedReason = "counter-regression";
-                  break;
-                }
-              }
+          const changed = !previous || transitionChanged(previous, song);
+          if (localManual && !excludedReason && !changed) ignoredChartKeys.push(songKey);
+          if (localManual && changed) {
+            chartExclusions[songKey] = "manual";
+            pendingChartBaselines.add(songKey);
+          } else if (!excludedReason && !manual) {
+            const regressed = previous && changed && regressionFields.some(field => {
+              const left = numberValue(previous[field]), right = numberValue(song[field]);
+              return left !== null && right !== null && right < left;
+            });
+            if (pendingChartBaselines.has(songKey)) {
+              // The previous edited/regressed row is not a trusted comparator.
+              chartExclusions[songKey] = "discontinuity-baseline";
+              pendingChartBaselines.delete(songKey);
+            } else if (regressed) {
+              chartExclusions[songKey] = "counter-regression";
+              pendingChartBaselines.add(songKey);
             }
+          }
+          if (previous && changed) {
             const playDay = calendarDayFor(song.update_datetime), scoreDay = calendarDayFor(song.highscore_datetime);
             if (playDay) eventDaySet.add(playDay);
             if (scoreDay) eventDaySet.add(scoreDay);
@@ -136,20 +175,7 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           next.set(songKey, song);
         }
         const eventDays = [...eventDaySet].sort();
-        if (!excludedReason && lastAuthoritativeSource && source !== lastAuthoritativeSource) {
-          excludedReason = "source-switch";
-          lastAuthoritativeSource = source;
-          needsAuthoritativeBaseline = !full;
-        } else if (!excludedReason && needsAuthoritativeBaseline) {
-          excludedReason = "discontinuity-baseline";
-          if (full) {
-            lastAuthoritativeSource = source;
-            needsAuthoritativeBaseline = false;
-          }
-        } else if (!excludedReason) {
-          lastAuthoritativeSource = source;
-        }
-        if (excludedReason && !["dispatcher-transfer", "source-switch", "discontinuity-baseline"].includes(excludedReason)) needsAuthoritativeBaseline = true;
+        const observationExclusion = excludedReason || writerExclusion || Object.values(chartExclusions)[0] || null;
         const removed = (payload as UserdataPayload & { songs_removed?: unknown[] }).songs_removed;
         if (Array.isArray(removed)) {
           for (const item of removed) next.delete(Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item));
@@ -163,12 +189,11 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           revision,
           source,
           removed: Array.isArray(removed) ? removed.map(item => Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item)) : [],
-          excludedReason: excludedReason || (!observedAt ? 'unknown-source' : null),
-          identity: JSON.stringify([source, meta.source_account || meta.sourceAccount || meta.account_id || payload.profile?.userid || taikoId, topologyIdentity(meta)])
+          excludedReason, chartExclusions, ignoredChartKeys, identity
         });
         const declaredContentRevision = String(meta.content_sha256 || meta.contentRevision || meta.content_revision || meta.revision || "");
         const contentRevision = /^[a-f0-9]{64}$/i.test(declaredContentRevision) ? declaredContentRevision.toLowerCase() : null;
-        observations.push({ token: observationToken(observedAt, orderKey, revision), orderKey, revision, contentRevision, observedAt, source, eventDays, evidenceLevel: excludedReason || !observedAt ? "L0" : "L1", excludedReason: excludedReason || (!observedAt ? "unknown-source" : null) });
+        observations.push({ token: observationToken(observedAt, orderKey, revision), orderKey, revision, contentRevision, observedAt, source, eventDays, evidenceLevel: observationExclusion ? "L0" : "L1", excludedReason: observationExclusion });
       } catch {
         invalidFiles += 1;
       }

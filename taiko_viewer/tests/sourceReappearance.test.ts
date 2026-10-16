@@ -55,7 +55,7 @@ test('genuinely new chart retains first observation and subsequent improvement',
   const days = replay([snap(1,[]),snap(2,[song(2)]),snap(3,[song(3,930000)])]);
   assert.equal(days[1].attendance,'played');
   assert.ok(days[2].events[0].facts.some(f=>f.type==='score-pb'));
-  assert.equal((projectScoreFacts(1,2,days)[0].evidence.provenance as Record<string,unknown>).factPolicyRevision,'observation-reappearance-v2');
+  assert.equal((projectScoreFacts(1,2,days)[0].evidence.provenance as Record<string,unknown>).factPolicyRevision,'observation-chart-continuity-v3');
 });
 
 test('partial new topology cannot compare untouched charts against the old identity', () => {

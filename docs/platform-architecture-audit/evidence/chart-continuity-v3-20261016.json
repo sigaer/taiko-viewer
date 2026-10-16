@@ -1,0 +1,42 @@
+{
+  "status": "PASS_SCOPED",
+  "ownerDecision": "Per-chart targeted fix; preserve legitimate improvements",
+  "policyRevision": "observation-chart-continuity-v3",
+  "viewerVersion": "0.82.1",
+  "taikoWheelChanged": false,
+  "productionAccess": false,
+  "releaseGate": "0.82 BLOCKED",
+  "firstAttempt": {
+    "pass": 21,
+    "fail": 1,
+    "reason": "new v3 fact policy vs old v2 version assertion; original log preserved"
+  },
+  "retry": {
+    "targetedTests": 22,
+    "pass": 22,
+    "fail": 0,
+    "exactFactScenarios": 4,
+    "scopedTscIncludingEvidenceLoader": "PASS",
+    "diffCheck": "PASS"
+  },
+  "additionalValidation": {
+    "chartIntegrationTests": 11,
+    "pass": 11,
+    "fail": 0,
+    "passportFrozenDtoDifferences": 0,
+    "counterexamples": 8
+  },
+  "evidence": {
+    "/var/tmp/chart-continuity-qa-20261016.log": "e0c7f277393bf7bb311dccd64d70781b70f86a98d98ee7dca3671ea40abf867d",
+    "/var/tmp/chart-continuity-qa-retry-20261016.log": "f76043c446667706f962731769ed9b89f44fe183da2618094aed8a4a210e2d08",
+    "/var/tmp/chart-continuity-last-qa-20261016.log": "8bc49dae5399d76db154753183b86e34268eb6ec0f154130003b27bd92fba64d",
+    "/var/tmp/chart-continuity-audit-20261016.json": "a2be8d47c5148653981339e3ea432b4b53c58513356c66ba4c10208a3a472330",
+    "/var/tmp/passport-chart-continuity-v3-20261016.json": "f1f8bb1c8004797d8c1c84cf0ff9e52630459552659bc3bb433480ecce57d6bc"
+  },
+  "limits": [
+    "Synthetic fixtures; no production or full suite rerun",
+    "No Taiko wheel/model/checkpoint modifications",
+    "Frozen reports and measurements untouched",
+    "Root must rerun affected exact DTO suite on integrated candidate"
+  ]
+}

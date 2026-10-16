@@ -4,7 +4,7 @@ import { legacyScoreReader, legacyCrown, legacyJudgmentTotal, legacyScoreInstant
 import { growthCalendarDay } from "./playerGrowth.ts";
 import { memoizeGrowthString } from "./growthRequestMemo.ts";
 
-export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; identity?: string };
+export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; chartExclusions?: Record<string, string>; ignoredChartKeys?: string[]; identity?: string };
 const num = legacyScoreReader("viewer-daily-v1");
 const key = (s: UserdataSong) => `${s.song_no}:${s.level}`;
 const epoch = (v: unknown) => {
@@ -130,9 +130,15 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
     for (const song of snapshot.songs) {
       const songKey = key(song);
       const before = state.get(songKey);
+      if (before && snapshot.ignoredChartKeys?.includes(songKey)) {
+        next.set(songKey, before);
+        if (observed.has(songKey)) nextObserved.set(songKey, observed.get(songKey)!);
+        continue;
+      }
       const reappeared = !before && everSeen.has(songKey);
       const changed = before && (before.high_score !== song.high_score || before.stage_cnt !== song.stage_cnt || before.update_datetime !== song.update_datetime || before.highscore_datetime !== song.highscore_datetime);
-      if (discontinuity || reappeared) {
+      if (snapshot.chartExclusions?.[songKey]) bestScores.delete(songKey);
+      if (discontinuity || snapshot.chartExclusions?.[songKey] || reappeared) {
         unconfirmed.add(songKey);
         const blocked = unconfirmedInstants.get(songKey) || new Set<string>();
         for (const value of [song.update_datetime, song.highscore_datetime]) {
