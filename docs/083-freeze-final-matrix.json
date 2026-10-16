@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "status": "OWNER_SIGNATURE_PENDING",
+  "contractFrozen": false,
+  "runtimeEnabled": false,
+  "runtimeEnabledScope": "candidate source/default local runtime configuration; production state NOT_OBSERVED",
+  "testFixtureRoutesAdmitted": true,
+  "deployReady": false,
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "publicApiState": "PUBLIC_API_NOT_ENABLED_BY_THIS_WORK",
+  "productionAccess": false,
+  "viewerVersion": "0.83.0-rc.3",
+  "baseline": {
+    "reviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
+    "consumerPrepCommit": "49899d48a0ccff677d8506f59cea502b521758c4",
+    "originalCandidateCommit": "ac1042791f76b82c9f11d2b9b5b7a1ca326a0112",
+    "taikoSource": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+    "taikoVersion": "0.14.2",
+    "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+    "installedRoles": {
+      "centerPackages": 94,
+      "clientPackages": 94,
+      "contract": "0.1.0",
+      "centerCore": "0.1.1",
+      "clientCore": "0.1.2",
+      "support": "1.1.0"
+    },
+    "workspaceContract": "0.1.2",
+    "contractVersion": "1.0",
+    "viewer082GateC": "PASS_WITH_ACCEPTED_RISK",
+    "viewer082GateP": "DEPLOY_PENDING_AUTH"
+  },
+  "approvalTarget": {
+    "runtimeSourceCommit": "46991b202b531fc18709bbfbdb453b880bd9920b",
+    "releaseManifest": {
+      "path": "docs/083-release-manifest.json",
+      "sha256": "425e747960802284edb92af6ce2950d80e4c8a1e14c2fb7bc7cc51317fc3b6d5"
+    },
+    "finalReportCommit": "resolve from persistent delivery-identity.json; reporting commits do not change runtime"
+  },
+  "ownerDecisions": {
+    "F1": {
+      "ownerStatus": "OWNER_APPROVAL_PENDING",
+      "owner": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "recommendation": "ACCEPT_UNCHANGED_UNIQUE_SCHEMA_ADDITIVE_SCOPE"
+    },
+    "F2": {
+      "ownerStatus": "OWNER_APPROVAL_PENDING",
+      "owner": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "recommendation": "ACCEPT_EXISTING_SCOPED_GRANT_AUTHORITY"
+    },
+    "F3": {
+      "ownerStatus": "OWNER_APPROVAL_PENDING",
+      "owner": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "recommendation": "ACCEPT_AFTER_OWNER_REVIEW_OF_SCOPED_MANAGEABILITY_PASS_AND_PAGINATION_COMPATIBILITY"
+    },
+    "F4": {
+      "ownerStatus": "OWNER_APPROVAL_PENDING",
+      "owner": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "recommendation": "KEEP_LEGACY_AUTH_DOMAINS_WITHOUT_SUNSET"
+    },
+    "F5": {
+      "ownerStatus": "OWNER_APPROVAL_PENDING",
+      "owner": null,
+      "approvedAt": null,
+      "approvalId": null,
+      "recommendation": "NO_FREEZE_RECORD_WITHOUT_EXPLICIT_OWNER_APPROVAL"
+    }
+  },
+  "manageability": {
+    "status": "PASS_SCOPED",
+    "selectedPolicy": "OWNER_ONLY_KEYSET_PAGINATION",
+    "activeCountCap": null,
+    "activeCountCapTest": "NOT_APPLICABLE_PAGINATION_ALTERNATIVE_SELECTED",
+    "pageSize": 100,
+    "lookahead": 101,
+    "grantRows": 306,
+    "clientRows": 306,
+    "grantPages": 4,
+    "clientPages": 4,
+    "concurrency": "Five real concurrent consents retain per-page bound; real overlapping consent/UI-disable serialized by existing owner authority; no quota authorizes data",
+    "cursors": "owner scoped; timestamps+IDs descending; invalid/foreign/reconsented-away cursor yields 400 INVALID_CURSOR and first-page restart",
+    "snapshotAcrossPages": false,
+    "uiSelectionCaps": "public approved client selection and verified binding selection remain capped with independent truthful hasMore; no cap hides retained grants or own clients from pagination",
+    "strictRc2ValidatorUpgradeRequired": true,
+    "evidence": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/f3-manageability-observations.json",
+      "sha256": "3f0513128897513f94b5a11f5d1865182ffffe621467b3a418cc553ccafee5ae"
+    }
+  },
+  "validation": {
+    "baselineManifest": {
+      "status": "PASS_SCOPED",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-6fea955fefec/evidence/freeze-openapi-review.json",
+        "sha256": "511a6c1498c8f77101b2f603c4f6026c99a7b539efee42c516d33cb500d6fe91"
+      }
+    },
+    "f3SqlHttp": {
+      "status": "PASS_SCOPED",
+      "observations": 34,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/f3-manageability-observations.json",
+        "sha256": "3f0513128897513f94b5a11f5d1865182ffffe621467b3a418cc553ccafee5ae"
+      }
+    },
+    "f3ActualComponentBrowser": {
+      "status": "PASS_SCOPED",
+      "viewports": [
+        375,
+        1280
+      ],
+      "fullNuxt": false,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/083-management-ui.json",
+        "sha256": "066e4f4ed0d42baac324acb83b854f367b1eaa76532ab7708be199030b292f7c"
+      }
+    },
+    "openapi": {
+      "status": "PASS_SCOPED",
+      "operations": 11,
+      "examples": 95,
+      "paginationGolden": 6,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-60ab99e90cf0/evidence/freeze-openapi-review.json",
+        "sha256": "be011d6aef71dc9ba2ee72a3f78828f6b272efca85548a0ff8148c7a6d2c713d"
+      }
+    },
+    "formalBuild": {
+      "status": "PASS_SCOPED",
+      "sourceCommit": "46991b202b531fc18709bbfbdb453b880bd9920b",
+      "seconds": 149.759,
+      "sampledMemoryPeakBytes": 4229136384,
+      "kernelPeakAvailable": false,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/build.json",
+        "sha256": "2534c80d7f561a90c9a0f02d677ecae9d724590957aeae4768a910124b7e611f"
+      }
+    },
+    "freezeRecord": {
+      "status": "NOT_RUN_OWNER_F5_PENDING"
+    },
+    "i5ProductBffVueNuxt": {
+      "status": "NOT_RUN_OWNER_F1_F5_PENDING",
+      "allowedWork": "isolated design and prototype tests on independent prep branch"
+    },
+    "production": {
+      "status": "NOT_RUN_NOT_AUTHORIZED"
+    }
+  },
+  "reusedHistoricalEvidence": {
+    "scope": "Original scoped claims and failures retained; never recertified as revised-runtime or production PASS",
+    "indexes": [
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-contract-api-20261016/evidence-index.json",
+        "sha256": "bc1a9326fb53c820da71ffa40e168ec91037807005d87c29a750129de3455538"
+      },
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016/evidence-index.json",
+        "sha256": "dd88f4662f91e7229b4f533fe14954ea900242800afd28b960335208482578c5"
+      },
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/100-consumer-readmodel-prep-20261016/evidence-index.json",
+        "sha256": "c174783f7ebbbd83bada8298caf637df594f55075d83f4f8064531cfe07301ab"
+      }
+    ],
+    "unchangedGolden": {
+      "js": 11,
+      "python": 7,
+      "sourceInputs": "HASH_VERIFIED_UNCHANGED_NO_RERUN"
+    },
+    "originalHttpSdk": 74,
+    "originalBoundedObservations": 20
+  },
+  "failuresRetained": [
+    {
+      "run": "qa-de85a6689179",
+      "status": "FAIL",
+      "reason": "375px horizontal overflow in actual management component; fixed control/grid min-width and rerun scoped F3 only",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-de85a6689179/evidence/f3-manageability-sql-http.log",
+        "sha256": "781b245299eed179a2691ebb7960c14aa5312b2459845b201659dfd972e269d5"
+      }
+    }
+  ],
+  "productionRisks": {
+    "P-ID": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-APP": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-PROXY": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-KEY": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-RESTORE": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-AUDIT": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-MIGRATION": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION"
+  },
+  "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016",
+  "reviewRecordedAt": "2026-10-16T19:22:40.648334+08:00",
+  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/review-evidence-index.json"
+}
