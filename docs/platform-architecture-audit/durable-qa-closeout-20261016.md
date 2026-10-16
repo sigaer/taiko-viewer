@@ -49,3 +49,11 @@ Annual、后续 O1 cohort 与最小一致性恢复补验正在串行执行，只
 系统可用空间变化包含工作树依赖及其他系统活动，不能全算作本任务净占用。清单另含每个目录分配空间。持久目录包括 `artifacts`（运行清单、npm 缓存）、`wheelhouse`、`locks-*`、`role-center-*`、`role-client-*`、`sources`（固定 Oracle、合成素材）、`tooling`、`runs/*/evidence`。它们都位于受保护 vault 内。Git 工作树位于相邻 `.worktrees`，不在临时目录中。
 
 Annual 第一轮 `qa-87c1a800ccdb` 是 SQL bootstrap 的旧路径校验失败，未触达 Annual queue，不能计入冷生成业务耗时或成功率；修复共享前置后继续，失败日志保留。
+
+## 第二阶段：history 专项与隔离恢复
+
+原 buffered 方法与流式方法均完成同规模 history c3 600/600（各规模 200），0 失败/429/超时/dropped/OOM。总体 P95/P99 分别为 1733/1929 ms、1516/1677 ms。两轮各规模输入摘要、完整响应摘要集合、wheel、Viewer 运行闭包和测试脚本摘要一致。本轮两方法都未复现历史资源 FAIL；最低 MemAvailable 分别 14,526,328 / 14,633,556 KiB，高于历史失败轮，所以不能将原失败仅归因于客户端分配。
+
+完整独立诊断：`/home/sigaer/taiko/qa-vault/evidence/o1-history-methods-20261016/history-method-diagnostic-20261016.json`（SHA-256 `e28f84e33d423927c14641514dfa745e790664806f4049a8f07c7313fd0e233d`），同目录 Markdown 与逐请求/资源原始记录可复核。**历史 474/126 FAIL 保留，迁移性能基线归因仍待证据。**
+
+恢复准入 14 PASS（`qa-9b37dfa703ce`）；独立 MySQL 恢复 1 PASS（`qa-518bbc2e2069/evidence/recovery-tnnAr7/evidence.json`），RPO 145 ms、RTO 8401.57 ms。涵盖 SQL、C/H、daily、Goal/measurement、Annual 旧身份、授权撤销及新 publication 代际；两 MySQL 均退出，scratch 清理完成。此结论仅适用于受控停写的小规模合成检查点及实际服务图，不是生产 HTTP、PITR、定时异地备份或完整恢复 Gate PASS。独立 HTTP 就绪场景继续实现。

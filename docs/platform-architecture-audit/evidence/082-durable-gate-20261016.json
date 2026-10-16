@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "gate": "BLOCKED",
+  "viewerVersion": "0.82.1",
+  "contractFreeze": false,
+  "productionAccess": false,
+  "taiko": {
+    "version": "0.14.2",
+    "sourceCommit": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+    "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+    "historicalWheelSha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8",
+    "historicalArchiveParity": "UNKNOWN_OLD_BYTES_LOST"
+  },
+  "runtimeManifest": {
+    "path": "/home/sigaer/taiko/qa-vault/artifacts/runtime-manifest.json",
+    "sha256": "407a3ad925ef2b22d96639153758e644e4723e33e5e6e56ccf800b0e95e217b4"
+  },
+  "roles": {
+    "center": {
+      "packages": 94,
+      "core": "0.1.1",
+      "status": "PASS"
+    },
+    "client": {
+      "packages": 94,
+      "core": "0.1.2",
+      "status": "PASS"
+    }
+  },
+  "keyGates": [
+    {
+      "name": "facts",
+      "passed": 28,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-dc168789101e/evidence"
+    },
+    {
+      "name": "credential",
+      "passed": 11,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-dc168789101e/evidence"
+    },
+    {
+      "name": "annual-identity",
+      "passed": 3,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-dc168789101e/evidence"
+    },
+    {
+      "name": "passport-strict",
+      "passed": 13,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-e51b0af965bc/evidence"
+    },
+    {
+      "name": "installed-consumers-revision-fingerprint-annual-layout",
+      "passed": 14,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-7f126a4b8860/evidence"
+    },
+    {
+      "name": "lifecycle-center",
+      "passed": 46,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-7f73d15bcbff/evidence"
+    },
+    {
+      "name": "lifecycle-client",
+      "passed": 46,
+      "status": "PASS_SCOPED",
+      "evidenceDirectory": "/home/sigaer/taiko/qa-vault/runs/qa-abc55d05f04b/evidence"
+    }
+  ],
+  "historicalHistoryC3": {
+    "status": "FAIL",
+    "successful": 474,
+    "planned": 600,
+    "dropped": 126,
+    "p95Ms": 1506.67,
+    "p99Ms": 1587.44,
+    "rawEvidence": "LOST",
+    "newDiagnosis": "PASS_SCOPED_METHOD_DIAGNOSTIC_HISTORICAL_FAIL_RETAINED",
+    "historicalFailureFixedClaim": false
+  },
+  "diskInventory": "/home/sigaer/taiko/qa-vault/runs/qa-d5709b0e543c/evidence/durable-qa-inventory.json",
+  "remaining": [
+    "O1 history diagnosis and incomplete cohorts",
+    "isolated consistency restore replacement evidence and full recovery readiness",
+    "encrypted off-host backup and rights clearance",
+    "authorized production read-only ingress/ACL/runtime audit",
+    "owner signoff"
+  ],
+  "historyMethodDiagnostic": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/o1-history-methods-20261016/history-method-diagnostic-20261016.json",
+    "sha256": "e28f84e33d423927c14641514dfa745e790664806f4049a8f07c7313fd0e233d",
+    "buffered": {
+      "success": 600,
+      "dropped": 0,
+      "p95Ms": 1733,
+      "p99Ms": 1929
+    },
+    "stream": {
+      "success": 600,
+      "dropped": 0,
+      "p95Ms": 1516,
+      "p99Ms": 1677
+    },
+    "causalAttribution": "UNRESOLVED_HIGHER_HOST_HEADROOM_AND_MISSING_OLD_BASELINE"
+  },
+  "recovery": {
+    "status": "PASS_SCOPED_SYNTHETIC_RESTORE",
+    "rpoMs": 145,
+    "rtoMs": 8401.57,
+    "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-518bbc2e2069/evidence/recovery-tnnAr7/evidence.json",
+    "admissionUnitTests": 14,
+    "admissionEvidenceRun": "qa-9b37dfa703ce",
+    "productionRecoveryGate": "BLOCKED",
+    "httpReadiness": "IN_PROGRESS"
+  }
+}
