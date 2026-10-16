@@ -40,7 +40,7 @@
     },
     {
       "path": "docs/083-developer-api-openapi.yaml",
-      "sha256": "5379eaae9704dc2b3c325a0cbceaeb72e89e5b3671e34f5fcd12977f33e99070"
+      "sha256": "0e7d6d584a22796ff9bb6dfc7260d3ac253e7a8654196272d2d2e3823efdc21b"
     },
     {
       "path": "taiko_viewer/lib/developer-api-v1.ts",
@@ -52,11 +52,11 @@
     },
     {
       "path": "taiko_viewer/package.json",
-      "sha256": "678e6b3fc4cb45d8233b9db7ee536151e2034138f80978b7105c11d459ebf748"
+      "sha256": "7c36e812e4020a931fffc37d63e839e85b4150f7eeede1a95de83cd26167f0a4"
     },
     {
       "path": "taiko_viewer/package-lock.json",
-      "sha256": "f373e924568cea9217a817ff8b43bc3d64e1e56b2b62078f57956def413e0d9c"
+      "sha256": "185249645957669f675e5dd91aabbebca2ae8f24cb1a606dd75b888110332c7d"
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/authority.ts",
@@ -72,7 +72,7 @@
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/grants.ts",
-      "sha256": "9ee6e748aa3c22e1d15c5826a0d54122f820b73d106273fc1e6d5da8b9123210"
+      "sha256": "3f017e6be0bf393dc9d6d378416904e82a4061d72bab31226d5124f113820a15"
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/lifecycle.ts",
@@ -84,7 +84,7 @@
     },
     {
       "path": "taiko_viewer/pages/account/developer/grants.vue",
-      "sha256": "7cc8b08247c7b7e0973db46828421150a54eb4c2c9f1cb10cd598084b9776ba5"
+      "sha256": "5978d06959480a6060423dedac1a780fe92d89492293673d93761fe2d59f10df"
     },
     {
       "path": "taiko_viewer/tests/developerApiV1FreezeReviewSql.test.mjs",
@@ -113,6 +113,41 @@
     {
       "path": "packages/sakura-taiko-contract/tools/generate_bindings.py",
       "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
+    },
+    {
+      "path": "taiko_viewer/server/infrastructure/developer-api-v1/schema.ts",
+      "sha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1"
+    },
+    {
+      "path": "taiko_viewer/scripts/migrate_developer_api_v1.ts",
+      "sha256": "2940750d562f3e0752fc56401ff9ec3c9d051181a3ddf79d6dcd22dea861ce6b"
+    },
+    {
+      "path": "taiko_viewer/tests/developerApiV1ManageabilitySql.test.mjs",
+      "sha256": "47a835ae75e69024b440564a3e0f1eba65009e64ad9ab9ccd40904ec5ea8f3ce"
+    },
+    {
+      "path": "taiko_viewer/tests/fixtures/developerApiV1ManageabilityUi.mjs",
+      "sha256": "373d3c925cfe06d3792e47128dd549d39a99ed6629903f2c10eb1529eb7998a1"
+    },
+    {
+      "path": "scripts/readiness/run-viewer083-qa.py",
+      "sha256": "94de68414012c22093022fe15590ea1738675c8e3efbaaa43ab3846e00ffac61"
+    },
+    {
+      "path": "scripts/readiness/review-viewer083-openapi.mjs",
+      "sha256": "79bcab629193cae45e59a143c0a2041cf55b63bca7e8f4fc822cede9c9347204"
     }
-  ]
+  ],
+  "baselineReviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
+  "viewerVersion": "0.83.0-rc.3",
+  "ownerManagementPagination": {
+    "scope": "owner-only grants and own clients",
+    "pageSize": 100,
+    "lookahead": 101,
+    "activeCountCap": null,
+    "cursor": "optional before; nextCursor optional nullable response field",
+    "consistency": "keyset, no cross-request snapshot; invalid/reconsented-away cursor restarts first page",
+    "strictRc2ValidatorUpgradeRequired": true
+  }
 }

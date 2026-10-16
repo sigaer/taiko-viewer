@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {readBody,getRouterParam,type H3Event} from 'h3';
+import {readBody,getRouterParam,getQuery,type H3Event} from 'h3';
 import type {PoolConnection,RowDataPacket} from 'mysql2/promise';
 import type {ResourceGrant} from '@sakura-taiko/contract';
 import {apiDb,sessionOwner} from './authority';
@@ -19,8 +19,20 @@ async function transaction<T>(event:H3Event,task:(connection:PoolConnection,owne
   await connection.commit();return result;
  }catch(error){await connection.rollback();throw error;}finally{connection.release();}
 }
+function beforeCursor(event:H3Event,pattern:RegExp){
+ const query=getQuery(event);exactKeys(query,['before']);
+ if(query.before===undefined)return null;
+ if(typeof query.before!=='string'||!pattern.test(query.before))throw new ApiFailure(400,'INVALID_CURSOR');
+ return query.before;
+}
 export async function listGrants(event:H3Event){
  const db=await apiDb();const owner=await sessionOwner(event,db);
+ const before=beforeCursor(event,/^[a-f0-9]{32}$/);let cursorTime:string|null=null;
+ if(before){
+  const [[cursor]]=await db.execute<RowDataPacket[]>(`SELECT DATE_FORMAT(issued_at,'%Y-%m-%d %H:%i:%s.%f') cursor_time
+   FROM web_developer_resource_grants WHERE grant_id=? AND owner_user_id=?`,[before,owner]);
+  if(!cursor)throw new ApiFailure(400,'INVALID_CURSOR');cursorTime=cursor.cursor_time;
+ }
  const [clients]=await db.query<RowDataPacket[]>(`SELECT c.client_id clientId,c.display_name displayName,c.status FROM web_developer_api_clients c
  JOIN web_developer_applications a ON a.id=c.application_id AND a.user_id=c.owner_user_id
  JOIN web_user_accounts u ON u.id=c.owner_user_id WHERE c.status='active' AND a.status='approved' AND u.email_verified=1 ORDER BY c.client_id LIMIT 101`);
@@ -28,9 +40,11 @@ export async function listGrants(event:H3Event){
  LEFT JOIN web_developer_api_resources r ON r.binding_id=b.id WHERE b.user_id=?
  AND ((b.source IN ('wahlap','hiroba') AND b.verified_title IS NOT NULL AND b.manual_account_id IS NULL)
  OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) ORDER BY b.id LIMIT 101`,[owner]);
- const [rows]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE owner_user_id=? ORDER BY g.issued_at DESC LIMIT 101`,[owner]);
+ const [rows]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE owner_user_id=?
+ ${before?'AND (g.issued_at<? OR (g.issued_at=? AND g.grant_id<?))':''}
+ ORDER BY g.issued_at DESC,g.grant_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
- return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:clients.slice(0,100),bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100}};
+ return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:clients.slice(0,100),bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99].grant_id:null};
 }
 export async function issueGrant(event:H3Event){
  const body=await readBody(event);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiFailure(400,'INVALID_REQUEST');
@@ -76,5 +90,18 @@ export async function registerClient(event:H3Event){
   const [[row]]=await db.execute<RowDataPacket[]>('SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients WHERE application_id=?',[app.id]);return {client:row};
  });
 }
-export async function listOwnClients(event:H3Event){const db=await apiDb(),owner=await sessionOwner(event,db);const [clients]=await db.execute<RowDataPacket[]>('SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients WHERE owner_user_id=? ORDER BY created_at DESC LIMIT 101',[owner]);if(owner!==await sessionOwner(event,db))throw deny();return {clients:clients.slice(0,100),hasMore:clients.length>100};}
+export async function listOwnClients(event:H3Event){
+ const db=await apiDb(),owner=await sessionOwner(event,db);
+ const before=beforeCursor(event,/^clt_[a-f0-9]{32}$/);let cursorTime:string|null=null;
+ if(before){
+  const [[cursor]]=await db.execute<RowDataPacket[]>(`SELECT DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s.%f') cursor_time
+   FROM web_developer_api_clients WHERE client_id=? AND owner_user_id=?`,[before,owner]);
+  if(!cursor)throw new ApiFailure(400,'INVALID_CURSOR');cursorTime=cursor.cursor_time;
+ }
+ const [clients]=await db.execute<RowDataPacket[]>(`SELECT client_id clientId,display_name displayName,status FROM web_developer_api_clients
+ WHERE owner_user_id=? ${before?'AND (created_at<? OR (created_at=? AND client_id<?))':''}
+ ORDER BY created_at DESC,client_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
+ if(owner!==await sessionOwner(event,db))throw deny();
+ return {clients:clients.slice(0,100),hasMore:clients.length>100,nextCursor:clients.length>100?clients[99].clientId:null};
+}
 export async function disableClient(event:H3Event){const clientId=getRouterParam(event,'clientId')||'';return transaction(event,async(db,owner)=>{const [result]=await db.execute<any>('UPDATE web_developer_api_clients SET status=\'disabled\' WHERE client_id=? AND owner_user_id=?',[clientId,owner]);if(!result.affectedRows)throw deny();return {ok:true};});}

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — local Freeze Candidate
-  version: 0.83.0-rc.2
+  version: 0.83.0-rc.3
   description: "NOT FROZEN / NOT DEPLOYED. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
@@ -1244,11 +1244,10 @@ paths:
   /api/account/developer/grants:
     get:
       operationId: listOwnerGrants
-      description: Verified Viewer session only; Authorization header is rejected even when a Cookie is
-        valid. Lists at most 100 approved active clients, 100 verified owner bindings and 100 most
-        recent grant rows; no score read. Expired/revoked rows remain visible. Each list fetches 101
-        rows and emits at most 100, with per-list hasMore. No pagination or total count; omitted
-        records require support, not a claim of completeness.
+      description: Verified owner Cookie session only. Lists up to 100 grant rows ordered by issued_at
+        DESC, grant_id DESC. Follow nextCursor via ?before= to reach every retained grant, including
+        old active, expired and revoked grants. No active-grant count cap. Clients/bindings remain
+        separate capped selections with truthful hasMore; their cap never limits grant revocation.
       security:
         - ViewerSession: []
       responses:
@@ -1325,6 +1324,13 @@ paths:
                       - clients
                       - bindings
                       - grants
+                  nextCursor:
+                    type:
+                      - string
+                      - "null"
+                    pattern: ^[a-f0-9]{32}$
+                    description: Last returned ID only when a further row exists, otherwise null. Additive optional
+                      candidate field; runtime always emits it.
                 required:
                   - consentVersion
                   - audience
@@ -1367,6 +1373,7 @@ paths:
                   clients: false
                   bindings: false
                   grants: false
+                nextCursor: null
         "400":
           description: Invalid request; unknown query/body fields rejected
           headers:
@@ -1383,10 +1390,17 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: INVALID_REQUEST
-                message: INVALID_REQUEST
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                INVALID_REQUEST:
+                  value:
+                    code: INVALID_REQUEST
+                    message: INVALID_REQUEST
+                    requestId: 00000000-0000-4000-8000-000000000000
+                INVALID_CURSOR:
+                  value:
+                    code: INVALID_CURSOR
+                    message: INVALID_CURSOR
+                    requestId: 00000000-0000-4000-8000-000000000000
         "401":
           description: Missing/invalid initial client or Viewer session identity
           headers:
@@ -1469,6 +1483,28 @@ paths:
                 message: UNAVAILABLE
                 requestId: 00000000-0000-4000-8000-000000000000
       x-example-policy: Synthetic examples only; no live account/key/score bytes.
+      parameters:
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+          description: Owner-scoped keyset cursor returned by this endpoint. Omit for first page. Invalid,
+            foreign or reconsented-away cursor returns 400 INVALID_CURSOR; restart from first page.
+            Not a consistent snapshot across requests. Consent/registration restarts first page;
+            revocation/disable keeps ordering.
+      x-pagination:
+        pageSize: 100
+        lookahead: 101
+        ownerOnly: true
+        order:
+          - issued_at DESC
+          - grantId DESC
+        snapshot: false
+        backwardCompatibility: Existing body fields retained; nextCursor optional in revised schema. Strict
+          rc.2 additionalProperties:false validators require the new candidate schema; not claimed
+          as already frozen compatibility.
     post:
       operationId: consentResourceGrant
       description: Explicit user consent to one immutable binding ID and stable client. Owner inferred
@@ -1825,8 +1861,9 @@ paths:
   /api/account/developer/clients:
     get:
       operationId: listOwnClients
-      description: Lists at most 100 client identities owned by this verified Viewer session; no secret
-        credentials. hasMore=true means further rows exist; no pagination or total count.
+      description: Verified owner Cookie session only. Lists up to 100 own clients ordered by created_at
+        DESC, client_id DESC. Follow nextCursor via ?before= to reach and disable every retained
+        client. No active-client count cap. No secret credentials.
       security:
         - ViewerSession: []
       responses:
@@ -1854,6 +1891,13 @@ paths:
                       $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperClient
                   hasMore:
                     type: boolean
+                  nextCursor:
+                    type:
+                      - string
+                      - "null"
+                    pattern: ^clt_[a-f0-9]{32}$
+                    description: Last returned ID only when a further row exists, otherwise null. Additive optional
+                      candidate field; runtime always emits it.
                 required:
                   - clients
                   - hasMore
@@ -1863,6 +1907,7 @@ paths:
                     displayName: Synthetic app
                     status: active
                 hasMore: false
+                nextCursor: null
         "400":
           description: Invalid request; unknown query/body fields rejected
           headers:
@@ -1879,10 +1924,17 @@ paths:
             application/json:
               schema:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: INVALID_REQUEST
-                message: INVALID_REQUEST
-                requestId: 00000000-0000-4000-8000-000000000000
+              examples:
+                INVALID_REQUEST:
+                  value:
+                    code: INVALID_REQUEST
+                    message: INVALID_REQUEST
+                    requestId: 00000000-0000-4000-8000-000000000000
+                INVALID_CURSOR:
+                  value:
+                    code: INVALID_CURSOR
+                    message: INVALID_CURSOR
+                    requestId: 00000000-0000-4000-8000-000000000000
         "401":
           description: Missing/invalid initial client or Viewer session identity
           headers:
@@ -1965,6 +2017,28 @@ paths:
                 message: UNAVAILABLE
                 requestId: 00000000-0000-4000-8000-000000000000
       x-example-policy: Synthetic examples only; no live account/key/score bytes.
+      parameters:
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^clt_[a-f0-9]{32}$
+          description: Owner-scoped keyset cursor returned by this endpoint. Omit for first page. Invalid,
+            foreign or reconsented-away cursor returns 400 INVALID_CURSOR; restart from first page.
+            Not a consistent snapshot across requests. Consent/registration restarts first page;
+            revocation/disable keeps ordering.
+      x-pagination:
+        pageSize: 100
+        lookahead: 101
+        ownerOnly: true
+        order:
+          - created_at DESC
+          - clientId DESC
+        snapshot: false
+        backwardCompatibility: Existing body fields retained; nextCursor optional in revised schema. Strict
+          rc.2 additionalProperties:false validators require the new candidate schema; not claimed
+          as already frozen compatibility.
     post:
       operationId: registerApprovedClient
       description: Only a verified Viewer owner of an approved developer application may register its
