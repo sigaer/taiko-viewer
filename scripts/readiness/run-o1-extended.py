@@ -2,12 +2,12 @@
 """Serial 50-sample chunks; each gets an unchanged QA cgroup and private SQL.
 The coordinator must grant the host QA slot before starting this scheduler.
 """
-import os,argparse,json,math,re,subprocess,time
+import os,hashlib,argparse,json,math,re,subprocess,time
 from pathlib import Path
 vault=Path('/home/sigaer/taiko/qa-vault')
 evidence_root=Path(os.environ['QA_EVIDENCE_DIR']).resolve(strict=True)
 assert evidence_root.is_relative_to(vault) and evidence_root!=vault
-p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-current','private-history','growth-history','private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--concurrency',action='append',type=int,choices=[1,3,5]);p.add_argument('--smoke-only',action='store_true');p.add_argument('--extreme',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-current','private-history','growth-history','private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--concurrency',action='append',type=int,choices=[1,3,5]);p.add_argument('--smoke-evidence',action='append',type=Path);p.add_argument('--smoke-only',action='store_true');p.add_argument('--extreme',action='store_true');a=p.parse_args()
 root=Path(__file__).resolve().parents[2]
 assert a.out.is_absolute() and a.out.resolve().is_relative_to(evidence_root) and not a.out.exists();a.out.mkdir(mode=0o700)
 node='/www/server/nvm/versions/node/v24.13.0/bin/node'
@@ -34,18 +34,34 @@ def misses(chunks):
 try:
  if a.extreme:run('growth-passport',1,'extreme',1,'growth-passport-extreme-smoke')
  for operation in a.operation or []:
-  smoke=run(operation,1,'small',3,operation+'-smoke')
-  if smoke['summary']['success']!=3:
+  smoke=None
+  for path in a.smoke_evidence or []:
+   assert path.resolve().is_relative_to(vault/'runs')
+   candidate_smoke=json.loads(path.read_text())
+   if candidate_smoke['operation']!=operation:continue
+   assert candidate_smoke['manifest']['testHarnessSha256']==hashlib.sha256((root/'taiko_viewer/tests/o1RequestPerformance.test.mjs').read_bytes()).hexdigest()
+   assert candidate_smoke['manifest']['artifactManifestSha256']==hashlib.sha256(Path(os.environ['QA_ARTIFACT_MANIFEST']).read_bytes()).hexdigest()
+   assert candidate_smoke['samplesPerScale']==3 and candidate_smoke['concurrency']==1
+   assert {x['scale'] for x in candidate_smoke['byScale']}=={'small','medium','large'}
+   assert not candidate_smoke['summary']['pressureStop'] and not candidate_smoke['summary']['oomDelta'] and not candidate_smoke['summary']['oomKillDelta']
+   smoke=candidate_smoke;state.setdefault('reusedSmokes',[]).append({'operation':operation,'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()});break
+  if smoke is None:smoke=run(operation,1,'all',3,operation+'-smoke')
+  if smoke['summary']['success']!=9:
    state.setdefault('blockedOperations',[]).append({'operation':operation,'reason':'SMOKE_FAIL_RETAINED; no formal samples admitted'})
    continue
   if a.smoke_only:continue
+  estimates={scale['scale']:60+1.5*max(x['wallMs'] for x in smoke['samples'] if x['scale']==scale['scale'])*200/1000 for scale in smoke['byScale']}
+  whole_estimate=60+sum(value-60 for value in estimates.values())
   for concurrency in a.concurrency or [1,3,5]:
-   for scale in ['small','medium','large']:
-    chunks=[run(operation,concurrency,scale,50,f'{operation}-{scale}-{concurrency}-candidate-{i}') for i in range(4)]
-    if misses(chunks) and not baseline:
+   plans=[('all',200,1)] if operation!='b30' and whole_estimate<450 else [(scale,200,1) if operation!='b30' and estimates[scale]<450 else (scale,50,4) for scale in ['small','medium','large']]
+   state.setdefault('batchPlans',[]).append({'operation':operation,'concurrency':concurrency,'plans':plans,'wholeEstimateSeconds':whole_estimate,'scaleEstimateSeconds':estimates,'reason':'c1 smoke maximum times 200, 1.5 safety factor plus60s setup; no assumed concurrency speedup; prefer one 600 run below450s, else scale200 below450s; B30 and heavier scales use50; guard unchanged'})
+   for scale,count,repeats in plans:
+    chunks=[run(operation,concurrency,scale,count,f'{operation}-{scale}-{concurrency}-candidate-{i}') for i in range(repeats)]
+    target_miss=misses(chunks) or any(row['status']=='FAIL' for chunk in chunks for row in chunk['byScale'])
+    if target_miss and not baseline:
      state.setdefault('baselineComparisons',[]).append({'operation':operation,'concurrency':concurrency,'scale':scale,'status':'PENDING_BASELINE_ARTIFACT_UNAVAILABLE','candidateStatus':'TARGET_MISS_RETAINED'})
-    elif misses(chunks):
-     for i in range(4):run(operation,concurrency,scale,50,f'{operation}-{scale}-{concurrency}-baseline-{i}',old=True)
+    elif target_miss:
+     for i in range(repeats):run(operation,concurrency,scale,count,f'{operation}-{scale}-{concurrency}-baseline-{i}',old=True)
  state['status']='COMPLETE_MEASUREMENTS_NOT_RELEASE_GATE'
 except BaseException as error:
  state['status']='STOPPED';state['reason']=str(error)[:300];raise

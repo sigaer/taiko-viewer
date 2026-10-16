@@ -106,6 +106,7 @@ test('O1 synthetic real HTTP request cohort',{timeout:570000},async()=>{
     const dataHash=createHash('sha256');let lastPayload;
     try{
      for(let h=0;h<history;h++){
+      assert.equal(stopped,null,'Resource guard stopped synthetic input generation');
       const day=new Date(fixtureEpoch-(history-h)*86400000).toISOString().slice(0,10),ts=day+' 12:00:00';
       const songs=Array.from({length:charts},(_,i)=>({song_no:100+i,level:4,high_score:900000+h,good_cnt:500,ok_cnt:20,ng_cnt:8,combo_cnt:300,stage_cnt:h+1,clear_cnt:h+1,full_combo_cnt:0,dondaful_combo_cnt:0,best_score_rank:5,update_datetime:ts,highscore_datetime:ts}));
       const payload=JSON.stringify({_meta:{full:true,ts,source:'wahlap'},profile:{userid:c.taikoId,...(op==='b30'?{gameCostume:{color_limb:0,color_body:0,color_face:0}}:{})},songs});
