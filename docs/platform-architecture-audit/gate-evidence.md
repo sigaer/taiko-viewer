@@ -1,5 +1,13 @@
 # Viewer 1.0 readiness — 2026-10-15
 
+## 2026-10-16 最新续行：Runtime Integration
+
+按新工作令完成本轮隔离实现与验证，详见 [Runtime Integration 收尾](runtime-integration-20261016.md)。两个角色精确离线重建；补齐共享 `runtime_memory` 的独立 wheel 后，新候选为各 94 个发行包。compute、Growth、Annual、merged-read 已切到统一绝对解释器与 installed `-I` 模块；保留新版身份复核与 Publication/worker 协议。
+
+center 联合消费者、3 个图片 callsite、两个角色各 46 个代表生命周期通过；新增 merged SQL/HTTP **16 PASS**、内部服务边界 **7 PASS**。这些均为合成/隔离证据，不覆盖完整生产生命周期。
+
+**0.82 总 Gate 仍 BLOCKED**：本轮离线复现了两处凭据控制面无调用者认证，以及删除后重现谱面的 Source-switch 历史归属失败。4 条 source CLI、其他图片/Web 路径、真实 ingress/ACL、全 Writer 与恢复/性能验收仍待完成。未进入 0.83，未改候选版本、合并、推送、部署或读取生产私有数据。以下旧记录保留其原时点与范围。
+
 ## 2026-10-16 续行：独立 SQL 配置已解决
 
 无需用户提供测试配置：新增 `scripts/readiness/run-isolated-sql.mjs`，在 QA cgroup 内以 `--no-defaults` 初始化全新 MySQL 8.0.24 datadir，禁用数据库 TCP 监听，仅经本任务 loopback→私有 socket 代理访问。随机测试凭据自动生成到 Git 外 0600 文件；不读取生产配置、不复制生产数据。先核对实际 `@@datadir`，仅创建空 `viewer1_security_test`，再验证实际 `SELECT DATABASE()` 和 mutation opt-in 后执行测试写入。基础四表从生产 DDL 静态提取，保留其外键；其余表仍沿用现有 fixture，不能视为全量生产 migration 验收。

@@ -3,7 +3,7 @@
   "baselineCommit": "56aa05a",
   "status": "NOT_ACCEPTED",
   "scope": "All current Viewer developer/*, taiko/* (including proxy/internal), internal/* handlers. Other account/admin/forum routes are outside this incremental matrix.",
-  "evidence": "Source inspection plus three synthetic private cache HTTP tests and 92 isolated SQL/HTTP tests for developer userdata and source history/update/Hiroba sync. Per-route evidence lists actual coverage; production ACL and overall authorization acceptance remain blocked.",
+  "evidence": "Existing 92 source SQL/HTTP PASS retained; additional 16 installed merged-resource SQL/HTTP PASS applies only to developer userdata and proxy history. Internal service guard 7 PASS is adapter-scoped. Credential control-plane source probe FAIL blocks affected integration/deployment; no overall API acceptance.",
   "routes": [
     {
       "file": "taiko_viewer/server/api/developer/userdata/[userid].get.ts",
@@ -39,9 +39,11 @@
         "Consumer grant/audience and deployed credential/network boundary remain outside these synthetic suites"
       ],
       "evidence": [
-        "source-auth-conditional-sql-20261016"
+        "source-auth-conditional-sql-20261016",
+        "merged-sql-installed-20261016"
       ],
-      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked",
+      "mergedSqlValidation": "PASS: 16 installed merged-worker SQL/HTTP tests with new center94 role; overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/internal/annual-posters/[summaryId]/my-don.get.ts",
@@ -334,7 +336,11 @@
         "Production routing/ACL unverified",
         "Isolated SQL authorization E2E not rerun in this readiness candidate",
         "Static service secret has no per-client scopes/audience; issuer/rotation and asserted-principal trust require acceptance"
-      ]
+      ],
+      "evidence": [
+        "internal-service-boundary-20261016"
+      ],
+      "guardValidation": "PASS: anonymous/impersonation/wrong key/missing configuration denied before body and downstream effects; resource-level SQL and real ingress remain unaccepted"
     },
     {
       "file": "taiko_viewer/server/api/taiko/internal/manual.post.ts",
@@ -367,7 +373,11 @@
         "Production routing/ACL unverified",
         "Isolated SQL authorization E2E not rerun in this readiness candidate",
         "Static service secret has no per-client scopes/audience; issuer/rotation and asserted-principal trust require acceptance"
-      ]
+      ],
+      "evidence": [
+        "internal-service-boundary-20261016"
+      ],
+      "guardValidation": "PASS: anonymous/impersonation/wrong key/missing configuration denied before body and downstream effects; resource-level SQL and real ingress remain unaccepted"
     },
     {
       "file": "taiko_viewer/server/api/taiko/manifest.get.ts",
@@ -776,9 +786,11 @@
       ],
       "evidence": [
         "source-auth-conditional-sql-20261016",
-        "source-proxy-sql-20261016"
+        "source-proxy-sql-20261016",
+        "merged-sql-installed-20261016"
       ],
-      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked"
+      "sqlValidation": "PASS: listed isolated synthetic suites only; route overall acceptance remains blocked",
+      "mergedSqlValidation": "PASS: 16 installed merged-worker SQL/HTTP tests with new center94 role; overall acceptance remains blocked"
     },
     {
       "file": "taiko_viewer/server/api/taiko/proxy/userdata/[taikoId]/sync-hiroba.post.ts",
@@ -980,7 +992,7 @@
     },
     {
       "file": "taiko_viewer/server/infrastructure/account/merged-read-worker.ts",
-      "sourceSha256": "7d3b2a62b33fbb944c22485aac2850cd20e8f4d12c000962d8aa237157bb2d4b"
+      "sourceSha256": "80c0654593219ebdc781fbf38e153a494a022c781dbcd93b51177e811e6160ce"
     },
     {
       "file": "taiko_viewer/server/infrastructure/account/merged-source-id.ts",
@@ -1028,7 +1040,7 @@
     },
     {
       "file": "taiko_viewer/server/infrastructure/taiko-publication/python.ts",
-      "sourceSha256": "4efcc107e39d014b87af382c41fd16091948a65e5d18276ef47a991c22423a9a"
+      "sourceSha256": "39d1656e6464901643027e8ba6407272b321ec596d9fd8fe9e966259fa2c303f"
     },
     {
       "file": "taiko_viewer/server/infrastructure/taiko-publication/scope.ts",
@@ -1113,20 +1125,30 @@
     {
       "file": "taiko_viewer/server/utils/taiko-open.ts",
       "sourceSha256": "525289465a08f2cfe9fe3e6a6915d1485a4aca6942fb6561466c068d2178dbe8"
+    },
+    {
+      "file": "taiko_viewer/server/utils/taiko-python.ts",
+      "sourceSha256": "d53242979e1d4c51eec05307dc57755c8b8ac636917bb204af161cb66fb75f17"
     }
   ],
   "externalBoundaries": [
     {
       "route": "/api/token",
       "owner": "Taiko center",
-      "status": "NOT_ACCEPTED",
-      "blocker": "Credential control plane caller authentication and deployed ACL require read-only acceptance; no production access performed"
+      "status": "FAIL_SOURCE_REPRODUCED",
+      "blocker": "Unauthenticated synthetic caller reaches the configuration writer spy in current source; affected path integration/deployment stopped. Actual network reachability remains unknown. Owner must repair caller authorization and re-run negative probe.",
+      "evidence": [
+        "credential-control-plane-negative-20261016"
+      ]
     },
     {
       "route": "/uploadTaikoLogin",
       "owner": "Sakura upload host / Taiko credential adapter",
-      "status": "NOT_ACCEPTED",
-      "blocker": "Caller identity, JWT validation and migration ownership require acceptance; no credential read performed"
+      "status": "FAIL_SOURCE_REPRODUCED",
+      "blocker": "Unauthenticated synthetic caller reaches the configuration writer spy in current source; affected path integration/deployment stopped. Actual network reachability remains unknown. Owner must repair caller authorization and re-run negative probe.",
+      "evidence": [
+        "credential-control-plane-negative-20261016"
+      ]
     },
     {
       "route": "/dispatch and /score-token",
@@ -1140,7 +1162,8 @@
     "Atomic quota and trusted proxy configuration unverified",
     "Developer userdata and source history/update/Hiroba-sync isolated suites passed 92 tests; bot binding, credential bind/status, migration, internal render/service, consumer audience and remaining unlisted authorization paths are not accepted by that evidence",
     "Nginx/ACL, upstream private-field classification and credential-control-plane acceptance outstanding",
-    "Publication bridge now uses configured absolute interpreter and -I installed module; this does not isolate all calculation/source workers. Merged read still launches python3 -m scripts.merged_read_cli from repoRoot; full worker/runtime ownership and trusted interpreter/site-packages provenance remain unaccepted."
+    "Publication bridge now uses configured absolute interpreter and -I installed module; this does not isolate all calculation/source workers. Merged-read installed-runtime changes are now in the parallel candidate and require their own evidence; full worker/runtime ownership and trusted interpreter/site-packages provenance remain unaccepted.",
+    "Reproduced current-source anonymous credential-control-plane writes at /api/token and /uploadTaikoLogin; affected path integration/deployment blocked, no production exposure claim"
   ],
   "dependencyCoverage": "Fixed reviewed dependency inventory, not a transitive dependency closure. Covers primary actor/grant policies, merged source authorization, source/principal identity, binding/token/credential rows, worker launch/admission/environment and account/credential configuration. Includes the publication interpreter selector, bridge client and scope; other imported publication readers, annual/manual implementation subgraphs, external Python workers, runtime configuration and deployed ACL require separate acceptance; unchanged listed hashes do not establish authorization correctness.",
   "publicationBridgeReview": {
@@ -1234,6 +1257,115 @@
           "sourceSha256": "ad2062ec68dae229e6b7dd5537e36d3a509a38bd31a306565b14fddbdb966f98"
         }
       ]
+    },
+    {
+      "id": "merged-sql-installed-20261016",
+      "status": "PASS",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "file": "docs/platform-architecture-audit/evidence/merged-sql-installed-20261016.json",
+      "sha256": "5e21e69f00f86fbe46b2b52edc39fa7a90c792860b5b74bcad86a849fa367149",
+      "scope": "Formal developer userdata/current and proxy history with merged resource identities; real account/service SQL, installed all-member SH worker, live proof and response validation. No other route acceptance."
     }
-  ]
+  ],
+  "additionalSecurityEvidence": [
+    {
+      "id": "internal-service-boundary-20261016",
+      "status": "PASS",
+      "passed": 7,
+      "failed": 0,
+      "exitCode": 0,
+      "log": "/var/tmp/viewer0822-internal-boundary.log",
+      "sha256": "a64b694c3df32e3222e89d0aee280a285e1f6be825e85232b8d77fff9da4099f",
+      "test": "taiko_viewer/tests/internalServiceBoundary.test.mjs",
+      "testSha256": "e227aaec9388e66f1ca286908be9f68843442a050f1af68ce839e37b29d3170f",
+      "runtime": "/www/server/nvm/versions/node/v24.13.0/bin/node",
+      "priorAttempt": "System /usr/bin/node does not support --test (exit 9); retried with project Node v24.13.0",
+      "scope": "Actual handlers + extracted exact production guard; synthetic H3/business adapters; no SQL/network. Positive test proves dispatch only, not business owner authorization."
+    },
+    {
+      "id": "credential-control-plane-negative-20261016",
+      "status": "FAIL",
+      "exitCode": 1,
+      "log": "/var/tmp/viewer0822-credential-probe.log",
+      "sha256": "1c5c26a39d6bb4e7b905ffbc5158b5a7f67d121e5c0c2ac769ef3ae054a9d720",
+      "test": "taiko_viewer/tests/credentialControlPlaneProbe.py",
+      "testSha256": "3deec651c37c51151b3a38d2a0b85c99da40a3e5b4fdd72e95b8c5f762793de2",
+      "sourceRepo": "Sakura_bot",
+      "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+      "scope": "AST-extracted current handlers/validation/service-route guard; anonymous synthetic input reaches memory-only writers. No app import, real config read, network, SQL or disk mutation. Does not prove deployed public reachability.",
+      "result": {
+        "securityGate": "FAIL",
+        "productionAccess": false,
+        "diskWrites": 0,
+        "checks": [
+          {
+            "route": "/api/token",
+            "anonymousWriterCalls": 1,
+            "response": 200
+          },
+          {
+            "route": "/uploadTaikoLogin",
+            "anonymousWriterCalls": 1,
+            "expiredDummySignatureAccepted": true,
+            "response": 200
+          }
+        ],
+        "sourceEvidence": [
+          {
+            "file": "taiko/server.py",
+            "sha256": "533ac79768a5e759fcc06ef23113012477458a6ffbf501edb357049831f8d665"
+          },
+          {
+            "file": "miku_bot/sekai/upload/taiko_login.py",
+            "sha256": "41a72b94c262075801a6e8c3393707535c5260f3a78f843c9ed5335719790ca0"
+          },
+          {
+            "file": "miku_bot/sekai/upload/server.py",
+            "sha256": "a562f140bcb9a1e62a3549173ec43f246b4ddf9840e9774437dd752526f4007d"
+          }
+        ]
+      },
+      "action": "BLOCK integration/deployment of the affected credential control-plane paths pending owner repair and negative retest; unrelated local runtime candidate work may continue"
+    }
+  ],
+  "ingressTemplateReview": {
+    "status": "SOURCE_REVIEWED_NOT_DEPLOYED_VERIFIED",
+    "files": [
+      {
+        "file": "taiko_viewer/deploy/nginx.viewer.sakura-bot.cn.dynamic.conf",
+        "sha256": "8fb684ebc747aae66261b2b50184017eb53e1ca624aa83195bf6d8e3e55837d8"
+      },
+      {
+        "file": "taiko_viewer/deploy/nginx.forum.sakura-bot.cn.conf",
+        "sha256": "cc3b003d80533bee54491e7fc62e58327eed92710562fc91299332f52f765c2d"
+      },
+      {
+        "file": "taiko_viewer/deploy/taiko-viewer.service",
+        "sha256": "9ec0bd95d11ac79e59946bd1a03bc92e91cd0e3b435c59e70b612753b96e3270"
+      },
+      {
+        "file": "taiko_viewer/deploy/taiko-sync-receiver.service",
+        "sha256": "8222f1939ddf543be1b9afcb371f900961c20e9ed801d2e61ec547d995e75bc3"
+      }
+    ],
+    "findings": [
+      "Viewer nginx template forwards all paths to loopback Nuxt; no per-internal-route network ACL is present",
+      "Viewer and dispatcher service templates specify loopback; deployed listener/config/ACL not inspected",
+      "Proxy forwards appended X-Forwarded-For while quota trusts it; edge/header trust remains unaccepted",
+      "Sakura tracked public-api service template binds 0.0.0.0:9999; installation and external reachability unknown"
+    ],
+    "noProductionConfigRead": true,
+    "externalFiles": [
+      {
+        "repository": "Sakura_bot",
+        "commit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+        "file": "taiko/deploy/taiko-public-api.service",
+        "sha256": "ea691abc962317da0384736778ea3ffce9ec076af59402f39ef8aca7104a7b0f"
+      }
+    ]
+  },
+  "resourceGrantDraft": "docs/platform-architecture-audit/resource-grant-threat-model-draft.md",
+  "overallApiGate": "BLOCKED: credential control-plane negative probe FAIL; production ingress/ACL, consumer grant/audience and uncovered paths remain unaccepted"
 }

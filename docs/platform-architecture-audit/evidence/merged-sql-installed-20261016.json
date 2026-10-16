@@ -1,0 +1,51 @@
+{
+  "id": "merged-sql-installed-20261016",
+  "status": "PASS",
+  "tests": 16,
+  "passed": 16,
+  "failed": 0,
+  "skipped": 0,
+  "scope": "Formal developer userdata/current and proxy history with merged resource identities; real account/service SQL, installed all-member SH worker, live proof and response validation. No other route acceptance.",
+  "testFile": "taiko_viewer/tests/mergedSourceSql.test.mjs",
+  "testSha256": "9ea3032bffc9faa87898770ccad0ee85f26a6c0ffeaa45843b7a935aeb66e144",
+  "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+  "roleRebuildEvidence": "docs/platform-architecture-audit/evidence/r1-rebuild-center-with-memory-20261016.json",
+  "roleRebuildEvidenceSha256": "82cc851783a349c85324cb4a7f872602076dca7e10a2ae07f82dce146d2910db",
+  "distributionCount": 94,
+  "productionAccess": false,
+  "isolation": "Fresh independent MySQL datadir, actual SELECT DATABASE() matched *_test, bootstrap @@datadir proof before DDL, explicit mutation opt-in, base four production-DDL tables including foreign keys; remaining fixture tables are synthetic, not complete production migration acceptance",
+  "run": {
+    "workspace": "/var/tmp/viewer1-sql-gf8Ntu",
+    "database": "viewer1_security_test",
+    "status": "PASS",
+    "startedAt": "2026-10-16T01:05:01.938Z",
+    "tests": [
+      "taiko_viewer/tests/mergedSourceSql.test.mjs"
+    ],
+    "productionAccess": false,
+    "databaseProof": "viewer1_security_test",
+    "port": 35157,
+    "result": {
+      "code": 0,
+      "signal": null
+    },
+    "daemonExited": true,
+    "finishedAt": "2026-10-16T01:05:30.193Z",
+    "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792112701-2681978.service",
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+  },
+  "artifacts": [
+    {
+      "file": "/var/tmp/viewer1-sql-gf8Ntu/result.json",
+      "sha256": "9c2ab78eca08a6c6476fc9a4b8efa07e111f870e63e769edc08aff930e6860b3"
+    },
+    {
+      "file": "/var/tmp/viewer1-sql-gf8Ntu/tests.log",
+      "sha256": "27c99672710c98eab774e71b3fc5f9cc574d411dd2b2f3a930dc6227ee94752a"
+    },
+    {
+      "file": "/var/tmp/viewer1-sql-gf8Ntu/bootstrap.log",
+      "sha256": "c6eb6748d602aabb5bcd193f252a82c50e326ba94de2bc600077aeb31fdea0e5"
+    }
+  ]
+}

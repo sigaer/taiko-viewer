@@ -1,5 +1,11 @@
 # Runtime closeout — 2026-10-16 incremental evidence
 
+Latest continuation: [Runtime Integration](runtime-integration-20261016.md)
+supersedes the pending-install/consumer descriptions below with scoped evidence.
+The active local role candidates now contain 94 distributions including the
+independently packaged shared memory support; the original 93-distribution
+results and all failures remain historical evidence. Overall Gate stays BLOCKED.
+
 Status: **BLOCKED_NOT_RELEASE_READY**. This extends the existing architecture audit;
 no production API/SQL, private account credentials, runtime configuration, deploy, restart,
 push or merge was performed. Local `main` refs are observations, not proof that

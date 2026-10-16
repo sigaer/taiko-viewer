@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "auditDate": "2026-10-15",
+  "auditDate": "2026-10-16",
   "viewerBase": "56aa05a",
   "taikoCandidate": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
   "method": "Incremental source inspection and historical evidence review, followed by candidate-only publication interpreter isolation. Coordinator-run validation is tracked separately in gate-evidence.md; this audit agent ran no QA, SQL, private-data or production access.",
@@ -62,7 +62,7 @@
       ],
       "retirementStatus": "ACTIVE_SOURCE_RUNTIME_UNVERIFIED",
       "acceptance": "PENDING_OWNER_SIGNOFF",
-      "remediation": "Candidate absolute interpreter/-I bridge passed 52 installed-wheel synthetic client/scope/account/Kinoko regressions. Full runtime still requires compute/Annual/merged-read-worker migration and live coverage; no SQL or production acceptance inferred.",
+      "remediation": "Installed bridge and merged readers verified in synthetic consumer/SQL tests; compute/Annual installed consumers now have scoped evidence. Four source-control workers, live routing, all Writers and production cutover remain unaccepted.",
       "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md"
     },
     {
@@ -222,7 +222,7 @@
       ],
       "retirementStatus": "ACTIVE_SOURCE_RUNTIME_UNVERIFIED",
       "acceptance": "PENDING_OWNER_SIGNOFF",
-      "remediation": "Preserve published reports; installed-runtime revision and historical retention Gate still required.",
+      "remediation": "Installed generator/rating admission, timeout, failure and cleanup verified against synthetic data; saved production reports, full Web/renderer lifecycle and Source-switch history remain unaccepted.",
       "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md"
     },
     {
@@ -276,10 +276,10 @@
   "scopeLimit": "Ownership is a proposed accountable component map, not human signoff or a claim of exhaustive live-process inventory. Existing audit prose remains historical; this file records the increment against main 56aa05a.",
   "runtimeTransition": {
     "baseline": "main 56aa05a publication bridge used python3 -m with source repo cwd and no isolated mode.",
-    "candidate": "Publication bridge now selects an absolute deployment-controlled TAIKO_PYTHON_EXECUTABLE (default /usr/bin/python3) and launches -I -m taiko_store.bridge. Protocol, source locks and lifecycle are unchanged.",
-    "validation": "ISOLATED_SYNTHETIC_PASS: coordinator reports 52 installed-wheel candidate tests PASS across publication client/scope and account/Kinoko regressions. Log: /var/tmp/taiko-viewer1-installed-publication-qa.log. This is not SQL, production, full-runtime or restore acceptance.",
-    "scopeLimit": "Publication bridge only. Compute/Annual and merged-read-worker remain on unmigrated runtime paths; actual running Writer coverage is unaccepted. No G-RUNTIME or production PASS.",
+    "candidate": "Publication, compute, Annual, Growth fingerprint and merged-read use one absolute interpreter selector and installed -I modules in the isolated candidate. Four source-controlled mutation/sync CLIs remain an explicit compatibility boundary.",
+    "validation": "Scoped installed-runtime, image, exact role rebuild, merged SQL and representative role evidence: runtime-integration-20261016.md. Gates remain BLOCKED; old failures retained.",
+    "scopeLimit": "No deployment or live process signoff. Image cases are synthetic callsite parity, not all image/permission flows; source CLI cutovers, credential boundary, history Source-switch and restore remain blocked.",
     "evidence": "docs/platform-architecture-audit/gate-evidence.md"
   },
-  "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md"
+  "candidateEvidence": "docs/platform-architecture-audit/runtime-integration-20261016.md"
 }

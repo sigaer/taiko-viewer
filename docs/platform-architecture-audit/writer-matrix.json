@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "auditDate": "2026-10-15",
+  "auditDate": "2026-10-16",
   "viewerBase": "56aa05a",
   "taikoCandidate": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
   "method": "Incremental source inspection and historical evidence review, followed by candidate-only publication interpreter isolation. Coordinator-run validation is tracked separately in gate-evidence.md; this audit agent ran no QA, SQL, private-data or production access.",
@@ -31,7 +31,16 @@
         "Full cross-writer fault/recovery acceptance on integrated candidate",
         "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
       ],
-      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance.",
+      "sourceCallChain": [
+        "utils/account/songs.ts edit/create/import -> withUserdataWriteLock -> writeUserdataWithHistory -> withScoreWrite stage current/H -> installed bridge -> PublicationStore.publish"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "viewer-manual-edit",
@@ -52,7 +61,16 @@
         "Full cross-writer fault/recovery acceptance on integrated candidate",
         "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
       ],
-      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance.",
+      "sourceCallChain": [
+        "utils/account/manual.ts rename/edit/delete -> withUserdataWriteLock -> shared writer -> installed bridge"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "viewer-manual-create-delete-restore",
@@ -78,7 +96,18 @@
         "Full cross-writer fault/recovery acceptance on integrated candidate",
         "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
       ],
-      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance.",
+      "sourceCallChain": [
+        "manual-creation stage -> explicit operation-id publishScoreBatch -> SQL receipt",
+        "manual-lifecycle verified backup -> clearScoreSource/tombstone -> SQL receipt",
+        "manual-recovery -> restoreScoreBackup -> lifecycle reconcile"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "viewer-kinoko",
@@ -100,7 +129,16 @@
         "Full cross-writer fault/recovery acceptance on integrated candidate",
         "SQL authority/lifecycle acceptance beyond synthetic bridge regressions"
       ],
-      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance."
+      "candidateValidation": "Shared installed-wheel bridge: 52 synthetic client/scope/account/Kinoko tests PASS; not fresh SQL/manual lifecycle E2E or full-runtime acceptance.",
+      "sourceCallChain": [
+        "utils/account/sync.ts -> withUserdataWriteLock -> internal/account/kinoko-history.ts stageScoreText + changed current -> outer publication"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "center-wahlap",
@@ -120,7 +158,22 @@
       "unverified": [
         "Installed runtime identity and deployment coverage",
         "Full cross-writer fault/recovery acceptance on integrated candidate"
-      ]
+      ],
+      "sourceCallChain": [
+        "update_user.getUserData -> userdata_storage.save_userdata -> Source EX -> _save_userdata_locked -> current + full/delta H store.commit",
+        "native owned acquisition may supply an already-held Source EX"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "ISOLATED_ADAPTER_PASS",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance.",
+        "validation": "7 cross-writer tests passed within center combined 10-test run. Three real installed adapter source paths, nonce and four dispatcher recovery cases only; does not accept all production writers.",
+        "log": {
+          "path": "/var/tmp/viewer0822-consumers-center.log",
+          "sha256": "cf9923e384a14610d8aba3623ec5ff4458de65a906e7c14e3dec415f5b8a4399"
+        }
+      }
     },
     {
       "id": "center-hiroba",
@@ -140,7 +193,21 @@
       "unverified": [
         "Installed runtime identity and deployment coverage",
         "Full cross-writer fault/recovery acceptance on integrated candidate"
-      ]
+      ],
+      "sourceCallChain": [
+        "hiroba.sync sync_hiroba_userdata/sync_public_hiroba_userdata -> _save_hiroba_userdata_from_pages -> save_userdata(source=hiroba) -> store.commit"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "ISOLATED_ADAPTER_PASS",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance.",
+        "validation": "7 cross-writer tests passed within center combined 10-test run. Three real installed adapter source paths, nonce and four dispatcher recovery cases only; does not accept all production writers.",
+        "log": {
+          "path": "/var/tmp/viewer0822-consumers-center.log",
+          "sha256": "cf9923e384a14610d8aba3623ec5ff4458de65a906e7c14e3dec415f5b8a4399"
+        }
+      }
     },
     {
       "id": "dispatcher-local-target",
@@ -159,7 +226,22 @@
       "unverified": [
         "Historical generic publication evidence is not a fresh dispatcher endpoint test",
         "Remote target compatibility and live dispatcher provenance not verified"
-      ]
+      ],
+      "sourceCallChain": [
+        "sync_dispatch_server.dispatch_to_target(local) -> write_local_snapshot -> supplied EX or local exclusive -> store.commit(current, delta H)",
+        "refresh_userdata_from_wahlap -> getUserData is a preceding separate logical observation"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "ISOLATED_ADAPTER_PASS",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance.",
+        "validation": "7 cross-writer tests passed within center combined 10-test run. Three real installed adapter source paths, nonce and four dispatcher recovery cases only; does not accept all production writers.",
+        "log": {
+          "path": "/var/tmp/viewer0822-consumers-center.log",
+          "sha256": "cf9923e384a14610d8aba3623ec5ff4458de65a906e7c14e3dec415f5b8a4399"
+        }
+      }
     },
     {
       "id": "native-u0-materialization",
@@ -178,7 +260,16 @@
       "unverified": [
         "Installed runtime identity and deployment coverage",
         "Full cross-writer fault/recovery acceptance on integrated candidate"
-      ]
+      ],
+      "sourceCallChain": [
+        "center/materialization -> taiko_store.merged_materialization.materialize -> sorted member SH -> derived EX -> store.publish(dependencyHash)"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "daily-trend-backfill",
@@ -197,7 +288,16 @@
       "unverified": [
         "No atomic C/H + daily + SQL transaction claimed",
         "Integrated runtime, large-account cost and complete recovery not verified"
-      ]
+      ],
+      "sourceCallChain": [
+        "userdata_storage after C/H commit -> daily_ability.capture_snapshot -> taiko_store.daily archive; trend/backfill share source namespace fences"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
     },
     {
       "id": "client-derived-cache",
@@ -214,7 +314,47 @@
       ],
       "unverified": [
         "Client fresh candidate wheel and complete cache consumers not re-audited here"
-      ]
+      ],
+      "sourceCallChain": [
+        "authorized remote canonical response -> client cache, not center commit authority"
+      ],
+      "runtimeCoverage": "NOT_VERIFIED: no process/production identity audit; installed fixture does not prove active service path.",
+      "r3CandidateEvidence": {
+        "status": "NOT_COVERED_BY_NEW_ADAPTER_TEST",
+        "test": "taiko_viewer/tests/crossWriterInstalled.test.ts",
+        "scope": "Installed save_userdata/source-label and dispatcher-local writer versus Node bridge; SQL song lock lookup and daily compute stubbed. No upstream, native command, full manual/Kinoko product, u0, SQL or active-runtime acceptance."
+      }
+    },
+    {
+      "id": "source-switch",
+      "owner": "Account binding authority and source acquisition adapters",
+      "entrypoints": [
+        "taiko_viewer/server/services/account/binding-lifecycle.ts",
+        "taiko_viewer/server/api/taiko/proxy/bind/current.post.ts",
+        "taiko_bot/runtime/player/center/userdata_storage.py",
+        "taiko_bot/offline/annual_summary/events.py"
+      ],
+      "classification": "Selection is SQL metadata; incoming publication source change is an observation boundary, not a separate unconditional C/H writer or physical play.",
+      "commit": "Binding selection alone must not invent a score publication; subsequent source acquisition uses existing save_userdata/current+H commit.",
+      "lock": "Account source/SQL fences apply to selection; score acquisitions use PublicationStore EX.",
+      "faultAndRepair": "Score recovery shares canonical journal; authority and observation interpretation remain separate.",
+      "publicationStoreCompatibility": "SOURCE_PATH_REVIEWED_HISTORY_SEMANTICS_FAIL",
+      "runtimeCoverage": "NOT_VERIFIED",
+      "evidence": [
+        "docs/platform-architecture-audit/history-continuity-20261016.json"
+      ],
+      "unverified": [
+        "Source switch concurrent with actual authorization and all product reads",
+        "Historical reappearance play_delta defect unresolved; no owner waiver"
+      ],
+      "candidateValidation": {
+        "status": "SEMANTIC_FAIL_REPRODUCED",
+        "log": {
+          "path": "/var/tmp/viewer0822-source-switch-retry.log",
+          "sha256": "47b0d7f1c964975b7346ff5a89756c1ac04fb227ac16b2e10867d4bfaa623614"
+        },
+        "result": "Historical four-snapshot and same-source delete/reappear each produce play_delta=1; direct source switch without deletion produces none. Publication atomicity does not repair this event-attribution bug."
+      }
     }
   ],
   "blockingActions": [
@@ -247,5 +387,16 @@
     "scopeLimit": "Publication bridge only. Compute/Annual and merged-read-worker remain on unmigrated runtime paths; actual running Writer coverage is unaccepted. No G-RUNTIME or production PASS.",
     "evidence": "docs/platform-architecture-audit/gate-evidence.md"
   },
-  "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md"
+  "candidateEvidence": "docs/platform-architecture-audit/gate-evidence.md",
+  "reviewedViewerCommit": "c08ec17c9c9f0ac45a6f833f8089b4b09d6e5608",
+  "r3Acceptance": "BLOCKED: call chains are source-reviewed; all production-used writers, service paths and mixed recovery are not jointly accepted. The prior 52 synthetic PASS is preserved with its original scope.",
+  "legacyReaderConstraint": "Legacy direct C/H projections are installed one file at a time before committed pointer switch and can expose mixed generations to readers lacking a shared lease. Only canonical immutable readers under Source SH have snapshot consistency. Activation requires consumer inventory/migration or exclusion from concurrent writes; never advertise legacy path snapshot isolation.",
+  "r3SupplementaryEvidence": {
+    "log": {
+      "path": "/var/tmp/viewer0822-consumers-center-final.log",
+      "sha256": "f6ce1a80e96e5426fd973587fcc0050ebcdc2c527414ef1405d4f0380614d496"
+    },
+    "status": "17_ISOLATED_TESTS_PASS",
+    "scope": "3 center consumer tests including enhanced merged read plus 14 publication client regressions; not 17 new all-writer cases, no production activation proof."
+  }
 }

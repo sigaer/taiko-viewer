@@ -1,0 +1,68 @@
+{
+  "role": "client",
+  "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+  "workspace": "/var/tmp/viewer-runtime-integration-bey2xlwy",
+  "commands": [
+    {
+      "label": "client-lifecycle",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-y9g4d027/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/scripts/readiness/run-installed-lifecycle.py",
+        "--host",
+        "client",
+        "--work",
+        "/var/tmp/viewer-runtime-integration-bey2xlwy/lifecycle"
+      ],
+      "cwd": "/var/tmp/viewer-runtime-integration-bey2xlwy",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-bey2xlwy/client-lifecycle.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112977-2690317.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "8990720"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 9.46,
+      "logBytes": 1979,
+      "logSha256": "314cc7eebfccc6c6080df4aad945086c0261b24d2ae424b65628a358f29a22a2",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112977-2690317.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "10493952"
+      }
+    }
+  ],
+  "productionAccess": false,
+  "priorEvidenceOverwritten": false,
+  "scope": "Only representative installed role lifecycle with explicit hashed test helpers and frozen oracle; earlier consumer/dispatch tests not rerun.",
+  "cgroupBefore": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112977-2690317.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "8990720"
+  },
+  "rebuildEvidence": "/var/tmp/taiko-viewer-1-readiness-20261015/docs/platform-architecture-audit/evidence/r1-rebuild-client-with-memory-20261016.json",
+  "rebuildEvidenceSha256": "55d6585d4adebcc62f761a42295d95bb10f4325df29ee591608dd38e182e8797",
+  "environmentIdentity": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a",
+  "interpreter": "/var/tmp/taiko-role-rebuild-y9g4d027/venv/bin/python",
+  "testSources": [
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/scripts/readiness/run-installed-lifecycle.py",
+      "sha256": "31dee8273258ab7c1965949badf479e0e5edd41ed531c3a932b4b3aa3f07549c"
+    }
+  ],
+  "elapsedSeconds": 9.461,
+  "cgroupAfter": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112977-2690317.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "10493952"
+  },
+  "memoryPeakScope": "Whole owning QA cgroup peak, not sum or per-command allocation"
+}

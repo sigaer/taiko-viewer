@@ -85,6 +85,7 @@
         "?? docs/Sakura_Viewer_0.80.1_P1_Growth_History_Read_Model_Architecture_Audit.md",
         "?? docs/Sakura_Viewer_0.80.1_Passport_Usability_Recovery_Codex_Brief.md",
         "?? \"docs/Viewer 1.0.0 \\342\\200\\224 My Taiko, in one place.\\345\\256\\236\\346\\226\\275\\344\\270\\273\\346\\216\\247\\346\\226\\207\\346\\241\\243.md\"",
+        "?? docs/Viewer_0822_Runtime_Integration_and_API_Readiness_20261016.md",
         "?? docs/growth-history-read-model-architecture.md",
         "?? docs/growth-history-read-model-audit.md",
         "?? docs/growth-history-read-model-benchmark.md",
@@ -787,6 +788,169 @@
         }
       },
       "acceptanceLimit": "Retains prior failed attempts; full role lifecycle remains unaccepted."
+    },
+    "roleLocks": {
+      "file": "runtime-role-locks.json",
+      "sha256": "ab83531dfc8ae029e4fd81289e0a05d84dc63359f121962301ab2eb1d911fbab"
+    },
+    "conflictLedger": {
+      "file": "conflict-ledger.json",
+      "sha256": "b8e3ec6fe9be7baf7bed1497d931a93fc684a8bdcb2a4282da13d6428edfd438"
+    },
+    "exactRebuildCenter": {
+      "file": "evidence/r1-rebuild-center-20261016.json",
+      "sha256": "8dc885c39c7e00574b2ea5f9f8f482557c542169301541b53b47dec94c2da00f",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+      "durationSeconds": 29.089
+    },
+    "exactRebuildClient": {
+      "file": "evidence/r1-rebuild-client-20261016.json",
+      "sha256": "4420b55e83cd6919bcecccaeb8cbb94162739fd9193267d15f84e8612690f04b",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f",
+      "durationSeconds": 28.916
+    },
+    "supplementalRoleLocks": {
+      "file": "runtime-role-locks-with-memory.json",
+      "sha256": "59fe2f2f67a1bdba7e96cc7ba7e9633822d1adc8d27496f71e0a0c4249477b75",
+      "scope": "94-distribution business QA candidate; preserves original 93-distribution role acceptance."
+    },
+    "sharedMemoryPackage": {
+      "file": "evidence/runtime-memory-package-20261016.json",
+      "sha256": "69e986031319df5df29fabc337b4c6245d281a8464acdf2bba8dafb854e3238b",
+      "status": "PASS_LOCAL_INTEGRATION_PACKAGING",
+      "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+      "wheelDigest": "1e6197b0c4298808e70038cc5de3fff8c2f6517888514c996648a140091f9724",
+      "owner": "Sakura_bot shared infrastructure",
+      "upstreamReleaseClaim": false
+    },
+    "supplementalRebuildCenter": {
+      "file": "evidence/r1-rebuild-center-with-memory-20261016.json",
+      "sha256": "82cc851783a349c85324cb4a7f872602076dca7e10a2ae07f82dce146d2910db",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+      "durationSeconds": 29.373
+    },
+    "supplementalRebuildClient": {
+      "file": "evidence/r1-rebuild-client-with-memory-20261016.json",
+      "sha256": "55d6585d4adebcc62f761a42295d95bb10f4325df29ee591608dd38e182e8797",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a",
+      "durationSeconds": 29.22
+    },
+    "runtimeIntegrationCenter": {
+      "file": "evidence/r2-center-integration-94-20261016.json",
+      "sha256": "0d510bcf1e130bdc4fd050f8556dce45e6fbe37c37a21d5385441668fe040605",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Recorded 94-distribution role-specific consumer checks only; full R2 and four source compatibility worker cutovers remain unaccepted."
+    },
+    "priorPublicDispatchCenter": {
+      "file": "/var/tmp/viewer0822-center-public.log",
+      "sha256": "3615212eba52830a9ffc209340b564078aa0e26ee375b346b1e727f6efcc6003",
+      "status": "PASS_SCOPED",
+      "distributionCount": 93,
+      "scope": "18 real installed public/player dispatch cases on synthetic OneBot/QQ transports; not a complete image/support or account lifecycle closure."
+    },
+    "runtimeIntegrationClient": {
+      "file": "evidence/r2-client-integration-94-20261016.json",
+      "sha256": "4913bea75a6a8890133fe749aeaf92eaa1d9cc5a5009138798b6dbc1d8afa269",
+      "status": "FAIL",
+      "scope": "Recorded 94-distribution role-specific consumer checks only; full R2 and four source compatibility worker cutovers remain unaccepted."
+    },
+    "priorPublicDispatchClient": {
+      "file": "/var/tmp/viewer0822-client-public.log",
+      "sha256": "84eba8d0aa004cd3b9e06fbc293780d0b2b0ebee6e500dd570cd4f9d1e8b2cf6",
+      "status": "PASS_SCOPED",
+      "distributionCount": 93,
+      "scope": "18 real installed public/player dispatch cases on synthetic OneBot/QQ transports; not a complete image/support or account lifecycle closure."
+    },
+    "imageCallsiteInitialFailure": {
+      "file": "evidence/installed-viewer-images-20261016.json",
+      "sha256": "431a29bc3dba8bbb6502ac982e68c233bbd9802d6ee5350a85edc859ef45bc03",
+      "status": "FAIL",
+      "scope": null,
+      "imageCases": null,
+      "limitation": "Original missing-support failure retained; the 94-package retry verifies synthetic callsite parity, not frozen legacy algorithm equivalence."
+    },
+    "imageCallsiteSupplementalRetry": {
+      "file": "evidence/installed-viewer-images-retry-20261016.json",
+      "sha256": "b7a3c195bdef8fb4acf9e913c4f363b88bfaaf1255ddc69f86f2f1b8afd3d7c0",
+      "status": "PASS_LIMITED_IMAGE_CALLSITE_PARITY",
+      "scope": "installed Viewer image callsite parity; synthetic assets; no frozen algorithm claim",
+      "imageCases": 3,
+      "limitation": "Original missing-support failure retained; the 94-package retry verifies synthetic callsite parity, not frozen legacy algorithm equivalence."
+    },
+    "representativeLifecycleCenter": {
+      "file": "evidence/r2-center-lifecycle-94-20261016.json",
+      "sha256": "029a91e7b0b98627e3ae3611b1f476cc51f640a0e29060d71578f3fa3f7cc686",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Installed representative role lifecycle with exact test-helper whitelist and frozen source oracle; previous setup failure is retained separately. No production lifecycle claim."
+    },
+    "representativeLifecycleClient": {
+      "file": "evidence/r2-client-lifecycle-retry-94-20261016.json",
+      "sha256": "ca5eab8c1f830dce4796f32230ed67c1d1a0ab08eb28773c5cfdc1fb01f5bf52",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Installed representative role lifecycle with exact test-helper whitelist and frozen source oracle; previous setup failure is retained separately. No production lifecycle claim."
+    },
+    "mergedSqlInstalled": {
+      "file": "evidence/merged-sql-installed-20261016.json",
+      "sha256": "5e21e69f00f86fbe46b2b52edc39fa7a90c792860b5b74bcad86a849fa367149",
+      "status": "PASS",
+      "tests": 16,
+      "scope": "Formal developer userdata/current and proxy history with merged resource identities; real account/service SQL, installed all-member SH worker, live proof and response validation. No other route acceptance.",
+      "isolation": "Fresh independent MySQL datadir, actual SELECT DATABASE() matched *_test, bootstrap @@datadir proof before DDL, explicit mutation opt-in, base four production-DDL tables including foreign keys; remaining fixture tables are synthetic, not complete production migration acceptance"
+    },
+    "apiAuthMatrix": {
+      "file": "api-auth-matrix.json",
+      "sha256": "530c8c0d5a6644e17375debfbb331acc557464d6bca8452739114f034eabd2de",
+      "status": "BLOCKED: credential control-plane negative probe FAIL; production ingress/ACL, consumer grant/audience and uncovered paths remain unaccepted",
+      "credentialControlPlaneNegativeProbe": {
+        "id": "credential-control-plane-negative-20261016",
+        "status": "FAIL",
+        "exitCode": 1,
+        "log": "/var/tmp/viewer0822-credential-probe.log",
+        "sha256": "1c5c26a39d6bb4e7b905ffbc5158b5a7f67d121e5c0c2ac769ef3ae054a9d720",
+        "test": "taiko_viewer/tests/credentialControlPlaneProbe.py",
+        "testSha256": "3deec651c37c51151b3a38d2a0b85c99da40a3e5b4fdd72e95b8c5f762793de2",
+        "sourceRepo": "Sakura_bot",
+        "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+        "scope": "AST-extracted current handlers/validation/service-route guard; anonymous synthetic input reaches memory-only writers. No app import, real config read, network, SQL or disk mutation. Does not prove deployed public reachability.",
+        "result": {
+          "securityGate": "FAIL",
+          "productionAccess": false,
+          "diskWrites": 0,
+          "checks": [
+            {
+              "route": "/api/token",
+              "anonymousWriterCalls": 1,
+              "response": 200
+            },
+            {
+              "route": "/uploadTaikoLogin",
+              "anonymousWriterCalls": 1,
+              "expiredDummySignatureAccepted": true,
+              "response": 200
+            }
+          ],
+          "sourceEvidence": [
+            {
+              "file": "taiko/server.py",
+              "sha256": "533ac79768a5e759fcc06ef23113012477458a6ffbf501edb357049831f8d665"
+            },
+            {
+              "file": "miku_bot/sekai/upload/taiko_login.py",
+              "sha256": "41a72b94c262075801a6e8c3393707535c5260f3a78f843c9ed5335719790ca0"
+            },
+            {
+              "file": "miku_bot/sekai/upload/server.py",
+              "sha256": "a562f140bcb9a1e62a3549173ec43f246b4ddf9840e9774437dd752526f4007d"
+            }
+          ]
+        },
+        "action": "BLOCK integration/deployment of the affected credential control-plane paths pending owner repair and negative retest; unrelated local runtime candidate work may continue"
+      },
+      "scope": "P0 credential-control-plane failure blocks affected integration/deployment; isolated runtime passes do not override this result. Production reachability is unverified."
     }
   },
   "gates": {
@@ -808,13 +972,29 @@
   },
   "observedReadinessCheckout": {
     "branch": "feat/viewer-1-readiness-20261015",
-    "head": "a9bcbfa4117770a2b32a4fdc08b957dfca1aa6c9",
+    "head": "def8082511375476ef184989248f76599ee56cb2",
     "sourceHashes": {
       "taiko_viewer/server/infrastructure/taiko-publication/client.ts": "2739bd5202901547b1508eea6592f2445ddedcccaf58d21258748a4a06712467",
-      "taiko_viewer/server/infrastructure/taiko-publication/python.ts": "4efcc107e39d014b87af382c41fd16091948a65e5d18276ef47a991c22423a9a",
+      "taiko_viewer/server/infrastructure/taiko-publication/python.ts": "39d1656e6464901643027e8ba6407272b321ec596d9fd8fe9e966259fa2c303f",
       "taiko_viewer/server/middleware/private-cache.ts": "cc7f737ee14f37539f349890d181598128984146c21b488f595c914367e2d181",
       "taiko_viewer/server/utils/cache-policy.ts": "f730834e3c8467f2c81687d2ff96d2cdcd2620ad5fb779d820a81ef6df8019dc",
-      "taiko_viewer/server/infrastructure/account/private-source-response.ts": "dde106e59e4d2470f643891a7dda5a74f4bd379e0073ab2e14884cf169d52649"
+      "taiko_viewer/server/infrastructure/account/private-source-response.ts": "dde106e59e4d2470f643891a7dda5a74f4bd379e0073ab2e14884cf169d52649",
+      "taiko_viewer/server/infrastructure/account/merged-read-worker.ts": "80c0654593219ebdc781fbf38e153a494a022c781dbcd93b51177e811e6160ce",
+      "taiko_viewer/server/utils/taiko-python.ts": "d53242979e1d4c51eec05307dc57755c8b8ac636917bb204af161cb66fb75f17",
+      "taiko_viewer/server/utils/taiko-artifact.ts": "82f28efa767f3a76bfcf4c448431e8e10292b2639df2573de52968ac8f41f259",
+      "taiko_viewer/scripts/annual_python_worker.py": "d77a596e9ce8b78e34edbb04bfd5691bbb0dd88f9b1ee1045b5c35b26dc77aa4",
+      "taiko_viewer/server/services/account/python-compute.ts": "f96c56393e0a33706890193468e22b651a7616423ee6d18c2fc9e3470ed32623",
+      "taiko_viewer/server/services/account/charts.ts": "18e10c20943702104b8ddd538f5f70875739689bfff01d689f51adf64d607a27",
+      "taiko_viewer/server/services/account/progress.ts": "92356dce8fde2d28f0358c15606d4835ddd90b94ed38a7d8294c0e4ef88cf74d",
+      "taiko_viewer/server/services/account/annual-summary/bot.ts": "974790cd27b850956f5225a53684cdb1536c8bde8986592b8ffba4df9fdd8b74",
+      "taiko_viewer/server/services/account/annual-summary/runtime.ts": "844c9531467476a3823bfcc0bf6460f31f935e710d5caba316510c045bcbf296",
+      "taiko_viewer/server/services/account/annual-summary/isolated-worker.ts": "c4cc1c4e0c2cd7feae1c3e5121e73c957d812c883ba84c20aacb1095301a5d92",
+      "taiko_viewer/server/services/growth-history/model-revision.ts": "6f7aa4652f11174de18b2bd20645da42533d4e83bced26b41dd04da23ef40041",
+      "taiko_viewer/server/utils/account/my-don.ts": "7dbbf5b62b0e31dec9e8eb251a51fee30b52a7755d4acce565c4fb8b60120f66",
+      "taiko_viewer/server/infrastructure/account/sync-worker-runner.ts": "bd7c0d2e379511369d14e458a3f4c247e7fd4ad28a802d4c8087ef6ad1626429",
+      "taiko_viewer/server/infrastructure/account/source-mutation-worker-runner.ts": "bb95e96a26edb4ce51cc9c1144e6aa3e0d7dc32bc40b11b90bd6f7018190d4ae",
+      "taiko_viewer/server/infrastructure/account/qq-migration-worker-runner.ts": "575604cae7e20f99bc135f4cdf1eeae486d3494f2a2e3fb7e41a82d8fcf3f167",
+      "taiko_viewer/server/infrastructure/account/hiroba-credential-worker-runner.ts": "4dbb9c60300104c1d563c894a842b727babb4627c91617988b05b228620e7421"
     },
     "identityNote": "This is the current readiness checkout, distinct from historical 6331aea ownership candidate. HEAD is observed before any subsequent documentation commit; source hashes identify the audited implementation. Manifest excludes its own hash to avoid self-reference."
   },
@@ -824,5 +1004,112 @@
     "frozenResult": "1 failed, 36 deselected",
     "newExecution": false,
     "skips": "Seven historical production-fixture cases; private fixtures not accessed."
-  }
+  },
+  "viewerCommit": "def8082511375476ef184989248f76599ee56cb2",
+  "taikoCommit": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
+  "sakuraCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+  "wheelDigest": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529",
+  "dependenciesDigest": {
+    "center": "1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "contractDigest": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+  "coreRoleVersion": {
+    "center": "0.1.1",
+    "client": "0.1.2"
+  },
+  "catalogRevision": null,
+  "workerProtocol": {
+    "publication": {
+      "module": "taiko_store.bridge",
+      "schema": 1
+    },
+    "mergedRead": {
+      "module": "taiko_bot.cli.merged_read_cli",
+      "schema": 1,
+      "currentConsumerAcceptance": {
+        "status": "PASS_SCOPED",
+        "scope": "3 installed consumer tests plus 14 Publication tests; source vectors/history, failure/lease and restore behavior. Not all production Writers.",
+        "evidencePath": "/var/tmp/viewer0822-consumers-center-final.log",
+        "sha256": "f6ce1a80e96e5426fd973587fcc0050ebcdc2c527414ef1405d4f0380614d496",
+        "passed": 17,
+        "failed": 0
+      }
+    },
+    "annual": {
+      "module": "taiko_bot.offline.annual_summary",
+      "currentConsumerAcceptance": {
+        "status": "PASS_SCOPED",
+        "scope": "Installed generator ratings/build, poisoned import path, missing-module/deadline/isolation cleanup and fingerprint regression; not complete authenticated Web/report lifecycle.",
+        "evidencePath": "/var/tmp/viewer0822-annual-retry.log",
+        "sha256": "446ea18d62cb2469244011cb4546816d4a086d44658d5b05d6ffbdd0ac82028c",
+        "passed": 9,
+        "failed": 0
+      }
+    },
+    "sourceCompatibility": {
+      "status": "BLOCKED_INSTALLED_CUTOVER_NOT_ACCEPTED",
+      "modules": [
+        "scripts.account_sync_cli",
+        "scripts.source_mutation_cli",
+        "scripts.qq_migration_cli",
+        "scripts.hiroba_credential_cli"
+      ],
+      "scope": "Existing source-worker compatibility paths remain; production interpreter/activation unknown. Preserve authorization and transactions until separate installed-worker acceptance."
+    }
+  },
+  "rollbackTarget": {
+    "productionCommit": null,
+    "productionInterpreter": null,
+    "databaseRestorePoint": null,
+    "preservedViewerActiveMain": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+    "policy": "No production cutover occurred. Retain active main and prior immutable artifacts; deployment/DB restoration instructions require verified production state before authorization."
+  },
+  "verifiedAt": "2026-10-16T01:15:25.902807+00:00",
+  "verificationScope": "Local ref/artifact inventory, exact role rebuild evidence when available; not production or full runtime acceptance.",
+  "roleEnvironmentIdentity": {
+    "center": "sha256:1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "supplementalDependenciesDigest": {
+    "center": "1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "historicalRoleEnvironmentIdentity": {
+    "center": "sha256:ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+    "client": "sha256:0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f"
+  },
+  "baseDependenciesDigest": {
+    "center": "ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+    "client": "0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f"
+  },
+  "activeEnvironmentScope": "94-distribution candidate adds the independently packaged Sakura shared runtime_memory support; 93-distribution installs remain historical PASS but did not cover the image/runtime dependency closure.",
+  "evidencePaths": [
+    "/var/tmp/viewer0822-annual-retry.log",
+    "/var/tmp/viewer0822-center-public.log",
+    "/var/tmp/viewer0822-client-public.log",
+    "/var/tmp/viewer0822-consumers-center-final.log",
+    "api-auth-matrix.json",
+    "conflict-ledger.json",
+    "evidence/fresh-runtime-20261015.json",
+    "evidence/fresh-runtime-proxy-20261016.json",
+    "evidence/fresh-runtime-proxy-retry-20261016.json",
+    "evidence/fresh-runtime-pypi-20261015.json",
+    "evidence/installed-viewer-images-20261016.json",
+    "evidence/installed-viewer-images-retry-20261016.json",
+    "evidence/isolated-sql-20261016.json",
+    "evidence/merged-sql-installed-20261016.json",
+    "evidence/r1-rebuild-center-20261016.json",
+    "evidence/r1-rebuild-center-with-memory-20261016.json",
+    "evidence/r1-rebuild-client-20261016.json",
+    "evidence/r1-rebuild-client-with-memory-20261016.json",
+    "evidence/r2-center-integration-94-20261016.json",
+    "evidence/r2-center-lifecycle-94-20261016.json",
+    "evidence/r2-client-integration-94-20261016.json",
+    "evidence/r2-client-lifecycle-retry-94-20261016.json",
+    "evidence/runtime-memory-package-20261016.json",
+    "runtime-role-locks-with-memory.json",
+    "runtime-role-locks.json",
+    "taiko_bot-0.14.1-py3-none-any.whl"
+  ]
 }

@@ -1,0 +1,215 @@
+{
+  "role": "center",
+  "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+  "workspace": "/var/tmp/viewer-runtime-integration-jab0lkmm",
+  "commands": [
+    {
+      "label": "installedRuntimeConsumers",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedRuntimeConsumers.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-jab0lkmm/installedRuntimeConsumers.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "8986624"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 3.022,
+      "logBytes": 1322,
+      "logSha256": "0460807d98996c21370c29b6e26a521456f980fec91db1ddb916c654cb8955d6",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "9633792"
+      }
+    },
+    {
+      "label": "installedGrowthRevision",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedGrowthRevision.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-jab0lkmm/installedGrowthRevision.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "9760768"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.885,
+      "logBytes": 599,
+      "logSha256": "c6807cbf55d7fadcbe5adecd99ee7662718defe74e6b1dd8575e8ae3c7c39412",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "13717504"
+      }
+    },
+    {
+      "label": "taikoFingerprint",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/taikoFingerprint.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-jab0lkmm/taikoFingerprint.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "13848576"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.96,
+      "logBytes": 216,
+      "logSha256": "631791d92f2106adfc15d7265b81abf70981a6bbe39a3c97a7fe496666f1109f",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "18440192"
+      }
+    },
+    {
+      "label": "annualWheelWorker",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualWheelWorker.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-jab0lkmm/annualWheelWorker.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "18440192"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 9.318,
+      "logBytes": 3353,
+      "logSha256": "1a42254c09ed598b8b3cb46db01fe5dc73fef8d6cd60aae9ca4bfc1924b5bd8f",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "18407424"
+      }
+    },
+    {
+      "label": "crossWriterInstalled",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/crossWriterInstalled.test.ts"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-jab0lkmm/crossWriterInstalled.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "18407424"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 3.245,
+      "logBytes": 956,
+      "logSha256": "086a77d4ac2ab4fd1229dd824abe927d6951261e942f04b9c42a34ee4900f257",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "19763200"
+      }
+    }
+  ],
+  "productionAccess": false,
+  "priorEvidenceOverwritten": false,
+  "scope": "Center real Viewer consumers; client synthetic dispatch and frozen source oracle. No production lifecycle claim.",
+  "cgroupBefore": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "8986624"
+  },
+  "rebuildEvidence": "/var/tmp/taiko-viewer-1-readiness-20261015/docs/platform-architecture-audit/evidence/r1-rebuild-center-with-memory-20261016.json",
+  "rebuildEvidenceSha256": "82cc851783a349c85324cb4a7f872602076dca7e10a2ae07f82dce146d2910db",
+  "environmentIdentity": "sha256:1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+  "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+  "priorIndependentImageEvidence": {
+    "file": "/var/tmp/taiko-viewer-1-readiness-20261015/docs/platform-architecture-audit/evidence/installed-viewer-images-retry-20261016.json",
+    "sha256": "b7a3c195bdef8fb4acf9e913c4f363b88bfaaf1255ddc69f86f2f1b8afd3d7c0",
+    "rerun": false
+  },
+  "testSources": [
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedRuntimeConsumers.test.mjs",
+      "sha256": "725e8ac056d8cae83f46ccd80ba521dcbad0caf4a673f2a330ba7bedc1187396"
+    },
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedGrowthRevision.test.mjs",
+      "sha256": "f9a82c755dd5517d30f3dc8a9165652d79a76d9e2e84dbdd5f556e0a82b09bf0"
+    },
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/taikoFingerprint.test.mjs",
+      "sha256": "ab183a649cb09d6ad4ea4eb9a7aed6c13d21a04d03b626a5661545563b6c302a"
+    },
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualWheelWorker.test.mjs",
+      "sha256": "b283923dbd002f537705c043693b16f3513dea2b8670b7651c60932c0dad85d0"
+    },
+    {
+      "file": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/crossWriterInstalled.test.ts",
+      "sha256": "5d167128efba50d03c3e1607f84b7fda10bec6a31440bde8f1e4ff933103f3b2"
+    }
+  ],
+  "elapsedSeconds": 17.434,
+  "cgroupAfter": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112767-2684606.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "19763200"
+  },
+  "memoryPeakScope": "Whole owning QA cgroup peak, not sum or per-command allocation"
+}
