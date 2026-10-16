@@ -7,7 +7,7 @@ from pathlib import Path
 vault=Path('/home/sigaer/taiko/qa-vault')
 evidence_root=Path(os.environ['QA_EVIDENCE_DIR']).resolve(strict=True)
 assert evidence_root.is_relative_to(vault) and evidence_root!=vault
-p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--extreme',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-current','private-history','growth-history','private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--extreme',action='store_true');a=p.parse_args()
 root=Path(__file__).resolve().parents[2]
 assert a.out.is_absolute() and a.out.resolve().is_relative_to(evidence_root) and not a.out.exists();a.out.mkdir(mode=0o700)
 node='/www/server/nvm/versions/node/v24.13.0/bin/node'

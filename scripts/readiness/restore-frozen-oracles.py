@@ -41,7 +41,7 @@ lifecycle=a.destination.parent/'lifecycle-original';assert not lifecycle.exists(
 ownership=a.taiko/'docs/lifecycle-ownership.md';validation=a.taiko/'docs/validation/lifecycle-20261015.txt'
 assert 'Taiko e37e07e / Sakura 3b08986' in ownership.read_text() and 'Taiko e37e07e / Sakura 3b08986' in validation.read_text()
 rows=[]
-for host,repo,revision,member in [('center',a.taiko,'e37e07e9f66825fb8860655ee146112e4ca1797d','plugins/taiko.py'),('client',a.sakura,'3b08986f21e54e4f6a84a105987174b55546dd42','taiko/plugins/taiko.py')]:
+for host,repo,revision,member in [('client',a.taiko,'e37e07e9f66825fb8860655ee146112e4ca1797d','plugins/taiko.py'),('center',a.sakura,'3b08986f21e54e4f6a84a105987174b55546dd42','taiko/plugins/taiko.py')]:
  raw=git(repo,'show',revision+':'+member);dest=lifecycle/('baseline-'+host)/'plugins/taiko.py';dest.parent.mkdir(parents=True);dest.write_bytes(raw)
  rows.append({'host':host,'revision':revision,'gitMember':member,'path':str(dest),'sha256':hashlib.sha256(raw).hexdigest()})
 (evidence_dir/'lifecycle-baseline-restoration.json').write_text(json.dumps({'status':'FIXED_SOURCE_RESTORED_NOT_TESTED','sources':rows,'ownershipDocumentSha256':sha(ownership),'validationDocumentSha256':sha(validation),'oldRawEvidenceRestored':False,'oldBaselineFileHashRecorded':False},indent=2)+'\n')
