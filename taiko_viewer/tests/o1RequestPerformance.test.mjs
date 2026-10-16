@@ -36,6 +36,7 @@ test('O1 synthetic real HTTP request cohort',{timeout:570000},async()=>{
   await resource();assert.equal(stopped,null,'Insufficient initial resource reserve');timer=setInterval(()=>resource().catch(()=>{stopped='MONITOR_ERROR'}),200);
   await writeFile(output,JSON.stringify(evidence,null,2)+'\n',{mode:0o600});
   await accountSourceFixture(async c=>{
+   c.taikoId='7000000000000142';c.ownedTokenIds.add(c.taikoId);await c.pool.execute('UPDATE web_taiko_bindings SET taiko_id=? WHERE id=?',[c.taikoId,c.bindingId]);
    const isGrowth=op.startsWith('growth-'),isCompute=['growth-overview','growth-passport','b30'].includes(op),isAccount=isGrowth||op==='b30';
    if(isCompute){
     const fixture=JSON.parse(await readFile(new URL('./fixtures/installedRuntimeCatalog.json',import.meta.url),'utf8'));
@@ -70,17 +71,18 @@ test('O1 synthetic real HTTP request cohort',{timeout:570000},async()=>{
     if(stopped)break;
     const {openPublicationLease}=await import('../server/infrastructure/taiko-publication/client.ts');
     const lease=await openPublicationLease({root:c.config.userdataDir,repoRoot:c.config.repoRoot,identity:c.taikoId,mode:'write'});
-    const dataHash=createHash('sha256');
+    const dataHash=createHash('sha256');let lastPayload;
     try{
      for(let h=0;h<history;h++){
       const day=new Date(fixtureEpoch-(history-h)*86400000).toISOString().slice(0,10),ts=day+' 12:00:00';
       const songs=Array.from({length:charts},(_,i)=>({song_no:100+i,level:4,high_score:900000+h,good_cnt:500,ok_cnt:20,ng_cnt:8,combo_cnt:300,stage_cnt:h+1,clear_cnt:h+1,full_combo_cnt:0,dondaful_combo_cnt:0,best_score_rank:5,update_datetime:ts,highscore_datetime:ts}));
       const payload=JSON.stringify({_meta:{full:true,ts,source:'wahlap'},profile:{userid:c.taikoId,...(op==='b30'?{gameCostume:{color_limb:0,color_body:0,color_face:0}}:{})},songs});
-      dataHash.update(payload);
+      dataHash.update(payload);lastPayload=payload;
       await lease.put('history/data_'+day+'_12_00_00.json',payload);if(h===history-1)await lease.put('current',payload);
      }
      const publication=await lease.publish();evidence.scales.push({scale,charts,history,fixtureEpoch:'2026-10-16T04:00:00Z',inputSha256:dataHash.digest('hex'),syntheticIdentity:c.taikoId,publication});
     }finally{await lease.close();}
+    if(op==='b30')await writeFile(resolve(c.config.userdataDir,c.taikoId+'data.json'),lastPayload);
     await writeFile(output,JSON.stringify(evidence,null,2)+'\n',{mode:0o600});
     const count=n,end=nextIndex+count;
     let cursor=nextIndex;nextIndex=end;
