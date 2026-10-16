@@ -164,7 +164,7 @@ export const writeKinokoHistorySnapshots = async (
     const local = await inspectLocalHistory(reader, taikoId, names);
     const missing = normalized.filter((record) => !local.knownRecordFingerprints.has(record.fingerprint));
     const needsBaseline =
-      local.earliestFullSnapshotAt === null || normalized[0].epochMs < local.earliestFullSnapshotAt;
+      local.earliestFullSnapshotAt === null || normalized[0]!.epochMs < local.earliestFullSnapshotAt;
     const snapshotUpperBound = missing.length + (needsBaseline ? 1 : 0);
     if (snapshotUpperBound > MAX_HISTORY_FILES_PER_IMPORT) {
       throw createError({ statusCode: 400, statusMessage: "历史记录跨度过大，无法安全写入本地快照" });
@@ -173,7 +173,7 @@ export const writeKinokoHistorySnapshots = async (
     let snapshotFiles = 0;
     let baselineCreated = false;
     if (needsBaseline) {
-      const baselineDate = new Date(normalized[0].epochMs - 1000 + 8 * 60 * 60 * 1000);
+      const baselineDate = new Date(normalized[0]!.epochMs - 1000 + 8 * 60 * 60 * 1000);
       const pad = (value: number) => String(value).padStart(2, "0");
       const baselineTimestamp = `${baselineDate.getUTCFullYear()}-${pad(baselineDate.getUTCMonth() + 1)}-${pad(baselineDate.getUTCDate())} ${pad(baselineDate.getUTCHours())}:${pad(baselineDate.getUTCMinutes())}:${pad(baselineDate.getUTCSeconds())}`;
       const baseline: UserdataPayload = {
@@ -189,10 +189,10 @@ export const writeKinokoHistorySnapshots = async (
 
     let cursor = 0;
     while (cursor < missing.length) {
-      const timestamp = missing[cursor].timestamp;
+      const timestamp = missing[cursor]!.timestamp;
       const sameTime: NormalizedHistoryRecord[] = [];
-      while (cursor < missing.length && missing[cursor].timestamp === timestamp) {
-        sameTime.push(missing[cursor]);
+      while (cursor < missing.length && missing[cursor]!.timestamp === timestamp) {
+        sameTime.push(missing[cursor]!);
         cursor += 1;
       }
 
@@ -204,7 +204,7 @@ export const writeKinokoHistorySnapshots = async (
           laneIndex = lanes.length;
           lanes.push([]);
         }
-        lanes[laneIndex].push(record.song);
+        lanes[laneIndex]!.push(record.song);
       }
 
       for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
