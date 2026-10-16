@@ -75,7 +75,7 @@ try{
  if (o1) {
   const match=/^--o1=(private-current|private-history|private-merged-current|private-merged-history|growth-history|growth-overview|growth-passport|b30):(1|3|5):(1|3|50|200)$/.exec(o1);
   assert.ok(match,'Explicit bounded O1 operation:concurrency:samples required');
-  Object.assign(testEnv,{TAIKO_O1_OPERATION:match[1],TAIKO_O1_CONCURRENCY:match[2],TAIKO_O1_SAMPLES:match[3],TAIKO_O1_OUTPUT:resolve(workspace,'o1-performance.json')});
+  Object.assign(testEnv,{PYTHONDONTWRITEBYTECODE:'1',TAIKO_O1_OPERATION:match[1],TAIKO_O1_CONCURRENCY:match[2],TAIKO_O1_SAMPLES:match[3],TAIKO_O1_OUTPUT:resolve(workspace,'o1-performance.json')});
   evidence.o1={operation:match[1],concurrency:Number(match[2]),samples:Number(match[3])};
   const scale=process.argv.find(arg=>arg.startsWith('--o1-scale='))?.slice(11)||'all';assert.ok(['all','small','medium','large','extreme'].includes(scale));assert.ok(scale!=='extreme'||match[1]==='growth-passport');testEnv.TAIKO_O1_SCALE=scale;evidence.o1.scale=scale;
   if(process.argv.includes('--o1-baseline')){testEnv.TAIKO_O1_BASELINE='1';evidence.o1.baseline='Taiko 0.14.1; unchanged other 93 locked wheels';}
