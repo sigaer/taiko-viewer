@@ -35,3 +35,13 @@ assert text.count("logpath=workspace/'tests.log'")==1;text=text.replace("logpath
 report={'status':'ADAPTER_RESTORED_NOT_EXECUTED','originalGitRevision':git(a.taiko,'rev-parse','b71986f^{commit}').decode().strip(),'originalSha256':hashlib.sha256(raw).hexdigest(),'adaptedSha256':sha(credential/'installed_acceptance.py'),'changes':['owned scratch location and vault guard','retain test log in evidence directory'],'assertionsChanged':False,'priorEvidenceAdapterHash':'NOT_RECORDED; no retrospective hash claim','directory':str(credential)}
 (evidence_dir/'credential-adapter-restoration.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps({'frozenStatus':'PASS_RESTORED_BYTE_IDENTICAL','credentialStatus':report['status'],'evidence':str(evidence_dir)}))
+# Representative lifecycle baselines are explicitly fixed by ownership docs.
+# events.py reads only plugins/taiko.py from each baseline; no player data needed.
+lifecycle=a.destination.parent/'lifecycle-original';assert not lifecycle.exists();lifecycle.mkdir(mode=0o700)
+ownership=a.taiko/'docs/lifecycle-ownership.md';validation=a.taiko/'docs/validation/lifecycle-20261015.txt'
+assert 'Taiko e37e07e / Sakura 3b08986' in ownership.read_text() and 'Taiko e37e07e / Sakura 3b08986' in validation.read_text()
+rows=[]
+for host,repo,revision,member in [('center',a.taiko,'e37e07e9f66825fb8860655ee146112e4ca1797d','plugins/taiko.py'),('client',a.sakura,'3b08986f21e54e4f6a84a105987174b55546dd42','taiko/plugins/taiko.py')]:
+ raw=git(repo,'show',revision+':'+member);dest=lifecycle/('baseline-'+host)/'plugins/taiko.py';dest.parent.mkdir(parents=True);dest.write_bytes(raw)
+ rows.append({'host':host,'revision':revision,'gitMember':member,'path':str(dest),'sha256':hashlib.sha256(raw).hexdigest()})
+(evidence_dir/'lifecycle-baseline-restoration.json').write_text(json.dumps({'status':'FIXED_SOURCE_RESTORED_NOT_TESTED','sources':rows,'ownershipDocumentSha256':sha(ownership),'validationDocumentSha256':sha(validation),'oldRawEvidenceRestored':False,'oldBaselineFileHashRecorded':False},indent=2)+'\n')
