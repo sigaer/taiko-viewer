@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build only fixed tracked Taiko source in a private persistent vault; wrapper required."""
+"""Build fixed Taiko source in QA scratch; retain only artifacts in the private vault.
+Run through scripts/memory/run_qa.sh for local candidate packaging."""
 import argparse, hashlib, json, os, subprocess, sys, tarfile, tempfile, time, zipfile
 sys.dont_write_bytecode=True
 from pathlib import Path
@@ -17,15 +18,18 @@ def main():
     a=p.parse_args(); vault=a.vault.resolve()
     if str(vault).startswith(('/tmp/','/var/tmp/')) or not vault.is_dir() or vault.stat().st_mode&0o077: p.error('private persistent vault required')
     if sha(a.builder_wheel)!=helper.BUILDER_SHA: p.error('exact builder required')
-    root=Path(tempfile.mkdtemp(prefix='taiko-rebuild-',dir=vault)); source=root/'source'; source.mkdir()
-    report={'status':'FAIL','sourceCommit':REVISION,'historicalWheelSha256':EXPECTED,'productionAccess':False,'workspace':str(root),'logs':{}}
-    def run(command,label,cwd=root,env=None):
+    scratch=Path(os.environ['QA_RUN_TMPDIR']).resolve()
+    if scratch != Path(os.environ['QA_RUN_DIR']).resolve()/'scratch' or not scratch.is_dir() or not scratch.is_relative_to(vault/'runs'): p.error('owned QA scratch required')
+    work=Path(tempfile.mkdtemp(prefix='taiko-build-',dir=scratch))
+    root=Path(tempfile.mkdtemp(prefix='taiko-rebuild-',dir=vault)); source=work/'source'; source.mkdir()
+    report={'status':'FAIL','sourceCommit':REVISION,'historicalWheelSha256':EXPECTED,'productionAccess':False,'workspace':str(root),'temporaryWorkspace':str(work),'logs':{}}
+    def run(command,label,cwd=work,env=None):
         log=root/(label+'.log')
         with log.open('wb') as f: result=subprocess.run([str(x) for x in command],cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=180)
         report['logs'][label]={'file':str(log),'sha256':sha(log),'exitCode':result.returncode}
         if result.returncode or log.stat().st_size>2_000_000: raise RuntimeError(label+' failed')
     try:
-        archive=root/'source.tar'
+        archive=work/'source.tar'
         run(['git','-C',a.source_repo,'archive','--format=tar','--output='+str(archive),REVISION],'export')
         with tarfile.open(archive) as tar:
             for member in tar.getmembers():
@@ -39,9 +43,9 @@ def main():
                 elif not member.isdir(): raise RuntimeError('tracked symlink unsupported')
         epoch=a.epoch
         if epoch is None: epoch=int(subprocess.check_output(['git','-C',str(a.source_repo),'show','-s','--format=%ct',REVISION],timeout=20))
-        env={'PATH':'/usr/bin:/bin','TMPDIR':str(root),'PIP_CONFIG_FILE':'/dev/null','PIP_NO_INDEX':'1','PIP_DISABLE_PIP_VERSION_CHECK':'1','SOURCE_DATE_EPOCH':str(epoch)}
+        env={'PATH':'/usr/bin:/bin','TMPDIR':str(work),'PIP_CACHE_DIR':str(work/'pip-cache'),'PIP_NO_CACHE_DIR':'1','PYTHONDONTWRITEBYTECODE':'1','PIP_CONFIG_FILE':'/dev/null','PIP_NO_INDEX':'1','PIP_DISABLE_PIP_VERSION_CHECK':'1','SOURCE_DATE_EPOCH':str(epoch)}
         report['sourceDateEpoch']=epoch
-        builder=root/'builder';python=builder/'bin/python';wheels=root/'wheels';wheels.mkdir()
+        builder=work/'builder';python=builder/'bin/python';wheels=root/'wheels';wheels.mkdir()
         run(['/usr/bin/python3','-m','venv',builder],'venv',env=env)
         run([python,'-I','-m','pip','install','--no-index','--no-deps',a.builder_wheel],'builder-install',env=env)
         run([python,'-I','-m','pip','wheel','--no-index','--no-deps','--no-build-isolation','--wheel-dir',wheels,source],'build',env=env)

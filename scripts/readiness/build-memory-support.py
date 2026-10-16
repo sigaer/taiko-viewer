@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Package fixed Sakura shared-memory source without modifying any source repo.
-Use scripts/memory/run_build.sh. This is local integration packaging, not release.
+Use scripts/memory/run_qa.sh for local candidate packaging only; no deployment.
 """
 import argparse
 import hashlib
@@ -11,11 +11,8 @@ import subprocess
 import tempfile
 import zipfile
 
-ROOT = Path(__file__).resolve().parents[2]
-AUDIT = ROOT / 'docs/platform-architecture-audit'
 SOURCE = '/home/sigaer/git/Sakura_bot'
 REVISION = '63be19a5c35ba98831b3eeec1746f36fed049a7e'
-BUILDER_WHEEL = Path('/var/tmp/taiko-final-ownership-20261015/wheel-env/lib/python3.11/site-packages/virtualenv/seed/wheels/embed/setuptools-84.0.0-py3-none-any.whl')
 FILES = ('__init__.py', 'cache.py', 'metrics.py', 'store.py', '_build_sqlite.py')
 METADATA = '''[build-system]
 requires = ["setuptools==84.0.0"]
@@ -48,18 +45,23 @@ def main():
     parser.add_argument('--builder-wheel', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args=parser.parse_args()
-    global BUILDER_WHEEL
     BUILDER_WHEEL=args.builder_wheel.resolve()
     if sha(BUILDER_WHEEL) != '51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670':
         parser.error('exact builder wheel required')
     vault=args.vault.resolve()
     if str(vault).startswith(('/tmp/', '/var/tmp/')) or not vault.is_dir() or vault.stat().st_mode & 0o077:
         parser.error('existing private persistent vault required')
-    evidence_path=args.output
+    scratch=Path(os.environ['QA_RUN_TMPDIR']).resolve()
+    if scratch != Path(os.environ['QA_RUN_DIR']).resolve()/'scratch' or not scratch.is_dir() or not scratch.is_relative_to(vault/'runs'):
+        parser.error('owned QA scratch required')
+    evidence_path=args.output.resolve()
+    if not evidence_path.is_relative_to(vault) or evidence_path.is_relative_to(scratch):
+        parser.error('evidence must remain in persistent vault outside scratch')
     if evidence_path.exists():
         raise RuntimeError('packaging evidence already exists; do not overwrite prior run')
     workspace=Path(tempfile.mkdtemp(prefix='taiko-shared-memory-wheel-',dir=vault))
-    source=workspace/'source'
+    temporary=Path(tempfile.mkdtemp(prefix='memory-build-',dir=scratch))
+    source=temporary/'source'
     package=source/'runtime_memory'
     package.mkdir(parents=True)
     origins={}
@@ -69,16 +71,16 @@ def main():
         (package/name).write_bytes(content)
         origins[relative]={'blob':git('rev-parse',REVISION+':'+relative).decode().strip(),'sha256':sha(package/name)}
     (source/'pyproject.toml').write_text(METADATA)
-    builder=workspace/'builder'
+    builder=temporary/'builder'
     output=workspace/'wheels'
     output.mkdir()
-    env={'PATH':'/usr/bin:/bin','TMPDIR':str(workspace),'PIP_CONFIG_FILE':'/dev/null','PIP_NO_INDEX':'1','PIP_DISABLE_PIP_VERSION_CHECK':'1',
+    env={'PATH':'/usr/bin:/bin','TMPDIR':str(temporary),'PIP_CACHE_DIR':str(temporary/'pip-cache'),'PYTHONDONTWRITEBYTECODE':'1','PIP_CONFIG_FILE':'/dev/null','PIP_NO_INDEX':'1','PIP_DISABLE_PIP_VERSION_CHECK':'1',
          'SOURCE_DATE_EPOCH':git('show','-s','--format=%ct',REVISION).decode().strip()}
     logs={}
     def run(command,label):
         log=workspace/(label+'.log')
         with log.open('w') as handle:
-            result=subprocess.run([str(x) for x in command],cwd=workspace,env=env,stdout=handle,stderr=subprocess.STDOUT,timeout=120)
+            result=subprocess.run([str(x) for x in command],cwd=temporary,env=env,stdout=handle,stderr=subprocess.STDOUT,timeout=120)
         logs[label]={'exitCode':result.returncode,'sha256':sha(log)}
         if log.stat().st_size>1_000_000 or result.returncode:
             raise RuntimeError('packaging failed at '+label)
@@ -102,7 +104,7 @@ def main():
               'versionMeaning':'1.1.0 is the pre-existing shared artifact version; distribution metadata was added only for this local integration build.',
               'packagingMetadata':METADATA,'packagingMetadataSha256':sha(source/'pyproject.toml'),
               'buildTool':{'file':BUILDER_WHEEL.name,'sha256':sha(BUILDER_WHEEL)},
-              'wheel':{'file':str(wheel),'sha256':sha(wheel)},'logs':logs,'workspace':str(workspace)}
+              'wheel':{'file':str(wheel),'sha256':sha(wheel)},'logs':logs,'workspace':str(workspace),'temporaryWorkspace':str(temporary)}
     evidence_path.write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'status':evidence['status'],'wheel':str(wheel),'output':str(evidence_path)}))
 
