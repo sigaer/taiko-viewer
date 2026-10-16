@@ -27,7 +27,13 @@ const lockBytes=await readFile(artifact.lockFile);assert.equal(createHash('sha25
 const lock=JSON.parse(lockBytes);const originName=artifact.originEvidenceFile;
 const wheel=lock.roles.center.wheels.find(item=>item.name==='taiko-bot');
 assert.equal(wheel.version,baseline?'0.14.1':'0.14.2');
-if(!baseline)assert.equal(wheel.sha256,'0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8');
+const originalWheelSha256='0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8';
+let derivation=null;
+if(!baseline&&wheel.sha256!==originalWheelSha256){
+ assert.equal(artifact.provenanceStatus,'LOCKED_SOURCE_REBUILD_DERIVED_LOCK');
+ const bytes=await readFile(artifact.derivationEvidenceFile);assert.equal(createHash('sha256').update(bytes).digest('hex'),artifact.derivationEvidenceSha256);
+ derivation=JSON.parse(bytes);assert.equal(derivation.status,'PASS_LOCKED_SOURCE_REBUILD');assert.equal(derivation.historicalContentParityClaim,false);assert.equal(derivation.thirdPartyWheelsUnchanged,true);assert.equal(derivation.originalWheelSha256,originalWheelSha256);assert.equal(derivation.candidateWheelSha256,wheel.sha256);
+} else if(!baseline)assert.equal(wheel.sha256,originalWheelSha256);
 if(baseline){const candidate=JSON.parse(await readFile(artifacts.candidate.lockFile));const remaining=role=>role.wheels.filter(v=>v.name!=='taiko-bot').map(({name,version,sha256})=>({name,version,sha256}));assert.deepEqual(remaining(lock.roles.center),remaining(candidate.roles.center));assert.equal(lock.roles.center.wheels.length,94);}
 const {createReadStream}=await import('node:fs');
 async function sha(path){const h=createHash('sha256');for await(const block of createReadStream(path))h.update(block);return h.digest('hex');}
@@ -35,6 +41,7 @@ assert.equal(await sha(artifact.wheelFile),wheel.sha256);
 const rebuild=JSON.parse(await readFile(originName));
 assert.equal(await sha(originName),artifact.originEvidenceSha256);assert.equal(process.env.TAIKO_PYTHON_EXECUTABLE,artifact.python);assert.equal(artifact.python,rebuild.installed.interpreter);
 evidence.manifest={viewerBaseline:'6e7f35b',viewerVersion:'0.82.1',taikoWheelSha256:wheel.sha256,lockSha256:createHash('sha256').update(lockBytes).digest('hex'),interpreter:process.env.TAIKO_PYTHON_EXECUTABLE,centerRole:lock.roles.center.environmentIdentity,clientRole:lock.roles.client.environmentIdentity,comparisonAxis:baseline?'old Taiko artifact only; same Viewer service source':'candidate',installedOriginEvidence:originName,installedOriginEvidenceSha256:await sha(originName),testHarnessSha256:await sha(new URL(import.meta.url))};
+evidence.manifest.artifactRole=baseline?'baseline':'candidate';evidence.manifest.provenanceStatus=artifact.provenanceStatus||'EXACT_ORIGINAL';evidence.manifest.historicalContentParityClaim=derivation?false:null;evidence.manifest.derivationEvidenceSha256=artifact.derivationEvidenceSha256||null;
 evidence.manifest.artifactManifestSha256=await sha(artifactManifestPath);
 evidence.manifest.measurementRevision='stream-consume-v3-persistent-recovery';
 evidence.manifest.viewerWorktreeHead=execFileSync('git',['rev-parse','HEAD'],{cwd:new URL('../../',import.meta.url),encoding:'utf8'}).trim();
