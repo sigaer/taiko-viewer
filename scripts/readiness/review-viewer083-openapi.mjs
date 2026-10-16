@@ -28,9 +28,9 @@ for(const path of ['/api/account/developer/grants','/api/account/developer/clien
  assert.equal(check({...c.example,nextCursor:'bad'}),false);paginationGolden++;
  assert.equal(op.parameters[0].name,'before');assert.equal(op.parameters[0].required,false);
 }
-assert.equal(operations,11);assert.equal(doc['x-lifecycle-policy'].contractFrozen,false);assert.equal(doc['x-lifecycle-policy'].runtimeDefaultEnabled,false);
-const meta=doc.paths['/api/v1/taiko/meta'].get.responses['200'].content['application/json'];assert.deepEqual(meta.schema.properties.status.enum,['FREEZE_CANDIDATE','CONTRACT_FROZEN']);assert.equal(meta.example.contractFrozen,false);
-const checkMeta=ajv.compile(refs(meta.schema));assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:false}),false);assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:true}),true);
+assert.equal(operations,11);assert.equal(doc['x-lifecycle-policy'].contractFrozen,true);assert.equal(doc['x-lifecycle-policy'].runtimeDefaultEnabled,false);
+const meta=doc.paths['/api/v1/taiko/meta'].get.responses['200'].content['application/json'];assert.deepEqual(meta.schema.properties.status.enum,['FREEZE_CANDIDATE','CONTRACT_FROZEN']);assert.equal(meta.example.contractFrozen,true);
+const checkMeta=ajv.compile(refs(meta.schema));assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:false}),false);assert.equal(checkMeta({...meta.example,status:'CONTRACT_FROZEN',contractFrozen:true}),true);assert.equal(checkMeta({...meta.example,status:'FREEZE_CANDIDATE',contractFrozen:true}),false);assert.equal(checkMeta({...meta.example,status:'FREEZE_CANDIDATE',contractFrozen:false}),true);
 const score=doc.paths['/api/v1/taiko/players/{playerId}/scores'].get.responses['200'].content['application/json'];const leak=structuredClone(score.example);leak.items[0].legacy={credential:'forbidden'};assert.equal(ajv.compile(refs(score.schema))(leak),false);
 async function sha(path){const h=createHash('sha256');for await(const b of createReadStream(path))h.update(b);return h.digest('hex');}
 const matrix=JSON.parse(await readFile(resolve(R,'docs/083-contract-and-api-matrix.json'),'utf8'));const reused=[];for(const name of ['contract','sqlHttp','browser','build','openapi']){const e=matrix.validation[name].evidence;assert.equal(await sha(e.path),e.sha256,name+' immutable evidence');reused.push({name,...e,scope:'historical ac10427 evidence; not a rerun or full revised runtime certification'});}

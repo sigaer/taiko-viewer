@@ -4,7 +4,7 @@
   "contractVersion": "1.0",
   "sourcePackage": "0.1.2",
   "installedPackage": "0.1.0",
-  "contractFrozen": false,
+  "contractFrozen": true,
   "gateP": "DEPLOY_PENDING_AUTH",
   "schemaSerializedRevision": "be89a7146265219ac6153ed3152f5cf76c46eae23bb262f3cc47ac9c9b9815f7",
   "mappings": {
@@ -40,7 +40,7 @@
     },
     {
       "path": "docs/083-developer-api-openapi.yaml",
-      "sha256": "0e7d6d584a22796ff9bb6dfc7260d3ac253e7a8654196272d2d2e3823efdc21b"
+      "sha256": "ab5ebcb9da6aec09f579af54c4eb1fc83cd71d6f55408677c1805e7d886ae354"
     },
     {
       "path": "taiko_viewer/lib/developer-api-v1.ts",
@@ -76,7 +76,7 @@
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/lifecycle.ts",
-      "sha256": "d2898452619eef8e03b273959a7cf44c8862e65e865850a3153d35753b7dfddf"
+      "sha256": "52bc060db1d0c84563c6682e29ef3a5da9ec453aeab17ab51cef6e44bbe6d7d9"
     },
     {
       "path": "taiko_viewer/server/services/developer-api-v1/read.ts",
@@ -88,7 +88,7 @@
     },
     {
       "path": "taiko_viewer/tests/developerApiV1FreezeReviewSql.test.mjs",
-      "sha256": "daf8bba2d8e3a607b4720126062aea9c11f3733cacd1718bfe9974bb18a94f33"
+      "sha256": "43fd7994a4e9115edf9042b758dd2f4b91461f99e4c3ae21ba8bd2f4d5e02e8b"
     },
     {
       "path": "packages/sakura-taiko-contract/src/legacy.mjs",
@@ -136,7 +136,11 @@
     },
     {
       "path": "scripts/readiness/review-viewer083-openapi.mjs",
-      "sha256": "79bcab629193cae45e59a143c0a2041cf55b63bca7e8f4fc822cede9c9347204"
+      "sha256": "d654911db769221c69b941a26a85ed72a87c0ecb817ba9d55a0bfcf2dbccf6fe"
+    },
+    {
+      "path": "taiko_viewer/tests/developerApiV1LifecycleSql.test.mjs",
+      "sha256": "7a0eabfcd3adf195e91d9b492bf77947772c67dcf2f4de5794bceaccc6641022"
     }
   ],
   "baselineReviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
@@ -149,5 +153,14 @@
     "cursor": "optional before; nextCursor optional nullable response field",
     "consistency": "keyset, no cross-request snapshot; invalid/reconsented-away cursor restarts first page",
     "strictRc2ValidatorUpgradeRequired": true
-  }
+  },
+  "freezeStatus": "CONTRACT_FROZEN_LOCAL",
+  "approvedInput": {
+    "runtimeSourceCommit": "46991b202b531fc18709bbfbdb453b880bd9920b",
+    "manifestSha256": "425e747960802284edb92af6ce2950d80e4c8a1e14c2fb7bc7cc51317fc3b6d5",
+    "reviewCommit": "289094de74fa4872c7e43459ec57ce5c207ce36f",
+    "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5"
+  },
+  "runtimeDefaultEnabled": false,
+  "publicApiEnabled": false
 }
