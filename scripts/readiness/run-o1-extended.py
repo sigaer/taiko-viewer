@@ -7,7 +7,7 @@ from pathlib import Path
 vault=Path('/home/sigaer/taiko/qa-vault')
 evidence_root=Path(os.environ['QA_EVIDENCE_DIR']).resolve(strict=True)
 assert evidence_root.is_relative_to(vault) and evidence_root!=vault
-p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-current','private-history','growth-history','private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--extreme',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--operation',action='append',choices=['private-current','private-history','growth-history','private-merged-current','private-merged-history','growth-overview','growth-passport','b30']);p.add_argument('--concurrency',action='append',type=int,choices=[1,3,5]);p.add_argument('--extreme',action='store_true');a=p.parse_args()
 root=Path(__file__).resolve().parents[2]
 assert a.out.is_absolute() and a.out.resolve().is_relative_to(evidence_root) and not a.out.exists();a.out.mkdir(mode=0o700)
 node='/www/server/nvm/versions/node/v24.13.0/bin/node'
@@ -35,8 +35,10 @@ try:
  if a.extreme:run('growth-passport',1,'extreme',1,'growth-passport-extreme-smoke')
  for operation in a.operation or []:
   smoke=run(operation,1,'small',3,operation+'-smoke')
-  if smoke['summary']['success']!=3:raise RuntimeError('Operation smoke failed; inspect fixture or runtime before cohort')
-  for concurrency in [1,3,5]:
+  if smoke['summary']['success']!=3:
+   state.setdefault('blockedOperations',[]).append({'operation':operation,'reason':'SMOKE_FAIL_RETAINED; no formal samples admitted'})
+   continue
+  for concurrency in a.concurrency or [1,3,5]:
    for scale in ['small','medium','large']:
     chunks=[run(operation,concurrency,scale,50,f'{operation}-{scale}-{concurrency}-candidate-{i}') for i in range(4)]
     if misses(chunks) and not baseline:
