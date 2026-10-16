@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_SCOPED_WITH_RETAINED_HARNESS_FAILURE",
+  "candidateCommit": "6ec45d1f2d2a936b01769fd23ab3904dd9bd0a6d",
+  "builtSourceCommit": "8d915ca2724480c7a287073b742e94a83b44686a",
+  "sourceToArtifactIdentity": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/source-to-artifact-identity.json",
+    "sha256": "eed795c9642be25aab4df8c6c66aeda75b0d8860f5fe747dfe139e37fe65d51e"
+  },
+  "allNonDocsTrackedFilesCompared": 1487,
+  "outputFilesRehashed": 5185,
+  "newBuild": false,
+  "newFullStartupSuite": false,
+  "newRuns": [
+    {
+      "label": "local-merge",
+      "status": "PASS",
+      "runId": "qa-2ad5dd0ee9cb",
+      "elapsedSeconds": 10.945,
+      "exitCode": 0,
+      "processGroupExited": true,
+      "receipt": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/local-merge-run.json",
+        "sha256": "8b800f63dcf6906de2e786f76aa7f91e2a0f167596609b564b953adaab9aabb7"
+      },
+      "rawLog": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-2ad5dd0ee9cb/evidence/local-merge.log",
+        "sha256": "da8cc7d2ed3db90e78ead8204cab394459229ee071dc0ab8734df6e4c9fedba3"
+      },
+      "resourceEvidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-2ad5dd0ee9cb/evidence/resources.json",
+        "sha256": "4f75529de824640d1eac9f1a1f4789f0d9bb20a7c665c92d39dc8fbcaef26f82"
+      },
+      "cgroupSampledPeakBytes": 125472768,
+      "maxMemoryPsiFullAvg10": 0,
+      "memoryEventsAfter": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "scratchRemoved": true
+    },
+    {
+      "label": "source-identity",
+      "status": "FAIL",
+      "runId": "qa-0ab6b0779b02",
+      "elapsedSeconds": 0.118,
+      "exitCode": 1,
+      "processGroupExited": true,
+      "receipt": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/source-identity-run.json",
+        "sha256": "d60e469bfd1c6ff52100706aecf5fee863b784ee9020fa20597b1857c414b054"
+      },
+      "rawLog": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-0ab6b0779b02/evidence/source-identity.log",
+        "sha256": "e44c237851078381f25c98c170f5797db52b3ab09b62fdfa1f2cb1894b7ae728"
+      },
+      "resourceEvidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-0ab6b0779b02/evidence/resources.json",
+        "sha256": "00d475cc09ec4d5430911c578088cfc028d626bd4b21e2ae501c0266e6f9e701"
+      },
+      "cgroupSampledPeakBytes": 9531392,
+      "maxMemoryPsiFullAvg10": 0,
+      "memoryEventsAfter": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "scratchRemoved": true
+    },
+    {
+      "label": "source-identity-v2",
+      "status": "PASS",
+      "runId": "qa-d05277af24d1",
+      "elapsedSeconds": 4.142,
+      "exitCode": 0,
+      "processGroupExited": true,
+      "receipt": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/source-identity-v2-run.json",
+        "sha256": "ee18ddb550cbf7fbf52014b4e98253bf81d1e1efa1c7d2d5e0fa844d0557fa65"
+      },
+      "rawLog": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-d05277af24d1/evidence/source-identity-v2.log",
+        "sha256": "e49d0bf0454181eb2cc2831e44ece9ac191d1dbad729cdef41bdddaddccd00d5"
+      },
+      "resourceEvidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-d05277af24d1/evidence/resources.json",
+        "sha256": "565292f3fe02770d1bfe35896f296bc7dc7c1a855acbe0b1a1aed6bd35b912d7"
+      },
+      "cgroupSampledPeakBytes": 25305088,
+      "maxMemoryPsiFullAvg10": 0,
+      "memoryEventsAfter": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "scratchRemoved": true
+    },
+    {
+      "label": "default-off",
+      "status": "PASS",
+      "runId": "qa-1e873d5e0569",
+      "elapsedSeconds": 15.095,
+      "exitCode": 0,
+      "processGroupExited": true,
+      "receipt": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/default-off-run.json",
+        "sha256": "c3e8d96db0999eeb57b108652decc998cd6338b423d6d6a991373dc66f4feff2"
+      },
+      "rawLog": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1e873d5e0569/evidence/default-off.log",
+        "sha256": "9631794dde45df3ced3e603d67448572d7efafa3b8f9034ba93209edcd8aad30"
+      },
+      "resourceEvidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1e873d5e0569/evidence/resources.json",
+        "sha256": "67395083c8ed71b58949b77a734712cfe2962373bb2331909bd5f49363f4b8a9"
+      },
+      "cgroupSampledPeakBytes": 459976704,
+      "maxMemoryPsiFullAvg10": 0,
+      "memoryEventsAfter": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "scratchRemoved": true
+    }
+  ],
+  "newOffObservations": 16,
+  "offFourTableProof": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/off-path-proof.json",
+    "sha256": "870a886246a71921ff7dd4101e2bbee90588242f506d388d1fc2fcb2d2cb15f7",
+    "status": "PASS_SCOPED",
+    "fourTablesBefore": [],
+    "fourTablesAfter": [],
+    "applicationReferences": 0,
+    "defaultFlagsAbsent": true,
+    "sql": {
+      "name": "viewer1_security_test",
+      "datadir": "/home/sigaer/taiko/qa-vault/runs/qa-1e873d5e0569/scratch/sql-qDTtl8/mysql/",
+      "mutationOptIn": true
+    },
+    "hostExited": true,
+    "listenerClosed": true
+  },
+  "offSourceReview": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/off-source-review.json",
+    "sha256": "14df418ad3f0ecc34470cdc74806b51558c42a8bc502c73d07453dd00e5b4347"
+  },
+  "reusedEvidence": {
+    "evidenceRoot": "/home/sigaer/taiko/qa-vault/evidence/083-rc5-main-integration-20261016",
+    "buildReceiptSha256": "0dbbcbcd427e25450a65b54feedd75f7dbb2f4cf88a67b7af48da6cdd7174876",
+    "kinoko": "16 native SQL/H3 observations, including whole-current pollution 409/zero receipts and one-generation success",
+    "adapters": "11 adapter/Publication tests",
+    "startup": "23 observations, six browser cases, original unmodified artifact; 5185 files rechecked",
+    "frozenGoldens": "18 historical Golden cases at frozen identity; no Schema/SDK/OpenAPI changes",
+    "http74": "Original 74 HTTP/SDK scope retained at original source identity; not newly certified",
+    "typecheck": "Affected scope previously clean; outside-scope 154 diagnostics retained; no whole-repo PASS claim"
+  },
+  "retainedFailures": [
+    {
+      "label": "source-identity first attempt",
+      "classification": "Harness pathname quoting bug; git ls-tree default quoting of Chinese path; no product mismatch",
+      "raw": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-0ab6b0779b02/evidence/source-identity.log",
+        "sha256": "e44c237851078381f25c98c170f5797db52b3ab09b62fdfa1f2cb1894b7ae728"
+      },
+      "fixedBy": "NUL-delimited ls-tree in source-identity-v2; failed script identity-v1-failed.py retained"
+    },
+    {
+      "label": "Previous Kinoko boundary-v1 FAIL",
+      "classification": "Expected 400 versus actual correct full-binding 409; raw evidence retained",
+      "receipt": "/home/sigaer/taiko/qa-vault/evidence/083-rc5-main-integration-20261016/kinoko-boundary-v1-run.json"
+    },
+    {
+      "label": "Historical 0.82 performance/Annual/PNG evidence",
+      "classification": "Unchanged and not rerun; accepted-risk/history status preserved"
+    }
+  ],
+  "mergeExit1": "Expected eight merge conflicts, not a test PASS; individual resolutions and real merge commit verified separately",
+  "resourceLimits": {
+    "wrapper": "scripts/memory/run_qa.sh",
+    "serializedLock": "/run/lock/taiko-memory-qa.lock",
+    "memoryHighBytes": 2147483648,
+    "memoryMaxBytes": 3221225472,
+    "swapMaxBytes": 268435456,
+    "cpus": 2,
+    "outerCommandSeconds": 240,
+    "logMaxBytes": 1048576,
+    "evidenceFinalMaxBytes": 67108864,
+    "worktreeMaxBytes": 1073741824,
+    "scratchRetention": "All owned run scratch removed; no /var/tmp task artifacts added",
+    "diskLimitation": "No directory hard quota or transient SQL scratch peak measurement; wrapper per-file limit 2GiB; owned SQL uses fixed 128MiB buffer/32MiB redo and bounded empty synthetic data. Final task retained bytes checked."
+  },
+  "resourceLimitations": [
+    "Sampled memory/RSS/PSS can miss sub-second peaks; memory.peak unavailable",
+    "Not capacity or production performance acceptance"
+  ],
+  "productionAccess": false,
+  "GateP": "DEPLOY_PENDING_AUTH",
+  "deployReady": false
+}
