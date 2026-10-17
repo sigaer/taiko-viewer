@@ -1,32 +1,30 @@
 # Developer API — Batch 1
 
-This batch adds three structured analysis reads and two public catalog reads to the existing `/api/v1/taiko` surface.
-
-Draft endpoint definitions are in `developer-api-batch1-openapi.yaml`. The frozen Contract v1.0 schema and existing OpenAPI file remain unchanged until this extension is separately reviewed.
+Batch one focuses on concrete, reusable data—not filter-menu metadata.
 
 ## Endpoints
 
-| Method | Endpoint | Auth | Purpose |
+| Method | Endpoint | Authentication | Purpose |
 |---|---|---|---|
-| GET | `/api/v1/taiko/catalog/aliases` | Public; optional Developer Bearer is validated if supplied | Song IDs, aliases and Japanese titles |
-| GET | `/api/v1/taiko/catalog/progress-options` | Public | Supported dani/constant/star/named progress filter options |
-| GET | `/api/v1/taiko/players/{playerId}/rating` | Existing Developer Token + live `scores:read` ResourceGrant | Overall Rating, sample count and six dimensions |
-| GET | `/api/v1/taiko/players/{playerId}/b30` | Existing Developer Token + live `scores:read` ResourceGrant | Structured B30/top-30 results and six-dimensional analysis |
-| GET | `/api/v1/taiko/players/{playerId}/recommendations` | Existing Developer Token + live `scores:read` ResourceGrant | Structured rating-based recommendations |
+| GET | `/api/v1/taiko/catalog/aliases` | Public; any supplied Bearer token is validated | Song IDs, aliases and Japanese titles |
+| GET | `/api/developer/userdata/{userid}/rating` | Same authorization as the existing Developer userdata endpoint | One Rating response: overall Rating, six dimensions, sample count, algorithm metadata and top-30 song-level details |
+| GET | `/api/developer/userdata/{userid}/recommendations` | Same authorization as the existing Developer userdata endpoint | Structured rating-based recommendations |
 
-Existing `catalog/songs`, `catalog/charts`, `meta`, `players/{playerId}/profile` and `scores` remain unchanged.
+There is no separate B30 endpoint and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The frozen v1 Contract/OpenAPI documents are unchanged; additive proposal details live in `developer-api-batch1-openapi.yaml`.
 
-## Behaviour
+## Authorization and consistency
 
-- Public catalog reads do not require a token. If an Authorization header is present, it must be valid; invalid credentials do not fall back to anonymous access.
-- Private endpoints reuse the existing API client, ResourceGrant, quota and committed Publication read path. The grant is rechecked around the computation; the result is private/no-store.
-- Analysis runs through the already-installed Taiko Python runtime and its existing algorithms. This batch does not introduce a second rating implementation or any score writer.
-- Responses carry the existing contract/schema/catalog revisions and a score revision based on the committed Publication sequence and commit ID.
-- No new scopes, migrations, app allowlists or automatic user consent are introduced.
+- The two player-analysis routes reuse the existing `/api/developer/userdata/{userid}` access model, including approved Developer Token service grants and existing cross-user score-read capability. They do not introduce a ResourceGrant requirement or a new scope.
+- Owner-session access follows the same existing source authorization rules.
+- The current score payload is captured through the authorized source reader; analysis runs against those captured records. A second authorized read must match the original score snapshot before the response is returned; otherwise the request fails closed.
+- Analysis runs through the installed Taiko Python runtime and existing Rating/recommendation algorithms. No new score writer or alternate formula is introduced.
+- Rating returns overall Rating, dimension values, sample count, algorithm/aggregation metadata and up to 30 top-rated chart details in one response.
+- Recommendations are a separate result because they answer a different question: what to play next, rather than how the player rates now.
+- Responses use private/no-store handling. No query options, history, Growth, Goal, annual-report data, writes, sync or upstream credentials are added.
 
-## Explicit limitations
+## Explicit limits
 
-- B30 returns structured score/rating rows and dimension values, not a rendered image.
-- Recommendations use the existing rating-based ordinary recommendation model.
-- Historical score series, growth/goal analytics, progress completion summaries, and annual-report data are not part of this batch.
-- This branch is a code candidate only. Build, runtime integration tests, SDK examples and deployment are not implied by adding these routes.
+- The public aliases endpoint is catalog metadata, not player data.
+- The top-30 array is structured data, not an image.
+- History, Growth, Goal and annual-report APIs remain future work.
+- This branch is still a code candidate. Static tests do not replace build, real isolated SQL/HTTP integration tests, or deployment validation.
