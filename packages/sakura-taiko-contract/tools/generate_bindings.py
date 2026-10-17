@@ -1,4 +1,4 @@
-"""Generate Python/TypeScript types from the frozen JSON Schema; check in outputs."""
+"""Generate Python/TypeScript types from the canonical JSON Schema; check in outputs."""
 from pathlib import Path
 import argparse
 import json
