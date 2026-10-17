@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Viewer Developer API v1 — locally frozen Contract v1.0
-  version: 0.83.0-rc.3
-  description: "CONTRACT FROZEN LOCALLY / NOT DEPLOYED. Explicit local opt-in required. External read surface has
+  title: Viewer Developer API v1 — Contract v1.1 candidate
+  version: 0.85.0-rc.2
+  description: "CONTRACT 1.1 CANDIDATE / NOT DEPLOYED. Contract 1.1 intentionally replaces Song.title with song_name, song_name_jp and aliases; Contract 1.0 is not maintained for this new API. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
     into ResourceGrants."
@@ -44,7 +44,7 @@ paths:
                   apiVersion:
                     const: v1
                   contractVersion:
-                    const: "1.0"
+                    const: "1.1"
                   schemaRevision:
                     type: string
                   catalogRevision:
@@ -110,7 +110,7 @@ paths:
                           const: true
               example:
                 apiVersion: v1
-                contractVersion: "1.0"
+                contractVersion: "1.1"
                 schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                 capabilities:
@@ -320,7 +320,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogSongsResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: null
@@ -329,19 +329,28 @@ paths:
                   capturedAt: null
                 items:
                   - songId: "1"
-                    title: Synthetic CN
+                    song_name: Synthetic CN
+                    song_name_jp: Synthetic CN JP
+                    aliases:
+                      - cn-short
+                      - first song
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: CN
                       status: active
                   - songId: "2"
-                    title: Synthetic JP
+                    song_name: Synthetic JP
+                    song_name_jp: Synthetic JP 日本語
+                    aliases:
+                      - jp-short
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: JP
                       status: removed
                   - songId: "3"
-                    title: Unknown region/mode
+                    song_name: Unknown region/mode
+                    song_name_jp: null
+                    aliases: []
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: UNKNOWN
@@ -541,7 +550,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogChartsResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: null
@@ -800,7 +809,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperProfileResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -1026,7 +1035,7 @@ paths:
                               - legacy
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -1037,7 +1046,9 @@ paths:
                 items:
                   - song:
                       songId: "1"
-                      title: null
+                      song_name: null
+                      song_name_jp: null
+                      aliases: []
                       catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     chart:
                       songId: "1"
