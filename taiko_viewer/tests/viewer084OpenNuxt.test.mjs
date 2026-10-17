@@ -46,6 +46,9 @@ test('0.84 open My Taiko and approved developer global scores real Nuxt',{timeou
   await db.execute("INSERT INTO web_developer_tokens(user_id,application_id,token_hash,token_mask,status) VALUES(?,?,?,?,'active')",[D,app.insertId,sha(granular),'controlled']);
   const {grantApprovedDeveloperScores}=await import('../server/infrastructure/account/approved-developer-scores.ts');
   const connection=await db.getConnection();try{await connection.beginTransaction();await grantApprovedDeveloperScores(connection,issued.insertId,D);await connection.commit();}finally{connection.release();}
+  const auditBefore=(await db.query('SELECT COUNT(*) n FROM taiko_source_service_grant_audit'))[0][0].n;
+  const idem=await db.getConnection();try{await idem.beginTransaction();check('global provisioning is idempotent',(await grantApprovedDeveloperScores(idem,issued.insertId,D)).action==='unchanged');await idem.commit();}finally{idem.release();}
+  check('idempotent provisioning adds no duplicate audit',(await db.query('SELECT COUNT(*) n FROM taiko_source_service_grant_audit'))[0][0].n===auditBefore);
   const client=(await http('/api/account/developer/clients',{cookie:cd,body:{displayName:'Any approved client'}})).data.client;
   check('empty pilot list no longer closes approved client',(await http('/api/v1/taiko/meta')).data.runtimeEnabled===true);
   const consent={bindingId:String(A1),clientId:client.clientId,scopes:['scores:read'],expiresInDays:1,consent:true,consentVersion:'viewer-resource-consent-v1',audience:'viewer:developer-api:v1'};

@@ -52,7 +52,8 @@ async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceSer
   const globalScores=scope==='source_read'&&policy.scopes.includes('scores_read_any');
   if(!globalScores&&(!policy.scopes.includes(scope) || (policy.sources!=='*'&&!policy.sources.includes(source))))return null;
   if(globalScores || (scope==='source_read' && row.service_name==='approved-developer-scores')){
-    if(!useRuntimeConfig().developerGlobalScoresRead)return null;
+    const enabled=useRuntimeConfig().developerGlobalScoresRead;
+    if(!(enabled===true||String(enabled)==='1'))return null;
     const [[approved]]=await db.execute<RowDataPacket[]>(`SELECT t.id FROM web_developer_tokens t
       JOIN web_developer_applications app ON app.id=t.application_id AND app.user_id=t.user_id
       JOIN web_user_accounts a ON a.id=t.user_id

@@ -27,20 +27,25 @@ const pictureElement = ref<HTMLElement | null>(null);
 const webpFailed = ref(false);
 const originalFailed = ref(false);
 const placeholder = ref(false);
+const retryVersion = ref('');
 const shouldLoad = ref(props.priority);
 let visibilityObserver: IntersectionObserver | null = null;
 const activeSongId = computed(() => originalFailed.value ? props.fallbackSongId : props.songId);
 const webpSrcset = computed(() => buildSongCoverThumbnailSrcset(activeSongId.value));
-const originalSrc = computed(() => buildSongCoverOriginalUrl(activeSongId.value));
+const originalSrc = computed(() => buildSongCoverOriginalUrl(activeSongId.value) +
+  (retryVersion.value ? `?v=${retryVersion.value}` : ''));
 
 watch(() => [props.songId, props.fallbackSongId], () => {
   webpFailed.value = false;
   originalFailed.value = false;
   placeholder.value = false;
+  retryVersion.value = '';
 });
 
 const handleError = (event: Event) => {
   if (!webpFailed.value) {
+    // Bypass an earlier negative edge/browser cache after a new Bot upload.
+    retryVersion.value = String(Math.floor(Date.now() / 300000));
     webpFailed.value = true;
     return;
   }
