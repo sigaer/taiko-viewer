@@ -1,3 +1,4 @@
+import {enabled as developerApiEnabled} from '../../../services/developer-api-v1/common';
 import {setHeader} from 'h3';
 import {captureMyTaikoAdmission} from '../../../services/my-taiko/admission';
 import { getCurrentAccountSummary } from "~/server/utils/account";
@@ -10,7 +11,7 @@ export default defineEventHandler(async (event) => {
   return {
     authenticated: Boolean(user),
     user: user
-      ? { ...user, annualSummaryAccess: await hasAccountAnnualSummaryAccess(user.id), myTaikoReadModelAccess: Boolean(await captureMyTaikoAdmission(user.id)) }
+      ? { ...user, annualSummaryAccess: await hasAccountAnnualSummaryAccess(user.id), myTaikoReadModelAccess: Boolean(await captureMyTaikoAdmission(user.id)), developerApiV1Access: await developerApiEnabled() }
       : null
   };
 });

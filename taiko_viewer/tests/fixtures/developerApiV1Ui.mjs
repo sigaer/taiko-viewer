@@ -11,12 +11,12 @@ export async function consentBrowser(c,{clientId,bindingId,key,ask}){
  const source=await readFile(new URL('../../pages/account/developer/grants.vue',import.meta.url),'utf8');
  const {descriptor}=parse(source);const compiled=compileScript(descriptor,{id:'grant-qa',inlineTemplate:true});
  const code=compiled.content.replace('export default','const Page =')+`
- import {createApp,ref} from 'vue';
+ import {createApp,ref,h,Suspense} from 'vue';
  globalThis.definePageMeta=()=>{};
- globalThis.useRuntimeConfig=()=>({public:{developerApiV1:true}});
+ globalThis.useRuntimeConfig=()=>({public:{developerApiV1:true}});globalThis.useAccountState=()=>({accountUser:ref({developerApiV1Access:true}),fetchCurrentUser:async()=>{}});
  globalThis.useI18n=()=>({locale:ref('zh')});
  globalThis.useViewerApiFetch=()=>async(url,options={})=>{const response=await fetch(url,{...options,headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,credentials:'same-origin'});const data=await response.json();if(!response.ok)throw new Error('API_REQUEST_FAILED');return data;};
- createApp(Page).mount('#app');`;
+ createApp({render:()=>h(Suspense,null,{default:()=>h(Page)})}).mount('#app');`;
  const bundled=await build({stdin:{contents:code,resolveDir:new URL('../../',import.meta.url).pathname,loader:'ts'},bundle:true,format:'iife',write:false,minify:true,define:{'process.env.NODE_ENV':'"production"'}});
  const script=bundled.outputFiles[0].text;assert.ok(script.length<1024*1024);
  const html=`<!doctype html><html lang="zh-CN"><meta name="viewport" content="width=device-width, initial-scale=1"><style>:root{--el-text-color-primary:#242424;--el-bg-color:#fff;--el-fill-color-blank:#fff;--el-border-color:#777;--el-color-primary:#135aa5;--el-color-danger:#a51515}*{box-sizing:border-box}body{margin:0;font:16px system-ui} ${descriptor.styles.map(s=>s.content).join('\n')}</style><div id="app"></div><script>${script.replaceAll('</script','<\\/script')}</script></html>`;

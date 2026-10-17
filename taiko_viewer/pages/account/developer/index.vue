@@ -31,13 +31,13 @@ type DeveloperPayload = {
   token: DeveloperToken | null;
 };
 
-const developerApiV1Enabled = Boolean(useRuntimeConfig().public.developerApiV1);
+const developerApiV1Enabled = computed(() => accountUser.value?.developerApiV1Access === true);
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 const { accountUser, fetchCurrentUser } = useAccountState();
-await fetchCurrentUser();
+await fetchCurrentUser(true);
 
 definePageMeta({
   middleware: "account-auth",

@@ -4,12 +4,12 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import type { UploadFile, UploadInstance, UploadRawFile } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 
-const developerApiV1Enabled = Boolean(useRuntimeConfig().public.developerApiV1);
+const developerApiV1Enabled = computed(() => accountUser.value?.developerApiV1Access === true);
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 const { accountUser, fetchCurrentUser } = useAccountState();
-await fetchCurrentUser();
+await fetchCurrentUser(true);
 
 definePageMeta({
   middleware: "account-auth",
