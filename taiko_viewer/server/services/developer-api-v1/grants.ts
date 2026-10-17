@@ -46,7 +46,7 @@ export async function listGrants(event:H3Event){
  ORDER BY g.issued_at DESC,g.grant_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
  const admittedClients=[];for(const client of clients.slice(0,100))if(await developerClientAdmitted(client.clientId))admittedClients.push(client);
- return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:admittedClients,bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99].grant_id:null};
+ return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:admittedClients,bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99]!.grant_id:null};
 }
 export async function issueGrant(event:H3Event){
  const body=await readBody(event);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiFailure(400,'INVALID_REQUEST');
@@ -66,11 +66,12 @@ export async function issueGrant(event:H3Event){
    JOIN web_user_accounts u ON u.id=c.owner_user_id WHERE c.client_id=? AND c.status='active' AND a.status='approved' AND u.email_verified=1 FOR UPDATE`,[clientId]);if(!clients[0])throw deny();
   await db.execute('INSERT INTO web_developer_api_resources(player_id,binding_id) VALUES (?,?) ON DUPLICATE KEY UPDATE binding_id=VALUES(binding_id)',[id('plr_'),bindingId]);
   const [[resource]]=await db.execute<RowDataPacket[]>('SELECT player_id FROM web_developer_api_resources WHERE binding_id=?',[bindingId]);
+  if(!resource)throw new ApiFailure(503,'UNAVAILABLE');
   const scopes=JSON.stringify([...body.scopes].sort());const grantId=id();
   await db.execute(`INSERT INTO web_developer_resource_grants(grant_id,revision,owner_user_id,binding_id,player_id,client_id,audience,taiko_id,source,manual_account_id,scopes_json,consent_version,consented_at,issued_at,expires_at)
    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3),DATE_ADD(UTC_TIMESTAMP(3),INTERVAL ? DAY)) ON DUPLICATE KEY UPDATE grant_id=VALUES(grant_id),revision=VALUES(revision),player_id=VALUES(player_id),audience=VALUES(audience),taiko_id=VALUES(taiko_id),source=VALUES(source),manual_account_id=VALUES(manual_account_id),scopes_json=VALUES(scopes_json),consent_version=VALUES(consent_version),consented_at=VALUES(consented_at),issued_at=VALUES(issued_at),expires_at=VALUES(expires_at),revoked_at=NULL`,[grantId,id(),owner,bindingId,resource.player_id,clientId,AUDIENCE,binding.taiko_id,binding.source,binding.manual_account_id,scopes,CONSENT_VERSION,body.expiresInDays]);
   await db.execute(`INSERT INTO web_developer_resource_grant_events(grant_id,owner_user_id,binding_id,client_id,action,scopes_json,consent_version) VALUES (?,?,?,?,'consent',?,?)`,[grantId,owner,bindingId,clientId,scopes,CONSENT_VERSION]);
-  const [[row]]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE grant_id=?`,[grantId]);return {grant:dto(row)};
+  const [[row]]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE grant_id=?`,[grantId]);if(!row)throw new ApiFailure(503,'UNAVAILABLE');return {grant:dto(row)};
  });
 }
 export async function revokeGrant(event:H3Event){
@@ -105,6 +106,6 @@ export async function listOwnClients(event:H3Event){
  WHERE owner_user_id=? ${before?'AND (created_at<? OR (created_at=? AND client_id<?))':''}
  ORDER BY created_at DESC,client_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
- return {clients:clients.slice(0,100),hasMore:clients.length>100,nextCursor:clients.length>100?clients[99].clientId:null};
+ return {clients:clients.slice(0,100),hasMore:clients.length>100,nextCursor:clients.length>100?clients[99]!.clientId:null};
 }
 export async function disableClient(event:H3Event){const clientId=getRouterParam(event,'clientId')||'';return transaction(event,async(db,owner)=>{const [result]=await db.execute<any>('UPDATE web_developer_api_clients SET status=\'disabled\' WHERE client_id=? AND owner_user_id=?',[clientId,owner]);if(!result.affectedRows)throw deny();return {ok:true};});}

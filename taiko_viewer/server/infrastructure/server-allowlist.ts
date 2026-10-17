@@ -8,9 +8,9 @@ export async function readServerAllowlist(path:unknown,key:'userIds'|'clientIds'
  try{
   file=await open(path,'r');const stat=await file.stat();
   if(!stat.isFile()||stat.size>32768||(stat.mode&0o022)!==0)return null;
-  const bytes=Buffer.alloc(32769),{bytesRead}=await file.read(bytes,0,bytes.length,0);
+  const bytes=new Uint8Array(32769),{bytesRead}=await file.read(bytes,0,bytes.length,0);
   if(bytesRead>32768)return null;
-  const raw=bytes.subarray(0,bytesRead),policy=JSON.parse(raw.toString('utf8'));
+  const raw=bytes.subarray(0,bytesRead),policy=JSON.parse(new TextDecoder().decode(raw));
   if(!policy||policy.schemaVersion!==1||Object.keys(policy).some(k=>!['schemaVersion',key].includes(k))||!Array.isArray(policy[key])||policy[key].length>500)return null;
   const ids:unknown[]=policy[key];
   if(ids.some(v=>typeof v!=='string'||!pattern.test(v))||new Set(ids).size!==ids.length)return null;

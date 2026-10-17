@@ -17,7 +17,7 @@ export async function clientFromHash(db:Pick<Pool,'execute'>,credentialHash:stri
 }
 export async function apiClient(event:H3Event,db:Pool){
  const value=getHeader(event,'authorization');const match=typeof value==='string'?/^Bearer ([A-Za-z0-9_-]{16,256})$/i.exec(value):null;
- if(!match)throw new ApiFailure(401,'UNAUTHENTICATED');return clientFromHash(db,hash(match[1]));
+ const credential=match?.[1];if(!credential)throw new ApiFailure(401,'UNAUTHENTICATED');return clientFromHash(db,hash(credential));
 }
 /** Session-only authority never interprets a Developer Key as an owner. */
 export async function sessionOwner(event:H3Event,db:Pick<Pool,'execute'>,mutation=false,locked=false){
@@ -43,6 +43,7 @@ export async function quota(event:H3Event,db:Pool,client?:ClientProof){
  const ip=trusted.includes(direct)&&typeof forwarded==='string'&&isIP(forwarded)?forwarded:direct;
  const subject=client?'v1:client:'+client.clientId:'v1:ip:'+hash(ip).slice(0,56);
  const [[clock]]=await db.query<RowDataPacket[]>('SELECT DATE_FORMAT(UTC_DATE(),"%Y-%m-%d") AS day');
+ if(!clock||typeof clock.day!=='string')throw new ApiFailure(503,'UNAVAILABLE');
  if(!await consumeOpenQuota(db,subject,'developer-api-v1',String(clock.day),limit))throw new ApiFailure(429,'RATE_LIMITED');
 }
 export async function publicIdentity(event:H3Event,db:Pool){
