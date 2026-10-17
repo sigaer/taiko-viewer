@@ -23,10 +23,12 @@ test('song metadata and aliases are joined by song ID in one revisioned catalog'
   read('../server/services/developer-api-v1/read.ts')
  ]);
  for(const value of ['song_data.json','song_alias.json','song_name','song_name_jp','aliases','songDataSha256','songAliasSha256']) assert.ok(catalog.includes(value),value);
- assert.ok(catalog.includes('const sourceById=new Map'));
+ assert.ok(catalog.includes('projectCatalog(songSource.rows,revision,aliasSource.rows)'));
+ assert.ok(catalog.includes('songAliasSha256'));
+ assert.ok(!catalog.includes('title:'));
  assert.ok(reader.includes("items:kind==='songs'?c.songs:c.charts"));
  assert.ok(reader.includes('versions:versions(c.revision)'));
- assert.ok(!reader.includes('kind:')||!reader.includes("'aliases'"));
+ assert.ok(!reader.includes("kind==='aliases'"));
 });
 
 test('Rating response includes top-30 detail and uses the existing source authorization path',async()=>{
@@ -48,4 +50,12 @@ test('analysis fails closed if score data changes during computation',async()=>{
  assert.ok(service.includes("const revision=digest({songs:before.songs,meta:before._meta??null})"));
  assert.ok(service.includes("digest({songs:after.songs,meta:after._meta??null})!==revision"));
  assert.ok(service.includes('new PublicationUnavailableError()'));
+});
+
+test('public Song Contract 1.1 has no duplicate title alias',async()=>{
+ const schema=JSON.parse(await read('../packages/sakura-taiko-contract/schema/contract-v1.json'));
+ assert.equal(schema.$id,'urn:sakura-taiko:contract:1.1');
+ assert.deepEqual(Object.keys(schema.$defs.Song.properties),['songId','song_name','song_name_jp','aliases','catalogRevision','availability']);
+ assert.equal(Object.hasOwn(schema.$defs.Song.properties,'title'),false);
+ assert.equal(schema.$defs.ApiReadVersions.properties.contractVersion.enum[0],'1.1');
 });
