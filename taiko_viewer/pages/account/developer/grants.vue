@@ -79,7 +79,7 @@ onMounted(refresh);
   <details v-if="state" class="panel">
    <summary>{{copy.grantNew}}</summary>
    <p class="permission-explainer">{{copy.grantHelp}}</p>
-  <form v-if="state" class="panel" @submit.prevent="submit">
+   <form class="grant-new-form" @submit.prevent="submit">
    <label for="grant-app">{{copy.app}}</label>
    <select id="grant-app" v-model="clientId" required :disabled="busy"><option value="" disabled>{{copy.choose}}</option><option v-for="client in state.clients" :key="client.clientId" :value="client.clientId">{{client.displayName}} · {{client.clientId}}</option></select>
    <label for="grant-binding">{{copy.binding}}</label>
@@ -88,7 +88,7 @@ onMounted(refresh);
    <label for="grant-days">{{copy.days}}</label><select id="grant-days" v-model.number="days" :disabled="busy"><option :value="7">7 {{ja?'日':'天'}}</option><option :value="30">30 {{ja?'日':'天'}}</option><option :value="90">90 {{ja?'日':'天'}}</option></select>
    <label class="check"><input v-model="consent" type="checkbox" :disabled="busy">{{copy.agree}}</label>
    <button type="submit" class="primary" :disabled="!canSubmit">{{copy.allow}}</button>
-  </form>
+   </form>
   </details>
   <details v-if="approvedDeveloper" class="panel"><summary>{{copy.clientTitle}}</summary>
    <p class="permission-explainer">{{copy.clientHelp}}</p>
@@ -102,5 +102,5 @@ onMounted(refresh);
 </template>
 
 <style scoped>
-.permission-explainer{margin:10px 0 14px;line-height:1.7;color:var(--el-text-color-regular);overflow-wrap:anywhere}.permission-explainer--secondary{font-size:13px;color:var(--el-text-color-secondary)}.grant-page{max-width:780px;margin:auto;padding:24px 16px 48px;color:var(--el-text-color-primary);line-height:1.6}.grant-page h1{font-size:1.6rem}.panel{margin:20px 0;padding:20px;border:1px solid var(--el-border-color);border-radius:16px;background:var(--el-bg-color)}form{min-width:0;display:grid;gap:12px}input:not([type=checkbox]),select,button{min-height:44px;min-width:0;max-width:100%;font:inherit;color:inherit;border:1px solid var(--el-border-color);border-radius:8px;padding:8px 12px;background:var(--el-fill-color-blank)}select{width:100%}.paging{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}button.primary{color:var(--el-color-primary);border-color:var(--el-color-primary)}:is(button,input,select,summary):focus-visible{outline:3px solid var(--el-color-primary);outline-offset:3px}.check{display:flex;align-items:center;gap:10px;min-height:44px}.check input{width:20px;height:20px;flex-shrink:0}fieldset{min-width:0;border:1px solid var(--el-border-color);border-radius:8px}.grant{padding:12px 0;border-bottom:1px solid var(--el-border-color)}.grant h2{overflow-wrap:anywhere;font-size:1.1rem;margin:0}.grant p{overflow-wrap:anywhere}summary{cursor:pointer;min-height:44px}code{overflow-wrap:anywhere}.error{color:var(--el-color-danger)}@media(max-width:480px){.panel{padding:16px}.grant-page{padding:16px 12px 32px}}
+.grant-new-form{margin-top:14px}.permission-explainer{margin:10px 0 14px;line-height:1.7;color:var(--el-text-color-regular);overflow-wrap:anywhere}.permission-explainer--secondary{font-size:13px;color:var(--el-text-color-secondary)}.grant-page{max-width:780px;margin:auto;padding:24px 16px 48px;color:var(--el-text-color-primary);line-height:1.6}.grant-page h1{font-size:1.6rem}.panel{margin:20px 0;padding:20px;border:1px solid var(--el-border-color);border-radius:16px;background:var(--el-bg-color)}form{min-width:0;display:grid;gap:12px}input:not([type=checkbox]),select,button{min-height:44px;min-width:0;max-width:100%;font:inherit;color:inherit;border:1px solid var(--el-border-color);border-radius:8px;padding:8px 12px;background:var(--el-fill-color-blank)}select{width:100%}.paging{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}button.primary{color:var(--el-color-primary);border-color:var(--el-color-primary)}:is(button,input,select,summary):focus-visible{outline:3px solid var(--el-color-primary);outline-offset:3px}.check{display:flex;align-items:center;gap:10px;min-height:44px}.check input{width:20px;height:20px;flex-shrink:0}fieldset{min-width:0;border:1px solid var(--el-border-color);border-radius:8px}.grant{padding:12px 0;border-bottom:1px solid var(--el-border-color)}.grant h2{overflow-wrap:anywhere;font-size:1.1rem;margin:0}.grant p{overflow-wrap:anywhere}summary{cursor:pointer;min-height:44px}code{overflow-wrap:anywhere}.error{color:var(--el-color-danger)}@media(max-width:480px){.panel{padding:16px}.grant-page{padding:16px 12px 32px}}
 </style>
