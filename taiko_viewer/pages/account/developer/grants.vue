@@ -2,8 +2,9 @@
 import {ref,computed,onMounted,watch,nextTick} from 'vue';
 import type {ResourceGrant,DeveloperClient} from '@sakura-taiko/contract';
 definePageMeta({middleware:'account-auth',pageTitleKey:'account.developer',hidePageDescription:true,navKey:'/account/profile'});
-const config=useRuntimeConfig();
-if(!config.public.developerApiV1)throw createError({statusCode:404,statusMessage:'Not found'});
+const {accountUser,fetchCurrentUser}=useAccountState();
+await fetchCurrentUser(true);
+if(accountUser.value?.developerApiV1Access!==true)throw createError({statusCode:404,statusMessage:'Not found'});
 const api=useViewerApiFetch();
 const {locale}=useI18n();
 const ja=computed(()=>locale.value==='ja');

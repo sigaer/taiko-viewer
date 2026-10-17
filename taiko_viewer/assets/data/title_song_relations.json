@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-11T02:07:14.278350+00:00",
+  "generated_at": "2026-10-17T02:06:24.486981+00:00",
   "stats": {
     "rows_total": 866,
-    "api_relations_total": 593,
-    "relations_total": 685,
-    "songs_total": 442,
-    "titles_total": 525
+    "api_relations_total": 634,
+    "relations_total": 732,
+    "songs_total": 453,
+    "titles_total": 542
   },
   "relations": [
     {
@@ -3441,12 +3441,28 @@
       "source_row_index": 701
     },
     {
+      "song_name": "ダジャレdeオシャレ(裏)",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでドンダフルコンボ",
+      "source_row_index": 702
+    },
+    {
       "song_name": "Emma",
       "title_name": "乾坤を開闢せし者",
       "requirement_type": "full_combo",
       "difficulty_scope": "inner_oni",
       "condition_text": "在《Emma》的“魔王（隐藏）”难度下达成全连吧",
       "source_row_index": 702
+    },
+    {
+      "song_name": "ダジャレdeオシャレ(裏)",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでフルコンボ",
+      "source_row_index": 703
     },
     {
       "song_name": "Aloft in the wind",
@@ -3465,6 +3481,22 @@
       "source_row_index": 704
     },
     {
+      "song_name": "ダジャレdeオシャレ(裏)",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでクリア",
+      "source_row_index": 704
+    },
+    {
+      "song_name": "さよならワーリャ(裏)",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "さよならワーリャ(裏)を難易度おにでドンダフルコンボ",
+      "source_row_index": 705
+    },
+    {
       "song_name": "the telescope in virtual reality",
       "title_name": "往古来今のクレアボヤンス",
       "requirement_type": "full_combo",
@@ -3479,6 +3511,22 @@
       "difficulty_scope": "inner_oni",
       "condition_text": "在《Mood Swing》的“魔王（隐藏）”难度下达成全连吧",
       "source_row_index": 706
+    },
+    {
+      "song_name": "さよならワーリャ(裏)",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "さよならワーリャ(裏)を難易度おにでフルコンボ",
+      "source_row_index": 706
+    },
+    {
+      "song_name": "さよならワーリャ(裏)",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni_or_inner_oni",
+      "condition_text": "さよならワーリャ(裏)を難易度おにでクリア",
+      "source_row_index": 707
     },
     {
       "song_name": "尽头的魔法使",
@@ -5009,6 +5057,142 @@
       "source_row_index": 931
     },
     {
+      "song_name": "古典乐组曲（寒假篇）",
+      "title_name": "クラシックメドレー（冬休み編）",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 932
+    },
+    {
+      "song_name": "古典乐组曲（寒假篇）",
+      "title_name": "クラシックメドレー（冬休み編）",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+      "source_row_index": 933
+    },
+    {
+      "song_name": "古典乐组曲（寒假篇）",
+      "title_name": "クラシックメドレー（冬休み編）",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成通关吧",
+      "source_row_index": 934
+    },
+    {
+      "song_name": "古典乐组曲（寒假篇）",
+      "title_name": "年の瀬の達人",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+      "source_row_index": 935
+    },
+    {
+      "song_name": "BUBBLE LIP RAVE MACHINE",
+      "title_name": "バブル・リップ・レイヴ・マシン",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 936
+    },
+    {
+      "song_name": "BUBBLE LIP RAVE MACHINE",
+      "title_name": "バブル・リップ・レイヴ・マシン",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+      "source_row_index": 937
+    },
+    {
+      "song_name": "BUBBLE LIP RAVE MACHINE",
+      "title_name": "バブル・リップ・レイヴ・マシン",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成通关吧",
+      "source_row_index": 938
+    },
+    {
+      "song_name": "BUBBLE LIP RAVE MACHINE",
+      "title_name": "はじけるレイヴ 無敵のマシン",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+      "source_row_index": 939
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 940
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全连吧",
+      "source_row_index": 941
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成通关吧",
+      "source_row_index": 942
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 943
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 944
+    },
+    {
+      "song_name": "DAJARE de OSHARE",
+      "title_name": "ダジャレdeオシャレ",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 945
+    },
+    {
+      "song_name": "再见了Varya",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 946
+    },
+    {
+      "song_name": "再见了Varya",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 947
+    },
+    {
+      "song_name": "再见了Varya",
+      "title_name": "さよならワーリャ",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 948
+    },
+    {
       "song_name": "Dimpy Dimper",
       "title_name": "でぃんぴーでぃんぱー！",
       "requirement_type": "all_perfect",
@@ -5425,6 +5609,102 @@
       "source_row_index": 1001
     },
     {
+      "song_name": "ZOMEKI THUNDER",
+      "title_name": "ZOMEKI THUNDER",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1003
+    },
+    {
+      "song_name": "ZOMEKI THUNDER",
+      "title_name": "ZOMEKI THUNDER",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+      "source_row_index": 1004
+    },
+    {
+      "song_name": "ZOMEKI THUNDER",
+      "title_name": "ZOMEKI THUNDER",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成通关吧",
+      "source_row_index": 1005
+    },
+    {
+      "song_name": "ZOMEKI THUNDER",
+      "title_name": "雷鳴の囃子方",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+      "source_row_index": 1006
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《铁锤》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1007
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+      "source_row_index": 1008
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《铁锤》的“魔王”难度下达成通关吧",
+      "source_row_index": 1009
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "清浄な世界を君と",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+      "source_row_index": 1010
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 1011
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1012
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "マルトーアンフェール",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 1013
+    },
+    {
+      "song_name": "铁锤",
+      "title_name": "Marteau en fer",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1014
+    },
+    {
       "song_name": "小咚绘图之歌",
       "title_name": "どんちゃんえかき歌",
       "requirement_type": "all_perfect",
@@ -5447,6 +5727,102 @@
       "difficulty_scope": "oni",
       "condition_text": "在《小咚绘图之歌》的“魔王”难度下达成通关吧",
       "source_row_index": 1017
+    },
+    {
+      "song_name": "虹色·梦色·太鼓色",
+      "title_name": "虹色・夢色・太鼓色",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 1018
+    },
+    {
+      "song_name": "虹色·梦色·太鼓色",
+      "title_name": "虹色・夢色・太鼓色",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1019
+    },
+    {
+      "song_name": "虹色·梦色·太鼓色",
+      "title_name": "虹色・夢色・太鼓色",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 1020
+    },
+    {
+      "song_name": "虹色·梦色·太鼓色",
+      "title_name": "これぞ！太鼓の達人",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1021
+    },
+    {
+      "song_name": "钝响Likelihood",
+      "title_name": "鈍響ライクリフド",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1034
+    },
+    {
+      "song_name": "钝响Likelihood",
+      "title_name": "鈍響ライクリフド",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+      "source_row_index": 1035
+    },
+    {
+      "song_name": "钝响Likelihood",
+      "title_name": "鈍響ライクリフド",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《钝响Likelihood》的“魔王”难度下达成通关吧",
+      "source_row_index": 1036
+    },
+    {
+      "song_name": "钝响Likelihood",
+      "title_name": "Don't fear the Echo,",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+      "source_row_index": 1037
+    },
+    {
+      "song_name": "活声Likelihood",
+      "title_name": "活声ライクリフド",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《活声Likelihood》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1038
+    },
+    {
+      "song_name": "活声Likelihood",
+      "title_name": "活声ライクリフド",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+      "source_row_index": 1039
+    },
+    {
+      "song_name": "活声Likelihood",
+      "title_name": "活声ライクリフド",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《活声Likelihood》的“魔王”难度下达成通关吧",
+      "source_row_index": 1040
+    },
+    {
+      "song_name": "活声Likelihood",
+      "title_name": "Cut down the Voice.",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+      "source_row_index": 1041
     },
     {
       "song_name": "Purple Rose Fusion",
@@ -5918,6 +6294,36 @@
         "source_row_index": 530
       }
     ],
+    "BUBBLE LIP RAVE MACHINE": [
+      {
+        "title_name": "バブル・リップ・レイヴ・マシン",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 936
+      },
+      {
+        "title_name": "バブル・リップ・レイヴ・マシン",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+        "source_row_index": 937
+      },
+      {
+        "title_name": "バブル・リップ・レイヴ・マシン",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成通关吧",
+        "source_row_index": 938
+      },
+      {
+        "title_name": "はじけるレイヴ 無敵のマシン",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+        "source_row_index": 939
+      }
+    ],
     "Calamity Fortune": [
       {
         "title_name": "奇跡を起こす程度のドンだー",
@@ -6129,6 +6535,50 @@
         "difficulty_scope": "oni",
         "condition_text": "D's Adventure Noteを難易度おにでフルコンボ",
         "source_row_index": 104
+      }
+    ],
+    "DAJARE de OSHARE": [
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 940
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全连吧",
+        "source_row_index": 941
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成通关吧",
+        "source_row_index": 942
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 943
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 944
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 945
       }
     ],
     "DANGAN NOTES": [
@@ -8965,6 +9415,36 @@
         "source_row_index": 537
       }
     ],
+    "ZOMEKI THUNDER": [
+      {
+        "title_name": "ZOMEKI THUNDER",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1003
+      },
+      {
+        "title_name": "ZOMEKI THUNDER",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+        "source_row_index": 1004
+      },
+      {
+        "title_name": "ZOMEKI THUNDER",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成通关吧",
+        "source_row_index": 1005
+      },
+      {
+        "title_name": "雷鳴の囃子方",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+        "source_row_index": 1006
+      }
+    ],
     "λ7708": [
       {
         "title_name": "スキル：完全混乱耐性",
@@ -9053,6 +9533,29 @@
         "difficulty_scope": "oni",
         "condition_text": "さいたま2000を難易度おにでフルコンボ",
         "source_row_index": 134
+      }
+    ],
+    "さよならワーリャ(裏)": [
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでドンダフルコンボ",
+        "source_row_index": 705
+      },
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでフルコンボ",
+        "source_row_index": 706
+      },
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでクリア",
+        "source_row_index": 707
       }
     ],
     "さんぽ(裏)": [
@@ -9231,6 +9734,29 @@
         "difficulty_scope": "oni",
         "condition_text": "タベルナ2000を難易度おにでフルコンボ",
         "source_row_index": 132
+      }
+    ],
+    "ダジャレdeオシャレ(裏)": [
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでドンダフルコンボ",
+        "source_row_index": 702
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでフルコンボ",
+        "source_row_index": 703
+      },
+      {
+        "title_name": "ダジャレdeオシャレ",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでクリア",
+        "source_row_index": 704
       }
     ],
     "ダーク・エクス・マキナ♡": [
@@ -9453,6 +9979,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《其方，激昂》的“魔王”难度下达成全连吧",
         "source_row_index": 585
+      }
+    ],
+    "再见了Varya": [
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 946
+      },
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 947
+      },
+      {
+        "title_name": "さよならワーリャ",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 948
       }
     ],
     "冬龙 ～Toryu～": [
@@ -9717,6 +10266,36 @@
         "difficulty_scope": "oni",
         "condition_text": "在《双龙之乱》的“魔王”难度下达成全连吧",
         "source_row_index": 318
+      }
+    ],
+    "古典乐组曲（寒假篇）": [
+      {
+        "title_name": "クラシックメドレー（冬休み編）",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 932
+      },
+      {
+        "title_name": "クラシックメドレー（冬休み編）",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+        "source_row_index": 933
+      },
+      {
+        "title_name": "クラシックメドレー（冬休み編）",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成通关吧",
+        "source_row_index": 934
+      },
+      {
+        "title_name": "年の瀬の達人",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+        "source_row_index": 935
       }
     ],
     "可笑可啸2000": [
@@ -10478,6 +11057,36 @@
         "source_row_index": 450
       }
     ],
+    "活声Likelihood": [
+      {
+        "title_name": "活声ライクリフド",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1038
+      },
+      {
+        "title_name": "活声ライクリフド",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1039
+      },
+      {
+        "title_name": "活声ライクリフド",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1040
+      },
+      {
+        "title_name": "Cut down the Voice.",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1041
+      }
+    ],
     "流浪的琥珀公主": [
       {
         "title_name": "踊れ美しき華",
@@ -10820,6 +11429,36 @@
         "source_row_index": 762
       }
     ],
+    "虹色·梦色·太鼓色": [
+      {
+        "title_name": "虹色・夢色・太鼓色",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1018
+      },
+      {
+        "title_name": "虹色・夢色・太鼓色",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1019
+      },
+      {
+        "title_name": "虹色・夢色・太鼓色",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1020
+      },
+      {
+        "title_name": "これぞ！太鼓の達人",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1021
+      }
+    ],
     "蛇铁": [
       {
         "title_name": "鋼鉄の蛇使い",
@@ -10938,6 +11577,94 @@
         "difficulty_scope": "oni",
         "condition_text": "在《還是埼玉2000》的“魔王”难度下达成全连吧",
         "source_row_index": 350
+      }
+    ],
+    "钝响Likelihood": [
+      {
+        "title_name": "鈍響ライクリフド",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1034
+      },
+      {
+        "title_name": "鈍響ライクリフド",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1035
+      },
+      {
+        "title_name": "鈍響ライクリフド",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1036
+      },
+      {
+        "title_name": "Don't fear the Echo,",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1037
+      }
+    ],
+    "铁锤": [
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1007
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+        "source_row_index": 1008
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成通关吧",
+        "source_row_index": 1009
+      },
+      {
+        "title_name": "清浄な世界を君と",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+        "source_row_index": 1010
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1011
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1012
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1013
+      },
+      {
+        "title_name": "Marteau en fer",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1014
       }
     ],
     "闇之魂": [
@@ -11352,6 +12079,15 @@
         "source_row_index": 641
       }
     ],
+    "Cut down the Voice.": [
+      {
+        "song_name": "活声Likelihood",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1041
+      }
+    ],
     "DAYBREAKER": [
       {
         "song_name": "YOAKE",
@@ -11377,6 +12113,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Destination 2F29》的“魔王”难度下达成全连吧",
         "source_row_index": 624
+      }
+    ],
+    "Don't fear the Echo,": [
+      {
+        "song_name": "钝响Likelihood",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1037
       }
     ],
     "Don't Stop the Game": [
@@ -11772,6 +12517,15 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《Lightning Boys》的“魔王（隐藏）”难度下达成通关吧",
         "source_row_index": 879
+      }
+    ],
+    "Marteau en fer": [
+      {
+        "song_name": "铁锤",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1014
       }
     ],
     "Mission Complete!": [
@@ -12594,6 +13348,29 @@
         "source_row_index": 840
       }
     ],
+    "ZOMEKI THUNDER": [
+      {
+        "song_name": "ZOMEKI THUNDER",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1003
+      },
+      {
+        "song_name": "ZOMEKI THUNDER",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+        "source_row_index": 1004
+      },
+      {
+        "song_name": "ZOMEKI THUNDER",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成通关吧",
+        "source_row_index": 1005
+      }
+    ],
     "”Mood” Maker": [
       {
         "song_name": "Mood Swing",
@@ -12792,6 +13569,15 @@
         "source_row_index": 5545
       }
     ],
+    "これぞ！太鼓の達人": [
+      {
+        "song_name": "虹色·梦色·太鼓色",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1021
+      }
+    ],
     "ごはん派の達人": [
       {
         "song_name": "PAN vs GOHAN! DAIKESSEN!",
@@ -12826,6 +13612,50 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《NEKOKUJIRA》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 581
+      }
+    ],
+    "さよならワーリャ": [
+      {
+        "song_name": "さよならワーリャ(裏)",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでドンダフルコンボ",
+        "source_row_index": 705
+      },
+      {
+        "song_name": "さよならワーリャ(裏)",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでフルコンボ",
+        "source_row_index": 706
+      },
+      {
+        "song_name": "さよならワーリャ(裏)",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "さよならワーリャ(裏)を難易度おにでクリア",
+        "source_row_index": 707
+      },
+      {
+        "song_name": "再见了Varya",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 946
+      },
+      {
+        "song_name": "再见了Varya",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 947
+      },
+      {
+        "song_name": "再见了Varya",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《再见了Varya》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 948
       }
     ],
     "さんばいドンだー": [
@@ -13106,6 +13936,15 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《好想用别人的钱吃烤肉！》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 391
+      }
+    ],
+    "はじけるレイヴ 無敵のマシン": [
+      {
+        "song_name": "BUBBLE LIP RAVE MACHINE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+        "source_row_index": 939
       }
     ],
     "はやさいたまの達人": [
@@ -13414,6 +14253,29 @@
         "source_row_index": 116
       }
     ],
+    "クラシックメドレー（冬休み編）": [
+      {
+        "song_name": "古典乐组曲（寒假篇）",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 932
+      },
+      {
+        "song_name": "古典乐组曲（寒假篇）",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+        "source_row_index": 933
+      },
+      {
+        "song_name": "古典乐组曲（寒假篇）",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成通关吧",
+        "source_row_index": 934
+      }
+    ],
     "クラポルの達人": [
       {
         "song_name": "竖波波卡",
@@ -13574,6 +14436,71 @@
         "difficulty_scope": "oni",
         "condition_text": "在《!!!Chaos Time!!!》的“魔王”难度下达成全连吧",
         "source_row_index": 333
+      }
+    ],
+    "ダジャレdeオシャレ": [
+      {
+        "song_name": "ダジャレdeオシャレ(裏)",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでドンダフルコンボ",
+        "source_row_index": 702
+      },
+      {
+        "song_name": "ダジャレdeオシャレ(裏)",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでフルコンボ",
+        "source_row_index": 703
+      },
+      {
+        "song_name": "ダジャレdeオシャレ(裏)",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni_or_inner_oni",
+        "condition_text": "ダジャレdeオシャレ(裏)を難易度おにでクリア",
+        "source_row_index": 704
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 940
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成全连吧",
+        "source_row_index": 941
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王”难度下达成通关吧",
+        "source_row_index": 942
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 943
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 944
+      },
+      {
+        "song_name": "DAJARE de OSHARE",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《DAJARE de OSHARE》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 945
       }
     ],
     "ダンガンドンだー": [
@@ -13848,6 +14775,29 @@
         "source_row_index": 589
       }
     ],
+    "バブル・リップ・レイヴ・マシン": [
+      {
+        "song_name": "BUBBLE LIP RAVE MACHINE",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 936
+      },
+      {
+        "song_name": "BUBBLE LIP RAVE MACHINE",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成全连吧",
+        "source_row_index": 937
+      },
+      {
+        "song_name": "BUBBLE LIP RAVE MACHINE",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《BUBBLE LIP RAVE MACHINE》的“魔王”难度下达成通关吧",
+        "source_row_index": 938
+      }
+    ],
     "パラレルリズム": [
       {
         "song_name": "Parallel Lollipop",
@@ -13998,6 +14948,50 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Hello, Worldooon!!》的“魔王”难度下达成全连吧",
         "source_row_index": 541
+      }
+    ],
+    "マルトーアンフェール": [
+      {
+        "song_name": "铁锤",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1007
+      },
+      {
+        "song_name": "铁锤",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+        "source_row_index": 1008
+      },
+      {
+        "song_name": "铁锤",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成通关吧",
+        "source_row_index": 1009
+      },
+      {
+        "song_name": "铁锤",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1011
+      },
+      {
+        "song_name": "铁锤",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1012
+      },
+      {
+        "song_name": "铁锤",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1013
       }
     ],
     "マワルまわる回る": [
@@ -15077,6 +16071,15 @@
         "source_row_index": 837
       }
     ],
+    "年の瀬の達人": [
+      {
+        "song_name": "古典乐组曲（寒假篇）",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《古典乐组曲（寒假篇）》的“魔王”难度下达成全连吧",
+        "source_row_index": 935
+      }
+    ],
     "幻ドンだー": [
       {
         "song_name": "Spectral Rider",
@@ -15814,6 +16817,29 @@
         "source_row_index": 397
       }
     ],
+    "活声ライクリフド": [
+      {
+        "song_name": "活声Likelihood",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1038
+      },
+      {
+        "song_name": "活声Likelihood",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1039
+      },
+      {
+        "song_name": "活声Likelihood",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1040
+      }
+    ],
     "流れ星に願いを込めて": [
       {
         "song_name": "miracle shooting star",
@@ -15821,6 +16847,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《miracle shooting star》的“魔王”难度下达成全连吧",
         "source_row_index": 691
+      }
+    ],
+    "清浄な世界を君と": [
+      {
+        "song_name": "铁锤",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《铁锤》的“魔王”难度下达成全连吧",
+        "source_row_index": 1010
       }
     ],
     "準備はええか？ほないくで！": [
@@ -16439,6 +17474,29 @@
         "source_row_index": 477
       }
     ],
+    "虹色・夢色・太鼓色": [
+      {
+        "song_name": "虹色·梦色·太鼓色",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1018
+      },
+      {
+        "song_name": "虹色·梦色·太鼓色",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1019
+      },
+      {
+        "song_name": "虹色·梦色·太鼓色",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《虹色·梦色·太鼓色》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1020
+      }
+    ],
     "蚊取り光線の達人": [
       {
         "song_name": "弩蚊怒夏",
@@ -16677,6 +17735,29 @@
         "source_row_index": 322
       }
     ],
+    "鈍響ライクリフド": [
+      {
+        "song_name": "钝响Likelihood",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1034
+      },
+      {
+        "song_name": "钝响Likelihood",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
+        "source_row_index": 1035
+      },
+      {
+        "song_name": "钝响Likelihood",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1036
+      }
+    ],
     "鋼鉄の蛇使い": [
       {
         "song_name": "蛇铁",
@@ -16807,6 +17888,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《畅游云间》的“魔王”难度下达成通关吧",
         "source_row_index": 856
+      }
+    ],
+    "雷鳴の囃子方": [
+      {
+        "song_name": "ZOMEKI THUNDER",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
+        "source_row_index": 1006
       }
     ],
     "電光石火ボーイズ": [

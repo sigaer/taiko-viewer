@@ -1,3 +1,5 @@
+import {writeFile,rename} from 'node:fs/promises';
+import {resolve} from 'node:path';
 // Two owned loopback servers, actual account/session/source/token SQL, no real gateways.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -64,7 +66,18 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    const router=createRouter();
    c.route=(method,path,handler)=>router[method](path,defineEventHandler(handler));
    for(const [method,path,file] of [['post','/login','auth/login.post.ts'],['post','/logout','auth/logout.post.ts'],['get','/profile','profile.get.ts'],['get','/bindings','bindings.get.ts'],['get','/sync','sync/targets.get.ts'],['post','/sync-submit','sync.post.ts'],['post','/token','score-token.post.ts'],['post','/current','bindings/current.post.ts'],['post','/remove','bindings/remove.post.ts']])router[method](path,(await import(new URL('../../server/api/account/'+file,import.meta.url).href)).default);
-   api=createServer(toNodeListener(createApp().use(router)));api.listen(0,'127.0.0.1');await once(api,'listening');
+   const app=createApp();
+   if(withDeveloper){
+    // Existing isolated fixtures explicitly admit their own synthetic clients.
+    // Production and the real Nuxt rollout test read the server-owned policy directly.
+    c.config.developerApiClientAllowlistPath=resolve(c.root,'fixture-v1-clients.json');
+    app.use(defineEventHandler(async()=>{
+     let clients=[];try{const [rows]=await c.pool.query('SELECT client_id FROM web_developer_api_clients ORDER BY client_id');clients=rows.map(r=>r.client_id);}catch(error){if(error.code!=='ER_NO_SUCH_TABLE')throw error;}
+     const file=c.config.developerApiClientAllowlistPath,temp=file+'.'+randomUUID()+'.next';
+     await writeFile(temp,JSON.stringify({schemaVersion:1,clientIds:clients.length?clients:['clt_'+'f'.repeat(32)]}),{mode:0o600});await rename(temp,file);
+    }));
+   }
+   api=createServer(toNodeListener(app.use(router)));api.listen(0,'127.0.0.1');await once(api,'listening');
    const apiBase=`http://127.0.0.1:${api.address().port}`;
    c.baseUrl=apiBase;
    c.request=(method,path,body,cookie=c.cookie,headers={})=>nativeFetch(apiBase+path,{method,headers:{'Content-Type':'application/json',Cookie:cookie||'',...headers},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(requestTimeoutMs)});

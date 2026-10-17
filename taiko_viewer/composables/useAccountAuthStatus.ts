@@ -6,6 +6,8 @@ export type AccountAuthUser = {
   avatarUrl: string;
   createdAt: string;
   annualSummaryAccess: boolean;
+  myTaikoReadModelAccess?: boolean;
+  developerApiV1Access?: boolean;
 };
 
 type AccountAuthPayload = {

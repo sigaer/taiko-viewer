@@ -135,7 +135,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     annualStartupMode: "normal",
     myTaikoReadModelMode: "legacy",
+    myTaikoReadModelAllowlistPath: "",
     developerApiV1: process.env.TAIKO_DEVELOPER_API_V1_ENABLED === "1",
+    developerApiClientAllowlistPath: "",
+    developerApiTrustedProxyAddresses: "",
     developerApiAnonymousDailyLimit: 300,
     developerApiClientDailyLimit: 5000,
     dataDir: process.env.TAIKO_FRONTEND_DATA_DIR || "",
