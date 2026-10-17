@@ -1,4 +1,4 @@
-import type { H3Event } from "h3";
+import { appendHeader, getHeader, setHeader, type H3Event } from "h3";
 
 const hasViewerCredentials = (event: H3Event) => Boolean(
   getHeader(event, "cookie") || getHeader(event, "authorization")

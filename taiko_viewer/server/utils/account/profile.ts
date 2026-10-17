@@ -2,13 +2,16 @@ import { createError } from "h3";
 import type { H3Event, MultiPartData } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "./auth";
-import { listBindings } from "./bindings";
+import { readViewerBindings } from "../../internal/account/binding-read.ts";
+import { captureBindingIdentity, assertBindingIdentity } from "../../internal/account/binding-identity.ts";
+import { withViewerCurrentSource } from "../../services/account/current-source.ts";
+import { enrichAuthorizedCurrentTitle } from "../../services/account/profile-source.ts";
 import { getQqBinding } from "./qq";
 import {
   type AccountRow,
   AVATAR_MAX_BYTES,
   DEFAULT_AVATAR,
-  enrichBindingWithCurrentTitle,
+  sanitizeBinding,
   getOssClient,
   getPendingBinding,
   readAvatarMultipart,
@@ -18,9 +21,7 @@ import {
 } from "../../internal/account/shared";
 import sharp from "sharp";
 
-export const getAccountProfile = async (userId: number) => {
-  await ensureAccountSchema();
-  const db = getAccountDb();
+export const getAccountProfile = (userId: number) => withViewerCurrentSource(userId, "read", async (binding, db) => {
   const [userRows] = await db.execute<DbRow<AccountRow>[]>(
     "SELECT * FROM web_user_accounts WHERE id = ? LIMIT 1",
     [userId]
@@ -29,13 +30,16 @@ export const getAccountProfile = async (userId: number) => {
   if (!user) {
     throw createError({ statusCode: 404, statusMessage: "用户不存在" });
   }
-  const bindings = await listBindings(userId);
-  const baseCurrentBinding = bindings.find((item) => item.isCurrent) || bindings[0] || null;
+  const rows = await readViewerBindings(db, userId);
+  if (binding) assertBindingIdentity(captureBindingIdentity(binding), rows[0]);
+  else if (rows[0]) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
+  const bindings = rows.map(sanitizeBinding);
+  const baseCurrentBinding = bindings[0] || null;
   const currentBinding = baseCurrentBinding
-    ? await enrichBindingWithCurrentTitle(baseCurrentBinding)
+    ? await enrichAuthorizedCurrentTitle(baseCurrentBinding)
     : null;
-  const pendingBinding = await getPendingBinding(userId);
-  const qqBinding = await getQqBinding(userId);
+  const pendingBinding = await getPendingBinding(userId, db);
+  const qqBinding = await getQqBinding(userId, db);
   return {
     user: sanitizePublicUser(user),
     bindings,
@@ -47,7 +51,7 @@ export const getAccountProfile = async (userId: number) => {
       taikoVerified: Boolean(currentBinding)
     }
   };
-};
+}, { bindingRequired: false });
 
 export const uploadAvatarForUser = async (userId: number, file: MultiPartData) => {
   await ensureAccountSchema();

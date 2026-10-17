@@ -1,0 +1,103 @@
+{
+  "step": "6.3d.8",
+  "status": "BINDING_REVOCATION_AND_GROWTH_IDENTITY_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "f3146cf",
+  "sakuraVersion": "9.81.5",
+  "sakuraPushed": true,
+  "validation": {
+    "pythonTests": 45,
+    "offlineNodeTests": 132,
+    "realTestDbSqlTests": 139,
+    "newBindingPublicationSqlTests": 33,
+    "typescript": "domainRead + publicationLifecycle configs PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "exitStatus": 0,
+    "systemdUnit": "taiko-qa-1791693079-1215142.service",
+    "unitResult": "success",
+    "unitActiveState": "inactive",
+    "unitMainPid": 0,
+    "unitControlGroup": "",
+    "logPath": "/var/tmp/phase6-binding-final2-qa.log",
+    "logSha256": "bbb633b22e973f419d645f515f32b4481b871c85aeaa5eed1a46d6d63a52bc89",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791693079-1215142.service",
+      "durationMs": 198253,
+      "sampledMemoryPeakBytes": 367939584,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "50968 kB",
+          "VmRSS": "50968 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "ordinary binding revocation holds Source EX before owner/all-binding SQL locks; full scalar binding identity rechecked after the actual wait",
+    "Goal/measurement/cursor/song-lock/showcase cleanup, remaining-current choice and minimal private acknowledgement receipt commit once; successful existing response fields retained",
+    "late cleanup/selection/receipt SQL failures roll back every authority and product field; failed rollback destroys the connection; actual driver diagnostics become generic 503",
+    "exact operation receipt proves lost SQL COMMIT acknowledgement; concurrent same-owner requests revoke once; completed retry returns its original acknowledgement without new selection or publication",
+    "queued same row with changed taikoId/source/manualAccountId rejected; last-binding count and actual current choice determined inside locks; foreign/manual targets rejected",
+    "SQL-only current selection uses one owner/binding transaction and never acquires Source after SQL; late failure does not clear current",
+    "grant services retain captured pool through shutdown-style global replacement; corrupt receipt and deleted owner cannot obtain replay acknowledgement",
+    "Overview/History/Passport/Recent reject all three same-row identity substitutions after SH; no computation/measurement emission in those rejected request cases",
+    "actual long Growth SH request finishes its original complete DTO before an independent removal enters EX",
+    "Recent ACK holds one SH evidence view through SQL owner/cursor COMMIT, proves complete binding identity, preserves CAS/idempotent boundary behavior and destroys failed rollback connections",
+    "actual concurrent publisher waits for cursor transaction; next Recent read sees the new token and retains the old acknowledged boundary",
+    "actual owned Node process death before/after revocation COMMIT proves TCP rollback versus durable minimal acknowledgement and correct retry",
+    "pure revocation/selection/ACK leave current/history raw SHA, commit ID and source sequence unchanged",
+    "writer source provenance rejects undefined/null/coercible object; valid serializer byte/clock behavior unchanged",
+    "existing acquisition/manual creation/grant/deletion/restoration/Goal/Growth full Golden regressions retained"
+  ],
+  "limits": [
+    "Owned synthetic temporary trees and guarded actual _test SQL only; no production DB/private files/external service QA",
+    "Test schema omits production FKs; not production migration/FK enforcement, authenticated HTTP Gate or full server tsc",
+    "Current selection is SQL metadata only; full private grant admission and all other source-consuming readers/writers remain pending",
+    "No public login-account deletion route exists in current source; existing ops/test SQL cleanup helpers still require separate convergence audit, no invented deletion product",
+    "Binding verification confirmation, private resource grants, actual dispatcher/u0/daily convergence, P1a/Read Model/million-record costs/operational restore/final activation/release remain pending",
+    "Revocation SQL and kernel source lease coordinate ordering, not a joint SQL/filesystem transaction",
+    "Viewer steps remain local until unified standard Phase 6 deployment/push; no R sync, NoneBot/service restart or online product completion claimed",
+    "250 ms sampled cgroup peak is not exact process-tree maximum or million-record resource gate"
+  ],
+  "harnessCorrections": [
+    "First focused SQL run used an already-bound replacement taiko ID, unsupported history/passport ranges and omitted synthetic writer source; corrected fixture inputs; second focused run passed 29/29",
+    "Omitted source exposed regex string-coercion acceptance in real writer; tightened both serializer/write entry checks and added provenance regression",
+    "First comprehensive run stopped at narrow domainRead tsc because new test import pulled runtime auto-import globals; moved provenance case to existing publicationLifecycle-scoped Infrastructure test; no weakened typings or isolation limits",
+    "Removed own added blank line from unchanged publicationScope fixture; no executable/type/comment change; final changed-source hashes below"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/binding-revocation-schema.ts": "5ee7038b12b9388aaa27fef9e9db59c1e41345935b7f9769f15ef2d2f5ff9811",
+    "taiko_viewer/server/infrastructure/taiko-publication/writer.ts": "fd373d06a4057ff46cf312578b4647dea9e6a546501f8647057d9ae86f8a37c0",
+    "taiko_viewer/server/internal/account/binding-identity.ts": "69ec9a30b00c788f127c2170879485f3661ae1391640b85fe20fafd67268afe6",
+    "taiko_viewer/server/internal/account/shared.ts": "818205d59077c932dcd09fa9fcdf6a2c3b9a4739b85b77f5c94cabb7cef719da",
+    "taiko_viewer/server/services/account/binding-lifecycle.ts": "b2cac197a536852d1f63a38bb67d98b468425c7ecc20ab069519beab18c34244",
+    "taiko_viewer/server/services/account/growth.ts": "c008c0256cbad5df7f1aa07f93458606a366da1c7f1b534db9a1c5c5e60f8052",
+    "taiko_viewer/server/services/growth-history/service.ts": "d7693fb65645951642be700c34f48a874ed33f1e52c00e0a3012ea8d444cae6c",
+    "taiko_viewer/server/services/growth-passport/service.ts": "8b5927fe4b385329665e9d6ff87f4feb7cd1f728df01d3f744206dcd9d7c9e47",
+    "taiko_viewer/server/services/growth-recent/service.ts": "5cf0d4de668e5ab4e952211f37f6f2c9bcc2dbd7ba2ee3fe4fb278f278094b2a",
+    "taiko_viewer/server/utils/account-db.ts": "c3366f4074f615f2cf473013d4ca7c8bc1bb90f48a9c56666efa9647ec93eacf",
+    "taiko_viewer/server/utils/account/bindings.ts": "397077a665bf0e04043884ec83ee0512f79dbad6c01605dc837d37fe38d201c7",
+    "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "273730191d5e810b19c21a32ef73b16beaa821446f39a7297b685de383d26072",
+    "taiko_viewer/tests/fixtures/growthReplayHarness.mjs": "fddb9e37b80ee1dcaf962b3c21e4ff0411995b26b58c3d2449e977111bebae87",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "65408e561fdcd01d978d0c9bf0bc61f10f19598c044928f7fb3796bda67968fe",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "165fa8fd7694867bf8882bda31cee09c934167484d0e3108f76dc1013a6b7cb6",
+    "taiko_viewer/tests/publicationSqlBackup.test.ts": "98a8fb264a793d2a07f82d7af49ef39c843a0ee2ab3e9d9df8f454f30234577b",
+    "taiko_viewer/tests/bindingPublicationSql.test.mjs": "64f60e84e7c01ab206a0c18a8d7240e435bfa2194eabd347e7f95ca802f8adb3"
+  }
+}

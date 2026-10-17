@@ -1,0 +1,167 @@
+{
+  "status": "PASS_FOUR_INSTALLED_WORKERS_SCOPED",
+  "role": "center",
+  "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+  "distributionCount": 94,
+  "coreVersion": "0.1.1",
+  "productionAccess": false,
+  "memoryPeak": "UNAVAILABLE",
+  "runs": [
+    {
+      "stage": "transport",
+      "log": "/var/tmp/viewer-r4-transport.log",
+      "logSha256": "beb4c591c217171c686b7fede8a5757bf8ee92f119e83d02a0423784432bd45d",
+      "counts": {
+        "passed": 30,
+        "failed": 0
+      },
+      "scope": "Fake transport plus captured SQL pool; no business SQL"
+    },
+    {
+      "stage": "module-smoke",
+      "log": "/var/tmp/viewer-r4-module-smoke.log",
+      "logSha256": "9b7d2603c842c5ff70c0b361861929c6d5c3bd77e7e6c4bf452f3e0444baea9c",
+      "counts": null,
+      "scope": "Four actual installed CLI malformed frames, empty venv rejection, isolated imports and stable credential fingerprint"
+    },
+    {
+      "stage": "initial-sql",
+      "log": "/var/tmp/viewer1-sql-AqeQ1R/tests.log",
+      "logSha256": "cfe5f0a662687f3622434bf9a7a0e99d7ef05e546e5fc5caffd2c09e9687a7ce",
+      "counts": {
+        "passed": 79,
+        "failed": 40
+      },
+      "scope": "Full four suites; retained failure; missing explicit synthetic dojo catalog and old death-child source path",
+      "run": {
+        "workspace": "/var/tmp/viewer1-sql-AqeQ1R",
+        "database": "viewer1_security_test",
+        "status": "FAIL",
+        "startedAt": "2026-10-16T01:34:34.001Z",
+        "tests": [
+          "taiko_viewer/tests/accountSyncCanonicalSql.test.mjs",
+          "taiko_viewer/tests/sourceProxySql.test.mjs",
+          "taiko_viewer/tests/qqMigrationProxySql.test.mjs",
+          "taiko_viewer/tests/hirobaCredentialSql.test.mjs"
+        ],
+        "productionAccess": false,
+        "databaseProof": "viewer1_security_test",
+        "port": 36813,
+        "result": {
+          "code": 1,
+          "signal": null
+        },
+        "daemonExited": true,
+        "finishedAt": "2026-10-16T01:37:40.536Z",
+        "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792114473-2739192.service",
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+      }
+    },
+    {
+      "stage": "diagnostic",
+      "log": "/var/tmp/viewer1-sql-QqUQlq/tests.log",
+      "logSha256": "dfaeb9890c24cae143e3c0e4f33c6e783379c1418f435f078b2529ffcc6bcb3d",
+      "counts": {
+        "passed": 0,
+        "failed": 2
+      },
+      "scope": "Only two successful mutation cases; bounded exception metadata; missing synthetic dojo catalog",
+      "run": {
+        "workspace": "/var/tmp/viewer1-sql-QqUQlq",
+        "database": "viewer1_security_test",
+        "status": "FAIL",
+        "startedAt": "2026-10-16T01:41:49.326Z",
+        "tests": [
+          "taiko_viewer/tests/accountSyncCanonicalSql.test.mjs",
+          "taiko_viewer/tests/sourceProxySql.test.mjs"
+        ],
+        "productionAccess": false,
+        "databaseProof": "viewer1_security_test",
+        "port": 43477,
+        "result": {
+          "code": 1,
+          "signal": null
+        },
+        "daemonExited": true,
+        "finishedAt": "2026-10-16T01:42:04.289Z",
+        "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792114909-2759728.service",
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+      }
+    },
+    {
+      "stage": "targeted-retry",
+      "log": "/var/tmp/viewer1-sql-RxfipX/tests.log",
+      "logSha256": "ca05ab7a3541a6ef6b92860ab3c91edc4ce12eba9974679ae378e73edccd4e76",
+      "counts": {
+        "passed": 6,
+        "failed": 0
+      },
+      "scope": "Only six selected cases, not full three listed suites; fixture-only corrections",
+      "run": {
+        "workspace": "/var/tmp/viewer1-sql-RxfipX",
+        "database": "viewer1_security_test",
+        "status": "PASS",
+        "startedAt": "2026-10-16T01:42:21.234Z",
+        "tests": [
+          "taiko_viewer/tests/accountSyncCanonicalSql.test.mjs",
+          "taiko_viewer/tests/sourceProxySql.test.mjs",
+          "taiko_viewer/tests/hirobaCredentialSql.test.mjs"
+        ],
+        "productionAccess": false,
+        "databaseProof": "viewer1_security_test",
+        "port": 35715,
+        "result": {
+          "code": 0,
+          "signal": null
+        },
+        "daemonExited": true,
+        "finishedAt": "2026-10-16T01:42:49.928Z",
+        "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792114941-2761687.service",
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+      }
+    },
+    {
+      "stage": "final-four-sql",
+      "log": "/var/tmp/viewer1-sql-vM9Ak8/tests.log",
+      "logSha256": "0c84c4271a4cf0df710d6b8326835deb9ab6991773a55bb70b993fd8287f83a5",
+      "counts": {
+        "passed": 119,
+        "failed": 0,
+        "skipped": 0
+      },
+      "scope": "Four installed center workers: real guarded isolated SQL and HTTP controllers, synthetic upstream replies/daily/image panels; not all-image acceptance.",
+      "run": {
+        "workspace": "/var/tmp/viewer1-sql-vM9Ak8",
+        "database": "viewer1_security_test",
+        "status": "PASS",
+        "startedAt": "2026-10-16T01:45:28.470Z",
+        "tests": [
+          "taiko_viewer/tests/accountSyncCanonicalSql.test.mjs",
+          "taiko_viewer/tests/sourceProxySql.test.mjs",
+          "taiko_viewer/tests/qqMigrationProxySql.test.mjs",
+          "taiko_viewer/tests/hirobaCredentialSql.test.mjs"
+        ],
+        "productionAccess": false,
+        "databaseProof": "viewer1_security_test",
+        "port": 39107,
+        "testNamePattern": null,
+        "result": {
+          "code": 0,
+          "signal": null
+        },
+        "daemonExited": true,
+        "finishedAt": "2026-10-16T01:48:52.035Z",
+        "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792115128-2772325.service",
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n"
+      }
+    }
+  ],
+  "remaining": "Remaining image/PNG Golden and deployed service/ACL acceptance required; no release Gate upgrade.",
+  "sourceHashes": {
+    "taiko_viewer/server/infrastructure/account/hiroba-credential-worker-runner.ts": "42c0115d5e8228d86c98d7aad63fb75c6515b86a7133fec4f5c700a9e7769541",
+    "taiko_viewer/server/infrastructure/account/private-worker-environment.ts": "41a3fd7d8f1b0c684a2ee59fed387f73797574a19420788aa1f815c16810bb90",
+    "taiko_viewer/server/infrastructure/account/qq-migration-worker-runner.ts": "0d7b51c632f8a757fdee903d3ca25cc032f47c309e8e1212a2e8f7a26f71c324",
+    "taiko_viewer/server/infrastructure/account/source-mutation-worker-runner.ts": "76749ac8e562e5d0eb42632d5a510a2bd9f8847afc76e21f0c9945fce5fddea6",
+    "taiko_viewer/server/infrastructure/account/sync-worker-runner.ts": "4b5e6c2deb9d6c34d8065414caa7f8f0573554737e21a49811f86972d29597bd"
+  }
+}

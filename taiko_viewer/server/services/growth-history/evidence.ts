@@ -3,6 +3,8 @@ import type { GrowthSnapshot } from "~/utils/dailyProgress";
 import { growthCalendarDay } from "~/utils/playerGrowth";
 import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as UserdataSong, ScoreReadPort } from "../../domain/score-read-contract.ts";
 import { getDomainScoreReader } from "../taiko-domain/read.ts";
+import { withDomainScoreRead, scorePublication } from "../taiko-domain/publication.ts";
+import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
 import { memoizeGrowthString } from "~/utils/growthRequestMemo";
 import { GROWTH_HISTORY_FILE_LIMIT } from "./constants";
 import { legacyScoreReader, legacyScoreInstant } from "@sakura-taiko/contract";
@@ -36,6 +38,15 @@ const sourceFromName = (name: string) => viewerWriterSources.find(source => name
 const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-evidence-v1") || "";
 const numberValue = legacyScoreReader("viewer-evidence-v1");
 const chartKey = (song: UserdataSong) => `${Number(song?.song_no || 0)}:${Number(song?.level || 0)}`;
+const topologyIdentity = (meta: Record<string, unknown>) => {
+  let raw = meta.merge_topology || meta.mergeTopology || meta.member_ids || meta.memberIds || [];
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const object = raw as Record<string, unknown>;
+    raw = object.members || object.ids || Object.keys(object);
+  }
+  if (typeof raw === 'string') raw = raw.split(',');
+  return Array.isArray(raw) ? [...new Set(raw.map(item => String(item).trim()).filter(Boolean))].sort() : [];
+};
 // Direct field access keeps million-row full histories off dynamic-key hot loops.
 const transitionChanged = (before: UserdataSong, after: UserdataSong) =>
   before.high_score !== after.high_score || before.best_score_rank !== after.best_score_rank ||
@@ -64,121 +75,161 @@ async function* readHistoryFiles(reader: ScoreReadPort, taikoId: string, names: 
       try {
         const raw = await reader.readHistory(taikoId, name);
         return { name, raw };
-      } catch { return { name, raw: null }; }
+      } catch (error) {
+        if (error instanceof PublicationUnavailableError) throw error;
+        return { name, raw: null };
+      }
     }));
     for (const file of batch) yield file;
   }
 }
 
 async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvidence> {
-  const calendarDayFor = memoizeGrowthString(growthCalendarDay);
-  const reader = getDomainScoreReader();
-  const allNames = (await reader.listHistory(taikoId).catch(() => [] as string[])).filter(name => name.startsWith("data_") && name.endsWith(".json")).sort((left, right) => fileOrder(left).localeCompare(fileOrder(right)));
-  const names = allNames.slice(-GROWTH_HISTORY_FILE_LIMIT);
-  const snapshots: GrowthSnapshot[] = [];
-  const observations: GrowthObservation[] = [];
-  let state = new Map<string, UserdataSong>();
-  let lastAuthoritativeSource = "";
-  let needsAuthoritativeBaseline = false;
-  let invalidFiles = 0;
-  for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
-    try {
-      if (raw === null) { invalidFiles += 1; continue; }
-      const payload = JSON.parse(raw) as UserdataPayload;
-      if (!Array.isArray(payload.songs)) { invalidFiles += 1; continue; }
-      const meta = payload._meta && typeof payload._meta === "object" ? payload._meta as Record<string, unknown> : {};
-      const timestamp = String(meta.observed_at || meta.observedAt || meta.synced_at || meta.ts || fileTimestamp(name));
-      const observedAt = normalizedInstant(timestamp);
-      const revision = createHash("sha256").update(raw).digest("hex");
-      const filenameSource = normalizeSource(sourceFromName(name));
-      const declaredWriter = normalizeSource(meta.writer_source);
-      const source = declaredWriter !== "unknown" ? declaredWriter : filenameSource !== "unknown" ? filenameSource : normalizeSource(meta.source);
-      let excludedReason = exclusionFor(source, meta, filenameSource);
-      const eventDaySet = new Set<string>();
-      const full = isFullPayload(payload);
-      const next = full ? new Map<string, UserdataSong>() : new Map(state);
-      for (const song of payload.songs) {
-        const songKey = chartKey(song);
-        const previous = state.get(songKey);
-        if (previous && transitionChanged(previous, song)) {
-          // Every regression field is a transition field; unchanged rows cannot regress.
-          if (!excludedReason) {
-            for (const field of regressionFields) {
+  return withDomainScoreRead(taikoId, async () => {
+    const calendarDayFor = memoizeGrowthString(growthCalendarDay);
+    const reader = getDomainScoreReader();
+    const allNames = (await reader.listHistory(taikoId).catch(error => {
+      if (error instanceof PublicationUnavailableError) throw error;
+      return [] as string[];
+    })).filter(name => name.startsWith("data_") && name.endsWith(".json")).sort((left, right) => fileOrder(left).localeCompare(fileOrder(right)));
+    const names = allNames.slice(-GROWTH_HISTORY_FILE_LIMIT);
+    const snapshots: GrowthSnapshot[] = [];
+    const observations: GrowthObservation[] = [];
+    let state = new Map<string, UserdataSong>();
+    let lastAuthoritativeSource = "";
+    let lastAuthoritativeIdentity = "";
+    const pendingChartBaselines = new Set<string>();
+    let needsAuthoritativeBaseline = false;
+    let invalidFiles = 0;
+    for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
+      try {
+        if (raw === null) { invalidFiles += 1; continue; }
+        const payload = JSON.parse(raw) as UserdataPayload;
+        if (!Array.isArray(payload.songs)) { invalidFiles += 1; continue; }
+        const meta = payload._meta && typeof payload._meta === "object" ? payload._meta as Record<string, unknown> : {};
+        const timestamp = String(meta.observed_at || meta.observedAt || meta.synced_at || meta.ts || fileTimestamp(name));
+        const observedAt = normalizedInstant(timestamp);
+        const revision = createHash("sha256").update(raw).digest("hex");
+        const filenameSource = normalizeSource(sourceFromName(name));
+        const declaredWriter = normalizeSource(meta.writer_source);
+        const source = declaredWriter !== "unknown" ? declaredWriter : filenameSource !== "unknown" ? filenameSource : normalizeSource(meta.source);
+        const writerExclusion = exclusionFor(source, meta, filenameSource);
+        const full = isFullPayload(payload);
+        const previousIdentity = lastAuthoritativeIdentity ? JSON.parse(lastAuthoritativeIdentity) as [string, string, string[]] : null;
+        const manual = writerExclusion === "manual";
+        const hasTopology = ["merge_topology", "mergeTopology", "member_ids", "memberIds"].some(key => key in meta);
+        // Writer cause is not an account/source switch. A manual edit may inherit
+        // the known authority, but explicit changed account/topology still breaks it.
+        const identity = JSON.stringify([
+          manual ? lastAuthoritativeSource || source : source,
+          meta.source_account || meta.sourceAccount || meta.account_id || payload.profile?.userid || (manual ? previousIdentity?.[1] : null) || taikoId,
+          manual && !hasTopology ? previousIdentity?.[2] || [] : topologyIdentity(meta)
+        ]);
+        const localManual = manual && !!lastAuthoritativeIdentity && identity === lastAuthoritativeIdentity;
+        let excludedReason: GrowthObservationExclusion | null = localManual ? null : writerExclusion;
+        if (!observedAt) excludedReason = "unknown-source";
+        if (!excludedReason && lastAuthoritativeIdentity && identity !== lastAuthoritativeIdentity) {
+          excludedReason = "source-switch";
+          needsAuthoritativeBaseline = !full;
+        } else if (!excludedReason && needsAuthoritativeBaseline) {
+          excludedReason = "discontinuity-baseline";
+          // A manual write cannot establish authoritative recovery, even if full.
+          if (full && !manual) needsAuthoritativeBaseline = false;
+        }
+        if (!manual && (!excludedReason || ["source-switch", "discontinuity-baseline"].includes(excludedReason))) {
+          lastAuthoritativeSource = source;
+          lastAuthoritativeIdentity = identity;
+        }
+        if (excludedReason && !["dispatcher-transfer", "source-switch", "discontinuity-baseline"].includes(excludedReason)) needsAuthoritativeBaseline = true;
+        const chartExclusions: Record<string, GrowthObservationExclusion> = {};
+        const ignoredChartKeys: string[] = [];
+        const eventDaySet = new Set<string>();
+        const next = full ? new Map<string, UserdataSong>() : new Map(state);
+        for (const song of payload.songs) {
+          const songKey = chartKey(song);
+          const previous = state.get(songKey);
+          const changed = !previous || transitionChanged(previous, song);
+          if (localManual && !excludedReason && !changed) ignoredChartKeys.push(songKey);
+          if (localManual && changed) {
+            chartExclusions[songKey] = "manual";
+            pendingChartBaselines.add(songKey);
+          } else if (!excludedReason && !manual) {
+            const regressed = previous && changed && regressionFields.some(field => {
               const left = numberValue(previous[field]), right = numberValue(song[field]);
-              if (left !== null && right !== null && right < left) {
-                excludedReason = "counter-regression";
-                break;
-              }
+              return left !== null && right !== null && right < left;
+            });
+            if (pendingChartBaselines.has(songKey)) {
+              // The previous edited/regressed row is not a trusted comparator.
+              chartExclusions[songKey] = "discontinuity-baseline";
+              pendingChartBaselines.delete(songKey);
+            } else if (regressed) {
+              chartExclusions[songKey] = "counter-regression";
+              pendingChartBaselines.add(songKey);
             }
           }
-          const playDay = calendarDayFor(song.update_datetime), scoreDay = calendarDayFor(song.highscore_datetime);
-          if (playDay) eventDaySet.add(playDay);
-          if (scoreDay) eventDaySet.add(scoreDay);
+          if (previous && changed) {
+            const playDay = calendarDayFor(song.update_datetime), scoreDay = calendarDayFor(song.highscore_datetime);
+            if (playDay) eventDaySet.add(playDay);
+            if (scoreDay) eventDaySet.add(scoreDay);
+          }
+          next.set(songKey, song);
         }
-        next.set(songKey, song);
-      }
-      const eventDays = [...eventDaySet].sort();
-      if (!excludedReason && lastAuthoritativeSource && source !== lastAuthoritativeSource) {
-        excludedReason = "source-switch";
-        lastAuthoritativeSource = source;
-        needsAuthoritativeBaseline = !full;
-      } else if (!excludedReason && needsAuthoritativeBaseline) {
-        excludedReason = "discontinuity-baseline";
-        if (full) {
-          lastAuthoritativeSource = source;
-          needsAuthoritativeBaseline = false;
+        const eventDays = [...eventDaySet].sort();
+        const observationExclusion = excludedReason || writerExclusion || Object.values(chartExclusions)[0] || null;
+        const removed = (payload as UserdataPayload & { songs_removed?: unknown[] }).songs_removed;
+        if (Array.isArray(removed)) {
+          for (const item of removed) next.delete(Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item));
         }
-      } else if (!excludedReason) {
-        lastAuthoritativeSource = source;
+        state = next;
+        const orderKey = fileOrder(name);
+        snapshots.push({
+          full,
+          timestamp,
+          songs: payload.songs,
+          revision,
+          source,
+          removed: Array.isArray(removed) ? removed.map(item => Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item)) : [],
+          excludedReason, chartExclusions, ignoredChartKeys, identity
+        });
+        const declaredContentRevision = String(meta.content_sha256 || meta.contentRevision || meta.content_revision || meta.revision || "");
+        const contentRevision = /^[a-f0-9]{64}$/i.test(declaredContentRevision) ? declaredContentRevision.toLowerCase() : null;
+        observations.push({ token: observationToken(observedAt, orderKey, revision), orderKey, revision, contentRevision, observedAt, source, eventDays, evidenceLevel: observationExclusion ? "L0" : "L1", excludedReason: observationExclusion });
+      } catch {
+        invalidFiles += 1;
       }
-      if (excludedReason && !["dispatcher-transfer", "source-switch", "discontinuity-baseline"].includes(excludedReason)) needsAuthoritativeBaseline = true;
-      const removed = (payload as UserdataPayload & { songs_removed?: unknown[] }).songs_removed;
-      if (Array.isArray(removed)) {
-        for (const item of removed) next.delete(Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item));
-      }
-      state = next;
-      const orderKey = fileOrder(name);
-      snapshots.push({
-        full,
-        timestamp,
-        songs: payload.songs,
-        revision,
-        source
-      });
-      const declaredContentRevision = String(meta.content_sha256 || meta.contentRevision || meta.content_revision || meta.revision || "");
-      const contentRevision = /^[a-f0-9]{64}$/i.test(declaredContentRevision) ? declaredContentRevision.toLowerCase() : null;
-      observations.push({ token: observationToken(observedAt, orderKey, revision), orderKey, revision, contentRevision, observedAt, source, eventDays, evidenceLevel: excludedReason || !observedAt ? "L0" : "L1", excludedReason: excludedReason || (!observedAt ? "unknown-source" : null) });
-    } catch {
-      invalidFiles += 1;
     }
-  }
-  const days = snapshots.map(snapshot => calendarDayFor(snapshot.timestamp)).filter(Boolean).sort();
-  observations.sort((left, right) => left.observedAt.localeCompare(right.observedAt) || left.orderKey.localeCompare(right.orderKey) || left.revision.localeCompare(right.revision));
-  return {
-    snapshots,
-    observations,
-    totalFiles: allNames.length,
-    filesRead: names.length,
-    invalidFiles,
-    truncated: allNames.length > names.length,
-    fromDay: days[0] || null,
-    toDay: days.at(-1) || null
-  };
+    const days = snapshots.map(snapshot => calendarDayFor(snapshot.timestamp)).filter(Boolean).sort();
+    observations.sort((left, right) => left.observedAt.localeCompare(right.observedAt) || left.orderKey.localeCompare(right.orderKey) || left.revision.localeCompare(right.revision));
+    return {
+      snapshots,
+      observations,
+      totalFiles: allNames.length,
+      filesRead: names.length,
+      invalidFiles,
+      truncated: allNames.length > names.length,
+      fromDay: days[0] || null,
+      toDay: days.at(-1) || null
+    };
+  });
 }
 
 export function loadGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvidence> {
-  const existing = inFlightEvidence.get(taikoId);
-  if (existing) return existing;
-  const pending = readGrowthScoreEvidence(taikoId).finally(() => {
-    if (inFlightEvidence.get(taikoId) === pending) inFlightEvidence.delete(taikoId);
+  return withDomainScoreRead(taikoId, async () => {
+    const key = `${taikoId}:${scorePublication(taikoId)?.commitId || "legacy"}`;
+    const existing = inFlightEvidence.get(key);
+    if (existing) return existing;
+    const pending = readGrowthScoreEvidence(taikoId).finally(() => {
+      if (inFlightEvidence.get(key) === pending) inFlightEvidence.delete(key);
+    });
+    inFlightEvidence.set(key, pending);
+    return pending;
   });
-  inFlightEvidence.set(taikoId, pending);
-  return pending;
 }
 
 /** Metadata validation is local to a request; no retained account/history cache.
  * ctimeNs also detects same-size rewrites with restored mtime. This preserves the
- * legacy per-file read boundary, not an atomic multi-file writer transaction.
+ * legacy per-file validation before adoption. Adopted sources use their single
+ * captured publication; the caller keeps its kernel lease throughout replay.
  */
 async function historyVersion(taikoId: string): Promise<string | null> {
   try {
@@ -196,11 +247,15 @@ async function historyVersion(taikoId: string): Promise<string | null> {
         versions[index] = await reader.historyFileVersion(taikoId, names[index]);
       }
     }));
+    for (const result of results) {
+      if (result.status === "rejected" && result.reason instanceof PublicationUnavailableError) throw result.reason;
+    }
     if (results.some(result => result.status === "rejected")) return null;
     const directoryAfter = await reader.historyDirectoryVersion(taikoId);
     if (directoryBefore !== directoryAfter) return null;
     return createHash("sha256").update(`${directoryAfter}\n${allNames.length}\n${versions.join("\n")}`).digest("hex");
-  } catch {
+  } catch (error) {
+    if (error instanceof PublicationUnavailableError) throw error;
     // Unreadable/missing history may become available later in this request.
     return null;
   }
@@ -214,7 +269,7 @@ export function createGrowthScoreEvidenceRequest(taikoId: string): typeof loadGr
   return requestedId => {
     if (requestedId !== taikoId) return loadGrowthScoreEvidence(requestedId);
     if (!pending) {
-      pending = (async () => {
+      pending = withDomainScoreRead(taikoId, async () => {
         const before = await historyVersion(taikoId);
         if (retained && before !== null && before === retainedVersion) return retained;
         retained = undefined;
@@ -227,7 +282,7 @@ export function createGrowthScoreEvidenceRequest(taikoId: string): typeof loadGr
           retainedVersion = after;
         }
         return evidence;
-      })().finally(() => { pending = undefined; });
+      }).finally(() => { pending = undefined; });
     }
     return pending;
   };

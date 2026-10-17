@@ -19,6 +19,7 @@ import {
   withUserdataWriteLock,
   writeUserdataWithHistory
 } from "../../internal/account/shared";
+import { onScoreRollback } from "../../services/taiko-domain/publication.ts";
 
 const SONG_MUTABLE_KEYS = [
   "high_score",
@@ -189,32 +190,36 @@ export const updateAccountSong = async (
   const { songNo, level } = assertSongIdentity(payload.songNo, payload.level);
   const sanitized = sanitizeSongValues(payload.values);
 
-  const userdata = await readUserdata(binding.taiko_id);
-  const songs = userdata.songs || [];
-  const target = songs.find((item) => Number(item.song_no) === songNo && Number(item.level) === level);
-  if (!target) {
-    throw createError({ statusCode: 404, statusMessage: "未找到该谱面记录" });
-  }
+  return withUserdataWriteLock(binding.taiko_id, async () => {
+    const liveBinding = await getCurrentBindingRow(userId);
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    const userdata = await readUserdata(binding.taiko_id);
+    const songs = userdata.songs || [];
+    const target = songs.find((item) => Number(item.song_no) === songNo && Number(item.level) === level);
+    if (!target) {
+      throw createError({ statusCode: 404, statusMessage: "未找到该谱面记录" });
+    }
 
-  const merged: UserdataSong = { ...target, ...sanitized };
-  await validateSongAccuracy(songNo, level, merged);
+    const merged: UserdataSong = { ...target, ...sanitized };
+    await validateSongAccuracy(songNo, level, merged);
 
-  Object.assign(target, sanitized);
-  const stamp = formatLocalTimestamp();
-  target.update_datetime = stamp;
-  if (sanitized.high_score !== undefined) {
-    target.highscore_datetime = stamp;
-  }
-  if (binding.source === "manual") rebuildUserdataAchievement(userdata);
-  await writeUserdataWithHistory(
-    binding.taiko_id,
-    userdata,
-    binding.source === "manual" ? "manual-score" : "web-account"
-  );
+    Object.assign(target, sanitized);
+    const stamp = formatLocalTimestamp();
+    target.update_datetime = stamp;
+    if (sanitized.high_score !== undefined) {
+      target.highscore_datetime = stamp;
+    }
+    if (binding.source === "manual") rebuildUserdataAchievement(userdata);
+    await writeUserdataWithHistory(
+      binding.taiko_id,
+      userdata,
+      binding.source === "manual" ? "manual-score" : "web-account"
+    );
 
-  const catalog = await getSongCatalog();
-  const lockedKeys = await getLockMap(userId, binding.taiko_id);
-  return toSongRow(target, catalog.map.get(songNo), lockedKeys);
+    const catalog = await getSongCatalog();
+    const lockedKeys = await getLockMap(userId, binding.taiko_id);
+    return toSongRow(target, catalog.map.get(songNo), lockedKeys);
+  });
 };
 
 export const createAccountSong = async (
@@ -237,43 +242,47 @@ export const createAccountSong = async (
   const customTitleJp = String(payload.titleJp || "").trim();
   const sanitized = sanitizeSongValues(payload.values);
 
-  const userdata = await readUserdata(binding.taiko_id);
-  const songs = userdata.songs || [];
-  const exists = songs.some((item) => Number(item.song_no) === songNo && Number(item.level) === level);
-  if (exists) {
-    throw createError({ statusCode: 409, statusMessage: "该谱面记录已存在，请直接编辑现有成绩" });
-  }
-
-  const catalog = await getSongCatalog();
-  const meta = catalog.map.get(songNo);
-  assertCatalogChartExists(meta, level);
-  if (!meta && !customTitle) {
-    throw createError({ statusCode: 400, statusMessage: "未收录曲目请至少填写一个曲名" });
-  }
-
-  const stamp = formatLocalTimestamp();
-  const newSong: UserdataSong = {
-    song_no: songNo,
-    level,
-    option_flg: [1, 0, 0, "00"],
-    highscore_mode: 0,
-    update_datetime: stamp,
-    highscore_datetime: stamp,
-    ...sanitized
-  };
-  if (!meta) {
-    newSong.song_name = customTitle;
-    if (customTitleJp) {
-      newSong.song_name_jp = customTitleJp;
+  return withUserdataWriteLock(binding.taiko_id, async () => {
+    const liveBinding = await getCurrentBindingRow(userId);
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    const userdata = await readUserdata(binding.taiko_id);
+    const songs = userdata.songs || [];
+    const exists = songs.some((item) => Number(item.song_no) === songNo && Number(item.level) === level);
+    if (exists) {
+      throw createError({ statusCode: 409, statusMessage: "该谱面记录已存在，请直接编辑现有成绩" });
     }
-  }
 
-  await validateSongAccuracy(songNo, level, newSong);
+    const catalog = await getSongCatalog();
+    const meta = catalog.map.get(songNo);
+    assertCatalogChartExists(meta, level);
+    if (!meta && !customTitle) {
+      throw createError({ statusCode: 400, statusMessage: "未收录曲目请至少填写一个曲名" });
+    }
 
-  if (binding.source !== "manual") {
-    await ensureSongLocked(userId, binding.taiko_id, songNo, level);
-  }
-  try {
+    const stamp = formatLocalTimestamp();
+    const newSong: UserdataSong = {
+      song_no: songNo,
+      level,
+      option_flg: [1, 0, 0, "00"],
+      highscore_mode: 0,
+      update_datetime: stamp,
+      highscore_datetime: stamp,
+      ...sanitized
+    };
+    if (!meta) {
+      newSong.song_name = customTitle;
+      if (customTitleJp) {
+        newSong.song_name_jp = customTitleJp;
+      }
+    }
+
+    await validateSongAccuracy(songNo, level, newSong);
+
+    if (binding.source !== "manual") {
+      const previouslyLocked = (await getLockMap(userId, binding.taiko_id)).has(`${songNo}:${level}`);
+      await ensureSongLocked(userId, binding.taiko_id, songNo, level);
+      if (!previouslyLocked) onScoreRollback(binding.taiko_id, () => removeSongLock(userId, binding.taiko_id, songNo, level));
+    }
     songs.push(newSong);
     if (binding.source === "manual") rebuildUserdataAchievement(userdata);
     await writeUserdataWithHistory(
@@ -281,17 +290,10 @@ export const createAccountSong = async (
       userdata,
       binding.source === "manual" ? "manual-score" : "web-account"
     );
-  } catch (error) {
-    if (binding.source !== "manual") {
-      await removeSongLock(userId, binding.taiko_id, songNo, level).catch((cleanupError) => {
-        console.error("[web-account] 回滚新建谱面锁定失败", { songNo, level, cleanupError });
-      });
-    }
-    throw error;
-  }
 
-  const lockedKeys = await getLockMap(userId, binding.taiko_id);
-  return toSongRow(newSong, meta, lockedKeys);
+    const lockedKeys = await getLockMap(userId, binding.taiko_id);
+    return toSongRow(newSong, meta, lockedKeys);
+  });
 };
 
 /** Import the scoreInfo payload produced by userdata/songscore.json. */
@@ -328,6 +330,9 @@ export const importAccountSongs = async (userId: number, payload: unknown) => {
   if (!normalized.size) throw createError({ statusCode: 400, statusMessage: "没有可导入的有效成绩记录" });
 
   return withUserdataWriteLock(binding.taiko_id, async () => {
+    const liveBinding = await getCurrentBindingRow(userId);
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    const previouslyLocked = binding.source === "manual" ? new Set<string>() : await getLockMap(userId, binding.taiko_id);
     const userdata = await readUserdata(binding.taiko_id);
     const songs = (userdata.songs ||= []);
     let created = 0;
@@ -368,6 +373,9 @@ export const importAccountSongs = async (userId: number, payload: unknown) => {
            ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
           [userId, binding.taiko_id, entry.songNo, entry.level]
         );
+        if (!previouslyLocked.has(`${entry.songNo}:${entry.level}`)) {
+          onScoreRollback(binding.taiko_id, () => removeSongLock(userId, binding.taiko_id, entry.songNo, entry.level));
+        }
       }
     }
     return { ok: true, total: normalized.size, created, updated, taikoId: binding.taiko_id };
@@ -389,19 +397,23 @@ export const setAccountSongLock = async (
   }
   const locked = Boolean(payload.locked);
 
-  const db = getAccountDb();
-  if (locked) {
-    await db.execute(
-      `INSERT INTO web_song_locks (user_id, taiko_id, song_no, level, is_locked)
-       VALUES (?, ?, ?, ?, 1)
-       ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
-      [userId, binding.taiko_id, songNo, level]
-    );
-  } else {
-    await db.execute(
-      "DELETE FROM web_song_locks WHERE user_id = ? AND taiko_id = ? AND song_no = ? AND level = ?",
-      [userId, binding.taiko_id, songNo, level]
-    );
-  }
-  return { locked };
+  return withUserdataWriteLock(binding.taiko_id, async () => {
+    const liveBinding = await getCurrentBindingRow(userId);
+    if (!liveBinding || liveBinding.id !== binding.id || liveBinding.taiko_id !== binding.taiko_id || liveBinding.source !== binding.source) throw createError({ statusCode: 409, statusMessage: "绑定已变更，请重新加载" });
+    const db = getAccountDb();
+    if (locked) {
+      await db.execute(
+        `INSERT INTO web_song_locks (user_id, taiko_id, song_no, level, is_locked)
+         VALUES (?, ?, ?, ?, 1)
+         ON DUPLICATE KEY UPDATE is_locked = 1, updated_at = CURRENT_TIMESTAMP`,
+        [userId, binding.taiko_id, songNo, level]
+      );
+    } else {
+      await db.execute(
+        "DELETE FROM web_song_locks WHERE user_id = ? AND taiko_id = ? AND song_no = ? AND level = ?",
+        [userId, binding.taiko_id, songNo, level]
+      );
+    }
+    return { locked };
+  });
 };

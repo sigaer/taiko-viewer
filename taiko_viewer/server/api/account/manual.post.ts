@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const owner = { kind: "viewer" as const, userId: user.id };
   const action = String(body?.action || "").trim();
-  if (action === "create") return createManualAccount(owner, body?.nickname);
+  if (action === "create") return createManualAccount(owner, body?.nickname, body?.requestId);
   if (action === "claim") return claimManualAccount(owner, body?.code);
   if (action === "rename") {
     const taikoId = await resolveManualTaikoIdForOwner(owner, body?.taikoId);

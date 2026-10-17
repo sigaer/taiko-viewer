@@ -1,0 +1,1115 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-16",
+  "status": "BLOCKED_NOT_RELEASE_READY",
+  "scope": "local refs and offline artifacts only; remote refs not fetched",
+  "repositories": {
+    "taiko": {
+      "documentedBaseline": "248713e4b795c6d9d4b63c51310bcadddb134d08",
+      "localMain": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "candidate": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
+      "mergeBase": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "mainOnlyCommits": 0,
+      "candidateOnlyCommits": 28,
+      "relationship": "main_is_candidate_ancestor",
+      "worktreeStatus": [
+        "M web.conf",
+        "?? v1_test_report.md"
+      ],
+      "configuredHooksPath": null,
+      "activeHookHashes": {},
+      "trackedWorkflows": {},
+      "remoteHooksRulesets": "UNVERIFIED; local files cannot prove absence"
+    },
+    "sakura": {
+      "documentedBaseline": "86b8334e13d758404487971c992dd0e0b07c8fd0",
+      "localMain": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+      "candidate": "38298afd7b74e92081c855266954bfb15af90991",
+      "mergeBase": "390175e13563926377258a99849cbb3528aec2be",
+      "mainOnlyCommits": 3,
+      "candidateOnlyCommits": 29,
+      "relationship": "diverged",
+      "worktreeStatus": [
+        "M miku_bot/plugins/utils/executor_pool.py",
+        " M miku_bot/plugins/utils/render_memory.py",
+        " M miku_bot/runtime_init.py",
+        " M taiko/plugins/taiko.py",
+        " M taiko/plugins/utils/__init__.py",
+        " M taiko/plugins/utils/b30_render.py",
+        " M taiko/plugins/utils/dani_progress.py",
+        " M taiko/plugins/utils/draw_dress.py",
+        " M taiko/plugins/utils/draw_summary.py",
+        " M taiko/plugins/utils/drawinfo.py",
+        " M taiko/plugins/utils/recommend_image.py",
+        " M taiko/plugins/utils/taikob_v2.py",
+        " M taiko/plugins/utils/tcloud.py",
+        " M taiko/taiko_runtime/platform_adapter.py",
+        " M taiko/taiko_store/merged_materialization.py",
+        " M taiko/taiko_store/reader.py",
+        "?? miku_bot/plugins/utils/attribution_hooks.py",
+        "?? miku_bot/plugins/utils/attribution_publisher.py",
+        "?? miku_bot/plugins/utils/attribution_schema.py",
+        "?? miku_bot/plugins/utils/executor_metrics.py",
+        "?? miku_bot/scripts/memory_burst/",
+        "?? miku_bot/tests/test_memory_burst.py",
+        "?? taiko/plugins/utils/native_score_read.py",
+        "?? taiko/tests/native_score_read_sql_child.py",
+        "?? taiko/tests/test_native_score_read.py"
+      ],
+      "configuredHooksPath": null,
+      "activeHookHashes": {},
+      "trackedWorkflows": {},
+      "remoteHooksRulesets": "UNVERIFIED; local files cannot prove absence"
+    },
+    "viewer": {
+      "documentedBaseline": "777546c943b9ca196c365fffa6d1289eb558a2db",
+      "localMain": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+      "candidate": "6331aea59cbddc78146adddfa97162b937c3192d",
+      "mergeBase": "9a77dbcfa6c7ef6e502a1a5ae7ba4efc714e2209",
+      "mainOnlyCommits": 39,
+      "candidateOnlyCommits": 2,
+      "relationship": "diverged",
+      "worktreeStatus": [
+        "D docs/taiko-domain-extraction/status.md",
+        " M taiko_viewer/assets/data/title_song_relations.json",
+        "?? docs/Sakura_Taiko_P0_H4_Kinoko_Time_Exclusion_Execution_Brief_20261012.md",
+        "?? docs/Sakura_Taiko_P0_Production_Recovery_Sprint_20261012.md",
+        "?? docs/Sakura_Taiko_Viewer_0.74.0_Recent_Growth_Session_Identifiability_Audit.md",
+        "?? docs/Sakura_Taiko_Viewer_0.79.2_Growth_Experience_Closure_Codex_Brief.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.0_Growth_Product_Voice_Narrative_System.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.1_Growth_Passport_Temporal_UX_Closure.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.1_P0_Performance_Remediation_Gate.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.2_Growth_Passport_Narrative_Visualization_Closure.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.2_Passport_Final_UX_Acceptance.md",
+        "?? docs/Sakura_Taiko_Viewer_1.0_Release_Readiness_Platform_Stabilization_Audit.md",
+        "?? docs/Sakura_Viewer_0.80.1_P1_Growth_History_Read_Model_Architecture_Audit.md",
+        "?? docs/Sakura_Viewer_0.80.1_Passport_Usability_Recovery_Codex_Brief.md",
+        "?? \"docs/Viewer 1.0.0 \\342\\200\\224 My Taiko, in one place.\\345\\256\\236\\346\\226\\275\\344\\270\\273\\346\\216\\247\\346\\226\\207\\346\\241\\243.md\"",
+        "?? docs/Viewer_0822_Runtime_Integration_and_API_Readiness_20261016.md",
+        "?? docs/growth-history-read-model-architecture.md",
+        "?? docs/growth-history-read-model-audit.md",
+        "?? docs/growth-history-read-model-benchmark.md",
+        "?? docs/growth-history-read-model-decision.md",
+        "?? docs/growth-passport-temporal-ux-architecture.md",
+        "?? docs/growth-passport-temporal-ux-audit.md",
+        "?? docs/python-memory-phase4-attribution.md",
+        "?? docs/release-readiness-1.0/",
+        "?? docs/taiko-domain-extraction/Taiko_Application_Extraction_Bounded_Implementation_Brief.md",
+        "?? docs/taiko-domain-extraction/handoff/",
+        "?? docs/taiko-extraction-v2-boundary.md",
+        "?? docs/taiko-extraction-v2-phase2a.md",
+        "?? docs/taiko-extraction-v2-phase2b.md",
+        "?? docs/taiko-extraction-v2-phase2c.md",
+        "?? docs/taiko-extraction-v2-phase2d.md",
+        "?? docs/taiko-extraction-v2-phase2e.md",
+        "?? docs/taiko-extraction-v2-phase2er.md",
+        "?? docs/taiko-extraction-v2-phase2fa.md",
+        "?? docs/taiko-extraction-v2-phase2fb.md",
+        "?? docs/taiko-extraction-v2-phase2fc.md",
+        "?? docs/taiko-extraction-v2-phase2fd1.md",
+        "?? docs/taiko-extraction-v2-phase2fl.md",
+        "?? docs/taiko-extraction-v2-phase2fp.md",
+        "?? docs/taiko-official-schema.dbml",
+        "?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\344\\270\\212\\347\\272\\277\\345\\211\\215\\345\\277\\253\\351\\200\\237\\351\\252\\214\\346\\224\\266\\346\\211\\247\\350\\241\\214\\346\\214\\207\\344\\273\\244.md\"",
+        "?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\351\\252\\214\\346\\224\\266\\347\\273\\255\\350\\275\\256\\357\\274\\232\\350\\247\\243\\351\\231\\244\\347\\216\\257\\345\\242\\203\\351\\230\\273\\345\\241\\236\\357\\274\\214\\350\\267\\221\\351\\200\\232\\347\\234\\237\\345\\256\\236\\344\\270\\232\\345\\212\\241\\351\\223\\276\\350\\267\\257.md\"",
+        "?? taiko_viewer/tests/growthReadModelPreflight.test.mjs",
+        "?? taiko_viewer/tests/nativeScoreReadSql.test.mjs"
+      ],
+      "configuredHooksPath": null,
+      "activeHookHashes": {},
+      "trackedWorkflows": {
+        ".github/workflows/passport-request-audit.yml": "0114bc3909d84eb81db5f6ceae7ec122f62b5888e350677f9d9b43e2d665767f"
+      },
+      "remoteHooksRulesets": "UNVERIFIED; local files cannot prove absence"
+    }
+  },
+  "artifacts": {
+    "candidateWheel": {
+      "file": "taiko_bot-0.14.1-py3-none-any.whl",
+      "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529",
+      "name": "taiko-bot",
+      "version": "0.14.1",
+      "requiresPython": "<4.0,>=3.11",
+      "requiresDist": [
+        "taiko-application==0.8.0",
+        "sakura-taiko-contract==0.1.0",
+        "aiomysql>=0.2.0",
+        "nonebot-plugin-apscheduler>=0.5.0",
+        "beautifulsoup4>=4.12.0",
+        "cryptography>=44.0.0",
+        "fastapi>=0.115.0",
+        "fuzzywuzzy>=0.18.0",
+        "httpx>=0.27.0",
+        "matplotlib>=3.8.0",
+        "nb-cli>=1.4.2",
+        "nonebot-adapter-onebot>=2.4.0",
+        "nonebot-adapter-qq>=1.6.0",
+        "nonebot2>=2.4.0",
+        "numpy>=1.26.0",
+        "pandas>=2.2.0",
+        "Pillow>=10.4.0",
+        "python-dotenv>=1.0.0",
+        "redis>=5.0.0",
+        "requests>=2.32.0",
+        "ujson>=5.10.0",
+        "uvicorn>=0.30.0",
+        "websockets>=12.0",
+        "wordcloud>=1.9.0",
+        "sakura-taiko-core[hiroba]==0.1.1; extra == \"center\"",
+        "PyMySQL>=1.1.0; extra == \"center\"",
+        "sakura-taiko-core[hiroba]==0.1.2; extra == \"client\""
+      ],
+      "freshCenterInstall": "FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED",
+      "freshClientInstall": "FULL_INSTALL_PASS_LIFECYCLE_NOT_ACCEPTED"
+    },
+    "existingEnvironment": {
+      "interpreter": "wheel-env/bin/python",
+      "origin": "historical candidate QA environment",
+      "dependencyInventorySha256": "b849b564dda144d44feaf91c6cfa221889ed8392c02a70fead6211e0ce2ffeee",
+      "dependencies": [
+        {
+          "name": "aiomysql",
+          "version": "0.3.2",
+          "metadataSha256": "1acf57e96e2e91d350c5fbc2d94dd2c3234d7277c53c5ec077049fac46fbe97e"
+        },
+        {
+          "name": "annotated-doc",
+          "version": "0.0.5",
+          "metadataSha256": "8c24d70c5d9153d22123353a906042fd7603df2d15c2196290b0f8a962558c46"
+        },
+        {
+          "name": "annotated-types",
+          "version": "0.8.0",
+          "metadataSha256": "614985b278f601b8ef863f82783b991cc3ada4b89f592eb71c7c48c5f2ef2298"
+        },
+        {
+          "name": "anyio",
+          "version": "4.15.1",
+          "metadataSha256": "043aecb571af7189e8a6c528f5d8e32545f1b2cdfaaf761d51e6d5b67ea3ca81"
+        },
+        {
+          "name": "APScheduler",
+          "version": "3.11.3",
+          "metadataSha256": "704848c9adcf732a2f9315f55fed35f6cce21c5542ae5b7a5ff46cd3a7c63638"
+        },
+        {
+          "name": "arrow",
+          "version": "1.4.0",
+          "metadataSha256": "36407a40cd6a7f3147f8c8ab802d516fb4c152d7e2aabab52718ff3407a1706d"
+        },
+        {
+          "name": "beautifulsoup4",
+          "version": "4.15.0",
+          "metadataSha256": "b2f888103259f1607c85f3b1163be1bc49fc9941a3243c3b89a21075bfc6d4fb"
+        },
+        {
+          "name": "binaryornot",
+          "version": "0.6.0",
+          "metadataSha256": "8887d4227a6c530f061dcde877cb5bd0562bfdb229a7f6f74b1eb6d1b0dde9f5"
+        },
+        {
+          "name": "cashews",
+          "version": "7.6.0",
+          "metadataSha256": "74677e8b4a8c271ee08b78bc496fc21b688eaa30c7279ffbe54f197dc0f0255e"
+        },
+        {
+          "name": "certifi",
+          "version": "2026.7.22",
+          "metadataSha256": "ef5af1638fbb23676ac3c5777dfcfc2cd9c348fe4172ed5ba3d277655b248090"
+        },
+        {
+          "name": "cffi",
+          "version": "2.1.1",
+          "metadataSha256": "558bafb9093a8e790175d9ecff9688382981d744877dad86fd6770db0f4dc918"
+        },
+        {
+          "name": "charset-normalizer",
+          "version": "3.5.2",
+          "metadataSha256": "89ce6362bb7be88558f4be99a98f5d1b4da93d19cd0323e5ee0bac05cf883dfb"
+        },
+        {
+          "name": "click",
+          "version": "8.5.0",
+          "metadataSha256": "e87bce0bd194de70dfb8e708e0a6b0483009f25611804eaf87bfeb63e6c20501"
+        },
+        {
+          "name": "contourpy",
+          "version": "1.3.3",
+          "metadataSha256": "c43cef86baef09cff9c77975e578fa8cca0c9454df40dc176938b499a63de54a"
+        },
+        {
+          "name": "cookiecutter",
+          "version": "2.7.1",
+          "metadataSha256": "059204c23e73a11c50dbf083f5a74ea53b4c936d1f19d5288b0ce4e00f23979b"
+        },
+        {
+          "name": "cryptography",
+          "version": "48.0.1",
+          "metadataSha256": "5b62dcfcaddf62e26f8c28f6055c0aba858eea2a3697a3fc8e7aced427bf8d94"
+        },
+        {
+          "name": "cycler",
+          "version": "0.12.1",
+          "metadataSha256": "23289e19b76f1e01394227696e6af2b6cd1ce79e89731209bf9195148b18ed36"
+        },
+        {
+          "name": "distlib",
+          "version": "0.4.3",
+          "metadataSha256": "6c988f8c23faa0ef8734f6863b32976d65f5851333161e8a8df3d80fc57e080d"
+        },
+        {
+          "name": "exceptiongroup",
+          "version": "1.3.1",
+          "metadataSha256": "81984a523a2f7a522ad12bea784a8bb85edec0805ebbd0fb4e350169a36dd802"
+        },
+        {
+          "name": "fastapi",
+          "version": "0.143.0",
+          "metadataSha256": "1bfa2ecf35ea529d68e56c195c5a4cee7864335d24bcc4a76cf40d7a71edc6e9"
+        },
+        {
+          "name": "filelock",
+          "version": "4.1.1",
+          "metadataSha256": "55e884d295b9bc70f9e71631e0703253e3b9dca6e6568b8778704a3f40105c83"
+        },
+        {
+          "name": "fonttools",
+          "version": "4.66.1",
+          "metadataSha256": "d354d7b32166f817cb64da296e3e3152df8130c8a09a65fa8399631e20e3d672"
+        },
+        {
+          "name": "fuzzywuzzy",
+          "version": "0.18.0",
+          "metadataSha256": "1fcadcf7353cc3be65f729199653d9257fda856970d2476f6b702b128bc8b0d7"
+        },
+        {
+          "name": "h11",
+          "version": "0.16.0",
+          "metadataSha256": "28f326098ac09fcba79b8f180f96087c841fe2456215cb7b872a9c7d5cd19d64"
+        },
+        {
+          "name": "httpcore",
+          "version": "1.0.9",
+          "metadataSha256": "fe2d4fda6199128978779e0cf27f3c045c531863fcdd987eacc74f3a18d41c21"
+        },
+        {
+          "name": "httpx",
+          "version": "0.28.1",
+          "metadataSha256": "febb9b0f8f3e80d57c8199c304f35c4336e8581d1d18d7983c92766b82793b25"
+        },
+        {
+          "name": "idna",
+          "version": "3.20",
+          "metadataSha256": "dbd8c14c1e4ca1e0c9824a6dbc7cbbf78884f38eb52d91148cd3025f671e4b85"
+        },
+        {
+          "name": "iniconfig",
+          "version": "2.3.1",
+          "metadataSha256": "47c2c35d936f5c649d8074c6464719a42966a67b5cebad01e3e5784cf090cfb6"
+        },
+        {
+          "name": "Jinja2",
+          "version": "3.1.6",
+          "metadataSha256": "68c5548fb67c4132a13898d9b31ec50c6bea2abdd915d921f214355c3a6499c8"
+        },
+        {
+          "name": "kiwisolver",
+          "version": "1.5.1",
+          "metadataSha256": "f07b7b6c0c9c2a624c8a31f931e16712f2cf3490e7dfd51643d68e9d42d4b2c9"
+        },
+        {
+          "name": "linkify-it-py",
+          "version": "2.2.0",
+          "metadataSha256": "5bc112f7a322ec1d8b3a71c3357daf6340353f773ad386fa9784c22de8339eb9"
+        },
+        {
+          "name": "loguru",
+          "version": "0.7.3",
+          "metadataSha256": "3a371f8b089014fdaee055edc440d448242847926ad67613621af402f9975fd9"
+        },
+        {
+          "name": "markdown-it-py",
+          "version": "4.2.0",
+          "metadataSha256": "72c36ff516755443b1ecb61e17b2567a990230b49a504b0eb0c42d5f82448a9c"
+        },
+        {
+          "name": "MarkupSafe",
+          "version": "3.0.4",
+          "metadataSha256": "66767d76388ece15d49d50dafb655891ef5d868715e7128e7f7d737a70b353c4"
+        },
+        {
+          "name": "matplotlib",
+          "version": "3.11.2",
+          "metadataSha256": "e5f532226d1025af2dd15ff951df27391f66d46403b8244ea61e6b8eb3e4d806"
+        },
+        {
+          "name": "mdit-py-plugins",
+          "version": "0.6.1",
+          "metadataSha256": "cd9486029c276a4bf819a85ca25f32f3bcff07a7e1c577dd45be523c7f0c472e"
+        },
+        {
+          "name": "mdurl",
+          "version": "0.1.2",
+          "metadataSha256": "b53b29d48f499367053fda3c81e7ce27d2558380ebbf83e66023b02eb7ddd25d"
+        },
+        {
+          "name": "msgpack",
+          "version": "1.2.3",
+          "metadataSha256": "f47c09192e9f4f81b8b4a63979473a13f7a63c67dcdc41be2e0f97353a9dc5b4"
+        },
+        {
+          "name": "multidict",
+          "version": "7.1.0",
+          "metadataSha256": "fe2db435bc86c7e62a42cc1f5b0c0650ba4fd1b05a420413f14085f8a3730e62"
+        },
+        {
+          "name": "nb-cli",
+          "version": "1.7.4",
+          "metadataSha256": "efece4cb4ca114a60ef9136b03192ba73465603d5f859caf9e47ee781a8101bb"
+        },
+        {
+          "name": "nonebot2",
+          "version": "2.5.0",
+          "metadataSha256": "b976ef39cc1248c6f8cfbb198366db75caede2948f6aff2f8cb681227e8d093f"
+        },
+        {
+          "name": "nonebot-adapter-onebot",
+          "version": "2.4.6",
+          "metadataSha256": "515c44fd2d15b790c69a28f7e7c1a411bfdc38aa0c756b6989e2343f4a8982be"
+        },
+        {
+          "name": "nonebot-adapter-qq",
+          "version": "1.7.2",
+          "metadataSha256": "67af34c9ca2d3fb4138a3899331a22eacb05aa458c03e03df1df9732971b2cb4"
+        },
+        {
+          "name": "nonebot-plugin-apscheduler",
+          "version": "0.5.0",
+          "metadataSha256": "f87ed06b77e065f737fd237ed2bdf42bc438da26e5f07b79aa9aa5e0ebf251f8"
+        },
+        {
+          "name": "noneprompt",
+          "version": "0.1.11",
+          "metadataSha256": "cc6f5cc6d474c3313eaabc136c1d1f662d7ada16bfa8f15f3b65a35359fefac5"
+        },
+        {
+          "name": "nonestorage",
+          "version": "0.1.0",
+          "metadataSha256": "5088220c679c8f40d7d9ab89f4a109cc1aae8c938f6d480d57626e53a54e3685"
+        },
+        {
+          "name": "numpy",
+          "version": "2.4.6",
+          "metadataSha256": "b082c52ccbe3b880bae177c35171b52ed6c947f3ad71e3762f2723f60a411de0"
+        },
+        {
+          "name": "opentelemetry-api",
+          "version": "1.45.1",
+          "metadataSha256": "5bc71e90cb421be92a43bf5ad5b0f25dccfa2a24ddceaa2877779879962a4c9e"
+        },
+        {
+          "name": "packaging",
+          "version": "26.3",
+          "metadataSha256": "70fdb89fc4d4a9a043bf7372b8972bcc883fddff34ab55e9cf80d73875384763"
+        },
+        {
+          "name": "pandas",
+          "version": "3.0.6",
+          "metadataSha256": "c2e8c472e1f49c30b7b00dc1cde8b8ed384b1b6d85b4d5ffe163e800e71dbc61"
+        },
+        {
+          "name": "pillow",
+          "version": "12.3.0",
+          "metadataSha256": "8fc07146cab33ef7582361dab6eac596d340b03ec648f18217da7894f73838c8"
+        },
+        {
+          "name": "pip",
+          "version": "26.2.1",
+          "metadataSha256": "3a561005822841f2c45f442f6c7a7505172c8c376c9fe274d876c8ac912968cb"
+        },
+        {
+          "name": "platformdirs",
+          "version": "4.13.0",
+          "metadataSha256": "b41f474d5fb53a7de4a4a79c08f13c3a8cc675fe2c5522be8ce1b063e695dc7d"
+        },
+        {
+          "name": "pluggy",
+          "version": "1.6.0",
+          "metadataSha256": "7438c35ee25a095eb7416f84b461c2d74425c5e734ad54c3912453c65244e01c"
+        },
+        {
+          "name": "prompt_toolkit",
+          "version": "3.0.53",
+          "metadataSha256": "d04994e4401b88abf884ca54fb3b85e50a8b4fb1fde1ed7eb3ece9d8bf5459a9"
+        },
+        {
+          "name": "propcache",
+          "version": "0.5.4",
+          "metadataSha256": "6ed3bac0ad43050ceaf8bd09878ba3d673c94c4da0d4498f903f86c36cc6fb57"
+        },
+        {
+          "name": "pycparser",
+          "version": "3.11",
+          "metadataSha256": "e3a74c846648bb55f4f907284b745e2003b87b96d9c9d17a8a50cf37804541c9"
+        },
+        {
+          "name": "pydantic",
+          "version": "2.14.1",
+          "metadataSha256": "4d4c8e8d5e6a27d5208f0d7949f25628e6747133034969d4d1399b1ad5394036"
+        },
+        {
+          "name": "pydantic_core",
+          "version": "2.50.1",
+          "metadataSha256": "ae6817764b603fa2300cd31b9566ecc33476df46163c4150fffc353121a166f2"
+        },
+        {
+          "name": "Pygments",
+          "version": "2.21.0",
+          "metadataSha256": "1dde075570136774c706bf0009183a793fe0ee262e4a5590cc6eff8453eedd43"
+        },
+        {
+          "name": "pygtrie",
+          "version": "2.6.2",
+          "metadataSha256": "56bf61715ef78cabdd9a37ad12549aca13174a86da3131258a6d36e6b79f712a"
+        },
+        {
+          "name": "PyMySQL",
+          "version": "1.2.3",
+          "metadataSha256": "f78050096bbb8cbd5a6c4cef6bfb78898d87e795647dc3f9cf764ae69e2dcb05"
+        },
+        {
+          "name": "pyparsing",
+          "version": "3.3.3",
+          "metadataSha256": "f2ca34052d720622d300023472ef8ae94fe5b57d69acbb28a8667f6dd0e13497"
+        },
+        {
+          "name": "pytest",
+          "version": "9.1.1",
+          "metadataSha256": "c5d032518012789cabc870d46589aca3aeda36cf9fa4399ee88bda3d10438451"
+        },
+        {
+          "name": "python-dateutil",
+          "version": "2.9.0.post0",
+          "metadataSha256": "a9d436da322be808332f98d88325998e87cb693a678a9969feb4cfad729a6e93"
+        },
+        {
+          "name": "python-discovery",
+          "version": "1.6.2",
+          "metadataSha256": "b2202a194eb79bf2e4985632614b1d0ca0059799bdbabd6ea6c2f598dbcaac9b"
+        },
+        {
+          "name": "python-dotenv",
+          "version": "1.2.4",
+          "metadataSha256": "87cfee6042412d48df1100ea7822684988c3f2b79de7a250f4717f4df3026d6f"
+        },
+        {
+          "name": "python-slugify",
+          "version": "9.1.3",
+          "metadataSha256": "29f8b673b715c82ad8fc1c841df2bbc4582a1cd5941a745b3cf529b3934105b5"
+        },
+        {
+          "name": "PyYAML",
+          "version": "6.0.3",
+          "metadataSha256": "03c3b415ed38d09faedc49360e930769b40c58f68585e6de00e2e4916a858d34"
+        },
+        {
+          "name": "redis",
+          "version": "8.1.0",
+          "metadataSha256": "4668671cc6f1f9d6687255571a069e98f146dff48ba9840f38801b3e8cabba06"
+        },
+        {
+          "name": "requests",
+          "version": "2.34.2",
+          "metadataSha256": "8c384ba3e979480faae2859d3c5e6c1276dd2c3616e322e124d52c8cfc556f27"
+        },
+        {
+          "name": "rich",
+          "version": "15.0.0",
+          "metadataSha256": "fad34fc603fac4481bf81f8dd629492fc302c0ec31909c86644751512afb2e3b"
+        },
+        {
+          "name": "sakura-taiko-contract",
+          "version": "0.1.0",
+          "metadataSha256": "22631eabd688881d32a9f7a9c179c73d89fa4c077d421316ee60e8e6700cb29c"
+        },
+        {
+          "name": "sakura-taiko-core",
+          "version": "0.1.1",
+          "metadataSha256": "10619f12b9b7c6069459d86892efb4fed56d68c50576564035f8b52936496a55"
+        },
+        {
+          "name": "setuptools",
+          "version": "65.5.0",
+          "metadataSha256": "80c7a3b78ea0dff1f57855ee795e7d33842a0827aa1ef4ee17ec97172a80c892"
+        },
+        {
+          "name": "six",
+          "version": "1.17.0",
+          "metadataSha256": "562042078c2752549f6d8a7c86dbc5dd708088a7be6d80672ec7b07100b72468"
+        },
+        {
+          "name": "soupsieve",
+          "version": "2.10",
+          "metadataSha256": "02ecd6c72d2fa0911bedfd99d53b2198e1bbf556f4606108819e8c19fdf32880"
+        },
+        {
+          "name": "starlette",
+          "version": "1.8.0",
+          "metadataSha256": "551e8d74d290002521c655b816b27654e49922b88cb474c8d710a893099036f8"
+        },
+        {
+          "name": "taiko-application",
+          "version": "0.8.0",
+          "metadataSha256": "992c22dad64ee2fff3b067a2a6dc65308adf06c9abf760a493bb0df86d2c80d9"
+        },
+        {
+          "name": "taiko-bot",
+          "version": "0.14.1",
+          "metadataSha256": "9a6880dfd7ff7609753006f135f94dcdbd0ac39fdde43f6584d1c3c3f492fae9"
+        },
+        {
+          "name": "text-unidecode",
+          "version": "1.3",
+          "metadataSha256": "07d8fed65e3ec8df4fe5ef26a41ad70aa010b11527038233cb2d211bb272ae7e"
+        },
+        {
+          "name": "textual",
+          "version": "8.2.8",
+          "metadataSha256": "fa4831c4001c94a8d8177cccd05099d8fa021575c81a3bd53eae3b995eb22f1e"
+        },
+        {
+          "name": "tomlkit",
+          "version": "0.14.0",
+          "metadataSha256": "2404b6a8b042bad3dbd0e0d5c0009fffc351fc718cf77bc1d908b4ead77565b9"
+        },
+        {
+          "name": "typing_extensions",
+          "version": "4.16.0",
+          "metadataSha256": "b05084ca1d50879865178d9fff9fabeab61bdfb1f361bfbde95421ffc8f9be46"
+        },
+        {
+          "name": "typing-inspection",
+          "version": "0.4.4",
+          "metadataSha256": "bad3d9e6342ef6750cf5128ec942327b8bebdce0b6e4d6f67cb15b27ae5118da"
+        },
+        {
+          "name": "tzdata",
+          "version": "2026.5",
+          "metadataSha256": "e0780e8b6dc8882ce87e871a9d4589d59cb05a0c2d64f58b1ba62cde1ee91f6a"
+        },
+        {
+          "name": "tzlocal",
+          "version": "5.4.4",
+          "metadataSha256": "f6cde6f73645cd3fb9491119e58a845cabc1e761e01afc83c02d8df2ad6191d1"
+        },
+        {
+          "name": "ujson",
+          "version": "6.0.0",
+          "metadataSha256": "6f5cd2502edee5672eecdc90d2a7896210a1089708ba73398fc5c0c27490a7d1"
+        },
+        {
+          "name": "urllib3",
+          "version": "2.8.0",
+          "metadataSha256": "10898c620e8007c030e07fa5622b68358a43010025dfbd78a1cb797699de2bb4"
+        },
+        {
+          "name": "uvicorn",
+          "version": "0.54.0",
+          "metadataSha256": "9399e5ddda3d26e842d6fb5420c38b0857aac568d53badbdc224b3a21339efa8"
+        },
+        {
+          "name": "virtualenv",
+          "version": "21.14.7",
+          "metadataSha256": "ce3efd23592e1946c1d3f77d1184956d2df569cb6501b162e527bbb29bfd8c2e"
+        },
+        {
+          "name": "watchfiles",
+          "version": "1.3.0",
+          "metadataSha256": "1fba87d08d66f10f7515e4817abd4ac7f27abf3300cb33b7ad3f79762987a502"
+        },
+        {
+          "name": "wcwidth",
+          "version": "0.9.2",
+          "metadataSha256": "cce73426c72bcd655c08f6229262e5868bf69c1e9e10130119b275ebd200e2b8"
+        },
+        {
+          "name": "websockets",
+          "version": "17.2",
+          "metadataSha256": "0d5f1279d095e7ba84ef21614af0822dc500ccb2e51b7c3a19eda7159b2dade4"
+        },
+        {
+          "name": "wordcloud",
+          "version": "1.9.6",
+          "metadataSha256": "7dea757e809e8819b3f9c8aa4656d7aa751548e26fefc528c091edc6da175aed"
+        },
+        {
+          "name": "yarl",
+          "version": "1.25.1",
+          "metadataSha256": "fd6baa258a11c4d7e7008272a69180d4d34aa04a6a5afda36ac5e55aa0aa4f41"
+        }
+      ],
+      "limitation": "Installed metadata inventory is not a dependency wheel lock or fresh install proof."
+    },
+    "sourceAndEvidenceHashes": {
+      "contract": {
+        "sha256": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+        "file": "viewer/packages/sakura-taiko-contract/schema/contract-v1.json"
+      },
+      "viewerInterpreterSelector": {
+        "sha256": "8f38474e7bb0cdd7ec266789215e1b9ccd15e88b5f33155722b55cf3eb9b7273",
+        "file": "viewer/taiko_viewer/server/utils/taiko-python.ts"
+      },
+      "growthCompatibility": {
+        "sha256": "0dbfd3b7a9b8a30ed9a149342071358beed990974bfa7900027ac571d2046e61",
+        "file": "taiko/taiko_bot/offline/growth-compatibility.dat"
+      },
+      "syncServiceTemplate": {
+        "sha256": "28c008defaa314eec596b8e3d26b7162f842dc560dd084d1120985c28f023c09",
+        "file": "taiko/deploy/services/taiko-sync-dispatch.service"
+      },
+      "publicServiceTemplate": {
+        "sha256": "0ce9b25e6a327c826a1fc533425276ac979a1d98b9af6b2ad5a9ec75cb9b3043",
+        "file": "taiko/deploy/services/taiko-public-api.service"
+      },
+      "songUpdateServiceTemplate": {
+        "sha256": "57976122fff7a71c0b6264ca5af7209c8005429ba2ec81203b7cb848c2044f22",
+        "file": "taiko/deploy/offline/taiko-song-update.service"
+      },
+      "oldSourceFailureLog": {
+        "sha256": "d4500a154660fd226b956ae2d1d1a36ea2dc2f5f313c760760717d7df1f64822",
+        "file": "frozen-failure.log"
+      },
+      "candidateFailureLog": {
+        "sha256": "b330d28904c89e4c238954a2845e9256f5c6847d9b90cf029c6e0b2a2d0650f4",
+        "file": "offline-final.log"
+      },
+      "viewerDeployScript": {
+        "sha256": "d957ea47324950269679709bd4e74eb7b5c2b97b5da039550c5a92ad3197b673",
+        "file": "scripts/deploy_forum_web.sh"
+      }
+    },
+    "freshRuntimeEvidence": {
+      "file": "evidence/fresh-runtime-20261015.json",
+      "sha256": "7cb9944b0e67671fcda3940f18c5d42aecea6635a3cba5de4ae127b4e09d5b85",
+      "status": "BLOCKED_FULL_ROLE_INSTALL",
+      "roles": {
+        "center": {
+          "fullRoleInstall": "FAIL_OFFLINE_DEPENDENCY_RESOLUTION",
+          "pipCheck": "FAIL_DEPENDENCIES_MISSING",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        },
+        "client": {
+          "fullRoleInstall": "FAIL_OFFLINE_DEPENDENCY_RESOLUTION",
+          "pipCheck": "FAIL_DEPENDENCIES_MISSING",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        }
+      }
+    },
+    "freshRuntimePypiEvidence": {
+      "file": "evidence/fresh-runtime-pypi-20261015.json",
+      "sha256": "6301b3334ea4d53ed8abd933959d364288a5ea1604ca2bd4007e3708ae6bdfc2",
+      "status": "FAIL_RUNTIME_VERIFICATION",
+      "durationSeconds": 244.248,
+      "failure": {
+        "reason": "DOWNLOAD_TIME_LIMIT",
+        "reviewedAfterRun": true,
+        "downloadDeadlineSeconds": 240,
+        "lastLoggedPackage": "cryptography-50.0.2 (4.8 MB)",
+        "resolverLogSha256": "de4f2532c4c5a87e905ae11a3f54b9d9dda44fc5440323238ffa5676406bbe41",
+        "qaLogSha256": "7e679220f51088a3fa082ed7c14f3146a4927fce1cb9eba4b75dbb7bf1cbc386",
+        "outcome": "center resolution interrupted; no full installation; client not started; budgets not expanded"
+      },
+      "roles": {}
+    },
+    "freshRuntimeProxyEvidence": {
+      "file": "evidence/fresh-runtime-proxy-20261016.json",
+      "sha256": "877a58e5cdccc78cb0445db006b3a49383dbf1194807965d4369b4a56f0d1a8e",
+      "status": "FAIL_RUNTIME_VERIFICATION",
+      "durationSeconds": 206.63,
+      "failure": "FileNotFoundError",
+      "roles": {},
+      "acceptanceLimit": "Fresh installation and bridge only; full role lifecycle remains unaccepted."
+    },
+    "isolatedSqlEvidence": {
+      "file": "evidence/isolated-sql-20261016.json",
+      "sha256": "147feb30401aa12a049cca084aacd9ff2d3b00c2b7eaca04f4bdb57b46b2b9aa",
+      "status": "SCOPED_SQL_PASS",
+      "passed": 92,
+      "failed": 0,
+      "limitations": [
+        "Existing fixture creates most tables without foreign keys; four production base tables retain their declared foreign keys.",
+        "Source proxy uses current Sakura source helper at 63be19a rather than an installed worker; private remote data is synthetic.",
+        "No production ACL audit, browser E2E, consumer OAuth grant/audience or complete cross-writer restore acceptance."
+      ],
+      "acceptanceLimit": "Scoped authorization/conditionals/proxy SQL only; complete login-to-annual authenticated chain not accepted."
+    },
+    "freshRuntimeProxyRetryEvidence": {
+      "file": "evidence/fresh-runtime-proxy-retry-20261016.json",
+      "sha256": "a15ef42118a67d2d8430b528849f1c85298c6e2a187ffa44f042d1b049d43182",
+      "status": "PARTIAL_FRESH_INSTALL_AND_BRIDGE_ONLY",
+      "durationSeconds": 348.986,
+      "failure": null,
+      "roles": {
+        "center": {
+          "fullRoleInstall": "PASS",
+          "pipCheck": "PASS",
+          "installedLockSha256": "b338ce9815481876112b2afa02069dac20759eee114ac6aaa5aee24e4d5336f5",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        },
+        "client": {
+          "fullRoleInstall": "PASS",
+          "pipCheck": "PASS",
+          "installedLockSha256": "92c5a13bbe670776502ebd104c185fb5052a0a261d7cb065242a8e7d109aba44",
+          "bridgeSynthetic": {
+            "status": "PASS",
+            "currentAndHistorySameCommit": true,
+            "readLeaseMutationDenied": true,
+            "isolatedImport": true,
+            "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+          }
+        }
+      },
+      "acceptanceLimit": "Retains prior failed attempts; full role lifecycle remains unaccepted."
+    },
+    "roleLocks": {
+      "file": "runtime-role-locks.json",
+      "sha256": "ab83531dfc8ae029e4fd81289e0a05d84dc63359f121962301ab2eb1d911fbab"
+    },
+    "conflictLedger": {
+      "file": "conflict-ledger.json",
+      "sha256": "b8e3ec6fe9be7baf7bed1497d931a93fc684a8bdcb2a4282da13d6428edfd438"
+    },
+    "exactRebuildCenter": {
+      "file": "evidence/r1-rebuild-center-20261016.json",
+      "sha256": "8dc885c39c7e00574b2ea5f9f8f482557c542169301541b53b47dec94c2da00f",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+      "durationSeconds": 29.089
+    },
+    "exactRebuildClient": {
+      "file": "evidence/r1-rebuild-client-20261016.json",
+      "sha256": "4420b55e83cd6919bcecccaeb8cbb94162739fd9193267d15f84e8612690f04b",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f",
+      "durationSeconds": 28.916
+    },
+    "supplementalRoleLocks": {
+      "file": "runtime-role-locks-with-memory.json",
+      "sha256": "59fe2f2f67a1bdba7e96cc7ba7e9633822d1adc8d27496f71e0a0c4249477b75",
+      "scope": "94-distribution business QA candidate; preserves original 93-distribution role acceptance."
+    },
+    "sharedMemoryPackage": {
+      "file": "evidence/runtime-memory-package-20261016.json",
+      "sha256": "69e986031319df5df29fabc337b4c6245d281a8464acdf2bba8dafb854e3238b",
+      "status": "PASS_LOCAL_INTEGRATION_PACKAGING",
+      "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+      "wheelDigest": "1e6197b0c4298808e70038cc5de3fff8c2f6517888514c996648a140091f9724",
+      "owner": "Sakura_bot shared infrastructure",
+      "upstreamReleaseClaim": false
+    },
+    "supplementalRebuildCenter": {
+      "file": "evidence/r1-rebuild-center-with-memory-20261016.json",
+      "sha256": "82cc851783a349c85324cb4a7f872602076dca7e10a2ae07f82dce146d2910db",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+      "durationSeconds": 29.373
+    },
+    "supplementalRebuildClient": {
+      "file": "evidence/r1-rebuild-client-with-memory-20261016.json",
+      "sha256": "55d6585d4adebcc62f761a42295d95bb10f4325df29ee591608dd38e182e8797",
+      "status": "PASS_EXACT_OFFLINE_ROLE_REBUILD",
+      "environmentIdentity": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a",
+      "durationSeconds": 29.22
+    },
+    "runtimeIntegrationCenter": {
+      "file": "evidence/r2-center-integration-94-20261016.json",
+      "sha256": "0d510bcf1e130bdc4fd050f8556dce45e6fbe37c37a21d5385441668fe040605",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Recorded 94-distribution role-specific consumer checks only; full R2 and four source compatibility worker cutovers remain unaccepted."
+    },
+    "priorPublicDispatchCenter": {
+      "file": "/var/tmp/viewer0822-center-public.log",
+      "sha256": "3615212eba52830a9ffc209340b564078aa0e26ee375b346b1e727f6efcc6003",
+      "status": "PASS_SCOPED",
+      "distributionCount": 93,
+      "scope": "18 real installed public/player dispatch cases on synthetic OneBot/QQ transports; not a complete image/support or account lifecycle closure."
+    },
+    "runtimeIntegrationClient": {
+      "file": "evidence/r2-client-integration-94-20261016.json",
+      "sha256": "4913bea75a6a8890133fe749aeaf92eaa1d9cc5a5009138798b6dbc1d8afa269",
+      "status": "FAIL",
+      "scope": "Recorded 94-distribution role-specific consumer checks only; full R2 and four source compatibility worker cutovers remain unaccepted."
+    },
+    "priorPublicDispatchClient": {
+      "file": "/var/tmp/viewer0822-client-public.log",
+      "sha256": "84eba8d0aa004cd3b9e06fbc293780d0b2b0ebee6e500dd570cd4f9d1e8b2cf6",
+      "status": "PASS_SCOPED",
+      "distributionCount": 93,
+      "scope": "18 real installed public/player dispatch cases on synthetic OneBot/QQ transports; not a complete image/support or account lifecycle closure."
+    },
+    "imageCallsiteInitialFailure": {
+      "file": "evidence/installed-viewer-images-20261016.json",
+      "sha256": "431a29bc3dba8bbb6502ac982e68c233bbd9802d6ee5350a85edc859ef45bc03",
+      "status": "FAIL",
+      "scope": null,
+      "imageCases": null,
+      "limitation": "Original missing-support failure retained; the 94-package retry verifies synthetic callsite parity, not frozen legacy algorithm equivalence."
+    },
+    "imageCallsiteSupplementalRetry": {
+      "file": "evidence/installed-viewer-images-retry-20261016.json",
+      "sha256": "b7a3c195bdef8fb4acf9e913c4f363b88bfaaf1255ddc69f86f2f1b8afd3d7c0",
+      "status": "PASS_LIMITED_IMAGE_CALLSITE_PARITY",
+      "scope": "installed Viewer image callsite parity; synthetic assets; no frozen algorithm claim",
+      "imageCases": 3,
+      "limitation": "Original missing-support failure retained; the 94-package retry verifies synthetic callsite parity, not frozen legacy algorithm equivalence."
+    },
+    "representativeLifecycleCenter": {
+      "file": "evidence/r2-center-lifecycle-94-20261016.json",
+      "sha256": "029a91e7b0b98627e3ae3611b1f476cc51f640a0e29060d71578f3fa3f7cc686",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Installed representative role lifecycle with exact test-helper whitelist and frozen source oracle; previous setup failure is retained separately. No production lifecycle claim."
+    },
+    "representativeLifecycleClient": {
+      "file": "evidence/r2-client-lifecycle-retry-94-20261016.json",
+      "sha256": "ca5eab8c1f830dce4796f32230ed67c1d1a0ab08eb28773c5cfdc1fb01f5bf52",
+      "status": "PASS_LIMITED_SYNTHETIC_RUNTIME_INTEGRATION",
+      "scope": "Installed representative role lifecycle with exact test-helper whitelist and frozen source oracle; previous setup failure is retained separately. No production lifecycle claim."
+    },
+    "mergedSqlInstalled": {
+      "file": "evidence/merged-sql-installed-20261016.json",
+      "sha256": "5e21e69f00f86fbe46b2b52edc39fa7a90c792860b5b74bcad86a849fa367149",
+      "status": "PASS",
+      "tests": 16,
+      "scope": "Formal developer userdata/current and proxy history with merged resource identities; real account/service SQL, installed all-member SH worker, live proof and response validation. No other route acceptance.",
+      "isolation": "Fresh independent MySQL datadir, actual SELECT DATABASE() matched *_test, bootstrap @@datadir proof before DDL, explicit mutation opt-in, base four production-DDL tables including foreign keys; remaining fixture tables are synthetic, not complete production migration acceptance"
+    },
+    "apiAuthMatrix": {
+      "file": "api-auth-matrix.json",
+      "sha256": "530c8c0d5a6644e17375debfbb331acc557464d6bca8452739114f034eabd2de",
+      "status": "BLOCKED: credential control-plane negative probe FAIL; production ingress/ACL, consumer grant/audience and uncovered paths remain unaccepted",
+      "credentialControlPlaneNegativeProbe": {
+        "id": "credential-control-plane-negative-20261016",
+        "status": "FAIL",
+        "exitCode": 1,
+        "log": "/var/tmp/viewer0822-credential-probe.log",
+        "sha256": "1c5c26a39d6bb4e7b905ffbc5158b5a7f67d121e5c0c2ac769ef3ae054a9d720",
+        "test": "taiko_viewer/tests/credentialControlPlaneProbe.py",
+        "testSha256": "3deec651c37c51151b3a38d2a0b85c99da40a3e5b4fdd72e95b8c5f762793de2",
+        "sourceRepo": "Sakura_bot",
+        "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+        "scope": "AST-extracted current handlers/validation/service-route guard; anonymous synthetic input reaches memory-only writers. No app import, real config read, network, SQL or disk mutation. Does not prove deployed public reachability.",
+        "result": {
+          "securityGate": "FAIL",
+          "productionAccess": false,
+          "diskWrites": 0,
+          "checks": [
+            {
+              "route": "/api/token",
+              "anonymousWriterCalls": 1,
+              "response": 200
+            },
+            {
+              "route": "/uploadTaikoLogin",
+              "anonymousWriterCalls": 1,
+              "expiredDummySignatureAccepted": true,
+              "response": 200
+            }
+          ],
+          "sourceEvidence": [
+            {
+              "file": "taiko/server.py",
+              "sha256": "533ac79768a5e759fcc06ef23113012477458a6ffbf501edb357049831f8d665"
+            },
+            {
+              "file": "miku_bot/sekai/upload/taiko_login.py",
+              "sha256": "41a72b94c262075801a6e8c3393707535c5260f3a78f843c9ed5335719790ca0"
+            },
+            {
+              "file": "miku_bot/sekai/upload/server.py",
+              "sha256": "a562f140bcb9a1e62a3549173ec43f246b4ddf9840e9774437dd752526f4007d"
+            }
+          ]
+        },
+        "action": "BLOCK integration/deployment of the affected credential control-plane paths pending owner repair and negative retest; unrelated local runtime candidate work may continue"
+      },
+      "scope": "P0 credential-control-plane failure blocks affected integration/deployment; isolated runtime passes do not override this result. Production reachability is unverified."
+    }
+  },
+  "gates": {
+    "O1": "PARTIAL_LOCAL_HOOKS_ONLY",
+    "O2": "BLOCKED_FULL_ROLE_LIFECYCLE_NOT_ACCEPTED",
+    "O3": "FAIL_SOURCE_SWITCH",
+    "O4": "PARTIAL_SQL_EVIDENCE_FULL_AUTH_CHAIN_NOT_ACCEPTED",
+    "O5": "BLOCKED_OFF_HOST_BACKUP_AND_RIGHTS_REVIEW",
+    "O7": "BLOCKED_RESTORE_DRILL_AND_LIVE_CONFIG_NOT_AUDITED",
+    "O8": "NOT_RUN_NO_DEPLOYMENT"
+  },
+  "rollback": {
+    "productionInterpreter": null,
+    "databaseSchemaHash": null,
+    "databaseRestoreEvidence": null,
+    "productionDataHash": null,
+    "reason": "No live configuration, SQL, private data or restore access in this audit.",
+    "policy": "Retain current main and saved historical measurements; do not replace main with old candidate."
+  },
+  "observedReadinessCheckout": {
+    "branch": "feat/viewer-1-readiness-20261015",
+    "head": "def8082511375476ef184989248f76599ee56cb2",
+    "sourceHashes": {
+      "taiko_viewer/server/infrastructure/taiko-publication/client.ts": "2739bd5202901547b1508eea6592f2445ddedcccaf58d21258748a4a06712467",
+      "taiko_viewer/server/infrastructure/taiko-publication/python.ts": "39d1656e6464901643027e8ba6407272b321ec596d9fd8fe9e966259fa2c303f",
+      "taiko_viewer/server/middleware/private-cache.ts": "cc7f737ee14f37539f349890d181598128984146c21b488f595c914367e2d181",
+      "taiko_viewer/server/utils/cache-policy.ts": "f730834e3c8467f2c81687d2ff96d2cdcd2620ad5fb779d820a81ef6df8019dc",
+      "taiko_viewer/server/infrastructure/account/private-source-response.ts": "dde106e59e4d2470f643891a7dda5a74f4bd379e0073ab2e14884cf169d52649",
+      "taiko_viewer/server/infrastructure/account/merged-read-worker.ts": "80c0654593219ebdc781fbf38e153a494a022c781dbcd93b51177e811e6160ce",
+      "taiko_viewer/server/utils/taiko-python.ts": "d53242979e1d4c51eec05307dc57755c8b8ac636917bb204af161cb66fb75f17",
+      "taiko_viewer/server/utils/taiko-artifact.ts": "82f28efa767f3a76bfcf4c448431e8e10292b2639df2573de52968ac8f41f259",
+      "taiko_viewer/scripts/annual_python_worker.py": "d77a596e9ce8b78e34edbb04bfd5691bbb0dd88f9b1ee1045b5c35b26dc77aa4",
+      "taiko_viewer/server/services/account/python-compute.ts": "f96c56393e0a33706890193468e22b651a7616423ee6d18c2fc9e3470ed32623",
+      "taiko_viewer/server/services/account/charts.ts": "18e10c20943702104b8ddd538f5f70875739689bfff01d689f51adf64d607a27",
+      "taiko_viewer/server/services/account/progress.ts": "92356dce8fde2d28f0358c15606d4835ddd90b94ed38a7d8294c0e4ef88cf74d",
+      "taiko_viewer/server/services/account/annual-summary/bot.ts": "974790cd27b850956f5225a53684cdb1536c8bde8986592b8ffba4df9fdd8b74",
+      "taiko_viewer/server/services/account/annual-summary/runtime.ts": "844c9531467476a3823bfcc0bf6460f31f935e710d5caba316510c045bcbf296",
+      "taiko_viewer/server/services/account/annual-summary/isolated-worker.ts": "c4cc1c4e0c2cd7feae1c3e5121e73c957d812c883ba84c20aacb1095301a5d92",
+      "taiko_viewer/server/services/growth-history/model-revision.ts": "6f7aa4652f11174de18b2bd20645da42533d4e83bced26b41dd04da23ef40041",
+      "taiko_viewer/server/utils/account/my-don.ts": "7dbbf5b62b0e31dec9e8eb251a51fee30b52a7755d4acce565c4fb8b60120f66",
+      "taiko_viewer/server/infrastructure/account/sync-worker-runner.ts": "bd7c0d2e379511369d14e458a3f4c247e7fd4ad28a802d4c8087ef6ad1626429",
+      "taiko_viewer/server/infrastructure/account/source-mutation-worker-runner.ts": "bb95e96a26edb4ce51cc9c1144e6aa3e0d7dc32bc40b11b90bd6f7018190d4ae",
+      "taiko_viewer/server/infrastructure/account/qq-migration-worker-runner.ts": "575604cae7e20f99bc135f4cdf1eeae486d3494f2a2e3fb7e41a82d8fcf3f167",
+      "taiko_viewer/server/infrastructure/account/hiroba-credential-worker-runner.ts": "4dbb9c60300104c1d563c894a842b727babb4627c91617988b05b228620e7421"
+    },
+    "identityNote": "This is the current readiness checkout, distinct from historical 6331aea ownership candidate. HEAD is observed before any subsequent documentation commit; source hashes identify the audited implementation. Manifest excludes its own hash to avoid self-reference."
+  },
+  "knownFailure": {
+    "test": "test_source_switch_and_deleted_readded_chart_never_create_cross_epoch_delta",
+    "historicalResult": "271 passed, 7 skipped, 1 failed",
+    "frozenResult": "1 failed, 36 deselected",
+    "newExecution": false,
+    "skips": "Seven historical production-fixture cases; private fixtures not accessed."
+  },
+  "viewerCommit": "def8082511375476ef184989248f76599ee56cb2",
+  "taikoCommit": "15722e86bbd554ce8d89f2df031ab0f29bb7437d",
+  "sakuraCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+  "wheelDigest": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529",
+  "dependenciesDigest": {
+    "center": "1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "contractDigest": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+  "coreRoleVersion": {
+    "center": "0.1.1",
+    "client": "0.1.2"
+  },
+  "catalogRevision": null,
+  "workerProtocol": {
+    "publication": {
+      "module": "taiko_store.bridge",
+      "schema": 1
+    },
+    "mergedRead": {
+      "module": "taiko_bot.cli.merged_read_cli",
+      "schema": 1,
+      "currentConsumerAcceptance": {
+        "status": "PASS_SCOPED",
+        "scope": "3 installed consumer tests plus 14 Publication tests; source vectors/history, failure/lease and restore behavior. Not all production Writers.",
+        "evidencePath": "/var/tmp/viewer0822-consumers-center-final.log",
+        "sha256": "f6ce1a80e96e5426fd973587fcc0050ebcdc2c527414ef1405d4f0380614d496",
+        "passed": 17,
+        "failed": 0
+      }
+    },
+    "annual": {
+      "module": "taiko_bot.offline.annual_summary",
+      "currentConsumerAcceptance": {
+        "status": "PASS_SCOPED",
+        "scope": "Installed generator ratings/build, poisoned import path, missing-module/deadline/isolation cleanup and fingerprint regression; not complete authenticated Web/report lifecycle.",
+        "evidencePath": "/var/tmp/viewer0822-annual-retry.log",
+        "sha256": "446ea18d62cb2469244011cb4546816d4a086d44658d5b05d6ffbdd0ac82028c",
+        "passed": 9,
+        "failed": 0
+      }
+    },
+    "sourceCompatibility": {
+      "status": "BLOCKED_INSTALLED_CUTOVER_NOT_ACCEPTED",
+      "modules": [
+        "scripts.account_sync_cli",
+        "scripts.source_mutation_cli",
+        "scripts.qq_migration_cli",
+        "scripts.hiroba_credential_cli"
+      ],
+      "scope": "Existing source-worker compatibility paths remain; production interpreter/activation unknown. Preserve authorization and transactions until separate installed-worker acceptance."
+    }
+  },
+  "rollbackTarget": {
+    "productionCommit": null,
+    "productionInterpreter": null,
+    "databaseRestorePoint": null,
+    "preservedViewerActiveMain": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+    "policy": "No production cutover occurred. Retain active main and prior immutable artifacts; deployment/DB restoration instructions require verified production state before authorization."
+  },
+  "verifiedAt": "2026-10-16T01:15:25.902807+00:00",
+  "verificationScope": "Local ref/artifact inventory, exact role rebuild evidence when available; not production or full runtime acceptance.",
+  "roleEnvironmentIdentity": {
+    "center": "sha256:1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "supplementalDependenciesDigest": {
+    "center": "1e243c1b76acb5f01cc1673970df7378c7c38db17aeeea1889dc4ce9f3eac930",
+    "client": "3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a"
+  },
+  "historicalRoleEnvironmentIdentity": {
+    "center": "sha256:ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+    "client": "sha256:0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f"
+  },
+  "baseDependenciesDigest": {
+    "center": "ced576b69a965a77753fbccd8871de9050c1b9c827b1992b911efe49125f923a",
+    "client": "0d45180419301ba668d93dc9d060611656f5efc3d360a28d6eb1af1ab8c3fa8f"
+  },
+  "activeEnvironmentScope": "94-distribution candidate adds the independently packaged Sakura shared runtime_memory support; 93-distribution installs remain historical PASS but did not cover the image/runtime dependency closure.",
+  "evidencePaths": [
+    "/var/tmp/viewer0822-annual-retry.log",
+    "/var/tmp/viewer0822-center-public.log",
+    "/var/tmp/viewer0822-client-public.log",
+    "/var/tmp/viewer0822-consumers-center-final.log",
+    "api-auth-matrix.json",
+    "conflict-ledger.json",
+    "evidence/fresh-runtime-20261015.json",
+    "evidence/fresh-runtime-proxy-20261016.json",
+    "evidence/fresh-runtime-proxy-retry-20261016.json",
+    "evidence/fresh-runtime-pypi-20261015.json",
+    "evidence/installed-viewer-images-20261016.json",
+    "evidence/installed-viewer-images-retry-20261016.json",
+    "evidence/isolated-sql-20261016.json",
+    "evidence/merged-sql-installed-20261016.json",
+    "evidence/r1-rebuild-center-20261016.json",
+    "evidence/r1-rebuild-center-with-memory-20261016.json",
+    "evidence/r1-rebuild-client-20261016.json",
+    "evidence/r1-rebuild-client-with-memory-20261016.json",
+    "evidence/r2-center-integration-94-20261016.json",
+    "evidence/r2-center-lifecycle-94-20261016.json",
+    "evidence/r2-client-integration-94-20261016.json",
+    "evidence/r2-client-lifecycle-retry-94-20261016.json",
+    "evidence/runtime-memory-package-20261016.json",
+    "runtime-role-locks-with-memory.json",
+    "runtime-role-locks.json",
+    "taiko_bot-0.14.1-py3-none-any.whl"
+  ]
+}

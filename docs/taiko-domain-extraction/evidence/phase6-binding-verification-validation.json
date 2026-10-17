@@ -1,0 +1,97 @@
+{
+  "step": "6.3d.9",
+  "status": "BINDING_VERIFICATION_TRANSACTION_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "f3146cf",
+  "sakuraVersion": "9.81.5",
+  "sakuraPushed": true,
+  "validation": {
+    "pythonTests": 45,
+    "offlineNodeTests": 132,
+    "realTestDbSqlTests": 169,
+    "newBindingVerificationSqlTests": 30,
+    "typescript": "domainRead + publicationLifecycle configs PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "exitStatus": 0,
+    "systemdUnit": "taiko-qa-1791694754-1232337.service",
+    "unitResult": "success",
+    "unitActiveState": "inactive",
+    "unitMainPid": 0,
+    "unitControlGroup": "",
+    "logPath": "/var/tmp/phase6-verification-final-qa.log",
+    "logSha256": "fd16eaf97846e4f7ca1245d3f50cc2574212fde14491bba6bd241207f39de90d",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791694754-1232337.service",
+      "durationMs": 224135,
+      "sampledMemoryPeakBytes": 386424832,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "50628 kB",
+          "VmRSS": "50628 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "preparation observes a public exact profile outside SQL, then replaces the title challenge in one owner-locked SQL transaction; no score grant/Source lease required for challenge preparation",
+    "confirmation captures challenge and existing binding identity, observes public title, then holds Source EX before SQL owner/binding locks and rechecks challenge ID/hash/expiry and all binding identity fields",
+    "grant/title metadata/current selection/challenge consumption/minimal confirmation receipt commit once; late grant/current/consumption/receipt failures roll back together; failed rollback destroys connection",
+    "exact immutable operation receipt proves lost confirmation COMMIT ack; exact inserted verification proves lost preparation ack; captured pool retained after shutdown-style global replacement",
+    "same-actor concurrent confirmation grants once; completed replay requires matching live owner/binding/title proof and never switches a later current or consumes unrelated pending challenge",
+    "queued challenge replacement/expiry/baseline title or plate/source ID substitution and new foreign owner rejected without grant",
+    "new grant uses Wahlap source; refresh preserves an existing binding identity; queued same-row source change rejected",
+    "exact official userid only, 15 second HTTP deadline, unsafe numeric ID rejects instead of granting a rounded alias; unchanged title keeps challenge",
+    "bot-only/deleted manual sources and legacy orphaned reserved 98 namespace cannot acquire external title-verification grants",
+    "corrupt confirmation receipt or deleted login owner cannot replay; no plaintext title/challenge/password/score/credential in confirmation receipt",
+    "actual frozen 7d67edc successful prepare/confirm DTO and binding/source/current/verified metadata fields unchanged; pure SQL operations leave C/H raw SHA, source commit ID and sequence unchanged",
+    "actual authenticated HTTP login cookie with real prepare/confirm/current/GET adapters, 401 without cookie, pending/complete views, reload, later selection, completed replay, logout and re-login",
+    "actual owned Node death before/after confirmation COMMIT demonstrates TCP rollback versus durable receipt and correct retry",
+    "owner locking/current selection/rollback destruction now use one shared SQL helper; existing binding/manual/Goal/Growth/acquisition regressions retained"
+  ],
+  "limits": [
+    "Owned synthetic files, actual guarded _test SQL and loopback HTTP only; official Wahlap profile responses mocked, no official API network or production data QA",
+    "Test schema omits production FKs; not production migration/FK enforcement, full server tsc or million-record resource gate",
+    "Existing title-change verification semantics retained; no claim of stronger ownership protocol or a new challenge-secret scheme",
+    "Legacy confirm body carries only taikoId: completed replay requires still-owned matching binding/title proof, and cannot recreate later removed/replaced bindings",
+    "Preparation has no client operation UUID: a fresh prepare after process/HTTP response loss may replace its baseline, retaining historical API semantics",
+    "Personal Python CLI still reads compatibility projections and requires canonical Reader convergence; this step does not claim those reader aliases complete",
+    "Other private source/QQ/Hiroba/token/profile readers and grants, ops cleanup audit, actual dispatcher/u0/daily convergence, P1a/Read Model/million costs/operational restore/final sync/release remain pending",
+    "No R sync, service/NoneBot restart or Viewer push/deploy; source steps remain local until unified standard Phase 6 release",
+    "250 ms sampled cgroup peak is not an exact process-tree maximum"
+  ],
+  "harnessCorrections": [
+    "First focused run 25/26: attempted synthetic manual account with non-98 ID violated the actual test table manual-ID CHECK; did not weaken constraint",
+    "Second focused run 28/29: test called a nonexistent delete alias; corrected to permanentlyDeleteManualAccount with true confirmation",
+    "Third focused run 30/30 including real authenticated HTTP passed; final review reserved the manual namespace even with no SQL authority, replaced impossible late manual-ID case with legacy orphan fixture and ran the whole final suite",
+    "Profile exposure in the native test module is opt-in; existing Goal/manual fixture boundaries remain unchanged; QQ/verification test DDL omits FKs and matches required production fields"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/binding-confirmation-schema.ts": "844c2b66424dc52b19d73dc206cf15d3f00992caf2d15699e5bec48b93244324",
+    "taiko_viewer/server/internal/account/binding-authority.ts": "5266f302494ac393bd36cd7e720dba57e9cadc568d539a0b1441a492f58476cc",
+    "taiko_viewer/server/internal/account/shared.ts": "32bc61f2cb8ac17b3f8c29752da3498e24cd648f9842b3e24d9f05300e9c8648",
+    "taiko_viewer/server/services/account/binding-lifecycle.ts": "0e8318eb707bccabd0648a7c8a6b406678703563ca76a72aedcbe21cde6e7342",
+    "taiko_viewer/server/services/account/binding-verification.ts": "8554fbcbe4f9b8766a2eeb9ee9e68049e95556c41d1f613736f219d8c1bd22ba",
+    "taiko_viewer/server/utils/account-db.ts": "9d6617106a46442eff0d4c1cef7891ebe7b18222b6d857b5f456f00956659660",
+    "taiko_viewer/server/utils/account/bindings.ts": "31641bbfd70f56cd5515b506ea19b3c5060a25991e5aab672d7a2f53ded89299",
+    "taiko_viewer/tests/bindingVerificationSql.test.mjs": "0d99b805c7f700dec5599de331cdbb6e55ca245205715c83ed5a7a8664d7017a",
+    "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "b7f6d2ac482d2677060c4585e9c69e6598f19d81eedbbb2d6d67a2a7c31151e2",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "2c05640d44a5d7f539c15ecadf71f07abac912cb8f128e42d395a2f776e55e52",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "14af98528cdac50bfbd7cdf0c22627214a68b1e9f0d8a99dc1186041334e94aa"
+  }
+}

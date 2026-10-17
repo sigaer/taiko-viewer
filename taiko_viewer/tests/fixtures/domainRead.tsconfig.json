@@ -7,8 +7,14 @@
     "noEmit": true,
     "skipLibCheck": true,
     "baseUrl": "../..",
-    "paths": { "~/*": ["./*"] },
-    "types": ["node"]
+    "paths": {
+      "~/*": [
+        "./*"
+      ]
+    },
+    "types": [
+      "node"
+    ]
   },
   "files": [
     "../../server/domain/file-score-reader.ts",
@@ -16,6 +22,11 @@
     "../domainScoreRead.test.ts",
     "../../utils/canonicalGrowth.ts",
     "../../utils/growthHistory.ts",
-    "../../types/player-growth.ts"
+    "../../types/player-growth.ts",
+    "../../server/infrastructure/taiko-publication/client.ts",
+    "../publicationClient.test.ts",
+    "../../server/infrastructure/taiko-publication/scope.ts",
+    "../../server/infrastructure/taiko-publication/reader.ts",
+    "../publicationScope.test.ts"
   ]
 }

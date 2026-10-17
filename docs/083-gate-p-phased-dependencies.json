@@ -1,0 +1,587 @@
+{
+  "schemaVersion": 1,
+  "status": "PHASE_DEPENDENCIES_RECORDED",
+  "proposalOnly": true,
+  "candidateCommit": "6ec45d1f2d2a936b01769fd23ab3904dd9bd0a6d",
+  "builtSourceCommit": "8d915ca2724480c7a287073b742e94a83b44686a",
+  "GateP": "DEPLOY_PENDING_AUTH",
+  "deployReady": false,
+  "Contract": "CONTRACT_FROZEN_LOCAL",
+  "frozenCommit": "5c68a13964cc8d8750709002485c11cf1ee239cb",
+  "I6": "DEFERRED_WITH_EVIDENCE",
+  "dependencyEnum": [
+    "DEPENDENCY_REQUIRED",
+    "NOT_APPLICABLE"
+  ],
+  "interpretation": "Dependency obligation and evidence state are independent dimensions. Required recovery foundation stays DEPENDENCY_REQUIRED + EVIDENCE_PENDING. No unknown becomes PASS. Four-table/F3 for OFF P-A/P-B is NOT_APPLICABLE.",
+  "phaseDependencies": [
+    {
+      "id": "P-ID-DISCOVERY",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "One named candidate unit only; this card remains unapproved"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "One named candidate unit only; this card remains unapproved"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "One named candidate unit only; this card remains unapproved"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-ID-VERIFY",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-APP",
+      "phaseDependencies": {
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Original row covers v1 client/Grant tests; not prerequisite while v1 OFF"
+        },
+        "P-B": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Original v1 Grant row inapplicable; separate required MyTaiko real Session/owner/source/revision negatives remain PENDING"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Real and synthetic approved application/Key/owner/binding/Grant issue/revoke/expiry/304/cache negatives REQUIRED"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false
+    },
+    {
+      "id": "P-PROXY",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Existing legacy ingress/ACL/Host/Origin/forwarded headers REQUIRED; v1 quota probe N/A while OFF"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Restricted instance ingress/ACL and complete request routing REQUIRED; no per-user mode allowlist exists"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Independent external API ingress/Origin/trusted peer/public-private quota REQUIRED"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-KEY",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Existing Session/legacy credential handling/redaction REQUIRED; new v1 Key lifecycle N/A while OFF"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Existing Session credential handling REQUIRED; no third-party Key/Grant changes"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Actual app Key lifecycle/Origin/logging and redaction REQUIRED"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-AUDIT",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Legacy/synthetic smoke log redaction REQUIRED; v1 event retention N/A while OFF"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "MyTaiko access/failure trace and redaction REQUIRED"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "External v1 quota/grant/revocation audit and retention REQUIRED"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-MIGRATION-OBSERVE",
+      "phaseDependencies": {
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "NOT_APPLICABLE",
+          "scope": "The four-table/F3-only metadata row is N/A; general existing schema/bootstrap compatibility remains REQUIRED separately"
+        },
+        "P-B": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Same: Session read-model does not need v1 four tables; Goal/Growth/Publication compatibility still required"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Production four-table/F3 schema/index diff UNKNOWN; read-only SQL metadata needs separate approval"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "Optional existing-schema metadata only if explicitly included in onepass; v1 four-table scope remains NOT_APPLICABLE"
+    },
+    {
+      "id": "P-MIGRATION-DDL",
+      "phaseDependencies": {
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Do not create four new v1 tables for this OFF path"
+        },
+        "P-B": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Do not create v1 tables for restricted MyTaiko; existing read-model schema compatibility is separate"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Reviewed exact additive four-table/F3 diff, lock/algorithm/disk/rollback plan and separate DDL authorization REQUIRED"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false
+    },
+    {
+      "id": "P-RESTORE",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Valid existing-data backup/recovery foundation REQUIRED; exact real dependencies, rights and recovery scope PENDING; v1-only synthetic four-table restore/PITR is not blanket dark-deploy prerequisite"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Actual Session/owner/Publication/history/Goal/Growth checkpoint and rollback/recovery PENDING; no third-party Grant change"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Revoke-safe consistent restore/PITR, encrypted offsite, RPO<=15min/RTO<=120min and real-scale proof REQUIRED; all unproven"
+        }
+      },
+      "phasePendingFields": {
+        "P-A": [
+          "dataOwner",
+          "authorizedActualDependencyInventory",
+          "existingDataBackupEvidence",
+          "verifiedRecoveryFoundation",
+          "rollbackArtifact",
+          "operator"
+        ],
+        "P-B": [
+          "authorizedActualReadModelDependencies",
+          "SessionOwnerPublicationGoalGrowthCheckpoint",
+          "recoveryAndPairedModeRollback"
+        ],
+        "P-C": [
+          "realDataAndFourTableScope",
+          "consistentCheckpointAndRevocationReplay",
+          "binlogPitr",
+          "encryptedOffsiteDestination",
+          "keyCustodian",
+          "restoreTarget",
+          "realScaleRpoRtoProof"
+        ]
+      },
+      "CAN_RUN_NOW": false,
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
+    },
+    {
+      "id": "P-CANARY",
+      "phaseDependencies": {
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Separately authorized code update and synthetic anonymous/legacy smoke; both modes legacy, v1 OFF, Annual normal; immutable rollback UNKNOWN"
+        },
+        "P-B": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Separately approved restricted-instance plan, authorized cohort, paired modes and immediate rollback REQUIRED"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Independent API instance/deployment route may differ from MyTaiko canary; exact deployment scope PENDING, no automatic inheritance"
+        }
+      },
+      "phasePendingFields": {
+        "P-A": [
+          "deployApproval",
+          "runtimeIdentity",
+          "window",
+          "immutableNewAndOldRollbackArtifacts",
+          "operator"
+        ],
+        "P-B": [
+          "restrictedInstanceIngressReview",
+          "approvedCohortRestriction",
+          "completeRoutingAndSessionNegativeProof",
+          "pairedModeRollback",
+          "window",
+          "operator"
+        ],
+        "P-C": [
+          "independentApiDeploymentRouteAndApproval"
+        ]
+      },
+      "CAN_RUN_NOW": false
+    },
+    {
+      "id": "P-V1-ENABLE",
+      "phaseDependencies": {
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
+      },
+      "phaseEvidence": {
+        "P-A": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Keep v1 OFF; no enablement action"
+        },
+        "P-B": {
+          "status": "NOT_APPLICABLE",
+          "scope": "Keep v1 OFF; MyTaiko acceptance never enables v1"
+        },
+        "P-C": {
+          "status": "EVIDENCE_PENDING",
+          "scope": "Independent narrow enablement authorization and grey rollout REQUIRED; none granted"
+        }
+      },
+      "phasePendingFields": {},
+      "CAN_RUN_NOW": false
+    }
+  ],
+  "phases": {
+    "P-A": {
+      "name": "仅更新代码，旧模式暗部署",
+      "status": "DEPLOY_PENDING_AUTH",
+      "deployReady": false,
+      "requiredRuntime": {
+        "myTaikoPublic": "legacy",
+        "myTaikoPrivate": "legacy",
+        "developerApiV1": "OFF",
+        "annualStartupMode": "normal"
+      },
+      "fourTableDependency": "NOT_APPLICABLE",
+      "fourTableEvidence": "PASS_SCOPED; source review + original artifact/fresh MySQL/16 HTTP observations + zero matching application general-log queries; not general side-effect freedom",
+      "requiredEvidence": {
+        "actualDeployedIdentity": "UNKNOWN",
+        "currentIngressAndAcl": "UNKNOWN",
+        "newAndOldImmutableRollbackArtifacts": "PENDING_EVIDENCE",
+        "existingDataBackupAndRecoveryFoundation": "PENDING_EVIDENCE",
+        "existingSchemaBootstrapAndSourceLifecycleCompatibility": "PENDING_EVIDENCE",
+        "normalAnnualStartupCompatibility": "PENDING_EVIDENCE_NOT_TESTED_HERE",
+        "authorizedDarkDeploymentAndAnonymousLegacySmoke": "PENDING_AUTH"
+      },
+      "v1OnlyNotPrerequisites": [
+        "Four-table/F3 DDL",
+        "Third-party app authenticity/Grant acceptance",
+        "External API-specific quota acceptance"
+      ],
+      "realBlockers": [],
+      "qualification": "No four-table OFF blocker observed. Production baseline evidence/authorization is still missing; general account CREATE/ALTER and lifecycle workers are not proven side-effect-free.",
+      "realBlockersScope": "NEW_P0_CODE_CONFLICTS_ONLY; production prerequisites remain pending",
+      "canonicalGateRef": "083-mainline-gate.json#/P-A"
+    },
+    "P-B": {
+      "name": "受控 My Taiko 新读取",
+      "status": "DEPLOY_PENDING_AUTH",
+      "deployReady": false,
+      "developerApiV1": "OFF",
+      "modeSemantics": "Process-level paired public/private mode; not a per-user allowlist",
+      "routingProposal": {
+        "status": "PENDING_OWNER_AND_INGRESS_REVIEW_NOT_IMPLEMENTED",
+        "option": "Separate restricted instance and approved internal host, network/VPN plus per-operator mTLS ingress ACL; paired read-model modes only on that instance, public/default instance stays paired legacy",
+        "authorizationBoundary": "Ingress restriction only limits instance reachability. Existing Viewer Session/owner/source/read-view checks remain sole data authority; no new permission system or trusted user-id header. mTLS is not a Viewer user allowlist.",
+        "completeRouting": "Approved host must route /my SSR, assets, Session auth and all related account API reads consistently to the same restricted instance; no path-only BFF canary",
+        "pending": [
+          "Exact approved host/unit/upstream/ACL/client certificate custody",
+          "Owner-confirmed cohort/usage restriction and ordinary-user denial proof",
+          "Host/Origin/secure-cookie/session compatibility and direct upstream denial",
+          "Real identities/owner/source/session-switch/logout/unbind/revision negatives",
+          "Existing Goal/Growth/Publication schema and checkpoint compatibility",
+          "Both public/private mode rollback to legacy with immutable previous artifact; v1 remains OFF"
+        ],
+        "actualConfigObserved": false
+      },
+      "grantOrClientKeyChanges": false,
+      "productionProof": "PENDING_EVIDENCE"
+    },
+    "P-C": {
+      "name": "Developer API v1 独立对外启用",
+      "status": "DEPLOY_PENDING_AUTH",
+      "deployReady": false,
+      "requiredEvidence": {
+        "realIdentityHistoricalBindings": "PENDING_EVIDENCE",
+        "proxyOriginKeyLogRedaction": "PENDING_EVIDENCE",
+        "businessAndSyntheticGrantsRevokeExpiryCache304": "PENDING_EVIDENCE",
+        "fourTableAndF3ReviewedDDL": "PENDING_EVIDENCE",
+        "revocationSafePitrAndEncryptedOffsite": "UNPROVEN",
+        "publicPrivateBudgetsAndAudit": "PENDING_EVIDENCE",
+        "independentEnablementAndLimitedRollout": "PENDING_AUTH"
+      },
+      "notAuthorizedScopes": [
+        "history",
+        "growth",
+        "sync",
+        "score writes"
+      ],
+      "legacyCredentialsNotPromoted": [
+        "Bot token",
+        "public-score-token"
+      ]
+    }
+  },
+  "offProof": {
+    "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/off-path-proof.json",
+    "sha256": "870a886246a71921ff7dd4101e2bbee90588242f506d388d1fc2fcb2d2cb15f7",
+    "status": "PASS_SCOPED",
+    "fourTablesBefore": [],
+    "fourTablesAfter": [],
+    "applicationReferences": 0,
+    "defaultFlagsAbsent": true,
+    "sql": {
+      "name": "viewer1_security_test",
+      "datadir": "/home/sigaer/taiko/qa-vault/runs/qa-1e873d5e0569/scratch/sql-qDTtl8/mysql/",
+      "mutationOptIn": true
+    },
+    "hostExited": true,
+    "listenerClosed": true
+  },
+  "privateAssets": [
+    {
+      "id": "private-resource-01",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-02",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-03",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-04",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-05",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-06",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-07",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-08",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-09",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-10",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-11",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    },
+    {
+      "id": "private-resource-12",
+      "name": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "rights": "UNPROVEN",
+      "runtimeDependency": "UNKNOWN",
+      "offsiteDestination": "UNKNOWN",
+      "recoverability": "UNPROVEN",
+      "readAuthorized": false
+    }
+  ],
+  "privateAssetsInterpretation": "12 unmapped placeholders, not known production runtime dependencies; authorized inventory must determine actual use/rights/backup. No automatic loop/blocker or dismissal.",
+  "recovery": {
+    "syntheticFourTableRestore": "PASS_SCOPED_HISTORICAL_ONLY",
+    "productionSchemaDiff": "UNKNOWN",
+    "pitr": "UNPROVEN",
+    "encryptedOffsite": "UNPROVEN",
+    "realScaleRestore": "UNPROVEN",
+    "rpoMinutesTarget": 15,
+    "rtoMinutesTarget": 120,
+    "targetsTested": false,
+    "existingDataRecoveryFoundationStillRequiredForDarkDeployment": true
+  },
+  "productionAccess": false,
+  "featureEnablement": false,
+  "decisionRegister": "083-decision-register.json",
+  "decisionRefs": [
+    "083-decision-register.json#/decisions/KINOKO-CURRENT-TIME-COMPATIBILITY",
+    "083-decision-register.json#/decisions/CONTRACT-F1-F5",
+    "083-decision-register.json#/decisions/VIEWER-082-O1-O2",
+    "083-decision-register.json#/decisions/ANNUAL-OFFSEASON",
+    "083-decision-register.json#/decisions/VIEWER1-I6-HOME",
+    "083-decision-register.json#/decisions/ORIGIN-NINE-PATH-DISPOSITION"
+  ],
+  "authorizationPendingRef": "083-mainline-gate.json#/nextActions",
+  "currentHandoffGate": "083-mainline-gate.json",
+  "evidenceEnum": [
+    "EVIDENCE_PENDING",
+    "NOT_APPLICABLE",
+    "PASS_SCOPED"
+  ]
+}

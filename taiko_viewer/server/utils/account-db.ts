@@ -1,8 +1,20 @@
 import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/services/annual-beta/schema";
+import { SOURCE_LIFECYCLE_TABLE_SQL } from "../infrastructure/taiko-publication/lifecycle-schema";
+import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from "../infrastructure/taiko-publication/grant-schema";
+import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/creation-schema";
+import { BINDING_CONFIRMATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-confirmation-schema";
+import { BINDING_REVOCATION_TABLE_SQL } from "../infrastructure/taiko-publication/binding-revocation-schema";
+import { SCORE_TOKEN_TABLE_SQL } from "../infrastructure/account/score-token";
+import { SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL, SOURCE_SERVICE_PRINCIPAL_MIGRATIONS } from "../infrastructure/account/source-service-schema";
+import { BOT_BINDING_OPERATION_TABLE_SQL, BOT_BINDING_OPERATION_MIGRATIONS } from "../infrastructure/account/bot-binding-schema";
+import { QQ_MIGRATION_CODE_TABLE_SQL } from "../infrastructure/account/qq-migration-schema";
+import { HIROBA_CREDENTIAL_TABLE_SQL, HIROBA_CREDENTIAL_MIGRATIONS, HIROBA_BINDING_OPERATION_TABLE_SQL } from "../infrastructure/account/hiroba-credential-schema";
+import { ACCOUNT_SYNC_RECEIPT_TABLE_SQL } from "../infrastructure/account/sync-request";
 import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 
 let pool: Pool | null = null;
 let schemaReady: Promise<void> | null = null;
+const nativeConfigs = new WeakMap<Pool, Readonly<ReturnType<typeof getDbConfig>>>();
 
 const getDbConfig = () => {
   const runtimeConfig = useRuntimeConfig();
@@ -41,8 +53,17 @@ export const getAccountDb = () => {
       namedPlaceholders: true,
       charset: "utf8mb4"
     });
+    nativeConfigs.set(pool, Object.freeze({ ...config }));
   }
   return pool;
+};
+
+/** Private worker composition uses the captured pool's credentials. Never
+ * re-read globals or expose this configuration in an API response. */
+export const getAccountDbNativeConfig = (captured: Pool) => {
+  const config = nativeConfigs.get(captured);
+  if (!config) throw new Error("Account database is unavailable");
+  return config;
 };
 
 export const closeAccountDb = async () => {
@@ -53,6 +74,18 @@ export const closeAccountDb = async () => {
 };
 
 const CREATE_TABLES = [
+  SCORE_TOKEN_TABLE_SQL,
+  ACCOUNT_SYNC_RECEIPT_TABLE_SQL,
+  SOURCE_SERVICE_GRANT_TABLE_SQL, SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL,
+  BOT_BINDING_OPERATION_TABLE_SQL,
+  QQ_MIGRATION_CODE_TABLE_SQL,
+  HIROBA_CREDENTIAL_TABLE_SQL,
+  HIROBA_BINDING_OPERATION_TABLE_SQL,
+  SOURCE_LIFECYCLE_TABLE_SQL,
+  MANUAL_GRANT_RECEIPT_TABLE_SQL,
+  MANUAL_CREATION_TABLE_SQL,
+  BINDING_REVOCATION_TABLE_SQL,
+  BINDING_CONFIRMATION_TABLE_SQL,
   `CREATE TABLE IF NOT EXISTS web_user_accounts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(64) NOT NULL,
@@ -517,6 +550,9 @@ const CREATE_TABLES = [
 ];
 
 const MIGRATIONS = [
+  ...BOT_BINDING_OPERATION_MIGRATIONS,
+  ...SOURCE_SERVICE_PRINCIPAL_MIGRATIONS,
+  ...HIROBA_CREDENTIAL_MIGRATIONS,
   "ALTER TABLE web_taiko_bindings ADD COLUMN source VARCHAR(16) NOT NULL DEFAULT 'wahlap' AFTER taiko_id",
   "ALTER TABLE web_taiko_bindings ADD COLUMN manual_account_id CHAR(18) DEFAULT NULL AFTER source",
   "ALTER TABLE web_taiko_bindings ADD COLUMN mydon_showcase_layout VARCHAR(32) NOT NULL DEFAULT 'nickname' AFTER verified_titleplate_id",

@@ -1,0 +1,701 @@
+{
+  "schemaVersion": 1,
+  "status": "CONTRACT_FROZEN_LOCAL",
+  "contractFrozen": true,
+  "runtimeEnabled": false,
+  "runtimeEnabledScope": "Developer API runtime default in frozen local source; production state NOT_OBSERVED",
+  "testFixtureRoutesAdmitted": true,
+  "deployReady": false,
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "publicApiState": "PUBLIC_API_NOT_ENABLED_BY_THIS_WORK",
+  "productionAccess": false,
+  "viewerVersion": "0.83.0-rc.4",
+  "baseline": {
+    "reviewCommit": "d0c6fea8f172c6bc39086f13eac6fe2113205046",
+    "consumerPrepCommit": "49899d48a0ccff677d8506f59cea502b521758c4",
+    "originalCandidateCommit": "ac1042791f76b82c9f11d2b9b5b7a1ca326a0112",
+    "taikoSource": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+    "taikoVersion": "0.14.2",
+    "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+    "installedRoles": {
+      "centerPackages": 94,
+      "clientPackages": 94,
+      "contract": "0.1.0",
+      "centerCore": "0.1.1",
+      "clientCore": "0.1.2",
+      "support": "1.1.0"
+    },
+    "workspaceContract": "0.1.2",
+    "contractVersion": "1.0",
+    "viewer082GateC": "PASS_WITH_ACCEPTED_RISK",
+    "viewer082GateP": "DEPLOY_PENDING_AUTH"
+  },
+  "approvalTarget": {
+    "runtimeSourceCommit": "46991b202b531fc18709bbfbdb453b880bd9920b",
+    "releaseManifest": {
+      "path": "docs/083-release-manifest.json",
+      "sha256": "425e747960802284edb92af6ce2950d80e4c8a1e14c2fb7bc7cc51317fc3b6d5"
+    },
+    "finalReportCommit": "289094de74fa4872c7e43459ec57ce5c207ce36f"
+  },
+  "ownerDecisions": {
+    "F1": {
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
+      "approvedAt": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "ACCEPT_UNCHANGED_UNIQUE_SCHEMA_ADDITIVE_SCOPE"
+    },
+    "F2": {
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
+      "approvedAt": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "ACCEPT_EXISTING_SCOPED_GRANT_AUTHORITY"
+    },
+    "F3": {
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
+      "approvedAt": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "ACCEPT_AFTER_OWNER_REVIEW_OF_SCOPED_MANAGEABILITY_PASS_AND_PAGINATION_COMPATIBILITY"
+    },
+    "F4": {
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
+      "approvedAt": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "KEEP_LEGACY_AUTH_DOMAINS_WITHOUT_SUNSET"
+    },
+    "F5": {
+      "ownerStatus": "OWNER_APPROVED",
+      "owner": "Owner (chat approval)",
+      "approvedAt": null,
+      "approvalId": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+      "recommendation": "APPROVED_LOCAL_CONTRACT_FREEZE_ONLY"
+    }
+  },
+  "manageability": {
+    "status": "PASS_SCOPED",
+    "selectedPolicy": "OWNER_ONLY_KEYSET_PAGINATION",
+    "activeCountCap": null,
+    "activeCountCapTest": "NOT_APPLICABLE_PAGINATION_ALTERNATIVE_SELECTED",
+    "pageSize": 100,
+    "lookahead": 101,
+    "grantRows": 306,
+    "clientRows": 306,
+    "grantPages": 4,
+    "clientPages": 4,
+    "concurrency": "Five real concurrent consents retain per-page bound; real overlapping consent/UI-disable serialized by existing owner authority; no quota authorizes data",
+    "cursors": "owner scoped; timestamps+IDs descending; invalid/foreign/reconsented-away cursor yields 400 INVALID_CURSOR and first-page restart",
+    "snapshotAcrossPages": false,
+    "uiSelectionCaps": "public approved client selection and verified binding selection remain capped with independent truthful hasMore; no cap hides retained grants or own clients from pagination",
+    "strictRc2ValidatorUpgradeRequired": true,
+    "evidence": {
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/f3-manageability-observations.json",
+      "sha256": "3f0513128897513f94b5a11f5d1865182ffffe621467b3a418cc553ccafee5ae"
+    }
+  },
+  "validation": {
+    "baselineManifest": {
+      "status": "PASS_SCOPED",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-6fea955fefec/evidence/freeze-openapi-review.json",
+        "sha256": "511a6c1498c8f77101b2f603c4f6026c99a7b539efee42c516d33cb500d6fe91"
+      }
+    },
+    "f3SqlHttp": {
+      "status": "PASS_SCOPED",
+      "observations": 34,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/f3-manageability-observations.json",
+        "sha256": "3f0513128897513f94b5a11f5d1865182ffffe621467b3a418cc553ccafee5ae"
+      }
+    },
+    "f3ActualComponentBrowser": {
+      "status": "PASS_SCOPED",
+      "viewports": [
+        375,
+        1280
+      ],
+      "fullNuxt": false,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/083-management-ui.json",
+        "sha256": "066e4f4ed0d42baac324acb83b854f367b1eaa76532ab7708be199030b292f7c"
+      }
+    },
+    "openapi": {
+      "status": "PASS_SCOPED",
+      "operations": 11,
+      "examples": 95,
+      "paginationGolden": 6,
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-60ab99e90cf0/evidence/freeze-openapi-review.json",
+        "sha256": "be011d6aef71dc9ba2ee72a3f78828f6b272efca85548a0ff8148c7a6d2c713d"
+      }
+    },
+    "formalBuild": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/build-final/build.json",
+        "sha256": "e9ad73adb03f786477fe8b335b967fab2eaf689413fb2e1c4033c95aa9a28771"
+      },
+      "sourceInputs": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/build-final/source-inputs.json",
+        "sha256": "2c1ed3ebaf457b816e9b06dd8c380dbb9bd6059e1527933f759aa1956822d35c"
+      },
+      "elapsedSeconds": 154.29,
+      "sampledPeakBytes": 4248760320,
+      "kernelPeakAvailable": false,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "dirtyBuildBaseCommit": "196be85a6216d1468f3b8182b2a017fe6cd08b37",
+      "finalCommitEquivalence": "Every listed source input verified against final local commit via external delivery identity; no commit hash fabricated for dirty build"
+    },
+    "freezeRecord": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/freeze-scoped-validation.json",
+        "sha256": "39d35d442eadbc59478ea724d7a5bc48b57f09e8bb7bd9a2d266ef59fe0801d5"
+      }
+    },
+    "i5ProductBffVueNuxt": {
+      "status": "RERUN_PASS",
+      "host": "actual built Nuxt and native _test MySQL; no API/authority mocks",
+      "namedNonBrowserObservations": 26,
+      "observedBrowserHttpResponses": 14,
+      "browserFlows": [
+        {
+          "name": "actual Nuxt login refresh data tools and layout",
+          "width": 375,
+          "overflow": false
+        },
+        {
+          "name": "actual Nuxt login refresh data tools and layout",
+          "width": 1280,
+          "overflow": false
+        },
+        {
+          "name": "binding select A1 A2 A1 keyboard retry",
+          "pass": true
+        },
+        {
+          "name": "503 clears previous payload and retry recovers",
+          "pass": true
+        },
+        {
+          "name": "real SQL-stalled request times out and clears old body",
+          "pass": true
+        },
+        {
+          "name": "anonymous page login state",
+          "pass": true
+        },
+        {
+          "name": "unbound page binding entry",
+          "pass": true
+        }
+      ],
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-732c619e5434/evidence/my-taiko-product-observations.json",
+        "sha256": "6ab1ee818260a985a5c27ba675c3ad04634c5947955df75c32e7aad28dfc9fde"
+      },
+      "cleanup": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-732c619e5434/evidence/my-taiko-product-cleanup.json",
+        "sha256": "81fe7940a94ef91bdc0d9d5d0bf0d0abbd2acb5c2214c47404e3990960adaa36"
+      },
+      "measurements": "NOT_REQUESTED",
+      "measurementWrites": 0,
+      "goalWrites": 0,
+      "sessionWrites": "Existing last_seen_at touch; login/logout and fixture-owned mutations are separate actions",
+      "crossRequestPrivateResponseCache": false,
+      "readCurrentLoadsPerSuccess": 1,
+      "rangeDays": 90,
+      "historyBoundaryFixtureFiles": 2001,
+      "historyBoundaryScope": "Existing 2000-file canonical coverage boundary with tiny identical observations; no Annual/capacity load"
+    },
+    "production": {
+      "status": "NOT_RUN_NOT_AUTHORIZED"
+    },
+    "i5Types": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-379f53c8a1be/evidence/my-taiko-types.json",
+        "sha256": "c30b36dcc4f5849d4bac2cbb4b5e63a98108a5d8293bbea1641722e767c7cf30"
+      },
+      "scope": "Changed server/types semantic TypeScript; SFC script/template compile. 131 transitive diagnostics outside changed files retained, not certified fixed."
+    },
+    "openapiFrozenI5": {
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-69383459c9db/evidence/freeze-openapi-review.json",
+        "sha256": "c6371fe5338d397828490a20fb7c6ac2720f34ca4db6d7a2e04adec3caed565c"
+      },
+      "operations": 11,
+      "examples": 95,
+      "paginationGolden": 6
+    },
+    "annualIsolation": {
+      "status": "PASS_DERIVED_ISOLATED_BUILD",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/nuxt-isolated-artifact-portable.json",
+        "sha256": "50806995f1f7e682f32247ab5018e119f56d946c6d5ea92444d0af9de8a17c97"
+      },
+      "productionPluginSourceChanged": false,
+      "scope": "One compiled Annual startup invocation only; account configuration guard and DB close hook preserved; all other output file bytes match formal build"
+    }
+  },
+  "reusedHistoricalEvidence": {
+    "scope": "Original scoped claims and failures retained; never recertified as revised-runtime or production PASS",
+    "indexes": [
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-contract-api-20261016/evidence-index.json",
+        "sha256": "bc1a9326fb53c820da71ffa40e168ec91037807005d87c29a750129de3455538"
+      },
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-owner-freeze-review-20261016/evidence-index.json",
+        "sha256": "dd88f4662f91e7229b4f533fe14954ea900242800afd28b960335208482578c5"
+      },
+      {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/100-consumer-readmodel-prep-20261016/evidence-index.json",
+        "sha256": "c174783f7ebbbd83bada8298caf637df594f55075d83f4f8064531cfe07301ab"
+      }
+    ],
+    "unchangedGolden": {
+      "js": 11,
+      "python": 7,
+      "sourceInputs": "HASH_VERIFIED_UNCHANGED_NO_RERUN"
+    },
+    "originalHttpSdk": 74,
+    "originalBoundedObservations": 20
+  },
+  "failuresRetained": [
+    {
+      "run": "qa-de85a6689179",
+      "status": "FAIL",
+      "reason": "375px horizontal overflow in actual management component; fixed control/grid min-width and rerun scoped F3 only",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-de85a6689179/evidence/f3-manageability-sql-http.log",
+        "sha256": "781b245299eed179a2691ebb7960c14aa5312b2459845b201659dfd972e269d5"
+      }
+    },
+    {
+      "run": "qa-53c71cf57d55",
+      "status": "FAIL",
+      "reason": "Test SDK imported before TS transpiler fixture registration; no product failure"
+    },
+    {
+      "run": "qa-55b027bc13a8",
+      "status": "FAIL",
+      "reason": "SDK default fetch collided with fixture gateway-only guard; fixed by explicit owned native fetch"
+    }
+  ],
+  "productionRisks": {
+    "P-ID": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-APP": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-PROXY": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-KEY": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-RESTORE": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-AUDIT": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION",
+    "P-MIGRATION": "OWNER_SIGNOFF_PENDING_NO_PRODUCTION_OBSERVATION"
+  },
+  "evidenceDirectory": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016",
+  "reviewRecordedAt": "2026-10-16T19:22:40.648334+08:00",
+  "evidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/evidence-index.json",
+  "publicApiEnabled": false,
+  "approvalSource": {
+    "id": "CHAT_OWNER_APPROVAL_20261016_F1_F5",
+    "approver": "Owner (chat approval)",
+    "quote": "尽快吧，我这边没什么需要确认的，都差不多了",
+    "source": "docs/Viewer_083_Owner_Approved_Freeze_and_MyTaiko_I5_Implementation_20261016.md (archived in qa-vault)",
+    "signatureKind": "contextual chat approval; no cryptographic or handwritten signature",
+    "exactUtteranceTime": null
+  },
+  "frozenOutput": {
+    "manifest": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer083-contract-api-20261016/docs/083-release-manifest.json",
+      "sha256": "463a090855f571ed72da184a7d1d4c01691e9f5013cf1c106ce99ec190e34b36"
+    },
+    "commit": "5c68a13964cc8d8750709002485c11cf1ee239cb"
+  },
+  "freezeScopedValidation": [
+    {
+      "name": "golden18",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-7217c1949d21/evidence/contract-summary.json",
+        "sha256": "fba2730dc1694f77ccb9ae4aa1a3c61aed0ab51cb07ac0061729a83ef41376d5"
+      },
+      "verifiedInputs": [
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/api-v1.json",
+          "sha256": "c2ebf3ec5311de9734880697a728caf440b6ae358e268386fd8457e0a2ab93dd"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/growth-chart-continuity-v3.json",
+          "sha256": "1b1b98a741db0e7a883ebd18f38d7036e9be8c6da65df0932bfefe84620b1b36"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+          "sha256": "8982c5dd2dda12f8337f6f43fda87c74b07d142fa7d0b3c2ae2717b458000927"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/catalog.d.mts",
+          "sha256": "65a925798c537df2085e3744e8ca18cb7150acdc4882f5cf17f2e7702632623c"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/catalog.mjs",
+          "sha256": "721faa66f6631cdd4c89de180102e1eb40b28a7f5c651d15ebb20e5a4bfda447"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/api-v1.test.mjs",
+          "sha256": "50448d6593ba17d432864d2ec05c661b7963d670c8e685bbe4d108aaf40ae02a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/test_api_v1.py",
+          "sha256": "fc55c237d02c2ee56fcc3c5d7ee1e8be66f26fd594e3a1277e08075bde34cc78"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/.gitignore",
+          "sha256": "d17600d717042c45f76ced332fba65f02a996c07c3974396f1c4ecc89370fd06"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/README.md",
+          "sha256": "18f2e8de6423bcc00fbff7d5521711ec8f91a4004c775f1eb7480fb2be6daf0a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/growth.json",
+          "sha256": "5006e8b767ac5e68f30a35ace2a5b56c578c5e1b745abbe403573a17e5098e77"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/legacy_hiroba.py",
+          "sha256": "ab69065e301bd824c63099fb38b829ef1b7ecfdfd510368f63c7819458e303c3"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/oracle-provenance.json",
+          "sha256": "8207643eb15ce1a9039555218c594f22c584fa93466aa495190408fb6020b998"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/scores.json",
+          "sha256": "59224c009066ac71d1e407f9f3ea1ab0c02e538c1d0d229b7b4dc041342dcc40"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/viewer-read-shanghai.json",
+          "sha256": "c3807d1cb165f674d545c478576cbb62418163e4b40e80b9921cfecfb50c9c37"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/fixtures/viewer-read-utc.json",
+          "sha256": "e8c7ed13924db4a2bbb36c33da3657da996e913de6f8f18badb571fa8f6b339e"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/package.json",
+          "sha256": "004df181edab0289afac9e700d9d8615aa518f2d26630619b9338b1fddfc0aba"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/pyproject.toml",
+          "sha256": "e210aba3154fc0a592f73ecef76174acaec9a29d1604db5a995d4bee151fd25a"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/__init__.py",
+          "sha256": "d118253e1c4d7be71622c096e4119b1a1f67da2319da426207daf763ff9a5cd6"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/legacy.py",
+          "sha256": "66fce2b4d944f4406a700683a033a79d391c845fc6e7a0ef74a6a709da023137"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
+          "sha256": "b3d58e459e2f070f4830a901b61b15a1a3bdb364370cf052e6b8fdc0bdda0a76"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/schema/contract-v1.json",
+          "sha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/index.ts",
+          "sha256": "a1e11721e36cf4914f8957748b82cb3570498ff129f0aa51b7a601ab4cb7698d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/legacy.mjs",
+          "sha256": "0617cb98bcd79111e3e068558c0444faa80912eb0d6b4127bfa23f6dee756df4"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/read-values.d.mts",
+          "sha256": "968552346ace2b39f6e40f6984d99c6853014ba1a7e123fdf08af20486df073b"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/read-values.mjs",
+          "sha256": "6820d1a2e6645e978b9b4c50dd4d2ad88ba21c8e1f05ddb5ed86895c5dfdc96c"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/src/score-read.ts",
+          "sha256": "af04c4cf13d7c5d2597822a6401a83cef64331cf27a152e73f9a0363f54febbd"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/contract.test.mjs",
+          "sha256": "04a9947968038e50e4c871be242d6b0bc22b8b976cfd0830a979aed9a636fe7d"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/test_contract.py",
+          "sha256": "74d2519ff3c43abc28d4a938316ba948569db68617def5d629459c11f5a51d3f"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tests/viewer-read.test.mjs",
+          "sha256": "9ee792a7259a7c8a6f7570ae55a181fe147f487131ab7e9ab7fa5fef8caaca31"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tools/generate_bindings.py",
+          "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
+        },
+        {
+          "file": "packages/sakura-taiko-contract/tools/generate_viewer_read_goldens.mjs",
+          "sha256": "75c7a7a48974a87d08ea651fb108a53ead121aa7541d724b96080a0aff1be2eb"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "f3_34",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1cf7e19aac2f/evidence/manageability-summary.json",
+        "sha256": "d52d4ae2c9bbf94e94b3e6968e3a86201051f7b95eba2d68430b4ee2d2562ba0"
+      },
+      "verifiedInputs": [
+        {
+          "file": "taiko_viewer/tests/developerApiV1ManageabilitySql.test.mjs",
+          "sha256": "47a835ae75e69024b440564a3e0f1eba65009e64ad9ab9ccd40904ec5ea8f3ce"
+        },
+        {
+          "file": "taiko_viewer/tests/fixtures/developerApiV1ManageabilityUi.mjs",
+          "sha256": "373d3c925cfe06d3792e47128dd549d39a99ed6629903f2c10eb1529eb7998a1"
+        },
+        {
+          "file": "taiko_viewer/pages/account/developer/grants.vue",
+          "sha256": "5978d06959480a6060423dedac1a780fe92d89492293673d93761fe2d59f10df"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/[clientId].delete.ts",
+          "sha256": "ca6b2f84c34b43bbf72fbda7859ea17b7017f7605a0532a7890f24ffa7267baf"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/index.get.ts",
+          "sha256": "2e002f64853f7a4e24ba08791068ac36040564291733037cb4916b3ec9f33996"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/clients/index.post.ts",
+          "sha256": "16eb4eef7316beb794ed3d59fc20d93b0b944b6ab0b5714aeabd7a99be297bdc"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/[grantId].delete.ts",
+          "sha256": "7a32cf5cc2a2c85038f42ab344fe59cfe1fc1bb51053745807f128119e8267b9"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/index.get.ts",
+          "sha256": "1e6a4e5a2123ca48b79bae84ac816b7e0e284dcfcbefe619a4dcf72cc01bf1e9"
+        },
+        {
+          "file": "taiko_viewer/server/api/account/developer/grants/index.post.ts",
+          "sha256": "c313340130be6c37b90c7c485cc7784c4432d724024e0be364d21c5b59ca518a"
+        },
+        {
+          "file": "taiko_viewer/server/infrastructure/developer-api-v1/schema.ts",
+          "sha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1"
+        },
+        {
+          "file": "taiko_viewer/server/services/developer-api-v1/authority.ts",
+          "sha256": "ee317e2cceeb3bbf7af3333447c402215fd4a9fcdf87496b6f504a02228bae18"
+        },
+        {
+          "file": "taiko_viewer/server/services/developer-api-v1/grants.ts",
+          "sha256": "3f017e6be0bf393dc9d6d378416904e82a4061d72bab31226d5124f113820a15"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "httpSdk74_sdk_scope",
+      "status": "REUSED_WITH_HASH_PROOF",
+      "source": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-8b89a48bcfcd/evidence/sql-summary.json",
+        "sha256": "c993e0290fe1a08c2dab804ce23ce0508958f60c188f55418bc23740504275cf"
+      },
+      "verifiedInputs": [
+        {
+          "file": "taiko_viewer/lib/developer-api-v1.ts",
+          "sha256": "3f67f0b59b31866215bab3f0176bb8dd91940e3597fde21b18ca0213dc0726f1"
+        }
+      ],
+      "scope": "Only listed unchanged inputs and original claims. Lifecycle rerun separately; original74 is not a full revised-runtime recertification."
+    },
+    {
+      "name": "frozen-sql-native",
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-1d5d7afd3543/evidence/command.json",
+        "sha256": "f5c70fc8202a091054369a499626aeda2d0e7ced26c09b9f43b73ed79779c2b9"
+      }
+    },
+    {
+      "name": "frozen-openapi-final",
+      "status": "RERUN_PASS",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-28fc183c32c2/evidence/command.json",
+        "sha256": "169cb983674aea9635bf1e7c65a0db510b905cfbc0378a44ab90dd56de5f6aa8"
+      }
+    }
+  ],
+  "historicalConsumerPreparation": {
+    "branch": "prep/viewer1-consumer-readmodel-20261016",
+    "baseline": "49899d48a0ccff677d8506f59cea502b521758c4",
+    "reviewDeliveryCommit": "289094de74fa4872c7e43459ec57ce5c207ce36f",
+    "runtimeChangeFromReview": false,
+    "report": "docs/viewer1-readmodel-i5-report.md",
+    "productRouteRegistered": false,
+    "productPageChanged": false,
+    "fallbackImplemented": false,
+    "sourceSchemaOrAlgorithmsChanged": false
+  },
+  "historicalI5EvidenceIndex": "/home/sigaer/taiko/qa-vault/evidence/083-freeze-closeout-i5-20261016/i5-evidence-index.json",
+  "i5Status": "MY_TAIKO_I5_PRODUCT_CANDIDATE_READY_FOR_REVIEW",
+  "i5Release": {
+    "baseline": "1b06f7d7e7ab2c6c7c6bd66ebfa117512196fed3",
+    "freezeIntegrationCommit": "196be85a6216d1468f3b8182b2a017fe6cd08b37",
+    "commitIdentity": "/home/sigaer/taiko/qa-vault/evidence/083-owner-approved-freeze-i5-20261016/i5-delivery-identity.json",
+    "manifest": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer1-consumer-readmodel-20261016/docs/083-release-manifest.json",
+      "sha256": "7e40b26b5cd6c28e903f21ad2ebf720752b81b019f26edfea22cf68a08beaf04"
+    },
+    "modeDefault": "legacy",
+    "modeInOwnedQA": "read-model",
+    "modeKeys": [
+      "NUXT_MY_TAIKO_READ_MODEL_MODE",
+      "NUXT_PUBLIC_MY_TAIKO_READ_MODEL_MODE"
+    ],
+    "automaticFallback": false,
+    "productRoute": "GET /api/account/my-taiko/overview",
+    "page": "/my",
+    "thirdPartyKeyAuthorizesSelfRead": false,
+    "prototypeRoutesInProduct": false,
+    "runtimeEnabledScope": "Developer API default only; My Taiko explicitly enabled in owned QA. Production state NOT_OBSERVED"
+  },
+  "failuresRetainedThisOrder": [
+    {
+      "label": "frozen-sql-fixed",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-55b027bc13a8/evidence/command.json",
+        "sha256": "2c18207079d5b00f69e0c23fd40585afd310e4613a5074f5e14d78538705ebc2"
+      }
+    },
+    {
+      "label": "frozen-sql",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-53c71cf57d55/evidence/command.json",
+        "sha256": "d05c280ba84b614e2592ca08f073eb96b0b4cabb4a2747f86ceefe4c132eb521"
+      }
+    },
+    {
+      "label": "i5-product-browser-diagnostic",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-bd882b87b255/evidence/command.json",
+        "sha256": "ad01b4f6a792e80aeb3f49b3bb0c2aa30c8162e2efbc7d3990d25caa86d44b09"
+      }
+    },
+    {
+      "label": "i5-product-diagnostic",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-ec37a720dd4b/evidence/command.json",
+        "sha256": "399510c7199327389d0b4deb1606573374fc6493d5b6f43988462cec85aca555"
+      }
+    },
+    {
+      "label": "i5-product-fact-fixtures",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-667f0d470ac9/evidence/command.json",
+        "sha256": "6b04932991985c89a7d08fb41e9417ac49d2185766cf0db20f417921b5a12b0b"
+      }
+    },
+    {
+      "label": "i5-product-host",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-471fd69bbf9f/evidence/command.json",
+        "sha256": "35e2d173f81b2e7d045a181c33fbff4cf40f582abac453d8d9031a3086e388b6"
+      }
+    },
+    {
+      "label": "i5-product-hydrated-browser",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-fb6b27a539f8/evidence/command.json",
+        "sha256": "9654255d01235ef9f09f5e32ab1ee6422440292440648345fa427419d8939e3e"
+      }
+    },
+    {
+      "label": "i5-product-profile-probe",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-5b41f2a98efe/evidence/command.json",
+        "sha256": "b55788fd99a42c493404cfad8218eab3ad53ad6fbcb8e7ab28f8c05839c378a4"
+      }
+    },
+    {
+      "label": "i5-product-ready",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-c6d5a7aec636/evidence/command.json",
+        "sha256": "ef98e0591602ef208cff6d264c641d3c2114fb8480d4b6c18d7a61ee8e7c7892"
+      }
+    },
+    {
+      "label": "i5-product-schema-complete",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-e4ab2e099f7d/evidence/command.json",
+        "sha256": "f69fb730fa22723ea8708254ec44061d4e345fdc37024547316b2fc3440d52cd"
+      }
+    },
+    {
+      "label": "i5-types",
+      "status": "FAIL",
+      "record": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-d0ea35767e14/evidence/command.json",
+        "sha256": "03e8223e2f00cfc7946380f771230dd25804b81d88f108e0b5180d93c618efe7"
+      }
+    },
+    {
+      "status": "FAIL",
+      "run": "qa-f77e2f29a44f",
+      "reason": "Reuse proof rejected original74 read.ts mismatch; reuse explicitly narrowed to unchanged SDK. Not an approved-input mismatch.",
+      "evidence": {
+        "path": "/home/sigaer/taiko/qa-vault/runs/qa-f77e2f29a44f/evidence/output.log",
+        "sha256": "e7f58d13e56e9eab2ee59e0ac25d14215e4b76e4594a8475ef615d9b47d42b95"
+      }
+    }
+  ],
+  "nextViewer1": [
+    {
+      "priority": "P0 before activation",
+      "task": "Gate P identity/ingress/ACL/proxy/quota/key audit and restore/migration/runbook review",
+      "dependsOn": "local F/I5 delivery",
+      "productionAuthorizationRequired": true
+    },
+    {
+      "priority": "P1 local",
+      "task": "Choose next actual consumer owner/version and adopt read-model/CalculationProfile compatibility matrix",
+      "dependsOn": "this I5 candidate review; sole Contract remains unchanged",
+      "productionAuthorizationRequired": false
+    },
+    {
+      "priority": "P1 before release",
+      "task": "Controlled canary, enable approved mode, real post-migration read smoke and rollback rehearsal",
+      "dependsOn": "Gate P independent authorization and reviewed backups",
+      "productionAuthorizationRequired": true
+    }
+  ],
+  "testFixtureRoutesAdmittedScope": "Historical isolated F/SDK hosts only; /qa/* absent from built product routes."
+}

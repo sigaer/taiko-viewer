@@ -1,5 +1,10 @@
+import { readAuthorizedSourceUserdata } from "../../services/account/source-access.ts";
+import { privateSourceResponse } from "../../infrastructure/account/private-source-response.ts";
+import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
+import {readAuthorizedMergedSource} from '../../services/account/merged-source-read.ts';
 import type { H3Event, MultiPartData } from "h3";
-import { createError } from "h3";
+import { createError, isError } from "h3";
+import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import {
@@ -7,7 +12,6 @@ import {
   type DeveloperApplicationRow,
   ensureNonEmpty,
   isSiteOperator,
-  readRawUserdataText,
   sha256
 } from "~/server/internal/account/shared";
 import {
@@ -285,13 +289,13 @@ export const requireDeveloperToken = async (event: H3Event) => {
 };
 
 export const getDeveloperUserdataByUserid = async (event: H3Event, useridInput: unknown) => {
-  await enforceTaikoOpenQuota(event, "developer_userdata");
-  const userid = String(useridInput || "").trim();
-  ensureNonEmpty(userid, "缺少 userid");
-  const text = await readRawUserdataText(userid);
   try {
-    return JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    throw createError({ statusCode: 500, statusMessage: "目标用户的本地 JSON 已损坏" });
+    await enforceTaikoOpenQuota(event, "developer_userdata");
+    const userid = String(useridInput || "").trim();
+    ensureNonEmpty(userid, "缺少 userid");
+    return await privateSourceResponse(event, 'current', () => isMergedSource(userid)?readAuthorizedMergedSource(event,userid,'current'):readAuthorizedSourceUserdata(event, userid));
+  } catch (error) {
+    if (isError(error) || error instanceof PublicationUnavailableError) throw error;
+    throw new PublicationUnavailableError();
   }
 };

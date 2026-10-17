@@ -1,20 +1,27 @@
+import {qaTempPrefix} from '../../tests/fixtures/qaPaths.mjs';
 // Offline-only import adapter. Production algorithms run from their actual source;
 // only runtime paths, the frozen calendar oracle and benchmark hooks are injected.
-import { readFile } from "node:fs/promises";
+import { readFile, mkdtemp, writeFile, rm } from "node:fs/promises";
 import { resolve, dirname, isAbsolute } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const dataUrl = code => `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`;
 export async function importGrowthModule(relative, { userdataDir, before = false, hooks = null } = {}) {
+  const modules = await mkdtemp(qaTempPrefix('growth-loader-modules-'));
+  let moduleIndex = 0;
+  const dataUrl = async code => {
+    const path = resolve(modules, `module-${moduleIndex++}.mjs`);
+    await writeFile(path, code);
+    return pathToFileURL(path).href;
+  };
   const cache = new Map();
   const hookKey = `growth_bench_${crypto.randomUUID().replaceAll("-", "_")}`;
   if (hooks) globalThis[hookKey] = hooks;
   const load = async path => {
     if (cache.has(path)) return cache.get(path);
-    if (path === resolve(root, "server/internal/account/shared.ts")) {
+    if (path === resolve(root, "server/internal/account/shared.ts") || path === resolve(root, "server/infrastructure/runtime-paths.ts")) {
       if (!userdataDir) throw new Error("Offline evidence requires injected paths");
-      return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)}});`);
+      return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)},repoRoot:${JSON.stringify(process.env.QA_RUN_TMPDIR)}});`);
     }
     let source = await readFile(path, "utf8");
     if (before && path === resolve(root, "utils/playerGrowth.ts")) {
@@ -39,7 +46,7 @@ export async function importGrowthModule(relative, { userdataDir, before = false
       }
       replace("const payload = JSON.parse(raw) as UserdataPayload;", "__bench.rawRead(Buffer.byteLength(raw));\n      const payload = JSON.parse(raw) as UserdataPayload;\n      __bench.parsed(payload.songs?.length || 0);");
       replace("const days = snapshots.map", "__bench.loaded(snapshots.length, invalidFiles);\n  const days = snapshots.map");
-      replace("  }\n  __bench.loaded", "    finally { __bench.fileDone(snapshots.length, invalidFiles, observations.length, observations.at(-1)?.evidenceLevel); }\n  }\n  __bench.loaded");
+      source = source.replace(/(\s*)}\n\s*__bench.loaded/, "$1  finally { __bench.fileDone(snapshots.length, invalidFiles, observations.length, observations.at(-1)?.evidenceLevel); }$1}\n  __bench.loaded");
       source = `const __bench=globalThis[${JSON.stringify(hookKey)}];\n` + source;
     }
     let code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -55,7 +62,8 @@ export async function importGrowthModule(relative, { userdataDir, before = false
       } else if (!specifier.startsWith("node:") && !specifier.startsWith("file:")) url = import.meta.resolve(specifier);
       code = code.replace(match[0], `from ${JSON.stringify(url)}`);
     }
-    const url = dataUrl(code); cache.set(path, url); return url;
+    const url = await dataUrl(code); cache.set(path, url); return url;
   };
-  return import(await load(resolve(root, relative)));
+  try { return await import(await load(resolve(root, relative))); }
+  finally { await rm(modules, { recursive: true, force: true }); }
 }

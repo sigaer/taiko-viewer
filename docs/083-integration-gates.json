@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "status": "LOCAL_INTEGRATION_READY_FOR_REVIEW",
+  "CONTRACT_FROZEN_LOCAL": true,
+  "I5_LOCAL_SCOPED_PASS": true,
+  "UNMODIFIED_NUXT_STARTUP": "PASS_UNMODIFIED_ISOLATED_STARTUP",
+  "LOCAL_INTEGRATION_READY_FOR_REVIEW": true,
+  "contractFrozen": true,
+  "gateC082": "PASS_WITH_ACCEPTED_RISK",
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "deployReady": false,
+  "publicApiEnabled": false,
+  "productionPublicApiState": null,
+  "productionAccess": false,
+  "push": false,
+  "mergeMain": false,
+  "deploy": false,
+  "productionRestart": false,
+  "annualLoad": false,
+  "builtSourceCommit": "3fb935a7763f86d7c6c45fc1b5a16846b2fa142a",
+  "qaFixCommit": "d4f997caace3252cf2045c0158593d161f864c2b",
+  "deliveryIdentityArtifactId": "083-integration-delivery-identity",
+  "manifestSha256": "afbafdf26491c14fa1b9b1f4437029dee3da71ccdd5433668631de053cdff09b",
+  "checks": {
+    "lockedInput": "PASS",
+    "localRepositoryInventory": "PASS_SOURCE_ONLY_NO_FETCH",
+    "formalBuild": "PASS",
+    "unmodifiedOutputBeforeAfter": "PASS",
+    "runtimeNamedObservations": 23,
+    "browserApiResponses": 13,
+    "browserFlows": 6,
+    "recovery": "PASS_FOUR_SYNTHETIC_TABLES_ONLY",
+    "f3Indexes": "PASS_NEW_ISOLATED_SCHEMA",
+    "productionSchemaDiff": "NOT_OBSERVED",
+    "affectedTypeDiagnostics": 0,
+    "outsideScopeTypeDiagnostics": 154,
+    "wholeRepositoryTypes": "NOT_CERTIFIED",
+    "cleanup": "PASS",
+    "goalWrites": 0,
+    "measurementWrites": 0
+  },
+  "resourceEvidence": {
+    "buildSampledPeakBytes": 4270735360,
+    "qaSampledPeakBytes": 1140666368,
+    "qaMaxMemoryPsiFullAvg10": 2.53,
+    "kernelMemoryPeak": "UNAVAILABLE",
+    "oomEvents": 0,
+    "capacityCertification": false
+  },
+  "defaults": {
+    "myTaikoPrivate": "legacy",
+    "myTaikoPublic": "legacy",
+    "developerApiPrivate": false,
+    "developerApiPublic": false,
+    "annualStartupMode": "normal",
+    "qaAnnualStartupMode": "owned-qa with actual isolation admission"
+  },
+  "reusedHistoricalEvidence": {
+    "i5": "26 HTTP and 7 browser flows, with historical compiled-plugin patch boundary retained",
+    "contract": "18 Golden / 74 HTTP-SDK / 11 OpenAPI operations retained; no full rerun",
+    "082": "O1/O2 accepted risks and all historical FAIL retained"
+  },
+  "failedAttemptsRetained": [
+    "locked-install log-label collision",
+    "Kinoko old rejection assertion versus filtered zero-write behavior",
+    "recovery expected 403 instead of disabled-client 401",
+    "first scoped types: tuple/bounded array diagnostics",
+    "build memory.peak missing before npm",
+    "external legacy Annual build schema missing",
+    "NODE_ENV production omitted build devDependencies",
+    "clean-tree guard rejected pending docs",
+    "first unmodified startup: Nitro import.meta driver resolution",
+    "second startup: narrowed owner-race fixture selected another binding",
+    "document assembly: string path passed to Path-only hash helper"
+  ],
+  "artifacts": [
+    {
+      "artifactId": "locked-input-proof",
+      "sha256": "23f7504de2348ba22873a8c4da7c4b50086105561b2d76ad92fd68ce5ea4d394"
+    },
+    {
+      "artifactId": "local-three-repository-inventory",
+      "sha256": "d96f15a95fb17332144ea7a45b8d67532e3c293b63cc788aadd2b710cff6d8b0"
+    },
+    {
+      "artifactId": "production-build-receipt",
+      "sha256": "6a96a7a254555f0d070147286ee7ccaf21f9482bd9da98869cd13d0edc5991e1"
+    },
+    {
+      "artifactId": "unmodified-output-proof",
+      "sha256": "6527e7bfc68060d8ef3eaa8af8efeef3e3ef72078b1dec43291501dfb0433b34"
+    },
+    {
+      "artifactId": "unmodified-runtime-observations",
+      "sha256": "f16bbb6a9ed60cc6e406c0e4241933cbc791ef1433259df55ce46d637786f747"
+    },
+    {
+      "artifactId": "unmodified-runtime-cleanup",
+      "sha256": "d736680eec5308e8e3ab21e0d53cfcde4f77c6966456e8d9bf3fadb941c8c87f"
+    },
+    {
+      "artifactId": "unmodified-runtime-resources",
+      "sha256": "63f82c1c111de75d56e7131ff329b1c4c211acb6aff6c50891c5a0eb5cc05739"
+    },
+    {
+      "artifactId": "schema-recovery-proof",
+      "sha256": "f3abf2cd1bbec8b8a85970bde95a87612e6aadb87fb8b101051af1873996f184"
+    },
+    {
+      "artifactId": "schema-recovery-http",
+      "sha256": "cdb67c072ba7cbb0e7ce7000108c406213ae434c8ef3ac6d847ff238355cb4a2"
+    },
+    {
+      "artifactId": "scoped-typecheck",
+      "sha256": "59575233f9238c81eeda8fa6da22dbc35f93fa45d6d10aef74d474767dd009bd"
+    },
+    {
+      "artifactId": "kinoko-admission",
+      "sha256": "0702936fda9ae9f4245e5519d492333150e3da6db53630bdd83735b646c9dd35"
+    }
+  ],
+  "ownerPending": [
+    {
+      "id": "R-ORIGIN-DIFF",
+      "state": "OWNER_REVIEW_REQUIRED_BEFORE_MAIN_INTEGRATION",
+      "scope": "Selective Kinoko admission port; origin legacy contamination/conflict/Writer/UI remainder not merged"
+    },
+    {
+      "id": "P-ID-PROXY-KEY-AUDIT",
+      "state": "PENDING_SEPARATE_READONLY_AUTH",
+      "scope": "Fill exact allowlist and observe actual deployed identity, ingress, ACL, trusted peers and redaction"
+    },
+    {
+      "id": "P-SCHEMA",
+      "state": "PENDING_SEPARATE_DDL_AUTH",
+      "scope": "Observe production schema then approve four-table and conditional F3-index diff"
+    },
+    {
+      "id": "P-RESTORE-ASSETS",
+      "state": "PENDING_OWNER",
+      "scope": "Consistent checkpoint, PITR, encrypted offsite destination, RPO/RTO at real scale, 12 private assets mapping"
+    },
+    {
+      "id": "P-CANARY",
+      "state": "PENDING_OWNER",
+      "scope": "Allowlist routing implementation, paired MyTaiko modes and independent Developer OFF rollback"
+    },
+    {
+      "id": "P-V1",
+      "state": "PENDING_SEPARATE_ENABLEMENT_AUTH",
+      "scope": "No enablement implied by contract freeze or local integration"
+    }
+  ],
+  "i6": {
+    "separateBranch": "integration/viewer1-i6-home-20261016",
+    "status": "I6_DEFERRED_WITH_EVIDENCE",
+    "blocksR": false,
+    "commit": "d52410c352f2071e6d28af095504d323214bd363"
+  }
+}

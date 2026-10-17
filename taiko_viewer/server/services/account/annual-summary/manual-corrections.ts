@@ -22,6 +22,6 @@ export const annualCorrectionsAreCurrent = (
   algorithm: string | undefined, generatedAt: string, latestEdit: number
 ) => {
   if (algorithm === 'annual-observation-v4.5.2') return latestEdit === 0;
-  if (algorithm !== 'annual-observation-v4.5.3') return false;
+  if (algorithm !== 'annual-observation-v4.5.3' && algorithm !== 'annual-observation-v4.5.4') return false;
   return latestEdit <= Date.parse(generatedAt);
 };

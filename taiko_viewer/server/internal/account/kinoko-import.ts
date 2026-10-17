@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import { filterKinokoEvents, scoreTimeIssue, scoreEventEpoch, type TimeSummary } from "./kinoko-time";
+import { filterKinokoEvents, scoreEventEpoch, scoreTimeIssue, type TimeSummary } from "./kinoko-time";
 import type { UserdataPayload, UserdataSong } from "./shared";
 
 const KINOKO_SCORE_ENDPOINT = "https://kinoko.zorua.cn/api/v1/scores/hiroba";
@@ -154,12 +154,12 @@ export const fetchKinokoScores = async (apiKey: string, now = new Date()): Promi
   }
   const rawSongs = Array.isArray(playedRecords?.scoreInfo) ? playedRecords.scoreInfo : null;
   if (!rawSongs) throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回的成绩结构不正确" });
-  const songs = rawSongs.map(song => sanitizeKinokoSong(song)).filter(Boolean) as UserdataSong[];
+  const songs = rawSongs.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
   if (songs.length !== rawSongs.length) {
     throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的成绩记录" });
   }
-  const filtered = filterKinokoEvents(songs, now);
-  return { playerId: returnedPlayerId, songs: filtered.records, receivedBytes, timeSummary: filtered.timeSummary };
+  const admitted = filterKinokoEvents(songs, now);
+  return { playerId: returnedPlayerId, songs: admitted.records, receivedBytes, timeSummary: admitted.timeSummary };
 };
 
 export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Promise<KinokoHistoryFetchResult> => {
@@ -185,7 +185,7 @@ export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Prom
     if (songNo <= 0 || level < 1 || level > 5 || !rawRecords?.length) {
       throw createError({ statusCode: 502, statusMessage: "菌菌控制台返回了无效的历史分组" });
     }
-    const songs = rawRecords.map(song => sanitizeKinokoSong(song)).filter(Boolean) as UserdataSong[];
+    const songs = rawRecords.map(sanitizeKinokoSong).filter(Boolean) as UserdataSong[];
     if (
       songs.length !== rawRecords.length ||
       songs.some((song) => song.song_no !== songNo || song.level !== level)
@@ -198,45 +198,47 @@ export const fetchKinokoHistory = async (apiKey: string, now = new Date()): Prom
     }
   }
   const filtered = filterKinokoEvents(records, now);
-  // Select latest only after admission, across all groups for the same chart.
+  const admitted = filtered.records;
   const latest = new Map<string, UserdataSong>();
-  for (const song of filtered.records) {
+  for (const song of admitted) {
     const key = `${song.song_no}:${song.level}`, previous = latest.get(key);
     if (!previous || scoreEventEpoch(song) >= scoreEventEpoch(previous)) latest.set(key, song);
   }
   latestSongs.push(...latest.values());
-  return { playerId: returnedPlayerId, records: filtered.records, latestSongs, receivedBytes, timeSummary: filtered.timeSummary };
+  return { playerId: returnedPlayerId, records: admitted, latestSongs, receivedBytes, timeSummary: filtered.timeSummary };
 };
 
 const maxField = (local: UserdataSong, remote: UserdataSong, field: (typeof CUMULATIVE_FIELDS)[number]) => {
   local[field] = Math.max(toNonNegativeInteger(local[field]), toNonNegativeInteger(remote[field]));
 };
 
+/** Keep pre-existing polluted current out of every new full history snapshot.
+ * Reconcile through the existing Writer by refusing this import before staging;
+ * repair of historical data is a separate operation, never an import side effect.
+ */
+export const assertKinokoCurrentTime = (userdata: UserdataPayload, now: Date) => {
+  if ((userdata.songs || []).some(song => scoreTimeIssue(song, now, false))) {
+    throw createError({ statusCode: 409, statusMessage: "现有成绩时间异常，导入已停止，请联系管理员处理", data: { code: "KINOKO_CURRENT_TIME_CONFLICT", published: false } });
+  }
+};
+
 export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: UserdataSong[], now = new Date()) => {
-  const filtered = filterKinokoEvents(remoteSongs, now);
+  assertKinokoCurrentTime(userdata, now);
+  remoteSongs = filterKinokoEvents(remoteSongs, now).records;
   const songs = Array.isArray(userdata.songs) ? userdata.songs : [];
   const songMap = new Map(songs.map((song) => [`${song.song_no}:${song.level}`, song]));
   let added = 0;
   let updated = 0;
   let unchanged = 0;
 
-  let conflictRecords = 0;
-  let duplicateRecords = 0;
-  const known = new Set(songs.map(getKinokoScoreFingerprint));
-  const changedSongs: UserdataSong[] = [];
-  for (const remote of filtered.records) {
+  for (const remote of remoteSongs) {
     const key = `${remote.song_no}:${remote.level}`;
     const local = songMap.get(key);
-    if (local && scoreTimeIssue(local, now, false)) { conflictRecords++; continue; }
-    const fingerprint = getKinokoScoreFingerprint(remote);
-    if (known.has(fingerprint)) { duplicateRecords++; unchanged++; continue; }
-    known.add(fingerprint);
     if (!local) {
       const inserted = { ...remote };
       songs.push(inserted);
       songMap.set(key, inserted);
       added += 1;
-      changedSongs.push(inserted);
       continue;
     }
     const before = JSON.stringify(local);
@@ -252,21 +254,8 @@ export const mergeKinokoScores = (userdata: UserdataPayload, remoteSongs: Userda
     const remoteUpdatedAt = String(remote.update_datetime || "");
     if (remoteUpdatedAt && scoreEventEpoch(remote) > localEpoch) local.update_datetime = remoteUpdatedAt;
     if (JSON.stringify(local) === before) unchanged += 1;
-    else { updated += 1; changedSongs.push(local); }
+    else updated += 1;
   }
   userdata.songs = songs;
-  const uniqueChanged = [...new Map(changedSongs.map(row => [`${row.song_no}:${row.level}`, row])).values()];
-  return { added, updated, unchanged, total: remoteSongs.length, conflictRecords, duplicateRecords, writtenRecords: uniqueChanged.length, changedSongs: uniqueChanged, timeSummary: filtered.timeSummary };
-};
-
-// Existing pollution is an R0 conflict, never a fatal whole-account validation.
-export const excludeKinokoConflicts = (userdata: UserdataPayload, records: UserdataSong[], now: Date) => {
-  const polluted = new Set((userdata.songs || []).filter(row => scoreTimeIssue(row, now, false)).map(row => `${row.song_no}:${row.level}`));
-  const accepted: UserdataSong[] = [], conflicts: { position: number; reason: string }[] = [];
-  let conflictRecords = 0;
-  records.forEach((row, position) => {
-    if (polluted.has(`${row.song_no}:${row.level}`)) { conflictRecords++; if (conflicts.length < 20) conflicts.push({ position, reason: "existing-time-contamination-requires-R0" }); }
-    else accepted.push(row);
-  });
-  return { records: accepted, conflictRecords, conflicts, conflictDetailsTruncated: conflictRecords > conflicts.length };
+  return { added, updated, unchanged, total: remoteSongs.length };
 };

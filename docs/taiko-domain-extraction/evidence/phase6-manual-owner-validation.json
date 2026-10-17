@@ -1,0 +1,100 @@
+{
+  "step": "6.3d.3",
+  "status": "MANUAL_OWNER_RECHECK_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "validation": {
+    "offlineNodeTests": 120,
+    "realTestDbSqlTests": 15,
+    "newManualSqlTests": 10,
+    "typescript": "domainRead.tsconfig PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "frozenManualOracleCommit": "fbfd43e",
+    "logPath": "/var/tmp/phase6-manual-owner-final-qa.log",
+    "logSha256": "f4fc2e63034637e38b7a0bcab822d258de498a5ff89fe536aede02d3a2c289f5",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791685097-1126077.service",
+      "durationMs": 60002,
+      "sampledMemoryPeakBytes": 289484800,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "48904 kB",
+          "VmRSS": "48904 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "actual manual current and all H bytes match frozen legacy across create/read/upsert/rename/edit/delete sequence",
+    "actual SQL grant revoked while rename/upsert/delete/read wait for source EX/SH returns 403 and preserves entire C/H",
+    "manual nickname SQL change remains inside source fence; proven publication failure compensates old nickname",
+    "lost source acknowledgement retains committed nickname and scores after nonce proof",
+    "callback failure compensation runs in original ALS request while source EX remains alive",
+    "post-failure proof and destructive SQL compensation retain the same reacquired EX against an independent queued writer",
+    "bot visibility and claim mutations hold EX without generating score observation",
+    "viewer detach gets EX before owner cleanup SQL transaction; removed owner cannot write",
+    "confirmation, input, owner and last-holder API statuses preserved",
+    "existing Goal SQL ordering, completion, concurrency and privacy regression preserved"
+  ],
+  "dailyTitleRelations": {
+    "path": "taiko_viewer/assets/data/title_song_relations.json",
+    "status": "PASS",
+    "previousGeneratedAt": "2026-10-10T02:07:10.978898+00:00",
+    "currentGeneratedAt": "2026-10-11T02:07:14.278350+00:00",
+    "businessFields": [
+      "stats",
+      "relations",
+      "by_song",
+      "by_title"
+    ],
+    "stats": {
+      "rows_total": 866,
+      "api_relations_total": 593,
+      "relations_total": 685,
+      "songs_total": 442,
+      "titles_total": 525
+    },
+    "relationsChanged": false,
+    "indexesChanged": false,
+    "change": "generation timestamp only",
+    "previousSha256": "e9b7e6f95e1b396758d5b981a2c28b93a1c7bb3019c76378c5b5097ae29eec34",
+    "currentSha256": "333b32abdd78e67d5d3d94fa28fbbf8c3d3bce312192a0c72f3563f7682c2874",
+    "businessSha256": "723218e275b43c58fb3e001ba7a37eaa430e3ebaaf9f453b5ab985a0daf44b09"
+  },
+  "limits": [
+    "Synthetic directories and synthetic owned SQL rows only; no production private data/DB/network QA",
+    "Test DB lacks production FK enforcement; manual test bootstrap deliberately omits FK and is not a production migration",
+    "Source EX/SH plus recheck closes queued manual request/ownership revocation tested here; generic unbind/account deletion and full grant convergence still pending",
+    "Manual permanentlyDelete currently remains historical rename path; durable receipt/outbox and one-transaction source/SQL cleanup not yet implemented",
+    "Claim/creation/detach SQL transaction/failure recovery still need lifecycle consolidation; no SQL/FS joint atomicity claim",
+    "No runtime R sync, Viewer deploy/push or service restart; pending unified Phase 6 release",
+    "250 ms sampled memory maximum is not an exact process-tree maximum or million-record capacity gate"
+  ],
+  "harnessCorrections": [
+    "First SQL invocation omitted explicit mutation opt-in and was rejected before any DB connection/mutation; rerun explicitly opted in",
+    "Frozen temporary module required absolute h3 resolution; rename has one optimistic owner precheck rather than two; corrected fixtures and reran",
+    "Full regression found pre-publication compensation had kernel EX but no request ALS; corrected callback context, 16 focused cases and then all 120+15 passed"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/scope.ts": "9a3f293607a55884db25a4ce4e9cad6864a439b590faae67f4f24d9436979792",
+    "taiko_viewer/server/utils/account/manual.ts": "d3fc01b084c27edeaae3eb8e96a752f433728e64617f91451242f5d10e863e3e",
+    "taiko_viewer/tests/publicationScope.test.ts": "ed4c5e81bb5419dea4ead15053f53d3af3fa661ceae26a8004aeff009faf714f",
+    "taiko_viewer/tests/manualPublicationSql.test.mjs": "dc8ebabf4ead4e3bb802ea7e0244d2ee3f849a6a525120a456bbc08edc7d45d2",
+    "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "8600675c27da681bcb8e9b9a81aedf6f25b5e7643f75ceae852dc9f6e0144c44"
+  }
+}

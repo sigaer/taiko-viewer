@@ -1,0 +1,1952 @@
+{
+  "schemaVersion": 1,
+  "status": "PARTIAL_FRESH_INSTALL_AND_BRIDGE_ONLY",
+  "workspace": "/var/tmp/taiko-runtime-fresh-xgdwnr6l",
+  "network": "PyPI index binary dependency download only; Taiko/Application/Contract/Core exact local wheels plus hash pins; install from downloaded wheelhouse",
+  "offlineWheelHashesScope": "Taiko candidate and pinned application/contract/core candidates only; not a complete dependency lock",
+  "offlineWheelHashes": [
+    {
+      "file": "taiko_bot-0.14.1-py3-none-any.whl",
+      "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+    },
+    {
+      "file": "taiko_application-0.8.0-py3-none-any.whl",
+      "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+      "sha256": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+      "sha256": "f34c1d0a3e58f5a7ce232ca50741e3235260eb8dabaedd95b41d84e7d0d0d47f"
+    }
+  ],
+  "roles": {
+    "center": {
+      "fullRoleInstall": "PASS",
+      "resolverExit": 0,
+      "resolverLogSha256": "6d1753f485040e9ea527fcac5d27f0bdd9928372a7635252834c584b708c6efe",
+      "resolverLog": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/center-install.log",
+      "pipCheck": "PASS",
+      "pipCheckLogSha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "installedOrigin": {
+        "version": "0.14.1",
+        "interpreter": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/center/bin/python",
+        "module": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/center/lib/python3.11/site-packages/taiko_store/bridge.py",
+        "isolated": 1,
+        "dependencies": [
+          {
+            "name": "setuptools",
+            "version": "65.5.0"
+          },
+          {
+            "name": "yarl",
+            "version": "1.25.1"
+          },
+          {
+            "name": "soupsieve",
+            "version": "2.10"
+          },
+          {
+            "name": "nb-cli",
+            "version": "1.7.4"
+          },
+          {
+            "name": "APScheduler",
+            "version": "3.11.3"
+          },
+          {
+            "name": "pydantic_core",
+            "version": "2.50.1"
+          },
+          {
+            "name": "binaryornot",
+            "version": "0.6.0"
+          },
+          {
+            "name": "nonebot-plugin-apscheduler",
+            "version": "0.5.0"
+          },
+          {
+            "name": "python-discovery",
+            "version": "1.6.2"
+          },
+          {
+            "name": "distlib",
+            "version": "0.4.3"
+          },
+          {
+            "name": "msgpack",
+            "version": "1.2.3"
+          },
+          {
+            "name": "markdown-it-py",
+            "version": "4.2.0"
+          },
+          {
+            "name": "pygtrie",
+            "version": "2.6.2"
+          },
+          {
+            "name": "textual",
+            "version": "8.2.8"
+          },
+          {
+            "name": "filelock",
+            "version": "4.2.0"
+          },
+          {
+            "name": "numpy",
+            "version": "2.4.6"
+          },
+          {
+            "name": "h11",
+            "version": "0.16.0"
+          },
+          {
+            "name": "linkify-it-py",
+            "version": "2.2.0"
+          },
+          {
+            "name": "pip",
+            "version": "26.2.1"
+          },
+          {
+            "name": "kiwisolver",
+            "version": "1.5.1"
+          },
+          {
+            "name": "fuzzywuzzy",
+            "version": "0.18.0"
+          },
+          {
+            "name": "starlette",
+            "version": "1.8.0"
+          },
+          {
+            "name": "nonestorage",
+            "version": "0.1.0"
+          },
+          {
+            "name": "httpx",
+            "version": "0.28.1"
+          },
+          {
+            "name": "anyio",
+            "version": "4.15.1"
+          },
+          {
+            "name": "sakura-taiko-core",
+            "version": "0.1.1"
+          },
+          {
+            "name": "nonebot2",
+            "version": "2.5.0"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.67.0"
+          },
+          {
+            "name": "idna",
+            "version": "3.20"
+          },
+          {
+            "name": "pydantic",
+            "version": "2.14.1"
+          },
+          {
+            "name": "virtualenv",
+            "version": "21.14.7"
+          },
+          {
+            "name": "annotated-types",
+            "version": "0.8.0"
+          },
+          {
+            "name": "propcache",
+            "version": "0.5.4"
+          },
+          {
+            "name": "cryptography",
+            "version": "48.0.1"
+          },
+          {
+            "name": "python-dateutil",
+            "version": "2.9.0.post0"
+          },
+          {
+            "name": "ujson",
+            "version": "6.0.0"
+          },
+          {
+            "name": "pandas",
+            "version": "3.0.6"
+          },
+          {
+            "name": "arrow",
+            "version": "1.4.0"
+          },
+          {
+            "name": "redis",
+            "version": "8.1.0"
+          },
+          {
+            "name": "watchfiles",
+            "version": "1.3.0"
+          },
+          {
+            "name": "uvicorn",
+            "version": "0.54.0"
+          },
+          {
+            "name": "wordcloud",
+            "version": "1.9.6"
+          },
+          {
+            "name": "Pygments",
+            "version": "2.21.0"
+          },
+          {
+            "name": "matplotlib",
+            "version": "3.11.2"
+          },
+          {
+            "name": "typing_extensions",
+            "version": "4.16.0"
+          },
+          {
+            "name": "python-slugify",
+            "version": "9.1.3"
+          },
+          {
+            "name": "beautifulsoup4",
+            "version": "4.15.0"
+          },
+          {
+            "name": "noneprompt",
+            "version": "0.1.11"
+          },
+          {
+            "name": "nonebot-adapter-qq",
+            "version": "1.7.3"
+          },
+          {
+            "name": "MarkupSafe",
+            "version": "3.0.4"
+          },
+          {
+            "name": "taiko-application",
+            "version": "0.8.0"
+          },
+          {
+            "name": "pillow",
+            "version": "12.3.0"
+          },
+          {
+            "name": "platformdirs",
+            "version": "4.13.0"
+          },
+          {
+            "name": "cookiecutter",
+            "version": "2.7.1"
+          },
+          {
+            "name": "PyYAML",
+            "version": "6.0.3"
+          },
+          {
+            "name": "contourpy",
+            "version": "1.3.3"
+          },
+          {
+            "name": "annotated-doc",
+            "version": "0.0.5"
+          },
+          {
+            "name": "urllib3",
+            "version": "2.8.0"
+          },
+          {
+            "name": "python-dotenv",
+            "version": "1.2.4"
+          },
+          {
+            "name": "text-unidecode",
+            "version": "1.3"
+          },
+          {
+            "name": "cashews",
+            "version": "7.6.0"
+          },
+          {
+            "name": "charset-normalizer",
+            "version": "3.5.2"
+          },
+          {
+            "name": "opentelemetry-api",
+            "version": "1.45.1"
+          },
+          {
+            "name": "mdit-py-plugins",
+            "version": "0.6.1"
+          },
+          {
+            "name": "tzlocal",
+            "version": "5.4.4"
+          },
+          {
+            "name": "PyMySQL",
+            "version": "1.2.3"
+          },
+          {
+            "name": "loguru",
+            "version": "0.7.3"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.11"
+          },
+          {
+            "name": "exceptiongroup",
+            "version": "1.3.1"
+          },
+          {
+            "name": "click",
+            "version": "8.5.0"
+          },
+          {
+            "name": "mdurl",
+            "version": "0.1.2"
+          },
+          {
+            "name": "rich",
+            "version": "15.0.0"
+          },
+          {
+            "name": "fastapi",
+            "version": "0.143.2"
+          },
+          {
+            "name": "Jinja2",
+            "version": "3.1.6"
+          },
+          {
+            "name": "aiomysql",
+            "version": "0.3.2"
+          },
+          {
+            "name": "httpcore",
+            "version": "1.0.9"
+          },
+          {
+            "name": "tomlkit",
+            "version": "0.14.0"
+          },
+          {
+            "name": "tzdata",
+            "version": "2026.5"
+          },
+          {
+            "name": "typing-inspection",
+            "version": "0.4.4"
+          },
+          {
+            "name": "cycler",
+            "version": "0.12.1"
+          },
+          {
+            "name": "sakura-taiko-contract",
+            "version": "0.1.0"
+          },
+          {
+            "name": "taiko-bot",
+            "version": "0.14.1"
+          },
+          {
+            "name": "six",
+            "version": "1.17.0"
+          },
+          {
+            "name": "multidict",
+            "version": "7.1.0"
+          },
+          {
+            "name": "prompt_toolkit",
+            "version": "3.0.53"
+          },
+          {
+            "name": "nonebot-adapter-onebot",
+            "version": "2.4.6"
+          },
+          {
+            "name": "websockets",
+            "version": "17.2"
+          },
+          {
+            "name": "cffi",
+            "version": "2.1.1"
+          },
+          {
+            "name": "wcwidth",
+            "version": "0.9.2"
+          },
+          {
+            "name": "requests",
+            "version": "2.34.2"
+          },
+          {
+            "name": "packaging",
+            "version": "26.3"
+          },
+          {
+            "name": "certifi",
+            "version": "2026.7.22"
+          },
+          {
+            "name": "pyparsing",
+            "version": "3.3.3"
+          }
+        ]
+      },
+      "installedLockSha256": "b338ce9815481876112b2afa02069dac20759eee114ac6aaa5aee24e4d5336f5",
+      "bridgeSynthetic": {
+        "status": "PASS",
+        "currentAndHistorySameCommit": true,
+        "readLeaseMutationDenied": true,
+        "isolatedImport": true,
+        "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+      }
+    },
+    "client": {
+      "fullRoleInstall": "PASS",
+      "resolverExit": 0,
+      "resolverLogSha256": "46c8ac547e6c9e9752cc49c1142e08b98075d76e65358ec9bcf236bc8c692acd",
+      "resolverLog": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/client-install.log",
+      "pipCheck": "PASS",
+      "pipCheckLogSha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "installedOrigin": {
+        "version": "0.14.1",
+        "interpreter": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/client/bin/python",
+        "module": "/var/tmp/taiko-runtime-fresh-xgdwnr6l/client/lib/python3.11/site-packages/taiko_store/bridge.py",
+        "isolated": 1,
+        "dependencies": [
+          {
+            "name": "setuptools",
+            "version": "65.5.0"
+          },
+          {
+            "name": "yarl",
+            "version": "1.25.1"
+          },
+          {
+            "name": "soupsieve",
+            "version": "2.10"
+          },
+          {
+            "name": "nb-cli",
+            "version": "1.7.4"
+          },
+          {
+            "name": "APScheduler",
+            "version": "3.11.3"
+          },
+          {
+            "name": "pydantic_core",
+            "version": "2.50.1"
+          },
+          {
+            "name": "binaryornot",
+            "version": "0.6.0"
+          },
+          {
+            "name": "nonebot-plugin-apscheduler",
+            "version": "0.5.0"
+          },
+          {
+            "name": "python-discovery",
+            "version": "1.6.2"
+          },
+          {
+            "name": "distlib",
+            "version": "0.4.3"
+          },
+          {
+            "name": "msgpack",
+            "version": "1.2.3"
+          },
+          {
+            "name": "markdown-it-py",
+            "version": "4.2.0"
+          },
+          {
+            "name": "pygtrie",
+            "version": "2.6.2"
+          },
+          {
+            "name": "textual",
+            "version": "8.2.8"
+          },
+          {
+            "name": "filelock",
+            "version": "4.2.0"
+          },
+          {
+            "name": "numpy",
+            "version": "2.4.6"
+          },
+          {
+            "name": "h11",
+            "version": "0.16.0"
+          },
+          {
+            "name": "linkify-it-py",
+            "version": "2.2.0"
+          },
+          {
+            "name": "pip",
+            "version": "26.2.1"
+          },
+          {
+            "name": "kiwisolver",
+            "version": "1.5.1"
+          },
+          {
+            "name": "fuzzywuzzy",
+            "version": "0.18.0"
+          },
+          {
+            "name": "starlette",
+            "version": "1.8.0"
+          },
+          {
+            "name": "nonestorage",
+            "version": "0.1.0"
+          },
+          {
+            "name": "httpx",
+            "version": "0.28.1"
+          },
+          {
+            "name": "anyio",
+            "version": "4.15.1"
+          },
+          {
+            "name": "nonebot2",
+            "version": "2.5.0"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.67.0"
+          },
+          {
+            "name": "idna",
+            "version": "3.20"
+          },
+          {
+            "name": "pydantic",
+            "version": "2.14.1"
+          },
+          {
+            "name": "virtualenv",
+            "version": "21.14.7"
+          },
+          {
+            "name": "annotated-types",
+            "version": "0.8.0"
+          },
+          {
+            "name": "propcache",
+            "version": "0.5.4"
+          },
+          {
+            "name": "cryptography",
+            "version": "48.0.1"
+          },
+          {
+            "name": "python-dateutil",
+            "version": "2.9.0.post0"
+          },
+          {
+            "name": "ujson",
+            "version": "6.0.0"
+          },
+          {
+            "name": "pandas",
+            "version": "3.0.6"
+          },
+          {
+            "name": "arrow",
+            "version": "1.4.0"
+          },
+          {
+            "name": "redis",
+            "version": "8.1.0"
+          },
+          {
+            "name": "watchfiles",
+            "version": "1.3.0"
+          },
+          {
+            "name": "uvicorn",
+            "version": "0.54.0"
+          },
+          {
+            "name": "wordcloud",
+            "version": "1.9.6"
+          },
+          {
+            "name": "Pygments",
+            "version": "2.21.0"
+          },
+          {
+            "name": "matplotlib",
+            "version": "3.11.2"
+          },
+          {
+            "name": "typing_extensions",
+            "version": "4.16.0"
+          },
+          {
+            "name": "python-slugify",
+            "version": "9.1.3"
+          },
+          {
+            "name": "beautifulsoup4",
+            "version": "4.15.0"
+          },
+          {
+            "name": "noneprompt",
+            "version": "0.1.11"
+          },
+          {
+            "name": "nonebot-adapter-qq",
+            "version": "1.7.3"
+          },
+          {
+            "name": "MarkupSafe",
+            "version": "3.0.4"
+          },
+          {
+            "name": "taiko-application",
+            "version": "0.8.0"
+          },
+          {
+            "name": "pillow",
+            "version": "12.3.0"
+          },
+          {
+            "name": "platformdirs",
+            "version": "4.13.0"
+          },
+          {
+            "name": "cookiecutter",
+            "version": "2.7.1"
+          },
+          {
+            "name": "PyYAML",
+            "version": "6.0.3"
+          },
+          {
+            "name": "contourpy",
+            "version": "1.3.3"
+          },
+          {
+            "name": "annotated-doc",
+            "version": "0.0.5"
+          },
+          {
+            "name": "urllib3",
+            "version": "2.8.0"
+          },
+          {
+            "name": "python-dotenv",
+            "version": "1.2.4"
+          },
+          {
+            "name": "text-unidecode",
+            "version": "1.3"
+          },
+          {
+            "name": "cashews",
+            "version": "7.6.0"
+          },
+          {
+            "name": "charset-normalizer",
+            "version": "3.5.2"
+          },
+          {
+            "name": "opentelemetry-api",
+            "version": "1.45.1"
+          },
+          {
+            "name": "mdit-py-plugins",
+            "version": "0.6.1"
+          },
+          {
+            "name": "tzlocal",
+            "version": "5.4.4"
+          },
+          {
+            "name": "PyMySQL",
+            "version": "1.2.3"
+          },
+          {
+            "name": "loguru",
+            "version": "0.7.3"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.11"
+          },
+          {
+            "name": "exceptiongroup",
+            "version": "1.3.1"
+          },
+          {
+            "name": "click",
+            "version": "8.5.0"
+          },
+          {
+            "name": "mdurl",
+            "version": "0.1.2"
+          },
+          {
+            "name": "rich",
+            "version": "15.0.0"
+          },
+          {
+            "name": "fastapi",
+            "version": "0.143.2"
+          },
+          {
+            "name": "Jinja2",
+            "version": "3.1.6"
+          },
+          {
+            "name": "aiomysql",
+            "version": "0.3.2"
+          },
+          {
+            "name": "httpcore",
+            "version": "1.0.9"
+          },
+          {
+            "name": "tomlkit",
+            "version": "0.14.0"
+          },
+          {
+            "name": "tzdata",
+            "version": "2026.5"
+          },
+          {
+            "name": "sakura-taiko-core",
+            "version": "0.1.2"
+          },
+          {
+            "name": "typing-inspection",
+            "version": "0.4.4"
+          },
+          {
+            "name": "cycler",
+            "version": "0.12.1"
+          },
+          {
+            "name": "sakura-taiko-contract",
+            "version": "0.1.0"
+          },
+          {
+            "name": "taiko-bot",
+            "version": "0.14.1"
+          },
+          {
+            "name": "six",
+            "version": "1.17.0"
+          },
+          {
+            "name": "multidict",
+            "version": "7.1.0"
+          },
+          {
+            "name": "prompt_toolkit",
+            "version": "3.0.53"
+          },
+          {
+            "name": "nonebot-adapter-onebot",
+            "version": "2.4.6"
+          },
+          {
+            "name": "websockets",
+            "version": "17.2"
+          },
+          {
+            "name": "cffi",
+            "version": "2.1.1"
+          },
+          {
+            "name": "wcwidth",
+            "version": "0.9.2"
+          },
+          {
+            "name": "requests",
+            "version": "2.34.2"
+          },
+          {
+            "name": "packaging",
+            "version": "26.3"
+          },
+          {
+            "name": "certifi",
+            "version": "2026.7.22"
+          },
+          {
+            "name": "pyparsing",
+            "version": "3.3.3"
+          }
+        ]
+      },
+      "installedLockSha256": "92c5a13bbe670776502ebd104c185fb5052a0a261d7cb065242a8e7d109aba44",
+      "bridgeSynthetic": {
+        "status": "PASS",
+        "currentAndHistorySameCommit": true,
+        "readLeaseMutationDenied": true,
+        "isolatedImport": true,
+        "scope": "stdlib bridge only; not role lifecycle or SQL acceptance"
+      }
+    }
+  },
+  "downloadPolicy": {
+    "idleSeconds": 120,
+    "maximumSeconds": 600,
+    "overallDownloadDeadlineSeconds": 780,
+    "workspaceLimitBytes": 1572864000,
+    "proxyMode": "file",
+    "proxyConfigured": true,
+    "progress": "new workspace byte high-water mark or meaningful pip download/resolution lines; retries do not reset idle timer"
+  },
+  "reusedWheelHashes": [
+    {
+      "file": "aiomysql-0.3.2-py3-none-any.whl",
+      "sha256": "c82c5ba04137d7afd5c693a258bea8ead2aad77101668044143a991e04632eb2"
+    },
+    {
+      "file": "annotated_doc-0.0.5-py3-none-any.whl",
+      "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+    },
+    {
+      "file": "annotated_types-0.8.0-py3-none-any.whl",
+      "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+    },
+    {
+      "file": "anyio-4.15.1-py3-none-any.whl",
+      "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101"
+    },
+    {
+      "file": "apscheduler-3.11.3-py3-none-any.whl",
+      "sha256": "bbeb2ec02d23d3c06a6c07ed7f0f3939ada6680eb121fae809a69bb42c537a30"
+    },
+    {
+      "file": "arrow-1.4.0-py3-none-any.whl",
+      "sha256": "749f0769958ebdc79c173ff0b0670d59051a535fa26e8eba02953dc19eb43205"
+    },
+    {
+      "file": "beautifulsoup4-4.15.0-py3-none-any.whl",
+      "sha256": "d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9"
+    },
+    {
+      "file": "binaryornot-0.6.0-py3-none-any.whl",
+      "sha256": "900adfd5e1b821255ba7e63139b0396b14c88b9286e74e03b6f51e0200331337"
+    },
+    {
+      "file": "cashews-7.6.0-py3-none-any.whl",
+      "sha256": "4fef6d17b94c7c5750aa1b6b5c10a422ba7d81c80a5b3b30eb2aeb49155c042d"
+    },
+    {
+      "file": "certifi-2026.7.22-py3-none-any.whl",
+      "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+    },
+    {
+      "file": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632"
+    },
+    {
+      "file": "charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "211d5a3eb6af8f513b8d4ca19a8c1b7accab1b5f0d3175f9826b03c1a920dc1f"
+    },
+    {
+      "file": "click-8.5.0-py3-none-any.whl",
+      "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"
+    },
+    {
+      "file": "contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "51e79c1f7470158e838808d4a996fa9bac72c498e93d8ebe5119bc1e6becb0db"
+    },
+    {
+      "file": "cookiecutter-2.7.1-py3-none-any.whl",
+      "sha256": "cee50defc1eaa7ad0071ee9b9893b746c1b3201b66bf4d3686d0f127c8ed6cf9"
+    },
+    {
+      "file": "cryptography-48.0.1-cp311-abi3-manylinux_2_34_x86_64.whl",
+      "sha256": "0ee6ea481db1ab889cba043ec1eda17bb9c1ea79db6722f779c3667f9f70322f"
+    },
+    {
+      "file": "cycler-0.12.1-py3-none-any.whl",
+      "sha256": "85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"
+    },
+    {
+      "file": "distlib-0.4.3-py2.py3-none-any.whl",
+      "sha256": "4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b"
+    },
+    {
+      "file": "exceptiongroup-1.3.1-py3-none-any.whl",
+      "sha256": "a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598"
+    },
+    {
+      "file": "fastapi-0.143.2-py3-none-any.whl",
+      "sha256": "da2fe9893b7392ebce76d8c8511e3fa43e5a25f5852103aa2eee7cff3ab80b75"
+    },
+    {
+      "file": "filelock-4.2.0-py3-none-any.whl",
+      "sha256": "2ff5690882e8cdb00ef31fb3d01a3094c29f30985426c59495afb1733f3b7238"
+    },
+    {
+      "file": "fonttools-4.67.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "59f44309ce78851c9621ee88e3f667ca3fbcc89dc0e8641336be3f12ba06bfd4"
+    },
+    {
+      "file": "fuzzywuzzy-0.18.0-py2.py3-none-any.whl",
+      "sha256": "928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"
+    },
+    {
+      "file": "h11-0.16.0-py3-none-any.whl",
+      "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+    },
+    {
+      "file": "httpcore-1.0.9-py3-none-any.whl",
+      "sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"
+    },
+    {
+      "file": "httpx-0.28.1-py3-none-any.whl",
+      "sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"
+    },
+    {
+      "file": "idna-3.20-py3-none-any.whl",
+      "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+    },
+    {
+      "file": "jinja2-3.1.6-py3-none-any.whl",
+      "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+    },
+    {
+      "file": "kiwisolver-1.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "95a02752aa032eef4aed01cda6d9b687c669bd0396bf4519eef8bba22a286720"
+    },
+    {
+      "file": "linkify_it_py-2.2.0-py3-none-any.whl",
+      "sha256": "3adc40eb5af300b2605fcfdb968c24e1d780a90f1f2221af7c15e5111e94d443"
+    },
+    {
+      "file": "loguru-0.7.3-py3-none-any.whl",
+      "sha256": "31a33c10c8e1e10422bfd431aeb5d351c7cf7fa671e3c4df004162264b28220c"
+    },
+    {
+      "file": "markdown_it_py-4.2.0-py3-none-any.whl",
+      "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"
+    },
+    {
+      "file": "markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "6da83a088f8ef93b2d483a8232a4dbf4d69d3d8496b568a03c56becac43e1808"
+    },
+    {
+      "file": "matplotlib-3.11.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "07d9b9fa60cd4c393692f50d0bb03123242ddf61c99bb0e95e75feb354e7c1a8"
+    },
+    {
+      "file": "mdit_py_plugins-0.6.1-py3-none-any.whl",
+      "sha256": "214c82fb2ac524472ab6a5bcab1de80f73b50443e187f401bfd77efbc7c6481d"
+    },
+    {
+      "file": "mdurl-0.1.2-py3-none-any.whl",
+      "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
+    },
+    {
+      "file": "msgpack-1.2.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "382b219de3d436de3baba0f4b0c6d4336e8f5858d0eb047918b13b69a71c6c55"
+    },
+    {
+      "file": "multidict-7.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "c54ae1b89e582aa25f213cd8b5eac0bda1724e79299f486baeb3f562bbf82ca5"
+    },
+    {
+      "file": "nb_cli-1.7.4-py3-none-any.whl",
+      "sha256": "5024c106e986109b4d5cc83e76041e525db1ad77e7901a0a01ce1efee8b7fb04"
+    },
+    {
+      "file": "nonebot2-2.5.0-py3-none-any.whl",
+      "sha256": "12380d396a3d5126eeeae0a1aa53af45e9d99b63896e3e2dd6340ee436869e36"
+    },
+    {
+      "file": "nonebot_adapter_onebot-2.4.6-py3-none-any.whl",
+      "sha256": "b1ec7023fd83d731f63b513217327a57d12893a261944934b9195f79173791ad"
+    },
+    {
+      "file": "nonebot_adapter_qq-1.7.3-py3-none-any.whl",
+      "sha256": "fe59b6b9dbde979f1eb8a4a33dc6f27634feb92ecb4ceb9dc3ea8d04c979ac77"
+    },
+    {
+      "file": "nonebot_plugin_apscheduler-0.5.0-py3-none-any.whl",
+      "sha256": "8b99b5ee60c4bc195d4df2fd27dab3d6963691e3332f6cee31a06eb4277c307f"
+    },
+    {
+      "file": "noneprompt-0.1.11-py3-none-any.whl",
+      "sha256": "e3d83e7cf57f645a35c6b8eaf918baefe077c41b761bb6326e8e6adb4f73150e"
+    },
+    {
+      "file": "nonestorage-0.1.0-py3-none-any.whl",
+      "sha256": "35811adf67c680c272bcb71fa9d6c3613cc2d1bb79f5bfc7d83c4412a79537cb"
+    },
+    {
+      "file": "numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+    },
+    {
+      "file": "opentelemetry_api-1.45.1-py3-none-any.whl",
+      "sha256": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb"
+    },
+    {
+      "file": "packaging-26.3-py3-none-any.whl",
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+    },
+    {
+      "file": "pandas-3.0.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "47121f9571503f724c9b93e297ab6254ac99c77adf5e9ed085ea419fd585c258"
+    },
+    {
+      "file": "pillow-12.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "23d27a3e0307ec2244cc51e7287b919aa68d097504ebe19df4e76a98a3eea5bd"
+    },
+    {
+      "file": "pip-26.2.1-py3-none-any.whl",
+      "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e"
+    },
+    {
+      "file": "platformdirs-4.13.0-py3-none-any.whl",
+      "sha256": "3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1"
+    },
+    {
+      "file": "prompt_toolkit-3.0.53-py3-none-any.whl",
+      "sha256": "01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2"
+    },
+    {
+      "file": "propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "6e9368e87a3efc285e559131092c5db643eb8e56de4ee42064d5baec22ef2bb5"
+    },
+    {
+      "file": "pycparser-3.11-py3-none-any.whl",
+      "sha256": "51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80"
+    },
+    {
+      "file": "pydantic-2.14.1-py3-none-any.whl",
+      "sha256": "9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454"
+    },
+    {
+      "file": "pydantic_core-2.50.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "8812592c85d0edf423f10eadcef42716d71e8219085ad9e85b775057b7306133"
+    },
+    {
+      "file": "pygments-2.21.0-py3-none-any.whl",
+      "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+    },
+    {
+      "file": "pygtrie-2.6.2-py3-none-any.whl",
+      "sha256": "51dcc50ecb8291238e261b4e9f8ecca7313b763da258dd320d208ca2bc86b5f4"
+    },
+    {
+      "file": "pymysql-1.2.3-py3-none-any.whl",
+      "sha256": "14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a"
+    },
+    {
+      "file": "pyparsing-3.3.3-py3-none-any.whl",
+      "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+    },
+    {
+      "file": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+      "sha256": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+    },
+    {
+      "file": "python_discovery-1.6.2-py3-none-any.whl",
+      "sha256": "f0c697f95a3aaec4174a6e5e58f5885e25768684bafc76f1afde384709ebdcf2"
+    },
+    {
+      "file": "python_dotenv-1.2.4-py3-none-any.whl",
+      "sha256": "42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc"
+    },
+    {
+      "file": "python_slugify-9.1.3-py3-none-any.whl",
+      "sha256": "9aced0670e54c5603e2335c0fa9a4011ad4bc41ecb3c46e8097294c46fd60ed4"
+    },
+    {
+      "file": "pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+    },
+    {
+      "file": "redis-8.1.0-py3-none-any.whl",
+      "sha256": "a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb"
+    },
+    {
+      "file": "requests-2.34.2-py3-none-any.whl",
+      "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+    },
+    {
+      "file": "rich-15.0.0-py3-none-any.whl",
+      "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"
+    },
+    {
+      "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+      "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+    },
+    {
+      "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+      "sha256": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+    },
+    {
+      "file": "six-1.17.0-py2.py3-none-any.whl",
+      "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+    },
+    {
+      "file": "soupsieve-2.10-py3-none-any.whl",
+      "sha256": "8596eb8967d744174820280fa62b4542a2e955bfaccca73ed8a13c6eb8e9b502"
+    },
+    {
+      "file": "starlette-1.8.0-py3-none-any.whl",
+      "sha256": "dfdd6b29c26483288088d990eee59631dedadd66ce20d203402a7ca8e3c4656f"
+    },
+    {
+      "file": "taiko_application-0.8.0-py3-none-any.whl",
+      "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+    },
+    {
+      "file": "taiko_bot-0.14.1-py3-none-any.whl",
+      "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+    },
+    {
+      "file": "text_unidecode-1.3-py2.py3-none-any.whl",
+      "sha256": "1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"
+    },
+    {
+      "file": "textual-8.2.8-py3-none-any.whl",
+      "sha256": "267375fd402dc8d981457212efa71f0e3365fd17bba144ba9bb3ed7563cb374a"
+    },
+    {
+      "file": "tomlkit-0.14.0-py3-none-any.whl",
+      "sha256": "592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680"
+    },
+    {
+      "file": "typing_extensions-4.16.0-py3-none-any.whl",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+    },
+    {
+      "file": "typing_inspection-0.4.4-py3-none-any.whl",
+      "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    {
+      "file": "tzdata-2026.5-py2.py3-none-any.whl",
+      "sha256": "b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac"
+    },
+    {
+      "file": "tzlocal-5.4.4-py3-none-any.whl",
+      "sha256": "aae09f0126a8a86fa736be266eb4a471380d26a0de3bc14844e7821fee3e2a15"
+    },
+    {
+      "file": "ujson-6.0.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "fd26d4b182b7138fc948cda55fe2e91b70d987731e169e628f42ba22cc6e3cce"
+    },
+    {
+      "file": "urllib3-2.8.0-py3-none-any.whl",
+      "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+    },
+    {
+      "file": "uvicorn-0.54.0-py3-none-any.whl",
+      "sha256": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+    },
+    {
+      "file": "virtualenv-21.14.7-py3-none-any.whl",
+      "sha256": "3769219a308c5d2f093e7729621ad12a6346b5767a7ec4338414e2a0fb0c526b"
+    },
+    {
+      "file": "watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "b5768b49e426fd5b550b012c866db347cdf15c398ef98dc557b6e6b72fa74cd1"
+    },
+    {
+      "file": "wcwidth-0.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "751bef0ab404b6a1dc028b56b4b85d46486be1c55833f80da533e42dc691f389"
+    },
+    {
+      "file": "websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+      "sha256": "376a693697ddb695ea282ead76060f4847f90e564b12b4389f2c7589e6fadb9e"
+    },
+    {
+      "file": "wordcloud-1.9.6-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "e1c31741b7612d9f408551434d4164e75d2e6b8542b59ec53ea77f773286713a"
+    },
+    {
+      "file": "yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "d5add7b4ca7afeea91d52e4d4e4db3b1fe9885b71f07054560d8c4296b7441a2"
+    }
+  ],
+  "reusePolicy": "Existing completed wheels are read-only resolver inputs; new role venvs and explicit Taiko-family pins remain authoritative.",
+  "downloadedWheelHashes": {
+    "center": [
+      {
+        "file": "aiomysql-0.3.2-py3-none-any.whl",
+        "sha256": "c82c5ba04137d7afd5c693a258bea8ead2aad77101668044143a991e04632eb2"
+      },
+      {
+        "file": "annotated_doc-0.0.5-py3-none-any.whl",
+        "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+      },
+      {
+        "file": "annotated_types-0.8.0-py3-none-any.whl",
+        "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+      },
+      {
+        "file": "anyio-4.15.1-py3-none-any.whl",
+        "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101"
+      },
+      {
+        "file": "apscheduler-3.11.3-py3-none-any.whl",
+        "sha256": "bbeb2ec02d23d3c06a6c07ed7f0f3939ada6680eb121fae809a69bb42c537a30"
+      },
+      {
+        "file": "arrow-1.4.0-py3-none-any.whl",
+        "sha256": "749f0769958ebdc79c173ff0b0670d59051a535fa26e8eba02953dc19eb43205"
+      },
+      {
+        "file": "beautifulsoup4-4.15.0-py3-none-any.whl",
+        "sha256": "d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9"
+      },
+      {
+        "file": "binaryornot-0.6.0-py3-none-any.whl",
+        "sha256": "900adfd5e1b821255ba7e63139b0396b14c88b9286e74e03b6f51e0200331337"
+      },
+      {
+        "file": "cashews-7.6.0-py3-none-any.whl",
+        "sha256": "4fef6d17b94c7c5750aa1b6b5c10a422ba7d81c80a5b3b30eb2aeb49155c042d"
+      },
+      {
+        "file": "certifi-2026.7.22-py3-none-any.whl",
+        "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+      },
+      {
+        "file": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632"
+      },
+      {
+        "file": "charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "211d5a3eb6af8f513b8d4ca19a8c1b7accab1b5f0d3175f9826b03c1a920dc1f"
+      },
+      {
+        "file": "click-8.5.0-py3-none-any.whl",
+        "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"
+      },
+      {
+        "file": "contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "51e79c1f7470158e838808d4a996fa9bac72c498e93d8ebe5119bc1e6becb0db"
+      },
+      {
+        "file": "cookiecutter-2.7.1-py3-none-any.whl",
+        "sha256": "cee50defc1eaa7ad0071ee9b9893b746c1b3201b66bf4d3686d0f127c8ed6cf9"
+      },
+      {
+        "file": "cryptography-48.0.1-cp311-abi3-manylinux_2_34_x86_64.whl",
+        "sha256": "0ee6ea481db1ab889cba043ec1eda17bb9c1ea79db6722f779c3667f9f70322f"
+      },
+      {
+        "file": "cycler-0.12.1-py3-none-any.whl",
+        "sha256": "85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"
+      },
+      {
+        "file": "distlib-0.4.3-py2.py3-none-any.whl",
+        "sha256": "4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b"
+      },
+      {
+        "file": "exceptiongroup-1.3.1-py3-none-any.whl",
+        "sha256": "a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598"
+      },
+      {
+        "file": "fastapi-0.143.2-py3-none-any.whl",
+        "sha256": "da2fe9893b7392ebce76d8c8511e3fa43e5a25f5852103aa2eee7cff3ab80b75"
+      },
+      {
+        "file": "filelock-4.2.0-py3-none-any.whl",
+        "sha256": "2ff5690882e8cdb00ef31fb3d01a3094c29f30985426c59495afb1733f3b7238"
+      },
+      {
+        "file": "fonttools-4.67.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "59f44309ce78851c9621ee88e3f667ca3fbcc89dc0e8641336be3f12ba06bfd4"
+      },
+      {
+        "file": "fuzzywuzzy-0.18.0-py2.py3-none-any.whl",
+        "sha256": "928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"
+      },
+      {
+        "file": "h11-0.16.0-py3-none-any.whl",
+        "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+      },
+      {
+        "file": "httpcore-1.0.9-py3-none-any.whl",
+        "sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"
+      },
+      {
+        "file": "httpx-0.28.1-py3-none-any.whl",
+        "sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"
+      },
+      {
+        "file": "idna-3.20-py3-none-any.whl",
+        "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+      },
+      {
+        "file": "jinja2-3.1.6-py3-none-any.whl",
+        "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+      },
+      {
+        "file": "kiwisolver-1.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "95a02752aa032eef4aed01cda6d9b687c669bd0396bf4519eef8bba22a286720"
+      },
+      {
+        "file": "linkify_it_py-2.2.0-py3-none-any.whl",
+        "sha256": "3adc40eb5af300b2605fcfdb968c24e1d780a90f1f2221af7c15e5111e94d443"
+      },
+      {
+        "file": "loguru-0.7.3-py3-none-any.whl",
+        "sha256": "31a33c10c8e1e10422bfd431aeb5d351c7cf7fa671e3c4df004162264b28220c"
+      },
+      {
+        "file": "markdown_it_py-4.2.0-py3-none-any.whl",
+        "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"
+      },
+      {
+        "file": "markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "6da83a088f8ef93b2d483a8232a4dbf4d69d3d8496b568a03c56becac43e1808"
+      },
+      {
+        "file": "matplotlib-3.11.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "07d9b9fa60cd4c393692f50d0bb03123242ddf61c99bb0e95e75feb354e7c1a8"
+      },
+      {
+        "file": "mdit_py_plugins-0.6.1-py3-none-any.whl",
+        "sha256": "214c82fb2ac524472ab6a5bcab1de80f73b50443e187f401bfd77efbc7c6481d"
+      },
+      {
+        "file": "mdurl-0.1.2-py3-none-any.whl",
+        "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
+      },
+      {
+        "file": "msgpack-1.2.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "382b219de3d436de3baba0f4b0c6d4336e8f5858d0eb047918b13b69a71c6c55"
+      },
+      {
+        "file": "multidict-7.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "c54ae1b89e582aa25f213cd8b5eac0bda1724e79299f486baeb3f562bbf82ca5"
+      },
+      {
+        "file": "nb_cli-1.7.4-py3-none-any.whl",
+        "sha256": "5024c106e986109b4d5cc83e76041e525db1ad77e7901a0a01ce1efee8b7fb04"
+      },
+      {
+        "file": "nonebot2-2.5.0-py3-none-any.whl",
+        "sha256": "12380d396a3d5126eeeae0a1aa53af45e9d99b63896e3e2dd6340ee436869e36"
+      },
+      {
+        "file": "nonebot_adapter_onebot-2.4.6-py3-none-any.whl",
+        "sha256": "b1ec7023fd83d731f63b513217327a57d12893a261944934b9195f79173791ad"
+      },
+      {
+        "file": "nonebot_adapter_qq-1.7.3-py3-none-any.whl",
+        "sha256": "fe59b6b9dbde979f1eb8a4a33dc6f27634feb92ecb4ceb9dc3ea8d04c979ac77"
+      },
+      {
+        "file": "nonebot_plugin_apscheduler-0.5.0-py3-none-any.whl",
+        "sha256": "8b99b5ee60c4bc195d4df2fd27dab3d6963691e3332f6cee31a06eb4277c307f"
+      },
+      {
+        "file": "noneprompt-0.1.11-py3-none-any.whl",
+        "sha256": "e3d83e7cf57f645a35c6b8eaf918baefe077c41b761bb6326e8e6adb4f73150e"
+      },
+      {
+        "file": "nonestorage-0.1.0-py3-none-any.whl",
+        "sha256": "35811adf67c680c272bcb71fa9d6c3613cc2d1bb79f5bfc7d83c4412a79537cb"
+      },
+      {
+        "file": "numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+      },
+      {
+        "file": "opentelemetry_api-1.45.1-py3-none-any.whl",
+        "sha256": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb"
+      },
+      {
+        "file": "packaging-26.3-py3-none-any.whl",
+        "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+      },
+      {
+        "file": "pandas-3.0.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "47121f9571503f724c9b93e297ab6254ac99c77adf5e9ed085ea419fd585c258"
+      },
+      {
+        "file": "pillow-12.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "23d27a3e0307ec2244cc51e7287b919aa68d097504ebe19df4e76a98a3eea5bd"
+      },
+      {
+        "file": "pip-26.2.1-py3-none-any.whl",
+        "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e"
+      },
+      {
+        "file": "platformdirs-4.13.0-py3-none-any.whl",
+        "sha256": "3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1"
+      },
+      {
+        "file": "prompt_toolkit-3.0.53-py3-none-any.whl",
+        "sha256": "01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2"
+      },
+      {
+        "file": "propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "6e9368e87a3efc285e559131092c5db643eb8e56de4ee42064d5baec22ef2bb5"
+      },
+      {
+        "file": "pycparser-3.11-py3-none-any.whl",
+        "sha256": "51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80"
+      },
+      {
+        "file": "pydantic-2.14.1-py3-none-any.whl",
+        "sha256": "9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454"
+      },
+      {
+        "file": "pydantic_core-2.50.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "8812592c85d0edf423f10eadcef42716d71e8219085ad9e85b775057b7306133"
+      },
+      {
+        "file": "pygments-2.21.0-py3-none-any.whl",
+        "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+      },
+      {
+        "file": "pygtrie-2.6.2-py3-none-any.whl",
+        "sha256": "51dcc50ecb8291238e261b4e9f8ecca7313b763da258dd320d208ca2bc86b5f4"
+      },
+      {
+        "file": "pymysql-1.2.3-py3-none-any.whl",
+        "sha256": "14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a"
+      },
+      {
+        "file": "pyparsing-3.3.3-py3-none-any.whl",
+        "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+      },
+      {
+        "file": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+        "sha256": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+      },
+      {
+        "file": "python_discovery-1.6.2-py3-none-any.whl",
+        "sha256": "f0c697f95a3aaec4174a6e5e58f5885e25768684bafc76f1afde384709ebdcf2"
+      },
+      {
+        "file": "python_dotenv-1.2.4-py3-none-any.whl",
+        "sha256": "42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc"
+      },
+      {
+        "file": "python_slugify-9.1.3-py3-none-any.whl",
+        "sha256": "9aced0670e54c5603e2335c0fa9a4011ad4bc41ecb3c46e8097294c46fd60ed4"
+      },
+      {
+        "file": "pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+      },
+      {
+        "file": "redis-8.1.0-py3-none-any.whl",
+        "sha256": "a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb"
+      },
+      {
+        "file": "requests-2.34.2-py3-none-any.whl",
+        "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+      },
+      {
+        "file": "rich-15.0.0-py3-none-any.whl",
+        "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"
+      },
+      {
+        "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+        "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+      },
+      {
+        "file": "sakura_taiko_core-0.1.1-py3-none-any.whl",
+        "sha256": "76294144080b8816331cfce02b6363749078ab60fb048c1b72767387d989b273"
+      },
+      {
+        "file": "six-1.17.0-py2.py3-none-any.whl",
+        "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+      },
+      {
+        "file": "soupsieve-2.10-py3-none-any.whl",
+        "sha256": "8596eb8967d744174820280fa62b4542a2e955bfaccca73ed8a13c6eb8e9b502"
+      },
+      {
+        "file": "starlette-1.8.0-py3-none-any.whl",
+        "sha256": "dfdd6b29c26483288088d990eee59631dedadd66ce20d203402a7ca8e3c4656f"
+      },
+      {
+        "file": "taiko_application-0.8.0-py3-none-any.whl",
+        "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+      },
+      {
+        "file": "taiko_bot-0.14.1-py3-none-any.whl",
+        "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+      },
+      {
+        "file": "text_unidecode-1.3-py2.py3-none-any.whl",
+        "sha256": "1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"
+      },
+      {
+        "file": "textual-8.2.8-py3-none-any.whl",
+        "sha256": "267375fd402dc8d981457212efa71f0e3365fd17bba144ba9bb3ed7563cb374a"
+      },
+      {
+        "file": "tomlkit-0.14.0-py3-none-any.whl",
+        "sha256": "592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680"
+      },
+      {
+        "file": "typing_extensions-4.16.0-py3-none-any.whl",
+        "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+      },
+      {
+        "file": "typing_inspection-0.4.4-py3-none-any.whl",
+        "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+      },
+      {
+        "file": "tzdata-2026.5-py2.py3-none-any.whl",
+        "sha256": "b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac"
+      },
+      {
+        "file": "tzlocal-5.4.4-py3-none-any.whl",
+        "sha256": "aae09f0126a8a86fa736be266eb4a471380d26a0de3bc14844e7821fee3e2a15"
+      },
+      {
+        "file": "ujson-6.0.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "fd26d4b182b7138fc948cda55fe2e91b70d987731e169e628f42ba22cc6e3cce"
+      },
+      {
+        "file": "urllib3-2.8.0-py3-none-any.whl",
+        "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+      },
+      {
+        "file": "uvicorn-0.54.0-py3-none-any.whl",
+        "sha256": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+      },
+      {
+        "file": "virtualenv-21.14.7-py3-none-any.whl",
+        "sha256": "3769219a308c5d2f093e7729621ad12a6346b5767a7ec4338414e2a0fb0c526b"
+      },
+      {
+        "file": "watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "b5768b49e426fd5b550b012c866db347cdf15c398ef98dc557b6e6b72fa74cd1"
+      },
+      {
+        "file": "wcwidth-0.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "751bef0ab404b6a1dc028b56b4b85d46486be1c55833f80da533e42dc691f389"
+      },
+      {
+        "file": "websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+        "sha256": "376a693697ddb695ea282ead76060f4847f90e564b12b4389f2c7589e6fadb9e"
+      },
+      {
+        "file": "wordcloud-1.9.6-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "e1c31741b7612d9f408551434d4164e75d2e6b8542b59ec53ea77f773286713a"
+      },
+      {
+        "file": "yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "d5add7b4ca7afeea91d52e4d4e4db3b1fe9885b71f07054560d8c4296b7441a2"
+      }
+    ],
+    "client": [
+      {
+        "file": "aiomysql-0.3.2-py3-none-any.whl",
+        "sha256": "c82c5ba04137d7afd5c693a258bea8ead2aad77101668044143a991e04632eb2"
+      },
+      {
+        "file": "annotated_doc-0.0.5-py3-none-any.whl",
+        "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+      },
+      {
+        "file": "annotated_types-0.8.0-py3-none-any.whl",
+        "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+      },
+      {
+        "file": "anyio-4.15.1-py3-none-any.whl",
+        "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101"
+      },
+      {
+        "file": "apscheduler-3.11.3-py3-none-any.whl",
+        "sha256": "bbeb2ec02d23d3c06a6c07ed7f0f3939ada6680eb121fae809a69bb42c537a30"
+      },
+      {
+        "file": "arrow-1.4.0-py3-none-any.whl",
+        "sha256": "749f0769958ebdc79c173ff0b0670d59051a535fa26e8eba02953dc19eb43205"
+      },
+      {
+        "file": "beautifulsoup4-4.15.0-py3-none-any.whl",
+        "sha256": "d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9"
+      },
+      {
+        "file": "binaryornot-0.6.0-py3-none-any.whl",
+        "sha256": "900adfd5e1b821255ba7e63139b0396b14c88b9286e74e03b6f51e0200331337"
+      },
+      {
+        "file": "cashews-7.6.0-py3-none-any.whl",
+        "sha256": "4fef6d17b94c7c5750aa1b6b5c10a422ba7d81c80a5b3b30eb2aeb49155c042d"
+      },
+      {
+        "file": "certifi-2026.7.22-py3-none-any.whl",
+        "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+      },
+      {
+        "file": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632"
+      },
+      {
+        "file": "charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "211d5a3eb6af8f513b8d4ca19a8c1b7accab1b5f0d3175f9826b03c1a920dc1f"
+      },
+      {
+        "file": "click-8.5.0-py3-none-any.whl",
+        "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"
+      },
+      {
+        "file": "contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "51e79c1f7470158e838808d4a996fa9bac72c498e93d8ebe5119bc1e6becb0db"
+      },
+      {
+        "file": "cookiecutter-2.7.1-py3-none-any.whl",
+        "sha256": "cee50defc1eaa7ad0071ee9b9893b746c1b3201b66bf4d3686d0f127c8ed6cf9"
+      },
+      {
+        "file": "cryptography-48.0.1-cp311-abi3-manylinux_2_34_x86_64.whl",
+        "sha256": "0ee6ea481db1ab889cba043ec1eda17bb9c1ea79db6722f779c3667f9f70322f"
+      },
+      {
+        "file": "cycler-0.12.1-py3-none-any.whl",
+        "sha256": "85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"
+      },
+      {
+        "file": "distlib-0.4.3-py2.py3-none-any.whl",
+        "sha256": "4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b"
+      },
+      {
+        "file": "exceptiongroup-1.3.1-py3-none-any.whl",
+        "sha256": "a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598"
+      },
+      {
+        "file": "fastapi-0.143.2-py3-none-any.whl",
+        "sha256": "da2fe9893b7392ebce76d8c8511e3fa43e5a25f5852103aa2eee7cff3ab80b75"
+      },
+      {
+        "file": "filelock-4.2.0-py3-none-any.whl",
+        "sha256": "2ff5690882e8cdb00ef31fb3d01a3094c29f30985426c59495afb1733f3b7238"
+      },
+      {
+        "file": "fonttools-4.67.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "59f44309ce78851c9621ee88e3f667ca3fbcc89dc0e8641336be3f12ba06bfd4"
+      },
+      {
+        "file": "fuzzywuzzy-0.18.0-py2.py3-none-any.whl",
+        "sha256": "928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"
+      },
+      {
+        "file": "h11-0.16.0-py3-none-any.whl",
+        "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+      },
+      {
+        "file": "httpcore-1.0.9-py3-none-any.whl",
+        "sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"
+      },
+      {
+        "file": "httpx-0.28.1-py3-none-any.whl",
+        "sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"
+      },
+      {
+        "file": "idna-3.20-py3-none-any.whl",
+        "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+      },
+      {
+        "file": "jinja2-3.1.6-py3-none-any.whl",
+        "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+      },
+      {
+        "file": "kiwisolver-1.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "95a02752aa032eef4aed01cda6d9b687c669bd0396bf4519eef8bba22a286720"
+      },
+      {
+        "file": "linkify_it_py-2.2.0-py3-none-any.whl",
+        "sha256": "3adc40eb5af300b2605fcfdb968c24e1d780a90f1f2221af7c15e5111e94d443"
+      },
+      {
+        "file": "loguru-0.7.3-py3-none-any.whl",
+        "sha256": "31a33c10c8e1e10422bfd431aeb5d351c7cf7fa671e3c4df004162264b28220c"
+      },
+      {
+        "file": "markdown_it_py-4.2.0-py3-none-any.whl",
+        "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"
+      },
+      {
+        "file": "markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "6da83a088f8ef93b2d483a8232a4dbf4d69d3d8496b568a03c56becac43e1808"
+      },
+      {
+        "file": "matplotlib-3.11.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "07d9b9fa60cd4c393692f50d0bb03123242ddf61c99bb0e95e75feb354e7c1a8"
+      },
+      {
+        "file": "mdit_py_plugins-0.6.1-py3-none-any.whl",
+        "sha256": "214c82fb2ac524472ab6a5bcab1de80f73b50443e187f401bfd77efbc7c6481d"
+      },
+      {
+        "file": "mdurl-0.1.2-py3-none-any.whl",
+        "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
+      },
+      {
+        "file": "msgpack-1.2.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "382b219de3d436de3baba0f4b0c6d4336e8f5858d0eb047918b13b69a71c6c55"
+      },
+      {
+        "file": "multidict-7.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "c54ae1b89e582aa25f213cd8b5eac0bda1724e79299f486baeb3f562bbf82ca5"
+      },
+      {
+        "file": "nb_cli-1.7.4-py3-none-any.whl",
+        "sha256": "5024c106e986109b4d5cc83e76041e525db1ad77e7901a0a01ce1efee8b7fb04"
+      },
+      {
+        "file": "nonebot2-2.5.0-py3-none-any.whl",
+        "sha256": "12380d396a3d5126eeeae0a1aa53af45e9d99b63896e3e2dd6340ee436869e36"
+      },
+      {
+        "file": "nonebot_adapter_onebot-2.4.6-py3-none-any.whl",
+        "sha256": "b1ec7023fd83d731f63b513217327a57d12893a261944934b9195f79173791ad"
+      },
+      {
+        "file": "nonebot_adapter_qq-1.7.3-py3-none-any.whl",
+        "sha256": "fe59b6b9dbde979f1eb8a4a33dc6f27634feb92ecb4ceb9dc3ea8d04c979ac77"
+      },
+      {
+        "file": "nonebot_plugin_apscheduler-0.5.0-py3-none-any.whl",
+        "sha256": "8b99b5ee60c4bc195d4df2fd27dab3d6963691e3332f6cee31a06eb4277c307f"
+      },
+      {
+        "file": "noneprompt-0.1.11-py3-none-any.whl",
+        "sha256": "e3d83e7cf57f645a35c6b8eaf918baefe077c41b761bb6326e8e6adb4f73150e"
+      },
+      {
+        "file": "nonestorage-0.1.0-py3-none-any.whl",
+        "sha256": "35811adf67c680c272bcb71fa9d6c3613cc2d1bb79f5bfc7d83c4412a79537cb"
+      },
+      {
+        "file": "numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+      },
+      {
+        "file": "opentelemetry_api-1.45.1-py3-none-any.whl",
+        "sha256": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb"
+      },
+      {
+        "file": "packaging-26.3-py3-none-any.whl",
+        "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+      },
+      {
+        "file": "pandas-3.0.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "47121f9571503f724c9b93e297ab6254ac99c77adf5e9ed085ea419fd585c258"
+      },
+      {
+        "file": "pillow-12.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "23d27a3e0307ec2244cc51e7287b919aa68d097504ebe19df4e76a98a3eea5bd"
+      },
+      {
+        "file": "pip-26.2.1-py3-none-any.whl",
+        "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e"
+      },
+      {
+        "file": "platformdirs-4.13.0-py3-none-any.whl",
+        "sha256": "3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1"
+      },
+      {
+        "file": "prompt_toolkit-3.0.53-py3-none-any.whl",
+        "sha256": "01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2"
+      },
+      {
+        "file": "propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "6e9368e87a3efc285e559131092c5db643eb8e56de4ee42064d5baec22ef2bb5"
+      },
+      {
+        "file": "pycparser-3.11-py3-none-any.whl",
+        "sha256": "51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80"
+      },
+      {
+        "file": "pydantic-2.14.1-py3-none-any.whl",
+        "sha256": "9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454"
+      },
+      {
+        "file": "pydantic_core-2.50.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "8812592c85d0edf423f10eadcef42716d71e8219085ad9e85b775057b7306133"
+      },
+      {
+        "file": "pygments-2.21.0-py3-none-any.whl",
+        "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+      },
+      {
+        "file": "pygtrie-2.6.2-py3-none-any.whl",
+        "sha256": "51dcc50ecb8291238e261b4e9f8ecca7313b763da258dd320d208ca2bc86b5f4"
+      },
+      {
+        "file": "pymysql-1.2.3-py3-none-any.whl",
+        "sha256": "14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a"
+      },
+      {
+        "file": "pyparsing-3.3.3-py3-none-any.whl",
+        "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+      },
+      {
+        "file": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+        "sha256": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+      },
+      {
+        "file": "python_discovery-1.6.2-py3-none-any.whl",
+        "sha256": "f0c697f95a3aaec4174a6e5e58f5885e25768684bafc76f1afde384709ebdcf2"
+      },
+      {
+        "file": "python_dotenv-1.2.4-py3-none-any.whl",
+        "sha256": "42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc"
+      },
+      {
+        "file": "python_slugify-9.1.3-py3-none-any.whl",
+        "sha256": "9aced0670e54c5603e2335c0fa9a4011ad4bc41ecb3c46e8097294c46fd60ed4"
+      },
+      {
+        "file": "pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+      },
+      {
+        "file": "redis-8.1.0-py3-none-any.whl",
+        "sha256": "a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb"
+      },
+      {
+        "file": "requests-2.34.2-py3-none-any.whl",
+        "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+      },
+      {
+        "file": "rich-15.0.0-py3-none-any.whl",
+        "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"
+      },
+      {
+        "file": "sakura_taiko_contract-0.1.0-py3-none-any.whl",
+        "sha256": "61c63fda6949c6c8c4f84dd63b170482cc127dcf957facad056663bcf6f240d7"
+      },
+      {
+        "file": "sakura_taiko_core-0.1.2-py3-none-any.whl",
+        "sha256": "f34c1d0a3e58f5a7ce232ca50741e3235260eb8dabaedd95b41d84e7d0d0d47f"
+      },
+      {
+        "file": "six-1.17.0-py2.py3-none-any.whl",
+        "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+      },
+      {
+        "file": "soupsieve-2.10-py3-none-any.whl",
+        "sha256": "8596eb8967d744174820280fa62b4542a2e955bfaccca73ed8a13c6eb8e9b502"
+      },
+      {
+        "file": "starlette-1.8.0-py3-none-any.whl",
+        "sha256": "dfdd6b29c26483288088d990eee59631dedadd66ce20d203402a7ca8e3c4656f"
+      },
+      {
+        "file": "taiko_application-0.8.0-py3-none-any.whl",
+        "sha256": "cccb0c52ddb582823b8ade4550bc8c2cd0f8ac96a99708a38c508647baf60c89"
+      },
+      {
+        "file": "taiko_bot-0.14.1-py3-none-any.whl",
+        "sha256": "4f7c44ae1a0dd78cce3f36d159caba457ec3758eb6c2c43d11fb35480e750529"
+      },
+      {
+        "file": "text_unidecode-1.3-py2.py3-none-any.whl",
+        "sha256": "1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"
+      },
+      {
+        "file": "textual-8.2.8-py3-none-any.whl",
+        "sha256": "267375fd402dc8d981457212efa71f0e3365fd17bba144ba9bb3ed7563cb374a"
+      },
+      {
+        "file": "tomlkit-0.14.0-py3-none-any.whl",
+        "sha256": "592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680"
+      },
+      {
+        "file": "typing_extensions-4.16.0-py3-none-any.whl",
+        "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+      },
+      {
+        "file": "typing_inspection-0.4.4-py3-none-any.whl",
+        "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+      },
+      {
+        "file": "tzdata-2026.5-py2.py3-none-any.whl",
+        "sha256": "b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac"
+      },
+      {
+        "file": "tzlocal-5.4.4-py3-none-any.whl",
+        "sha256": "aae09f0126a8a86fa736be266eb4a471380d26a0de3bc14844e7821fee3e2a15"
+      },
+      {
+        "file": "ujson-6.0.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "fd26d4b182b7138fc948cda55fe2e91b70d987731e169e628f42ba22cc6e3cce"
+      },
+      {
+        "file": "urllib3-2.8.0-py3-none-any.whl",
+        "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+      },
+      {
+        "file": "uvicorn-0.54.0-py3-none-any.whl",
+        "sha256": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+      },
+      {
+        "file": "virtualenv-21.14.7-py3-none-any.whl",
+        "sha256": "3769219a308c5d2f093e7729621ad12a6346b5767a7ec4338414e2a0fb0c526b"
+      },
+      {
+        "file": "watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "b5768b49e426fd5b550b012c866db347cdf15c398ef98dc557b6e6b72fa74cd1"
+      },
+      {
+        "file": "wcwidth-0.9.2-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "751bef0ab404b6a1dc028b56b4b85d46486be1c55833f80da533e42dc691f389"
+      },
+      {
+        "file": "websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+        "sha256": "376a693697ddb695ea282ead76060f4847f90e564b12b4389f2c7589e6fadb9e"
+      },
+      {
+        "file": "wordcloud-1.9.6-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "e1c31741b7612d9f408551434d4164e75d2e6b8542b59ec53ea77f773286713a"
+      },
+      {
+        "file": "yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "d5add7b4ca7afeea91d52e4d4e4db3b1fe9885b71f07054560d8c4296b7441a2"
+      }
+    ]
+  },
+  "cachePolicy": "Pip HTTP cache retained inside this new workspace and shared by these two roles only; cache bytes are not accepted artifacts. Completed wheel files receive SHA-256 hashes.",
+  "durationSeconds": 348.986,
+  "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792081214-2082368.service",
+  "memory": {
+    "memory.peak": "UNAVAILABLE",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0"
+  }
+}

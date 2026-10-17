@@ -1,0 +1,28 @@
+--- a/taiko_viewer/tests/growthRequestEvidence.test.mjs
++++ b/taiko_viewer/tests/growthRequestEvidence.test.mjs
+@@ -27,7 +27,24 @@
+     fixture.measurements = [{ id: 'frozen', ownerId: '1', bindingId: '1', capturedAt: '2026-10-07T04:00:00Z', scoreRevision: 'frozen', measurementVersion: 1, algorithmVersion: 'growth-v1', modelRevision: 'frozen-model', rating: 7,
+       dimensions: Object.fromEntries(['big_song','stamina','speed','accuracy_power','rhythm','complex'].map(key => [key, 7])), focus: 'balanced', sampleCount: 30, availabilityState: 'ready' }];
+     const before = await run(fixture, true), after = await run(fixture, false);
+-    assert.equal(digest(after.result), digest(before.result), 'Passport facts, time/evidence, coverage or frozen abilities changed');
++    let expected = before.result;
++    if (mode === 'boundary') {
++      // Owner-approved observation-reappearance-v2 semantic oracle revision.
++      // Frozen source/input are unchanged. Only this low-trust milestone and
++      // its view references may disappear; every other DTO byte must match.
++      expected = structuredClone(before.result);
++      const excluded = 'milestone:1:1:2:4:2026-10-08:instant';
++      assert.equal(expected.milestones.filter(item => item.id === excluded).length, 1);
++      assert.equal(expected.shared.milestones.filter(item => item.id === excluded).length, 1);
++      expected.milestones = expected.milestones.filter(item => item.id !== excluded);
++      expected.initialMilestoneIds = expected.initialMilestoneIds.filter(id => id !== excluded);
++      expected.shared.milestones = expected.shared.milestones.filter(item => item.id !== excluded);
++      for (const view of Object.values(expected.shared.views)) {
++        view.milestoneIds = view.milestoneIds.filter(id => id !== excluded);
++        view.initialMilestoneIds = view.initialMilestoneIds.filter(id => id !== excluded);
++      }
++    }
++    assert.equal(digest(after.result), digest(expected), 'Passport facts, time/evidence, coverage or frozen abilities changed');
+     assert.equal(after.result.segments.flatMap(segment => segment.points).find(point => point.id === 'frozen')?.rating, 7, 'past persisted capability must remain authoritative');
+     const factor = mode === 'invalid' ? 1 : 2;
+     assert.equal(before.counters.enumeration, 2);

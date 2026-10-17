@@ -3,11 +3,11 @@ import { createReadStream, constants as fsConstants } from "node:fs";
 import { access, readFile, readdir, stat } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { createError, getHeader, getRequestIP, setHeader, type H3Event } from "h3";
-import type { RowDataPacket } from "mysql2/promise";
 import { getContentRuntimePaths } from "~/server/services/content/runtime";
 import { getDeveloperTokenRowByHash, readDeveloperBearerToken, touchDeveloperToken } from "~/server/internal/account/developer";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { getV2ConstantsCsvDataset } from "~/server/services/content/v2Constants";
+import {consumeOpenQuota} from '../infrastructure/account/open-quota.ts';
 
 type FileInfo = {
   filename: string;
@@ -19,10 +19,6 @@ type FileInfo = {
 type FileInfoCache = {
   mtimeMs: number;
   info: FileInfo;
-};
-
-type UsageRow = RowDataPacket & {
-  request_count: number;
 };
 
 const fileInfoCache = new Map<string, FileInfoCache>();
@@ -198,26 +194,10 @@ export const enforceTaikoOpenQuota = async (
   const limit = developerToken ? config.developerDailyLimit : config.dailyLimit;
   const dayKey = getUsageDayKey();
   const db = getAccountDb();
-  const [rows] = await db.execute<UsageRow[]>(
-    "SELECT request_count FROM web_taiko_open_api_daily_usage WHERE ip_address = ? AND api_name = ? AND day_key = ? LIMIT 1",
-    [quotaSubject, apiName, dayKey]
-  );
-  const currentCount = Number(rows[0]?.request_count || 0);
-  if (currentCount >= limit) {
+  const nextCount=await consumeOpenQuota(db,quotaSubject,apiName,dayKey,limit);
+  if (nextCount===0) {
     throw createError({ statusCode: 429, statusMessage: `当日请求次数已达上限（${limit}）` });
   }
-  if (rows.length) {
-    await db.execute(
-      "UPDATE web_taiko_open_api_daily_usage SET request_count = request_count + 1 WHERE ip_address = ? AND api_name = ? AND day_key = ?",
-      [quotaSubject, apiName, dayKey]
-    );
-  } else {
-    await db.execute(
-      "INSERT INTO web_taiko_open_api_daily_usage (ip_address, api_name, day_key, request_count) VALUES (?, ?, ?, 1)",
-      [quotaSubject, apiName, dayKey]
-    );
-  }
-  const nextCount = currentCount + 1;
   setHeader(event, "X-Taiko-Api-Limit", String(limit));
   setHeader(event, "X-Taiko-Api-Remaining", String(Math.max(0, limit - nextCount)));
   setHeader(event, "X-Taiko-Api-Day", dayKey);

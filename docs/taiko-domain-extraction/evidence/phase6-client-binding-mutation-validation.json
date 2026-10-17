@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6c",
+  "status": "CLIENT_BINDING_MUTATION_AUTHORITY_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "clientParent": "47bf5c174ceb2d791e0cf508502fcad39d771290",
+  "clientCommit": "a8f1b3833dc807321e92548f5909ee7d7eecd61c",
+  "clientRemote": "a8f1b3833dc807321e92548f5909ee7d7eecd61c",
+  "clientVersion": "0.2.5",
+  "clientPushVerified": true,
+  "clientPushSession": 3868,
+  "clientPushExit": 0,
+  "remoteVerificationSession": 30564,
+  "sourceCommit": "9befec4209e8ef48db953a99fc41e723c76eb253",
+  "sourceVersion": "9.81.21",
+  "sourceChanged": false,
+  "sourceTestsRerun": false,
+  "sourcePreviousEvidence": "phase6-native-binding-mutation-validation.json",
+  "viewerPreparedParent": "39c2327a4cb6ba5c4a3db1a7e7443444b308cac5",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "coreClientVersion": "0.1.2",
+  "coreClientGit": "0b7319d",
+  "coreSourceVersion": "0.1.1",
+  "tests": {
+    "client": {
+      "passed": 181,
+      "existing": 153,
+      "new": 28,
+      "warnings": 2,
+      "skipped": 0,
+      "guard": "actual validate_domain_migration.py; production env/storage IO blocked"
+    },
+    "typescript": {
+      "exitCode": 0,
+      "config": "tests/fixtures/publicationLifecycle.tsconfig.json"
+    },
+    "finalActualSqlHttp": {
+      "passed": 66,
+      "oldBinding": 35,
+      "newMutationComposites": 31,
+      "failed": 0,
+      "database": "taiko_annual_poster_test",
+      "mutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1; actual SELECT DATABASE() ending _test"
+    },
+    "earlierUnaffectedSqlHttp": {
+      "passed": 78,
+      "hirobaCredential": 33,
+      "sourceAccess": 45,
+      "sameServerImplementation": true,
+      "log": "/var/tmp/phase6-client-binding-mutation-route-failure.log",
+      "wholeRunExit": 1,
+      "wholeRunPassed": 78,
+      "wholeRunFailedBindingFixtures": 66
+    },
+    "sqlTotalAcrossTwoRuns": 144,
+    "actualPythonHttp": true,
+    "commandExecution": "selected actual AST adapters; no full framework boot",
+    "frozenClientOracle": "47bf5c1:plugins/taiko.py; five deletion/current selection cases in both Python and actual SQL",
+    "realProcessDeathCases": 4,
+    "upstream": "synthetic; no official login",
+    "fullNoneBotRun": false,
+    "fullNuxtRun": false,
+    "onlineAuthenticatedRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "client",
+        "exitCode": 0,
+        "seconds": 6.557
+      },
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.243
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 62.533
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 72.334,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791750450-1884766.service",
+    "sampledPeakBytes": 533839872,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 399568
+  },
+  "resourceCaveat": "250ms cgroup sample is not an absolute peak; OS child maxRSS separate; no million-record cost claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791750450-1884766.service",
+    "activeState": "inactive",
+    "result": "success",
+    "execMainStatus": 0,
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T04:27:30+08:00",
+    "ended": "2026-10-12T04:28:42+08:00",
+    "session": 16737,
+    "terminalToolOutput": "Earlier terminal output was truncated; runner exitCode 0, ExecMainStatus 0 and journal success independently observed."
+  },
+  "failureHistory": [
+    {
+      "stage": "client fixture expectation",
+      "outcome": "177 pass / 1 fail; later 181 pass",
+      "fix": "fixture already creates owned settings directory; assert no new files"
+    },
+    {
+      "stage": "TypeScript",
+      "outcome": "client178 pass; missing route global names",
+      "fix": "explicit h3 imports"
+    },
+    {
+      "stage": "SQL fixture imports",
+      "outcome": "client181/TS pass; binding66 failed at setup, other78 passed",
+      "fix": "relative path after shared fixture extraction; wrap setup in finally"
+    },
+    {
+      "stage": "Python HTTP QA adapter",
+      "outcome": "client181/TS pass; SQL65 pass / 1 fail",
+      "fix": "functools.wraps IO guards and exact httpx send(request=...) signature; final66 pass"
+    },
+    {
+      "stage": "one diagnostic wrapper path",
+      "outcome": "exit127 before QA wrapper started",
+      "fix": "absolute standard memory wrapper; no unbounded fallback"
+    }
+  ],
+  "ownedFailedFixtureCleanup": {
+    "rows": 66,
+    "proof": "exact failed QA time window, generated 13/14 digit QQ, absent parent, active/verified/hash-null, consecutive user IDs 8304..8369; all 66 failed binding fixtures",
+    "locks": "FOR UPDATE plus per-id/user DELETE assertion in one transaction",
+    "actualTestDatabase": true,
+    "explicitOptIns": [
+      "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+      "TAIKO_FAILED_BINDING_FIXTURE_CLEANUP=1"
+    ],
+    "remaining": 0,
+    "log": "/var/tmp/phase6-binding-fixture-orphans-cleanup.log",
+    "newFixtureSetupFinally": true
+  },
+  "decisions": [
+    "Separate explicit bind_remove / bind_visibility scopes; old bind_write does not authorize them.",
+    "SQL-only center principal gate and one mutation transaction; no Source file IO.",
+    "Exact configured_by_qq-owned credential deletion shares binding COMMIT; foreign ownership retained.",
+    "Client successor selection frozen independently of native first-remaining profile; native global manual u0 state preserved.",
+    "Bounded hash-bound effect receipts distinguish last confirmation from deletion; exact nonce replay never reapplies a deletion to rebound data.",
+    "Unknown COMMIT fresh proof uses captured pool after releasing old connection/gate.",
+    "Client streams at most 256KiB and two identical nonce requests; 90s between-chunk deadline with socket waits at most 10s is not a hard process deadline.",
+    "Framework message identity provides stable request nonce; confirmation captures concrete center ID."
+  ],
+  "fileHashes": {
+    "viewerServer": {
+      "server/infrastructure/account/bot-binding-rows.ts": "3708c8402563bc487e321a8f277db65fbe91e24f521191a3de49afda635be744",
+      "server/infrastructure/account/bot-binding-schema.ts": "d8b00404ab158dd63b4637d31a58f6e7609170a32101af4b8be13e9c5060b217",
+      "server/infrastructure/account/source-service-schema.ts": "2b964aa54ee431c83457221894077da861333e85292e64cf75f5b68ff48a4840",
+      "server/services/account/bot-binding-proxy.ts": "3f367e6bd8396ae51774c0f78eb32f82a48febdef2305794cb6453cfb6cc969f",
+      "server/services/account/principal-access.ts": "d936971c4992f549dc8248b742001305bc88c9185c84eb8a1b5f44ee7a082873",
+      "server/utils/account-db.ts": "61b866dc209d03d5f89a47b073a2a7bca64a68ea40353cbebaac770bee5a402f",
+      "server/api/taiko/proxy/bind/remove.post.ts": "b8737f648c1bd33ba13d094b944837e74e480a6d0197f5006903db11e78f8b8d",
+      "server/api/taiko/proxy/bind/visibility.post.ts": "780c214b68e112b8ca22a511f5401a0be9f97c2e6758cf4c7d3e1b0ff827bcb0",
+      "server/infrastructure/account/bot-binding-effect.ts": "598b26f7270d8c787b12eefeec7c8fe0ca1c49ff3d5c79346c41b9fbe8b800f9"
+    },
+    "viewerTests": {
+      "tests/botBindingProxySql.test.mjs": "03da137e8ceb9096e1cac8c1fb892dcf2f0be65ab1cbd0d85f7dc44e20d6363e",
+      "tests/fixtures/botBindingSqlDeathChild.mjs": "c1cda22ca718fc689eda64335d9f8ec52fe7910985655ad7c5b9c33c57ec6057",
+      "tests/fixtures/manualSqlRuntime.mjs": "64ac28767b66990b517186047f58f15d314055bedd877af1406ca1ee492126e3",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "96ab194372872466c4d3230389d9f54dcdefd3a27c7c73ffbff58ee427ff9eb8",
+      "tests/botBindingMutationSql.test.mjs": "918d13c0101f7fe1c572de06a20f63a6aa76fd5df95a38a2c482c375ef788855",
+      "tests/fixtures/botBindingHttp.mjs": "3b8521bf8d5e5c38cfb548264df943416a28fd09bf6abc91bf940367eeca8fba",
+      "tests/hirobaCredentialSql.test.mjs": "3b10279a1abfaac2c535902ca5b70e2b3b8c6be5d7732d01181af78aa741216e",
+      "tests/sourceAccessSql.test.mjs": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305"
+    },
+    "client": {
+      ".env.example": "d6c43a0c753b29f76e4c081dd1fc95bfa7696a036a0188ca7a288285692f2047",
+      "README.md": "60ec2cce8a74e78b2b464c0fd75ce6508223dba3b10aa7324312751d583db82d",
+      "pyproject.toml": "916b41fe26f29ece7386592d052f2e795fa675af4dd6998646ac94c4a039aeba",
+      "plugins/taiko.py": "658863d669d9710153f573256eb484763c70faab9b29cbfb404d725a1af148ed",
+      "taiko_bot/binding_mutation_client.py": "5123aea4646ff62b8f387839d1cad7ac6f54619ac1366b0fef616b1687c14202",
+      "tests/test_binding_mutation_client.py": "bd8c30b76d451e9366e67405615dd6929a1762f2d08dcdf1fb23057a841c2bf9",
+      "tests/binding_mutation_http_child.py": "eacbd5bc7bd21699fa22448290d28599f19856397ea8725bc22b6e6c01020823",
+      "docs/taiko-domain-extraction/phase6-private-read-client.md": "25a055654a57f53898a2722b6a14499a4de4d42359f789dddc3f3d915d577376",
+      "scripts/validate_domain_migration.py": "56675a7cdbb10391cb19db708822fb70ff1ee6725a27aababb0eb0b2e2e08286"
+    },
+    "unchangedSource": {
+      "taiko/plugins/taiko.py": "a357c2ce51c9b602527c8bbf5b2caf3820248fa4be835a0bb0c9525af1ef668c",
+      "taiko/plugins/utils/bot_binding_mutation.py": "67eb078626aa1d6258f6df3dc722d4d4190d62711d7158fd67b6cb19bfd54e48",
+      "taiko/plugins/utils/bot_binding_metadata.py": "4c012efd2ef3755df5b5975688b8a10e4c7784bb2ac420aec3ac44fcd5b3c8b8",
+      "taiko/plugins/utils/bot_binding_authority.py": "5d6dd9dda36a066103082d0addf88e4e0b78ee35146dfe912ae37879643a4850",
+      "taiko/taiko_runtime/platform_adapter.py": "18dc084ead004f533cbb6c4c352d2e54085c147691b0d92603d3a579e544ff8b",
+      "taiko/tests/test_native_binding_mutation.py": "49cecf68381e7ddf3491e751160ef0bcf38507d4718b6db9722759e4e2f691eb",
+      "taiko/tests/native_binding_mutation_sql_child.py": "739a3e0714db5f901476b02b34585bf643c612277dad6f01c85e38b7331164fd",
+      "taiko/tests/test_native_binding_metadata.py": "f3913a5279c18cdcc3c663705c879c636ac12fd74764371d901cf9d0bdaeae0d",
+      "taiko/tests/native_binding_metadata_sql_child.py": "42ea4a4ff8961e86ef0983c393b8031560301c41f2d7e143c41f16972081d6a2",
+      "taiko/tests/test_u0_bind_slots.py": "5d4e933b806d8f4e1b60d11a1a7eb0cd4c2b70f1f45d19dabb37dee6d0ab47b0",
+      "taiko/scripts/validate_domain_migration.py": "e4c3c8b811224a956963e2aa08cdc7eea5ac242b772b37c141b1b11a8b27462f",
+      "taiko/docs/domain-extraction-phase6-publication.md": "40e04a9aed86d710a78fcb7409bf354fd1ddc8239945b69aaf477b08a6e4a1d7"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-client-binding-mutation-final-qa.log": "e25352408c73edc928febdd0bec905fa784245a982a70cf651acf216c390bac6",
+      "/var/tmp/phase6-client-binding-mutation-focused-resource.json": "9a548343d76d99c75c3e95c89493b8f99ee1f9efc69d87a4239f60587c88bebb",
+      "/var/tmp/phase6-client-binding-mutation-fixture-failure.log": "5f64c0269a76ba12e8d425aee22ac6b15f8cbb4779b501d82ca0a6db4c069b6c",
+      "/var/tmp/phase6-client-binding-mutation-fixture-failure-resource.json": "fd6ab22180b125936e18d84de5ae8410d056ec715ed97955d82068fb1daf0e03",
+      "/var/tmp/phase6-client-binding-mutation-ts-failure.log": "759b984a858618ca2418e7a65566709ca5bb4b314639c153899a6ac2d06873d0",
+      "/var/tmp/phase6-client-binding-mutation-ts-failure-resource.json": "d5ef27e1523c188f97107e7f7991fde41f270dc08b677204a27e37e5b443f1e8",
+      "/var/tmp/phase6-client-binding-mutation-route-failure.log": "3dacbb1fedcacddc190c4cd46d9d00e768875ebab58a52a2c5551d1eae55d357",
+      "/var/tmp/phase6-client-binding-mutation-route-failure-resource.json": "b88d9d27a65a5d267e13f6154410d1c084aa1e58cab6bd4e2e4fe674806c496d",
+      "/var/tmp/phase6-client-binding-mutation-sdk-failure.log": "0e9756c886c768b1786ddc172b8b771efe115453c889746f58b641b919420d62",
+      "/var/tmp/phase6-client-binding-mutation-sdk-failure-resource.json": "2b9d021a1c00502ee178450f4d13682a126d3194f27491709008796f1b361521",
+      "/var/tmp/phase6-client-binding-mutation-sdk-diagnostic.log": "7fff1321edfe7658ebac2ee8d35de06ca93b148c10ad1426701ca120cae370b5",
+      "/var/tmp/phase6-binding-fixture-orphans-cleanup.log": "c7d47035c60ac1a9464373f15e444b1e02e11b7e9d6955d742a6e78a01295409",
+      "/var/tmp/phase6-client-binding-mutation-qa.py": "f0df5d9e54e509a6596cb0e7d65a80042d026ec05f15eb6229a8567c446edc0d",
+      "/var/tmp/phase6-client-binding-mutation-focused-qa.py": "a63aaf9b5c1732080c3d7fd86dc10045c6e78184dff05dd45b54af19c6174337",
+      "/var/tmp/phase6-binding-fixture-orphans.mjs": "53e6a4080fb68b777ac176268b37ccb3af0d00a96ea15a4545f4f8fb1eefc522"
+    }
+  },
+  "production": {
+    "mutations": false,
+    "copiedPersonalData": false,
+    "sourceRuntimeSync": false,
+    "servicesRestarted": false,
+    "viewerDeployed": false,
+    "liveViewerVersion": "0.81.11",
+    "unchangedPids": {
+      "taiko-viewer.service": 1063394,
+      "taiko-sync-receiver.service": 1063408,
+      "taiko-public-api.service": 829173
+    },
+    "clientStarted": false
+  },
+  "pending": [
+    "Client QQ migration/token issuer; native Hiroba/QQ authority",
+    "All Writer inventory/quiescence/adoption and P1a",
+    "Full Read Model dependencies, invalidation and fail-closed projections",
+    "Million-record actual cold/warm IO/RSS and protocol/store size reconciliation",
+    "Trusted recovery/cleanup/runbook, fixed runtime dependencies, stop all legacy writers before R sync",
+    "Standard coordinated build/push/deploy/restart and real authenticated online product smoke"
+  ],
+  "rollback": {
+    "client": "47bf5c1 / 0.2.4",
+    "viewer": "39c2327 local preparation",
+    "activation": "Client 0.2.5 requires Viewer 0.82.0 and explicit grants; no standalone running activation this step."
+  }
+}

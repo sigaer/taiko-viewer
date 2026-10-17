@@ -1,3 +1,5 @@
+import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity";
+import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { readRecentCompletedGoal } from '../goals/evaluation-store';
 import { readGoalSnapshot } from "../goals/snapshot";
 import { readActiveGoal } from "../goals/store";
@@ -36,63 +38,70 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
   const binding = await getCurrentBindingRow(userId);
   const authDurationMs = performance.now() - authStartedAt;
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
-  if (!await getDomainScoreReader().currentExists(binding.taiko_id)) throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" });
-  const scoreStartedAt = performance.now();
-  const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id)]);
-  const history = scoreEvidence.snapshots;
-  const { current } = snapshot;
-  const scoreDurationMs = performance.now() - scoreStartedAt;
-  const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
-  const computePromise = runGrowthPythonJson(binding.taiko_id, mode, 3);
-  const computed = await computePromise;
-  const stateAggregationStartedAt = performance.now();
-  const playerState = buildPlayerGrowthState(computed.playerState.dimensions, computed.playerState.sampleCount, mode, computed.playerState.overallRating);
-  const measurementDay = growthCalendarDay(snapshot.capturedAt);
-  const measurementPromise = readDailyAbilityArchive(getRuntimePaths().userdataDir, binding.taiko_id, userId, Number(binding.id), measurementDay, measurementDay)
-    // A read-time calculation must not replace a value already frozen by the
-    // snapshot writer/backfill, including accounts visiting Viewer first today.
-    .then(async archived => archived.length ? { created: false } : upsertGrowthMeasurement(getAccountDb(), { userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision, capturedAt: snapshot.capturedAt, modelRevision: await getGrowthModelRevision(), playerState, rawDimensions: computed.playerState.dimensions }))
-    .then(result => console.info("[growth-history] measurement upsert", { userId, bindingId: Number(binding.id), result: result.created ? "create" : "hit" }))
-    .catch(error => console.error("[growth-history] measurement persistence failed", { userId, bindingId: Number(binding.id), error: error instanceof Error ? error.message : String(error) }));
-  const stateAggregationDurationMs = performance.now() - stateAggregationStartedAt;
-  const stateDurationMs = stateAggregationDurationMs;
-  const progressStartedAt = performance.now();
-  const dailyProgressPromise = Promise.resolve().then(() => buildDailyProgress(current, catalog, history));
-  const planStartedAt = performance.now();
-  const recommendations = computed.todayPlan.items;
-  const usedFallback = Boolean(computed.todayPlan.usedFallback);
-  const scoreMap = new Map((current.songs || []).map((song) => [chartKey(song), song]));
-  const items = recommendations.slice(0, 3).map((item: { songId: number; level: number; title: string; isUnplayed: boolean }) => {
-    const song = scoreMap.get(`${item.songId}:${item.level}`);
-    const catalogSong = catalog.find((entry) => Number(entry.id) === item.songId) || null;
-    const difficulty = resolveDifficultyPresentation(catalogSong, item.level);
-    if (!difficulty.difficultyType) return null;
-    return { goalOptions: goalOptions(goalBaseline(song, snapshot.revision, snapshot.capturedAt), binding.source, goalChartAvailable(catalogSong || undefined, item.level)), songId: item.songId, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.isUnplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
-  }).filter(Boolean) as GrowthPlanItem[];
-  const planDurationMs = performance.now() - planStartedAt;
-  const dailyProgress = await dailyProgressPromise;
-  await measurementPromise;
-  const progressDurationMs = performance.now() - progressStartedAt;
-  console.info("[player-growth] overview timing", {
-    userId,
-    authDurationMs: Math.round(authDurationMs),
-    scoreDurationMs: Math.round(scoreDurationMs),
-    stateDurationMs: Math.round(stateDurationMs),
-    planDurationMs: Math.round(planDurationMs),
-    pythonDurationMs: Number(computed.timing?.totalPythonMs || 0),
-    pythonTiming: computed.timing || null,
-    stateAggregationDurationMs: Math.round(stateAggregationDurationMs),
-    progressDurationMs: Math.round(progressDurationMs),
-    totalDurationMs: Math.round(performance.now() - requestStartedAt),
-    recommendationCount: items.length,
-    historyFileCount: history.length,
-    historyTotalFileCount: scoreEvidence.totalFiles,
-    historyTruncated: scoreEvidence.truncated,
-    dataMode: mode,
-    recommendationFallback: usedFallback
+  const expected = captureBindingIdentity(binding);
+  return withDomainScoreRead(binding.taiko_id, async () => {
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
+    if (!await getDomainScoreReader().currentExists(binding.taiko_id)) throw createError({ statusCode: 404, statusMessage: "未找到本地成绩数据，请先在「多端同步」更新数据" });
+    const scoreStartedAt = performance.now();
+    const [snapshot, catalog, scoreEvidence] = await Promise.all([readGoalSnapshot(binding.taiko_id), getSongCatalog(), (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id)]);
+    const history = scoreEvidence.snapshots;
+    const { current } = snapshot;
+    const scoreDurationMs = performance.now() - scoreStartedAt;
+    const mode: GrowthDataMode = history.some((item) => item.full) ? "FULL_HISTORY" : current.songs?.length ? "SNAPSHOT_LIMITED" : "INSUFFICIENT";
+    const computePromise = runGrowthPythonJson(binding.taiko_id, mode, 3);
+    const computed = await computePromise;
+    const stateAggregationStartedAt = performance.now();
+    const playerState = buildPlayerGrowthState(computed.playerState.dimensions, computed.playerState.sampleCount, mode, computed.playerState.overallRating);
+    const measurementDay = growthCalendarDay(snapshot.capturedAt);
+    const measurementPromise = readDailyAbilityArchive(getRuntimePaths().userdataDir, binding.taiko_id, userId, Number(binding.id), measurementDay, measurementDay)
+      // A read-time calculation must not replace a value already frozen by the
+      // snapshot writer/backfill, including accounts visiting Viewer first today.
+      .then(async archived => archived.length ? { created: false } : upsertGrowthMeasurement(getAccountDb(), { userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision, capturedAt: snapshot.capturedAt, modelRevision: await getGrowthModelRevision(), playerState, rawDimensions: computed.playerState.dimensions }))
+      .then(result => console.info("[growth-history] measurement upsert", { userId, bindingId: Number(binding.id), result: result.created ? "create" : "hit" }))
+      .catch(error => console.error("[growth-history] measurement persistence failed", { userId, bindingId: Number(binding.id), error: error instanceof Error ? error.message : String(error) }));
+    const stateAggregationDurationMs = performance.now() - stateAggregationStartedAt;
+    const stateDurationMs = stateAggregationDurationMs;
+    const progressStartedAt = performance.now();
+    const dailyProgressPromise = Promise.resolve().then(() => buildDailyProgress(current, catalog, history));
+    const planStartedAt = performance.now();
+    const recommendations = computed.todayPlan.items;
+    const usedFallback = Boolean(computed.todayPlan.usedFallback);
+    const scoreMap = new Map((current.songs || []).map((song) => [chartKey(song), song]));
+    const items = recommendations.slice(0, 3).map((item: { songId: number; level: number; title: string; isUnplayed: boolean }) => {
+      const song = scoreMap.get(`${item.songId}:${item.level}`);
+      const catalogSong = catalog.find((entry) => Number(entry.id) === item.songId) || null;
+      const difficulty = resolveDifficultyPresentation(catalogSong, item.level);
+      if (!difficulty.difficultyType) return null;
+      return { goalOptions: goalOptions(goalBaseline(song, snapshot.revision, snapshot.capturedAt), binding.source, goalChartAvailable(catalogSong || undefined, item.level)), songId: item.songId, difficultyType: difficulty.difficultyType, starLevel: difficulty.starLevel, title: item.title, isUnplayed: item.isUnplayed, targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, reason: usedFallback ? "general-fallback" as const : "target-dimension" as const, currentBestScore: song ? scoreValue(song) || null : null, currentBestRank: song ? numberValue(song.best_score_rank) || null : null };
+    }).filter(Boolean) as GrowthPlanItem[];
+    const planDurationMs = performance.now() - planStartedAt;
+    const dailyProgress = await dailyProgressPromise;
+    await measurementPromise;
+    const progressDurationMs = performance.now() - progressStartedAt;
+    console.info("[player-growth] overview timing", {
+      userId,
+      authDurationMs: Math.round(authDurationMs),
+      scoreDurationMs: Math.round(scoreDurationMs),
+      stateDurationMs: Math.round(stateDurationMs),
+      planDurationMs: Math.round(planDurationMs),
+      pythonDurationMs: Number(computed.timing?.totalPythonMs || 0),
+      pythonTiming: computed.timing || null,
+      stateAggregationDurationMs: Math.round(stateAggregationDurationMs),
+      progressDurationMs: Math.round(progressDurationMs),
+      totalDurationMs: Math.round(performance.now() - requestStartedAt),
+      recommendationCount: items.length,
+      historyFileCount: history.length,
+      historyTotalFileCount: scoreEvidence.totalFiles,
+      historyTruncated: scoreEvidence.truncated,
+      dataMode: mode,
+      recommendationFallback: usedFallback
+    });
+    const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
+    if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
+    const recentCompletedGoal = activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id));
+    assertBindingIdentity(expected, await getCurrentBindingRow(userId));
+    return { recentCompletedGoal, profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
   });
-  const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
-  if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
-  return { recentCompletedGoal: activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id)), profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
+
 };
 

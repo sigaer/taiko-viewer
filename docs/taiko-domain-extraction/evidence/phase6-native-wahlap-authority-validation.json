@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6h",
+  "status": "NATIVE_WAHLAP_OWNERSHIP_UPDATE_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceStartedParent": "926ad234d835a3f91a3428fe249fc073c779199c",
+  "sourceParent": "8c877ee201a1fd3c36c7ed4699cbf2a6c0f5ea1b",
+  "sourceCommit": "539f6e527171f788eb44ed93687d6d31fb3312c3",
+  "sourceVersion": "9.81.26",
+  "sourceRemote": "539f6e527171f788eb44ed93687d6d31fb3312c3",
+  "sourcePushVerified": true,
+  "sourcePushSession": 5106,
+  "sourcePushExit": 0,
+  "concurrentUserCommits": [
+    "ff1778fb1efbae378a16f6647f3c929c034aae64",
+    "8c877ee201a1fd3c36c7ed4699cbf2a6c0f5ea1b"
+  ],
+  "concurrentUserTaikoDiff": "git diff --name-only 926ad23..8c877ee -- taiko empty; preserve Milky commits and use next patch 9.81.26",
+  "viewerPreparedParent": "f4af6d31b0d7e401b7bcfdafba16577a61625b8a",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "clientCommit": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+  "clientVersion": "0.2.7",
+  "clientChanged": false,
+  "corePins": "Source 0.1.1 / client 0.1.2 unchanged",
+  "tests": {
+    "sourceOffline": {
+      "passed": 258,
+      "existingPassed": 241,
+      "newNativeWahlapPassed": 17,
+      "productionOrRealDeselected": 9,
+      "warnings": 1,
+      "wrapperSession": 21484,
+      "wrapperExit": 0
+    },
+    "actualMysqlAndCommonWriter": {
+      "finalNewComposites": 28,
+      "initialUnchangedComposites": 70,
+      "actualSqlAcrossRuns": 98,
+      "totalsCaveat": "70 existing native metadata/mutation/Hiroba/QQ passed in earlier failed new-fixture run; 28 new passed final, not one all-green 98 suite",
+      "eachNativeAndSongLockConnectionActualSelectDatabase": true,
+      "database": "taiko_annual_poster_test",
+      "explicitMutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+      "coverage": [
+        "own hidden canonical current real binding and complete row/state proof",
+        "bare/foreign/manual/u0/noncurrent/wrong-platform deny before upstream",
+        "actual getUserData four synthetic HTTP calls and actual common C/H writer",
+        "actual daily capture functions with tracked public catalog and empty synthetic scores",
+        "captured same-view renderer interface, show_all and text fallback/16MiB cap",
+        "fuzzy mismatched search profile denied before writer; 404/-1 frozen product copy",
+        "late binding mutation and failed rollback dedicated close; legal observations retained after late read-only SQL failure",
+        "real process exits before/after Source publish and read-only COMMIT; next update restores lease availability",
+        "Node-held identical principal gate actual 5s bounded timeout",
+        "Source EX queue replacement of visibility/row_id/source/u0 rejects captured old identity"
+      ]
+    },
+    "golden": {
+      "oracle": "926ad23:taiko/plugins/utils/update_user.py",
+      "sameSourceAndClock": true,
+      "twoObservationsPerRoot": true,
+      "twoOwnedIndependentRoots": true,
+      "currentContentSha256Exact": true,
+      "fullAndDeltaHistorySha256Exact": true,
+      "filenameTimestampSequenceStructureExact": true,
+      "randomNonceExcludedFromFilenameEquality": true
+    },
+    "retainedTests": {
+      "selectedOfficialAndCooldown": 2,
+      "selectedBindImage": 1,
+      "mode": "Selected retained test AST plus actual current handler/adapter namespace; no full NoneBot registration"
+    },
+    "nativeAdmission": "Shared in-process bounded thread semaphore 2, 30s wait, both command and first-bind helper; not host-global admission claim",
+    "renderBoundary": "Synthetic small captured-view bytes; no real PNG renderer run",
+    "dailyCaveat": "Actual capture/compute functions execute with empty synthetic scores; no claim of full daily measurement values/ownership coverage",
+    "clientTestsAndTsThisStep": false,
+    "previousClientAndTsEvidence": "phase6-client-qq-migration-validation.json unchanged B 223/Core pins; not rerun here",
+    "fullNoneBotRun": false,
+    "realUpstreamRun": false,
+    "onlineAuthenticatedRun": false,
+    "millionRecordCostRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 13.959
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 53.643
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 67.602,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791776870-2153889.service",
+    "sampledPeakBytes": 308043776,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 217192
+  },
+  "resourceCaveat": "250ms sample is not absolute peak, child OS maxRSS separate, no production or million-record maximum claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791776870-2153889.service",
+    "result": "success",
+    "execMainStatus": 0,
+    "activeState": "inactive",
+    "loadState": "not-found after collection",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T11:47:50+08:00",
+    "ended": "2026-10-12T11:48:58+08:00"
+  },
+  "failureHistory": [
+    {
+      "sourcePassed": 255,
+      "sourceFailed": 1,
+      "sqlRun": false,
+      "cause": "Retained bind-image AST fixture missing official-event and matcher exception symbols",
+      "log": "/var/tmp/phase6-native-wahlap-bind-reply-fixture-failure.log"
+    },
+    {
+      "sourcePassed": 256,
+      "nodePassed": 82,
+      "nodeFailed": 11,
+      "cause": "Actual common writer daily capture failed to find relative public rating config from Viewer cwd; fixture now uses actual Source cwd",
+      "log": "/var/tmp/phase6-native-wahlap-common-writer-diagnostic-failure.log"
+    },
+    {
+      "cause": "Fresh tracked public V2 catalog preloaded to prevent QA background network refresh/catalog rewrite; actual daily computation remains",
+      "log": "/var/tmp/phase6-native-wahlap-public-catalog-fixture-failure.log"
+    },
+    {
+      "cause": "Golden assumed obsolete current projection path; compare canonical reader content hashes instead",
+      "log": "/var/tmp/phase6-native-wahlap-golden-projection-path-failure.log"
+    },
+    {
+      "nodePassed": 27,
+      "nodeFailed": 1,
+      "cause": "Content hashes already exact, random protocol nonce filenames intentionally differ; compare timestamp/sequence structure plus hashes",
+      "log": "/var/tmp/phase6-native-wahlap-golden-random-name-fixture-failure.log"
+    }
+  ],
+  "earlierPass": {
+    "sourcePassed": 256,
+    "newSqlPassed": 28,
+    "followup": "Add fixed state feedback for handler metadata read failure and private driver detail suppression, then final 258/28 rerun",
+    "log": "/var/tmp/phase6-native-wahlap-first-full-pass.log"
+  },
+  "decisions": [
+    "One bounded current DTO chooses source/slot; framework authenticated sender propagated into command and first-bind auto update, ownerless helper fails before IO.",
+    "Capture complete current row/state then Source EX then shared principal gate then SQL proof; every publish/render/response rechecks same current identity.",
+    "Actual existing getUserData/common publication/daily semantics retained; renderer consumes captured canonical view.",
+    "Owned publication requires exact profile userid, old unowned public fallback retained but not claimed verified.",
+    "Frozen 404/-1/success/all/default copy and silent cooldown, in-process two update jobs retained; first-bind uses same admission.",
+    "Image failures/oversize use text-only success; legitimate committed observations persist after late SQL proof failure with failed response, no cross-system transaction claim.",
+    "Changed handler no longer writes old ad-hoc debug records; fixed metadata/driver state copy."
+  ],
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/taiko.py": "1791ce3472ac841ced908dba058539ecebbcad4b6cd9b2b3e2e435a855871dc3",
+      "taiko/plugins/utils/native_wahlap_update.py": "4011c89254bda4ab63c26910e089cd08501e4515faba861d63a2e750a06b534f",
+      "taiko/plugins/utils/update_user.py": "8b04b705247a7da8a48905fcb755b357001e0f4ceb494be2633ca89776ce0a32",
+      "taiko/tests/test_official_update_behavior.py": "20f7ecf9374522c24a586b3164cd7352ae3b9bb8e95639db03de0279987a0e38",
+      "taiko/tests/test_native_wahlap_update.py": "de496f84ed0077d30d70712554b3213d2fb838934b9847b341df4b33be437957",
+      "taiko/tests/native_wahlap_sql_child.py": "d7ad7375b2a1ad2e8532a2539f161bc2a0a3bee0f8d3a7176b620af80168ee4e",
+      "taiko/docs/domain-extraction-phase6-publication.md": "7cbae8be7fc8d417ac1aabc966cb952c7109aef2d1990f256008656d57404f93"
+    },
+    "viewer": {
+      "taiko_viewer/tests/nativeWahlapUpdateSql.test.mjs": "810d26df6efea560674f4b39b8b22b6c2f7efdae71f643bdadc9886e49b31e25"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-native-wahlap-final-qa.py": "ea95c289dd99f65d302c6cbfe3ce8ec5791754c9851879121b2e0e684a6412de",
+      "/var/tmp/phase6-native-wahlap-final-qa.log": "8567897373ef327d545b985894b1a8404815852cac21ea932e27e834746651f4",
+      "/var/tmp/phase6-native-wahlap-final-resource.json": "01e4bf2f60784f002d2a03d188de20ac60126ba00f36751cedd0ede441a1767b",
+      "/var/tmp/phase6-native-wahlap-bind-reply-fixture-failure.log": "31e5a17d3098c26fa19201452359ce8765ab5a4a4c15f37c21cccce798c39e2f",
+      "/var/tmp/phase6-native-wahlap-bind-reply-fixture-failure-resource.json": "6377371714a6fb7455c6859871cb03d0629b793101b65946ca4b6bd6adc6660e",
+      "/var/tmp/phase6-native-wahlap-common-writer-diagnostic-failure.log": "2a6c626d4ac7d92d116c4056ea3dc6b6ef2d78d9abb03e23c2f09c74d3e98302",
+      "/var/tmp/phase6-native-wahlap-common-writer-diagnostic-failure-resource.json": "cb547363ec806a99e1dbcc37e03979ef3db52b7bcac81f6be5d905786a9cb4d6",
+      "/var/tmp/phase6-native-wahlap-cwd-diagnostic.log": "c7d5dad9d9d4b67ee3b0e687b320c0f9210cb422c88b902554d8cba70f0d8e02",
+      "/var/tmp/phase6-native-wahlap-cwd-diagnostic-resource.json": "4e93b665287a1ae7b83ef1648e3dffacf124017dcda5dc701ab6d54a55c5b37d",
+      "/var/tmp/phase6-native-wahlap-public-catalog-fixture-failure.log": "c0b157525a9b0e8a1f0ab90c1fbe9284728cdf00ece1b4f9e895572bd63934f1",
+      "/var/tmp/phase6-native-wahlap-public-catalog-fixture-failure-resource.json": "1b60413da70f3a03b994f1eb6f1513b0f46cf534bd5d4473c0e87897c3dae3a1",
+      "/var/tmp/phase6-native-wahlap-golden-projection-path-failure.log": "3079ee2d1030a79bf7a39afc3da591fc0d95e7d7a0dcb0dca0dfa156392dcea2",
+      "/var/tmp/phase6-native-wahlap-golden-projection-path-failure-resource.json": "aba8bd1a9ec1626d9a6d310dcec53d8c52688238e43318aea0c6e8673ce77e0a",
+      "/var/tmp/phase6-native-wahlap-golden-random-name-fixture-failure.log": "02557eb46b930da4c550bc5b15900982493d6ed15eabde3d31c42315bc6fd4e9",
+      "/var/tmp/phase6-native-wahlap-golden-random-name-fixture-failure-resource.json": "acdea92a851aaf7b7c5d206fc95814ad7581655a5dc92bb957efbed3514b2085",
+      "/var/tmp/phase6-native-wahlap-own-healthy-pass.log": "9f161128f6737b69f94e9a6eb53a0c9c95c5315ff9f23a68e7138239f0f3ece6",
+      "/var/tmp/phase6-native-wahlap-own-healthy-pass-resource.json": "3183b6e1f3cb5f801d7f4d4aeb4386a465d00b5873bbce1a7ede32eb96686890",
+      "/var/tmp/phase6-native-wahlap-first-full-pass.log": "3d93593968b4f1cd115d99f6123074dda9edc44b2dbeef497d40804e0cd74681",
+      "/var/tmp/phase6-native-wahlap-first-full-pass-resource.json": "d092521f659876e221143aca22e3d6d8733a6fbd9c9e24708931190c99e108b5"
+    }
+  },
+  "runtime": {
+    "sourceCopiedToR": false,
+    "servicesRestarted": false,
+    "deploymentRun": false,
+    "clientStarted": false,
+    "productionSqlMutated": false,
+    "productionDataCopied": false,
+    "liveViewerVersion": "0.81.11",
+    "preparedViewerVersion": "0.82.0",
+    "services": {
+      "taiko-viewer.service": {
+        "active": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "active": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "active": "active",
+        "pid": 829173
+      }
+    }
+  },
+  "rollback": {
+    "source": "8c877ee201a1fd3c36c7ed4699cbf2a6c0f5ea1b",
+    "viewerPreparation": "f4af6d31b0d7e401b7bcfdafba16577a61625b8a",
+    "activation": "Prepared code only, retain user Milky commits; final R synchronization/restart remains required after whole Phase 6 gate ready."
+  },
+  "remaining": [
+    "other native private readers and startup SQL binding migration writer",
+    "all u0/daily/maintenance writers, persistent admission and P1a only after legacy writers quiesced",
+    "private Read Model/exact dependency invalidation/full parity and actual million cold/warm IO RSS",
+    "trusted recovery/cleanup/runbook/fixed R dependencies and production grants",
+    "standard Viewer release/R sync-restarts/real authenticated online full Gate"
+  ]
+}

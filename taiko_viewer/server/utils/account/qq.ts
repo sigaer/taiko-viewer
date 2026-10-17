@@ -2,6 +2,7 @@ import { createError } from "h3";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import { type DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { createCode, ensureNonEmpty, sendMailCode, sha256, toIso } from "../../internal/account/shared";
+import type { BindingReadDb } from "../../internal/account/binding-read.ts";
 
 export type QqBindingRow = {
     id: number;
@@ -33,9 +34,9 @@ const normalizeQqNumber = (value: unknown) => {
 
 const isValidQqNumber = (value: string) => /^[1-9]\d{4,14}$/.test(value);
 
-export const getQqBinding = async (userId: number): Promise<QqBindingSummary | null> => {
+export const getQqBinding = async (userId: number, suppliedDb?: BindingReadDb): Promise<QqBindingSummary | null> => {
     await ensureAccountSchema();
-    const db = getAccountDb();
+    const db = suppliedDb || getAccountDb();
     const [rows] = await db.execute<DbRow<QqBindingRow>[]>(
         "SELECT * FROM web_user_qq_bindings WHERE user_id = ? AND status IN ('pending', 'active') ORDER BY status = 'active' DESC, created_at DESC LIMIT 1",
         [userId]

@@ -20,6 +20,8 @@ useViewerSeo(() => ({
   path: "/my"
 }));
 
+const readModelEnabled = useRuntimeConfig().public.myTaikoReadModelMode === "read-model";
+
 const personalLinks = [
   { path: "/my/growth", label: "passport.title" },
   { path: "/my/weekly", label: "weekly.title" },
@@ -45,6 +47,8 @@ const personalLinks = [
       <p class="my-intro__eyebrow">{{ t("nav.myTaiko") }}</p>
       <h2>{{ t("page.myTaiko.readyTitle", { name: accountUser.username }) }}</h2>
     </section>
+
+    <MyTaikoOverview v-if="readModelEnabled && accountUser" />
 
     <section class="my-links panel-card">
       <h2>{{ t("page.myTaiko.linksTitle") }}</h2>

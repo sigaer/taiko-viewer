@@ -1,0 +1,3803 @@
+{
+  "status": "OWNER_DECISION_PENDING",
+  "productionAccess": false,
+  "scope": "Unchanged synthetic Passport boundary and paired observation facts; frozen oracle unchanged",
+  "passport": {
+    "oldHash": "14c7c098b8b22dc927a8bf198490ede62392c98a964fde37bf5ffcb0f1857ecb",
+    "candidateHash": "005c4f7f65484cc7e315ff376928d20f7087f08f1d89f1a4b180275c7d7b55a2",
+    "differences": [
+      {
+        "path": "$.milestones.0.id",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.milestones.0.primaryType",
+        "before": "fc",
+        "after": "goal-completed"
+      },
+      {
+        "path": "$.milestones.0.factKeys.0",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.milestones.0.factKeys.1",
+        "before": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+        "after": null
+      },
+      {
+        "path": "$.milestones.0.day",
+        "before": "2026-10-08",
+        "after": null
+      },
+      {
+        "path": "$.milestones.0.observedAt",
+        "before": "2026-09-03T20:38:10.909Z",
+        "after": "2026-10-07T16:00:00Z"
+      },
+      {
+        "path": "$.milestones.0.timeSemantics",
+        "before": "played",
+        "after": "observed"
+      },
+      {
+        "path": "$.milestones.0.title",
+        "before": "synthetic-2",
+        "after": "synthetic"
+      },
+      {
+        "path": "$.milestones.0.songId",
+        "before": 2,
+        "after": 1
+      },
+      {
+        "path": "$.milestones.0.before",
+        "before": 0,
+        "after": 1
+      },
+      {
+        "path": "$.milestones.0.after",
+        "before": 1,
+        "after": 2
+      },
+      {
+        "path": "$.milestones.0.goalCompleted",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "$.milestones.0.observationOnly",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "$.milestones.0.improvements.0.type",
+        "before": "fc",
+        "after": "goal-completed"
+      },
+      {
+        "path": "$.milestones.0.improvements.0.before",
+        "before": 0,
+        "after": 1
+      },
+      {
+        "path": "$.milestones.0.improvements.0.after",
+        "before": 1,
+        "after": 2
+      },
+      {
+        "path": "$.milestones.0.improvements.0.factKey",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.milestones.0.improvements.1",
+        "before": {
+          "type": "score-pb",
+          "before": 900000,
+          "after": 900002,
+          "delta": 2,
+          "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+        },
+        "after": null
+      },
+      {
+        "path": "$.milestones.0.evidenceRefs.0.factKey",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.milestones.0.evidenceRefs.0.source",
+        "before": "score-history",
+        "after": "goal"
+      },
+      {
+        "path": "$.milestones.0.evidenceRefs.0.sourceRevision",
+        "before": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+        "after": "fixture"
+      },
+      {
+        "path": "$.milestones.0.evidenceRefs.1",
+        "before": {
+          "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+          "source": "score-history",
+          "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+          "evidenceVersion": 1
+        },
+        "after": null
+      },
+      {
+        "path": "$.milestones.1",
+        "before": {
+          "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+          "primaryType": "goal-completed",
+          "factKeys": [
+            "goal:v1:1:42:fixture"
+          ],
+          "day": null,
+          "observedAt": "2026-10-07T16:00:00Z",
+          "timeSemantics": "observed",
+          "title": "synthetic",
+          "songId": 1,
+          "difficultyType": 4,
+          "before": 1,
+          "after": 2,
+          "delta": 1,
+          "goalCompleted": true,
+          "observationOnly": true,
+          "improvements": [
+            {
+              "type": "goal-completed",
+              "before": 1,
+              "after": 2,
+              "delta": 1,
+              "factKey": "goal:v1:1:42:fixture"
+            }
+          ],
+          "evidenceRefs": [
+            {
+              "factKey": "goal:v1:1:42:fixture",
+              "source": "goal",
+              "sourceRevision": "fixture",
+              "evidenceVersion": 1
+            }
+          ]
+        },
+        "after": null
+      },
+      {
+        "path": "$.initialMilestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.initialMilestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.milestones.0.id",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.milestones.0.primaryType",
+        "before": "fc",
+        "after": "goal-completed"
+      },
+      {
+        "path": "$.shared.milestones.0.factKeys.0",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.milestones.0.factKeys.1",
+        "before": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+        "after": null
+      },
+      {
+        "path": "$.shared.milestones.0.day",
+        "before": "2026-10-08",
+        "after": null
+      },
+      {
+        "path": "$.shared.milestones.0.observedAt",
+        "before": "2026-09-03T20:38:10.909Z",
+        "after": "2026-10-07T16:00:00Z"
+      },
+      {
+        "path": "$.shared.milestones.0.timeSemantics",
+        "before": "played",
+        "after": "observed"
+      },
+      {
+        "path": "$.shared.milestones.0.title",
+        "before": "synthetic-2",
+        "after": "synthetic"
+      },
+      {
+        "path": "$.shared.milestones.0.songId",
+        "before": 2,
+        "after": 1
+      },
+      {
+        "path": "$.shared.milestones.0.before",
+        "before": 0,
+        "after": 1
+      },
+      {
+        "path": "$.shared.milestones.0.after",
+        "before": 1,
+        "after": 2
+      },
+      {
+        "path": "$.shared.milestones.0.goalCompleted",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "$.shared.milestones.0.observationOnly",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "$.shared.milestones.0.improvements.0.type",
+        "before": "fc",
+        "after": "goal-completed"
+      },
+      {
+        "path": "$.shared.milestones.0.improvements.0.before",
+        "before": 0,
+        "after": 1
+      },
+      {
+        "path": "$.shared.milestones.0.improvements.0.after",
+        "before": 1,
+        "after": 2
+      },
+      {
+        "path": "$.shared.milestones.0.improvements.0.factKey",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.milestones.0.improvements.1",
+        "before": {
+          "type": "score-pb",
+          "before": 900000,
+          "after": 900002,
+          "delta": 2,
+          "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+        },
+        "after": null
+      },
+      {
+        "path": "$.shared.milestones.0.evidenceRefs.0.factKey",
+        "before": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+        "after": "goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.milestones.0.evidenceRefs.0.source",
+        "before": "score-history",
+        "after": "goal"
+      },
+      {
+        "path": "$.shared.milestones.0.evidenceRefs.0.sourceRevision",
+        "before": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+        "after": "fixture"
+      },
+      {
+        "path": "$.shared.milestones.0.evidenceRefs.1",
+        "before": {
+          "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+          "source": "score-history",
+          "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+          "evidenceVersion": 1
+        },
+        "after": null
+      },
+      {
+        "path": "$.shared.milestones.1",
+        "before": {
+          "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+          "primaryType": "goal-completed",
+          "factKeys": [
+            "goal:v1:1:42:fixture"
+          ],
+          "day": null,
+          "observedAt": "2026-10-07T16:00:00Z",
+          "timeSemantics": "observed",
+          "title": "synthetic",
+          "songId": 1,
+          "difficultyType": 4,
+          "before": 1,
+          "after": 2,
+          "delta": 1,
+          "goalCompleted": true,
+          "observationOnly": true,
+          "improvements": [
+            {
+              "type": "goal-completed",
+              "before": 1,
+              "after": 2,
+              "delta": 1,
+              "factKey": "goal:v1:1:42:fixture"
+            }
+          ],
+          "evidenceRefs": [
+            {
+              "factKey": "goal:v1:1:42:fixture",
+              "source": "goal",
+              "sourceRevision": "fixture",
+              "evidenceVersion": 1
+            }
+          ]
+        },
+        "after": null
+      },
+      {
+        "path": "$.shared.views.30.milestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.30.milestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.30.initialMilestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.30.initialMilestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.90.milestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.90.milestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.90.initialMilestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.90.initialMilestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.180.milestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.180.milestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.180.initialMilestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.180.initialMilestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.365.milestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.365.milestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      },
+      {
+        "path": "$.shared.views.365.initialMilestoneIds.0",
+        "before": "milestone:1:1:2:4:2026-10-08:instant",
+        "after": "milestone:goal:1:1:goal:v1:1:42:fixture"
+      },
+      {
+        "path": "$.shared.views.365.initialMilestoneIds.1",
+        "before": "milestone:goal:1:1:goal:v1:1:42:fixture",
+        "after": null
+      }
+    ],
+    "old": {
+      "profileId": "1",
+      "coverage": {
+        "measurementFrom": "2026-10-07T04:00:00Z",
+        "measurementTo": "2026-10-07T04:00:00Z",
+        "measurementDays": 0,
+        "recentFactsFrom": "2026-07-11",
+        "recentFactsTo": "2026-10-08",
+        "recentFactsState": "complete"
+      },
+      "current": {
+        "rating": 10,
+        "dimensions": {
+          "big_song": 10,
+          "stamina": 10,
+          "speed": 10,
+          "accuracy_power": 10,
+          "rhythm": 10,
+          "complex": 10
+        },
+        "focus": "balanced",
+        "readiness": "ready"
+      },
+      "range": {
+        "requestedDays": 365,
+        "from": "2025-10-09",
+        "to": "2026-10-08",
+        "actualFrom": "2026-10-07",
+        "actualTo": "2026-10-07",
+        "measurementDays": 1,
+        "factDays": 90,
+        "timezone": "Asia/Shanghai",
+        "selectedDimension": "rating"
+      },
+      "segments": [
+        {
+          "id": "segment-1",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "from": "2026-10-07",
+          "to": "2026-10-07",
+          "points": [
+            {
+              "id": "frozen",
+              "ownerId": "1",
+              "bindingId": "1",
+              "capturedAt": "2026-10-07T04:00:00Z",
+              "scoreRevision": "frozen",
+              "measurementVersion": 1,
+              "algorithmVersion": "growth-v1",
+              "modelRevision": "frozen-model",
+              "rating": 7,
+              "dimensions": {
+                "big_song": 7,
+                "stamina": 7,
+                "speed": 7,
+                "accuracy_power": 7,
+                "rhythm": 7,
+                "complex": 7
+              },
+              "focus": "balanced",
+              "sampleCount": 30,
+              "availabilityState": "ready",
+              "day": "2026-10-07"
+            }
+          ]
+        }
+      ],
+      "currentSegmentChange": {
+        "start": {
+          "id": "frozen",
+          "ownerId": "1",
+          "bindingId": "1",
+          "capturedAt": "2026-10-07T04:00:00Z",
+          "scoreRevision": "frozen",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "rating": 7,
+          "dimensions": {
+            "big_song": 7,
+            "stamina": 7,
+            "speed": 7,
+            "accuracy_power": 7,
+            "rhythm": 7,
+            "complex": 7
+          },
+          "focus": "balanced",
+          "sampleCount": 30,
+          "availabilityState": "ready",
+          "day": "2026-10-07"
+        },
+        "end": {
+          "id": "frozen",
+          "ownerId": "1",
+          "bindingId": "1",
+          "capturedAt": "2026-10-07T04:00:00Z",
+          "scoreRevision": "frozen",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "rating": 7,
+          "dimensions": {
+            "big_song": 7,
+            "stamina": 7,
+            "speed": 7,
+            "accuracy_power": 7,
+            "rhythm": 7,
+            "complex": 7
+          },
+          "focus": "balanced",
+          "sampleCount": 30,
+          "availabilityState": "ready",
+          "day": "2026-10-07"
+        },
+        "compatible": false,
+        "ratingDelta": null,
+        "dimensionDeltas": null,
+        "primaryDimensionChange": null,
+        "focusFrom": "balanced",
+        "focusTo": "balanced",
+        "reason": "insufficient"
+      },
+      "focusTimeline": [
+        {
+          "id": "focus-1",
+          "segmentId": "segment-1",
+          "focus": "balanced",
+          "startedAt": "2026-10-07",
+          "endedAt": "2026-10-07",
+          "current": true
+        }
+      ],
+      "milestones": [
+        {
+          "id": "milestone:1:1:2:4:2026-10-08:instant",
+          "primaryType": "fc",
+          "factKeys": [
+            "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+            "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+          ],
+          "day": "2026-10-08",
+          "observedAt": "2026-09-03T20:38:10.909Z",
+          "timeSemantics": "played",
+          "title": "synthetic-2",
+          "songId": 2,
+          "difficultyType": 4,
+          "before": 0,
+          "after": 1,
+          "delta": 1,
+          "goalCompleted": false,
+          "observationOnly": false,
+          "improvements": [
+            {
+              "type": "fc",
+              "before": 0,
+              "after": 1,
+              "delta": 1,
+              "factKey": "score-history:v1:1:2026-10-08:2:4:fc:0:1"
+            },
+            {
+              "type": "score-pb",
+              "before": 900000,
+              "after": 900002,
+              "delta": 2,
+              "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+            }
+          ],
+          "evidenceRefs": [
+            {
+              "factKey": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+              "source": "score-history",
+              "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+              "evidenceVersion": 1
+            },
+            {
+              "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+              "source": "score-history",
+              "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+              "evidenceVersion": 1
+            }
+          ]
+        },
+        {
+          "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+          "primaryType": "goal-completed",
+          "factKeys": [
+            "goal:v1:1:42:fixture"
+          ],
+          "day": null,
+          "observedAt": "2026-10-07T16:00:00Z",
+          "timeSemantics": "observed",
+          "title": "synthetic",
+          "songId": 1,
+          "difficultyType": 4,
+          "before": 1,
+          "after": 2,
+          "delta": 1,
+          "goalCompleted": true,
+          "observationOnly": true,
+          "improvements": [
+            {
+              "type": "goal-completed",
+              "before": 1,
+              "after": 2,
+              "delta": 1,
+              "factKey": "goal:v1:1:42:fixture"
+            }
+          ],
+          "evidenceRefs": [
+            {
+              "factKey": "goal:v1:1:42:fixture",
+              "source": "goal",
+              "sourceRevision": "fixture",
+              "evidenceVersion": 1
+            }
+          ]
+        }
+      ],
+      "initialMilestoneIds": [
+        "milestone:1:1:2:4:2026-10-08:instant",
+        "milestone:goal:1:1:goal:v1:1:42:fixture"
+      ],
+      "shared": {
+        "segments": [
+          {
+            "id": "segment-1",
+            "measurementVersion": 1,
+            "algorithmVersion": "growth-v1",
+            "modelRevision": "frozen-model",
+            "from": "2026-10-07",
+            "to": "2026-10-07",
+            "points": [
+              {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              }
+            ]
+          }
+        ],
+        "milestones": [
+          {
+            "id": "milestone:1:1:2:4:2026-10-08:instant",
+            "primaryType": "fc",
+            "factKeys": [
+              "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+              "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+            ],
+            "day": "2026-10-08",
+            "observedAt": "2026-09-03T20:38:10.909Z",
+            "timeSemantics": "played",
+            "title": "synthetic-2",
+            "songId": 2,
+            "difficultyType": 4,
+            "before": 0,
+            "after": 1,
+            "delta": 1,
+            "goalCompleted": false,
+            "observationOnly": false,
+            "improvements": [
+              {
+                "type": "fc",
+                "before": 0,
+                "after": 1,
+                "delta": 1,
+                "factKey": "score-history:v1:1:2026-10-08:2:4:fc:0:1"
+              },
+              {
+                "type": "score-pb",
+                "before": 900000,
+                "after": 900002,
+                "delta": 2,
+                "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002"
+              }
+            ],
+            "evidenceRefs": [
+              {
+                "factKey": "score-history:v1:1:2026-10-08:2:4:fc:0:1",
+                "source": "score-history",
+                "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+                "evidenceVersion": 1
+              },
+              {
+                "factKey": "score-history:v1:1:2026-10-08:2:4:score-pb:900000:900002",
+                "source": "score-history",
+                "sourceRevision": "0815d60eac4a22a93906ab1227c915d25d812b80e89c6b90703345d41d0996a9",
+                "evidenceVersion": 1
+              }
+            ]
+          },
+          {
+            "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+            "primaryType": "goal-completed",
+            "factKeys": [
+              "goal:v1:1:42:fixture"
+            ],
+            "day": null,
+            "observedAt": "2026-10-07T16:00:00Z",
+            "timeSemantics": "observed",
+            "title": "synthetic",
+            "songId": 1,
+            "difficultyType": 4,
+            "before": 1,
+            "after": 2,
+            "delta": 1,
+            "goalCompleted": true,
+            "observationOnly": true,
+            "improvements": [
+              {
+                "type": "goal-completed",
+                "before": 1,
+                "after": 2,
+                "delta": 1,
+                "factKey": "goal:v1:1:42:fixture"
+              }
+            ],
+            "evidenceRefs": [
+              {
+                "factKey": "goal:v1:1:42:fixture",
+                "source": "goal",
+                "sourceRevision": "fixture",
+                "evidenceVersion": 1
+              }
+            ]
+          }
+        ],
+        "views": {
+          "30": {
+            "range": {
+              "requestedDays": 30,
+              "from": "2026-09-09",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 30,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-09-09",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "90": {
+            "range": {
+              "requestedDays": 90,
+              "from": "2026-07-11",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "180": {
+            "range": {
+              "requestedDays": 180,
+              "from": "2026-04-12",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "365": {
+            "range": {
+              "requestedDays": 365,
+              "from": "2025-10-09",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:1:1:2:4:2026-10-08:instant",
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          }
+        }
+      },
+      "activeGoal": null,
+      "recentCompletedGoal": null,
+      "currentNextAction": {
+        "focus": "balanced",
+        "todayPlan": {
+          "targetDimension": "big_song",
+          "items": [],
+          "usedFallback": false
+        }
+      }
+    },
+    "candidate": {
+      "profileId": "1",
+      "coverage": {
+        "measurementFrom": "2026-10-07T04:00:00Z",
+        "measurementTo": "2026-10-07T04:00:00Z",
+        "measurementDays": 0,
+        "recentFactsFrom": "2026-07-11",
+        "recentFactsTo": "2026-10-08",
+        "recentFactsState": "complete"
+      },
+      "current": {
+        "rating": 10,
+        "dimensions": {
+          "big_song": 10,
+          "stamina": 10,
+          "speed": 10,
+          "accuracy_power": 10,
+          "rhythm": 10,
+          "complex": 10
+        },
+        "focus": "balanced",
+        "readiness": "ready"
+      },
+      "range": {
+        "requestedDays": 365,
+        "from": "2025-10-09",
+        "to": "2026-10-08",
+        "actualFrom": "2026-10-07",
+        "actualTo": "2026-10-07",
+        "measurementDays": 1,
+        "factDays": 90,
+        "timezone": "Asia/Shanghai",
+        "selectedDimension": "rating"
+      },
+      "segments": [
+        {
+          "id": "segment-1",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "from": "2026-10-07",
+          "to": "2026-10-07",
+          "points": [
+            {
+              "id": "frozen",
+              "ownerId": "1",
+              "bindingId": "1",
+              "capturedAt": "2026-10-07T04:00:00Z",
+              "scoreRevision": "frozen",
+              "measurementVersion": 1,
+              "algorithmVersion": "growth-v1",
+              "modelRevision": "frozen-model",
+              "rating": 7,
+              "dimensions": {
+                "big_song": 7,
+                "stamina": 7,
+                "speed": 7,
+                "accuracy_power": 7,
+                "rhythm": 7,
+                "complex": 7
+              },
+              "focus": "balanced",
+              "sampleCount": 30,
+              "availabilityState": "ready",
+              "day": "2026-10-07"
+            }
+          ]
+        }
+      ],
+      "currentSegmentChange": {
+        "start": {
+          "id": "frozen",
+          "ownerId": "1",
+          "bindingId": "1",
+          "capturedAt": "2026-10-07T04:00:00Z",
+          "scoreRevision": "frozen",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "rating": 7,
+          "dimensions": {
+            "big_song": 7,
+            "stamina": 7,
+            "speed": 7,
+            "accuracy_power": 7,
+            "rhythm": 7,
+            "complex": 7
+          },
+          "focus": "balanced",
+          "sampleCount": 30,
+          "availabilityState": "ready",
+          "day": "2026-10-07"
+        },
+        "end": {
+          "id": "frozen",
+          "ownerId": "1",
+          "bindingId": "1",
+          "capturedAt": "2026-10-07T04:00:00Z",
+          "scoreRevision": "frozen",
+          "measurementVersion": 1,
+          "algorithmVersion": "growth-v1",
+          "modelRevision": "frozen-model",
+          "rating": 7,
+          "dimensions": {
+            "big_song": 7,
+            "stamina": 7,
+            "speed": 7,
+            "accuracy_power": 7,
+            "rhythm": 7,
+            "complex": 7
+          },
+          "focus": "balanced",
+          "sampleCount": 30,
+          "availabilityState": "ready",
+          "day": "2026-10-07"
+        },
+        "compatible": false,
+        "ratingDelta": null,
+        "dimensionDeltas": null,
+        "primaryDimensionChange": null,
+        "focusFrom": "balanced",
+        "focusTo": "balanced",
+        "reason": "insufficient"
+      },
+      "focusTimeline": [
+        {
+          "id": "focus-1",
+          "segmentId": "segment-1",
+          "focus": "balanced",
+          "startedAt": "2026-10-07",
+          "endedAt": "2026-10-07",
+          "current": true
+        }
+      ],
+      "milestones": [
+        {
+          "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+          "primaryType": "goal-completed",
+          "factKeys": [
+            "goal:v1:1:42:fixture"
+          ],
+          "day": null,
+          "observedAt": "2026-10-07T16:00:00Z",
+          "timeSemantics": "observed",
+          "title": "synthetic",
+          "songId": 1,
+          "difficultyType": 4,
+          "before": 1,
+          "after": 2,
+          "delta": 1,
+          "goalCompleted": true,
+          "observationOnly": true,
+          "improvements": [
+            {
+              "type": "goal-completed",
+              "before": 1,
+              "after": 2,
+              "delta": 1,
+              "factKey": "goal:v1:1:42:fixture"
+            }
+          ],
+          "evidenceRefs": [
+            {
+              "factKey": "goal:v1:1:42:fixture",
+              "source": "goal",
+              "sourceRevision": "fixture",
+              "evidenceVersion": 1
+            }
+          ]
+        }
+      ],
+      "initialMilestoneIds": [
+        "milestone:goal:1:1:goal:v1:1:42:fixture"
+      ],
+      "shared": {
+        "segments": [
+          {
+            "id": "segment-1",
+            "measurementVersion": 1,
+            "algorithmVersion": "growth-v1",
+            "modelRevision": "frozen-model",
+            "from": "2026-10-07",
+            "to": "2026-10-07",
+            "points": [
+              {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              }
+            ]
+          }
+        ],
+        "milestones": [
+          {
+            "id": "milestone:goal:1:1:goal:v1:1:42:fixture",
+            "primaryType": "goal-completed",
+            "factKeys": [
+              "goal:v1:1:42:fixture"
+            ],
+            "day": null,
+            "observedAt": "2026-10-07T16:00:00Z",
+            "timeSemantics": "observed",
+            "title": "synthetic",
+            "songId": 1,
+            "difficultyType": 4,
+            "before": 1,
+            "after": 2,
+            "delta": 1,
+            "goalCompleted": true,
+            "observationOnly": true,
+            "improvements": [
+              {
+                "type": "goal-completed",
+                "before": 1,
+                "after": 2,
+                "delta": 1,
+                "factKey": "goal:v1:1:42:fixture"
+              }
+            ],
+            "evidenceRefs": [
+              {
+                "factKey": "goal:v1:1:42:fixture",
+                "source": "goal",
+                "sourceRevision": "fixture",
+                "evidenceVersion": 1
+              }
+            ]
+          }
+        ],
+        "views": {
+          "30": {
+            "range": {
+              "requestedDays": 30,
+              "from": "2026-09-09",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 30,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-09-09",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "90": {
+            "range": {
+              "requestedDays": 90,
+              "from": "2026-07-11",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "180": {
+            "range": {
+              "requestedDays": 180,
+              "from": "2026-04-12",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          },
+          "365": {
+            "range": {
+              "requestedDays": 365,
+              "from": "2025-10-09",
+              "to": "2026-10-08",
+              "actualFrom": "2026-10-07",
+              "actualTo": "2026-10-07",
+              "measurementDays": 1,
+              "factDays": 90,
+              "timezone": "Asia/Shanghai",
+              "selectedDimension": "rating"
+            },
+            "recentFactsFrom": "2026-07-11",
+            "recentFactsTo": "2026-10-08",
+            "pointIds": [
+              "frozen"
+            ],
+            "milestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "initialMilestoneIds": [
+              "milestone:goal:1:1:goal:v1:1:42:fixture"
+            ],
+            "currentSegmentChange": {
+              "start": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "end": {
+                "id": "frozen",
+                "ownerId": "1",
+                "bindingId": "1",
+                "capturedAt": "2026-10-07T04:00:00Z",
+                "scoreRevision": "frozen",
+                "measurementVersion": 1,
+                "algorithmVersion": "growth-v1",
+                "modelRevision": "frozen-model",
+                "rating": 7,
+                "dimensions": {
+                  "big_song": 7,
+                  "stamina": 7,
+                  "speed": 7,
+                  "accuracy_power": 7,
+                  "rhythm": 7,
+                  "complex": 7
+                },
+                "focus": "balanced",
+                "sampleCount": 30,
+                "availabilityState": "ready",
+                "day": "2026-10-07"
+              },
+              "compatible": false,
+              "ratingDelta": null,
+              "dimensionDeltas": null,
+              "primaryDimensionChange": null,
+              "focusFrom": "balanced",
+              "focusTo": "balanced",
+              "reason": "insufficient"
+            },
+            "focusTimeline": [
+              {
+                "id": "focus-1",
+                "segmentId": "segment-1",
+                "focus": "balanced",
+                "startedAt": "2026-10-07",
+                "endedAt": "2026-10-07",
+                "current": true
+              }
+            ]
+          }
+        }
+      },
+      "activeGoal": null,
+      "recentCompletedGoal": null,
+      "currentNextAction": {
+        "focus": "balanced",
+        "todayPlan": {
+          "targetDimension": "big_song",
+          "items": [],
+          "usedFallback": false
+        }
+      }
+    }
+  },
+  "inputHashes": {
+    "daily-ability-v1-top20.json": "91862f1f17146e9ca01f84c29377f3b1a6250fde7b4e108e900c74db99e7a419",
+    "data_20251007_010000.json": "4d5d44b3172a0d51e8bb1975e174679f465d4992398c10ebf5c46dc2208d4839",
+    "data_20251109_052149.json": "f558de1575cf72fc121ba501fdf28bc108754c6c4db56bb37116b2ff4b94b579",
+    "data_20251212_094338.json": "d96467d81113461b55b4c4a784a03849050bb37691c63ed1d4268e6705c73599",
+    "data_20260114_140527.json": "0ac81aaa1f436e462c6386a42c8d3b6b4a8a00f2e7b8dc4547fbcef582a99249",
+    "data_20260216_182716.json": "a7342686c8d4a80bb77e6ac3e698b18ba39bcaad0270616e8947148b4e542edc",
+    "data_20260321_224905.json": "f3cbe73736968b2e0b30cbe218bb039bc612a46c69847c47c889a9be55fc42db",
+    "data_20260424_031054.json": "23f2bc45dd3ec2d82ee86d0be866fbf1f4872a63ab0f53534da7d63b6b01f3f7",
+    "data_20260527_073243.json": "40fd13e744aae13b21255842dc9917de8176bc2d45022c2ccd70a589df8e2896",
+    "data_20260629_115432.json": "2b28f84235662fc0fe0b65c57850f91461bee444db0fa58491e3b567a0ed1bd7",
+    "data_20260801_161621.json": "c3285065628b21b0b8656a7bad622763473f554e0cad6697b185530a0405df67",
+    "data_20260903_203810.json": "53e3e611d1b8c55ad43746907d946381a962269cdaacb01dd8b85faf55026f70",
+    "data_20261007_010000.json": "1c92fa88959b069a2378f7807c63adc1c2b99bc4038b657d80cc246078424cfc"
+  },
+  "frozenSourceSha256": "b22048540237d3a6f97f9e281f430a03f63f03c489e13c4fde96009676d3f71c",
+  "counterexamples": [
+    {
+      "name": "same-source-full-reappearance",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": []
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-03 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900300,
+              "stage_cnt": 3,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-03 12:00:00",
+              "highscore_datetime": "2026-01-03 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "unknown",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.2.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.2.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.2.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-03 12:00:00",
+            "importance": 0,
+            "facts": [
+              {
+                "type": "played",
+                "before": null,
+                "after": null,
+                "delta": null
+              }
+            ],
+            "evidenceRevision": "2026-01-03 13:00:00",
+            "observedAt": "2026-01-03T05:00:00.000Z",
+            "factOccurredAt": {
+              "played": "2026-01-03T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "name": "source-switch-reappearance",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "hiroba",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": []
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-03 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900300,
+              "stage_cnt": 3,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-03 12:00:00",
+              "highscore_datetime": "2026-01-03 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "unknown",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.2.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.2.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.2.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-03 12:00:00",
+            "importance": 0,
+            "facts": [
+              {
+                "type": "played",
+                "before": null,
+                "after": null,
+                "delta": null
+              }
+            ],
+            "evidenceRevision": "2026-01-03 13:00:00",
+            "observedAt": "2026-01-03T05:00:00.000Z",
+            "factOccurredAt": {
+              "played": "2026-01-03T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "name": "explicit-removed",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": false,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": [],
+          "removed": [
+            "1:4"
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-03 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900300,
+              "stage_cnt": 3,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-03 12:00:00",
+              "highscore_datetime": "2026-01-03 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900300,
+                  "delta": 200
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "unknown",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.2.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.2.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.2.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-03 12:00:00",
+            "importance": 60,
+            "facts": [
+              {
+                "type": "score-pb",
+                "before": 900100,
+                "after": 900300,
+                "delta": 200
+              }
+            ],
+            "evidenceRevision": "2026-01-03 13:00:00",
+            "observedAt": "2026-01-03T05:00:00.000Z",
+            "factOccurredAt": {
+              "score-pb": "2026-01-03T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "name": "direct-source-switch",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "hiroba",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900200,
+              "stage_cnt": 2,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-02 12:00:00",
+              "highscore_datetime": "2026-01-02 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-02 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900200,
+                  "delta": 100
+                }
+              ],
+              "evidenceRevision": "2026-01-02 13:00:00",
+              "observedAt": "2026-01-02T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-02T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "unknown",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.1.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.1.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.1.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-02 12:00:00",
+            "importance": 60,
+            "facts": [
+              {
+                "type": "score-pb",
+                "before": 900100,
+                "after": 900200,
+                "delta": 100
+              }
+            ],
+            "evidenceRevision": "2026-01-02 13:00:00",
+            "observedAt": "2026-01-02T05:00:00.000Z",
+            "factOccurredAt": {
+              "score-pb": "2026-01-02T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "name": "manual",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900200,
+              "stage_cnt": 2,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-02 12:00:00",
+              "highscore_datetime": "2026-01-02 12:00:00"
+            }
+          ],
+          "excludedReason": "manual"
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-02 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900200,
+                  "delta": 100
+                }
+              ],
+              "evidenceRevision": "2026-01-02 13:00:00",
+              "observedAt": "2026-01-02T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-02T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "unknown",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.1.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.1.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.1.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-02 12:00:00",
+            "importance": 60,
+            "facts": [
+              {
+                "type": "score-pb",
+                "before": 900100,
+                "after": 900200,
+                "delta": 100
+              }
+            ],
+            "evidenceRevision": "2026-01-02 13:00:00",
+            "observedAt": "2026-01-02T05:00:00.000Z",
+            "factOccurredAt": {
+              "score-pb": "2026-01-02T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "name": "delta-omission",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": false,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": []
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-03 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900300,
+              "stage_cnt": 3,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-03 12:00:00",
+              "highscore_datetime": "2026-01-03 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900300,
+                  "delta": 200
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900300,
+                  "delta": 200
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "played",
+      "candidateAssertion": "PASS",
+      "differences": []
+    },
+    {
+      "name": "legitimate-pb-ng-rank-clear",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 11:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-02 10:00:00",
+              "highscore_datetime": "2026-01-02 10:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900200,
+              "stage_cnt": 2,
+              "best_score_rank": 5,
+              "clear_cnt": 1,
+              "full_combo_cnt": 1,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 485,
+              "ok_cnt": 10,
+              "ng_cnt": 5,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-02 12:00:00",
+              "highscore_datetime": "2026-01-02 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-02 10:00:00",
+              "importance": 90,
+              "facts": [
+                {
+                  "type": "fc",
+                  "before": 0,
+                  "after": 1,
+                  "delta": 1
+                },
+                {
+                  "type": "rank-upgrade",
+                  "before": 4,
+                  "after": 5,
+                  "delta": 1
+                },
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900200,
+                  "delta": 100
+                },
+                {
+                  "type": "ng-reduced",
+                  "before": 10,
+                  "after": 5,
+                  "delta": -5
+                }
+              ],
+              "evidenceRevision": "2026-01-02 13:00:00",
+              "observedAt": "2026-01-02T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-02T04:00:00.000Z",
+                "ng-reduced": "2026-01-02T04:00:00.000Z",
+                "fc": "2026-01-02T04:00:00.000Z",
+                "rank-upgrade": "2026-01-02T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-02 10:00:00",
+              "importance": 90,
+              "facts": [
+                {
+                  "type": "fc",
+                  "before": 0,
+                  "after": 1,
+                  "delta": 1
+                },
+                {
+                  "type": "rank-upgrade",
+                  "before": 4,
+                  "after": 5,
+                  "delta": 1
+                },
+                {
+                  "type": "score-pb",
+                  "before": 900100,
+                  "after": 900200,
+                  "delta": 100
+                },
+                {
+                  "type": "ng-reduced",
+                  "before": 10,
+                  "after": 5,
+                  "delta": -5
+                }
+              ],
+              "evidenceRevision": "2026-01-02 13:00:00",
+              "observedAt": "2026-01-02T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-02T04:00:00.000Z",
+                "ng-reduced": "2026-01-02T04:00:00.000Z",
+                "fc": "2026-01-02T04:00:00.000Z",
+                "rank-upgrade": "2026-01-02T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "played",
+      "candidateAssertion": "PASS",
+      "differences": []
+    },
+    {
+      "name": "next-comparable-after-reappearance",
+      "input": [
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-01 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900100,
+              "stage_cnt": 1,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-01 12:00:00",
+              "highscore_datetime": "2026-01-01 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-02 13:00:00",
+          "songs": []
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-03 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900300,
+              "stage_cnt": 3,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-03 12:00:00",
+              "highscore_datetime": "2026-01-03 12:00:00"
+            }
+          ]
+        },
+        {
+          "full": true,
+          "source": "wahlap",
+          "timestamp": "2026-01-04 13:00:00",
+          "songs": [
+            {
+              "song_no": 1,
+              "level": 4,
+              "high_score": 900400,
+              "stage_cnt": 4,
+              "best_score_rank": 4,
+              "clear_cnt": 1,
+              "full_combo_cnt": 0,
+              "dondaful_combo_cnt": 0,
+              "good_cnt": 480,
+              "ok_cnt": 10,
+              "ng_cnt": 10,
+              "combo_cnt": 300,
+              "update_datetime": "2026-01-04 12:00:00",
+              "highscore_datetime": "2026-01-04 12:00:00"
+            }
+          ]
+        }
+      ],
+      "old": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-03 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-03 13:00:00",
+              "observedAt": "2026-01-03T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-03T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-04 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900300,
+                  "after": 900400,
+                  "delta": 100
+                }
+              ],
+              "evidenceRevision": "2026-01-04 13:00:00",
+              "observedAt": "2026-01-04T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-04T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "candidate": [
+        {
+          "calendarDay": "2026-01-01",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-01 12:00:00",
+              "importance": 0,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ],
+              "evidenceRevision": "2026-01-01 13:00:00",
+              "observedAt": "2026-01-01T05:00:00.000Z",
+              "factOccurredAt": {
+                "played": "2026-01-01T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-02",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-03",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-04",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "played",
+          "uniqueCharts": 1,
+          "events": [
+            {
+              "songId": 1,
+              "level": 4,
+              "title": "Synthetic",
+              "evidence": "full-snapshot",
+              "occurredAt": "2026-01-04 12:00:00",
+              "importance": 60,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 900300,
+                  "after": 900400,
+                  "delta": 100
+                }
+              ],
+              "evidenceRevision": "2026-01-04 13:00:00",
+              "observedAt": "2026-01-04T05:00:00.000Z",
+              "factOccurredAt": {
+                "score-pb": "2026-01-04T04:00:00.000Z"
+              }
+            }
+          ]
+        },
+        {
+          "calendarDay": "2026-01-05",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        {
+          "calendarDay": "2026-01-06",
+          "dataMode": "FULL_HISTORY",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        }
+      ],
+      "expectedAttendance": "played",
+      "candidateAssertion": "PASS",
+      "differences": [
+        {
+          "path": "$.2.attendance",
+          "before": "played",
+          "after": "unknown"
+        },
+        {
+          "path": "$.2.uniqueCharts",
+          "before": 1,
+          "after": null
+        },
+        {
+          "path": "$.2.events.0",
+          "before": {
+            "songId": 1,
+            "level": 4,
+            "title": "Synthetic",
+            "evidence": "full-snapshot",
+            "occurredAt": "2026-01-03 12:00:00",
+            "importance": 0,
+            "facts": [
+              {
+                "type": "played",
+                "before": null,
+                "after": null,
+                "delta": null
+              }
+            ],
+            "evidenceRevision": "2026-01-03 13:00:00",
+            "observedAt": "2026-01-03T05:00:00.000Z",
+            "factOccurredAt": {
+              "played": "2026-01-03T04:00:00.000Z"
+            }
+          },
+          "after": null
+        }
+      ]
+    }
+  ]
+}

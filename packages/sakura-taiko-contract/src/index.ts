@@ -25,6 +25,7 @@ export type Song = {
   songId: string;
   title: string | null;
   catalogRevision: string | null;
+  availability?: CatalogAvailability;
 };
 export type Chart = {
   songId: string;
@@ -34,6 +35,8 @@ export type Chart = {
   type: "single" | "double" | "unknown";
   variant: string | null;
   catalogRevision: string | null;
+  availability?: CatalogAvailability;
+  tjaCourse?: number;
 };
 export type ScoreCounts = {
   clear: number | null;
@@ -115,6 +118,67 @@ export type CalculationProfile = {
   catalogRevision: string;
   topN: number;
   availabilityRevision: string;
+};
+export type CatalogAvailability = {
+  region: "CN" | "JP" | "UNKNOWN";
+  status: "active" | "removed" | "unknown";
+};
+export type ResourceGrant = {
+  grantId: string;
+  ownerUserId: string;
+  bindingId: string;
+  playerId: string;
+  clientId: string;
+  audience: "viewer:developer-api:v1";
+  scopes: Array<"profile:read" | "scores:read" | "history:read" | "growth:read">;
+  consentVersion: string;
+  consentedAt: string;
+  issuedAt: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  revision: string;
+};
+export type DeveloperClient = {
+  clientId: string;
+  displayName: string;
+  status: "active" | "disabled";
+};
+export type DeveloperPlayerProfile = {
+  playerId: string;
+  bindingId: string;
+  displayName: string | null;
+  source: string;
+};
+export type ApiReadVersions = {
+  contractVersion: "1.0";
+  schemaRevision: string;
+  catalogRevision: string;
+  scoreRevision: string | null;
+  calculationProfile: null;
+  observationSource: string | null;
+  capturedAt: string | null;
+};
+export type DeveloperScoresResponse = {
+  versions: ApiReadVersions;
+  playerId: string;
+  items: Array<Score>;
+};
+export type DeveloperProfileResponse = {
+  versions: ApiReadVersions;
+  profile: DeveloperPlayerProfile;
+};
+export type CatalogSongsResponse = {
+  versions: ApiReadVersions;
+  items: Array<Song>;
+};
+export type CatalogChartsResponse = {
+  versions: ApiReadVersions;
+  items: Array<Chart>;
+};
+export type ApiError = {
+  code: string;
+  message: string;
+  requestId: string;
 };
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";

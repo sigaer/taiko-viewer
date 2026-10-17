@@ -1,0 +1,747 @@
+{
+  "schemaVersion": 1,
+  "Contract": "FROZEN_LOCAL",
+  "contractStatus": "CONTRACT_FROZEN_LOCAL",
+  "contractFrozen": true,
+  "R": "MAINLINE_HANDOFF_READY_FOR_AUTHORIZED_PUSH",
+  "GateP": "DEPLOY_PENDING_AUTH",
+  "gateP": "DEPLOY_PENDING_AUTH",
+  "I6": "DEFERRED",
+  "i6Status": "I6_DEFERRED_WITH_EVIDENCE",
+  "i6Commit": "d52410c352f2071e6d28af095504d323214bd363",
+  "deployReady": false,
+  "publicApiEnabled": false,
+  "productionRuntimeState": "UNKNOWN",
+  "productionAccess": false,
+  "mainModified": false,
+  "push": false,
+  "mergeMain": false,
+  "tag": false,
+  "deploy": false,
+  "productionRestart": false,
+  "annualEntryModified": false,
+  "annualLoad": false,
+  "origin": {
+    "remote": "origin",
+    "ref": "refs/heads/main",
+    "previousObservation": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "observedMain": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "startedAt": "2026-10-17T02:15:20.113206+00:00",
+    "observedAt": "2026-10-17T02:15:30.529887+00:00",
+    "fetchExitCode": 0,
+    "changed": false,
+    "productionAccess": false,
+    "originIsCandidateAncestor": true,
+    "mergeCommitCreated": true,
+    "mergeCommit": "6ec45d1f2d2a936b01769fd23ab3904dd9bd0a6d",
+    "candidateBaseCommit": "6aa5d3a93305e046fcf20d29e7ac8616e3b548e8",
+    "mainMergeExecuted": false
+  },
+  "originDispositions": [
+    {
+      "path": "taiko_viewer/deploy/taiko-viewer.service",
+      "disposition": "INTENTIONALLY_NOT_PORTED",
+      "decision": "旧发布目录 WorkingDirectory/ExecStart 不覆盖候选或生产；保留当前模板，实际路径 UNKNOWN",
+      "evidence": "no runtime/template edit; Gate P separately observes actual identity",
+      "originBlob": "9c189945af797f260cbdd5bd0a7ed93d0762f6db",
+      "candidateBlob": "4b0b3e723ee4398d35469737eebadbc570d8ced7",
+      "candidateSha256": "9ec0bd95d11ac79e59946bd1a03bc92e91cd0e3b435c59e70b612753b96e3270"
+    },
+    {
+      "path": "taiko_viewer/package.json",
+      "disposition": "INTENTIONALLY_NOT_PORTED",
+      "decision": "不回退旧 0.81.12 版本；在 rc.5 基础按行为修复递增 rc.6，不升级依赖",
+      "evidence": "normalized package dependency equality against rc.5",
+      "originBlob": "3428a95745a70401d1f69048eabf51b6f5109061",
+      "candidateBlob": "340e24673849ad4db31c47765d1c79f2373ff566",
+      "candidateSha256": "45200efe29e37af7afd2f28d1352155e3602ef46add02140b74e07773a7cdc48"
+    },
+    {
+      "path": "taiko_viewer/package-lock.json",
+      "disposition": "INTENTIONALLY_NOT_PORTED",
+      "decision": "保留完整现行 workspace/lock；只同步 root/package version 到 rc.6",
+      "evidence": "normalized lock equality against rc.5; offline npm ci",
+      "originBlob": "974e04289b08fcb106fba5b01901913437de7c26",
+      "candidateBlob": "a06e85f4afb1987e1e724d6204b9cfdfa2fdfca4",
+      "candidateSha256": "aedc0106fefa93601f43cb6dfba7d5e1d752144650c3ea814d17d9d463e49cc2"
+    },
+    {
+      "path": "taiko_viewer/pages/account/sync.vue",
+      "disposition": "MANUALLY_RECONCILE",
+      "decision": "保留现有本地化成功文案；部分实际发布用 warning；拒绝由旧 catch 显示，不把零写入显示成功",
+      "evidence": "SFC compilation and real H3 partial/rejection responses",
+      "originBlob": "adc03db8275ba01c01961f35446c19d6054eaaab",
+      "candidateBlob": "3961ed8a156d97ee6ad4c0678450e0a7bc438388",
+      "candidateSha256": "2d97832d515acbca8e01c968190580299bba0f1b4f71222a98f7f29ea9d17119"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/kinoko-history.ts",
+      "disposition": "ALREADY_INCLUDED",
+      "decision": "时间准入、metadata/event 分离、Shanghai/offset 及 baseline 规则已进入 rc.5；保留 canonical Reader/Writer，禁止旧 fs 落盘覆盖",
+      "evidence": "unchanged from input; affected 11 adapter/publication regressions",
+      "originBlob": "6274a6de1156edfefd8f9fa967c617c95843c57a",
+      "candidateBlob": "521f2f589d4920bafa4e50f1e952d6a15e531dbc",
+      "candidateSha256": "62fb1d0d4f61b2d0fb5a8ac0b8dc5c1e737706d3065be168405f034354d4ebad"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/kinoko-import.ts",
+      "disposition": "MANUALLY_RECONCILE",
+      "decision": "保留准入；补 timeSummary、非字符串时间拒绝、上游错误脱敏和 epoch 顺序。既存 current 任一异常则整批拒绝，替代旧 per-chart continue/changedSongs+delta 依赖",
+      "evidence": "16 SQL/H3 observations; epoch-order regression; no staged pollution",
+      "originBlob": "8d870930ab5c8a1dd65eb832700cff7837dfdef8",
+      "candidateBlob": "d8097a2bfcf35d5cff5e3c188cb39f60b34cd902",
+      "candidateSha256": "d0d35e41b957a1104693cff2e0b12483bf7a2b2e5991d0d3e69f8e1ff8cbe6b3"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/kinoko-time.ts",
+      "disposition": "ALREADY_INCLUDED",
+      "decision": "完整 helper 已进入 rc.5；只存在已检查的 TS tuple 约束差别，无新运行变化",
+      "evidence": "identical Git blob to input; timestamp regression",
+      "originBlob": "fc2971de1e74d8824fee9ea0966a1358ba27817f",
+      "candidateBlob": "989254ca98038548ac7249c4a059824973225356",
+      "candidateSha256": "bf9570ccd877272e2776251f532cb1d2ac57fd29559a5861b9c6915d93b607d6"
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/shared.ts",
+      "disposition": "INTENTIONALLY_NOT_PORTED",
+      "decision": "旧第四参数 partial-history/direct fs Writer 不移植；既存污染在调用边界拒绝，唯一现行 Writer 与 full/delta 格式不变",
+      "evidence": "protected Publication/Source trees and shared.ts unchanged; C/H rollback proofs",
+      "originBlob": "180f888a90820237b187bde0e331ff176f379dab",
+      "candidateBlob": "e2b26ed7845529868665934faeef98110172b083",
+      "candidateSha256": "81c39745b1419404de18640434e0ae65d2494d737ea8b1636a1e816f032e50db"
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/sync.ts",
+      "disposition": "MANUALLY_RECONCILE",
+      "decision": "在现行 auth/Source 上调整：全过滤 422、重复零变更 409、污染 409，不写 success log；复用完整 owner/binding/source tuple 与 Session 前后检查，真实写入才 published=true",
+      "evidence": "16 native SQL/installed -I/H3 cases; successful C/H advances exactly one generation",
+      "originBlob": "cc99af6969c630a66dbabc01aaaf1697c2eb2023",
+      "candidateBlob": "057c82fdecfe521d6368504c0846bfc507156e80",
+      "candidateSha256": "4b02679ffb0e3c34c6e7f58f393c17a6d9b70c9ebde20d23659134623059b9ed"
+    }
+  ],
+  "semanticDispositions": [
+    {
+      "area": "authentication",
+      "disposition": "ALREADY_INCLUDED",
+      "originDelta": false,
+      "note": "keep current Session/owner authority; no legacy overwrite"
+    },
+    {
+      "area": "Source",
+      "disposition": "MANUALLY_RECONCILE",
+      "note": "reuse existing withViewerCurrentSource; no new permission system"
+    },
+    {
+      "area": "Catalog/Contract/DTO",
+      "disposition": "ALREADY_INCLUDED",
+      "originDelta": false,
+      "note": "frozen trees and OpenAPI unchanged"
+    },
+    {
+      "area": "Publication Writer and history delta",
+      "disposition": "INTENTIONALLY_NOT_PORTED",
+      "note": "do not add old partial Writer; whole contaminated import refuses before staging"
+    },
+    {
+      "area": "deploy script",
+      "disposition": "ALREADY_INCLUDED",
+      "originDelta": false,
+      "note": "not modified or invoked"
+    }
+  ],
+  "importantUnresolvedP0CodeConflicts": [],
+  "protected": [
+    {
+      "path": "packages/sakura-taiko-contract",
+      "gitObject": "4ae445cc4a274c502c4652672b2b2304bab84f81",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/infrastructure/taiko-publication",
+      "gitObject": "df851792f8766abd1d96d198d4ad6761e124cbd8",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/services/taiko-domain",
+      "gitObject": "bfd31ab72536aa2840dc92bed1d92b6a10171b82",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/services/developer-api-v1",
+      "gitObject": "6a5c823dacefdc7215ded29ab88414b4f3d70fa9",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/services/my-taiko",
+      "gitObject": "646ea96fed82e2135d3b022924a5fc941d26a04d",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/shared.ts",
+      "gitObject": "e2b26ed7845529868665934faeef98110172b083",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/binding-identity.ts",
+      "gitObject": "9d6e7543e0cfcacaf1eb38a5e0daa5d23d94e5f0",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/internal/account/binding-read.ts",
+      "gitObject": "fd4975f577b7b8a7a42c69b01830f542fec27d3c",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/utils/account/auth.ts",
+      "gitObject": "76979112e827cd0e44e726774f1840796e1c2164",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/services/account/current-source.ts",
+      "gitObject": "6e937008776405b2f9cffc883aeaa09a0040121a",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/nuxt.config.ts",
+      "gitObject": "e9ffa7f290f9a7a39183aca79187c84ed79cf0b0",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "taiko_viewer/server/plugins",
+      "gitObject": "a9110159114165fa5a63d4ec057b1966b1087c0a",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "scripts/deploy_forum_web.sh",
+      "gitObject": "bbaf3c428d4c8ea1b0876982d317edd955cefd72",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "docs/083-developer-api-openapi.yaml",
+      "gitObject": "11d35bc27731671978d0390681505734f300036a",
+      "unchangedFromRc5": true
+    },
+    {
+      "path": "docs/082-gate-status.json",
+      "gitObject": "52889e8ee564bb120e58041732b3069469ae5d6f",
+      "unchangedFromRc5": true
+    }
+  ],
+  "checks": {
+    "lockedRc5Input": "PASS",
+    "allOriginPathsClassified": "PASS_9_PATHS",
+    "nativeMysqlInstalledWorkerH3": "PASS_SCOPED_16_OBSERVATIONS",
+    "kinokoAdapterRegressions": "PASS_11_TESTS",
+    "affectedTypeDiagnostics": 0,
+    "outsideScopeTypeDiagnostics": 154,
+    "wholeRepositoryTypes": "NOT_CERTIFIED",
+    "formalNuxtBuild": "PASS",
+    "unmodifiedStartup": "PASS_UNMODIFIED_ISOLATED_STARTUP",
+    "namedRuntimeObservations": 23,
+    "browserApiResponses": 13,
+    "browserFlows": 6,
+    "outputFilesBeforeAfter": 5185,
+    "compiledPatches": 0,
+    "runtimeCleanup": "PASS",
+    "fourTableRecovery": "REUSED_PASS_SCOPED_NOT_PRODUCTION_PITR"
+  },
+  "resources": {
+    "buildSampledPeakBytes": 4193734656,
+    "buildSeconds": 157.921,
+    "qaSampledPeakBytes": 1159069696,
+    "qaMemoryPsiFullAvg10Max": 1.81,
+    "kernelMemoryPeak": "UNAVAILABLE",
+    "oom": 0,
+    "capacityCertification": false
+  },
+  "legacyImportBehavior": {
+    "noEligibleRecords": {
+      "http": 422,
+      "published": false,
+      "successReceipt": false
+    },
+    "duplicateNoChange": {
+      "http": 409,
+      "published": false,
+      "successReceipt": false
+    },
+    "pollutedCurrent": {
+      "http": 409,
+      "published": false,
+      "policy": "whole import refused before staging; old per-chart continuation and delta Writer intentionally not ported"
+    },
+    "partialValidWrites": {
+      "http": 200,
+      "published": true,
+      "partial": true,
+      "ui": "warning; normal localized success copy retained"
+    },
+    "historyAndCurrent": "one canonical Publication sequence per successful request",
+    "frozenExternalContractChanged": false
+  },
+  "reusedEvidence": {
+    "rc5Input": {
+      "manifestSha256": "afbafdf26491c14fa1b9b1f4437029dee3da71ccdd5433668631de053cdff09b",
+      "identitySha256": "64eeb8d621edd6942aba3510f838792b5a066cc2e830250f961b30ea257aadd5",
+      "scope": "accepted 5185 / 23 / 13 / 6 startup; historical FAIL preserved"
+    },
+    "frozenSchemaGoldenSdkOpenapi": "same source identities; no repeated Golden/OpenAPI suite",
+    "historical74HttpSdk": "retained at original source identities; no blanket recertification at current source",
+    "fourAuthTables": {
+      "status": "REUSED_PASS_SCOPED",
+      "ddlSourceSha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1",
+      "proofSha256": "f3abf2cd1bbec8b8a85970bde95a87612e6aadb87fb8b101051af1873996f184",
+      "notClaimed": [
+        "production schema",
+        "production DDL",
+        "PITR",
+        "encrypted offsite backup",
+        "real-scale RPO/RTO"
+      ]
+    },
+    "082": "O1/O2 accepted risks and all original FAIL unchanged",
+    "I6": "accepted deferred conclusion; no new consumer work"
+  },
+  "failedAttemptsRetained": [
+    {
+      "artifactId": "kinoko-boundary-v1",
+      "status": "FAIL_TEST_EXPECTATION",
+      "reason": "owner reassignment retained another binding; existing full identity guard correctly returned 409 instead of test-expected 400",
+      "final": "kinoko-boundary-v2 PASS; no runtime relaxation"
+    }
+  ],
+  "sourceToRelease": {
+    "builtSourceCommit": "8d915ca2724480c7a287073b742e94a83b44686a",
+    "inputDeliveryCommit": "35d473dfd350af5a6f40bcc00993a9fbdb1b3825",
+    "inputManifestSha256": "afbafdf26491c14fa1b9b1f4437029dee3da71ccdd5433668631de053cdff09b",
+    "inputDeliveryIdentitySha256": "64eeb8d621edd6942aba3510f838792b5a066cc2e830250f961b30ea257aadd5",
+    "inputBuildSourceCommit": "3fb935a7763f86d7c6c45fc1b5a16846b2fa142a",
+    "inputQaFixCommit": "d4f997caace3252cf2045c0158593d161f864c2b",
+    "viewerVersion": "0.83.0-rc.6",
+    "releaseManifestSha256": "c743de0b28123cac01599b9525315c9fc6c4e71b05749de6d0ceb6622a95358b",
+    "gitArchiveSha256": "b9ba3f280e2944e468ca75ac023b7cac5cc2911f5cb37ba6de0a30733ed25a16",
+    "node": {
+      "version": "24.13.0",
+      "lockSha256": "aedc0106fefa93601f43cb6dfba7d5e1d752144650c3ea814d17d9d463e49cc2",
+      "dependencyUpgrade": false
+    },
+    "contract": {
+      "protocol": "1.0",
+      "workspacePackage": "0.1.2",
+      "installedPackage": "0.1.0",
+      "rawSchemaSha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d",
+      "serializedSchemaSha256": "be89a7146265219ac6153ed3152f5cf76c46eae23bb262f3cc47ac9c9b9815f7",
+      "installedNewDtoConsumer": false
+    },
+    "frozenContractCommit": "5c68a13964cc8d8750709002485c11cf1ee239cb",
+    "frozenOutputManifestSha256": "463a090855f571ed72da184a7d1d4c01691e9f5013cf1c106ce99ec190e34b36",
+    "installedTaiko": {
+      "version": "0.14.2",
+      "sourceCommit": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+      "roles": [
+        {
+          "role": "center",
+          "packageCount": 94,
+          "packages": {
+            "sakura-taiko-core": "0.1.1",
+            "taiko-bot": "0.14.2",
+            "python-memory-runtime": "1.1.0",
+            "taiko-application": "0.8.0",
+            "sakura-taiko-contract": "0.1.0"
+          },
+          "executableArtifactId": "locked-center-python",
+          "pythonSha256": "0f9289d8178e0ccf58fbfd5e9216e0e7f4676d4f9aa10f8182cf3d2552a8bce8",
+          "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+          "lockSha256": "122763d862b0a513b692c9f6ef7b64410a276f909fab442065162733abe6da80",
+          "originEvidenceSha256": "d335383950cf9e66b6b9a0937b6854fbf380b90f3074269c78213bf48f5e9602",
+          "pythonVersion": "3.11.4",
+          "isolated": 1,
+          "installedWheelRecordSha256": "ade1748cb7a977bd5eb4b35f0c0b6781ec3c6a434237bc0771646faaedfc3b88"
+        },
+        {
+          "role": "client",
+          "packageCount": 94,
+          "packages": {
+            "taiko-bot": "0.14.2",
+            "python-memory-runtime": "1.1.0",
+            "taiko-application": "0.8.0",
+            "sakura-taiko-core": "0.1.2",
+            "sakura-taiko-contract": "0.1.0"
+          },
+          "executableArtifactId": "locked-client-python",
+          "pythonSha256": "0f9289d8178e0ccf58fbfd5e9216e0e7f4676d4f9aa10f8182cf3d2552a8bce8",
+          "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+          "lockSha256": "122763d862b0a513b692c9f6ef7b64410a276f909fab442065162733abe6da80",
+          "originEvidenceSha256": "14b87421ebddcf1c56b1efe03c1247921b56abb6fa268adb1ac30d31bc001004",
+          "pythonVersion": "3.11.4",
+          "isolated": 1,
+          "installedWheelRecordSha256": "b6f20618f66b99999c14268c8e254fb1f81d80b202d32dbebe9230c64ba78931"
+        }
+      ]
+    },
+    "runtimeRoleEvidence": "reuse locked 94-package origin/RECORD attestations; rechecked Python/wheel/lock artifact hashes; actual center -I worker used in scoped tests",
+    "legacyAnnualBuildSchemaSha256": "a8ecc11504f4f59c9460e2ca72ac8e330d1aa182df0f7d18936e377fedf33ad1",
+    "buildReceiptSha256": "0dbbcbcd427e25450a65b54feedd75f7dbb2f4cf88a67b7af48da6cdd7174876",
+    "outputInventorySha256": "32b52ef215321b5a9ce56f9a56782998851662734c9b82d131c4929c897fe036",
+    "outputFiles": 5185,
+    "compiledPatches": 0,
+    "sourceFiles": [
+      {
+        "path": "packages/sakura-taiko-contract/schema/contract-v1.json",
+        "sha256": "c9c93ad60185753cc36b62c80e094a42a84612bac19e6353f94a0143236ba46d"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/index.ts",
+        "sha256": "a1e11721e36cf4914f8957748b82cb3570498ff129f0aa51b7a601ab4cb7698d"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/sakura_taiko_contract/types.py",
+        "sha256": "b3d58e459e2f070f4830a901b61b15a1a3bdb364370cf052e6b8fdc0bdda0a76"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/catalog.mjs",
+        "sha256": "721faa66f6631cdd4c89de180102e1eb40b28a7f5c651d15ebb20e5a4bfda447"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+        "sha256": "8982c5dd2dda12f8337f6f43fda87c74b07d142fa7d0b3c2ae2717b458000927"
+      },
+      {
+        "path": "docs/083-developer-api-openapi.yaml",
+        "sha256": "ab5ebcb9da6aec09f579af54c4eb1fc83cd71d6f55408677c1805e7d886ae354"
+      },
+      {
+        "path": "taiko_viewer/lib/developer-api-v1.ts",
+        "sha256": "3f67f0b59b31866215bab3f0176bb8dd91940e3597fde21b18ca0213dc0726f1"
+      },
+      {
+        "path": "taiko_viewer/nuxt.config.ts",
+        "sha256": "469c0c6338090b4d4d077ffbc879ded938e2a3c906568b894577250672abee03"
+      },
+      {
+        "path": "taiko_viewer/package.json",
+        "sha256": "45200efe29e37af7afd2f28d1352155e3602ef46add02140b74e07773a7cdc48"
+      },
+      {
+        "path": "taiko_viewer/package-lock.json",
+        "sha256": "aedc0106fefa93601f43cb6dfba7d5e1d752144650c3ea814d17d9d463e49cc2"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/authority.ts",
+        "sha256": "ee317e2cceeb3bbf7af3333447c402215fd4a9fcdf87496b6f504a02228bae18"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/catalog.ts",
+        "sha256": "0e9c450185e2c8c11fbd84e62dfc9b0d9ecc2fd194ee6f255c21782572387316"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/common.ts",
+        "sha256": "e1f92e6a7f0f4b9dead521ef06411344079aa532c651991afbe554db48084cf8"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/grants.ts",
+        "sha256": "3f017e6be0bf393dc9d6d378416904e82a4061d72bab31226d5124f113820a15"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/lifecycle.ts",
+        "sha256": "52bc060db1d0c84563c6682e29ef3a5da9ec453aeab17ab51cef6e44bbe6d7d9"
+      },
+      {
+        "path": "taiko_viewer/server/services/developer-api-v1/read.ts",
+        "sha256": "605ad818017b2ffae00560ce8a7c46de53715c76f9a1f557b3600ec43d8ab61f"
+      },
+      {
+        "path": "taiko_viewer/pages/account/developer/grants.vue",
+        "sha256": "5978d06959480a6060423dedac1a780fe92d89492293673d93761fe2d59f10df"
+      },
+      {
+        "path": "taiko_viewer/tests/developerApiV1FreezeReviewSql.test.mjs",
+        "sha256": "43fd7994a4e9115edf9042b758dd2f4b91461f99e4c3ae21ba8bd2f4d5e02e8b"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/legacy.mjs",
+        "sha256": "0617cb98bcd79111e3e068558c0444faa80912eb0d6b4127bfa23f6dee756df4"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/read-values.mjs",
+        "sha256": "6820d1a2e6645e978b9b4c50dd4d2ad88ba21c8e1f05ddb5ed86895c5dfdc96c"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/score-read.ts",
+        "sha256": "af04c4cf13d7c5d2597822a6401a83cef64331cf27a152e73f9a0363f54febbd"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/src/catalog.d.mts",
+        "sha256": "65a925798c537df2085e3744e8ca18cb7150acdc4882f5cf17f2e7702632623c"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/package.json",
+        "sha256": "004df181edab0289afac9e700d9d8615aa518f2d26630619b9338b1fddfc0aba"
+      },
+      {
+        "path": "packages/sakura-taiko-contract/tools/generate_bindings.py",
+        "sha256": "a203f2c9d94be0ecc898121f8216afb3d7df6bd33f1776077ad430ac42144829"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/developer-api-v1/schema.ts",
+        "sha256": "e0b196fdafd4d8d824e9530e6377b51b97f236a41a59ad55f64fefc57198abd1"
+      },
+      {
+        "path": "taiko_viewer/scripts/migrate_developer_api_v1.ts",
+        "sha256": "2940750d562f3e0752fc56401ff9ec3c9d051181a3ddf79d6dcd22dea861ce6b"
+      },
+      {
+        "path": "taiko_viewer/tests/developerApiV1ManageabilitySql.test.mjs",
+        "sha256": "47a835ae75e69024b440564a3e0f1eba65009e64ad9ab9ccd40904ec5ea8f3ce"
+      },
+      {
+        "path": "taiko_viewer/tests/fixtures/developerApiV1ManageabilityUi.mjs",
+        "sha256": "373d3c925cfe06d3792e47128dd549d39a99ed6629903f2c10eb1529eb7998a1"
+      },
+      {
+        "path": "scripts/readiness/run-viewer083-qa.py",
+        "sha256": "94de68414012c22093022fe15590ea1738675c8e3efbaaa43ab3846e00ffac61"
+      },
+      {
+        "path": "scripts/readiness/review-viewer083-openapi.mjs",
+        "sha256": "d654911db769221c69b941a26a85ed72a87c0ecb817ba9d55a0bfcf2dbccf6fe"
+      },
+      {
+        "path": "taiko_viewer/tests/developerApiV1LifecycleSql.test.mjs",
+        "sha256": "7a0eabfcd3adf195e91d9b492bf77947772c67dcf2f4de5794bceaccc6641022"
+      },
+      {
+        "path": "taiko_viewer/server/services/my-taiko/overview.ts",
+        "sha256": "b1b10a7f1a6c2f863393eaebb92972cc26365b4f7b6feeae72998a41b2220d56"
+      },
+      {
+        "path": "taiko_viewer/server/api/account/my-taiko/overview.get.ts",
+        "sha256": "0d067b84fbfe4cd1f528af4d4a2e2eb004e23ccd608b52e962057ef0be6cd546"
+      },
+      {
+        "path": "taiko_viewer/types/my-taiko.ts",
+        "sha256": "bc014286c6117b26a97577a311a31a53ebbcc745b1b94ae97d8b74767b05ffa0"
+      },
+      {
+        "path": "taiko_viewer/components/my-taiko/Overview.vue",
+        "sha256": "72340985894e6483d5f025b5bc1acb76d01102096820f01de525275ed6427b25"
+      },
+      {
+        "path": "taiko_viewer/pages/my/index.vue",
+        "sha256": "764fc39554ff575fc1fc43332c2be0b7b1dbd18d546a8b4b28d4514e9f360b4b"
+      },
+      {
+        "path": "taiko_viewer/tests/myTaikoProductNuxt.test.mjs",
+        "sha256": "d8c85d9271027f10b45cc7b0b5124d8a6a33929d68dc95ebed0fb4bf7b9caef7"
+      },
+      {
+        "path": "scripts/readiness/check-my-taiko-types.mjs",
+        "sha256": "57beac9f5265be8605586740e0dd87552aa9cb3a1150030e992451965de015b6"
+      },
+      {
+        "path": "scripts/readiness/run-viewer1-integration-qa.py",
+        "sha256": "3395ec605ad32ec79d1564267f429f72c1a101aff693db3a3ba3cff60da3204c"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/qa-startup-isolation.ts",
+        "sha256": "ff5b93e3257ee695b6a07611b749c6634012488ebeda5725ab96bdd2f42b5f9c"
+      },
+      {
+        "path": "taiko_viewer/server/plugins/annual-summary.ts",
+        "sha256": "2e858b19cc3e8b794bdc8629b9300b3d04f08656777ecec24144c633edd388a9"
+      },
+      {
+        "path": "taiko_viewer/server/plugins/source-lifecycle.ts",
+        "sha256": "b3e6a171e88e1af054ec711028243083b93e7c801f2e6cbdb0ce1a10ffef664a"
+      },
+      {
+        "path": "taiko_viewer/server/internal/account/kinoko-history.ts",
+        "sha256": "62fb1d0d4f61b2d0fb5a8ac0b8dc5c1e737706d3065be168405f034354d4ebad"
+      },
+      {
+        "path": "taiko_viewer/server/internal/account/kinoko-import.ts",
+        "sha256": "d0d35e41b957a1104693cff2e0b12483bf7a2b2e5991d0d3e69f8e1ff8cbe6b3"
+      },
+      {
+        "path": "taiko_viewer/server/internal/account/kinoko-time.ts",
+        "sha256": "bf9570ccd877272e2776251f532cb1d2ac57fd29559a5861b9c6915d93b607d6"
+      },
+      {
+        "path": "taiko_viewer/tests/kinokoTimeAdmission.test.mjs",
+        "sha256": "b2e99cfab458b281f0e0a394ca2de2544c4eaf51ffdceaff6ce7151776e358bb"
+      },
+      {
+        "path": "taiko_viewer/tests/kinokoPublication.test.mjs",
+        "sha256": "15c8dcf4db9ec48bab8bf4366b83d96b23099103bc77c1d1681c35627a257f2b"
+      },
+      {
+        "path": "taiko_viewer/tests/viewer083IntegrationNuxt.test.mjs",
+        "sha256": "1c77b0140740a7d854c2ed60d403b2330c671f55ad85d5174e6e36bde459bbb6"
+      },
+      {
+        "path": "taiko_viewer/tests/viewer083SchemaRecovery.test.mjs",
+        "sha256": "ba97c9303ddee9dfbbb373aecaa7996032b1f1ee55634819d20bdc9a1bb89d8b"
+      },
+      {
+        "path": "taiko_viewer/pages/account/sync.vue",
+        "sha256": "2d97832d515acbca8e01c968190580299bba0f1b4f71222a98f7f29ea9d17119"
+      },
+      {
+        "path": "taiko_viewer/server/utils/account/sync.ts",
+        "sha256": "4b02679ffb0e3c34c6e7f58f393c17a6d9b70c9ebde20d23659134623059b9ed"
+      },
+      {
+        "path": "taiko_viewer/tests/kinokoImportBoundarySql.test.mjs",
+        "sha256": "61e8caa53b3d46927cee8aabb1c47ae9c5e327a09ac513e8547899d95135e668"
+      }
+    ],
+    "deliveryCommitIdentityArtifactId": "rc6-main-integration-delivery-identity",
+    "deliveryScope": "Later delivery changes are documents only, not an assertion that delivery HEAD was deployed."
+  },
+  "repositoriesAtStart": [
+    {
+      "name": "viewer",
+      "head": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+      "branch": "main",
+      "dirtyAtStart": true,
+      "statusSha256": "d7f36d64595047ad73b943454fa0cb317c3013ecf120a3dc8d0f56659f8d5710",
+      "modifiedByThisTask": false
+    },
+    {
+      "name": "sakura-bot",
+      "head": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+      "branch": "main",
+      "dirtyAtStart": true,
+      "statusSha256": "f9558688f6f40a3e5981bbdb035db9605f1bb840c493fc45a2bcd3c77cdb929c",
+      "modifiedByThisTask": false
+    },
+    {
+      "name": "taiko-bot",
+      "head": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "branch": "main",
+      "dirtyAtStart": true,
+      "statusSha256": "41d8b3ff56df9f11272e37f1b89bb75ff6cdb5b0726ea3dee0111c036b09682e",
+      "modifiedByThisTask": false
+    }
+  ],
+  "authorizationPackage": {
+    "scopeId": "P-A_PRODUCTION_READONLY_AUDIT",
+    "status": "READY_FOR_SINGLE_READONLY_APPROVAL",
+    "authorizationStatus": "PRODUCTION_READONLY_AUDIT_NOT_YET_AUTHORIZED",
+    "CAN_RUN_NOW": false,
+    "request": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer083-rc6-mainline-handoff-20261017/docs/gate-p-readonly-onepass.md",
+      "sha256": "6550a5a70e37bcb90b8ef9d27b624130c9de7cd9bfd754161682b67a1c445956"
+    },
+    "operator": "UNKNOWN",
+    "machine": "UNKNOWN",
+    "validFrom": "UNKNOWN",
+    "expiresAt": "UNKNOWN",
+    "evidenceDestination": "UNKNOWN",
+    "candidateUnit": "taiko-viewer.service",
+    "unitObserved": false,
+    "maxSeconds": 240,
+    "oneApprovalCoversBoundedReferenceChains": true,
+    "optionalSqlDefault": "EXCLUDED",
+    "executed": false
+  },
+  "artifacts": [
+    {
+      "artifactId": "rc5-input-identity",
+      "sha256": "26a5c6fc921546dc015e9b98881c6c3abbd4dba1e50daf1c0211cf07dfee981e"
+    },
+    {
+      "artifactId": "remote-main-observation",
+      "sha256": "5061cce88d74dc044e398f37e54849c68665058d703ef3eccade2b0a5e60f2da"
+    },
+    {
+      "artifactId": "origin-disposition-proof",
+      "sha256": "ea830ee1956302f63eda95223f2c1fa3b937ac7225111c1a63daeeeb7f1ab38d"
+    },
+    {
+      "artifactId": "code-review-patch",
+      "sha256": "55f0b9fdea931a1caf6278267480504ab9023125bb36a294adbe371b10aff2f8"
+    },
+    {
+      "artifactId": "three-way-merge-tree",
+      "sha256": "9f44c8f6deaf8c31d4a4aae1a684fac5e79331bd0e6b4d8d7909c48a3675f0e4"
+    },
+    {
+      "artifactId": "two-way-commit-graph",
+      "sha256": "6f69a8a83538757825d441efb41974855b3fd037218f3ccd9ccb7c7c061f091f"
+    },
+    {
+      "artifactId": "rc6-build",
+      "sha256": "0dbbcbcd427e25450a65b54feedd75f7dbb2f4cf88a67b7af48da6cdd7174876"
+    },
+    {
+      "artifactId": "rc6-output-unmodified",
+      "sha256": "a3b33c0ec1cccb826e445ce4203db26e949c65a5802004be67ba16aa0445e11a"
+    },
+    {
+      "artifactId": "rc6-runtime-observations",
+      "sha256": "18428da81b769fab981cc06a4f59c22737904fc148379740d4d327c380666970"
+    },
+    {
+      "artifactId": "rc6-runtime-cleanup",
+      "sha256": "d736680eec5308e8e3ab21e0d53cfcde4f77c6966456e8d9bf3fadb941c8c87f"
+    },
+    {
+      "artifactId": "rc6-runtime-resources",
+      "sha256": "2c55b2b45ff994a3cd762e03255e20fd10f037096922b9a1a0ba5ac448f2b5d8"
+    },
+    {
+      "artifactId": "kinoko-native-sql-h3",
+      "sha256": "02dfa45d16ca21342bbe103739c8e674c328e691d267a1e0fec6fa090368e4f3"
+    },
+    {
+      "artifactId": "kinoko-adapter-regression",
+      "sha256": "8a68e67ac8e3b3f624f83152e33f108041fe9949616bfd4ca2658ece5830d2f9"
+    },
+    {
+      "artifactId": "rc6-scoped-types",
+      "sha256": "41d8a5a30fad544d6f9fc883052035ca3bc849031b2981c713a0c89746a61b95"
+    },
+    {
+      "artifactId": "authorization-package-offline-proof",
+      "sha256": "b73636e83e771851411a7e7d82d85a8bfc018c99c00ed0d5d35a2f5d71277687"
+    }
+  ],
+  "evidenceIndexArtifactId": "rc6-main-integration-evidence-index",
+  "deliveryIdentityArtifactId": "rc6-main-integration-delivery-identity",
+  "decisionRegister": "083-decision-register.json",
+  "decisionRefs": [
+    "083-decision-register.json#/decisions/KINOKO-CURRENT-TIME-COMPATIBILITY",
+    "083-decision-register.json#/decisions/CONTRACT-F1-F5",
+    "083-decision-register.json#/decisions/VIEWER-082-O1-O2",
+    "083-decision-register.json#/decisions/ANNUAL-OFFSEASON",
+    "083-decision-register.json#/decisions/VIEWER1-I6-HOME",
+    "083-decision-register.json#/decisions/ORIGIN-NINE-PATH-DISPOSITION"
+  ],
+  "currentHandoffGate": "083-mainline-gate.json",
+  "historicalOriginReview": {
+    "sha": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "observedAt": "2026-10-16T14:02:28.816036+00:00",
+    "status": "REMOTE_HEAD_VERIFIED",
+    "fetch": true,
+    "mergeBase": "9a77dbcfa6c7ef6e502a1a5ae7ba4efc714e2209",
+    "aheadBehindAtRuntimeCommit": "134\t1",
+    "originExclusiveCommits": [
+      "777546c943b9ca196c365fffa6d1289eb558a2db"
+    ],
+    "originIsCandidateAncestor": false,
+    "mergeCommitCreated": false,
+    "note": "Path behavior is reconciled for review; no main merge executed and fast-forward is not claimed."
+  },
+  "remainingAuthorizationsRef": "083-mainline-gate.json#/nextActions",
+  "historicalAuthorizationPackage": {
+    "path": "docs/gate-p-authorization-ready.json",
+    "sha256": "e8843af024a7e5ebbcf3cff8e1b779d0e8856fa745d90c847981887a394c8e9e",
+    "decisions": 11,
+    "granted": false,
+    "missingScopes": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+    "sourceCommit": "70c3d3e1cd6b6964c396ea2fda1fc07e73a49fe1",
+    "scope": "Historical unsplit package, no longer active request"
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.5a",
+  "status": "CENTER_MERGED_PRIVATE_READ_PASS",
+  "gate6": "IN_PROGRESS",
+  "cacheRoundStatus": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "2a27f090bd368e672afd8a16c62399477b6e67c8",
+  "sourceCommits": [
+    "fb8f3a24275e813ae5bb5d76632d19e871f3b44c",
+    "356cd1efb959eaea1cc2fb91dea179ebb80f3f7b"
+  ],
+  "sourceVersions": [
+    "9.81.16",
+    "9.81.17"
+  ],
+  "sourceRemote": "356cd1efb959eaea1cc2fb91dea179ebb80f3f7b",
+  "sourcePushVerified": true,
+  "viewerPreparedParent": "11acaf8453f0e407baa5f990573ae0a3d9a6441e",
+  "viewerVersion": "0.82.0",
+  "clientParent": "adae96ea2976347386d85b416cba9e385710b43d",
+  "clientVersion": "0.2.3",
+  "clientCodeCommitted": false,
+  "fileHashes": {
+    "source": {
+      "taiko/scripts/merged_read_cli.py": "cc1ae5982f7a03d8cbdf7e21d5768260c1cbafeb211276ac30bdfacbd47e0109",
+      "taiko/taiko_store/merged_read.py": "4d861e671e529df284eb98ea3d2f00ca7f0c09d775ac8ab5e6a74f2762657cd2",
+      "taiko/tests/test_merged_private_read.py": "2854193a81be669dea905e675feea1498f1c1c659d8070a72052be846b710863",
+      "taiko/tests/test_merged_bind.py": "0454b625902887cffcf75d950763e5e5efa083233c5d4ff63a220a29db780f75",
+      "taiko/plugins/utils/merged_bind.py": "fa6934a453b5d6a94867cfe768144154fbcc07f6edbc9bf089827c2b58d7b0dc",
+      "taiko/plugins/utils/snapshot_history.py": "741535379c92b6d5a992e64ac501a906fc75a48df17121fcefc67ec90515e278",
+      "taiko/taiko_store/reader.py": "eed520e0616a3cd590abf46349d117182220fd318f89596e6ca2931ea698ed9a",
+      "taiko/taiko_store/publication.py": "f5cc402b0163933ce92aef167224c2e42759db25d15aa9a0b17b2d648a99a017"
+    },
+    "viewer": {
+      "server/infrastructure/account/bot-binding-rows.ts": "2d27e66dca0dccf9cb085bf78d46f182b2a79c0550a848f6d45731419d7579d4",
+      "server/infrastructure/account/private-source-response.ts": "c17326389b764702ee3af271c4bf50f390b45d5692db9ed5e22b69b8434446c9",
+      "server/infrastructure/account/merged-source-id.ts": "84287c436686d0744b1a7aad39fe11af5bedcf5d6c528710d1bf75c2e173aed9",
+      "server/infrastructure/account/merged-read-worker.ts": "c26c2da4f57c8dc618f644d908643676cdeecbbc800c9465bb17813843a22b8f",
+      "server/services/account/merged-source-read.ts": "7d238411c665933e6b0b473624c6fbb6e4ab5fa7179de1b85e27ce3dd7b8f856",
+      "server/services/account/source-access.ts": "8db22918121b4d3fdb412b2d963fa97f61e17d1b31e9b2d9f6ee9578c1854061",
+      "server/services/account/source-proxy.ts": "900835bc34e12728a1b7cf035dfde2d3c7deaedadbdfe7339772fe0d2af80865",
+      "server/utils/account/developer.ts": "8a5a94d3d4b45028b684312bcf3396da23f49b71b0631a88f79ed3c794099e5e",
+      "server/api/taiko/proxy/userdata/[taikoId]/history.get.ts": "6e30b6d351a811bcb1acb5bd0a0ac6285594c26a18e657d650359ebe3d0debb8",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "3953643274cfd27a78d06d3d716e35043da1d45563f5ffebf0a7ee52fbd81d30",
+      "tests/mergedSourceSql.test.mjs": "6c3f08ab5fd5296532fd4bec5c3e199111926cdbe41673c466682b14a6f36f08",
+      "tests/privateSourceConditionalSql.test.mjs": "34aef11fd19be7423f11113d1257063e362c7a0d1f9415a60673012974ac7ff7",
+      "tests/sourceAccessSql.test.mjs": "a74ca1979f75272244cb94e6e10cb35e5ab103ddbd371a3ccac30557f6d29305",
+      "tests/sourceProxySql.test.mjs": "4f348cbb0e4fb8800792cdc9ad2ebfc1cd180f117ca4bde6db77f8d0d68c604d",
+      "tests/botBindingProxySql.test.mjs": "d5d7a009ad39a4a5e62c1fc661b37a1d3f29823feaf75ba456002452929e6c10",
+      "tests/fixtures/accountSourceHttp.mjs": "a3fa5cbf9e8bd0a439ec04daa8c48377c82c964e6bc5b78e66153e1e3778f7e6",
+      "tests/fixtures/manualSqlRuntime.mjs": "f7960061c301f37196c9db232d8345cbfed920f0d864cfc9ee1dc3bd2404d80e",
+      "tests/fixtures/goalSqlRuntime.mjs": "9bb19576f5f90b123b505379af96d41621dad3020ee774c68d1ea82c043803d7"
+    },
+    "client": {
+      ".env.example": "2487444d17c9b5a2fd44e73a3b7526dab49d6995b6173f14642ea33d2f6ea58b",
+      "README.md": "c868aa89271d57f741f4a512a042a725d3009a4f111c6b7778574eb88d2a8140",
+      "taiko_bot/private_read_client.py": "4eea070786c67ac77403c3bf2df304d9b31d3cb6cbc9a7f3a2908e2b19b88060",
+      "taiko_bot/private_read_cache.py": "af24b0138544ae5d0862fd0c0241ed61fe9cd431d0a5b25b989cc25977d4b843",
+      "taiko_bot/merged_source_id.py": "cf1490d3b2b296224a6308f4e9d1fc81599c17870065f9930e3ddc149dbcfbb1",
+      "taiko_bot/userdata_provider.py": "3b3e9b327828e6132b450feff41d4df4fcd0ca04fc217f88dd7cf45b336d96e5",
+      "taiko_bot/viewer_client.py": "1408e6306a49861380695008d64ad208adf39016bc58a6cebe6edf36c6c2123c",
+      "taiko_bot/local_api.py": "9695ded3808e2adea7c2cd7293c7a524324bf0950609ae299bda91c81427b5f0",
+      "plugins/taiko.py": "1dc9fd6d1320701ae430a721b20129be0e2c7900c380549bcb213b0b4dc2b401",
+      "plugins/utils/b30_render.py": "7793b4fb296ae8d408f1aabb957b6d8129482d66b761a492ee92c6b8c4139b21",
+      "plugins/utils/draw_dress.py": "17090e49b57e73c1df7ccc68d538528452c421bb501e3ba07a828d3f4eec56a0",
+      "plugins/utils/draw_summary.py": "e734b8a9598391c049d9555f13f5a6aa7e81afc9568e14da57863ef5c4bf373f",
+      "plugins/utils/drawinfo.py": "7a482b5b9a5ea4f1e7a2bb54fdbcd40a945b780995eb301f338dd360f59ce84b",
+      "plugins/utils/score_calculator.py": "4a85c81b266773903ff40e2860f43945478192be574e456bf9eb9d9c5218045d",
+      "plugins/utils/taikob_v2.py": "0b8d3328203db00f08d624e1babcebbf23346c020175804ac6af68f700f5bde4",
+      "plugins/utils/target_recommend.py": "ac4afecd88b7000fff1b3f2315b784bf8f560005a8fd46523feb4e310d7a4c0a",
+      "plugins/utils/tcloud.py": "6a940c1c44164acca029a92e74b7d2b5b3d729e5ce87b4c6f165c683049b8a54",
+      "tests/test_merged_private_read.py": "dfcecf982fa3435439e7ea010d17e8be926ccc31b082ba49a5ded60d3be94769",
+      "tests/test_private_read_cache.py": "0230c020b91959be07d6aefb8018c4ef42eb4b90b2061df84a30fbff06201b32",
+      "tests/test_private_renderer_reads.py": "692c4d5e25ff30542579220f5e8894475f1b076aa4a15bcd5380a713f1c52249",
+      "tests/test_private_local_api.py": "209d7dc6017ccd82fd528a97f35c3cc169b4e1133323397285000e95ac22ab9a",
+      "tests/test_viewer_access.py": "333a0ce8bea2721f0f2f100397aef4960cc7e5138f11792471e3855645277ef1"
+    }
+  },
+  "hashCaptureNote": "Final code hashes captured after successful focused checks. Source commits only add the standalone worker; runtime R is not synced. Client cache round is incomplete and remains uncommitted. Broader Phase6 acceptance is pending.",
+  "validation": {
+    "source": {
+      "pass": 13,
+      "new": 9,
+      "existingMaterializer": 4,
+      "frozenOracle": "2a27f09",
+      "log": "/var/tmp/phase6-merged-rules-final-qa.log",
+      "coreVersion": "0.1.1",
+      "sourceInvocation": "python -m pytest tests/test_merged_private_read.py tests/test_merged_bind.py; owned /var/tmp basetemp"
+    },
+    "client": {
+      "pass": 120,
+      "log": "/var/tmp/phase6-merged-client-final-qa.log",
+      "wrapperSession": 68090,
+      "wrapperExit": 0,
+      "coreVersion": "0.1.2",
+      "coreGitInstalledRoot": "/var/tmp/taiko-domain-extraction/git-pin-installed",
+      "guardedValidator": "scripts/validate_domain_migration.py",
+      "standalonePeakNotCaptured": true
+    },
+    "viewer": {
+      "pass": 140,
+      "merged": 15,
+      "botBinding": 35,
+      "privateConditionalSourceAccessAndProxy": 90,
+      "typechecks": 1,
+      "log": "/var/tmp/phase6-merged-rules-final-qa.log",
+      "wrapperSession": 95544,
+      "wrapperExit": 0,
+      "database": "taiko_annual_poster_test",
+      "actualSelectDatabaseGuard": true,
+      "actualChildMutationOptIn": true,
+      "sqlFixturesLackProductionFk": true,
+      "productionMutation": false
+    }
+  },
+  "resources": {
+    "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791739223-1760593.service",
+    "durationMs": 159063,
+    "sampledMemoryPeakBytes": 513875968,
+    "sampleIntervalMs": 250,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "processes": [
+      {
+        "Name": "MainThread",
+        "VmHWM": "50556 kB",
+        "VmRSS": "50556 kB"
+      }
+    ]
+  },
+  "resourceNote": "250ms cgroup sampled peak; not a proven production or million-record maximum. Final Source13/TS/SQL140 share this owned unit; B120 ran separately with the standard QA wrapper.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791739223-1760593.service",
+    "journal": "Started 2026-10-12T01:20:23+08:00; Deactivated successfully 2026-10-12T01:23:02+08:00",
+    "noActiveQaOrBuildUnits": true,
+    "ownedListenersWorkersRootsRowsClosed": true
+  },
+  "implemented": [
+    "Existing formal current/history routes preserve quotas; ETag reuse follows actual private proof and canonical content validation.",
+    "One owned worker holds every member SH in sorted order before principal gate and SQL. Same captured pool/root/actor used throughout.",
+    "Locked actor/principal/full membership/current state and per-Source grants proved before and after derivation; no SQL-held wait for Source.",
+    "u0 history requires all current and history scopes; manual excluded from merge but complete returned membership remains authorized.",
+    "Lossless canonical base64url principal identity; no sanitized-name reverse mapping or client materialization.",
+    "Managed canonical manifests required; no verified-vector claim for legacy inplace files.",
+    "Bounded two-pass history preserves frozen full/delta/removed/equal timestamp/final current append/profile/dojo/unknown field semantics.",
+    "Merged observation includes complete private vector, bindings/profile and the pinned public combo reference plus explicit rule profiles.",
+    "Conditional current 304 carries updated vector after H-only publication; client permits canonical adopted sequence0, retries a changed C/H vector at most once.",
+    "No private disk cache fill; bounded credential/source/kind/address cache and native implicit current/local caller authorization carried from the previous checkpoint."
+  ],
+  "limits": {
+    "members": 128,
+    "manifestVectorBytes": 33554432,
+    "aggregateInputBytes": 33554432,
+    "expandedOutputBytes": 33554432,
+    "stdinBytes": 32768,
+    "stderrBytes": 8192,
+    "readySeconds": 45,
+    "deriveSeconds": 90,
+    "nativeAlarmSeconds": 180,
+    "workerActive": 2,
+    "workerQueue": 8,
+    "queueSeconds": 30,
+    "admissionScope": "existing single Viewer process; multi-replica capacity remains pending"
+  },
+  "attempts": [
+    {
+      "log": "/var/tmp/phase6-merged-source-qa.log",
+      "result": "3 frozen AST harness failures / 9 pass; fixed missing lineno."
+    },
+    {
+      "log": "/var/tmp/phase6-merged-focused-qa.log",
+      "result": "Source collection 2 errors because B Core0.1.2 pin was incorrectly added to Source, which expects0.1.1; corrected."
+    },
+    {
+      "log": "/var/tmp/phase6-merged-focused2-qa.log",
+      "result": "Source12/B119 PASS; merged Node module collection failed before fixture registration, existing SQL90 PASS; fixed unnecessary service import in identity utility."
+    },
+    {
+      "log": "/var/tmp/phase6-merged-node-qa.log",
+      "result": "TS/SQL140 PASS before public rule revision hardening; resources157.239s/485629952B sampled."
+    },
+    {
+      "log": "/var/tmp/phase6-merged-client-final-qa.log",
+      "result": "Final B120 PASS including canonical sequence0."
+    },
+    {
+      "log": "/var/tmp/phase6-merged-rules-final-qa.log",
+      "result": "Final Source13/TS1/SQL140 PASS after public dependency revision hardening."
+    }
+  ],
+  "logHashes": {
+    "/var/tmp/phase6-merged-source-qa.log": "10fa47c828181fcc8340962232f28c585c98ca15fcc70a831c340e805eb1feed",
+    "/var/tmp/phase6-merged-focused-qa.log": "5ccbd6c74aaad57f4debd8e6de2eeb9adf6eb30aefbd9f2ce20d17665d8b2ff7",
+    "/var/tmp/phase6-merged-focused2-qa.log": "0ffe7c9fca8f9456bc113f128f6fef3ea3056686db9f377f2ecdc768d1bcec06",
+    "/var/tmp/phase6-merged-node-qa.log": "36f43d4a29de602409d0c7df876cdf8a5d986fcf83cfa6f214b55d9dd01f9cf9",
+    "/var/tmp/phase6-merged-client-final-qa.log": "ed05e7861788bee55777d135649d58c41738f3f860f81a8cdf37fa48295adc64",
+    "/var/tmp/phase6-merged-rules-final-qa.log": "b3efd3664575cfa92d11b9dee6aff081895e371ec3797c6df6a0ffd5121f5bba"
+  },
+  "runtime": {
+    "viewerLiveVersion": "0.81.11",
+    "viewerPid": 1063394,
+    "receiverPid": 1063408,
+    "publicApiPid": 829173,
+    "rSynced": false,
+    "restarted": false,
+    "deployed": false,
+    "viewerManuallyPushed": false,
+    "sourceWorkerHasLiveEntryPoint": false
+  },
+  "remaining": [
+    "B history disk loaders, renderer current/history joins and private bearer fallback; finish cache round, regress, version and push B.",
+    "Native Source/Bot Hiroba credentials and QQ mutations, native u0 persistent writer and daily/all writers/P1a convergence.",
+    "Complete Fact/Goal/Growth read models, measurement semantics and version invalidation.",
+    "Million-record cold/warm IO/RSS cost and bridge/store capacity alignment.",
+    "Trusted restore/cleanup/runbook, fixed R dependencies and quiescence of every legacy inplace writer before canonical adoption.",
+    "R sync/production restarts and adapter proof, standard Viewer build/deploy/push, authenticated online product smoke."
+  ]
+}

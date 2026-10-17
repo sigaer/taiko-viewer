@@ -1,0 +1,118 @@
+{
+  "role": "client",
+  "status": "FAIL",
+  "workspace": "/var/tmp/viewer-runtime-integration-ilfptd1i",
+  "commands": [
+    {
+      "label": "client-delivery",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-y9g4d027/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-final-ownership-20261015/taiko/tests/runtime_ownership/delivery_smoke.py",
+        "--host",
+        "client",
+        "--work",
+        "/var/tmp/viewer-runtime-integration-ilfptd1i/delivery",
+        "--assets",
+        "/var/tmp/taiko-phase2fe-20261014/assets"
+      ],
+      "cwd": "/var/tmp/viewer-runtime-integration-ilfptd1i",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-ilfptd1i/client-delivery.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "9199616"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 4.431,
+      "logBytes": 420,
+      "logSha256": "4ddd61d6e245325d18507c51d3df4bad9ac66c813ce2af529e278a6cfdd47fe5",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "29687808"
+      }
+    },
+    {
+      "label": "client-lifecycle",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-y9g4d027/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-final-ownership-20261015/taiko/tests/lifecycle/events.py",
+        "--representative",
+        "--host",
+        "client",
+        "--baseline",
+        "/var/tmp/taiko-lifecycle-20261015/baseline-client",
+        "--work",
+        "/var/tmp/viewer-runtime-integration-ilfptd1i/lifecycle",
+        "--assets",
+        "/var/tmp/taiko-phase2fe-20261014/assets",
+        "--application",
+        "/var/tmp/taiko-final-ownership-20261015/taiko"
+      ],
+      "cwd": "/var/tmp/viewer-runtime-integration-ilfptd1i",
+      "status": "FAIL",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer-runtime-integration-ilfptd1i/client-lifecycle.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "29687808"
+      },
+      "exitCode": 1,
+      "processGroupExited": true,
+      "failure": "NONZERO_EXIT",
+      "elapsedSeconds": 1.609,
+      "logBytes": 804,
+      "logSha256": "e1fa8a756648e68560502d66e7a5d1082e75b004f0f1a7975ded20771bc15eca",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "30257152"
+      }
+    }
+  ],
+  "productionAccess": false,
+  "priorEvidenceOverwritten": false,
+  "scope": "Center real Viewer consumers; client synthetic dispatch and frozen source oracle. No production lifecycle claim.",
+  "cgroupBefore": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "9199616"
+  },
+  "rebuildEvidence": "/var/tmp/taiko-viewer-1-readiness-20261015/docs/platform-architecture-audit/evidence/r1-rebuild-client-with-memory-20261016.json",
+  "rebuildEvidenceSha256": "55d6585d4adebcc62f761a42295d95bb10f4325df29ee591608dd38e182e8797",
+  "environmentIdentity": "sha256:3d66e70d6d94ed92372431d8cf89c93142d93366aa6ebc03a11dc30917f3423a",
+  "interpreter": "/var/tmp/taiko-role-rebuild-y9g4d027/venv/bin/python",
+  "clientOracleBoundary": "Frozen baseline source and test fixture helpers only; business imports must resolve installed modules. Shared assets are prior QA public fixtures, no real userdata.",
+  "testSources": [
+    {
+      "file": "/var/tmp/taiko-final-ownership-20261015/taiko/tests/runtime_ownership/delivery_smoke.py",
+      "sha256": "fffa78a58f508fee68ea9087434c73f48a443c75366bcf08daa7586aadcd231c"
+    },
+    {
+      "file": "/var/tmp/taiko-final-ownership-20261015/taiko/tests/lifecycle/events.py",
+      "sha256": "c21b9347685537683b3231710a1e562c9cfc93d55c6add76fcddbd7c5a922e19"
+    }
+  ],
+  "stoppedAfterFailure": "client-lifecycle",
+  "elapsedSeconds": 6.041,
+  "cgroupAfter": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792112801-2686210.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "30257152"
+  },
+  "memoryPeakScope": "Whole owning QA cgroup peak, not sum or per-command allocation"
+}

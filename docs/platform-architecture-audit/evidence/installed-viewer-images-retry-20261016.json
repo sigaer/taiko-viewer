@@ -1,0 +1,45 @@
+{
+  "status": "PASS_LIMITED_IMAGE_CALLSITE_PARITY",
+  "passed": 1,
+  "failed": 0,
+  "imageCases": 3,
+  "log": "/var/tmp/viewer0822-images-with-memory.log",
+  "logSha256": "7ec2ca662f88ddf0d85d08678dce5af10b273ea3825a4293031cbf15151d14b1",
+  "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+  "role": "center",
+  "distributionCount": 94,
+  "supportVersion": "1.1.0",
+  "roleRebuildEvidence": "docs/platform-architecture-audit/evidence/r1-rebuild-center-with-memory-20261016.json",
+  "roleRebuildEvidenceSha256": "82cc851783a349c85324cb4a7f872602076dca7e10a2ae07f82dce146d2910db",
+  "previousFailureEvidence": "docs/platform-architecture-audit/evidence/installed-viewer-images-20261016.json",
+  "scope": "installed Viewer image callsite parity; synthetic assets; no frozen algorithm claim",
+  "outputs": [
+    {
+      "consumer": "b30",
+      "pngSha256": "4389099633145d982b07a5c41287b0d049a2d1e3af26f8daf1c8129e72708381",
+      "jpegSha256": "082bb8b9c01f622dc6677f35b0a30feaf4c27e12c886d8a49339fc693c1ae351",
+      "width": 1920,
+      "height": 2868
+    },
+    {
+      "consumer": "dimension",
+      "pngSha256": "b4de2c0985c6869363e674ee7c828731733188e906a4b264cf4415d64e89bd9d",
+      "jpegSha256": "3de63bfb50e2b413f28f24dda58cf30e3b9db7d76cbffc9156138aeb7b3c326c",
+      "width": 1628,
+      "height": 1446
+    },
+    {
+      "consumer": "radar",
+      "pngSha256": "5762830d15de06f6c5efa2d98ec4bb2e1b87d697176072b90fa9903dcca1c8fe",
+      "jpegSha256": "be7628a9d12e51084708e1018508cce67c4dbaa9e75a5342c85ccbfbe1426502",
+      "width": 865,
+      "height": 555
+    }
+  ],
+  "limitations": [
+    "Direct installed adapter oracle; not frozen legacy algorithm golden",
+    "Synthetic templates/catalog/score and system font; not production visual asset acceptance",
+    "Only B30, dimension top and radar callsites; other image consumers not covered"
+  ],
+  "existing93EnvironmentModified": false
+}

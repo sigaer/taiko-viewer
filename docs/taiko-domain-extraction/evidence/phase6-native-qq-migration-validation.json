@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6f",
+  "status": "NATIVE_QQ_VERIFIED_MIGRATION_TRANSACTION_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "3e1d76e5ef953c3e8f968049f2cd84ba92b011c0",
+  "sourceCommit": "f04b320012393a03dcd94bdc151b0b7f847a26af",
+  "sourceVersion": "9.81.23",
+  "sourceRemote": "f04b320012393a03dcd94bdc151b0b7f847a26af",
+  "sourcePushVerified": true,
+  "sourcePushSession": 88678,
+  "sourcePushExit": 0,
+  "viewerPreparedParent": "3d9c6d77f34e52ee81e75b49b9839af400648fd4",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "clientCommit": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+  "clientVersion": "0.2.6",
+  "clientChanged": false,
+  "clientQqMigrationUpdated": false,
+  "tests": {
+    "sourceOffline": {
+      "passed": 231,
+      "existingPassed": 208,
+      "nativeQqPassed": 23,
+      "productionOrRealDeselected": 9,
+      "warnings": 1,
+      "wrapperSession": 72487,
+      "wrapperExit": 0
+    },
+    "actualMysqlNativeChild": {
+      "passed": 70,
+      "existingComposites": 38,
+      "newQqComposites": 32,
+      "database": "taiko_annual_poster_test",
+      "eachConnectionActualSelectDatabase": true,
+      "explicitMutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+      "coverage": [
+        "private OneBot source authority/hash-only code/60s cooldown/10min expiry/full source binding-state fingerprint",
+        "canonical/bare precedence, source-first order, explicit SQL current, target visibility, source rows retained",
+        "invalid/missing/expired proof and changed visibility/current/binding cannot write target",
+        "manual source dedicated lifecycle; target manual preservation; 128 union cap; exact-case collision rejection",
+        "exact owned canonical/bare Hiroba credential transfer and foreign owner preservation",
+        "late bind/credential/source/code error; rollback failure closes dedicated connection; uncertain COMMIT before/after",
+        "real process exits before/after consumption COMMIT and code issuance COMMIT (4 sites)",
+        "two concurrent targets only one consumes; exact replay preserves later selection and deletion",
+        "consumed hash-bound effect corruption rejects; bounded identical principal gates"
+      ]
+    },
+    "typescript": {
+      "project": "tests/fixtures/publicationLifecycle.tsconfig.json",
+      "exitCode": 0
+    },
+    "retainedTests": {
+      "selectedMigrationTests": 2,
+      "selectedUsageTests": 1,
+      "mode": "Actual selected retained function AST and native adapter/usage namespace within 23 new cases; full NoneBot registration not run."
+    },
+    "keyboard": {
+      "passed": 1,
+      "mode": "Selected retained test AST with actual QQ Bot keyboard/payload serializers in existing Bot venv; no pytest import, dependency install or framework boot",
+      "python": "/home/sigaer/taiko/.venv/bin/python",
+      "wrapperExit": 0,
+      "log": "/var/tmp/phase6-native-qq-keyboard-qa.log",
+      "separateFromMain231": true
+    },
+    "fullNoneBotRun": false,
+    "onlineAuthenticatedRun": false,
+    "actualAutoUpdateUpstreamRun": false,
+    "millionRecordCostRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.284
+      },
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 12.217
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 105.797
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 121.298,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791755796-1948775.service",
+    "sampledPeakBytes": 331796480,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 354164
+  },
+  "keyboardResource": {
+    "results": [
+      {
+        "name": "source-keyboard",
+        "exitCode": 0,
+        "seconds": 0.816
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 0.816,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791756031-1951138.service",
+    "sampledPeakBytes": 57143296,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 53088
+  },
+  "resourceCaveat": "250ms sample is not absolute peak; child OS maxRSS separately recorded. No million-record or production maximum claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791755796-1948775.service",
+    "result": "success",
+    "execMainStatus": 0,
+    "loadState": "not-found after collection",
+    "activeState": "inactive",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T05:56:36+08:00",
+    "ended": "2026-10-12T05:58:37+08:00"
+  },
+  "keyboardUnitOutcome": {
+    "unit": "taiko-qa-1791756031-1951138.service",
+    "result": "success",
+    "execMainStatus": 0,
+    "loadState": "not-found after collection",
+    "activeState": "inactive",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T06:00:31+08:00",
+    "ended": "2026-10-12T06:00:32+08:00"
+  },
+  "failureHistory": [
+    {
+      "sourcePassed": 230,
+      "typescriptPass": true,
+      "sqlPassed": 69,
+      "sqlFailed": 1,
+      "cause": "Fault injection toggled source visibility once per target insert, twice total, restoring original state. Inject exactly once.",
+      "log": "/var/tmp/phase6-native-qq-double-toggle-fixture-failure.log"
+    },
+    {
+      "sourcePassed": 231,
+      "typescriptPass": true,
+      "sqlPassed": 69,
+      "sqlFailed": 1,
+      "cause": "Existing native os._exit test immediate GET_LOCK(0) raced MySQL asynchronous disconnect cleanup; prove bounded release with GET_LOCK(1), runtime locks unchanged.",
+      "log": "/var/tmp/phase6-native-qq-old-native-gate-exit-race.log"
+    },
+    {
+      "phase": "keyboard",
+      "exitCode": 2,
+      "cause": "System Python QQ SDK/pydantic dependency mismatch during collection, no test ran",
+      "log": "/var/tmp/phase6-native-qq-keyboard-system-dependency-failure.log"
+    },
+    {
+      "phase": "keyboard",
+      "exitCode": 1,
+      "cause": "Existing Bot venv has no pytest; final selected retained AST executed without pytest in same venv, actual SDK serialization passed; no dependencies installed",
+      "log": "/var/tmp/phase6-native-qq-keyboard-venv-pytest-missing.log"
+    }
+  ],
+  "decisions": [
+    "Official openid is not authority for an entered QQ number; source authenticated OneBot private sender issues 128bit one-use transfer code.",
+    "Only SHA256 code and bounded binding/state snapshot fingerprint persist; UTC ten-minute TTL and one-minute issuance cooldown.",
+    "SQL-only fixed sorted principal gates/source-bare-target reads; never take Source/files/network lock after SQL.",
+    "Binding merge, owned Hiroba credential transfer and hash-bound code consumption use one COMMIT; leave source bindings intact.",
+    "Keep canonical-first/bare fallback/source-first unique order/target visibility; use explicit SQL is_current rather than old unordered first row.",
+    "Manual origin requires dedicated claim lifecycle; existing target manual and native u0 product definition preserved.",
+    "Same consumed code/target returns current target DTO, never replays merge or automatic update; code reissue replaces old proof/receipt.",
+    "Unknown COMMIT fixed unavailable; no auto replay for native self migration or lost plaintext code issuance.",
+    "QQ prompt, usage and button use private verified flow; no code in action logs.",
+    "New shared SQL schema belongs to Viewer infrastructure, must exist before final R activation; no native request DDL."
+  ],
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/taiko.py": "6787956c11bbca2cbb65d750bfad64abd5e4c3ce731de393ebdd252c59d76ce6",
+      "taiko/plugins/utils/bot_qq_migration.py": "4448e0917cd65ce71e1478fc4d702b1737fb447b255eb93ce889f5ddec557dd5",
+      "taiko/taiko_runtime/platform_adapter.py": "5bd9321dd6d58817f9ed879b90dd0953c0292fe695f518108baf24743f0480f0",
+      "taiko/tests/test_bind_usage_message.py": "f83899bcc83463432c181eb7f7c46de09a671cde17f8d35ce9a47918a286d6a2",
+      "taiko/tests/test_qq_markdown_media.py": "b2faa3d128bf8a7e7cec3dc036e0630dcfd947889c621224654a9a71f7d68766",
+      "taiko/tests/test_u0_bind_slots.py": "f1f24cafb8fa930c07cede6ab5589abf71e0a586c369cda2993e6dc40f674706",
+      "taiko/tests/test_native_qq_migration.py": "eae893104b06505e1fa16e67c95f4690d83d23fd7b945ba4d621725b5afa396b",
+      "taiko/tests/native_qq_migration_sql_child.py": "f7ef5898d8729a1af1e5db7ae7e2e0ff1949808ccbdea98e21cf11a3e236b0ad",
+      "taiko/docs/domain-extraction-phase6-publication.md": "8cfc96cf860322671d2824ca3c1b52eb4ad50c73813d4890125106076b476163"
+    },
+    "viewer": {
+      "taiko_viewer/server/infrastructure/account/qq-migration-schema.ts": "80d29f7d40b2d242a20642759d0edccb6eea93f918e7084ba49131c23e8b710e",
+      "taiko_viewer/server/utils/account-db.ts": "bb46b24921cbdffad222073f23e6c6c611510b2e3cb7cc58849beb43d284ff19",
+      "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "d749390547ae44f3efbd43210b0951cef0e783b02b25607fcd2ee74cd6cb7afb",
+      "taiko_viewer/tests/nativeBindingMutationSql.test.mjs": "9eaa0f1adaae053a509f46b8413d60e7bc93ad03368ef1aa29243490fc3d6cc3",
+      "taiko_viewer/tests/nativeQqMigrationSql.test.mjs": "143703b5dbe665ad539ac9f53b484502f3084575aa1ba292ff382b94a58cb026"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-native-qq-qa.py": "81bc718c2b8db05b99e4091459b439ade895dcd8e22eae5c92376f3b4abd62ed",
+      "/var/tmp/phase6-native-qq-qa.log": "dee560730bae7b87978975c72b9530413c322d7767cd692ab758b1746de49db2",
+      "/var/tmp/phase6-native-qq-resource.json": "7aed3c1108ddfc8482f9073ac8d97d1f17e8b7c337924ede2777b6027be2aaeb",
+      "/var/tmp/phase6-native-qq-double-toggle-fixture-failure.log": "f0c5f26e2b5ea8a63a4f40fd27c2ddae2d50233de4f4927612f08ff014f7618b",
+      "/var/tmp/phase6-native-qq-double-toggle-fixture-failure-resource.json": "a92c203ed00b22f1a62fac3c11bd8eb783195a3c6f3eaf0c7f8ef1628275e3f9",
+      "/var/tmp/phase6-native-qq-old-native-gate-exit-race.log": "907065a7919da8e4bcd684a896c2bee6ed0d2ddbc5e8714ca227644670d2f375",
+      "/var/tmp/phase6-native-qq-old-native-gate-exit-race-resource.json": "51fc55c86bf073083e50b2aeb40586e94660c56784034279e8d16d3b8552e223",
+      "/var/tmp/phase6-native-qq-keyboard-qa.py": "578f2587143fc8cfe7f1e919253a02a6d8deed8d239341504eeb3104e2d4fd07",
+      "/var/tmp/phase6-native-qq-keyboard-retained.py": "2b4298bfafc47d80cb3962e3003c54fffeabb840c4a060f785917f9a5ffe8983",
+      "/var/tmp/phase6-native-qq-keyboard-qa.log": "9465eef000947544061026f3c3042255ada9c6f2f01f0dd61e925333e5b1bdbc",
+      "/var/tmp/phase6-native-qq-keyboard-resource.json": "04dd984f17c3bd7fcccf506a6a60dd72092770f124b0a50cd670d875f5cdc2ac",
+      "/var/tmp/phase6-native-qq-keyboard-system-dependency-failure.log": "4b9f8c61567e8c5f0335ed16f557f97195984305e74549ff1e22d67d5c5772eb",
+      "/var/tmp/phase6-native-qq-keyboard-system-dependency-failure-resource.json": "fd3e493eecf39e07b8d5b22de66fdc891c02ff5aafe713f5830dd5fe2ad74183",
+      "/var/tmp/phase6-native-qq-keyboard-venv-pytest-missing.log": "b045515d14cda33569d3cada4789b81bf62e501aac6278829f4de77f015659de",
+      "/var/tmp/phase6-native-qq-keyboard-venv-pytest-missing-resource.json": "fac2dac99aba796969c6357910c7bebc56ca2163a7c4c5826fc33bc93edfe769"
+    }
+  },
+  "runtime": {
+    "sourceCopiedToR": false,
+    "servicesRestarted": false,
+    "deploymentRun": false,
+    "productionSqlMutated": false,
+    "productionDataCopied": false,
+    "liveViewerVersion": "0.81.11",
+    "preparedViewerVersion": "0.82.0",
+    "services": {
+      "taiko-viewer.service": {
+        "active": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "active": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "active": "active",
+        "pid": 829173
+      }
+    }
+  },
+  "rollback": {
+    "source": "3e1d76e5ef953c3e8f968049f2cd84ba92b011c0",
+    "viewerPreparation": "3d9c6d7",
+    "activation": "No deployment this step. After activation, keep unsafe QQ self-assertion denied and fix forward."
+  },
+  "remaining": [
+    "client QQ center private endpoints/transport/nonce/grants and compatible command/keyboard flow",
+    "remaining native private readers, ordinary updates and startup SQL writer convergence",
+    "all u0/daily/maintenance writers and verified P1a adoption only after all legacy writers quiesced",
+    "private Read Model/exact invalidation/actual million cold-warm IO RSS and limits",
+    "trusted recovery/cleanup/runbook/fixed R dependencies",
+    "coordinated standard Viewer deploy/R sync-restarts and real authenticated product Gate"
+  ]
+}

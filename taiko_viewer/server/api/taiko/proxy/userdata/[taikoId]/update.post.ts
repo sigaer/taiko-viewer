@@ -1,12 +1,10 @@
 import { readBody } from "h3";
-import { enforceTaikoOpenQuota } from "~/server/utils/taiko-open";
-import { proxyTaikoCenterUserdataUpdate } from "~/server/utils/taiko-center";
+import { updateAuthorizedSource, sourceProxyRequest } from "~/server/services/account/source-proxy";
 
-export default defineEventHandler(async (event) => {
-  await enforceTaikoOpenQuota(event, "taiko_proxy_userdata_update");
+export default defineEventHandler(async (event) => sourceProxyRequest(event, "taiko_proxy_userdata_update", async () => {
   const body = ((await readBody(event)) || {}) as Record<string, unknown>;
-  return proxyTaikoCenterUserdataUpdate(event.context.params?.taikoId, {
+  return updateAuthorizedSource(event, event.context.params?.taikoId, 'wahlap', {
     showAll: Boolean(body.showAll),
     includeImage: body.includeImage === undefined ? true : Boolean(body.includeImage)
   });
-});
+}));

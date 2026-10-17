@@ -1,0 +1,264 @@
+{
+  "phase": 6,
+  "step": "6.3e.7",
+  "status": "VIEWER_AUTHENTICATED_SYNC_AND_RUNTIME_DISPATCHER_PASS",
+  "phaseGate": "IN_PROGRESS",
+  "validatedAt": "2026-10-11T10:03:20.198Z",
+  "sourceVersion": "9.81.10",
+  "sourceCommit": "565a7da138b57d7e460e632372920e4191d99b90",
+  "sourcePushed": true,
+  "viewerVersion": "0.82.0",
+  "viewerReleasePending": true,
+  "actualRuntimeFrozen": {
+    "dispatcher": "tests/fixtures/sync_dispatch_runtime_legacy.py",
+    "dispatcherSha256": "fdec5275a7326f953c96ee461b640a94344fe7782b65662d0c0e11361f8f8af2",
+    "targets": "tests/fixtures/sync_dispatch_targets_runtime_legacy.py",
+    "targetsSha256": "3d4723ccb697a68755fe8a64722081354170c99bb65b9db8459ac3d0ce22c385",
+    "distinctRuntimeFilesUnmodified": true
+  },
+  "qa": {
+    "focused": {
+      "unit": "taiko-qa-1791711618-1427856.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791711618-1427856.service",
+        "durationMs": 49456,
+        "sampledMemoryPeakBytes": 349405184,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48708 kB",
+            "VmRSS": "48688 kB"
+          }
+        ]
+      },
+      "resourcePath": "/var/tmp/phase6-sync-focused-final2-resources.json",
+      "resourceSha256": "a5171c4df6c3d9caba126ea6af83c8c9d354b5cda66f29f41f3996951685a99b",
+      "log": "/var/tmp/phase6-sync-focused-final2-qa.log",
+      "logSha256": "e4c8583208913d508e590bd5c33e459adabd4a96ee9eadba7c207eb700e1441a",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "counts": {
+        "publicationPython": 12,
+        "workerTransportNode": 11,
+        "nativeSyncSql": 31,
+        "scopedTypeScript": 1
+      }
+    },
+    "preHardeningFull": {
+      "unit": "taiko-qa-1791711745-1430073.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791711745-1430073.service",
+        "durationMs": 487858,
+        "sampledMemoryPeakBytes": 451190784,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "55636 kB",
+            "VmRSS": "55636 kB"
+          }
+        ]
+      },
+      "resourcePath": "/var/tmp/phase6-sync-final-resources.json",
+      "resourceSha256": "e304a7ef0a8f147de7135e2e6d33f1eca9f44cdda076e995628dae23efbab150",
+      "log": "/var/tmp/phase6-sync-final-qa.log",
+      "logSha256": "a3bd5040d99053e35b12209aba3f37fca4841220218d1bdf223e130810e8644d",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "counts": {
+        "publicationPython": 119,
+        "domainPython": 170,
+        "offlineNode": 149,
+        "isolatedSql": 334,
+        "scopedTypeScript": 2
+      }
+    },
+    "hardening": {
+      "unit": "taiko-qa-1791712339-1439216.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791712339-1439216.service",
+        "durationMs": 52616,
+        "sampledMemoryPeakBytes": 353501184,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48996 kB",
+            "VmRSS": "48996 kB"
+          }
+        ]
+      },
+      "resourcePath": "/var/tmp/phase6-sync-hardening-resources.json",
+      "resourceSha256": "1f0cbd28229a68b8779915d1e5af09729e5bc864d904266607949590bbb7e17b",
+      "log": "/var/tmp/phase6-sync-hardening-qa.log",
+      "logSha256": "2a65953c9511e5b1b1a49bdb0fc4608e5ccb423c8ed0f8a602f71b9670171e20",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "counts": {
+        "publicationPython": 13,
+        "workerTransportNode": 11,
+        "nativeSyncSql": 32,
+        "scopedTypeScript": 1
+      }
+    },
+    "final": {
+      "unit": "taiko-qa-1791712443-1440477.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791712443-1440477.service",
+        "durationMs": 492871,
+        "sampledMemoryPeakBytes": 456409088,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "57912 kB",
+            "VmRSS": "57516 kB"
+          }
+        ]
+      },
+      "resourcePath": "/var/tmp/phase6-sync-final2-resources.json",
+      "resourceSha256": "500e2844e69e337be6c151f870cbb72e4c13bffec622fd932393eaed310accdf",
+      "log": "/var/tmp/phase6-sync-final2-qa.log",
+      "logSha256": "2c80c9f57bd3e3651ac426afb471a91680e83f38cb85c782c9e450bc9453bd7a",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "counts": {
+        "publicationPython": 120,
+        "domainPython": 170,
+        "offlineNode": 149,
+        "isolatedSql": 335,
+        "scopedTypeScript": 2
+      }
+    }
+  },
+  "testedFiles": {
+    "source": {
+      "plugins/utils/account_sync.py": "84b094f2e1b99673c00f0b8ce338fcfb2155292c8200a13362e695589dc41042",
+      "plugins/utils/viewer_binding_authority.py": "b2832bd21f962ee0f804758a310158706d47115b1ebf95bc6007b70488d4e86c",
+      "scripts/account_sync_cli.py": "5f23dfc118714a0154a0682e47abadf315088f90a143856a5e9b071c03b14276",
+      "scripts/sync_dispatch_server.py": "1c96e26c0f305cc308c7b5c6fcff7f1de6603b3f3ec21920f8153348a6914500",
+      "scripts/sync_dispatch_targets.py": "3d4723ccb697a68755fe8a64722081354170c99bb65b9db8459ac3d0ce22c385",
+      "tests/account_sync_sql_child.py": "e9b4acfb48cc122f879dcb52a85797bb75decc6227120030e2d35f5cfb6668f6",
+      "tests/test_publication_sync.py": "f1fc4b523e145d3d8ec025eed9f3a24f4dfebbc1c18516ec4d58365de991b525",
+      "tests/fixtures/sync_dispatch_runtime_legacy.py": "fdec5275a7326f953c96ee461b640a94344fe7782b65662d0c0e11361f8f8af2",
+      "tests/fixtures/sync_dispatch_targets_runtime_legacy.py": "3d4723ccb697a68755fe8a64722081354170c99bb65b9db8459ac3d0ce22c385"
+    },
+    "viewer": {
+      "server/utils/account-db.ts": "c03e4f1d4c215c171a9eff77d23bd0e681eadf267cfc3de7c8e42887cd3f9da8",
+      "server/utils/account/sync.ts": "74e65d911bf1194c1729e8eba488534382921673768bde2c58a25aace31415d4",
+      "server/infrastructure/account/sync-request.ts": "697381063dadcaba314d0d8fdf1bc88bd9b136b4bafee610967d1ed2d713c53e",
+      "server/infrastructure/account/sync-worker.ts": "e578d2b935294903300a13749f0bb661b0cf107e8f315fe9ef035866cf7205ce",
+      "server/infrastructure/account/sync-worker-runner.ts": "405581ca7b5f7c23997b4be16eb0f86b5c6658ceea4c7e978b33b4048fff9ac8",
+      "server/services/account/sync-authority.ts": "502ea20cf081507a43d50899c9f7e2ff32a2c7c33f3fa1b606f249b46341521b",
+      "tests/accountSyncWorker.test.mjs": "261ed561db482d341d70274d5db66b7ecf622e4c7a49c842d5599974ca235c09",
+      "tests/accountSyncCanonicalSql.test.mjs": "1e522a9ab5ec70788baabdd69d5d36a0ca87344f07e8d7f18841d67e842ae204",
+      "tests/fixtures/accountScorePublicationHarness.mjs": "3bdfcf53e705357d18984b2977b075d0c0935faaee7dc23f2baafe65ca958f2c",
+      "tests/fixtures/accountSourceHttp.mjs": "ab88eb78684442348c652bc358f194be58bcce7f21947c2c62ce3ce22676ca35",
+      "tests/fixtures/goalSqlRuntime.mjs": "e3b3a1e373b522b3be377b66e9c9dcdfb3973f6395393b95bc7a5b1ea71cefdc",
+      "tests/fixtures/manualSqlRuntime.mjs": "7498e86a76ff5f9bb38734129456f9be6358a6dcc7b421fe5b694953c9ba8361",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "b57480102587a84fd37876de3b0dde8f9e1077d09fdefea68d7b8578f51f8380"
+    }
+  },
+  "authorization": {
+    "actor": "Actual authenticated Viewer cookie user.id; body userId/userid/taikoId ignored",
+    "identity": [
+      "binding id",
+      "taiko_id",
+      "source",
+      "manual_account_id"
+    ],
+    "lockOrder": "Optimistic SQL ends; worker Source EX -> SQL owner -> all bindings -> request receipt/cooldown -> acquisition/local target -> exact log/final identity -> one SQL COMMIT",
+    "finalResultProof": "Fresh Source SH with captured pool; exact request/user/source/log id+hash and complete current identity before and after log read",
+    "manualSourcesRejected": true,
+    "queuedIdentityRaces": 4,
+    "finalIdentityRaces": 4,
+    "retiredGateway": "POST /dispatch 410 before body/SQL/Source; GET targets/health kept",
+    "optionalRequestId": "32 lowercase hex or normalized UUID supplied by caller; generated when omitted; no automatic browser cross-reload replay claimed"
+  },
+  "boundaries": {
+    "fileCommits": "Actual runtime Wahlap refresh and local-target snapshot remain two separate C/H observations inside one EX",
+    "sqlCommit": "One log and minimal exact-hash receipt in one authority transaction; completed same request replays despite cooldown without new observations",
+    "lateFailure": "Authorized file observations may remain if SQL fails; log/receipt roll back. No automatic file undo",
+    "uncertainAck": "Only attempted COMMIT can use captured fresh connection under retained EX to prove exact log/receipt/current owner. No-commit/later owner/tampered log fail closed",
+    "runtimeCompatibility": "Frozen actual R full/delta/removed/order/raw/compression/local target DTO and target metadata; same-clock H names become unique",
+    "independentNativeLifetime": "Actual CLI SIGALRM 180 s; test shortens to 2 s and proves signal death/lock release/retry. No actual Viewer-parent-death test claim"
+  },
+  "worker": {
+    "active": 2,
+    "queue": 8,
+    "queueDeadlineSeconds": 30,
+    "parentDeadlineSeconds": 180,
+    "nativeDeadlineSeconds": 180,
+    "stdinMaxBytes": 16384,
+    "stdoutMaxBytes": 65536,
+    "stderrMaxBytes": 8192,
+    "killEscalationMs": 1500,
+    "admissionScope": "Single actual Viewer process; all runner instances share admission. Multi-replica host gate and complete all-writer capacity review pending",
+    "configuration": "Captured real pool WeakMap/native config; stdin actor and whitelisted environment; absent /proc/self path prevents global credential-file load; leaf module bootstrap avoids Bot/drawing preload"
+  },
+  "fixtureScope": {
+    "database": "taiko_annual_poster_test",
+    "everyNativeConnectionSelectDatabaseProved": true,
+    "actualTestSuffixAndExplicitMutationOptIn": true,
+    "remoteHttp": "Synthetic four bounded Wahlap replies",
+    "dailyMeasurement": "Synthetic callback checks Source root; actual daily/all-writer calculation and lifecycle verification remain pending",
+    "productionPrivateAccess": false,
+    "productionDataCopied": false,
+    "productionForeignKeysTested": false,
+    "fullNoneBotRegistration": false,
+    "fullNuxtBuild": false,
+    "onlineAuthenticatedSmoke": false
+  },
+  "activation": {
+    "runtimeSourceCopied": false,
+    "servicesRestarted": false,
+    "viewerDeployed": false,
+    "unchangedProductionPids": {
+      "viewer": 1063394,
+      "receiver": 1063408,
+      "publicApi": 829173
+    },
+    "unrelatedWorkPreserved": true,
+    "titleRelationsChanged": false
+  },
+  "corrections": [
+    "Initial private worker env file /dev/null rejected by existing root-only secret loader; absent proc path corrected and all suites rerun",
+    "Post-regression audit preserved actual R target description and added independent CLI lifetime; targeted and final full reruns passed"
+  ],
+  "remaining": [
+    "Other private/arbitrary Source/QQ/Hiroba/developer/proxy and explicit service grants",
+    "u0 membership and all remaining real writers/daily/B derived cache",
+    "P1a verified input provenance, complete private read model/invalidation and million-record cold/warm memory/IO/cost",
+    "Trusted operational restore/cleanup/runbook",
+    "Pinned deps, R sync, standard 0.82 Viewer release, required Bot/API restart/adapters and online product smoke"
+  ],
+  "sourceRemoteMain": "565a7da138b57d7e460e632372920e4191d99b90",
+  "sourceCommittedTestedHashesMatch": true,
+  "callerAuditCorrection": {
+    "accountSyncMigrated": true,
+    "remainingFormalAdapterCaller": "server/utils/taiko-center.ts:proxyTaikoCenterUserdataUpdate (Wahlap update)",
+    "releaseForbiddenUntilMigrated": true,
+    "sourceCodeUnchanged": true,
+    "independentPendingProxy": "proxyTaikoCenterHirobaSync uses a separate Python task; service grant/Writer/credential transport migration pending",
+    "sourceDocumentationCommit": "59c3569fccdeac93e1d633f4643da5fcbfaa4003",
+    "sourceDocumentationPushed": true,
+    "sourceDocumentationRemoteMainVerified": "59c3569fccdeac93e1d633f4643da5fcbfaa4003"
+  }
+}

@@ -1,37 +1,31 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
+import { getTaikoArtifact } from "~/server/utils/taiko-artifact";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { getRuntimePaths } from "~/server/internal/account/shared";
+import { getTaikoPython } from "~/server/utils/taiko-python";
 
-type RevisionCache = { identity: string; revision: string };
-let cache: RevisionCache | null = null;
+const execute = promisify(execFile);
+let cache: { identity: string; revision: string } | null = null;
 
-const relativeInputs = [
-  "growth_compute/__main__.py",
-  "plugins/utils/chart_availability.py",
-  "plugins/utils/duplicate_versions.py",
-  "plugins/utils/snapshot_history.py",
-  "plugins/utils/score_calculator.py",
-  "songs/rating_structured_with_ids.json",
-  "songs/song_data.json",
-  "songs/song_alias.json"
-];
-
+// The wheel owns the algorithm identity and the verified legacy hash bridge.
+// Existing measurement rows are never rewritten by this read operation.
 export async function getGrowthModelRevision() {
   const { repoRoot } = getRuntimePaths();
-  const paths = relativeInputs.map(name => resolve(repoRoot, name));
-  const stats = await Promise.all(paths.map(path => stat(path)));
-  const identity = stats.map((item, index) => `${relativeInputs[index]}:${item.size}:${item.mtimeMs}`).join("|");
-  if (cache?.identity === identity) return cache.revision;
-  const hash = createHash("sha256");
-  for (let index = 0; index < paths.length; index += 1) {
-    hash.update(relativeInputs[index]);
-    hash.update("\0");
-    for await (const chunk of createReadStream(paths[index])) hash.update(chunk);
-    hash.update("\0");
+  const hash = createHash("sha256").update((await getTaikoArtifact()).identity);
+  for (const name of ["rating_structured_with_ids.json", "song_data.json", "song_alias.json"]) {
+    hash.update(`\0${name}\0`);
+    for await (const chunk of createReadStream(resolve(repoRoot, "songs", name))) hash.update(chunk);
   }
-  const revision = hash.digest("hex");
+  const identity = hash.digest("hex");
+  if (cache?.identity === identity) return cache.revision;
+  const { stdout } = await execute(getTaikoPython(), ["-I", "-m", "taiko_bot.offline.fingerprint", "--growth-root", repoRoot], {
+    timeout: 60_000, maxBuffer: 64 * 1024, encoding: "utf8"
+  });
+  const revision = stdout.trim();
+  if (!/^[0-9a-f]{64}$/.test(revision)) throw new Error("Invalid installed Growth revision");
   cache = { identity, revision };
   return revision;
 }

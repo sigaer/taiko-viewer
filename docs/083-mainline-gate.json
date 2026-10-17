@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "status": "MAINLINE_HANDOFF_READY_FOR_AUTHORIZED_PUSH",
+  "codeStatus": "CODE_HANDOFF_READY",
+  "productionReadonlyStatus": "PRODUCTION_READONLY_AUDIT_NOT_YET_AUTHORIZED",
+  "pAStatus": "P_A_DEPLOY_PENDING_AUTH",
+  "pBStatus": "P_B_PENDING",
+  "pCStatus": "P_C_PENDING",
+  "GateP": "DEPLOY_PENDING_AUTH",
+  "deployReady": false,
+  "newP0": [],
+  "newP0Summary": "NONE",
+  "decisionRegister": "083-decision-register.json",
+  "decisionRefs": [
+    "083-decision-register.json#/decisions/KINOKO-CURRENT-TIME-COMPATIBILITY",
+    "083-decision-register.json#/decisions/CONTRACT-F1-F5",
+    "083-decision-register.json#/decisions/VIEWER-082-O1-O2",
+    "083-decision-register.json#/decisions/ANNUAL-OFFSEASON",
+    "083-decision-register.json#/decisions/VIEWER1-I6-HOME",
+    "083-decision-register.json#/decisions/ORIGIN-NINE-PATH-DISPOSITION"
+  ],
+  "candidate": {
+    "branch": "integration/viewer083-rc6-mainline-handoff-20261017",
+    "integrationTarget": "origin/main",
+    "baseDeliveryCommit": "6aa5d3a93305e046fcf20d29e7ac8616e3b548e8",
+    "runtimeMergeCommit": "6ec45d1f2d2a936b01769fd23ab3904dd9bd0a6d",
+    "builtSourceCommit": "8d915ca2724480c7a287073b742e94a83b44686a",
+    "version": "0.83.0-rc.6",
+    "exactFinalCommitAndTreeIdentityFile": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-mainline-handoff-20261017/delivery-identity.json",
+    "identityFilePurpose": "Written and hash-sealed after local documentation commit; final HEAD must be read there, not inferred from base SHA",
+    "nonDocsBlobDiff": [],
+    "newBuild": false
+  },
+  "origin": {
+    "remote": "origin",
+    "ref": "refs/heads/main",
+    "previousObservation": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "observedMain": "777546c943b9ca196c365fffa6d1289eb558a2db",
+    "startedAt": "2026-10-17T02:15:20.113206+00:00",
+    "observedAt": "2026-10-17T02:15:30.529887+00:00",
+    "fetchExitCode": 0,
+    "changed": false,
+    "productionAccess": false,
+    "isCandidateAncestor": true,
+    "originalNinePathDecisionsRef": "083-decision-register.json#/decisions/ORIGIN-NINE-PATH-DISPOSITION"
+  },
+  "sourceToArtifact": {
+    "inputVerification": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-mainline-handoff-20261017/input-verification.json",
+      "sha256": "fc98f30333aecec81b5cfbd8db94f5a0043c3d4c0b6d5a2008e7a1a034587480"
+    },
+    "priorDeliveryIdentity": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/delivery-identity.json",
+      "sha256": "ecced8fced9a2306b5cf8244046401953531cd9db0d110c5152ceb4f34b3bae7"
+    },
+    "priorEvidenceIndex": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/evidence-index.json",
+      "sha256": "1b5230f49282beeecc56a811f7feb1e53d3f35d21fceaf05f9772a7b65467ed3"
+    },
+    "priorSourceToArtifactProof": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/source-to-artifact-identity.json",
+      "sha256": "eed795c9642be25aab4df8c6c66aeda75b0d8860f5fe747dfe139e37fe65d51e"
+    },
+    "buildReceipt": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc5-main-integration-20261016/build.json",
+      "sha256": "0dbbcbcd427e25450a65b54feedd75f7dbb2f4cf88a67b7af48da6cdd7174876"
+    },
+    "releaseManifest": {
+      "path": "/home/sigaer/taiko/.worktrees/viewer083-rc6-mainline-handoff-20261017/docs/083-release-manifest.json",
+      "sha256": "c743de0b28123cac01599b9525315c9fc6c4e71b05749de6d0ceb6622a95358b"
+    },
+    "outputFiles": 5185,
+    "newOutputRehashOrStartupTest": false,
+    "baseline": "Viewer rc.6, Contract v1.0, Taiko installed 0.14.2; fixed wheel/locks and two 94-package roles unchanged",
+    "priorDefaultOffProof": {
+      "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/off-path-proof.json",
+      "sha256": "870a886246a71921ff7dd4101e2bbee90588242f506d388d1fc2fcb2d2cb15f7"
+    },
+    "reuseLimitations": [
+      "Historical 74 HTTP/SDK retain original source scope; not recertified here",
+      "Historical full typecheck outside-scope failures remain; no whole-repo PASS",
+      "Owned-qa startup evidence is not production normal Annual/background validation",
+      "Four-table synthetic restore remains PASS_SCOPED, not real backup/PITR/offsite acceptance"
+    ]
+  },
+  "dependencyDimension": "DEPENDENCY_REQUIRED vs NOT_APPLICABLE",
+  "evidenceDimension": "PASS_SCOPED vs EVIDENCE_PENDING vs NOT_APPLICABLE",
+  "P-A": {
+    "status": "P_A_DEPLOY_PENDING_AUTH",
+    "realBlockers": [],
+    "realBlockersScope": "NEW_P0_CODE_CONFLICTS_ONLY; empty does not satisfy production prerequisites",
+    "gates": {
+      "codeAndUnmodifiedStartup": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "PASS_SCOPED",
+        "needed": "复用同树构建与原样隔离启动，不代表生产当前版本/normal启动已验证"
+      },
+      "productionRuntimeAndSchema": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "EVIDENCE_PENDING",
+        "needed": "真实当前版本/运行身份、有效 modes、normal启动与既有 schema/Source生命周期兼容"
+      },
+      "sessionSourceIngressRedaction": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "EVIDENCE_PENDING",
+        "needed": "真实 Session/Source 访问链、当前入口 ACL、Host/Origin/代理和敏感字段脱敏"
+      },
+      "existingDataRecoveryFoundation": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "EVIDENCE_PENDING",
+        "needed": "现有成绩/绑定/历史/测量/Goal 数据的真实备份与恢复基础；metadata仅作证据，不能冒充恢复"
+      },
+      "immutableRollback": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "EVIDENCE_PENDING",
+        "needed": "当前/上一可恢复构件身份、不可变候选与准确回退程序；旧版本 UNKNOWN"
+      },
+      "releaseExecution": {
+        "dependency": "DEPENDENCY_REQUIRED",
+        "evidence": "EVIDENCE_PENDING",
+        "needed": "明确授权窗口/操作者、受控部署/回滚及发布后最小匿名/旧路由冒烟"
+      },
+      "developerFourTableF3Ddl": {
+        "dependency": "NOT_APPLICABLE",
+        "evidence": "NOT_APPLICABLE",
+        "needed": "仅在双 legacy＋v1 OFF；原样隔离四表不存在/无应用SQL引用的历史证据保留"
+      },
+      "externalGrantAndApiBudgets": {
+        "dependency": "NOT_APPLICABLE",
+        "evidence": "NOT_APPLICABLE",
+        "needed": "第三方 Grant 开通及对外专属公私配额归 P-C"
+      },
+      "annualPerformanceAndI6": {
+        "dependency": "NOT_APPLICABLE",
+        "evidence": "NOT_APPLICABLE",
+        "needed": "Annual性能与I6不阻断P-A；normal插件是否妨碍旧服务归正常启动兼容"
+      }
+    },
+    "runtimeRequired": {
+      "myTaikoPrivate": "legacy",
+      "myTaikoPublic": "legacy",
+      "developerApiV1": "OFF",
+      "annualStartupMode": "normal"
+    },
+    "productionActualState": "UNKNOWN",
+    "readonlyAudit": {
+      "scopeId": "P-A_PRODUCTION_READONLY_AUDIT",
+      "status": "READY_FOR_SINGLE_READONLY_APPROVAL",
+      "authorizationStatus": "PRODUCTION_READONLY_AUDIT_NOT_YET_AUTHORIZED",
+      "CAN_RUN_NOW": false,
+      "request": {
+        "path": "/home/sigaer/taiko/.worktrees/viewer083-rc6-mainline-handoff-20261017/docs/gate-p-readonly-onepass.md",
+        "sha256": "6550a5a70e37bcb90b8ef9d27b624130c9de7cd9bfd754161682b67a1c445956"
+      },
+      "operator": "UNKNOWN",
+      "machine": "UNKNOWN",
+      "validFrom": "UNKNOWN",
+      "expiresAt": "UNKNOWN",
+      "evidenceDestination": "UNKNOWN",
+      "candidateUnit": "taiko-viewer.service",
+      "unitObserved": false,
+      "maxSeconds": 240,
+      "oneApprovalCoversBoundedReferenceChains": true,
+      "optionalSqlDefault": "EXCLUDED",
+      "executed": false
+    }
+  },
+  "P-B": {
+    "status": "P_B_PENDING",
+    "enablementAuthorized": false,
+    "scope": "独立受限MyTaiko实例/路由与真实Session/owner/revision负面证明；进程mode不等于用户allowlist",
+    "blocksP-A": false
+  },
+  "P-C": {
+    "status": "P_C_PENDING",
+    "enablementAuthorized": false,
+    "scope": "独立Developer应用/Grant/撤销/缓存/四表F3/PITR/加密异地/配额审计与开关许可",
+    "blocksP-A": false
+  },
+  "gitAuthorization": {
+    "push": "NOT_GRANTED",
+    "remotePrCreation": "NOT_GRANTED",
+    "mergeMain": "NOT_GRANTED",
+    "tag": "NOT_GRANTED"
+  },
+  "nextActions": [
+    {
+      "id": "SINGLE_READONLY_AUDIT",
+      "state": "READY_FOR_SINGLE_READONLY_APPROVAL",
+      "request": "gate-p-readonly-onepass.md",
+      "requiresExplicitAuthorization": true
+    },
+    {
+      "id": "PUSH_EXACT_HANDOFF_BRANCH",
+      "state": "READY_AFTER_SEPARATE_EXPLICIT_GIT_AUTHORIZATION",
+      "requiresExplicitAuthorization": true
+    },
+    {
+      "id": "MAIN_INTEGRATION_AND_P_A_RELEASE_EXECUTION",
+      "state": "NOT_AUTHORIZED; real P-A evidence/rollback/window still pending",
+      "requiresExplicitAuthorization": true
+    }
+  ],
+  "historicalFailurePolicy": "RETAINED_AT_ORIGINAL_IDENTITIES; no reclassification to PASS",
+  "privateResourcePlaceholders": "12 unmapped placeholders; no runtime-dependency assumption or P-A circular mapping blocker; real authorized dependency inventory remains necessary",
+  "productionAccess": false,
+  "push": false,
+  "mergeMain": false,
+  "deploy": false,
+  "restart": false,
+  "featureEnablement": false
+}

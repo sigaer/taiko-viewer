@@ -9,10 +9,13 @@ import { collectAnnualOperationalMetrics } from "~/server/services/account/annua
 import { assertAnnualSecurityConfiguration } from "~/server/services/account/annual-summary/security";
 import { assertAccountDbConfiguration, closeAccountDb } from "~/server/utils/account-db";
 
+import { useOwnedQaStartupIsolation } from "../infrastructure/qa-startup-isolation";
+
 export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook("close", closeAccountDb);
   if (import.meta.prerender) return;
   assertAccountDbConfiguration();
+  if (useOwnedQaStartupIsolation()) return;
   assertAnnualSecurityConfiguration();
   void cleanupAnnualCache().catch((error) => {
     console.error("[annual-summary] cache cleanup failed", error);

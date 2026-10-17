@@ -1,0 +1,37 @@
+{
+  "status": "FAIL",
+  "tests": 1,
+  "passed": 0,
+  "failed": 1,
+  "log": "/var/tmp/viewer0822-images.log",
+  "logSha256": "575357bf3c2aae37420da22f33b659eeb8eb193a44a11fd125a7862610072735",
+  "failure": "ModuleNotFoundError: runtime_memory on first B30 render; dimension/radar not reached",
+  "privateDataAccess": false,
+  "test": "taiko_viewer/tests/installedViewerImages.test.mjs",
+  "rootCause": "Shared runtime_memory 1.1.0 support artifact required by existing migration contract is absent from rebuilt role environment and dependency manifest; not a Taiko-private implementation to copy",
+  "sourceEvidence": [
+    {
+      "file": "taiko_bot/offline/memory.py",
+      "sha256": "ae5c15088ec2911b88fa10d3e9e43f1e5f9d8a5101514f36e70d35cc880551e8"
+    },
+    {
+      "file": "taiko_bot/runtime/player/center/b30_support/memory.py",
+      "sha256": "83521ea5b5fc030682f213fb6d36f6966f809b39b1e9d5aa15ea3a61ed436b23"
+    },
+    {
+      "file": "pyproject.toml",
+      "sha256": "6e758760a7d68be3a21ca51674b2040f142a8f808f5535af51895261d2b28e51"
+    },
+    {
+      "file": "docs/server-ownership-migration.md",
+      "sha256": "e39426b9cc39ea375338e9eab3deb9027b741cf62439a8007b6aef18917b2aa0"
+    }
+  ],
+  "sharedOwner": {
+    "repository": "Sakura_bot",
+    "path": "runtime_memory",
+    "lastChangeCommit": "1491c128ef2159370145b73325b33ca2691b788f"
+  },
+  "noExistingEnvironmentMutation": true,
+  "nextGate": "Build/install hash-pinned standalone support wheel in a NEW role environment, rerun real Viewer PNG/JPEG callsites; retain this failed evidence"
+}

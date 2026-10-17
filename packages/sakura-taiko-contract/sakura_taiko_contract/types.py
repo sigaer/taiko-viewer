@@ -23,6 +23,7 @@ class Song(TypedDict):
     songId: str
     title: str | None
     catalogRevision: str | None
+    availability: NotRequired[CatalogAvailability]
 class Chart(TypedDict):
     songId: str
     chartId: str
@@ -31,6 +32,8 @@ class Chart(TypedDict):
     type: Literal['single', 'double', 'unknown']
     variant: str | None
     catalogRevision: str | None
+    availability: NotRequired[CatalogAvailability]
+    tjaCourse: NotRequired[int]
 class ScoreCounts(TypedDict):
     clear: int | None
     fullCombo: int | None
@@ -104,3 +107,54 @@ class CalculationProfile(TypedDict):
     catalogRevision: str
     topN: int
     availabilityRevision: str
+class CatalogAvailability(TypedDict):
+    region: Literal['CN', 'JP', 'UNKNOWN']
+    status: Literal['active', 'removed', 'unknown']
+class ResourceGrant(TypedDict):
+    grantId: str
+    ownerUserId: str
+    bindingId: str
+    playerId: str
+    clientId: str
+    audience: Literal['viewer:developer-api:v1']
+    scopes: List[Literal['profile:read', 'scores:read', 'history:read', 'growth:read']]
+    consentVersion: str
+    consentedAt: str
+    issuedAt: str
+    expiresAt: str
+    revokedAt: str | None
+    revision: str
+class DeveloperClient(TypedDict):
+    clientId: str
+    displayName: str
+    status: Literal['active', 'disabled']
+class DeveloperPlayerProfile(TypedDict):
+    playerId: str
+    bindingId: str
+    displayName: str | None
+    source: str
+class ApiReadVersions(TypedDict):
+    contractVersion: Literal['1.0']
+    schemaRevision: str
+    catalogRevision: str
+    scoreRevision: str | None
+    calculationProfile: None
+    observationSource: str | None
+    capturedAt: str | None
+class DeveloperScoresResponse(TypedDict):
+    versions: ApiReadVersions
+    playerId: str
+    items: List[Score]
+class DeveloperProfileResponse(TypedDict):
+    versions: ApiReadVersions
+    profile: DeveloperPlayerProfile
+class CatalogSongsResponse(TypedDict):
+    versions: ApiReadVersions
+    items: List[Song]
+class CatalogChartsResponse(TypedDict):
+    versions: ApiReadVersions
+    items: List[Chart]
+class ApiError(TypedDict):
+    code: str
+    message: str
+    requestId: str

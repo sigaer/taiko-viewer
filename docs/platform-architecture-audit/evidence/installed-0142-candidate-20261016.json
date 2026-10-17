@@ -1,0 +1,440 @@
+{
+  "status": "FAIL",
+  "workspace": "/var/tmp/viewer0142-candidate-l8zif4a3",
+  "roles": {
+    "center": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+    "client": "/var/tmp/taiko-role-rebuild-347ik6hh/venv/bin/python"
+  },
+  "productionAccess": false,
+  "commands": [
+    {
+      "label": "facts",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-082-closeout-20261016/scripts/readiness/run-installed-reappearance.py",
+        "--tests",
+        "/var/tmp/taiko-082-closeout-20261016/tests/offline/test_reappearance_facts.py",
+        "--output",
+        "/var/tmp/viewer0142-candidate-l8zif4a3/facts.json"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "FAIL",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/facts.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "9162752"
+      },
+      "exitCode": 1,
+      "processGroupExited": true,
+      "failure": "NONZERO_EXIT",
+      "elapsedSeconds": 0.667,
+      "logBytes": 3752,
+      "logSha256": "aac1d02907e07ab48881f2c0f44df529d03b1ec3225edf2aefc5e804886e2af7",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20652032"
+      }
+    },
+    {
+      "label": "original-reproduction",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/scripts/readiness/reproduce-source-switch.py"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/original-reproduction.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20652032"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.144,
+      "logBytes": 750,
+      "logSha256": "12a21c73f33fc22ab857711c037a3b3994101662926b069822e2a80cd214e53b",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20701184"
+      }
+    },
+    {
+      "label": "credential",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-credential-control-plane-20261016/tests/credential_control/installed_acceptance.py",
+        "--output",
+        "/var/tmp/viewer0142-candidate-l8zif4a3/credential.json"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "FAIL",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/credential.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20701184"
+      },
+      "exitCode": 1,
+      "processGroupExited": true,
+      "failure": "NONZERO_EXIT",
+      "elapsedSeconds": 0.017,
+      "logBytes": 182,
+      "logSha256": "dc81266f2f647990e0f3212616c1ad866ac697a559591e267dfcbf1be42b28aa",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20668416"
+      }
+    },
+    {
+      "label": "annualManualCorrections.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualManualCorrections.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/annualManualCorrections.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "20668416"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.216,
+      "logBytes": 501,
+      "logSha256": "fa9fb3f6ef19040dadbd43a78d3eddbf43359a2db76c266326b413aae375c045",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "22454272"
+      }
+    },
+    {
+      "label": "annualPublishedRevision.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualPublishedRevision.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/annualPublishedRevision.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "22454272"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.727,
+      "logBytes": 411,
+      "logSha256": "4680b985aa3be1ad3738932e6246dd08ac6a5ff7a126a5a54b92ef0d0a2c2659",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "23379968"
+      }
+    },
+    {
+      "label": "annualPolicy.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualPolicy.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/annualPolicy.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "23379968"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.438,
+      "logBytes": 1285,
+      "logSha256": "b763b4cd00c69e83b18e9bda4e92930465dc7175b49fb14bbf719e65b99ffa47",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "29204480"
+      }
+    },
+    {
+      "label": "installedRuntimeConsumers.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedRuntimeConsumers.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/installedRuntimeConsumers.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "29200384"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 3.246,
+      "logBytes": 1322,
+      "logSha256": "b1f212c02a7862b58a46a73ede86c66dfb33343e415b863af32c9cb45c42c5c6",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "30003200"
+      }
+    },
+    {
+      "label": "installedGrowthRevision.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/installedGrowthRevision.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/installedGrowthRevision.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "30003200"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.733,
+      "logBytes": 599,
+      "logSha256": "1cb2161f5d6a389d1f83f87d5b99311e84c9d2dcd67d7edc1b5bc59682dffbfc",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "30277632"
+      }
+    },
+    {
+      "label": "taikoFingerprint.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/taikoFingerprint.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/taikoFingerprint.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "30277632"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 0.955,
+      "logBytes": 216,
+      "logSha256": "9ffbba98872252905e6b34ee3802a5abe0f1de2d8e88213c4116fb9140b3901a",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "32878592"
+      }
+    },
+    {
+      "label": "annualWheelWorker.test.mjs",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/annualWheelWorker.test.mjs"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/annualWheelWorker.test.mjs.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "33009664"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 8.25,
+      "logBytes": 3354,
+      "logSha256": "fd15648cd07ffa553506c580cc7706939876c663b462375347a39775545ce7d4",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "32661504"
+      }
+    },
+    {
+      "label": "crossWriterInstalled.test.ts",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "--test-concurrency=1",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer/tests/crossWriterInstalled.test.ts"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/crossWriterInstalled.test.ts.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "32657408"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 3.5,
+      "logBytes": 958,
+      "logSha256": "d36d1f2982b4172e4fbe3d8f3a08c9df47cfb86fe732dcf191573ec76972bc24",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "36016128"
+      }
+    },
+    {
+      "label": "center-lifecycle",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/scripts/readiness/run-installed-lifecycle.py",
+        "--host",
+        "center",
+        "--work",
+        "/var/tmp/viewer0142-candidate-l8zif4a3/center-lifecycle"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/center-lifecycle.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "36143104"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 10.068,
+      "logBytes": 1980,
+      "logSha256": "0ce13ff9c8ab260eda6f4bad34862864456bb8f19cdfc0ffdee66a9bf6fa1168",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "43106304"
+      }
+    },
+    {
+      "label": "client-lifecycle",
+      "command": [
+        "/var/tmp/taiko-role-rebuild-347ik6hh/venv/bin/python",
+        "-I",
+        "/var/tmp/taiko-viewer-1-readiness-20261015/scripts/readiness/run-installed-lifecycle.py",
+        "--host",
+        "client",
+        "--work",
+        "/var/tmp/viewer0142-candidate-l8zif4a3/client-lifecycle"
+      ],
+      "cwd": "/var/tmp/taiko-viewer-1-readiness-20261015/taiko_viewer",
+      "status": "PASS",
+      "timeoutSeconds": 240,
+      "maxLogBytes": 1048576,
+      "log": "/var/tmp/viewer0142-candidate-l8zif4a3/client-lifecycle.log",
+      "cgroupBefore": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "43106304"
+      },
+      "exitCode": 0,
+      "processGroupExited": true,
+      "elapsedSeconds": 9.897,
+      "logBytes": 1980,
+      "logSha256": "a3dec1eb216b97ca451a56dc9f4abd772826f11e1cb8c7153a85ae5730e215eb",
+      "cgroupAfter": {
+        "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+        "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+        "memory.peak": "UNAVAILABLE",
+        "memory.current": "56205312"
+      }
+    }
+  ],
+  "scope": "Installed synthetic candidate regression; no performance SLO or live ingress claim",
+  "cgroup": {
+    "membership": "0::/development.slice/development-qa.slice/taiko-qa-1792116315-2812972.service",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0",
+    "memory.peak": "UNAVAILABLE",
+    "memory.current": "56205312"
+  }
+}

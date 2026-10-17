@@ -1,0 +1,354 @@
+{
+  "phase": 6,
+  "step": "6.3e.8.2",
+  "status": "PRIVATE_CENTER_UPDATE_HISTORY_AND_RENDER_VIEW_PASS",
+  "phaseGate": "IN_PROGRESS",
+  "validatedAt": "2026-10-11T11:55:56.079Z",
+  "viewerVersion": "0.82.0",
+  "viewerStepParent": "b0a76f06356887c72f9e0a0130cedf4c46698424",
+  "viewerStandardReleaseAndPushPending": true,
+  "sourceParent": "59c3569fccdeac93e1d633f4643da5fcbfaa4003",
+  "sourceVersion": "9.81.12",
+  "sourceCommitAndPushPending": false,
+  "clientParent": "d50134332a7e4a5247db9063fdc12b5e950e987c",
+  "clientVersion": "0.2.1",
+  "clientCommitAndPushPending": false,
+  "testedFiles": {
+    "source": {
+      "plugins/utils/viewer_source_authority.py": "721f909b61dbdb851cafbcce0fa965a129d62c5aac5bf3d9ae9a11f5c6f2f597",
+      "plugins/utils/source_mutation.py": "a07cda5c0fd78c5c744f3719cd849e07144e3fe28272ee1dcfe0b38bf52b96f5",
+      "plugins/utils/draw_dress.py": "bcd53361f72af727041bcc874984a4c73e2c7fc50397f87e339f560a78ec964d",
+      "plugins/utils/hiroba/credentials.py": "8051aa4ea4af802f5c8b53be9b7dec9258c7511f07ebc67eccbcb6d5b875e7fe",
+      "plugins/utils/hiroba/cooldown.py": "226dbf19389d047ef49ab01600093ee31db058b1c2bd1b97f23173c9e46a0266",
+      "scripts/source_mutation_cli.py": "aaaa20a0bba9a18b1cec849b7a72edab5480d5f084559fcec303ad6f63e4c1ed",
+      "tests/source_mutation_sql_child.py": "31acddcc52d246ba1a71e53ed3f49a8fbd322af76a5c4d5cba1f531b940530b4",
+      "tests/test_publication_proxy_renderer.py": "3617a5afb242d3d7d26c1ae47612994977507db34fddb6efea8a93a0b20a4f47",
+      "tests/fixtures/source_proxy_renderer_legacy.json": "15e286779ffc943c296fb1389954890a6de5e127214eafa10ead8f486d6e0a76"
+    },
+    "viewer": {
+      "server/utils/account-db.ts": "676bbfbe42c306363df082a12aacaa896d6793606c88c7922378d93762f910e1",
+      "server/utils/taiko-center.ts": "f35ea92258c490d98454e70a1b76ad0fe724d9be47627d5a83d6feb695df1ff5",
+      "server/services/account/source-access.ts": "7cc41b601770f1563b60eda6560e2b593c02ef214f738a480966a3fd1119fcf8",
+      "server/services/account/source-proxy.ts": "c22b3baad03021b8dd1a12caf25022fdc3c2940be95a1ae657f838533e7bef8a",
+      "server/infrastructure/account/private-worker-admission.ts": "08475566f93a0ce0c2ecc74e12d2e76ba1593bd353700c54e10e8bf9995458fc",
+      "server/infrastructure/account/private-worker-environment.ts": "b89c0660dbcf126e8b6376857f1cc0d591f37287bfc31dc0f9d023fcc1146118",
+      "server/infrastructure/account/source-mutation-worker.ts": "c69e6f7e6a52271ad4215da46c94dad81b496ddb4f1109c4f155be46896b917e",
+      "server/infrastructure/account/source-mutation-worker-runner.ts": "bb95e96a26edb4ce51cc9c1144e6aa3e0d7dc32bc40b11b90bd6f7018190d4ae",
+      "server/infrastructure/account/sync-worker-runner.ts": "bd7c0d2e379511369d14e458a3f4c247e7fd4ad28a802d4c8087ef6ad1626429",
+      "server/infrastructure/account/hiroba-credential-schema.ts": "d9655a1fed1f3d457aa913c570dfd76b9a64bd7bf5b9ac7736c559331f37888f",
+      "server/api/taiko/proxy/userdata/[taikoId]/update.post.ts": "ec2bb7a614ae523f8766e73c9985511d88911a9b7aa5fd37007103b813c9a6d8",
+      "server/api/taiko/proxy/userdata/[taikoId]/sync-hiroba.post.ts": "02213978b9e7eac43cc54e5b6b57cef9693d40251a2950128d6d46d55b50dab4",
+      "server/api/taiko/proxy/userdata/[taikoId]/history.get.ts": "ee7678558654620ec845df007eee7ceb109d991e713bf63bf1a68df781346f6b",
+      "tests/sourceProxySql.test.mjs": "4f348cbb0e4fb8800792cdc9ad2ebfc1cd180f117ca4bde6db77f8d0d68c604d",
+      "tests/accountSyncWorker.test.mjs": "2b6a6bfe9835197373f0b99f9aa1e93ed30d93cdc445624ff61e9b1170dd942e",
+      "tests/fixtures/goalSqlRuntime.mjs": "c37ddc8de30e1f2f24a87496bbe6e09bba16ef58ada55cc9a6214cb261e1d034",
+      "tests/fixtures/manualSqlRuntime.mjs": "e1407c43d8e978f1c883b58be66a48e0a88a29eebee7d96c2b3632dd354c1d34",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "868d11b328cfd38b1dceb60049a149a7b95d29dca9e423b1b11264f3ce09f01c"
+    },
+    "client": {
+      "taiko_bot/viewer_client.py": "47f1514b099ae3d0bb5787ebe1fe6cb9f7448ed2054c6b71862ce87d2f76f181",
+      "tests/test_viewer_access.py": "2e84454d276851986420d6fce8eb176fd6c3d3d1768efca0f1511a3e967cc53d",
+      "README.md": "40c720f8bb8d34e45504af9eb021ce1a830568bb96e75fc73b86654f58c6c393",
+      ".env.example": "555396184a7608c71375151d3921daf93156ee44b5b109bfe0d0859c547634aa",
+      "pyproject.toml": "f745c90d0c27464f43d36a37048ffd836594ffa731a9241ab2bebe507f003311"
+    }
+  },
+  "qa": {
+    "focusedBeforeFinalSchemaAndThreeAdditionalSqlTests": {
+      "unit": "taiko-qa-1791718359-1504216.service",
+      "logPath": "/var/tmp/phase6-source-proxy-focused2-qa.log",
+      "resourcePath": "/var/tmp/phase6-source-proxy-focused2-resources.json",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791718359-1504216.service",
+        "durationMs": 83666,
+        "sampledMemoryPeakBytes": 386199552,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48696 kB",
+            "VmRSS": "48660 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true
+    },
+    "sourcePythonPassBeforeClientEnvironmentCorrection": {
+      "unit": "taiko-qa-1791718794-1508676.service",
+      "logPath": "/var/tmp/phase6-source-proxy-final-qa.log",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791718794-1508676.service",
+        "durationMs": 70286,
+        "sampledMemoryPeakBytes": 243658752,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "51336 kB",
+            "VmRSS": "51024 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 2,
+      "sourcePublicationPassed": 126,
+      "sourceDomainPassed": 170,
+      "domainDeselected": 12,
+      "clientCollectionFailure": "QA driver selected system Core 0.1.1 instead of client pinned 0.1.2; no B tests ran. Corrected to guarded client validator with isolated fixed Git packages.",
+      "sourceFileHashesMatchFinal": true,
+      "cgroupRemoved": true
+    },
+    "finalClientTypeScriptOfflineAndSql": {
+      "unit": "taiko-qa-1791719154-1513898.service",
+      "logPath": "/var/tmp/phase6-source-proxy-final2-qa.log",
+      "resourcePath": "/var/tmp/phase6-source-proxy-final2-resources.json",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791719154-1513898.service",
+        "durationMs": 533993,
+        "sampledMemoryPeakBytes": 526479360,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "58572 kB",
+            "VmRSS": "58572 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true
+    },
+    "postClientDocumentationCorrection": {
+      "unit": "taiko-qa-1791719803-1526044.service",
+      "logPath": "/var/tmp/phase6-source-proxy-client-final-qa.log",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791719803-1526044.service",
+        "durationMs": 3427,
+        "sampledMemoryPeakBytes": 141963264,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "50692 kB",
+            "VmRSS": "50692 kB"
+          }
+        ]
+      },
+      "wrapperExitCode": 0,
+      "observedBy": "write_stdin session 29920",
+      "clientPassed": 52,
+      "journalDeactivatedSuccessfully": true,
+      "mainPidAfterCollection": 0,
+      "cgroupRemoved": true,
+      "scope": "Only .env.example anonymous-use comment corrected; all client code/version/README/tests hashes unchanged."
+    }
+  },
+  "counts": {
+    "sourcePublication": 126,
+    "newRendererPublication": 6,
+    "sourceDomain": 170,
+    "domainExcludedProduction": 9,
+    "domainExcludedUntouchedBotRoutes": 3,
+    "clientOffline": 52,
+    "newClientMissingTokenCases": 4,
+    "offlineNode": 153,
+    "workerTransport": 15,
+    "actualGuardedSql": 409,
+    "existingSql": 335,
+    "sourceAccessSql": 45,
+    "newSourceProxySql": 29,
+    "typeScriptConfigs": [
+      "domainRead",
+      "publicationLifecycle"
+    ]
+  },
+  "authority": {
+    "formalRoutes": [
+      "POST /api/taiko/proxy/userdata/:taikoId/update",
+      "POST /api/taiko/proxy/userdata/:taikoId/sync-hiroba",
+      "GET /api/taiko/proxy/userdata/:taikoId/history"
+    ],
+    "actualCookieLogin": true,
+    "actualDeveloperQuota": true,
+    "ordinaryCredentials": "live Cookie/token + exact owned binding; update platform must match binding",
+    "service": "explicit live per-token Source allowlist/scopes/exact revision/expiry",
+    "bodyIdentityDoesNotGrantAccess": true,
+    "capturedBeforeActorSql": [
+      "pool",
+      "userdataDir",
+      "repoRoot"
+    ],
+    "nativeMutation": "parent has no EX; child optimistic proof then Source EX -> locked SQL credential/full binding or service tuple; proof before every publication and final read-only COMMIT",
+    "returnProof": "fresh SH + exact produced commit/sequence + captured full grant, live credential and lease before/after DTO",
+    "foreignAndManualMutationDenied": true,
+    "quotaOrSqlDiagnosticsPrivateSafe": true
+  },
+  "publication": {
+    "wahlapObservations": 2,
+    "hirobaObservations": 1,
+    "actualAcquisitionAndDispatcherAndHirobaWriter": true,
+    "lateSqlOrTransportFailurePreservesAuthorizedFileCommits": true,
+    "readOnlyCommitAckFailureReturns503": true,
+    "noCrossFileSqlRollbackOrNonceClaim": true,
+    "actualWorkerDeathPoints": [
+      "grant-pinned",
+      "acquired",
+      "before-commit",
+      "after-commit",
+      "rendered"
+    ],
+    "history": "canonical raw full/delta/unknown payload; original filename order/meta timestamp/invalid JSON skipping; no projection fallback",
+    "historyResponseBudgetBytes": 33554432,
+    "historyOverBudget": "503 without truncation",
+    "renderer": "canonical current/history in one supplied EX view or default SH; frozen seven-function AST equals actual unchanged R; synthetic PIL panels/columns compare previous states and PNG hashes, no full-asset visual claim"
+  },
+  "worker": {
+    "sharedAccountAndSourceAdmission": {
+      "active": 2,
+      "queued": 8,
+      "queueDeadlineSeconds": 30,
+      "scope": "single Viewer process"
+    },
+    "stdinBytes": 32768,
+    "stdoutBytes": 65536,
+    "stderrBytes": 8192,
+    "wahlapLifetimeSeconds": 180,
+    "hirobaLifetimeSeconds": 900,
+    "nativeIndependentSignalDeadline": true,
+    "releaseAdmissionOnlyAfterChildClose": true,
+    "terminationGraceMs": 1500,
+    "privateCredentialArgs": false,
+    "environment": "captured real pool config/runtime roots/whitelist; no global env loader/PYTHONPATH or mutation flag sent by production runner",
+    "imageBytes": 16777216,
+    "privateImageMaxFiles": 16,
+    "privateImageStaleSeconds": 1800,
+    "privateArtifactCleanupAfterSuccessOrFailure": true,
+    "capturedStoredEncryptedHirobaCredentials": true
+  },
+  "client": {
+    "fixedCore": "0.1.2",
+    "fixedContract": "0.1.0",
+    "isolatedGitPinPackages": "/var/tmp/taiko-domain-extraction/git-pin-installed",
+    "guardedValidator": "scripts/validate_domain_migration.py",
+    "fourPrivateAccessorsRequireTokenBeforeHttp": true,
+    "hirobaHttpTimeoutSeconds": 900,
+    "publicAccessorsPreserved": true,
+    "permissionAwareCacheComplete": false
+  },
+  "isolation": {
+    "database": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "everyNativeConnectionGuarded": true,
+    "productionDataCopied": false,
+    "productionMutatingQa": false,
+    "upstreamNetworkSyntheticOrForbidden": true,
+    "ownedRowsRootsProcessesListenersClosed": true,
+    "productionFkValidationClaimed": false
+  },
+  "runtimeUnchanged": {
+    "viewer": {
+      "service": "taiko-viewer.service",
+      "pid": 1063394,
+      "version": "0.81.11"
+    },
+    "syncReceiver": {
+      "service": "taiko-sync-receiver.service",
+      "pid": 1063408
+    },
+    "publicApi": {
+      "service": "taiko-public-api.service",
+      "pid": 829173
+    },
+    "rSynced": false,
+    "noneBotRestarted": false
+  },
+  "limits": {
+    "fullNuxtBuild": false,
+    "productionAuthenticatedSmoke": false,
+    "serviceRuntimeActivation": false,
+    "hirobaCredentialAndBindMigrated": false,
+    "qqBindMigrated": false,
+    "permissionAwareCacheComplete": false,
+    "allWritersComplete": false,
+    "readModelComplete": false,
+    "millionCostComplete": false
+  },
+  "remaining": [
+    "Hiroba credential status/bind and QQ bind private authority/transaction/native protocol",
+    "taiko-bot permission-aware bounded cache and complete private SDK",
+    "u0 membership/all Source/daily writers/P1a",
+    "full Fact Read Model + complete invalidation/cold-warm million IO/RSS cost",
+    "trusted restore/cleanup/runbook and pinned R dependencies",
+    "quiesce legacy writers, R sync/restart/adapter proof, standard Viewer release and authorized online product smoke"
+  ],
+  "clientFilesBeforeDocumentationCorrection": {
+    "taiko_bot/viewer_client.py": "47f1514b099ae3d0bb5787ebe1fe6cb9f7448ed2054c6b71862ce87d2f76f181",
+    "tests/test_viewer_access.py": "2e84454d276851986420d6fce8eb176fd6c3d3d1768efca0f1511a3e967cc53d",
+    "README.md": "40c720f8bb8d34e45504af9eb021ce1a830568bb96e75fc73b86654f58c6c393",
+    ".env.example": "156fabeaea59dc8672f3e06c467e0a8e71d7aa5f8cc5fe4fce5139d7d37e2cd2",
+    "pyproject.toml": "f745c90d0c27464f43d36a37048ffd836594ffa731a9241ab2bebe507f003311"
+  },
+  "sourceCommit": "6a218a2c729771b34d590f38e9630b2f4335f355",
+  "sourceRemoteHead": "6a218a2c729771b34d590f38e9630b2f4335f355",
+  "sourceCommittedHashesMatchTestedFiles": true,
+  "clientCommit": "d120f6564f3e7ef8476884925b4f7bc63524024c",
+  "clientRemoteHead": "d120f6564f3e7ef8476884925b4f7bc63524024c",
+  "clientCommittedHashesMatchTestedFiles": true,
+  "actualRemoteLsVerified": true,
+  "releaseWhitespaceCorrections": [
+    {
+      "file": "taiko_viewer/server/infrastructure/account/private-worker-admission.ts",
+      "testedSha256": "08475566f93a0ce0c2ecc74e12d2e76ba1593bd353700c54e10e8bf9995458fc",
+      "releaseSha256": "042460fa75e4041e6f6176bfec12e5226f241cfc27a5131ac56610b25166da3e",
+      "change": "Removed one redundant empty line at EOF; all code bytes otherwise identical."
+    }
+  ],
+  "releaseFileHashes": {
+    "source": {
+      "plugins/utils/viewer_source_authority.py": "721f909b61dbdb851cafbcce0fa965a129d62c5aac5bf3d9ae9a11f5c6f2f597",
+      "plugins/utils/source_mutation.py": "a07cda5c0fd78c5c744f3719cd849e07144e3fe28272ee1dcfe0b38bf52b96f5",
+      "plugins/utils/draw_dress.py": "bcd53361f72af727041bcc874984a4c73e2c7fc50397f87e339f560a78ec964d",
+      "plugins/utils/hiroba/credentials.py": "8051aa4ea4af802f5c8b53be9b7dec9258c7511f07ebc67eccbcb6d5b875e7fe",
+      "plugins/utils/hiroba/cooldown.py": "226dbf19389d047ef49ab01600093ee31db058b1c2bd1b97f23173c9e46a0266",
+      "scripts/source_mutation_cli.py": "aaaa20a0bba9a18b1cec849b7a72edab5480d5f084559fcec303ad6f63e4c1ed",
+      "tests/source_mutation_sql_child.py": "31acddcc52d246ba1a71e53ed3f49a8fbd322af76a5c4d5cba1f531b940530b4",
+      "tests/test_publication_proxy_renderer.py": "3617a5afb242d3d7d26c1ae47612994977507db34fddb6efea8a93a0b20a4f47",
+      "tests/fixtures/source_proxy_renderer_legacy.json": "15e286779ffc943c296fb1389954890a6de5e127214eafa10ead8f486d6e0a76"
+    },
+    "client": {
+      "taiko_bot/viewer_client.py": "47f1514b099ae3d0bb5787ebe1fe6cb9f7448ed2054c6b71862ce87d2f76f181",
+      "tests/test_viewer_access.py": "2e84454d276851986420d6fce8eb176fd6c3d3d1768efca0f1511a3e967cc53d",
+      "README.md": "40c720f8bb8d34e45504af9eb021ce1a830568bb96e75fc73b86654f58c6c393",
+      ".env.example": "555396184a7608c71375151d3921daf93156ee44b5b109bfe0d0859c547634aa",
+      "pyproject.toml": "f745c90d0c27464f43d36a37048ffd836594ffa731a9241ab2bebe507f003311"
+    },
+    "viewer": {
+      "server/utils/account-db.ts": "676bbfbe42c306363df082a12aacaa896d6793606c88c7922378d93762f910e1",
+      "server/utils/taiko-center.ts": "f35ea92258c490d98454e70a1b76ad0fe724d9be47627d5a83d6feb695df1ff5",
+      "server/services/account/source-access.ts": "7cc41b601770f1563b60eda6560e2b593c02ef214f738a480966a3fd1119fcf8",
+      "server/services/account/source-proxy.ts": "c22b3baad03021b8dd1a12caf25022fdc3c2940be95a1ae657f838533e7bef8a",
+      "server/infrastructure/account/private-worker-admission.ts": "042460fa75e4041e6f6176bfec12e5226f241cfc27a5131ac56610b25166da3e",
+      "server/infrastructure/account/private-worker-environment.ts": "b89c0660dbcf126e8b6376857f1cc0d591f37287bfc31dc0f9d023fcc1146118",
+      "server/infrastructure/account/source-mutation-worker.ts": "c69e6f7e6a52271ad4215da46c94dad81b496ddb4f1109c4f155be46896b917e",
+      "server/infrastructure/account/source-mutation-worker-runner.ts": "bb95e96a26edb4ce51cc9c1144e6aa3e0d7dc32bc40b11b90bd6f7018190d4ae",
+      "server/infrastructure/account/sync-worker-runner.ts": "bd7c0d2e379511369d14e458a3f4c247e7fd4ad28a802d4c8087ef6ad1626429",
+      "server/infrastructure/account/hiroba-credential-schema.ts": "d9655a1fed1f3d457aa913c570dfd76b9a64bd7bf5b9ac7736c559331f37888f",
+      "server/api/taiko/proxy/userdata/[taikoId]/update.post.ts": "ec2bb7a614ae523f8766e73c9985511d88911a9b7aa5fd37007103b813c9a6d8",
+      "server/api/taiko/proxy/userdata/[taikoId]/sync-hiroba.post.ts": "02213978b9e7eac43cc54e5b6b57cef9693d40251a2950128d6d46d55b50dab4",
+      "server/api/taiko/proxy/userdata/[taikoId]/history.get.ts": "ee7678558654620ec845df007eee7ceb109d991e713bf63bf1a68df781346f6b",
+      "tests/sourceProxySql.test.mjs": "4f348cbb0e4fb8800792cdc9ad2ebfc1cd180f117ca4bde6db77f8d0d68c604d",
+      "tests/accountSyncWorker.test.mjs": "2b6a6bfe9835197373f0b99f9aa1e93ed30d93cdc445624ff61e9b1170dd942e",
+      "tests/fixtures/goalSqlRuntime.mjs": "c37ddc8de30e1f2f24a87496bbe6e09bba16ef58ada55cc9a6214cb261e1d034",
+      "tests/fixtures/manualSqlRuntime.mjs": "e1407c43d8e978f1c883b58be66a48e0a88a29eebee7d96c2b3632dd354c1d34",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "868d11b328cfd38b1dceb60049a149a7b95d29dca9e423b1b11264f3ce09f01c"
+    }
+  }
+}

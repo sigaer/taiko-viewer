@@ -1,0 +1,122 @@
+{
+  "status": "WARM_PASS_COLD_FAIL_RESOURCE_STOP",
+  "productionAccess": false,
+  "runtime": {
+    "viewerHead": "680a749f2e851fb94e16634f242d8efa24f8feea",
+    "harnessSha256": "442a27654ca4fb0e3c1b2448d2686e190c52c044c145f85838948ba9f68682d9",
+    "viewerVersion": "0.82.1",
+    "python": "/home/sigaer/taiko/qa-vault/role-center-wf9putbr/venv/bin/python",
+    "manifestSha256": "407a3ad925ef2b22d96639153758e644e4723e33e5e6e56ccf800b0e95e217b4",
+    "candidate": {
+      "python": "/home/sigaer/taiko/qa-vault/role-center-wf9putbr/venv/bin/python",
+      "pythonSha256": "0f9289d8178e0ccf58fbfd5e9216e0e7f4676d4f9aa10f8182cf3d2552a8bce8",
+      "wheelFile": "/home/sigaer/taiko/qa-vault/taiko-rebuild-gevcqabl/wheels/taiko_bot-0.14.2-py3-none-any.whl",
+      "wheelSha256": "398d23000ebde8a9696b8586fc7fff6cf566e49eb6efe970ceba2e5ecf488c0a",
+      "lockFile": "/home/sigaer/taiko/qa-vault/locks-1792122755686743218/runtime-role-locks.json",
+      "lockSha256": "122763d862b0a513b692c9f6ef7b64410a276f909fab442065162733abe6da80",
+      "originEvidenceFile": "/home/sigaer/taiko/qa-vault/center-rebuild-evidence.json",
+      "originEvidenceSha256": "d335383950cf9e66b6b9a0937b6854fbf380b90f3074269c78213bf48f5e9602",
+      "provenanceStatus": "LOCKED_SOURCE_REBUILD_DERIVED_LOCK",
+      "derivationEvidenceFile": "/home/sigaer/taiko/qa-vault/locks-1792122755686743218/derivation-evidence.json",
+      "derivationEvidenceSha256": "6de4e37f906201f577a843d5b0d96a2282fd6c42099d4d5b74c21ed79c7e6d93"
+    }
+  },
+  "warmEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-287cb26197ae/evidence/annual-o1-WUpDqP/evidence.json",
+  "warmEvidenceSha256": "d9d17a7b201965c4811c4cc54691e7514333d4137469ee895b9001c24b8a1bc8",
+  "warmStages": [
+    {
+      "requestsPerSecond": 1,
+      "planned": 200,
+      "success": 200,
+      "failures": 0,
+      "http429": 0,
+      "timeouts": 0,
+      "dropped": 0,
+      "p50Ms": 66.68743499999982,
+      "p95Ms": 88.44764300000679,
+      "p99Ms": 98.61033899999893,
+      "status": "PASS"
+    },
+    {
+      "requestsPerSecond": 3,
+      "planned": 200,
+      "success": 200,
+      "failures": 0,
+      "http429": 0,
+      "timeouts": 0,
+      "dropped": 0,
+      "p50Ms": 61.82772699999623,
+      "p95Ms": 80.51479200000176,
+      "p99Ms": 93.01602099998854,
+      "status": "PASS"
+    },
+    {
+      "requestsPerSecond": 5,
+      "planned": 200,
+      "success": 200,
+      "failures": 0,
+      "http429": 0,
+      "timeouts": 0,
+      "dropped": 0,
+      "p50Ms": 59.57016100001056,
+      "p95Ms": 75.08863299997756,
+      "p99Ms": 84.22243299998809,
+      "status": "PASS"
+    }
+  ],
+  "resourceAlarm": null,
+  "formalCold": "FAIL_RESOURCE_STOP",
+  "poster": "NOT_TESTED_AFTER_RESOURCE_STOP",
+  "runs": {
+    "qa-48b66bfdda37": {
+      "kind": "ISOLATION_GUARDS_PASS",
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-48b66bfdda37/evidence/manifest.json",
+      "sha256": "1de347dc8fdf3c498f9f12840c0a9cbc9f5f5e57a02749b4b098969f0dc5dad3",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-87c1a800ccdb": {
+      "kind": "RETAINED_BOOTSTRAP_FAIL",
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-87c1a800ccdb/evidence/manifest.json",
+      "sha256": "496875a1b9449471c604054e8b1759739496c7d5203d768953c5bce4d50e3075",
+      "exitCode": 1,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-703cdec083df": {
+      "kind": "RETAINED_FIXTURE_500",
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-703cdec083df/evidence/manifest.json",
+      "sha256": "95dc78ed61b74f94a7696e3e0d1076ed8c9ef30e6dc476c22895a4d06c8d8599",
+      "exitCode": 1,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-61192ba89124": {
+      "kind": "SMOKE_ONLY",
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-61192ba89124/evidence/manifest.json",
+      "sha256": "79123bd690d24ec73df53d4924210c961621c5efd5853d4bc3c5aa07e2372611",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    },
+    "qa-287cb26197ae": {
+      "kind": "FORMAL_WARM",
+      "path": "/home/sigaer/taiko/qa-vault/runs/qa-287cb26197ae/evidence/manifest.json",
+      "sha256": "15946b2c08c2afd2f7055b8d1904a8b3eae52e7c9cfd249937e8aa5b7bb74d70",
+      "exitCode": 0,
+      "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+      "childrenStopped": true
+    }
+  },
+  "sourceHashes": {
+    "taiko_viewer/tests/annualO1Harness.mjs": "442a27654ca4fb0e3c1b2448d2686e190c52c044c145f85838948ba9f68682d9",
+    "taiko_viewer/server/services/account/annual-summary/test-isolation.ts": "962adaf1f243987aed9bca507e24b99e54b0478f9ae52c6d610f1e5e6aaed768",
+    "taiko_viewer/tests/annualQaIsolation.test.mjs": "3d8407107bbd4c58f5193b697ed21938684d37a24d8162b10c866692672ac844",
+    "taiko_viewer/tests/annualO1SmokeSql.test.mjs": "8e1ee2d3447eb04680f445d368cd1cab39e20b1c21775017ee0c8c60e231a944",
+    "taiko_viewer/tests/annualO1WarmSql.test.mjs": "24842e0562966ab02d6ae90f3d9c3a58451a6e12d4997912616816a6fe8a8980",
+    "taiko_viewer/scripts/performance/run-annual-o1.py": "8d87c820670c9e6fc88f592ab2ddd19a983c410a666ca867c448c20aedf72cb2",
+    "taiko_viewer/scripts/performance/annual-o1-summary.mjs": "eccbc2734dbc8cbe8f8c4eda2d1420ce16f770d3adba1064e123f70a81705bf4"
+  },
+  "formalColdEvidence": "annual-o1-cold-resource-stop-20261016.json"
+}

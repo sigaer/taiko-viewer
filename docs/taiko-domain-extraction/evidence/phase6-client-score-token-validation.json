@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6d",
+  "status": "CLIENT_SCORE_TOKEN_CENTER_AUTHORITY_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "clientParent": "a8f1b3833dc807321e92548f5909ee7d7eecd61c",
+  "clientCodeCommit": "e2759956b22472de034ef78162960b076fba8f8a",
+  "clientCommit": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+  "clientRemote": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+  "clientVersion": "0.2.6",
+  "clientPushVerified": true,
+  "clientCodePushSession": 36532,
+  "clientDocsPushSession": 40487,
+  "clientPushExit": 0,
+  "remoteVerificationSession": 75208,
+  "sourceCommit": "9befec4209e8ef48db953a99fc41e723c76eb253",
+  "sourceVersion": "9.81.21",
+  "sourceChanged": false,
+  "sourceTestsRerun": false,
+  "sourcePreviousEvidence": "phase6-native-binding-mutation-validation.json",
+  "viewerPreparedParent": "80c8d3c0c085633e6e94b76140153c09fbc8460e",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "coreClientVersion": "0.1.2",
+  "coreSourceVersion": "0.1.1",
+  "tests": {
+    "client": {
+      "passed": 195,
+      "retained": 171,
+      "oldLocalAuthorityTestsReplaced": 10,
+      "centerTokenTransportCommandAndRetirement": 24,
+      "warnings": 2,
+      "skipped": 0,
+      "guard": "actual validate_domain_migration.py; production env/storage access blocked",
+      "log": "/var/tmp/phase6-client-score-token-registration-failure.log",
+      "stageExit": 0,
+      "existingParityNoneBotImportExecuted": true,
+      "fullNoneBotBootAndAdapterRun": false
+    },
+    "existingBindingSql": {
+      "passed": 66,
+      "log": "/var/tmp/phase6-client-score-token-registration-failure.log",
+      "wholeRunFailedFiles": 1,
+      "wholeRunExit": 1,
+      "scope": "Existing 35 proxy +31 mutation cases passed; new token file failed to register before fixture hooks."
+    },
+    "finalToken": {
+      "passed": 25,
+      "actualMysqlHttpComposites": 24,
+      "pureProvisioningPolicyChecks": 1,
+      "failed": 0,
+      "log": "/var/tmp/phase6-client-score-token-final-qa.log"
+    },
+    "actualSqlHttpTotalAcrossTwoRuns": 90,
+    "policyTotal": 1,
+    "typescript": {
+      "exitCode": 0,
+      "config": "tests/fixtures/publicationLifecycle.tsconfig.json",
+      "finalWrapperSession": 4207,
+      "finalWrapperExit": 0
+    },
+    "database": "taiko_annual_poster_test",
+    "mutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1 with actual SELECT DATABASE() ending _test",
+    "actualPythonSdkToOwnedH3": true,
+    "actualSqlCommitProcessDeathCases": 2,
+    "upstreamNetworkRun": false,
+    "productionPersonalReadsOrWrites": false,
+    "fullNuxtRun": false,
+    "onlineAuthenticatedRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.222
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 23.391
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 26.613,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791752280-1907186.service",
+    "sampledPeakBytes": 471056384,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 361936
+  },
+  "resourceCaveat": "250ms cgroup sample is not an absolute peak; child OS maxRSS separate; no million-record cold/warm benchmark.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791752280-1907186.service",
+    "result": "success",
+    "activeState": "inactive",
+    "execMainStatus": 0,
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T04:58:00+08:00",
+    "ended": "2026-10-12T04:58:27+08:00",
+    "wrapperSession": 4207,
+    "wrapperExit": 0
+  },
+  "priorResource": {
+    "results": [
+      {
+        "name": "client",
+        "exitCode": 0,
+        "seconds": 7.599
+      },
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.24
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 1,
+        "seconds": 63.455
+      }
+    ],
+    "exitCode": 1,
+    "seconds": 74.295,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791751948-1903650.service",
+    "sampledPeakBytes": 523620352,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 399672
+  },
+  "failureHistory": [
+    {
+      "stage": "client full suite",
+      "passed": 150,
+      "failed": 3,
+      "reason": "Command imported DB helper through old token module transitive export.",
+      "fix": "Import DB infrastructure directly; final client195 pass."
+    },
+    {
+      "stage": "new Node file registration",
+      "existingSqlPassed": 66,
+      "failedFiles": 1,
+      "reason": "Top-level binding-effect import pulled extensionless Nuxt dependency before runtime fixture hooks.",
+      "fix": "Use explicit test hash for named-gate observation; new file24 initial pass, final25 pass after no-store/captured-pool checks."
+    },
+    {
+      "stage": "focused runner preparation",
+      "reason": "One owned generator syntax error before any QA invocation.",
+      "fix": "Bounded standard wrapper started after correcting generation; no unbounded fallback."
+    }
+  ],
+  "decisions": [
+    "Source EX acquired from captured runtime paths before principal gate and SQL; no SQL waits for Source.",
+    "Verify sender principal, full binding/current/virtual metadata and ordinary owner same web Source/platform before token mutation and return.",
+    "Explicit score_token_issue scope includes principal policy and all bound Sources; unrelated bind/source scopes do not imply mint authority.",
+    "Center existing public_score_tokens schema and 48hex/mask retained; hidden own real accounts allowed, u0/manual/foreign denied.",
+    "One token rotation transaction; ACK loss accepts only exact committed hash/mask on captured pool while EX/caller/current remain valid.",
+    "Mint POST is one request with no automatic retry and no receipt that persists or regenerates raw token; new user command deliberately rotates.",
+    "Private token response no-store and Vary credentials.",
+    "Unused client-local bearer helper returns410 before IO; historical unused SQLite schema kept for separate cleanup.",
+    "Transport bounded256KiB/90s between chunks/socket waits max10s; no strict90s process deadline claim."
+  ],
+  "coverage": [
+    "real session and explicit service scopes; hidden owner, manual/u0/foreign/current Source mismatch",
+    "late session/QQ/binding/SQL/failed rollback/lease loss preserves old token",
+    "Source EX and principal gate queues recheck identity",
+    "ACK loss and no-applied-COMMIT proof, captured pool/config replacement",
+    "actual Node process exit before/afterCOMMIT; actual Python SDK private stdin toH3",
+    "actual command AST sends private sender/current; group/empty/manual/u0/denial do not mint"
+  ],
+  "fileHashes": {
+    "viewerServer": {
+      "server/services/account/bot-score-token.ts": "eff1bba0579e71f7fa51c89637b5f653acf32d30b40340b180bc8b38952ee2d8",
+      "server/api/taiko/proxy/bind/score-token.post.ts": "89a31608a4cf8db3686e2bf506a595372fab6e72238973496168939b4a2dcaf4",
+      "server/infrastructure/account/source-service-schema.ts": "82fde44920918246358a12ea2aa2658e5ce0471c5cb869c120cace58283156c1",
+      "server/infrastructure/account/source-service-provision.ts": "0da9bbc338ab1f6e6dc272f074df63d3d7781b2f2babb53e285392555e2202ef",
+      "server/services/account/principal-access.ts": "13abbbcc6539b9715fcd2f2c33e81ceda8a3658495bcbdd54553b9f2666bc447",
+      "server/infrastructure/account/score-token.ts": "f717e58368f6d8f5476734d9f3b0282fc4721f5b1aaad4661e37e6854d7bec8c",
+      "server/infrastructure/account/bot-binding-rows.ts": "3708c8402563bc487e321a8f277db65fbe91e24f521191a3de49afda635be744",
+      "server/infrastructure/taiko-publication/scope.ts": "6535805c90ff60a9b5cbd6c09eb260c80c0e128775f9976ba9398d068a6ac889"
+    },
+    "viewerTests": {
+      "tests/botScoreTokenSql.test.mjs": "86f3f04a320abe03e671197cf39ed76f99037ed6c7ceace5ec62f533539478b5",
+      "tests/fixtures/botBindingSqlDeathChild.mjs": "be8425e4965c4024e50c1be27ac1287219f1170ea5382538f0849d72a626cc36",
+      "tests/fixtures/publicationLifecycle.tsconfig.json": "1407279a34c4b70ddb2cb733eb1a18af352e6e2188c7197c7f3ff3a5090c1edb",
+      "tests/botBindingProxySql.test.mjs": "03da137e8ceb9096e1cac8c1fb892dcf2f0be65ab1cbd0d85f7dc44e20d6363e",
+      "tests/botBindingMutationSql.test.mjs": "918d13c0101f7fe1c572de06a20f63a6aa76fd5df95a38a2c482c375ef788855",
+      "tests/fixtures/botBindingHttp.mjs": "3b8521bf8d5e5c38cfb548264df943416a28fd09bf6abc91bf940367eeca8fba"
+    },
+    "client": {
+      ".env.example": "915bc8b5b76a9a855ce5979a63925b23e40d6ccd8e4ecffdb07ce621403be0dd",
+      "README.md": "9facf3046789a4cd59b8e14b47f5ebce83174c7615d8fb71e442831f6e29679f",
+      "pyproject.toml": "0f32992d50de2c2140e605f331f64c620d6d50a4e2fa8ef539621cdc53ab9b26",
+      "plugins/taiko.py": "4f5b6c2b22224a110d026d90b42c2073788469ee94029ebb9cff752efff62192",
+      "plugins/utils/public_score_token.py": "820d46db2c7f4a17da7c0497a96e9b2f5edefc3c3f90bc6e93f2bf903c72711d",
+      "taiko_bot/binding_mutation_client.py": "368f12abe3177f0348d244c149daa274133cfea62d4cd337efb6b89da22ad503",
+      "taiko_bot/score_token_client.py": "423e863a0a795171eda313112ee6e0968eb2ac201a6988d1a05ed7ed113357e9",
+      "tests/binding_mutation_http_child.py": "011ea12919418ad093b5a2ece0a0f413f9941043bb799e89371748246df55878",
+      "tests/test_public_token_center_read.py": "7c769f7e510b2c01d622e61f09966c509c2c95903476ff55466aee2fb72f2aa4",
+      "docs/taiko-domain-extraction/phase6-private-read-client.md": "656f5001132f1946a33ad20c69609acd0337e8effe7050b8aade0f9a7cdd7f1d",
+      "scripts/validate_domain_migration.py": "56675a7cdbb10391cb19db708822fb70ff1ee6725a27aababb0eb0b2e2e08286"
+    },
+    "unchangedSource": {
+      "taiko/plugins/taiko.py": "a357c2ce51c9b602527c8bbf5b2caf3820248fa4be835a0bb0c9525af1ef668c",
+      "taiko/plugins/utils/bot_binding_mutation.py": "67eb078626aa1d6258f6df3dc722d4d4190d62711d7158fd67b6cb19bfd54e48",
+      "taiko/plugins/utils/bot_binding_metadata.py": "4c012efd2ef3755df5b5975688b8a10e4c7784bb2ac420aec3ac44fcd5b3c8b8",
+      "taiko/plugins/utils/bot_binding_authority.py": "5d6dd9dda36a066103082d0addf88e4e0b78ee35146dfe912ae37879643a4850",
+      "taiko/taiko_runtime/platform_adapter.py": "18dc084ead004f533cbb6c4c352d2e54085c147691b0d92603d3a579e544ff8b",
+      "taiko/tests/test_native_binding_mutation.py": "49cecf68381e7ddf3491e751160ef0bcf38507d4718b6db9722759e4e2f691eb",
+      "taiko/tests/native_binding_mutation_sql_child.py": "739a3e0714db5f901476b02b34585bf643c612277dad6f01c85e38b7331164fd",
+      "taiko/tests/test_native_binding_metadata.py": "f3913a5279c18cdcc3c663705c879c636ac12fd74764371d901cf9d0bdaeae0d",
+      "taiko/tests/native_binding_metadata_sql_child.py": "42ea4a4ff8961e86ef0983c393b8031560301c41f2d7e143c41f16972081d6a2",
+      "taiko/tests/test_u0_bind_slots.py": "5d4e933b806d8f4e1b60d11a1a7eb0cd4c2b70f1f45d19dabb37dee6d0ab47b0",
+      "taiko/scripts/validate_domain_migration.py": "e4c3c8b811224a956963e2aa08cdc7eea5ac242b772b37c141b1b11a8b27462f",
+      "taiko/docs/domain-extraction-phase6-publication.md": "40e04a9aed86d710a78fcb7409bf354fd1ddc8239945b69aaf477b08a6e4a1d7"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-client-score-token-qa.py": "fc5eaae2e12fcc245141912165736048279958b5aa094c05f405f9b420cb6b66",
+      "/var/tmp/phase6-client-score-token-focused-qa.py": "0d39c9904b4b3165bb6bf97a24feddfceaf2bd0014a5a079c0d57930550727f3",
+      "/var/tmp/phase6-client-score-token-import-failure.log": "9621367ee27091a6ca13af1e7c9f2ab504805c3f794b1e988eabfec57ef0dafa",
+      "/var/tmp/phase6-client-score-token-import-failure-resource.json": "24d741e47029c3ac1eb8f4968d0892a1afc579e67d66dbc9782745d6528aed59",
+      "/var/tmp/phase6-client-score-token-registration-failure.log": "7b50668f8171a9f3da9d9cd912249c763ad945f9c88353270f66067b75fa09e6",
+      "/var/tmp/phase6-client-score-token-registration-failure-resource.json": "f858035b67039898b8e45e482ea7c19056d8a9fea3241ad5656d47944cda642c",
+      "/var/tmp/phase6-client-score-token-initial-pass.log": "48830d918a4a18d9556606d15be9491c02c73a4adc9b443981b5af35b74504f2",
+      "/var/tmp/phase6-client-score-token-initial-pass-resource.json": "555e04cfc66d57d57ba9072c4de990b1e2e263a92f4d9061b2aa2e1dcd45c4f4",
+      "/var/tmp/phase6-client-score-token-final-qa.log": "ebffa7c262af34fce851ba18de37efcf960cb5c8737e6caa76602d392be4e8fd",
+      "/var/tmp/phase6-client-score-token-focused-resource.json": "a10252fd65c05bd5fd74855873c15a50a9051b9883e8cdb9ad80e8001164dca2"
+    }
+  },
+  "production": {
+    "mutations": false,
+    "copiedPersonalData": false,
+    "sourceRuntimeSync": false,
+    "servicesRestarted": false,
+    "viewerDeployed": false,
+    "liveViewerVersion": "0.81.11",
+    "unchangedPids": {
+      "taiko-viewer.service": 1063394,
+      "taiko-sync-receiver.service": 1063408,
+      "taiko-public-api.service": 829173
+    },
+    "clientStarted": false
+  },
+  "pending": [
+    "Client QQ migration and native Hiroba/QQ authority",
+    "All Writer ownership/quiescence/adoption and P1a",
+    "Read Model exact dependencies/invalidation/fail-closed projections",
+    "Million-record actual cold/warm IO/RSS and transport/store size reconciliation",
+    "Trusted recovery/cleanup/runbook, fixed runtime dependencies, stop all legacy writers before R sync",
+    "Standard coordinated build/push/deploy/restart and real authenticated online product smoke"
+  ],
+  "rollback": {
+    "client": "a8f1b38 /0.2.5",
+    "viewer": "80c8d3c local preparation",
+    "activation": "0.2.6 requires Viewer0.82 protocol and explicit production grant; code/docs pushes do not activate running clients."
+  }
+}

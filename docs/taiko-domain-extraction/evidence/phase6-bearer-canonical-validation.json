@@ -1,0 +1,219 @@
+{
+  "step": "6.3e.5",
+  "status": "PYTHON_BEARER_SOURCE_GRANT_AND_ACQUISITION_LEASE_REUSE_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "recordedAt": "2026-10-11T08:09:54.916Z",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraBaseCommit": "e568df1b308cd31349ba9341e749976b655d5462",
+  "sakuraVersion": "9.81.8",
+  "sakuraCommit": "408d2f838d19ee181a4ca5f603213fdd59c8128e",
+  "sakuraPushed": true,
+  "validation": {
+    "publicationPython": {
+      "passed": 95,
+      "newBearer": 20
+    },
+    "domainPython": {
+      "passed": 166,
+      "deselected": 12,
+      "productionExcluded": 9,
+      "unchangedFullBotRoutesExcluded": 3
+    },
+    "offlineNode": {
+      "passed": 138
+    },
+    "actualIsolatedSql": {
+      "passed": 267,
+      "newNativeBearer": 17,
+      "existingRealPythonPersonal": 2
+    },
+    "localTypeScriptGroups": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "focusedPython": {
+      "unit": "taiko-qa-1791705021-1343313.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791705021-1343313.service",
+        "durationMs": 1404,
+        "sampledMemoryPeakBytes": 51765248,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "46528 kB",
+            "VmRSS": "46528 kB"
+          }
+        ]
+      },
+      "resourceSha256": "41bb17f88ed27963b666214d76fc33c562be97f402a6179dd7bd2f63c555529e",
+      "log": "/var/tmp/phase6-bearer-focused-qa.log",
+      "logSha256": "4c220bd8f6bf744661efe464ea8a17fc6b4d6ff7a107d7a47114865e91b1a9ad",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "passed": 19,
+      "finalNewCasesPassed": 20
+    },
+    "focusedNativeSql": {
+      "unit": "taiko-qa-1791705277-1346007.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791705277-1346007.service",
+        "durationMs": 22857,
+        "sampledMemoryPeakBytes": 346271744,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "47840 kB",
+            "VmRSS": "47840 kB"
+          }
+        ]
+      },
+      "resourceSha256": "c60fc5880d7844eaa5191bd4fbc2e3cee0fed23fdb52bb701a04fd5ed47d789d",
+      "log": "/var/tmp/phase6-bearer-sql-focused-qa.log",
+      "logSha256": "638ea11108733d8a67e9c2ab961ffc41936ac9e21783e74e94a606254af64496",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": "",
+      "passed": 17
+    },
+    "final": {
+      "unit": "taiko-qa-1791705601-1352125.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791705601-1352125.service",
+        "durationMs": 420048,
+        "sampledMemoryPeakBytes": 472195072,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "51028 kB",
+            "VmRSS": "50644 kB"
+          }
+        ]
+      },
+      "resourceSha256": "5e9b6c9ec502f8ce205240f63b94ce20c5a9c21cf7ebf5c502fc94f47fa4901a",
+      "log": "/var/tmp/phase6-bearer-final-qa.log",
+      "logSha256": "7e479bfb7fc4ef7e1a19164d9f1928192ef2ab70d3f684979e29271bccdc19fd",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "corrections": [
+      {
+        "log": "/var/tmp/phase6-bearer-module-fixture-failure.log",
+        "cause": "Dataclass source module was not registered before loading; fixed test bootstrap before any test/DB access",
+        "logSha256": "7161431127393528608d8b1383769f2bf5e3d60fc88027fae2101303f2dac12d"
+      },
+      {
+        "log": "/var/tmp/phase6-bearer-missing-object-failure.log",
+        "cause": "Managed missing current object incorrectly mapped to legacy 404; fixed canonical 503 classification and reran focused/final regression",
+        "logSha256": "6d8ad36f5b5a1a6d57a1c844ae5e2ae408e4d020dbcc93a53710a93a38b60300"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/plugins/utils/public_score_token.py",
+      "sha256": "ca7626ec13180e2d1ece36f5e1c46f74465d5d3220303eae2da45de7f70ba106"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/plugins/utils/userdata_storage.py",
+      "sha256": "30575ba14f3039ef2fd90420912f98698e736390a49abf93664ff5971f9e0aba"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/plugins/utils/update_user.py",
+      "sha256": "58d6df00bceeddffbd74ff6b8853678e8a3bf733f77895bf5e7c153b11f7eeed"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/plugins/utils/hiroba/sync.py",
+      "sha256": "79fba0acc0f67e9508ff2cfe8222fd27a7385e5d7094da149be5827e41a32a19"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/server.py",
+      "sha256": "533ac79768a5e759fcc06ef23113012477458a6ffbf501edb357049831f8d665"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/tests/test_publication_token_bearer.py",
+      "sha256": "3735526502ec7d046b194cd6e63807a17a0b35299dbf51abe4d10c62a6b4f972"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/tests/token_bearer_fixture.py",
+      "sha256": "aa3e784c7f0a929097d4c03523e12a38e3be2a26ee25ae7f87a23d5c88631e0d"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/tests/token_bearer_sql_child.py",
+      "sha256": "bd37a2f92477ced2cc3d4c2672d806185bfcd14a809cc39ee3a4c32ee695e2e0"
+    },
+    {
+      "repo": "Sakura_bot",
+      "path": "taiko/taiko_store/README.md",
+      "sha256": "c766a8135a5d91ac3e13a278595c0e871ec8e5b4a67638931237d3ca04312a53"
+    },
+    {
+      "repo": "Viewer",
+      "path": "taiko_viewer/tests/tokenBearerCanonicalSql.test.mjs",
+      "sha256": "874a885a08fe10e59ffab15c02b79972a5c70e702d14ca009e18737e6412d7ad"
+    }
+  ],
+  "coverage": [
+    "Captured SQL connection, optimistic token lookup completed before Source EX, then exact token id/hash/Source FOR UPDATE pin through refresh/canonical DTO/final proof/usage COMMIT",
+    "Bearer is an explicit Source capability; forged userid/taikoId cannot select another source; unknown/unsafe/manual token resources rejected before private refresh",
+    "Complete healthy DTO against frozen 6a90c7e; projection loss/tamper independence; managed corruption/missing objects 503, legacy invalid/missing state retains existing refresh behavior",
+    "Actual Wahlap four-request parsing/serializer/current-history publication and real SQL song lock under explicitly reused EX; real Hiroba private/public routing and both zero/nonzero task save branches with synthetic transport",
+    "Native Python + PyMySQL + owned actual HTTP POST, four queued row-id/Source/hash/revoke races, pinned token SQL rotation and waiting Source publisher",
+    "Native late usage SQL failure/failed rollback close, usage COMMIT ACK loss generic unavailable, four native deaths grant-pinned/source-published/before-use-commit/after-use-commit with fresh retry",
+    "HTTP 16KiB body budget/15s socket read bound and malformed UTF8 state; Wahlap 5s connect/30s read; explicit store rejects SH/expired/wrong identity; monotonic owned checkpoint deadlines"
+  ],
+  "boundaries": {
+    "database": "taiko_annual_poster_test",
+    "actualSelectDatabaseSuffixGuard": true,
+    "explicitMutationOptIn": "TAIKO_ALLOW_TEST_DB_MUTATION=1",
+    "productionDb": false,
+    "productionPersonalOrSecretFiles": false,
+    "realOfficialNetwork": false,
+    "testSchemaForeignKeys": false,
+    "syntheticDailyCaptureInNativeBearer": true,
+    "fullNuxtTypecheck": false,
+    "fullNoneBotRegistration": false,
+    "millionRecordCost": false,
+    "onlineAuthenticatedSmoke": false,
+    "allNativeTokenIssuersAuthorized": false,
+    "allWritersConverged": false,
+    "scoreReadModelComplete": false,
+    "sourceAndSqlUsageJointAtomic": false
+  },
+  "runtime": {
+    "viewerVersion": "0.81.11",
+    "viewerPid": 1063394,
+    "receiverPid": 1063408,
+    "publicApiPid": 829173,
+    "noRuntimeSync": true,
+    "noRestart": true,
+    "noViewerDeploy": true
+  },
+  "pushConfirmedAt": "2026-10-11T08:13:30.375Z",
+  "concurrentBaseCommit": {
+    "commit": "e568df1b308cd31349ba9341e749976b655d5462",
+    "scope": "Existing separate Miku MySekai commit; no taiko source changes; preserved in ancestry"
+  }
+}

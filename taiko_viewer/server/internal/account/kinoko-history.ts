@@ -1,15 +1,17 @@
 import { createHash } from "node:crypto";
 import { parseKinokoTimestamp, parseKinokoMetadataTime, filterKinokoEvents } from "./kinoko-time";
-import { access, mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
 import { createError } from "h3";
 import {
-  getRuntimePaths,
+  withUserdataWriteLock,
   rebuildUserdataAchievement,
   type UserdataPayload,
   type UserdataSong
 } from "./shared";
 import { getKinokoScoreFingerprint } from "./kinoko-import";
+import { getDomainScoreReader } from "../../services/taiko-domain/read.ts";
+import { stageScoreText } from "../../services/taiko-domain/publication.ts";
+import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
+import type { ScoreReadPort } from "../../domain/score-read-contract.ts";
 
 const MAX_HISTORY_FILES_PER_IMPORT = 10_000;
 const HISTORY_SOURCE = "wahlap";
@@ -81,14 +83,13 @@ const snapshotObservedAt = (payload: UserdataPayload, fileName: string) => {
   )?.epochMs ?? null;
 };
 
-const inspectLocalHistory = async (historyDir: string) => {
+const inspectLocalHistory = async (reader: ScoreReadPort, taikoId: string, names: Set<string>) => {
   const knownRecordFingerprints = new Set<string>();
   const fullSnapshotTimes: number[] = [];
-  const names = await readdir(historyDir).catch(() => [] as string[]);
   for (const name of names) {
     if (!name.startsWith("data_") || !name.endsWith(".json")) continue;
     try {
-      const payload = JSON.parse(await readFile(join(historyDir, name), "utf-8")) as UserdataPayload;
+      const payload = JSON.parse(await reader.readHistory(taikoId, name)) as UserdataPayload;
       const full = isFullSnapshot(payload);
       const importedVia = String(payload._meta?.imported_via || "") === IMPORTED_VIA;
       if (full) {
@@ -98,7 +99,8 @@ const inspectLocalHistory = async (historyDir: string) => {
       if (!full || importedVia) {
         for (const song of payload.songs || []) knownRecordFingerprints.add(getKinokoScoreFingerprint(song));
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof PublicationUnavailableError) throw error;
       // Existing malformed history is ignored here and remains available for the normal history loader to report.
     }
   }
@@ -111,7 +113,8 @@ const inspectLocalHistory = async (historyDir: string) => {
 const compactTimestamp = (timestamp: string) => timestamp.replace(/[-: ]/g, "").replace(/^(\d{8})(\d{6})$/, "$1_$2");
 
 const writeSnapshot = async (
-  historyDir: string,
+  taikoId: string,
+  names: Set<string>,
   payload: UserdataPayload,
   timestamp: string,
   sequence: number
@@ -120,16 +123,9 @@ const writeSnapshot = async (
   const hash = createHash("sha256").update(serialized).digest("hex").slice(0, 12);
   const micros = String(Math.min(sequence, 999_999)).padStart(6, "0");
   const fileName = `data_${compactTimestamp(timestamp)}_${micros}_kinoko-history_${hash}.json`;
-  const filePath = join(historyDir, fileName);
-  try {
-    await access(filePath);
-    return false;
-  } catch {
-    // Continue with an atomic create.
-  }
-  const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
-  await writeFile(tempPath, serialized, "utf-8");
-  await rename(tempPath, filePath);
+  if (names.has(fileName)) return false;
+  await stageScoreText(taikoId, `history/${fileName}`, serialized);
+  names.add(fileName);
   return true;
 };
 
@@ -162,70 +158,71 @@ export const writeKinokoHistorySnapshots = async (
     };
   }
 
-  const { userdataDir } = getRuntimePaths();
-  const historyDir = resolve(userdataDir, taikoId);
-  await mkdir(historyDir, { recursive: true });
-  const local = await inspectLocalHistory(historyDir);
-  const missing = normalized.filter((record) => !local.knownRecordFingerprints.has(record.fingerprint));
-  const needsBaseline =
-    local.earliestFullSnapshotAt === null || normalized[0].epochMs < local.earliestFullSnapshotAt;
-  const snapshotUpperBound = missing.length + (needsBaseline ? 1 : 0);
-  if (snapshotUpperBound > MAX_HISTORY_FILES_PER_IMPORT) {
-    throw createError({ statusCode: 400, statusMessage: "历史记录跨度过大，无法安全写入本地快照" });
-  }
-
-  let snapshotFiles = 0;
-  let baselineCreated = false;
-  if (needsBaseline) {
-    const baselineDate = new Date(normalized[0].epochMs - 1000 + 8 * 60 * 60 * 1000);
-    const pad = (value: number) => String(value).padStart(2, "0");
-    const baselineTimestamp = `${baselineDate.getUTCFullYear()}-${pad(baselineDate.getUTCMonth() + 1)}-${pad(baselineDate.getUTCDate())} ${pad(baselineDate.getUTCHours())}:${pad(baselineDate.getUTCMinutes())}:${pad(baselineDate.getUTCSeconds())}`;
-    const baseline: UserdataPayload = {
-      _meta: buildMeta(taikoId, baselineTimestamp, true),
-      profile: { ...(currentUserdata.profile || {}), userid: taikoId },
-      songs: [],
-      dojo: currentUserdata.dojo && typeof currentUserdata.dojo === "object" ? { ...currentUserdata.dojo } : {}
-    };
-    rebuildUserdataAchievement(baseline);
-    baselineCreated = await writeSnapshot(historyDir, baseline, baselineTimestamp, 0);
-    if (baselineCreated) snapshotFiles += 1;
-  }
-
-  let cursor = 0;
-  while (cursor < missing.length) {
-    const timestamp = missing[cursor].timestamp;
-    const sameTime: NormalizedHistoryRecord[] = [];
-    while (cursor < missing.length && missing[cursor].timestamp === timestamp) {
-      sameTime.push(missing[cursor]);
-      cursor += 1;
+  return withUserdataWriteLock(taikoId, async () => {
+    const reader = getDomainScoreReader();
+    const names = new Set(await reader.listHistory(taikoId));
+    const local = await inspectLocalHistory(reader, taikoId, names);
+    const missing = normalized.filter((record) => !local.knownRecordFingerprints.has(record.fingerprint));
+    const needsBaseline =
+      local.earliestFullSnapshotAt === null || normalized[0]!.epochMs < local.earliestFullSnapshotAt;
+    const snapshotUpperBound = missing.length + (needsBaseline ? 1 : 0);
+    if (snapshotUpperBound > MAX_HISTORY_FILES_PER_IMPORT) {
+      throw createError({ statusCode: 400, statusMessage: "历史记录跨度过大，无法安全写入本地快照" });
     }
 
-    const lanes: UserdataSong[][] = [];
-    for (const record of sameTime) {
-      const key = `${record.song.song_no}:${record.song.level}`;
-      let laneIndex = lanes.findIndex((lane) => !lane.some((song) => `${song.song_no}:${song.level}` === key));
-      if (laneIndex < 0) {
-        laneIndex = lanes.length;
-        lanes.push([]);
-      }
-      lanes[laneIndex].push(record.song);
-    }
-
-    for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
-      const payload: UserdataPayload = {
-        _meta: buildMeta(taikoId, timestamp, false),
-        songs: lanes[laneIndex]
+    let snapshotFiles = 0;
+    let baselineCreated = false;
+    if (needsBaseline) {
+      const baselineDate = new Date(normalized[0]!.epochMs - 1000 + 8 * 60 * 60 * 1000);
+      const pad = (value: number) => String(value).padStart(2, "0");
+      const baselineTimestamp = `${baselineDate.getUTCFullYear()}-${pad(baselineDate.getUTCMonth() + 1)}-${pad(baselineDate.getUTCDate())} ${pad(baselineDate.getUTCHours())}:${pad(baselineDate.getUTCMinutes())}:${pad(baselineDate.getUTCSeconds())}`;
+      const baseline: UserdataPayload = {
+        _meta: buildMeta(taikoId, baselineTimestamp, true),
+        profile: { ...(currentUserdata.profile || {}), userid: taikoId },
+        songs: [],
+        dojo: currentUserdata.dojo && typeof currentUserdata.dojo === "object" ? { ...currentUserdata.dojo } : {}
       };
-      if (await writeSnapshot(historyDir, payload, timestamp, laneIndex + 1)) snapshotFiles += 1;
+      rebuildUserdataAchievement(baseline);
+      baselineCreated = await writeSnapshot(taikoId, names, baseline, baselineTimestamp, 0);
+      if (baselineCreated) snapshotFiles += 1;
     }
-  }
 
-  return {
-    remoteRecords: remoteRecords.length,
-    uniqueRecords: normalized.length,
-    importedRecords: missing.length,
-    skippedRecords: normalized.length - missing.length,
-    snapshotFiles,
-    baselineCreated
-  };
+    let cursor = 0;
+    while (cursor < missing.length) {
+      const timestamp = missing[cursor]!.timestamp;
+      const sameTime: NormalizedHistoryRecord[] = [];
+      while (cursor < missing.length && missing[cursor]!.timestamp === timestamp) {
+        sameTime.push(missing[cursor]!);
+        cursor += 1;
+      }
+
+      const lanes: UserdataSong[][] = [];
+      for (const record of sameTime) {
+        const key = `${record.song.song_no}:${record.song.level}`;
+        let laneIndex = lanes.findIndex((lane) => !lane.some((song) => `${song.song_no}:${song.level}` === key));
+        if (laneIndex < 0) {
+          laneIndex = lanes.length;
+          lanes.push([]);
+        }
+        lanes[laneIndex]!.push(record.song);
+      }
+
+      for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
+        const payload: UserdataPayload = {
+          _meta: buildMeta(taikoId, timestamp, false),
+          songs: lanes[laneIndex]
+        };
+        if (await writeSnapshot(taikoId, names, payload, timestamp, laneIndex + 1)) snapshotFiles += 1;
+      }
+    }
+
+    return {
+      remoteRecords: remoteRecords.length,
+      uniqueRecords: normalized.length,
+      importedRecords: missing.length,
+      skippedRecords: normalized.length - missing.length,
+      snapshotFiles,
+      baselineCreated
+    };
+  });
 };

@@ -1,0 +1,35 @@
+{
+  "status": "PASS_CONTENT_IDENTITY_GUARD",
+  "results": {
+    "baseline0141": {
+      "version": "0.14.1",
+      "interpreter": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/bin/python",
+      "module": "/var/tmp/taiko-role-rebuild-tvcehdgr/venv/lib/python3.11/site-packages/taiko_bot/offline/fingerprint.py",
+      "artifactIdentity": "977bdc0b64c1187f4a6f3679656f02c74c97701468770bb259c5ef05580ac839",
+      "checkpointArtifact": "977bdc0b64c1187f4a6f3679656f02c74c97701468770bb259c5ef05580ac839",
+      "checkpointSha256": "0dbfd3b7a9b8a30ed9a149342071358beed990974bfa7900027ac571d2046e61",
+      "exactCheckpointMatch": true,
+      "revision": "f166d8b2d7e07d3974982d459ea4d5ca248a31b26af7f0550951bc749ca1c3ed",
+      "domain": "legacy-checkpoint",
+      "v2Expected": "a331a605b66937678aeb82bb01277f72b5074fc70954bb11eed2a3a9ed7f19b8"
+    },
+    "candidate0142": {
+      "version": "0.14.2",
+      "interpreter": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+      "module": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/lib/python3.11/site-packages/taiko_bot/offline/fingerprint.py",
+      "artifactIdentity": "c5f22ea6b41692431b88b7222595f3f3c195e54330f171688af55a38a6268595",
+      "checkpointArtifact": "977bdc0b64c1187f4a6f3679656f02c74c97701468770bb259c5ef05580ac839",
+      "checkpointSha256": "0dbfd3b7a9b8a30ed9a149342071358beed990974bfa7900027ac571d2046e61",
+      "exactCheckpointMatch": false,
+      "revision": "f4138169a87bee0d06789c9fb0d4d9939f849e9b8e9ddf7feeadf1d3d50b3464",
+      "domain": "v2-content-identity",
+      "v2Expected": "f4138169a87bee0d06789c9fb0d4d9939f849e9b8e9ddf7feeadf1d3d50b3464"
+    }
+  },
+  "productionAccess": false,
+  "checkpointModified": false,
+  "strictAnnualOracleDisposition": "BLOCKED_PENDING_EXPLICIT_IDENTITY_ORACLE_REVISION",
+  "reason": "Annual v4.5.4 and changed installed contents require new identity; old measurements/reports retain their persisted identities. No reset of compatibility checkpoint is legitimate. Existing exact equality test remains FAIL, not waived.",
+  "priorEvidence": "evidence/source-reappearance-20261016.json",
+  "cgroup": "0::/development.slice/development-qa.slice/taiko-qa-1792118887-2884043.service"
+}

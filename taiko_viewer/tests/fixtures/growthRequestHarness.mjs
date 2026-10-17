@@ -1,16 +1,23 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Offline service adapter: real disk evidence, Daily/History/Passport algorithms;
 // no DB, Python subprocess, network, real account, or final-DTO replacement.
 import * as fs from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import { execFileSync } from 'node:child_process';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const url = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
 export async function importGrowthRequest(fixture, { baseline = false, migrationBaseline = false, binding = null, failPython = false, onPython = null, onHistoryRead = null, onHistoryStat = null, onHistoryEnumerate = null } = {}) {
   const counters = { enumeration: 0, reads: 0, parseAttempts: 0, parses: 0, bytes: 0, normalization: 0, daily: 0, range: 0, scoreFacts: 0, currentReads: 0, archiveReads: 0, measurementWrites: 0,
     loaderMs: 0, readMs: 0, readBatchMs: 0, parseMs: 0, dailyMs: 0, rangeMs: 0, scoreFactsMs: 0 };
   const key = `growth_request_${crypto.randomUUID().replaceAll('-', '_')}`;
+  const modules = await fs.mkdtemp(qaTempPrefix('growth-request-modules-'));
+  let moduleIndex = 0;
+  const url = async source => {
+    const path = resolve(modules, `module-${moduleIndex++}.mjs`);
+    await fs.writeFile(path, source);
+    return pathToFileURL(path).href;
+  };
   const currentPath = resolve(fixture.userdataDir, `${fixture.id}data.json`);
   await fs.writeFile(currentPath, JSON.stringify({ songs: fixture.current }));
   const defaultBinding = { id: 1, taiko_id: fixture.id, source: 'wahlap' };
@@ -18,7 +25,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
   const state = {
     counters,
     shared: { getCurrentBindingRow: async () => binding ? binding() : defaultBinding,
-      getRuntimePaths: () => ({ userdataDir: fixture.userdataDir }), getUserdataPath: () => currentPath },
+      getRuntimePaths: () => ({ userdataDir: fixture.userdataDir, repoRoot: process.env.QA_RUN_TMPDIR }), getUserdataPath: () => currentPath },
     // Services pass this inert sentinel only to the explicitly replaced repositories.
     safeDb: { getAccountDb: () => null },
     content: { getSongCatalog: async () => fixture.current.map(row => ({ id: row.song_no, song_name: `synthetic-${row.song_no}`, level_4: 10, level_5: 10 })) },
@@ -53,13 +60,14 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
   };
   globalThis[key] = state;
   const stub = name => url(Object.keys(state[name]).filter(exportName => exportName !== 'default').map(exportName => `export const ${exportName}=globalThis[${JSON.stringify(key)}][${JSON.stringify(name)}][${JSON.stringify(exportName)}];`).join('\n'));
-  const overrides = new Map([
-    ['server/internal/account/shared.ts', 'shared'], ['server/utils/account-db.ts', 'safeDb'], ['server/services/content.ts', 'content'],
+  const overrideEntries = [
+    ['server/internal/account/shared.ts', 'shared'], ['server/infrastructure/runtime-paths.ts', 'shared'], ['server/utils/account-db.ts', 'safeDb'], ['server/services/content.ts', 'content'],
     ['server/services/account/personal.ts', 'personal'], ['server/services/goals/store.ts', 'goalStore'],
     ['server/services/goals/evaluation-store.ts', 'goalEvaluation'], ['server/services/growth-history/goals.ts', 'goalFacts'],
     ['server/services/growth-history/model-revision.ts', 'model'], ['server/services/growth-history/measurements.ts', 'measurements'],
     ['server/services/goals/provenance.ts', 'provenance']
-  ].map(([path, name]) => [resolve(root, path), stub(name)]));
+  ];
+  const overrides = new Map(await Promise.all(overrideEntries.map(async ([path, name]) => [resolve(root, path), await stub(name)])));
   const cache = new Map();
   const load = async path => {
     if (overrides.has(path)) return overrides.get(path);
@@ -104,8 +112,8 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
     for (const match of [...code.matchAll(/from (["'])([^"']+)\1/g)]) {
       const specifier = match[2];
       let dependency = specifier;
-      if (specifier === 'node:fs/promises') dependency = stub('fs');
-      else if (specifier === 'h3') dependency = url('export const createError=options=>Object.assign(new Error(options.statusMessage),options);');
+      if (specifier === 'node:fs/promises') dependency = await stub('fs');
+      else if (specifier === 'h3') dependency = await url('export const createError=options=>Object.assign(new Error(options.statusMessage),options);');
       else if (specifier.startsWith('.') || specifier.startsWith('~/')) {
         let target = specifier.startsWith('~/') ? resolve(root, specifier.slice(2)) : resolve(dirname(path), specifier);
         if (!/\.(ts|mjs|js)$/.test(target)) target += '.ts';
@@ -114,11 +122,12 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
       else if (!specifier.startsWith('node:')) throw new Error(`Unexpected offline dependency: ${specifier}`);
       code = code.replace(match[0], `from ${JSON.stringify(dependency)}`);
     }
-    const result = url(code); cache.set(path, result); return result;
+    const result = await url(code); cache.set(path, result); return result;
   };
   try {
     const service = await import(await load(resolve(root, 'server/services/growth-passport/service.ts')));
     const evidence = await import(await load(resolve(root, 'server/services/growth-history/evidence.ts')));
     return { service, evidence, counters, dispose: () => { delete globalThis[key]; } };
   } catch (error) { delete globalThis[key]; throw error; }
+  finally { await fs.rm(modules, { recursive: true, force: true }); }
 }

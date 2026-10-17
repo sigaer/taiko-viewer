@@ -1,0 +1,148 @@
+{
+  "catalogInput": [
+    {
+      "id": 1,
+      "song_name": "Synthetic CN",
+      "shelf_status": 0,
+      "region": "CN",
+      "chart_type": "single",
+      "level_1": 1,
+      "level_4": 9
+    },
+    {
+      "id": 2,
+      "song_name": "Synthetic JP",
+      "shelf_status": 1,
+      "region": "JP",
+      "chart_type": "double",
+      "level_5": "10"
+    },
+    {
+      "id": 3,
+      "song_name": "Unknown region/mode",
+      "shelf_status": 2,
+      "level_2": 3,
+      "level_3": 4
+    }
+  ],
+  "catalogExpected": {
+    "songs": [
+      {
+        "songId": "1",
+        "title": "Synthetic CN",
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "CN",
+          "status": "active"
+        }
+      },
+      {
+        "songId": "2",
+        "title": "Synthetic JP",
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "JP",
+          "status": "removed"
+        }
+      },
+      {
+        "songId": "3",
+        "title": "Unknown region/mode",
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "UNKNOWN",
+          "status": "unknown"
+        }
+      }
+    ],
+    "charts": [
+      {
+        "songId": "1",
+        "chartId": "1:1:single",
+        "difficulty": 1,
+        "level": 1,
+        "type": "single",
+        "variant": null,
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "CN",
+          "status": "active"
+        },
+        "tjaCourse": 0
+      },
+      {
+        "songId": "1",
+        "chartId": "1:4:single",
+        "difficulty": 4,
+        "level": 9,
+        "type": "single",
+        "variant": null,
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "CN",
+          "status": "active"
+        },
+        "tjaCourse": 3
+      },
+      {
+        "songId": "2",
+        "chartId": "2:5:double",
+        "difficulty": 5,
+        "level": 10,
+        "type": "double",
+        "variant": null,
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "JP",
+          "status": "removed"
+        },
+        "tjaCourse": 4
+      },
+      {
+        "songId": "3",
+        "chartId": "3:2:unknown",
+        "difficulty": 2,
+        "level": 3,
+        "type": "unknown",
+        "variant": null,
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "UNKNOWN",
+          "status": "unknown"
+        },
+        "tjaCourse": 1
+      },
+      {
+        "songId": "3",
+        "chartId": "3:3:unknown",
+        "difficulty": 3,
+        "level": 4,
+        "type": "unknown",
+        "variant": null,
+        "catalogRevision": "synthetic-catalog-v1",
+        "availability": {
+          "region": "UNKNOWN",
+          "status": "unknown"
+        },
+        "tjaCourse": 2
+      }
+    ]
+  },
+  "grant": {
+    "grantId": "synthetic-grant",
+    "ownerUserId": "synthetic-owner",
+    "bindingId": "synthetic-binding",
+    "playerId": "synthetic-player",
+    "clientId": "synthetic-client",
+    "audience": "viewer:developer-api:v1",
+    "scopes": [
+      "scores:read"
+    ],
+    "consentVersion": "viewer-resource-consent-v1",
+    "consentedAt": "2026-10-16T00:00:00Z",
+    "issuedAt": "2026-10-16T00:00:00Z",
+    "expiresAt": "2026-10-17T00:00:00Z",
+    "revokedAt": null,
+    "revision": "synthetic-revision"
+  }
+}

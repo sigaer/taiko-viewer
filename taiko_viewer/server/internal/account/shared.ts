@@ -1,8 +1,13 @@
-import { access, mkdir, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
+export { formatLocalTimestamp, writeUserdataWithHistory } from "../../infrastructure/taiko-publication/writer.ts";
+import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
+import { readViewerCurrentBinding, type BindingRow, type BindingReadDb } from "./binding-read.ts";
+export type { BindingRow } from "./binding-read.ts";
+export { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
+import { access, readFile } from "node:fs/promises";
 import { constants as fsConstants, readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { createHash, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from "node:crypto";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { promisify } from "node:util";
 import nodemailer from "nodemailer";
 import OSS from "ali-oss";
@@ -12,7 +17,8 @@ import { createError, getCookie, getHeader, readMultipartFormData } from "h3";
 import { getRatingEntries, getSongCatalog as loadSongCatalog } from "~/server/services/content";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
-import { createFileScoreReader } from "../../domain/file-score-reader.ts";
+import { getDomainScoreReader } from "../../services/taiko-domain/read.ts";
+import { withDomainScoreRead, withDomainScoreWrite } from "../../services/taiko-domain/publication.ts";
 import type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 export type { LegacyScoreRecord as UserdataSong, LegacyScorePayload as UserdataPayload } from "../../domain/score-read-contract.ts";
 
@@ -26,15 +32,7 @@ export const BIND_VERIFY_TTL_MS = 1000 * 60 * 30;
 export const SYNC_COOLDOWN_MS = 1000 * 60 * 30;
 export const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
 export const DEFAULT_AVATAR = "https://viewer.sakura-bot.cn/miku.png";
-export const DEVELOPER_REVIEWER_USERNAME = "sigaer";
-export const DEVELOPER_REVIEWER_EMAIL = "1106865024@qq.com";
-
-export const isSiteOperator = (user: Pick<AccountRow, "username" | "email"> | null | undefined) =>
-  Boolean(
-    user &&
-      String(user.username || "").trim() === DEVELOPER_REVIEWER_USERNAME &&
-      normalizeEmail(user.email) === DEVELOPER_REVIEWER_EMAIL
-  );
+export { DEVELOPER_REVIEWER_USERNAME, DEVELOPER_REVIEWER_EMAIL, isSiteOperator } from '../../infrastructure/account/operator.ts';
 
 export type AccountRow = {
   id: number;
@@ -52,21 +50,6 @@ export type SessionRow = {
   session_token: string;
   user_id: number;
   expires_at: Date | string;
-};
-
-export type BindingRow = {
-  id: number;
-  user_id: number;
-  taiko_id: string;
-  source: "wahlap" | "hiroba" | "manual";
-  manual_account_id: string | null;
-  display_name?: string | null;
-  is_current: number;
-  verified_title: string | null;
-  verified_titleplate_id: number | null;
-  mydon_showcase_layout: string;
-  created_at: string;
-  updated_at: string;
 };
 
 export type VerifyRow = {
@@ -190,14 +173,7 @@ export type EditableSongFields = {
   combo_cnt?: number;
 };
 
-export const getRuntimePaths = () => {
-  const runtimeConfig = useRuntimeConfig();
-  const repoRoot = String(runtimeConfig.repoRoot || process.env.TAIKO_REPO_ROOT || resolve(process.cwd(), ".."));
-  const userdataDir = String(runtimeConfig.userdataDir || process.env.TAIKO_USERDATA_DIR || resolve(repoRoot, "userdata"));
-  const configPath = String(runtimeConfig.taikoConfigPath || process.env.TAIKO_CONFIG_PATH || resolve(repoRoot, "config.json"));
-  const cacheDir = String(runtimeConfig.accountCacheDir || process.env.TAIKO_ACCOUNT_CACHE_DIR || resolve(process.cwd(), ".data", "account-cache"));
-  return { repoRoot, userdataDir, configPath, cacheDir };
-};
+
 
 const getIniValue = (content: string, key: string) => {
   const match = content.match(new RegExp(`^${key}\\s*=\\s*(.+)$`, "m"));
@@ -248,18 +224,11 @@ const getSmtpConfig = () => {
   };
 };
 
-const now = () => new Date();
-
 export const toIso = (value: Date | string | number | null | undefined) => {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString();
-};
-
-export const formatLocalTimestamp = (date = now()) => {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
 export const sha256 = (input: string | Buffer) => createHash("sha256").update(input).digest("hex");
@@ -490,6 +459,7 @@ export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
       Referer: "https://servicewechat.com/wxeafab0667490cd23/21/page-frame.html",
       Authorization: auth
     },
+    signal: AbortSignal.timeout(15000),
     body: JSON.stringify({ keyword: taikoId, page: 1, pageSize: 10 })
   });
 
@@ -511,8 +481,13 @@ export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
     });
   }
   const players = Array.isArray(data?.data?.players) ? data.data.players : [];
-  const exact = players.find((item: Record<string, unknown>) => String(item.userid || "").trim() === taikoId);
-  const player = exact || players[0];
+  const exact = players.find((item: unknown) => {
+    if (!item || typeof item !== "object") return false;
+    const id = (item as Record<string, unknown>).userid;
+    return typeof id === "string" ? id.trim() === taikoId
+      : typeof id === "number" && Number.isSafeInteger(id) && String(id) === taikoId;
+  });
+  const player = exact;
   if (!player) {
     throw createError({ statusCode: 404, statusMessage: "未找到该鼓众ID，请确认输入是否正确" });
   }
@@ -548,9 +523,9 @@ export const enrichBindingWithCurrentTitle = async (binding: BindingSummary) => 
   }
 };
 
-export const getPendingBinding = async (userId: number) => {
+export const getPendingBinding = async (userId: number, suppliedDb?: BindingReadDb) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
+  const db = suppliedDb || getAccountDb();
   const [rows] = await db.execute<DbRow<VerifyRow>[]>(
     "SELECT * FROM web_taiko_binding_verifications WHERE user_id = ? AND expires_at > NOW() LIMIT 1",
     [userId]
@@ -565,25 +540,12 @@ export const getPendingBinding = async (userId: number) => {
   } satisfies PendingBindingSummary;
 };
 
-export const setCurrentBindingById = async (userId: number, bindingId: number) => {
-  const db = getAccountDb();
-  await db.execute("UPDATE web_taiko_bindings SET is_current = 0 WHERE user_id = ?", [userId]);
-  await db.execute("UPDATE web_taiko_bindings SET is_current = 1 WHERE id = ? AND user_id = ?", [bindingId, userId]);
-};
+export const setCurrentBindingById = async (userId: number, bindingId: number) =>
+  (await import("../../services/account/binding-lifecycle.ts")).switchViewerBinding(userId, bindingId);
 
 export const getCurrentBindingRow = async (userId: number) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
-  const [rows] = await db.execute<DbRow<BindingRow>[]>(
-    `SELECT b.*, m.nickname AS display_name
-       FROM web_taiko_bindings b
-       LEFT JOIN taiko_manual_accounts m
-         ON CAST(m.taiko_id AS BINARY) = CAST(b.manual_account_id AS BINARY)
-      WHERE b.user_id = ?
-      ORDER BY b.is_current DESC, b.id ASC LIMIT 1`,
-    [userId]
-  );
-  return rows[0] || null;
+  return readViewerCurrentBinding(getAccountDb(), userId);
 };
 
 export const getSongCatalog = async () => {
@@ -614,48 +576,26 @@ export const getUserdataPath = (taikoId: string) => {
   return resolve(userdataDir, `${taikoId}data.json`);
 };
 
-const domainScoreReader = () => createFileScoreReader(getRuntimePaths().userdataDir, () => new Date().toISOString());
+const domainScoreReader = getDomainScoreReader;
 export const userdataFileExists = (taikoId: string) => domainScoreReader().currentExists(taikoId);
 
-const getUserdataHistoryDir = (taikoId: string) => {
-  const { userdataDir } = getRuntimePaths();
-  return resolve(userdataDir, taikoId);
-};
-
-export const readUserdata = async (taikoId: string) => {
+export const readUserdata = async (taikoId: string) => withDomainScoreRead(taikoId, async () => {
   if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
   const { current: payload } = await domainScoreReader().readCurrent(taikoId);
   if (!Array.isArray(payload.songs)) payload.songs = [];
   return payload;
-};
+});
 
-export const readRawUserdataText = async (taikoId: string) => {
+export const readRawUserdataText = async (taikoId: string) => withDomainScoreRead(taikoId, async () => {
   if (!await userdataFileExists(taikoId)) {
     throw createError({ statusCode: 404, statusMessage: "未找到当前绑定 ID 的本地成绩数据" });
   }
   return domainScoreReader().readRawCurrent(taikoId);
-};
+});
 
-const userdataWriteQueues = new Map<string, Promise<unknown>>();
-
-export const withUserdataWriteLock = async <T>(taikoId: string, task: () => Promise<T>): Promise<T> => {
-  const previous = userdataWriteQueues.get(taikoId) || Promise.resolve();
-  let release!: () => void;
-  const current = new Promise<void>((resolveLock) => {
-    release = resolveLock;
-  });
-  const chained = previous.catch(() => undefined).then(() => current);
-  userdataWriteQueues.set(taikoId, chained);
-  await previous.catch(() => undefined);
-  try {
-    return await task();
-  } finally {
-    release();
-    if (userdataWriteQueues.get(taikoId) === chained) userdataWriteQueues.delete(taikoId);
-  }
-};
+export const withUserdataWriteLock = <T>(identity: string, task: () => Promise<T>) => withDomainScoreWrite(identity, task);
 
 export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
   const rankCounts = Array.from({ length: 7 }, () => 0);
@@ -676,29 +616,6 @@ export const rebuildUserdataAchievement = (payload: UserdataPayload) => {
     ary_score_rank_count: rankCounts
   };
   return payload;
-};
-
-export const writeUserdataWithHistory = async (taikoId: string, payload: UserdataPayload, source: string, historySongs?: UserdataSong[]) => {
-  const filePath = getUserdataPath(taikoId);
-  const historyDir = getUserdataHistoryDir(taikoId);
-  await mkdir(historyDir, { recursive: true });
-  const serialized = JSON.stringify(payload, null, 4);
-  const tempPath = `${filePath}.tmp-${Date.now()}`;
-  await writeFile(tempPath, serialized, "utf-8");
-  await rename(tempPath, filePath);
-  const timestamp = formatLocalTimestamp().replace(/[: ]/g, "_");
-  const payloadMeta = payload._meta && typeof payload._meta === "object" ? payload._meta : {};
-  const historyPayload = {
-    ...(historySongs ? { songs: historySongs } : payload),
-    _meta: {
-      ...(historySongs ? {} : payloadMeta),
-      full: !historySongs,
-      ts: formatLocalTimestamp(),
-      source,
-      writer_source: source
-    }
-  };
-  await writeFile(join(historyDir, `data_${timestamp}_${source}.json`), JSON.stringify(historyPayload, null, 4), "utf-8");
 };
 
 export const getLockMap = async (userId: number, taikoId: string) => {

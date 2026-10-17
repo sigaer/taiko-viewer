@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "phase": "6.3e.8.6g",
+  "status": "CLIENT_QQ_CENTER_AUTHORITY_PASS",
+  "nativeAuthorityRound": "IN_PROGRESS",
+  "gate6": "IN_PROGRESS",
+  "goal": "active",
+  "releaseReady": false,
+  "sourceParent": "f04b320012393a03dcd94bdc151b0b7f847a26af",
+  "sourceCommit": "926ad234d835a3f91a3428fe249fc073c779199c",
+  "sourceVersion": "9.81.24",
+  "sourceRemote": "926ad234d835a3f91a3428fe249fc073c779199c",
+  "sourcePushVerified": true,
+  "sourcePushSession": 18496,
+  "sourcePushExit": 0,
+  "clientParent": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+  "clientCommit": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+  "clientVersion": "0.2.7",
+  "clientRemote": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+  "clientPushVerified": true,
+  "clientPushSession": 54875,
+  "clientPushExit": 0,
+  "viewerPreparedParent": "afb3b0d252403cb3c89f8fc6c4799257af8fd76d",
+  "viewerVersion": "0.82.0",
+  "viewerPushedOrDeployed": false,
+  "corePins": "Source 0.1.1 / client 0.1.2 complete Git pin unchanged",
+  "tests": {
+    "sourceOffline": {
+      "passed": 241,
+      "existingPassed": 231,
+      "newPrivateFrame": 10,
+      "productionOrRealDeselected": 9,
+      "warnings": 1
+    },
+    "clientOffline": {
+      "passed": 223,
+      "existingPassed": 195,
+      "newQqSdkAndAdapter": 28,
+      "warnings": 2,
+      "validator": "scripts/validate_domain_migration.py with private storage/.env/real network blocked"
+    },
+    "typescript": {
+      "project": "tests/fixtures/publicationLifecycle.tsconfig.json",
+      "exitCode": 0
+    },
+    "finalNode": {
+      "passed": 33,
+      "actualSqlHttp": 23,
+      "pureWorkerTransport": 10,
+      "wrapperSession": 25873,
+      "wrapperExit": 0
+    },
+    "initialUnchangedPass": {
+      "nodePassed": 161,
+      "actualSql": 160,
+      "pureProvisioningPolicy": 1,
+      "newQqFailedBeforeBusiness": 21,
+      "log": "/var/tmp/phase6-client-qq-initial-private-task-failure.log"
+    },
+    "actualSqlAcrossRuns": 183,
+    "pureAcrossRuns": 11,
+    "totalsCaveat": "Initial unchanged 160 actual SQL + 1 policy, final new 23 actual SQL + 10 pure transport; separate runs, not a single full-green 184 suite.",
+    "virtualReplaySupplement": {
+      "passed": 1,
+      "newUniqueTest": false,
+      "purpose": "Extend the existing exact retry composite: later u0 remains selected, then current member deletion is not resurrected; final test file hash includes this addition",
+      "wrapperSession": 91153,
+      "wrapperExit": 0
+    },
+    "coverage": [
+      "actual Python SDK/command AST to owned H3/private CLI/actual MySQL",
+      "one shared native SQL merge with auth callbacks; code/owned credentials/bind same COMMIT",
+      "explicit bind_migrate and live actor/token/session/QQ exact tuple/service 10-field policy",
+      "canonical principal subject and all source/bare/target members covered",
+      "owner cookie/self/bare and official explicit service restriction",
+      "late actor/grant/QQ revocation and rollback close, COMMIT before/after response loss",
+      "real private task process exits before/after COMMIT; independent SIGALRM kills held SQL transaction",
+      "same consumed code current DTO after deletion/u0; no auto-update replays",
+      "unsorted valid Source policy normalized and runtime host/pool replacement retains captured composition",
+      "private,no-store/Vary headers; stdout/stderr/input quotas, close cleanup, split Unicode and protocol identity checks"
+    ],
+    "fullNoneBotRun": false,
+    "fullNuxtRun": false,
+    "realOfficialUpstreamRun": false,
+    "onlineAuthenticatedRun": false,
+    "millionRecordCostRun": false
+  },
+  "resource": {
+    "results": [
+      {
+        "name": "source-offline",
+        "exitCode": 0,
+        "seconds": 14.391
+      },
+      {
+        "name": "client",
+        "exitCode": 0,
+        "seconds": 9.739
+      },
+      {
+        "name": "typescript",
+        "exitCode": 0,
+        "seconds": 3.901
+      },
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 33.813
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 61.846,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791772648-2099982.service",
+    "sampledPeakBytes": 445947904,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 362448
+  },
+  "virtualSupplementResource": {
+    "results": [
+      {
+        "name": "sql-http",
+        "exitCode": 0,
+        "seconds": 3.522
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 3.522,
+    "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791773091-2105724.service",
+    "sampledPeakBytes": 276811776,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+    "selfMaxRssKiB": 15852,
+    "largestChildMaxRssKiB": 286960
+  },
+  "resourceCaveat": "250ms sample is not absolute peak; child OS maxRSS separate; no million-record or production cost claim.",
+  "unitOutcome": {
+    "unit": "taiko-qa-1791772648-2099982.service",
+    "result": "success",
+    "execMainStatus": 0,
+    "activeState": "inactive",
+    "loadState": "not-found after collection",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T10:37:28+08:00",
+    "ended": "2026-10-12T10:38:30+08:00"
+  },
+  "supplementUnitOutcome": {
+    "unit": "taiko-qa-1791773091-2105724.service",
+    "result": "success",
+    "execMainStatus": 0,
+    "activeState": "inactive",
+    "loadState": "not-found after collection",
+    "mainPid": 0,
+    "controlGroup": "",
+    "cgroupRemoved": true,
+    "started": "2026-10-12T10:44:52+08:00",
+    "ended": "2026-10-12T10:44:55+08:00"
+  },
+  "failureHistory": [
+    {
+      "sourcePassed": 241,
+      "clientPassed": 223,
+      "tsPass": true,
+      "nodePassed": 161,
+      "nodeFailed": 21,
+      "cause": "Owned Python fixture replaced -m with direct script execution without Source root sys.path; failed before shared SQL transaction",
+      "log": "/var/tmp/phase6-client-qq-initial-private-task-failure.log"
+    },
+    {
+      "nodePassed": 21,
+      "nodeFailed": 1,
+      "cause": "SDK fixture omitted the actual owned loopback base URL; SDK guard rejected before request. Expose fixture URL. Also covered unsorted Source policy normalization.",
+      "log": "/var/tmp/phase6-client-qq-sdk-adapter-failure.log"
+    },
+    {
+      "sourcePassed": 241,
+      "clientPassed": 223,
+      "tsPass": true,
+      "actualSqlPassed": 23,
+      "pureWorkerFileFailed": 1,
+      "cause": "Pure worker test imported Nuxt extensionless modules before installing existing test resolver; install resolver before dynamic import, production code unchanged",
+      "log": "/var/tmp/phase6-client-qq-worker-test-registration-failure.log"
+    }
+  ],
+  "decisions": [
+    "Reuse native QQ migration implementation with optional auth callback, no duplicate Node SQL merge or local authority fallback.",
+    "Capture pool/paths/private env once; fixed sorted principal gates then actor SQL proof then bounded bind/state; no Source/files/network lock after SQL.",
+    "Every center task requires live actor and exact owner QQ tuple or explicit bind_migrate service principal plus all source/bare/target Sources, rechecked before COMMIT/response.",
+    "Private 64KiB input/256KiB output/8KiB stderr; independent 45s kernel alarm, 50s parent + 1.5s kill grace and close before admission release.",
+    "Issue is one request/hash-only code, no secret response replay; consume at most two same code/target network/503 attempts; self migration one request.",
+    "Strict returned operation/principal/QQ/bindings/current/Source/manual/Unicode; fixed public errors and private no-store metadata.",
+    "Client old SQLite/JSON QQ reader and repeated upsert removed; original local table definitions left for historical cleanup.",
+    "Preserve source-first order/SQL real current, target visibility including zero, native/client distinct u0 rules; manual origin dedicated lifecycle."
+  ],
+  "fileHashes": {
+    "source": {
+      "taiko/plugins/utils/bot_qq_migration.py": "42ee895ebae66768fdf26973d6c24eb6eeb1153ca659aacb2c9459a153a2fff2",
+      "taiko/plugins/utils/viewer_qq_migration.py": "8b40e91ac3605e90e4561928ec167c1e77854210be1a627718e97f6cc70e38ef",
+      "taiko/scripts/qq_migration_cli.py": "0039706e826b969ac67a78a06f978d7909aa321dab295326c1f2cedf013beb20",
+      "taiko/tests/qq_migration_private_fixture.py": "64733901b090e63701bc36eaa2d33765279f41931149274e6b47a3ce6555263d",
+      "taiko/tests/test_viewer_qq_migration.py": "c1d2411679b055fa91bf4cffca67d23419b2b12b9799c97075728969b72d74ea",
+      "taiko/docs/domain-extraction-phase6-publication.md": "72e1fda0360bc5cf2a1561a00463d70329f48de441b049d6144de67b43036a45"
+    },
+    "client": {
+      ".env.example": "bcabd6f63c8ee89f3998f4f18da2a6035af3220aed5ab711e0b4d05261bcbe61",
+      "README.md": "95f4685c2b1b4219911304a44c229d36d8feba78ee4cbba43b164f9e790dc281",
+      "plugins/taiko.py": "a2a519c473f8fcc17272cdd42d36d48eb2404cbca03edd2be23a3f55f8349aa1",
+      "pyproject.toml": "365a5050862253d203a3c037b01760849b980c331609676efc4fe609851d592f",
+      "taiko_bot/binding_mutation_client.py": "4e4a65407e4734987f1e17d38b14295c3312b148f27e35b68bdb41b9215feb12",
+      "taiko_bot/qq_migration_client.py": "8d53bc62a7df532ca38554a00da29c2807d5796cfb6c5686e8693585613b9ee0",
+      "taiko_runtime/platform_adapter.py": "5fc0b2080165249ddb0a3d453a89be958bd13c0bced5a3901a2f692ed64563b7",
+      "tests/binding_mutation_http_child.py": "25a793c818d4efa42bb7f871c5ba6d9072a66183ecedf78236e60bb05723b1e6",
+      "tests/test_taiko_parity.py": "9038a7dad70abbdd12d4c3147a96ccc7655e1dc2d847afa08f44a2be6a98be98",
+      "tests/test_qq_migration_client.py": "5bc4ea6db4ca9593a8f66859d0c6f4b4f735f77c36ab7e34c51921aa9932879b",
+      "docs/taiko-domain-extraction/phase6-private-qq-migration-sdk.md": "9e413fc6eea68e85f8d6c1e59263afc1ad40e60be13ad29cf0510d22256b0ce4"
+    },
+    "viewer": {
+      "taiko_viewer/server/infrastructure/account/source-service-schema.ts": "95fac7c315bd057601160b111e8fd9b668f2df5203aa96861c218c904069f4cc",
+      "taiko_viewer/server/services/account/principal-access.ts": "c23056d00d20fccb373c9bd44b1d1a5637cbde1bce08eb464c8c65e3033756d8",
+      "taiko_viewer/server/infrastructure/account/qq-migration-worker.ts": "2b0cdff9a9b0a69858168c6e54888774c9d54c4c9c0b13a9292a215872b7fa04",
+      "taiko_viewer/server/infrastructure/account/qq-migration-worker-runner.ts": "575604cae7e20f99bc135f4cdf1eeae486d3494f2a2e3fb7e41a82d8fcf3f167",
+      "taiko_viewer/server/services/account/qq-migration.ts": "4073214fbd8fcc085fa88cc7fcc4dec48761107dfebbe9afc52e7550b0c79d7e",
+      "taiko_viewer/server/api/taiko/proxy/bind/qq-code.post.ts": "24758492ecf670b323333ffe4f6457b523d156cc28cddd8d437891bdb8375c6c",
+      "taiko_viewer/server/api/taiko/proxy/bind/qq-migrate.post.ts": "94b2f049cc5e4cd1c5eb8bcdeea215a8405ae532d10861798822290faca0debb",
+      "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "9d2660679463f98a481913fc040ed82c2dd3d5c9477fb766808ff339970f51d4",
+      "taiko_viewer/tests/fixtures/accountSourceHttp.mjs": "0351568332f4cc7382eda7c3e09740f7f36ac18cf1084f40ba9653229f06118e",
+      "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "afc416d8d784e8fd591040b3d4bcd58d7eceb8158c15fd579bbb0f24e9fcb029",
+      "taiko_viewer/tests/qqMigrationWorker.test.mjs": "06964cc7635ec7d8ca1d18c1c1a55857efc219c062b617ad47ee8bcbcbff8aa4",
+      "taiko_viewer/tests/qqMigrationProxySql.test.mjs": "93dfe430e1ea90a76f4ad058918045a3512201a1cb673ea52daf318291d88b46"
+    },
+    "artifacts": {
+      "/var/tmp/phase6-client-qq-final-qa.py": "c5a4b0b8f7da776964ada0f9ad2b7e7dba327ae37ca8d3c831412a09f79c0848",
+      "/var/tmp/phase6-client-qq-final-qa.log": "3b1be105afae8b41a9d7e977debcc48567eaca31bd949cfa4f7c774f4538b976",
+      "/var/tmp/phase6-client-qq-final-resource.json": "d7e42d8e1f0b603a27a879e27670703e3033511d418764aeb892e466215bcee4",
+      "/var/tmp/phase6-client-qq-qa.py": "cfa7555187bd1cdd942a8162d83bc2d07459079bf81ac222a3ebfba6b26a16bc",
+      "/var/tmp/phase6-client-qq-initial-private-task-failure.log": "1ab39ef39914a3ad30680d44c89b484ed31abdb1b96f3667a3b92e2ba7cc6fd3",
+      "/var/tmp/phase6-client-qq-initial-private-task-failure-resource.json": "689e058c3c8ea6ce72d0187677153df5f6d31e092b6b5a34339547a267f7e69b",
+      "/var/tmp/phase6-client-qq-missing-module-path-diagnostic.log": "8f7b24bfe70a2e8deda54f312150ed572df060475f795bb6d942cb1ed3b891d0",
+      "/var/tmp/phase6-client-qq-missing-module-path-diagnostic-resource.json": "36d6ac8d43517a3bce45a1fdcf66658edf64d58d4628be7d0aca44feef6d8fd6",
+      "/var/tmp/phase6-client-qq-sdk-adapter-failure.log": "707772fc113722048bb46512b82932e87385c84da1a3a5c21bca2ec03b03508f",
+      "/var/tmp/phase6-client-qq-sdk-adapter-failure-resource.json": "e9ee59b389388049f53220fec43b4055a48a1b9ae0d4c6adddc2b049528c7e74",
+      "/var/tmp/phase6-client-qq-worker-test-registration-failure.log": "13d5b83221bb17ac5ef245af0df7d4e1b61972fb0bcbefaa226ebd649b0f9a40",
+      "/var/tmp/phase6-client-qq-worker-test-registration-failure-resource.json": "1cf4fa6154c4f51276c482b412d7234a8300463e48f974887bb8e3419c7c2a56",
+      "/var/tmp/phase6-client-qq-http-23-pass.log": "3f2a133b2b9fc056bfed027f288f8641602ff75dab709dfd2cfad8f38b9e4eaa",
+      "/var/tmp/phase6-client-qq-http-23-pass-resource.json": "0b90065f9b626f4f3d8d2489521d1dcd6e1ccfc23e504f20f4553f35b0905622",
+      "/var/tmp/phase6-client-qq-virtual-replay-qa.py": "d23309397898ef96ae9074b748dcaee5f370c6e24f24c2823db17ed20f8798f9",
+      "/var/tmp/phase6-client-qq-virtual-replay-qa.log": "d2bf177c7739d4fd7147343c56ed466ff83386bb029f335ee99a1aa1561c72ad",
+      "/var/tmp/phase6-client-qq-virtual-replay-resource.json": "76bb87258c38887940e9ea79768765ef2dce00a7e4b87040889144fec04db9a2"
+    }
+  },
+  "runtime": {
+    "sourceCopiedToR": false,
+    "servicesRestarted": false,
+    "deploymentRun": false,
+    "clientBusinessProcessStarted": false,
+    "productionSqlMutated": false,
+    "productionDataCopied": false,
+    "liveViewerVersion": "0.81.11",
+    "preparedViewerVersion": "0.82.0",
+    "services": {
+      "taiko-viewer.service": {
+        "active": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "active": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "active": "active",
+        "pid": 829173
+      }
+    }
+  },
+  "rollback": {
+    "source": "f04b320012393a03dcd94bdc151b0b7f847a26af",
+    "client": "6ade2e18d92e09534383301f82c888dbf70cc71d",
+    "viewerPreparation": "afb3b0d252403cb3c89f8fc6c4799257af8fd76d",
+    "activation": "Prepared source only; after activation keep unsafe QQ self-assertion disabled and fix forward."
+  },
+  "remaining": [
+    "remaining native private readers/ordinary updates and startup SQL writer",
+    "all u0/daily/maintenance writers and P1a adoption only after legacy writer quiescence",
+    "complete private Read Model/exact dependencies/invalidation and actual million cold/warm IO RSS",
+    "trusted recovery/cleanup/runbook/fixed R dependencies",
+    "standard Viewer deployment plus coordinated R sync/restarts, production explicit grants and real authenticated online Gate"
+  ]
+}

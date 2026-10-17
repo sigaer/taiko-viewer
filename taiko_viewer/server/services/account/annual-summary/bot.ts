@@ -1,3 +1,4 @@
+import { getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { createHash } from 'node:crypto';
 import { access, readFile, readdir, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -44,11 +45,11 @@ const pruneBotRevisions = async (dir: string, currentImage: string) => {
 
 const buildMyDon = async (taikoId: string, path: string) => {
   if (await exists(path)) return;
-  const { repoRoot, configPath } = getRuntimePaths();
+  const { repoRoot, configPath, userdataDir } = getRuntimePaths();
   await annualAdmission.run('generator', `bot-mydon:${path}`, 60_000, async id => {
     const child = await spawnAnnualWorker('generator', id, {
-      cwd: repoRoot, args: ['-m', 'plugins.utils.my_don_cli', 'render', '--taiko-id', taikoId],
-      env: { ...process.env, TAIKO_CONFIG_PATH: configPath }
+      cwd: repoRoot, args: ['-I', '-m', 'taiko_bot.offline.my_don_cli', 'render', '--taiko-id', taikoId],
+      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_CONFIG_PATH: configPath, TAIKO_USERDATA_DIR: userdataDir }
     }, 60_000);
     const image = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = []; let size = 0; let oversized = false;

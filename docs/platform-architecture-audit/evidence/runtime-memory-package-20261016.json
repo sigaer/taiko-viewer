@@ -1,0 +1,55 @@
+{
+  "status": "PASS_LOCAL_INTEGRATION_PACKAGING",
+  "owner": "Sakura_bot shared infrastructure",
+  "upstreamReleaseClaim": false,
+  "sourceCommit": "63be19a5c35ba98831b3eeec1746f36fed049a7e",
+  "sourceFiles": {
+    "runtime_memory/__init__.py": {
+      "blob": "5b8c5683585a57872747524f3110e52bb4b5fa54",
+      "sha256": "969299b2188e6b848bf4b43c5d604d5543c5b15e5f89c9abf8c073b14d890bfa"
+    },
+    "runtime_memory/cache.py": {
+      "blob": "4cb8a2a7fb33274a82eadf744b7c86e5db521519",
+      "sha256": "bc9c0b572cdaeaab35307b3ef512068f11d94a7dbf132f52962558b6d8b755d0"
+    },
+    "runtime_memory/metrics.py": {
+      "blob": "41bd38b4c8c06982259dae8971656de35337e0e5",
+      "sha256": "8520ee722703918be0ddcfc3a48a69fe77d60eb068392d6836ff68bcb4a0aef1"
+    },
+    "runtime_memory/store.py": {
+      "blob": "f06c623940ec0be2111a7314e865e93821b71d25",
+      "sha256": "3597c57e34272a744ce0f2576b9a8d32e5443246576ad7b42236bb083d57300e"
+    },
+    "runtime_memory/_build_sqlite.py": {
+      "blob": "6853891d5b9f14a19287c097c258fc670d67b45a",
+      "sha256": "9f01ce30df7b80b3eee84ef40f6a0da1eeba3b6eeeba1c616c9f1bd74141820e"
+    }
+  },
+  "sourceByteParity": true,
+  "versionMeaning": "1.1.0 is the pre-existing shared artifact version; distribution metadata was added only for this local integration build.",
+  "packagingMetadata": "[build-system]\nrequires = [\"setuptools==84.0.0\"]\nbuild-backend = \"setuptools.build_meta\"\n[project]\nname = \"python-memory-runtime\"\nversion = \"1.1.0\"\ndescription = \"Local integration packaging of Sakura shared resident-memory tools\"\nrequires-python = \">=3.11\"\n[tool.setuptools]\npackages = [\"runtime_memory\"]\n",
+  "packagingMetadataSha256": "b6b0b1ba98e06a0635799bba38fbd777ea11866886fbe7fa13ef3f5300e1f307",
+  "buildTool": {
+    "file": "setuptools-84.0.0-py3-none-any.whl",
+    "sha256": "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670"
+  },
+  "wheel": {
+    "file": "/var/tmp/taiko-shared-memory-wheel-gof4hudf/wheels/python_memory_runtime-1.1.0-py3-none-any.whl",
+    "sha256": "1e6197b0c4298808e70038cc5de3fff8c2f6517888514c996648a140091f9724"
+  },
+  "logs": {
+    "venv": {
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "builder-install": {
+      "exitCode": 0,
+      "sha256": "6e8f9023520a7023293265bf667569b680dd6b34bc09c1610f06e996d72f60d6"
+    },
+    "wheel": {
+      "exitCode": 0,
+      "sha256": "58f9c2f58d0bd17f6a480209f8f3b263f111082249e9f6cac5e5c17a8dd0d200"
+    }
+  },
+  "workspace": "/var/tmp/taiko-shared-memory-wheel-gof4hudf"
+}

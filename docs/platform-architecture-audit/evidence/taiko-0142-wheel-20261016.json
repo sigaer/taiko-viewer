@@ -1,0 +1,18 @@
+{
+  "wheel": "/var/tmp/taiko-0142-candidate-20261016/repack/wheels/taiko_bot-0.14.2-py3-none-any.whl",
+  "sha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8",
+  "bytes": 1020012,
+  "sourceCommit": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+  "version": "0.14.2",
+  "fileCount": 393,
+  "nonCodePackageData": [
+    "taiko_bot/offline/growth-compatibility.dat",
+    "taiko_bot/offline/annual_summary/data/finaltitle_reference_v1.json",
+    "taiko_bot/offline/schemas/annual-summary-v4.schema.json"
+  ],
+  "credentialControlIncluded": true,
+  "annualAlgorithmVersion": "annual-observation-v4.5.4",
+  "runtimeDataIncluded": false,
+  "editable": false,
+  "cgroup": "0::/development.slice/development-build.slice/taiko-build-1792116214-2809248.service"
+}

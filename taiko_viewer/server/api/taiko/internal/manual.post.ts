@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     identityKey: String(body?.identityKey || "").trim()
   };
   const action = String(body?.action || "").trim();
-  if (action === "create") return createManualAccount(owner, body?.nickname);
+  if (action === "create") return createManualAccount(owner, body?.nickname, body?.requestId);
   if (action === "claim") return claimManualAccount(owner, body?.code);
   if (action === "rename") {
     const taikoId = await resolveManualTaikoIdForOwner(owner, body?.taikoId);

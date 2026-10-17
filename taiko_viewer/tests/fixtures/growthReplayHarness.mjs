@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './qaPaths.mjs';
 // Test-only dependency injection. Executes the unmodified production Growth service,
 // including its disk loader and replay; never mocks the final overview or daily DTO.
 import {readFile,mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
@@ -7,7 +8,7 @@ import {catalog} from './dailyProgressReplay.mjs';
 const root = new URL('../../',import.meta.url);
 const dataModule = code => `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 export async function replayOverview(fixture,style='ready',measurementStyle='success') {
- const dir=await mkdtemp('/var/tmp/growth-replay-');
+ const dir=await mkdtemp(qaTempPrefix('growth-replay-'));
  try {
   await mkdir(resolve(dir,'fixture'));
   let current=new Map();
@@ -27,6 +28,7 @@ export async function replayOverview(fixture,style='ready',measurementStyle='suc
   const fsModule=dataModule(`import * as fs from 'node:fs/promises';export const {access,constants,readFile}=fs;export const readdir=async(...args)=>{globalThis[${JSON.stringify(hook)}].counters.historyLoads++;return fs.readdir(...args)};`);
   const dailyModule=dataModule(`import {deriveDailyProgress as derive} from ${JSON.stringify(new URL('utils/dailyProgress.ts',root).href)};export const deriveDailyProgress=(...args)=>{globalThis[${JSON.stringify(hook)}].counters.replays++;return derive(...args)};`);
   const shared=dataModule(`import {readFile} from 'node:fs/promises';export const getCurrentBindingRow=async()=>({id:1,taiko_id:'fixture',source:'wahlap'});export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(dir)}});export const getUserdataPath=()=>${JSON.stringify(resolve(dir,'fixturedata.json'))};export const readUserdata=async()=>{globalThis[${JSON.stringify(hook)}].counters.current++;return JSON.parse(await readFile(getUserdataPath(),'utf8'))};`);
+  const publication=dataModule(`export const withDomainScoreRead=async(identity,task)=>task();`);
   const scoreRead=dataModule(`import {createFileScoreReader} from ${JSON.stringify(new URL('server/domain/file-score-reader.ts',root).href)};export const getDomainScoreReader=()=>createFileScoreReader(${JSON.stringify(dir)},()=>new Date().toISOString());`);
   const goalSnapshot=dataModule(`import {readUserdata} from ${JSON.stringify(shared)};export const readGoalSnapshot=async()=>({current:await readUserdata(),revision:'fixture',capturedAt:new Date().toISOString()});`);
   const goalStore=dataModule(`export const readActiveGoal=async()=>null;`);
@@ -41,7 +43,7 @@ export async function replayOverview(fixture,style='ready',measurementStyle='suc
   const personal=dataModule(`export const runGrowthPythonJson=async()=>{globalThis[${JSON.stringify(hook)}].counters.compute++;return ${JSON.stringify(computed)}}`);
   let code=ts.transpileModule(await readFile(new URL('server/services/account/growth.ts',root),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
   code=code.replace(/from (["'])([^"']+)\1/g,(_,quote,specifier)=>{
-   const url=specifier==='../taiko-domain/read.ts'?scoreRead:specifier==='../goals/snapshot'?goalSnapshot:specifier==='../goals/store'?goalStore:specifier==='../goals/evaluation-store'?goalEvaluationStore:specifier==='../growth-history/evidence'?evidence:specifier==='../growth-history/model-revision'?modelRevision:specifier==='../growth-history/measurements'?measurements:specifier==='../growth-history/daily-archive'?new URL('server/services/growth-history/daily-archive.ts',root).href:specifier==='~/server/utils/account-db'?goalDb:specifier==='node:fs/promises'?fsModule:specifier==='~/utils/dailyProgress'?dailyModule:specifier.startsWith('node:')?specifier:specifier==='~/server/internal/account/shared'?shared:specifier==='~/server/services/content'?content:specifier==='./personal'?personal:specifier==='@sakura-taiko/contract'?import.meta.resolve(specifier):specifier==='h3'?import.meta.resolve('h3'):new URL(specifier.replace('~/','')+'.ts',root).href;
+   const url=specifier==='../taiko-domain/publication.ts'?publication:specifier==='../taiko-domain/read.ts'?scoreRead:specifier==='../goals/snapshot'?goalSnapshot:specifier==='../goals/store'?goalStore:specifier==='../goals/evaluation-store'?goalEvaluationStore:specifier==='../growth-history/evidence'?evidence:specifier==='../growth-history/model-revision'?modelRevision:specifier==='../growth-history/measurements'?measurements:specifier==='../growth-history/daily-archive'?new URL('server/services/growth-history/daily-archive.ts',root).href:specifier==='~/server/utils/account-db'?goalDb:specifier==='node:fs/promises'?fsModule:specifier==='~/utils/dailyProgress'?dailyModule:specifier.startsWith('node:')?specifier:specifier==='~/server/internal/account/shared'?shared:specifier==='~/server/services/content'?content:specifier==='./personal'?personal:specifier==='../../internal/account/binding-identity'?new URL('server/internal/account/binding-identity.ts',root).href:specifier==='@sakura-taiko/contract'?import.meta.resolve(specifier):specifier==='h3'?import.meta.resolve('h3'):new URL(specifier.replace('~/','')+'.ts',root).href;
    return `from ${JSON.stringify(url)}`;
   });
   code=`const Date=class extends globalThis.Date {constructor(...args){super(...(args.length?args:[${JSON.stringify(fixture.clock)}]))}};\n`+code;

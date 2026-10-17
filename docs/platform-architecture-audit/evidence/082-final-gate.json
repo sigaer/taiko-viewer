@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "status": "BLOCKED",
+  "blocker": "EXTERNAL_TEMP_STORAGE_LOSS_AND_UNFINISHED_GATES",
+  "viewerVersion": "0.82.1",
+  "localBaseline": "6e7f35b",
+  "recoveredCodeCommit": "4e08fb1",
+  "worktree": "/home/sigaer/taiko/.worktrees/viewer082-recovered-20261016",
+  "taikoSource": "a632913dfbdbec1d465f8eaccc0bb80c35e25745",
+  "taikoRecoveredTestsCommit": "443f5cd",
+  "taikoRecoveredWorktree": "/home/sigaer/taiko/.worktrees/taiko082-recovered-20261016",
+  "wheel": {
+    "version": "0.14.2",
+    "expectedSha256": "0963350629b261fb5002bf6ef96c6019c22ca5c9515b73279f3c578d8e6725c8",
+    "originalPath": "/var/tmp/taiko-0142-candidate-20261016/repack/wheels/taiko_bot-0.14.2-py3-none-any.whl",
+    "available": false,
+    "status": "MISSING_AFTER_EXTERNAL_REMOVAL"
+  },
+  "roles": {
+    "center": {
+      "evidence": {
+        "path": "docs/platform-architecture-audit/evidence/r1-rebuild-center-0142-20261016.json",
+        "sha256": "b5e78ce00e154166d9be52c901e6ecb7e38efa4a0d9f077b8f4180b5c86a2956",
+        "available": true
+      },
+      "environmentIdentity": "sha256:bfc4d4f5c6ef1a0fea21823e1c586f84723ec5a92a21960c7b812f286a398534",
+      "lockManifestSha256": "dceff2e96b9a115fb61c3b77421f1fcb81844543689d478a2589752d5dab16ab",
+      "interpreter": "/var/tmp/taiko-role-rebuild-hlmgfkq0/venv/bin/python",
+      "available": false,
+      "packages": 94,
+      "coreVersion": "0.1.1",
+      "memoryRuntimeVersion": "1.1.0"
+    },
+    "client": {
+      "evidence": {
+        "path": "docs/platform-architecture-audit/evidence/r1-rebuild-client-0142-20261016.json",
+        "sha256": "0046f5e87426fa72f74cf946db6b5e856f03ed1122deddb5c452474b64e866cd",
+        "available": true
+      },
+      "environmentIdentity": "sha256:489032d449fb9d38d1f07d23e3cf7469cc001ebce51e897e3118a533b0aa2074",
+      "lockManifestSha256": "dceff2e96b9a115fb61c3b77421f1fcb81844543689d478a2589752d5dab16ab",
+      "interpreter": "/var/tmp/taiko-role-rebuild-347ik6hh/venv/bin/python",
+      "available": false,
+      "packages": 94,
+      "coreVersion": "0.1.2",
+      "memoryRuntimeVersion": "1.1.0"
+    }
+  },
+  "schemaRevisions": {
+    "contractPackage": "@sakura-taiko/contract 0.1.1",
+    "contractSchema": {
+      "path": "packages/sakura-taiko-contract/schema/contract-v1.json",
+      "sha256": "2ffb0b5381300928b2fa89dcd041b8b371990aa3c77d7d0cf33887a996ad9a09",
+      "available": true
+    },
+    "annualSchema": 4,
+    "annualAlgorithm": "annual-observation-v4.5.4",
+    "growthFactPolicy": "observation-chart-continuity-v3",
+    "persistedHistoricalIdentities": "UNCHANGED"
+  },
+  "oracles": {
+    "observedStatus": "PASS",
+    "currentVerifiability": "Committed summaries and code preserved; raw logs/external frozen oracle missing",
+    "sourceLayoutTests": 3,
+    "passportStrictTests": 13,
+    "passportDtoDifferences": 0,
+    "annualIdentityTests": 3,
+    "ownerDecision": "按谱面定向修复，保留合法改善",
+    "evidence": [
+      {
+        "path": "docs/platform-architecture-audit/evidence/passport-chart-policy-closeout-20261016.json",
+        "sha256": "a01d9b0fd8be3ac9250811e5aead5949f976e4d51aaa155d04dc246f62827680",
+        "available": true
+      },
+      {
+        "path": "docs/platform-architecture-audit/evidence/chart-continuity-v3-20261016.json",
+        "sha256": "6f4ff2d336be69b41931c3cda274fbc56cd2063497b9c0d066fcc10414a16961",
+        "available": true
+      },
+      {
+        "path": "docs/platform-architecture-audit/evidence/annual-identity-oracle-20261016.json",
+        "sha256": "39f0828b2d5b146b3155da7c4197ea0ba0a60d31b11df9779553cd782d9ae588",
+        "available": true
+      },
+      {
+        "path": "docs/platform-architecture-audit/evidence/fast-growth-identity-20261016.json",
+        "sha256": "16a051d4bc2eb2d39daa370d055801b70c114de2a484a511e9a8364555dfb37b",
+        "available": true
+      }
+    ]
+  },
+  "performance": {
+    "path": "docs/platform-architecture-audit/evidence/fast-o1-performance-20261016.json",
+    "sha256": "7f6e97324cbe8cad13c07febe99fba47dce8a2c3502d29061588383cab6a1fe1",
+    "available": true
+  },
+  "recovery": {
+    "status": "BLOCKED",
+    "observedScopedSyntheticStatus": "PASS",
+    "rpoMs": 139,
+    "rtoMs": 8606.965387,
+    "scope": "Small quiesced synthetic service graph, not production HTTP/PITR/offhost",
+    "evidence": {
+      "path": "docs/platform-architecture-audit/evidence/fast-recovery-20261016.json",
+      "sha256": "3058e2d826be4b87ed263bc66cb54cf6dd6239a01af7a555af167914713c1ca7",
+      "available": true
+    },
+    "rawCheckpointAvailability": "MISSING_AFTER_EXTERNAL_REMOVAL",
+    "checkpointAdmission": {
+      "path": "docs/platform-architecture-audit/evidence/checkpoint-admission-20261016.json",
+      "sha256": "55ed86bdde55c9b621635b00d127914b389c43904192dc077699b517ca7912ea",
+      "available": true
+    },
+    "offHostBackup": "BLOCKED_NO_AUTHORIZED_DESTINATION",
+    "quarantinedResourcesRights": "BLOCKED_PENDING_CLEARANCE"
+  },
+  "productionAdmission": {
+    "status": "PENDING_AUTHORIZATION",
+    "executed": false,
+    "protocol": {
+      "path": "docs/platform-architecture-audit/production-readonly-admission-protocol-20261016.md",
+      "sha256": "f9bfe4d184897803a6138cf61eaa18bf136c8601b05227b776b4d471043db8ec",
+      "available": true
+    }
+  },
+  "downstream": {
+    "status": "READY_FOR_FREEZE_REVIEW",
+    "commit": "78ce858",
+    "worktree": "/home/sigaer/taiko/.worktrees/viewer1-draft-recovered-20261016",
+    "observedTestsPass": 25,
+    "rawLogs": "MISSING_AFTER_EXTERNAL_REMOVAL",
+    "productionEnabled": false,
+    "contractFrozen": false
+  },
+  "acceptedEvidenceReusedWithoutRerun": [
+    {
+      "path": "docs/platform-architecture-audit/evidence/candidate-0142-closeout-20261016.json",
+      "sha256": "9a95fac75cdd027cf32ef9729938e1c005e8c516e80712977df3468e0bfc3224",
+      "available": true
+    },
+    {
+      "path": "docs/platform-architecture-audit/evidence/credential-installed-0142-20261016.json",
+      "sha256": "a537c5755a290f7f0f566c77c60a913d4ca4a47903086547c01b9229e72a6e96",
+      "available": true
+    },
+    {
+      "path": "docs/platform-architecture-audit/evidence/facts-installed-0142-20261016.json",
+      "sha256": "e066faaef20afc8e7d9252e3187cf66a48cb9b1cd5c58b5605742e0e3f1cdfe0",
+      "available": true
+    },
+    {
+      "path": "docs/platform-architecture-audit/evidence/workers-sql-0142-20261016.json",
+      "sha256": "d3eb0ad0fab19760e920ad7df0c71cec3bf1055a0d9ec730230f0ce67f03769b",
+      "available": true
+    },
+    {
+      "path": "docs/platform-architecture-audit/evidence/image-goldens-0142-20261016.json",
+      "sha256": "7c3bf39f31bb63ed754d425f32a80a5bcc3e1d7e10747bf4d11e095c3ad11bd0",
+      "available": true
+    }
+  ],
+  "acceptedEvidenceLimitation": "Committed summaries survive; referenced external logs/artifacts must be recovered or explicitly revalidated before release acceptance",
+  "ownerSignature": "PENDING",
+  "productionAccess": false,
+  "release": false,
+  "freeze083": false,
+  "rollback": {
+    "localComparisonPoint": "6e7f35b",
+    "deployedCommit": null,
+    "deployedInterpreter": null,
+    "productionRollback": "NOT_ESTABLISHED"
+  },
+  "remainingBlockers": [
+    "Recover and verify exact wheel/94-package environments/frozen oracle/raw evidence after external temporary-directory loss",
+    "Complete O1 and attribute resource/latency misses without relaxing guards",
+    "Offhost backup/rights and full recovery readiness",
+    "Authorized production ingress/ACL/runtime audit and owner signature"
+  ]
+}

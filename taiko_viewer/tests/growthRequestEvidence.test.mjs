@@ -1,3 +1,4 @@
+import {qaTempPrefix} from './fixtures/qaPaths.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile, readFile, readdir, stat, utimes, rename } from 'node:fs/promises';
@@ -14,7 +15,7 @@ const run = async (fixture, baseline, options = {}, selectedRange = range) => {
   finally { adapter.dispose(); }
 };
 for (const mode of ['mixed', 'no-baseline', 'invalid', 'boundary', 'truncated']) test(`Passport service evidence sharing and exact DTO parity: ${mode}`, async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-');
+  const out = await mkdtemp(qaTempPrefix('growth-request-'));
   try {
     const fixture = await prepareFixture(mode, out);
     // Exercise persisted Goal projection and a frozen daily ability point.
@@ -27,6 +28,8 @@ for (const mode of ['mixed', 'no-baseline', 'invalid', 'boundary', 'truncated'])
     fixture.measurements = [{ id: 'frozen', ownerId: '1', bindingId: '1', capturedAt: '2026-10-07T04:00:00Z', scoreRevision: 'frozen', measurementVersion: 1, algorithmVersion: 'growth-v1', modelRevision: 'frozen-model', rating: 7,
       dimensions: Object.fromEntries(['big_song','stamina','speed','accuracy_power','rhythm','complex'].map(key => [key, 7])), focus: 'balanced', sampleCount: 30, availabilityState: 'ready' }];
     const before = await run(fixture, true), after = await run(fixture, false);
+    // The owner-approved per-chart policy preserves this fixture's legitimate
+    // milestone. Compare the complete frozen DTO again, with no exclusions.
     assert.equal(digest(after.result), digest(before.result), 'Passport facts, time/evidence, coverage or frozen abilities changed');
     assert.equal(after.result.segments.flatMap(segment => segment.points).find(point => point.id === 'frozen')?.rating, 7, 'past persisted capability must remain authoritative');
     const factor = mode === 'invalid' ? 1 : 2;
@@ -42,7 +45,7 @@ for (const mode of ['mixed', 'no-baseline', 'invalid', 'boundary', 'truncated'])
 });
 
 test('default Passport path shares stable history and reloads after changes in the same request', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-fresh-'); let adapter;
+  const out = await mkdtemp(qaTempPrefix('growth-request-fresh-')); let adapter;
   try {
     const fixture = await prepareFixture('mixed', out); adapter = await importGrowthRequest(fixture);
     await adapter.service.getSkillPassport(1, range);
@@ -82,7 +85,7 @@ test('default Passport path shares stable history and reloads after changes in t
 });
 
 test('Overview compute failure still reuses successfully loaded evidence for History', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-failure-');
+  const out = await mkdtemp(qaTempPrefix('growth-request-failure-'));
   try {
     const fixture = await prepareFixture('mixed', out);
     const before = await run(fixture, true, { failPython: true }), after = await run(fixture, false, { failPython: true });
@@ -92,7 +95,7 @@ test('Overview compute failure still reuses successfully loaded evidence for His
 });
 
 test('all Passport periods preserve DTOs and manual History remains independent of score evidence', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-periods-');
+  const out = await mkdtemp(qaTempPrefix('growth-request-periods-'));
   try {
     const fixture = await prepareFixture('mixed', out);
     for (const requestedDays of [30, 90, 180, 365]) {
@@ -110,7 +113,7 @@ test('all Passport periods preserve DTOs and manual History remains independent 
 });
 
 test('binding switch is rejected by the actual Passport guard', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-binding-'); let adapter;
+  const out = await mkdtemp(qaTempPrefix('growth-request-binding-')); let adapter;
   try {
     const fixture = await prepareFixture('mixed', out); let calls = 0;
     adapter = await importGrowthRequest(fixture, { binding: () => ({ id: ++calls === 1 ? 1 : 2, taiko_id: fixture.id, source: 'wahlap' }) });
@@ -119,7 +122,7 @@ test('binding switch is rejected by the actual Passport guard', async () => {
 });
 
 test('missing or invalid history is retried in the same request', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-retry-'); let adapter;
+  const out = await mkdtemp(qaTempPrefix('growth-request-retry-')); let adapter;
   try {
     const fixture = await prepareFixture('invalid', out); adapter = await importGrowthRequest(fixture);
     const request = adapter.evidence.createGrowthScoreEvidenceRequest(fixture.id);
@@ -135,7 +138,7 @@ test('missing or invalid history is retried in the same request', async () => {
 });
 
 test('sync between Overview and History preserves the original complete Passport DTO', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-sync-');
+  const out = await mkdtemp(qaTempPrefix('growth-request-sync-'));
   try {
     const fixture = await prepareFixture('mixed', out);
     const path = resolve(fixture.userdataDir, fixture.id, 'data_20261008_130000.json');
@@ -149,7 +152,7 @@ test('sync between Overview and History preserves the original complete Passport
 });
 
 test('write during initial load prevents retaining mixed evidence; metadata failure fails open to fresh reads', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-race-'); let adapter;
+  const out = await mkdtemp(qaTempPrefix('growth-request-race-')); let adapter;
   try {
     const fixture = await prepareFixture('mixed', out);
     const path = resolve(fixture.userdataDir, fixture.id, 'data_20261008_130000.json');
@@ -178,7 +181,7 @@ test('write during initial load prevents retaining mixed evidence; metadata fail
 });
 
 test('transient directory changes during loading invalidate even when final filenames match', async () => {
-  const out = await mkdtemp('/var/tmp/growth-request-transient-'); let adapter;
+  const out = await mkdtemp(qaTempPrefix('growth-request-transient-')); let adapter;
   try {
     const fixture = await prepareFixture('mixed', out);
     const path = resolve(fixture.userdataDir, fixture.id, 'data_20200101_000000.json');

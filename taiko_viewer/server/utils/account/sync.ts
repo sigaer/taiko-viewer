@@ -5,112 +5,65 @@ import {
   getSyncCooldownState,
   insertSyncLog,
   loadSyncTargets,
-  requestSyncDispatch,
   toPublicSyncLog,
   toPublicSyncTargets
 } from "~/server/internal/account/sync";
 import {
   getCurrentBindingRow,
-  getRuntimePaths,
-  getUserdataPath,
   loadWahlapCookie,
   readUserdata,
   rebuildUserdataAchievement,
   sanitizeBinding,
   userdataFileExists,
-  withUserdataWriteLock,
   writeUserdataWithHistory
 } from "~/server/internal/account/shared";
-import { scoreTimeIssue } from "~/server/internal/account/kinoko-time";
 import { writeKinokoHistorySnapshots } from "~/server/internal/account/kinoko-history";
-import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores, excludeKinokoConflicts } from "~/server/internal/account/kinoko-import";
-import { requestScoreTokenManagement } from "~/server/internal/account/score-token";
+import { fetchKinokoHistory, fetchKinokoScores, mergeKinokoScores, assertKinokoCurrentTime } from "~/server/internal/account/kinoko-import";
 import { requireAccountUser } from "./auth";
+import { captureBindingIdentity, assertBindingIdentity } from "../../internal/account/binding-identity";
+import { captureAccountSyncOwner, dispatchOwnedAccountSync } from "../../services/account/sync-authority.ts";
+import { withViewerCurrentSource } from "../../services/account/current-source.ts";
+import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
 export const getAccountSyncOverview = async (event: H3Event) => {
   const user = await requireAccountUser(event);
-  const [currentBinding, cooldown, lastLogRow, wahlapCookie] = await Promise.all([
-    getCurrentBindingRow(user.id),
-    getSyncCooldownState(user.id),
-    getLastSyncLogRow(user.id),
-    loadWahlapCookie().catch(() => "")
-  ]);
-  const targets = await loadSyncTargets();
-  const taikoId = currentBinding?.taiko_id || "";
-  const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
-  const canSyncFromWahlap =
-    currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
-  const userdataPath = taikoId ? getUserdataPath(taikoId) : "";
-  const scoreTokenResult = currentBinding && currentBinding.source !== "manual"
-    ? await requestScoreTokenManagement(taikoId, "status").catch((error) => {
-        console.error("[account-sync] 读取网页成绩 token 状态失败", error);
-        return null;
-      })
-    : null;
-  const { userdataDir } = getRuntimePaths();
-  // #region agent log
-  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
-    body: JSON.stringify({
-      sessionId: "b6e9de",
-      runId: "post-fix",
-      hypothesisId: "H-cn",
-      location: "server/utils/account/sync.ts:getAccountSyncOverview",
-      message: "sync_overview_wahlap_state",
-      data: {
-        userId: user.id,
-        taikoId,
-        hasUserdata,
-        canSyncFromWahlap,
-        userdataPath,
-        userdataDir
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-  // #endregion
-  return {
-    currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
-    hasUserdata,
-    canSyncFromWahlap,
-    scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
-    scoreToken: scoreTokenResult?.status || null,
-    targets: toPublicSyncTargets(targets),
-    cooldownRemainingSeconds: cooldown.remainingSeconds,
-    cooldownUntil: cooldown.availableAt,
-    lastSync: toPublicSyncLog(lastLogRow)
-  };
+  return withViewerCurrentSource(user.id, "read", async (currentBinding, db) => {
+    const [cooldown, lastLogRow, wahlapCookie] = await Promise.all([
+      getSyncCooldownState(user.id, db),
+      getLastSyncLogRow(user.id, db),
+      loadWahlapCookie().catch(() => "")
+    ]);
+    const targets = await loadSyncTargets();
+    const taikoId = currentBinding?.taiko_id || "";
+    const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
+    const canSyncFromWahlap =
+      currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
+    const scoreTokenResult = canManageExternalScoreToken(currentBinding)
+      ? await readViewerScoreTokenStatus(db, taikoId).catch(() => null)
+      : null;
+    return {
+      currentBinding: currentBinding ? sanitizeBinding(currentBinding) : null,
+      hasUserdata,
+      canSyncFromWahlap,
+      scoreTokenAvailable: currentBinding?.source !== "manual" && scoreTokenResult !== null,
+      scoreToken: scoreTokenResult,
+      targets: toPublicSyncTargets(targets),
+      cooldownRemainingSeconds: cooldown.remainingSeconds,
+      cooldownUntil: cooldown.availableAt,
+      lastSync: toPublicSyncLog(lastLogRow)
+    };
+  }, { bindingRequired: false });
 };
 
 export const submitAccountSync = async (event: H3Event, payload: Record<string, unknown>) => {
   const user = await requireAccountUser(event);
-  const currentBinding = await getCurrentBindingRow(user.id);
-  if (!currentBinding) {
-    throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID 后再同步" });
-  }
-  if (currentBinding.source === "manual") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "手动账号不关联外部平台，手录内容已经保存在中心，无需拉取同步"
-    });
-  }
+  const userId = user.id;
+  const { db, binding: currentBinding } = await captureAccountSyncOwner(userId);
   const wahlapCookie = await loadWahlapCookie().catch(() => "");
   if (!String(wahlapCookie || "").trim()) {
     throw createError({
       statusCode: 503,
       statusMessage: "服务端暂未配置鼓众广场访问凭据，暂时无法拉取成绩，请联系管理员"
-    });
-  }
-  const cooldown = await getSyncCooldownState(user.id);
-  if (cooldown.remainingSeconds > 0) {
-    throw createError({
-      statusCode: 429,
-      statusMessage: `同步冷却中，请在 ${cooldown.remainingSeconds} 秒后重试`,
-      data: {
-        remainingSeconds: cooldown.remainingSeconds,
-        availableAt: cooldown.availableAt
-      }
     });
   }
   const requestedIds = Array.from(
@@ -130,42 +83,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
     throw createError({ statusCode: 400, statusMessage: "存在无效的同步目标，请刷新页面后重试" });
   }
 
-  const taikoId = currentBinding.taiko_id;
-  const hasUserdata = await userdataFileExists(taikoId);
-  // #region agent log
-  fetch("http://localhost:7449/ingest/b08e74f3-d0d4-4722-9f28-4087fe85bf3e", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6e9de" },
-    body: JSON.stringify({
-      sessionId: "b6e9de",
-      runId: "post-fix",
-      hypothesisId: "H-cn",
-      location: "server/utils/account/sync.ts:submitAccountSync",
-      message: "sync_submit_before_dispatch",
-      data: {
-        userId: user.id,
-        taikoId,
-        hasUserdata,
-        userdataPath: getUserdataPath(taikoId),
-        targetIds: requestedIds
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-  // #endregion
-
-  const dispatchPayload = await requestSyncDispatch(taikoId, requestedIds);
-  const results = dispatchPayload.results;
-  const status = results.every((item) => item.ok) ? "success" : results.some((item) => item.ok) ? "partial" : "failed";
-  const logRow = await insertSyncLog({
-    userId: user.id,
-    taikoId: currentBinding.taiko_id,
-    status,
-    targetIds: requestedIds,
-    results,
-    originalBytes: dispatchPayload.originalBytes,
-    compressedBytes: dispatchPayload.compressedBytes
-  });
+  const logRow = await dispatchOwnedAccountSync(userId, db, currentBinding, requestedIds, payload.requestId);
   return {
     ok: true,
     currentBinding: sanitizeBinding(currentBinding),
@@ -191,6 +109,7 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     });
   }
 
+  const expected = captureBindingIdentity(currentBinding);
   const taikoId = currentBinding.taiko_id;
   const fetched = await fetchKinokoScores(apiKey, now);
   if (fetched.playerId !== taikoId) {
@@ -200,23 +119,22 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
     });
   }
   if (!fetched.songs.length) throwNoKinokoRecords(fetched.timeSummary);
-  const summary = await withUserdataWriteLock(taikoId, async () => {
+  const summary = await withViewerCurrentSource(user.id, "write", async binding => {
+    assertBindingIdentity(expected, binding);
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     const userdata = (await userdataFileExists(taikoId))
       ? await readUserdata(taikoId)
       : { profile: { userid: taikoId }, songs: [] };
-    const admitted = excludeKinokoConflicts(userdata, fetched.songs, now);
-    if (!admitted.records.length) throwNoKinokoRecords({ ...fetched.timeSummary, ...conflictSummary(admitted) });
-    const polluted = (userdata.songs || []).some(row => scoreTimeIssue(row, now, false));
-    const { changedSongs, timeSummary: _time, ...result } = mergeKinokoScores(userdata, admitted.records, now);
-    if (result.added || result.updated) {
-      rebuildUserdataAchievement(userdata);
-      await writeUserdataWithHistory(taikoId, userdata, "kinoko-import", polluted ? changedSongs : undefined);
-    }
-    return { ...result, ...fetched.timeSummary, ...conflictSummary(admitted),
-      duplicateRecords: result.duplicateRecords, writtenRecords: result.writtenRecords };
+    const result = mergeKinokoScores(userdata, fetched.songs, now);
+    if (!result.added && !result.updated) throwKinokoUnchanged();
+    rebuildUserdataAchievement(userdata);
+    if (result.added || result.updated) await writeUserdataWithHistory(taikoId, userdata, "kinoko-import");
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
+    return result;
   });
-  const partial = summary.skippedTimeRecords > 0 || summary.conflictRecords > 0;
-  const message = kinokoImportMessage(summary);
+
+  const partial = fetched.timeSummary.skippedTimeRecords > 0;
+  const message = partial ? `已更新成绩，跳过 ${fetched.timeSummary.skippedTimeRecords} 条异常时间记录` : `已读取 ${summary.total} 条，新增 ${summary.added} 条，更新 ${summary.updated} 条`;
   const result = {
     targetId: "kinoko-import",
     label: "菌菌控制台迁移",
@@ -238,8 +156,10 @@ export const importKinokoScores = async (event: H3Event, payload: Record<string,
   });
   return {
     ok: true,
+    published: true,
     partial,
     message,
+    timeSummary: fetched.timeSummary,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
@@ -265,6 +185,7 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
     });
   }
 
+  const expected = captureBindingIdentity(currentBinding);
   const taikoId = currentBinding.taiko_id;
   const fetched = await fetchKinokoHistory(apiKey, now);
   if (fetched.playerId !== taikoId) {
@@ -275,29 +196,27 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   }
 
   if (!fetched.records.length) throwNoKinokoRecords(fetched.timeSummary);
-  const summary = await withUserdataWriteLock(taikoId, async () => {
+  const summary = await withViewerCurrentSource(user.id, "write", async binding => {
+    assertBindingIdentity(expected, binding);
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
     const existed = await userdataFileExists(taikoId);
     const userdata = existed
       ? await readUserdata(taikoId)
       : { _meta: { full: true, source: "wahlap", source_account: taikoId }, profile: { userid: taikoId }, songs: [] };
-    const admitted = excludeKinokoConflicts(userdata, fetched.records, now);
-    if (!admitted.records.length) throwNoKinokoRecords({ ...fetched.timeSummary, ...conflictSummary(admitted) });
-    // Apply the same chart conflict set to history and latest current inputs.
-    const latest = excludeKinokoConflicts(userdata, fetched.latestSongs, now).records;
-    const polluted = (userdata.songs || []).some(row => scoreTimeIssue(row, now, false));
-    const { changedSongs, timeSummary: _time, ...current } = mergeKinokoScores(userdata, latest, now);
-    const history = await writeKinokoHistorySnapshots(taikoId, admitted.records, userdata, now);
+    assertKinokoCurrentTime(userdata, now);
+    const history = await writeKinokoHistorySnapshots(taikoId, fetched.records, userdata, now);
+    const current = mergeKinokoScores(userdata, fetched.latestSongs, now);
+    if (!history.snapshotFiles && !current.added && !current.updated) throwKinokoUnchanged();
     if (!existed || current.added > 0 || current.updated > 0) {
       rebuildUserdataAchievement(userdata);
-      await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current", polluted ? changedSongs : undefined);
+      await writeUserdataWithHistory(taikoId, userdata, "kinoko-history-current");
     }
-    return { history, current, ...fetched.timeSummary, ...conflictSummary(admitted),
-      duplicateRecords: admitted.records.length - history.importedRecords,
-      existingDuplicateRecords: history.skippedRecords, batchDuplicateRecords: admitted.records.length - history.uniqueRecords,
-      writtenRecords: history.importedRecords, currentWrittenRecords: current.writtenRecords };
+    if ((await requireAccountUser(event)).id !== user.id) throw createError({ statusCode: 401, statusMessage: "请重新登录" });
+    return { history, current };
   });
-  const partial = summary.skippedTimeRecords > 0 || summary.conflictRecords > 0;
-  const message = kinokoImportMessage(summary);
+
+  const partial = fetched.timeSummary.skippedTimeRecords > 0;
+  const message = partial ? `已导入有效历史，跳过 ${fetched.timeSummary.skippedTimeRecords} 条异常时间记录` : `历史 ${summary.history.importedRecords} 条新增、${summary.history.skippedRecords} 条已存在，写入 ${summary.history.snapshotFiles} 个兼容快照`;
   const result = {
     targetId: "kinoko-history-import",
     label: "菌菌控制台完整历史迁移",
@@ -319,8 +238,10 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   });
   return {
     ok: true,
+    published: true,
     partial,
     message,
+    timeSummary: fetched.timeSummary,
     sourcePlayerId: fetched.playerId,
     targetTaikoId: taikoId,
     summary,
@@ -328,13 +249,9 @@ export const importKinokoScoreHistory = async (event: H3Event, payload: Record<s
   };
 };
 
-const conflictSummary = (value: ReturnType<typeof excludeKinokoConflicts>) => ({
-  conflictRecords: value.conflictRecords, conflicts: value.conflicts, conflictDetailsTruncated: value.conflictDetailsTruncated
-});
 const throwNoKinokoRecords = (summary: object): never => {
-  throw createError({ statusCode: 422, statusMessage: "No eligible Kinoko records",
-    message: "没有可导入的有效记录；异常时间或已有冲突记录已跳过，现有成绩未改动。",
-    data: { code: "KINOKO_NO_ELIGIBLE_RECORDS", summary: { duplicateRecords: 0, writtenRecords: 0, currentWrittenRecords: 0, conflictRecords: 0, ...summary } } });
+  throw createError({ statusCode: 422, statusMessage: "没有可导入的有效记录，现有成绩未改动", data: { code: "KINOKO_NO_ELIGIBLE_RECORDS", published: false, summary } });
 };
-const kinokoImportMessage = (s: { sourceRecords: number; validRecords: number; skippedTimeRecords: number; conflictRecords: number; duplicateRecords: number; writtenRecords: number }) =>
-  `${s.skippedTimeRecords || s.conflictRecords ? "部分导入" : "导入完成"}：来源 ${s.sourceRecords} 条，有效 ${s.validRecords} 条，跳过异常时间 ${s.skippedTimeRecords} 条，已有冲突 ${s.conflictRecords} 条，重复 ${s.duplicateRecords} 条，写入 ${s.writtenRecords} 条。`;
+const throwKinokoUnchanged = (): never => {
+  throw createError({ statusCode: 409, statusMessage: "记录已存在，没有新增成绩", data: { code: "KINOKO_UNCHANGED", published: false } });
+};

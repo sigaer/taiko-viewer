@@ -1,0 +1,86 @@
+{
+  "step": "6.3d.6",
+  "status": "MANUAL_GRANT_TRANSACTION_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "fd7b52e",
+  "sakuraVersion": "9.81.4",
+  "validation": {
+    "pythonTests": 43,
+    "offlineNodeTests": 128,
+    "realTestDbSqlTests": 73,
+    "newManualGrantSqlTests": 25,
+    "typescript": "domainRead + publicationLifecycle configs PASS; not full server typecheck",
+    "testDatabase": "taiko_annual_poster_test",
+    "actualSelectDatabaseAndExplicitMutationOptInRequired": true,
+    "exitStatus": 0,
+    "systemdUnit": "taiko-qa-1791689938-1178871.service",
+    "logPath": "/var/tmp/phase6-grants-final-qa.log",
+    "logSha256": "450737625a43ac4fdbd034e4eb86008e817030cf7eb96fb63c7639e242422640",
+    "resources": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791689938-1178871.service",
+      "durationMs": 137912,
+      "sampledMemoryPeakBytes": 341823488,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "50760 kB",
+          "VmRSS": "50760 kB"
+        }
+      ]
+    }
+  },
+  "cases": [
+    "issue/claim/detach each use one source-EX-ordered SQL transaction and minimal private operation receipt",
+    "late SQL failure restores old capability/ownership/current/slots/product records; failed rollback destroys connection",
+    "exact nonce receipt proves lost actual COMMIT acknowledgement without duplicated grants",
+    "same actor committed claim retries preserve later current selection; consumed hash plus live ownership required",
+    "same/different actor concurrency admits one consumption; queued expiry/consumption/same-row source substitution rejects",
+    "viewer detach deletes own Goal/measurement/cursor/showcase with grants atomically; bot detach preserves surviving legacy principal",
+    "six owned Node deaths for issue/claim/detach before and after COMMIT verify actual TCP rollback and durable acknowledgement",
+    "all three services preserve captured pool across shutdown-style global replacement",
+    "actual driver SQL diagnostics are generic 503 without sql/private cause",
+    "pure grant operations preserve current/all history bytes, commit ID and sequence",
+    "existing manual Golden/delete/restore/Goal/Growth/acquisition/publication tests retained"
+  ],
+  "limits": [
+    "Synthetic private trees and owned test rows only; no production private DB/data/network QA",
+    "Test schema lacks production FKs; not production migration/FK enforcement or authenticated HTTP acceptance",
+    "Creation coordination, generic unbind/account deletion, owner/public/service private grants remain pending",
+    "Actual dispatcher/u0/daily Writer convergence, P1a/Read Model/million-record costs/operational restore/runbook/final activation remain pending",
+    "No R sync, service restart or Viewer push/deploy; unified Phase 6 standard release pending",
+    "Sampled 250ms memory peak is not exact process-tree maximum or million-record capacity proof"
+  ],
+  "harnessCorrections": [
+    "Existing claim insertion hook now observes transaction connection as well as legacy Pool path",
+    "Existing same-actor consumed-code retry expects new idempotent acknowledgement; other actor rejected",
+    "Lifecycle COMMIT counters measured relative to setup since issue now uses transaction",
+    "Final review explicitly passed captured pool to detach precheck and added all three shutdown regressions; repeated full QA"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/infrastructure/taiko-publication/grant-schema.ts": "42330d654dd6ccf933d3eabc0615af11f1c245dcc5b75a881c33e7636dbeeb3b",
+    "taiko_viewer/server/internal/account/manual-grants.ts": "482b1d5bd1420eb670be866e667881854d9c856f9afa3743eb0d24ca10c0f4d9",
+    "taiko_viewer/server/services/account/manual-grants.ts": "57876af05c679b4207ff7e3fd02e5a96e6f2519513cf3a19c0e63770d8368e98",
+    "taiko_viewer/server/utils/account-db.ts": "866328be2fc5b8fb82895800948e146e0b4a94ef5b4dad99d7688aff2dbee2e1",
+    "taiko_viewer/server/utils/account/manual.ts": "d1fa1aa46b582a1106434b2f4f783a3b3e1e83de26f4dc451e440661c49e6f36",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "227f5facbb9c63b48f6dfa8fa146c75ecbc766a84d5813d74beffd34b831d269",
+    "taiko_viewer/tests/fixtures/manualLifecycleRuntime.mjs": "67a2fedadd70961f1bfa9ee3298d3301058c4f2f7a4f3ded2255b86fafb0b647",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "63e61a401f939ddd60d32896bbea17d555a26497046af80ca216c647d1df7c0d",
+    "taiko_viewer/tests/manualLifecycleSql.test.mjs": "5a16e38edc70c84cd4ee39aadac034222c988fce2b27695a895b5e0120a011b2",
+    "taiko_viewer/tests/manualPublicationSql.test.mjs": "f5cd6ea0107af81051ba29c3883de9346313031daccb0bf1632855c9799679af",
+    "taiko_viewer/tests/manualGrantSql.test.mjs": "00fca61a73ce3f29351debb4223500140a1041a973a130b81ed90c3df400b4db"
+  }
+}

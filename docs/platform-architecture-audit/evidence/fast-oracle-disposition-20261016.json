@@ -1,0 +1,57 @@
+{
+  "status": "BLOCKED",
+  "sourceLayout": {
+    "status": "PASS",
+    "targetedTests": 3
+  },
+  "fixedPassportOracle": {
+    "status": "PASS",
+    "ownerApproval": "批准该具体修订并运行受影响回归",
+    "affectedTests": 13,
+    "scope": "Only the fixed boundary DTO milestone/reference removal; frozen source and original old failure retained"
+  },
+  "crossChartPolicy": {
+    "status": "FAIL",
+    "diagnostic": "evidence/fast-oracle-multichart-20261016.json",
+    "actual": "One chart regression or manual edit suppresses four independently comparable changes of another chart until authoritative full baseline",
+    "positiveControl": "PB/NG/rank/FC complete facts preserved before discontinuity; complete facts resume after full baseline",
+    "ownerWaiver": false
+  },
+  "strictAnnualIdentity": {
+    "status": "BLOCKED",
+    "attribution": "Only four declared identity fields differ; old checkpoint exact artifact restriction verified",
+    "guardEvidence": "evidence/fast-growth-identity-20261016.json",
+    "checkpointReset": false
+  },
+  "logs": [
+    {
+      "path": "/var/tmp/fast-oracle-layout.log",
+      "sha256": "e0455adfd44c609df16c1a7a45b1f6f7fbed0cf09efce23ed19e9e7d75e63633"
+    },
+    {
+      "path": "/var/tmp/fast-passport-oracle.log",
+      "sha256": "f5e308169c5d47cccab25811b7910d3dc68176d51b2b4ae5678895dd820ddec3"
+    },
+    {
+      "path": "/var/tmp/fast-passport-oracle-retry.log",
+      "sha256": "4d0decf6d8bfce77a6311f60e892d8efdbf47ddd3b30d3e64e2a7f7d25a9809f"
+    },
+    {
+      "path": "/var/tmp/fast-growth-identity.log",
+      "sha256": "01d54003bfa30b2ffc8e7e94d409c57ce225c67c719ec8542fe51abba5178051"
+    },
+    {
+      "path": "/var/tmp/fast-oracle-multichart.log",
+      "sha256": "827afe10eb009343f6ce78e98e274878462aba33cf0f8830f5c15a94bd5bd125"
+    },
+    {
+      "path": "/var/tmp/fast-oracle-multichart-retry.log",
+      "sha256": "5b37abde3cb2bba513da3b10c7d17bca0ae09abeddf2cbdf54c357499fd297a6"
+    },
+    {
+      "path": "/var/tmp/fast-passport-approved-regression.log",
+      "sha256": "483baa3a2e6b4d4a7564659a21484555bd8608bc284d7480ca3225a83ef6cb7f"
+    }
+  ],
+  "productionAccess": false
+}

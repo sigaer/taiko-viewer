@@ -11,7 +11,7 @@ const parseTime = (value: unknown) => {
   if (typeof value !== "string") throw invalidTime();
   const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?(Z|[+-]\d{2}:\d{2})?$/);
   if (!m) throw invalidTime();
-  const [year, month, day, hour, minute, second] = m.slice(1, 7).map(Number);
+  const [year, month, day, hour, minute, second] = m.slice(1, 7).map(Number) as [number, number, number, number, number, number];
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day); date.setUTCHours(hour, minute, second, 0);
   if (year < 1 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day ||

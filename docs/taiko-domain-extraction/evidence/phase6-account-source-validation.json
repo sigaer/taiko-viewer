@@ -1,0 +1,144 @@
+{
+  "step": "6.3e.2",
+  "status": "ACCOUNT_PROFILE_SYNC_OVERVIEW_TOKEN_AUTHORITY_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "recordedAt": "2026-10-11T06:29:53.996Z",
+  "viewerPreparedVersion": "0.82.0",
+  "runtimeActivated": false,
+  "sakuraCommit": "5b61502c5a335b2b740055e858bf5e6c99452ad7",
+  "sakuraVersion": "9.81.6",
+  "sakuraChanged": false,
+  "validation": {
+    "offlineNode": {
+      "passed": 136,
+      "newGatewayBoundary": 4
+    },
+    "actualIsolatedSql": {
+      "passed": 236,
+      "newAccountSource": 37,
+      "actualPythonPersonal": 2
+    },
+    "localTypeScriptGroups": [
+      "domainRead",
+      "publicationLifecycle"
+    ],
+    "unchangedPythonSuites": {
+      "publicationPassedPreviously": 53,
+      "domainPassedPreviously": 132,
+      "rerunThisStep": false,
+      "previousEvidence": "phase6-personal-canonical-validation.json"
+    },
+    "final": {
+      "unit": "taiko-qa-1791699879-1287126.service",
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791699879-1287126.service",
+        "durationMs": 287916,
+        "sampledMemoryPeakBytes": 390651904,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "51072 kB",
+            "VmRSS": "51072 kB"
+          }
+        ]
+      },
+      "resourceSha256": "e831199db6b16c6dee9097831ad97e6a33c5940c5e4d15fb3cd126f691f5a7a0",
+      "log": "/var/tmp/phase6-account-source-final-qa.log",
+      "logSha256": "080540397c3a49c10d5701d3e8df668e633b4f4b3a37ae549c2de18face5f625",
+      "runnerExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "collectedUnitInactive": true,
+      "remainingMainPid": 0,
+      "remainingControlGroup": ""
+    },
+    "focused": {
+      "passedAccountSource": 36,
+      "passedGatewayBoundary": 4,
+      "runnerExit": 0,
+      "resource": {
+        "cgroup": "/development.slice/development-qa.slice/taiko-qa-1791699786-1286157.service",
+        "durationMs": 33473,
+        "sampledMemoryPeakBytes": 343855104,
+        "sampleIntervalMs": 250,
+        "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+        "processes": [
+          {
+            "Name": "MainThread",
+            "VmHWM": "48204 kB",
+            "VmRSS": "48204 kB"
+          }
+        ]
+      },
+      "log": "/var/tmp/phase6-account-source-qa.log",
+      "logSha256": "db157e557f1ebfe5cdd4eef27ccdc2a6a598f7bfe5865dd5f7aa5d5dcb8a324d"
+    },
+    "firstHarnessFailure": {
+      "unit": "taiko-qa-1791699521-1283710.service",
+      "runnerExit": 1,
+      "reason": "Injected SQL exception lacked actual mysql2 driver attributes; corrected test injection to carry code/sql. No whole-suite PASS claimed.",
+      "log": "/var/tmp/phase6-account-source-harness-failure.log",
+      "logSha256": "00229c6d6d6b053b77e595879a4980c35051498051e59b733376220a2f7ea2ea"
+    }
+  },
+  "cases": [
+    "Captured pool and frozen id/taiko_id/source/manual_account_id; Source SH for profile/sync overview, EX for issue/revoke; live owner/current before consumption and return, with lease liveness checked around SQL proofs",
+    "Sixteen actual Source-wait substitutions across four products and four identity fields fail before private reads/gateway; post-title/status substitution and lease loss during final SQL proof fail closed",
+    "Real login cookie, actual profile/sync/token/logout HTTP adapters, issue/hash/mask status, rotation, repeated revoke, reload and re-login; arbitrary request Source fields ignored in favor of authenticated current binding",
+    "Healthy full profile and sync DTO equality against frozen 7bf9a56 entrypoints; unchanged runtime dependencies, frozen profile uses current shared DAO/Reader for healthy-state comparison",
+    "Current title reads verified immutable object after projection loss/tamper; managed corrupt/non-object rejects 503; legacy missing/invalid/non-object retains verified public title",
+    "Long sync SH blocks token EX and score publisher; token EX plus SQL owner/current locks fences concurrent row changes and publication until independent loopback gateway completes",
+    "Manual/no-binding states do not call token gateway; token grant does not create score observation or change C/H hashes/commit/sequence",
+    "Bounded fetch and body deadlines, 16 KiB streamed response budget, exact string Source echo, actual SQL token hash/mask/existence proof; foreign/numeric identity, bad token/exists, oversized body and private gateway failures rejected/redacted",
+    "Sync target metadata bounded by 64 entries and text lengths; invalid/oversized replies retain the existing default, status failures retain unavailable state",
+    "Read-only authority COMMIT acknowledgement loss re-proves exact committed gateway token without second issue; late SQL failure plus failed rollback destroys connection; fresh retry deliberately rotates independent already-committed token",
+    "Pool replacement during profile subqueries and lost token COMMIT ACK cannot redirect captured ownership proof; two owned loopback listeners/clients, SQL rows, Source roots and Python lease children cleaned",
+    "Four offline gateway stream cases cover split UTF-8, header/stream budgets, malformed/invalid UTF-8 and deadline with uncooperative cancellation"
+  ],
+  "limits": [
+    "Viewer layer isolated acceptance only; token gateway is synthetic owned loopback with actual SQL. No real bot/direct gateway token grant authorization or private-source public API completion claimed",
+    "Gateway commits token SQL independently of the read-only authority transaction. Late response failure may leave an already committed token; fresh issue preserves original rotation semantics and has no durable idempotent client nonce",
+    "Parent token Source EX requires a SQL-only gateway; future gateway Writer integration must reuse/rework this grant boundary, never recursively acquire child Source EX under parent EX",
+    "Sync dispatch mutation remains pending common grant/Writer convergence; this step covers read-only overview, target metadata and Viewer token operations",
+    "SQL fixture has actual SELECT DATABASE()=taiko_annual_poster_test and explicit mutation opt-in but omits production FK enforcement; scoped TS is not full server/Nuxt typecheck",
+    "Previous Python-only suites unchanged and not rerun; final SQL suite includes two actual Python personal tests. Sampled 250 ms memory peaks are not exact maxima",
+    "No production DB writes, real score files, external business gateway QA, R sync, service restart, Viewer push/deploy or authenticated online smoke; Phase 6 remains IN_PROGRESS",
+    "Remaining history/ctime readers, private source/QQ/Hiroba grants, ops cleanup, actual dispatcher/u0/daily/all Writers, P1a/Read Model/million costs, operational restore and final activation pending"
+  ],
+  "runtimeReadOnlyStatus": {
+    "viewer": {
+      "active": true,
+      "pid": 1063394
+    },
+    "syncReceiver": {
+      "active": true,
+      "pid": 1063408
+    },
+    "publicApi": {
+      "active": true,
+      "pid": 829173
+    }
+  },
+  "sourceSha256": {
+    "taiko_viewer/server/internal/account/binding-read.ts": "ee96d5648093f2e1addc0ef3363e0985a9d71c92bec954c13efcc6c75a9ff6ed",
+    "taiko_viewer/server/internal/account/score-token.ts": "59e1fa6961858048e1e1174d9130d1ab8ae9ae05af498f2b515d2238f9953056",
+    "taiko_viewer/server/internal/account/shared.ts": "21167e7f919321f03c396b2af00578d762b887ec1cbb8caf5a118c46f51f562d",
+    "taiko_viewer/server/internal/account/sync.ts": "261c57b14ce03a6eb4210d90598ac93b28d04e9dc8658083bc1ee70de874a324",
+    "taiko_viewer/server/services/account/current-source.ts": "0f789adbb1a2139fc928a87512d95cc3c99fce5445c9d43eb3be007fe335e2ed",
+    "taiko_viewer/server/services/account/profile-source.ts": "7c4ca0c5b7793ca4eaf19e6a96e74bd4d83491454b817b90a28f5f241aa048e1",
+    "taiko_viewer/server/services/account/score-token-authority.ts": "63ff4f5375bd28ae9d01552855f8556804f75831dcd8ba50e741e1a65baa9588",
+    "taiko_viewer/server/infrastructure/local-gateway/json.ts": "66f2686de95065e815dca903ddd05352909211f2190c772d482ea40269de859d",
+    "taiko_viewer/server/utils/account/bindings.ts": "a2380bdb4a1ab66376acc08015a63783aa9b5f56cf905ed2daaf01deb5ead17c",
+    "taiko_viewer/server/utils/account/profile.ts": "67c1e5e0b14e7e8c1b80fad67c061d6a102dd3cc78eb60e9b136c14a4fbd020b",
+    "taiko_viewer/server/utils/account/qq.ts": "8ef0298688aee66b6612c7c7fc63ba4c38584bfbf34eb50f8b4b4209c1a660ee",
+    "taiko_viewer/server/utils/account/score-token.ts": "c19e0d3c5983dea12a43883525086f9d411a831758abb3bcfe4e0534b2f49e12",
+    "taiko_viewer/server/utils/account/sync.ts": "3e5b92d608e4454e40aff744270bf86ff105446afd2a86f056aee7871689bdb3",
+    "taiko_viewer/tests/accountSourcePublicationSql.test.mjs": "07468837fe266f842036c7919506784485dff05dedfcce9d53ad8e0eed0e19ef",
+    "taiko_viewer/tests/gatewayReplyBoundary.test.ts": "29a9e7b107dc1f9185d3956daa2c461f61380269d927d9c3584617265b0070b5",
+    "taiko_viewer/tests/fixtures/accountSourceHttp.mjs": "f35318384609478d9d2d283ef7e485ff9c6c90bea02726141ecd4870ee88a8ac",
+    "taiko_viewer/tests/fixtures/goalSqlRuntime.mjs": "f8901f432774fef6740dd54d397cdd943f18329a8790acb45f6d015d010aa2f9",
+    "taiko_viewer/tests/fixtures/manualSqlRuntime.mjs": "91499458b0b874d5825e5cd6ff4a18c7f931f926419774f4192a5f99ed50a9e2",
+    "taiko_viewer/tests/fixtures/publicationLifecycle.tsconfig.json": "e911a00f1603f37476ba2cf96aa2638f702b20fb3027780e17d891aa10fe2a78"
+  }
+}

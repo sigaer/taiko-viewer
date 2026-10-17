@@ -1,0 +1,209 @@
+{
+  "step": "6.3e.8.6j",
+  "date": "2026-10-12",
+  "timezone": "Asia/Shanghai",
+  "status": "DAILY_WRITER_FENCE_PASS",
+  "phase6Gate": "IN_PROGRESS",
+  "goalStatus": "active",
+  "source": {
+    "version": "9.81.28",
+    "commit": "cc66b2207a725489987787bb8d5f785f61c3a352",
+    "parent": "d4a9d22cbb0d9cf7e14116f487909aff9034d023",
+    "pushed": true,
+    "actualRemoteMainVerified": true,
+    "filesSha256": {
+      "taiko/plugins/utils/daily_ability.py": "9c0a4ef231259a30cef93a43098f738e672cb63c45654066aef29f57d30ca4c4",
+      "taiko/plugins/utils/score_calculator.py": "3c9e55aef75d2ea5acee2a55c93c265dc7afede31c543b7e1bb44cd1667e0a9d",
+      "taiko/plugins/utils/userdata_storage.py": "f0c2334f4e64aa6ce544092dac1176665bc6aab4cedd1a98b5efa12c3a23419f",
+      "taiko/scripts/backfill_daily_ability.py": "c8d10c4a401b37105fa674fbbb3bdfb3c99f77350843bc1e185295d3d17e8005",
+      "taiko/taiko_store/README.md": "0e6923ef9cae02ee358c8454881901f6e278013a34996df07eaeeb5c876df477",
+      "taiko/taiko_store/backup.py": "c3788c2182bba553c39d367bce616aad80abb9f5ca671e8e5cf8a11b4d88028f",
+      "taiko/taiko_store/publication.py": "bd402a38fbc9916e52a2e274180406dcfc2ff0c0a0155b828391b4921d775f3f",
+      "taiko/taiko_store/daily.py": "9409a2b508ff1c5823b09ffc02e16b0003e6445e878c782bdc8204389ab97f2a",
+      "taiko/tests/test_daily_ability.py": "cf29192941b0d92770a5eb325a3cbdcb5e6ff6daf3ff80cb844afe715b82a912",
+      "taiko/tests/test_playtrend.py": "a0ab7c89e48f89a1fc8f3b4e4f8bfac04aa6ce61e10f3cdbe7930d2e4878a31b",
+      "taiko/tests/test_publication_history.py": "25eb77baa2afdf5e4515085aa2efde1bd4e483bffc5d5c58af3c8a8cbd66ce6d",
+      "taiko/tests/test_daily_publication.py": "5d2a2c85f6c2afbdcf815f501e06fb99dcd203c0ebe269d050f1953e3d53c879"
+    }
+  },
+  "viewer": {
+    "preparedVersion": "0.82.0",
+    "liveVersion": "0.81.11",
+    "parentCommit": "f33fbe34658e1bcf19baa4b79203456def8641fe",
+    "standardReleasePending": true,
+    "manualPush": false
+  },
+  "implementation": [
+    "One taiko_store.daily implementation; Source SH then namespace EX for writes, namespace SH for explicit reads; acquisition reuses its existing Source EX.",
+    "v1/v2 direct capture also retains one Source SH across both families when no explicit store is provided; no SH-to-EX upgrade.",
+    "Existing backup/restore/purge reuse the same bounded namespace lock under Source EX.",
+    "Source identity/root/live lease are checked; plain directory/file/lock, O_NOFOLLOW and 30-second namespace deadline.",
+    "8MiB archive cap, fsync atomic file plus parent directory; optional Source stage identity is recognized by existing EX collector.",
+    "Any changed measurement requires active canonical current/history; legacy and tombstone mutations fail, unchanged frozen reads remain available.",
+    "Trend captures history, computes and persists while Source SH remains held.",
+    "Backfill streams canonical history and sorting fallback metadata under Source SH; 10000 files/32MiB per-file ceilings retained; plain seed 8MiB/10000 records.",
+    "Past days, capturedAt/computedAt/origin, namespace envelope and first-value/later-today rules preserved; daily IO does not increment C/H Source head.",
+    "No transaction across v1/v2 namespaces or SQL/filesystem is claimed."
+  ],
+  "qa": {
+    "isolation": "One serial memory runner. Guarded Source regression excludes production personal records/runtime mutations/real HTTP; separate pure multiprocessing publication/backup tests use owned /var/tmp roots. No SQL used.",
+    "finalRuns": [
+      {
+        "name": "source-offline",
+        "passed": 349,
+        "deselectedProductionCases": 9,
+        "warnings": 1,
+        "secondsPytest": 28.43
+      },
+      {
+        "name": "publication-process-backup",
+        "passed": 40,
+        "faultSubtestsPassed": 25,
+        "secondsPytest": 5.67
+      },
+      {
+        "name": "retained-daily-trend-adapter",
+        "passed": 3,
+        "deselectedBySelection": 160,
+        "warnings": 1,
+        "secondsPytest": 1.44
+      }
+    ],
+    "finalPassed": 392,
+    "additionalFaultSubtests": 25,
+    "sameSerialWrapper": true,
+    "frozenOracle": "d4a9d22:taiko/plugins/utils/daily_ability.py",
+    "golden": "Complete v1/v2 daily JSON byte equality on separate owned roots with frozen clocks; both stubbed calculations and actual Core computations using three synthetic scores from common tracked public catalogs.",
+    "supplementalTrackedCatalogRun": {
+      "passed": 1,
+      "includedInFinal349": true,
+      "artifactPrefix": "/var/tmp/phase6-daily-real-formula"
+    },
+    "actualProcesses": [
+      "Daily Source SH blocks concurrent Source EX deletion/backup/collection",
+      "Namespace EX blocks another namespace writer, with bounded lock failure and release verification",
+      "Death before atomic daily replace preserves whole old file and leaves a Source-tagged stage; EX collector removes it",
+      "Death after fsync daily-archive-durable keeps whole new file; C/H head remains unchanged; subsequent mutation succeeds"
+    ],
+    "otherChecks": [
+      "existing acquisition EX reused without nested store",
+      "frozen past/today behavior and v1/v2 namespaces",
+      "real six-dimension formula envelopes",
+      "trend Source SH before history capture",
+      "canonical backfill after projection loss",
+      "unmanaged/tombstone write refusal",
+      "wrong root/Source/expired lease",
+      "archive/file-lock symlink rejection",
+      "readonly/exception preserve bytes",
+      "archive/seed input caps"
+    ],
+    "resources": {
+      "results": [
+        {
+          "name": "source-offline",
+          "exitCode": 0,
+          "seconds": 31.12
+        },
+        {
+          "name": "publication-process-backup",
+          "exitCode": 0,
+          "seconds": 6.077
+        },
+        {
+          "name": "retained-daily-trend-adapter",
+          "exitCode": 0,
+          "seconds": 3.881
+        }
+      ],
+      "exitCode": 0,
+      "seconds": 41.078,
+      "cgroup": "/sys/fs/cgroup/development.slice/development-qa.slice/taiko-qa-1791784950-2236004.service",
+      "sampledPeakBytes": 267546624,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "selfMaxRssKiB": 15852,
+      "largestChildMaxRssKiB": 321568
+    },
+    "cleanup": {
+      "wrapperExit": 0,
+      "journalDeactivatedSuccessfully": true,
+      "cgroupRemoved": true,
+      "ownedChildrenReaped": true,
+      "noQaDevBuildServiceLeft": true
+    },
+    "artifacts": [
+      "/var/tmp/phase6-daily-final-qa.py",
+      "/var/tmp/phase6-daily-final-qa.log",
+      "/var/tmp/phase6-daily-final-resource.json",
+      "/var/tmp/phase6-daily-pre-final-pass-qa.log",
+      "/var/tmp/phase6-daily-real-formula-qa.log"
+    ],
+    "earlierFailures": [
+      {
+        "artifactPrefix": "/var/tmp/phase6-daily-first",
+        "passed": 333,
+        "failed": 1,
+        "reason": "Frozen trend fixture attempted daily mutation before canonical adoption; fixture now adopts its owned Source before invoking either adapter. Canonical write requirement unchanged."
+      },
+      {
+        "artifactPrefix": "/var/tmp/phase6-daily-real-formula-selection-failure",
+        "selected": 0,
+        "exitCode": 5,
+        "reason": "Synthetic tracked-catalog test name started test_real_, which the offline guard deliberately excludes. Renamed to test_tracked_catalog_actual without weakening the guard; supplemental and final run both pass."
+      }
+    ]
+  },
+  "maintenanceAudit": [
+    {
+      "path": "taiko/scripts/storage_maintenance.py",
+      "finding": "Host VSIX cleanup; userdata explicitly protected. No Source current/history/daily Writer; not modified or executed against host caches."
+    },
+    {
+      "path": "taiko/scripts/taiko_admin_backup.py",
+      "finding": "Managed catalog JSON/cover assets and admin-log tables; scheduled archive maintenance deletes only backup artifacts. Does not back up or mutate userdata; not modified or executed."
+    },
+    {
+      "path": "taiko/taiko_store/publication.py:collect",
+      "finding": "Explicit Source EX keeps current/previous generations and removes only this Source stages. New daily atomic stages use the existing recognized Source prefix; actual dead-stage test verifies cleanup."
+    },
+    {
+      "path": "taiko/taiko_store/backup.py",
+      "finding": "Daily namespace lock now shared with daily storage; existing independent portable backup/restore/purge tests pass."
+    }
+  ],
+  "production": {
+    "sqlMutation": false,
+    "dataCopiedIntoTest": false,
+    "sourceRuntimeCopied": false,
+    "restart": false,
+    "deploy": false,
+    "clientStarted": false,
+    "services": {
+      "taiko-viewer.service": {
+        "state": "active",
+        "pid": 1063394
+      },
+      "taiko-sync-receiver.service": {
+        "state": "active",
+        "pid": 1063408
+      },
+      "taiko-public-api.service": {
+        "state": "active",
+        "pid": 829173
+      }
+    }
+  },
+  "limitations": [
+    "Not all Writer activation or native private return-proof completion.",
+    "No production adoption, real upstream, complete NoneBot boot, PNG or authenticated online acceptance.",
+    "No million-record cold/warm cost or full-size acceptance; existing ceilings require remaining reconciliation.",
+    "Daily archives remain independently atomic and must be included by exact content in Read Model dependencies."
+  ],
+  "remaining": [
+    "Native private return proof and final writer coverage audit",
+    "P1a explicit canonical adoption after all old Writers stop",
+    "Rebuildable Read Model with exact Source/daily/catalog/goal/measurement dependencies and invalidation",
+    "Limit reconciliation/million-record cold/warm IO/RSS",
+    "Trusted operations/recovery and fixed runtime dependencies",
+    "Standard Viewer deployment/coordinated runtime activation/explicit production grants/real product acceptance"
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "definedBy": "owner explicit reply 2026-10-16",
+  "appliesTo": [
+    "Viewer 0.82",
+    "0.95 Platform RC"
+  ],
+  "status": "TARGET_DEFINED",
+  "evidenceStatus": "EVIDENCE_PENDING",
+  "acceptance": "NOT_PASSED",
+  "recovery": {
+    "rpoMinutesMax": 15,
+    "coreRtoMinutesMax": 120,
+    "recommendedIncrementalBackupAttemptIntervalMinutes": 5,
+    "recoverableCheckpointAgeMinutesMax": 15,
+    "rtoStart": "Failure makes service unavailable",
+    "rtoEnd": "Authentication, score reads, history queries and core writes restored",
+    "authorities": [
+      "SQL accounts and bindings",
+      "current/history publication",
+      "Growth measurements",
+      "daily ability archive",
+      "Goal",
+      "developer grants and revocations",
+      "privacy state",
+      "published Annual reports and share identities",
+      "required configuration and artifact versions"
+    ],
+    "immutableHistory": "Preserve original values, provenance and model identity; no silent recomputation",
+    "authorizationRecovery": "No restored excess privilege; invalidate affected tokens and require fresh authorization if revocation continuity cannot be proven",
+    "recomputableImagesAndCaches": {
+      "independentRpo": null,
+      "rebuildAfterCoreRecoveryHoursMax": 24
+    },
+    "requiredProof": "Consistent DB/current/history/measurement/authorization recovery and last valid commit generation, not merely service startup"
+  },
+  "latencyMilliseconds": {
+    "b30FullGeneration": {
+      "p95": 8000,
+      "p99": 15000,
+      "hardMax": 30000
+    },
+    "b30CacheHit": {
+      "p95": 2000,
+      "p99": 5000,
+      "whenNoCache": "N/A; never fabricate hits"
+    },
+    "growthOverviewAnd90DayHistory": {
+      "p95": 3000,
+      "p99": 6000
+    },
+    "growthPassport": {
+      "p95": 5000,
+      "p99": 10000
+    },
+    "growthPassportExtreme2000Snapshots": {
+      "hardMax": 15000,
+      "separateGate": true
+    },
+    "annualCachedReportRead": {
+      "p95": 800,
+      "p99": 2000
+    },
+    "annualColdGenerationIncludingQueue": {
+      "p95": 30000,
+      "p99": 90000,
+      "hardMax": 180000
+    },
+    "annualCachedPosterRead": {
+      "p95": 1200,
+      "p99": 3000
+    },
+    "annualFirstPosterRender": {
+      "workerTimeoutMax": 60000,
+      "separateFromReportGet": true
+    },
+    "privateCurrentReadIncludingAuthorization": {
+      "p95": 800,
+      "p99": 2000
+    },
+    "privateMergedAndHistoryRead": {
+      "p95": 2500,
+      "p99": 6000,
+      "hardMax": 10000
+    }
+  },
+  "measurementProtocol": {
+    "duration": "Server request/task wall time including reads, calculation, serialization and applicable queue time; not isolated function time",
+    "runtime": "Candidate Viewer + owner-approved local installed Taiko 0.14.2 + exact 94-distribution roles; retain 0.14.1 as baseline, match all other environment/input/concurrency conditions",
+    "identityFields": [
+      "artifact SHA",
+      "dataset revision",
+      "actual executable",
+      "role",
+      "source commit",
+      "concurrency",
+      "sample class"
+    ],
+    "concurrencyForB30GrowthPrivateReads": [
+      1,
+      3,
+      5
+    ],
+    "syntheticUserSizes": [
+      "small",
+      "medium",
+      "large"
+    ],
+    "recommendedSuccessfulSamplesPerClassMin": 200,
+    "annualGeneratorConcurrencyMax": 2,
+    "annualRendererConcurrencyMax": 1,
+    "annualArrivalRatesPerSecond": [
+      1,
+      3,
+      5
+    ],
+    "annualColdHistorySizes": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "successRateMin": 0.995,
+    "oomMax": 0,
+    "oomKillMax": 0,
+    "includeInFailureAccounting": [
+      "errors",
+      "timeouts",
+      "429",
+      "dropped requests"
+    ],
+    "metrics": [
+      "p50",
+      "p95",
+      "p99",
+      "CPU",
+      "RSS/cgroup",
+      "I/O",
+      "subprocess starts",
+      "cache hits",
+      "replay count",
+      "failure rate"
+    ],
+    "memoryPeakUnavailable": "UNAVAILABLE",
+    "comparison": "Same environment, input and concurrency for previous and candidate implementations",
+    "prohibited": [
+      "exclude failing or high-load samples",
+      "relax isolation",
+      "increase worker limits to force PASS",
+      "mix extreme users into ordinary percentiles",
+      "infer full latency from generator-only time"
+    ],
+    "originalRuntimeTarget": "Candidate Viewer + locked installed Taiko 0.14.1 + exact 94-distribution role environments"
+  },
+  "independentReleaseBlockers": [
+    "Credential control plane",
+    "Source-switch false play"
+  ],
+  "contractFreeze": "0.83 NOT STARTED; O1 success cannot waive P0 or owner signoff"
+}
