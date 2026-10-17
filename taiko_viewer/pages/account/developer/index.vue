@@ -68,7 +68,7 @@ const copy = computed(() =>
   locale.value === "ja"
     ? {
         title: "開発者権限",
-        intro: "承認後、24 桁の開発者 Token がメールで送信され、userid 単位で完全な JSON を取得できます。",
+        intro: "承認済み Token で任意の Source ID の現在スコアを読み取れます。プレイヤーごとの同意は不要です。書き込み・同期・認証情報・成長履歴は対象外です。",
         currentStatus: "現在の状態",
         notApplied: "未申請",
         tokenMask: "Token マスク",
@@ -102,7 +102,7 @@ const copy = computed(() =>
       }
     : {
         title: "开发者权限",
-        intro: "申请通过后会向你填写的邮箱发送 24 位开发者 Token，可用于按 userid 读取完整 JSON。",
+        intro: "申请通过后可用 Developer Token 按 Source ID 读取任意玩家的当前成绩，无需玩家逐人授权；不含写入、同步、凭据或成长历史权限。",
         currentStatus: "当前状态",
         notApplied: "未申请",
         tokenMask: "Token 掩码",

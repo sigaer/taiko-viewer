@@ -25,7 +25,7 @@ const fail=(statusCode:number,statusMessage:string)=>createError({statusCode,sta
  */
 export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview>{
  setHeader(event,'cache-control','private, no-store');setHeader(event,'vary','Cookie, Authorization');
- if(useRuntimeConfig().myTaikoReadModelMode!=='allowlist')throw fail(404,'not-found');
+ if(!['all','allowlist'].includes(String(useRuntimeConfig().myTaikoReadModelMode)))throw fail(404,'not-found');
  if(Object.keys(getQuery(event)).length)throw fail(400,'unsupported-query');
  const user=await requireAccountUser(event);
  const admission=await captureMyTaikoAdmission(user.id);if(!admission)throw fail(404,'not-found');

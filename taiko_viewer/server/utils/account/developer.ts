@@ -1,3 +1,5 @@
+import {sanitizeDeveloperScores} from '../../infrastructure/account/developer-score-dto';
+import {grantApprovedDeveloperScores} from '../../infrastructure/account/approved-developer-scores';
 import { readAuthorizedSourceUserdata } from "../../services/account/source-access.ts";
 import { privateSourceResponse } from "../../infrastructure/account/private-source-response.ts";
 import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
@@ -215,22 +217,20 @@ export const reviewDeveloperApplication = async (
   let mailDelivered = true;
   if (action === "approve") {
     issuedToken = generateDeveloperToken();
-    await revokeActiveDeveloperTokens(application.user_id);
-    await db.execute(
-      `INSERT INTO web_developer_tokens
-        (user_id, application_id, token_hash, token_mask, status, issued_by_user_id)
-       VALUES (?, ?, ?, ?, 'active', ?)`,
-      [application.user_id, application.id, sha256(issuedToken), maskDeveloperToken(issuedToken), reviewer.id]
-    );
-    await db.execute(
-      `UPDATE web_developer_applications
-       SET status = 'approved',
-           review_note = ?,
-           reviewed_by_user_id = ?,
-           reviewed_at = NOW()
-       WHERE id = ?`,
-      [reviewNote || null, reviewer.id, application.id]
-    );
+    const connection=await db.getConnection();
+    try{
+      await connection.beginTransaction();
+      const [[locked]]=await connection.execute<DbRow<DeveloperApplicationJoinedRow>[]>(
+        'SELECT id,status FROM web_developer_applications WHERE id=? FOR UPDATE',[application.id]);
+      if(locked?.status!=='pending')throw createError({statusCode:409,statusMessage:'该申请已处理，请刷新后重试'});
+      await connection.execute("UPDATE web_developer_tokens SET status='revoked',revoked_at=NOW() WHERE user_id=? AND status='active'",[application.user_id]);
+      const [issued]=await connection.execute<ResultSetHeader>(`INSERT INTO web_developer_tokens
+        (user_id,application_id,token_hash,token_mask,status,issued_by_user_id) VALUES(?,?,?,?,'active',?)`,
+        [application.user_id,application.id,sha256(issuedToken),maskDeveloperToken(issuedToken),reviewer.id]);
+      await connection.execute(`UPDATE web_developer_applications SET status='approved',review_note=?,reviewed_by_user_id=?,reviewed_at=NOW() WHERE id=?`,[reviewNote||null,reviewer.id,application.id]);
+      await grantApprovedDeveloperScores(connection,issued.insertId,reviewer.id);
+      await connection.commit();
+    }catch(error){await connection.rollback();throw error;}finally{connection.release();}
     try {
       await sendDeveloperApprovedMail({
         email: application.reply_email,
@@ -293,7 +293,7 @@ export const getDeveloperUserdataByUserid = async (event: H3Event, useridInput: 
     await enforceTaikoOpenQuota(event, "developer_userdata");
     const userid = String(useridInput || "").trim();
     ensureNonEmpty(userid, "缺少 userid");
-    return await privateSourceResponse(event, 'current', () => isMergedSource(userid)?readAuthorizedMergedSource(event,userid,'current'):readAuthorizedSourceUserdata(event, userid));
+    return await privateSourceResponse(event, 'current', async () => sanitizeDeveloperScores(await ( isMergedSource(userid)?readAuthorizedMergedSource(event,userid,'current'):readAuthorizedSourceUserdata(event, userid))));
   } catch (error) {
     if (isError(error) || error instanceof PublicationUnavailableError) throw error;
     throw new PublicationUnavailableError();

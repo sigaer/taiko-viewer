@@ -1,4 +1,4 @@
-/** Explicit source authority; developer quota approval alone grants no access. */
+/** Explicit source authority, including approved developer current-score reads. */
 export const SOURCE_SERVICE_GRANT_TABLE_SQL = `CREATE TABLE IF NOT EXISTS taiko_source_service_grants (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   developer_token_id BIGINT UNSIGNED NOT NULL,
@@ -32,7 +32,7 @@ export const SOURCE_SERVICE_GRANT_AUDIT_TABLE_SQL = `CREATE TABLE IF NOT EXISTS 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`;
 
 export const SOURCE_SERVICE_SCOPES = [
-  'source_read', 'history_read', 'wahlap_update', 'hiroba_sync',
+  'source_read', 'scores_read_any', 'history_read', 'wahlap_update', 'hiroba_sync',
   'hiroba_credential_status', 'hiroba_bind', 'bind_read', 'bind_write', 'bind_current',
   'bind_remove', 'bind_visibility', 'score_token_issue', 'bind_migrate'
 ] as const;
