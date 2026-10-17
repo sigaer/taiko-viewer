@@ -4,7 +4,11 @@ info:
   version: 0.85.0-rc.2
   description: Additive proposal only. The frozen Contract v1.0 schema and original OpenAPI document are unchanged.
 servers:
-  - url: https://viewer.sakura-bot.cn
+  - url: http://127.0.0.1:{port}
+    description: Isolated local validation only; this candidate is not deployed.
+    variables:
+      port:
+        default: "43085"
 paths:
   /api/v1/taiko/catalog/songs:
     get:
@@ -26,7 +30,7 @@ paths:
                     type: object
                     required: [contractVersion, schemaRevision, catalogRevision]
                     properties:
-                      contractVersion: { type: string }
+                      contractVersion: { const: "1.1" }
                       schemaRevision: { type: string }
                       catalogRevision: { type: string }
                   items:
