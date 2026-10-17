@@ -6,6 +6,7 @@ import { buildPageDescription } from "~/utils/seo";
 
 const developerApiV1Enabled = computed(() => accountUser.value?.developerApiV1Access === true);
 const { t, locale } = useI18n();
+const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 const { accountUser, fetchCurrentUser } = useAccountState();
@@ -1376,14 +1377,23 @@ const removeQqBinding = async () => {
 }
 .third-party-settings p {
   margin: 0;
-  color: var(--el-text-color-secondary);
+  color: var(--el-text-color-regular);
   line-height: 1.65;
   font-size: 13px;
 }
 .third-party-settings a {
   flex-shrink: 0;
-  color: var(--el-color-primary);
+  color: inherit;
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+:global(body.theme-dark .third-party-settings p) {
+  color: inherit;
 }
 
 .onboarding-card {

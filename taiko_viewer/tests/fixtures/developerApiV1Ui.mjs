@@ -26,7 +26,7 @@ export async function consentBrowser(c,{clientId,bindingId,key,ask}){
   browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage'],timeout:15000});
   context=await browser.newContext({viewport:{width:375,height:812},reducedMotion:'reduce'});const cookie=c.cookie.split('=');await context.addCookies([{name:cookie[0],value:cookie.slice(1).join('='),url:c.baseUrl}]);
   page=await context.newPage();page.setDefaultTimeout(10000);await page.goto(c.baseUrl+'/consent-ui',{waitUntil:'domcontentloaded',timeout:15000});
-  const submit=page.getByRole('button',{name:'同意授权',exact:true});await page.locator('#grant-app').waitFor();assert.equal(await submit.isDisabled(),true);
+  const submit=page.getByRole('button',{name:'同意授权',exact:true});await page.locator('details').filter({has:page.locator('#grant-app')}).locator('summary').click();await page.locator('#grant-app').waitFor();assert.equal(await submit.isDisabled(),true);
   const prior=await page.locator('[data-grant-id]').first().getAttribute('data-grant-id');
   await page.locator('#grant-app').selectOption(clientId);await page.locator('#grant-binding').selectOption(bindingId);await page.locator('input[value="scores:read"]').check();
   assert.equal(await submit.isDisabled(),true);await page.locator('form').first().locator('input[type="checkbox"]').last().check();await submit.click();

@@ -68,6 +68,7 @@ export async function accountSourceFixture(task,{manual=false,withDeveloper=fals
    for(const [method,path,file] of [['post','/login','auth/login.post.ts'],['post','/logout','auth/logout.post.ts'],['get','/profile','profile.get.ts'],['get','/bindings','bindings.get.ts'],['get','/sync','sync/targets.get.ts'],['post','/sync-submit','sync.post.ts'],['post','/token','score-token.post.ts'],['post','/current','bindings/current.post.ts'],['post','/remove','bindings/remove.post.ts']])router[method](path,(await import(new URL('../../server/api/account/'+file,import.meta.url).href)).default);
    const app=createApp();
    if(withDeveloper){
+    c.route('get','/api/account/developer',(await import('../../server/api/account/developer.get.ts')).default);
     // Existing isolated fixtures explicitly admit their own synthetic clients.
     // Production and the real Nuxt rollout test read the server-owned policy directly.
     c.config.developerApiClientAllowlistPath=resolve(c.root,'fixture-v1-clients.json');
