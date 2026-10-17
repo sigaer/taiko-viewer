@@ -129,7 +129,8 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
   // The nullable schema migration preserves every pre-existing grant value.
   const [legacyBefore]=await c.pool.query('SELECT grant_id,scopes_json,consent_version,expires_at FROM web_developer_resource_grants WHERE consent_version=? ORDER BY grant_id',[issue.consentVersion]);
   await c.pool.execute('ALTER TABLE web_developer_resource_grants MODIFY COLUMN expires_at DATETIME(3) NOT NULL');
-  await c.pool.execute(await readFile(new URL('../deploy/migrations/20261017_developer_account_consent.sql',import.meta.url),'utf8'));
+  execFileSync(process.execPath,[new URL('../scripts/migrate_developer_account_consent.mjs',import.meta.url).pathname,'--database='+process.env.TAIKO_DB_NAME,'--apply'],{env:process.env,timeout:30000,maxBuffer:2048});
+  execFileSync(process.execPath,[new URL('../scripts/migrate_developer_account_consent.mjs',import.meta.url).pathname,'--database='+process.env.TAIKO_DB_NAME],{env:process.env,timeout:30000,maxBuffer:2048});
   const [legacyAfter]=await c.pool.query('SELECT grant_id,scopes_json,consent_version,expires_at FROM web_developer_resource_grants WHERE consent_version=? ORDER BY grant_id',[issue.consentVersion]);assert.deepEqual(legacyAfter,legacyBefore);
   const unified={bindingId,clientId:clientX,consent:true,consentVersion:'viewer-account-consent-v2',audience:issue.audience};
   await ask('unified-explicit-refusal','/api/account/developer/grants',{method:'POST',body:{...unified,consent:false},expected:400});
