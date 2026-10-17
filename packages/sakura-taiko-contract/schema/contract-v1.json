@@ -127,14 +127,16 @@
             "string",
             "null"
           ],
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "Original Chinese/display name from song_data.json; null when the source has no value."
         },
         "song_name_jp": {
           "type": [
             "string",
             "null"
           ],
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "Original Japanese name from song_data.json, falling back to song_alias.json when absent; null when neither source has a value."
         },
         "aliases": {
           "type": "array",
@@ -142,7 +144,8 @@
           "items": {
             "type": "string",
             "maxLength": 256
-          }
+          },
+          "description": "Alias strings from song_alias.json joined by numeric song ID; empty when no aliases exist."
         },
         "catalogRevision": {
           "type": [
