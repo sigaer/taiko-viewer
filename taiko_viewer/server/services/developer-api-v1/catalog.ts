@@ -29,7 +29,7 @@ export async function catalog(){
  const runtime=useRuntimeConfig();
  const paths=getRuntimePaths();
  const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));
- const aliasPath=resolve(paths.repoRoot,'songs/song_alias.json');
+ const aliasPath=resolve(songPath,'..','song_alias.json');
  const [songSource,aliasSource]=await Promise.all([
   readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
   readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
