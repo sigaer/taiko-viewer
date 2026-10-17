@@ -530,8 +530,8 @@ const submitApplication = async () => {
   color: var(--el-color-primary);
 }
 
-:global(body.theme-dark) .developer-guide .section-title p,
-:global(body.theme-dark) .developer-guide .guide-note {
+:global(body.theme-dark .developer-guide .section-title p),
+:global(body.theme-dark .developer-guide .guide-note) {
   color: inherit;
 }
 
