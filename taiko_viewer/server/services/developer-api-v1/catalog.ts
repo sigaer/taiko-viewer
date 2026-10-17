@@ -24,22 +24,26 @@ async function readBoundedArray(path:string,maxBytes:number,maxRows:number,code:
  finally{await file.close();}
 }
 
-/** Song and alias metadata share one bounded read model and one revision. */
-export async function catalog(){
+/** Song metadata and aliases are combined only for public songs/meta reads. */
+export async function catalog(includeAliases=false){
  const runtime=useRuntimeConfig();
  const paths=getRuntimePaths();
  const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));
- const aliasPath=resolve(songPath,'..','song_alias.json');
- const [songSource,aliasSource]=await Promise.all([
-  readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
-  readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
- ]);
+ const songSource=await readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED');
  const songRevision=hash(songSource.bytes.toString('utf8'));
- const aliasRevision=hash(aliasSource.bytes.toString('utf8'));
- const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
+ let aliasRevision:string|null=null;
+ let aliasRows:Array<Record<string,unknown>>=[];
+ if(includeAliases){
+  const aliasPath=resolve(songPath,'..','song_alias.json');
+  const aliasSource=await readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED');
+  aliasRevision=hash(aliasSource.bytes.toString('utf8'));
+  aliasRows=aliasSource.rows;
+ }
+ const revision=includeAliases?hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision})):songRevision;
  const projected=projectCatalog(songSource.rows,revision);
+ if(!includeAliases)return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};
  const aliasById=new Map<string,Record<string,unknown>>();
- for(const row of aliasSource.rows){
+ for(const row of aliasRows){
   const id=Number(row.id);
   if(Number.isSafeInteger(id)&&id>0)aliasById.set(String(id),row);
  }
