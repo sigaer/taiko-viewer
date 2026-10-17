@@ -1,5 +1,19 @@
 """Value-only Catalog v1.1 projection. Unknown region/mode remain explicit."""
+import math
 import re
+
+
+def _source_id(value, label):
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise ValueError('Invalid ' + label)
+    if isinstance(value, float):
+        if not math.isfinite(value) or not value.is_integer():
+            raise ValueError('Invalid ' + label)
+        value = int(value)
+    text = str(value)
+    if not re.fullmatch(r'[1-9][0-9]*', text) or int(text) > 9007199254740991:
+        raise ValueError('Invalid ' + label)
+    return text
 
 def difficulty_to_tja_course(difficulty):
     if type(difficulty) is not int or not 1 <= difficulty <= 5:
@@ -16,9 +30,7 @@ def project_catalog(rows, revision, alias_rows=None):
     aliases_by_id = {}
     for row in alias_rows:
         value = row.get('id') if isinstance(row, dict) else None
-        if type(value) not in (int, str) or not re.fullmatch(r'[1-9][0-9]*', str(value)) or int(value) > 9007199254740991:
-            raise ValueError('Invalid alias song ID')
-        song_id = str(value)
+        song_id = _source_id(value, 'alias song ID')
         if song_id in aliases_by_id:
             raise ValueError('Ambiguous alias catalog')
         aliases_by_id[song_id] = row
