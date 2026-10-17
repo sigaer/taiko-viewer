@@ -39,8 +39,8 @@ paths:
                         title: { type: [string, "null"], description: Existing canonical display title retained for compatibility }
                         catalogRevision: { type: string }
                         availability: { type: object }
-                        song_name: { type: [string, "null"], description: Original catalog display/Chinese title field; no translation is fabricated }
-                        song_name_jp: { type: [string, "null"], description: Japanese title from source metadata }
+                        song_name: { type: [string, "null"], description: Chinese title from the original song_name source field }
+                        song_name_jp: { type: [string, "null"], description: Japanese title from the original song_name_jp field }
                         aliases: { type: array, maxItems: 100, items: { type: string } }
         "401": { description: Invalid supplied Developer Token }
         "503": { description: Song catalog or alias source unavailable or exceeds its size limit }
