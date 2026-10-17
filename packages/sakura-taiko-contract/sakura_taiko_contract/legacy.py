@@ -82,7 +82,7 @@ def from_legacy_score(record: dict[str, Any], *, source: str, captured_at: str |
             raise ValueError('invalid score timestamp: ' + field)
     timestamp = lambda field: None if record.get(field) in (None, '') else str(record[field])
     return {
-        'song': {'songId': identity, 'title': None, 'catalogRevision': catalog_revision},
+        'song': {'songId': identity, 'song_name': None, 'song_name_jp': None, 'aliases': [], 'catalogRevision': catalog_revision},
         'chart': {'songId': identity, 'chartId': f'{identity}:{difficulty}:{chart_type}',
                   'difficulty': difficulty, 'level': chart_level, 'type': chart_type,
                   'variant': None, 'catalogRevision': catalog_revision},
