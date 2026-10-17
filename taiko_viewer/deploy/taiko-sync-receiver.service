@@ -1,18 +1,15 @@
 [Unit]
-Description=Taiko Sync Dispatcher (Sakura bot)
+Description=Taiko Sync Dispatcher
 After=network.target
 
 [Service]
 Type=simple
 WorkingDirectory=/home/sigaer/taiko
-Environment=PYTHONUNBUFFERED=1
-Environment=TAIKO_SYNC_RECEIVER_HOST=127.0.0.1
-Environment=TAIKO_SYNC_RECEIVER_PORT=3102
-Environment="TAIKO_SYNC_RECEIVER_NAME=Sakura bot"
-Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
-ExecStart=/home/sigaer/taiko/qa-vault/role-center-wf9putbr/venv/bin/python -I -m taiko_bot.services.sync_dispatch_server
+Environment=TAIKO_RUNTIME_ROOT=/home/sigaer/taiko
+EnvironmentFile=/etc/taiko-runtime.env
+ExecStart=/opt/taiko-bot/current/bin/python -I -m taiko_bot.services.sync_dispatch_server
 Restart=always
-RestartSec=5
+RestartSec=3
 User=root
 Group=root
 

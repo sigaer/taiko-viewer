@@ -1,7 +1,7 @@
 import type { GrowthDailyProgress, GrowthFact, GrowthFactType } from "../types/player-growth";
 import type { PlayerGoal } from "../types/player-goal";
 import { growthCalendarDay } from "./playerGrowth.ts";
-export const GROWTH_FACT_POLICY_REVISION = 'observation-chart-continuity-v3';
+export const GROWTH_FACT_POLICY_REVISION = 'observation-chart-continuity-v4';
 
 const scoreType = (type: string): GrowthFactType => type === "clear-upgrade" ? "clear" : type as GrowthFactType;
 const part = (value: unknown) => encodeURIComponent(value === null || value === undefined || value === "" ? "_" : String(value));
