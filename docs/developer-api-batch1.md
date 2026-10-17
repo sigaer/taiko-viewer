@@ -22,7 +22,7 @@ The songs endpoint returns one canonical song shape:
 - `title` is not returned. Consumers use `song_name` directly; there is no duplicate alias for the same value.
 - `catalogRevision` / response `versions.catalogRevision`: SHA-256 over the source song-data and alias-file SHA-256 values. Changing either input changes the catalog revision and ETag.
 
-A missing source title remains `null`; this API does not fabricate translations.
+A missing `song_name` or `song_name_jp` remains `null`; this API does not fabricate translations.
 
 ## Authorization and consistency
 
