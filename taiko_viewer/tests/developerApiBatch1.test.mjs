@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(path,import.meta.url),'utf8');
 test('batch 1 exposes the intended API routes',async()=>{
- const [aliases,rating,b30,recommendations]=await Promise.all([read('../server/api/v1/taiko/catalog/aliases.get.ts'),read('../server/api/v1/taiko/players/[playerId]/rating.get.ts'),read('../server/api/v1/taiko/players/[playerId]/b30.get.ts'),read('../server/api/v1/taiko/players/[playerId]/recommendations.get.ts')]);
- assert.ok(aliases.includes("publicRead(event,'aliases')"));
+ const [aliases,progress,rating,b30,recommendations]=await Promise.all([read('../server/api/v1/taiko/catalog/aliases.get.ts'),read('../server/api/v1/taiko/catalog/progress-options.get.ts'),read('../server/api/v1/taiko/players/[playerId]/rating.get.ts'),read('../server/api/v1/taiko/players/[playerId]/b30.get.ts'),read('../server/api/v1/taiko/players/[playerId]/recommendations.get.ts')]);
+ assert.ok(aliases.includes("publicRead(event,'aliases')"));assert.ok(progress.includes('getProgressOptions'));assert.ok(progress.includes('conditional(event'));
  for(const source of [rating,b30,recommendations]){assert.ok(source.includes('apiHandler'));assert.ok(source.includes('privateAnalysis'));assert.ok(source.includes('conditional(event'));}
 });
 test('analysis delegates to installed algorithm and rechecks live score grant',async()=>{
