@@ -4,7 +4,7 @@ import {getCookie,getHeader,getRequestIP,getRequestURL,type H3Event} from 'h3';
 import type {Pool,RowDataPacket} from 'mysql2/promise';
 import {getAccountDb,ensureAccountSchema} from '../../utils/account-db';
 import {consumeOpenQuota} from '../../infrastructure/account/open-quota';
-import {ApiFailure,AUDIENCE,CONSENT_VERSION,OPEN_SCOPES,hash,deny} from './common';
+import {ApiFailure,AUDIENCE,CONSENT_VERSION,LEGACY_CONSENT_VERSION,OPEN_SCOPES,hash,deny} from './common';
 export type ClientProof={clientId:string;tokenId:string;credentialHash:string};
 export async function clientFromHash(db:Pick<Pool,'execute'>,credentialHash:string):Promise<ClientProof>{
  const [rows]=await db.execute<RowDataPacket[]>(`SELECT c.client_id,CAST(t.id AS CHAR) token_id
@@ -49,7 +49,7 @@ export async function quota(event:H3Event,db:Pool,client?:ClientProof){
 export async function publicIdentity(event:H3Event,db:Pool){
  const client=getHeader(event,'authorization')===undefined?undefined:await apiClient(event,db);await quota(event,db,client);
 }
-export type GrantProof={grantId:string;revision:string;ownerId:string;bindingId:string;playerId:string;taikoId:string;source:string;manualId:string|null;scopes:string[];expiresAt:string};
+export type GrantProof={grantId:string;revision:string;ownerId:string;bindingId:string;playerId:string;taikoId:string;source:string;manualId:string|null;scopes:string[];expiresAt:string|null};
 export async function proveGrant(db:Pick<Pool,'execute'>,client:ClientProof,playerId:string,scope:string):Promise<GrantProof>{
  if(!/^plr_[a-f0-9]{32}$/.test(playerId)||!await developerClientAdmitted(client.clientId))throw deny();
  const [rows]=await db.execute<RowDataPacket[]>(`SELECT g.*,CAST(g.owner_user_id AS CHAR) owner_id,CAST(g.binding_id AS CHAR) binding_key,
@@ -63,14 +63,19 @@ export async function proveGrant(db:Pick<Pool,'execute'>,client:ClientProof,play
  JOIN web_user_accounts developer ON developer.id=c.owner_user_id
  WHERE t.token_hash=? AND t.id=? AND t.status='active' AND t.revoked_at IS NULL
  AND c.status='active' AND app.status='approved' AND developer.email_verified=1 AND g.client_id=? AND g.player_id=? AND CAST(g.audience AS BINARY)=CAST(? AS BINARY) AND g.revoked_at IS NULL
- AND g.issued_at<=UTC_TIMESTAMP(3) AND g.consented_at<=g.issued_at AND g.expires_at>UTC_TIMESTAMP(3)
+ AND g.issued_at<=UTC_TIMESTAMP(3) AND g.consented_at<=g.issued_at
+ AND ((CAST(g.consent_version AS BINARY)=CAST(? AS BINARY) AND g.expires_at IS NULL)
+ OR (CAST(g.consent_version AS BINARY)=CAST(? AS BINARY) AND g.expires_at>UTC_TIMESTAMP(3)))
  AND owner.email_verified=1 AND CAST(b.taiko_id AS BINARY)=CAST(g.taiko_id AS BINARY)
  AND CAST(b.source AS BINARY)=CAST(g.source AS BINARY) AND CAST(b.manual_account_id AS BINARY)<=>CAST(g.manual_account_id AS BINARY)
- AND CAST(g.consent_version AS BINARY)=CAST(? AS BINARY) AND ((b.source IN ('wahlap','hiroba') AND b.verified_title IS NOT NULL AND b.manual_account_id IS NULL)
- OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) LIMIT 1`,[client.credentialHash,client.tokenId,client.clientId,playerId,AUDIENCE,CONSENT_VERSION]);
+ AND ((b.source IN ('wahlap','hiroba') AND b.verified_title IS NOT NULL AND b.manual_account_id IS NULL)
+ OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) LIMIT 1`,[client.credentialHash,client.tokenId,client.clientId,playerId,AUDIENCE,CONSENT_VERSION,LEGACY_CONSENT_VERSION]);
  const row=rows[0];if(!row)throw deny();
  let scopes:unknown;try{scopes=JSON.parse(row.scopes_json);}catch{throw deny();}
- if(!Array.isArray(scopes)||scopes.length===0||scopes.some(s=>!OPEN_SCOPES.includes(s))||!scopes.includes(scope))throw deny();
+ if(!Array.isArray(scopes)||scopes.length===0||scopes.some(s=>!OPEN_SCOPES.includes(s)))throw deny();
+ if(row.consent_version===CONSENT_VERSION){
+  if(scopes.length!==1||scopes[0]!=='account:read'||!OPEN_SCOPES.includes(scope as any))throw deny();
+ }else if(scopes.includes('account:read')||!scopes.includes(scope))throw deny();
  const taikoId=String(row.taiko_id);if(!/^(?:[0-9]{1,25}|manual_[A-Za-z0-9_-]{1,18})$/.test(taikoId)){
   // Existing manual identifiers use the domain's own validated namespace.
   if(row.source!=='manual'||!/^[A-Za-z0-9_-]{1,25}$/.test(taikoId))throw deny();

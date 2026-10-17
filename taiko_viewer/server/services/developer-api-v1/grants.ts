@@ -4,7 +4,7 @@ import {readBody,getRouterParam,getQuery,type H3Event} from 'h3';
 import type {PoolConnection,RowDataPacket} from 'mysql2/promise';
 import type {ResourceGrant} from '@sakura-taiko/contract';
 import {apiDb,sessionOwner} from './authority';
-import {ApiFailure,exactKeys,AUDIENCE,CONSENT_VERSION,OPEN_SCOPES,deny} from './common';
+import {ApiFailure,exactKeys,AUDIENCE,CONSENT_VERSION,LEGACY_CONSENT_VERSION,deny} from './common';
 const id=(prefix='')=>prefix+randomUUID().replaceAll('-','');
 const bindingKey=(value:unknown)=>{if(typeof value!=='string'||!/^[1-9][0-9]{0,18}$/.test(value)||value==='0')throw new ApiFailure(400,'INVALID_REQUEST');return value;};
 const GRANT_FIELDS=`g.*,CAST(g.owner_user_id AS CHAR) owner_id,CAST(g.binding_id AS CHAR) binding_key,
@@ -37,7 +37,7 @@ export async function listGrants(event:H3Event){
  const [clients]=await db.query<RowDataPacket[]>(`SELECT c.client_id clientId,c.display_name displayName,c.status FROM web_developer_api_clients c
  JOIN web_developer_applications a ON a.id=c.application_id AND a.user_id=c.owner_user_id
  JOIN web_user_accounts u ON u.id=c.owner_user_id WHERE c.status='active' AND a.status='approved' AND u.email_verified=1 ORDER BY c.client_id LIMIT 101`);
- const [bindings]=await db.execute<RowDataPacket[]>(`SELECT CAST(b.id AS CHAR) bindingId,b.source,b.verified_title displayName,r.player_id playerId FROM web_taiko_bindings b
+ const [bindings]=await db.execute<RowDataPacket[]>(`SELECT CAST(b.id AS CHAR) bindingId,b.source,b.taiko_id displayName,r.player_id playerId FROM web_taiko_bindings b
  LEFT JOIN web_developer_api_resources r ON r.binding_id=b.id WHERE b.user_id=?
  AND ((b.source IN ('wahlap','hiroba') AND b.verified_title IS NOT NULL AND b.manual_account_id IS NULL)
  OR (b.source='manual' AND CAST(b.manual_account_id AS BINARY)=CAST(b.taiko_id AS BINARY) AND EXISTS(SELECT 1 FROM taiko_manual_accounts m WHERE CAST(m.taiko_id AS BINARY)=CAST(b.taiko_id AS BINARY)))) ORDER BY b.id LIMIT 101`,[owner]);
@@ -46,14 +46,19 @@ export async function listGrants(event:H3Event){
  ORDER BY g.issued_at DESC,g.grant_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
  const admittedClients=[];for(const client of clients.slice(0,100))if(await developerClientAdmitted(client.clientId))admittedClients.push(client);
- return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:admittedClients,bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99]!.grant_id:null};
+ return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:['account:read'],clients:admittedClients,bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99]!.grant_id:null};
 }
 export async function issueGrant(event:H3Event){
  const body=await readBody(event);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiFailure(400,'INVALID_REQUEST');
  exactKeys(body,['bindingId','clientId','scopes','expiresInDays','consent','consentVersion','audience']);
  const bindingId=bindingKey(body.bindingId),clientId=body.clientId;
- if(typeof clientId!=='string'||!/^clt_[a-f0-9]{32}$/.test(clientId)||body.consent!==true||body.consentVersion!==CONSENT_VERSION||body.audience!==AUDIENCE
- ||!Array.isArray(body.scopes)||!body.scopes.length||body.scopes.length>2||body.scopes.some((s:unknown)=>!OPEN_SCOPES.includes(s as any))||new Set(body.scopes).size!==body.scopes.length
+ if(typeof clientId!=='string'||!/^clt_[a-f0-9]{32}$/.test(clientId)||body.consent!==true||body.audience!==AUDIENCE)throw new ApiFailure(400,'INVALID_REQUEST');
+ const unified=body.consentVersion===CONSENT_VERSION;
+ if(unified){
+  // The server determines the complete read permission and its lifetime.
+  if(body.scopes!==undefined||body.expiresInDays!==undefined)throw new ApiFailure(400,'INVALID_REQUEST');
+ }else if(body.consentVersion!==LEGACY_CONSENT_VERSION
+ ||!Array.isArray(body.scopes)||!body.scopes.length||body.scopes.length>2||body.scopes.some((s:unknown)=>s!=='profile:read'&&s!=='scores:read')||new Set(body.scopes).size!==body.scopes.length
  ||!Number.isInteger(body.expiresInDays)||body.expiresInDays<1||body.expiresInDays>90)throw new ApiFailure(400,'INVALID_REQUEST');
  if(!await developerClientAdmitted(clientId))throw deny();
  return transaction(event,async(db,owner)=>{
@@ -67,10 +72,11 @@ export async function issueGrant(event:H3Event){
   await db.execute('INSERT INTO web_developer_api_resources(player_id,binding_id) VALUES (?,?) ON DUPLICATE KEY UPDATE binding_id=VALUES(binding_id)',[id('plr_'),bindingId]);
   const [[resource]]=await db.execute<RowDataPacket[]>('SELECT player_id FROM web_developer_api_resources WHERE binding_id=?',[bindingId]);
   if(!resource)throw new ApiFailure(503,'UNAVAILABLE');
-  const scopes=JSON.stringify([...body.scopes].sort());const grantId=id();
+  const scopes=JSON.stringify(unified?['account:read']:[...body.scopes].sort());const grantId=id();
+  const consentVersion=unified?CONSENT_VERSION:LEGACY_CONSENT_VERSION;
   await db.execute(`INSERT INTO web_developer_resource_grants(grant_id,revision,owner_user_id,binding_id,player_id,client_id,audience,taiko_id,source,manual_account_id,scopes_json,consent_version,consented_at,issued_at,expires_at)
-   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3),DATE_ADD(UTC_TIMESTAMP(3),INTERVAL ? DAY)) ON DUPLICATE KEY UPDATE grant_id=VALUES(grant_id),revision=VALUES(revision),player_id=VALUES(player_id),audience=VALUES(audience),taiko_id=VALUES(taiko_id),source=VALUES(source),manual_account_id=VALUES(manual_account_id),scopes_json=VALUES(scopes_json),consent_version=VALUES(consent_version),consented_at=VALUES(consented_at),issued_at=VALUES(issued_at),expires_at=VALUES(expires_at),revoked_at=NULL`,[grantId,id(),owner,bindingId,resource.player_id,clientId,AUDIENCE,binding.taiko_id,binding.source,binding.manual_account_id,scopes,CONSENT_VERSION,body.expiresInDays]);
-  await db.execute(`INSERT INTO web_developer_resource_grant_events(grant_id,owner_user_id,binding_id,client_id,action,scopes_json,consent_version) VALUES (?,?,?,?,'consent',?,?)`,[grantId,owner,bindingId,clientId,scopes,CONSENT_VERSION]);
+   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3),DATE_ADD(UTC_TIMESTAMP(3),INTERVAL ? DAY)) ON DUPLICATE KEY UPDATE grant_id=VALUES(grant_id),revision=VALUES(revision),player_id=VALUES(player_id),audience=VALUES(audience),taiko_id=VALUES(taiko_id),source=VALUES(source),manual_account_id=VALUES(manual_account_id),scopes_json=VALUES(scopes_json),consent_version=VALUES(consent_version),consented_at=VALUES(consented_at),issued_at=VALUES(issued_at),expires_at=VALUES(expires_at),revoked_at=NULL`,[grantId,id(),owner,bindingId,resource.player_id,clientId,AUDIENCE,binding.taiko_id,binding.source,binding.manual_account_id,scopes,consentVersion,unified?null:body.expiresInDays]);
+  await db.execute(`INSERT INTO web_developer_resource_grant_events(grant_id,owner_user_id,binding_id,client_id,action,scopes_json,consent_version) VALUES (?,?,?,?,'consent',?,?)`,[grantId,owner,bindingId,clientId,scopes,consentVersion]);
   const [[row]]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE grant_id=?`,[grantId]);if(!row)throw new ApiFailure(503,'UNAVAILABLE');return {grant:dto(row)};
  });
 }
@@ -80,7 +86,7 @@ export async function revokeGrant(event:H3Event){
   const [[row]]=await db.execute<RowDataPacket[]>(`SELECT ${GRANT_FIELDS} FROM web_developer_resource_grants g WHERE grant_id=? AND owner_user_id=? FOR UPDATE`,[grantId,owner]);if(!row)throw deny();
   if(!row.revoked_at){
    await db.execute('UPDATE web_developer_resource_grants SET revoked_at=UTC_TIMESTAMP(3),revision=? WHERE grant_id=?',[id(),grantId]);
-   await db.execute(`INSERT INTO web_developer_resource_grant_events(grant_id,owner_user_id,binding_id,client_id,action,scopes_json,consent_version) VALUES (?,?,?,?,'revoke',?,?)`,[grantId,owner,row.binding_id,row.client_id,row.scopes_json,CONSENT_VERSION]);
+   await db.execute(`INSERT INTO web_developer_resource_grant_events(grant_id,owner_user_id,binding_id,client_id,action,scopes_json,consent_version) VALUES (?,?,?,?,'revoke',?,?)`,[grantId,owner,row.binding_id,row.client_id,row.scopes_json,row.consent_version]);
   }
   return {ok:true};
  });

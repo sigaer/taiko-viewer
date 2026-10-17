@@ -18,7 +18,7 @@ export const DEVELOPER_API_V1_TABLES = [
   taiko_id VARCHAR(25) NOT NULL, source VARCHAR(16) NOT NULL, manual_account_id VARCHAR(25) DEFAULT NULL,
   scopes_json TEXT NOT NULL, consent_version VARCHAR(32) NOT NULL,
   consented_at DATETIME(3) NOT NULL, issued_at DATETIME(3) NOT NULL,
-  expires_at DATETIME(3) NOT NULL, revoked_at DATETIME(3) DEFAULT NULL,
+  expires_at DATETIME(3) DEFAULT NULL, revoked_at DATETIME(3) DEFAULT NULL,
   UNIQUE KEY uniq_api_grant_binding_client(owner_user_id,binding_id,client_id),
   KEY idx_api_grant_player_client(player_id,client_id),
   KEY idx_api_grant_owner_page(owner_user_id,issued_at,grant_id)

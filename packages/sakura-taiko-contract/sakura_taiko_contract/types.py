@@ -117,11 +117,11 @@ class ResourceGrant(TypedDict):
     playerId: str
     clientId: str
     audience: Literal['viewer:developer-api:v1']
-    scopes: List[Literal['profile:read', 'scores:read', 'history:read', 'growth:read']]
+    scopes: List[Literal['profile:read', 'scores:read', 'history:read', 'growth:read', 'account:read']]
     consentVersion: str
     consentedAt: str
     issuedAt: str
-    expiresAt: str
+    expiresAt: str | None
     revokedAt: str | None
     revision: str
 class DeveloperClient(TypedDict):
@@ -133,6 +133,9 @@ class DeveloperPlayerProfile(TypedDict):
     bindingId: str
     displayName: str | None
     source: str
+    taikoId: NotRequired[str]
+    title: NotRequired[str | None]
+    dan: NotRequired[DeveloperDan]
 class ApiReadVersions(TypedDict):
     contractVersion: Literal['1.0']
     schemaRevision: str
@@ -158,3 +161,7 @@ class ApiError(TypedDict):
     code: str
     message: str
     requestId: str
+class DeveloperDan(TypedDict):
+    equippedGrade: int | None
+    equippedLevel: int | None
+    highestPassedGrade: int | None

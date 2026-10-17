@@ -26,19 +26,19 @@ export async function consentBrowser(c,{clientId,bindingId,key,ask}){
   browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage'],timeout:15000});
   context=await browser.newContext({viewport:{width:375,height:812},reducedMotion:'reduce'});const cookie=c.cookie.split('=');await context.addCookies([{name:cookie[0],value:cookie.slice(1).join('='),url:c.baseUrl}]);
   page=await context.newPage();page.setDefaultTimeout(10000);await page.goto(c.baseUrl+'/consent-ui',{waitUntil:'domcontentloaded',timeout:15000});
-  const submit=page.getByRole('button',{name:'同意授权',exact:true});await page.locator('details').filter({has:page.locator('#grant-app')}).locator('summary').click();await page.locator('#grant-app').waitFor();assert.equal(await submit.isDisabled(),true);
+  const submit=page.getByRole('button',{name:'同意',exact:true});await page.locator('details').filter({has:page.locator('#grant-app')}).locator('summary').click();await page.locator('#grant-app').waitFor();assert.equal(await submit.isDisabled(),true);
   const prior=await page.locator('[data-grant-id]').first().getAttribute('data-grant-id');
-  await page.locator('#grant-app').selectOption(clientId);await page.locator('#grant-binding').selectOption(bindingId);await page.locator('input[value="scores:read"]').check();
-  assert.equal(await submit.isDisabled(),true);await page.locator('form').first().locator('input[type="checkbox"]').last().check();await submit.click();
+  await page.locator('#grant-app').selectOption(clientId);await page.locator('#grant-binding').selectOption(bindingId);assert.equal(await page.locator('input[type=checkbox],#grant-days').count(),0);assert.equal(await page.locator('#grant-binding option:checked').textContent(),c.taikoId+' · wahlap');
+  assert.equal(await submit.isEnabled(),true);await submit.click();
   await page.waitForFunction(previous=>document.querySelector('[data-grant-id]')?.getAttribute('data-grant-id')!==previous,prior);
   const current=await page.locator('[data-grant-id]').first().getAttribute('data-grant-id');assert.notEqual(current,prior);
-  const state=(await ask('ui-list-authorized','/api/account/developer/grants')).body;const grant=state.grants.find(g=>g.grantId===current);assert.ok(grant);
+  const state=(await ask('ui-list-authorized','/api/account/developer/grants')).body;const grant=state.grants.find(g=>g.grantId===current);assert.ok(grant);assert.deepEqual(grant.scopes,['account:read']);assert.equal(grant.expiresAt,null);
   const response=await ask('ui-consent-then-third-party-read','/api/v1/taiko/players/'+grant.playerId+'/scores',{token:key});
   const screenshot=resolve(process.env.QA_EVIDENCE_DIR,'083-consent-mobile.png');await page.screenshot({path:screenshot,fullPage:true,timeout:10000});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile horizontal overflow');
   await page.locator('[data-grant-id="'+current+'"]').getByRole('button',{name:'撤销授权',exact:true}).click();
   await page.waitForFunction(id=>document.querySelector('[data-grant-id="'+id+'"]')?.textContent?.includes('已撤销'),current);
   await ask('ui-revoke-then-third-party-denied','/api/v1/taiko/players/'+grant.playerId+'/scores',{token:key,headers:{'if-none-match':response.res.headers.get('etag')},expected:403});
-  await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'083-consent-ui.json'),JSON.stringify({status:'PASS_SCOPED',scope:'Actual grants.vue compiled with Vue; real native SQL/session/API; shell composables and CSS variables supplied by isolated test host; no full Nuxt startup',viewport:{width:375,height:812},consentRequired:true,consentReadRevokeDenied:true,noHorizontalOverflow:true,sourceSha256:createHash('sha256').update(source).digest('hex'),screenshot},null,2)+'\n');
+  await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'083-consent-ui.json'),JSON.stringify({status:'PASS_SCOPED',scope:'Actual grants.vue compiled with Vue; real native SQL/session/API; shell composables and CSS variables supplied by isolated test host; no full Nuxt startup',viewport:{width:375,height:812},singleConsent:true,noExpiry:true,consentReadRevokeDenied:true,noHorizontalOverflow:true,sourceSha256:createHash('sha256').update(source).digest('hex'),screenshot},null,2)+'\n');
  }finally{await page?.close();await context?.close();await browser?.close();}
 }

@@ -23,7 +23,7 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
  const catalogPath=resolve(c.root,'songs.json');const rows=[{id:100,title:'unused',song_name:'Synthetic',level_4:9,level_5:10,shelf_status:0,region:'CN',chart_type:'single'},{id:101,song_name:'Other region',level_1:1,shelf_status:2,region:'JP',chart_type:'double'}];await writeFile(catalogPath,JSON.stringify(rows));c.config.songDataPath=catalogPath;
  const {withPublicationLease}=await import('../server/infrastructure/taiko-publication/client.ts');
  const paths={root:c.config.userdataDir,repoRoot:c.root,identity:c.taikoId,mode:'write'};
- const base={_meta:{source:'wahlap',ts:'2026-10-15T04:00:00Z'},profile:{mydon_name:'Synthetic player',cookie:'never-return-this-cookie',token:'never-return-this-token'},songs:[{song_no:100,level:4,high_score:900000,good_cnt:100,ok_cnt:1,ng_cnt:0,stage_cnt:2,clear_cnt:1,combo_cnt:null,highscore_datetime:'upstream text',update_datetime:'not a play event',private_extension:'never-return-extension'}]};
+ const base={_meta:{source:'wahlap',ts:'2026-10-15T04:00:00Z'},profile:{mydon_name:'Synthetic player',gameCostume:{title:'Synthetic title',got_dan_max:12,dan_name:{grade:11,level:2},private_extension:'never-return-extension'},cookie:'never-return-this-cookie',token:'never-return-this-token'},songs:[{song_no:100,level:4,high_score:900000,good_cnt:100,ok_cnt:1,ng_cnt:0,stage_cnt:2,clear_cnt:1,combo_cnt:null,highscore_datetime:'upstream text',update_datetime:'not a play event',private_extension:'never-return-extension'}]};
  async function publish(score=900000){return withPublicationLease(paths,async lease=>{await lease.put('current',JSON.stringify({...base,songs:base.songs.map(s=>({...s,high_score:score}))}));return lease.publish();});}
  await publish();
  const endpoints=[['get','/api/v1/taiko/meta','v1/taiko/meta.get.ts'],['get','/api/v1/taiko/catalog/songs','v1/taiko/catalog/songs.get.ts'],['get','/api/v1/taiko/catalog/charts','v1/taiko/catalog/charts.get.ts'],['get','/api/v1/taiko/players/:playerId/scores','v1/taiko/players/[playerId]/scores.get.ts'],['get','/api/v1/taiko/players/:playerId/profile','v1/taiko/players/[playerId]/profile.get.ts'],['get','/api/account/developer/grants','account/developer/grants/index.get.ts'],['post','/api/account/developer/grants','account/developer/grants/index.post.ts'],['delete','/api/account/developer/grants/:grantId','account/developer/grants/[grantId].delete.ts'],['get','/api/account/developer/clients','account/developer/clients/index.get.ts'],['post','/api/account/developer/clients','account/developer/clients/index.post.ts'],['delete','/api/account/developer/clients/:clientId','account/developer/clients/[clientId].delete.ts']];
@@ -126,6 +126,27 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
   // Requests are concurrent: assert aggregate accepted/capped counts, not launch order.
   const burstRows=observations.filter(x=>x.case.startsWith('atomic-quota-'));assert.equal(burstRows.filter(x=>x.status===200).length,2);assert.equal(burstRows.filter(x=>x.status===429).length,3);assert.equal(burst.filter(x=>!(x instanceof Error)).length,5);
   c.config.developerApiClientDailyLimit=5000;
+  // The nullable schema migration preserves every pre-existing grant value.
+  const [legacyBefore]=await c.pool.query('SELECT grant_id,scopes_json,consent_version,expires_at FROM web_developer_resource_grants WHERE consent_version=? ORDER BY grant_id',[issue.consentVersion]);
+  await c.pool.execute('ALTER TABLE web_developer_resource_grants MODIFY COLUMN expires_at DATETIME(3) NOT NULL');
+  await c.pool.execute(await readFile(new URL('../deploy/migrations/20261017_developer_account_consent.sql',import.meta.url),'utf8'));
+  const [legacyAfter]=await c.pool.query('SELECT grant_id,scopes_json,consent_version,expires_at FROM web_developer_resource_grants WHERE consent_version=? ORDER BY grant_id',[issue.consentVersion]);assert.deepEqual(legacyAfter,legacyBefore);
+  const unified={bindingId,clientId:clientX,consent:true,consentVersion:'viewer-account-consent-v2',audience:issue.audience};
+  await ask('unified-explicit-refusal','/api/account/developer/grants',{method:'POST',body:{...unified,consent:false},expected:400});
+  await ask('unified-rejects-scope-selection','/api/account/developer/grants',{method:'POST',body:{...unified,scopes:['profile:read']},expected:400});
+  await ask('unified-rejects-expiry-selection','/api/account/developer/grants',{method:'POST',body:{...unified,expiresInDays:30},expected:400});
+  grant=(await ask('unified-account-consent','/api/account/developer/grants',{method:'POST',body:unified})).body.grant;
+  assert.deepEqual(grant.scopes,['account:read']);assert.equal(grant.expiresAt,null);assert.equal(validate('ResourceGrant')(grant),true);
+  const unifiedProfile=await ask('unified-profile-and-dan',profile(player),{token:keyX,schemaName:'DeveloperProfileResponse'});
+  assert.equal(unifiedProfile.body.profile.taikoId,c.taikoId);assert.equal(unifiedProfile.body.profile.title,'Synthetic title');assert.deepEqual(unifiedProfile.body.profile.dan,{equippedGrade:11,equippedLevel:2,highestPassedGrade:12});
+  const unifiedScores=await ask('unified-scores',scores(player),{token:keyX,schemaName:'DeveloperScoresResponse'});
+  // A long-standing consent remains valid; no rolling timeout or renewal required.
+  await c.pool.execute('UPDATE web_developer_resource_grants SET issued_at=DATE_SUB(UTC_TIMESTAMP(3),INTERVAL 10 YEAR),consented_at=DATE_SUB(UTC_TIMESTAMP(3),INTERVAL 10 YEAR) WHERE grant_id=?',[grant.grantId]);
+  await ask('unified-ten-year-old-consent-still-valid',scores(player),{token:keyX});
+  await ask('unified-wrong-app-denied',scores(player),{token:keyY,expected:403});
+  await ask('unified-revoke','/api/account/developer/grants/'+grant.grantId,{method:'DELETE'});
+  await ask('unified-revoked-scores-no-304',scores(player),{token:keyX,headers:{'if-none-match':unifiedScores.res.headers.get('etag')},expected:403});
+  await ask('unified-revoked-profile',profile(player),{token:keyX,expected:403});
   const {consentBrowser}=await import('./fixtures/developerApiV1Ui.mjs');await consentBrowser(c,{clientId:clientX,bindingId,key:keyX,ask});
   await ask('cross-owner-client-disable-denied','/api/account/developer/clients/'+clientY,{method:'DELETE',expected:403});
   await ask('owner-disables-client','/api/account/developer/clients/'+clientY,{method:'DELETE',cookie:cookieB});
