@@ -764,7 +764,8 @@
               "profile:read",
               "scores:read",
               "history:read",
-              "growth:read"
+              "growth:read",
+              "account:read"
             ]
           }
         },
@@ -781,7 +782,10 @@
           "minLength": 1
         },
         "expiresAt": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "revokedAt": {
@@ -858,6 +862,18 @@
         "source": {
           "type": "string",
           "minLength": 1
+        },
+        "taikoId": {
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dan": {
+          "$ref": "#/$defs/DeveloperDan"
         }
       },
       "required": [
@@ -1016,6 +1032,35 @@
         "code",
         "message",
         "requestId"
+      ]
+    },
+    "DeveloperDan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "equippedGrade": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "equippedLevel": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "highestPassedGrade": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "equippedGrade",
+        "equippedLevel",
+        "highestPassedGrade"
       ]
     }
   }

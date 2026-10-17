@@ -1,8 +1,9 @@
 import {createHash,randomUUID} from 'node:crypto';
 import {defineEventHandler,getHeader,setHeader,removeResponseHeader,setResponseStatus,type H3Event} from 'h3';
 export const AUDIENCE='viewer:developer-api:v1';
-export const CONSENT_VERSION='viewer-resource-consent-v1';
-export const OPEN_SCOPES=['profile:read','scores:read'] as const;
+export const LEGACY_CONSENT_VERSION='viewer-resource-consent-v1';
+export const CONSENT_VERSION='viewer-account-consent-v2';
+export const OPEN_SCOPES=['profile:read','scores:read','account:read'] as const;
 export class ApiFailure extends Error { constructor(public status:number,public code:string){super(code);} }
 export const deny=()=>new ApiFailure(403,'GRANT_REQUIRED');
 export const hash=(text:string)=>createHash('sha256').update(text).digest('hex');

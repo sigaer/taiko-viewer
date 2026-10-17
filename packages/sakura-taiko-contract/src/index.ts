@@ -130,11 +130,11 @@ export type ResourceGrant = {
   playerId: string;
   clientId: string;
   audience: "viewer:developer-api:v1";
-  scopes: Array<"profile:read" | "scores:read" | "history:read" | "growth:read">;
+  scopes: Array<"profile:read" | "scores:read" | "history:read" | "growth:read" | "account:read">;
   consentVersion: string;
   consentedAt: string;
   issuedAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
   revokedAt: string | null;
   revision: string;
 };
@@ -148,6 +148,9 @@ export type DeveloperPlayerProfile = {
   bindingId: string;
   displayName: string | null;
   source: string;
+  taikoId?: string;
+  title?: string | null;
+  dan?: DeveloperDan;
 };
 export type ApiReadVersions = {
   contractVersion: "1.0";
@@ -179,6 +182,11 @@ export type ApiError = {
   code: string;
   message: string;
   requestId: string;
+};
+export type DeveloperDan = {
+  equippedGrade: number | null;
+  equippedLevel: number | null;
+  highestPassedGrade: number | null;
 };
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";
