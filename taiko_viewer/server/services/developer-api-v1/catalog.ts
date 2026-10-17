@@ -24,38 +24,20 @@ async function readBoundedArray(path:string,maxBytes:number,maxRows:number,code:
  finally{await file.close();}
 }
 
-/** Song metadata and aliases are combined only for public songs/meta reads. */
-export async function catalog(includeAliases=false){
+/** One revision covers song metadata and aliases; no duplicate title field. */
+export async function catalog(){
  const runtime=useRuntimeConfig();
  const paths=getRuntimePaths();
  const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));
- const songSource=await readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED');
+ const aliasPath=resolve(songPath,'..','song_alias.json');
+ const [songSource,aliasSource]=await Promise.all([
+  readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
+  readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
+ ]);
  const songRevision=hash(songSource.bytes.toString('utf8'));
- let aliasRevision:string|null=null;
- let aliasRows:Array<Record<string,unknown>>=[];
- if(includeAliases){
-  const aliasPath=resolve(songPath,'..','song_alias.json');
-  const aliasSource=await readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED');
-  aliasRevision=hash(aliasSource.bytes.toString('utf8'));
-  aliasRows=aliasSource.rows;
- }
- const revision=includeAliases?hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision})):songRevision;
- const projected=projectCatalog(songSource.rows,revision);
- if(!includeAliases)return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};
- const aliasById=new Map<string,Record<string,unknown>>();
- for(const row of aliasRows){
-  const id=Number(row.id);
-  if(Number.isSafeInteger(id)&&id>0)aliasById.set(String(id),row);
- }
- const sourceById=new Map(songSource.rows.map(row=>[String(row.id),row]));
- const songs=projected.songs.map(song=>{
-  const source=sourceById.get(song.songId);
-  const alias=aliasById.get(song.songId);
-  const songName=typeof source?.song_name==='string'?source.song_name:null;
-  const songNameJp=typeof source?.song_name_jp==='string'?source.song_name_jp:typeof alias?.song_name_jp==='string'?alias.song_name_jp:null;
-  const aliases=Array.isArray(alias?.aliases)?alias.aliases.filter((value):value is string=>typeof value==='string').slice(0,100):[];
-  return {...song,song_name:songName,song_name_jp:songNameJp,aliases};
- });
- return {revision,songRevision,aliasRevision,songs,charts:projected.charts};
+ const aliasRevision=hash(aliasSource.bytes.toString('utf8'));
+ const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
+ const projected=projectCatalog(songSource.rows,revision,aliasSource.rows);
+ return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};
 }
-export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
+export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
