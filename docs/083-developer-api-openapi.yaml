@@ -2483,6 +2483,28 @@ x-lifecycle-policy:
         "403": { description: Missing, expired or revoked scores:read grant }
         "429": { description: Daily quota exceeded }
         "503": { description: Publication or analysis unavailable }
+  /api/v1/taiko/catalog/progress-options:
+    get:
+      operationId: getCatalogProgressOptions
+      description: Public supported progress catalog filters; does not contain player-specific progress or scores.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Supported progress filters and page counts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: object
+                    description: Supported dani versions/grades, constants, stars, named groups and page counts.
+        "401": { description: Invalid supplied Bearer token }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Progress catalog unavailable }
 components:
   securitySchemes:
     ClientKey:
