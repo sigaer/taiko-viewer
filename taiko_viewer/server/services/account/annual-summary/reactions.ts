@@ -37,7 +37,7 @@ const serialize = (row: ReactionRow, badge?: { id: number; username: string; ava
 
 export const listAnnualReactions = async (event: H3Event) => {
   setPrivateNoStore(event);
-  await requireAccountAnnualSummaryUser(event); await ensureAccountSchema();
+  await requireAccountAnnualSummaryUser(event); await ensureAccountSchema("annual");
   const query = getQuery(event); const versionKey = String(query.versionKey || ANNUAL_VERSION_KEY).trim();
   const limit = Math.trunc(Math.min(100, Math.max(1, Number(query.limit || 40) || 40)));
   const [rows] = await getAccountDb().execute<DbRow<ReactionRow>[]>(`SELECT * FROM web_annual_poster_reactions WHERE version_key = ? AND status = 'published' ORDER BY created_at DESC LIMIT ${limit}`, [versionKey]);
@@ -50,7 +50,7 @@ export const createAnnualReaction = async (event: H3Event, summaryId: string) =>
   const summary = await findOwnerAnnualSummary(summaryId, user.id); if (!summary || summary.version_key !== ANNUAL_VERSION_KEY) throw createError({ statusCode: 404, statusMessage: "年度回顾不存在" });
   const body = (await readBody<{ content?: unknown; syncCommunity?: unknown; clientNonce?: unknown }>(event).catch(() => ({}))) || {};
   const nonce = String(body.clientNonce || "").trim(); if (!/^[0-9a-f-]{16,36}$/iu.test(nonce)) throw createError({ statusCode: 400, statusMessage: "请求标识无效" });
-  await ensureAccountSchema(); const db = getAccountDb();
+  await ensureAccountSchema("annual"); const db = getAccountDb();
   const selectReaction = async () => {
     const [rows] = await db.execute<DbRow<ReactionRow>[]>("SELECT * FROM web_annual_poster_reactions WHERE user_id = ? AND client_nonce = ? LIMIT 1", [user.id, nonce]);
     return rows[0] || null;

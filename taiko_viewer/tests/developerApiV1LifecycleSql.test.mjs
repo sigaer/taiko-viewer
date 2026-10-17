@@ -10,7 +10,7 @@ const nativeFetch=globalThis.fetch;
 test('Frozen lifecycle minimal SQL HTTP SDK pagination and revoke-before-304',{timeout:120000},()=>accountSourceFixture(async c=>{
  const {createDeveloperApi,DeveloperApiError}=await import('../lib/developer-api-v1.ts');
  c.state.expectedSourceMode='none';Object.assign(c.config,{developerApiV1:true,developerApiAnonymousDailyLimit:300,developerApiClientDailyLimit:5000,repoRoot:c.root,public:{}});
- const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');let ddl;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS web_developer_applications ('))ddl=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(ddl);await c.pool.execute(ddl);
+ const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');let ddl;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS web_developer_applications ('))ddl=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(ddl);await c.pool.execute(ddl);
  execFileSync(process.execPath,['--experimental-strip-types',new URL('../scripts/migrate_developer_api_v1.ts',import.meta.url).pathname,'--apply'],{env:process.env,timeout:30000,maxBuffer:32768});
  const [[proof]]=await c.pool.query('SELECT DATABASE() name,@@datadir datadir');assert.match(proof.name,/_test$/);assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');
  c.config.songDataPath=resolve(c.root,'catalog.json');await writeFile(c.config.songDataPath,JSON.stringify([{id:100,song_name:'Synthetic',level_4:9}]));

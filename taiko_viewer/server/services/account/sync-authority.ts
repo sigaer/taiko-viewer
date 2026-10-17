@@ -13,7 +13,7 @@ import type { SyncLogRow } from "../../internal/account/shared";
 
 export async function captureAccountSyncOwner(userId: number) {
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     if (!Number.isSafeInteger(userId) || userId <= 0) throw createError({ statusCode: 403, statusMessage: "账号归属无效" });
     const db = getAccountDb();
     await requireViewerBindingOwner(db, userId);

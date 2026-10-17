@@ -8,7 +8,7 @@ import ts from 'typescript';
 import Ajv from 'ajv';
 import YAML from 'yaml';
 import {accountSourceFixture,deferred,bounded} from './fixtures/accountSourceHttp.mjs';
-async function ddl(c,table){const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');let text;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))text=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(text);await c.pool.execute(text);}
+async function ddl(c,table){const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');let text;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))text=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(text);await c.pool.execute(text);}
 const uuid=()=>randomBytes(16).toString('hex'),hash=x=>createHash('sha256').update(x).digest('hex');
 test('F3 manageability owner pagination, reachability and consent-disable concurrency',{timeout:180000},()=>accountSourceFixture(async c=>{
  c.state.expectedSourceMode='none';Object.assign(c.config,{developerApiV1:true,developerApiAnonymousDailyLimit:300,developerApiClientDailyLimit:5000,repoRoot:c.root,public:{}});

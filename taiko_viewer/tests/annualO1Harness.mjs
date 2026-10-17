@@ -34,7 +34,7 @@ export async function runAnnualO1({warmSamples=3,warmRates=[1,3,5],scale='low',f
   hook=registerHooks({resolve(specifier,context,next){if(specifier.endsWith('/services/annual-beta/events.ts')||specifier==='~/server/services/annual-beta/events')return {url:'data:text/javascript,export const trackBetaServer=async()=>{};export const trackBetaUser=async()=>{};',shortCircuit:true};if(specifier==='~/server/services/content'||specifier.endsWith('/server/services/content.ts'))return {url:'data:text/javascript,export const getSongCatalog=async()=>globalThis.__annualO1Catalog||[];export const getRatingEntries=async()=>[];export const getSongCoverUrl=id=>%22/synthetic-cover/%22%2Bid;',shortCircuit:true};return next(specifier,context);}});
    // Existing SQL fixture intentionally stubs Beta telemetry. Supply all exports
    // used by Annual; no scheduler, repository, generator or reader is mocked.
-   const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');
+   const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');
    const [[guard]]=await c.pool.query('SELECT DATABASE() AS name,@@datadir AS datadir');assert.match(guard.name,/_test$/);assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');evidence.databaseProof=guard;
    const connection=await c.pool.getConnection();try{
     await connection.query('SET FOREIGN_KEY_CHECKS=0');

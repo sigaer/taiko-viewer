@@ -26,7 +26,7 @@ export async function readAuthorizedMergedSource(event:H3Event,input:unknown,kin
   try{
     let principal:string;
     try{principal=mergedSourcePrincipal(input);}catch{throw principalFailure(400,'合并账号标识无效。');}
-    await ensureAccountSchema();const db=getAccountDb(),paths=Object.freeze(getRuntimePaths()),actor=await captureActor(event,db);
+    await ensureAccountSchema("source");const db=getAccountDb(),paths=Object.freeze(getRuntimePaths()),actor=await captureActor(event,db);
     const ticket=await capturePrincipalForActor(db,actor,principal,'bind_read');
     await provePrincipalAccess(db,ticket);
     const original=await readBotBindingData(db,ticket,false),{sources,profileSource}=composition(original);

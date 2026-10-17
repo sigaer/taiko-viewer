@@ -43,7 +43,7 @@ const readHostPressure = async () => {
 };
 
 export const collectAnnualOperationalMetrics = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [queue, disk, pressure, statusResult, syncResult, bytes, counters] = await Promise.all([
     getAnnualQueueMetrics(),
     readAnnualDiskState(),

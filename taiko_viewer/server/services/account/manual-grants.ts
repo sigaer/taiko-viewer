@@ -54,7 +54,7 @@ async function inGrantScope<T>(owner: ManualOwner, taikoId: string, task: (db: P
   if (!MANUAL_SOURCE_ID.test(taikoId)) throw createError({ statusCode: 400, statusMessage: "手动账号标识无效" });
   manualActorKey(owner);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb();
     return await withDomainScoreWrite(taikoId, () => task(db));
   } catch (error) { throw sourceLifecycleFailure(error); }
@@ -79,7 +79,7 @@ export async function consumeManualGrantCode(owner: ManualOwner, hash: string) {
   if (!/^[a-f0-9]{64}$/.test(hash)) throw invalidClaim();
   const actor = manualActorKey(owner);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb();
     const [claims] = await db.execute<RowDataPacket[]>(`SELECT id, taiko_id FROM taiko_manual_claim_codes
       WHERE code_hash = ? AND consumed_at IS NULL AND expires_at > NOW() LIMIT 1`, [hash]);

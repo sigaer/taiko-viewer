@@ -13,7 +13,7 @@ import { PublicationUnavailableError } from "../../infrastructure/taiko-publicat
 export async function recoverOneManualSourceLifecycle(signal?: AbortSignal, operationId?: string) {
   if (operationId && !LIFECYCLE_UUID.test(operationId)) throw new PublicationUnavailableError();
   signal?.throwIfAborted();
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   signal?.throwIfAborted();
   const db = getAccountDb();
   const [rows] = await db.execute<RowDataPacket[]>(

@@ -10,7 +10,7 @@ const nativeFetch=globalThis.fetch;
 test('RC4 schema dryrun idempotence indexes disabled revoke and synthetic restore',{timeout:120000},()=>accountSourceFixture(async c=>{
  const {createDeveloperApi,DeveloperApiError}=await import('../lib/developer-api-v1.ts');
  c.state.expectedSourceMode='none';Object.assign(c.config,{developerApiV1:true,developerApiAnonymousDailyLimit:300,developerApiClientDailyLimit:5000,repoRoot:c.root,public:{}});
- const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');let ddl;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS web_developer_applications ('))ddl=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(ddl);await c.pool.execute(ddl);
+ const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');let ddl;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS web_developer_applications ('))ddl=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(ddl);await c.pool.execute(ddl);
  execFileSync(process.execPath,['--experimental-strip-types',new URL('../scripts/migrate_developer_api_v1.ts',import.meta.url).pathname,'--apply'],{env:process.env,timeout:30000,maxBuffer:32768});
  const migration=new URL('../scripts/migrate_developer_api_v1.ts',import.meta.url).pathname;
  const dryrun=execFileSync(process.execPath,['--experimental-strip-types',migration],{env:process.env,timeout:10000,maxBuffer:32768}).toString();assert.equal((dryrun.match(/CREATE TABLE IF NOT EXISTS/g)||[]).length,4);

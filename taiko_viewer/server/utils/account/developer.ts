@@ -62,7 +62,7 @@ const getDeveloperApplicationRows = async (query: {
   status?: string;
   limit?: number;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   const db = getAccountDb();
   const conditions: string[] = [];
   const params: Array<number | string> = [];
@@ -104,7 +104,7 @@ export const requireDeveloperReviewer = async (event: H3Event) => {
 };
 
 const revokeActiveDeveloperTokens = async (userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   const db = getAccountDb();
   await db.execute(
     "UPDATE web_developer_tokens SET status = 'revoked', revoked_at = NOW(), updated_at = NOW() WHERE user_id = ? AND status = 'active'",

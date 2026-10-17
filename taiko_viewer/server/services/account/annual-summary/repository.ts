@@ -64,7 +64,7 @@ export class AnnualQueueCapacityError extends Error {
 }
 
 export const findAnnualSummaryById = async (summaryId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
     "SELECT * FROM web_annual_summaries WHERE id = ? LIMIT 1",
     [summaryId]
@@ -73,7 +73,7 @@ export const findAnnualSummaryById = async (summaryId: string) => {
 };
 
 export const listAnnualSummariesForAdmin = async (target: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow & { username: string; taiko_id: string; verified_title: string | null }>[]>(
     `SELECT s.*, a.username, b.taiko_id, b.verified_title
      FROM web_annual_summaries s
@@ -86,7 +86,7 @@ export const listAnnualSummariesForAdmin = async (target: string) => {
 };
 
 export const findAnnualBinding = async (bindingId: number, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<BindingRow>[]>(
     "SELECT * FROM web_taiko_bindings WHERE id = ? AND user_id = ? LIMIT 1",
     [bindingId, userId]
@@ -95,7 +95,7 @@ export const findAnnualBinding = async (bindingId: number, userId: number) => {
 };
 
 export const listAnnualBindingsForAdmin = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<BindingRow & { username: string; email: string }>[]>(
     `SELECT b.*, a.username, a.email
      FROM web_taiko_bindings b INNER JOIN web_user_accounts a ON a.id = b.user_id
@@ -105,7 +105,7 @@ export const listAnnualBindingsForAdmin = async () => {
 };
 
 export const findOwnerAnnualSummary = async (summaryId: string, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
     "SELECT * FROM web_annual_summaries WHERE id = ? AND user_id = ? LIMIT 1",
     [summaryId, userId]
@@ -119,7 +119,7 @@ export const findLatestAnnualSummary = async (
   versionKey: string,
   fingerprint?: string
 ) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const sql = fingerprint
     ? `SELECT * FROM web_annual_summaries
        WHERE user_id = ? AND binding_id = ? AND version_key = ? AND input_fingerprint = ?
@@ -146,7 +146,7 @@ export const insertAnnualSummary = async (input: {
   eventCount: number;
   generatedAt: string;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `INSERT INTO web_annual_summaries
       (id, user_id, binding_id, version_key, schema_version, data_mode, input_fingerprint,
@@ -169,7 +169,7 @@ export const insertAnnualSummary = async (input: {
 };
 
 export const pruneSupersededAnnualSummaries = async (userId: number, bindingId: number, versionKey: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
     `SELECT s.* FROM web_annual_summaries s
      WHERE s.user_id=? AND s.binding_id=? AND s.version_key=?
@@ -191,7 +191,7 @@ export const pruneSupersededAnnualSummaries = async (userId: number, bindingId: 
 };
 
 export const findAnnualJobById = async (jobId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
     "SELECT * FROM web_annual_summary_jobs WHERE id = ? LIMIT 1",
     [jobId]
@@ -200,7 +200,7 @@ export const findAnnualJobById = async (jobId: string) => {
 };
 
 export const findOwnerAnnualJob = async (jobId: string, userId: number, type?: AnnualJobType) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const sql = type
     ? "SELECT * FROM web_annual_summary_jobs WHERE id = ? AND user_id = ? AND job_type = ? LIMIT 1"
     : "SELECT * FROM web_annual_summary_jobs WHERE id = ? AND user_id = ? LIMIT 1";
@@ -215,7 +215,7 @@ export const findActiveAnnualJob = async (input: {
   type: AnnualJobType;
   summaryId?: string;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const summaryClause = input.summaryId ? " AND summary_id = ?" : "";
   const params = [input.userId, input.bindingId, input.versionKey, input.type, ...(input.summaryId ? [input.summaryId] : [])];
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
@@ -245,7 +245,7 @@ export const insertAnnualJob = async (input: {
   sourceRevision?: string | null;
   estimatedServiceSeconds?: number;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `INSERT INTO web_annual_summary_jobs
       (id, user_id, binding_id, version_key, job_type, status, summary_id, poster_id,
@@ -276,7 +276,7 @@ export const insertAnnualJob = async (input: {
 };
 
 const withAnnualAdmissionLock = async <T>(runner: (connection: any) => Promise<T>): Promise<T> => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const connection = await getAccountDb().getConnection();
   let locked = false;
   let lockName = "annual-build-durable-admission";
@@ -393,7 +393,7 @@ export const admitAnnualBuildJob = async (input: {
 });
 
 export const getAnnualQueueMetrics = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   return selectAnnualQueueMetrics(getAccountDb());
 };
 
@@ -456,7 +456,7 @@ export const claimNextAnnualBuild = async (leaseOwner: string) => withAnnualAdmi
 });
 
 export const heartbeatAnnualBuild = async (jobId: string, leaseOwner: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_summary_jobs SET heartbeat_at=NOW(), lease_until=DATE_ADD(NOW(), INTERVAL ? SECOND)
      WHERE id=? AND job_type='build' AND status='running' AND lease_owner=? AND lease_until >= NOW()`,
@@ -466,7 +466,7 @@ export const heartbeatAnnualBuild = async (jobId: string, leaseOwner: string) =>
 };
 
 export const completeLeasedAnnualBuild = async (jobId: string, leaseOwner: string, summaryId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_summary_jobs
      SET status='completed', summary_id=?, active_key=NULL, lease_owner=NULL, lease_until=NULL, heartbeat_at=NULL,
@@ -485,7 +485,7 @@ export const failLeasedAnnualBuild = async (
   message: string,
   status: "failed" | "expired" = "failed"
 ) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_summary_jobs
      SET status=?, active_key=NULL, lease_owner=NULL, lease_until=NULL, heartbeat_at=NULL,
@@ -497,7 +497,7 @@ export const failLeasedAnnualBuild = async (
 };
 
 export const markAnnualJobRunning = async (jobId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     "UPDATE web_annual_summary_jobs SET status = 'running', started_at = NOW(), error_code = NULL, error_message = NULL, progress_stage = 'preparing', progress_percent = 5 WHERE id = ? AND status = 'queued'",
     [jobId]
@@ -506,7 +506,7 @@ export const markAnnualJobRunning = async (jobId: string) => {
 };
 
 export const markAnnualJobCompleted = async (jobId: string, result: { summaryId?: string; posterId?: string }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'completed', summary_id = COALESCE(?, summary_id), poster_id = COALESCE(?, poster_id),
@@ -519,7 +519,7 @@ export const markAnnualJobCompleted = async (jobId: string, result: { summaryId?
 };
 
 export const markAnnualJobFailed = async (jobId: string, code: string, message: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'failed', error_code = ?, error_message = ?, completed_at = NOW(), progress_stage = 'failed'
@@ -535,7 +535,7 @@ export const updateAnnualJobProgress = async (
   percent: number,
   detail?: string | null
 ) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET progress_stage = ?, progress_percent = ?, progress_detail = ?
@@ -546,7 +546,7 @@ export const updateAnnualJobProgress = async (
 
 // Expire queue wait atomically; never overwrite a job that acquired its slot.
 export const expireQueuedAnnualJobs = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
     "SELECT * FROM web_annual_summary_jobs WHERE status = 'queued' AND queued_at <= DATE_SUB(NOW(), INTERVAL 10 MINUTE) ORDER BY queued_at LIMIT 64"
   );
@@ -566,7 +566,7 @@ export const expireQueuedAnnualJobs = async () => {
 };
 
 export const recoverInterruptedAnnualJobs = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `UPDATE web_annual_summary_jobs
      SET status = 'queued'
@@ -583,7 +583,7 @@ export const countRecentAnnualJobs = async (input: {
   type: AnnualJobType;
   since: Date;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<{ count: number }>[]>(
     `SELECT COUNT(*) AS count FROM web_annual_summary_jobs
      WHERE user_id = ? AND job_type = ? AND created_at >= ?`,
@@ -593,7 +593,7 @@ export const countRecentAnnualJobs = async (input: {
 };
 
 export const findAnnualShareById = async (shareId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualShareRow>[]>(
     "SELECT * FROM web_annual_shares WHERE id = ? LIMIT 1",
     [shareId]
@@ -602,7 +602,7 @@ export const findAnnualShareById = async (shareId: string) => {
 };
 
 export const findOwnerAnnualShare = async (shareId: string, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualShareRow>[]>(
     "SELECT * FROM web_annual_shares WHERE id = ? AND user_id = ? LIMIT 1",
     [shareId, userId]
@@ -611,7 +611,7 @@ export const findOwnerAnnualShare = async (shareId: string, userId: number) => {
 };
 
 export const findActiveAnnualShare = async (summaryId: string, userId?: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const sql = userId
     ? `SELECT * FROM web_annual_shares
        WHERE summary_id = ? AND user_id = ? AND status = 'active' AND expires_at > NOW()
@@ -624,7 +624,7 @@ export const findActiveAnnualShare = async (summaryId: string, userId?: number) 
 };
 
 export const listActiveAnnualShares = async (summaryId: string, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualShareRow>[]>(
     "SELECT * FROM web_annual_shares WHERE summary_id = ? AND user_id = ? AND status = 'active'",
     [summaryId, userId]
@@ -640,7 +640,7 @@ export const insertAnnualShare = async (input: {
   tokenHash: string;
   expiresAt: Date;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const db = getAccountDb();
   const connection = await db.getConnection();
   try {
@@ -666,7 +666,7 @@ export const insertAnnualShare = async (input: {
 };
 
 export const renewAnnualShare = async (shareId: string, userId: number, expiresAt: Date) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_shares
      SET status = 'active', expires_at = ?, revoked_at = NULL
@@ -677,7 +677,7 @@ export const renewAnnualShare = async (shareId: string, userId: number, expiresA
 };
 
 export const revokeAnnualShare = async (shareId: string, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_shares
      SET status = 'revoked', revoked_at = NOW()
@@ -688,14 +688,14 @@ export const revokeAnnualShare = async (shareId: string, userId: number) => {
 };
 
 export const expireAnnualShares = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     "UPDATE web_annual_shares SET status = 'expired' WHERE status = 'active' AND expires_at <= NOW()"
   );
 };
 
 export const expireAnnualShare = async (shareId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     "UPDATE web_annual_shares SET status = 'expired' WHERE id = ? AND status = 'active' AND expires_at <= NOW()",
     [shareId]
@@ -703,7 +703,7 @@ export const expireAnnualShare = async (shareId: string) => {
 };
 
 export const listAnnualSharesNeedingPosterCleanup = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<{ id: string }>[]>(
     `SELECT DISTINCT s.id
      FROM web_annual_shares s
@@ -714,7 +714,7 @@ export const listAnnualSharesNeedingPosterCleanup = async () => {
 };
 
 export const findAnnualPosterById = async (posterId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualPosterRow>[]>(
     "SELECT * FROM web_annual_posters WHERE id = ? LIMIT 1",
     [posterId]
@@ -723,7 +723,7 @@ export const findAnnualPosterById = async (posterId: string) => {
 };
 
 export const findAnnualPosterForShare = async (shareId: string, locale?: AnnualLocale) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const sql = locale
     ? "SELECT * FROM web_annual_posters WHERE share_id = ? AND locale = ? LIMIT 1"
     : "SELECT * FROM web_annual_posters WHERE share_id = ? ORDER BY updated_at DESC LIMIT 1";
@@ -742,7 +742,7 @@ export const upsertAnnualPoster = async (input: {
   width: number;
   height: number;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `INSERT INTO web_annual_posters
       (id, summary_id, share_id, user_id, locale, fingerprint, file_path, width, height)
@@ -755,7 +755,7 @@ export const upsertAnnualPoster = async (input: {
 };
 
 export const findAnnualShareCard = async (summaryId: string, locale: AnnualLocale, fingerprint: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualShareCardRow>[]>(
     "SELECT * FROM web_annual_share_cards WHERE summary_id = ? AND locale = ? AND fingerprint = ? LIMIT 1",
     [summaryId, locale, fingerprint]
@@ -764,7 +764,7 @@ export const findAnnualShareCard = async (summaryId: string, locale: AnnualLocal
 };
 
 export const findOwnerAnnualShareCard = async (cardId: string, userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualShareCardRow>[]>(
     "SELECT * FROM web_annual_share_cards WHERE id = ? AND user_id = ? LIMIT 1",
     [cardId, userId]
@@ -782,7 +782,7 @@ export const insertAnnualShareCard = async (input: {
   width: number;
   height: number;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     `INSERT INTO web_annual_share_cards
       (id, summary_id, user_id, locale, fingerprint, file_path, width, height)
@@ -801,7 +801,7 @@ export const markAnnualShareCardForumSync = async (input: {
   imageUrl: string;
   threadId: number;
 }) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `UPDATE web_annual_share_cards
      SET forum_image_url = ?, forum_thread_id = ?, updated_at = NOW()
@@ -812,7 +812,7 @@ export const markAnnualShareCardForumSync = async (input: {
 };
 
 export const listAnnualPosterPathsForShare = async (shareId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<{ file_path: string }>[]>(
     "SELECT file_path FROM web_annual_posters WHERE share_id = ?",
     [shareId]
@@ -821,12 +821,12 @@ export const listAnnualPosterPathsForShare = async (shareId: string) => {
 };
 
 export const deleteAnnualPostersForShare = async (shareId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute("DELETE FROM web_annual_posters WHERE share_id = ?", [shareId]);
 };
 
 export const listAnnualSummaryGcCandidates = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualSummaryRow>[]>(
     `SELECT s.*
      FROM web_annual_summaries s
@@ -847,7 +847,7 @@ export const listAnnualSummaryGcCandidates = async () => {
 };
 
 export const deleteAnnualSummaryForGc = async (summaryId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>(
     `DELETE FROM web_annual_summaries
      WHERE id = ? AND NOT EXISTS (
@@ -860,13 +860,13 @@ export const deleteAnnualSummaryForGc = async (summaryId: string) => {
 };
 
 export const deleteAnnualSummaryForAdmin = async (summaryId: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [result] = await getAccountDb().execute<ResultSetHeader>("DELETE FROM web_annual_summaries WHERE id = ?", [summaryId]);
   return result.affectedRows > 0;
 };
 
 export const deleteOldAnnualJobs = async () => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   await getAccountDb().execute(
     "DELETE FROM web_annual_summary_jobs WHERE status IN ('completed', 'failed', 'expired', 'cancelled') AND created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)"
   );
@@ -874,7 +874,7 @@ export const deleteOldAnnualJobs = async () => {
 
 // Preserve a terminal failure across reloads; the entry UI must not auto-loop builds.
 export const findLatestFailedAnnualBuild = async (userId: number, bindingId: number, versionKey: string) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<AnnualJobRow>[]>(
     `SELECT * FROM web_annual_summary_jobs WHERE user_id = ? AND binding_id = ?
      AND version_key = ? AND job_type = 'build' ORDER BY created_at DESC LIMIT 1`,

@@ -2,17 +2,11 @@ import type { RowDataPacket } from "mysql2/promise";
 import { UGC_CREATE_TABLE_STATEMENTS } from "~/server/services/ugc/schema";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 
-let ugcSchemaReady: Promise<void> | null = null;
-
+import { schemaRequirement, validateSchemaTables } from "./account-schema-runtime";
+const requirements = UGC_CREATE_TABLE_STATEMENTS.map(schemaRequirement);
 export const ensureUgcSchema = async () => {
-  if (!ugcSchemaReady) {
-    ugcSchemaReady = (async () => {
-      await ensureAccountSchema();
-      const db = getAccountDb();
-      for (const statement of UGC_CREATE_TABLE_STATEMENTS) await db.execute(statement);
-    })();
-  }
-  await ugcSchemaReady;
+  await ensureAccountSchema();
+  await validateSchemaTables(getAccountDb(), requirements, "ugc");
 };
 
 export const getUgcDb = () => getAccountDb();

@@ -89,7 +89,7 @@ export const proveCapturedSourceAccess=(db:ProofDb,ticket:SourceAccessTicket,loc
 async function captureAccess(event:H3Event,sourceInput:unknown,scope:SourceServiceScope,mutation=false):Promise<SourceAccessTicket> {
   try {
     const source=typeof sourceInput==='string'?sourceInput.trim():'';if(!validSourceIdentity(source))throw failure(400,'成绩账号标识无效');
-    await ensureAccountSchema();const db=getAccountDb(),paths=Object.freeze(getRuntimePaths());
+    await ensureAccountSchema("source");const db=getAccountDb(),paths=Object.freeze(getRuntimePaths());
     const actor=await captureActor(event,db);
     const grant=await serviceGrant(db,actor,source,scope) || await ownerGrant(db,actor,source);
     if(grant.kind==='owner'&&!['source_read','history_read'].includes(scope)){

@@ -7,7 +7,7 @@ import {resolve} from 'node:path';
 import ts from 'typescript';
 import {accountSourceFixture} from './fixtures/accountSourceHttp.mjs';
 const nativeFetch=globalThis.fetch;
-async function ddl(c,table){const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');let value;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))value=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(value);await c.pool.execute(value);}
+async function ddl(c,table){const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');let value;function visit(n){if(ts.isNoSubstitutionTemplateLiteral(n)&&n.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))value=n.text;ts.forEachChild(n,visit);}visit(ts.createSourceFile('db.ts',source,ts.ScriptTarget.Latest,true));assert.ok(value);await c.pool.execute(value);}
 test('Freeze review bounded HTTP, lifecycle, SDK and owner list completeness',{timeout:180000},()=>accountSourceFixture(async c=>{
  c.state.expectedSourceMode='none';Object.assign(c.config,{developerApiV1:true,developerApiAnonymousDailyLimit:300,developerApiClientDailyLimit:5000,repoRoot:c.root,public:{}});
  await ddl(c,'web_developer_applications');execFileSync(process.execPath,['--experimental-strip-types',new URL('../scripts/migrate_developer_api_v1.ts',import.meta.url).pathname,'--apply'],{env:process.env,timeout:30000,maxBuffer:32768});
