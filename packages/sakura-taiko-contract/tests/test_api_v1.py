@@ -14,4 +14,6 @@ class ApiV1Golden(unittest.TestCase):
         for value in (True,0,6,1.5,'4'):
             with self.assertRaises(ValueError):module.difficulty_to_tja_course(value)
         with self.assertRaises(ValueError):module.project_catalog([{'id':1},{'id':1}],'r')
+        with self.assertRaises(ValueError):module.project_catalog(fixture['catalogInput'],'r',[{'id':1,'aliases':[]},{'id':1,'aliases':[]}])
+        with self.assertRaises(ValueError):module.project_catalog(fixture['catalogInput'],'r',[{'id':'9007199254740992','aliases':[]}])
 if __name__=='__main__':unittest.main()
