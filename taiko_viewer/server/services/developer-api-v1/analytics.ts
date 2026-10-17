@@ -12,8 +12,8 @@ const execFileAsync=promisify(execFile);
 type AnalysisKind='rating'|'b30'|'recommendations';
 async function compute(taikoId:string,kind:AnalysisKind){
  const paths=getRuntimePaths(),python=getTaikoPython();
- const rating=['import json,sys','from taiko_bot.offline.recommendation_intelligence import build_player_rating_intelligence','print(json.dumps(build_player_rating_intelligence(sys.argv[1]),ensure_ascii=False,separators=(",",":")))'].join('\\n');
- const recommendations=['import json,sys','from taiko_bot.offline.recommendation_intelligence import build_ordinary_recommendation_intelligence','print(json.dumps(build_ordinary_recommendation_intelligence(sys.argv[1],basis="rating",limit=20),ensure_ascii=False,separators=(",",":")))'].join('\\n');
+ const rating=['import json,sys','from taiko_bot.offline.recommendation_intelligence import build_player_rating_intelligence','print(json.dumps(build_player_rating_intelligence(sys.argv[1]),ensure_ascii=False,separators=(",",":")))'].join('\n');
+ const recommendations=['import json,sys','from taiko_bot.offline.recommendation_intelligence import build_ordinary_recommendation_intelligence','print(json.dumps(build_ordinary_recommendation_intelligence(sys.argv[1],basis="rating",limit=20),ensure_ascii=False,separators=(",",":")))'].join('\n');
  const b30=[
  'import json,sys',
  'from taiko_bot.offline.score_calculator import compute_all_from_userdata',
@@ -23,7 +23,7 @@ async function compute(taikoId:string,kind:AnalysisKind){
  'rows=sorted(r,key=lambda x:float(getattr(x,"AI_rating",0) or 0),reverse=True)[:30]',
  'items=[{"songId":int(getattr(x,"song_id",0) or 0),"level":int(getattr(x,"level",0) or 0),"rating":round(float(getattr(x,"AI_rating",0) or 0),6),"dimensions":{"big_song":round(float(getattr(x,"big_song",0) or 0),6),"stamina":round(float(getattr(x,"stamina",0) or 0),6),"speed":round(float(getattr(x,"speed",0) or 0),6),"accuracy_power":round(float(getattr(x,"accuracy_power",0) or 0),6),"rhythm":round(float(getattr(x,"rhythm",0) or 0),6),"complex":round(float(getattr(x,"complex_proc",0) or 0),6)}} for x in rows if int(getattr(x,"song_id",0) or 0)>0 and int(getattr(x,"level",0) or 0)>0]',
  'print(json.dumps({"model":"v1","aggregation":"per-dimension-top20","topN":20,"overallRating":round(float(aggregate_topN_value(r,"AI_rating",20)),6) if r else None,"sampleCount":len(r),"dimensions":[{"key":k,"label":label,"value":round(float(dims.get(label,0) or 0),6)} for k,label in [("big_song","大歌力"),("stamina","体力"),("speed","高速处理"),("accuracy_power","精度力"),("rhythm","节奏处理"),("complex","复合处理")]],"b30":items},ensure_ascii=False,separators=(",",":")))'
- ].join('\\n');
+ ].join('\n');
  try{const result=await execFileAsync(python,['-I','-c',kind==='rating'?rating:kind==='recommendations'?recommendations:b30,taikoId],{cwd:paths.repoRoot,env:{...getTaikoPythonEnv(paths.repoRoot),TAIKO_USERDATA_DIR:paths.userdataDir,TAIKO_COMPUTE_ONLY:'1'},encoding:'utf8',timeout:120000,killSignal:'SIGKILL',maxBuffer:8*1024*1024});const value=JSON.parse(String(result.stdout||''));if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('invalid payload');return value;}catch{throw new ApiFailure(503,'ANALYSIS_UNAVAILABLE');}
 }
 export async function privateAnalysis(event:H3Event,kind:AnalysisKind,playerId:string){
