@@ -9,16 +9,48 @@ import {hash,ApiFailure} from './common';
 export const SCHEMA_REVISION=hash(JSON.stringify(schema));
 export {difficultyToTjaCourse} from '@sakura-taiko/contract/catalog';
 export {projectCatalog as mapCatalog} from '@sakura-taiko/contract/catalog';
-/** Hash and projection come from the same bounded bytes; no upstream call/cache. */
-export async function catalog(){
- const c=useRuntimeConfig();const path=String(c.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(getRuntimePaths().repoRoot,'songs/song_data.json'));
+
+async function readBoundedArray(path:string,maxBytes:number,maxRows:number,code:string){
  const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
- try{const stat=await file.stat();if(!stat.isFile())throw new ApiFailure(503,'UNAVAILABLE');if(stat.size>8*1024*1024)throw new ApiFailure(503,'CATALOG_LIMIT_EXCEEDED');const bytes=await file.readFile();if(bytes.length>8*1024*1024)throw new ApiFailure(503,'CATALOG_LIMIT_EXCEEDED');const revision=hash(bytes.toString('utf8'));const rows=JSON.parse(bytes.toString('utf8'));if(Array.isArray(rows)&&rows.length>10000)throw new ApiFailure(503,'CATALOG_LIMIT_EXCEEDED');return {revision,...projectCatalog(rows,revision)};}finally{await file.close();}
+ try{
+  const stat=await file.stat();
+  if(!stat.isFile()||stat.size>maxBytes)throw new ApiFailure(503,code);
+  const bytes=await file.readFile();
+  if(bytes.length>maxBytes)throw new ApiFailure(503,code);
+  const rows=JSON.parse(bytes.toString('utf8'));
+  if(!Array.isArray(rows)||rows.length>maxRows)throw new ApiFailure(503,code);
+  return {bytes,rows:rows as Array<Record<string,unknown>>};
+ }catch(error){if(error instanceof ApiFailure)throw error;throw new ApiFailure(503,code);}
+ finally{await file.close();}
+}
+
+/** Song and alias metadata share one bounded read model and one revision. */
+export async function catalog(){
+ const runtime=useRuntimeConfig();
+ const paths=getRuntimePaths();
+ const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));
+ const aliasPath=resolve(paths.repoRoot,'songs/song_alias.json');
+ const [songSource,aliasSource]=await Promise.all([
+  readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
+  readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
+ ]);
+ const songRevision=hash(songSource.bytes.toString('utf8'));
+ const aliasRevision=hash(aliasSource.bytes.toString('utf8'));
+ const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
+ const projected=projectCatalog(songSource.rows,revision);
+ const aliasById=new Map<string,Record<string,unknown>>();
+ for(const row of aliasSource.rows){
+  const id=Number(row.id);
+  if(Number.isSafeInteger(id)&&id>0)aliasById.set(String(id),row);
+ }
+ const songs=projected.songs.map(song=>{
+  const source=songSource.rows.find(row=>String(row.id)===song.songId);
+  const alias=aliasById.get(song.songId);
+  const songName=typeof source?.song_name==='string'?source.song_name:null;
+  const songNameJp=typeof source?.song_name_jp==='string'?source.song_name_jp:typeof alias?.song_name_jp==='string'?alias.song_name_jp:null;
+  const aliases=Array.isArray(alias?.aliases)?alias.aliases.filter((value):value is string=>typeof value==='string').slice(0,100):[];
+  return {...song,song_name:songName,song_name_jp:songNameJp,aliases};
+ });
+ return {revision,songRevision,aliasRevision,songs,charts:projected.charts};
 }
 export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
-
-export async function aliases(){
- const aliasPath=resolve(getRuntimePaths().repoRoot,'songs','song_alias.json');
- const file=await open(aliasPath,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
- try{const stat=await file.stat();if(!stat.isFile()||stat.size>4*1024*1024)throw new ApiFailure(503,'ALIASES_UNAVAILABLE');const bytes=await file.readFile();if(bytes.length>4*1024*1024)throw new ApiFailure(503,'ALIASES_UNAVAILABLE');const revision=hash(bytes.toString('utf8'));const rows=JSON.parse(bytes.toString('utf8'));if(!Array.isArray(rows)||rows.length>20000)throw new ApiFailure(503,'ALIASES_UNAVAILABLE');return {revision,items:rows.filter(x=>x&&Number.isSafeInteger(Number(x.id))&&Number(x.id)>0).map(x=>({songId:Number(x.id),aliases:Array.isArray(x.aliases)?x.aliases.filter((a:unknown)=>typeof a==='string').slice(0,100):[],japaneseTitle:typeof x.song_name_jp==='string'?x.song_name_jp:null}))};}finally{await file.close();}
-}
