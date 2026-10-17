@@ -1,3 +1,5 @@
+> 历史本地 merge/QA 报告；当前交付及唯一只读申请见 [主线交付](083-mainline-handoff.md)。原执行证据不变。
+
 # Viewer rc.6 本地合并演练交付
 
 状态：`LOCAL_MERGE_ANCESTRY_READY_FOR_REVIEW` + `GATE_P_PHASED_APPROVAL_PREPARED`。`Gate P=DEPLOY_PENDING_AUTH`，`deployReady=false`。
@@ -10,7 +12,7 @@
 
 九项逐文件决定、全部路径、双向独有提交和 tree diff 见 [祖先关系证明](origin-ancestry-reconciliation.json)。旧发布目录 service 模板、0.81.12 lock、旧直接 fs Writer 均未进入候选。
 
-Kinoko 兼容性：既有 current 任一异常／未来事件时间，整批 409，在 staging 前终止；诊断 `KINOKO_CURRENT_TIME_CONFLICT`，可见提示“现有成绩时间异常，导入已停止，请联系管理员处理”。不是旧逐谱面跳过后 delta 发布的等价行为。**`OWNER_RISK_ACCEPTANCE_PENDING`**；保留污染数据，后续仅通过另行授权的账号诊断／修复工单处理，本轮没有创建修复接口或清理数据。
+Kinoko 兼容性：既有 current 任一异常／未来事件时间，整批 409，在 staging 前终止；诊断 `KINOKO_CURRENT_TIME_CONFLICT`，可见提示“现有成绩时间异常，导入已停止，请联系管理员处理”。不是旧逐谱面跳过后 delta 发布的等价行为。工程结论见 [唯一决策登记](083-decision-register.json)，无需重复签收；保留污染数据，后续仅通过另行授权的账号诊断／修复工单处理，本轮没有创建修复接口或清理数据。
 
 ## 2. 最小 QA 与构件身份
 
@@ -36,6 +38,6 @@ Kinoko 兼容性：既有 current 任一异常／未来事件时间，整批 409
 
 ## 4. 唯一下一项待批请求
 
-交付 [P-ID-DISCOVERY 单项卡](gate-p-id-discovery-request.md)：一个候选 unit、十字段、十秒，`CAN_RUN_NOW=false`。待 Owner 填写明确批准、操作者、有效期和私有存证位置；本轮未执行任何生产发现。只有获得这一项真实发现后，才准备下一张精确运行身份／代理审批。
+该历史 P-ID-DISCOVERY 卡已由 [P-A 一次有界只读核查申请](gate-p-readonly-onepass.md)替代，当前 `CAN_RUN_NOW=false`。一次明确批准后，可沿包内有限引用链连续观察，不再逐个 PID／文件签收；原卡及原执行证据保留历史身份。
 
 Contract 保持 `CONTRACT_FROZEN_LOCAL`，冻结提交 `5c68a13964cc8d8750709002485c11cf1ee239cb`；I6 `DEFERRED_WITH_EVIDENCE`；默认双 legacy、v1 OFF、Annual normal 均保留。未 push、tag、合入既有 main、访问生产配置/SQL/数据、部署、重启或启用功能。交付后停止扩展。

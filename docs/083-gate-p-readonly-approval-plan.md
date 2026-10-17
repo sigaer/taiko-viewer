@@ -1,3 +1,5 @@
+> 历史审批分类存档；当前唯一 P-A 只读申请见 [一次有界核查](gate-p-readonly-onepass.md)。旧文逐项审批流程不再适用；DDL/发布/业务数据操作与 P-B/P-C 仍独立授权。
+
 # 0.83 Gate P：生产只读观察申请草案
 
 状态 `DEPLOY_PENDING_AUTH`。这是离线计划，`productionAccess=false`；本轮没有读取生产配置、业务数据、SQL、进程身份或 HTTP。历史部署文档和模板不能证明当前运行状态。Owner 签收本文件本身不授权执行观察，也不授权 DDL、切换、重启或外部 API 启用。

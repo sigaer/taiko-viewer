@@ -1,3 +1,5 @@
+> 历史审批分类存档；当前唯一 P-A 只读申请见 [一次有界核查](gate-p-readonly-onepass.md)。旧文逐项审批流程不再适用；DDL/发布/业务数据操作与 P-B/P-C 仍独立授权。
+
 # Gate P 一次性授权决定表（尚未授权）
 
 Gate P=`DEPLOY_PENDING_AUTH`。本轮未做任何生产观察或变更。**所有 CAN_RUN_NOW=否、OWNER_APPROVAL_NEEDED=是**；UNKNOWN 的行均 `NEEDS_SCOPED_DISCOVERY_APPROVAL`，不能用一次“同意上线”授权整表。Owner 可先单独批准 P-ID-DISCOVERY 对一个仓库模板候选名称的元数据观察；无许可不执行。

@@ -181,5 +181,8 @@
   ],
   "productionAccess": false,
   "GateP": "DEPLOY_PENDING_AUTH",
-  "deployReady": false
+  "deployReady": false,
+  "decisionRegister": "083-decision-register.json",
+  "kinokoDecisionRef": "083-decision-register.json#/decisions/KINOKO-CURRENT-TIME-COMPATIBILITY",
+  "currentHandoffGate": "083-mainline-gate.json"
 }

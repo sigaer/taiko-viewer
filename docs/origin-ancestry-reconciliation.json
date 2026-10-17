@@ -953,10 +953,11 @@
   "push": false,
   "mergeExistingMain": false,
   "KinokoRisk": {
-    "decision": "OWNER_RISK_ACCEPTANCE_PENDING",
     "diagnosticCode": "KINOKO_CURRENT_TIME_CONFLICT",
     "behavior": "Any existing current invalid/future event time rejects whole import 409 before staging; no partial legacy delta Writer",
     "visibleMessage": "现有成绩时间异常，导入已停止，请联系管理员处理",
-    "futureRepair": "Separate owner-authorized account-specific diagnosis and repair; no automatic cleanup in this task"
-  }
+    "futureRepair": "Separate owner-authorized account-specific diagnosis and repair; no automatic cleanup in this task",
+    "decisionRef": "083-decision-register.json#/decisions/KINOKO-CURRENT-TIME-COMPATIBILITY"
+  },
+  "decisionRegister": "083-decision-register.json"
 }

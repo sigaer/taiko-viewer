@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "status": "CLOSED_DECISION_REGISTER",
+  "effectiveOrderDate": "2026-10-17",
+  "timeZone": "Asia/Shanghai",
+  "authority": "Viewer_083_RC6_Final_Delivery_and_OnePass_GateP_20261017.md and current explicit user instruction; engineering decision closure, no fabricated cryptographic approval",
+  "workOrder": {
+    "path": "/home/sigaer/taiko/taiko-forum/docs/Viewer_083_RC6_Final_Delivery_and_OnePass_GateP_20261017.md",
+    "sha256": "18e8397acd32f21e63a316688b1a685af74796c81392df041e9539e6b5a19be6"
+  },
+  "baseDeliveryCommit": "6aa5d3a93305e046fcf20d29e7ac8616e3b548e8",
+  "decisions": {
+    "KINOKO-CURRENT-TIME-COMPATIBILITY": {
+      "status": "DECIDED_IMPLEMENTED_VERIFIED",
+      "kind": "ENGINEERING_DECISION_CLOSED",
+      "conclusion": "既有 current 任一无效/未来事件时间，整批 409、staging 前退出；KINOKO_CURRENT_TIME_CONFLICT；不引入旧 per-chart continue、partial-history Writer 或自动修复。零写入不生成成功回执/日志或 Publication 增量。全过滤 422、重复零写入 409、部分真实写入 warning 保持不变。",
+      "basis": [
+        "已明确的 rc.6 行为方案",
+        "rc.6 16 项 SQL/H3 与 11 项 adapter/Publication 原证据",
+        "本次工作令明确要求停止重复签收"
+      ],
+      "evidence": [
+        {
+          "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc5-main-integration-20261016/kinoko-boundary-v2-run.json",
+          "sha256": "f8245de6f4593598dbd6b2ad7cc3862357c5b54136d2addf48ef4de7804d5073"
+        },
+        {
+          "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc5-main-integration-20261016/rc6-prebuild-run.json",
+          "sha256": "b68337f839595653690e625bed54adf7763d1870f8e4b63d3f8562aa72c1b659"
+        }
+      ],
+      "newSignatureClaimed": false,
+      "approvalTimestampClaimed": false,
+      "requiresOwnerResign": false,
+      "runtimeChangedForClosure": false
+    },
+    "CONTRACT-F1-F5": {
+      "status": "FROZEN_LOCAL",
+      "conclusion": "唯一 Contract v1.0 Schema；ResourceGrant 与 profile:read/scores:read 边界维持冻结结论。",
+      "frozenCommit": "5c68a13964cc8d8750709002485c11cf1ee239cb",
+      "contractStatus": "CONTRACT_FROZEN_LOCAL",
+      "productionEnablementAuthorized": false
+    },
+    "VIEWER-082-O1-O2": {
+      "status": "CLOSED_ACCEPTED_RISK",
+      "conclusion": "历史 PNG Pixel Oracle 缺失、限定性能历史失败已接受；保留 FAIL，不重写为 PASS。",
+      "gateC": "PASS_WITH_ACCEPTED_RISK",
+      "historicalGate": {
+        "path": "/home/sigaer/taiko/.worktrees/viewer083-rc6-mainline-handoff-20261017/docs/082-gate-status.json",
+        "sha256": "2f15af87484787ad424d54d2959a07a6fcb3580b3c366686d976bb1509bd0c64"
+      }
+    },
+    "ANNUAL-OFFSEASON": {
+      "status": "PARKED_EOL",
+      "conclusion": "退出窗口安排独立；历史报告/入口保持，不冷生成、不高尾 PSI/海报/容量试验。候选默认和发布要求为 Annual startup normal；生产实际状态尚未知。",
+      "historicalFailRetained": true,
+      "entryRemovalAuthorized": false
+    },
+    "VIEWER1-I6-HOME": {
+      "status": "DEFERRED_WITH_EVIDENCE",
+      "conclusion": "现有 Home 已消费 Growth，缺乏新增适配收益；不重写 CalculationProfile。",
+      "evidenceCommit": "d52410c352f2071e6d28af095504d323214bd363"
+    },
+    "ORIGIN-NINE-PATH-DISPOSITION": {
+      "status": "DECIDED_LOCAL",
+      "conclusion": "已评审九路径逐项保留 rc.6 行为；真实本地 merge 已完成；旧 unit/fs Writer/lock 不覆盖候选。",
+      "mergeCommit": "6ec45d1f2d2a936b01769fd23ab3904dd9bd0a6d",
+      "originalReconciliation": {
+        "path": "/home/sigaer/taiko/qa-vault/evidence/083-rc6-merge-rehearsal-20261016/origin-ancestry-reconciliation.json",
+        "sha256": "2a6e0cfa296a02420bd55c532807d9f75dff12be1ee6f5b8c32d7a00d1da01eb"
+      }
+    }
+  },
+  "reopenRule": "Only a concrete previously uncovered new P0 counterexample with exact file/request/input/log SHA can reopen the affected decision",
+  "historicalEvidencePolicy": "All raw PASS/FAIL remain at original identities; missing PNG pixel oracle, history performance failures and Annual PSI are retained; no historical FAIL is relabelled PASS",
+  "productionAuthorizationGranted": false
+}

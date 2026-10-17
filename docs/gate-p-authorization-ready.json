@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "GATE_P_PHASED_APPROVAL_PREPARED",
+  "status": "SUPERSEDED_BY_SINGLE_READONLY_PACKAGE",
   "GateP": "DEPLOY_PENDING_AUTH",
   "productionAccess": false,
   "productionObservedValues": {
@@ -46,7 +46,7 @@
     {
       "id": "P-ID-DISCOVERY",
       "authorizationCategory": "READONLY_NAMED_DISCOVERY",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "确认真实 unit/PID，避免把历史模板当作已部署状态",
       "EXACT_SCOPE": {
         "candidateUnit": "taiko-viewer.service",
@@ -80,30 +80,32 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "One named candidate unit only; this card remains unapproved"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "One named candidate unit only; this card remains unapproved"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "One named candidate unit only; this card remains unapproved"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-ID-VERIFY",
       "authorizationCategory": "READONLY_EXACT_RUNTIME_FILES",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "证明部署构件/Node/两角色 Python 与 approved source 对应",
       "EXACT_SCOPE": {
         "unit": "UNKNOWN",
@@ -141,30 +143,32 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Actual deployment/new-old immutable artifacts and Node/Python identity UNKNOWN"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-APP",
       "authorizationCategory": "SYNTHETIC_MUTATING_HTTP_SEPARATE_AUTH",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "历史绑定/资源属主与 Grant/Key/Session 撤销不能靠可达性证明",
       "EXACT_SCOPE": {
         "origin": "UNKNOWN",
@@ -202,21 +206,21 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "NOT_APPLICABLE_WHILE_OFF",
-        "P-B": "NOT_APPLICABLE_WHILE_OFF",
-        "P-C": "REQUIRED"
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Original row covers v1 client/Grant tests; not prerequisite while v1 OFF"
         },
         "P-B": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Original v1 Grant row inapplicable; separate required MyTaiko real Session/owner/source/revision negatives remain PENDING"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Real and synthetic approved application/Key/owner/binding/Grant issue/revoke/expiry/304/cache negatives REQUIRED"
         }
       },
@@ -225,7 +229,7 @@
     {
       "id": "P-PROXY",
       "authorizationCategory": "READONLY_CONFIG_AND_SEPARATE_SYNTHETIC_HTTP",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "核实新旧反代、Host/Origin、可信转发头与匿名 direct-peer 日预算",
       "EXACT_SCOPE": {
         "vhostFile": "UNKNOWN",
@@ -262,30 +266,32 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Existing legacy ingress/ACL/Host/Origin/forwarded headers REQUIRED; v1 quota probe N/A while OFF"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Restricted instance ingress/ACL and complete request routing REQUIRED; no per-user mode allowlist exists"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Independent external API ingress/Origin/trusted peer/public-private quota REQUIRED"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-KEY",
       "authorizationCategory": "READONLY_PRESENCE_AND_REDACTION",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "避免 Authorization/Cookie/JWT/Key 泄入 URL、日志、前端或异常",
       "EXACT_SCOPE": {
         "approvedFiles": "UNKNOWN",
@@ -312,30 +318,32 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Existing Session/legacy credential handling/redaction REQUIRED; new v1 Key lifecycle N/A while OFF"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Existing Session credential handling REQUIRED; no third-party Key/Grant changes"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Actual app Key lifecycle/Origin/logging and redaction REQUIRED"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-AUDIT",
       "authorizationCategory": "READONLY_LOG_FORMAT_THEN_SCOPED_SYNTHETIC_SAMPLE",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "验证审计可追责且不泄漏真实用户/凭证",
       "EXACT_SCOPE": {
         "logFormatFile": "UNKNOWN",
@@ -369,30 +377,32 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Legacy/synthetic smoke log redaction REQUIRED; v1 event retention N/A while OFF"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "MyTaiko access/failure trace and redaction REQUIRED"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "External v1 quota/grant/revocation audit and retention REQUIRED"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-MIGRATION-OBSERVE",
       "authorizationCategory": "READONLY_SQL_METADATA",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "在 DDL 前确定四表及 F3 owner-keyset 的真实结构",
       "EXACT_SCOPE": {
         "connectionIdentity": "UNKNOWN",
@@ -444,30 +454,31 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "NOT_APPLICABLE_WHILE_OFF",
-        "P-B": "NOT_APPLICABLE_WHILE_OFF",
-        "P-C": "REQUIRED"
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "The four-table/F3-only metadata row is N/A; general existing schema/bootstrap compatibility remains REQUIRED separately"
         },
         "P-B": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Same: Session read-model does not need v1 four tables; Goal/Growth/Publication compatibility still required"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Production four-table/F3 schema/index diff UNKNOWN; read-only SQL metadata needs separate approval"
         }
       },
-      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase."
+      "pendingFieldsScope": "Historical unsplit request fields; phaseDependencies/phaseEvidence define phase applicability. These are not blanket prerequisites for every phase.",
+      "pAReadonlyApprovalScope": "Optional existing-schema metadata only if explicitly included in onepass; v1 four-table scope remains NOT_APPLICABLE"
     },
     {
       "id": "P-MIGRATION-DDL",
       "authorizationCategory": "DDL_SEPARATE_AUTH",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "仅执行经观察后审阅的 additive schema/index diff",
       "EXACT_SCOPE": {
         "database": "UNKNOWN",
@@ -495,21 +506,21 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "NOT_APPLICABLE_WHILE_OFF",
-        "P-B": "NOT_APPLICABLE_WHILE_OFF",
-        "P-C": "REQUIRED"
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Do not create four new v1 tables for this OFF path"
         },
         "P-B": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Do not create v1 tables for restricted MyTaiko; existing read-model schema compatibility is separate"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Reviewed exact additive four-table/F3 diff, lock/algorithm/disk/rollback plan and separate DDL authorization REQUIRED"
         }
       },
@@ -518,7 +529,7 @@
     {
       "id": "P-RESTORE",
       "authorizationCategory": "BUSINESS_DATA_BACKUP_RESTORE_SEPARATE_AUTH",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "Grant/Key/Session 撤销与 Publication/measurement 必须同检查点恢复",
       "EXACT_SCOPE": {
         "database": "UNKNOWN",
@@ -549,21 +560,21 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "PENDING_EVIDENCE",
-        "P-B": "PENDING_EVIDENCE",
-        "P-C": "REQUIRED"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Valid existing-data backup/recovery foundation REQUIRED; exact real dependencies, rights and recovery scope PENDING; v1-only synthetic four-table restore/PITR is not blanket dark-deploy prerequisite"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Actual Session/owner/Publication/history/Goal/Growth checkpoint and rollback/recovery PENDING; no third-party Grant change"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Revoke-safe consistent restore/PITR, encrypted offsite, RPO<=15min/RTO<=120min and real-scale proof REQUIRED; all unproven"
         }
       },
@@ -592,12 +603,14 @@
           "restoreTarget",
           "realScaleRpoRtoProof"
         ]
-      }
+      },
+      "pAReadonlyApprovalScope": "P-A_PRODUCTION_READONLY_AUDIT",
+      "sideEffectsStillRequireSeparateApproval": true
     },
     {
       "id": "P-CANARY",
       "authorizationCategory": "DEPLOYMENT_AND_MYTAIKO_ROLLOUT_SEPARATE_AUTH",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "先旧模式确认，再受控名单 My Taiko，具备完整回滚",
       "EXACT_SCOPE": {
         "deploymentUnit": "UNKNOWN",
@@ -629,21 +642,21 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "REQUIRED",
-        "P-B": "REQUIRED",
-        "P-C": "PENDING_EVIDENCE"
+        "P-A": "DEPENDENCY_REQUIRED",
+        "P-B": "DEPENDENCY_REQUIRED",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Separately authorized code update and synthetic anonymous/legacy smoke; both modes legacy, v1 OFF, Annual normal; immutable rollback UNKNOWN"
         },
         "P-B": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Separately approved restricted-instance plan, authorized cohort, paired modes and immediate rollback REQUIRED"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Independent API instance/deployment route may differ from MyTaiko canary; exact deployment scope PENDING, no automatic inheritance"
         }
       },
@@ -672,7 +685,7 @@
     {
       "id": "P-V1-ENABLE",
       "authorizationCategory": "EXTERNAL_API_ENABLEMENT_SEPARATE_AUTH",
-      "scopeStatus": "NEEDS_SCOPED_DISCOVERY_APPROVAL",
+      "scopeStatus": "HISTORICAL_CATEGORY_NOT_AN_INDIVIDUAL_ACTIVE_REQUEST",
       "WHY": "冻结协议不等于允许外部读取",
       "EXACT_SCOPE": {
         "runtimeUnit": "UNKNOWN",
@@ -695,21 +708,21 @@
       "approved": false,
       "authorizationId": null,
       "phaseDependencies": {
-        "P-A": "NOT_APPLICABLE_WHILE_OFF",
-        "P-B": "NOT_APPLICABLE_WHILE_OFF",
-        "P-C": "REQUIRED"
+        "P-A": "NOT_APPLICABLE",
+        "P-B": "NOT_APPLICABLE",
+        "P-C": "DEPENDENCY_REQUIRED"
       },
       "phaseEvidence": {
         "P-A": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Keep v1 OFF; no enablement action"
         },
         "P-B": {
-          "status": "NOT_APPLICABLE_WHILE_OFF",
+          "status": "NOT_APPLICABLE",
           "scope": "Keep v1 OFF; MyTaiko acceptance never enables v1"
         },
         "P-C": {
-          "status": "PENDING_EVIDENCE",
+          "status": "EVIDENCE_PENDING",
           "scope": "Independent narrow enablement authorization and grey rollout REQUIRED; none granted"
         }
       },
@@ -848,6 +861,10 @@
   },
   "permissionRule": "Each category requires a separate explicit decision; document acceptance is not authorization. UNKNOWN scopes require scoped discovery or Owner-provided exact scope; no execution now.",
   "phaseDependencyMatrix": "083-gate-p-phased-dependencies.json",
-  "firstPendingRequest": "gate-p-id-discovery-request.md",
-  "privateAssetInterpretation": "12 unmapped placeholders, not known production runtime dependencies; authorized inventory must determine actual use/rights/backup. No automatic loop/blocker or dismissal."
+  "firstPendingRequest": "gate-p-readonly-onepass.md",
+  "privateAssetInterpretation": "12 unmapped placeholders, not known production runtime dependencies; authorized inventory must determine actual use/rights/backup. No automatic loop/blocker or dismissal.",
+  "activeReadonlyRequest": "gate-p-readonly-onepass.md",
+  "decisionRegister": "083-decision-register.json",
+  "splitApprovalWorkflowActive": false,
+  "historicalScopeNote": "The eleven rows retain category scope/history; they are not eleven active approval requests. P-A read-only branches in onepass require one approval; side effects and P-B/P-C remain independent."
 }
