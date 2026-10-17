@@ -23,8 +23,9 @@ def render_type(value, language):
 
 def generate():
     schema=json.loads((ROOT/'schema/contract-v1.json').read_text())
-    ts=['// Generated from schema/contract-v1.json. Run tools/generate_bindings.py.','export const CONTRACT_VERSION = "1.0" as const;']
-    py=['# Generated from schema/contract-v1.json. Run tools/generate_bindings.py.','from __future__ import annotations','from typing import Any, Dict, List, Literal, NotRequired, TypedDict','CONTRACT_VERSION = "1.0"']
+    version=schema['$id'].rsplit(':',1)[-1]
+    ts=['// Generated from schema/contract-v1.json. Run tools/generate_bindings.py.','export const CONTRACT_VERSION = '+json.dumps(version)+' as const;']
+    py=['# Generated from schema/contract-v1.json. Run tools/generate_bindings.py.','from __future__ import annotations','from typing import Any, Dict, List, Literal, NotRequired, TypedDict','CONTRACT_VERSION = '+json.dumps(version)]
     for name,definition in schema['$defs'].items():
         if definition.get('type')!='object' or 'properties' not in definition:
             ts.append(f'export type {name} = {render_type(definition,"ts")};')
