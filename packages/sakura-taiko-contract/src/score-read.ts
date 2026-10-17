@@ -1,5 +1,5 @@
 /** Internal read protocol. Legacy evidence is confined to the compatibility adapter. */
-import type { CONTRACT_VERSION } from "./index.ts";
+const SCORE_READ_VERSION = "1.0" as const;
 
 export type LegacyScoreRecord = {
   song_no: number;
@@ -33,7 +33,7 @@ export type LegacyScorePayload = {
 };
 
 export type DomainScoreSnapshot = {
-  contractVersion: typeof CONTRACT_VERSION;
+  contractVersion: typeof SCORE_READ_VERSION;
   current: LegacyScorePayload;
   raw: string;
   revision: string;
@@ -42,7 +42,7 @@ export type DomainScoreSnapshot = {
 
 /** All methods are reads. No publication, caches, ownership or clock inference. */
 export interface ScoreReadPort {
-  readonly contractVersion: typeof CONTRACT_VERSION;
+  readonly contractVersion: typeof SCORE_READ_VERSION;
   readCurrent(taikoId: string): Promise<DomainScoreSnapshot>;
   readRawCurrent(taikoId: string): Promise<string>;
   currentExists(taikoId: string): Promise<boolean>;
