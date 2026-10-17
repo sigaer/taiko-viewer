@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import Any, Dict, List, Literal, NotRequired, TypedDict
 CONTRACT_VERSION = "1.1"
 class ExternalIdentity(TypedDict):
-    namespace: 'wahlap' | 'hiroba' | 'qq' | 'onebot' | 'manual' | 'legacy-content'
+    namespace: Literal['wahlap', 'hiroba', 'qq', 'onebot', 'manual', 'legacy-content']
     id: str
 class User(TypedDict):
     id: str
-    namespace: 'viewer'
+    namespace: Literal['viewer']
     displayName: str | None
 class Binding(TypedDict):
     id: str
@@ -31,7 +31,7 @@ class Chart(TypedDict):
     chartId: str
     difficulty: int
     level: float | None
-    type: 'single' | 'double' | 'unknown'
+    type: Literal['single', 'double', 'unknown']
     variant: str | None
     catalogRevision: str | None
     availability: NotRequired[CatalogAvailability]
@@ -68,16 +68,16 @@ class GrowthObservation(TypedDict):
     observedAt: str
     source: str
     eventDays: List[str]
-    evidenceLevel: 'L0' | 'L1'
-    excludedReason: None | 'import' | 'manual' | 'repair' | 'content-edit' | 'dispatcher-transfer' | 'counter-regression' | 'unknown-source' | 'source-switch' | 'discontinuity-baseline'
+    evidenceLevel: Literal['L0', 'L1']
+    excludedReason: Literal[None, 'import', 'manual', 'repair', 'content-edit', 'dispatcher-transfer', 'counter-regression', 'unknown-source', 'source-switch', 'discontinuity-baseline']
 class GrowthTemporal(TypedDict):
     attributedDay: NotRequired[str | None]
     occurredAt: NotRequired[str | None]
     observedAt: NotRequired[str | None]
     confirmedAt: NotRequired[str | None]
-    precision: 'instant' | 'day' | 'observation' | 'unknown'
+    precision: Literal['instant', 'day', 'observation', 'unknown']
 class GrowthEvidence(TypedDict):
-    source: 'score-history' | 'goal'
+    source: Literal['score-history', 'goal']
     sourceRevision: NotRequired[str]
     evidenceVersion: int
     provenance: NotRequired[Any]
@@ -86,7 +86,7 @@ class CanonicalFact(TypedDict):
     factKey: str
     ownerId: str
     bindingId: str
-    type: 'played' | 'score-pb' | 'ng-reduced' | 'combo-improved' | 'clear' | 'fc' | 'df' | 'rank-upgrade' | 'goal-completed'
+    type: Literal['played', 'score-pb', 'ng-reduced', 'combo-improved', 'clear', 'fc', 'df', 'rank-upgrade', 'goal-completed']
     title: NotRequired[str]
     songId: NotRequired[int | None]
     difficultyType: NotRequired[int | None]
@@ -100,26 +100,26 @@ class CanonicalFact(TypedDict):
 class GrowthProjection(TypedDict):
     ownerId: str
     bindingId: str
-    timezone: 'Asia/Shanghai'
+    timezone: Literal['Asia/Shanghai']
     facts: List[CanonicalFact]
     projectionVersion: str
 class CalculationProfile(TypedDict):
-    algorithmVersion: 'v1-great-only' | 'v1-comprehensive' | 'v2-center-20261010' | 'v2-client-20261010'
+    algorithmVersion: Literal['v1-great-only', 'v1-comprehensive', 'v2-center-20261010', 'v2-client-20261010']
     modelRevision: str
     catalogRevision: str
     topN: int
     availabilityRevision: str
 class CatalogAvailability(TypedDict):
-    region: 'CN' | 'JP' | 'UNKNOWN'
-    status: 'active' | 'removed' | 'unknown'
+    region: Literal['CN', 'JP', 'UNKNOWN']
+    status: Literal['active', 'removed', 'unknown']
 class ResourceGrant(TypedDict):
     grantId: str
     ownerUserId: str
     bindingId: str
     playerId: str
     clientId: str
-    audience: 'viewer:developer-api:v1'
-    scopes: List['profile:read' | 'scores:read' | 'history:read' | 'growth:read' | 'account:read']
+    audience: Literal['viewer:developer-api:v1']
+    scopes: List[Literal['profile:read', 'scores:read', 'history:read', 'growth:read', 'account:read']]
     consentVersion: str
     consentedAt: str
     issuedAt: str
@@ -129,7 +129,7 @@ class ResourceGrant(TypedDict):
 class DeveloperClient(TypedDict):
     clientId: str
     displayName: str
-    status: 'active' | 'disabled'
+    status: Literal['active', 'disabled']
 class DeveloperPlayerProfile(TypedDict):
     playerId: str
     bindingId: str
@@ -139,7 +139,7 @@ class DeveloperPlayerProfile(TypedDict):
     title: NotRequired[str | None]
     dan: NotRequired[DeveloperDan]
 class ApiReadVersions(TypedDict):
-    contractVersion: '1.1'
+    contractVersion: Literal['1.1']
     schemaRevision: str
     catalogRevision: str
     scoreRevision: str | None
