@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {execFileSync} from 'node:child_process';
 import Ajv from '../../../taiko_viewer/node_modules/ajv/dist/ajv.js';
 import {projectCatalog as mapCatalog,difficultyToTjaCourse} from '../src/catalog.mjs';
 const schema=JSON.parse(readFileSync(new URL('../schema/contract-v1.json',import.meta.url)));
@@ -13,7 +12,7 @@ test('Contract 1.1 Song uses source names and does not duplicate title',()=>{
  assert.deepEqual(Object.keys(schema.$defs.Song.properties),['songId','song_name','song_name_jp','aliases','catalogRevision','availability']);
  assert.equal(Object.hasOwn(schema.$defs.Song.properties,'title'),false);
 });
-test('Catalog region, mode, shelf, difficulty/course and source IDs match frozen cross-language examples',()=>{
+test('Contract 1.1 catalog names, aliases, region, mode, shelf and difficulty/course match cross-language examples',()=>{
  assert.deepEqual(mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1',fixtures.aliasInput),fixtures.catalogExpected);
  for(const song of fixtures.catalogExpected.songs)assert.equal(validate('Song')(song),true);
  for(const chart of fixtures.catalogExpected.charts)assert.equal(validate('Chart')(chart),true);
