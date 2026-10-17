@@ -7,15 +7,14 @@ import {projectCatalog as mapCatalog,difficultyToTjaCourse} from '../src/catalog
 const schema=JSON.parse(readFileSync(new URL('../schema/contract-v1.json',import.meta.url)));
 const fixtures=JSON.parse(readFileSync(new URL('../fixtures/api-v1.json',import.meta.url)));
 const ajv=new Ajv({strict:true,allowUnionTypes:true});ajv.addSchema(schema);const validate=name=>ajv.compile({$ref:schema.$id+'#/$defs/'+name});
-test('additions preserve every existing v1 definition and required field',()=>{
- const before=JSON.parse(execFileSync('git',['show','c9b87f4:packages/sakura-taiko-contract/schema/contract-v1.json'],{encoding:'utf8'}));
- for(const [name,definition] of Object.entries(before.$defs)){
-  const current=structuredClone(schema.$defs[name]);if(name==='Song'||name==='Chart'){delete current.properties.availability;if(name==='Chart')delete current.properties.tjaCourse;}
-  assert.deepEqual(current,definition,name+' existing contract changed');
- }
+test('Contract 1.1 Song uses source names and does not duplicate title',()=>{
+ assert.equal(schema.$id,'urn:sakura-taiko:contract:1.1');
+ assert.equal(schema.$defs.ApiReadVersions.properties.contractVersion.enum[0],'1.1');
+ assert.deepEqual(Object.keys(schema.$defs.Song.properties),['songId','song_name','song_name_jp','aliases','catalogRevision','availability']);
+ assert.equal(Object.hasOwn(schema.$defs.Song.properties,'title'),false);
 });
 test('Catalog region, mode, shelf, difficulty/course and source IDs match frozen cross-language examples',()=>{
- assert.deepEqual(mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1'),fixtures.catalogExpected);
+ assert.deepEqual(mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1',fixtures.aliasInput),fixtures.catalogExpected);
  for(const song of fixtures.catalogExpected.songs)assert.equal(validate('Song')(song),true);
  for(const chart of fixtures.catalogExpected.charts)assert.equal(validate('Chart')(chart),true);
  for(let i=1;i<=5;i++)assert.equal(difficultyToTjaCourse(i),i-1);
