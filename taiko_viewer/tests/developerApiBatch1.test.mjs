@@ -10,7 +10,7 @@ test('batch 1 exposes the intended API routes',async()=>{
 test('analysis delegates to installed algorithm and rechecks live score grant',async()=>{
  const source=await read('../server/services/developer-api-v1/analytics.ts');
  for(const name of ['build_player_rating_intelligence','build_ordinary_recommendation_intelligence','compute_all_from_userdata','withScoreRead','publication-v1:','TAIKO_COMPUTE_ONLY'])assert.ok(source.includes(name),name);
- assert.ok((source.match(/proveGrant\\(/g)||[]).length>=4);
+ assert.ok(source.split('proveGrant(').length-1>=4);
 });
 test('aliases use bounded source bytes and no-follow open',async()=>{
  const [catalog,reader]=await Promise.all([read('../server/services/developer-api-v1/catalog.ts'),read('../server/services/developer-api-v1/read.ts')]);
