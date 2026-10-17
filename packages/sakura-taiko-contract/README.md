@@ -41,3 +41,11 @@ The original `growth.json` Golden is retained. `growth-chart-continuity-v3.json`
 New consent uses `viewer-account-consent-v2`, grants `account:read` and returns `expiresAt: null` (valid until revoked). The owner POST contains only bindingId, clientId, consent=true, consentVersion and audience. Profile and scores use this same permission; the profile additionally exposes taikoId, title and source-reported equipped/highest passed dan, without new calculations. Secret credentials and web account details are never part of account data. `unavailableScopes` in meta still identifies unimplemented history/Growth reads.
 
 Existing `viewer-resource-consent-v1` grants and owner requests remain supported with their original scopes and expiry. They are never silently broadened or extended. The explicit nullable-expiry SQL migration changes metadata storage only, preserving existing rows; it is not run by request handlers. API read authorization still verifies owner binding, approved application, active client/token and revocation before and after the Publication read.
+
+Before activating Viewer 0.84.8 on an existing deployment, run the explicit operator command from the repository root, under `scripts/memory/run_qa.sh`:
+
+```sh
+bash scripts/memory/run_qa.sh /absolute/path/to/node --env-file=/etc/taiko-viewer.env taiko_viewer/scripts/migrate_developer_account_consent.mjs --database=taiko --apply --allow-production-schema-change
+```
+
+Omit both apply flags for a read-only readiness check (exit 2 if migration is needed). The command verifies `SELECT DATABASE()`, column type, and the result of the migration; it is idempotent and changes no grant values or score tables. Isolated test writes additionally require `TAIKO_ALLOW_TEST_DB_MUTATION=1` and the QA-owned MySQL datadir. The standard Viewer deployment script remains unchanged; deployment must not proceed when the pre-activation command fails.
