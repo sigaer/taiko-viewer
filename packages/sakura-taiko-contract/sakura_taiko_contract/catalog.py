@@ -16,7 +16,7 @@ def project_catalog(rows, revision, alias_rows=None):
     aliases_by_id = {}
     for row in alias_rows:
         value = row.get('id') if isinstance(row, dict) else None
-        if type(value) not in (int, str) or not re.fullmatch(r'[1-9][0-9]*', str(value)):
+        if type(value) not in (int, str) or not re.fullmatch(r'[1-9][0-9]*', str(value)) or int(value) > 9007199254740991:
             raise ValueError('Invalid alias song ID')
         song_id = str(value)
         if song_id in aliases_by_id:
