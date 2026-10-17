@@ -489,6 +489,10 @@ const submitApplication = async () => {
   margin: 14px 0 8px;
 }
 
+.guide-sample-header .el-button {
+  min-height: 44px;
+}
+
 .guide-code {
   max-width: 100%;
   overflow-x: auto;
@@ -518,10 +522,17 @@ const submitApplication = async () => {
 .guide-extra summary {
   cursor: pointer;
   font-weight: 600;
+  min-height: 44px;
+  align-content: center;
 }
 
 .guide-note a {
   color: var(--el-color-primary);
+}
+
+:global(body.theme-dark) .developer-guide .section-title p,
+:global(body.theme-dark) .developer-guide .guide-note {
+  color: inherit;
 }
 
 .hidden-input {
