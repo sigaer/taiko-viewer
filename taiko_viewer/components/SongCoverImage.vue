@@ -24,20 +24,31 @@ const props = withDefaults(
 
 const emit = defineEmits<{ error: [event: Event] }>();
 const pictureElement = ref<HTMLElement | null>(null);
-const failed = ref(false);
+const webpFailed = ref(false);
+const originalFailed = ref(false);
+const placeholder = ref(false);
 const shouldLoad = ref(props.priority);
 let visibilityObserver: IntersectionObserver | null = null;
-const activeSongId = computed(() => failed.value ? props.fallbackSongId : props.songId);
+const activeSongId = computed(() => originalFailed.value ? props.fallbackSongId : props.songId);
 const webpSrcset = computed(() => buildSongCoverThumbnailSrcset(activeSongId.value));
 const originalSrc = computed(() => buildSongCoverOriginalUrl(activeSongId.value));
 
-watch(() => props.songId, () => { failed.value = false; });
+watch(() => [props.songId, props.fallbackSongId], () => {
+  webpFailed.value = false;
+  originalFailed.value = false;
+  placeholder.value = false;
+});
 
 const handleError = (event: Event) => {
-  if (!failed.value && props.songId !== props.fallbackSongId) {
-    failed.value = true;
+  if (!webpFailed.value) {
+    webpFailed.value = true;
     return;
   }
+  if (!originalFailed.value && props.songId !== props.fallbackSongId) {
+    originalFailed.value = true;
+    return;
+  }
+  placeholder.value = true;
   emit("error", event);
 };
 
@@ -63,8 +74,9 @@ onBeforeUnmount(() => visibilityObserver?.disconnect());
 
 <template>
   <picture ref="pictureElement" class="song-cover-picture">
-    <source v-if="shouldLoad" type="image/webp" :srcset="webpSrcset" :sizes="sizes" />
+    <source v-if="shouldLoad && !webpFailed && !placeholder" type="image/webp" :srcset="webpSrcset" :sizes="sizes" />
     <img
+      v-if="!placeholder"
       :src="shouldLoad ? originalSrc : undefined"
       :alt="alt"
       width="400"
