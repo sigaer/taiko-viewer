@@ -21,7 +21,7 @@ const exists = (path: string) => access(path).then(() => true).catch(() => false
 
 export const resolveBotAnnualBinding = async (identity: string) => {
   if (!/^qq_official:[A-Za-z0-9_-]{1,128}$/.test(identity)) throw createError({ statusCode: 403, statusMessage: '仅支持 QQ 官方机器人' });
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const [rows] = await getAccountDb().execute<DbRow<{ id: string; current_virtual: number }>[]>(
     `SELECT b.id, COALESCE(s.current_virtual,0) AS current_virtual FROM bind b
      LEFT JOIN taiko_bind_identity_state s ON BINARY s.identity_key=BINARY b.qq

@@ -86,7 +86,7 @@ async function restoreOperation(db: Pool, operationId: string, signal?: AbortSig
 export async function restoreDeletedManualSource(operationId: string) {
   if (!LIFECYCLE_UUID.test(operationId)) throw new PublicationUnavailableError();
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     return await restoreOperation(getAccountDb(), operationId);
   } catch (error) { throw sourceLifecycleFailure(error); }
 }
@@ -97,7 +97,7 @@ export async function restoreDeletedManualSource(operationId: string) {
 export async function recoverOneManualSourceRestoration(signal?: AbortSignal, operationId?: string, existingDb?: Pool) {
   if (operationId && !LIFECYCLE_UUID.test(operationId)) throw new PublicationUnavailableError();
   signal?.throwIfAborted();
-  if (!existingDb) await ensureAccountSchema();
+  if (!existingDb) await ensureAccountSchema("source");
   signal?.throwIfAborted();
   const db = existingDb || getAccountDb();
   const [rows] = await db.execute<RowDataPacket[]>(

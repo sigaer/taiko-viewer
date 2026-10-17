@@ -177,7 +177,7 @@ export async function createManualSource(owner: ManualOwner, nicknameInput: unkn
  const requestId = requestIdInput === undefined || requestIdInput === null ? undefined : String(requestIdInput);
  if (requestId !== undefined && !LIFECYCLE_UUID.test(requestId)) throw createError({ statusCode: 400, statusMessage: "创建请求标识无效" });
  try {
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   const db = getAccountDb();
   const pendingKey = manualCreationPendingKey(owner, nickname);
   let operationId = requestId || await pendingCreation(db, pendingKey) || randomUUID().replaceAll("-", "");
@@ -223,7 +223,7 @@ export async function recoverOneManualSourceCreation(signal?: AbortSignal, opera
  if (operationId && !LIFECYCLE_UUID.test(operationId)) throw new PublicationUnavailableError();
  signal?.throwIfAborted();
  try {
-  if (!capturedDb) await ensureAccountSchema();
+  if (!capturedDb) await ensureAccountSchema("source");
   const db = capturedDb || getAccountDb();
   const [rows] = await db.execute<RowDataPacket[]>(`SELECT operation_id FROM taiko_manual_creations WHERE status='pending'
    AND ${operationId ? "operation_id=?" : "(last_attempt_at IS NULL OR last_attempt_at < DATE_SUB(NOW(3),INTERVAL 60 SECOND))"}

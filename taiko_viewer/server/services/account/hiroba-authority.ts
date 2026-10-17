@@ -39,7 +39,7 @@ async function grantFor(db:Db,actor:SourceActor,scope:HirobaTicket['scope'],targ
 export async function captureHirobaAccess(event:H3Event,scope:HirobaTicket['scope'],target:string,principal:string):Promise<HirobaTicket>{
  try{
   if(target&&!validHirobaSource(target))throw principalFailure(400,'账号标识无效。');
-  await ensureAccountSchema();const db=getAccountDb(),paths=Object.freeze(getRuntimePaths()),workerEnv=Object.freeze(capturedWorkerEnvironment(db,paths));
+  await ensureAccountSchema("source");const db=getAccountDb(),paths=Object.freeze(getRuntimePaths()),workerEnv=Object.freeze(capturedWorkerEnvironment(db,paths));
   const actor=await captureActor(event,db),grant=await grantFor(db,actor,scope,target);
   const qq=principal?await capturePrincipalForActor(db,actor,principal,'hiroba_bind'):null;
   return Object.freeze({db,paths,workerEnv,actor,grant,principal:qq,scope,target});

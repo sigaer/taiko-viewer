@@ -46,7 +46,7 @@ async function grantFor(db:Db,actor:SourceActor,principal:string,scope:Principal
 export async function capturePrincipalAccess(event:H3Event,input:unknown,scope:PrincipalScope,targetSource:string|null=null,targetPlatform:string|null=null):Promise<PrincipalTicket>{
  try{
   const principal=typeof input==='string'?input.trim():'';if(!validBotPrincipal(principal))throw principalFailure(400,'身份标识无效。');
-  await ensureAccountSchema();const db=getAccountDb(),actor=await captureActor(event,db);
+  await ensureAccountSchema("source");const db=getAccountDb(),actor=await captureActor(event,db);
   return await capturePrincipalForActor(db,actor,principal,scope,targetSource,targetPlatform);
  }catch(error){throw safePrincipalError(error);}
 }

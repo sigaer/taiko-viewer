@@ -5,7 +5,7 @@ import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account
 import { requireAccountUser } from "~/server/utils/account";
 
 export const hasAccountAnnualSummaryAccess = async (userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   const db = getAccountDb();
   const [rows] = await db.execute<DbRow<{ username: string; annual_summary_access: number }>[]>(
     `SELECT a.username, (w.user_id IS NOT NULL) AS annual_summary_access

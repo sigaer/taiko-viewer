@@ -119,7 +119,7 @@ async function markPublished(db: Pool, receipt: Receipt) {
 async function deleteManualSource(owner: ManualOwner, taikoId: string) {
   if (!MANUAL_ID.test(taikoId)) throw createError({ statusCode: 400, statusMessage: "手动账号标识无效" });
   const key = actorKey(owner);
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   const db = getAccountDb();
   const receipt = await withDomainScoreWrite(taikoId, async () => {
     let previous = await latestReceipt(db, taikoId);
@@ -157,7 +157,7 @@ export async function permanentlyDeleteManualSource(owner: ManualOwner, taikoId:
 export async function recoverOneManualSourceDeletion(signal?: AbortSignal, operationId?: string, existingDb?: Pool) {
   if (operationId && !UUID.test(operationId)) throw new PublicationUnavailableError();
   signal?.throwIfAborted();
-  if (!existingDb) await ensureAccountSchema();
+  if (!existingDb) await ensureAccountSchema("source");
   signal?.throwIfAborted();
   const db = existingDb || getAccountDb();
   const [rows] = await db.execute<Receipt[]>(

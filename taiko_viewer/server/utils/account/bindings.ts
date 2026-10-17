@@ -12,7 +12,7 @@ import {
 } from "../../internal/account/shared";
 
 export const listBindings = async (userId: number) => {
-  await ensureAccountSchema();
+  await ensureAccountSchema("source");
   const db = getAccountDb();
   const rows = await readViewerBindings(db, userId);
   return rows.map(sanitizeBinding);

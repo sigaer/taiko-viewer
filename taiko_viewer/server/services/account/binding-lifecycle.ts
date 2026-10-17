@@ -45,7 +45,7 @@ function assertRevocationScope(taikoId: string) {
 export async function removeViewerBinding(userId: number, bindingIdInput: unknown, forceInput?: unknown) {
   const bindingId = ids(userId, bindingIdInput);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb();
     const [initial] = await db.execute<Binding[]>(`SELECT ${bindingColumns} FROM web_taiko_bindings WHERE id=? AND user_id=? LIMIT 1`, [bindingId,userId]);
     if (!initial[0]) {
@@ -108,7 +108,7 @@ export async function removeViewerBinding(userId: number, bindingIdInput: unknow
 export async function switchViewerBinding(userId: number, bindingIdInput: unknown) {
   const bindingId = ids(userId, bindingIdInput);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb(), connection = await db.getConnection();
     try {
       await connection.beginTransaction();

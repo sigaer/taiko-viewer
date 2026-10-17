@@ -44,7 +44,7 @@ const routeName=(input:string)=> {
  return /^\/(?:ja\/)?(?:account\/(?:profile|sync|login|register|version-summary)|annual|)$/.test(path)?path:'/annual';
 };
 export const betaContext = async(event:H3Event,userId:number|null=null):Promise<BetaContext>=> {
- await ensureAccountSchema();const db=getAccountDb();let token=getCookie(event,'annual_beta_session')||'';
+ await ensureAccountSchema("annual");const db=getAccountDb();let token=getCookie(event,'annual_beta_session')||'';
  let sid=/^[A-Za-z0-9_-]{43}$/.test(token)?hashBetaToken(token):'';
  let [sessions]:any=sid?await db.execute('SELECT s.*,p.user_id AS previous_user FROM web_beta_sessions s JOIN web_beta_participants p ON p.id=s.participant_id WHERE s.id=? AND s.expires_at>NOW()',[sid]):[[]];
  if(sessions[0]?.previous_user && Number(sessions[0].previous_user)!==userId)sessions=[];
@@ -83,7 +83,7 @@ export const trackBetaServer = async(event:H3Event,userId:number|null,name:strin
 export const trackBetaUser = async(userId:number,name:string,meta:unknown={},dedup?:string)=> {
  try{
   if((await readAnnualPolicy()).mode==='public')return;
-  await ensureAccountSchema();const [rows]:any=await getAccountDb().execute(`SELECT p.id,p.invite_id,s.id AS session_id FROM web_beta_participants p JOIN web_beta_sessions s ON s.participant_id=p.id WHERE p.user_id=? ORDER BY s.created_at DESC LIMIT 1`,[userId]);
+  await ensureAccountSchema("annual");const [rows]:any=await getAccountDb().execute(`SELECT p.id,p.invite_id,s.id AS session_id FROM web_beta_participants p JOIN web_beta_sessions s ON s.participant_id=p.id WHERE p.user_id=? ORDER BY s.created_at DESC LIMIT 1`,[userId]);
   if(!rows.length)return;const r=rows[0];
   const [context]:any=await getAccountDb().execute('SELECT locale,device_class,route FROM web_beta_events WHERE session_id=? ORDER BY occurred_at DESC LIMIT 1',[r.session_id]);
   const c=context[0];await recordBetaEvent({participantId:r.id,inviteId:r.invite_id,userId,sessionId:r.session_id,locale:c?.locale||'zh',device:c?.device_class||'desktop',route:c?.route||'/annual'},name,meta,dedup);

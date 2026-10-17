@@ -8,7 +8,7 @@ import { betaParticipantAnalysisFilter } from './analysis';
 export const requireBetaAdmin = async (event: H3Event) => {
   const session = await requireTaikoAdminSession(event);
   if (!isAnnualReportOperator(session.user.username)) throw createError({ statusCode: 403, statusMessage: '无年度报告管理权限' });
-  await ensureAccountSchema();
+  await ensureAccountSchema("annual");
   return session;
 };
 

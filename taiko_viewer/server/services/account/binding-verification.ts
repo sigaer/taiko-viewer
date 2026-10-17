@@ -96,7 +96,7 @@ async function currentVerification(connection: PoolConnection, userId: number) {
 export async function prepareViewerBindingVerification(userId: number, taikoId: string, readTitle: ReadTitle, ttlMs: number) {
   identity(userId,taikoId);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb();
     await assertExternalSourceAvailable(db,taikoId);
     assertExternalTarget(await target(db,taikoId),userId);
@@ -153,7 +153,7 @@ async function acknowledgeExisting(db: Pool, userId: number, taikoId: string) {
 export async function confirmViewerBindingVerification(userId: number, taikoId: string, readTitle: ReadTitle) {
   identity(userId,taikoId);
   try {
-    await ensureAccountSchema();
+    await ensureAccountSchema("source");
     const db = getAccountDb();
     const [initial] = await db.execute<Verification[]>(`SELECT * FROM web_taiko_binding_verifications
       WHERE user_id=? AND taiko_id=? AND expires_at>NOW() ORDER BY id DESC LIMIT 1`,[userId,taikoId]);
