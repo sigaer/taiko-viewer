@@ -1,6 +1,6 @@
 // Explicit administrative bootstrap; no runtime caller.
 import { getAccountDb } from "./account-db";
-import { CREATE_FORUM_TABLES, MIGRATIONS } from "./forum-schema-definition";
+import { CREATE_FORUM_TABLES, FORUM_SCHEMA_MIGRATIONS } from "./forum-schema-definition";
 import { FORUM_SECTION_SEEDS } from "~/types/forum";
 const runMigration = async (statement: string) => {
   const db = getAccountDb();
@@ -50,6 +50,6 @@ const seedSections = async () => {
 export const initializeForumSchema = async () => {
   const db = getAccountDb();
   for (const statement of CREATE_FORUM_TABLES) await db.execute(statement);
-  for (const statement of MIGRATIONS) await runMigration(statement);
+  for (const statement of FORUM_SCHEMA_MIGRATIONS) await runMigration(statement);
   await seedSections();
 };

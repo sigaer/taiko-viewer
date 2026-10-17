@@ -199,7 +199,7 @@ export const CREATE_FORUM_TABLES = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 ];
 
-export const MIGRATIONS = [
+export const FORUM_SCHEMA_MIGRATIONS = [
   "ALTER TABLE forum_user_profiles ADD COLUMN record_history_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER reputation",
   "ALTER TABLE forum_posts ADD COLUMN content_blocks_json LONGTEXT DEFAULT NULL AFTER body_text",
   "ALTER TABLE forum_posts ADD KEY idx_forum_posts_root_post_id (root_post_id, created_at)",
