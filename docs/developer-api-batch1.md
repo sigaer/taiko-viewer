@@ -6,15 +6,26 @@ Batch one focuses on concrete, reusable data—not filter-menu metadata.
 
 | Method | Endpoint | Authentication | Purpose |
 |---|---|---|---|
-| GET | `/api/v1/taiko/catalog/aliases` | Public; any supplied Bearer token is validated | Song IDs, aliases and Japanese titles |
+| GET | `/api/v1/taiko/catalog/songs` | Public; any supplied Bearer token is validated | Song metadata, original `song_name` / `song_name_jp` fields, and aliases in one response |
 | GET | `/api/developer/userdata/{userid}/rating` | Same authorization as the existing Developer userdata endpoint | One Rating response: overall Rating, six dimensions, sample count, algorithm metadata and top-30 song-level details |
 | GET | `/api/developer/userdata/{userid}/recommendations` | Same authorization as the existing Developer userdata endpoint | Structured rating-based recommendations |
 
-There is no separate B30 endpoint and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The frozen v1 Contract/OpenAPI documents are unchanged; additive proposal details live in `developer-api-batch1-openapi.yaml`.
+There is no separate aliases endpoint, no separate B30 endpoint, and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The frozen Contract v1.0 schema and original OpenAPI document are unchanged; additive endpoint documentation is in `developer-api-batch1-openapi.yaml`.
+
+## Song catalog fields
+
+The songs endpoint preserves the existing canonical fields and adds the source names without inventing new naming conventions:
+
+- `song_name`: the source catalog display name (used as the Chinese/display title where the source provides it).
+- `song_name_jp`: Japanese title from the catalog/alias metadata.
+- `aliases`: alias strings joined by numeric song ID; empty array when no aliases exist.
+- `catalogRevision` / response `versions.catalogRevision`: SHA-256 over the source song-data and alias-file SHA-256 values. Changing either input changes the catalog revision and ETag.
+
+A missing source title remains `null`; this API does not fabricate translations.
 
 ## Authorization and consistency
 
-- The two player-analysis routes reuse the existing `/api/developer/userdata/{userid}` access model, including approved Developer Token service grants and existing cross-user score-read capability. They do not introduce a ResourceGrant requirement or a new scope.
+- The two player-analysis routes reuse the existing `/api/developer/userdata/{userid}` access model, including approved Developer Token service grants and existing cross-user current-score read capability. They do not introduce a ResourceGrant requirement or a new scope.
 - Owner-session access follows the same existing source authorization rules.
 - The current score payload is captured through the authorized source reader; analysis runs against those captured records. A second authorized read must match the original score snapshot before the response is returned; otherwise the request fails closed.
 - Analysis runs through the installed Taiko Python runtime and existing Rating/recommendation algorithms. No new score writer or alternate formula is introduced.
@@ -24,7 +35,6 @@ There is no separate B30 endpoint and no `progress-options` endpoint. The Rating
 
 ## Explicit limits
 
-- The public aliases endpoint is catalog metadata, not player data.
-- The top-30 array is structured data, not an image.
+- Song names are exposed exactly under the source field names `song_name` and `song_name_jp`; the API does not add `titleJapanese` or a made-up Chinese translation field.
 - History, Growth, Goal and annual-report APIs remain future work.
 - This branch is still a code candidate. Static tests do not replace build, real isolated SQL/HTTP integration tests, or deployment validation.
