@@ -7,6 +7,7 @@ This batch adds three structured analysis reads and one public catalog read to t
 | Method | Endpoint | Auth | Purpose |
 |---|---|---|---|
 | GET | `/api/v1/taiko/catalog/aliases` | Public; optional Developer Bearer is validated if supplied | Song IDs, aliases and Japanese titles |
+| GET | `/api/v1/taiko/catalog/progress-options` | Public | Supported dani/constant/star/named progress filter options |
 | GET | `/api/v1/taiko/players/{playerId}/rating` | Existing Developer Token + live `scores:read` ResourceGrant | Overall Rating, sample count and six dimensions |
 | GET | `/api/v1/taiko/players/{playerId}/b30` | Existing Developer Token + live `scores:read` ResourceGrant | Structured B30/top-30 results and six-dimensional analysis |
 | GET | `/api/v1/taiko/players/{playerId}/recommendations` | Existing Developer Token + live `scores:read` ResourceGrant | Structured rating-based recommendations |
