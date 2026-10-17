@@ -19,6 +19,8 @@ test('Contract 1.1 catalog names, aliases, region, mode, shelf and difficulty/co
  for(let i=1;i<=5;i++)assert.equal(difficultyToTjaCourse(i),i-1);
  for(const bad of [0,6,1.5,'4',true])assert.throws(()=>difficultyToTjaCourse(bad));
  assert.throws(()=>mapCatalog([...fixtures.catalogInput,fixtures.catalogInput[0]],'r'));
+ assert.throws(()=>mapCatalog(fixtures.catalogInput,'r',[{id:1,aliases:[]},{id:1,aliases:[]}]));
+ assert.throws(()=>mapCatalog(fixtures.catalogInput,'r',[{id:'9007199254740992',aliases:[]}]));
 });
 test('grant DTO is canonical schema, while unopened scopes remain a separate runtime policy',()=>{
  assert.equal(validate('ResourceGrant')(fixtures.grant),true);
