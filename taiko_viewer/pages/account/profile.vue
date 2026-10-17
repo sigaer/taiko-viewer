@@ -1322,7 +1322,7 @@ const removeQqBinding = async () => {
         </div>
       </el-card>
 
-      <section v-if="developerApiV1Enabled" class="third-party-settings" aria-label="第三方应用权限">
+      <section v-if="developerApiV1Enabled" class="third-party-settings" :aria-label="locale === 'ja' ? '外部アプリのアクセス管理' : '第三方应用权限'">
         <div>
           <h3>{{ locale === 'ja' ? '外部アプリのアクセス管理（任意）' : '第三方应用权限（可选）' }}</h3>
           <p>{{ locale === 'ja' ? '自分で許可した v1 アプリのアクセスを確認・取り消せます。許可したことがなければ何もする必要はありません。' : '查看或撤销你主动授予第三方 v1 应用的访问权限；没有授权过就无需操作。' }}</p>
