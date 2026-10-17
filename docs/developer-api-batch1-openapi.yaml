@@ -2,38 +2,48 @@ openapi: 3.1.0
 info:
   title: Viewer Developer API — Batch 1 proposal
   version: 0.85.0-rc.1
-  description: Additive proposal only. The frozen Contract v1.0 schema and its existing OpenAPI document are unchanged.
+  description: Additive proposal only. The frozen Contract v1.0 schema and original OpenAPI document are unchanged.
 servers:
   - url: https://viewer.sakura-bot.cn
 paths:
-  /api/v1/taiko/catalog/aliases:
+  /api/v1/taiko/catalog/songs:
     get:
-      operationId: getCatalogAliases
-      description: Public song aliases and Japanese titles. Any supplied Bearer token is validated.
+      operationId: getCatalogSongsWithAliases
+      description: Public complete song catalog. Existing canonical fields are preserved and source fields song_name/song_name_jp plus aliases are included in the same response. Any supplied Bearer token is validated.
       security:
         - {}
         - DeveloperToken: []
       responses:
         "200":
-          description: Bounded alias catalog
+          description: Bounded song catalog with a revision derived from song metadata and alias source bytes
           content:
             application/json:
               schema:
                 type: object
                 required: [versions, items]
                 properties:
-                  versions: { type: object }
+                  versions:
+                    type: object
+                    required: [contractVersion, schemaRevision, catalogRevision]
+                    properties:
+                      contractVersion: { type: string }
+                      schemaRevision: { type: string }
+                      catalogRevision: { type: string }
                   items:
                     type: array
                     items:
                       type: object
-                      required: [songId, aliases, japaneseTitle]
+                      required: [songId, title, catalogRevision, availability, song_name, song_name_jp, aliases]
                       properties:
-                        songId: { type: integer, minimum: 1 }
+                        songId: { type: string }
+                        title: { type: [string, "null"], description: Existing canonical display title retained for compatibility }
+                        catalogRevision: { type: string }
+                        availability: { type: object }
+                        song_name: { type: [string, "null"], description: Original catalog display/Chinese title field; no translation is fabricated }
+                        song_name_jp: { type: [string, "null"], description: Japanese title from source metadata }
                         aliases: { type: array, maxItems: 100, items: { type: string } }
-                        japaneseTitle: { type: [string, "null"] }
         "401": { description: Invalid supplied Developer Token }
-        "503": { description: Alias source unavailable or exceeds its size limit }
+        "503": { description: Song catalog or alias source unavailable or exceeds its size limit }
   /api/developer/userdata/{userid}/rating:
     get:
       operationId: getDeveloperRating
