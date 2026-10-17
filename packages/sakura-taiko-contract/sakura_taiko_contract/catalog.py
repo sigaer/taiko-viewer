@@ -51,7 +51,7 @@ def project_catalog(rows, revision, alias_rows=None):
         seen.add(song_id)
         region = row.get('region') if row.get('region') in ('CN', 'JP') else 'UNKNOWN'
         raw_status = row.get('shelf_status')
-        status = 'active' if type(raw_status) in (str, int) and raw_status in (0, '0') else 'removed' if type(raw_status) in (str, int) and raw_status in (1, '1') else 'unknown'
+        status = 'active' if type(raw_status) in (str, int, float) and raw_status in (0, '0') else 'removed' if type(raw_status) in (str, int) and raw_status in (1, '1') else 'unknown'
         availability = dict(region=region, status=status)
         alias = aliases_by_id.get(song_id)
         song_name = row.get('song_name')[:512] if isinstance(row.get('song_name'), str) else None
