@@ -43,8 +43,9 @@ export async function catalog(){
   const id=Number(row.id);
   if(Number.isSafeInteger(id)&&id>0)aliasById.set(String(id),row);
  }
+ const sourceById=new Map(songSource.rows.map(row=>[String(row.id),row]));
  const songs=projected.songs.map(song=>{
-  const source=songSource.rows.find(row=>String(row.id)===song.songId);
+  const source=sourceById.get(song.songId);
   const alias=aliasById.get(song.songId);
   const songName=typeof source?.song_name==='string'?source.song_name:null;
   const songNameJp=typeof source?.song_name_jp==='string'?source.song_name_jp:typeof alias?.song_name_jp==='string'?alias.song_name_jp:null;
