@@ -4,7 +4,7 @@ import { buildPageDescription } from "~/utils/seo";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const { accountUser, fetchCurrentUser } = useAccountState();
-await fetchCurrentUser();
+await fetchCurrentUser(true);
 
 definePageMeta({
   pageTitleKey: "nav.myTaiko",
@@ -20,7 +20,7 @@ useViewerSeo(() => ({
   path: "/my"
 }));
 
-const readModelEnabled = useRuntimeConfig().public.myTaikoReadModelMode === "read-model";
+const readModelEnabled = computed(() => accountUser.value?.myTaikoReadModelAccess === true);
 
 const personalLinks = [
   { path: "/my/growth", label: "passport.title" },

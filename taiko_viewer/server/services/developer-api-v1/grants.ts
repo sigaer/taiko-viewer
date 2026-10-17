@@ -1,3 +1,4 @@
+import {developerClientAdmitted} from './admission';
 import {randomUUID} from 'node:crypto';
 import {readBody,getRouterParam,getQuery,type H3Event} from 'h3';
 import type {PoolConnection,RowDataPacket} from 'mysql2/promise';
@@ -44,7 +45,8 @@ export async function listGrants(event:H3Event){
  ${before?'AND (g.issued_at<? OR (g.issued_at=? AND g.grant_id<?))':''}
  ORDER BY g.issued_at DESC,g.grant_id DESC LIMIT 101`,before?[owner,cursorTime,cursorTime,before]:[owner]);
  if(owner!==await sessionOwner(event,db))throw deny();
- return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:clients.slice(0,100),bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99].grant_id:null};
+ const admittedClients=[];for(const client of clients.slice(0,100))if(await developerClientAdmitted(client.clientId))admittedClients.push(client);
+ return {consentVersion:CONSENT_VERSION,audience:AUDIENCE,availableScopes:OPEN_SCOPES,clients:admittedClients,bindings:bindings.slice(0,100),grants:rows.slice(0,100).map(dto),hasMore:{clients:clients.length>100,bindings:bindings.length>100,grants:rows.length>100},nextCursor:rows.length>100?rows[99].grant_id:null};
 }
 export async function issueGrant(event:H3Event){
  const body=await readBody(event);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiFailure(400,'INVALID_REQUEST');
@@ -53,6 +55,7 @@ export async function issueGrant(event:H3Event){
  if(typeof clientId!=='string'||!/^clt_[a-f0-9]{32}$/.test(clientId)||body.consent!==true||body.consentVersion!==CONSENT_VERSION||body.audience!==AUDIENCE
  ||!Array.isArray(body.scopes)||!body.scopes.length||body.scopes.length>2||body.scopes.some((s:unknown)=>!OPEN_SCOPES.includes(s as any))||new Set(body.scopes).size!==body.scopes.length
  ||!Number.isInteger(body.expiresInDays)||body.expiresInDays<1||body.expiresInDays>90)throw new ApiFailure(400,'INVALID_REQUEST');
+ if(!await developerClientAdmitted(clientId))throw deny();
  return transaction(event,async(db,owner)=>{
   const [bindings]=await db.execute<RowDataPacket[]>('SELECT id,taiko_id,source,manual_account_id,verified_title FROM web_taiko_bindings WHERE id=? AND user_id=? FOR UPDATE',[bindingId,owner]);
   const binding=bindings[0];if(!binding)throw deny();

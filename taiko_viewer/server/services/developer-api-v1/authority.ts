@@ -1,3 +1,5 @@
+import {isIP} from 'node:net';
+import {developerClientAdmitted} from './admission';
 import {getCookie,getHeader,getRequestIP,getRequestURL,type H3Event} from 'h3';
 import type {Pool,RowDataPacket} from 'mysql2/promise';
 import {getAccountDb,ensureAccountSchema} from '../../utils/account-db';
@@ -10,7 +12,7 @@ export async function clientFromHash(db:Pick<Pool,'execute'>,credentialHash:stri
  JOIN web_developer_applications app ON app.id=c.application_id AND app.user_id=c.owner_user_id
  JOIN web_user_accounts a ON a.id=c.owner_user_id
  WHERE t.token_hash=? AND t.status='active' AND t.revoked_at IS NULL AND c.status='active' AND app.status='approved' AND a.email_verified=1 LIMIT 1`,[credentialHash]);
- if(!rows[0])throw new ApiFailure(401,'UNAUTHENTICATED');
+ if(!rows[0]||!await developerClientAdmitted(String(rows[0].client_id)))throw new ApiFailure(401,'UNAUTHENTICATED');
  return {clientId:String(rows[0].client_id),tokenId:String(rows[0].token_id),credentialHash};
 }
 export async function apiClient(event:H3Event,db:Pool){
@@ -33,8 +35,13 @@ export async function apiDb(){await ensureAccountSchema();return getAccountDb();
 export async function quota(event:H3Event,db:Pool,client?:ClientProof){
  const config=useRuntimeConfig();const specified=Number(client?config.developerApiClientDailyLimit:config.developerApiAnonymousDailyLimit);
  const limit=Number.isSafeInteger(specified)&&specified>0&&specified<=100000?specified:client?5000:300;
- // Direct socket IP only. Untrusted forwarded headers cannot create quota subjects.
- const subject=client?'v1:client:'+client.clientId:'v1:ip:'+hash(getRequestIP(event)||'unknown').slice(0,56);
+ // Trust X-Real-IP only from explicitly configured ingress sockets. Nginx
+ // overwrites it with remote_addr; arbitrary X-Forwarded-For is never authority.
+ const direct=getRequestIP(event)||'unknown';
+ const trusted=String(config.developerApiTrustedProxyAddresses||'').split(',').map(x=>x.trim());
+ const forwarded=getHeader(event,'x-real-ip');
+ const ip=trusted.includes(direct)&&typeof forwarded==='string'&&isIP(forwarded)?forwarded:direct;
+ const subject=client?'v1:client:'+client.clientId:'v1:ip:'+hash(ip).slice(0,56);
  const [[clock]]=await db.query<RowDataPacket[]>('SELECT DATE_FORMAT(UTC_DATE(),"%Y-%m-%d") AS day');
  if(!await consumeOpenQuota(db,subject,'developer-api-v1',String(clock.day),limit))throw new ApiFailure(429,'RATE_LIMITED');
 }
@@ -43,7 +50,7 @@ export async function publicIdentity(event:H3Event,db:Pool){
 }
 export type GrantProof={grantId:string;revision:string;ownerId:string;bindingId:string;playerId:string;taikoId:string;source:string;manualId:string|null;scopes:string[];expiresAt:string};
 export async function proveGrant(db:Pick<Pool,'execute'>,client:ClientProof,playerId:string,scope:string):Promise<GrantProof>{
- if(!/^plr_[a-f0-9]{32}$/.test(playerId))throw deny();
+ if(!/^plr_[a-f0-9]{32}$/.test(playerId)||!await developerClientAdmitted(client.clientId))throw deny();
  const [rows]=await db.execute<RowDataPacket[]>(`SELECT g.*,CAST(g.owner_user_id AS CHAR) owner_id,CAST(g.binding_id AS CHAR) binding_key,
  DATE_FORMAT(g.expires_at,'%Y-%m-%dT%H:%i:%s.%fZ') expiry
  FROM web_developer_resource_grants g JOIN web_taiko_bindings b ON b.id=g.binding_id AND b.user_id=g.owner_user_id

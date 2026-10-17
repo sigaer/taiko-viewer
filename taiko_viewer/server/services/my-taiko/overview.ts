@@ -14,6 +14,7 @@ import {createGrowthScoreEvidenceRequest} from '../growth-history/evidence';
 import {resolveGrowthHistoryRange} from '../growth-history/range';
 import {getSongCatalog} from '../content';
 import {catalog,mapCatalog,versions} from '../developer-api-v1/catalog';
+import {captureMyTaikoAdmission} from './admission';
 import type {MyTaikoOverview} from '../../../types/my-taiko';
 const hash=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail=(statusCode:number,statusMessage:string)=>createError({statusCode,statusMessage});
@@ -23,9 +24,10 @@ const fail=(statusCode:number,statusMessage:string)=>createError({statusCode,sta
  */
 export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview>{
  setHeader(event,'cache-control','private, no-store');setHeader(event,'vary','Cookie, Authorization');
- if(useRuntimeConfig().myTaikoReadModelMode!=='read-model')throw fail(404,'not-found');
+ if(useRuntimeConfig().myTaikoReadModelMode!=='allowlist')throw fail(404,'not-found');
  if(Object.keys(getQuery(event)).length)throw fail(400,'unsupported-query');
  const user=await requireAccountUser(event);
+ const admission=await captureMyTaikoAdmission(user.id);if(!admission)throw fail(404,'not-found');
  let expected:BindingIdentity|undefined;
  try{
   const result=await withViewerCurrentSource(user.id,'read',async binding=>{
@@ -84,6 +86,8 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
   const db=getAccountDb();await requireViewerBindingOwner(db,user.id);
   assertBindingIdentity(expected!,await readViewerCurrentBinding(db,user.id));
   if((await catalog()).revision!==result.release.catalogRevision)throw fail(409,'catalog-changed');
+  const currentAdmission=await captureMyTaikoAdmission(user.id);
+  if(!currentAdmission||currentAdmission.revision!==admission.revision)throw fail(404,'not-found');
   return result;
  }catch(error){
   // Never expose driver data, worker paths or malformed source contents.
