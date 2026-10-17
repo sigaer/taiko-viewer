@@ -1,7 +1,7 @@
 /** Value-only lossless read adapter. Host adapters supply source, clock and catalog. */
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from './read-values.mjs';
 const MAX = Number.MAX_SAFE_INTEGER;
-export const CONTRACT_VERSION = '1.0';
+export const CONTRACT_VERSION = '1.1';
 const secretKeys = new Set(['cookie', 'password', 'token', 'authorization', 'secret', 'credentials', 'accesskeysecret']);
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -56,7 +56,7 @@ export function fromLegacyScore(record, { source, capturedAt, chartLevel = null,
   }
   const timestamp = field => record[field] === null || record[field] === undefined || record[field] === '' ? null : String(record[field]);
   return {
-    song: { songId: identity, title: null, catalogRevision },
+    song: { songId: identity, song_name: null, song_name_jp: null, aliases: [], catalogRevision },
     chart: { songId: identity, chartId: `${identity}:${difficulty}:${chartType}`, difficulty, level: chartLevel, type: chartType, variant: null, catalogRevision },
     score: count(record.high_score, 'high_score'), good: count(record.good_cnt, 'good_cnt'), ok: count(record.ok_cnt, 'ok_cnt'), ng: count(record.ng_cnt, 'ng_cnt'), combo: count(record.combo_cnt, 'combo_cnt'),
     clear: flag('clear'), fullCombo: flag('fullCombo'), dondafulCombo: flag('dondafulCombo'), rank: count(record.best_score_rank, 'best_score_rank'),
