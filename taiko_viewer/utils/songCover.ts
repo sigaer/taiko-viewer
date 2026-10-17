@@ -6,7 +6,7 @@ export const buildSongCoverOriginalUrl = (songId: number) =>
   `${SONG_COVER_STATIC_BASE_URL}/cover/${songId}.png`;
 
 export const buildSongCoverThumbnailUrl = (songId: number, size: 200 | 400 = 400) =>
-  `${SONG_COVER_STATIC_BASE_URL}/cover/thumb/${size}/${songId}.webp`;
+  `${SONG_COVER_STATIC_BASE_URL}/cover/thumb/${size}/${songId}.webp?v=0841`;
 
 export const buildSongCoverThumbnailSrcset = (songId: number) =>
   `${buildSongCoverThumbnailUrl(songId, 200)} 200w, ${buildSongCoverThumbnailUrl(songId, 400)} 400w`;
