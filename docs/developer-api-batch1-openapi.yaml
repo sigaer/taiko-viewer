@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Viewer Developer API v1 — Batch 1 additive endpoint proposal
+  version: 0.85.0-rc.1
+  description: Draft for review. This file describes only the new batch-one endpoints; it does not modify the frozen Contract v1.0 schema or existing OpenAPI document.
+servers:
+  - url: https://viewer.sakura-bot.cn
+paths:
+  /api/v1/taiko/catalog/aliases:
+    get:
+      operationId: getCatalogAliases
+      description: Public song aliases and Japanese titles. Any supplied Bearer token is validated.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Complete bounded alias catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [versions, items]
+                properties:
+                  versions: { type: object }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [songId, aliases, japaneseTitle]
+                      properties:
+                        songId: { type: integer, minimum: 1 }
+                        aliases: { type: array, maxItems: 100, items: { type: string } }
+                        japaneseTitle: { type: [string, "null"] }
+        "401": { description: Invalid supplied Bearer token }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Alias source unavailable or exceeds 4 MiB }
+  /api/v1/taiko/catalog/progress-options:
+    get:
+      operationId: getCatalogProgressOptions
+      description: Public supported progress filters and page counts; contains no player-specific progress.
+      security:
+        - {}
+        - ClientKey: []
+      responses:
+        "200":
+          description: Supported progress catalog options
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [versions, items]
+                properties:
+                  versions: { type: object }
+                  items: { type: object }
+        "401": { description: Invalid supplied Bearer token }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Progress catalog unavailable }
+  /api/v1/taiko/players/{playerId}/rating:
+    get:
+      operationId: getPlayerRatingAnalysis
+      description: Existing Taiko Rating algorithm, overall score and six dimensions. Requires a live scores:read ResourceGrant.
+      security: [{ ClientKey: [] }]
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^plr_[a-f0-9]{32}$' }
+      responses:
+        "200": { description: Structured Rating summary with committed score revision }
+        "401": { description: Invalid or missing Developer Token }
+        "403": { description: Missing, expired or revoked scores:read grant }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Publication or analysis unavailable }
+  /api/v1/taiko/players/{playerId}/b30:
+    get:
+      operationId: getPlayerB30Analysis
+      description: Structured top-30 chart ratings plus overall Rating and six dimensions. Requires a live scores:read ResourceGrant.
+      security: [{ ClientKey: [] }]
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^plr_[a-f0-9]{32}$' }
+      responses:
+        "200": { description: Structured B30 analysis }
+        "401": { description: Invalid or missing Developer Token }
+        "403": { description: Missing, expired or revoked scores:read grant }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Publication or analysis unavailable }
+  /api/v1/taiko/players/{playerId}/recommendations:
+    get:
+      operationId: getPlayerRecommendations
+      description: Structured rating-based recommendations from the existing Taiko model. Requires a live scores:read ResourceGrant.
+      security: [{ ClientKey: [] }]
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^plr_[a-f0-9]{32}$' }
+      responses:
+        "200": { description: Structured recommendation result }
+        "401": { description: Invalid or missing Developer Token }
+        "403": { description: Missing, expired or revoked scores:read grant }
+        "429": { description: Daily quota exceeded }
+        "503": { description: Publication or analysis unavailable }
+components:
+  securitySchemes:
+    ClientKey:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque Developer Token
+      description: Developer identity only; existing live ResourceGrant remains required for private player data.
