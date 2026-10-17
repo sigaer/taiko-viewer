@@ -120,10 +120,10 @@ paths:
                 unavailableScopes:
                   - history:read
                   - growth:read
-                status: CONTRACT_FROZEN
+                status: FREEZE_CANDIDATE
                 catalogProfile: source-catalog-explicit-v1
                 pagination: none-bounded-complete-response
-                contractFrozen: true
+                contractFrozen: false
                 runtimeEnabled: true
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
