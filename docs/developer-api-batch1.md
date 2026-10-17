@@ -1,6 +1,8 @@
 # Developer API — Batch 1
 
-This batch adds three structured analysis reads and one public catalog read to the existing `/api/v1/taiko` surface.
+This batch adds three structured analysis reads and two public catalog reads to the existing `/api/v1/taiko` surface.
+
+Draft endpoint definitions are in `developer-api-batch1-openapi.yaml`. The frozen Contract v1.0 schema and existing OpenAPI file remain unchanged until this extension is separately reviewed.
 
 ## Endpoints
 
