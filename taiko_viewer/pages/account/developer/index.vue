@@ -98,7 +98,26 @@ const copy = computed(() =>
         needReason: "申請理由を入力してください",
         needEmail: "連絡先メールを入力してください",
         submitSuccess: "申請を送信しました。審査をお待ちください。",
-        submitFailed: "申請送信に失敗しました"
+        submitFailed: "申請送信に失敗しました",
+        guideTitle: "Token の使い方",
+        guideLead: "承認メールで届いた Token を使い、任意の太鼓 Source ID の現在スコアを読み取れます。",
+        guideSteps: [
+          "承認メールの Token を確認します（この画面にはマスクのみ表示）。",
+          "太鼓の Source ID を用意します（Viewer のユーザー ID ではありません）。",
+          "サーバーやターミナルから、下の HTTPS GET を実行します。"
+        ],
+        guideCurl: "cURL サンプル（YOUR_... を置き換えてください）",
+        guidePython: "Python サンプル（requests が必要です）",
+        guideCopy: "サンプルをコピー",
+        guideCopied: "サンプルをコピーしました",
+        guideCopyFailed: "コピーできませんでした。コードを選択してコピーしてください。",
+        guideResponse: "成功時は profile、songs、achievement、dojo などを含む JSON が返ります。songs の song_no / level / high_score が曲別の主要フィールドです。",
+        guideErrors: "401: Token が無効・失効、403: 権限不足、404: データなし、429: 利用回数制限、503: 一時的に利用不可。",
+        guideSafety: "この Token は現在スコアの読み取り専用です。履歴・同期・書き込み・認証情報は対象外です。Token を公開コード、ブラウザー、URL やログに置かないでください。",
+        guideLost: "Token の全文は再表示できません。紛失時は管理者に再発行を相談してください。",
+        guideInactive: "有効な Token がありません。使用前に管理者にお問い合わせください。",
+        guideV1: "別の Developer API v1 では、アプリへの ResourceGrant による個別アクセス許可が必要です。",
+        guideV1Link: "v1 アプリとアクセス許可
       }
     : {
         title: "开发者权限",
@@ -132,9 +151,56 @@ const copy = computed(() =>
         needReason: "请先填写开发者权限申请理由",
         needEmail: "请先填写接收反馈邮箱",
         submitSuccess: "开发者申请已提交，请等待审批",
-        submitFailed: "提交申请失败"
+        submitFailed: "提交申请失败",
+        guideTitle: "Token 使用指南",
+        guideLead: "审批邮件中的 Developer Token 可用于按太鼓 Source ID 读取不同玩家的当前成绩。",
+        guideSteps: [
+          "从审批通知邮件中保存 Token；这里仅显示掩码，不会再次显示完整密钥。",
+          "准备要查询的太鼓 Source ID（不是 Viewer 网站用户 ID）。",
+          "从服务端或终端发送下面的 HTTPS GET 请求，读取返回的 JSON。"
+        ],
+        guideCurl: "cURL 示例（请替换 YOUR_... 占位符）",
+        guidePython: "Python 示例（需要 requests 库）",
+        guideCopy: "复制示例",
+        guideCopied: "已复制示例代码",
+        guideCopyFailed: "复制失败，请手动选中代码复制",
+        guideResponse: "成功返回包含 profile、songs、achievement、dojo 等字段的 JSON；歌曲记录主要使用 songs 中的 song_no、level、high_score。",
+        guideErrors: "401：Token 无效或已撤销；403：缺少读取权限；404：成绩数据不存在；429：调用次数超限；503：服务暂不可用。",
+        guideSafety: "仅支持当前成绩只读，不包含历史、写入、同步或上游凭据。不要把 Token 放入公开仓库、浏览器脚本、URL 或日志。",
+        guideLost: "完整 Token 不会在页面上重新显示；如果遗失，请联系管理员处理重新签发。",
+        guideInactive: "当前没有有效 Token。请联系管理员处理后再调用接口。",
+        guideV1: "另有 Developer API v1，使用 ResourceGrant 逐应用、逐绑定授权，与此接口的 Token 权限不同。",
+        guideV1Link: "查看 v1 应用及授权管理
       }
 );
+
+const curlExample =
+  'curl -H "Authorization: Bearer YOUR_DEVELOPER_TOKEN" "https://viewer.sakura-bot.cn/api/developer/userdata/YOUR_SOURCE_ID"';
+
+const pythonExample = [
+  "import os",
+  "import requests",
+  "",
+  'source_id = "YOUR_SOURCE_ID"',
+  'token = os.environ["TAIKO_VIEWER_DEVELOPER_TOKEN"]',
+  'response = requests.get(',
+  '    f"https://viewer.sakura-bot.cn/api/developer/userdata/{source_id}",',
+  '    headers={"Authorization": f"Bearer {token}"},',
+  '    timeout=20,',
+  ')',
+  'response.raise_for_status()',
+  'for song in response.json().get("songs", []):',
+  '    print(song.get("song_no"), song.get("level"), song.get("high_score"))'
+].join("\n");
+
+const copyGuideExample = async (example: string) => {
+  try {
+    await navigator.clipboard.writeText(example);
+    ElMessage.success(copy.value.guideCopied);
+  } catch {
+    ElMessage.warning(copy.value.guideCopyFailed);
+  }
+};
 
 const { data, pending, refresh } = await useAsyncData<DeveloperPayload>(
   "account-developer",
@@ -229,7 +295,38 @@ const submitApplication = async () => {
         </div>
       </el-card>
 
-      <el-card class="panel-card">
+      <el-card v-if="developerState.currentApplication?.status === 'approved'" class="panel-card developer-guide">
+        <div class="section-title">
+          <h3>{{ copy.guideTitle }}</h3>
+          <p>{{ copy.guideLead }}</p>
+        </div>
+        <p v-if="developerState.token?.status !== 'active'" class="guide-alert" role="status">{{ copy.guideInactive }}</p>
+        <ol class="guide-steps">
+          <li v-for="step in copy.guideSteps" :key="step">{{ step }}</li>
+        </ol>
+        <div class="guide-sample-header">
+          <strong>{{ copy.guideCurl }}</strong>
+          <el-button plain @click="copyGuideExample(curlExample)">{{ copy.guideCopy }}</el-button>
+        </div>
+        <pre class="guide-code"><code>{{ curlExample }}</code></pre>
+        <p class="guide-note">{{ copy.guideResponse }}</p>
+        <details class="guide-extra">
+          <summary>{{ copy.guidePython }}</summary>
+          <div class="guide-sample-header">
+            <el-button plain @click="copyGuideExample(pythonExample)">{{ copy.guideCopy }}</el-button>
+          </div>
+          <pre class="guide-code"><code>{{ pythonExample }}</code></pre>
+        </details>
+        <p class="guide-note">{{ copy.guideErrors }}</p>
+        <p class="guide-note">{{ copy.guideSafety }}</p>
+        <p class="guide-note">{{ copy.guideLost }}</p>
+        <p v-if="developerApiV1Enabled" class="guide-note">
+          {{ copy.guideV1 }}
+          <NuxtLink :to="localePath('/account/developer/grants')">{{ copy.guideV1Link }}</NuxtLink>
+        </p>
+      </el-card>
+
+      <el-card v-if="canSubmitApplication" class="panel-card">
         <div class="section-title">
           <h3>{{ copy.submitTitle }}</h3>
           <p>{{ copy.submitDesc }}</p>
@@ -368,6 +465,56 @@ const submitApplication = async () => {
   color: #d84a34;
   text-decoration: none;
   font-weight: 600;
+}
+
+.developer-guide .guide-steps {
+  padding-left: 22px;
+  line-height: 1.8;
+  margin: 16px 0;
+}
+
+.guide-sample-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0 8px;
+}
+
+.guide-code {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-primary);
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre;
+}
+
+.guide-note {
+  line-height: 1.75;
+  color: var(--el-text-color-regular);
+  overflow-wrap: anywhere;
+}
+
+.guide-alert {
+  color: var(--el-color-danger);
+}
+
+.guide-extra {
+  margin-top: 14px;
+}
+
+.guide-extra summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.guide-note a {
+  color: var(--el-color-primary);
 }
 
 .hidden-input {
