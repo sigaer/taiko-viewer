@@ -36,6 +36,13 @@ const normalizeSource = (value: unknown) => String(value || "unknown").trim().to
 const viewerWriterSources = ["kinoko-history-current", "manual-score-delete", "web-score-import", "kinoko-import", "manual-create", "manual-rename", "manual-score", "web-account"];
 const sourceFromName = (name: string) => viewerWriterSources.find(source => name.includes(`_${source}.json`)) || "";
 const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-evidence-v1") || "";
+// The sync writer's legacy ts is a local timestamp, not an ISO date. Keep
+// its observation time (including milliseconds) instead of rejecting the batch.
+const snapshotTimestamp = (value: unknown) => {
+  const text = String(value || "");
+  const compact = text.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(?:_(\d{1,6}))?$/);
+  return compact ? `${compact[1]}-${compact[2]}-${compact[3]}T${compact[4]}:${compact[5]}:${compact[6]}.${(compact[7] || "").padEnd(3, "0").slice(0, 3)}+08:00` : text;
+};
 const numberValue = legacyScoreReader("viewer-evidence-v1");
 const chartKey = (song: UserdataSong) => `${Number(song?.song_no || 0)}:${Number(song?.level || 0)}`;
 const topologyIdentity = (meta: Record<string, unknown>) => {
@@ -107,7 +114,7 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
         const payload = JSON.parse(raw) as UserdataPayload;
         if (!Array.isArray(payload.songs)) { invalidFiles += 1; continue; }
         const meta = payload._meta && typeof payload._meta === "object" ? payload._meta as Record<string, unknown> : {};
-        const timestamp = String(meta.observed_at || meta.observedAt || meta.synced_at || meta.ts || fileTimestamp(name));
+        const timestamp = snapshotTimestamp(meta.observed_at || meta.observedAt || meta.synced_at || meta.ts || fileTimestamp(name));
         const observedAt = normalizedInstant(timestamp);
         const revision = createHash("sha256").update(raw).digest("hex");
         const filenameSource = normalizeSource(sourceFromName(name));
@@ -140,7 +147,13 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           lastAuthoritativeSource = source;
           lastAuthoritativeIdentity = identity;
         }
-        if (excludedReason && !["dispatcher-transfer", "source-switch", "discontinuity-baseline"].includes(excludedReason)) needsAuthoritativeBaseline = true;
+        // An import/edit is not an authoritative account switch. Delta-only
+        // syncs can re-establish each affected chart's baseline independently;
+        // requiring a new full export here would suppress real progress forever.
+        if (excludedReason && !["source-switch", "discontinuity-baseline"].includes(excludedReason)) {
+          if (full) for (const songKey of state.keys()) pendingChartBaselines.add(songKey);
+          for (const song of payload.songs) pendingChartBaselines.add(chartKey(song));
+        }
         const chartExclusions: Record<string, GrowthObservationExclusion> = {};
         const ignoredChartKeys: string[] = [];
         const eventDaySet = new Set<string>();
@@ -189,7 +202,9 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           revision,
           source,
           removed: Array.isArray(removed) ? removed.map(item => Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item)) : [],
-          excludedReason, chartExclusions, ignoredChartKeys, identity
+          excludedReason, chartExclusions, ignoredChartKeys,
+          // Transport/unknown writer labels must not reset the last authority.
+          identity: lastAuthoritativeIdentity || identity
         });
         const declaredContentRevision = String(meta.content_sha256 || meta.contentRevision || meta.content_revision || meta.revision || "");
         const contentRevision = /^[a-f0-9]{64}$/i.test(declaredContentRevision) ? declaredContentRevision.toLowerCase() : null;
