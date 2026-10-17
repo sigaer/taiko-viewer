@@ -5,7 +5,7 @@ import {fromLegacyScore,type Score} from '@sakura-taiko/contract';
 import {getRuntimePaths} from '../../infrastructure/runtime-paths';
 import {withScoreRead,currentScoreScope} from '../../infrastructure/taiko-publication/scope';
 import {apiDb,apiClient,proveGrant,quota,publicIdentity} from './authority';
-import {catalog,versions,SCHEMA_REVISION} from './catalog';
+import {catalog,aliases,versions,SCHEMA_REVISION} from './catalog';
 import {ApiFailure,conditional,exactKeys,hash} from './common';
 import {contractRelease} from './lifecycle';
 // The frozen JS mapper's default-null inference is narrower than its Schema types.
@@ -13,9 +13,9 @@ import {contractRelease} from './lifecycle';
 const mapScore=fromLegacyScore as unknown as (row:Record<string,unknown>,options:{source:Score['source'];capturedAt:Score['capturedAt'];chartLevel:Score['chart']['level'];chartType:Score['chart']['type'];catalogRevision:Score['chart']['catalogRevision']})=>Score;
 const observationSources=new Set(['wahlap','hiroba','manual','manual-score','cookie','import','repair','dispatcher-transfer','local-snapshot','content-edit','unknown']);
 const fields=['song_no','level','high_score','best_score_rank','good_cnt','ok_cnt','ng_cnt','pound_cnt','combo_cnt','stage_cnt','clear_cnt','full_combo_cnt','dondaful_combo_cnt','highscore_datetime','update_datetime'];
-export async function publicRead(event:H3Event,kind:'meta'|'songs'|'charts'){
- exactKeys(getQuery(event),[]);const db=await apiDb();await publicIdentity(event,db);const c=await catalog();
- const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:c.charts};
+export async function publicRead(event:H3Event,kind:'meta'|'songs'|'charts'|'aliases'){
+ exactKeys(getQuery(event),[]);const db=await apiDb();await publicIdentity(event,db);const c=await catalog();const a=kind==='aliases'?await aliases():null;
+ const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:kind==='charts'?c.charts:a};
  return conditional(event,payload);
 }
 export async function privateRead(event:H3Event,kind:'profile'|'scores',playerId:string){
