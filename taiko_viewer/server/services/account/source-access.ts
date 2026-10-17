@@ -37,7 +37,7 @@ export async function readActor(db:Pick<Pool,'execute'>,kind:Actor['kind'],crede
 export async function captureActor(event:H3Event,db:Pool) {
   const header=getHeader(event,'authorization');
   if(header!==undefined){const match=/^Bearer ([A-Za-z0-9_-]{16,256})$/i.exec(header.trim());if(!match)throw unauthorized();
-    return readActor(db,'developer',createHash('sha256').update(match[1]).digest('hex'));}
+    return readActor(db,'developer',createHash('sha256').update(match[1]!).digest('hex'));}
   const cookie=getCookie(event,SESSION_COOKIE_NAME);if(!cookie || !/^[a-f0-9]{64}$/.test(cookie))throw unauthorized();
   return readActor(db,'session',cookie);
 }
@@ -45,7 +45,7 @@ async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceSer
   if(actor.kind!=='developer')return null;
   const [rows]=await db.execute<RowDataPacket[]>(`SELECT CAST(id AS CHAR) AS id,developer_user_id,service_name,scopes_json,sources_json,
     revision_nonce,status,DATE_FORMAT(expires_at,'%Y-%m-%dT%H:%i:%s') AS expires_at,issued_by_user_id
-    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`+(locked?' FOR UPDATE':''),[actor.tokenId]);
+    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`+(locked?' FOR UPDATE':''),[actor.tokenId!]);
   const row=rows[0];if(!row)return null;
   if(Number(row.developer_user_id)!==actor.userId || !/^[A-Za-z0-9_-]{1,64}$/.test(row.service_name) || !/^[a-f0-9]{32}$/.test(row.revision_nonce))throw new PublicationUnavailableError();
   const policy=validateSourceServicePolicy(JSON.parse(row.scopes_json),JSON.parse(row.sources_json));
@@ -57,7 +57,7 @@ async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceSer
     const [[approved]]=await db.execute<RowDataPacket[]>(`SELECT t.id FROM web_developer_tokens t
       JOIN web_developer_applications app ON app.id=t.application_id AND app.user_id=t.user_id
       JOIN web_user_accounts a ON a.id=t.user_id
-      WHERE t.id=? AND t.status='active' AND t.revoked_at IS NULL AND app.status='approved' AND a.email_verified=1`,[actor.tokenId]);
+      WHERE t.id=? AND t.status='active' AND t.revoked_at IS NULL AND app.status='approved' AND a.email_verified=1`,[actor.tokenId!]);
     if(!approved)return null;
   }
   return Object.freeze({kind:'service',tuple:Object.freeze([row.id,row.developer_user_id,row.service_name,row.scopes_json,row.sources_json,row.revision_nonce,row.status,row.expires_at,row.issued_by_user_id])});
@@ -65,9 +65,9 @@ async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceSer
 async function ownerGrant(db:ProofDb,actor:Actor,source:string,expected?:BindingIdentity,locked=false):Promise<Grant> {
   const [rows]=await db.execute<(RowDataPacket & BindingIdentity)[]>(`SELECT CAST(id AS CHAR) AS id,taiko_id,source,manual_account_id
     FROM web_taiko_bindings WHERE user_id=? AND CAST(taiko_id AS BINARY)=CAST(? AS BINARY) ORDER BY id LIMIT 2`+(locked?' FOR UPDATE':''),[actor.userId,source]);
-  if(rows.length!==1)throw denied();const row=rows[0];
+  if(rows.length!==1)throw denied();const row=rows[0]!;
   if(expected&&!same(captureBindingIdentity(row),expected))throw denied();
-  if(!['wahlap','hiroba','manual'].includes(row.source))throw new PublicationUnavailableError();
+  if(!['wahlap','hiroba','manual'].includes(row.source!))throw new PublicationUnavailableError();
   if(MANUAL_SOURCE_ID.test(source) && (row.source!=='manual'||row.manual_account_id!==source))throw denied();
   if(!MANUAL_SOURCE_ID.test(source)&&(row.source==='manual'||row.manual_account_id))throw new PublicationUnavailableError();
   return Object.freeze({kind:'owner',binding:captureBindingIdentity(row)});
