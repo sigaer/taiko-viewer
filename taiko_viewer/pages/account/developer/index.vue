@@ -108,6 +108,7 @@ const copy = computed(() =>
         ],
         guideCurl: "cURL サンプル（YOUR_... を置き換えてください）",
         guidePython: "Python サンプル（requests が必要です）",
+        guidePythonSetup: "実行前に、環境変数 TAIKO_VIEWER_DEVELOPER_TOKEN に承認メールの Token を設定してください。",
         guideCopy: "サンプルをコピー",
         guideCopied: "サンプルをコピーしました",
         guideCopyFailed: "コピーできませんでした。コードを選択してコピーしてください。",
@@ -117,7 +118,7 @@ const copy = computed(() =>
         guideLost: "Token の全文は再表示できません。紛失時は管理者に再発行を相談してください。",
         guideInactive: "有効な Token がありません。使用前に管理者にお問い合わせください。",
         guideV1: "別の Developer API v1 では、アプリへの ResourceGrant による個別アクセス許可が必要です。",
-        guideV1Link: "v1 アプリとアクセス許可
+        guideV1Link: "v1 アプリとアクセス許可"
       }
     : {
         title: "开发者权限",
@@ -161,6 +162,7 @@ const copy = computed(() =>
         ],
         guideCurl: "cURL 示例（请替换 YOUR_... 占位符）",
         guidePython: "Python 示例（需要 requests 库）",
+        guidePythonSetup: "运行前，请将审批邮件中的 Token 设置为环境变量 TAIKO_VIEWER_DEVELOPER_TOKEN。",
         guideCopy: "复制示例",
         guideCopied: "已复制示例代码",
         guideCopyFailed: "复制失败，请手动选中代码复制",
@@ -170,7 +172,7 @@ const copy = computed(() =>
         guideLost: "完整 Token 不会在页面上重新显示；如果遗失，请联系管理员处理重新签发。",
         guideInactive: "当前没有有效 Token。请联系管理员处理后再调用接口。",
         guideV1: "另有 Developer API v1，使用 ResourceGrant 逐应用、逐绑定授权，与此接口的 Token 权限不同。",
-        guideV1Link: "查看 v1 应用及授权管理
+        guideV1Link: "查看 v1 应用及授权管理"
       }
 );
 
@@ -306,16 +308,17 @@ const submitApplication = async () => {
         </ol>
         <div class="guide-sample-header">
           <strong>{{ copy.guideCurl }}</strong>
-          <el-button plain @click="copyGuideExample(curlExample)">{{ copy.guideCopy }}</el-button>
+          <el-button plain :aria-label="`${copy.guideCopy} (cURL)`" @click="copyGuideExample(curlExample)">{{ copy.guideCopy }}</el-button>
         </div>
-        <pre class="guide-code"><code>{{ curlExample }}</code></pre>
+        <pre class="guide-code" tabindex="0" :aria-label="copy.guideCurl"><code>{{ curlExample }}</code></pre>
         <p class="guide-note">{{ copy.guideResponse }}</p>
         <details class="guide-extra">
           <summary>{{ copy.guidePython }}</summary>
+          <p class="guide-note">{{ copy.guidePythonSetup }}</p>
           <div class="guide-sample-header">
-            <el-button plain @click="copyGuideExample(pythonExample)">{{ copy.guideCopy }}</el-button>
+            <el-button plain :aria-label="`${copy.guideCopy} (Python)`" @click="copyGuideExample(pythonExample)">{{ copy.guideCopy }}</el-button>
           </div>
-          <pre class="guide-code"><code>{{ pythonExample }}</code></pre>
+          <pre class="guide-code" tabindex="0" :aria-label="copy.guidePython"><code>{{ pythonExample }}</code></pre>
         </details>
         <p class="guide-note">{{ copy.guideErrors }}</p>
         <p class="guide-note">{{ copy.guideSafety }}</p>
@@ -465,6 +468,10 @@ const submitApplication = async () => {
   color: #d84a34;
   text-decoration: none;
   font-weight: 600;
+}
+
+.developer-guide {
+  min-width: 0;
 }
 
 .developer-guide .guide-steps {
