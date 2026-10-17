@@ -4,7 +4,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const R=fileURLToPath(new URL('../../',import.meta.url)),V=resolve(R,'taiko_viewer');
-const targets=['server/services/my-taiko/overview.ts','server/services/my-taiko/admission.ts','server/infrastructure/server-allowlist.ts','server/services/developer-api-v1/common.ts','server/services/developer-api-v1/admission.ts','server/services/developer-api-v1/authority.ts','server/services/developer-api-v1/grants.ts','server/api/account/auth/me.get.ts'].map(x=>resolve(V,x));
+const targets=['server/services/my-taiko/overview.ts','server/services/my-taiko/admission.ts','server/infrastructure/server-allowlist.ts','server/infrastructure/taiko-publication/projection-integrity.ts','server/services/developer-api-v1/read.ts','server/services/developer-api-v1/common.ts','server/services/developer-api-v1/admission.ts','server/services/developer-api-v1/authority.ts','server/services/developer-api-v1/grants.ts','server/api/account/auth/me.get.ts'].map(x=>resolve(V,x));
 const config=ts.readConfigFile(resolve(V,'.nuxt/tsconfig.server.json'),ts.sys.readFile);const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,resolve(V,'.nuxt'));
 const globals=resolve(V,'.nuxt/types/nitro-imports.d.ts');
 const options={...parsed.options,noEmit:true,allowImportingTsExtensions:true,skipLibCheck:true};

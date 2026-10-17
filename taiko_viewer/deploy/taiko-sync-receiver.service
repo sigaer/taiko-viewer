@@ -10,7 +10,7 @@ Environment=TAIKO_SYNC_RECEIVER_HOST=127.0.0.1
 Environment=TAIKO_SYNC_RECEIVER_PORT=3102
 Environment="TAIKO_SYNC_RECEIVER_NAME=Sakura bot"
 Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
-ExecStart=/home/sigaer/taiko/.venv/bin/python /home/sigaer/taiko/scripts/sync_dispatch_server.py
+ExecStart=/home/sigaer/taiko/qa-vault/role-center-wf9putbr/venv/bin/python -I -m taiko_bot.services.sync_dispatch_server
 Restart=always
 RestartSec=5
 User=root

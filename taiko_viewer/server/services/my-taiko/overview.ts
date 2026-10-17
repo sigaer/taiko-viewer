@@ -1,3 +1,4 @@
+import {captureProjectionIntegrity} from '../../infrastructure/taiko-publication/projection-integrity';
 import {createHash} from 'node:crypto';
 import {createError,getQuery,setHeader,type H3Event} from 'h3';
 import {fromLegacyScore} from '@sakura-taiko/contract';
@@ -36,6 +37,7 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
    const scope=currentScoreScope(binding.taiko_id);
    if(!scope?.lease.view)throw fail(503,'publication-required');
    const publication=scope.lease.view,original=scope.reader;
+   const projectionIntegrity=await captureProjectionIntegrity(scope.root,publication,true);
    let current:ReturnType<typeof original.readCurrent>|undefined,physicalCurrentReads=0;
    // Never retain this memo beyond this request's already authorized ALS scope.
    scope.reader={...original,readCurrent:identity=>{
@@ -76,6 +78,7 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
      recommendation:{href:'/tools/recommend',state:'ENTRY_ONLY',bindingId:String(binding.id),scoreRevision},
      diagnostics:{physicalCurrentReads,measurements:'NOT_REQUESTED',historyMeaning:'CANONICAL_FACTS_NOT_SYNCHRONIZATION_PLAY_EVENTS'}
     };
+    if(await captureProjectionIntegrity(scope.root,publication,true)!==projectionIntegrity)throw fail(503,'read-unavailable');
     if(Buffer.byteLength(JSON.stringify(result))>8*1024*1024)throw fail(503,'bounded-read-required');
     return result;
    }finally{scope.reader=original;}
