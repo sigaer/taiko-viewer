@@ -13,7 +13,7 @@ paths:
   /api/v1/taiko/catalog/songs:
     get:
       operationId: getCatalogSongsWithAliases
-      description: Public complete song catalog. Existing canonical fields are preserved and source fields song_name/song_name_jp plus aliases are included in the same response. Any supplied Bearer token is validated.
+      description: Public complete song catalog with canonical song_name/song_name_jp fields and aliases in one response. Any supplied Bearer token is validated.
       security:
         - {}
         - DeveloperToken: []
