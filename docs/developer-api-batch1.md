@@ -10,15 +10,16 @@ Batch one focuses on concrete, reusable data—not filter-menu metadata.
 | GET | `/api/developer/userdata/{userid}/rating` | Same authorization as the existing Developer userdata endpoint | One Rating response: overall Rating, six dimensions, sample count, algorithm metadata and top-30 song-level details |
 | GET | `/api/developer/userdata/{userid}/recommendations` | Same authorization as the existing Developer userdata endpoint | Structured rating-based recommendations |
 
-There is no separate aliases endpoint, no separate B30 endpoint, and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The frozen Contract v1.0 schema and original OpenAPI document are unchanged; additive endpoint documentation is in `developer-api-batch1-openapi.yaml`.
+There is no separate aliases endpoint, no separate B30 endpoint, and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The shared Contract is now v1.1. This is an intentional breaking shape change: `Song.title` is removed rather than maintained alongside duplicate fields. The original v1.0 shape is not supported by this candidate; the current OpenAPI is updated to v1.1.
 
 ## Song catalog fields
 
-The songs endpoint preserves the existing canonical fields and adds the source names without inventing new naming conventions:
+The songs endpoint returns one canonical song shape:
 
-- `song_name`: the source catalog display name (used as the Chinese/display title where the source provides it).
-- `song_name_jp`: Japanese title from the catalog/alias metadata.
+- `song_name`: the original Chinese/display name from the source catalog.
+- `song_name_jp`: the original Japanese name from the catalog, falling back to alias metadata when absent.
 - `aliases`: alias strings joined by numeric song ID; empty array when no aliases exist.
+- `title` is not returned. Consumers use `song_name` directly; there is no duplicate alias for the same value.
 - `catalogRevision` / response `versions.catalogRevision`: SHA-256 over the source song-data and alias-file SHA-256 values. Changing either input changes the catalog revision and ETag.
 
 A missing source title remains `null`; this API does not fabricate translations.
@@ -35,6 +36,6 @@ A missing source title remains `null`; this API does not fabricate translations.
 
 ## Explicit limits
 
-- Song names are exposed exactly under the source field names `song_name` and `song_name_jp`; the API does not add `titleJapanese` or a made-up Chinese translation field.
+- The Contract 1.1 `Song` schema has no `title` field; `song_name`, `song_name_jp` and `aliases` are canonical and required (name values may be null if the source lacks them).
 - History, Growth, Goal and annual-report APIs remain future work.
 - This branch is still a code candidate. Static tests do not replace build, real isolated SQL/HTTP integration tests, or deployment validation.
