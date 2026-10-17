@@ -13,7 +13,7 @@ const observations=[];const nativeFetch=globalThis.fetch;
 const schema=JSON.parse(await readFile(new URL('../../packages/sakura-taiko-contract/schema/contract-v1.json',import.meta.url),'utf8'));
 const ajv=new Ajv({strict:true,allowUnionTypes:true});ajv.addSchema(schema);
 const validate=name=>ajv.compile({$ref:schema.$id+'#/$defs/'+name});
-async function actualBaseDdl(c,table){const source=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');const ast=ts.createSourceFile('account-db.ts',source,ts.ScriptTarget.Latest,true);let value;function visit(node){if(ts.isNoSubstitutionTemplateLiteral(node)&&node.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))value=node.text;ts.forEachChild(node,visit);}visit(ast);assert.ok(value);await c.pool.execute(value);}
+async function actualBaseDdl(c,table){const source=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');const ast=ts.createSourceFile('account-db.ts',source,ts.ScriptTarget.Latest,true);let value;function visit(node){if(ts.isNoSubstitutionTemplateLiteral(node)&&node.text.startsWith('CREATE TABLE IF NOT EXISTS '+table+' ('))value=node.text;ts.forEachChild(node,visit);}visit(ast);assert.ok(value);await c.pool.execute(value);}
 
 test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization and Publication generation',{timeout:180000},()=>accountSourceFixture(async c=>{
  c.state.expectedSourceMode='none';assertQaPython();Object.assign(c.config,{developerApiV1:true,developerApiAnonymousDailyLimit:300,developerApiClientDailyLimit:5000,repoRoot:c.root,public:{}});

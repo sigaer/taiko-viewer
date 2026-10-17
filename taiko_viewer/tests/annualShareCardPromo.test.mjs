@@ -62,7 +62,7 @@ test('renderer dimensions and cache identity advance together', async () => {
     read('server/services/account/annual-summary/constants.ts'),
     read('server/services/account/annual-summary/index.ts'),
     read('server/services/account/annual-summary/poster.ts'),
-    read('server/utils/account-db.ts')
+    read('server/utils/account-schema-definition.ts')
   ]);
 
   assert.match(constants, /ANNUAL_SHARE_CARD_CONTENT_HEIGHT = 1648/);

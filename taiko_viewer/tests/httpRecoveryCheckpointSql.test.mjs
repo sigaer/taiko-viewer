@@ -41,7 +41,7 @@ test('real HTTP authentication reads and core writes become ready after independ
   const annual={summaryId:'00000000-0000-4000-8000-000000000082',algorithmVersion:'v4.5.3',inputFingerprint:'e'.repeat(64),schemaVersion:4,bindingId:f.id,source:'synthetic',published:true};
   await writeFile(resolve(annualDir,'report.json'),encode(annual)+'\n');
   // Use the exact repository Annual table DDL, including its foreign keys.
-  const accountSource=await readFile(new URL('../server/utils/account-db.ts',import.meta.url),'utf8');
+  const accountSource=await readFile(new URL('../server/utils/account-schema-definition.ts',import.meta.url),'utf8');
   const annualDdl=accountSource.match(/`(CREATE TABLE IF NOT EXISTS web_annual_summaries \([\s\S]*?ENGINE=InnoDB DEFAULT CHARSET=utf8mb4)`/)[1];
   await c.pool.query(annualDdl);
   await c.pool.execute('INSERT INTO web_annual_summaries (id,user_id,binding_id,version_key,data_mode,input_fingerprint,summary_path,events_path,generated_at) VALUES (?,?,?,?,?,?,?,?,NOW())',[annual.summaryId,c.user,f.id,'historical-v4.5.3','snapshot',annual.inputFingerprint,'report.json','events.json']);
