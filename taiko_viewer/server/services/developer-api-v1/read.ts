@@ -15,7 +15,7 @@ const observationSources=new Set(['wahlap','hiroba','manual','manual-score','coo
 const fields=['song_no','level','high_score','best_score_rank','good_cnt','ok_cnt','ng_cnt','pound_cnt','combo_cnt','stage_cnt','clear_cnt','full_combo_cnt','dondaful_combo_cnt','highscore_datetime','update_datetime'];
 export async function publicRead(event:H3Event,kind:'meta'|'songs'|'charts'|'aliases'){
  exactKeys(getQuery(event),[]);const db=await apiDb();await publicIdentity(event,db);const c=await catalog();const a=kind==='aliases'?await aliases():null;
- const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:kind==='charts'?c.charts:a};
+ const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.0',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(kind==='aliases'?(a?.revision||c.revision):c.revision),items:kind==='songs'?c.songs:kind==='charts'?c.charts:a?.items};
  return conditional(event,payload);
 }
 export async function privateRead(event:H3Event,kind:'profile'|'scores',playerId:string){
