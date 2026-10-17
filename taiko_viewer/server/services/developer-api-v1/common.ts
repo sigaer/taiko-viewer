@@ -1,4 +1,3 @@
-import {readServerAllowlist} from '../../infrastructure/server-allowlist.ts';
 import {createHash,randomUUID} from 'node:crypto';
 import {defineEventHandler,getHeader,setHeader,removeResponseHeader,setResponseStatus,type H3Event} from 'h3';
 export const AUDIENCE='viewer:developer-api:v1';
@@ -8,9 +7,7 @@ export class ApiFailure extends Error { constructor(public status:number,public 
 export const deny=()=>new ApiFailure(403,'GRANT_REQUIRED');
 export const hash=(text:string)=>createHash('sha256').update(text).digest('hex');
 export async function enabled(){
- const c=useRuntimeConfig();if(!(c.developerApiV1===true||String(c.developerApiV1)==='1'))return false;
- const policy=await readServerAllowlist(c.developerApiClientAllowlistPath,'clientIds',/^clt_[a-f0-9]{32}$/);
- return Boolean(policy?.ids.size);
+ const c=useRuntimeConfig();return c.developerApiV1===true||String(c.developerApiV1)==='1';
 }
 export async function requireEnabled(){if(!await enabled())throw new ApiFailure(404,'NOT_FOUND');}
 export function exactKeys(value:Record<string,unknown>,keys:string[]){if(Object.keys(value).some(k=>!keys.includes(k)))throw new ApiFailure(400,'INVALID_REQUEST');}

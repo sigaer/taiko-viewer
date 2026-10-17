@@ -1,8 +1,5 @@
-import {readServerAllowlist} from '../../infrastructure/server-allowlist';
-/** This deployment admits selected clients in addition to, never instead of,
- * the approved application, active token and live per-resource consent proof.
- */
+/** SQL proves approved application, active client/token and live consent.
+ * Client identifiers never depend on an additional operator pilot list. */
 export async function developerClientAdmitted(clientId:string){
- const policy=await readServerAllowlist(useRuntimeConfig().developerApiClientAllowlistPath,'clientIds',/^clt_[a-f0-9]{32}$/);
- return policy?.ids.has(clientId)===true;
+ return /^clt_[a-f0-9]{32}$/.test(clientId);
 }

@@ -7,6 +7,9 @@ test('rollout fails closed and never turns process read-model mode into account 
  async function policy(value){await writeFile(path+'.next',JSON.stringify(value),{mode:0o600});await rename(path+'.next',path);}
  try{
   assert.equal(await captureMyTaikoAdmission(1,config),null);
+  assert.ok(await captureMyTaikoAdmission(2,{myTaikoReadModelMode:'all'}));
+  assert.equal(await captureMyTaikoAdmission(2,{myTaikoReadModelMode:'legacy'}),null);
+  assert.equal(await captureMyTaikoAdmission('owner=1',{myTaikoReadModelMode:'all'}),null);
   await policy({schemaVersion:1,userIds:['1']});const admitted=await captureMyTaikoAdmission(1,config);assert.ok(admitted);
   assert.equal(await captureMyTaikoAdmission(2,config),null);assert.equal(await captureMyTaikoAdmission(1,{...config,myTaikoReadModelMode:'read-model'}),null);
   await policy({schemaVersion:1,userIds:[]});assert.equal(await captureMyTaikoAdmission(1,config),null);

@@ -9,6 +9,7 @@ import {withScoreRead, currentScoreScope} from '../../infrastructure/taiko-publi
 import {getRuntimePaths} from '../../infrastructure/runtime-paths.ts';
 import {recordPrivateSourceView} from '../../infrastructure/account/private-source-response.ts';
 import {PublicationUnavailableError} from '../../infrastructure/taiko-publication/client.ts';
+import {captureProjectionIntegrity} from '../../infrastructure/taiko-publication/projection-integrity';
 import {validSourceIdentity, validateSourceServicePolicy, type SourceServiceScope} from '../../infrastructure/account/source-service-schema.ts';
 
 export type SourceActor = Readonly<{kind:'session'|'developer'; userId:number; credential:string; tokenId?:string}>;
@@ -36,7 +37,7 @@ export async function readActor(db:Pick<Pool,'execute'>,kind:Actor['kind'],crede
 export async function captureActor(event:H3Event,db:Pool) {
   const header=getHeader(event,'authorization');
   if(header!==undefined){const match=/^Bearer ([A-Za-z0-9_-]{16,256})$/i.exec(header.trim());if(!match)throw unauthorized();
-    return readActor(db,'developer',createHash('sha256').update(match[1]).digest('hex'));}
+    return readActor(db,'developer',createHash('sha256').update(match[1]!).digest('hex'));}
   const cookie=getCookie(event,SESSION_COOKIE_NAME);if(!cookie || !/^[a-f0-9]{64}$/.test(cookie))throw unauthorized();
   return readActor(db,'session',cookie);
 }
@@ -44,19 +45,29 @@ async function serviceGrant(db:ProofDb,actor:Actor,source:string,scope:SourceSer
   if(actor.kind!=='developer')return null;
   const [rows]=await db.execute<RowDataPacket[]>(`SELECT CAST(id AS CHAR) AS id,developer_user_id,service_name,scopes_json,sources_json,
     revision_nonce,status,DATE_FORMAT(expires_at,'%Y-%m-%dT%H:%i:%s') AS expires_at,issued_by_user_id
-    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`+(locked?' FOR UPDATE':''),[actor.tokenId]);
+    FROM taiko_source_service_grants WHERE developer_token_id=? AND status='active' AND (expires_at IS NULL OR expires_at>NOW()) LIMIT 1`+(locked?' FOR UPDATE':''),[actor.tokenId!]);
   const row=rows[0];if(!row)return null;
   if(Number(row.developer_user_id)!==actor.userId || !/^[A-Za-z0-9_-]{1,64}$/.test(row.service_name) || !/^[a-f0-9]{32}$/.test(row.revision_nonce))throw new PublicationUnavailableError();
   const policy=validateSourceServicePolicy(JSON.parse(row.scopes_json),JSON.parse(row.sources_json));
-  if(!policy.scopes.includes(scope) || (policy.sources!=='*'&&!policy.sources.includes(source)))return null;
+  const globalScores=scope==='source_read'&&policy.scopes.includes('scores_read_any');
+  if(!globalScores&&(!policy.scopes.includes(scope) || (policy.sources!=='*'&&!policy.sources.includes(source))))return null;
+  if(globalScores || (scope==='source_read' && row.service_name==='approved-developer-scores')){
+    const enabled=useRuntimeConfig().developerGlobalScoresRead;
+    if(!(enabled===true||String(enabled)==='1'))return null;
+    const [[approved]]=await db.execute<RowDataPacket[]>(`SELECT t.id FROM web_developer_tokens t
+      JOIN web_developer_applications app ON app.id=t.application_id AND app.user_id=t.user_id
+      JOIN web_user_accounts a ON a.id=t.user_id
+      WHERE t.id=? AND t.status='active' AND t.revoked_at IS NULL AND app.status='approved' AND a.email_verified=1`,[actor.tokenId!]);
+    if(!approved)return null;
+  }
   return Object.freeze({kind:'service',tuple:Object.freeze([row.id,row.developer_user_id,row.service_name,row.scopes_json,row.sources_json,row.revision_nonce,row.status,row.expires_at,row.issued_by_user_id])});
 }
 async function ownerGrant(db:ProofDb,actor:Actor,source:string,expected?:BindingIdentity,locked=false):Promise<Grant> {
   const [rows]=await db.execute<(RowDataPacket & BindingIdentity)[]>(`SELECT CAST(id AS CHAR) AS id,taiko_id,source,manual_account_id
     FROM web_taiko_bindings WHERE user_id=? AND CAST(taiko_id AS BINARY)=CAST(? AS BINARY) ORDER BY id LIMIT 2`+(locked?' FOR UPDATE':''),[actor.userId,source]);
-  if(rows.length!==1)throw denied();const row=rows[0];
+  if(rows.length!==1)throw denied();const row=rows[0]!;
   if(expected&&!same(captureBindingIdentity(row),expected))throw denied();
-  if(!['wahlap','hiroba','manual'].includes(row.source))throw new PublicationUnavailableError();
+  if(!['wahlap','hiroba','manual'].includes(row.source!))throw new PublicationUnavailableError();
   if(MANUAL_SOURCE_ID.test(source) && (row.source!=='manual'||row.manual_account_id!==source))throw denied();
   if(!MANUAL_SOURCE_ID.test(source)&&(row.source==='manual'||row.manual_account_id))throw new PublicationUnavailableError();
   return Object.freeze({kind:'owner',binding:captureBindingIdentity(row)});
@@ -104,11 +115,12 @@ export const captureAuthorizedSourceMutation=(event:H3Event,sourceInput:unknown,
 export async function withCapturedSourceRead<T>(ticket:SourceAccessTicket,task:()=>Promise<T>):Promise<T>{
   try{
     const {db,paths:{userdataDir,repoRoot},actor,grant,source,scope}=ticket;
-    return await withScoreRead({root:userdataDir,repoRoot,identity:source,now:()=>new Date().toISOString()},async()=>{
+    const result=await withScoreRead({root:userdataDir,repoRoot,identity:source,now:()=>new Date().toISOString()},async()=>{
       const alive=()=>{if(!currentScoreScope(source)?.lease.alive())throw new PublicationUnavailableError();};
       alive();await prove(db,actor,grant,source,scope);alive();const result=await task();
       await prove(db,actor,grant,source,scope);alive();return result;
     });
+    await prove(db,actor,grant,source,scope);return result;
   }catch(error){throw safe(error);}
 }
 export async function withAuthorizedSourceRead<T>(event:H3Event,sourceInput:unknown,scope:SourceServiceScope,task:()=>Promise<T>):Promise<T> {
@@ -118,8 +130,10 @@ export async function withAuthorizedSourceRead<T>(event:H3Event,sourceInput:unkn
 export async function readAuthorizedSourceUserdata(event:H3Event,sourceInput:unknown) {
   return withAuthorizedSourceRead(event,sourceInput,'source_read',async()=>{
     const source=String(sourceInput).trim(),scope=currentScoreScope(source)!;
+    const integrity=scope.lease.view?await captureProjectionIntegrity(scope.root,scope.lease.view):null;
     if(!await scope.reader.currentExists(source))throw failure(404,'未找到该账号的成绩');
     const raw=await scope.reader.readRawCurrent(source);
+    if(scope.lease.view&&await captureProjectionIntegrity(scope.root,scope.lease.view)!==integrity)throw new PublicationUnavailableError();
     recordPrivateSourceView(event,scope.lease.view);
     try{const data=JSON.parse(raw);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid score object');return data as Record<string,unknown>;}
     catch{if(scope.lease.view)throw new PublicationUnavailableError();throw failure(500,'目标用户的本地 JSON 已损坏');}
