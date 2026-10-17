@@ -21,10 +21,7 @@ test('Rating response includes top-30 detail and uses the existing source author
   read('../server/services/account/developer-analytics.ts'),
   read('../server/services/account/source-access.ts')
  ]);
- for(const value of ['compute_all_from_userdata_records','project_player_rating','topSongs','topSongsCount','withScoreRead']) {
-  if(value==='withScoreRead') continue; // Existing authorized readers own the committed-read lifecycle.
-  assert.ok(service.includes(value),value);
- }
+ for(const value of ['compute_all_from_userdata_records','project_player_rating','topSongs','topSongsCount']) assert.ok(service.includes(value),value);
  assert.ok(service.includes('readAuthorizedSourceUserdata'));
  assert.ok(service.includes('readAuthorizedMergedSource'));
  assert.ok(service.includes('enforceTaikoOpenQuota'));
