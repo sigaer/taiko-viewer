@@ -998,7 +998,6 @@ const removeQqBinding = async () => {
 
 <template>
   <div class="profile-page">
-    <NuxtLink v-if="developerApiV1Enabled" to="/account/developer/grants">{{locale==='ja'?'アプリへのアクセス許可':'应用授权'}}</NuxtLink>
     <el-card v-if="pending" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
@@ -1323,6 +1322,16 @@ const removeQqBinding = async () => {
         </div>
       </el-card>
 
+      <section v-if="developerApiV1Enabled" class="third-party-settings" aria-label="第三方应用权限">
+        <div>
+          <h3>{{ locale === 'ja' ? '外部アプリのアクセス管理（任意）' : '第三方应用权限（可选）' }}</h3>
+          <p>{{ locale === 'ja' ? '自分で許可した v1 アプリのアクセスを確認・取り消せます。許可したことがなければ何もする必要はありません。' : '查看或撤销你主动授予第三方 v1 应用的访问权限；没有授权过就无需操作。' }}</p>
+        </div>
+        <NuxtLink :to="localePath('/account/developer/grants')">
+          {{ locale === 'ja' ? 'アクセス許可を管理' : '管理授权' }}
+        </NuxtLink>
+      </section>
+
       <AccountAvatarCropperDialog
         v-model="avatarCropVisible"
         :source-url="avatarCropSourceUrl"
@@ -1350,6 +1359,31 @@ const removeQqBinding = async () => {
 .profile-page {
   display: grid;
   gap: 18px;
+}
+
+.third-party-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 2px 0;
+  border-top: 1px solid var(--el-border-color-light);
+}
+.third-party-settings h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.third-party-settings p {
+  margin: 0;
+  color: var(--el-text-color-secondary);
+  line-height: 1.65;
+  font-size: 13px;
+}
+.third-party-settings a {
+  flex-shrink: 0;
+  color: var(--el-color-primary);
+  font-weight: 600;
 }
 
 .onboarding-card {
