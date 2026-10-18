@@ -23,9 +23,20 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: sigaer/taiko-bot
+          ref: a632913dfbdbec1d465f8eaccc0bb80c35e25745
+          path: taiko-bot-source
+      - name: Prepare pinned shared Annual schema
+        run: |
+          schema_dir="$(dirname "$(dirname "$GITHUB_WORKSPACE")")/schemas"
+          mkdir -p "$schema_dir"
+          cp taiko-bot-source/taiko_bot/offline/schemas/annual-summary-v4.schema.json "$schema_dir/annual-summary-v4.schema.json"
+          test -s "$schema_dir/annual-summary-v4.schema.json"
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
           cache: npm
           cache-dependency-path: taiko_viewer/package-lock.json
       - uses: actions/setup-python@v5
@@ -36,8 +47,13 @@ jobs:
         run: |
           npm install --package-lock-only --ignore-scripts
           git diff --stat -- package-lock.json
-          git diff -- package-lock.json | sed -n '1,260p'
+          git diff -- package-lock.json | sed -n '1,600p'
           node -e "const l=require('./package-lock.json'); console.log(JSON.stringify(Object.entries(l.packages).filter(([k])=>/dxup\\/nuxt|magic-string|unplugin/.test(k)).map(([path,p])=>({path,version:p.version,resolved:p.resolved,integrity:p.integrity,dependencies:p.dependencies})),null,2))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: generated-npm-lockfile
+          path: taiko_viewer/package-lock.json
+          retention-days: 1
       - name: Install locked dependencies
         working-directory: taiko_viewer
         run: npm ci
