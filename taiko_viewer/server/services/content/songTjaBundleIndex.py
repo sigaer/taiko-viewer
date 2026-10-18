@@ -3,24 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import sys
 from pathlib import Path
+from taiko_bot.offline import merge_index
 
 
-def load_merge_index_module(module_path: Path):
-    spec = importlib.util.spec_from_file_location("viewer_merge_index", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"failed to load merge_index module from {module_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def build_song_tja_index(song_data_path: Path, tja_root: Path, merge_index_path: Path):
-    merge_index = load_merge_index_module(merge_index_path)
-
+def build_song_tja_index(song_data_path: Path, tja_root: Path):
     with song_data_path.open("r", encoding="utf-8") as handle:
         song_data = json.load(handle)
 
@@ -88,13 +77,11 @@ def main():
     parser = argparse.ArgumentParser(description="Build song ID to TJA path index for viewer downloads")
     parser.add_argument("--song-data", required=True, help="Path to song_data.json")
     parser.add_argument("--tja-root", required=True, help="Path to the ESE TJA root")
-    parser.add_argument("--merge-index", required=True, help="Path to merge_index.py")
     args = parser.parse_args()
 
     payload = build_song_tja_index(
         song_data_path=Path(args.song_data),
         tja_root=Path(args.tja_root),
-        merge_index_path=Path(args.merge_index),
     )
     json.dump(payload, sys.stdout, ensure_ascii=False)
 
