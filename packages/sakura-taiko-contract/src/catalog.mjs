@@ -30,3 +30,14 @@ export function projectCatalog(rows,revision,aliasRows=[]){
  }
  songs.sort((a,b)=>Number(a.songId)-Number(b.songId));charts.sort((a,b)=>Number(a.songId)-Number(b.songId)||a.difficulty-b.difficulty);return {songs,charts};
 }
+
+/** Catalog-only DTO: attach existing charts without extending canonical Song. */
+export function catalogSongsWithCharts({songs,charts}){
+ const bySong=new Map(songs.map(song=>[song.songId,[]]));
+ for(const chart of charts){
+  const bucket=bySong.get(chart.songId);
+  if(!bucket)throw new Error('Chart without catalog song');
+  bucket.push(chart);
+ }
+ return songs.map(song=>({...song,charts:bySong.get(song.songId)}));
+}

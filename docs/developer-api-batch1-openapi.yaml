@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
-  version: 0.85.0-rc.5
-  description: Application documentation release 0.85.0-rc.5. API path v1 and calculation model v1 are
+  version: 0.85.0-rc.6
+  description: Application documentation release 0.85.0-rc.6. API path v1 and calculation model v1 are
     separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
     returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
     does not expand account/token authority or enable new capabilities. Examples are synthetic;
@@ -62,18 +62,23 @@ paths:
           description: Source temporarily unavailable.
   /api/v1/taiko/catalog/songs:
     get:
-      summary: 歌曲目录与别名
+      summary: 歌曲、谱面与难度
       description: 查询歌曲 ID、中日原始曲名与别名，用于搜索和成绩关联。 400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429
         日次限流（RATE_LIMITED）；503 曲库或服务暂不可用。错误体为 code、message、requestId。
       security: []
       responses:
         "200":
-          description: Successful read. 公开请求不发送 Authorization。主动附带的 Bearer Token
-            仍会被验证，无效时不会自动降级为匿名读取。别名已包含在本响应中；没有独立 aliases 接口。曲库不包含谱面成绩。
+          description: "Without include: original Song items. With include=charts: CatalogSongWithCharts
+            items. Charts reuse the independent chart projection from the same read and
+            catalogRevision. Chart.difficulty is legacy score level 1–5; Chart.level is star level,
+            not the same field. Inherited availability is catalog metadata, not per-difficulty
+            regional implementation proof."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Catalog"
+                oneOf:
+                  - $ref: "#/components/schemas/Catalog"
+                  - $ref: "#/components/schemas/CatalogSongsWithChartsResponse"
               example:
                 versions:
                   contractVersion: "1.1"
@@ -92,6 +97,29 @@ paths:
                     availability:
                       region: UNKNOWN
                       status: active
+                    charts:
+                      - songId: "10001"
+                        chartId: 10001:1:unknown
+                        difficulty: 1
+                        level: 3
+                        type: unknown
+                        variant: null
+                        catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                        availability:
+                          region: UNKNOWN
+                          status: active
+                        tjaCourse: 0
+                      - songId: "10001"
+                        chartId: 10001:4:unknown
+                        difficulty: 4
+                        level: 9
+                        type: unknown
+                        variant: null
+                        catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                        availability:
+                          region: UNKNOWN
+                          status: active
+                        tjaCourse: 3
         "304":
           description: Conditional ETag match; no response body. Authorization is still checked; analysis may
             still run.
@@ -107,6 +135,16 @@ paths:
         "503":
           description: Catalog unavailable or bounded size limit exceeded; error body contains code, message,
             requestId.
+      parameters:
+        - name: include
+          in: query
+          required: false
+          description: Use include=charts for the complete catalog in a single read/revision. Omit for the
+            unchanged legacy Song response. Other/repeated values are rejected.
+          schema:
+            type: string
+            enum:
+              - charts
   /api/developer/userdata/{userid}/rating:
     get:
       summary: Rating 与六维
@@ -233,6 +271,29 @@ paths:
         "504":
           description: Gateway timeout; a 90-second client read timeout cannot extend the current 60-second
             API gateway limit.
+  /api/v1/taiko/catalog/charts:
+    get:
+      summary: Existing independent chart catalog (retained)
+      security: []
+      responses:
+        "200":
+          description: Existing flat Chart projection; same contents as complete catalog charts for the same
+            catalogRevision.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - versions
+                  - items
+                properties:
+                  versions:
+                    $ref: "#/components/schemas/ApiReadVersions"
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Chart"
 components:
   securitySchemes:
     legacyDeveloperToken:
@@ -515,3 +576,115 @@ components:
               inStrictRange:
                 type: boolean
                 description: Candidate indicator is between 90% and 105% of reference indicator.
+    Chart:
+      type: object
+      additionalProperties: false
+      properties:
+        songId:
+          type: string
+          minLength: 1
+        chartId:
+          type: string
+          minLength: 1
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 5
+        level:
+          type:
+            - number
+            - "null"
+          minimum: 0
+        type:
+          type: string
+          enum:
+            - single
+            - double
+            - unknown
+        variant:
+          type:
+            - string
+            - "null"
+        catalogRevision:
+          type:
+            - string
+            - "null"
+        availability:
+          $ref: "#/components/schemas/CatalogAvailability"
+        tjaCourse:
+          type: integer
+          minimum: 0
+          maximum: 4
+      required:
+        - songId
+        - chartId
+        - difficulty
+        - level
+        - type
+        - variant
+        - catalogRevision
+    CatalogSongWithCharts:
+      type: object
+      additionalProperties: false
+      properties:
+        songId:
+          type: string
+          minLength: 1
+        song_name:
+          type:
+            - string
+            - "null"
+          maxLength: 512
+          description: Original Chinese/display name from song_data.json; null when the source has no value.
+        song_name_jp:
+          type:
+            - string
+            - "null"
+          maxLength: 512
+          description: Original Japanese name from song_data.json, falling back to song_alias.json when
+            absent; null when neither source has a value.
+        aliases:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 256
+          description: Alias strings from song_alias.json joined by numeric song ID; empty when no aliases
+            exist.
+        catalogRevision:
+          type:
+            - string
+            - "null"
+        availability:
+          $ref: "#/components/schemas/CatalogAvailability"
+        charts:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/Chart"
+          description: Existing chart projection from the same catalog read/revision. Availability is
+            inherited catalog metadata, not proof of regional implementation for each difficulty.
+            Missing difficulties are absent.
+      required:
+        - songId
+        - song_name
+        - song_name_jp
+        - aliases
+        - catalogRevision
+        - charts
+      description: Catalog-only Song DTO returned only for include=charts. Canonical Song and all other
+        Song references are unchanged.
+    CatalogSongsWithChartsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        versions:
+          $ref: "#/components/schemas/ApiReadVersions"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogSongWithCharts"
+          maxItems: 10000
+      required:
+        - versions
+        - items

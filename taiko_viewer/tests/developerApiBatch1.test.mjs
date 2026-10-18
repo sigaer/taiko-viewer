@@ -1,3 +1,4 @@
+import '../../packages/sakura-taiko-contract/tests/api-v1.test.mjs';
 // Run the documentation contract/example checks in the existing API CI job.
 import './developerApiGuide.test.mjs';
 import test from 'node:test';
@@ -28,7 +29,7 @@ test('catalog adapter joins song names and aliases by ID using one fixture',asyn
  ]);
  for(const value of ['song_data.json','song_alias.json','songDataSha256','songAliasSha256']) assert.ok(catalog.includes(value),value);
  for(const value of ['song_name','song_name_jp','aliases']) assert.ok(adapter.includes(value),value);
- assert.match(reader,/items:kind==='songs'\?c\.songs:c\.charts/);
+ assert.match(reader,/catalogSongsWithCharts\(c\)/);
  assert.ok(!reader.includes("kind==='aliases'"));
  const fixture=JSON.parse(fixtureSource);
  assert.deepEqual(projectCatalog(fixture.catalogInput,'synthetic-catalog-v1',fixture.aliasInput),fixture.catalogExpected);

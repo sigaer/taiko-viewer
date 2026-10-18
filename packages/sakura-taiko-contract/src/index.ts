@@ -190,5 +190,18 @@ export type DeveloperDan = {
   equippedLevel: number | null;
   highestPassedGrade: number | null;
 };
+export type CatalogSongWithCharts = {
+  songId: string;
+  song_name: string | null;
+  song_name_jp: string | null;
+  aliases: Array<string>;
+  catalogRevision: string | null;
+  availability?: CatalogAvailability;
+  charts: Array<Chart>;
+};
+export type CatalogSongsWithChartsResponse = {
+  versions: ApiReadVersions;
+  items: Array<CatalogSongWithCharts>;
+};
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";

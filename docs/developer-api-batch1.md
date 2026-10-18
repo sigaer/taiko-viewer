@@ -1,17 +1,17 @@
 # Developer API：现有只读能力与接入指南
 
-文档对应应用发布 `0.85.0-rc.5`。公开曲库使用 API 路径 `v1`，分析结果中的 `model: v1` 是计算模型；两者与网站发布版本、Contract 版本分别管理。Contract 1.1 维持 `FREEZE_CANDIDATE`，本次没有宣布冻结。
+文档对应应用发布 `0.85.0-rc.6`。公开曲库使用 API 路径 `v1`，分析结果中的 `model: v1` 是计算模型；两者与网站发布版本、Contract 版本分别管理。Contract 1.1 维持 `FREEZE_CANDIDATE`，本次没有宣布冻结。
 
 正式地址为 `https://viewer.sakura-bot.cn`。2026-10-18 在此前线上 rc.4 上，使用既有受控 Token 与受控 Source 串行只读预查，以下四个接口均返回 HTTP 200，包括匿名曲库读取；因此移除“仅本地候选、未部署”的过时说明。可用性不是权限承诺：第三方受保护读取仍要求现有已获批、有效 Token 及服务端读取权限，不因文档可见而开放。
 
 | 能力 | GET 路径 | 第三方接入 | 用途 |
 | --- | --- | --- | --- |
 | 当前成绩 | `/api/developer/userdata/{userid}` | 现有 Developer Token | 当前存档展示、自定义统计 |
-| 歌曲目录与别名 | `/api/v1/taiko/catalog/songs` | 公开，不发送 Authorization | 曲名搜索、别名与 ID 关联 |
+| 歌曲、谱面与难度 | `/api/v1/taiko/catalog/songs?include=charts` | 公开，不发送 Authorization | 曲名搜索、别名与 ID 关联 |
 | Rating 与六维 | `/api/developer/userdata/{userid}/rating` | 现有 Developer Token | 综合与六维计算、高 Rating 谱面详情 |
 | 推荐游玩谱面 | `/api/developer/userdata/{userid}/recommendations` | 现有 Developer Token | 普通 Rating 推荐列表 |
 
-`{userid}` 是太鼓 Source ID，不是 Viewer 网站账号 ID，也不是其他接口的 `plr_...` 资源标识。服务端保留本人会话等已有能力；第三方示例统一使用 Bearer Token，不复制浏览器 Cookie。以上接口不新增查询参数；曲库会拒绝不支持的查询参数。别名已经包含在曲库内，没有独立 aliases 接口，也没有新增 B30 路径。
+`{userid}` 是太鼓 Source ID，不是 Viewer 网站账号 ID，也不是其他接口的 `plr_...` 资源标识。服务端保留本人会话等已有能力；第三方示例统一使用 Bearer Token，不复制浏览器 Cookie。完整曲库使用显式查询参数 `include=charts`；其他接口参数不变，曲库拒绝其他或重复的 include 值。别名已经包含在曲库内，没有独立 aliases 接口，也没有新增 B30 路径。
 
 ## 网站中的指南
 
@@ -25,13 +25,21 @@
 
 仅保留来源数据中存在的 `profile`、`songs`、`achievement`、`dojo`、`_meta`，不为缺省字段补空对象或数组。内部结构来自 Source，可能为 null 或其他 JSON 类型；`songs` 通常为成绩数组，常见 `song_no`、`level`、`high_score` 等不代表每条记录都具有这些字段。递归过滤凭据、Token、Cookie 等敏感键。该接口没有成长历史、年度报告、同步或写入能力。
 
-### 歌曲目录与别名
+### 歌曲、谱面与难度
 
-响应 `{versions, items}` 复用 Contract 1.1。`versions` 包含 `contractVersion`、`schemaRevision`、`catalogRevision`，而 `scoreRevision`、`calculationProfile`、`observationSource`、`capturedAt` 为 null。
+主要入口为 `GET /api/v1/taiko/catalog/songs?include=charts`，一次读取返回 `{versions, items: CatalogSongWithCharts[]}`。每项保留现有 Song 字段并新增 `charts: Chart[]`。独立 `/api/v1/taiko/catalog/charts` 保留。新 DTO 不替代或放宽 canonical Song 的 `additionalProperties: false`，不扩展成绩等其他 Song 引用。
 
-每个 Song 包含字符串 `songId`、可为 null 的 `song_name`/`song_name_jp`、字符串数组 `aliases`（可为空）、`catalogRevision` 和 `availability: {region, status}`。地区为 CN/JP/UNKNOWN，状态为 active/removed/unknown。原始曲名缺失不补造翻译；日文名可从现有别名表补充。别名按数字 ID 关联，联合 revision 覆盖两份源文件。Song 不再有重复 `title` 字段，但这不影响分析投影的 `title`。
+兼容路径 `GET /api/v1/taiko/catalog/songs` 不带参数时仍返回原 `CatalogSongsResponse`；现有 TypeScript SDK 的 `songs()`、旧示例和严格 Schema 消费者继续走该路径。新 Schema 只添加目录专用 DTO；Contract 1.1 仍为候选，schemaRevision 随规范内容更新，不改变已发布字段含义。
 
-公开请求无需 Token；若主动附带 Authorization，现有实现仍验证对应 Bearer 凭据，不保证当作匿名请求处理。特别是未关联有效应用凭据的普通 Developer Token 也不一定能用于带 Authorization 的曲库请求，因此公开示例完全省略该头。
+Song 保留字符串 songId、中日原始曲名（缺失为 null）、aliases（可为空）、catalogRevision、availability。Chart 直接复用同一次 `catalog()` 的投影，按 songId 线性分组，无逐曲读取，无第二套谱面识别逻辑；版本与 `versions.catalogRevision` 相同。嵌套 charts 与同版本独立 charts 的内容完全一致。
+
+- `difficulty`：难度档位 1 简单 / 2 普通 / 3 困难 / 4 鬼 / 5 里鬼，对应旧成绩的 `level`。
+- `level`：谱面星级，例如 difficulty=4、level=9 表示鬼 9 星。不是旧成绩的 level。
+- 关联旧成绩时使用 `String(song_no) === songId` 和 `record.level === chart.difficulty`；不是拿成绩 level 匹配星级。`tjaCourse = difficulty - 1` 是既有 TJA 映射。
+- chartId、type（single/double/unknown）、variant（未知为 null）、availability、catalogRevision 保留原谱面投影。仅从已存在且有效的 level_1…level_5 记录形成谱面；缺少难度或里谱不补造，无谱面时 charts=[]。
+- region 为 CN/JP/UNKNOWN，status 为 active/removed/unknown。Chart 的 availability 是现有投影继承的曲库记录元数据，**不是逐难度、逐地区实装证明**。不能因为歌曲上架便认为其所有难度已在中国实装。
+
+公开调用不发送 Authorization；主动附带的 Bearer 仍会被验证，不自动降级为匿名。响应仍受 8 MiB 上限、歌曲源 8 MiB/10000 行、别名源 4 MiB/20000 行等原有限制；超限返回 503，而非放宽资源限制。完整与兼容响应按各自内容生成 ETag，不可混用。
 
 ### Rating
 

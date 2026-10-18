@@ -1,3 +1,4 @@
+import {catalogSongsWithCharts} from '@sakura-taiko/contract/catalog';
 import {captureProjectionIntegrity} from '../../infrastructure/taiko-publication/projection-integrity';
 import type {H3Event} from 'h3';
 import {getQuery} from 'h3';
@@ -14,8 +15,10 @@ const mapScore=fromLegacyScore as unknown as (row:Record<string,unknown>,options
 const observationSources=new Set(['wahlap','hiroba','manual','manual-score','cookie','import','repair','dispatcher-transfer','local-snapshot','content-edit','unknown']);
 const fields=['song_no','level','high_score','best_score_rank','good_cnt','ok_cnt','ng_cnt','pound_cnt','combo_cnt','stage_cnt','clear_cnt','full_combo_cnt','dondaful_combo_cnt','highscore_datetime','update_datetime'];
 export async function publicRead(event:H3Event,kind:'meta'|'songs'|'charts'){
- exactKeys(getQuery(event),[]);const db=await apiDb();await publicIdentity(event,db);const c=await catalog();
- const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?c.songs:c.charts};
+ const query=getQuery(event);exactKeys(query,kind==='songs'?['include']:[]);
+ if(query.include!==undefined&&query.include!=='charts')throw new ApiFailure(400,'INVALID_REQUEST');
+ const db=await apiDb();await publicIdentity(event,db);const c=await catalog();
+ const payload=kind==='meta'?{apiVersion:'v1',contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision:c.revision,capabilities:['catalog:read','profile:read','scores:read','account:read'],unavailableScopes:['history:read','growth:read'],...contractRelease,runtimeEnabled:true,catalogProfile:'source-catalog-explicit-v1',pagination:'none-bounded-complete-response'}:{versions:versions(c.revision),items:kind==='songs'?(query.include==='charts'?catalogSongsWithCharts(c):c.songs):c.charts};
  return conditional(event,payload);
 }
 export async function privateRead(event:H3Event,kind:'profile'|'scores',playerId:string){

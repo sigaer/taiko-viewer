@@ -51,6 +51,27 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
   c.config.developerApiV1=false;await ask('default-off','/api/v1/taiko/meta',{expected:404});c.config.developerApiV1=true;
   const pub=await ask('anonymous-public-songs','/api/v1/taiko/catalog/songs',{cookie:'',schemaName:'CatalogSongsResponse'});assert.equal(pub.body.items[0].availability.region,'CN');
   const charts=await ask('anonymous-public-charts','/api/v1/taiko/catalog/charts',{cookie:'',schemaName:'CatalogChartsResponse'});assert.equal(charts.body.items[0].difficulty,4);assert.equal(charts.body.items[0].tjaCourse,3);assert.equal(charts.body.items.at(-1).type,'double');assert.equal(charts.body.items.at(-1).availability.status,'unknown');
+  const complete=await ask('anonymous-complete-songs','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',schemaName:'CatalogSongsWithChartsResponse'});
+  assert.deepEqual(complete.body.items.map(({charts,...song})=>song),pub.body.items);
+  assert.deepEqual(complete.body.items.flatMap(s=>s.charts),charts.body.items);
+  assert.ok(complete.body.items.every(s=>s.catalogRevision===complete.body.versions.catalogRevision&&s.charts.every(c=>c.songId===s.songId&&c.catalogRevision===s.catalogRevision)));
+  assert.notEqual(complete.res.headers.get('etag'),pub.res.headers.get('etag'));
+  await ask('complete-own-304','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',headers:{'if-none-match':complete.res.headers.get('etag')},expected:304});
+  await ask('legacy-etag-not-complete','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',headers:{'if-none-match':pub.res.headers.get('etag')},schemaName:'CatalogSongsWithChartsResponse'});
+  for(const query of ['include=other','include=','include=charts&include=charts','include=charts&extra=1'])await ask('invalid-complete-query','/api/v1/taiko/catalog/songs?'+query,{cookie:'',expected:400});
+  await ask('charts-query-unchanged','/api/v1/taiko/catalog/charts?include=charts',{cookie:'',expected:400});
+  await ask('complete-invalid-bearer-no-anonymous-fallback','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',token:'synthetic-invalid-token',expected:401});
+  // Same complete request, one existing projection: no second data source or N+1.
+  try{
+   await writeFile(catalogPath,JSON.stringify([{id:500,level_1:1,level_2:3,level_4:9,shelf_status:1,chart_type:'unexpected'},{id:501,level_1:null,level_3:'-',level_5:null}]));
+   const partial=await ask('complete-missing-difficulties-and-unknowns','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',schemaName:'CatalogSongsWithChartsResponse'});
+   assert.deepEqual(partial.body.items[0].charts.map(x=>[x.difficulty,x.level]),[[1,1],[2,3],[4,9]]);
+   assert.deepEqual(partial.body.items[1].charts,[]);assert.deepEqual(partial.body.items[0].aliases,[]);assert.equal(partial.body.items[0].availability.region,'UNKNOWN');assert.equal(partial.body.items[0].availability.status,'removed');assert.ok(partial.body.items[0].charts.every(c=>c.type==='unknown'&&c.variant===null));
+   const maxRows=Array.from({length:10000},(_,i)=>({id:200000+i,level_1:1,level_2:2,level_3:3,level_4:9,level_5:10}));
+   await writeFile(catalogPath,JSON.stringify(maxRows));
+   const legacyMax=await ask('legacy-10000-still-bounded','/api/v1/taiko/catalog/songs',{cookie:'',schemaName:'CatalogSongsResponse'});assert.equal(legacyMax.body.items.length,10000);assert.ok(Buffer.byteLength(JSON.stringify(legacyMax.body))<8*1024*1024);
+   await ask('complete-response-size-cap-unchanged','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',expected:503});
+  }finally{await writeFile(catalogPath,JSON.stringify(rows));}
   await ask('public-304','/api/v1/taiko/catalog/songs',{cookie:'',headers:{'if-none-match':pub.res.headers.get('etag')},expected:304});
   await ask('public-meta','/api/v1/taiko/meta',{cookie:''});
   await ask('anonymous-private',scores(fake),{cookie:'',expected:401});
