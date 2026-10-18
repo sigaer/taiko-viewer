@@ -69,6 +69,7 @@ test('developer guide: zh/ja five account states, mobile disclosures, copy/fallb
    else assert.equal(await guide.getByRole('status').count(),0);
    assert.equal(await page.locator('a[href*="/account/developer/grants"]').count(),0);
    assert.ok(!(await page.locator('body').innerText()).includes('ResourceGrant'));
+   await guide.locator('[data-common] > summary').click();assert.ok(!/Contract 1\.1[^。]*(?:候选状态|候補状態)/.test(await guide.innerText()),'Keep internal release stages in specifications');
    assert.equal(await page.locator('body').getByText('syn...mask',{exact:true}).count(),state==='approved'?1:0);
    for(const api of developerApis){
     const panel=guide.locator('[data-api="'+api.id+'"]');assert.equal(await panel.getAttribute('open'),null);

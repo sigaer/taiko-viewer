@@ -34,7 +34,7 @@ export const developerApis = [
     purpose: text('查询歌曲 ID、中日原始曲名与别名，用于搜索和成绩关联。', '曲 ID・中国語／日本語の元の曲名・別名を取得し、検索やスコアとの照合に使えます。'),
     note: text('公开请求不发送 Authorization。主动附带的 Bearer Token 仍会被验证，无效时不会自动降级为匿名读取。别名已包含在本响应中；没有独立 aliases 接口。曲库不包含谱面成绩。', '公開リクエストには Authorization を付けません。付けた Bearer Token は検証され、無効でも匿名アクセスには切り替わりません。別名はこの応答に含まれ、独立した aliases API はありません。スコアは含みません。'),
     fields: [
-      field('versions', 'object', 'contractVersion 当前为 1.1；schemaRevision 与 catalogRevision 是摘要。scoreRevision、calculationProfile、observationSource、capturedAt 在此接口均为 null。Contract 1.1 仍为候选状态。', 'contractVersion は現在 1.1。schemaRevision・catalogRevision はダイジェストです。scoreRevision・calculationProfile・observationSource・capturedAt は null。Contract 1.1 は引き続き候補状態です。'),
+      field('versions', 'object', 'contractVersion 当前为 1.1；schemaRevision 与 catalogRevision 是摘要。scoreRevision、calculationProfile、observationSource、capturedAt 在此接口均为 null。', 'contractVersion は現在 1.1。schemaRevision・catalogRevision はダイジェストです。scoreRevision・calculationProfile・observationSource・capturedAt は null。'),
       field('items', 'array<object>', '完整有界目录，无分页或筛选参数。', '件数が制限された全件カタログ。ページ分割や絞り込みパラメーターはありません。'),
       field('items[].songId', 'string', '歌曲 ID。与分析接口的数字 songId 类型不同。', '曲 ID。分析 API の数値 songId とは型が異なります。'),
       field('items[].song_name / song_name_jp', 'string | null', '中文／日文原始曲名；缺失时为 null，不生成翻译。', '中国語／日本語の元の曲名。欠損時は null で、翻訳を生成しません。'),
@@ -131,7 +131,7 @@ export const developerGuideCopy = {
     quota: '受保护的三个接口共用 developer_userdata 日次额度，曲库使用另一套日次计数；实际额度由服务配置决定。收到 429 后暂停调用，按响应及额度重置情况处理，不要立即循环重试。当前不保证返回 Retry-After。',
     busy: 'Rating 与推荐共享单分析任务容量，应串行请求。503 可能表示繁忙、数据变化或计算失败；稍后有限次数退避重试，持续失败时联系维护者。Worker 期限为 60 秒，当前 API 网关读取超时为 60 秒；示例客户端读取等待 90 秒，但不能保证服务完成，也不能避免网关 504。',
     cache: '200 返回 JSON。携带 If-None-Match 命中时可返回无正文的 304，此时不要解析 JSON；受保护接口仍检查权限，分析计算也可能照常执行。曲库响应为 public 缓存，个人响应为 private，请勿共享个人缓存。',
-    version: 'API 路径 v1、计算模型 v1、Contract 1.1 与网站发布版本各自独立。Contract 1.1 仍为候选状态。'
+    version: 'API 路径 v1、计算模型 v1、Contract 1.1 与网站发布版本各自独立。'
   },
   ja: {
     title: '利用可能な API・接続ガイド', public: '公開 · Token 不要', protected: 'Developer Token が必要',
@@ -148,6 +148,6 @@ export const developerGuideCopy = {
     quota: '保護された 3 API は developer_userdata の日次枠を共有し、カタログは別の日次カウントを使います。上限はサービス設定によります。429 を受けたら呼び出しを停止し、応答と枠のリセット状況を確認してください。即時ループ再試行は避けてください。Retry-After の返却は保証されません。',
     busy: 'Rating とおすすめは単一の分析枠を共有します。直列で呼び出してください。503 は混雑・データ変更・計算失敗などを示します。間隔を空けて有限回のみ再試行し、続く場合は管理者に連絡してください。Worker 期限と現在の API ゲートウェイ読み取りタイムアウトは共に 60 秒です。例のクライアント読み取り待機は 90 秒ですが、完了やゲートウェイ 504 の回避を保証しません。',
     cache: '200 は JSON を返します。If-None-Match が一致すると本文のない 304 になるため JSON として読まないでください。保護された API の権限確認は継続し、分析計算も通常どおり行われる場合があります。カタログは public、個人応答は private キャッシュです。個人キャッシュを共有しないでください。',
-    version: 'API パス v1・計算モデル v1・Contract 1.1・サイトのリリース版は別の識別子です。Contract 1.1 は引き続き候補状態です。'
+    version: 'API パス v1・計算モデル v1・Contract 1.1・サイトのリリース版は別の識別子です。'
   }
 } as const;
