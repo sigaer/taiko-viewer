@@ -9,6 +9,7 @@ import {readAuthorizedSourceUserdata} from './source-access';
 import {readAuthorizedMergedSource} from './merged-source-read';
 import {enforceTaikoOpenQuota} from '../../utils/taiko-open';
 import {getTaikoPython,getTaikoPythonEnv} from '../../utils/taiko-python';
+import {acquireDeveloperAnalysisSlot,ANALYSIS_ADDRESS_SPACE_BYTES,ANALYSIS_MAX_INPUT_BYTES,ANALYSIS_MAX_OUTPUT_BYTES,ANALYSIS_TIMEOUT_MS} from './developer-analysis-limits';
 
 type AnalysisKind='rating'|'recommendations';
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -40,20 +41,21 @@ const recommendationsCode=[
 ].join('\n');
 async function runPython(kind:AnalysisKind,records:unknown[]){
  const paths=getRuntimePaths(),python=getTaikoPython(),input=JSON.stringify({songs:records});
- if(Buffer.byteLength(input,'utf8')>8*1024*1024)throw new PublicationUnavailableError();
+ if(Buffer.byteLength(input,'utf8')>ANALYSIS_MAX_INPUT_BYTES)throw new PublicationUnavailableError();
  const code=kind==='rating'?ratingCode:recommendationsCode;
  return await new Promise<Record<string,unknown>>((resolve,reject)=>{
-  const child=spawn(python,['-I','-c',code],{cwd:paths.repoRoot,env:{...getTaikoPythonEnv(paths.repoRoot),TAIKO_COMPUTE_ONLY:'1'},stdio:['pipe','pipe','ignore']});
+  const child=spawn('prlimit',[`--as=${ANALYSIS_ADDRESS_SPACE_BYTES}`,'--',python,'-I','-c',code],{cwd:paths.repoRoot,env:{...getTaikoPythonEnv(paths.repoRoot),PATH:process.env.PATH||'',TAIKO_COMPUTE_ONLY:'1',OPENBLAS_NUM_THREADS:'1',OMP_NUM_THREADS:'1',MKL_NUM_THREADS:'1',NUMEXPR_NUM_THREADS:'1'},stdio:['pipe','pipe','ignore']});
   let stdout='',bytes=0,settled=false;
   const finish=(error?:Error,value?:Record<string,unknown>)=>{if(settled)return;settled=true;clearTimeout(timer);if(error)reject(error);else if(value)resolve(value);else reject(new Error('Invalid analysis output'));};
-  const timer=setTimeout(()=>{child.kill('SIGKILL');finish(new Error('Analysis timeout'));},60000);
-  child.stdout.on('data',(chunk:Buffer)=>{bytes+=chunk.length;if(bytes>8*1024*1024){child.kill('SIGKILL');finish(new Error('Analysis output limit'));return;}stdout+=chunk.toString('utf8');});
+  const timer=setTimeout(()=>{child.kill('SIGKILL');finish(new Error('Analysis timeout'));},ANALYSIS_TIMEOUT_MS);
+  child.stdout.on('data',(chunk:Buffer)=>{bytes+=chunk.length;if(bytes>ANALYSIS_MAX_OUTPUT_BYTES){child.kill('SIGKILL');finish(new Error('Analysis output limit'));return;}stdout+=chunk.toString('utf8');});
   child.on('error',()=>finish(new Error('Analysis worker unavailable')));
   child.on('close',code=>{if(code!==0){finish(new Error('Analysis worker failed'));return;}try{const value=JSON.parse(stdout);if(!value||typeof value!=='object'||Array.isArray(value))throw new Error();finish(undefined,value);}catch{finish(new Error('Invalid analysis output'));}});
   child.stdin.on('error',()=>{});child.stdin.end(input);
  });
 }
 export async function getDeveloperAnalysisByUserid(event:H3Event,useridInput:unknown,kind:AnalysisKind){
+ const release=acquireDeveloperAnalysisSlot();
  try{
   await enforceTaikoOpenQuota(event,'developer_userdata');
   const id=String(useridInput||'').trim();
@@ -69,4 +71,5 @@ export async function getDeveloperAnalysisByUserid(event:H3Event,useridInput:unk
    return {playerId:id,scoreRevision:revision,...result};
   });
  }catch(error){if(isError(error)||error instanceof PublicationUnavailableError)throw error;throw new PublicationUnavailableError();}
+ finally{release();}
 }
