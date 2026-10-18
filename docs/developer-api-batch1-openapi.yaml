@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — Batch 1 proposal
-  version: 0.85.0-rc.2
+  version: 0.85.0-rc.1
   description: Contract 1.1 candidate. Song.title is removed; song_name, song_name_jp and aliases are canonical. Contract 1.0 Song compatibility is intentionally not maintained.
 servers:
   - url: http://127.0.0.1:{port}
