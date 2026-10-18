@@ -1083,6 +1083,87 @@
         "equippedLevel",
         "highestPassedGrade"
       ]
+    },
+    "CatalogSongWithCharts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "songId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "song_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512,
+          "description": "Original Chinese/display name from song_data.json; null when the source has no value."
+        },
+        "song_name_jp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512,
+          "description": "Original Japanese name from song_data.json, falling back to song_alias.json when absent; null when neither source has a value."
+        },
+        "aliases": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "description": "Alias strings from song_alias.json joined by numeric song ID; empty when no aliases exist."
+        },
+        "catalogRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "availability": {
+          "$ref": "#/$defs/CatalogAvailability"
+        },
+        "charts": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/Chart"
+          },
+          "description": "Existing chart projection from the same catalog read/revision. Availability is inherited catalog metadata, not proof of regional implementation for each difficulty. Missing difficulties are absent."
+        }
+      },
+      "required": [
+        "songId",
+        "song_name",
+        "song_name_jp",
+        "aliases",
+        "catalogRevision",
+        "charts"
+      ],
+      "description": "Catalog-only Song DTO returned only for include=charts. Canonical Song and all other Song references are unchanged."
+    },
+    "CatalogSongsWithChartsResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "$ref": "#/$defs/ApiReadVersions"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatalogSongWithCharts"
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "versions",
+        "items"
+      ]
     }
   }
 }

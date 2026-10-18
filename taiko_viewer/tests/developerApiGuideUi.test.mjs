@@ -71,18 +71,43 @@ test('developer guide: zh/ja five account states, mobile disclosures, copy/fallb
    assert.ok(!(await page.locator('body').innerText()).includes('ResourceGrant'));
    await guide.locator('[data-common] > summary').click();assert.ok(!/Contract 1\.1[^。]*(?:候选状态|候補状態)/.test(await guide.innerText()),'Keep internal release stages in specifications');
    assert.equal(await page.locator('body').getByText('syn...mask',{exact:true}).count(),state==='approved'?1:0);
+   assert.equal(await guide.locator('details details details').count(),0,'maximum two disclosure levels');
    for(const api of developerApis){
     const panel=guide.locator('[data-api="'+api.id+'"]');assert.equal(await panel.getAttribute('open'),null);
-    await panel.locator(':scope > summary').focus();await page.keyboard.press('Enter');
-    await panel.locator('details').first().locator('summary').click();await panel.locator('[data-examples] > summary').click();
-    for(const kind of ['curl','python','json'])assert.ok(await panel.locator('[data-example="'+kind+'"] pre').isVisible());
+    const overview=guide.locator('.api-overview-item[href="#developer-api-'+api.id+'"]');
+    await overview.focus();await page.keyboard.press('Enter');
+    assert.notEqual(await panel.getAttribute('open'),null,'overview opens target');
+    assert.equal(await panel.locator(':scope > summary').evaluate(el=>document.activeElement===el),true);
+    assert.ok(await panel.locator('h4').filter({hasText:copy.fields}).isVisible());
+    assert.ok(await panel.locator('[data-example="curl"] pre').isVisible());
+    await panel.getByRole('tab',{name:'Python',exact:true}).click();assert.ok(await panel.locator('[data-example="python"] pre').isVisible());
+    const tab=panel.getByRole('tab',{name:'Python',exact:true});await tab.focus();await page.keyboard.press('ArrowLeft');assert.equal(await panel.getByRole('tab',{name:'cURL',exact:true}).getAttribute('aria-selected'),'true');
+    await panel.getByRole('tab',{name:'cURL',exact:true}).click();assert.ok(await panel.locator('[data-example="curl"] pre').isVisible());
+    await panel.locator('[data-example="json"] > summary').click();assert.ok(await panel.locator('[data-example="json"] pre').isVisible());
    }
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,scenario+' '+locale+' mobile overflow');
    await guide.locator('[data-api="catalog"] [data-example="curl"] button').click();
-   assert.ok((await page.evaluate(()=>window.__copied)).includes('/api/v1/taiko/catalog/songs'));
+   assert.ok((await page.evaluate(()=>window.__copied)).includes('/api/v1/taiko/catalog/songs?include=charts'));
    assert.ok(!(await page.evaluate(()=>window.__copied)).includes('Authorization'));
    await page.evaluate(()=>{window.__copyFailure=true;});
+   await guide.locator('[data-api="rating"]').getByRole('tab',{name:'Python',exact:true}).click();
    await guide.locator('[data-api="rating"] [data-example="python"] button').click();await page.getByText(copy.copyFailed,{exact:true}).waitFor();
+   if(!scenario){
+    await page.locator('.el-message').last().waitFor({state:'detached',timeout:6000});
+    // Both catalog and current-score panels stay open with fields/code/JSON visible.
+    for(const api of ['rating','recommendations'])await guide.locator('[data-api="'+api+'"] > summary').click();
+    for(const [viewport,width,height]of [['mobile',375,812],['desktop',1280,900]]){
+     await page.setViewportSize({width,height});
+     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+     await guide.screenshot({path:resolve(process.env.QA_EVIDENCE_DIR,`guide-${locale}-${viewport}.png`),timeout:15000});
+     await guide.locator('[data-api="catalog"]').screenshot({path:resolve(process.env.QA_EVIDENCE_DIR,`catalog-${locale}-${viewport}.png`),timeout:15000});
+     await guide.locator('[data-api="catalog"]').evaluate(el=>el.scrollIntoView({block:'start'}));
+     await page.screenshot({path:resolve(process.env.QA_EVIDENCE_DIR,`catalog-fields-${locale}-${viewport}.png`),timeout:15000});
+     await guide.locator('[data-api="catalog"] [data-examples]').evaluate(el=>el.scrollIntoView({block:'start'}));
+     await page.screenshot({path:resolve(process.env.QA_EVIDENCE_DIR,`catalog-code-${locale}-${viewport}.png`),timeout:15000});
+    }
+    await page.setViewportSize({width:375,height:812});
+   }
    meta=await page.evaluate(()=>window.__pageMeta);assert.equal(meta.middleware,'account-auth');
    checks.push({locale,state:scenario||'unapplied',apis:4,noOverflow:true,copy:true,copyFallback:true});
   }

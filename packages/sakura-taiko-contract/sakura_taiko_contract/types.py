@@ -167,3 +167,14 @@ class DeveloperDan(TypedDict):
     equippedGrade: int | None
     equippedLevel: int | None
     highestPassedGrade: int | None
+class CatalogSongWithCharts(TypedDict):
+    songId: str
+    song_name: str | None
+    song_name_jp: str | None
+    aliases: List[str]
+    catalogRevision: str | None
+    availability: NotRequired[CatalogAvailability]
+    charts: List[Chart]
+class CatalogSongsWithChartsResponse(TypedDict):
+    versions: ApiReadVersions
+    items: List[CatalogSongWithCharts]

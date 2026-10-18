@@ -66,3 +66,13 @@ def project_catalog(rows, revision, alias_rows=None):
                 continue
             charts.append(dict(songId=song_id,chartId=f'{song_id}:{difficulty}:{mode}',difficulty=difficulty,level=level,type=mode,variant=None,catalogRevision=revision,availability=availability,tjaCourse=difficulty_to_tja_course(difficulty)))
     return dict(songs=sorted(songs,key=lambda x:int(x['songId'])),charts=sorted(charts,key=lambda x:(int(x['songId']),x['difficulty'])))
+
+
+def catalog_songs_with_charts(projected):
+    """Catalog-only DTO using the existing projected charts, without re-identification."""
+    by_song = {song['songId']: [] for song in projected['songs']}
+    for chart in projected['charts']:
+        if chart['songId'] not in by_song:
+            raise ValueError('Chart without catalog song')
+        by_song[chart['songId']].append(chart)
+    return [dict(song, charts=by_song[song['songId']]) for song in projected['songs']]

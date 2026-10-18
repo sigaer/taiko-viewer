@@ -49,3 +49,7 @@ bash scripts/memory/run_qa.sh /absolute/path/to/node --env-file=/etc/taiko-viewe
 ```
 
 Omit both apply flags for a read-only readiness check (exit 2 if migration is needed). The command verifies `SELECT DATABASE()`, column type, and the result of the migration; it is idempotent and changes no grant values or score tables. Isolated test writes additionally require `TAIKO_ALLOW_TEST_DB_MUTATION=1` and the QA-owned MySQL datadir. The standard Viewer deployment script remains unchanged; deployment must not proceed when the pre-activation command fails.
+
+## Opt-in complete catalog
+
+`GET /api/v1/taiko/catalog/songs?include=charts` returns `CatalogSongsWithChartsResponse` with catalog-only `CatalogSongWithCharts` items. Canonical Song stays strict and unchanged. The no-query path and existing SDK songs() stay on `CatalogSongsResponse`; independent /catalog/charts remains available. The adapter only groups already-projected charts by songId, preserving contents and catalogRevision. Chart availability is inherited source catalog metadata, not proof of per-difficulty regional implementation. Unknown type/region/variant remain unknown/null; missing difficulties are absent, never inferred. The existing response size cap remains 8 MiB.

@@ -29,3 +29,23 @@ test('grant DTO is canonical schema, while unopened scopes remain a separate run
  const definition=schema.$defs.ResourceGrant;assert.ok(definition.properties.scopes.items.enum.includes('history:read'));
 });
 
+
+test('opt-in catalog-only DTO preserves strict Song and groups the existing chart projection',async()=>{
+ const {catalogSongsWithCharts}=await import('../src/catalog.mjs');
+ const original=mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1',fixtures.aliasInput);
+ const complete=catalogSongsWithCharts(original);
+ assert.deepEqual(complete.flatMap(s=>s.charts),original.charts);
+ for(const row of complete){
+  assert.equal(validate('CatalogSongWithCharts')(row),true);
+  assert.equal(validate('Song')(row),false,'strict old consumers reject the opt-in extension');
+  const {charts,...song}=row;assert.deepEqual(song,original.songs.find(s=>s.songId===row.songId));
+  assert.ok(charts.every(c=>c.songId===row.songId&&c.catalogRevision===row.catalogRevision));
+ }
+ assert.deepEqual(complete[0].charts.map(c=>[c.difficulty,c.level]),[[1,1],[4,9]]);
+ assert.equal(complete[0].charts.some(c=>c.difficulty===5),false);
+ assert.deepEqual(complete[2].aliases,[]);assert.equal(complete[2].charts[0].type,'unknown');assert.equal(complete[2].availability.region,'UNKNOWN');assert.equal(complete[1].availability.status,'removed');
+ const empty=catalogSongsWithCharts(mapCatalog([{id:4,level_1:null,level_2:'-',level_3:0,level_4:'',level_5:null}],'r'));assert.deepEqual(empty[0].charts,[]);
+ const multi=catalogSongsWithCharts(mapCatalog([{id:5,level_1:1,level_2:2,level_3:3,level_4:9,level_5:10}],'r'));
+ assert.deepEqual(multi[0].charts.map(c=>c.difficulty),[1,2,3,4,5]);assert.equal(new Set(multi[0].charts.map(c=>c.chartId)).size,5);
+ assert.deepEqual(original,fixtures.catalogExpected,'composition does not mutate original consumers');
+});

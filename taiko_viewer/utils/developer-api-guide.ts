@@ -30,19 +30,25 @@ export const developerApis = [
   },
   {
     id: 'catalog', path: '/api/v1/taiko/catalog/songs', protected: false, timeout: 20,
-    name: text('歌曲目录与别名', '楽曲カタログ・別名'),
-    purpose: text('查询歌曲 ID、中日原始曲名与别名，用于搜索和成绩关联。', '曲 ID・中国語／日本語の元の曲名・別名を取得し、検索やスコアとの照合に使えます。'),
+    name: text('歌曲、谱面与难度', '楽曲・譜面・難易度'),
+    purpose: text('一次取得歌曲、中日曲名、别名及每首歌曲的谱面与星级，用于选曲展示和关联成绩。', '楽曲・中国語／日本語曲名・別名と各曲の譜面・星の数を一度に取得し、選曲表示やスコアとの照合に使えます。'),
     note: text('公开请求不发送 Authorization。主动附带的 Bearer Token 仍会被验证，无效时不会自动降级为匿名读取。别名已包含在本响应中；没有独立 aliases 接口。曲库不包含谱面成绩。', '公開リクエストには Authorization を付けません。付けた Bearer Token は検証され、無効でも匿名アクセスには切り替わりません。別名はこの応答に含まれ、独立した aliases API はありません。スコアは含みません。'),
     fields: [
       field('versions', 'object', 'contractVersion 当前为 1.1；schemaRevision 与 catalogRevision 是摘要。scoreRevision、calculationProfile、observationSource、capturedAt 在此接口均为 null。', 'contractVersion は現在 1.1。schemaRevision・catalogRevision はダイジェストです。scoreRevision・calculationProfile・observationSource・capturedAt は null。'),
-      field('items', 'array<object>', '完整有界目录，无分页或筛选参数。', '件数が制限された全件カタログ。ページ分割や絞り込みパラメーターはありません。'),
+      field('items', 'array<CatalogSongWithCharts>', 'include=charts 返回含谱面的完整有界目录，无分页；省略 include 仍返回原歌曲列表。', 'include=charts で譜面付きの件数制限付き全件カタログを返します。ページ分割はありません。include を省略すると従来の楽曲一覧を返します。'),
       field('items[].songId', 'string', '歌曲 ID。与分析接口的数字 songId 类型不同。', '曲 ID。分析 API の数値 songId とは型が異なります。'),
       field('items[].song_name / song_name_jp', 'string | null', '中文／日文原始曲名；缺失时为 null，不生成翻译。', '中国語／日本語の元の曲名。欠損時は null で、翻訳を生成しません。'),
       field('items[].aliases', 'array<string>', '已有别名；没有别名时为 []。', '登録済みの別名。ない場合は []。'),
       field('items[].catalogRevision', 'string', '与 versions.catalogRevision 对应，联合覆盖曲名元数据与别名数据。', 'versions.catalogRevision と対応し、楽曲メタデータと別名データの両方を対象にします。'),
-      field('items[].availability', 'object', 'region 为 CN、JP 或 UNKNOWN；status 为 active、removed 或 unknown，不推断缺失地区。', 'region は CN・JP・UNKNOWN、status は active・removed・unknown。不明な地域を推測しません。')
+      field('items[].availability', 'object', 'region 为 CN、JP 或 UNKNOWN；status 为 active、removed 或 unknown。不推断缺失地区；这些是曲库记录的状态，不证明每个难度已在某地区实装。', 'region は CN・JP・UNKNOWN、status は active・removed・unknown。カタログ記録の状態であり、各難易度の地域別実装を保証しません。'),
+      field('items[].charts', 'array<Chart>', '该歌曲实际列出的谱面；缺少的难度不会补造，无谱面时为 []。与歌曲来自同一次读取和同一 catalogRevision。独立 /api/v1/taiko/catalog/charts 继续可用。', 'その曲に実際に記載された譜面。ない難易度は補完せず、譜面なしは []。楽曲と同じ読み取り・catalogRevision です。独立 /api/v1/taiko/catalog/charts も引き続き利用できます。'),
+      field('charts[].songId / chartId', 'string / string', 'songId 与所属歌曲一致；chartId 是现有曲库投影的谱面标识，不根据曲名重新识别。', 'songId は所属曲と一致。chartId は既存カタログ投影の譜面識別子で、曲名から再推定しません。'),
+      field('charts[].difficulty', 'integer (1–5)', '难度档位：1 简单、2 普通、3 困难、4 鬼、5 里鬼。不是星级。旧成绩以 String(song_no) = songId、level = difficulty 关联，level_4 等曲库字段才是星级来源。', '難易度区分：1 かんたん・2 ふつう・3 むずかしい・4 おに・5 裏おに。星の数ではありません。旧スコアの String(song_no) = songId、level = difficulty で照合します。カタログの level_4 などが星の数の元です。'),
+      field('charts[].level / tjaCourse', 'number | null / integer (0–4)', 'level 为曲库星级，如 difficulty=4、level=9 表示鬼 9 星；tjaCourse = difficulty − 1，用于 TJA COURSE。', 'level はカタログの星の数。difficulty=4・level=9 はおに★9。tjaCourse = difficulty − 1 は TJA COURSE 用です。'),
+      field('charts[].type / variant', 'string / string | null', 'type 为 single、double 或 unknown，不把未知当作单打；variant 未知时为 null。', 'type は single・double・unknown。不明なものをシングルと扱いません。variant 不明時は null。'),
+      field('charts[].availability / catalogRevision', 'object / string', '复用独立谱面接口的可用性和版本；可用性继承曲库记录，不是逐谱面地域实装证明。版本与外层 versions.catalogRevision 一致。', '独立譜面 API と同じ提供状態・版情報。提供状態はカタログ記録から継承し、譜面別地域実装の証明ではありません。版は versions.catalogRevision と一致します。')
     ],
-    example: { versions, items: [{ songId: '10001', song_name: '合成歌曲', song_name_jp: null, aliases: [], catalogRevision: revision, availability: { region: 'UNKNOWN', status: 'active' } }] },
+    example: { versions, items: [{ songId: '10001', song_name: '合成歌曲', song_name_jp: null, aliases: [], catalogRevision: revision, availability: { region: 'UNKNOWN', status: 'active' }, charts: [1, 4].map(difficulty => ({ songId: '10001', chartId: `10001:${difficulty}:unknown`, difficulty, level: difficulty === 1 ? 3 : 9, type: 'unknown', variant: null, catalogRevision: revision, availability: { region: 'UNKNOWN', status: 'active' }, tjaCourse: difficulty - 1 })) }] },
     errors: text('400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429 日次限流（RATE_LIMITED）；503 曲库或服务暂不可用。错误体为 code、message、requestId。', '400 未対応のクエリ、401 付与した Token が無効、404 API 無効、429 日次制限（RATE_LIMITED）、503 カタログ・サービス一時利用不可。エラー本文は code・message・requestId です。')
   },
   {
@@ -81,8 +87,10 @@ export const developerApis = [
 ] as const;
 export type DeveloperApi = typeof developerApis[number];
 
+export const developerApiRequestPath = (api: DeveloperApi) => api.path + (api.id === 'catalog' ? '?include=charts' : '');
+
 export function developerApiExamples(api: DeveloperApi) {
-  const curlUrl = developerApiOrigin + api.path.replace('{userid}', '${TAIKO_SOURCE_ID:?Set TAIKO_SOURCE_ID}');
+  const curlUrl = developerApiOrigin + developerApiRequestPath(api).replace('{userid}', '${TAIKO_SOURCE_ID:?Set TAIKO_SOURCE_ID}');
   const curl = [
     ...(api.protected ? ['export TAIKO_SOURCE_ID=\'YOUR_SOURCE_ID\''] : []),
     `curl --fail-with-body --connect-timeout 5 --max-time ${api.timeout} \\`,
@@ -97,7 +105,7 @@ export function developerApiExamples(api: DeveloperApi) {
       'token = os.environ["TAIKO_VIEWER_DEVELOPER_TOKEN"]',
       'source_id = quote(source_id, safe="")'
     ] : []),
-    `url = ${api.protected ? 'f' : ''}"${developerApiOrigin + api.path.replace('{userid}', '{source_id}')}"`,
+    `url = ${api.protected ? 'f' : ''}"${developerApiOrigin + developerApiRequestPath(api).replace('{userid}', '{source_id}')}"`,
     'try:',
     '    response = requests.get(', '        url,',
     ...(api.protected ? ['        headers={"Authorization": f"Bearer {token}"},'] : []),
@@ -123,7 +131,8 @@ export const developerGuideCopy = {
     active: 'Token 使用指南',
     tokenHelp: '从审批邮件保存完整 Token；本页仅显示掩码，不会再次显示完整密钥。遗失时请联系管理员。',
     setup: '受保护示例：将 YOUR_... 替换为自己的值，在本机环境中设置以下变量。公开曲库无需设置 Token。Python 依赖：python -m pip install requests。',
-    params: '参数', sourceParam: '{userid}：太鼓 Source ID，不是 Viewer 网站账号 ID。无查询参数。', noParams: '无路径参数或查询参数；一次返回完整有界目录。',
+    publicSetup: '公开曲库无需 Token。Python 依赖：python -m pip install requests。',
+    params: '参数', sourceParam: '{userid}：太鼓 Source ID，不是 Viewer 网站账号 ID。无查询参数。', noParams: 'include=charts：一次返回歌曲与谱面；省略 include 保留旧响应。无路径参数、分页或其他查询参数。',
     fields: '关键返回字段', field: '字段', type: '类型', meaning: '含义', examples: '调用示例与响应',
     curl: 'cURL', python: 'Python', json: '合成 JSON 示例', errors: '错误处理', copy: '复制', copied: '已复制示例代码', copyFailed: '复制失败，请手动选中代码复制',
     common: '鉴权、安全与调用限制',
@@ -140,7 +149,8 @@ export const developerGuideCopy = {
     active: 'Token の使い方',
     tokenHelp: '承認メールの完全な Token を保存してください。この画面ではマスクのみ表示し、全文を再表示しません。紛失時は管理者へお問い合わせください。',
     setup: '保護された API の例：YOUR_... を自分の値に置き換え、ローカル環境に以下の変数を設定します。公開カタログに Token は不要です。Python 依存：python -m pip install requests。',
-    params: 'パラメーター', sourceParam: '{userid} は太鼓 Source ID で、Viewer アカウント ID ではありません。クエリパラメーターはありません。', noParams: 'パス・クエリパラメーターはありません。件数が制限された全件カタログを返します。',
+    publicSetup: '公開カタログに Token は不要です。Python 依存：python -m pip install requests。',
+    params: 'パラメーター', sourceParam: '{userid} は太鼓 Source ID で、Viewer アカウント ID ではありません。クエリパラメーターはありません。', noParams: 'include=charts で楽曲と譜面を一括取得します。省略時は従来の応答。パス指定・ページ分割・その他のクエリはありません。',
     fields: '主なレスポンスフィールド', field: 'フィールド', type: '型', meaning: '意味', examples: 'リクエスト・レスポンス例',
     curl: 'cURL', python: 'Python', json: '合成 JSON 例', errors: 'エラー処理', copy: 'コピー', copied: 'サンプルをコピーしました', copyFailed: 'コピーできませんでした。コードを選択してコピーしてください。',
     common: '認証・安全性・利用制限',
