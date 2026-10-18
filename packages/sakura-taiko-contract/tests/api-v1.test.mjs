@@ -34,18 +34,19 @@ test('default catalog-only DTO preserves strict Song and groups the existing cha
  const {catalogSongsWithCharts}=await import('../src/catalog.mjs');
  const original=mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1',fixtures.aliasInput);
  const complete=catalogSongsWithCharts(original);
- assert.deepEqual(complete.flatMap(s=>s.charts),original.charts);
+ assert.deepEqual(complete,fixtures.catalogSongsExpected);
+ assert.deepEqual(complete.flatMap(s=>s.charts),original.charts.map(({difficulty,level})=>({difficulty,level})));
+ for(const chart of complete.flatMap(s=>s.charts))assert.deepEqual(Object.keys(chart),['difficulty','level']);
  for(const row of complete){
-  assert.equal(validate('CatalogSongWithCharts')(row),true);
+  assert.equal(validate('CatalogSong')(row),true);
   assert.equal(validate('Song')(row),false,'strict old consumers must use the catalog response DTO');
-  const {charts,...song}=row;assert.deepEqual(song,original.songs.find(s=>s.songId===row.songId));
-  assert.ok(charts.every(c=>c.songId===row.songId&&c.catalogRevision===row.catalogRevision));
+  assert.deepEqual(Object.keys(row),['songId','song_name','song_name_jp','aliases','status','charts']);
  }
  assert.deepEqual(complete[0].charts.map(c=>[c.difficulty,c.level]),[[1,1],[4,9]]);
  assert.equal(complete[0].charts.some(c=>c.difficulty===5),false);
- assert.deepEqual(complete[2].aliases,[]);assert.equal(complete[2].charts[0].type,'unknown');assert.equal(complete[2].availability.region,'UNKNOWN');assert.equal(complete[1].availability.status,'removed');
+ assert.deepEqual(complete[2].aliases,[]);assert.equal(complete[2].status,'unknown');assert.equal(complete[1].status,'removed');
  const empty=catalogSongsWithCharts(mapCatalog([{id:4,level_1:null,level_2:'-',level_3:0,level_4:'',level_5:null}],'r'));assert.deepEqual(empty[0].charts,[]);
  const multi=catalogSongsWithCharts(mapCatalog([{id:5,level_1:1,level_2:2,level_3:3,level_4:9,level_5:10}],'r'));
- assert.deepEqual(multi[0].charts.map(c=>c.difficulty),[1,2,3,4,5]);assert.equal(new Set(multi[0].charts.map(c=>c.chartId)).size,5);
+ assert.deepEqual(multi[0].charts.map(c=>c.difficulty),[1,2,3,4,5]);assert.equal(new Set(multi[0].charts.map(c=>c.difficulty)).size,5);
  assert.deepEqual(original,fixtures.catalogExpected,'composition does not mutate original consumers');
 });

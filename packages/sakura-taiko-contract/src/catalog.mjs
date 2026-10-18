@@ -31,13 +31,13 @@ export function projectCatalog(rows,revision,aliasRows=[]){
  songs.sort((a,b)=>Number(a.songId)-Number(b.songId));charts.sort((a,b)=>Number(a.songId)-Number(b.songId)||a.difficulty-b.difficulty);return {songs,charts};
 }
 
-/** Catalog-only DTO: attach existing charts without extending canonical Song. */
+/** Compact catalog DTO: select public fields from the existing song/chart projection. */
 export function catalogSongsWithCharts({songs,charts}){
  const bySong=new Map(songs.map(song=>[song.songId,[]]));
  for(const chart of charts){
   const bucket=bySong.get(chart.songId);
   if(!bucket)throw new Error('Chart without catalog song');
-  bucket.push(chart);
+  bucket.push({difficulty:chart.difficulty,level:chart.level});
  }
- return songs.map(song=>({...song,charts:bySong.get(song.songId)}));
+ return songs.map(song=>({songId:song.songId,song_name:song.song_name,song_name_jp:song.song_name_jp,aliases:[...song.aliases],status:song.availability?.status??'unknown',charts:bySong.get(song.songId)}));
 }

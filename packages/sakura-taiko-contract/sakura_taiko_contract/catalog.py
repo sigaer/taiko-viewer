@@ -74,5 +74,5 @@ def catalog_songs_with_charts(projected):
     for chart in projected['charts']:
         if chart['songId'] not in by_song:
             raise ValueError('Chart without catalog song')
-        by_song[chart['songId']].append(chart)
-    return [dict(song, charts=by_song[song['songId']]) for song in projected['songs']]
+        by_song[chart['songId']].append(dict(difficulty=chart['difficulty'],level=chart['level']))
+    return [dict(songId=song['songId'],song_name=song['song_name'],song_name_jp=song['song_name_jp'],aliases=list(song['aliases']),status=song.get('availability',{}).get('status','unknown'),charts=by_song[song['songId']]) for song in projected['songs']]

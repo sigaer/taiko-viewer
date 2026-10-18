@@ -173,8 +173,8 @@ export type DeveloperProfileResponse = {
   profile: DeveloperPlayerProfile;
 };
 export type CatalogSongsResponse = {
-  versions: ApiReadVersions;
-  items: Array<CatalogSongWithCharts>;
+  versions: CatalogVersions;
+  items: Array<CatalogSong>;
 };
 export type ApiError = {
   code: string;
@@ -186,14 +186,22 @@ export type DeveloperDan = {
   equippedLevel: number | null;
   highestPassedGrade: number | null;
 };
-export type CatalogSongWithCharts = {
+export type CatalogChart = {
+  difficulty: number;
+  level: number;
+};
+export type CatalogSong = {
   songId: string;
   song_name: string | null;
   song_name_jp: string | null;
   aliases: Array<string>;
-  catalogRevision: string | null;
-  availability?: CatalogAvailability;
-  charts: Array<Chart>;
+  status: "active" | "removed" | "unknown";
+  charts: Array<CatalogChart>;
+};
+export type CatalogVersions = {
+  contractVersion: "1.1";
+  schemaRevision: string;
+  catalogRevision: string;
 };
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";

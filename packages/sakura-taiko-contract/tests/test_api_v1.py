@@ -12,9 +12,13 @@ class ApiV1Golden(unittest.TestCase):
     def test_complete_catalog_cross_language(self):
         fixture=json.loads((ROOT/'fixtures/api-v1.json').read_text())
         projected=module.project_catalog(fixture['catalogInput'],'synthetic-catalog-v1',fixture['aliasInput'])
-        expected=[dict(song,charts=[c for c in fixture['catalogExpected']['charts'] if c['songId']==song['songId']]) for song in fixture['catalogExpected']['songs']]
+        expected=fixture['catalogSongsExpected']
         self.assertEqual(module.catalog_songs_with_charts(projected),expected)
-        self.assertEqual([c for s in expected for c in s['charts']],projected['charts'])
+        self.assertEqual([c for s in expected for c in s['charts']],[dict(difficulty=c['difficulty'],level=c['level']) for c in projected['charts']])
+        for song in expected:
+            self.assertEqual(set(song),{'songId','song_name','song_name_jp','aliases','status','charts'})
+            for chart in song['charts']:
+                self.assertEqual(set(chart),{'difficulty','level'})
         empty=module.project_catalog([{'id':4,'level_1':None,'level_2':'-','level_3':0,'level_4':'','level_5':None}],'r')
         self.assertEqual(module.catalog_songs_with_charts(empty)[0]['charts'],[])
         multi=module.project_catalog([dict(id=5,**{'level_'+str(i):i for i in range(1,6)})],'r')

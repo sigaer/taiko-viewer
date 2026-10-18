@@ -6,7 +6,7 @@ const text = (zh: string, ja: string): Text => ({ zh, ja });
 type Field = { name: string; type: string; description: Text };
 const field = (name: string, type: string, zh: string, ja: string): Field => ({ name, type, description: text(zh, ja) });
 const revision = '0'.repeat(64);
-const versions = { contractVersion: '1.1', schemaRevision: revision, catalogRevision: revision, scoreRevision: null, calculationProfile: null, observationSource: null, capturedAt: null };
+const versions = { contractVersion: '1.1', schemaRevision: revision, catalogRevision: revision };
 const analysisFields = [
   field('playerId', 'string', '本次请求的太鼓 Source ID；不是网站账号 ID。', 'リクエストした太鼓 Source ID。Viewer アカウント ID ではありません。'),
   field('scoreRevision', 'string', 'songs 与 _meta 的 SHA-256 摘要；用于识别本次计算使用的数据。', '計算対象の songs と _meta の SHA-256 ダイジェスト。'),
@@ -34,21 +34,17 @@ export const developerApis = [
     purpose: text('一次取得歌曲、中日曲名、别名及每首歌曲的谱面与星级，用于选曲展示和关联成绩。', '楽曲・中国語／日本語曲名・別名と各曲の譜面・星の数を一度に取得し、選曲表示やスコアとの照合に使えます。'),
     note: text('公开请求不发送 Authorization。主动附带的 Bearer Token 仍会被验证，无效时不会自动降级为匿名读取。别名已包含在本响应中；没有独立 aliases 接口。曲库不包含谱面成绩。', '公開リクエストには Authorization を付けません。付けた Bearer Token は検証され、無効でも匿名アクセスには切り替わりません。別名はこの応答に含まれ、独立した aliases API はありません。スコアは含みません。'),
     fields: [
-      field('versions', 'object', 'contractVersion 当前为 1.1；schemaRevision 与 catalogRevision 是摘要。scoreRevision、calculationProfile、observationSource、capturedAt 在此接口均为 null。', 'contractVersion は現在 1.1。schemaRevision・catalogRevision はダイジェストです。scoreRevision・calculationProfile・observationSource・capturedAt は null。'),
-      field('items', 'array<CatalogSongWithCharts>', '默认返回含谱面的完整有界目录，无分页。', '譜面付きの件数制限付き全件カタログを返します。ページ分割はありません。'),
-      field('items[].songId', 'string', '歌曲 ID。与分析接口的数字 songId 类型不同。', '曲 ID。分析 API の数値 songId とは型が異なります。'),
-      field('items[].song_name / song_name_jp', 'string | null', '中文／日文原始曲名；缺失时为 null，不生成翻译。', '中国語／日本語の元の曲名。欠損時は null で、翻訳を生成しません。'),
-      field('items[].aliases', 'array<string>', '已有别名；没有别名时为 []。', '登録済みの別名。ない場合は []。'),
-      field('items[].catalogRevision', 'string', '与 versions.catalogRevision 对应，联合覆盖曲名元数据与别名数据。', 'versions.catalogRevision と対応し、楽曲メタデータと別名データの両方を対象にします。'),
-      field('items[].availability', 'object', 'region 为 CN、JP 或 UNKNOWN；status 为 active、removed 或 unknown。不推断缺失地区；这些是曲库记录的状态，不证明每个难度已在某地区实装。', 'region は CN・JP・UNKNOWN、status は active・removed・unknown。カタログ記録の状態であり、各難易度の地域別実装を保証しません。'),
-      field('items[].charts', 'array<Chart>', '该歌曲实际列出的谱面；缺少的难度不会补造，无谱面时为 []。与歌曲来自同一次读取和同一 catalogRevision。', 'その曲に実際に記載された譜面。ない難易度は補完せず、譜面なしは []。楽曲と同じ読み取り・catalogRevision です。'),
-      field('charts[].songId / chartId', 'string / string', 'songId 与所属歌曲一致；chartId 是现有曲库投影的谱面标识，不根据曲名重新识别。', 'songId は所属曲と一致。chartId は既存カタログ投影の譜面識別子で、曲名から再推定しません。'),
-      field('charts[].difficulty', 'integer (1–5)', '难度档位：1 简单、2 普通、3 困难、4 鬼、5 里鬼。不是星级。旧成绩以 String(song_no) = songId、level = difficulty 关联，level_4 等曲库字段才是星级来源。', '難易度区分：1 かんたん・2 ふつう・3 むずかしい・4 おに・5 裏おに。星の数ではありません。旧スコアの String(song_no) = songId、level = difficulty で照合します。カタログの level_4 などが星の数の元です。'),
-      field('charts[].level / tjaCourse', 'number | null / integer (0–4)', 'level 为曲库星级，如 difficulty=4、level=9 表示鬼 9 星；tjaCourse = difficulty − 1，用于 TJA COURSE。', 'level はカタログの星の数。difficulty=4・level=9 はおに★9。tjaCourse = difficulty − 1 は TJA COURSE 用です。'),
-      field('charts[].type / variant', 'string / string | null', 'type 为 single、double 或 unknown，不把未知当作单打；variant 未知时为 null。', 'type は single・double・unknown。不明なものをシングルと扱いません。variant 不明時は null。'),
-      field('charts[].availability / catalogRevision', 'object / string', '复用独立谱面接口的可用性和版本；可用性继承曲库记录，不是逐谱面地域实装证明。版本与外层 versions.catalogRevision 一致。', '独立譜面 API と同じ提供状態・版情報。提供状態はカタログ記録から継承し、譜面別地域実装の証明ではありません。版は versions.catalogRevision と一致します。')
+      field('versions', 'object', 'contractVersion 为契约版本（当前 1.1）；schemaRevision 标识响应结构，catalogRevision 标识整份曲库内容。版本信息仅在这里声明一次。', 'contractVersion は契約のバージョン（現在 1.1）、schemaRevision は応答構造、catalogRevision はカタログ全体の内容を識別します。バージョン情報はここに一度だけ記載します。'),
+      field('items', 'array<CatalogSong>', '全部歌曲，无分页。', '全楽曲。ページ分割はありません。'),
+      field('items[].songId', 'string', '歌曲 ID。关联成绩时使用 String(song_no) = songId。', '曲 ID。スコアとの照合は String(song_no) = songId を使います。'),
+      field('items[].song_name / song_name_jp', 'string | null', '中文／日文原始曲名；缺失为 null，不生成翻译。', '中国語／日本語の元の曲名。欠損時は null で、翻訳を生成しません。'),
+      field('items[].aliases', 'array<string>', '已有别名；无别名时为 []。', '登録済みの別名。ない場合は []。'),
+      field('items[].status', 'string', '歌曲状态：active 上架、removed 下架、unknown 来源未标明。不代表各难度在不同地区的实装状态。', '楽曲の状態：active 配信中、removed 配信終了、unknown 元データに記載なし。難易度ごとの地域別配信状況を示すものではありません。'),
+      field('items[].charts', 'array<CatalogChart>', '该歌曲实际存在的谱面，按 difficulty 区分；缺少的难度不补造，无谱面时为 []。', 'その曲に実際にある譜面。difficulty で区別し、ない難易度は補完しません。譜面なしは []。'),
+      field('charts[].difficulty', 'integer (1–5)', '难度档位：1 简单、2 普通、3 困难、4 鬼、5 里鬼。对应旧成绩的 level，不是星级。', '難易度区分：1 かんたん・2 ふつう・3 むずかしい・4 おに・5 裏おに。旧スコアの level と対応し、星の数とは別です。'),
+      field('charts[].level', 'number', '谱面星级。difficulty=4、level=9 表示鬼 9 星。', '譜面の星の数。difficulty=4・level=9 はおに★9 です。')
     ],
-    example: { versions, items: [{ songId: '10001', song_name: '合成歌曲', song_name_jp: null, aliases: [], catalogRevision: revision, availability: { region: 'UNKNOWN', status: 'active' }, charts: [1, 4].map(difficulty => ({ songId: '10001', chartId: `10001:${difficulty}:unknown`, difficulty, level: difficulty === 1 ? 3 : 9, type: 'unknown', variant: null, catalogRevision: revision, availability: { region: 'UNKNOWN', status: 'active' }, tjaCourse: difficulty - 1 })) }] },
+    example: { versions, items: [{ songId: '10001', song_name: '合成歌曲', song_name_jp: null, aliases: [], status: 'active', charts: [{ difficulty: 1, level: 3 }, { difficulty: 4, level: 9 }] }] },
     errors: text('400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429 日次限流（RATE_LIMITED）；503 曲库或服务暂不可用。错误体为 code、message、requestId。', '400 未対応のクエリ、401 付与した Token が無効、404 API 無効、429 日次制限（RATE_LIMITED）、503 カタログ・サービス一時利用不可。エラー本文は code・message・requestId です。')
   },
   {

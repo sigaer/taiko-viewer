@@ -173,5 +173,59 @@
         "jp-short"
       ]
     }
+  ],
+  "catalogSongsExpected": [
+    {
+      "songId": "1",
+      "song_name": "Synthetic CN",
+      "song_name_jp": "Synthetic CN JP",
+      "aliases": [
+        "cn-short",
+        "first song"
+      ],
+      "status": "active",
+      "charts": [
+        {
+          "difficulty": 1,
+          "level": 1
+        },
+        {
+          "difficulty": 4,
+          "level": 9
+        }
+      ]
+    },
+    {
+      "songId": "2",
+      "song_name": "Synthetic JP",
+      "song_name_jp": "Synthetic JP 日本語",
+      "aliases": [
+        "jp-short"
+      ],
+      "status": "removed",
+      "charts": [
+        {
+          "difficulty": 5,
+          "level": 10
+        }
+      ]
+    },
+    {
+      "songId": "3",
+      "song_name": "Unknown region/mode",
+      "song_name_jp": null,
+      "aliases": [],
+      "status": "unknown",
+      "charts": [
+        {
+          "difficulty": 2,
+          "level": 3
+        },
+        {
+          "difficulty": 3,
+          "level": 4
+        }
+      ]
+    }
   ]
 }

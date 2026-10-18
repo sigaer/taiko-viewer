@@ -4,7 +4,7 @@ import {constants} from 'node:fs';
 import {resolve} from 'node:path';
 import schema from '@sakura-taiko/contract/schema' with {type:'json'};
 import {projectCatalog} from '@sakura-taiko/contract/catalog';
-import type {ApiReadVersions} from '@sakura-taiko/contract';
+import type {ApiReadVersions,CatalogVersions} from '@sakura-taiko/contract';
 import {getRuntimePaths} from '../../infrastructure/runtime-paths';
 import {hash,ApiFailure} from './common';
 export const SCHEMA_REVISION=hash(JSON.stringify(schema));
@@ -42,3 +42,6 @@ export async function catalog(){
  return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};
 }
 export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
+
+/** One catalog revision for the entire public response. */
+export const catalogVersions=(catalogRevision:string):CatalogVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision});
