@@ -42,18 +42,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Diagnose and regenerate npm lock metadata
-        working-directory: taiko_viewer
-        run: |
-          npm install --package-lock-only --ignore-scripts
-          git diff --stat -- package-lock.json
-          git diff -- package-lock.json | sed -n '1,600p'
-          node -e "const l=require('./package-lock.json'); console.log(JSON.stringify(Object.entries(l.packages).filter(([k])=>/dxup\\/nuxt|magic-string|unplugin/.test(k)).map(([path,p])=>({path,version:p.version,resolved:p.resolved,integrity:p.integrity,dependencies:p.dependencies})),null,2))"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: generated-npm-lockfile
-          path: taiko_viewer/package-lock.json
-          retention-days: 1
       - name: Install locked dependencies
         working-directory: taiko_viewer
         run: npm ci
@@ -62,10 +50,13 @@ jobs:
         run: python -I tools/generate_bindings.py --check
       - name: Verify version projection and API batch regression tests
         working-directory: taiko_viewer
-        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs
+        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs
       - name: Verify cross-language catalog Golden
         working-directory: packages/sakura-taiko-contract
         run: python -I tests/test_api_v1.py
       - name: Build production Nuxt output
         working-directory: taiko_viewer
+        # Match the documented production build heap; runtime stays unchanged.
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: npm run build

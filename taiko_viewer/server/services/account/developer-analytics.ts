@@ -1,5 +1,4 @@
 import {createHash} from 'node:crypto';
-import {spawn} from 'node:child_process';
 import {createError,isError,type H3Event} from 'h3';
 import {getRuntimePaths} from '../../infrastructure/runtime-paths';
 import {privateSourceResponse} from '../../infrastructure/account/private-source-response';
@@ -9,7 +8,8 @@ import {readAuthorizedSourceUserdata} from './source-access';
 import {readAuthorizedMergedSource} from './merged-source-read';
 import {enforceTaikoOpenQuota} from '../../utils/taiko-open';
 import {getTaikoPython,getTaikoPythonEnv} from '../../utils/taiko-python';
-import {acquireDeveloperAnalysisSlot,ANALYSIS_ADDRESS_SPACE_BYTES,ANALYSIS_MAX_INPUT_BYTES,ANALYSIS_MAX_OUTPUT_BYTES,ANALYSIS_TIMEOUT_MS} from './developer-analysis-limits';
+import {acquireDeveloperAnalysisSlot} from './developer-analysis-limits';
+import {createDeveloperAnalysisWorker} from './developer-analysis-worker';
 
 type AnalysisKind='rating'|'recommendations';
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -29,7 +29,7 @@ const ratingCode=[
 const recommendationsCode=[
 'import json,sys',
 'from taiko_bot.offline import score_calculator as sc',
-'from taiko_bot.offline.recommendation_intelligence import project_ordinary_recommendations',
+'from taiko_application.query.recommendation import project_ordinary_recommendations',
 'from taiko_application.query import RecommendationContext',
 'd=json.load(sys.stdin); records=d.get("songs",[])',
 'cfg=sc.load_rating_config("./songs/rating_structured_with_ids.json")',
@@ -39,20 +39,10 @@ const recommendationsCode=[
 'p=project_ordinary_recommendations(RecommendationContext(rows=rows,basis="rating"))',
 'print(json.dumps(p,ensure_ascii=False,separators=(",",":")))'
 ].join('\n');
+const executeWorker=createDeveloperAnalysisWorker();
 async function runPython(kind:AnalysisKind,records:unknown[]){
- const paths=getRuntimePaths(),python=getTaikoPython(),input=JSON.stringify({songs:records});
- if(Buffer.byteLength(input,'utf8')>ANALYSIS_MAX_INPUT_BYTES)throw new PublicationUnavailableError();
- const code=kind==='rating'?ratingCode:recommendationsCode;
- return await new Promise<Record<string,unknown>>((resolve,reject)=>{
-  const child=spawn('prlimit',[`--as=${ANALYSIS_ADDRESS_SPACE_BYTES}`,'--',python,'-I','-c',code],{cwd:paths.repoRoot,env:{...getTaikoPythonEnv(paths.repoRoot),PATH:process.env.PATH||'',TAIKO_COMPUTE_ONLY:'1',OPENBLAS_NUM_THREADS:'1',OMP_NUM_THREADS:'1',MKL_NUM_THREADS:'1',NUMEXPR_NUM_THREADS:'1'},stdio:['pipe','pipe','ignore']});
-  let stdout='',bytes=0,settled=false;
-  const finish=(error?:Error,value?:Record<string,unknown>)=>{if(settled)return;settled=true;clearTimeout(timer);if(error)reject(error);else if(value)resolve(value);else reject(new Error('Invalid analysis output'));};
-  const timer=setTimeout(()=>{child.kill('SIGKILL');finish(new Error('Analysis timeout'));},ANALYSIS_TIMEOUT_MS);
-  child.stdout.on('data',(chunk:Buffer)=>{bytes+=chunk.length;if(bytes>ANALYSIS_MAX_OUTPUT_BYTES){child.kill('SIGKILL');finish(new Error('Analysis output limit'));return;}stdout+=chunk.toString('utf8');});
-  child.on('error',()=>finish(new Error('Analysis worker unavailable')));
-  child.on('close',code=>{if(code!==0){finish(new Error('Analysis worker failed'));return;}try{const value=JSON.parse(stdout);if(!value||typeof value!=='object'||Array.isArray(value))throw new Error();finish(undefined,value);}catch{finish(new Error('Invalid analysis output'));}});
-  child.stdin.on('error',()=>{});child.stdin.end(input);
- });
+ const {repoRoot}=getRuntimePaths();
+ return executeWorker({python:getTaikoPython(),repoRoot,env:getTaikoPythonEnv(repoRoot),code:kind==='rating'?ratingCode:recommendationsCode,records});
 }
 export async function getDeveloperAnalysisByUserid(event:H3Event,useridInput:unknown,kind:AnalysisKind){
  const release=acquireDeveloperAnalysisSlot();

@@ -30,6 +30,7 @@ A missing `song_name` or `song_name_jp` remains `null`; this API does not fabric
 - Owner-session access follows the same existing source authorization rules.
 - The current score payload is captured through the authorized source reader; analysis runs against those captured records. A second authorized read must match the original score snapshot before the response is returned; otherwise the request fails closed.
 - Analysis runs through the installed Taiko Python runtime and existing Rating/recommendation algorithms. No new score writer or alternate formula is introduced.
+- Deployment requires Linux `flock` and `prlimit`. A shared lock beneath the runtime root admits one analysis Python process across Viewer replicas; excess requests fail with 503. Each worker has a 1 GiB address-space limit, one numerical-library thread and a 60-second deadline. Admission is retained until the worker exits, including timeout cleanup.
 - Rating returns overall Rating, dimension values, sample count, algorithm/aggregation metadata and up to 30 top-rated chart details in one response.
 - Recommendations are a separate result because they answer a different question: what to play next, rather than how the player rates now.
 - Responses use private/no-store handling. No query options, history, Growth, Goal, annual-report data, writes, sync or upstream credentials are added.
@@ -39,3 +40,7 @@ A missing `song_name` or `song_name_jp` remains `null`; this API does not fabric
 - The Contract 1.1 `Song` schema has no `title` field; `song_name`, `song_name_jp` and `aliases` are canonical and required (name values may be null if the source lacks them).
 - History, Growth, Goal and annual-report APIs remain future work.
 - This branch is still a code candidate. Static tests do not replace build, real isolated SQL/HTTP integration tests, or deployment validation.
+
+## Focused validation
+
+Contract bindings and cross-language catalog fixtures, worker UTF-8/concurrency/timeout tests, and isolated MySQL/HTTP tests cover the batch. The HTTP test executes the installed Rating and recommendation implementations against synthetic captured scores; it also verifies existing cross-owner Developer Token access, conditional reads, feature disablement and token revocation. It requires the documented QA runner, installed Taiko Python runtime, and the isolated SQL harness with mutation opt-in. CI installs the committed lockfile and builds Nuxt with the existing 4 GiB build heap budget.
