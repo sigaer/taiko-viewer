@@ -1,4 +1,5 @@
 import {open} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {constants} from 'node:fs';
 import {resolve} from 'node:path';
 import schema from '@sakura-taiko/contract/schema' with {type:'json'};
@@ -34,8 +35,8 @@ export async function catalog(){
   readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
   readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
  ]);
- const songRevision=hash(songSource.bytes.toString('utf8'));
- const aliasRevision=hash(aliasSource.bytes.toString('utf8'));
+ const songRevision=createHash('sha256').update(songSource.bytes).digest('hex');
+ const aliasRevision=createHash('sha256').update(aliasSource.bytes).digest('hex');
  const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
  const projected=projectCatalog(songSource.rows,revision,aliasSource.rows);
  return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};

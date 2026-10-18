@@ -37,21 +37,13 @@ def project_catalog(rows, revision, alias_rows=None):
     songs, charts, seen = [], [], set()
     for row in rows:
         value = row.get('id')
-        if type(value) not in (int, str) or not re.fullmatch(r'[1-9][0-9]*',str(value)):
-            raise ValueError('Invalid song ID')
-        try:
-            number = float(value)
-            if not number.is_integer() or not 0 < number <= 9007199254740991:
-                raise ValueError('Invalid song ID')
-        except (TypeError, ValueError):
-            raise ValueError('Invalid song ID') from None
-        song_id = str(value)
+        song_id = _source_id(value, 'song ID')
         if song_id in seen:
             raise ValueError('Ambiguous catalog')
         seen.add(song_id)
         region = row.get('region') if row.get('region') in ('CN', 'JP') else 'UNKNOWN'
         raw_status = row.get('shelf_status')
-        status = 'active' if type(raw_status) in (str, int, float) and raw_status in (0, '0') else 'removed' if type(raw_status) in (str, int) and raw_status in (1, '1') else 'unknown'
+        status = 'active' if type(raw_status) in (str, int, float) and raw_status in (0, '0') else 'removed' if type(raw_status) in (str, int, float) and raw_status in (1, '1') else 'unknown'
         availability = dict(region=region, status=status)
         alias = aliases_by_id.get(song_id)
         song_name = row.get('song_name')[:512] if isinstance(row.get('song_name'), str) else None
