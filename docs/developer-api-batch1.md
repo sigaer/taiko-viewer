@@ -1,46 +1,61 @@
-# Developer API — Batch 1
+# Developer API：现有只读能力与接入指南
 
-Batch one focuses on concrete, reusable data—not filter-menu metadata.
+文档对应应用发布 `0.85.0-rc.5`。公开曲库使用 API 路径 `v1`，分析结果中的 `model: v1` 是计算模型；两者与网站发布版本、Contract 版本分别管理。Contract 1.1 维持 `FREEZE_CANDIDATE`，本次没有宣布冻结。
 
-## Endpoints
+正式地址为 `https://viewer.sakura-bot.cn`。2026-10-18 在此前线上 rc.4 上，使用既有受控 Token 与受控 Source 串行只读预查，以下四个接口均返回 HTTP 200，包括匿名曲库读取；因此移除“仅本地候选、未部署”的过时说明。可用性不是权限承诺：第三方受保护读取仍要求现有已获批、有效 Token 及服务端读取权限，不因文档可见而开放。
 
-| Method | Endpoint | Authentication | Purpose |
-|---|---|---|---|
-| GET | `/api/v1/taiko/catalog/songs` | Public; any supplied Bearer token is validated | Song metadata, original `song_name` / `song_name_jp` fields, and aliases in one response |
-| GET | `/api/developer/userdata/{userid}/rating` | Same authorization as the existing Developer userdata endpoint | One Rating response: overall Rating, six dimensions, sample count, algorithm metadata and top-30 song-level details |
-| GET | `/api/developer/userdata/{userid}/recommendations` | Same authorization as the existing Developer userdata endpoint | Structured rating-based recommendations |
+| 能力 | GET 路径 | 第三方接入 | 用途 |
+| --- | --- | --- | --- |
+| 当前成绩 | `/api/developer/userdata/{userid}` | 现有 Developer Token | 当前存档展示、自定义统计 |
+| 歌曲目录与别名 | `/api/v1/taiko/catalog/songs` | 公开，不发送 Authorization | 曲名搜索、别名与 ID 关联 |
+| Rating 与六维 | `/api/developer/userdata/{userid}/rating` | 现有 Developer Token | 综合与六维计算、高 Rating 谱面详情 |
+| 推荐游玩谱面 | `/api/developer/userdata/{userid}/recommendations` | 现有 Developer Token | 普通 Rating 推荐列表 |
 
-There is no separate aliases endpoint, no separate B30 endpoint, and no `progress-options` endpoint. The Rating response includes its top-30 detail so consumers do not need two calls. The shared Contract is now v1.1. This is an intentional breaking shape change: `Song.title` is removed rather than maintained alongside duplicate fields. The original v1.0 shape is not supported by this candidate; the current OpenAPI is updated to v1.1.
+`{userid}` 是太鼓 Source ID，不是 Viewer 网站账号 ID，也不是其他接口的 `plr_...` 资源标识。服务端保留本人会话等已有能力；第三方示例统一使用 Bearer Token，不复制浏览器 Cookie。以上接口不新增查询参数；曲库会拒绝不支持的查询参数。别名已经包含在曲库内，没有独立 aliases 接口，也没有新增 B30 路径。
 
-## Song catalog fields
+## 网站中的指南
 
-The songs endpoint returns one canonical song shape:
+登录后的 `/account/developer` 提供中日双语总览、按接口折叠的字段表、cURL/Python 示例和合成 JSON。未申请、待审批、驳回、获批但 Token 失效的用户也能阅读，并看到相应权限提示。申请、掩码、审批记录保持现有范围，不重新显示或自动使用真实密钥。页面加载、展开、复制不请求成绩或分析 API。
 
-- `song_name`: the original Chinese/display name from the source catalog.
-- `song_name_jp`: the original Japanese name from the catalog, falling back to alias metadata when absent.
-- `aliases`: alias strings joined by numeric song ID; empty array when no aliases exist.
-- `title` is not returned. Consumers use `song_name` directly; there is no duplicate alias for the same value.
-- `catalogRevision` / response `versions.catalogRevision`: SHA-256 over the source song-data and alias-file SHA-256 values. Changing either input changes the catalog revision and ETag.
+完整可解析响应示例与字段类型见 [OpenAPI](developer-api-batch1-openapi.yaml)。网站代码示例与翻译位于 `taiko_viewer/utils/developer-api-guide.ts`，自动化测试执行 cURL/Python 的请求构造和失败分支，并按 OpenAPI 校验合成及隔离 HTTP 响应。
 
-A missing `song_name` or `song_name_jp` remains `null`; this API does not fabricate translations.
+## 真实返回契约
 
-## Authorization and consistency
+### 当前成绩
 
-- The two player-analysis routes reuse the existing `/api/developer/userdata/{userid}` access model, including approved Developer Token service grants and existing cross-user current-score read capability. They do not introduce a ResourceGrant requirement or a new scope.
-- Owner-session access follows the same existing source authorization rules.
-- The current score payload is captured through the authorized source reader; analysis runs against those captured records. A second authorized read must match the original score snapshot before the response is returned; otherwise the request fails closed.
-- Analysis runs through the installed Taiko Python runtime and existing Rating/recommendation algorithms. No new score writer or alternate formula is introduced.
-- Deployment requires Linux `flock` and `prlimit`. A shared lock beneath the runtime root admits one analysis Python process across Viewer replicas; excess requests fail with 503. Each worker has a 1 GiB address-space limit, one numerical-library thread and a 60-second deadline. Admission is retained until the worker exits, including timeout cleanup.
-- Rating returns overall Rating, dimension values, sample count, algorithm/aggregation metadata and up to 30 top-rated chart details in one response.
-- Recommendations are a separate result because they answer a different question: what to play next, rather than how the player rates now.
-- Responses use private/no-store handling. No query options, history, Growth, Goal, annual-report data, writes, sync or upstream credentials are added.
+仅保留来源数据中存在的 `profile`、`songs`、`achievement`、`dojo`、`_meta`，不为缺省字段补空对象或数组。内部结构来自 Source，可能为 null 或其他 JSON 类型；`songs` 通常为成绩数组，常见 `song_no`、`level`、`high_score` 等不代表每条记录都具有这些字段。递归过滤凭据、Token、Cookie 等敏感键。该接口没有成长历史、年度报告、同步或写入能力。
 
-## Explicit limits
+### 歌曲目录与别名
 
-- The Contract 1.1 `Song` schema has no `title` field; `song_name`, `song_name_jp` and `aliases` are canonical and required (name values may be null if the source lacks them).
-- History, Growth, Goal and annual-report APIs remain future work.
-- This branch is still a code candidate. Static tests do not replace build, real isolated SQL/HTTP integration tests, or deployment validation.
+响应 `{versions, items}` 复用 Contract 1.1。`versions` 包含 `contractVersion`、`schemaRevision`、`catalogRevision`，而 `scoreRevision`、`calculationProfile`、`observationSource`、`capturedAt` 为 null。
 
-## Focused validation
+每个 Song 包含字符串 `songId`、可为 null 的 `song_name`/`song_name_jp`、字符串数组 `aliases`（可为空）、`catalogRevision` 和 `availability: {region, status}`。地区为 CN/JP/UNKNOWN，状态为 active/removed/unknown。原始曲名缺失不补造翻译；日文名可从现有别名表补充。别名按数字 ID 关联，联合 revision 覆盖两份源文件。Song 不再有重复 `title` 字段，但这不影响分析投影的 `title`。
 
-Contract bindings and cross-language catalog fixtures, worker UTF-8/concurrency/timeout tests, and isolated MySQL/HTTP tests cover the batch. The HTTP test executes the installed Rating and recommendation implementations against synthetic captured scores; it also verifies existing cross-owner Developer Token access, conditional reads, feature disablement and token revocation. It requires the documented QA runner, installed Taiko Python runtime, and the isolated SQL harness with mutation opt-in. CI installs the committed lockfile and builds Nuxt with the existing 4 GiB build heap budget.
+公开请求无需 Token；若主动附带 Authorization，现有实现仍验证对应 Bearer 凭据，不保证当作匿名请求处理。特别是未关联有效应用凭据的普通 Developer Token 也不一定能用于带 Authorization 的曲库请求，因此公开示例完全省略该头。
+
+### Rating
+
+响应包含 `playerId`（本次 Source ID）、`scoreRevision`（songs 与 _meta 摘要）、`model`（v1）、`aggregation`（per-dimension-top20）、整数 `topN`（当前 20）、`duplicateHandling`（preserve）、`overallRating`（数字或 null）、整数 `sampleCount`、`dimensions`、`topSongs` 和整数 `topSongsCount`。
+
+六维数组元素是 `{key, value}`；键为 big_song、stamina、speed、accuracy_power、rhythm、complex。六维各自按现有 Top-N 规则聚合，综合值复用 Core 的自身聚合规则，不是简单平均最多 30 个详情。没有正的综合结果时 overallRating 为 null；空样本时 sampleCount 为 0、六维值为 0、topSongs 为空。
+
+详情按谱面 rating 降序，最多 30 个。每项包含数字 songId、level、字符串 title（可为空）、数字 rating，以及六维键到数字的 dimensions **对象**。顶层 dimensions 是数组，二者不可混同。`sampleCount` 可能大于详情数。没有把 topN 改成 30，也没有复制或修改业务算法。
+
+### 推荐
+
+响应 `{playerId, scoreRevision, model, basis, items}`，basis 固定为 rating。items 最多 20 项，可为空或不足上限。每项只有 `songId`、`level`（整数）、`title`（字符串）、`isUnplayed`（布尔）、`candidateIndicator`、`referenceIndicator`、`deviationRatio`（数字）、`inStrictRange`（布尔）。
+
+候选指标来自谱面，参考指标是个人 Rating 前 20 样本对应谱面指标的中位数。deviationRatio 是 `(candidate-reference)/reference` 的比例，0.05 表示 +5%；返回数值经过舍入。严格范围为参考指标的 90%～105%。isUnplayed 依据合并重复版本后的样本，而不是查询全平台历史。
+
+保持已实现排序：严格范围内未玩与已玩候选优先，按现有分组补足；严格组内按算法平衡分排序，宽松组内按绝对指标偏离排序。响应没有暴露该平衡分，也不是按某个返回字段全局排序。没有推荐理由、预期提升分数、数量或六维选项。
+
+## 限制、缓存与错误
+
+- 当前成绩与两个分析接口共用 `developer_userdata` UTC 日次额度；曲库使用独立计数。配置决定实际额度，不承诺固定调用次数。429 后停止即时重试，按响应和额度重置情况处理；实现不保证 Retry-After。
+- 分析复用安装的 `taiko_bot.offline.score_calculator` 与 `taiko_application.query.recommendation`，没有 Core 副本。进程内与全局 flock 保证单分析任务，Worker 地址空间 1 GiB、数值库线程 1、期限 60 秒，admission 持续到 PID 退出。本次没有更改这些限制。
+- 当前生产 `/api/developer/` 代理使用现有 60 秒读取超时（不是普通页面 location 的 300 秒）。客户端分析示例使用连接 5 秒／读取 90 秒，当前成绩和曲库使用读取 20 秒。较长客户端等待不延长网关期限，可能仍收到 502/504，且响应不一定是 JSON。不得承诺固定完成时间或默认并发调用。
+- 503 可来自 ANALYSIS_BUSY、计算期限、输入限制、Publication 不可用或计算前后数据摘要变化。只做有限次数的串行退避重试；持续失败应报告维护者。401 检查密钥有效性，403 检查现有权限，404 检查 Source/数据或接口开关；400 检查请求参数。
+- 受保护响应为 `private, no-cache, must-revalidate` 并带 ETag，不是此前文档声称的 no-store。曲库为 `public, max-age=60, must-revalidate`。If-None-Match 命中可返回无正文 304，仍经过鉴权；分析也可能照常计算并计数。示例不发送条件头，客户端若自行添加须先处理 304 再读 JSON。
+- 曲库错误体为 `{code, message, requestId}`；受保护接口沿用现有 H3 错误格式，可能有 data.code，不应假定所有错误具有相同 JSON 结构。示例先检查 HTTP 状态，再解析 JSON；不输出 Token。
+
+本次只补齐展示、说明和测试，不改变路由、参数、算法、权限、Token、已有授权或数据。独立的应用授权管理页面仍保留原地址和权限；开发者首页不恢复此前隐藏的旧版授权说明与管理链接。History、Growth、Goal、年度报告不在这四个第三方 API 的文档范围内，本文不宣布整个 API 体系冻结。

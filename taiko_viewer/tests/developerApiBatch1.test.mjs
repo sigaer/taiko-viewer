@@ -1,3 +1,5 @@
+// Run the documentation contract/example checks in the existing API CI job.
+import './developerApiGuide.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,access} from 'node:fs/promises';
