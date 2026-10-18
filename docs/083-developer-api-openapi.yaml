@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — Contract v1.1 candidate
-  version: 0.85.0-rc.2
+  version: 0.85.0-rc.1
   description: "CONTRACT 1.1 CANDIDATE / NOT DEPLOYED. Contract 1.1 intentionally replaces Song.title with song_name, song_name_jp and aliases; Contract 1.0 is not maintained for this new API. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
