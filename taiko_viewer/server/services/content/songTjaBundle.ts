@@ -5,6 +5,7 @@ import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { getContentRuntimePaths, readJsonFile } from "./runtime";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
+import { getTaikoPython, getTaikoPythonEnv } from "../../utils/taiko-python";
 
 const execFileAsync = promisify(execFile);
 const songTjaBundleIndexHelperPath = resolve(process.cwd(), "server/services/content/songTjaBundleIndex.py");
@@ -90,7 +91,6 @@ const resolveTjaRepoPath = async (reportPath: string): Promise<RepoPathInfo> => 
 
 const loadSongTjaIndex = async (forceRefresh = false): Promise<SongTjaIndexPayload> => {
   const { repoRoot, songDataPath } = getContentRuntimePaths();
-  const mergeIndexPath = resolve(repoRoot, "plugins", "utils", "merge_index.py");
   const reportPath = resolve(repoRoot, "logs", "ese_audio_sync_report.json");
   const songDataStat = await stat(songDataPath);
   const { tjaRoot, reportMtimeMs } = await resolveTjaRepoPath(reportPath);
@@ -112,24 +112,22 @@ const loadSongTjaIndex = async (forceRefresh = false): Promise<SongTjaIndexPaylo
 
   songTjaIndexBuildPromise = (async () => {
     await ensureReadablePath(songTjaBundleIndexHelperPath);
-    await ensureReadablePath(mergeIndexPath);
 
     let stdout = "";
     let stderr = "";
 
     try {
       const result = await execFileAsync(
-        "python3",
+        getTaikoPython(),
         [
+          "-I",
           songTjaBundleIndexHelperPath,
           "--song-data",
           songDataPath,
           "--tja-root",
-          tjaRoot,
-          "--merge-index",
-          mergeIndexPath
+          tjaRoot
         ],
-        { maxBuffer: 16 * 1024 * 1024 }
+        { maxBuffer: 16 * 1024 * 1024, timeout: 120_000, killSignal: "SIGKILL", env: getTaikoPythonEnv(repoRoot) }
       );
       stdout = result.stdout;
       stderr = result.stderr;
@@ -215,6 +213,11 @@ export const resolveSongTjaBundleSource = async (songId: number): Promise<SongTj
 };
 
 export const getSongTjaBundleUrl = async (songId: number) => {
-  const source = await resolveSongTjaBundleSource(songId);
-  return source ? `/api/content/songs/${songId}/tja-package` : null;
+  try {
+    const source = await resolveSongTjaBundleSource(songId);
+    return source ? `/api/content/songs/${songId}/tja-package` : null;
+  } catch {
+    // Download availability must not prevent the song and chart data rendering.
+    return null;
+  }
 };
