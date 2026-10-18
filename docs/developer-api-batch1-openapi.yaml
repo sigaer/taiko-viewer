@@ -1,0 +1,107 @@
+openapi: 3.1.0
+info:
+  title: Viewer Developer API — Batch 1 proposal
+  version: 0.85.0-rc.1
+  description: Contract 1.1 candidate. Song.title is removed; song_name, song_name_jp and aliases are canonical. Contract 1.0 Song compatibility is intentionally not maintained.
+servers:
+  - url: http://127.0.0.1:{port}
+    description: Isolated local validation only; this candidate is not deployed.
+    variables:
+      port:
+        default: "43085"
+paths:
+  /api/v1/taiko/catalog/songs:
+    get:
+      operationId: getCatalogSongsWithAliases
+      description: Public complete song catalog with canonical song_name/song_name_jp fields and aliases in one response. Any supplied Bearer token is validated.
+      security:
+        - {}
+        - DeveloperToken: []
+      responses:
+        "200":
+          description: Bounded song catalog with a revision derived from song metadata and alias source bytes
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [versions, items]
+                properties:
+                  versions:
+                    type: object
+                    required: [contractVersion, schemaRevision, catalogRevision]
+                    properties:
+                      contractVersion: { const: "1.1" }
+                      schemaRevision: { type: string }
+                      catalogRevision: { type: string }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [songId, song_name, song_name_jp, aliases, catalogRevision]
+                      properties:
+                        songId: { type: string }
+                        catalogRevision: { type: string }
+                        availability: { type: object }
+                        song_name: { type: [string, "null"], description: Original Chinese song name field }
+                        song_name_jp: { type: [string, "null"], description: Original Japanese song name field }
+                        aliases: { type: array, maxItems: 100, items: { type: string } }
+        "401": { description: Invalid supplied Developer Token }
+        "503": { description: Song catalog or alias source unavailable or exceeds its size limit }
+  /api/developer/userdata/{userid}/rating:
+    get:
+      operationId: getDeveloperRating
+      description: Uses the same authorization and cross-user current-score read rules as the existing Developer userdata endpoint. Returns overall Rating, six dimensions, sample count, algorithm metadata and up to 30 top-rated chart details.
+      security:
+        - DeveloperToken: []
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      responses:
+        "200":
+          description: Rating summary and top-30 details from one score snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [playerId, scoreRevision, model, aggregation, topN, sampleCount, dimensions, topSongs, topSongsCount]
+                properties:
+                  playerId: { type: string }
+                  scoreRevision: { type: string, description: SHA-256 of the captured score records and metadata }
+                  model: { type: string }
+                  aggregation: { type: string }
+                  topN: { type: integer }
+                  sampleCount: { type: integer, minimum: 0 }
+                  overallRating: { type: [number, "null"] }
+                  dimensions: { type: array, items: { type: object } }
+                  topSongsCount: { type: integer, minimum: 0, maximum: 30 }
+                  topSongs: { type: array, maxItems: 30, items: { type: object } }
+        "401": { description: Missing or invalid authentication }
+        "403": { description: Source is not authorized for this caller }
+        "429": { description: Existing Developer userdata quota exceeded }
+        "503": { description: Score snapshot changed or analysis unavailable }
+  /api/developer/userdata/{userid}/recommendations:
+    get:
+      operationId: getDeveloperRecommendations
+      description: Uses the same authorization as the existing Developer userdata endpoint and returns the existing rating-based recommendation algorithm's structured result.
+      security:
+        - DeveloperToken: []
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      responses:
+        "200": { description: Structured rating-based recommendation result }
+        "401": { description: Missing or invalid authentication }
+        "403": { description: Source is not authorized for this caller }
+        "429": { description: Existing Developer userdata quota exceeded }
+        "503": { description: Score snapshot changed or analysis unavailable }
+components:
+  securitySchemes:
+    DeveloperToken:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Existing Developer Token authorization; no new ResourceGrant is introduced by these analysis routes.

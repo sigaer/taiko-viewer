@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:sakura-taiko:contract:1.0",
-  "title": "Sakura Taiko Contract v1.0",
+  "$id": "urn:sakura-taiko:contract:1.1",
+  "title": "Sakura Taiko Contract v1.1",
   "$defs": {
     "ExternalIdentity": {
       "type": "object",
@@ -122,11 +122,30 @@
           "type": "string",
           "minLength": 1
         },
-        "title": {
+        "song_name": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "maxLength": 512,
+          "description": "Original Chinese/display name from song_data.json; null when the source has no value."
+        },
+        "song_name_jp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512,
+          "description": "Original Japanese name from song_data.json, falling back to song_alias.json when absent; null when neither source has a value."
+        },
+        "aliases": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "description": "Alias strings from song_alias.json joined by numeric song ID; empty when no aliases exist."
         },
         "catalogRevision": {
           "type": [
@@ -140,7 +159,9 @@
       },
       "required": [
         "songId",
-        "title",
+        "song_name",
+        "song_name_jp",
+        "aliases",
         "catalogRevision"
       ]
     },
@@ -890,7 +911,7 @@
         "contractVersion": {
           "type": "string",
           "enum": [
-            "1.0"
+            "1.1"
           ]
         },
         "schemaRevision": {

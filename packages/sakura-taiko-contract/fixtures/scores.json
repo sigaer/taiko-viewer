@@ -41,7 +41,9 @@
     "canonical": {
       "song": {
         "songId": "1",
-        "title": null,
+        "song_name": null,
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": null
       },
       "chart": {
@@ -143,7 +145,9 @@
     "canonical": {
       "song": {
         "songId": "2",
-        "title": null,
+        "song_name": null,
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": null
       },
       "chart": {
@@ -226,7 +230,9 @@
     "canonical": {
       "song": {
         "songId": "3",
-        "title": null,
+        "song_name": null,
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": null
       },
       "chart": {
@@ -301,7 +307,9 @@
     "canonical": {
       "song": {
         "songId": "0004",
-        "title": null,
+        "song_name": null,
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": null
       },
       "chart": {
@@ -356,7 +364,7 @@
   {
     "name": "double-hard",
     "legacy": {
-      "song_no": 5.0,
+      "song_no": 5,
       "level": 3,
       "high_score": 0,
       "good_cnt": 0,
@@ -387,7 +395,9 @@
     "canonical": {
       "song": {
         "songId": "5",
-        "title": null,
+        "song_name": null,
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": null
       },
       "chart": {
@@ -420,7 +430,7 @@
       "highscoreAt": null,
       "updatedAt": null,
       "legacy": {
-        "song_no": 5.0,
+        "song_no": 5,
         "level": 3,
         "high_score": 0,
         "good_cnt": 0,

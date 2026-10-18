@@ -1,7 +1,7 @@
 # Generated from schema/contract-v1.json. Run tools/generate_bindings.py.
 from __future__ import annotations
 from typing import Any, Dict, List, Literal, NotRequired, TypedDict
-CONTRACT_VERSION = "1.0"
+CONTRACT_VERSION = "1.1"
 class ExternalIdentity(TypedDict):
     namespace: Literal['wahlap', 'hiroba', 'qq', 'onebot', 'manual', 'legacy-content']
     id: str
@@ -21,7 +21,9 @@ class DeveloperIdentity(TypedDict):
     scopes: List[str]
 class Song(TypedDict):
     songId: str
-    title: str | None
+    song_name: str | None
+    song_name_jp: str | None
+    aliases: List[str]
     catalogRevision: str | None
     availability: NotRequired[CatalogAvailability]
 class Chart(TypedDict):
@@ -137,7 +139,7 @@ class DeveloperPlayerProfile(TypedDict):
     title: NotRequired[str | None]
     dan: NotRequired[DeveloperDan]
 class ApiReadVersions(TypedDict):
-    contractVersion: Literal['1.0']
+    contractVersion: Literal['1.1']
     schemaRevision: str
     catalogRevision: str
     scoreRevision: str | None

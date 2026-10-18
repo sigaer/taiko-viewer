@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Viewer Developer API v1 — locally frozen Contract v1.0
-  version: 0.83.0-rc.3
-  description: "CONTRACT FROZEN LOCALLY / NOT DEPLOYED. Explicit local opt-in required. External read surface has
+  title: Viewer Developer API v1 — Contract v1.1 candidate
+  version: 0.85.0-rc.1
+  description: "CONTRACT 1.1 CANDIDATE / NOT DEPLOYED. Contract 1.1 intentionally replaces Song.title with song_name, song_name_jp and aliases; Contract 1.0 is not maintained for this new API. Explicit local opt-in required. External read surface has
     one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
     scores:read are open. This document does not register production access or upgrade legacy tokens
     into ResourceGrants."
@@ -17,7 +17,7 @@ paths:
   /api/v1/taiko/meta:
     get:
       operationId: getMeta
-      description: Locally frozen contract only. Anonymous public metadata, same source catalog revision;
+      description: Contract 1.1 candidate only. Anonymous public metadata uses the combined song/alias catalog revision;
         no production availability claim.
       security:
         - {}
@@ -44,7 +44,7 @@ paths:
                   apiVersion:
                     const: v1
                   contractVersion:
-                    const: "1.0"
+                    const: "1.1"
                   schemaRevision:
                     type: string
                   catalogRevision:
@@ -110,7 +110,7 @@ paths:
                           const: true
               example:
                 apiVersion: v1
-                contractVersion: "1.0"
+                contractVersion: "1.1"
                 schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                 capabilities:
@@ -120,10 +120,10 @@ paths:
                 unavailableScopes:
                   - history:read
                   - growth:read
-                status: CONTRACT_FROZEN
+                status: FREEZE_CANDIDATE
                 catalogProfile: source-catalog-explicit-v1
                 pagination: none-bounded-complete-response
-                contractFrozen: true
+                contractFrozen: false
                 runtimeEnabled: true
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
@@ -320,7 +320,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogSongsResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: null
@@ -329,19 +329,28 @@ paths:
                   capturedAt: null
                 items:
                   - songId: "1"
-                    title: Synthetic CN
+                    song_name: Synthetic CN
+                    song_name_jp: Synthetic CN JP
+                    aliases:
+                      - cn-short
+                      - first song
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: CN
                       status: active
                   - songId: "2"
-                    title: Synthetic JP
+                    song_name: Synthetic JP
+                    song_name_jp: Synthetic JP 日本語
+                    aliases:
+                      - jp-short
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: JP
                       status: removed
                   - songId: "3"
-                    title: Unknown region/mode
+                    song_name: Unknown region/mode
+                    song_name_jp: null
+                    aliases: []
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     availability:
                       region: UNKNOWN
@@ -541,7 +550,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogChartsResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: null
@@ -800,7 +809,7 @@ paths:
                 $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/DeveloperProfileResponse
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -1026,7 +1035,7 @@ paths:
                               - legacy
               example:
                 versions:
-                  contractVersion: "1.0"
+                  contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                   scoreRevision: publication-v1:1:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -1037,7 +1046,9 @@ paths:
                 items:
                   - song:
                       songId: "1"
-                      title: null
+                      song_name: null
+                      song_name_jp: null
+                      aliases: []
                       catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     chart:
                       songId: "1"
@@ -2359,9 +2370,9 @@ components:
       name: stv_session
       description: Existing verified owner session; Authorization headers are rejected for these operations.
 x-schema-source: packages/sakura-taiko-contract/schema/contract-v1.json
-x-freeze-status: CONTRACT_FROZEN_LOCAL
+x-freeze-status: FREEZE_CANDIDATE_LOCAL
 x-production-authorized: false
 x-lifecycle-policy:
-  contractFrozen: true
+  contractFrozen: false
   runtimeDefaultEnabled: false
-  ownerApproval: CHAT_OWNER_APPROVAL_20261016_F1_F5
+  ownerApproval: null

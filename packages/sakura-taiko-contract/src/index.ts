@@ -1,5 +1,5 @@
 // Generated from schema/contract-v1.json. Run tools/generate_bindings.py.
-export const CONTRACT_VERSION = "1.0" as const;
+export const CONTRACT_VERSION = "1.1" as const;
 export type ExternalIdentity = {
   namespace: "wahlap" | "hiroba" | "qq" | "onebot" | "manual" | "legacy-content";
   id: string;
@@ -23,7 +23,9 @@ export type DeveloperIdentity = {
 };
 export type Song = {
   songId: string;
-  title: string | null;
+  song_name: string | null;
+  song_name_jp: string | null;
+  aliases: Array<string>;
   catalogRevision: string | null;
   availability?: CatalogAvailability;
 };
@@ -153,7 +155,7 @@ export type DeveloperPlayerProfile = {
   dan?: DeveloperDan;
 };
 export type ApiReadVersions = {
-  contractVersion: "1.0";
+  contractVersion: "1.1";
   schemaRevision: string;
   catalogRevision: string;
   scoreRevision: string | null;

@@ -7,7 +7,8 @@
       "region": "CN",
       "chart_type": "single",
       "level_1": 1,
-      "level_4": 9
+      "level_4": 9,
+      "song_name_jp": "Synthetic CN JP"
     },
     {
       "id": 2,
@@ -29,7 +30,12 @@
     "songs": [
       {
         "songId": "1",
-        "title": "Synthetic CN",
+        "song_name": "Synthetic CN",
+        "song_name_jp": "Synthetic CN JP",
+        "aliases": [
+          "cn-short",
+          "first song"
+        ],
         "catalogRevision": "synthetic-catalog-v1",
         "availability": {
           "region": "CN",
@@ -38,7 +44,11 @@
       },
       {
         "songId": "2",
-        "title": "Synthetic JP",
+        "song_name": "Synthetic JP",
+        "song_name_jp": "Synthetic JP 日本語",
+        "aliases": [
+          "jp-short"
+        ],
         "catalogRevision": "synthetic-catalog-v1",
         "availability": {
           "region": "JP",
@@ -47,7 +57,9 @@
       },
       {
         "songId": "3",
-        "title": "Unknown region/mode",
+        "song_name": "Unknown region/mode",
+        "song_name_jp": null,
+        "aliases": [],
         "catalogRevision": "synthetic-catalog-v1",
         "availability": {
           "region": "UNKNOWN",
@@ -144,5 +156,22 @@
     "expiresAt": "2026-10-17T00:00:00Z",
     "revokedAt": null,
     "revision": "synthetic-revision"
-  }
+  },
+  "aliasInput": [
+    {
+      "id": 1,
+      "song_name_jp": "Alias JP should not override source",
+      "aliases": [
+        "cn-short",
+        "first song"
+      ]
+    },
+    {
+      "id": 2,
+      "song_name_jp": "Synthetic JP 日本語",
+      "aliases": [
+        "jp-short"
+      ]
+    }
+  ]
 }

@@ -1,0 +1,62 @@
+name: Developer API batch 1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "taiko_viewer/**"
+      - "packages/sakura-taiko-contract/**"
+      - ".github/workflows/developer-api-batch1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "taiko_viewer/**"
+      - "packages/sakura-taiko-contract/**"
+      - ".github/workflows/developer-api-batch1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract-and-api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: sigaer/taiko-bot
+          ref: a632913dfbdbec1d465f8eaccc0bb80c35e25745
+          path: taiko-bot-source
+      - name: Prepare pinned shared Annual schema
+        run: |
+          schema_dir="$(dirname "$(dirname "$GITHUB_WORKSPACE")")/schemas"
+          mkdir -p "$schema_dir"
+          cp taiko-bot-source/taiko_bot/offline/schemas/annual-summary-v4.schema.json "$schema_dir/annual-summary-v4.schema.json"
+          test -s "$schema_dir/annual-summary-v4.schema.json"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: taiko_viewer/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install locked dependencies
+        working-directory: taiko_viewer
+        run: npm ci
+      - name: Verify generated Contract bindings
+        working-directory: packages/sakura-taiko-contract
+        run: python -I tools/generate_bindings.py --check
+      - name: Verify version projection and API batch regression tests
+        working-directory: taiko_viewer
+        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs
+      - name: Verify cross-language catalog Golden
+        working-directory: packages/sakura-taiko-contract
+        run: python -I tests/test_api_v1.py
+      - name: Build production Nuxt output
+        working-directory: taiko_viewer
+        # Match the documented production build heap; runtime stays unchanged.
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: npm run build
