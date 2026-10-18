@@ -1,107 +1,517 @@
 openapi: 3.1.0
 info:
-  title: Viewer Developer API — Batch 1 proposal
-  version: 0.85.0-rc.1
-  description: Contract 1.1 candidate. Song.title is removed; song_name, song_name_jp and aliases are canonical. Contract 1.0 Song compatibility is intentionally not maintained.
+  title: Viewer Developer API — existing read APIs
+  version: 0.85.0-rc.5
+  description: Application documentation release 0.85.0-rc.5. API path v1 and calculation model v1 are
+    separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
+    returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
+    does not expand account/token authority or enable new capabilities. Examples are synthetic;
+    reading documentation grants no data permission.
 servers:
-  - url: http://127.0.0.1:{port}
-    description: Isolated local validation only; this candidate is not deployed.
-    variables:
-      port:
-        default: "43085"
+  - url: https://viewer.sakura-bot.cn
+    description: Confirmed production origin; authentication and runtime availability still apply.
 paths:
+  /api/developer/userdata/{userid}:
+    get:
+      summary: 当前成绩
+      description: 读取玩家当前存档，用于成绩展示与自定义统计。 400 参数无效；401 Token 无效或已撤销；403 无读取权限；404 Source 或数据不存在；429
+        当日调用限额；503 数据暂不可用。
+      security:
+        - legacyDeveloperToken: []
+      parameters:
+        - in: path
+          name: userid
+          required: true
+          description: Taiko Source ID, not a Viewer website account ID.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful read. 只读当前数据，不提供成长历史、年度报告、同步或写入。响应保留来源数据的结构；以下 JSON 是合成示例，不是所有 Source 的固定字段模板。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentScores"
+              example:
+                profile:
+                  mydon_name: Synthetic Player
+                songs:
+                  - song_no: 10001
+                    level: 4
+                    high_score: 900000
+                achievement: null
+                dojo: []
+                _meta:
+                  source: manual
+                  ts: 2026-01-01T00:00:00Z
+        "304":
+          description: Conditional ETag match; no response body. Authorization is still checked; analysis may
+            still run.
+        "400":
+          description: Invalid Source ID or input.
+        "401":
+          description: Invalid or revoked Developer Token.
+        "403":
+          description: No existing authority for this source; reading documentation does not grant access.
+        "404":
+          description: Source/data not found.
+        "429":
+          description: Configured UTC daily developer_userdata quota exceeded; shared by these three protected
+            endpoints. No guaranteed Retry-After.
+        "503":
+          description: Source temporarily unavailable.
   /api/v1/taiko/catalog/songs:
     get:
-      operationId: getCatalogSongsWithAliases
-      description: Public complete song catalog with canonical song_name/song_name_jp fields and aliases in one response. Any supplied Bearer token is validated.
-      security:
-        - {}
-        - DeveloperToken: []
+      summary: 歌曲目录与别名
+      description: 查询歌曲 ID、中日原始曲名与别名，用于搜索和成绩关联。 400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429
+        日次限流（RATE_LIMITED）；503 曲库或服务暂不可用。错误体为 code、message、requestId。
+      security: []
       responses:
         "200":
-          description: Bounded song catalog with a revision derived from song metadata and alias source bytes
+          description: Successful read. 公开请求不发送 Authorization。主动附带的 Bearer Token
+            仍会被验证，无效时不会自动降级为匿名读取。别名已包含在本响应中；没有独立 aliases 接口。曲库不包含谱面成绩。
           content:
             application/json:
               schema:
-                type: object
-                required: [versions, items]
-                properties:
-                  versions:
-                    type: object
-                    required: [contractVersion, schemaRevision, catalogRevision]
-                    properties:
-                      contractVersion: { const: "1.1" }
-                      schemaRevision: { type: string }
-                      catalogRevision: { type: string }
-                  items:
-                    type: array
-                    items:
-                      type: object
-                      required: [songId, song_name, song_name_jp, aliases, catalogRevision]
-                      properties:
-                        songId: { type: string }
-                        catalogRevision: { type: string }
-                        availability: { type: object }
-                        song_name: { type: [string, "null"], description: Original Chinese song name field }
-                        song_name_jp: { type: [string, "null"], description: Original Japanese song name field }
-                        aliases: { type: array, maxItems: 100, items: { type: string } }
-        "401": { description: Invalid supplied Developer Token }
-        "503": { description: Song catalog or alias source unavailable or exceeds its size limit }
+                $ref: "#/components/schemas/Catalog"
+              example:
+                versions:
+                  contractVersion: "1.1"
+                  schemaRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                  catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                  scoreRevision: null
+                  calculationProfile: null
+                  observationSource: null
+                  capturedAt: null
+                items:
+                  - songId: "10001"
+                    song_name: 合成歌曲
+                    song_name_jp: null
+                    aliases: []
+                    catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                    availability:
+                      region: UNKNOWN
+                      status: active
+        "304":
+          description: Conditional ETag match; no response body. Authorization is still checked; analysis may
+            still run.
+        "400":
+          description: Unsupported query parameter.
+        "401":
+          description: An explicitly supplied Bearer credential failed validation; omit Authorization for
+            public access.
+        "404":
+          description: API disabled.
+        "429":
+          description: Configured UTC daily catalog quota exceeded; RATE_LIMITED. No guaranteed Retry-After.
+        "503":
+          description: Catalog unavailable or bounded size limit exceeded; error body contains code, message,
+            requestId.
   /api/developer/userdata/{userid}/rating:
     get:
-      operationId: getDeveloperRating
-      description: Uses the same authorization and cross-user current-score read rules as the existing Developer userdata endpoint. Returns overall Rating, six dimensions, sample count, algorithm metadata and up to 30 top-rated chart details.
+      summary: Rating 与六维
+      description: 基于当前成绩计算综合 Rating、六维与高 Rating 谱面详情。 400 参数无效；401 Token 无效或已撤销；403 无读取权限；404 数据不存在；429
+        当日调用限额；503 包括 ANALYSIS_BUSY、数据变化、计算超时或数据不可用。网关可能返回 502 / 504。
       security:
-        - DeveloperToken: []
+        - legacyDeveloperToken: []
       parameters:
-        - name: userid
-          in: path
+        - in: path
+          name: userid
           required: true
-          schema: { type: string, minLength: 1, maxLength: 128 }
+          description: Taiko Source ID, not a Viewer website account ID.
+          schema:
+            type: string
       responses:
         "200":
-          description: Rating summary and top-30 details from one score snapshot
+          description: Successful read. 最多返回 30 个谱面详情，按谱面 rating 降序。这不代表综合 Rating 是这 30 项的平均值。聚合复用现有模型：topN
+            当前为 20，六维分别聚合，综合值使用自身的聚合规则。没有独立 B30 路径或可调查询参数。
           content:
             application/json:
               schema:
-                type: object
-                required: [playerId, scoreRevision, model, aggregation, topN, sampleCount, dimensions, topSongs, topSongsCount]
-                properties:
-                  playerId: { type: string }
-                  scoreRevision: { type: string, description: SHA-256 of the captured score records and metadata }
-                  model: { type: string }
-                  aggregation: { type: string }
-                  topN: { type: integer }
-                  sampleCount: { type: integer, minimum: 0 }
-                  overallRating: { type: [number, "null"] }
-                  dimensions: { type: array, items: { type: object } }
-                  topSongsCount: { type: integer, minimum: 0, maximum: 30 }
-                  topSongs: { type: array, maxItems: 30, items: { type: object } }
-        "401": { description: Missing or invalid authentication }
-        "403": { description: Source is not authorized for this caller }
-        "429": { description: Existing Developer userdata quota exceeded }
-        "503": { description: Score snapshot changed or analysis unavailable }
+                $ref: "#/components/schemas/Rating"
+              example:
+                playerId: SYNTHETIC_SOURCE
+                scoreRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                model: v1
+                aggregation: per-dimension-top20
+                topN: 20
+                duplicateHandling: preserve
+                overallRating: null
+                sampleCount: 0
+                dimensions:
+                  - key: big_song
+                    value: 0
+                  - key: stamina
+                    value: 0
+                  - key: speed
+                    value: 0
+                  - key: accuracy_power
+                    value: 0
+                  - key: rhythm
+                    value: 0
+                  - key: complex
+                    value: 0
+                topSongs: []
+                topSongsCount: 0
+        "304":
+          description: Conditional ETag match; no response body. Authorization is still checked; analysis may
+            still run.
+        "400":
+          description: Invalid Source ID or input.
+        "401":
+          description: Invalid or revoked Developer Token.
+        "403":
+          description: No existing authority for this source; reading documentation does not grant access.
+        "404":
+          description: Source/data not found.
+        "429":
+          description: Configured UTC daily developer_userdata quota exceeded; shared by these three protected
+            endpoints. No guaranteed Retry-After.
+        "502":
+          description: Gateway/upstream error; response may not be JSON.
+        "503":
+          description: Analysis busy, worker timeout, changed data, source unavailable, or computation
+            failure. ANALYSIS_BUSY may appear in data.code.
+        "504":
+          description: Gateway timeout; a 90-second client read timeout cannot extend the current 60-second
+            API gateway limit.
   /api/developer/userdata/{userid}/recommendations:
     get:
-      operationId: getDeveloperRecommendations
-      description: Uses the same authorization as the existing Developer userdata endpoint and returns the existing rating-based recommendation algorithm's structured result.
+      summary: 推荐游玩谱面
+      description: 基于当前成绩取得普通 Rating 推荐列表，用于安排下一次游玩。 400 参数无效；401 Token 无效或已撤销；403 无读取权限；404 数据不存在；429
+        当日调用限额；503 包括 ANALYSIS_BUSY、数据变化、计算超时或数据不可用。网关可能返回 502 / 504。
       security:
-        - DeveloperToken: []
+        - legacyDeveloperToken: []
       parameters:
-        - name: userid
-          in: path
+        - in: path
+          name: userid
           required: true
-          schema: { type: string, minLength: 1, maxLength: 128 }
+          description: Taiko Source ID, not a Viewer website account ID.
+          schema:
+            type: string
       responses:
-        "200": { description: Structured rating-based recommendation result }
-        "401": { description: Missing or invalid authentication }
-        "403": { description: Source is not authorized for this caller }
-        "429": { description: Existing Developer userdata quota exceeded }
-        "503": { description: Score snapshot changed or analysis unavailable }
+        "200":
+          description: Successful read. 最多 20 项，保留算法排序：优先严格范围内的未玩／已玩候选，再按现有分组规则补足；不是按某个返回字段全局排序。可为空或不足 20
+            项。没有数量、六维等查询选项，也不返回推荐理由或预计提升分数。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendations"
+              example:
+                playerId: SYNTHETIC_SOURCE
+                scoreRevision: "0000000000000000000000000000000000000000000000000000000000000000"
+                model: v1
+                basis: rating
+                items:
+                  - songId: 10001
+                    level: 4
+                    title: Synthetic Song
+                    isUnplayed: true
+                    candidateIndicator: 10.5
+                    referenceIndicator: 10
+                    deviationRatio: 0.05
+                    inStrictRange: true
+        "304":
+          description: Conditional ETag match; no response body. Authorization is still checked; analysis may
+            still run.
+        "400":
+          description: Invalid Source ID or input.
+        "401":
+          description: Invalid or revoked Developer Token.
+        "403":
+          description: No existing authority for this source; reading documentation does not grant access.
+        "404":
+          description: Source/data not found.
+        "429":
+          description: Configured UTC daily developer_userdata quota exceeded; shared by these three protected
+            endpoints. No guaranteed Retry-After.
+        "502":
+          description: Gateway/upstream error; response may not be JSON.
+        "503":
+          description: Analysis busy, worker timeout, changed data, source unavailable, or computation
+            failure. ANALYSIS_BUSY may appear in data.code.
+        "504":
+          description: Gateway timeout; a 90-second client read timeout cannot extend the current 60-second
+            API gateway limit.
 components:
   securitySchemes:
-    DeveloperToken:
+    legacyDeveloperToken:
       type: http
       scheme: bearer
-      bearerFormat: opaque
-      description: Existing Developer Token authorization; no new ResourceGrant is introduced by these analysis routes.
+      description: Existing approved, active Developer Token, with existing read authority. Never put
+        credentials in the URL or copy browser cookies. Public catalog examples omit Authorization.
+  schemas:
+    CurrentScores:
+      type: object
+      additionalProperties: false
+      description: Only present source keys are retained; nested JSON is source dependent and may be null.
+        Sensitive keys are recursively removed. No history, annual reports, sync or write
+        operations.
+      properties:
+        profile: {}
+        songs: {}
+        achievement: {}
+        dojo: {}
+        _meta: {}
+    ApiReadVersions:
+      type: object
+      additionalProperties: false
+      properties:
+        contractVersion:
+          type: string
+          enum:
+            - "1.1"
+        schemaRevision:
+          type: string
+          minLength: 1
+        catalogRevision:
+          type: string
+          minLength: 1
+        scoreRevision:
+          type:
+            - string
+            - "null"
+        calculationProfile:
+          type: "null"
+        observationSource:
+          type:
+            - string
+            - "null"
+        capturedAt:
+          type:
+            - string
+            - "null"
+      required:
+        - contractVersion
+        - schemaRevision
+        - catalogRevision
+        - scoreRevision
+        - calculationProfile
+        - observationSource
+        - capturedAt
+    CatalogAvailability:
+      type: object
+      additionalProperties: false
+      properties:
+        region:
+          type: string
+          enum:
+            - CN
+            - JP
+            - UNKNOWN
+        status:
+          type: string
+          enum:
+            - active
+            - removed
+            - unknown
+      required:
+        - region
+        - status
+    Song:
+      type: object
+      additionalProperties: false
+      properties:
+        songId:
+          type: string
+          minLength: 1
+        song_name:
+          type:
+            - string
+            - "null"
+          maxLength: 512
+          description: Original Chinese/display name from song_data.json; null when the source has no value.
+        song_name_jp:
+          type:
+            - string
+            - "null"
+          maxLength: 512
+          description: Original Japanese name from song_data.json, falling back to song_alias.json when
+            absent; null when neither source has a value.
+        aliases:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 256
+          description: Alias strings from song_alias.json joined by numeric song ID; empty when no aliases
+            exist.
+        catalogRevision:
+          type:
+            - string
+            - "null"
+        availability:
+          $ref: "#/components/schemas/CatalogAvailability"
+      required:
+        - songId
+        - song_name
+        - song_name_jp
+        - aliases
+        - catalogRevision
+    Catalog:
+      type: object
+      required:
+        - versions
+        - items
+      additionalProperties: false
+      properties:
+        versions:
+          $ref: "#/components/schemas/ApiReadVersions"
+        items:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/Song"
+    Rating:
+      type: object
+      required:
+        - playerId
+        - scoreRevision
+        - model
+        - aggregation
+        - topN
+        - duplicateHandling
+        - overallRating
+        - sampleCount
+        - dimensions
+        - topSongs
+        - topSongsCount
+      additionalProperties: false
+      properties:
+        playerId: &a3
+          type: string
+          description: Requested Taiko Source ID, not a Viewer account ID.
+        scoreRevision: &a4
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        model: &a5
+          type: string
+          const: v1
+        aggregation:
+          type: string
+          const: per-dimension-top20
+        topN:
+          type: integer
+          const: 20
+          description: Aggregation parameter, independent of the maximum 30 details.
+        duplicateHandling:
+          type: string
+          const: preserve
+        overallRating:
+          type:
+            - number
+            - "null"
+        sampleCount:
+          type: integer
+          minimum: 0
+        dimensions:
+          type: array
+          minItems: 6
+          maxItems: 6
+          items:
+            type: object
+            required:
+              - key
+              - value
+            additionalProperties: false
+            properties:
+              key:
+                type: string
+                enum:
+                  - big_song
+                  - stamina
+                  - speed
+                  - accuracy_power
+                  - rhythm
+                  - complex
+              value: &a2
+                type: number
+        topSongs:
+          type: array
+          maxItems: 30
+          description: Descending rating; not a promise to average these rows for overallRating.
+          items:
+            type: object
+            required:
+              - songId
+              - level
+              - title
+              - rating
+              - dimensions
+            additionalProperties: false
+            properties:
+              songId: &a1
+                type: integer
+              level: *a1
+              title: &a6
+                type: string
+              rating: *a2
+              dimensions:
+                type: object
+                required:
+                  - big_song
+                  - stamina
+                  - speed
+                  - accuracy_power
+                  - rhythm
+                  - complex
+                additionalProperties: false
+                properties:
+                  big_song: *a2
+                  stamina: *a2
+                  speed: *a2
+                  accuracy_power: *a2
+                  rhythm: *a2
+                  complex: *a2
+        topSongsCount:
+          type: integer
+          minimum: 0
+          maximum: 30
+    Recommendations:
+      type: object
+      required:
+        - playerId
+        - scoreRevision
+        - model
+        - basis
+        - items
+      additionalProperties: false
+      properties:
+        playerId: *a3
+        scoreRevision: *a4
+        model: *a5
+        basis:
+          type: string
+          const: rating
+        items:
+          type: array
+          maxItems: 20
+          description: Existing algorithm order, with strict-range groups before fallback groups; not a global
+            field sort. Empty and partial results are valid.
+          items:
+            type: object
+            required:
+              - songId
+              - level
+              - title
+              - isUnplayed
+              - candidateIndicator
+              - referenceIndicator
+              - deviationRatio
+              - inStrictRange
+            additionalProperties: false
+            properties:
+              songId: *a1
+              level: *a1
+              title: *a6
+              isUnplayed:
+                type: boolean
+              candidateIndicator: *a2
+              referenceIndicator: *a2
+              deviationRatio:
+                type: number
+                description: (candidateIndicator-referenceIndicator)/referenceIndicator before rounding. 0.05 means
+                  +5%.
+              inStrictRange:
+                type: boolean
+                description: Candidate indicator is between 90% and 105% of reference indicator.
