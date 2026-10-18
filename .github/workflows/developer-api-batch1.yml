@@ -1,0 +1,42 @@
+name: Developer API batch 1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "taiko_viewer/**"
+      - "packages/sakura-taiko-contract/**"
+      - ".github/workflows/developer-api-batch1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "taiko_viewer/**"
+      - "packages/sakura-taiko-contract/**"
+      - ".github/workflows/developer-api-batch1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract-and-api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: taiko_viewer/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install locked dependencies
+        working-directory: taiko_viewer
+        run: npm ci
+      - name: Verify version projection and API batch regression tests
+        working-directory: taiko_viewer
+        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs
+      - name: Verify cross-language catalog Golden
+        working-directory: packages/sakura-taiko-contract
+        run: python -I tests/test_api_v1.py
