@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
-  version: 0.85.0-rc.6
-  description: Application documentation release 0.85.0-rc.6. API path v1 and calculation model v1 are
+  version: 0.85.0-rc.7
+  description: Application documentation release 0.85.0-rc.7. API path v1 and calculation model v1 are
     separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
     returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
     does not expand account/token authority or enable new capabilities. Examples are synthetic;
@@ -68,17 +68,13 @@ paths:
       security: []
       responses:
         "200":
-          description: "Without include: original Song items. With include=charts: CatalogSongWithCharts
-            items. Charts reuse the independent chart projection from the same read and
-            catalogRevision. Chart.difficulty is legacy score level 1–5; Chart.level is star level,
-            not the same field. Inherited availability is catalog metadata, not per-difficulty
-            regional implementation proof."
+          description: Default complete catalog with nested charts from one read and catalogRevision.
+            Chart.difficulty matches legacy score level (1–5); Chart.level is star level.
+            Availability is not proof of per-difficulty regional implementation.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/Catalog"
-                  - $ref: "#/components/schemas/CatalogSongsWithChartsResponse"
+                $ref: "#/components/schemas/CatalogSongsResponse"
               example:
                 versions:
                   contractVersion: "1.1"
@@ -135,16 +131,6 @@ paths:
         "503":
           description: Catalog unavailable or bounded size limit exceeded; error body contains code, message,
             requestId.
-      parameters:
-        - name: include
-          in: query
-          required: false
-          description: Use include=charts for the complete catalog in a single read/revision. Omit for the
-            unchanged legacy Song response. Other/repeated values are rejected.
-          schema:
-            type: string
-            enum:
-              - charts
   /api/developer/userdata/{userid}/rating:
     get:
       summary: Rating 与六维
@@ -271,29 +257,6 @@ paths:
         "504":
           description: Gateway timeout; a 90-second client read timeout cannot extend the current 60-second
             API gateway limit.
-  /api/v1/taiko/catalog/charts:
-    get:
-      summary: Existing independent chart catalog (retained)
-      security: []
-      responses:
-        "200":
-          description: Existing flat Chart projection; same contents as complete catalog charts for the same
-            catalogRevision.
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - versions
-                  - items
-                properties:
-                  versions:
-                    $ref: "#/components/schemas/ApiReadVersions"
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Chart"
 components:
   securitySchemes:
     legacyDeveloperToken:
@@ -409,20 +372,6 @@ components:
         - song_name_jp
         - aliases
         - catalogRevision
-    Catalog:
-      type: object
-      required:
-        - versions
-        - items
-      additionalProperties: false
-      properties:
-        versions:
-          $ref: "#/components/schemas/ApiReadVersions"
-        items:
-          type: array
-          maxItems: 10000
-          items:
-            $ref: "#/components/schemas/Song"
     Rating:
       type: object
       required:
@@ -672,9 +621,9 @@ components:
         - aliases
         - catalogRevision
         - charts
-      description: Catalog-only Song DTO returned only for include=charts. Canonical Song and all other
-        Song references are unchanged.
-    CatalogSongsWithChartsResponse:
+      description: Catalog-only Song DTO with charts, returned by the default song catalog. Canonical Song
+        and all other Song references are unchanged.
+    CatalogSongsResponse:
       type: object
       additionalProperties: false
       properties:

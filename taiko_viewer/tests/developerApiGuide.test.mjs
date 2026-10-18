@@ -12,7 +12,7 @@ test('four static guides match OpenAPI paths, auth, response schemas and bilingu
  for(const api of developerApis){
   const operation=contract.paths[api.path].get;
   assert.deepEqual(operation.security,api.protected?[{legacyDeveloperToken:[]}]:[]);
-  assert.equal((operation.parameters||[]).length,1);
+  assert.equal((operation.parameters||[]).length,api.protected?1:0);
   assert.equal(api.protected,api.id!=='catalog');
   validateGuideResponse(api.id,api.example);
   assert.deepEqual(operation.responses['200'].content['application/json'].example,api.example);

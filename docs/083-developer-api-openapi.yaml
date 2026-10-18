@@ -335,284 +335,74 @@ paths:
                       - cn-short
                       - first song
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
+                    availability: &a1
                       region: CN
                       status: active
+                    charts:
+                      - songId: "1"
+                        chartId: 1:1:single
+                        difficulty: 1
+                        level: 1
+                        type: single
+                        variant: null
+                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                        availability: *a1
+                        tjaCourse: 0
+                      - songId: "1"
+                        chartId: 1:4:single
+                        difficulty: 4
+                        level: 9
+                        type: single
+                        variant: null
+                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                        availability: *a1
+                        tjaCourse: 3
                   - songId: "2"
                     song_name: Synthetic JP
                     song_name_jp: Synthetic JP 日本語
                     aliases:
                       - jp-short
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
+                    availability: &a2
                       region: JP
                       status: removed
+                    charts:
+                      - songId: "2"
+                        chartId: 2:5:double
+                        difficulty: 5
+                        level: 10
+                        type: double
+                        variant: null
+                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                        availability: *a2
+                        tjaCourse: 4
                   - songId: "3"
                     song_name: Unknown region/mode
                     song_name_jp: null
                     aliases: []
                     catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
+                    availability: &a3
                       region: UNKNOWN
                       status: unknown
-        "304":
-          description: Revalidated representation. Private requests complete all live authority checks before
-            304.
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-        "400":
-          description: Invalid request; unknown query/body fields rejected
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: INVALID_REQUEST
-                message: INVALID_REQUEST
-                requestId: 00000000-0000-4000-8000-000000000000
-        "401":
-          description: Missing/invalid initial client or Viewer session identity
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: UNAUTHENTICATED
-                message: UNAUTHENTICATED
-                requestId: 00000000-0000-4000-8000-000000000000
-        "403":
-          description: Missing grant, wrong binding/client/scope/audience, late revocation or invalid consent
-            origin
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: GRANT_REQUIRED
-                message: GRANT_REQUIRED
-                requestId: 00000000-0000-4000-8000-000000000000
-        "404":
-          description: Candidate disabled or route absent
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: NOT_FOUND
-                message: NOT_FOUND
-                requestId: 00000000-0000-4000-8000-000000000000
-        "429":
-          description: Atomic shared daily quota exhausted
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              example:
-                code: RATE_LIMITED
-                message: RATE_LIMITED
-                requestId: 00000000-0000-4000-8000-000000000000
-        "503":
-          description: "No complete representation available: CATALOG_LIMIT_EXCEEDED (>10000 catalog rows or
-            source >8 MiB), SCORES_LIMIT_EXCEEDED (>20000 records), RESPONSE_LIMIT_EXCEEDED
-            (serialized UTF-8 JSON >8 MiB), PUBLICATION_REQUIRED, or UNAVAILABLE
-            (invalid/unavailable data). No truncated 200/304, no partial items; private,no-store.
-            Retrying unchanged data does not fix a bound; no Retry-After or automatic SDK retry."
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/ApiError
-              examples:
-                CATALOG_LIMIT_EXCEEDED:
-                  value:
-                    code: CATALOG_LIMIT_EXCEEDED
-                    message: CATALOG_LIMIT_EXCEEDED
-                    requestId: 00000000-0000-4000-8000-000000000000
-                SCORES_LIMIT_EXCEEDED:
-                  value:
-                    code: SCORES_LIMIT_EXCEEDED
-                    message: SCORES_LIMIT_EXCEEDED
-                    requestId: 00000000-0000-4000-8000-000000000000
-                RESPONSE_LIMIT_EXCEEDED:
-                  value:
-                    code: RESPONSE_LIMIT_EXCEEDED
-                    message: RESPONSE_LIMIT_EXCEEDED
-                    requestId: 00000000-0000-4000-8000-000000000000
-                PUBLICATION_REQUIRED:
-                  value:
-                    code: PUBLICATION_REQUIRED
-                    message: PUBLICATION_REQUIRED
-                    requestId: 00000000-0000-4000-8000-000000000000
-                UNAVAILABLE:
-                  value:
-                    code: UNAVAILABLE
-                    message: UNAVAILABLE
-                    requestId: 00000000-0000-4000-8000-000000000000
-      parameters:
-        - name: If-None-Match
-          in: header
-          required: false
-          schema:
-            type: string
-      x-example-policy: Synthetic examples only; no live account/key/score bytes.
-  /api/v1/taiko/catalog/charts:
-    get:
-      operationId: getCatalogCharts
-      description: Anonymous public data. Optional Authorization is always validated; an invalid header
-        never falls back to Cookie/anonymous. Atomic shared daily quota. Complete bounded result; no
-        pagination. Region/mode remain unknown when not explicit. Duplicate source IDs fail closed.
-      security:
-        - {}
-        - ClientKey: []
-      responses:
-        "200":
-          description: Completed read
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-            ETag:
-              schema:
-                type: string
-            X-Request-Id:
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: ../packages/sakura-taiko-contract/schema/contract-v1.json#/$defs/CatalogChartsResponse
-              example:
-                versions:
-                  contractVersion: "1.1"
-                  schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                  catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                  scoreRevision: null
-                  calculationProfile: null
-                  observationSource: null
-                  capturedAt: null
-                items:
-                  - songId: "1"
-                    chartId: 1:1:single
-                    difficulty: 1
-                    level: 1
-                    type: single
-                    variant: null
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
-                      region: CN
-                      status: active
-                    tjaCourse: 0
-                  - songId: "1"
-                    chartId: 1:4:single
-                    difficulty: 4
-                    level: 9
-                    type: single
-                    variant: null
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
-                      region: CN
-                      status: active
-                    tjaCourse: 3
-                  - songId: "2"
-                    chartId: 2:5:double
-                    difficulty: 5
-                    level: 10
-                    type: double
-                    variant: null
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
-                      region: JP
-                      status: removed
-                    tjaCourse: 4
-                  - songId: "3"
-                    chartId: 3:2:unknown
-                    difficulty: 2
-                    level: 3
-                    type: unknown
-                    variant: null
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
-                      region: UNKNOWN
-                      status: unknown
-                    tjaCourse: 1
-                  - songId: "3"
-                    chartId: 3:3:unknown
-                    difficulty: 3
-                    level: 4
-                    type: unknown
-                    variant: null
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability:
-                      region: UNKNOWN
-                      status: unknown
-                    tjaCourse: 2
+                    charts:
+                      - songId: "3"
+                        chartId: 3:2:unknown
+                        difficulty: 2
+                        level: 3
+                        type: unknown
+                        variant: null
+                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                        availability: *a3
+                        tjaCourse: 1
+                      - songId: "3"
+                        chartId: 3:3:unknown
+                        difficulty: 3
+                        level: 4
+                        type: unknown
+                        variant: null
+                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                        availability: *a3
+                        tjaCourse: 2
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
             304.

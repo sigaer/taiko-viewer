@@ -87,7 +87,7 @@ test('developer guide: zh/ja five account states, mobile disclosures, copy/fallb
    }
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,scenario+' '+locale+' mobile overflow');
    await guide.locator('[data-api="catalog"] [data-example="curl"] button').click();
-   assert.ok((await page.evaluate(()=>window.__copied)).includes('/api/v1/taiko/catalog/songs?include=charts'));
+   assert.ok((await page.evaluate(()=>window.__copied)).includes('/api/v1/taiko/catalog/songs'));
    assert.ok(!(await page.evaluate(()=>window.__copied)).includes('Authorization'));
    await page.evaluate(()=>{window.__copyFailure=true;});
    await guide.locator('[data-api="rating"]').getByRole('tab',{name:'Python',exact:true}).click();

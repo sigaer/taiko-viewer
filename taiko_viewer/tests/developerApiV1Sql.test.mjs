@@ -26,7 +26,7 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
  const base={_meta:{source:'wahlap',ts:'2026-10-15T04:00:00Z'},profile:{mydon_name:'Synthetic player',gameCostume:{title:'Synthetic title',got_dan_max:12,dan_name:{grade:11,level:2},private_extension:'never-return-extension'},cookie:'never-return-this-cookie',token:'never-return-this-token'},songs:[{song_no:100,level:4,high_score:900000,good_cnt:100,ok_cnt:1,ng_cnt:0,stage_cnt:2,clear_cnt:1,combo_cnt:null,highscore_datetime:'upstream text',update_datetime:'not a play event',private_extension:'never-return-extension'}]};
  async function publish(score=900000){return withPublicationLease(paths,async lease=>{await lease.put('current',JSON.stringify({...base,songs:base.songs.map(s=>({...s,high_score:score}))}));return lease.publish();});}
  await publish();
- const endpoints=[['get','/api/v1/taiko/meta','v1/taiko/meta.get.ts'],['get','/api/v1/taiko/catalog/songs','v1/taiko/catalog/songs.get.ts'],['get','/api/v1/taiko/catalog/charts','v1/taiko/catalog/charts.get.ts'],['get','/api/v1/taiko/players/:playerId/scores','v1/taiko/players/[playerId]/scores.get.ts'],['get','/api/v1/taiko/players/:playerId/profile','v1/taiko/players/[playerId]/profile.get.ts'],['get','/api/account/developer/grants','account/developer/grants/index.get.ts'],['post','/api/account/developer/grants','account/developer/grants/index.post.ts'],['delete','/api/account/developer/grants/:grantId','account/developer/grants/[grantId].delete.ts'],['get','/api/account/developer/clients','account/developer/clients/index.get.ts'],['post','/api/account/developer/clients','account/developer/clients/index.post.ts'],['delete','/api/account/developer/clients/:clientId','account/developer/clients/[clientId].delete.ts']];
+ const endpoints=[['get','/api/v1/taiko/meta','v1/taiko/meta.get.ts'],['get','/api/v1/taiko/catalog/songs','v1/taiko/catalog/songs.get.ts'],['get','/api/v1/taiko/players/:playerId/scores','v1/taiko/players/[playerId]/scores.get.ts'],['get','/api/v1/taiko/players/:playerId/profile','v1/taiko/players/[playerId]/profile.get.ts'],['get','/api/account/developer/grants','account/developer/grants/index.get.ts'],['post','/api/account/developer/grants','account/developer/grants/index.post.ts'],['delete','/api/account/developer/grants/:grantId','account/developer/grants/[grantId].delete.ts'],['get','/api/account/developer/clients','account/developer/clients/index.get.ts'],['post','/api/account/developer/clients','account/developer/clients/index.post.ts'],['delete','/api/account/developer/clients/:clientId','account/developer/clients/[clientId].delete.ts']];
  for(const [method,path,file] of endpoints)c.route(method,path,(await import('../server/api/'+file)).default);
  async function ask(name,path,{method='GET',body,cookie=c.cookie,token,headers={},expected=200,schemaName}={}){
   const res=await c.request(method,path,body,cookie,{origin:c.baseUrl,...(token!==undefined?{authorization:'Bearer '+token}:{}),...headers});const text=await res.text();let value=text?JSON.parse(text):null;
@@ -50,27 +50,22 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
  try{
   c.config.developerApiV1=false;await ask('default-off','/api/v1/taiko/meta',{expected:404});c.config.developerApiV1=true;
   const pub=await ask('anonymous-public-songs','/api/v1/taiko/catalog/songs',{cookie:'',schemaName:'CatalogSongsResponse'});assert.equal(pub.body.items[0].availability.region,'CN');
-  const charts=await ask('anonymous-public-charts','/api/v1/taiko/catalog/charts',{cookie:'',schemaName:'CatalogChartsResponse'});assert.equal(charts.body.items[0].difficulty,4);assert.equal(charts.body.items[0].tjaCourse,3);assert.equal(charts.body.items.at(-1).type,'double');assert.equal(charts.body.items.at(-1).availability.status,'unknown');
-  const complete=await ask('anonymous-complete-songs','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',schemaName:'CatalogSongsWithChartsResponse'});
-  assert.deepEqual(complete.body.items.map(({charts,...song})=>song),pub.body.items);
-  assert.deepEqual(complete.body.items.flatMap(s=>s.charts),charts.body.items);
-  assert.ok(complete.body.items.every(s=>s.catalogRevision===complete.body.versions.catalogRevision&&s.charts.every(c=>c.songId===s.songId&&c.catalogRevision===s.catalogRevision)));
-  assert.notEqual(complete.res.headers.get('etag'),pub.res.headers.get('etag'));
-  await ask('complete-own-304','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',headers:{'if-none-match':complete.res.headers.get('etag')},expected:304});
-  await ask('legacy-etag-not-complete','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',headers:{'if-none-match':pub.res.headers.get('etag')},schemaName:'CatalogSongsWithChartsResponse'});
-  for(const query of ['include=other','include=','include=charts&include=charts','include=charts&extra=1'])await ask('invalid-complete-query','/api/v1/taiko/catalog/songs?'+query,{cookie:'',expected:400});
-  await ask('charts-query-unchanged','/api/v1/taiko/catalog/charts?include=charts',{cookie:'',expected:400});
-  await ask('complete-invalid-bearer-no-anonymous-fallback','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',token:'synthetic-invalid-token',expected:401});
+  const flat=pub.body.items.flatMap(s=>s.charts);
+  assert.deepEqual(flat.map(c=>[c.songId,c.difficulty,c.level]),[['100',4,9],['100',5,10],['101',1,1]]);
+  assert.equal(flat[0].tjaCourse,3);assert.equal(flat.at(-1).type,'double');assert.equal(flat.at(-1).availability.status,'unknown');
+  assert.ok(pub.body.items.every(s=>s.catalogRevision===pub.body.versions.catalogRevision&&s.charts.every(c=>c.songId===s.songId&&c.catalogRevision===s.catalogRevision)));
+  for(const query of ['include=charts','include=other','include=','include=charts&include=charts','include=charts&extra=1'])await ask('unsupported-catalog-query','/api/v1/taiko/catalog/songs?'+query,{cookie:'',expected:400});
+  const removed=await c.request('GET','/api/v1/taiko/catalog/charts',undefined,'');assert.equal(removed.status,404);
+  await ask('complete-invalid-bearer-no-anonymous-fallback','/api/v1/taiko/catalog/songs',{cookie:'',token:'synthetic-invalid-token',expected:401});
   // Same complete request, one existing projection: no second data source or N+1.
   try{
    await writeFile(catalogPath,JSON.stringify([{id:500,level_1:1,level_2:3,level_4:9,shelf_status:1,chart_type:'unexpected'},{id:501,level_1:null,level_3:'-',level_5:null}]));
-   const partial=await ask('complete-missing-difficulties-and-unknowns','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',schemaName:'CatalogSongsWithChartsResponse'});
+   const partial=await ask('complete-missing-difficulties-and-unknowns','/api/v1/taiko/catalog/songs',{cookie:'',schemaName:'CatalogSongsResponse'});
    assert.deepEqual(partial.body.items[0].charts.map(x=>[x.difficulty,x.level]),[[1,1],[2,3],[4,9]]);
    assert.deepEqual(partial.body.items[1].charts,[]);assert.deepEqual(partial.body.items[0].aliases,[]);assert.equal(partial.body.items[0].availability.region,'UNKNOWN');assert.equal(partial.body.items[0].availability.status,'removed');assert.ok(partial.body.items[0].charts.every(c=>c.type==='unknown'&&c.variant===null));
    const maxRows=Array.from({length:10000},(_,i)=>({id:200000+i,level_1:1,level_2:2,level_3:3,level_4:9,level_5:10}));
    await writeFile(catalogPath,JSON.stringify(maxRows));
-   const legacyMax=await ask('legacy-10000-still-bounded','/api/v1/taiko/catalog/songs',{cookie:'',schemaName:'CatalogSongsResponse'});assert.equal(legacyMax.body.items.length,10000);assert.ok(Buffer.byteLength(JSON.stringify(legacyMax.body))<8*1024*1024);
-   await ask('complete-response-size-cap-unchanged','/api/v1/taiko/catalog/songs?include=charts',{cookie:'',expected:503});
+   await ask('complete-response-size-cap-unchanged','/api/v1/taiko/catalog/songs',{cookie:'',expected:503});
   }finally{await writeFile(catalogPath,JSON.stringify(rows));}
   await ask('public-304','/api/v1/taiko/catalog/songs',{cookie:'',headers:{'if-none-match':pub.res.headers.get('etag')},expected:304});
   await ask('public-meta','/api/v1/taiko/meta',{cookie:''});
@@ -85,6 +80,7 @@ test('Developer API v1 real isolated MySQL/HTTP consent, negative authorization 
   let grant=(await ask('owner-consents-A1-X-scores','/api/account/developer/grants',{method:'POST',body:issue})).body.grant;
   assert.equal(validate('ResourceGrant')(grant),true);const player=grant.playerId;
   const {createDeveloperApi,DeveloperApiError}=await import('../lib/developer-api-v1.ts');const sdk=createDeveloperApi({baseUrl:c.baseUrl,key:keyX,fetcher:nativeFetch});
+  const sdkCatalog=await sdk.songs();assert.deepEqual(sdkCatalog.data.items,pub.body.items);assert.equal('charts' in sdk,false);
   const sdkScores=await sdk.scores(player);assert.equal(sdkScores.data.items[0].score,900000);observations.push({case:'typescript-sdk-read',status:200,expected:200});
   const first=await ask('grant-reads-scores-A1',scores(player),{token:keyX,schemaName:'DeveloperScoresResponse'});const etag=first.res.headers.get('etag');assert.equal(first.body.items[0].combo,null);assert.equal(first.body.items[0].capturedAt,base._meta.ts);assert.equal(first.body.items[0].highscoreAt,'upstream text');assert.equal(first.body.items[0].chart.level,9);
   await ask('authorized-private-304',scores(player),{token:keyX,headers:{'if-none-match':etag},expected:304});
