@@ -31,7 +31,6 @@ type DeveloperPayload = {
   token: DeveloperToken | null;
 };
 
-const developerApiV1Enabled = computed(() => accountUser.value?.developerApiV1Access === true);
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
@@ -116,9 +115,7 @@ const copy = computed(() =>
         guideErrors: "401: Token が無効・失効、403: 権限不足、404: データなし、429: 利用回数制限、503: 一時的に利用不可。",
         guideSafety: "この Token は現在スコアの読み取り専用です。履歴・同期・書き込み・認証情報は対象外です。Token を公開コード、ブラウザー、URL やログに置かないでください。",
         guideLost: "Token の全文は再表示できません。紛失時は管理者に再発行を相談してください。",
-        guideInactive: "有効な Token がありません。使用前に管理者にお問い合わせください。",
-        guideV1: "別の Developer API v1 では、アプリへの ResourceGrant による個別アクセス許可が必要です。",
-        guideV1Link: "v1 アプリとアクセス許可"
+        guideInactive: "有効な Token がありません。使用前に管理者にお問い合わせください。"
       }
     : {
         title: "开发者权限",
@@ -170,9 +167,7 @@ const copy = computed(() =>
         guideErrors: "401：Token 无效或已撤销；403：缺少读取权限；404：成绩数据不存在；429：调用次数超限；503：服务暂不可用。",
         guideSafety: "仅支持当前成绩只读，不包含历史、写入、同步或上游凭据。不要把 Token 放入公开仓库、浏览器脚本、URL 或日志。",
         guideLost: "完整 Token 不会在页面上重新显示；如果遗失，请联系管理员处理重新签发。",
-        guideInactive: "当前没有有效 Token。请联系管理员处理后再调用接口。",
-        guideV1: "另有 Developer API v1，使用 ResourceGrant 逐应用、逐绑定授权，与此接口的 Token 权限不同。",
-        guideV1Link: "查看 v1 应用及授权管理"
+        guideInactive: "当前没有有效 Token。请联系管理员处理后再调用接口。"
       }
 );
 
@@ -322,10 +317,6 @@ const submitApplication = async () => {
         <p class="guide-note">{{ copy.guideErrors }}</p>
         <p class="guide-note">{{ copy.guideSafety }}</p>
         <p class="guide-note">{{ copy.guideLost }}</p>
-        <p v-if="developerApiV1Enabled" class="guide-note">
-          {{ copy.guideV1 }}
-          <NuxtLink :to="localePath('/account/developer/grants')">{{ copy.guideV1Link }}</NuxtLink>
-        </p>
       </el-card>
 
       <el-card v-if="canSubmitApplication" class="panel-card">
@@ -523,10 +514,6 @@ const submitApplication = async () => {
   font-weight: 600;
   min-height: 44px;
   align-content: center;
-}
-
-.guide-note a {
-  color: var(--el-color-primary);
 }
 
 :global(body.theme-dark .developer-guide .section-title p),
