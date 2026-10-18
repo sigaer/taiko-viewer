@@ -1004,27 +1004,9 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Song"
-          }
-        }
-      },
-      "required": [
-        "versions",
-        "items"
-      ]
-    },
-    "CatalogChartsResponse": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "versions": {
-          "$ref": "#/$defs/ApiReadVersions"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Chart"
-          }
+            "$ref": "#/$defs/CatalogSongWithCharts"
+          },
+          "maxItems": 10000
         }
       },
       "required": [
@@ -1143,27 +1125,7 @@
         "catalogRevision",
         "charts"
       ],
-      "description": "Catalog-only Song DTO returned only for include=charts. Canonical Song and all other Song references are unchanged."
-    },
-    "CatalogSongsWithChartsResponse": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "versions": {
-          "$ref": "#/$defs/ApiReadVersions"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/CatalogSongWithCharts"
-          },
-          "maxItems": 10000
-        }
-      },
-      "required": [
-        "versions",
-        "items"
-      ]
+      "description": "Catalog-only Song DTO with charts, returned by the default song catalog. Canonical Song and all other Song references are unchanged."
     }
   }
 }

@@ -31,7 +31,7 @@ test('analysis HTTP uses installed algorithms, captured scores and existing Deve
  c.route('get','/api/v1/taiko/catalog/songs',(await import('../server/api/v1/taiko/catalog/songs.get.ts')).default);
  c.route('get','/api/developer/userdata/:userid',(await import('../server/api/developer/userdata/[userid].get.ts')).default);
  for(const kind of ['rating','recommendations'])c.route('get','/api/developer/userdata/:userid/'+kind,(await import('../server/api/developer/userdata/[userid]/'+kind+'.get.ts')).default);
- const path=kind=>kind==='catalog'?'/api/v1/taiko/catalog/songs?include=charts':'/api/developer/userdata/'+c.taikoId+(kind==='userdata'?'':'/'+kind),observations=[];
+ const path=kind=>kind==='catalog'?'/api/v1/taiko/catalog/songs':'/api/developer/userdata/'+c.taikoId+(kind==='userdata'?'':'/'+kind),observations=[];
  async function ask(kind,{token,cookie=c.cookie,status=200,etag}={}){
   const r=await c.request('GET',path(kind),undefined,cookie,{...(token?{authorization:'Bearer '+token}:{}),...(etag?{'if-none-match':etag}:{})});
   assert.equal(r.status,status,kind);const body=r.status===304?null:await r.json();

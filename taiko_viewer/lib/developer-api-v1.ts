@@ -1,4 +1,4 @@
-import type {CatalogSongsResponse,CatalogChartsResponse,DeveloperScoresResponse,DeveloperProfileResponse} from '@sakura-taiko/contract';
+import type {CatalogSongsResponse,DeveloperScoresResponse,DeveloperProfileResponse} from '@sakura-taiko/contract';
 export class DeveloperApiError extends Error {
  constructor(public status:number,public code:string,public requestId:string|null){super(code);}
 }
@@ -13,5 +13,5 @@ export function createDeveloperApi(options:{baseUrl:string;key?:string;fetcher?:
   return {data:data as T,etag:response.headers.get('etag'),notModified:false};
  }
  const resource=(playerId:string)=>{if(!/^plr_[a-f0-9]{32}$/.test(playerId))throw new Error('Invalid player ID');return 'players/'+playerId;};
- return {meta:()=>read<Record<string,unknown>>('meta'),songs:()=>read<CatalogSongsResponse>('catalog/songs'),charts:()=>read<CatalogChartsResponse>('catalog/charts'),scores:(playerId:string,etag?:string)=>read<DeveloperScoresResponse>(resource(playerId)+'/scores',etag),profile:(playerId:string,etag?:string)=>read<DeveloperProfileResponse>(resource(playerId)+'/profile',etag)};
+ return {meta:()=>read<Record<string,unknown>>('meta'),songs:()=>read<CatalogSongsResponse>('catalog/songs'),scores:(playerId:string,etag?:string)=>read<DeveloperScoresResponse>(resource(playerId)+'/scores',etag),profile:(playerId:string,etag?:string)=>read<DeveloperProfileResponse>(resource(playerId)+'/profile',etag)};
 }

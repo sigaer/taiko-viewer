@@ -174,11 +174,7 @@ export type DeveloperProfileResponse = {
 };
 export type CatalogSongsResponse = {
   versions: ApiReadVersions;
-  items: Array<Song>;
-};
-export type CatalogChartsResponse = {
-  versions: ApiReadVersions;
-  items: Array<Chart>;
+  items: Array<CatalogSongWithCharts>;
 };
 export type ApiError = {
   code: string;
@@ -198,10 +194,6 @@ export type CatalogSongWithCharts = {
   catalogRevision: string | null;
   availability?: CatalogAvailability;
   charts: Array<Chart>;
-};
-export type CatalogSongsWithChartsResponse = {
-  versions: ApiReadVersions;
-  items: Array<CatalogSongWithCharts>;
 };
 export { fromLegacyScore, toLegacyScore } from "./legacy.mjs";
 export { legacyScoreReader, legacyScoreValue, legacyCrown, legacyJudgmentTotal, legacyScoreInstant, hasLegacyScoreEvidence } from "./read-values.mjs";

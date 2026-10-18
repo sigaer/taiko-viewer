@@ -18,6 +18,7 @@ test('batch one routes delegate to the intended service and removed aliases rout
  assert.match(rating,/getDeveloperAnalysisByUserid\(event,event\.context\.params\?\.userid,'rating'\)/);
  assert.match(recommendations,/getDeveloperAnalysisByUserid\(event,event\.context\.params\?\.userid,'recommendations'\)/);
  await assert.rejects(access(new URL('../server/api/v1/taiko/catalog/aliases.get.ts',import.meta.url)));
+ await assert.rejects(access(new URL('../server/api/v1/taiko/catalog/charts.get.ts',import.meta.url)));
 });
 
 test('catalog adapter joins song names and aliases by ID using one fixture',async()=>{

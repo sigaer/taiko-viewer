@@ -30,14 +30,14 @@ test('grant DTO is canonical schema, while unopened scopes remain a separate run
 });
 
 
-test('opt-in catalog-only DTO preserves strict Song and groups the existing chart projection',async()=>{
+test('default catalog-only DTO preserves strict Song and groups the existing chart projection',async()=>{
  const {catalogSongsWithCharts}=await import('../src/catalog.mjs');
  const original=mapCatalog(fixtures.catalogInput,'synthetic-catalog-v1',fixtures.aliasInput);
  const complete=catalogSongsWithCharts(original);
  assert.deepEqual(complete.flatMap(s=>s.charts),original.charts);
  for(const row of complete){
   assert.equal(validate('CatalogSongWithCharts')(row),true);
-  assert.equal(validate('Song')(row),false,'strict old consumers reject the opt-in extension');
+  assert.equal(validate('Song')(row),false,'strict old consumers must use the catalog response DTO');
   const {charts,...song}=row;assert.deepEqual(song,original.songs.find(s=>s.songId===row.songId));
   assert.ok(charts.every(c=>c.songId===row.songId&&c.catalogRevision===row.catalogRevision));
  }

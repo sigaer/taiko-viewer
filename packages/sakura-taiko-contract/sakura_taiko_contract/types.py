@@ -155,10 +155,7 @@ class DeveloperProfileResponse(TypedDict):
     profile: DeveloperPlayerProfile
 class CatalogSongsResponse(TypedDict):
     versions: ApiReadVersions
-    items: List[Song]
-class CatalogChartsResponse(TypedDict):
-    versions: ApiReadVersions
-    items: List[Chart]
+    items: List[CatalogSongWithCharts]
 class ApiError(TypedDict):
     code: str
     message: str
@@ -175,6 +172,3 @@ class CatalogSongWithCharts(TypedDict):
     catalogRevision: str | None
     availability: NotRequired[CatalogAvailability]
     charts: List[Chart]
-class CatalogSongsWithChartsResponse(TypedDict):
-    versions: ApiReadVersions
-    items: List[CatalogSongWithCharts]
