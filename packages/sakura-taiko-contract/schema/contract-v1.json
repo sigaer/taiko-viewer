@@ -999,12 +999,12 @@
       "additionalProperties": false,
       "properties": {
         "versions": {
-          "$ref": "#/$defs/ApiReadVersions"
+          "$ref": "#/$defs/CatalogVersions"
         },
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CatalogSongWithCharts"
+            "$ref": "#/$defs/CatalogSong"
           },
           "maxItems": 10000
         }
@@ -1066,7 +1066,27 @@
         "highestPassedGrade"
       ]
     },
-    "CatalogSongWithCharts": {
+    "CatalogChart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "level": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Star level, distinct from difficulty."
+        }
+      },
+      "required": [
+        "difficulty",
+        "level"
+      ]
+    },
+    "CatalogSong": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -1099,22 +1119,20 @@
           },
           "description": "Alias strings from song_alias.json joined by numeric song ID; empty when no aliases exist."
         },
-        "catalogRevision": {
-          "type": [
-            "string",
-            "null"
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "removed",
+            "unknown"
           ]
-        },
-        "availability": {
-          "$ref": "#/$defs/CatalogAvailability"
         },
         "charts": {
           "type": "array",
           "maxItems": 5,
           "items": {
-            "$ref": "#/$defs/Chart"
-          },
-          "description": "Existing chart projection from the same catalog read/revision. Availability is inherited catalog metadata, not proof of regional implementation for each difficulty. Missing difficulties are absent."
+            "$ref": "#/$defs/CatalogChart"
+          }
         }
       },
       "required": [
@@ -1122,10 +1140,35 @@
         "song_name",
         "song_name_jp",
         "aliases",
-        "catalogRevision",
+        "status",
         "charts"
       ],
-      "description": "Catalog-only Song DTO with charts, returned by the default song catalog. Canonical Song and all other Song references are unchanged."
+      "description": "Public song catalog DTO. Difficulty is unique within the parent song; catalog version is declared once in the response."
+    },
+    "CatalogVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "enum": [
+            "1.1"
+          ]
+        },
+        "schemaRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalogRevision": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "contractVersion",
+        "schemaRevision",
+        "catalogRevision"
+      ]
     }
   }
 }

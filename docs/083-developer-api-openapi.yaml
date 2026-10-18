@@ -323,10 +323,6 @@ paths:
                   contractVersion: "1.1"
                   schemaRevision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                  scoreRevision: null
-                  calculationProfile: null
-                  observationSource: null
-                  capturedAt: null
                 items:
                   - songId: "1"
                     song_name: Synthetic CN
@@ -334,75 +330,31 @@ paths:
                     aliases:
                       - cn-short
                       - first song
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability: &a1
-                      region: CN
-                      status: active
+                    status: active
                     charts:
-                      - songId: "1"
-                        chartId: 1:1:single
-                        difficulty: 1
+                      - difficulty: 1
                         level: 1
-                        type: single
-                        variant: null
-                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                        availability: *a1
-                        tjaCourse: 0
-                      - songId: "1"
-                        chartId: 1:4:single
-                        difficulty: 4
+                      - difficulty: 4
                         level: 9
-                        type: single
-                        variant: null
-                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                        availability: *a1
-                        tjaCourse: 3
                   - songId: "2"
                     song_name: Synthetic JP
                     song_name_jp: Synthetic JP 日本語
                     aliases:
                       - jp-short
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability: &a2
-                      region: JP
-                      status: removed
+                    status: removed
                     charts:
-                      - songId: "2"
-                        chartId: 2:5:double
-                        difficulty: 5
+                      - difficulty: 5
                         level: 10
-                        type: double
-                        variant: null
-                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                        availability: *a2
-                        tjaCourse: 4
                   - songId: "3"
                     song_name: Unknown region/mode
                     song_name_jp: null
                     aliases: []
-                    catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                    availability: &a3
-                      region: UNKNOWN
-                      status: unknown
+                    status: unknown
                     charts:
-                      - songId: "3"
-                        chartId: 3:2:unknown
-                        difficulty: 2
+                      - difficulty: 2
                         level: 3
-                        type: unknown
-                        variant: null
-                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                        availability: *a3
-                        tjaCourse: 1
-                      - songId: "3"
-                        chartId: 3:3:unknown
-                        difficulty: 3
+                      - difficulty: 3
                         level: 4
-                        type: unknown
-                        variant: null
-                        catalogRevision: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-                        availability: *a3
-                        tjaCourse: 2
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
             304.

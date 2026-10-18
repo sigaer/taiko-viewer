@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
-  version: 0.85.0-rc.7
-  description: Application documentation release 0.85.0-rc.7. API path v1 and calculation model v1 are
+  version: 0.85.0-rc.8
+  description: Application documentation release 0.85.0-rc.8. API path v1 and calculation model v1 are
     separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
     returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
     does not expand account/token authority or enable new capabilities. Examples are synthetic;
@@ -63,14 +63,14 @@ paths:
   /api/v1/taiko/catalog/songs:
     get:
       summary: 歌曲、谱面与难度
-      description: 查询歌曲 ID、中日原始曲名与别名，用于搜索和成绩关联。 400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429
+      description: 一次取得歌曲 ID、中日原始曲名、别名、状态及谱面难度与星级，用于选曲展示和成绩关联。 400 不支持的查询参数；401 主动附带的 Token 无效；404 接口未开放；429
         日次限流（RATE_LIMITED）；503 曲库或服务暂不可用。错误体为 code、message、requestId。
       security: []
       responses:
         "200":
-          description: Default complete catalog with nested charts from one read and catalogRevision.
-            Chart.difficulty matches legacy score level (1–5); Chart.level is star level.
-            Availability is not proof of per-difficulty regional implementation.
+          description: Complete catalog from one read/revision. Each song contains names, aliases, status and
+            charts; chart difficulty is the legacy score level (1–5), while level is star level.
+            Version metadata is declared once at the top level.
           content:
             application/json:
               schema:
@@ -80,42 +80,17 @@ paths:
                   contractVersion: "1.1"
                   schemaRevision: "0000000000000000000000000000000000000000000000000000000000000000"
                   catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
-                  scoreRevision: null
-                  calculationProfile: null
-                  observationSource: null
-                  capturedAt: null
                 items:
                   - songId: "10001"
                     song_name: 合成歌曲
                     song_name_jp: null
                     aliases: []
-                    catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
-                    availability:
-                      region: UNKNOWN
-                      status: active
+                    status: active
                     charts:
-                      - songId: "10001"
-                        chartId: 10001:1:unknown
-                        difficulty: 1
+                      - difficulty: 1
                         level: 3
-                        type: unknown
-                        variant: null
-                        catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
-                        availability:
-                          region: UNKNOWN
-                          status: active
-                        tjaCourse: 0
-                      - songId: "10001"
-                        chartId: 10001:4:unknown
-                        difficulty: 4
+                      - difficulty: 4
                         level: 9
-                        type: unknown
-                        variant: null
-                        catalogRevision: "0000000000000000000000000000000000000000000000000000000000000000"
-                        availability:
-                          region: UNKNOWN
-                          status: active
-                        tjaCourse: 3
         "304":
           description: Conditional ETag match; no response body. Authorization is still checked; analysis may
             still run.
@@ -277,101 +252,6 @@ components:
         achievement: {}
         dojo: {}
         _meta: {}
-    ApiReadVersions:
-      type: object
-      additionalProperties: false
-      properties:
-        contractVersion:
-          type: string
-          enum:
-            - "1.1"
-        schemaRevision:
-          type: string
-          minLength: 1
-        catalogRevision:
-          type: string
-          minLength: 1
-        scoreRevision:
-          type:
-            - string
-            - "null"
-        calculationProfile:
-          type: "null"
-        observationSource:
-          type:
-            - string
-            - "null"
-        capturedAt:
-          type:
-            - string
-            - "null"
-      required:
-        - contractVersion
-        - schemaRevision
-        - catalogRevision
-        - scoreRevision
-        - calculationProfile
-        - observationSource
-        - capturedAt
-    CatalogAvailability:
-      type: object
-      additionalProperties: false
-      properties:
-        region:
-          type: string
-          enum:
-            - CN
-            - JP
-            - UNKNOWN
-        status:
-          type: string
-          enum:
-            - active
-            - removed
-            - unknown
-      required:
-        - region
-        - status
-    Song:
-      type: object
-      additionalProperties: false
-      properties:
-        songId:
-          type: string
-          minLength: 1
-        song_name:
-          type:
-            - string
-            - "null"
-          maxLength: 512
-          description: Original Chinese/display name from song_data.json; null when the source has no value.
-        song_name_jp:
-          type:
-            - string
-            - "null"
-          maxLength: 512
-          description: Original Japanese name from song_data.json, falling back to song_alias.json when
-            absent; null when neither source has a value.
-        aliases:
-          type: array
-          maxItems: 100
-          items:
-            type: string
-            maxLength: 256
-          description: Alias strings from song_alias.json joined by numeric song ID; empty when no aliases
-            exist.
-        catalogRevision:
-          type:
-            - string
-            - "null"
-        availability:
-          $ref: "#/components/schemas/CatalogAvailability"
-      required:
-        - songId
-        - song_name
-        - song_name_jp
-        - aliases
-        - catalogRevision
     Rating:
       type: object
       required:
@@ -525,54 +405,36 @@ components:
               inStrictRange:
                 type: boolean
                 description: Candidate indicator is between 90% and 105% of reference indicator.
-    Chart:
+    CatalogSongsResponse:
       type: object
       additionalProperties: false
       properties:
-        songId:
-          type: string
-          minLength: 1
-        chartId:
-          type: string
-          minLength: 1
+        versions:
+          $ref: "#/components/schemas/CatalogVersions"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogSong"
+          maxItems: 10000
+      required:
+        - versions
+        - items
+    CatalogChart:
+      type: object
+      additionalProperties: false
+      properties:
         difficulty:
           type: integer
           minimum: 1
           maximum: 5
         level:
-          type:
-            - number
-            - "null"
-          minimum: 0
-        type:
-          type: string
-          enum:
-            - single
-            - double
-            - unknown
-        variant:
-          type:
-            - string
-            - "null"
-        catalogRevision:
-          type:
-            - string
-            - "null"
-        availability:
-          $ref: "#/components/schemas/CatalogAvailability"
-        tjaCourse:
-          type: integer
-          minimum: 0
-          maximum: 4
+          type: number
+          exclusiveMinimum: 0
+          description: Star level, distinct from difficulty.
       required:
-        - songId
-        - chartId
         - difficulty
         - level
-        - type
-        - variant
-        - catalogRevision
-    CatalogSongWithCharts:
+    CatalogSong:
       type: object
       additionalProperties: false
       properties:
@@ -600,40 +462,41 @@ components:
             maxLength: 256
           description: Alias strings from song_alias.json joined by numeric song ID; empty when no aliases
             exist.
-        catalogRevision:
-          type:
-            - string
-            - "null"
-        availability:
-          $ref: "#/components/schemas/CatalogAvailability"
+        status:
+          type: string
+          enum:
+            - active
+            - removed
+            - unknown
         charts:
           type: array
           maxItems: 5
           items:
-            $ref: "#/components/schemas/Chart"
-          description: Existing chart projection from the same catalog read/revision. Availability is
-            inherited catalog metadata, not proof of regional implementation for each difficulty.
-            Missing difficulties are absent.
+            $ref: "#/components/schemas/CatalogChart"
       required:
         - songId
         - song_name
         - song_name_jp
         - aliases
-        - catalogRevision
+        - status
         - charts
-      description: Catalog-only Song DTO with charts, returned by the default song catalog. Canonical Song
-        and all other Song references are unchanged.
-    CatalogSongsResponse:
+      description: Public song catalog DTO. Difficulty is unique within the parent song; catalog version
+        is declared once in the response.
+    CatalogVersions:
       type: object
       additionalProperties: false
       properties:
-        versions:
-          $ref: "#/components/schemas/ApiReadVersions"
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/CatalogSongWithCharts"
-          maxItems: 10000
+        contractVersion:
+          type: string
+          enum:
+            - "1.1"
+        schemaRevision:
+          type: string
+          minLength: 1
+        catalogRevision:
+          type: string
+          minLength: 1
       required:
-        - versions
-        - items
+        - contractVersion
+        - schemaRevision
+        - catalogRevision

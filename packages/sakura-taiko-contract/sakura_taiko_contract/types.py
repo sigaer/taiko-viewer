@@ -154,8 +154,8 @@ class DeveloperProfileResponse(TypedDict):
     versions: ApiReadVersions
     profile: DeveloperPlayerProfile
 class CatalogSongsResponse(TypedDict):
-    versions: ApiReadVersions
-    items: List[CatalogSongWithCharts]
+    versions: CatalogVersions
+    items: List[CatalogSong]
 class ApiError(TypedDict):
     code: str
     message: str
@@ -164,11 +164,17 @@ class DeveloperDan(TypedDict):
     equippedGrade: int | None
     equippedLevel: int | None
     highestPassedGrade: int | None
-class CatalogSongWithCharts(TypedDict):
+class CatalogChart(TypedDict):
+    difficulty: int
+    level: float
+class CatalogSong(TypedDict):
     songId: str
     song_name: str | None
     song_name_jp: str | None
     aliases: List[str]
-    catalogRevision: str | None
-    availability: NotRequired[CatalogAvailability]
-    charts: List[Chart]
+    status: Literal['active', 'removed', 'unknown']
+    charts: List[CatalogChart]
+class CatalogVersions(TypedDict):
+    contractVersion: Literal['1.1']
+    schemaRevision: str
+    catalogRevision: str
