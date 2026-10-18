@@ -11,6 +11,7 @@ Environment=NITRO_PORT=3100
 Environment=NITRO_HOST=127.0.0.1
 EnvironmentFile=-/etc/taiko-viewer.env
 Environment=TAIKO_REPO_ROOT=/home/sigaer/taiko
+Environment=TAIKO_PYTHON_EXECUTABLE=/opt/taiko-bot/current/bin/python
 Environment=TAIKO_USERDATA_DIR=/home/sigaer/taiko/userdata
 Environment=TAIKO_VIEWER_CACHE_DIR=/home/sigaer/taiko/data/viewer_cache
 Environment=TAIKO_OPEN_RESOURCE_DIR=/home/sigaer/taiko-open-resources
