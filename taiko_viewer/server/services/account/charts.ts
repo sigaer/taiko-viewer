@@ -81,7 +81,7 @@ const ensureBindingWithUserdata = async (userId: number) => {
   return binding;
 };
 
-const runPythonImage = async (pythonCode: string, args: string[] = []) => {
+export const runPythonImage = async (pythonCode: string, args: string[] = []) => {
   const { repoRoot, userdataDir } = getRuntimePaths();
   const result = await execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
     cwd: repoRoot,
@@ -93,7 +93,7 @@ const runPythonImage = async (pythonCode: string, args: string[] = []) => {
   return result.stdout as Buffer;
 };
 
-const toJpeg = async (pngBuffer: Buffer) => {
+export const toJpeg = async (pngBuffer: Buffer) => {
   const sharp = (await import("sharp")).default;
   return sharp(pngBuffer).jpeg({ quality: 85 }).toBuffer();
 };
@@ -224,7 +224,7 @@ const RECOMMEND_DIM_ALIASES: Record<string, string> = {
 
 const normalizeRecommendDim = (token: string) => token.replace(/\s+/g, "").trim().toLowerCase();
 
-const resolveRecommendDim = (token: string) => {
+export const resolveRecommendDim = (token: string) => {
   const trimmed = token.trim();
   if (!trimmed) {
     return { dimKey: "rating", dimLabel: "rating" };

@@ -81,6 +81,8 @@ test('real session login/logout + SQL Goal HTTP lifecycle and all production bin
   const manualId='98'+String(Date.now()).padStart(16,'0').slice(-16);manualIds.push(manualId);
   await db.execute('INSERT INTO taiko_manual_accounts (taiko_id,nickname,bot_identity_key,created_by) VALUES (?,?,?,?)',[manualId,'Goal fixture',permanent?null:`goal-${tag}`,'viewer']);
   const [binding]=await db.execute("INSERT INTO web_taiko_bindings (user_id,taiko_id,source,manual_account_id,is_current) VALUES (?,?,'manual',?,0)",[user,manualId,manualId]);
+  await (await import('../server/internal/account/shared.ts')).writeUserdataWithHistory(manualId,{profile:{userid:manualId},songs:[]},'manual');
+  if(!permanent)await db.execute("INSERT INTO bind(qq,id,source) VALUES (?,?,'manual')",[`goal-${tag}`,manualId]);
   // Legacy/corrupt retained Goal fixture, to verify privacy cleanup despite manual Goal creation being disabled.
   await db.execute("INSERT INTO web_player_goals (user_id,binding_id,song_id,difficulty_type,goal_type,source,source_mode,source_rank,source_revision,source_generated_at,status,goal_data,created_at,updated_at) VALUES (?,?,100,4,'score-pb','today-plan','dimension',1,'fixture','2026-09-19','cancelled','{}','2026-09-19','2026-09-19')",[user,binding.insertId]);
   if(permanent)await permanentlyDeleteManualAccount({kind:'viewer',userId:user},manualId,true);else await detachManualAccount({kind:'viewer',userId:user},manualId);
@@ -90,7 +92,7 @@ test('real session login/logout + SQL Goal HTTP lifecycle and all production bin
  console.log('Authenticated SQL lifecycle PASS: real login/logout, profile switch, create/read/replace/cancel, ordinary/manual cleanup, zero orphans');
  }finally{
   if(server){server.closeAllConnections();await new Promise(r=>server.close(r))}
-  try{if(user)await deleteUserWithGoals(db,user);for(const id of manualIds)await db.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?',[id]);}
+  try{if(user)await deleteUserWithGoals(db,user);for(const id of manualIds){await db.execute('DELETE FROM bind WHERE id=?',[id]);await db.execute('DELETE FROM taiko_manual_accounts WHERE taiko_id=?',[id]);}}
   finally{uninstall();delete globalThis.defineEventHandler;await db.end();await rm(root,{recursive:true,force:true})}
  }
 });

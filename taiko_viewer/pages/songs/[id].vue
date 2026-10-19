@@ -33,6 +33,7 @@ const levelTrackMap: Record<ChartDifficultyCode, string> = {
 };
 const requestedDifficulty = Number(route.query.difficulty) as ChartDifficultyCode;
 const selectedTrack = ref(levelTrackMap[requestedDifficulty] || "ONI");
+watch(() => route.query.difficulty, value => { selectedTrack.value = levelTrackMap[Number(value) as ChartDifficultyCode] || "ONI"; });
 
 const songId = computed(() => Number(route.params.id));
 const selectedDifficultyCode = computed(() => trackLevelMap[selectedTrack.value] || 4);
@@ -879,6 +880,7 @@ useViewerSeo(() => ({
         @login="goToChartUgcLogin"
       />
 
+      <RecommendationGoalAction v-if="accountUser && typeof route.query.recommendation === 'string' && selectedDifficultyCode === Number(route.query.difficulty)" :key="route.query.recommendation" :token="route.query.recommendation" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
       <ForumSongRelatedDiscussions :song-id="songId" :difficulty-type="selectedDifficultyCode" />
 
       <AccountSongScores
