@@ -29,11 +29,12 @@ async function fixture(task,{manualNamespace=false,withProfile=false}={}) {
     const previousCookie=process.env.TAIKO_WAHLAP_COOKIE,previousFetch=globalThis.fetch;
     process.env.TAIKO_WAHLAP_COOKIE='synthetic-official-cookie';
     const remote={userid:c.taikoId,title:'Original public title',titleplateId:1,requests:0,beforeResponse:null};
+    const profiles=new Map([[c.taikoId,remote]]);c.remoteProfiles=profiles;
     globalThis.fetch=async(url,options)=>{
       assert.equal(String(url),'https://wl-taiko.wahlap.net/api/user/search/player');
-      assert.equal(options.method,'POST');assert.ok(options.signal);assert.equal(JSON.parse(options.body).keyword,c.taikoId);
-      remote.requests++;await remote.beforeResponse?.();
-      return new Response(JSON.stringify({data:{players:[{userid:remote.userid,gameCostume:{title:remote.title,titleplate_id:remote.titleplateId}}]}}),{status:200,headers:{'Content-Type':'application/json'}});
+      assert.equal(options.method,'POST');assert.ok(options.signal);const key=JSON.parse(options.body).keyword;const current=key===c.taikoId?remote:profiles.get(key);assert.ok(current);
+      current.requests++;await current.beforeResponse?.();
+      return new Response(JSON.stringify({data:{players:[{userid:current.userid,gameCostume:{title:current.title,titleplate_id:current.titleplateId}}]}}),{status:200,headers:{'Content-Type':'application/json'}});
     };
     c.remote=remote;
     c.prepare=async()=>{c.state.expectedSourceMode='none';return c.binding.startBindingVerification(c.user,c.taikoId);};
@@ -45,6 +46,11 @@ async function fixture(task,{manualNamespace=false,withProfile=false}={}) {
     }
   },{withProfile});
 }
+
+test('real profile browser isolates binding verification responses across targets, identities and lifecycle',{timeout:180000},()=>fixture(c=>withOtherUser(c,async other=>{
+  const {bindingVerificationBrowser}=await import('./fixtures/bindingVerificationBrowser.mjs');
+  await bindingVerificationBrowser(c,other,nativeFetch);
+}),{withProfile:true}));
 async function source(c) {
   return c.scopeModule.withDomainScoreRead(c.taikoId,async()=>({body:await manualSourceSnapshot(c),commitId:c.scopeModule.scorePublication(c.taikoId)?.commitId,sequence:c.scopeModule.scorePublication(c.taikoId)?.sequence}));
 }

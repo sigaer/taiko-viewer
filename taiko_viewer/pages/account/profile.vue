@@ -429,6 +429,56 @@ const { data, pending, refresh } = useAsyncData<ProfilePayload>(
 
 const profile = computed(() => data.value);
 
+// A response belongs to the account, challenge and input that started it.
+// Cancellation does not roll back a server operation that already committed.
+const bindingGeneration = useState("account-binding-generation", () => 0);
+type BindingAction = {
+  controller: AbortController;
+  context: string;
+  generation: number;
+  acceptsOwnGeneration: boolean;
+};
+let bindingAction: BindingAction | null = null;
+let bindingDisposed = false;
+const bindingActionContext = () => JSON.stringify([
+  accountUser.value?.id,
+  bindingInput.value.trim(),
+  profile.value?.currentBinding?.id,
+  profile.value?.currentBinding?.source,
+  profile.value?.pendingBinding
+]);
+const cancelBindingAction = () => {
+  const previous = bindingAction;
+  bindingAction = null;
+  previous?.controller.abort();
+  preparing.value = false;
+  confirming.value = false;
+};
+const ownsBindingAction = (action: BindingAction) =>
+  !bindingDisposed && bindingAction === action &&
+  action.context === bindingActionContext() && action.generation === bindingGeneration.value;
+const beginBindingAction = (kind: "prepare" | "confirm") => {
+  cancelBindingAction();
+  const action: BindingAction = {
+    controller: new AbortController(), context: bindingActionContext(),
+    generation: bindingGeneration.value, acceptsOwnGeneration: false
+  };
+  bindingAction = action;
+  (kind === "prepare" ? preparing : confirming).value = true;
+  return action;
+};
+watch(bindingActionContext, cancelBindingAction, { flush: "sync" });
+watch(bindingGeneration, (generation) => {
+  const action = bindingAction;
+  // useViewerApiFetch increments the generation for our own successful POST.
+  if (action?.acceptsOwnGeneration && generation === action.generation + 1) {
+    action.generation = generation;
+    action.acceptsOwnGeneration = false;
+  } else {
+    cancelBindingAction();
+  }
+}, { flush: "sync" });
+onBeforeUnmount(() => { bindingDisposed = true; cancelBindingAction(); });
 
 let betaBindingObserver: IntersectionObserver | null = null;
 onMounted(()=>{
@@ -831,18 +881,24 @@ const prepareBinding = async () => {
   if (!bindingInput.value.trim() || preparing.value) return;
   beta.track("binding_start");
   beta.track("binding_id_submitted");
-  preparing.value = true;
+  const action = beginBindingAction("prepare");
   try {
     const result = await apiFetch<{ message: string }>("/api/account/bindings/prepare", {
       method: "POST",
-      body: { taikoId: bindingInput.value.trim() }
+      body: { taikoId: bindingInput.value.trim() },
+      signal: action.controller.signal,
+      onResponse: ({ response }) => {
+        action.acceptsOwnGeneration = response.ok && ownsBindingAction(action);
+      }
     });
+    if (!ownsBindingAction(action)) return;
     ElMessage.success(result.message);
     await refreshProfile();
   } catch (error: any) {
+    if (!ownsBindingAction(action)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.prepareFailed);
   } finally {
-    preparing.value = false;
+    if (bindingAction === action) cancelBindingAction();
   }
 };
 
@@ -850,19 +906,30 @@ const confirmBinding = async (taikoId?: string | null) => {
   const target = taikoId || profile.value?.pendingBinding?.taikoId;
   if (!target || confirming.value) return;
   beta.track("binding_verify_start");
-  confirming.value = true;
+  const action = beginBindingAction("confirm");
   try {
     await apiFetch("/api/account/bindings/confirm", {
       method: "POST",
-      body: { taikoId: target }
+      body: { taikoId: target },
+      signal: action.controller.signal,
+      onResponse: ({ response }) => {
+        action.acceptsOwnGeneration = response.ok && ownsBindingAction(action);
+      }
     });
+    if (!ownsBindingAction(action)) return;
     ElMessage.success(copy.value.confirmSuccess);
     bindingInput.value = "";
     await refreshProfile();
   } catch (error: any) {
+    if (!ownsBindingAction(action)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.confirmFailed);
+    if ([400, 409].includes(error?.statusCode || error?.status)) {
+      // Keep unchanged-title retries, but discard expired/replaced challenges
+      // according to the authoritative profile rather than a guessed error kind.
+      await refreshProfile().catch(() => {});
+    }
   } finally {
-    confirming.value = false;
+    if (bindingAction === action) cancelBindingAction();
   }
 };
 
