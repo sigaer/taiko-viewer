@@ -25,9 +25,11 @@ export async function writePlayerGoal(userId: number, body: Record<string, unkno
       // Resolve installed compute identity before acquiring SQL owner locks.
       const modelRevision = await getGrowthModelRevision();
       const activeGoal = await withDomainScoreRead(binding.taiko_id, () => mutateGoal(getAccountDb(),userId,body.profileId as string,body.expectedActiveGoalId as string|null,async (active,connection) => {
+        // A retry only reads the already-owned goal; preserve its immutable
+        // baseline even if a newer score has arrived since the first commit.
+        if (active && active.songId===body.songId && active.difficultyType===body.difficultyType && active.goalType===body.goalType) return active;
         const {receipt,baseline,options,song} = await validateRecommendation(userId,binding,body.recommendationToken,connection,modelRevision);
         if (receipt.songId !== body.songId || receipt.difficultyType !== body.difficultyType || receipt.revision !== body.scoreRevision) throw new GoalConflict('recommendation-changed');
-        if (active && active.songId===body.songId && active.difficultyType===body.difficultyType && active.goalType===body.goalType) return active;
         if (!options.includes(body.goalType as GoalType)) throw createError({statusCode:400,statusMessage:'goal-unavailable'});
         return {profileId:String(binding.id),songId:receipt.songId,difficultyType:receipt.difficultyType,title:song!.song_name,starLevel:Number(song![`level_${receipt.difficultyType}` as keyof typeof song]),goalType:body.goalType as GoalType,baselineVersion:1,baseline,source:'ordinary-recommendation',sourceBasis:receipt.basis,sourceMode:'ordinary',sourceRank:receipt.rank,sourceRevision:receipt.revision,sourceGeneratedAt:receipt.generatedAt,targetData:goalTarget(body.goalType as GoalType),status:'active',createdAt:'',cancelledAt:null,unavailable:false};
       },{taikoId:binding.taiko_id,source:binding.source}));

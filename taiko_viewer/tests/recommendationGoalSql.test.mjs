@@ -63,7 +63,8 @@ test('ordinary recommendation HTTP batch to confirmed Goal, original evaluation 
   let result=await ask('POST','/evaluate',{profileId:p.profileId,expectedActiveGoalId:active.id});assert.equal(result.outcome,'inconclusive');
   const changed=records.map(r=>r.song_no===item.songId?{...r,high_score:900001}:r);
   c.tick();await publish(changed,new Date(Date.now()-10));
-  await ask('POST','/goal',input(item,p),409);
+  const retry=await ask('POST','/goal',input(item,p));assert.equal(retry.activeGoal.id,active.id);assert.equal(retry.activeGoal.baseline.highScore,900000,'retry never refreshes the baseline');
+  await ask('POST','/goal',input(normal.items.find(x=>!x.isUnplayed&&x.songId!==item.songId),{...p,activeGoal:active}),409);
   result=await ask('POST','/evaluate',{profileId:p.profileId,expectedActiveGoalId:active.id});assert.equal(result.outcome,'completed');assert.equal(result.recentCompletedGoal.completionEvidence.result.delta,1);
   const repeated=await ask('POST','/evaluate',{profileId:p.profileId,expectedActiveGoalId:active.id});assert.equal(repeated.recentCompletedGoal.completedAt,result.recentCompletedGoal.completedAt);
   const {loadGoalFacts}=await import('../server/services/growth-history/goals.ts');
