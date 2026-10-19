@@ -1,6 +1,6 @@
 # Developer API：现有只读能力与接入指南
 
-文档对应应用发布 `0.85.0-rc.8`。公开曲库使用 API 路径 `v1`，分析结果中的 `model: v1` 是计算模型；两者与网站发布版本、Contract 版本分别管理。Contract 1.1 维持 `FREEZE_CANDIDATE`，本次没有宣布冻结。
+文档对应应用发布 `0.85.0`（沿用 rc.8 已验收功能）。公开曲库使用 API 路径 `v1`，分析结果中的 `model: v1` 是计算模型；两者与网站发布版本、Contract 版本分别管理。Contract 1.1 维持 `FREEZE_CANDIDATE`，本次没有宣布冻结。
 
 正式地址为 `https://viewer.sakura-bot.cn`。2026-10-18 在此前线上 rc.4 上，使用既有受控 Token 与受控 Source 串行只读预查，以下四个接口均返回 HTTP 200，包括匿名曲库读取；因此移除“仅本地候选、未部署”的过时说明。可用性不是权限承诺：第三方受保护读取仍要求现有已获批、有效 Token 及服务端读取权限，不因文档可见而开放。
 
@@ -69,4 +69,6 @@ rc.8 精简了 rc.7 的目录响应：移除嵌套 chartId/songId、tjaCourse、
 - 受保护响应为 `private, no-cache, must-revalidate` 并带 ETag，不是此前文档声称的 no-store。曲库为 `public, max-age=60, must-revalidate`。If-None-Match 命中可返回无正文 304，仍经过鉴权；分析也可能照常计算并计数。示例不发送条件头，客户端若自行添加须先处理 304 再读 JSON。
 - 曲库错误体为 `{code, message, requestId}`；受保护接口沿用现有 H3 错误格式，可能有 data.code，不应假定所有错误具有相同 JSON 结构。示例先检查 HTTP 状态，再解析 JSON；不输出 Token。
 
-本次修改歌曲目录默认响应并移除独立谱面路由；其他接口、算法、权限、Token、已有授权和数据保持不变。独立的应用授权管理页面仍保留原地址和权限；开发者首页不恢复此前隐藏的旧版授权说明与管理链接。History、Growth、Goal、年度报告不在这四个第三方 API 的文档范围内，本文不宣布整个 API 体系冻结。
+0.85.0 包含此前默认完整曲库、独立谱面路由移除和 rc.8 精简 DTO 的迁移；本次转正保持 rc.8 接口、算法、权限、Token、已有授权和数据不变。独立的应用授权管理页面仍保留原地址和权限；开发者首页不恢复此前隐藏的旧版授权说明与管理链接。History、Growth、Goal、年度报告不在这四个第三方 API 的文档范围内，本文不宣布整个 API 体系冻结。
+
+本批交付与客户端迁移示例见 [0.85.0 发布说明](releases/0.85.0.md)。

@@ -1,0 +1,25 @@
+name: Publish Viewer 0.85.0
+on:
+  push:
+    tags: ["0.85.0"]
+permissions:
+  contents: write
+concurrency:
+  group: viewer-stable-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.repository == 'sigaer/taiko-viewer'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Publish reviewed notes for verified tag
+        run: RELEASE_COMMIT="$(git rev-parse HEAD)" node scripts/release/publish-viewer-release.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

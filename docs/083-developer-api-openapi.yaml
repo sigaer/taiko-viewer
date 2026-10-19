@@ -1,18 +1,16 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — Contract v1.1 candidate
-  version: 0.85.0-rc.1
-  description: "CONTRACT 1.1 CANDIDATE / NOT DEPLOYED. Contract 1.1 intentionally replaces Song.title with song_name, song_name_jp and aliases; Contract 1.0 is not maintained for this new API. Explicit local opt-in required. External read surface has
-    one prefix: /api/v1/taiko. Session consent management is separate. Only profile:read and
-    scores:read are open. This document does not register production access or upgrade legacy tokens
-    into ResourceGrants."
+  version: 0.85.0
+  description: "Application documentation release 0.85.0. Contract 1.1 remains FREEZE_CANDIDATE, not frozen.
+    The default compact public song catalog is verified in production at the confirmed origin below.
+    Other application-key/ResourceGrant capabilities retain their existing server enablement and authority;
+    this release does not grant access or claim new production verification for private v1 paths.
+    Developer Token integration for current scores, Rating and recommendations is documented separately
+    in developer-api-batch1-openapi.yaml."
 servers:
-  - url: http://127.0.0.1:{port}
-    description: Owned isolated local test listener only
-    variables:
-      port:
-        default: "43083"
-        description: Use the actual admitted run loopback port; no production default.
+  - url: https://viewer.sakura-bot.cn
+    description: Confirmed production origin; existing enablement and authorization apply per endpoint.
 paths:
   /api/v1/taiko/meta:
     get:
