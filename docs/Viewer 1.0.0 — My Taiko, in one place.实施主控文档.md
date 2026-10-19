@@ -1,5 +1,7 @@
 # Viewer 1.0.0 — My Taiko, in one place.
 
+> **2026-10-19 版本管理更新**：旧数字路线作为历史规划保留；后续按业务工作包推进，软件版本独立管理，不再用 0.90、0.95 等版本号表示进度。按各仓库实际发布内容正常递增：兼容缺陷用下一 patch，兼容新功能才用下一 minor，不跳号、不自动加 rc；仅测试和文档不制造应用版本，各组件无须同号。本轮工作包为「Rating／六维／普通推荐跨端一致性」。沿用既有记录，不另建 Gate 或审批体系。
+
 > 2026-10-16 最新隔离候选续行：用户已批准本地 Taiko 0.14.2 验证；详见 [本轮收尾](platform-architecture-audit/local-0142-closeout-20261016.md) 和 [Gate 矩阵](platform-architecture-audit/viewer082-gate.json)。原时点记录保留。O1 目标已明确、实测未签收；0.82 仍 BLOCKED，未进入 0.83。
 
 > **2026-10-16 Runtime Integration 增量**：已完成精确角色重建、共享 memory wheel 补齐、compute/Annual/merged/Growth installed 入口，以及两个角色各 46 个代表生命周期和新增 16 项 merged SQL 验证。凭据控制面与 Source-switch 失败已离线复现并保留，0.82 仍 BLOCKED。详见 [本轮实现与 Gate](platform-architecture-audit/runtime-integration-20261016.md)；未升级版本、进入 0.83 或部署。

@@ -79,6 +79,8 @@ try{
   TAIKO_DB_USER:'viewer1_test',TAIKO_DB_PASSWORD:password,TAIKO_ALLOW_TEST_DB_MUTATION:'1',
   TAIKO_TEST_MYSQL_DATADIR:datadir,TAIKO_PYTHON_EXECUTABLE:python,
   TAIKO_PUBLICATION_TEST_REPO_ROOT:runTmp};
+ const botSource=process.argv.find(arg=>arg.startsWith('--rating-entry-bot-source='))?.split('=')[1];
+ if(botSource){assert.ok(botSource.startsWith('/'));testEnv.TAIKO_ENTRY_BOT_SOURCE=botSource;}
  const o1 = process.argv.find(arg=>arg.startsWith('--o1='));
  if (o1) {
   const match=/^--o1=(private-current|private-history|private-merged-current|private-merged-history|growth-history|growth-overview|growth-passport|b30):(1|3|5):(1|3|50|200)$/.exec(o1);

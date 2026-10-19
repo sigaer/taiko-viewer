@@ -1,4 +1,5 @@
 import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
+import { withPersonalScoreRead } from "./personal";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import {
@@ -235,8 +236,7 @@ const resolveRecommendDim = (token: string) => {
 export const getRecommendImageBuffer = async (
   userId: number,
   options: { n?: number; dim?: string }
-) => {
-  const binding = await ensureBindingWithUserdata(userId);
+) => withPersonalScoreRead(userId, async binding => {
   const limit = Math.min(50, Math.max(1, Number(options.n) || 20));
   const resolved = options.dim ? resolveRecommendDim(options.dim) : { dimKey: "rating", dimLabel: "rating" };
   if (!resolved) {
@@ -280,7 +280,7 @@ export const getRecommendImageBuffer = async (
 
   const png = await runPythonImage(code, [binding.taiko_id, payload]);
   return toJpeg(png);
-};
+});
 
 export const getWordCloudImageBuffer = async (userId: number) => {
   const binding = await ensureBindingWithUserdata(userId);
