@@ -1,14 +1,12 @@
 # Developer API v1 服务端接入例
 
-本地候选，尚未正式冻结或启用生产。以 [Owner 评审](../../docs/083-owner-freeze-review.md) 的精确组合为评审输入；正式接入待 Owner 签收。`server-read.ts` 可直接纳入服务端 TypeScript 项目，复用仓库 SDK；不要打进浏览器包。
+应用文档版本为 0.85.0；Contract 1.1 仍为候选，未宣布冻结。常规 Developer Token 接入请先阅读 [四个只读 API 与指南](../../docs/developer-api-batch1.md)。本目录保留既有应用 Key / ResourceGrant API 的服务端示例，鉴权体系与 Developer Token 分开，应用转正不扩大任何权限。`server-read.ts` 可纳入服务端 TypeScript 项目，不放入浏览器包。
 
-1. 开发者通过既有申请入口提交应用，等待审核；登录自己的 Viewer 会话注册稳定 client。注册不签发资源权限，Key 仍通过既有后台管理获取/轮换。
-2. 资源 owner 在「应用授权」选择该应用、自己的具体绑定、profile:read 和/或 scores:read、有效期并明确同意。owner 留存授权结果中的 playerId，再通过其应用后端的受信流程交给该应用；本候选没有 OAuth callback 或自动授权码流，不能让应用搜集其他人的绑定/授权资料。
-3. 应用后端从受保护服务配置读取 Key 与已同意的 playerId，调用 `readAuthorizedScores({baseUrl,key,playerId})`。baseUrl 必须是明确批准的 HTTPS origin，隔离测试可用 loopback HTTP；不将 Key 放 URL、前端、构建变量或日志。
-4. profile 接口另需 profile:read；有 scores:read 不隐含 profile。没有 Grant 返回 403；错误用 `safeFailure` 只保留 status/code/requestId，不记录载荷或 Key。轮换 Key 不变 client，不增加 scope。
-5. 用户可随时撤销；下一次读取（包括 ETag 请求）拒绝。示例不缓存载荷、不自动重试；304 只表示已重新授权核验的表示未变，SDK 的 data 为 null，不能忽略新错误继续返回旧载荷。
+公开目录使用 `readPublicCatalog('https://viewer.sakura-bot.cn')`，无需 Key 或查询参数，默认歌曲内包含 charts；每个谱面仅有 difficulty 和 level。独立 charts 路径与旧 include 查询不再可用，严格旧客户端需更新绑定。
 
-公共 Catalog 可调用 `readPublicCatalog(baseUrl)`，无需 Key。现有候选同一 client/匿名每日预算暂由所有 v1 读共用；后续公共与私有预算拆分、可信反代与错误率/429/响应字节/失效 Key 观测须由独立启用工作包签收，本准备分支不修改配额或权限行为。
+`readAuthorizedScores({baseUrl,key,playerId})` 仅用于已有稳定 client、有效应用 Key 和明确同意的 playerId，仍受服务器启用状态和现有读取权限控制；没有授权返回 403。不要用 Developer Token 冒充此处的应用 Key，不收集浏览器 Cookie，也不把密钥放入 URL、前端或日志。本次线上验收只覆盖指南中的四个 API，没有新建或扩大生产 ResourceGrant。
+
+用户可按现有规则撤销。读取时仍重新核验授权；示例不缓存载荷、不自动重试。304 时 SDK 的 data 为 null，不能继续使用未经重新核验的旧载荷。`safeFailure` 只保留 status/code/requestId。本次未修改日次配额或权限规则。
 
 超过 Catalog 10,000 行/源 8 MiB、Scores 20,000 条或响应 JSON 8 MiB，服务端返回 503 + 明确 LIMIT_EXCEEDED 错误，无部分 200/304。不能用重试规避；后续分页另提版本。Owner 列表最多 100，有 hasMore 说明遗漏。
 
