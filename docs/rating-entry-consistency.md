@@ -66,4 +66,19 @@ SQL runner启动空的独立 MySQL，先验证实际 datadir 和 `SELECT DATABAS
 
 选择 Viewer **0.85.1**、Bot **0.16.2**：均为现有功能的兼容缺陷修复。Core、Application、Contract及其他仓库不改版本。称号关系JSON相对实际main只有生成时间刷新，关系、统计和索引无语义变化。
 
-当前验证/PR/部署最终结果随本轮执行补入此节；不另建 Gate。仅使用现有 Bot deploy 与 Viewer `run_build.sh → deploy_forum_web.sh "<HEAD subject>"`，上线后少量串行只读验收，不用生产写入制造测试条件。
+本轮已完成修复、验证、合并及受影响服务发布；未建立新 Gate。
+
+| 项目 | 最终结果 |
+| --- | --- |
+| Viewer代码/PR/CI | 应用提交 `81674aed36801c101215448ff24e3ee1ae7e927b`，[PR #23](https://github.com/sigaer/taiko-viewer/pull/23)已合并；[CI](https://github.com/sigaer/taiko-viewer/actions/runs/39208687509)契约、26项Node、跨语言Golden与全新Nuxt构建通过 |
+| Bot代码/PR/CI | 合并提交 `305ca37c2366e8938f029024b4e1086440872f77`，源提交 `e4a9a4a`，[PR #10](https://github.com/sigaer/taiko-bot/pull/10)已合并；[CI](https://github.com/sigaer/taiko-bot/actions/runs/39208392042)安装wheel/缓存loader验证通过 |
+| 最终跨入口SQL/HTTP | `qa-f267e733e5db`：新增跨入口矩阵和原Developer真实HTTP套件通过；实际测试库、显式mutation opt-in、daemon退出已留证 |
+| 本地Node及两角色缓存 | `qa-4892760970b7`：26项Node、中心/客户端安装loader与实际分组/visibility刷新检查通过 |
+| 安装构件 | Bot wheel SHA256 `937833b0d8612a02c5c2b7e763205316646773e872fdd26cd9a5daf3deba2c71`；中心/客户端pip check通过。最终 `qa-0cfb2467db72` 对全部11个修改的安装Python模块逐一核对源码SHA，且确认无editable安装 |
+| 部署 | Bot使用现有 `deploy_taiko.sh 0.16.2 0` 并保留screen模式；Viewer仅使用原 `run_build.sh → deploy_forum_web.sh "<HEAD subject>"`，211.21秒成功。脚本未改；网络代理短超时验证后显式传入构建子进程，无全局代理改动 |
+| 线上只读 | 发布前 `qa-8e30dcabe6c3`、发布后 `qa-0b3711be6c42`：Developer Rating/推荐、Web summary/普通推荐/图片和页面均200，无效Token401。使用现有会话与Token，无登录/绑定/成绩/授权变更；最终证明来源与scoreRevision相同，Rating/六维及推荐业务摘要前后一致 |
+| 实际运行与恢复保护 | Viewer和中心Bot均实际加载Bot0.16.2/Application0.8.1/Core0.1.1；客户端安装验证保留Core0.1.2。Bot健康与唯一screen子进程通过；Viewer当前输出0.85.1、`.output.previous`0.85.0，旧Bot0.16.1环境及wheel保留。构建采样约3.97GiB，无high/max/OOM事件；采样不冒充OS峰值 |
+
+部署证据：`/home/sigaer/taiko/qa-vault/evidence/rating-entry-consistency-20261019/`；其余上述QA编号位于同vault的`runs/<编号>/evidence/`。npm安装只产生peer注解差异，在证明版本、完整性、地址及依赖图完全相同后恢复为已提交lock；生产checkout干净。原Viewer脏工作区未重置；Bot源main快进后保留用户原web.conf及未跟踪报告。
+
+客户端Profile已通过实际安装wheel及命令回归；没有操作他人的自部署实例。生产Bot未发送外部聊天消息，实际命令业务验证在隔离环境完成，线上仅检查运行身份与只读健康。此验收补录仅改文档，不再递增应用版本或重启服务。
