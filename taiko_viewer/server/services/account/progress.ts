@@ -1,6 +1,7 @@
 import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
+import { failProgressPython, failProgressOutput } from "./progress-errors";
 import {
   execFileAsync,
   getCurrentBindingRow,
@@ -38,15 +39,19 @@ export interface ProgressImageRequest {
   page?: number;
 }
 
-const runPython = async (pythonCode: string, args: string[] = [], encoding: "buffer" | "utf8" = "buffer") => {
+const runPython = async (pythonCode: string, args: string[] = [], encoding: "buffer" | "utf8" = "buffer", stage = "options") => {
   const { repoRoot, userdataDir } = getRuntimePaths();
-  return execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
-    cwd: repoRoot,
-    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
-    timeout: 120_000, killSignal: "SIGKILL",
-    encoding,
-    maxBuffer: 30 * 1024 * 1024
-  });
+  try {
+    return await execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
+      cwd: repoRoot,
+      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
+      timeout: 120_000, killSignal: "SIGKILL",
+      encoding,
+      maxBuffer: 30 * 1024 * 1024
+    });
+  } catch (error) {
+    failProgressPython(stage, error);
+  }
 };
 
 const ensureBindingWithUserdata = async (userId: number) => {
@@ -120,7 +125,12 @@ export const getProgressOptions = async (): Promise<ProgressOptions> => {
     "print(json.dumps(payload, ensure_ascii=False))"
   ].join("\n");
   const result = await runPython(code, [], "utf8");
-  const value = JSON.parse(String(result.stdout)) as ProgressOptions;
+  let value: ProgressOptions;
+  try {
+    value = JSON.parse(String(result.stdout)) as ProgressOptions;
+  } catch {
+    failProgressOutput("options");
+  }
   optionsCache = { expiresAt: Date.now() + 5 * 60 * 1000, value };
   return value;
 };
@@ -133,7 +143,9 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
   const binding = await ensureBindingWithUserdata(userId);
   const options = await getProgressOptions();
   const kind = String(request.kind || "") as ProgressKind;
-  const page = Math.min(9999, Math.max(1, Number(request.page) || 1));
+  const requestedPage = request.page === undefined ? 1 : Number(request.page);
+  assertChoice(Number.isFinite(requestedPage) && Number.isInteger(requestedPage), "请选择有效的页码");
+  const page = Math.min(9999, Math.max(1, requestedPage || 1));
   const args = [binding.taiko_id, kind, String(page)];
   let rendererCode = "";
 
@@ -187,6 +199,10 @@ export const getProgressImageBuffer = async (userId: number, request: ProgressIm
     ...rendererCode.split("\n").map((line) => `    ${line}`),
     "sys.stdout.buffer.write(buf.getvalue() if hasattr(buf, 'getvalue') else buf)"
   ].join("\n");
-  const result = await runPython(code, args);
-  return result.stdout as Buffer;
+  const result = await runPython(code, args, "buffer", `render-${kind}`);
+  const buffer = result.stdout as Buffer;
+  if (!Buffer.isBuffer(buffer) || buffer.length < 8 || !buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
+    failProgressOutput(`render-${kind}`);
+  }
+  return buffer;
 };

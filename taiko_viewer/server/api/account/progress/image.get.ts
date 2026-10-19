@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     mode: String(query.mode || ""),
     star: Number(query.star),
     name: String(query.name || ""),
-    page: Number(query.page)
+    page: query.page === undefined ? undefined : Number(query.page)
   });
   setHeader(event, "Content-Type", "image/png");
   setHeader(event, "Cache-Control", "no-store");
