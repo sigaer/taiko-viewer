@@ -50,7 +50,7 @@ jobs:
         run: python -I tools/generate_bindings.py --check
       - name: Verify version projection and API batch regression tests
         working-directory: taiko_viewer
-        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs tests/viewerRelease.test.mjs
+        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs tests/viewerRelease.test.mjs tests/toolChartIdentity.test.mjs
       - name: Verify cross-language catalog Golden
         working-directory: packages/sakura-taiko-contract
         run: python -I tests/test_api_v1.py

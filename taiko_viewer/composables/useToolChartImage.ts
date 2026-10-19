@@ -1,10 +1,14 @@
-import { onBeforeUnmount, ref } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
 import { resolveViewerError } from "~/utils/viewerError";
 
 export const useToolChartImage = () => {
   const imageUrl = ref("");
   const loading = ref(false);
   const errorMessage = ref("");
+  const accountUser = useState<{ id: number } | null>("account-user", () => null);
+  const bindingGeneration = useState("account-binding-generation", () => 0);
+  let generation = 0;
+  let controller: AbortController | null = null;
 
   const revokeUrl = () => {
     if (imageUrl.value) {
@@ -14,6 +18,9 @@ export const useToolChartImage = () => {
   };
 
   const loadChart = async (path: string, query?: Record<string, string | number | boolean | undefined>) => {
+    const request = ++generation;
+    controller?.abort();
+    controller = new AbortController();
     loading.value = true;
     errorMessage.value = "";
     revokeUrl();
@@ -29,17 +36,33 @@ export const useToolChartImage = () => {
       const suffix = params.toString() ? `?${params.toString()}` : "";
       const blob = await $fetch<Blob>(`${path}${suffix}`, {
         responseType: "blob",
-        credentials: "include"
+        credentials: "include",
+        signal: controller.signal
       });
+      if (request !== generation) return;
       imageUrl.value = URL.createObjectURL(blob);
     } catch (error: unknown) {
-      errorMessage.value = await resolveViewerError(error, "图表生成失败，请稍后重试");
+      if (request !== generation) return;
+      const message = await resolveViewerError(error, "图表生成失败，请稍后重试");
+      if (request === generation) errorMessage.value = message;
     } finally {
-      loading.value = false;
+      if (request === generation) {
+        controller = null;
+        loading.value = false;
+      }
     }
   };
 
-  onBeforeUnmount(revokeUrl);
+  const invalidate = () => {
+    generation++;
+    controller?.abort();
+    controller = null;
+    loading.value = false;
+    errorMessage.value = "";
+    revokeUrl();
+  };
+  watch(() => [accountUser.value?.id, bindingGeneration.value], invalidate, { flush: "sync" });
+  onBeforeUnmount(invalidate);
 
   return {
     imageUrl,

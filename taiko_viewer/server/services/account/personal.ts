@@ -11,7 +11,7 @@ type PersonalRecommendationPayload = OrdinaryRecommendationsPayload & {
   items: Array<OrdinaryRecommendationsPayload["items"][number] & { song_id: number; is_unplayed: boolean }>;
 };
 
-const withPersonalScoreRead = async <T>(userId: number, task: (binding: NonNullable<Awaited<ReturnType<typeof getCurrentBindingRow>>>) => Promise<T>) => {
+export const withPersonalScoreRead = async <T>(userId: number, task: (binding: NonNullable<Awaited<ReturnType<typeof getCurrentBindingRow>>>) => Promise<T>) => {
   const binding = await getCurrentBindingRow(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
   const expected = captureBindingIdentity(binding);
