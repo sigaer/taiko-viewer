@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { buildPageDescription } from "~/utils/seo";
-import { viewerErrorAlertType } from "~/utils/viewerError";
+import { difficultyLabelKey } from "~/utils/difficulty";
 import type { TargetRecommendationKey, TargetRecommendationsPayload } from "~/types/recommendation-intelligence";
 
 const { t, locale } = useI18n();
@@ -19,17 +19,24 @@ const n = ref(20);
 const dim = ref("");
 const target = ref<TargetRecommendationKey>("goku");
 const star = ref("");
-const { imageUrl, loading, errorMessage, loadChart } = useToolChartImage();
+const includeImage = ref(false);
+const { data: ordinaryData, loading, failed, load, invalidate } = useRecommendationTool();
+watch([n,dim],invalidate);
+const accountUser = useState<{id:number}|null>("account-user",()=>null);
+const bindingGeneration = useState("account-binding-generation",()=>0);
+let targetGeneration=0;
+let targetController:AbortController|null=null;
+const clearTarget=()=>{targetGeneration++;targetController?.abort();targetController=null;targetData.value=null;targetLoading.value=false;targetError.value="";};
 const targetData = ref<TargetRecommendationsPayload | null>(null);
 const targetLoading = ref(false);
 const targetError = ref("");
 const copy = computed(() => locale.value === "ja" ? {
   hint: "通常推薦と目標推薦を選択できます。",
-  ordinary: "通常推薦", target: "目標推薦", count: "推薦数（1-50）", dim: "指標（任意）", placeholder: "空欄なら総合 Rating", submit: "画像を生成", imageAlt: "おすすめ楽曲",
+  ordinary: "通常推薦", target: "目標推薦", count: "推薦数（1-50）", dim: "指標（任意）", placeholder: "空欄なら総合 Rating", submit: "推薦を表示", exportImage: "画像も生成", imageAlt: "おすすめ楽曲",
   targetType: "目標", star: "星級（任意）", allStars: "すべて", runTarget: "目標候補を表示", current: "現在", targetScore: "目標", gap: "差", progress: "進捗", index: "目標推薦指数", unplayed: "未プレイ", empty: "条件に合う候補がありません", insufficient: "候補数が少ないため、表示できる結果が限られています"
 } : {
   hint: "可分别查看普通推荐与目标推荐。",
-  ordinary: "普通推荐", target: "目标推荐", count: "推荐数量（1-50）", dim: "维度（可选）", placeholder: "留空为综合 Rating", submit: "生成推荐图", imageAlt: "推荐歌曲",
+  ordinary: "普通推荐", target: "目标推荐", count: "推荐数量（1-50）", dim: "维度（可选）", placeholder: "留空为综合 Rating", submit: "查看推荐", exportImage: "同时生成图片", imageAlt: "推荐歌曲",
   targetType: "目标", star: "星级（可选）", allStars: "全部", runTarget: "查看目标候选", current: "当前", targetScore: "目标", gap: "差距", progress: "进度", index: "目标推荐指数", unplayed: "未游玩", empty: "没有符合条件的候选歌曲", insufficient: "候选数量不足，当前结果可能有限"
 });
 const targetOptions = computed(() => locale.value === "ja" ? [
@@ -40,16 +47,22 @@ const targetOptions = computed(() => locale.value === "ja" ? [
 const stars = Array.from({ length: 10 }, (_, i) => String(i + 1));
 const targetLabel = computed(() => targetOptions.value.find((item) => item.value === target.value)?.label || target.value);
 
-const submitOrdinary = async () => loadChart("/api/account/charts/recommend", { n: n.value, dim: dim.value || undefined });
+watch(()=>[accountUser.value?.id,bindingGeneration.value],clearTarget,{flush:"sync"});
+watch([target,star],clearTarget);
+onBeforeUnmount(clearTarget);
+const submitOrdinary = async () => load({ n: n.value, dim: dim.value, image: includeImage.value });
 const submitTarget = async () => {
+  clearTarget();const request=targetGeneration;targetController=new AbortController();
   targetLoading.value = true;
   targetError.value = "";
   targetData.value = null;
   try {
-    targetData.value = await $fetch<TargetRecommendationsPayload>("/api/account/recommendation/target", { query: { target: target.value, ...(star.value ? { star: star.value } : {}) } });
+    const result = await $fetch<TargetRecommendationsPayload>("/api/account/recommendation/target", { signal:targetController.signal, query: { target: target.value, ...(star.value ? { star: star.value } : {}) } });
+    if(request===targetGeneration)targetData.value=result;
   } catch (error) {
+    if(request!==targetGeneration)return;
     targetError.value = error instanceof Error ? error.message : t("home.personal.recommendationUnavailable");
-  } finally { targetLoading.value = false; }
+  } finally { if(request===targetGeneration){targetLoading.value = false;targetController=null;} }
 };
 const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
   if (item.gapKind === "unplayed") return copy.value.unplayed;
@@ -74,10 +87,23 @@ const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
           <el-form label-position="top" @submit.prevent="submitOrdinary">
             <el-form-item :label="copy.count"><el-input-number v-model="n" :min="1" :max="50" controls-position="right" /></el-form-item>
             <el-form-item :label="copy.dim"><el-select v-model="dim" clearable :placeholder="copy.placeholder"><el-option v-for="option in (locale === 'ja' ? [{ label: '総合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速処理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: 'リズム処理', value: '节奏处理' }, { label: '複合処理', value: '复合处理' }] : [{ label: '综合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速处理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: '节奏处理', value: '节奏处理' }, { label: '复合处理', value: '复合处理' }])" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
+            <el-form-item><el-checkbox v-model="includeImage">{{ copy.exportImage }}</el-checkbox></el-form-item>
             <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
           </el-form>
-          <el-alert v-if="errorMessage" :title="errorMessage" :type="viewerErrorAlertType(errorMessage)" show-icon :closable="false" class="result-alert viewer-friendly-alert" />
-          <div v-if="imageUrl" class="chart-wrap"><img :src="imageUrl" :alt="copy.imageAlt" class="chart-image" /></div>
+          <el-alert v-if="failed" :title="t('home.personal.recommendationUnavailable')" type="error" show-icon :closable="false" class="result-alert viewer-friendly-alert" />
+          <template v-if="ordinaryData">
+            <div v-if="!ordinaryData.items.length" class="empty-state">{{ copy.empty }}</div>
+            <div v-else class="target-list" data-testid="ordinary-list">
+              <article v-for="item in ordinaryData.items" :key="`${item.songId}-${item.level}`" class="target-item" :data-song-id="item.songId" :data-difficulty="item.level">
+                <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level), ...(item.canCreateGoal ? { recommendation: item.recommendationToken } : {}) } })" class="target-item__song">
+                  <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="64px" fit="contain" /><span class="target-item__title">{{ item.title }}</span>
+                </NuxtLink>
+                <div class="target-item__meta"><span>{{ t(difficultyLabelKey(item.level)) }}</span><span>{{ item.starLevel === null ? '—' : `${item.starLevel}★` }}</span><span v-if="item.isUnplayed">{{ copy.unplayed }}</span></div>
+                <RecommendationGoalAction v-if="item.canCreateGoal" :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" />
+              </article>
+            </div>
+            <div v-if="ordinaryData.image" class="chart-wrap"><img :src="ordinaryData.image" :alt="copy.imageAlt" class="chart-image" /></div>
+          </template>
         </div>
 
         <div v-else>

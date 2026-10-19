@@ -13,7 +13,7 @@ export type GoalBaseline = {
 export type PlayerGoal = {
   id: string; profileId: string; songId: number; difficultyType: number; title: string; starLevel: number | null;
   goalType: GoalType; baselineVersion: 1; baseline: GoalBaseline;
-  source: 'today-plan'; sourceBasis: string | null; sourceMode: 'dimension' | 'general-fallback';
+  source: 'today-plan' | 'ordinary-recommendation'; sourceBasis: string | null; sourceMode: 'dimension' | 'general-fallback' | 'ordinary';
   sourceRank: number; sourceRevision: string; sourceGeneratedAt: string;
   targetData: { comparison: 'greater' | 'less' | 'present'; field: string; value?: number };
   status: 'active' | 'cancelled' | 'completed'; completedAt?: string; completionEvidence?: {evaluationVersion: 1; evaluatedAt: string; observationCapturedAt: string; observationRevision: string; baselineRevision: string; source: string; provenance: GoalProvenance; result: NonNullable<GoalEvaluation['result']>}; createdAt: string; cancelledAt: string | null; unavailable: boolean;

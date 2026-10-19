@@ -8,10 +8,11 @@ import { GoalConflict, mutateGoal } from './store';
 import { readGoalSnapshot } from './snapshot';
 import { withDomainScoreRead } from '../taiko-domain/publication.ts';
 import type { GoalType } from '../../../types/player-goal';
+import { getGrowthModelRevision } from '../growth-history/model-revision';
 
 export async function writePlayerGoal(userId: number, body: Record<string, unknown>, cancel = false) {
   const started = performance.now();
-  const allowed = cancel ? ['profileId', 'expectedActiveGoalId'] : ['profileId', 'expectedActiveGoalId', 'songId', 'difficultyType', 'goalType', 'scoreRevision'];
+  const allowed = cancel ? ['profileId', 'expectedActiveGoalId'] : ['profileId', 'expectedActiveGoalId', 'songId', 'difficultyType', 'goalType', 'scoreRevision', 'source', 'recommendationToken'];
   if (!body || typeof body !== 'object' || Object.keys(body).some(k => !allowed.includes(k)) || typeof body.profileId !== 'string' || !/^\d+$/.test(body.profileId) || !(body.expectedActiveGoalId === null || (typeof body.expectedActiveGoalId === 'string' && /^\d+$/.test(body.expectedActiveGoalId)))) throw createError({ statusCode: 400, statusMessage: 'invalid-goal-request' });
   const binding = await getCurrentBindingRow(userId);
   if (!binding || String(binding.id) !== body.profileId) throw createError({ statusCode: 409, statusMessage: 'profile-changed' });
@@ -19,6 +20,20 @@ export async function writePlayerGoal(userId: number, body: Record<string, unkno
   try {
     if (cancel) return { activeGoal: await mutateGoal(getAccountDb(), userId, body.profileId, body.expectedActiveGoalId as string | null, null), profileId: body.profileId };
     if (!Number.isSafeInteger(body.songId) || !Number.isInteger(body.difficultyType) || typeof body.goalType !== 'string' || typeof body.scoreRevision !== 'string') throw createError({ statusCode: 400, statusMessage: 'invalid-goal-request' });
+    if (body.source === 'ordinary-recommendation') {
+      const { validateRecommendation } = await import('./recommendation');
+      // Resolve installed compute identity before acquiring SQL owner locks.
+      const modelRevision = await getGrowthModelRevision();
+      const activeGoal = await withDomainScoreRead(binding.taiko_id, () => mutateGoal(getAccountDb(),userId,body.profileId as string,body.expectedActiveGoalId as string|null,async (active,connection) => {
+        const {receipt,baseline,options,song} = await validateRecommendation(userId,binding,body.recommendationToken,connection,modelRevision);
+        if (receipt.songId !== body.songId || receipt.difficultyType !== body.difficultyType || receipt.revision !== body.scoreRevision) throw new GoalConflict('recommendation-changed');
+        if (active && active.songId===body.songId && active.difficultyType===body.difficultyType && active.goalType===body.goalType) return active;
+        if (!options.includes(body.goalType as GoalType)) throw createError({statusCode:400,statusMessage:'goal-unavailable'});
+        return {profileId:String(binding.id),songId:receipt.songId,difficultyType:receipt.difficultyType,title:song!.song_name,starLevel:Number(song![`level_${receipt.difficultyType}` as keyof typeof song]),goalType:body.goalType as GoalType,baselineVersion:1,baseline,source:'ordinary-recommendation',sourceBasis:receipt.basis,sourceMode:'ordinary',sourceRank:receipt.rank,sourceRevision:receipt.revision,sourceGeneratedAt:receipt.generatedAt,targetData:goalTarget(body.goalType as GoalType),status:'active',createdAt:'',cancelledAt:null,unavailable:false};
+      },{taikoId:binding.taiko_id,source:binding.source}));
+      return {activeGoal,profileId:String(binding.id)};
+    }
+    if (body.source !== undefined || body.recommendationToken !== undefined) throw createError({statusCode:400,statusMessage:'invalid-goal-source'});
     const overview = await getPlayerGrowthOverview(userId);
     if (overview.profileId !== body.profileId) throw new GoalConflict('profile-changed');
     const index = overview.todayPlan.items.findIndex(item => item.songId === body.songId && item.difficultyType === body.difficultyType);
