@@ -50,7 +50,14 @@ test('reviewed release JSON, examples, workflow and current documentation metada
  for(const script of [...text.matchAll(/```python\n([\s\S]*?)\n```/g)])execFileSync('/usr/bin/python3',['-c','import ast,sys;ast.parse(sys.stdin.read())'],{input:script[1]});
  const pkg=JSON.parse(await read('taiko_viewer/package.json'));
  for(const file of ['docs/developer-api-batch1-openapi.yaml','docs/083-developer-api-openapi.yaml']){
-  const doc=yaml.parse(await read(file));assert.equal(doc.info.version,pkg.version);assert.equal(doc.servers[0].url,'https://viewer.sakura-bot.cn');
+  const doc=yaml.parse(await read(file));assert.equal(doc.info.version,pkg.version);
+  const songs=doc.paths['/api/v1/taiko/catalog/songs'].get;
+  assert.equal((songs.servers||doc.servers)[0].url,'https://viewer.sakura-bot.cn');
+  if(file.includes('083-')){
+   for(const item of Object.values(doc.paths))for(const method of ['post','delete','patch','put'])if(item[method]){
+    const servers=item[method].servers||item.servers||doc.servers;assert.ok(servers[0].url.startsWith('http://127.0.0.1:'),'Candidate mutation must not inherit production default');
+   }
+  }
   assert.equal(doc.paths['/api/v1/taiko/catalog/charts'],undefined);
  }
  const workflow=yaml.parse(await read('.github/workflows/viewer-stable-release.yml'));

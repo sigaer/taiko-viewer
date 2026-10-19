@@ -9,8 +9,12 @@ info:
     Developer Token integration for current scores, Rating and recommendations is documented separately
     in developer-api-batch1-openapi.yaml."
 servers:
-  - url: https://viewer.sakura-bot.cn
-    description: Confirmed production origin; existing enablement and authorization apply per endpoint.
+  - url: http://127.0.0.1:{port}
+    description: Existing isolated default for candidate operations; verified public catalog overrides this below.
+    variables:
+      port:
+        default: "43083"
+        description: Actual admitted test listener; never a production default for candidate mutations.
 paths:
   /api/v1/taiko/meta:
     get:
@@ -292,6 +296,9 @@ paths:
       x-example-policy: Synthetic examples only; no live account/key/score bytes.
   /api/v1/taiko/catalog/songs:
     get:
+      servers:
+        - url: https://viewer.sakura-bot.cn
+          description: Verified public song catalog; no change to candidate write-operation defaults.
       operationId: getCatalogSongs
       description: Anonymous public data. Optional Authorization is always validated; an invalid header
         never falls back to Cookie/anonymous. Atomic shared daily quota. Complete bounded result; no
