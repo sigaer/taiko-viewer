@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T02:18:22.343803+00:00",
+  "generated_at": "2026-10-20T02:10:14.559294+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 634,
@@ -11073,18 +11073,18 @@
         "source_row_index": 1039
       },
       {
-        "title_name": "活声ライクリフド",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《活声Likelihood》的“魔王”难度下达成通关吧",
-        "source_row_index": 1040
-      },
-      {
         "title_name": "Cut down the Voice.",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
         "source_row_index": 1041
+      },
+      {
+        "title_name": "活声ライクリフド",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《活声Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1040
       }
     ],
     "流浪的琥珀公主": [
@@ -11595,18 +11595,18 @@
         "source_row_index": 1035
       },
       {
-        "title_name": "鈍響ライクリフド",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成通关吧",
-        "source_row_index": 1036
-      },
-      {
         "title_name": "Don't fear the Echo,",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《钝响Likelihood》的“魔王”难度下达成全连吧",
         "source_row_index": 1037
+      },
+      {
+        "title_name": "鈍響ライクリフド",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《钝响Likelihood》的“魔王”难度下达成通关吧",
+        "source_row_index": 1036
       }
     ],
     "铁锤": [
