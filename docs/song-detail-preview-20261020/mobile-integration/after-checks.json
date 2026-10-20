@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Single mobile detail navigation; original menu, language switch and five destinations retained",
+    "Five real charts, practice links and excerpt expand/collapse preserved",
+    "Judgements visible; combo, roll, play count and date reachable in one disclosure",
+    "Existing drum/mix/pure audio retained; public mix plays",
+    "Guest, no record, no EDIT and branch audio/mute checked on mobile",
+    "Existing recommendation target condition retained without submitting a write",
+    "Other route retains default shell",
+    "CDP confirms native Japanese face and a coherent Chinese subtitle face on this host",
+    "Local same-browser review gallery is reachable"
+  ],
+  "browserErrors": []
+}

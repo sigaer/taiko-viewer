@@ -41,7 +41,8 @@ definePageMeta({
   pageTitleKey: "songs.detail",
   pageDescKey: "page.songs.detail.desc",
   navKey: "/songs/available",
-  hidePageHeader: true
+  hidePageHeader: true,
+  shellAppearance: "song-detail"
 });
 
 const [songDetailState, chartUgcState] = await Promise.all([
@@ -439,12 +440,12 @@ useViewerSeo(() => ({
     <template v-else>
       <NuxtLink class="back-link" :to="localePath(songListPath)">{{ copy.back }}</NuxtLink>
       <header class="song-heading">
-        <SongCoverImage :song-id="song.id" :alt="getSongPrimaryTitle(song)" sizes="(max-width: 767px) 64px, 112px" priority class="cover-image" @error="coverError = true" />
+        <SongCoverImage :song-id="song.id" :alt="getSongPrimaryTitle(song)" sizes="(max-width: 767px) 80px, 112px" fit="contain" priority class="cover-image" @error="coverError = true" />
         <div class="song-title-group">
           <p class="song-category">{{ songCategory }}</p>
           <h1>{{ titleParts.name }}<wbr v-if="titleParts.suffix"><span class="song-title-version">{{ titleParts.suffix }}</span></h1>
-          <p class="secondary-title">{{ getSongSecondaryTitle(song) }}</p>
         </div>
+        <p class="secondary-title" :lang="locale === 'ja' ? 'zh-CN' : 'ja'">{{ getSongSecondaryTitle(song) }}</p>
         <div class="song-meta"><span>BPM {{ song.bpm || '—' }}</span><span>ID {{ song.id }}</span><span>{{ copy.releaseDate }} {{ song.open_day || '—' }}</span></div>
       </header>
 
@@ -536,10 +537,11 @@ useViewerSeo(() => ({
 
         <aside class="song-reading-rail">
           <div class="song-personal">
-            <AccountSongScores v-if="accountUser" :items="selectedAccountScores" :pending="accountScoresPending" :unavailable="accountScores.unavailable" :empty-text="sectionCopy.empty" appearance="song-detail" />
+            <AccountSongScores v-if="accountUser" :items="selectedAccountScores" :pending="accountScoresPending" :unavailable="accountScores.unavailable" :empty-text="sectionCopy.empty" appearance="song-detail">
+              <template #heading-action><NuxtLink class="all-scores-link" :to="localePath('/account/songs')">{{ sectionCopy.allScores }}</NuxtLink></template>
+            </AccountSongScores>
             <section v-else class="song-sign-in"><h2>{{ sectionCopy.personal }}</h2><p>{{ sectionCopy.signIn }}</p><button type="button" class="song-login" @click="goToChartUgcLogin">{{ sectionCopy.login }}</button></section>
             <RecommendationGoalAction v-if="accountUser && typeof route.query.recommendation === 'string' && selectedDifficultyCode === Number(route.query.difficulty)" :key="route.query.recommendation" :token="route.query.recommendation" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
-            <NuxtLink v-if="accountUser" class="all-scores-link" :to="localePath('/account/songs')">{{ sectionCopy.allScores }}</NuxtLink>
           </div>
           <ForumSongRelatedDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" appearance="song-detail" />
         </aside>
@@ -580,31 +582,29 @@ useViewerSeo(() => ({
 
 <style scoped>
 .song-detail-page {
-  --song-ink:#203a43; --song-muted:#526a72; --song-link:#007c86; --song-red:#c93e36; --song-on-red:#fff;
-  --song-paper:#fff; --song-tint:#edf6f4; --song-rule:#d5e2df; --song-control:#8aa3a7;
-  --viewer-text:var(--song-ink); --viewer-text-muted:var(--song-muted); --viewer-accent-strong:var(--song-link); --viewer-border:var(--song-rule); --viewer-surface:var(--song-paper);
   --el-bg-color:var(--song-paper);--el-text-color-primary:var(--song-ink);--el-border-color:var(--song-control);
-  padding:24px 28px 32px; border:1px solid #e1e9e4; border-radius:18px;
-  background:linear-gradient(140deg,#fff9f5 0%,#f8fbf9 28%,#f0f8f7 100%); color:var(--song-ink); min-width:0;
+  padding:8px 0 32px; color:var(--song-ink); min-width:0;
 }
 .back-link{display:inline-flex;align-items:center;min-height:44px;margin-bottom:18px;color:var(--song-link);font-size:14px;text-decoration:none;}
 .song-heading{display:grid;grid-template-columns:112px minmax(0,1fr);gap:0 26px;align-items:center;}
-.cover-image{width:112px;height:112px;grid-row:1/3;border-radius:10px;overflow:hidden;}
+.cover-image{width:112px;height:112px;grid-row:1/4;border-radius:10px;overflow:hidden;background:var(--song-paper);}
 .song-title-group{min-width:0;}
 .song-category{margin:0 0 8px;color:var(--song-muted);font-size:14px;}
-h1{font-size:30px;line-height:1.4;font-weight:700;letter-spacing:-.02em;margin:0 0 10px;overflow-wrap:anywhere;}
+h1{font-size:30px;line-height:1.4;font-weight:600;letter-spacing:-.015em;margin:0;overflow-wrap:anywhere;}
 .song-title-version{white-space:nowrap;}
-.secondary-title{font-size:15px;line-height:1.7;color:var(--song-muted);margin:0;overflow-wrap:anywhere;}
+.secondary-title{font-size:15px;line-height:1.7;color:var(--song-muted);margin:8px 0 0;overflow-wrap:anywhere;grid-column:2;}
+.secondary-title:lang(zh-CN){font-family:var(--song-zh-font);}
+.secondary-title:lang(ja){font-family:var(--song-ja-font);}
 .song-meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;font-size:14px;line-height:1.6;color:var(--song-muted);}
 .song-reading-layout{display:grid;grid-template-columns:minmax(0,1fr) 264px;gap:40px;align-items:start;}
 .song-main-column{min-width:0;}
 .song-reading-rail{display:grid;gap:36px;min-width:0;align-content:start;}
-.song-personal{min-width:0;}
-.all-scores-link{display:inline-flex;align-items:center;min-height:44px;margin-top:12px;color:var(--song-link);font-size:14px;text-decoration:none;}
+.song-personal{min-width:0;background:var(--song-paper);padding:22px 24px 12px;border-radius:14px;}
+.all-scores-link{display:inline-flex;align-items:center;min-height:44px;color:var(--song-link);font-size:14px;text-decoration:none;}
 .song-sign-in h2{font-size:18px;line-height:1.5;margin:0 0 16px;font-weight:600;}.song-sign-in p{font-size:15px;line-height:1.7;color:var(--song-muted);margin:0 0 12px;}
 .song-login{min-height:44px;padding:9px 16px;border:1px solid var(--song-control);border-radius:7px;color:var(--song-ink);background:var(--song-paper);font:inherit;font-size:15px;cursor:pointer;}
 .song-personal :deep(.recommendation-goal-action){margin-top:18px;}
-.song-analysis,.song-information{border-bottom:1px solid var(--song-rule);padding:6px 0;margin-top:16px;}
+.song-analysis,.song-information{padding:0;margin-top:8px;}
 summary{display:list-item;min-height:48px;align-content:center;cursor:pointer;font-size:15px;color:var(--song-ink);}
 .song-analysis[open],.song-information[open]{padding-bottom:24px;}
 .song-facts{font-size:14px;display:grid;gap:16px;margin:18px 0 0;}.song-facts>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:16px;}.song-facts dt{color:var(--song-muted);}.song-facts dd{margin:0;overflow-wrap:anywhere;}
@@ -614,20 +614,20 @@ summary{display:list-item;min-height:48px;align-content:center;cursor:pointer;fo
 .radar-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--song-muted);}.radar-values{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;}.radar-values li{display:flex;justify-content:space-between;gap:12px;}.radar-values strong{font-weight:500;}.radar-empty{grid-column:1/-1;font-size:14px;color:var(--song-muted);}.radar-empty-image{display:none;}
 .song-community{margin-top:36px;}
 .back-link:focus-visible,.all-scores-link:focus-visible,summary:focus-visible,.song-login:focus-visible{outline:3px solid var(--song-link);outline-offset:3px;}
-:global(body.theme-dark) .song-detail-page{--song-ink:#e7f2f0;--song-muted:#b3cbc8;--song-link:#73d2d7;--song-red:#f38379;--song-on-red:#251817;--song-paper:#213638;--song-tint:#243c3d;--song-rule:#48605f;--song-control:#7f9d9d;background:linear-gradient(135deg,#2b302f,#192e30);border-color:var(--song-rule);}
-@media(max-width:1190px){.song-reading-layout{grid-template-columns:minmax(0,1fr);gap:32px}.song-reading-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}.song-detail-page{padding:22px}.song-heading h1{font-size:28px}}
+@media(max-width:1190px){.song-reading-layout{grid-template-columns:minmax(0,1fr);gap:32px}.song-reading-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}.song-heading h1{font-size:28px}}
+@media(max-width:960px){.back-link{display:none;}}
 @media(max-width:767px){
- .song-detail-page{padding:12px 0 24px;border:0;background:linear-gradient(160deg,#fff9f5,#f2f9f7 50%,#f8fbfa);border-radius:12px;}
- .back-link{margin-bottom:14px;font-size:14px;}
- .song-heading{grid-template-columns:64px minmax(0,1fr);gap:0 16px;align-items:start;}
- .cover-image{width:64px;height:64px;grid-row:1;}
- .song-category{font-size:14px;margin-bottom:6px;}
- .song-heading h1{font-size:22px;line-height:1.5;margin-bottom:8px;}
- .secondary-title{font-size:14px;line-height:1.65;}
- .song-meta{grid-column:1/-1;font-size:14px;gap:6px 18px;margin-top:18px;}
- .song-reading-rail{grid-template-columns:1fr;gap:32px;}
- .song-reading-layout{gap:32px;}
- .song-analysis,.song-information{margin-top:14px;}
+ .song-detail-page{padding:0 0 24px;}
+ .song-heading{grid-template-columns:80px minmax(0,1fr);gap:0 16px;align-items:center;}
+ .cover-image{width:80px;height:80px;grid-row:1;}
+ .song-category{font-size:14px;margin-bottom:6px;line-height:1.5;}
+ .song-heading h1{font-size:22px;line-height:1.4;}
+ .secondary-title{grid-column:1/-1;font-size:14px;line-height:1.7;margin-top:16px;}
+ .song-meta{grid-column:1/-1;font-size:14px;gap:6px 16px;margin-top:10px;}
+ .song-reading-rail{grid-template-columns:1fr;gap:24px;}
+ .song-reading-layout{gap:24px;}
+ .song-personal{padding:20px 20px 12px;}
+ .song-analysis,.song-information{margin-top:4px;}
  .radar-card{grid-template-columns:1fr;gap:16px;}.radar-chart{grid-row:auto;margin:auto;}.radar-meta{grid-column:1;}.radar-values{margin:0;}
  .song-facts>div{grid-template-columns:80px minmax(0,1fr);gap:12px;}
  .song-community{margin-top:32px;}

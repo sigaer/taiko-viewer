@@ -45,6 +45,8 @@ const hideGuestHomeChrome = computed(
   () => shouldHideHomeChrome(route.meta.navKey, homePresentation.value)
 );
 const hidePageHeader = computed(() => Boolean(route.meta.hidePageHeader));
+const songDetailAppearance = computed(() => route.meta.shellAppearance === "song-detail");
+const songListDestination = computed(() => breadcrumbItems.value[1]?.to || "/songs/available");
 const showMobileTabBar = computed(
   () => Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
 );
@@ -238,7 +240,7 @@ onBeforeUnmount(() => {
 
 <template>
   <el-config-provider :locale="elementLocale">
-    <div class="app-shell" :class="{ 'mobile-nav-open': isMobileNavOpen }">
+    <div class="app-shell" :class="{ 'mobile-nav-open': isMobileNavOpen, 'app-shell--song-detail': songDetailAppearance, 'app-shell--song-ja': songDetailAppearance && locale === 'ja' }">
       <transition name="mobile-mask">
         <button
           v-if="isMobileNavOpen"
@@ -275,7 +277,12 @@ onBeforeUnmount(() => {
         <SidebarNav />
       </aside>
       <main class="app-content" :class="{ 'has-mobile-tabbar': showMobileTabBar }">
-        <div class="mobile-nav-row">
+        <div class="mobile-nav-row" :class="{ 'mobile-song-navigation': songDetailAppearance }">
+          <NuxtLink v-if="songDetailAppearance" :to="localePath(songListDestination)" class="mobile-song-back">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span>{{ locale === 'ja' ? '楽曲一覧' : '歌曲列表' }}</span>
+          </NuxtLink>
+          <span v-if="songDetailAppearance" class="mobile-song-brand">My Taiko</span>
           <button
             type="button"
             class="mobile-nav-toggle"
@@ -290,7 +297,7 @@ onBeforeUnmount(() => {
             </span>
           </button>
         </div>
-        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum') }">
+        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum'), 'song-detail-breadcrumb': songDetailAppearance }">
           <el-breadcrumb :key="route.fullPath" separator="/">
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbItems"
@@ -417,7 +424,7 @@ onBeforeUnmount(() => {
           <slot />
         </section>
       </main>
-      <MobileTabBar v-if="showMobileTabBar" :active-tab="mobileActiveTab" />
+      <MobileTabBar v-if="showMobileTabBar" :active-tab="mobileActiveTab" :appearance="songDetailAppearance ? 'song-detail' : undefined" />
     </div>
   </el-config-provider>
 </template>
@@ -625,5 +632,50 @@ onBeforeUnmount(() => {
   .app-content.has-mobile-tabbar {
     padding-bottom: calc(82px + env(safe-area-inset-bottom));
   }
+}
+</style>
+
+<style scoped>
+/* Explicit route opt-in: tokens, typography and chrome end at this shell. */
+.app-shell--song-detail {
+  --song-zh-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
+  --song-ja-font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
+  --viewer-font-family: var(--song-zh-font);
+  --viewer-display-font: var(--viewer-font-family);
+  --song-ink: #263b42;
+  --song-muted: #50666e;
+  --song-link: #007982;
+  --song-red: #c74036;
+  --song-on-red: #fff;
+  --song-paper: #fff;
+  --song-tint: #eef5f3;
+  --song-rule: #dce5e2;
+  --song-control: #8aa3a7;
+  --viewer-text: var(--song-ink);
+  --viewer-text-muted: var(--song-muted);
+  --viewer-accent-strong: var(--song-link);
+  --viewer-border: var(--song-rule);
+  --viewer-surface: var(--song-paper);
+  font-family: var(--viewer-font-family);
+  color: var(--song-ink);
+  background: #f7f9f8;
+}
+.app-shell--song-detail.app-shell--song-ja { --viewer-font-family: var(--song-ja-font); }
+.app-shell--song-detail .app-content { background: transparent; }
+.mobile-song-back { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; color: var(--song-ink); font-size: 15px; text-decoration: none; }
+.mobile-song-back svg { width: 20px; height: 20px; }
+.mobile-song-brand { color: var(--song-muted); font-size: 14px; font-weight: 500; }
+.mobile-song-back:focus-visible { outline: 3px solid var(--song-link); outline-offset: 3px; }
+body.theme-dark .app-shell--song-detail {
+  --song-ink: #e7f2f0; --song-muted: #b3cbc8; --song-link: #73d2d7; --song-red: #f38379; --song-on-red: #251817;
+  --song-paper: #213638; --song-tint: #243c3d; --song-rule: #48605f; --song-control: #7f9d9d;
+  background: #192e30;
+}
+@media (max-width: 960px) {
+  .app-shell--song-detail .app-content { padding: 0 20px 28px; }
+  .app-shell--song-detail .app-content.has-mobile-tabbar { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .mobile-song-navigation { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; min-height: 64px; margin: 0 -4px 20px; }
+  .mobile-song-navigation .mobile-nav-toggle { justify-self: end; color: var(--song-ink); }
+  .song-detail-breadcrumb { display: none; }
 }
 </style>

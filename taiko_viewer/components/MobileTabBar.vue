@@ -2,7 +2,7 @@
 import type { MobileTab } from "~/utils/navigation";
 import { mobileTabLabelKey } from "~/utils/navigation";
 
-defineProps<{ activeTab: MobileTab | null }>();
+defineProps<{ activeTab: MobileTab | null; appearance?: "song-detail" }>();
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -17,7 +17,7 @@ const tabs: Array<{ key: MobileTab; path: string; icon: string }> = [
 </script>
 
 <template>
-  <nav class="mobile-tabbar" :aria-label="t('layout.mobileNavigation')">
+  <nav class="mobile-tabbar" :class="{ 'mobile-tabbar--song-detail': appearance === 'song-detail' }" :aria-label="t('layout.mobileNavigation')">
     <NuxtLink
       v-for="tab in tabs"
       :key="tab.key"
@@ -102,4 +102,19 @@ const tabs: Array<{ key: MobileTab; path: string; icon: string }> = [
     transition: none;
   }
 }
+</style>
+
+<style scoped>
+.mobile-tabbar--song-detail {
+  background: var(--song-paper);
+  border-color: var(--song-rule);
+  box-shadow: none;
+  backdrop-filter: none;
+  padding-top: 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+.mobile-tabbar--song-detail .mobile-tabbar__item { color: var(--song-muted); font-size: 12px; font-weight: 400; gap: 4px; border-radius: 0; }
+.mobile-tabbar--song-detail .mobile-tabbar__item.is-active { background: transparent; color: var(--song-red); font-weight: 600; }
+.mobile-tabbar--song-detail .mobile-tabbar__icon { width: 20px; height: 20px; }
+.mobile-tabbar--song-detail .mobile-tabbar__item:focus-visible { outline-color: var(--song-link); }
 </style>

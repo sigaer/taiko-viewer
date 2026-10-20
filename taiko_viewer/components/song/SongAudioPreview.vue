@@ -25,7 +25,7 @@ watch([drumVolume, drumMuted], syncDrumState);
 watch([() => props.songId, () => props.selectedTrack], () => drumAudioRefs.clear());
 </script>
 <template>
-<section class="song-audio" aria-labelledby="song-audio-title"><h2 id="song-audio-title">{{ copy.preview }}</h2>
+<details class="song-audio"><summary>{{ copy.preview }}<span class="audio-summary-modes">{{ copy.drum }} · {{ copy.mix }} · {{ copy.pure }}</span></summary>
             <div class="audio-grid">
               <div class="audio-block">
                 <div class="audio-head">
@@ -131,11 +131,13 @@ watch([() => props.songId, () => props.selectedTrack], () => drumAudioRefs.clear
                 <p v-if="hasAudioError(getAudioErrorKey('pure'))" class="audio-error">{{ copy.pureAudioMissing }}</p>
               </div>
             </div>
-</section></template>
+</details></template>
 <style scoped>
 
-.song-audio { padding:24px; border-top:1px solid var(--song-rule); }
-h2 { margin:0 0 20px; font-size:18px; font-weight:600; }
+.song-audio { margin-top:12px; }
+summary { min-height:48px; align-content:center; cursor:pointer; font-size:15px; color:var(--song-ink); }
+.audio-summary-modes{font-size:14px;margin-left:12px;color:var(--song-muted);}
+.song-audio[open] summary{margin-bottom:16px;}
 .audio-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 28px; }
 .audio-block { min-width:0; }
 .audio-block:last-child { grid-column:1/-1; }
@@ -150,5 +152,6 @@ h2 { margin:0 0 20px; font-size:18px; font-weight:600; }
 .variant-label {font-size:14px;color:var(--song-muted);}
 .audio-error { margin:8px 0 0; font-size:14px; color:var(--song-red); }
 .volume-btn:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
-@media(max-width:767px) { .song-audio{padding:20px 16px}.audio-grid{grid-template-columns:1fr;gap:22px}.audio-block:last-child{grid-column:auto} }
+summary:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
+@media(max-width:767px) { .audio-grid{grid-template-columns:1fr;gap:22px}.audio-block:last-child{grid-column:auto} }
 </style>

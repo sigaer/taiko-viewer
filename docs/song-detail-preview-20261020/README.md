@@ -2,7 +2,9 @@
 
 日期：2026-10-20。分支：`design/song-detail-preview-20261020`。基线：Viewer 0.86.2 / `1c522c1`。**待视觉确认，仅本地预览，不部署。**
 
-先打开[同视口新旧对照](index.html)。它包含长曲名、有／无里谱、已登录有成绩、已登录无成绩、未登录，以及中日文的 1440×1000 桌面和 390×844 手机画面。左侧为现有 0.86.2 源码，右侧为真实 Vue 实现，两侧运行同一 Nuxt 布局并使用相同输入。
+最新一轮请打开[歌曲页外壳与内容整合对照](mobile-integration/index.html)，重点是 414×846 手机首屏、成绩／讨论区域，另有 390 手机与 1440 桌面对照。[简短改动说明与字体实测](mobile-integration/README.md)。
+
+[首次交付的新旧对照](index.html)继续保留：包含长曲名、有／无里谱、已登录有成绩、已登录无成绩、未登录，以及中日文的 1440×1000 桌面和 390×844 手机画面。左侧为现有 0.86.2 源码，右侧为首次交付 `d49db80` 的真实 Vue 实现，两侧使用相同输入；这些历史截图没有被本轮覆盖。
 
 [启动真实页面的说明](../../preview/song-detail/README.md)提供本地预览命令、路由和状态切换。它读取本分支实际的 Vue 页面与组件，保留 SSR 和客户端挂载；没有使用原型 HTML 或 `refine.js` 代替真实页面。
 
@@ -12,7 +14,7 @@
 sudo bash /var/tmp/viewer-song-preview-20261020/preview/song-detail/run.sh
 ```
 
-root 终端省略 `sudo`。打开 `http://127.0.0.1:3208/songs/1455?previewState=scores`；远程编辑器需先转发服务器端口 `3208`。权限和停止方法见上方启动说明。
+root 终端省略 `sudo`。真实页面为 `http://127.0.0.1:3208/songs/1455?previewState=scores`，最新对照为 `http://127.0.0.1:3208/__song-review/index.html`；远程编辑器需先转发服务器端口 `3208`。权限和停止方法见上方启动说明。
 
 | 长标题曲目、有成绩 | 桌面对照 | 手机对照 |
 | --- | --- | --- |
@@ -21,19 +23,19 @@ root 终端省略 `sudo`。打开 `http://127.0.0.1:3208/songs/1455?previewState
 
 ## 空间关系
 
-沿用 revision-v2 的完整标题宽度、轻量难度导航、谱面主列和辅助阅读列。移除歌曲页重复的泛化页头，将曲绘缩为桌面 112px、手机 64px，给曲名和原名完整的可用宽度；版本括号前允许自然换行。
+沿用 revision-v2 的完整标题宽度、轻量难度导航、谱面主列和辅助阅读列。移除歌曲页重复的泛化页头，曲绘为桌面 112px、手机 80px，使用 contain 保留完整图像；手机副标题移到完整行宽，版本括号前允许自然换行。
 
-主列显示**当前难度的真实谱面 PNG**，上方直接提供原有播放器和完整谱面入口。难度选择同时统领谱面、音轨、当前成绩、分析与社区上下文；不再把五组谱面链接和五组播放器卡片重复平铺。所有已有难度仍可通过页签访问，键盘方向键、Home、End 同样可用。
+主列显示**当前难度的真实谱面 PNG**。练习播放器为主要按钮，完整谱面为文字入口；默认节选标明范围，可展开，试听收在具名展开项中。难度选择同时统领谱面、音轨、当前成绩、分析与社区上下文。所有已有难度仍可通过页签访问，键盘方向键、Home、End 同样可用。
 
 桌面主列与辅助列相隔 40px；成绩保留数值重点，讨论按内容自然结束。手机改为单列，先读谱面和试听，再接成绩、讨论及谱面评价。分析和歌曲资料使用具名展开项，保留全部内容。
 
-背景只在歌曲区域采用轻微暖白到青白的层次，白色谱面表面承担主要操作；真实曲绘、谱面音符、红色主要按钮和青色链接提供色彩。没有扩大 Hero，也没有添加空白装饰卡片。全站原有侧栏、导航、字体与其他页面主题保持原样。
+歌曲路由显式使用 `shellAppearance="song-detail"`，整合手机顶栏、底栏、排版与页面底色，白色谱面和成绩表面承担主要内容；真实曲绘、谱面音符、红色主要按钮和青色链接提供色彩。没有扩大 Hero。其他路由保留默认外壳；本轮没有推广全站主题。
 
 ## 保留的功能
 
 | 能力 | 新页面中的位置与语义 |
 | --- | --- |
-| 难度、谱面、练习 | 有里谱显示五项，无里谱显示四项；每项继续使用对应 PNG 文件夹、星级与 `/ourtaikoview/:song/:difficulty` 路由。完整图片仍在新标签页打开，内嵌节选可横向浏览，纵向滚动继续阅读页面 |
+| 难度、谱面、练习 | 有里谱显示五项，无里谱显示四项；每项继续使用对应 PNG 文件夹、星级与 `/ourtaikoview/:song/:difficulty` 路由。完整图片仍在新标签页打开；默认内嵌节选可横向浏览，展开后可在更高窗口中滚动 |
 | 试听与分支 | 鼓点、混音、纯音乐全部保留；复用 `useSongBranchAudio` 的基础／分支 URL 与合并标签，鼓点共享音量和静音仍在 |
 | 下载 | 原 `tjaBundleUrl` 存在时提供 TJA+OGG 下载；不存在时不制造下载或播放器能力 |
 | 成绩 | API 仍返回原来的全部难度记录；界面显示当前难度。分数、星级、判定、通关／全连／全良状态、连击、连打、游玩次数及日期均保留，另可进入既有全部成绩页面 |
@@ -43,13 +45,13 @@ root 终端省略 `sudo`。打开 `http://127.0.0.1:3208/songs/1455?previewState
 
 ## 必要的局部调整
 
-- [歌曲页](<../../taiko_viewer/pages/songs/[id].vue>)：用显式 Vue 结构组织标题、当前谱面、阅读侧栏与社区；仅该路由设置 `hidePageHeader`。分类日语采用现有歌曲列表用语，不改变目录值。
+- [歌曲页](<../../taiko_viewer/pages/songs/[id].vue>)：用显式 Vue 结构组织标题、当前谱面、阅读侧栏与社区；仅该路由设置 `hidePageHeader` 和 `shellAppearance`。分类日语采用现有歌曲列表用语，不改变目录值。
 - [难度选择](../../taiko_viewer/components/song/SongDifficultyTabs.vue)、[真实谱面](../../taiko_viewer/components/song/SongChartPreview.vue)、[试听](../../taiko_viewer/components/song/SongAudioPreview.vue)：从原页拆出局部组件；试听继续调用原 composable，没有复制新的音频规则。
-- [成绩](../../taiko_viewer/components/account/AccountSongScores.vue)、[相关讨论](../../taiko_viewer/components/forum/SongRelatedDiscussions.vue)、[谱面评价](../../taiko_viewer/components/ChartUgcSection.vue)：增加显式 `appearance="song-detail"` 外观，默认外观保留。样式均 scoped，歌曲 token 仅定义在页面根元素，未修改全局 CSS。
+- [成绩](../../taiko_viewer/components/account/AccountSongScores.vue)、[相关讨论](../../taiko_viewer/components/forum/SongRelatedDiscussions.vue)、[谱面评价](../../taiko_viewer/components/ChartUgcSection.vue)：使用显式 `appearance="song-detail"` 外观，默认外观保留。样式均 scoped，歌曲 token 仅定义在歌曲专用外壳根元素，未修改全局 CSS。
 
 公开 1455 DTO 缺少 `max_combo`，但对应分析已有 `combo`。物量展示先读取目录值，缺失时只取同曲目、同难度的现有分析数值；没有用其他难度补造数值。无里谱时的无效 EDIT 深链接落回 ONI。谱面组件检查已完成加载的 SSR／缓存图片，避免挂载前 load 事件已经触发后仍显示“正在读取”。
 
-## 数据与检查范围
+## 首次交付的数据与检查范围
 
 公开歌曲 DTO 来自[来源清单](../../preview/song-detail/fixtures/sources.json)；谱面和音频使用已有静态资源。账号、个人成绩和社区空数据为合成，未读取生产私人记录。新旧对照使用同一套 fixture，不把它称为生产账号验收。
 

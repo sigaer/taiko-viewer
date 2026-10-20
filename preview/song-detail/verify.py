@@ -39,6 +39,7 @@ try:
    assert '766' in page.locator('.chart-identity').inner_text();page.locator('.score-primary strong').filter(has_text='1,000,450').wait_for();page.wait_for_function('document.querySelector(".chart-sheet img").naturalWidth>0');snapshot('after-edit-zh-1440.png');ok('EDIT uses its own combo and personal record')
    page.locator('[data-track=EDIT]').focus();page.keyboard.press('ArrowLeft');assert page.locator('[data-track=ONI]').get_attribute('aria-selected')=='true';assert page.locator('[data-track=ONI]').evaluate('(e)=>e===document.activeElement');ok('Difficulty keyboard focus follows selection')
    page.locator('.song-analysis summary').click();assert page.locator('.radar-chart').is_visible();assert page.locator('.radar-values li').count()==6;page.locator('.song-information summary').click();assert 'The Haruhi Suzumiya Series' in page.locator('.song-facts').inner_text();snapshot('after-analysis-zh-1440.png');ok('Analysis and complete song metadata remain reachable')
+   page.locator('.song-audio summary').click()
    play=page.locator('.song-audio audio').nth(1);assert play.evaluate('(e)=>Promise.race([e.play().then(()=>true),new Promise(r=>setTimeout(()=>r(false),12000))])'), 'Public mix audio did not start within the bounded wait';page.wait_for_function('document.querySelectorAll(".song-audio audio")[1].currentTime>0.2',timeout=20000);media=play.evaluate('(e)=>({duration:e.duration,readyState:e.readyState,currentTime:e.currentTime,src:e.currentSrc})');play.evaluate('(e)=>e.pause()');ok('Existing public mix audio loads and advances in the native player')
    assert page.locator('.chart-footer a').get_attribute('href')=='/api/content/songs/1455/tja-package'
    compose=page.locator('.related-discussions__compose').get_attribute('href');assert 'songId=1455' in compose and 'difficulty=4' in compose
@@ -48,7 +49,7 @@ try:
    with page.expect_response(lambda r:'/growth/goal/preview' in r.url) as response:page.locator('.recommendation-goal-action>button').click()
    assert response.value.status==405;assert not page.locator('.goal-dialog').is_visible();ok('Goal source/difficulty conditions retained; preview POST is rejected with 405')
    visit('/songs/1455?previewState=guest');assert page.locator('.account-score-section').count()==0;page.locator('.song-login').click();page.wait_for_function("location.pathname==='/account/login' && new URL(location.href).searchParams.has('redirect')");assert 'redirect=' in page.url;ok('Guest score action uses the existing localized login redirect')
-   page.set_viewport_size({'width':390,'height':844});visit('/songs/627?previewState=scores');assert page.locator('.song-audio audio').count()==5
+   page.set_viewport_size({'width':390,'height':844});visit('/songs/627?previewState=scores');page.locator('.song-audio summary').click();assert page.locator('.song-audio audio').count()==5
    srcs=page.locator('.song-audio audio').evaluate_all('(es)=>es.map(e=>decodeURI(e.src))');assert any('_ONI_普通.mp3' in u for u in srcs);assert any('_ONI_达人.mp3' in u for u in srcs)
    page.locator('.volume-btn').click();assert page.locator('.audio-block').first.locator('audio').evaluate_all('(es)=>es.every(e=>e.muted)')
    page.locator('.volume-slider').focus();page.keyboard.press('Home');assert page.locator('.audio-block').first.locator('audio').evaluate_all('(es)=>es.every(e=>e.volume===0)')

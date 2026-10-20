@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>歌曲页外壳与内容整合 · 同浏览器对照</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#f4f7f6;color:#263b42;font:16px/1.65 system-ui,"Microsoft YaHei",sans-serif}header,footer{max-width:1040px;margin:32px auto;padding:0 24px}h1{font-size:28px;line-height:1.4;margin:8px 0 16px}p{margin:8px 0;color:#50666e}a{color:#007982;text-underline-offset:4px}.controls{display:flex;flex-wrap:wrap;gap:16px;margin:24px 0}label{display:grid;gap:6px}select{min-height:44px;font:inherit;padding:6px 12px;border:1px solid #8aa3a7;border-radius:6px;background:white;color:inherit}.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:900px;margin:auto;padding:0 24px;align-items:start}.pair[data-width="1440"]{max-width:1800px}figure{margin:0;min-width:0}figcaption{margin:0 0 12px;font-size:15px}.pair img{display:block;width:100%;height:auto;background:#fff;border-radius:8px}.meta{font-size:14px}footer{padding-bottom:24px}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #007982;outline-offset:4px}@media(max-width:650px){.pair{padding:0 12px;gap:12px}header,footer{padding:0 16px}.meta{font-size:14px}h1{font-size:23px}}
+</style>
+<header>
+  <p class="meta">design/song-detail-preview-20261020 · 仅本地预览 · 未部署</p>
+  <h1>歌曲页：外壳、内容与真实谱面</h1>
+  <p>同一 Chromium、同一曲目 1455、同一合成成绩、同一语言与视口。点击截图查看原尺寸。</p>
+  <p><a href="/songs/1455?previewState=scores" id="live">打开修改后的真实页面 ↗</a> · <a href="../index.html" id="history">上一轮交付与 0.86.2 对照</a></p>
+  <div class="controls">
+    <label>视口<select id="width"><option value="414">414 × 846</option><option value="390">390 × 844</option><option value="1440">1440 × 1000</option></select></label>
+    <label>区域<select id="region"><option value="first">首屏</option><option value="record-discussion">成绩与讨论（414）</option></select></label>
+    <label>语言<select id="lang"><option value="zh">中文</option><option value="ja">日本語（414）</option></select></label>
+  </div>
+</header>
+<main class="pair" id="pair">
+  <figure><figcaption>修改前 · 12aabc4</figcaption><a id="before-link"><img id="before" alt="本轮修改前的真实页面"></a></figure>
+  <figure><figcaption>修改后 · 本轮真实组件</figcaption><a id="after-link"><img id="after" alt="本轮修改后的真实页面"></a></figure>
+</main>
+<footer>
+  <p>一行详情导航；完整曲绘与题名；练习主操作、完整图片与下载分级；明确的谱面节选；成绩摘要与可展开明细；两行空讨论。</p>
+  <p class="meta">这是 Linux Chromium 的手机视口检查，不能代替用户手机的操作系统、浏览器及字体实测。谱面中的字形、底色与音符属于现有 PNG，未修改。</p>
+  <p class="meta"><a href="after-zh-414-record-expanded.png">展开成绩明细</a> · <a href="after-zh-414-empty.png">无个人成绩</a> · <a href="after-zh-414-guest.png">未登录</a></p>
+</footer>
+<script>
+  const width=document.querySelector('#width'),region=document.querySelector('#region'),lang=document.querySelector('#lang');
+  function update(){
+    if(width.value!=='414'){region.value='first';lang.value='zh'}
+    region.disabled=lang.disabled=width.value!=='414';
+    document.querySelector('#pair').dataset.width=width.value;
+    for(const stage of ['before','after']){
+      const name=`${stage}-${lang.value}-${width.value}-${region.value}.png`;
+      document.querySelector(`#${stage}`).src=name;document.querySelector(`#${stage}-link`).href=name;
+    }
+  }
+  for(const input of [width,region,lang])input.addEventListener('change',update);
+  if(location.protocol==='file:')document.querySelector('#live').href='http://127.0.0.1:3208/songs/1455?previewState=scores';
+  else{document.querySelector('#history').href='/__song-history/index.html'}
+  update();
+</script>
+</html>

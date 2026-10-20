@@ -30,7 +30,8 @@ const copy = computed(() =>
         fullCombo: "フルコンボ",
         clear: "クリア",
         played: "プレイ済み",
-        times: "回"
+        times: "回",
+        details: "成績の詳細"
       }
     : {
         eyebrow: "PLAYER RECORD",
@@ -49,7 +50,8 @@ const copy = computed(() =>
         fullCombo: "全连",
         clear: "通关",
         played: "已游玩",
-        times: "次"
+        times: "次",
+        details: "成绩明细"
       }
 );
 
@@ -85,6 +87,7 @@ const formatDate = (value: string) => {
         <span v-if="appearance !== 'song-detail'" class="score-eyebrow">{{ copy.eyebrow }}</span>
         <h3 id="account-score-title">{{ copy.title }}</h3>
       </div>
+      <slot name="heading-action" />
     </header>
 
     <div v-if="pending" class="score-skeleton" aria-busy="true">
@@ -110,7 +113,16 @@ const formatDate = (value: string) => {
           <div><dt>{{ copy.ok }}</dt><dd>{{ formatNumber(item.okCnt) }}</dd></div>
           <div><dt>{{ copy.bad }}</dt><dd>{{ formatNumber(item.ngCnt) }}</dd></div>
         </dl>
-        <dl class="score-meta">
+        <details v-if="appearance === 'song-detail'" class="score-details">
+          <summary>{{ copy.details }}<span aria-hidden="true">+</span></summary>
+          <dl class="score-meta">
+            <div><dt>{{ copy.combo }}</dt><dd>{{ formatNumber(item.comboCnt) }}</dd></div>
+            <div><dt>{{ copy.drumroll }}</dt><dd>{{ formatNumber(item.poundCnt) }}</dd></div>
+            <div><dt>{{ copy.plays }}</dt><dd>{{ formatNumber(item.stageCnt) }}{{ copy.times }}</dd></div>
+            <div><dt>{{ copy.updated }}</dt><dd>{{ formatDate(item.highscoreDatetime || item.updateDatetime) }}</dd></div>
+          </dl>
+        </details>
+        <dl v-else class="score-meta">
           <div><dt>{{ copy.combo }}</dt><dd>{{ formatNumber(item.comboCnt) }}</dd></div>
           <div><dt>{{ copy.drumroll }}</dt><dd>{{ formatNumber(item.poundCnt) }}</dd></div>
           <div><dt>{{ copy.plays }}</dt><dd>{{ formatNumber(item.stageCnt) }}{{ copy.times }}</dd></div>
@@ -210,21 +222,29 @@ const formatDate = (value: string) => {
 <style scoped>
 /* Only the song detail opts in; existing score-list presentation is unchanged. */
 .account-score-section--song-detail {margin:0;padding:4px 0 0;border:0;min-width:0;color:var(--song-ink);}
-.account-score-section--song-detail .score-section-head {margin-bottom:20px;}
+.account-score-section--song-detail .score-section-head {margin-bottom:16px;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;}
 .account-score-section--song-detail h3 {font-size:18px;font-weight:600;line-height:1.5;color:var(--song-ink);}
-.account-score-section--song-detail .score-lane {display:grid;grid-template-columns:1fr;min-height:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;}
-.account-score-section--song-detail .difficulty-stamp {display:flex;gap:8px;align-items:baseline;padding:0 0 12px;color:var(--song-muted);}
+.account-score-section--song-detail .score-lane {display:grid;grid-template-columns:1fr;min-height:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;gap:12px;}
+.account-score-section--song-detail .difficulty-stamp {display:flex;gap:8px;align-items:baseline;padding:0;color:var(--song-muted);}
 .account-score-section--song-detail .difficulty-stamp span,.account-score-section--song-detail .difficulty-stamp strong {font-size:14px;font-weight:500;}
-.account-score-section--song-detail .score-primary {padding:0;border:0;gap:8px;}
+.account-score-section--song-detail .score-primary {display:flex;align-items:baseline;justify-content:space-between;padding:0;border:0;gap:12px;flex-wrap:wrap;}
 .account-score-section--song-detail .score-primary>span {display:none;}
-.account-score-section--song-detail .score-primary strong {font-size:32px;line-height:1.3;font-weight:650;color:var(--song-ink);}
+.account-score-section--song-detail .score-primary strong {font-size:32px;line-height:1.3;font-weight:600;color:var(--song-ink);}
 .account-score-section--song-detail .score-primary em {position:static;padding:0;background:transparent;color:var(--song-muted);font-size:14px;font-weight:400;}
-.account-score-section--song-detail .judge-strip {grid-column:auto;padding:18px 0;border:0;gap:16px;}
-.account-score-section--song-detail .judge-strip div {display:flex;justify-content:flex-start;gap:6px;}
-.account-score-section--song-detail .judge-strip dt,.account-score-section--song-detail .judge-strip dd {font-size:14px;font-weight:400;}
+.account-score-section--song-detail .judge-strip {grid-column:auto;padding:4px 0 0;border:0;gap:16px;}
+.account-score-section--song-detail .judge-strip div {display:grid;justify-items:start;gap:4px;}
+.account-score-section--song-detail .judge-strip dt {font-size:14px;font-weight:400;}
+.account-score-section--song-detail .judge-strip dd {font-size:18px;font-weight:500;}
 .account-score-section--song-detail .judge-strip dt,.account-score-section--song-detail .score-meta dt {color:var(--song-muted);}
 .account-score-section--song-detail .judge-strip dd,.account-score-section--song-detail .score-meta dd {color:var(--song-ink);}
-.account-score-section--song-detail .score-meta {grid-column:auto;padding:16px 0 0;border:0;border-top:1px solid var(--song-rule);grid-template-columns:1fr;gap:12px;}
+.account-score-section--song-detail .score-meta {grid-column:auto;padding:8px 0 12px;border:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;}
+.account-score-section--song-detail .score-meta div {display:grid;gap:6px;}
+.account-score-section--song-detail .score-meta dd {text-align:left;}
 .account-score-section--song-detail .score-meta dt,.account-score-section--song-detail .score-meta dd {font-size:14px;font-weight:400;}
+.score-details summary {display:flex;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;color:var(--song-link);font-size:14px;list-style:none;}
+.score-details summary::-webkit-details-marker {display:none;}
+.score-details summary span {font-size:18px;}
+.score-details[open] summary span {transform:rotate(45deg);}
+.score-details summary:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
 .account-score-section--song-detail .score-empty,.account-score-section--song-detail .score-skeleton {padding:0;min-height:0;background:transparent;text-align:left;justify-content:start;font-size:15px;line-height:1.7;color:var(--song-muted);}
 </style>

@@ -18,6 +18,8 @@ sudo bash /var/tmp/viewer-song-preview-20261020/preview/song-detail/run.sh
 
 这里的绝对路径、Node 路径和依赖链接是这台服务器的设置，不是其他机器克隆仓库后可直接使用的安装说明。
 
+最新一轮的同浏览器对照可在服务启动后打开 `http://127.0.0.1:3208/__song-review/index.html`，包含 414×846 首屏和成绩／讨论、390 手机及 1440 桌面。首次交付的 0.86.2 对照仍保留在 `http://127.0.0.1:3208/__song-history/index.html`。这些静态评审地址仅由独立预览配置提供。
+
 可选视图：
 
 | 检查 | URL |

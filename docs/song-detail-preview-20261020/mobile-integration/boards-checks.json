@@ -1,0 +1,6 @@
+{
+  "checks": [
+    "Review boards preserve original screenshot pixel widths; final compact discussion renders"
+  ],
+  "browserErrors": []
+}

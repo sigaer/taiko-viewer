@@ -28,5 +28,12 @@ export default defineNuxtConfig({
     dbHost: '127.0.0.1', dbPort: '1', dbUser: 'song_preview', dbPassword: '', dbName: 'song_preview_test',
     public: { ...base.runtimeConfig?.public, googleAnalyticsId: '', webVitalsSampleRate: 0 }
   },
-  nitro: { ...base.nitro, storage: {}, devStorage: {} }
+  nitro: {
+    ...base.nitro, storage: {}, devStorage: {},
+    // Review artifacts are opt-in local preview assets, never production routes.
+    publicAssets: [
+      { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020/mobile-integration'), baseURL: '/__song-review', maxAge: 0 },
+      { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020'), baseURL: '/__song-history', maxAge: 0 }
+    ]
+  }
 });
