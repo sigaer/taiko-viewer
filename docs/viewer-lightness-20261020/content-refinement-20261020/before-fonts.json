@@ -1,0 +1,167 @@
+[
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "22px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".secondary-title",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(82, 102, 109)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".song-category",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(82, 102, 109)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".score-primary strong",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "32px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".song-action--primary",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "15px",
+      "color": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "28px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".target-item__title",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "16px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".target-item__meta",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 5
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(82, 102, 109)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".mode-tab",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "15px",
+      "color": "rgb(197, 61, 53)"
+    }
+  }
+]

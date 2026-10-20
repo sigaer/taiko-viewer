@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
@@ -86,25 +86,42 @@ const isDeveloperReviewer = computed(
 
 const {theme}=useViewerTheme();
 
-const cacheItems = computed(() => (process.client ? Object.keys(localStorage) : []));
+const cacheItems = ref<string[]>([]);
+const refreshCacheItems = () => { if (import.meta.client) cacheItems.value = Object.keys(localStorage); };
+onMounted(refreshCacheItems);
 const cacheSize = computed(() => {
-  if (!process.client) return 0;
-  let total = 0;
-  cacheItems.value.forEach((key) => {
-    const value = localStorage.getItem(key) || "";
-    total += key.length + value.length;
-  });
+  if (!import.meta.client) return 0;
+  const total = cacheItems.value.reduce((size, key) => size + key.length + (localStorage.getItem(key)?.length || 0), 0);
   return Math.round((total / 1024) * 10) / 10;
 });
-
 const clearCache = () => {
-  if (!process.client) return;
+  if (!import.meta.client) return;
   localStorage.clear();
+  refreshCacheItems();
 };
 </script>
 
 <template>
   <div class="page-stack">
+    <section class="settings-theme setting-row" aria-labelledby="theme-title">
+      <h2 id="theme-title">{{ copy.theme }}</h2>
+      <el-switch v-model="theme" active-value="dark" inactive-value="light" :active-text="copy.dark" :inactive-text="copy.light" :aria-label="copy.themeMode" />
+    </section>
+    <el-card class="panel-card cache-panel">
+      <div class="panel-header">
+        <div>
+          <h2>{{ copy.cache }}</h2>
+          <p class="cache-summary">{{ copy.cacheItems }} {{ cacheItems.length }} · {{ copy.cacheSize }} {{ cacheSize }} KB</p>
+        </div>
+        <el-button type="danger" plain @click="clearCache">{{ copy.clearCache }}</el-button>
+      </div>
+      <details class="cache-details" @toggle="refreshCacheItems">
+        <summary>{{ locale === 'ja' ? 'キャッシュの詳細' : '查看缓存明细' }}</summary>
+        <el-table :data="cacheItems.map((key) => ({ key }))" border max-height="240" :empty-text="copy.empty">
+          <el-table-column prop="key" :label="copy.cacheKey" />
+        </el-table>
+      </details>
+    </el-card>
     <el-card class="panel-card">
       <div class="panel-header">
         <div>
@@ -122,7 +139,6 @@ const clearCache = () => {
             </span>
             {{ copy.shortcuts }}
           </h3>
-          <p>{{ copy.shortcutsDesc }}</p>
         </div>
       </div>
       <div class="tool-links">
@@ -152,244 +168,21 @@ const clearCache = () => {
         </NuxtLink>
       </div>
     </el-card>
-
-    <el-card class="panel-card">
-      <div class="panel-header">
-        <div>
-          <h3 class="panel-title">
-            <span class="section-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z M4 12h2.2l.4-1.4-1.6-1.2 2-3.2 1.8.7 1.1-1.1-.7-1.8 3.2-1.2 1 1.6h1.6l1-1.6 3.2 1.2-.7 1.8 1.1 1.1 1.8-.7 2 3.2-1.6 1.2.4 1.4H20"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            {{ copy.theme }}
-          </h3>
-          <p>{{ copy.themeDesc }}</p>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span>{{ copy.themeMode }}</span>
-        <el-switch
-          v-model="theme"
-          active-value="dark"
-          inactive-value="light"
-          :active-text="copy.dark"
-          :inactive-text="copy.light"
-        />
-      </div>
-    </el-card>
-
-    <el-card class="panel-card">
-      <div class="panel-header">
-        <div>
-          <h3 class="panel-title">
-            <span class="section-icon alt" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 7h16M7 12h10M9 17h6"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </span>
-            {{ copy.cache }}
-          </h3>
-          <p>{{ copy.cacheDesc }}</p>
-        </div>
-        <el-button type="danger" plain @click="clearCache">
-          <span class="btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-12"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
-          {{ copy.clearCache }}
-        </el-button>
-      </div>
-      <div class="cache-info">
-        <div class="cache-card">
-          <div class="cache-label">
-            <span class="mini-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </span>
-            {{ copy.cacheItems }}
-          </div>
-          <div class="cache-value">{{ cacheItems.length }}</div>
-        </div>
-        <div class="cache-card">
-          <div class="cache-label">
-            <span class="mini-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M6 18h12M8 14h8M10 10h4"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </span>
-            {{ copy.cacheSize }}
-          </div>
-          <div class="cache-value">{{ cacheSize }} KB</div>
-        </div>
-      </div>
-      <el-table :data="cacheItems.map((key) => ({ key }))" border height="240" :empty-text="copy.empty">
-        <el-table-column prop="key" :label="copy.cacheKey" />
-      </el-table>
-    </el-card>
   </div>
 </template>
-
 <style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.panel-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.panel-header h3 {
-  margin: 0 0 6px;
-  font-size: 18px;
-}
-
-.panel-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color:var(--viewer-link);
-  background:var(--viewer-surface-subtle);
-  border-radius: 6px;
-}
-
-.section-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.section-icon.alt {
-  background:rgba(88, 136, 197, 0.2);
-  color:#3c6aa6;
-}
-
-.panel-header p {
-  margin: 0;
-  color:var(--viewer-text-muted);
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  font-size: 14px;
-}
-
-.cache-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.tool-links {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-
-.tool-link {
-  display: grid;
-  gap: 6px;
-  padding: 14px;
-  border-radius: 16px;
-  text-decoration: none;
-  color:var(--viewer-text);
-  background:var(--viewer-surface-subtle);
-  box-shadow:0 8px 18px var(--viewer-shadow);
-}
-
-.tool-link strong {
-  font-size: 15px;
-}
-
-.tool-link span {
-  color:var(--viewer-text-muted);
-  line-height: 1.7;
-}
-
-.cache-card {
-  border-radius: 16px;
-  padding: 12px;
-  background:var(--viewer-surface-subtle);
-  box-shadow:0 8px 18px var(--viewer-shadow);
-}
-
-.cache-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color:var(--viewer-text-muted);
-}
-
-.mini-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color:var(--viewer-link);
-}
-
-.mini-icon svg {
-  width: 12px;
-  height: 12px;
-}
-
-.btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 6px;
-}
-
-.btn-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.cache-value {
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 4px;
-}
+.page-stack { display: grid; gap: 20px; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.setting-row h2, .panel-header h2, .panel-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.cache-summary { margin: 8px 0 0; color: var(--viewer-text-muted); font-size: 14px; }
+.cache-details summary { min-height: 44px; align-content: center; cursor: pointer; color: var(--viewer-link); font-size: 14px; }
+.cache-details summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
+.panel-title { display: inline-flex; align-items: center; gap: 8px; }
+.section-icon { display: inline-flex; width: 20px; height: 20px; color: var(--viewer-text-muted); }
+.section-icon svg { width: 20px; height: 20px; }
+.tool-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.tool-link { display: grid; gap: 6px; padding: 14px; border-radius: 10px; text-decoration: none; color: var(--viewer-text); background: var(--viewer-surface-subtle); }
+.tool-link strong { font-size: 15px; font-weight: 600; }
+.tool-link span { color: var(--viewer-text-muted); line-height: 1.7; }
 </style>

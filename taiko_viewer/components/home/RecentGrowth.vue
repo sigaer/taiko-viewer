@@ -4,7 +4,7 @@ import { composeRecentGrowthCopy } from "~/utils/growthVoice";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { formatScoreRank } from "~/utils/scoreRank";
 
-const props = defineProps<{ recent: RecentGrowthResponse; facts?: GrowthFact[]; suppressedCount?: number; pending?: boolean; failed?: boolean }>();
+const props = defineProps<{ recent: RecentGrowthResponse; facts?: GrowthFact[]; suppressedCount?: number; pending?: boolean; failed?: boolean; appearance?: "home" }>();
 const emit = defineEmits<{ presented: [token: string]; retry: [] }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -34,8 +34,8 @@ watch(() => props.recent.boundary.currentToken, async token => {
 </script>
 
 <template>
-  <section v-if="pending || failed || (recent.state !== 'unavailable' && !shownElsewhere)" class="recent-growth" aria-labelledby="recent-growth-title" :aria-busy="pending || undefined">
-    <div class="recent-growth__head">
+  <section v-if="pending || failed || (recent.state !== 'unavailable' && !shownElsewhere)" class="recent-growth" :class="{ 'recent-growth--quiet': appearance === 'home' && !pending && !failed && !visibleFacts.length }" :aria-labelledby="appearance !== 'home' || pending || failed || visibleFacts.length ? 'recent-growth-title' : undefined" :aria-busy="pending || undefined">
+    <div v-if="appearance !== 'home' || pending || failed || visibleFacts.length" class="recent-growth__head">
       <div>
         <h2 id="recent-growth-title">{{ t("home.growth.recent.title") }}</h2>
       </div>
@@ -70,6 +70,10 @@ watch(() => props.recent.boundary.currentToken, async token => {
 </template>
 
 <style scoped>
+.recent-growth.recent-growth--quiet { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.recent-growth--quiet::before { display: none; }
+.recent-growth.recent-growth--quiet .recent-growth__empty { font-size: 14px; }
+
 .recent-growth { position: relative; display: grid; gap: 16px; min-width: 0; padding: clamp(18px, 3vw, 26px); overflow: hidden; border: 1px solid var(--viewer-border); border-radius: 20px; background:var(--viewer-surface-subtle); }
 .recent-growth::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background:var(--viewer-primary); }
 .recent-growth__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }

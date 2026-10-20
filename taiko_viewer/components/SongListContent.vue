@@ -102,11 +102,11 @@ const categoryLabelMap: Record<string, { zh: string; ja: string }> = {
 };
 
 const difficultyDefs = [
-  { key: "level_1", icon: "/kantan.png", color: "#e74c3c" },
-  { key: "level_2", icon: "/futsuu.png", color: "#2ecc71" },
-  { key: "level_3", icon: "/muzukashii.png", color: "#27ae60" },
-  { key: "level_4", icon: "/oni.png", color: "#ff69b4" },
-  { key: "level_5", icon: "/inner_oni.png", color: "#8e44ad" }
+  { key: "level_1", icon: "/icons/difficulty/1.png", color: "#e74c3c" },
+  { key: "level_2", icon: "/icons/difficulty/2.png", color: "#2ecc71" },
+  { key: "level_3", icon: "/icons/difficulty/3.png", color: "#27ae60" },
+  { key: "level_4", icon: "/icons/difficulty/4.png", color: "#ff69b4" },
+  { key: "level_5", icon: "/icons/difficulty/5.png", color: "#8e44ad" }
 ];
 
 const getLevels = (song: SongCatalogItem) =>

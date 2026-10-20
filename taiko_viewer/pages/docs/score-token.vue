@@ -3,15 +3,16 @@ import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
 const { locale } = useI18n();
+const localePath = useLocalePath();
 
 definePageMeta({
   contentLayout: "reading",
-  pageTitle: "网页成绩 token",
-  pageDesc: "网页成绩 token 用户指南与开发者 API 文档",
+  pageTitleKey: "page.scoreTokenGuide.title",
+  hidePageDescription: true,
   navKey: "/account/sync",
   breadcrumbs: [
     { label: "多端同步", to: "/account/sync" },
-    { label: "网页成绩 token", to: "/docs/score-token" }
+    { labelKey: "page.scoreTokenGuide.title", to: "/docs/score-token" }
   ]
 });
 
@@ -128,10 +129,8 @@ const responseExample = `{
 <template>
   <article class="token-docs">
     <header class="docs-header">
-      <p class="docs-kicker">Sakura Taiko Viewer / scoretoken</p>
-      <h1>{{ copy.title }}</h1>
       <p>{{ copy.lead }}</p>
-      <NuxtLink class="back-link" to="/account/sync">{{ copy.back }}</NuxtLink>
+      <NuxtLink class="back-link" :to="localePath('/account/sync')">{{ copy.back }}</NuxtLink>
     </header>
 
     <section class="docs-section">
@@ -188,8 +187,8 @@ const responseExample = `{
 }
 
 .docs-header {
-  padding: 30px 0 24px;
-  border-bottom: 2px solid var(--viewer-primary);
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .docs-kicker {

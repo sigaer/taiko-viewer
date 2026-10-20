@@ -3,12 +3,12 @@ import argparse, hashlib, json, os, resource, signal, subprocess, threading, tim
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-parser=argparse.ArgumentParser();parser.add_argument('stage',choices=['before','after']);parser.add_argument('--compat',action='store_true');parser.add_argument('--checks',action='store_true');parser.add_argument('--only');parser.add_argument('--space',action='store_true');parser.add_argument('--probe',action='store_true');parser.add_argument('--home-width',choices=['before','after']);args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('stage',choices=['before','after']);parser.add_argument('--content-checks',action='store_true');parser.add_argument('--content',action='store_true');parser.add_argument('--compat',action='store_true');parser.add_argument('--checks',action='store_true');parser.add_argument('--only');parser.add_argument('--space',action='store_true');parser.add_argument('--probe',action='store_true');parser.add_argument('--home-width',choices=['before','after']);args=parser.parse_args()
 signal.alarm(840)
-root=Path(__file__).resolve().parents[3];preview=root/'preview/song-detail';out=root/'docs/viewer-lightness-20261020';shots=out/'screenshots';shots.mkdir(parents=True,exist_ok=True)
-source=Path('/var/tmp/viewer-light-before-20261020/taiko_viewer') if args.stage=='before' else root/'taiko_viewer'
+root=Path(__file__).resolve().parents[3];preview=root/'preview/song-detail';out=root/'docs/viewer-lightness-20261020';out=out/'content-refinement-20261020' if args.content else out;out.mkdir(parents=True,exist_ok=True);shots=out/'screenshots';shots.mkdir(parents=True,exist_ok=True)
+source=Path('/var/tmp/viewer-content-before-20261020/taiko_viewer' if args.content else '/var/tmp/viewer-light-before-20261020/taiko_viewer') if args.stage=='before' else root/'taiko_viewer'
 env={k:os.environ[k] for k in ['PATH','TMPDIR','NODE_OPTIONS'] if k in os.environ};env.update(SONG_PREVIEW_SOURCE=str(source),NUXT_TELEMETRY_DISABLED='1')
-node='/www/server/nvm/versions/node/v24.13.0/bin/node';log=open(out/f'{args.stage}-server.log','w');server=None;records=[];errors=[];font_records=[]
+node='/www/server/nvm/versions/node/v24.13.0/bin/node';log=open(out/f'{args.stage}-server.log','w');server=None;records=json.loads((out/f'{args.stage}-capture.json').read_text()) if args.only and (out/f'{args.stage}-capture.json').exists() else [];errors=[];font_records=[]
 cg=Path('/sys/fs/cgroup')/Path('/proc/self/cgroup').read_text().strip().split('0::')[-1].lstrip('/');peak=0;stop=threading.Event()
 def monitor():
  global peak
@@ -29,9 +29,10 @@ try:
   try:
    cases=[(w,h,theme,'zh') for w,h in [(414,846),(390,844),(820,1000),(1440,1000)] for theme in ['light','dark']]
    cases += [(414,846,'light','ja'),(1440,1000,'dark','ja')]
+   if args.content:cases=[(414,846,'light','zh'),(390,844,'light','zh'),(1440,1000,'light','zh'),(1440,1000,'dark','ja')]
    if args.space:cases=[(w,846 if w<768 else 1000,theme,'zh') for w in [414,390,820,1280,1440,1920] for theme in ['light','dark']]+[(414,846,'light','ja'),(1440,1000,'dark','ja')]
    if args.compat:cases=[(414,846,'light','zh'),(1440,1000,'dark','ja')]
-   if args.checks or args.home_width or args.probe:cases=[]
+   if args.checks or args.content_checks and not args.only or args.home_width or args.probe:cases=[]
    for width,height,theme,lang in cases:
     context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=1,is_mobile=width<768,has_touch=width<768,reduced_motion='reduce',locale='ja-JP' if lang=='ja' else 'zh-CN',service_workers='block')
     try:
@@ -39,10 +40,11 @@ try:
      page=context.new_page();page.set_default_timeout(20000);page.on('pageerror',lambda e:errors.append(e.stack[:2500]))
      pages=[('catalog','/songs/available'),('song','/songs/1455'),('recommend','/tools/recommend'),('profile','/account/profile')]
      if args.space:pages=[('home','/'),*pages]
+     if args.content:pages=[*pages,('home','/'),('settings','/settings'),('developer','/docs/score-token'),('community','/forum')]
      if args.compat:pages=[('admin-login','/admin/taiko/login'),('home','/'),('scores','/account/songs'),('growth','/my/growth'),('weekly','/my/weekly'),('community','/forum'),('developer','/docs/score-token'),('settings','/settings'),('annual','/annual'),('b30','/tools/b30'),('progress','/tools/progress')]
-     if args.only:pages=[(key,path) for key,path in pages if key==args.only]
+     if args.only:pages=[(key,path) for key,path in pages if key in args.only.split(',')]
      for key,path in pages:
-      if args.compat:
+      if args.compat or args.content:
        context.close();context=browser.new_context(viewport={'width':width,'height':height},device_scale_factor=1,is_mobile=width<768,has_touch=width<768,reduced_motion='reduce',locale='ja-JP' if lang=='ja' else 'zh-CN',service_workers='block')
        context.add_cookies([{'name':'song_preview_state','value':'scores','url':'http://127.0.0.1:3208'},{'name':'taiko_theme','value':theme,'url':'http://127.0.0.1:3208'}])
        page=context.new_page();page.set_default_timeout(20000);page.on('pageerror',lambda e:errors.append(e.stack[:2500]))
@@ -63,15 +65,21 @@ try:
        page.get_by_role('button',name='推薦を表示' if lang=='ja' else '查看推荐',exact=True).click();page.get_by_test_id('ordinary-list').wait_for();assert page.get_by_test_id('ordinary-list').locator('article').count()==20
       elif key=='profile':page.locator('.binding-card input').first.wait_for()
       elif key=='progress':page.locator('.progress-form').wait_for()
-      elif key=='song':page.wait_for_function('document.querySelector(".chart-sheet img")?.naturalWidth>0')
+      elif key=='song':
+       page.wait_for_function('document.querySelector(".chart-sheet img")?.naturalWidth>0')
+       if args.content:page.locator('.score-primary strong').wait_for()
       page.wait_for_timeout(400);page.evaluate('window.scrollTo(0,0)')
       # Wait for visible real covers, retaining failures and placeholders as-is.
       page.evaluate('''()=>Promise.all([...document.querySelectorAll('.song-cover-picture img')].filter(e=>{let r=e.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0}).map(e=>new Promise(resolve=>{if(e.complete&&e.naturalWidth)return resolve();let done=()=>resolve();e.addEventListener('load',done,{once:true});setTimeout(done,4000)})))''')
       name=f'{args.stage}-{key}-{width}-{theme}-{lang}'
       page.screenshot(path=str(shots/(name+'.png')))
-      if key=='recommend' and width in [414,1440] and lang=='zh' and theme=='light':page.screenshot(path=str(shots/(name+'-full.png')),full_page=True)
+      if (key=='recommend' or args.content and key in ['home','profile','community','settings','developer']) and width in [414,1440] and lang=='zh' and theme=='light':page.screenshot(path=str(shots/(name+'-full.png')),full_page=True)
+      if args.content and key=='song':
+       page.locator('.score-primary strong').first.scroll_into_view_if_needed();page.screenshot(path=str(shots/(name+'-scores.png')))
+       page.locator('.chart-excerpt-head').scroll_into_view_if_needed();page.screenshot(path=str(shots/(name+'-chart.png')))
+       page.evaluate('window.scrollTo(0,0)')
       row={'route':url,'page':key,'width':width,'height':height,'theme':theme,'locale':lang,'browser':browser.version,'image':name+'.png','overflow':page.evaluate('document.documentElement.scrollWidth>innerWidth+1'),'clientApiRequests':requests,'layout':page.locator('.viewer-content').get_attribute('data-content-layout') if page.locator('.viewer-content').count() else 'dedicated','geometry':page.evaluate('()=>Object.fromEntries([".app-content",".viewer-content",".page-body",".page-header",".breadcrumb-bar"].map(s=>{let e=document.querySelector(s),r=e?.getBoundingClientRect();return [s,r?{x:r.x,width:r.width,right:r.right}:null]}))'),'recordCount':page.get_by_test_id('ordinary-list').locator('article').count() if key=='recommend' else page.locator('.song-card-link').count() if key=='catalog' else None}
-      records.append(row);save(f'{args.stage}{"-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-capture.json',records);print(name,'overflow',row['overflow'],flush=True)
+      records[:]=[record for record in records if record['image']!=row['image']];records.append(row);save(f'{args.stage}{"-content-checks" if args.content_checks else "-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-capture.json',records);print(name,'overflow',row['overflow'],flush=True)
       if key in ['song','recommend'] and width==414:
        cdp=context.new_cdp_session(page);cdp.send('DOM.enable');cdp.send('CSS.enable');doc=cdp.send('DOM.getDocument')
        for selector in ['h1','.secondary-title','.song-category','.score-primary strong','.song-action--primary','.target-item__title','.target-item__meta','.mode-tab']:
@@ -88,11 +96,17 @@ try:
    if args.home_width:
     from home_width import run
     run(browser,out,args.home_width)
+   if args.content_checks:
+    from content_checks import run as content_checks
+    content_checks(browser,root,out)
    if args.checks:
     from interaction import run
     run(browser,root,out)
+    if args.content:
+     from content_checks import run as content_checks
+     content_checks(browser,root,out)
   finally:browser.close()
- save(f'{args.stage}{"-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-errors.json',errors)
+ save(f'{args.stage}{"-content-checks" if args.content_checks else "-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-errors.json',errors)
  assert not errors,errors[:3]
 finally:
  if server and server.poll() is None:
@@ -100,5 +114,5 @@ finally:
   try:server.wait(timeout=10)
   except subprocess.TimeoutExpired:os.killpg(server.pid,signal.SIGKILL);server.wait(timeout=5)
  log.close();stop.set();thread.join(1)
- save(f'{args.stage}{"-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-resources.json',{'durationSeconds':round(time.monotonic()-started,2),'sampledPeakBytes':peak,'samplingMs':200,'kernelPeakBytes':int((cg/'memory.peak').read_text()) if (cg/'memory.peak').exists() else None,'maxChildRssKiB':resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,'events':(cg/'memory.events').read_text(),'serverExit':server.returncode if server else None,'limitation':'Sampling may miss short peaks; child RSS maximum is not an aggregate.'})
+ save(f'{args.stage}{"-content-checks" if args.content_checks else "-compat" if args.compat else "-probe" if args.probe else "-interactions" if args.checks else "-home-width-"+args.home_width if args.home_width else ""}-resources.json',{'durationSeconds':round(time.monotonic()-started,2),'sampledPeakBytes':peak,'samplingMs':200,'kernelPeakBytes':int((cg/'memory.peak').read_text()) if (cg/'memory.peak').exists() else None,'maxChildRssKiB':resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,'events':(cg/'memory.events').read_text(),'serverExit':server.returncode if server else None,'limitation':'Sampling may miss short peaks; child RSS maximum is not an aggregate.'})
  print('Owned preview stopped',flush=True)

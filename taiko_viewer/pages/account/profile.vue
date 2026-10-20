@@ -1087,7 +1087,9 @@ const removeQqBinding = async () => {
               <el-avatar :size="80" :src="profile.user.avatarUrl" class="profile-avatar">
                 {{ profile.user.username.slice(0, 1) }}
               </el-avatar>
-              <div class="avatar-actions">
+              <details class="avatar-manager">
+                <summary>{{ copy.changeAvatar }}</summary>
+                <div class="avatar-actions">
                 <el-upload
                   ref="avatarUploadRef"
                   :show-file-list="false"
@@ -1095,15 +1097,16 @@ const removeQqBinding = async () => {
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   :on-change="handleAvatarSelect"
                 >
-                  <el-button class="avatar-upload-button" :loading="uploading">
+                  <el-button class="avatar-upload-button" link :loading="uploading">
                     <span class="avatar-upload-label avatar-upload-label--desktop">{{ copy.uploadAvatar }}</span>
                     <span class="avatar-upload-label avatar-upload-label--mobile">{{ copy.changeAvatar }}</span>
                   </el-button>
                 </el-upload>
-                <el-button class="avatar-reset-button" plain :loading="removingAvatar" @click="removeAvatar">
+                <el-button class="avatar-reset-button" link :loading="removingAvatar" @click="removeAvatar">
                   {{ copy.resetAvatar }}
                 </el-button>
-              </div>
+                </div>
+              </details>
             </div>
             <div class="profile-info">
               <h2>{{ profile.user.username }}</h2>
@@ -1183,13 +1186,14 @@ const removeQqBinding = async () => {
                 <p>{{ binding.verifiedTitle || "-" }}</p>
               </div>
               <div class="binding-actions">
+                <span v-if="binding.isCurrent" class="binding-current" role="status">{{ copy.currentUsing }}</span>
                 <el-button
-                  :type="binding.isCurrent ? 'primary' : 'default'"
+                  v-else
                   :loading="switchingId === binding.id"
-                  :disabled="binding.isCurrent || switchingId === binding.id"
+                  :disabled="switchingId === binding.id"
                   @click="switchBinding(binding.id)"
                 >
-                  {{ binding.isCurrent ? copy.currentUsing : copy.switchCurrent }}
+                  {{ copy.switchCurrent }}
                 </el-button>
                 <template v-if="binding.isManual">
                   <el-button plain @click="renameManual(binding)">{{ copy.manualRename }}</el-button>
@@ -1484,6 +1488,7 @@ const removeQqBinding = async () => {
 .profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+  align-items: start;
   gap: 28px;
 }
 
@@ -1516,6 +1521,14 @@ const removeQqBinding = async () => {
   justify-items: center;
 }
 
+.avatar-manager { width: 100%; }
+.avatar-manager summary { min-height: 44px; display: flex; align-items: center; justify-content: center; color: var(--viewer-link); cursor: pointer; font-size: 14px; }
+.avatar-manager summary::after { content: "⌄"; margin-left: 4px; }
+.avatar-manager[open] summary::after { content: "⌃"; }
+.avatar-manager summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
+.binding-current { display: inline-flex; align-items: center; min-height: 44px; gap: 6px; font-size: 14px; color: var(--viewer-success); }
+.binding-current::before { content: "✓"; }
+.avatar-actions :deep(.el-button) { white-space: normal; width: 100%; height: auto; min-height: 44px; line-height: 1.5; margin: 0; padding: 6px 0; }
 .avatar-actions {
   display: grid;
   gap: 10px;

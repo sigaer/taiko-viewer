@@ -149,6 +149,39 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 
 <template>
   <section class="growth-surface" aria-labelledby="growth-title">
+    <header class="growth-focus">
+      <div class="growth-focus__topline">
+        <h1 id="growth-title">{{ greeting }}</h1>
+        <div class="growth-focus__aside">
+          <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
+            <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
+            <NuxtLink :to="localePath('/my/growth')" class="growth-weekly-link">{{ t('home.growth.passportEntry') }} <span aria-hidden="true">→</span></NuxtLink>
+          </nav>
+        </div>
+      </div>
+      <details v-if="!pending && !failed" class="growth-ability">
+        <summary><span v-if="overview.playerState.overallRating !== null">Rating <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong><span aria-hidden="true"> · </span></span>{{ locale === 'ja' ? '能力の詳細' : '能力详情' }}</summary>
+        <div class="growth-focus__observation">
+          <p>{{ t(recommendationCopy.observation.key) }}</p>
+        </div>
+        <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
+          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
+            <span :title="dimensionLabel(item.key)">{{ dimensionShortLabel(item.key) }}</span>
+            <strong>{{ Number(item.value).toFixed(2) }}</strong>
+          </div>
+        </div>
+      </details>
+      <HomeRecentGrowth
+        appearance="home"
+        :recent="recent"
+        :facts="feedback.recentFacts"
+        :suppressed-count="feedback.recentSuppressedCount"
+        :pending="recentPending"
+        :failed="recentFailed"
+        @presented="acknowledgeRecent"
+        @retry="refreshRecent"
+      />
+    </header>
     <div v-if="pending" class="growth-loading" aria-busy="true">
       <div class="growth-loading__focus shimmer-card">
         <span class="growth-skeleton__line growth-skeleton__line--title"></span>
@@ -191,60 +224,9 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       </section>
     </template>
 
-    <HomeRecentGrowth
-      :recent="recent"
-      :facts="feedback.recentFacts"
-      :suppressed-count="feedback.recentSuppressedCount"
-      :pending="recentPending"
-      :failed="recentFailed"
-      @presented="acknowledgeRecent"
-      @retry="refreshRecent"
-    />
 
     <template v-if="!pending && !failed">
-      <section class="growth-progress" aria-labelledby="growth-progress-title">
-        <div class="growth-section-head">
-          <div>
-            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
-          </div>
-        </div>
-        <div class="growth-progress__card panel-card">
-          <p v-if="!hasProgress" class="growth-empty">{{ t(dailyCopy.key) }}</p>
-          <template v-else>
-            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
-            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
-              <strong class="growth-event__song">{{ event.title }}</strong>
-              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
-              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
-            </article>
-            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
-          </template>
-        </div>
-      </section>
-      <header class="growth-focus panel-card">
-        <div class="growth-focus__topline">
-          <h1 id="growth-title">{{ greeting }}</h1>
-          <div class="growth-focus__aside">
-            <div v-if="overview.playerState.overallRating !== null" class="growth-rating">
-              <span>Rating</span>
-              <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
-            </div>
-            <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
-              <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
-              <NuxtLink :to="localePath('/my/growth')" class="growth-weekly-link">{{ t('home.growth.passportEntry') }} <span aria-hidden="true">→</span></NuxtLink>
-            </nav>
-          </div>
-        </div>
-        <div class="growth-focus__observation">
-          <p>{{ t(recommendationCopy.observation.key) }}</p>
-        </div>
-        <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
-          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
-            <span :title="dimensionLabel(item.key)">{{ dimensionShortLabel(item.key) }}</span>
-            <strong>{{ Number(item.value).toFixed(2) }}</strong>
-          </div>
-        </div>
-      </header>
+
       <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
@@ -273,6 +255,26 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
+      <section v-if="hasProgress" class="growth-progress" aria-labelledby="growth-progress-title">
+        <div class="growth-section-head">
+          <div>
+            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
+          </div>
+        </div>
+        <div class="growth-progress__card">
+            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
+            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
+              <strong class="growth-event__song">{{ event.title }}</strong>
+              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
+              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
+            </article>
+            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
+        </div>
+      </section>
+      <details v-else class="growth-record-note">
+        <summary>{{ t('home.growth.progressTitle') }}</summary>
+        <p>{{ t(dailyCopy.key) }}</p>
+      </details>
 
 
       <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
@@ -297,6 +299,11 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 </template>
 
 <style scoped>
+.growth-ability summary, .growth-record-note summary { min-height: 44px; align-content: center; color: var(--viewer-link); font-size: 14px; cursor: pointer; }
+.growth-ability summary strong { font-weight: 600; color: var(--viewer-text); font-variant-numeric: tabular-nums; }
+.growth-ability summary:focus-visible, .growth-record-note summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
+.growth-record-note p { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.6; }
+
 .growth-plan__choice { min-width: 0; display: grid; gap: 4px; }
 .growth-plan__choose { justify-self: end; }
 .growth-plan__unavailable { padding: 8px; font-size: 12px; color:var(--el-text-color-secondary); }
@@ -320,24 +327,24 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .goal-error { color:var(--el-color-danger); font-size: 14px; }
 
 .growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; min-width: 0; gap: var(--growth-section-gap); }
-.growth-focus { border: 1px solid var(--viewer-border); border-radius: 22px; background:var(--viewer-surface-subtle); box-shadow:none; }
-.growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
+.growth-focus { min-width: 0; }
+.growth-focus { display: grid; gap: 8px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .growth-focus__aside { display: grid; justify-items: end; gap: 8px; }
-.growth-weekly-link { color:var(--viewer-link); font-size: 13px; font-weight: 800; text-decoration: none; }
+.growth-weekly-link { color:var(--viewer-link); font-size: 13px; font-weight: 500; text-decoration: none; }
 .growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 .growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); line-height: 1.1; }
-.growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 3.4vw, 36px); }
+.growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 2.8vw, 30px); }
 .growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
 .growth-rating { display: grid; gap: 2px; text-align: right; }
 .growth-rating span { color:var(--viewer-text-muted); font-size: 11px; font-weight: 700; }
 .growth-rating strong { color:var(--viewer-text); font: 800 28px/1 var(--viewer-display-font); }
 .growth-focus__observation p { margin: 0; color:var(--viewer-text); font-size: clamp(16px, 2vw, 19px); line-height: 1.6; overflow-wrap: anywhere; }
-.growth-focus__observation { padding-top: 14px; border-top: 1px solid var(--viewer-border); }
+.growth-focus__observation { margin-block: 12px; }
 .growth-skills { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .growth-skill { position: relative; display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid var(--viewer-border); }
-.growth-skill span { color:var(--viewer-text-muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.growth-skill span { color:var(--viewer-text-muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .growth-skill strong { color:var(--viewer-text); font-size: 14px; font-variant-numeric: tabular-nums; }
 .growth-skill--priority { border-top-color:var(--viewer-border); }
 .growth-skill--priority::after { content: ""; position: absolute; top: -2px; left: 0; width: 24px; height: 2px; border-radius: 99px; background:var(--viewer-primary); }
@@ -356,7 +363,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-plan__arrow { color:var(--viewer-primary); font-size: 20px; }
 .growth-empty { margin: 0; color:var(--viewer-text-muted); font-size: 13px; }
 .growth-progress__lead { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
-.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
+.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; }
 .growth-event { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; min-width: 0; color:var(--viewer-text); }
 .growth-event + .growth-event { border-top: 1px solid var(--viewer-border); padding-top: 16px; }
 .growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color:var(--viewer-link); }
@@ -366,7 +373,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 :global(body.theme-dark .growth-event) { color:var(--viewer-text); }
 :global(body.theme-dark .growth-event h3) { color:var(--viewer-primary); }
 :global(body.theme-dark .growth-summary), :global(body.theme-dark .growth-empty) { color:var(--viewer-text-muted); }
-:global(body.theme-dark .growth-focus) { border-color:rgba(255,255,255,.12); background:var(--viewer-surface-subtle); }
+
 :global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color:rgba(255,255,255,.12); }
 :global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color:var(--viewer-text); }
 :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color:var(--viewer-link); }
@@ -386,6 +393,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-skeleton__line--progress { width: 78%; height: 58px; margin-top: 10px; }
 .growth-skeleton__row { width: 100%; height: 58px; border: 1px solid var(--viewer-border); border-radius: 15px; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-focus__aside { width: 100%; grid-template-columns: 1fr auto; align-items: end; } .growth-rating { text-align: left; justify-self: start; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
+@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus__topline { flex-direction: column; } .growth-focus__aside { justify-items: start; } .growth-rating { text-align: left; justify-self: start; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>

@@ -22,7 +22,7 @@ root 终端省略 sudo。脚本复用本机 Node 24 与已有依赖，并使用�
 | 资料／绑定 | `/account/profile` |
 | 兼容检查 | `/`、`/account/songs`、`/my/growth`、`/my/weekly`、`/forum`、`/docs/score-token`、`/settings` |
 
-中日文使用原有语言切换；浅／暗主题在设置页切换。可在任意页面 URL 加 `?previewState=scores`、`empty`、`guest`、`pending` 或 `unbound`；`failure` 明确模拟首页内容与成长读取 503。切换合成身份请完整导航／刷新；普通站内导航继续使用真实 Nuxt 路由。`/songs/1` 无里谱，`/songs/627` 带分支音轨。
+中日文使用原有语言切换；浅／暗主题在设置页切换。可在任意页面 URL 加 `?previewState=scores`、`empty`、`guest`、`pending` 或 `unbound`；`failure` 明确模拟首页内容与成长读取 503；`recent-failure` 仅让近期变化读取失败，`unchanged` 表示同步后没有新变化，`changes` 展示有证据的合成 PB 与今日记录。切换合成身份请完整导航／刷新；普通站内导航继续使用真实 Nuxt 路由。`/songs/1` 无里谱，`/songs/627` 带分支音轨。
 
 ## 数据边界
 
@@ -34,8 +34,8 @@ root 终端省略 sudo。脚本复用本机 Node 24 与已有依赖，并使用�
 
 ## 检查与历史
 
-[本轮说明](../../docs/viewer-lightness-20261020/README.md)、[唯一迁移表](../../docs/viewer-lightness-20261020/migration.md)。统一评审页显示同输入、同浏览器／视口的前后图，旧设计资料与歌曲页历史图继续保留。
+[本次内容收口与对照](../../docs/viewer-lightness-20261020/content-refinement-20261020/README.md)、[公共基础历史说明](../../docs/viewer-lightness-20261020/README.md)、[唯一迁移表](../../docs/viewer-lightness-20261020/migration.md)。统一评审页显示同输入、同浏览器／视口的前后图，旧设计资料与歌曲页历史图继续保留。
 
-新截图脚本：`review/capture.py`。在该工作树根目录，以 root 通过 `scripts/memory/run_qa.sh` 运行；先停止预览，避免共用锁冲突。`before` 读取本机冻结的 `55a979a` 工作树；`after` 读取当前源码，二者共用同一只读数据根。`--space` 检查五类优先页面的 390／414／820／1280／1440／1920 浅暗布局；`--compat` 检查其他页面，`--checks` 检查控件、主题、跨页与拒绝写入。旧 `capture.py`／`capture-integration.py` 为之前交付的复现工具，会写旧截图目录，不用于本轮评审。
+新截图脚本：`review/capture.py`。在该工作树根目录，以 root 通过 `scripts/memory/run_qa.sh` 运行；先停止预览，避免共用锁冲突。`before` 读取本机冻结的 `55a979a` 工作树；`after` 读取当前源码，二者共用同一只读数据根。`--content` 将对照基线改为冻结的 `63fda22`，写入独立的 `content-refinement-20261020` 子目录，覆盖八个真实页面；`--content --content-checks` 检查本次内容交互。`--space` 检查五类优先页面的 390／414／820／1280／1440／1920 浅暗布局；`--compat` 检查其他页面，`--checks` 检查控件、主题、跨页与拒绝写入。旧 `capture.py`／`capture-integration.py` 为之前交付的复现工具，会写旧截图目录，不用于本轮评审。
 
 这些绝对路径和依赖链接属于这台主机，不是其他机器克隆后可直接使用的安装说明。预览不合入 main、不部署、不 bump；版本在实际准备发布时处理。

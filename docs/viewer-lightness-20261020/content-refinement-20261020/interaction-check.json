@@ -1,0 +1,225 @@
+{
+  "checks": [
+    "Dark cookie is present in SSR html and body before hydration; no client-only theme requirement",
+    "20 complete recommendation rows preserve fixture order and source conditions; disclosure causes no request",
+    "Count/dimension/image are one batch request; teleported dark select and configuration summary agree",
+    "Recommendation → matching EDIT chart → original confirmation dialog; source retained, unplayed goal not enabled, write rejected",
+    "Real chart URLs, fixed notation excerpt/full expansion and score details retained; all five vote options equal width",
+    "Original menu, language switch, five bottom destinations and SPA exit retain no song-only class or scroll lock",
+    "Pending verification and deliberate failure remain actionable; dark message, details and simulated soft-keyboard clearance checked",
+    "Guest gate, actual SSR login redirect response and login page mount, empty recommendation, no EDIT and branch audio render with real components; fixture identities use separate browser contexts",
+    "Existing theme switch updates cookie/localStorage and survives reload with dark SSR",
+    "Legacy localStorage-only dark preference migrates to SSR cookie without being overwritten by a default cookie",
+    "Unified Nuxt review route links the real user pages"
+  ],
+  "browserErrors": [],
+  "unresolvedComponents": [],
+  "apiRequests": [
+    {
+      "path": "/api/account/recommendation/tool",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    },
+    {
+      "path": "/api/account/recommendation/tool",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim=%E4%BD%93%E5%8A%9B&image=true"
+    },
+    {
+      "path": "/api/content/songs/1455",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=5"
+    },
+    {
+      "path": "/api/account/charts/1455/5/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/5/ugc/me"
+    },
+    {
+      "path": "/api/account/songs/1455",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/songs/1455"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=5&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/account/growth/goal/preview",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/account/growth/goal/preview"
+    },
+    {
+      "path": "/api/account/growth/goal/preview",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/account/growth/goal/preview"
+    },
+    {
+      "path": "/api/account/growth/goal",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/account/growth/goal"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=1"
+    },
+    {
+      "path": "/api/account/charts/1455/1/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/1/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=1&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=2"
+    },
+    {
+      "path": "/api/account/charts/1455/2/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/2/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=2&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=3"
+    },
+    {
+      "path": "/api/account/charts/1455/3/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/3/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=3&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=4"
+    },
+    {
+      "path": "/api/account/charts/1455/4/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=4&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=5"
+    },
+    {
+      "path": "/api/account/charts/1455/5/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/5/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=5&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/content/songs/1455/ugc",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/content/songs/1455/ugc?difficulty=4"
+    },
+    {
+      "path": "/api/account/charts/1455/4/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me"
+    },
+    {
+      "path": "/api/forum/threads",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/forum/threads?songId=1455&difficultyType=4&page=1&pageSize=3&sort=latest"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/my-don?t=0"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/auth/me"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/annual-beta/status"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/annual-beta/events"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/annual-beta/events"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/annual-beta/events"
+    },
+    {
+      "path": "/api/account/bindings/confirm",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/account/bindings/confirm"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST",
+      "url": "http://127.0.0.1:3208/api/annual-beta/events"
+    },
+    {
+      "path": "/api/account/recommendation/tool",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    },
+    {
+      "path": "/api/account/charts/1/4/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/1/4/ugc/me"
+    },
+    {
+      "path": "/api/account/songs/1",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/songs/1"
+    },
+    {
+      "path": "/api/account/charts/627/4/ugc/me",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/charts/627/4/ugc/me"
+    },
+    {
+      "path": "/api/account/songs/627",
+      "method": "GET",
+      "url": "http://127.0.0.1:3208/api/account/songs/627"
+    }
+  ],
+  "scope": "UI and local read-only fixture checks; synthetic goal preview allowed, all writes denied; keyboard test is simulated viewport, not a physical device."
+}

@@ -3,6 +3,7 @@ import happiness from '../../fixtures/1455.json';
 import tenjiku from '../../fixtures/1.json';
 import miku from '../../fixtures/1357.json';
 import saitama from '../../fixtures/627.json';
+import type { ForumThreadCard } from '~/types/forum';
 import type { SongDetailPayload, SongCatalogItem } from '~/types/content';
 
 export const publicSongs = catalog.songs as SongCatalogItem[];
@@ -35,6 +36,27 @@ export function songScores(id:number,state:string){
       clearCnt:12,fullComboCnt:0,dondafulComboCnt:0,comboCnt:Math.min(450,combo),updateDatetime:'2026-10-07 14:00:00',highscoreDatetime:'2026-10-07 14:00:00'};
   });
 }
+// Synthetic reading fixtures only; no author, discussion or count comes from production.
+const communityTitles = [
+  '复杂节奏总是慢半拍，大家会怎样拆开练？', '十星入门：从第一首通关到稳定发挥',
+  '今日练习记录：终于把这一段接起来了', '「さいたま2000」のリズムを区切って練習する',
+  '怎样在播放器里反复练同一段谱面？', '同一首歌的表谱与里谱，适合分开安排目标吗',
+  '第一次在机厅玩太鼓，有哪些需要提前了解的事？', '长曲练到后半段容易累，有没有合适的节奏安排',
+  '今週の小さな進歩：苦手だった複合に慣れてきた', '分享一份自己的练习笔记：先听，再读，最后上机',
+  '新曲交流：你最喜欢哪一段编排？', '想找一些中速、节奏清楚的谱面练准确度',
+  '机厅见闻与本周游玩记录', '练习时先追求连击还是减少不可？',
+  '歌曲名称有多个译名时，怎样快速找到对应曲目', '周末练习交流：欢迎分享遇到的困难'
+];
+export const communityThreads: ForumThreadCard[] = communityTitles.map((title,index)=>({
+  id:2000000100+index,section:{id:index%2+1,slug:index%2?'guide':'general',name:index%2?'攻略交流':'综合交流',icon:'',accentColor:''},
+  author:{id:990100+index,username:['鼓声未停','小咚练习中','青空のドン','节奏笔记'][index%4],avatarUrl:'',role:'user',roleLabel:'',taikoIdMasked:'',verifiedTitle:null,verifiedTitleplateId:null},
+  threadType:index%3===1?'guide':'discussion',title,
+  summary:['这几天反复练习后，整理了自己卡住的位置和尝试过的方法，想和大家交流。','从较慢的速度开始，听清每一个音符的位置，再逐步回到原速。','记录一次小小的进步，也想听听大家的练习经验。'][index%3],
+  coverImageUrl:'',tags:index%3===1?['练习方法','谱面阅读']:index%3===0?['交流']:[],song:null,status:'published',
+  isPinned:index===0,isFeatured:index===1,isLocked:false,likeCount:3+index*2,replyCount:2+index*3,viewCount:40+index*17,
+  createdAt:'2026-10-19T10:00:00Z',updatedAt:'2026-10-20T06:00:00Z',latestPostAt:'2026-10-20T06:00:00Z',viewerHasLiked:false,viewerHasFavorited:false
+}));
+const recentFact = {id:'synthetic-pb',factKey:'synthetic-pb-1455-4',ownerId:'990093',bindingId:'1',type:'score-pb',title:details[1455].song.song_name,songId:1455,difficultyType:4,before:970000,after:980000,delta:10000,evidence:{source:'score-history',sourceRevision:'synthetic-review-r1',evidenceVersion:1},temporal:{attributedDay:'2026-10-20',occurredAt:'2026-10-20T05:00:00Z',observedAt:'2026-10-20T06:00:00Z',precision:'instant'}};
 export function extraReadonly(path:string,query:Record<string,any>,state:string):unknown{
   const empty=state==='empty',signedIn=state!=='guest';
   if(path==='/api/content/songs'){
@@ -58,12 +80,12 @@ export function extraReadonly(path:string,query:Record<string,any>,state:string)
   if(path==='/api/account/growth/overview')return {profileId:'1',scoreRevision:'synthetic-review-r1',activeGoal:null,recentCompletedGoal:null,
     playerState:{overallRating:11.18,skills:Object.entries(dimensions).map(([key,value])=>({key,value})),priorityDimension:'complex',tiedDimensions:['complex'],dataSufficiency:'ready',basis:'lowest-valid-dimension',sampleCount:120},
     todayPlan:{targetDimension:'complex',items:recommendations.slice(0,3).map(item=>({...item,difficultyType:item.level,targetDimension:'complex',reason:'target-dimension',currentBestScore:980000,currentBestRank:5})),usedFallback:false},
-    dailyProgress:{calendarDay:'2026-10-20',dataMode:'SNAPSHOT_LIMITED',attendance:'unknown',uniqueCharts:null,events:[]},dataStatus:{mode:'SNAPSHOT_LIMITED',timezone:'Asia/Shanghai'}};
-  if(path==='/api/account/growth/recent')return {profileId:'1',state:'caught-up',observedAt:null,facts:[],totalFacts:0,boundary:{acknowledgedToken:null,currentToken:null,acknowledgeRequired:false,recovered:false}};
+    dailyProgress:{calendarDay:'2026-10-20',dataMode:'SNAPSHOT_LIMITED',attendance:state==='changes'?'played':'unknown',uniqueCharts:state==='changes'?2:null,events:state==='changes'?[{songId:1455,level:4,title:details[1455].song.song_name,occurredAt:'2026-10-20T05:00:00Z',evidence:'history',importance:65,facts:[{type:'score-pb',before:970000,after:980000,delta:10000}]},{songId:1357,level:4,title:details[1357].song.song_name,occurredAt:'2026-10-20T05:30:00Z',evidence:'history',importance:60,facts:[{type:'ng-reduced',before:10,after:4,delta:-6}]}]:[]},dataStatus:{mode:'SNAPSHOT_LIMITED',timezone:'Asia/Shanghai'}};
+  if(path==='/api/account/growth/recent')return {profileId:'1',state:['unchanged','changes'].includes(state)?'new':'caught-up',observedAt:['unchanged','changes'].includes(state)?'2026-10-20T06:00:00Z':null,facts:state==='changes'?[recentFact]:[],totalFacts:state==='changes'?1:0,boundary:{acknowledgedToken:state==='unchanged'?'synthetic-reviewed-boundary':null,currentToken:null,acknowledgeRequired:false,recovered:false}};
   if(path==='/api/account/growth/passport')return {profileId:'1',coverage:{measurementFrom:null,measurementTo:null,measurementDays:0,recentFactsFrom:'2026-09-20',recentFactsTo:'2026-10-20',recentFactsState:'partial'},
     current:{rating:11.18,dimensions,focus:'complex',readiness:'limited'},range:{requestedDays:Number(query.range)||90,actualFrom:null,actualTo:null,timezone:'Asia/Shanghai',selectedDimension:query.dimension||'rating'},segments:[],currentSegmentChange:change,focusTimeline:[],milestones:[],activeGoal:null,recentCompletedGoal:null,currentNextAction:null};
   if(path==='/api/account/growth/weekly')return {profileId:'1',week:{from:'2026-10-19',to:'2026-10-25',timezone:'Asia/Shanghai',isCompleteWeek:false},coverage:{scoreHistoryFrom:null,scoreHistoryTo:null,scoreHistoryState:'partial',measurementFrom:null,measurementTo:null,measurementState:'unknown'},theme:{type:'limited-coverage',confidence:'low',evidenceFactKeys:[],evidenceMeasurementIds:[]},highlights:[],measurementChange:change,totals:{distinctCharts:0,pb:0,fc:0,df:0,rankUpgrade:0,completedGoals:0},currentNextAction:null};
-  if(path==='/api/forum/home')return {sections:[],featuredThreads:[],hotThreads:[],latestGuides:[],announcements:[],leaderboard:[],currentUser:signedIn?user:null,unreadNotificationCount:0,highlightedTags:[]};
+  if(path==='/api/forum/home')return {sections:[],featuredThreads:empty?[]:communityThreads.filter(t=>t.isFeatured),hotThreads:empty?[]:communityThreads,latestGuides:empty?[]:communityThreads.filter(t=>t.threadType==='guide'),announcements:[],leaderboard:[],currentUser:signedIn?user:null,unreadNotificationCount:0,highlightedTags:[]};
   if(path==='/api/content/community/chart-activity')return {items:[]};
   return undefined;
 }

@@ -4,7 +4,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure'].includes(state)) {
+    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
@@ -23,6 +23,7 @@ export default defineEventHandler(async event => {
   if (!['GET', 'HEAD'].includes(getMethod(event))) throw createError({ statusCode: 405, statusMessage: 'Read-only component preview' });
   const state = getCookie(event, 'song_preview_state') || 'scores';
   const signedIn = state !== 'guest';
+  if(state==='recent-failure' && path==='/api/account/growth/recent')throw createError({statusCode:503,statusMessage:'Synthetic recent-growth read failure'});
   if(state==='failure' && ['/api/content/home','/api/account/growth/overview','/api/account/growth/recent'].includes(path))throw createError({statusCode:503,statusMessage:'Synthetic preview unavailable'});
   if(!signedIn && path.startsWith('/api/account/') && path!=='/api/account/auth/me')throw createError({statusCode:401,statusMessage:'Synthetic preview is signed out'});
   const extra=extraReadonly(path,getQuery(event),state);

@@ -1,0 +1,1338 @@
+[
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-catalog-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-song-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-recommend-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/settings?previewState=scores",
+    "page": "settings",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/forum?previewState=scores",
+    "page": "community",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-community-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-catalog-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-song-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-recommend-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/settings?previewState=scores",
+    "page": "settings",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/forum?previewState=scores",
+    "page": "community",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-community-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-catalog-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-song-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-body": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-recommend-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/settings?previewState=scores",
+    "page": "settings",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/forum?previewState=scores",
+    "page": "community",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-community-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-catalog-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-song-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-body": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-recommend-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/settings?previewState=scores",
+    "page": "settings",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/forum?previewState=scores",
+    "page": "community",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-community-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-profile-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/?previewState=scores",
+    "page": "home",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-home-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-profile-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/?previewState=scores",
+    "page": "home",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-home-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-profile-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/?previewState=scores",
+    "page": "home",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-home-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-profile-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/?previewState=scores",
+    "page": "home",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-home-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  }
+]

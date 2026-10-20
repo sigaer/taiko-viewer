@@ -67,6 +67,7 @@ const trackClick = (event: string, source: string) => {
           {{ stateCopy.cta }}
           <span aria-hidden="true">→</span>
         </NuxtLink>
+        <NuxtLink class="personal-button personal-button--secondary" :to="localePath('/my')" @click="trackClick('home_personal_scores_click', 'status')">{{ t('home.personal.viewScores') }}</NuxtLink>
       </div>
     </section>
 
@@ -85,7 +86,7 @@ const trackClick = (event: string, source: string) => {
       :acknowledge-recent="acknowledgeRecent"
     />
 
-    <section v-else class="personal-top" aria-labelledby="personal-home-title">
+    <section v-else-if="!stateCopy" class="personal-top" aria-labelledby="personal-home-title">
       <div class="personal-status panel-card">
         <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
         <h1 id="personal-home-title">{{ t("home.personal.greeting", { name: displayName }) }}</h1>

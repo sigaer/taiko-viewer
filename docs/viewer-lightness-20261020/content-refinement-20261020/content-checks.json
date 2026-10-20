@@ -1,0 +1,529 @@
+{
+  "checks": [
+    "Avatar disclosure, original file-selection/crop dialog and cancel work in Chinese/Japanese; default avatar reset remains discoverable; no avatar write submitted",
+    {
+      "naturalPanelHeights": [
+        400.984375,
+        236.5
+      ],
+      "currentBindingIsStatus": true
+    },
+    "Cache disclosure reads local keys; original clear-all localStorage action refreshes visible summary/list and does not remove theme cookie",
+    "Eight separate home contexts: observed PB plus distinct daily event, first evidence, no new change, recent read failure, full read failure, unbound, empty scores and guest; one personal opening; six skills remain expandable",
+    "Community real feed renders 12 of 16 synthetic DTOs using existing cap/order; guide/hot/featured filters show 5/12/1 rows; no production users or posts",
+    {
+      "additionalLayoutChecks": [
+        {
+          "width": 820,
+          "page": "home",
+          "container": {
+            "x": 20,
+            "width": 780
+          }
+        },
+        {
+          "width": 820,
+          "page": "catalog",
+          "container": {
+            "x": 20,
+            "width": 780
+          }
+        },
+        {
+          "width": 820,
+          "page": "profile",
+          "container": {
+            "x": 20,
+            "width": 780
+          }
+        },
+        {
+          "width": 820,
+          "page": "settings",
+          "container": {
+            "x": 20,
+            "width": 780
+          }
+        },
+        {
+          "width": 820,
+          "page": "guide",
+          "container": {
+            "x": 20,
+            "width": 780
+          }
+        },
+        {
+          "width": 1280,
+          "page": "home",
+          "container": {
+            "x": 286.390625,
+            "width": 955.21875
+          }
+        },
+        {
+          "width": 1280,
+          "page": "catalog",
+          "container": {
+            "x": 286.390625,
+            "width": 955.21875
+          }
+        },
+        {
+          "width": 1280,
+          "page": "profile",
+          "container": {
+            "x": 364,
+            "width": 800
+          }
+        },
+        {
+          "width": 1280,
+          "page": "settings",
+          "container": {
+            "x": 286.390625,
+            "width": 955.21875
+          }
+        },
+        {
+          "width": 1280,
+          "page": "guide",
+          "container": {
+            "x": 364,
+            "width": 800
+          }
+        },
+        {
+          "width": 1920,
+          "page": "home",
+          "container": {
+            "x": 584,
+            "width": 1000
+          }
+        },
+        {
+          "width": 1920,
+          "page": "catalog",
+          "container": {
+            "x": 584,
+            "width": 1000
+          }
+        },
+        {
+          "width": 1920,
+          "page": "profile",
+          "container": {
+            "x": 684,
+            "width": 800
+          }
+        },
+        {
+          "width": 1920,
+          "page": "settings",
+          "container": {
+            "x": 584,
+            "width": 1000
+          }
+        },
+        {
+          "width": 1920,
+          "page": "guide",
+          "container": {
+            "x": 684,
+            "width": 800
+          }
+        }
+      ]
+    },
+    {
+      "unchangedHandlers": [
+        {
+          "file": "taiko_viewer/pages/account/profile.vue",
+          "scriptSha256": "46fef96954c7f4b86d626f2e9d065eddf023d7c69ce823cf20c428d445fbce1f",
+          "unchangedFrom": "63fda22"
+        },
+        {
+          "file": "taiko_viewer/components/home/PlayerGrowthSurface.vue",
+          "scriptSha256": "c775ad797662f0baa0fb3387f89bc05fe354c3b4ce763aad3b376ee4a69bf448",
+          "unchangedFrom": "63fda22"
+        },
+        {
+          "file": "taiko_viewer/components/home/AuthenticatedHome.vue",
+          "scriptSha256": "7e402cfbb2efc684009355e833388c61c9aba9aa2f7563f5b961cd399c77f7f2",
+          "unchangedFrom": "63fda22"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "apiRequests": [
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/bilibili/dynamic/3493292593383796",
+      "method": "GET"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/bilibili/dynamic/3493292593383796",
+      "method": "GET"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/bilibili/dynamic/3493292593383796",
+      "method": "GET"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/bilibili/dynamic/3493292593383796",
+      "method": "GET"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/songs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/songs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/home",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/overview",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/growth/recent",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    },
+    {
+      "path": "/api/content/songs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/my-don",
+      "method": "GET"
+    },
+    {
+      "path": "/api/account/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/annual-beta/events",
+      "method": "POST"
+    }
+  ]
+}
