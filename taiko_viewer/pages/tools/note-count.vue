@@ -6,6 +6,7 @@ const { t } = useI18n();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "tools.noteCount",
   pageDescKey: "page.tools.noteCount.desc",
   navKey: "/tools/note-count",
@@ -99,7 +100,7 @@ const submit = async () => {
 
 .hint {
   margin: 0 0 14px;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
 }
 
 .result-alert {
@@ -110,8 +111,8 @@ const submit = async () => {
   margin-top: 16px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(196, 127, 79, 0.2);
+  background:var(--viewer-surface-subtle);
+  border: 1px solid var(--viewer-surface-subtle);
 }
 
 .result-box ul {

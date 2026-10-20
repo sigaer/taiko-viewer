@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
-  background: rgba(14, 10, 8, 0.9);
+  background:rgba(14, 10, 8, 0.9);
 }
 
 .forum-media-viewer__figure {
@@ -165,7 +165,7 @@ onBeforeUnmount(() => {
   touch-action: pinch-zoom;
 }
 
-.forum-media-viewer__figure figcaption { color: #f7eee7; font-size: 13px; }
+.forum-media-viewer__figure figcaption { color:#f7eee7; font-size: 13px; }
 
 .forum-media-viewer__close,
 .forum-media-viewer__nav {
@@ -177,8 +177,8 @@ onBeforeUnmount(() => {
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
-  color: #fff;
-  background: rgba(25, 19, 15, 0.72);
+  color:#fff;
+  background:rgba(25, 19, 15, 0.72);
   cursor: pointer;
   transition: background-color 140ms ease, border-color 140ms ease;
 }
@@ -187,8 +187,8 @@ onBeforeUnmount(() => {
 .forum-media-viewer__close:focus-visible,
 .forum-media-viewer__nav:hover,
 .forum-media-viewer__nav:focus-visible {
-  border-color: rgba(255, 255, 255, 0.62);
-  background: rgba(75, 54, 42, 0.92);
+  border-color:rgba(255, 255, 255, 0.62);
+  background:var(--viewer-surface-subtle);
   outline: none;
 }
 

@@ -249,7 +249,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 
 .me-profile-panel__main p {
   margin: 8px 0 0;
-  color: #765f4d;
+  color:#765f4d;
   line-height: 1.8;
 }
 
@@ -266,8 +266,8 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
   padding: 11px 16px;
   border-radius: 999px;
   text-decoration: none;
-  color: #fff;
-  background: linear-gradient(135deg, #d84a34, #f08a24);
+  color:#fff;
+  background:linear-gradient(135deg, var(--viewer-primary), #f08a24);
 }
 
 .panel-head {
@@ -284,7 +284,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 
 .panel-head p {
   margin: 6px 0 0;
-  color: #77604d;
+  color:#77604d;
   line-height: 1.8;
 }
 
@@ -305,7 +305,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
   gap: 16px;
   padding: 14px;
   border-radius: 18px;
-  background: rgba(255, 247, 238, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 .moderation-item__meta {
@@ -314,18 +314,18 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 }
 
 .moderation-item__meta span {
-  color: #816754;
+  color:#816754;
   font-size: 13px;
 }
 
 body.theme-dark .me-profile-panel__main p,
 body.theme-dark .panel-head p,
 body.theme-dark .moderation-item__meta span {
-  color: #c7b4a7;
+  color:#c7b4a7;
 }
 
 body.theme-dark .moderation-item {
-  background: rgba(45, 33, 27, 0.7);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 860px) {

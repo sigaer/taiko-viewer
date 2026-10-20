@@ -1,0 +1,856 @@
+[
+  {
+    "route": "http://127.0.0.1:3208/admin/taiko/login?previewState=scores",
+    "page": "admin-login",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-admin-login-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "dedicated",
+    "geometry": {
+      ".app-content": null,
+      ".viewer-content": null,
+      ".page-body": null,
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/?previewState=scores",
+    "page": "home",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-home-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/songs?previewState=scores",
+    "page": "scores",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-scores-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/my/growth?previewState=scores",
+    "page": "growth",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-growth-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/my/weekly?previewState=scores",
+    "page": "weekly",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-weekly-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/forum?previewState=scores",
+    "page": "community",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-community-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/settings?previewState=scores",
+    "page": "settings",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/annual?previewState=scores",
+    "page": "annual",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-annual-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/b30?previewState=scores",
+    "page": "b30",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-b30-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/progress?previewState=scores",
+    "page": "progress",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "after-progress-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/progress/options"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".viewer-content": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-body": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".page-header": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      },
+      ".breadcrumb-bar": {
+        "x": 0,
+        "width": 0,
+        "right": 0
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/admin/taiko/login?previewState=scores",
+    "page": "admin-login",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-admin-login-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "dedicated",
+    "geometry": {
+      ".app-content": null,
+      ".viewer-content": null,
+      ".page-body": null,
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/?previewState=scores",
+    "page": "home",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-home-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/account/songs?previewState=scores",
+    "page": "scores",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-scores-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-body": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-header": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".breadcrumb-bar": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/my/growth?previewState=scores",
+    "page": "growth",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-growth-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/my/weekly?previewState=scores",
+    "page": "weekly",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-weekly-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/forum?previewState=scores",
+    "page": "community",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-community-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/docs/score-token?previewState=scores",
+    "page": "developer",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-developer-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "reading",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-body": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".page-header": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      },
+      ".breadcrumb-bar": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/settings?previewState=scores",
+    "page": "settings",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-settings-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".breadcrumb-bar": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/annual?previewState=scores",
+    "page": "annual",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-annual-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/home",
+      "http://127.0.0.1:3208/api/account/growth/overview",
+      "http://127.0.0.1:3208/api/account/growth/recent",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "layout": "standard",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-body": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".page-header": null,
+      ".breadcrumb-bar": null
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/tools/b30?previewState=scores",
+    "page": "b30",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-b30-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-body": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-header": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".breadcrumb-bar": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/tools/progress?previewState=scores",
+    "page": "progress",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "after-progress-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/progress/options"
+    ],
+    "layout": "wide",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".viewer-content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-body": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".page-header": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".breadcrumb-bar": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "recordCount": null
+  }
+]

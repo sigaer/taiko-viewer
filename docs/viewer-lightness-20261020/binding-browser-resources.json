@@ -1,0 +1,34 @@
+{
+  "cgroup": "/development.slice/development-qa.slice/taiko-qa-647c22ef72bb.service",
+  "durationMs": 42894,
+  "sampledMemoryPeakBytes": 894328832,
+  "sampleIntervalMs": 250,
+  "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+  "processes": [
+    {
+      "Name": "python3",
+      "VmHWM": "13756 kB",
+      "VmRSS": "13756 kB"
+    },
+    {
+      "Name": "MainThread",
+      "VmHWM": "73428 kB",
+      "VmRSS": "73428 kB"
+    },
+    {
+      "Name": "mysqld",
+      "VmHWM": "153908 kB",
+      "VmRSS": "153908 kB"
+    },
+    {
+      "Name": "MainThread",
+      "VmHWM": "47872 kB",
+      "VmRSS": "47872 kB"
+    },
+    {
+      "Name": "MainThread",
+      "VmHWM": "435656 kB",
+      "VmRSS": "435656 kB"
+    }
+  ]
+}

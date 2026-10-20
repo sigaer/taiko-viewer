@@ -21,6 +21,7 @@ type BreadcrumbItem = {
 };
 
 const route = useRoute();
+const contentLayout = computed(() => ['wide', 'reading', 'immersive'].includes(String(route.meta.contentLayout)) ? String(route.meta.contentLayout) : 'standard');
 const runtimeConfig = useRuntimeConfig();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -45,10 +46,11 @@ const hideGuestHomeChrome = computed(
   () => shouldHideHomeChrome(route.meta.navKey, homePresentation.value)
 );
 const hidePageHeader = computed(() => Boolean(route.meta.hidePageHeader));
-const songDetailAppearance = computed(() => route.meta.shellAppearance === "song-detail");
-const songListDestination = computed(() => breadcrumbItems.value[1]?.to || "/songs/available");
+const mobileParent = computed(() => [...breadcrumbItems.value].reverse().find(item => item.to && item.to !== '/' && localePath(item.to) !== route.path));
+const mobileContextTitle = computed(() => hidePageHeader.value || route.meta.navKey === '/' ? 'My Taiko' : pageTitle.value);
+const keyboardOpen = ref(false);
 const showMobileTabBar = computed(
-  () => Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
+  () => !keyboardOpen.value && Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
 );
 
 useHead(() => ({
@@ -222,7 +224,9 @@ watch(
   }
 );
 
+const syncKeyboard = () => { keyboardOpen.value = Boolean(window.visualViewport && window.innerHeight - window.visualViewport.height > 150 && /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')); };
 onMounted(() => {
+  window.visualViewport?.addEventListener('resize',syncKeyboard);
   stopPageLoading();
   mobileMediaQuery = window.matchMedia("(max-width: 960px)");
   syncMobileNavState(mobileMediaQuery);
@@ -233,6 +237,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopPageLoading();
   if (!process.client) return;
+  window.visualViewport?.removeEventListener('resize',syncKeyboard);
   mobileMediaQuery?.removeEventListener("change", syncMobileNavState);
   mobileMediaQuery = null;
 });
@@ -240,7 +245,7 @@ onBeforeUnmount(() => {
 
 <template>
   <el-config-provider :locale="elementLocale">
-    <div class="app-shell" :class="{ 'mobile-nav-open': isMobileNavOpen, 'app-shell--song-detail': songDetailAppearance, 'app-shell--song-ja': songDetailAppearance && locale === 'ja' }">
+    <div class="app-shell" :class="{ 'mobile-nav-open': isMobileNavOpen }">
       <transition name="mobile-mask">
         <button
           v-if="isMobileNavOpen"
@@ -250,7 +255,7 @@ onBeforeUnmount(() => {
           @click="closeMobileNav"
         ></button>
       </transition>
-      <aside class="app-sidebar">
+      <aside id="site-sidebar" class="app-sidebar">
         <div class="logo-space">
           <NuxtLink :to="localePath('/')" class="logo-link" :aria-label="`${SITE_TITLE} ${t('nav.home')}`">
             <img
@@ -276,28 +281,10 @@ onBeforeUnmount(() => {
         </div>
         <SidebarNav />
       </aside>
-      <main class="app-content" :class="{ 'has-mobile-tabbar': showMobileTabBar }">
-        <div class="mobile-nav-row" :class="{ 'mobile-song-navigation': songDetailAppearance }">
-          <NuxtLink v-if="songDetailAppearance" :to="localePath(songListDestination)" class="mobile-song-back">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            <span>{{ locale === 'ja' ? '楽曲一覧' : '歌曲列表' }}</span>
-          </NuxtLink>
-          <span v-if="songDetailAppearance" class="mobile-song-brand">My Taiko</span>
-          <button
-            type="button"
-            class="mobile-nav-toggle"
-            :aria-label="t('layout.openNav')"
-            :title="t('layout.openNav')"
-            @click="toggleMobileNav"
-          >
-            <span class="mobile-nav-toggle__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16 M4 12h16 M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-            </span>
-          </button>
-        </div>
-        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum'), 'song-detail-breadcrumb': songDetailAppearance }">
+      <main class="app-content" :class="[{ 'has-mobile-tabbar': showMobileTabBar }, `app-content--${contentLayout}`]">
+        <div class="viewer-content" :class="`viewer-content--${contentLayout}`" :data-content-layout="contentLayout">
+        <AppMobileHeader :title="mobileContextTitle" :back-path="mobileParent?.to" :back-label="mobileParent ? (mobileParent.labelKey ? t(mobileParent.labelKey) : mobileParent.label) : undefined" :expanded="isMobileNavOpen" @menu="toggleMobileNav" />
+        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum') }">
           <el-breadcrumb :key="route.fullPath" separator="/">
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbItems"
@@ -423,259 +410,25 @@ onBeforeUnmount(() => {
           </div>
           <slot />
         </section>
+        </div>
       </main>
-      <MobileTabBar v-if="showMobileTabBar" :active-tab="mobileActiveTab" :appearance="songDetailAppearance ? 'song-detail' : undefined" />
+      <MobileTabBar v-if="showMobileTabBar" :active-tab="mobileActiveTab" />
     </div>
   </el-config-provider>
 </template>
 
 <style scoped>
-.page-loading {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: inline-flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 14px 28px rgba(160, 130, 100, 0.16);
-  z-index: 3;
-  color: #6c5a4b;
-  font-size: 13px;
-  font-weight: 600;
-  pointer-events: none;
-}
-
-.mobile-nav-mask {
-  position: fixed;
-  inset: 0;
-  border: 0;
-  margin: 0;
-  background: rgba(15, 12, 10, 0.38);
-  backdrop-filter: blur(2px);
-  z-index: 11;
-}
-
-.mobile-mask-enter-active,
-.mobile-mask-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.mobile-mask-enter-from,
-.mobile-mask-leave-to {
-  opacity: 0;
-}
-
-.mobile-nav-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.mobile-nav-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid transparent;
-  background: transparent;
-  border-radius: 12px;
-  color: var(--viewer-text-muted);
-  padding: 0;
-  cursor: pointer;
-}
-
-.mobile-nav-toggle:hover,
-.mobile-nav-toggle:focus-visible {
-  border-color: var(--viewer-border);
-  background: rgba(196, 164, 132, 0.1);
-}
-
-.mobile-nav-toggle__icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-}
-
-.mobile-nav-toggle__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.logo-link {
-  text-decoration: none;
-  display: inline-flex;
-  border-radius: 20px;
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.logo-link:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
-}
-
-.locale-switcher {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.locale-switcher--mobile {
-  margin-top: 0;
-}
-
-.locale-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 74px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(139, 107, 77, 0.22);
-  background: rgba(255, 255, 255, 0.88);
-  color: #7a5a3e;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.locale-chip.active {
-  color: #fff;
-  background: linear-gradient(135deg, #d46d3b, #f0ab42);
-  border-color: transparent;
-}
-
-.breadcrumb-bar {
-  margin-bottom: 10px;
-  font-size: 12px;
-  color: #7a6552;
-}
-
-@media (max-width: 700px) {
-  .breadcrumb-bar.forum-breadcrumb { display: none; }
-}
-
-.breadcrumb-bar :deep(a) {
-  color: inherit;
-  text-decoration: none;
-}
-
-.crumb-icon {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-
-.crumb-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.page-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.page-title-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(210, 185, 160, 0.22);
-  color: #9a846f;
-}
-
-.page-title-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.page-body {
-  position: relative;
-  min-height: 120px;
-}
-
-.spinner {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid rgba(108, 90, 75, 0.2);
-  border-top-color: #c47f4f;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (min-width: 961px) {
-  .mobile-nav-row {
-    display: none;
-  }
-}
-
-@media (max-width: 960px) {
-  .app-content.has-mobile-tabbar {
-    padding-bottom: calc(82px + env(safe-area-inset-bottom));
-  }
-}
-</style>
-
-<style scoped>
-/* Explicit route opt-in: tokens, typography and chrome end at this shell. */
-.app-shell--song-detail {
-  --song-zh-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
-  --song-ja-font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
-  --viewer-font-family: var(--song-zh-font);
-  --viewer-display-font: var(--viewer-font-family);
-  --song-ink: #263b42;
-  --song-muted: #50666e;
-  --song-link: #007982;
-  --song-red: #c74036;
-  --song-on-red: #fff;
-  --song-paper: #fff;
-  --song-tint: #eef5f3;
-  --song-rule: #dce5e2;
-  --song-control: #8aa3a7;
-  --viewer-text: var(--song-ink);
-  --viewer-text-muted: var(--song-muted);
-  --viewer-accent-strong: var(--song-link);
-  --viewer-border: var(--song-rule);
-  --viewer-surface: var(--song-paper);
-  font-family: var(--viewer-font-family);
-  color: var(--song-ink);
-  background: #f7f9f8;
-}
-.app-shell--song-detail.app-shell--song-ja { --viewer-font-family: var(--song-ja-font); }
-.app-shell--song-detail .app-content { background: transparent; }
-.mobile-song-back { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; color: var(--song-ink); font-size: 15px; text-decoration: none; }
-.mobile-song-back svg { width: 20px; height: 20px; }
-.mobile-song-brand { color: var(--song-muted); font-size: 14px; font-weight: 500; }
-.mobile-song-back:focus-visible { outline: 3px solid var(--song-link); outline-offset: 3px; }
-body.theme-dark .app-shell--song-detail {
-  --song-ink: #e7f2f0; --song-muted: #b3cbc8; --song-link: #73d2d7; --song-red: #f38379; --song-on-red: #251817;
-  --song-paper: #213638; --song-tint: #243c3d; --song-rule: #48605f; --song-control: #7f9d9d;
-  background: #192e30;
-}
-@media (max-width: 960px) {
-  .app-shell--song-detail .app-content { padding: 0 20px 28px; }
-  .app-shell--song-detail .app-content.has-mobile-tabbar { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
-  .mobile-song-navigation { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; min-height: 64px; margin: 0 -4px 20px; }
-  .mobile-song-navigation .mobile-nav-toggle { justify-self: end; color: var(--song-ink); }
-  .song-detail-breadcrumb { display: none; }
-}
+.page-loading{position:absolute;top:0;right:0;display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:8px;background:var(--viewer-surface);z-index:3;color:var(--viewer-text-muted);font-size:14px;pointer-events:none;}
+.mobile-nav-mask{position:fixed;inset:0;border:0;margin:0;background:var(--viewer-overlay);z-index:35;}
+.mobile-mask-enter-active,.mobile-mask-leave-active{transition:opacity .18s ease;}.mobile-mask-enter-from,.mobile-mask-leave-to{opacity:0;}
+.logo-link{display:inline-flex;text-decoration:none;border-radius:10px;}
+.locale-switcher{display:flex;flex-wrap:wrap;gap:4px;}
+.locale-chip{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:6px 8px;border-radius:6px;color:var(--viewer-text-muted);font-size:13px;text-decoration:none;}
+.locale-chip.active{color:var(--viewer-primary);background:var(--viewer-selected);font-weight:600;}
+.breadcrumb-bar{margin-bottom:12px;font-size:14px;color:var(--viewer-text-muted);}.breadcrumb-bar :deep(a){color:inherit;text-decoration:none;}.breadcrumb-bar :deep(.el-breadcrumb__inner){font-weight:400;color:var(--viewer-text-muted);}
+.crumb-icon{display:inline-flex;width:16px;height:16px;margin-right:6px;vertical-align:middle;}.crumb-icon svg{width:100%;height:100%;}
+.page-title-row{display:flex;align-items:center;gap:10px;}.page-title-icon{display:none;}
+.spinner{width:18px;height:18px;border-radius:50%;border:2px solid var(--viewer-border);border-top-color:var(--viewer-link);animation:spin .9s linear infinite;}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:960px){.breadcrumb-bar{display:none;}.app-content.has-mobile-tabbar{padding-bottom:calc(88px + env(safe-area-inset-bottom));}}
+@media(prefers-reduced-motion:reduce){.mobile-mask-enter-active,.mobile-mask-leave-active{transition:none;}.spinner{animation:none;}}
 </style>

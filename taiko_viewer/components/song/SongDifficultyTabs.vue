@@ -22,12 +22,12 @@ const onKeydown = async (event:KeyboardEvent, index:number) => {
   </div>
 </template>
 <style scoped>
-.difficulty-tabs { display:flex; gap:26px; border-bottom:1px solid var(--song-rule); margin:30px 0 28px; }
-.difficulty-tab { display:flex; align-items:center; justify-content:center; gap:8px; min-height:54px; padding:10px 10px 13px; color:var(--song-ink); font:inherit; font-size:15px; background:transparent; border:0; border-bottom:3px solid transparent; cursor:pointer; }
+.difficulty-tabs { display:flex; gap:26px; border-bottom:1px solid var(--viewer-border); margin:30px 0 28px; }
+.difficulty-tab { display:flex; align-items:center; justify-content:center; gap:8px; min-height:54px; padding:10px 10px 13px; color:var(--viewer-text); font:inherit; font-size:15px; background:transparent; border:0; border-bottom:3px solid transparent; cursor:pointer; }
 .difficulty-star {font-size:14px;font-weight:400;}
-.difficulty-tab[aria-selected=true] { color:var(--song-red); border-bottom-color:var(--song-red); font-weight:600; }
-.difficulty-tab:hover {background:var(--song-tint);}
-.difficulty-tab:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
+.difficulty-tab[aria-selected=true] { color:var(--viewer-primary); border-bottom-color:var(--viewer-primary); font-weight:600; }
+.difficulty-tab:hover {background:var(--viewer-surface-subtle);}
+.difficulty-tab:focus-visible {outline:3px solid var(--viewer-link);outline-offset:3px;}
 @media(max-width:767px){.difficulty-tabs{gap:0;margin:20px 0 24px}.difficulty-tab{flex:1;min-width:0;flex-direction:column;gap:4px;padding:8px 0 11px;font-size:14px;line-height:1.5}.difficulty-star{font-size:14px}}
 @media(prefers-reduced-motion:no-preference){.difficulty-tab{transition:color 120ms ease,background-color 120ms ease;}}
 </style>

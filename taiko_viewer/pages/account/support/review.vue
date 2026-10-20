@@ -16,6 +16,7 @@ const submitting = ref(false);
 const ticketDetail = ref<SupportTicketDetail | null>(null);
 
 definePageMeta({
+  contentLayout: "wide",
   middleware: "account-auth",
   pageTitleKey: "account.supportReview",
   pageDescKey: "page.account.supportReview.desc",
@@ -395,7 +396,7 @@ const closeTicket = async () => {
 
 .section-title p {
   margin: 8px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -415,13 +416,13 @@ const closeTicket = async () => {
   padding: 12px 14px;
   border: 1px solid rgba(171, 141, 110, 0.18);
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
   cursor: pointer;
 }
 
 .ticket-summary.active {
-  border-color: rgba(196, 127, 79, 0.55);
-  background: rgba(255, 236, 214, 0.95);
+  border-color:rgba(196, 127, 79, 0.55);
+  background:var(--viewer-surface-subtle);
 }
 
 .ticket-summary__head {
@@ -433,7 +434,7 @@ const closeTicket = async () => {
 
 .ticket-summary p {
   margin: 6px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -450,7 +451,7 @@ const closeTicket = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #846b57;
+  color:var(--viewer-text-muted);
 }
 
 .detail-head {
@@ -466,7 +467,7 @@ const closeTicket = async () => {
 
 .detail-head p {
   margin: 0 0 4px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .thread-block,
@@ -489,15 +490,15 @@ const closeTicket = async () => {
 .thread-item {
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item--staff {
-  background: rgba(232, 244, 255, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item--user {
-  background: rgba(255, 248, 240, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item__head {
@@ -505,7 +506,7 @@ const closeTicket = async () => {
   justify-content: space-between;
   gap: 10px;
   font-size: 12px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   margin-bottom: 8px;
 }
 

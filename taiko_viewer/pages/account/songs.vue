@@ -21,6 +21,7 @@ const editorMode = ref<"edit" | "create">("edit");
 const editingSong = ref<SongRow | null>(null);
 
 definePageMeta({
+  contentLayout: "wide",
   middleware: "account-auth",
   pageTitleKey: "account.songs",
   pageDescKey: "page.account.songs.desc",
@@ -446,7 +447,7 @@ const deleteScore = async (row: SongRow) => {
 
 .section-title p {
   margin: 8px 0 18px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 
@@ -471,7 +472,7 @@ const deleteScore = async (row: SongRow) => {
 
 .binding-switcher span,
 .toolbar-meta span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -489,7 +490,7 @@ const deleteScore = async (row: SongRow) => {
   min-width: 120px;
   padding: 12px 16px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.86);
+  background:var(--viewer-surface-subtle);
   display: grid;
   gap: 4px;
   align-self: flex-start;
@@ -511,14 +512,14 @@ const deleteScore = async (row: SongRow) => {
 }
 
 .song-title-cell span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
 .judge-cell {
   display: grid;
   gap: 4px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
   line-height: 1.5;
 }

@@ -70,7 +70,7 @@ const personalLinks = [
 
 .my-intro__eyebrow {
   margin: 0;
-  color: var(--viewer-accent-strong);
+  color:var(--viewer-accent-strong);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -79,13 +79,13 @@ const personalLinks = [
 .my-intro h2,
 .my-links h2 {
   margin: 8px 0;
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   font-size: 22px;
 }
 
 .my-intro p:not(.my-intro__eyebrow) {
   margin: 0;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   line-height: 1.6;
 }
 
@@ -96,8 +96,8 @@ const personalLinks = [
   margin-top: 16px;
   padding: 0 16px;
   border-radius: 12px;
-  color: #fff;
-  background: var(--viewer-accent-strong);
+  color:#fff;
+  background:var(--viewer-accent-strong);
   text-decoration: none;
   font-weight: 700;
 }
@@ -115,7 +115,7 @@ const personalLinks = [
   padding: 10px 12px;
   border: 1px solid var(--viewer-border);
   border-radius: 12px;
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
@@ -123,8 +123,8 @@ const personalLinks = [
 
 .my-link:hover,
 .my-link:focus-visible {
-  border-color: rgba(196, 164, 132, 0.62);
-  background: rgba(196, 164, 132, 0.12);
+  border-color:rgba(196, 164, 132, 0.62);
+  background:rgba(196, 164, 132, 0.12);
 }
 
 @media (max-width: 560px) {

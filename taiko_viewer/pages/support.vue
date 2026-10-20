@@ -525,7 +525,7 @@ const submit = async () => {
 
 .panel-header p {
   margin: 0;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
 }
 
 .panel-title {
@@ -540,8 +540,8 @@ const submit = async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9a6d47;
-  background: rgba(196, 127, 79, 0.2);
+  color:var(--viewer-link);
+  background:var(--viewer-surface-subtle);
   border-radius: 6px;
 }
 
@@ -551,19 +551,17 @@ const submit = async () => {
 }
 
 .section-icon.alt {
-  background: rgba(88, 136, 197, 0.2);
-  color: #3c6aa6;
+  background:rgba(88, 136, 197, 0.2);
+  color:#3c6aa6;
 }
 
 .section-icon.warm {
-  background: rgba(255, 190, 126, 0.22);
-  color: #c77432;
+  background:rgba(255, 190, 126, 0.22);
+  color:#c77432;
 }
 
 .hero-card {
-  background:
-    radial-gradient(circle at top right, rgba(255, 214, 168, 0.26), transparent 38%),
-    linear-gradient(135deg, rgba(255, 249, 240, 0.96), rgba(255, 255, 255, 0.98));
+  background:var(--viewer-surface-subtle);
 }
 
 .support-form {
@@ -588,8 +586,8 @@ const submit = async () => {
 .ticket-card {
   padding: 16px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 245, 239, 0.92));
-  box-shadow: 0 10px 24px rgba(165, 138, 110, 0.12);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 10px 24px var(--viewer-shadow);
   display: grid;
   gap: 12px;
 }
@@ -616,12 +614,12 @@ const submit = async () => {
   flex-wrap: wrap;
   gap: 10px;
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .ticket-id {
   font-weight: 600;
-  color: #a56535;
+  color:#a56535;
 }
 
 .ticket-tags {
@@ -632,7 +630,7 @@ const submit = async () => {
 
 .ticket-content {
   margin: 0;
-  color: #3f2f23;
+  color:#3f2f23;
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
@@ -643,7 +641,7 @@ const submit = async () => {
   flex-wrap: wrap;
   gap: 10px 16px;
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .empty-state {
@@ -653,8 +651,8 @@ const submit = async () => {
   justify-content: center;
   border-radius: 18px;
   border: 1px dashed rgba(171, 141, 110, 0.36);
-  color: #846b57;
-  background: rgba(255, 252, 248, 0.7);
+  color:var(--viewer-text-muted);
+  background:var(--viewer-surface-subtle);
 }
 
 .ticket-thread {
@@ -667,11 +665,11 @@ const submit = async () => {
 .ticket-thread h5 {
   margin: 0;
   font-size: 14px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .thread-loading {
-  color: #846b57;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -683,15 +681,15 @@ const submit = async () => {
 .thread-item {
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item--staff {
-  background: rgba(232, 244, 255, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item--user {
-  background: rgba(255, 248, 240, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 .thread-item__head {
@@ -699,7 +697,7 @@ const submit = async () => {
   justify-content: space-between;
   gap: 10px;
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
   margin-bottom: 8px;
 }
 
@@ -718,7 +716,7 @@ const submit = async () => {
 .closed-hint {
   margin: 0;
   font-size: 13px;
-  color: #846b57;
+  color:var(--viewer-text-muted);
 }
 
 @media (max-width: 960px) {

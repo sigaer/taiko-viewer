@@ -110,7 +110,7 @@ const groups = [
 
 .more-group h2 {
   margin: 0 0 12px;
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   font-size: 16px;
 }
 
@@ -128,28 +128,28 @@ const groups = [
   padding: 0 14px;
   border: 1px solid var(--viewer-border);
   border-radius: 999px;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
 }
 
 .more-language__option.active {
-  border-color: transparent;
-  color: #fff;
-  background: var(--viewer-accent-strong);
+  border-color:transparent;
+  color:#fff;
+  background:var(--viewer-accent-strong);
 }
 
 .more-product-meta {
   padding: 4px 4px 2px;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   font-size: 12px;
   line-height: 1.5;
   text-align: center;
 }
 
 :global(body.theme-dark .more-product-meta) {
-  color: #cbbbae;
+  color:#cbbbae;
 }
 
 .more-language__option:focus-visible,
@@ -173,8 +173,8 @@ const groups = [
   padding: 10px 12px;
   border: 1px solid var(--viewer-border);
   border-radius: 12px;
-  color: var(--viewer-text);
-  background: rgba(255, 255, 255, 0.42);
+  color:var(--viewer-text);
+  background:var(--viewer-surface-subtle);
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
@@ -182,8 +182,8 @@ const groups = [
 
 .more-link:hover,
 .more-link:focus-visible {
-  border-color: rgba(196, 164, 132, 0.62);
-  background: rgba(196, 164, 132, 0.12);
+  border-color:rgba(196, 164, 132, 0.62);
+  background:rgba(196, 164, 132, 0.12);
 }
 
 @media (max-width: 560px) {

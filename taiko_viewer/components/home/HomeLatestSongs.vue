@@ -65,7 +65,7 @@ const getSubtitle = (song: SongCatalogItem) =>
 
 .guest-latest__rail {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
 }
 
@@ -76,9 +76,9 @@ const getSubtitle = (song: SongCatalogItem) =>
   overflow: hidden;
   border: 1px solid var(--viewer-border);
   border-radius: 18px;
-  color: inherit;
-  background: rgba(255, 253, 250, 0.9);
-  box-shadow: 0 12px 24px rgba(110, 77, 51, 0.08);
+  color:inherit;
+  background:var(--viewer-surface-subtle);
+  box-shadow:none;
   text-decoration: none;
   scroll-snap-align: start;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -86,12 +86,12 @@ const getSubtitle = (song: SongCatalogItem) =>
 
 .guest-song-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(168, 95, 62, 0.34);
-  box-shadow: 0 16px 30px rgba(110, 77, 51, 0.13);
+  border-color:var(--viewer-control-border);
+  box-shadow:none;
 }
 
 .guest-song-card:focus-visible {
-  outline: 3px solid #a85f3e;
+  outline: 3px solid var(--viewer-link);
   outline-offset: 3px;
 }
 
@@ -101,7 +101,7 @@ const getSubtitle = (song: SongCatalogItem) =>
   place-items: center;
   overflow: hidden;
   padding: 8px;
-  background: linear-gradient(145deg, #fff, #f6eadf);
+  background:var(--viewer-surface);
 }
 
 .guest-song-card__cover :deep(img) {
@@ -125,14 +125,14 @@ const getSubtitle = (song: SongCatalogItem) =>
 }
 
 .guest-song-card__copy strong {
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   font-size: 14px;
 }
 
 .guest-song-card__copy span,
 .guest-song-card__copy small {
-  color: var(--viewer-text-muted);
-  font-size: 11px;
+  color:var(--viewer-text-muted);
+  font-size: 14px;
 }
 
 .guest-song-card--loading {
@@ -143,21 +143,15 @@ const getSubtitle = (song: SongCatalogItem) =>
   min-height: 120px;
   display: grid;
   place-items: center;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
 }
 
 :global(body.theme-dark .guest-song-card) {
-  background: rgba(35, 30, 27, 0.92);
+  background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-song-card__cover) {
-  background: linear-gradient(145deg, #2c2521, #211c19);
-}
-
-@media (max-width: 980px) {
-  .guest-latest__rail {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  background:var(--viewer-surface);
 }
 
 @media (max-width: 720px) {

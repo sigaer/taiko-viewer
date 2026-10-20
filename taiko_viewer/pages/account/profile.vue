@@ -13,6 +13,7 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser(true);
 
 definePageMeta({
+  contentLayout: "reading",
   middleware: "account-auth",
   pageTitleKey: "account.profile",
   pageDescKey: "page.account.profile.desc",
@@ -1083,7 +1084,7 @@ const removeQqBinding = async () => {
         <el-card class="panel-card profile-main-card">
           <div class="profile-main">
             <div class="avatar-block">
-              <el-avatar :size="132" :src="profile.user.avatarUrl" class="profile-avatar">
+              <el-avatar :size="80" :src="profile.user.avatarUrl" class="profile-avatar">
                 {{ profile.user.username.slice(0, 1) }}
               </el-avatar>
               <div class="avatar-actions">
@@ -1126,6 +1127,7 @@ const removeQqBinding = async () => {
                     <span class="binding-value binding-value--mobile">{{ profile.currentBinding?.taikoId || profile.currentBinding?.displayName || copy.unbound }}</span>
                   </strong>
                 </div>
+                <details class="profile-more"><summary>{{ locale === 'ja' ? 'プロフィールの詳細' : '更多资料' }}</summary>
                 <div class="meta-item meta-item--title">
                   <span>{{ copy.currentTitle }}</span>
                   <strong>{{ profile.currentBinding?.currentTitle || "-" }}</strong>
@@ -1134,6 +1136,7 @@ const removeQqBinding = async () => {
                   <span>{{ copy.createdAt }}</span>
                   <strong>{{ formatDateTime(profile.user.createdAt) }}</strong>
                 </div>
+                </details>
               </div>
             </div>
           </div>
@@ -1145,8 +1148,9 @@ const removeQqBinding = async () => {
             <h3>{{ copy.bindTitle }}</h3>
             <p>{{ copy.bindDesc }}</p>
           </div>
+          <label class="binding-field-label" for="binding-taiko-id">{{ copy.taikoIdLabel }}</label>
           <div class="bind-input-row">
-            <el-input ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
+            <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
             <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
           </div>
           <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
@@ -1160,43 +1164,6 @@ const removeQqBinding = async () => {
               <strong>{{ copy.expiresAt }}：</strong>{{ formatDateTime(profile.pendingBinding.expiresAt) }}
             </div>
             <el-button type="success" :loading="confirming" @click="confirmBinding()">{{ copy.confirmBinding }}</el-button>
-          </div>
-          <div class="manual-account-panel">
-            <div class="manual-drum" aria-hidden="true"><span /></div>
-            <div class="manual-account-copy">
-              <strong>{{ copy.manualTitle }}</strong>
-              <p>{{ copy.manualDesc }}</p>
-            </div>
-            <div class="manual-account-controls">
-              <el-input
-                v-model="manualNickname"
-                :placeholder="copy.manualNickname"
-                maxlength="24"
-                @keyup.enter="createManual"
-              />
-              <el-button
-                type="success"
-                plain
-                :loading="manualLoading"
-                :disabled="!manualNickname.trim()"
-                @click="createManual"
-              >
-                {{ copy.manualCreate }}
-              </el-button>
-              <el-input
-                v-model="manualClaimCode"
-                :placeholder="copy.manualClaimPlaceholder"
-                maxlength="12"
-                @keyup.enter="claimManual"
-              />
-              <el-button
-                :loading="manualLoading"
-                :disabled="!manualClaimCode.trim()"
-                @click="claimManual"
-              >
-                {{ copy.manualClaim }}
-              </el-button>
-            </div>
           </div>
           <el-empty v-if="!profile.bindings.length" :description="copy.noBindings" />
           <div v-else class="binding-list">
@@ -1242,6 +1209,41 @@ const removeQqBinding = async () => {
               </div>
             </div>
           </div>
+          <details class="manual-account-panel"><summary>{{ copy.manualTitle }}</summary>
+            <div class="manual-account-copy">
+              <p>{{ copy.manualDesc }}</p>
+            </div>
+            <div class="manual-account-controls">
+              <el-input
+                v-model="manualNickname"
+                :placeholder="copy.manualNickname"
+                maxlength="24"
+                @keyup.enter="createManual"
+              />
+              <el-button
+                type="success"
+                plain
+                :loading="manualLoading"
+                :disabled="!manualNickname.trim()"
+                @click="createManual"
+              >
+                {{ copy.manualCreate }}
+              </el-button>
+              <el-input
+                v-model="manualClaimCode"
+                :placeholder="copy.manualClaimPlaceholder"
+                maxlength="12"
+                @keyup.enter="claimManual"
+              />
+              <el-button
+                :loading="manualLoading"
+                :disabled="!manualClaimCode.trim()"
+                @click="claimManual"
+              >
+                {{ copy.manualClaim }}
+              </el-button>
+            </div>
+          </details>
         </el-card>
 
         <el-card class="panel-card qq-card">
@@ -1425,8 +1427,9 @@ const removeQqBinding = async () => {
 
 <style scoped>
 .profile-page {
+  width: 100%;
   display: grid;
-  gap: 18px;
+  gap: 28px;
 }
 
 .third-party-settings {
@@ -1444,13 +1447,13 @@ const removeQqBinding = async () => {
 }
 .third-party-settings p {
   margin: 0;
-  color: var(--el-text-color-regular);
+  color:var(--el-text-color-regular);
   line-height: 1.65;
-  font-size: 13px;
+  font-size: 14px;
 }
 .third-party-settings a {
   flex-shrink: 0;
-  color: inherit;
+  color:inherit;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1460,7 +1463,7 @@ const removeQqBinding = async () => {
 }
 
 :global(body.theme-dark .third-party-settings p) {
-  color: inherit;
+  color:inherit;
 }
 
 .onboarding-card {
@@ -1473,15 +1476,15 @@ const removeQqBinding = async () => {
 }
 .onboarding-card .onboarding-copy { min-width: 0; }
 .onboarding-card h3 { margin: 0 0 6px; font-size: 16px; }
-.onboarding-card p { margin: 0; color: var(--el-text-color-secondary); font-size: 13px; line-height: 1.6; }
+.onboarding-card p { margin: 0; color:var(--el-text-color-secondary); font-size: 14px; line-height: 1.6; }
 @media (max-width: 520px) {
   .onboarding-card { flex-direction: column; align-items: stretch; text-align: left; }
   .onboarding-card .el-button { width: 100%; }
 }
 .profile-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+  gap: 28px;
 }
 
 .profile-grid > *,
@@ -1496,13 +1499,13 @@ const removeQqBinding = async () => {
   container-type: inline-size;
 }
 
-.mydon-config-card {
+.profile-main-card,.mydon-config-card {
   grid-column: 1 / -1;
 }
 
 .profile-main {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 80px minmax(0,1fr);
   gap: 22px;
   align-items: center;
 }
@@ -1526,12 +1529,12 @@ const removeQqBinding = async () => {
 
 .profile-info h2 {
   margin: 0;
-  font-size: 30px;
+  font-size: 26px;
 }
 
 .profile-info p {
   margin: 6px 0 18px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .status-list {
@@ -1542,51 +1545,54 @@ const removeQqBinding = async () => {
 }
 
 .status-chip {
-  min-width: 150px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  display: grid;
-  gap: 4px;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .status-chip.ok {
-  background: rgba(121, 197, 135, 0.16);
+  background:var(--viewer-success-surface);
 }
 
 .status-chip.pending {
-  background: rgba(233, 174, 77, 0.16);
+  background:var(--viewer-warning-surface);
 }
 
 .status-chip span,
 .meta-grid span {
-  color: #7d6a5a;
-  font-size: 13px;
+  color:var(--viewer-text-muted);
+  font-size: 14px;
 }
 
 .meta-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
 .meta-grid div {
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.8);
+  background:var(--viewer-surface-subtle);
   display: grid;
   gap: 4px;
 }
 
 .section-title h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .section-title p {
   margin: 6px 0 16px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
+
+.binding-field-label{display:block;font-size:14px;margin:0 0 8px;}
 
 .bind-input-row {
   display: grid;
@@ -1606,20 +1612,20 @@ const removeQqBinding = async () => {
   gap: 8px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 247, 218, 0.8);
+  background:var(--viewer-warning-surface);
   margin-bottom: 14px;
 }
 
 .manual-account-panel {
-  display: grid;
-  grid-template-columns: auto minmax(180px, 0.8fr) minmax(260px, 1.2fr);
+  display: block;
+  grid-template-columns: minmax(0,1fr);
   gap: 14px;
   align-items: center;
   padding: 14px;
   margin: 4px 0 16px;
-  border: 1px solid rgba(213, 112, 73, 0.22);
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 246, 235, 0.92), rgba(255, 255, 255, 0.88));
+  border: 0;
+  border-radius: 0;
+  background:transparent;
 }
 
 .manual-drum {
@@ -1627,17 +1633,17 @@ const removeQqBinding = async () => {
   height: 54px;
   display: grid;
   place-items: center;
-  border: 4px solid #d76545;
+  border: 4px solid var(--viewer-primary);
   border-radius: 50%;
-  background: #fffdf9;
-  box-shadow: inset 0 0 0 4px #ffd1a8;
+  background:#fffdf9;
+  box-shadow:inset 0 0 0 4px #ffd1a8;
 }
 
 .manual-drum span {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #d76545;
+  background:var(--viewer-primary);
   opacity: 0.32;
 }
 
@@ -1648,8 +1654,8 @@ const removeQqBinding = async () => {
 
 .manual-account-copy p {
   margin: 0;
-  color: #7d6a5a;
-  font-size: 13px;
+  color:var(--viewer-text-muted);
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -1672,16 +1678,16 @@ const removeQqBinding = async () => {
   gap: 16px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.78);
+  background:var(--viewer-surface-subtle);
 }
 
 .binding-item p {
   margin: 6px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .binding-item--manual {
-  box-shadow: inset 4px 0 0 #d76545;
+  box-shadow:inset 4px 0 0 var(--viewer-primary);
 }
 
 .binding-heading {
@@ -1695,22 +1701,22 @@ const removeQqBinding = async () => {
   padding: 2px 7px;
   border: 1px solid currentColor;
   border-radius: 5px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: 0.08em;
   line-height: 1.4;
 }
 
 .source-stamp--wahlap {
-  color: #b65337;
+  color:var(--viewer-text-muted);
 }
 
 .source-stamp--hiroba {
-  color: #386da8;
+  color:var(--viewer-text-muted);
 }
 
 .source-stamp--manual {
-  color: #8b604c;
+  color:var(--viewer-text-muted);
   border-style: dashed;
 }
 
@@ -1724,7 +1730,7 @@ const removeQqBinding = async () => {
 .mydon-frame {
   border-radius: 18px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 244, 232, 0.8), rgba(255, 255, 255, 0.9));
+  background:var(--viewer-surface-subtle);
   padding: 12px;
 }
 
@@ -1755,7 +1761,7 @@ const removeQqBinding = async () => {
 .showcase-layout-picker {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.78);
+  background:var(--viewer-surface-subtle);
 }
 
 .showcase-status__item {
@@ -1768,7 +1774,7 @@ const removeQqBinding = async () => {
 .showcase-layout-picker__label,
 .showcase-hint,
 .showcase-clear-hint {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .showcase-slot-list {
@@ -1819,12 +1825,12 @@ const removeQqBinding = async () => {
   gap: 16px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.78);
+  background:var(--viewer-surface-subtle);
 }
 
 .qq-bound-row p {
   margin: 6px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .qq-pending-row {
@@ -1832,12 +1838,12 @@ const removeQqBinding = async () => {
   gap: 12px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 247, 218, 0.8);
+  background:var(--viewer-warning-surface);
 }
 
 .qq-pending-hint {
   margin: 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.6;
 }
 
@@ -1852,7 +1858,7 @@ const removeQqBinding = async () => {
   gap: 12px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 247, 218, 0.8);
+  background:var(--viewer-warning-surface);
   margin-bottom: 14px;
 }
 
@@ -1862,10 +1868,10 @@ const removeQqBinding = async () => {
   font-weight: 700;
 }
 
-.qq-code-hint {
+.qq-code-result .qq-code-hint {
   font-size: 13px !important;
-  font-weight: 400 !important;
-  color: #7d6a5a;
+  font-weight: 400;
+  color:var(--viewer-text-muted);
 }
 
 @container (max-width: 620px) {
@@ -1909,9 +1915,9 @@ const removeQqBinding = async () => {
   }
 
   .profile-avatar {
-    width: 84px !important;
-    height: 84px !important;
-    line-height: 84px !important;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
     font-size: 28px;
   }
 
@@ -1933,18 +1939,18 @@ const removeQqBinding = async () => {
   }
 
   .avatar-upload-button {
-    min-height: 32px;
+    min-height: 44px;
     padding: 5px 8px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .avatar-reset-button {
-    min-height: 32px;
+    min-height: 44px;
     padding: 4px 0;
     border: 0;
-    background: transparent;
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
+    background:transparent;
+    color:var(--el-text-color-secondary);
+    font-size: 14px;
   }
 
   .avatar-upload-label--desktop,
@@ -1960,7 +1966,7 @@ const removeQqBinding = async () => {
   }
 
   .profile-info h2 {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1.2;
   }
 
@@ -1984,35 +1990,35 @@ const removeQqBinding = async () => {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.35;
   }
 
   .status-chip.ok {
-    border-color: rgba(77, 154, 95, 0.35);
-    background: rgba(121, 197, 135, 0.08);
+    border-color:var(--viewer-border);
+    background:var(--viewer-success-surface);
   }
 
   .status-chip.ok::before {
     content: "✓";
-    color: #3f8e50;
-    font-weight: 800;
+    color:var(--viewer-success);
+    font-weight: 600;
   }
 
   .status-chip.pending {
-    border-color: rgba(196, 132, 32, 0.45);
-    background: rgba(233, 174, 77, 0.1);
+    border-color:var(--viewer-border);
+    background:var(--viewer-warning-surface);
   }
 
   .status-chip.pending::before {
     content: "!";
-    color: #a86c16;
-    font-weight: 800;
+    color:var(--viewer-warning);
+    font-weight: 600;
   }
 
   .status-chip span,
   .status-chip strong {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.35;
   }
 
@@ -2023,7 +2029,7 @@ const removeQqBinding = async () => {
 
   .meta-grid .meta-item--title,
   .meta-grid .meta-item--created {
-    display: none;
+    display: grid;
   }
 
   .meta-grid .meta-item--binding {
@@ -2032,11 +2038,11 @@ const removeQqBinding = async () => {
     gap: 6px;
     padding: 0;
     border-radius: 0;
-    background: transparent;
+    background:transparent;
   }
 
   .meta-grid .meta-item--binding > span {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .meta-grid .meta-item--binding > strong {
@@ -2077,4 +2083,6 @@ const removeQqBinding = async () => {
     justify-content: flex-start;
   }
 }
+.manual-account-panel summary{cursor:pointer;min-height:44px;align-content:center;font-size:15px;color:var(--viewer-link);}.manual-account-panel[open] summary{margin-bottom:12px;}.manual-account-controls{margin-top:16px;}.manual-account-panel{margin-top:16px;padding:0;}.binding-item--manual{box-shadow:none;}.section-title h3,.profile-info h2{font-weight:600;}.profile-main-card{background:transparent;}.profile-main-card :deep(.el-card__body){padding:0 0 8px;}.meta-grid div{background:transparent;padding:0;}.status-chip.ok{color:var(--viewer-success);}.status-chip.pending{color:var(--viewer-warning);}.status-chip strong{font-weight:500;}.avatar-reset-button{color:var(--viewer-link);}.profile-avatar{background:var(--viewer-surface-subtle);color:var(--viewer-text-muted);}.mydon-frame{background:var(--viewer-surface-subtle);}.qq-code-result p.qq-code-hint{font-size:14px;font-weight:400;}
+.profile-more summary{min-height:44px;align-content:center;cursor:pointer;color:var(--viewer-link);font-size:14px;}.profile-more[open]{display:grid;gap:12px;}.profile-more .meta-item{padding:0;background:transparent;}
 </style>

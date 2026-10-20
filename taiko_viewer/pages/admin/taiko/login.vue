@@ -85,9 +85,7 @@ const submit = async () => {
   grid-template-columns: minmax(0, 1.25fr) minmax(360px, 460px);
   gap: 32px;
   padding: 40px;
-  background:
-    radial-gradient(circle at top left, rgba(247, 206, 117, 0.35), transparent 26%),
-    linear-gradient(145deg, #efe5d7 0%, #faf6ee 46%, #f3eadf 100%);
+  background: var(--viewer-bg);
 }
 
 .admin-login-hero {
@@ -102,8 +100,8 @@ const submit = async () => {
   width: fit-content;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(36, 28, 18, 0.08);
-  color: #8a6937;
+  background: var(--viewer-surface-subtle);
+  color: var(--viewer-text-muted);
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -113,13 +111,13 @@ const submit = async () => {
   margin: 0;
   font-size: clamp(42px, 7vw, 72px);
   line-height: 0.94;
-  color: #182338;
+  color: var(--viewer-text);
 }
 
 .admin-login-hero p {
   margin: 0;
   max-width: 560px;
-  color: #5d5244;
+  color: var(--viewer-text-muted);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -128,18 +126,20 @@ const submit = async () => {
   align-self: center;
   border-radius: 28px;
   border: none;
+  background: var(--viewer-surface);
+  box-shadow: none;
   overflow: hidden;
 }
 
 .admin-login-card__head h2 {
   margin: 0 0 8px;
-  color: #1e2a3d;
+  color: var(--viewer-text);
   font-size: 28px;
 }
 
 .admin-login-card__head p {
   margin: 0 0 18px;
-  color: #7c6e5c;
+  color: var(--viewer-text-muted);
   line-height: 1.7;
 }
 

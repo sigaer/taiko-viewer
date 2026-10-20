@@ -188,13 +188,13 @@ const getSectionTabKey = (sectionTitle: string) => {
   max-width: 980px;
   margin: 0 auto;
   padding: 24px 28px 40px;
-  background: rgba(255, 255, 255, 0.9);
+  background:var(--viewer-surface-subtle);
   border-radius: 18px;
-  box-shadow: 0 18px 32px rgba(165, 138, 110, 0.12);
+  box-shadow:0 18px 32px var(--viewer-shadow);
 }
 
 .grade-title {
-  border-bottom: 1px solid rgba(165, 138, 110, 0.2);
+  border-bottom: 1px solid var(--viewer-border);
   padding-bottom: 12px;
   margin-bottom: 20px;
 }
@@ -210,7 +210,7 @@ const getSectionTabKey = (sectionTitle: string) => {
   margin: 0 0 6px;
   font-size: 22px;
   font-weight: 700;
-  color: #3b2f25;
+  color:var(--viewer-text);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -220,7 +220,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 .title small {
   font-size: 15px;
   font-weight: 700;
-  color: #8d5e3c;
+  color:#8d5e3c;
 }
 
 .title-icon {
@@ -230,8 +230,8 @@ const getSectionTabKey = (sectionTitle: string) => {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(196, 127, 79, 0.2);
-  color: #9a6d47;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-link);
 }
 
 .title-icon svg {
@@ -243,16 +243,16 @@ const getSectionTabKey = (sectionTitle: string) => {
   text-decoration: none;
   font-size: 12px;
   font-weight: 700;
-  color: #8d5e3c;
+  color:#8d5e3c;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(196, 127, 79, 0.12);
+  background:rgba(196, 127, 79, 0.12);
   white-space: nowrap;
 }
 
 .lastmodified {
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .grade-directory {
@@ -261,7 +261,7 @@ const getSectionTabKey = (sectionTitle: string) => {
   margin-bottom: 20px;
   padding: 16px 18px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 247, 239, 0.94), rgba(255, 255, 255, 0.92));
+  background:var(--viewer-surface-subtle);
   border: 1px solid rgba(165, 138, 110, 0.18);
 }
 
@@ -272,7 +272,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 
 .directory-group strong {
   font-size: 13px;
-  color: #6c4a30;
+  color:#6c4a30;
 }
 
 .directory-chips {
@@ -283,8 +283,8 @@ const getSectionTabKey = (sectionTitle: string) => {
 
 .grade-chip {
   border: 1px solid rgba(154, 109, 71, 0.22);
-  background: rgba(255, 255, 255, 0.88);
-  color: #5f4430;
+  background:var(--viewer-surface-subtle);
+  color:#5f4430;
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;
@@ -293,10 +293,10 @@ const getSectionTabKey = (sectionTitle: string) => {
 }
 
 .grade-chip.active {
-  background: linear-gradient(135deg, #c48455, #9a6d47);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 10px 18px rgba(154, 109, 71, 0.22);
+  background:linear-gradient(135deg, #c48455, var(--viewer-link));
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 10px 18px rgba(154, 109, 71, 0.22);
 }
 
 .grade-content {
@@ -314,7 +314,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 .heading-with-anchor-link {
   margin: 16px 0 10px;
   font-size: 16px;
-  color: #3b2f25;
+  color:var(--viewer-text);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -327,8 +327,8 @@ const getSectionTabKey = (sectionTitle: string) => {
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: rgba(196, 127, 79, 0.15);
-  color: #9a6d47;
+  background:rgba(196, 127, 79, 0.15);
+  color:var(--viewer-link);
 }
 
 .heading-icon svg {
@@ -340,7 +340,7 @@ const getSectionTabKey = (sectionTitle: string) => {
   border: 1px solid rgba(165, 138, 110, 0.25);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.75);
+  background:var(--viewer-surface-subtle);
   margin-bottom: 16px;
 }
 
@@ -355,19 +355,19 @@ const getSectionTabKey = (sectionTitle: string) => {
 
 .tab button {
   border: 1px solid rgba(154, 109, 71, 0.18);
-  background: #f6efe6;
+  background:#f6efe6;
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
-  color: #5a4a3b;
+  color:#5a4a3b;
   cursor: pointer;
 }
 
 .tab.active button {
-  background: #eddcc9;
-  border-color: #c48455;
-  color: #6b4527;
+  background:#eddcc9;
+  border-color:#c48455;
+  color:#6b4527;
 }
 
 .section-stack {
@@ -376,7 +376,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 }
 
 .rich-html {
-  color: #3b2f25;
+  color:var(--viewer-text);
   font-size: 13px;
 }
 
@@ -394,7 +394,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 .grade-content :deep(td),
 .grade-content :deep(th) {
   padding: 6px 8px;
-  border: 1px solid rgba(165, 138, 110, 0.2);
+  border: 1px solid var(--viewer-border);
   vertical-align: top;
 }
 
@@ -405,7 +405,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 .grade-content :deep(.list1),
 .grade-content :deep(.list2),
 .grade-content :deep(.list3) {
-  color: #3b2f25;
+  color:var(--viewer-text);
 }
 
 .grade-content :deep(.list1) {
@@ -428,7 +428,7 @@ const getSectionTabKey = (sectionTitle: string) => {
 }
 
 .grade-content :deep(a) {
-  color: #8d5e3c;
+  color:#8d5e3c;
   text-decoration: none;
 }
 

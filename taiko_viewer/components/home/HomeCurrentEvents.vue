@@ -70,7 +70,7 @@ onBeforeUnmount(() => observer?.disconnect());
   position: relative;
   min-height: 220px;
   overflow: hidden;
-  background: #2b1d15;
+  background:var(--viewer-surface);
 }
 
 .guest-event-card img {
@@ -85,12 +85,12 @@ onBeforeUnmount(() => observer?.disconnect());
   position: absolute;
   inset: auto 0 0;
   padding: 42px 16px 16px;
-  background: linear-gradient(transparent, rgba(31, 18, 11, 0.8));
+  background:var(--viewer-surface-subtle);
 }
 
 .guest-event-card h3 {
   margin: 0;
-  color: #fff;
+  color:var(--viewer-text);
   font-size: clamp(16px, 2vw, 22px);
   line-height: 1.25;
 }

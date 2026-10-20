@@ -60,7 +60,7 @@ const tools = [
   align-items: center;
   gap: 10px;
   padding: 18px;
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   text-decoration: none;
   transition: transform 0.18s ease, border-color 0.18s ease;
 }
@@ -71,8 +71,8 @@ const tools = [
   display: grid;
   place-items: center;
   border-radius: 13px;
-  color: #a85f3e;
-  background: rgba(168, 95, 62, 0.1);
+  color:var(--viewer-link);
+  background:var(--viewer-border);
 }
 
 .guest-tool svg {
@@ -82,16 +82,16 @@ const tools = [
 
 .guest-tool > svg {
   width: 18px;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
 }
 
 .guest-tool:hover {
   transform: translateY(-2px);
-  border-color: rgba(168, 95, 62, 0.34);
+  border-color:var(--viewer-border);
 }
 
 .guest-tool:focus-visible {
-  outline: 3px solid #a85f3e;
+  outline: 3px solid var(--viewer-link);
   outline-offset: 3px;
 }
 

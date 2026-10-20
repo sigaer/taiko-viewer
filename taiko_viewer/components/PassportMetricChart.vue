@@ -76,8 +76,8 @@ const summary = computed(() => {
 <style scoped>
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .passport-metric { min-width: 0; }
-.passport-chart-summary { color: var(--viewer-text-muted); font-size: 13px; line-height: 1.6; margin: 12px 0; }
-.passport-scale { color: var(--viewer-text-muted); font-size: 12px; }
+.passport-chart-summary { color:var(--viewer-text-muted); font-size: 13px; line-height: 1.6; margin: 12px 0; }
+.passport-scale { color:var(--viewer-text-muted); font-size: 12px; }
 .passport-chart { width: 100%; height: 240px; display: block; overflow: visible; }
 .axis { stroke: var(--viewer-border); }
 text { fill: var(--viewer-text-muted); font-size: 12px; }
@@ -87,8 +87,8 @@ circle.is-selected { fill: var(--viewer-accent-strong); }
 circle.passport-chart__hit { fill: transparent; stroke: transparent; cursor: pointer; }
 circle:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 2px; }
 .passport-chart-selection { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-.passport-chart-selection button { flex: 0 0 44px; min-height: 44px; border: 1px solid var(--viewer-border); border-radius: 8px; color: var(--viewer-text); background: var(--viewer-surface); cursor: pointer; }
+.passport-chart-selection button { flex: 0 0 44px; min-height: 44px; border: 1px solid var(--viewer-border); border-radius: 8px; color:var(--viewer-text); background:var(--viewer-surface); cursor: pointer; }
 .passport-chart-selection button:disabled { opacity: .4; cursor: default; }
 .passport-chart-selection button:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 2px; }
-.passport-chart-detail { min-height: 22px; margin: 0; text-align: right; color: var(--viewer-text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.passport-chart-detail { min-height: 22px; margin: 0; text-align: right; color:var(--viewer-text); font-size: 13px; font-variant-numeric: tabular-nums; }
 </style>

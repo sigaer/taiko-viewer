@@ -84,25 +84,7 @@ const isDeveloperReviewer = computed(
   () => accountUser.value?.username === "sigaer" && accountUser.value?.email === "1106865024@qq.com"
 );
 
-const theme = ref("light");
-
-const applyTheme = (value: string) => {
-  if (!process.client) return;
-  document.body.classList.toggle("theme-dark", value === "dark");
-};
-
-if (process.client) {
-  theme.value = localStorage.getItem("taiko_theme") || "light";
-
-  watch(theme, (value) => {
-    localStorage.setItem("taiko_theme", value);
-    applyTheme(value);
-  });
-
-  onMounted(() => {
-    applyTheme(theme.value);
-  });
-}
+const {theme}=useViewerTheme();
 
 const cacheItems = computed(() => (process.client ? Object.keys(localStorage) : []));
 const cacheSize = computed(() => {
@@ -303,8 +285,8 @@ const clearCache = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9a6d47;
-  background: rgba(196, 127, 79, 0.2);
+  color:var(--viewer-link);
+  background:var(--viewer-surface-subtle);
   border-radius: 6px;
 }
 
@@ -314,13 +296,13 @@ const clearCache = () => {
 }
 
 .section-icon.alt {
-  background: rgba(88, 136, 197, 0.2);
-  color: #3c6aa6;
+  background:rgba(88, 136, 197, 0.2);
+  color:#3c6aa6;
 }
 
 .panel-header p {
   margin: 0;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
 }
 
 .setting-row {
@@ -350,9 +332,9 @@ const clearCache = () => {
   padding: 14px;
   border-radius: 16px;
   text-decoration: none;
-  color: #3d2f25;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 18px rgba(165, 138, 110, 0.12);
+  color:var(--viewer-text);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 8px 18px var(--viewer-shadow);
 }
 
 .tool-link strong {
@@ -360,15 +342,15 @@ const clearCache = () => {
 }
 
 .tool-link span {
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 
 .cache-card {
   border-radius: 16px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 18px rgba(165, 138, 110, 0.12);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 8px 18px var(--viewer-shadow);
 }
 
 .cache-label {
@@ -376,7 +358,7 @@ const clearCache = () => {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .mini-icon {
@@ -385,7 +367,7 @@ const clearCache = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9a6d47;
+  color:var(--viewer-link);
 }
 
 .mini-icon svg {

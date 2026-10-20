@@ -28,6 +28,7 @@ const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "nav.aliasLog",
   pageDescKey: "page.aliasLog.desc",
   navKey: "/alias-log",
@@ -211,7 +212,7 @@ const navigateToSong = (songId: string) => {
 
 .panel-card {
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(160, 120, 86, 0.12);
+  box-shadow:none;
 }
 
 .card-header {
@@ -256,8 +257,8 @@ const navigateToSong = (songId: string) => {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(248, 224, 193, 0.85), rgba(255, 244, 230, 0.95));
-  color: #a36b39;
+  background:var(--viewer-surface-subtle);
+  color:#a36b39;
 }
 
 .header-icon svg {
@@ -269,13 +270,13 @@ const navigateToSong = (songId: string) => {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #73573d;
+  color:var(--viewer-text-muted);
 }
 
 .subtitle-text {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #9b7a5c;
+  color:var(--viewer-text-muted);
 }
 
 .loading-state,
@@ -294,7 +295,7 @@ const navigateToSong = (songId: string) => {
   min-width: 900px;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid #f0e6dc;
+  border: 1px solid var(--viewer-surface-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -302,24 +303,24 @@ const navigateToSong = (songId: string) => {
 .alias-table th,
 .alias-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid #f0e6dc;
+  border-bottom: 1px solid var(--viewer-surface-subtle);
   text-align: left;
   vertical-align: middle;
 }
 
 .alias-table th {
-  background: #faf5ef;
-  color: #73573d;
+  background:#faf5ef;
+  color:var(--viewer-text-muted);
   font-size: 13px;
   font-weight: 600;
 }
 
-.alias-table tbody tr:nth-child(even) { background: #fffdfb; }
+.alias-table tbody tr:nth-child(even) { background:#fffdfb; }
 .alias-table tbody tr:last-child td { border-bottom: 0; }
 
 .time-cell {
   font-size: 13px;
-  color: #8b6d53;
+  color:#8b6d53;
   font-family: monospace;
 }
 
@@ -331,7 +332,7 @@ const navigateToSong = (songId: string) => {
   transition: opacity 0.2s;
   padding: 0;
   border: 0;
-  background: transparent;
+  background:transparent;
   text-align: left;
 }
 
@@ -341,21 +342,21 @@ const navigateToSong = (songId: string) => {
 
 .song-title {
   font-weight: 500;
-  color: #73573d;
+  color:var(--viewer-text-muted);
   font-size: 14px;
 }
 
 .song-id {
   font-size: 12px;
-  color: #9b7a5c;
+  color:var(--viewer-text-muted);
 }
 
 .alias-tag {
   display: inline-flex;
   padding: 4px 9px;
   border: 1px solid #e9bd72;
-  background: #fff7e6;
-  color: #a76819;
+  background:#fff7e6;
+  color:#a76819;
   font-size: 13px;
   border-radius: 8px;
 }
@@ -363,8 +364,8 @@ const navigateToSong = (songId: string) => {
 .view-button {
   padding: 5px;
   border: 0;
-  background: transparent;
-  color: var(--el-color-primary, #409eff);
+  background:transparent;
+  color:var(--el-color-primary, #409eff);
   cursor: pointer;
 }
 
@@ -378,22 +379,22 @@ const navigateToSong = (songId: string) => {
 .user-icon,
 .group-icon {
   font-size: 14px;
-  color: #9b7a5c;
+  color:var(--viewer-text-muted);
 }
 
 .user-text,
 .group-text {
   font-size: 13px;
-  color: #73573d;
+  color:var(--viewer-text-muted);
 }
 
 .group-text.private {
-  color: #9b7a5c;
+  color:var(--viewer-text-muted);
   font-style: italic;
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #f0e6dc;
+  border-bottom: 1px solid var(--viewer-surface-subtle);
   padding: 16px 20px;
 }
 

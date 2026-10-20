@@ -54,9 +54,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
   overflow: hidden;
   padding: clamp(28px, 5vw, 64px);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at 84% 20%, rgba(221, 126, 80, 0.2), transparent 26%),
-    linear-gradient(135deg, rgba(255, 253, 249, 0.98), rgba(250, 237, 222, 0.94));
+  background:var(--viewer-surface-subtle);
 }
 
 .guest-hero::before {
@@ -79,7 +77,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 
 .guest-hero__brand {
   margin: 0;
-  color: #a85f3e;
+  color:var(--viewer-link);
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -96,7 +94,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero h1 {
   max-width: 760px;
   margin: 0;
-  color: #3d2c22;
+  color:#3d2c22;
   font-size: clamp(34px, 5vw, 58px);
   line-height: 1.08;
   letter-spacing: -0.035em;
@@ -106,7 +104,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero__lead {
   max-width: 650px;
   margin: 0 0 4px;
-  color: #6e5a4a;
+  color:#6e5a4a;
   font-size: clamp(15px, 1.7vw, 18px);
   line-height: 1.65;
 }
@@ -131,15 +129,15 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 }
 
 .guest-hero__cta--primary {
-  color: #fff;
-  background: #a85f3e;
-  box-shadow: 0 12px 24px rgba(168, 95, 62, 0.22);
+  color:#fff;
+  background:var(--viewer-link);
+  box-shadow:0 12px 24px var(--viewer-border);
 }
 
 .guest-hero__cta--secondary {
   border: 1px solid rgba(134, 94, 64, 0.28);
-  color: #6d4d38;
-  background: rgba(255, 255, 255, 0.62);
+  color:#6d4d38;
+  background:var(--viewer-surface-subtle);
 }
 
 .guest-hero__cta:hover {
@@ -147,13 +145,13 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 }
 
 .guest-hero__cta:focus-visible {
-  outline: 3px solid #a85f3e;
+  outline: 3px solid var(--viewer-link);
   outline-offset: 3px;
 }
 
 .guest-hero__scope {
   margin: 0;
-  color: #8a7768;
+  color:#8a7768;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -166,9 +164,9 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
   width: clamp(230px, 32vw, 420px);
   aspect-ratio: 1;
   transform: translateY(-50%) rotate(-8deg);
-  border: clamp(10px, 1.2vw, 18px) solid rgba(168, 95, 62, 0.09);
+  border: clamp(10px, 1.2vw, 18px) solid var(--viewer-border);
   border-radius: 50%;
-  box-shadow: inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.48);
+  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.48);
 }
 
 .guest-hero__drum::before,
@@ -181,18 +179,18 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 
 .guest-hero__drum::before {
   inset: 15%;
-  border: 2px solid rgba(168, 95, 62, 0.12);
+  border: 2px solid var(--viewer-border);
 }
 
 .guest-hero__drum::after {
   inset: 40%;
-  background: rgba(221, 126, 80, 0.1);
+  background:rgba(221, 126, 80, 0.1);
 }
 
 .guest-hero__drum span {
   width: 14%;
   aspect-ratio: 1;
-  background: rgba(168, 95, 62, 0.12);
+  background:var(--viewer-border);
 }
 
 .guest-hero__drum span:nth-child(1) { top: 9%; left: 43%; }
@@ -200,46 +198,44 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero__drum span:nth-child(3) { left: 16%; bottom: 19%; }
 
 :global(body.theme-dark .guest-hero) {
-  border-color: rgba(255, 255, 255, 0.1);
-  background:
-    radial-gradient(circle at 84% 20%, rgba(202, 111, 70, 0.16), transparent 28%),
-    linear-gradient(135deg, rgba(35, 29, 25, 0.98), rgba(28, 23, 20, 0.98));
+  border-color:rgba(255, 255, 255, 0.1);
+  background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-hero h1) {
-  color: #f7eee6;
+  color:#f7eee6;
 }
 
 :global(body.theme-dark .guest-hero__brand) {
-  color: #df946f;
+  color:#df946f;
 }
 
 :global(body.theme-dark .guest-hero__lead) {
-  color: #d1c1b5;
+  color:#d1c1b5;
 }
 
 :global(body.theme-dark .guest-hero__scope) {
-  color: #b8a89b;
+  color:#b8a89b;
 }
 
 :global(body.theme-dark .guest-hero__cta--secondary) {
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #f0dfd0;
-  background: rgba(255, 255, 255, 0.06);
+  border-color:rgba(255, 255, 255, 0.18);
+  color:#f0dfd0;
+  background:rgba(255, 255, 255, 0.06);
 }
 
 :global(body.theme-dark .guest-hero__drum) {
-  border-color: rgba(223, 148, 111, 0.13);
-  box-shadow: inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.04);
+  border-color:rgba(223, 148, 111, 0.13);
+  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.04);
 }
 
 :global(body.theme-dark .guest-hero__drum::before) {
-  border-color: rgba(223, 148, 111, 0.18);
+  border-color:rgba(223, 148, 111, 0.18);
 }
 
 :global(body.theme-dark .guest-hero__drum::after),
 :global(body.theme-dark .guest-hero__drum span) {
-  background: rgba(223, 148, 111, 0.14);
+  background:rgba(223, 148, 111, 0.14);
 }
 
 @media (max-width: 720px) {

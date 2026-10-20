@@ -14,6 +14,11 @@ export default defineNuxtConfig({
   buildDir: resolve(previewRoot, '.nuxt'),
   devServer: { host: '127.0.0.1', port: 3208 },
   devtools: { enabled: false },
+  hooks: {
+    'pages:extend'(pages) {
+      pages.push({name:'local-design-review',path:'/__review',file:resolve(previewRoot,'review/index.vue')});
+    }
+  },
   vite: {
     server: { fs: { allow: [sourceRoot, previewRoot, resolve(sourceRoot, '../packages'), realpathSync(resolve(sourceRoot, 'node_modules'))] } }
   },
@@ -33,7 +38,8 @@ export default defineNuxtConfig({
     // Review artifacts are opt-in local preview assets, never production routes.
     publicAssets: [
       { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020/mobile-integration'), baseURL: '/__song-review', maxAge: 0 },
-      { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020'), baseURL: '/__song-history', maxAge: 0 }
+      { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020'), baseURL: '/__song-history', maxAge: 0 },
+      { dir: resolve(previewRoot, '../../docs/viewer-lightness-20261020'), baseURL: '/__review-assets', maxAge: 0 }
     ]
   }
 });

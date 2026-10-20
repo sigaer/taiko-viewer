@@ -37,23 +37,26 @@ const copy=computed(()=>locale.value==='ja'?{notes:'最大ノーツ',open:'譜�
   </section>
 </template>
 <style scoped>
-.song-chart-workspace { min-width:0; border-radius:14px; overflow:hidden; background:var(--song-paper); padding:24px; }
+.song-chart-workspace { min-width:0; border-radius:14px; overflow:hidden; background:var(--viewer-surface); padding:24px; }
 .chart-heading{display:grid;gap:20px;}
 .chart-identity{display:flex;align-items:baseline;gap:10px 20px;flex-wrap:wrap;}
 h2{font-size:18px;line-height:1.5;margin:0;font-weight:600;}h2 span{font-weight:400;}
-.chart-identity p{font-size:14px;margin:0;color:var(--song-muted);}.chart-identity strong{font-weight:500;color:var(--song-ink);margin-left:4px;}
+.chart-identity p{font-size:14px;margin:0;color:var(--viewer-text-muted);}.chart-identity strong{font-weight:500;color:var(--viewer-text);margin-left:4px;}
 .chart-actions{display:flex;gap:12px;flex-wrap:wrap;}
-.song-action{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 18px;border:1px solid var(--song-control);border-radius:8px;color:var(--song-ink);text-decoration:none;font-size:15px;font-weight:600;line-height:1.5;}
-.song-action--primary{background:var(--song-red);border-color:var(--song-red);color:var(--song-on-red);}
-.chart-complete-link{display:inline-flex;align-items:center;min-height:46px;padding:10px 0;color:var(--song-link);font-size:15px;text-decoration:none;}
-.chart-excerpt-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;font-size:14px;color:var(--song-muted);}
-.chart-excerpt-toggle{display:inline-flex;align-items:center;justify-content:end;gap:10px;min-height:44px;padding:6px 0 6px 12px;border:0;background:transparent;color:var(--song-link);font:inherit;cursor:pointer;}
+.song-action{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 18px;border:1px solid var(--viewer-control-border);border-radius:8px;color:var(--viewer-text);text-decoration:none;font-size:15px;font-weight:600;line-height:1.5;}
+.song-action--primary{background:var(--viewer-primary);border-color:var(--viewer-primary);color:var(--viewer-on-primary);}
+.chart-complete-link{display:inline-flex;align-items:center;min-height:46px;padding:10px 0;color:var(--viewer-link);font-size:15px;text-decoration:none;}
+.chart-excerpt-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;font-size:14px;color:var(--viewer-text-muted);}
+.chart-excerpt-toggle{display:inline-flex;align-items:center;justify-content:end;gap:10px;min-height:44px;padding:6px 0 6px 12px;border:0;background:transparent;color:var(--viewer-link);font:inherit;cursor:pointer;}
 .chart-excerpt-toggle span{font-size:18px;}
-.chart-sheet{height:280px;overflow-x:auto;overflow-y:hidden;position:relative;background:#fff;border-radius:6px;scrollbar-color:var(--song-control) var(--song-tint);}
+.chart-sheet{height:280px;overflow-x:auto;overflow-y:hidden;position:relative;background:var(--viewer-surface);border-radius:6px;scrollbar-color:var(--viewer-control-border) var(--viewer-surface-subtle);}
 .chart-sheet--expanded{height:560px;overflow-y:auto;}
 .chart-sheet a{display:block;min-width:680px;}.chart-sheet img{display:block;width:100%;height:auto;}
-.chart-state{position:sticky;left:0;top:0;margin:0;padding:20px;font-size:14px;background:var(--song-paper);color:var(--song-muted);}
-.chart-footer{padding:0;text-align:left;}.chart-footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--song-link);font-size:14px;text-underline-offset:4px;}
-a:focus-visible,.chart-excerpt-toggle:focus-visible,.chart-sheet:focus-visible{outline:3px solid var(--song-link);outline-offset:-3px;}
-@media(max-width:767px){.song-chart-workspace{padding:20px 16px 12px}.chart-heading{gap:16px}.chart-actions{gap:20px;align-items:center}.song-action{padding:11px 15px}.chart-complete-link{font-size:14px}.chart-sheet{height:148px}.chart-sheet--expanded{height:560px}.chart-excerpt-head{margin-top:12px}}
+/* A fixed excerpt window starts at the notation, not the duplicate image title.
+   Expanding restores the unshifted original. No pixels or chart data are changed. */
+.chart-sheet:not(.chart-sheet--expanded) a{position:relative;top:-64px;}
+.chart-state{position:sticky;left:0;top:0;margin:0;padding:20px;font-size:14px;background:var(--viewer-surface);color:var(--viewer-text-muted);}
+.chart-footer{padding:0;text-align:left;}.chart-footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--viewer-link);font-size:14px;text-underline-offset:4px;}
+a:focus-visible,.chart-excerpt-toggle:focus-visible,.chart-sheet:focus-visible{outline:3px solid var(--viewer-link);outline-offset:-3px;}
+@media(max-width:767px){.song-chart-workspace{padding:20px 16px 12px}.chart-heading{gap:16px}.chart-actions{gap:20px;align-items:center}.song-action{padding:11px 15px}.chart-complete-link{font-size:14px}.chart-sheet{height:164px}.chart-sheet--expanded{height:560px}.chart-excerpt-head{margin-top:12px}.chart-sheet:not(.chart-sheet--expanded) a{top:-56px;}}
 </style>

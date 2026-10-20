@@ -25,6 +25,7 @@ const form = reactive({
 });
 
 definePageMeta({
+  contentLayout: "reading",
   middleware: "account-guest",
   pageTitleKey: "account.register",
   pageDescKey: "page.account.register.desc",
@@ -236,7 +237,7 @@ const submit = async () => {
 }
 
 .auth-card {
-  width: min(560px, 100%);
+  width: 100%;
 }
 
 .auth-head h2 {
@@ -246,7 +247,7 @@ const submit = async () => {
 
 .auth-head p {
   margin: 8px 0 18px;
-  color: #7f6c5e;
+  color:#7f6c5e;
   line-height: 1.7;
 }
 
@@ -269,7 +270,7 @@ const submit = async () => {
 }
 
 .auth-links a {
-  color: #9a6d47;
+  color:var(--viewer-link);
   text-decoration: none;
 }
 

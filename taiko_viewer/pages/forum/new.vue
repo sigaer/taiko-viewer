@@ -18,6 +18,7 @@ const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
+  contentLayout: "reading",
   middleware: "account-auth",
   pageTitleKey: "forum.newThread",
   pageDescKey: "page.forum.new.desc",
@@ -376,15 +377,15 @@ const submit = async () => {
 }
 
 .composer-panel {
-  width: min(980px, 100%);
+  width: 100%;
   padding: 4px 0 24px;
 }
 
-.composer-context-card { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--viewer-border); border-radius: 14px; background: var(--viewer-surface); }
+.composer-context-card { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--viewer-border); border-radius: 14px; background:var(--viewer-surface); }
 .composer-context-card img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
 .composer-context-card div { display: grid; gap: 4px; min-width: 0; }
 .composer-context-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.composer-context-card span { color: var(--viewer-text-muted); font-size: 13px; }
+.composer-context-card span { color:var(--viewer-text-muted); font-size: 13px; }
 
 .composer-panel__head {
   display: flex;
@@ -399,16 +400,16 @@ const submit = async () => {
   font-size: 32px;
 }
 
-.composer-context { margin: 0; color: var(--viewer-text); font-size: 22px; font-weight: 750; }
+.composer-context { margin: 0; color:var(--viewer-text); font-size: 22px; font-weight: 750; }
 
 .composer-panel__head p {
   margin: 8px 0 0;
-  color: #745d4a;
+  color:#745d4a;
   line-height: 1.8;
 }
 
 .composer-back-link {
-  color: #b25237;
+  color:#b25237;
   text-decoration: none;
 }
 
@@ -419,8 +420,8 @@ const submit = async () => {
 }
 
 .type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.type-chips button { min-height: 38px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color: var(--viewer-text-muted); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
-.type-chips button.active { border-color: var(--viewer-accent-strong); color: #fff; background: var(--viewer-accent-strong); }
+.type-chips button { min-height: 38px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color:var(--viewer-text-muted); background:transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.type-chips button.active { border-color:var(--viewer-accent-strong); color:var(--viewer-on-primary); background:var(--viewer-primary); }
 
 .composer-grid--song {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -428,17 +429,17 @@ const submit = async () => {
 
 .composer-grid--compact { margin-bottom: 2px; }
 .more-options { margin-top: 12px; border-top: 1px solid var(--viewer-border); border-bottom: 1px solid var(--viewer-border); }
-.more-options summary { padding: 14px 2px; color: var(--viewer-accent-strong); font-weight: 700; cursor: pointer; }
+.more-options summary { padding: 14px 2px; color:var(--viewer-accent-strong); font-weight: 700; cursor: pointer; }
 .more-options__body { display: grid; gap: 4px; padding: 4px 0 12px; }
 .song-picker { display: grid; gap: 8px; margin: 2px 0 10px; }
-.song-picker > label { color: var(--viewer-text); font-size: 14px; font-weight: 600; }
+.song-picker > label { color:var(--viewer-text); font-size: 14px; font-weight: 600; }
 .song-picker__search { display: flex; gap: 8px; }
 .song-picker__search .el-input { flex: 1; }
-.song-picker__results { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; padding: 4px; border: 1px solid var(--viewer-border); border-radius: 12px; background: var(--viewer-surface); }
-.song-picker__results button { display: grid; gap: 2px; padding: 9px 10px; border: 0; border-radius: 8px; color: var(--viewer-text); background: transparent; text-align: left; cursor: pointer; }
-.song-picker__results button:hover, .song-picker__results button:focus-visible { background: color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); outline: none; }
-.song-picker__results small { color: var(--viewer-text-muted); }
-.song-picker__selected { margin: 0; padding: 8px 10px; border-radius: 8px; color: var(--viewer-accent-strong); background: color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); font-size: 13px; }
+.song-picker__results { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; padding: 4px; border: 1px solid var(--viewer-border); border-radius: 12px; background:var(--viewer-surface); }
+.song-picker__results button { display: grid; gap: 2px; padding: 9px 10px; border: 0; border-radius: 8px; color:var(--viewer-text); background:transparent; text-align: left; cursor: pointer; }
+.song-picker__results button:hover, .song-picker__results button:focus-visible { background:color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); outline: none; }
+.song-picker__results small { color:var(--viewer-text-muted); }
+.song-picker__selected { margin: 0; padding: 8px 10px; border-radius: 8px; color:var(--viewer-accent-strong); background:color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); font-size: 13px; }
 
 .block-editor {
   display: grid;
@@ -446,10 +447,10 @@ const submit = async () => {
   padding: 18px;
   margin-top: 10px;
   border-radius: 22px;
-  background: rgba(255, 249, 242, 0.9);
+  background:var(--viewer-surface-subtle);
 }
 
-.block-editor--body { padding: 0; margin-top: 5px; border-radius: 0; background: transparent; }
+.block-editor--body { padding: 0; margin-top: 5px; border-radius: 0; background:transparent; }
 .block-editor--body .block-editor__head h3 { font-size: 15px; }
 
 .block-editor__head {
@@ -464,7 +465,7 @@ const submit = async () => {
 }
 
 .block-editor__head span {
-  color: #866957;
+  color:#866957;
   font-size: 12px;
 }
 
@@ -484,7 +485,7 @@ const submit = async () => {
 .image-card {
   padding: 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.88);
+  background:var(--viewer-surface-subtle);
 }
 
 .block-list__item p {
@@ -509,18 +510,18 @@ const submit = async () => {
 
 body.theme-dark .composer-panel__head p,
 body.theme-dark .block-editor__head span {
-  color: #c6b2a4;
+  color:#c6b2a4;
 }
 
 body.theme-dark .block-editor {
-  background: rgba(50, 36, 29, 0.68);
+  background:var(--viewer-surface-subtle);
 }
 
-body.theme-dark .block-editor--body { background: transparent; }
+body.theme-dark .block-editor--body { background:transparent; }
 
 body.theme-dark .block-list__item,
 body.theme-dark .image-card {
-  background: rgba(30, 23, 20, 0.74);
+  background:rgba(30, 23, 20, 0.74);
 }
 
 @media (max-width: 860px) {

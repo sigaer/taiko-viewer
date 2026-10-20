@@ -135,8 +135,8 @@ watch([() => props.songId, () => props.selectedTrack], () => drumAudioRefs.clear
 <style scoped>
 
 .song-audio { margin-top:12px; }
-summary { min-height:48px; align-content:center; cursor:pointer; font-size:15px; color:var(--song-ink); }
-.audio-summary-modes{font-size:14px;margin-left:12px;color:var(--song-muted);}
+summary { min-height:48px; align-content:center; cursor:pointer; font-size:15px; color:var(--viewer-text); }
+.audio-summary-modes{font-size:14px;margin-left:12px;color:var(--viewer-text-muted);}
 .song-audio[open] summary{margin-bottom:16px;}
 .audio-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 28px; }
 .audio-block { min-width:0; }
@@ -144,14 +144,14 @@ summary { min-height:48px; align-content:center; cursor:pointer; font-size:15px;
 .audio-head { margin-bottom:10px; font-size:14px; }
 .audio-head strong {font-weight:500;}
 .audio-player { width:100%; display:block; height:44px; }
-.volume-row { display:flex; gap:12px; align-items:center; margin-top:10px; font-size:14px; color:var(--song-muted); }
-.volume-btn { min-height:44px; flex-shrink:0; padding:8px 0; border:0; background:transparent; color:var(--song-link); font:inherit; cursor:pointer; }
-.volume-slider { min-width:0; flex:1; min-height:44px; accent-color:var(--song-link); }
+.volume-row { display:flex; gap:12px; align-items:center; margin-top:10px; font-size:14px; color:var(--viewer-text-muted); }
+.volume-btn { min-height:44px; flex-shrink:0; padding:8px 0; border:0; background:transparent; color:var(--viewer-link); font:inherit; cursor:pointer; }
+.volume-slider { min-width:0; flex:1; min-height:44px; accent-color:var(--viewer-link); }
 .variant-audios { display:grid; gap:16px; }
 .variant-item { display:grid; gap:8px; min-width:0; }
-.variant-label {font-size:14px;color:var(--song-muted);}
-.audio-error { margin:8px 0 0; font-size:14px; color:var(--song-red); }
-.volume-btn:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
-summary:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
+.variant-label {font-size:14px;color:var(--viewer-text-muted);}
+.audio-error { margin:8px 0 0; font-size:14px; color:var(--viewer-primary); }
+.volume-btn:focus-visible {outline:3px solid var(--viewer-link);outline-offset:3px;}
+summary:focus-visible {outline:3px solid var(--viewer-link);outline-offset:3px;}
 @media(max-width:767px) { .audio-grid{grid-template-columns:1fr;gap:22px}.audio-block:last-child{grid-column:auto} }
 </style>

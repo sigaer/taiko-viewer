@@ -139,30 +139,20 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   gap: 18px;
   padding: 20px;
   border-radius: 24px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(255, 248, 239, 0.9)
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(255, 187, 120, 0.14),
-      transparent 36%
-    );
+  background:var(--viewer-surface-subtle);
   border: 1px solid rgba(218, 163, 104, 0.14);
-  box-shadow: 0 18px 28px rgba(173, 132, 86, 0.12);
+  box-shadow:0 18px 28px rgba(173, 132, 86, 0.12);
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color:transparent;
   transition: background-color 140ms ease, border-color 140ms ease, opacity 140ms ease;
 }
 
 .forum-thread-card:hover {
-  background: color-mix(in srgb, var(--viewer-surface) 92%, var(--viewer-accent) 8%);
+  background:color-mix(in srgb, var(--viewer-surface) 92%, var(--viewer-accent) 8%);
 }
 
 .forum-thread-card:active {
-  background: color-mix(in srgb, var(--viewer-surface) 86%, var(--viewer-accent) 14%);
+  background:color-mix(in srgb, var(--viewer-surface) 86%, var(--viewer-accent) 14%);
 }
 
 .forum-thread-card:focus-visible {
@@ -176,16 +166,16 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   border: 0;
   border-bottom: 1px solid var(--viewer-border);
   border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  background:transparent;
+  box-shadow:none;
 }
 
 .forum-thread-card.compact:hover {
-  background: color-mix(in srgb, var(--viewer-surface) 90%, var(--viewer-accent) 10%);
+  background:color-mix(in srgb, var(--viewer-surface) 90%, var(--viewer-accent) 10%);
 }
 
 .forum-thread-card.compact:active {
-  background: color-mix(in srgb, var(--viewer-surface) 84%, var(--viewer-accent) 16%);
+  background:color-mix(in srgb, var(--viewer-surface) 84%, var(--viewer-accent) 16%);
 }
 
 .forum-thread-card.compact .forum-thread-card__main { gap: 7px; }
@@ -223,54 +213,54 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 }
 
 .section-pill {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 18%, white);
+  color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 18%, white);
 }
 
 .type-pill {
-  color: #fff;
+  color:#fff;
 }
 
 .type-discussion {
-  background: linear-gradient(135deg, #de6d42, #efab55);
+  background:linear-gradient(135deg, #de6d42, #efab55);
 }
 
 .type-guide {
-  background: linear-gradient(135deg, #d84a34, #f08b26);
+  background:linear-gradient(135deg, var(--viewer-primary), #f08b26);
 }
 
 .type-achievement {
-  background: linear-gradient(135deg, #c86e23, #e4b74a);
+  background:linear-gradient(135deg, #c86e23, #e4b74a);
 }
 
 .type-official {
-  background: linear-gradient(135deg, #356f9b, #4aa1d8);
+  background:linear-gradient(135deg, #356f9b, #4aa1d8);
 }
 
 .state-pill {
-  color: #7f5a2e;
-  background: rgba(241, 223, 174, 0.56);
+  color:#7f5a2e;
+  background:rgba(241, 223, 174, 0.56);
 }
 
 .state-pill--gold {
-  background: linear-gradient(135deg, #f8e7b4, #ffd970);
+  background:linear-gradient(135deg, #f8e7b4, #ffd970);
 }
 
 .state-pill--muted {
-  color: #6d6357;
-  background: rgba(171, 163, 151, 0.18);
+  color:#6d6357;
+  background:rgba(171, 163, 151, 0.18);
 }
 
 .forum-thread-card__title {
   font-size: 24px;
   line-height: 1.24;
-  color: #2f261f;
+  color:#2f261f;
   text-decoration: none;
 }
 
 .forum-thread-card__summary {
   margin: 0;
-  color: #6f5b4a;
+  color:#6f5b4a;
   line-height: 1.8;
 }
 
@@ -278,7 +268,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  color: #b45239;
+  color:#b45239;
   font-size: 12px;
 }
 
@@ -288,7 +278,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   align-items: center;
   padding: 10px 12px;
   border-radius: 18px;
-  background: rgba(252, 236, 216, 0.72);
+  background:var(--viewer-surface-subtle);
 }
 
 .forum-thread-card__song img {
@@ -309,7 +299,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 
 .forum-thread-card__song span,
 .forum-thread-card__stats {
-  color: #7a6552;
+  color:var(--viewer-text-muted);
   font-size: 12px;
 }
 
@@ -332,7 +322,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   min-height: 160px;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  box-shadow:inset 0 0 0 1px rgba(255, 255, 255, 0.45);
 }
 
 .forum-thread-card__cover img {
@@ -343,49 +333,43 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 }
 
 body.theme-dark .forum-thread-card {
-  background:
-    linear-gradient(180deg, rgba(31, 26, 23, 0.95), rgba(25, 21, 18, 0.92)),
-    radial-gradient(
-      circle at top right,
-      rgba(216, 112, 64, 0.18),
-      transparent 36%
-    );
-  border-color: rgba(255, 255, 255, 0.08);
+  background:var(--viewer-surface-subtle);
+  border-color:rgba(255, 255, 255, 0.08);
 }
 
 body.theme-dark .forum-thread-card.compact {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.12);
+  background:transparent;
+  border-color:rgba(255, 255, 255, 0.12);
 }
 
 body.theme-dark .forum-thread-card:hover {
-  background: color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
+  background:color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
 }
 
 body.theme-dark .forum-thread-card:active {
-  background: color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
+  background:color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
 }
 
 body.theme-dark .forum-thread-card.compact:hover {
-  background: color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
+  background:color-mix(in srgb, var(--viewer-surface) 88%, var(--viewer-accent) 12%);
 }
 
 body.theme-dark .forum-thread-card.compact:active {
-  background: color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
+  background:color-mix(in srgb, var(--viewer-surface) 80%, var(--viewer-accent) 20%);
 }
 
 body.theme-dark .forum-thread-card__title {
-  color: #f3e5d8;
+  color:#f3e5d8;
 }
 
 body.theme-dark .forum-thread-card__summary,
 body.theme-dark .forum-thread-card__song span,
 body.theme-dark .forum-thread-card__stats {
-  color: #cab7a9;
+  color:#cab7a9;
 }
 
 body.theme-dark .forum-thread-card__song {
-  background: rgba(70, 47, 34, 0.56);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 900px) {

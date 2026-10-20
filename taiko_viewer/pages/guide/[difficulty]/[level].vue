@@ -32,6 +32,7 @@ const pageMeta = computed(() => ({
 }));
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "guide.title",
   pageDescKey: "guide.summary",
   navKey: "/guide",
@@ -348,7 +349,7 @@ useViewerSeo(() => ({
   justify-content: center;
   width: 20px;
   height: 20px;
-  color: #d36d37;
+  color:#d36d37;
 }
 
 .section-icon svg {
@@ -357,7 +358,7 @@ useViewerSeo(() => ({
 }
 
 .section-icon.alt {
-  color: #a34b6b;
+  color:#a34b6b;
 }
 
 .summary-table,
@@ -379,7 +380,7 @@ useViewerSeo(() => ({
   border: 1px solid var(--el-border-color-light);
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(255, 252, 248, 0.72);
+  background:var(--viewer-surface-subtle);
 }
 
 .guide-detail-head,
@@ -392,8 +393,8 @@ useViewerSeo(() => ({
 .guide-detail-head {
   min-height: 46px;
   padding: 0 12px;
-  background: rgba(245, 236, 227, 0.92);
-  color: var(--el-text-color-secondary);
+  background:var(--viewer-surface-subtle);
+  color:var(--el-text-color-secondary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -413,8 +414,8 @@ useViewerSeo(() => ({
   padding: 0 12px;
   border: 0;
   text-align: left;
-  background: transparent;
-  color: inherit;
+  background:transparent;
+  color:inherit;
   cursor: pointer;
   transition: background-color 0.2s ease;
   font-weight: 600;
@@ -436,7 +437,7 @@ useViewerSeo(() => ({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgba(87, 66, 49, 0.78);
+  color:rgba(87, 66, 49, 0.78);
   transition: transform 0.2s ease;
 }
 
@@ -458,36 +459,36 @@ useViewerSeo(() => ({
 }
 
 .guide-tag-row.hardest {
-  background: rgba(196, 79, 45, 0.16);
+  background:rgba(196, 79, 45, 0.16);
 }
 
 .guide-tag-row.harder {
-  background: rgba(220, 116, 58, 0.16);
+  background:rgba(220, 116, 58, 0.16);
 }
 
 .guide-tag-row.hard {
-  background: rgba(232, 148, 51, 0.16);
+  background:rgba(232, 148, 51, 0.16);
 }
 
 .guide-tag-row.normal {
-  background: rgba(241, 183, 80, 0.16);
+  background:rgba(241, 183, 80, 0.16);
 }
 
 .guide-tag-row.easy {
-  background: rgba(171, 197, 117, 0.16);
+  background:rgba(171, 197, 117, 0.16);
 }
 
 .guide-tag-row.easier {
-  background: rgba(107, 182, 132, 0.16);
+  background:rgba(107, 182, 132, 0.16);
 }
 
 .guide-tag-row.easiest {
-  background: rgba(76, 160, 180, 0.16);
+  background:rgba(76, 160, 180, 0.16);
 }
 
 .tag-detail-wrap {
   padding: 8px 12px;
-  background: rgba(255, 252, 248, 0.92);
+  background:var(--viewer-surface-subtle);
   border-radius: 12px;
   border-top: 1px solid rgba(181, 146, 113, 0.16);
 }
@@ -498,7 +499,7 @@ useViewerSeo(() => ({
   display: grid;
   place-items: center;
   gap: 8px;
-  color: var(--el-text-color-secondary);
+  color:var(--el-text-color-secondary);
 }
 
 @media (max-width: 840px) {

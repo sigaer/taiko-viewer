@@ -1,48 +1,41 @@
-# 歌曲详情真实组件本地预览
+# Viewer 多页真实组件预览
 
-这是独立分支的本地 Nuxt 预览根，读取实际的 `taiko_viewer/pages/songs/[id].vue`、组件、布局、composable 和国际化文件。没有移植 `refine.js`，也没有复制歌曲页处理器。保留 Nuxt SSR 与客户端挂载，用生产的 DTO 类型提供预览输入。
+本机工作树：`/var/tmp/viewer-song-preview-20261020`。分支：`design/song-detail-preview-20261020`。原 `song-detail` 路径保留，现已承载公共体系和第一批真实页面；当前目录 `pjskClient` 和原 Viewer 主工作区没有这个文件夹。
 
-## 本机启动位置
-
-这份交付位于独立工作树 `/var/tmp/viewer-song-preview-20261020`，分支为 `design/song-detail-preview-20261020`。`/home/sigaer/pjskClient` 和原 Viewer 主工作区没有这个 `preview` 文件夹；不用在这两个目录中执行相对路径命令，也不用切换或覆盖它们的分支。
-
-在这台服务器的任意目录执行以下命令（普通用户终端）：
+从服务器任意目录启动：
 
 ```bash
 sudo bash /var/tmp/viewer-song-preview-20261020/preview/song-detail/run.sh
 ```
 
-如果终端已经是 root，直接执行 `bash /var/tmp/viewer-song-preview-20261020/preview/song-detail/run.sh`。本机复用的依赖目录和既有 systemd 内存隔离包装器由 root 管理，普通用户直接执行会遇到权限问题；无需修改生产依赖的权限或重新安装依赖。
+root 终端省略 sudo。脚本复用本机 Node 24 与已有依赖，并使用既有 systemd 内存隔离包装器；不要与 QA／构建并行运行。保持终端打开，Ctrl+C 停止。若服务已经运行，直接打开页面，不要再启动第二份。
 
-等待终端完成 Nuxt 构建后，打开 `http://127.0.0.1:3208/songs/1455?previewState=scores`。脚本仅监听服务器回环地址；如果通过 SSH／VS Code Remote 开发，先在编辑器的「端口」面板转发服务器的 `3208`，再用本机浏览器打开上述地址。终端 Ctrl+C 结束；不要与本仓库 QA 或构建并行运行。默认使用主机已有 Node 24，可通过 `SONG_PREVIEW_NODE` 指定同版本可执行文件。复用现有依赖，无新增包或安装步骤。
+**统一评审入口：** `http://127.0.0.1:3208/__review`。
 
-这里的绝对路径、Node 路径和依赖链接是这台服务器的设置，不是其他机器克隆仓库后可直接使用的安装说明。
+远程 IDE 需在「端口」面板转发 `127.0.0.1:3208`，用面板显示的实际本地地址打开；本地端口被占用时可能改变，不能只凭服务器端口手写地址。若原转发失效，删除后重新转发，再在电脑的系统浏览器打开。
 
-最新一轮的同浏览器对照可在服务启动后打开 `http://127.0.0.1:3208/__song-review/index.html`，包含 414×846 首屏和成绩／讨论、390 手机及 1440 桌面。首次交付的 0.86.2 对照仍保留在 `http://127.0.0.1:3208/__song-history/index.html`。这些静态评审地址仅由独立预览配置提供。
-
-可选视图：
-
-| 检查 | URL |
+| 真实页面 | 路由 |
 | --- | --- |
-| 长标题、有里谱、合成成绩 | `/songs/1455?previewState=scores` |
-| 已登录、无成绩 | `/songs/1455?previewState=empty` |
-| 未登录 | `/songs/1455?previewState=guest` |
-| 无里谱 | `/songs/1?previewState=scores` |
-| 日语长标题 | `/ja/songs/1455?previewState=scores` |
-| 分支音轨 | `/songs/627?previewState=scores` |
-| 推荐来源目标入口 | `/songs/1455?difficulty=4&recommendation=preview-only-invalid&previewState=scores` |
+| 歌曲列表 | `/songs/available` |
+| 歌曲详情 | `/songs/1455` |
+| 普通推荐 | `/tools/recommend`，点击“查看推荐” |
+| 资料／绑定 | `/account/profile` |
+| 兼容检查 | `/`、`/account/songs`、`/my/growth`、`/my/weekly`、`/forum`、`/docs/score-token`、`/settings` |
 
-状态切换通过本地 `song_preview_state` Cookie 影响 fixture；它不代表真实登录。目标入口仍使用原组件的来源条件。`preview-only-invalid` 不是有效推荐凭证；点击后会收到本地 405，不会创建目标，也不会伪造确认成功。
+中日文使用原有语言切换；浅／暗主题在设置页切换。可在任意页面 URL 加 `?previewState=scores`、`empty`、`guest`、`pending` 或 `unbound`；`failure` 明确模拟首页内容与成长读取 503。切换合成身份请完整导航／刷新；普通站内导航继续使用真实 Nuxt 路由。`/songs/1` 无里谱，`/songs/627` 带分支音轨。
 
-公开歌曲、难度、分析、分支音轨与下载地址来自 `fixtures/sources.json` 记录的现有公开 GET。个人账号、成绩和社区空数据为合成；预览没有读取生产用户记录。谱面 PNG、音频使用既有静态资源地址；TJA 下载转到现有公开 GET。
+## 数据边界
 
-这个预览根将 `serverDir` 指向自身的只读 fixture middleware，**不加载业务 server 目录**。所有 API 的 POST、PUT、PATCH、DELETE 等非 GET/HEAD 请求均返回 405；未知 API 返回 404。它不提供演示写入后端。标准应用的配置、服务端路由、认证和 API 没有改变。
+- 公开歌曲来自已保存的公开 GET，目录样本 60 首；20 条推荐、账号、成绩及有限历史为明确的合成 fixture，不代表生产推荐质量或真实玩家事实。
+- 读取实际 Vue 页面、组件、布局、composable 和国际化，保留 SSR 与客户端挂载。不使用 refine.js 或独立 HTML 原型替代页面。
+- `serverDir` 仅指向本目录。普通生产业务 server 不加载，未知 API 不代理到生产。预览不携带生产凭据。
+- 既有 `/api/account/growth/goal/preview` 的 POST 只返回合成的只读确认 DTO，用于查看原确认弹窗；它不写入目标。绑定、目标提交、同步、上传等写入一律拒绝为 405，不伪造保存成功。
+- 同批推荐图片是预先保存的合成 SVG 样本，随列表数量匹配，不调用生产图片生成器。原谱面 PNG、封面、音频和播放器地址保持原能力；不对图片调色。
 
-浏览器截图脚本 `capture.py` 必须在该独立工作树根目录通过既有 QA 包装器运行（本机 root 终端，先结束预览服务）：
+## 检查与历史
 
-```bash
-cd /var/tmp/viewer-song-preview-20261020
-bash scripts/memory/run_qa.sh /usr/bin/python3 "$PWD/preview/song-detail/capture.py" after
-```
+[本轮说明](../../docs/viewer-lightness-20261020/README.md)、[唯一迁移表](../../docs/viewer-lightness-20261020/migration.md)。统一评审页显示同输入、同浏览器／视口的前后图，旧设计资料与歌曲页历史图继续保留。
 
-`before` 使用本机保存的 0.86.2 生产源码构件作为只读源，复用同一个预览根和相同输入；因此新旧对照不受登录数据或 API 响应差异影响。它不是生产私人账号截图。旧源码路径记录在脚本中，只用于本机复现；标准应用不引用该路径。
+新截图脚本：`review/capture.py`。在该工作树根目录，以 root 通过 `scripts/memory/run_qa.sh` 运行；先停止预览，避免共用锁冲突。`before` 读取本机冻结的 `55a979a` 工作树；`after` 读取当前源码，二者共用同一只读数据根。`--space` 检查五类优先页面的 390／414／820／1280／1440／1920 浅暗布局；`--compat` 检查其他页面，`--checks` 检查控件、主题、跨页与拒绝写入。旧 `capture.py`／`capture-integration.py` 为之前交付的复现工具，会写旧截图目录，不用于本轮评审。
+
+这些绝对路径和依赖链接属于这台主机，不是其他机器克隆后可直接使用的安装说明。预览不合入 main、不部署、不 bump；版本在实际准备发布时处理。

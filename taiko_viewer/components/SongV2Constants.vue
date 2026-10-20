@@ -58,23 +58,23 @@ const format = (value: number) => value.toFixed(2);
 </template>
 
 <style scoped>
-.v2-card { border-radius: 16px; padding: 14px; background: linear-gradient(145deg, rgba(236, 248, 255, .9), rgba(255, 255, 255, .96)); border: 1px solid rgba(95, 143, 191, .22); color: #4a5f79; }
+.v2-card { border-radius: 16px; padding: 14px; background:var(--viewer-surface-subtle); border: 1px solid rgba(95, 143, 191, .22); color:#4a5f79; }
 .v2-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.v2-heading h2 { margin: 0; font-size: 16px; color: #304b68; }
+.v2-heading h2 { margin: 0; font-size: 16px; color:#304b68; }
 .v2-heading span, .v2-summary dt { font-size: 12px; }
 .v2-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 20px 0; text-align: center; }
 .v2-summary dd { margin: 8px 0 0; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.v2-main { color: #2f5f95; }
+.v2-main { color:#2f5f95; }
 .v2-metrics { margin: 0; }
 .v2-metrics > div { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(116, 145, 177, .18); font-size: 13px; }
 .v2-metrics dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
-.v2-notes { color: #5f7185; }
-.v2-source { display: inline-block; margin-top: 16px; color: #3b6898; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.v2-notes { color:#5f7185; }
+.v2-source { display: inline-block; margin-top: 16px; color:#3b6898; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
 .v2-source:focus-visible { outline: 2px solid #3b6898; outline-offset: 4px; }
 .v2-state { padding: 22px 0; font-size: 13px; line-height: 1.6; }
-body.theme-dark .v2-card { background: #242b33; border-color: #40536a; color: #d0dbe8; }
+body.theme-dark .v2-card { background:#242b33; border-color:#40536a; color:#d0dbe8; }
 body.theme-dark .v2-heading h2,
 body.theme-dark .v2-main,
-body.theme-dark .v2-source { color: #a7cdf6; }
-body.theme-dark .v2-notes { color: #b8c9dc; }
+body.theme-dark .v2-source { color:#a7cdf6; }
+body.theme-dark .v2-notes { color:#b8c9dc; }
 </style>

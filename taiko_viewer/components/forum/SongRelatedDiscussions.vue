@@ -32,28 +32,28 @@ const allDiscussionsLocation = computed(() => ({ path: '/forum/discussions', que
 </template>
 
 <style scoped>
-.related-discussions { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--viewer-border); border-radius: 14px; background: var(--viewer-surface); }
+.related-discussions { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--viewer-border); border-radius: 14px; background:var(--viewer-surface); }
 .related-discussions__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .related-discussions h3 { margin: 0; font-size: 16px; }
-.related-discussions a { color: var(--viewer-accent-strong); text-decoration: none; }
+.related-discussions a { color:var(--viewer-accent-strong); text-decoration: none; }
 .related-discussions__head a, .related-discussions__compose { font-size: 12px; }
 .related-discussions__list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
-.related-discussions__list li a { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; color: var(--viewer-text); border-bottom: 1px solid var(--viewer-border); }
+.related-discussions__list li a { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; color:var(--viewer-text); border-bottom: 1px solid var(--viewer-border); }
 .related-discussions__list span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.related-discussions__list small { flex: 0 0 auto; color: var(--viewer-text-muted); }
-.related-discussions__loading { color: var(--viewer-text-muted); font-size: 13px; }
+.related-discussions__list small { flex: 0 0 auto; color:var(--viewer-text-muted); }
+.related-discussions__loading { color:var(--viewer-text-muted); font-size: 13px; }
 </style>
 
 <style scoped>
 .related-discussions--song-detail {padding:0 4px;border:0;border-radius:0;background:transparent;gap:4px;}
 .related-discussions--song-detail .related-discussions__head {align-items:baseline;flex-wrap:wrap;gap:6px 16px;}
 .related-discussions--song-detail h3 {font-size:18px;font-weight:600;line-height:1.5;}
-.related-discussions--song-detail a {color:var(--song-link);font-size:14px;min-height:44px;display:inline-flex;align-items:center;}
+.related-discussions--song-detail a {color:var(--viewer-link);font-size:14px;min-height:44px;display:inline-flex;align-items:center;}
 .related-discussions--song-detail .related-discussions__head>a {padding:8px 0;}
-.related-discussions--song-detail .related-discussions__empty {font-size:15px;line-height:1.7;margin:0;color:var(--song-muted);}
+.related-discussions--song-detail .related-discussions__empty {font-size:15px;line-height:1.7;margin:0;color:var(--viewer-text-muted);}
 .related-discussions--song-detail .related-discussions__empty-row {display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;}
 .related-discussions--song-detail .related-discussions__list li a {display:grid;width:100%;gap:8px;padding:12px 0;}
-.related-discussions--song-detail .related-discussions__list span {white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;color:var(--song-ink);}
+.related-discussions--song-detail .related-discussions__list span {white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;color:var(--viewer-text);}
 .related-discussions--song-detail .related-discussions__list small {font-size:14px;}
-.related-discussions--song-detail a:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
+.related-discussions--song-detail a:focus-visible {outline:3px solid var(--viewer-link);outline-offset:3px;}
 </style>

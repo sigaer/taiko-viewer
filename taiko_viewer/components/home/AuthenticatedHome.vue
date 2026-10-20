@@ -110,10 +110,10 @@ const trackClick = (event: string, source: string) => {
 
 <style scoped>
 .authenticated-home {
-  --personal-ink: #342922;
-  --personal-muted: #806b5c;
-  --personal-accent: #b84d37;
-  --personal-accent-soft: #f6dfd4;
+  --personal-ink:var(--viewer-text);
+  --personal-muted: var(--viewer-text-muted);
+  --personal-accent: var(--viewer-primary);
+  --personal-accent-soft:var(--viewer-selected);
   display: grid;
   gap: clamp(28px, 4.5vw, 52px);
 }
@@ -128,10 +128,10 @@ const trackClick = (event: string, source: string) => {
 .personal-status,
 .recommendation-card,
 .personal-onboarding {
-  border: 1px solid rgba(151, 105, 73, 0.18);
+  border: 1px solid var(--viewer-border);
   border-radius: 24px;
-  background: linear-gradient(135deg, rgba(255, 252, 247, 0.98), rgba(248, 235, 225, 0.92));
-  box-shadow: 0 20px 44px rgba(104, 70, 45, 0.1);
+  background:var(--viewer-surface-subtle);
+  box-shadow:none;
 }
 
 .personal-status {
@@ -151,7 +151,7 @@ const trackClick = (event: string, source: string) => {
 
 .personal-eyebrow {
   margin: 0;
-  color: var(--personal-accent);
+  color:var(--personal-accent);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -162,7 +162,7 @@ const trackClick = (event: string, source: string) => {
 .recommendation-card h2,
 .personal-onboarding h1 {
   margin: 0;
-  color: var(--personal-ink);
+  color:var(--personal-ink);
   font-family: var(--viewer-display-font);
   line-height: 1.1;
 }
@@ -175,9 +175,9 @@ const trackClick = (event: string, source: string) => {
 .recommendation-card h2 { font-size: clamp(22px, 2.5vw, 30px); }
 
 .personal-rating { display: grid; gap: 4px; }
-.personal-rating span { color: var(--personal-muted); font-size: 13px; font-weight: 700; }
-.personal-rating strong { color: var(--personal-ink); font: 800 clamp(40px, 6vw, 66px)/0.95 var(--viewer-display-font); letter-spacing: -0.04em; }
-.personal-rating small { color: var(--personal-muted); font-size: 12px; }
+.personal-rating span { color:var(--personal-muted); font-size: 13px; font-weight: 700; }
+.personal-rating strong { color:var(--personal-ink); font: 800 clamp(40px, 6vw, 66px)/0.95 var(--viewer-display-font); letter-spacing: -0.04em; }
+.personal-rating small { color:var(--personal-muted); font-size: 12px; }
 
 .personal-button {
   width: fit-content;
@@ -194,51 +194,51 @@ const trackClick = (event: string, source: string) => {
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 .personal-button:hover { transform: translateY(-2px); }
-.personal-button:focus-visible { outline: 3px solid #d18366; outline-offset: 3px; }
-.personal-button--primary { color: #fff; background: var(--personal-accent); box-shadow: 0 9px 18px rgba(184, 77, 55, 0.2); }
-.personal-button--secondary { color: var(--personal-accent); border: 1px solid rgba(184, 77, 55, 0.28); background: rgba(255, 255, 255, 0.66); }
+.personal-button:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
+.personal-button--primary { color:#fff; background:var(--personal-accent); box-shadow:none; }
+.personal-button--secondary { color:var(--personal-accent); border: 1px solid var(--viewer-border); background:var(--viewer-surface-subtle); }
 
 .recommendation-card { display: grid; align-content: space-between; gap: 20px; min-height: 330px; padding: clamp(20px, 3.5vw, 32px); }
-.recommendation-card__song { min-width: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 18px; color: inherit; text-decoration: none; }
-.recommendation-card__cover { aspect-ratio: 1; overflow: hidden; border-radius: 18px; background: linear-gradient(145deg, #fff, var(--personal-accent-soft)); box-shadow: 0 12px 25px rgba(104, 70, 45, 0.14); }
+.recommendation-card__song { min-width: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 18px; color:inherit; text-decoration: none; }
+.recommendation-card__cover { aspect-ratio: 1; overflow: hidden; border-radius: 18px; background:linear-gradient(145deg, #fff, var(--personal-accent-soft)); box-shadow:none; }
 .recommendation-card__details { min-width: 0; display: grid; gap: 8px; }
 .recommendation-card__details strong {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--personal-ink);
+  color:var(--personal-ink);
   font-size: clamp(17px, 2vw, 24px);
   line-height: 1.25;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
-.recommendation-card__details span { color: var(--personal-accent); font-size: 14px; font-weight: 800; }
-.recommendation-card__arrow { color: var(--personal-accent); font-size: 26px; }
+.recommendation-card__details span { color:var(--personal-accent); font-size: 14px; font-weight: 800; }
+.recommendation-card__arrow { color:var(--personal-accent); font-size: 26px; }
 .recommendation-card__loading { min-height: 170px; border-radius: 18px; }
 
 .personal-onboarding { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 24px; padding: clamp(24px, 5vw, 48px); }
-.personal-onboarding__mark { width: 86px; height: 86px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 6px solid #fff; border-radius: 50%; background: var(--personal-accent); box-shadow: 0 12px 25px rgba(104, 70, 45, 0.16); }
-.personal-onboarding__mark span:first-child { background: #d8785d; }
-.personal-onboarding__mark span:last-child { background: #8c3f37; }
+.personal-onboarding__mark { width: 86px; height: 86px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 6px solid #fff; border-radius: 50%; background:var(--personal-accent); box-shadow:none; }
+.personal-onboarding__mark span:first-child { background:#d8785d; }
+.personal-onboarding__mark span:last-child { background:#8c3f37; }
 .personal-onboarding__copy { display: grid; gap: 10px; }
 .personal-onboarding h1 { font-size: clamp(26px, 4vw, 42px); }
-.personal-onboarding p:not(.personal-eyebrow) { max-width: 540px; margin: 0 0 4px; color: var(--personal-muted); line-height: 1.65; }
+.personal-onboarding p:not(.personal-eyebrow) { max-width: 540px; margin: 0 0 4px; color:var(--personal-muted); line-height: 1.65; }
 
 :global(body.theme-dark .authenticated-home) {
-  --personal-ink: #f5e7dc;
-  --personal-muted: #c6b3a5;
-  --personal-accent: #e58b6e;
-  --personal-accent-soft: #493128;
-  --viewer-text: #f2e7dc;
-  --viewer-text-muted: #c1b2a5;
-  --viewer-accent-strong: #d89368;
-  --viewer-surface: rgba(27, 24, 22, 0.92);
-  --viewer-border: rgba(255, 255, 255, 0.12);
+  --personal-ink:var(--viewer-text);
+  --personal-muted: var(--viewer-text-muted);
+  --personal-accent: var(--viewer-primary);
+  --personal-accent-soft:var(--viewer-selected);
+
+
+
+
+
 }
 :global(body.theme-dark .personal-status),
 :global(body.theme-dark .recommendation-card),
-:global(body.theme-dark .personal-onboarding) { border-color: rgba(255, 255, 255, 0.12); background: linear-gradient(135deg, rgba(46, 35, 29, 0.98), rgba(54, 38, 31, 0.94)); }
-:global(body.theme-dark .personal-button--secondary) { background: rgba(48, 36, 30, 0.8); }
+:global(body.theme-dark .personal-onboarding) { border-color:rgba(255, 255, 255, 0.12); background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .personal-button--secondary) { background:var(--viewer-surface-subtle); }
 
 @media (max-width: 820px) {
   .personal-top { grid-template-columns: 1fr; }

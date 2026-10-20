@@ -1,0 +1,862 @@
+[
+  {
+    "image": "home-width-after-1440-light-scores.png",
+    "full": "home-width-after-1440-light-scores-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".annual-hero": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".growth-surface": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-latest": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-events": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1440-light-failure.png",
+    "full": "home-width-after-1440-light-failure-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".annual-hero": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".growth-surface": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-latest": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-events": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1440-dark-scores.png",
+    "full": "home-width-after-1440-dark-scores-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".annual-hero": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".growth-surface": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-latest": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-events": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1440-dark-failure.png",
+    "full": "home-width-after-1440-dark-failure-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".annual-hero": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".growth-surface": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-latest": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      },
+      ".guest-events": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1280-light-scores.png",
+    "full": "home-width-after-1280-light-scores-full.png",
+    "width": 1280,
+    "height": 1000,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1032,
+        "right": 1280
+      },
+      ".home-page": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".annual-hero": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".growth-surface": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-latest": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-events": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1280-light-failure.png",
+    "full": "home-width-after-1280-light-failure-full.png",
+    "width": 1280,
+    "height": 1000,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1032,
+        "right": 1280
+      },
+      ".home-page": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".annual-hero": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".growth-surface": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-latest": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-events": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1280-dark-scores.png",
+    "full": "home-width-after-1280-dark-scores-full.png",
+    "width": 1280,
+    "height": 1000,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1032,
+        "right": 1280
+      },
+      ".home-page": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".annual-hero": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".growth-surface": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-latest": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-events": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1280-dark-failure.png",
+    "full": "home-width-after-1280-dark-failure-full.png",
+    "width": 1280,
+    "height": 1000,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1032,
+        "right": 1280
+      },
+      ".home-page": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".annual-hero": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".growth-surface": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-latest": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      },
+      ".guest-events": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1920-light-scores.png",
+    "full": "home-width-after-1920-light-scores-full.png",
+    "width": 1920,
+    "height": 1000,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1672,
+        "right": 1920
+      },
+      ".home-page": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".annual-hero": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".growth-surface": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-latest": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-events": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1920-light-failure.png",
+    "full": "home-width-after-1920-light-failure-full.png",
+    "width": 1920,
+    "height": 1000,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1672,
+        "right": 1920
+      },
+      ".home-page": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".annual-hero": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".growth-surface": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-latest": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-events": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1920-dark-scores.png",
+    "full": "home-width-after-1920-dark-scores-full.png",
+    "width": 1920,
+    "height": 1000,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1672,
+        "right": 1920
+      },
+      ".home-page": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".annual-hero": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".growth-surface": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-latest": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-events": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-1920-dark-failure.png",
+    "full": "home-width-after-1920-dark-failure-full.png",
+    "width": 1920,
+    "height": 1000,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1672,
+        "right": 1920
+      },
+      ".home-page": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".annual-hero": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".growth-surface": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-latest": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      },
+      ".guest-events": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-414-light-scores.png",
+    "full": "home-width-after-414-light-scores-full.png",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-414-light-failure.png",
+    "full": "home-width-after-414-light-failure-full.png",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-414-dark-scores.png",
+    "full": "home-width-after-414-dark-scores-full.png",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-414-dark-failure.png",
+    "full": "home-width-after-414-dark-failure-full.png",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 414,
+        "right": 414
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 374,
+        "right": 394
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-390-light-scores.png",
+    "full": "home-width-after-390-light-scores-full.png",
+    "width": 390,
+    "height": 846,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-390-light-failure.png",
+    "full": "home-width-after-390-light-failure-full.png",
+    "width": 390,
+    "height": 846,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-390-dark-scores.png",
+    "full": "home-width-after-390-dark-scores-full.png",
+    "width": 390,
+    "height": 846,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-after-390-dark-failure.png",
+    "full": "home-width-after-390-dark-failure-full.png",
+    "width": 390,
+    "height": 846,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 0,
+        "width": 390,
+        "right": 390
+      },
+      ".home-page": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".annual-hero": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".growth-surface": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-latest": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      },
+      ".guest-events": {
+        "x": 20,
+        "width": 350,
+        "right": 370
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  }
+]
