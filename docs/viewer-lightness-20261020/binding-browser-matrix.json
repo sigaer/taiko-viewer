@@ -1,0 +1,276 @@
+{
+  "sourceSha256": "0666deb94daee76d5634d4f71a5643132bb6c948475f9a2b8afb27f9618bf639",
+  "scope": "Real complete profile SFC and Element Plus; actual API composable and authenticated binding HTTP/SQL; Nuxt shell/async-data adapter supplied, unrelated showcase/beta components stubbed; no production access",
+  "cases": [
+    {
+      "name": "confirm-input",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "confirm-input",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "confirm-target",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "pendingTargetB": "待确认 ID：741052016223611508\n记录称号：Synthetic B\n到期时间：2026-10-20T08:28:08.000Z\n我已修改称号，立即确认",
+      "errors": []
+    },
+    {
+      "name": "confirm-target",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "pendingTargetB": "待确认 ID：741052016223611508\n记录称号：Synthetic B\n到期时间：2026-10-20T08:28:08.000Z\n我已修改称号，立即确认",
+      "errors": []
+    },
+    {
+      "name": "confirm-account",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "confirm-account",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "confirm-binding",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "confirm-binding",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "prepare-input",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "prepare-input",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "prepare-account",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "prepare-account",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "prepare-target",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "newRequestStillBusy": true,
+      "errors": []
+    },
+    {
+      "name": "prepare-target",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "newRequestStillBusy": true,
+      "errors": []
+    },
+    {
+      "name": "confirm-retry-busy",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "newRequestStillBusy": true,
+      "errors": []
+    },
+    {
+      "name": "confirm-retry-busy",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "newRequestStillBusy": true,
+      "errors": []
+    },
+    {
+      "name": "leave-confirm",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "leave-confirm",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "leave-prepare",
+      "status": 200,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "leave-prepare",
+      "status": 400,
+      "result": "PASS",
+      "inputPreserved": true,
+      "messages": [],
+      "unexpectedRefreshes": 0,
+      "errors": []
+    },
+    {
+      "name": "unchanged-400",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "expired-400",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 0,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "replaced-409",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 0,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "network-confirm",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "timeout-confirm",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "cancel-confirm",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "network-prepare",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "timeout-prepare",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    },
+    {
+      "name": "cancel-prepare",
+      "result": "PASS",
+      "errorVisible": true,
+      "submissionsBeforeRetry": 1,
+      "busyReleased": true,
+      "pendingCount": 1,
+      "deliberateRetry": "PASS"
+    }
+  ],
+  "passed": 29,
+  "total": 29,
+  "status": "PASS"
+}

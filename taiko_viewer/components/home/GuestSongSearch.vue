@@ -240,13 +240,13 @@ onBeforeUnmount(() => {
   padding: 6px;
   border: 1px solid rgba(157, 101, 63, 0.26);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 38px rgba(107, 72, 45, 0.14);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 18px 38px rgba(107, 72, 45, 0.14);
 }
 
 .guest-song-search__form:focus-within {
-  border-color: #a85f3e;
-  box-shadow: 0 0 0 3px rgba(168, 95, 62, 0.14), 0 20px 42px rgba(107, 72, 45, 0.16);
+  border-color:var(--viewer-link);
+  box-shadow:0 0 0 3px var(--viewer-border), 0 20px 42px rgba(107, 72, 45, 0.16);
 }
 
 .guest-song-search__icon {
@@ -254,7 +254,7 @@ onBeforeUnmount(() => {
   height: 44px;
   display: grid;
   place-items: center;
-  color: #a85f3e;
+  color:var(--viewer-link);
 }
 
 .guest-song-search__icon svg,
@@ -269,13 +269,13 @@ onBeforeUnmount(() => {
   height: 48px;
   border: 0;
   outline: 0;
-  color: var(--viewer-text);
-  background: transparent;
+  color:var(--viewer-text);
+  background:transparent;
   font-size: 16px;
 }
 
 .guest-song-search input::placeholder {
-  color: #9b8c80;
+  color:#9b8c80;
 }
 
 .guest-song-search__clear,
@@ -290,21 +290,21 @@ onBeforeUnmount(() => {
 .guest-song-search__clear {
   display: grid;
   place-items: center;
-  color: var(--viewer-text-muted);
-  background: transparent;
+  color:var(--viewer-text-muted);
+  background:transparent;
 }
 
 .guest-song-search__submit {
   padding: 0 18px;
-  color: #fff;
-  background: #a85f3e;
+  color:#fff;
+  background:var(--viewer-link);
   font-weight: 700;
 }
 
 .guest-song-search__clear:focus-visible,
 .guest-song-search__submit:focus-visible,
 .guest-song-search__result:focus-visible {
-  outline: 3px solid #a85f3e;
+  outline: 3px solid var(--viewer-link);
   outline-offset: 2px;
 }
 
@@ -316,14 +316,14 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid var(--viewer-border);
   border-radius: 16px;
-  background: rgba(255, 253, 250, 0.98);
-  box-shadow: 0 22px 48px rgba(80, 55, 35, 0.2);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 22px 48px rgba(80, 55, 35, 0.2);
   backdrop-filter: blur(16px);
 }
 
 .guest-song-search__status {
   padding: 18px;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   text-align: center;
 }
 
@@ -337,8 +337,8 @@ onBeforeUnmount(() => {
   padding: 8px 14px;
   border: 0;
   border-bottom: 1px solid var(--viewer-border);
-  color: var(--viewer-text);
-  background: transparent;
+  color:var(--viewer-text);
+  background:transparent;
   text-align: left;
   cursor: pointer;
 }
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
 
 .guest-song-search__result:hover,
 .guest-song-search__result.is-active {
-  background: rgba(196, 164, 132, 0.13);
+  background:rgba(196, 164, 132, 0.13);
 }
 
 .guest-song-search__cover {
@@ -357,7 +357,7 @@ onBeforeUnmount(() => {
   height: 48px;
   border-radius: 10px;
   overflow: hidden;
-  background: #f5e9dc;
+  background:#f5e9dc;
 }
 
 .guest-song-search__copy {
@@ -378,14 +378,14 @@ onBeforeUnmount(() => {
 }
 
 .guest-song-search__copy small {
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   font-size: 12px;
 }
 
 .guest-song-search__result > svg {
   width: 20px;
   height: 20px;
-  color: var(--viewer-accent-strong);
+  color:var(--viewer-accent-strong);
 }
 
 .sr-only {
@@ -402,21 +402,21 @@ onBeforeUnmount(() => {
 
 :global(body.theme-dark .guest-song-search__form),
 :global(body.theme-dark .guest-song-search__results) {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(35, 30, 27, 0.98);
+  border-color:rgba(255, 255, 255, 0.14);
+  background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-song-search input::placeholder) {
-  color: #a9998c;
+  color:#a9998c;
 }
 
 :global(body.theme-dark .guest-song-search__result:hover),
 :global(body.theme-dark .guest-song-search__result.is-active) {
-  background: rgba(223, 148, 111, 0.12);
+  background:rgba(223, 148, 111, 0.12);
 }
 
 :global(body.theme-dark .guest-song-search__cover) {
-  background: #2b2420;
+  background:#2b2420;
 }
 
 @media (max-width: 560px) {

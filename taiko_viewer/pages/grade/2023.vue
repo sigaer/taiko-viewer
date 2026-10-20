@@ -9,6 +9,7 @@ const pageMeta = {
 const dojoTitle = "虹段位道场 2023";
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitle: "段位查询",
   pageDesc: "虹 2023",
   navKey: "/grade/2023",
@@ -173,16 +174,16 @@ useViewerSeo({
 
 <style scoped>
 .grade-body {
-  max-width: 980px;
+  width: 100%;
   margin: 0 auto;
   padding: 24px 28px 40px;
-  background: rgba(255, 255, 255, 0.9);
+  background:var(--viewer-surface-subtle);
   border-radius: 18px;
-  box-shadow: 0 18px 32px rgba(165, 138, 110, 0.12);
+  box-shadow:0 18px 32px var(--viewer-shadow);
 }
 
 .grade-title {
-  border-bottom: 1px solid rgba(165, 138, 110, 0.2);
+  border-bottom: 1px solid var(--viewer-border);
   padding-bottom: 12px;
   margin-bottom: 20px;
 }
@@ -191,12 +192,12 @@ useViewerSeo({
   margin: 0 0 6px;
   font-size: 22px;
   font-weight: 700;
-  color: #3b2f25;
+  color:var(--viewer-text);
 }
 
 .lastmodified {
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .grade-content {
@@ -216,7 +217,7 @@ useViewerSeo({
 
 .nav-table td {
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(165, 138, 110, 0.2);
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .grade-content table {
@@ -227,20 +228,20 @@ useViewerSeo({
 
 .grade-content td {
   padding: 6px 8px;
-  border: 1px solid rgba(165, 138, 110, 0.2);
+  border: 1px solid var(--viewer-border);
 }
 
 .heading-with-anchor-link,
 .heading-after-first {
   margin: 16px 0 10px;
   font-size: 16px;
-  color: #3b2f25;
+  color:var(--viewer-text);
 }
 
 .list1 {
   margin: 0 0 16px;
   padding-left: 18px;
-  color: #3b2f25;
+  color:var(--viewer-text);
   font-size: 13px;
 }
 
@@ -248,7 +249,7 @@ useViewerSeo({
   border: 1px solid rgba(165, 138, 110, 0.25);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.75);
+  background:var(--viewer-surface-subtle);
   margin-bottom: 16px;
 }
 
@@ -262,21 +263,21 @@ useViewerSeo({
 
 .tab button {
   border: none;
-  background: #f6efe6;
+  background:#f6efe6;
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
-  color: #5a4a3b;
+  color:#5a4a3b;
   cursor: default;
 }
 
 .tab.active button {
-  background: #eddcc9;
+  background:#eddcc9;
   font-weight: 600;
 }
 
 .rel-wiki-page {
-  color: inherit;
+  color:inherit;
   text-decoration: none;
 }
 </style>

@@ -1,0 +1,705 @@
+[
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "title",
+    "css": {
+      "text": "无敌的HAPPINESS!(SOS团5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "lineHeight": "33px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "secondaryJapaneseOrChinese",
+    "css": {
+      "text": "無敵的ハピネス！(SOS団5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "23.1px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "bodyChineseOrJapanese",
+    "css": {
+      "text": "动漫音乐",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "numericMeta",
+    "css": {
+      "text": "BPM 185ID 1455发布日期 8/12/2026",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "22.4px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 28
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "scoreDigits",
+    "css": {
+      "text": "980,000",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "32px",
+      "lineHeight": "41.6px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "primaryAction",
+    "css": {
+      "text": "打开练习播放器 ↗",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "14px",
+      "lineHeight": "21px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "difficultyButton",
+    "css": {
+      "text": "魔王7★",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "role": "mobileNavLabel",
+    "css": {
+      "text": "首页",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "11px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "title",
+    "css": {
+      "text": "無敵的ハピネス！(SOS団5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "lineHeight": "33px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "secondaryJapaneseOrChinese",
+    "css": {
+      "text": "无敌的HAPPINESS!(SOS团5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "23.1px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "WenQuanYi Zen Hei",
+        "isCustomFont": false,
+        "glyphCount": 2
+      },
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 23
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "bodyChineseOrJapanese",
+    "css": {
+      "text": "アニメ",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "numericMeta",
+    "css": {
+      "text": "BPM 185ID 1455公開日 8/12/2026",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "22.4px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 27
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "scoreDigits",
+    "css": {
+      "text": "980,000",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "32px",
+      "lineHeight": "41.6px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "primaryAction",
+    "css": {
+      "text": "練習プレイヤー ↗",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "14px",
+      "lineHeight": "21px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "difficultyButton",
+    "css": {
+      "text": "おに7★",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "role": "mobileNavLabel",
+    "css": {
+      "text": "ホーム",
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "11px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "title",
+    "css": {
+      "text": "无敌的HAPPINESS!(SOS团5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "lineHeight": "33px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "secondaryJapaneseOrChinese",
+    "css": {
+      "text": "無敵的ハピネス！(SOS団5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "23.1px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "bodyChineseOrJapanese",
+    "css": {
+      "text": "动漫音乐",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "numericMeta",
+    "css": {
+      "text": "BPM 185ID 1455发布日期 8/12/2026",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "22.4px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 28
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "scoreDigits",
+    "css": {
+      "text": "980,000",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "32px",
+      "lineHeight": "41.6px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "primaryAction",
+    "css": {
+      "text": "打开练习播放器 ↗",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "14px",
+      "lineHeight": "21px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "difficultyButton",
+    "css": {
+      "text": "魔王7★",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "role": "mobileNavLabel",
+    "css": {
+      "text": "首页",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "11px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "title",
+    "css": {
+      "text": "无敌的HAPPINESS!(SOS团5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "30px",
+      "lineHeight": "42px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "secondaryJapaneseOrChinese",
+    "css": {
+      "text": "無敵的ハピネス！(SOS団5人Ver.)",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "15px",
+      "lineHeight": "25.5px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "bodyChineseOrJapanese",
+    "css": {
+      "text": "动漫音乐",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "numericMeta",
+    "css": {
+      "text": "BPM 185ID 1455发布日期 8/12/2026",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "lineHeight": "22.4px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 28
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "scoreDigits",
+    "css": {
+      "text": "980,000",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "32px",
+      "lineHeight": "41.6px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "primaryAction",
+    "css": {
+      "text": "打开练习播放器 ↗",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "14px",
+      "lineHeight": "21px"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "difficultyButton",
+    "css": {
+      "text": "魔王7★",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "650",
+      "size": "15px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "role": "mobileNavLabel",
+    "css": {
+      "text": "首页",
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "600",
+      "size": "11px",
+      "lineHeight": "normal"
+    },
+    "actualFonts": []
+  }
+]

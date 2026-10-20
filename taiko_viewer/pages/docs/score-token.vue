@@ -3,14 +3,16 @@ import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 
 const { locale } = useI18n();
+const localePath = useLocalePath();
 
 definePageMeta({
-  pageTitle: "网页成绩 token",
-  pageDesc: "网页成绩 token 用户指南与开发者 API 文档",
+  contentLayout: "reading",
+  pageTitleKey: "page.scoreTokenGuide.title",
+  hidePageDescription: true,
   navKey: "/account/sync",
   breadcrumbs: [
     { label: "多端同步", to: "/account/sync" },
-    { label: "网页成绩 token", to: "/docs/score-token" }
+    { labelKey: "page.scoreTokenGuide.title", to: "/docs/score-token" }
   ]
 });
 
@@ -127,10 +129,8 @@ const responseExample = `{
 <template>
   <article class="token-docs">
     <header class="docs-header">
-      <p class="docs-kicker">Sakura Taiko Viewer / scoretoken</p>
-      <h1>{{ copy.title }}</h1>
       <p>{{ copy.lead }}</p>
-      <NuxtLink class="back-link" to="/account/sync">{{ copy.back }}</NuxtLink>
+      <NuxtLink class="back-link" :to="localePath('/account/sync')">{{ copy.back }}</NuxtLink>
     </header>
 
     <section class="docs-section">
@@ -183,25 +183,24 @@ const responseExample = `{
   gap: 28px;
   width: 100%;
   min-width: 0;
-  max-width: 980px;
-  margin: 0 auto;
+
 }
 
 .docs-header {
-  padding: 30px 0 24px;
-  border-bottom: 2px solid #d45b4d;
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .docs-kicker {
   margin: 0 0 10px;
-  color: #a0443a;
+  color:var(--viewer-link);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 13px;
 }
 
 .docs-header h1 {
   margin: 0;
-  color: #3f332b;
+  color:var(--viewer-text);
   font-size: 42px;
   letter-spacing: 0;
 }
@@ -209,31 +208,31 @@ const responseExample = `{
 .docs-header > p:not(.docs-kicker) {
   max-width: 760px;
   margin: 14px 0;
-  color: #6f5d50;
+  color:var(--viewer-text-muted);
   font-size: 17px;
   line-height: 1.8;
 }
 
 .back-link {
-  color: var(--el-color-primary);
+  color:var(--viewer-link);
   font-weight: 600;
 }
 
 .docs-section {
   min-width: 0;
   padding-bottom: 28px;
-  border-bottom: 1px solid rgba(125, 106, 90, 0.22);
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .docs-section h2 {
   margin: 0 0 18px;
-  color: #3f332b;
+  color:var(--viewer-text);
   font-size: 25px;
 }
 
 .docs-section h3 {
   margin: 26px 0 10px;
-  color: #4b3d34;
+  color:var(--viewer-text);
   font-size: 17px;
 }
 
@@ -258,29 +257,29 @@ const responseExample = `{
   height: 30px;
   place-items: center;
   border-radius: 50%;
-  background: #d45b4d;
-  color: #fff;
+  background:var(--viewer-primary);
+  color:var(--viewer-on-primary);
   font-weight: 700;
 }
 
 .step-list p,
 .safety-note p {
   margin: 2px 0 0;
-  color: #625146;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
 .safety-note {
   margin-top: 18px;
   padding: 16px 18px;
-  border-left: 4px solid #d79a36;
-  background: #fff8ea;
+  border-left: 4px solid var(--viewer-warning);
+  background:var(--viewer-warning-surface);
 }
 
 .api-facts {
   display: grid;
   grid-template-columns: 130px minmax(0, 1fr) 180px;
-  border: 1px solid rgba(125, 106, 90, 0.22);
+  border: 1px solid var(--viewer-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -290,15 +289,15 @@ const responseExample = `{
   gap: 6px;
   min-width: 0;
   padding: 14px;
-  background: rgba(255, 248, 240, 0.72);
+  background:var(--viewer-surface-subtle);
 }
 
 .api-facts > div + div {
-  border-left: 1px solid rgba(125, 106, 90, 0.22);
+  border-left: 1px solid var(--viewer-border);
 }
 
 .api-facts span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 12px;
 }
 
@@ -322,14 +321,14 @@ pre {
   margin: 0;
   padding: 16px;
   border-radius: 8px;
-  background: #2f2a27;
-  color: #fffaf5;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-text);
   line-height: 1.7;
 }
 
 .error-table {
   display: grid;
-  border-top: 1px solid rgba(125, 106, 90, 0.22);
+  border-top: 1px solid var(--viewer-border);
 }
 
 .error-table > div {
@@ -337,14 +336,14 @@ pre {
   grid-template-columns: 64px 1fr;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(125, 106, 90, 0.22);
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .docs-section ul {
   display: grid;
   gap: 8px;
   padding-left: 22px;
-  color: #625146;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 
@@ -362,7 +361,7 @@ pre {
   }
 
   .api-facts > div + div {
-    border-top: 1px solid rgba(125, 106, 90, 0.22);
+    border-top: 1px solid var(--viewer-border);
     border-left: 0;
   }
 }

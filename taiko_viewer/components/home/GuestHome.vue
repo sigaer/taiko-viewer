@@ -48,13 +48,7 @@ onMounted(() => {
   gap: clamp(28px, 4.5vw, 52px);
 }
 
-:global(body.theme-dark .guest-home) {
-  --viewer-text: #f2e7dc;
-  --viewer-text-muted: #c1b2a5;
-  --viewer-accent-strong: #d89368;
-  --viewer-surface: rgba(27, 24, 22, 0.92);
-  --viewer-border: rgba(255, 255, 255, 0.12);
-}
+
 
 @media (max-width: 720px) {
   .guest-home {

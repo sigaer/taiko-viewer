@@ -17,6 +17,7 @@ const { t } = useI18n();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "page.songs.v2Constants.title",
   pageDescKey: "page.songs.v2Constants.desc",
   navKey: "/songs/v2-constants",
@@ -350,7 +351,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
 .v2-title-row h3 {
   margin: 0;
-  color: #4f3e31;
+  color:#4f3e31;
   font-size: 20px;
 }
 
@@ -362,8 +363,8 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  color: #b66c3d;
-  background: #fff0e4;
+  color:#b66c3d;
+  background:#fff0e4;
 }
 
 .section-icon svg {
@@ -373,7 +374,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
 .v2-heading p {
   margin: 8px 0 0;
-  color: #796858;
+  color:#796858;
   line-height: 1.6;
 }
 
@@ -382,7 +383,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
   flex-wrap: wrap;
   gap: 8px 18px;
   margin-top: 8px;
-  color: #9a7254;
+  color:#9a7254;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -424,21 +425,21 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 }
 
 .difficulty-tag--hard {
-  color: #257547;
-  background: #e8f6ed;
-  border-color: #b9e3c8;
+  color:#257547;
+  background:#e8f6ed;
+  border-color:#b9e3c8;
 }
 
 .difficulty-tag--oni {
-  color: #a63868;
-  background: #fceaf2;
-  border-color: #f2bfd4;
+  color:#a63868;
+  background:#fceaf2;
+  border-color:#f2bfd4;
 }
 
 .difficulty-tag--edit {
-  color: #6d3c97;
-  background: #f2eafd;
-  border-color: #d9c2f0;
+  color:#6d3c97;
+  background:#f2eafd;
+  border-color:#d9c2f0;
 }
 
 .v2-pagination {
@@ -453,13 +454,13 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
   padding: 18px 0;
 }
 
-:global(body.theme-dark) .v2-title-row h3 {
-  color: #f2e4d7;
+body.theme-dark .v2-title-row h3 {
+  color:#f2e4d7;
 }
 
-:global(body.theme-dark) .v2-heading p,
-:global(body.theme-dark) .v2-meta {
-  color: #c7ad98;
+body.theme-dark .v2-heading p,
+body.theme-dark .v2-meta {
+  color:#c7ad98;
 }
 
 @media (max-width: 760px) {

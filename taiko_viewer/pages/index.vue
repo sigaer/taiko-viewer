@@ -80,7 +80,7 @@ useViewerSeo(() => ({
 </template>
 
 <style scoped>
-.home-page { display: grid; gap: 16px; }
+.home-page { display: grid; gap: 16px; width: 100%; min-width: 0;  }
 .home-neutral-loading { display: grid; gap: 18px; }
 .home-neutral-loading__hero { min-height: 360px; border-radius: 26px; }
 .home-neutral-loading__rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }

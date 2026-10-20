@@ -521,7 +521,7 @@ const submit = async () => {
 .catalog-summary span,
 .catalog-hint,
 .dialog-head span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .catalog-hint {

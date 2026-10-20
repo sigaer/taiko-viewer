@@ -38,6 +38,7 @@ const { formatDateTime } = useViewerDateTime();
 const processingId = ref<number | null>(null);
 
 definePageMeta({
+  contentLayout: "wide",
   middleware: "account-auth",
   pageTitleKey: "account.developerReview",
   pageDescKey: "page.account.developerReview.desc",
@@ -323,7 +324,7 @@ const handleReject = async (application: ReviewApplication) => {
 
 .section-title p {
   margin: 8px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -338,7 +339,7 @@ const handleReject = async (application: ReviewApplication) => {
 .history-item {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .application-item__head,
@@ -351,7 +352,7 @@ const handleReject = async (application: ReviewApplication) => {
 .application-item__head p,
 .history-item p {
   margin: 6px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .application-item__reason,

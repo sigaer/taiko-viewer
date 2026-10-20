@@ -1,0 +1,29 @@
+{
+  "cgroup": "/development.slice/development-qa.slice/taiko-qa-80a490b754e1.service",
+  "durationMs": 42807,
+  "sampledMemoryPeakBytes": 821587968,
+  "sampleIntervalMs": 250,
+  "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+  "processes": [
+    {
+      "Name": "MainThread",
+      "VmHWM": "73704 kB",
+      "VmRSS": "73704 kB"
+    },
+    {
+      "Name": "mysqld",
+      "VmHWM": "155928 kB",
+      "VmRSS": "155928 kB"
+    },
+    {
+      "Name": "MainThread",
+      "VmHWM": "48080 kB",
+      "VmRSS": "48080 kB"
+    },
+    {
+      "Name": "MainThread",
+      "VmHWM": "419644 kB",
+      "VmRSS": "357740 kB"
+    }
+  ]
+}

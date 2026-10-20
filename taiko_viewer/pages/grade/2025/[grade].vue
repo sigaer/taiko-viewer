@@ -10,6 +10,7 @@ const pageMeta = {
 };
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitle: "段位查询",
   pageDesc: "虹 2025",
   navKey: "/grade/2025",

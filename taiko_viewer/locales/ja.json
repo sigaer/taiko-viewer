@@ -710,6 +710,7 @@
     "supportReview": "サポート審査"
   },
   "page": {
+    "scoreTokenGuide": { "title": "Web スコア token" },
     "more": {
       "desc": "段位、攻略、コミュニティ、ツール、アカウント設定への入口です。",
       "apiDocs": "API ドキュメント",

@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
   margin: 0 auto;
   border-radius: 24px;
   overflow: hidden;
-  background: linear-gradient(135deg, #fbf3ec, #f1e4d8);
+  background:linear-gradient(135deg, #fbf3ec, #f1e4d8);
   touch-action: none;
   cursor: grab;
 }
@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
   inset: 0;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 0 999px rgba(26, 24, 30, 0.48);
+  box-shadow:0 0 0 999px rgba(26, 24, 30, 0.48);
   pointer-events: none;
 }
 
@@ -343,9 +343,9 @@ onBeforeUnmount(() => {
   inset: 0;
   display: grid;
   place-items: center;
-  color: #ffffff;
+  color:#ffffff;
   font-size: 26px;
-  background: rgba(36, 31, 28, 0.18);
+  background:var(--viewer-surface-subtle);
 }
 
 .avatar-cropper__spinner {
@@ -353,7 +353,7 @@ onBeforeUnmount(() => {
   height: 28px;
   border-radius: 50%;
   border: 3px solid rgba(255, 255, 255, 0.36);
-  border-top-color: #ffffff;
+  border-top-color:#ffffff;
   animation: avatar-cropper-spin 0.9s linear infinite;
 }
 
@@ -369,7 +369,7 @@ onBeforeUnmount(() => {
 
 .avatar-cropper__hint p {
   margin: 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -380,7 +380,7 @@ onBeforeUnmount(() => {
 }
 
 .avatar-cropper__zoom-row span {
-  color: #5a4738;
+  color:#5a4738;
   font-weight: 600;
 }
 

@@ -1,0 +1,10 @@
+{
+  "durationSeconds": 68.97,
+  "sampledPeakBytes": 1518907392,
+  "samplingMs": 200,
+  "kernelPeakBytes": null,
+  "maxChildRssKiB": 921636,
+  "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+  "serverExit": 0,
+  "limitation": "Sampling may miss short peaks; child RSS maximum is not an aggregate."
+}

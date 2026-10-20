@@ -1,0 +1,174 @@
+[
+  {
+    "image": "home-width-before-1440-light-scores.png",
+    "full": "home-width-before-1440-light-scores-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".annual-hero": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".growth-surface": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-latest": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-events": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-before-1440-light-failure.png",
+    "full": "home-width-before-1440-light-failure-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".annual-hero": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".growth-surface": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-latest": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-events": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-before-1440-dark-scores.png",
+    "full": "home-width-before-1440-dark-scores-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "state": "scores",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".annual-hero": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".growth-surface": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-latest": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-events": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "songCount": 6,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  },
+  {
+    "image": "home-width-before-1440-dark-failure.png",
+    "full": "home-width-before-1440-dark-failure-full.png",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "state": "failure",
+    "geometry": {
+      ".app-content": {
+        "x": 248,
+        "width": 1192,
+        "right": 1440
+      },
+      ".home-page": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".annual-hero": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".growth-surface": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-latest": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      },
+      ".guest-events": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    "songCount": 0,
+    "overflow": false,
+    "browser": "113.0.5672.126"
+  }
+]

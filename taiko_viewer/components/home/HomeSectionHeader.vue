@@ -33,14 +33,14 @@ defineProps<{
 
 .home-section-head h2 {
   margin: 0;
-  color: var(--viewer-text);
+  color:var(--viewer-text);
   font-size: clamp(21px, 2.4vw, 28px);
   line-height: 1.2;
 }
 
 .home-section-head p {
   margin: 6px 0 0;
-  color: var(--viewer-text-muted);
+  color:var(--viewer-text-muted);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -50,7 +50,7 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #85583d;
+  color:var(--viewer-link);
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
@@ -63,7 +63,7 @@ defineProps<{
 }
 
 .home-section-head__link:focus-visible {
-  outline: 3px solid #a85f3e;
+  outline: 3px solid var(--viewer-link);
   outline-offset: 3px;
   border-radius: 6px;
 }

@@ -99,20 +99,20 @@ async function copyExample(value: string) {
 </template>
 
 <style scoped>
-.developer-guide { min-width: 0; color: var(--el-text-color-primary); }
+.developer-guide { min-width: 0; color:var(--el-text-color-primary); }
 h3 { margin: 0; }
 p { line-height: 1.8; overflow-wrap: anywhere; }
 .api-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin: 18px 0; }
-.api-overview-item { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--el-border-color); border-radius: 12px; color: inherit; text-decoration: none; overflow-wrap: anywhere; min-width: 0; }
-.api-overview-item:hover { border-color: var(--el-color-primary); }
+.api-overview-item { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--el-border-color); border-radius: 12px; color:inherit; text-decoration: none; overflow-wrap: anywhere; min-width: 0; }
+.api-overview-item:hover { border-color:var(--el-color-primary); }
 .api-overview-item span { font-size: 14px; line-height: 1.7; }
 .guide-details { margin-top: 14px; border-top: 1px solid var(--el-border-color); padding-top: 8px; scroll-margin-top: 90px; min-width: 0; }
 summary { cursor: pointer; min-height: 44px; align-content: center; font-weight: 600; overflow-wrap: anywhere; }
 .auth-label { font-weight: 400; font-size: 13px; margin-inline-start: 10px; }
-.guide-alert { color: var(--el-color-warning-dark-2); }
+.guide-alert { color:var(--el-color-warning-dark-2); }
 .sample-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 14px; }
 .el-button { min-height: 44px; }
-pre { max-width: 100%; overflow-x: auto; padding: 14px; border-radius: 10px; background: var(--el-fill-color-light); color: var(--el-text-color-primary); font-size: 13px; line-height: 1.65; white-space: pre; }
+pre { max-width: 100%; overflow-x: auto; padding: 14px; border-radius: 10px; background:var(--el-fill-color-light); color:var(--el-text-color-primary); font-size: 13px; line-height: 1.65; white-space: pre; }
 code { overflow-wrap: anywhere; }
 .field-table { max-width: 100%; overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; min-width: 540px; line-height: 1.7; font-size: 14px; }
@@ -120,7 +120,7 @@ th, td { text-align: start; vertical-align: top; padding: 10px; border-bottom: 1
 th:first-child { width: 27%; }
 
 .api-panel { border: 1px solid var(--el-border-color); border-radius: 12px; margin-top: 18px; min-width: 0; scroll-margin-top: 90px; }
-.api-panel-title { padding: 14px 18px; font-size: 17px; background: var(--el-fill-color-light); border-radius: 12px; }
+.api-panel-title { padding: 14px 18px; font-size: 17px; background:var(--el-fill-color-light); border-radius: 12px; }
 .api-panel[open] > .api-panel-title { border-bottom: 1px solid var(--el-border-color); border-radius: 12px 12px 0 0; }
 .api-panel-body { padding: 8px 22px 22px; min-width: 0; }
 .guide-section { margin-top: 24px; min-width: 0; }

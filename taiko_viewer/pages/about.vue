@@ -5,6 +5,7 @@ import { buildPageDescription } from "~/utils/seo";
 const { t, locale } = useI18n();
 
 definePageMeta({
+  contentLayout: "reading",
   pageTitleKey: "nav.about",
   pageDescKey: "page.about.desc",
   navKey: "/about",
@@ -159,8 +160,8 @@ const stacks = [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9a6d47;
-  background: rgba(196, 127, 79, 0.2);
+  color:var(--viewer-link);
+  background:var(--viewer-surface-subtle);
   border-radius: 6px;
 }
 
@@ -170,13 +171,13 @@ const stacks = [
 }
 
 .section-icon.alt {
-  background: rgba(88, 136, 197, 0.2);
-  color: #3c6aa6;
+  background:rgba(88, 136, 197, 0.2);
+  color:#3c6aa6;
 }
 
 .panel-header p {
   margin: 0;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
 }
 
 .team-grid {
@@ -191,16 +192,16 @@ const stacks = [
   gap: 12px;
   padding: 12px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 18px rgba(165, 138, 110, 0.12);
+  background:var(--viewer-surface-subtle);
+  box-shadow:0 8px 18px var(--viewer-shadow);
 }
 
 .avatar {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #ffc596, #ff9f75);
-  color: #fff;
+  background:linear-gradient(135deg, #ffc596, #ff9f75);
+  color:#fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,7 +220,7 @@ const stacks = [
 
 .team-role {
   font-size: 12px;
-  color: #7a6552;
+  color:var(--viewer-text-muted);
 }
 
 .stack-tags {

@@ -1,0 +1,209 @@
+{
+  "base": "55a979a",
+  "mainChecked": "1c522c1",
+  "branch": "design/song-detail-preview-20261020",
+  "versionChanged": false,
+  "productionDeployed": false,
+  "browser": "Linux Chromium 113.0.5672.126; simulated viewport DPR 1, not a physical phone",
+  "captureCounts": {
+    "before-capture.json": 40,
+    "after-capture.json": 70,
+    "after-compat-capture.json": 22,
+    "home-width-before.json": 4,
+    "home-width-after.json": 20
+  },
+  "verifiedWidths": [
+    390,
+    414,
+    820,
+    1280,
+    1440,
+    1920
+  ],
+  "allMeasuredContainersCenteredInMain": true,
+  "allMeasuredHeadersAndBodiesShareBoundary": true,
+  "layoutMeasurements": [
+    {
+      "page": "home",
+      "viewport": 1280,
+      "layout": "standard",
+      "content": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": 1280,
+      "layout": "standard",
+      "content": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    {
+      "page": "song",
+      "viewport": 1280,
+      "layout": "wide",
+      "content": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    {
+      "page": "recommend",
+      "viewport": 1280,
+      "layout": "standard",
+      "content": {
+        "x": 286.390625,
+        "width": 955.21875,
+        "right": 1241.609375
+      }
+    },
+    {
+      "page": "profile",
+      "viewport": 1280,
+      "layout": "reading",
+      "content": {
+        "x": 364,
+        "width": 800,
+        "right": 1164
+      }
+    },
+    {
+      "page": "home",
+      "viewport": 1440,
+      "layout": "standard",
+      "content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": 1440,
+      "layout": "standard",
+      "content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    {
+      "page": "song",
+      "viewport": 1440,
+      "layout": "wide",
+      "content": {
+        "x": 291.1875,
+        "width": 1105.625,
+        "right": 1396.8125
+      }
+    },
+    {
+      "page": "recommend",
+      "viewport": 1440,
+      "layout": "standard",
+      "content": {
+        "x": 344,
+        "width": 1000,
+        "right": 1344
+      }
+    },
+    {
+      "page": "profile",
+      "viewport": 1440,
+      "layout": "reading",
+      "content": {
+        "x": 444,
+        "width": 800,
+        "right": 1244
+      }
+    },
+    {
+      "page": "home",
+      "viewport": 1920,
+      "layout": "standard",
+      "content": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": 1920,
+      "layout": "standard",
+      "content": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    {
+      "page": "song",
+      "viewport": 1920,
+      "layout": "wide",
+      "content": {
+        "x": 494,
+        "width": 1180,
+        "right": 1674
+      }
+    },
+    {
+      "page": "recommend",
+      "viewport": 1920,
+      "layout": "standard",
+      "content": {
+        "x": 584,
+        "width": 1000,
+        "right": 1584
+      }
+    },
+    {
+      "page": "profile",
+      "viewport": 1920,
+      "layout": "reading",
+      "content": {
+        "x": 684,
+        "width": 800,
+        "right": 1484
+      }
+    }
+  ],
+  "catalogLoadedRows": 60,
+  "recommendationRows": 20,
+  "bindingMatrix": {
+    "passed": 29,
+    "failed": 0,
+    "run": "qa-647c22ef72bb",
+    "sourceSha256": "0666deb94daee76d5634d4f71a5643132bb6c948475f9a2b8afb27f9618bf639",
+    "scope": "Real complete profile SFC and Element Plus; actual API composable and authenticated binding HTTP/SQL; Nuxt shell/async-data adapter supplied, unrelated showcase/beta components stubbed; no production access"
+  },
+  "recommendationIdentityTests": {
+    "passed": 2,
+    "run": "qa-ef8926924c13"
+  },
+  "uiChecks": {
+    "passed": 11,
+    "browserErrors": 0,
+    "unresolvedComponents": 0,
+    "run": "qa-0d856673ca38",
+    "scope": "UI and local read-only fixture checks; synthetic goal preview allowed, all writes denied; keyboard test is simulated viewport, not a physical device."
+  },
+  "finalCaptureRuns": {
+    "before": "qa-dd31d8eef521",
+    "spaceAfter": "qa-8d3e1e5a481c",
+    "compatAndHome": "qa-0d856673ca38"
+  },
+  "limitations": [
+    "Only first-batch content migrated; remaining pages and width exceptions are explicit in migration.md.",
+    "Private data and recommendation results are synthetic; no production writes or real authentication lifecycle proof.",
+    "Compatibility samples use independent browser contexts; same-identity song → more SPA navigation is separately checked.",
+    "Progress has empty option fixture; original asynchronous error-translation issue recorded but not modified.",
+    "All write attempts fail in local preview; goal preview DTO is read-only and does not prove a goal save."
+  ]
+}

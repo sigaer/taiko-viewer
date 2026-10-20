@@ -24,15 +24,14 @@ const copy = computed(() =>
 </script>
 
 <template>
+  <section v-if="!accountUser" class="tool-gate-alert">
   <el-alert
-    v-if="!accountUser"
     type="warning"
     :closable="false"
     show-icon
     :title="copy.title"
-    class="tool-gate-alert"
-  >
-    <p>{{ copy.desc }}</p>
+    :description="copy.desc"
+  />
     <div class="tool-gate-actions">
       <NuxtLink :to="localePath('/account/login')">
         <el-button type="primary">{{ copy.login }}</el-button>
@@ -41,7 +40,7 @@ const copy = computed(() =>
         <el-button>{{ copy.register }}</el-button>
       </NuxtLink>
     </div>
-  </el-alert>
+  </section>
   <slot v-else />
 </template>
 

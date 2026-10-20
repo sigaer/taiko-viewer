@@ -5,7 +5,8 @@ const canReenterInvite=computed(()=>!isPublic.value&&!beta.status.value?.entitle
 const restartInvite=()=>{code.value='';error.value='';state.value='invite';};
 const code=ref('');const busy=ref(false);const error=ref('');const state=ref('loading');
 const copy=computed(()=>locale.value==='ja'?{title:'年間レポート限定テスト',intro:'招待コードを入力して続けてください。',label:'招待コード',submit:'確認して続ける',note:'今回のテストは招待された方のみ参加できます。',login:'ログイン',register:'新規登録',valid:'招待を確認しました。ログインして参加を完了してください。',binding:'ドンダー ID を連携してください',bind:'ID を連携する',sync:'プレイデータを準備してください',openSync:'データ同期へ',retry:'もう一度確認',failed:'招待コードを確認できませんでした。もう一度お試しください。'}:{title:'年度报告限时测试',intro:'本功能目前处于封闭测试阶段，请输入测试邀请码继续体验。',label:'邀请码',submit:'验证并继续',note:'还没有邀请码？本轮测试仅向受邀用户开放。',login:'登录',register:'注册账号',valid:'邀请码有效。请注册或登录，完成领取测试资格。',binding:'请先绑定鼓众 ID',bind:'绑定账号',sync:'请先准备游玩数据',openSync:'前往数据同步',retry:'重新检查',failed:'邀请码验证失败，请检查后重试。'});
-definePageMeta({pageTitleKey:'account.versionSummary',mobileNav:false});
+definePageMeta({
+  contentLayout: "reading",pageTitleKey:'account.versionSummary',mobileNav:false});
 const continueEntry=async()=>{
  state.value='loading';error.value='';
  try{

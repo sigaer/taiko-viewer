@@ -149,6 +149,39 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 
 <template>
   <section class="growth-surface" aria-labelledby="growth-title">
+    <header class="growth-focus">
+      <div class="growth-focus__topline">
+        <h1 id="growth-title">{{ greeting }}</h1>
+        <div class="growth-focus__aside">
+          <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
+            <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
+            <NuxtLink :to="localePath('/my/growth')" class="growth-weekly-link">{{ t('home.growth.passportEntry') }} <span aria-hidden="true">→</span></NuxtLink>
+          </nav>
+        </div>
+      </div>
+      <details v-if="!pending && !failed" class="growth-ability">
+        <summary><span v-if="overview.playerState.overallRating !== null">Rating <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong><span aria-hidden="true"> · </span></span>{{ locale === 'ja' ? '能力の詳細' : '能力详情' }}</summary>
+        <div class="growth-focus__observation">
+          <p>{{ t(recommendationCopy.observation.key) }}</p>
+        </div>
+        <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
+          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
+            <span :title="dimensionLabel(item.key)">{{ dimensionShortLabel(item.key) }}</span>
+            <strong>{{ Number(item.value).toFixed(2) }}</strong>
+          </div>
+        </div>
+      </details>
+      <HomeRecentGrowth
+        appearance="home"
+        :recent="recent"
+        :facts="feedback.recentFacts"
+        :suppressed-count="feedback.recentSuppressedCount"
+        :pending="recentPending"
+        :failed="recentFailed"
+        @presented="acknowledgeRecent"
+        @retry="refreshRecent"
+      />
+    </header>
     <div v-if="pending" class="growth-loading" aria-busy="true">
       <div class="growth-loading__focus shimmer-card">
         <span class="growth-skeleton__line growth-skeleton__line--title"></span>
@@ -191,60 +224,9 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       </section>
     </template>
 
-    <HomeRecentGrowth
-      :recent="recent"
-      :facts="feedback.recentFacts"
-      :suppressed-count="feedback.recentSuppressedCount"
-      :pending="recentPending"
-      :failed="recentFailed"
-      @presented="acknowledgeRecent"
-      @retry="refreshRecent"
-    />
 
     <template v-if="!pending && !failed">
-      <section class="growth-progress" aria-labelledby="growth-progress-title">
-        <div class="growth-section-head">
-          <div>
-            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
-          </div>
-        </div>
-        <div class="growth-progress__card panel-card">
-          <p v-if="!hasProgress" class="growth-empty">{{ t(dailyCopy.key) }}</p>
-          <template v-else>
-            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
-            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
-              <strong class="growth-event__song">{{ event.title }}</strong>
-              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
-              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
-            </article>
-            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
-          </template>
-        </div>
-      </section>
-      <header class="growth-focus panel-card">
-        <div class="growth-focus__topline">
-          <h1 id="growth-title">{{ greeting }}</h1>
-          <div class="growth-focus__aside">
-            <div v-if="overview.playerState.overallRating !== null" class="growth-rating">
-              <span>Rating</span>
-              <strong>{{ overview.playerState.overallRating.toFixed(2) }}</strong>
-            </div>
-            <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
-              <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
-              <NuxtLink :to="localePath('/my/growth')" class="growth-weekly-link">{{ t('home.growth.passportEntry') }} <span aria-hidden="true">→</span></NuxtLink>
-            </nav>
-          </div>
-        </div>
-        <div class="growth-focus__observation">
-          <p>{{ t(recommendationCopy.observation.key) }}</p>
-        </div>
-        <div v-if="skillItems.length" class="growth-skills" :aria-label="t('home.growth.skillOverview')">
-          <div v-for="item in skillItems" :key="item.key" class="growth-skill" :class="{ 'growth-skill--priority': !balanced && overview.playerState.dataSufficiency === 'ready' && item.key === overview.playerState.priorityDimension }" :aria-label="skillAriaLabel(item.key, item.value)">
-            <span :title="dimensionLabel(item.key)">{{ dimensionShortLabel(item.key) }}</span>
-            <strong>{{ Number(item.value).toFixed(2) }}</strong>
-          </div>
-        </div>
-      </header>
+
       <section class="growth-plan" aria-labelledby="growth-plan-title">
         <div class="growth-section-head">
           <div>
@@ -273,6 +255,26 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
+      <section v-if="hasProgress" class="growth-progress" aria-labelledby="growth-progress-title">
+        <div class="growth-section-head">
+          <div>
+            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
+          </div>
+        </div>
+        <div class="growth-progress__card">
+            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
+            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
+              <strong class="growth-event__song">{{ event.title }}</strong>
+              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
+              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
+            </article>
+            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
+        </div>
+      </section>
+      <details v-else class="growth-record-note">
+        <summary>{{ t('home.growth.progressTitle') }}</summary>
+        <p>{{ t(dailyCopy.key) }}</p>
+      </details>
 
 
       <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
@@ -297,95 +299,100 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 </template>
 
 <style scoped>
+.growth-ability summary, .growth-record-note summary { min-height: 44px; align-content: center; color: var(--viewer-link); font-size: 14px; cursor: pointer; }
+.growth-ability summary strong { font-weight: 600; color: var(--viewer-text); font-variant-numeric: tabular-nums; }
+.growth-ability summary:focus-visible, .growth-record-note summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
+.growth-record-note p { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.6; }
+
 .growth-plan__choice { min-width: 0; display: grid; gap: 4px; }
 .growth-plan__choose { justify-self: end; }
-.growth-plan__unavailable { padding: 8px; font-size: 12px; color: var(--el-text-color-secondary); }
-.growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color: var(--el-text-color-primary); }
+.growth-plan__unavailable { padding: 8px; font-size: 12px; color:var(--el-text-color-secondary); }
+.growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color:var(--el-text-color-primary); }
 .growth-goal--completed { max-width: none; padding: 20px 24px; border-left: 3px solid var(--viewer-accent-strong); box-sizing: border-box; }
-.growth-goal__support { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
+.growth-goal__support { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
 .growth-goal h2 { margin: 0 0 6px; font: 700 23px/1.2 var(--viewer-display-font); }
 .growth-goal > strong { font-size: 18px; overflow-wrap: anywhere; }
 .growth-goal > span { font-size: 14px; }
 .goal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-.growth-plan__choose, .goal-actions button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background: var(--el-bg-color); color: var(--el-text-color-primary); cursor: pointer; font: inherit; }
+.growth-plan__choose, .goal-actions button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background:var(--el-bg-color); color:var(--el-text-color-primary); cursor: pointer; font: inherit; }
 button:disabled { opacity: .55; cursor: default; }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
-.goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color: var(--el-text-color-primary); background: var(--el-bg-color); }
-.goal-dialog::backdrop { background: rgb(0 0 0 / 40%); }
+.goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color:var(--el-text-color-primary); background:var(--el-bg-color); }
+.goal-dialog::backdrop { background:rgb(0 0 0 / 40%); }
 .goal-dialog h2 { margin: 0 0 16px; font-size: 21px; }
 .goal-dialog fieldset { border: 0; padding: 0; margin: 12px 0; }
 .goal-dialog legend { font-size: 14px; margin-bottom: 8px; }
 .goal-dialog label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
-.goal-dialog input { accent-color: var(--el-color-primary); }
-.goal-error { color: var(--el-color-danger); font-size: 14px; }
+.goal-dialog input { accent-color:var(--el-color-primary); }
+.goal-error { color:var(--el-color-danger); font-size: 14px; }
 
 .growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; min-width: 0; gap: var(--growth-section-gap); }
-.growth-focus { border: 1px solid rgba(151,105,73,.18); border-radius: 22px; background: linear-gradient(135deg, rgba(255,252,247,.98), rgba(248,235,225,.92)); box-shadow: 0 16px 34px rgba(104,70,45,.08); }
-.growth-focus { padding: clamp(22px, 4vw, 34px); display: grid; gap: 22px; }
+.growth-focus { min-width: 0; }
+.growth-focus { display: grid; gap: 8px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .growth-focus__aside { display: grid; justify-items: end; gap: 8px; }
-.growth-weekly-link { color: #b84d37; font-size: 13px; font-weight: 800; text-decoration: none; }
+.growth-weekly-link { color:var(--viewer-link); font-size: 13px; font-weight: 500; text-decoration: none; }
 .growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color: #342922; font-family: var(--viewer-display-font); line-height: 1.1; }
-.growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 3.4vw, 36px); }
+.growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); line-height: 1.1; }
+.growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 2.8vw, 30px); }
 .growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
 .growth-rating { display: grid; gap: 2px; text-align: right; }
-.growth-rating span { color: #806b5c; font-size: 11px; font-weight: 700; }
-.growth-rating strong { color: #342922; font: 800 28px/1 var(--viewer-display-font); }
-.growth-focus__observation p { margin: 0; color: var(--viewer-text); font-size: clamp(16px, 2vw, 19px); line-height: 1.6; overflow-wrap: anywhere; }
-.growth-focus__observation { padding-top: 14px; border-top: 1px solid var(--viewer-border); }
+.growth-rating span { color:var(--viewer-text-muted); font-size: 11px; font-weight: 700; }
+.growth-rating strong { color:var(--viewer-text); font: 800 28px/1 var(--viewer-display-font); }
+.growth-focus__observation p { margin: 0; color:var(--viewer-text); font-size: clamp(16px, 2vw, 19px); line-height: 1.6; overflow-wrap: anywhere; }
+.growth-focus__observation { margin-block: 12px; }
 .growth-skills { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.growth-skill { position: relative; display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid rgba(151,105,73,.2); }
-.growth-skill span { color: #806b5c; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.growth-skill strong { color: #49382d; font-size: 14px; font-variant-numeric: tabular-nums; }
-.growth-skill--priority { border-top-color: rgba(184,77,55,.55); }
-.growth-skill--priority::after { content: ""; position: absolute; top: -2px; left: 0; width: 24px; height: 2px; border-radius: 99px; background: #b84d37; }
+.growth-skill { position: relative; display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid var(--viewer-border); }
+.growth-skill span { color:var(--viewer-text-muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.growth-skill strong { color:var(--viewer-text); font-size: 14px; font-variant-numeric: tabular-nums; }
+.growth-skill--priority { border-top-color:var(--viewer-border); }
+.growth-skill--priority::after { content: ""; position: absolute; top: -2px; left: 0; width: 24px; height: 2px; border-radius: 99px; background:var(--viewer-primary); }
 .growth-skill--priority span, .growth-skill--priority strong { font-weight: 800; }
 .growth-plan, .growth-progress { display: grid; gap: 8px; min-width: 0; }
-.growth-reason { margin: 0; color: #806b5c; font-size: 13px; line-height: 1.55; }
+.growth-reason { margin: 0; color:var(--viewer-text-muted); font-size: 13px; line-height: 1.55; }
 .growth-plan__items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--growth-card-gap); margin-top: 8px; }
-.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 16px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; color: inherit; text-decoration: none; background: rgba(255,255,255,.5); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
-.growth-plan__item:hover { transform: translateY(-2px); border-color: rgba(184,77,55,.35); background: #fff; }
-.growth-plan__item:focus-visible { outline: 3px solid #d18366; outline-offset: 3px; }
-.growth-plan__cover { aspect-ratio: 1; overflow: hidden; border-radius: 10px; background: #f2e5da; }
+.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 16px; border: 1px solid var(--viewer-border); border-radius: 15px; color:inherit; text-decoration: none; background:var(--viewer-surface-subtle); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.growth-plan__item:hover { transform: translateY(-2px); border-color:var(--viewer-border); background:var(--viewer-surface); }
+.growth-plan__item:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
+.growth-plan__cover { aspect-ratio: 1; overflow: hidden; border-radius: 10px; background:var(--viewer-surface-subtle); }
 .growth-plan__details { min-width: 0; display: grid; gap: 3px; }
-.growth-plan__details strong { overflow: hidden; color: #49382d; font-size: 13px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
-.growth-plan__details span, .growth-plan__details small { color: #a85f3e; font-size: 11px; }
-.growth-plan__details small { color: #806b5c; font-variant-numeric: tabular-nums; }
-.growth-plan__arrow { color: #b84d37; font-size: 20px; }
-.growth-empty { margin: 0; color: #806b5c; font-size: 13px; }
-.growth-progress__lead { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
-.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; padding: 19px 16px; border-radius: 18px; }
-.growth-event { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; min-width: 0; color: #49382d; }
-.growth-event + .growth-event { border-top: 1px solid rgba(151,105,73,.2); padding-top: 16px; }
-.growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color: #a04430; }
+.growth-plan__details strong { overflow: hidden; color:var(--viewer-text); font-size: 13px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.growth-plan__details span, .growth-plan__details small { color:var(--viewer-link); font-size: 11px; }
+.growth-plan__details small { color:var(--viewer-text-muted); font-variant-numeric: tabular-nums; }
+.growth-plan__arrow { color:var(--viewer-primary); font-size: 20px; }
+.growth-empty { margin: 0; color:var(--viewer-text-muted); font-size: 13px; }
+.growth-progress__lead { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
+.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; }
+.growth-event { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; min-width: 0; color:var(--viewer-text); }
+.growth-event + .growth-event { border-top: 1px solid var(--viewer-border); padding-top: 16px; }
+.growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color:var(--viewer-link); }
 .growth-event__song { font-size: 16px; overflow-wrap: anywhere; }
 .growth-event__change { grid-column: 1 / -1; margin: 0; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; }
-.growth-summary { margin: 0; color: #735f50; font-size: 14px; }
-:global(body.theme-dark .growth-event) { color: #f5e7dc; }
-:global(body.theme-dark .growth-event h3) { color: #eaa58c; }
-:global(body.theme-dark .growth-summary), :global(body.theme-dark .growth-empty) { color: #cbb8aa; }
-:global(body.theme-dark .growth-focus) { border-color: rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(46,35,29,.98), rgba(54,38,31,.94)); }
-:global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color: rgba(255,255,255,.12); }
-:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color: #f5e7dc; }
-:global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color: #e58b6e; }
-:global(body.theme-dark .growth-skill--priority) { border-top-color: rgba(229,139,110,.65); }
-:global(body.theme-dark .growth-skill--priority::after) { background: #e58b6e; }
-:global(body.theme-dark .growth-plan__item) { border-color: rgba(255,255,255,.1); background: rgba(48,36,30,.65); }
+.growth-summary { margin: 0; color:var(--viewer-text-muted); font-size: 14px; }
+:global(body.theme-dark .growth-event) { color:var(--viewer-text); }
+:global(body.theme-dark .growth-event h3) { color:var(--viewer-primary); }
+:global(body.theme-dark .growth-summary), :global(body.theme-dark .growth-empty) { color:var(--viewer-text-muted); }
+
+:global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color:rgba(255,255,255,.12); }
+:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color:var(--viewer-text); }
+:global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color:var(--viewer-link); }
+:global(body.theme-dark .growth-skill--priority) { border-top-color:var(--viewer-border); }
+:global(body.theme-dark .growth-skill--priority::after) { background:var(--viewer-primary); }
+:global(body.theme-dark .growth-plan__item) { border-color:rgba(255,255,255,.1); background:var(--viewer-surface-subtle); }
 .growth-loading { display: grid; gap: var(--growth-section-gap); }
 .growth-loading > div { display: grid; align-content: start; gap: 14px; min-height: 150px; padding: clamp(22px, 4vw, 34px); border-radius: 22px; }
 .growth-loading__focus { min-height: 235px !important; }
-.growth-loading__plan, .growth-loading__progress { min-height: 180px !important; padding: 0; background: none; }
-.growth-skeleton__line, .growth-skeleton__row { display: block; min-height: 0; border-radius: 6px; background: rgba(151,105,73,.16); }
+.growth-loading__plan, .growth-loading__progress { min-height: 180px !important; padding: 0; background:none; }
+.growth-skeleton__line, .growth-skeleton__row { display: block; min-height: 0; border-radius: 6px; background:var(--viewer-border); }
 .growth-skeleton__line--title { width: min(56%, 240px); height: 30px; }
 .growth-skeleton__line--rating { width: 92px; height: 26px; margin-left: auto; }
 .growth-skeleton__line--focus { width: min(72%, 310px); height: 36px; margin-top: 8px; }
 .growth-skeleton__line--skills { width: 100%; height: 42px; margin-top: auto; }
 .growth-skeleton__line--section { width: 130px; height: 27px; }
 .growth-skeleton__line--progress { width: 78%; height: 58px; margin-top: 10px; }
-.growth-skeleton__row { width: 100%; height: 58px; border: 1px solid rgba(151,105,73,.14); border-radius: 15px; }
+.growth-skeleton__row { width: 100%; height: 58px; border: 1px solid var(--viewer-border); border-radius: 15px; }
 @media (max-width: 820px) { .growth-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } .growth-plan__items { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus { padding: 19px; border-radius: 18px; } .growth-focus__topline { flex-direction: column; } .growth-focus__aside { width: 100%; grid-template-columns: 1fr auto; align-items: end; } .growth-rating { text-align: left; justify-self: start; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-progress__card { margin-top: 8px; padding: 19px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
+@media (max-width: 520px) { .growth-surface { padding-inline: 2px; } .growth-focus__topline { flex-direction: column; } .growth-focus__aside { justify-items: start; } .growth-rating { text-align: left; justify-self: start; } .growth-plan__items { grid-template-columns: 1fr; } .growth-plan__item { padding: 13px 16px; } .growth-loading > div { min-height: 130px; padding: 19px; border-radius: 18px; } .growth-loading__plan, .growth-loading__progress { padding: 0; } .growth-loading__focus { min-height: 190px !important; } }
 @media (prefers-reduced-motion: reduce) { .growth-plan__item { transition: none; } .growth-plan__item:hover { transform: none; } }
 </style>

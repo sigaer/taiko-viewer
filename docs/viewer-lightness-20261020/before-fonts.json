@@ -1,0 +1,515 @@
+[
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "22px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".secondary-title",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(80, 102, 110)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".song-category",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(80, 102, 110)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".score-primary strong",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "32px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".song-action--primary",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "15px",
+      "color": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "color": "rgb(58, 50, 44)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".target-item__title",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "16px",
+      "color": "rgb(48, 49, 51)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".target-item__meta",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 5
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13px",
+      "color": "rgb(184, 77, 55)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "zh",
+    "selector": ".mode-tab",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13.3333px",
+      "color": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "22px",
+      "color": "rgb(231, 242, 240)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".secondary-title",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(179, 203, 200)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".song-category",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(179, 203, 200)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".score-primary strong",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "32px",
+      "color": "rgb(231, 242, 240)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".song-action--primary",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "600",
+      "size": "15px",
+      "color": "rgb(37, 24, 23)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "color": "rgb(198, 179, 165)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".target-item__title",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "16px",
+      "color": "rgb(242, 231, 220)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".target-item__meta",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 5
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13px",
+      "color": "rgb(184, 77, 55)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "dark",
+    "locale": "zh",
+    "selector": ".mode-tab",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Yu Gothic\", Meiryo, \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13.3333px",
+      "color": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "ja",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 20
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "600",
+      "size": "22px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".secondary-title",
+    "actual": [
+      {
+        "familyName": "Microsoft YaHei UI",
+        "isCustomFont": false,
+        "glyphCount": 25
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(80, 102, 110)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".song-category",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 3
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "400",
+      "size": "14px",
+      "color": "rgb(80, 102, 110)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".score-primary strong",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "600",
+      "size": "32px",
+      "color": "rgb(38, 59, 66)"
+    }
+  },
+  {
+    "page": "song",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".song-action--primary",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 9
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"Noto Sans CJK JP\", \"Noto Sans JP\", sans-serif",
+      "weight": "600",
+      "size": "15px",
+      "color": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "ja",
+    "selector": "h1",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 6
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "700",
+      "size": "22px",
+      "color": "rgb(58, 50, 44)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".target-item__title",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 7
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "16px",
+      "color": "rgb(48, 49, 51)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".target-item__meta",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 5
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13px",
+      "color": "rgb(184, 77, 55)"
+    }
+  },
+  {
+    "page": "recommend",
+    "theme": "light",
+    "locale": "ja",
+    "selector": ".mode-tab",
+    "actual": [
+      {
+        "familyName": "Hiragino Sans",
+        "isCustomFont": false,
+        "glyphCount": 4
+      }
+    ],
+    "computed": {
+      "family": "-apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Hiragino Kaku Gothic ProN\", \"Yu Gothic\", Meiryo, \"PingFang SC\", \"Segoe UI\", \"Apple Color Emoji\", sans-serif",
+      "weight": "800",
+      "size": "13.3333px",
+      "color": "rgb(255, 255, 255)"
+    }
+  }
+]

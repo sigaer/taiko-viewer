@@ -68,6 +68,7 @@ const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
+  contentLayout: "reading",
   middleware: "account-auth",
   pageTitleKey: "account.sync",
   pageDescKey: "page.account.sync.desc",
@@ -699,7 +700,7 @@ const copyIssuedScoreToken = async () => {
 
 .section-title p {
   margin: 8px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -717,12 +718,12 @@ const copyIssuedScoreToken = async () => {
   gap: 4px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .binding-meta span,
 .last-sync-meta span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -739,7 +740,7 @@ const copyIssuedScoreToken = async () => {
 
 .score-token-docs {
   flex: 0 0 auto;
-  color: var(--el-color-primary);
+  color:var(--el-color-primary);
   font-weight: 600;
   text-decoration: none;
 }
@@ -757,7 +758,7 @@ const copyIssuedScoreToken = async () => {
   padding: 14px;
   border: 1px solid rgba(151, 119, 91, 0.22);
   border-radius: 8px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .token-status-strip > div {
@@ -767,7 +768,7 @@ const copyIssuedScoreToken = async () => {
 }
 
 .token-status-strip span {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -786,12 +787,12 @@ const copyIssuedScoreToken = async () => {
   padding: 14px;
   border-left: 4px solid var(--el-color-warning);
   border-radius: 4px;
-  background: rgba(253, 246, 236, 0.9);
+  background:var(--viewer-surface-subtle);
 }
 
 .token-reveal p {
   margin: 0 0 10px;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.6;
 }
 
@@ -806,8 +807,8 @@ const copyIssuedScoreToken = async () => {
   overflow-x: auto;
   padding: 10px 12px;
   border-radius: 6px;
-  background: #fff;
-  color: #3f332b;
+  background:var(--viewer-surface);
+  color:#3f332b;
   white-space: nowrap;
 }
 
@@ -850,7 +851,7 @@ const copyIssuedScoreToken = async () => {
 
 .kinoko-history-hint {
   margin: 10px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -890,13 +891,13 @@ const copyIssuedScoreToken = async () => {
   gap: 6px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .target-item p,
 .result-item p {
   margin: 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 
@@ -913,7 +914,7 @@ const copyIssuedScoreToken = async () => {
 .result-item {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .result-item__head {

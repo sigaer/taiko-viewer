@@ -6,6 +6,7 @@ const { t } = useI18n();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "tools.chartConfig",
   pageDescKey: "page.tools.chartConfig.desc",
   navKey: "/tools/chart-config",
@@ -76,7 +77,7 @@ const submit = async () => {
 
 .hint {
   margin: 0 0 14px;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
   line-height: 1.6;
 }
 
@@ -88,12 +89,12 @@ const submit = async () => {
   margin: 16px 0 0;
   padding: 14px 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(196, 127, 79, 0.2);
+  background:var(--viewer-surface-subtle);
+  border: 1px solid var(--viewer-surface-subtle);
   white-space: pre-wrap;
   word-break: break-word;
   font-size: 13px;
   line-height: 1.6;
-  color: #4a3b30;
+  color:#4a3b30;
 }
 </style>

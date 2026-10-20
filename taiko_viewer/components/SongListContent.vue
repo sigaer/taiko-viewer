@@ -102,11 +102,11 @@ const categoryLabelMap: Record<string, { zh: string; ja: string }> = {
 };
 
 const difficultyDefs = [
-  { key: "level_1", color: "#e74c3c" },
-  { key: "level_2", color: "#2ecc71" },
-  { key: "level_3", color: "#27ae60" },
-  { key: "level_4", color: "#ff69b4" },
-  { key: "level_5", color: "#8e44ad" }
+  { key: "level_1", icon: "/icons/difficulty/1.png", color: "#e74c3c" },
+  { key: "level_2", icon: "/icons/difficulty/2.png", color: "#2ecc71" },
+  { key: "level_3", icon: "/icons/difficulty/3.png", color: "#27ae60" },
+  { key: "level_4", icon: "/icons/difficulty/4.png", color: "#ff69b4" },
+  { key: "level_5", icon: "/icons/difficulty/5.png", color: "#8e44ad" }
 ];
 
 const getLevels = (song: SongCatalogItem) =>
@@ -208,26 +208,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="page-stack">
-    <el-card class="panel-card">
+    <section class="song-catalog">
       <div class="panel-header">
-        <div>
-          <h3 class="panel-title">
-            <span class="section-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M17 15V6l-9 2.5v9.5"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            {{ props.title }}
-          </h3>
-          <p>{{ props.desc }}</p>
-        </div>
-        <el-input v-model="query" :placeholder="t('songs.searchPlaceholder')" clearable class="search-input">
+        <label class="catalog-search-label" for="song-search">{{ t('songs.searchPlaceholder') }}</label>
+        <el-input id="song-search" v-model="query" :placeholder="t('songs.searchPlaceholder')" clearable class="search-input">
           <template #prefix>
             <span class="input-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
@@ -266,17 +250,17 @@ onBeforeUnmount(() => {
                 <SongCoverImage
                   :song-id="song.id"
                   :alt="getSongTitle(song)"
-                  sizes="(max-width: 640px) 45vw, (max-width: 1100px) 30vw, 220px"
+                  sizes="80px"
                   :priority="songIndex === 0"
                   fit="contain"
                   class="cover-img"
                 />
               </div>
               <div class="song-body">
-                <h4>{{ getSongTitle(song) }}</h4>
-                <p class="song-sub">{{ getSongSubtitle(song) }}</p>
+                <h4 :lang="locale === 'ja' && song.song_name_jp ? 'ja' : 'zh-CN'">{{ getSongTitle(song) }}</h4>
+                <p class="song-sub viewer-secondary-title" :lang="locale === 'ja' ? 'zh-CN' : 'ja'">{{ getSongSubtitle(song) }}</p>
                 <div class="song-meta">
-                  <span class="category-tag" :style="{ backgroundColor: categoryColors[song.type] || '#9a8b7b' }">
+                  <span class="category-tag" :style="{ '--category-accent': categoryColors[song.type] || 'var(--viewer-text-muted)' }">
                     {{ getCategoryLabel(song.type) }}
                   </span>
                   <span class="bpm-text">BPM {{ song.bpm || "-" }}</span>
@@ -287,9 +271,9 @@ onBeforeUnmount(() => {
                     v-for="level in getLevels(song)"
                     :key="level.key"
                     class="level-pill"
-                    :style="{ backgroundColor: level.color }"
+                    :aria-label="`${t(`difficulty.${level.key.slice(-1)}`)} ${level.value}★`" :title="`${t(`difficulty.${level.key.slice(-1)}`)} ${level.value}★`"
                   >
-                    {{ level.value }}
+                    <img :src="level.icon" alt="" width="20" height="20">{{ level.value }}★
                   </span>
                 </div>
               </div>
@@ -315,191 +299,12 @@ onBeforeUnmount(() => {
         </div>
         <p v-else-if="songs.length" class="load-progress">{{ copy.progress }}</p>
       </div>
-    </el-card>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.panel-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.panel-header h3 {
-  margin: 0 0 6px;
-  font-size: 18px;
-}
-
-.panel-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #9a6d47;
-  background: rgba(196, 127, 79, 0.2);
-  border-radius: 6px;
-}
-
-.section-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.input-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #9a6d47;
-}
-
-.input-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.panel-header p {
-  margin: 0;
-  color: #6c5a4b;
-}
-
-.search-input {
-  max-width: 260px;
-}
-
-.song-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.song-card {
-  display: grid;
-  grid-template-rows: 170px auto;
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 24px rgba(165, 138, 110, 0.14);
-}
-
-.song-card-link {
-  text-decoration: none;
-  color: inherit;
-  border-radius: 18px;
-  transition: transform 0.2s ease;
-}
-
-.song-card-link:hover {
-  transform: translateY(-2px);
-}
-
-.song-cover {
-  width: 100%;
-  height: 170px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 243, 230, 0.9));
-  padding: 8px;
-}
-
-.song-body {
-  padding: 12px 14px 16px;
-}
-
-.song-body h4 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  line-height: 1.35;
-  min-height: calc(1.35em * 2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.song-sub {
-  margin: 0 0 10px;
-  font-size: 12px;
-  color: #7a6552;
-}
-
-.song-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-size: 12px;
-}
-
-.category-tag {
-  padding: 4px 8px;
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.bpm-text {
-  color: #7a6552;
-}
-
-.song-id {
-  margin-left: auto;
-  color: #7a6552;
-  font-weight: 600;
-}
-
-.song-levels {
-  display: grid;
-  grid-template-columns: repeat(var(--level-count, 4), minmax(0, 1fr));
-  gap: 6px;
-  width: 100%;
-}
-
-.level-pill {
-  width: 100%;
-  padding: 4px 8px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.cover-img {
-  width: 100%;
-  height: 100%;
-}
-
-.song-alert {
-  grid-column: 1 / -1;
-}
-
-.load-more-row,
-.load-progress {
-  grid-column: 1 / -1;
-  min-height: 52px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: #7a6552;
-  font-size: 12px;
-}
+.page-stack{display:grid;gap:32px;}.panel-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}.catalog-search-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}.search-input{width:100%;max-width:520px;}.input-icon{display:inline-flex;width:20px;color:var(--viewer-text-muted);}.input-icon svg{width:18px;height:18px;}
+.song-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px;}.song-card-link{display:block;min-width:0;text-decoration:none;color:var(--viewer-text);border-radius:8px;}.song-card{display:grid;grid-template-columns:80px minmax(0,1fr);align-items:start;gap:16px;padding:18px 0;border-bottom:1px solid var(--viewer-border);background:transparent;min-width:0;}.song-cover{width:80px;height:80px;border-radius:8px;overflow:hidden;background:var(--viewer-surface);}.cover-img{width:100%;height:100%;}.song-body{min-width:0;}.song-body h4{font-size:16px;font-weight:600;line-height:1.5;margin:0 0 4px;overflow-wrap:anywhere;}.song-sub{font-size:14px;line-height:1.6;color:var(--viewer-text-muted);margin:0 0 8px;overflow-wrap:anywhere;}.song-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--viewer-text-muted);}.category-tag{color:var(--viewer-text-muted);}.song-id{margin-left:auto;}.song-levels{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;}.level-pill{font-size:14px;display:inline-flex;gap:4px;align-items:baseline;white-space:nowrap;}.level-pill img{object-fit:contain;flex-shrink:0;}.song-alert,.load-more-row,.load-progress{grid-column:1/-1;}.load-more-row,.load-progress{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;min-height:64px;margin:16px 0 0;color:var(--viewer-text-muted);font-size:14px;}.song-card-link:hover{background:var(--viewer-surface-subtle);}.song-card-link:focus-visible{outline:3px solid var(--viewer-link);outline-offset:4px;}
+@media(max-width:700px){.song-grid{grid-template-columns:minmax(0,1fr);}.panel-header{margin-bottom:8px;}.song-card{padding:18px 0;}.song-meta{gap:4px 12px;}.song-id{margin-left:0;}.song-levels{gap:4px 10px;}}
 </style>

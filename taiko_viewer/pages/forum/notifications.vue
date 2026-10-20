@@ -187,12 +187,12 @@ const formatNotificationTime = (value: string) => {
   gap: 12px;
 }
 
-.notification-count { margin: 0; color: var(--viewer-text-muted); font-size: 14px; }
+.notification-count { margin: 0; color:var(--viewer-text-muted); font-size: 14px; }
 
 .notification-head p,
 .notification-card p {
   margin: 8px 0 0;
-  color: #725b4a;
+  color:#725b4a;
   line-height: 1.8;
 }
 
@@ -213,10 +213,10 @@ const formatNotificationTime = (value: string) => {
   transition: background .18s ease, border-color .18s ease;
 }
 
-.notification-card:hover, .notification-card:focus-visible { background: color-mix(in srgb, var(--viewer-accent-strong) 8%, var(--viewer-surface)); outline: none; }
+.notification-card:hover, .notification-card:focus-visible { background:color-mix(in srgb, var(--viewer-accent-strong) 8%, var(--viewer-surface)); outline: none; }
 
 .notification-card.unread {
-  border-left-color: #d84a34;
+  border-left-color:var(--viewer-primary);
 }
 
 .notification-card__main {
@@ -229,14 +229,14 @@ const formatNotificationTime = (value: string) => {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: #846956;
+  color:#846956;
 }
 
 .notification-type {
   padding: 2px 7px;
   border-radius: 999px;
-  color: #fff;
-  background: linear-gradient(135deg, #d84a34, #f08a24);
+  color:#fff;
+  background:linear-gradient(135deg, var(--viewer-primary), #f08a24);
 }
 
 .notification-card h3 {
@@ -246,12 +246,12 @@ const formatNotificationTime = (value: string) => {
 
 .notification-card p { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; line-height: 1.5; }
 
-.notification-card__arrow { color: var(--viewer-accent-strong); font-size: 22px; }
+.notification-card__arrow { color:var(--viewer-accent-strong); font-size: 22px; }
 
 body.theme-dark .notification-head p,
 body.theme-dark .notification-card p,
 body.theme-dark .notification-card__meta {
-  color: #c6b4a7;
+  color:#c6b4a7;
 }
 
 @media (min-width: 861px) {

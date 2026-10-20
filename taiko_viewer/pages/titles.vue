@@ -9,6 +9,7 @@ const titles = computed<TitleCatalogItem[]>(() => titleTableData.value?.titles |
 const { t } = useI18n();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "page.titles.title",
   pageDescKey: "page.titles.desc",
   navKey: "/titles",
@@ -103,7 +104,7 @@ useViewerSeo(() => ({
 
 .panel-card {
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(160, 120, 86, 0.12);
+  box-shadow:none;
 }
 
 .card-header {
@@ -125,8 +126,8 @@ useViewerSeo(() => ({
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(248, 224, 193, 0.85), rgba(255, 244, 230, 0.95));
-  color: #a36b39;
+  background:var(--viewer-surface-subtle);
+  color:#a36b39;
 }
 
 .header-icon svg {
@@ -138,13 +139,13 @@ useViewerSeo(() => ({
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #73573d;
+  color:var(--viewer-text-muted);
 }
 
 .subtitle-text {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #9b7a5c;
+  color:var(--viewer-text-muted);
 }
 
 .table-wrap {
@@ -154,8 +155,8 @@ useViewerSeo(() => ({
 .wikitable {
   width: 100%;
   min-width: 760px;
-  background-color: #f8f9fa;
-  color: #202122;
+  background-color:#f8f9fa;
+  color:#202122;
   margin: 0;
   border: 1px solid #a2a9b1;
   border-collapse: collapse;
@@ -174,10 +175,10 @@ useViewerSeo(() => ({
 }
 
 .wikitable > thead > tr > th {
-  background-color: #eaecf0;
+  background-color:#eaecf0;
   text-align: center;
   font-weight: 600;
-  color: #73573d;
+  color:var(--viewer-text-muted);
 }
 
 .wikitable > tbody > tr > td {
@@ -197,15 +198,15 @@ useViewerSeo(() => ({
   justify-content: center;
   padding: 0 8px;
   border-radius: 999px;
-  background: #fff0df;
-  color: #9a5b25;
+  background:#fff0df;
+  color:#9a5b25;
   font-weight: 700;
 }
 
 .title-name {
   min-width: 180px;
   font-weight: 600;
-  color: #5f4632;
+  color:#5f4632;
 }
 
 .song-links {
@@ -220,11 +221,11 @@ useViewerSeo(() => ({
 .empty-cell {
   padding: 32px !important;
   text-align: center;
-  color: #8d7968;
+  color:#8d7968;
 }
 
 .wikitable a {
-  color: #0645ad;
+  color:#0645ad;
   text-decoration: none;
 }
 
@@ -235,11 +236,11 @@ useViewerSeo(() => ({
 
 /* 优化表格行hover效果 */
 .wikitable > tbody > tr:hover {
-  background-color: #fff8f0;
+  background-color:var(--viewer-surface-subtle);
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #f0e6dc;
+  border-bottom: 1px solid var(--viewer-surface-subtle);
   padding: 16px 20px;
 }
 

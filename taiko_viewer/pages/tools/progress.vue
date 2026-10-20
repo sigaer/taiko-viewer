@@ -25,6 +25,7 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "tools.progress",
   pageDescKey: "page.tools.progress.desc",
   navKey: "/tools/progress",
@@ -306,7 +307,7 @@ onMounted(() => {
 }
 
 .kind-switch {
-  width: min(100%, 620px);
+  width: min(100%, var(--viewer-content-reading));
 }
 
 .progress-form {
@@ -357,17 +358,17 @@ onMounted(() => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #e45543;
+  background:#e45543;
   animation: progress-beat 1s ease-in-out infinite;
 }
 
 .beat-dot:nth-child(2) {
-  background: #f1ae42;
+  background:#f1ae42;
   animation-delay: 0.12s;
 }
 
 .beat-dot:nth-child(3) {
-  background: #5792c5;
+  background:#5792c5;
   animation-delay: 0.24s;
 }
 
@@ -387,7 +388,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
@@ -400,7 +401,7 @@ onMounted(() => {
 .image-stage {
   overflow: auto;
   padding: 12px;
-  background: #ede8df;
+  background:#ede8df;
   border: 1px solid rgba(111, 87, 66, 0.14);
   border-radius: 8px;
   text-align: center;
@@ -412,7 +413,7 @@ onMounted(() => {
   max-width: 100%;
   height: auto;
   margin: 0 auto;
-  box-shadow: 0 8px 22px rgba(62, 46, 34, 0.14);
+  box-shadow:0 8px 22px rgba(62, 46, 34, 0.14);
 }
 
 @keyframes progress-beat {

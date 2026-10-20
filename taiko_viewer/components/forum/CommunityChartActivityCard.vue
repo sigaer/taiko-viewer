@@ -33,17 +33,17 @@ const tagLabel = (labelKey: string) => t(labelKey);
 </template>
 
 <style scoped>
-.chart-activity-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 12px; border: 1px solid var(--viewer-border); border-radius: 14px; color: var(--viewer-text); background: var(--viewer-surface); text-decoration: none; transition: border-color .18s ease, transform .18s ease; }
-.chart-activity-card:hover, .chart-activity-card:focus-visible { border-color: var(--viewer-accent-strong); transform: translateY(-1px); }
-.chart-activity-card > img { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; background: var(--viewer-border); }
+.chart-activity-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 12px; border: 1px solid var(--viewer-border); border-radius: 14px; color:var(--viewer-text); background:var(--viewer-surface); text-decoration: none; transition: border-color .18s ease, transform .18s ease; }
+.chart-activity-card:hover, .chart-activity-card:focus-visible { border-color:var(--viewer-accent-strong); transform: translateY(-1px); }
+.chart-activity-card > img { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; background:var(--viewer-border); }
 .chart-activity-card__body { min-width: 0; display: grid; gap: 6px; align-content: center; }
 .chart-activity-card__heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .chart-activity-card__heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
-.chart-activity-card__heading span, .chart-activity-card__footer { color: var(--viewer-text-muted); font-size: 12px; }
+.chart-activity-card__heading span, .chart-activity-card__footer { color:var(--viewer-text-muted); font-size: 12px; }
 .chart-activity-card__signals { display: flex; flex-wrap: wrap; gap: 5px; }
-.signal { padding: 2px 7px; border-radius: 999px; color: var(--viewer-text-muted); background: color-mix(in srgb, var(--viewer-border) 55%, transparent); font-size: 11px; }
-.signal--summary { color: var(--viewer-accent-strong); background: color-mix(in srgb, var(--viewer-accent-strong) 12%, transparent); font-weight: 700; }
-.chart-activity-card__tip { overflow: hidden; display: -webkit-box; margin: 0; color: var(--viewer-text); font-size: 12px; line-height: 1.45; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.signal { padding: 2px 7px; border-radius: 999px; color:var(--viewer-text-muted); background:color-mix(in srgb, var(--viewer-border) 55%, transparent); font-size: 11px; }
+.signal--summary { color:var(--viewer-accent-strong); background:color-mix(in srgb, var(--viewer-accent-strong) 12%, transparent); font-weight: 700; }
+.chart-activity-card__tip { overflow: hidden; display: -webkit-box; margin: 0; color:var(--viewer-text); font-size: 12px; line-height: 1.45; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 .chart-activity-card__footer { display: flex; justify-content: space-between; gap: 8px; }
 @media (max-width: 560px) { .chart-activity-card { grid-template-columns: 64px minmax(0, 1fr); } .chart-activity-card > img { width: 64px; height: 64px; } .chart-activity-card__heading { display: grid; gap: 2px; } }
 </style>

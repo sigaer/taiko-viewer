@@ -1,0 +1,160 @@
+{
+  "baseline": "63fda227dff20be10bad05e94b41957d8f121989",
+  "branch": "design/song-detail-preview-20261020",
+  "productionMain": "1c522c1d3e4aa6f5b34fa54bc1624252b697c1aa",
+  "version": "0.86.2",
+  "deployed": false,
+  "mergedToMain": false,
+  "runs": {
+    "before": "qa-f48f3902f9ee",
+    "after": "qa-6fe9079791ae",
+    "sharedInteractionsAndInitialContent": "qa-d50d319ae9c4",
+    "finalContentAndHomeProfile": "qa-ce8f40194b26",
+    "profileBindingMatrix": "qa-80a490b754e1"
+  },
+  "uniquePairedPageConditions": 32,
+  "screenshots": 118,
+  "browser": "Linux Chromium 113.0.5672.126",
+  "zoom": "100%",
+  "deviceScaleFactor": 1,
+  "devices": "Simulated viewports, not physical phones",
+  "sharedInteractionChecks": 11,
+  "contentCheckGroups": 7,
+  "bindingBrowserCases": {
+    "passed": 29,
+    "total": 29,
+    "sourceSha256": "4e6cc76c833096c2ad946830f28f2b682396eb6bdd2a590bbc9669e21654aa09",
+    "scope": "Real complete profile SFC and Element Plus; actual API composable and authenticated binding HTTP/SQL; Nuxt shell/async-data adapter supplied, unrelated showcase/beta components stubbed; no production access"
+  },
+  "unchangedSourceFiles": [
+    "taiko_viewer/assets/css/tokens.css",
+    "taiko_viewer/assets/css/main.css",
+    "taiko_viewer/layouts/default.vue",
+    "taiko_viewer/pages/tools/recommend.vue",
+    "taiko_viewer/components/song/SongChartPreview.vue",
+    "taiko_viewer/components/account/AccountSongScores.vue",
+    "taiko_viewer/package.json",
+    "taiko_viewer/package-lock.json"
+  ],
+  "unchangedScripts": [
+    {
+      "file": "taiko_viewer/pages/account/profile.vue",
+      "scriptSha256": "46fef96954c7f4b86d626f2e9d065eddf023d7c69ce823cf20c428d445fbce1f",
+      "unchangedFrom": "63fda22"
+    },
+    {
+      "file": "taiko_viewer/components/home/PlayerGrowthSurface.vue",
+      "scriptSha256": "c775ad797662f0baa0fb3387f89bc05fe354c3b4ce763aad3b376ee4a69bf448",
+      "unchangedFrom": "63fda22"
+    },
+    {
+      "file": "taiko_viewer/components/home/AuthenticatedHome.vue",
+      "scriptSha256": "7e402cfbb2efc684009355e833388c61c9aba9aa2f7563f5b961cd399c77f7f2",
+      "unchangedFrom": "63fda22"
+    }
+  ],
+  "difficultyAssets": [
+    {
+      "path": "taiko_viewer/public/icons/difficulty/1.png",
+      "size": 5998,
+      "sha256": "6f809ecc6b6baa91ec578a6b4aace0b70d8be407da7993e8fd6842316ff75b59"
+    },
+    {
+      "path": "taiko_viewer/public/icons/difficulty/2.png",
+      "size": 6167,
+      "sha256": "bed794cba4faa4f0cff3ee75a5b17f6495db66e0fc6977ed854803772b2815b4"
+    },
+    {
+      "path": "taiko_viewer/public/icons/difficulty/3.png",
+      "size": 7494,
+      "sha256": "07edddb8f71ba79097f63c562e58d4148bb5963f11cfff1cbd072708ceb00961"
+    },
+    {
+      "path": "taiko_viewer/public/icons/difficulty/4.png",
+      "size": 6128,
+      "sha256": "59aa541319bdede9a412283f56d18721711339ff43ba3e38f4545ae579994655"
+    },
+    {
+      "path": "taiko_viewer/public/icons/difficulty/5.png",
+      "size": 5996,
+      "sha256": "6cee0cdd94729c62236c808daa6dd8d433e87f32ee07c66504d7bf5cbfc63e0f"
+    }
+  ],
+  "resources": {
+    "after-resources.json": {
+      "durationSeconds": 172.46,
+      "sampledPeakBytes": 1581879296,
+      "samplingMs": 200,
+      "kernelPeakBytes": null,
+      "maxChildRssKiB": 1034188,
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "serverExit": 0,
+      "limitation": "Sampling may miss short peaks; child RSS maximum is not an aggregate."
+    },
+    "before-resources.json": {
+      "durationSeconds": 171.93,
+      "sampledPeakBytes": 1656414208,
+      "samplingMs": 200,
+      "kernelPeakBytes": null,
+      "maxChildRssKiB": 1091608,
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "serverExit": 0,
+      "limitation": "Sampling may miss short peaks; child RSS maximum is not an aggregate."
+    },
+    "binding-browser-resources.json": {
+      "cgroup": "/development.slice/development-qa.slice/taiko-qa-80a490b754e1.service",
+      "durationMs": 42807,
+      "sampledMemoryPeakBytes": 821587968,
+      "sampleIntervalMs": 250,
+      "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "processes": [
+        {
+          "Name": "MainThread",
+          "VmHWM": "73704 kB",
+          "VmRSS": "73704 kB"
+        },
+        {
+          "Name": "mysqld",
+          "VmHWM": "155928 kB",
+          "VmRSS": "155928 kB"
+        },
+        {
+          "Name": "MainThread",
+          "VmHWM": "48080 kB",
+          "VmRSS": "48080 kB"
+        },
+        {
+          "Name": "MainThread",
+          "VmHWM": "419644 kB",
+          "VmRSS": "357740 kB"
+        }
+      ]
+    },
+    "after-content-checks-resources.json": {
+      "durationSeconds": 164.92,
+      "sampledPeakBytes": 1910829056,
+      "samplingMs": 200,
+      "kernelPeakBytes": null,
+      "maxChildRssKiB": 1170040,
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "serverExit": 0,
+      "limitation": "Sampling may miss short peaks; child RSS maximum is not an aggregate."
+    },
+    "after-interactions-resources.json": {
+      "durationSeconds": 164.1,
+      "sampledPeakBytes": 1770299392,
+      "samplingMs": 200,
+      "kernelPeakBytes": null,
+      "maxChildRssKiB": 1067280,
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+      "serverExit": 0,
+      "limitation": "Sampling may miss short peaks; child RSS maximum is not an aggregate."
+    }
+  },
+  "limitations": [
+    "Preview APIs are local read-only synthetic fixtures; no write-success simulation or production business data.",
+    "Community feed only: existing 12-row limit/order retained from 16 synthetic DTOs; deeper thread, publish and management flows remain unmodified and not covered.",
+    "Other user page content migration remains explicitly partial in the single migration table.",
+    "Binding matrix uses real complete profile SFC and authenticated isolated HTTP/SQL with existing host adapters, not full Nuxt auth or multi-tab proof."
+  ]
+}

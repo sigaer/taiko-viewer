@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AccountToolGate from "~/components/tools/AccountToolGate.vue";
 import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { viewerErrorAlertType } from "~/utils/viewerError";
@@ -6,6 +7,7 @@ import { viewerErrorAlertType } from "~/utils/viewerError";
 const { t, locale } = useI18n();
 
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "tools.wordCloud",
   pageDescKey: "page.tools.wordCloud.desc",
   navKey: "/tools/word-cloud",
@@ -71,7 +73,7 @@ const submit = async () => {
 
 .hint {
   margin: 0 0 14px;
-  color: #6c5a4b;
+  color:var(--viewer-text-muted);
 }
 
 .result-alert {
@@ -86,6 +88,6 @@ const submit = async () => {
 .chart-image {
   max-width: 100%;
   border-radius: 12px;
-  box-shadow: 0 10px 24px rgba(46, 35, 26, 0.12);
+  box-shadow:0 10px 24px var(--viewer-shadow);
 }
 </style>

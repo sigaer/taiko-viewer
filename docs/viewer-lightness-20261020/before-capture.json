@@ -1,0 +1,672 @@
+[
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-414-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-414-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-414-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-414-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 414,
+    "height": 846,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-414-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 390,
+    "height": 844,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-390-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 390,
+    "height": 844,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-390-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 390,
+    "height": 844,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-390-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 390,
+    "height": 844,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-390-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 390,
+    "height": 844,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-390-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 820,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-820-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 820,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-820-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 820,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-820-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 820,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-820-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 820,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-820-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 820,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-820-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 820,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-820-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 820,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-820-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 1440,
+    "height": 1000,
+    "theme": "light",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-1440-light-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-1440-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-song-1440-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-1440-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-1440-dark-zh.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-414-light-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-song-414-light-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-414-light-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 414,
+    "height": 846,
+    "theme": "light",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-414-light-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/available?previewState=scores",
+    "page": "catalog",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-catalog-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=2&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=3&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=4&pageSize=12&sort=open-day-desc",
+      "http://127.0.0.1:3208/api/content/songs?view=list&shelfStatus=0&page=5&pageSize=12&sort=open-day-desc"
+    ],
+    "recordCount": 60
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/songs/1455?previewState=scores",
+    "page": "song",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-song-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/charts/1455/4/ugc/me",
+      "http://127.0.0.1:3208/api/account/songs/1455"
+    ],
+    "recordCount": null
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/tools/recommend?previewState=scores",
+    "page": "recommend",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-recommend-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/recommendation/tool?n=20&dim&image=false"
+    ],
+    "recordCount": 20
+  },
+  {
+    "route": "http://127.0.0.1:3208/ja/account/profile?previewState=scores",
+    "page": "profile",
+    "width": 1440,
+    "height": 1000,
+    "theme": "dark",
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "image": "before-profile-1440-dark-ja.png",
+    "overflow": false,
+    "clientApiRequests": [
+      "http://127.0.0.1:3208/api/account/my-don?t=0",
+      "http://127.0.0.1:3208/api/account/auth/me",
+      "http://127.0.0.1:3208/api/annual-beta/status",
+      "http://127.0.0.1:3208/api/annual-beta/events"
+    ],
+    "recordCount": null
+  }
+]

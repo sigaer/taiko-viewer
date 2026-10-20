@@ -511,7 +511,7 @@
     "detail": "歌曲详情",
     "searchPlaceholder": "搜索歌曲/分类",
     "catalogDesc": "展示歌曲曲绘、标题与分类信息。",
-    "availableTitle": "现有歌曲",
+    "availableTitle": "实装歌曲",
     "removedTitle": "已下架歌曲",
     "version": "实装版本",
     "subtitle": "副标题",
@@ -711,6 +711,7 @@
     "supportReview": "工单审批"
   },
   "page": {
+    "scoreTokenGuide": { "title": "网页成绩 token" },
     "more": {
       "desc": "段位、攻略、社区、工具与账户设置的集中入口。",
       "apiDocs": "API 文档",
@@ -769,8 +770,8 @@
     },
     "songs": {
       "available": {
-        "title": "现有歌曲",
-        "desc": "国行太鼓现有歌曲列表，支持按曲名、分类与难度搜索。",
+        "title": "实装歌曲",
+        "desc": "国行太鼓实装歌曲列表，支持按曲名、分类与难度搜索。",
         "keyword": "国行歌曲列表",
         "panelDesc": "展示当前可用歌曲，默认按实装日期倒序排列，支持按名称与分类搜索。"
       },

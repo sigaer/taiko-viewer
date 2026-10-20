@@ -1,0 +1,178 @@
+[
+  {
+    "stage": "after",
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/113.0.5672.126 Safari/537.36",
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "positions": [
+      {
+        "selector": "song-heading",
+        "y": 84,
+        "height": 160.78125
+      },
+      {
+        "selector": "difficulty-tabs",
+        "y": 264.78125,
+        "height": 69
+      },
+      {
+        "selector": "song-chart-workspace",
+        "y": 357.78125,
+        "height": 429.5
+      },
+      {
+        "selector": "chart-sheet",
+        "y": 523.28125,
+        "height": 148
+      },
+      {
+        "selector": "song-personal",
+        "y": 915.28125,
+        "height": 284.59375
+      }
+    ]
+  },
+  {
+    "stage": "after",
+    "route": "http://127.0.0.1:3208/ja/songs/1455?previewState=scores",
+    "viewport": [
+      414,
+      846
+    ],
+    "locale": "ja",
+    "browser": "113.0.5672.126",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/113.0.5672.126 Safari/537.36",
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "positions": [
+      {
+        "selector": "song-heading",
+        "y": 84,
+        "height": 160.78125
+      },
+      {
+        "selector": "difficulty-tabs",
+        "y": 264.78125,
+        "height": 69
+      },
+      {
+        "selector": "song-chart-workspace",
+        "y": 357.78125,
+        "height": 429.5
+      },
+      {
+        "selector": "chart-sheet",
+        "y": 523.28125,
+        "height": 148
+      },
+      {
+        "selector": "song-personal",
+        "y": 915.28125,
+        "height": 294.59375
+      }
+    ]
+  },
+  {
+    "stage": "after",
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "viewport": [
+      390,
+      844
+    ],
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/113.0.5672.126 Safari/537.36",
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "positions": [
+      {
+        "selector": "song-heading",
+        "y": 84,
+        "height": 160.78125
+      },
+      {
+        "selector": "difficulty-tabs",
+        "y": 264.78125,
+        "height": 69
+      },
+      {
+        "selector": "song-chart-workspace",
+        "y": 357.78125,
+        "height": 429.5
+      },
+      {
+        "selector": "chart-sheet",
+        "y": 523.28125,
+        "height": 148
+      },
+      {
+        "selector": "song-personal",
+        "y": 915.28125,
+        "height": 284.59375
+      }
+    ]
+  },
+  {
+    "stage": "after",
+    "route": "http://127.0.0.1:3208/songs/1455?previewState=scores",
+    "viewport": [
+      1440,
+      1000
+    ],
+    "locale": "zh",
+    "browser": "113.0.5672.126",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/113.0.5672.126 Safari/537.36",
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "positions": [
+      {
+        "selector": "song-heading",
+        "y": 124.21875,
+        "height": 135.890625
+      },
+      {
+        "selector": "difficulty-tabs",
+        "y": 290.109375,
+        "height": 55
+      },
+      {
+        "selector": "song-chart-workspace",
+        "y": 373.109375,
+        "height": 585.5
+      },
+      {
+        "selector": "chart-sheet",
+        "y": 550.609375,
+        "height": 280
+      },
+      {
+        "selector": "song-personal",
+        "y": 373.109375,
+        "height": 286.59375
+      }
+    ]
+  }
+]

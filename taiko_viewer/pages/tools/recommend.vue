@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AccountToolGate from "~/components/tools/AccountToolGate.vue";
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { difficultyLabelKey } from "~/utils/difficulty";
@@ -70,35 +71,42 @@ const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
   if (item.gapKind === "score") return `${item.gapValue.toLocaleString()}`;
   return `${item.gapValue}`;
 };
+const ordinarySummary = computed(() => `${dim.value || (locale.value === 'ja' ? '総合 Rating' : '综合 Rating')} · ${includeImage.value ? copy.value.exportImage : (locale.value === 'ja' ? 'リストのみ' : '仅列表')}`);
 </script>
 
 <template>
   <div class="page-stack">
     <AccountToolGate>
-      <el-card class="panel-card recommendation-tool">
+      <section class="recommendation-tool">
         <div class="tool-header">
-          <div><p class="hint">{{ copy.hint }}</p><div class="mode-tabs" role="tablist">
+          <div><div class="mode-tabs" role="tablist">
             <button class="mode-tab" :class="{ active: mode === 'ordinary' }" role="tab" :aria-selected="mode === 'ordinary'" @click="mode = 'ordinary'">{{ copy.ordinary }}</button>
             <button class="mode-tab" :class="{ active: mode === 'target' }" role="tab" :aria-selected="mode === 'target'" @click="mode = 'target'">{{ copy.target }}</button>
           </div></div>
         </div>
 
         <div v-if="mode === 'ordinary'">
-          <el-form label-position="top" @submit.prevent="submitOrdinary">
+          <el-form label-position="top" class="ordinary-form" @submit.prevent="submitOrdinary">
+            <div class="recommend-primary-controls">
             <el-form-item :label="copy.count"><el-input-number v-model="n" :min="1" :max="50" controls-position="right" /></el-form-item>
+              <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
+            </div>
+            <details class="recommend-advanced"><summary>{{ locale === 'ja' ? '推薦の条件' : '推荐设置' }}<span>{{ ordinarySummary }}</span></summary>
+              <div class="advanced-fields">
             <el-form-item :label="copy.dim"><el-select v-model="dim" clearable :placeholder="copy.placeholder"><el-option v-for="option in (locale === 'ja' ? [{ label: '総合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速処理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: 'リズム処理', value: '节奏处理' }, { label: '複合処理', value: '复合处理' }] : [{ label: '综合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速处理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: '节奏处理', value: '节奏处理' }, { label: '复合处理', value: '复合处理' }])" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
             <el-form-item><el-checkbox v-model="includeImage">{{ copy.exportImage }}</el-checkbox></el-form-item>
-            <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
+              </div>
+            </details>
           </el-form>
           <el-alert v-if="failed" :title="t('home.personal.recommendationUnavailable')" type="error" show-icon :closable="false" class="result-alert viewer-friendly-alert" />
           <template v-if="ordinaryData">
             <div v-if="!ordinaryData.items.length" class="empty-state">{{ copy.empty }}</div>
-            <div v-else class="target-list" data-testid="ordinary-list">
+            <header v-if="ordinaryData.items.length" class="recommend-results-head"><h2>{{ locale === 'ja' ? 'おすすめ楽曲' : '推荐结果' }}</h2><span>{{ ordinaryData.items.length }}{{ locale === 'ja' ? '曲' : '首' }}</span></header>
+            <div v-if="ordinaryData.items.length" class="target-list" data-testid="ordinary-list">
               <article v-for="item in ordinaryData.items" :key="`${item.songId}-${item.level}`" class="target-item" :data-song-id="item.songId" :data-difficulty="item.level">
                 <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level), ...(item.canCreateGoal ? { recommendation: item.recommendationToken } : {}) } })" class="target-item__song">
-                  <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="64px" fit="contain" /><span class="target-item__title">{{ item.title }}</span>
+                  <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="56px" fit="contain" /><span class="target-item__text"><span class="target-item__title" lang="zh-CN">{{ item.title }}</span><span class="target-item__meta"><span>{{ t(difficultyLabelKey(item.level)) }}</span><span>{{ item.starLevel === null ? '—' : `${item.starLevel}★` }}</span><span v-if="item.isUnplayed">{{ copy.unplayed }}</span></span></span>
                 </NuxtLink>
-                <div class="target-item__meta"><span>{{ t(difficultyLabelKey(item.level)) }}</span><span>{{ item.starLevel === null ? '—' : `${item.starLevel}★` }}</span><span v-if="item.isUnplayed">{{ copy.unplayed }}</span></div>
                 <RecommendationGoalAction v-if="item.canCreateGoal" :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" />
               </article>
             </div>
@@ -118,10 +126,10 @@ const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
             <p v-if="!targetData.isEnough" class="result-note">{{ copy.insufficient }}</p>
             <div v-if="!targetData.items.length" class="empty-state">{{ copy.empty }}</div>
             <div v-else class="target-list">
-              <article v-for="item in targetData.items" :key="`${item.songId}-${item.level}`" class="target-item">
+              <article v-for="item in targetData.items" :key="`${item.songId}-${item.level}`" class="target-item target-item--target">
                 <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level) } })" class="target-item__song">
                   <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="64px" fit="contain" />
-                  <span class="target-item__title">{{ item.title }}</span>
+                  <span class="target-item__title" lang="zh-CN">{{ item.title }}</span>
                 </NuxtLink>
                 <div class="target-item__meta"><span>{{ item.star }}★</span><span>{{ copy.index }} {{ item.targetRecommendationIndex.toFixed(1) }}</span></div>
                 <div class="target-item__metrics"><span>{{ copy.current }} {{ item.currentScore === null ? copy.unplayed : item.currentScore.toLocaleString() }}</span><span>{{ copy.targetScore }} {{ item.targetScore === null ? targetLabel : item.targetScore.toLocaleString() }}</span><span>{{ copy.gap }} {{ formatGap(item) }}</span></div>
@@ -131,35 +139,14 @@ const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
             </div>
           </template>
         </div>
-      </el-card>
+      </section>
     </AccountToolGate>
   </div>
 </template>
 
 <style scoped>
-.page-stack { display: grid; gap: 20px; }
-.recommendation-tool { display: grid; gap: 22px; }
-.hint { margin: 0 0 14px; color: #6c5a4b; }
-.mode-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-.mode-tab { min-height: 44px; padding: 0 16px; border: 1px solid var(--viewer-border, #dfd1c4); border-radius: 10px; background: transparent; color: inherit; font-weight: 800; cursor: pointer; }
-.mode-tab.active { border-color: #b84d37; background: #b84d37; color: #fff; }
-.mode-tab:focus-visible { outline: 3px solid #d18366; outline-offset: 2px; }
-.result-alert { margin-top: 16px; }
-.chart-wrap { margin-top: 16px; text-align: center; }
-.chart-image { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 24px rgba(46, 35, 26, 0.12); }
-.target-list { display: grid; gap: 10px; margin-top: 20px; }
-.target-item { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--viewer-border, #dfd1c4); border-radius: 10px; }
-.target-item__song { min-width: 0; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; color: inherit; text-decoration: none; }
-.target-item__song :deep(img) { width: 64px; height: 64px; border-radius: 8px; object-fit: contain; }
-.target-item__title { overflow-wrap: anywhere; font-weight: 800; }
-.target-item__meta, .target-item__metrics { display: flex; flex-wrap: wrap; gap: 12px; color: var(--viewer-text-muted, #806b5c); font-size: 13px; }
-.target-item__meta { color: #b84d37; font-weight: 800; }
-.progress-line { height: 7px; overflow: hidden; border-radius: 99px; background: rgba(184, 77, 55, 0.14); }
-.progress-line span { display: block; height: 100%; border-radius: inherit; background: #b84d37; }
-.target-item small { color: var(--viewer-text-muted, #806b5c); }
-.target-loading { min-height: 180px; margin-top: 20px; border-radius: 10px; background: linear-gradient(90deg, rgba(184,77,55,.08), rgba(184,77,55,.2), rgba(184,77,55,.08)); animation: pulse 1.4s ease-in-out infinite; }
-.empty-state, .result-note { margin-top: 18px; color: var(--viewer-text-muted, #806b5c); }
-@keyframes pulse { 50% { opacity: .45; } }
-:global(body.theme-dark) .hint { color: #c6b3a5; }
-@media (max-width: 640px) { .target-item { padding: 12px; } .target-item__metrics { display: grid; gap: 4px; } }
+.page-stack{display:grid;gap:32px;}.recommendation-tool{min-width:0;}.tool-header{margin-bottom:24px;}.mode-tabs{display:flex;gap:24px;border-bottom:1px solid var(--viewer-border);}.mode-tab{min-height:48px;padding:8px 0;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--viewer-text-muted);font:inherit;cursor:pointer;}.mode-tab.active{color:var(--viewer-primary);border-bottom-color:var(--viewer-primary);font-weight:600;}.mode-tab:focus-visible{outline:3px solid var(--viewer-link);outline-offset:3px;}
+.ordinary-form{margin-bottom:28px;}.recommend-primary-controls{display:flex;align-items:flex-end;gap:20px;}.recommend-primary-controls .el-form-item{margin:0;}.recommend-primary-controls>.el-button{margin-bottom:0;}.recommend-advanced{margin-top:12px;}.recommend-advanced summary{display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px;min-height:48px;cursor:pointer;color:var(--viewer-link);font-size:14px;}.recommend-advanced summary::before{content:'+';font-size:18px;}.recommend-advanced[open] summary::before{content:'−';}.recommend-advanced summary span{color:var(--viewer-text-muted);}.advanced-fields{display:grid;grid-template-columns:minmax(200px,320px) auto;align-items:end;gap:12px 24px;padding:16px 0 4px;}.advanced-fields .el-form-item{margin:0;}
+.recommend-results-head{display:flex;gap:16px;align-items:baseline;margin:0 0 8px;}.recommend-results-head h2{font-size:20px;font-weight:600;margin:0;}.recommend-results-head>span{font-size:14px;color:var(--viewer-text-muted);}.target-list{display:grid;gap:0;}.target-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--viewer-border);min-width:0;}.target-item__song{min-width:0;display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;gap:14px;color:var(--viewer-text);text-decoration:none;}.target-item__song :deep(.song-cover-picture){width:56px;height:56px;border-radius:7px;overflow:hidden;}.target-item__text{display:grid;gap:6px;min-width:0;}.target-item__title{overflow-wrap:anywhere;font-weight:600;font-size:16px;line-height:1.5;}.target-item__meta,.target-item__metrics{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:14px;line-height:1.5;color:var(--viewer-text-muted);}.target-item :deep(.recommendation-goal-action>button){font-size:14px;padding:8px 12px;border-color:var(--viewer-border);color:var(--viewer-link);background:var(--viewer-surface);white-space:nowrap;}.target-item--target{grid-template-columns:minmax(0,1fr);}.result-alert{margin-top:16px;}.chart-wrap{margin-top:28px;}.chart-image{display:block;max-width:100%;height:auto;}.empty-state,.result-note{margin-top:20px;font-size:15px;color:var(--viewer-text-muted);}.target-loading{min-height:120px;background:var(--viewer-surface-subtle);}.progress-line{height:6px;background:var(--viewer-surface-subtle);border-radius:6px;overflow:hidden;}.progress-line span{height:100%;display:block;background:var(--viewer-primary);}.target-item small{color:var(--viewer-text-muted);font-size:14px;}
+@media(max-width:640px){.advanced-fields{grid-template-columns:minmax(0,1fr);}.target-item{gap:12px;}.target-item__song{gap:12px;}.recommend-primary-controls{justify-content:space-between;gap:16px;}}
 </style>

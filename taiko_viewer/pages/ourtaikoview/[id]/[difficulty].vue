@@ -5,6 +5,9 @@ import { downloadPracticeBundle } from "~/utils/practiceBundle";
 
 defineOptions({ name: 'PracticePlayerPage' });
 definePageMeta({
+  contentLayout: "immersive",
+  hidePageHeader: true,
+  mobileNav: false,
   key: route => route.fullPath,
   validate: route => /^[1-9]\d*$/.test(String(route.params.id)) &&
     Number.isSafeInteger(Number(route.params.id)) && /^[1-5]$/.test(String(route.params.difficulty))

@@ -40,6 +40,7 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser(true);
 
 definePageMeta({
+  contentLayout: "reading",
   middleware: "account-auth",
   pageTitleKey: "account.developer",
   pageDescKey: "page.account.developer.desc",
@@ -335,7 +336,7 @@ const submitApplication = async () => {
 
 .section-title p {
   margin: 8px 0 0;
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -351,7 +352,7 @@ const submitApplication = async () => {
 .history-item {
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255, 248, 240, 0.82);
+  background:var(--viewer-surface-subtle);
 }
 
 .status-grid div {
@@ -362,7 +363,7 @@ const submitApplication = async () => {
 .status-grid span,
 .application-card__meta,
 .history-item p {
-  color: #7d6a5a;
+  color:var(--viewer-text-muted);
 }
 
 .review-link {
@@ -370,7 +371,7 @@ const submitApplication = async () => {
 }
 
 .review-link a {
-  color: #d84a34;
+  color:var(--viewer-primary);
   text-decoration: none;
   font-weight: 600;
 }
@@ -395,8 +396,8 @@ const submitApplication = async () => {
 .image-name-list span {
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 240, 224, 0.9);
-  color: #7d6a5a;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
