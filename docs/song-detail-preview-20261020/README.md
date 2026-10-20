@@ -6,6 +6,14 @@
 
 [启动真实页面的说明](../../preview/song-detail/README.md)提供本地预览命令、路由和状态切换。它读取本分支实际的 Vue 页面与组件，保留 SSR 和客户端挂载；没有使用原型 HTML 或 `refine.js` 代替真实页面。
 
+本机交付在 `/var/tmp/viewer-song-preview-20261020` 独立工作树，`pjskClient` 和原 Viewer 主工作区中没有 `preview`。普通用户可从任意目录执行：
+
+```bash
+sudo bash /var/tmp/viewer-song-preview-20261020/preview/song-detail/run.sh
+```
+
+root 终端省略 `sudo`。打开 `http://127.0.0.1:3208/songs/1455?previewState=scores`；远程编辑器需先转发服务器端口 `3208`。权限和停止方法见上方启动说明。
+
 | 长标题曲目、有成绩 | 桌面对照 | 手机对照 |
 | --- | --- | --- |
 | 中文 | [原尺寸并排图](screenshots/compare-zh-1440.png) | [原尺寸并排图](screenshots/compare-zh-390.png) |
