@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { type BranchVariant, useSongBranchAudio } from "~/composables/useSongBranchAudio";
+import SongDifficultyTabs from "~/components/song/SongDifficultyTabs.vue";
+import SongChartPreview from "~/components/song/SongChartPreview.vue";
+import SongAudioPreview from "~/components/song/SongAudioPreview.vue";
 import type { AccountSongScoresPayload } from "~/types/account-song";
 import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import type { ChartDifficultyCode } from "~/types/ugc";
@@ -10,13 +12,8 @@ import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
 const route = useRoute();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
-const apiBase = "https://static.sakura-bot.cn";
 const coverFallbackId = 1384;
 const coverError = ref(false);
-const drumVolume = ref(1);
-const drumMuted = ref(false);
-const audioErrors = ref<Record<string, boolean>>({});
-const drumAudioRefs = new Map<string, HTMLAudioElement>();
 const trackLevelMap: Record<string, ChartDifficultyCode> = {
   EASY: 1,
   NORMAL: 2,
@@ -43,7 +40,8 @@ const { accountUser, resolveAccountUser } = useAccountAuthStatus();
 definePageMeta({
   pageTitleKey: "songs.detail",
   pageDescKey: "page.songs.detail.desc",
-  navKey: "/songs/available"
+  navKey: "/songs/available",
+  hidePageHeader: true
 });
 
 const [songDetailState, chartUgcState] = await Promise.all([
@@ -146,29 +144,13 @@ const copy = computed(() =>
         back: "← 一覧へ戻る",
         releaseDate: "公開日",
         subtitle: "サブタイトル",
-        jpName: "日本語名",
         version: "実装バージョン",
         artists: "作曲 / 歌唱",
         radar: "六次元レーダー",
         radarAria: "六次元レーダーチャート",
         radarRange: "座標範囲",
         radarLevel: "レベル",
-        radarEmpty: "この楽曲 ID に対応する六次元データはありません",
-        preview: "試聴",
-        drum: "DRUM · 純ドラム音声",
-        mix: "MIX · フルミックス音声",
-        pure: "PURE · インスト音声",
-        audioMissing: "音源が見つかりません",
-        baseAudioMissing: "基本音源が見つかりません",
-        pureAudioMissing: "インスト音源が見つかりません",
-        unmute: "ミュート解除",
-        mute: "ミュート",
-        charts: "譜面プレビュー",
-        practice: "プレイ練習",
-        openPractice: "練習する",
-        maxNotes: "最大ノーツ",
-        openChart: "新しいタブで開く",
-        downloadTjaBundle: "TJA+OGG をダウンロード"
+        radarEmpty: "この楽曲 ID に対応する六次元データはありません"
       }
     : {
         detailTitle: "歌曲详情",
@@ -178,29 +160,13 @@ const copy = computed(() =>
         back: "← 返回列表",
         releaseDate: "发布日期",
         subtitle: "副标题",
-        jpName: "日文名",
         version: "实装版本",
         artists: "作曲/演唱",
         radar: "六维雷达",
         radarAria: "六维雷达图",
         radarRange: "坐标范围",
         radarLevel: "层级",
-        radarEmpty: "暂无该歌曲 ID 对应的六维数据",
-        preview: "试听",
-        drum: "DRUM · 纯鼓点音效试听",
-        mix: "MIX · 完整混音试听",
-        pure: "PURE · 纯音乐试听",
-        audioMissing: "音源不存在",
-        baseAudioMissing: "基础音源不存在",
-        pureAudioMissing: "纯音乐音源不存在",
-        unmute: "取消静音",
-        mute: "静音",
-        charts: "谱面预览",
-        practice: "游玩练习",
-        openPractice: "开始练习",
-        maxNotes: "最大物量",
-        openChart: "打开新页面预览",
-        downloadTjaBundle: "下载 TJA+OGG"
+        radarEmpty: "暂无该歌曲 ID 对应的六维数据"
       }
 );
 
@@ -265,43 +231,11 @@ const formatList = (input?: string[]) => {
 const getFumenComboLabel = (key: string) => {
   const comboList = song.value?.max_combo;
   const index = comboIndexMap[key];
-  if (!comboList || comboList[index] === undefined || comboList[index] === null || comboList[index] === "") {
-    return "—";
-  }
-  return String(comboList[index]);
+  const catalogCombo = comboList?.[index];
+  if (catalogCombo !== undefined && catalogCombo !== null && catalogCombo !== "") return String(catalogCombo);
+  const analysis = songDetail.value.ratingEntries.find(item => Number(item.id) === songId.value && Number(item.level) === index + 1);
+  return analysis?.combo === undefined || analysis.combo === null || analysis.combo === "" ? "—" : String(analysis.combo);
 };
-
-const {
-  activeBranchVariants,
-  hasBranchVariants,
-  getBaseAudioUrl,
-  getVariantAudioUrl,
-  getVariantDisplayLabel,
-  getPureAudioUrl
-} = useSongBranchAudio({
-  apiBase,
-  songId,
-  selectedTrack,
-  branchVariants: branchAudioVariants
-});
-
-const currentDrumAudio = computed(() => {
-  if (!song.value) return "";
-  return getBaseAudioUrl("drum");
-});
-
-const currentMixAudio = computed(() => {
-  if (!song.value) return "";
-  return getBaseAudioUrl("mix");
-});
-
-const currentPureAudio = computed(() => {
-  if (!song.value) return "";
-  return getPureAudioUrl();
-});
-
-const getDrumVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("drum", variant);
-const getMixVariantAudioUrl = (variant: BranchVariant) => getVariantAudioUrl("mix", variant);
 
 const fumenDefs = computed(() => {
   const base = [
@@ -313,38 +247,7 @@ const fumenDefs = computed(() => {
   return hasEditDifficulty.value ? [...base, { key: "inner", label: t("songs.levels.edit"), folder: "InnerOni" }] : base;
 });
 
-const getFumenUrl = (folder: string) => `${apiBase}/fumen/${folder}/${songId.value}.png`;
 const practiceDifficulty: Record<string, number> = { easy: 1, normal: 2, hard: 3, oni: 4, inner: 5 };
-
-const setDrumAudioRef = (key: string, el: Element | null) => {
-  if (el instanceof HTMLAudioElement) {
-    drumAudioRefs.set(key, el);
-  } else {
-    drumAudioRefs.delete(key);
-  }
-  syncDrumState();
-};
-
-const syncDrumState = () => {
-  drumAudioRefs.forEach((audio) => {
-    audio.volume = drumVolume.value;
-    audio.muted = drumMuted.value;
-  });
-};
-
-const markAudioError = (key: string) => {
-  audioErrors.value = { ...audioErrors.value, [key]: true };
-};
-
-const hasAudioError = (key: string) => !!audioErrors.value[key];
-const getAudioErrorKey = (mode: "drum" | "mix" | "pure", variant?: BranchVariant) => {
-  if (mode === "pure") {
-    return `pure-base-${songId.value}`;
-  }
-  return variant
-    ? `${mode}-${songId.value}-${selectedTrack.value}-${variant.label}`
-    : `${mode}-base-${songId.value}-${selectedTrack.value}`;
-};
 
 const radarDataKeys = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
 const radarLabels = computed(() =>
@@ -465,15 +368,29 @@ const formatRadarValue = (value: number) => {
   return value.toFixed(2);
 };
 
-watch([drumVolume, drumMuted], () => syncDrumState());
-watch([songId, selectedTrack], () => {
-  drumAudioRefs.clear();
+// Invalid EDIT deep links fall back to an available chart, including after route changes.
+watch([hasEditDifficulty, selectedTrack], ([hasEdit, track]) => {
+  if (!hasEdit && track === "EDIT") selectedTrack.value = "ONI";
+}, { immediate: true });
+const selectedFumen = computed(() => fumenDefs.value.find(item => practiceDifficulty[item.key] === selectedDifficultyCode.value));
+const difficultyTabs = computed(() => trackDefs.value.map(track => ({ ...track, star: getTrackStarLabel(track.key) })));
+const selectedAccountScores = computed(() => accountScores.value.items.filter(item => item.level === selectedDifficultyCode.value));
+const titleParts = computed(() => {
+  const full = getSongPrimaryTitle(song.value), suffix = full.match(/\([^()]*\)$/)?.[0] || "";
+  return { name: suffix ? full.slice(0, -suffix.length) : full, suffix };
 });
-watch(hasEditDifficulty, (value) => {
-  if (!value && selectedTrack.value === "EDIT") {
-    selectedTrack.value = "ONI";
-  }
+// Match the existing song-list taxonomy without changing catalog values.
+const songCategory = computed(() => {
+  const category = song.value?.type || "";
+  const japaneseLabels: Record<string, string> = {
+    南梦宫原创音乐: "ナムコオリジナル", 流行音乐: "ポップス", 儿童音乐: "キッズ", 古典音乐: "クラシック",
+    综合音乐: "バラエティ", 游戏音乐: "ゲームミュージック", 博歌乐音乐: "ボーカロイド", 动漫音乐: "アニメ"
+  };
+  return locale.value === "ja" ? japaneseLabels[category] || category : category;
 });
+const sectionCopy = computed(() => locale.value === "ja" ? {
+  analysis: "譜面の特徴と分析", info: "楽曲情報", personal: "自分の成績", empty: "この譜面の成績はまだ同期されていません", signIn: "ログインして、この譜面の成績を確認できます。", login: "ログイン", allScores: "すべての成績 →", volume: "打音の音量"
+} : { analysis: "谱面特征与分析", info: "歌曲资料", personal: "我的成绩", empty: "这张谱面还没有同步到成绩记录", signIn: "登录后查看这张谱面的成绩。", login: "登录", allScores: "全部成绩 →", volume: "鼓点音量" });
 
 const pageDescription = computed(() => {
   if (!song.value) return buildPageDescription(t("page.songs.detail.desc"));
@@ -515,74 +432,33 @@ useViewerSeo(() => ({
 
 <template>
   <div class="song-detail-page">
-    <el-card v-if="pending" class="panel-card">
-      <el-skeleton :rows="8" animated />
-    </el-card>
-
+    <el-card v-if="pending" class="panel-card"><el-skeleton :rows="8" animated /></el-card>
     <el-card v-else-if="error || !song" class="panel-card">
-      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle">
-        <template #extra>
-          <NuxtLink :to="localePath(songListPath)">
-            <el-button type="primary">{{ copy.backToList }}</el-button>
-          </NuxtLink>
-        </template>
-      </el-result>
+      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle"><template #extra><NuxtLink :to="localePath(songListPath)"><el-button type="primary">{{ copy.backToList }}</el-button></NuxtLink></template></el-result>
     </el-card>
+    <template v-else>
+      <NuxtLink class="back-link" :to="localePath(songListPath)">{{ copy.back }}</NuxtLink>
+      <header class="song-heading">
+        <SongCoverImage :song-id="song.id" :alt="getSongPrimaryTitle(song)" sizes="(max-width: 767px) 64px, 112px" priority class="cover-image" @error="coverError = true" />
+        <div class="song-title-group">
+          <p class="song-category">{{ songCategory }}</p>
+          <h1>{{ titleParts.name }}<wbr v-if="titleParts.suffix"><span class="song-title-version">{{ titleParts.suffix }}</span></h1>
+          <p class="secondary-title">{{ getSongSecondaryTitle(song) }}</p>
+        </div>
+        <div class="song-meta"><span>BPM {{ song.bpm || '—' }}</span><span>ID {{ song.id }}</span><span>{{ copy.releaseDate }} {{ song.open_day || '—' }}</span></div>
+      </header>
 
-    <el-card v-else class="panel-card detail-shell">
-      <div class="back-row">
-        <NuxtLink class="back-link" :to="localePath(songListPath)">{{ copy.back }}</NuxtLink>
-      </div>
+      <SongDifficultyTabs v-model="selectedTrack" :tracks="difficultyTabs" />
 
-      <main class="detail-main">
-        <section class="detail-left">
-          <div class="cover-wrap">
-            <SongCoverImage
-              :song-id="song.id"
-              :alt="getSongPrimaryTitle(song)"
-              sizes="(max-width: 760px) 82vw, 360px"
-              priority
-              class="cover-image"
-              @error="coverError = true"
-            />
-          </div>
-          <h2>{{ getSongPrimaryTitle(song) }}</h2>
-          <p class="jp-name">{{ getSongSecondaryTitle(song) }}</p>
+      <div class="song-reading-layout">
+        <div class="song-main-column">
+          <SongChartPreview v-if="selectedFumen" :song-id="songId" :song-title="getSongPrimaryTitle(song)" :difficulty="selectedDifficultyCode" :track="selectedTrack" :label="selectedFumen.label" :star="getFumenStarLabel(selectedFumen.key)" :combo="getFumenComboLabel(selectedFumen.key)" :folder="selectedFumen.folder" :tja-bundle-url="tjaBundleUrl">
+            <SongAudioPreview :song-id="songId" :selected-track="selectedTrack" :branch-variants="branchAudioVariants" />
+          </SongChartPreview>
 
-          <div class="meta-list">
-            <div class="meta-row">
-              <span>{{ copy.releaseDate }}</span>
-              <strong>{{ song.open_day || "-" }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>ID</span>
-              <strong>#{{ song.id }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>{{ copy.subtitle }}</span>
-              <strong>{{ song.subtitle || "-" }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>{{ copy.jpName }}</span>
-              <strong>{{ song.song_name_jp || "-" }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>BPM</span>
-              <strong>{{ song.bpm || "-" }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>{{ copy.version }}</span>
-              <strong>{{ formatList(song.version) }}</strong>
-            </div>
-            <div class="meta-row">
-              <span>{{ copy.artists }}</span>
-              <strong>{{ formatList(song.artists) }}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section class="detail-middle">
-          <SongV2Constants v-if="normalizedShelfStatus(song.shelf_status) === 2" :key="songId" :song-id="songId" :track="selectedTrack" />
+          <details class="song-analysis">
+            <summary>{{ sectionCopy.analysis }}</summary>
+            <SongV2Constants v-if="normalizedShelfStatus(song.shelf_status) === 2" :key="songId" :song-id="songId" :track="selectedTrack" />
           <div v-if="normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData" class="radar-card">
             <div class="section-title">
               <span class="title-icon radar-icon" aria-hidden="true">
@@ -599,7 +475,7 @@ useViewerSeo(() => ({
               <span>{{ copy.radar }}</span>
             </div>
             <template v-if="hasRadarData">
-              <svg class="radar-chart" viewBox="0 0 260 260" role="img" :aria-label="copy.radarAria">
+              <svg class="radar-chart" viewBox="-48 0 356 260" role="img" :aria-label="copy.radarAria">
                 <polygon
                   v-for="(polygon, index) in radarGridPolygons"
                   :key="`grid-${index}`"
@@ -651,209 +527,27 @@ useViewerSeo(() => ({
               <p>{{ copy.radarEmpty }}</p>
             </div>
           </div>
-        </section>
+          </details>
+          <details class="song-information">
+            <summary>{{ sectionCopy.info }}</summary>
+            <dl class="song-facts"><div><dt>{{ copy.subtitle }}</dt><dd>{{ song.subtitle || '—' }}</dd></div><div><dt>{{ copy.version }}</dt><dd>{{ formatList(song.version) }}</dd></div><div><dt>{{ copy.artists }}</dt><dd>{{ formatList(song.artists) }}</dd></div></dl>
+          </details>
+        </div>
 
-        <section class="detail-right">
-          <div class="player-card">
-            <div class="section-title">
-              <span class="title-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M9 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M17 15V6l-9 2.5v9.5"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </span>
-              <span>{{ copy.preview }}</span>
-            </div>
-            <div class="track-tabs">
-              <button
-                v-for="track in trackDefs"
-                :key="track.key"
-                type="button"
-                class="track-btn"
-                :class="{ active: selectedTrack === track.key }"
-                @click="selectedTrack = track.key"
-              >
-                <span class="track-label">
-                  <span>{{ track.label }}</span>
-                  <span class="track-star">{{ getTrackStarLabel(track.key) }}</span>
-                </span>
-              </button>
-            </div>
-
-            <div class="audio-grid">
-              <div class="audio-block">
-                <div class="audio-head">
-                  <strong>{{ copy.drum }}</strong>
-                </div>
-                <template v-if="hasBranchVariants">
-                  <div class="variant-audios">
-                    <div
-                      v-for="variant in activeBranchVariants"
-                      :key="`drum-${selectedTrack}-${variant.label}`"
-                      class="variant-item"
-                    >
-                      <span class="variant-label" :class="{ merged: variant.aliases.length }">
-                        {{ getVariantDisplayLabel(variant) }}
-                      </span>
-                      <audio
-                        :ref="(el) => setDrumAudioRef(`drum-${selectedTrack}-${variant.label}`, el)"
-                        :key="`drum-${songId}-${selectedTrack}-${variant.label}`"
-                        :src="getDrumVariantAudioUrl(variant)"
-                        class="audio-player"
-                        controls
-                        preload="none"
-                        @loadedmetadata="syncDrumState"
-                        @error="markAudioError(getAudioErrorKey('drum', variant))"
-                      />
-                      <p v-if="hasAudioError(getAudioErrorKey('drum', variant))" class="audio-error">{{ copy.audioMissing }}</p>
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <audio
-                    :ref="(el) => setDrumAudioRef(getAudioErrorKey('drum'), el)"
-                    :key="currentDrumAudio"
-                    :src="currentDrumAudio"
-                    class="audio-player"
-                    controls
-                    preload="none"
-                    @loadedmetadata="syncDrumState"
-                    @error="markAudioError(getAudioErrorKey('drum'))"
-                  />
-                  <p v-if="hasAudioError(getAudioErrorKey('drum'))" class="audio-error">{{ copy.baseAudioMissing }}</p>
-                </template>
-                <div class="volume-row">
-                  <button class="volume-btn" type="button" @click="drumMuted = !drumMuted">
-                    {{ drumMuted ? copy.unmute : copy.mute }}
-                  </button>
-                  <input v-model.number="drumVolume" class="volume-slider" type="range" min="0" max="1" step="0.01" />
-                  <span>{{ Math.round(drumVolume * 100) }}%</span>
-                </div>
-              </div>
-
-              <div class="audio-block">
-                <div class="audio-head">
-                  <strong>{{ copy.mix }}</strong>
-                </div>
-                <template v-if="hasBranchVariants">
-                  <div class="variant-audios">
-                    <div
-                      v-for="variant in activeBranchVariants"
-                      :key="`mix-${selectedTrack}-${variant.label}`"
-                      class="variant-item"
-                    >
-                      <span class="variant-label" :class="{ merged: variant.aliases.length }">
-                        {{ getVariantDisplayLabel(variant) }}
-                      </span>
-                      <audio
-                        :key="`mix-${songId}-${selectedTrack}-${variant.label}`"
-                        :src="getMixVariantAudioUrl(variant)"
-                        class="audio-player"
-                        controls
-                        preload="none"
-                        @error="markAudioError(getAudioErrorKey('mix', variant))"
-                      />
-                      <p v-if="hasAudioError(getAudioErrorKey('mix', variant))" class="audio-error">{{ copy.audioMissing }}</p>
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <audio
-                    :key="`mix-base-${songId}-${selectedTrack}`"
-                    :src="currentMixAudio"
-                    class="audio-player"
-                    controls
-                    preload="none"
-                    @error="markAudioError(getAudioErrorKey('mix'))"
-                  />
-                  <p v-if="hasAudioError(getAudioErrorKey('mix'))" class="audio-error">{{ copy.baseAudioMissing }}</p>
-                </template>
-              </div>
-
-              <div class="audio-block">
-                <div class="audio-head">
-                  <strong>{{ copy.pure }}</strong>
-                </div>
-                <audio
-                  :key="`pure-base-${songId}`"
-                  :src="currentPureAudio"
-                  class="audio-player"
-                  controls
-                  preload="none"
-                  @error="markAudioError(getAudioErrorKey('pure'))"
-                />
-                <p v-if="hasAudioError(getAudioErrorKey('pure'))" class="audio-error">{{ copy.pureAudioMissing }}</p>
-              </div>
-            </div>
+        <aside class="song-reading-rail">
+          <div class="song-personal">
+            <AccountSongScores v-if="accountUser" :items="selectedAccountScores" :pending="accountScoresPending" :unavailable="accountScores.unavailable" :empty-text="sectionCopy.empty" appearance="song-detail" />
+            <section v-else class="song-sign-in"><h2>{{ sectionCopy.personal }}</h2><p>{{ sectionCopy.signIn }}</p><button type="button" class="song-login" @click="goToChartUgcLogin">{{ sectionCopy.login }}</button></section>
+            <RecommendationGoalAction v-if="accountUser && typeof route.query.recommendation === 'string' && selectedDifficultyCode === Number(route.query.difficulty)" :key="route.query.recommendation" :token="route.query.recommendation" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
+            <NuxtLink v-if="accountUser" class="all-scores-link" :to="localePath('/account/songs')">{{ sectionCopy.allScores }}</NuxtLink>
           </div>
-
-          <div class="fumen-block">
-            <div class="fumen-head">
-              <div class="section-title">
-                <span class="title-icon chart-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M4 6h6v6H4z M14 6h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
-                <span>{{ copy.charts }}</span>
-              </div>
-              <a v-if="tjaBundleUrl" class="tja-bundle-btn" :href="tjaBundleUrl">
-                {{ copy.downloadTjaBundle }}
-              </a>
-            </div>
-            <div class="fumen-grid">
-              <div
-                v-for="item in fumenDefs"
-                :key="item.folder"
-                :class="['fumen-card', `fumen-${item.key}`]"
-              >
-                <span class="fumen-label">{{ item.label }}</span>
-                <span class="fumen-star">{{ getFumenStarLabel(item.key) }}</span>
-                <span class="fumen-combo">{{ copy.maxNotes }} {{ getFumenComboLabel(item.key) }}</span>
-                <a
-                  class="fumen-link-btn"
-                  :href="getFumenUrl(item.folder)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ copy.openChart }}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div v-if="tjaBundleUrl" class="fumen-block">
-            <div class="fumen-head">
-              <div class="section-title">{{ copy.practice }}</div>
-            </div>
-            <div class="fumen-grid">
-              <div v-for="item in fumenDefs" :key="item.key" :class="['fumen-card', `fumen-${item.key}`]">
-                <span class="fumen-label">{{ item.label }}</span>
-                <span class="fumen-star">{{ getFumenStarLabel(item.key) }}</span>
-                <span class="fumen-combo">{{ copy.maxNotes }} {{ getFumenComboLabel(item.key) }}</span>
-                <NuxtLink
-                  class="fumen-link-btn"
-                  :to="localePath(`/ourtaikoview/${songId}/${practiceDifficulty[item.key]}`)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >{{ copy.openPractice }}</NuxtLink>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
+          <ForumSongRelatedDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" appearance="song-detail" />
+        </aside>
+      </div>
+      <div class="song-community">
       <ChartUgcSection
         v-if="chartUgcSummary"
+        appearance="song-detail"
         :summary="chartUgcSummary"
         :viewer-state="chartUgcViewerState"
         :authenticated="Boolean(accountUser)"
@@ -879,516 +573,63 @@ useViewerSeo(() => ({
         @report="reportChartUgcTip"
         @login="goToChartUgcLogin"
       />
-
-      <RecommendationGoalAction v-if="accountUser && typeof route.query.recommendation === 'string' && selectedDifficultyCode === Number(route.query.difficulty)" :key="route.query.recommendation" :token="route.query.recommendation" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
-      <ForumSongRelatedDiscussions :song-id="songId" :difficulty-type="selectedDifficultyCode" />
-
-      <AccountSongScores
-        v-if="accountUser"
-        :items="accountScores.items"
-        :pending="accountScoresPending"
-        :unavailable="accountScores.unavailable"
-      />
-    </el-card>
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
 .song-detail-page {
-  display: grid;
-}
-
-.back-row {
-  margin-bottom: 14px;
-}
-
-.back-link {
-  color: #8b5a2b;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.detail-main {
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
-}
-
-.detail-left {
-  width: min(360px, 100%);
-  flex-shrink: 0;
-}
-
-.detail-middle {
-  width: min(320px, 100%);
-  flex-shrink: 0;
-}
-
-.cover-wrap {
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 16px 28px rgba(130, 95, 60, 0.2);
-}
-
-.cover-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-}
-
-.detail-left h2 {
-  margin: 16px 0 6px;
-  font-size: 24px;
-  line-height: 1.3;
-}
-
-.jp-name {
-  margin: 0 0 14px;
-  color: #7c6a58;
-}
-
-.meta-list {
-  display: grid;
-  gap: 10px;
-}
-
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(155, 122, 90, 0.2);
-}
-
-.meta-row span {
-  color: #786657;
-  font-size: 13px;
-}
-
-.meta-row strong {
-  text-align: right;
-  font-size: 13px;
-  word-break: break-all;
-}
-
-.detail-right {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  gap: 18px;
-  max-width: 760px;
-}
-
-.radar-card {
-  border-radius: 16px;
-  padding: 14px;
-  background: linear-gradient(145deg, rgba(236, 248, 255, 0.9), rgba(255, 255, 255, 0.96));
-  border: 1px solid rgba(95, 143, 191, 0.22);
-}
-
-.radar-icon {
-  background: rgba(76, 126, 179, 0.2);
-  color: #3b6898;
-}
-
-.radar-chart {
-  width: 100%;
-  max-width: 270px;
-  display: block;
-  margin: 4px auto 0;
-}
-
-.radar-grid {
-  fill: none;
-  stroke: rgba(120, 146, 176, 0.3);
-  stroke-width: 1;
-}
-
-.radar-axis {
-  stroke: rgba(102, 131, 163, 0.35);
-  stroke-width: 1;
-}
-
-.radar-area {
-  fill: rgba(75, 136, 216, 0.26);
-  stroke: #4a77aa;
-  stroke-width: 1.8;
-}
-
-.radar-point {
-  fill: #2f5f95;
-}
-
-.radar-label {
-  fill: #4d5f75;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.radar-meta {
-  margin-top: 2px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color: #5f7185;
-}
-
-.radar-values {
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 6px;
-}
-
-.radar-values li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color: #4a5f79;
-  border-bottom: 1px solid rgba(116, 145, 177, 0.18);
-  padding-bottom: 4px;
-}
-
-.radar-values strong {
-  color: #2f5f95;
-}
-
-.radar-empty {
-  min-height: 320px;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.radar-empty-image {
-  width: min(220px, 100%);
-}
-
-.radar-empty p {
-  margin: 0;
-  font-size: 13px;
-  color: #5c6f84;
-}
-
-.player-card {
-  border-radius: 16px;
-  padding: 16px;
-  background: linear-gradient(130deg, rgba(255, 243, 229, 0.85), rgba(255, 255, 255, 0.96));
-  border: 1px solid rgba(161, 127, 95, 0.2);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #6f4b2f;
-}
-
-.title-icon {
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: rgba(196, 127, 79, 0.2);
-  color: #9a6d47;
-  font-size: 14px;
-}
-
-.title-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.chart-icon {
-  background: rgba(88, 136, 197, 0.2);
-  color: #3c6aa6;
-}
-
-.track-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.track-btn {
-  border: 1px solid rgba(139, 107, 77, 0.35);
-  background: #fff;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #7d5a3d;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-
-.track-btn.active {
-  background: #9a6d47;
-  color: #fff;
-  border-color: #9a6d47;
-}
-
-.track-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.track-star {
-  font-size: 11px;
-  font-weight: 700;
-  color: inherit;
-}
-
-.audio-player {
-  width: 100%;
-  display: block;
-  height: 40px;
-  min-height: 40px;
-  max-height: 40px;
-  box-sizing: border-box;
-}
-
-.audio-grid {
-  display: grid;
-  gap: 12px;
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.audio-block {
-  border-radius: 12px;
-  border: 1px solid rgba(161, 127, 95, 0.25);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 10px;
-}
-
-.audio-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  font-size: 13px;
-}
-
-.audio-tag {
-  font-size: 11px;
-  line-height: 1;
-  border-radius: 999px;
-  padding: 4px 8px;
-  background: #fbe7d4;
-  color: #8a5a35;
-  font-weight: 700;
-}
-
-.mix-tag {
-  background: #e8f1fb;
-  color: #2d567e;
-}
-
-.volume-row {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #6f5d4c;
-}
-.volume-btn {
-  border: 1px solid rgba(139, 107, 77, 0.35);
-  background: #fff;
-  color: #7d5a3d;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-
-.volume-slider {
-  flex: 1;
-}
-
-.variant-audios {
-  display: grid;
-  gap: 4px;
-  margin-top: 2px;
-}
-
-.variant-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-auto-rows: max-content;
-  align-content: start;
-  gap: 4px;
-}
-
-.variant-item .audio-player {
-  margin: 0;
-}
-
-.variant-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6f5d4c;
-}
-
-.variant-label::before {
-  content: "";
-  width: 14px;
-  height: 7px;
-  border-left: 2px solid #c47f4f;
-  border-bottom: 2px solid #c47f4f;
-  border-radius: 0 0 0 5px;
-}
-
-.variant-label.merged::before {
-  border-top: 2px solid #c47f4f;
-  border-radius: 5px 0 0 5px;
-}
-
-.audio-error {
-  margin: 0;
-  font-size: 11px;
-  color: #c16a5a;
-}
-
-.fumen-block h3 {
-  margin: 0 0 12px;
-  font-size: 18px;
-}
-
-.fumen-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.fumen-head .section-title {
-  margin-bottom: 0;
-}
-
-.tja-bundle-btn {
-  text-decoration: none;
-  border-radius: 999px;
-  border: 1px solid rgba(83, 123, 186, 0.35);
-  background: linear-gradient(135deg, rgba(79, 140, 214, 0.12), rgba(255, 255, 255, 0.95));
-  color: #345f96;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 7px 12px;
-  white-space: nowrap;
-}
-
-.fumen-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.fumen-card {
-  color: #6f5d4c;
-  border-radius: 12px;
-  border: 1px solid rgba(161, 127, 95, 0.22);
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.82);
-  display: grid;
-  gap: 8px;
-  text-align: center;
-}
-
-.fumen-easy {
-  border-top: 4px solid #7ddfa0;
-  background: rgba(240, 252, 245, 0.85);
-}
-
-.fumen-normal {
-  border-top: 4px solid #7db2ff;
-  background: rgba(240, 246, 255, 0.85);
-}
-
-.fumen-hard {
-  border-top: 4px solid #ffb15e;
-  background: rgba(255, 246, 236, 0.85);
-}
-
-.fumen-oni {
-  border-top: 4px solid #ff7b7b;
-  background: rgba(255, 241, 241, 0.85);
-}
-
-.fumen-inner {
-  border-top: 4px solid #c08dff;
-  background: rgba(248, 241, 255, 0.85);
-}
-
-.fumen-card span {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.fumen-label {
-  color: #6f5d4c;
-}
-
-.fumen-star {
-  font-size: 12px;
-  color: #8a6b52;
-}
-
-.fumen-combo {
-  font-size: 12px;
-  color: #6f5d4c;
-}
-
-.fumen-link-btn {
-  text-decoration: none;
-  border-radius: 8px;
-  border: 1px solid rgba(139, 107, 77, 0.35);
-  background: #fff;
-  color: #7d5a3d;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 8px;
-}
-
-@media (max-width: 1240px) {
-  .detail-main {
-    flex-direction: column;
-  }
-
-  .detail-left {
-    width: 100%;
-    max-width: 460px;
-  }
-
-  .detail-middle,
-  .detail-right {
-    width: 100%;
-    max-width: 760px;
-  }
-
-  .audio-grid {
-    max-width: none;
-  }
+  --song-ink:#203a43; --song-muted:#526a72; --song-link:#007c86; --song-red:#c93e36; --song-on-red:#fff;
+  --song-paper:#fff; --song-tint:#edf6f4; --song-rule:#d5e2df; --song-control:#8aa3a7;
+  --viewer-text:var(--song-ink); --viewer-text-muted:var(--song-muted); --viewer-accent-strong:var(--song-link); --viewer-border:var(--song-rule); --viewer-surface:var(--song-paper);
+  --el-bg-color:var(--song-paper);--el-text-color-primary:var(--song-ink);--el-border-color:var(--song-control);
+  padding:24px 28px 32px; border:1px solid #e1e9e4; border-radius:18px;
+  background:linear-gradient(140deg,#fff9f5 0%,#f8fbf9 28%,#f0f8f7 100%); color:var(--song-ink); min-width:0;
+}
+.back-link{display:inline-flex;align-items:center;min-height:44px;margin-bottom:18px;color:var(--song-link);font-size:14px;text-decoration:none;}
+.song-heading{display:grid;grid-template-columns:112px minmax(0,1fr);gap:0 26px;align-items:center;}
+.cover-image{width:112px;height:112px;grid-row:1/3;border-radius:10px;overflow:hidden;}
+.song-title-group{min-width:0;}
+.song-category{margin:0 0 8px;color:var(--song-muted);font-size:14px;}
+h1{font-size:30px;line-height:1.4;font-weight:700;letter-spacing:-.02em;margin:0 0 10px;overflow-wrap:anywhere;}
+.song-title-version{white-space:nowrap;}
+.secondary-title{font-size:15px;line-height:1.7;color:var(--song-muted);margin:0;overflow-wrap:anywhere;}
+.song-meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;font-size:14px;line-height:1.6;color:var(--song-muted);}
+.song-reading-layout{display:grid;grid-template-columns:minmax(0,1fr) 264px;gap:40px;align-items:start;}
+.song-main-column{min-width:0;}
+.song-reading-rail{display:grid;gap:36px;min-width:0;align-content:start;}
+.song-personal{min-width:0;}
+.all-scores-link{display:inline-flex;align-items:center;min-height:44px;margin-top:12px;color:var(--song-link);font-size:14px;text-decoration:none;}
+.song-sign-in h2{font-size:18px;line-height:1.5;margin:0 0 16px;font-weight:600;}.song-sign-in p{font-size:15px;line-height:1.7;color:var(--song-muted);margin:0 0 12px;}
+.song-login{min-height:44px;padding:9px 16px;border:1px solid var(--song-control);border-radius:7px;color:var(--song-ink);background:var(--song-paper);font:inherit;font-size:15px;cursor:pointer;}
+.song-personal :deep(.recommendation-goal-action){margin-top:18px;}
+.song-analysis,.song-information{border-bottom:1px solid var(--song-rule);padding:6px 0;margin-top:16px;}
+summary{display:list-item;min-height:48px;align-content:center;cursor:pointer;font-size:15px;color:var(--song-ink);}
+.song-analysis[open],.song-information[open]{padding-bottom:24px;}
+.song-facts{font-size:14px;display:grid;gap:16px;margin:18px 0 0;}.song-facts>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:16px;}.song-facts dt{color:var(--song-muted);}.song-facts dd{margin:0;overflow-wrap:anywhere;}
+.radar-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px;margin-top:16px;}
+.section-title{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:17px;font-weight:600;margin-bottom:14px;}.title-icon{display:none;}
+.radar-chart{width:100%;max-width:356px;display:block;grid-row:2/5;}.radar-grid{fill:none;stroke:var(--song-rule);stroke-width:1;}.radar-axis{stroke:var(--song-rule);stroke-width:1;}.radar-area{fill:#007c8622;stroke:var(--song-link);stroke-width:1.8;}.radar-point{fill:var(--song-link);}.radar-label{font-size:14px;fill:var(--song-muted);}
+.radar-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--song-muted);}.radar-values{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;}.radar-values li{display:flex;justify-content:space-between;gap:12px;}.radar-values strong{font-weight:500;}.radar-empty{grid-column:1/-1;font-size:14px;color:var(--song-muted);}.radar-empty-image{display:none;}
+.song-community{margin-top:36px;}
+.back-link:focus-visible,.all-scores-link:focus-visible,summary:focus-visible,.song-login:focus-visible{outline:3px solid var(--song-link);outline-offset:3px;}
+:global(body.theme-dark) .song-detail-page{--song-ink:#e7f2f0;--song-muted:#b3cbc8;--song-link:#73d2d7;--song-red:#f38379;--song-on-red:#251817;--song-paper:#213638;--song-tint:#243c3d;--song-rule:#48605f;--song-control:#7f9d9d;background:linear-gradient(135deg,#2b302f,#192e30);border-color:var(--song-rule);}
+@media(max-width:1190px){.song-reading-layout{grid-template-columns:minmax(0,1fr);gap:32px}.song-reading-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}.song-detail-page{padding:22px}.song-heading h1{font-size:28px}}
+@media(max-width:767px){
+ .song-detail-page{padding:12px 0 24px;border:0;background:linear-gradient(160deg,#fff9f5,#f2f9f7 50%,#f8fbfa);border-radius:12px;}
+ .back-link{margin-bottom:14px;font-size:14px;}
+ .song-heading{grid-template-columns:64px minmax(0,1fr);gap:0 16px;align-items:start;}
+ .cover-image{width:64px;height:64px;grid-row:1;}
+ .song-category{font-size:14px;margin-bottom:6px;}
+ .song-heading h1{font-size:22px;line-height:1.5;margin-bottom:8px;}
+ .secondary-title{font-size:14px;line-height:1.65;}
+ .song-meta{grid-column:1/-1;font-size:14px;gap:6px 18px;margin-top:18px;}
+ .song-reading-rail{grid-template-columns:1fr;gap:32px;}
+ .song-reading-layout{gap:32px;}
+ .song-analysis,.song-information{margin-top:14px;}
+ .radar-card{grid-template-columns:1fr;gap:16px;}.radar-chart{grid-row:auto;margin:auto;}.radar-meta{grid-column:1;}.radar-values{margin:0;}
+ .song-facts>div{grid-template-columns:80px minmax(0,1fr);gap:12px;}
+ .song-community{margin-top:32px;}
 }
 </style>

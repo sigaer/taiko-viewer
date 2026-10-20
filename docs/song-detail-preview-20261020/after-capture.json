@@ -1,0 +1,482 @@
+[
+  {
+    "image": "after-1455-scores-zh-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "scores",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1455?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n魔王\n7★\n980,000\n通关\n良\n495\n可\n7\n不可\n1\n最大连击\n450\n连打\n25\n游玩\n12次\n更新于\n2026/10/07\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-guest-zh-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "guest",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1455?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n登录后查看这张谱面的成绩。\n\n登录\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-empty-zh-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "empty",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1455?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n这张谱面还没有同步到成绩记录\n\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-scores-zh-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "scores",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n魔王\n10★\n980,000\n通关\n良\n823\n可\n7\n不可\n1\n最大连击\n450\n连打\n25\n游玩\n12次\n更新于\n2026/10/07\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-guest-zh-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "guest",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n登录后查看这张谱面的成绩。\n\n登录\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-empty-zh-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "empty",
+    "locale": "zh",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/songs/1?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n这张谱面还没有同步到成绩记录\n\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-scores-ja-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "scores",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1455?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\nおに\n7★\n980,000\nクリア\n良\n495\n可\n7\n不可\n1\n最大コンボ\n450\n連打\n25\nプレイ\n12回\n更新\n2026/10/07\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1455-guest-ja-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "guest",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1455?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nログインして、この譜面の成績を確認できます。\n\nログイン\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1455-empty-ja-1440.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "empty",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1455?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nこの譜面の成績はまだ同期されていません\n\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-scores-ja-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "scores",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\nおに\n10★\n980,000\nクリア\n良\n823\n可\n7\n不可\n1\n最大コンボ\n450\n連打\n25\nプレイ\n12回\n更新\n2026/10/07\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-guest-ja-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "guest",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nログインして、この譜面の成績を確認できます。\n\nログイン\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-empty-ja-1440.png",
+    "version": "after",
+    "songId": 1,
+    "state": "empty",
+    "locale": "ja",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "route": "/ja/songs/1?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nこの譜面の成績はまだ同期されていません\n\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1455-scores-zh-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "scores",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1455?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n魔王\n7★\n980,000\n通关\n良\n495\n可\n7\n不可\n1\n最大连击\n450\n连打\n25\n游玩\n12次\n更新于\n2026/10/07\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-guest-zh-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "guest",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1455?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n登录后查看这张谱面的成绩。\n\n登录\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-empty-zh-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "empty",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1455?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 返回列表\n\n动漫音乐\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\n無敵的ハピネス！(SOS団5人Ver.)\n\nBPM 185\nID 1455\n发布日期 8/12/2026\n简单\n3★\n一般\n5★\n困难\n5★\n魔王\n7★\n里谱\n9★\n魔王 7★\n\n最大物量 503\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n这张谱面还没有同步到成绩记录\n\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-scores-zh-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "scores",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n魔王\n10★\n980,000\n通关\n良\n823\n可\n7\n不可\n1\n最大连击\n450\n连打\n25\n游玩\n12次\n更新于\n2026/10/07\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-guest-zh-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "guest",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n登录后查看这张谱面的成绩。\n\n登录\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1-empty-zh-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "empty",
+    "locale": "zh",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/songs/1?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 返回列表\n\n南梦宫原创音乐\n\n天竺2000\n\nてんぢく2000\n\nBPM 180\nID 1\n发布日期 7/25/2023\n简单\n4★\n一般\n7★\n困难\n8★\n魔王\n10★\n魔王 10★\n\n最大物量 831\n\n打开练习播放器 ↗\n查看完整谱面 ↗\n下载 TJA+OGG\n试听\n鼓点\n静音\n100%\n混音\n纯音乐\n谱面特征与分析\n歌曲资料\n我的成绩\n\n这张谱面还没有同步到成绩记录\n\n全部成绩 →\n相关讨论\n查看全部讨论\n\n还没有相关讨论\n\n讨论这张谱\n玩家谱面体验\n魔王\n玩家体感\n\n还没有人留下判断\n\n明显偏易\n偏易\n合理\n偏难\n明显偏难\n常见标签\n\n还没有常见标签\n\n添加标签\n玩家提示\n\n还没有人留下提示\n\n留下提示"
+  },
+  {
+    "image": "after-1455-scores-ja-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "scores",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1455?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\nおに\n7★\n980,000\nクリア\n良\n495\n可\n7\n不可\n1\n最大コンボ\n450\n連打\n25\nプレイ\n12回\n更新\n2026/10/07\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1455-guest-ja-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "guest",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1455?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nログインして、この譜面の成績を確認できます。\n\nログイン\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1455-empty-ja-390.png",
+    "version": "after",
+    "songId": 1455,
+    "state": "empty",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1455?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1455.png",
+      "width": 816,
+      "height": 1264
+    },
+    "text": "← 一覧へ戻る\n\nアニメ\n\n無敵的ハピネス！(SOS団5人Ver.)\n\n无敌的HAPPINESS!(SOS团5人Ver.)\n\nBPM 185\nID 1455\n公開日 8/12/2026\nかんたん\n3★\nふつう\n5★\nむずかしい\n5★\nおに\n7★\n裏譜面\n9★\nおに 7★\n\n最大ノーツ 503\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nこの譜面の成績はまだ同期されていません\n\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-scores-ja-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "scores",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1?previewState=scores",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\nおに\n10★\n980,000\nクリア\n良\n823\n可\n7\n不可\n1\n最大コンボ\n450\n連打\n25\nプレイ\n12回\n更新\n2026/10/07\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-guest-ja-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "guest",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1?previewState=guest",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nログインして、この譜面の成績を確認できます。\n\nログイン\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  },
+  {
+    "image": "after-1-empty-ja-390.png",
+    "version": "after",
+    "songId": 1,
+    "state": "empty",
+    "locale": "ja",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/ja/songs/1?previewState=empty",
+    "errors": [],
+    "overflow": false,
+    "chart": {
+      "src": "https://static.sakura-bot.cn/fumen/Oni/1.png",
+      "width": 816,
+      "height": 2032
+    },
+    "text": "← 一覧へ戻る\n\nナムコオリジナル\n\nてんぢく2000\n\n天竺2000\n\nBPM 180\nID 1\n公開日 7/25/2023\nかんたん\n4★\nふつう\n7★\nむずかしい\n8★\nおに\n10★\nおに 10★\n\n最大ノーツ 831\n\n練習プレイヤー ↗\n譜面画像を開く ↗\nTJA+OGG をダウンロード\n試聴\n打音\nミュート\n100%\nミックス\nインスト\n譜面の特徴と分析\n楽曲情報\n自分の成績\n\nこの譜面の成績はまだ同期されていません\n\nすべての成績 →\n関連ディスカッション\nすべてのディスカッションを見る\n\n関連する投稿はまだありません\n\nこの譜面について話す\nプレイヤーの譜面体験\nおに\n体感難度\n\nまだ体感は寄せられていません\n\nかなり易しい\n易しい\n適正\n難しい\nかなり難しい\nよく選ばれるタグ\n\nよく選ばれるタグはまだありません\n\nタグを追加\nプレイヤーのヒント\n\nまだヒントはありません\n\nヒントを残す"
+  }
+]

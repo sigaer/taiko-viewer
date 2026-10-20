@@ -1,0 +1,35 @@
+{
+  "baseCommit": "1c522c1d3e4aa6f5b34fa54bc1624252b697c1aa",
+  "branch": "design/song-detail-preview-20261020",
+  "appVersion": "0.86.2",
+  "unchangedCriticalFilesSha256": {
+    "taiko_viewer/assets/css/main.css": "910afa53ac754da6034ff89e3901fbfc2ef2206a0cde96529f377fd64b26783d",
+    "taiko_viewer/nuxt.config.ts": "9ce71110aef51e829cb1c4238d04f974c22467ad3f6b2fa309f8847c0c3426ae",
+    "taiko_viewer/package.json": "75a773eccb6ec8ab489402436004e6f54dc9aeba689d63585cca9aeeaebfe660",
+    "taiko_viewer/package-lock.json": "f49bb3e080f3a68c90219567aff05ad34f0cd0f1813b9d57d73a85198a365eeb",
+    "taiko_viewer/components/RecommendationGoalAction.vue": "3e65946fb098e9523a0ab3ecb04f069749f57fffbecdf64f6446750220f60277",
+    "taiko_viewer/composables/useSongBranchAudio.ts": "39ab552e89515c7b1023d9d7f3dc7f90581566eb210dd67390f923ebe9e3f4a2",
+    "taiko_viewer/composables/useChartUgc.ts": "f4562dd073acc3df3acae7b6804a7b2e698ec94001d4d794051f4b8392c51d31"
+  },
+  "baselineSongPageMatchesCommit": true,
+  "beforeViews": 24,
+  "afterViews": 24,
+  "sameInputsAndViewports": true,
+  "styleBlocksScoped": {
+    "taiko_viewer/pages/songs/[id].vue": true,
+    "taiko_viewer/components/ChartUgcSection.vue": true,
+    "taiko_viewer/components/account/AccountSongScores.vue": true,
+    "taiko_viewer/components/forum/SongRelatedDiscussions.vue": true,
+    "taiko_viewer/components/song/SongChartPreview.vue": true,
+    "taiko_viewer/components/song/SongAudioPreview.vue": true,
+    "taiko_viewer/components/song/SongDifficultyTabs.vue": true
+  },
+  "originalV1Preserved": true,
+  "data": "Public song DTOs and static media; synthetic private account/scores only",
+  "productionDeployment": false,
+  "aestheticStatus": "Awaiting final visual review",
+  "localLinksResolved": true,
+  "viewportPngDimensionsVerified": true,
+  "retainedInteractionChecks": 13,
+  "previewListenerStopped": true
+}

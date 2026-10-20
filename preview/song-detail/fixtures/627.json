@@ -1,0 +1,125 @@
+{
+  "song": {
+    "sort": 1208,
+    "id": 627,
+    "open_day": "7/25/2023",
+    "type": "南梦宫原创音乐",
+    "song_name_jp": "まださいたま2000",
+    "song_name": "還是埼玉2000",
+    "level_1": 5,
+    "level_2": 7,
+    "level_3": 8,
+    "level_4": 10,
+    "level_5": "-",
+    "isPlayed": true,
+    "bpm": "280",
+    "roll_times": [
+      [
+        0.410714,
+        0.410714
+      ],
+      [
+        0.410714,
+        0.410714
+      ],
+      [
+        0.410714,
+        0.410714
+      ],
+      [
+        0.410714,
+        0.410714
+      ],
+      null
+    ],
+    "roll_time": [
+      0.821428,
+      0.821428,
+      0.821428,
+      0.821428,
+      null
+    ],
+    "balloons": [
+      [
+        18,
+        50
+      ],
+      [
+        20,
+        60
+      ],
+      [
+        30,
+        78
+      ],
+      [],
+      null
+    ],
+    "balloon_num": [
+      68,
+      80,
+      108,
+      0,
+      null
+    ],
+    "version": [
+      "NAC",
+      "DF",
+      "NS2",
+      "NS1",
+      "NSRPG",
+      "PS4",
+      "3DS3",
+      "RC"
+    ],
+    "artists": [
+      "LindaAI-CUE"
+    ],
+    "max_combo": [
+      323,
+      444,
+      636,
+      999,
+      "-"
+    ],
+    "shelf_status": 0
+  },
+  "ratingEntries": [
+    {
+      "曲名": "まださいたま2000",
+      "score": 11.2,
+      "combo": 999,
+      "复合处理": 62.3,
+      "平均密度": 71.86,
+      "瞬间密度": 75.24,
+      "叩き分け": 44.27,
+      "BPM变化": 0,
+      "HS变化": 67.66,
+      "复杂鱼蛋处理": 62.3,
+      "体力": 71.86,
+      "高速处理": 75.24,
+      "节奏处理": 44.27,
+      "平均": 63.4175,
+      "url": "https://fumen-database.com/song/627-4/",
+      "bpm": "280",
+      "roll_time": "0.821秒",
+      "balloon_num": 0,
+      "level": 4,
+      "id": 627,
+      "song_name_cn": "還是埼玉2000"
+    }
+  ],
+  "branchAudioVariants": {
+    "ONI": [
+      {
+        "label": "普通",
+        "aliases": []
+      },
+      {
+        "label": "达人",
+        "aliases": []
+      }
+    ]
+  },
+  "tjaBundleUrl": "/api/content/songs/627/tja-package"
+}

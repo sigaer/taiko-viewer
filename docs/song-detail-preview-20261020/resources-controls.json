@@ -1,0 +1,16 @@
+{
+  "cgroup": "/development.slice/development-qa.slice/taiko-qa-00d766b4d36d.service",
+  "serverExitCode": 0,
+  "peakBytes": null,
+  "sampledPeakBytes": 1375928320,
+  "sampleIntervalMs": 200,
+  "samplingLimitation": "Sampling may miss sub-200ms peaks; child MaxRSS is a maximum, not an aggregate.",
+  "maxChildRssKiB": 818136,
+  "events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0
+  }
+}

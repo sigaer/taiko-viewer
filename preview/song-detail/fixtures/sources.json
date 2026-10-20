@@ -1,0 +1,11 @@
+{
+  "capturedOn": "2026-10-20",
+  "publicSongPayloads": [
+    "https://viewer.sakura-bot.cn/api/content/songs/1455",
+    "https://viewer.sakura-bot.cn/api/content/songs/1",
+    "https://viewer.sakura-bot.cn/api/content/songs/1357",
+    "https://viewer.sakura-bot.cn/api/content/songs/627"
+  ],
+  "privateData": "Synthetic account and scores only; no production user records.",
+  "mutations": "All non-GET/HEAD API requests are rejected with 405 by the opt-in preview server."
+}

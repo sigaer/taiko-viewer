@@ -1,0 +1,36 @@
+{
+  "scope": "Real song component preview only; no backend business suite or production writes",
+  "checks": [
+    "Long title, SSR/cached real image, initial personal record",
+    "All five difficulty selections retain matching chart/player/audio addresses",
+    "EDIT uses its own combo and personal record",
+    "Difficulty keyboard focus follows selection",
+    "Analysis and complete song metadata remain reachable",
+    "Existing public mix audio loads and advances in the native player",
+    "Download, discussion, difficulty vote, tags and tips entries retained",
+    "No EDIT: four choices and invalid EDIT deep link falls back to ONI",
+    "Goal source/difficulty conditions retained; preview POST is rejected with 405",
+    "Guest score action uses the existing localized login redirect",
+    "Real branch variants, drum mute and shared drum volume retained on mobile",
+    "Narrow chart keeps horizontal browsing while vertical wheel scroll reaches the page",
+    "Song tokens do not reach body or another route’s shell"
+  ],
+  "publicAudio": {
+    "duration": 99.73551,
+    "readyState": 4,
+    "currentTime": 0.228149,
+    "src": "https://static.sakura-bot.cn/mix/1455_ONI.mp3"
+  },
+  "apiMutations": [
+    {
+      "url": "http://127.0.0.1:3208/api/account/growth/goal/preview",
+      "method": "POST"
+    }
+  ],
+  "mutationResponse": 405,
+  "globalTokenScope": {
+    "body": "",
+    "chrome": ""
+  },
+  "browserErrors": []
+}

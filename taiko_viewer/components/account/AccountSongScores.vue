@@ -6,6 +6,8 @@ const props = defineProps<{
   items: AccountSongScore[];
   pending?: boolean;
   unavailable?: boolean;
+  appearance?: "song-detail";
+  emptyText?: string;
 }>();
 
 const { locale, t } = useI18n();
@@ -76,11 +78,11 @@ const formatDate = (value: string) => {
 </script>
 
 <template>
-  <section class="account-score-section" aria-labelledby="account-score-title">
+  <section class="account-score-section" :class="{ 'account-score-section--song-detail': appearance === 'song-detail' }" aria-labelledby="account-score-title">
     <header class="score-section-head">
-      <div class="score-title-mark" aria-hidden="true"><span></span><span></span></div>
+      <div v-if="appearance !== 'song-detail'" class="score-title-mark" aria-hidden="true"><span></span><span></span></div>
       <div>
-        <span class="score-eyebrow">{{ copy.eyebrow }}</span>
+        <span v-if="appearance !== 'song-detail'" class="score-eyebrow">{{ copy.eyebrow }}</span>
         <h3 id="account-score-title">{{ copy.title }}</h3>
       </div>
     </header>
@@ -89,8 +91,8 @@ const formatDate = (value: string) => {
       <el-skeleton :rows="3" animated />
     </div>
     <div v-else-if="!items.length" class="score-empty">
-      <span class="empty-drum" aria-hidden="true">♪</span>
-      <p>{{ unavailable ? copy.unavailable : copy.empty }}</p>
+      <span v-if="appearance !== 'song-detail'" class="empty-drum" aria-hidden="true">♪</span>
+      <p>{{ unavailable ? copy.unavailable : emptyText || copy.empty }}</p>
     </div>
     <div v-else class="score-lanes">
       <article v-for="item in items" :key="item.level" :class="['score-lane', `level-${item.level}`]">
@@ -203,4 +205,26 @@ const formatDate = (value: string) => {
   .score-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px 14px; }
   .score-empty { align-items: flex-start; text-align: left; }
 }
+</style>
+
+<style scoped>
+/* Only the song detail opts in; existing score-list presentation is unchanged. */
+.account-score-section--song-detail {margin:0;padding:4px 0 0;border:0;min-width:0;color:var(--song-ink);}
+.account-score-section--song-detail .score-section-head {margin-bottom:20px;}
+.account-score-section--song-detail h3 {font-size:18px;font-weight:600;line-height:1.5;color:var(--song-ink);}
+.account-score-section--song-detail .score-lane {display:grid;grid-template-columns:1fr;min-height:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;}
+.account-score-section--song-detail .difficulty-stamp {display:flex;gap:8px;align-items:baseline;padding:0 0 12px;color:var(--song-muted);}
+.account-score-section--song-detail .difficulty-stamp span,.account-score-section--song-detail .difficulty-stamp strong {font-size:14px;font-weight:500;}
+.account-score-section--song-detail .score-primary {padding:0;border:0;gap:8px;}
+.account-score-section--song-detail .score-primary>span {display:none;}
+.account-score-section--song-detail .score-primary strong {font-size:32px;line-height:1.3;font-weight:650;color:var(--song-ink);}
+.account-score-section--song-detail .score-primary em {position:static;padding:0;background:transparent;color:var(--song-muted);font-size:14px;font-weight:400;}
+.account-score-section--song-detail .judge-strip {grid-column:auto;padding:18px 0;border:0;gap:16px;}
+.account-score-section--song-detail .judge-strip div {display:flex;justify-content:flex-start;gap:6px;}
+.account-score-section--song-detail .judge-strip dt,.account-score-section--song-detail .judge-strip dd {font-size:14px;font-weight:400;}
+.account-score-section--song-detail .judge-strip dt,.account-score-section--song-detail .score-meta dt {color:var(--song-muted);}
+.account-score-section--song-detail .judge-strip dd,.account-score-section--song-detail .score-meta dd {color:var(--song-ink);}
+.account-score-section--song-detail .score-meta {grid-column:auto;padding:16px 0 0;border:0;border-top:1px solid var(--song-rule);grid-template-columns:1fr;gap:12px;}
+.account-score-section--song-detail .score-meta dt,.account-score-section--song-detail .score-meta dd {font-size:14px;font-weight:400;}
+.account-score-section--song-detail .score-empty,.account-score-section--song-detail .score-skeleton {padding:0;min-height:0;background:transparent;text-align:left;justify-content:start;font-size:15px;line-height:1.7;color:var(--song-muted);}
 </style>

@@ -24,6 +24,7 @@ const props = defineProps<{
   reportSavingById: Record<string, boolean>;
   reportErrorById: Record<string, string | null>;
   reportSuccessById: Record<string, boolean>;
+  appearance?: "song-detail";
 }>();
 
 const emit = defineEmits<{
@@ -183,10 +184,10 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
 </script>
 
 <template>
-  <section id="chart-ugc" class="chart-ugc-section" aria-labelledby="chart-ugc-title">
+  <section id="chart-ugc" class="chart-ugc-section" :class="{ 'chart-ugc-section--song-detail': appearance === 'song-detail' }" aria-labelledby="chart-ugc-title">
     <header class="chart-ugc-head">
       <div>
-        <span class="chart-ugc-eyebrow">PLAYER NOTES</span>
+        <span v-if="appearance !== 'song-detail'" class="chart-ugc-eyebrow">PLAYER NOTES</span>
         <h3 id="chart-ugc-title">{{ t("ugc.sectionTitle") }}</h3>
       </div>
       <span class="chart-ugc-difficulty">{{ difficultyLabel }}</span>
@@ -476,4 +477,21 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
 @media (prefers-reduced-motion: reduce) {
   .ugc-choice, .ugc-tag-option, .ugc-tag-editor-toggle, .ugc-tag-done { transition: none; }
 }
+</style>
+
+<style scoped>
+.chart-ugc-section--song-detail {margin:0;padding-top:28px;border-color:var(--song-rule);}
+.chart-ugc-section--song-detail .chart-ugc-head {margin-bottom:24px;}
+.chart-ugc-section--song-detail h3 {font-size:21px;font-weight:650;line-height:1.5;color:var(--song-ink);}
+.chart-ugc-section--song-detail .chart-ugc-difficulty {background:transparent;color:var(--song-muted);font-size:14px;font-weight:400;padding:0;}
+.chart-ugc-section--song-detail .chart-ugc-grid {gap:32px 36px;}
+.chart-ugc-section--song-detail .ugc-panel {border:0;border-radius:0;background:transparent;padding:0;}
+.chart-ugc-section--song-detail .ugc-panel h4 {font-size:17px;font-weight:600;color:var(--song-ink);}
+.chart-ugc-section--song-detail .ugc-cold-copy {font-size:14px;color:var(--song-muted);}
+.chart-ugc-section--song-detail button {font-size:14px;min-height:44px;}
+.chart-ugc-section--song-detail .ugc-control-meta {font-size:14px;flex-wrap:wrap;}
+.chart-ugc-section--song-detail .ugc-panel--tips {padding-top:24px;border-top:1px solid var(--song-rule);}
+.chart-ugc-section--song-detail .ugc-tip-primary {background:var(--song-paper);color:var(--song-link);border-color:var(--song-control);}
+.chart-ugc-section--song-detail .ugc-choice,.chart-ugc-section--song-detail .ugc-tag-editor-toggle {background:var(--song-paper);border-color:var(--song-control);color:var(--song-ink);}
+.chart-ugc-section--song-detail .ugc-tip-primary:focus-visible {outline:3px solid var(--song-link);outline-offset:3px;}
 </style>
