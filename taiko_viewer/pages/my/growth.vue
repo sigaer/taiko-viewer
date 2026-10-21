@@ -7,6 +7,7 @@ import { composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/grow
 import { formatScoreRank } from "~/utils/scoreRank";
 import { passportRangeChoices, selectPassportPeriod } from "~/utils/passportPresentation";
 import { composePassportMilestoneNarrative } from "~/utils/passportNarrative";
+import { resolveViewerError } from "~/utils/viewerError";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
@@ -35,9 +36,12 @@ const dimensions: SkillPassportTrendDimension[] = ["rating", ...GROWTH_DIMENSION
 const requestedRange = computed(() => ranges.includes(Number(route.query.range) as SkillPassportRangeDays) ? Number(route.query.range) as SkillPassportRangeDays : 90);
 const requestedDimension = computed(() => dimensions.includes(String(route.query.dimension) as SkillPassportTrendDimension) ? String(route.query.dimension) as SkillPassportTrendDimension : "rating");
 
+const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}`);
+const guard = useAccountRequestGuard();
 const passportKey = `growth-passport:${accountUser.value?.id || 'guest'}:${useRouter().currentRoute.value.path}`;
 const fetchPassport = async () => {
   if (!accountUser.value) return { payload: null, error: "" };
+  const context = identity.value, request = guard.capture();
   try {
     const range = requestedRange.value;
     const userId = accountUser.value.id, generation = bindingGeneration.value;
@@ -46,10 +50,11 @@ const fetchPassport = async () => {
     if (payload.range.requestedDays !== range) throw new Error("passport-range-mismatch");
     return {
       payload,
-      error: ""
+      error: "", context
     };
-  } catch {
-    return { payload: null, error: t("passport.loadFailed") };
+  } catch (error) {
+    const message = await resolveViewerError(error, t("passport.loadFailed"), t);
+    return guard.current(request) ? { payload: null, error: message, context } : { payload: null, error: "" };
   }
 };
 
@@ -60,8 +65,8 @@ const { data: passportState, pending, refresh, clear } = await useAsyncData(pass
 });
 onUnmounted(clear);
 watch([() => accountUser.value?.id, bindingGeneration], clear, { flush: "sync" });
-const passport = computed(() => selectPassportPeriod(passportState.value?.payload || null, requestedRange.value));
-const pageError = computed(() => passportState.value?.error || "");
+const passport = computed(() => selectPassportPeriod(passportState.value?.context === identity.value ? passportState.value.payload : null, requestedRange.value));
+const pageError = computed(() => passportState.value?.context === identity.value ? passportState.value.error : "");
 const selectedDimension = computed(() => requestedDimension.value === "rating" ? "accuracy_power" : requestedDimension.value);
 
 const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
@@ -84,11 +89,11 @@ const changeRange = async (range: SkillPassportRangeDays) => {
 const chooseDimension = (dimension: SkillPassportTrendDimension) => navigateTo(localePath({ path: "/my/growth", query: { ...route.query, dimension } }));
 const retry = () => refresh();
 
-const currentSkills = computed(() => GROWTH_DIMENSION_ORDER.flatMap(key => {
+const currentSkills = computed(() => GROWTH_DIMENSION_ORDER.map(key => {
   const value = passport.value?.current?.dimensions[key];
-  return typeof value === "number" && Number.isFinite(value) ? [{ key, value }] : [];
+  return { key, value: typeof value === "number" && Number.isFinite(value) ? value : null };
 }));
-const skillMax = computed(() => Math.max(1, ...currentSkills.value.map(item => item.value)));
+const skillMax = computed(() => Math.max(1, ...currentSkills.value.map(item => item.value ?? 0)));
 const businessDate = useState('growth-voice-business-date', () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
 const passportCopy = computed(() => composeRecommendationCopy({ profileId: `${accountUser.value?.id}:${passport.value?.profileId}`, businessDate: businessDate.value, focus: passport.value?.current?.focus || null, readiness: passport.value?.current?.readiness || 'insufficient', goalState: passport.value?.activeGoal ? 'active' : passport.value?.recentCompletedGoal ? 'completed' : 'none', activity: 'unknown' } as GrowthVoiceContext));
 const focusChangeText = computed(() => {
@@ -98,14 +103,14 @@ const focusChangeText = computed(() => {
 });
 const coverageText = computed(() => passport.value ? t(`passport.coverage.${passport.value.coverage.recentFactsState}`) : "");
 const expandedMilestones = ref(false);
-watch(requestedRange, () => { expandedMilestones.value = false; });
+watch([requestedRange, identity], () => { expandedMilestones.value = false; });
 const initialMilestones = computed(() => new Set(passport.value?.initialMilestoneIds || passport.value?.milestones.slice(0, 8).map(node => node.id)));
 const visibleMilestones = computed(() => passport.value?.milestones.filter(node => expandedMilestones.value || initialMilestones.value.has(node.id)) || []);
 const moreMilestones = computed(() => (passport.value?.milestones.length || 0) > initialMilestones.value.size);
 const narratives = computed(() => new Map((passport.value?.milestones || []).map(node => [node.id, composePassportMilestoneNarrative(node, (type, value) => type === 'rank-upgrade' ? formatScoreRank(value, locale.value) : value.toLocaleString(numberLocale.value))])));
 const narrative = (node: SkillPassportMilestone) => narratives.value.get(node.id)!;
 const evidenceText = (line: ReturnType<typeof composePassportMilestoneNarrative>['support'][number]) => t(line.key, { ...line.params, label: t(`passport.fact.${line.params.type}`) });
-const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? formatDay(milestone.day) : milestone.observedAt ? formatCaptured(milestone.observedAt) : "";
+const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? formatDay(milestone.day) : milestone.observedAt ? formatCaptured(milestone.observedAt) : t("passport.unknownDate");
 </script>
 
 <template>
@@ -122,28 +127,30 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 
     <section v-else-if="!passport" class="passport-state panel-card" role="alert">
       <h1>{{ t("passport.loadFailed") }}</h1>
+      <p v-if="pageError">{{ pageError }}</p>
+      <NuxtLink :to="localePath('/account/profile')">{{ t("growthProfileEntry") }}</NuxtLink>
       <button class="passport-button" type="button" @click="retry">{{ t("passport.retry") }}</button>
     </section>
 
     <template v-else>
-      <header class="passport-hero panel-card">
+      <header class="passport-hero">
         <div class="passport-hero__topline">
           <div>
-            <p class="passport-kicker">{{ t("passport.title") }}</p>
             <h1>{{ t("passport.currentTitle") }}</h1>
           </div>
           <NuxtLink :to="localePath('/my/weekly')" class="passport-weekly-link">{{ t("passport.weeklyEntry") }} <span aria-hidden="true">→</span></NuxtLink>
         </div>
         <p v-if="passport.coverage.measurementFrom" class="passport-recorded">{{ t("passport.recordedSince", { date: formatCaptured(passport.coverage.measurementFrom) }) }}</p>
         <div v-if="passport.current" class="passport-now">
-          <div v-if="passport.current.rating !== null" class="passport-rating"><span>Rating</span><strong>{{ passport.current.rating.toFixed(2) }}</strong></div>
+          <div class="passport-rating"><span>Rating</span><strong>{{ passport.current.rating === null ? t("passport.noValue") : passport.current.rating.toFixed(2) }}</strong></div>
           <p class="passport-focus">{{ t(passportCopy.observation.key) }}</p>
         </div>
-        <div v-if="currentSkills.length" class="passport-skills" :aria-label="t('passport.skillOverview')">
+        <p v-if="!passport.current" class="passport-limited">{{ t("passport.noCurrent") }}</p>
+        <div class="passport-skills" :aria-label="t('passport.skillOverview')">
           <div v-for="skill in currentSkills" :key="skill.key" class="passport-skill">
             <span>{{ dimensionLabel(skill.key) }}</span>
-            <i aria-hidden="true"><b :style="{ width: `${Math.max(4, skill.value / skillMax * 100)}%` }"></b></i>
-            <strong>{{ skill.value.toFixed(2) }}</strong>
+            <i v-if="skill.value !== null" aria-hidden="true"><b :style="{ width: `${Math.max(4, skill.value / skillMax * 100)}%` }"></b></i>
+            <strong :aria-label="skill.value === null ? t('passport.noValue') : undefined">{{ skill.value === null ? t("passport.noValue") : skill.value.toFixed(2) }}</strong>
           </div>
         </div>
       </header>
@@ -160,6 +167,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <p v-if="pending" class="passport-updating" role="status">{{ t('passport.updating') }}</p>
         <div v-else-if="pageError" class="passport-refresh-error" role="alert"><span>{{ pageError }}</span><button type="button" @click="retry">{{ t('passport.retry') }}</button></div>
 
+        <p class="passport-coverage">{{ t("passport.rangeActual", { range: requestedRange, days: passport.range.measurementDays ?? passport.segments.reduce((sum, segment) => sum + segment.points.length, 0) }) }}</p>
         <div class="passport-metrics">
           <section aria-labelledby="passport-rating-trend">
             <h3 id="passport-rating-trend">{{ t('passport.ratingTrend') }}</h3>
@@ -175,30 +183,19 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         </div>
       </section>
 
-      <section v-if="passport.focusTimeline.length" class="passport-section passport-focus-history" aria-labelledby="passport-focus-title">
-        <h2 id="passport-focus-title">{{ t("passport.focusTitle") }}</h2>
-        <p class="passport-coverage">{{ t("passport.focusMeaning") }}</p>
-        <p v-if="focusChangeText" class="passport-focus-note">{{ focusChangeText }}</p>
-        <ol>
-          <li v-for="run in passport.focusTimeline" :key="run.id" :class="{ 'is-current': run.current }">
-            <span aria-hidden="true"></span>
-            <div><strong>{{ focusLabel(run.focus) }}</strong><small>{{ formatDay(run.startedAt) }}<template v-if="run.endedAt !== run.startedAt"> — {{ formatDay(run.endedAt) }}</template></small></div>
-          </li>
-        </ol>
-      </section>
-
       <section class="passport-section passport-milestones" aria-labelledby="passport-milestones-title">
         <div class="passport-section__head"><h2 id="passport-milestones-title">{{ t("passport.milestonesTitle") }}</h2></div>
-        <p v-if="requestedRange > 90" class="passport-coverage">{{ t("passport.factCap") }}</p>
+        <p class="passport-coverage">{{ t("passport.factDates", { from: formatDay(passport.coverage.recentFactsFrom), to: formatDay(passport.coverage.recentFactsTo) }) }}</p>
         <div v-if="passport.milestones.length" id="passport-milestone-list" class="passport-milestone-list">
           <article v-for="milestone in visibleMilestones" :key="milestone.id" class="passport-milestone">
             <time><span v-if="milestone.observationOnly">{{ t('passport.observedDay') }} · </span>{{ milestoneDate(milestone) }}</time>
             <div>
+              <p class="passport-milestone-headline">{{ t(narrative(milestone).headline.key, narrative(milestone).headline.params) }}</p>
               <NuxtLink v-if="milestone.songId" :to="localePath({ path: `/songs/${milestone.songId}`, query: milestone.difficultyType ? { difficulty: String(milestone.difficultyType) } : undefined })"><strong>{{ milestone.title }}</strong></NuxtLink>
               <strong v-else>{{ milestone.title }}</strong>
               <span v-if="milestone.difficultyType">{{ t(difficultyLabelKey(milestone.difficultyType)) }}</span>
-              <p class="passport-milestone-headline">{{ t(narrative(milestone).headline.key, narrative(milestone).headline.params) }}</p>
               <p v-if="narrative(milestone).support.length" class="passport-milestone-evidence">{{ narrative(milestone).support.map(evidenceText).join(' · ') }}</p>
+              <details v-if="narrative(milestone).detail.length" class="passport-fact-details"><summary>{{ t('passport.moreEvidence') }}</summary><p v-for="(line, index) in narrative(milestone).detail" :key="index">{{ evidenceText(line) }}</p></details>
               <small v-if="milestone.goalCompleted && !milestone.observationOnly && milestone.primaryType !== 'goal-completed'">{{ t('passport.goalCompleted') }}</small>
             </div>
           </article>
@@ -208,13 +205,25 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
         <p v-if="passport.coverage.recentFactsState !== 'complete'" class="passport-coverage">{{ coverageText }}</p>
       </section>
 
+      <section v-if="passport.focusTimeline.length" class="passport-section passport-focus-history" aria-labelledby="passport-focus-title">
+        <h2 id="passport-focus-title">{{ t("passport.focusTitle") }}</h2>
+        <details class="passport-fact-details"><summary>{{ t("passport.learnMore") }}</summary><p>{{ t("passport.focusMeaning") }}</p></details>
+        <p v-if="focusChangeText" class="passport-focus-note">{{ focusChangeText }}</p>
+        <ol>
+          <li v-for="run in passport.focusTimeline" :key="run.id" :class="{ 'is-current': run.current }">
+            <span aria-hidden="true"></span>
+            <div><strong>{{ focusLabel(run.focus) }}</strong><small>{{ formatDay(run.startedAt) }}<template v-if="run.endedAt !== run.startedAt"> — {{ formatDay(run.endedAt) }}</template></small></div>
+          </li>
+        </ol>
+      </section>
+
       <section v-if="passport.activeGoal || passport.recentCompletedGoal || passport.currentNextAction" class="passport-section passport-next" aria-labelledby="passport-next-title">
         <h2 id="passport-next-title">{{ t("passport.nextTitle") }}</h2>
         <div v-if="passport.activeGoal" class="passport-goal">
-          <span>{{ t("passport.activeGoalTitle") }}</span><strong>{{ passport.activeGoal.title }}</strong><small>{{ t(`home.goal.types.${passport.activeGoal.goalType}`) }}</small>
+          <span>{{ t("passport.activeGoalTitle") }}</span><NuxtLink :to="localePath({ path: `/songs/${passport.activeGoal.songId}`, query: { difficulty: String(passport.activeGoal.difficultyType) } })"><strong>{{ passport.activeGoal.title }}</strong></NuxtLink><small>{{ t(`home.goal.types.${passport.activeGoal.goalType}`) }}</small>
         </div>
-        <div v-else-if="passport.recentCompletedGoal" class="passport-goal">
-          <span>{{ t("passport.completedGoalTitle") }}</span><strong>{{ passport.recentCompletedGoal.title }}</strong><small>{{ t(`home.goal.completedTypes.${passport.recentCompletedGoal.goalType}`) }}</small>
+        <div v-if="passport.recentCompletedGoal" class="passport-goal">
+          <span>{{ t("passport.completedGoalTitle") }}</span><NuxtLink :to="localePath({ path: `/songs/${passport.recentCompletedGoal.songId}`, query: { difficulty: String(passport.recentCompletedGoal.difficultyType) } })"><strong>{{ passport.recentCompletedGoal.title }}</strong></NuxtLink><small>{{ t(`home.goal.completedTypes.${passport.recentCompletedGoal.goalType}`) }}</small>
         </div>
         <p v-if="passport.currentNextAction" class="passport-next__focus">{{ t(passportCopy.invitation.key) }}</p>
         <div v-if="passport.currentNextAction?.todayPlan.items.length" class="passport-next__songs">
@@ -229,125 +238,79 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 </template>
 
 <style scoped>
-
-:global(body.theme-dark .passport-milestone .passport-milestone-evidence) { color:var(--viewer-text-muted); }
-
-.passport-metrics { display: grid; gap: 28px; }
-.passport-metrics section + section { padding-top: 20px; border-top: 1px solid var(--viewer-border); }
-.passport-metrics h3 { margin: 6px 0 12px; color:var(--viewer-text); font-size: 18px; }
-.passport-milestone .passport-milestone-headline { font-size: 17px; line-height: 1.55; }
-.passport-milestone .passport-milestone-evidence, .passport-fact-details { color:var(--viewer-text-muted); font-size: 12px; line-height: 1.7; font-weight: 400; }
-.passport-fact-details summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
-.passport-fact-details summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); }
-.passport-milestone > div > a, .passport-milestone > div > strong { font-size: 13px; overflow-wrap: anywhere; }
-
-.passport-page { width: 100%; display: grid; gap: clamp(30px, 5vw, 54px); padding-bottom: 52px; }
-.passport-hero { position: relative; overflow: hidden; display: grid; gap: 20px; padding: clamp(24px, 5vw, 54px); border-radius: 28px; }
-.passport-hero::after { content: ""; position: absolute; right: -90px; top: -100px; width: 270px; height: 270px; border: 1px solid var(--viewer-border); border-radius: 50%; box-shadow:none; pointer-events: none; }
-.passport-hero__topline, .passport-section__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-.passport-kicker { margin: 0 0 7px; color:var(--viewer-accent-strong); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-.passport-hero h1, .passport-section h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); }
-.passport-hero h1 { font-size: clamp(31px, 5vw, 52px); line-height: 1.04; letter-spacing: -.035em; }
-.passport-weekly-link { position: relative; z-index: 1; color:var(--viewer-accent-strong); font-size: 13px; font-weight: 800; text-decoration: none; }
-.passport-weekly-link:hover, .passport-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.passport-recorded { margin: 0; color:var(--viewer-text-muted); font-size: 13px; }
-.passport-now { display: flex; align-items: flex-end; gap: clamp(20px, 5vw, 52px); }
-.passport-rating { display: grid; gap: 3px; }
-.passport-rating span { color:var(--viewer-text-muted); font-size: 12px; font-weight: 700; }
-.passport-rating strong { color:var(--viewer-text); font: 800 clamp(38px, 6vw, 64px)/.95 var(--viewer-display-font); font-variant-numeric: tabular-nums; }
-.passport-focus { max-width: 28ch; margin: 0 0 4px; color:var(--viewer-accent-strong); font: 800 clamp(18px, 2.4vw, 26px)/1.35 var(--viewer-display-font); }
-.passport-limited { margin: 0; color:var(--viewer-text-muted); line-height: 1.6; }
-.passport-skills { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; padding-top: 20px; border-top: 1px solid var(--viewer-border); }
-.passport-skill { display: grid; grid-template-columns: minmax(72px, auto) minmax(50px, 1fr) 44px; align-items: center; gap: 10px; min-width: 0; }
-.passport-skill span { overflow: hidden; color:var(--viewer-text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.passport-skill i { height: 2px; overflow: hidden; border-radius: 99px; background:var(--viewer-surface-subtle); }
-.passport-skill b { display: block; height: 100%; border-radius: inherit; background:var(--viewer-accent-strong); }
-.passport-skill strong { color:var(--viewer-text); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
-.passport-section { min-width: 0; padding: 0 clamp(3px, 3vw, 28px); }
-.passport-section h2 { font-size: clamp(22px, 3vw, 30px); line-height: 1.2; }
-.passport-section__head > span { color:var(--viewer-text-muted); font-size: 12px; }
-.passport-range, .passport-dimensions { display: flex; flex-wrap: wrap; gap: 7px; }
-.passport-controls { display: grid; gap: 8px; margin: 18px 0 14px; }
-.passport-range button, .passport-dimensions button { min-height: 44px; padding: 0 11px; border: 0; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; color:var(--viewer-text-muted); background:transparent; cursor: pointer; font: inherit; font-size: 12px; }
-.passport-range button[aria-pressed="true"], .passport-dimensions button[aria-pressed="true"] { border-bottom-color:var(--viewer-accent-strong); color:var(--viewer-accent-strong); font-weight: 700; background:var(--viewer-surface-subtle); }
-.passport-range button:focus-visible, .passport-dimensions button:focus-visible, .passport-chart circle:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-dimensions { gap: 3px; }
-.passport-dimensions button { padding-inline: 9px; }
-.passport-focus-note, .passport-updating { margin: 8px 0 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.6; }
-.passport-updating { min-height: 24px; }
-.passport-refresh-error { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color:var(--viewer-text-muted); }
-.passport-refresh-error button { min-height: 44px; padding: 0 12px; background:transparent; border: 1px solid var(--viewer-border); border-radius: 8px; color:var(--viewer-accent-strong); cursor: pointer; }
-.passport-refresh-error button:focus-visible, .passport-segment-note summary:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-more { min-height: 44px; padding: 0 16px; margin-top: 16px; border: 1px solid var(--viewer-border); border-radius: 12px; background:var(--viewer-surface); color:var(--viewer-accent-strong); font: inherit; font-weight: 700; cursor: pointer; }
-.passport-range button:focus-visible, .passport-dimensions button:focus-visible, .passport-more:focus-visible, .passport-segment-note summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.passport-change { margin: 18px 0 0; color:var(--viewer-text); font: 700 17px/1.55 var(--viewer-display-font); }
-.passport-segment-note { margin-top: 14px; color:var(--viewer-text-muted); font-size: 12px; }
-.passport-segment-note summary { min-height: 44px; display: flex; align-items: center; color:var(--viewer-accent-strong); cursor: pointer; font-weight: 800; }
-.passport-segment-note p { margin: 0; line-height: 1.6; }
-.passport-focus-history, .passport-milestones, .passport-next { padding-top: 28px; border-top: 1px solid var(--viewer-border); }
-.passport-focus-history ol { display: flex; overflow-x: auto; gap: 0; margin: 22px 0 0; padding: 0 0 8px; list-style: none; scrollbar-width: thin; }
-.passport-focus-history li { position: relative; flex: 1 0 150px; display: grid; grid-template-columns: 22px 1fr; gap: 8px; }
-.passport-focus-history li::before { content: ""; position: absolute; top: 10px; left: 11px; right: -11px; height: 1px; background:var(--viewer-border); }
-.passport-focus-history li:last-child::before { right: 100%; }
-.passport-focus-history li > span { z-index: 1; width: 20px; height: 20px; box-sizing: border-box; border: 5px solid var(--viewer-surface); border-radius: 50%; background:var(--viewer-text-muted); box-shadow:0 0 0 1px var(--viewer-border); }
-.passport-focus-history li.is-current > span { background:var(--viewer-accent-strong); }
-.passport-focus-history li div { display: grid; gap: 4px; }
-.passport-focus-history strong { color:var(--viewer-text); font-size: 13px; }
-.passport-focus-history small { color:var(--viewer-text-muted); font-size: 11px; }
-.passport-milestone-list { position: relative; display: grid; margin-top: 20px; }
-.passport-milestone-list::before { content: ""; position: absolute; top: 16px; bottom: 16px; left: 92px; width: 1px; background:var(--viewer-border); }
-.passport-milestone { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 30px; min-height: 86px; padding: 13px 0; }
-.passport-milestone::before { content: ""; position: absolute; left: 87px; top: 20px; width: 11px; height: 11px; border: 3px solid var(--viewer-surface); border-radius: 50%; background:var(--viewer-accent-strong); box-shadow:0 0 0 1px var(--viewer-border); }
-.passport-milestone time { color:var(--viewer-text-muted); font-size: 11px; text-align: right; }
-.passport-milestone > div { min-width: 0; display: grid; gap: 3px; }
-.passport-milestone a { min-width: 0; color:var(--viewer-text); text-decoration: none; overflow-wrap: anywhere; }
-.passport-milestone a:hover, .passport-milestone a:focus-visible { color:var(--viewer-accent-strong); }
-.passport-milestone span, .passport-milestone small { color:var(--viewer-text-muted); font-size: 12px; }
-.passport-milestone p { margin: 3px 0 0; color:var(--viewer-text); font-weight: 700; }
-.passport-milestone small { color:var(--viewer-accent-strong); }
-.passport-coverage { margin: 18px 0 0; color:var(--viewer-text-muted); font-size: 12px; }
-.passport-empty { display: grid; gap: 6px; margin: 20px 0; color:var(--viewer-text-muted); line-height: 1.6; }
-.passport-empty strong { color:var(--viewer-text); font-size: 18px; }
-.passport-goal { display: grid; gap: 5px; margin-top: 18px; padding-left: 16px; border-left: 3px solid var(--viewer-accent-strong); }
-.passport-goal span, .passport-goal small { color:var(--viewer-text-muted); font-size: 12px; }
-.passport-goal strong { color:var(--viewer-text); font-size: 17px; }
-.passport-next__focus { margin: 20px 0 10px; color:var(--viewer-text); font: 700 18px/1.5 var(--viewer-display-font); }
-.passport-next__songs { display: grid; gap: 7px; }
-.passport-next__songs a { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 11px; min-height: 62px; padding: 8px; border-radius: 13px; color:var(--viewer-text); text-decoration: none; }
-.passport-next__songs a:hover, .passport-next__songs a:focus-visible { background:var(--viewer-surface-subtle); }
-.passport-next__songs :deep(img) { width: 46px; height: 46px; border-radius: 9px; }
-.passport-next__songs span { min-width: 0; display: grid; gap: 2px; }
-.passport-next__songs strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.passport-page { width:100%; display:grid; gap:32px; padding-bottom:32px; }
+.passport-hero { display:grid; gap:14px; padding:20px; background:var(--viewer-surface); border-radius:14px; }
+.passport-hero__topline,.passport-section__head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.passport-hero h1,.passport-section h2 { margin:0; font-size:21px; line-height:1.4; color:var(--viewer-text); }
+.passport-weekly-link,.passport-goal a { color:var(--viewer-accent-strong); text-decoration:none; }
+.passport-weekly-link { min-height:44px; display:inline-flex; align-items:center; font-size:14px; }
+.passport-recorded,.passport-coverage { margin:0; font-size:13px; line-height:1.6; color:var(--viewer-text-muted); }
+.passport-now { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+.passport-rating { display:grid; gap:4px; }
+.passport-rating span { color:var(--viewer-text-muted); font-size:13px; }
+.passport-rating strong { font-size:36px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.passport-focus { flex:1; min-width:180px; margin:0; color:var(--viewer-text); line-height:1.6; }
+.passport-skills { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px 24px; border-top:1px solid var(--viewer-border); padding-top:14px; }
+.passport-skill { display:grid; grid-template-columns:1fr auto; gap:5px 8px; min-width:0; }
+.passport-skill span { font-size:13px; color:var(--viewer-text-muted); }
+.passport-skill strong { grid-column:2; grid-row:1; font-size:14px; font-variant-numeric:tabular-nums; }
+.passport-skill i { grid-column:1/-1; height:3px; background:var(--viewer-surface-subtle); }
+.passport-skill b { display:block; height:100%; background:var(--viewer-accent-strong); }
+.passport-section { min-width:0; }
+.passport-controls { margin:12px 0 8px; }
+.passport-range,.passport-dimensions { display:flex; flex-wrap:wrap; gap:4px; }
+.passport-range button,.passport-dimensions button { min-height:44px; padding:0 12px; border:0; border-bottom:2px solid transparent; border-radius:6px 6px 0 0; color:var(--viewer-text-muted); background:transparent; cursor:pointer; font:inherit; font-size:14px; }
+.passport-range button[aria-pressed=true],.passport-dimensions button[aria-pressed=true] { color:var(--viewer-accent-strong); border-bottom-color:var(--viewer-accent-strong); background:var(--viewer-surface-subtle); font-weight:700; }
+.passport-page button:focus-visible,.passport-page a:focus-visible,.passport-page summary:focus-visible { outline:2px solid var(--viewer-accent-strong); outline-offset:3px; }
+.passport-metrics { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:18px; }
+.passport-metrics section { min-width:0; }
+.passport-metrics h3 { font-size:16px; margin:0 0 8px; }
+.passport-milestones,.passport-focus-history,.passport-next { padding-top:24px; border-top:1px solid var(--viewer-border); }
+.passport-milestones .passport-coverage { margin-top:10px; }
+.passport-milestone-list { margin-top:12px; }
+.passport-milestone { display:grid; grid-template-columns:90px minmax(0,1fr); gap:16px; padding:16px 0; border-bottom:1px solid var(--viewer-border); }
+.passport-milestone:last-child { border-bottom:0; }
+.passport-milestone time { font-size:12px; line-height:1.6; color:var(--viewer-text-muted); }
+.passport-milestone > div { display:grid; gap:5px; min-width:0; }
+.passport-milestone-headline { margin:0; font-size:17px; font-weight:700; }
+.passport-milestone a { color:var(--viewer-accent-strong); text-decoration:none; overflow-wrap:anywhere; }
+.passport-milestone a strong,.passport-milestone > div > strong { font-size:14px; font-weight:500; }
+.passport-milestone span,.passport-milestone small,.passport-milestone-evidence { margin:0; font-size:13px; line-height:1.6; color:var(--viewer-text-muted); }
+.passport-fact-details { color:var(--viewer-text-muted); font-size:13px; }
+.passport-fact-details summary { min-height:44px; align-content:center; cursor:pointer; }
+.passport-fact-details p { line-height:1.6; margin:0 0 8px; }
+.passport-focus-note { font-size:14px; line-height:1.6; }
+.passport-focus-history ol { display:flex; overflow-x:auto; gap:20px; margin:12px 0 0; padding:0 0 8px; list-style:none; }
+.passport-focus-history li { flex:0 0 auto; border-left:2px solid var(--viewer-border); padding-left:12px; }
+.passport-focus-history li.is-current { border-color:var(--viewer-accent-strong); }
+.passport-focus-history li div { display:grid; gap:4px; }
+.passport-focus-history strong { font-size:14px; }
+.passport-focus-history small { font-size:12px; color:var(--viewer-text-muted); }
+.passport-goal { display:grid; gap:5px; margin-top:16px; }
+.passport-goal span,.passport-goal small { font-size:13px; color:var(--viewer-text-muted); }
+.passport-next__focus { margin:16px 0 8px; font-size:16px; }
+.passport-next__songs { display:grid; gap:8px; }
+.passport-next__songs a { display:grid; grid-template-columns:46px minmax(0,1fr) auto; align-items:center; gap:12px; min-height:62px; padding:8px 0; color:var(--viewer-text); text-decoration:none; }
+.passport-next__songs :deep(img) { width:46px; height:46px; border-radius:8px; }
+.passport-next__songs span { display:grid; gap:4px; min-width:0; overflow-wrap:anywhere; }
 .passport-next__songs small { color:var(--viewer-text-muted); }
-.passport-next__songs i { color:var(--viewer-accent-strong); font-style: normal; }
-.passport-state { display: grid; justify-items: start; gap: 16px; padding: 28px; }
-.passport-state h1 { margin: 0; color:var(--viewer-text); font-size: 25px; }
-.passport-button { min-height: 44px; display: inline-flex; align-items: center; padding: 0 17px; border: 0; border-radius: 12px; color:var(--viewer-on-primary); background:var(--viewer-primary); cursor: pointer; text-decoration: none; font: inherit; font-weight: 800; }
-.passport-loading { display: grid; gap: 18px; padding: 28px; }
-.passport-loading__line { display: block; height: 118px; border-radius: 20px; }
-:global(body.theme-dark .passport-hero h1), :global(body.theme-dark .passport-section h2), :global(body.theme-dark .passport-rating strong), :global(body.theme-dark .passport-skill strong), :global(body.theme-dark .passport-change), :global(body.theme-dark .passport-focus-history strong), :global(body.theme-dark .passport-milestone a), :global(body.theme-dark .passport-milestone p), :global(body.theme-dark .passport-goal strong), :global(body.theme-dark .passport-next__focus), :global(body.theme-dark .passport-next__songs a), :global(body.theme-dark .passport-state h1), :global(body.theme-dark .passport-empty strong) { color:var(--viewer-text); }
-:global(body.theme-dark .passport-recorded), :global(body.theme-dark .passport-rating span), :global(body.theme-dark .passport-skill span), :global(body.theme-dark .passport-chart-summary), :global(body.theme-dark .passport-chart text), :global(body.theme-dark .passport-section__head > span), :global(body.theme-dark .passport-focus-history small), :global(body.theme-dark .passport-milestone time), :global(body.theme-dark .passport-milestone span), :global(body.theme-dark .passport-coverage), :global(body.theme-dark .passport-empty), :global(body.theme-dark .passport-limited), :global(body.theme-dark .passport-next__songs small) { color:var(--viewer-text-muted); }
-:global(body.theme-dark .passport-chart-detail), :global(body.theme-dark .passport-focus-history li > span), :global(body.theme-dark .passport-milestone::before) { background:var(--viewer-surface-subtle); }
-:global(body.theme-dark .passport-more) { color:var(--viewer-primary); background:var(--viewer-surface-subtle); }
-:global(body.theme-dark .passport-kicker), :global(body.theme-dark .passport-focus), :global(body.theme-dark .passport-weekly-link), :global(body.theme-dark .passport-milestone small), :global(body.theme-dark .passport-next__songs i) { color:var(--viewer-primary); }
-:global(body.theme-dark .passport-chart__segment path) { stroke: var(--viewer-primary); }
-:global(body.theme-dark .passport-chart circle:not(.passport-chart__hit)) { fill: var(--viewer-text); stroke: var(--viewer-primary); }
-@media (max-width: 680px) {
-  .passport-page { gap: 32px; padding-bottom: 104px; }
-  .passport-hero { padding: 24px 20px 30px; border-radius: 21px; }
-  .passport-hero__topline, .passport-section__head { align-items: flex-start; flex-direction: column; }
-  .passport-now { align-items: flex-start; flex-direction: column; gap: 14px; }
-  .passport-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
-  .passport-skill { grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
-  .passport-skill i { grid-column: 1 / -1; grid-row: 2; }
-  .passport-section { padding-inline: 2px; }
-  .passport-range { width: 100%; }
-  .passport-range button { flex: 1; padding-inline: 8px; }
-  .passport-dimensions { padding-bottom: 7px; }
-  .passport-chart { min-height: 210px; }
-  .passport-milestone-list::before { left: 70px; }
-  .passport-milestone { grid-template-columns: 57px minmax(0, 1fr); gap: 26px; }
-  .passport-milestone::before { left: 65px; }
+.passport-next__songs i { color:var(--viewer-accent-strong); font-style:normal; }
+.passport-more,.passport-refresh-error button { min-height:44px; padding:0 14px; border:1px solid var(--viewer-border); border-radius:8px; background:var(--viewer-surface); color:var(--viewer-accent-strong); cursor:pointer; font:inherit; }
+.passport-refresh-error { display:flex; flex-wrap:wrap; align-items:center; gap:12px; color:var(--viewer-danger); }
+.passport-state { display:grid; gap:16px; justify-items:start; padding:24px; }
+.passport-state h1 { font-size:24px; margin:0; }
+.passport-state p { margin:0; line-height:1.6; }
+.passport-button { min-height:44px; display:inline-flex; align-items:center; padding:0 16px; border:0; border-radius:8px; background:var(--viewer-primary); color:var(--viewer-on-primary); cursor:pointer; text-decoration:none; font:inherit; }
+.passport-loading { display:grid; gap:16px; }
+.passport-loading__line { display:block; height:100px; border-radius:12px; }
+.passport-empty,.passport-limited,.passport-updating { color:var(--viewer-text-muted); line-height:1.6; }
+@media(max-width:760px) {
+ .passport-hero { padding:16px; }
+ .passport-skills { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+ .passport-metrics { grid-template-columns:1fr; gap:24px; }
+ .passport-metrics section+section { border-top:1px solid var(--viewer-border); padding-top:20px; }
+ .passport-range button { flex:1; padding-inline:6px; }
+ .passport-dimensions button { padding-inline:9px; }
+ .passport-milestone { grid-template-columns:1fr; gap:6px; }
 }
-@media (prefers-reduced-motion: reduce) { .passport-range button, .passport-dimensions button { scroll-behavior: auto; } }
 </style>

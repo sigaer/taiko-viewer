@@ -1,4 +1,5 @@
 {
+  "growthProfileEntry": "アカウントと連携",
   "site": {
     "title": "Sakura Taiko Viewer",
     "shortTitle": "Taiko Viewer",
@@ -312,6 +313,11 @@
     }
   },
   "passport": {
+    "noValue": "未記録",
+    "noCurrent": "現在の力の記録はまだありません。",
+    "unknownDate": "日付不明",
+    "factDates": "スコアの記録 · {from} — {to}",
+
     "learnMore": "詳しく見る",
     "title": "成長の記録",
     "description": "スコアや練習で意識したこと、これまでの変化を振り返る。",
@@ -427,6 +433,13 @@
     }
   },
   "weekly": {
+    "refresh": "更新",
+    "recordedTotals": "確認できた記録",
+    "currentAdvice": "現在のおすすめ",
+    "noAdvice": "現在おすすめできる曲はありません。",
+    "totals": {"distinctCharts": "記録のある譜面", "pb": "PB", "fc": "新フルコンボ", "df": "新全良", "rankUpgrade": "評価アップ", "completedGoals": "達成した目標"},
+    "measurementReasons": {"algorithm-mismatch": "週初と週末では力の計算アルゴリズムが異なるため、差分を表示していません。", "model-mismatch": "記録のモデル改訂が異なるため、差分を表示していません。", "measurement-version-mismatch": "力の記録バージョンが異なるため、差分を表示していません。"},
+
     "title": "この一週間",
     "description": "この一週間のスコアと練習の記録を振り返る。",
     "currentWeek": "今週 · 今日まで",

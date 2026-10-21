@@ -1,3 +1,4 @@
+import { growthData } from '../utils/growth-fixtures';
 import { batch2Data, batch2Image } from '../utils/batch2-fixtures';
 import { createError, defineEventHandler, getCookie, getHeader, getMethod, getQuery, getRequestURL, readBody, setHeader, sendRedirect, setCookie } from 'h3';
 import { details as songs, user, extraReadonly, profile, publicSongs, recommendations, songScores } from '../utils/site-fixtures';
@@ -5,7 +6,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow'].includes(state)) {
+    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
@@ -37,6 +38,12 @@ export default defineEventHandler(async event => {
     if (state === 'slow') await new Promise(resolve=>setTimeout(resolve,1800));
     setHeader(event,'content-type','image/svg+xml');
     return batch2Image(path,getQuery(event));
+  }
+  if (path === '/api/account/growth/passport' || path === '/api/account/growth/weekly') {
+    if (state === 'unbound') throw createError({statusCode:400,statusMessage:'请先绑定鼓众 ID'});
+    if (state === 'growth-failure') throw createError({statusCode:503,statusMessage:'Synthetic growth read failure'});
+    if (state === 'slow') await new Promise(resolve => setTimeout(resolve, 1800));
+    return growthData(path, getQuery(event), state);
   }
   const batch=batch2Data(path,getQuery(event),state);
   if(batch!==undefined)return batch;

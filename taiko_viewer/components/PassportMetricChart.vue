@@ -60,7 +60,7 @@ const summary = computed(() => {
           <path v-if="run.points.length >= 2" :d="path(run.points)" />
           <g v-for="point in run.points" :key="point.id">
             <circle :cx="x(point.day)" :cy="y(point.value)" r="4" aria-hidden="true" :class="{ 'is-selected': selected?.id === point.id }" />
-            <circle class="passport-chart__hit" :cx="x(point.day)" :cy="y(point.value)" r="22" tabindex="0" role="button" :aria-label="pointLabel(point)" @pointermove="selectedId = point.id" @click="selectedId = point.id" @focus="selectedId = point.id" @keydown.enter.prevent="selectedId = point.id" @keydown.space.prevent="selectedId = point.id" />
+            <circle class="passport-chart__hit" :cx="x(point.day)" :cy="y(point.value)" r="22" tabindex="0" role="button" :aria-label="pointLabel(point)" :aria-pressed="selected?.id === point.id" @pointermove="selectedId = point.id" @click="selectedId = point.id" @focus="selectedId = point.id" @keydown.left.prevent="stepPoint(-1)" @keydown.right.prevent="stepPoint(1)" @keydown.enter.prevent="selectedId = point.id" @keydown.space.prevent="selectedId = point.id" />
           </g>
         </g>
         <text x="44" y="218">{{ date(from) }}</text><text :x="chartWidth - 48" y="218" text-anchor="end">{{ date(to) }}</text>
