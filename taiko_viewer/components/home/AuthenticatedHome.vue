@@ -196,12 +196,12 @@ const trackClick = (event: string, source: string) => {
 }
 .personal-button:hover { transform: translateY(-2px); }
 .personal-button:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
-.personal-button--primary { color:#fff; background:var(--personal-accent); box-shadow:none; }
+.personal-button--primary { color:var(--viewer-on-primary); background:var(--personal-accent); box-shadow:none; }
 .personal-button--secondary { color:var(--personal-accent); border: 1px solid var(--viewer-border); background:var(--viewer-surface-subtle); }
 
 .recommendation-card { display: grid; align-content: space-between; gap: 20px; min-height: 330px; padding: clamp(20px, 3.5vw, 32px); }
 .recommendation-card__song { min-width: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 18px; color:inherit; text-decoration: none; }
-.recommendation-card__cover { aspect-ratio: 1; overflow: hidden; border-radius: 18px; background:linear-gradient(145deg, #fff, var(--personal-accent-soft)); box-shadow:none; }
+.recommendation-card__cover { aspect-ratio: 1; overflow: hidden; border-radius: 18px; background:linear-gradient(145deg, var(--viewer-surface), var(--personal-accent-soft)); box-shadow:none; }
 .recommendation-card__details { min-width: 0; display: grid; gap: 8px; }
 .recommendation-card__details strong {
   display: -webkit-box;
@@ -218,9 +218,9 @@ const trackClick = (event: string, source: string) => {
 .recommendation-card__loading { min-height: 170px; border-radius: 18px; }
 
 .personal-onboarding { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 24px; padding: clamp(24px, 5vw, 48px); }
-.personal-onboarding__mark { width: 86px; height: 86px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 6px solid #fff; border-radius: 50%; background:var(--personal-accent); box-shadow:none; }
-.personal-onboarding__mark span:first-child { background:#d8785d; }
-.personal-onboarding__mark span:last-child { background:#8c3f37; }
+.personal-onboarding__mark { width: 86px; height: 86px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 6px solid var(--viewer-surface); border-radius: 50%; background:var(--personal-accent); box-shadow:none; }
+.personal-onboarding__mark span:first-child { background:var(--viewer-primary); }
+.personal-onboarding__mark span:last-child { background:var(--viewer-primary-hover); }
 .personal-onboarding__copy { display: grid; gap: 10px; }
 .personal-onboarding h1 { font-size: clamp(26px, 4vw, 42px); }
 .personal-onboarding p:not(.personal-eyebrow) { max-width: 540px; margin: 0 0 4px; color:var(--personal-muted); line-height: 1.65; }
@@ -238,7 +238,7 @@ const trackClick = (event: string, source: string) => {
 }
 :global(body.theme-dark .personal-status),
 :global(body.theme-dark .recommendation-card),
-:global(body.theme-dark .personal-onboarding) { border-color:rgba(255, 255, 255, 0.12); background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .personal-onboarding) { border-color:var(--viewer-border); background:var(--viewer-surface-subtle); }
 :global(body.theme-dark .personal-button--secondary) { background:var(--viewer-surface-subtle); }
 
 @media (max-width: 820px) {

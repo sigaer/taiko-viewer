@@ -25,14 +25,21 @@ const getSubtitle = (song: SongCatalogItem) =>
       :link-to="localePath('/songs/available')"
     />
     <div v-if="pending" class="guest-latest__rail" aria-hidden="true">
-      <div v-for="index in 6" :key="index" class="guest-song-card guest-song-card--loading shimmer-card"></div>
+      <div v-for="index in 5" :key="index" class="guest-song-card guest-song-card--loading shimmer-card">
+        <div class="guest-song-card__cover"></div>
+        <div class="guest-song-card__copy">
+          <span class="guest-song-card__placeholder guest-song-card__placeholder--title"></span>
+          <span class="guest-song-card__placeholder"></span>
+          <span class="guest-song-card__placeholder"></span>
+        </div>
+      </div>
     </div>
     <div v-else-if="failed || !songs.length" class="guest-latest__empty panel-card">
       {{ t("home.latestSongsUnavailable") }}
     </div>
     <div v-else class="guest-latest__rail">
       <NuxtLink
-        v-for="(song, index) in songs.slice(0, 6)"
+        v-for="(song, index) in songs.slice(0, 5)"
         :key="song.id"
         :to="localePath(`/songs/${song.id}`)"
         class="guest-song-card"
@@ -42,14 +49,14 @@ const getSubtitle = (song: SongCatalogItem) =>
           <SongCoverImage
             :song-id="song.id"
             :alt="getTitle(song)"
-            sizes="(max-width: 720px) 148px, (max-width: 1200px) 16vw, 180px"
+            sizes="(max-width: 720px) 42vw, 190px"
             fit="contain"
             :priority="index === 0"
           />
         </div>
         <div class="guest-song-card__copy">
-          <strong>{{ getTitle(song) }}</strong>
-          <span>{{ getSubtitle(song) }}</span>
+          <strong :title="getTitle(song)">{{ getTitle(song) }}</strong>
+          <span :title="getSubtitle(song)">{{ getSubtitle(song) }}</span>
           <small v-if="song.open_day">{{ song.open_day }}</small>
         </div>
       </NuxtLink>
@@ -60,12 +67,13 @@ const getSubtitle = (song: SongCatalogItem) =>
 <style scoped>
 .guest-latest {
   display: grid;
+  min-width: 0;
   gap: 14px;
 }
 
 .guest-latest__rail {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -77,7 +85,7 @@ const getSubtitle = (song: SongCatalogItem) =>
   border: 1px solid var(--viewer-border);
   border-radius: 18px;
   color:inherit;
-  background:var(--viewer-surface-subtle);
+  background:var(--viewer-surface);
   box-shadow:none;
   text-decoration: none;
   scroll-snap-align: start;
@@ -125,8 +133,14 @@ const getSubtitle = (song: SongCatalogItem) =>
 }
 
 .guest-song-card__copy strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
   color:var(--viewer-text);
   font-size: 14px;
+  line-height: 1.45;
 }
 
 .guest-song-card__copy span,
@@ -135,9 +149,8 @@ const getSubtitle = (song: SongCatalogItem) =>
   font-size: 14px;
 }
 
-.guest-song-card--loading {
-  min-height: 230px;
-}
+.guest-song-card__placeholder { display: block; height: 1.6em; background: var(--viewer-border); border-radius: 4px; }
+.guest-song-card__placeholder--title { height: 2.9em; }
 
 .guest-latest__empty {
   min-height: 120px;
@@ -147,7 +160,7 @@ const getSubtitle = (song: SongCatalogItem) =>
 }
 
 :global(body.theme-dark .guest-song-card) {
-  background:var(--viewer-surface-subtle);
+  background:var(--viewer-surface);
 }
 
 :global(body.theme-dark .guest-song-card__cover) {
@@ -176,9 +189,6 @@ const getSubtitle = (song: SongCatalogItem) =>
     display: none;
   }
 
-  .guest-song-card--loading {
-    min-height: 210px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

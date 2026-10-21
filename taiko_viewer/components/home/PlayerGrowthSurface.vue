@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RatingDimensionKey } from "~/types/recommendation-intelligence";
-import { composeRecommendationCopy, composeGoalCopy, composeDailyNarrative, composeDailyFactCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
-import { composeGrowthFeedback } from "~/utils/composeGrowthFeedback";
+import { composeRecommendationCopy, composeGoalCopy, composeDailyFactCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
+import { composeHomeGrowthFeedback } from "~/utils/homeGrowthFeedback";
 import { formatScoreRank } from "~/utils/scoreRank";
 import type { GrowthEventFact, GrowthPlanItem, PlayerGrowthOverview, RecentGrowthResponse } from "~/types/player-growth";
 import { GROWTH_DIMENSION_LABELS, GROWTH_DIMENSION_SHORT_LABELS, growthGreetingPeriod } from "~/utils/playerGrowth";
@@ -25,13 +25,20 @@ const props = defineProps<{
 }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+// Goal options describe goal creation only. Their absence says nothing about
+// browsing or recommendation eligibility, and this DTO has no reason code.
+const goalCopy = computed(() => locale.value === 'ja'
+  ? { choose: '目標を選ぶ', browse: '楽曲を見る', missing: '目標の選択肢を取得できませんでした', empty: '作成できる目標はありません' }
+  : { choose: '选择目标', browse: '查看歌曲', missing: '未获取到目标选项', empty: '暂无可创建目标' });
+const goalOptionsStatus = (item: GrowthPlanItem) => Array.isArray(item.goalOptions) ? goalCopy.value.empty : goalCopy.value.missing;
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
 const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_LABELS[key][locale.value === "ja" ? "ja" : "zh"];
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
 const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
-const feedback = computed(() => composeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value, props.overview.dailyProgress, props.recent, activeGoal.value));
+const feedback = computed(() => composeHomeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value,
+  props.overview.dailyProgress, props.recent, activeGoal.value, props.overview.profileId,
+  { daily: !props.pending && !props.failed, recent: !props.recentPending && !props.recentFailed }));
 const progress = computed(() => feedback.value.dailyProgress);
-const hasProgress = computed(() => progress.value.attendance === "played");
 const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
 const voiceContext = computed<GrowthVoiceContext>(() => ({
   profileId: props.identity,
@@ -42,7 +49,6 @@ const voiceContext = computed<GrowthVoiceContext>(() => ({
   activity: 'unknown'
 }));
 const recommendationCopy = computed(() => composeRecommendationCopy(voiceContext.value));
-const dailyCopy = computed(() => composeDailyNarrative(progress.value, props.overview.dailyProgress));
 const factText = (fact: GrowthEventFact, songId = 0) => {
   const line = composeDailyFactCopy(fact, { ...voiceContext.value, profileId: `${voiceContext.value.profileId}:${songId}` }, eventValue(fact, fact.after), eventValue(fact, fact.delta));
   return t(line.key, line.params || {});
@@ -81,7 +87,7 @@ watch(() => props.overview, overview => {
 }, { immediate: true });
 onBeforeUnmount(() => { identityGeneration++; mutationGeneration++; });
 const openGoal = (item: GrowthPlanItem) => {
-  if (choicesDisabled.value) return;
+  if (choicesDisabled.value || !item.goalOptions?.length) return;
   returnFocus = document.activeElement as HTMLElement;
   selected.value = item; selectedType.value = null; goalError.value = '';
   expectedGoalId = activeGoal.value?.id || null;
@@ -245,36 +251,18 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
               <strong>{{ item.title }}</strong>
               <span>{{ t(difficultyLabelKey(item.difficultyType)) }}<template v-if="item.starLevel"> · {{ item.starLevel }}{{ t("guide.starSuffix") }}</template></span>
               <small v-if="item.currentBestScore">{{ item.currentBestScore.toLocaleString() }}</small>
+              <span class="growth-plan__browse">{{ goalCopy.browse }}</span>
             </div>
             <span class="growth-plan__arrow" aria-hidden="true">↗</span>
           </NuxtLink>
-          <button v-if="item.goalOptions?.length" class="growth-plan__choose" :disabled="choicesDisabled" @click="openGoal(item)">{{ t(selectedChart(item) ? 'home.goal.selected' : 'home.goal.choose') }}</button>
-          <span v-else class="growth-plan__unavailable">{{ t('home.goal.noOptions') }}</span>
+          <button v-if="item.goalOptions?.length" class="growth-plan__choose" :disabled="choicesDisabled" @click="openGoal(item)">{{ selectedChart(item) ? t('home.goal.selected') : goalCopy.choose }}</button>
+          <p v-else class="growth-plan__goal-status">{{ goalOptionsStatus(item) }}</p>
           </div>
         </div>
         <p v-else class="growth-empty">{{ t("home.growth.noRecommendation") }}</p>
       </section>
 
-      <section v-if="hasProgress" class="growth-progress" aria-labelledby="growth-progress-title">
-        <div class="growth-section-head">
-          <div>
-            <h2 id="growth-progress-title">{{ t("home.growth.progressTitle") }}</h2>
-          </div>
-        </div>
-        <div class="growth-progress__card">
-            <p class="growth-progress__lead">{{ feedback.additionalPbCount ? t('home.growth.additionalPb', { count: feedback.additionalPbCount }) : t(dailyCopy.key) }}</p>
-            <article v-for="event in progress.events" :key="`${event.songId}:${event.level}`" class="growth-event">
-              <strong class="growth-event__song">{{ event.title }}</strong>
-              <span class="growth-summary">{{ t(difficultyLabelKey(event.level)) }}</span>
-              <p class="growth-event__change">{{ event.facts.map(fact => factText(fact, event.songId)).join(t('home.growth.logSeparator')) }}</p>
-            </article>
-            <p v-if="progress.uniqueCharts" class="growth-summary">{{ t('home.growth.playedSummary', { count: progress.uniqueCharts }) }}</p>
-        </div>
-      </section>
-      <details v-else class="growth-record-note">
-        <summary>{{ t('home.growth.progressTitle') }}</summary>
-        <p>{{ t(dailyCopy.key) }}</p>
-      </details>
+      <HomeDailyProgress :progress="progress" :original="overview.dailyProgress" />
 
 
       <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
@@ -299,14 +287,14 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 </template>
 
 <style scoped>
-.growth-ability summary, .growth-record-note summary { min-height: 44px; align-content: center; color: var(--viewer-link); font-size: 14px; cursor: pointer; }
+.growth-ability summary { min-height: 44px; align-content: center; color: var(--viewer-link); font-size: 14px; cursor: pointer; }
 .growth-ability summary strong { font-weight: 600; color: var(--viewer-text); font-variant-numeric: tabular-nums; }
-.growth-ability summary:focus-visible, .growth-record-note summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
-.growth-record-note p { margin: 0; color: var(--viewer-text-muted); font-size: 14px; line-height: 1.6; }
+.growth-ability summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
 
 .growth-plan__choice { min-width: 0; display: grid; gap: 4px; }
 .growth-plan__choose { justify-self: end; }
-.growth-plan__unavailable { padding: 8px; font-size: 12px; color:var(--el-text-color-secondary); }
+.growth-plan__goal-status { margin: 0; padding: 4px 8px; font-size: 13px; line-height: 1.5; color:var(--viewer-text-muted); }
+.growth-plan__details .growth-plan__browse { color:var(--viewer-link); font-size: 12px; }
 .growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color:var(--el-text-color-primary); }
 .growth-goal--completed { max-width: none; padding: 20px 24px; border-left: 3px solid var(--viewer-accent-strong); box-sizing: border-box; }
 .growth-goal__support { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
@@ -318,7 +306,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 button:disabled { opacity: .55; cursor: default; }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
 .goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color:var(--el-text-color-primary); background:var(--el-bg-color); }
-.goal-dialog::backdrop { background:rgb(0 0 0 / 40%); }
+.goal-dialog::backdrop { background:var(--viewer-overlay); }
 .goal-dialog h2 { margin: 0 0 16px; font-size: 21px; }
 .goal-dialog fieldset { border: 0; padding: 0; margin: 12px 0; }
 .goal-dialog legend { font-size: 14px; margin-bottom: 8px; }
@@ -334,9 +322,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-weekly-link { color:var(--viewer-link); font-size: 13px; font-weight: 500; text-decoration: none; }
 .growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.growth-focus h1, .growth-plan h2, .growth-progress h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); line-height: 1.1; }
+.growth-focus h1, .growth-plan h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); line-height: 1.1; }
 .growth-focus h1 { min-width: 0; overflow-wrap: anywhere; font-size: clamp(24px, 2.8vw, 30px); }
-.growth-plan h2, .growth-progress h2 { font-size: clamp(21px, 2.5vw, 28px); }
+.growth-plan h2 { font-size: clamp(21px, 2.5vw, 28px); }
 .growth-rating { display: grid; gap: 2px; text-align: right; }
 .growth-rating span { color:var(--viewer-text-muted); font-size: 11px; font-weight: 700; }
 .growth-rating strong { color:var(--viewer-text); font: 800 28px/1 var(--viewer-display-font); }
@@ -349,10 +337,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-skill--priority { border-top-color:var(--viewer-border); }
 .growth-skill--priority::after { content: ""; position: absolute; top: -2px; left: 0; width: 24px; height: 2px; border-radius: 99px; background:var(--viewer-primary); }
 .growth-skill--priority span, .growth-skill--priority strong { font-weight: 800; }
-.growth-plan, .growth-progress { display: grid; gap: 8px; min-width: 0; }
+.growth-plan { display: grid; gap: 8px; min-width: 0; }
 .growth-reason { margin: 0; color:var(--viewer-text-muted); font-size: 13px; line-height: 1.55; }
 .growth-plan__items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--growth-card-gap); margin-top: 8px; }
-.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 16px; border: 1px solid var(--viewer-border); border-radius: 15px; color:inherit; text-decoration: none; background:var(--viewer-surface-subtle); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.growth-plan__item { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 16px; border: 1px solid var(--viewer-border); border-radius: 15px; color:inherit; text-decoration: none; background:var(--viewer-surface); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
 .growth-plan__item:hover { transform: translateY(-2px); border-color:var(--viewer-border); background:var(--viewer-surface); }
 .growth-plan__item:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
 .growth-plan__cover { aspect-ratio: 1; overflow: hidden; border-radius: 10px; background:var(--viewer-surface-subtle); }
@@ -362,24 +350,14 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .growth-plan__details small { color:var(--viewer-text-muted); font-variant-numeric: tabular-nums; }
 .growth-plan__arrow { color:var(--viewer-primary); font-size: 20px; }
 .growth-empty { margin: 0; color:var(--viewer-text-muted); font-size: 13px; }
-.growth-progress__lead { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
-.growth-progress__card { display: grid; gap: 14px; min-width: 0; margin-top: 8px; }
-.growth-event { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; min-width: 0; color:var(--viewer-text); }
-.growth-event + .growth-event { border-top: 1px solid var(--viewer-border); padding-top: 16px; }
-.growth-event h3 { margin: 0; font-size: 14px; font-weight: 600; color:var(--viewer-link); }
-.growth-event__song { font-size: 16px; overflow-wrap: anywhere; }
-.growth-event__change { grid-column: 1 / -1; margin: 0; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; }
-.growth-summary { margin: 0; color:var(--viewer-text-muted); font-size: 14px; }
-:global(body.theme-dark .growth-event) { color:var(--viewer-text); }
-:global(body.theme-dark .growth-event h3) { color:var(--viewer-primary); }
-:global(body.theme-dark .growth-summary), :global(body.theme-dark .growth-empty) { color:var(--viewer-text-muted); }
+:global(body.theme-dark .growth-empty) { color:var(--viewer-text-muted); }
 
-:global(body.theme-dark .growth-plan), :global(body.theme-dark .growth-progress) { border-color:rgba(255,255,255,.12); }
-:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-progress h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color:var(--viewer-text); }
+:global(body.theme-dark .growth-plan) { border-color:var(--viewer-border); }
+:global(body.theme-dark .growth-focus h1), :global(body.theme-dark .growth-plan h2), :global(body.theme-dark .growth-rating strong), :global(body.theme-dark .growth-skill strong), :global(body.theme-dark .growth-plan__details strong) { color:var(--viewer-text); }
 :global(body.theme-dark .growth-plan__arrow), :global(body.theme-dark .growth-weekly-link) { color:var(--viewer-link); }
 :global(body.theme-dark .growth-skill--priority) { border-top-color:var(--viewer-border); }
 :global(body.theme-dark .growth-skill--priority::after) { background:var(--viewer-primary); }
-:global(body.theme-dark .growth-plan__item) { border-color:rgba(255,255,255,.1); background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .growth-plan__item) { border-color:var(--viewer-border); background:var(--viewer-surface); }
 .growth-loading { display: grid; gap: var(--growth-section-gap); }
 .growth-loading > div { display: grid; align-content: start; gap: 14px; min-height: 150px; padding: clamp(22px, 4vw, 34px); border-radius: 22px; }
 .growth-loading__focus { min-height: 235px !important; }

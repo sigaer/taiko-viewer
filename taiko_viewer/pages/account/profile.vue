@@ -1476,7 +1476,7 @@ const removeQqBinding = async () => {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  border: 1px solid rgba(64, 158, 255, 0.35);
+  border: 1px solid var(--viewer-border);
 }
 .onboarding-card .onboarding-copy { min-width: 0; }
 .onboarding-card h3 { margin: 0 0 6px; font-size: 16px; }
@@ -1648,8 +1648,8 @@ const removeQqBinding = async () => {
   place-items: center;
   border: 4px solid var(--viewer-primary);
   border-radius: 50%;
-  background:#fffdf9;
-  box-shadow:inset 0 0 0 4px #ffd1a8;
+  background:var(--viewer-surface);
+  box-shadow:inset 0 0 0 4px var(--viewer-selected);
 }
 
 .manual-drum span {

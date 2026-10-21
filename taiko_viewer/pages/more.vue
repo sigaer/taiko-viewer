@@ -136,7 +136,7 @@ const groups = [
 
 .more-language__option.active {
   border-color:transparent;
-  color:#fff;
+  color:var(--viewer-on-primary);
   background:var(--viewer-accent-strong);
 }
 
@@ -149,7 +149,7 @@ const groups = [
 }
 
 :global(body.theme-dark .more-product-meta) {
-  color:#cbbbae;
+  color:var(--viewer-text-muted);
 }
 
 .more-language__option:focus-visible,
@@ -182,8 +182,8 @@ const groups = [
 
 .more-link:hover,
 .more-link:focus-visible {
-  border-color:rgba(196, 164, 132, 0.62);
-  background:rgba(196, 164, 132, 0.12);
+  border-color:var(--viewer-border);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 560px) {

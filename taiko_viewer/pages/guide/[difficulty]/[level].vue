@@ -349,7 +349,7 @@ useViewerSeo(() => ({
   justify-content: center;
   width: 20px;
   height: 20px;
-  color:#d36d37;
+  color:var(--viewer-link);
 }
 
 .section-icon svg {
@@ -358,7 +358,7 @@ useViewerSeo(() => ({
 }
 
 .section-icon.alt {
-  color:#a34b6b;
+  color:var(--viewer-constant-comprehensive);
 }
 
 .summary-table,
@@ -368,7 +368,7 @@ useViewerSeo(() => ({
 
 .guide-divider {
   border: 0;
-  border-top: 1px solid rgba(181, 146, 113, 0.2);
+  border-top: 1px solid var(--viewer-border);
   margin: 20px 0;
 }
 
@@ -405,7 +405,7 @@ useViewerSeo(() => ({
 }
 
 .guide-detail-item + .guide-detail-item {
-  border-top: 1px solid rgba(181, 146, 113, 0.16);
+  border-top: 1px solid var(--viewer-border);
 }
 
 .guide-detail-row {
@@ -426,7 +426,7 @@ useViewerSeo(() => ({
 }
 
 .guide-detail-row:focus-visible {
-  outline: 2px solid rgba(211, 109, 55, 0.45);
+  outline: 2px solid var(--viewer-link);
   outline-offset: -2px;
 }
 
@@ -437,7 +437,7 @@ useViewerSeo(() => ({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color:rgba(87, 66, 49, 0.78);
+  color:var(--viewer-text-muted);
   transition: transform 0.2s ease;
 }
 
@@ -459,38 +459,38 @@ useViewerSeo(() => ({
 }
 
 .guide-tag-row.hardest {
-  background:rgba(196, 79, 45, 0.16);
+  background:var(--viewer-guide-hardest);
 }
 
 .guide-tag-row.harder {
-  background:rgba(220, 116, 58, 0.16);
+  background:var(--viewer-guide-harder);
 }
 
 .guide-tag-row.hard {
-  background:rgba(232, 148, 51, 0.16);
+  background:var(--viewer-guide-hard);
 }
 
 .guide-tag-row.normal {
-  background:rgba(241, 183, 80, 0.16);
+  background:var(--viewer-guide-normal);
 }
 
 .guide-tag-row.easy {
-  background:rgba(171, 197, 117, 0.16);
+  background:var(--viewer-guide-easy);
 }
 
 .guide-tag-row.easier {
-  background:rgba(107, 182, 132, 0.16);
+  background:var(--viewer-guide-easier);
 }
 
 .guide-tag-row.easiest {
-  background:rgba(76, 160, 180, 0.16);
+  background:var(--viewer-guide-easiest);
 }
 
 .tag-detail-wrap {
   padding: 8px 12px;
   background:var(--viewer-surface-subtle);
   border-radius: 12px;
-  border-top: 1px solid rgba(181, 146, 113, 0.16);
+  border-top: 1px solid var(--viewer-border);
 }
 
 .tag-detail-error {

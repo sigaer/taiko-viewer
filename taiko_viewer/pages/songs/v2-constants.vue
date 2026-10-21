@@ -351,7 +351,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
 .v2-title-row h3 {
   margin: 0;
-  color:#4f3e31;
+  color:var(--viewer-text);
   font-size: 20px;
 }
 
@@ -363,8 +363,8 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  color:#b66c3d;
-  background:#fff0e4;
+  color:var(--viewer-warning);
+  background:var(--viewer-warning-surface);
 }
 
 .section-icon svg {
@@ -374,7 +374,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 
 .v2-heading p {
   margin: 8px 0 0;
-  color:#796858;
+  color:var(--viewer-text-muted);
   line-height: 1.6;
 }
 
@@ -383,7 +383,7 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
   flex-wrap: wrap;
   gap: 8px 18px;
   margin-top: 8px;
-  color:#9a7254;
+  color:var(--viewer-text-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -425,21 +425,21 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 }
 
 .difficulty-tag--hard {
-  color:#257547;
-  background:#e8f6ed;
-  border-color:#b9e3c8;
+  color:var(--viewer-success);
+  background:var(--viewer-success-surface);
+  border-color:var(--viewer-border);
 }
 
 .difficulty-tag--oni {
-  color:#a63868;
-  background:#fceaf2;
-  border-color:#f2bfd4;
+  color:var(--viewer-constant-comprehensive);
+  background:var(--viewer-constant-comprehensive-surface);
+  border-color:var(--viewer-border);
 }
 
 .difficulty-tag--edit {
-  color:#6d3c97;
-  background:#f2eafd;
-  border-color:#d9c2f0;
+  color:var(--viewer-constant-star);
+  background:var(--viewer-constant-star-surface);
+  border-color:var(--viewer-border);
 }
 
 .v2-pagination {
@@ -455,12 +455,12 @@ const handleSortChange = ({ prop, order }: TableSortChange) => {
 }
 
 body.theme-dark .v2-title-row h3 {
-  color:#f2e4d7;
+  color:var(--viewer-text-muted);
 }
 
 body.theme-dark .v2-heading p,
 body.theme-dark .v2-meta {
-  color:#c7ad98;
+  color:var(--viewer-text-muted);
 }
 
 @media (max-width: 760px) {

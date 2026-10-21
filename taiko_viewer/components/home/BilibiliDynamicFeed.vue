@@ -270,7 +270,7 @@ const openPreview = (url: string, event: Event) => {
 }
 
 .space-link:hover {
-  color:#c24e2f;
+  color:var(--viewer-primary);
 }
 
 .dynamic-list {
@@ -283,7 +283,7 @@ const openPreview = (url: string, event: Event) => {
   gap: 12px;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(162, 128, 98, 0.2);
+  border: 1px solid var(--viewer-border);
   background:var(--viewer-surface-subtle);
   text-decoration: none;
   color:inherit;
@@ -292,8 +292,8 @@ const openPreview = (url: string, event: Event) => {
 
 .dynamic-card:hover {
   transform: translateY(-1px);
-  border-color:rgba(194, 132, 82, 0.52);
-  box-shadow:0 12px 20px rgba(157, 119, 83, 0.16);
+  border-color:var(--viewer-border);
+  box-shadow:0 12px 20px var(--viewer-shadow);
 }
 
 .dynamic-card--skeleton {
@@ -338,13 +338,13 @@ const openPreview = (url: string, event: Event) => {
 
 .dynamic-action {
   font-size: 12px;
-  color:#7a6655;
+  color:var(--viewer-text-muted);
   white-space: nowrap;
 }
 
 .dynamic-time {
   font-size: 12px;
-  color:#9a8574;
+  color:var(--viewer-text-muted);
 }
 
 .dynamic-body {
@@ -356,7 +356,7 @@ const openPreview = (url: string, event: Event) => {
   margin: 0;
   font-size: 14px;
   line-height: 1.55;
-  color:#4a3f35;
+  color:var(--viewer-text);
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-line-clamp: 4;
@@ -376,7 +376,7 @@ const openPreview = (url: string, event: Event) => {
   justify-self: start;
   border: none;
   background:transparent;
-  color:#c24e2f;
+  color:var(--viewer-primary);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -433,8 +433,8 @@ const openPreview = (url: string, event: Event) => {
   bottom: 6px;
   padding: 2px 6px;
   border-radius: 6px;
-  background:rgba(0, 0, 0, 0.65);
-  color:#fff;
+  background:var(--viewer-overlay);
+  color:var(--viewer-on-primary);
   font-size: 11px;
 }
 
@@ -458,20 +458,20 @@ const openPreview = (url: string, event: Event) => {
   display: flex;
   gap: 10px;
   font-size: 12px;
-  color:#7a6655;
+  color:var(--viewer-text-muted);
 }
 
 .dynamic-stats {
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color:#8d7a6a;
+  color:var(--viewer-text-muted);
 }
 
 .dynamic-disclaimer {
   margin: 0;
   font-size: 12px;
-  color:#9a8574;
+  color:var(--viewer-text-muted);
   text-align: center;
 }
 
@@ -487,20 +487,20 @@ const openPreview = (url: string, event: Event) => {
 :global(body.theme-dark .dynamic-time),
 :global(body.theme-dark .dynamic-stats),
 :global(body.theme-dark .dynamic-disclaimer) {
-  color:#b9aa9d;
+  color:var(--viewer-text-muted);
 }
 
 :global(body.theme-dark .dynamic-card) {
-  border-color:rgba(255, 255, 255, 0.12);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .dynamic-text) {
-  color:#eee2d7;
+  color:var(--viewer-text);
 }
 
 :global(body.theme-dark .dynamic-archive) {
-  background:rgba(255, 255, 255, 0.06);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 780px) {

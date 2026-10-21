@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
   margin: 0 auto;
   border-radius: 24px;
   overflow: hidden;
-  background:linear-gradient(135deg, #fbf3ec, #f1e4d8);
+  background:linear-gradient(135deg, var(--viewer-surface-subtle), var(--viewer-surface-hover));
   touch-action: none;
   cursor: grab;
 }
@@ -333,8 +333,8 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow:0 0 0 999px rgba(26, 24, 30, 0.48);
+  border: 2px solid var(--viewer-border);
+  box-shadow:0 0 0 999px var(--viewer-overlay);
   pointer-events: none;
 }
 
@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
   inset: 0;
   display: grid;
   place-items: center;
-  color:#ffffff;
+  color:var(--viewer-text-muted);
   font-size: 26px;
   background:var(--viewer-surface-subtle);
 }
@@ -352,8 +352,8 @@ onBeforeUnmount(() => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.36);
-  border-top-color:#ffffff;
+  border: 3px solid var(--viewer-border);
+  border-top-color:var(--viewer-surface);
   animation: avatar-cropper-spin 0.9s linear infinite;
 }
 
@@ -380,7 +380,7 @@ onBeforeUnmount(() => {
 }
 
 .avatar-cropper__zoom-row span {
-  color:#5a4738;
+  color:var(--viewer-text);
   font-weight: 600;
 }
 

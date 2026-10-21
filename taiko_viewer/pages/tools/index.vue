@@ -90,7 +90,7 @@ const copy = computed(() =>
   padding: 16px;
   border-radius: 16px;
   background:var(--viewer-surface-subtle);
-  border: 1px solid var(--viewer-border, rgba(160, 140, 120, 0.14));
+  border: 1px solid var(--viewer-border, var(--viewer-border));
   text-decoration: none;
   color:inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -98,7 +98,7 @@ const copy = computed(() =>
 
 .tool-card:hover {
   transform: translateY(-2px);
-  box-shadow:0 12px 24px var(--viewer-shadow, rgba(150, 132, 115, 0.12));
+  box-shadow:0 12px 24px var(--viewer-shadow, var(--viewer-shadow));
 }
 
 .tool-card__head {

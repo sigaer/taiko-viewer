@@ -85,7 +85,7 @@ watch(() => props.recent.boundary.currentToken, async token => {
 .recent-growth__fact { cursor: pointer; transition: background .18s ease, transform .18s ease; }
 .recent-growth__fact:hover { transform: translateY(-1px); background:var(--viewer-surface); }
 .recent-growth__fact:focus-visible, .recent-growth__state button:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
-.recent-growth__pulse { width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background:var(--viewer-primary); box-shadow:none; }
+.recent-growth__pulse { width: 9px; height: 9px; border: 2px solid var(--viewer-surface); border-radius: 50%; background:var(--viewer-primary); box-shadow:none; }
 .recent-growth__copy { min-width: 0; display: grid; gap: 3px; }
 .recent-growth__copy strong { overflow: hidden; color:var(--viewer-text); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .recent-growth__copy small, .recent-growth__empty, .recent-growth__more, .recent-growth__state { color:var(--viewer-text-muted); font-size: 12px; line-height: 1.5; }
@@ -96,7 +96,7 @@ watch(() => props.recent.boundary.currentToken, async token => {
 .recent-growth__state button { min-width: 72px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--viewer-border); border-radius: 10px; color:var(--viewer-link); background:transparent; cursor: pointer; font: inherit; font-weight: 700; }
 .recent-growth__loading { display: grid; gap: 9px; }
 .recent-growth__loading span { height: 52px; border-radius: 13px; background:var(--viewer-border); }
-:global(body.theme-dark .recent-growth) { border-color:rgba(255,255,255,.12); background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .recent-growth) { border-color:var(--viewer-border); background:var(--viewer-surface-subtle); }
 :global(body.theme-dark .recent-growth h2), :global(body.theme-dark .recent-growth__copy strong) { color:var(--viewer-text); }
 :global(body.theme-dark .recent-growth__fact) { background:var(--viewer-surface-subtle); }
 :global(body.theme-dark .recent-growth__copy small), :global(body.theme-dark .recent-growth__empty), :global(body.theme-dark .recent-growth__more), :global(body.theme-dark .recent-growth__state), :global(body.theme-dark .recent-growth time) { color:var(--viewer-text-muted); }

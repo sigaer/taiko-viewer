@@ -238,15 +238,15 @@ onBeforeUnmount(() => {
   align-items: center;
   min-height: 64px;
   padding: 6px;
-  border: 1px solid rgba(157, 101, 63, 0.26);
+  border: 1px solid var(--viewer-border);
   border-radius: 18px;
   background:var(--viewer-surface-subtle);
-  box-shadow:0 18px 38px rgba(107, 72, 45, 0.14);
+  box-shadow:0 18px 38px var(--viewer-shadow);
 }
 
 .guest-song-search__form:focus-within {
   border-color:var(--viewer-link);
-  box-shadow:0 0 0 3px var(--viewer-border), 0 20px 42px rgba(107, 72, 45, 0.16);
+  box-shadow:0 0 0 3px var(--viewer-border), 0 20px 42px var(--viewer-shadow);
 }
 
 .guest-song-search__icon {
@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
 }
 
 .guest-song-search input::placeholder {
-  color:#9b8c80;
+  color:var(--viewer-text-muted);
 }
 
 .guest-song-search__clear,
@@ -296,7 +296,7 @@ onBeforeUnmount(() => {
 
 .guest-song-search__submit {
   padding: 0 18px;
-  color:#fff;
+  color:var(--viewer-on-primary);
   background:var(--viewer-link);
   font-weight: 700;
 }
@@ -317,7 +317,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--viewer-border);
   border-radius: 16px;
   background:var(--viewer-surface-subtle);
-  box-shadow:0 22px 48px rgba(80, 55, 35, 0.2);
+  box-shadow:0 22px 48px var(--viewer-shadow);
   backdrop-filter: blur(16px);
 }
 
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
 
 .guest-song-search__result:hover,
 .guest-song-search__result.is-active {
-  background:rgba(196, 164, 132, 0.13);
+  background:var(--viewer-surface-subtle);
 }
 
 .guest-song-search__cover {
@@ -357,7 +357,7 @@ onBeforeUnmount(() => {
   height: 48px;
   border-radius: 10px;
   overflow: hidden;
-  background:#f5e9dc;
+  background:var(--viewer-surface-hover);
 }
 
 .guest-song-search__copy {
@@ -402,21 +402,21 @@ onBeforeUnmount(() => {
 
 :global(body.theme-dark .guest-song-search__form),
 :global(body.theme-dark .guest-song-search__results) {
-  border-color:rgba(255, 255, 255, 0.14);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-song-search input::placeholder) {
-  color:#a9998c;
+  color:var(--viewer-text-muted);
 }
 
 :global(body.theme-dark .guest-song-search__result:hover),
 :global(body.theme-dark .guest-song-search__result.is-active) {
-  background:rgba(223, 148, 111, 0.12);
+  background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-song-search__cover) {
-  background:#2b2420;
+  background:var(--viewer-surface);
 }
 
 @media (max-width: 560px) {

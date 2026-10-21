@@ -414,14 +414,14 @@ const closeTicket = async () => {
   width: 100%;
   text-align: left;
   padding: 12px 14px;
-  border: 1px solid rgba(171, 141, 110, 0.18);
+  border: 1px solid var(--viewer-border);
   border-radius: 14px;
   background:var(--viewer-surface-subtle);
   cursor: pointer;
 }
 
 .ticket-summary.active {
-  border-color:rgba(196, 127, 79, 0.55);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface-subtle);
 }
 

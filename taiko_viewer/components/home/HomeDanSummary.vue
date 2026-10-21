@@ -126,7 +126,7 @@ const localePath = useLocalePath();
   display: block;
   overflow: hidden;
   transform: rotate(3deg) translate(4%, 12%);
-  border: 10px solid rgba(255, 255, 255, 0.7);
+  border: 10px solid var(--viewer-border);
   border-radius: 22px 22px 0 0;
   background:var(--viewer-surface);
   box-shadow:none;
@@ -146,12 +146,12 @@ const localePath = useLocalePath();
 }
 
 :global(body.theme-dark .guest-dan) {
-  border-color:rgba(255, 255, 255, 0.1);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-dan__visual) {
-  border-color:rgba(255, 255, 255, 0.12);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface);
 }
 

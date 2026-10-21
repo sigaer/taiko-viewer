@@ -218,7 +218,7 @@ watch(
 
 .section-hero p {
   margin: 0;
-  color:#765e4a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -243,8 +243,8 @@ watch(
   padding: 12px 18px;
   border-radius: 999px;
   text-decoration: none;
-  color:#fff;
-  background:linear-gradient(135deg, var(--section-accent), #f08a24);
+  color:var(--viewer-on-primary);
+  background:linear-gradient(135deg, var(--section-accent), var(--viewer-primary-hover));
 }
 
 .filter-panel {
@@ -289,7 +289,7 @@ watch(
 }
 
 body.theme-dark .section-hero p {
-  color:#c4b1a4;
+  color:var(--viewer-text-muted);
 }
 
 @media (max-width: 860px) {

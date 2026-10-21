@@ -171,8 +171,8 @@ const stacks = [
 }
 
 .section-icon.alt {
-  background:rgba(88, 136, 197, 0.2);
-  color:#3c6aa6;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-link);
 }
 
 .panel-header p {
@@ -200,8 +200,8 @@ const stacks = [
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background:linear-gradient(135deg, #ffc596, #ff9f75);
-  color:#fff;
+  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
+  color:var(--viewer-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;

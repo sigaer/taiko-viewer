@@ -62,7 +62,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(123, 83, 52, 0.12) 0.7px, transparent 0.7px);
+  background-image: radial-gradient(var(--viewer-pattern) 0.7px, transparent 0.7px);
   background-size: 12px 12px;
   mask-image: linear-gradient(90deg, transparent 5%, #000 65%);
 }
@@ -94,7 +94,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero h1 {
   max-width: 760px;
   margin: 0;
-  color:#3d2c22;
+  color:var(--viewer-text);
   font-size: clamp(34px, 5vw, 58px);
   line-height: 1.08;
   letter-spacing: -0.035em;
@@ -104,7 +104,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero__lead {
   max-width: 650px;
   margin: 0 0 4px;
-  color:#6e5a4a;
+  color:var(--viewer-text-muted);
   font-size: clamp(15px, 1.7vw, 18px);
   line-height: 1.65;
 }
@@ -129,14 +129,14 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 }
 
 .guest-hero__cta--primary {
-  color:#fff;
+  color:var(--viewer-on-primary);
   background:var(--viewer-link);
   box-shadow:0 12px 24px var(--viewer-border);
 }
 
 .guest-hero__cta--secondary {
-  border: 1px solid rgba(134, 94, 64, 0.28);
-  color:#6d4d38;
+  border: 1px solid var(--viewer-border);
+  color:var(--viewer-text);
   background:var(--viewer-surface-subtle);
 }
 
@@ -151,7 +151,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 
 .guest-hero__scope {
   margin: 0;
-  color:#8a7768;
+  color:var(--viewer-text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -166,7 +166,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
   transform: translateY(-50%) rotate(-8deg);
   border: clamp(10px, 1.2vw, 18px) solid var(--viewer-border);
   border-radius: 50%;
-  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.48);
+  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) var(--viewer-shadow);
 }
 
 .guest-hero__drum::before,
@@ -184,7 +184,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 
 .guest-hero__drum::after {
   inset: 40%;
-  background:rgba(221, 126, 80, 0.1);
+  background:var(--viewer-surface-subtle);
 }
 
 .guest-hero__drum span {
@@ -198,44 +198,44 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
 .guest-hero__drum span:nth-child(3) { left: 16%; bottom: 19%; }
 
 :global(body.theme-dark .guest-hero) {
-  border-color:rgba(255, 255, 255, 0.1);
+  border-color:var(--viewer-border);
   background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-hero h1) {
-  color:#f7eee6;
+  color:var(--viewer-text);
 }
 
 :global(body.theme-dark .guest-hero__brand) {
-  color:#df946f;
+  color:var(--viewer-link);
 }
 
 :global(body.theme-dark .guest-hero__lead) {
-  color:#d1c1b5;
+  color:var(--viewer-text-muted);
 }
 
 :global(body.theme-dark .guest-hero__scope) {
-  color:#b8a89b;
+  color:var(--viewer-text-muted);
 }
 
 :global(body.theme-dark .guest-hero__cta--secondary) {
-  border-color:rgba(255, 255, 255, 0.18);
-  color:#f0dfd0;
-  background:rgba(255, 255, 255, 0.06);
+  border-color:var(--viewer-border);
+  color:var(--viewer-text);
+  background:var(--viewer-surface-subtle);
 }
 
 :global(body.theme-dark .guest-hero__drum) {
-  border-color:rgba(223, 148, 111, 0.13);
-  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) rgba(255, 255, 255, 0.04);
+  border-color:var(--viewer-border);
+  box-shadow:inset 0 0 0 clamp(6px, 0.8vw, 12px) var(--viewer-shadow);
 }
 
 :global(body.theme-dark .guest-hero__drum::before) {
-  border-color:rgba(223, 148, 111, 0.18);
+  border-color:var(--viewer-border);
 }
 
 :global(body.theme-dark .guest-hero__drum::after),
 :global(body.theme-dark .guest-hero__drum span) {
-  background:rgba(223, 148, 111, 0.14);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 720px) {

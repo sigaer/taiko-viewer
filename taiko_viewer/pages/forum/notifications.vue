@@ -192,7 +192,7 @@ const formatNotificationTime = (value: string) => {
 .notification-head p,
 .notification-card p {
   margin: 8px 0 0;
-  color:#725b4a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -229,14 +229,14 @@ const formatNotificationTime = (value: string) => {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color:#846956;
+  color:var(--viewer-text-muted);
 }
 
 .notification-type {
   padding: 2px 7px;
   border-radius: 999px;
-  color:#fff;
-  background:linear-gradient(135deg, var(--viewer-primary), #f08a24);
+  color:var(--viewer-on-primary);
+  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
 }
 
 .notification-card h3 {
@@ -251,7 +251,7 @@ const formatNotificationTime = (value: string) => {
 body.theme-dark .notification-head p,
 body.theme-dark .notification-card p,
 body.theme-dark .notification-card__meta {
-  color:#c6b4a7;
+  color:var(--viewer-text-muted);
 }
 
 @media (min-width: 861px) {

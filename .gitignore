@@ -44,3 +44,7 @@ taiko_viewer/首页Viewer_files/
 backups/
 pnpm-lock.yaml
 pnpm-workspace.yaml
+
+# Raw first-design completion captures are vaulted, never release inputs.
+/docs/viewer-0871-completion-20261021/screenshots/
+/docs/viewer-0871-completion-20261021/*.json

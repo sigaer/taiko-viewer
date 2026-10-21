@@ -312,8 +312,8 @@ onMounted(() => {
 
 .progress-form {
   padding: 20px 0 18px;
-  border-top: 1px solid rgba(139, 107, 77, 0.18);
-  border-bottom: 1px solid rgba(139, 107, 77, 0.18);
+  border-top: 1px solid var(--viewer-border);
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .control-grid {
@@ -350,25 +350,25 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-top: 1px solid rgba(139, 107, 77, 0.14);
-  border-bottom: 1px solid rgba(139, 107, 77, 0.14);
+  border-top: 1px solid var(--viewer-border);
+  border-bottom: 1px solid var(--viewer-border);
 }
 
 .beat-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background:#e45543;
+  background:var(--viewer-primary);
   animation: progress-beat 1s ease-in-out infinite;
 }
 
 .beat-dot:nth-child(2) {
-  background:#f1ae42;
+  background:var(--viewer-warning);
   animation-delay: 0.12s;
 }
 
 .beat-dot:nth-child(3) {
-  background:#5792c5;
+  background:var(--viewer-info);
   animation-delay: 0.24s;
 }
 
@@ -401,8 +401,8 @@ onMounted(() => {
 .image-stage {
   overflow: auto;
   padding: 12px;
-  background:#ede8df;
-  border: 1px solid rgba(111, 87, 66, 0.14);
+  background:var(--viewer-surface-subtle);
+  border: 1px solid var(--viewer-border);
   border-radius: 8px;
   text-align: center;
 }
@@ -413,7 +413,7 @@ onMounted(() => {
   max-width: 100%;
   height: auto;
   margin: 0 auto;
-  box-shadow:0 8px 22px rgba(62, 46, 34, 0.14);
+  box-shadow:0 8px 22px var(--viewer-shadow);
 }
 
 @keyframes progress-beat {

@@ -61,5 +61,5 @@ async function confirm(){
 .recommendation-goal-action button { min-height:44px; padding:8px 14px; border:1px solid var(--el-border-color);border-radius:10px;background:var(--el-bg-color);color:var(--el-text-color-primary);font:inherit;cursor:pointer; }
 button:disabled {opacity:.55;cursor:default;} button:focus-visible,a:focus-visible {outline:3px solid var(--viewer-accent-strong);outline-offset:2px;}
 .goal-dialog {max-width:min(480px,calc(100vw - 48px));box-sizing:border-box;border:1px solid var(--el-border-color);border-radius:14px;padding:24px;background:var(--el-bg-color);color:var(--el-text-color-primary);overflow-wrap:anywhere;}
-.goal-dialog::backdrop {background:rgb(0 0 0 / .45);} fieldset {display:grid;gap:12px;margin:16px 0;border:0;padding:0;}label {display:flex;align-items:center;gap:8px;min-height:44px;} .goal-actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;}p {font-size:14px;}
+.goal-dialog::backdrop {background:var(--viewer-overlay);} fieldset {display:grid;gap:12px;margin:16px 0;border:0;padding:0;}label {display:flex;align-items:center;gap:8px;min-height:44px;} .goal-actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;}p {font-size:14px;}
 </style>

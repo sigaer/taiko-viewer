@@ -95,6 +95,6 @@ const submit = async () => {
   word-break: break-word;
   font-size: 13px;
   line-height: 1.6;
-  color:#4a3b30;
+  color:var(--viewer-text);
 }
 </style>

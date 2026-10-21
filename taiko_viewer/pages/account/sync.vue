@@ -756,7 +756,7 @@ const copyIssuedScoreToken = async () => {
   gap: 12px;
   margin-top: 18px;
   padding: 14px;
-  border: 1px solid rgba(151, 119, 91, 0.22);
+  border: 1px solid var(--viewer-border);
   border-radius: 8px;
   background:var(--viewer-surface-subtle);
 }
@@ -808,7 +808,7 @@ const copyIssuedScoreToken = async () => {
   padding: 10px 12px;
   border-radius: 6px;
   background:var(--viewer-surface);
-  color:#3f332b;
+  color:var(--viewer-text);
   white-space: nowrap;
 }
 

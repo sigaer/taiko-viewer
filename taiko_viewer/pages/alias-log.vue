@@ -258,7 +258,7 @@ const navigateToSong = (songId: string) => {
   justify-content: center;
   border-radius: 12px;
   background:var(--viewer-surface-subtle);
-  color:#a36b39;
+  color:var(--viewer-link);
 }
 
 .header-icon svg {
@@ -309,18 +309,18 @@ const navigateToSong = (songId: string) => {
 }
 
 .alias-table th {
-  background:#faf5ef;
+  background:var(--viewer-surface-subtle);
   color:var(--viewer-text-muted);
   font-size: 13px;
   font-weight: 600;
 }
 
-.alias-table tbody tr:nth-child(even) { background:#fffdfb; }
+.alias-table tbody tr:nth-child(even) { background:var(--viewer-surface); }
 .alias-table tbody tr:last-child td { border-bottom: 0; }
 
 .time-cell {
   font-size: 13px;
-  color:#8b6d53;
+  color:var(--viewer-text-muted);
   font-family: monospace;
 }
 
@@ -354,9 +354,9 @@ const navigateToSong = (songId: string) => {
 .alias-tag {
   display: inline-flex;
   padding: 4px 9px;
-  border: 1px solid #e9bd72;
-  background:#fff7e6;
-  color:#a76819;
+  border: 1px solid var(--viewer-border);
+  background:var(--viewer-warning-surface);
+  color:var(--viewer-warning);
   font-size: 13px;
   border-radius: 8px;
 }
@@ -365,7 +365,7 @@ const navigateToSong = (songId: string) => {
   padding: 5px;
   border: 0;
   background:transparent;
-  color:var(--el-color-primary, #409eff);
+  color:var(--el-color-primary);
   cursor: pointer;
 }
 
