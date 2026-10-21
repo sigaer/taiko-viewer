@@ -26,7 +26,14 @@ useViewerSeo(() => ({
 const n = ref(30);
 const dim = ref("");
 const dynamicOrigin = ref(false);
-const { imageUrl, loading, errorMessage, loadChart } = useToolChartImage();
+const query = computed(() => ({ n: n.value, dim: dim.value || undefined, r: dynamicOrigin.value ? "1" : undefined }));
+const { imageUrl, loading, errorMessage, resultQuery, changed, generate } = useToolChartResult(query);
+const stateCopy = computed(() => locale.value === "ja" ? {
+  result:"生成結果", ready:"条件を選んで画像を生成してください", changed:"条件を変更しました。画像を再生成してください", loading:"画像を生成中…", defaultDim:"総合 Rating", fixedOrigin:"通常原点", dynamicOrigin:"動的原点", view:"画像を拡大"
+} : {
+  result:"生成结果", ready:"选择条件后生成图表", changed:"条件已修改，请重新生成图表", loading:"正在生成图表…", defaultDim:"综合 Rating", fixedOrigin:"默认原点", dynamicOrigin:"动态原点", view:"放大查看图片"
+});
+const resultSummary = computed(() => resultQuery.value ? `Top ${resultQuery.value.n} · ${dimOptions.value.find(item => item.value === resultQuery.value?.dim)?.label || stateCopy.value.defaultDim} · ${resultQuery.value.r ? stateCopy.value.dynamicOrigin : stateCopy.value.fixedOrigin}` : "");
 const copy = computed(() =>
   locale.value === "ja"
     ? {
@@ -69,72 +76,45 @@ const dimOptions = computed(() =>
 );
 
 const submit = async () => {
-  await loadChart("/api/account/charts/b30", {
-    n: n.value,
-    dim: dim.value || undefined,
-    r: dynamicOrigin.value ? "1" : undefined
-  });
+  if (loading.value || !Number.isInteger(n.value) || n.value < 1 || n.value > 50) return;
+  await generate("/api/account/charts/b30");
 };
 </script>
 
 <template>
-  <div class="page-stack">
+  <div class="b30-page">
     <AccountToolGate>
-      <el-card class="panel-card">
-        <p class="hint">{{ copy.hint }}</p>
-        <el-form label-position="top" @submit.prevent="submit">
-          <el-form-item :label="copy.topN">
-            <el-input-number v-model="n" :min="1" :max="50" controls-position="right" />
-          </el-form-item>
-          <el-form-item :label="copy.dim">
-            <el-select v-model="dim" clearable :placeholder="copy.placeholder">
-              <el-option v-for="option in dimOptions" :key="option.value" :label="option.label" :value="option.value" />
-            </el-select>
-          </el-form-item>
-          <el-form-item :label="copy.dynamicOrigin">
-            <el-switch v-model="dynamicOrigin" />
-          </el-form-item>
-          <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
-        </el-form>
-        <el-alert
-          v-if="errorMessage"
-          :title="errorMessage"
-          :type="viewerErrorAlertType(errorMessage)"
-          show-icon
-          :closable="false"
-          class="result-alert viewer-friendly-alert"
-        />
-        <div v-if="imageUrl" class="chart-wrap">
-          <img :src="imageUrl" :alt="copy.imageAlt" class="chart-image" />
-        </div>
-      </el-card>
+      <el-form class="chart-parameters" label-position="top" @submit.prevent="submit">
+        <el-form-item :label="copy.topN"><el-input-number v-model="n" :min="1" :max="50" :precision="0" controls-position="right" /></el-form-item>
+        <el-form-item :label="copy.dim"><el-select v-model="dim" clearable :placeholder="copy.placeholder"><el-option v-for="option in dimOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
+        <el-form-item :label="copy.dynamicOrigin"><el-switch v-model="dynamicOrigin" :aria-label="copy.dynamicOrigin" /></el-form-item>
+        <el-button type="primary" :loading="loading" :disabled="!n || n < 1 || n > 50" native-type="submit">{{ copy.submit }}</el-button>
+      </el-form>
+      <el-alert v-if="errorMessage" :title="errorMessage" :type="viewerErrorAlertType(errorMessage)" show-icon :closable="false" class="viewer-friendly-alert" />
+      <section class="chart-result" :aria-busy="loading">
+        <header v-if="imageUrl && resultQuery" class="result-heading"><h2>{{ stateCopy.result }}</h2><p>{{ resultSummary }}</p></header>
+        <p v-if="loading" class="result-state" role="status">{{ stateCopy.loading }}</p>
+        <p v-else-if="!imageUrl && !errorMessage" class="result-state" role="status">{{ changed ? stateCopy.changed : stateCopy.ready }}</p>
+        <a v-if="imageUrl" :href="imageUrl" target="_blank" rel="noopener" class="image-open" :aria-label="stateCopy.view"><img :src="imageUrl" :alt="`${copy.imageAlt} · ${resultSummary}`" class="chart-image" /></a>
+      </section>
     </AccountToolGate>
   </div>
 </template>
 
 <style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.hint {
-  margin: 0 0 14px;
-  color:var(--viewer-text-muted);
-}
-
-.result-alert {
-  margin-top: 16px;
-}
-
-.chart-wrap {
-  margin-top: 16px;
-  text-align: center;
-}
-
-.chart-image {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow:0 10px 24px var(--viewer-shadow);
+.b30-page { display:grid; gap:20px; min-width:0; }
+.chart-parameters { display:grid; grid-template-columns:140px minmax(200px,320px) auto auto; align-items:end; gap:16px; padding-bottom:20px; border-bottom:1px solid var(--viewer-border); }
+.chart-parameters :deep(.el-form-item) { margin:0; min-width:0; }
+.chart-parameters :deep(.el-input-number), .chart-parameters :deep(.el-select) { width:100%; }
+.chart-parameters > :deep(.el-button) { justify-self:start; }
+.result-heading { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 20px; margin-bottom:12px; }
+.result-heading h2 { margin:0; font-size:18px; }
+.result-heading p, .result-state { margin:0; color:var(--viewer-text-muted); font-size:14px; line-height:1.7; }
+.chart-result { min-width:0; }
+.image-open { display:block; width:fit-content; max-width:100%; }
+.chart-image { display:block; max-width:100%; height:auto; }
+@media(max-width:740px) {
+ .chart-parameters { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:14px; }
+ .chart-parameters > :deep(.el-button) { width:100%; justify-self:stretch; }
 }
 </style>

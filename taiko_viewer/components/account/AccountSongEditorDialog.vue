@@ -44,6 +44,8 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
+const requestGuard = useAccountRequestGuard();
+watch(() => props.modelValue, (open) => { requestGuard.invalidate(); if (open) saving.value = false; }, { flush: "sync" });
 const DEFAULT_LEVEL_OPTIONS = [
   { value: 1, label: "简单" },
   { value: 2, label: "一般" },
@@ -354,7 +356,15 @@ const submit = async () => {
     }
   }
 
+  const request = requestGuard.capture();
   saving.value = true;
+  const completeSave = () => {
+    if (!requestGuard.current(request)) return;
+    saving.value = false;
+    ElMessage.success(isCreateMode.value ? copy.value.createSuccess : copy.value.updateSuccess);
+    visible.value = false;
+    emit("saved");
+  };
   try {
     const body = buildRequestBody();
     await apiFetch(
@@ -365,16 +375,19 @@ const submit = async () => {
           : "/api/account/songs/update",
       {
       method: "POST",
-      body: props.isManual ? { action: "score-upsert", ...body } : body
+      body: props.isManual ? { action: "score-upsert", ...body } : body,
+      // ofetch has parsed a successful response here, before our API wrapper
+      // broadcasts its own manual-write invalidation. Finish this view's
+      // callback while the captured identity is still valid; external changes
+      // have already invalidated the guard and cannot complete this view.
+      onResponse: props.isManual ? ({ response }) => { if (response.ok) completeSave(); } : undefined
       }
     );
-    ElMessage.success(isCreateMode.value ? copy.value.createSuccess : copy.value.updateSuccess);
-    visible.value = false;
-    emit("saved");
+    if (!props.isManual) completeSave();
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.saveFailed);
+    if (requestGuard.current(request)) ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.saveFailed);
   } finally {
-    saving.value = false;
+    if (requestGuard.current(request)) saving.value = false;
   }
 };
 </script>

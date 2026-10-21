@@ -6,7 +6,8 @@ import {ref,nextTick,createRenderer,h} from 'vue';
 
 test('tool image rejects late responses across account/binding switch, switch back and unmount',async()=>{
  const pending=[],revoked=[],state=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]);
- const before={fetch:globalThis.$fetch,state:globalThis.useState,create:URL.createObjectURL,revoke:URL.revokeObjectURL};
+ const before={i18n:globalThis.useI18n,fetch:globalThis.$fetch,state:globalThis.useState,create:URL.createObjectURL,revoke:URL.revokeObjectURL};
+ globalThis.useI18n=()=>({t:key=>key,locale:ref('zh')});
  globalThis.useState=(key,init)=>{if(!state.has(key))state.set(key,ref(init?.()));return state.get(key);};
  globalThis.$fetch=()=>new Promise((resolve,reject)=>pending.push({resolve,reject}));
  let urls=0;URL.createObjectURL=()=>`blob:synthetic-${++urls}`;URL.revokeObjectURL=url=>revoked.push(url);
@@ -30,6 +31,6 @@ test('tool image rejects late responses across account/binding switch, switch ba
   const unmounted=model.loadChart('/api/account/charts/recommend');app.unmount();app=null;
   pending.shift().resolve(new Blob(['unmounted']));await unmounted;assert.equal(model.imageUrl.value,'');
  }finally{
-  app?.unmount();globalThis.$fetch=before.fetch;globalThis.useState=before.state;URL.createObjectURL=before.create;URL.revokeObjectURL=before.revoke;
+  app?.unmount();globalThis.useI18n=before.i18n;globalThis.$fetch=before.fetch;globalThis.useState=before.state;URL.createObjectURL=before.create;URL.revokeObjectURL=before.revoke;
  }
 });

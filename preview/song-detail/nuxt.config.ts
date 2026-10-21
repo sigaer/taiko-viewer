@@ -16,6 +16,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   hooks: {
     'pages:extend'(pages) {
+      pages.push({name:'local-batch2-review',path:'/__batch2',file:resolve(previewRoot,'review/batch2.vue')});
       pages.push({name:'local-palette-controls',path:'/__palette-controls',file:resolve(previewRoot,'review/palette-controls.vue')});
       pages.push({name:'local-completion-review',path:'/__completion',file:resolve(previewRoot,'review/completion.vue')});
       pages.push({name:'local-design-review',path:'/__review',file:resolve(previewRoot,'review/index.vue')});
@@ -39,6 +40,7 @@ export default defineNuxtConfig({
     ...base.nitro, storage: {}, devStorage: {},
     // Review artifacts are opt-in local preview assets, never production routes.
     publicAssets: [
+      ...(process.env.VIEWER_BATCH2_EVIDENCE ? [{ dir: resolve(process.env.VIEWER_BATCH2_EVIDENCE, "screenshots"), baseURL: "/__batch2-shots", maxAge: 0 }] : []),
       { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020/mobile-integration'), baseURL: '/__song-review', maxAge: 0 },
       { dir: resolve(previewRoot, '../../docs/song-detail-preview-20261020'), baseURL: '/__song-history', maxAge: 0 },
       { dir: resolve(previewRoot, '../../docs/viewer-lightness-20261020'), baseURL: '/__review-assets', maxAge: 0 }

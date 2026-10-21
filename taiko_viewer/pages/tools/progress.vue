@@ -1,26 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { buildPageDescription } from "~/utils/seo";
 import { viewerErrorAlertType } from "~/utils/viewerError";
 
 type ProgressKind = "dani" | "constant" | "star" | "named";
 type ConstantMode = "pass" | "comprehensive";
 
-interface ProgressOptions {
-  dani: Array<{ version: string; grades: string[] }>;
-  constants: { pass: string[]; comprehensive: string[] };
-  stars: number[];
-  named: string[];
-  pages: {
-    pass: Record<string, number>;
-    comprehensive: Record<string, number>;
-    star: Record<string, number>;
-    named: Record<string, number>;
-  };
-}
-
 const { t, locale } = useI18n();
-const apiFetch = useViewerApiFetch();
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
@@ -95,9 +81,7 @@ const copy = computed(() =>
       }
 );
 
-const options = ref<ProgressOptions | null>(null);
-const optionsLoading = ref(false);
-const optionsError = ref("");
+const { options, optionsLoading, optionsError, loadOptions } = useProgressOptions();
 const kind = ref<ProgressKind>("dani");
 const version = ref("");
 const grade = ref("");
@@ -107,7 +91,7 @@ const star = ref(10);
 const named = ref("");
 const page = ref(1);
 
-const { imageUrl, loading, errorMessage, loadChart, revokeUrl } = useToolChartImage();
+
 
 const gradeOptions = computed(
   () => options.value?.dani.find((item) => item.version === version.value)?.grades || []
@@ -123,14 +107,14 @@ const pageText = computed(() =>
   copy.value.page.replace("{page}", String(page.value)).replace("{total}", String(totalPages.value))
 );
 const canSubmit = computed(() => {
-  if (!options.value) return false;
-  if (kind.value === "dani") return Boolean(version.value && grade.value);
-  if (kind.value === "constant") return Boolean(constant.value);
+  if (!options.value || optionsLoading.value || optionsError.value) return false;
+  if (kind.value === "dani") return gradeOptions.value.includes(grade.value);
+  if (kind.value === "constant") return constantOptions.value.includes(constant.value);
   if (kind.value === "star") return options.value.stars.includes(star.value);
-  return Boolean(named.value);
+  return options.value.named.includes(named.value);
 });
 
-const requestQuery = () => {
+const requestQuery = computed(() => {
   const base = { kind: kind.value, page: page.value };
   if (kind.value === "dani") return { ...base, version: version.value, grade: grade.value };
   if (kind.value === "constant") {
@@ -138,12 +122,13 @@ const requestQuery = () => {
   }
   if (kind.value === "star") return { ...base, star: star.value };
   return { ...base, name: named.value };
-};
+});
+const { imageUrl, loading, errorMessage, resultQuery, changed, generate, invalidate } = useToolChartResult(requestQuery);
 
 const submit = async () => {
-  if (!canSubmit.value) return;
+  if (!canSubmit.value || loading.value) return;
   page.value = Math.min(page.value, totalPages.value);
-  await loadChart("/api/account/progress/image", requestQuery());
+  await generate("/api/account/progress/image");
 };
 
 const movePage = async (offset: number) => {
@@ -151,26 +136,33 @@ const movePage = async (offset: number) => {
   await submit();
 };
 
-const loadOptions = async () => {
-  optionsLoading.value = true;
-  optionsError.value = "";
-  try {
-    options.value = await apiFetch<ProgressOptions>("/api/account/progress/options", {
-      credentials: "include"
-    });
-    const newest = options.value.dani[0];
-    version.value = newest?.version || "";
-    grade.value = newest?.grades.includes("十段") ? "十段" : newest?.grades.at(-1) || "";
-    constant.value = options.value.constants.pass[0] || "";
-    star.value = options.value.stars.includes(10) ? 10 : options.value.stars.at(-1) || 1;
-    named.value = options.value.named[0] || "";
-    await submit();
-  } catch (error: unknown) {
-    optionsError.value = await resolveViewerError(error, copy.value.loadFailed);
-  } finally {
-    optionsLoading.value = false;
-  }
-};
+const stateCopy = computed(() => locale.value === "ja" ? {
+  type:"進捗タイプ", loadingOptions:"項目を読み込み中…", empty:"この種類には選択できる項目がありません", retry:"再試行", ready:"条件を選んで進捗画像を表示してください", changed:"条件を変更しました。進捗画像を再生成してください", generating:"進捗画像を生成中…", result:"生成結果", view:"画像を拡大"
+} : {
+  type:"进度类型", loadingOptions:"正在读取进度选项…", empty:"当前类型暂无可用选项", retry:"重试", ready:"选择条件后查看进度图", changed:"条件已修改，请重新生成进度图", generating:"正在生成进度图…", result:"生成结果", view:"放大查看图片"
+});
+const resultSummary = computed(() => {
+  const q = resultQuery.value;
+  if (!q) return "";
+  const type = copy.value.kinds.find(item => item.value === q.kind)?.label;
+  if (q.kind === "dani") return `${type} · 虹 ${q.version} · ${q.grade}`;
+  if (q.kind === "constant") return `${type} · ${q.mode === "pass" ? copy.value.pass : copy.value.comprehensive} · ${q.constant}`;
+  if (q.kind === "star") return `${type} · ★${q.star}`;
+  return `${type} · ${q.name}`;
+});
+watch(options, async (value) => {
+  invalidate(); resultQuery.value = null;
+  if (!value) return;
+  const newest = value.dani[0];
+  version.value = newest?.version || "";
+  grade.value = newest?.grades.includes("十段") ? "十段" : newest?.grades.at(-1) || "";
+  constant.value = value.constants[constantMode.value][0] || "";
+  star.value = value.stars.includes(10) ? 10 : value.stars.at(-1) || 1;
+  named.value = value.named[0] || "";
+  page.value = 1;
+  await nextTick();
+  if (options.value === value) await submit();
+});
 
 watch(version, () => {
   const grades = gradeOptions.value;
@@ -181,7 +173,7 @@ watch(constantMode, () => {
 });
 watch([kind, version, grade, constantMode, constant, star, named], () => {
   page.value = 1;
-  revokeUrl();
+
 });
 
 onMounted(() => {
@@ -193,11 +185,11 @@ onMounted(() => {
   <div class="progress-page">
     <ToolsAccountToolGate>
       <section class="progress-workbench">
-        <div class="kind-switch" aria-label="Progress type">
+        <div class="kind-switch" :aria-label="stateCopy.type">
           <el-segmented v-model="kind" :options="copy.kinds" block />
         </div>
 
-        <el-skeleton v-if="optionsLoading" :rows="3" animated class="control-skeleton" />
+        <div v-if="optionsLoading" role="status"><p class="state-text">{{ stateCopy.loadingOptions }}</p><el-skeleton :rows="2" class="control-skeleton" /></div>
         <el-alert
           v-else-if="optionsError"
           :title="optionsError"
@@ -205,16 +197,16 @@ onMounted(() => {
           show-icon
           :closable="false"
           class="viewer-friendly-alert"
-        />
+        ><el-button @click="loadOptions">{{ stateCopy.retry }}</el-button></el-alert>
         <el-form v-else-if="options" class="progress-form" label-position="top" @submit.prevent="submit">
           <div v-if="kind === 'dani'" class="control-grid">
             <el-form-item :label="copy.version">
-              <el-select v-model="version">
+              <el-select v-model="version" :disabled="!options.dani.length">
                 <el-option v-for="item in options.dani" :key="item.version" :label="`虹 ${item.version}`" :value="item.version" />
               </el-select>
             </el-form-item>
             <el-form-item :label="copy.grade">
-              <el-select v-model="grade" filterable>
+              <el-select v-model="grade" :disabled="!gradeOptions.length" filterable>
                 <el-option v-for="item in gradeOptions" :key="item" :label="item" :value="item" />
               </el-select>
             </el-form-item>
@@ -232,7 +224,7 @@ onMounted(() => {
               />
             </el-form-item>
             <el-form-item :label="copy.constant">
-              <el-select v-model="constant" filterable>
+              <el-select v-model="constant" :disabled="!constantOptions.length" filterable>
                 <el-option v-for="item in constantOptions" :key="item" :label="item" :value="item" />
               </el-select>
             </el-form-item>
@@ -240,7 +232,7 @@ onMounted(() => {
 
           <div v-else-if="kind === 'star'" class="control-grid control-grid--single">
             <el-form-item :label="copy.star">
-              <el-select v-model="star">
+              <el-select v-model="star" :disabled="!options.stars.length">
                 <el-option v-for="item in options.stars" :key="item" :label="`${item} ★`" :value="item" />
               </el-select>
             </el-form-item>
@@ -248,14 +240,15 @@ onMounted(() => {
 
           <div v-else class="control-grid control-grid--single">
             <el-form-item :label="copy.named">
-              <el-select v-model="named" filterable>
+              <el-select v-model="named" :disabled="!options.named.length" filterable>
                 <el-option v-for="item in options.named" :key="item" :label="item" :value="item" />
               </el-select>
             </el-form-item>
           </div>
 
+          <p v-if="!canSubmit" class="state-text" role="status">{{ stateCopy.empty }}</p>
           <div class="primary-actions">
-            <el-button type="primary" size="large" :loading="loading" :disabled="!canSubmit" native-type="submit">
+            <el-button type="primary" :loading="loading" :disabled="!canSubmit" native-type="submit">
               {{ imageUrl ? copy.refresh : copy.generate }}
             </el-button>
           </div>
@@ -270,15 +263,13 @@ onMounted(() => {
           class="result-alert viewer-friendly-alert"
         />
 
-        <div v-if="loading && !imageUrl" class="image-loading" aria-live="polite">
-          <span class="beat-dot"></span>
-          <span class="beat-dot"></span>
-          <span class="beat-dot"></span>
-        </div>
+        <p v-if="loading" class="state-text" role="status">{{ stateCopy.generating }}</p>
+        <p v-else-if="canSubmit && !imageUrl && !errorMessage" class="state-text" role="status">{{ changed ? stateCopy.changed : stateCopy.ready }}</p>
 
-        <section v-if="imageUrl" class="progress-result">
+        <section v-if="imageUrl && resultQuery" class="progress-result">
+          <header class="result-heading"><h2>{{ stateCopy.result }}</h2><p>{{ resultSummary }}</p></header>
           <div class="result-toolbar">
-            <div v-if="totalPages > 1" class="pager">
+            <div class="pager">
               <el-button :disabled="loading || page <= 1" @click="movePage(-1)">{{ copy.previous }}</el-button>
               <span>{{ pageText }}</span>
               <el-button :disabled="loading || page >= totalPages" @click="movePage(1)">{{ copy.next }}</el-button>
@@ -287,9 +278,9 @@ onMounted(() => {
               <el-button>{{ copy.download }}</el-button>
             </a>
           </div>
-          <div class="image-stage">
-            <img :src="imageUrl" :alt="copy.imageAlt" class="progress-image" />
-          </div>
+          <a :href="imageUrl" target="_blank" rel="noopener" class="image-stage" :aria-label="stateCopy.view">
+            <img :src="imageUrl" :alt="`${copy.imageAlt} · ${resultSummary} · ${pageText}`" class="progress-image" />
+          </a>
         </section>
       </section>
     </ToolsAccountToolGate>
@@ -297,145 +288,36 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.progress-page {
-  width: 100%;
-}
-
-.progress-workbench {
-  display: grid;
-  gap: 20px;
-}
-
-.kind-switch {
-  width: min(100%, var(--viewer-content-reading));
-}
-
-.progress-form {
-  padding: 20px 0 18px;
-  border-top: 1px solid var(--viewer-border);
-  border-bottom: 1px solid var(--viewer-border);
-}
-
-.control-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 280px));
-  gap: 16px;
-  align-items: end;
-}
-
-.control-grid--single {
-  grid-template-columns: minmax(0, 360px);
-}
-
-.control-grid :deep(.el-form-item) {
-  margin-bottom: 0;
-}
-
-.control-grid :deep(.el-select),
-.control-grid :deep(.el-segmented) {
-  width: 100%;
-}
-
-.primary-actions {
-  margin-top: 18px;
-}
-
-.result-alert {
-  margin-top: 2px;
-}
-
-.image-loading {
-  min-height: 240px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-top: 1px solid var(--viewer-border);
-  border-bottom: 1px solid var(--viewer-border);
-}
-
-.beat-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background:var(--viewer-primary);
-  animation: progress-beat 1s ease-in-out infinite;
-}
-
-.beat-dot:nth-child(2) {
-  background:var(--viewer-warning);
-  animation-delay: 0.12s;
-}
-
-.beat-dot:nth-child(3) {
-  background:var(--viewer-info);
-  animation-delay: 0.24s;
-}
-
-.progress-result {
-  min-width: 0;
-}
-
-.result-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color:var(--viewer-text-muted);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.download-link {
-  margin-left: auto;
-  text-decoration: none;
-}
-
-.image-stage {
-  overflow: auto;
-  padding: 12px;
-  background:var(--viewer-surface-subtle);
-  border: 1px solid var(--viewer-border);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.progress-image {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  margin: 0 auto;
-  box-shadow:0 8px 22px var(--viewer-shadow);
-}
-
-@keyframes progress-beat {
-  0%, 100% { transform: translateY(0); opacity: 0.42; }
-  50% { transform: translateY(-7px); opacity: 1; }
-}
-
-@media (max-width: 640px) {
-  .progress-workbench { gap: 16px; }
-  .kind-switch { width: 100%; }
-  .kind-switch :deep(.el-segmented__item-label) { font-size: 12px; }
-  .progress-form { padding-top: 16px; }
-  .control-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  .primary-actions :deep(.el-button) { width: 100%; }
-  .result-toolbar { align-items: stretch; flex-direction: column; }
-  .pager { display: grid; grid-template-columns: auto minmax(90px, 1fr) auto; text-align: center; }
-  .download-link { margin-left: 0; }
-  .download-link :deep(.el-button) { width: 100%; }
-  .image-stage { margin-inline: -8px; padding: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .beat-dot { animation: none; opacity: 0.8; }
+.progress-page, .progress-result { width:100%; min-width:0; }
+.progress-workbench { display:grid; gap:20px; }
+.kind-switch { width:min(100%, var(--viewer-content-reading)); }
+.progress-form { display:flex; align-items:flex-end; flex-wrap:wrap; gap:16px; padding-bottom:20px; border-bottom:1px solid var(--viewer-border); }
+.control-grid { display:grid; grid-template-columns:repeat(2,minmax(0,260px)); gap:16px; align-items:end; }
+.control-grid--single { grid-template-columns:minmax(0,300px); }
+.control-grid :deep(.el-form-item) { margin-bottom:0; min-width:0; }
+.control-grid :deep(.el-select), .control-grid :deep(.el-segmented) { width:100%; }
+.state-text { margin:0; color:var(--viewer-text-muted); font-size:14px; line-height:1.7; }
+.progress-form > .state-text { flex-basis:100%; }
+.result-heading { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 20px; margin-bottom:12px; }
+.result-heading h2 { margin:0; font-size:18px; }
+.result-heading p { margin:0; color:var(--viewer-text-muted); font-size:14px; }
+.result-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+.pager { display:flex; align-items:center; flex-wrap:wrap; gap:12px; color:var(--viewer-text-muted); font-size:14px; font-variant-numeric:tabular-nums; }
+.download-link { margin-left:auto; text-decoration:none; }
+.image-stage { display:block; width:fit-content; max-width:100%; }
+.progress-image { display:block; width:auto; max-width:100%; height:auto; }
+@media(max-width:640px) {
+ .progress-workbench { gap:16px; }
+ .kind-switch { width:100%; }
+ .kind-switch :deep(.el-segmented__item-label) { font-size:13px; }
+ .progress-form { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; }
+ .control-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+ .control-grid--single { grid-template-columns:minmax(0,1fr); }
+ .primary-actions :deep(.el-button) { width:100%; }
+ .result-toolbar { align-items:stretch; flex-direction:column; }
+ .pager { display:grid; grid-template-columns:auto minmax(70px,1fr) auto; gap:8px; text-align:center; }
+ .pager :deep(.el-button + .el-button) { margin:0; }
+ .download-link { margin:0; }
+ .download-link :deep(.el-button) { width:100%; }
 }
 </style>
