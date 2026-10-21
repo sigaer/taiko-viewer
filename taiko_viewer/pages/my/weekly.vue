@@ -5,6 +5,7 @@ import { difficultyLabelKey } from "~/utils/difficulty";
 import { GROWTH_DIMENSION_LABELS } from "~/utils/playerGrowth";
 import { composeWeeklyNarrative, composeRecommendationCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { formatScoreRank } from "~/utils/scoreRank";
+import { resolveViewerError } from "~/utils/viewerError";
 import { buildPageDescription } from "~/utils/seo";
 
 const { t, locale } = useI18n();
@@ -32,24 +33,34 @@ useViewerSeo(() => ({
   path: "/my/weekly"
 }));
 
+const bindingGeneration = useState("account-binding-generation", () => 0);
+const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}`);
+const context = computed(() => `${identity.value}:${String(route.query.week || "current")}`);
+const guard = useAccountRequestGuard();
 const fetchWeekly = async () => {
-  if (!accountUser.value) return { payload: null, error: "" };
+  const requestedContext = context.value, request = guard.capture();
+  if (!accountUser.value) return { payload: null, error: "", context: requestedContext };
   try {
     const week = typeof route.query.week === "string" ? route.query.week : undefined;
-    return { payload: await apiFetch<WeeklyGrowthResponse>("/api/account/growth/weekly", { query: week ? { week } : undefined }), error: "" };
-  } catch {
-    return { payload: null, error: t("weekly.loadFailed") };
+    const payload = await apiFetch<WeeklyGrowthResponse>("/api/account/growth/weekly", { query: week ? { week } : undefined, retry: 0 });
+    return guard.current(request) && context.value === requestedContext
+      ? { payload, error: "", context: requestedContext } : { payload: null, error: "", context: requestedContext };
+  } catch (error) {
+    const message = await resolveViewerError(error, t("weekly.loadFailed"), t);
+    return { payload: null, error: guard.current(request) && context.value === requestedContext ? message : "", context: requestedContext };
   }
 };
-
-const { data: weeklyState, pending, refresh } = await useAsyncData("growth-weekly", fetchWeekly, {
-  default: () => ({ payload: null, error: "" }),
-  watch: [() => route.query.week]
+const { data: weeklyState, pending, refresh, clear } = await useAsyncData(`growth-weekly:${accountUser.value?.id || 'guest'}:${route.path}`, fetchWeekly, {
+  default: () => ({ payload: null, error: "", context: "" }),
+  watch: [context],
+  dedupe: "cancel"
 });
+watch(context, clear, { flush: "sync" });
+onUnmounted(clear);
 const retry = () => refresh();
-const weekly = computed(() => weeklyState.value?.payload || null);
-const pageError = computed(() => weeklyState.value?.error || "");
-const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
+const weekly = computed(() => weeklyState.value?.context === context.value ? weeklyState.value.payload : null);
+const pageError = computed(() => weeklyState.value?.context === context.value ? weeklyState.value.error : "");
+const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value === "ja" ? "ja-JP" : "zh-CN", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Shanghai" }));
 const numberLocale = computed(() => locale.value === "ja" ? "ja-JP" : "zh-CN");
 const coverageIncomplete = computed(() => weekly.value?.coverage.scoreHistoryState !== "complete");
 
@@ -77,6 +88,7 @@ const measurement = computed(() => weekly.value?.measurementChange || null);
 const next = computed(() => weekly.value?.currentNextAction || null);
 const businessDate = useState('growth-voice-business-date', () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
 const nextCopy = computed(() => composeRecommendationCopy({ profileId: `${accountUser.value?.id}:${weekly.value?.profileId}`, businessDate: businessDate.value, focus: next.value?.focus || null, readiness: !next.value || ['limited', 'insufficient-data'].includes(next.value.focus) ? 'limited' : 'ready', goalState: 'none', activity: 'unknown' } as GrowthVoiceContext));
+const totalFields = ['distinctCharts', 'pb', 'fc', 'df', 'rankUpgrade', 'completedGoals'] as const;
 const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatch', 'measurement-version-mismatch'].includes(measurement.value?.reason || ''));
 
 </script>
@@ -95,17 +107,23 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
 
     <section v-else-if="pageError || !weekly" class="weekly-state panel-card" role="alert">
       <h1>{{ t("weekly.loadFailed") }}</h1>
+      <p v-if="pageError">{{ pageError }}</p>
+      <NuxtLink :to="localePath('/account/profile')">{{ t("growthProfileEntry") }}</NuxtLink>
       <button class="weekly-button" type="button" @click="retry">{{ t("weekly.retry") }}</button>
     </section>
 
     <template v-else>
-      <header class="weekly-hero panel-card">
+      <header class="weekly-hero">
         <div class="weekly-hero__meta">
           <p class="weekly-kicker">{{ t(weekly.week.isCompleteWeek ? "weekly.completeWeek" : "weekly.currentWeek") }}</p>
-          <time>{{ formatDay(weekly.week.from) }} — {{ formatDay(weekly.week.to) }}</time>
+          <button class="weekly-refresh" type="button" @click="retry">{{ t("weekly.refresh") }}</button>
         </div>
-        <h1>{{ themeText }}</h1>
-        <details v-if="coverageIncomplete" class="weekly-coverage"><summary>{{ t("weekly.recordsRange") }}</summary><p>{{ t(`weekly.coverage.${weekly.coverage.scoreHistoryState}`) }}</p></details>
+        <time>{{ formatDay(weekly.week.from) }} — {{ formatDay(weekly.week.to) }}</time>
+        <div class="weekly-summary" :aria-label="t('weekly.recordedTotals')">
+          <dl><div v-for="field in totalFields" :key="field"><dt>{{ t(`weekly.totals.${field}`) }}</dt><dd>{{ weekly.totals[field].toLocaleString(numberLocale) }}</dd></div></dl>
+        </div>
+        <p class="weekly-theme">{{ themeText }}</p>
+        <p v-if="coverageIncomplete" class="weekly-coverage" role="note">{{ t(`weekly.coverage.${weekly.coverage.scoreHistoryState}`) }}</p>
         <NuxtLink :to="localePath('/my/growth')" class="weekly-passport-link">{{ t("weekly.passportEntry") }} <span aria-hidden="true">→</span></NuxtLink>
       </header>
 
@@ -118,11 +136,11 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
               <SongCoverImage :song-id="highlight.songId" :alt="highlight.title" sizes="64px" />
             </NuxtLink>
             <div class="weekly-highlight__body">
+              <p class="weekly-highlight__change">{{ highlightChange(highlight) }}</p>
               <NuxtLink :to="localePath({ path: `/songs/${highlight.songId}`, query: { difficulty: String(highlight.difficultyType) } })">
                 <strong>{{ highlight.title }}</strong>
               </NuxtLink>
               <span>{{ t(difficultyLabelKey(highlight.difficultyType)) }}</span>
-              <p>{{ highlightChange(highlight) }}</p>
               <small v-if="highlight.goalCompleted">{{ t("weekly.goalCompleted") }}</small>
             </div>
           </article>
@@ -146,14 +164,15 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
           </p>
           <p v-else-if="measurement.focusTo">{{ t("weekly.measurement.focusSame", { focus: focusLabel(measurement.focusTo) }) }}</p>
         </template>
-        <details v-else-if="recordMethodChanged" class="weekly-coverage"><summary>{{ t('weekly.segmentUpdated') }}</summary><p>{{ t('weekly.segmentExplanation') }}</p></details>
+        <details v-else-if="recordMethodChanged" class="weekly-coverage"><summary>{{ t('weekly.segmentUpdated') }}</summary><p>{{ t(`weekly.measurementReasons.${measurement.reason}`) }}</p></details>
         <p v-else class="weekly-muted">{{ t(`weekly.measurement.${measurement?.reason || 'insufficient'}`) }}</p>
       </section>
 
-      <section v-if="next" class="weekly-section weekly-next" aria-labelledby="weekly-next-title">
-        <h2 id="weekly-next-title">{{ t("weekly.next.title") }}</h2>
-        <p class="weekly-next__focus">{{ t(nextCopy.observation.key) }}</p>
-        <div v-if="next.todayPlan.items.length" class="weekly-next__songs">
+      <section class="weekly-section weekly-next" aria-labelledby="weekly-next-title">
+        <h2 id="weekly-next-title">{{ t("weekly.currentAdvice") }}</h2>
+        <p v-if="next" class="weekly-next__focus">{{ t(nextCopy.observation.key) }}</p>
+        <p v-if="!next || !next.todayPlan.items.length" class="weekly-muted">{{ t("weekly.noAdvice") }}</p>
+        <div v-if="next?.todayPlan.items.length" class="weekly-next__songs">
           <NuxtLink
             v-for="item in next.todayPlan.items"
             :key="`${item.songId}-${item.difficultyType}`"
@@ -170,94 +189,60 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
 </template>
 
 <style scoped>
-.weekly-page { width: 100%; display: grid; gap: 34px; padding-bottom: 42px; }
-.weekly-hero { position: relative; overflow: hidden; padding: clamp(24px, 5vw, 52px); border-radius: 26px; }
-.weekly-hero::after { content: ""; position: absolute; right: -44px; bottom: -62px; width: 190px; height: 190px; border: 1px solid var(--viewer-border); border-radius: 50%; box-shadow:none; pointer-events: none; }
-.weekly-hero__meta, .weekly-section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-.weekly-kicker { margin: 0; color:var(--viewer-accent-strong); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
-.weekly-hero time, .weekly-section__head span { color:var(--viewer-text-muted); font-size: 12px; }
-.weekly-hero h1 { text-wrap: balance; position: relative; z-index: 1; max-width: 650px; margin: 36px 0 10px; color:var(--viewer-text); font: 800 clamp(30px, 5vw, 50px)/1.16 var(--viewer-display-font); letter-spacing: -.035em; }
-.weekly-coverage summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }
-.weekly-coverage summary:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 3px; }
-.weekly-coverage { position: relative; z-index: 1; margin: 20px 0 0; color:var(--viewer-text-muted); font-size: 12px; }
-.weekly-passport-link { position: relative; z-index: 1; display: inline-flex; margin-top: 20px; color:var(--viewer-accent-strong); font-size: 13px; font-weight: 800; text-decoration: none; }
-.weekly-passport-link:hover, .weekly-passport-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
-.weekly-section { padding: 0 clamp(4px, 3vw, 26px); }
-.weekly-section h2 { margin: 0 0 18px; color:var(--viewer-text); font: 800 21px/1.25 var(--viewer-display-font); }
-.weekly-rhythm { position: relative; display: grid; gap: 0; }
-.weekly-rhythm::before { content: ""; position: absolute; top: 24px; bottom: 24px; left: 17px; width: 1px; background:linear-gradient(var(--viewer-accent-strong), var(--viewer-surface-subtle)); }
-.weekly-highlight { position: relative; display: grid; grid-template-columns: 35px 64px minmax(0, 1fr); gap: 14px; align-items: center; min-height: 104px; padding: 14px 0; }
-.weekly-highlight__beat { z-index: 1; display: grid; width: 35px; height: 35px; place-items: center; border: 1px solid var(--viewer-border); border-radius: 50%; color:var(--viewer-accent-strong); background:var(--viewer-surface); font-size: 11px; font-weight: 800; }
-.weekly-highlight__cover, .weekly-highlight__cover :deep(img) { display: block; width: 64px; height: 64px; border-radius: 14px; }
-.weekly-highlight__cover { overflow: hidden; box-shadow:0 7px 20px var(--viewer-shadow); }
-.weekly-highlight__body { min-width: 0; display: grid; gap: 4px; }
-.weekly-highlight__body a { min-width: 0; overflow: hidden; color:var(--viewer-text); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
-.weekly-highlight__body span, .weekly-highlight__body small { color:var(--viewer-text-muted); font-size: 12px; }
-.weekly-highlight__body p { margin: 2px 0 0; color:var(--viewer-text); font-weight: 700; }
-.weekly-highlight__body small { color:var(--viewer-accent-strong); }
-.weekly-measurement { border-top: 1px solid var(--viewer-border); padding-top: 28px; }
-.weekly-measurement__change { display: grid; grid-template-columns: minmax(70px, 1fr) auto auto; gap: 16px; align-items: baseline; padding: 18px 0; }
-.weekly-measurement__change > span { color:var(--viewer-text-muted); font-weight: 700; }
-.weekly-measurement__change strong { color:var(--viewer-text); font: 800 clamp(23px, 4vw, 34px)/1 var(--viewer-display-font); }
-.weekly-measurement__change strong i { margin: 0 5px; color:var(--viewer-accent-strong); font-style: normal; font-weight: 400; }
-.weekly-measurement__change small, .weekly-measurement__rating { color:var(--viewer-accent-strong); font-weight: 800; }
-.weekly-measurement p { margin: 10px 0 0; color:var(--viewer-text-muted); line-height: 1.65; }
-.weekly-next { padding-top: 28px; border-top: 1px solid var(--viewer-border); }
-.weekly-next__focus { margin: 0 0 18px; color:var(--viewer-text); font: 700 19px/1.5 var(--viewer-display-font); }
-.weekly-next__songs { display: grid; gap: 8px; }
-.weekly-next__songs a { min-width: 0; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 64px; padding: 8px 10px; border-radius: 14px; color:var(--viewer-text); text-decoration: none; transition: background .18s ease, transform .18s ease; }
-.weekly-next__songs a:hover, .weekly-next__songs a:focus-visible { background:var(--viewer-surface-subtle); transform: translateX(3px); }
-.weekly-next__songs :deep(img) { display: block; width: 48px; height: 48px; border-radius: 10px; }
-.weekly-next__songs span { min-width: 0; display: grid; gap: 3px; }
-.weekly-next__songs strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.weekly-page { width:100%; display:grid; gap:28px; padding-bottom:32px; }
+.weekly-hero { display:grid; gap:12px; }
+.weekly-hero__meta,.weekly-section__head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+.weekly-kicker { margin:0; color:var(--viewer-accent-strong); font-weight:700; font-size:14px; }
+.weekly-hero time { font-size:18px; line-height:1.5; font-weight:700; }
+.weekly-refresh { min-height:44px; border:1px solid var(--viewer-border); border-radius:8px; padding:0 14px; background:var(--viewer-surface); color:var(--viewer-accent-strong); cursor:pointer; font:inherit; }
+.weekly-summary { padding:16px; background:var(--viewer-surface); border-radius:12px; }
+.weekly-summary dl { display:flex; flex-wrap:wrap; gap:16px 28px; margin:0; }
+.weekly-summary dl > div { display:flex; align-items:baseline; gap:8px; }
+.weekly-summary dt { color:var(--viewer-text-muted); font-size:13px; }
+.weekly-summary dd { margin:0; font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.weekly-theme { margin:4px 0 0; font-size:21px; line-height:1.55; font-weight:700; text-wrap:pretty; }
+.weekly-coverage { margin:0; font-size:13px; line-height:1.65; color:var(--viewer-text-muted); }
+.weekly-passport-link { min-height:44px; display:inline-flex; align-items:center; justify-self:start; color:var(--viewer-accent-strong); text-decoration:none; font-size:14px; }
+.weekly-section { min-width:0; }
+.weekly-section h2 { font-size:19px; line-height:1.5; margin:0 0 12px; }
+.weekly-section__head > span { color:var(--viewer-text-muted); font-size:13px; }
+.weekly-rhythm { display:grid; }
+.weekly-highlight { display:grid; grid-template-columns:48px minmax(0,1fr); gap:12px; align-items:start; padding:16px 0; border-bottom:1px solid var(--viewer-border); }
+.weekly-highlight:last-child { border-bottom:0; }
+.weekly-highlight__beat { display:none; }
+.weekly-highlight__cover,.weekly-highlight__cover :deep(img) { display:block; width:48px; height:48px; border-radius:8px; }
+.weekly-highlight__body { min-width:0; display:grid; gap:5px; }
+.weekly-highlight__body a { color:var(--viewer-accent-strong); text-decoration:none; overflow-wrap:anywhere; }
+.weekly-highlight__body a strong { font-weight:500; font-size:14px; }
+.weekly-highlight__body span,.weekly-highlight__body small { font-size:13px; color:var(--viewer-text-muted); }
+.weekly-highlight__change { margin:0; font-size:17px; line-height:1.5; font-weight:700; }
+.weekly-measurement,.weekly-next { padding-top:24px; border-top:1px solid var(--viewer-border); }
+.weekly-measurement__change { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 16px; margin:16px 0 10px; }
+.weekly-measurement__change strong { font-size:22px; font-variant-numeric:tabular-nums; }
+.weekly-measurement__change i { color:var(--viewer-text-muted); font-style:normal; }
+.weekly-measurement__change small,.weekly-measurement__rating { color:var(--viewer-accent-strong); font-weight:700; }
+.weekly-measurement p { line-height:1.65; margin:10px 0 0; }
+.weekly-coverage summary { min-height:44px; align-content:center; cursor:pointer; }
+.weekly-next__focus { margin:0 0 12px; line-height:1.6; }
+.weekly-next__songs { display:grid; gap:8px; }
+.weekly-next__songs a { display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:center; gap:12px; min-height:64px; padding:8px 0; color:var(--viewer-text); text-decoration:none; }
+.weekly-next__songs :deep(img) { width:48px; height:48px; border-radius:8px; }
+.weekly-next__songs span { display:grid; gap:4px; min-width:0; overflow-wrap:anywhere; }
 .weekly-next__songs small { color:var(--viewer-text-muted); }
-.weekly-next__songs i { color:var(--viewer-accent-strong); font-style: normal; }
-.weekly-muted { color:var(--viewer-text-muted); }
-.weekly-state { display: grid; justify-items: start; gap: 16px; padding: 28px; }
-.weekly-state h1 { margin: 0; color:var(--viewer-text); font-size: 24px; }
-.weekly-button { min-height: 44px; display: inline-flex; align-items: center; padding: 0 17px; border: 0; border-radius: 12px; color:var(--viewer-on-primary); background:var(--viewer-primary); text-decoration: none; font: inherit; font-weight: 800; cursor: pointer; }
-.weekly-loading { display: grid; gap: 18px; padding: 28px; }
-.weekly-loading__line { display: block; height: 92px; border-radius: 18px; }
-
-:global(body.theme-dark .weekly-highlight__beat) { color:var(--viewer-primary); background:var(--viewer-surface-subtle); border-color:var(--viewer-border); }
-:global(body.theme-dark .weekly-rhythm::before) { background:linear-gradient(var(--viewer-primary), var(--viewer-surface-subtle)); }
-:global(body.theme-dark .weekly-hero h1),
-:global(body.theme-dark .weekly-section h2),
-:global(body.theme-dark .weekly-highlight__body a),
-:global(body.theme-dark .weekly-highlight__body p),
-:global(body.theme-dark .weekly-measurement__change strong),
-:global(body.theme-dark .weekly-next__focus),
-:global(body.theme-dark .weekly-next__songs a),
-:global(body.theme-dark .weekly-state h1) { color:var(--viewer-text); }
-:global(body.theme-dark .weekly-hero time),
-:global(body.theme-dark .weekly-section__head span),
-:global(body.theme-dark .weekly-coverage),
-:global(body.theme-dark .weekly-highlight__body span),
-:global(body.theme-dark .weekly-measurement p),
-:global(body.theme-dark .weekly-next__songs small),
-:global(body.theme-dark .weekly-muted) { color:var(--viewer-text-muted); }
-:global(body.theme-dark .weekly-kicker),
-:global(body.theme-dark .weekly-highlight__body small),
-:global(body.theme-dark .weekly-measurement__change small),
-:global(body.theme-dark .weekly-measurement__rating),
-:global(body.theme-dark .weekly-next__songs i) { color:var(--viewer-primary); }
-
-@media (max-width: 600px) {
-  .weekly-page { gap: 27px; }
-  .weekly-hero { padding: 24px 20px 30px; border-radius: 20px; }
-  .weekly-hero__meta { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .weekly-hero h1 { margin-top: 28px; font-size: 32px; }
-  .weekly-section { padding-inline: 3px; }
-  .weekly-highlight { grid-template-columns: 31px 54px minmax(0, 1fr); gap: 11px; min-height: 91px; }
-  .weekly-rhythm::before { left: 15px; }
-  .weekly-highlight__beat { width: 31px; height: 31px; }
-  .weekly-highlight__cover, .weekly-highlight__cover :deep(img) { width: 54px; height: 54px; border-radius: 12px; }
-  .weekly-measurement__change { grid-template-columns: 1fr auto; gap: 8px 12px; }
-  .weekly-measurement__change strong { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
-  .weekly-measurement__change small { grid-column: 2; grid-row: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .weekly-next__songs a { transition: none; }
+.weekly-next__songs i { color:var(--viewer-accent-strong); font-style:normal; }
+.weekly-page button:focus-visible,.weekly-page a:focus-visible,.weekly-page summary:focus-visible { outline:2px solid var(--viewer-accent-strong); outline-offset:3px; }
+.weekly-muted { color:var(--viewer-text-muted); line-height:1.6; }
+.weekly-state { display:grid; justify-items:start; gap:16px; padding:24px; }
+.weekly-state h1 { margin:0; font-size:24px; }
+.weekly-state p { margin:0; line-height:1.6; }
+.weekly-button { min-height:44px; display:inline-flex; align-items:center; padding:0 16px; border:0; border-radius:8px; color:var(--viewer-on-primary); background:var(--viewer-primary); text-decoration:none; font:inherit; cursor:pointer; }
+.weekly-loading { display:grid; gap:16px; }
+.weekly-loading__line { display:block; height:92px; border-radius:12px; }
+@media(max-width:600px) {
+ .weekly-summary dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px; }
+ .weekly-summary dl > div { justify-content:space-between; flex-wrap:wrap; gap:4px; }
+ .weekly-summary dt { max-width:calc(100% - 24px); }
+ .weekly-measurement__change > span { width:100%; }
+ .weekly-hero time { font-size:17px; }
 }
 </style>

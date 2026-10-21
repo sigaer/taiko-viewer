@@ -1,4 +1,5 @@
 {
+  "growthProfileEntry": "账号与绑定",
   "site": {
     "title": "Sakura Taiko Viewer",
     "shortTitle": "Taiko Viewer",
@@ -313,6 +314,11 @@
     }
   },
   "passport": {
+    "noValue": "暂无记录",
+    "noCurrent": "当前能力记录尚未建立。",
+    "unknownDate": "日期未知",
+    "factDates": "成绩事实 · {from} — {to}",
+
     "learnMore": "了解更多",
     "title": "成长档案",
     "description": "记录自己的成绩、关注方向与一路走来的变化。",
@@ -428,6 +434,13 @@
     }
   },
   "weekly": {
+    "refresh": "刷新",
+    "recordedTotals": "已确认的记录",
+    "currentAdvice": "当前建议",
+    "noAdvice": "暂无可用的推荐歌曲。",
+    "totals": {"distinctCharts": "已记录谱面", "pb": "PB", "fc": "新全连", "df": "新全良", "rankUpgrade": "评价提升", "completedGoals": "完成目标"},
+    "measurementReasons": {"algorithm-mismatch": "周初和周末采用的能力计算算法不同，暂不展示差值。", "model-mismatch": "两次记录使用的模型修订不同，暂不展示差值。", "measurement-version-mismatch": "两次记录使用的能力记录版本不同，暂不展示差值。"},
+
     "title": "这一周",
     "description": "回看这一周的成绩与练习记录。",
     "currentWeek": "本周 · 截至今天",

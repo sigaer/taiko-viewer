@@ -491,7 +491,15 @@ const deleteScore = async (row: SongRow) => {
             v-model:current-page="page"
             v-model:page-size="pageSize"
             background
-            layout="total, sizes, prev, pager, next"
+            layout="total, sizes"
+            :page-sizes="[25, 50, 100]"
+            :total="total"
+          />
+          <el-pagination
+            v-model:current-page="page"
+            v-model:page-size="pageSize"
+            background
+            layout="prev, pager, next"
             :page-sizes="[25, 50, 100]"
             :pager-count="5"
             :total="total"
@@ -536,8 +544,8 @@ const deleteScore = async (row: SongRow) => {
 .song-tags { display:flex; flex-wrap:wrap; gap:6px; }
 .song-tags:empty { display:none; }
 .judge-cell { display:grid; gap:4px; line-height:1.5; }
-.pagination-row { margin-top:16px; display:flex; justify-content:flex-end; }
-.pagination-row :deep(.el-pagination) { flex-wrap:wrap; gap:8px; }
+.pagination-row { margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:12px 20px; }
+.pagination-row :deep(.el-pagination) { flex-wrap:nowrap; gap:8px; }
 .mobile-scores { display:none; }
 @media(max-width:640px) {
  .binding-switcher { align-items:flex-start; }

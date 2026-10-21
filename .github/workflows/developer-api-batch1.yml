@@ -50,7 +50,7 @@ jobs:
         run: python -I tools/generate_bindings.py --check
       - name: Verify version projection and API batch regression tests
         working-directory: taiko_viewer
-        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs tests/viewerRelease.test.mjs tests/toolChartIdentity.test.mjs tests/uiBatch2State.test.mjs tests/accountSongsUi.test.mjs tests/recommendationToolIdentity.test.mjs tests/recommendationGoalIdentity.test.mjs tests/playerGoalService.test.mjs tests/playerGoalHttp.test.mjs tests/playerGoal.test.ts tests/goalEvaluation.test.ts tests/homeGrowthFeedback.test.ts tests/homeDailyProgress.test.mjs
+        run: node --experimental-strip-types --test tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs tests/viewerRelease.test.mjs tests/toolChartIdentity.test.mjs tests/uiBatch2State.test.mjs tests/accountSongsUi.test.mjs tests/recommendationToolIdentity.test.mjs tests/recommendationGoalIdentity.test.mjs tests/playerGoalService.test.mjs tests/playerGoalHttp.test.mjs tests/playerGoal.test.ts tests/goalEvaluation.test.ts tests/homeGrowthFeedback.test.ts tests/homeDailyProgress.test.mjs tests/growthPageState.test.mjs tests/passportNarrative.test.ts tests/passportFinalUx.test.ts tests/growthPassport.test.ts tests/growthWeekly.test.ts tests/growthPassportHttp.test.mjs tests/growthWeeklyHttp.test.mjs
       - name: Verify cross-language catalog Golden
         working-directory: packages/sakura-taiko-contract
         run: python -I tests/test_api_v1.py

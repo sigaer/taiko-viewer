@@ -4,14 +4,14 @@ import {parse,compileScript} from '@vue/compiler-sfc';
 import {createRenderer,h,Suspense,nextTick} from 'vue';
 const vue=new URL('../../node_modules/vue/dist/vue.runtime.esm-bundler.js',import.meta.url).href;
 let instance = 0;
-export async function component(path){
- const source=await readFile(new URL('../../'+path,import.meta.url),'utf8');
+export async function component(path, sourceRoot = new URL('../../',import.meta.url)){
+ const source=await readFile(new URL(path,sourceRoot),'utf8');
  let code=compileScript(parse(source).descriptor,{id:'batch2-component'}).content;
  code=code.replace(/from ["']vue["']/g,'from '+JSON.stringify(vue))
  .replace(/import \{ ElMessage, ElMessageBox \} from "element-plus";/g,'const { ElMessage, ElMessageBox } = globalThis.__batch2Messages;')
  .replace(/import \{ ElMessage \} from "element-plus";/g,'const { ElMessage } = globalThis.__batch2Messages;')
  .replace(/import \{ buildPageDescription \} from "~\/utils\/seo";/g,'const buildPageDescription = x => x;')
- .replace(/(["'])~\/utils\/(scoreRank|viewerError)\1/g,(_,q,name)=>JSON.stringify(new URL('../../utils/'+name+'.ts',import.meta.url).href));
+ .replace(/(["'])~\/utils\/([A-Za-z]+)\1/g,(_,q,name)=>JSON.stringify(new URL('../../utils/'+name+'.ts',import.meta.url).href));
  const compiled=ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
  let result;try{result=(await import('data:text/javascript,'+encodeURIComponent(compiled+'\n// fixture '+(++instance)))).default;}catch{throw new Error('SFC harness import failed: '+path);}
  result.render=()=>h('div');return result;
