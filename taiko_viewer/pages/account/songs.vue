@@ -265,7 +265,7 @@ const applyFilters = async () => {
 };
 
 const changeBinding = async (bindingId: number) => {
-  if (!bindingId || busy.value || bindingId === currentBinding.value?.id) return;
+  if (!bindingId || busy.value || lockingKey.value || bindingId === currentBinding.value?.id) return;
   const request = bindingSwitchGuard.capture();
   switchingBinding.value = true;
   editorVisible.value = false; importVisible.value = false;
@@ -369,7 +369,7 @@ const deleteScore = async (row: SongRow) => {
     <section class="binding-context" :aria-label="copy.currentBinding">
       <div v-if="profileReady && profileData.bindings.length" class="binding-switcher">
         <label for="scores-binding">{{ copy.currentBinding }}</label>
-        <el-select id="scores-binding" :model-value="currentBinding?.id" :placeholder="copy.chooseBinding" class="binding-select" :loading="switchingBinding" :disabled="busy" @change="changeBinding">
+        <el-select id="scores-binding" :model-value="currentBinding?.id" :placeholder="copy.chooseBinding" class="binding-select" :loading="switchingBinding" :disabled="busy || Boolean(lockingKey)" @change="changeBinding">
           <el-option v-for="binding in profileData.bindings" :key="binding.id" :label="binding.isManual ? `${binding.displayName}（${copy.manualSource}）` : binding.taikoId" :value="binding.id" />
         </el-select>
         <span v-if="currentBinding" class="source-label">{{ sourceLabel }}</span>

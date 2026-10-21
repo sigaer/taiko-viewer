@@ -33,7 +33,7 @@ async function fixture(fn){
 }
 test('actual scores page preserves rows, handles lock failure/success and suppresses stale identity completion',async()=>fixture(async({mount,pending,messages,states})=>{
  const m=await mount('pages/account/songs.vue');assert.equal(m.rows.length,1);assert.equal(m.resultReady,true);
- let op=m.toggleLock(m.rows[0],true);assert.equal(pending[0].path,'/api/account/songs/lock');pending.shift().reject({data:{statusMessage:'Synthetic lock failure'}});await op;assert.equal(m.rows[0].isLocked,false);assert.equal(messages.at(-1)[1],'Synthetic lock failure');
+ let op=m.toggleLock(m.rows[0],true);await m.changeBinding(2);assert.equal(pending.length,1,'binding switch waits for the active lock operation');assert.equal(pending[0].path,'/api/account/songs/lock');pending.shift().reject({data:{statusMessage:'Synthetic lock failure'}});await op;assert.equal(m.rows[0].isLocked,false);assert.equal(messages.at(-1)[1],'Synthetic lock failure');
  op=m.toggleLock(m.rows[0],true);pending.shift().resolve({});await op;assert.equal(m.rows[0].isLocked,true);
  op=m.toggleLock(m.rows[0],false);const late=pending.shift();const count=messages.length;states.get('account-user').value=null;await settle();assert.equal(m.rows.length,0);assert.equal(m.editorVisible,false);
  late.resolve({});await op;assert.equal(messages.length,count);assert.equal(m.lockingKey,'');
@@ -69,4 +69,23 @@ test('actual manual delete preserves confirmed identity payload and success/erro
 test('actual creator keeps catalog validation, source endpoint and score payload',async()=>fixture(async({mount,pending,messages})=>{
  const song={id:1455,song_name:'Synthetic',level_4:10};const m=await mount('components/account/AccountSongEditorDialog.vue',{modelValue:true,mode:'create',songCatalog:[song],isManual:false});
  await m.submit();assert.equal(pending.length,0);assert.equal(messages.at(-1)[0],'error');m.handleCatalogSelect({song});m.form.high_score=987654;await settle();const op=m.submit();assert.equal(pending[0].path,'/api/account/songs/create');assert.equal(pending[0].options.body.songNo,1455);assert.equal(pending[0].options.body.level,4);assert.equal(pending[0].options.body.values.high_score,987654);pending.shift().resolve({});await op;assert.equal(messages.at(-1)[0],'success');
+}));
+test('manual create/edit completes before its own real API generation broadcast, but rejects external identity changes',async()=>fixture(async({mount,pending,messages,states,emits})=>{
+ const beforeFetch=globalThis.$fetch;
+ const source=await readFile(new URL('../composables/useViewerApiFetch.ts',import.meta.url),'utf8');
+ globalThis.useViewerApiFetch=(await import('data:text/javascript,'+encodeURIComponent(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText))).useViewerApiFetch;
+ // Transport only: ofetch invokes onResponse after parsing, before resolving.
+ globalThis.$fetch=(path,options)=>new Promise((resolve,reject)=>pending.push({path,options,reject,resolve:value=>{options.onResponse?.({response:{ok:true,_data:value}});resolve(value);}}));
+ try{
+  const song={id:1455,song_name:'Synthetic',level_4:10};const props=reactive({modelValue:true,mode:'edit',initialSong:{songNo:1455,level:4,highScore:980000},songCatalog:[song],isManual:true});
+  props['onUpdate:modelValue']=value=>{props.modelValue=value;};props.onSaved=()=>emits.push('saved');
+  const m=await mount('components/account/AccountSongEditorDialog.vue',props);
+  for(const mode of ['edit','create']){
+   props.mode=mode;props.modelValue=true;await settle();if(mode==='create')m.handleCatalogSelect({song});
+   const generation=states.get('account-binding-generation').value,events=emits.length,op=m.submit();assert.equal(pending[0].path,'/api/account/manual');assert.equal(pending[0].options.body.action,'score-upsert');pending.shift().resolve({});await op;
+   assert.equal(states.get('account-binding-generation').value,generation+1);assert.equal(emits.length,events+1);assert.equal(props.modelValue,false);assert.equal(m.saving,false);assert.equal(messages.at(-1)[0],'success');
+  }
+  props.mode='edit';props.modelValue=true;await settle();let op=m.submit(),late=pending.shift(),count=messages.length,events=emits.length;states.get('account-binding-generation').value++;late.resolve({});await op;assert.equal(messages.length,count);assert.equal(emits.length,events);
+  props.modelValue=false;await settle();props.modelValue=true;await settle();const generation=states.get('account-binding-generation').value;op=m.submit();pending.shift().reject({data:{statusMessage:'Synthetic manual save failure'}});await op;assert.equal(states.get('account-binding-generation').value,generation);assert.equal(m.saving,false);assert.equal(messages.at(-1)[1],'Synthetic manual save failure');
+ }finally{if(beforeFetch===undefined)delete globalThis.$fetch;else globalThis.$fetch=beforeFetch;}
 }));

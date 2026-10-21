@@ -9,6 +9,10 @@ def sha(path):
   for block in iter(lambda:f.read(1048576),b''):h.update(block)
  return h.hexdigest()
 before=json.loads((out/'before-browser.json').read_text());after=json.loads((out/'after-browser.json').read_text());unit=json.loads((out/'unit-tests.json').read_text());build=json.loads((out/'normal-build.json').read_text())
+partial=out/'after-scores-browser.json'
+if partial.exists() and partial.stat().st_mtime > (out/'after-browser.json').stat().st_mtime:
+ recheck=json.loads(partial.read_text());assert len(recheck['records'])==8 and not recheck['errors'] and not recheck['writes'] and recheck['serverStopped'] and recheck['fixtureSha256']==after['fixtureSha256']
+ after['records']=recheck['records']+[r for r in after['records'] if r['page']!='scores']
 assert len(before['records'])==10 and len(after['records'])==24
 assert before['fixtureSha256']==after['fixtureSha256']
 assert before['errors']==['Must be called at the top of a `setup` function']
@@ -31,7 +35,7 @@ for key,title in [('scores','成绩'),('b30','B30'),('progress','进度')]:
   if row['page']==key and row['state']!='scores':parts.append(f'<li><a href="{row["screenshot"]}">{html.escape(row["state"])} · {row["width"]} · {row["locale"]}</a></li>')
  parts.append('</ul></section>')
 parts.append('<p>进度历史错误已在冻结 main 复现；失败后 loading 退出、页面内重试恢复，详见 <a href="after-browser.json">浏览器记录</a>、<a href="unit-tests.json">测试</a>及 <a href="validation.json">源码校验</a>。</p></html>');(out/'index.html').write_text('\n'.join(parts))
-files=[p for p in out.rglob('*') if p.is_file() and p.name not in ['evidence.tar.gz','evidence-manifest.json'] and not p.name.startswith('online-') and 'rollback' not in str(p)]
+files=[p for p in out.rglob('*') if p.is_file() and p.name not in ['evidence.tar.gz','evidence-manifest.json'] and not p.name.startswith(('online-','candidate-')) and 'rollback' not in str(p)]
 archive=out/'evidence.tar.gz'
 with tarfile.open(archive,'w:gz') as tar:
  for path in sorted(files):tar.add(path,arcname=str(path.relative_to(out)),recursive=False)

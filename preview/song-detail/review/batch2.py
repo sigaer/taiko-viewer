@@ -3,7 +3,7 @@ import argparse,json,os,signal,subprocess,time,urllib.request,hashlib
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from completion_output import review_output
-ap=argparse.ArgumentParser();ap.add_argument('stage',choices=['before','after']);ap.add_argument('--source');ap.add_argument('--checks',action='store_true');ap.add_argument('--entry-only',action='store_true');args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('stage',choices=['before','after']);ap.add_argument('--source');ap.add_argument('--checks',action='store_true');ap.add_argument('--entry-only',action='store_true');ap.add_argument('--page',choices=['scores','b30','progress']);args=ap.parse_args()
 signal.alarm(720)
 root=Path(__file__).resolve().parents[3];preview=root/'preview/song-detail';out=review_output();shots=out/'screenshots';shots.mkdir(exist_ok=True,parents=True)
 for link,target in [(preview/'node_modules',root/'taiko_viewer/node_modules'),(root/'taiko_viewer/.nuxt',preview/'.nuxt'),(Path(args.source or root/'taiko_viewer')/'.nuxt',preview/'.nuxt')]:
@@ -23,6 +23,7 @@ try:
    browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-dev-shm-usage'])
    try:
     for route,key in ([] if args.entry_only else [('/account/songs','scores'),('/tools/b30','b30'),('/tools/progress','progress')]):
+     if args.page and key!=args.page:continue
      cases=[(1440,'light','zh','scores'),(390,'light','zh','scores'),(414,'dark','ja','scores')]
      if args.stage=='before' and key=='progress':cases.append((390,'light','zh','options-failure'))
      if args.stage=='after':cases += [(414,'light','zh','empty'),(390,'dark','ja','scores-failure' if key=='scores' else 'options-failure' if key=='progress' else 'image-failure'),(1440,'dark','ja','manual' if key=='scores' else 'scores'),(390,'light','zh','guest'),(414,'light','zh','unbound')]
@@ -72,5 +73,5 @@ finally:
   os.killpg(server.pid,signal.SIGTERM)
   try:server.wait(timeout=12)
   except subprocess.TimeoutExpired:os.killpg(server.pid,signal.SIGKILL);server.wait()
- (out/('review-entry-browser.json' if args.entry_only else args.stage+'-browser.json')).write_text(json.dumps({'stage':args.stage,'source':args.source or str(root/'taiko_viewer'),'fixtureSha256':hashlib.sha256((preview/'server/utils/batch2-fixtures.ts').read_bytes()).hexdigest(),'records':records,'errors':errors,'writes':writes,'serverStopped':server is None or server.poll() is not None},ensure_ascii=False,indent=2)+'\n')
+ (out/('review-entry-browser.json' if args.entry_only else args.stage+'-'+args.page+'-browser.json' if args.page else args.stage+'-browser.json')).write_text(json.dumps({'stage':args.stage,'source':args.source or str(root/'taiko_viewer'),'fixtureSha256':hashlib.sha256((preview/'server/utils/batch2-fixtures.ts').read_bytes()).hexdigest(),'records':records,'errors':errors,'writes':writes,'serverStopped':server is None or server.poll() is not None},ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'stage':args.stage,'cases':len(records),'errors':len(errors),'writes':len(writes)}))
