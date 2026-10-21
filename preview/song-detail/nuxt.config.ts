@@ -16,6 +16,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   hooks: {
     'pages:extend'(pages) {
+      pages.push({name:'local-song-rows-review',path:'/__song-rows',file:resolve(previewRoot,'review/song_rows.vue')});
       pages.push({name:'local-growth-review',path:'/__growth-review',file:resolve(previewRoot,'review/growth.vue')});
       pages.push({name:'local-batch2-review',path:'/__batch2',file:resolve(previewRoot,'review/batch2.vue')});
       pages.push({name:'local-palette-controls',path:'/__palette-controls',file:resolve(previewRoot,'review/palette-controls.vue')});

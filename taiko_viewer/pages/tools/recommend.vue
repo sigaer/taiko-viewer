@@ -103,12 +103,12 @@ const ordinarySummary = computed(() => `${dim.value || (locale.value === 'ja' ? 
             <div v-if="!ordinaryData.items.length" class="empty-state">{{ copy.empty }}</div>
             <header v-if="ordinaryData.items.length" class="recommend-results-head"><h2>{{ locale === 'ja' ? 'おすすめ楽曲' : '推荐结果' }}</h2><span>{{ ordinaryData.items.length }}{{ locale === 'ja' ? '曲' : '首' }}</span></header>
             <div v-if="ordinaryData.items.length" class="target-list" data-testid="ordinary-list">
-              <article v-for="item in ordinaryData.items" :key="`${item.songId}-${item.level}`" class="target-item" :data-song-id="item.songId" :data-difficulty="item.level">
-                <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level), ...(item.canCreateGoal ? { recommendation: item.recommendationToken } : {}) } })" class="target-item__song">
-                  <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="56px" fit="contain" /><span class="target-item__text"><span class="target-item__title" lang="zh-CN">{{ item.title }}</span><span class="target-item__meta"><span>{{ t(difficultyLabelKey(item.level)) }}</span><span>{{ item.starLevel === null ? '—' : `${item.starLevel}★` }}</span><span v-if="item.isUnplayed">{{ copy.unplayed }}</span></span></span>
-                </NuxtLink>
-                <RecommendationGoalAction v-if="item.canCreateGoal" :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" />
-              </article>
+              <RecommendationSongItem v-for="item in ordinaryData.items" :key="`${item.songId}-${item.level}`"
+                :song-id="item.songId" :title="item.title" :difficulty-type="item.level" :star-level="item.starLevel"
+                :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level), ...(item.canCreateGoal ? { recommendation: item.recommendationToken } : {}) } })">
+                <template v-if="item.isUnplayed" #tags><span>{{ copy.unplayed }}</span></template>
+                <template v-if="item.canCreateGoal" #actions><RecommendationGoalAction :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" /></template>
+              </RecommendationSongItem>
             </div>
             <div v-if="ordinaryData.image" class="chart-wrap"><img :src="ordinaryData.image" :alt="copy.imageAlt" class="chart-image" /></div>
           </template>

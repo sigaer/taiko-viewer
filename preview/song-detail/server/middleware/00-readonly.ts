@@ -1,3 +1,4 @@
+import { songRowData, songRowRecommendations } from '../utils/song-row-fixtures';
 import { growthData } from '../utils/growth-fixtures';
 import { batch2Data, batch2Image } from '../utils/batch2-fixtures';
 import { createError, defineEventHandler, getCookie, getHeader, getMethod, getQuery, getRequestURL, readBody, setHeader, sendRedirect, setCookie } from 'h3';
@@ -6,7 +7,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
+    if (typeof state === 'string' && ['song-rows', 'scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
@@ -17,7 +18,8 @@ export default defineEventHandler(async event => {
   // This existing POST is a read-only preview operation. No goal is ever written.
   if(path==='/api/account/growth/goal/preview' && getMethod(event)==='POST'){
     if(getCookie(event,'song_preview_state')==='guest')throw createError({statusCode:401,statusMessage:'Synthetic preview is signed out'});
-    const body=await readBody(event),item=recommendations.find(item=>item.recommendationToken===body.recommendationToken && item.canCreateGoal);
+    const candidates=getCookie(event,'song_preview_state')==='song-rows'?songRowRecommendations:recommendations;
+    const body=await readBody(event),item=candidates.find(item=>item.recommendationToken===body.recommendationToken && item.canCreateGoal);
     if(!item)throw createError({statusCode:409,statusMessage:'Invalid synthetic recommendation source'});
     return {profileId:'1',scoreRevision:'synthetic-review-r1',songId:item.songId,difficultyType:item.level,title:item.title,starLevel:item.starLevel,goalOptions:['score-pb','ng-reduced','clear','fc','df'],activeGoal:null};
   }
@@ -45,6 +47,8 @@ export default defineEventHandler(async event => {
     if (state === 'slow') await new Promise(resolve => setTimeout(resolve, 1800));
     return growthData(path, getQuery(event), state);
   }
+  const shared=songRowData(path,getQuery(event),state);
+  if(shared!==undefined)return shared;
   const batch=batch2Data(path,getQuery(event),state);
   if(batch!==undefined)return batch;
   const extra=extraReadonly(path,getQuery(event),state);

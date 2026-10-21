@@ -40,9 +40,9 @@ async function confirm(){
 <template>
   <div class="recommendation-goal-action">
     <template v-if="saved"><span role="status">{{ copy.done }}</span> <NuxtLink :to="localePath('/#growth-title')">{{ copy.view }}</NuxtLink></template>
-    <button v-else :disabled="busy||invalid" :aria-busy="busy" @click="open">{{ copy.open }}</button>
+    <button v-else data-song-action :disabled="busy||invalid" :aria-busy="busy" @click="open">{{ copy.open }}</button>
     <p v-if="stale" role="alert">{{ copy.refresh }}</p><p v-else-if="failed" role="alert">{{ t('home.goal.error') }}</p>
-    <dialog ref="dialog" class="goal-dialog" @cancel.prevent="close" @close="focus?.focus()" :aria-label="t('home.goal.question')">
+    <dialog :ref="element => dialog = element as HTMLDialogElement | null" class="goal-dialog" @cancel.prevent="close" @close="focus?.focus()" :aria-label="t('home.goal.question')">
       <template v-if="preview">
         <h2>{{ t(same?'home.goal.selected':preview.activeGoal?'home.goal.replaceConfirm':'home.goal.question') }}</h2>
         <strong>{{ preview.title }}</strong><p>{{ t(difficultyLabelKey(preview.difficultyType)) }} · {{ preview.starLevel }}★</p>

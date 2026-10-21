@@ -56,7 +56,7 @@
 | `/grade` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/guide/:difficulty/:level` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/guide` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/` | default | 常规 1000 | 已适配 | 内容局部迁移 | 单次个人上下文；能力详情折叠；未知记录与读取失败分开；真实目标及深度内容后续 | [414](content-refinement-20261020/screenshots/after-home-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-home-1440-dark-ja.png) |
+| `/` | default | 常规 1000 | 已适配 | 内容局部迁移 | 单次个人上下文；能力详情折叠；未知记录与读取失败分开；真实目标及深度内容后续；本批今日推荐与普通列表共享紧凑歌曲条目，按钮移入同一条目 | [414](content-refinement-20261020/screenshots/after-home-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-home-1440-dark-ja.png) |
 | `/more` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/my/growth` | default | 常规 1000 | 已适配 | 本批内容完成 | 当前状态与范围 → 四周期／六维冻结趋势 → 成长事实 → 关注方向历史／目标与下一步；缺失数值与观察日期明确 | [成长／周报证据](../viewer-growth-weekly-20261021/README.md) |
 | `/my` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
@@ -76,7 +76,7 @@
 | `/tools` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/tools/note-count` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/tools/progress` | default | 密集 1180 | 已适配 | 本批内容完成 | 四类参数与结果／页码／下载；选项失败、空选项、生成失败分开，可重试；异步翻译上下文异常已修复 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
-| `/tools/recommend` | default | 常规 1000 | 已适配 | 普通推荐完成并复核 | 保留筛选、20 条结果与行密度；目标及来源限制不变 | [414](content-refinement-20261020/screenshots/after-recommend-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-recommend-1440-dark-ja.png) |
+| `/tools/recommend` | default | 常规 1000 | 已适配 | 普通推荐完成并复核 | 本批与首页今日推荐共享歌曲行；保留筛选、20 条结果与标签，难度／凭据／目标来源限制不变，目标 tab 不变 | [414](content-refinement-20261020/screenshots/after-recommend-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-recommend-1440-dark-ja.png) |
 | `/tools/trend` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/tools/word-cloud` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 
@@ -85,3 +85,5 @@
 年度入口使用普通表单空间，独立演出、时间线和分享图不套内容容器。播放器保留原 1440px 自有工作区、iframe 固定比例和全屏行为；普通公共容器不限制其画布。
 
 历史首批预览的社区为合成空社区，成长／周报仅为有限历史，不能作为本批完成证据。本批成长／周报使用完整合成 DTO 驱动真实 Vue／SVG，独立覆盖周期、维度、身份、错误与覆盖状态，见成长／周报证据。第二批进度预览现有完整合成选项、与条件相符的固定样图、合法空选项及请求失败响应；历史异步错误已复现并修复，详见第二批证据。后台仅独立登录入口外观初检，不声称运营和认证生命周期已验证。中日文截图均为 Linux Chromium 模拟视口，不代表真实设备。
+
+首页＋My Taiko 批次已完成[共享歌曲条目增量](../viewer-home-my-20261021/README.md)，不等同于首页深层内容或 My Taiko 总览完成；后续范围保持。

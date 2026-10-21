@@ -75,7 +75,7 @@ try:
          assert choices.nth(0).locator('button').count()==1
          assert choices.nth(1).locator('button').count()==choices.nth(2).locator('button').count()==0
          assert choices.nth(1).locator('p').inner_text()!=choices.nth(2).locator('p').inner_text()
-         assert all(x.get_attribute('href') for x in page.locator('.growth-plan__item').all())
+         assert all(x.get_attribute('href') for x in page.locator('.growth-plan__choice a[href]').all())
          if state=='changes' and width==1440:
           choices.nth(0).locator('button').click();assert page.locator('dialog[open]').count()==1
           page.keyboard.press('Escape');assert page.locator('dialog[open]').count()==0
