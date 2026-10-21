@@ -1,4 +1,5 @@
 import { songRowData, songRowRecommendations } from '../utils/song-row-fixtures';
+import { homeDeepData } from '../utils/home-deep-fixtures';
 import { growthData } from '../utils/growth-fixtures';
 import { batch2Data, batch2Image } from '../utils/batch2-fixtures';
 import { createError, defineEventHandler, getCookie, getHeader, getMethod, getQuery, getRequestURL, readBody, setHeader, sendRedirect, setCookie } from 'h3';
@@ -7,13 +8,20 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['song-rows', 'scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
+    if (typeof state === 'string' && ['home-deep', 'auth-failure', 'binding-failure', 'overview-failure', 'song-rows', 'scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
       event.node.req.headers.cookie=[...otherCookies,`song_preview_state=${state}`].join('; ');
     }
     return;
+  }
+  // The automatic acknowledgement is confined to this synthetic token. This
+  // controlled response neither persists a boundary nor reaches a real API.
+  if (path === '/api/account/growth/recent/ack' && getMethod(event) === 'POST' && getCookie(event, 'song_preview_state') === 'home-deep') {
+    const body = await readBody(event);
+    if (body.profileId !== '1' || body.acknowledgeToken !== 'synthetic-home-deep-token') throw createError({statusCode:409,statusMessage:'Synthetic boundary conflict'});
+    return {profileId:'1',acknowledgedToken:body.acknowledgeToken};
   }
   // This existing POST is a read-only preview operation. No goal is ever written.
   if(path==='/api/account/growth/goal/preview' && getMethod(event)==='POST'){
@@ -26,6 +34,9 @@ export default defineEventHandler(async event => {
   // No mutation is implemented or forwarded by this preview root.
   if (!['GET', 'HEAD'].includes(getMethod(event))) throw createError({ statusCode: 405, statusMessage: 'Read-only component preview' });
   const state = getCookie(event, 'song_preview_state') || 'scores';
+  if (path === '/api/account/auth/me' && state === 'auth-failure') throw createError({statusCode:503,statusMessage:'Synthetic authentication read failure'});
+  if (path === '/api/account/bindings' && state === 'binding-failure') throw createError({statusCode:503,statusMessage:'Synthetic binding read failure'});
+  if (path === '/api/account/growth/overview' && state === 'overview-failure') throw createError({statusCode:503,statusMessage:'Synthetic overview read failure'});
   const signedIn = state !== 'guest';
   if(state==='recent-failure' && path==='/api/account/growth/recent')throw createError({statusCode:503,statusMessage:'Synthetic recent-growth read failure'});
   if(state==='failure' && ['/api/content/home','/api/account/growth/overview','/api/account/growth/recent'].includes(path))throw createError({statusCode:503,statusMessage:'Synthetic preview unavailable'});
@@ -47,6 +58,8 @@ export default defineEventHandler(async event => {
     if (state === 'slow') await new Promise(resolve => setTimeout(resolve, 1800));
     return growthData(path, getQuery(event), state);
   }
+  const deep=homeDeepData(path,state);
+  if(deep!==undefined)return deep;
   const shared=songRowData(path,getQuery(event),state);
   if(shared!==undefined)return shared;
   const batch=batch2Data(path,getQuery(event),state);

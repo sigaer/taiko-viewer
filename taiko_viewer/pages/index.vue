@@ -8,7 +8,12 @@ const { t } = useI18n();
 const { data: homeContent, pending, error } = useHomeContent();
 const { accountUser } = useAccountAuthStatus();
 const homeStateResolver = useHomeState();
-await homeStateResolver.resolve();
+const initialState = homeStateResolver.resolve();
+if (import.meta.server) await initialState;
+const homeActive = ref(true);
+watch(homeStateResolver.revision, () => { if (homeActive.value) void homeStateResolver.resolve(); });
+onDeactivated(() => { homeActive.value = false; homeStateResolver.suspend(); });
+onActivated(() => { homeActive.value = true; void homeStateResolver.resolve(); });
 const homeState = homeStateResolver.homeState;
 const homeStateStatus = homeStateResolver.status;
 const homePresentation = computed(() =>
@@ -51,7 +56,7 @@ useViewerSeo(() => ({
   >
     <AnnualHero />
     <HomeGuestHome
-      v-if="homePresentation === 'guest' || homePresentation === 'public_error'"
+      v-if="homePresentation === 'guest'"
       :latest-songs="latestSongs"
       :content-pending="pending"
       :content-failed="!!error"
@@ -59,13 +64,16 @@ useViewerSeo(() => ({
       :events="eventSlides"
     />
 
-    <section v-else-if="homePresentation === 'loading'" class="home-neutral-loading" aria-live="polite">
-      <div class="home-neutral-loading__hero shimmer-card"></div>
-      <div class="home-neutral-loading__rail">
-        <div v-for="index in 4" :key="index" class="shimmer-card"></div>
-      </div>
-      <span class="sr-only">{{ t("layout.loading") }}</span>
-    </section>
+    <div v-else-if="homePresentation === 'loading' || homePresentation === 'public_error'" class="home-recovery">
+      <section class="home-account-status" :role="homePresentation === 'public_error' ? 'alert' : 'status'" :aria-busy="homePresentation === 'loading'">
+        <p>{{ homePresentation === 'loading' ? t('layout.loading') : t(`home.recovery.${homeStateResolver.error.value?.stage || 'auth'}`) }}</p>
+        <button v-if="homePresentation === 'public_error'" type="button" @click="homeStateResolver.refresh()">{{ t('home.growth.recent.retry') }}</button>
+      </section>
+      <HomeLatestSongs :songs="latestSongs" :pending="pending" :failed="!!error" />
+      <HomeCurrentEvents :events="eventSlides" />
+      <HomeDanSummary />
+      <HomePublicTools />
+    </div>
 
     <HomeAuthenticatedHome
       v-else
@@ -81,13 +89,9 @@ useViewerSeo(() => ({
 
 <style scoped>
 .home-page { display: grid; gap: 16px; width: 100%; min-width: 0;  }
-.home-neutral-loading { display: grid; gap: 18px; }
-.home-neutral-loading__hero { min-height: 360px; border-radius: 26px; }
-.home-neutral-loading__rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.home-neutral-loading__rail > div { min-height: 220px; border-radius: 18px; }
-@media (max-width: 720px) {
-  .home-neutral-loading__hero { min-height: 270px; }
-  .home-neutral-loading__rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .home-neutral-loading__rail > div { min-height: 150px; }
-}
+.home-recovery { display:grid; gap:var(--viewer-space-group); min-width:0; }
+.home-account-status { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; padding:16px 0; border-bottom:1px solid var(--viewer-border); }
+.home-account-status p { margin:0; color:var(--viewer-text-muted); }
+.home-account-status button { min-height:44px; padding:8px 16px; border:1px solid var(--viewer-border); border-radius:10px; background:var(--viewer-surface); color:var(--viewer-link); font:inherit; cursor:pointer; }
+.home-account-status button:focus-visible { outline:3px solid var(--viewer-link); outline-offset:3px; }
 </style>

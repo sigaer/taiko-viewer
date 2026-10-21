@@ -7,6 +7,8 @@ export const useAccountState = () => {
     accountUser,
     accountLoaded,
     accountAuthError,
+    accountAuthPending,
+    accountAuthStatus,
     resolveAccountUser,
     clearResolvedAccountUser
   } = useAccountAuthStatus();
@@ -23,6 +25,8 @@ export const useAccountState = () => {
     accountUser,
     accountLoaded,
     accountAuthError,
+    accountAuthPending,
+    accountAuthStatus,
     fetchCurrentUser,
     clearAccountUser
   };

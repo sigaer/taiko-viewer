@@ -16,15 +16,22 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
   const pending = ref(false);
   const error = shallowRef<unknown>(null);
   let generation = 0;
+  let identityGeneration = 0;
+  let disposed = false;
+  let inactive = false;
+  let needsLoad = false;
+  let ackRequest = 0;
   let acknowledgedToken = "";
-  let acknowledgingToken = "";
+  const acknowledging = new Map<string, number>();
   const identity = computed(() => `${toValue(userId) || ""}:${currentBinding.value?.id || ""}:${toValue(enabled)}`);
 
   const load = async (expectedIdentity = identity.value) => {
-    if (expectedIdentity !== identity.value) return false;
+    if (disposed || expectedIdentity !== identity.value) return false;
+    if (inactive) { needsLoad = true; return false; }
+    needsLoad = false;
     if (import.meta.server) { pending.value = Boolean(toValue(enabled) && toValue(userId)); return false; }
     const request = ++generation;
-    if (!toValue(enabled) || !toValue(userId)) { recent.value = emptyRecent(); pending.value = false; return false; }
+    if (!toValue(enabled) || !toValue(userId) || !currentBinding.value?.id) { recent.value = emptyRecent(); pending.value = false; error.value = null; return false; }
     pending.value = true;
     error.value = null;
     try {
@@ -45,30 +52,37 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
   const acknowledge = async (token: string) => {
     const snapshot = recent.value;
     const expectedIdentity = identity.value;
-    if (!snapshot.boundary.acknowledgeRequired || snapshot.boundary.currentToken !== token || acknowledgedToken === token || acknowledgingToken === token) return;
-    acknowledgingToken = token;
+    const epoch = identityGeneration;
+    if (disposed || inactive || !toValue(enabled) || !toValue(userId) || snapshot.profileId !== String(currentBinding.value?.id || "") || !token || !snapshot.boundary.acknowledgeRequired || snapshot.boundary.currentToken !== token || acknowledgedToken === token || acknowledging.has(token)) return;
+    const request = ++ackRequest;
+    acknowledging.set(token, request);
+    const current = () => !disposed && !inactive && epoch === identityGeneration && expectedIdentity === identity.value && recent.value.boundary.currentToken === token;
     try {
       const result = await apiFetch<RecentGrowthAcknowledgeResponse>("/api/account/growth/recent/ack", {
         method: "POST",
         retry: 0,
         body: { profileId: snapshot.profileId, expectedBoundary: snapshot.boundary.acknowledgedToken, acknowledgeToken: token }
       });
-      if (expectedIdentity !== identity.value || result.profileId !== snapshot.profileId) return;
+      if (!current() || result.profileId !== snapshot.profileId) return;
       acknowledgedToken = result.acknowledgedToken;
     } catch (cause) {
-      if (expectedIdentity === identity.value && Number((cause as { statusCode?: number }).statusCode) === 409) void load(expectedIdentity);
+      if (current() && Number((cause as { statusCode?: number; status?: number }).statusCode || (cause as { status?: number }).status) === 409) void load(expectedIdentity);
     } finally {
-      if (acknowledgingToken === token) acknowledgingToken = "";
+      if (acknowledging.get(token) === request) acknowledging.delete(token);
     }
   };
 
   watch(identity, () => {
     generation++;
+    identityGeneration++;
     acknowledgedToken = "";
-    acknowledgingToken = "";
+    acknowledging.clear();
     recent.value = emptyRecent();
+    error.value = null;
     void load();
   }, { immediate: true, flush: "sync" });
-  onScopeDispose(() => { generation++; });
+  onDeactivated(() => { inactive = true; needsLoad ||= pending.value; generation++; identityGeneration++; acknowledging.clear(); pending.value = false; });
+  onActivated(() => { if (!inactive) return; inactive = false; if (needsLoad) void load(); });
+  onScopeDispose(() => { disposed = true; generation++; identityGeneration++; acknowledging.clear(); });
   return { recent, pending, error, identity, refresh: load, acknowledge };
 };
