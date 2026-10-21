@@ -404,12 +404,12 @@ const submit = async () => {
 
 .composer-panel__head p {
   margin: 8px 0 0;
-  color:#745d4a;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
 .composer-back-link {
-  color:#b25237;
+  color:var(--viewer-error);
   text-decoration: none;
 }
 
@@ -465,7 +465,7 @@ const submit = async () => {
 }
 
 .block-editor__head span {
-  color:#866957;
+  color:var(--viewer-text-muted);
   font-size: 12px;
 }
 
@@ -510,7 +510,7 @@ const submit = async () => {
 
 body.theme-dark .composer-panel__head p,
 body.theme-dark .block-editor__head span {
-  color:#c6b2a4;
+  color:var(--viewer-text-muted);
 }
 
 body.theme-dark .block-editor {
@@ -521,7 +521,7 @@ body.theme-dark .block-editor--body { background:transparent; }
 
 body.theme-dark .block-list__item,
 body.theme-dark .image-card {
-  background:rgba(30, 23, 20, 0.74);
+  background:var(--viewer-overlay);
 }
 
 @media (max-width: 860px) {

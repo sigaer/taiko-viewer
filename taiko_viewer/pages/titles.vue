@@ -127,7 +127,7 @@ useViewerSeo(() => ({
   justify-content: center;
   border-radius: 12px;
   background:var(--viewer-surface-subtle);
-  color:#a36b39;
+  color:var(--viewer-link);
 }
 
 .header-icon svg {
@@ -155,10 +155,10 @@ useViewerSeo(() => ({
 .wikitable {
   width: 100%;
   min-width: 760px;
-  background-color:#f8f9fa;
-  color:#202122;
+  background-color:var(--viewer-surface-subtle);
+  color:var(--viewer-text);
   margin: 0;
-  border: 1px solid #a2a9b1;
+  border: 1px solid var(--viewer-border);
   border-collapse: collapse;
 }
 
@@ -168,14 +168,14 @@ useViewerSeo(() => ({
 
 .wikitable > thead > tr > th,
 .wikitable > tbody > tr > td {
-  border: 1px solid #a2a9b1;
+  border: 1px solid var(--viewer-border);
   padding: 0.6em 0.8em;
   font-size: 14px;
   line-height: 1.5;
 }
 
 .wikitable > thead > tr > th {
-  background-color:#eaecf0;
+  background-color:var(--viewer-surface-hover);
   text-align: center;
   font-weight: 600;
   color:var(--viewer-text-muted);
@@ -198,15 +198,15 @@ useViewerSeo(() => ({
   justify-content: center;
   padding: 0 8px;
   border-radius: 999px;
-  background:#fff0df;
-  color:#9a5b25;
+  background:var(--viewer-warning-surface);
+  color:var(--viewer-warning);
   font-weight: 700;
 }
 
 .title-name {
   min-width: 180px;
   font-weight: 600;
-  color:#5f4632;
+  color:var(--viewer-text);
 }
 
 .song-links {
@@ -221,11 +221,11 @@ useViewerSeo(() => ({
 .empty-cell {
   padding: 32px !important;
   text-align: center;
-  color:#8d7968;
+  color:var(--viewer-text-muted);
 }
 
 .wikitable a {
-  color:#0645ad;
+  color:var(--viewer-link);
   text-decoration: none;
 }
 

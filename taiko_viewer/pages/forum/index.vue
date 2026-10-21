@@ -88,7 +88,7 @@ onBeforeUnmount(() => {
 .community-icon-link { position: relative; width: 44px; color:var(--viewer-text-muted); border: 1px solid var(--viewer-border); font-size: 22px; }
 .community-icon-link svg { width: 20px; height: 20px; }
 .community-publish { padding: 0 16px; color:var(--viewer-on-primary); background:var(--viewer-primary); box-shadow:none; }
-.notification-dot { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 2px 4px; border-radius: 99px; color:#fff; background:#c64c3a; font-size: 10px; text-align: center; }
+.notification-dot { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 2px 4px; border-radius: 99px; color:var(--viewer-on-primary); background:var(--viewer-primary); font-size: 10px; text-align: center; }
 .community-filters { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
 .community-filters::-webkit-scrollbar { display: none; }
 .community-filter, .community-section-link { min-height: 38px; display: inline-flex; align-items: center; flex: 0 0 auto; padding: 0 14px; border: 1px solid var(--viewer-border); border-radius: 999px; color:var(--viewer-text-muted); background:transparent; font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }

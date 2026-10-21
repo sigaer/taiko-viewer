@@ -88,7 +88,7 @@ useViewerSeo(() => ({
 }
 
 .guide-entry-hero__eyebrow {
-  color:#b55a38;
+  color:var(--viewer-link);
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -101,7 +101,7 @@ useViewerSeo(() => ({
 
 .guide-entry-hero__copy p {
   margin: 0;
-  color:#6e5947;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -141,7 +141,7 @@ useViewerSeo(() => ({
 
 .guide-entry-card__title p {
   margin: 4px 0 0;
-  color:#8d745e;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
@@ -165,15 +165,15 @@ useViewerSeo(() => ({
   padding: 9px 14px;
   border-radius: 999px;
   text-decoration: none;
-  color:#6b4c34;
+  color:var(--viewer-text);
   background:var(--viewer-surface-subtle);
-  border: 1px solid rgba(185, 137, 95, 0.18);
+  border: 1px solid var(--viewer-border);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .guide-entry-link:hover {
   transform: translateY(-1px);
-  box-shadow:0 10px 18px rgba(157, 115, 75, 0.12);
+  box-shadow:0 10px 18px var(--viewer-shadow);
 }
 
 @media (max-width: 720px) {

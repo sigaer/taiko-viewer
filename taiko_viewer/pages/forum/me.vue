@@ -249,7 +249,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 
 .me-profile-panel__main p {
   margin: 8px 0 0;
-  color:#765f4d;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -266,8 +266,8 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
   padding: 11px 16px;
   border-radius: 999px;
   text-decoration: none;
-  color:#fff;
-  background:linear-gradient(135deg, var(--viewer-primary), #f08a24);
+  color:var(--viewer-on-primary);
+  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
 }
 
 .panel-head {
@@ -284,7 +284,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 
 .panel-head p {
   margin: 6px 0 0;
-  color:#77604d;
+  color:var(--viewer-text-muted);
   line-height: 1.8;
 }
 
@@ -314,14 +314,14 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 }
 
 .moderation-item__meta span {
-  color:#816754;
+  color:var(--viewer-text-muted);
   font-size: 13px;
 }
 
 body.theme-dark .me-profile-panel__main p,
 body.theme-dark .panel-head p,
 body.theme-dark .moderation-item__meta span {
-  color:#c7b4a7;
+  color:var(--viewer-text-muted);
 }
 
 body.theme-dark .moderation-item {

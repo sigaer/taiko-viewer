@@ -104,6 +104,6 @@ onBeforeUnmount(() => visibilityObserver?.disconnect());
 }
 
 .song-cover-picture {
-  background:var(--el-fill-color-light, #f5f7fa);
+  background:var(--el-fill-color-light, var(--viewer-surface-subtle));
 }
 </style>

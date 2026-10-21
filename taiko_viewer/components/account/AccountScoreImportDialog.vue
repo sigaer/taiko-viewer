@@ -79,11 +79,11 @@ const submit = async () => {
 </template>
 
 <style scoped>
-.import-intro { margin: 0 0 14px; color:#756452; line-height: 1.65; }
-.import-label { display: block; margin-bottom: 7px; color:#4b392c; font-size: 13px; font-weight: 750; }
+.import-intro { margin: 0 0 14px; color:var(--viewer-text-muted); line-height: 1.65; }
+.import-label { display: block; margin-bottom: 7px; color:var(--viewer-text); font-size: 13px; font-weight: 750; }
 .import-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; min-height: 32px; }
-.import-hint { color:#8f7c69; font-size: 12px; }
-.import-count { color:#2e8a61; font-size: 13px; font-weight: 700; }
-.import-error { color:#c94e42; font-size: 13px; font-weight: 650; }
+.import-hint { color:var(--viewer-text-muted); font-size: 12px; }
+.import-count { color:var(--viewer-success); font-size: 13px; font-weight: 700; }
+.import-error { color:var(--viewer-error); font-size: 13px; font-weight: 650; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 </style>

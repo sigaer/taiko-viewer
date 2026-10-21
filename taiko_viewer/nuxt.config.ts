@@ -1,10 +1,13 @@
 import { defineNuxtConfig } from "nuxt/config";
+import { readFileSync } from "node:fs";
 import packageJson from "./package.json" with { type: "json" };
 import { CANONICAL_BASE_URL, SITE_TITLE } from "./utils/seo";
 
 const appVersion = process.env.npm_package_version || packageJson.version;
-const themeColor = "#ffb37c";
-const backgroundColor = "#f4efe7";
+// Browser chrome and install metadata read the public CSS palette as well.
+const paletteCss = readFileSync(new URL("./assets/css/tokens.css", import.meta.url), "utf8");
+const themeColor = paletteCss.match(/--viewer-bg:\s*(#[\da-f]{6})/i)![1];
+const backgroundColor = themeColor;
 const pwaDescription = "Taiko data viewer, song list, guides, forum and tools.";
 const baiduSiteVerification =
   process.env.NUXT_PUBLIC_BAIDU_SITE_VERIFICATION || "codeva-IokhumYAJv";

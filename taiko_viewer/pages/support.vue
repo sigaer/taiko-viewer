@@ -551,13 +551,13 @@ const submit = async () => {
 }
 
 .section-icon.alt {
-  background:rgba(88, 136, 197, 0.2);
-  color:#3c6aa6;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-link);
 }
 
 .section-icon.warm {
-  background:rgba(255, 190, 126, 0.22);
-  color:#c77432;
+  background:var(--viewer-surface-subtle);
+  color:var(--viewer-warning);
 }
 
 .hero-card {
@@ -619,7 +619,7 @@ const submit = async () => {
 
 .ticket-id {
   font-weight: 600;
-  color:#a56535;
+  color:var(--viewer-warning);
 }
 
 .ticket-tags {
@@ -630,7 +630,7 @@ const submit = async () => {
 
 .ticket-content {
   margin: 0;
-  color:#3f2f23;
+  color:var(--viewer-text);
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
@@ -650,14 +650,14 @@ const submit = async () => {
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  border: 1px dashed rgba(171, 141, 110, 0.36);
+  border: 1px dashed var(--viewer-border);
   color:var(--viewer-text-muted);
   background:var(--viewer-surface-subtle);
 }
 
 .ticket-thread {
   padding-top: 8px;
-  border-top: 1px solid rgba(171, 141, 110, 0.18);
+  border-top: 1px solid var(--viewer-border);
   display: grid;
   gap: 12px;
 }

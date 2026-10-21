@@ -246,7 +246,7 @@ useViewerSeo({
 }
 
 .tab-container {
-  border: 1px solid rgba(165, 138, 110, 0.25);
+  border: 1px solid var(--viewer-border);
   border-radius: 12px;
   padding: 12px;
   background:var(--viewer-surface-subtle);
@@ -263,16 +263,16 @@ useViewerSeo({
 
 .tab button {
   border: none;
-  background:#f6efe6;
+  background:var(--viewer-surface-subtle);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
-  color:#5a4a3b;
+  color:var(--viewer-text);
   cursor: default;
 }
 
 .tab.active button {
-  background:#eddcc9;
+  background:var(--viewer-surface-hover);
   font-weight: 600;
 }
 

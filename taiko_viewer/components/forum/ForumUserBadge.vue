@@ -54,8 +54,8 @@ const localizedTaikoId = computed(() =>
   height: 46px;
   border-radius: 14px;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  box-shadow:0 10px 22px rgba(116, 69, 38, 0.18);
+  border: 2px solid var(--viewer-border);
+  box-shadow:0 10px 22px var(--viewer-shadow);
 }
 
 .forum-user.compact .forum-user__avatar {
@@ -90,19 +90,19 @@ const localizedTaikoId = computed(() =>
   border-radius: 999px;
   font-size: 11px;
   line-height: 1.2;
-  color:#fff;
+  color:var(--viewer-on-primary);
 }
 
 .role-user {
-  background:linear-gradient(135deg, #d4733b, #f0ab42);
+  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
 }
 
 .role-moderator {
-  background:linear-gradient(135deg, #3a80ac, #5da8d9);
+  background:linear-gradient(135deg, var(--viewer-info), var(--viewer-info));
 }
 
 .role-admin {
-  background:linear-gradient(135deg, #b93b45, #e16d3a);
+  background:linear-gradient(135deg, var(--viewer-error), var(--viewer-error));
 }
 
 .forum-user__detail {
@@ -114,6 +114,6 @@ const localizedTaikoId = computed(() =>
 }
 
 body.theme-dark .forum-user__detail {
-  color:#c7b4a6;
+  color:var(--viewer-text-muted);
 }
 </style>

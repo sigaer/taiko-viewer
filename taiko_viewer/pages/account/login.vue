@@ -168,7 +168,7 @@ const submit = async () => {
 
 .auth-head p {
   margin: 8px 0 18px;
-  color:#7f6c5e;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 

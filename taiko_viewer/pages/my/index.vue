@@ -96,7 +96,7 @@ const personalLinks = [
   margin-top: 16px;
   padding: 0 16px;
   border-radius: 12px;
-  color:#fff;
+  color:var(--viewer-on-primary);
   background:var(--viewer-accent-strong);
   text-decoration: none;
   font-weight: 700;
@@ -123,8 +123,8 @@ const personalLinks = [
 
 .my-link:hover,
 .my-link:focus-visible {
-  border-color:rgba(196, 164, 132, 0.62);
-  background:rgba(196, 164, 132, 0.12);
+  border-color:var(--viewer-border);
+  background:var(--viewer-surface-subtle);
 }
 
 @media (max-width: 560px) {

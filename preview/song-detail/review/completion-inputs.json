@@ -1,0 +1,815 @@
+{
+  "states": {
+    "changes": {
+      "overview": {
+        "profileId": "1",
+        "scoreRevision": "synthetic-review-r1",
+        "activeGoal": null,
+        "recentCompletedGoal": null,
+        "playerState": {
+          "overallRating": 11.18,
+          "skills": [
+            {
+              "key": "big_song",
+              "value": 11.2
+            },
+            {
+              "key": "stamina",
+              "value": 10.7
+            },
+            {
+              "key": "speed",
+              "value": 10.9
+            },
+            {
+              "key": "accuracy_power",
+              "value": 11.4
+            },
+            {
+              "key": "rhythm",
+              "value": 10.8
+            },
+            {
+              "key": "complex",
+              "value": 10.6
+            }
+          ],
+          "priorityDimension": "complex",
+          "tiedDimensions": [
+            "complex"
+          ],
+          "dataSufficiency": "ready",
+          "basis": "lowest-valid-dimension",
+          "sampleCount": 120
+        },
+        "todayPlan": {
+          "targetDimension": "complex",
+          "items": [
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "初音未来的激唱",
+              "isUnplayed": false,
+              "candidateIndicator": 10.5,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1357-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": [
+                "score-pb",
+                "ng-reduced"
+              ]
+            },
+            {
+              "songId": 1503,
+              "level": 4,
+              "title": "活声Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.51,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1503-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": []
+            },
+            {
+              "songId": 1502,
+              "level": 4,
+              "title": "钝响Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.52,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1502-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5
+            }
+          ],
+          "usedFallback": false
+        },
+        "dailyProgress": {
+          "calendarDay": "2026-10-20",
+          "dataMode": "SNAPSHOT_LIMITED",
+          "attendance": "played",
+          "uniqueCharts": 2,
+          "events": [
+            {
+              "songId": 1455,
+              "level": 4,
+              "title": "合成练习曲 A",
+              "occurredAt": "2026-10-20T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "factOccurredAt": {
+                "score-pb": "2026-10-20T05:00:00Z"
+              },
+              "evidence": "history",
+              "evidenceRevision": "synthetic-today-r1",
+              "importance": 65,
+              "facts": [
+                {
+                  "type": "score-pb",
+                  "before": 970000,
+                  "after": 980000,
+                  "delta": 10000
+                },
+                {
+                  "type": "rank-upgrade",
+                  "before": 5,
+                  "after": 6,
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "合成练习曲 B",
+              "occurredAt": "2026-10-20T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "factOccurredAt": {
+                "ng-reduced": "2026-10-20T05:00:00Z"
+              },
+              "evidence": "history",
+              "evidenceRevision": "synthetic-today-r1",
+              "importance": 65,
+              "facts": [
+                {
+                  "type": "ng-reduced",
+                  "before": 10,
+                  "after": 4,
+                  "delta": -6
+                }
+              ]
+            }
+          ]
+        },
+        "dataStatus": {
+          "mode": "SNAPSHOT_LIMITED",
+          "timezone": "Asia/Shanghai"
+        }
+      },
+      "recent": {
+        "profileId": "1",
+        "state": "new",
+        "observedAt": "2026-10-20T06:00:00Z",
+        "facts": [
+          {
+            "id": "fixture-1455-score-pb",
+            "factKey": "fixture-1455-score-pb",
+            "ownerId": "990093",
+            "bindingId": "1",
+            "type": "score-pb",
+            "title": "合成练习曲 A",
+            "songId": 1455,
+            "difficultyType": 4,
+            "before": 970000,
+            "after": 980000,
+            "delta": 10000,
+            "evidence": {
+              "source": "score-history",
+              "sourceRevision": "synthetic-today-r1",
+              "evidenceVersion": 1
+            },
+            "temporal": {
+              "attributedDay": "2026-10-20",
+              "occurredAt": "2026-10-20T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "precision": "instant"
+            }
+          },
+          {
+            "id": "fixture-1503-score-pb",
+            "factKey": "fixture-1503-score-pb",
+            "ownerId": "990093",
+            "bindingId": "1",
+            "type": "score-pb",
+            "title": "较早记录",
+            "songId": 1503,
+            "difficultyType": 4,
+            "before": 900000,
+            "after": 910000,
+            "delta": 10000,
+            "evidence": {
+              "source": "score-history",
+              "sourceRevision": "synthetic-today-r1",
+              "evidenceVersion": 1
+            },
+            "temporal": {
+              "attributedDay": "2026-10-19",
+              "occurredAt": "2026-10-19T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "precision": "instant"
+            }
+          },
+          {
+            "id": "fixture-1501-ng-reduced",
+            "factKey": "fixture-1501-ng-reduced",
+            "ownerId": "990093",
+            "bindingId": "1",
+            "type": "ng-reduced",
+            "title": "日期未知记录",
+            "songId": 1501,
+            "difficultyType": 4,
+            "before": 8,
+            "after": 5,
+            "delta": -3,
+            "evidence": {
+              "source": "score-history",
+              "sourceRevision": "synthetic-today-r1",
+              "evidenceVersion": 1
+            },
+            "temporal": {
+              "attributedDay": null,
+              "occurredAt": null,
+              "observedAt": "2026-10-20T06:00:00Z",
+              "precision": "unknown"
+            }
+          }
+        ],
+        "totalFacts": 3,
+        "boundary": {
+          "acknowledgedToken": "fixture-before",
+          "currentToken": null,
+          "acknowledgeRequired": false,
+          "recovered": false
+        }
+      }
+    },
+    "played-only": {
+      "overview": {
+        "profileId": "1",
+        "scoreRevision": "synthetic-review-r1",
+        "activeGoal": null,
+        "recentCompletedGoal": null,
+        "playerState": {
+          "overallRating": 11.18,
+          "skills": [
+            {
+              "key": "big_song",
+              "value": 11.2
+            },
+            {
+              "key": "stamina",
+              "value": 10.7
+            },
+            {
+              "key": "speed",
+              "value": 10.9
+            },
+            {
+              "key": "accuracy_power",
+              "value": 11.4
+            },
+            {
+              "key": "rhythm",
+              "value": 10.8
+            },
+            {
+              "key": "complex",
+              "value": 10.6
+            }
+          ],
+          "priorityDimension": "complex",
+          "tiedDimensions": [
+            "complex"
+          ],
+          "dataSufficiency": "ready",
+          "basis": "lowest-valid-dimension",
+          "sampleCount": 120
+        },
+        "todayPlan": {
+          "targetDimension": "complex",
+          "items": [
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "初音未来的激唱",
+              "isUnplayed": false,
+              "candidateIndicator": 10.5,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1357-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": [
+                "score-pb",
+                "ng-reduced"
+              ]
+            },
+            {
+              "songId": 1503,
+              "level": 4,
+              "title": "活声Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.51,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1503-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": []
+            },
+            {
+              "songId": 1502,
+              "level": 4,
+              "title": "钝响Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.52,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1502-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5
+            }
+          ],
+          "usedFallback": false
+        },
+        "dailyProgress": {
+          "calendarDay": "2026-10-20",
+          "dataMode": "SNAPSHOT_LIMITED",
+          "attendance": "played",
+          "uniqueCharts": 2,
+          "events": [
+            {
+              "songId": 1455,
+              "level": 4,
+              "title": "合成练习曲 A",
+              "occurredAt": "2026-10-20T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "factOccurredAt": {
+                "score-pb": "2026-10-20T05:00:00Z"
+              },
+              "evidence": "history",
+              "evidenceRevision": "synthetic-today-r1",
+              "importance": 65,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ]
+            },
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "合成练习曲 B",
+              "occurredAt": "2026-10-20T05:00:00Z",
+              "observedAt": "2026-10-20T06:00:00Z",
+              "factOccurredAt": {
+                "ng-reduced": "2026-10-20T05:00:00Z"
+              },
+              "evidence": "history",
+              "evidenceRevision": "synthetic-today-r1",
+              "importance": 65,
+              "facts": [
+                {
+                  "type": "played",
+                  "before": null,
+                  "after": null,
+                  "delta": null
+                }
+              ]
+            }
+          ]
+        },
+        "dataStatus": {
+          "mode": "SNAPSHOT_LIMITED",
+          "timezone": "Asia/Shanghai"
+        }
+      },
+      "recent": {
+        "profileId": "1",
+        "state": "new",
+        "observedAt": "2026-10-20T06:00:00Z",
+        "facts": [],
+        "totalFacts": 0,
+        "boundary": {
+          "acknowledgedToken": "fixture-before",
+          "currentToken": null,
+          "acknowledgeRequired": false,
+          "recovered": false
+        }
+      }
+    },
+    "no-play": {
+      "overview": {
+        "profileId": "1",
+        "scoreRevision": "synthetic-review-r1",
+        "activeGoal": null,
+        "recentCompletedGoal": null,
+        "playerState": {
+          "overallRating": 11.18,
+          "skills": [
+            {
+              "key": "big_song",
+              "value": 11.2
+            },
+            {
+              "key": "stamina",
+              "value": 10.7
+            },
+            {
+              "key": "speed",
+              "value": 10.9
+            },
+            {
+              "key": "accuracy_power",
+              "value": 11.4
+            },
+            {
+              "key": "rhythm",
+              "value": 10.8
+            },
+            {
+              "key": "complex",
+              "value": 10.6
+            }
+          ],
+          "priorityDimension": "complex",
+          "tiedDimensions": [
+            "complex"
+          ],
+          "dataSufficiency": "ready",
+          "basis": "lowest-valid-dimension",
+          "sampleCount": 120
+        },
+        "todayPlan": {
+          "targetDimension": "complex",
+          "items": [
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "初音未来的激唱",
+              "isUnplayed": false,
+              "candidateIndicator": 10.5,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1357-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": [
+                "score-pb",
+                "ng-reduced"
+              ]
+            },
+            {
+              "songId": 1503,
+              "level": 4,
+              "title": "活声Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.51,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1503-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": []
+            },
+            {
+              "songId": 1502,
+              "level": 4,
+              "title": "钝响Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.52,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1502-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5
+            }
+          ],
+          "usedFallback": false
+        },
+        "dailyProgress": {
+          "calendarDay": "2026-10-20",
+          "dataMode": "SNAPSHOT_LIMITED",
+          "attendance": "not_played",
+          "uniqueCharts": 0,
+          "events": []
+        },
+        "dataStatus": {
+          "mode": "SNAPSHOT_LIMITED",
+          "timezone": "Asia/Shanghai"
+        }
+      },
+      "recent": {
+        "profileId": "1",
+        "state": "new",
+        "observedAt": "2026-10-20T06:00:00Z",
+        "facts": [],
+        "totalFacts": 0,
+        "boundary": {
+          "acknowledgedToken": "fixture-before",
+          "currentToken": null,
+          "acknowledgeRequired": false,
+          "recovered": false
+        }
+      }
+    },
+    "unknown": {
+      "overview": {
+        "profileId": "1",
+        "scoreRevision": "synthetic-review-r1",
+        "activeGoal": null,
+        "recentCompletedGoal": null,
+        "playerState": {
+          "overallRating": 11.18,
+          "skills": [
+            {
+              "key": "big_song",
+              "value": 11.2
+            },
+            {
+              "key": "stamina",
+              "value": 10.7
+            },
+            {
+              "key": "speed",
+              "value": 10.9
+            },
+            {
+              "key": "accuracy_power",
+              "value": 11.4
+            },
+            {
+              "key": "rhythm",
+              "value": 10.8
+            },
+            {
+              "key": "complex",
+              "value": 10.6
+            }
+          ],
+          "priorityDimension": "complex",
+          "tiedDimensions": [
+            "complex"
+          ],
+          "dataSufficiency": "ready",
+          "basis": "lowest-valid-dimension",
+          "sampleCount": 120
+        },
+        "todayPlan": {
+          "targetDimension": "complex",
+          "items": [
+            {
+              "songId": 1357,
+              "level": 4,
+              "title": "初音未来的激唱",
+              "isUnplayed": false,
+              "candidateIndicator": 10.5,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1357-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": [
+                "score-pb",
+                "ng-reduced"
+              ]
+            },
+            {
+              "songId": 1503,
+              "level": 4,
+              "title": "活声Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.51,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1503-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5,
+              "goalOptions": []
+            },
+            {
+              "songId": 1502,
+              "level": 4,
+              "title": "钝响Likelihood",
+              "isUnplayed": false,
+              "candidateIndicator": 10.52,
+              "referenceIndicator": 10.4,
+              "deviationRatio": 0.02,
+              "inStrictRange": true,
+              "starLevel": 10,
+              "recommendationToken": "synthetic-review-1502-4",
+              "canCreateGoal": true,
+              "difficultyType": 4,
+              "targetDimension": "complex",
+              "reason": "target-dimension",
+              "currentBestScore": 980000,
+              "currentBestRank": 5
+            }
+          ],
+          "usedFallback": false
+        },
+        "dailyProgress": {
+          "calendarDay": "2026-10-20",
+          "dataMode": "SNAPSHOT_LIMITED",
+          "attendance": "unknown",
+          "uniqueCharts": null,
+          "events": []
+        },
+        "dataStatus": {
+          "mode": "SNAPSHOT_LIMITED",
+          "timezone": "Asia/Shanghai"
+        }
+      },
+      "recent": {
+        "profileId": "1",
+        "state": "caught-up",
+        "observedAt": null,
+        "facts": [],
+        "totalFacts": 0,
+        "boundary": {
+          "acknowledgedToken": null,
+          "currentToken": null,
+          "acknowledgeRequired": false,
+          "recovered": false
+        }
+      }
+    }
+  },
+  "latestSongs": [
+    {
+      "id": 1357,
+      "song_name": "初音未来的激唱",
+      "song_name_jp": "初音ミクの激唱",
+      "open_day": "12/1/2050",
+      "type": "游戏音乐",
+      "bpm": "170.31-200",
+      "shelf_status": 0,
+      "level_1": 4,
+      "level_2": 6,
+      "level_3": 6,
+      "level_4": 10,
+      "level_5": 10
+    },
+    {
+      "id": 1503,
+      "song_name": "活声Likelihood",
+      "song_name_jp": "活声ライクリフド",
+      "open_day": "10/14/2026",
+      "type": "南梦宫原创音乐",
+      "bpm": "150-244",
+      "shelf_status": 0,
+      "level_1": 5,
+      "level_2": 7,
+      "level_3": 8,
+      "level_4": 10,
+      "level_5": "-"
+    },
+    {
+      "id": 1502,
+      "song_name": "钝响Likelihood",
+      "song_name_jp": "鈍響ライクリフド",
+      "open_day": "10/14/2026",
+      "type": "南梦宫原创音乐",
+      "bpm": "200",
+      "shelf_status": 0,
+      "level_1": 4,
+      "level_2": 6,
+      "level_3": 7,
+      "level_4": 10,
+      "level_5": "-"
+    },
+    {
+      "id": 1501,
+      "song_name": "技神暗鬼",
+      "song_name_jp": "技神闇鬼",
+      "open_day": "10/14/2026",
+      "type": "游戏音乐",
+      "bpm": "-",
+      "shelf_status": 0,
+      "level_1": 5,
+      "level_2": 7,
+      "level_3": 8,
+      "level_4": 9,
+      "level_5": 10
+    },
+    {
+      "id": 1500,
+      "song_name": "LUMINΔ",
+      "song_name_jp": "LUMINΔ",
+      "open_day": "10/6/2026",
+      "type": "游戏音乐",
+      "bpm": "-",
+      "shelf_status": 0,
+      "level_1": 3,
+      "level_2": 6,
+      "level_3": 7,
+      "level_4": 9,
+      "level_5": 0
+    },
+    {
+      "id": 1466,
+      "song_name": "小咚绘图之歌",
+      "song_name_jp": "どんちゃんえかき歌",
+      "open_day": "9/23/2026",
+      "type": "南梦宫原创音乐",
+      "bpm": "114.64-142.07",
+      "shelf_status": 0,
+      "level_1": 3,
+      "level_2": 4,
+      "level_3": 5,
+      "level_4": 7,
+      "level_5": 2
+    },
+    {
+      "id": 1459,
+      "song_name": "给我听Waruloo大人的歌！",
+      "song_name_jp": "ワルルーさまの歌を聴けぇ！",
+      "open_day": "9/23/2026",
+      "type": "南梦宫原创音乐",
+      "bpm": "127",
+      "shelf_status": 0,
+      "level_1": 3,
+      "level_2": 5,
+      "level_3": 7,
+      "level_4": 8,
+      "level_5": "-"
+    },
+    {
+      "id": 1458,
+      "song_name": "闇之魂",
+      "song_name_jp": "闇の魂",
+      "open_day": "9/23/2026",
+      "type": "南梦宫原创音乐",
+      "bpm": "142",
+      "shelf_status": 0,
+      "level_1": 4,
+      "level_2": 7,
+      "level_3": 7,
+      "level_4": 9,
+      "level_5": "-"
+    }
+  ]
+}

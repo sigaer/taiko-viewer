@@ -58,7 +58,7 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
 }
 
 .guest-account-value__copy > span {
-  color:#f4c990;
+  color:var(--viewer-link);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -67,7 +67,7 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
 
 .guest-account-value h2 {
   margin: 0;
-  color:#fff8ef;
+  color:var(--viewer-text);
   font-size: clamp(25px, 3.5vw, 40px);
   line-height: 1.15;
 }
@@ -75,7 +75,7 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
 .guest-account-value p {
   max-width: 620px;
   margin: 0;
-  color:#e7d5c7;
+  color:var(--viewer-text-muted);
   line-height: 1.7;
 }
 
@@ -87,10 +87,10 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
 
 .guest-account-value__features span {
   padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--viewer-border);
   border-radius: 999px;
-  color:#fff4e7;
-  background:rgba(255, 255, 255, 0.07);
+  color:var(--viewer-text);
+  background:var(--viewer-surface-subtle);
   font-size: 12px;
 }
 
@@ -101,15 +101,15 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
   align-items: center;
   padding: 0 17px;
   border-radius: 13px;
-  color:#5d3927;
-  background:#f6d4a7;
+  color:var(--viewer-on-primary);
+  background:var(--viewer-primary);
   text-decoration: none;
   font-size: 13px;
   font-weight: 800;
 }
 
 .guest-account-value__cta:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--viewer-surface);
   outline-offset: 3px;
 }
 
@@ -121,10 +121,10 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
   gap: 20px;
   justify-self: end;
   padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--viewer-border);
   border-radius: 22px;
-  background:rgba(255, 255, 255, 0.09);
-  box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  background:var(--viewer-surface-subtle);
+  box-shadow:inset 0 1px 0 var(--viewer-shadow);
   transform: rotate(2deg);
 }
 
@@ -135,14 +135,14 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
 
 .guest-account-value__score small,
 .guest-account-value__score span {
-  color:#e8c49e;
+  color:var(--viewer-link);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.14em;
 }
 
 .guest-account-value__score strong {
-  color:#fff8ef;
+  color:var(--viewer-text);
   font-size: 36px;
   line-height: 1;
 }
@@ -157,7 +157,7 @@ const features = ["B30", "Rating", t("tools.recommend"), t("tools.progress"), t(
   height: 7px;
   display: block;
   border-radius: 999px;
-  background:linear-gradient(90deg, #f3b66c, #f8dfba);
+  background:linear-gradient(90deg, var(--viewer-link), var(--viewer-link));
 }
 
 @media (max-width: 720px) {

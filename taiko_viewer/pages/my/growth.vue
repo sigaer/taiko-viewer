@@ -243,7 +243,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 
 .passport-page { width: 100%; display: grid; gap: clamp(30px, 5vw, 54px); padding-bottom: 52px; }
 .passport-hero { position: relative; overflow: hidden; display: grid; gap: 20px; padding: clamp(24px, 5vw, 54px); border-radius: 28px; }
-.passport-hero::after { content: ""; position: absolute; right: -90px; top: -100px; width: 270px; height: 270px; border: 1px solid rgba(184,77,55,.19); border-radius: 50%; box-shadow:none; pointer-events: none; }
+.passport-hero::after { content: ""; position: absolute; right: -90px; top: -100px; width: 270px; height: 270px; border: 1px solid var(--viewer-border); border-radius: 50%; box-shadow:none; pointer-events: none; }
 .passport-hero__topline, .passport-section__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .passport-kicker { margin: 0 0 7px; color:var(--viewer-accent-strong); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .passport-hero h1, .passport-section h2 { margin: 0; color:var(--viewer-text); font-family: var(--viewer-display-font); }
@@ -260,7 +260,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-skills { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; padding-top: 20px; border-top: 1px solid var(--viewer-border); }
 .passport-skill { display: grid; grid-template-columns: minmax(72px, auto) minmax(50px, 1fr) 44px; align-items: center; gap: 10px; min-width: 0; }
 .passport-skill span { overflow: hidden; color:var(--viewer-text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.passport-skill i { height: 2px; overflow: hidden; border-radius: 99px; background:rgba(151,105,73,.14); }
+.passport-skill i { height: 2px; overflow: hidden; border-radius: 99px; background:var(--viewer-surface-subtle); }
 .passport-skill b { display: block; height: 100%; border-radius: inherit; background:var(--viewer-accent-strong); }
 .passport-skill strong { color:var(--viewer-text); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
 .passport-section { min-width: 0; padding: 0 clamp(3px, 3vw, 28px); }
@@ -269,7 +269,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-range, .passport-dimensions { display: flex; flex-wrap: wrap; gap: 7px; }
 .passport-controls { display: grid; gap: 8px; margin: 18px 0 14px; }
 .passport-range button, .passport-dimensions button { min-height: 44px; padding: 0 11px; border: 0; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; color:var(--viewer-text-muted); background:transparent; cursor: pointer; font: inherit; font-size: 12px; }
-.passport-range button[aria-pressed="true"], .passport-dimensions button[aria-pressed="true"] { border-bottom-color:var(--viewer-accent-strong); color:var(--viewer-accent-strong); font-weight: 700; background:rgba(184,77,55,.04); }
+.passport-range button[aria-pressed="true"], .passport-dimensions button[aria-pressed="true"] { border-bottom-color:var(--viewer-accent-strong); color:var(--viewer-accent-strong); font-weight: 700; background:var(--viewer-surface-subtle); }
 .passport-range button:focus-visible, .passport-dimensions button:focus-visible, .passport-chart circle:focus-visible { outline: 3px solid var(--viewer-accent-strong); outline-offset: 3px; }
 .passport-dimensions { gap: 3px; }
 .passport-dimensions button { padding-inline: 9px; }
@@ -314,7 +314,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
 .passport-next__focus { margin: 20px 0 10px; color:var(--viewer-text); font: 700 18px/1.5 var(--viewer-display-font); }
 .passport-next__songs { display: grid; gap: 7px; }
 .passport-next__songs a { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 11px; min-height: 62px; padding: 8px; border-radius: 13px; color:var(--viewer-text); text-decoration: none; }
-.passport-next__songs a:hover, .passport-next__songs a:focus-visible { background:rgba(196,164,132,.12); }
+.passport-next__songs a:hover, .passport-next__songs a:focus-visible { background:var(--viewer-surface-subtle); }
 .passport-next__songs :deep(img) { width: 46px; height: 46px; border-radius: 9px; }
 .passport-next__songs span { min-width: 0; display: grid; gap: 2px; }
 .passport-next__songs strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

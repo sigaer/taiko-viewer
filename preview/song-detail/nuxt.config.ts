@@ -16,6 +16,8 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   hooks: {
     'pages:extend'(pages) {
+      pages.push({name:'local-palette-controls',path:'/__palette-controls',file:resolve(previewRoot,'review/palette-controls.vue')});
+      pages.push({name:'local-completion-review',path:'/__completion',file:resolve(previewRoot,'review/completion.vue')});
       pages.push({name:'local-design-review',path:'/__review',file:resolve(previewRoot,'review/index.vue')});
     }
   },
