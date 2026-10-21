@@ -4,7 +4,7 @@ from pathlib import Path
 signal.alarm(300)
 root=Path(__file__).resolve().parents[3];out=review_output();start=time.monotonic()
 node='/www/server/nvm/versions/node/v24.13.0/bin/node'
-tests=['versionProjection.test.mjs','developerApiBatch1.test.mjs','developerAnalysisWorker.test.mjs','viewerRelease.test.mjs','toolChartIdentity.test.mjs','recommendationToolIdentity.test.mjs','recommendationGoalIdentity.test.mjs','playerGoalService.test.mjs','playerGoalHttp.test.mjs','playerGoal.test.ts','goalEvaluation.test.ts','homeGrowthFeedback.test.ts','growthFeedback.test.ts','homeStateResolver.test.ts','homePresentation.test.ts','personalHomeLocale.test.ts']
+tests=['versionProjection.test.mjs','developerApiBatch1.test.mjs','developerAnalysisWorker.test.mjs','viewerRelease.test.mjs','toolChartIdentity.test.mjs','recommendationToolIdentity.test.mjs','recommendationGoalIdentity.test.mjs','playerGoalService.test.mjs','playerGoalHttp.test.mjs','playerGoal.test.ts','goalEvaluation.test.ts','homeGrowthFeedback.test.ts','homeDailyProgress.test.mjs','growthFeedback.test.ts','homeStateResolver.test.ts','homePresentation.test.ts','personalHomeLocale.test.ts']
 log=out/'related-tests.log'
 with log.open('w') as f:
  r=subprocess.run([node,'--experimental-strip-types','--test','--test-concurrency=1',*['tests/'+t for t in tests]],cwd=root/'taiko_viewer',stdout=f,stderr=f,timeout=180)

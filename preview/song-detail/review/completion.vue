@@ -2,6 +2,7 @@
 import inputs from './completion-inputs.json';
 import type { PlayerGrowthOverview, RecentGrowthResponse } from '~/types/player-growth';
 import type { SongCatalogItem } from '~/types/content';
+import type { PlayerGoal } from '~/types/player-goal';
 definePageMeta({ hidePageHeader: true, navKey: '/' });
 const route = useRoute();
 const state = computed(() => String(route.query.state || 'changes'));
@@ -9,6 +10,18 @@ const fixture = computed(() => inputs.states[state.value as keyof typeof inputs.
 const overview = computed(() => {
   const value = JSON.parse(JSON.stringify(fixture.value.overview)) as PlayerGrowthOverview;
   if (state.value === 'no-recommendations') value.todayPlan.items = [];
+  if (state.value === 'goal-and-played') {
+    const changed = value.dailyProgress.events[0];
+    const score = changed.facts.find(fact => fact.type === 'score-pb')!;
+    value.recentCompletedGoal = {
+      id: 'synthetic-completed-goal', profileId: value.profileId, status: 'completed',
+      songId: changed.songId, difficultyType: changed.level, title: changed.title, starLevel: 10,
+      goalType: 'score-pb', baseline: { highScore: score.before },
+      completionEvidence: { observationRevision: changed.evidenceRevision,
+        result: { goalType: 'score-pb', before: score.before, after: score.after, facts: {} } }
+    } as PlayerGoal;
+    value.dailyProgress.events[1].facts = [{ type: 'played', before: null, after: null, delta: null }];
+  }
   return value;
 });
 const recent = computed(() => {

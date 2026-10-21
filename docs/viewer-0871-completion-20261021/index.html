@@ -6,8 +6,8 @@
 <tr><td>B 最新歌曲</td><td>components/home/HomeLatestSongs.vue</td><td>原排序前 5 首，五张封面/文字占位；1000/1180/1440 桌面单行，390/414 手机横滑及查看全部。</td></tr>
 <tr><td>C 今日进展</td><td>components/home/DailyProgress.vue、utils/homeGrowthFeedback.ts、tests/homeGrowthFeedback.test.ts</td><td>原日期归属与 uniqueCharts；去重核对绑定、难度、变化值、源/version/revision；加载、失败或未知不隐藏其他模块唯一有效记录。</td></tr>
 <tr><td>D 淡青色</td><td>assets/css/tokens.css、assets/css/main.css、nuxt.config.ts；另 47 个 Vue 文件仅样式配色</td><td>浅暗控件、42 个当前色对（最低 4.595:1）；容器、边距与非首页结构不变。</td></tr></table>
-<p>本次实际运行：126 项相关及既有 CI 回归单测通过，Contract 生成与跨语言 Golden 通过，16 组同数据前后条件、2 组控件条件通过。合成 DTO 仅用于状态/视觉验证，fixture API 写入为 0，未以 405 拒绝写入作为业务通过。正常应用生产构建由原 GitHub Actions 和受控部署流程执行。</p>
+<p>本次实际运行：128 项相关及既有 CI 回归单测通过，Contract 生成与跨语言 Golden 通过，16 组同数据前后条件、2 组目标承接变化回归及 2 组控件条件通过。合成 DTO 仅用于状态/视觉验证，fixture API 写入为 0，未以 405 拒绝写入作为业务通过。正常应用生产构建由原 GitHub Actions 和受控部署流程执行。</p>
 <p>原提示由 !item.goalOptions?.length 将字段缺失与服务端空选项混为一类。响应没有具体原因码，因此不按标题、星级或成绩猜测不可用原因。近期 observedAt 是观测时间，不等于游玩日；今日沿用服务端归属，数量不按可见行重算。</p>
-<p>原始截图、完整记录、57 个运行时文件 hash 与冻结输入已持久归档到 QA 证据库（不在未提交工作区内），归档 ID：<code>viewer-0871-completion-20261021</code>；文件 <code>source-evidence.tar.gz</code>，SHA-256：<code>53e3faf84d92718f90c9c22b4194fae3b4df122dbf2f89e200ec079995a279a5</code>。最终交付链接指向该归档及在线只读检查记录。运行时代码在证据迁移前后逐字节一致。</p>
+<p>原始截图、完整记录、58 个源码文件 hash 与冻结输入已持久归档到 QA 证据库（不在未提交工作区内），归档 ID：<code>viewer-0871-completion-20261021</code>；文件 <code>source-evidence-final.tar.gz</code>，SHA-256：<code>1be1c743c3ff9781105928b76f7160543bea4cecaf217135cf445578e9584400</code>。最终交付链接指向该归档及在线只读检查记录。最终待合并源码与归档内 sourceSha256 逐项一致。另以真实中日文组件验证目标承接变化与另一张仅游玩谱面共存的文案。</p>
 <p>复跑使用 scripts/memory/run_qa.sh，显式 VIEWER_REVIEW_OUT 指向仓库外持久目录，执行 preview/song-detail/review/completion_tests.py、verify_completion_scope.mjs、completion.py before/after、completion_controls.py、completion_report.py。completion.py 的 before 使用 e827d9c 源码根目录参数 --source；所有脚本和冻结输入随源码提交。未部署本地 fixture 后端或评审路由。</p>
 <p>后台、年度/导出、播放器媒体画布、历史段位表业务色及社区自定义 accent 保留既有例外。本轮不启动第二批 UI。</p></body></html>

@@ -3,7 +3,7 @@ from completion_output import review_output
 import argparse,hashlib,json,os,re,signal,subprocess,time,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-parser=argparse.ArgumentParser();parser.add_argument('stage',choices=['before','after']);parser.add_argument('--source',type=Path);parser.add_argument('--probe',action='store_true');args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('stage',choices=['before','after']);parser.add_argument('--source',type=Path);parser.add_argument('--probe',action='store_true');parser.add_argument('--goal-relocated-only',action='store_true');args=parser.parse_args()
 signal.alarm(720)
 root=Path(__file__).resolve().parents[3];preview=root/'preview/song-detail';source=args.source or root/'taiko_viewer'
 out=review_output();out.mkdir(parents=True,exist_ok=True);shots=out/'screenshots';shots.mkdir(exist_ok=True)
@@ -14,6 +14,7 @@ env={k:os.environ[k] for k in ['PATH','TMPDIR','NODE_OPTIONS'] if k in os.enviro
 node='/www/server/nvm/versions/node/v24.13.0/bin/node';base='http://127.0.0.1:3208';server=None;records=[];errors=[];writes=[];started=time.monotonic()
 conditions=[(1440,'light','zh','changes'),(390,'dark','ja','changes'),(414,'light','ja','changes'),(390,'light','zh','played-only'),(414,'dark','zh','no-play'),(1440,'dark','ja','unknown'),(414,'light','zh','daily-loading'),(390,'light','ja','daily-failed'),(1440,'light','zh','recent-failed'),(414,'dark','ja','recent-loading'),(390,'light','zh','recent-unknown'),(390,'light','zh','no-recommendations'),(1000,'light','zh','changes'),(1180,'light','zh','changes'),(1000,'light','zh','latest-loading'),(390,'light','zh','latest-loading')]
 if args.probe:conditions=conditions[:2]
+if args.goal_relocated_only:conditions=[(390,'light','zh','goal-and-played'),(1440,'dark','ja','goal-and-played')]
 try:
  with (out/f'{args.stage}-preview.log').open('w') as log:
   server=subprocess.Popen([node,str(root/'taiko_viewer/node_modules/@nuxt/cli/bin/nuxi.mjs'),'dev',str(preview),'--host','127.0.0.1','--port','3208','--no-fork','--dotenv',str(preview/'.env.preview-empty')],cwd=root,env=env,stdout=log,stderr=log,start_new_session=True)
@@ -55,12 +56,16 @@ try:
         assert daily.locator('h2').inner_text()==('今日の進捗' if lang=='ja' else '今日进展')
         assert daily.locator('.growth-progress__count').count()==(0 if state=='unknown' else 1 if state!='no-play' else 0)
        else:assert daily.count()==0 and recent.count()==3,row
-       if state not in ['daily-loading','daily-failed','unknown','no-play','played-only']:
+       if state not in ['daily-loading','daily-failed','unknown','no-play','played-only','goal-and-played']:
         assert row['dailyEvents']==2,row
         assert '980,000' in daily.inner_text() and '970,000' in daily.inner_text()
         if state=='recent-failed':assert page.locator('.recent-growth__state button').is_visible()
         if state in ['recent-loading','recent-failed','recent-unknown']:assert recent.count()==0,row
         else:assert recent.count()==2,row
+       if state=='goal-and-played':
+        assert row['dailyEvents']==1 and page.locator('.growth-goal--completed').count()==1,row
+        assert ('今天的变化已经记在上面了' if lang=='zh' else '今日の変化は上にまとめています') in daily.inner_text()
+        assert ('暂无可确认的成绩变化' if lang=='zh' else '成績の変化はまだ確認できません') not in daily.inner_text()
        if state=='played-only':assert row['dailyEvents']==2 and '→' not in daily.inner_text()
        if state in ['no-play','unknown']:assert row['dailyEvents']==0
        if state not in ['daily-loading','daily-failed']:
@@ -91,6 +96,6 @@ finally:
   os.killpg(server.pid,signal.SIGTERM)
   try:server.wait(timeout=12)
   except subprocess.TimeoutExpired:os.killpg(server.pid,signal.SIGKILL);server.wait()
- result={'stage':args.stage,'source':str(source),'fixtureSha256':hashlib.sha256((preview/'review/completion-inputs.json').read_bytes()).hexdigest(),'cases':records,'pageErrors':errors,'apiWrites':writes,'seconds':round(time.monotonic()-started,2),'ownedServerStopped':server is None or server.poll() is not None}
- (out/f'{args.stage}-browser.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+ result={'run':os.environ.get('QA_RUN_DIR'),'stage':args.stage,'source':str(source),'fixtureSha256':hashlib.sha256((preview/'review/completion-inputs.json').read_bytes()).hexdigest(),'cases':records,'pageErrors':errors,'apiWrites':writes,'seconds':round(time.monotonic()-started,2),'ownedServerStopped':server is None or server.poll() is not None}
+ (out/('goal-relocated-browser.json' if args.goal_relocated_only else f'{args.stage}-browser.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'stage':args.stage,'cases':len(records),'pass':True,'pageErrors':len(errors),'apiWrites':len(writes)}))

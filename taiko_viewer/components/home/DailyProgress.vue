@@ -17,7 +17,7 @@ const dateLabel = computed(() => {
     { month: 'numeric', day: 'numeric', timeZone: 'Asia/Shanghai' }).format(date) : '';
 });
 const hasChanges = computed(() => props.progress.events.some(event => event.facts.some(fact => fact.type !== 'played')));
-const changesElsewhere = computed(() => !props.progress.events.length && props.original.events.some(event => event.facts.some(fact => fact.type !== 'played')));
+const changesElsewhere = computed(() => !hasChanges.value && props.original.events.some(event => event.facts.some(fact => fact.type !== 'played')));
 const stateText = computed(() => props.progress.attendance === 'unknown' ? t('home.growth.progressUnavailable')
   : props.progress.attendance === 'not_played' ? t('home.growth.noPlay')
   : changesElsewhere.value ? t('home.growth.dailyElsewhere') : !hasChanges.value ? copy.value.quiet : '');
