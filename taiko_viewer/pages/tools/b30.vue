@@ -85,7 +85,7 @@ const submit = async () => {
   <div class="b30-page">
     <AccountToolGate>
       <el-form class="chart-parameters" label-position="top" @submit.prevent="submit">
-        <el-form-item :label="copy.topN"><el-input-number v-model="n" :min="1" :max="50" controls-position="right" /></el-form-item>
+        <el-form-item :label="copy.topN"><el-input-number v-model="n" :min="1" :max="50" :precision="0" controls-position="right" /></el-form-item>
         <el-form-item :label="copy.dim"><el-select v-model="dim" clearable :placeholder="copy.placeholder"><el-option v-for="option in dimOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
         <el-form-item :label="copy.dynamicOrigin"><el-switch v-model="dynamicOrigin" :aria-label="copy.dynamicOrigin" /></el-form-item>
         <el-button type="primary" :loading="loading" :disabled="!n || n < 1 || n > 50" native-type="submit">{{ copy.submit }}</el-button>

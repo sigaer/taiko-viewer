@@ -5,6 +5,8 @@ def run(page,context,key,state,base,out):
  def image_ready():page.locator('.chart-image, .progress-image').wait_for();page.wait_for_function('Array.from(document.querySelectorAll(".chart-image,.progress-image")).every(x=>x.complete&&x.naturalWidth>0)')
  checks=[]
  if key=='scores' and state=='scores':
+  titles=page.locator('.song-table .song-title-cell');assert titles.nth(2).locator('a').count()==0 and titles.nth(2).locator('.custom-song-title').count()==1
+  link=titles.first.locator('a');assert 'difficulty=1' in link.get_attribute('href');link.click();page.locator('.difficulty-tab[aria-selected=true][data-track=EASY]').wait_for();page.screenshot(path=str(out/'screenshots'/'score-desktop-navigation.png'));page.go_back(wait_until='networkidle');checks.extend(['custom-title-no-catalog-link','song-navigation-preserves-difficulty'])
   search=page.locator('.filter-row input').first;search.fill('长曲名');page.locator('button[type=submit]').click();settle();assert page.locator('.song-table .el-table__body tbody tr').count()==1;checks.append('search')
   search.fill('');page.locator('button[type=submit]').click();settle();page.locator('.el-pagination .btn-next').click();settle();assert '2' in page.locator('.el-pagination .number.is-active').inner_text();checks.append('pagination')
   page.locator('.song-table').get_by_role('button',name='编辑',exact=True).first.click();page.locator('.el-dialog:visible').wait_for();assert page.locator('.el-dialog:visible input').count()>5;page.locator('.el-dialog:visible .el-dialog__headerbtn').click();checks.append('editor')
@@ -35,6 +37,8 @@ def run(page,context,key,state,base,out):
 def run_mobile(page,key,out):
  checks=[]
  if key=='scores':
+  custom=page.locator('.mobile-score').nth(2);assert custom.locator('a').count()==0 and custom.locator('.custom-song-title').count()==1
+  link=page.locator('.mobile-score').first.locator('a');assert 'difficulty=1' in link.get_attribute('href');link.click();page.locator('.difficulty-tab[aria-selected=true][data-track=EASY]').wait_for();page.screenshot(path=str(out/'screenshots'/'score-mobile-navigation.png'));page.go_back(wait_until='networkidle');checks.extend(['mobile-custom-title','mobile-chart-navigation'])
   article=page.locator('.mobile-score').first;article.locator('summary').click();assert article.locator('details').get_attribute('open') is not None;assert '更新时间' in article.inner_text();assert article.locator('a').get_attribute('href');checks.append('score-fields-disclosure-song-link')
   page.locator('.el-pagination .btn-next').click();page.wait_for_timeout(400);assert '2' in page.locator('.el-pagination .number.is-active').inner_text();checks.append('mobile-pagination')
  else:

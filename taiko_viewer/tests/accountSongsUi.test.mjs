@@ -89,3 +89,8 @@ test('manual create/edit completes before its own real API generation broadcast,
   props.modelValue=false;await settle();props.modelValue=true;await settle();const generation=states.get('account-binding-generation').value;op=m.submit();pending.shift().reject({data:{statusMessage:'Synthetic manual save failure'}});await op;assert.equal(states.get('account-binding-generation').value,generation);assert.equal(m.saving,false);assert.equal(messages.at(-1)[1],'Synthetic manual save failure');
  }finally{if(beforeFetch===undefined)delete globalThis.$fetch;else globalThis.$fetch=beforeFetch;}
 }));
+test('actual score navigation keeps each chart difficulty and uses the server custom flag',async()=>fixture(async({mount})=>{
+ const m=await mount('pages/account/songs.vue');const row=m.rows[0];
+ for(const level of [1,2,3,4,5])assert.deepEqual(m.scoreSongPath({...row,level,isCustom:false}),{path:'/songs/1455',query:{difficulty:level}});
+ assert.equal(m.scoreSongPath({...row,isCustom:true}),null,'custom title must not offer a missing catalog destination');
+}));

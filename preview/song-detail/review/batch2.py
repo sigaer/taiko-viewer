@@ -65,6 +65,16 @@ try:
       page.locator('.batch-review details').first.locator('summary').click();page.wait_for_function('Array.from(document.querySelectorAll(".batch-review details[open] img")).every(x=>x.complete&&x.naturalWidth>0)')
       page.screenshot(path=str(shots/'review-entry.png'))
      finally:context.close()
+     if args.entry_only:
+      context=browser.new_context(viewport={'width':390,'height':846},is_mobile=True,has_touch=True,service_workers='block')
+      try:
+       page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)[:500]));page.goto(base+'/tools/b30?previewState=scores',wait_until='networkidle',timeout=60000)
+       number=page.locator('.el-input-number input')
+       for value,expected in [('0','1'),('51','50'),('1.4','1')]:
+        number.fill(value);number.press('Tab');assert number.input_value()==expected
+       number.fill('30');number.press('Tab');page.locator('button[type=submit]').click();page.locator('.chart-image').wait_for();assert 'Top 30' in page.locator('.result-heading').inner_text()
+       assert not page.evaluate('document.documentElement.scrollWidth>innerWidth+2');page.screenshot(path=str(shots/'top-n-bounds.png'));records.append({'page':'b30','state':'top-n-bounds','width':390,'checks':['integer-range-1-50-and-generation']})
+      finally:context.close()
      assert not errors,errors
     assert not writes,writes
    finally:browser.close()

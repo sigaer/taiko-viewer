@@ -190,6 +190,10 @@ const levelOptions = computed(() =>
   [1, 2, 3, 4, 5].map((value) => ({ value, label: t(`difficulty.${value}`) }))
 );
 const scoreRankLabel = (value: unknown) => formatScoreRank(value, locale.value);
+const scoreSongPath = (row: SongRow) => row.isCustom ? null : localePath({
+  path: `/songs/${row.songNo}`,
+  query: { difficulty: row.level }
+});
 
 const { data: profileData, error: profileError, status: profileStatus, refresh: refreshProfile, clear: clearProfile } = await useAsyncData<ProfilePayload>(
   "account-song-profile",
@@ -403,7 +407,8 @@ const deleteScore = async (row: SongRow) => {
           <el-table-column prop="title" :label="copy.titleCol" min-width="260">
             <template #default="{ row }">
               <div class="song-title-cell">
-                <NuxtLink :to="localePath(`/songs/${row.songNo}`)" class="song-link">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</NuxtLink>
+                <NuxtLink v-if="scoreSongPath(row)" :to="scoreSongPath(row)!" class="song-link">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</NuxtLink>
+                <strong v-else class="custom-song-title">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</strong>
                 <span>{{ row.titleJp || row.songNo }}</span>
                 <div class="song-tags">
                   <el-tag v-if="row.shelfStatus === 1" size="small" type="warning" effect="light">{{ copy.removed }}</el-tag>
@@ -450,7 +455,8 @@ const deleteScore = async (row: SongRow) => {
         <div v-if="resultReady" class="mobile-scores">
           <p v-if="!rows.length" class="read-state">{{ stateCopy.empty }}</p>
           <article v-for="row in rows" :key="`${row.songNo}:${row.level}`" class="mobile-score">
-            <NuxtLink :to="localePath(`/songs/${row.songNo}`)" class="song-link">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</NuxtLink>
+            <NuxtLink v-if="scoreSongPath(row)" :to="scoreSongPath(row)!" class="song-link">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</NuxtLink>
+                <strong v-else class="custom-song-title">{{ locale === 'ja' ? row.titleJp || row.title : row.title }}</strong>
             <div class="mobile-score-main"><span>{{ t(`difficulty.${row.level}`) }} · ★{{ row.starLevel }}</span><strong>{{ row.highScore }}</strong><span>{{ scoreRankLabel(row.bestScoreRank) }}</span></div>
             <div class="song-tags"><el-tag v-if="row.shelfStatus === 1" size="small" type="warning">{{ copy.removed }}</el-tag><el-tag v-if="row.isCustom" size="small" type="info">{{ copy.custom }}</el-tag><el-tag v-if="row.isLocked" size="small">{{ copy.lock }}</el-tag></div>
             <details><summary>{{ stateCopy.details }}</summary>
@@ -511,6 +517,7 @@ const deleteScore = async (row: SongRow) => {
 .scores-results { min-width:0; }
 .song-title-cell { display:grid; gap:4px; }
 .song-link { color:var(--viewer-link); font-weight:650; text-decoration:none; overflow-wrap:anywhere; line-height:1.5; }
+.custom-song-title { color:var(--viewer-text); overflow-wrap:anywhere; line-height:1.5; }
 .song-link:hover { text-decoration:underline; }
 .song-title-cell > span, .judge-cell { color:var(--viewer-text-muted); font-size:13px; }
 .song-tags { display:flex; flex-wrap:wrap; gap:6px; }
