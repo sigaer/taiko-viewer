@@ -49,6 +49,6 @@ cd /var/tmp/viewer-ui-batch2-20261021
 VIEWER_BATCH2_EVIDENCE=/home/sigaer/taiko/qa-vault/evidence/viewer-ui-batch2-20261021 bash preview/song-detail/run.sh
 ```
 
-入口 `http://127.0.0.1:3208/__batch2`；使用 IDE 端口转发。三页均为原路由和真实组件，预览图片为明确标识的固定 SVG 样例，不验证后台计算。页面链接可切换 `scores`、`manual`、`empty`、`options-failure`、`image-failure`、`scores-failure`、`unbound`、`guest`。同步来源与手动来源分别查看；切换身份需完整导航，不以 cookie 切换代替实际绑定写入。选项重试测试在同一页面恢复 GET 响应。所有预览写入仍为 405，组件成功处理器另由可控响应测试，真实业务写入 0。
+入口 `http://127.0.0.1:3208/__batch2`；使用 IDE 端口转发。三页均为原路由和真实组件，预览图片为明确标识的固定 SVG 样例，不验证后台计算。页面链接可切换 `scores`、`manual`、`empty`、`options-failure`、`image-failure`、`scores-failure`、`catalog-failure`、`unbound`、`guest`。同步来源与手动来源分别查看；切换身份需完整导航，不以 cookie 切换代替实际绑定写入。选项重试测试在同一页面恢复 GET 响应。所有预览写入仍为 405，组件成功处理器另由可控响应测试，真实业务写入 0。
 
 在工作区根目录通过 `scripts/memory/run_qa.sh /usr/bin/env VIEWER_REVIEW_OUT=<仓库外持久目录> /usr/bin/python3 ...` 运行 `review/batch2.py before --source <冻结 main 的 taiko_viewer>`、`review/batch2.py after --checks`、`review/batch2_tests.py`（此机附加 `TAIKO_PYTHON_EXECUTABLE=/opt/taiko-bot/releases/0.16.3/bin/python TAIKO_PUBLICATION_TEST_REPO_ROOT=/opt/taiko-bot/releases/0.16.3`，成绩发布回归仅使用 QA 临时目录）。前后共用同一个 fixture 后端；正常输入为 39 条代表性成绩、Top 30、2025 十段／各类型有限分页。源数据、复用用例与样图生成器随代码提交，截图、下载样本和运行记录仅保存仓库外。端口仅监听 127.0.0.1，生产配置不加载本目录。

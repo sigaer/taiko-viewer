@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveViewerError, viewerErrorAlertType } from "~/utils/viewerError";
@@ -190,7 +190,7 @@ const levelOptions = computed(() =>
   [1, 2, 3, 4, 5].map((value) => ({ value, label: t(`difficulty.${value}`) }))
 );
 const scoreRankLabel = (value: unknown) => formatScoreRank(value, locale.value);
-const scoreSongPath = (row: SongRow) => row.isCustom ? null : localePath({
+const scoreSongPath = (row: SongRow) => row.isCustom || !catalogSongIds.value.has(Number(row.songNo)) ? null : localePath({
   path: `/songs/${row.songNo}`,
   query: { difficulty: row.level }
 });
@@ -201,7 +201,7 @@ const { data: profileData, error: profileError, status: profileStatus, refresh: 
   { default: () => ({ bindings: [], currentBinding: null }) }
 );
 
-const { data: songCatalogData } = await useAsyncData<SongCatalogPayload>(
+const { data: songCatalogData, error: catalogError, status: catalogStatus, refresh: refreshCatalog } = await useAsyncData<SongCatalogPayload>(
   "account-song-catalog",
   () => apiFetch("/api/content/songs"),
   { default: () => ({ songs: [] }) }
@@ -236,7 +236,11 @@ const busy = computed(() => switchingBinding.value || profileStatus.value === "p
 const resultReady = computed(() => profileReady.value && songsData.value?.identity === identity.value && songsData.value.currentBinding?.id === currentBinding.value?.id && !busy.value && !profileError.value && !songsError.value);
 const total = computed(() => resultReady.value ? songsData.value?.total || 0 : 0);
 const rows = computed(() => resultReady.value ? songsData.value?.items || [] : []);
-const songCatalog = computed(() => songCatalogData.value?.songs || []);
+const songCatalog = shallowRef<SongCatalogPayload["songs"]>([]);
+watch([songCatalogData, catalogStatus], () => {
+  if (catalogStatus.value === "success") songCatalog.value = songCatalogData.value?.songs || [];
+}, { immediate: true });
+const catalogSongIds = computed(() => new Set(songCatalog.value.map(song => Number(song.id))));
 const readError = ref("");
 watch([profileError, songsError], async () => {
   const request = guard.capture();
@@ -260,7 +264,13 @@ const sourceLabel = computed(() => currentBinding.value?.isManual ? copy.value.m
 const sourceHint = computed(() => locale.value === "ja"
   ? currentBinding.value?.isManual ? "手動入力の成績。編集・削除できます。" : "同期された成績。ロックすると今後の更新で上書きされません。"
   : currentBinding.value?.isManual ? "手动录入成绩，可编辑或删除。" : "同步来源的成绩；锁定后，后续更新不会覆盖该谱面记录。");
-const stateCopy = computed(() => locale.value === "ja" ? {retry:"再試行",loading:"成績を読み込み中…",empty:"条件に一致する成績がありません",details:"判定・更新日時・管理",manage:"成績の管理"} : {retry:"重试",loading:"正在读取成绩…",empty:"没有符合条件的成绩",details:"判定、更新时间与管理",manage:"成绩管理"});
+const stateCopy = computed(() => locale.value === "ja" ? {retry:"再試行",loading:"成績を読み込み中…",empty:"条件に一致する成績がありません",details:"判定・更新日時・管理",manage:"成績の管理",catalog:"楽曲一覧を読み込めませんでした"} : {retry:"重试",loading:"正在读取成绩…",empty:"没有符合条件的成绩",details:"判定、更新时间与管理",manage:"成绩管理",catalog:"歌曲目录读取失败"});
+
+const catalogReadError = ref("");
+watch(catalogError, async (error) => {
+  const message = error ? await resolveViewerError(error, stateCopy.value.catalog, t) : "";
+  if (catalogError.value === error) catalogReadError.value = message;
+}, { immediate: true });
 
 const applyFilters = async () => {
   page.value = 1;
@@ -382,6 +392,9 @@ const deleteScore = async (row: SongRow) => {
     </section>
     <el-alert v-if="readError" :title="readError" :type="viewerErrorAlertType(readError)" :closable="false" show-icon>
       <el-button @click="retryRead">{{ stateCopy.retry }}</el-button>
+    </el-alert>
+    <el-alert v-if="catalogReadError" class="catalog-read-alert" :title="stateCopy.catalog" :type="viewerErrorAlertType(catalogReadError)" :closable="false" show-icon>
+      <span>{{ catalogReadError }}</span> <el-button :loading="catalogStatus === 'pending'" @click="refreshCatalog()">{{ stateCopy.retry }}</el-button>
     </el-alert>
     <p v-if="busy" role="status" class="read-state">{{ stateCopy.loading }}</p>
     <el-empty v-else-if="profileReady && !profileData.bindings.length && !readError" :description="copy.needBinding">

@@ -5,7 +5,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'slow'].includes(state)) {
+    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
@@ -28,6 +28,7 @@ export default defineEventHandler(async event => {
   if(state==='failure' && ['/api/content/home','/api/account/growth/overview','/api/account/growth/recent'].includes(path))throw createError({statusCode:503,statusMessage:'Synthetic preview unavailable'});
   if(!signedIn && path.startsWith('/api/account/') && path!=='/api/account/auth/me')throw createError({statusCode:401,statusMessage:'Synthetic preview is signed out'});
   if (state === 'options-failure' && path === '/api/account/progress/options') throw createError({statusCode:503,statusMessage:'Synthetic options unavailable'});
+  if (state === 'catalog-failure' && path === '/api/content/songs') throw createError({statusCode:503,statusMessage:'Synthetic catalog read failure'});
   if (state === 'scores-failure' && path === '/api/account/songs') throw createError({statusCode:503,statusMessage:'Synthetic scores unavailable'});
   if (['/api/account/charts/b30','/api/account/progress/image'].includes(path)) {
     if (state === 'unbound') throw createError({statusCode:400,statusMessage:'请先绑定鼓众 ID'});

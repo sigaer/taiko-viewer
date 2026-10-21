@@ -2,7 +2,7 @@
 const { theme, setTheme } = useViewerTheme();
 const { locale } = useI18n();
 const pages = [{name:'成绩 / 成績',path:'/account/songs',key:'scores'},{name:'B30',path:'/tools/b30',key:'b30'},{name:'进度 / 進捗',path:'/tools/progress',key:'progress'}];
-const states = ['scores','manual','empty','options-failure','image-failure','scores-failure','unbound','guest'];
+const states = ['scores','manual','empty','options-failure','image-failure','scores-failure','catalog-failure','unbound','guest'];
 const prefix = computed(() => locale.value === 'ja' ? '/ja' : '');
 </script>
 <template>
