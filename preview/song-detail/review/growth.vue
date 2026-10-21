@@ -16,7 +16,7 @@ const frames=[['1440','light','zh'],['390','light','zh'],['414','dark','ja']];
  <main class="review">
   <h1>成长档案与周报 · 真实组件预览</h1>
   <p>仅使用隔离的合成数据；API 写入不转发。</p>
-  <label>状态 <select v-model="state"><option v-for="value in ['scores','growth-empty','growth-single','growth-missing','growth-limited','growth-unknown','growth-incompatible','growth-no-next','growth-quiet','growth-no-play','growth-failure','slow','guest','unbound']" :key="value">{{ value }}</option></select></label>
+  <label>状态 <select v-model="state"><option v-for="value in ['scores','growth-expanded', 'growth-empty','growth-single','growth-missing','growth-limited','growth-unknown','growth-incompatible','growth-no-next','growth-quiet','growth-no-play','growth-failure','slow','guest','unbound']" :key="value">{{ value }}</option></select></label>
   <label>主题 <select v-model="theme"><option>light</option><option>dark</option></select></label>
   <label>语言 <select v-model="language"><option>zh</option><option>ja</option></select></label>
   <div><button @click="go('/my/growth')">成长档案</button><button @click="go('/my/weekly')">周报</button><button @click="go('/account/songs')">成绩分页</button></div>

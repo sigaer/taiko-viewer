@@ -2,10 +2,11 @@
 // This module is only loaded by the isolated preview server.
 import { buildSkillPassport } from '../../../../taiko_viewer/server/services/growth-passport/composer';
 import { resolveSkillPassportRange } from '../../../../taiko_viewer/server/services/growth-passport/range';
+import { resolveWeeklyGrowthWindow } from '../../../../taiko_viewer/server/services/growth-weekly/range';
 import { buildWeeklyGrowthRecap } from '../../../../taiko_viewer/server/services/growth-weekly/composer';
 import { recoveryFact as fact, recoveryMeasurement as measurement, recoveryInput } from '../../../../taiko_viewer/tests/fixtures/passportRecovery';
 import { finalFlood } from '../../../../taiko_viewer/tests/fixtures/passportFinalUx';
-import { extraReadonly } from './site-fixtures';
+import { extraReadonly, publicSongs } from './site-fixtures';
 import type { PlayerGoal } from '../../../../taiko_viewer/types/player-goal';
 import type { PlayerGrowthOverview } from '../../../../taiko_viewer/types/player-growth';
 
@@ -19,6 +20,7 @@ export function growthData(path: string, query: Record<string, any>, state: stri
     return row;
   });
   const input = recoveryInput(empty ? [] : [...finalFlood(), ...Array.from({ length: 10 }, (_, i) => fact(`preview-strong-${i}`, 'score-pb', `2026-10-${String(i + 9).padStart(2, '0')}`, { songId: [1455, 1, 1357, 627][i % 4], title: i % 2 ? 'さいたま2000' : 'ハッピーシンセサイザ · 长标题的练习记录与这一段旋律', before: 930000, after: 950000 + i * 1300, delta: 20000 + i * 1300 }))], rows);
+  if (state === 'growth-expanded') input.history.facts = [...input.history.facts, ...publicSongs.slice(0, 12).map((song, i) => fact(`expanded-fc-${i}`, 'fc', '2026-10-20', {songId:song.id,title:song.song_name,before:0,after:1,delta:1}))];
   input.range = resolveSkillPassportRange({ range: Number(query.range) || 90, dimension: query.dimension || 'rating' }, new Date('2026-10-21T04:00:00Z'));
   input.history.range = { from: input.range.recentFrom, to: input.range.to, maxDays: 90, timezone: 'Asia/Shanghai' };
   input.history.coverage.scoreHistoryState = ['growth-limited', 'growth-empty'].includes(state) ? 'partial' : state === 'growth-unknown' ? 'unknown' : 'complete';
@@ -33,8 +35,8 @@ export function growthData(path: string, query: Record<string, any>, state: stri
   if (empty) input.overview = null;
   if (state === 'growth-missing' && input.overview) input.overview.playerState.skills = input.overview.playerState.skills.filter(skill => skill.key !== 'speed');
   if (path.endsWith('/passport')) return buildSkillPassport(input);
-  const historical = query.week === '2026-10-12';
-  const from = historical ? '2026-10-12' : '2026-10-19', to = historical ? '2026-10-18' : '2026-10-25';
+  const window = resolveWeeklyGrowthWindow(query.week ? {week: query.week} : {}, new Date('2026-10-21T04:00:00Z'));
+  const {from, to, isCompleteWeek: historical} = window;
   const day = historical ? '2026-10-14' : '2026-10-20';
   input.history.measurements = rows.slice(-2).map((row, i) => ({ ...row, capturedAt: `${historical ? (i ? '2026-10-18' : '2026-10-12') : (i ? '2026-10-20' : '2026-10-19')}T04:00:00Z`, modelRevision: state === 'growth-incompatible' ? `revision-${i}` : 'synthetic-r2' }));
   input.history.facts = empty || ['growth-quiet', 'growth-no-play'].includes(state) ? [] : [

@@ -17,7 +17,7 @@
 | `/account/login` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
 | `/account/profile` | default | 正文／表单 800 | 已适配 | 首批完成 | 短面板自然结束；当前使用为状态；头像操作按需展开；原异步脚本不变 | [414](content-refinement-20261020/screenshots/after-profile-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-profile-1440-dark-ja.png) |
 | `/account/register` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
-| `/account/songs` | default | 密集 1180 | 已适配 | 本批内容完成 | 绑定及来源 → 搜索／难度与次要管理 → 成绩 → 分页；桌面对照表、手机逐条展开判定与管理；身份切换隐藏旧结果 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
+| `/account/songs` | default | 密集 1180 | 已适配 | 本批内容完成 | 绑定及来源 → 搜索／难度与次要管理 → 成绩 → 分页；桌面对照表、手机逐条展开判定与管理；身份切换隐藏旧结果；本批附修 414px 中日文完整分页分组 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
 | `/account/support/review` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 支持记录及处理面板 | 未逐页截图 |
 | `/account/sync` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
 | `/account/version-summary` | story | 专用 | 独立布局 | 独立内容未迁移 | 年度独立演出／分享画布，固定比例与视口保持 | 未逐页截图 |
@@ -58,9 +58,9 @@
 | `/guide` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/` | default | 常规 1000 | 已适配 | 内容局部迁移 | 单次个人上下文；能力详情折叠；未知记录与读取失败分开；真实目标及深度内容后续 | [414](content-refinement-20261020/screenshots/after-home-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-home-1440-dark-ja.png) |
 | `/more` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/my/growth` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | [414](screenshots/after-growth-414-light-zh.png) · [1440 暗色](screenshots/after-growth-1440-dark-ja.png) |
+| `/my/growth` | default | 常规 1000 | 已适配 | 本批内容完成 | 当前状态与范围 → 四周期／六维冻结趋势 → 成长事实 → 关注方向历史／目标与下一步；缺失数值与观察日期明确 | [成长／周报证据](../viewer-growth-weekly-20261021/README.md) |
 | `/my` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/my/weekly` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 周报叙事与事实阅读 | [414](screenshots/after-weekly-414-light-zh.png) · [1440 暗色](screenshots/after-weekly-1440-dark-ja.png) |
+| `/my/weekly` | default | 正文／表单 800 | 已适配 | 本批内容完成 | 服务端周日期／事实汇总 → 具体变化 → 可比较能力 → 当前建议；身份、绑定、周次及迟到响应隔离 | [成长／周报证据](../viewer-growth-weekly-20261021/README.md) |
 | `/ourtaikoview/:id/:difficulty` | default | 专用 | 专用例外 | 播放器未改 | 播放器自有画布、全屏与展开视口；隐藏普通底栏 | 未逐页截图 |
 | `/settings` | default | 常规 1000 | 已适配 | 本次内容收口完成 | 单行主题切换；缓存摘要与按需明细；清空仍清除全部 localStorage | [414](content-refinement-20261020/screenshots/after-settings-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-settings-1440-dark-ja.png) |
 | `/songs/:id` | default | 密集 1180 | 已适配 | 首批完成并补验 | 真实谱面节选含音符与小节；成绩完成态、明细与空讨论核对 | [414](content-refinement-20261020/screenshots/after-song-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-song-1440-dark-ja.png) |
@@ -80,8 +80,8 @@
 | `/tools/trend` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/tools/word-cloud` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 
-本批成绩／B30／进度已完成。后续内容顺序：成长／周报 → 首页与 My Taiko 真实状态 → 社区／开发者／设置／帮助及其他入口。空间规则已全站应用，这个顺序不再表示等待接入公共容器。管理后台仅兼容，不扩展运营流程。
+第二批成绩／B30／进度及成长／周报内容已完成；成绩分页附修见成长／周报证据。后续内容顺序：首页与 My Taiko 真实状态 → 社区／开发者／设置／帮助及其他入口。空间规则已全站应用，这个顺序不再表示等待接入公共容器。管理后台仅兼容，不扩展运营流程。
 
 年度入口使用普通表单空间，独立演出、时间线和分享图不套内容容器。播放器保留原 1440px 自有工作区、iframe 固定比例和全屏行为；普通公共容器不限制其画布。
 
-历史首批预览的社区为合成空社区，成长／周报为有限历史。第二批进度预览现有完整合成选项、与条件相符的固定样图、合法空选项及请求失败响应；历史异步错误已复现并修复，详见第二批证据。后台仅独立登录入口外观初检，不声称运营和认证生命周期已验证。中日文截图均为 Linux Chromium 模拟视口，不代表真实设备。
+历史首批预览的社区为合成空社区，成长／周报仅为有限历史，不能作为本批完成证据。本批成长／周报使用完整合成 DTO 驱动真实 Vue／SVG，独立覆盖周期、维度、身份、错误与覆盖状态，见成长／周报证据。第二批进度预览现有完整合成选项、与条件相符的固定样图、合法空选项及请求失败响应；历史异步错误已复现并修复，详见第二批证据。后台仅独立登录入口外观初检，不声称运营和认证生命周期已验证。中日文截图均为 Linux Chromium 模拟视口，不代表真实设备。

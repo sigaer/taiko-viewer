@@ -6,7 +6,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
+    if (typeof state === 'string' && ['scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));

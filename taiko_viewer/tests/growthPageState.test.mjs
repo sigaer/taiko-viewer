@@ -51,6 +51,7 @@ if(!source){
   for(const days of [30,90,180,365]){await m.changeRange(days);await settle();assert.equal(m.passport.range.requestedDays,days);for(const dim of ['big_song','stamina','speed','accuracy_power','rhythm','complex']){await m.chooseDimension(dim);await settle();assert.equal(m.selectedDimension,dim);}}
   assert.equal(requests.length,0);assert.equal(route.query.range,'365');assert.deepEqual(m.passportState.payload.shared.segments.map(s=>s.points.map(p=>p.rating)),originals);
   m.passportState.payload.current.dimensions.speed=null;await settle();assert.equal(m.currentSkills.find(s=>s.key==='speed').value,null);
+  m.passportState.payload=buildSkillPassport(finalBrowserInput('ceiling'));await settle();const initial=m.visibleMilestones.map(n=>n.id);assert.equal(initial.length,8);m.expandedMilestones=true;await settle();assert.ok(m.visibleMilestones.length>8);assert.deepEqual(m.visibleMilestones.map(n=>n.id),m.passport.milestones.map(n=>n.id));m.expandedMilestones=false;await settle();assert.deepEqual(m.visibleMilestones.map(n=>n.id),initial);
  }));
  test('growth identity change, late failure, retry and observed date semantics remain independent of selected period',async()=>fixture('growth',async({m,states,requests,payload})=>{
   assert.equal(m.milestoneDate({day:null,observedAt:null}),'passport.unknownDate');assert.ok(m.milestoneDate({day:null,observedAt:'2026-08-11T04:00:00Z'}));
