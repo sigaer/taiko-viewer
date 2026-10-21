@@ -5,6 +5,8 @@ import { ElMessage } from "element-plus";
 const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ "update:modelValue": [value: boolean]; imported: [] }>();
 const apiFetch = useViewerApiFetch();
+const requestGuard = useAccountRequestGuard();
+watch(() => props.modelValue, () => requestGuard.invalidate(), { flush: "sync" });
 const { locale } = useI18n();
 const text = ref("");
 const importing = ref(false);
@@ -46,15 +48,17 @@ const readFile = (event: Event) => {
 
 const submit = async () => {
   if (!parsed.value.value || parsed.value.error || !parsed.value.count || importing.value) return;
+  const request = requestGuard.capture();
   importing.value = true;
   try {
     const result = await apiFetch<{ created: number; updated: number }>("/api/account/songs/import", { method: "POST", body: parsed.value.value });
+    if (!requestGuard.current(request)) return;
     ElMessage.success(`${copy.value.success}（${Number(result.created || 0) + Number(result.updated || 0)}）`);
     visible.value = false;
     emit("imported");
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
-  } finally { importing.value = false; }
+    if (requestGuard.current(request)) ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
+  } finally { if (requestGuard.current(request)) importing.value = false; }
 };
 </script>
 

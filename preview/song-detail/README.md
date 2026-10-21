@@ -39,3 +39,16 @@ root 终端省略 sudo。脚本复用本机 Node 24 与已有依赖，并使用�
 新截图脚本：`review/capture.py`。在该工作树根目录，以 root 通过 `scripts/memory/run_qa.sh` 运行；先停止预览，避免共用锁冲突。`before` 读取本机冻结的 `55a979a` 工作树；`after` 读取当前源码，二者共用同一只读数据根。`--content` 将对照基线改为冻结的 `63fda22`，写入独立的 `content-refinement-20261020` 子目录，覆盖八个真实页面；`--content --content-checks` 检查本次内容交互。`--space` 检查五类优先页面的 390／414／820／1280／1440／1920 浅暗布局；`--compat` 检查其他页面，`--checks` 检查控件、主题、跨页与拒绝写入。旧 `capture.py`／`capture-integration.py` 为之前交付的复现工具，会写旧截图目录，不用于本轮评审。
 
 这些绝对路径和依赖链接属于这台主机，不是其他机器克隆后可直接使用的安装说明。预览不合入 main、不部署、不 bump；版本在实际准备发布时处理。
+
+## 第二批：成绩、B30、进度
+
+独立工作区 `/var/tmp/viewer-ui-batch2-20261021`，分支 `design/viewer-ui-batch2-20261021`；基于远程 main `ad260fd`，没有合并旧设计分支。该目录启动：
+
+```bash
+cd /var/tmp/viewer-ui-batch2-20261021
+VIEWER_BATCH2_EVIDENCE=/home/sigaer/taiko/qa-vault/evidence/viewer-ui-batch2-20261021 bash preview/song-detail/run.sh
+```
+
+入口 `http://127.0.0.1:3208/__batch2`；使用 IDE 端口转发。三页均为原路由和真实组件，预览图片为明确标识的固定 SVG 样例，不验证后台计算。页面链接可切换 `scores`、`manual`、`empty`、`options-failure`、`image-failure`、`scores-failure`、`unbound`、`guest`。同步来源与手动来源分别查看；切换身份需完整导航，不以 cookie 切换代替实际绑定写入。选项重试测试在同一页面恢复 GET 响应。所有预览写入仍为 405，组件成功处理器另由可控响应测试，真实业务写入 0。
+
+在工作区根目录通过 `scripts/memory/run_qa.sh /usr/bin/env VIEWER_REVIEW_OUT=<仓库外持久目录> /usr/bin/python3 ...` 运行 `review/batch2.py before --source <冻结 main 的 taiko_viewer>`、`review/batch2.py after --checks`、`review/batch2_tests.py`（此机附加 `TAIKO_PYTHON_EXECUTABLE=/opt/taiko-bot/releases/0.16.3/bin/python TAIKO_PUBLICATION_TEST_REPO_ROOT=/opt/taiko-bot/releases/0.16.3`，成绩发布回归仅使用 QA 临时目录）。前后共用同一个 fixture 后端；正常输入为 39 条代表性成绩、Top 30、2025 十段／各类型有限分页。源数据、复用用例与样图生成器随代码提交，截图、下载样本和运行记录仅保存仓库外。端口仅监听 127.0.0.1，生产配置不加载本目录。

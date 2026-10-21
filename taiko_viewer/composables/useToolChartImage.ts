@@ -2,6 +2,7 @@ import { onBeforeUnmount, ref, watch } from "vue";
 import { resolveViewerError } from "~/utils/viewerError";
 
 export const useToolChartImage = () => {
+  const { t, locale } = useI18n();
   const imageUrl = ref("");
   const loading = ref(false);
   const errorMessage = ref("");
@@ -43,7 +44,7 @@ export const useToolChartImage = () => {
       imageUrl.value = URL.createObjectURL(blob);
     } catch (error: unknown) {
       if (request !== generation) return;
-      const message = await resolveViewerError(error, "图表生成失败，请稍后重试");
+      const message = await resolveViewerError(error, locale.value === "ja" ? "画像を生成できませんでした。再試行してください" : "图表生成失败，请重试", t);
       if (request === generation) errorMessage.value = message;
     } finally {
       if (request === generation) {
@@ -69,6 +70,7 @@ export const useToolChartImage = () => {
     loading,
     errorMessage,
     loadChart,
-    revokeUrl
+    revokeUrl,
+    invalidate
   };
 };

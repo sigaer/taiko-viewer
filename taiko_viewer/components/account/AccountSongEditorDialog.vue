@@ -44,6 +44,8 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
+const requestGuard = useAccountRequestGuard();
+watch(() => props.modelValue, (open) => { requestGuard.invalidate(); if (open) saving.value = false; }, { flush: "sync" });
 const DEFAULT_LEVEL_OPTIONS = [
   { value: 1, label: "简单" },
   { value: 2, label: "一般" },
@@ -354,6 +356,7 @@ const submit = async () => {
     }
   }
 
+  const request = requestGuard.capture();
   saving.value = true;
   try {
     const body = buildRequestBody();
@@ -368,13 +371,14 @@ const submit = async () => {
       body: props.isManual ? { action: "score-upsert", ...body } : body
       }
     );
+    if (!requestGuard.current(request)) return;
     ElMessage.success(isCreateMode.value ? copy.value.createSuccess : copy.value.updateSuccess);
     visible.value = false;
     emit("saved");
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.saveFailed);
+    if (requestGuard.current(request)) ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.saveFailed);
   } finally {
-    saving.value = false;
+    if (requestGuard.current(request)) saving.value = false;
   }
 };
 </script>
