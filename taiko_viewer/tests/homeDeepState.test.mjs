@@ -3,6 +3,21 @@ import assert from 'node:assert/strict';
 import {ref,reactive} from 'vue';
 import {fixture,settle} from './fixtures/homeStateHarness.mjs';
 const authPath='/api/account/auth/me',recentPath='/api/account/growth/recent',ackPath=recentPath+'/ack',overviewPath='/api/account/growth/overview';
+test('actual My page rechecks prerendered guest cache and recovers the active session',async()=>fixture(async({auth,states,controlled,requests,load,attach})=>{
+ states.get('account-user').value=null;states.get('account-user-loaded').value=true;controlled.add(authPath);
+ assert.equal(auth.accountAuthStatus.value,'guest');
+ const View=await load('pages/my/index.vue',true);const mounted=attach(()=>View.setup({}, {expose(){}}));
+ assert.equal(requests.length,1);assert.equal(auth.accountAuthStatus.value,'loading');
+ requests.shift().resolve({authenticated:true,user:{id:7,username:'Restored session'}});
+ const page=await mounted.model;await settle();assert.equal(auth.accountAuthStatus.value,'authenticated');assert.equal(page.accountUser.value.id,7);
+ assert.equal(page.linkGroups.flatMap(g=>g.items).length,9);assert.equal(requests.length,0);
+}));
+test('actual My page joins pending auth and keeps a known authenticated cache',async()=>fixture(async({auth,controlled,requests,load,attach})=>{
+ controlled.add(authPath);const View=await load('pages/my/index.vue',true);
+ const known=attach(()=>View.setup({}, {expose(){}}));await known.model;assert.equal(requests.length,0);
+ const refresh=auth.resolveAccountUser(true),current=requests.shift();const pending=attach(()=>View.setup({}, {expose(){}}));assert.equal(requests.length,0,'page must join the in-flight request');
+ current.resolve({authenticated:true,user:{id:8}});await refresh;await pending.model;assert.equal(auth.accountUser.value.id,8);
+}));
 test('auth initial reads coalesce; force retry and logout ignore late success/failure',async()=>fixture(async({auth,requests,controlled,states})=>{
  controlled.add(authPath);states.get('account-user-loaded').value=false;
  const first=auth.resolveAccountUser(),joined=auth.resolveAccountUser();assert.equal(requests.length,1);

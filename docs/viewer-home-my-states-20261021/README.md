@@ -35,7 +35,7 @@
 ```sh
 bash scripts/memory/run_dev.sh /usr/bin/env \
   VIEWER_BATCH2_EVIDENCE=/home/sigaer/taiko/qa-vault/evidence/viewer-home-my-states-20261021 \
-  /www/server/nvm/versions/node/v24.13.0/bin/node \
+  /opt/taiko-viewer-runtime/node-v24.22.1-linux-x64/bin/node \
   taiko_viewer/node_modules/@nuxt/cli/bin/nuxi.mjs dev preview/song-detail \
   --host 127.0.0.1 --port 3208 --no-fork --dotenv preview/song-detail/.env.preview-empty
 ```
@@ -58,6 +58,8 @@ bash scripts/memory/run_dev.sh /usr/bin/env \
 
 网站已由独立安全修复恢复至 0.87.4，应用源码仍为本批基线，但运行时与制品已是 Node.js 24.22.1、内置及 npm Undici 7.30.1。本分支仅复用该安全修复已审查的 Undici 精确版本、下载地址和完整性值，变更 package、锁文件根依赖、Undici 的两处锁定条目；其他依赖不变。不会重新部署旧 Node.js 或 Undici 7.25.0。
 
-使用这套运行时和安全依赖重新执行当前 CI 同组测试：**201／201**，Contract 生成与跨语言检查通过，隔离业务写入 0。UI 组件与原截图对应源码未变，八组对照和 56 项浏览器检查继续作为展示证据；新的测试、CI、制品、配置和线上只读结果归档在原证据目录的 `closeout-20261022/`，不覆盖首轮记录。
+审查补充复现 My Taiko 从预渲染页面携带已加载游客缓存进入的路径。现在仅在客户端进入且缓存为确认游客时刷新认证；已知账号保持缓存，进行中的认证请求继续合并，错误仍由明确重试恢复。新增两个实际 My 页面 SFC 回归，验证旧游客缓存恢复已登录会话，以及已知账号／进行中请求不重复读取。
+
+使用这套运行时和安全依赖重新执行当前 CI 同组测试：**203／203**，Contract 生成与跨语言检查通过，隔离业务写入 0。页面模板与样式未变，八组对照和 56 项浏览器检查继续作为展示证据；新增缓存恢复逻辑由上述实际组件回归验证。新的测试、CI、制品、配置和线上只读结果归档在原证据目录的 `closeout-20261022/`，不覆盖首轮记录。
 
 用户明确授权本次忽略内存限制。若执行本地发布，仅对该次构建的 MemAvailable 准入作临时豁免；仍保留原构建 cgroup 上限、CPU／超时、串行互斥及失败即停止，仓库的资源包装和部署脚本不变。正式结果以最终候选对应 CI、审查和仓库外交付记录为准。0.87.4 安全制品和此前回滚产物均保留；应用启动正常后台写入与验收主动写入分别记录，不将线上启动声称为零写入。

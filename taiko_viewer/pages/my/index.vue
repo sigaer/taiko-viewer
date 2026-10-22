@@ -4,7 +4,9 @@ import { buildPageDescription } from "~/utils/seo";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const { accountUser, accountAuthStatus, fetchCurrentUser } = useAccountState();
-const initialAuth = fetchCurrentUser();
+// A prerendered public page can carry a cached anonymous build identity.
+// Recheck that state on entry; join pending reads and retain known accounts.
+const initialAuth = fetchCurrentUser(import.meta.client && accountAuthStatus.value === 'guest');
 if (import.meta.server) await initialAuth;
 const retryAuth = () => fetchCurrentUser(true);
 
