@@ -31,6 +31,7 @@ try:
     break
    except Exception:time.sleep(1)
   else:raise RuntimeError('Nuxt startup deadline')
+  with urllib.request.urlopen(base+'/api/forum/home',timeout=10) as response:home_seed=json.load(response)
   with sync_playwright() as p:
    browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-dev-shm-usage'])
    try:
@@ -60,6 +61,7 @@ try:
         if mode['read']=='hold':read_pending.append(route)
         elif mode['read']=='failure':answer(route,{'statusCode':503,'statusMessage':'Synthetic notification read failure'},503)
         else:answer(route,payload(route.request))
+       elif path=='/api/forum/home':answer(route,{**home_seed,'unreadNotificationCount':sum(not row['isRead'] for row in rows)})
        elif urllib.parse.urlparse(route.request.url).netloc not in ['127.0.0.1:3208','localhost:3208']:route.abort()
        else:route.continue_()
       context.route('**/*',transport)
@@ -86,6 +88,9 @@ try:
       if width==1440:
        mode['read']='hold';nav('/forum/notifications');wait_for(lambda:len(read_pending)>=1,page);old=read_pending.pop(0);identity(990094);wait_for(lambda:len(read_pending)==1,page);fresh=read_pending.pop();fresh_data=payload(fresh.request);fresh_data['items']=[{**fresh_data['items'][0],'title':'Synthetic current B'}];fresh_data['total']=1;answer(fresh,fresh_data);page.get_by_text('Synthetic current B',exact=True).wait_for();answer(old,seed);page.wait_for_timeout(150);assert page.locator('.notification-card').count()==1;ok('late old identity GET cannot replace current identity DOM')
        nav('/my');identity(990093);nav('/forum/notifications');wait_for(lambda:len(read_pending)==1,page);old=read_pending.pop();nav('/my');answer(old,seed);mode['read']='normal';nav('/forum/notifications');page.locator('.notification-card').nth(19).wait_for();ok('KeepAlive deactivation discards late GET and reloads on return')
+       rows[:]=[{**row,'isRead':False} for row in rows];nav('/forum');page.locator('.notification-dot').wait_for();nav('/forum/me');page.wait_for_function('document.querySelector("#__nuxt").__vue_app__.$nuxt.payload.data["forum-me-home"]?.unreadNotificationCount===23');nav('/forum/notifications');page.locator('.notification-head button').wait_for();page.locator('.notification-head button').click();wait_for(lambda:len(pending)==1,page);accepted=pending.pop();nav('/my');rows[:]=[{**row,'isRead':True} for row in rows];answer(accepted,{'unreadCount':0});page.wait_for_timeout(120)
+       counts=page.evaluate('()=>{const d=document.querySelector("#__nuxt").__vue_app__.$nuxt.payload.data;return [d["forum-home"].unreadNotificationCount,d["forum-me-home"].unreadNotificationCount]}');assert counts==[23,23]
+       nav('/forum/notifications');page.wait_for_function('()=>{const d=document.querySelector("#__nuxt").__vue_app__.$nuxt.payload.data;return d["forum-home"]?.unreadNotificationCount===0&&d["forum-me-home"]?.unreadNotificationCount===0}');nav('/forum');assert page.locator('.notification-dot').count()==0;ok('accepted read while inactive refreshes both real cached unread badges after return')
       hydrate('/forum/new?songId=1455&difficulty=5');page.locator('.composer-panel input[maxlength="120"]').first.fill('Synthetic long community title · テスト投稿');draft=page.locator('.block-editor--body textarea').first;draft.fill('First editable paragraph');page.locator('.type-chips button').nth(1).click();page.locator('.block-editor__actions button').click();page.locator('.block-list textarea').first.fill('Edited first paragraph');page.locator('.type-chips button').first.click();assert page.locator('.block-list textarea').first.is_visible();draft.fill('Draft second paragraph')
       page.locator('.composer-submit button').click();wait_for(lambda:len(post_pending)==1,page);route=post_pending.pop();assert [b['text'] for b in route.request.post_data_json['contentBlocks'] if b['type']=='paragraph']==['Edited first paragraph','Draft second paragraph'];answer(route,{'statusCode':503,'statusMessage':'Synthetic post failure'},503);page.wait_for_function('!document.querySelector(".composer-submit button").classList.contains("is-loading")');assert draft.input_value()=='Draft second paragraph' and draft.is_editable();assert page.locator('.block-list textarea').first.input_value()=='Edited first paragraph';ok('post failure preserves visible editable paragraphs across type switch')
       screenshot('composer-failed-editable');draft.fill('Edited second paragraph');freeze_navigation();page.locator('.composer-submit button').click();wait_for(lambda:len(post_pending)==1,page);route=post_pending.pop();body=route.request.post_data_json;assert [b['text'] for b in body['contentBlocks'] if b['type']=='paragraph']==['Edited first paragraph','Edited second paragraph'];assert str(body['songId'])=='1455' and str(body['difficultyType'])=='5';answer(route,{'id':7001});page.locator('.composer-published').wait_for();assert '/forum/new' in page.url;assert page.locator('.composer-submit button').is_disabled();ok('accepted creation and cancelled navigation retain receipt and lock duplicate POST')

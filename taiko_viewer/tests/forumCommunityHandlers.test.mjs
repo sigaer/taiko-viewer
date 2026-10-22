@@ -2,6 +2,28 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { notifications, notification, composer, deferred, settle } from './fixtures/forumHandlerHarness.mjs';
 
+await test('valid notification refresh reconciles both caches while failed refresh keeps the last count', async () => {
+  const h = await notifications([notification(1)]);
+  h.server.unreadCount = 8;
+  await h.retry();
+  for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 8);
+  h.readsQueue.push(() => Promise.reject(new Error('read unavailable')));
+  await h.retry();
+  assert.equal(h.data.value, null);
+  for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 8);
+});
+await test('accepted mark while inactive reconciles cached badges only after a valid resumed read', async () => {
+  const h = await notifications([notification(1)]);
+  const pending = h.markAllRead();
+  h.deactivate();
+  h.writes[0].resolve({ unreadCount: 0 });
+  await pending;
+  for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 1);
+  h.activate();
+  await settle();
+  for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 0);
+});
+
 await test('notification success uses the server count, including off-page unread', async () => {
   const h = await notifications([notification(1)], { unreadCount: 31 });
   const task = h.openNotification(h.item(1));

@@ -40,10 +40,13 @@ const copy = computed(() => locale.value === 'ja'
 
 // Each accepted write is reflected only after its response. Single-read and
 // mark-all share one lock, so an older failure cannot roll back a newer success.
-const syncUnreadCount = (unreadCount: number) => {
-  if (data.value) data.value.unreadCount = unreadCount;
+const syncCachedUnreadCount = (unreadCount: number) => {
   if (forumHome.value) forumHome.value.unreadNotificationCount = unreadCount;
   if (forumMeHome.value) forumMeHome.value.unreadNotificationCount = unreadCount;
+};
+const syncUnreadCount = (unreadCount: number) => {
+  if (data.value) data.value.unreadCount = unreadCount;
+  syncCachedUnreadCount(unreadCount);
 };
 
 definePageMeta({
@@ -80,6 +83,11 @@ const { data: notificationState, pending, refresh, clear } = await useAsyncData<
   { default: () => ({ context: "", payload: null, error: "" }), dedupe: "cancel" }
 );
 const data = computed(() => notificationState.value?.context === context.value ? notificationState.value.payload : null);
+// An accepted write may complete while this KeepAlive view is inactive. Only
+// current, valid reads can reconcile its count with the other cached pages.
+watch(data, payload => {
+  if (payload && active && !disposed && accountUser.value) syncCachedUnreadCount(payload.unreadCount);
+}, { immediate: true, flush: 'sync' });
 const loadError = computed(() => notificationState.value?.context === context.value ? notificationState.value.error : "");
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value?.total || 0) / pageSize)));
 const actionsDisabled = computed(() => mutationBusy.value || pending.value || !active || !accountUser.value || !data.value || Boolean(loadError.value));
