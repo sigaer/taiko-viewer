@@ -1,42 +1,44 @@
-# 社区通知与发帖状态修复候选
+# Viewer 0.87.6：通知与发帖状态修复
 
-基线：Viewer 0.87.5，`2bf1a09f8a123826f4c0689fe6041ae06b0b8231`。
-分支：`fix/community-notifications-composer-20261022`。
+延续 PR #33、分支 `fix/community-notifications-composer-20261022`，基线 0.87.5 / `2bf1a09f8a123826f4c0689fe6041ae06b0b8231`。接续原候选 `7e5e2e61b30359bff7c1d9442f516e8fa8fe17e0`，没有重新实现或重复应用补丁。独立工作区 `/var/tmp/viewer-community-pr33-20261022`，原工作区及 WIP 保留。本轮仅验收并发布通知、发帖两个页面的兼容修复，不表示整个社区批次完成。
 
-这是开发草稿，不是 0.87.6 发布或整批社区验收证明。未合并 main、未部署，也未修改服务器、自启策略或资源准入。应用版本暂与基线一致；正式发布准备必须在本 PR 中同步下一 patch、package/lock 根版本、应用文档元数据和发布说明。不得直接合并此草稿。
+## 实际修复
 
-## 实现
+- `pages/forum/notifications.vue`：单条已读、全部已读与导航共用锁；响应确认后更新未读数，失败恢复操作；已读成功不因导航失败回滚。区分读取失败与空态，保留 20 条分页、身份代次及 KeepAlive 保护。
+- `pages/forum/new.vue`：提交快照保留失败原稿与可编辑段落。创建回执与导航分开，打开失败只重试打开，不重复 POST。账号切换清除私有草稿，迟到创建／上传不得覆盖新身份；上传结束前禁止提交；停用期间接受的本作者回执保留但不抢占导航。
 
-- `pages/forum/notifications.vue`：单条已读、全部已读和导航共用操作锁；成功响应前不修改已读状态，消除旧失败快照覆盖较新成功的竞态。已读成功后导航失败不回滚已确认状态。全路径释放忙碌状态，读取失败与合法空列表分开，有重试和现有 page/pageSize 分页。服务端全局未读计数、未读优先排序、接口与权限均保留。
-- 通知读取和操作回调复用 `useAccountRequestGuard(false)`，补充页面代次与 KeepAlive 停用/恢复；迟到结果不能写入新用户或触发后台导航。SSR 数据继续经过 useAsyncData，不另建存储。
-- `pages/forum/new.vue`：提交内容使用快照，不在接受前清空编辑框。失败后原稿可编辑；已加入段落在切换帖子类型后仍可见、可编辑。成功创建回执与跳转结果分开，跳转失败后仅重试打开已创建帖子，不再次 POST；提供显式再发一帖操作。
-- 发帖、上传与搜索回调复用现有身份 guard；账号切换清空私有草稿，旧上传和旧创建响应失效；页面停用期间收到本作者的创建成功回执时保留回执但不抢占当前页面。所有上传结束前禁止发帖，避免附件遗漏。
+上述两页实现仍为原候选；真实页面验收未发现需再改的产品代码。客户端回执不等于服务端 exactly-once；服务端接受后网络丢失的歧义仍按原协议处理。不改服务端权限、API、数据库结构、评分、目标、首页或 My Taiko。
 
-不改服务端、数据库结构、授权、评分、目标、历史事实或已完成的首页与 My Taiko。客户端创建回执保护不等于服务端 exactly-once：服务端已接受但响应丢失的歧义仍需原服务端协议处理，本候选不声称解决。
+## 验证层级
 
-## 已执行验证
+| 层级 | 实际执行与边界 |
+| --- | --- |
+| 定向脚本／原身份 guard | 原 38 项为完整 SFC script 加受控响应式／生命周期／导航端口，不能作为 Vue DOM、浏览器或 SQL 通过。旧候选 CI #58 的 241 项仅为历史索引，不代替新提交结果 |
+| 真实 Nuxt／Vue／浏览器 | 使用实际路由、真实组件及合成身份。34 项交互检查，1440 浅中、390 浅中、414 暗日代表场景，6 张页面截图。覆盖读取失败／空态／重试、23 条分页、单条／全部互斥、重复点击、取消导航后恢复、原稿可编辑、重试正文不重复、创建回执仅重试打开、上传忙碌、身份切换、迟到响应及 KeepAlive。成功写入只由 Playwright route 受控返回 |
+| 真实隔离 HTTP／SQL | 复用现有 SQL 源码加载边界、H3 HTTP 栈和 MySQL 8 测试启动方式；独立私有 socket、`--no-defaults`、禁用网络／事件／复制，空白测试库。验证实际 `SELECT DATABASE()` 为 `viewer_community_pr33_test`、datadir 为本次 QA scratch、显式 `TAIKO_ALLOW_TEST_DB_MUTATION=1`，然后执行真实 schema、session 查询、权限与 forum handlers。合成作者创建 → 合成第二账号回复 → 作者收到通知 → 已读并打开对应回复，9 次 HTTP 请求；正文、歌曲 100／难度 4、SQL 通知归属、未读 1→0 及异账号不能改读状态通过。catalog 与 runtime 为合成输入，session 为测试表种入，不声称真实登录流程通过 |
 
-冻结 0.87.5 的原处理函数复现：7 项中 3 项对照通过、4 项缺陷断言失败，失败记录保留在仓库外。
+测试不会连接生产库，也不复制真实用户数据。线上仅匿名只读，发帖、回复、已读、上传等非读取请求均阻断。应用正常启动／后台任务与验收主动写入分别记录，不将启动声明为零写入。
 
-候选新增 `tests/forumCommunityHandlers.test.mjs` 与 `tests/fixtures/forumHandlerHarness.mjs`：38/38 定向测试通过。测试执行完整实际 SFC script 和原有 useAccountRequestGuard，传输、最小响应式/生命周期端口及导航为受控模拟。覆盖已读互斥、失败、导航拒绝/取消、分页、身份往返、迟到 GET/POST、停用/恢复、原稿保留、重复提交、已创建回执与上传。
+隔离 SQL 首次因原测试加载器缺少 Nuxt 服务端文案 JSON 导入支持而失败；记录保留，未计通过。仅在既有 fixture 增加真实 locale JSON 的源码加载及合成封面导出后，完整 HTTP／SQL 链路通过。没有修改业务错误处理来让测试通过。
 
-验证层级必须准确：这不是 Vue DOM 挂载、真实 Nuxt 路由、浏览器或 SQL 验收。初次本地运行环境为独立 ChatGPT 容器 Node.js 22.16.0，单进程串行、128 MiB Node heap、25 秒外部超时；没有使用或修改生产主机的 systemd 包装器。两页 TypeScript script 的语法转译无诊断；不冒充完整类型检查或 SFC 模板编译。外部网络、生产读取和生产业务写入均为 0。
+## 可复跑
 
-现有 CI 只追加上述测试路径，权限、任务预算、其他测试和正常 Nuxt build 步骤不变。CI 的实际结果以 PR 对应最终提交记录为准，本文不预填 PASS。
-
-生产开发主机复验遵循原包装器：
+安全运行时：`/opt/taiko-viewer-runtime/node-v24.22.1-linux-x64/bin/node`，内置及 npm Undici 7.30.1。没有新增依赖或升级无关依赖，Contract 不变。版本仅更新 package、lock 根版本、两份应用文档元数据和发布说明至 0.87.6。
 
 ```sh
-bash scripts/memory/run_qa.sh /absolute/node --experimental-strip-types --test --test-concurrency=1 taiko_viewer/tests/forumCommunityHandlers.test.mjs
+# 自动启动、检查并清理本地 Nuxt；入口 http://127.0.0.1:3208/forum/notifications 和 /forum/new
+bash scripts/memory/run_qa.sh /usr/bin/env VIEWER_REVIEW_OUT=/var/tmp/pr33-browser-evidence /usr/bin/python3 preview/song-detail/review/community.py
+
+# 新建本次私有测试 daemon／空测试库；结束即关闭，绝不读取生产配置
+bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_ALLOW_TEST_DB_MUTATION=1 VIEWER_REVIEW_OUT=/var/tmp/pr33-sql-evidence /usr/bin/python3 preview/song-detail/review/community_sql.py
 ```
 
-## 合并前剩余事项
+预览 root `preview/song-detail` 不加载业务后端，非读取请求默认 405；浏览器成功操作由测试 transport 完成，不将拒写当作业务成功。相关 GET fixtures 只在预览中加载；预览封面使用本地图片占位，不能作为真实歌曲封面数据验收。生产构建仍为正常 `taiko_viewer` 入口，不含 fixture／评审路由。
 
-1. 同一候选的现有完整 CI、正常业务构建及代码审查。
-2. 实际 Vue/Nuxt/浏览器验证：中日文、手机与桌面、分页、导航失败、身份切换、KeepAlive、发帖/上传失败原稿恢复；不能用函数级测试替代。
-3. 复用隔离数据库/HTTP 验证发帖、回复、通知持久化与权限，保留实际 SELECT DATABASE 和 mutation opt-in；不要写生产。
-4. 正式版本与 lock/application 文档元数据同步；保留已审查 Node.js 24.22.1/Undici 7.30.1 或后续已核实安全基线，不回退依赖。
-5. 社区其他入口、登录返回、帮助/开发者/歌曲分类仍按原批次验收；不得将这两页修复计为整个社区完成。
-6. 更新唯一迁移表时分别记录已验收、已修复与未验证。受控部署仍走原脚本，本轮不继承上次一次性 MemAvailable 豁免，不启用开机自启。
+原始日志、首次失败记录、截图、候选源码哈希及 SQL 链路结果归档于仓库外 `/home/sigaer/taiko/qa-vault/evidence/viewer-community-pr33-20261022`。Git 保留可复用脚本、fixture、测试与本说明。最终回归／CI／审查、合并及运行产物以同一候选的交付记录为准，不预填发布结果。
 
-原始日志与补丁归档在仓库外，Git 只保留源码、可复用测试和此简明说明。
+## 发布与后续范围
+
+采用原 `scripts/memory/run_build.sh` 和 `scripts/deploy_forum_web.sh`，本轮不继承任何内存准入豁免，脚本失败即停止，不手工替换产物。保留安全运行时与依赖、0.87.5 回滚产物、开机自启关闭状态。
+
+其余社区首页、版块／列表／帖子阅读内容、关系／偏好、登录返回、帮助、开发者及其他常用入口继续按唯一迁移表安排，不作为此 PR 的无限前置条件。两页状态修复验收不等于整个社区内容迁移完成。

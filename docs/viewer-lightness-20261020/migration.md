@@ -43,8 +43,8 @@
 | `/forum/discussions` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/forum` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 补验 16 条合成 DTO，现有首页上限显示 12 条；徽章及卡片主次仍待后续整理 | [414](content-refinement-20261020/screenshots/after-community-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-community-1440-dark-ja.png) |
 | `/forum/me` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/forum/new` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 发帖主表单 | 未逐页截图 |
-| `/forum/notifications` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
+| `/forum/new` | default | 正文／表单 800 | 已适配 | 状态修复已验收；整体内容迁移另行安排 | 失败保留可编辑原稿、创建回执与打开重试分离、上传／身份／KeepAlive 保护；真实页面及隔离持久化链路 | [0.87.6 修复验收](../community-state-fixes-20261022.md) |
+| `/forum/notifications` | default | 常规 1000 | 已适配 | 状态修复已验收；整体内容迁移另行安排 | 读取失败／空态／重试、20 条分页、单条与全部已读互斥、导航失败恢复及身份／KeepAlive 保护 | [0.87.6 修复验收](../community-state-fixes-20261022.md) |
 | `/forum/section/:slug` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/forum/thread/:id` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 长帖、回复与编辑器共享正文边界 | 未逐页截图 |
 | `/grade/2023` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
