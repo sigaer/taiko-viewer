@@ -14,6 +14,7 @@ export const useViewerApiFetch = () => {
   // Capture Nuxt state during setup; do not call composables after the await.
   const homeResolvedUserId = useState<number | null>("home-state-resolved-user-id", () => null);
   const bindingGeneration = useState("account-binding-generation", () => 0);
+  const homeGeneration = useState("account-home-generation", () => 0);
   return async <T>(request: Parameters<typeof $fetch<T>>[0], options: ViewerApiFetchOptions = {}) => {
     const result = await $fetch<T>(request, {
       ...options,
@@ -22,6 +23,12 @@ export const useViewerApiFetch = () => {
     if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && /^\/api\/account\/(bindings|manual|qq)(?:\/|$)/.test(request)) {
       homeResolvedUserId.value = null;
       bindingGeneration.value += 1;
+    }
+    // A completed sync request invalidates the cached score-presence check.
+    // Its response still determines success/failure in the existing sync UI.
+    if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && /^\/api\/account\/sync(?:\/|$)/.test(request)) {
+      homeResolvedUserId.value = null;
+      homeGeneration.value += 1;
     }
     return result;
   };

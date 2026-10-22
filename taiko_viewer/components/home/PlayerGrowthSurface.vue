@@ -15,6 +15,8 @@ const props = defineProps<{
   displayName: string;
   pending?: boolean;
   failed?: boolean;
+  overviewRefreshing?: boolean;
+  overviewRefreshFailed?: boolean;
   identity: string;
   refreshGrowth: (identity: string) => Promise<boolean>;
   recent: RecentGrowthResponse;
@@ -188,6 +190,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         @retry="refreshRecent"
       />
     </header>
+    <p v-if="overviewRefreshing && !refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
+    <div v-else-if="overviewRefreshFailed && !refreshFailed && !refreshing" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button type="button" @click="refreshGrowth(identity)">{{ t('home.growth.recent.retry') }}</button></div>
     <div v-if="pending" class="growth-loading" aria-busy="true">
       <div class="growth-loading__focus shimmer-card">
         <span class="growth-skeleton__line growth-skeleton__line--title"></span>
@@ -206,7 +210,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <span class="growth-skeleton__line growth-skeleton__line--progress shimmer-card"></span>
       </div>
     </div>
-    <el-alert v-else-if="failed" :title="t('home.growth.loadFailed')" type="warning" :closable="false" show-icon />
+    <div v-else-if="failed" class="goal-actions" role="alert"><span>{{ t('home.growth.loadFailed') }}</span><button type="button" @click="refreshGrowth(identity)">{{ t('home.growth.recent.retry') }}</button></div>
     <template v-else>
       <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
         <h2 id="growth-goal-title">{{ t(composeGoalCopy('active').key) }}</h2>

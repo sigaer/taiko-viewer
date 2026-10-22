@@ -17,7 +17,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
 const isReady = computed(() => props.state === "authenticated_ready");
-const { growth, pending: growthPending, error: growthError, identity: growthIdentity, refresh: refreshGrowth } = usePlayerGrowth(isReady, userId);
+const { growth, pending: growthPending, error: growthError, refreshing: overviewRefreshing, refreshError: overviewRefreshError, identity: growthIdentity, refresh: refreshGrowth } = usePlayerGrowth(isReady, userId);
 const { recent, pending: recentPending, error: recentError, refresh: refreshRecent, acknowledge: acknowledgeRecent } = useRecentGrowth(isReady, userId);
 
 const displayName = computed(() => props.user?.username || t("account.title"));
@@ -77,6 +77,8 @@ const trackClick = (event: string, source: string) => {
       :display-name="displayName"
       :pending="growthPending"
       :failed="!!growthError"
+      :overview-refreshing="overviewRefreshing"
+      :overview-refresh-failed="!!overviewRefreshError"
       :identity="growthIdentity"
       :refresh-growth="refreshGrowth"
       :recent="recent"

@@ -25,11 +25,28 @@ const factText = (fact: GrowthFact) => {
   return t(`home.growth.recent.types.${fact.type}`);
 };
 
-watch(() => props.recent.boundary.currentToken, async token => {
-  if (!import.meta.client || !token || !props.recent.boundary.acknowledgeRequired) return;
+let presentation = 0;
+let frame: number | null = null;
+let presentedToken = "";
+let presentedProfile = "";
+const active = ref(true);
+onDeactivated(() => { active.value = false; presentation++; presentedToken = ""; if (frame !== null) cancelAnimationFrame(frame); });
+onActivated(() => { active.value = true; });
+onBeforeUnmount(() => { presentation++; if (frame !== null) cancelAnimationFrame(frame); });
+watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.recent.boundary.acknowledgeRequired, props.pending, props.failed, active.value] as const, async ([profile, token, required, pending, failed, visible]) => {
+  const request = ++presentation;
+  if (frame !== null) { cancelAnimationFrame(frame); frame = null; }
+  if (presentedProfile !== profile) { presentedProfile = profile; presentedToken = ""; }
+  if (!import.meta.client || !visible || !profile || !token || !required || pending || failed || presentedToken === token || props.recent.state === 'unavailable') return;
   await nextTick();
-  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-  if (props.recent.boundary.currentToken === token && props.recent.boundary.acknowledgeRequired) emit("presented", token);
+  if (request !== presentation) return;
+  frame = requestAnimationFrame(() => {
+    frame = null;
+    if (request === presentation && props.recent.profileId === profile && props.recent.boundary.currentToken === token && props.recent.boundary.acknowledgeRequired && !props.pending && !props.failed) {
+      presentedToken = token;
+      emit("presented", token);
+    }
+  });
 }, { immediate: true, flush: "post" });
 </script>
 

@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — Contract v1.1 candidate
-  version: 0.87.4
-  description: "Application documentation release 0.87.4. Contract 1.1 remains FREEZE_CANDIDATE, not frozen.
+  version: 0.87.5
+  description: "Application documentation release 0.87.5. Contract 1.1 remains FREEZE_CANDIDATE, not frozen.
     The default compact public song catalog is verified in production at the confirmed origin below.
     Other application-key/ResourceGrant capabilities retain their existing server enablement and authority;
     this release does not grant access or claim new production verification for private v1 paths.
