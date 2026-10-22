@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
+import { isNavigationFailure } from "vue-router";
 import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
 import type { SongCatalogItem, SongCatalogPagePayload, SongDetailPayload } from "~/types/content";
@@ -16,6 +17,19 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
+const { accountUser } = useAccountState();
+const requestGuard = useAccountRequestGuard(false);
+let viewActive = true;
+let searchGeneration = 0;
+const publishedThreadId = ref<number | null>(null);
+const navigationFailed = ref(false);
+const uploadCount = ref(0);
+const editorDisabled = computed(() => !accountUser.value || submitting.value || publishedThreadId.value !== null);
+// Accepted creation receipts survive KeepAlive deactivation; they must not be
+// submitted again merely because the following route transition was cancelled.
+onActivated(() => { viewActive = true; });
+onDeactivated(() => { viewActive = false; searchGeneration++; songLoading.value = false; });
+onBeforeUnmount(() => { viewActive = false; searchGeneration++; });
 
 definePageMeta({
   contentLayout: "reading",
@@ -50,7 +64,7 @@ form.sectionSlug = String(route.query.section || form.sectionSlug);
 
 const paragraphBlocks = ref<string[]>([]);
 const imageBlocks = ref<UploadedImage[]>([]);
-const uploading = ref(false);
+const uploading = computed(() => uploadCount.value > 0);
 const submitting = ref(false);
 const showMoreOptions = ref(false);
 const songQuery = ref("");
@@ -100,7 +114,10 @@ const copy = computed(() =>
         uploadTooLarge: "1枚の画像は20MB以内で選択してください",
         uploadFailed: "画像アップロードに失敗しました",
         publishSuccess: "投稿を公開しました",
-        publishFailed: "投稿に失敗しました"
+        publishFailed: "投稿に失敗しました",
+        viewPublished: "投稿を見る",
+        newPost: "新しい投稿",
+        navigationFailed: "投稿は公開済みですが、ページを開けませんでした。"
       }
     : {
         discussionTip: "适合普通交流、提问和经验分享。",
@@ -141,7 +158,10 @@ const copy = computed(() =>
         uploadTooLarge: "单张图片不能超过 20MB",
         uploadFailed: "图片上传失败",
         publishSuccess: "帖子已发布",
-        publishFailed: "发帖失败"
+        publishFailed: "发帖失败",
+        viewPublished: "查看帖子",
+        newPost: "再发一帖",
+        navigationFailed: "帖子已发布，但未能打开帖子页面。"
       }
 );
 
@@ -176,12 +196,36 @@ const selectedSongLevel = computed(() => {
   return String(selectedSong.value[`level_${form.difficultyType}` as keyof SongCatalogItem] ?? "");
 });
 
+watch(() => accountUser.value?.id, () => {
+  searchGeneration++;
+  // Drafts and completion receipts are private to the current author.
+  form.title = "";
+  form.summary = "";
+  form.tagsInput = "";
+  form.paragraphDraft = "";
+  form.songId = "";
+  form.difficultyType = "";
+  form.level = "";
+  paragraphBlocks.value = [];
+  imageBlocks.value = [];
+  selectedSong.value = null;
+  contextualSong.value = false;
+  songQuery.value = "";
+  songResults.value = [];
+  songLoading.value = false;
+  publishedThreadId.value = null;
+  navigationFailed.value = false;
+  submitting.value = false;
+  uploadCount.value = 0;
+}, { flush: 'sync' });
+
 const contextualSongId = Number(route.query.songId || 0);
 const contextualDifficulty = Number(route.query.difficulty || 0);
 if (Number.isInteger(contextualSongId) && contextualSongId > 0) {
+  const request = requestGuard.capture();
   try {
     const payload = await apiFetch<SongDetailPayload>(`/api/content/songs/${contextualSongId}`);
-    if (payload.song) {
+    if (requestGuard.current(request) && payload.song) {
       selectedSong.value = payload.song;
       form.songId = String(payload.song.id);
       songQuery.value = payload.song.song_name;
@@ -196,18 +240,28 @@ if (Number.isInteger(contextualSongId) && contextualSongId > 0) {
 const getSectionLabel = (section: ForumSection) => resolveForumSectionTranslation(t, section.slug, section.name);
 
 const searchSongs = async () => {
+  if (editorDisabled.value || !viewActive) return;
   const keyword = songQuery.value.trim();
-  if (!keyword) { songResults.value = []; return; }
+  const search = ++searchGeneration;
+  if (!keyword) { songResults.value = []; songLoading.value = false; return; }
+  const request = requestGuard.capture();
   songLoading.value = true;
   try {
-    const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", { query: { view: "list", shelfStatus: 0, page: 1, pageSize: 8, keyword } });
-    songResults.value = payload.songs;
+    const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", { query: { view: "list", shelfStatus: 0, page: 1, pageSize: 8, keyword }, retry: 0 });
+    if (viewActive && requestGuard.current(request) && search === searchGeneration && songQuery.value.trim() === keyword) songResults.value = payload.songs;
+  } catch (error: any) {
+    if (viewActive && requestGuard.current(request) && search === searchGeneration) {
+      ElMessage.error(error?.data?.statusMessage || error?.message || t("errors.actionFailed"));
+    }
   } finally {
-    songLoading.value = false;
+    if (requestGuard.current(request) && search === searchGeneration) songLoading.value = false;
   }
 };
 
 const chooseSong = (song: SongCatalogItem) => {
+  if (editorDisabled.value || !viewActive) return;
+  searchGeneration++;
+  songLoading.value = false;
   selectedSong.value = song;
   form.songId = String(song.id);
   songQuery.value = song.song_name;
@@ -220,16 +274,18 @@ watch(selectedSongLevel, (level) => {
 }, { immediate: true });
 
 const addParagraph = () => {
-  if (!form.paragraphDraft.trim()) return;
+  if (editorDisabled.value || !form.paragraphDraft.trim()) return;
   paragraphBlocks.value.push(form.paragraphDraft.trim());
   form.paragraphDraft = "";
 };
 
 const removeParagraph = (index: number) => {
+  if (editorDisabled.value) return;
   paragraphBlocks.value.splice(index, 1);
 };
 
 const removeImage = (index: number) => {
+  if (editorDisabled.value) return;
   imageBlocks.value.splice(index, 1);
 };
 
@@ -242,46 +298,81 @@ const validateImageFile = (file: File) => {
 };
 
 const uploadImage = async (options: any) => {
+  if (editorDisabled.value || !viewActive) {
+    options.onError?.(new Error(copy.value.uploadFailed));
+    return;
+  }
   if (options.file && !validateImageFile(options.file)) {
     options.onError?.(new Error(copy.value.uploadTooLarge));
     return;
   }
-  uploading.value = true;
+  const request = requestGuard.capture();
+  uploadCount.value++;
   try {
     const body = new FormData();
     body.append("image", options.file);
     const result = await apiFetch<{ imageUrl: string }>("/api/forum/media/images", {
       method: "POST",
-      body
+      body,
+      retry: 0
     });
+    if (!requestGuard.current(request)) return;
     imageBlocks.value.push({
       imageUrl: result.imageUrl,
       caption: ""
     });
-    ElMessage.success(copy.value.uploadSuccess);
+    if (viewActive) ElMessage.success(copy.value.uploadSuccess);
     options.onSuccess?.(result, options.file);
   } catch (error: any) {
+    if (!requestGuard.current(request)) return;
     const statusCode = Number(error?.statusCode || error?.data?.statusCode || 0);
     const statusMessage = String(error?.data?.statusMessage || error?.message || "");
     const isOversized = statusCode === 413 || statusMessage.includes("20MB") || statusMessage.includes("图片过大");
-    if (isOversized) {
-      ElMessage.warning(copy.value.uploadTooLarge);
-    } else {
-      ElMessage.error(statusMessage || copy.value.uploadFailed);
+    if (viewActive) {
+      if (isOversized) ElMessage.warning(copy.value.uploadTooLarge);
+      else ElMessage.error(statusMessage || copy.value.uploadFailed);
     }
     options.onError?.(error);
   } finally {
-    uploading.value = false;
+    if (requestGuard.current(request)) uploadCount.value = Math.max(0, uploadCount.value - 1);
+  }
+};
+
+const startAnotherThread = () => {
+  if (submitting.value || !accountUser.value || !viewActive || publishedThreadId.value === null) return;
+  form.title = "";
+  form.summary = "";
+  form.tagsInput = "";
+  form.paragraphDraft = "";
+  paragraphBlocks.value = [];
+  imageBlocks.value = [];
+  publishedThreadId.value = null;
+  navigationFailed.value = false;
+};
+
+const viewPublishedThread = async () => {
+  if (!publishedThreadId.value || submitting.value || !accountUser.value || !viewActive) return;
+  const request = requestGuard.capture();
+  submitting.value = true;
+  navigationFailed.value = false;
+  try {
+    const failure = await router.push(localePath(`/forum/thread/${publishedThreadId.value}`));
+    if (requestGuard.current(request) && isNavigationFailure(failure)) navigationFailed.value = true;
+  } catch {
+    if (requestGuard.current(request)) navigationFailed.value = true;
+  } finally {
+    if (requestGuard.current(request)) submitting.value = false;
   }
 };
 
 const submit = async () => {
-  if (submitting.value) return;
-  if (form.paragraphDraft.trim()) {
-    addParagraph();
-  }
+  if (submitting.value || uploading.value || !accountUser.value || !viewActive) return;
+  if (publishedThreadId.value !== null) { await viewPublishedThread(); return; }
+  const request = requestGuard.capture();
+  // Submit a snapshot; do not remove the editable text before acceptance.
+  const draft = form.paragraphDraft.trim();
   const contentBlocks = [
-    ...paragraphBlocks.value.map((text) => ({ type: "paragraph" as const, text })),
+    ...[...paragraphBlocks.value.map(text => text.trim()).filter(Boolean), ...(draft ? [draft] : [])].map((text) => ({ type: "paragraph" as const, text })),
     ...imageBlocks.value.map((image) => ({
       type: "image" as const,
       imageUrl: image.imageUrl,
@@ -296,6 +387,7 @@ const submit = async () => {
   try {
     const thread = await apiFetch<{ id: number }>("/api/forum/threads", {
       method: "POST",
+      retry: 0,
       body: {
         sectionSlug: form.sectionSlug,
         threadType: form.threadType,
@@ -311,13 +403,18 @@ const submit = async () => {
         contentBlocks
       }
     });
-    ElMessage.success(copy.value.publishSuccess);
-    await router.push(localePath(`/forum/thread/${thread.id}`));
+    if (!requestGuard.current(request)) return;
+    publishedThreadId.value = thread.id;
+    if (viewActive) ElMessage.success(copy.value.publishSuccess);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.publishFailed);
+    if (requestGuard.current(request) && viewActive) {
+      ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.publishFailed);
+    }
   } finally {
-    submitting.value = false;
+    if (requestGuard.current(request)) submitting.value = false;
   }
+  // A failed route transition is not a failed creation and cannot resend POST.
+  if (requestGuard.current(request) && viewActive && publishedThreadId.value !== null) await viewPublishedThread();
 };
 </script>
 
@@ -334,23 +431,28 @@ const submit = async () => {
         <div><strong>{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</strong><span>{{ t(`community.discussingChart`) }} · {{ t(`difficulty.${form.difficultyType}`) }} · {{ form.level }}{{ t("guide.starSuffix") }}</span></div>
       </section>
 
-      <el-form label-position="top">
-        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><div class="type-chips"><button v-for="option in threadTypeOptions" :key="option.value" type="button" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button></div></el-form-item></div>
+      <section v-if="publishedThreadId !== null" class="composer-published" role="status">
+        <p>{{ navigationFailed ? copy.navigationFailed : copy.publishSuccess }}</p>
+        <el-button :loading="submitting" @click="viewPublishedThread">{{ copy.viewPublished }}</el-button>
+        <el-button :disabled="submitting" @click="startAnotherThread">{{ copy.newPost }}</el-button>
+      </section>
+      <el-form label-position="top" :disabled="editorDisabled">
+        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><div class="type-chips"><button v-for="option in threadTypeOptions" :key="option.value" type="button" :disabled="editorDisabled" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button></div></el-form-item></div>
 
         <el-form-item :label="copy.title">
           <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
         </el-form-item>
 
-        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div v-if="form.threadType === 'guide'" class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div v-if="form.threadType === 'guide'" class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><p>{{ text }}</p><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
+        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div v-if="form.threadType === 'guide'" class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div v-if="paragraphBlocks.length" class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><el-input v-model="paragraphBlocks[index]" type="textarea" :rows="3" maxlength="4000" :aria-label="`${copy.paragraphs} ${index + 1}`" /><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
 
-        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open"><summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary><div class="more-options__body"><el-form-item :label="copy.summary"><el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" /></el-form-item><el-form-item :label="copy.tags"><el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" /></el-form-item><div class="song-picker"><label>{{ copy.songId }}</label><div class="song-picker__search"><el-input v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" /><el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button></div><div v-if="songResults.length" class="song-picker__results"><button v-for="song in songResults" :key="song.id" type="button" @click="chooseSong(song)"><span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span><small>#{{ song.id }} · {{ song.type }}</small></button></div><p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p></div><div v-if="selectedSong" class="composer-grid composer-grid--song"><el-form-item :label="copy.difficulty"><el-select v-model="form.difficultyType" clearable><el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item><el-form-item :label="copy.level"><el-input v-model="form.level" :placeholder="copy.levelPlaceholder" /></el-form-item></div></div></details>
+        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open"><summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary><div class="more-options__body"><el-form-item :label="copy.summary"><el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" /></el-form-item><el-form-item :label="copy.tags"><el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" /></el-form-item><div class="song-picker"><label>{{ copy.songId }}</label><div class="song-picker__search"><el-input v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" /><el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button></div><div v-if="songResults.length" class="song-picker__results"><button v-for="song in songResults" :key="song.id" type="button" :disabled="editorDisabled" @click="chooseSong(song)"><span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span><small>#{{ song.id }} · {{ song.type }}</small></button></div><p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p></div><div v-if="selectedSong" class="composer-grid composer-grid--song"><el-form-item :label="copy.difficulty"><el-select v-model="form.difficultyType" clearable><el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item><el-form-item :label="copy.level"><el-input v-model="form.level" :placeholder="copy.levelPlaceholder" /></el-form-item></div></div></details>
 
         <section class="block-editor block-editor--attachments">
           <div class="block-editor__head">
             <h3>{{ copy.images }}</h3>
             <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
           </div>
-          <el-upload :show-file-list="false" :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
+          <el-upload :key="accountUser?.id || 'guest'" :disabled="editorDisabled" :show-file-list="false" :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
             <el-button :loading="uploading">{{ copy.uploadImage }}</el-button>
           </el-upload>
           <div class="image-grid">
@@ -363,7 +465,7 @@ const submit = async () => {
         </section>
 
         <div class="composer-submit">
-          <el-button type="primary" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
+          <el-button type="primary" :disabled="uploading || publishedThreadId !== null" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
         </div>
       </el-form>
     </section>
@@ -371,6 +473,9 @@ const submit = async () => {
 </template>
 
 <style scoped>
+.composer-published { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.composer-published p { margin: 0; }
+
 .forum-new-page {
   display: flex;
   justify-content: center;
