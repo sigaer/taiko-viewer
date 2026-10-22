@@ -1,5 +1,6 @@
 import { songRowData, songRowRecommendations } from '../utils/song-row-fixtures';
 import { homeDeepData } from '../utils/home-deep-fixtures';
+import { communityData } from '../utils/community-fixtures';
 import { growthData } from '../utils/growth-fixtures';
 import { batch2Data, batch2Image } from '../utils/batch2-fixtures';
 import { createError, defineEventHandler, getCookie, getHeader, getMethod, getQuery, getRequestURL, readBody, setHeader, sendRedirect, setCookie } from 'h3';
@@ -34,6 +35,11 @@ export default defineEventHandler(async event => {
   // No mutation is implemented or forwarded by this preview root.
   if (!['GET', 'HEAD'].includes(getMethod(event))) throw createError({ statusCode: 405, statusMessage: 'Read-only component preview' });
   const state = getCookie(event, 'song_preview_state') || 'scores';
+  // Local stand-in for isolated page checks; no production cover fetch.
+  if (/^\/api\/content\/covers\/\d+$/.test(path)) return sendRedirect(event, '/miku.png', 302);
+  if (path === '/api/forum/notifications' && state === 'community-read-failure') throw createError({statusCode:503,statusMessage:'Synthetic notification read failure'});
+  const community = communityData(path, getQuery(event), state);
+  if (community !== undefined) return community;
   if (path === '/api/account/auth/me' && state === 'auth-failure') throw createError({statusCode:503,statusMessage:'Synthetic authentication read failure'});
   if (path === '/api/account/bindings' && state === 'binding-failure') throw createError({statusCode:503,statusMessage:'Synthetic binding read failure'});
   if (path === '/api/account/growth/overview' && state === 'overview-failure') throw createError({statusCode:503,statusMessage:'Synthetic overview read failure'});
