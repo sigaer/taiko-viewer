@@ -9,6 +9,10 @@ const route = useRoute();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
+const { accountUser } = useAccountState();
+const requestGuard = useAccountRequestGuard(false);
+let viewActive = true;
+let privateGeneration = 0;
 const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
@@ -136,10 +140,12 @@ const getSectionName = (slug: string, fallback = slug) => resolveForumSectionTra
 const getSongDifficultyLabel = (difficultyType: number | null, fallback: string) =>
   difficultyType ? t(`difficulty.${difficultyType}`) : fallback;
 
-const { data, pending } = await useAsyncData<ForumThreadDetail>(
-  () => `forum-thread-${route.params.id}`,
-  () => apiFetch(`/api/forum/threads/${route.params.id}`),
+const threadResource = useForumResource<ForumThreadDetail>(
+  `forum-thread-detail:${route.params.id}`, () => apiFetch(`/api/forum/threads/${route.params.id}`, { retry: 0 }),
+  { context: () => String(route.params.id) }
 );
+const { data, pending, error: readError, refresh } = threadResource;
+const mutationCurrent = (ticket: number, threadId: string) => viewActive && requestGuard.current(ticket) && String(route.params.id) === threadId;
 
 useViewerSeo(() => ({
   title: data.value?.title || t("forum.threadDetail"),
@@ -189,6 +195,22 @@ const openImageViewer = (url: string, event?: MouseEvent) => {
   viewerOpen.value = true;
 };
 
+const resetPrivateState = () => {
+  privateGeneration++;
+  requestGuard.invalidate();
+  replyBody.value = ''; replyImages.value = []; replyTarget.value = { id: null, label: '' };
+  replyExpanded.value = false; submitting.value = false; uploadingImages.value = false;
+  likingThread.value = false; activePostLikeId.value = null;
+  revealedBlockedPostIds.value = []; viewerOpen.value = false;
+};
+watch(() => [accountUser.value?.id, route.params.id], resetPrivateState, { flush: 'sync' });
+onDeactivated(() => {
+  viewActive = false; requestGuard.invalidate();
+  likingThread.value = false; activePostLikeId.value = null; uploadingImages.value = false;
+  viewerOpen.value = false;
+});
+onActivated(() => { viewActive = true; });
+
 const highlightedReplyId = ref<number | null>(null);
 const threadPageMounted = ref(false);
 let handledReplyHash = "";
@@ -199,14 +221,16 @@ const waitForRouteScroll = () => new Promise<void>((resolve) => {
 });
 
 const scrollToReplyHash = async () => {
-  if (!import.meta.client || !threadPageMounted.value || !detail.value || !route.hash || route.hash === handledReplyHash) return;
+  if (!import.meta.client || !viewActive || !threadPageMounted.value || !detail.value || !route.hash || route.hash === handledReplyHash) return;
   const match = route.hash.match(/^#reply-(\d+)$/);
   if (!match) return;
   const replyId = Number(match[1]);
   await nextTick();
   await waitForRouteScroll();
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
   let attempts = 0;
   const locate = () => {
+    if (!mutationCurrent(request, requestedThread)) return;
     const target = document.getElementById(`reply-${replyId}`);
     if (!target && attempts++ < 4) {
       requestAnimationFrame(locate);
@@ -243,6 +267,11 @@ onMounted(() => {
   threadPageMounted.value = true;
   void scrollToReplyHash();
 });
+onDeactivated(() => {
+  handledReplyHash = ''; highlightedReplyId.value = null;
+  if (highlightTimer) { clearTimeout(highlightTimer); highlightTimer = null; }
+});
+onActivated(() => { void scrollToReplyHash(); });
 onBeforeUnmount(() => {
   if (highlightTimer) clearTimeout(highlightTimer);
 });
@@ -288,7 +317,8 @@ const showActionError = (
 const uploadReplyImages = async (event: Event) => {
   const input = event.target as HTMLInputElement | null;
   const files = Array.from(input?.files || []);
-  if (!files.length || uploadingImages.value) return;
+  if (!files.length || uploadingImages.value || submitting.value || detail.value?.isLocked || !viewActive) return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
   if (replyImages.value.length >= 4) {
     ElMessage.warning(copy.value.uploadLimit);
     if (input) input.value = "";
@@ -314,12 +344,14 @@ const uploadReplyImages = async (event: Event) => {
           body: formData,
         },
       );
+      if (!mutationCurrent(request, requestedThread)) return;
       if (result.imageUrl) {
         replyImages.value.push(result.imageUrl);
       }
     }
     ElMessage.success(copy.value.uploadDone);
   } catch (error: any) {
+    if (!mutationCurrent(request, requestedThread)) return;
     const statusCode = Number(error?.statusCode || error?.data?.statusCode || 0);
     const statusMessage = String(error?.data?.statusMessage || error?.message || "");
     if (statusCode === 413 || statusMessage.includes("20MB") || statusMessage.includes("图片过大")) {
@@ -328,8 +360,10 @@ const uploadReplyImages = async (event: Event) => {
     }
     showActionError(error, copy.value.uploadFailed, copy.value.loginForUpload);
   } finally {
-    uploadingImages.value = false;
-    if (input) input.value = "";
+    if (mutationCurrent(request, requestedThread)) {
+      uploadingImages.value = false;
+      if (input) input.value = "";
+    }
   }
 };
 
@@ -359,9 +393,10 @@ const restoreScrollPosition = async (scrollY: number) => {
 const submitReply = async () => {
   if (
     (!replyBody.value.trim() && !replyImages.value.length) ||
-    submitting.value
+    submitting.value || uploadingImages.value || detail.value?.isLocked || !viewActive
   )
     return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id), generation = privateGeneration;
   submitting.value = true;
   try {
     const contentBlocks = [
@@ -379,7 +414,7 @@ const submitReply = async () => {
       })),
     ];
     const scrollY = import.meta.client ? window.scrollY : 0;
-    const result = await apiFetch<ForumThreadDetail>(`/api/forum/threads/${route.params.id}/replies`, {
+    const result = await apiFetch<ForumThreadDetail>(`/api/forum/threads/${requestedThread}/replies`, {
       method: "POST",
       body: {
         bodyText: replyBody.value,
@@ -387,46 +422,56 @@ const submitReply = async () => {
         parentPostId: replyTarget.value.id || undefined,
       },
     });
-    data.value = result;
+    // An accepted reply from this unchanged identity/thread retires its draft
+    // even while away; only an active current view may consume the DTO.
+    if (generation !== privateGeneration) return;
     replyBody.value = "";
     replyImages.value = [];
     replyTarget.value = { id: null, label: "" };
     replyExpanded.value = false;
+    submitting.value = false;
+    if (!mutationCurrent(request, requestedThread)) return;
+    threadResource.accept(result);
     ElMessage.success(copy.value.replySuccess);
     await restoreScrollPosition(scrollY);
   } catch (error: any) {
-    showActionError(error, copy.value.replyFailed, copy.value.loginForReply);
+    if (mutationCurrent(request, requestedThread)) showActionError(error, copy.value.replyFailed, copy.value.loginForReply);
   } finally {
-    submitting.value = false;
+    if (generation === privateGeneration) submitting.value = false;
   }
 };
 
 const toggleThreadLike = async (event?: MouseEvent) => {
-  if (likingThread.value) return;
+  if (likingThread.value || !viewActive) return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
   const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
   const scrollY = import.meta.client ? window.scrollY : 0;
   likingThread.value = true;
   try {
     const wasLiked = Boolean(detail.value?.viewerHasLiked);
-    const result = await apiFetch<ForumLikeMutationResult>(`/api/forum/threads/${route.params.id}/like`, {
+    const result = await apiFetch<ForumLikeMutationResult>(`/api/forum/threads/${requestedThread}/like`, {
       method: "POST",
     });
+    if (!mutationCurrent(request, requestedThread)) return;
     if (detail.value) {
       detail.value.viewerHasLiked = result.liked;
       detail.value.likeCount = result.likeCount;
     }
     ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
   } catch (error: any) {
-    showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
+    if (mutationCurrent(request, requestedThread)) showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
-    likingThread.value = false;
-    await restoreScrollPosition(scrollY);
-    trigger?.focus({ preventScroll: true });
+    if (mutationCurrent(request, requestedThread)) {
+      likingThread.value = false;
+      await restoreScrollPosition(scrollY);
+      trigger?.focus({ preventScroll: true });
+    }
   }
 };
 
 const togglePostLike = async (postId: number, event?: MouseEvent) => {
-  if (activePostLikeId.value === postId) return;
+  if (activePostLikeId.value !== null || !viewActive) return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
   const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
   const scrollY = import.meta.client ? window.scrollY : 0;
   activePostLikeId.value = postId;
@@ -441,17 +486,20 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
     const result = await apiFetch<ForumLikeMutationResult>(`/api/forum/posts/${postId}/like`, {
       method: "POST",
     });
+    if (!mutationCurrent(request, requestedThread)) return;
     if (currentPost) {
       currentPost.viewerHasLiked = result.liked;
       currentPost.likeCount = result.likeCount;
     }
     ElMessage.success(wasLiked ? copy.value.likeRemoved : copy.value.likeSuccess);
   } catch (error: any) {
-    showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
+    if (mutationCurrent(request, requestedThread)) showActionError(error, copy.value.likeFailed, copy.value.loginForLike);
   } finally {
-    activePostLikeId.value = null;
-    await restoreScrollPosition(scrollY);
-    trigger?.focus({ preventScroll: true });
+    if (mutationCurrent(request, requestedThread)) {
+      activePostLikeId.value = null;
+      await restoreScrollPosition(scrollY);
+      trigger?.focus({ preventScroll: true });
+    }
   }
 };
 
@@ -477,6 +525,7 @@ const renderReplyBlocks = (
       :rows="10"
     />
 
+    <ForumReadState v-else-if="readError" :pending="false" :error="readError" @retry="refresh" />
     <template v-else-if="detail">
       <article class="thread-article">
       <header class="thread-header">
@@ -599,7 +648,7 @@ const renderReplyBlocks = (
           :rows="replyExpanded ? 5 : 1"
           maxlength="1000"
           show-word-limit
-          :disabled="detail.isLocked"
+          :disabled="detail.isLocked || submitting"
           :placeholder="copy.replyPlaceholder"
           @focus="replyExpanded = true"
         />
@@ -619,7 +668,7 @@ const renderReplyBlocks = (
               accept="image/*"
               multiple
               :disabled="
-                detail.isLocked || uploadingImages || replyImages.length >= 4
+                detail.isLocked || submitting || uploadingImages || replyImages.length >= 4
               "
               @change="uploadReplyImages"
             />
@@ -638,7 +687,7 @@ const renderReplyBlocks = (
             class="reply-image-card"
           >
             <ForumSafeImage :src="imageUrl" alt="reply image" />
-            <el-button text size="small" @click="removeReplyImage(index)"
+            <el-button text size="small" :disabled="submitting" @click="removeReplyImage(index)"
               >{{ copy.remove }}</el-button
             >
           </div>
@@ -713,6 +762,7 @@ const renderReplyBlocks = (
               size="small"
               :aria-pressed="post.viewerHasLiked"
               :loading="activePostLikeId === post.id"
+              :disabled="activePostLikeId !== null && activePostLikeId !== post.id"
               @click="togglePostLike(post.id, $event)"
             >
               <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="post.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>
@@ -792,6 +842,7 @@ const renderReplyBlocks = (
                   size="small"
                   :aria-pressed="reply.viewerHasLiked"
                   :loading="activePostLikeId === reply.id"
+                  :disabled="activePostLikeId !== null && activePostLikeId !== reply.id"
                   @click="togglePostLike(reply.id, $event)"
                 >
                   <svg class="reply-action__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5L12 7.2l.7-.7A4.6 4.6 0 0 1 19.2 13L12 20.2Z" :fill="reply.viewerHasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ForumSection, ForumThreadCard, ForumThreadType } from "~/types/forum";
+import { parseForumListQuery, forumListLocationQuery } from "~/utils/forumListQuery";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveForumSectionTranslation, resolveForumSectionDescription } from "~/utils/forum";
 
@@ -17,22 +18,13 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 
-const filterState = reactive({
-  keyword: String(route.query.keyword || ""),
-  sort: String(route.query.sort || "latest"),
-  threadType: String(route.query.threadType || ""),
-  songId: String(route.query.songId || ""),
-  difficultyType: String(route.query.difficultyType || ""),
-  page: Number(route.query.page || 1)
-});
+// Only the committed URL drives reads. Dialog edits are a draft until Apply.
+const applied = computed(() => parseForumListQuery(route.query));
+const filterState = reactive({ ...applied.value });
 const filterOpen = ref(false);
 
-const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
-  "forum-sections",
-  () => apiFetch("/api/forum/sections"),
-  {
-    default: () => ({ items: [] })
-  }
+const { data: sectionsData, error: sectionsError, pending: sectionsPending, refresh: refreshSections } = useForumResource<{ items: ForumSection[] }>(
+  `forum-sections:${route.path}`, () => apiFetch('/api/forum/sections', { retry: 0 })
 );
 
 const currentSection = computed(
@@ -53,36 +45,12 @@ useViewerSeo(() => ({
   keywords: [t("page.forum.section.title"), localizedSectionName.value || ""].filter(Boolean)
 }));
 
-const requestQuery = computed(() => ({
-  sectionSlug: route.params.slug,
-  keyword: filterState.keyword,
-  sort: filterState.sort,
-  threadType: filterState.threadType,
-  songId: filterState.songId,
-  difficultyType: filterState.difficultyType,
-  page: filterState.page,
-  pageSize: 12
-}));
-
-const { data, pending, refresh } = await useAsyncData<ThreadListPayload>(
-  () => `forum-section-${route.params.slug}-${JSON.stringify(requestQuery.value)}`,
-  () =>
-    apiFetch("/api/forum/threads", {
-      query: requestQuery.value
-    }),
-  {
-    watch: [requestQuery],
-    default: () => ({
-      total: 0,
-      page: 1,
-      pageSize: 12,
-      sort: "latest",
-      items: []
-    })
-  }
+const requestQuery = computed(() => ({ ...applied.value, sectionSlug: route.params.slug, pageSize: 12 }));
+const { data, pending, error, refresh } = useForumResource<ThreadListPayload>(
+  `forum-thread-list:${route.path}`, () => apiFetch('/api/forum/threads', { query: requestQuery.value, retry: 0 }),
+  { context: () => `${route.path}:${JSON.stringify(requestQuery.value)}` }
 );
-
-const section = computed(() => sectionsData.value.items.find((item) => item.slug === route.params.slug));
+const section = currentSection;
 
 const sortOptions = computed(() => [
   { label: t("page.forum.section.sortLatest"), value: "latest" },
@@ -99,7 +67,7 @@ const typeOptions = computed<Array<{ label: string; value: "" | ForumThreadType 
 ]);
 
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value?.total || 0) / (data.value?.pageSize || 12))));
-const activeFilterCount = computed(() => Number(Boolean(filterState.keyword)) + Number(Boolean(filterState.threadType)) + Number(filterState.sort === "featured"));
+const activeFilterCount = computed(() => Number(Boolean(applied.value.keyword)) + Number(Boolean(applied.value.threadType)) + Number(applied.value.sort === "featured"));
 const newThreadPath = computed(() => ({
   path: "/forum/new",
   query: {
@@ -109,67 +77,48 @@ const newThreadPath = computed(() => ({
   }
 }));
 
-const pushFilters = async (page = 1) => {
-  filterState.page = page;
-  await router.push({
-    query: {
-      keyword: filterState.keyword || undefined,
-      sort: filterState.sort !== "latest" ? filterState.sort : undefined,
-      threadType: filterState.threadType || undefined,
-      songId: filterState.songId || undefined,
-      difficultyType: filterState.difficultyType || undefined,
-      page: page > 1 ? String(page) : undefined
-    }
-  });
-  await refresh();
+const pushFilters = async (page = 1, filters = filterState) => {
+  await router.push({ query: forumListLocationQuery({ ...filters, page }) });
   filterOpen.value = false;
 };
-
-watch(
-  () => route.query,
-  (query) => {
-    filterState.keyword = String(query.keyword || "");
-    filterState.sort = String(query.sort || "latest");
-    filterState.threadType = String(query.threadType || "");
-    filterState.songId = String(query.songId || "");
-    filterState.difficultyType = String(query.difficultyType || "");
-    filterState.page = Math.max(1, Number(query.page || 1));
-  }
-);
+watch(() => route.query, () => Object.assign(filterState, applied.value));
+watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value); });
 </script>
 
 <template>
   <div class="forum-section-page">
+    <ForumReadState v-if="sectionsError" :pending="sectionsPending" :error="sectionsError" @retry="refreshSections" />
     <section class="section-hero" :style="{ '--section-accent': section?.accentColor || '#d84a34' }">
       <div>
         <h2>{{ localizedSectionName || t("page.forum.section.title") }}</h2>
         <p v-if="route.params.slug">{{ localizedSectionDescription || t("page.forum.section.heroDesc") }}</p>
       </div>
       <div class="section-hero__stats">
-        <span>{{ route.params.slug ? (section?.threadCount || 0) : (data?.total || 0) }} {{ t("page.forum.section.threads") }}</span>
+        <span v-if="route.params.slug ? section : data">{{ route.params.slug ? section?.threadCount : data?.total }} {{ t("page.forum.section.threads") }}</span>
         <NuxtLink :to="localePath(newThreadPath)">{{ t("forum.writeThread") }}</NuxtLink>
       </div>
     </section>
 
     <section class="filter-panel">
       <div class="sort-chips" role="group" :aria-label="t('page.forum.section.sortLabel')">
-        <button v-for="option in sortOptions.slice(0, 2)" :key="option.value" type="button" :class="{ active: filterState.sort === option.value }" :aria-pressed="filterState.sort === option.value" @click="filterState.sort = option.value; pushFilters()">{{ option.label }}</button>
+        <button v-for="option in sortOptions.slice(0, 2)" :key="option.value" type="button" :class="{ active: applied.sort === option.value }" :aria-pressed="applied.sort === option.value" @click="pushFilters(1, { ...applied, sort: option.value })">{{ option.label }}</button>
       </div>
       <button type="button" class="filter-trigger" :aria-expanded="filterOpen" @click="filterOpen = true">{{ t("page.forum.section.filter") }}<span v-if="activeFilterCount">{{ activeFilterCount }}</span></button>
     </section>
 
     <section class="thread-list-panel">
-      <el-empty v-if="!pending && !data?.items.length" :description="t('page.forum.section.empty')" />
+      <ForumReadState v-if="pending || error" :pending="pending" :error="error" @retry="refresh" />
+      <el-empty v-else-if="!data?.items.length" :description="t('page.forum.section.empty')" />
       <div v-else class="thread-list">
         <ForumThreadCard v-for="thread in data?.items" :key="thread.id" :thread="thread" compact />
       </div>
     </section>
 
-    <section class="pager-panel">
+    <section v-if="data" class="pager-panel">
       <div>{{ t("page.forum.section.pagination", { page: data?.page || 1, totalPages, total: data?.total || 0 }) }}</div>
       <div class="pager-panel__actions">
-        <el-button :disabled="filterState.page <= 1" @click="pushFilters(filterState.page - 1)">{{ t("page.forum.section.prevPage") }}</el-button>
-        <el-button :disabled="filterState.page >= totalPages" @click="pushFilters(filterState.page + 1)">{{ t("page.forum.section.nextPage") }}</el-button>
+        <el-button :disabled="applied.page <= 1 || pending" @click="pushFilters(applied.page - 1, applied)">{{ t("page.forum.section.prevPage") }}</el-button>
+        <el-button :disabled="applied.page >= totalPages || pending" @click="pushFilters(applied.page + 1, applied)">{{ t("page.forum.section.nextPage") }}</el-button>
       </div>
     </section>
 

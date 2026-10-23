@@ -8,28 +8,34 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const route = useRoute();
-const activeFilter = useState("community-filter", () => String(route.query.filter || "latest"));
+const router = useRouter();
+const activeFilter = computed(() => ['hot', 'guide', 'featured'].includes(String(route.query.filter)) ? String(route.query.filter) : 'latest');
+const selectFilter = (filter: string) => router.push({ query: { ...route.query, filter: filter === 'latest' ? undefined : filter } });
+const allDiscussionsPath = computed(() => ({ path: '/forum/discussions', query: {
+  ...(activeFilter.value === 'hot' || activeFilter.value === 'featured' ? { sort: activeFilter.value } : {}),
+  ...(activeFilter.value === 'guide' ? { threadType: 'guide' } : {})
+} }));
 
 definePageMeta({ pageTitleKey: "forum.title", pageDescKey: "page.forum.index.desc", navKey: "/forum", hidePageHeader: true, breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }] });
 useViewerSeo(() => ({ title: t("forum.title"), description: buildPageDescription(t("page.forum.index.desc")), path: "/forum", keywords: [t("forum.title"), t("page.forum.index.keyword")] }));
 
-const { data, pending } = await useLazyAsyncData<ForumHomePayload>("forum-home", () => apiFetch("/api/forum/home"), {
-  default: () => ({ sections: [], featuredThreads: [], hotThreads: [], latestGuides: [], announcements: [], leaderboard: [], currentUser: null, unreadNotificationCount: 0, highlightedTags: [] })
-});
+const { data, pending, error: homeError, refresh: refreshHome } = useForumResource<ForumHomePayload>('forum-home', () => apiFetch('/api/forum/home', { retry: 0 }));
+// Home DTO has no latest feed. Read the existing list endpoint with its real
+// latest ordering instead of relabelling a union of featured/hot/guides.
+const { data: latest, pending: latestPending, error: latestError, refresh: refreshLatest } = useForumResource<{ items: ForumThreadCard[] }>(
+  'forum-home-latest', () => apiFetch('/api/forum/threads', { query: { sort: 'latest', page: 1, pageSize: 12 }, retry: 0 }),
+  { enabled: () => activeFilter.value === 'latest' }
+);
+const feedPending = computed(() => activeFilter.value === 'latest' ? latestPending.value : pending.value);
+const feedError = computed(() => activeFilter.value === 'latest' ? latestError.value : homeError.value);
+const retryFeed = () => activeFilter.value === 'latest' ? refreshLatest() : refreshHome();
 const { data: chartActivity, pending: chartActivityPending } = await useLazyAsyncData<CommunityChartActivityPayload>("community-chart-activity", () => apiFetch("/api/content/community/chart-activity"), {
   default: () => ({ items: [] }),
   server: true
 });
 const home = computed(() => data.value);
 const getSectionName = (slug: string, fallback = "") => resolveForumSectionTranslation(t, slug, fallback);
-const uniqueThreads = (groups: ForumThreadCard[][]) => {
-  const seen = new Set<number>();
-  return groups.flat().filter((thread) => !seen.has(thread.id) && seen.add(thread.id));
-};
-const feedThreads = computed(() => {
-  const source = activeFilter.value === "hot" ? home.value?.hotThreads || [] : activeFilter.value === "guide" ? home.value?.latestGuides || [] : activeFilter.value === "featured" ? home.value?.featuredThreads || [] : uniqueThreads([home.value?.featuredThreads || [], home.value?.hotThreads || [], home.value?.latestGuides || [], home.value?.announcements || []]);
-  return uniqueThreads([source]).slice(0, 12);
-});
+const feedThreads = computed(() => (activeFilter.value === 'latest' ? latest.value?.items : activeFilter.value === 'hot' ? home.value?.hotThreads : activeFilter.value === 'guide' ? home.value?.latestGuides : home.value?.featuredThreads) || []);
 const filters = computed(() => [
   { key: "latest", label: t("page.forum.index.latest") },
   { key: "hot", label: t("page.forum.index.hot") },
@@ -61,13 +67,15 @@ onBeforeUnmount(() => {
       </div>
     </header>
     <nav class="community-filters" :aria-label="t('page.forum.index.filtersLabel')">
-      <button v-for="filter in filters" :key="filter.key" type="button" class="community-filter" :class="{ 'is-active': activeFilter === filter.key }" :aria-pressed="activeFilter === filter.key" @click="activeFilter = filter.key">{{ filter.label }}</button>
+      <button v-for="filter in filters" :key="filter.key" type="button" class="community-filter" :class="{ 'is-active': activeFilter === filter.key }" :aria-pressed="activeFilter === filter.key" @click="selectFilter(filter.key)">{{ filter.label }}</button>
       <span class="community-filter__rule" aria-hidden="true"></span>
       <NuxtLink v-for="section in home?.sections?.slice(0, 4)" :key="section.id" :to="localePath(`/forum/section/${section.slug}`)" class="community-section-link">{{ getSectionName(section.slug, section.name) }}</NuxtLink>
     </nav>
+    <ForumReadState v-if="homeError && activeFilter === 'latest'" :pending="pending" :error="homeError" @retry="refreshHome" />
     <section class="community-feed" aria-labelledby="latest-discussions-title">
-      <div class="community-section-heading"><h2 id="latest-discussions-title">{{ t("page.forum.index.feedTitle") }}</h2><NuxtLink :to="localePath('/forum')" class="text-action">{{ t("common.viewAll") }}</NuxtLink></div>
-      <div v-if="pending" class="community-feed__list"><div v-for="n in 4" :key="n" class="community-skeleton community-skeleton--row"></div></div>
+      <div class="community-section-heading"><h2 id="latest-discussions-title">{{ t("page.forum.index.feedTitle") }}</h2><NuxtLink :to="localePath(allDiscussionsPath)" class="text-action">{{ t("common.viewAll") }}</NuxtLink></div>
+      <div v-if="feedPending" class="community-feed__list"><div v-for="n in 4" :key="n" class="community-skeleton community-skeleton--row"></div></div>
+      <ForumReadState v-else-if="feedError" :pending="false" :error="feedError" @retry="retryFeed" />
       <div v-else-if="feedThreads.length" class="community-feed__list"><ForumThreadCard v-for="thread in feedThreads" :key="thread.id" :thread="thread" compact /></div>
       <p v-else class="community-empty">{{ t("page.forum.index.empty") }}</p>
     </section>
