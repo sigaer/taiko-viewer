@@ -209,30 +209,38 @@ const followUpSubmittingId = ref<number | null>(null);
 const ticketDetails = ref<Record<number, SupportTicketDetail>>({});
 const followUpDrafts = reactive<Record<number, string>>({});
 
-const { data: ticketsData, refresh: refreshTickets, status: ticketsStatus } = await useAsyncData<SupportTicketListResponse>(
-  "support-ticket-list",
-  () => apiFetch("/api/support/tickets"),
-  {
-    default: () => ({ items: [] })
-  }
+const { data: ticketsData, refresh: refreshTickets, pending: loadingTickets, error: historyError } = useForumResource<SupportTicketListResponse>(
+  "support-ticket-list", () => apiFetch("/api/support/tickets"), { enabled: () => Boolean(accountUser.value) }
 );
-
 const tickets = computed(() => ticketsData.value?.items || []);
-const loadingTickets = computed(() => ticketsStatus.value === "pending");
+const detailErrors = ref<Record<number, string>>({});
+const actionScope = useAccountPageScope(() => {
+  submitting.value = false; expandedTicketId.value = null; loadingDetailId.value = null; followUpSubmittingId.value = null;
+  ticketDetails.value = {}; detailErrors.value = {};
+  for (const key of Object.keys(followUpDrafts)) delete followUpDrafts[Number(key)];
+  form.title = ""; form.content = ""; form.contact = accountUser.value?.email || "";
+});
 
 const getMessageLabel = (message: SupportTicketMessage) =>
   message.authorRole === "staff" ? copy.value.staffLabel : copy.value.userLabel;
 
 const loadTicketDetail = async (ticketId: number) => {
+  if (loadingDetailId.value === ticketId) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
+  detailErrors.value[ticketId] = "";
   loadingDetailId.value = ticketId;
   try {
     const detail = await apiFetch<SupportTicketDetail>(`/api/support/tickets/${ticketId}`);
+    if (!actionScope.current(ticket)) return;
     ticketDetails.value[ticketId] = detail;
     await refreshTickets();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
+    detailErrors.value[ticketId] = locale.value === "ja" ? "読み込めませんでした" : "读取失败";
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.followUpFailed);
   } finally {
-    loadingDetailId.value = null;
+    if (actionScope.current(ticket) && loadingDetailId.value === ticketId) loadingDetailId.value = null;
   }
 };
 
@@ -257,6 +265,8 @@ const submitFollowUp = async (ticketId: number) => {
     return;
   }
 
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
   followUpSubmittingId.value = ticketId;
   try {
     const response = await apiFetch<{ ok: true; ticket: SupportTicketDetail; mailDelivered: boolean }>(
@@ -266,8 +276,10 @@ const submitFollowUp = async (ticketId: number) => {
         body: { content }
       }
     );
+    if (!actionScope.current(ticket)) return;
     ticketDetails.value[ticketId] = response.ticket;
     followUpDrafts[ticketId] = "";
+    if (!actionScope.current(ticket)) return;
     if (response.mailDelivered) {
       ElMessage.success(copy.value.followUpSuccess);
     } else {
@@ -275,9 +287,10 @@ const submitFollowUp = async (ticketId: number) => {
     }
     await refreshTickets();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.followUpFailed);
   } finally {
-    followUpSubmittingId.value = null;
+    if (actionScope.current(ticket)) followUpSubmittingId.value = null;
   }
 };
 
@@ -292,6 +305,8 @@ const submit = async () => {
     return;
   }
 
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
   submitting.value = true;
   try {
     const response = await apiFetch<SupportTicketCreateResponse>("/api/support/tickets", {
@@ -304,6 +319,7 @@ const submit = async () => {
       }
     });
 
+    if (!actionScope.current(ticket)) return;
     if (response.mailDelivered) {
       ElMessage.success(copy.value.submitSuccess.replace("{id}", String(response.ticket.id)).replace("#{id}", `#${response.ticket.id}`));
     } else {
@@ -314,9 +330,10 @@ const submit = async () => {
     form.content = "";
     await refreshTickets();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.submitFailed);
   } finally {
-    submitting.value = false;
+    if (actionScope.current(ticket)) submitting.value = false;
   }
 };
 </script>
@@ -421,7 +438,8 @@ const submit = async () => {
           </div>
         </div>
 
-        <div v-if="!tickets.length" class="empty-state">
+        <div v-if="historyError" role="alert" class="entry-read-error"><p>{{ historyError }}</p><el-button @click="refreshTickets">{{ t('common.retry') }}</el-button></div>
+        <div v-else-if="!tickets.length" class="empty-state">
           {{ loadingTickets ? copy.loading : copy.empty }}
         </div>
 
@@ -462,6 +480,7 @@ const submit = async () => {
               <div v-if="loadingDetailId === ticket.id && !ticketDetails[ticket.id]" class="thread-loading">
                 {{ copy.loading }}
               </div>
+              <div v-else-if="detailErrors[ticket.id]" role="alert"><p>{{ detailErrors[ticket.id] }}</p><el-button @click="loadTicketDetail(ticket.id)">{{ t('common.retry') }}</el-button></div>
               <div v-else class="thread-list">
                 <div
                   v-for="message in ticketDetails[ticket.id]?.messages || []"

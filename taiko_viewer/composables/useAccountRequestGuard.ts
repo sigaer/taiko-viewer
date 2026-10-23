@@ -7,7 +7,7 @@ export const useAccountRequestGuard = (includeBinding = true) => {
   const binding = useState("account-binding-generation", () => 0);
   let generation = 0;
   const invalidate = () => { generation++; };
-  watch(() => [user.value?.id, includeBinding ? binding.value : null], invalidate, { flush: "sync" });
+  watch([() => user.value?.id, () => includeBinding ? binding.value : null], invalidate, { flush: "sync" });
   onBeforeUnmount(invalidate);
   return { capture: () => generation, current: (request: number) => request === generation, invalidate };
 };

@@ -36,6 +36,12 @@ const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
 const { formatDateTime } = useViewerDateTime();
 const processingId = ref<number | null>(null);
+let reviewDialogOwner: symbol | null = null;
+async function openOwnedReviewDialog<T>(open: () => Promise<T>) {
+  const owner = Symbol(); reviewDialogOwner = owner;
+  try { return await open(); }
+  finally { if (reviewDialogOwner === owner) reviewDialogOwner = null; }
+}
 
 definePageMeta({
   contentLayout: "wide",
@@ -118,35 +124,27 @@ const copy = computed(() =>
       }
 );
 
-const { data, pending, refresh } = await useAsyncData<ReviewPayload>(
-  "account-developer-review",
-  async () => {
-    try {
-      return await apiFetch("/api/account/developer/review");
-    } catch (error: any) {
-      return {
-        pending: [],
-        history: [],
-        forbidden: true,
-        message: error?.data?.statusMessage || error?.message || copy.value.forbiddenTitle
-      };
+const { accountUser } = useAccountState();
+const { data, pending, error: readError, refresh } = useForumResource<ReviewPayload>(
+  "account-developer-review", async () => {
+    try { return await apiFetch<ReviewPayload>("/api/account/developer/review"); }
+    catch (error: any) {
+      if (Number(error?.statusCode || error?.status) === 403) return {pending: [], history: [], forbidden: true};
+      throw error;
     }
-  },
-  {
-    default: () => ({
-      pending: [],
-      history: []
-    })
-  }
+  }, { enabled: () => Boolean(accountUser.value) }
 );
+const actionScope = useAccountPageScope(() => { processingId.value = null; if (reviewDialogOwner) { reviewDialogOwner = null; ElMessageBox.close(); } });
 
 const reviewState = computed(() => data.value);
 
 const handleApprove = async (application: ReviewApplication) => {
-  if (processingId.value) return;
+  if (processingId.value || reviewDialogOwner) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
   let reviewNote = "";
   try {
-    const result = await ElMessageBox.prompt(
+    const result = await openOwnedReviewDialog(() => ElMessageBox.prompt(
       copy.value.approvePrompt,
       copy.value.approveTitle.replace("{id}", String(application.id)),
       {
@@ -154,11 +152,12 @@ const handleApprove = async (application: ReviewApplication) => {
         cancelButtonText: t("common.cancel"),
         inputPlaceholder: copy.value.approvePlaceholder
       }
-    );
+    ));
     reviewNote = String(result.value || "").trim();
   } catch {
     return;
   }
+  if (!actionScope.current(ticket) || processingId.value) return;
   processingId.value = application.id;
   try {
     const result = await apiFetch<{
@@ -172,32 +171,36 @@ const handleApprove = async (application: ReviewApplication) => {
         reviewNote
       }
     });
+    if (!actionScope.current(ticket)) return;
     const message = result.mailDelivered
       ? copy.value.successMail.replace("{email}", application.replyEmail)
       : copy.value.successNoMail;
     ElMessage.success(message);
     if (result.issuedToken) {
-      await ElMessageBox.alert(
+      await openOwnedReviewDialog(() => ElMessageBox.alert(
         `Token: ${result.issuedToken}\n${result.mailDelivered ? copy.value.issuedTokenMailOk : copy.value.issuedTokenMailFailed}`,
         copy.value.issuedTokenTitle,
         {
           confirmButtonText: copy.value.issuedTokenConfirm
         }
-      );
+      ));
     }
-    await refresh();
+    if (actionScope.current(ticket)) await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.approveFailed);
   } finally {
-    processingId.value = null;
+    if (actionScope.current(ticket)) processingId.value = null;
   }
 };
 
 const handleReject = async (application: ReviewApplication) => {
-  if (processingId.value) return;
+  if (processingId.value || reviewDialogOwner) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
   let reviewNote = "";
   try {
-    const result = await ElMessageBox.prompt(
+    const result = await openOwnedReviewDialog(() => ElMessageBox.prompt(
       copy.value.rejectPrompt,
       copy.value.rejectTitle.replace("{id}", String(application.id)),
       {
@@ -206,11 +209,12 @@ const handleReject = async (application: ReviewApplication) => {
         inputPlaceholder: copy.value.rejectPlaceholder,
         inputValidator: (value) => (String(value || "").trim() ? true : copy.value.rejectValidation)
       }
-    );
+    ));
     reviewNote = String(result.value || "").trim();
   } catch {
     return;
   }
+  if (!actionScope.current(ticket) || processingId.value) return;
   processingId.value = application.id;
   try {
     await apiFetch("/api/account/developer/review", {
@@ -221,12 +225,14 @@ const handleReject = async (application: ReviewApplication) => {
         reviewNote
       }
     });
+    if (!actionScope.current(ticket)) return;
     ElMessage.success(copy.value.rejected);
-    await refresh();
+    if (actionScope.current(ticket)) await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.rejectFailed);
   } finally {
-    processingId.value = null;
+    if (actionScope.current(ticket)) processingId.value = null;
   }
 };
 </script>
@@ -237,11 +243,14 @@ const handleReject = async (application: ReviewApplication) => {
       <el-skeleton :rows="8" animated />
     </el-card>
 
-    <template v-else-if="reviewState.forbidden">
+    <div v-else-if="readError" role="alert" class="panel-card entry-read-error">
+      <p>{{ readError }}</p><el-button @click="refresh">{{ t('common.retry') }}</el-button>
+    </div>
+    <template v-else-if="reviewState?.forbidden">
       <el-result icon="warning" :title="copy.forbiddenTitle" :sub-title="reviewState.message || copy.forbiddenSubtitle" />
     </template>
 
-    <template v-else>
+    <template v-else-if="reviewState">
       <el-card class="panel-card">
         <div class="section-title">
           <h2>{{ copy.pendingTitle }}</h2>

@@ -8,7 +8,7 @@ const localePath = useLocalePath();
 const route = useRoute();
 const redirectAfterAuth = computed(() => { const value=String(route.query.redirect||""); return value.startsWith("/")&&!value.startsWith("//")&&!/[\\\r\n]/.test(value)?value:localePath("/account/profile"); });
 const apiFetch = useViewerApiFetch();
-const { fetchCurrentUser } = useAccountState();
+const { accountUser, accountAuthError, fetchCurrentUser } = useAccountState();
 const sendingCode = ref(false);
 const submitting = ref(false);
 const beta = useAnnualBeta();
@@ -22,6 +22,14 @@ const form = reactive({
   password: "",
   confirmPassword: "",
 });
+
+const authenticatedUserId = ref<number | null>(null);
+const registered = ref(false);
+const completionError = ref("");
+const authScope = useAuthFormScope(() => { authenticatedUserId.value = null; registered.value = false; completionError.value = ""; submitting.value = false; sendingCode.value = false; cooldown.value = 0; if (timer) clearInterval(timer); timer = null; form.password = ""; form.confirmPassword = ""; });
+const completionCopy = computed(() => locale.value === "ja"
+  ? {continue: "続ける", login: "ログインを続ける", registered: "アカウントを作成しました。ログインを続けてください。", reset: "パスワードを再設定しました。ログイン画面を開いてください。", session: "ログイン状態を確認できませんでした。もう一度お試しください。", sessionChanged: "ログイン状態が変わりました。パスワードを再入力してください。", navigation: "処理は完了しましたが、ページを開けませんでした。もう一度お試しください。"}
+  : {continue: "继续", login: "继续登录", registered: "账号已创建，请继续登录。", reset: "密码已重置，请继续打开登录页。", session: "未能确认登录状态，请重试。", sessionChanged: "登录会话已变化，请重新输入密码。", navigation: "操作已完成，但未能打开页面，请重试。"});
 
 definePageMeta({
   contentLayout: "reading",
@@ -108,7 +116,9 @@ const startCooldown = () => {
 };
 
 const sendCode = async () => {
-  if (!form.email || sendingCode.value || cooldown.value > 0) return;
+  if (registered.value || !form.email || sendingCode.value || cooldown.value > 0) return;
+  const ticket = authScope.capture();
+  if (!authScope.current(ticket)) return;
   sendingCode.value = true;
   try {
     await apiFetch("/api/account/auth/send-code", {
@@ -118,50 +128,50 @@ const sendCode = async () => {
         purpose: "register",
       },
     });
+    if (!authScope.current(ticket)) return;
     ElMessage.success(copy.value.codeSent);
     startCooldown();
   } catch (error: any) {
+    if (!authScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.codeFailed);
   } finally {
-    sendingCode.value = false;
+    if (authScope.currentView(ticket)) sendingCode.value = false;
   }
 };
 
 const submit = async () => {
   if (submitting.value) return;
-  if (form.password !== form.confirmPassword) {
-    ElMessage.error(copy.value.passwordMismatch);
-    return;
-  }
-  beta.track("auth_start",{auth_method:"register"});
-  submitting.value = true;
+  if (!registered.value && form.password !== form.confirmPassword) { ElMessage.error(copy.value.passwordMismatch); return; }
+  const ticket = authScope.capture();
+  if (!authScope.current(ticket)) return;
+  submitting.value = true; completionError.value = "";
   try {
-    await apiFetch("/api/account/auth/register", {
-      method: "POST",
-      body: {
-        username: form.username,
-        email: form.email,
-        code: form.code,
-        password: form.password,
-      },
-    });
-    await apiFetch("/api/account/auth/login", {
-      method: "POST",
-      body: {
-        identifier: form.username,
-        password: form.password,
-      },
-    });
-    form.password = "";
-    form.confirmPassword = "";
-    await fetchCurrentUser(true);
+    if (!registered.value) {
+      beta.track("auth_start", {auth_method: "register"});
+      await apiFetch("/api/account/auth/register", {method: "POST", body: {username: form.username, email: form.email, code: form.code, password: form.password}});
+      if (!authScope.current(ticket)) return;
+      registered.value = true;
+    }
+    if (!authenticatedUserId.value) {
+      const result = await apiFetch<{user: {id: number}}>("/api/account/auth/login", {method: "POST", body: {identifier: form.username, password: form.password}});
+      if (!authScope.current(ticket)) return;
+      authenticatedUserId.value = result.user.id;
+      form.password = ""; form.confirmPassword = "";
+    }
+    const session = await fetchCurrentUser(true);
+    if (!authScope.currentView(ticket)) return;
+    if (!session || session.id !== authenticatedUserId.value || accountUser.value?.id !== session.id) {
+      if (!accountAuthError.value) { authenticatedUserId.value = null; throw new Error(completionCopy.value.sessionChanged); }
+      throw new Error(completionCopy.value.session);
+    }
     ElMessage.success(copy.value.success);
-    await navigateTo(redirectAfterAuth.value);
+    const failure = await navigateTo(redirectAfterAuth.value);
+    if (failure) throw new Error(completionCopy.value.navigation);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
-  } finally {
-    submitting.value = false;
-  }
+    if (!authScope.currentView(ticket)) return;
+    completionError.value = error?.data?.statusMessage || error?.message || copy.value.failed;
+    ElMessage.error(completionError.value);
+  } finally { if (authScope.currentView(ticket)) submitting.value = false; }
 };
 </script>
 
@@ -172,31 +182,33 @@ const submit = async () => {
         <h2>{{ copy.heading }}</h2>
         <p>{{ copy.intro }}</p>
       </div>
+      <p v-if="completionError" role="alert">{{ completionError }}</p>
+      <p v-if="registered && !authenticatedUserId" role="status">{{ completionCopy.registered }}</p>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.username">
           <el-input
             name="username"
             autocomplete="username"
-            v-model="form.username"
+            v-model="form.username" :disabled="registered"
             maxlength="64"
             :placeholder="copy.usernamePlaceholder"
           />
         </el-form-item>
         <el-form-item :label="copy.email">
-          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
+          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :disabled="registered" :placeholder="copy.emailPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.code">
           <div class="code-row">
             <el-input
               name="verification-code"
               autocomplete="one-time-code"
-              v-model="form.code"
+              v-model="form.code" :disabled="registered"
               maxlength="6"
               :placeholder="copy.codePlaceholder"
             />
             <el-button
               :loading="sendingCode"
-              :disabled="cooldown > 0"
+              :disabled="cooldown > 0 || registered"
               @click="sendCode"
             >
               {{ cooldown > 0 ? copy.resend.replace("{seconds}", String(cooldown)) : copy.sendCode }}
@@ -205,7 +217,7 @@ const submit = async () => {
         </el-form-item>
         <el-form-item :label="copy.password">
           <el-input
-            v-model="form.password"
+            v-model="form.password" :disabled="Boolean(authenticatedUserId)"
             autocomplete="new-password"
             type="password"
             show-password
@@ -214,7 +226,7 @@ const submit = async () => {
         </el-form-item>
         <el-form-item :label="copy.confirmPassword">
           <el-input
-            v-model="form.confirmPassword"
+            v-model="form.confirmPassword" :disabled="Boolean(authenticatedUserId)"
             autocomplete="new-password"
             type="password"
             show-password
@@ -226,7 +238,7 @@ const submit = async () => {
           class="submit-btn"
           :loading="submitting"
           native-type="submit"
-          >{{ copy.submit }}</el-button
+          >{{ authenticatedUserId ? completionCopy.continue : registered ? completionCopy.login : copy.submit }}</el-button
         >
       </el-form>
       <div class="auth-links single-link">

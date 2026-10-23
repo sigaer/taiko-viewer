@@ -10,15 +10,19 @@ const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve
 const settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();await nextTick();};
 async function resource(load,{context=ref('one'),enabled=ref(true),hydratedFailure=''}={}){
  const scope=effectScope(),user=ref({id:1}),states=new Map(),hooks={deactivated:[],activated:[],beforeUnmount:[]};let raw,loads=0;
+ states.set('account-user',user);states.set('account-binding-generation',ref(0));
  if(hydratedFailure)states.set('fixture:failure',ref({context:'1:one',message:hydratedFailure}));
  const source=await readFile(new URL('../composables/useForumResource.ts',import.meta.url),'utf8');
  const code=stripTypeScriptTypes(source.replace(/^import[^\n]*;\r?\n/gm,'').replace('export const useForumResource','const useForumResource'),{mode:'strip'});
  const ports={ref,computed,watch,useState:(key,factory)=>{if(!states.has(key))states.set(key,ref(factory()));return states.get(key);},useAccountState:()=>({accountUser:user}),useI18n:()=>({t:key=>key,locale:ref('zh')}),
   resolveViewerError:async(error,_fallback,t)=>{assert.equal(typeof t,'function');return error.message;},
-  useAccountRequestGuard:()=>{let generation=0;watch(()=>user.value?.id,()=>generation++,{flush:'sync'});return {capture:()=>generation,current:n=>n===generation,invalidate:()=>generation++};},
+  useAccountRequestGuard:null,
   onDeactivated:fn=>hooks.deactivated.push(fn),onActivated:fn=>hooks.activated.push(fn),onBeforeUnmount:fn=>hooks.beforeUnmount.push(fn),
   useAsyncData:(_key,loader)=>{const data=ref(null),pending=ref(false);let sequence=0;const refresh=async()=>{const n=++sequence;pending.value=true;try{const value=await loader();if(n===sequence)data.value=value;}finally{if(n===sequence)pending.value=false;}};raw={data,pending,refresh,clear:()=>{sequence++;data.value=null;pending.value=false;}};if(!hydratedFailure)void refresh();return raw;}
  };
+ const guardSource=await readFile(new URL('../composables/useAccountRequestGuard.ts',import.meta.url),'utf8');
+ const guardCode=stripTypeScriptTypes(guardSource.replace(/^import[^\n]*;\r?\n/gm,'').replace('export const','const'),{mode:'strip'});
+ ports.useAccountRequestGuard=new Function('useState','watch','onBeforeUnmount',guardCode+';return useAccountRequestGuard;')(ports.useState,watch,ports.onBeforeUnmount);
  const create=new Function(...Object.keys(ports),code+';return useForumResource;')(...Object.values(ports));
  const view=scope.run(()=>create('fixture',()=>{loads++;return load();},{context:()=>context.value,enabled:()=>enabled.value}));
  await settle();return {view,user,context,enabled,raw,loads:()=>loads,fire:name=>hooks[name].forEach(fn=>fn()),close:()=>{hooks.beforeUnmount.forEach(fn=>fn());scope.stop();}};
@@ -76,4 +80,21 @@ test('shared chart/section list corrects only the page while preserving committe
  const original={songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',page:9};
  const next=forumListLocationQuery({...original,page:forumPageInRange(9,15,12)});
  assert.deepEqual(next,{songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',threadType:undefined,page:'2'});
+});
+
+
+test('same-user metadata refresh does not invalidate a real Vue resource success',async()=>{
+ const pending=deferred();const r=await resource(()=>pending.promise);
+ try{r.user.value={id:1,username:'updated metadata'};pending.resolve({marker:'accepted'});await settle();assert.equal(r.view.data.value.marker,'accepted');assert.equal(r.view.pending.value,false);}finally{r.close();}
+});
+test('same-user metadata refresh does not silently drop a resource failure and retry',async()=>{
+ const pending=deferred();let n=0;const r=await resource(()=>++n===1?pending.promise:Promise.resolve({marker:'recovered'}));
+ try{r.user.value={id:1,username:'updated metadata'};pending.reject(Error('read failed'));await settle();assert.equal(r.view.error.value,'read failed');assert.equal(r.view.pending.value,false);await r.view.refresh();assert.equal(r.view.data.value.marker,'recovered');}finally{r.close();}
+});
+test('real Vue account page scope resets only identity/binding changes and its own lifecycle',async()=>{
+ const user=ref({id:1}),binding=ref(0),scope=effectScope(),hooks={before:[],activated:[],deactivated:[]};let resets=0,resumes=0;
+ const ports={watch,useState:key=>key==='account-user'?user:binding,useAccountState:()=>({accountUser:user}),onBeforeUnmount:fn=>hooks.before.push(fn),onActivated:fn=>hooks.activated.push(fn),onDeactivated:fn=>hooks.deactivated.push(fn)};
+ for(const name of ['useAccountRequestGuard','useAccountPageScope']){const source=await readFile(new URL('../composables/'+name+'.ts',import.meta.url),'utf8');const code=stripTypeScriptTypes(source.replace(/^import[^\n]*;\r?\n/gm,'').replace('export const','const'),{mode:'strip'});ports[name]=new Function(...Object.keys(ports),code+';return '+name+';')(...Object.values(ports));}
+ const view=scope.run(()=>ports.useAccountPageScope(()=>resets++,true,()=>resumes++));
+ try{const ticket=view.capture();user.value={id:1,username:'metadata'};assert.equal(view.current(ticket),true);assert.equal(resets,0);binding.value++;assert.equal(resets,1);assert.equal(view.current(ticket),false);user.value={id:2};assert.equal(resets,2);hooks.deactivated.forEach(fn=>fn());assert.equal(resets,3);hooks.activated.forEach(fn=>fn());assert.equal(resumes,1);}finally{hooks.before.forEach(fn=>fn());scope.stop();}
 });
