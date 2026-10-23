@@ -14,7 +14,7 @@ PR #36 squash为 `efbbdb739db1e364d6d7cc1c74a08e59d38c87bb`，合并树与候选
 
 - 现有cron每日本地04:15执行，2026-10-23包SHA256 `7ace1613b2a6fbb78db86d854fa006dde3962e71e5f594f2dc517e2c19d53443` 实际流式校验通过。282,312,981 B／1046条archive项；内容仅曲库、别名、封面及 `web_admin_action_logs`、`web_admin_access_rollups`、`web_admin_ingest_state` 三表。只读索引，没有提取业务正文、读取备份Key或改动备份。
 - 实际latest-verified指针为2026-10-17 05:03:41.240381Z，24表／53,622文件，原生恢复121.165秒，20项功能记录；是较早检查点，不沿用另一个03:57检查点的117.325秒数字。该job自己的allowlist确认缺少当前四张v1授权表及两张source service grant／audit表，且记录的源仍为旧文件格式，无当前Publication vector。旧恢复策略要求独立新目标、恢复后全部Bearer／待确认凭据fail closed；不证明检查点后撤销replay、持续RPO/RTO或异地/PITR。
-- 为补当前授权结构的恢复证据，本次新建私有 `_test` MySQL，在实际 `SELECT DATABASE()`、datadir归属及 `TAIKO_ALLOW_TEST_DB_MUTATION=1` 后，执行18张合成表的原生mysqldump／mysql import。dump 27,612 B，原生round-trip约1.267秒；48次真实本地HTTP。恢复后Session／Key撤销、Grant对旧ETag的拒绝、属主／绑定／client和跨账号拒绝保持；source service grant撤销行及audit保持。没有将缺Publication夹具时的503当成source读取拒绝通过，不声称该HTTP路径已恢复验收。
+- 为补当前授权结构的恢复证据，本次新建私有 `_test` MySQL，在实际 `SELECT DATABASE()`、datadir归属及 `TAIKO_ALLOW_TEST_DB_MUTATION=1` 后，执行18张合成表的原生mysqldump／mysql import。dump 27,612 B，原生round-trip为秒级（精确值见最终 `authorization-recovery.json`，不作为生产RTO）；48次真实本地HTTP。恢复后Session／Key撤销、Grant对旧ETag的拒绝、属主／绑定／client和跨账号拒绝保持；source service grant撤销行及audit保持。没有将缺Publication夹具时的503当成source读取拒绝通过，不声称该HTTP路径已恢复验收。
 - 合成dump仅在owned scratch中存在并删除；私有MySQL、socket、库已退出删除。没有生产连接、生产数据复制、新建生产备份、运行维护任务或修改调度。历史失败attempts保留，只有最终run计入结果。
 
 复跑（只会创建独占合成测试库；不恢复生产备份）：
