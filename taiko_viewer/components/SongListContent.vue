@@ -70,11 +70,13 @@ const copy = computed(() =>
     ? {
         progress: `${songs.value.length} / ${total.value} 件を表示中`,
         loadMore: "続きを読み込む",
+        empty: query.value.trim() ? "一致する楽曲はありません" : "楽曲はありません",
         loadingMore: "読み込み中"
       }
     : {
         progress: `已显示 ${songs.value.length} / ${total.value} 首`,
         loadMore: "继续加载",
+        empty: query.value.trim() ? "没有匹配的歌曲" : "暂无歌曲",
         loadingMore: "正在加载"
       }
 );
@@ -239,6 +241,7 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <template v-else>
+          <el-empty v-if="!songs.length" class="catalog-empty" :description="copy.empty" />
           <NuxtLink
             v-for="(song, songIndex) in songs"
             :key="song.id"
@@ -304,6 +307,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.catalog-empty{grid-column:1/-1;}
 .page-stack{display:grid;gap:32px;}.panel-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}.catalog-search-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}.search-input{width:100%;max-width:520px;}.input-icon{display:inline-flex;width:20px;color:var(--viewer-text-muted);}.input-icon svg{width:18px;height:18px;}
 .song-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px;}.song-card-link{display:block;min-width:0;text-decoration:none;color:var(--viewer-text);border-radius:8px;}.song-card{display:grid;grid-template-columns:80px minmax(0,1fr);align-items:start;gap:16px;padding:18px 0;border-bottom:1px solid var(--viewer-border);background:transparent;min-width:0;}.song-cover{width:80px;height:80px;border-radius:8px;overflow:hidden;background:var(--viewer-surface);}.cover-img{width:100%;height:100%;}.song-body{min-width:0;}.song-body h4{font-size:16px;font-weight:600;line-height:1.5;margin:0 0 4px;overflow-wrap:anywhere;}.song-sub{font-size:14px;line-height:1.6;color:var(--viewer-text-muted);margin:0 0 8px;overflow-wrap:anywhere;}.song-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--viewer-text-muted);}.category-tag{color:var(--viewer-text-muted);}.song-id{margin-left:auto;}.song-levels{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;}.level-pill{font-size:14px;display:inline-flex;gap:4px;align-items:baseline;white-space:nowrap;}.level-pill img{object-fit:contain;flex-shrink:0;}.song-alert,.load-more-row,.load-progress{grid-column:1/-1;}.load-more-row,.load-progress{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;min-height:64px;margin:16px 0 0;color:var(--viewer-text-muted);font-size:14px;}.song-card-link:hover{background:var(--viewer-surface-subtle);}.song-card-link:focus-visible{outline:3px solid var(--viewer-link);outline-offset:4px;}
 @media(max-width:700px){.song-grid{grid-template-columns:minmax(0,1fr);}.panel-header{margin-bottom:8px;}.song-card{padding:18px 0;}.song-meta{gap:4px 12px;}.song-id{margin-left:0;}.song-levels{gap:4px 10px;}}

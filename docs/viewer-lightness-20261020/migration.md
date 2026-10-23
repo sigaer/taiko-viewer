@@ -9,17 +9,17 @@
 | `/about` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
 | `/account/annual-poster/:summaryId` | story | 专用 | 独立布局 | 独立内容未迁移 | 年度独立演出／分享画布，固定比例与视口保持 | 未逐页截图 |
 | `/account/annual-share-card/:summaryId` | false | 专用 | 独立布局 | 独立内容未迁移 | 年度独立演出／分享画布，固定比例与视口保持 | 未逐页截图 |
-| `/account/developer/grants` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
-| `/account/developer` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
-| `/account/developer/review` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 权限审核数据表 | 未逐页截图 |
-| `/account/forgot-password` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
+| `/account/developer/grants` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 既有v1授权／撤销、身份和缓存返回保护；不影响旧Developer Token | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
+| `/account/developer` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 申请状态失败可重试；入库后通知失败重新读状态；旧Token掩码与独立v1说明保留 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
+| `/account/developer/review` | default | 密集 1180 | 已适配 | 功能验收收口；整体内容未重做 | 审批权限拒绝与读取失败分开；提示／异步回执受当前身份保护 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
+| `/account/forgot-password` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 邮箱语义、验证码／失败恢复；重置完成后只重试打开登录页 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/account` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 既有跳转／路由入口；使用目的页面的空间规则 | 未逐页截图 |
-| `/account/login` | default | 正文／表单 800 | 已适配 | 凭据保存安全修复；整体内容未重做 | 仅记住账号、浏览器密码管理器、同源旧密码清理；常用入口功能验收另行收口 | [0.87.8 工作包](../account-credential-safety-20261023.md) |
+| `/account/login` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 0.87.8仅记住账号已独立发布；会话／导航重试不重复登录，内部返回目标与认证失败恢复 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/account/profile` | default | 正文／表单 800 | 已适配 | 首批完成 | 短面板自然结束；当前使用为状态；头像操作按需展开；原异步脚本不变 | [414](content-refinement-20261020/screenshots/after-profile-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-profile-1440-dark-ja.png) |
-| `/account/register` | default | 正文／表单 800 | 已适配 | 凭据保存安全修复；整体内容未重做 | 注册不持久化密码，使用标准自动填充；常用入口功能验收另行收口 | [0.87.8 工作包](../account-credential-safety-20261023.md) |
+| `/account/register` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 已创建与自动登录分开重试；验证码忙碌／冷却／迟到保护；不持久化密码 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/account/songs` | default | 密集 1180 | 已适配 | 本批内容完成 | 绑定及来源 → 搜索／难度与次要管理 → 成绩 → 分页；桌面对照表、手机逐条展开判定与管理；身份切换隐藏旧结果；本批附修 414px 中日文完整分页分组 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
 | `/account/support/review` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 支持记录及处理面板 | 未逐页截图 |
-| `/account/sync` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
+| `/account/sync` | default | 正文／表单 800 | 已适配 | 功能验收收口；整体内容未重做 | 概览失败与未绑定区分；Source／目标／冷却／结果／Token保留；身份／绑定／迟到及首页返回 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/account/version-summary` | story | 专用 | 独立布局 | 独立内容未迁移 | 年度独立演出／分享画布，固定比例与视口保持 | 未逐页截图 |
 | `/admin/taiko/aliases` | admin-taiko | 后台专用 | 根级变量兼容 | 未迁移 | 运营布局保持；仅公共变量兼容 | 未逐页截图 |
 | `/admin/taiko/annual-beta` | admin-taiko | 后台专用 | 根级变量兼容 | 未迁移 | 运营布局保持；仅公共变量兼容 | 未逐页截图 |
@@ -57,7 +57,7 @@
 | `/guide/:difficulty/:level` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/guide` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
 | `/` | default | 常规 1000 | 已适配 | 本批深层状态收口完成 | 游客／未绑定／无有效成绩／就绪、分阶段错误与重试；账号／绑定／同步返回与 KeepAlive 恢复，概览与近期独立失败；共享歌曲条目直接复用，目标及近期确认受控验证 | [0.87.5 证据](../viewer-home-my-states-20261021/README.md) |
-| `/more` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
+| `/more` | default | 常规 1000 | 已适配 | 功能验收收口；整体内容未重做 | 13个原有入口及语言／版本导航验收；产品源码无需修改，未重排内容 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/my/growth` | default | 常规 1000 | 已适配 | 本批内容完成 | 当前状态与范围 → 四周期／六维冻结趋势 → 成长事实 → 关注方向历史／目标与下一步；缺失数值与观察日期明确 | [成长／周报证据](../viewer-growth-weekly-20261021/README.md) |
 | `/my` | default | 常规 1000 | 已适配 | 本批九入口内容完成 | 三组紧凑导航；初始加载、游客、已登录、认证失败及强制重试分开，九路由保留；不启用 Overview admission 或新读模型 | [0.87.5 证据](../viewer-home-my-states-20261021/README.md) |
 | `/my/weekly` | default | 正文／表单 800 | 已适配 | 本批内容完成 | 服务端周日期／事实汇总 → 具体变化 → 可比较能力 → 当前建议；身份、绑定、周次及迟到响应隔离 | [成长／周报证据](../viewer-growth-weekly-20261021/README.md) |
@@ -66,14 +66,14 @@
 | `/songs/:id` | default | 密集 1180 | 已适配 | 首批完成并补验 | 真实谱面节选含音符与小节；成绩完成态、明细与空讨论核对 | [414](content-refinement-20261020/screenshots/after-song-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-song-1440-dark-ja.png) |
 | `/songs/available` | default | 常规 1000 | 已适配 | 首批完成 | 两列紧凑对象行；名称统一为实装歌曲；使用静态五难度图标 | [414](content-refinement-20261020/screenshots/after-catalog-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-catalog-1440-dark-ja.png) |
 | `/songs` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 既有跳转／路由入口；使用目的页面的空间规则 | 未逐页截图 |
-| `/songs/other` | default | 常规 1000 | 已适配 | 复用列表组件；分类状态待验 | 共享两列对象行与五难度图标；具体分类内容未逐项收口 | 共享组件见实装歌曲；本路由未单独截图 |
-| `/songs/removed` | default | 常规 1000 | 已适配 | 复用列表组件；分类状态待验 | 共享两列对象行与五难度图标；具体分类内容未逐项收口 | 共享组件见实装歌曲；本路由未单独截图 |
+| `/songs/other` | default | 常规 1000 | 已适配 | 功能验收收口；整体内容未重做 | 独立shelfStatus=2分类、搜索／继续加载／空态／读取失败恢复；共享列表空白修复 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
+| `/songs/removed` | default | 常规 1000 | 已适配 | 功能验收收口；整体内容未重做 | 独立shelfStatus=1分类、搜索／继续加载／空态／读取失败恢复；共享列表空白修复 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/songs/v2-constants` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列定数表 | 未逐页截图 |
-| `/support` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
+| `/support` | default | 常规 1000 | 已适配 | 功能验收收口；整体内容未重做 | 历史／详情失败和重试、身份隔离、保存与邮件分开；既有关闭状态及权限 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/titles` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 称号数据列表 | 未逐页截图 |
 | `/tools/b30` | default | 密集 1180 | 已适配 | 本批内容完成 | 紧凑参数与状态；结果绑定生成时条件，参数变化清图并取消迟到响应；原 Top N／维度／原点及生成能力保留 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
 | `/tools/chart-config` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
-| `/tools` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
+| `/tools` | default | 常规 1000 | 已适配 | 功能验收收口；整体内容未重做 | 7个原有工具导航及登录标签验收；产品源码无需修改，未重排内容 | [账号／常用入口验收](../account-entry-closeout-20261023.md) |
 | `/tools/note-count` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/tools/progress` | default | 密集 1180 | 已适配 | 本批内容完成 | 四类参数与结果／页码／下载；选项失败、空选项、生成失败分开，可重试；异步翻译上下文异常已修复 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
 | `/tools/recommend` | default | 常规 1000 | 已适配 | 普通推荐完成并复核 | 本批与首页今日推荐共享歌曲行；保留筛选、20 条结果与标签，难度／凭据／目标来源限制不变，目标 tab 不变 | [414](content-refinement-20261020/screenshots/after-recommend-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-recommend-1440-dark-ja.png) |

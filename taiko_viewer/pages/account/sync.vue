@@ -91,6 +91,12 @@ const importingKinoko = ref(false);
 const importingKinokoHistory = ref(false);
 const kinokoApiKey = ref("");
 const scoreTokenBusy = ref(false);
+let scoreTokenDialogOwner: symbol | null = null;
+async function openScoreTokenDialog(open: () => Promise<unknown>) {
+  const owner = Symbol(); scoreTokenDialogOwner = owner;
+  try { return await open(); }
+  finally { if (scoreTokenDialogOwner === owner) scoreTokenDialogOwner = null; }
+}
 const issuedScoreToken = ref("");
 const cooldown = ref(0);
 let cooldownTimer: ReturnType<typeof setInterval> | null = null;
@@ -233,23 +239,18 @@ const copy = computed(() =>
       }
 );
 
-const { data, pending, refresh } = await useAsyncData<SyncOverviewPayload>(
-  "account-sync-overview",
-  () => apiFetch("/api/account/sync/targets"),
-  {
-    default: () => ({
-      currentBinding: null,
-      hasUserdata: false,
-      canSyncFromWahlap: true,
-      scoreTokenAvailable: false,
-      scoreToken: null,
-      targets: [],
-      cooldownRemainingSeconds: 0,
-      cooldownUntil: "",
-      lastSync: null
-    })
-  }
+const { accountUser } = useAccountState();
+const bindingGeneration = useState("account-binding-generation", () => 0);
+const { data, pending, error: readError, refresh } = useForumResource<SyncOverviewPayload>(
+  "account-sync-overview", () => apiFetch("/api/account/sync/targets"),
+  { context: () => String(bindingGeneration.value), enabled: () => Boolean(accountUser.value) }
 );
+const actionScope = useAccountPageScope(() => {
+  if (scoreTokenDialogOwner) { scoreTokenDialogOwner = null; ElMessageBox.close(); }
+  selectedTargetIds.value = []; submitting.value = false; importingKinoko.value = false;
+  importingKinokoHistory.value = false; kinokoApiKey.value = ""; scoreTokenBusy.value = false;
+  issuedScoreToken.value = ""; startCooldown(0);
+}, true);
 
 const overview = computed(() => data.value);
 const compressionRatio = computed(() => {
@@ -284,8 +285,8 @@ onBeforeUnmount(() => {
 const buildSyncFeedback = (log: SyncLog | null | undefined) => {
   if (!log) {
     return {
-      level: "success" as const,
-      message: copy.value.syncDone
+      level: "warning" as const,
+      message: locale.value === "ja" ? "同期結果が返されませんでした。再読み込みして確認してください。" : "未返回同步结果，请刷新查看。"
     };
   }
   const successCount = log.results.filter((item) => item.ok).length;
@@ -318,7 +319,9 @@ const buildSyncFeedback = (log: SyncLog | null | undefined) => {
 };
 
 const submitSync = async () => {
-  if (submitting.value) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
+  if (submitting.value || pending.value) return;
   if (!selectedTargetIds.value.length) {
     ElMessage.warning(copy.value.selectTarget);
     return;
@@ -331,6 +334,7 @@ const submitSync = async () => {
         targetIds: selectedTargetIds.value
       }
     });
+    if (!actionScope.current(ticket)) return;
     const feedback = buildSyncFeedback(response?.log);
     if (feedback.level === "success") {
       ElMessage.success(feedback.message);
@@ -341,15 +345,18 @@ const submitSync = async () => {
     }
     await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
-    submitting.value = false;
+    if (actionScope.current(ticket)) submitting.value = false;
   }
 };
 
 const importFromKinoko = async () => {
-  if (importingKinoko.value || importingKinokoHistory.value) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
+  if (importingKinoko.value || importingKinokoHistory.value || pending.value) return;
   if (!kinokoApiKey.value.trim()) {
     ElMessage.warning(copy.value.kinokoNeedKey);
     return;
@@ -365,6 +372,7 @@ const importFromKinoko = async () => {
         apiKey: kinokoApiKey.value.trim()
       }
     });
+    if (!actionScope.current(ticket)) return;
     kinokoApiKey.value = "";
     if (response.partial) ElMessage.warning(response.message);
     else ElMessage.success(
@@ -375,15 +383,18 @@ const importFromKinoko = async () => {
     );
     await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
-    importingKinoko.value = false;
+    if (actionScope.current(ticket)) importingKinoko.value = false;
   }
 };
 
 const importHistoryFromKinoko = async () => {
-  if (importingKinoko.value || importingKinokoHistory.value) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
+  if (importingKinoko.value || importingKinokoHistory.value || pending.value) return;
   if (!kinokoApiKey.value.trim()) {
     ElMessage.warning(copy.value.kinokoNeedKey);
     return;
@@ -401,6 +412,7 @@ const importHistoryFromKinoko = async () => {
         apiKey: kinokoApiKey.value.trim()
       }
     });
+    if (!actionScope.current(ticket)) return;
     kinokoApiKey.value = "";
     if (response.partial) ElMessage.warning(response.message);
     else ElMessage.success(
@@ -411,27 +423,31 @@ const importHistoryFromKinoko = async () => {
     );
     await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
-    importingKinokoHistory.value = false;
+    if (actionScope.current(ticket)) importingKinokoHistory.value = false;
   }
 };
 
 const manageScoreToken = async (action: "issue" | "revoke") => {
-  if (scoreTokenBusy.value) return;
+  const ticket = actionScope.capture();
+  if (!actionScope.current(ticket)) return;
+  if (scoreTokenBusy.value || scoreTokenDialogOwner || pending.value) return;
   if (action === "revoke") {
     try {
-      await ElMessageBox.confirm(copy.value.scoreTokenConfirm, copy.value.scoreTokenConfirmTitle, {
+      await openScoreTokenDialog(() => ElMessageBox.confirm(copy.value.scoreTokenConfirm, copy.value.scoreTokenConfirmTitle, {
         confirmButtonText: copy.value.confirm,
         cancelButtonText: copy.value.cancel,
         type: "warning"
-      });
+      }));
     } catch {
       return;
     }
   }
 
+  if (!actionScope.current(ticket) || scoreTokenBusy.value) return;
   scoreTokenBusy.value = true;
   try {
     const response = await apiFetch<{
@@ -441,13 +457,15 @@ const manageScoreToken = async (action: "issue" | "revoke") => {
       method: "POST",
       body: { action }
     });
+    if (!actionScope.current(ticket)) return;
     issuedScoreToken.value = action === "issue" ? String(response.token || "") : "";
     ElMessage.success(action === "issue" ? copy.value.scoreTokenIssued : copy.value.scoreTokenRevoked);
     await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.scoreTokenUnavailable);
   } finally {
-    scoreTokenBusy.value = false;
+    if (actionScope.current(ticket)) scoreTokenBusy.value = false;
   }
 };
 
@@ -469,7 +487,11 @@ const copyIssuedScoreToken = async () => {
       <el-skeleton :rows="8" animated />
     </el-card>
 
-    <template v-else>
+
+    <div v-else-if="readError" role="alert" class="panel-card entry-read-error">
+      <p>{{ readError }}</p><el-button @click="refresh">{{ t('common.retry') }}</el-button>
+    </div>
+    <template v-else-if="overview">
       <el-card class="panel-card">
         <div class="section-title">
           <h2>{{ copy.title }}</h2>
@@ -556,7 +578,7 @@ const copyIssuedScoreToken = async () => {
             <el-button
               type="primary"
               :loading="scoreTokenBusy"
-              :disabled="!overview.currentBinding || !overview.scoreTokenAvailable"
+              :disabled="pending || !overview.currentBinding || !overview.scoreTokenAvailable"
               @click="manageScoreToken('issue')"
             >
               {{ overview.scoreToken?.exists ? copy.scoreTokenRotate : copy.scoreTokenIssue }}
@@ -565,7 +587,7 @@ const copyIssuedScoreToken = async () => {
               v-if="overview.scoreToken?.exists"
               type="danger"
               plain
-              :disabled="scoreTokenBusy"
+              :disabled="pending || scoreTokenBusy"
               @click="manageScoreToken('revoke')"
             >
               {{ copy.scoreTokenRevoke }}
@@ -590,6 +612,7 @@ const copyIssuedScoreToken = async () => {
           <el-form-item :label="copy.kinokoKey">
             <el-input
               v-model="kinokoApiKey"
+              :disabled="pending || importingKinoko || importingKinokoHistory"
               type="password"
               show-password
               autocomplete="off"
@@ -624,7 +647,7 @@ const copyIssuedScoreToken = async () => {
           <p>{{ copy.targetsDesc }}</p>
         </div>
         <el-empty v-if="!overview.targets.length" :description="copy.noTargets" />
-        <el-checkbox-group v-else v-model="selectedTargetIds" class="target-list">
+        <el-checkbox-group v-else :disabled="pending || submitting" v-model="selectedTargetIds" class="target-list">
           <label v-for="target in overview.targets" :key="target.id" class="target-item">
             <el-checkbox :label="target.id">
               <span class="target-label">{{ target.label }}</span>
@@ -635,7 +658,7 @@ const copyIssuedScoreToken = async () => {
         <el-button
           type="primary"
           :loading="submitting"
-          :disabled="!overview.currentBinding || overview.canSyncFromWahlap === false || cooldown > 0 || !overview.targets.length"
+          :disabled="pending || !overview.currentBinding || overview.canSyncFromWahlap === false || cooldown > 0 || !overview.targets.length"
           @click="submitSync"
         >
           {{ cooldown > 0 ? copy.coolingDown.replace("{seconds}", String(cooldown)) : copy.start }}

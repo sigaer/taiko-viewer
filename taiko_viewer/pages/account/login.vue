@@ -7,7 +7,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
-const { fetchCurrentUser } = useAccountState();
+const { accountUser, accountAuthError, fetchCurrentUser } = useAccountState();
 const { loadRememberedIdentifier, saveRememberedIdentifier } = useRememberedAccountIdentifier();
 const submitting = ref(false);
 const beta = useAnnualBeta();
@@ -16,9 +16,17 @@ const form = reactive({
   password: "",
 });
 const rememberIdentifier = ref(false);
+const authenticatedUserId = ref<number | null>(null);
+const completionError = ref("");
+const authRetrying = ref(false);
+const authScope = useAuthFormScope(() => { authenticatedUserId.value = null; completionError.value = ""; authRetrying.value = false; submitting.value = false; form.password = ""; });
+const completionCopy = computed(() => locale.value === "ja"
+  ? {continue: "続ける", login: "ログインを続ける", registered: "アカウントを作成しました。ログインを続けてください。", reset: "パスワードを再設定しました。ログイン画面を開いてください。", session: "ログイン状態を確認できませんでした。もう一度お試しください。", sessionChanged: "ログイン状態が変わりました。パスワードを再入力してください。", navigation: "処理は完了しましたが、ページを開けませんでした。もう一度お試しください。"}
+  : {continue: "继续", login: "继续登录", registered: "账号已创建，请继续登录。", reset: "密码已重置，请继续打开登录页。", session: "未能确认登录状态，请重试。", sessionChanged: "登录会话已变化，请重新输入密码。", navigation: "操作已完成，但未能打开页面，请重试。"});
+
 const redirectAfterLogin = computed(() => {
   const target = String(route.query.redirect || "").trim();
-  return target.startsWith("/") && !target.startsWith("//") && !/[\r\n]/.test(target)
+  return target.startsWith("/") && !target.startsWith("//") && !/[\\\r\n]/.test(target)
     ? target
     : localePath("/account/profile");
 });
@@ -81,25 +89,51 @@ onMounted(() => {
   }
 });
 
+const retryAuth = async () => {
+  if (authRetrying.value) return;
+  const ticket = authScope.capture();
+  authRetrying.value = true;
+  try {
+    const user = await fetchCurrentUser(true);
+    if (authScope.currentView(ticket) && user && !accountAuthError.value) {
+      authenticatedUserId.value = user.id;
+      form.identifier = user.username || user.email || ""; form.password = "";
+      const failure = await navigateTo(redirectAfterLogin.value);
+      if (failure) completionError.value = completionCopy.value.navigation;
+    }
+  } catch {
+    if (authScope.currentView(ticket)) completionError.value = completionCopy.value.navigation;
+  } finally { if (authScope.currentView(ticket)) authRetrying.value = false; }
+};
+
 const submit = async () => {
   if (submitting.value) return;
-  beta.track("auth_start",{auth_method:"login"});
-  submitting.value = true;
+  const ticket = authScope.capture();
+  if (!authScope.current(ticket)) return;
+  submitting.value = true; completionError.value = "";
   try {
-    await apiFetch("/api/account/auth/login", {
-      method: "POST",
-      body: form,
-    });
-    saveRememberedIdentifier(form.identifier, rememberIdentifier.value);
-    form.password = "";
-    await fetchCurrentUser(true);
+    if (!authenticatedUserId.value) {
+      beta.track("auth_start", {auth_method: "login"});
+      const result = await apiFetch<{user: {id: number}}>("/api/account/auth/login", {method: "POST", body: {identifier: form.identifier, password: form.password}});
+      if (!authScope.current(ticket)) return;
+      authenticatedUserId.value = result.user.id;
+      saveRememberedIdentifier(form.identifier, rememberIdentifier.value);
+      form.password = "";
+    }
+    const session = await fetchCurrentUser(true);
+    if (!authScope.currentView(ticket)) return;
+    if (!session || session.id !== authenticatedUserId.value || accountUser.value?.id !== session.id) {
+      if (!accountAuthError.value) { authenticatedUserId.value = null; throw new Error(completionCopy.value.sessionChanged); }
+      throw new Error(completionCopy.value.session);
+    }
     ElMessage.success(copy.value.success);
-    await navigateTo(redirectAfterLogin.value);
+    const failure = await navigateTo(redirectAfterLogin.value);
+    if (failure) throw new Error(completionCopy.value.navigation);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
-  } finally {
-    submitting.value = false;
-  }
+    if (!authScope.currentView(ticket)) return;
+    completionError.value = error?.data?.statusMessage || error?.message || copy.value.failed;
+    ElMessage.error(completionError.value);
+  } finally { if (authScope.currentView(ticket)) submitting.value = false; }
 };
 </script>
 
@@ -110,13 +144,18 @@ const submit = async () => {
         <h2>{{ copy.heading }}</h2>
         <p>{{ copy.intro }}</p>
       </div>
-      <el-form label-position="top" @submit.prevent="submit">
+      <p v-if="completionError" role="alert">{{ completionError }}</p>
+      <div v-if="accountAuthError && !authenticatedUserId" class="auth-state-error" role="alert">
+        <p>{{ completionCopy.session }}</p>
+        <el-button :loading="authRetrying" @click="retryAuth">{{ t('common.retry') }}</el-button>
+      </div>
+      <el-form v-else label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.identifier">
-          <el-input name="username" autocomplete="username" v-model="form.identifier" :placeholder="copy.identifierPlaceholder" />
+          <el-input name="username" autocomplete="username" v-model="form.identifier" :disabled="Boolean(authenticatedUserId)" :placeholder="copy.identifierPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.password">
           <el-input
-            v-model="form.password"
+            v-model="form.password" :disabled="Boolean(authenticatedUserId)"
             name="password"
             autocomplete="current-password"
             type="password"
@@ -132,7 +171,7 @@ const submit = async () => {
           class="submit-btn"
           :loading="submitting"
           native-type="submit"
-          >{{ copy.submit }}</el-button
+          >{{ authenticatedUserId ? completionCopy.continue : copy.submit }}</el-button
         >
       </el-form>
       <div class="auth-links">

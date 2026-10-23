@@ -4,7 +4,7 @@ import {registerHooks} from 'node:module';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
-export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false, withRealModel = false, withRealCatalog = false } = {}) {
+export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPersonal = false, withRealPython = false, withAccountSource = false, withDeveloper = false, withRealModel = false, withRealCatalog = false, withControlledMail = false } = {}) {
  const root=new URL('../../',import.meta.url);
  globalThis.__goalSqlRuntime={db,runtime,pythonCalls:0};
  globalThis.useRuntimeConfig=()=>runtime;
@@ -39,7 +39,7 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   const accountUrl=new URL('server/utils/account.ts',root).href;
   overrides.set(accountUrl,overrides.get(accountUrl)+`export * from '${new URL('server/utils/account/developer.ts',root).href}';`);
  }
- if (withRealCatalog) overrides.set(new URL('server/services/content.ts',root).href,`export {getSongCatalog,getRatingEntries} from '${new URL('server/services/content/songs.ts',root).href}';`);
+ if (withRealCatalog) overrides.set(new URL('server/services/content.ts',root).href,`export {getSongCatalog,getRatingEntries,getSongCatalogPayload,getSongCatalogPagePayload} from '${new URL('server/services/content/songs.ts',root).href}';`);
  if (withRealModel) overrides.delete(new URL('server/services/growth-history/model-revision.ts',root).href);
  if (withPersonal) {
   overrides.delete(new URL('server/services/account/personal.ts',root).href);
@@ -55,6 +55,7 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
  }
  const hook=registerHooks({
   resolve(specifier,context,next){
+   if(withControlledMail && specifier==='nodemailer')return {url:'data:text/javascript,'+encodeURIComponent("export default {createTransport:()=>({sendMail:async()=>{throw new Error('Synthetic mail unavailable')}})}"),shortCircuit:true};
    let target;
    if(specifier.startsWith('~/'))target=new URL(specifier.slice(2),root).href;
    else if(specifier.startsWith('.')&&context.parentURL?.startsWith(root.href)&&!context.parentURL.includes('/node_modules/'))target=new URL(specifier,context.parentURL).href;

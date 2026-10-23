@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T02:03:55.939503+00:00",
+  "generated_at": "2026-10-22T02:04:30.344664+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 634,
@@ -11683,18 +11683,18 @@
         "source_row_index": 1001
       },
       {
-        "title_name": "闇の魂",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《闇之魂》的“魔王”难度下达成通关吧",
-        "source_row_index": 1002
-      },
-      {
         "title_name": "7つの島の英雄",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《闇之魂》的“魔王”难度下达成全连吧",
         "source_row_index": 1003
+      },
+      {
+        "title_name": "闇の魂",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《闇之魂》的“魔王”难度下达成通关吧",
+        "source_row_index": 1002
       }
     ],
     "闪光天舞": [

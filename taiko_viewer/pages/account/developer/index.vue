@@ -137,22 +137,17 @@ const copy = computed(() =>
       }
 );
 
-const { data, pending, refresh } = await useAsyncData<DeveloperPayload>(
-  "account-developer",
-  () => apiFetch("/api/account/developer"),
-  {
-    default: () => ({
-      canReview: false,
-      currentApplication: null,
-      history: [],
-      token: null
-    })
-  }
+const { data, pending, error: readError, refresh } = useForumResource<DeveloperPayload>(
+  "account-developer", () => apiFetch("/api/account/developer"), { enabled: () => Boolean(accountUser.value) }
 );
+const actionScope = useAccountPageScope(() => {
+  submitting.value = false; imageFiles.value = []; form.value = {reason: "", replyEmail: accountUser.value?.email || ""};
+  if (fileInput.value) fileInput.value.value = "";
+});
 
 const developerState = computed(() => data.value);
-const currentStatus = computed(() => developerState.value.currentApplication?.status || "");
-const canSubmitApplication = computed(() => !["pending", "approved"].includes(currentStatus.value));
+const currentStatus = computed(() => developerState.value?.currentApplication?.status || "");
+const canSubmitApplication = computed(() => Boolean(data.value) && !pending.value && !readError.value && !["pending", "approved"].includes(currentStatus.value));
 
 const triggerImageInput = () => {
   fileInput.value?.click();
@@ -174,6 +169,7 @@ const submitApplication = async () => {
     ElMessage.warning(copy.value.needEmail);
     return;
   }
+  const ticket = actionScope.capture();
   submitting.value = true;
   try {
     const body = new FormData();
@@ -186,14 +182,18 @@ const submitApplication = async () => {
       method: "POST",
       body
     });
+    if (!actionScope.current(ticket)) return;
     ElMessage.success(copy.value.submitSuccess);
     imageFiles.value = [];
     if (fileInput.value) fileInput.value.value = "";
     await refresh();
   } catch (error: any) {
+    if (!actionScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.submitFailed);
+    // A notification failure may follow a persisted application. Re-read status.
+    await refresh();
   } finally {
-    submitting.value = false;
+    if (actionScope.current(ticket)) submitting.value = false;
   }
 };
 </script>
@@ -204,7 +204,10 @@ const submitApplication = async () => {
       <el-skeleton :rows="8" animated />
     </el-card>
 
-    <template v-else>
+    <div v-else-if="readError" role="alert" class="panel-card entry-read-error">
+      <p>{{ readError }}</p><el-button @click="refresh">{{ t('common.retry') }}</el-button>
+    </div>
+    <template v-else-if="developerState">
       <el-card class="panel-card">
         <div class="section-title">
           <h2>{{ copy.title }}</h2>
@@ -229,12 +232,18 @@ const submitApplication = async () => {
         </div>
       </el-card>
 
+    </template>
+
+    <!-- Keep public examples mounted: tearing down ElTabs during KeepAlive deactivation corrupts pane ownership. -->
+    <div :hidden="pending || Boolean(readError) || !developerState">
       <DeveloperApiGuide
         :locale="locale"
         :application-status="currentStatus"
-        :token-active="developerState.token?.status === 'active'"
+        :token-active="developerState?.token?.status === 'active'"
       />
+    </div>
 
+    <template v-if="!pending && !readError && developerState">
       <el-card v-if="canSubmitApplication" class="panel-card">
         <div class="section-title">
           <h3>{{ copy.submitTitle }}</h3>

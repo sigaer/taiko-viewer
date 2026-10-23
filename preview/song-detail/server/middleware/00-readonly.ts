@@ -1,3 +1,4 @@
+import {entryData} from '../utils/entry-fixtures';
 import { songRowData, songRowRecommendations } from '../utils/song-row-fixtures';
 import { homeDeepData } from '../utils/home-deep-fixtures';
 import { communityData } from '../utils/community-fixtures';
@@ -10,7 +11,7 @@ export default defineEventHandler(async event => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith('/api/')) {
     const state = getQuery(event).previewState;
-    if (typeof state === 'string' && ['home-deep', 'auth-failure', 'binding-failure', 'overview-failure', 'song-rows', 'scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
+    if (typeof state === 'string' && ['entry-normal','entry-empty','entry-reviewer','entry-failure','entry-catalog-failure','home-deep', 'auth-failure', 'binding-failure', 'overview-failure', 'song-rows', 'scores', 'guest', 'empty', 'pending', 'unbound', 'failure', 'unchanged', 'recent-failure', 'changes', 'manual', 'options-failure', 'image-failure', 'scores-failure', 'catalog-failure', 'slow', 'growth-expanded', 'growth-empty', 'growth-single', 'growth-missing', 'growth-limited', 'growth-unknown', 'growth-incompatible', 'growth-no-next', 'growth-quiet', 'growth-no-play', 'growth-failure'].includes(state)) {
       setCookie(event, 'song_preview_state', state, { path: '/', sameSite: 'lax' });
       // SSR and client requests must use the same fixture on the first navigation.
       const otherCookies=(getHeader(event,'cookie') || '').split(';').map(value=>value.trim()).filter(value=>value && !value.startsWith('song_preview_state='));
@@ -36,6 +37,8 @@ export default defineEventHandler(async event => {
   // No mutation is implemented or forwarded by this preview root.
   if (!['GET', 'HEAD'].includes(getMethod(event))) throw createError({ statusCode: 405, statusMessage: 'Read-only component preview' });
   const state = getCookie(event, 'song_preview_state') || 'scores';
+  const entry=entryData(path,getQuery(event),state);
+  if(entry!==undefined)return entry;
   const core = communityCoreData(path, getQuery(event), state);
   if (core !== undefined) return core;
   // Local stand-in for isolated page checks; no production cover fetch.

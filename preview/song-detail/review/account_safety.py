@@ -38,7 +38,7 @@ try:
         writes[path]=writes.get(path,0)+1
         if path.endswith('/auth/login'):
          if mode['fail']:return answer(route,{'statusMessage':'Synthetic sign-in failure'},401)
-         mode['signed']=True;context.add_cookies([{'name':'song_preview_state','value':'scores','url':base}]);return answer(route,{'ok':True})
+         mode['signed']=True;context.add_cookies([{'name':'song_preview_state','value':'scores','url':base}]);return answer(route,{'ok':True,'user':user})
         if path.endswith('/auth/logout'):mode['signed']=False;context.add_cookies([{'name':'song_preview_state','value':'guest','url':base}]);return answer(route,{'ok':True})
         if path.endswith('/auth/register'):return answer(route,{'ok':True})
         return answer(route,{'statusMessage':'Controlled preview write denied'},405)

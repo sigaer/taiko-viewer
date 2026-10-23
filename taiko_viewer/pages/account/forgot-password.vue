@@ -18,6 +18,13 @@ const form = reactive({
   confirmPassword: ""
 });
 
+const completed = ref(false);
+const completionError = ref("");
+const authScope = useAuthFormScope(() => { completed.value = false; completionError.value = ""; submitting.value = false; sendingCode.value = false; cooldown.value = 0; if (timer) clearInterval(timer); timer = null; form.password = ""; form.confirmPassword = ""; });
+const completionCopy = computed(() => locale.value === "ja"
+  ? {continue: "続ける", login: "ログインを続ける", registered: "アカウントを作成しました。ログインを続けてください。", reset: "パスワードを再設定しました。ログイン画面を開いてください。", session: "ログイン状態を確認できませんでした。もう一度お試しください。", navigation: "処理は完了しましたが、ページを開けませんでした。もう一度お試しください。"}
+  : {continue: "继续", login: "继续登录", registered: "账号已创建，请继续登录。", reset: "密码已重置，请继续打开登录页。", session: "未能确认登录状态，请重试。", navigation: "操作已完成，但未能打开页面，请重试。"});
+
 definePageMeta({
   contentLayout: "reading",
   pageTitleKey: "account.forgotPassword",
@@ -98,7 +105,9 @@ const startCooldown = () => {
 };
 
 const sendCode = async () => {
-  if (!form.email || sendingCode.value || cooldown.value > 0) return;
+  if (completed.value || !form.email || sendingCode.value || cooldown.value > 0) return;
+  const ticket = authScope.capture();
+  if (!authScope.current(ticket)) return;
   sendingCode.value = true;
   try {
     await apiFetch("/api/account/auth/send-code", {
@@ -108,38 +117,37 @@ const sendCode = async () => {
         purpose: "reset"
       }
     });
+    if (!authScope.current(ticket)) return;
     ElMessage.success(copy.value.codeSent);
     startCooldown();
   } catch (error: any) {
+    if (!authScope.current(ticket)) return;
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.codeFailed);
   } finally {
-    sendingCode.value = false;
+    if (authScope.currentView(ticket)) sendingCode.value = false;
   }
 };
 
 const submit = async () => {
   if (submitting.value) return;
-  if (form.password !== form.confirmPassword) {
-    ElMessage.error(copy.value.passwordMismatch);
-    return;
-  }
-  submitting.value = true;
+  if (!completed.value && form.password !== form.confirmPassword) { ElMessage.error(copy.value.passwordMismatch); return; }
+  const ticket = authScope.capture();
+  if (!authScope.current(ticket)) return;
+  submitting.value = true; completionError.value = "";
   try {
-    await apiFetch("/api/account/auth/reset-password", {
-      method: "POST",
-      body: {
-        email: form.email,
-        code: form.code,
-        password: form.password
-      }
-    });
-    ElMessage.success(copy.value.success);
-    await navigateTo(localePath("/account/login"));
+    if (!completed.value) {
+      await apiFetch("/api/account/auth/reset-password", {method: "POST", body: {email: form.email, code: form.code, password: form.password}});
+      if (!authScope.current(ticket)) return;
+      completed.value = true; form.password = ""; form.confirmPassword = "";
+      ElMessage.success(copy.value.success);
+    }
+    const failure = await navigateTo(localePath("/account/login"));
+    if (failure) throw new Error(completionCopy.value.navigation);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.failed);
-  } finally {
-    submitting.value = false;
-  }
+    if (!authScope.currentView(ticket)) return;
+    completionError.value = completed.value ? completionCopy.value.navigation : (error?.data?.statusMessage || copy.value.failed);
+    ElMessage.error(completionError.value);
+  } finally { if (authScope.currentView(ticket)) submitting.value = false; }
 };
 </script>
 
@@ -150,25 +158,27 @@ const submit = async () => {
         <h2>{{ copy.heading }}</h2>
         <p>{{ copy.intro }}</p>
       </div>
+      <p v-if="completionError" role="alert">{{ completionError }}</p>
+      <p v-if="completed" role="status">{{ completionCopy.reset }}</p>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.email">
-          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
+          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :disabled="completed" :placeholder="copy.emailPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.code">
           <div class="code-row">
-            <el-input autocomplete="one-time-code" v-model="form.code" maxlength="6" :placeholder="copy.codePlaceholder" />
-            <el-button :loading="sendingCode" :disabled="cooldown > 0" @click="sendCode">
+            <el-input autocomplete="one-time-code" v-model="form.code" :disabled="completed" maxlength="6" :placeholder="copy.codePlaceholder" />
+            <el-button :loading="sendingCode" :disabled="cooldown > 0 || completed" @click="sendCode">
               {{ cooldown > 0 ? copy.resend.replace("{seconds}", String(cooldown)) : copy.sendCode }}
             </el-button>
           </div>
         </el-form-item>
         <el-form-item :label="copy.password">
-          <el-input v-model="form.password" type="password" autocomplete="new-password" show-password :placeholder="copy.passwordPlaceholder" />
+          <el-input v-model="form.password" :disabled="completed" type="password" autocomplete="new-password" show-password :placeholder="copy.passwordPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" autocomplete="new-password" show-password :placeholder="copy.confirmPasswordPlaceholder" />
+          <el-input v-model="form.confirmPassword" :disabled="completed" type="password" autocomplete="new-password" show-password :placeholder="copy.confirmPasswordPlaceholder" />
         </el-form-item>
-        <el-button type="primary" class="submit-btn" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
+        <el-button type="primary" class="submit-btn" :loading="submitting" @click="submit">{{ completed ? completionCopy.continue : copy.submit }}</el-button>
       </el-form>
       <div class="auth-links single-link">
         <NuxtLink :to="localePath('/account/login')">{{ copy.back }}</NuxtLink>

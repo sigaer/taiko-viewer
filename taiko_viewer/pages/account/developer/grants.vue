@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref,computed,onMounted,nextTick} from 'vue';
+import {ref,computed,onMounted,onActivated,watch,nextTick} from 'vue';
 import type {ResourceGrant,DeveloperClient} from '@sakura-taiko/contract';
 definePageMeta({
   contentLayout: "reading",middleware:'account-auth',pageTitleKey:'account.developer',hidePageDescription:true,navKey:'/account/profile'});
@@ -17,7 +17,16 @@ const approvedDeveloper=ref(false);
 const bindingId=ref(''),clientId=ref(''),clientName=ref('');
 const consentPanel=ref<HTMLDetailsElement|null>(null);
 const canSubmit=computed(()=>!!state.value&&!!bindingId.value&&!!clientId.value&&!busy.value&&!pending.value);
+const actionScope=useAccountPageScope(()=>{
+ state.value=null;ownClients.value=[];pending.value=false;busy.value=false;error.value='';notice.value='';
+ approvedDeveloper.value=false;bindingId.value='';clientId.value='';clientName.value='';
+ ownClientsHasMore.value=false;ownClientsCursor.value=null;grantPage.value=0;clientPage.value=0;
+},false,()=>{void refresh();});
+watch(()=>accountUser.value?.id,()=>{void refresh();},{flush:'sync'});
 async function refresh(){
+ if(accountUser.value?.developerApiV1Access!==true){pending.value=false;return;}
+ const ticket=actionScope.capture();
+ if(!actionScope.current(ticket))return;
  pending.value=true;error.value='';
  try{
   const [grants,own,developer]=await Promise.all([
@@ -25,34 +34,41 @@ async function refresh(){
    api<{clients:DeveloperClient[];hasMore:boolean;nextCursor?:string|null}>('/api/account/developer/clients'),
    api<{currentApplication:{status:string}|null}>('/api/account/developer').catch(()=>null)
   ]);
+  if(!actionScope.current(ticket))return;
   state.value=grants;
   ownClients.value=own.clients;
   ownClientsHasMore.value=own.hasMore;
   ownClientsCursor.value=own.nextCursor??null;
   approvedDeveloper.value=developer?.currentApplication?.status==='approved';
   grantPage.value=0;clientPage.value=0;
- }catch{error.value=copy.value.failure;}
- finally{pending.value=false;}
+ }catch{if(actionScope.current(ticket))error.value=copy.value.failure;}
+ finally{if(actionScope.current(ticket))pending.value=false;}
 }
 async function grantRecords(first=false){
  if(pending.value||busy.value)return;
  const cursor=first?null:state.value?.nextCursor;if(!first&&!cursor)return;
- pending.value=true;error.value='';
- try{state.value=await api<State>('/api/account/developer/grants'+(cursor?'?before='+encodeURIComponent(cursor):''));grantPage.value=first?0:grantPage.value+1;await nextTick();grantHeading.value?.focus();}
- catch{error.value=copy.value.failure;}finally{pending.value=false;}
+ const ticket=actionScope.capture();pending.value=true;error.value='';
+ try{const data=await api<State>('/api/account/developer/grants'+(cursor?'?before='+encodeURIComponent(cursor):''));if(!actionScope.current(ticket))return;state.value=data;grantPage.value=first?0:grantPage.value+1;await nextTick();grantHeading.value?.focus();}
+ catch{if(actionScope.current(ticket))error.value=copy.value.failure;}finally{if(actionScope.current(ticket))pending.value=false;}
 }
 async function clientRecords(first=false){
  if(pending.value||busy.value)return;
  const cursor=first?null:ownClientsCursor.value;if(!first&&!cursor)return;
- pending.value=true;error.value='';
- try{const own=await api<{clients:DeveloperClient[];hasMore:boolean;nextCursor?:string|null}>('/api/account/developer/clients'+(cursor?'?before='+encodeURIComponent(cursor):''));ownClients.value=own.clients;ownClientsHasMore.value=own.hasMore;ownClientsCursor.value=own.nextCursor??null;clientPage.value=first?0:clientPage.value+1;await nextTick();clientList.value?.focus();}
- catch{error.value=copy.value.failure;}finally{pending.value=false;}
+ const ticket=actionScope.capture();pending.value=true;error.value='';
+ try{const own=await api<{clients:DeveloperClient[];hasMore:boolean;nextCursor?:string|null}>('/api/account/developer/clients'+(cursor?'?before='+encodeURIComponent(cursor):''));if(!actionScope.current(ticket))return;ownClients.value=own.clients;ownClientsHasMore.value=own.hasMore;ownClientsCursor.value=own.nextCursor??null;clientPage.value=first?0:clientPage.value+1;await nextTick();clientList.value?.focus();}
+ catch{if(actionScope.current(ticket))error.value=copy.value.failure;}finally{if(actionScope.current(ticket))pending.value=false;}
 }
 function disable(client:DeveloperClient){if(!window.confirm(copy.value.disableConfirm+' '+client.displayName))return;void run(()=>api('/api/account/developer/clients/'+client.clientId,{method:'DELETE'}),copy.value.disabledSaved);}
-async function run(task:()=>Promise<unknown>,message:string){busy.value=true;error.value='';notice.value='';try{await task();notice.value=message;await refresh();}catch{error.value=copy.value.failure;}finally{busy.value=false;}}
+async function run(task:()=>Promise<unknown>,message:string){
+ if(busy.value||pending.value||!state.value)return;
+ const ticket=actionScope.capture();busy.value=true;error.value='';notice.value='';
+ try{await task();if(!actionScope.current(ticket))return;notice.value=message;await refresh();}
+ catch{if(actionScope.current(ticket))error.value=copy.value.failure;}
+ finally{if(actionScope.current(ticket))busy.value=false;}
+}
 function submit(){if(!canSubmit.value||!state.value)return;const data=state.value;void run(()=>api('/api/account/developer/grants',{method:'POST',body:{bindingId:bindingId.value,clientId:clientId.value,consent:true,consentVersion:data.consentVersion,audience:data.audience}}),copy.value.saved);}
 function decline(){bindingId.value='';clientId.value='';if(consentPanel.value)consentPanel.value.open=false;}
-function revoke(grantId:string){void run(()=>api('/api/account/developer/grants/'+grantId,{method:'DELETE'}),copy.value.removed);}
+function revoke(grantId:string){if(!state.value?.grants.some(g=>g.grantId===grantId&&!g.revokedAt))return;void run(()=>api('/api/account/developer/grants/'+grantId,{method:'DELETE'}),copy.value.removed);}
 function register(){if(!clientName.value.trim())return;void run(()=>api('/api/account/developer/clients',{method:'POST',body:{displayName:clientName.value.trim()}}),copy.value.saved);}
 const clientLabel=(id:string)=>state.value?.clients.find(c=>c.clientId===id)?.displayName||id;
 const bindingLabel=(id:string)=>state.value?.bindings.find(b=>b.bindingId===id)?.displayName||id;
