@@ -235,12 +235,13 @@ const submitApplication = async () => {
     </template>
 
     <!-- Keep public examples mounted: tearing down ElTabs during KeepAlive deactivation corrupts pane ownership. -->
-    <DeveloperApiGuide
-      v-show="!pending && !readError && developerState"
-      :locale="locale"
-      :application-status="currentStatus"
-      :token-active="developerState?.token?.status === 'active'"
-    />
+    <div v-show="!pending && !readError && developerState">
+      <DeveloperApiGuide
+        :locale="locale"
+        :application-status="currentStatus"
+        :token-active="developerState?.token?.status === 'active'"
+      />
+    </div>
 
     <template v-if="!pending && !readError && developerState">
       <el-card v-if="canSubmitApplication" class="panel-card">
