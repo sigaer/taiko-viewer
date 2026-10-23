@@ -40,13 +40,13 @@
 | `/annual/share/:token` | story | 专用 | 独立布局 | 独立内容未迁移 | 年度独立演出／分享画布，固定比例与视口保持 | 未逐页截图 |
 | `/annual` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 年度入口表单，独立报告另列 | [414](screenshots/after-annual-414-light-zh.png) · [1440 暗色](screenshots/after-annual-1440-dark-ja.png) |
 | `/docs/score-token` | default | 正文／表单 800 | 已适配 | 本指南内容收口完成 | 公共标题唯一；安全说明、字段及调用示例保留；其他开发者入口未深改 | [414](content-refinement-20261020/screenshots/after-developer-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-developer-1440-dark-ja.png) |
-| `/forum/discussions` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/forum` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 补验 16 条合成 DTO，现有首页上限显示 12 条；徽章及卡片主次仍待后续整理 | [414](content-refinement-20261020/screenshots/after-community-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-community-1440-dark-ja.png) |
-| `/forum/me` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
+| `/forum/discussions` | default | 常规 1000 | 已适配 | 核心功能链路已验收；整体内容设计未重做 | 共享列表搜索应用／排序／分页与歌曲难度URL恢复，失败／重试／身份保护 | [0.87.7 功能验收](../community-core-closeout-20261023.md) |
+| `/forum` | default | 常规 1000 | 已适配 | 核心功能链路已验收；整体内容设计未重做 | 最新真实排序／四筛选与完整列表导航，URL历史与未读缓存；未重做视觉设计 | [0.87.7 功能验收](../community-core-closeout-20261023.md) |
+| `/forum/me` | default | 常规 1000 | 已适配 | 核心功能链路已验收；整体内容设计未重做 | 摘要与帖子分段错误／加载／重试、实际总数分页、身份隔离、管理员拒绝与恢复 | [0.87.7 功能验收](../community-core-closeout-20261023.md) |
 | `/forum/new` | default | 正文／表单 800 | 已适配 | 状态修复已验收；整体内容迁移另行安排 | 失败保留可编辑原稿、创建回执与打开重试分离、上传／身份／KeepAlive 保护；真实页面及隔离持久化链路 | [0.87.6 修复验收](../community-state-fixes-20261022.md) |
 | `/forum/notifications` | default | 常规 1000 | 已适配 | 状态修复已验收；整体内容迁移另行安排 | 读取失败／空态／重试、20 条分页、单条与全部已读互斥、导航失败恢复及身份／KeepAlive 保护 | [0.87.6 修复验收](../community-state-fixes-20261022.md) |
-| `/forum/section/:slug` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 普通概览、列表或导航；无需占满右侧区域 | 未逐页截图 |
-| `/forum/thread/:id` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 长帖、回复与编辑器共享正文边界 | 未逐页截图 |
+| `/forum/section/:slug` | default | 常规 1000 | 已适配 | 核心功能链路已验收；整体内容设计未重做 | 共享列表版块限定／URL历史／新帖来源；失败与空态分开 | [0.87.7 功能验收](../community-core-closeout-20261023.md) |
+| `/forum/thread/:id` | default | 正文／表单 800 | 已适配 | 核心功能链路已验收；整体内容设计未重做 | 阅读／定向回复／点赞／上传／图片查看／锁帖／屏蔽折叠；身份和迟到保护 | [0.87.7 功能验收](../community-core-closeout-20261023.md) |
 | `/grade/2023` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/grade/2024` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |
 | `/grade/2025/:grade` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 多列课题／分析数据或固定比例图表 | 未逐页截图 |

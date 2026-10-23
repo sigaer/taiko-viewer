@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
+import { parseForumListQuery, forumPageInRange } from "~/utils/forumListQuery";
 import { resolveForumSectionTranslation } from "~/utils/forum";
 
 type ProfilePayload = {
@@ -30,7 +31,16 @@ type ThreadListPayload = {
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const route = useRoute();
+const router = useRouter();
 const apiFetch = useViewerApiFetch();
+const { accountUser } = useAccountState();
+const guard = useAccountRequestGuard(false);
+const moderationBusy = ref(false);
+let active = true;
+onDeactivated(() => { active = false; guard.invalidate(); moderationBusy.value = false; });
+onActivated(() => { active = true; });
+watch(() => accountUser.value?.id, () => { moderationBusy.value = false; }, { flush: 'sync' });
 
 definePageMeta({
   middleware: "account-auth",
@@ -62,6 +72,7 @@ const copy = computed(() =>
         myThreads: "自分の投稿",
         myThreadsDesc: "フォーラムに投稿したスレッドがここに表示されます。",
         noThreads: "まだ投稿していません",
+        emptyPage: "このページには投稿がありません",
         moderation: "管理コンソール",
         moderationDesc: "最近のスレッドに対して固定、注目、ロック、非表示を操作します。",
         actionUpdated: "スレッド状態を更新しました",
@@ -86,6 +97,7 @@ const copy = computed(() =>
         myThreads: "我的帖子",
         myThreadsDesc: "你在论坛里发布的主题都会出现在这里。",
         noThreads: "你还没有发过帖子",
+        emptyPage: "当前页暂无帖子",
         moderation: "站务操作台",
         moderationDesc: "对近期主题执行置顶、加精、锁帖和隐藏操作。",
         actionUpdated: "帖子状态已更新",
@@ -102,43 +114,36 @@ const copy = computed(() =>
 );
 const getSectionLabel = (slug: string) => resolveForumSectionTranslation(t, slug, slug);
 
-const { data: homeData, refresh: refreshHome } = await useAsyncData<ForumHomePayload>(
-  "forum-me-home",
-  () => apiFetch("/api/forum/home")
+const { data: homeData, pending: homePending, error: homeError, refresh: refreshHome } = useForumResource<ForumHomePayload>(
+  'forum-me-home', () => apiFetch('/api/forum/home', { retry: 0 }), { enabled: () => !!accountUser.value }
 );
-
-const { data: profileData } = await useAsyncData<ProfilePayload>(
-  "forum-me-profile",
-  () => apiFetch("/api/account/profile")
+const { data: profileData, pending: profilePending, error: profileError, refresh: refreshProfile } = useForumResource<ProfilePayload>(
+  'forum-me-profile', () => apiFetch('/api/account/profile', { retry: 0 }), { enabled: () => !!accountUser.value }
 );
-
-const { data: myThreadsData, refresh: refreshMyThreads } = await useAsyncData<ThreadListPayload>(
-  "forum-me-threads",
-  () =>
-    apiFetch("/api/forum/threads", {
-      query: {
-        scope: "mine",
-        pageSize: 10
-      }
-    })
+const page = computed(() => parseForumListQuery(route.query).page);
+const { data: myThreadsData, pending: threadsPending, error: threadsError, refresh: refreshMyThreads } = useForumResource<ThreadListPayload>(
+  'forum-me-threads', () => apiFetch('/api/forum/threads', { query: { scope: 'mine', page: page.value, pageSize: 10 }, retry: 0 }),
+  { context: () => String(page.value), enabled: () => !!accountUser.value }
 );
-
-const { data: moderationData, refresh: refreshModeration } = await useAsyncData<ThreadListPayload>(
-  "forum-moderation-threads",
-  () =>
-    apiFetch("/api/forum/threads", {
-      query: {
-        sort: "latest",
-        pageSize: 10,
-        includeHidden: 1
-      }
-    })
-);
-
+const correctedPage = computed(() => myThreadsData.value ? forumPageInRange(page.value, myThreadsData.value.total, myThreadsData.value.pageSize) : page.value);
+const correctingPage = computed(() => correctedPage.value !== page.value);
+const threadsLoading = computed(() => threadsPending.value || correctingPage.value);
+watch(myThreadsData, payload => {
+  if (!payload || !correctingPage.value) return;
+  void router.replace({ query: { ...route.query, page: correctedPage.value > 1 ? String(correctedPage.value) : undefined } });
+}, { immediate: true, flush: 'post' });
 const currentUser = computed(() => homeData.value?.currentUser || null);
-const canModerate = computed(() => ["moderator", "admin"].includes(currentUser.value?.role || ""));
+const canModerate = computed(() => ['moderator', 'admin'].includes(currentUser.value?.role || ''));
+const { data: moderationData, pending: moderationPending, error: moderationError, refresh: refreshModeration } = useForumResource<ThreadListPayload>(
+  'forum-moderation-threads', () => apiFetch('/api/forum/threads', { query: { sort: 'latest', pageSize: 10, includeHidden: 1 }, retry: 0 }),
+  { enabled: () => canModerate.value }
+);
+const changePage = (value: number) => router.push({ query: { ...route.query, page: value > 1 ? String(value) : undefined } });
 
 const runModeration = async (threadId: number, action: string, enabled: boolean) => {
+  if (!active || !canModerate.value || moderationBusy.value) return;
+  const request = guard.capture();
+  moderationBusy.value = true;
   try {
     await apiFetch("/api/forum/moderation/action", {
       method: "POST",
@@ -148,10 +153,13 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
         enabled
       }
     });
+    if (!active || !guard.current(request)) return;
     ElMessage.success(copy.value.actionUpdated);
     await Promise.all([refreshHome(), refreshMyThreads(), refreshModeration()]);
   } catch (error: any) {
-    ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.actionFailed);
+    if (active && guard.current(request)) ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.actionFailed);
+  } finally {
+    if (guard.current(request)) moderationBusy.value = false;
   }
 };
 </script>
@@ -164,10 +172,12 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
         <div>
           <h2>{{ copy.title }}</h2>
           <p>
-            {{ copy.bound }}：{{ profileData?.currentBinding?.taikoId || copy.unbound }}，
-            {{ copy.threadCount }} {{ myThreadsData?.total || 0 }}，
-            {{ copy.unread }} {{ homeData?.unreadNotificationCount || 0 }}。
+            <span v-if="profileData">{{ copy.bound }}：{{ profileData.currentBinding?.taikoId || copy.unbound }} </span>
+            <span v-if="myThreadsData">{{ copy.threadCount }} {{ myThreadsData.total }} </span>
+            <span v-if="homeData">{{ copy.unread }} {{ homeData.unreadNotificationCount }}</span>
           </p>
+          <ForumReadState :pending="profilePending" :error="profileError" @retry="refreshProfile" />
+          <ForumReadState :pending="homePending" :error="homeError" @retry="refreshHome" />
         </div>
       </div>
       <div class="me-profile-panel__actions">
@@ -183,12 +193,18 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
           <p>{{ copy.myThreadsDesc }}</p>
         </div>
       </div>
-      <el-empty v-if="!myThreadsData?.items.length" :description="copy.noThreads" />
-      <div v-else class="thread-stack">
+      <ForumReadState v-if="threadsLoading || threadsError" :pending="threadsLoading" :error="threadsError" @retry="refreshMyThreads" />
+      <el-empty v-else-if="myThreadsData && !myThreadsData.items.length" :description="myThreadsData.total === 0 ? copy.noThreads : copy.emptyPage" />
+      <div v-else-if="myThreadsData" class="thread-stack">
         <ForumThreadCard v-for="thread in myThreadsData?.items" :key="thread.id" :thread="thread" compact />
       </div>
     </section>
 
+    <div v-if="myThreadsData && myThreadsData.total > myThreadsData.pageSize && !correctingPage" class="me-pager">
+      <el-button :disabled="page <= 1 || threadsPending" @click="changePage(page - 1)">{{ t('page.forum.section.prevPage') }}</el-button>
+      <span>{{ page }} / {{ Math.ceil(myThreadsData.total / myThreadsData.pageSize) }}</span>
+      <el-button :disabled="page * myThreadsData.pageSize >= myThreadsData.total || threadsPending" @click="changePage(page + 1)">{{ t('page.forum.section.nextPage') }}</el-button>
+    </div>
     <section v-if="canModerate" class="panel-card moderation-panel">
       <div class="panel-head">
         <div>
@@ -196,23 +212,24 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
           <p>{{ copy.moderationDesc }}</p>
         </div>
       </div>
-      <div class="moderation-list">
+      <ForumReadState :pending="moderationPending" :error="moderationError" @retry="refreshModeration" />
+      <div v-if="!moderationPending && !moderationError" class="moderation-list">
         <article v-for="thread in moderationData?.items" :key="thread.id" class="moderation-item">
           <div class="moderation-item__meta">
             <strong>{{ thread.title }}</strong>
             <span>{{ getSectionLabel(thread.section.slug) }} · {{ thread.author.username }}</span>
           </div>
           <div class="moderation-item__actions">
-            <el-button size="small" @click="runModeration(thread.id, 'pin', !thread.isPinned)">
+            <el-button size="small" :disabled="moderationBusy" @click="runModeration(thread.id, 'pin', !thread.isPinned)">
               {{ thread.isPinned ? copy.unpin : copy.pin }}
             </el-button>
-            <el-button size="small" @click="runModeration(thread.id, 'feature', !thread.isFeatured)">
+            <el-button size="small" :disabled="moderationBusy" @click="runModeration(thread.id, 'feature', !thread.isFeatured)">
               {{ thread.isFeatured ? copy.unfeature : copy.feature }}
             </el-button>
-            <el-button size="small" @click="runModeration(thread.id, 'lock', !thread.isLocked)">
+            <el-button size="small" :disabled="moderationBusy" @click="runModeration(thread.id, 'lock', !thread.isLocked)">
               {{ thread.isLocked ? copy.unlock : copy.lock }}
             </el-button>
-            <el-button size="small" type="danger" plain @click="runModeration(thread.id, 'hide', thread.status === 'published')">
+            <el-button size="small" type="danger" plain :disabled="moderationBusy" @click="runModeration(thread.id, 'hide', thread.status === 'published')">
               {{ thread.status === "published" ? copy.hide : copy.restore }}
             </el-button>
           </div>
@@ -223,6 +240,7 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 </template>
 
 <style scoped>
+.me-pager { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .forum-me-page {
   display: grid;
   gap: 18px;
