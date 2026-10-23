@@ -24,7 +24,7 @@ try:
     break
    except OSError:time.sleep(.1)
   else:raise RuntimeError('Owned test MySQL readiness timeout')
-  inherited={k:v for k,v in os.environ.items() if k in ['PATH','TMPDIR','NODE_OPTIONS','QA_RUN_DIR','QA_EVIDENCE_DIR','QA_RUN_TMPDIR','TAIKO_ALLOW_TEST_DB_MUTATION','VIEWER_REVIEW_OUT']} if test_file=='accountEntrySqlHttp.test.mjs' else os.environ
+  inherited={k:v for k,v in os.environ.items() if k in ['PATH','TMPDIR','NODE_OPTIONS','QA_RUN_DIR','QA_EVIDENCE_DIR','QA_RUN_TMPDIR','TAIKO_ALLOW_TEST_DB_MUTATION','VIEWER_REVIEW_OUT','ENTRY_AUTH_RECOVERY']} if test_file=='accountEntrySqlHttp.test.mjs' else os.environ
   env={**inherited,'ANNUAL_E2E_ISOLATED_ROOT':str(scratch/'synthetic-annual'),'COMMUNITY_TEST_SOCKET':str(sock),'TAIKO_DB_HOST':'127.0.0.1','TAIKO_DB_PORT':'1','TAIKO_DB_NAME':'viewer_community_core_test' if test_file=='forumCoreSqlHttp.test.mjs' else 'viewer_community_pr33_test'}
   with (out/'sql-http.log').open('w') as log:subprocess.run(['/opt/taiko-viewer-runtime/node-v24.22.1-linux-x64/bin/node','--experimental-strip-types','--test','--test-concurrency=1','tests/'+test_file],cwd=root/'taiko_viewer',env=env,stdout=log,stderr=log,check=True,timeout=100)
   result['pass']=True

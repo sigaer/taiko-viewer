@@ -1,3 +1,5 @@
+# Candidate-origin metadata below is historical, not the current runtime permission switch.
+# Current approved exposure and stable/deprecation commitments: developer-api-compatibility.md.
 openapi: 3.1.0
 info:
   title: Viewer Developer API v1 — Contract v1.1 candidate

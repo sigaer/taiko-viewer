@@ -1,3 +1,4 @@
+# Stable/deprecation commitments for these current four endpoints: developer-api-compatibility.md.
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
