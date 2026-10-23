@@ -8,18 +8,14 @@ const route = useRoute();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { fetchCurrentUser } = useAccountState();
-const {
-  loadRememberedCredentials,
-  saveRememberedCredentials,
-  clearRememberedCredentials,
-} = useRememberedAccountCredentials();
+const { loadRememberedIdentifier, saveRememberedIdentifier } = useRememberedAccountIdentifier();
 const submitting = ref(false);
 const beta = useAnnualBeta();
 const form = reactive({
   identifier: "",
   password: "",
 });
-const rememberCredentials = ref(false);
+const rememberIdentifier = ref(false);
 const redirectAfterLogin = computed(() => {
   const target = String(route.query.redirect || "").trim();
   return target.startsWith("/") && !target.startsWith("//") && !/[\r\n]/.test(target)
@@ -54,7 +50,7 @@ const copy = computed(() =>
         identifierPlaceholder: "ユーザー名またはメールアドレスを入力",
         password: "パスワード",
         passwordPlaceholder: "パスワードを入力",
-        remember: "ユーザー名とパスワードを保存",
+        remember: "アカウントを保存",
         submit: "ログイン",
         register: "新規登録",
         forgot: "パスワードを忘れた場合",
@@ -68,7 +64,7 @@ const copy = computed(() =>
         identifierPlaceholder: "输入用户名或邮箱",
         password: "密码",
         passwordPlaceholder: "输入密码",
-        remember: "记住用户名和密码",
+        remember: "记住账号",
         submit: "登录",
         register: "注册账号",
         forgot: "找回密码",
@@ -78,13 +74,10 @@ const copy = computed(() =>
 );
 
 onMounted(() => {
-  const remembered = loadRememberedCredentials();
-  rememberCredentials.value = remembered.enabled;
+  const remembered = loadRememberedIdentifier();
+  rememberIdentifier.value = remembered.enabled;
   if (remembered.identifier) {
     form.identifier = remembered.identifier;
-  }
-  if (remembered.password) {
-    form.password = remembered.password;
   }
 });
 
@@ -97,11 +90,7 @@ const submit = async () => {
       method: "POST",
       body: form,
     });
-    if (rememberCredentials.value) {
-      saveRememberedCredentials(form.identifier.trim(), form.password, true);
-    } else {
-      clearRememberedCredentials();
-    }
+    saveRememberedIdentifier(form.identifier, rememberIdentifier.value);
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
     await navigateTo(redirectAfterLogin.value);
@@ -122,24 +111,26 @@ const submit = async () => {
       </div>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.identifier">
-          <el-input v-model="form.identifier" :placeholder="copy.identifierPlaceholder" />
+          <el-input name="username" autocomplete="username" v-model="form.identifier" :placeholder="copy.identifierPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.password">
           <el-input
             v-model="form.password"
+            name="password"
+            autocomplete="current-password"
             type="password"
             show-password
             :placeholder="copy.passwordPlaceholder"
           />
         </el-form-item>
         <div class="remember-row">
-          <el-checkbox v-model="rememberCredentials">{{ copy.remember }}</el-checkbox>
+          <el-checkbox v-model="rememberIdentifier" @change="value => { if (!value) saveRememberedIdentifier('', false); }">{{ copy.remember }}</el-checkbox>
         </div>
         <el-button
           type="primary"
           class="submit-btn"
           :loading="submitting"
-          @click="submit"
+          native-type="submit"
           >{{ copy.submit }}</el-button
         >
       </el-form>

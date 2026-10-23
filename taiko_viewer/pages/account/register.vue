@@ -9,7 +9,6 @@ const route = useRoute();
 const redirectAfterAuth = computed(() => { const value=String(route.query.redirect||""); return value.startsWith("/")&&!value.startsWith("//")&&!/[\\\r\n]/.test(value)?value:localePath("/account/profile"); });
 const apiFetch = useViewerApiFetch();
 const { fetchCurrentUser } = useAccountState();
-const { saveRememberedCredentials } = useRememberedAccountCredentials();
 const sendingCode = ref(false);
 const submitting = ref(false);
 const beta = useAnnualBeta();
@@ -153,7 +152,6 @@ const submit = async () => {
         password: form.password,
       },
     });
-    saveRememberedCredentials(form.username.trim(), form.password, true);
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
     await navigateTo(redirectAfterAuth.value);
@@ -175,17 +173,21 @@ const submit = async () => {
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.username">
           <el-input
+            name="username"
+            autocomplete="username"
             v-model="form.username"
             maxlength="64"
             :placeholder="copy.usernamePlaceholder"
           />
         </el-form-item>
         <el-form-item :label="copy.email">
-          <el-input v-model="form.email" :placeholder="copy.emailPlaceholder" />
+          <el-input name="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.code">
           <div class="code-row">
             <el-input
+              name="verification-code"
+              autocomplete="one-time-code"
               v-model="form.code"
               maxlength="6"
               :placeholder="copy.codePlaceholder"
@@ -202,6 +204,7 @@ const submit = async () => {
         <el-form-item :label="copy.password">
           <el-input
             v-model="form.password"
+            autocomplete="new-password"
             type="password"
             show-password
             :placeholder="copy.passwordPlaceholder"
@@ -210,6 +213,7 @@ const submit = async () => {
         <el-form-item :label="copy.confirmPassword">
           <el-input
             v-model="form.confirmPassword"
+            autocomplete="new-password"
             type="password"
             show-password
             :placeholder="copy.confirmPasswordPlaceholder"
@@ -219,7 +223,7 @@ const submit = async () => {
           type="primary"
           class="submit-btn"
           :loading="submitting"
-          @click="submit"
+          native-type="submit"
           >{{ copy.submit }}</el-button
         >
       </el-form>

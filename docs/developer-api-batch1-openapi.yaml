@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
-  version: 0.87.7
-  description: Application documentation release 0.87.7, preserving the verified rc.8 surface. API path v1 and calculation model v1 are
+  version: 0.87.8
+  description: Application documentation release 0.87.8, preserving the verified rc.8 surface. API path v1 and calculation model v1 are
     separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
     returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
     does not expand account/token authority or enable new capabilities. Examples are synthetic;

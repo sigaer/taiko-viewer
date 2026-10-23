@@ -14,9 +14,9 @@
 | `/account/developer/review` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 权限审核数据表 | 未逐页截图 |
 | `/account/forgot-password` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
 | `/account` | default | 常规 1000 | 已适配 | 公共适配；内容未迁移 | 既有跳转／路由入口；使用目的页面的空间规则 | 未逐页截图 |
-| `/account/login` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
+| `/account/login` | default | 正文／表单 800 | 已适配 | 凭据保存安全修复；整体内容未重做 | 仅记住账号、浏览器密码管理器、同源旧密码清理；常用入口功能验收另行收口 | [0.87.8 工作包](../account-credential-safety-20261023.md) |
 | `/account/profile` | default | 正文／表单 800 | 已适配 | 首批完成 | 短面板自然结束；当前使用为状态；头像操作按需展开；原异步脚本不变 | [414](content-refinement-20261020/screenshots/after-profile-414-light-zh.png) · [1440 暗色日文](content-refinement-20261020/screenshots/after-profile-1440-dark-ja.png) |
-| `/account/register` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
+| `/account/register` | default | 正文／表单 800 | 已适配 | 凭据保存安全修复；整体内容未重做 | 注册不持久化密码，使用标准自动填充；常用入口功能验收另行收口 | [0.87.8 工作包](../account-credential-safety-20261023.md) |
 | `/account/songs` | default | 密集 1180 | 已适配 | 本批内容完成 | 绑定及来源 → 搜索／难度与次要管理 → 成绩 → 分页；桌面对照表、手机逐条展开判定与管理；身份切换隐藏旧结果；本批附修 414px 中日文完整分页分组 | [第二批证据](../viewer-ui-batch2-20261021/README.md) |
 | `/account/support/review` | default | 密集 1180 | 已适配 | 公共适配；内容未迁移 | 支持记录及处理面板 | 未逐页截图 |
 | `/account/sync` | default | 正文／表单 800 | 已适配 | 公共适配；内容未迁移 | 正文或主要表单；弹层不受容器限宽 | 未逐页截图 |
