@@ -235,7 +235,7 @@ const submitApplication = async () => {
     </template>
 
     <!-- Keep public examples mounted: tearing down ElTabs during KeepAlive deactivation corrupts pane ownership. -->
-    <div v-show="!pending && !readError && developerState">
+    <div :hidden="pending || Boolean(readError) || !developerState">
       <DeveloperApiGuide
         :locale="locale"
         :application-status="currentStatus"
