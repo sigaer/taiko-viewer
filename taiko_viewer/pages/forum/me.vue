@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
-import { parseForumListQuery } from "~/utils/forumListQuery";
+import { parseForumListQuery, forumPageInRange } from "~/utils/forumListQuery";
 import { resolveForumSectionTranslation } from "~/utils/forum";
 
 type ProfilePayload = {
@@ -72,6 +72,7 @@ const copy = computed(() =>
         myThreads: "自分の投稿",
         myThreadsDesc: "フォーラムに投稿したスレッドがここに表示されます。",
         noThreads: "まだ投稿していません",
+        emptyPage: "このページには投稿がありません",
         moderation: "管理コンソール",
         moderationDesc: "最近のスレッドに対して固定、注目、ロック、非表示を操作します。",
         actionUpdated: "スレッド状態を更新しました",
@@ -96,6 +97,7 @@ const copy = computed(() =>
         myThreads: "我的帖子",
         myThreadsDesc: "你在论坛里发布的主题都会出现在这里。",
         noThreads: "你还没有发过帖子",
+        emptyPage: "当前页暂无帖子",
         moderation: "站务操作台",
         moderationDesc: "对近期主题执行置顶、加精、锁帖和隐藏操作。",
         actionUpdated: "帖子状态已更新",
@@ -123,6 +125,13 @@ const { data: myThreadsData, pending: threadsPending, error: threadsError, refre
   'forum-me-threads', () => apiFetch('/api/forum/threads', { query: { scope: 'mine', page: page.value, pageSize: 10 }, retry: 0 }),
   { context: () => String(page.value), enabled: () => !!accountUser.value }
 );
+const correctedPage = computed(() => myThreadsData.value ? forumPageInRange(page.value, myThreadsData.value.total, myThreadsData.value.pageSize) : page.value);
+const correctingPage = computed(() => correctedPage.value !== page.value);
+const threadsLoading = computed(() => threadsPending.value || correctingPage.value);
+watch(myThreadsData, payload => {
+  if (!payload || !correctingPage.value) return;
+  void router.replace({ query: { ...route.query, page: correctedPage.value > 1 ? String(correctedPage.value) : undefined } });
+}, { immediate: true, flush: 'post' });
 const currentUser = computed(() => homeData.value?.currentUser || null);
 const canModerate = computed(() => ['moderator', 'admin'].includes(currentUser.value?.role || ''));
 const { data: moderationData, pending: moderationPending, error: moderationError, refresh: refreshModeration } = useForumResource<ThreadListPayload>(
@@ -184,14 +193,14 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
           <p>{{ copy.myThreadsDesc }}</p>
         </div>
       </div>
-      <ForumReadState v-if="threadsPending || threadsError" :pending="threadsPending" :error="threadsError" @retry="refreshMyThreads" />
-      <el-empty v-else-if="myThreadsData && !myThreadsData.items.length" :description="copy.noThreads" />
+      <ForumReadState v-if="threadsLoading || threadsError" :pending="threadsLoading" :error="threadsError" @retry="refreshMyThreads" />
+      <el-empty v-else-if="myThreadsData && !myThreadsData.items.length" :description="myThreadsData.total === 0 ? copy.noThreads : copy.emptyPage" />
       <div v-else-if="myThreadsData" class="thread-stack">
         <ForumThreadCard v-for="thread in myThreadsData?.items" :key="thread.id" :thread="thread" compact />
       </div>
     </section>
 
-    <div v-if="myThreadsData && myThreadsData.total > myThreadsData.pageSize" class="me-pager">
+    <div v-if="myThreadsData && myThreadsData.total > myThreadsData.pageSize && !correctingPage" class="me-pager">
       <el-button :disabled="page <= 1 || threadsPending" @click="changePage(page - 1)">{{ t('page.forum.section.prevPage') }}</el-button>
       <span>{{ page }} / {{ Math.ceil(myThreadsData.total / myThreadsData.pageSize) }}</span>
       <el-button :disabled="page * myThreadsData.pageSize >= myThreadsData.total || threadsPending" @click="changePage(page + 1)">{{ t('page.forum.section.nextPage') }}</el-button>

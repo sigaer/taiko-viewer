@@ -19,3 +19,7 @@ export const forumListLocationQuery = (query: Record<string, unknown>) => {
     difficultyType: value.difficultyType || undefined, page: value.page > 1 ? String(value.page) : undefined,
   };
 };
+
+// Use API totals, never the length of the currently visible slice.
+export const forumPageInRange = (page: number, total: number, pageSize: number) =>
+  Math.min(Math.max(1, page), Math.max(1, Math.ceil(total / Math.max(1, pageSize))));

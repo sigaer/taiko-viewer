@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ForumSection, ForumThreadCard, ForumThreadType } from "~/types/forum";
-import { parseForumListQuery, forumListLocationQuery } from "~/utils/forumListQuery";
+import { parseForumListQuery, forumListLocationQuery, forumPageInRange } from "~/utils/forumListQuery";
 import { buildPageDescription } from "~/utils/seo";
 import { resolveForumSectionTranslation, resolveForumSectionDescription } from "~/utils/forum";
 
@@ -50,6 +50,13 @@ const { data, pending, error, refresh } = useForumResource<ThreadListPayload>(
   `forum-thread-list:${route.path}`, () => apiFetch('/api/forum/threads', { query: requestQuery.value, retry: 0 }),
   { context: () => `${route.path}:${JSON.stringify(requestQuery.value)}` }
 );
+const correctedPage = computed(() => data.value ? forumPageInRange(applied.value.page, data.value.total, data.value.pageSize) : applied.value.page);
+const correctingPage = computed(() => correctedPage.value !== applied.value.page);
+const listLoading = computed(() => pending.value || correctingPage.value);
+watch(data, payload => {
+  if (!payload || !correctingPage.value) return;
+  void router.replace({ query: { ...route.query, page: correctedPage.value > 1 ? String(correctedPage.value) : undefined } });
+}, { immediate: true, flush: 'post' });
 const section = currentSection;
 
 const sortOptions = computed(() => [
@@ -107,14 +114,14 @@ watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value);
     </section>
 
     <section class="thread-list-panel">
-      <ForumReadState v-if="pending || error" :pending="pending" :error="error" @retry="refresh" />
+      <ForumReadState v-if="listLoading || error" :pending="listLoading" :error="error" @retry="refresh" />
       <el-empty v-else-if="!data?.items.length" :description="t('page.forum.section.empty')" />
       <div v-else class="thread-list">
         <ForumThreadCard v-for="thread in data?.items" :key="thread.id" :thread="thread" compact />
       </div>
     </section>
 
-    <section v-if="data" class="pager-panel">
+    <section v-if="data && !correctingPage" class="pager-panel">
       <div>{{ t("page.forum.section.pagination", { page: data?.page || 1, totalPages, total: data?.total || 0 }) }}</div>
       <div class="pager-panel__actions">
         <el-button :disabled="applied.page <= 1 || pending" @click="pushFilters(applied.page - 1, applied)">{{ t("page.forum.section.prevPage") }}</el-button>

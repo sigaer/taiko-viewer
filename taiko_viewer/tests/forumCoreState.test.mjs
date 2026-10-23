@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {stripTypeScriptTypes} from 'node:module';
 import {ref,computed,watch,nextTick,effectScope} from 'vue';
-import {parseForumListQuery,forumListLocationQuery} from '../utils/forumListQuery.ts';
+import {parseForumListQuery,forumListLocationQuery,forumPageInRange} from '../utils/forumListQuery.ts';
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j;});return {promise,resolve,reject};};
 const settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();await nextTick();};
 async function resource(load,{context=ref('one'),enabled=ref(true),hydratedFailure=''}={}){
@@ -67,4 +67,13 @@ test('staff-only disabled resource does not request, enables once and clears on 
 test('SSR failed payload remains failure through cached-null hydration, without a false empty state',async()=>{
  const r=await resource(async()=>({items:[]}),{hydratedFailure:'SSR unavailable'});
  try{assert.equal(r.view.error.value,'SSR unavailable');assert.equal(r.view.data.value,null);assert.equal(r.loads(),0);await r.view.refresh();assert.deepEqual(r.view.data.value.items,[]);assert.equal(r.view.error.value,'');}finally{r.close();}
+});
+
+test('stale personal page is clamped from server total and page size, not an empty visible slice',()=>{
+ assert.equal(forumPageInRange(9,15,10),2);assert.equal(forumPageInRange(2,15,10),2);assert.equal(forumPageInRange(9,0,10),1);
+});
+test('shared chart/section list corrects only the page while preserving committed filter query',()=>{
+ const original={songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',page:9};
+ const next=forumListLocationQuery({...original,page:forumPageInRange(9,15,12)});
+ assert.deepEqual(next,{songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',threadType:undefined,page:'2'});
 });
