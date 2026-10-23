@@ -183,7 +183,7 @@ const submit = async () => {
           />
         </el-form-item>
         <el-form-item :label="copy.email">
-          <el-input name="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
+          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.code">
           <div class="code-row">
