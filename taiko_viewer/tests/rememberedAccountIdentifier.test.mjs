@@ -15,3 +15,10 @@ test('startup cleanup also covers an existing session and public first visit',as
 test('login never hydrates or passes a password to remembered account storage',async()=>{const page=await readFile(new URL('../pages/account/login.vue',import.meta.url),'utf8');assert.doesNotMatch(page,/remembered\.password|saveRememberedCredentials/);assert.match(page,/saveRememberedIdentifier\(form.identifier, rememberIdentifier.value\)/);assert.match(page,/autocomplete="username"/);assert.match(page,/autocomplete="current-password"/);});
 test('register never invokes custom credential storage and passwords use new-password',async()=>{const page=await readFile(new URL('../pages/account/register.vue',import.meta.url),'utf8');assert.doesNotMatch(page,/Remembered|localStorage|sessionStorage/);assert.equal((page.match(/autocomplete="new-password"/g)||[]).length,2);});
 test('reset password uses browser password manager new-password semantics',async()=>{const page=await readFile(new URL('../pages/account/forgot-password.vue',import.meta.url),'utf8');assert.equal((page.match(/autocomplete="new-password"/g)||[]).length,2);assert.match(page,/type="email" autocomplete="email"/);assert.doesNotMatch(page,/autocomplete="username"/);});
+test('unavailable browser storage cannot turn successful authentication into failure',async()=>{
+ const source=(await readFile(new URL('../composables/useRememberedAccountIdentifier.ts',import.meta.url),'utf8')).replace(/^import[^\n]*;\n/gm,'').replace('export const','const').replaceAll('import.meta.client','true');
+ const {stripTypeScriptTypes}=await import('node:module');
+ const unavailable={removeItem:()=>{throw Error('Storage unavailable');}};
+ const create=new Function('loadRememberedAccountIdentifier','saveRememberedAccountIdentifier','localStorage',stripTypeScriptTypes(source,{mode:'strip'})+';return useRememberedAccountIdentifier;')(load,save,unavailable);
+ assert.deepEqual(create().loadRememberedIdentifier(),{enabled:false,identifier:''});assert.doesNotThrow(()=>create().saveRememberedIdentifier('synthetic-account',true));
+});

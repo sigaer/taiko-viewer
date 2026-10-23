@@ -22,6 +22,6 @@
 bash scripts/memory/run_qa.sh /usr/bin/env VIEWER_REVIEW_OUT=/var/tmp/account-safety-browser /usr/bin/python3 preview/song-detail/review/account_safety.py
 ```
 
-当前本地完整 CI 回归列表264/264、Contract生成检查、跨语言Golden通过（`qa-4be473ceb97c`）；真实页面27项／9图已通过；审查P2指出重置页只接受邮箱，现将其标为 type=email／autocomplete=email，防止填入登录用户名，并补回归。最终候选真实页面、CI、审查及发布结果在仓库外 `/home/sigaer/taiko/qa-vault/evidence/viewer-account-safety-20261023` 归档。浏览器首轮因预览SSR合成会话未随登录更新而停止，保留失败记录；修正预览输入。第二轮发现成功后 KeepAlive 表单仍保留密码，现登录／注册成功后清空内存字段，再用同一真实组件重跑。未改变业务认证规则。
+当前本地完整 CI 回归列表265/265、Contract生成检查、跨语言Golden通过（最终运行以外置 unit.json 为准）；真实页面27项／9图已通过；审查P2指出重置页只接受邮箱，现将其标为 type=email／autocomplete=email，防止填入登录用户名，并补回归。最终候选真实页面、CI、审查及发布结果在仓库外 `/home/sigaer/taiko/qa-vault/evidence/viewer-account-safety-20261023` 归档。浏览器首轮因预览SSR合成会话未随登录更新而停止，保留失败记录；修正预览输入。第二轮发现成功后 KeepAlive 表单仍保留密码，现登录／注册成功后清空内存字段，再用同一真实组件重跑。未改变业务认证规则。
 
 版本仅从0.87.7更新为0.87.8，同步锁文件根版本及两份应用OpenAPI文档版本。未升级依赖、未更改Contract版本。发布仍需精确候选 CI／审查与原资源包装器、标准部署脚本通过；保留0.87.7回滚产物、安全运行时和自启disabled。
