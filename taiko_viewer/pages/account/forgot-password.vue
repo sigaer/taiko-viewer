@@ -152,21 +152,21 @@ const submit = async () => {
       </div>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="copy.email">
-          <el-input v-model="form.email" :placeholder="copy.emailPlaceholder" />
+          <el-input name="email" type="email" autocomplete="email" v-model="form.email" :placeholder="copy.emailPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.code">
           <div class="code-row">
-            <el-input v-model="form.code" maxlength="6" :placeholder="copy.codePlaceholder" />
+            <el-input autocomplete="one-time-code" v-model="form.code" maxlength="6" :placeholder="copy.codePlaceholder" />
             <el-button :loading="sendingCode" :disabled="cooldown > 0" @click="sendCode">
               {{ cooldown > 0 ? copy.resend.replace("{seconds}", String(cooldown)) : copy.sendCode }}
             </el-button>
           </div>
         </el-form-item>
         <el-form-item :label="copy.password">
-          <el-input v-model="form.password" type="password" show-password :placeholder="copy.passwordPlaceholder" />
+          <el-input v-model="form.password" type="password" autocomplete="new-password" show-password :placeholder="copy.passwordPlaceholder" />
         </el-form-item>
         <el-form-item :label="copy.confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" show-password :placeholder="copy.confirmPasswordPlaceholder" />
+          <el-input v-model="form.confirmPassword" type="password" autocomplete="new-password" show-password :placeholder="copy.confirmPasswordPlaceholder" />
         </el-form-item>
         <el-button type="primary" class="submit-btn" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
       </el-form>
