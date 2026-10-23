@@ -46,3 +46,9 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_ALLOW_TEST_DB_MUTATION=1 ENTRY_
 仓库外 `/home/sigaer/taiko/qa-vault/evidence/viewer-1-rc-closeout-20261023/`：`backup/inventory.json`、`backup/authorization-recovery.json`、`backup/entry-sql-http.json`、`backup/sql-runtime.json`；`contract/inventory.json`、`contract/consumers.json`及独立文档审查；`performance/current-telemetry.json`、`existing-500-classification.json`、`existing-500-attribution.json`；`pr36-review/`。PR #36部署构件／只读线上证据在相邻 `viewer-entry-closeout-20261023/delivery.json`。
 
 本PR只增加文档、静态公开说明和复用测试／夹具，不改业务处理器、Schema、Contract版本、权限、依赖或资源预算。依本轮明确指示保持应用0.87.9；静态文档仍使用原受控部署流程发布。只读线上验收不主动同步、发帖、授权、撤销、确认近期事实或写入真实账号。恢复集合缺口和有效歌曲500未解决前，不宣称Viewer 1.0 RC已就绪。
+
+## 静态兼容说明发布停止记录
+
+PR #37最终候选 `e050305` 对应CI #75和独立审查通过，合并 `0b6da1f`。原包装器／未修改标准部署脚本在构建前因HEAD标题未以0.87.9开头拒绝，退出1；本轮停止部署，无绕过、重试、手动替换或重启。生产checkout为0b6da1f，但运行的仍是PR #36 / efbbdb7构件，PID与buildId未变。只读复核公开兼容URL为404，故承诺公开项尚未PASS；Git文档审查与正式冻结仍分别记录。0.87.8完整归档和.previous、安全运行时、自启disabled均保留。
+
+本段为准确记录阻塞的文档修正，不部署、不升级应用版本。未来公开发布须使用符合标准版本前缀的提交标题，并重新通过受控脚本与只读哈希核对；当前没有把此未完成步骤写为通过。证据：外置deploy-result.json、stopped-deployment-readonly.json。
