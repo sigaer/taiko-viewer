@@ -91,6 +91,7 @@ const submit = async () => {
       body: form,
     });
     saveRememberedIdentifier(form.identifier, rememberIdentifier.value);
+    form.password = "";
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
     await navigateTo(redirectAfterLogin.value);

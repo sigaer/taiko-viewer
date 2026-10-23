@@ -152,6 +152,8 @@ const submit = async () => {
         password: form.password,
       },
     });
+    form.password = "";
+    form.confirmPassword = "";
     await fetchCurrentUser(true);
     ElMessage.success(copy.value.success);
     await navigateTo(redirectAfterAuth.value);
