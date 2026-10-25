@@ -37,7 +37,7 @@ export const useChartUgc = async (
   const requestKey = () => `${toValue(songId)}-${toValue(difficultyCode)}`;
   const keyForState = (state: ViewerChartUgcState) => `${state.chart.songId}-${state.chart.difficultyCode}`;
 
-  const publicState = await useAsyncData<ChartUgcSummary | null>(
+  const publicState = useAsyncData<ChartUgcSummary | null>(
     () => `chart-ugc-public-${requestKey()}`,
     () => apiFetch<ChartUgcSummary>(
       `/api/content/songs/${toValue(songId)}/ugc?difficulty=${toValue(difficultyCode)}`
@@ -384,7 +384,7 @@ export const useChartUgc = async (
     void drainTagQueue(key);
   };
 
-  return {
+  const state = {
     publicState,
     privateState,
     publicSummary,
@@ -410,4 +410,7 @@ export const useChartUgc = async (
     reportTip,
     goToLogin
   };
+  // Register Nuxt composables and Vue watchers while setup still owns its
+  // context. Awaiting a custom composable does not restore context inside it.
+  return { ...state, publicState: await publicState };
 };
