@@ -2,6 +2,8 @@
 
 本报告只解释证据，当前状态见 [唯一 Release Gate 表](viewer-1-release-gates-20261023.md)。案件对外别名为 **B1-CURRENT-01**。Source 身份、revision/commitId、私有路径和正文不进入 Git、PR、站点或公开日志；精确映射、原始 manifest 及结构差异留在现有私有证据区。本文没有生产变更授权效力。
 
+B1单案定位与B2方案准备 **PASS（限定范围）**；具体历史写入入口 **NOT VERIFIED**；Source生产修复及B整体 **BLOCKED**。该状态不将分析完成等同于恢复完成。
+
 ## B1：异常类型与范围
 
 以现有 Publication SH 锁只读核对，无 pending；当前 sequence **2**，committed manifest 与保留的原始 commit 记录完全一致，读前后未变化。身份、revision、previousCommitId、引用关系已在私有证据核对，原始记录未修改。
@@ -52,3 +54,5 @@
 本案生产修复获得授权、执行并验收之后，才重新捕获实际同代检查点和完整隔离恢复：35 表、相关文件闭包、全部 committed manifest/引用、身份/Session/Key/Grant、Source、历史、Growth/Goal、配置及 Publication vector 均须同代。检查点已有撤销须保留；检查点后的撤销若无连续 replay 证据，开放前使恢复出的所有凭据/Grant fail-closed，入口和后台 Writer 保持关闭直至重新验证授权。
 
 完整恢复及 RPO≤15min/RTO≤120min 继续 **NOT VERIFIED**。上轮 195.887 秒原生还原和诊断包不能替代本案修复与全流程验收；latest-verified 仍保留 10 月 17 日旧点。本轮没有重新恢复或推进指针。B 整体 **BLOCKED**，与歌曲 SSR 归因独立，不能进入 RC。
+
+0.87.11发布后再次只读核对，本案对象/projection的坏hash与committed manifest均未变，latest-verified未推进。应用SSR修复没有实施本案数据修复，也不为本申请提供生产写入授权。
