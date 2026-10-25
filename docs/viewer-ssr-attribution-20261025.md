@@ -38,8 +38,10 @@ server/chunks/build/_id_-M54YOrvQ.mjs:1334:19         song page Promise.all
 
 ## 状态及历史边界
 
-已定位的真实 Nuxt 上下文缺陷：修复与隔离回归 PASS；发布结果在 Gate 中记录。兼容应用修复按 patch 0.87.11 处理，未因 Source 分析升级版本。
+已定位的真实 Nuxt 上下文缺陷：修复、隔离回归及标准发布 **PASS**。运行版本为 **0.87.11 / 92e6106ef84753ac3f0830ffccdf9717b1dfd5dd**，buildId `acc7ece2-0652-4e7f-a02b-4759ae2e62f4`；标准发布耗时215.66秒，脚本未改。新产物在 `qa-b06e518e33e4` 中28次隔离读取全200；单浏览器/单页完成hydration、难度切换、跨ID及日文导航，无未处理浏览器异常、无生产连接，finally关闭浏览器与服务。兼容应用修复按 patch 0.87.11 处理，未因 Source 分析升级版本。
 
 2026-10-23 UTC 05:11–05:20 的 65 次 / 47 个有效 ID 仍缺原始异常栈；目前证明该机制可影响历史有效 ID，没有证明它解释全部历史故障。历史整体归因继续 **BLOCKED**，既有空成功响应、非数组 artists 合成反例也不追认为历史原因。受限观测继续沿用原授权，不加日志字段、不改 Nginx、不提升采样。
 
 有界在线性能仍 **NOT VERIFIED**：未满足历史故障收口前置条件，不开展全站压测、不以这 28 次隔离读取推算在线 p95。Contract 1.1 保持 `FREEZE_CANDIDATE`。
+
+发布后 `qa-1a0e11b2f542` 仅九次匿名GET：100126、1454、日文1466/580详情均200，100126歌曲API200、UGC合法缺失404；公开兼容文档200且原哈希不变，More显示0.87.11，meta保持候选。新编译歌曲组件已包含修复。截止09:56:45Z的完整journal观察仍只有发布前两条真实栈；新进程短窗口无记录不能冒充长期成功率。详见 `postrelease-verification.json`、`isolated-08711-browser.json` 和 `ssr-observation-final.json`。
