@@ -2,7 +2,7 @@
 
 本记录对应 2026-10-25 的明确工作令，当前状态只维护在 [唯一 1.0 Release Gate 表](viewer-1-release-gates-20261023.md)。原始证据保留在 `/home/sigaer/taiko/qa-vault/evidence/viewer-rc-blockers-20261025`，历史 10 月 23 日证据未覆盖或删除。
 
-## 运行基线
+## 初始运行基线
 
 远程 main 为 `2d571d0ad7b1aa98aadbe285b80df807e052a9f3`；生产 checkout 为 `0b6da1f1b8a8fe4710419220abc8ecf87916cb69`，实际构件仍为 `efbbdb739db1e364d6d7cc1c74a08e59d38c87bb / 0.87.9`。PID 2523912、buildId `98b36f90-d99d-4204-8dd0-2329954f259f`，三项关键产物哈希与既有发布证据一致。Node 24.22.1、内置及产物 Undici 7.30.1、服务自启 disabled。
 
@@ -48,4 +48,32 @@ O1 的业务成功率 99.5%、每类建议至少 200 个成功样本、原 p95/p
 
 ## 发布与执行结果
 
-待标准流程执行后填入实际结果。未执行的步骤保持 NOT VERIFIED，A/B 阻断实际关闭前不准备 1.0 RC。
+0.87.10发布提交为 `d21779a84905d68c9d6b55ed78b7c8ea2463bd69`。12项定向测试通过，真实隔离Nitro错误钩子验证通过；原run_build与未修改标准脚本发布成功，234.07秒。第一次仅包装器因可用内存不足拒绝，标准部署脚本未执行；后续服务维护结束后资源自然满足才执行，没有降低准入。BASH_ENV只指定既有Node24.22.1的PATH，使标准构建的登录子Shell也使用安全运行时，不改部署脚本。
+
+公开More页为0.87.10，buildId `50a30255-b0a6-43c3-94f0-dfc844246b83`。兼容文档HTTP200/5151B/SHA256 `9eb8d4775317cb307d0c42dff97ea9a38e708ecabbf80bd4a7d41cde72a7f36a`。真实公共目录1503曲，通过现行OpenAPI白名单校验；chart只有difficulty和level。Schema/SDK/v1处理实现与0.87.9无变化，meta保持候选。0.87.9的.previous及0.87.8/0.87.9完整归档哈希复核保留，服务自启disabled，Node24.22.1和Undici7.30.1保持。原设计WIP未修改。
+
+## 当前生产规模恢复的实际失败边界
+
+用户授权后的同代捕获为UTC **2026-10-25 08:31:51.907458Z**，35表/11,308行，90,092文件/6,955,112,108B，506份Publication committed manifest。全局Writer静止、35表读锁、现行Publication内核EX锁和源inode/size/mtime/ctime前后稳定证明同代；未变更文件复用预拷贝时逐个核对该签名，变化文件在静止窗口重取。包含六张授权/审计表、身份/Session/Key/绑定、Source生命周期/回执、历史/冻结日事实/Growth/Goal及必需运行配置。加密捕获719,317,597B，仍在原私有位置与保留机制下，不改调度、权限、存储位置或异地/PITR。
+
+首次对象闭包校验失败，服务在21.215秒内恢复；保留失败加密输出和原始校验证据。只读定位确认一份current对象和projection已不符合committed引用：期望428,002B/hash `66b61224c72bee75a583d83febfc618319897ac6f088b1457952e795b12544c7`，实际428,028B/hash `d186ad57ea8f36b20ac6106d58880b00dba63018384554bdca605fdfbf45feb2`。实际mtime为10月17日09:52:49.908Z，预拷贝及重新流式读取的坏hash一致。本轮未改该文件，不推断历史写入者或原因；这是私有Source完整性问题，不能当作公共歌曲SSR500的原因。
+
+为完成实际规模受控隔离恢复，第二次只捕获这项已明确的损坏并如实标记 `ENCRYPTED_DIAGNOSTIC_CURRENT_GENERATION_CAPTURE_NOT_RECOVERABLE`；仍对其他对象严格校验，静止窗口19.639秒，服务全部恢复。绝不将该诊断包标成可恢复点，也未推进latest-verified。
+
+原生MySQL还原与全文件闭包验证通过，195.887秒；35表DDL/索引/11,308行的原生值摘要及90,092文件hash全部匹配。恢复目的地是原机制下的全新私有root和实际 `_test` 数据库，实际SELECT DATABASE()/@@datadir/skip_networking及显式mutation opt-in成立；没有将生产身份恢复到生产服务。
+
+随后按实际committed vector核对506份manifest，29,846份健康唯一对象通过；同一坏current对象恢复后仍被Publication内核拒绝。21项健康代表业务检查通过，范围明确排除这项已计入整体失败的损坏源，不能据此宣称整体恢复成功。恢复中的Session、Key、client、ResourceGrant、source service grant及待确认凭据全部fail-closed；撤销/授权审计保留，原Goal和measurement值不重算。旧凭据无法复活，检查点后撤销没有replay能力，因此恢复服务仍须保持入口与后台Writer关闭，重新登录、源验证和授权后才能开放。
+
+在同代捕获文件清单、最新旧verified点和另一个旧完整点中查找精确committed hash，均没有匹配。额外26字节也不是可验证的简单前后缀或尾部空白；没有删除字段、截断正文、改写hash或混用无法证明一致的旧数据来使校验通过。需要可信canonical副本，或另行裁决源数据修复；当前工作令禁止生产验收真实业务写入，故没有擅自修复生产Source。
+
+RPO≤15分钟、RTO≤120分钟仍未签收。诊断捕获至隔离恢复开始的年龄、原生耗时及完整工作流耗时分别记录于 `backup/rpo-rto.json`；原生195.887秒低于目标不代表整体RTO通过，健康代表HTTP也不能替代损坏Source和核心写入恢复。有效verified指针仍是10月17日旧点，不能据本次诊断包宣称当前持续RPO达标。
+
+所有owned MySQL、HTTP及桥接子进程退出后清理了本轮明文恢复副本；私有加密诊断包、失败尝试、SQL摘要、原始坏对象证据及旧verified点保留。没有改生产数据库业务行或Source正文。
+
+## 最终资源及RC结论
+
+最终只读服务快照：RSS265,120KiB，cgroup当前221,061,120B，swap0，PSI full avg10=0，当前high/max/OOM计数均0；服务重启后的短窗口不证明长期容量。原生恢复QA采样峰1,364,357,120B、RSS合计峰396,932KiB，当前代验证峰1,140,924,416B；两者OOM计数增量0。每次QA仍2/3GiB、两CPU、15分钟，构建仍4/5GiB和原超时/互斥；没有准入豁免。新构建瞬时峰没有完整捕获，保持边界，不沿用旧构建的峰值。
+
+A历史归因BLOCKED；B有效恢复集合BLOCKED，真实规模原生还原与fail-closed验证已完成；C公开兼容承诺PASS，正式Contract1.1 Freeze仍NOT VERIFIED；D在线性能NOT VERIFIED，未违反前置条件提前压测。业务成功率与代表路由的p50/p95/p99、热冷容量均没有本轮合格时间队列。旧O1/Annual接受风险不重开。
+
+**不能进入1.0 RC，未准备RC。**
