@@ -16,7 +16,7 @@ UTC 2026-10-26 16:12:33（北京时间10月27日00:12:33）再次通过只读SH�
 
 固定请求为原申请的songs POST（page1/pageSize3000/sort1/isPlayed=true/本案userid）、search POST（本案keyword/page1/pageSize10）、achievement GET和dojo GET。身份只从封存capsule加载，没有首项fallback；搜索必须恰好匹配一个本案userid。原读取代码的公开User-Agent、Referer及Content-Type已逐项比较；没有读取配置cookie。
 
-单并发、最多4请求；禁重试、自动重定向、环境代理/netrc和凭据刷新，TLS验证保持开启。连接≤3s、读超时≤10s，逐块接收≤8MiB/响应、累计≤16MiB；未知长度达到上限而无法证明结束时拒绝，不为探测结尾继续超额读取。只接收未压缩/identity响应，压缩或未知编码停止，不暗中扩展解压预算。状态失败、截断、身份不符、分页不明或到期均停止，剩余请求标为NOT_ISSUED。
+单并发、最多4请求；禁重试、自动重定向、环境代理/netrc和凭据刷新，TLS验证保持开启。连接≤3s、读超时≤10s，逐块接收≤8MiB/响应、累计≤16MiB；未知长度达到上限而无法证明结束时拒绝，不为探测结尾继续超额读取。只接收未压缩/identity响应，压缩或未知编码停止，不暗中扩展解压预算。response hook在Requests内部redirect resolver运行前拒绝异常状态并关闭响应；真实Session.send配合禁止正文读取的假Adapter验证302/Location/超大gzip正文不会被预读（PR自动审查P2已处理）。状态失败、截断、身份不符、分页不明或到期均停止，剩余请求标为NOT_ISSUED。
 
 分页策略有意保守：短于3000条本身不算完整。当前只认识明确且内部一致的 `playedRecords.pagination`（page/pageSize/total/hasNext）形状；**合成fixture不是实际Wahlap schema的证据**。真实响应缺少这个元数据或字段语义无法确认时，停止并记录NOT VERIFIED，不猜别名、不追加分页、不自动重试。若以后需要改变参数、请求范围或重新请求，应另行核对授权。
 
@@ -40,7 +40,7 @@ bash scripts/memory/run_qa.sh /usr/bin/timeout --signal=TERM --kill-after=1s 58s
 
 ## 验证与当前结果
 
-24项离线测试PASS：未授权零副作用、不能把凭据文件当plan读取、四请求参数、身份/重复身份、分页/截断、状态/重定向/无重试、大小/累计上限、压缩、时限、异常脱敏、私有文件权限、受限读取及禁止持久化依赖。全部使用合成身份/凭据及fake transport，socket连接被禁止。真实请求头比对的初次失败记录保留，修正后通过。
+25项离线测试PASS：未授权零副作用、不能把凭据文件当plan读取、四请求参数、身份/重复身份、分页/截断、状态/重定向/无重试、大小/累计上限、压缩、时限、异常脱敏、私有文件权限、受限读取及禁止持久化依赖。全部使用合成身份/凭据及fake transport，socket连接被禁止。真实请求头比对的初次失败记录保留，修正后通过。
 
 另外对真实入口做未授权**拒绝测试**，审计钩子禁止任何配置cookie打开、DNS/socket事件、Source写入及响应目录创建；入口按预期退出3。四类尝试计数全部0，确认不是“读了凭据后才拒绝”。这是准备阶段的负向测试，不是U1实际执行。
 
@@ -53,6 +53,6 @@ bash scripts/memory/run_qa.sh /usr/bin/timeout --signal=TERM --kill-after=1s 58s
 | 恢复旧committed字节或新revision | 尚无数据可裁决；新获取内容不会直接追认为旧字节 |
 | 后续权限 | U1仍待明确授权；可信候选形成后，W1仍须新的独立授权 |
 
-证据留在现有私有区 `qa-vault/evidence/viewer-u1-preparation-20261026`：`case-precheck.json`、`execution-preparation.json`、`authorization-guard-proof.json`；最终离线运行 `qa-587f18a1a939`，拒绝入口审计 `qa-dbb9bddea95a`，本案最新复核 `qa-fb5e663d82a5`。初始状态和失败测试分别留存，owned子进程均退出；不提交capsule、plan或私有资料。
+证据留在现有私有区 `qa-vault/evidence/viewer-u1-preparation-20261026`：`case-precheck.json`、`execution-preparation.json`、`authorization-guard-proof.json`；最终离线运行 `qa-119f339155e4`，拒绝入口审计 `qa-14170ed746a8`，本案最新复核 `qa-fb5e663d82a5`。初始状态和失败测试分别留存，owned子进程均退出；不提交capsule、plan或私有资料。
 
 结论：**准备/离线边界PASS；U1执行BLOCKED_PENDING_EXPLICIT_AUTHORIZATION；候选可信度NOT VERIFIED；W1未授权且未执行；Source仍fail-closed、RC仍BLOCKED。** 本轮上游请求0、cookie读取0、生产Source/Writer/manifest/verified/数据库权限及备份调度变更0，无版本升级或部署。
