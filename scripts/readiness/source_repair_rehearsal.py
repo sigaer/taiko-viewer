@@ -59,6 +59,10 @@ class RepairStore(PublicationStore):
                 or following.get('dependencyHash') != p['approvalDigest']
                 or following['files'] != expected):
             raise PublicationError('Repair receipt is outside approved scope')
+        for field in ('fileMtimes', 'fileCtimes'):
+            if {k: v for k, v in following.get(field, {}).items() if k != 'current'} != {
+                    k: v for k, v in p['parent'].get(field, {}).items() if k != 'current'}:
+                raise PublicationError('Repair changes historical metadata')
         for reference in following['files'].values():
             self.read_object(reference)
         if sha((self.objects / p['parent']['files']['current']['sha256']).read_bytes()) != p['badSha256']:
@@ -114,6 +118,8 @@ def setup(name):
 
 
 def run(root, plan, payload, fault=None):
+    if {'bytes': len(payload), 'sha256': sha(payload)} != plan['candidate']:
+        raise PublicationError('Candidate bytes changed')
     store = RepairStore(root, identity, plan, fault=fault)
     with store.exclusive():
         if store.view()['commitId'] == plan['transactionId']:
@@ -270,6 +276,36 @@ try:
         assert os.waitstatus_to_exitcode(status) == 97
         assert store.view() == parent
     results.append({'case': 'kernelLockConflictDenied', 'pass': True})
+
+    root, parent, payload, plan, records, protected = setup('changed-historical-metadata')
+    pid = os.fork()
+    if pid == 0:
+        run(root, plan, payload, lambda p: os._exit(97) if p == 'intent-durable' else None)
+        os._exit(98)
+    _, status = os.waitpid(pid, 0)
+    assert os.waitstatus_to_exitcode(status) == 97
+    store = PublicationStore(root, identity)
+    receipt = store.commits / (plan['transactionId'] + '.json')
+    uncommitted = json.loads(receipt.read_text())
+    uncommitted['fileMtimes']['history/data_fixture.json'] += 1
+    receipt.write_bytes(raw_json(uncommitted))
+    try:
+        run(root, plan, payload)
+    except PublicationError:
+        assert json.loads((store.base / 'committed.json').read_text()) == parent
+        results.append({'case': 'alteredHistoricalMetadataFailsClosed', 'pass': True})
+    else:
+        raise AssertionError('HISTORICAL_METADATA_CHANGE_ACCEPTED')
+
+    root, parent, payload, plan, records, protected = setup('nonce-input-conflict-after-success')
+    view = run(root, plan, payload)
+    try:
+        run(root, plan, payload + b' ')
+    except PublicationError:
+        assert json.loads((root / '.taiko-publications' / identity / 'committed.json').read_text()) == view
+        results.append({'case': 'idempotentRetryWithDifferentBytesDenied', 'pass': True})
+    else:
+        raise AssertionError('DIFFERENT_RETRY_INPUT_ACCEPTED')
 
     # Inspect the installed upstream function with fake HTTP/config/save only.
     source = Path('/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_bot/runtime/player/center/update_user.py')
