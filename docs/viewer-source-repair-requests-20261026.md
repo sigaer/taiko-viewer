@@ -37,6 +37,8 @@ UTC 2026-10-26 14:36:29（北京时间22:36:29），只读 SH 锁下确认 B1-CU
 
 新增 [合成演练脚本](../scripts/readiness/source_repair_rehearsal.py) 只允许现有 QA scratch，拒绝生产根目录，运行时禁止网络。它没有安装或改写生产内核。20项验证 PASS：正常 saver 拒绝、原回滚边界、显式修复的新 revision、8处实际子进程死亡/恢复、幂等、外来 pending/变更候选/陈旧父代拒绝、恢复中候选损坏拒绝、锁冲突拒绝、四请求带保存副作用的 mock 及身份不符拒绝。
 
+三个 `repair-*` 恢复用例先在 intent-durable 处实际退出，确认坏父代仍为current且pending已持久化，再在恢复子进程中断并重试；最终20项通过。这也补强了PR自动审查P2提出的恢复前置条件。
+
 原型使用绑定到精确父 manifest、坏 hash、候选 hash、transaction ID 和审批摘要的专用 forward-only 修复意图。中断后只能恢复该已批准新代；旧内容已坏时不假装可回退为健康旧代。它保留旧 commit 文件和坏对象证据，只改变新 revision 与当前指针；不追加历史观测、不重算 Growth/Goal，不改凭据。受保护权限/测量只用合成文件验证未变，**不是生产 SQL 原子性或完整恢复证明**。
 
 硬链接风险在合成 fixture 中实际复现：对象与 projection 共用 inode，绕过内核的原地写会同时破坏对象。已核对的当前 `_put_stream`、`_install`、正常 saver 和 `write_local_snapshot` 使用新对象/原子 replace/Publication commit，没有发现这些路径原地写入已有 canonical 对象。0600文件和硬链接本身不阻止同一有权限主体原地写；本轮没有证明历史写入者，也没有因此重开完整 Writer 迁移。
