@@ -1,5 +1,7 @@
 # U1 独立只读适配器准备与执行授权核对
 
+后续状态：用户已另行明确授权U1；首次资源准入失败后停止，详见[授权后的准入记录](viewer-u1-admission-20261027.md)。本文余下内容保留为PR #42的授权前准备快照，不再代表当前授权状态。
+
 日期：2026-10-27，Asia/Shanghai。承接PR #41及main `2b2f8ddea222e6a007420a6b7fd06e5114bf0780`，沿用[原Source报告](viewer-source-integrity-20261025.md)、[U1/W1申请](viewer-source-repair-requests-20261026.md)和[唯一Gate](viewer-1-release-gates-20261023.md)。本轮只准备U1，不执行W1或改备份。Viewer仍为0.87.11 / `92e6106`，运行PID4179944、buildId和资源限制未变。
 
 ## 授权判定与单案状态
