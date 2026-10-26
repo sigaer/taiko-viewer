@@ -1,5 +1,7 @@
 # U1 明确授权后的首次资源准入结果
 
+后续：用户要求手动复查资源后通过，并进一步明确继续；U1首个请求返回401后停止。最新状态见[限定执行结果](viewer-u1-execution-20261027.md)，下文保留首次资源准入失败的完整记录。
+
 日期：2026-10-27，Asia/Shanghai。承接main `763bd3c48fabbb8dce59b629e4350fb682e3ab04`，依据[已审查U1准备报告](viewer-u1-preparation-20261027.md)、[原U1/W1申请](viewer-source-repair-requests-20261026.md)及用户本轮的明确授权。现行状态只维护在[唯一Gate](viewer-1-release-gates-20261023.md)。
 
 ## 授权与立即停止
