@@ -35,8 +35,9 @@ RESOURCE_ADMISSION_DENIED PLAN_SCOPE_INVALID'''.split())
 
 class U1Stop(Exception):
     """Contains an allowlisted category only, never a response or exception."""
-    def __init__(self, category):
+    def __init__(self, category, http_status=None):
         super().__init__(category if category in STOP_CODES else 'UNCLASSIFIED_U1_FAILURE')
+        self.http_status = http_status if type(http_status) is int and 100 <= http_status <= 599 else None
 
 
 def sha(raw):
@@ -229,6 +230,11 @@ def collect(identity, credential_provider, session_factory, sink_factory, *, aut
         summary['candidateStatus'] = 'AWAITING_ISOLATED_SOURCE_VALIDATION'
     except U1Stop as error:
         summary['stopReason'] = str(error)
+        if error.http_status is not None:
+            for row in reversed(rows):
+                if row['state'] == 'ISSUED':
+                    row['status'] = error.http_status
+                    break
     except Exception:
         # Network/JSON/provider exceptions can embed IDs, paths and secrets.
         summary['stopReason'] = 'SANITIZED_EXECUTION_FAILURE'
@@ -255,6 +261,15 @@ def make_session(credential):
     session = requests.Session()
     session.trust_env = False
     session.mount('https://', HTTPAdapter(max_retries=0))
+    def reject_unsafe_status(response, *_, **__):
+        # Requests may consume a redirect's body to populate Response.next even
+        # with allow_redirects=False. Hooks run before that resolver/cookie work.
+        if response.status_code not in (200, 201):
+            status = response.status_code
+            response.close()
+            raise U1Stop('HTTP_STATUS_REJECTED', http_status=status)
+        return response
+    session.hooks['response'] = [reject_unsafe_status]
     session.headers.update({'Authorization': credential, 'Accept-Encoding': 'identity',
                             'Content-Type': 'application/json',
                             'Referer': 'https://servicewechat.com/wxeafab0667490cd23/21/page-frame.html',
