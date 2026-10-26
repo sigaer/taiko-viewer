@@ -35,7 +35,7 @@ UTC 2026-10-26 14:36:29（北京时间22:36:29），只读 SH 锁下确认 B1-CU
 
 普通 saver 会先调用 current reader，已坏 current 因长度/hash 不符而被拒绝；正常同步不能直接自愈。底层 `stage/publish` 可以只替换 current 并产生 sequence+1，但在提交前失败时，通用 `_recover` 会试图重装旧坏对象，拒绝并保留 pending。故“正常 publish 成功一次”不能证明失败恢复合格。
 
-新增 [合成演练脚本](../scripts/readiness/source_repair_rehearsal.py) 只允许现有 QA scratch，拒绝生产根目录，运行时禁止网络。它没有安装或改写生产内核。18项验证 PASS：正常 saver 拒绝、原回滚边界、显式修复的新 revision、8处实际子进程死亡/恢复、幂等、外来 pending/变更候选/陈旧父代拒绝、恢复中候选损坏拒绝、锁冲突拒绝、四请求带保存副作用的 mock 及身份不符拒绝。
+新增 [合成演练脚本](../scripts/readiness/source_repair_rehearsal.py) 只允许现有 QA scratch，拒绝生产根目录，运行时禁止网络。它没有安装或改写生产内核。20项验证 PASS：正常 saver 拒绝、原回滚边界、显式修复的新 revision、8处实际子进程死亡/恢复、幂等、外来 pending/变更候选/陈旧父代拒绝、恢复中候选损坏拒绝、锁冲突拒绝、四请求带保存副作用的 mock 及身份不符拒绝。
 
 原型使用绑定到精确父 manifest、坏 hash、候选 hash、transaction ID 和审批摘要的专用 forward-only 修复意图。中断后只能恢复该已批准新代；旧内容已坏时不假装可回退为健康旧代。它保留旧 commit 文件和坏对象证据，只改变新 revision 与当前指针；不追加历史观测、不重算 Growth/Goal，不改凭据。受保护权限/测量只用合成文件验证未变，**不是生产 SQL 原子性或完整恢复证明**。
 
@@ -53,6 +53,6 @@ U1完成后，才补齐：权威四响应的验证报告、**候选完整长度/
 
 新 revision **不能恢复丢失的旧字节**。后续恢复验收必须区分“全体 Source 当前 committed vector 的全部引用”与“保留的旧损坏 revision”。原型只证明前者可恢复健康；旧坏 revision仍坏。若发布 Gate 要求旧 revision内容也完整可读，W1新代修复不能关闭该项，需精确副本或发布决策对历史不可恢复边界作明确裁决；不能静默排除旧引用来推进 verified。
 
-证据在 `qa-vault/evidence/viewer-source-stability-20261026`：`source-state-check.json`、`repair-backup-capabilities.json`、`source-repair-rehearsal.json` 及私有绑定前置条件。18项最终运行见该证据的交付索引；初次元数据格式比较与回滚故障注入位置的失败运行原样保留。
+证据在 `qa-vault/evidence/viewer-source-stability-20261026`：`source-state-check.json`、`repair-backup-capabilities.json`、`source-repair-rehearsal.json` 及私有绑定前置条件。20项最终运行见该证据的交付索引；初次元数据格式比较与回滚故障注入位置的失败运行原样保留。
 
 结论：调查和合成演练 **PASS（限定范围）**；上游权威获取 **BLOCKED_PENDING_U1**；生产修复 **BLOCKED_PENDING_CANDIDATE_AND_W1**；完整恢复及推进 verified 均未执行。
