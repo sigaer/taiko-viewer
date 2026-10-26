@@ -188,6 +188,18 @@ try:
                         'repair-commit-durable', 'repair-pending-cleared']:
         name = fault_point or 'success'
         root, parent, payload, plan, records, protected = setup(name)
+        if fault_point and fault_point.startswith('repair-'):
+            # Exercise recovery of an interrupted publication while the corrupt
+            # parent is still current, rather than only cleanup after commit.
+            seed_pid = os.fork()
+            if seed_pid == 0:
+                run(root, plan, payload, lambda p: os._exit(97) if p == 'intent-durable' else None)
+                os._exit(98)
+            _, seed_status = os.waitpid(seed_pid, 0)
+            assert os.waitstatus_to_exitcode(seed_status) == 97
+            base = root / '.taiko-publications' / identity
+            assert (base / 'pending.json').is_file()
+            assert json.loads((base / 'committed.json').read_text()) == parent
         if fault_point:
             pid = os.fork()
             if pid == 0:
@@ -205,6 +217,7 @@ try:
         verify(root, plan, payload, records, protected)
         assert run(root, plan, payload) == view
         results.append({'case': name, 'pass': True, 'actualProcessDeath': bool(fault_point),
+                        'preCommitPendingSeeded': bool(fault_point and fault_point.startswith('repair-')),
                         'oldCommitRecordsPreserved': True, 'newRevisionOnly': True,
                         'protectedAuthoritiesUnchanged': True, 'idempotent': True})
 
