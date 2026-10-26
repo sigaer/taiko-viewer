@@ -210,6 +210,41 @@ class BoundaryTests(unittest.TestCase):
         finally:
             session.headers.clear(); session.close()
 
+    def test_requests_session_rejects_redirect_before_implicit_body_consumption(self):
+        import requests
+        from requests.adapters import BaseAdapter
+        class UnreadBody:
+            reads = 0; closed = False
+            def read(self, *_args, **_kwargs):
+                self.reads += 1; raise AssertionError('REDIRECT_BODY_MUST_NOT_BE_READ')
+            def stream(self, *_args, **_kwargs):
+                self.reads += 1; raise AssertionError('REDIRECT_BODY_MUST_NOT_BE_READ')
+                yield b''
+            def close(self): self.closed = True
+            def release_conn(self): pass
+        class HeaderAdapter(BaseAdapter):
+            calls = 0
+            def send(self, request, **kwargs):
+                self.calls += 1
+                response = requests.Response(); response.request = request
+                response.status_code = 302; response.url = request.url
+                response.headers = {'Location': u1.ORIGIN + '/must-not-follow',
+                                    'Content-Encoding': 'gzip',
+                                    'Content-Length': str(u1.PER_RESPONSE + 1)}
+                response.raw = raw
+                return response
+            def close(self): pass
+        raw = UnreadBody(); adapter = HeaderAdapter(); session = u1.make_session(SECRET)
+        session.mount('https://', adapter)
+        result = u1.collect(IDENTITY, lambda: SECRET, lambda _: session, Sink, authorized=True)
+        self.assertEqual(result['stopReason'], 'HTTP_STATUS_REJECTED')
+        self.assertEqual(result['requests'][0]['status'], 302)
+        self.assertEqual(adapter.calls, 1)
+        self.assertEqual(raw.reads, 0)
+        self.assertTrue(raw.closed)
+        self.assertEqual(result['totalResponseBytes'], 0)
+        self.assertTrue(all(r['state'] == 'NOT_ISSUED' for r in result['requests'][1:]))
+
     def test_private_evidence_modes(self):
         destination = ROOT / 'mode-check'
         sink = u1.PrivateResponses(destination)
