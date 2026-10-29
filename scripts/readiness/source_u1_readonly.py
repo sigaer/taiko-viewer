@@ -30,7 +30,7 @@ WALL_DEADLINE CREDENTIAL_UNAVAILABLE HTTP_STATUS_REJECTED ENCODED_BODY_UNSUPPORT
 RESPONSE_LENGTH_REJECTED RESPONSE_BUDGET_EXCEEDED RESPONSE_TRUNCATED RESPONSE_JSON_INVALID
 UNREVIEWED_ADAPTER_VERSION AUTHORIZATION_EXPIRED CASE_FILE_OUTSIDE_PRIVATE_SCOPE
 CASE_STATE_CHANGED FRESH_CASE_PRECHECK_REQUIRED EVIDENCE_SCOPE_INVALID QA_ISOLATION_REQUIRED
-RESOURCE_ADMISSION_DENIED PLAN_SCOPE_INVALID'''.split())
+RESOURCE_ADMISSION_DENIED PLAN_SCOPE_INVALID PARSER_DEPENDENCY_UNAVAILABLE'''.split())
 
 
 class U1Stop(Exception):
@@ -73,44 +73,25 @@ def request_specs(identity):
     ]
 
 
-def validate(kind, value, identity):
-    if not isinstance(value, dict) or not isinstance(value.get('data'), dict) or value.get('success') is False:
-        raise U1Stop('RESPONSE_STRUCTURE_INVALID')
-    data = value['data']
-    if kind == 'songs':
-        records = data.get('playedRecords')
-        if not isinstance(records, dict) or not isinstance(records.get('scoreInfo'), list):
-            raise U1Stop('SONGS_STRUCTURE_INVALID')
-        rows = records['scoreInfo']
-        if any(not isinstance(row, dict) for row in rows):
-            raise U1Stop('SONGS_STRUCTURE_INVALID')
-        if len(rows) >= 3000:
-            raise U1Stop('PAGINATION_TRUNCATION_POSSIBLE')
-        # Deliberately narrow: no inference from a short page alone and no
-        # guessing aliases. Real upstream metadata/semantics remain unverified.
-        paging = records.get('pagination')
-        if not isinstance(paging, dict) or set(paging) != {'page', 'pageSize', 'total', 'hasNext'}:
-            raise U1Stop('PAGINATION_COMPLETENESS_UNKNOWN')
-        if (type(paging['page']) is not int or paging['page'] != 1
-                or type(paging['pageSize']) is not int or paging['pageSize'] != 3000
-                or type(paging['total']) is not int or paging['total'] != len(rows)
-                or paging['hasNext'] is not False):
-            raise U1Stop('PAGINATION_INCOMPLETE')
-        if any('userid' in row and str(row['userid']) != identity for row in rows):
-            raise U1Stop('CASE_ID_MISMATCH')
-        return {'structureValid': True, 'pagination': 'EXPLICIT_SINGLE_PAGE_CHECK_PASSED',
-                'recordCount': len(rows), 'actualUpstreamSchemaProven': False}
-    if kind == 'profile':
-        players = data.get('players')
-        if not isinstance(players, list):
-            raise U1Stop('PROFILE_STRUCTURE_INVALID')
-        matches = [p for p in players if isinstance(p, dict) and str(p.get('userid')) == identity]
-        if len(matches) != 1:
-            raise U1Stop('CASE_ID_MISMATCH_OR_AMBIGUOUS')
-        return {'structureValid': True, 'exactCaseIdentity': True, 'fallbackUsed': False}
-    if 'userid' in data and str(data['userid']) != identity:
-        raise U1Stop('CASE_ID_MISMATCH')
-    return {'structureValid': True, 'identityBasis': 'exact-profile-and-case-scoped-HTTPS-request'}
+JSON_VALIDATOR_SHA256 = '40d735a7aa7288a463abe624c59eece6d33698dfad91ff03633394b0cd3dbdc7'
+_JSON_VALIDATOR = None
+
+
+def json_validator():
+    global _JSON_VALIDATOR
+    if _JSON_VALIDATOR is None:
+        import importlib.util
+        source = Path(__file__).with_name('source_u1_json.py')
+        if sha(source.read_bytes()) != JSON_VALIDATOR_SHA256:
+            raise U1Stop('UNREVIEWED_ADAPTER_VERSION')
+        spec = importlib.util.spec_from_file_location('source_u1_json', source)
+        module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(module)
+        except ImportError:
+            raise U1Stop('PARSER_DEPENDENCY_UNAVAILABLE') from None
+        _JSON_VALIDATOR = module
+    return _JSON_VALIDATOR
 
 
 class PrivateResponses:
@@ -120,8 +101,8 @@ class PrivateResponses:
 
     def open_response(self, index):
         fd = os.open(self.directory / f'{index:02d}.response',
-                     os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
-        return os.fdopen(fd, 'wb')
+                     os.O_CREAT | os.O_EXCL | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+        return os.fdopen(fd, 'w+b')
 
     def save_summary(self, summary):
         fd = os.open(self.directory / 'u1-summary.json',
@@ -136,6 +117,7 @@ def collect(identity, credential_provider, session_factory, sink_factory, *, aut
             clock=time.monotonic):
     if authorized is not True:
         raise U1Stop('BLOCKED_PENDING_EXPLICIT_U1_AUTHORIZATION')
+    validator = json_validator()
     specs = request_specs(identity)
     deadline = clock() + BODY_SECONDS
     rows = [{'endpoint': kind, 'state': 'NOT_ISSUED'} for kind, *_ in specs]
@@ -186,7 +168,6 @@ def collect(identity, credential_provider, session_factory, sink_factory, *, aut
                     raise U1Stop('RESPONSE_LENGTH_REJECTED')
                 digest = hashlib.sha256()
                 with sink.open_response(index) as target:
-                    chunks = []
                     while True:
                         remaining()
                         allowance = min(PER_RESPONSE - row['bytes'], TOTAL - total)
@@ -201,23 +182,21 @@ def collect(identity, credential_provider, session_factory, sink_factory, *, aut
                         total += len(chunk)
                         digest.update(chunk)
                         target.write(chunk)
-                        chunks.append(chunk)
                         if length is not None and row['bytes'] == int(length):
                             break
                     target.flush()
                     os.fsync(target.fileno())
-                row['sha256'] = digest.hexdigest()
-                if length is not None and row['bytes'] != int(length):
-                    raise U1Stop('RESPONSE_TRUNCATED')
-                row['transportComplete'] = True
-                remaining()
-                try:
-                    value = json.loads(b''.join(chunks))
-                except (ValueError, UnicodeError, RecursionError):
-                    raise U1Stop('RESPONSE_JSON_INVALID') from None
-                row.update(validate(kind, value, identity))
+                    row['sha256'] = digest.hexdigest()
+                    if length is not None and row['bytes'] != int(length):
+                        raise U1Stop('RESPONSE_TRUNCATED')
+                    row['transportComplete'] = True
+                    remaining()
+                    target.seek(0)
+                    try:
+                        row.update(validator.validate_stream(kind, target, identity, remaining))
+                    except validator.ResponseValidationError as error:
+                        raise U1Stop(str(error)) from None
                 row.update(state='VALIDATED', complete=True)
-                del value, chunks
                 remaining()
             finally:
                 if digest is not None:
