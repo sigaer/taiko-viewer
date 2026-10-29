@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "scope": "U1 standalone QA tool only; production Python unchanged",
+  "python": "3.11.4",
+  "platform": "CPython 3.11 / Linux x86_64",
+  "backend": "yajl2_c",
+  "openssl": "OpenSSL 1.1.1n  15 Mar 2022",
+  "installedTreeHashFormat": "SHA256 of sorted compact JSON [{path,sha256}], excluding pyc and external CLI entrypoints",
+  "packages": {
+    "ijson": {
+      "version": "3.6.0",
+      "installedFiles": 25,
+      "installedTreeSha256": "3ac77237dee6e411ddd502c2c6196d7fcc11aec80f15c6830874568e87506f9a"
+    },
+    "requests": {
+      "version": "2.34.2",
+      "installedFiles": 27,
+      "installedTreeSha256": "8cedbb7e4c7e6685f82a26ed5150c45ac9743d463e83c32b39e5cf05b916c162"
+    },
+    "urllib3": {
+      "version": "2.8.0",
+      "installedFiles": 43,
+      "installedTreeSha256": "eb9dca2eb884f996df79fdba1f49dbeb8d5bb4ab20618527de2f0fe0e201b7e2"
+    },
+    "charset-normalizer": {
+      "version": "3.5.2",
+      "installedFiles": 22,
+      "installedTreeSha256": "1427a4bc5811dce80450ac662bcb2fcbb92fe62fa8005b37153944fddf6ef164"
+    },
+    "idna": {
+      "version": "3.20",
+      "installedFiles": 17,
+      "installedTreeSha256": "b8e080705d53af778695ff6793eda777856f706e977499642b2a87e0646322bc"
+    },
+    "certifi": {
+      "version": "2026.7.22",
+      "installedFiles": 13,
+      "installedTreeSha256": "8e9ab7c7fc09b83d960bfafb727444302908ad47e6eccd50ee5ee8d6e064fcb9"
+    }
+  }
+}

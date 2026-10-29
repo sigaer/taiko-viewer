@@ -54,7 +54,7 @@ class Sink:
     def open_response(self, index):
         self.opens += 1
         # A bounded real scratch file tests flush/fsync without retaining bytes.
-        return open(ROOT / f'response-{self.opens}', 'wb')
+        return open(ROOT / f'response-{self.opens}', 'w+b')
     def save_summary(self, summary): self.summary = summary
 
 
