@@ -41,8 +41,20 @@ class StreamingProjectionTests(unittest.TestCase):
         value = songs()
         value['data']['playedRecords']['pagination']['extra'] = 0
         self.reject('PAGINATION_COMPLETENESS_UNKNOWN', 'songs', value)
-        del value['data']['playedRecords']['pagination']
+        value['data']['playedRecords']['pagination'] = None
         self.reject('PAGINATION_COMPLETENESS_UNKNOWN', 'songs', value)
+
+    def test_legacy_first_page_without_pagination_keeps_full_collection_unverified(self):
+        value = songs([{} for _ in range(627)])
+        del value['data']['playedRecords']['pagination']
+        result = self.parse('songs', value)
+        self.assertEqual(result['recordCount'], 627)
+        self.assertEqual(result['pagination'], 'LEGACY_FIRST_PAGE_TOTAL_UNVERIFIED')
+        self.assertIs(result['upstreamCollectionComplete'], False)
+        value['data']['playedRecords']['scoreInfo'][0] = {'userid': 'wrong'}
+        self.reject('CASE_ID_MISMATCH', 'songs', value)
+        value['data']['playedRecords']['scoreInfo'] = [{}] * 3000
+        self.reject('PAGINATION_TRUNCATION_POSSIBLE', 'songs', value)
 
     def test_profile_unique_exact_match_and_container_identity(self):
         self.assertTrue(self.parse('profile', {'data': {'players': [None, [], {}, {'userid': IDENTITY}]}})['exactCaseIdentity'])
