@@ -178,7 +178,15 @@ def validate_stream(kind, source, identity, remaining):
             raise ResponseValidationError('SONGS_STRUCTURE_INVALID')
         if rows.count >= 3000:
             raise ResponseValidationError('PAGINATION_TRUNCATION_POSSIBLE')
-        paging = records.fields.get('pagination')
+        # Existing Wahlap readers consume scoreInfo from page 1 without
+        # pagination metadata. Do not infer that the full collection was sent.
+        if 'pagination' not in records.fields:
+            if rows.mismatch:
+                raise ResponseValidationError('CASE_ID_MISMATCH')
+            return {'structureValid': True, 'pagination': 'LEGACY_FIRST_PAGE_TOTAL_UNVERIFIED',
+                    'recordCount': rows.count, 'actualUpstreamSchemaProven': False,
+                    'upstreamCollectionComplete': False}
+        paging = records.fields['pagination']
         if not mapping(paging) or paging.extra or set(paging.fields) != set(CHILDREN['pagination']):
             raise ResponseValidationError('PAGINATION_COMPLETENESS_UNKNOWN')
         values = {key: scalar(value) for key, value in paging.fields.items()}

@@ -125,11 +125,17 @@ class BoundaryTests(unittest.TestCase):
         self.assertEqual(result['stopReason'], 'CASE_ID_MISMATCH_OR_AMBIGUOUS')
         self.assertEqual(len(session.calls), 2)
 
-    def test_short_page_without_totals_is_unknown(self):
-        data = payloads(); del data[0]['data']['playedRecords']['pagination']
+    def test_legacy_page_without_pagination_matches_existing_reader(self):
+        data = payloads()
+        data[0]['data']['playedRecords']['scoreInfo'] = [{} for _ in range(627)]
+        del data[0]['data']['playedRecords']['pagination']
         result, session, _ = self.run_case([Response(v) for v in data])
-        self.assertEqual(result['stopReason'], 'PAGINATION_COMPLETENESS_UNKNOWN')
-        self.assertEqual(len(session.calls), 1)
+        self.assertIsNone(result['stopReason'])
+        self.assertEqual(len(session.calls), 4)
+        self.assertTrue(result['inputSetValidated'])
+        self.assertEqual(result['requests'][0]['pagination'], 'LEGACY_FIRST_PAGE_TOTAL_UNVERIFIED')
+        self.assertIs(result['requests'][0]['upstreamCollectionComplete'], False)
+        self.assertEqual(result['candidateStatus'], 'AWAITING_ISOLATED_SOURCE_VALIDATION')
 
     def test_unknown_pagination_alias_is_not_guessed(self):
         data = payloads(); paging = data[0]['data']['playedRecords']['pagination']; paging['totalCount'] = paging.pop('total')
