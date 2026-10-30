@@ -5,6 +5,7 @@ import type { RecommendationGoalPreview } from '~/types/recommendation-tool';
 const props = defineProps<{token:string;songId:number;difficultyType:number}>();
 const {t,locale} = useI18n(), localePath = useLocalePath(), apiFetch = useViewerApiFetch();
 const account = useState<{id:number}|null>('account-user',()=>null), bindingGeneration = useState('account-binding-generation',()=>0);
+const homeGeneration = useState('account-home-generation',()=>0);
 const dialog = ref<HTMLDialogElement|null>(null), preview = ref<RecommendationGoalPreview|null>(null), selected = ref<GoalType|null>(null);
 const busy = ref(false), failed = ref(false), stale = ref(false), saved = ref(false), invalid = ref(false);
 let generation=0, controller:AbortController|null=null, focus:HTMLElement|null=null;
@@ -32,21 +33,21 @@ async function confirm(){
   try {
     const result=await apiFetch<{profileId:string}>('/api/account/growth/goal',{method:'POST',signal:controller.signal,body:{profileId:p.profileId,expectedActiveGoalId:p.activeGoal?.id||null,songId:p.songId,difficultyType:p.difficultyType,goalType:selected.value,scoreRevision:p.scoreRevision,source:'ordinary-recommendation',recommendationToken:props.token}});
     if(request!==generation||result.profileId!==p.profileId)return;
-    saved.value=true;close();
+    saved.value=true;close();homeGeneration.value++;
   }catch(error){if(request===generation){close();preview.value=null;stale.value=true;invalid.value=true;}}
   finally{if(request===generation){busy.value=false;controller=null;}}
 }
 </script>
 <template>
   <div class="recommendation-goal-action">
-    <template v-if="saved"><span role="status">{{ copy.done }}</span> <NuxtLink :to="localePath('/#growth-title')">{{ copy.view }}</NuxtLink></template>
+    <template v-if="saved"><span role="status">{{ copy.done }}</span> <NuxtLink :to="localePath('/my/growth')">{{ copy.view }}</NuxtLink></template>
     <button v-else data-song-action :disabled="busy||invalid" :aria-busy="busy" @click="open">{{ copy.open }}</button>
     <p v-if="stale" role="alert">{{ copy.refresh }}</p><p v-else-if="failed" role="alert">{{ t('home.goal.error') }}</p>
     <dialog :ref="element => dialog = element as HTMLDialogElement | null" class="goal-dialog" @cancel.prevent="close" @close="focus?.focus()" :aria-label="t('home.goal.question')">
       <template v-if="preview">
         <h2>{{ t(same?'home.goal.selected':preview.activeGoal?'home.goal.replaceConfirm':'home.goal.question') }}</h2>
         <strong>{{ preview.title }}</strong><p>{{ t(difficultyLabelKey(preview.difficultyType)) }} · {{ preview.starLevel }}★</p>
-        <template v-if="same"><p>{{ t(`home.goal.types.${preview.activeGoal!.goalType}`) }}</p><NuxtLink :to="localePath('/#growth-title')">{{ copy.view }}</NuxtLink></template>
+        <template v-if="same"><p>{{ t(`home.goal.types.${preview.activeGoal!.goalType}`) }}</p><NuxtLink :to="localePath('/my/growth')">{{ copy.view }}</NuxtLink></template>
         <template v-else>
           <p v-if="preview.activeGoal">{{ preview.activeGoal.title }} · {{ t(`home.goal.types.${preview.activeGoal.goalType}`) }}</p>
           <fieldset v-if="preview.goalOptions.length" :disabled="busy" :aria-label="t('home.goal.question')"><label v-for="option in preview.goalOptions" :key="option"><input v-model="selected" type="radio" :name="`goal-${songId}-${difficultyType}`" :value="option">{{ t(`home.goal.types.${option}`) }}</label></fieldset>

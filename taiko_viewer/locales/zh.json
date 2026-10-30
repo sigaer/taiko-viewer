@@ -1,4 +1,10 @@
 {
+  "accountSyncNext": {
+    "title": "接下来",
+    "recommend": "获取推荐并设置目标",
+    "success": "本次同步操作已完成。",
+    "partial": "部分目标未完成，请核对同步结果。下方入口展示当前可用的数据。"
+  },
   "growthProfileEntry": "账号与绑定",
   "site": {
     "title": "Sakura Taiko Viewer",

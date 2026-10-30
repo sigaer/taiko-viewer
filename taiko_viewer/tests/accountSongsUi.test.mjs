@@ -1,3 +1,4 @@
+import {useAccountDataRefresh} from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ref,reactive,watch,nextTick} from 'vue';
@@ -6,13 +7,15 @@ import ts from 'typescript';
 import {component,mount} from './fixtures/batch2ComponentHarness.mjs';
 const settle=async()=>{for(let i=0;i<12;i++)await nextTick();};
 async function fixture(fn){
- const keys=['useState','useI18n','useLocalePath','useViewerApiFetch','useViewerSeo','definePageMeta','useAsyncData','useAccountRequestGuard','__batch2Messages'];const before=new Map(keys.map(k=>[k,globalThis[k]]));
- const states=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]),pending=[],messages=[],emits=[];
+ const keys=['useState','useI18n','useLocalePath','useViewerApiFetch','useViewerSeo','definePageMeta','useAsyncData','useAccountRequestGuard','__batch2Messages','useAccountDataRefresh'];const before=new Map(keys.map(k=>[k,globalThis[k]]));
+ const states=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]),pending=[],messages=[],emits=[],readCalls=[],readRequests=[],held=new Set();
  let confirmResolve,failRead=false,failCatalog=false,current={id:1,taikoId:'synthetic-A',isManual:false,source:'wahlap'};
  const row={songNo:1455,level:4,title:'Synthetic',titleJp:'Synthetic',highScore:980000,bestScoreRank:5,goodCnt:700,okCnt:7,ngCnt:1,poundCnt:25,stageCnt:12,clearCnt:10,fullComboCnt:3,dondafulComboCnt:0,comboCnt:700,isLocked:false};
- Object.assign(globalThis,{useState:(k,init)=>{if(!states.has(k))states.set(k,ref(init?.()));return states.get(k);},useI18n:()=>({t:k=>k,locale:ref('zh')}),useLocalePath:()=>x=>x,useViewerSeo:()=>{},definePageMeta:()=>{},__batch2Messages:{ElMessage:{success:m=>messages.push(['success',m]),error:m=>messages.push(['error',m])},ElMessageBox:{confirm:()=>new Promise(resolve=>{confirmResolve=resolve;})}}});
+ Object.assign(globalThis,{useAccountDataRefresh,useState:(k,init)=>{if(!states.has(k))states.set(k,ref(init?.()));return states.get(k);},useI18n:()=>({t:k=>k,locale:ref('zh')}),useLocalePath:()=>x=>x,useViewerSeo:()=>{},definePageMeta:()=>{},__batch2Messages:{ElMessage:{success:m=>messages.push(['success',m]),error:m=>messages.push(['error',m])},ElMessageBox:{confirm:()=>new Promise(resolve=>{confirmResolve=resolve;})}}});
  globalThis.useViewerApiFetch=()=>async(path,options={})=>{
   if(options.method)return new Promise((resolve,reject)=>pending.push({path,options,resolve,reject}));
+  readCalls.push(path);
+  if(held.has(path))return new Promise((resolve,reject)=>readRequests.push({path,options,resolve,reject}));
   if(path==='/api/account/bindings')return {bindings:[current],currentBinding:current};
   if(path==='/api/content/songs'){if(failCatalog)throw {statusCode:503,data:{message:'Synthetic catalog failure'}};return {songs:[{id:1455,song_name:'Synthetic',level_4:10}]};}
   if(failRead)throw {statusCode:503,data:{message:'Synthetic scores failure'}};
@@ -28,7 +31,7 @@ async function fixture(fn){
  const raw=(await readFile(new URL('../composables/useAccountRequestGuard.ts',import.meta.url),'utf8')).replace('"vue"',JSON.stringify(new URL('../node_modules/vue/dist/vue.runtime.esm-bundler.js',import.meta.url).href));
  globalThis.useAccountRequestGuard=(await import('data:text/javascript,'+encodeURIComponent(ts.transpileModule(raw,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText))).useAccountRequestGuard;
  let app;
- try{await fn({mount:async(path,props)=>{app=await mount(await component(path),props);return app.model;},close:()=>{app?.close();app=null;},states,pending,messages,emits,row,confirm:()=>confirmResolve(),binding:b=>{current=b;},fail:value=>{failRead=value;},catalogFail:value=>{failCatalog=value;}});}
+ try{await fn({mount:async(path,props)=>{app=await mount(await component(path),props);return app.model;},close:()=>{app?.close();app=null;},states,pending,messages,emits,row,readCalls,readRequests,held,deactivate:()=>app.deactivate(),activate:()=>app.activate(),confirm:()=>confirmResolve(),binding:b=>{current=b;},fail:value=>{failRead=value;},catalogFail:value=>{failCatalog=value;}});}
  finally{app?.close();for(const [key,value] of before){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}
 }
 test('actual scores page preserves rows, handles lock failure/success and suppresses stale identity completion',async()=>fixture(async({mount,pending,messages,states})=>{
@@ -99,4 +102,21 @@ test('catalog failure preserves valid scores, reports independently, retries and
  catalogFail(true);const m=await mount('pages/account/songs.vue');await settle();assert.equal(m.rows.length,1);assert.equal(m.resultReady,true);assert.match(m.catalogReadError,/Synthetic catalog failure/);assert.equal(m.scoreSongPath(m.rows[0]),null);
  catalogFail(false);await m.refreshCatalog();await settle();assert.equal(m.catalogReadError,'');assert.equal(m.rows.length,1);assert.deepEqual(m.scoreSongPath(m.rows[0]),{path:'/songs/1455',query:{difficulty:4}});
  catalogFail(true);await m.refreshCatalog();await settle();assert.equal(m.rows.length,1);assert.match(m.catalogReadError,/Synthetic catalog failure/);assert.ok(m.scoreSongPath(m.rows[0]),'previously read catalog membership remains usable');
+}));
+test('scores invalidate on sync generation, defer cached reads and reload the current binding once on return',async()=>fixture(async({mount,states,binding,deactivate,activate,readCalls})=>{
+ const m=await mount('pages/account/songs.vue');assert.equal(m.resultReady,true);const before=readCalls.length;
+ deactivate();states.get('account-home-generation').value++;await settle();assert.equal(m.rows.length,0);assert.equal(m.profileStatus,'idle');assert.equal(readCalls.length,before);
+ binding({id:2,taikoId:'synthetic-B',isManual:false,source:'wahlap'});states.get('account-binding-generation').value++;
+ activate();await settle();assert.equal(m.currentBinding.id,2);assert.equal(m.rows.length,1);assert.equal(m.resultReady,true);
+ const data=m.songsData;activate();await settle();assert.equal(m.songsData,data,'unchanged activation retains its current result');assert.deepEqual(readCalls.slice(before),['/api/account/bindings','/api/account/songs']);
+}));
+
+test('late scores cannot replace the refreshed current account and binding after sync',async()=>fixture(async({mount,states,held,readRequests,row})=>{
+ const m=await mount('pages/account/songs.vue');held.add('/api/account/songs');
+ const oldRun=m.refreshSongs();await settle();const old=readRequests.shift();
+ states.get('account-home-generation').value++;await settle();assert.equal(m.rows.length,0);assert.equal(readRequests.length,1);
+ readRequests.shift().resolve({currentBinding:{id:1},total:1,items:[{...row,highScore:999999}]});await settle();assert.equal(m.rows[0].highScore,999999);
+ old.resolve({currentBinding:{id:1},total:1,items:[{...row,highScore:1}]});await oldRun;assert.equal(m.rows[0].highScore,999999);
+ const later=m.refreshSongs();await settle();const stale=readRequests.shift();states.get('account-user').value={id:2};await settle();
+ readRequests.shift().resolve({currentBinding:{id:1},total:1,items:[{...row,highScore:888888}]});await settle();stale.reject(Error('old account'));await later;assert.equal(m.rows[0].highScore,888888);assert.equal(m.readError,'');
 }));

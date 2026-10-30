@@ -1,3 +1,4 @@
+import {useAccountDataRefresh} from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ref,computed,reactive,watch,nextTick,onUnmounted,onBeforeUnmount} from 'vue';
@@ -10,10 +11,10 @@ import {finalBrowserInput} from './fixtures/passportFinalUx.ts';
 const settle=async()=>{for(let i=0;i<20;i++)await nextTick();};
 const source=process.env.VIEWER_GROWTH_BASELINE ? pathToFileURL(process.env.VIEWER_GROWTH_BASELINE+'/') : undefined;
 async function fixture(page,fn){
- const globals=['ref','computed','watch','onUnmounted','onBeforeUnmount','useState','useI18n','useLocalePath','useRoute','useRouter','navigateTo','useAccountState','useViewerApiFetch','useViewerSeo','definePageMeta','useAsyncData','useAccountRequestGuard','$fetch'];const saved=new Map(globals.map(k=>[k,globalThis[k]]));
+ const globals=['ref','computed','watch','onUnmounted','onBeforeUnmount','useState','useI18n','useLocalePath','useRoute','useRouter','navigateTo','useAccountState','useViewerApiFetch','useViewerSeo','definePageMeta','useAsyncData','useAccountRequestGuard','useAccountDataRefresh','$fetch'];const saved=new Map(globals.map(k=>[k,globalThis[k]]));
  const states=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]),route=reactive({path:'/my/'+page,query:{}}),requests=[];let app,initial=true;
  const payload=page==='growth'?buildSkillPassport(finalBrowserInput('normal')):{profileId:'binding-A',week:{from:'2026-10-19',to:'2026-10-25'},coverage:{scoreHistoryState:'complete'},theme:{type:'score-breakthrough',confidence:'high'},measurementChange:{compatible:false,reason:'insufficient'},totals:{distinctCharts:7,pb:4,fc:2,df:1,rankUpgrade:2,completedGoals:1},highlights:[],currentNextAction:null};
- Object.assign(globalThis,{ref,computed,watch,onUnmounted,onBeforeUnmount,useState:(k,init)=>{if(!states.has(k))states.set(k,ref(init?.()));return states.get(k);},useI18n:()=>({t:k=>k,locale:ref('zh')}),useLocalePath:()=>x=>x,useRoute:()=>route,useRouter:()=>({currentRoute:ref(route)}),navigateTo:async x=>{route.query=x.query;},useAccountState:()=>({accountUser:states.get('account-user'),fetchCurrentUser:async()=>{}}),useViewerSeo:()=>{},definePageMeta:()=>{}});
+ Object.assign(globalThis,{useAccountDataRefresh,ref,computed,watch,onUnmounted,onBeforeUnmount,useState:(k,init)=>{if(!states.has(k))states.set(k,ref(init?.()));return states.get(k);},useI18n:()=>({t:k=>k,locale:ref('zh')}),useLocalePath:()=>x=>x,useRoute:()=>route,useRouter:()=>({currentRoute:ref(route)}),navigateTo:async x=>{route.query=x.query;},useAccountState:()=>({accountUser:states.get('account-user'),fetchCurrentUser:async()=>{}}),useViewerSeo:()=>{},definePageMeta:()=>{}});
  const module=async name=>{const raw=await readFile(new URL('../composables/'+name+'.ts',import.meta.url),'utf8');const code=ts.transpileModule(raw,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText.replace(/from "vue"/, 'from '+JSON.stringify(new URL('../node_modules/vue/dist/vue.runtime.esm-bundler.js',import.meta.url).href));return import('data:text/javascript,'+encodeURIComponent(code));};
  // Actual API wrapper, transport only is synthetic. Binding mutation notification
  // is tested without touching a server, account, binding or score store.
@@ -26,7 +27,7 @@ async function fixture(page,fn){
   const refresh=async()=>{const token=++generation;pending.value=true;try{const result=await load();if(token===generation)data.value=result;}finally{if(token===generation)pending.value=false;}};
   if(opts.watch)watch(opts.watch,()=>void refresh());await refresh();return {data,pending,refresh,clear};
  };
- try{app=await mount(await component('pages/my/'+page+'.vue',source));await fn({m:app.model,states,route,requests,payload,close:()=>{app.close();app=null;},api:globalThis.useViewerApiFetch()});}
+ try{app=await mount(await component('pages/my/'+page+'.vue',source));await fn({m:app.model,states,route,requests,payload,close:()=>{app.close();app=null;},deactivate:()=>app.deactivate(),activate:()=>app.activate(),api:globalThis.useViewerApiFetch()});}
  finally{app?.close();for(const[k,v]of saved){if(v===undefined)delete globalThis[k];else globalThis[k]=v;}}
 }
 test('weekly actual page refetches after actual API binding invalidation; late success/failure cannot replace current identity',async()=>fixture('weekly',async({m,states,requests,api,payload})=>{
@@ -62,7 +63,7 @@ if(!source){
 }
 if(!source)test('actual SVG chart retains frozen runs across metadata revisions, null gaps, point stepping and dimension reset',async()=>{
  const keys=['useI18n','ref','computed','watch','onBeforeUnmount'];const saved=new Map(keys.map(k=>[k,globalThis[k]]));let app;
- Object.assign(globalThis,{ref,computed,watch,onBeforeUnmount,useI18n:()=>({t:k=>k,locale:ref('zh')})});
+ Object.assign(globalThis,{useAccountDataRefresh,ref,computed,watch,onBeforeUnmount,useI18n:()=>({t:k=>k,locale:ref('zh')})});
  try{
   const payload=buildSkillPassport(finalBrowserInput('singletons'));const props=reactive({segments:payload.segments,dimension:'rating',label:'Rating long label',from:'2026-07-11',to:'2026-10-08'});
   app=await mount(await component('components/PassportMetricChart.vue'),props);const m=app.model;
@@ -72,3 +73,13 @@ if(!source)test('actual SVG chart retains frozen runs across metadata revisions,
   props.segments=[];await settle();assert.equal(m.points.length,0);assert.equal(m.selected,undefined);
  }finally{app?.close();for(const[k,v]of saved){if(v===undefined)delete globalThis[k];else globalThis[k]=v;}}
 });
+test('growth uses sync generation while cached, rejects old reads, coalesces changes and shows a newly created goal on return',async()=>fixture('growth',async({m,states,requests,payload,deactivate,activate,api})=>{
+ const oldRun=m.retry();await settle();const old=requests.shift();deactivate();
+ await api('/api/account/sync',{method:'POST'});await api('/api/account/sync',{method:'POST'});await settle();
+ assert.equal(m.passport,null);assert.equal(requests.length,0,'inactive page must not fetch');
+ old.resolve({...payload,profileId:'stale-before-sync'});await oldRun;assert.equal(m.passport,null);
+ activate();await settle();assert.equal(requests.length,1);
+ const goal={id:'new-goal',title:'New goal',songId:1455,difficultyType:5,goalType:'fc'};
+ requests.shift().resolve({...payload,profileId:'after-sync',activeGoal:goal});await settle();assert.equal(m.passport.profileId,'after-sync');assert.equal(m.passport.activeGoal.id,'new-goal');
+ activate();await settle();assert.equal(requests.length,0);
+}));

@@ -65,6 +65,7 @@ type SyncOverviewPayload = {
 
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
+const localePath = useLocalePath();
 const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
@@ -87,6 +88,7 @@ useViewerSeo(() => ({
 
 const selectedTargetIds = ref<string[]>([]);
 const submitting = ref(false);
+const completion = ref<{ status: "success" | "partial" | "failed"; logId?: number } | null>(null);
 const importingKinoko = ref(false);
 const importingKinokoHistory = ref(false);
 const kinokoApiKey = ref("");
@@ -247,12 +249,28 @@ const { data, pending, error: readError, refresh } = useForumResource<SyncOvervi
 );
 const actionScope = useAccountPageScope(() => {
   if (scoreTokenDialogOwner) { scoreTokenDialogOwner = null; ElMessageBox.close(); }
+  completion.value = null;
   selectedTargetIds.value = []; submitting.value = false; importingKinoko.value = false;
   importingKinokoHistory.value = false; kinokoApiKey.value = ""; scoreTokenBusy.value = false;
   issuedScoreToken.value = ""; startCooldown(0);
 }, true);
 
 const overview = computed(() => data.value);
+const completedStatus = computed(() => {
+  const current = overview.value;
+  if (!current?.currentBinding || !current.hasUserdata) return null;
+  const log = current.lastSync;
+  if (completion.value) {
+    if (completion.value.status === "failed") return null;
+    if (completion.value.logId !== undefined &&
+      (log?.id !== completion.value.logId || log.taikoId !== current.currentBinding.taikoId)) return null;
+    return completion.value.status;
+  }
+  return log?.taikoId === current.currentBinding.taikoId && log.results.some(result => result.ok) &&
+    ["success", "partial"].includes(log.status) ? log.status : null;
+});
+const showNextSteps = computed(() => Boolean(accountUser.value && completedStatus.value) &&
+  !pending.value && !readError.value && !submitting.value && !importingKinoko.value && !importingKinokoHistory.value);
 const compressionRatio = computed(() => {
   const log = overview.value?.lastSync;
   if (!log?.originalBytes) return "";
@@ -327,6 +345,7 @@ const submitSync = async () => {
     return;
   }
   submitting.value = true;
+  completion.value = { status: "failed" };
   try {
     const response = await apiFetch<{ log: SyncLog | null }>("/api/account/sync", {
       method: "POST",
@@ -335,6 +354,8 @@ const submitSync = async () => {
       }
     });
     if (!actionScope.current(ticket)) return;
+    const status = response?.log?.status;
+    completion.value = { status: status === "success" || status === "partial" ? status : "failed", logId: response?.log?.id };
     const feedback = buildSyncFeedback(response?.log);
     if (feedback.level === "success") {
       ElMessage.success(feedback.message);
@@ -346,6 +367,7 @@ const submitSync = async () => {
     await refresh();
   } catch (error: any) {
     if (!actionScope.current(ticket)) return;
+    completion.value = { status: "failed" };
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
@@ -362,6 +384,7 @@ const importFromKinoko = async () => {
     return;
   }
   importingKinoko.value = true;
+  completion.value = { status: "failed" };
   try {
     const response = await apiFetch<{
       partial?: boolean; message?: string;
@@ -374,6 +397,7 @@ const importFromKinoko = async () => {
     });
     if (!actionScope.current(ticket)) return;
     kinokoApiKey.value = "";
+    completion.value = { status: response.partial ? "partial" : "success" };
     if (response.partial) ElMessage.warning(response.message);
     else ElMessage.success(
       copy.value.kinokoDone
@@ -384,6 +408,7 @@ const importFromKinoko = async () => {
     await refresh();
   } catch (error: any) {
     if (!actionScope.current(ticket)) return;
+    completion.value = { status: "failed" };
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
@@ -400,6 +425,7 @@ const importHistoryFromKinoko = async () => {
     return;
   }
   importingKinokoHistory.value = true;
+  completion.value = { status: "failed" };
   try {
     const response = await apiFetch<{
       partial?: boolean; message?: string;
@@ -414,6 +440,7 @@ const importHistoryFromKinoko = async () => {
     });
     if (!actionScope.current(ticket)) return;
     kinokoApiKey.value = "";
+    completion.value = { status: response.partial ? "partial" : "success" };
     if (response.partial) ElMessage.warning(response.message);
     else ElMessage.success(
       copy.value.kinokoHistoryDone
@@ -424,6 +451,7 @@ const importHistoryFromKinoko = async () => {
     await refresh();
   } catch (error: any) {
     if (!actionScope.current(ticket)) return;
+    completion.value = { status: "failed" };
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.syncFailed);
     await refresh();
   } finally {
@@ -665,6 +693,16 @@ const copyIssuedScoreToken = async () => {
         </el-button>
       </el-card>
 
+      <section v-if="showNextSteps" class="sync-next panel-card" aria-labelledby="sync-next-title">
+        <h2 id="sync-next-title">{{ t('accountSyncNext.title') }}</h2>
+        <p role="status">{{ t(completedStatus === 'partial' ? 'accountSyncNext.partial' : 'accountSyncNext.success') }}</p>
+        <nav :aria-label="t('accountSyncNext.title')">
+          <NuxtLink :to="localePath('/account/songs')">{{ t('account.songs') }}</NuxtLink>
+          <NuxtLink :to="localePath('/my/growth')">{{ t('passport.title') }}</NuxtLink>
+          <NuxtLink :to="localePath('/tools/recommend')">{{ t('accountSyncNext.recommend') }}</NuxtLink>
+        </nav>
+      </section>
+
       <el-card class="panel-card">
         <div class="section-title">
           <h3>{{ copy.lastSync }}</h3>
@@ -679,7 +717,7 @@ const copyIssuedScoreToken = async () => {
             </div>
             <div>
               <span>{{ copy.overallStatus }}</span>
-              <strong>{{ overview.lastSync.status }}</strong>
+              <strong>{{ buildSyncFeedback(overview.lastSync).message }}</strong>
             </div>
             <div>
               <span>{{ copy.compressedSize }}</span>
@@ -711,6 +749,13 @@ const copyIssuedScoreToken = async () => {
 </template>
 
 <style scoped>
+.sync-next { min-width:0; padding:20px; overflow-wrap:anywhere; }
+.sync-next h2 { margin:0; font-size:18px; }
+.sync-next p { color:var(--viewer-text-muted); line-height:1.6; }
+.sync-next nav { display:flex; flex-wrap:wrap; gap:12px; }
+.sync-next a { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border:1px solid var(--viewer-border); border-radius:10px; color:var(--viewer-link); text-decoration:none; }
+.sync-next a:focus-visible { outline:3px solid var(--viewer-link); outline-offset:3px; }
+
 .sync-page {
   display: grid;
   gap: 18px;

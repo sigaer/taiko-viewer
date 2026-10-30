@@ -7,7 +7,7 @@ import {ref,reactive,computed,watch,onBeforeUnmount,nextTick,createRenderer,h} f
 
 test('actual confirmation component drops late preview/save across identities and requires a fresh intent',async()=>{
  const keys=['useState','useI18n','useLocalePath','useViewerApiFetch','ref','computed','watch','onBeforeUnmount','nextTick','document'],before=new Map(keys.map(k=>[k,globalThis[k]]));
- const state=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]),pending=[];
+ const state=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)],['account-home-generation',ref(0)]]),pending=[];
  Object.assign(globalThis,{ref,computed,watch,onBeforeUnmount,nextTick,useState:(key)=>state.get(key),useI18n:()=>({t:x=>x,locale:ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>((path,options)=>new Promise((resolve,reject)=>pending.push({path,options,resolve,reject}))),document:{activeElement:{focus(){}}}});
  const renderer=createRenderer({createElement:()=>({}),insert:()=>{},remove:()=>{},setElementText:()=>{},patchProp:()=>{},parentNode:()=>null,nextSibling:()=>null,createText:()=>({}),createComment:()=>({}),setText:()=>{},setComment:()=>{}});
  let app;
@@ -25,6 +25,9 @@ test('actual confirmation component drops late preview/save across identities an
   props.token='fresh-intent-A';await nextTick();request=model.open();pending.shift().resolve(preview);await request;assert.equal(shown,1);model.selected='score-pb';
   request=model.confirm();old=pending.shift();await model.confirm();assert.equal(pending.length,0,'double click issues one save');assert.equal(old.options.body.source,'ordinary-recommendation');assert.equal(old.options.body.difficultyType,5);
   state.get('account-binding-generation').value++;assert.equal(old.options.signal.aborted,true);old.resolve({profileId:'1'});await request;assert.equal(model.saved,false);assert.equal(model.preview,null);assert.equal(model.busy,false);
+  props.token='saved-intent';await nextTick();request=model.open();pending.shift().resolve(preview);await request;model.selected='score-pb';
+  request=model.confirm();pending.shift().resolve({profileId:'1'});await request;assert.equal(model.saved,true);assert.equal(state.get('account-home-generation').value,1);
+  assert.equal((source.match(/localePath\('\/my\/growth'\)/g)||[]).length,2,'saved and existing-goal links both open the growth page');
   props.token='fresh-again';await nextTick();request=model.open();old=pending.shift();app.unmount();app=null;old.reject(Error('late after unmount'));await request;assert.equal(model.failed,false);
  }finally{app?.unmount();for(const [key,value] of before){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}}
 });

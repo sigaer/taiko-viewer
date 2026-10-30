@@ -69,3 +69,27 @@ test('inactive auth form cannot start a queued submission',async()=>{
 test('verified existing session with navigation failure continues without password POST',async()=>{
  let posts=0,nav=0;const h=await page('login',async()=>{posts++;return {user:{id:1}};},{session:async()=>({id:1,username:'synthetic'}),navigate:()=>{if(++nav===1)throw Error('navigation');}},['retryAuth']);await h.retryAuth();assert.ok(h.completionError.value);await h.submit();assert.equal(posts,0);assert.equal(nav,2);
 });
+test('sync next actions require refreshed current-binding data and successful/partial business results',async()=>{
+ const log={id:1,taikoId:'A',status:'success',results:[{ok:true,label:'one'}]};
+ const data={currentBinding:{id:1,taikoId:'A'},hasUserdata:true,lastSync:log,targets:[],cooldownRemainingSeconds:0};
+ const refreshed=deferred();
+ const h=await accountPage('pages/account/sync.vue',['showNextSteps','submitSync','selectedTargetIds'],async()=>({log}),{user:{id:1},data,refresh:()=>refreshed.promise});
+ assert.equal(h.showNextSteps.value,true);
+ for(const status of ['partial','failed','running']){h.resource.data.value={...data,lastSync:{...log,status}};assert.equal(h.showNextSteps.value,status==='partial');}
+ for(const changed of [{hasUserdata:false},{currentBinding:{id:2,taikoId:'B'}},{lastSync:null}]){h.resource.data.value={...data,...changed};assert.equal(h.showNextSteps.value,false);}
+ h.resource.data.value=data;h.resource.pending.value=true;assert.equal(h.showNextSteps.value,false);h.resource.pending.value=false;
+ h.resource.error.value='refresh failed';assert.equal(h.showNextSteps.value,false);h.resource.error.value='';
+ h.selectedTargetIds.value=['one'];const op=h.submitSync();await settle();assert.equal(h.showNextSteps.value,false,'actions wait for refreshed results');
+ h.resource.data.value={...data,lastSync:{...log,status:'partial'}};refreshed.resolve();await op;assert.equal(h.showNextSteps.value,true);
+ h.user.value={id:2};h.resource.data.value=null;assert.equal(h.showNextSteps.value,false);
+});
+test('failed or missing sync response cannot reuse earlier successful navigation; imports use their own completion',async()=>{
+ const log={id:1,taikoId:'A',status:'success',results:[{ok:true}]};let response={log};let fail=false;
+ const data={currentBinding:{id:1,taikoId:'A'},hasUserdata:true,lastSync:log,targets:[],cooldownRemainingSeconds:0};
+ const h=await accountPage('pages/account/sync.vue',['showNextSteps','completedStatus','submitSync','selectedTargetIds','importFromKinoko','kinokoApiKey'],async()=>{if(fail)throw Error('failed');return response;},{user:{id:1},data});
+ h.selectedTargetIds.value=['one'];
+ for(const next of [{log:{...log,status:'failed'}},{log:null},{log:{...log,id:2}}]){response=next;await h.submitSync();assert.equal(h.showNextSteps.value,false);}
+ fail=true;await h.submitSync();assert.equal(h.showNextSteps.value,false);fail=false;
+ h.resource.data.value={...data,lastSync:null};h.kinokoApiKey.value='synthetic';response={partial:true,message:'partial import',summary:{added:1,updated:0,unchanged:0}};
+ await h.importFromKinoko();assert.equal(h.showNextSteps.value,true);assert.equal(h.completedStatus.value,'partial');
+});

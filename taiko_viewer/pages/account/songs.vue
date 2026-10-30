@@ -11,7 +11,8 @@ const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const accountUser = useState<{ id: number } | null>("account-user", () => null);
 const bindingGeneration = useState("account-binding-generation", () => 0);
-const identity = computed(() => `${accountUser.value?.id ?? "guest"}:${bindingGeneration.value}`);
+const homeGeneration = useState("account-home-generation", () => 0);
+const identity = computed(() => `${accountUser.value?.id ?? "guest"}:${bindingGeneration.value}:${homeGeneration.value}`);
 const guard = useAccountRequestGuard();
 const bindingSwitchGuard = useAccountRequestGuard(false);
 const importVisible = ref(false);
@@ -196,7 +197,7 @@ const scoreSongPath = (row: SongRow) => row.isCustom || !catalogSongIds.value.ha
 });
 
 const { data: profileData, error: profileError, status: profileStatus, refresh: refreshProfile, clear: clearProfile } = await useAsyncData<ProfilePayload>(
-  "account-song-profile",
+  `account-song-profile:${identity.value}`,
   async () => { const context = identity.value; return { ...await apiFetch<ProfilePayload>("/api/account/bindings"), identity: context }; },
   { default: () => ({ bindings: [], currentBinding: null }) }
 );
@@ -225,9 +226,8 @@ const loadSongs = async () => {
   }
 };
 
-const { data: songsData, error: songsError, status: songsStatus, refresh: refreshSongs, clear: clearSongs } = await useAsyncData<SongsPayload>("account-songs", loadSongs, {
-  default: () => ({ currentBinding: null as unknown as BindingSummary, total: 0, page: 1, pageSize: 25, items: [] }),
-  watch: [page, pageSize, keyword, levelFilter]
+const { data: songsData, error: songsError, status: songsStatus, refresh: refreshSongs, clear: clearSongs } = await useAsyncData<SongsPayload>(`account-songs:${identity.value}`, loadSongs, {
+  default: () => ({ currentBinding: null as unknown as BindingSummary, total: 0, page: 1, pageSize: 25, items: [] })
 });
 
 const profileReady = computed(() => profileData.value?.identity === identity.value);
@@ -249,17 +249,21 @@ watch([profileError, songsError], async () => {
   if (guard.current(request)) readError.value = message;
 }, { immediate: true });
 const retryRead = async () => {
+  const context = identity.value;
   await refreshProfile();
-  if (!profileError.value) await refreshSongs();
+  if (context === identity.value && profileReady.value && !profileError.value) await refreshSongs();
 };
 watch(() => accountUser.value?.id, () => { switchingBinding.value = false; }, { flush: "sync" });
-watch(identity, async () => {
+watch([page, pageSize, keyword, levelFilter], () => {
+  if (profileReady.value && accountUser.value) void refreshSongs();
+});
+useAccountDataRefresh(identity, () => {
+  guard.invalidate();
   editorVisible.value = false; importVisible.value = false; editingSong.value = null; lockingKey.value = "";
   if (!accountUser.value) switchingBinding.value = false;
   clearProfile(); clearSongs(); readError.value = "";
   page.value = 1;
-  if (accountUser.value) await retryRead();
-}, { flush: "sync" });
+}, async () => { if (accountUser.value) await retryRead(); });
 const sourceLabel = computed(() => currentBinding.value?.isManual ? copy.value.manualSource : currentBinding.value?.source === "hiroba" ? "ドンだーひろば" : "华立 / Wahlap");
 const sourceHint = computed(() => locale.value === "ja"
   ? currentBinding.value?.isManual ? "手動入力の成績。編集・削除できます。" : "同期された成績。ロックすると今後の更新で上書きされません。"
@@ -291,8 +295,6 @@ const changeBinding = async (bindingId: number) => {
     });
     if (!bindingSwitchGuard.current(request)) return;
     ElMessage.success(copy.value.switched);
-    page.value = 1;
-    await retryRead();
   } catch (error: any) {
     if (bindingSwitchGuard.current(request)) ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.switchFailed);
   } finally {
