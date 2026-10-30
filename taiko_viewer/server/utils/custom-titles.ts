@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { RowDataPacket } from "mysql2/promise";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
-import { getTitlesPageContent } from "~/server/services/content/titles";
+import { getOfficialTitlesContent } from "~/server/services/content/titles";
 import { getRuntimePaths } from "~/server/internal/account/shared";
 
 export const CUSTOM_TITLE_MAX_LENGTH = 30;
@@ -92,7 +92,7 @@ export const getOfficialTitleKeys = async () => {
   if (officialTitleKeysCache && officialTitleKeysCache.expiresAt > Date.now()) {
     return officialTitleKeysCache.keys;
   }
-  const payload = await getTitlesPageContent();
+  const payload = await getOfficialTitlesContent();
   const keys = new Set(
     (payload.titles || [])
       .map((item) => normalizeCustomTitleKey(item?.name))
