@@ -21,7 +21,7 @@ export async function load(path,sfc=false,inlineTemplate=false){
 }
 const renderer=Vue.createRenderer({createElement:()=>({}),insert:()=>{},remove:()=>{},setElementText:()=>{},patchProp:()=>{},parentNode:()=>null,nextSibling:()=>null,createText:()=>({}),createComment:()=>({}),setText:()=>{},setComment:()=>{}});
 export async function fixture(fn){
- const keys=[...Object.keys(Vue),'useState','useNuxtApp','useI18n','useLocalePath','useViewerSeo','definePageMeta','$fetch','useAccountAuthStatus','useAccountState','useHomeState','useViewerApiFetch','usePlayerGrowth','useRecentGrowth'];
+ const keys=[...Object.keys(Vue),'useState','useNuxtApp','useI18n','useLocalePath','useViewerSeo','definePageMeta','$fetch','useAccountAuthStatus','useAccountState','useHomeState','useViewerApiFetch','usePlayerGrowth','useRecentGrowth','useAccountDataRefresh'];
  const saved=new Map(keys.map(k=>[k,globalThis[k]]));
  const cleanup=[],states=new Map(),nuxt={vueApp:{onUnmount:fn=>cleanup.push(fn)}},apps=[],requests=[],controlled=new Set();
  const user={id:1,username:'Synthetic account A'},binding={id:1,taikoId:'synthetic-A',source:'manual'};
@@ -31,7 +31,7 @@ export async function fixture(fn){
  state('account-user',()=>user);state('account-user-loaded',()=>true);
  const payload=path=>path.endsWith('/auth/me')?{authenticated:Boolean(states.get('account-user').value),user:states.get('account-user').value}:path==='/api/account/bindings'?{bindings:[binding],currentBinding:binding}:path==='/api/account/songs'?{total:1,items:[{highScore:900000}]}:path.endsWith('/overview')?structuredClone(overview):path.endsWith('/recent')?structuredClone(recent):{};
  Object.assign(globalThis,Vue,{useState:state,useNuxtApp:()=>nuxt,useI18n:()=>({t:k=>k,locale:Vue.ref('zh')}),useLocalePath:()=>x=>x,useViewerSeo:()=>{},definePageMeta:()=>{},$fetch:(path,options={})=>controlled.has(path)||options.method?new Promise((resolve,reject)=>requests.push({path,options,resolve,reject})):Promise.resolve(payload(path))});
- for(const name of ['useAccountAuthStatus','useAccountState','useViewerApiFetch','useHomeState','usePlayerGrowth','useRecentGrowth']){const mod=await load('composables/'+name+'.ts');globalThis[name]=mod[name];}
+ for(const name of ['useAccountAuthStatus','useAccountState','useViewerApiFetch','useHomeState','usePlayerGrowth','useRecentGrowth','useAccountDataRefresh']){const mod=await load('composables/'+name+'.ts');globalThis[name]=mod[name];}
  const attach=setup=>{let model;const app=renderer.createApp({setup(){model=setup();return()=>Vue.h('div');}});app.mount({});apps.push(app);return {model,close:()=>{app.unmount();apps.splice(apps.indexOf(app),1);}};};
  const mount=(component,components={})=>{
   const app=renderer.createApp({render:()=>Vue.h(Vue.Suspense,null,{default:()=>Vue.h(component)})});

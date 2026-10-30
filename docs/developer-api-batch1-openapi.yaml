@@ -2,8 +2,8 @@
 openapi: 3.1.0
 info:
   title: Viewer Developer API — existing read APIs
-  version: 0.88.0
-  description: Compatible My Taiko personal-home feature release 0.88.0, preserving the verified rc.8 surface. API path v1 and calculation model v1 are
+  version: 0.88.1
+  description: Compatible sync, growth and goal navigation UX update 0.88.1, preserving the verified rc.8 surface. API path v1 and calculation model v1 are
     separate from Contract 1.1, which remains FREEZE_CANDIDATE (not frozen). All four endpoints
     returned HTTP 200 in sequential controlled read-only production preflight on 2026-10-18; this
     does not expand account/token authority or enable new capabilities. Examples are synthetic;

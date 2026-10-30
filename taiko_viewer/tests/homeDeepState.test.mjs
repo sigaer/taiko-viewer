@@ -157,3 +157,18 @@ test('actual home goal component preserves evaluation states and requires refres
   props.identity='2:2:true';assert.equal(m.recentCompletedGoal.value,null);assert.equal(m.busy.value,false);assert.equal(m.needsRefresh.value,false);
  }finally{globalThis.document=oldDocument;}
 }));
+test('actual My overview defers cached sync/focus reads and reloads exactly once on binding selection',async()=>fixture(async({cached,load,requests,controlled,states})=>{
+ const beforeWindow=globalThis.window,beforeDocument=globalThis.document,listeners=new Map();
+ const port={addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)};
+ globalThis.window=port;globalThis.document={...port,visibilityState:'visible'};
+ try{
+  const path='/api/account/my-taiko/overview';controlled.add(path);
+  const View=await load('components/my-taiko/Overview.vue',true);const page=cached(()=>View.setup({}, {expose(){}}));
+  assert.equal(requests.length,1);requests.shift().resolve({profile:{bindingId:'1'}});await settle();assert.equal(page.model.overview.value.profile.bindingId,'1');
+  await page.deactivate();states.get('account-home-generation').value++;listeners.get('focus')();await settle();assert.equal(requests.length,0);assert.equal(page.model.overview.value,null);
+  await page.activate();assert.equal(requests.length,1);requests.shift().resolve({profile:{bindingId:'1'}});await settle();
+  page.model.selection.value='2';const switching=page.model.switchBinding();assert.equal(requests.length,1);requests.shift().resolve({});await switching;await settle();assert.equal(requests.length,1,'selection and generation share one overview read');
+  requests.shift().resolve({profile:{bindingId:'2'}});await settle();assert.equal(page.model.overview.value.profile.bindingId,'2');
+  page.close();assert.equal(listeners.size,0);
+ }finally{if(beforeWindow===undefined)delete globalThis.window;else globalThis.window=beforeWindow;if(beforeDocument===undefined)delete globalThis.document;else globalThis.document=beforeDocument;}
+}));

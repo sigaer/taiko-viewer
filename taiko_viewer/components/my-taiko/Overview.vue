@@ -5,9 +5,10 @@ const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { accountUser } = useAccountState();
 const bindingGeneration = useState('account-binding-generation', () => 0);
+const homeGeneration = useState('account-home-generation', () => 0);
 const overview = shallowRef<MyTaikoOverview | null>(null);
 const pending = ref(false), failure = ref<number | null>(null), selection = ref('');
-let epoch = 0, controller: AbortController | undefined, switching = false, mounted = false;
+let epoch = 0, controller: AbortController | undefined, mounted = false;
 const copy = computed(() => locale.value === 'ja' ? {
  title:'マイデータ',binding:'連携 ID',refresh:'再読み込み',loading:'読み込み中…',scores:'スコア',charts:'譜面',scored:'スコアあり',cleared:'クリア確認済み',growth:'最近90日の成長',empty:'信頼できる成長記録がありません',unknown:'履歴の範囲を確認できません',partial:'一部の履歴',truncated:'履歴の読み込み上限に達しました',complete:'対象期間の履歴あり',more:'成長記録を見る',login:'ログインし直す',bind:'ID を連携',unbound:'鼓众 ID を連携してください',denied:'このデータにアクセスできません',changed:'連携が変更されました。再読み込みしてください',unavailable:'データを読み込めません。時間をおいて再試行してください',timeout:'読み込みがタイムアウトしました',observed:'確認',played:'プレイ',recommend:'おすすめツール',
  facts:{played:'プレイ', 'score-pb':'自己ベスト', 'ng-reduced':'不可減少', 'combo-improved':'コンボ更新',clear:'クリア',fc:'フルコンボ',df:'ドンダフルコンボ','rank-upgrade':'ランク更新','goal-completed':'目標達成'}
@@ -32,15 +33,16 @@ async function load(){
 }
 async function switchBinding(){
  const target=selection.value;if(!target||target===overview.value?.profile.bindingId)return;
- clear();failure.value=null;pending.value=true;switching=true;
+ clear();failure.value=null;pending.value=true;
  try{await apiFetch('/api/account/bindings/current',{method:'POST',body:{bindingId:Number(target)},retry:0,timeout:15000});}
  catch(error:any){failure.value=Number(error?.statusCode||error?.response?.status)||503;pending.value=false;return;}
- finally{switching=false;}
- await load();
 }
-function visible(){if(document.visibilityState==='hidden'){clear();pending.value=false;}else void load();}
-function focus(){void load();}
-watch([()=>accountUser.value?.id,bindingGeneration],()=>{clear();if(mounted&&!switching)void load();});
+function visible(){if(document.visibilityState==='hidden'){clear();pending.value=false;}else requestRefresh();}
+function focus(){requestRefresh();}
+const identity = computed(() => `${accountUser.value?.id}:${bindingGeneration.value}:${homeGeneration.value}`);
+const requestRefresh = useAccountDataRefresh(identity, () => { clear(); pending.value=false; }, async () => { if(mounted) await load(); });
+onActivated(()=>{mounted=true;if(!overview.value&&!pending.value&&!failure.value)requestRefresh();});
+onDeactivated(()=>{mounted=false;});
 onMounted(()=>{mounted=true;void load();document.addEventListener('visibilitychange',visible);window.addEventListener('focus',focus);});
 onBeforeUnmount(()=>{mounted=false;clear();document.removeEventListener('visibilitychange',visible);window.removeEventListener('focus',focus);});
 </script>

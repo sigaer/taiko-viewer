@@ -15,6 +15,7 @@ const localePath = useLocalePath();
 const route = useRoute();
 const apiFetch = useViewerApiFetch();
 const bindingGeneration = useState("account-binding-generation", () => 0);
+const homeGeneration = useState("account-home-generation", () => 0);
 const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
@@ -36,9 +37,9 @@ const dimensions: SkillPassportTrendDimension[] = ["rating", ...GROWTH_DIMENSION
 const requestedRange = computed(() => ranges.includes(Number(route.query.range) as SkillPassportRangeDays) ? Number(route.query.range) as SkillPassportRangeDays : 90);
 const requestedDimension = computed(() => dimensions.includes(String(route.query.dimension) as SkillPassportTrendDimension) ? String(route.query.dimension) as SkillPassportTrendDimension : "rating");
 
-const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}`);
+const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}:${homeGeneration.value}`);
 const guard = useAccountRequestGuard();
-const passportKey = `growth-passport:${accountUser.value?.id || 'guest'}:${useRouter().currentRoute.value.path}`;
+const passportKey = `growth-passport:${identity.value}:${useRouter().currentRoute.value.path}`;
 const fetchPassport = async () => {
   if (!accountUser.value) return { payload: null, error: "" };
   const context = identity.value, request = guard.capture();
@@ -46,7 +47,7 @@ const fetchPassport = async () => {
     const range = requestedRange.value;
     const userId = accountUser.value.id, generation = bindingGeneration.value;
     const payload = await apiFetch<SkillPassportResponse>("/api/account/growth/passport", { query: { range, dimension: requestedDimension.value }, retry: 0 });
-    if (accountUser.value?.id !== userId || bindingGeneration.value !== generation) return { payload: null, error: "" };
+    if (!guard.current(request) || context !== identity.value || accountUser.value?.id !== userId || bindingGeneration.value !== generation) return { payload: null, error: "" };
     if (payload.range.requestedDays !== range) throw new Error("passport-range-mismatch");
     return {
       payload,
@@ -54,17 +55,17 @@ const fetchPassport = async () => {
     };
   } catch (error) {
     const message = await resolveViewerError(error, t("passport.loadFailed"), t);
-    return guard.current(request) ? { payload: null, error: message, context } : { payload: null, error: "" };
+    return guard.current(request) && context === identity.value ? { payload: null, error: message, context } : { payload: null, error: "" };
   }
 };
 
 const { data: passportState, pending, refresh, clear } = await useAsyncData(passportKey, fetchPassport, {
   default: () => ({ payload: null, error: "" }),
-  watch: [() => accountUser.value?.id, bindingGeneration],
   dedupe: "cancel"
 });
 onUnmounted(clear);
-watch([() => accountUser.value?.id, bindingGeneration], clear, { flush: "sync" });
+const refreshCurrentData = useAccountDataRefresh(identity, () => { guard.invalidate(); clear(); }, refresh);
+if (accountUser.value && passportState.value?.context !== identity.value) refreshCurrentData();
 const passport = computed(() => selectPassportPeriod(passportState.value?.context === identity.value ? passportState.value.payload : null, requestedRange.value));
 const pageError = computed(() => passportState.value?.context === identity.value ? passportState.value.error : "");
 const selectedDimension = computed(() => requestedDimension.value === "rating" ? "accuracy_power" : requestedDimension.value);

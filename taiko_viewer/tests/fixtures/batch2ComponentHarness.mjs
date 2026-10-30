@@ -21,5 +21,5 @@ export async function mount(component,props={}){
  const app=renderer.createApp({render:()=>h(Suspense,null,{default:()=>h(component,props)})});app.mount({});
  for(let i=0;i<20;i++)await nextTick();
  const model=app._instance.subTree.suspense.activeBranch.component.setupState;
- return {model,close:()=>app.unmount()};
+ return {model,close:()=>app.unmount(),deactivate:()=>app._instance.subTree.suspense.activeBranch.component.da?.forEach(fn=>fn()),activate:()=>app._instance.subTree.suspense.activeBranch.component.a?.forEach(fn=>fn())};
 }

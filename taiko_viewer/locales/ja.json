@@ -1,4 +1,10 @@
 {
+  "accountSyncNext": {
+    "title": "次にできること",
+    "recommend": "おすすめから目標を設定",
+    "success": "同期処理が完了しました。",
+    "partial": "一部の送信先で同期が完了していません。同期結果を確認してください。以下では現在利用できるデータを表示します。"
+  },
   "growthProfileEntry": "アカウントと連携",
   "site": {
     "title": "Sakura Taiko Viewer",
