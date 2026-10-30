@@ -24,7 +24,9 @@ useViewerSeo(() => ({
   path: "/my"
 }));
 
-const linkGroups = [
+// Keep the navigation reactive to login changes and the same permissions
+// used by the sidebar. The private overview keeps its own server-side gate.
+const linkGroups = computed(() => [
   { key: 'practice', items: [
     { path: "/my/growth", label: "passport.title" },
     { path: "/my/weekly", label: "weekly.title" },
@@ -38,9 +40,12 @@ const linkGroups = [
   ] },
   { key: 'account', items: [
     { path: "/account/profile", label: "account.profile" },
-    { path: "/account/version-summary", label: "account.versionSummary" }
+    ...(accountUser.value ? [{ path: "/account/sync", label: "account.sync" }] : []),
+    ...(accountUser.value?.annualSummaryAccess
+      ? [{ path: "/account/version-summary", label: "account.versionSummary" }]
+      : [])
   ] }
-];
+]);
 </script>
 
 <template>
@@ -60,6 +65,13 @@ const linkGroups = [
     <section v-else class="my-intro">
       <h2>{{ t("page.myTaiko.readyTitle", { name: accountUser?.username }) }}</h2>
     </section>
+
+    <!-- Only accounts admitted by the existing My Taiko read-model policy
+         mount the private BFF consumer. Legacy and guest pages stay unchanged. -->
+    <MyTaikoOverview
+      v-if="accountAuthStatus === 'authenticated' && accountUser?.myTaikoReadModelAccess === true"
+      :key="accountUser.id"
+    />
 
     <div class="my-groups">
       <nav v-for="group in linkGroups" :key="group.key" class="my-links" :aria-labelledby="`my-group-${group.key}`">
