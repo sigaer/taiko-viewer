@@ -77,7 +77,7 @@ useViewerSeo(() => ({
                 <span class="rarity-badge">{{ title.rarity }}</span>
               </td>
               <td class="title-name">{{ title.name }}</td>
-              <td>{{ title.condition || "—" }}</td>
+              <td>{{ title.condition }}</td>
               <td class="song-links">
                 <template v-if="title.songIds.length">
                   <NuxtLink v-for="songId in title.songIds" :key="songId" :to="`/songs/${songId}`">
