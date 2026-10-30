@@ -10,7 +10,7 @@ import {buildSkillPassport} from '../server/services/growth-passport/composer.ts
 import {finalBrowserInput} from './fixtures/passportFinalUx.ts';
 const settle=async()=>{for(let i=0;i<20;i++)await nextTick();};
 const source=process.env.VIEWER_GROWTH_BASELINE ? pathToFileURL(process.env.VIEWER_GROWTH_BASELINE+'/') : undefined;
-async function fixture(page,fn){
+async function fixture(page,fn,onInitial){
  const globals=['ref','computed','watch','onUnmounted','onBeforeUnmount','useState','useI18n','useLocalePath','useRoute','useRouter','navigateTo','useAccountState','useViewerApiFetch','useViewerSeo','definePageMeta','useAsyncData','useAccountRequestGuard','useAccountDataRefresh','$fetch'];const saved=new Map(globals.map(k=>[k,globalThis[k]]));
  const states=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]),route=reactive({path:'/my/'+page,query:{}}),requests=[];let app,initial=true;
  const payload=page==='growth'?buildSkillPassport(finalBrowserInput('normal')):{profileId:'binding-A',week:{from:'2026-10-19',to:'2026-10-25'},coverage:{scoreHistoryState:'complete'},theme:{type:'score-breakthrough',confidence:'high'},measurementChange:{compatible:false,reason:'insufficient'},totals:{distinctCharts:7,pb:4,fc:2,df:1,rankUpgrade:2,completedGoals:1},highlights:[],currentNextAction:null};
@@ -20,7 +20,7 @@ async function fixture(page,fn){
  // is tested without touching a server, account, binding or score store.
  globalThis.useViewerApiFetch=(await module('useViewerApiFetch')).useViewerApiFetch;
  globalThis.useAccountRequestGuard=(await module('useAccountRequestGuard')).useAccountRequestGuard;
- globalThis.$fetch=async(path,options)=>{if(options?.method)return {};if(initial){initial=false;return payload;}return new Promise((resolve,reject)=>requests.push({path,options,resolve,reject}));};
+ globalThis.$fetch=async(path,options)=>{if(options?.method)return {};if(initial){initial=false;onInitial?.(states);return payload;}return new Promise((resolve,reject)=>requests.push({path,options,resolve,reject}));};
  globalThis.useAsyncData=async(key,load,opts)=>{
   const data=ref(opts.default()),pending=ref(false);let generation=0;
   const clear=()=>{generation++;data.value=opts.default();pending.value=false;};
@@ -83,3 +83,7 @@ test('growth uses sync generation while cached, rejects old reads, coalesces cha
  requests.shift().resolve({...payload,profileId:'after-sync',activeGoal:goal});await settle();assert.equal(m.passport.profileId,'after-sync');assert.equal(m.passport.activeGoal.id,'new-goal');
  activate();await settle();assert.equal(requests.length,0);
 }));
+
+test('sync during initial growth setup retries the discarded generation once',async()=>fixture('growth',async({m,requests,payload})=>{
+ assert.equal(requests.length,1);assert.equal(m.passport,null);requests.shift().resolve({...payload,profileId:'initial-current'});await settle();assert.equal(m.passport.profileId,'initial-current');assert.equal(requests.length,0);
+},states=>{states.get('account-home-generation').value++;}));

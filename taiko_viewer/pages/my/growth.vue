@@ -64,7 +64,8 @@ const { data: passportState, pending, refresh, clear } = await useAsyncData(pass
   dedupe: "cancel"
 });
 onUnmounted(clear);
-useAccountDataRefresh(identity, () => { guard.invalidate(); clear(); }, refresh);
+const refreshCurrentData = useAccountDataRefresh(identity, () => { guard.invalidate(); clear(); }, refresh);
+if (accountUser.value && passportState.value?.context !== identity.value) refreshCurrentData();
 const passport = computed(() => selectPassportPeriod(passportState.value?.context === identity.value ? passportState.value.payload : null, requestedRange.value));
 const pageError = computed(() => passportState.value?.context === identity.value ? passportState.value.error : "");
 const selectedDimension = computed(() => requestedDimension.value === "rating" ? "accuracy_power" : requestedDimension.value);

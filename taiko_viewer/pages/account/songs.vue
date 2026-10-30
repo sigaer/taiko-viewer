@@ -257,13 +257,15 @@ watch(() => accountUser.value?.id, () => { switchingBinding.value = false; }, { 
 watch([page, pageSize, keyword, levelFilter], () => {
   if (profileReady.value && accountUser.value) void refreshSongs();
 });
-useAccountDataRefresh(identity, () => {
+const refreshCurrentData = useAccountDataRefresh(identity, () => {
   guard.invalidate();
   editorVisible.value = false; importVisible.value = false; editingSong.value = null; lockingKey.value = "";
   if (!accountUser.value) switchingBinding.value = false;
   clearProfile(); clearSongs(); readError.value = "";
   page.value = 1;
 }, async () => { if (accountUser.value) await retryRead(); });
+if (accountUser.value && !profileError.value && !songsError.value &&
+  (!profileReady.value || songsData.value?.identity !== identity.value)) refreshCurrentData();
 const sourceLabel = computed(() => currentBinding.value?.isManual ? copy.value.manualSource : currentBinding.value?.source === "hiroba" ? "ドンだーひろば" : "华立 / Wahlap");
 const sourceHint = computed(() => locale.value === "ja"
   ? currentBinding.value?.isManual ? "手動入力の成績。編集・削除できます。" : "同期された成績。ロックすると今後の更新で上書きされません。"
