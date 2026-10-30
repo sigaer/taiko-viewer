@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ref,reactive} from 'vue';
+import {ref,reactive,h,onMounted,onBeforeUnmount} from 'vue';
 import {fixture,settle} from './fixtures/homeStateHarness.mjs';
 const authPath='/api/account/auth/me',recentPath='/api/account/growth/recent',ackPath=recentPath+'/ack',overviewPath='/api/account/growth/overview';
 test('actual My page rechecks prerendered guest cache and recovers the active session',async()=>fixture(async({auth,states,controlled,requests,load,attach})=>{
@@ -10,7 +10,36 @@ test('actual My page rechecks prerendered guest cache and recovers the active se
  assert.equal(requests.length,1);assert.equal(auth.accountAuthStatus.value,'loading');
  requests.shift().resolve({authenticated:true,user:{id:7,username:'Restored session'}});
  const page=await mounted.model;await settle();assert.equal(auth.accountAuthStatus.value,'authenticated');assert.equal(page.accountUser.value.id,7);
- assert.equal(page.linkGroups.flatMap(g=>g.items).length,9);assert.equal(requests.length,0);
+ assert.equal(page.linkGroups.value.flatMap(g=>g.items).length,9);assert.equal(requests.length,0);
+}));
+test('actual My navigation reacts to login, annual access grants/revocation and logout',async()=>fixture(async({auth,states,load,attach})=>{
+ const View=await load('pages/my/index.vue',true);const page=await attach(()=>View.setup({}, {expose(){}})).model;
+ const paths=()=>page.linkGroups.value.flatMap(group=>group.items.map(item=>item.path));
+ const original=['/my/growth','/my/weekly','/tools/recommend','/account/songs','/tools/b30','/tools/progress','/tools/word-cloud','/account/profile'];
+ assert.deepEqual(paths(),[...original,'/account/sync']);
+ states.get('account-user').value.annualSummaryAccess=true;
+ assert.deepEqual(paths(),[...original,'/account/sync','/account/version-summary']);
+ states.get('account-user').value.annualSummaryAccess=false;
+ assert.deepEqual(paths(),[...original,'/account/sync']);
+ auth.clearResolvedAccountUser();assert.deepEqual(paths(),original);
+ states.get('account-user').value={id:2,annualSummaryAccess:true};
+ assert.deepEqual(paths(),[...original,'/account/sync','/account/version-summary']);
+}));
+test('actual My template mounts the private overview only while authenticated and admitted, keyed by account',async()=>fixture(async({auth,states,load,mount})=>{
+ let reads=0,unmounts=0;
+ const Overview={setup(){onMounted(()=>reads++);onBeforeUnmount(()=>unmounts++);return()=>h('section');}};
+ const Link={props:['to'],setup(_,ctx){return()=>h('a',{},ctx.slots.default?.());}};
+ const View=await load('pages/my/index.vue',true,true);
+ mount(View,{MyTaikoOverview:Overview,NuxtLink:Link});await settle();
+ assert.equal(reads,0,'legacy account must not mount the private consumer');
+ for(const access of [false,undefined,'true']){
+  states.get('account-user').value.myTaikoReadModelAccess=access;await settle();assert.equal(reads,0);
+ }
+ states.get('account-user').value.myTaikoReadModelAccess=true;await settle();assert.equal(reads,1);
+ states.get('account-user').value={id:2,myTaikoReadModelAccess:true};await settle();
+ assert.equal(reads,2,'account switch must mount a fresh private consumer');assert.equal(unmounts,1);
+ states.get('account-user').value.myTaikoReadModelAccess=false;await settle();assert.equal(unmounts,2);
+ auth.clearResolvedAccountUser();await settle();assert.equal(reads,2,'guest must not mount the private consumer');
 }));
 test('actual My page joins pending auth and keeps a known authenticated cache',async()=>fixture(async({auth,controlled,requests,load,attach})=>{
  controlled.add(authPath);const View=await load('pages/my/index.vue',true);
