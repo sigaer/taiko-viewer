@@ -16,8 +16,9 @@ import {getGrowthHistory} from '../growth-history/service';
 import {createGrowthScoreEvidenceRequest} from '../growth-history/evidence';
 import {resolveGrowthHistoryRange} from '../growth-history/range';
 import {getSongCatalog} from '../content';
-import {catalog,mapCatalog,versions} from '../developer-api-v1/catalog';
+import {catalog,versions} from '../developer-api-v1/catalog';
 import {captureMyTaikoAdmission} from './admission';
+import {assertSongCatalogSource} from './catalog-consistency';
 import type {MyTaikoOverview} from '../../../types/my-taiko';
 const hash=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail=(statusCode:number,statusMessage:string)=>createError({statusCode,statusMessage});
@@ -49,7 +50,7 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
    try{
     const sourceCatalog=await catalog();
     const profile=await getAccountProfile(user.id),snapshot=await readGoalSnapshot(binding.taiko_id),legacy=await getSongCatalog();
-    if(hash(mapCatalog(legacy,sourceCatalog.revision))!==hash({songs:sourceCatalog.songs,charts:sourceCatalog.charts}))throw fail(409,'catalog-source-mismatch');
+    assertSongCatalogSource(legacy,sourceCatalog);
     if(!Array.isArray(snapshot.current.songs)||snapshot.current.songs.length>20000)throw fail(503,'bounded-read-required');
     const source=typeof snapshot.current._meta?.source==='string'?snapshot.current._meta.source:null;
     const authoritySource=source==='manual-score'?'manual':source;

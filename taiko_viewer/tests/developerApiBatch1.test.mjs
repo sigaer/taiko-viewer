@@ -72,3 +72,26 @@ test('analysis subprocess admission is bounded and memory-limited',()=>{
  assert.equal(activeDeveloperAnalyses(),0);
  const next=acquireDeveloperAnalysisSlot();next();
 });
+test('My Taiko source check accepts a populated alias catalog but still rejects real song-source drift',async()=>{
+ const {mkdtemp,writeFile,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path'),{createRequire}=await import('node:module'),{pathToFileURL}=await import('node:url'),{createHash}=await import('node:crypto');
+ const ts=(await import('typescript')).default,require=createRequire(import.meta.url),root=new URL('../',import.meta.url),saved=globalThis.useRuntimeConfig;
+ const dir=await mkdtemp(join(process.env.QA_RUN_TMPDIR||tmpdir(),'my-catalog-'));
+ const moduleUrl=async path=>{
+  let code=await readFile(new URL(path,root),'utf8');
+  code=code.replace("'../../infrastructure/runtime-paths'",JSON.stringify(new URL('server/infrastructure/runtime-paths.ts',root).href));
+  if(code.includes("'./common'"))code=code.replace("'./common'",JSON.stringify(await moduleUrl('server/services/developer-api-v1/common.ts')));
+  for(const spec of ['@sakura-taiko/contract/schema','@sakura-taiko/contract/catalog','h3'])code=code.replaceAll("'"+spec+"'",JSON.stringify(pathToFileURL(require.resolve(spec)).href));
+  return 'data:text/javascript,'+encodeURIComponent(ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText);
+ };
+ const load=async path=>import(await moduleUrl(path));
+ try{
+  const rows=[{id:100,song_name:'Fixture',level_4:9,shelf_status:0}],aliases=[{id:100,song_name_jp:'別名側の日本語名',aliases:['fixture alias']}];
+  await writeFile(join(dir,'song_data.json'),JSON.stringify(rows));await writeFile(join(dir,'song_alias.json'),JSON.stringify(aliases));globalThis.useRuntimeConfig=()=>({repoRoot:dir,songDataPath:join(dir,'song_data.json')});
+  const {catalog}=await load('server/services/developer-api-v1/catalog.ts'),{assertSongCatalogSource}=await load('server/services/my-taiko/catalog-consistency.ts');const current=await catalog();
+  assert.deepEqual(current.songs[0].aliases,['fixture alias']);assert.equal(current.songs[0].song_name_jp,'別名側の日本語名');
+  assert.doesNotThrow(()=>assertSongCatalogSource(rows,current));
+  assert.throws(()=>assertSongCatalogSource([{...rows[0],level_4:10}],current),error=>error.statusCode===409);
+  await writeFile(join(dir,'song_alias.json'),JSON.stringify([{...aliases[0],aliases:['changed alias']}]));const changed=await catalog();assert.notEqual(changed.revision,current.revision);assert.doesNotThrow(()=>assertSongCatalogSource(rows,changed));
+  const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');assert.notEqual(hash(projectCatalog(rows,current.revision)),hash({songs:current.songs,charts:current.charts}),'old comparison reproduces alias mismatch');
+ }finally{if(saved===undefined)delete globalThis.useRuntimeConfig;else globalThis.useRuntimeConfig=saved;await rm(dir,{recursive:true,force:true});}
+});
