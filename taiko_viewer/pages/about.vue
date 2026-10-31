@@ -25,29 +25,31 @@ const copy = computed(() =>
         teamTitle: "開発チーム",
         teamDesc: "Taiko プロジェクトに参加したすべてのメンバーに感謝します。",
         stackTitle: "技術スタック",
-        stackDesc: "フロントエンドとバックエンドの主要技術です。"
+        stackDesc: "フロントエンドとバックエンドの主要技術です。",
+        linksTitle: "関連リンク"
       }
     : {
         teamTitle: "开发团队",
         teamDesc: "感谢所有参与 Taiko 项目的成员。",
         stackTitle: "技术栈",
-        stackDesc: "前端与后端主要技术。"
+        stackDesc: "前端与后端主要技术。",
+        linksTitle: "友情链接"
       }
 );
 
 const team = computed(() =>
   locale.value === "ja"
     ? [
-        { name: "马路", role: "プロダクト・企画" },
-        { name: "sigaer", role: "フロントエンド / UI デザイン" },
-        { name: "Sparklizm/星川sutari", role: "翻訳" },
-        { name: "Hyperionml/百里莫凌", role: "バックエンド" }
+        { name: "马路", role: "プロダクト・企画", avatar: "/avatar/maru.jpg" },
+        { name: "sigaer", role: "フロントエンド / UI デザイン", avatar: "/avatar/sigaer.jpg" },
+        { name: "Sparklizm/星川sutari", role: "翻訳", avatar: "/avatar/sutari.png" },
+        { name: "Hyperionml/百里莫凌", role: "バックエンド", avatar: "/avatar/baili.jpg" }
       ]
     : [
-        { name: "马路", role: "产品与策划" },
-        { name: "sigaer", role: "前端开发/UI设计" },
-        { name: "Sparklizm/星川sutari", role: "翻译" },
-        { name: "Hyperionml/百里莫凌", role: "后端" }
+        { name: "马路", role: "产品与策划", avatar: "/avatar/maru.jpg" },
+        { name: "sigaer", role: "前端开发/UI设计", avatar: "/avatar/sigaer.jpg" },
+        { name: "Sparklizm/星川sutari", role: "翻译", avatar: "/avatar/sutari.png" },
+        { name: "Hyperionml/百里莫凌", role: "后端", avatar: "/avatar/baili.jpg" }
       ]
 );
 
@@ -92,17 +94,7 @@ const stacks = [
       </div>
       <div class="team-grid">
         <div v-for="member in team" :key="member.name" class="team-card">
-          <div class="avatar">
-            <svg class="avatar-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M5 20a7 7 0 0 1 14 0"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </div>
+          <img class="avatar" :src="member.avatar" :alt="member.name" width="44" height="44" />
           <div>
             <div class="team-name">{{ member.name }}</div>
             <div class="team-role">{{ member.role }}</div>
@@ -133,6 +125,15 @@ const stacks = [
       <div class="stack-tags">
         <el-tag v-for="stack in stacks" :key="stack" effect="plain" size="large">{{ stack }}</el-tag>
       </div>
+    </el-card>
+
+    <el-card class="panel-card">
+      <div class="panel-header">
+        <h3>{{ copy.linksTitle }}</h3>
+      </div>
+      <el-link href="https://www.ourtaiko.org/" target="_blank" rel="noopener noreferrer" type="primary">
+        Ourtaiko
+      </el-link>
     </el-card>
   </div>
 </template>
@@ -199,18 +200,9 @@ const stacks = [
 .avatar {
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
   border-radius: 14px;
-  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
-  color:var(--viewer-on-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-}
-
-.avatar-icon {
-  width: 22px;
-  height: 22px;
+  object-fit: cover;
 }
 
 .team-name {
