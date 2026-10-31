@@ -1,5 +1,4 @@
 import {sanitizeDeveloperScores} from '../../infrastructure/account/developer-score-dto';
-import {grantApprovedDeveloperScores} from '../../infrastructure/account/approved-developer-scores';
 import { readAuthorizedSourceUserdata } from "../../services/account/source-access.ts";
 import { privateSourceResponse } from "../../infrastructure/account/private-source-response.ts";
 import {isMergedSource} from '../../infrastructure/account/merged-source-id.ts';
@@ -228,7 +227,6 @@ export const reviewDeveloperApplication = async (
         (user_id,application_id,token_hash,token_mask,status,issued_by_user_id) VALUES(?,?,?,?,'active',?)`,
         [application.user_id,application.id,sha256(issuedToken),maskDeveloperToken(issuedToken),reviewer.id]);
       await connection.execute(`UPDATE web_developer_applications SET status='approved',review_note=?,reviewed_by_user_id=?,reviewed_at=NOW() WHERE id=?`,[reviewNote||null,reviewer.id,application.id]);
-      await grantApprovedDeveloperScores(connection,issued.insertId,reviewer.id);
       await connection.commit();
     }catch(error){await connection.rollback();throw error;}finally{connection.release();}
     try {

@@ -1,3 +1,4 @@
+import {legacyDeveloperGrant, type LegacyDeveloperGrant} from './legacy-developer-access.ts';
 import type {H3Event} from 'h3';
 import type {Pool,RowDataPacket} from 'mysql2/promise';
 import {ensureAccountSchema,getAccountDb} from '../../utils/account-db';
@@ -10,13 +11,18 @@ import {captureActor,readActor,type SourceActor} from './source-access.ts';
 import {capturePrincipalForActor,provePrincipalAccess,principalFailure,safePrincipalError,type PrincipalTicket} from './principal-access.ts';
 type Db=Pick<Pool,'execute'>;
 type Binding=Readonly<{id:string;taiko_id:string;source:string;manual_account_id:null}>;
-type Grant=Readonly<{kind:'owner';bindings:readonly Binding[]}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
+type Grant=LegacyDeveloperGrant|Readonly<{kind:'owner';bindings:readonly Binding[]}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
 export type HirobaTicket=Readonly<{db:Pool;paths:ReturnType<typeof getRuntimePaths>;workerEnv:NodeJS.ProcessEnv;actor:SourceActor;grant:Grant;principal:PrincipalTicket|null;scope:'hiroba_bind'|'hiroba_credential_status';target:string}>;
 export const validHirobaSource=(value:unknown):value is string=>typeof value==='string'&&/^[0-9]{1,25}$/.test(value)&&!MANUAL_SOURCE_ID.test(value);
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const denied=()=>principalFailure(403,'没有访问该账号凭据的权限。');
 async function grantFor(db:Db,actor:SourceActor,scope:HirobaTicket['scope'],target:string,locked=false,chosen?:Grant):Promise<Grant>{
  const suffix=locked?' FOR UPDATE':'';
+ if(!chosen || chosen.kind==='developer'){
+  const developer=await legacyDeveloperGrant(db,actor,locked);
+  if(developer)return developer;
+  if(chosen?.kind==='developer')throw denied();
+ }
  if(actor.kind==='developer'&&chosen?.kind!=='owner'){
   const [[row]]=await db.execute<RowDataPacket[]>(`SELECT CAST(id AS CHAR) AS id,developer_user_id,service_name,scopes_json,sources_json,revision_nonce,status,
    DATE_FORMAT(expires_at,'%Y-%m-%dT%H:%i:%s') AS expires_at,issued_by_user_id,principals_json FROM taiko_source_service_grants
@@ -52,11 +58,11 @@ export async function proveHirobaAccess(db:Db,ticket:HirobaTicket,locked=false){
  if(ticket.principal)await provePrincipalAccess(db,ticket.principal,locked);
 }
 export function requireHirobaSources(ticket:HirobaTicket,ids:readonly string[]){
- const allowed=ticket.grant.kind==='service'?ticket.grant.sources:ticket.grant.bindings.map(row=>row.taiko_id);
+ const allowed=ticket.grant.kind==='developer'?'*':ticket.grant.kind==='service'?ticket.grant.sources:ticket.grant.bindings.map(row=>row.taiko_id);
  if(allowed!=='*'&&ids.some(id=>!allowed.includes(id)))throw denied();
 }
 /** Owner receipts cover selected complete bindings; unrelated later additions
  * do not invalidate a completed operation. Service receipts cover the full policy. */
 export function hirobaReceiptGrant(ticket:HirobaTicket,ids:readonly string[]){
- return {source:ticket.grant.kind==='service'?ticket.grant:{kind:'owner',bindings:ticket.grant.bindings.filter(row=>ids.includes(row.taiko_id))},principal:ticket.principal?.grant||null};
+ return {source:ticket.grant.kind!=='owner'?ticket.grant:{kind:'owner',bindings:ticket.grant.bindings.filter(row=>ids.includes(row.taiko_id))},principal:ticket.principal?.grant||null};
 }

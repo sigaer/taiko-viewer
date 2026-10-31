@@ -1,3 +1,4 @@
+import {legacyDeveloperGrant, type LegacyDeveloperGrant} from './legacy-developer-access.ts';
 import {createError,type H3Event} from 'h3';
 import type {Pool,RowDataPacket} from 'mysql2/promise';
 import {ensureAccountSchema,getAccountDb} from '../../utils/account-db';
@@ -7,7 +8,7 @@ import {validateSourceServicePolicy} from '../../infrastructure/account/source-s
 type Db=Pick<Pool,'execute'>;
 export type PrincipalScope='bind_read'|'bind_write'|'bind_current'|'bind_remove'|'bind_visibility'|'hiroba_bind'|'score_token_issue'|'bind_migrate';
 type Target=Readonly<{id:string;taiko_id:string;source:string;manual_account_id:null}>;
-type Grant=Readonly<{kind:'owner';tuple:readonly unknown[];target:Target|null}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
+type Grant=LegacyDeveloperGrant|Readonly<{kind:'owner';tuple:readonly unknown[];target:Target|null}|{kind:'service';tuple:readonly unknown[];sources:'*'|readonly string[]}>;
 export type PrincipalTicket=Readonly<{db:Pool;actor:SourceActor;principal:string;scope:PrincipalScope;grant:Grant;targetSource:string|null;targetPlatform:string|null}>;
 const publicErrors=new WeakSet<Error>();
 export const principalFailure=(status:number,message:string)=>{const e=createError({statusCode:status,statusMessage:message});publicErrors.add(e);return e;};
@@ -16,6 +17,11 @@ const deny=()=>principalFailure(403,'没有访问该绑定的权限。');
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 async function grantFor(db:Db,actor:SourceActor,principal:string,scope:PrincipalScope,targetSource:string|null,targetPlatform:string|null,locked=false,chosen?:Grant):Promise<Grant>{
  const suffix=locked?' FOR UPDATE':'';
+ if(!chosen || chosen.kind==='developer'){
+  const developer=await legacyDeveloperGrant(db,actor,locked);
+  if(developer)return developer;
+  if(chosen?.kind==='developer')throw deny();
+ }
  if(actor.kind==='developer'&&chosen?.kind!=='owner'){
   const [rows]=await db.execute<RowDataPacket[]>(`SELECT CAST(id AS CHAR) AS id,developer_user_id,service_name,scopes_json,sources_json,
    revision_nonce,status,DATE_FORMAT(expires_at,'%Y-%m-%dT%H:%i:%s') AS expires_at,issued_by_user_id,principals_json

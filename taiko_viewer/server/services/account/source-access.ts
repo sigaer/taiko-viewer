@@ -1,3 +1,4 @@
+import {legacyDeveloperGrant, type LegacyDeveloperGrant} from './legacy-developer-access.ts';
 import {createHash} from 'node:crypto';
 import {createError, getCookie, getHeader, type H3Event} from 'h3';
 import type {Pool, RowDataPacket} from 'mysql2/promise';
@@ -13,7 +14,7 @@ import {captureProjectionIntegrity} from '../../infrastructure/taiko-publication
 import {validSourceIdentity, validateSourceServicePolicy, type SourceServiceScope} from '../../infrastructure/account/source-service-schema.ts';
 
 export type SourceActor = Readonly<{kind:'session'|'developer'; userId:number; credential:string; tokenId?:string}>;
-export type SourceGrant = Readonly<{kind:'owner'; binding:BindingIdentity}|{kind:'service'; tuple:readonly unknown[]}>;
+export type SourceGrant = LegacyDeveloperGrant | Readonly<{kind:'owner'; binding:BindingIdentity}|{kind:'service'; tuple:readonly unknown[]}>;
 type Actor = SourceActor;
 type Grant = SourceGrant;
 export type SourceAccessTicket = Readonly<{db:Pool;paths:ReturnType<typeof getRuntimePaths>;actor:Actor;grant:Grant;source:string;scope:SourceServiceScope}>;
@@ -79,7 +80,7 @@ async function requireManualAlive(db:ProofDb,source:string) {
 }
 async function prove(db:ProofDb,actor:Actor,grant:Grant,source:string,scope:SourceServiceScope,locked=false) {
   if(!same(actor,await readActor(db,actor.kind,actor.credential,locked)))throw unauthorized();
-  const actual=grant.kind==='service'?await serviceGrant(db,actor,source,scope,locked):await ownerGrant(db,actor,source,grant.binding,locked);
+  const actual=grant.kind==='developer'?await legacyDeveloperGrant(db,actor,locked):grant.kind==='service'?await serviceGrant(db,actor,source,scope,locked):await ownerGrant(db,actor,source,grant.binding,locked);
   if(!same(grant,actual))throw denied();await requireManualAlive(db,source);
   // Resource checks may wait on SQL. A credential that expires or is revoked
   // during those checks cannot authorize the completed proof.
@@ -89,7 +90,7 @@ async function prove(db:ProofDb,actor:Actor,grant:Grant,source:string,scope:Sour
 /** Compose several private Sources using the same captured host and actor. */
 export async function captureSourceReadForActor(db:Pool,paths:SourceAccessTicket['paths'],actor:SourceActor,source:string,scope:'source_read'|'history_read'):Promise<SourceAccessTicket>{
   if(!validSourceIdentity(source))throw failure(400,'成绩账号标识无效');
-  const grant=await serviceGrant(db,actor,source,scope)||await ownerGrant(db,actor,source);
+  const grant=await legacyDeveloperGrant(db,actor)||await serviceGrant(db,actor,source,scope)||await ownerGrant(db,actor,source);
   await prove(db,actor,grant,source,scope);
   return Object.freeze({db,paths,actor,grant,source,scope});
 }
@@ -102,7 +103,7 @@ async function captureAccess(event:H3Event,sourceInput:unknown,scope:SourceServi
     const source=typeof sourceInput==='string'?sourceInput.trim():'';if(!validSourceIdentity(source))throw failure(400,'成绩账号标识无效');
     await ensureAccountSchema("source");const db=getAccountDb(),paths=Object.freeze(getRuntimePaths());
     const actor=await captureActor(event,db);
-    const grant=await serviceGrant(db,actor,source,scope) || await ownerGrant(db,actor,source);
+    const grant=await legacyDeveloperGrant(db,actor)||await serviceGrant(db,actor,source,scope) || await ownerGrant(db,actor,source);
     if(grant.kind==='owner'&&!['source_read','history_read'].includes(scope)){
       const platform=scope==='wahlap_update'?'wahlap':scope==='hiroba_sync'?'hiroba':null;
       if(!mutation||!platform||grant.binding.source!==platform||grant.binding.manual_account_id||MANUAL_SOURCE_ID.test(source))throw denied();
