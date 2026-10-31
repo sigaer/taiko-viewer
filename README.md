@@ -1,6 +1,8 @@
-# Taiko Viewer
+# Sakura Taiko Viewer
 
-Private dual-project repository for the Taiko forum service.
+**My Taiko, in one place.**
+
+Viewer 1.0.0收口My Viewer、Community、Training和Progress四条产品主线。见[正式版本说明、Contract 1.1冻结及已知限制](docs/releases/1.0.0.md)。
 
 ## Layout
 
@@ -21,11 +23,7 @@ Private dual-project repository for the Taiko forum service.
 ### Web
 
 ```bash
-cd taiko_viewer
-npm install
-npm run build
-sudo systemctl restart taiko-viewer taiko-sync-receiver
-curl http://127.0.0.1:3102/health
+bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh "$(git log -1 --pretty=%s)"
 ```
 
 ### Sakura Bot Sync Gateway

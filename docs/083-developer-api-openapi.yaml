@@ -2,9 +2,9 @@
 # Current approved exposure and stable/deprecation commitments: developer-api-compatibility.md.
 openapi: 3.1.0
 info:
-  title: Viewer Developer API v1 — Contract v1.1 candidate
-  version: 0.88.3
-  description: "Compatible My Taiko catalog-consistency bugfix 0.88.3. Contract 1.1 remains FREEZE_CANDIDATE, not frozen.
+  title: Viewer Developer API v1 — Contract v1.1 frozen
+  version: 1.0.0
+  description: "Viewer 1.0.0 formally freezes Contract 1.1; decision and accepted limits: releases/1.0.0.md.
     The default compact public song catalog is verified in production at the confirmed origin below.
     Other application-key/ResourceGrant capabilities retain their existing server enablement and authority;
     this release does not grant access or claim new production verification for private v1 paths.
@@ -21,8 +21,8 @@ paths:
   /api/v1/taiko/meta:
     get:
       operationId: getMeta
-      description: Contract 1.1 candidate only. Anonymous public metadata uses the combined song/alias catalog revision;
-        no production availability claim.
+      description: Formally frozen Contract 1.1. Anonymous public metadata uses the combined song/alias catalog revision;
+        Availability remains subject to existing runtime enablement. No new authority is granted.
       security:
         - {}
         - ClientKey: []
@@ -60,6 +60,7 @@ paths:
                         - catalog:read
                         - profile:read
                         - scores:read
+                        - account:read
                   unavailableScopes:
                     type: array
                     items:
@@ -121,13 +122,14 @@ paths:
                   - catalog:read
                   - profile:read
                   - scores:read
+                  - account:read
                 unavailableScopes:
                   - history:read
                   - growth:read
-                status: FREEZE_CANDIDATE
+                status: CONTRACT_FROZEN
                 catalogProfile: source-catalog-explicit-v1
                 pagination: none-bounded-complete-response
-                contractFrozen: false
+                contractFrozen: true
                 runtimeEnabled: true
         "304":
           description: Revalidated representation. Private requests complete all live authority checks before
@@ -1030,15 +1032,14 @@ paths:
                 additionalProperties: false
                 properties:
                   consentVersion:
-                    const: viewer-resource-consent-v1
+                    const: viewer-account-consent-v2
                   audience:
                     const: viewer:developer-api:v1
                   availableScopes:
                     type: array
                     items:
                       enum:
-                        - profile:read
-                        - scores:read
+                        - account:read
                   clients:
                     type: array
                     items:
@@ -1100,11 +1101,10 @@ paths:
                   - grants
                   - hasMore
               example:
-                consentVersion: viewer-resource-consent-v1
+                consentVersion: viewer-account-consent-v2
                 audience: viewer:developer-api:v1
                 availableScopes:
-                  - profile:read
-                  - scores:read
+                  - account:read
                 clients:
                   - clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     displayName: Synthetic app
@@ -1450,25 +1450,32 @@ paths:
                 consent:
                   const: true
                 consentVersion:
-                  const: viewer-resource-consent-v1
+                  enum: [viewer-resource-consent-v1, viewer-account-consent-v2]
                 audience:
                   const: viewer:developer-api:v1
               required:
                 - bindingId
                 - clientId
-                - scopes
-                - expiresInDays
                 - consent
                 - consentVersion
                 - audience
+              oneOf:
+                - properties:
+                    consentVersion:
+                      const: viewer-account-consent-v2
+                  not:
+                    anyOf:
+                      - required: [scopes]
+                      - required: [expiresInDays]
+                - properties:
+                    consentVersion:
+                      const: viewer-resource-consent-v1
+                  required: [scopes, expiresInDays]
             example:
               bindingId: "2"
               clientId: clt_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-              scopes:
-                - scores:read
-              expiresInDays: 30
               consent: true
-              consentVersion: viewer-resource-consent-v1
+              consentVersion: viewer-account-consent-v2
               audience: viewer:developer-api:v1
       x-example-policy: Synthetic examples only; no live account/key/score bytes.
   /api/account/developer/grants/{grantId}:
@@ -2119,9 +2126,10 @@ components:
       name: stv_session
       description: Existing verified owner session; Authorization headers are rejected for these operations.
 x-schema-source: packages/sakura-taiko-contract/schema/contract-v1.json
-x-freeze-status: FREEZE_CANDIDATE_LOCAL
+x-freeze-status: CONTRACT_FROZEN
 x-production-authorized: false
 x-lifecycle-policy:
-  contractFrozen: false
+  contractFrozen: true
   runtimeDefaultEnabled: false
-  ownerApproval: null
+  ownerApproval: releases/1.0.0.md
+  schemaRevision: 30591840759a1d437e01f002f215a320673ce7ed95580d30f162756339c646db

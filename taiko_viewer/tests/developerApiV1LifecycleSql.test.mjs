@@ -5,6 +5,7 @@ import {randomBytes,createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import ts from 'typescript';
+import {createRequire} from 'node:module';
 import {accountSourceFixture} from './fixtures/accountSourceHttp.mjs';
 const nativeFetch=globalThis.fetch;
 test('Frozen lifecycle minimal SQL HTTP SDK pagination and revoke-before-304',{timeout:120000},()=>accountSourceFixture(async c=>{
@@ -16,7 +17,15 @@ test('Frozen lifecycle minimal SQL HTTP SDK pagination and revoke-before-304',{t
  c.config.songDataPath=resolve(c.root,'catalog.json');await writeFile(c.config.songDataPath,JSON.stringify([{id:100,song_name:'Synthetic',level_4:9}]));await writeFile(resolve(c.root,'song_alias.json'),JSON.stringify([]));
  for(const [m,p,f] of [['get','/api/v1/taiko/meta','v1/taiko/meta.get.ts'],['get','/api/v1/taiko/players/:playerId/scores','v1/taiko/players/[playerId]/scores.get.ts'],['get','/api/account/developer/grants','account/developer/grants/index.get.ts'],['post','/api/account/developer/grants','account/developer/grants/index.post.ts'],['delete','/api/account/developer/grants/:grantId','account/developer/grants/[grantId].delete.ts'],['post','/api/account/developer/clients','account/developer/clients/index.post.ts']])c.route(m,p,(await import('../server/api/'+f)).default);
  const observations=[];async function ask(name,path,method='GET',body){const r=await c.request(method,path,body,c.cookie,{origin:c.baseUrl});const data=await r.json();assert.equal(r.status,200,name);observations.push({name,status:r.status});return data;}
- const sdk=createDeveloperApi({baseUrl:c.baseUrl,fetcher:nativeFetch});const meta=(await sdk.meta()).data;assert.equal(meta.status,'FREEZE_CANDIDATE');assert.equal(meta.contractFrozen,false);assert.equal(meta.runtimeEnabled,true);observations.push({name:'sdk-candidate-meta',status:200});
+ const sdk=createDeveloperApi({baseUrl:c.baseUrl,fetcher:nativeFetch});const meta=(await sdk.meta()).data;assert.equal(meta.status,'CONTRACT_FROZEN');assert.equal(meta.contractFrozen,true);assert.equal(meta.runtimeEnabled,true);observations.push({name:'sdk-frozen-meta',status:200});
+ const require=createRequire(import.meta.url),yaml=require('yaml'),Ajv=require('ajv');
+ const openapi=yaml.parse(await readFile(new URL('../../docs/083-developer-api-openapi.yaml',import.meta.url),'utf8'));
+ const ajv=new Ajv({strict:false,allowUnionTypes:true});const checkMeta=ajv.compile(openapi.paths['/api/v1/taiko/meta'].get.responses['200'].content['application/json'].schema);
+ assert.equal(checkMeta(meta),true,JSON.stringify(checkMeta.errors));
+ const checkConsent=ajv.compile(openapi.paths['/api/account/developer/grants'].post.requestBody.content['application/json'].schema);
+ const currentConsent={bindingId:String(c.bindingId),clientId:'clt_'+'a'.repeat(32),consent:true,consentVersion:'viewer-account-consent-v2',audience:'viewer:developer-api:v1'};
+ assert.equal(checkConsent(currentConsent),true);assert.equal(checkConsent({...currentConsent,scopes:['account:read']}),false);assert.equal(checkConsent({...currentConsent,expiresInDays:7}),false);
+ assert.equal(checkConsent({...currentConsent,consentVersion:'viewer-resource-consent-v1',scopes:['scores:read'],expiresInDays:7}),true);
  c.config.developerApiV1=false;await assert.rejects(sdk.meta(),e=>e instanceof DeveloperApiError&&e.status===404);observations.push({name:'frozen-does-not-enable-runtime',status:404});c.config.developerApiV1=true;
  const [a]=await c.pool.execute("INSERT INTO web_developer_applications(user_id,reply_email,reason,status) VALUES (?,'synthetic@example.test','local lifecycle','approved')",[c.user]);const key=randomBytes(24).toString('hex');await c.pool.execute('INSERT INTO web_developer_tokens(user_id,application_id,token_hash,token_mask) VALUES (?,?,?,?)',[c.user,a.insertId,createHash('sha256').update(key).digest('hex'),'synthetic']);
  const client=(await ask('register-client','/api/account/developer/clients','POST',{displayName:'Local freeze'})).client;
@@ -26,5 +35,5 @@ test('Frozen lifecycle minimal SQL HTTP SDK pagination and revoke-before-304',{t
  const privateSdk=createDeveloperApi({baseUrl:c.baseUrl,key,fetcher:nativeFetch});const live=await privateSdk.scores(grant.playerId);assert.equal(live.data.items.length,1);assert.ok(live.etag);observations.push({name:'sdk-authorized-scores',status:200});
  await ask('owner-revoke','/api/account/developer/grants/'+grant.grantId,'DELETE');await assert.rejects(privateSdk.scores(grant.playerId,live.etag),e=>e instanceof DeveloperApiError&&e.status===403);observations.push({name:'sdk-revoked-old-etag-rejected',status:403});
  const response=await c.request('GET','/api/v1/taiko/players/'+grant.playerId+'/scores',undefined,'',{authorization:'Bearer '+key,'if-none-match':live.etag});assert.equal(response.status,403);assert.equal(response.headers.get('etag'),null);assert.equal(response.headers.get('cache-control'),'private, no-store');
- await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'candidate-lifecycle-observations.json'),JSON.stringify({status:'RERUN_PASS',databaseProof:proof,observations,contractFrozen:false,runtimeDefaultEnabled:false,publicApiEnabled:false,productionAccess:false},null,2)+'\n');
+ await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'frozen-lifecycle-observations.json'),JSON.stringify({status:'RERUN_PASS',databaseProof:proof,observations,contractFrozen:true,runtimeDefaultEnabled:false,publicApiEnabled:false,productionAccess:false},null,2)+'\n');
 },{withDeveloper:true}));

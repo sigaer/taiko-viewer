@@ -1,4 +1,4 @@
-/** Release-controlled Contract 1.1 candidate state; not frozen until a new explicit release decision. */
+/** Contract 1.1 formally frozen for Viewer 1.0.0. Decision and accepted limits: docs/releases/1.0.0.md. */
 export const contractRelease: ({status:'FREEZE_CANDIDATE';contractFrozen:false}|{status:'CONTRACT_FROZEN';contractFrozen:true}) = {
- status:'FREEZE_CANDIDATE',contractFrozen:false
+ status:'CONTRACT_FROZEN',contractFrozen:true
 };

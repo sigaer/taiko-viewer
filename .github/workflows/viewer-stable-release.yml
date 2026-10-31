@@ -1,7 +1,7 @@
-name: Publish Viewer 0.85.0
+name: Publish stable Viewer release
 on:
   push:
-    tags: ["0.85.0"]
+    tags: ["0.85.0", "1.0.0"]
 permissions:
   contents: write
 concurrency:

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {publishRelease} from '../../scripts/release/publish-viewer-release.mjs';
 import {validateGuideResponse} from './fixtures/developerGuideContract.mjs';
 const require=createRequire(import.meta.url),yaml=require('yaml');
@@ -61,6 +62,26 @@ test('reviewed release JSON, examples, workflow and current documentation metada
   assert.equal(doc.paths['/api/v1/taiko/catalog/charts'],undefined);
  }
  const workflow=yaml.parse(await read('.github/workflows/viewer-stable-release.yml'));
- assert.deepEqual(workflow.on.push.tags,['0.85.0']);assert.equal(workflow.permissions.contents,'write');assert.equal(workflow.on.pull_request,undefined);
+ assert.deepEqual(workflow.on.push.tags,['0.85.0','1.0.0']);assert.equal(workflow.permissions.contents,'write');assert.equal(workflow.on.pull_request,undefined);
  assert.ok(workflow.jobs.release.steps.some(x=>x.env?.GITHUB_TOKEN==='${{ github.token }}'));
+});
+
+test('1.0 release freezes the unchanged Contract and documents current consent formats without enabling permissions',async()=>{
+ const {contractRelease}=await import('../server/services/developer-api-v1/lifecycle.ts');
+ assert.deepEqual(contractRelease,{status:'CONTRACT_FROZEN',contractFrozen:true});
+ const read=p=>readFile(new URL('../../'+p,import.meta.url),'utf8');
+ const doc=yaml.parse(await read('docs/083-developer-api-openapi.yaml'));
+ const schema=JSON.parse(await read('packages/sakura-taiko-contract/schema/contract-v1.json'));
+ const revision=createHash('sha256').update(JSON.stringify(schema)).digest('hex');
+ assert.equal(revision,'30591840759a1d437e01f002f215a320673ce7ed95580d30f162756339c646db');
+ assert.equal(doc['x-freeze-status'],'CONTRACT_FROZEN');
+ assert.equal(doc['x-lifecycle-policy'].contractFrozen,true);
+ assert.equal(doc['x-lifecycle-policy'].runtimeDefaultEnabled,false);
+ assert.equal(doc['x-lifecycle-policy'].schemaRevision,revision);
+ const meta=doc.paths['/api/v1/taiko/meta'].get.responses['200'].content['application/json'];
+ assert.equal(meta.example.status,contractRelease.status);assert.equal(meta.example.contractFrozen,contractRelease.contractFrozen);
+ assert.ok(meta.schema.properties.capabilities.items.enum.includes('account:read'));
+ const notes=await read('docs/releases/1.0.0.md');
+ for(const value of ['My Viewer','Community','Training','Progress',revision,'RPO','RTO','Source','暂缓'])assert.ok(notes.includes(value),value);
+ assert.ok((await read('taiko_viewer/public/docs/developer-api-compatibility.md')).includes('CONTRACT_FROZEN / contractFrozen=true'));
 });

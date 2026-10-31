@@ -2,4 +2,4 @@
 
 唯一正文为[随网站发布的静态说明](../taiko_viewer/public/docs/developer-api-compatibility.md)，上线入口：<https://viewer.sakura-bot.cn/docs/developer-api-compatibility.md>。
 
-本轮只发布现有公开接口的字段与弃用承诺，不修改Schema、Contract版本、运行开关、授权或SDK行为。应用版本依本轮指示保持0.87.9；正式Contract1.1冻结决定仍单独记录。
+Contract 1.1 随 Viewer 1.0.0 正式冻结，明确发布决定见 [1.0.0版本说明](releases/1.0.0.md)。冻结不修改Schema、授权、灰度或接口运行开关；历史候选记录不改写。

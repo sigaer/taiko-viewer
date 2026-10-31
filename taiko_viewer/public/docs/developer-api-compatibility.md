@@ -1,6 +1,6 @@
 # Developer API 现行兼容边界与变更承诺
 
-适用当前已公开的 Developer Token 四接口与 ResourceGrant v1 读取；网站版本、API 路径 v1、计算模型 v1、Contract 1.1 以及内部 ScoreRead 1.0 分别管理。本文件通过现有文档审查与发布流程合并后作为维护承诺，不追溯宣称过去已正式冻结。当前运行 meta 继续准确返回 FREEZE_CANDIDATE / contractFrozen=false；本次文档不切换 Contract 状态、不修改权限。
+适用当前已公开的 Developer Token 四接口与 ResourceGrant v1 读取；网站版本、API 路径 v1、计算模型 v1、Contract 1.1 以及内部 ScoreRead 1.0 分别管理。Contract 1.1 自 Viewer 1.0.0 正式冻结，发布决定见仓库 docs/releases/1.0.0.md；对应 meta 返回 CONTRACT_FROZEN / contractFrozen=true。此前候选状态保留原历史含义。冻结只确认当前结构与语义，不修改权限、灰度或运行开关。
 
 ## 保持稳定的边界
 
@@ -23,4 +23,4 @@
 
 当前源码内14个 Contract 使用点、服务端SDK示例、既有受控真实HTTPS/隔离HTTP记录已核对。独立 Bot/Client 保留其内部认证域和历史安装pin；没有证据证明所有外部第三方已经迁移，也不把独立旧应用强制迁移列为1.0前置项。
 
-正式 Contract 1.1 Freeze 必须仍由现有 release-controlled lifecycle 的明确发布记录决定，并使 meta/OpenAPI/最小样例一致；本文不代替该决定，不修改运行时、权限或用户授权。若1.0 RC要求“正式Frozen”而不是“候选但已承诺保持现有公开兼容”，该既有发布决定仍是剩余条件。
+正式冻结依据2026年10月31日Viewer 1.0.0发布决定，受控lifecycle、有效OpenAPI和meta示例同步。Schema revision保持不变，现有授权与安装构件不迁移。后续变更遵守上面的兼容检查与弃用承诺，不把网站版本号作为扩权凭证。
