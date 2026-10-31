@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MyTaikoOverview } from '~/types/my-taiko';
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
 const { accountUser } = useAccountState();
@@ -10,10 +10,10 @@ const overview = shallowRef<MyTaikoOverview | null>(null);
 const pending = ref(false), failure = ref<number | null>(null), selection = ref('');
 let epoch = 0, controller: AbortController | undefined, mounted = false;
 const copy = computed(() => locale.value === 'ja' ? {
- title:'マイデータ',binding:'連携 ID',refresh:'再読み込み',loading:'読み込み中…',scores:'スコア',charts:'譜面',scored:'スコアあり',cleared:'クリア確認済み',growth:'最近90日の成長',empty:'信頼できる成長記録がありません',unknown:'履歴の範囲を確認できません',partial:'一部の履歴',truncated:'履歴の読み込み上限に達しました',complete:'対象期間の履歴あり',more:'成長記録を見る',login:'ログインし直す',bind:'ID を連携',unbound:'鼓众 ID を連携してください',denied:'このデータにアクセスできません',changed:'連携が変更されました。再読み込みしてください',unavailable:'データを読み込めません。時間をおいて再試行してください',timeout:'読み込みがタイムアウトしました',observed:'確認',played:'プレイ',recommend:'おすすめツール',
+ title:'マイデータ',binding:'連携 ID',refresh:'再読み込み',loading:'読み込み中…',scores:'スコア',charts:'譜面',scored:'スコアあり',cleared:'クリア確認済み',growth:'最近90日の成長',empty:'信頼できる成長記録がありません',unknown:'履歴の範囲を確認できません',partial:'一部の履歴',truncated:'履歴の読み込み上限に達しました',complete:'対象期間の履歴あり',more:'成長記録を見る',login:'ログインし直す',bind:'ID を連携',unbound:'鼓众 ID を連携してください',denied:'このデータにアクセスできません',changed:'連携が変更されました。再読み込みしてください',unavailable:'データを読み込めません。時間をおいて再試行してください',timeout:'読み込みがタイムアウトしました',observed:'確認',played:'プレイ',recommend:'おすすめツール',goal:'今の目標',noGoal:'練習目標はまだありません',chooseGoal:'おすすめから目標を選ぶ',viewGoal:'成長記録で目標を見る',goalUnavailable:'現在この譜面は利用できません',
  facts:{played:'プレイ', 'score-pb':'自己ベスト', 'ng-reduced':'不可減少', 'combo-improved':'コンボ更新',clear:'クリア',fc:'フルコンボ',df:'ドンダフルコンボ','rank-upgrade':'ランク更新','goal-completed':'目標達成'}
 } : {
- title:'我的数据',binding:'当前绑定',refresh:'重新获取',loading:'正在读取…',scores:'当前成绩',charts:'谱面记录',scored:'有分数',cleared:'已确认通关',growth:'近 90 天成长',empty:'暂无可靠成长记录',unknown:'历史覆盖未知',partial:'部分历史',truncated:'历史读取已达上限',complete:'期间历史完整',more:'查看成长记录',login:'重新登录',bind:'绑定鼓众 ID',unbound:'请先绑定鼓众 ID',denied:'无法访问这份数据',changed:'绑定已变更，请重新获取',unavailable:'暂时无法读取，请稍后重试',timeout:'读取超时，请重试',observed:'观测',played:'游玩',recommend:'打开推荐工具',
+ title:'我的数据',binding:'当前绑定',refresh:'重新获取',loading:'正在读取…',scores:'当前成绩',charts:'谱面记录',scored:'有分数',cleared:'已确认通关',growth:'近 90 天成长',empty:'暂无可靠成长记录',unknown:'历史覆盖未知',partial:'部分历史',truncated:'历史读取已达上限',complete:'期间历史完整',more:'查看成长记录',login:'重新登录',bind:'绑定鼓众 ID',unbound:'请先绑定鼓众 ID',denied:'无法访问这份数据',changed:'绑定已变更，请重新获取',unavailable:'暂时无法读取，请稍后重试',timeout:'读取超时，请重试',observed:'观测',played:'游玩',recommend:'打开推荐工具',goal:'当前目标',noGoal:'还没有设置练习目标',chooseGoal:'从推荐中选择目标',viewGoal:'在成长档案中查看目标',goalUnavailable:'该谱面当前不可用',
  facts:{played:'游玩', 'score-pb':'分数新高', 'ng-reduced':'不可减少', 'combo-improved':'连击提升',clear:'通关',fc:'全连',df:'全良','rank-upgrade':'评级提升','goal-completed':'目标完成'}
 });
 const errorText = computed(() => {
@@ -69,6 +69,20 @@ onBeforeUnmount(()=>{mounted=false;clear();document.removeEventListener('visibil
     <div><dt>{{ copy.scored }}</dt><dd>{{ overview.scores.scored }}</dd></div>
     <div><dt>{{ copy.cleared }}</dt><dd>{{ overview.scores.cleared }}</dd></div>
    </dl>
+   <section class="my-current-goal" aria-labelledby="my-active-goal-heading" data-testid="my-active-goal">
+    <h3 id="my-active-goal-heading">{{ copy.goal }}</h3>
+    <template v-if="overview.activeGoal">
+     <NuxtLink v-if="overview.activeGoal.available" class="my-current-goal__song" :to="localePath({path:`/songs/${overview.activeGoal.songId}`,query:{difficulty:String(overview.activeGoal.difficultyType)}})">{{ overview.activeGoal.title }}</NuxtLink>
+     <strong v-else class="my-current-goal__song">{{ overview.activeGoal.title }}</strong>
+     <p>{{ t(`home.goal.types.${overview.activeGoal.goalType}`) }}</p>
+     <p v-if="!overview.activeGoal.available">{{ copy.goalUnavailable }}</p>
+     <NuxtLink class="my-current-goal__action" :to="localePath('/my/growth')">{{ copy.viewGoal }}</NuxtLink>
+    </template>
+    <template v-else>
+     <p>{{ copy.noGoal }}</p>
+     <NuxtLink class="my-current-goal__action" :to="localePath(overview.recommendation.href)">{{ copy.chooseGoal }}</NuxtLink>
+    </template>
+   </section>
    <h3>{{ copy.growth }}</h3>
    <p class="my-coverage" data-testid="my-coverage">{{ copy[overview.growth.coverage.scoreHistoryState] }}</p>
    <p class="my-range">{{ overview.growth.range.from }} — {{ overview.growth.range.to }}</p>
@@ -89,4 +103,9 @@ onBeforeUnmount(()=>{mounted=false;clear();document.removeEventListener('visibil
 
 <style scoped>
 .my-overview{padding:20px;min-width:0;overflow-wrap:anywhere}.my-overview header{display:flex;align-items:center;justify-content:space-between;gap:12px}.my-overview h2{font-size:22px;margin:0}.my-overview h3{font-size:16px;margin:24px 0 12px}.my-overview button,.my-overview select{min-height:44px;border:1px solid var(--viewer-border);border-radius:10px;background:var(--viewer-surface);color:var(--viewer-text);padding:8px 12px;font:inherit}.my-overview button{cursor:pointer;flex-shrink:0}.my-overview button:disabled{opacity:.6;cursor:wait}.my-overview :is(button,select,a):focus-visible{outline:2px solid var(--viewer-accent-strong);outline-offset:3px}.my-binding{display:grid;gap:8px;margin-top:20px;font-size:14px}.my-binding select{width:100%;min-width:0;max-width:100%}.my-title{font-size:18px;font-weight:600}.my-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}.my-stats div{padding:12px 8px;background:var(--viewer-bg);border-radius:12px;min-width:0}.my-stats dt{font-size:12px;color:var(--viewer-text-muted)}.my-stats dd{margin:8px 0 0;font-size:24px;font-weight:700}.my-range,.my-coverage,.my-facts small{font-size:13px;color:var(--viewer-text-muted)}.my-facts{list-style:none;margin:12px 0;padding:0}.my-facts li{display:grid;gap:4px;padding:12px 0;border-bottom:1px solid var(--viewer-border)}.my-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.my-actions a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border:1px solid var(--viewer-border);border-radius:10px;color:var(--viewer-text);text-decoration:none}.my-overview [role=alert] a{display:inline-flex;align-items:center;min-height:44px;color:var(--viewer-accent-strong)}
+.my-current-goal{display:grid;justify-items:start;gap:8px;margin-top:24px;padding:16px;border:1px solid var(--viewer-border);border-radius:12px;background:var(--viewer-surface-subtle)}
+.my-current-goal h3{margin:0 0 4px}.my-current-goal p{margin:0;color:var(--viewer-text-muted);font-size:14px;line-height:1.5}
+.my-current-goal__song{color:var(--viewer-text);font-size:16px;font-weight:650;line-height:1.5;text-decoration:none;overflow-wrap:anywhere}
+.my-current-goal__action{display:inline-flex;align-items:center;min-height:44px;padding:8px 0;color:var(--viewer-link);text-decoration:none}
+.my-current-goal a:hover{text-decoration:underline}
 </style>

@@ -10,6 +10,8 @@ import {assertBindingIdentity,captureBindingIdentity,type BindingIdentity} from 
 import {withViewerCurrentSource} from '../account/current-source';
 import {currentScoreScope} from '../taiko-domain/publication';
 import {readGoalSnapshot} from '../goals/snapshot';
+import {readActiveGoal} from '../goals/store';
+import {goalChartAvailable} from '../../../utils/playerGoal';
 import {getGrowthHistory} from '../growth-history/service';
 import {createGrowthScoreEvidenceRequest} from '../growth-history/evidence';
 import {resolveGrowthHistoryRange} from '../growth-history/range';
@@ -63,6 +65,7 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
     const growth=await getGrowthHistory(user.id,resolveGrowthHistoryRange({days:90}),{
      includeMeasurements:false,loadScoreEvidence:createGrowthScoreEvidenceRequest(binding.taiko_id)
     });
+    const activeGoal=await readActiveGoal(getAccountDb(),user.id,Number(binding.id));
     if((await catalog()).revision!==sourceCatalog.revision||hash(await getSongCatalog())!==hash(legacy))throw fail(409,'catalog-changed');
     const counts:Partial<Record<MyTaikoOverview['growth']['recentFacts'][number]['type'],number>>={};
     for(const fact of growth.facts){
@@ -74,6 +77,10 @@ export async function readMyTaikoOverview(event:H3Event):Promise<MyTaikoOverview
      profile:{username:profile.user.username,bindingId:String(binding.id),taikoId:binding.taiko_id,currentTitle:profile.currentBinding?.currentTitle??null,
       bindings:profile.bindings.map(b=>({bindingId:String(b.id),label:b.displayName||b.taikoId,isCurrent:String(b.id)===String(binding.id)}))},
      scores:summary,
+     activeGoal:activeGoal?{
+      songId:activeGoal.songId,difficultyType:activeGoal.difficultyType,title:activeGoal.title,goalType:activeGoal.goalType,
+      available:goalChartAvailable(legacy.find(song=>Number(song.id)===activeGoal.songId),activeGoal.difficultyType)
+     }:null,
      growth:{range:growth.range,coverage:growth.coverage,totalFacts:growth.facts.length,counts,recentFacts:growth.facts.slice(-8).reverse(),recentFactsLimit:8,hasMoreFacts:growth.facts.length>8},
      recommendation:{href:'/tools/recommend',state:'ENTRY_ONLY',bindingId:String(binding.id),scoreRevision},
      diagnostics:{physicalCurrentReads,measurements:'NOT_REQUESTED',historyMeaning:'CANONICAL_FACTS_NOT_SYNCHRONIZATION_PLAY_EVENTS'}

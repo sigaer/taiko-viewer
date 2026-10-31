@@ -68,6 +68,18 @@ test('My Taiko product built Nuxt HTTP SQL browser and generation isolation',{ti
   const cookieA=await login('mytaiko-product-a'),cookieB=await login('mytaiko-product-b'),cookieU=await login('mytaiko-product-empty');
   await http('/api/account/profile',{cookie:cookieA});
   const before=await ask('A1 authenticated product BFF',cookieA);assert.equal(before.profile.bindingId,String(A1));assert.equal(before.profile.currentTitle,'Synthetic A1');assert.equal(before.scores.highestScore,900000);assert.ok(before.growth.totalFacts>0);assert.equal(before.release.scoreRevision,`publication-v1:${first.sequence}:${first.commitId}`);assert.equal(before.growth.range.maxDays,90);assert.equal((Date.parse(before.growth.range.to)-Date.parse(before.growth.range.from))/86400000+1,90);
+  assert.equal(before.activeGoal,null,'No active goal remains a real empty state');
+  const goalData={songId:100,difficultyType:4,title:'Synthetic chart',goalType:'score-pb'};
+  const goalTime='2026-10-30 00:00:00';
+  await pool.execute(
+   'INSERT INTO web_player_goals (user_id,binding_id,song_id,difficulty_type,goal_type,source,source_mode,source_rank,source_revision,source_generated_at,status,goal_data,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+   [A,A1,100,4,'score-pb','today-plan','dimension',1,sha('synthetic-source'),goalTime,'active',JSON.stringify(goalData),goalTime,goalTime]
+  );
+  const withGoal=await ask('active goal on personal homepage',cookieA);
+  assert.deepEqual(withGoal.activeGoal,{...goalData,available:true});
+  assert.equal((await ask('other account has no leaked goal',cookieB)).activeGoal,null);
+  await pool.execute('DELETE FROM web_player_goals WHERE user_id=? AND binding_id=?',[A,A1]);
+  assert.equal((await ask('removed goal returns empty',cookieA)).activeGoal,null);
   await ask('anonymous 401','',401);await ask('owner binding query override denied',cookieA,400,'?bindingId='+B1);await ask('unbound controlled 400',cookieU,400);await http('/api/v1/taiko/meta',{expected:404});await http('/qa/my-taiko',{expected:404});
   await switchTo(cookieA,A2);assert.equal((await ask('A1 to A2',cookieA)).scores.highestScore,910000);await switchTo(cookieA,A1);assert.equal((await ask('A2 back A1',cookieA)).scores.highestScore,900000);assert.equal((await ask('independent account B',cookieB)).scores.highestScore,920000);assert.equal((await ask('A1 after B',cookieA)).profile.bindingId,String(A1));
   await barrier(()=>ask('switch during read discards body',cookieA,409),()=>switchTo(cookieA,A2));await switchTo(cookieA,A1);
