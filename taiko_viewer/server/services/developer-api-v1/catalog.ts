@@ -39,7 +39,7 @@ export async function catalog(){
  const aliasRevision=createHash('sha256').update(aliasSource.bytes).digest('hex');
  const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
  const projected=projectCatalog(songSource.rows,revision,aliasSource.rows);
- return {revision,songRevision,aliasRevision,songs:projected.songs,charts:projected.charts};
+ return {revision,songRevision,aliasRevision,songRowsHash:hash(JSON.stringify(songSource.rows)),songs:projected.songs,charts:projected.charts};
 }
 export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
 

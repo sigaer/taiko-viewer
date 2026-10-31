@@ -172,3 +172,15 @@ test('actual My overview defers cached sync/focus reads and reloads exactly once
   page.close();assert.equal(listeners.size,0);
  }finally{if(beforeWindow===undefined)delete globalThis.window;else globalThis.window=beforeWindow;if(beforeDocument===undefined)delete globalThis.document;else globalThis.document=beforeDocument;}
 }));
+test('My overview distinguishes real binding conflicts from catalog and other 409 failures',async()=>fixture(async({attach,load})=>{
+ const doc=globalThis.document,win=globalThis.window;let mounted;const port={addEventListener(){},removeEventListener(){}};globalThis.document={...port,visibilityState:'visible'};globalThis.window=port;
+ try{
+  const View=await load('components/my-taiko/Overview.vue',true);mounted=attach(()=>View.setup({}, {expose(){}}));const {model}=mounted;await settle();
+  for(const reason of ['catalog-source-mismatch','source-mismatch','fact-owner-mismatch','unknown']){
+   model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:reason}});assert.equal(model.errorText.value,model.copy.value.unavailable);
+  }
+  model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:'catalog-changed'}});assert.equal(model.errorText.value,model.copy.value.catalogChanged);
+  for(const reason of ['profile-changed','binding-changed']){model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:reason}});assert.equal(model.errorText.value,model.copy.value.changed);}
+  model.failure.value=model.readFailure({},true);assert.equal(model.errorText.value,model.copy.value.timeout);
+ }finally{mounted?.close();globalThis.document=doc;globalThis.window=win;}
+}));

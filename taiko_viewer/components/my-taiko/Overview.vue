@@ -7,19 +7,22 @@ const { accountUser } = useAccountState();
 const bindingGeneration = useState('account-binding-generation', () => 0);
 const homeGeneration = useState('account-home-generation', () => 0);
 const overview = shallowRef<MyTaikoOverview | null>(null);
-const pending = ref(false), failure = ref<number | null>(null), selection = ref('');
+const pending = ref(false), failure = shallowRef<{status:number;reason:string} | null>(null), selection = ref('');
 let epoch = 0, controller: AbortController | undefined, mounted = false;
 const copy = computed(() => locale.value === 'ja' ? {
- title:'マイデータ',binding:'連携 ID',refresh:'再読み込み',loading:'読み込み中…',scores:'スコア',charts:'譜面',scored:'スコアあり',cleared:'クリア確認済み',growth:'最近90日の成長',empty:'信頼できる成長記録がありません',unknown:'履歴の範囲を確認できません',partial:'一部の履歴',truncated:'履歴の読み込み上限に達しました',complete:'対象期間の履歴あり',more:'成長記録を見る',login:'ログインし直す',bind:'ID を連携',unbound:'鼓众 ID を連携してください',denied:'このデータにアクセスできません',changed:'連携が変更されました。再読み込みしてください',unavailable:'データを読み込めません。時間をおいて再試行してください',timeout:'読み込みがタイムアウトしました',observed:'確認',played:'プレイ',recommend:'おすすめツール',goal:'今の目標',noGoal:'練習目標はまだありません',chooseGoal:'おすすめから目標を選ぶ',viewGoal:'成長記録で目標を見る',goalUnavailable:'現在この譜面は利用できません',
+ title:'マイデータ',binding:'連携 ID',refresh:'再読み込み',loading:'読み込み中…',scores:'スコア',charts:'譜面',scored:'スコアあり',cleared:'クリア確認済み',growth:'最近90日の成長',empty:'信頼できる成長記録がありません',unknown:'履歴の範囲を確認できません',partial:'一部の履歴',truncated:'履歴の読み込み上限に達しました',complete:'対象期間の履歴あり',more:'成長記録を見る',login:'ログインし直す',bind:'ID を連携',unbound:'鼓众 ID を連携してください',denied:'このデータにアクセスできません',changed:'連携が変更されました。再読み込みしてください',catalogChanged:'楽曲情報が更新されました。再読み込みしてください',unavailable:'データを読み込めません。時間をおいて再試行してください',timeout:'読み込みがタイムアウトしました',observed:'確認',played:'プレイ',recommend:'おすすめツール',goal:'今の目標',noGoal:'練習目標はまだありません',chooseGoal:'おすすめから目標を選ぶ',viewGoal:'成長記録で目標を見る',goalUnavailable:'現在この譜面は利用できません',
  facts:{played:'プレイ', 'score-pb':'自己ベスト', 'ng-reduced':'不可減少', 'combo-improved':'コンボ更新',clear:'クリア',fc:'フルコンボ',df:'ドンダフルコンボ','rank-upgrade':'ランク更新','goal-completed':'目標達成'}
 } : {
- title:'我的数据',binding:'当前绑定',refresh:'重新获取',loading:'正在读取…',scores:'当前成绩',charts:'谱面记录',scored:'有分数',cleared:'已确认通关',growth:'近 90 天成长',empty:'暂无可靠成长记录',unknown:'历史覆盖未知',partial:'部分历史',truncated:'历史读取已达上限',complete:'期间历史完整',more:'查看成长记录',login:'重新登录',bind:'绑定鼓众 ID',unbound:'请先绑定鼓众 ID',denied:'无法访问这份数据',changed:'绑定已变更，请重新获取',unavailable:'暂时无法读取，请稍后重试',timeout:'读取超时，请重试',observed:'观测',played:'游玩',recommend:'打开推荐工具',goal:'当前目标',noGoal:'还没有设置练习目标',chooseGoal:'从推荐中选择目标',viewGoal:'在成长档案中查看目标',goalUnavailable:'该谱面当前不可用',
+ title:'我的数据',binding:'当前绑定',refresh:'重新获取',loading:'正在读取…',scores:'当前成绩',charts:'谱面记录',scored:'有分数',cleared:'已确认通关',growth:'近 90 天成长',empty:'暂无可靠成长记录',unknown:'历史覆盖未知',partial:'部分历史',truncated:'历史读取已达上限',complete:'期间历史完整',more:'查看成长记录',login:'重新登录',bind:'绑定鼓众 ID',unbound:'请先绑定鼓众 ID',denied:'无法访问这份数据',changed:'绑定已变更，请重新获取',catalogChanged:'歌曲目录已更新，请重新获取',unavailable:'暂时无法读取，请稍后重试',timeout:'读取超时，请重试',observed:'观测',played:'游玩',recommend:'打开推荐工具',goal:'当前目标',noGoal:'还没有设置练习目标',chooseGoal:'从推荐中选择目标',viewGoal:'在成长档案中查看目标',goalUnavailable:'该谱面当前不可用',
  facts:{played:'游玩', 'score-pb':'分数新高', 'ng-reduced':'不可减少', 'combo-improved':'连击提升',clear:'通关',fc:'全连',df:'全良','rank-upgrade':'评级提升','goal-completed':'目标完成'}
 });
 const errorText = computed(() => {
- const c=copy.value;
- return failure.value===401?c.login:failure.value===400?c.unbound:failure.value===403?c.denied:failure.value===409?c.changed:failure.value===504?c.timeout:c.unavailable;
+ const c=copy.value,status=failure.value?.status,reason=failure.value?.reason;
+ return status===401?c.login:status===400?c.unbound:status===403?c.denied:
+  status===409&&['profile-changed','binding-changed'].includes(reason||'')?c.changed:
+  status===409&&reason==='catalog-changed'?c.catalogChanged:status===504?c.timeout:c.unavailable;
 });
+function readFailure(error:any,timedOut=false){return {status:timedOut?504:Number(error?.statusCode||error?.response?.status)||503,reason:String(error?.data?.statusMessage||error?.statusMessage||'')};}
 function clear(){epoch++;controller?.abort();overview.value=null;selection.value='';}
 async function load(){
  clear();const request=epoch;failure.value=null;pending.value=true;
@@ -28,14 +31,14 @@ async function load(){
  try{
   const data=await apiFetch<MyTaikoOverview>('/api/account/my-taiko/overview',{signal:requestController.signal,retry:0,cache:'no-store'});
   if(request===epoch){overview.value=data;selection.value=data.profile.bindingId;}
- }catch(error:any){if(request===epoch){overview.value=null;failure.value=timedOut?504:Number(error?.statusCode||error?.response?.status)||503;}}
+ }catch(error:any){if(request===epoch){overview.value=null;failure.value=readFailure(error,timedOut);}}
  finally{clearTimeout(deadline);if(request===epoch)pending.value=false;}
 }
 async function switchBinding(){
  const target=selection.value;if(!target||target===overview.value?.profile.bindingId)return;
  clear();failure.value=null;pending.value=true;
  try{await apiFetch('/api/account/bindings/current',{method:'POST',body:{bindingId:Number(target)},retry:0,timeout:15000});}
- catch(error:any){failure.value=Number(error?.statusCode||error?.response?.status)||503;pending.value=false;return;}
+ catch(error:any){failure.value=readFailure(error);pending.value=false;return;}
 }
 function visible(){if(document.visibilityState==='hidden'){clear();pending.value=false;}else requestRefresh();}
 function focus(){requestRefresh();}
@@ -53,8 +56,8 @@ onBeforeUnmount(()=>{mounted=false;clear();document.removeEventListener('visibil
   <p v-if="pending" role="status">{{ copy.loading }}</p>
   <div v-else-if="failure" role="alert">
    <p>{{ errorText }}</p>
-   <NuxtLink v-if="failure===401" :to="localePath('/account/login')">{{ copy.login }}</NuxtLink>
-   <NuxtLink v-else-if="failure===400" :to="localePath('/account/profile')">{{ copy.bind }}</NuxtLink>
+   <NuxtLink v-if="failure.status===401" :to="localePath('/account/login')">{{ copy.login }}</NuxtLink>
+   <NuxtLink v-else-if="failure.status===400" :to="localePath('/account/profile')">{{ copy.bind }}</NuxtLink>
   </div>
   <template v-else-if="overview">
    <label class="my-binding">{{ copy.binding }}
