@@ -1,5 +1,54 @@
 # Viewer 1.0 Release Gate 当前差距
 
+## 2026-10-31 最终收口判定（0.88.3）
+
+本文件仍是唯一现行 Gate。下方10月29日及更早记录均保留其原时点含义，不再代表当前运行版本。原产品合同是“查歌查谱、管理和理解成绩、选择练习目标、同步验证进展、查看回顾和参与社区”；不以全面视觉重做、全量迁库或更多新功能作为1.0前置条件。
+
+**生产已正常发布0.88.3，源码为 `9c264af760ec1962c989a9867f9e122a0d449dae`。** PR49原CI为316/316与Nuxt生产构建通过，原标准部署已完成；本轮不重复部署、不制造0.88.4。10月31日公开More、有效OpenAPI/package/lock版本一致，公开兼容承诺与源码字节一致。匿名My Taiko BFF为401。实际Contract仍为1.1 / FREEZE_CANDIDATE / contractFrozen=false，Schema revision为 `30591840759a1d437e01f002f215a320673ce7ed95580d30f162756339c646db`。
+
+| 既有 Gate | 当前结论 | 收口依据与剩余范围 |
+| --- | --- | --- |
+| API授权与凭据边界 | PASS（既有公开范围） | 沿用已通过的授权/SQL负例。0.88.3定向验收补真实会话、跨账号读取隔离、绑定切换及读取中变更拒绝，不扩大权限。 |
+| 单一Writer／Publication | PASS（已验收协议）；恢复缺口见B | 不重开迁移或全Writer审计。新验收通过已安装Publication桥接发布**隔离合成**数据；不能用它覆盖已知生产损坏。 |
+| Contract／公开兼容承诺（C） | 实现/Schema/样例PASS；正式冻结待发布决策 | 当前84个OpenAPI样例、79个内部引用及SDK例子的撤销拒绝通过；公开meta/唯一Schema一致。正式1.1冻结尚未发生。应在正式发布决定时同步受控lifecycle、两份有效OpenAPI及最小样例；不修改历史freeze记录，不要求外部旧客户端全部迁移。 |
+| Growth／Goal／Annual事实连续性 | PASS（既有规则及权限范围） | 推荐→明确确认→目标创建→原评估→Growth的真实Nuxt/SQL/wheel证据沿用0.86；Weekly、Passport及Annual原验收沿用。0.88.1补同步返回后的缓存信号和目标直达Growth，不重算历史，不扩大Annual准入。 |
+| 生产恢复、备份与回滚（B） | **BLOCKED：真正的数据恢复阻断** | 已知单案坏current与committed引用不符，没有关闭证据；旧verified恢复点不覆盖当前同代完整集合。诊断捕获/195.887秒原生还原不等于健康恢复点。受支持current/history、授权撤销、Growth/Goal的同代可恢复性及原RPO≤15分钟/RTO≤120分钟未签收。U1/W1及生产备份调度等仍按既有独立授权处理；本轮未获取上游、修复数据或重跑全量恢复。 |
+| 历史有效歌曲SSR500（A） | 历史归因UNKNOWN；不判为已证明的当前回归 | 沿用修复和0.87.11窗口965次有效歌曲GET、4xx/5xx=0的证据。历史65次不追认同因或全部修复；本轮代码未影响歌曲SSR，不重复验证。建议将残余归因列入1.0.x监测，发布人仍须记录此有限风险的接受决定，不伪造既往签收。 |
+| 资源控制／在线性能（D） | 原控制PASS；完整容量NOT VERIFIED | 保持正常内存准入、cgroup/Worker/互斥，未继承一次性例外。没有已批准歌曲延迟阈值，不能凭缺少新p95自行制造阻断；旧已接受O1/Annual限制不重开。新容量或无目标全站压测延期。 |
+
+**当前不能正式发布1.0.0。** 真正未关闭的是B所列生产数据与恢复能力；Contract正式冻结及有限历史风险接受属于现有发布决定，不能由测试PASS自动代签。关闭B并完成这些现有发布决定后，进行最终候选与正常发布即可，不需新增产品功能、Gate或准备型PR。不能用缩小产品范围豁免现有受支持数据的恢复要求。
+
+### 四条产品主线：已有能力与诚实边界
+
+| 主线 | 已达到的用户体验 | 证据与边界 |
+| --- | --- | --- |
+| My Viewer | 登录／绑定／切换→成绩与歌曲→同步→查看当前成绩和成长；有准入时My Taiko概览展示绑定、成绩摘要、成长和当前目标；无准入保留原入口 | [账号入口验收](account-entry-closeout-20261023.md)、PR47–49及本轮0.88.3真实链路定向验收。新概览仍受原灰度控制；不把全部账号准入视为发布必要条件。 |
+| Community | 歌曲／谱面关联→列表查找→发帖／回复／点赞→通知与我的帖子，失败可重试且身份隔离 | [社区状态](community-state-fixes-20261022.md)、[社区核心](community-core-closeout-20261023.md)：真实Vue与独立SQL分层验收；不冒称每个生产真实账号均走过完整旅程。无需为1.0重做社区布局。 |
+| Training | 既有Today Plan或普通推荐→歌曲／难度→Goal Preview→用户确认→既有目标创建API→Growth查看／评估→后续方向 | [推荐目标交付](recommendation-goal-handoff.md)、既有真实Nuxt/SQL/wheel中日文移动端证据；0.88.1把“查看目标”直接接到成长档案。未玩／无可靠基线候选仍只供浏览，不扩大写入范围。 |
+| Progress | 同步后查看当前成长→Recent／Daily→Weekly／Passport→既有权限下Annual回顾／分享 | [成长与周报](viewer-growth-weekly-20261021/README.md)、[Passport](skill-passport-status.md)、既有Annual验收。冻结测量可选四档，可信成绩事实最多近90天；没有记录不补零，同步不推定游玩。 |
+
+产品能力已覆盖原定四条主线，**不等于全部生产数据均健康，也不等于已授权生产写入验收**。新增定向验收使用未修改0.88.3产物、真实登录/SQL/Publication/Chromium与合成账号；没有借用用户会话或复制生产私人数据。0.88.1四组同步成功/部分成功→新成绩/成长→推荐确认创建目标的线上页面证据使用受控API响应，继续明确区别于服务端实链；服务端推荐/Goal真实证据另行沿用。
+
+### 本轮新增证据及可延期事项
+
+- 0.88.3最终定向验收：`qa-vault/runs/qa-9f08a8f71b4a/evidence`，12项BFF观察、中文375px／日文414px真实登录和绑定切换；非空别名与日文回填、别名变更、真实源漂移、读取中目录/绑定变化均覆盖。Nuxt/浏览器/测试MySQL退出，OOM/high/max均0。首次测试因填表时序／选择器问题失败，保留 `qa-60e5f5c3f106`，不计PASS。
+- 当前契约示例：`qa-d6b0a8d2c5b8/evidence/developer-examples.json`；生产只读版本/Schema/兼容承诺：`qa-78c437489d71/evidence/public-release.json`。公开meta可能产生既有配额记账，不能宣称数据库完全零侧效应。
+- 既有0.88.1四组产品流程：`qa-6838f5ef3642/evidence/live-flow.json`；0.88.2当前目标12种页面状态：`qa-ab3dacb79962/evidence/goal-results.json`；0.88.3错误文案八种页面组合：`qa-b6b52b4b0e08/evidence/errors.json`。这些页面证据的API受控性质不变。
+- 1.0.x或以后：首页/个人中心/详情结构改版、更多训练功能、完整365天成绩事实、OAuth生态、全量外部迁移、历史SSR65次逐条归因与新增容量研究。生产Source和必要恢复能力**不在延期清单中**；作为独立维护事项推进，不再衍生无关产品改造。
+
+定向复验复用现有空MySQL runner，不新增CI矩阵：
+
+```sh
+bash scripts/memory/run_qa.sh /usr/bin/env \
+  QA_ARTIFACT_MANIFEST=/absolute/protected/runtime-manifest.json \
+  /usr/bin/python3 scripts/readiness/run-my-taiko-catalog-qa.py \
+  /absolute/release/taiko_viewer/.output SOURCE_COMMIT_SHA
+```
+
+该命令只读已有构建，写入仅限owned QA scratch的合成测试库/文件。它不是部署、生产恢复或全体真实用户的验收命令。本轮仅测试/文档提交，保持应用0.88.3，不创建PR。
+
+## 2026-10-29及更早历史记录
+
 更新：2026-10-29，Asia/Shanghai。此文件是唯一现行 1.0 Release Gate 表；[本轮证据](viewer-1-rc-blockers-20261025.md)、[A：SSR 归因](viewer-ssr-attribution-20261025.md)、[B：Source 完整性与修复准备](viewer-source-integrity-20261025.md)、[本轮Source授权申请](viewer-source-repair-requests-20261026.md)、[0.87.11稳定性](viewer-08711-stability-20261026.md)、[持续备份设计](viewer-continuous-backup-plan-20261026.md)、[U1准备及授权核对](viewer-u1-preparation-20261027.md)、[U1已授权后的资源准入](viewer-u1-admission-20261027.md)、[U1实际限定执行](viewer-u1-execution-20261027.md)和[历史收口记录](viewer-1-rc-closeout-20261023.md)解释证据，不另设 Gate。本轮起始main为`763bd3c48fabbb8dce59b629e4350fb682e3ab04`，生产checkout/运行均未变，仍为上轮标准发布的 **0.87.11 / 92e6106ef84753ac3f0830ffccdf9717b1dfd5dd**，buildId **acc7ece2-0652-4e7f-a02b-4759ae2e62f4**，PID4179944，公开More版本一致。后续纯仓库报告提交不作为新运行构件。
 
 | Gate | 当前分类 | 实际证据及边界 | 剩余最小工作 |
