@@ -1,26 +1,23 @@
+import { createAccountSession, setAccountSessionCookie } from "./session";
 import type { H3Event } from "h3";
-import { createError, deleteCookie, setCookie } from "h3";
+import { createError, deleteCookie } from "h3";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import {
   type AccountRow,
   type SessionRow,
   createCode,
-  createSessionToken,
   EMAIL_CODE_TTL_MS,
   ensureNonEmpty,
   ensureValidEmail,
   getPasswordHash,
-  getSecureCookieFlag,
   normalizeEmail,
   normalizeUsername,
   readSessionTokenFromEvent,
   sanitizePublicUser,
   sendMailCode,
   SESSION_COOKIE_NAME,
-  SESSION_TTL_MS,
   sha256,
-  toIso,
   verifyPasswordHash
 } from "../../internal/account/shared";
 
@@ -48,24 +45,9 @@ const consumeEmailCode = async (
 
 const createAndSetSession = async (event: H3Event, userId: number) => {
   await ensureAccountSchema();
-  const db = getAccountDb();
-  const token = createSessionToken();
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
-  await db.execute(
-    "INSERT INTO web_user_sessions (session_token, user_id, expires_at) VALUES (?, ?, ?)",
-    [token, userId, expiresAt]
-  );
-  setCookie(event, SESSION_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: getSecureCookieFlag(event),
-    path: "/",
-    expires: expiresAt
-  });
-  return {
-    sessionToken: token,
-    expiresAt: toIso(expiresAt)
-  };
+  const session = await createAccountSession(getAccountDb(), userId);
+  setAccountSessionCookie(event, session);
+  return session;
 };
 
 export const sendRegisterCode = async (emailInput: unknown) => {

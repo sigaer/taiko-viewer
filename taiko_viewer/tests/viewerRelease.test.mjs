@@ -49,9 +49,11 @@ test('reviewed release JSON, examples, workflow and current documentation metada
  for(const song of json[0].items)for(const chart of song.charts)assert.deepEqual(Object.keys(chart),['difficulty','level']);
  for(const script of [...text.matchAll(/```sh\n([\s\S]*?)\n```/g)])execFileSync('/bin/bash',['-n'],{input:script[1]});
  for(const script of [...text.matchAll(/```python\n([\s\S]*?)\n```/g)])execFileSync('/usr/bin/python3',['-c','import ast,sys;ast.parse(sys.stdin.read())'],{input:script[1]});
- const pkg=JSON.parse(await read('taiko_viewer/package.json'));
+ // Viewer feature versions and the frozen Developer API documentation have
+ // separate lifecycles. OIDC must not revise the frozen API release metadata.
+ const frozenApiDocVersion='1.0.0';
  for(const file of ['docs/developer-api-batch1-openapi.yaml','docs/083-developer-api-openapi.yaml']){
-  const doc=yaml.parse(await read(file));assert.equal(doc.info.version,pkg.version);
+  const doc=yaml.parse(await read(file));assert.equal(doc.info.version,frozenApiDocVersion);
   const songs=doc.paths['/api/v1/taiko/catalog/songs'].get;
   assert.equal((songs.servers||doc.servers)[0].url,'https://viewer.sakura-bot.cn');
   if(file.includes('083-')){

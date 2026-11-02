@@ -1111,6 +1111,7 @@ const removeQqBinding = async () => {
             <div class="profile-info">
               <h2>{{ profile.user.username }}</h2>
               <p>{{ profile.user.email }}</p>
+              <AccountOidcOptions purpose="link" :redirect="localePath('/account/profile')" />
               <div class="status-list">
                 <div class="status-chip" :class="profile.verificationStatus.emailVerified ? 'ok' : 'pending'">
                   <span>{{ copy.emailVerified }}</span>

@@ -1,0 +1,194 @@
+import { createHash, randomBytes } from "node:crypto";
+import type { H3Event } from "h3";
+import { createError, deleteCookie, getCookie, getHeader, getRouterParam, readBody, sendRedirect, setCookie, setHeader } from "h3";
+import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import { getAccountDb, type DbRow } from "../../utils/account-db";
+import { schemaRequirement, validateSchemaTables } from "../../utils/account-schema-runtime";
+import { getAccountUserFromEvent, requireAccountUser } from "../../utils/account/auth";
+import { createAccountSession, setAccountSessionCookie } from "../../utils/account/session";
+import { SESSION_COOKIE_NAME, normalizeEmail, sha256 } from "../../internal/account/shared";
+import { oidcProvider, oidcProviders, safeOidcReturnPath, type OidcProvider } from "./config";
+import { client, discoverOidc } from "./protocol";
+import { OIDC_TABLES } from "./schema";
+
+type FailureCode = "invalid_transaction" | "session_changed" | "email_required" | "email_conflict" | "identity_conflict" | "provider_unavailable";
+class OidcFailure extends Error {
+  constructor(readonly code: FailureCode) { super(code); }
+}
+type Transaction = {
+  state_hash: string; browser_hash: string; provider_id: string; config_hash: string;
+  nonce: string; verifier: string; purpose: "login" | "link"; target_user_id: number | null;
+  session_hash: string | null; return_path: string; locale: string;
+};
+const cookieName = (id: string) => `stv_oidc_${id}`;
+const fingerprint = (provider: OidcProvider) => sha256(JSON.stringify(provider));
+const schema = () => validateSchemaTables(getAccountDb(), OIDC_TABLES.map(schemaRequirement), "oidc");
+const noStore = (event: H3Event) => {
+  setHeader(event, "cache-control", "no-store");
+  setHeader(event, "referrer-policy", "no-referrer");
+};
+
+export async function listOidcProviders(event: H3Event) {
+  noStore(event);
+  return { providers: oidcProviders().map(({ id, label }) => ({ id, label })) };
+}
+
+export async function oidcBindingStatus(event: H3Event) {
+  noStore(event);
+  const providers = oidcProviders();
+  if (!providers.length) return { providers: [] };
+  const user = await requireAccountUser(event);
+  await schema();
+  const [rows] = await getAccountDb().execute<DbRow<{ issuer: Buffer; status: string; remote_link_status: string }>[]>(
+    "SELECT issuer, status, remote_link_status FROM web_external_identities WHERE user_id = ?", [user.id]
+  );
+  return { providers: providers.map(({ id, label, issuer }) => {
+    const row = rows.find(r => r.issuer.toString("utf8") === issuer);
+    return { id, label, linked: row?.status === "active", remoteLinkStatus: row?.remote_link_status || "not_requested" };
+  }) };
+}
+
+export async function startOidc(event: H3Event) {
+  noStore(event);
+  const provider = oidcProvider(getRouterParam(event, "provider") || "");
+  // A top-level GET callback is permitted by SameSite=Lax; starts must be an
+  // explicit same-origin POST to prevent a cross-site account binding prompt.
+  if (getHeader(event, "origin") !== new URL(provider.redirectUri).origin) throw createError({ statusCode: 403, statusMessage: "Invalid origin" });
+  const body = await readBody(event);
+  if (body?.purpose !== "login" && body?.purpose !== "link") throw createError({ statusCode: 400, statusMessage: "Invalid purpose" });
+  const user = body.purpose === "link" ? await requireAccountUser(event) : await getAccountUserFromEvent(event);
+  // Browser round trips deliberately use only the existing HttpOnly session cookie.
+  const session = user ? getCookie(event, SESSION_COOKIE_NAME) || "" : "";
+  if (user && !session) throw createError({ statusCode: 401, statusMessage: "Browser session required" });
+  await schema();
+  let config: Awaited<ReturnType<typeof discoverOidc>>;
+  try { config = await discoverOidc(provider); } catch { throw createError({ statusCode: 503, statusMessage: "External login unavailable" }); }
+  const state = client.randomState(), nonce = client.randomNonce(), verifier = client.randomPKCECodeVerifier();
+  const browser = randomBytes(32).toString("hex");
+  const locale = body.locale === "ja" ? "ja" : "zh";
+  const returnPath = safeOidcReturnPath(body.redirect, locale === "ja" ? "/ja/account/profile" : "/account/profile");
+  const url = client.buildAuthorizationUrl(config, {
+    response_type: "code", response_mode: "query", redirect_uri: provider.redirectUri, scope: provider.scopes.join(" "),
+    state, nonce, code_challenge: await client.calculatePKCECodeChallenge(verifier), code_challenge_method: "S256",
+    ...(body.purpose === "link" ? { prompt: "select_account" } : {})
+  });
+  const db = getAccountDb();
+  // Bounded retention of secrets; expired rows are never accepted, even before cleanup.
+  await db.execute("DELETE FROM web_oidc_transactions WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY) LIMIT 100");
+  await db.execute(`INSERT INTO web_oidc_transactions
+    (state_hash, browser_hash, provider_id, config_hash, nonce, verifier, purpose, target_user_id, session_hash, return_path, locale, expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
+  [sha256(state), sha256(browser), provider.id, fingerprint(provider), nonce, verifier, body.purpose,
+    user?.id || null, session ? sha256(session) : null, returnPath, locale]);
+  setCookie(event, cookieName(provider.id), browser, { httpOnly: true, secure: true, sameSite: "lax", path: `/api/account/oidc/${provider.id}`, maxAge: 600 });
+  return { authorizationUrl: url.href };
+}
+
+async function assertStartingSession(db: PoolConnection, event: H3Event, tx: Transaction) {
+  const session = getCookie(event, SESSION_COOKIE_NAME) || "";
+  if ((session ? sha256(session) : null) !== tx.session_hash) throw new OidcFailure("session_changed");
+  if (tx.session_hash) {
+    const [rows] = await db.execute<DbRow<{ user_id: number }>[]>(
+      "SELECT user_id FROM web_user_sessions WHERE session_token = ? AND expires_at > NOW() FOR UPDATE", [session]);
+    if (!rows.length || rows[0].user_id !== tx.target_user_id) throw new OidcFailure("session_changed");
+  } else if (tx.purpose === "link") throw new OidcFailure("session_changed");
+}
+
+async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transaction, claims: Record<string, unknown>) {
+  if (fingerprint(oidcProvider(provider.id)) !== tx.config_hash) throw new OidcFailure("invalid_transaction");
+  const sub = claims.sub;
+  // OIDC Subject is opaque ASCII, case-sensitive and never trimmed.
+  if (typeof sub !== "string" || !/^[\x00-\x7f]{1,255}$/.test(sub)) throw new OidcFailure("provider_unavailable");
+  const db = await getAccountDb().getConnection();
+  let newSession: Awaited<ReturnType<typeof createAccountSession>> | undefined;
+  try {
+    await db.beginTransaction();
+    await assertStartingSession(db, event, tx);
+    const [identities] = await db.execute<DbRow<{ user_id: number; status: string }>[]>(
+      "SELECT user_id, status FROM web_external_identities WHERE issuer = ? AND subject = ? FOR UPDATE", [provider.issuer, sub]);
+    let userId = identities[0]?.user_id;
+    if (identities.length) {
+      if (identities[0].status !== "active" || (tx.purpose === "link" && userId !== tx.target_user_id)) throw new OidcFailure("identity_conflict");
+    } else {
+      if (tx.purpose === "link") {
+        userId = tx.target_user_id!;
+      } else {
+        // The existing account schema requires a real recoverable email. Never
+        // synthesize an email or turn an unverified claim into local ownership.
+        const email = typeof claims.email === "string" ? normalizeEmail(claims.email) : "";
+        if (claims.email_verified !== true || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new OidcFailure("email_required");
+        const [existing] = await db.execute<DbRow<{ id: number }>[]>("SELECT id FROM web_user_accounts WHERE email = ? OR username = ?", [email, email]);
+        if (existing.length) throw new OidcFailure("email_conflict");
+        try {
+          const [created] = await db.execute<ResultSetHeader>(
+            "INSERT INTO web_user_accounts (username, email, password_hash, email_verified) VALUES (?, ?, 'oidc-only', 1)",
+            [`viewer_${randomBytes(16).toString("hex")}`, email]);
+          userId = created.insertId;
+        } catch (error: any) {
+          if (error?.code === "ER_DUP_ENTRY") throw new OidcFailure("email_conflict");
+          throw error;
+        }
+      }
+      await db.execute(`INSERT INTO web_external_identities
+        (user_id, provider_id, issuer, subject, status, remote_link_operation_id) VALUES (?, ?, ?, ?, 'active', ?)`,
+      [userId, provider.id, provider.issuer, sub, randomBytes(32).toString("hex")]);
+    }
+    if (tx.purpose === "login") newSession = await createAccountSession(db, userId!);
+    await db.commit();
+  } catch (error: any) {
+    await db.rollback();
+    if (["ER_DUP_ENTRY", "ER_LOCK_DEADLOCK", "ER_LOCK_WAIT_TIMEOUT"].includes(error?.code)) throw new OidcFailure("identity_conflict");
+    throw error;
+  } finally { db.release(); }
+  if (newSession) setAccountSessionCookie(event, newSession);
+}
+
+export async function callbackOidc(event: H3Event) {
+  noStore(event);
+  // Disabled/unknown providers fail before DB access or any account/session changes.
+  const provider = oidcProvider(getRouterParam(event, "provider") || "");
+  let tx: Transaction | undefined;
+  try {
+    await schema();
+    const incoming = new URL(event.node.req.url || "", new URL(provider.redirectUri).origin);
+    const state = incoming.searchParams.get("state") || "";
+    const browser = getCookie(event, cookieName(provider.id)) || "";
+    if (!/^[A-Za-z0-9_-]{20,128}$/.test(state) || !/^[a-f0-9]{64}$/.test(browser) || [...incoming.searchParams.keys()].some(k => incoming.searchParams.getAll(k).length !== 1)) throw new OidcFailure("invalid_transaction");
+    const db = getAccountDb();
+    const [claimed] = await db.execute<ResultSetHeader>(`UPDATE web_oidc_transactions SET consumed_at = NOW()
+      WHERE state_hash = ? AND browser_hash = ? AND provider_id = ? AND config_hash = ? AND consumed_at IS NULL AND expires_at > NOW()`,
+    [sha256(state), sha256(browser), provider.id, fingerprint(provider)]);
+    if (claimed.affectedRows !== 1) throw new OidcFailure("invalid_transaction");
+    const [rows] = await db.execute<DbRow<Transaction>[]>("SELECT * FROM web_oidc_transactions WHERE state_hash = ?", [sha256(state)]);
+    tx = rows[0];
+    deleteCookie(event, cookieName(provider.id), { secure: true, httpOnly: true, sameSite: "lax", path: `/api/account/oidc/${provider.id}` });
+    // Check before contacting the provider, and recheck under a session row lock
+    // inside the final commit to reject logout/account switch during exchange.
+    const check = await db.getConnection();
+    try { await assertStartingSession(check, event, tx); } finally { check.release(); }
+    const config = await discoverOidc(provider);
+    const currentUrl = new URL(provider.redirectUri);
+    currentUrl.search = incoming.search;
+    const tokens = await client.authorizationCodeGrant(config, currentUrl, {
+      pkceCodeVerifier: tx.verifier, expectedState: state, expectedNonce: tx.nonce, idTokenExpected: true
+    });
+    const claims = tokens.claims();
+    if (!claims) throw new OidcFailure("provider_unavailable");
+    // These optional token-endpoint hashes are not mandatory in pure code flow.
+    // When present, verify them against the actual code/access token. All allowed
+    // signing algorithms use SHA-256; signature validation remains in the library.
+    for (const [claim, value] of [["c_hash", incoming.searchParams.get("code")], ["at_hash", tokens.access_token]] as const) {
+      if (claims[claim] !== undefined && (typeof value !== "string" || claims[claim] !== createHash("sha256").update(value).digest().subarray(0, 16).toString("base64url"))) throw new OidcFailure("provider_unavailable");
+    }
+    if (claims.azp !== undefined && claims.azp !== provider.clientId) throw new OidcFailure("provider_unavailable");
+    await finishIdentity(event, provider, tx, claims);
+    // Access/refresh/ID tokens are request-local only and never persisted or returned.
+    return sendRedirect(event, safeOidcReturnPath(tx.return_path), 303);
+  } catch (error) {
+    // Deliberately do not log protocol errors: providers can embed codes/tokens.
+    const code = error instanceof OidcFailure ? error.code : "provider_unavailable";
+    const prefix = (tx?.locale || getCookie(event, "viewer_locale")) === "ja" ? "/ja" : "";
+    const target = tx?.purpose === "link" ? "/account/profile" : "/account/login";
+    return sendRedirect(event, `${prefix}${target}?oidc_error=${code}`, 303);
+  }
+}

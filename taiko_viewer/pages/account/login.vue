@@ -174,6 +174,7 @@ const submit = async () => {
           >{{ authenticatedUserId ? completionCopy.continue : copy.submit }}</el-button
         >
       </el-form>
+      <AccountOidcOptions purpose="login" :redirect="redirectAfterLogin" />
       <div class="auth-links">
         <NuxtLink :to="{path:localePath('/account/register'),query:{redirect:redirectAfterLogin}}">{{ copy.register }}</NuxtLink>
         <NuxtLink :to="localePath('/account/forgot-password')">{{ copy.forgot }}</NuxtLink>

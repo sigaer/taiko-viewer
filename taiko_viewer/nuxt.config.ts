@@ -136,6 +136,8 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    oidcEnabled: false,
+    oidcProvidersJson: "[]",
     annualStartupMode: "normal",
     myTaikoReadModelMode: "legacy",
     myTaikoReadModelAllowlistPath: "",
