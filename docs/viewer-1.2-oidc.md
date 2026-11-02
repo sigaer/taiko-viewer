@@ -111,7 +111,7 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/absolute/pat
 
 ## OurTaiko OIDC 与 external lookup Mock 联调
 
-Viewer 1.2.1 按 [SAKURA-PROTOCOL.md 0.1 草案](https://github.com/OurTaiko/OurTaikoLogs/blob/main/OurTaikoSSO/docs/SAKURA-PROTOCOL.md) 的 OIDC 与外源查询部分实现服务器端资料解析。读取的协议文件 blob 为 `208acf6b9964b4cde572ad2c94341d8551792157`。本批只验证本地合成 HTTPS Mock；OurTaiko 的真实 external lookup 尚未实现，未进行双方真实生产联调。
+Viewer 1.2.1 按 [SAKURA-PROTOCOL.md 0.1 草案](https://github.com/OurTaiko/OurTaikoLogs/blob/main/OurTaikoSSO/docs/SAKURA-PROTOCOL.md) 的 OIDC 与外源查询部分实现服务器端资料解析。读取的协议文件 blob 为 `208acf6b9964b4cde572ad2c94341d8551792157`。该批只验证本地合成 HTTPS Mock；当时 OurTaiko 的真实 external lookup 尚未实现，未进行双方真实生产联调。后续真实联调入口准备见 [loopback 运行说明](viewer-1.2.1-ourtaiko-loopback.md)。
 
 只有 `provider.id === "ourtaiko"` 启用该解析器。该 Provider 固定使用 `openid profile`、RS256 及 confidential 客户端认证（basic 或 post），拒绝 email/offline_access 等其他作用域；其他 Provider 保留原有行为。OurTaiko ID Token 不需要、也不依赖 `email` 或 `email_verified`。
 
@@ -199,7 +199,7 @@ X-Service-Key: <server OIDC client_secret>
 https://viewer.sakura-bot.cn/api/account/oidc/ourtaiko/callback
 ```
 
-OurTaiko 仍需实现并向该 confidential Application 开放 `POST /internal/v1/external/lookup`，包括服务凭据认证、账号可见性（已远端关联或当前持有授予该 Application 的有效 access token）、已验证邮箱资料、错误码、限流/Retry-After 及审计。Viewer 当前只有本地身份关联，未执行双方远端 link；真实 lookup 必须接受刚完成 OIDC 的合成联调身份，不能依赖本批未实现的远端 link。
+2026-11-02 收到 OurTaiko 已部署 OIDC、lookup、link 的反馈。本机已验证真实 Discovery；lookup 的服务凭据认证、账号可见性（已远端关联或当前持有授予该 Application 的有效 access token）、已验证邮箱资料和错误行为仍需取得独立测试 Application 后实测。测试改用 loopback 回调，不能登记上面的正式 Viewer 地址来代替测试。Viewer 当前只有本地身份关联，未执行双方远端 link；真实 lookup 必须接受刚完成 OIDC 的合成联调身份，不能依赖本批未实现的远端 link。
 
 后续需要通过安全渠道取得 Client ID/Secret、确认精确 Issuer/Discovery/JWKS、basic/post 认证方式、RS256 与 PKCE S256、`openid profile`、稳定 32 位 sub、lookup 的 emailVerified 语义、测试身份及密钥轮换安排。先在双方明确授权的测试环境验证真实 lookup 的成功/错误/限流行为，再单独安排生产迁移、反向代理回调 query 日志脱敏和开关启用。客户端 Secret 只写私有服务器环境，不放在命令行或文档中。
 

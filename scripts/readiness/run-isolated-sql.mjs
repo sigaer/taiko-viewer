@@ -96,12 +96,18 @@ try{
  stage='bootstrap';
  assert.deepEqual(await run(process.execPath,['taiko_viewer/scripts/bootstrap_source_security_test_db.mjs'],'bootstrap',testEnv),{code:0,signal:null});
  const suites=process.argv.filter(arg=>/^taiko_viewer\/tests\/[A-Za-z0-9]+\.test\.mjs$/.test(arg));
- assert.ok(suites.length>0,'Explicit SQL suites required');
+ const oidcLoopback=process.argv.includes('--oidc-loopback');
+ assert.ok(oidcLoopback ? suites.length===0 : suites.length>0,'Select explicit SQL suites or OIDC loopback mode');
  stage='tests';
  const pattern=process.argv.find(arg=>arg.startsWith('--test-name-pattern='));
  assert.ok(!pattern || pattern.length<=256,'Bounded test name pattern required');
  evidence.testNamePattern=pattern?.slice('--test-name-pattern='.length)??null;
- const result=await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...(pattern?[pattern]:[]),...suites],'tests',testEnv,600000);
+ const duration=process.argv.find(arg=>arg.startsWith('--oidc-duration-seconds='))?.split('=')[1]||'480';
+ if(oidcLoopback)assert.ok(/^\d+$/.test(duration)&&Number(duration)>=15&&Number(duration)<=480,'OIDC loopback lifetime must be 15–480 seconds');
+ const result=oidcLoopback
+  ? await run(process.execPath,['scripts/readiness/serve-oidc-loopback.mjs'],'oidc-loopback',{...testEnv,OIDC_LOOPBACK_DURATION_SECONDS:duration},600000)
+  : await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...(pattern?[pattern]:[]),...suites],'tests',testEnv,600000);
+ if(oidcLoopback){evidence.mode='oidc-loopback';evidence.callback='https://localhost:8443/api/account/oidc/ourtaiko/callback';}
  evidence.tests=suites;evidence.result=result;evidence.status=result.code===0?'PASS':'FAIL';
  if(o1){const measured=JSON.parse(await readFile(testEnv.TAIKO_O1_OUTPUT,'utf8'));evidence.o1.status=measured.status;evidence.o1.summary=measured.summary;console.log(JSON.stringify({o1Status:measured.status,pressureStop:measured.summary?.pressureStop,output:testEnv.TAIKO_O1_OUTPUT}));}
  if(result.code!==0)process.exitCode=1;
