@@ -88,6 +88,27 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/absolute/pat
 
 核心实现位置：`server/services/oidc/{config,protocol,schema,service,remote-link}.ts`，路由位于 `server/api/account/oidc/`；统一会话签发位于 `server/utils/account/session.ts`，原密码认证仅改为调用该公共方法。三个页面各引入 `components/account/OidcOptions.vue`，不重做原有表单。`nuxt.config.ts` 增加私有配置，package/lock 升至 1.2.0 并锁定 OIDC 客户端依赖。三个 OIDC 测试文件及隔离 runner 随代码提交，配置边界测试加入现有 CI。
 
+## 第一阶段整合前安全审查
+
+2026 年 11 月 2 日复核交付提交 `a3dee126d392f68ce780981430c10a5b8b2b05dc`。远端及本地 main 均为 `e79aff6c3a3b6c94459bbafac7f40945edd9fde0`，交付分支直接基于该基线，工作树干净。未发现需要阻断主分支整合的问题，本次仅补充审查记录，不修改实现、不增加功能或验收门槛。
+
+| 审查项 | 代码与证据核对结果 |
+| --- | --- |
+| state、nonce、PKCE 和一次性回调 | 随机 state 与浏览器秘密分别哈希入库，绑定 Provider 及配置指纹；条件 UPDATE 同时检查有效期和未消费状态。库调用携带 S256 verifier、expectedState、expectedNonce，显式要求 ID Token 并开启签名验证。错误 state/nonce、重放、过期和并发回调已有隔离覆盖。 |
+| Session 身份一致性 | 关联目标来自有效 Viewer 会话；回调比较原会话哈希及所属用户，在换码前检查并在最终事务内锁定 Session 行复核。已有账号切换、会话过期、换码期间登出与无 Session 关联拒绝的证据。客户端传入 userId 不参与目标选择。 |
+| 唯一约束、并发与回滚 | `(issuer, subject)` 和 `(user_id, issuer)` 为完整二进制唯一键。新用户、外部身份及新 Session 同事务提交，冲突和死锁回滚；Cookie 在提交后签发。已有不同邮箱争用同一身份、不同用户并发关联及无孤立 OIDC-only 用户的 SQL 断言。 |
+| 重定向、配置与网络 | 仅使用服务器 Provider 注册表及固定 HTTPS 回调；返回路径拒绝跨站、编码绕过及 API 路径。Discovery 校验精确 Issuer，端点校验允许的 origin；请求禁用 HTTP 重定向，限制超时和响应大小。总开关关闭、Provider 禁用、配置变化与换码期间关闭均有拒绝证据。 |
+| OIDC-only 旧密码登录 | `oidc-only` 不符合原密码验证器的 `salt:hash` 格式，验证器立即返回 false；真实旧登录路由以该字符串尝试登录的 HTTP 结果为 401。已验证邮箱的正规重置密码流程保持原有语义。 |
+
+复用以下本机 QA 证据，均对应已交付实现：
+
+- OIDC 与原账号/Developer/ResourceGrant SQL HTTP：`/home/sigaer/taiko/qa-vault/runs/qa-63cbb1f47ba1/evidence/`，实际 `_test` 数据库及私有 datadir 已验证，生产连接和生产写入均为 0，测试 MySQL 已退出。
+- 36 个中日文页面组合、默认关闭时无入口及迁移保护：`/home/sigaer/taiko/qa-vault/runs/qa-3c9d653250ae/evidence/`，Nuxt 与 MySQL 已关闭。
+- 319 项 Node 回归、Contract bindings 及 3 项跨语言测试：`/home/sigaer/taiko/qa-vault/runs/qa-9e9ec6a9a48a/evidence/`。
+- 最终生产构建：`/var/tmp/taiko-viewer-oidc-build.log`、`/var/tmp/taiko-viewer-oidc-build-result.json`，npm 与隔离包装器均以 0 退出。
+
+本次没有实现修复，因此不重复运行上述测试或构建。整合保留 `oidcEnabled: false` 和空 Provider 注册表，不配置真实 OurTaiko 凭据、不执行生产迁移或部署。真实 OurTaiko 协议联调、生产迁移和启用需后续单独安排；远端 link 与 Sakura 反向登录仍属于独立批次。
+
 ## OurTaiko 后续接入
 
 在 Provider ID 确认为 `ourtaiko` 的前提下，需要向 OurTaiko 注册的精确回调地址是：
