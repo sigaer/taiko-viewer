@@ -6,10 +6,12 @@ import { getAccountDb, type DbRow } from "../../utils/account-db";
 import { schemaRequirement, validateSchemaTables } from "../../utils/account-schema-runtime";
 import { getAccountUserFromEvent, requireAccountUser } from "../../utils/account/auth";
 import { createAccountSession, setAccountSessionCookie } from "../../utils/account/session";
-import { SESSION_COOKIE_NAME, normalizeEmail, sha256 } from "../../internal/account/shared";
+import { SESSION_COOKIE_NAME, sha256 } from "../../internal/account/shared";
 import { oidcProvider, oidcProviders, safeOidcReturnPath, type OidcProvider } from "./config";
 import { client, discoverOidc } from "./protocol";
 import { OIDC_TABLES } from "./schema";
+import { type AccountEmailProfile, profileFromIdToken } from "./account-profile";
+import { assertOurTaikoSubject, lookupOurTaikoProfile, OurTaikoProfileError } from "./ourtaiko-profile";
 
 type FailureCode = "invalid_transaction" | "session_changed" | "email_required" | "email_conflict" | "identity_conflict" | "provider_unavailable";
 class OidcFailure extends Error {
@@ -94,11 +96,8 @@ async function assertStartingSession(db: PoolConnection, event: H3Event, tx: Tra
   } else if (tx.purpose === "link") throw new OidcFailure("session_changed");
 }
 
-async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transaction, claims: Record<string, unknown>) {
+async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transaction, sub: string, profile: AccountEmailProfile | null) {
   if (fingerprint(oidcProvider(provider.id)) !== tx.config_hash) throw new OidcFailure("invalid_transaction");
-  const sub = claims.sub;
-  // OIDC Subject is opaque ASCII, case-sensitive and never trimmed.
-  if (typeof sub !== "string" || !/^[\x00-\x7f]{1,255}$/.test(sub)) throw new OidcFailure("provider_unavailable");
   const db = await getAccountDb().getConnection();
   let newSession: Awaited<ReturnType<typeof createAccountSession>> | undefined;
   try {
@@ -115,8 +114,8 @@ async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transa
       } else {
         // The existing account schema requires a real recoverable email. Never
         // synthesize an email or turn an unverified claim into local ownership.
-        const email = typeof claims.email === "string" ? normalizeEmail(claims.email) : "";
-        if (claims.email_verified !== true || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new OidcFailure("email_required");
+        const email = profile?.email || "";
+        if (!profile?.emailVerified || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new OidcFailure("email_required");
         const [existing] = await db.execute<DbRow<{ id: number }>[]>("SELECT id FROM web_user_accounts WHERE email = ? OR username = ?", [email, email]);
         if (existing.length) throw new OidcFailure("email_conflict");
         try {
@@ -181,12 +180,26 @@ export async function callbackOidc(event: H3Event) {
       if (claims[claim] !== undefined && (typeof value !== "string" || claims[claim] !== createHash("sha256").update(value).digest().subarray(0, 16).toString("base64url"))) throw new OidcFailure("provider_unavailable");
     }
     if (claims.azp !== undefined && claims.azp !== provider.clientId) throw new OidcFailure("provider_unavailable");
-    await finishIdentity(event, provider, tx, claims);
+    const sub = claims.sub;
+    if (typeof sub !== "string" || !/^[\x00-\x7f]{1,255}$/.test(sub)) throw new OidcFailure("provider_unavailable");
+    let profile: AccountEmailProfile | null;
+    if (provider.id === "ourtaiko") {
+      assertOurTaikoSubject(sub);
+      // Protocol 0.1 §5.1: established identities log in without another lookup.
+      // This is a read-only preflight, outside the final write transaction. If
+      // that identity disappears, the final transaction cannot create without a profile.
+      const [existing] = tx.purpose === "login"
+        ? await db.execute<DbRow<{ user_id: number }>[]>("SELECT user_id FROM web_external_identities WHERE issuer = ? AND subject = ?", [provider.issuer, sub])
+        : [[]];
+      profile = existing.length ? null : await lookupOurTaikoProfile(provider, sub);
+    } else profile = profileFromIdToken(claims);
+    await finishIdentity(event, provider, tx, sub, profile);
     // Access/refresh/ID tokens are request-local only and never persisted or returned.
     return sendRedirect(event, safeOidcReturnPath(tx.return_path), 303);
   } catch (error) {
     // Deliberately do not log protocol errors: providers can embed codes/tokens.
-    const code = error instanceof OidcFailure ? error.code : "provider_unavailable";
+    const code = error instanceof OidcFailure || error instanceof OurTaikoProfileError ? error.code : "provider_unavailable";
+    if (error instanceof OurTaikoProfileError && error.retryAfter !== undefined) setHeader(event, "retry-after", String(error.retryAfter));
     const prefix = (tx?.locale || getCookie(event, "viewer_locale")) === "ja" ? "/ja" : "";
     const target = tx?.purpose === "link" ? "/account/profile" : "/account/login";
     return sendRedirect(event, `${prefix}${target}?oidc_error=${code}`, 303);

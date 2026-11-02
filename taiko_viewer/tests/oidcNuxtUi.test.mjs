@@ -101,6 +101,16 @@ test('built Nuxt OIDC disabled and enabled pages in zh/ja at 375, 414 and deskto
         await page.screenshot({ path: resolve(E, `oidc-${enabled}-${locale}-${width}-${pageName}.png`) });
         cases.push({ enabled, locale, width, page: pageName, overflow: false });
       }
+      if (enabled) for (const locale of ['zh', 'ja']) for (const error of ['ourtaiko_email_unverified', 'ourtaiko_rate_limited']) {
+        await page.setViewportSize({ width: 375, height: 812 });
+        await page.goto(base + (locale === 'ja' ? '/ja' : '') + '/account/login?oidc_error=' + error, { waitUntil: 'networkidle', timeout: 25000 });
+        const alert = page.locator('.oidc-options [role=alert]'); await alert.waitFor();
+        if (error === 'ourtaiko_email_unverified') assert.match(await alert.innerText(), /OurTaiko/);
+        else assert.match(await alert.innerText(), locale === 'ja' ? /しばらく待って/ : /稍后重试/);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+        assert.ok(await page.locator('input[type=password]').first().isEditable());
+        cases.push({ enabled, locale, width: 375, page: 'safe-error', error, overflow: false });
+      }
       // Profile uses a real existing Session and the actual profile/binding routes.
       const [user] = await pool.execute("INSERT INTO web_user_accounts(username,email,password_hash,email_verified) VALUES (?,?,'oidc-only',1)", ['ui-' + enabled, 'ui-' + enabled + '@example.invalid']);
       const session = randomBytes(32).toString('hex');

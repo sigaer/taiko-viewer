@@ -45,6 +45,8 @@ try {
   Object.assign(env, { OIDC_TEST_CERT: cert, OIDC_TEST_KEY: key, NODE_EXTRA_CA_CERTS: cert });
   report.oidcExit = await run(process.execPath, ['--experimental-strip-types', '--test', '--test-concurrency=1', 'tests/oidcSqlHttp.test.mjs'], 'oidc-sql-http', 180000);
   report.legacyExit = await run(process.execPath, ['--experimental-strip-types', '--test', '--test-concurrency=1', 'tests/accountEntrySqlHttp.test.mjs'], 'oidc-legacy-account-http', 180000);
+  report.ourTaikoMockOnly = true;
+  report.realOurTaikoRequests = 0;
   report.pass = report.oidcExit === 0 && report.legacyExit === 0;
 } finally {
   await admin?.end().catch(() => {});

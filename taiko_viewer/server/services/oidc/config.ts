@@ -45,8 +45,10 @@ export function oidcProviders(): OidcProvider[] {
       if (!["none", "client_secret_basic", "client_secret_post"].includes(method) || (method !== "none" && (typeof p.clientSecret !== "string" || !p.clientSecret))) throw unavailable();
       const signingAlg = p.idTokenSigningAlg || "RS256";
       if (!["RS256", "PS256", "ES256"].includes(signingAlg)) throw unavailable();
-      const scopes = p.scopes ?? ["openid", "email", "profile"];
+      const scopes = p.scopes ?? (p.id === "ourtaiko" ? ["openid", "profile"] : ["openid", "email", "profile"]);
       if (!Array.isArray(scopes) || !scopes.includes("openid") || scopes.length > 16 || scopes.some(s => typeof s !== "string" || !/^[\x21\x23-\x5b\x5d-\x7e]{1,64}$/.test(s))) throw unavailable();
+      if (p.id === "ourtaiko" && (method === "none" || signingAlg !== "RS256" || scopes.length !== 2 || !scopes.includes("profile"))) throw unavailable();
+      if (p.id === "ourtaiko" && issuer.origin !== "https://sso.ourtaiko.org" && (!["127.0.0.1", "[::1]", "localhost"].includes(issuer.hostname) || process.env.TAIKO_ALLOW_TEST_DB_MUTATION !== "1")) throw unavailable();
       const origins = p.endpointOrigins ?? [issuer.origin];
       if (!Array.isArray(origins) || !origins.length || origins.length > 8 || origins.some(o => httpsUrl(o).origin !== o)) throw unavailable();
       ids.add(p.id); issuers.add(p.issuer);

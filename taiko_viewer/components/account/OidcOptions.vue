@@ -22,6 +22,8 @@ const copy = computed(() => locale.value === "ja" ? {
   conflict: "このメールアドレスは登録済みです。元のアカウントにログインしてから連携してください。",
   email: "確認済みのメールアドレスが必要です。Viewer アカウントを作成するか、既存のアカウントにログインして連携してください。",
   session: "ログイン状態が変わりました。現在のアカウントで最初からやり直してください。",
+  ourtaikoEmail: "OurTaiko でメールアドレスを確認してから、もう一度お試しください。",
+  rateLimited: "操作が多すぎます。しばらく待ってから、もう一度お試しください。",
   identity: "この外部アカウントは連携できません。現在のアカウントと連携状況を確認してください。"
 } : {
   title: props.purpose === "link" ? "第三方账号关联" : "使用第三方账号登录",
@@ -30,11 +32,15 @@ const copy = computed(() => locale.value === "ja" ? {
   conflict: "该邮箱已注册。请先登录原账号，再主动关联。",
   email: "需要已验证的邮箱。请先注册 Viewer 账号，或登录已有账号后关联。",
   session: "登录会话已变化，请在当前账号重新发起操作。",
+  ourtaikoEmail: "请先在 OurTaiko 验证邮箱，再重试。",
+  rateLimited: "操作较频繁，请稍后重试。",
   identity: "无法关联此第三方账号，请确认当前账号及关联状态。"
 });
 const errorMessage = computed(() => {
   if (localError.value) return copy.value.failed;
   const code = route.query.oidc_error;
+  if (code === "ourtaiko_email_unverified") return copy.value.ourtaikoEmail;
+  if (code === "ourtaiko_rate_limited") return copy.value.rateLimited;
   if (code === "email_conflict") return copy.value.conflict;
   if (code === "email_required") return copy.value.email;
   if (code === "session_changed") return copy.value.session;

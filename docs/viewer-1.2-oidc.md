@@ -11,7 +11,7 @@ Viewer 1.2 复用现有 `web_user_accounts`、`web_user_sessions` 和 `stv_sessi
 | `NUXT_OIDC_ENABLED` | `false` | 总开关；启用值为 `1` 或布尔 `true` |
 | `NUXT_OIDC_PROVIDERS_JSON` | `[]` | Provider 注册表 JSON 字符串 |
 
-示例使用保留示例域名。生产凭据应存入私有环境配置，不能提交到 Git、放入命令行参数或输出到日志。
+以下是通用 Provider 示例；OurTaiko 的专用配置见后文，不使用 email scope。示例使用保留示例域名。生产凭据应存入私有环境配置，不能提交到 Git、放入命令行参数或输出到日志。
 
 ```json
 [
@@ -61,7 +61,7 @@ Viewer 1.2 复用现有 `web_user_accounts`、`web_user_sessions` 和 `stv_sessi
 
 协议处理使用 [openid-client](https://github.com/panva/openid-client)，显式启用 `enableNonRepudiationChecks`。强制 S256 PKCE、state、nonce 和 ID Token；库验证签名、Issuer、Audience、有效期及 nonce。本地额外验证出现时的 `azp`、`c_hash` 和 `at_hash`。每次 Provider HTTP 请求最多 10 秒，响应体最多 256 KiB。Access/Refresh/ID Token 仅停留在回调请求内，不持久化、不返回前端、不记录协议异常内容。
 
-已关联身份按精确 `(issuer, sub)` 登录，不用邮箱、昵称或用户名找关联。首次建号必须有可信 `email_verified: true` 和合法邮箱；没有已验证邮箱时引导用户先注册或登录后主动关联。邮箱冲突不会自动合并。新账号使用随机 `viewer_…` 用户名和无法通过现有密码验证器的 `oidc-only` 标记；可通过原有邮箱重置密码流程自行设置密码。未验证邮箱不会写入或覆盖本地账号。建号、身份写入及 Session 插入在同一个 SQL 事务中提交，任何冲突均回滚。
+已关联身份按精确 `(issuer, sub)` 登录，不用邮箱、昵称或用户名找关联。通用 Provider 首次建号必须有可信 `email_verified: true` 和合法邮箱；OurTaiko 的邮箱按下文通过受保护的服务器端 lookup 获取。通用 Provider 没有已验证邮箱时引导用户先注册或登录后主动关联。邮箱冲突不会自动合并。新账号使用随机 `viewer_…` 用户名和无法通过现有密码验证器的 `oidc-only` 标记；可通过原有邮箱重置密码流程自行设置密码。未验证邮箱不会写入或覆盖本地账号。建号、身份写入及 Session 插入在同一个 SQL 事务中提交，任何冲突均回滚。
 
 返回地址仅接受安全本站路径，拒绝外域、协议相对、反斜线、控制字符、编码绕过和 API 路径。回调不采用请求 Host 推导 Redirect URI。所有 OIDC 响应为 no-store，回调使用 no-referrer。上线时还需在反向代理访问日志中隐藏此回调的 query，避免基础设施记录授权码；本批不修改生产代理配置。
 
@@ -109,6 +109,88 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/absolute/pat
 
 本次没有实现修复，因此不重复运行上述测试或构建。整合保留 `oidcEnabled: false` 和空 Provider 注册表，不配置真实 OurTaiko 凭据、不执行生产迁移或部署。真实 OurTaiko 协议联调、生产迁移和启用需后续单独安排；远端 link 与 Sakura 反向登录仍属于独立批次。
 
+## OurTaiko OIDC 与 external lookup Mock 联调
+
+Viewer 1.2.1 按 [SAKURA-PROTOCOL.md 0.1 草案](https://github.com/OurTaiko/OurTaikoLogs/blob/main/OurTaikoSSO/docs/SAKURA-PROTOCOL.md) 的 OIDC 与外源查询部分实现服务器端资料解析。读取的协议文件 blob 为 `208acf6b9964b4cde572ad2c94341d8551792157`。本批只验证本地合成 HTTPS Mock；OurTaiko 的真实 external lookup 尚未实现，未进行双方真实生产联调。
+
+只有 `provider.id === "ourtaiko"` 启用该解析器。该 Provider 固定使用 `openid profile`、RS256 及 confidential 客户端认证（basic 或 post），拒绝 email/offline_access 等其他作用域；其他 Provider 保留原有行为。OurTaiko ID Token 不需要、也不依赖 `email` 或 `email_verified`。
+
+处理顺序为：验证签名、Issuer、Audience、有效期、state、nonce 及 PKCE → 从已验证的 `sub` 取得严格匹配 `^[0-9a-f]{32}$` 的 ID → 读取本地身份。按照协议 5.1，已关联的登录按精确 `(issuer, sub)` 签发新的 Viewer Session，不重复建号或再次 lookup。首次建号和主动关联必须完成 lookup；主动关联已有相同本地关系时也重新验证资料。
+
+lookup 目标由可信 Issuer 的 origin 加固定路径 `/internal/v1/external/lookup` 构成，不接受请求或配置自定义路径。生产 origin 仅接受 `https://sso.ourtaiko.org`。本地 Mock 仅接受 HTTPS 的 `127.0.0.1`、`[::1]` 或 `localhost`，同时要求 `TAIKO_ALLOW_TEST_DB_MUTATION=1`；请求前实际 `SELECT DATABASE()` 必须返回 `_test` 数据库。
+
+后端仅发送：
+
+```text
+POST /internal/v1/external/lookup
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+X-Service-ID: <server OIDC client_id>
+X-Service-Key: <server OIDC client_secret>
+
+{"id":"<verified OIDC sub>"}
+```
+
+不发送 Origin、Cookie、Authorization 或 OAuth Token/授权码/Client Secret 正文参数。TLS 校验证书，不跟随重定向；总网络期限为 8 秒，解码后响应体最多 32 KiB，拒绝非 JSON、无效 UTF-8、缺失/额外字段、类型错误和状态码与 code 不一致的响应。未自动重试；旧回调仍只能消费一次。
+
+成功响应要求 `code="OK"`、空 message、准确的 data 字段（id/nickname/email/emailVerified）、data.id 与已验证 sub 完全一致、合法非空邮箱及布尔 `emailVerified === true`。资料对象明确标记 `source="ourtaiko_external_lookup"`；通用 Provider 使用 `source="oidc_id_token"`。不修改或伪造 ID Token claims。资料获取在任何最终写事务和 Session 行锁之外完成，随后复用原有事务内 Session 复核、邮箱冲突拒绝、OIDC-only 密码标记和原子 Session 提交；主动关联不覆盖已有 Viewer 邮箱。
+
+| lookup 结果 | 对外行为 |
+| --- | --- |
+| 409 EMAIL_UNVERIFIED 或成功结构中的布尔 false | `ourtaiko_email_unverified`，中日文明确提示先在 OurTaiko 验证邮箱；不建号或关联 |
+| 429 RATE_LIMITED 且 Retry-After 为秒数 | `ourtaiko_rate_limited`，安全的 Retry-After 秒数限制在 1–3600；提示稍后重试 |
+| 400 REQUEST_INVALID、401 SERVICE_UNAUTHORIZED、403 SERVICE_FORBIDDEN、404 NOT_FOUND、409 ALREADY_LINKED、503 UNAVAILABLE | 统一 `provider_unavailable`；不区分账号不存在、不可见或停用，不显示远端 message |
+| 超时、重定向、异常 JSON、错误 ID、未提供邮箱、假冒 true、未知 code 或异常结构 | 安全失败，不创建用户、身份或 Session；不记录正文、邮箱、密钥或 OAuth Token |
+
+本批未新增 Schema，无需额外迁移。`remote_link_status` 保持 `not_requested`，没有 link/unlink、Sakura 反向登录或生命周期同步调用。默认总开关仍关闭，注册表仍为空。
+
+### 配置与复验
+
+以下是后续真实服务配置示例，`enabled` 保持 false；本批没有填入真实凭据或启用该配置。
+
+```json
+[
+  {
+    "id": "ourtaiko",
+    "label": "OurTaiko",
+    "enabled": false,
+    "issuer": "https://sso.ourtaiko.org",
+    "clientId": "REPLACE_IN_PRIVATE_SERVER_CONFIGURATION",
+    "clientSecret": "REPLACE_IN_PRIVATE_SERVER_CONFIGURATION",
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "idTokenSigningAlg": "RS256",
+    "scopes": ["openid", "profile"],
+    "redirectUri": "https://viewer.sakura-bot.cn/api/account/oidc/ourtaiko/callback"
+  }
+]
+```
+
+仍使用 `test_oidc_isolated.mjs --allow-test-db-mutation` 复验。扩展的 `oidcSqlHttp.test.mjs` 在同一个私有 MySQL 实例和自建 HTTPS Provider 上执行原通用 OIDC 用例及 OurTaiko 用例；每个 OurTaiko ID Token 都断言没有邮箱字段。`ourtaiko-lookup-http.json` 记录成功及错误分支的逐项结果、请求契约、真实 OurTaiko 请求为 0 和远端关联状态；`oidc-isolation.json` 记录两套 SQL HTTP 测试退出及数据库进程清理结果。测试密钥随机生成，仅在测试进程和私有 QA scratch 中使用。
+
+### 1.2.1 实际验证记录
+
+2026 年 11 月 2 日，从最新 main `0c9cc5dee0dbfdb6136234deb921e22a1cc190de` 开发并验证：
+
+| 验证范围 | 实际结果 |
+| --- | --- |
+| OurTaiko HTTPS Mock + 真实 H3 + MySQL | 49 个场景全部通过，44 次本地 lookup；首次登录原子建号及签发 Session、已关联登录不重复建号、已有 Viewer 用户主动关联后可再次登录均通过 |
+| lookup 错误及资料校验 | 协议全部 8 种错误码、实际服务密钥不匹配、超时、重定向、异常 JSON/结构/类型、错误 ID、无邮箱、未验证邮箱和伪造 true 等通过；失败后账号/身份/Session 数量不变 |
+| 身份与会话边界 | 错误签名/nonce/state/sub 在 lookup 前拒绝；重复回调、授权码重放、账号切换及 lookup 期间登出拒绝。另一连接可在 lookup 暂停时锁定同一 Session 行，证明未跨网络占用该写锁 |
+| 通用 OIDC 与既有账号/权限回归 | 原通用 Provider、并发建号/绑定、旧密码登录与重置密码、Developer Token 和 ResourceGrant 的 SQL HTTP 测试通过；OIDC-only 密码标记不能用于旧密码登录 |
+| 现有 CI | 320 项 Node 测试、Contract bindings 检查及 3 项跨语言测试通过；无新增 Gate |
+| 构建产物页面 | 40 个中日文页面场景通过：原 36 个开关状态/页面/375、414、1280px 组合及 4 个新错误提示；无横向溢出或页面运行错误，原密码输入可用，关闭时无第三方入口 |
+| 构建 | 原 `npm run build` 经内存隔离包装器完成，npm 与包装器退出均为 0；未运行部署脚本 |
+
+本机证据：
+
+- SQL HTTP 与逐项 Mock 结果：`/home/sigaer/taiko/qa-vault/runs/qa-da904ae5072a/evidence/`，查看 `ourtaiko-lookup-http.json`、`oidc-sql-http.json`、`oidc-isolation.json` 及旧账号 SQL HTTP 日志。
+- 定向配置/认证/版本回归（44 项）：`/home/sigaer/taiko/qa-vault/runs/qa-e8e1f855a972/evidence/`。
+- 现有 CI：`/home/sigaer/taiko/qa-vault/runs/qa-84f73c60dd5b/evidence/`。
+- 构建产物页面：`/home/sigaer/taiko/qa-vault/runs/qa-432338422114/evidence/oidc-nuxt-ui.json`，临时 Nuxt 和 MySQL 均已关闭；迁移 opt-in 拒绝、生产模式拒绝及测试库幂等执行仍通过。
+- 构建：`/var/tmp/taiko-viewer-ourtaiko-build.log`、`/var/tmp/taiko-viewer-ourtaiko-build-result.json`。
+
+所有 SQL 使用合成用户和隔离 `_test` 数据库，测试进程未继承生产连接配置；Provider/Viewer 网络请求只允许测试拥有的两个本机 HTTPS origin。真实 OurTaiko 请求、生产连接及生产写入均为 0，私有 MySQL 已退出。源码配置仍为 `oidcEnabled: false`、空 Provider 列表。
+
 ## OurTaiko 后续接入
 
 在 Provider ID 确认为 `ourtaiko` 的前提下，需要向 OurTaiko 注册的精确回调地址是：
@@ -117,6 +199,8 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/absolute/pat
 https://viewer.sakura-bot.cn/api/account/oidc/ourtaiko/callback
 ```
 
-接入前需要对方提供：精确 Issuer 及 Discovery/JWKS、Client ID、客户端认证方式及所需 Secret、允许的回调地址、`openid email profile` 作用域、稳定 Subject 规则、`email_verified` 语义、PKCE S256 支持、签名算法、端点来源列表、测试身份和错误/密钥轮换约定。若真实元数据不同，先在隔离环境验证，再单独安排生产迁移和开关启用。当前代码没有内置 OurTaiko 特例或真实凭据。
+OurTaiko 仍需实现并向该 confidential Application 开放 `POST /internal/v1/external/lookup`，包括服务凭据认证、账号可见性（已远端关联或当前持有授予该 Application 的有效 access token）、已验证邮箱资料、错误码、限流/Retry-After 及审计。Viewer 当前只有本地身份关联，未执行双方远端 link；真实 lookup 必须接受刚完成 OIDC 的合成联调身份，不能依赖本批未实现的远端 link。
+
+后续需要通过安全渠道取得 Client ID/Secret、确认精确 Issuer/Discovery/JWKS、basic/post 认证方式、RS256 与 PKCE S256、`openid profile`、稳定 32 位 sub、lookup 的 emailVerified 语义、测试身份及密钥轮换安排。先在双方明确授权的测试环境验证真实 lookup 的成功/错误/限流行为，再单独安排生产迁移、反向代理回调 query 日志脱敏和开关启用。客户端 Secret 只写私有服务器环境，不放在命令行或文档中。
 
 `remote_link_status` 初始为 `not_requested`。服务器内部 `readRemoteLinkIntent(db, userId, issuer)` 提供持久且唯一的操作 ID，作为未来远端 link 请求的幂等键；同一关联的重复本地绑定不会改变该键。当前没有远端 link 调用、重试 worker、远端状态确认、解绑/撤销、远端登出或账号生命周期同步，也没有宣称双方已绑定。双方成绩、QQ、权限和历史数据的互通均不在本批范围内。

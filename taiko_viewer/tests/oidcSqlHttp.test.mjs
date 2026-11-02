@@ -26,6 +26,10 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
   const codes = new Map();
   let providerOrigin, viewerOrigin, metadataOverride = {}, providerDown = false, exchangeGate;
   let tokenRequests = 0;
+  const ourSubject = index => index.toString(16).padStart(32, '0');
+  const ourSecret = randomBytes(32).toString('hex');
+  let lookupServiceKey = ourSecret, lookupReply = {}, lookupGate, lookupRequests = 0, lookupAuthFailures = 0, lookupRedirectsFollowed = 0;
+  const lookupInvariantFailures = [], lookupCases = [];
   const checks = [];
   try {
     const [[host]] = await admin.query('SELECT @@datadir dir');
@@ -56,13 +60,42 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
           response_types_supported: ['code'], subject_types_supported: ['public'], id_token_signing_alg_values_supported: ['RS256'],
           code_challenge_methods_supported: ['S256'], token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'client_secret_post'], ...metadataOverride
         }));
+        if (url.pathname === '/redirect-must-not-be-followed') { lookupRedirectsFollowed++; res.statusCode = 400; return res.end('{}'); }
+        if (url.pathname === '/internal/v1/external/lookup') {
+          lookupRequests++;
+          res.setHeader('cache-control', 'no-store');
+          let body = ''; for await (const chunk of req) { body += chunk; assert.ok(body.length < 32768); }
+          const input = JSON.parse(body);
+          try {
+            assert.equal(req.method, 'POST'); assert.equal(url.search, '');
+            assert.match(req.headers['content-type'], /^application\/json(?:;|$)/);
+            assert.equal(req.headers.origin, undefined); assert.equal(req.headers.cookie, undefined); assert.equal(req.headers.authorization, undefined);
+            assert.deepEqual(Object.keys(input), ['id']); assert.match(input.id, /^[0-9a-f]{32}$/);
+            assert.equal(req.headers['x-service-id'], 'viewer-test'); assert.ok(typeof req.headers['x-service-key'] === 'string');
+            assert.ok(!['client_id', 'client_secret', 'code', 'access_token', 'id_token'].some(k => url.searchParams.has(k) || Object.hasOwn(input, k)));
+          } catch { lookupInvariantFailures.push('lookup request contract violation'); throw Error('Mock lookup request invalid'); }
+          if (lookupGate) await lookupGate;
+          if (req.headers['x-service-key'] !== lookupServiceKey) {
+            lookupAuthFailures++; res.statusCode = 401; return res.end(JSON.stringify({ code: 'SERVICE_UNAUTHORIZED', message: 'private upstream detail', data: null }));
+          }
+          if (lookupReply.stall) return;
+          if (lookupReply.redirect) { res.writeHead(302, { location: lookupReply.redirect }); return res.end(); }
+          res.statusCode = lookupReply.status || 200;
+          if (lookupReply.retryAfter !== undefined) res.setHeader('retry-after', lookupReply.retryAfter);
+          if (lookupReply.contentType) res.setHeader('content-type', lookupReply.contentType);
+          if (lookupReply.raw !== undefined) return res.end(lookupReply.raw);
+          const response = { code: 'OK', message: '', data: { id: input.id, nickname: 'Synthetic player', email: input.id + '@ourtaiko.example.invalid', emailVerified: true } };
+          return res.end(JSON.stringify(lookupReply.body ?? response));
+        }
         if (url.pathname === '/jwks') return res.end(JSON.stringify({ keys: [jwk] }));
         if (url.pathname === '/authorize') {
           assert.equal(url.searchParams.get('response_type'), 'code');
           assert.equal(url.searchParams.get('code_challenge_method'), 'S256');
           assert.ok(url.searchParams.get('state')); assert.ok(url.searchParams.get('nonce'));
           const code = randomBytes(24).toString('hex');
-          codes.set(code, { request: url.searchParams });
+          const isOur = new URL(url.searchParams.get('redirect_uri')).pathname === '/api/account/oidc/ourtaiko/callback';
+          if (isOur) assert.equal(url.searchParams.get('scope'), 'openid profile');
+          codes.set(code, { request: url.searchParams, isOur, ...(isOur ? { auth: 'basic' } : {}) });
           const callback = new URL(url.searchParams.get('redirect_uri'));
           callback.searchParams.set('code', code); callback.searchParams.set('state', url.searchParams.get('state'));
           res.writeHead(302, { location: callback.href }); return res.end();
@@ -78,10 +111,11 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
           assert.equal(createHash('sha256').update(params.get('code_verifier')).digest('base64url'), record.request.get('code_challenge'));
           const auth = record.auth || 'none';
           if (auth === 'none') assert.equal(params.get('client_id'), 'viewer-test');
-          if (auth === 'basic') assert.equal(decodeURIComponent(Buffer.from(req.headers.authorization.slice(6), 'base64').toString()), 'viewer-test:synthetic-secret');
-          if (auth === 'post') { assert.equal(params.get('client_id'), 'viewer-test'); assert.equal(params.get('client_secret'), 'synthetic-secret'); }
+          if (auth === 'basic') assert.ok(decodeURIComponent(Buffer.from(req.headers.authorization.slice(6), 'base64').toString()) === 'viewer-test:' + (record.isOur ? ourSecret : 'synthetic-secret'), 'mock basic authentication accepted');
+          if (auth === 'post') { assert.equal(params.get('client_id'), 'viewer-test'); assert.ok(params.get('client_secret') === (record.isOur ? ourSecret : 'synthetic-secret'), 'mock client secret accepted'); }
           if (exchangeGate) await exchangeGate;
-          const claims = { sub: 'subject-default', email: 'new@example.invalid', email_verified: true, nonce: record.request.get('nonce'), ...record.claims };
+          const claims = { ...(record.isOur ? { sub: ourSubject(1) } : { sub: 'subject-default', email: 'new@example.invalid', email_verified: true }), nonce: record.request.get('nonce'), ...record.claims };
+          if (record.isOur) assert.ok(!Object.hasOwn(claims, 'email') && !Object.hasOwn(claims, 'email_verified'), 'OurTaiko ID Token has no email claims');
           const token = await new SignJWT(claims).setProtectedHeader({ alg: 'RS256', kid: 'test-key' }).setIssuer(record.issuer || providerOrigin)
             .setAudience(record.audience || 'viewer-test').setIssuedAt().setExpirationTime(record.expiry || '5m').sign(record.badSignature ? wrongKeys.privateKey : keys.privateKey);
           return res.end(JSON.stringify({ access_token: 'synthetic-access-token', token_type: 'Bearer', expires_in: 300, id_token: token }));
@@ -115,11 +149,11 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
       ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000)
     });
     const sessionCookie = res => res.headers.getSetCookie().find(c => c.startsWith('stv_session='))?.split(';')[0];
-    async function begin({ cookie, purpose = 'login', redirect = '/songs/42', locale = 'zh' } = {}) {
-      const res = await ask('/api/account/oidc/mock/start', { cookie, body: { purpose, redirect, locale, userId: 999999 } });
+    async function begin({ cookie, purpose = 'login', redirect = '/songs/42', locale = 'zh', providerId = 'mock' } = {}) {
+      const res = await ask(`/api/account/oidc/${providerId}/start`, { cookie, body: { purpose, redirect, locale, userId: 999999, lookupUrl: 'https://untrusted.invalid/custom' } });
       assert.equal(res.status, 200, 'start status');
       const { authorizationUrl } = await res.json();
-      const browserCookie = res.headers.getSetCookie().find(c => c.startsWith('stv_oidc_mock='));
+      const browserCookie = res.headers.getSetCookie().find(c => c.startsWith(`stv_oidc_${providerId}=`));
       assert.match(browserCookie, /HttpOnly/); assert.match(browserCookie, /Secure/); assert.match(browserCookie, /SameSite=Lax/);
       const response = await fetch(authorizationUrl, { redirect: 'manual', signal: AbortSignal.timeout(10000) });
       assert.equal(response.status, 302);
@@ -310,6 +344,146 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
       const [[identity]] = await pool.execute('SELECT subject FROM web_external_identities WHERE issuer=? AND subject=?', [providerOrigin, sub]);
       assert.equal(identity.subject.toString(), sub, 'opaque subject retains spaces and case');
     }
+    // OurTaiko 0.1: OIDC proves identity only; service lookup supplies the email.
+    const configureOur = (changes = {}) => {
+      runtime.oidcEnabled = true;
+      runtime.oidcProvidersJson = JSON.stringify([{ ...provider, id: 'ourtaiko', label: 'OurTaiko', clientSecret: ourSecret,
+        tokenEndpointAuthMethod: 'client_secret_basic', redirectUri: viewerOrigin + '/api/account/oidc/ourtaiko/callback', ...changes }]);
+    };
+    const ourBegin = async (options = {}, sub) => {
+      const f = await begin({ ...options, providerId: 'ourtaiko' });
+      if (sub !== undefined) f.record.claims = { sub };
+      return f;
+    };
+    const okProfile = (id, changes = {}) => ({ code: 'OK', message: '', data: { id, nickname: 'Synthetic player', email: id + '@ourtaiko.example.invalid', emailVerified: true, ...changes } });
+    const snapshot = () => Promise.all(['web_user_accounts', 'web_external_identities', 'web_user_sessions'].map(count));
+    configureOur();
+    let ourBefore = await snapshot(), callsBefore = lookupRequests;
+    const ourFirst = await complete(await ourBegin());
+    const ourCookie = sessionCookie(ourFirst); assert.ok(ourCookie);
+    const ourMe = (await (await ask('/api/account/auth/me', { cookie: ourCookie })).json()).user;
+    const [[ourAccount]] = await pool.execute('SELECT email,email_verified,password_hash FROM web_user_accounts WHERE id=?', [ourMe.id]);
+    assert.equal(ourAccount.email, ourSubject(1) + '@ourtaiko.example.invalid'); assert.equal(ourAccount.email_verified, 1); assert.equal(ourAccount.password_hash, 'oidc-only');
+    assert.deepEqual(await snapshot(), ourBefore.map(n => n + 1)); assert.equal(lookupRequests, callsBefore + 1);
+    lookupCases.push({ name: 'first login uses email-free ID Token then service lookup and atomic account/identity/session', pass: true });
+    lookupReply = { status: 503, body: { code: 'UNAVAILABLE', message: 'private upstream detail', data: null } };
+    ourBefore = await snapshot(); callsBefore = lookupRequests;
+    const ourAgain = await complete(await ourBegin());
+    assert.ok(sessionCookie(ourAgain) !== ourCookie); assert.equal(lookupRequests, callsBefore, 'known identity follows protocol without another lookup');
+    assert.deepEqual(await snapshot(), [ourBefore[0], ourBefore[1], ourBefore[2] + 1]); lookupReply = {};
+    lookupCases.push({ name: 'existing OurTaiko identity logs in without duplicate account or lookup', pass: true });
+    const localName = 'ourtaiko-local';
+    const [ourLocal] = await pool.execute('INSERT INTO web_user_accounts(username,email,password_hash,email_verified) VALUES (?,?,?,1)', [localName, 'our-local@example.invalid', await getPasswordHash(password)]);
+    let localCookie = sessionCookie(await ask('/api/account/auth/login', { body: { identifier: localName, password } }));
+    const bound = await complete(await ourBegin({ cookie: localCookie, purpose: 'link', redirect: '/account/profile' }, ourSubject(2)), '/account/profile');
+    assert.equal(sessionCookie(bound), undefined);
+    const [[linkedOur]] = await pool.execute('SELECT user_id,remote_link_status FROM web_external_identities WHERE issuer=? AND subject=?', [providerOrigin, ourSubject(2)]);
+    assert.equal(linkedOur.user_id, ourLocal.insertId); assert.equal(linkedOur.remote_link_status, 'not_requested');
+    assert.equal((await pool.execute('SELECT email FROM web_user_accounts WHERE id=?', [ourLocal.insertId]))[0][0].email, 'our-local@example.invalid');
+    const linkedLogin = sessionCookie(await complete(await ourBegin({}, ourSubject(2))));
+    assert.equal((await (await ask('/api/account/auth/me', { cookie: linkedLogin })).json()).user.id, ourLocal.insertId);
+    lookupCases.push({ name: 'active Viewer session binds only its user, keeps local email, and associated login matches issuer/sub', pass: true });
+    let ourIndex = 100;
+    async function ourFailure(name, reply, expectedCode = 'provider_unavailable', options = {}) {
+      const sub = ourSubject(ourIndex++); lookupReply = typeof reply === 'function' ? reply(sub) : reply;
+      const f = await ourBegin(options, sub);
+      const before = await snapshot(), requests = lookupRequests;
+      const res = await complete(f, `${options.locale === 'ja' ? '/ja' : ''}/account/${options.purpose === 'link' ? 'profile' : 'login'}?oidc_error=${expectedCode}`);
+      assert.equal(sessionCookie(res), undefined); assert.deepEqual(await snapshot(), before);
+      assert.equal(lookupRequests, requests + 1); assert.ok(!res.headers.get('location').includes('private upstream detail'));
+      if (expectedCode === 'ourtaiko_rate_limited') assert.equal(res.headers.get('retry-after'), '12');
+      lookupReply = {}; lookupCases.push({ name, pass: true, accountsIdentitiesSessionsUnchanged: true });
+    }
+    await ourFailure('existing Viewer email is never merged', id => ({ body: okProfile(id, { email: firstUser.email }) }), 'email_conflict');
+    for (const [status, code] of [[400, 'REQUEST_INVALID'], [401, 'SERVICE_UNAUTHORIZED'], [403, 'SERVICE_FORBIDDEN'], [404, 'NOT_FOUND'], [409, 'EMAIL_UNVERIFIED'], [409, 'ALREADY_LINKED'], [429, 'RATE_LIMITED'], [503, 'UNAVAILABLE']]) {
+      await ourFailure(code, { status, body: { code, message: 'private upstream detail', data: null }, ...(status === 429 ? { retryAfter: '12' } : {}) },
+        code === 'EMAIL_UNVERIFIED' ? 'ourtaiko_email_unverified' : code === 'RATE_LIMITED' ? 'ourtaiko_rate_limited' : 'provider_unavailable');
+    }
+    const authBefore = lookupAuthFailures; lookupServiceKey = randomBytes(32).toString('hex');
+    await ourFailure('service credential mismatch after successful OIDC', {}); assert.equal(lookupAuthFailures, authBefore + 1); lookupServiceKey = ourSecret;
+    for (const [name, reply, expected] of [
+      ['invalid JSON', { raw: '{invalid' }], ['missing envelope field', { body: { code: 'OK', data: {} } }],
+      ['array instead of envelope', { body: [] }], ['wrong code type', { body: { code: 200, message: '', data: null } }],
+      ['nonempty success message', id => ({ body: { ...okProfile(id), message: 'unexpected' } })],
+      ['trailing newline in email', id => ({ body: okProfile(id, { email: 'a@example.invalid' + String.fromCharCode(10) }) })],
+      ['wrong message type', { body: { code: 'OK', message: false, data: {} } }],
+      ['missing profile field', id => { const body = okProfile(id); delete body.data.nickname; return { body }; }],
+      ['wrong data ID', id => ({ body: okProfile(ourSubject(9999)) })],
+      ['non-string data ID', id => ({ body: okProfile(id, { id: 123 }) })],
+      ['non-string nickname', id => ({ body: okProfile(id, { nickname: {} }) })],
+      ['non-string email', id => ({ body: okProfile(id, { email: 123 }) })],
+      ['absent email', id => { const body = okProfile(id); delete body.data.email; return { body }; }],
+      ['empty email', id => ({ body: okProfile(id, { email: '' }) })],
+      ['invalid email', id => ({ body: okProfile(id, { email: 'invalid' }) })],
+      ['control character in email', id => ({ body: okProfile(id, { email: 'a' + String.fromCharCode(0) + '@example.invalid' }) })],
+      ['email verification is false', id => ({ body: okProfile(id, { emailVerified: false }) }), 'ourtaiko_email_unverified'],
+      ['string true does not verify email', id => ({ body: okProfile(id, { emailVerified: 'true' }) })],
+      ['numeric verification does not verify email', id => ({ body: okProfile(id, { emailVerified: 1 }) })],
+      ['unexpected profile field', id => ({ body: { ...okProfile(id), data: { ...okProfile(id).data, extra: true } } })],
+      ['wrong content type', { contentType: 'text/plain', raw: '{}' }],
+      ['response size limit', { raw: ' '.repeat(32769) }],
+      ['status and code mismatch', { status: 404, body: { code: 'EMAIL_UNVERIFIED', message: '', data: null } }],
+      ['unknown error code', { status: 409, body: { code: 'UNKNOWN', message: '', data: null } }],
+      ['error data must be null', { status: 404, body: { code: 'NOT_FOUND', message: '', data: {} } }],
+      ['invalid Retry-After', { status: 429, body: { code: 'RATE_LIMITED', message: '', data: null }, retryAfter: 'invalid' }],
+      ['HTTP redirect is not followed', { redirect: providerOrigin + '/redirect-must-not-be-followed' }],
+      ['lookup network timeout', { stall: true }]
+    ]) await ourFailure(name, reply, expected);
+    // The same lookup rejection must not attach an identity to an active account.
+    await ourFailure('binding requires verified external email', id => ({ body: okProfile(id, { emailVerified: false }) }), 'ourtaiko_email_unverified', { cookie: localCookie, purpose: 'link', locale: 'ja' });
+    // Invalid identity proofs are rejected before any service credential is sent.
+    for (const fault of ['signature', 'nonce', 'state', 'subject-uppercase', 'subject-length']) {
+      const f = await ourBegin({}, ourSubject(ourIndex++));
+      if (fault === 'signature') f.record.badSignature = true;
+      if (fault === 'nonce') f.record.claims.nonce = 'wrong';
+      if (fault === 'state') f.callback.searchParams.set('state', randomBytes(24).toString('hex'));
+      if (fault === 'subject-uppercase') f.record.claims.sub = 'ABCDEF0123456789ABCDEF0123456789AB';
+      if (fault === 'subject-length') f.record.claims.sub = 'too-short';
+      callsBefore = lookupRequests;
+      await unchangedFailure(f, '/account/login?oidc_error=' + (fault === 'state' ? 'invalid_transaction' : 'provider_unavailable'));
+      assert.equal(lookupRequests, callsBefore); lookupCases.push({ name: fault + ' rejected before lookup', pass: true });
+    }
+    const replay = await ourBegin({}, ourSubject(ourIndex++)); await complete(replay); callsBefore = lookupRequests;
+    await unchangedFailure(replay, '/account/login?oidc_error=invalid_transaction'); assert.equal(lookupRequests, callsBefore);
+    const exchangeA = await ourBegin({}, ourSubject(ourIndex++)), exchangeB = await ourBegin({}, ourSubject(ourIndex++));
+    exchangeB.callback.searchParams.set('code', exchangeA.callback.searchParams.get('code')); callsBefore = lookupRequests;
+    await unchangedFailure(exchangeB); assert.equal(lookupRequests, callsBefore);
+    lookupCases.push({ name: 'repeated callback and code replay cannot trigger another lookup', pass: true });
+    const changed = await ourBegin({ cookie: localCookie, purpose: 'link' }, ourSubject(ourIndex++));
+    changed.cookie = changed.cookie.replace(localCookie, linkedLogin); callsBefore = lookupRequests;
+    await unchangedFailure(changed, '/account/profile?oidc_error=session_changed'); assert.equal(lookupRequests, callsBefore);
+    // Keep lookup pending while proving the server has no Session row lock open.
+    const duringLookup = await ourBegin({ cookie: localCookie, purpose: 'link' }, ourSubject(ourIndex++));
+    let releaseLookup; lookupGate = new Promise(r => { releaseLookup = r; });
+    callsBefore = lookupRequests;
+    const pendingLookup = ask(duringLookup.callback.pathname + duringLookup.callback.search, { cookie: duringLookup.cookie });
+    for (let i = 0; i < 200 && lookupRequests === callsBefore; i++) await new Promise(r => setTimeout(r, 10));
+    assert.equal(lookupRequests, callsBefore + 1);
+    const locker = await pool.getConnection();
+    try {
+      await locker.query('SET innodb_lock_wait_timeout=1'); await locker.beginTransaction();
+      await locker.execute('SELECT user_id FROM web_user_sessions WHERE session_token=? FOR UPDATE', [localCookie.split('=')[1]]);
+      await locker.rollback();
+    } finally { await locker.rollback(); locker.release(); }
+    await ask('/api/account/auth/logout', { cookie: localCookie, body: {} });
+    const beforeLookupFinish = await snapshot(); releaseLookup(); lookupGate = null;
+    const lookupDenied = await pendingLookup;
+    assert.equal(lookupDenied.headers.get('location'), '/account/profile?oidc_error=session_changed'); assert.equal(sessionCookie(lookupDenied), undefined);
+    assert.deepEqual(await snapshot(), beforeLookupFinish);
+    lookupCases.push({ name: 'session switch, no network-held Session lock, logout during lookup rechecked before final transaction', pass: true });
+    configureOur({ tokenEndpointAuthMethod: 'client_secret_post' });
+    const ourPost = await ourBegin({}, ourSubject(ourIndex++)); ourPost.record.auth = 'post'; await complete(ourPost);
+    assert.equal((await pool.query("SELECT COUNT(*) n FROM web_external_identities WHERE provider_id='ourtaiko' AND remote_link_status<>'not_requested'"))[0][0].n, 0);
+    assert.equal(lookupRedirectsFollowed, 0);
+    assert.deepEqual(lookupInvariantFailures, []);
+    assert.ok(lookupCases.length >= 40);
+    await writeFile(resolve(process.env.VIEWER_REVIEW_OUT, 'ourtaiko-lookup-http.json'), JSON.stringify({ pass: true, cases: lookupCases, lookupRequests,
+      requestContract: 'POST JSON id only, X-Service-ID/Key from server OIDC config, no Origin/Cookie/Authorization/OAuth parameters, fixed local issuer origin',
+      redirectsFollowed: lookupRedirectsFollowed, emailInIdToken: false, profileSource: 'ourtaiko_external_lookup', writeTransactionDuringNetwork: false,
+      remoteLinkStatus: 'not_requested', productionConnections: 0, realOurTaikoRequests: 0, credentialsRecorded: false }, null, 2) + '\n');
+    configure();
+    await complete(await begin());
+    checks.push('OurTaiko lookup adapter leaves generic provider login and profile source unchanged');
     checks.push('parallel one-use callbacks, concurrent first account atomicity, confidential client basic/post, safe redirects and Japanese errors');
     await writeFile(resolve(process.env.VIEWER_REVIEW_OUT, 'oidc-sql-http.json'), JSON.stringify({ pass: true, database: proof.name, actualSelectDatabase: true, privateDatadirVerified: true, checks, productionConnections: 0, productionWrites: 0, credentialsRecorded: false }, null, 2) + '\n');
   } finally {
