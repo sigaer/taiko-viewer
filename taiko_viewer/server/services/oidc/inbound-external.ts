@@ -73,11 +73,11 @@ async function jsonBody(event: H3Event): Promise<Body> {
 
 function requireService(event: H3Event) {
   if (process.env.TAIKO_OURTAIKO_INBOUND_ENABLED !== "1") denied(503, "UNAVAILABLE");
-  if (event.method !== "POST") {
+  if (event.node.req.method !== "POST") {
     setHeader(event, "Allow", "POST");
     denied(405, "METHOD_NOT_ALLOWED");
   }
-  if (getHeader(event, "origin")) denied(403, "ORIGIN_INVALID");
+  if (getHeader(event, "origin") !== undefined) denied(403, "ORIGIN_INVALID");
   const configuredId = process.env.TAIKO_OURTAIKO_INBOUND_SERVICE_ID || "";
   const configuredKey = process.env.TAIKO_OURTAIKO_INBOUND_SERVICE_KEY || "";
   if (!configuredId || configuredKey.length < 24) denied(503, "UNAVAILABLE");
@@ -143,7 +143,8 @@ async function doLogin(event: H3Event, service: string, body: Body) {
   );
   const user = users[0];
   // No Viewer session, cookie or bearer token is created by this endpoint.
-  if (!user || !(await verifyPasswordHash(body.password, user.password_hash))) denied(401, "LOGIN_INVALID");
+  if (!user || !/^[0-9a-f]{32}:[0-9a-f]{128}$/.test(user.password_hash) ||
+      !(await verifyPasswordHash(body.password, user.password_hash))) denied(401, "LOGIN_INVALID");
   await getAccountDb().execute(
     "INSERT INTO web_inbound_external_proofs(service_id,viewer_id,expires_at) VALUES (?,?,DATE_ADD(NOW(),INTERVAL 10 MINUTE)) ON DUPLICATE KEY UPDATE expires_at=VALUES(expires_at)",
     [service, user.id]
@@ -170,7 +171,8 @@ async function doLookup(service: string, body: Body) {
   );
   if (!bound.length && !proof.length) denied(404, "NOT_FOUND");
   if (!user.email_verified || !user.email) denied(409, "EMAIL_UNVERIFIED");
-  return { id, nickname:user.username, email:user.email, emailVerified:true, linkedId:bound[0] ? subjectOf(bound[0] as unknown as Identity) : null };
+  return { id, nickname:user.username, email:user.email, emailVerified:true,
+    linkedId:bound[0] ? (Buffer.isBuffer(bound[0].subject) ? bound[0].subject.toString("utf8") : String(bound[0].subject)) : null };
 }
 
 async function doLink(service: string, body: Body) {
