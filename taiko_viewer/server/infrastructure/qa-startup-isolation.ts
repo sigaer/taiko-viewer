@@ -28,7 +28,19 @@ export function useOwnedQaStartupIsolation():boolean{
   }
   check(!(statSync(run).mode&0o077));
   check(String(config.dbHost)==='127.0.0.1'&&Number(config.dbPort)>1024&&Number(config.dbPort)!==3306&&/^\w+_test$/.test(String(config.dbName)));
-  stage="database-identity";const expected=realpathSync(env.TAIKO_TEST_MYSQL_DATADIR||'');check(/^sql-[a-zA-Z0-9]+\/mysql$/.test(relative(scratch,expected)));
+  stage="database-identity";const expected=realpathSync(env.TAIKO_TEST_MYSQL_DATADIR||'');
+  if(env.TAIKO_OIDC_PERSISTENT_STAGING==='1'){
+   // The real remote binding outlives a QA run. Only this pinned, private test
+   // datadir may survive scratch cleanup; all runtime paths remain run-owned.
+   const root='/var/tmp/taiko-viewer-ourtaiko-staging',manifest=resolve(root,'admission.json');
+   check(realpathSync(root)===root&&expected===resolve(root,'mysql'));
+   for(const path of [root,expected]){const info=statSync(path);check(info.uid===process.getuid?.()&&!(info.mode&0o077));}
+   const info=statSync(manifest),data=statSync(expected);
+   check(realpathSync(manifest)===manifest&&info.isFile()&&info.uid===process.getuid?.()&&(info.mode&0o777)===0o600&&info.size<4096);
+   const pinned=JSON.parse(readFileSync(manifest,'utf8'));
+   check(pinned.schema===1&&pinned.application==='Sakura-staging'&&pinned.database==='viewer_ourtaiko_staging_test');
+   check(String(config.dbName)===pinned.database&&pinned.datadir===expected&&pinned.device===data.dev&&pinned.inode===data.ino);
+  }else check(/^sql-[a-zA-Z0-9]+\/mysql$/.test(relative(scratch,expected)));
   // Private credentials travel on stdin; only DATABASE()/datadir are returned.
   // One bounded native SQL probe avoids Nitro's non-awaited async plugin race.
   // Nitro rewrites import.meta.url before entry evaluation; use the actual

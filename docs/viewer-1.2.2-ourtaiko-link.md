@@ -93,3 +93,5 @@ bash scripts/memory/run_qa.sh /usr/bin/env TAIKO_PYTHON_EXECUTABLE=/absolute/pat
 - 现有 CI：`/home/sigaer/taiko/qa-vault/runs/qa-63a2f3745739/evidence/`，320 项 Node 测试、Contract bindings 检查及 3 项跨语言测试通过；没有新增 CI Gate。
 - `npm run build` 通过 `scripts/memory/run_build.sh` 完成，包装器与 npm 退出均为 0。日志 `/var/tmp/taiko-viewer-1.2.2-build.log`，结果 `/var/tmp/taiko-viewer-1.2.2-build-result.json`。只生成隔离构建产物，没有调用部署脚本或替换生产输出。
 - 构建产物 Nuxt/Chromium 页面验证：`/home/sigaer/taiko/qa-vault/runs/qa-de56a27a5add/evidence/oidc-nuxt-ui.json`，89 项通过；包括中日文 × 375/414/1280px 的原页面与八类远端状态，以及键盘触发重新授权按钮、POST 用途为 link 且不传 externalId 的验证。页面运行错误和横向溢出为零；新旧显式迁移重复执行、无 opt-in 拒绝及生产模式拒绝通过。Nuxt、Chromium 与隔离 MySQL 均已退出。
+
+1.2.3 补充：用户已明确授权现有自有 staging 账号的真实绑定，并改为保留两端数据；该批不再要求上述管理员文书或预先解绑确认。真实结果、时间格式修复和同对恢复见 [1.2.3 真实 link 记录](viewer-1.2.3-ourtaiko-real-link.md)。1.2.2 的 Mock 证据保留为历史验证，不替代新的真实证据。

@@ -3,6 +3,12 @@ import { assertOurTaikoSubject, exactKeys, object, ourTaikoTarget, readOurTaikoJ
 
 export type LinkResult = { outcome: "linked" | "failed" | "unknown"; code?: string; retryAfter?: number; linkedAt?: string };
 
+// Django serializes aware datetimes with microseconds and +00:00. Keep the
+// exact remote timestamp; accept RFC 3339 offsets as well as the protocol's Z example.
+export function validOurTaikoLinkedAt(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(Date.parse(value));
+}
+
 /** Request-local fresh OIDC authorization is enforced by the callback caller.
  * OurTaiko checks its own token ledger; no OAuth token belongs in this request. */
 export async function linkOurTaiko(provider: OidcProvider, subject: string, externalId: string): Promise<LinkResult> {
@@ -20,7 +26,7 @@ export async function linkOurTaiko(provider: OidcProvider, subject: string, exte
     if (response.status === 200) {
       const data = payload.data;
       if (payload.code !== "OK" || payload.message !== "" || !object(data) || !exactKeys(data, ["id", "externalId", "linkedAt"]) || data.id !== subject || data.externalId !== externalId ||
-        typeof data.linkedAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(data.linkedAt) || !Number.isFinite(Date.parse(data.linkedAt))) return { outcome: "unknown", code: "invalid_response" };
+        !validOurTaikoLinkedAt(data.linkedAt)) return { outcome: "unknown", code: "invalid_response" };
       return { outcome: "linked", linkedAt: data.linkedAt };
     }
     const statuses: Record<string, number> = { REQUEST_INVALID: 400, SERVICE_UNAUTHORIZED: 401, SERVICE_FORBIDDEN: 403, NOT_FOUND: 404, ALREADY_LINKED: 409, RATE_LIMITED: 429, UNAVAILABLE: 503 };
