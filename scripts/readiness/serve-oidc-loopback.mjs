@@ -172,17 +172,27 @@ try{
  await writeFile(resolve(evidence,'oidc-loopback-ready.json'),JSON.stringify(report,null,2)+'\n');
  // Public URL/fingerprint/status only. No request, authorization URL, cookie or token logging.
  console.log(JSON.stringify({status:'READY',callback,providerReady:report.providerReady,expiresAt:report.expiresAt,caPath,caSha256:report.caSha256}));
- await sleep(duration*1000);
+ if(process.env.OIDC_LOOPBACK_BROWSER==='1'){
+  const driver=resolve(privateDir,'browser-driver.mjs'),info=await stat(driver);
+  assert.equal(info.uid,process.getuid());assert.equal(info.mode&0o077,0);assert.equal(await realpath(driver),driver);
+  const browserLog=await open(resolve(evidence,'oidc-loopback-browser.log'),'w',0o600);
+  const browser=spawn(process.execPath,['--max-old-space-size=384',driver],{cwd:process.cwd(),env:{PATH:process.env.PATH,TMPDIR:scratch,QA_RUN_ID:process.env.QA_RUN_ID,QA_RUN_TMPDIR:scratch,QA_EVIDENCE_DIR:evidence},stdio:['ignore',browserLog.fd,browserLog.fd]});
+  let forceBrowserStop;
+  const browserDeadline=setTimeout(()=>{browser.kill('SIGTERM');forceBrowserStop=setTimeout(()=>browser.kill('SIGKILL'),5000);},duration*1000);
+  try{const [code]=await once(browser,'close');report.browserExit=code;assert.equal(code,0,'Private browser driver failed');}finally{clearTimeout(browserDeadline);clearTimeout(forceBrowserStop);await browserLog.close();}
+ }else await sleep(duration*1000);
  stage='account-result';
  const [[accounts]]=await db.query('SELECT COUNT(*) n FROM web_user_accounts');
  const [[identities]]=await db.query('SELECT COUNT(*) n FROM web_external_identities');
  const [[sessions]]=await db.query('SELECT COUNT(*) n FROM web_user_sessions');
  const [[remote]]=await db.query("SELECT COUNT(*) n FROM web_external_identities WHERE remote_link_status<>'not_requested'");assert.equal(remote.n,0);
- report.counts={accounts:accounts.n,identities:identities.n,sessions:sessions.n};report.pass=true;
+ report.counts={accounts:accounts.n,identities:identities.n,sessions:sessions.n};
  report.successfulLoginCallbacks=successfulLoginCallbacks;report.distinctLoginSessions=sessionFingerprints.size;
  report.network=JSON.parse(await readFile(resolve(evidence,'oidc-loopback-network.json'),'utf8'));
  assert.equal(report.network.metadataVerified,true);
  report.realLoginValidated=report.providerReady&&successfulLoginCallbacks>=2&&sessionFingerprints.size>=2&&accounts.n===1&&identities.n===1&&report.network.lookup.ok===1&&report.network.token.ok>=2;
+ if(process.env.OIDC_LOOPBACK_BROWSER==='1')assert.equal(report.realLoginValidated,true,'Real OIDC login round trips incomplete');
+ report.pass=true;
 }catch(error){report.error={stage,code:typeof error.code==='string'&&/^[A-Z_0-9]+$/.test(error.code)?error.code:'ISOLATED_LOOPBACK_FAILURE'};process.exitCode=1;}
 finally{
  if(proxy){for(const socket of sockets)socket.destroy();await new Promise(r=>proxy.close(r));}

@@ -199,7 +199,7 @@ X-Service-Key: <server OIDC client_secret>
 https://viewer.sakura-bot.cn/api/account/oidc/ourtaiko/callback
 ```
 
-2026-11-02 收到 OurTaiko 已部署 OIDC、lookup、link 的反馈。本机已验证真实 Discovery；lookup 的服务凭据认证、账号可见性（已远端关联或当前持有授予该 Application 的有效 access token）、已验证邮箱资料和错误行为仍需取得独立测试 Application 后实测。测试改用 loopback 回调，不能登记上面的正式 Viewer 地址来代替测试。Viewer 当前只有本地身份关联，未执行双方远端 link；真实 lookup 必须接受刚完成 OIDC 的合成联调身份，不能依赖本批未实现的远端 link。
+2026-11-02 收到 OurTaiko 已部署 OIDC、lookup、link 的反馈。2026-11-03 已取得独立测试 Application，完成真实 OIDC、lookup、首次建号和再次登录；[真实联调记录](viewer-1.2.1-ourtaiko-loopback.md#2026-11-03-真实联调记录) 包含证据和边界。错误分支仍以此前 Mock 证据为准，本次没有将全部错误分支重跑到真实服务。测试使用 loopback 回调，不能登记上面的正式 Viewer 地址来代替测试。Viewer 当前只有本地身份关联，未执行双方远端 link；本次 lookup 已验证刚完成 OIDC 的测试身份可见，无需调用远端 link。
 
 后续需要通过安全渠道取得 Client ID/Secret、确认精确 Issuer/Discovery/JWKS、basic/post 认证方式、RS256 与 PKCE S256、`openid profile`、稳定 32 位 sub、lookup 的 emailVerified 语义、测试身份及密钥轮换安排。先在双方明确授权的测试环境验证真实 lookup 的成功/错误/限流行为，再单独安排生产迁移、反向代理回调 query 日志脱敏和开关启用。客户端 Secret 只写私有服务器环境，不放在命令行或文档中。
 

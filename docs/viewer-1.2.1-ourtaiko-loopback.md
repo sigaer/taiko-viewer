@@ -6,7 +6,7 @@
 
 采用现有 Linux 主机的短期限时实例，通过 SSH 转发供测试者 Windows 浏览器访问。不需要新服务器、公网测试域名或固定 IP 白名单。浏览器执行回调，OurTaiko 服务器无需连接 localhost。未获得 Windows 本机执行通道，因此本批实施并验证服务器侧方案；Windows 信任证书、SSH 转发及真实用户授权仍需在浏览器所在电脑完成。
 
-这是环境就绪验证，不是双方真实登录通过。独立 Application 的 Client ID/Secret 尚未取得，私有配置保持空值，实例中的 Provider 仍关闭。未换取 Token、未调用 lookup，更未调用 link/unlink。
+2026-11-03 已使用独立测试 Application 完成真实 OIDC → lookup → 首次建号及再次登录，同机隔离浏览器验证通过；见文末真实联调记录。凭据已注入 Git 外的私有配置，不在本文展示。正式 Viewer 开关保持关闭，没有执行远端 link/unlink。2026-11-02 的环境预检记录仍保留为历史证据。
 
 ## 给 OurTaiko 登记的信息
 
@@ -39,7 +39,7 @@
 
 | 路径 | 用途 |
 | --- | --- |
-| `/var/tmp/taiko-viewer-oidc-loopback/private/client.json` | 只允许 `clientId`、`clientSecret` 两个字符串字段，目前均为空；收到测试凭据后通过 SSH 私有编辑器填写 |
+| `/var/tmp/taiko-viewer-oidc-loopback/private/client.json` | 只允许 `clientId`、`clientSecret` 两个字符串字段；2026-11-03 已私有保存独立测试 Application 凭据，不通过终端回显或写入 Git |
 | `/var/tmp/taiko-viewer-oidc-loopback/localhost-ca.crt` | 公开的专用测试 CA 证书，可复制到测试电脑；不是私钥 |
 | `/var/tmp/taiko-viewer-oidc-loopback/private/` 下的 key/crt | CA 私钥及 localhost 服务端证书；私钥不离开服务器 |
 | `/var/tmp/taiko-viewer-oidc-loopback/status.json` | 无敏感内容的就绪/停止状态、证书指纹及验证摘要 |
@@ -50,7 +50,7 @@ CA 有效期 30 天，服务端证书 7 天，SAN 含 localhost、127.0.0.1、::
 0dd4a20d9fd4a06a5c755d698a1739908e8a3e933c9231027a6ba8e23fe4b834
 ```
 
-收到凭据后只修改私有 client.json。脚本将其注入该轮 Nuxt 子进程的私有运行环境，不写 Git、CLI 参数或日志。其他配置固定为真实 Issuer、上述回调和 scope/algorithm，不接受自定义目标 URL。两项凭据都为空时关闭该实例 OIDC；只填写一项则拒绝启动。正式 Viewer 的 OIDC 配置不变。
+凭据更新时只修改私有 client.json。脚本将其注入该轮 Nuxt 子进程的私有运行环境，不写 Git、CLI 参数或日志。其他配置固定为真实 Issuer、上述回调和 scope/algorithm，不接受自定义目标 URL。两项凭据都为空时关闭该实例 OIDC；只填写一项则拒绝启动。正式 Viewer 的 OIDC 配置不变。
 
 ## Windows 浏览器准备
 
@@ -119,3 +119,33 @@ Remove-Item "Cert:\CurrentUser\Root\$($ViewerTestCa.Thumbprint)"
 最终环境预检证据：`/home/sigaer/taiko/qa-vault/runs/qa-12146c0b8efd/evidence/`。其中 `oidc-loopback-result.json` 记录 TLS、页面、DB、日志、网络计数和 Nuxt 退出；`viewer1-sql-CEBVcR/result.json` 记录 MySQL 退出；`manifest.json` 记录整个 cgroup 已退出及 scratch 已移除。整组进程在 loopback 脚本运行期间的抽样内存最大值为 431,566,848 bytes（约 412 MiB），无 high/max/OOM 事件；内核未提供 memory.peak，不能当作真实峰值上界。服务端 SSH 配置允许 TCP 转发，实际 Windows 隧道仍未验证。
 
 使用同一命令加 `--oidc-duration-seconds=15` 可重做短时环境预检，无需重复 Mock 测试。预检结束后 8443 无监听，私有数据库及账号记录已随 scratch 删除；CA 和空的 client.json 保留，便于登记 Application 后直接复用。
+
+## 2026-11-03 真实联调记录
+
+独立 confidential Application 已取得，测试凭据仅保存在私有 client.json。以测试者指定的邮箱注册专用 OurTaiko 测试用户，测试者完成邮件链接验证；生成的测试用户登录资料仅保存在 `private/test-account.json`，未公开邮箱、密码或密钥。
+
+为避免 Windows localhost 回调指向错误机器，本轮浏览器与 Viewer 均运行于同一个受限 QA cgroup。只在临时浏览器 HOME 的 NSS 库导入专用 CA，Playwright 使用 `ignoreHTTPSErrors=false`，不修改系统或普通浏览器信任库。复用既有 1.2.1 产物、隔离数据库 bootstrap 和显式 OIDC 迁移，没有构建、部署或生产数据库操作。
+
+| 项目 | 实际结果 |
+| --- | --- |
+| 真实授权入口 | Issuer `https://sso.ourtaiko.org`，精确 localhost HTTPS callback，`openid profile`、S256、RS256/confidential basic 配置验证通过 |
+| 第一次登录 | 浏览器在真实 OurTaiko 登录并同意授权，携带事务 Cookie 回到 localhost；真实换码、JWKS 验证、lookup 均成功，进入 Viewer 个人资料页，邮箱显示已验证 |
+| 第二次登录 | 先退出 Viewer，再从登录页发起新的授权；OurTaiko SSO 会话仍有效，完成第二次真实换码及回调，复用同一 Viewer 账号和身份 |
+| 后端网络计数 | Token 2 次成功，JWKS 2 次成功，lookup 1 次成功；均无失败。第二次登录没有重复 lookup |
+| 数据与 Session | 2 个成功登录回调、2 个不同的新 Session；最终账号 1、外部身份 1、Session 1。第一次 Session 已由显式退出删除，最后一条为第二次登录签发 |
+| 远端关系 | `remote_link_status=not_requested`；没有 external/link、unlink 或其他远端业务接口调用 |
+| 真实浏览器结论 | `realLoginValidated=true`；跨站 Cookie 和 localhost TLS 已在同机浏览器的完整往返中验证，不是仅检查 Set-Cookie 属性，也不是复用 Mock 结论 |
+| 资源与清理 | 整组进程抽样内存最大值 749,101,056 bytes（约 714 MiB），无 high/max/OOM 事件；内核未提供 memory.peak。浏览器、Nuxt、TLS 代理及私有 MySQL 均已退出，QA scratch 已删除，8443 无监听 |
+
+真实流程证据：`/home/sigaer/taiko/qa-vault/runs/qa-a6a5b6e314fa/evidence/`。
+
+- `oidc-loopback-result.json`：`providerReady=true`、`browserExit=0`、`realLoginValidated=true`、账号/身份/Session 数量和清理状态。
+- `oidc-loopback-network.json`：真实 Discovery/JWKS/Token/lookup 的脱敏计数。
+- `viewer1-sql-UJtOpA/result.json`：独立 MySQL 身份、退出状态。
+- `manifest.json`：`childrenStopped=true`、`cleanup=REMOVED_OWNED_SCRATCH_ONLY`、wrapper exit 0。
+
+另一次只读证据审计位于 `/home/sigaer/taiko/qa-vault/runs/qa-eb232626b346/evidence/`，确认测试凭据、用户密码和邮箱未进入本轮日志/JSON证据或源码差异，私有文件权限正确。生产 Viewer 的 PID 和启动时间保持不变，未改动正式 OIDC 开关或生产 Nginx。
+
+本轮为操作脚本增加可选 `--oidc-browser`，在同一 QA cgroup 内调用已审阅的私有 `private/browser-driver.mjs`。该文件必须属于运行用户、权限 0600 且不可通过符号链接替换。驱动和测试用户资料不进入 Git；不传该参数时仍使用原手动浏览器/SSH 模式。浏览器驱动失败或两次真实登录证据不完整时，浏览器模式退出失败；超时先终止驱动，5 秒后强制结束，整个 cgroup 仍由既有 wrapper 清理。当前私有驱动代码 SHA-256 为 `ee309ad42930145f33afa42e04306b92b3ba44724244a0a3c1d39d8b977f0869`。
+
+该结果证明独立测试 Application 的两次真实登录及受保护资料查询，不代表远端 link、账号生命周期同步、公开上线或 Windows SSH 隧道已验收。后续联调继续使用同一测试用户资料；本轮未删除该 OurTaiko 测试用户，只清理了本地隔离库。没有新增 Release Gate 或重复运行 49 个 Mock 场景。

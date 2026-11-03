@@ -105,7 +105,7 @@ try{
  const duration=process.argv.find(arg=>arg.startsWith('--oidc-duration-seconds='))?.split('=')[1]||'480';
  if(oidcLoopback)assert.ok(/^\d+$/.test(duration)&&Number(duration)>=15&&Number(duration)<=480,'OIDC loopback lifetime must be 15–480 seconds');
  const result=oidcLoopback
-  ? await run(process.execPath,['scripts/readiness/serve-oidc-loopback.mjs'],'oidc-loopback',{...testEnv,OIDC_LOOPBACK_DURATION_SECONDS:duration},600000)
+  ? await run(process.execPath,['scripts/readiness/serve-oidc-loopback.mjs'],'oidc-loopback',{...testEnv,OIDC_LOOPBACK_DURATION_SECONDS:duration,...(process.argv.includes('--oidc-browser')?{OIDC_LOOPBACK_BROWSER:'1'}:{})},600000)
   : await run(process.execPath,['--experimental-strip-types','--test','--test-concurrency=1',...(pattern?[pattern]:[]),...suites],'tests',testEnv,600000);
  if(oidcLoopback){evidence.mode='oidc-loopback';evidence.callback='https://localhost:8443/api/account/oidc/ourtaiko/callback';}
  evidence.tests=suites;evidence.result=result;evidence.status=result.code===0?'PASS':'FAIL';
