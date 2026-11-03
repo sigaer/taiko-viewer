@@ -1,0 +1,93 @@
+{
+  "files": [
+    {
+      "file": "screenshots/song-1440-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 1440,
+      "sourceViewportHeight": 1000,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/training-1440-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 1440,
+      "sourceViewportHeight": 1000,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/home-1440-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 1440,
+      "sourceViewportHeight": 1000,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/progress-1440-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 1440,
+      "sourceViewportHeight": 1000,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/song-390-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 390,
+      "sourceViewportHeight": 844,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/training-390-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 390,
+      "sourceViewportHeight": 844,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/home-390-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 390,
+      "sourceViewportHeight": 844,
+      "scale": 1
+    },
+    {
+      "file": "screenshots/progress-390-compare.png",
+      "left": "V1",
+      "right": "V2",
+      "sourceViewportWidth": 390,
+      "sourceViewportHeight": 844,
+      "scale": 1
+    },
+    {
+      "file": "references/moe-home-1440-annotated.png",
+      "width": 1440,
+      "height": 1000,
+      "annotation": "HTML overlay, source PNG unchanged"
+    },
+    {
+      "file": "references/moe-music-1440-annotated.png",
+      "width": 1440,
+      "height": 1000,
+      "annotation": "HTML overlay, source PNG unchanged"
+    },
+    {
+      "file": "references/moe-home-390-annotated.png",
+      "width": 390,
+      "height": 844,
+      "annotation": "HTML overlay, source PNG unchanged"
+    },
+    {
+      "file": "references/moe-music-390-annotated.png",
+      "width": 390,
+      "height": 844,
+      "annotation": "HTML overlay, source PNG unchanged"
+    }
+  ],
+  "browserErrors": []
+}

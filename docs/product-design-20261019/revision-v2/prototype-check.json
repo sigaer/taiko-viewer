@@ -1,0 +1,181 @@
+{
+  "scope": "Independent prototype only; not a production or backend regression suite, and not an aesthetic verdict.",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "stateRenders": [
+    {
+      "page": "song",
+      "state": "guest",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "unbound",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "empty",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "no-goal",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "loading",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "error",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "completed",
+      "render": "ok"
+    },
+    {
+      "page": "song",
+      "state": "partial",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "guest",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "unbound",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "empty",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "no-goal",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "loading",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "error",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "completed",
+      "render": "ok"
+    },
+    {
+      "page": "training",
+      "state": "partial",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "guest",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "unbound",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "empty",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "no-goal",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "loading",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "error",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "completed",
+      "render": "ok"
+    },
+    {
+      "page": "home",
+      "state": "partial",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "guest",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "unbound",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "empty",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "no-goal",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "loading",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "error",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "completed",
+      "render": "ok"
+    },
+    {
+      "page": "progress",
+      "state": "partial",
+      "render": "ok"
+    }
+  ],
+  "retainedInteractions": [
+    "goal management/replacement/cancel",
+    "recommendation options/count 1–50/image checkbox",
+    "ordinary vs target recommendation eligibility",
+    "difficulty + note count",
+    "goal selection/confirmation",
+    "no completion before explicit sync",
+    "sync then completion",
+    "progress range/metric/table",
+    "file:// direct opening"
+  ],
+  "errors": []
+}

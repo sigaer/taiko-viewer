@@ -1,0 +1,265 @@
+/* V2 changes relationships and emphasis; V1 token values, font floor and hit targets remain. */
+body.v2{--v-shadow:none}
+.v2 .surface{box-shadow:none}
+.v2 .v2-content{padding-top:26px;padding-bottom:48px}
+.v2-content h2{font-weight:650}
+.v2-content h3{font-weight:600}
+.v2-content .page-title{margin-bottom:12px;align-items:center}
+.v2-content .page-title h1{font-size:30px;font-weight:700}
+.v2-content .subnav{margin:0 0 32px;gap:28px}
+.v2-content .subnav a{font-weight:500;font-size:15px}
+.v2-content .button{font-weight:600;font-size:15px;min-height:44px}
+.v2-content .text-link{font-weight:500;font-size:14px;min-height:44px}
+.v2-content .muted{color:var(--v-muted)}
+.v2-content .v2-section-label{font:500 15px/1.6 var(--v-body);letter-spacing:0;color:var(--v-muted);margin:0 0 9px}
+.v2-content .v2-side-section{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;min-width:0}
+.v2-content .v2-side-section h2{font-size:17px;font-weight:600;margin:0 0 16px}
+.v2-content .v2-side-section p{font-size:15px;line-height:1.7}
+.v2-content details>summary{min-height:44px;cursor:pointer;align-content:center;font-size:14px;font-weight:500}
+
+/* Song: the title uses its available line, while the chart owns the primary surface. */
+.v2-song .breadcrumb{font-size:14px;margin-bottom:26px}
+.v2-song .v2-song-header{grid-template-columns:112px minmax(0,1fr);gap:28px;align-items:center;margin-bottom:0}
+.v2-song .v2-song-header>img{width:112px;height:112px;border-radius:9px}
+.v2-song .song-heading h1{max-width:none;font-size:30px;line-height:1.4;margin:6px 0 8px;font-weight:700;text-wrap:pretty;letter-spacing:-.015em}
+.v2-song .v2-song-version{white-space:nowrap}
+.v2-song .song-heading .eyebrow{font-size:14px;font-weight:400;letter-spacing:0;color:var(--v-muted);margin:0}
+.v2-song .song-heading .original-title{font-size:15px;line-height:1.6}
+.v2-song .song-meta{margin-top:10px;gap:6px 20px;font-size:14px}
+.v2-song .v2-difficulties{margin:32px 0 28px;padding:0 0 0;gap:22px;border-bottom:1px solid var(--v-line)}
+.v2-song .difficulty-tab{flex:0 0 auto;min-width:80px;min-height:52px;padding:10px 8px 13px;border:0;border-bottom:3px solid transparent;background:transparent;border-radius:0;font-size:15px;font-weight:500;color:var(--v-ink)}
+.v2-song .difficulty-tab span{margin-left:6px;font-size:14px;font-weight:400}
+.v2-song .difficulty-tab[aria-selected=true]{border-bottom-color:var(--v-red);background:transparent;color:var(--v-red);font-weight:650}
+.v2-song .v2-song-layout{display:grid;grid-template-columns:minmax(0,1fr) 272px;gap:48px;align-items:start}
+.v2-song .v2-chart-column{min-width:0}
+.v2-song .chart-panel{padding:0;border:1px solid var(--v-line);border-radius:10px;background:var(--v-paper)}
+.v2-song .chart-summary{padding:20px 24px;border-bottom:0;align-items:baseline;gap:16px}
+.v2-song .chart-summary>div{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 18px}
+.v2-song .chart-summary h2{font-size:19px;font-weight:600}
+.v2-song .chart-summary small{font-size:14px}
+.v2-song .chart-lane{height:216px;gap:38px}
+.v2-song .chart-actions{padding:22px 24px 18px;gap:12px}
+.v2-song .audio-controls{padding:0 24px 22px}
+.v2-song .audio-tabs{gap:16px;margin-bottom:10px}
+.v2-song .audio-tabs button{font-size:14px;padding:8px 0;font-weight:400}
+.v2-song .audio-strip{font-size:14px}
+.v2-song .v2-song-notes{margin-top:24px}
+.v2-song .v2-song-notes .disclosure{padding:4px 0;border-top:0;border-bottom:1px solid var(--v-line)}
+.v2-song .v2-song-aside{display:block;min-width:0;padding-top:5px}
+.v2-song .v2-song-aside .v2-side-section+.v2-side-section{margin-top:48px;padding-top:24px;border-top:1px solid var(--v-line)}
+.v2-song .score-line{font-size:32px;font-weight:600;margin-bottom:14px;line-height:1.35}
+.v2-song .score-detail{font-size:14px;gap:15px;margin-bottom:20px}
+.v2-song .score-detail b{font-weight:500}
+.v2-song .score-date{font-size:14px;line-height:1.65;margin-top:16px}
+.v2-song .v2-side-section .text-link{margin-top:12px}
+
+/* Training: summary + available action, then results. No permanent lesson about the flow. */
+.v2-training .v2-training-layout{grid-template-columns:minmax(0,1fr) 244px;gap:48px;align-items:start}
+.v2-training .v2-goal-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:0 0 28px;margin:0 0 32px;border-bottom:1px solid var(--v-line);align-items:center}
+.v2-training .v2-goal-copy h2{font-size:21px;line-height:1.45;font-weight:600;margin:0 0 8px}
+.v2-training .v2-goal-copy>p:not(.v2-section-label){font-size:15px;color:var(--v-muted);line-height:1.7}
+.v2-training .v2-goal-control{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:125px}
+.v2-training .v2-goal-management{font-size:14px;max-width:260px}
+.v2-training .v2-goal-management summary{color:var(--v-cyan);font-size:14px;min-height:44px}
+.v2-training .v2-goal-management[open]{max-width:none;grid-column:1/-1}
+.v2-training .v2-goal-management p{margin:12px 0;font-size:14px}
+.v2-training .v2-goal-management small{font-size:14px}
+.v2-training .v2-goal-management .actions{gap:20px}
+.v2-training .v2-goal-management .button{font-size:14px;padding:8px 0}
+.v2-training .v2-recommendations>.section-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px}
+.v2-training .v2-recommendations h2{font-size:21px}
+.v2-training .mode-tabs{margin:0;gap:18px}
+.v2-training .mode-tabs button{min-height:44px;padding:8px 0;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;font-size:15px;font-weight:400}
+.v2-training .mode-tabs button[aria-selected=true]{background:transparent;border-bottom-color:var(--v-cyan);color:var(--v-cyan);font-weight:600}
+.v2-training .filters{gap:12px;align-items:end;padding:0 0 20px;flex-wrap:wrap}
+.v2-training .filters>label{font-size:14px;gap:5px}
+.v2-training .filters select{font-size:15px;min-height:44px;max-width:190px}
+.v2-training .v2-filter-more{border:0;margin:0;padding:0;position:relative;align-self:end}
+.v2-training .v2-filter-more>summary{min-height:44px;display:flex;align-items:center;padding:8px 4px;color:var(--v-cyan);font-size:14px}
+.v2-training .v2-filter-more>summary:before{content:'+';margin-right:7px;font-size:18px}
+.v2-training .v2-filter-more[open]{flex:1 0 100%;padding:14px 0 12px;border-block:1px solid var(--v-line)}
+.v2-training .v2-filter-more[open]>summary:before{content:'−'}
+.v2-training .v2-filter-more label{font-size:15px;display:flex;align-items:center;gap:10px;min-height:44px;margin:6px 0}
+.v2-training .recommendation-item{padding:22px 0;gap:16px;grid-template-columns:64px minmax(0,1fr) auto}
+.v2-training .recommendation-item img{width:64px;height:64px}
+.v2-training .recommendation-item h3{font-size:16px;font-weight:600;margin-bottom:6px;line-height:1.6}
+.v2-training .recommendation-item .difficulty{background:transparent;color:var(--v-muted);padding:0;border-radius:0;font-size:14px;font-weight:400}
+.v2-training .recommendation-item p{font-size:14px;margin-top:4px}
+.v2-training .recommendation-item>a:last-child{font-size:14px;font-weight:500}
+.v2-training .training-aside{gap:42px;padding-top:2px}
+.v2-training .training-aside .text-link{margin-top:8px}
+.v2-training .tool-links a{font-size:15px;min-height:48px;padding:12px 0}
+
+/* Home: identity is one group. Records and a chosen task have independent, modest space. */
+.v2-home .home-heading{margin-bottom:34px}
+.v2-home .home-heading h1{font-size:30px;font-weight:650;margin:0 0 10px}
+.v2-home .identity-line{margin:0;gap:12px;font-size:14px}
+.v2-home .identity-line .text-link{min-height:36px}
+.v2-home .identity-value{font-size:14px;font-weight:600}
+.v2-home .v2-home-overview{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:start;margin-bottom:44px}
+.v2-home .v2-home-recent{min-width:0;padding:0;background:transparent;border:0;box-shadow:none}
+.v2-home .v2-home-recent .section-head{margin-bottom:8px;align-items:baseline}
+.v2-home .v2-home-recent h2{font-size:21px}
+.v2-home .recent-list li{padding:16px 0;font-size:15px}
+.v2-home .recent-list strong{font-weight:500;font-size:15px;line-height:1.6}
+.v2-home .recent-list .inline-change{font-size:19px;font-weight:600;margin-top:5px;line-height:1.45}
+.v2-home .recent-list small{font-size:14px;margin-top:5px}
+.v2-home .v2-home-goal{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:18px;padding:4px 0 8px 32px;border-left:1px solid var(--v-line);align-items:start}
+.v2-home .v2-task-title{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:12px}
+.v2-home .v2-task-song{font-size:15px;line-height:1.65;margin-bottom:8px;overflow-wrap:anywhere}
+.v2-home .v2-task-baseline{font-size:14px;color:var(--v-muted);line-height:1.65}
+.v2-home .v2-task-cover{width:64px;height:64px;border-radius:7px;object-fit:cover;margin-top:34px}
+.v2-home .v2-home-goal .actions{margin-top:20px;gap:10px}
+.v2-home .v2-home-goal .button{font-size:14px;padding:9px 12px}
+.v2-home .v2-home-recommend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 26px;margin-top:0}
+.v2-home .v2-home-recommend>.section-head{grid-column:1/-1;margin-bottom:8px}
+.v2-home .v2-home-recommend>.section-head h2{font-size:21px}
+.v2-home .v2-home-recommend .song-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px 12px;padding:16px 0 8px;border:0;align-items:start}
+.v2-home .v2-home-recommend .song-row img{width:56px;height:56px}
+.v2-home .v2-home-recommend .song-row strong{font-size:15px;font-weight:500}
+.v2-home .v2-home-recommend .song-row small{font-size:14px}
+.v2-home .v2-home-recommend .row-link{grid-column:2;font-size:14px;min-height:36px}
+.v2-home .lower-section{margin-top:44px}
+.v2-home .v2-cover-tile{background:transparent;border:0;border-radius:8px 8px 0 0;box-shadow:none}
+.v2-home .v2-cover-tile div{padding:12px 0 0}
+.v2-home .v2-cover-tile strong{font-size:15px;font-weight:500}
+.v2-home .v2-cover-tile small{font-size:14px}
+.v2-home .annual-link{padding:20px 0;margin-top:36px;border-radius:0;border-top:1px solid var(--v-line);background:transparent}
+.v2-home .annual-link strong{font-weight:600}
+.v2-home .annual-link small{font-size:14px}
+.v2-home .guest-hero{padding:0 0 12px}
+.v2-home .guest-hero h1{font-size:32px;line-height:1.45;font-weight:650}
+
+/* Progress: one factual line, a working chart, and an unboxed change list. */
+.v2-progress .v2-progress-summary{margin:0 0 28px;padding:0;border:0}
+.v2-progress .v2-progress-summary p{font-size:20px;line-height:1.7;font-weight:400}
+.v2-progress .v2-progress-summary strong{font-weight:600;white-space:nowrap}
+.v2-progress .v2-progress-layout{grid-template-columns:minmax(0,1fr) 272px;gap:48px;align-items:start}
+.v2-progress .v2-trend-block{border:0;border-radius:10px;background:var(--v-paper);padding:20px 24px 8px;box-shadow:none;min-width:0}
+.v2-progress .v2-trend-block>.section-head{gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.v2-progress .v2-trend-block .range-buttons{margin:0;gap:4px}
+.v2-progress .range-buttons button{font-size:14px;min-width:52px;font-weight:400}
+.v2-progress .range-buttons button[aria-pressed=true]{background:transparent;color:var(--v-cyan);border-radius:0;border-bottom:2px solid var(--v-cyan)}
+.v2-progress .v2-trend-block select{font-size:14px}
+.v2-progress .v2-trend-block>p small{font-size:14px;line-height:1.7}
+.v2-progress .v2-trend-block>.disclosure{margin-top:12px;padding:6px 0;border-top:1px solid var(--v-line)}
+.v2-progress .v2-changes{align-self:start;height:auto;background:transparent;padding:5px 0 0;border:0;border-radius:0;box-shadow:none;min-width:0}
+.v2-progress .v2-changes h2{font-size:18px;font-weight:600}
+.v2-progress .milestone{padding-bottom:24px}
+.v2-progress .milestone strong{font-size:15px;font-weight:500;line-height:1.6;margin-top:6px}
+.v2-progress .milestone small{font-size:14px;line-height:1.65}
+.v2-progress .milestone .inline-change{font-size:18px;font-weight:600;margin-top:5px}
+.v2-progress .lower-section{margin-top:44px}
+.v2-progress .lower-section h2{font-size:21px}
+.v2-progress .lower-section .muted{font-size:14px}
+.v2-progress .v2-skill-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 48px;background:transparent;padding:12px 0;border:0;box-shadow:none}
+.v2-progress .feature-bars>div{font-size:14px}
+.v2-progress .feature-bars strong{font-weight:500}
+
+@media(min-width:768px) and (max-width:1150px){
+ .v2-song .v2-song-layout,.v2-training .v2-training-layout,.v2-progress .v2-progress-layout{grid-template-columns:minmax(0,1fr);gap:32px}
+ .v2-song .v2-song-aside{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px}
+ .v2-song .v2-song-aside .v2-side-section+.v2-side-section{margin:0;padding:0;border:0}
+ .v2-training .training-aside{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px}
+ .v2-home .v2-home-overview{gap:28px}.v2-home .v2-home-goal{padding-left:24px;grid-template-columns:minmax(0,1fr)}.v2-home .v2-task-cover{display:none}
+ .v2-home .v2-home-recommend{grid-template-columns:1fr}
+ .v2-home .v2-home-recommend .song-row{grid-template-columns:56px minmax(0,1fr) auto;border-bottom:1px solid var(--v-line)}
+ .v2-home .v2-home-recommend .row-link{grid-column:auto}
+}
+@media(max-width:767px){
+ .v2 .v2-content{padding:24px 16px 36px}
+ .v2-content .page-title h1{font-size:26px}
+ .v2-content .subnav{gap:0;justify-content:space-between;margin:0 0 26px}
+ .v2-content .subnav a{font-size:14px;min-height:48px;padding-inline:2px}
+ .v2-content .v2-side-section h2{font-size:18px}
+ .v2-content .button{font-size:15px;min-height:44px}
+ .v2-song .breadcrumb{font-size:14px;margin-bottom:22px}
+ .v2-song .v2-song-header{grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:start}
+ .v2-song .v2-song-header>img{width:72px;height:72px;margin-top:5px}
+ .v2-song .song-heading h1{font-size:22px;line-height:1.45;margin:5px 0 8px;max-width:none}
+ .v2-song .song-heading .eyebrow{font-size:14px;line-height:1.6}
+ .v2-song .song-heading .original-title{font-size:14px;line-height:1.65}
+ .v2-song .song-meta{font-size:14px;gap:4px 12px;margin-top:10px}
+ .v2-song .v2-difficulties{margin:26px 0 24px;gap:0}
+ .v2-song .difficulty-tab{flex:1;min-width:0;min-height:54px;padding:6px 0 10px;font-size:14px;line-height:1.5}
+ .v2-song .difficulty-tab span{display:block;font-size:14px;margin:1px 0 0}
+ .v2-song .v2-song-layout{display:flex;flex-direction:column;gap:36px}
+ .v2-song .v2-chart-column{width:100%}
+ .v2-song .chart-summary{padding:16px 18px}
+ .v2-song .chart-summary>div{gap:5px 14px}
+ .v2-song .chart-summary h2{font-size:18px}
+ .v2-song .chart-summary small{font-size:14px}
+ .v2-song .chart-lane{height:164px;padding:0 18px;gap:22px}
+ .v2-song .chart-actions{padding:20px 16px 14px;gap:10px}
+ .v2-song .chart-actions .button{font-size:14px;padding:10px 8px}
+ .v2-song .audio-controls{padding:0 18px 20px}
+ .v2-song .audio-tabs{gap:22px}
+ .v2-song .audio-tabs button{font-size:14px}
+ .v2-song .audio-strip{font-size:14px;gap:10px}
+ .v2-song .v2-song-notes{margin-top:22px}
+ .v2-song .v2-song-aside{width:100%;padding:0}
+ .v2-song .v2-song-aside .v2-side-section+.v2-side-section{margin-top:32px;padding-top:24px}
+ .v2-song .score-line{font-size:30px}
+ .v2-song .score-detail{font-size:14px}
+ .v2-training .v2-training-layout{display:block}
+ .v2-training .v2-goal-summary{grid-template-columns:minmax(0,1fr);gap:14px;padding-bottom:24px;margin-bottom:28px}
+ .v2-training .v2-goal-copy h2{font-size:21px}
+ .v2-training .v2-goal-copy>p:not(.v2-section-label){font-size:15px}
+ .v2-training .v2-goal-control{flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap}
+ .v2-training .v2-goal-management{max-width:none}
+ .v2-training .v2-goal-management[open]{flex-basis:100%}
+ .v2-training .v2-recommendations>.section-head{display:block;margin-bottom:18px}
+ .v2-training .v2-recommendations h2{font-size:21px;margin-bottom:10px}
+ .v2-training .mode-tabs{gap:24px}
+ .v2-training .mode-tabs button{font-size:15px}
+ .v2-training .filters{gap:10px;justify-content:flex-start}
+ .v2-training .filters>label{flex:0 1 auto;min-width:0;font-size:14px}
+ .v2-training .filters select{font-size:15px;max-width:160px;width:auto;min-height:44px}
+ .v2-training .filters>.button{padding:9px 12px}
+ .v2-training .v2-filter-more{flex:1;min-width:0}
+ .v2-training .v2-filter-more>summary{font-size:14px;padding-inline:0;white-space:nowrap}
+ .v2-training .v2-filter-more[open]{flex-basis:100%}
+ .v2-training .recommendation-item{grid-template-columns:56px minmax(0,1fr);gap:10px 14px;padding:20px 0}
+ .v2-training .recommendation-item img{width:56px;height:56px}
+ .v2-training .recommendation-item h3{font-size:16px;font-weight:600;line-height:1.6}
+ .v2-training .recommendation-item p,.v2-training .recommendation-item .difficulty{font-size:14px}
+ .v2-training .recommendation-item>a:last-child{grid-column:2;min-height:44px;margin-top:0;font-size:14px}
+ .v2-training .training-aside{display:block;margin-top:36px;padding:0}
+ .v2-training .training-aside>.v2-side-section+.v2-side-section{margin-top:36px}
+ .v2-home .home-heading{margin-bottom:28px}
+ .v2-home .home-heading h1{font-size:27px;line-height:1.45;margin-bottom:10px}
+ .v2-home .identity-line{font-size:14px;gap:4px 12px}
+ .v2-home .v2-home-overview{grid-template-columns:1fr;gap:28px;margin-bottom:36px}
+ .v2-home .v2-home-recent h2{font-size:21px}
+ .v2-home .v2-home-recent>.section-head{margin-bottom:2px}
+ .v2-home .recent-list li{padding:15px 0}
+ .v2-home .recent-list .inline-change{font-size:19px}
+ .v2-home .v2-home-goal{grid-template-columns:minmax(0,1fr) 56px;padding:0;border:0;gap:18px}
+ .v2-home .v2-task-title{font-size:20px;margin-bottom:8px}
+ .v2-home .v2-task-song{font-size:15px;margin-bottom:8px}
+ .v2-home .v2-task-cover{width:56px;height:56px;margin-top:32px}
+ .v2-home .v2-home-goal .actions{margin-top:14px}
+ .v2-home .v2-home-goal .button{font-size:15px;padding:9px 12px}
+ .v2-home .v2-home-recommend{display:block}
+ .v2-home .v2-home-recommend .song-row{grid-template-columns:56px minmax(0,1fr) auto;border-bottom:1px solid var(--v-line);gap:12px;padding:17px 0;align-items:center}
+ .v2-home .v2-home-recommend .row-link{grid-column:auto;min-height:44px;font-size:14px}
+ .v2-home .v2-home-recommend .song-row strong{font-size:15px}
+ .v2-home .lower-section{margin-top:36px}
+ .v2-home .v2-cover-tile img{aspect-ratio:1.35}
+ .v2-home .annual-link{margin-top:30px}
+ .v2-home .guest-hero h1{font-size:29px}
+ .v2-progress .v2-progress-summary{margin-bottom:26px}
+ .v2-progress .v2-progress-summary p{font-size:19px;line-height:1.75}
+ .v2-progress .v2-progress-layout{display:block}
+ .v2-progress .v2-trend-block{padding:16px 16px 6px}
+ .v2-progress .v2-trend-block>.section-head{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+ .v2-progress .v2-trend-block .range-buttons{justify-content:space-between;gap:6px}
+ .v2-progress .range-buttons button{font-size:14px;padding:8px 6px;min-width:0;min-height:44px}
+ .v2-progress .v2-trend-block select{justify-self:start;max-width:160px;font-size:15px;min-height:44px}
+ .v2-progress .v2-trend-block>p small{font-size:14px}
+ .v2-progress .v2-changes{margin-top:32px;padding:0}
+ .v2-progress .v2-changes h2{font-size:20px}
+ .v2-progress .v2-skill-bars{grid-template-columns:1fr;padding-top:10px;gap:16px}
+ .v2-progress .lower-section{margin-top:36px}
+ .v2-progress .lower-section .section-head{align-items:start;flex-wrap:wrap;gap:6px}
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "pair": "light ink/surface",
+    "foreground": "#192f3b",
+    "background": "#ffffff",
+    "ratio": 13.9,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light muted/canvas",
+    "foreground": "#526773",
+    "background": "#f3f7f8",
+    "ratio": 5.49,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light primary/white",
+    "foreground": "#ffffff",
+    "background": "#c83e36",
+    "ratio": 5.0,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light link/canvas",
+    "foreground": "#077680",
+    "background": "#f3f7f8",
+    "ratio": 4.98,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light link/soft",
+    "foreground": "#077680",
+    "background": "#e5f4f5",
+    "ratio": 4.75,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light selected/redsoft",
+    "foreground": "#c83e36",
+    "background": "#fff0ec",
+    "ratio": 4.51,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light success",
+    "foreground": "#25744c",
+    "background": "#eaf5ee",
+    "ratio": 5.11,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "dark ink/surface",
+    "foreground": "#f2f6f8",
+    "background": "#1b323e",
+    "ratio": 12.28,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "dark muted/surface",
+    "foreground": "#b0c3cc",
+    "background": "#1b323e",
+    "ratio": 7.33,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "dark primary",
+    "foreground": "#322124",
+    "background": "#ff8e7d",
+    "ratio": 6.83,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "dark link/soft",
+    "foreground": "#75ced6",
+    "background": "#193e48",
+    "ratio": 6.34,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "dark selected/redsoft",
+    "foreground": "#ff8e7d",
+    "background": "#442e30",
+    "ratio": 5.61,
+    "target": 4.5,
+    "pass": true
+  },
+  {
+    "pair": "light control border",
+    "foreground": "#81959f",
+    "background": "#ffffff",
+    "ratio": 3.12,
+    "target": 3,
+    "pass": true
+  },
+  {
+    "pair": "dark control border",
+    "foreground": "#7d99a8",
+    "background": "#1b323e",
+    "ratio": 4.45,
+    "target": 3,
+    "pass": true
+  }
+]

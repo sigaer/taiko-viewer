@@ -1,0 +1,238 @@
+// Official Taiko chart database design draft.
+// Baseline: Fanmade backend 7297c2f / target migration 035 + SSO 018 & 026
+// Requirements and design decisions: taiko-official-schema-requirements.txt
+// Reconstructed from source in an empty temporary PostgreSQL; not a live production dump.
+// FK relationships are physical. JSON course validation, SSO IDs and object keys are logical.
+Project taiko_official {
+  database_type: 'PostgreSQL'
+  Note: 'Official Taiko chart database design draft based on Fanmade; not applied to a database. CHECK expressions in notes describe intended constraints. Original Fanmade diagrams are baseline references only.'
+}
+
+Table auth.oidc_flows {
+  state_hash text [pk, not null]
+  binding_hash text [not null]
+  nonce text [not null]
+  verifier text [not null]
+  return_path text [not null]
+  expires_at timestamptz [not null]
+  Note: '一次性 OIDC 登录流程'
+}
+
+Table auth.sessions {
+  token_hash text [pk, not null]
+  user_id text [not null]
+  csrf_token text [not null]
+  expires_at timestamptz [not null]
+  upstream_token bytea [not null]
+  Note: '本站浏览器会话'
+}
+
+Table internal.pending_objects {
+  storage_key text [pk, not null]
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  Note: '外部对象写入意图'
+}
+
+Table internal.retired_files {
+  storage_key text [pk, not null]
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  Note: '待删除文件队列'
+}
+
+Table internal.retired_score_requests {
+  user_id text [not null]
+  idempotency_key text [not null]
+  indexes {
+    (user_id, idempotency_key) [pk]
+  }
+  Note: '已移除成绩的幂等键'
+}
+
+Table internal.schema_migrations {
+  version int4 [pk, not null]
+  applied_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  Note: '已执行迁移编号'
+}
+
+Table internal.upload_requests {
+  user_id text [not null]
+  idempotency_key text [not null]
+  payload_digest text [not null]
+  chart_id int8 [null]
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  tja_sha256 text [not null, note: 'PostgreSQL default: \'\'::text']
+  audio_sha256 text [not null, note: 'PostgreSQL default: \'\'::text']
+  indexes {
+    (user_id, idempotency_key) [pk]
+  }
+  Note: '上传幂等收据'
+}
+
+Table public.chart_resources {
+  id int8 [pk, not null, increment, note: 'Auto-generated bigint primary key; PostgreSQL primary-key B-tree index supports ID lookup.']
+  storage_key text [not null, unique, note: 'Relative object key: {sha256}.{extension}. Full bucket key: {path_prefix}/{sha256}.{extension}; prefix is configuration, with no resource-kind or chart-ID subdirectories.']
+  original_filename text [not null]
+  sha256 text [not null]
+  byte_size int8 [not null]
+  extension text [not null, note: 'Lowercase format extension without a leading dot, e.g. tja, ogg, webp.']
+  Note: 'Independent shared file records; file roles are defined by references on charts. CHECK (byte_size > 0) | CHECK (sha256 ~ \'^[a-f0-9]{64}$\') | CHECK (extension ~ \'^[a-z0-9]+$\') | CHECK (storage_key = sha256 || \'.\' || extension). 特殊情况：相同 SHA-256 且扩展名相同的文件对应同一桶路径；复用已有文件记录及 ID，不重复创建记录或覆盖桶对象。原始文件名不同时保留首次登记的 original_filename。详见需求记录 R005。 Role-specific format validation belongs to the upload/reference validation flow. Delete a file only after checking all four charts references and coordinating concurrent uploads; original Fanmade resource triggers/cleanup queries must be rewritten.'
+}
+
+Table public.chart_stats {
+  chart_id int8 [pk, not null]
+  upvotes int4 [not null, note: 'PostgreSQL default: 0']
+  downvotes int4 [not null, note: 'PostgreSQL default: 0']
+  comment_count int4 [not null, note: 'PostgreSQL default: 0']
+  Note: '作品投票与评论计数 | CHECK ((comment_count >= 0)) | CHECK ((downvotes >= 0)) | CHECK ((upvotes >= 0))'
+}
+
+Table public.chart_votes {
+  chart_id int8 [not null]
+  user_id text [not null]
+  value int2 [not null]
+  voted_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  indexes {
+    (chart_id, user_id) [pk]
+  }
+  Note: '作品赞 / 踩 | CHECK ((value = ANY (ARRAY[\'-1\'::integer, 1])))'
+}
+
+Table public.charts {
+  id int8 [pk, not null, increment, note: 'Auto-generated bigint primary key; PostgreSQL primary-key B-tree index supports fast ID lookup.']
+  nijiiro_id int4 [null, note: 'Numeric Nijiiro ID. User-reported current maximum is 3000; not a permanent upper bound.']
+  official_id text [null, note: 'Official string ID; nullable provisionally because requiredness was not specified.']
+  uploader_id text [not null]
+  tja_file int8 [null, note: 'Required unless status=deleted; references the TJA file record.']
+  audio_file int8 [null, note: 'Required unless status=deleted; locates the full audio through chart_resources. Normalize the referenced TJA WAVE to {audio.sha256}.{audio.extension}, matching the audio object basename and export filename. Compute the TJA hash and storage key after rewriting WAVE. original_filename is provenance only. See requirements R007, superseding the export naming rule in R006.']
+  cover_file int8 [null, note: 'Optional cover file record.']
+  preview_file int8 [null, note: 'Optional preview audio file record.']
+  description text [not null, note: 'PostgreSQL default: \'\'::text']
+  status text [not null, note: 'PostgreSQL default: \'published\'::text']
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  update_at timestamptz [not null, default: `now()`, note: 'Latest change time for the chart and its related data/resources, not only metadata. Initialize on creation; refresh on actual changes, including file-reference replacements and changes to referenced resource records. Shared-resource changes refresh all referencing charts. The default only initializes inserts; update paths/triggers must maintain this value. See requirements R010.']
+  title text [not null]
+  subtitle text [not null, note: 'PostgreSQL default: \'\'::text']
+  bpm float8 [not null]
+  offset_seconds float8 [not null, note: 'PostgreSQL default: 0']
+  demo_start float8 [not null, note: 'PostgreSQL default: 0']
+  duration float8 [not null]
+  title_translations jsonb [not null, note: 'PostgreSQL default: \'{}\'::jsonb']
+  subtitle_translations jsonb [not null, note: 'PostgreSQL default: \'{}\'::jsonb']
+  is_single bool [not null, note: 'PostgreSQL default: true']
+  difficulties jsonb [not null, note: 'PostgreSQL default: \'[]\'::jsonb']
+  category_flags int2 [not null, default: 0, note: '8-bit category mask: Namco=0x01, Pop=0x02, Game=0x04, Anime=0x08, Vocaloid=0x10, Variety=0x20, Kids=0x40, Classics=0x80. Combine with bitwise OR; 0=unclassified. PostgreSQL smallint uses 2 bytes; valid values fit an unsigned byte (0..255).']
+  demo_end float8 [not null]
+  indexes {
+    tja_file [type: btree]
+    audio_file [type: btree]
+    cover_file [type: btree]
+    preview_file [type: btree]
+  }
+  Note: '作品、歌曲元数据、难度集合与文件引用 | CHECK (status = \'deleted\' OR (tja_file IS NOT NULL AND audio_file IS NOT NULL)) | CHECK (((bpm > (0)::double precision) AND (bpm < \'Infinity\'::double precision))) | CHECK (((category_flags >= 0) AND (category_flags <= 255))) | CHECK (valid_chart_difficulties(difficulties, is_single)) NOT VALID | CHECK (((duration > (0)::double precision) AND (duration <= (1200)::double precision))) | CHECK ((status = ANY (ARRAY[\'published\'::text, \'deleted\'::text, \'hidden\'::text]))) | CHECK ((jsonb_typeof(subtitle_translations) = \'object\'::text)) | CHECK ((jsonb_typeof(title_translations) = \'object\'::text))'
+}
+
+Table public.comment_votes {
+  comment_id text [not null]
+  user_id text [not null]
+  value int2 [not null]
+  voted_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  indexes {
+    (comment_id, user_id) [pk]
+  }
+  Note: '评论赞 / 踩 | CHECK ((value = ANY (ARRAY[\'-1\'::integer, 1])))'
+}
+
+Table public.comments {
+  id text [pk, not null]
+  chart_id int8 [not null]
+  parent_id text [null]
+  root_id text [not null]
+  depth int4 [not null]
+  author_id text [not null]
+  body text [not null]
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  edited_at timestamptz [null]
+  deleted_at timestamptz [null]
+  removed_at timestamptz [null]
+  upvotes int4 [not null, note: 'PostgreSQL default: 0']
+  downvotes int4 [not null, note: 'PostgreSQL default: 0']
+  reply_count int4 [not null, note: 'PostgreSQL default: 0']
+  Note: '树形评论与回复 | CHECK ((char_length(body) <= 10000)) | CHECK ((((parent_id IS NULL) = (depth = 0)) AND ((parent_id IS NOT NULL) OR (root_id = id)))) | CHECK ((((deleted_at IS NULL) AND (removed_at IS NULL)) = (body <> \'\'::text))) | CHECK (((depth >= 0) AND (depth <= 1000))) | CHECK ((downvotes >= 0)) | CHECK ((reply_count >= 0)) | CHECK ((upvotes >= 0))'
+}
+
+Table public.notification_mutes {
+  user_id text [not null]
+  kind text [not null]
+  indexes {
+    (user_id, kind) [pk]
+  }
+  Note: '用户关闭的通知类型 | CHECK ((kind ~ \'^[a-z][a-z_]{0,39}$\'::text))'
+}
+
+Table public.notifications {
+  id text [pk, not null]
+  recipient_id text [not null]
+  kind text [not null]
+  actor_id text [null]
+  chart_id int8 [null]
+  comment_id text [null]
+  data jsonb [not null, note: 'PostgreSQL default: \'{}\'::jsonb']
+  dedupe_key text [null]
+  created_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  read_at timestamptz [null]
+  Note: '每个接收人的通知 | CHECK (((actor_id IS NULL) OR (actor_id <> recipient_id))) | CHECK ((jsonb_typeof(data) = \'object\'::text)) | CHECK ((kind ~ \'^[a-z][a-z_]{0,39}$\'::text)) | CREATE UNIQUE INDEX notifications_dedupe ON public.notifications USING btree (recipient_id, dedupe_key) WHERE (dedupe_key IS NOT NULL)'
+}
+
+Table public.scores {
+  id text [pk, not null]
+  user_id text [not null]
+  song_id int8 [not null]
+  difficulty text [not null]
+  good int4 [not null]
+  ok int4 [not null]
+  bad int4 [not null]
+  score int8 [not null]
+  drumroll int4 [not null]
+  submitted_at timestamptz [not null, note: 'PostgreSQL default: now()']
+  idempotency_key text [null]
+  payload_digest text [not null]
+  max_combo int4 [not null]
+  replay_data jsonb [null]
+  clear_status int4 [not null, note: 'PostgreSQL default: 0']
+  indexes {
+    (user_id, idempotency_key) [unique]
+  }
+  Note: '每局成绩与可选回放 | CHECK ((bad >= 0)) | CHECK (((clear_status >= 0) AND (clear_status <= 3))) | CHECK ((difficulty = ANY (ARRAY[\'Easy\'::text, \'Normal\'::text, \'Hard\'::text, \'Oni\'::text, \'Edit\'::text, \'Easy_1p\'::text, \'Easy_2p\'::text, \'Normal_1p\'::text, \'Normal_2p\'::text, \'Hard_1p\'::text, \'Hard_2p\'::text, \'Oni_1p\'::text, \'Oni_2p\'::text, \'Edit_1p\'::text, \'Edit_2p\'::text]))) NOT VALID | CHECK ((drumroll >= 0)) | CHECK ((good >= 0)) | CHECK ((max_combo >= 0)) | CHECK ((ok >= 0)) | CHECK ((length(payload_digest) = 64)) | CHECK (((replay_data IS NULL) OR (jsonb_typeof(replay_data) = \'object\'::text))) | CHECK (((score >= 0) AND (score <= \'9007199254740991\'::bigint)))'
+}
+
+Table public.users {
+  id text [pk, not null]
+  permission_flags int8 [not null, default: 0, note: 'Permission bitflags: upload=0x1. Show the frontend upload entry/interface only when (permission_flags & 1) = 1. Default 0 grants no upload permission; remaining bits reserved.']
+  first_login_at timestamptz [null]
+  last_active_at timestamptz [null]
+  Note: '本站用户 ID、权限位标记与活跃时间 | CHECK ((permission_flags >= 0)) | CHECK (((first_login_at IS NULL) OR ((last_active_at IS NOT NULL) AND (last_active_at >= first_login_at))))'
+}
+Ref fk_0: auth.sessions.user_id > public.users.id [delete: cascade]
+Ref fk_1: internal.retired_score_requests.user_id > public.users.id [delete: cascade]
+Ref fk_2: internal.upload_requests.chart_id > public.charts.id [delete: set null]
+Ref fk_3: internal.upload_requests.user_id > public.users.id [delete: no action]
+Ref fk_5: public.chart_stats.chart_id > public.charts.id [delete: cascade]
+Ref fk_6: public.chart_votes.chart_id > public.charts.id [delete: cascade]
+Ref fk_7: public.chart_votes.user_id > public.users.id [delete: no action]
+Ref fk_8: public.charts.uploader_id > public.users.id [delete: no action]
+Ref fk_9: public.comment_votes.comment_id > public.comments.id [delete: cascade]
+Ref fk_10: public.comment_votes.user_id > public.users.id [delete: no action]
+Ref fk_11: public.comments.author_id > public.users.id [delete: no action]
+Ref fk_12: public.comments.chart_id > public.charts.id [delete: cascade]
+Ref fk_13: public.comments.parent_id > public.comments.id [delete: cascade]
+Ref fk_14: public.notification_mutes.user_id > public.users.id [delete: no action]
+Ref fk_15: public.notifications.actor_id > public.users.id [delete: no action]
+Ref fk_16: public.notifications.chart_id > public.charts.id [delete: cascade]
+Ref fk_17: public.notifications.comment_id > public.comments.id [delete: cascade]
+Ref fk_18: public.notifications.recipient_id > public.users.id [delete: no action]
+Ref fk_19: public.scores.song_id > public.charts.id [delete: no action]
+Ref fk_20: public.scores.user_id > public.users.id [delete: no action]
+Ref fk_charts_tja_file: public.charts.tja_file > public.chart_resources.id [delete: restrict]
+Ref fk_charts_audio_file: public.charts.audio_file > public.chart_resources.id [delete: restrict]
+Ref fk_charts_cover_file: public.charts.cover_file > public.chart_resources.id [delete: restrict]
+Ref fk_charts_preview_file: public.charts.preview_file > public.chart_resources.id [delete: restrict]

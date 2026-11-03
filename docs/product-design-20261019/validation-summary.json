@@ -1,0 +1,21 @@
+{
+  "productionBaseline": "0.86.2",
+  "productionCommit": "1c522c1",
+  "productionSourceChanged": false,
+  "versionChanged": false,
+  "deployed": false,
+  "liveViews": 36,
+  "syntheticViews": 25,
+  "auditViewRecords": 61,
+  "localMarkdownLinksValid": true,
+  "prototypeJavascriptSyntaxValid": true,
+  "contrastPairsPassed": 14,
+  "prototypeValidation": "prototype-validation.json",
+  "limitations": [
+    "Synthetic API DTOs prove presentation only",
+    "No real private production session or database access",
+    "No real Safari or screen reader certification",
+    "B30 and progress PNG aesthetics not regenerated"
+  ],
+  "temporaryServersStopped": true
+}

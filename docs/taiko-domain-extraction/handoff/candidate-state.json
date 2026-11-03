@@ -1,0 +1,1757 @@
+{
+  "format_version": 1,
+  "conclusion": [
+    "CANDIDATE_CONTAINED",
+    "EXTRACTION_TARGET_NOT_YET_MET"
+  ],
+  "gate6": "IN_PROGRESS (historical status; not promoted in this turn)",
+  "scope": "Read-only containment snapshot; no implementation or release authorization. Freeze is documentary, not an OS lock.",
+  "timezone": "Asia/Shanghai",
+  "observation_window": {
+    "first": "2026-10-12T16:26:24.967184+08:00",
+    "second": "2026-10-12T16:29:29.001177+08:00"
+  },
+  "evidence_kinds": {
+    "MEASURED": "Read from local Git/files/process metadata or bounded anonymous HTTP in this turn",
+    "HISTORICAL": "Existing handoff/report claim, not rerun",
+    "UNKNOWN": "Not observed or insufficient evidence"
+  },
+  "handoff_deltas": [
+    {
+      "kind": "MEASURED",
+      "path": "docs/taiko-domain-extraction/status.md",
+      "change": "Tracked file deleted in working tree; absent at first read and stable through second sample; deletion author/time UNKNOWN; not restored",
+      "history_read_from": "git show 56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696:docs/taiko-domain-extraction/status.md",
+      "historical_blob_sha256": "c90cbcc3eadc2698ed1693c9b8a28c8092ab342e5ddc09c75b7746ec3572a06a"
+    },
+    {
+      "kind": "MEASURED",
+      "change": "All four main HEADs/local tracking refs and all 17 Native WIP fingerprints match handoff; index diffs empty"
+    },
+    {
+      "kind": "MEASURED",
+      "change": "handoff directory includes review/containment materials in addition to handoff.md; these remain untracked; see Viewer status and wip_sha256"
+    },
+    {
+      "kind": "MEASURED",
+      "change": "Viewer local/public HTTP appVersion 0.81.11 now observed; handoff marked current public version UNKNOWN"
+    }
+  ],
+  "stability": {
+    "kind": "MEASURED",
+    "observed_at": "2026-10-12T16:29:29.001177+08:00",
+    "deltas_since_snapshot": [],
+    "processes": [
+      {
+        "pid": 829173,
+        "comm": "python3",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 829369,
+        "comm": "nb",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 829379,
+        "comm": "python",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 1063408,
+        "comm": "python",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 1550183,
+        "comm": "python",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 1829053,
+        "comm": "codex",
+        "cwd": "/root"
+      },
+      {
+        "pid": 1946855,
+        "comm": "codex",
+        "cwd": "/root"
+      },
+      {
+        "pid": 2072413,
+        "comm": "codex",
+        "cwd": "/root"
+      },
+      {
+        "pid": 2074523,
+        "comm": "codex",
+        "cwd": "/root"
+      },
+      {
+        "pid": 3360153,
+        "comm": "python3",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 3360154,
+        "comm": "python3",
+        "cwd": "/home/sigaer/taiko"
+      },
+      {
+        "pid": 3360155,
+        "comm": "python3",
+        "cwd": "/home/sigaer/taiko"
+      }
+    ],
+    "R_has_own_git_marker": false,
+    "active_task_units": "",
+    "interpretation": "No changes across sampled HEAD/index/status/WIP hashes before report output. No active taiko QA/dev/build units at either sample. Other codex processes' task identities and future writes UNKNOWN; no established concurrent writer conflict. No old Goal resumed or queried as a live cross-thread fact."
+  },
+  "repositories": {
+    "Sakura": {
+      "evidence_kind": "MEASURED",
+      "path": "/home/sigaer/git/Sakura_bot",
+      "head": "cc66b2207a725489987787bb8d5f785f61c3a352",
+      "branch": "main",
+      "subject": "9.81.28 将daily采集与补算纳入Source发布锁",
+      "local_origin_main": "cc66b2207a725489987787bb8d5f785f61c3a352",
+      "ahead_behind_local_tracking": "0\t0",
+      "remote_current": "UNKNOWN (not queried)",
+      "status": [
+        " M miku_bot/plugins/utils/executor_pool.py",
+        " M miku_bot/plugins/utils/render_memory.py",
+        " M miku_bot/runtime_init.py",
+        " M taiko/plugins/taiko.py",
+        " M taiko/plugins/utils/__init__.py",
+        " M taiko/plugins/utils/b30_render.py",
+        " M taiko/plugins/utils/dani_progress.py",
+        " M taiko/plugins/utils/draw_dress.py",
+        " M taiko/plugins/utils/draw_summary.py",
+        " M taiko/plugins/utils/drawinfo.py",
+        " M taiko/plugins/utils/recommend_image.py",
+        " M taiko/plugins/utils/taikob_v2.py",
+        " M taiko/plugins/utils/tcloud.py",
+        " M taiko/taiko_runtime/platform_adapter.py",
+        " M taiko/taiko_store/merged_materialization.py",
+        " M taiko/taiko_store/reader.py",
+        "?? miku_bot/plugins/utils/attribution_hooks.py",
+        "?? miku_bot/plugins/utils/attribution_publisher.py",
+        "?? miku_bot/plugins/utils/attribution_schema.py",
+        "?? miku_bot/plugins/utils/executor_metrics.py",
+        "?? miku_bot/scripts/memory_burst/engine.py",
+        "?? miku_bot/scripts/memory_burst/install.sh",
+        "?? miku_bot/scripts/memory_burst/main.py",
+        "?? miku_bot/scripts/memory_burst/miku-memory-burst.service",
+        "?? miku_bot/scripts/memory_burst/proc_reader.py",
+        "?? miku_bot/scripts/memory_burst/storage.py",
+        "?? miku_bot/tests/test_memory_burst.py",
+        "?? taiko/plugins/utils/native_score_read.py",
+        "?? taiko/tests/native_score_read_sql_child.py",
+        "?? taiko/tests/test_native_score_read.py"
+      ],
+      "index_diff": "",
+      "diff_stat": " miku_bot/plugins/utils/executor_pool.py     |   6 +-\n miku_bot/plugins/utils/render_memory.py     |  41 ++++++\n miku_bot/runtime_init.py                    |  10 +-\n taiko/plugins/taiko.py                      | 191 ++++++++++++++--------------\n taiko/plugins/utils/__init__.py             |  41 +++---\n taiko/plugins/utils/b30_render.py           |   7 +-\n taiko/plugins/utils/dani_progress.py        |   8 +-\n taiko/plugins/utils/draw_dress.py           |   9 +-\n taiko/plugins/utils/draw_summary.py         |  18 +--\n taiko/plugins/utils/drawinfo.py             |  10 +-\n taiko/plugins/utils/recommend_image.py      |   7 +-\n taiko/plugins/utils/taikob_v2.py            |  10 +-\n taiko/plugins/utils/tcloud.py               |   8 +-\n taiko/taiko_runtime/platform_adapter.py     |  19 ++-\n taiko/taiko_store/merged_materialization.py |  14 +-\n taiko/taiko_store/reader.py                 |  29 +++++\n 16 files changed, 255 insertions(+), 173 deletions(-)",
+      "wip_sha256": {
+        "miku_bot/plugins/utils/executor_pool.py": "bce48f4dce98d4d4681b955850606312d36047bd9897b25fb329bb709a9b827c",
+        "miku_bot/plugins/utils/render_memory.py": "0692569165b300f2f21e41221ea64e5af32c58e178f7126a09b6b640d121ec14",
+        "miku_bot/runtime_init.py": "f13e38c12ba36ea5c9ea92d94f30ee137df738ccfbc25e7402c8800c1c4c8b82",
+        "taiko/plugins/taiko.py": "b7e9534f4cc749426efac5bda85944c9cc72a038ff5f88d58efb1d178578656e",
+        "taiko/plugins/utils/__init__.py": "08d889880ee2b4718e7d546c74c11d9fb2bdf0a224d5f04ba0b05f8e6c224ce9",
+        "taiko/plugins/utils/b30_render.py": "75101d4183cf7fd0a49a525f5b4f91a7bf9ceb7d6462b8c02f8a600a5462a11e",
+        "taiko/plugins/utils/dani_progress.py": "74305daf0877276cf79bf021e0a4d03b8c740f35fcdbaa42f8f994c1dbfc1b2e",
+        "taiko/plugins/utils/draw_dress.py": "b52a10c2c3acd4a8e1e1b84e25d0ecf3841bd50a8639164d288747412a403660",
+        "taiko/plugins/utils/draw_summary.py": "9c9d694eb82d5a9363073cdbc1ee2b0cf310e2d4d96675e2a526aa015a4592b6",
+        "taiko/plugins/utils/drawinfo.py": "a3ee2012844dfee8e2949f31c23de2a0bfb161acfac3f89da2fcd893725b97b1",
+        "taiko/plugins/utils/recommend_image.py": "f81cd5bbf15dbe1548f456da6e3a91ac14fde6309a2dcc0792d4c285de18e8ec",
+        "taiko/plugins/utils/taikob_v2.py": "53108d416458609501db1c560fe7eea5cf3cbd3173c51bb1cfc69ac02e0b2c2c",
+        "taiko/plugins/utils/tcloud.py": "a9a7deae068614f83eadcfc2a5104a1618e0e20c0f2f1d774e3d0616d93631cf",
+        "taiko/taiko_runtime/platform_adapter.py": "f0be53b8262e7e9ffdc71cd29b87c78dc52e239bd071eb217192505b0640d8d9",
+        "taiko/taiko_store/merged_materialization.py": "b80c2a88e7116e254062578ad13f84ba09cc3e0b2bcc154aeb32d484707e42db",
+        "taiko/taiko_store/reader.py": "8520ed38bdcb483fd616b5c9aa7725d8a552d06a30b51cc7c24d9e1c7a763d88",
+        "miku_bot/plugins/utils/attribution_hooks.py": "48573d38a763f546ee4df47bf287bb273a7e5b4b675046a6582840f0c6751c36",
+        "miku_bot/plugins/utils/attribution_publisher.py": "e0b2e7f3568fd211f3ee75901c948a68594d3656e5d68c89f363acd6d94eb63b",
+        "miku_bot/plugins/utils/attribution_schema.py": "98d3994ac8b6178925eb02f34b1beee43e6d8aed7cfc2c6b8267dff5f3a634f6",
+        "miku_bot/plugins/utils/executor_metrics.py": "7c8b09e7eb83c60636742d219fb1d97fd1ef601f0a9e04731dc844d8bec62757",
+        "miku_bot/scripts/memory_burst/engine.py": "ca3d3228433524b6b886bb73861f300b339474d3b20b122963457304f8dabe08",
+        "miku_bot/scripts/memory_burst/install.sh": "a6b2afdfc682405a031981c825b845c86c75d76263bd8e7f07bc21aae46449fe",
+        "miku_bot/scripts/memory_burst/main.py": "752b30a4904d80dc98a32ca004c4d49e6e3e4a19e3d0e8f901081edf4b7f2dd1",
+        "miku_bot/scripts/memory_burst/miku-memory-burst.service": "afff4fd2ba4831aeff9b241856a92ac99747622b67daad43f5b5b66748928f75",
+        "miku_bot/scripts/memory_burst/proc_reader.py": "c1b0b1d44b033e2a57c9dd0b99c9c5a79b231723bf4bf12cd0284059213a3890",
+        "miku_bot/scripts/memory_burst/storage.py": "7a597a8d613204cee3054b20824164e0b0b1eab5e09d748d8dd275a671a10a0f",
+        "miku_bot/tests/test_memory_burst.py": "806db1d3324b19fb8c7ccfcbb5cf941d321cde01d48d6e57f8e9ac8f7307f66b",
+        "taiko/plugins/utils/native_score_read.py": "ae8a8f536ffc7d1d0f5ab762d8691feccc88a6f3ed0c008bfeb1360837b38e90",
+        "taiko/tests/native_score_read_sql_child.py": "68b1389506436d7fdcd175bce57f2d9de9629ad8fc2f1b859f64f697ca8798bf",
+        "taiko/tests/test_native_score_read.py": "1cd212fe1305998d349cf826389155a030c0cb1b2ac183114696959409583cd8"
+      },
+      "worktrees": [
+        {
+          "registration": "worktree /home/sigaer/git/Sakura_bot\nHEAD cc66b2207a725489987787bb8d5f785f61c3a352\nbranch refs/heads/main",
+          "exists": true,
+          "actual_head": "cc66b2207a725489987787bb8d5f785f61c3a352",
+          "status": " M miku_bot/plugins/utils/executor_pool.py\n M miku_bot/plugins/utils/render_memory.py\n M miku_bot/runtime_init.py\n M taiko/plugins/taiko.py\n M taiko/plugins/utils/__init__.py\n M taiko/plugins/utils/b30_render.py\n M taiko/plugins/utils/dani_progress.py\n M taiko/plugins/utils/draw_dress.py\n M taiko/plugins/utils/draw_summary.py\n M taiko/plugins/utils/drawinfo.py\n M taiko/plugins/utils/recommend_image.py\n M taiko/plugins/utils/taikob_v2.py\n M taiko/plugins/utils/tcloud.py\n M taiko/taiko_runtime/platform_adapter.py\n M taiko/taiko_store/merged_materialization.py\n M taiko/taiko_store/reader.py\n?? miku_bot/plugins/utils/attribution_hooks.py\n?? miku_bot/plugins/utils/attribution_publisher.py\n?? miku_bot/plugins/utils/attribution_schema.py\n?? miku_bot/plugins/utils/executor_metrics.py\n?? miku_bot/scripts/memory_burst/\n?? miku_bot/tests/test_memory_burst.py\n?? taiko/plugins/utils/native_score_read.py\n?? taiko/tests/native_score_read_sql_child.py\n?? taiko/tests/test_native_score_read.py"
+        },
+        {
+          "registration": "worktree /home/sigaer/annual-p1-baseline2\nHEAD d554940cfd04bfe94f7bc5c22f1663e0a27269fd\ndetached",
+          "exists": false,
+          "actual_head": "UNKNOWN",
+          "status": "UNKNOWN"
+        },
+        {
+          "registration": "worktree /var/tmp/annual-phase4-baseline-src\nHEAD 17ba81027193865b57921c09cbfb6df8ebb916b5\ndetached",
+          "exists": false,
+          "actual_head": "UNKNOWN",
+          "status": "UNKNOWN"
+        },
+        {
+          "registration": "worktree /var/tmp/sakura-bot-phase2-a06dd12\nHEAD a06dd12e6e56077c2afd41837b66c3a4990d94ab\ndetached",
+          "exists": false,
+          "actual_head": "UNKNOWN",
+          "status": "UNKNOWN"
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-p1a-sakura\nHEAD c5863eb3f96d6aa7fba5cf78c4122dfe646edff1\nbranch refs/heads/feat/p1a-cross-writer",
+          "exists": true,
+          "actual_head": "c5863eb3f96d6aa7fba5cf78c4122dfe646edff1",
+          "status": ""
+        }
+      ]
+    },
+    "B": {
+      "evidence_kind": "MEASURED",
+      "path": "/home/sigaer/taiko-bot",
+      "head": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "branch": "main",
+      "subject": "0.2.7 将 QQ 验证迁移收敛到中心事务",
+      "local_origin_main": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "ahead_behind_local_tracking": "0\t0",
+      "remote_current": "UNKNOWN (not queried)",
+      "status": [
+        " M web.conf",
+        "?? v1_test_report.md"
+      ],
+      "index_diff": "",
+      "diff_stat": " web.conf | 22 ++--------------------\n 1 file changed, 2 insertions(+), 20 deletions(-)",
+      "wip_sha256": {
+        "web.conf": "26f3d1107a8c8977fd4ceae94a14252008194bf743eee1385ba85b40af259b96",
+        "v1_test_report.md": "9b3a0707396c52dd0ccc6f4d94f32dd9c9851b4632529afd2154046880178131"
+      },
+      "worktrees": [
+        {
+          "registration": "worktree /home/sigaer/taiko-bot\nHEAD fa0983dcc56ca109555a33d90aac0fecca6bdf0d\nbranch refs/heads/main",
+          "exists": true,
+          "actual_head": "fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+          "status": " M web.conf\n?? v1_test_report.md"
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-p1a-bot\nHEAD bedfc6fc1745edc17d946eaf1ad31afade5ec0e6\nbranch refs/heads/feat/p1a-cross-writer",
+          "exists": true,
+          "actual_head": "bedfc6fc1745edc17d946eaf1ad31afade5ec0e6",
+          "status": ""
+        }
+      ]
+    },
+    "Viewer": {
+      "evidence_kind": "MEASURED",
+      "path": "/home/sigaer/taiko/taiko-forum",
+      "head": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+      "branch": "main",
+      "subject": "0.82.0 留档daily采集与补算Writer收敛验收",
+      "local_origin_main": "9a77dbcfa6c7ef6e502a1a5ae7ba4efc714e2209",
+      "ahead_behind_local_tracking": "39\t0",
+      "remote_current": "UNKNOWN (not queried)",
+      "status": [
+        " D docs/taiko-domain-extraction/status.md",
+        "?? docs/Sakura_Taiko_Viewer_0.74.0_Recent_Growth_Session_Identifiability_Audit.md",
+        "?? docs/Sakura_Taiko_Viewer_0.79.2_Growth_Experience_Closure_Codex_Brief.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.0_Growth_Product_Voice_Narrative_System.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.1_Growth_Passport_Temporal_UX_Closure.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.1_P0_Performance_Remediation_Gate.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.2_Growth_Passport_Narrative_Visualization_Closure.md",
+        "?? docs/Sakura_Taiko_Viewer_0.80.2_Passport_Final_UX_Acceptance.md",
+        "?? docs/Sakura_Taiko_Viewer_1.0_Release_Readiness_Platform_Stabilization_Audit.md",
+        "?? docs/Sakura_Viewer_0.80.1_P1_Growth_History_Read_Model_Architecture_Audit.md",
+        "?? docs/Sakura_Viewer_0.80.1_Passport_Usability_Recovery_Codex_Brief.md",
+        "?? docs/growth-history-read-model-architecture.md",
+        "?? docs/growth-history-read-model-audit.md",
+        "?? docs/growth-history-read-model-benchmark.md",
+        "?? docs/growth-history-read-model-decision.md",
+        "?? docs/growth-passport-temporal-ux-architecture.md",
+        "?? docs/growth-passport-temporal-ux-audit.md",
+        "?? docs/python-memory-phase4-attribution.md",
+        "?? docs/release-readiness-1.0/00-executive-decision.md",
+        "?? docs/release-readiness-1.0/01-feature-contract.md",
+        "?? docs/release-readiness-1.0/02-writer-reader-inventory.md",
+        "?? docs/release-readiness-1.0/03-data-integrity-risk.md",
+        "?? docs/release-readiness-1.0/04-security-ownership.md",
+        "?? docs/release-readiness-1.0/05-performance-capacity.md",
+        "?? docs/release-readiness-1.0/06-operations-recovery.md",
+        "?? docs/release-readiness-1.0/07-telemetry-retention.md",
+        "?? docs/release-readiness-1.0/08-rc-test-plan.md",
+        "?? docs/release-readiness-1.0/09-remediation-roadmap.md",
+        "?? docs/release-readiness-1.0/10-gate-ledger.md",
+        "?? docs/release-readiness-1.0/11-change-impact-review.md",
+        "?? docs/taiko-domain-extraction/handoff/Taiko_Domain_Extraction_30h_Review_and_Containment.md",
+        "?? docs/taiko-domain-extraction/handoff/Taiko_Domain_Extraction_Review_Evidence.md",
+        "?? docs/taiko-domain-extraction/handoff/handoff.md",
+        "?? docs/taiko-domain-extraction/handoff/phase4-taiko-client.md",
+        "?? docs/taiko-domain-extraction/handoff/phase5-viewer-boundary.md",
+        "?? docs/taiko-domain-extraction/handoff/phase6-storage-consolidation.md",
+        "?? docs/taiko-domain-extraction/handoff/source-service-operations.md",
+        "?? docs/taiko-domain-extraction/handoff/status.md",
+        "?? docs/taiko-official-schema.dbml",
+        "?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\344\\270\\212\\347\\272\\277\\345\\211\\215\\345\\277\\253\\351\\200\\237\\351\\252\\214\\346\\224\\266\\346\\211\\247\\350\\241\\214\\346\\214\\207\\344\\273\\244.md\"",
+        "?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\351\\252\\214\\346\\224\\266\\347\\273\\255\\350\\275\\256\\357\\274\\232\\350\\247\\243\\351\\231\\244\\347\\216\\257\\345\\242\\203\\351\\230\\273\\345\\241\\236\\357\\274\\214\\350\\267\\221\\351\\200\\232\\347\\234\\237\\345\\256\\236\\344\\270\\232\\345\\212\\241\\351\\223\\276\\350\\267\\257.md\"",
+        "?? taiko_viewer/tests/growthReadModelPreflight.test.mjs",
+        "?? taiko_viewer/tests/nativeScoreReadSql.test.mjs"
+      ],
+      "index_diff": "",
+      "diff_stat": " docs/taiko-domain-extraction/status.md | 132 ---------------------------------\n 1 file changed, 132 deletions(-)",
+      "wip_sha256": {
+        "docs/taiko-domain-extraction/status.md": "MISSING",
+        "docs/Sakura_Taiko_Viewer_0.74.0_Recent_Growth_Session_Identifiability_Audit.md": "76d202e8b60f2c4ebdd05f54bf1e9169c139a756c7b8009949aea52d361c2d77",
+        "docs/Sakura_Taiko_Viewer_0.79.2_Growth_Experience_Closure_Codex_Brief.md": "32ccdc476b513c0a3b409708014698a746e938aa5b6fdb0571accd525cd6b5d8",
+        "docs/Sakura_Taiko_Viewer_0.80.0_Growth_Product_Voice_Narrative_System.md": "92dd3784303bd2b8baaed889f0aa4ae2ba268fcd6f53d7246f7c14abd869dc03",
+        "docs/Sakura_Taiko_Viewer_0.80.1_Growth_Passport_Temporal_UX_Closure.md": "d0a87acf6992730c3307b24d3fa9f37edc5c2941b4e6b52e2044ff3d3545327e",
+        "docs/Sakura_Taiko_Viewer_0.80.1_P0_Performance_Remediation_Gate.md": "7ba8c50b2d0d146eb09cb2aad078eb753295ca63d2ed79d770e94bcd5a798912",
+        "docs/Sakura_Taiko_Viewer_0.80.2_Growth_Passport_Narrative_Visualization_Closure.md": "9aa5991c7934adac8eff5b21840cc8653ae6d03b2ec94f59eebea9260d7af695",
+        "docs/Sakura_Taiko_Viewer_0.80.2_Passport_Final_UX_Acceptance.md": "2f5458637023115dda801355212f414cc09b647c952b38ab4aa5bee090771c5d",
+        "docs/Sakura_Taiko_Viewer_1.0_Release_Readiness_Platform_Stabilization_Audit.md": "ec6afc1adc2baffcf78ebcd4b2d9c4d4c0897bb2a910e8efc2309dcf9d0e5998",
+        "docs/Sakura_Viewer_0.80.1_P1_Growth_History_Read_Model_Architecture_Audit.md": "9a78b8db3b3755599c37a0ca9ea7a4160784f748cca47e7e7df05ec06700b21d",
+        "docs/Sakura_Viewer_0.80.1_Passport_Usability_Recovery_Codex_Brief.md": "166e75919efb480b1598ab2758ecb863eb6e710e67fa02d0ffcfabd5faafcdb6",
+        "docs/growth-history-read-model-architecture.md": "8d7f7a7340fab965a832f3a01e6caf7a3f1c27bc8793b27721c8f0d4dcec6581",
+        "docs/growth-history-read-model-audit.md": "299727d8a670387b0ae4082efd05cf245ddc1b1b6f72383628998c1f9eca3608",
+        "docs/growth-history-read-model-benchmark.md": "e3af65ac053e2244da3385bed267b86ed682c40cc486a40fcb73b3c21da3da6b",
+        "docs/growth-history-read-model-decision.md": "19b288af980b7eca7abbcd48fd7a444ffc5669ec74cf37ceef64589ffc6ec1b4",
+        "docs/growth-passport-temporal-ux-architecture.md": "11ce273a9be48fa66378a7559624d800d1e623835c316bf716c1d8ca5b070188",
+        "docs/growth-passport-temporal-ux-audit.md": "4461a80b2457a7aaf7bda08bf6af35d8355cf45b54acc775a29405ae629ada42",
+        "docs/python-memory-phase4-attribution.md": "d13a9f0e3b311fc9fc7cf8e281d4dad9a78d118426d3b4d7506d76796dc7cd5b",
+        "docs/release-readiness-1.0/00-executive-decision.md": "1c68b51b88223f4cceafd211e2cfc6f08ce5a2eea136b9efc3de2c97242231b7",
+        "docs/release-readiness-1.0/01-feature-contract.md": "e1979c1d4644b9ace5a63a509c197b199f8ad1477bddee876c3a389cf181be40",
+        "docs/release-readiness-1.0/02-writer-reader-inventory.md": "e656a51496c4318fc9bd0b1f441d47c479855d6f853ebfe261c605b98284e5bb",
+        "docs/release-readiness-1.0/03-data-integrity-risk.md": "187ac82916adaf551ddad627865acff451bae4ceffe0bcf0ae9fa3124b480788",
+        "docs/release-readiness-1.0/04-security-ownership.md": "b688cecb4ea85dea3e20006026c91edd4f67153f1c18d7ea4c7c650cf58f466d",
+        "docs/release-readiness-1.0/05-performance-capacity.md": "c2a5b379a7528b65957b4737f75c10305e3a9e79cb7fca702981115519caa83a",
+        "docs/release-readiness-1.0/06-operations-recovery.md": "b8b4e33594f8bf36c10740e7cf98d017acc3f803e71af34a845c102cbf9e3fb8",
+        "docs/release-readiness-1.0/07-telemetry-retention.md": "b65132216440058700a1029a83e00efb363eeca751dbede3223f7658eb40458f",
+        "docs/release-readiness-1.0/08-rc-test-plan.md": "0724f04307a1075be2fdedcd6855dc6442677b12f0a597721e7f47bed9d3a375",
+        "docs/release-readiness-1.0/09-remediation-roadmap.md": "b9c72174ad3870f37f975ae4b836e129722b6ba015c08625fa15e55aaa3ad153",
+        "docs/release-readiness-1.0/10-gate-ledger.md": "5e37344a3485880a66e904e9216bbfce9e79779245304f1ef1a3e5e57f6d6137",
+        "docs/release-readiness-1.0/11-change-impact-review.md": "3152f5da184055866737cd65d7a8669eb2a0beb7e2740fc7f14a838035c4a5ad",
+        "docs/taiko-domain-extraction/handoff/Taiko_Domain_Extraction_30h_Review_and_Containment.md": "46672a938f8e4e5fa957ad4d702d1e35c2fe215e1638836bf1b7171ac60dae84",
+        "docs/taiko-domain-extraction/handoff/Taiko_Domain_Extraction_Review_Evidence.md": "dbec6241cd4ff420d105017c421beb9703640be94f43f81c85a86857f25f08e5",
+        "docs/taiko-domain-extraction/handoff/handoff.md": "45b08f227f7b9159c4c6792f6241fd62c64a42044e677743c671040a66a6382b",
+        "docs/taiko-domain-extraction/handoff/phase4-taiko-client.md": "dcd0e8e64e796620412ff9ecfb4ba9c0f2e6b907a8255be15a83a68cbbb85d54",
+        "docs/taiko-domain-extraction/handoff/phase5-viewer-boundary.md": "7ff1914910dd5551427ed255f0c18977902d9f0a0af67e289d0d055698160cf2",
+        "docs/taiko-domain-extraction/handoff/phase6-storage-consolidation.md": "86223582c28aa2722ead89cd29c4d32f8c7d9bef3d32fdc361dcfacc01a4895c",
+        "docs/taiko-domain-extraction/handoff/source-service-operations.md": "0541f11143207bf665de323e6fc06fb3e74f135454e18bd119e1dd57e7c0b4ea",
+        "docs/taiko-domain-extraction/handoff/status.md": "c90cbcc3eadc2698ed1693c9b8a28c8092ab342e5ddc09c75b7746ec3572a06a",
+        "docs/taiko-official-schema.dbml": "558dbb2f78e25aec93644e5e07fb691c66f3043d3d84c96a946b8b951c2ff673",
+        "\"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\344\\270\\212\\347\\272\\277\\345\\211\\215\\345\\277\\253\\351\\200\\237\\351\\252\\214\\346\\224\\266\\346\\211\\247\\350\\241\\214\\346\\214\\207\\344\\273\\244.md\"": "MISSING",
+        "\"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\351\\252\\214\\346\\224\\266\\347\\273\\255\\350\\275\\256\\357\\274\\232\\350\\247\\243\\351\\231\\244\\347\\216\\257\\345\\242\\203\\351\\230\\273\\345\\241\\236\\357\\274\\214\\350\\267\\221\\351\\200\\232\\347\\234\\237\\345\\256\\236\\344\\270\\232\\345\\212\\241\\351\\223\\276\\350\\267\\257.md\"": "MISSING",
+        "taiko_viewer/tests/growthReadModelPreflight.test.mjs": "919924025c3ebcd528456c290811b45e36557303dbdfd719e49abc3fe4a0429a",
+        "taiko_viewer/tests/nativeScoreReadSql.test.mjs": "3967faeb42e5e4efa64a1c06f7d2f557498b8295e2fb3ff8feeb6d456cabd9e7"
+      },
+      "worktrees": [
+        {
+          "registration": "worktree /home/sigaer/taiko/taiko-forum\nHEAD 56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696\nbranch refs/heads/main",
+          "exists": true,
+          "actual_head": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+          "status": " D docs/taiko-domain-extraction/status.md\n?? docs/Sakura_Taiko_Viewer_0.74.0_Recent_Growth_Session_Identifiability_Audit.md\n?? docs/Sakura_Taiko_Viewer_0.79.2_Growth_Experience_Closure_Codex_Brief.md\n?? docs/Sakura_Taiko_Viewer_0.80.0_Growth_Product_Voice_Narrative_System.md\n?? docs/Sakura_Taiko_Viewer_0.80.1_Growth_Passport_Temporal_UX_Closure.md\n?? docs/Sakura_Taiko_Viewer_0.80.1_P0_Performance_Remediation_Gate.md\n?? docs/Sakura_Taiko_Viewer_0.80.2_Growth_Passport_Narrative_Visualization_Closure.md\n?? docs/Sakura_Taiko_Viewer_0.80.2_Passport_Final_UX_Acceptance.md\n?? docs/Sakura_Taiko_Viewer_1.0_Release_Readiness_Platform_Stabilization_Audit.md\n?? docs/Sakura_Viewer_0.80.1_P1_Growth_History_Read_Model_Architecture_Audit.md\n?? docs/Sakura_Viewer_0.80.1_Passport_Usability_Recovery_Codex_Brief.md\n?? docs/growth-history-read-model-architecture.md\n?? docs/growth-history-read-model-audit.md\n?? docs/growth-history-read-model-benchmark.md\n?? docs/growth-history-read-model-decision.md\n?? docs/growth-passport-temporal-ux-architecture.md\n?? docs/growth-passport-temporal-ux-audit.md\n?? docs/python-memory-phase4-attribution.md\n?? docs/release-readiness-1.0/\n?? docs/taiko-domain-extraction/handoff/\n?? docs/taiko-official-schema.dbml\n?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\344\\270\\212\\347\\272\\277\\345\\211\\215\\345\\277\\253\\351\\200\\237\\351\\252\\214\\346\\224\\266\\346\\211\\247\\350\\241\\214\\346\\214\\207\\344\\273\\244.md\"\n?? \"taiko_viewer/docs/\\345\\271\\264\\345\\272\\246\\346\\212\\245\\345\\221\\212\\351\\252\\214\\346\\224\\266\\347\\273\\255\\350\\275\\256\\357\\274\\232\\350\\247\\243\\351\\231\\244\\347\\216\\257\\345\\242\\203\\351\\230\\273\\345\\241\\236\\357\\274\\214\\350\\267\\221\\351\\200\\232\\347\\234\\237\\345\\256\\236\\344\\270\\232\\345\\212\\241\\351\\223\\276\\350\\267\\257.md\"\n?? taiko_viewer/tests/growthReadModelPreflight.test.mjs\n?? taiko_viewer/tests/nativeScoreReadSql.test.mjs"
+        },
+        {
+          "registration": "worktree /home/sigaer/taiko/taiko-forum-worktrees/annual-poster-community\nHEAD db5a71d633343debf5550b0860ecc73d2c1658a3\nbranch refs/heads/feature/annual-poster-community",
+          "exists": true,
+          "actual_head": "db5a71d633343debf5550b0860ecc73d2c1658a3",
+          "status": ""
+        },
+        {
+          "registration": "worktree /home/sigaer/taiko/taiko-forum-worktrees/v2-console-data-20261008\nHEAD df195d5084724dba65f19c8c1acabee0c469ff0f\nbranch refs/heads/feature/v2-console-data-20261008",
+          "exists": true,
+          "actual_head": "df195d5084724dba65f19c8c1acabee0c469ff0f",
+          "status": ""
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-growth-streaming-prototype\nHEAD 75177fa99fe50253265e539cbe878dcc0c976287\nbranch refs/heads/perf/growth-passport-streaming-prototype",
+          "exists": true,
+          "actual_head": "75177fa99fe50253265e539cbe878dcc0c976287",
+          "status": ""
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-passport-0801\nHEAD 03347639a764a83914dd136f9bceb93c242edb38\nbranch refs/heads/feat/passport-usability-recovery",
+          "exists": true,
+          "actual_head": "03347639a764a83914dd136f9bceb93c242edb38",
+          "status": ""
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-passport-0802\nHEAD b8092c40f100ccb01f79101bc1357b1b167b15ca\nbranch refs/heads/feat/passport-narrative-0802",
+          "exists": true,
+          "actual_head": "b8092c40f100ccb01f79101bc1357b1b167b15ca",
+          "status": ""
+        },
+        {
+          "registration": "worktree /var/tmp/taiko-viewer-audit-0790/taiko-forum\nHEAD 73c9ae72576289e39f8572990c5a97a0c560fa92\ndetached",
+          "exists": true,
+          "actual_head": "73c9ae72576289e39f8572990c5a97a0c560fa92",
+          "status": ""
+        }
+      ]
+    },
+    "Core": {
+      "evidence_kind": "MEASURED",
+      "path": "/home/sigaer/git/sakura-taiko-core",
+      "head": "0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+      "branch": "main",
+      "subject": "0.1.2 统一客户端领域内核并保留可见性与解析策略",
+      "local_origin_main": "0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+      "ahead_behind_local_tracking": "0\t0",
+      "remote_current": "UNKNOWN (not queried)",
+      "status": [],
+      "index_diff": "",
+      "diff_stat": "",
+      "wip_sha256": {},
+      "worktrees": [
+        {
+          "registration": "worktree /home/sigaer/git/sakura-taiko-core\nHEAD 0b7319d94b041daafb0a0d32e3ccc95e50da8810\nbranch refs/heads/main",
+          "exists": true,
+          "actual_head": "0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+          "status": ""
+        }
+      ]
+    }
+  },
+  "packages": {
+    "evidence_kind": "MEASURED (declarations and metadata only)",
+    "declarations": {
+      "Sakura": {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/pyproject.toml",
+        "version": "0.2.1",
+        "requires_python": ">=3.11, <4.0",
+        "domain_dependencies": [
+          "nonebot-adapter-qq==1.7.2",
+          "sakura-taiko-core[hiroba]==0.1.1",
+          "sakura-taiko-contract==0.1.0"
+        ],
+        "sha256": "e4c263b8281edb9593e68d18b7f87bd9992e73e7b8eaca2ca0607b3d0e3f381c",
+        "requirements_domain": {
+          "path": "/home/sigaer/git/Sakura_bot/taiko/requirements-domain.txt",
+          "lines": [
+            "sakura-taiko-contract @ git+ssh://git@ssh.github.com:443/sigaer/taiko-viewer.git@23f89b4f70e5a64ae76c33ac04c6c2d242808df1#subdirectory=packages/sakura-taiko-contract",
+            "sakura-taiko-core[hiroba] @ git+ssh://git@ssh.github.com:443/sigaer/sakura-taiko-core.git@9fc0731358f6863c1e1efd9f1930a608850786f7"
+          ]
+        }
+      },
+      "R": {
+        "path": "/home/sigaer/taiko/pyproject.toml",
+        "version": "0.2.1",
+        "requires_python": ">=3.11, <4.0",
+        "domain_dependencies": [
+          "nonebot-adapter-qq==1.7.2",
+          "sakura-taiko-core[hiroba]==0.1.1",
+          "sakura-taiko-contract==0.1.0"
+        ],
+        "sha256": "e4c263b8281edb9593e68d18b7f87bd9992e73e7b8eaca2ca0607b3d0e3f381c"
+      },
+      "B": {
+        "path": "/home/sigaer/taiko-bot/pyproject.toml",
+        "version": "0.2.7",
+        "requires_python": ">=3.11, <4.0",
+        "domain_dependencies": [
+          "sakura-taiko-core[hiroba]==0.1.2",
+          "sakura-taiko-contract==0.1.0",
+          "nonebot-adapter-qq>=1.6.0"
+        ],
+        "sha256": "365a5050862253d203a3c037b01760849b980c331609676efc4fe609851d592f",
+        "requirements_domain": {
+          "path": "/home/sigaer/taiko-bot/requirements-domain.txt",
+          "lines": [
+            "sakura-taiko-contract @ git+ssh://git@ssh.github.com:443/sigaer/taiko-viewer.git@23f89b4f70e5a64ae76c33ac04c6c2d242808df1#subdirectory=packages/sakura-taiko-contract",
+            "sakura-taiko-core[hiroba] @ git+ssh://git@ssh.github.com:443/sigaer/sakura-taiko-core.git@0b7319d94b041daafb0a0d32e3ccc95e50da8810"
+          ]
+        }
+      },
+      "Core": {
+        "path": "/home/sigaer/git/sakura-taiko-core/pyproject.toml",
+        "version": "0.1.2",
+        "requires_python": ">=3.11",
+        "domain_dependencies": [
+          "sakura-taiko-contract==0.1.0"
+        ],
+        "sha256": "00bad1e39fb2e2e83f2ab181824e7a20088f52556babcd8750c69fd979c3e5e8"
+      },
+      "ContractPython": {
+        "path": "/home/sigaer/taiko/taiko-forum/packages/sakura-taiko-contract/pyproject.toml",
+        "version": "0.1.0",
+        "requires_python": ">=3.11",
+        "domain_dependencies": [],
+        "sha256": "e210aba3154fc0a592f73ecef76174acaec9a29d1604db5a995d4bee151fd25a"
+      },
+      "Viewer": {
+        "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/package.json",
+        "version": "0.82.0",
+        "contract_dependency": "file:../packages/sakura-taiko-contract",
+        "resolved_path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/package.json",
+        "sha256": "90f8cb1d8c2afe3796f81624c2a6de4e2c1d040c7835d82581f61c4ac4421aac"
+      },
+      "ContractJS": {
+        "path": "/home/sigaer/taiko/taiko-forum/packages/sakura-taiko-contract/package.json",
+        "version": "0.1.1",
+        "contract_dependency": null,
+        "resolved_path": "/home/sigaer/taiko/taiko-forum/packages/sakura-taiko-contract/package.json",
+        "sha256": "f8ed3351bb6e9a003922ccb0c82879293bb3b21578d33b8609351a8bb496c20c"
+      },
+      "ContractNodeInstalled": {
+        "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/node_modules/@sakura-taiko/contract/package.json",
+        "version": "0.1.1",
+        "contract_dependency": null,
+        "resolved_path": "/home/sigaer/taiko/taiko-forum/packages/sakura-taiko-contract/package.json",
+        "sha256": "f8ed3351bb6e9a003922ccb0c82879293bb3b21578d33b8609351a8bb496c20c"
+      }
+    },
+    "installed_metadata": {
+      "/home/sigaer/taiko/.venv/lib/python3.11/site-packages": {
+        "exists": true,
+        "distributions": [
+          "sakura_taiko_core-0.1.1.dist-info",
+          "sakura_taiko_contract-0.1.0.dist-info",
+          "nonebot_adapter_qq-1.7.2.dist-info"
+        ]
+      },
+      "/home/sigaer/taiko-bot/.venv/lib/python3.11/site-packages": {
+        "exists": false,
+        "distributions": []
+      },
+      "/root/.local/lib/python3.11/site-packages": {
+        "exists": true,
+        "distributions": [
+          "sakura_taiko_core-0.1.1.dist-info",
+          "sakura_taiko_contract-0.1.0.dist-info"
+        ]
+      },
+      "/usr/lib/python3.11/site-packages": {
+        "exists": true,
+        "distributions": [
+          "nonebot_adapter_qq-1.7.2.dist-info"
+        ]
+      },
+      "/var/tmp/taiko-domain-extraction/git-pin-installed": {
+        "exists": true,
+        "distributions": [
+          "sakura_taiko_core-0.1.2.dist-info",
+          "sakura_taiko_contract-0.1.0.dist-info"
+        ]
+      }
+    },
+    "contract": {
+      "path": "/home/sigaer/taiko/taiko-forum/packages/sakura-taiko-contract",
+      "independent_git_repo": false,
+      "owning_repo": "Viewer",
+      "owning_head": "56aa05a6eecfbd163bc4cb2b985dfa66ab7ea696",
+      "python_version": "0.1.0",
+      "javascript_version": "0.1.1",
+      "python_consumer_git_pin": "23f89b4f70e5a64ae76c33ac04c6c2d242808df1",
+      "independent_registry_publication": "UNKNOWN",
+      "node_install": "Source symlink, not evidence of loaded production bundle"
+    },
+    "distribution": {
+      "current_private_repo_visibility": "UNKNOWN",
+      "historical_visibility": "Private Git dependencies per phase4 report and B README",
+      "developer_token_grants_github_access": false,
+      "ordinary_token_only_clean_install": "NOT_PROVEN",
+      "accepted_routes_documented": [
+        "Git + SSH read authorization for both pinned dependency repositories",
+        "Maintainer-provided exact-version wheels before installing client"
+      ],
+      "wheel_delivery_licenses_and_hash_verification_for_external_deployer": "UNKNOWN"
+    }
+  },
+  "runtime": {
+    "evidence_kind": "MEASURED for process state and disk metadata; loaded_source_sha UNKNOWN",
+    "services": {
+      "taiko-viewer": {
+        "MainPID": "1063394",
+        "ExecMainStartTimestamp": "Sun 2026-10-11 08:37:48 CST",
+        "WorkingDirectory": "/home/sigaer/taiko/taiko-forum/taiko_viewer",
+        "ActiveState": "active",
+        "SubState": "running",
+        "cwd": "/home/sigaer/taiko/taiko-forum/taiko_viewer",
+        "exe": "/www/server/nvm/versions/node/v24.13.0/bin/node"
+      },
+      "taiko-sync-receiver": {
+        "MainPID": "1063408",
+        "ExecMainStartTimestamp": "Sun 2026-10-11 08:37:48 CST",
+        "WorkingDirectory": "/home/sigaer/taiko",
+        "ActiveState": "active",
+        "SubState": "running",
+        "cwd": "/home/sigaer/taiko",
+        "exe": "/usr/bin/python3.11"
+      },
+      "taiko-public-api": {
+        "MainPID": "829173",
+        "ExecMainStartTimestamp": "Sun 2026-10-11 01:18:42 CST",
+        "WorkingDirectory": "/home/sigaer/taiko",
+        "ActiveState": "active",
+        "SubState": "running",
+        "cwd": "/home/sigaer/taiko",
+        "exe": "/usr/bin/python3.11"
+      },
+      "taiko-song-update": {
+        "MainPID": "1550183",
+        "ExecMainStartTimestamp": "Thu 2026-10-01 13:09:07 CST",
+        "WorkingDirectory": "/home/sigaer/taiko",
+        "ActiveState": "active",
+        "SubState": "running",
+        "cwd": "/home/sigaer/taiko",
+        "exe": "/usr/bin/python3.11"
+      }
+    },
+    "R": {
+      "path": "/home/sigaer/taiko",
+      "own_git_marker": false,
+      "exact_loaded_source_commit": "UNKNOWN",
+      "sampled_source_files": {
+        "/home/sigaer/taiko/pyproject.toml": {
+          "exists": true,
+          "sha256": "e4c263b8281edb9593e68d18b7f87bd9992e73e7b8eaca2ca0607b3d0e3f381c"
+        },
+        "/home/sigaer/taiko/plugins/utils/userdata_storage.py": {
+          "exists": true,
+          "sha256": "c8e83ec98b28ba17069478361d725c430074f2e86ea031a1874c00d14558bcc0"
+        },
+        "/home/sigaer/taiko/plugins/utils/merged_bind.py": {
+          "exists": true,
+          "sha256": "fa6934a453b5d6a94867cfe768144154fbcc07f6edbc9bf089827c2b58d7b0dc"
+        },
+        "/home/sigaer/taiko/plugins/utils/daily_ability.py": {
+          "exists": true,
+          "sha256": "6d775763da200a323e3563b826450fa5b17b8755cc05548f1b3b01022a8cb94c"
+        },
+        "/home/sigaer/taiko/scripts/sync_dispatch_server.py": {
+          "exists": true,
+          "sha256": "fdec5275a7326f953c96ee461b640a94344fe7782b65662d0c0e11361f8f8af2"
+        },
+        "/home/sigaer/taiko/taiko_store": {
+          "exists": false,
+          "sha256": null
+        },
+        "/home/sigaer/taiko/plugins/utils/native_score_read.py": {
+          "exists": false,
+          "sha256": null
+        }
+      },
+      "phase6_activation": "Full candidate not installed at R: taiko_store and native_score_read.py absent. No claim about all hosts.",
+      "historical_phase3_baseline": "95d71d5 / 9.80.7, Core 0.1.1",
+      "sql_schema_applied": "UNKNOWN",
+      "service_grants": "UNKNOWN",
+      "pending_outbox_journal": "UNKNOWN"
+    },
+    "B": {
+      "local_business_process": "Not observed in cwd scan",
+      "local_venv": "Not present at expected .venv path",
+      "external_deployments_and_auto_pull": "UNKNOWN",
+      "loaded_packages": "UNKNOWN"
+    },
+    "Viewer": {
+      "source_declared_version": "0.82.0",
+      "http": [
+        {
+          "url": "http://127.0.0.1:3100/",
+          "status": 200,
+          "appVersion": "0.81.11",
+          "response_bytes": 144581
+        },
+        {
+          "url": "https://viewer.sakura-bot.cn/",
+          "status": 200,
+          "appVersion": "0.81.11",
+          "response_bytes": 144581
+        }
+      ],
+      "http_method": "Anonymous GET; 8-second socket timeout each, 1 MiB read cap; timeout 25s under scripts/memory/run_qa.sh; exit 0; no browser/login/private API",
+      "exact_bundle_source_commit": "UNKNOWN",
+      "installed_node_contract_metadata": "0.1.1; source symlink; does not establish bundled version",
+      "authenticated_product_smoke": "NOT_RUN"
+    }
+  },
+  "release_states": {
+    "Sakura": {
+      "historical_source_pushed": "9.81.28 / cc66b2207a725489987787bb8d5f785f61c3a352",
+      "current_remote": "UNKNOWN",
+      "native_reader": "UNCOMMITTED_WIP",
+      "phase6_runtime": "NOT_FULLY_ACTIVATED_AT_R",
+      "phase3": "HISTORICAL_DEPLOYED"
+    },
+    "B": {
+      "historical_source_pushed": "0.2.7 / fa0983dcc56ca109555a33d90aac0fecca6bdf0d",
+      "current_remote": "UNKNOWN",
+      "candidate_client": "Depends on unreleased Viewer 0.82 protocol, canonical Source and explicit grants",
+      "online_joint_release": "NOT_PROVEN",
+      "external_installations": "UNKNOWN"
+    },
+    "Viewer": {
+      "local_candidate": "0.82.0 committed; 39 ahead of local origin/main; one untracked Native SQL test",
+      "candidate_deployed": "NO at sampled local/public homepage version",
+      "historical_phase5_release": "0.81.11 / eca1b08",
+      "remote_source_current": "UNKNOWN"
+    },
+    "Core": {
+      "source": "0.1.2 clean",
+      "historical_tag_and_push": "v0.1.2 / 0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+      "center_pin": "0.1.1 / 9fc0731358f6863c1e1efd9f1930a608850786f7",
+      "client_pin": "0.1.2 / 0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+      "registry_release": "UNKNOWN"
+    },
+    "Contract": {
+      "source_ownership": "Viewer package, no independent HEAD",
+      "historical_python_pin_installation": "0.1.0 at Viewer 23f89b4f70e5a64ae76c33ac04c6c2d242808df1",
+      "js_local_package": "0.1.1",
+      "independent_package_registry_release": "UNKNOWN"
+    }
+  },
+  "schemas": {
+    "database_connection_this_turn": false,
+    "production_applied": "UNKNOWN",
+    "test_current_schema": "UNKNOWN",
+    "historical_validation": "Isolated SQL evidence exists; reports explicitly exclude full production FK/schema parity",
+    "source_schema_inventory": [
+      {
+        "path": "taiko_viewer/server/infrastructure/account/bot-binding-schema.ts",
+        "sha256": "d8b00404ab158dd63b4637d31a58f6e7609170a32101af4b8be13e9c5060b217",
+        "create_tables": [
+          "taiko_bot_binding_operations"
+        ],
+        "alter_statements": [
+          "ALTER TABLE taiko_bot_binding_operations ADD COLUMN effect_json TEXT DEFAULT NULL AFTER outcome_hash",
+          "ALTER TABLE taiko_bot_binding_operations ADD COLUMN effect_hash CHAR(64) DEFAULT NULL AFTER effect_json"
+        ],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/account/hiroba-credential-schema.ts",
+        "sha256": "c79d818796a42aa2ccaf253cca4e34b7d8466861661f3b3a64a183c3aa5c7eb7",
+        "create_tables": [
+          "web_hiroba_credentials",
+          "taiko_hiroba_binding_operations"
+        ],
+        "alter_statements": [
+          "ALTER TABLE web_hiroba_credentials MODIFY COLUMN configured_by_qq VARCHAR(191) DEFAULT NULL"
+        ],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/account/qq-migration-schema.ts",
+        "sha256": "80d29f7d40b2d242a20642759d0edccb6eea93f918e7084ba49131c23e8b710e",
+        "create_tables": [
+          "taiko_qq_migration_codes"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/account/source-service-schema.ts",
+        "sha256": "95fac7c315bd057601160b111e8fd9b668f2df5203aa96861c218c904069f4cc",
+        "create_tables": [
+          "taiko_source_service_grants",
+          "taiko_source_service_grant_audit"
+        ],
+        "alter_statements": [
+          "ALTER TABLE taiko_source_service_grants ADD COLUMN principals_json TEXT DEFAULT NULL AFTER sources_json",
+          "ALTER TABLE taiko_source_service_grant_audit ADD COLUMN principals_json TEXT DEFAULT NULL AFTER sources_json"
+        ],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/binding-confirmation-schema.ts",
+        "sha256": "844c2b66424dc52b19d73dc206cf15d3f00992caf2d15699e5bec48b93244324",
+        "create_tables": [
+          "web_taiko_binding_confirmations"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/binding-revocation-schema.ts",
+        "sha256": "5ee7038b12b9388aaa27fef9e9db59c1e41345935b7f9769f15ef2d2f5ff9811",
+        "create_tables": [
+          "web_taiko_binding_revocations"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/creation-schema.ts",
+        "sha256": "093b1ba1a06b5d1c73ce42cecc920331b13e1fe37e167673b262cd61e1ca7215",
+        "create_tables": [
+          "taiko_manual_creations"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/grant-schema.ts",
+        "sha256": "42330d654dd6ccf933d3eabc0615af11f1c245dcc5b75a881c33e7636dbeeb3b",
+        "create_tables": [
+          "taiko_manual_grant_receipts"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/taiko-publication/lifecycle-schema.ts",
+        "sha256": "23cfe3424e4c6e20b0170fa88e7ce199f97cf533114b306cec3ba91437286569",
+        "create_tables": [
+          "taiko_source_lifecycle"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/account/score-token.ts",
+        "sha256": "f717e58368f6d8f5476734d9f3b0282fc4721f5b1aaad4661e37e6854d7bec8c",
+        "create_tables": [
+          "public_score_tokens"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      },
+      {
+        "path": "taiko_viewer/server/infrastructure/account/sync-request.ts",
+        "sha256": "697381063dadcaba314d0d8fdf1bc88bd9b136b4bafee610967d1ed2d713c53e",
+        "create_tables": [
+          "web_data_sync_receipts"
+        ],
+        "alter_statements": [],
+        "production_applied": "UNKNOWN",
+        "test_applied": "HISTORICAL partial isolated-schema validation; not full parity"
+      }
+    ],
+    "additional_required_modules": [
+      "taiko_viewer/server/utils/account-db.ts",
+      "taiko_viewer/server/infrastructure/account/score-token.ts",
+      "taiko_viewer/server/infrastructure/account/sync-request.ts",
+      "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/public_score_token.py"
+    ],
+    "contract_schema": {
+      "path": "packages/sakura-taiko-contract/schema/contract-v1.json",
+      "type": "JSON contract, not SQL migration"
+    },
+    "publication_schema": {
+      "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/publication.py",
+      "historical_protocol": "Schema 1 + optional fileMtimes/fileCtimes/dependencyHash; immutable C/H manifests",
+      "production_adoption": "UNKNOWN; no adoption command executed"
+    }
+  },
+  "native_wip_fingerprints": {
+    "kind": "MEASURED",
+    "files": [
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/taiko.py",
+        "handoff": "b7e9534f4cc749426efac5bda85944c9cc72a038ff5f88d58efb1d178578656e",
+        "current": "b7e9534f4cc749426efac5bda85944c9cc72a038ff5f88d58efb1d178578656e",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/__init__.py",
+        "handoff": "08d889880ee2b4718e7d546c74c11d9fb2bdf0a224d5f04ba0b05f8e6c224ce9",
+        "current": "08d889880ee2b4718e7d546c74c11d9fb2bdf0a224d5f04ba0b05f8e6c224ce9",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/b30_render.py",
+        "handoff": "75101d4183cf7fd0a49a525f5b4f91a7bf9ceb7d6462b8c02f8a600a5462a11e",
+        "current": "75101d4183cf7fd0a49a525f5b4f91a7bf9ceb7d6462b8c02f8a600a5462a11e",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/dani_progress.py",
+        "handoff": "74305daf0877276cf79bf021e0a4d03b8c740f35fcdbaa42f8f994c1dbfc1b2e",
+        "current": "74305daf0877276cf79bf021e0a4d03b8c740f35fcdbaa42f8f994c1dbfc1b2e",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/draw_dress.py",
+        "handoff": "b52a10c2c3acd4a8e1e1b84e25d0ecf3841bd50a8639164d288747412a403660",
+        "current": "b52a10c2c3acd4a8e1e1b84e25d0ecf3841bd50a8639164d288747412a403660",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/draw_summary.py",
+        "handoff": "9c9d694eb82d5a9363073cdbc1ee2b0cf310e2d4d96675e2a526aa015a4592b6",
+        "current": "9c9d694eb82d5a9363073cdbc1ee2b0cf310e2d4d96675e2a526aa015a4592b6",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/drawinfo.py",
+        "handoff": "a3ee2012844dfee8e2949f31c23de2a0bfb161acfac3f89da2fcd893725b97b1",
+        "current": "a3ee2012844dfee8e2949f31c23de2a0bfb161acfac3f89da2fcd893725b97b1",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/recommend_image.py",
+        "handoff": "f81cd5bbf15dbe1548f456da6e3a91ac14fde6309a2dcc0792d4c285de18e8ec",
+        "current": "f81cd5bbf15dbe1548f456da6e3a91ac14fde6309a2dcc0792d4c285de18e8ec",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/taikob_v2.py",
+        "handoff": "53108d416458609501db1c560fe7eea5cf3cbd3173c51bb1cfc69ac02e0b2c2c",
+        "current": "53108d416458609501db1c560fe7eea5cf3cbd3173c51bb1cfc69ac02e0b2c2c",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/tcloud.py",
+        "handoff": "a9a7deae068614f83eadcfc2a5104a1618e0e20c0f2f1d774e3d0616d93631cf",
+        "current": "a9a7deae068614f83eadcfc2a5104a1618e0e20c0f2f1d774e3d0616d93631cf",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_runtime/platform_adapter.py",
+        "handoff": "f0be53b8262e7e9ffdc71cd29b87c78dc52e239bd071eb217192505b0640d8d9",
+        "current": "f0be53b8262e7e9ffdc71cd29b87c78dc52e239bd071eb217192505b0640d8d9",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/merged_materialization.py",
+        "handoff": "b80c2a88e7116e254062578ad13f84ba09cc3e0b2bcc154aeb32d484707e42db",
+        "current": "b80c2a88e7116e254062578ad13f84ba09cc3e0b2bcc154aeb32d484707e42db",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/taiko_store/reader.py",
+        "handoff": "8520ed38bdcb483fd616b5c9aa7725d8a552d06a30b51cc7c24d9e1c7a763d88",
+        "current": "8520ed38bdcb483fd616b5c9aa7725d8a552d06a30b51cc7c24d9e1c7a763d88",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/plugins/utils/native_score_read.py",
+        "handoff": "ae8a8f536ffc7d1d0f5ab762d8691feccc88a6f3ed0c008bfeb1360837b38e90",
+        "current": "ae8a8f536ffc7d1d0f5ab762d8691feccc88a6f3ed0c008bfeb1360837b38e90",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/tests/native_score_read_sql_child.py",
+        "handoff": "68b1389506436d7fdcd175bce57f2d9de9629ad8fc2f1b859f64f697ca8798bf",
+        "current": "68b1389506436d7fdcd175bce57f2d9de9629ad8fc2f1b859f64f697ca8798bf",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/git/Sakura_bot/taiko/tests/test_native_score_read.py",
+        "handoff": "1cd212fe1305998d349cf826389155a030c0cb1b2ac183114696959409583cd8",
+        "current": "1cd212fe1305998d349cf826389155a030c0cb1b2ac183114696959409583cd8",
+        "match": true
+      },
+      {
+        "path": "/home/sigaer/taiko/taiko-forum/taiko_viewer/tests/nativeScoreReadSql.test.mjs",
+        "handoff": "3967faeb42e5e4efa64a1c06f7d2f557498b8295e2fb3ff8feeb6d456cabd9e7",
+        "current": "3967faeb42e5e4efa64a1c06f7d2f557498b8295e2fb3ff8feeb6d456cabd9e7",
+        "match": true
+      }
+    ],
+    "validation": "HISTORICAL 408 tests +25 subtests excludes later SQL child/parent; Native SQL test not run this turn; no Native Gate PASS"
+  },
+  "ownership_manifest": {
+    "kind": "MEASURED path inventory at frozen HEAD; not a content/security audit",
+    "repo": "/home/sigaer/git/Sakura_bot",
+    "head": "cc66b2207a725489987787bb8d5f785f61c3a352",
+    "tracked_paths": [
+      "taiko/AGENTS.md",
+      "taiko/README.md",
+      "taiko/assets/fumens/Futsuu/1007.png",
+      "taiko/assets/fumens/Futsuu/1028.png",
+      "taiko/assets/fumens/Futsuu/1046.png",
+      "taiko/assets/fumens/Futsuu/1091.png",
+      "taiko/assets/fumens/Futsuu/1189.png",
+      "taiko/assets/fumens/Futsuu/1288.png",
+      "taiko/assets/fumens/Futsuu/1289.png",
+      "taiko/assets/fumens/Futsuu/1290.png",
+      "taiko/assets/fumens/Futsuu/1291.png",
+      "taiko/assets/fumens/Futsuu/1372.png",
+      "taiko/assets/fumens/Futsuu/1418.png",
+      "taiko/assets/fumens/Futsuu/1429.png",
+      "taiko/assets/fumens/Futsuu/1440.png",
+      "taiko/assets/fumens/Futsuu/390.png",
+      "taiko/assets/fumens/Futsuu/601.png",
+      "taiko/assets/fumens/Futsuu/606.png",
+      "taiko/assets/fumens/Futsuu/719.png",
+      "taiko/assets/fumens/Futsuu/725.png",
+      "taiko/assets/fumens/Futsuu/847.png",
+      "taiko/assets/fumens/Futsuu/903.png",
+      "taiko/assets/fumens/Futsuu/904.png",
+      "taiko/assets/fumens/Futsuu/930.png",
+      "taiko/assets/fumens/InnerOni/1222.png",
+      "taiko/assets/fumens/InnerOni/1429.png",
+      "taiko/assets/fumens/InnerOni/606.png",
+      "taiko/assets/fumens/Kantan/1007.png",
+      "taiko/assets/fumens/Kantan/1028.png",
+      "taiko/assets/fumens/Kantan/1046.png",
+      "taiko/assets/fumens/Kantan/1091.png",
+      "taiko/assets/fumens/Kantan/1189.png",
+      "taiko/assets/fumens/Kantan/1288.png",
+      "taiko/assets/fumens/Kantan/1289.png",
+      "taiko/assets/fumens/Kantan/1290.png",
+      "taiko/assets/fumens/Kantan/1291.png",
+      "taiko/assets/fumens/Kantan/1372.png",
+      "taiko/assets/fumens/Kantan/1418.png",
+      "taiko/assets/fumens/Kantan/1429.png",
+      "taiko/assets/fumens/Kantan/390.png",
+      "taiko/assets/fumens/Kantan/601.png",
+      "taiko/assets/fumens/Kantan/606.png",
+      "taiko/assets/fumens/Kantan/719.png",
+      "taiko/assets/fumens/Kantan/725.png",
+      "taiko/assets/fumens/Kantan/847.png",
+      "taiko/assets/fumens/Kantan/902.png",
+      "taiko/assets/fumens/Kantan/903.png",
+      "taiko/assets/fumens/Kantan/904.png",
+      "taiko/assets/fumens/Kantan/930.png",
+      "taiko/assets/fumens/Muzukashii/1007.png",
+      "taiko/assets/fumens/Muzukashii/1028.png",
+      "taiko/assets/fumens/Muzukashii/1046.png",
+      "taiko/assets/fumens/Muzukashii/1091.png",
+      "taiko/assets/fumens/Muzukashii/1189.png",
+      "taiko/assets/fumens/Muzukashii/1288.png",
+      "taiko/assets/fumens/Muzukashii/1289.png",
+      "taiko/assets/fumens/Muzukashii/1290.png",
+      "taiko/assets/fumens/Muzukashii/1291.png",
+      "taiko/assets/fumens/Muzukashii/1372.png",
+      "taiko/assets/fumens/Muzukashii/1418.png",
+      "taiko/assets/fumens/Muzukashii/1429.png",
+      "taiko/assets/fumens/Muzukashii/390.png",
+      "taiko/assets/fumens/Muzukashii/601.png",
+      "taiko/assets/fumens/Muzukashii/606.png",
+      "taiko/assets/fumens/Muzukashii/719.png",
+      "taiko/assets/fumens/Muzukashii/725.png",
+      "taiko/assets/fumens/Muzukashii/847.png",
+      "taiko/assets/fumens/Muzukashii/903.png",
+      "taiko/assets/fumens/Muzukashii/904.png",
+      "taiko/assets/fumens/Muzukashii/930.png",
+      "taiko/assets/fumens/Oni/1007.png",
+      "taiko/assets/fumens/Oni/1028.png",
+      "taiko/assets/fumens/Oni/1091.png",
+      "taiko/assets/fumens/Oni/1189.png",
+      "taiko/assets/fumens/Oni/1288.png",
+      "taiko/assets/fumens/Oni/1289.png",
+      "taiko/assets/fumens/Oni/1290.png",
+      "taiko/assets/fumens/Oni/1291.png",
+      "taiko/assets/fumens/Oni/1372.png",
+      "taiko/assets/fumens/Oni/1429.png",
+      "taiko/assets/fumens/Oni/390.png",
+      "taiko/assets/fumens/Oni/606.png",
+      "taiko/assets/fumens/Oni/719.png",
+      "taiko/assets/fumens/Oni/903.png",
+      "taiko/assets/fumens/Oni/904.png",
+      "taiko/assets/fumens/Oni/930.png",
+      "taiko/assets/icons/b30_dims/accuracy_power.png",
+      "taiko/assets/icons/b30_dims/accuracy_power.svg",
+      "taiko/assets/icons/b30_dims/big_song.png",
+      "taiko/assets/icons/b30_dims/big_song.svg",
+      "taiko/assets/icons/b30_dims/complex_proc.png",
+      "taiko/assets/icons/b30_dims/complex_proc.svg",
+      "taiko/assets/icons/b30_dims/overall_rating.png",
+      "taiko/assets/icons/b30_dims/overall_rating.svg",
+      "taiko/assets/icons/b30_dims/rhythm.png",
+      "taiko/assets/icons/b30_dims/rhythm.svg",
+      "taiko/assets/icons/b30_dims/speed.png",
+      "taiko/assets/icons/b30_dims/speed.svg",
+      "taiko/assets/icons/b30_dims/stamina.png",
+      "taiko/assets/icons/b30_dims/stamina.svg",
+      "taiko/assets/icons/diff/icon_3.png",
+      "taiko/assets/name_plate_custom/name_plate_custom_gold.png",
+      "taiko/assets/name_plate_custom/name_plate_custom_rainbow.png",
+      "taiko/assets/name_plate_custom/name_plate_custom_sliver.png",
+      "taiko/assets/templates/anime-bg.png",
+      "taiko/assets/templates/anime-info-bg.png",
+      "taiko/assets/templates/classic-bg.png",
+      "taiko/assets/templates/classic-info-bg.png",
+      "taiko/assets/templates/gamemusic-bg.png",
+      "taiko/assets/templates/gamemusic-info-bg.png",
+      "taiko/assets/templates/info-bg-final-fix.png",
+      "taiko/assets/templates/kid-bg.png",
+      "taiko/assets/templates/kid-info-bg.png",
+      "taiko/assets/templates/original-bg.png",
+      "taiko/assets/templates/original-info-bg.png",
+      "taiko/assets/templates/pop-bg.png",
+      "taiko/assets/templates/pop-info-bg.png",
+      "taiko/assets/templates/variety-bg.png",
+      "taiko/assets/templates/variety-info-bg.png",
+      "taiko/assets/templates/vocaloid-bg.png",
+      "taiko/assets/templates/vocaloid-info-bg.png",
+      "taiko/bot.py",
+      "taiko/bot_core.py",
+      "taiko/bot_gateway.py",
+      "taiko/deploy/taiko-capacity-logs.logrotate",
+      "taiko/deploy/taiko-journald-capacity.conf",
+      "taiko/deploy/taiko-public-api.service",
+      "taiko/deploy/taiko-song-update.service",
+      "taiko/deploy/taiko-storage-maintenance.service",
+      "taiko/deploy/taiko-storage-maintenance.timer",
+      "taiko/deploy/taiko_admin_backup.cron",
+      "taiko/docs/chart-config-query.md",
+      "taiko/docs/domain-extraction-phase6-publication.md",
+      "taiko/docs/domain-migration-phase3.md",
+      "taiko/docs/public-score-token-api.md",
+      "taiko/docs/qq-official-adapter.md",
+      "taiko/docs/resident-memory-caches.md",
+      "taiko/docs/鼓众广场绑定教程.png",
+      "taiko/feature_handler/__init__.py",
+      "taiko/feature_handler/bot_group_whitelist.py",
+      "taiko/feature_handler/feature_handler.py",
+      "taiko/feature_handler/feature_switch_handler.py",
+      "taiko/growth_compute/__init__.py",
+      "taiko/growth_compute/__main__.py",
+      "taiko/hdu_upload/README.md",
+      "taiko/hdu_upload/__init__.py",
+      "taiko/hdu_upload/deploy/hdu-uploader.service",
+      "taiko/hdu_upload/deploy/hdu.sakura-bot.cn.conf",
+      "taiko/hdu_upload/server.py",
+      "taiko/hdu_upload/static/app.js",
+      "taiko/hdu_upload/static/favicon.ico",
+      "taiko/hdu_upload/static/index.html",
+      "taiko/hdu_upload/static/miku.png",
+      "taiko/hdu_upload/static/styles.css",
+      "taiko/hdu_upload/tests/test_server.py",
+      "taiko/hdu_upload/wsgi.py",
+      "taiko/nonebot_plugin_method_calls/__init__.py",
+      "taiko/nonebot_plugin_method_calls/cleanup.py",
+      "taiko/nonebot_plugin_method_calls/config.py",
+      "taiko/nonebot_plugin_method_calls/extractor.py",
+      "taiko/nonebot_plugin_method_calls/recorder.py",
+      "taiko/nonebot_plugin_method_calls/store.py",
+      "taiko/nonebot_plugin_method_calls/taiko_commands.py",
+      "taiko/nonebot_plugin_method_calls/tests/__init__.py",
+      "taiko/nonebot_plugin_method_calls/tests/test_extractor.py",
+      "taiko/onebot_runtime/__init__.py",
+      "taiko/onebot_runtime/adapter.py",
+      "taiko/onebot_runtime/gateway.py",
+      "taiko/output/grade_dojo_nijiiro_2025_extracted.json",
+      "taiko/plugins/__init__.py",
+      "taiko/plugins/config.py",
+      "taiko/plugins/taiko.py",
+      "taiko/plugins/utils/__init__.py",
+      "taiko/plugins/utils/account_sync.py",
+      "taiko/plugins/utils/admin_audit.py",
+      "taiko/plugins/utils/annual_report_command.py",
+      "taiko/plugins/utils/annual_summary/__init__.py",
+      "taiko/plugins/utils/annual_summary/__main__.py",
+      "taiko/plugins/utils/annual_summary/aggregates.py",
+      "taiko/plugins/utils/annual_summary/archive_fallback.py",
+      "taiko/plugins/utils/annual_summary/cache.py",
+      "taiko/plugins/utils/annual_summary/constants.py",
+      "taiko/plugins/utils/annual_summary/corrections.py",
+      "taiko/plugins/utils/annual_summary/dan_events.py",
+      "taiko/plugins/utils/annual_summary/dan_state.py",
+      "taiko/plugins/utils/annual_summary/data/finaltitle_reference_v1.json",
+      "taiko/plugins/utils/annual_summary/eligibility.py",
+      "taiko/plugins/utils/annual_summary/events.py",
+      "taiko/plugins/utils/annual_summary/finaltitle.py",
+      "taiko/plugins/utils/annual_summary/finaltitle_features.py",
+      "taiko/plugins/utils/annual_summary/finaltitle_model.py",
+      "taiko/plugins/utils/annual_summary/finaltitle_reference.py",
+      "taiko/plugins/utils/annual_summary/finaltitle_reference_cli.py",
+      "taiko/plugins/utils/annual_summary/helpers.py",
+      "taiko/plugins/utils/annual_summary/model.py",
+      "taiko/plugins/utils/annual_summary/profiling.py",
+      "taiko/plugins/utils/annual_summary/ratings.py",
+      "taiko/plugins/utils/annual_summary/reporting_window.py",
+      "taiko/plugins/utils/annual_summary/service.py",
+      "taiko/plugins/utils/annual_summary/shadow.py",
+      "taiko/plugins/utils/annual_summary/snapshots.py",
+      "taiko/plugins/utils/annual_summary/standalone.py",
+      "taiko/plugins/utils/annual_summary/standing_dan.py",
+      "taiko/plugins/utils/arcade_map.py",
+      "taiko/plugins/utils/audio_missing_mover.py",
+      "taiko/plugins/utils/b30_render.py",
+      "taiko/plugins/utils/b30_single.py",
+      "taiko/plugins/utils/bot_binding_authority.py",
+      "taiko/plugins/utils/bot_binding_metadata.py",
+      "taiko/plugins/utils/bot_binding_mutation.py",
+      "taiko/plugins/utils/bot_qq_migration.py",
+      "taiko/plugins/utils/branch_audio_manifest.py",
+      "taiko/plugins/utils/build_achievement_bg.py",
+      "taiko/plugins/utils/build_nijiiro_history_simple.py",
+      "taiko/plugins/utils/chart_availability.py",
+      "taiko/plugins/utils/chart_roll_metadata.py",
+      "taiko/plugins/utils/const_query.py",
+      "taiko/plugins/utils/cover_summary.py",
+      "taiko/plugins/utils/custom_title.py",
+      "taiko/plugins/utils/daily_ability.py",
+      "taiko/plugins/utils/dani_overview.py",
+      "taiko/plugins/utils/dani_progress.py",
+      "taiko/plugins/utils/dojo_score.py",
+      "taiko/plugins/utils/draw_dress.py",
+      "taiko/plugins/utils/draw_summary.py",
+      "taiko/plugins/utils/drawinfo.py",
+      "taiko/plugins/utils/duplicate_versions.py",
+      "taiko/plugins/utils/ese_audio_sync.py",
+      "taiko/plugins/utils/evaluation_roll.py",
+      "taiko/plugins/utils/font_fallback.py",
+      "taiko/plugins/utils/fumen_rename.py",
+      "taiko/plugins/utils/game_login_qr.py",
+      "taiko/plugins/utils/generate_alias.py",
+      "taiko/plugins/utils/grade_dojo_extract.py",
+      "taiko/plugins/utils/hiroba/__init__.py",
+      "taiko/plugins/utils/hiroba/client.py",
+      "taiko/plugins/utils/hiroba/cooldown.py",
+      "taiko/plugins/utils/hiroba/credentials.py",
+      "taiko/plugins/utils/hiroba/native_binding.py",
+      "taiko/plugins/utils/hiroba/normalize.py",
+      "taiko/plugins/utils/hiroba/parser.py",
+      "taiko/plugins/utils/hiroba/private_credentials.py",
+      "taiko/plugins/utils/hiroba/service.py",
+      "taiko/plugins/utils/hiroba/sync.py",
+      "taiko/plugins/utils/manual_account.py",
+      "taiko/plugins/utils/merge_index.py",
+      "taiko/plugins/utils/merge_json.py",
+      "taiko/plugins/utils/merged_bind.py",
+      "taiko/plugins/utils/my_don_cli.py",
+      "taiko/plugins/utils/my_don_showcase_sync.py",
+      "taiko/plugins/utils/native_wahlap_update.py",
+      "taiko/plugins/utils/performance_forecast.py",
+      "taiko/plugins/utils/progress_catalog.py",
+      "taiko/plugins/utils/progress_star.py",
+      "taiko/plugins/utils/public_score_token.py",
+      "taiko/plugins/utils/recommend_image.py",
+      "taiko/plugins/utils/recommendation_intelligence.py",
+      "taiko/plugins/utils/score_calculator.py",
+      "taiko/plugins/utils/score_estimator.py",
+      "taiko/plugins/utils/score_line.py",
+      "taiko/plugins/utils/score_prediction_support.py",
+      "taiko/plugins/utils/score_token_authority.py",
+      "taiko/plugins/utils/snapshot_history.py",
+      "taiko/plugins/utils/song_position.py",
+      "taiko/plugins/utils/song_rating_target.py",
+      "taiko/plugins/utils/song_title_query.py",
+      "taiko/plugins/utils/song_title_showcase.py",
+      "taiko/plugins/utils/song_tja_mapping.py",
+      "taiko/plugins/utils/song_update_task.py",
+      "taiko/plugins/utils/source_mutation.py",
+      "taiko/plugins/utils/taiko_db.py",
+      "taiko/plugins/utils/taiko_domain_adapter.py",
+      "taiko/plugins/utils/taiko_update_cooldown.py",
+      "taiko/plugins/utils/taikob_v2.py",
+      "taiko/plugins/utils/taikob_v2_data.py",
+      "taiko/plugins/utils/target_recommend.py",
+      "taiko/plugins/utils/target_score_core.py",
+      "taiko/plugins/utils/tcloud.py",
+      "taiko/plugins/utils/title_catalog.py",
+      "taiko/plugins/utils/tja_roll_parser.py",
+      "taiko/plugins/utils/tja_roll_sync.py",
+      "taiko/plugins/utils/twso.py",
+      "taiko/plugins/utils/update_db.py",
+      "taiko/plugins/utils/update_user.py",
+      "taiko/plugins/utils/userdata_storage.py",
+      "taiko/plugins/utils/viewer_binding_authority.py",
+      "taiko/plugins/utils/viewer_qq_migration.py",
+      "taiko/plugins/utils/viewer_source_authority.py",
+      "taiko/pyproject.toml",
+      "taiko/requirements-domain.txt",
+      "taiko/schemas/annual-summary-v4.schema.json",
+      "taiko/scripts/account_sync_cli.py",
+      "taiko/scripts/audit_annual_reporting_window.py",
+      "taiko/scripts/backfill_daily_ability.py",
+      "taiko/scripts/clear_nb_inherited_proxy_env.sh",
+      "taiko/scripts/hiroba_credential_cli.py",
+      "taiko/scripts/merged_read_cli.py",
+      "taiko/scripts/migrate_multi_bind_to_db.py",
+      "taiko/scripts/qq_migration_cli.py",
+      "taiko/scripts/source_mutation_cli.py",
+      "taiko/scripts/start_taiko_gateway_core.sh",
+      "taiko/scripts/storage_maintenance.py",
+      "taiko/scripts/sync_dispatch_server.py",
+      "taiko/scripts/sync_dispatch_targets.py",
+      "taiko/scripts/sync_hiroba.py",
+      "taiko/scripts/taiko_admin_backup.py",
+      "taiko/scripts/validate_domain_migration.py",
+      "taiko/server.py",
+      "taiko/songs/README.md",
+      "taiko/songs/_index.json",
+      "taiko/songs/analyze_result_filtered.json",
+      "taiko/songs/analyze_result_filtered_report.json",
+      "taiko/songs/archive_unused/README.md",
+      "taiko/songs/archive_unused/analyze_result.json",
+      "taiko/songs/archive_unused/db_data.json",
+      "taiko/songs/archive_unused/rating_structured_with_ids_old.json",
+      "taiko/songs/archive_unused/response_sample.json",
+      "taiko/songs/archive_unused/song_data_with_roll.json",
+      "taiko/songs/archive_unused/song_score_wiki_partial.json",
+      "taiko/songs/archive_unused/taiko_titles_readable_extract.json",
+      "taiko/songs/archive_unused/twso_cn_data_.json",
+      "taiko/songs/archive_unused/twso_data_.json",
+      "taiko/songs/branch_audio_manifest.json",
+      "taiko/songs/constants_id_v2.csv",
+      "taiko/songs/grade_dojo_nijiiro_2025_simple.json",
+      "taiko/songs/grade_dojo_nijiiro_2026_simple.json",
+      "taiko/songs/grade_dojo_nijiiro_history_simple.json",
+      "taiko/songs/music_donda_list.json",
+      "taiko/songs/rating_structured_with_ids.json",
+      "taiko/songs/song_alias.json",
+      "taiko/songs/song_data.json",
+      "taiko/songs/song_difficulty.json",
+      "taiko/songs/song_id2tjapath.json",
+      "taiko/songs/song_score.json",
+      "taiko/songs/taiko_goku_onis.json",
+      "taiko/songs/taiko_song_database.json",
+      "taiko/songs/tja_note_counts.json",
+      "taiko/songs/twso_cn_data.json",
+      "taiko/songs/twso_data.json",
+      "taiko/taiko_runtime/__init__.py",
+      "taiko/taiko_runtime/memory.py",
+      "taiko/taiko_runtime/platform_adapter.py",
+      "taiko/taiko_runtime/qq_markdown_media.py",
+      "taiko/taiko_runtime/reserved_commands.py",
+      "taiko/taiko_runtime/runtime_env.py",
+      "taiko/taiko_runtime/startup_migration.py",
+      "taiko/taiko_runtime_init.py",
+      "taiko/taiko_store/README.md",
+      "taiko/taiko_store/__init__.py",
+      "taiko/taiko_store/backup.py",
+      "taiko/taiko_store/bridge.py",
+      "taiko/taiko_store/daily.py",
+      "taiko/taiko_store/merged_materialization.py",
+      "taiko/taiko_store/merged_read.py",
+      "taiko/taiko_store/publication.py",
+      "taiko/taiko_store/reader.py",
+      "taiko/templates/info-bg-fix.png",
+      "taiko/templates/info-bg.png",
+      "taiko/tests/account_sync_sql_child.py",
+      "taiko/tests/conftest.py",
+      "taiko/tests/fixtures/hiroba_credential_legacy.json",
+      "taiko/tests/fixtures/source_proxy_renderer_legacy.json",
+      "taiko/tests/fixtures/sync_dispatch_runtime_legacy.py",
+      "taiko/tests/fixtures/sync_dispatch_targets_runtime_legacy.py",
+      "taiko/tests/hiroba_credential_child.py",
+      "taiko/tests/native_binding_metadata_sql_child.py",
+      "taiko/tests/native_binding_mutation_sql_child.py",
+      "taiko/tests/native_hiroba_sql_child.py",
+      "taiko/tests/native_qq_migration_sql_child.py",
+      "taiko/tests/native_wahlap_sql_child.py",
+      "taiko/tests/qq_migration_private_fixture.py",
+      "taiko/tests/source_mutation_sql_child.py",
+      "taiko/tests/test_annual_archive_fallback.py",
+      "taiko/tests/test_annual_manual_corrections.py",
+      "taiko/tests/test_annual_normalized_cache.py",
+      "taiko/tests/test_annual_report_command.py",
+      "taiko/tests/test_arcade_map.py",
+      "taiko/tests/test_b30_update_diff.py",
+      "taiko/tests/test_bind_auto_update_reply.py",
+      "taiko/tests/test_bind_input_rules.py",
+      "taiko/tests/test_bind_usage_message.py",
+      "taiko/tests/test_city_arcade_forward.py",
+      "taiko/tests/test_count.py",
+      "taiko/tests/test_custom_title.py",
+      "taiko/tests/test_custom_title_add.py",
+      "taiko/tests/test_daily_ability.py",
+      "taiko/tests/test_daily_publication.py",
+      "taiko/tests/test_dani_progress.py",
+      "taiko/tests/test_domain_adapter.py",
+      "taiko/tests/test_drawinfo.py",
+      "taiko/tests/test_duplicate_versions.py",
+      "taiko/tests/test_ese_audio_sync.py",
+      "taiko/tests/test_evaluation_roll.py",
+      "taiko/tests/test_feature_group_keys.py",
+      "taiko/tests/test_feature_switch_handler.py",
+      "taiko/tests/test_game_login_qr.py",
+      "taiko/tests/test_hiroba_bind_flow.py",
+      "taiko/tests/test_hiroba_cooldown.py",
+      "taiko/tests/test_hiroba_login_cards.py",
+      "taiko/tests/test_hiroba_parser_crowns.py",
+      "taiko/tests/test_hiroba_profile_and_stats.py",
+      "taiko/tests/test_hiroba_progress_reporter.py",
+      "taiko/tests/test_hiroba_render_crown_fallback.py",
+      "taiko/tests/test_hiroba_service_sync.py",
+      "taiko/tests/test_hiroba_sync_progress.py",
+      "taiko/tests/test_hiroba_transport.py",
+      "taiko/tests/test_hiroba_update_mode.py",
+      "taiko/tests/test_hiroba_update_reply.py",
+      "taiko/tests/test_memory_caches.py",
+      "taiko/tests/test_merged_bind.py",
+      "taiko/tests/test_merged_materialization.py",
+      "taiko/tests/test_merged_private_read.py",
+      "taiko/tests/test_my_don_showcase_layout.py",
+      "taiko/tests/test_my_don_showcase_sync.py",
+      "taiko/tests/test_native_binding_metadata.py",
+      "taiko/tests/test_native_binding_mutation.py",
+      "taiko/tests/test_native_hiroba_binding.py",
+      "taiko/tests/test_native_qq_migration.py",
+      "taiko/tests/test_native_wahlap_update.py",
+      "taiko/tests/test_official_command_compat.py",
+      "taiko/tests/test_official_command_gate.py",
+      "taiko/tests/test_official_update_behavior.py",
+      "taiko/tests/test_playtrend.py",
+      "taiko/tests/test_private_hiroba_credentials.py",
+      "taiko/tests/test_private_message_event.py",
+      "taiko/tests/test_public_score_token_management.py",
+      "taiko/tests/test_publication_adapters.py",
+      "taiko/tests/test_publication_backup.py",
+      "taiko/tests/test_publication_compute.py",
+      "taiko/tests/test_publication_history.py",
+      "taiko/tests/test_publication_metadata_bridge.py",
+      "taiko/tests/test_publication_proxy_renderer.py",
+      "taiko/tests/test_publication_store.py",
+      "taiko/tests/test_publication_sync.py",
+      "taiko/tests/test_publication_token_bearer.py",
+      "taiko/tests/test_publication_token_issuer.py",
+      "taiko/tests/test_qq_markdown_media.py",
+      "taiko/tests/test_recommendation_intelligence.py",
+      "taiko/tests/test_score_calculator.py",
+      "taiko/tests/test_score_estimate_command.py",
+      "taiko/tests/test_score_estimator.py",
+      "taiko/tests/test_song_data_pipeline.py",
+      "taiko/tests/test_song_position.py",
+      "taiko/tests/test_song_rating_target.py",
+      "taiko/tests/test_song_title_query.py",
+      "taiko/tests/test_song_title_showcase.py",
+      "taiko/tests/test_song_tja_mapping.py",
+      "taiko/tests/test_star_progress.py",
+      "taiko/tests/test_storage_maintenance.py",
+      "taiko/tests/test_taiko_admin_backup.py",
+      "taiko/tests/test_taiko_image_fallback.py",
+      "taiko/tests/test_taiko_runtime.py",
+      "taiko/tests/test_taiko_update_cooldown.py",
+      "taiko/tests/test_taikob_v2.py",
+      "taiko/tests/test_taikob_v2_data.py",
+      "taiko/tests/test_taikorec_hints.py",
+      "taiko/tests/test_target_recommend.py",
+      "taiko/tests/test_tcloud_command.py",
+      "taiko/tests/test_tja_roll_parser.py",
+      "taiko/tests/test_tja_roll_sync.py",
+      "taiko/tests/test_u0_bind_slots.py",
+      "taiko/tests/test_update_change_highlights.py",
+      "taiko/tests/test_update_command_hints.py",
+      "taiko/tests/test_update_user.py",
+      "taiko/tests/test_version_summary.py",
+      "taiko/tests/test_viewer_qq_migration.py",
+      "taiko/tests/token_bearer_fixture.py",
+      "taiko/tests/token_bearer_sql_child.py",
+      "taiko/tests/token_issuer_sql_child.py",
+      "taiko/tjaAnalyzer.py",
+      "taiko/太鼓年度总结实现方案_v2.md",
+      "taiko/太鼓年度总结实现方案_v3.md",
+      "taiko/机器人自测报告模板-2023.xlsx",
+      "taiko_backend/pom.xml",
+      "taiko_backend/sql/db_taiko.sql",
+      "taiko_backend/sql/tb_music.sql",
+      "taiko_backend/sql/tb_musicdifficulty.sql",
+      "taiko_backend/sql/tb_title.sql",
+      "taiko_backend/src/main/java/com/hyperionml/TaikoBackendApplication.java",
+      "taiko_backend/src/main/java/com/hyperionml/config/TaikoConfig.java",
+      "taiko_backend/src/main/java/com/hyperionml/controller/LoginController.java",
+      "taiko_backend/src/main/java/com/hyperionml/controller/ManageController.java",
+      "taiko_backend/src/main/java/com/hyperionml/controller/TaikoController.java",
+      "taiko_backend/src/main/java/com/hyperionml/interceptor/LoginCheckInterceptor.java",
+      "taiko_backend/src/main/java/com/hyperionml/mapper/TaikoMapper.java",
+      "taiko_backend/src/main/java/com/hyperionml/mapper/UserMapper.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/LevelTagCount.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/Music.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/MusicDetail.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/MusicDifficulty.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/PageResult.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/Result.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/ScoredName.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/Title.java",
+      "taiko_backend/src/main/java/com/hyperionml/pojo/User.java",
+      "taiko_backend/src/main/java/com/hyperionml/service/LoginService.java",
+      "taiko_backend/src/main/java/com/hyperionml/service/TaikoService.java",
+      "taiko_backend/src/main/java/com/hyperionml/utils/Entry.java",
+      "taiko_backend/src/main/java/com/hyperionml/utils/IntegerListJsonTypeHandler.java",
+      "taiko_backend/src/main/java/com/hyperionml/utils/JwtUtils.java",
+      "taiko_backend/src/main/java/com/hyperionml/utils/MyUtils.java",
+      "taiko_backend/src/main/resources/application.yml",
+      "taiko_backend/src/main/resources/com/hyperionml/mapper/TaikoMapper.xml",
+      "taiko_backend/src/test/java/com/hyperionml/TaikoBackendApplicationTests.java",
+      "taiko_manager/.editorconfig",
+      "taiko_manager/.env.development",
+      "taiko_manager/.env.production",
+      "taiko_manager/.env.test",
+      "taiko_manager/.eslintignore",
+      "taiko_manager/.eslintrc.cjs",
+      "taiko_manager/.eslintrc.json",
+      "taiko_manager/.gitignore",
+      "taiko_manager/.prettierrc.cjs",
+      "taiko_manager/.stylelintignore",
+      "taiko_manager/.stylelintrc.cjs",
+      "taiko_manager/LICENSE",
+      "taiko_manager/README.md",
+      "taiko_manager/commitlint.config.cjs",
+      "taiko_manager/index.html",
+      "taiko_manager/lint-staged.config.cjs",
+      "taiko_manager/package.json",
+      "taiko_manager/pnpm-lock.yaml",
+      "taiko_manager/postcss.config.cjs",
+      "taiko_manager/public/vite.png",
+      "taiko_manager/scripts/preinstall.js",
+      "taiko_manager/src/App.vue",
+      "taiko_manager/src/api/mock/index.ts",
+      "taiko_manager/src/api/system/dept/index.ts",
+      "taiko_manager/src/api/system/dict/data/index.ts",
+      "taiko_manager/src/api/system/dict/data/type.ts",
+      "taiko_manager/src/api/system/dict/type/index.ts",
+      "taiko_manager/src/api/system/dict/type/type.ts",
+      "taiko_manager/src/api/system/login/index.ts",
+      "taiko_manager/src/api/system/loginlog/index.ts",
+      "taiko_manager/src/api/system/menu/index.ts",
+      "taiko_manager/src/api/system/music/index.ts",
+      "taiko_manager/src/api/system/musicdetail/index.ts",
+      "taiko_manager/src/api/system/musicdifficulty/index.ts",
+      "taiko_manager/src/api/system/notice/index.ts",
+      "taiko_manager/src/api/system/notice/type.ts",
+      "taiko_manager/src/api/system/operlog/index.ts",
+      "taiko_manager/src/api/system/post/index.ts",
+      "taiko_manager/src/api/system/role/index.ts",
+      "taiko_manager/src/api/system/role/type.ts",
+      "taiko_manager/src/api/system/user/index.ts",
+      "taiko_manager/src/api/system/user/type.ts",
+      "taiko_manager/src/assets/fonts/KoiFont.woff2",
+      "taiko_manager/src/assets/icons/koi-menu-left.svg",
+      "taiko_manager/src/assets/icons/koi-menu-right.svg",
+      "taiko_manager/src/assets/icons/koi-mobile-menu.svg",
+      "taiko_manager/src/assets/images/error/403.png",
+      "taiko_manager/src/assets/images/error/404.png",
+      "taiko_manager/src/assets/images/error/500.png",
+      "taiko_manager/src/assets/images/login/bg.png",
+      "taiko_manager/src/assets/images/login/waoku.jpg",
+      "taiko_manager/src/assets/images/login/wuwu.jpg",
+      "taiko_manager/src/assets/images/logo/logo.webp",
+      "taiko_manager/src/assets/json/authLogin.json",
+      "taiko_manager/src/assets/json/authMenu.json",
+      "taiko_manager/src/assets/json/authUser.json",
+      "taiko_manager/src/assets/mouse/index.cur",
+      "taiko_manager/src/components/KoiCard/Index.vue",
+      "taiko_manager/src/components/KoiDialog/Index.vue",
+      "taiko_manager/src/components/KoiDrawer/Index.vue",
+      "taiko_manager/src/components/KoiExcel/Index.vue",
+      "taiko_manager/src/components/KoiGlobalIcon/Index.vue",
+      "taiko_manager/src/components/KoiImage/Index.vue",
+      "taiko_manager/src/components/KoiPicture/Index.vue",
+      "taiko_manager/src/components/KoiSelectIcon/Index.vue",
+      "taiko_manager/src/components/KoiTag/Index.vue",
+      "taiko_manager/src/components/KoiTagFilter/Index.vue",
+      "taiko_manager/src/components/KoiToolbar/Index.vue",
+      "taiko_manager/src/components/KoiUpload/File.vue",
+      "taiko_manager/src/components/KoiUpload/Image.vue",
+      "taiko_manager/src/components/KoiUpload/Images.vue",
+      "taiko_manager/src/components/MobileDrawer/Index.vue",
+      "taiko_manager/src/components/SvgIcon/Index.vue",
+      "taiko_manager/src/components/index.ts",
+      "taiko_manager/src/config/index.ts",
+      "taiko_manager/src/config/theme.ts",
+      "taiko_manager/src/directives/index.ts",
+      "taiko_manager/src/directives/modules/adaptive.ts",
+      "taiko_manager/src/directives/modules/adaptiveTree.ts",
+      "taiko_manager/src/directives/modules/auth.ts",
+      "taiko_manager/src/directives/modules/copy.ts",
+      "taiko_manager/src/directives/modules/debounce.ts",
+      "taiko_manager/src/directives/modules/debounceInput.ts",
+      "taiko_manager/src/directives/modules/draggable.ts",
+      "taiko_manager/src/directives/modules/throttle.ts",
+      "taiko_manager/src/directives/modules/throttleInput.ts",
+      "taiko_manager/src/directives/modules/waterMarker.ts",
+      "taiko_manager/src/hooks/dicts/index.ts",
+      "taiko_manager/src/hooks/screen/index.ts",
+      "taiko_manager/src/languages/index.ts",
+      "taiko_manager/src/languages/modules/en.ts",
+      "taiko_manager/src/languages/modules/zh.ts",
+      "taiko_manager/src/layouts/LayoutClassic/index.vue",
+      "taiko_manager/src/layouts/LayoutColumns/index.vue",
+      "taiko_manager/src/layouts/LayoutHorizontal/index.vue",
+      "taiko_manager/src/layouts/LayoutHorizontal/index1.vue",
+      "taiko_manager/src/layouts/LayoutMobile/index.vue",
+      "taiko_manager/src/layouts/LayoutOptimum/index.vue",
+      "taiko_manager/src/layouts/LayoutVertical/index.vue",
+      "taiko_manager/src/layouts/components/Header/components/BreadCrumb.vue",
+      "taiko_manager/src/layouts/components/Header/components/Collapse.vue",
+      "taiko_manager/src/layouts/components/Header/components/Dark.vue",
+      "taiko_manager/src/layouts/components/Header/components/Dimension.vue",
+      "taiko_manager/src/layouts/components/Header/components/FullScreen.vue",
+      "taiko_manager/src/layouts/components/Header/components/Language.vue",
+      "taiko_manager/src/layouts/components/Header/components/Refresh.vue",
+      "taiko_manager/src/layouts/components/Header/components/SearchMenu.vue",
+      "taiko_manager/src/layouts/components/Header/components/ThemeSetting.vue",
+      "taiko_manager/src/layouts/components/Header/components/Toolbar.vue",
+      "taiko_manager/src/layouts/components/Header/components/User.vue",
+      "taiko_manager/src/layouts/components/Header/index.vue",
+      "taiko_manager/src/layouts/components/Logo/index.vue",
+      "taiko_manager/src/layouts/components/Main/components/Maximize.vue",
+      "taiko_manager/src/layouts/components/Main/index.vue",
+      "taiko_manager/src/layouts/components/Menu/AsideSubMenu.vue",
+      "taiko_manager/src/layouts/components/Menu/ColumnSubMenu.vue",
+      "taiko_manager/src/layouts/components/Menu/HorizontalSubMenu.vue",
+      "taiko_manager/src/layouts/components/Tabs/components/TabMenu.vue",
+      "taiko_manager/src/layouts/components/Tabs/index.vue",
+      "taiko_manager/src/layouts/components/ThemeConfig/index.vue",
+      "taiko_manager/src/layouts/index.vue",
+      "taiko_manager/src/main.ts",
+      "taiko_manager/src/routers/index.ts",
+      "taiko_manager/src/routers/modules/dynamicRouter.ts",
+      "taiko_manager/src/routers/modules/staticRouter.ts",
+      "taiko_manager/src/settings.ts",
+      "taiko_manager/src/stores/index.ts",
+      "taiko_manager/src/stores/interface/index.ts",
+      "taiko_manager/src/stores/modules/auth-json.ts",
+      "taiko_manager/src/stores/modules/auth-mock.ts",
+      "taiko_manager/src/stores/modules/auth.ts",
+      "taiko_manager/src/stores/modules/global.ts",
+      "taiko_manager/src/stores/modules/keepAlive.ts",
+      "taiko_manager/src/stores/modules/tabs.ts",
+      "taiko_manager/src/stores/modules/user.ts",
+      "taiko_manager/src/styles/index.scss",
+      "taiko_manager/src/styles/nprogress.scss",
+      "taiko_manager/src/styles/reset.scss",
+      "taiko_manager/src/styles/transition.scss",
+      "taiko_manager/src/styles/variable.scss",
+      "taiko_manager/src/utils/axios.ts",
+      "taiko_manager/src/utils/errorStatus.ts",
+      "taiko_manager/src/utils/filterRoute.ts",
+      "taiko_manager/src/utils/index.ts",
+      "taiko_manager/src/utils/koi.ts",
+      "taiko_manager/src/utils/mittBus.ts",
+      "taiko_manager/src/utils/nprogress.ts",
+      "taiko_manager/src/utils/random.ts",
+      "taiko_manager/src/utils/storage.ts",
+      "taiko_manager/src/utils/theme.ts",
+      "taiko_manager/src/views/error/403.vue",
+      "taiko_manager/src/views/error/404.vue",
+      "taiko_manager/src/views/error/500.vue",
+      "taiko_manager/src/views/home/components/KoiCard.vue",
+      "taiko_manager/src/views/home/components/KoiLeftChart.vue",
+      "taiko_manager/src/views/home/components/KoiRightChart.vue",
+      "taiko_manager/src/views/home/components/KoiTimeline1.vue",
+      "taiko_manager/src/views/home/components/KoiTimeline2.vue",
+      "taiko_manager/src/views/home/index.vue",
+      "taiko_manager/src/views/link/gitee/index.vue",
+      "taiko_manager/src/views/link/github/index.vue",
+      "taiko_manager/src/views/link/iframe/index.vue",
+      "taiko_manager/src/views/login/index.vue",
+      "taiko_manager/src/views/login/index2.vue",
+      "taiko_manager/src/views/menus/menu1.vue",
+      "taiko_manager/src/views/menus/menu2.vue",
+      "taiko_manager/src/views/module/controls/index.vue",
+      "taiko_manager/src/views/module/dialog/index.vue",
+      "taiko_manager/src/views/module/drawer/index.vue",
+      "taiko_manager/src/views/module/driver/index.vue",
+      "taiko_manager/src/views/module/filter/index.vue",
+      "taiko_manager/src/views/module/svgIcon/index.vue",
+      "taiko_manager/src/views/module/tabs/detail.vue",
+      "taiko_manager/src/views/module/tabs/index.vue",
+      "taiko_manager/src/views/module/upload/index.vue",
+      "taiko_manager/src/views/system/dept/index.vue",
+      "taiko_manager/src/views/system/dict/data.vue",
+      "taiko_manager/src/views/system/dict/type.vue",
+      "taiko_manager/src/views/system/loginlog/index.vue",
+      "taiko_manager/src/views/system/menu/index.vue",
+      "taiko_manager/src/views/system/music/index.vue",
+      "taiko_manager/src/views/system/musicdetail/index.vue",
+      "taiko_manager/src/views/system/musicdifficulty/index.vue",
+      "taiko_manager/src/views/system/notice/index.vue",
+      "taiko_manager/src/views/system/operlog/index.vue",
+      "taiko_manager/src/views/system/personage/index.vue",
+      "taiko_manager/src/views/system/post/index.vue",
+      "taiko_manager/src/views/system/role/index.vue",
+      "taiko_manager/src/views/system/user/index.vue",
+      "taiko_manager/src/views/workbench/index.vue",
+      "taiko_manager/src/vite-env.d.ts",
+      "taiko_manager/tsconfig.json",
+      "taiko_manager/tsconfig.node.json",
+      "taiko_manager/unocss.config.ts",
+      "taiko_manager/vite.config.ts"
+    ],
+    "counts": {
+      "taiko": 473,
+      "taiko_backend": 31,
+      "taiko_manager": 195
+    },
+    "untracked_candidate_paths": [
+      "taiko/plugins/utils/native_score_read.py",
+      "taiko/tests/native_score_read_sql_child.py",
+      "taiko/tests/test_native_score_read.py"
+    ],
+    "outside_taiko_known_boundaries": [
+      "miku_bot/sekai/upload/taiko_login.py",
+      "miku_bot/sekai/upload/server.py",
+      "miku_bot/runtime_init.py",
+      "miku_bot/plugins/self_service.py",
+      "miku-self/self_func/self_test_runtime/user_commands.py"
+    ],
+    "shared_host_dependencies": [
+      "feature_handler_bootstrap.py",
+      "feature_handler/",
+      "runtime_memory/",
+      "nonebot_plugin_method_calls/"
+    ],
+    "interpretation": "Path ownership scope only; mixed files require symbol-level split. No private asset/data content read."
+  },
+  "evidence_sources": {
+    "docs/taiko-domain-extraction/handoff/handoff.md": {
+      "sha256": "45b08f227f7b9159c4c6792f6241fd62c64a42044e677743c671040a66a6382b",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/handoff/Taiko_Domain_Extraction_30h_Review_and_Containment.md": {
+      "sha256": "46672a938f8e4e5fa957ad4d702d1e35c2fe215e1638836bf1b7171ac60dae84",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/platform-architecture-audit/repository-inventory.md": {
+      "sha256": "6a31d3d1ad532c62bafc75992bf0be355b80976b8db16c69b2d004568a7e0c65",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/phase6-storage-consolidation.md": {
+      "sha256": "86223582c28aa2722ead89cd29c4d32f8c7d9bef3d32fdc361dcfacc01a4895c",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/module-classification.csv": {
+      "sha256": "fa705052e156a0d3452172e5a314fc598eb9c1e1c353eea47a51e65896017c2a",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/tracked-file-classification.csv": {
+      "sha256": "733e61fbffc593435604b690c72ee4d8817fa6a0c7df37c7fcfcaa644f706bb4",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/phase6-ownership-audit.json": {
+      "sha256": "9ded639ce2e77cd84712419a5d50058bb9353c3e429276f1f8855ff74c5904ec",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/phase4-validation.json": {
+      "sha256": "6981172b3e992b38a6bce6fbb67f99958af7d3137371dedf4f8997e21643fc05",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/phase3-runtime-sync.json": {
+      "sha256": "90807af384725d38a502054caf46086ec5e6b18a8705e45d9ed0cf8ec1f1329b",
+      "kind": "HISTORICAL_REPORT"
+    },
+    "docs/taiko-domain-extraction/evidence/phase5-publication-validation.json": {
+      "sha256": "470bf4d1f6eeacfb45af42dfdf818a5bdd924576e5ffad6cc9200e2b03bdc88a",
+      "kind": "HISTORICAL_REPORT"
+    }
+  },
+  "instructions_read": [
+    "/home/sigaer/AGENTS.md",
+    "/home/sigaer/taiko/AGENTS.md",
+    "/home/sigaer/taiko/taiko-forum/AGENTS.md",
+    "/home/sigaer/git/Sakura_bot/AGENTS.md",
+    "/home/sigaer/git/Sakura_bot/taiko/AGENTS.md",
+    "/home/sigaer/taiko-bot/AGENTS.md",
+    "/home/sigaer/taiko/taiko-forum/docs/memory-engineering-guidelines.md"
+  ],
+  "exclusions": [
+    "No fetch/pull/checkout/reset/merge/commit/push/deploy/service restart/dependency install",
+    "No business source/config/DB/private production data mutation or read of private userdata",
+    "No regression suite/benchmark/Read Model implementation",
+    "Missing registered worktrees retained as UNKNOWN; no pruning",
+    "No unsafe legacy entry restoration or existing security fix removal",
+    "Only three requested report files added; status.md deletion preserved"
+  ],
+  "final_review": {
+    "at": "2026-10-12T16:38:19.062110+08:00",
+    "unexpected_deltas": [],
+    "active_task_units": "",
+    "report_count": 3,
+    "interpretation": "Only three requested report files added since initial snapshot; business WIP hashes/HEAD/index preserved. JSON parsed and local Markdown links checked. No test suite or build run."
+  }
+}

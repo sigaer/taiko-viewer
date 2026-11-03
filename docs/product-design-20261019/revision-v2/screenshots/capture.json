@@ -1,0 +1,530 @@
+[
+  {
+    "image": "song-1440-v1.png",
+    "fullImage": "song-1440-v1-full.png",
+    "page": "song",
+    "version": "v1",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 193.796875,
+        "height": 78,
+        "width": 441.734375,
+        "text": "无敌的HAPPINESS!(SOS团5人Ver.)"
+      },
+      "firstRecommendation": null,
+      "chart": {
+        "y": 462.328125,
+        "height": 638.484375,
+        "width": 684.296875,
+        "text": "魔王 ★7最大物量 503谱面已收录谱面预览示意 · BPM 185打开练习播放器 ↗查看完整谱面 ↗混音鼓点原曲▶0:00播放位置—:—谱面特征与分析数据复合处理5.80平均密度31.04瞬间密度16.68叩き分け0.94BPM变化0.00hs变化0.00谱"
+      },
+      "chartActions": {
+        "y": 756.71875,
+        "height": 81.09375,
+        "width": 682.296875,
+        "text": "打开练习播放器 ↗查看完整谱面 ↗"
+      },
+      "trend": null,
+      "pageHeight": 1214,
+      "overflow": false
+    }
+  },
+  {
+    "image": "song-1440-v2.png",
+    "fullImage": "song-1440-v2-full.png",
+    "page": "song",
+    "version": "v2",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 205.09375,
+        "height": 42,
+        "width": 996,
+        "text": "无敌的HAPPINESS!(SOS团5人Ver.)"
+      },
+      "firstRecommendation": null,
+      "chart": {
+        "y": 425.1875,
+        "height": 489.84375,
+        "width": 816,
+        "text": "魔王 ★7最大物量 503谱面预览示意 · BPM 185打开练习播放器 ↗查看完整谱面 ↗混音鼓点原曲▶0:00播放位置—:—"
+      },
+      "chartActions": {
+        "y": 707.28125,
+        "height": 86.75,
+        "width": 814,
+        "text": "打开练习播放器 ↗查看完整谱面 ↗"
+      },
+      "trend": null,
+      "pageHeight": 1166,
+      "overflow": false
+    }
+  },
+  {
+    "image": "training-1440-v1.png",
+    "fullImage": "training-1440-v1-full.png",
+    "page": "training",
+    "version": "v1",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 135.796875,
+        "height": 41.59375,
+        "width": 162.9375,
+        "text": "练习与成长"
+      },
+      "firstRecommendation": {
+        "y": 858.1875,
+        "height": 124.734375,
+        "width": 726.203125,
+        "text": "无敌的HAPPINESS!魔王 ★7当前最好成绩 980,000查看谱面 →"
+      },
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1345,
+      "overflow": false
+    }
+  },
+  {
+    "image": "training-1440-v2.png",
+    "fullImage": "training-1440-v2-full.png",
+    "page": "training",
+    "version": "v2",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 109.875,
+        "height": 39,
+        "width": 58.5,
+        "text": "练习"
+      },
+      "firstRecommendation": {
+        "y": 555.59375,
+        "height": 130.078125,
+        "width": 844,
+        "text": "无敌的HAPPINESS!魔王 ★7当前最好成绩 980,000查看谱面 →"
+      },
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1067,
+      "overflow": false
+    }
+  },
+  {
+    "image": "home-1440-v1.png",
+    "fullImage": "home-1440-v1-full.png",
+    "page": "home",
+    "version": "v1",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 187.796875,
+        "height": 46.796875,
+        "width": 1136,
+        "text": "欢迎回来，樱花鼓众。"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1584,
+      "overflow": false
+    }
+  },
+  {
+    "image": "home-1440-v2.png",
+    "fullImage": "home-1440-v2-full.png",
+    "page": "home",
+    "version": "v2",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 106,
+        "height": 39,
+        "width": 1136,
+        "text": "欢迎回来，樱花鼓众。"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1370,
+      "overflow": false
+    }
+  },
+  {
+    "image": "progress-1440-v1.png",
+    "fullImage": "progress-1440-v1-full.png",
+    "page": "progress",
+    "version": "v1",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 135.796875,
+        "height": 41.59375,
+        "width": 161.515625,
+        "text": "成长档案"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": {
+        "y": 605.875,
+        "height": 230,
+        "width": 683.90625,
+        "text": "10.010.110.210.3Rating8/279/1710/710.28"
+      },
+      "pageHeight": 1369,
+      "overflow": false
+    }
+  },
+  {
+    "image": "progress-1440-v2.png",
+    "fullImage": "progress-1440-v2-full.png",
+    "page": "progress",
+    "version": "v2",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 108.5,
+        "height": 39,
+        "width": 117,
+        "text": "成长档案"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": {
+        "y": 383,
+        "height": 230,
+        "width": 768,
+        "text": "10.010.110.210.3Rating8/279/1710/710.28"
+      },
+      "pageHeight": 1050,
+      "overflow": false
+    }
+  },
+  {
+    "image": "song-390-v1.png",
+    "fullImage": "song-390-v1-full.png",
+    "page": "song",
+    "version": "v1",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 174.5,
+        "height": 64.375,
+        "width": 260,
+        "text": "无敌的HAPPINESS!(SOS团5人Ver.)"
+      },
+      "firstRecommendation": null,
+      "chart": {
+        "y": 411.46875,
+        "height": 583.78125,
+        "width": 358,
+        "text": "魔王 ★7最大物量 503谱面已收录谱面预览示意 · BPM 185打开练习播放器 ↗查看完整谱面 ↗混音鼓点原曲▶0:00播放位置—:—谱面特征与分析数据复合处理5.80平均密度31.04瞬间密度16.68叩き分け0.94BPM变化0.00hs变化0.00谱"
+      },
+      "chartActions": {
+        "y": 660.25,
+        "height": 76,
+        "width": 356,
+        "text": "打开练习播放器 ↗查看完整谱面 ↗"
+      },
+      "trend": null,
+      "pageHeight": 1662,
+      "overflow": false
+    }
+  },
+  {
+    "image": "song-390-v2.png",
+    "fullImage": "song-390-v2-full.png",
+    "page": "song",
+    "version": "v2",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 181.390625,
+        "height": 63.78125,
+        "width": 270,
+        "text": "无敌的HAPPINESS!(SOS团5人Ver.)"
+      },
+      "firstRecommendation": null,
+      "chart": {
+        "y": 449.453125,
+        "height": 419.1875,
+        "width": 358,
+        "text": "魔王 ★7最大物量 503谱面预览示意 · BPM 185打开练习播放器 ↗查看完整谱面 ↗混音鼓点原曲▶0:00播放位置—:—"
+      },
+      "chartActions": {
+        "y": 670.546875,
+        "height": 79.09375,
+        "width": 356,
+        "text": "打开练习播放器 ↗查看完整谱面 ↗"
+      },
+      "trend": null,
+      "pageHeight": 1597,
+      "overflow": false
+    }
+  },
+  {
+    "image": "training-390-v1.png",
+    "fullImage": "training-390-v1-full.png",
+    "page": "training",
+    "version": "v1",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 125.4375,
+        "height": 33.796875,
+        "width": 176.515625,
+        "text": "练习与成长"
+      },
+      "firstRecommendation": {
+        "y": 796.8125,
+        "height": 159.78125,
+        "width": 358,
+        "text": "无敌的HAPPINESS!魔王 ★7当前最好成绩 980,000查看谱面 →"
+      },
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1870,
+      "overflow": false
+    }
+  },
+  {
+    "image": "training-390-v2.png",
+    "fullImage": "training-390-v2-full.png",
+    "page": "training",
+    "version": "v2",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 93.09375,
+        "height": 33.796875,
+        "width": 50.703125,
+        "text": "练习"
+      },
+      "firstRecommendation": {
+        "y": 614.46875,
+        "height": 180.078125,
+        "width": 358,
+        "text": "无敌的HAPPINESS!魔王 ★7当前最好成绩 980,000查看谱面 →"
+      },
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1710,
+      "overflow": false
+    }
+  },
+  {
+    "image": "home-390-v1.png",
+    "fullImage": "home-390-v1-full.png",
+    "page": "home",
+    "version": "v1",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 177.09375,
+        "height": 36.390625,
+        "width": 358,
+        "text": "欢迎回来，樱花鼓众。"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1992,
+      "overflow": false
+    }
+  },
+  {
+    "image": "home-390-v2.png",
+    "fullImage": "home-390-v2-full.png",
+    "page": "home",
+    "version": "v2",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 88,
+        "height": 39.140625,
+        "width": 358,
+        "text": "欢迎回来，樱花鼓众。"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": null,
+      "pageHeight": 1855,
+      "overflow": false
+    }
+  },
+  {
+    "image": "progress-390-v1.png",
+    "fullImage": "progress-390-v1-full.png",
+    "page": "progress",
+    "version": "v1",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 125.4375,
+        "height": 33.796875,
+        "width": 174.984375,
+        "text": "成长档案"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": {
+        "y": 563.828125,
+        "height": 230,
+        "width": 324,
+        "text": "10.010.110.210.3Rating8/279/1710/710.28"
+      },
+      "pageHeight": 1725,
+      "overflow": false
+    }
+  },
+  {
+    "image": "progress-390-v2.png",
+    "fullImage": "progress-390-v2-full.png",
+    "page": "progress",
+    "version": "v2",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "ready",
+    "lang": "zh",
+    "dpr": 1,
+    "errors": [],
+    "measured": {
+      "title": {
+        "y": 93.09375,
+        "height": 33.796875,
+        "width": 101.40625,
+        "text": "成长档案"
+      },
+      "firstRecommendation": null,
+      "chart": null,
+      "chartActions": null,
+      "trend": {
+        "y": 437.5,
+        "height": 230,
+        "width": 326,
+        "text": "10.010.110.210.3Rating8/279/1710/710.28"
+      },
+      "pageHeight": 1640,
+      "overflow": false
+    }
+  }
+]

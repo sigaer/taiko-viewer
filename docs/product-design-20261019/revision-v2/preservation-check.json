@@ -1,0 +1,274 @@
+{
+  "originalAndV1Preserved": {
+    "prototype/app.js": true,
+    "revision-v2/v1/app.js": true,
+    "prototype/style.css": true,
+    "revision-v2/v1/style.css": true,
+    "prototype/index.html": true,
+    "revision-v2/v1/index.html": true,
+    "prototype/assets/sources.json": true,
+    "revision-v2/v1/assets/sources.json": true,
+    "prototype/assets/1455.webp": true,
+    "revision-v2/v1/assets/1455.webp": true,
+    "prototype/assets/1357.webp": true,
+    "revision-v2/v1/assets/1357.webp": true,
+    "prototype/assets/1466.png": true,
+    "revision-v2/v1/assets/1466.png": true,
+    "prototype/assets/1501.webp": true,
+    "revision-v2/v1/assets/1501.webp": true
+  },
+  "v2AppJsDifference": "one presentation hook; original data and handlers unchanged",
+  "localDeliverableLinks": "resolved",
+  "images": [
+    {
+      "file": "home-1440-compare.png",
+      "width": 2904,
+      "height": 1037
+    },
+    {
+      "file": "home-1440-v1-full.png",
+      "width": 1440,
+      "height": 1584
+    },
+    {
+      "file": "home-1440-v1.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "home-1440-v2-full.png",
+      "width": 1440,
+      "height": 1370
+    },
+    {
+      "file": "home-1440-v2.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "home-390-compare.png",
+      "width": 804,
+      "height": 881
+    },
+    {
+      "file": "home-390-v1-full.png",
+      "width": 390,
+      "height": 1992
+    },
+    {
+      "file": "home-390-v1.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "home-390-v2-dark.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "home-390-v2-full.png",
+      "width": 390,
+      "height": 1855
+    },
+    {
+      "file": "home-390-v2-ja.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "home-390-v2-no-goal.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "home-390-v2.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "progress-1440-compare.png",
+      "width": 2904,
+      "height": 1037
+    },
+    {
+      "file": "progress-1440-v1-full.png",
+      "width": 1440,
+      "height": 1369
+    },
+    {
+      "file": "progress-1440-v1.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "progress-1440-v2-full.png",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "file": "progress-1440-v2.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "progress-390-compare.png",
+      "width": 804,
+      "height": 881
+    },
+    {
+      "file": "progress-390-v1-full.png",
+      "width": 390,
+      "height": 1725
+    },
+    {
+      "file": "progress-390-v1.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "progress-390-v2-full.png",
+      "width": 390,
+      "height": 1640
+    },
+    {
+      "file": "progress-390-v2-ja.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "progress-390-v2-partial.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "progress-390-v2.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "song-1440-compare.png",
+      "width": 2904,
+      "height": 1037
+    },
+    {
+      "file": "song-1440-v1-full.png",
+      "width": 1440,
+      "height": 1214
+    },
+    {
+      "file": "song-1440-v1.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "song-1440-v2-full.png",
+      "width": 1440,
+      "height": 1166
+    },
+    {
+      "file": "song-1440-v2.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "song-390-compare.png",
+      "width": 804,
+      "height": 881
+    },
+    {
+      "file": "song-390-v1-full.png",
+      "width": 390,
+      "height": 1662
+    },
+    {
+      "file": "song-390-v1.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "song-390-v2-full.png",
+      "width": 390,
+      "height": 1597
+    },
+    {
+      "file": "song-390-v2-ja.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "song-390-v2.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-1440-compare.png",
+      "width": 2904,
+      "height": 1037
+    },
+    {
+      "file": "training-1440-v1-full.png",
+      "width": 1440,
+      "height": 1345
+    },
+    {
+      "file": "training-1440-v1.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "training-1440-v2-full.png",
+      "width": 1440,
+      "height": 1067
+    },
+    {
+      "file": "training-1440-v2.png",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "training-390-compare.png",
+      "width": 804,
+      "height": 881
+    },
+    {
+      "file": "training-390-v1-full.png",
+      "width": 390,
+      "height": 1870
+    },
+    {
+      "file": "training-390-v1.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-390-v2-completed.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-390-v2-full.png",
+      "width": 390,
+      "height": 1710
+    },
+    {
+      "file": "training-390-v2-ja.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-390-v2-management.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-390-v2-options.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "training-390-v2.png",
+      "width": 390,
+      "height": 844
+    }
+  ]
+}

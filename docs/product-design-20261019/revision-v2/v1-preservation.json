@@ -1,0 +1,13 @@
+{
+  "source": "../prototype",
+  "sha256": {
+    "app.js": "b662ec5167ecf474487b20251dc95d5c5d01594341434e1ba6d83defbf4f070b",
+    "style.css": "0cca296424f3bae33ca0645170d53cf018d43490203147e5054570d863f97fe6",
+    "index.html": "1e65ea1a1d3beeb2418a642c9274873ebcd8d50ece5d3aa6e2ad1a2458df837f",
+    "assets/sources.json": "a90bc113fc922a711abf57cbfbdf2174c2e179669dc324f86c5b5ccd413032cf",
+    "assets/1455.webp": "6f252532708b5a93cbfa5b3969b0d9aaa621f9ab7246510f7b373bbdd8b08ae2",
+    "assets/1357.webp": "f1a50ba727bb4d56ffc0c31025dc53b41df7a239ef7d571468f9fb14adac2bd9",
+    "assets/1466.png": "7798169efb62f978cfd183413eea1f000643c43a1d80413e6be8c8c3578c6ada",
+    "assets/1501.webp": "168cd45fb2cbddb1da21cb551d388b1411ac33f90ea1e93985f33784d12f2879"
+  }
+}

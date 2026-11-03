@@ -1,0 +1,191 @@
+{
+  "viewChecks": [
+    {
+      "view": "home",
+      "width": 1440,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "song",
+      "width": 1440,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "training",
+      "width": 1440,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "progress",
+      "width": 1440,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "song",
+      "width": 390,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "training",
+      "width": 390,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "progress",
+      "width": 390,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "locale": "ja",
+      "overflow": false
+    },
+    {
+      "view": "song",
+      "width": 390,
+      "locale": "ja",
+      "overflow": false
+    },
+    {
+      "view": "training",
+      "width": 390,
+      "locale": "ja",
+      "overflow": false
+    },
+    {
+      "view": "progress",
+      "width": 390,
+      "locale": "ja",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "guest",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "unbound",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "empty",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "no-goal",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "loading",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "error",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "completed",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "state": "partial",
+      "overflow": false
+    },
+    {
+      "view": "home",
+      "width": 360,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "song",
+      "width": 360,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "training",
+      "width": 360,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "progress",
+      "width": 360,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "home",
+      "width": 768,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "song",
+      "width": 768,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "training",
+      "width": 768,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "view": "progress",
+      "width": 768,
+      "overflow": false,
+      "errors": []
+    }
+  ],
+  "interactionChecks": [
+    "target recommendation mode",
+    "ordinary recommendation mode",
+    "difficulty changes chart notes",
+    "song to goal confirmation to training",
+    "no completion before explicit sync demo",
+    "sync then goal completion",
+    "dialog escape and focus return",
+    "period changes local chart",
+    "dimension label updates",
+    "dark theme",
+    "reduced motion",
+    "direct entry respects missing goal eligibility",
+    "target recommendation does not invent goal eligibility",
+    "difficulty tab keyboard navigation",
+    "no goal state has no active goal claim",
+    "mobile search opens and navigates"
+  ],
+  "portsStopped": true
+}
