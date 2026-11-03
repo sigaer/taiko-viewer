@@ -203,4 +203,4 @@ https://viewer.sakura-bot.cn/api/account/oidc/ourtaiko/callback
 
 后续需要通过安全渠道取得 Client ID/Secret、确认精确 Issuer/Discovery/JWKS、basic/post 认证方式、RS256 与 PKCE S256、`openid profile`、稳定 32 位 sub、lookup 的 emailVerified 语义、测试身份及密钥轮换安排。先在双方明确授权的测试环境验证真实 lookup 的成功/错误/限流行为，再单独安排生产迁移、反向代理回调 query 日志脱敏和开关启用。客户端 Secret 只写私有服务器环境，不放在命令行或文档中。
 
-`remote_link_status` 初始为 `not_requested`。服务器内部 `readRemoteLinkIntent(db, userId, issuer)` 提供持久且唯一的操作 ID，作为未来远端 link 请求的幂等键；同一关联的重复本地绑定不会改变该键。当前没有远端 link 调用、重试 worker、远端状态确认、解绑/撤销、远端登出或账号生命周期同步，也没有宣称双方已绑定。双方成绩、QQ、权限和历史数据的互通均不在本批范围内。
+1.2.0–1.2.1 的 `remote_link_status` 保持 `not_requested`，未调用真实远端 link。1.2.2 增加默认关闭的服务器端 link 客户端、持久审计及重新授权恢复路径，详见 [1.2.2 双端绑定与 staging 清理方案](viewer-1.2.2-ourtaiko-link.md)。稳定 operation ID 用于本地关联审计；远端幂等语义来自同一 Application 下完全一致的 OurTaiko ID 与 Viewer ID，并非新增自定义幂等请求头。该批只通过 Mock 验证，没有执行真实远端写入；解绑、反向登录、远端登出、生命周期同步及成绩/QQ/权限互通仍未实现。

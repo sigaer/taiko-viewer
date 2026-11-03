@@ -11,6 +11,7 @@ export type OidcProvider = {
   redirectUri: string;
   scopes: string[];
   endpointOrigins: string[];
+  remoteLinkEnabled: boolean;
 };
 
 const unavailable = () => createError({ statusCode: 503, statusMessage: "External login unavailable" });
@@ -49,11 +50,13 @@ export function oidcProviders(): OidcProvider[] {
       if (!Array.isArray(scopes) || !scopes.includes("openid") || scopes.length > 16 || scopes.some(s => typeof s !== "string" || !/^[\x21\x23-\x5b\x5d-\x7e]{1,64}$/.test(s))) throw unavailable();
       if (p.id === "ourtaiko" && (method === "none" || signingAlg !== "RS256" || scopes.length !== 2 || !scopes.includes("profile"))) throw unavailable();
       if (p.id === "ourtaiko" && issuer.origin !== "https://sso.ourtaiko.org" && (!["127.0.0.1", "[::1]", "localhost"].includes(issuer.hostname) || process.env.TAIKO_ALLOW_TEST_DB_MUTATION !== "1")) throw unavailable();
+      if (p.remoteLinkEnabled !== undefined && typeof p.remoteLinkEnabled !== "boolean") throw unavailable();
+      if (p.remoteLinkEnabled === true && p.id !== "ourtaiko") throw unavailable();
       const origins = p.endpointOrigins ?? [issuer.origin];
       if (!Array.isArray(origins) || !origins.length || origins.length > 8 || origins.some(o => httpsUrl(o).origin !== o)) throw unavailable();
       ids.add(p.id); issuers.add(p.issuer);
       return { id: p.id, label: typeof p.label === "string" ? p.label.slice(0, 80) : p.id, issuer: p.issuer, clientId: p.clientId,
-        clientSecret: p.clientSecret, tokenEndpointAuthMethod: method, idTokenSigningAlg: signingAlg, redirectUri: callback.href, scopes, endpointOrigins: origins };
+        clientSecret: p.clientSecret, tokenEndpointAuthMethod: method, idTokenSigningAlg: signingAlg, redirectUri: callback.href, scopes, endpointOrigins: origins, remoteLinkEnabled: p.remoteLinkEnabled === true };
     });
   } catch { throw unavailable(); }
 }

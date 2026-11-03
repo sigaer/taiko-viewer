@@ -9,7 +9,7 @@ const { accountUser } = useAccountState();
 const busy = ref("");
 const localError = ref(false);
 const scope = useAuthFormScope(() => { busy.value = ""; localError.value = false; });
-type Provider = { id: string; label: string; linked?: boolean };
+type Provider = { id: string; label: string; linked?: boolean; remoteLinkEnabled?: boolean; remoteLinkStatus?: string; remoteLinkError?: string; remoteLinkUnknown?: boolean };
 const key = computed(() => `oidc-options:${props.purpose}:${accountUser.value?.id || "guest"}`);
 const { data } = await useAsyncData(key, () => apiFetch<{ providers: Provider[] }>(
   props.purpose === "link" ? "/api/account/oidc/bindings" : "/api/account/oidc/providers"
@@ -17,7 +17,9 @@ const { data } = await useAsyncData(key, () => apiFetch<{ providers: Provider[] 
 const providers = computed(() => data.value?.providers || []);
 const copy = computed(() => locale.value === "ja" ? {
   title: props.purpose === "link" ? "外部アカウント連携" : "外部アカウントでログイン",
-  login: "でログイン", link: "を連携", linked: "連携済み",
+  login: "でログイン", link: "を連携", linked: "Viewer 連携済み",
+  notRequested: "OurTaiko 未連携", confirmed: "OurTaiko 確認済み", pending: "OurTaiko の確認待ち", unknown: "OurTaiko の結果を確認できませんでした", remoteFailed: "OurTaiko の連携を完了できませんでした", retry: "再認証して連携を確認",
+  remoteConflict: "OurTaiko の連携先が一致しません。サポートにお問い合わせください。", reauthorize: "もう一度 OurTaiko で認証してください。", applicationChanged: "連携設定が変更されました。サポートにお問い合わせください。",
   failed: "外部ログインを完了できませんでした。もう一度お試しいただくか、ユーザー名とパスワードでログインしてください。",
   conflict: "このメールアドレスは登録済みです。元のアカウントにログインしてから連携してください。",
   email: "確認済みのメールアドレスが必要です。Viewer アカウントを作成するか、既存のアカウントにログインして連携してください。",
@@ -27,7 +29,9 @@ const copy = computed(() => locale.value === "ja" ? {
   identity: "この外部アカウントは連携できません。現在のアカウントと連携状況を確認してください。"
 } : {
   title: props.purpose === "link" ? "第三方账号关联" : "使用第三方账号登录",
-  login: "登录", link: "关联", linked: "已关联",
+  login: "登录", link: "关联", linked: "Viewer 已关联",
+  notRequested: "尚未提交 OurTaiko 绑定", confirmed: "OurTaiko 已确认", pending: "待 OurTaiko 确认", unknown: "OurTaiko 绑定结果未知", remoteFailed: "OurTaiko 绑定未完成", retry: "重新授权并确认绑定",
+  remoteConflict: "OurTaiko 绑定关系冲突，请联系支持。", reauthorize: "请重新完成 OurTaiko 授权。", applicationChanged: "关联配置已变化，请联系支持。",
   failed: "第三方登录未完成。请重试，或使用用户名和密码登录。",
   conflict: "该邮箱已注册。请先登录原账号，再主动关联。",
   email: "需要已验证的邮箱。请先注册 Viewer 账号，或登录已有账号后关联。",
@@ -51,8 +55,19 @@ const label = (provider: Provider) => locale.value === "ja"
   ? `${provider.label}${props.purpose === "link" ? copy.value.link : copy.value.login}`
   : `${props.purpose === "link" ? copy.value.link : copy.value.login} ${provider.label}`;
 
+const canRetry = (provider: Provider) => provider.linked && provider.remoteLinkEnabled && provider.remoteLinkStatus !== "linked" && provider.remoteLinkError !== "application_changed";
+const remoteLabel = (provider: Provider) => {
+  if (provider.remoteLinkStatus === "linked") return copy.value.confirmed;
+  if (provider.remoteLinkStatus === "not_requested") return copy.value.notRequested;
+  if (provider.remoteLinkError === "application_changed") return copy.value.applicationChanged;
+  if (provider.remoteLinkError === "conflict") return copy.value.remoteConflict;
+  if (provider.remoteLinkError === "reauthorize") return copy.value.reauthorize;
+  if (provider.remoteLinkError === "rate_limited") return copy.value.rateLimited;
+  if (provider.remoteLinkUnknown) return copy.value.unknown;
+  return provider.remoteLinkStatus === "failed" ? copy.value.remoteFailed : copy.value.pending;
+};
 async function start(provider: Provider) {
-  if (busy.value || provider.linked) return;
+  if (busy.value || (provider.linked && !canRetry(provider))) return;
   const ticket = scope.capture();
   busy.value = provider.id; localError.value = false;
   try {
@@ -72,7 +87,8 @@ async function start(provider: Provider) {
     <div class="oidc-provider-list">
       <div v-for="provider in providers" :key="provider.id" class="oidc-provider">
         <span v-if="provider.linked" class="oidc-linked">{{ provider.label }} · {{ copy.linked }}</span>
-        <el-button v-else :loading="busy === provider.id" :disabled="Boolean(busy)" @click="start(provider)">{{ label(provider) }}</el-button>
+        <p v-if="provider.linked && (provider.remoteLinkEnabled || provider.remoteLinkStatus !== 'not_requested')" class="oidc-remote" role="status">{{ remoteLabel(provider) }}</p>
+        <el-button v-if="!provider.linked || canRetry(provider)" :loading="busy === provider.id" :disabled="Boolean(busy)" @click="start(provider)">{{ provider.linked ? copy.retry : label(provider) }}</el-button>
       </div>
     </div>
   </section>

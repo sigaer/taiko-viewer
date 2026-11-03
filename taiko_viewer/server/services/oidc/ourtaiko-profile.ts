@@ -18,7 +18,7 @@ export function assertOurTaikoSubject(sub: unknown): asserts sub is string {
   if (typeof sub !== "string" || !/^[0-9a-f]{32}$/.test(sub)) throw new OurTaikoProfileError();
 }
 
-async function lookupTarget(provider: OidcProvider) {
+export async function ourTaikoTarget(provider: OidcProvider, operation: "lookup" | "link") {
   const issuer = httpsUrl(provider.issuer);
   if (issuer.origin !== OURTAIKO_ORIGIN) {
     // Local mock support is gated by actual test DB identity, not a URL override
@@ -27,13 +27,13 @@ async function lookupTarget(provider: OidcProvider) {
     const [rows] = await getAccountDb().query<DbRow<{ name: string }>[]>("SELECT DATABASE() AS name");
     if (!rows[0]?.name?.endsWith("_test")) throw new OurTaikoProfileError();
   }
-  return new URL("/internal/v1/external/lookup", issuer.origin);
+  return new URL(`/internal/v1/external/${operation}`, issuer.origin);
 }
 
-const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
-const exactKeys = (value: Record<string, unknown>, keys: string[]) => Object.keys(value).length === keys.length && keys.every(k => Object.hasOwn(value, k));
+export const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+export const exactKeys = (value: Record<string, unknown>, keys: string[]) => Object.keys(value).length === keys.length && keys.every(k => Object.hasOwn(value, k));
 
-async function readJson(response: Response): Promise<unknown> {
+export async function readOurTaikoJson(response: Response): Promise<unknown> {
   if (!/^application\/json(?:\s*;|$)/i.test(response.headers.get("content-type") || "") || !response.body) {
     await response.body?.cancel().catch(() => {});
     throw new OurTaikoProfileError();
@@ -62,13 +62,13 @@ export async function lookupOurTaikoProfile(provider: OidcProvider, verifiedSubj
   try {
     assertOurTaikoSubject(verifiedSubject);
     if (provider.id !== "ourtaiko" || !provider.clientSecret || provider.tokenEndpointAuthMethod === "none") throw new OurTaikoProfileError();
-    const target = await lookupTarget(provider);
+    const target = await ourTaikoTarget(provider, "lookup");
     const response = await fetch(target, {
       method: "POST", redirect: "error", credentials: "omit", cache: "no-store",
       headers: { "content-type": "application/json; charset=utf-8", accept: "application/json", "x-service-id": provider.clientId, "x-service-key": provider.clientSecret },
       body: JSON.stringify({ id: verifiedSubject }), signal: AbortSignal.timeout(OURTAIKO_LOOKUP_TIMEOUT_MS)
     });
-    const payload = await readJson(response);
+    const payload = await readOurTaikoJson(response);
     if (!object(payload) || !exactKeys(payload, ["code", "message", "data"]) || typeof payload.code !== "string" || typeof payload.message !== "string") throw new OurTaikoProfileError();
     if (response.status !== 200) {
       const errors: Record<string, number> = { REQUEST_INVALID: 400, SERVICE_UNAUTHORIZED: 401, SERVICE_FORBIDDEN: 403, NOT_FOUND: 404, EMAIL_UNVERIFIED: 409, ALREADY_LINKED: 409, RATE_LIMITED: 429, UNAVAILABLE: 503 };

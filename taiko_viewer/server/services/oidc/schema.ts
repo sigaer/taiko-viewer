@@ -33,5 +33,23 @@ export const OIDC_TABLES = [
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_oidc_expiry (expires_at),
     CONSTRAINT fk_oidc_target FOREIGN KEY (target_user_id) REFERENCES web_user_accounts(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  // Intentionally no cascading FK: audit evidence must survive account removal.
+  // The immutable pair is persisted before any remote write; never store tokens.
+  `CREATE TABLE IF NOT EXISTS web_oidc_remote_link_attempts (
+    attempt_id CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+    operation_id CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    issuer VARBINARY(512) NOT NULL,
+    subject VARBINARY(255) NOT NULL,
+    service_id VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    external_id VARCHAR(20) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    outcome VARCHAR(16) NOT NULL,
+    error_code VARCHAR(32) DEFAULT NULL,
+    retry_at DATETIME DEFAULT NULL,
+    lease_until DATETIME NOT NULL,
+    remote_linked_at VARCHAR(40) DEFAULT NULL,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_remote_operation (operation_id, created_at)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ];

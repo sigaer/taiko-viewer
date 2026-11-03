@@ -12,6 +12,7 @@ import { client, discoverOidc } from "./protocol";
 import { OIDC_TABLES } from "./schema";
 import { type AccountEmailProfile, profileFromIdToken } from "./account-profile";
 import { assertOurTaikoSubject, lookupOurTaikoProfile, OurTaikoProfileError } from "./ourtaiko-profile";
+import { completeOurTaikoLink } from "./remote-link";
 
 type FailureCode = "invalid_transaction" | "session_changed" | "email_required" | "email_conflict" | "identity_conflict" | "provider_unavailable";
 class OidcFailure extends Error {
@@ -41,12 +42,18 @@ export async function oidcBindingStatus(event: H3Event) {
   if (!providers.length) return { providers: [] };
   const user = await requireAccountUser(event);
   await schema();
-  const [rows] = await getAccountDb().execute<DbRow<{ issuer: Buffer; status: string; remote_link_status: string }>[]>(
-    "SELECT issuer, status, remote_link_status FROM web_external_identities WHERE user_id = ?", [user.id]
+  const [rows] = await getAccountDb().execute<DbRow<{ issuer: Buffer; status: string; remote_link_status: string; error_code: string | null; outcome: string | null; lease_expired: number | null; service_id: string | null }>[]>(
+    `SELECT i.issuer, i.status, i.remote_link_status, a.error_code, a.outcome, a.lease_until<=NOW() lease_expired, a.service_id FROM web_external_identities i
+      LEFT JOIN web_oidc_remote_link_attempts a ON a.attempt_id=(SELECT attempt_id FROM web_oidc_remote_link_attempts
+        WHERE operation_id=i.remote_link_operation_id ORDER BY created_at DESC, attempt_id DESC LIMIT 1) WHERE i.user_id = ?`, [user.id]
   );
-  return { providers: providers.map(({ id, label, issuer }) => {
+  return { providers: providers.map(({ id, label, issuer, clientId, remoteLinkEnabled }) => {
     const row = rows.find(r => r.issuer.toString("utf8") === issuer);
-    return { id, label, linked: row?.status === "active", remoteLinkStatus: row?.remote_link_status || "not_requested" };
+    const changed = row?.service_id && row.service_id !== clientId;
+    return { id, label, linked: row?.status === "active", remoteLinkEnabled,
+      remoteLinkStatus: changed ? "failed" : row?.remote_link_status || "not_requested",
+      remoteLinkError: changed ? "application_changed" : row?.error_code || null,
+      remoteLinkUnknown: row?.outcome === "unknown" || (row?.outcome === "pending" && Boolean(row.lease_expired)) };
   }) };
 }
 
@@ -100,12 +107,13 @@ async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transa
   if (fingerprint(oidcProvider(provider.id)) !== tx.config_hash) throw new OidcFailure("invalid_transaction");
   const db = await getAccountDb().getConnection();
   let newSession: Awaited<ReturnType<typeof createAccountSession>> | undefined;
+  let userId: number | undefined;
   try {
     await db.beginTransaction();
     await assertStartingSession(db, event, tx);
     const [identities] = await db.execute<DbRow<{ user_id: number; status: string }>[]>(
       "SELECT user_id, status FROM web_external_identities WHERE issuer = ? AND subject = ? FOR UPDATE", [provider.issuer, sub]);
-    let userId = identities[0]?.user_id;
+    userId = identities[0]?.user_id;
     if (identities.length) {
       if (identities[0].status !== "active" || (tx.purpose === "link" && userId !== tx.target_user_id)) throw new OidcFailure("identity_conflict");
     } else {
@@ -139,7 +147,7 @@ async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transa
     if (["ER_DUP_ENTRY", "ER_LOCK_DEADLOCK", "ER_LOCK_WAIT_TIMEOUT"].includes(error?.code)) throw new OidcFailure("identity_conflict");
     throw error;
   } finally { db.release(); }
-  if (newSession) setAccountSessionCookie(event, newSession);
+  return { userId: userId!, newSession };
 }
 
 export async function callbackOidc(event: H3Event) {
@@ -147,6 +155,7 @@ export async function callbackOidc(event: H3Event) {
   // Disabled/unknown providers fail before DB access or any account/session changes.
   const provider = oidcProvider(getRouterParam(event, "provider") || "");
   let tx: Transaction | undefined;
+  let issuedSession: Awaited<ReturnType<typeof createAccountSession>> | undefined;
   try {
     await schema();
     const incoming = new URL(event.node.req.url || "", new URL(provider.redirectUri).origin);
@@ -193,10 +202,33 @@ export async function callbackOidc(event: H3Event) {
         : [[]];
       profile = existing.length ? null : await lookupOurTaikoProfile(provider, sub);
     } else profile = profileFromIdToken(claims);
-    await finishIdentity(event, provider, tx, sub, profile);
+    const identity = await finishIdentity(event, provider, tx, sub, profile);
+    issuedSession = identity.newSession;
+    const remoteStatus = await completeOurTaikoLink(provider, identity.userId, sub, async connection => {
+      if (fingerprint(oidcProvider(provider.id)) !== tx!.config_hash) throw new OidcFailure("invalid_transaction");
+      await assertStartingSession(connection, event, tx!);
+    });
+    // Remote HTTP never controls the target account or changes local identity.
+    // Do not deliver a newly issued Session after logout during that request.
+    const finalCheck = await db.getConnection();
+    try {
+      await finalCheck.beginTransaction();
+      if (fingerprint(oidcProvider(provider.id)) !== tx.config_hash) throw new OidcFailure("invalid_transaction");
+      await assertStartingSession(finalCheck, event, tx);
+      if (issuedSession) {
+        const [sessions] = await finalCheck.execute<DbRow<{ user_id: number }>[]>("SELECT user_id FROM web_user_sessions WHERE session_token=? AND expires_at>NOW() FOR UPDATE", [issuedSession.sessionToken]);
+        if (sessions[0]?.user_id !== identity.userId) throw new OidcFailure("session_changed");
+      }
+      await finalCheck.commit();
+    } catch (error) { await finalCheck.rollback(); throw error; }
+    finally { finalCheck.release(); }
+    if (issuedSession) setAccountSessionCookie(event, issuedSession);
+    issuedSession = undefined;
     // Access/refresh/ID tokens are request-local only and never persisted or returned.
-    return sendRedirect(event, safeOidcReturnPath(tx.return_path), 303);
+    return sendRedirect(event, provider.remoteLinkEnabled && remoteStatus !== "linked"
+      ? `${tx.locale === "ja" ? "/ja" : ""}/account/profile` : safeOidcReturnPath(tx.return_path), 303);
   } catch (error) {
+    if (issuedSession) await getAccountDb().execute("DELETE FROM web_user_sessions WHERE session_token=?", [issuedSession.sessionToken]).catch(() => {});
     // Deliberately do not log protocol errors: providers can embed codes/tokens.
     const code = error instanceof OidcFailure || error instanceof OurTaikoProfileError ? error.code : "provider_unavailable";
     if (error instanceof OurTaikoProfileError && error.retryAfter !== undefined) setHeader(event, "retry-after", String(error.retryAfter));

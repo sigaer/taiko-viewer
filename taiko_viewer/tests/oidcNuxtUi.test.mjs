@@ -47,12 +47,13 @@ test('built Nuxt OIDC disabled and enabled pages in zh/ja at 375, 414 and deskto
       await until(async () => { try { await fetch(base + '/api/account/auth/me', { signal: AbortSignal.timeout(300) }); return false; } catch { return true; } }, 3000);
       await log.close(); log = null;
     }
-    async function start(enabled) {
+    async function start(enabled, our = false) {
       await stop();
       const listener = createServer(); listener.listen(0, '127.0.0.1'); await once(listener, 'listening');
       const port = listener.address().port; await new Promise(r => listener.close(r)); base = `http://127.0.0.1:${port}`;
-      log = await open(resolve(E, `oidc-ui-nuxt-${enabled}.log`), 'w', 0o600);
+      log = await open(resolve(E, `oidc-ui-nuxt-${enabled}${our ? "-ourtaiko" : ""}.log`), 'w', 0o600);
       const providers = [{ id: 'mock', label: 'Synthetic OIDC', enabled: true, issuer: 'https://127.0.0.1:1', clientId: 'viewer-test', redirectUri: 'https://viewer.example/api/account/oidc/mock/callback' }];
+      if (our) Object.assign(providers[0], { id: 'ourtaiko', label: 'OurTaiko', clientSecret: 'synthetic-ui-only', remoteLinkEnabled: true, redirectUri: 'https://viewer.example/api/account/oidc/ourtaiko/callback' });
       host = spawn(process.execPath, [new URL('../.output/server/index.mjs', import.meta.url).pathname], {
         cwd: root, env: { ...env, NITRO_HOST: '127.0.0.1', NITRO_PORT: String(port), NUXT_OIDC_ENABLED: enabled ? '1' : 'false', NUXT_OIDC_PROVIDERS_JSON: JSON.stringify(providers) }, stdio: ['ignore', log.fd, log.fd]
       });
@@ -125,6 +126,42 @@ test('built Nuxt OIDC disabled and enabled pages in zh/ja at 375, 414 and deskto
         if (enabled) assert.equal(await page.locator('.oidc-options button').count(), 1);
         await page.screenshot({ path: resolve(E, `oidc-${enabled}-${locale}-${width}-profile.png`) });
         cases.push({ enabled, locale, width, page: 'profile', overflow: false });
+      }
+      if (enabled) {
+        await start(true, true);
+        await context.addCookies([{ name: 'stv_session', value: session, url: base }]);
+        const operation = randomBytes(32).toString('hex');
+        await pool.execute(`INSERT INTO web_external_identities(user_id,provider_id,issuer,subject,status,remote_link_operation_id)
+          VALUES (?,'ourtaiko','https://127.0.0.1:1',?,'active',?)`, [user.insertId,'0'.repeat(31)+'1',operation]);
+        const attempt = randomBytes(32).toString('hex');
+        await pool.execute(`INSERT INTO web_oidc_remote_link_attempts(attempt_id,operation_id,issuer,subject,service_id,external_id,outcome,lease_until)
+          VALUES (?,?, 'https://127.0.0.1:1',?,'viewer-test',?,'pending',NOW())`,[attempt,operation,'0'.repeat(31)+'1',String(user.insertId)]);
+        for (const [status,outcome,error] of [['not_requested','pending',null],['pending','pending',null],['pending','unknown','transport_unknown'],['failed','failed','conflict'],['failed','failed','reauthorize'],['failed','failed','rate_limited'],['failed','failed','application_changed'],['linked','linked',null]]) {
+          await pool.execute('UPDATE web_external_identities SET remote_link_status=? WHERE remote_link_operation_id=?',[status,operation]);
+          await pool.execute('UPDATE web_oidc_remote_link_attempts SET outcome=?,error_code=? WHERE attempt_id=?',[outcome,error,attempt]);
+          for(const locale of ['zh','ja']) for(const width of [375,414,1280]) {
+            await page.setViewportSize({width,height:900});
+            await page.goto(base+(locale==='ja'?'/ja':'')+'/account/profile',{waitUntil:'networkidle',timeout:25000});
+            const section=page.locator('.oidc-options'); await section.locator('.oidc-linked').waitFor();
+            assert.match(await section.locator('.oidc-linked').innerText(),/Viewer/);
+            assert.ok((await section.locator('[role=status]').innerText()).length>0);
+            const retry=section.locator('button');
+            assert.equal(await retry.count(),status==='linked'||error==='application_changed'?0:1);
+            if(await retry.count()) { assert.ok((await retry.boundingBox()).height>=44);assert.match(await retry.innerText(),locale==='ja'?/再認証/:/重新授权/); }
+            assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+            if(width===375&&locale==='zh'&&status==='pending'&&outcome==='unknown') {
+              await page.screenshot({path:resolve(E,'ourtaiko-link-unknown-zh-375.png')});
+              const requestPromise=page.waitForRequest(r=>new URL(r.url()).pathname==='/api/account/oidc/ourtaiko/start');
+              await retry.focus();await page.keyboard.press('Enter');const request=await requestPromise;
+              assert.equal(request.method(),'POST');assert.equal(request.postDataJSON().purpose,'link');
+              assert.equal(Object.hasOwn(request.postDataJSON(),'externalId'),false);
+              await section.locator('[role=alert]').waitFor();assert.equal(await retry.isEnabled(),true);
+              cases.push({enabled:true,locale,width,page:'remote-link-retry',keyboard:true,sessionOnlyLinkEndpoint:false});
+            }
+            if(width===375&&locale==='ja'&&status==='linked') await page.screenshot({path:resolve(E,'ourtaiko-link-confirmed-ja-375.png')});
+            cases.push({enabled:true,locale,width,page:'remote-link-state',status,outcome,error,overflow:false});
+          }
+        }
       }
       await context.clearCookies();
     }

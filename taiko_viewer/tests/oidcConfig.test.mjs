@@ -12,7 +12,7 @@ test('OIDC registry fails closed and requires server configured HTTPS and exact 
     assert.equal(oidcProviders()[0].issuer, provider.issuer);
     config.oidcEnabled = 1; config.oidcProvidersJson = [provider];
     assert.equal(oidcProviders()[0].issuer, provider.issuer, 'Nitro-parsed runtime environment values');
-    for (const changes of [{ issuer: 'http://issuer.example' }, { redirectUri: 'http://viewer.example/api/account/oidc/mock/callback' }, { redirectUri: provider.redirectUri + '?next=x' }, { redirectUri: 'https://viewer.example/callback' }, { scopes: ['email'] }, { id: '../other' }, { id: ['mock'] }, { clientSecret: 42 }, { endpointOrigins: ['https://issuer.example/path'] }, { tokenEndpointAuthMethod: 'client_secret_basic' }]) {
+    for (const changes of [{ issuer: 'http://issuer.example' }, { redirectUri: 'http://viewer.example/api/account/oidc/mock/callback' }, { redirectUri: provider.redirectUri + '?next=x' }, { redirectUri: 'https://viewer.example/callback' }, { scopes: ['email'] }, { id: '../other' }, { id: ['mock'] }, { clientSecret: 42 }, { remoteLinkEnabled: true }, { remoteLinkEnabled: 'true' }, { endpointOrigins: ['https://issuer.example/path'] }, { tokenEndpointAuthMethod: 'client_secret_basic' }]) {
       config.oidcProvidersJson = JSON.stringify([{ ...provider, ...changes }]);
       assert.throws(() => oidcProviders());
     }
@@ -37,6 +37,9 @@ test('OurTaiko uses confidential RS256 openid profile and only official or opted
   globalThis.useRuntimeConfig = () => config;
   try {
     assert.deepEqual(oidcProviders()[0].scopes, ['openid', 'profile']);
+    assert.equal(oidcProviders()[0].remoteLinkEnabled, false);
+    config.oidcProvidersJson = [{ ...our, remoteLinkEnabled: true }];
+    assert.equal(oidcProviders()[0].remoteLinkEnabled, true);
     assert.equal(oidcProviders()[0].tokenEndpointAuthMethod, 'client_secret_basic');
     for (const changes of [{ scopes: ['openid', 'email', 'profile'] }, { scopes: ['openid'] }, { scopes: ['openid', 'profile', 'offline_access'] }, { clientSecret: undefined }, { tokenEndpointAuthMethod: 'none' }, { idTokenSigningAlg: 'ES256' }, { issuer: 'https://untrusted.invalid' }]) {
       config.oidcProvidersJson = [{ ...our, ...changes }]; assert.throws(() => oidcProviders());

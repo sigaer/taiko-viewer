@@ -10,7 +10,7 @@ import { SignJWT } from 'jose';
 import { createApp, createRouter, defineEventHandler, toNodeListener } from 'h3';
 import { installGoalSqlRuntime } from './fixtures/goalSqlRuntime.mjs';
 
-test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 }, async () => {
+test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 }, async () => {
   assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION, '1');
   const scratch = await realpath(process.env.QA_RUN_TMPDIR);
   const socket = resolve(scratch, 'community-mysql.sock');
@@ -31,6 +31,9 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
   let lookupServiceKey = ourSecret, lookupReply = {}, lookupGate, lookupRequests = 0, lookupAuthFailures = 0, lookupRedirectsFollowed = 0;
   const lookupInvariantFailures = [], lookupCases = [];
   const checks = [];
+  let linkRequests = 0, linkReply = {}, linkGate;
+  const remotePairs = new Map(), linkCases = [], freshSubjects = new Set(), linkInvariantFailures = [];
+
   try {
     const [[host]] = await admin.query('SELECT @@datadir dir');
     assert.equal(await realpath(host.dir), resolve(scratch, 'community-mysql-data'));
@@ -61,6 +64,38 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
           code_challenge_methods_supported: ['S256'], token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'client_secret_post'], ...metadataOverride
         }));
         if (url.pathname === '/redirect-must-not-be-followed') { lookupRedirectsFollowed++; res.statusCode = 400; return res.end('{}'); }
+        if (url.pathname === '/internal/v1/external/link') {
+          linkRequests++;
+          const reply = linkReply;
+          let body = ''; for await (const chunk of req) { body += chunk; assert.ok(body.length < 32768); }
+          const input = JSON.parse(body);
+          try {
+            assert.equal(req.method, 'POST'); assert.equal(url.search, '');
+            assert.match(req.headers['content-type'], /^application\/json(?:;|$)/);
+            assert.equal(req.headers.origin, undefined); assert.equal(req.headers.cookie, undefined); assert.equal(req.headers.authorization, undefined);
+            assert.deepEqual(Object.keys(input), ['id', 'externalId']); assert.match(input.id, /^[0-9a-f]{32}$/); assert.match(input.externalId, /^[1-9][0-9]{0,19}$/);
+            assert.equal(req.headers['x-service-id'], 'viewer-test'); assert.ok(req.headers['x-service-key'] === ourSecret, 'synthetic link service authentication');
+            assert.ok(!['client_id', 'client_secret', 'code', 'access_token', 'id_token'].some(k => url.searchParams.has(k) || Object.hasOwn(input, k)));
+          } catch { linkInvariantFailures.push('link request contract violation'); throw Error('Mock link contract invalid'); }
+          if (linkGate) await linkGate;
+          const previous = remotePairs.get(input.id);
+          if (reply.expireBeforeCheck) freshSubjects.delete(input.id);
+          if (reply.stall) return;
+          if (reply.status) {
+            res.statusCode = reply.status;
+            if (reply.retryAfter) res.setHeader('retry-after', reply.retryAfter);
+            return res.end(JSON.stringify({ code: reply.code, message: 'private upstream detail', data: null }));
+          }
+          if ((previous && previous.externalId !== input.externalId) || [...remotePairs.values()].some(p => p.externalId === input.externalId && p.id !== input.id)) {
+            res.statusCode = 409; return res.end(JSON.stringify({ code: 'ALREADY_LINKED', message: '', data: null }));
+          }
+          if (!previous && !freshSubjects.has(input.id)) { res.statusCode = 404; return res.end(JSON.stringify({ code: 'NOT_FOUND', message: '', data: null })); }
+          const data = previous || { ...input, linkedAt: '2026-11-03T01:02:03Z' }; remotePairs.set(input.id, data);
+          if (reply.dropOnce) { linkReply = {}; req.socket.destroy(); return; }
+          if (reply.raw !== undefined) return res.end(reply.raw);
+          if (reply.redirect) { res.writeHead(302, { location: reply.redirect }); return res.end(); }
+          return res.end(JSON.stringify(reply.body ?? { code: 'OK', message: '', data: { ...data, ...reply.patch } }));
+        }
         if (url.pathname === '/internal/v1/external/lookup') {
           lookupRequests++;
           res.setHeader('cache-control', 'no-store');
@@ -116,6 +151,7 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
           if (exchangeGate) await exchangeGate;
           const claims = { ...(record.isOur ? { sub: ourSubject(1) } : { sub: 'subject-default', email: 'new@example.invalid', email_verified: true }), nonce: record.request.get('nonce'), ...record.claims };
           if (record.isOur) assert.ok(!Object.hasOwn(claims, 'email') && !Object.hasOwn(claims, 'email_verified'), 'OurTaiko ID Token has no email claims');
+          if (record.isOur) freshSubjects.add(claims.sub);
           const token = await new SignJWT(claims).setProtectedHeader({ alg: 'RS256', kid: 'test-key' }).setIssuer(record.issuer || providerOrigin)
             .setAudience(record.audience || 'viewer-test').setIssuedAt().setExpirationTime(record.expiry || '5m').sign(record.badSignature ? wrongKeys.privateKey : keys.privateKey);
           return res.end(JSON.stringify({ access_token: 'synthetic-access-token', token_type: 'Bearer', expires_in: 300, id_token: token }));
@@ -146,7 +182,7 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
     const configure = (changes = {}) => { runtime.oidcEnabled = true; runtime.oidcProvidersJson = JSON.stringify([{ ...provider, ...changes }]); };
     const ask = (path, { cookie = '', body, origin = viewerOrigin, method = body ? 'POST' : 'GET' } = {}) => fetch(viewerOrigin + path, {
       method, redirect: 'manual', headers: { cookie, origin, 'x-forwarded-proto': 'https', ...(body ? { 'content-type': 'application/json' } : {}) },
-      ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000)
+      ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(35000)
     });
     const sessionCookie = res => res.headers.getSetCookie().find(c => c.startsWith('stv_session='))?.split(';')[0];
     async function begin({ cookie, purpose = 'login', redirect = '/songs/42', locale = 'zh', providerId = 'mock' } = {}) {
@@ -481,6 +517,168 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 120000 
       requestContract: 'POST JSON id only, X-Service-ID/Key from server OIDC config, no Origin/Cookie/Authorization/OAuth parameters, fixed local issuer origin',
       redirectsFollowed: lookupRedirectsFollowed, emailInIdToken: false, profileSource: 'ourtaiko_external_lookup', writeTransactionDuringNetwork: false,
       remoteLinkStatus: 'not_requested', productionConnections: 0, realOurTaikoRequests: 0, credentialsRecorded: false }, null, 2) + '\n');
+    assert.equal(linkRequests, 0, 'existing real-login configuration never implicitly enables link');
+    assert.equal(await count('web_oidc_remote_link_attempts'), 0);
+    const note = name => linkCases.push({ name, pass: true });
+    const linkState = async sub => {
+      const [[row]] = await pool.execute(`SELECT CAST(user_id AS CHAR) externalId, remote_link_status status, remote_link_operation_id operationId
+        FROM web_external_identities WHERE issuer=? AND subject=?`, [providerOrigin, sub]); return row;
+    };
+    const attemptsFor = async sub => (await pool.execute('SELECT * FROM web_oidc_remote_link_attempts WHERE subject=? ORDER BY created_at,attempt_id', [sub]))[0];
+    const linkBegin = async (sub, options = {}) => ourBegin(options, sub);
+    configureOur({ remoteLinkEnabled: true });
+    const firstLinkedSub = ourSubject(ourIndex++), beforeFirstLink = await snapshot();
+    const remoteFirst = await complete(await linkBegin(firstLinkedSub)); const remoteCookie = sessionCookie(remoteFirst); assert.ok(remoteCookie);
+    const firstLinkState = await linkState(firstLinkedSub);
+    assert.equal(firstLinkState.status, 'linked'); assert.equal(remotePairs.get(firstLinkedSub).externalId, firstLinkState.externalId);
+    assert.deepEqual(await snapshot(), beforeFirstLink.map(n => n + 1));
+    assert.equal((await attemptsFor(firstLinkedSub))[0].outcome, 'linked');
+    note('fresh OIDC, lookup, first local account/session and exact remote pair confirmed');
+    const beforeRepeated = linkRequests;
+    await complete(await linkBegin(firstLinkedSub));
+    assert.equal(linkRequests, beforeRepeated); assert.equal((await linkState(firstLinkedSub)).operationId, firstLinkState.operationId);
+    note('repeated same-account authorization preserves account/operation and skips already confirmed remote link');
+    // Real remote success followed by a lost local confirmation: durable lease survives.
+    const lostSub = ourSubject(ourIndex++), getConnection = pool.getConnection.bind(pool);
+    let failConfirmation = true;
+    pool.getConnection = async (...args) => {
+      const connection = await getConnection(...args), execute = connection.execute.bind(connection);
+      connection.execute = async (sql, args) => {
+        if (failConfirmation && sql.startsWith('UPDATE web_oidc_remote_link_attempts SET outcome=?')) { failConfirmation = false; throw Error('Synthetic local confirmation failure'); }
+        return execute(sql, args);
+      };
+      return connection;
+    };
+    const lostResult = await complete(await linkBegin(lostSub), '/account/profile'); assert.ok(sessionCookie(lostResult));
+    pool.getConnection = getConnection;
+    assert.equal(remotePairs.has(lostSub), true); assert.equal((await linkState(lostSub)).status, 'pending');
+    assert.equal((await attemptsFor(lostSub))[0].outcome, 'pending');
+    const lostOperation = (await linkState(lostSub)).operationId;
+    const beforeLeaseRetry = linkRequests; await complete(await linkBegin(lostSub), '/account/profile'); assert.equal(linkRequests, beforeLeaseRetry);
+    await pool.execute('UPDATE web_oidc_remote_link_attempts SET lease_until=DATE_SUB(NOW(),INTERVAL 1 SECOND) WHERE operation_id=?', [lostOperation]);
+    const lostReplay = await linkBegin(lostSub); linkReply = { expireBeforeCheck: true };
+    await complete(lostReplay); linkReply = {}; assert.equal((await linkState(lostSub)).status, 'linked');
+    assert.equal((await linkState(lostSub)).operationId, lostOperation);
+    assert.deepEqual((await attemptsFor(lostSub)).map(a => a.outcome), ['unknown', 'linked']);
+    note('remote commit/local confirmation failure, live lease exclusion, stale lease recovery and same-pair idempotency');
+    const dropSub = ourSubject(ourIndex++), beforeDrop = linkRequests; linkReply = { dropOnce: true };
+    await complete(await linkBegin(dropSub)); assert.equal(linkRequests, beforeDrop + 2); assert.equal((await linkState(dropSub)).status, 'linked');
+    assert.deepEqual((await attemptsFor(dropSub)).map(a => a.outcome), ['unknown', 'linked']);
+    note('remote committed then connection lost: one bounded identical-pair retry confirms result');
+    for (const [status, code, safe] of [[409,'ALREADY_LINKED','conflict'],[404,'NOT_FOUND','reauthorize'],[429,'RATE_LIMITED','rate_limited'],[401,'SERVICE_UNAUTHORIZED','service_rejected'],[403,'SERVICE_FORBIDDEN','service_rejected'],[400,'REQUEST_INVALID','request_rejected'],[503,'UNAVAILABLE','unavailable']]) {
+      const sub = ourSubject(ourIndex++); linkReply = { status, code, retryAfter: '12' };
+      const before = linkRequests, result = await complete(await linkBegin(sub), '/account/profile');
+      const cookie = sessionCookie(result); assert.ok(cookie, 'valid local OIDC login remains usable on remote failure');
+      const state = await linkState(sub), attempts = await attemptsFor(sub);
+      assert.equal(state.status, status === 503 ? 'pending' : 'failed'); assert.equal(attempts.at(-1).error_code, safe);
+      assert.equal(linkRequests, before + (status === 503 ? 2 : 1));
+      const binding = (await (await ask('/api/account/oidc/bindings', { cookie })).json()).providers[0];
+      assert.equal(binding.linked, true); assert.equal(binding.remoteLinkStatus, state.status); assert.equal(binding.remoteLinkError, safe);
+      assert.ok(!JSON.stringify(binding).includes('private upstream detail'));
+      if (status === 429) {
+        const calls = linkRequests; await complete(await linkBegin(sub), '/account/profile'); assert.equal(linkRequests, calls, 'cooldown persists across OIDC retries');
+        await pool.execute('UPDATE web_oidc_remote_link_attempts SET retry_at=DATE_SUB(NOW(),INTERVAL 1 SECOND) WHERE operation_id=?', [state.operationId]);
+      }
+      linkReply = {}; await complete(await linkBegin(sub)); assert.equal((await linkState(sub)).status, 'linked');
+      note(code + ': stable safe status, no merge, recover after fresh authorization');
+    }
+    for (const [name, reply] of [
+      ['malformed JSON', { raw: '{invalid' }], ['oversized response', { raw: ' '.repeat(32769) }],
+      ['mismatched ID', { body: { code:'OK',message:'',data:{id:ourSubject(99999),externalId:'1',linkedAt:'2026-11-03T01:02:03Z'} } }],
+      ['wrong externalId type', { patch: { externalId: 1 } }],
+      ['different externalId string', { patch: { externalId: '99999999' } }],
+      ['wrong ID type', { patch: { id: 42 } }],
+      ['invalid linkedAt', { patch: { linkedAt: 'not-a-time' } }],
+      ['missing linkedAt', { body: { code:'OK',message:'',data:{id:ourSubject(99999),externalId:'1'} } }],
+      ['redirect rejected', { redirect: providerOrigin + '/redirect-must-not-be-followed' }], ['network timeout', { stall: true }]
+    ]) {
+      const sub = ourSubject(ourIndex++); linkReply = reply; const before = linkRequests;
+      const response = await complete(await linkBegin(sub), '/account/profile'); assert.ok(sessionCookie(response));
+      assert.equal(linkRequests, before + 2); assert.equal((await linkState(sub)).status, 'pending');
+      assert.equal((await attemptsFor(sub)).at(-1).outcome, 'unknown');
+      linkReply = {}; await complete(await linkBegin(sub)); assert.equal((await linkState(sub)).status, 'linked'); note(name + ': unknown retained and safely recoverable');
+    }
+    // Existing local identity -> same owner actively authorizes. No new account or Session.
+    const activeBefore = await snapshot();
+    await complete(await linkBegin(ourSubject(1), { cookie: ourCookie, purpose:'link',redirect:'/account/profile' }), '/account/profile');
+    assert.deepEqual(await snapshot(), activeBefore); assert.equal((await linkState(ourSubject(1))).status, 'linked');
+    note('active binding only targets current Session owner and preserves local account/session');
+    const replayLink = await linkBegin(firstLinkedSub); await complete(replayLink); const replayCalls = linkRequests;
+    await unchangedFailure(replayLink, '/account/login?oidc_error=invalid_transaction'); assert.equal(linkRequests, replayCalls);
+    for (const fault of ['nonce','signature','state']) {
+      const f = await linkBegin(ourSubject(ourIndex++));
+      if (fault === 'nonce') f.record.claims.nonce = 'wrong';
+      if (fault === 'signature') f.record.badSignature = true;
+      if (fault === 'state') f.callback.searchParams.set('state', randomBytes(24).toString('hex'));
+      const calls = linkRequests; await unchangedFailure(f, '/account/login?oidc_error='+(fault==='state'?'invalid_transaction':'provider_unavailable')); assert.equal(linkRequests,calls);
+    }
+    note('replay, bad state/nonce/signature cannot send remote requests');
+    const switched = await linkBegin(firstLinkedSub, { cookie: remoteCookie, purpose:'link' }); switched.cookie=switched.cookie.replace(remoteCookie,ourCookie);
+    const beforeSwitch = linkRequests; await unchangedFailure(switched,'/account/profile?oidc_error=session_changed'); assert.equal(linkRequests,beforeSwitch);
+    const conflict = await linkBegin(firstLinkedSub,{cookie:ourCookie,purpose:'link'}); await unchangedFailure(conflict,'/account/profile?oidc_error=identity_conflict'); assert.equal(linkRequests,beforeSwitch);
+    note('Session switch and conflicting local identity rejected before remote write');
+    // Concurrent callbacks for one durable pair: lease permits one HTTP request.
+    const concurrentSub = ourSubject(ourIndex++); configureOur();
+    const concurrentCookie = sessionCookie(await complete(await linkBegin(concurrentSub))); configureOur({remoteLinkEnabled:true});
+    const concurrentA = await linkBegin(concurrentSub,{cookie:concurrentCookie,purpose:'link'}), concurrentB = await linkBegin(concurrentSub,{cookie:concurrentCookie,purpose:'link'});
+    let releaseLink; linkGate = new Promise(r=>{releaseLink=r;}); const concurrentCalls=linkRequests;
+    const pendingLink=ask(concurrentA.callback.pathname+concurrentA.callback.search,{cookie:concurrentA.cookie});
+    for(let i=0;i<200&&linkRequests===concurrentCalls;i++) await new Promise(r=>setTimeout(r,10));
+    assert.equal(linkRequests,concurrentCalls+1);
+    await complete(concurrentB,'/account/profile'); assert.equal(linkRequests,concurrentCalls+1);
+    const sessionLocker=await pool.getConnection();
+    try { await sessionLocker.query('SET innodb_lock_wait_timeout=1'); await sessionLocker.beginTransaction();
+      await sessionLocker.execute('SELECT user_id FROM web_user_sessions WHERE session_token=? FOR UPDATE',[concurrentCookie.split('=')[1]]);
+      await sessionLocker.execute('SELECT id FROM web_external_identities WHERE subject=? FOR UPDATE',[concurrentSub]);
+      await sessionLocker.commit();
+    } finally { await sessionLocker.rollback();sessionLocker.release(); }
+    await ask('/api/account/auth/logout',{cookie:concurrentCookie,body:{}});
+    releaseLink();linkGate=null;
+    const duringLink=await pendingLink; assert.equal(duringLink.headers.get('location'),'/account/profile?oidc_error=session_changed');assert.equal(sessionCookie(duringLink),undefined);
+    assert.equal((await linkState(concurrentSub)).status,'linked');
+    note('concurrent binding lease, no network-held identity/Session locks, logout rejects delivery while preserving remote fact');
+    const fencedSub=ourSubject(ourIndex++);configureOur();
+    const fencedCookie=sessionCookie(await complete(await linkBegin(fencedSub)));configureOur({remoteLinkEnabled:true});
+    let releaseStale;linkGate=new Promise(r=>{releaseStale=r;});linkReply={status:503,code:'UNAVAILABLE'};
+    const staleFlow=await linkBegin(fencedSub,{cookie:fencedCookie,purpose:'link'}),staleCalls=linkRequests;
+    const staleResponse=ask(staleFlow.callback.pathname+staleFlow.callback.search,{cookie:staleFlow.cookie});
+    for(let i=0;i<200&&linkRequests===staleCalls;i++)await new Promise(r=>setTimeout(r,10));
+    assert.equal(linkRequests,staleCalls+1);const fencedOperation=(await linkState(fencedSub)).operationId;
+    await pool.execute('UPDATE web_oidc_remote_link_attempts SET lease_until=DATE_SUB(NOW(),INTERVAL 1 SECOND) WHERE operation_id=?',[fencedOperation]);
+    linkGate=null;linkReply={};await complete(await linkBegin(fencedSub,{cookie:fencedCookie,purpose:'link'}));
+    releaseStale();const staleFinished=await staleResponse;assert.equal(staleFinished.status,303);
+    assert.equal((await linkState(fencedSub)).status,'linked');assert.deepEqual((await attemptsFor(fencedSub)).map(a=>a.outcome),['unknown','linked']);
+    note('late failure from expired attempt cannot overwrite a newer confirmed binding');
+    configureOur({remoteLinkEnabled:true,clientId:'different-application'});
+    const changedApplication=(await(await ask('/api/account/oidc/bindings',{cookie:remoteCookie})).json()).providers[0];
+    assert.equal(changedApplication.remoteLinkStatus,'failed');assert.equal(changedApplication.remoteLinkError,'application_changed');
+    configureOur({remoteLinkEnabled:true});note('Application changes never inherit the old Application remote confirmation');
+    const remoteConflictSub=ourSubject(ourIndex++); remotePairs.set(remoteConflictSub,{id:remoteConflictSub,externalId:'999999999',linkedAt:'2026-11-03T01:02:03Z'});
+    await complete(await linkBegin(remoteConflictSub),'/account/profile'); assert.equal((await linkState(remoteConflictSub)).status,'failed');
+    assert.equal((await attemptsFor(remoteConflictSub)).at(-1).error_code,'conflict'); assert.equal(remotePairs.get(remoteConflictSub).externalId,'999999999');
+    note('actual remote pair conflict preserves remote owner and durable local failure without merging');
+    const revokedSub=ourSubject(ourIndex++); let releaseRevoked;linkGate=new Promise(r=>{releaseRevoked=r;});const revokeCalls=linkRequests;
+    const revokedFlow=await linkBegin(revokedSub), pendingRevoked=ask(revokedFlow.callback.pathname+revokedFlow.callback.search,{cookie:revokedFlow.cookie});
+    for(let i=0;i<200&&linkRequests===revokeCalls;i++) await new Promise(r=>setTimeout(r,10));
+    assert.equal(linkRequests,revokeCalls+1);const revokedState=await linkState(revokedSub);
+    await pool.execute('DELETE FROM web_user_sessions WHERE user_id=?',[revokedState.externalId]); releaseRevoked();linkGate=null;
+    const revokedResponse=await pendingRevoked;assert.equal(revokedResponse.headers.get('location'),'/account/login?oidc_error=session_changed');assert.equal(sessionCookie(revokedResponse),undefined);
+    assert.equal((await linkState(revokedSub)).status,'linked');
+    note('Session revoked during remote HTTP cannot be resurrected by callback; immutable remote confirmation retained');
+    const disabledSub=ourSubject(ourIndex++);let releaseRemoteDisabled;linkGate=new Promise(r=>{releaseRemoteDisabled=r;});const disableCalls=linkRequests;
+    const disableFlow=await linkBegin(disabledSub),pendingDisabled=ask(disableFlow.callback.pathname+disableFlow.callback.search,{cookie:disableFlow.cookie});
+    for(let i=0;i<200&&linkRequests===disableCalls;i++) await new Promise(r=>setTimeout(r,10));
+    assert.equal(linkRequests,disableCalls+1);runtime.oidcEnabled=false;releaseRemoteDisabled();linkGate=null;
+    const disabledRemoteResult=await pendingDisabled;assert.equal(sessionCookie(disabledRemoteResult),undefined);assert.equal(disabledRemoteResult.headers.get('location'),'/account/login?oidc_error=provider_unavailable');
+    assert.equal((await linkState(disabledSub)).status,'linked');
+    note('disable during in-flight remote commit prevents Session delivery and retains audit fact');
+    configureOur({remoteLinkEnabled:false});
+    const offSub=ourSubject(ourIndex++), beforeOff=linkRequests;await complete(await linkBegin(offSub));assert.equal(linkRequests,beforeOff);assert.equal((await linkState(offSub)).status,'not_requested');
+    const disabledFlow=await linkBegin(firstLinkedSub);runtime.oidcEnabled=false;
+    assert.equal((await ask(disabledFlow.callback.pathname+disabledFlow.callback.search,{cookie:disabledFlow.cookie})).status,404); assert.equal(linkRequests,beforeOff);
+    note('remote opt-in default off and global OIDC off prevent link calls');
+    assert.deepEqual(linkInvariantFailures,[]);assert.equal(lookupRedirectsFollowed,0);
+    await writeFile(resolve(process.env.VIEWER_REVIEW_OUT,'ourtaiko-link-http.json'),JSON.stringify({pass:true,cases:linkCases,linkRequests,requestContract:'POST JSON exact verified subject and database decimal user ID; configured service headers only; no Origin/Cookie/OAuth token',realOurTaikoRequests:0,productionConnections:0,credentialsRecorded:false},null,2)+'\n');
     configure();
     await complete(await begin());
     checks.push('OurTaiko lookup adapter leaves generic provider login and profile source unchanged');
