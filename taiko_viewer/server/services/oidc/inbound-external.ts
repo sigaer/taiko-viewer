@@ -37,7 +37,8 @@ const accountId = (id: unknown): id is string =>
 const ourId = (id: unknown): id is string => typeof id === "string" && OUR_ID.test(id);
 const iso = (date: unknown) => {
   const value = date instanceof Date ? date : new Date(String(date));
-  return Number.isFinite(value.getTime()) ? value.toISOString() : new Date(0).toISOString();
+  if (!Number.isFinite(value.getTime())) denied(503, "UNAVAILABLE");
+  return value.toISOString();
 };
 const noStore = (event: H3Event) => {
   setHeader(event, "Cache-Control", "no-store");
@@ -264,7 +265,10 @@ export async function handleInboundExternal(event: H3Event, action: Action) {
     if (typeof body.externalId === "string" && ourId(body.externalId)) subject = body.externalId;
     await validateSchemaTables(getAccountDb(), INBOUND_EXTERNAL_TABLES.map(schemaRequirement), "inbound-external");
     let data: unknown;
-    if (action === "login") data = await doLogin(event, service, body);
+    if (action === "login") {
+      data = await doLogin(event, service, body);
+      viewer = (data as {id: string}).id;
+    }
     else if (action === "lookup") data = await doLookup(service, body);
     else if (action === "link") data = await doLink(service, body);
     else if (action === "unlink") data = await doUnlink(body);
