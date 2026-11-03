@@ -144,8 +144,13 @@ async function doLogin(event: H3Event, service: string, body: Body) {
   );
   const user = users[0];
   // No Viewer session, cookie or bearer token is created by this endpoint.
-  if (!user || !/^[0-9a-f]{32}:[0-9a-f]{128}$/.test(user.password_hash) ||
-      !(await verifyPasswordHash(body.password, user.password_hash))) denied(401, "LOGIN_INVALID");
+  // Keep the password KDF cost comparable for unknown users; never mint a
+  // browser session or disclose whether a login identifier exists.
+  const dummyHash = "00000000000000000000000000000000:" + "0".repeat(128);
+  const stored = user?.password_hash || "";
+  const candidate = /^[0-9a-f]{32}:[0-9a-f]{128}$/.test(stored) ? stored : dummyHash;
+  const verified = await verifyPasswordHash(body.password, candidate);
+  if (!user || candidate === dummyHash || !verified) denied(401, "LOGIN_INVALID");
   await getAccountDb().execute(
     "INSERT INTO web_inbound_external_proofs(service_id,viewer_id,expires_at) VALUES (?,?,DATE_ADD(NOW(),INTERVAL 10 MINUTE)) ON DUPLICATE KEY UPDATE expires_at=VALUES(expires_at)",
     [service, user.id]
