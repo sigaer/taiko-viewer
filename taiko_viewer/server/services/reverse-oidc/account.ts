@@ -1,8 +1,5 @@
-/** Stable Viewer account identity for the future Viewer OIDC Provider.
- *
- * This read-only module is intentionally NOT an authorization server. A certified
- * Provider must validate sessions, authorization requests, consent and token
- * issuance before using this as its findAccount callback.
+/** Stable Viewer identity and scope-limited claims.
+ * Protocol handling and session-bound consent live in provider.ts/interaction.ts.
  */
 import type { Pool } from "mysql2/promise";
 import type { DbRow } from "../../utils/account-db";

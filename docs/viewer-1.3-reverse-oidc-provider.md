@@ -1,30 +1,42 @@
-# Viewer → OurTaiko 反向 OIDC：Viewer Provider 工程交付切面（方案 B）
+# Viewer → OurTaiko OIDC Provider（方案 B）
 
-状态：**Draft / 未部署**。原正式生产 Viewer 1.2.4 的 OurTaiko → Viewer OIDC 登录与 link 保持不变；本文件不是生产启用说明。本分支不包含任何服务密钥。
+状态：开发候选，生产仍为 1.2.4；反向入口默认关闭。生产验收未完成，不应把本地隔离验证当成正式绑定账号登录成功。
 
-## 已实施的基础
+## 实现
 
-- `server/services/reverse-oidc/account.ts`：不可复用、不可四舍五入的十进制 BIGINT `sub`，从 `CAST(id AS CHAR)` 提取的只读 Viewer 用户资料；按照 `openid/profile/email` 精确投影 claims。邮箱仅在 `email_verified=1` 时对已授权的 `email` scope 返回。没有任何原始密码、QQ、成绩或 Token。
-- `tests/reverseOidcAccount.test.mjs`：精确大整数、scope 隔离、未验证邮箱不外泄的定向用例。添加到新接口前需在服务器用原有资源限制执行，不增加全量 CI Gate。
+- `oidc-provider` 9.13.3，挂载在现有 Nuxt `/oidc/**`；原 `/api/account/oidc/*` RP 和私有配置独立。
+- Issuer 固定 `https://viewer.sakura-bot.cn/oidc`；Discovery、JWKS、Authorization、Token、UserInfo、Revocation 使用标准库。
+- 唯一 confidential Client `OurTaiko`，精确回调 `https://sso.ourtaiko.org/login/sakura/callback/`；code、S256、RS256，只有 `openid profile email`。nonce 必填，不允许静默跳过 Viewer 确认。
+- Viewer 原 `stv_session` 从数据库验证；用户明确确认授权。CSRF 随机值、Origin、单次同意记录及原账号/Session 绑定；禁止表单重放或授权期间切换会话。
+- 数据库 Adapter 存储 Session、Interaction、Grant、Code、Token 的 TTL 和单次消费；授权码消费用条件 UPDATE，Grant 撤销删除派生凭据。持久化授权绑定原 Viewer Session；撤销会话后拒绝换码与 UserInfo。
+- `sub` 只从 SQL `CAST(id AS CHAR)` 读取，并验证 uint64 十进制，支持 `9007199254740993` 等超过 JS 安全整数的 ID；没有 Number 转换。邮箱仅按 scope 且验证后分享。
 
-## 尚须实施的核心 Provider
+## 正式配置缺口
 
-不得手写 OAuth Authorization Code、PKCE、JWT 签名、Discovery 或 Token 的认证协议。建议采用维护中的 `oidc-provider` v9（Node 24 运行），并提供：
+服务器 `/etc/taiko-viewer.env` 尚未配置 `TAIKO_OIDC_PROVIDER_ENABLED` / `TAIKO_OIDC_PROVIDER_CONFIG_FILE`。启用前需要双方通过受控渠道提供、确认独立 confidential `OurTaiko` 凭据，Viewer OP RS256 私钥和持久 Cookie 签名密钥；不得复用正向 `Sakura` 凭据，也不得把测试值作为正式值。
 
-1. **独立 OP Origin/Issuer**：`https://viewer.sakura-bot.cn/oidc`，经 Nginx 明确代理到受限、仅 loopback 的独立 Node 进程，不覆盖现有 Nuxt /api/account/oidc/* 作为 RP 的路由。Discovery/JWKS/authorize/token/userinfo 由库产生，使用精确 Issuer 和 RS256。
-2. **RP Client 固定登记**：OurTaiko `client_id=OurTaiko`，客户端保密密钥与既有 OurTaiko → Viewer 的 `Sakura` 凭据严格隔离；回调必须精确为 `https://sso.ourtaiko.org/login/sakura/callback/`。仅 `response_type=code`、PKCE S256、`openid profile email`。
-3. **Viewer 登录与授权交互**：库内建 devInteractions 在生产必须关闭。用户必须通过 Viewer 已验证的第一方 `stv_session` 证明身份，并在 Viewer 本域明确确认向 OurTaiko 分享稳定 Viewer ID 与已验证邮箱；取消不得签发授权码。处理同意时防止 CSRF、会话切换、登录撤销、账号切换及回调重放。
-4. **持久存储**：实现 `oidc-provider` 文档约定的 Adapter，持久保存带 TTL 的会话/授权码/令牌/Grant；过期、消耗、吊销应原子执行。不能使用默认 MemoryAdapter 运行生产。
-5. **密钥**：签名私钥与 cookie keys 从 root-only 私有文件加载；JWKS 只暴露公钥。为密钥轮换留稳定 kid 与旧公钥验证窗口；不记录 authorization code、ID Token、用户邮箱、客户端密钥。
-6. **用户身份**：Provider 的 `findAccount` 只能使用本分支定义的 read-only SQL CAST adapter，`sub` 是精确原始十进制串，不能先强转 JS Number。用户被删除、Session 被撤销或用户未同意时拒绝。
-7. **流控和隔离**：单独 systemd/cgroup 限额，Node 24.22.1 或更高已批准安全版本；反代不得记录 `/oidc` 的 code/state；只有受控客户端拥有授权凭据。
+私有配置使用绝对路径，文件权限 0600，不能写入 Git、日志或 shell 参数。结构：`clientId` 固定 `OurTaiko`、`clientSecret`、`cookieKeys` 数组和 `jwks.keys` 私有 RSA JWK 数组（各有唯一 `kid`、`alg=RS256`、`use=sig`）。公开 JWKS 由库过滤私钥。
 
-## 与 OurTaiko 的最小集成顺序
+轮换：将新签名 key 放到数组首位，保留旧 key 至最后一个旧 Token/Grant 过期窗口结束，再删除旧 key；通过标准发布流程加载配置。Cookie keys 同样先添加新 key、保留旧验证 key 后移除。不能在进程启动时临时生成 key。
 
-第一步仅提供对**已有正式 `Sakura` 绑定关系**的反向 OIDC 登录。OurTaiko 校验 ID Token 中 Viewer sub，在现有 `ExternalLink` 按正式 Application + external ID 精确查询，若已有绑定，签发 OurTaiko 自己的会话；未绑定不进行邮箱自动合并，也不偷偷写入 Viewer 本地关系。
+## 迁移与发布
 
-第二步才实现未关联用户自动建号、主动绑定以及 backchannel exact-pair confirmation。特别注意：用户在 OurTaiko 完成 OIDC 不代表 Viewer `web_external_identities` 已经记录双向关系；必须按照 [SAKURA-PROTOCOL 0.2 草案](https://github.com/OurTaiko/OurTaikoLogs/pull/1) 协商并实现双端同对写入/恢复/解绑。
+`npm run oidc:provider:migrate -- --apply` 只添加 `web_oidc_provider_objects`、`web_oidc_provider_consent`。默认要求实际 `SELECT DATABASE()` 以 `_test` 结尾、写入另需 `TAIKO_ALLOW_TEST_DB_MUTATION=1`。生产迁移需私有明确 DB 配置、`--production --apply`、`TAIKO_OIDC_EXPECTED_DATABASE` 与实际库完全一致、`TAIKO_ALLOW_OIDC_PRODUCTION_MIGRATION=1`，执行前按现有流程备份；应用请求不会自动建表。
 
-## 发布边界
+过期对象查询立即不可用。维护任务应分批清理两表 `expires_at <= UNIX_TIMESTAMP()` 的记录（每批至多 1000），保留现有业务表。
 
-此 PR 仅交付 Provider 账号 claims 基础，不带运行服务、依赖更新或私有凭据，**不可合并后直接宣称 Provider 已可用**。后续单独实现成熟库集成及 Viewer 会话同意流程，完成一次基于真实 OIDC 的精确账号登录后方可启动生产上线工作。原 1.2.4 正向功能不得回退或关闭。
+取得正式配置、两端候选验收后，以 1.3.0 发布提交按仓库流程集成 main，仅通过 `scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh "<HEAD subject>"` 发布。脚本失败立即停止。OurTaiko 按其正式发布流程启用 RP；随后使用已有正式 `Sakura` 绑定账号取得真实浏览器、换码、验签、重复登录账号及绑定数量不变的在线证据。没有这份证据不能宣称验收通过。
+
+本批只处理已有正式绑定，不自动建号、不按邮箱合并、不扩展新的关联协议。
+
+## 定向验证（2026-11-04）
+
+本地新建 MySQL `viewer_reverse_oidc_test`，执行实际 `SELECT DATABASE()` 并显式 opt-in；OurTaiko 使用新建 SQLite `ourtaiko_test.sqlite3`，没有复制生产数据或复用旧 staging 绑定。Chromium 使用本地 TLS CONNECT 代理访问两个固定域名，后端使用真实 `oidc-provider`、数据库 Adapter 和 Authlib；只有网络目的地被隔离到本地，Token、JWKS、签名、PKCE、state/nonce 校验没有 Mock。Viewer 测试 Session 由隔离库提供，此测试不包含真实生产账号密码登录或公网证书验证。
+
+已验证授权确认 → 换码 → RS256 验签/claims → 现有正式应用名 `Sakura` 绑定账号登录，重复登录 user/link 各 1 行、账号对和密码/权限字段不变；同时覆盖错误 CSRF、会话切换、同意前撤销会话、发码后换码前撤销会话、code 单次消费、Grant 撤销、回调重放、取消、未关联但同邮箱拒绝。大整数 `sub=9007199254740993` 贯穿真实 Token 和账号映射。
+
+可复现命令（两个候选 checkout 均需锁定依赖，需主机 MySQL/Chromium）：在 Viewer `taiko_viewer` 下通过 `../scripts/memory/run_qa.sh` 启动 `node scripts/verify_reverse_oidc_wire.mjs`；命令环境只设 `TAIKO_ALLOW_TEST_DB_MUTATION=1`、绝对路径 `TAIKO_OURTAIKO_RP_CHECKOUT`。MySQL 可执行路径可用 `TAIKO_TEST_MYSQLD` 指定。Runner 必须保持资源隔离，测试将关闭自有数据库、浏览器和监听器。
+
+Viewer 定向测试 7 项、OurTaiko 映射测试 6 项通过。Nuxt 生产构建在既有 5 GiB cgroup / 正式脚本同款 4 GiB Node 堆下通过，耗时约 148 秒，采样 cgroup 峰值 4,190,056,448 字节，OS 最大 RSS 3,716,588 KiB，OOM/kill 均为 0。初次使用 Node 默认堆限制的构建因堆耗尽失败，随后采用仓库既定构建参数；没有调整 cgroup 上限或绕过隔离。
+
+打包的 `.output/server/index.mjs` 也通过上述全部浏览器/换码/验签/绑定与拒绝分支；该模式使用仓库已有的 `owned-qa` 启动隔离，另需 `TAIKO_TEST_NITRO_OUTPUT` 为绝对 server entry 路径。隔离启动再次核验真实 DB 名、datadir、cgroup 和私有运行路径，不启动 Annual 维护任务。版本投影检查通过。生产公开检查仍为正向 registry `ourtaiko` 200、OurTaiko Discovery 200、新反向 Discovery 404；没有正式发布或启用。
