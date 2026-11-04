@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { buildPageDescription } from "~/utils/seo";
+import { authReturnNavigationOptions } from "~/utils/auth-return-navigation";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -98,7 +99,7 @@ const retryAuth = async () => {
     if (authScope.currentView(ticket) && user && !accountAuthError.value) {
       authenticatedUserId.value = user.id;
       form.identifier = user.username || user.email || ""; form.password = "";
-      const failure = await navigateTo(redirectAfterLogin.value);
+      const failure = await navigateTo(redirectAfterLogin.value, authReturnNavigationOptions(redirectAfterLogin.value));
       if (failure) completionError.value = completionCopy.value.navigation;
     }
   } catch {
@@ -127,7 +128,7 @@ const submit = async () => {
       throw new Error(completionCopy.value.session);
     }
     ElMessage.success(copy.value.success);
-    const failure = await navigateTo(redirectAfterLogin.value);
+    const failure = await navigateTo(redirectAfterLogin.value, authReturnNavigationOptions(redirectAfterLogin.value));
     if (failure) throw new Error(completionCopy.value.navigation);
   } catch (error: any) {
     if (!authScope.currentView(ticket)) return;
