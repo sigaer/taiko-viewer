@@ -1,6 +1,6 @@
 # Viewer → OurTaiko OIDC Provider（方案 B）
 
-状态：开发候选，生产仍为 1.2.4；反向入口默认关闭。生产验收未完成，不应把本地隔离验证当成正式绑定账号登录成功。
+版本：1.3.0。本文记录实现、私有配置与发布要求；实际部署和正式账号验收结果以 PR #51 及服务器受限发布记录为准。本地隔离验证不代表正式绑定账号登录成功。
 
 ## 实现
 
@@ -11,9 +11,9 @@
 - 数据库 Adapter 存储 Session、Interaction、Grant、Code、Token 的 TTL 和单次消费；授权码消费用条件 UPDATE，Grant 撤销删除派生凭据。持久化授权绑定原 Viewer Session；撤销会话后拒绝换码与 UserInfo。
 - `sub` 只从 SQL `CAST(id AS CHAR)` 读取，并验证 uint64 十进制，支持 `9007199254740993` 等超过 JS 安全整数的 ID；没有 Number 转换。邮箱仅按 scope 且验证后分享。
 
-## 正式配置缺口
+## 正式配置
 
-服务器 `/etc/taiko-viewer.env` 尚未配置 `TAIKO_OIDC_PROVIDER_ENABLED` / `TAIKO_OIDC_PROVIDER_CONFIG_FILE`。启用前需要双方通过受控渠道提供、确认独立 confidential `OurTaiko` 凭据，Viewer OP RS256 私钥和持久 Cookie 签名密钥；不得复用正向 `Sakura` 凭据，也不得把测试值作为正式值。
+服务器 `/etc/taiko-viewer.env` 使用 `TAIKO_OIDC_PROVIDER_ENABLED=1` / `TAIKO_OIDC_PROVIDER_CONFIG_FILE` 加载配置。独立 confidential `OurTaiko` 凭据、Viewer OP RS256 私钥和持久 Cookie 签名密钥由 Viewer 生产服务器生成。仅通过受控渠道交付 RP Client ID/Secret；OP 私钥和 Cookie 签名密钥不离开 Viewer 服务器。不得复用正向 `Sakura` 凭据，也不得把测试值作为正式值。
 
 私有配置使用绝对路径，文件权限 0600，不能写入 Git、日志或 shell 参数。结构：`clientId` 固定 `OurTaiko`、`clientSecret`、`cookieKeys` 数组和 `jwks.keys` 私有 RSA JWK 数组（各有唯一 `kid`、`alg=RS256`、`use=sig`）。公开 JWKS 由库过滤私钥。
 
@@ -39,4 +39,4 @@
 
 Viewer 定向测试 7 项、OurTaiko 映射测试 6 项通过。Nuxt 生产构建在既有 5 GiB cgroup / 正式脚本同款 4 GiB Node 堆下通过，耗时约 148 秒，采样 cgroup 峰值 4,190,056,448 字节，OS 最大 RSS 3,716,588 KiB，OOM/kill 均为 0。初次使用 Node 默认堆限制的构建因堆耗尽失败，随后采用仓库既定构建参数；没有调整 cgroup 上限或绕过隔离。
 
-打包的 `.output/server/index.mjs` 也通过上述全部浏览器/换码/验签/绑定与拒绝分支；该模式使用仓库已有的 `owned-qa` 启动隔离，另需 `TAIKO_TEST_NITRO_OUTPUT` 为绝对 server entry 路径。隔离启动再次核验真实 DB 名、datadir、cgroup 和私有运行路径，不启动 Annual 维护任务。版本投影检查通过。生产公开检查仍为正向 registry `ourtaiko` 200、OurTaiko Discovery 200、新反向 Discovery 404；没有正式发布或启用。
+打包的 `.output/server/index.mjs` 也通过上述全部浏览器/换码/验签/绑定与拒绝分支；该模式使用仓库已有的 `owned-qa` 启动隔离，另需 `TAIKO_TEST_NITRO_OUTPUT` 为绝对 server entry 路径。隔离启动再次核验真实 DB 名、datadir、cgroup 和私有运行路径，不启动 Annual 维护任务。版本投影检查通过。发布前的生产基线检查为正向 registry `ourtaiko` 200、OurTaiko Discovery 200、新反向 Discovery 404。
