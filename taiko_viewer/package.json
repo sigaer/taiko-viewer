@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "1.2.4",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -70,38 +70,41 @@
     "test:growth:experience": "node --experimental-strip-types --test tests/growthExperience.test.ts tests/growthFeedback.test.ts tests/growthPassport.test.ts",
     "test:growth:experience:browser": "node scripts/verify_growth_experience_browser.mjs",
     "audit:growth:experience:performance": "node --experimental-strip-types scripts/benchmark_growth_experience.mjs",
-    "test:growth:experience:production": "node --experimental-strip-types scripts/run_growth_experience_production_smoke.mjs"
+    "test:growth:experience:production": "node --experimental-strip-types scripts/run_growth_experience_production_smoke.mjs",
+    "test:oidc:provider": "node --experimental-strip-types --test tests/reverseOidcAccount.test.mjs tests/reverseOidcProvider.test.mjs",
+    "oidc:provider:migrate": "node --experimental-strip-types scripts/migrate_oidc_provider_schema.ts"
   },
   "dependencies": {
-    "@sakura-taiko/contract": "file:../packages/sakura-taiko-contract",
     "@alicloud/esa20240910": "^3.7.0",
     "@alicloud/openapi-core": "^1.0.8",
     "@element-plus/nuxt": "^1.0.5",
     "@nuxtjs/i18n": "^9.5.6",
+    "@sakura-taiko/contract": "file:../packages/sakura-taiko-contract",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "ali-oss": "^6.23.0",
     "archiver": "^7.0.1",
     "echarts": "^6.1.0",
     "element-plus": "^2.9.0",
+    "fflate": "^0.8.3",
     "gsap": "^3.15.0",
     "mysql2": "^3.19.0",
     "nodemailer": "^8.0.1",
     "nuxt": "3.21.11",
+    "oidc-provider": "9.13.3",
     "openid-client": "^6.8.8",
     "playwright-core": "^1.61.1",
     "qrcode": "^1.5.4",
     "sharp": "^0.34.5",
     "three": "0.180.0",
     "undici": "7.30.1",
-    "web-vitals": "^5.3.0",
-    "fflate": "^0.8.3"
+    "web-vitals": "^5.3.0"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.6",
     "@types/three": "0.180.0",
     "@vite-pwa/nuxt": "^1.1.1",
-    "typescript": "~5.6.2",
-    "jose": "^6.2.15"
+    "jose": "^6.2.15",
+    "typescript": "~5.6.2"
   }
 }

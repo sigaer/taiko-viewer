@@ -251,6 +251,7 @@ export default defineNuxtConfig({
       "/api/data/**": { prerender: false },
       "/api/content/**": { prerender: false },
       "/api/account/**": { prerender: false },
+      "/oidc/**": { prerender: false, headers: { "cache-control": "no-store" } },
       "/api/annual/**": { prerender: false },
       "/api/internal/**": { prerender: false },
       "/api/admin/**": { prerender: false },
