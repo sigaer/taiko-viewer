@@ -13,7 +13,7 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser(true);
 
 definePageMeta({
-  contentLayout: "reading",
+  contentLayout: "standard",
   middleware: "account-auth",
   pageTitleKey: "account.profile",
   pageDescKey: "page.account.profile.desc",
@@ -1067,51 +1067,42 @@ const removeQqBinding = async () => {
 
 <template>
   <div class="profile-page">
-    <el-card v-if="pending" class="panel-card">
+    <el-card v-if="pending && !profile?.user.id" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
 
     <template v-else-if="profile">
-      <section class="profile-grid">
-        <el-card v-if="needsBindingOnboarding" class="panel-card onboarding-card" role="region" :aria-label="copy.onboardTitle">
-          <div class="onboarding-copy">
-            <h3>{{ copy.onboardTitle }}</h3>
-            <p>{{ copy.onboardDesc }}</p>
-          </div>
-          <el-button type="primary" size="large" @click="focusBindingForm">{{ copy.onboardCta }}</el-button>
-        </el-card>
-
-        <el-card class="panel-card profile-main-card">
-          <div class="profile-main">
-            <div class="avatar-block">
-              <el-avatar :size="80" :src="profile.user.avatarUrl" class="profile-avatar">
-                {{ profile.user.username.slice(0, 1) }}
-              </el-avatar>
-              <details class="avatar-manager">
-                <summary>{{ copy.changeAvatar }}</summary>
-                <div class="avatar-actions">
-                <el-upload
-                  ref="avatarUploadRef"
-                  :show-file-list="false"
-                  :auto-upload="false"
-                  accept="image/png,image/jpeg,image/webp,image/gif"
-                  :on-change="handleAvatarSelect"
-                >
-                  <el-button class="avatar-upload-button" link :loading="uploading">
-                    <span class="avatar-upload-label avatar-upload-label--desktop">{{ copy.uploadAvatar }}</span>
-                    <span class="avatar-upload-label avatar-upload-label--mobile">{{ copy.changeAvatar }}</span>
-                  </el-button>
-                </el-upload>
-                <el-button class="avatar-reset-button" link :loading="removingAvatar" @click="removeAvatar">
-                  {{ copy.resetAvatar }}
+      <el-card class="panel-card profile-main-card">
+        <div class="profile-main">
+          <div class="avatar-block">
+            <el-avatar :size="80" :src="profile.user.avatarUrl" class="profile-avatar">
+              {{ profile.user.username.slice(0, 1) }}
+            </el-avatar>
+            <details class="avatar-manager">
+              <summary>{{ copy.changeAvatar }}</summary>
+              <div class="avatar-actions">
+              <el-upload
+                ref="avatarUploadRef"
+                :show-file-list="false"
+                :auto-upload="false"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                :on-change="handleAvatarSelect"
+              >
+                <el-button class="avatar-upload-button" link :loading="uploading">
+                  <span class="avatar-upload-label avatar-upload-label--desktop">{{ copy.uploadAvatar }}</span>
+                  <span class="avatar-upload-label avatar-upload-label--mobile">{{ copy.changeAvatar }}</span>
                 </el-button>
-                </div>
-              </details>
-            </div>
-            <div class="profile-info">
+              </el-upload>
+              <el-button class="avatar-reset-button" link :loading="removingAvatar" @click="removeAvatar">
+                {{ copy.resetAvatar }}
+              </el-button>
+              </div>
+            </details>
+          </div>
+          <div class="profile-info">
+            <div class="identity-summary">
               <h2>{{ profile.user.username }}</h2>
               <p>{{ profile.user.email }}</p>
-              <AccountOidcOptions purpose="link" :redirect="localePath('/account/profile')" />
               <div class="status-list">
                 <div class="status-chip" :class="profile.verificationStatus.emailVerified ? 'ok' : 'pending'">
                   <span>{{ copy.emailVerified }}</span>
@@ -1122,280 +1113,297 @@ const removeQqBinding = async () => {
                   <strong>{{ profile.verificationStatus.taikoVerified ? copy.verified : copy.unverified }}</strong>
                 </div>
               </div>
-              <div class="meta-grid">
-                <div class="meta-item meta-item--binding">
-                  <span class="binding-label binding-label--desktop">{{ copy.currentBinding }}</span>
-                  <span class="binding-label binding-label--mobile">{{ copy.taikoIdLabel }}</span>
-                  <strong>
-                    <span class="binding-value binding-value--desktop">{{ profile.currentBinding?.displayName || profile.currentBinding?.taikoId || copy.unbound }}</span>
-                    <span class="binding-value binding-value--mobile">{{ profile.currentBinding?.taikoId || profile.currentBinding?.displayName || copy.unbound }}</span>
-                  </strong>
-                </div>
-                <details class="profile-more"><summary>{{ locale === 'ja' ? 'プロフィールの詳細' : '更多资料' }}</summary>
-                <div class="meta-item meta-item--title">
-                  <span>{{ copy.currentTitle }}</span>
-                  <strong>{{ profile.currentBinding?.currentTitle || "-" }}</strong>
-                </div>
-                <div class="meta-item meta-item--created">
-                  <span>{{ copy.createdAt }}</span>
-                  <strong>{{ formatDateTime(profile.user.createdAt) }}</strong>
-                </div>
-                </details>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-item meta-item--binding">
+                <span class="binding-label binding-label--desktop">{{ copy.currentBinding }}</span>
+                <span class="binding-label binding-label--mobile">{{ copy.taikoIdLabel }}</span>
+                <strong>
+                  <span class="binding-value binding-value--desktop">{{ profile.currentBinding?.taikoId || profile.currentBinding?.displayName || copy.unbound }}</span>
+                  <span class="binding-value binding-value--mobile">{{ profile.currentBinding?.taikoId || profile.currentBinding?.displayName || copy.unbound }}</span>
+                </strong>
               </div>
-            </div>
-          </div>
-        </el-card>
-
-        <AnnualBetaContinue />
-        <el-card ref="bindingCardRef" class="panel-card binding-card">
-          <div class="section-title">
-            <h3>{{ copy.bindTitle }}</h3>
-            <p>{{ copy.bindDesc }}</p>
-          </div>
-          <label class="binding-field-label" for="binding-taiko-id">{{ copy.taikoIdLabel }}</label>
-          <div class="bind-input-row">
-            <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
-            <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
-          </div>
-          <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
-            <div>
-              <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
-            </div>
-            <div>
-              <strong>{{ copy.pendingTitle }}：</strong>{{ profile.pendingBinding.originalTitle || copy.emptyTitle }}
-            </div>
-            <div>
-              <strong>{{ copy.expiresAt }}：</strong>{{ formatDateTime(profile.pendingBinding.expiresAt) }}
-            </div>
-            <el-button type="success" :loading="confirming" @click="confirmBinding()">{{ copy.confirmBinding }}</el-button>
-          </div>
-          <el-empty v-if="!profile.bindings.length" :description="copy.noBindings" />
-          <div v-else class="binding-list">
-            <div
-              v-for="binding in profile.bindings"
-              :key="binding.id"
-              class="binding-item"
-              :class="{ 'binding-item--manual': binding.isManual }"
-            >
-              <div>
-                <div class="binding-heading">
-                  <strong>{{ binding.displayName || binding.taikoId }}</strong>
-                  <span class="source-stamp" :class="`source-stamp--${binding.source}`">
-                    {{ binding.source === "manual" ? copy.manualStamp : binding.source === "hiroba" ? copy.jpStamp : copy.cnStamp }}
-                  </span>
-                </div>
-                <p>{{ binding.verifiedTitle || "-" }}</p>
+              <details class="profile-more"><summary>{{ locale === 'ja' ? 'プロフィールの詳細' : '更多资料' }}</summary>
+              <div class="meta-item meta-item--title">
+                <span>{{ copy.currentTitle }}</span>
+                <strong>{{ profile.currentBinding?.currentTitle || "-" }}</strong>
               </div>
-              <div class="binding-actions">
-                <span v-if="binding.isCurrent" class="binding-current" role="status">{{ copy.currentUsing }}</span>
-                <el-button
-                  v-else
-                  :loading="switchingId === binding.id"
-                  :disabled="switchingId === binding.id"
-                  @click="switchBinding(binding.id)"
-                >
-                  {{ copy.switchCurrent }}
-                </el-button>
-                <template v-if="binding.isManual">
-                  <el-button plain @click="renameManual(binding)">{{ copy.manualRename }}</el-button>
-                  <el-button plain @click="showManualClaimCode(binding)">{{ copy.manualClaimCode }}</el-button>
-                  <el-button type="warning" plain @click="detachManual(binding)">{{ copy.manualDetach }}</el-button>
-                  <el-button type="danger" plain @click="permanentlyDeleteManual(binding)">{{ copy.manualDelete }}</el-button>
-                </template>
-                <el-button
-                  v-else
-                  type="danger"
-                  plain
-                  :loading="deletingId === binding.id"
-                  @click="deleteBinding(binding)"
-                >
-                  {{ copy.deleteBinding }}
-                </el-button>
+              <div class="meta-item meta-item--created">
+                <span>{{ copy.createdAt }}</span>
+                <strong>{{ formatDateTime(profile.user.createdAt) }}</strong>
               </div>
+              </details>
             </div>
-          </div>
-          <details class="manual-account-panel"><summary>{{ copy.manualTitle }}</summary>
-            <div class="manual-account-copy">
-              <p>{{ copy.manualDesc }}</p>
-            </div>
-            <div class="manual-account-controls">
-              <el-input
-                v-model="manualNickname"
-                :placeholder="copy.manualNickname"
-                maxlength="24"
-                @keyup.enter="createManual"
-              />
-              <el-button
-                type="success"
-                plain
-                :loading="manualLoading"
-                :disabled="!manualNickname.trim()"
-                @click="createManual"
-              >
-                {{ copy.manualCreate }}
-              </el-button>
-              <el-input
-                v-model="manualClaimCode"
-                :placeholder="copy.manualClaimPlaceholder"
-                maxlength="12"
-                @keyup.enter="claimManual"
-              />
-              <el-button
-                :loading="manualLoading"
-                :disabled="!manualClaimCode.trim()"
-                @click="claimManual"
-              >
-                {{ copy.manualClaim }}
-              </el-button>
-            </div>
-          </details>
-        </el-card>
-
-        <el-card class="panel-card qq-card">
-          <div class="section-title">
-            <h3>{{ copy.qqTitle }}</h3>
-            <p>{{ copy.qqDesc }}</p>
-          </div>
-          <template v-if="profile.qqBinding && profile.qqBinding.status === 'active'">
-            <div class="qq-bound-row">
-              <div>
-                <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
-                <p>{{ copy.qqBound }} · {{ formatDateTime(profile.qqBinding.verifiedAt || profile.qqBinding.createdAt) }}</p>
-              </div>
-              <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
-            </div>
-          </template>
-          <template v-else-if="profile.qqBinding && profile.qqBinding.status === 'pending'">
-            <div class="qq-pending-row">
-              <div>
-                <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
-                <span class="source-stamp source-stamp--manual">{{ copy.qqPending }}</span>
-              </div>
-              <p class="qq-pending-hint">{{ copy.qqCodeHint }}</p>
-              <div class="qq-verify-row">
-                <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
-                <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
-                  {{ copy.qqConfirmButton }}
-                </el-button>
-              </div>
-              <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
-            </div>
-          </template>
-          <template v-else>
-            <div v-if="qqVerifyCodeResult" ref="qqVerifyBoxRef" class="qq-code-result" tabindex="-1">
-              <p>{{ copy.qqCodeReady }}</p>
-              <p class="qq-code-hint">{{ copy.qqCodeHint }}</p>
-              <div class="qq-verify-row">
-                <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
-                <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
-                  {{ copy.qqConfirmButton }}
-                </el-button>
-              </div>
-            </div>
-            <div v-else class="bind-input-row">
-              <el-input v-model="qqInput" :placeholder="copy.qqPlaceholder" @keyup.enter="prepareQqBinding" />
-              <el-button type="primary" :loading="qqPreparing" :disabled="!qqInput.trim()" @click="prepareQqBinding">
-                {{ copy.qqStartVerify }}
-              </el-button>
-            </div>
-          </template>
-        </el-card>
-
-        <el-card class="panel-card mydon-config-card">
-        <div class="section-title">
-          <h3>{{ copy.showcaseTitle }}</h3>
-          <p>{{ copy.showcaseDesc }}</p>
-        </div>
-
-        <div v-if="myDonShowcasePending" class="showcase-skeleton">
-          <el-skeleton :rows="6" animated />
-        </div>
-        <div v-else-if="!profile.currentBinding" class="mydon-empty">
-          <el-empty :description="copy.showcaseNeedBinding" />
-        </div>
-        <div v-else-if="myDonShowcaseError" class="showcase-error">
-          <el-alert :title="copy.showcaseLoadFailed" type="error" :closable="false" show-icon />
-        </div>
-        <div v-else-if="!myDonShowcaseData.hasUserdata" class="mydon-empty">
-          <el-empty :description="copy.showcaseNeedUserdata" />
-        </div>
-        <div v-else-if="!availableShowcaseTitles.length" class="mydon-empty">
-          <el-empty :description="copy.showcaseEmpty" />
-        </div>
-        <div v-else class="showcase-config">
-          <div class="showcase-status">
-            <div class="showcase-status__item">
-              <span>{{ copy.showcaseMode }}</span>
-              <strong>{{ myDonShowcaseData.isCustom ? copy.showcaseModeCustom : copy.showcaseModeDefault }}</strong>
-            </div>
-            <div class="showcase-status__item">
-              <span>{{ copy.showcaseSelection }}</span>
-              <strong v-if="currentShowcaseSelection.length">{{ currentShowcaseSelection.join(" / ") }}</strong>
-              <strong v-else>{{ copy.showcaseSelectionEmpty }}</strong>
-            </div>
-          </div>
-
-          <div class="showcase-layout-picker">
-            <span class="showcase-layout-picker__label">{{ copy.showcaseLayout }}</span>
-            <el-radio-group v-model="myDonShowcaseLayout" class="showcase-layout-picker__options">
-              <el-radio-button value="nickname">{{ copy.showcaseLayoutNickname }}</el-radio-button>
-              <el-radio-button value="full">{{ copy.showcaseLayoutFull }}</el-radio-button>
-              <el-radio-button value="full_gold">{{ copy.showcaseLayoutFullGold }}</el-radio-button>
-            </el-radio-group>
-          </div>
-
-          <p class="showcase-hint">{{ copy.showcaseOrderHint }}</p>
-
-          <div class="showcase-slot-list">
-            <div v-for="slotIndex in 5" :key="slotIndex" class="showcase-slot-item">
-              <span class="showcase-slot-item__label">
-                {{ copy.showcaseSlot.replace("{index}", String(slotIndex)) }}
-              </span>
-              <el-select
-                v-model="myDonShowcaseSlots[slotIndex - 1]"
-                filterable
-                clearable
-                class="showcase-slot-item__select"
-                :placeholder="copy.showcasePlaceholder"
-              >
-                <el-option
-                  v-for="option in getShowcaseSlotOptions(slotIndex - 1)"
-                  :key="option.titleName"
-                  :label="formatShowcaseOptionLabel(option)"
-                  :value="option.titleName"
-                />
-              </el-select>
-            </div>
-          </div>
-
-          <p class="showcase-clear-hint">{{ copy.showcaseClearHint }}</p>
-
-          <div class="showcase-actions">
-            <el-button type="primary" :loading="showcaseSaving" :disabled="!showcaseDirty" @click="saveMyDonShowcase">
-              {{ copy.showcaseSave }}
-            </el-button>
-            <el-button plain :loading="showcaseSaving" :disabled="!showcaseCanReset" @click="resetMyDonShowcase">
-              {{ copy.showcaseReset }}
-            </el-button>
           </div>
         </div>
       </el-card>
+
+      <AnnualBetaContinue />
+      <el-card v-if="needsBindingOnboarding" class="panel-card onboarding-card" role="region" :aria-label="copy.onboardTitle">
+        <div class="onboarding-copy">
+          <h3>{{ copy.onboardTitle }}</h3>
+          <p>{{ copy.onboardDesc }}</p>
+        </div>
+        <el-button type="primary" size="large" @click="focusBindingForm">{{ copy.onboardCta }}</el-button>
+      </el-card>
+
+      <section class="account-management">
+        <div ref="bindingCardRef" class="binding-section">
+          <el-card class="panel-card binding-card">
+            <div class="section-title">
+              <h3>{{ copy.bindTitle }}</h3>
+              <p>{{ copy.bindDesc }}</p>
+            </div>
+            <label class="binding-field-label" for="binding-taiko-id">{{ copy.taikoIdLabel }}</label>
+            <div class="bind-input-row">
+              <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
+              <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
+            </div>
+            <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">
+              <div>
+                <strong>{{ copy.pendingId }}：</strong>{{ profile.pendingBinding.taikoId }}
+              </div>
+              <div>
+                <strong>{{ copy.pendingTitle }}：</strong>{{ profile.pendingBinding.originalTitle || copy.emptyTitle }}
+              </div>
+              <div>
+                <strong>{{ copy.expiresAt }}：</strong>{{ formatDateTime(profile.pendingBinding.expiresAt) }}
+              </div>
+              <el-button type="success" :loading="confirming" @click="confirmBinding()">{{ copy.confirmBinding }}</el-button>
+            </div>
+            <el-empty v-if="!profile.bindings.length" :description="copy.noBindings" />
+            <div v-else class="binding-list">
+              <div
+                v-for="binding in profile.bindings"
+                :key="binding.id"
+                class="binding-item"
+                :class="{ 'binding-item--manual': binding.isManual }"
+              >
+                <div>
+                  <div class="binding-heading">
+                    <strong>{{ binding.displayName || binding.taikoId }}</strong>
+                    <span class="source-stamp" :class="`source-stamp--${binding.source}`">
+                      {{ binding.source === "manual" ? copy.manualStamp : binding.source === "hiroba" ? copy.jpStamp : copy.cnStamp }}
+                    </span>
+                  </div>
+                  <p>{{ binding.verifiedTitle || "-" }}</p>
+                </div>
+                <div class="binding-actions">
+                  <span v-if="binding.isCurrent" class="binding-current" role="status">{{ copy.currentUsing }}</span>
+                  <el-button
+                    v-else
+                    :loading="switchingId === binding.id"
+                    :disabled="switchingId === binding.id"
+                    @click="switchBinding(binding.id)"
+                  >
+                    {{ copy.switchCurrent }}
+                  </el-button>
+                  <template v-if="binding.isManual">
+                    <el-button plain @click="renameManual(binding)">{{ copy.manualRename }}</el-button>
+                    <el-button plain @click="showManualClaimCode(binding)">{{ copy.manualClaimCode }}</el-button>
+                    <el-button type="warning" plain @click="detachManual(binding)">{{ copy.manualDetach }}</el-button>
+                    <el-button type="danger" plain @click="permanentlyDeleteManual(binding)">{{ copy.manualDelete }}</el-button>
+                  </template>
+                  <el-button
+                    v-else
+                    type="danger"
+                    plain
+                    :loading="deletingId === binding.id"
+                    @click="deleteBinding(binding)"
+                  >
+                    {{ copy.deleteBinding }}
+                  </el-button>
+                </div>
+              </div>
+            </div>
+            <details class="manual-account-panel"><summary>{{ copy.manualTitle }}</summary>
+              <div class="manual-account-copy">
+                <p>{{ copy.manualDesc }}</p>
+              </div>
+              <div class="manual-account-controls">
+                <el-input
+                  v-model="manualNickname"
+                  :placeholder="copy.manualNickname"
+                  maxlength="24"
+                  @keyup.enter="createManual"
+                />
+                <el-button
+                  type="success"
+                  plain
+                  :loading="manualLoading"
+                  :disabled="!manualNickname.trim()"
+                  @click="createManual"
+                >
+                  {{ copy.manualCreate }}
+                </el-button>
+                <el-input
+                  v-model="manualClaimCode"
+                  :placeholder="copy.manualClaimPlaceholder"
+                  maxlength="12"
+                  @keyup.enter="claimManual"
+                />
+                <el-button
+                  :loading="manualLoading"
+                  :disabled="!manualClaimCode.trim()"
+                  @click="claimManual"
+                >
+                  {{ copy.manualClaim }}
+                </el-button>
+              </div>
+            </details>
+          </el-card>
+        </div>
+
+        <div class="account-links">
+          <AccountOidcOptions class="panel-card profile-oidc-card" purpose="link" :redirect="localePath('/account/profile')" />
+          <el-card class="panel-card qq-card">
+            <div class="section-title">
+              <h3>{{ copy.qqTitle }}</h3>
+              <p>{{ copy.qqDesc }}</p>
+            </div>
+            <template v-if="profile.qqBinding && profile.qqBinding.status === 'active'">
+              <div class="qq-bound-row">
+                <div>
+                  <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
+                  <p>{{ copy.qqBound }} · {{ formatDateTime(profile.qqBinding.verifiedAt || profile.qqBinding.createdAt) }}</p>
+                </div>
+                <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
+              </div>
+            </template>
+            <template v-else-if="profile.qqBinding && profile.qqBinding.status === 'pending'">
+              <div class="qq-pending-row">
+                <div>
+                  <strong>QQ：{{ profile.qqBinding.qqNumber }}</strong>
+                  <span class="source-stamp source-stamp--manual">{{ copy.qqPending }}</span>
+                </div>
+                <p class="qq-pending-hint">{{ copy.qqCodeHint }}</p>
+                <div class="qq-verify-row">
+                  <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
+                  <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
+                    {{ copy.qqConfirmButton }}
+                  </el-button>
+                </div>
+                <el-button type="danger" plain :loading="qqRemoving" @click="removeQqBinding">{{ copy.qqUnbind }}</el-button>
+              </div>
+            </template>
+            <template v-else>
+              <div v-if="qqVerifyCodeResult" ref="qqVerifyBoxRef" class="qq-code-result" tabindex="-1">
+                <p>{{ copy.qqCodeReady }}</p>
+                <p class="qq-code-hint">{{ copy.qqCodeHint }}</p>
+                <div class="qq-verify-row">
+                  <el-input v-model="qqVerifyCode" :placeholder="copy.qqConfirmPlaceholder" maxlength="6" @keyup.enter="confirmQqBinding" />
+                  <el-button type="primary" :loading="qqConfirming" :disabled="!qqVerifyCode.trim()" @click="confirmQqBinding">
+                    {{ copy.qqConfirmButton }}
+                  </el-button>
+                </div>
+              </div>
+              <div v-else class="bind-input-row">
+                <el-input v-model="qqInput" :placeholder="copy.qqPlaceholder" @keyup.enter="prepareQqBinding" />
+                <el-button type="primary" :loading="qqPreparing" :disabled="!qqInput.trim()" @click="prepareQqBinding">
+                  {{ copy.qqStartVerify }}
+                </el-button>
+              </div>
+            </template>
+          </el-card>
+        </div>
       </section>
 
-      <el-card class="panel-card mydon-card">
-        <div class="section-title">
-          <h3>{{ copy.myDon }}</h3>
-        </div>
-        <div v-if="!profile.currentBinding" class="mydon-empty">
-          <el-empty :description="copy.myDonNeedBinding" />
-        </div>
-        <div v-else-if="!myDonErrored" class="mydon-frame">
-          <img :src="myDonUrl" alt="我的小咚" class="mydon-image" @error="myDonErrored = true" />
-        </div>
-        <div v-else class="mydon-empty">
-          <el-empty :description="copy.myDonFailed" />
-        </div>
-      </el-card>
+      <section class="mydon-workspace">
+        <el-card class="panel-card mydon-config-card">
+          <div class="section-title">
+            <h3>{{ copy.showcaseTitle }}</h3>
+          </div>
+
+          <div v-if="myDonShowcasePending" class="showcase-skeleton">
+            <el-skeleton :rows="6" animated />
+          </div>
+          <div v-else-if="!profile.currentBinding" class="mydon-empty">
+            <el-empty :description="copy.showcaseNeedBinding" />
+          </div>
+          <div v-else-if="myDonShowcaseError" class="showcase-error">
+            <el-alert :title="copy.showcaseLoadFailed" type="error" :closable="false" show-icon />
+          </div>
+          <div v-else-if="!myDonShowcaseData.hasUserdata" class="mydon-empty">
+            <el-empty :description="copy.showcaseNeedUserdata" />
+          </div>
+          <div v-else-if="!availableShowcaseTitles.length" class="mydon-empty">
+            <el-empty :description="copy.showcaseEmpty" />
+          </div>
+          <div v-else class="showcase-config">
+            <div class="showcase-status">
+              <div class="showcase-status__item">
+                <span>{{ copy.showcaseMode }}</span>
+                <strong>{{ myDonShowcaseData.isCustom ? copy.showcaseModeCustom : copy.showcaseModeDefault }}</strong>
+              </div>
+              <div class="showcase-status__item">
+                <span>{{ copy.showcaseSelection }}</span>
+                <strong v-if="currentShowcaseSelection.length">{{ currentShowcaseSelection.join(" / ") }}</strong>
+                <strong v-else>{{ copy.showcaseSelectionEmpty }}</strong>
+              </div>
+            </div>
+
+            <div class="showcase-layout-picker">
+              <span class="showcase-layout-picker__label">{{ copy.showcaseLayout }}</span>
+              <el-radio-group v-model="myDonShowcaseLayout" class="showcase-layout-picker__options">
+                <el-radio-button value="nickname">{{ copy.showcaseLayoutNickname }}</el-radio-button>
+                <el-radio-button value="full">{{ copy.showcaseLayoutFull }}</el-radio-button>
+                <el-radio-button value="full_gold">{{ copy.showcaseLayoutFullGold }}</el-radio-button>
+              </el-radio-group>
+            </div>
+
+            <p class="showcase-hint">{{ copy.showcaseOrderHint }}</p>
+
+            <div class="showcase-slot-list">
+              <div v-for="slotIndex in 5" :key="slotIndex" class="showcase-slot-item">
+                <label :for="`showcase-slot-${slotIndex}`" class="showcase-slot-item__label">
+                  {{ copy.showcaseSlot.replace("{index}", String(slotIndex)) }}
+                </label>
+                <el-select
+                  :id="`showcase-slot-${slotIndex}`"
+                  v-model="myDonShowcaseSlots[slotIndex - 1]"
+                  filterable
+                  clearable
+                  class="showcase-slot-item__select"
+                  :placeholder="copy.showcasePlaceholder"
+                >
+                  <el-option
+                    v-for="option in getShowcaseSlotOptions(slotIndex - 1)"
+                    :key="option.titleName"
+                    :label="formatShowcaseOptionLabel(option)"
+                    :value="option.titleName"
+                  />
+                </el-select>
+              </div>
+            </div>
+
+            <p class="showcase-clear-hint">{{ copy.showcaseClearHint }}</p>
+
+            <div class="showcase-actions">
+              <el-button type="primary" :loading="showcaseSaving" :disabled="!showcaseDirty" @click="saveMyDonShowcase">
+                {{ copy.showcaseSave }}
+              </el-button>
+              <el-button plain :loading="showcaseSaving" :disabled="!showcaseCanReset" @click="resetMyDonShowcase">
+                {{ copy.showcaseReset }}
+              </el-button>
+            </div>
+          </div>
+        </el-card>
+
+        <el-card class="panel-card mydon-card">
+          <div class="section-title">
+            <h3>{{ copy.myDon }}</h3>
+          </div>
+          <div v-if="!profile.currentBinding" class="mydon-empty">
+            <el-empty :description="copy.myDonNeedBinding" />
+          </div>
+          <div v-else-if="!myDonErrored" class="mydon-frame">
+            <img :src="myDonUrl" alt="我的小咚" class="mydon-image" @error="myDonErrored = true" />
+          </div>
+          <div v-else class="mydon-empty">
+            <el-empty :description="copy.myDonFailed" />
+          </div>
+        </el-card>
+      </section>
 
       <section v-if="developerApiV1Enabled" class="third-party-settings" :aria-label="locale === 'ja' ? '外部アプリのアクセス管理' : '第三方应用权限'">
         <div>
@@ -1434,7 +1442,8 @@ const removeQqBinding = async () => {
 .profile-page {
   width: 100%;
   display: grid;
-  gap: 28px;
+  gap: 24px;
+  container: profile / inline-size;
 }
 
 .third-party-settings {
@@ -1472,41 +1481,71 @@ const removeQqBinding = async () => {
 }
 
 .onboarding-card {
+  border: 1px solid var(--viewer-border);
+}
+
+.onboarding-card :deep(.el-card__body) {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  border: 1px solid var(--viewer-border);
 }
 .onboarding-card .onboarding-copy { min-width: 0; }
 .onboarding-card h3 { margin: 0 0 6px; font-size: 16px; }
 .onboarding-card p { margin: 0; color:var(--el-text-color-secondary); font-size: 14px; line-height: 1.6; }
-@media (max-width: 520px) {
-  .onboarding-card { flex-direction: column; align-items: stretch; text-align: left; }
-  .onboarding-card .el-button { width: 100%; }
-}
-.profile-grid {
+.account-management,
+.mydon-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   align-items: start;
-  gap: 28px;
+  gap: 24px;
 }
 
-.profile-grid > *,
+.mydon-workspace {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-links {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.profile-oidc-card {
+  margin: 0;
+  padding: 24px;
+  border-top: 0;
+}
+
+.profile-oidc-card :deep(h3) {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.profile-page > *,
+.account-management > *,
+.mydon-workspace > *,
 .profile-main > *,
+.profile-info > *,
 .bind-input-row > *,
-.manual-account-panel > *,
 .manual-account-controls > * {
   min-width: 0;
 }
 
-.binding-card {
+.binding-card,
+.qq-card {
   container-type: inline-size;
+  scroll-margin-top: 16px;
 }
 
-.profile-main-card,.mydon-config-card {
-  grid-column: 1 / -1;
+.profile-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
+  align-items: center;
+  gap: 16px 24px;
+  overflow-wrap: anywhere;
 }
 
 .profile-main {
@@ -1547,7 +1586,7 @@ const removeQqBinding = async () => {
 }
 
 .profile-info p {
-  margin: 6px 0 18px;
+  margin: 6px 0 12px;
   color:var(--viewer-text-muted);
 }
 
@@ -1555,7 +1594,7 @@ const removeQqBinding = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .status-chip {
@@ -1631,34 +1670,7 @@ const removeQqBinding = async () => {
 }
 
 .manual-account-panel {
-  display: block;
-  grid-template-columns: minmax(0,1fr);
-  gap: 14px;
-  align-items: center;
-  padding: 14px;
-  margin: 4px 0 16px;
-  border: 0;
-  border-radius: 0;
-  background:transparent;
-}
-
-.manual-drum {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border: 4px solid var(--viewer-primary);
-  border-radius: 50%;
-  background:var(--viewer-surface);
-  box-shadow:inset 0 0 0 4px var(--viewer-selected);
-}
-
-.manual-drum span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background:var(--viewer-primary);
-  opacity: 0.32;
+  margin-top: 16px;
 }
 
 .manual-account-copy {
@@ -1678,6 +1690,7 @@ const removeQqBinding = async () => {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   width: 100%;
+  margin-top: 16px;
 }
 
 .binding-list {
@@ -1701,7 +1714,16 @@ const removeQqBinding = async () => {
 }
 
 .binding-item--manual {
-  box-shadow:inset 4px 0 0 var(--viewer-primary);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.binding-item--manual .binding-actions {
+  justify-content: flex-start;
+}
+
+.binding-actions .el-button {
+  margin-left: 0;
 }
 
 .binding-heading {
@@ -1750,6 +1772,7 @@ const removeQqBinding = async () => {
 
 .mydon-image {
   width: 100%;
+  height: auto;
   display: block;
   border-radius: 14px;
 }
@@ -1759,6 +1782,10 @@ const removeQqBinding = async () => {
   gap: 16px;
 }
 
+.mydon-workspace .section-title {
+  margin-bottom: 16px;
+}
+
 .showcase-error {
   display: grid;
   gap: 10px;
@@ -1766,7 +1793,7 @@ const removeQqBinding = async () => {
 
 .showcase-status {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -1793,13 +1820,16 @@ const removeQqBinding = async () => {
 
 .showcase-slot-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
 .showcase-slot-item {
   display: grid;
-  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
 }
 
 .showcase-slot-item__select {
@@ -1814,6 +1844,13 @@ const removeQqBinding = async () => {
 .showcase-layout-picker__options {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
+}
+
+.showcase-layout-picker__options :deep(.el-radio-button__inner) {
+  border: 1px solid var(--viewer-control-border);
+  border-radius: 6px;
+  box-shadow: none;
 }
 
 .showcase-hint,
@@ -1826,10 +1863,6 @@ const removeQqBinding = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-}
-
-.qq-card {
-  container-type: inline-size;
 }
 
 .qq-bound-row {
@@ -1888,25 +1921,42 @@ const removeQqBinding = async () => {
   color:var(--viewer-text-muted);
 }
 
-@container (max-width: 620px) {
-  .manual-account-panel {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
+@container profile (max-width: 760px) {
+  .account-management,
+  .mydon-workspace {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .manual-account-controls {
-    grid-column: 1 / -1;
+  .profile-info {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container (max-width: 460px) {
+  .bind-input-row,
+  .qq-verify-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .binding-item,
+  .qq-bound-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .binding-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .binding-actions .el-button {
+    margin-left: 0;
   }
 }
 
 @container (max-width: 390px) {
-  .manual-account-panel,
   .manual-account-controls {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .manual-account-controls {
-    grid-column: auto;
   }
 
   .manual-account-controls .el-button {
@@ -1915,13 +1965,13 @@ const removeQqBinding = async () => {
   }
 }
 
-@media (max-width: 1100px) {
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
+@container profile (max-width: 520px) {
+  .onboarding-card :deep(.el-card__body) { flex-direction: column; align-items: stretch; text-align: left; }
+  .onboarding-card .el-button { width: 100%; }
+  .profile-oidc-card { padding: 20px; }
 }
 
-@media (max-width: 720px) {
+@container profile (max-width: 720px) {
   .profile-main {
     grid-template-columns: 84px minmax(0, 1fr);
     align-items: start;
@@ -2063,40 +2113,82 @@ const removeQqBinding = async () => {
     font-size: 14px;
     line-height: 1.4;
   }
-
-  .binding-card,
-  .qq-card {
-    scroll-margin-top: 16px;
-  }
-
-  .meta-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .bind-input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .manual-account-panel,
-  .manual-account-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .binding-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .showcase-status,
-  .showcase-slot-list {
-    grid-template-columns: 1fr;
-  }
-
-  .binding-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
 }
-.manual-account-panel summary{cursor:pointer;min-height:44px;align-content:center;font-size:15px;color:var(--viewer-link);}.manual-account-panel[open] summary{margin-bottom:12px;}.manual-account-controls{margin-top:16px;}.manual-account-panel{margin-top:16px;padding:0;}.binding-item--manual{box-shadow:none;}.section-title h3,.profile-info h2{font-weight:600;}.profile-main-card{background:transparent;}.profile-main-card :deep(.el-card__body){padding:0 0 8px;}.meta-grid div{background:transparent;padding:0;}.status-chip.ok{color:var(--viewer-success);}.status-chip.pending{color:var(--viewer-warning);}.status-chip strong{font-weight:500;}.avatar-reset-button{color:var(--viewer-link);}.profile-avatar{background:var(--viewer-surface-subtle);color:var(--viewer-text-muted);}.mydon-frame{background:var(--viewer-surface-subtle);}.qq-code-result p.qq-code-hint{font-size:14px;font-weight:400;}
-.profile-more summary{min-height:44px;align-content:center;cursor:pointer;color:var(--viewer-link);font-size:14px;}.profile-more[open]{display:grid;gap:12px;}.profile-more .meta-item{padding:0;background:transparent;}
+
+.manual-account-panel summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  font-size: 15px;
+  color: var(--viewer-link);
+}
+
+.manual-account-panel[open] summary {
+  margin-bottom: 12px;
+}
+
+.section-title h3,.profile-info h2 {
+  font-weight: 600;
+}
+
+.profile-main-card {
+  background: transparent;
+}
+
+.profile-main-card :deep(.el-card__body) {
+  padding: 0 0 8px;
+}
+
+.meta-grid div {
+  background: transparent;
+  padding: 0;
+}
+
+.status-chip.ok {
+  color: var(--viewer-success);
+}
+
+.status-chip.pending {
+  color: var(--viewer-warning);
+}
+
+.status-chip strong {
+  font-weight: 500;
+}
+
+.avatar-reset-button {
+  color: var(--viewer-link);
+}
+
+.profile-avatar {
+  background: var(--viewer-surface-subtle);
+  color: var(--viewer-text-muted);
+}
+
+.mydon-frame {
+  background: var(--viewer-surface-subtle);
+}
+
+.qq-code-result p.qq-code-hint {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.profile-more summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+  color: var(--viewer-link);
+  font-size: 14px;
+}
+
+.profile-more[open] {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-more .meta-item {
+  padding: 0;
+  background: transparent;
+}
 </style>

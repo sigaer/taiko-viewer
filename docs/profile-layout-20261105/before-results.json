@@ -1,0 +1,50 @@
+[
+  {
+    "stage": "before",
+    "width": 1440,
+    "geometry": {
+      "width": 800,
+      "scroll": 800,
+      "bodyScroll": 1440,
+      "viewport": 1440
+    },
+    "checks": "baseline",
+    "result": "PASS"
+  },
+  {
+    "stage": "before",
+    "width": 1280,
+    "geometry": {
+      "width": 800,
+      "scroll": 800,
+      "bodyScroll": 1280,
+      "viewport": 1280
+    },
+    "checks": "baseline",
+    "result": "PASS"
+  },
+  {
+    "stage": "before",
+    "width": 414,
+    "geometry": {
+      "width": 374,
+      "scroll": 374,
+      "bodyScroll": 414,
+      "viewport": 414
+    },
+    "checks": "baseline",
+    "result": "PASS"
+  },
+  {
+    "stage": "before",
+    "width": 390,
+    "geometry": {
+      "width": 350,
+      "scroll": 350,
+      "bodyScroll": 390,
+      "viewport": 390
+    },
+    "checks": "baseline",
+    "result": "PASS"
+  }
+]

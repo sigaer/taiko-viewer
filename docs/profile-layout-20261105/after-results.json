@@ -1,0 +1,50 @@
+[
+  {
+    "stage": "after",
+    "width": 1440,
+    "geometry": {
+      "width": 1000,
+      "scroll": 1000,
+      "bodyScroll": 1440,
+      "viewport": 1440
+    },
+    "checks": "layout/save-refresh/reset/binding-focus-confirm/OurTaiko-error/QQ-focus-error-confirm/manual/avatar/grants",
+    "result": "PASS"
+  },
+  {
+    "stage": "after",
+    "width": 1280,
+    "geometry": {
+      "width": 955,
+      "scroll": 955,
+      "bodyScroll": 1280,
+      "viewport": 1280
+    },
+    "checks": "layout/save-refresh/reset/binding-focus-confirm/OurTaiko-error/QQ-focus-error-confirm/manual/avatar/grants",
+    "result": "PASS"
+  },
+  {
+    "stage": "after",
+    "width": 414,
+    "geometry": {
+      "width": 374,
+      "scroll": 374,
+      "bodyScroll": 414,
+      "viewport": 414
+    },
+    "checks": "layout/save-refresh/reset/binding-focus-confirm/OurTaiko-error/QQ-focus-error-confirm/manual/avatar/grants",
+    "result": "PASS"
+  },
+  {
+    "stage": "after",
+    "width": 390,
+    "geometry": {
+      "width": 350,
+      "scroll": 350,
+      "bodyScroll": 390,
+      "viewport": 390
+    },
+    "checks": "layout/save-refresh/reset/binding-focus-confirm/OurTaiko-error/QQ-focus-error-confirm/manual/avatar/grants",
+    "result": "PASS"
+  }
+]
