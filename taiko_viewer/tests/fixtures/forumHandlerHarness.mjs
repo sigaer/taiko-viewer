@@ -94,9 +94,12 @@ export async function handlers(path, api, exported, options = {}) {
     resolveForumSectionTranslation: (_t, _slug, name) => name,
     FormData: class { append() {} }
   };
+  const unreadSource = await readFile(new URL('../../composables/useForumUnreadCount.ts', import.meta.url), 'utf8');
+  const unreadCode = stripTypeScriptTypes(unreadSource.replace('export const', 'const'), { mode: 'strip' });
+  ports.useForumUnreadCount = new Function(...Object.keys(ports), `${unreadCode}; return useForumUnreadCount;`)(...Object.values(ports));
   const run = new AsyncFunction(...Object.keys(ports), `${code}\nreturn { ${exported.join(', ')} };`);
   const model = await run(...Object.values(ports));
-  return { ...model, source, states, caches, messages, navigations, route,
+  return { ...model, unreadCount: ports.useForumUnreadCount().unreadCount, source, states, caches, messages, navigations, route,
     changeUser: id => { states.get('account-user').value = id === null ? null : { id }; },
     deactivate: () => reactivity.fire('deactivated'), activate: () => reactivity.fire('activated'),
     unmount: () => reactivity.fire('beforeUnmount') };

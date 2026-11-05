@@ -6,11 +6,13 @@ await test('valid notification refresh reconciles both caches while failed refre
   const h = await notifications([notification(1)]);
   h.server.unreadCount = 8;
   await h.retry();
+  assert.equal(h.unreadCount.value, 8);
   for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 8);
   h.readsQueue.push(() => Promise.reject(new Error('read unavailable')));
   await h.retry();
   assert.equal(h.data.value, null);
   for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 8);
+  assert.equal(h.unreadCount.value, 8);
 });
 await test('accepted mark while inactive reconciles cached badges only after a valid resumed read', async () => {
   const h = await notifications([notification(1)]);
@@ -31,6 +33,7 @@ await test('notification success uses the server count, including off-page unrea
   h.writes[0].resolve({ unreadCount: 30 }); await task;
   assert.equal(h.data.value.unreadCount, 30); assert.equal(h.item(1).isRead, true);
   for (const cache of h.caches.values()) assert.equal(cache.value.unreadNotificationCount, 30);
+  assert.equal(h.unreadCount.value, 30);
   assert.equal(h.mutationBusy.value, false); assert.equal(h.openingNotificationId.value, null);
 });
 await test('single-read failure preserves the existing records and count', async () => {
@@ -54,6 +57,7 @@ await test('single-read and mark-all use the same lock', async () => {
   assert.equal(h.writes.length, 1); h.writes[0].reject(new Error('late single')); await first;
   const all = h.markAllRead(); h.writes[1].resolve({ unreadCount: 0 }); await all;
   assert.equal(h.data.value.unreadCount, 0); assert.ok(h.data.value.items.every(i => i.isRead));
+  assert.equal(h.unreadCount.value, 0);
 });
 await test('mark-all failure never optimistically erases unread flags', async () => {
   const h = await notifications([notification(1), notification(2)]);

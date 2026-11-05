@@ -21,6 +21,7 @@ const localePath = useLocalePath();
 const route = useRoute();
 const apiFetch = useViewerApiFetch();
 const { accountUser } = useAccountState();
+const { setUnreadCount } = useForumUnreadCount();
 const guard = useAccountRequestGuard(false);
 const { formatDateTime, formatDate } = useViewerDateTime();
 const forumHome = useNuxtData<ForumHomePayload>("forum-home").data;
@@ -41,6 +42,7 @@ const copy = computed(() => locale.value === 'ja'
 // Each accepted write is reflected only after its response. Single-read and
 // mark-all share one lock, so an older failure cannot roll back a newer success.
 const syncCachedUnreadCount = (unreadCount: number) => {
+  setUnreadCount(unreadCount);
   if (forumHome.value) forumHome.value.unreadNotificationCount = unreadCount;
   if (forumMeHome.value) forumMeHome.value.unreadNotificationCount = unreadCount;
 };

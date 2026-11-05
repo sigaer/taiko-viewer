@@ -380,6 +380,12 @@ export const getForumUserProfile = async (event: H3Event, targetUserIdInput: unk
   };
 };
 
+export const getForumUnreadNotificationCount = async (event: H3Event) => {
+  await ensureForumSchema();
+  const user = await requireAccountUser(event);
+  return { unreadCount: await countUnreadNotifications(user.id) };
+};
+
 export const getForumNotifications = async (
   event: H3Event,
   query: { page?: unknown; pageSize?: unknown }

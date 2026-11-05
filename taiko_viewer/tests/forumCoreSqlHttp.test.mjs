@@ -48,7 +48,8 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
    ['get','/api/forum/threads/:id','threads/[id].get.ts'],['post','/api/forum/threads/:id/like','threads/[id]/like.post.ts'],
    ['post','/api/forum/posts/:id/like','posts/[id]/like.post.ts'],['post','/api/forum/moderation/action','moderation/action.post.ts'],
    ['post','/api/forum/users/:id/block','users/[id]/block.post.ts'],
-   ['get','/api/forum/notifications','notifications.get.ts'],['post','/api/forum/notifications/read','notifications/read.post.ts']
+   ['get','/api/forum/notifications','notifications.get.ts'],['post','/api/forum/notifications/read','notifications/read.post.ts'],
+   ['get','/api/forum/notifications/unread','notifications/unread.get.ts']
   ])router[method](path,(await import('../server/api/forum/'+file)).default);
   server=createServer(toNodeListener(createApp().use(router)));server.listen(0,'127.0.0.1');await once(server,'listening');
   const base='http://127.0.0.1:'+server.address().port,calls=[],checks=[];
@@ -80,7 +81,13 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
   await ask('POST','/api/forum/users/990332/block','author',{enabled:true});const blocked=await ask('GET',`/api/forum/threads/${a.id}`,'author');assert.equal(blocked.posts[0].isBlockedAuthor,true);const filtered=await ask('GET','/api/forum/threads','author');assert.ok(!filtered.items.some(row=>row.id===b.id));
   await ask('POST','/api/forum/users/990332/block','author',{enabled:false});const restored=await ask('GET',`/api/forum/threads/${a.id}`,'author');assert.equal(restored.posts[0].isBlockedAuthor,false);checks.push('block API filters authors and marks reply folding; unblock restores');
   const notices=await ask('GET','/api/forum/notifications','author');const home=await ask('GET','/api/forum/home','author');assert.equal(home.unreadNotificationCount,notices.unreadCount);assert.ok(notices.unreadCount>0);
+  await ask('GET','/api/forum/notifications/unread',null,undefined,401);
+  const unread=await ask('GET','/api/forum/notifications/unread','author');assert.equal(unread.unreadCount,notices.unreadCount);assert.deepEqual(Object.keys(unread),['unreadCount']);
+  await ask('POST','/api/forum/users/990332/block','author',{enabled:true});
+  const blockedUnread=await ask('GET','/api/forum/notifications/unread','author');assert.equal(blockedUnread.unreadCount,(await ask('GET','/api/forum/notifications','author')).unreadCount);assert.ok(blockedUnread.unreadCount<unread.unreadCount);
+  await ask('POST','/api/forum/users/990332/block','author',{enabled:false});
   await ask('POST','/api/forum/notifications/read','author',{all:true});const fresh=await ask('GET','/api/forum/home','author');assert.equal(fresh.unreadNotificationCount,0);assert.equal((await ask('GET','/api/forum/notifications','author')).unreadCount,0);checks.push('real home unread count matches notifications before and after mark-all');
+  assert.equal((await ask('GET','/api/forum/notifications/unread','author')).unreadCount,0);checks.push('lightweight unread endpoint requires authentication, respects blocks and clears after mark-all');
   const result={pass:true,level:'actual H3 HTTP and private MySQL; synthetic catalog/session rows',database:identity.databaseName,actualSelectDatabase:true,privateDatadirVerified:true,checks,calls,productionConnections:0,productionWrites:0};
   await writeFile(resolve(process.env.VIEWER_REVIEW_OUT,'core-sql-http.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({pass:true,database:identity.databaseName,checks:checks.length,httpRequests:calls.length,productionConnections:0}));
  }finally{

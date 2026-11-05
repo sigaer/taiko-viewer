@@ -38,7 +38,8 @@
     "loading": "加载中...",
     "language": "语言",
     "switchLanguage": "切换语言",
-    "mobileNavigation": "移动端主导航"
+    "mobileNavigation": "移动端主导航",
+    "communityUnread": "社区，有未读通知"
   },
   "nav": {
     "home": "首页",
