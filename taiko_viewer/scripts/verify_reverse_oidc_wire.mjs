@@ -15,7 +15,7 @@ import {connect} from 'node:net';
 import {createServer as createNetServer} from 'node:net';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 const root=fileURLToPath(new URL('../',import.meta.url)).replace(/\/$/,'');
 const rp=process.env.TAIKO_OURTAIKO_RP_CHECKOUT;
@@ -24,7 +24,8 @@ const mysqldBinary=process.env.TAIKO_TEST_MYSQLD || '/www/server/mysql/bin/mysql
 const require=createRequire(root+'/package.json');
 const mysql=require('mysql2/promise');
 const {chromium}=require('playwright-core');
-const {generateKeyPair,exportJWK}=await import(root+'/node_modules/jose/dist/webapi/index.js');
+const {generateKeyPair,exportJWK,jwtVerify,createLocalJWKSet}=await import(root+'/node_modules/jose/dist/webapi/index.js');
+const oidc=await import('openid-client');
 const {installSchemaModuleLoader}=await import(root+'/scripts/schema_module_loader.mjs');
 const loader=installSchemaModuleLoader();
 const {PROVIDER_TABLES,databaseAdapter,authorizationBinding}=await import(root+'/server/services/reverse-oidc/adapter.ts');
@@ -59,6 +60,8 @@ try{
  const [[identity]]=await db.query('SELECT DATABASE() name');assert.ok(identity.name.endsWith('_test'));
  await db.query('CREATE TABLE web_user_accounts (id BIGINT UNSIGNED PRIMARY KEY,username VARCHAR(64),email VARCHAR(255),email_verified INT)');
  await db.query('CREATE TABLE web_user_sessions (session_token CHAR(64) PRIMARY KEY,user_id BIGINT UNSIGNED,expires_at DATETIME)');
+ const {OIDC_TABLES}=await import(root+'/server/services/oidc/schema.ts');
+ await db.query(OIDC_TABLES[0]);
  for(const sql of PROVIDER_TABLES)await db.query(sql);
  await db.execute('INSERT INTO web_user_accounts VALUES (?,?,?,1)',['9007199254740993','wire-viewer','viewer@example.test']);
  await db.execute('INSERT INTO web_user_sessions VALUES (?,?,DATE_ADD(NOW(),INTERVAL 1 HOUR))',[session,'9007199254740993']);
@@ -161,6 +164,8 @@ try{
  const firstCallback=lastCallback;
  assert.ok(exchanges[0]?.token?.id_token,'real code exchange returned signed ID Token');
  const token=exchanges[0].token;
+ const firstSigned=await jwtVerify(token.id_token,createLocalJWKSet(jwks),{issuer:metadata.issuer,audience:'OurTaiko',algorithms:['RS256']});
+ assert.equal(firstSigned.payload.sub,'9007199254740993');assert.equal(firstSigned.payload.email,'viewer@example.test');assert.equal(firstSigned.payload.email_verified,true);assert.equal(Object.hasOwn(firstSigned.payload,'ourtaiko_sub'),false);
  const userInfo=await raw(opBase+'/oidc/me','GET',{host:'viewer.sakura-bot.cn','x-forwarded-proto':'https',authorization:'Bearer '+token.access_token});
  assert.equal(userInfo.status,200);const claims=JSON.parse(userInfo.body);assert.equal(claims.sub,'9007199254740993');assert.equal(claims.preferred_username,'wire-viewer');assert.equal(claims.email,'viewer@example.test');
  const replay=await raw(opBase+'/oidc/token','POST',exchanges[0].headers,exchanges[0].body);
@@ -174,6 +179,48 @@ try{
  for(const cookie of await context.cookies())if(cookie.domain==='sso.ourtaiko.org')await context.clearCookies({name:cookie.name,domain:cookie.domain});
  await page.goto(firstCallback);assert.match(await page.locator('body').innerText(),/验证未完成/);
  await page.goto('https://sso.ourtaiko.org/login/sakura/');await page.getByRole('button',{name:'取消',exact:true}).click();await page.waitForURL('https://sso.ourtaiko.org/login/sakura/callback/**');assert.match(await page.locator('body').innerText(),/取消 Viewer 授权/);
+ // Exercise actual code exchange, scope filtering and RP state/nonce validation.
+ const clientConfig=new oidc.Configuration(metadata,'OurTaiko',secret,oidc.ClientSecretBasic(secret));
+ clientConfig[oidc.customFetch]=async(url,options)=>{
+  const remote=new URL(url);assert.equal(remote.origin,'https://viewer.sakura-bot.cn');
+  const result=await raw(opBase+remote.pathname+remote.search,options?.method||'GET',
+   {...Object.fromEntries(new Headers(options?.headers)),host:'viewer.sakura-bot.cn','x-forwarded-proto':'https'},options?.body?.toString());
+  return new Response(result.body,{status:result.status,headers:result.headers});
+ };
+ const callback='https://sso.ourtaiko.org/login/sakura/callback/';
+ await page.route(callback+'**',route=>route.fulfill({status:200,contentType:'text/html',body:'<p>Isolated callback</p>'}));
+ async function signedFlow(scope='openid profile email',wrongNonce=false){
+  const state=randomBytes(24).toString('base64url'),nonce=randomBytes(24).toString('base64url'),verifier=randomBytes(32).toString('base64url');
+  const auth=new URL(metadata.authorization_endpoint);auth.search=new URLSearchParams({client_id:'OurTaiko',redirect_uri:callback,response_type:'code',scope,state,nonce,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256'}).toString();
+  await page.goto(auth.href);await page.getByRole('heading',{name:'授权 OurTaiko',exact:true}).waitFor();
+  const text=await page.locator('main').innerText();assert.ok(text.includes('Viewer 账号 ID：9007199254740993'));
+  if(scope.includes('email'))assert.ok(text.includes('已验证邮箱：viewer@example.test')||text.includes('邮箱尚未验证'));
+  await page.getByRole('button',{name:'同意并继续'}).click();await page.waitForURL(callback+'**');
+  const response=new URL(page.url());
+  await assert.rejects(()=>oidc.authorizationCodeGrant(clientConfig,response,{pkceCodeVerifier:verifier,expectedState:'wrong-state',expectedNonce:nonce}),error=>error.code==='OAUTH_INVALID_RESPONSE' && /state/i.test(error.cause?.message));
+  if(wrongNonce){await assert.rejects(()=>oidc.authorizationCodeGrant(clientConfig,response,{pkceCodeVerifier:verifier,expectedState:state,expectedNonce:'wrong-nonce'}),error=>/nonce/i.test(error.cause?.message));return;}
+  const tokens=await oidc.authorizationCodeGrant(clientConfig,response,{pkceCodeVerifier:verifier,expectedState:state,expectedNonce:nonce});
+  const signed=await jwtVerify(tokens.id_token,createLocalJWKSet(jwks),{issuer:metadata.issuer,audience:'OurTaiko',algorithms:['RS256']});
+  assert.equal(signed.payload.nonce,nonce);assert.equal(signed.payload.sub,'9007199254740993');return {claims:signed.payload,text};
+ }
+ const mapping='0123456789abcdef0123456789abcdef';
+ // Different issuer and different Viewer account must not become this account's hint.
+ await db.execute('INSERT INTO web_user_accounts VALUES (?,?,?,1)',['9007199254740995','wire-other-owner','other@example.test']);
+ await db.execute(`INSERT INTO web_external_identities (user_id,provider_id,issuer,subject,remote_link_operation_id) VALUES (?, 'ourtaiko', ?, ?, ?)`,['9007199254740995','https://sso.ourtaiko.org',mapping,randomBytes(32).toString('hex')]);
+ await db.execute(`INSERT INTO web_external_identities (user_id,provider_id,issuer,subject,remote_link_operation_id) VALUES (?, 'other', ?, ?, ?)`,['9007199254740993','https://sso.ourtaiko.org/',mapping,randomBytes(32).toString('hex')]);
+ let flow=await signedFlow();assert.equal(flow.claims.email_verified,true);assert.equal(Object.hasOwn(flow.claims,'ourtaiko_sub'),false);
+ await db.execute(`INSERT INTO web_external_identities (user_id,provider_id,issuer,subject,remote_link_status,remote_link_operation_id) VALUES (?, 'ourtaiko', ?, ?, 'pending', ?)`,['9007199254740993','https://sso.ourtaiko.org',mapping.slice(0,31)+'0',randomBytes(32).toString('hex')]);
+ for(const status of ['pending','failed','linked','not_requested']){
+  await db.execute('UPDATE web_external_identities SET remote_link_status=? WHERE user_id=? AND issuer=?',[status,'9007199254740993','https://sso.ourtaiko.org']);
+  flow=await signedFlow();assert.equal(flow.claims.ourtaiko_sub,mapping.slice(0,31)+'0');assert.ok(flow.text.includes('OurTaiko 关联身份：'+flow.claims.ourtaiko_sub));
+ }
+ flow=await signedFlow('openid');assert.equal(Object.hasOwn(flow.claims,'email'),false);assert.equal(Object.hasOwn(flow.claims,'email_verified'),false);assert.equal(Object.hasOwn(flow.claims,'ourtaiko_sub'),false);
+ await db.execute('UPDATE web_user_accounts SET email_verified=0 WHERE id=?',['9007199254740993']);
+ flow=await signedFlow();assert.equal(flow.claims.email_verified,false);assert.equal(Object.hasOwn(flow.claims,'email'),false);
+ await signedFlow('openid profile email',true);
+ await db.execute('UPDATE web_user_accounts SET email_verified=1 WHERE id=?',['9007199254740993']);
+ await db.execute('DELETE FROM web_external_identities');await db.execute('DELETE FROM web_user_accounts WHERE id=?',['9007199254740995']);
+ await page.unroute(callback+'**');
  // A different Viewer subject with the same RP email cannot create/merge an account.
  const otherSession=randomBytes(32).toString('hex');
  await db.execute('INSERT INTO web_user_accounts VALUES (?,?,?,1)',['9007199254740994','wire-unlinked','wire-linked@example.test']);
@@ -198,7 +245,7 @@ try{
  revokeBeforeCallback=true;await page.getByRole('button',{name:'同意并继续'}).click();await page.waitForURL('https://sso.ourtaiko.org/login/sakura/callback/**');
  assert.match(await page.locator('body').innerText(),/验证未完成/);assert.equal(exchanges.at(-1).token.error,'invalid_grant');
  const [[counts]]=await db.query('SELECT COUNT(*) n FROM web_user_accounts');assert.equal(Number(counts.n),2);
- const result={kind:'isolated-real-browser-and-library-wire',database:identity.name,discovery:true,publicJwks:true,pkceS256:true,consent:true,authlibSignatureClaimsStateNonce:true,existingAccountLogin:true,repeatLoginSameAccount:true,users:1,links:1,callbackReplayRejected:true,codeSingleUse:true,grantRevocation:true,userInfo:true,unlinkedSameEmailRejected:true,denial:true,csrfRejected:true,sessionSwitchRejected:true,viewerRevocationRejected:true,revokedCodeExchangeRejected:true,bundledNuxt:Boolean(process.env.TAIKO_TEST_NITRO_OUTPUT),artifacts:dir};
+ const result={kind:'isolated-real-browser-and-library-wire',database:identity.name,discovery:true,publicJwks:true,pkceS256:true,consent:true,authlibSignatureClaimsStateNonce:true,signedEmailBoolean:true,absentMappingClaimOmitted:true,mappingStatuses:['pending','failed','linked','not_requested'],exactMappingOwnerIssuer:true,scopeFiltering:true,unverifiedEmailFalse:true,wrongStateRejected:true,wrongNonceRejected:true,existingAccountLogin:true,repeatLoginSameAccount:true,users:1,links:1,callbackReplayRejected:true,codeSingleUse:true,grantRevocation:true,userInfo:true,unlinkedSameEmailRejected:true,denial:true,csrfRejected:true,sessionSwitchRejected:true,viewerRevocationRejected:true,revokedCodeExchangeRejected:true,bundledNuxt:Boolean(process.env.TAIKO_TEST_NITRO_OUTPUT),artifacts:dir};
  await writeFile(dir+'/result.json',JSON.stringify(result));console.log(JSON.stringify(result));
  await page.close();
 }catch(error){

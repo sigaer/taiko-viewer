@@ -34,7 +34,10 @@ export function createViewerProvider(db: Pool, privateConfig: any) {
       claimsParameter: { enabled: false }, requestObjects: { request: false, requestUri: false },
       revocation: { enabled: true } },
     scopes: ['openid', 'profile', 'email'],
-    claims: { openid: ['sub'], profile: ['preferred_username'], email: ['email', 'email_verified'] },
+    claims: { openid: ['sub'], profile: ['preferred_username', 'ourtaiko_sub'], email: ['email', 'email_verified'] },
+    // 9.13.3 otherwise limits code-flow ID Tokens to openid when UserInfo is enabled.
+    // Let the library include consented scope claims before its normal RS256 signing.
+    conformIdTokenClaims: false,
     responseTypes: ['code'], subjectTypes: ['public'],
     pkce: { required: () => true },
     enabledJWA: { idTokenSigningAlgValues: ['RS256'] },
@@ -44,7 +47,7 @@ export function createViewerProvider(db: Pool, privateConfig: any) {
       const id = ctx.oidc.result?.consent?.grantId;
       return id ? provider.Grant.find(id) : undefined;
     },
-    findAccount: (_ctx: any, sub: string) => findViewerOidcAccount(db, sub),
+    findAccount: (ctx: any, sub: string) => findViewerOidcAccount(db, sub, ctx.oidc.client?.clientId),
     renderError: async (ctx: any) => {
       ctx.type = 'html';
       ctx.body = '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>授权未完成</title><p>授权请求无效或已过期，请返回 OurTaiko 重新登录。</p></html>';

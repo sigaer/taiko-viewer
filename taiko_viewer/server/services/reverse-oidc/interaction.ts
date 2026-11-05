@@ -3,7 +3,7 @@ import { createError, getCookie, getHeader, send, sendRedirect, setHeader, type 
 import type { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import { getAccountDb } from '../../utils/account-db';
 import { authorizationBinding } from './adapter';
-import { canonicalViewerSubject } from './account';
+import { canonicalViewerSubject, findViewerOidcAccount } from './account';
 import { getViewerProvider } from './provider';
 
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -42,16 +42,24 @@ export async function handleViewerInteraction(event: H3Event, uid: string) {
     const [rows] = await db.execute<RowDataPacket[]>('SELECT csrf_hash,subject,session_hash FROM web_oidc_provider_consent WHERE interaction_id=? AND expires_at>UNIX_TIMESTAMP()', [uid]);
     if (rows[0]?.csrf_hash !== hash(csrf) || rows[0]?.subject !== account.subject || rows[0]?.session_hash !== account.sessionHash)
       throw createError({statusCode:409,statusMessage:'Viewer session changed; restart authorization'});
-    const scopes = String(details.params.scope || '').split(' ');
-    const fields = ['账号 ID', ...(scopes.includes('profile') ? ['用户名'] : []), ...(scopes.includes('email') ? ['已验证邮箱及验证状态'] : [])];
+    const scope = String(details.params.scope || '');
+    const oidcAccount = await findViewerOidcAccount(db, account.subject, 'OurTaiko');
+    if (!oidcAccount) throw createError({statusCode:401});
+    const claims = await oidcAccount.claims('id_token', scope);
+    const fields = [`<li>Viewer 账号 ID：${escape(claims.sub)}</li>`,
+      ...(claims.preferred_username ? [`<li>用户名：${escape(claims.preferred_username)}</li>`] : []),
+      ...(claims.email ? [`<li>已验证邮箱：${escape(claims.email)}</li>`] : []),
+      ...(claims.ourtaiko_sub ? [`<li>OurTaiko 关联身份：${escape(claims.ourtaiko_sub)}</li>`] : [])];
+    const emailState = scope.split(/\s+/).includes('email') && !claims.email
+      ? '<p>邮箱尚未验证，不会分享邮箱地址。</p>' : '';
     return send(event, `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>授权 OurTaiko · Sakura Viewer</title><style>
       :root{color-scheme:light;--bg:#f7f6f8;--text:#24212c;--muted:#595260;--accent:#9d2757;--line:#dcd6de}
       *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,sans-serif}
       main{max-width:480px;margin:8vh auto;padding:32px;background:white;border:1px solid var(--line);border-radius:20px}
-      h1{font-size:24px;margin:20px 0}p{overflow-wrap:anywhere}.brand{color:var(--accent);font-weight:700}.account{padding:16px;background:var(--bg);border-radius:12px}
+      h1{font-size:24px;margin:20px 0}p,li{overflow-wrap:anywhere}.brand{color:var(--accent);font-weight:700}.account{padding:16px;background:var(--bg);border-radius:12px}
       ul{padding-left:24px;color:var(--muted)}form{display:flex;gap:12px;margin-top:28px}button{min-height:48px;padding:12px 22px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--text);font:inherit;cursor:pointer;flex:1}
       button[value=allow]{background:var(--accent);color:white;border-color:var(--accent)}button:focus-visible{outline:3px solid #282050;outline-offset:3px}@media(max-width:520px){main{margin:24px 16px;padding:24px}}
-      </style></head><body><main><div class="brand">Sakura Viewer</div><h1>授权 OurTaiko</h1><p class="account">当前账号：<strong>${escape(account.username)}</strong></p><p>OurTaiko 将获得：</p><ul>${fields.map(field=>`<li>${field}</li>`).join('')}</ul><form method="post" action="${target}"><input type="hidden" name="csrf" value="${csrf}"><button type="submit" name="decision" value="deny">取消</button><button type="submit" name="decision" value="allow">同意并继续</button></form></main></body></html>`, 'text/html; charset=utf-8');
+      </style></head><body><main><div class="brand">Sakura Viewer</div><h1>授权 OurTaiko</h1><p class="account">当前账号：<strong>${escape(account.username)}</strong></p><p>OurTaiko 将获得：</p><ul>${fields.join('')}</ul>${emailState}<form method="post" action="${target}"><input type="hidden" name="csrf" value="${csrf}"><button type="submit" name="decision" value="deny">取消</button><button type="submit" name="decision" value="allow">同意并继续</button></form></main></body></html>`, 'text/html; charset=utf-8');
   }
   if (event.method !== 'POST') throw createError({statusCode:405});
   if (getHeader(event,'origin') !== 'https://viewer.sakura-bot.cn' || !getHeader(event,'content-type')?.startsWith('application/x-www-form-urlencoded'))

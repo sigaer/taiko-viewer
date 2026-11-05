@@ -40,3 +40,13 @@
 Viewer 定向测试 7 项、OurTaiko 映射测试 6 项通过。Nuxt 生产构建在既有 5 GiB cgroup / 正式脚本同款 4 GiB Node 堆下通过，耗时约 148 秒，采样 cgroup 峰值 4,190,056,448 字节，OS 最大 RSS 3,716,588 KiB，OOM/kill 均为 0。初次使用 Node 默认堆限制的构建因堆耗尽失败，随后采用仓库既定构建参数；没有调整 cgroup 上限或绕过隔离。
 
 打包的 `.output/server/index.mjs` 也通过上述全部浏览器/换码/验签/绑定与拒绝分支；该模式使用仓库已有的 `owned-qa` 启动隔离，另需 `TAIKO_TEST_NITRO_OUTPUT` 为绝对 server entry 路径。隔离启动再次核验真实 DB 名、datadir、cgroup 和私有运行路径，不启动 Annual 维护任务。版本投影检查通过。发布前的生产基线检查为正向 registry `ourtaiko` 200、OurTaiko Discovery 200、新反向 Discovery 404。
+
+## 1.3.2：OurTaiko Phase 1 claims 适配（2026-11-05）
+
+依据 [OurTaiko 第一阶段交接](SAKURA-PHASE1-HANDOFF.md)，唯一登记 Client `OurTaiko` 的授权码流程使用固定版本 9.13.3 的正式 `conformIdTokenClaims: false` 配置，让库在 RS256 签名前将已同意 scope 的 claims 纳入 ID Token；保留 UserInfo 和原验证机制，不在签名后改写 JWT。实现依据固定依赖的 `lib/helpers/grant_common.js::issueIdToken` 及[该版本配置文档](https://github.com/panva/node-oidc-provider/blob/v9.13.3/docs/README.md#conformidtokenclaims)。
+
+`email` scope 仍只分享格式有效且本地已验证的邮箱，`email_verified` 始终是 JSON boolean；未验证时为 `false` 并省略邮箱地址。`profile` scope 增加 `ourtaiko_sub`：从现有 `web_external_identities` 按当前 Viewer ID 和二进制精确 Issuer `https://sso.ourtaiko.org` 读取，不按本地/远端状态过滤。值必须为 32 位小写十六进制；异常映射拒绝签发，无映射完全省略 claim。该值只表示本地已有身份，不代表远端关联确认。授权页使用相同资料投影展示真实 ID、将分享的邮箱及关联身份，保留 CSRF、Session、Origin、单次同意和取消分支。
+
+隔离 MySQL 实际 `SELECT DATABASE()=viewer_reverse_oidc_test`，并显式开启测试写入；不读取或复制生产账号。真实 Chromium → 授权确认 → code/S256 → openid-client/Authlib → RS256 验签覆盖：无映射省略、精确用户/Issuer 匹配、pending/failed/linked/not_requested 映射、scope 最小化、未验证邮箱 false、错误 state/nonce 拒绝。已有正式应用名 `Sakura` 的隔离账号重复登录保持同一账号、User/ExternalLink 数各 1 且密码和权限不变；原取消、CSRF、切换账号、撤销 Session、授权码/回调重放、Grant 撤销也通过。定向单元测试共 10 项。复现仍使用上一节的资源受限命令；本次兼容性回归使用旧 OurTaiko RP checkout，不代表已验证对方 bd7b6c1 的新注册表单。
+
+本批不改变正向 OIDC、`remoteLinkEnabled`、远端审计、映射表结构或既有账号绑定，不发送 lookup 新参数，不实现主动关联/unlink，也不修改 OurTaiko 生产配置。生产 Discovery/JWKS、新 Token 的在线验证与管理员开关操作分别记录；自动建号及真实首次注册/重复登录仅在对方开启开关并完成共同验收后才能宣布通过。
