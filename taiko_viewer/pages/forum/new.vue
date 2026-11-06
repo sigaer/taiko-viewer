@@ -103,7 +103,8 @@ const copy = computed(() =>
         paragraphCount: "{count} 段",
         addParagraph: "本文に追加",
         images: "画像",
-        imageCount: "{count} 枚",
+        uploadingImages: "{count}枚をアップロード中…",
+        imageCaption: "説明",
         uploadImage: "画像をアップロード",
         imageCaptionPlaceholder: "画像説明（任意）",
         submit: "投稿する",
@@ -142,8 +143,9 @@ const copy = computed(() =>
         paragraphDraftPlaceholder: "分享点什么？",
         paragraphCount: "{count} 段",
         addParagraph: "加入正文",
-        images: "插图",
-        imageCount: "{count} 张",
+        images: "图片",
+        uploadingImages: "正在上传 {count} 张…",
+        imageCaption: "说明",
         uploadImage: "上传图片",
         imageCaptionPlaceholder: "图片说明（可选）",
         submit: "发布",
@@ -442,22 +444,28 @@ const submit = async () => {
               <el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button>
             </div>
           </div>
-        </section>
-        <section class="block-editor block-editor--attachments">
-          <div class="block-editor__head">
-            <h3>{{ copy.images }}</h3>
-            <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
-          </div>
-          <el-upload :key="accountUser?.id || 'guest'" :disabled="editorDisabled" :show-file-list="false" multiple :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
-            <el-button :loading="uploading">{{ copy.uploadImage }}</el-button>
-          </el-upload>
-          <div class="image-grid">
-            <div v-for="(image, index) in imageBlocks" :key="image.imageUrl" class="image-card">
-              <img :src="image.imageUrl" :alt="image.caption || copy.images" />
-              <el-input v-model="image.caption" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" :aria-label="copy.imageCaptionPlaceholder" />
-              <el-button text @click="removeImage(index)">{{ copy.remove }}</el-button>
+          <div class="composer-media-grid" :aria-label="copy.images" :aria-busy="uploading">
+            <div v-for="(image, index) in imageBlocks" :key="image.imageUrl" class="composer-image">
+              <div class="composer-image__preview">
+                <img :src="image.imageUrl" :alt="image.caption || `${copy.images} ${index + 1}`" />
+              </div>
+              <div class="composer-image__actions">
+                <button type="button" class="composer-image__remove" :disabled="editorDisabled" :aria-label="`${copy.remove} ${copy.images} ${index + 1}`" @click="removeImage(index)">
+                  <span aria-hidden="true">×</span>
+                </button>
+                <details class="composer-image__caption">
+                  <summary>{{ copy.imageCaption }}</summary>
+                  <el-input v-model="image.caption" type="textarea" :rows="3" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" :aria-label="`${copy.imageCaptionPlaceholder} ${index + 1}`" />
+                </details>
+              </div>
             </div>
+            <el-upload :key="accountUser?.id || 'guest'" class="composer-image-upload" :disabled="editorDisabled" :show-file-list="false" multiple :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
+              <el-button class="composer-image-upload__trigger" :loading="uploading" :aria-label="copy.uploadImage" :title="copy.uploadImage">
+                <span v-if="!uploading" aria-hidden="true">+</span>
+              </el-button>
+            </el-upload>
           </div>
+          <p v-if="uploading" class="composer-upload-status" role="status">{{ copy.uploadingImages.replace("{count}", String(uploadCount)) }}</p>
         </section>
         <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open">
           <summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary>
@@ -604,14 +612,12 @@ const submit = async () => {
   justify-content: flex-end;
 }
 
-.block-list,
-.image-grid {
+.block-list {
   display: grid;
   gap: 12px;
 }
 
-.block-list__item,
-.image-card {
+.block-list__item {
   padding: 14px;
   border-radius: 18px;
   background:var(--viewer-surface-subtle);
@@ -623,19 +629,46 @@ const submit = async () => {
   line-height: 1.8;
 }
 
-.image-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.image-card {
+.composer-media-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  align-items: start;
   gap: 10px;
 }
-
-.image-card img {
-  width: 100%;
-  border-radius: 18px;
+.composer-image { min-width: 0; }
+.composer-image__preview { position: relative; aspect-ratio: 1; }
+.composer-image__preview img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+.composer-image__actions { position: relative; }
+.composer-image__remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--viewer-text-muted);
+  background: transparent;
+  font-size: 24px;
+  z-index: 1;
+  cursor: pointer;
 }
+.composer-image__remove:disabled { color: var(--viewer-text-disabled); cursor: not-allowed; }
+.composer-image__caption summary { padding-right: 44px; display: flex; align-items: center; min-height: 44px; color: var(--viewer-text-muted); font-size: 13px; cursor: pointer; }
+.composer-image-upload :deep(.el-upload) { display: block; }
+.composer-image-upload__trigger {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px dashed var(--viewer-control-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--viewer-text-muted);
+  font-size: 30px;
+}
+.composer-upload-status { margin: 0; color: var(--viewer-text-muted); font-size: 13px; }
 
 body.theme-dark .block-editor__head span {
   color:var(--viewer-text-muted);
@@ -647,8 +680,7 @@ body.theme-dark .block-editor {
 
 body.theme-dark .block-editor--body { background:transparent; }
 
-body.theme-dark .block-list__item,
-body.theme-dark .image-card {
+body.theme-dark .block-list__item {
   background:var(--viewer-overlay);
 }
 
@@ -658,21 +690,12 @@ body.theme-dark .image-card {
     grid-template-columns: 1fr;
   }
 
-  .image-grid {
-    grid-template-columns: 1fr;
-  }
-
   .composer-grid--song { grid-template-columns: 1fr; }
 }
 .composer-panel__head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: sticky; top: 0; z-index: 20; margin-bottom: 18px; gap: 16px; padding: 10px 0; background: var(--viewer-surface); }
 .composer-panel__head h1 { margin: 0; font-size: 20px; }
 .composer-panel__head > .el-button { justify-self: end; min-height: 44px; }
 .composer-back-link { display: flex; align-items: center; min-height: 44px; font-size: 14px; }
-.block-editor--attachments { padding: 16px 0; border-radius: 0; background: transparent; }
-body.theme-dark .block-editor--attachments { background: transparent; }
-.image-grid:empty { display: none; }
-.image-card { padding: 8px; border-radius: 10px; }
-.image-card img { max-height: 240px; object-fit: contain; border-radius: 8px; }
 .more-options summary { min-height: 44px; box-sizing: border-box; }
 @media (max-width: 960px) {
   .composer-panel { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
@@ -701,6 +724,5 @@ body.theme-dark .block-editor--attachments { background: transparent; }
   }
   .composer-title { display: none; }
   .block-editor--body :deep(.el-textarea__inner) { min-height: 240px; font-size: 16px; line-height: 1.7; }
-  .image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 </style>

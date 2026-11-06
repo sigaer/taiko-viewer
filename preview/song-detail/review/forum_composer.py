@@ -93,7 +93,7 @@ try:
        assert not page.evaluate('document.documentElement.scrollWidth>innerWidth+2'),name
        file=f'core-{name}-{width}-{theme}-{lang}.png';page.screenshot(path=str(out/'screenshots'/file),full_page=True);screens.append(file)
       hydrate('/forum/new?section=general')
-      body=page.locator('.block-editor--body textarea');body.wait_for()
+      body=page.locator('.block-editor--body textarea').first;body.wait_for()
       assert page.locator('.composer-panel h1').count()==1
       assert page.locator('.mobile-page-navigation').count()==0
       assert not page.locator('.more-options').evaluate('(e)=>e.open')
@@ -101,8 +101,10 @@ try:
        assert not page.locator('.composer-title').is_visible()
        assert body.bounding_box()['y'] < 240
       else:assert page.locator('.composer-title').is_visible()
-      assert page.locator('.block-editor--attachments').bounding_box()['y'] > body.bounding_box()['y']
-      assert page.locator('.more-options').bounding_box()['y'] > page.locator('.block-editor--attachments').bounding_box()['y']
+      assert page.locator('.block-editor--attachments').count()==0
+      assert page.locator('.block-editor--body .composer-media-grid').count()==1
+      assert page.locator('.composer-media-grid').bounding_box()['y'] > body.bounding_box()['y']
+      assert page.locator('.more-options').bounding_box()['y'] > page.locator('.composer-media-grid').bounding_box()['y']
       body.fill('初めての全良！' if lang=='ja' else '终于全良了！')
       screenshot('composer')
       page.locator('.more-options summary').click()
