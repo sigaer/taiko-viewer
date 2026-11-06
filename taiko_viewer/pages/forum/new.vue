@@ -676,8 +676,29 @@ body.theme-dark .block-editor--attachments { background: transparent; }
 .more-options summary { min-height: 44px; box-sizing: border-box; }
 @media (max-width: 960px) {
   .composer-panel { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
-  .composer-panel__head { padding-top: max(8px, env(safe-area-inset-top)); gap: 8px; }
-  .composer-panel__head h1 { font-size: 18px; }
+  .composer-panel__head {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: max(16px, env(safe-area-inset-top)) 0 12px;
+    /* Match the canvas while keeping scrolled content behind sticky navigation. */
+    background: var(--viewer-bg);
+  }
+  .composer-panel__head h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--viewer-text);
+  }
+  .composer-panel__head .composer-back-link {
+    justify-self: start;
+    color: var(--viewer-text-muted);
+  }
+  .composer-panel__head > .el-button {
+    height: 44px;
+    padding-inline: 18px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
   .composer-title { display: none; }
   .block-editor--body :deep(.el-textarea__inner) { min-height: 240px; font-size: 16px; line-height: 1.7; }
   .image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
