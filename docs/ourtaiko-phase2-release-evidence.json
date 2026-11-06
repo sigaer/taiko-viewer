@@ -1,0 +1,24 @@
+{
+  "phase": "OurTaiko Phase 2",
+  "baseline": "f4d7d7a20c1cf37fd7b5498846717acb39d636a0",
+  "version": "1.6.0",
+  "isolatedValidation": {
+    "qaRun": "qa-2ad7147b2152",
+    "oidcSqlHttp": "PASS",
+    "legacyAccountHttp": "PASS",
+    "productionConnections": 0,
+    "productionWrites": 0
+  },
+  "productionBeforeRelease": {
+    "liveVersion": "1.5.0",
+    "viewerId": "1414",
+    "ourtaikoId": "23a4bdbe23b6a86108a67b5dc63df7e3",
+    "viewerLocalMappings": 0,
+    "legacyLookupHttp": 200,
+    "extendedLookupHttp": 200,
+    "externalId": "1414"
+  },
+  "upstreamRequiredForScenarioB": "Deploy and enable SAKURA_REVERSE_LINK_ENABLED after review; Viewer has no new dependency on that route",
+  "migration": "Add two nullable short-lived recovery fields to existing web_oidc_transactions; no second mapping table; run migrate_oidc_schema.ts explicitly before deployment",
+  "security": "externalId only blocks provisioning; normal Viewer login plus fresh OurTaiko OIDC confirm the exact pair; no OAuth tokens persisted in recovery context; existing mapping operation ID retained"
+}

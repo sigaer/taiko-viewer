@@ -35,7 +35,14 @@ try {
     throw Error("Actual isolated _test database required");
   }
   const { schemaRequirement, validateSchemaTables } = await import("../server/utils/account-schema-runtime.ts");
-  if (apply) for (const sql of OIDC_TABLES) await db.execute(sql);
+  if (apply) {
+    for (const sql of OIDC_TABLES) await db.execute(sql);
+    // Additive transaction context only; never rewrite identity mappings.
+    const [columns] = await db.query<any[]>("SHOW COLUMNS FROM web_oidc_transactions");
+    for (const [name, definition] of [["recovery_subject", "VARBINARY(255) DEFAULT NULL"], ["recovery_external_id", "VARCHAR(20) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL"]]) {
+      if (!columns.some((c: any) => c.Field === name)) await db.execute(`ALTER TABLE web_oidc_transactions ADD COLUMN ${name} ${definition}`);
+    }
+  }
   await validateSchemaTables(db as any, OIDC_TABLES.map(schemaRequirement), "oidc");
   console.log(JSON.stringify({
     mode: production ? "production" : "test",

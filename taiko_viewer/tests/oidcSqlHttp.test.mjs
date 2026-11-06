@@ -105,7 +105,7 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
             assert.equal(req.method, 'POST'); assert.equal(url.search, '');
             assert.match(req.headers['content-type'], /^application\/json(?:;|$)/);
             assert.equal(req.headers.origin, undefined); assert.equal(req.headers.cookie, undefined); assert.equal(req.headers.authorization, undefined);
-            assert.deepEqual(Object.keys(input), ['id']); assert.match(input.id, /^[0-9a-f]{32}$/);
+            assert.deepEqual(Object.keys(input), input.withExternalId === true ? ['id', 'withExternalId'] : ['id']); assert.match(input.id, /^[0-9a-f]{32}$/);
             assert.equal(req.headers['x-service-id'], 'viewer-test'); assert.ok(typeof req.headers['x-service-key'] === 'string');
             assert.ok(!['client_id', 'client_secret', 'code', 'access_token', 'id_token'].some(k => url.searchParams.has(k) || Object.hasOwn(input, k)));
           } catch { lookupInvariantFailures.push('lookup request contract violation'); throw Error('Mock lookup request invalid'); }
@@ -119,7 +119,7 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
           if (lookupReply.retryAfter !== undefined) res.setHeader('retry-after', lookupReply.retryAfter);
           if (lookupReply.contentType) res.setHeader('content-type', lookupReply.contentType);
           if (lookupReply.raw !== undefined) return res.end(lookupReply.raw);
-          const response = { code: 'OK', message: '', data: { id: input.id, nickname: 'Synthetic player', email: input.id + '@ourtaiko.example.invalid', emailVerified: true } };
+          const response = { code: 'OK', message: '', data: { id: input.id, nickname: 'Synthetic player', email: input.id + '@ourtaiko.example.invalid', emailVerified: true, ...(input.withExternalId === true ? { externalId: remotePairs.get(input.id)?.externalId || null } : {}) } };
           return res.end(JSON.stringify(lookupReply.body ?? response));
         }
         if (url.pathname === '/jwks') return res.end(JSON.stringify({ keys: [jwk] }));
@@ -185,8 +185,8 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
       ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(35000)
     });
     const sessionCookie = res => res.headers.getSetCookie().find(c => c.startsWith('stv_session='))?.split(';')[0];
-    async function begin({ cookie, purpose = 'login', redirect = '/songs/42', locale = 'zh', providerId = 'mock' } = {}) {
-      const res = await ask(`/api/account/oidc/${providerId}/start`, { cookie, body: { purpose, redirect, locale, userId: 999999, lookupUrl: 'https://untrusted.invalid/custom' } });
+    async function begin({ cookie, purpose = 'login', redirect = '/songs/42', locale = 'zh', providerId = 'mock', recover = false } = {}) {
+      const res = await ask(`/api/account/oidc/${providerId}/start`, { cookie, body: { purpose, redirect, locale, recover, userId: 999999, lookupUrl: 'https://untrusted.invalid/custom' } });
       assert.equal(res.status, 200, 'start status');
       const { authorizationUrl } = await res.json();
       const browserCookie = res.headers.getSetCookie().find(c => c.startsWith(`stv_oidc_${providerId}=`));
@@ -391,7 +391,14 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
       if (sub !== undefined) f.record.claims = { sub };
       return f;
     };
-    const okProfile = (id, changes = {}) => ({ code: 'OK', message: '', data: { id, nickname: 'Synthetic player', email: id + '@ourtaiko.example.invalid', emailVerified: true, ...changes } });
+    configureOur();
+    const { lookupOurTaikoProfile } = await import('../server/services/oidc/ourtaiko-profile.ts');
+    const { oidcProvider } = await import('../server/services/oidc/config.ts');
+    const legacyProfile=await lookupOurTaikoProfile(oidcProvider('ourtaiko'),ourSubject(999999));
+    assert.equal(Object.hasOwn(legacyProfile,'externalId'),false);
+    const optedProfile=await lookupOurTaikoProfile(oidcProvider('ourtaiko'),ourSubject(999999),true);
+    assert.equal(optedProfile.externalId,null);
+    const okProfile = (id, changes = {}) => ({ code: 'OK', message: '', data: { id, nickname: 'Synthetic player', email: id + '@ourtaiko.example.invalid', emailVerified: true, externalId: null, ...changes } });
     const snapshot = () => Promise.all(['web_user_accounts', 'web_external_identities', 'web_user_sessions'].map(count));
     configureOur();
     let ourBefore = await snapshot(), callsBefore = lookupRequests;
@@ -654,8 +661,8 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
     assert.equal(changedApplication.remoteLinkStatus,'failed');assert.equal(changedApplication.remoteLinkError,'application_changed');
     configureOur({remoteLinkEnabled:true});note('Application changes never inherit the old Application remote confirmation');
     const remoteConflictSub=ourSubject(ourIndex++); remotePairs.set(remoteConflictSub,{id:remoteConflictSub,externalId:'999999999',linkedAt:'2026-11-03T01:02:03Z'});
-    await complete(await linkBegin(remoteConflictSub),'/account/profile'); assert.equal((await linkState(remoteConflictSub)).status,'failed');
-    assert.equal((await attemptsFor(remoteConflictSub)).at(-1).error_code,'conflict'); assert.equal(remotePairs.get(remoteConflictSub).externalId,'999999999');
+    await unchangedFailure(await linkBegin(remoteConflictSub),'/account/login?oidc_error=existing_viewer_required&redirect=%2Faccount%2Fprofile');
+    assert.equal(await linkState(remoteConflictSub),undefined); assert.equal(remotePairs.get(remoteConflictSub).externalId,'999999999');
     note('actual remote pair conflict preserves remote owner and durable local failure without merging');
     const revokedSub=ourSubject(ourIndex++); let releaseRevoked;linkGate=new Promise(r=>{releaseRevoked=r;});const revokeCalls=linkRequests;
     const revokedFlow=await linkBegin(revokedSub), pendingRevoked=ask(revokedFlow.callback.pathname+revokedFlow.callback.search,{cookie:revokedFlow.cookie});
@@ -677,6 +684,35 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
     const disabledFlow=await linkBegin(firstLinkedSub);runtime.oidcEnabled=false;
     assert.equal((await ask(disabledFlow.callback.pathname+disabledFlow.callback.search,{cookie:disabledFlow.cookie})).status,404); assert.equal(linkRequests,beforeOff);
     note('remote opt-in default off and global OIDC off prevent link calls');
+    // Phase 2: remote hint prevents provisioning but never authenticates an existing Viewer.
+    configureOur({remoteLinkEnabled:true});
+    const wrongCookie=sessionCookie(await complete(await linkBegin(firstLinkedSub)));
+    const recoverySub=ourSubject(ourIndex++), recoveryViewer='9007199254740993';
+    remotePairs.set(recoverySub,{id:recoverySub,externalId:recoveryViewer,linkedAt:'2026-11-03T01:02:03Z'});
+    const beforeRecovery=await count('web_user_accounts');
+    const blocked=await complete(await linkBegin(recoverySub),'/account/login?oidc_error=existing_viewer_required&redirect=%2Faccount%2Fprofile');
+    assert.equal(sessionCookie(blocked),undefined);assert.equal(await count('web_user_accounts'),beforeRecovery);
+    const recoveryHint=blocked.headers.getSetCookie().find(c=>c.startsWith('stv_oidc_recovery='))?.split(';')[0];assert.ok(recoveryHint);
+    const wrongRecovery=await ask('/api/account/oidc/ourtaiko/start',{cookie:wrongCookie+'; '+recoveryHint,body:{purpose:'link',recover:true}});assert.equal(wrongRecovery.status,409);
+    // Ordinary same-pair linking also checks the returned exact string before any mutation.
+    await unchangedFailure(await linkBegin(recoverySub,{cookie:wrongCookie,purpose:'link'}),'/account/profile?oidc_error=identity_conflict');
+    await pool.execute('INSERT INTO web_user_accounts(id,username,email,password_hash,email_verified) VALUES (?,?,?, ?,1)',
+      ['80001','recover-safe','recover-safe@example.invalid',await getPasswordHash(password)]);
+    const safeCookie=sessionCookie(await ask('/api/account/auth/login',{body:{identifier:'recover-safe',password}}));
+    const safeSub=ourSubject(ourIndex++);remotePairs.set(safeSub,{id:safeSub,externalId:'80001',linkedAt:'2026-11-03T01:02:03Z'});
+    const safeBlocked=await complete(await linkBegin(safeSub),'/account/login?oidc_error=existing_viewer_required&redirect=%2Faccount%2Fprofile');
+    const safeHint=safeBlocked.headers.getSetCookie().find(c=>c.startsWith('stv_oidc_recovery='))?.split(';')[0];
+    const ownerStatus=(await(await ask('/api/account/oidc/bindings',{cookie:safeCookie+'; '+safeHint})).json()).providers[0];assert.equal(ownerStatus.recoveryAvailable,true);
+    const switchedRecovery=await linkBegin(ourSubject(ourIndex++),{cookie:safeCookie+'; '+safeHint,purpose:'link',recover:true});
+    await unchangedFailure(switchedRecovery,'/account/profile?oidc_error=identity_conflict');
+    await complete(await linkBegin(safeSub,{cookie:safeCookie+'; '+safeHint,purpose:'link',recover:true}),'/songs/42');
+    const recovered=await linkState(safeSub);assert.equal(recovered.status,'linked');assert.equal(recovered.externalId,'80001');
+    const pairCount=await count('web_external_identities');await complete(await linkBegin(safeSub,{cookie:safeCookie,purpose:'link'}));
+    assert.equal(await count('web_external_identities'),pairCount);assert.equal((await linkState(safeSub)).operationId,recovered.operationId);
+    for(const externalId of [undefined,1,true,{},[], '0','01','1e3','18446744073709551616']) {
+      await ourFailure('reject malformed externalId',id=>({body:okProfile(id,{externalId})}));
+    }
+    note('Phase 2 remote hint blocks duplicate accounts; exact pair, independent session, fresh OIDC, subject switch, idempotency and malformed IDs');
     assert.deepEqual(linkInvariantFailures,[]);assert.equal(lookupRedirectsFollowed,0);
     await writeFile(resolve(process.env.VIEWER_REVIEW_OUT,'ourtaiko-link-http.json'),JSON.stringify({pass:true,cases:linkCases,linkRequests,requestContract:'POST JSON exact verified subject and database decimal user ID; configured service headers only; no Origin/Cookie/OAuth token',realOurTaikoRequests:0,productionConnections:0,credentialsRecorded:false},null,2)+'\n');
     configure();

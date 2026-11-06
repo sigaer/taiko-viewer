@@ -14,16 +14,37 @@ import { type AccountEmailProfile, profileFromIdToken } from "./account-profile"
 import { assertOurTaikoSubject, lookupOurTaikoProfile, OurTaikoProfileError } from "./ourtaiko-profile";
 import { completeOurTaikoLink } from "./remote-link";
 
-type FailureCode = "invalid_transaction" | "session_changed" | "email_required" | "email_conflict" | "identity_conflict" | "provider_unavailable";
+type FailureCode = "invalid_transaction" | "session_changed" | "email_required" | "email_conflict" | "identity_conflict" | "provider_unavailable" | "existing_viewer_required";
 class OidcFailure extends Error {
   constructor(readonly code: FailureCode) { super(code); }
 }
 type Transaction = {
   state_hash: string; browser_hash: string; provider_id: string; config_hash: string;
   nonce: string; verifier: string; purpose: "login" | "link"; target_user_id: number | null;
+  recovery_subject: Buffer | string | null; recovery_external_id: string | null;
   session_hash: string | null; return_path: string; locale: string;
 };
 const cookieName = (id: string) => `stv_oidc_${id}`;
+const recoveryCookie = "stv_oidc_recovery";
+const recoveryCookieOptions = { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/api/account/oidc", maxAge: 600 };
+// This is a short-lived hint in the existing transaction table, never a login
+// credential or a second identity mapping. Confirmation requires fresh OIDC.
+async function readRecovery(event: H3Event, provider: OidcProvider) {
+  const raw = getCookie(event, recoveryCookie) || "";
+  const [state, browser, ...extra] = raw.split(".");
+  if (extra.length || !/^[A-Za-z0-9_-]{20,128}$/.test(state || "") || !/^[a-f0-9]{64}$/.test(browser || "")) return null;
+  const [rows] = await getAccountDb().execute<DbRow<Transaction>[]>(`SELECT * FROM web_oidc_transactions
+    WHERE state_hash=? AND browser_hash=? AND provider_id=? AND config_hash=? AND purpose='login'
+    AND consumed_at IS NOT NULL AND expires_at>NOW() AND recovery_subject IS NOT NULL AND recovery_external_id IS NOT NULL`,
+    [sha256(state), sha256(browser), provider.id, fingerprint(provider)]);
+  return rows[0] || null;
+}
+async function exactSessionUser(event: H3Event) {
+  const [rows] = await getAccountDb().execute<DbRow<{ id: string }>[]>(
+    "SELECT CAST(user_id AS CHAR) id FROM web_user_sessions WHERE session_token=? AND expires_at>NOW()",
+    [getCookie(event, SESSION_COOKIE_NAME) || ""]);
+  return rows[0]?.id;
+}
 const fingerprint = (provider: OidcProvider) => sha256(JSON.stringify(provider));
 const schema = () => validateSchemaTables(getAccountDb(), OIDC_TABLES.map(schemaRequirement), "oidc");
 const noStore = (event: H3Event) => {
@@ -47,10 +68,13 @@ export async function oidcBindingStatus(event: H3Event) {
       LEFT JOIN web_oidc_remote_link_attempts a ON a.attempt_id=(SELECT attempt_id FROM web_oidc_remote_link_attempts
         WHERE operation_id=i.remote_link_operation_id ORDER BY created_at DESC, attempt_id DESC LIMIT 1) WHERE i.user_id = ?`, [user.id]
   );
+  const ourtaiko = providers.find(p => p.id === "ourtaiko");
+  const recovery = ourtaiko ? await readRecovery(event, ourtaiko) : null;
+  const recoveryMatches = recovery && await exactSessionUser(event) === recovery.recovery_external_id;
   return { providers: providers.map(({ id, label, issuer, clientId, remoteLinkEnabled }) => {
     const row = rows.find(r => r.issuer.toString("utf8") === issuer);
     const changed = row?.service_id && row.service_id !== clientId;
-    return { id, label, linked: row?.status === "active", remoteLinkEnabled,
+    return { id, label, recoveryAvailable: id === "ourtaiko" && Boolean(recoveryMatches), recoveryConflict: id === "ourtaiko" && Boolean(recovery && !recoveryMatches), linked: row?.status === "active", remoteLinkEnabled,
       remoteLinkStatus: changed ? "failed" : row?.remote_link_status || "not_requested",
       remoteLinkError: changed ? "application_changed" : row?.error_code || null,
       remoteLinkUnknown: row?.outcome === "unknown" || (row?.outcome === "pending" && Boolean(row.lease_expired)) };
@@ -70,6 +94,9 @@ export async function startOidc(event: H3Event) {
   const session = user ? getCookie(event, SESSION_COOKIE_NAME) || "" : "";
   if (user && !session) throw createError({ statusCode: 401, statusMessage: "Browser session required" });
   await schema();
+  const recovery = body.recover === true && provider.id === "ourtaiko" && body.purpose === "link" ? await readRecovery(event, provider) : null;
+  if (body.recover === true && (!recovery || !provider.remoteLinkEnabled || await exactSessionUser(event) !== recovery.recovery_external_id))
+    throw createError({ statusCode: 409, statusMessage: "Account confirmation unavailable; sign in to the original Viewer account" });
   let config: Awaited<ReturnType<typeof discoverOidc>>;
   try { config = await discoverOidc(provider); } catch { throw createError({ statusCode: 503, statusMessage: "External login unavailable" }); }
   const state = client.randomState(), nonce = client.randomNonce(), verifier = client.randomPKCECodeVerifier();
@@ -85,10 +112,10 @@ export async function startOidc(event: H3Event) {
   // Bounded retention of secrets; expired rows are never accepted, even before cleanup.
   await db.execute("DELETE FROM web_oidc_transactions WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY) LIMIT 100");
   await db.execute(`INSERT INTO web_oidc_transactions
-    (state_hash, browser_hash, provider_id, config_hash, nonce, verifier, purpose, target_user_id, session_hash, return_path, locale, expires_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
+    (state_hash, browser_hash, provider_id, config_hash, nonce, verifier, purpose, target_user_id, session_hash, return_path, locale, recovery_subject, recovery_external_id, expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
   [sha256(state), sha256(browser), provider.id, fingerprint(provider), nonce, verifier, body.purpose,
-    user?.id || null, session ? sha256(session) : null, returnPath, locale]);
+    user?.id || null, session ? sha256(session) : null, returnPath, locale, recovery?.recovery_subject || null, recovery?.recovery_external_id || null]);
   setCookie(event, cookieName(provider.id), browser, { httpOnly: true, secure: true, sameSite: "lax", path: `/api/account/oidc/${provider.id}`, maxAge: 600 });
   return { authorizationUrl: url.href };
 }
@@ -111,6 +138,13 @@ async function finishIdentity(event: H3Event, provider: OidcProvider, tx: Transa
   try {
     await db.beginTransaction();
     await assertStartingSession(db, event, tx);
+    if (tx.recovery_subject && (tx.purpose !== "link" || tx.recovery_subject.toString() !== sub)) throw new OidcFailure("identity_conflict");
+    const expected = tx.recovery_external_id || profile?.externalId;
+    if (expected) {
+      if (tx.purpose !== "link") throw new OidcFailure("existing_viewer_required");
+      const [owner] = await db.execute<DbRow<{ id: string }>[]>("SELECT CAST(user_id AS CHAR) id FROM web_user_sessions WHERE session_token=? AND expires_at>NOW()", [getCookie(event, SESSION_COOKIE_NAME) || ""]);
+      if (owner[0]?.id !== expected || (profile?.externalId && profile.externalId !== expected)) throw new OidcFailure("identity_conflict");
+    }
     const [identities] = await db.execute<DbRow<{ user_id: number; status: string }>[]>(
       "SELECT user_id, status FROM web_external_identities WHERE issuer = ? AND subject = ? FOR UPDATE", [provider.issuer, sub]);
     userId = identities[0]?.user_id;
@@ -200,8 +234,14 @@ export async function callbackOidc(event: H3Event) {
       const [existing] = tx.purpose === "login"
         ? await db.execute<DbRow<{ user_id: number }>[]>("SELECT user_id FROM web_external_identities WHERE issuer = ? AND subject = ?", [provider.issuer, sub])
         : [[]];
-      profile = existing.length ? null : await lookupOurTaikoProfile(provider, sub);
+      profile = existing.length ? null : await lookupOurTaikoProfile(provider, sub, true);
     } else profile = profileFromIdToken(claims);
+    if (tx.purpose === "login" && profile?.externalId) {
+      // Preserve only the verified subject and conflict hint. No OAuth tokens.
+      await db.execute("UPDATE web_oidc_transactions SET recovery_subject=?, recovery_external_id=? WHERE state_hash=?", [sub, profile.externalId, tx.state_hash]);
+      setCookie(event, recoveryCookie, `${state}.${browser}`, recoveryCookieOptions);
+      throw new OidcFailure("existing_viewer_required");
+    }
     const identity = await finishIdentity(event, provider, tx, sub, profile);
     issuedSession = identity.newSession;
     const remoteStatus = await completeOurTaikoLink(provider, identity.userId, sub, async connection => {
@@ -224,6 +264,7 @@ export async function callbackOidc(event: H3Event) {
     finally { finalCheck.release(); }
     if (issuedSession) setAccountSessionCookie(event, issuedSession);
     issuedSession = undefined;
+    if (tx.purpose === "link") deleteCookie(event, recoveryCookie, recoveryCookieOptions);
     // Access/refresh/ID tokens are request-local only and never persisted or returned.
     return sendRedirect(event, provider.remoteLinkEnabled && remoteStatus !== "linked"
       ? `${tx.locale === "ja" ? "/ja" : ""}/account/profile` : safeOidcReturnPath(tx.return_path), 303);
@@ -234,6 +275,6 @@ export async function callbackOidc(event: H3Event) {
     if (error instanceof OurTaikoProfileError && error.retryAfter !== undefined) setHeader(event, "retry-after", String(error.retryAfter));
     const prefix = (tx?.locale || getCookie(event, "viewer_locale")) === "ja" ? "/ja" : "";
     const target = tx?.purpose === "link" ? "/account/profile" : "/account/login";
-    return sendRedirect(event, `${prefix}${target}?oidc_error=${code}`, 303);
+    return sendRedirect(event, `${prefix}${target}?oidc_error=${code}${code === "existing_viewer_required" ? "&redirect=" + encodeURIComponent(prefix + "/account/profile") : ""}`, 303);
   }
 }

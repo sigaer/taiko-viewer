@@ -5,6 +5,7 @@ export type AccountEmailProfile = {
   source: "oidc_id_token" | "ourtaiko_external_lookup";
   email: string;
   emailVerified: boolean;
+  externalId?: string | null;
 };
 
 export const profileFromIdToken = (claims: Record<string, unknown>): AccountEmailProfile => ({

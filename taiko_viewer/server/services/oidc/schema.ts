@@ -25,6 +25,8 @@ export const OIDC_TABLES = [
     verifier VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     purpose VARCHAR(8) NOT NULL,
     target_user_id BIGINT UNSIGNED DEFAULT NULL,
+    recovery_subject VARBINARY(255) DEFAULT NULL,
+    recovery_external_id VARCHAR(20) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
     session_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
     return_path VARCHAR(1024) NOT NULL,
     locale VARCHAR(2) NOT NULL,
