@@ -88,6 +88,32 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
   await ask('POST','/api/forum/users/990332/block','author',{enabled:false});
   await ask('POST','/api/forum/notifications/read','author',{all:true});const fresh=await ask('GET','/api/forum/home','author');assert.equal(fresh.unreadNotificationCount,0);assert.equal((await ask('GET','/api/forum/notifications','author')).unreadCount,0);checks.push('real home unread count matches notifications before and after mark-all');
   assert.equal((await ask('GET','/api/forum/notifications/unread','author')).unreadCount,0);checks.push('lightweight unread endpoint requires authentication, respects blocks and clears after mark-all');
+  const plain = {sectionSlug:'general', threadType:'discussion', contentBlocks:[{type:'paragraph',text:'自动标题测试！ @synthetic-replier 第二句'}]};
+  const auto = await ask('POST','/api/forum/threads','author',plain);
+  assert.equal(auto.title,'自动标题测试！');
+  const [[stored]] = await pool.execute('SELECT title, summary FROM forum_threads WHERE id=?',[auto.id]);
+  assert.equal(stored.title,auto.title); assert.ok(stored.summary.includes(auto.title));
+  assert.equal((await ask('GET',`/api/forum/threads/${auto.id}`,'author')).title,auto.title);
+  const found = await ask('GET','/api/forum/threads?keyword='+encodeURIComponent(auto.title),'author');
+  assert.equal(found.items[0].title,auto.title);
+  const mentions = await ask('GET','/api/forum/notifications','replier');
+  assert.ok(mentions.items.some(row=>row.threadId===auto.id && row.title.includes(auto.title)));
+  for (const locale of ['zh','ja']) {
+    const image = await ask('POST','/api/forum/threads','author',{...plain,locale,title:'  ',contentBlocks:[{type:'paragraph',text:'  '},{type:'image',imageUrl:'/synthetic.png'}]});
+    assert.equal(image.title,locale==='ja'?'画像共有':'图片分享');
+  }
+  const both = await ask('POST','/api/forum/threads','author',{...plain,contentBlocks:[...plain.contentBlocks,{type:'image',imageUrl:'/synthetic.png'}]}); assert.equal(both.title,auto.title);
+  const short = await ask('POST','/api/forum/threads','author',{...plain,contentBlocks:[{type:'paragraph',text:'好'}]}); assert.equal(short.title,'好');
+  await ask('POST','/api/forum/threads',null,plain,401);
+  await ask('POST','/api/forum/threads','author',{...plain,contentBlocks:[]},400);
+  await ask('POST','/api/forum/threads','author',{...plain,sectionSlug:'invalid'},404);
+  await ask('POST','/api/forum/threads','author',{...plain,songId:999999},400);
+  await ask('POST','/api/forum/threads','author',{...plain,songId:100,difficultyType:99},400);
+  await ask('POST','/api/forum/threads','author',{...plain,threadType:'official'},403);
+  await ask('POST','/api/forum/threads','author',{...plain,title:'短'},400);
+  const {createForumThreadCore}=await import('../server/utils/forum/threads.ts');
+  await assert.rejects(()=>createForumThreadCore({actorUserId:990331,actorUsername:'synthetic-author',payload:plain,titlePolicy:'integration'}), /请输入标题/);
+  checks.push('automatic titles persist in SQL, detail, search/list, summary and mentions; localized image titles; explicit title and internal policy compatibility; auth and validation refusals');
   const result={pass:true,level:'actual H3 HTTP and private MySQL; synthetic catalog/session rows',database:identity.databaseName,actualSelectDatabase:true,privateDatadirVerified:true,checks,calls,productionConnections:0,productionWrites:0};
   await writeFile(resolve(process.env.VIEWER_REVIEW_OUT,'core-sql-http.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({pass:true,database:identity.databaseName,checks:checks.length,httpRequests:calls.length,productionConnections:0}));
  }finally{

@@ -269,3 +269,28 @@ await test('body text changed while a request is pending is never overwritten by
   h.calls[0].reject(new Error('503')); await old;
   assert.equal(h.form.paragraphDraft, 'New edit'); assert.deepEqual(h.paragraphBlocks.value, []);
 });
+
+await test('title-free body and image drafts submit with locale and query section', async () => {
+  const h = await composer({ query: { section: 'general' } }); h.form.title = '';
+  const first = h.submit(); assert.equal(h.calls[0].input.body.title, '');
+  assert.equal(h.calls[0].input.body.locale, 'zh'); assert.equal(h.calls[0].input.body.sectionSlug, 'general');
+  h.calls[0].reject(new Error('retry')); await first;
+  h.form.paragraphDraft = ''; h.imageBlocks.value = [{imageUrl:'/test.png', caption:''}];
+  const second = h.submit(); assert.equal(h.calls[1].input.body.contentBlocks.length, 1);
+  h.calls[1].resolve({id:40}); await second;
+});
+await test('upload failure preserves body and allows retry', async () => {
+  const h = await composer(); const body = h.form.paragraphDraft;
+  const first = h.uploadImage({file:{size:10}}); h.calls[0].reject(new Error('upload failed')); await first;
+  assert.equal(h.form.paragraphDraft, body); assert.equal(h.uploading.value, false);
+  const second = h.uploadImage({file:{size:10}}); h.calls[1].resolve({imageUrl:'/retry.png'}); await second;
+  assert.equal(h.imageBlocks.value[0].imageUrl, '/retry.png');
+});
+await test('deactivated upload cannot overwrite the resumed draft or unlock a new upload', async () => {
+  const h = await composer(); const old = h.uploadImage({file:{size:10}});
+  h.deactivate(); h.activate(); const current = h.uploadImage({file:{size:10}});
+  h.calls[0].resolve({imageUrl:'/stale.png'}); await old;
+  assert.equal(h.uploading.value,true); assert.equal(h.imageBlocks.value.length,0);
+  h.calls[1].resolve({imageUrl:'/fresh.png'}); await current;
+  assert.equal(h.imageBlocks.value[0].imageUrl,'/fresh.png');
+});

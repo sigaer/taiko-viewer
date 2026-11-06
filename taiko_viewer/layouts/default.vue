@@ -283,8 +283,8 @@ onBeforeUnmount(() => {
       </aside>
       <main class="app-content" :class="[{ 'has-mobile-tabbar': showMobileTabBar }, `app-content--${contentLayout}`]">
         <div class="viewer-content" :class="`viewer-content--${contentLayout}`" :data-content-layout="contentLayout">
-        <AppMobileHeader :title="mobileContextTitle" :back-path="mobileParent?.to" :back-label="mobileParent ? (mobileParent.labelKey ? t(mobileParent.labelKey) : mobileParent.label) : undefined" :expanded="isMobileNavOpen" @menu="toggleMobileNav" />
-        <nav v-if="!hideGuestHomeChrome" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum') }">
+        <AppMobileHeader v-if="!route.meta.composerHeader" :title="mobileContextTitle" :back-path="mobileParent?.to" :back-label="mobileParent ? (mobileParent.labelKey ? t(mobileParent.labelKey) : mobileParent.label) : undefined" :expanded="isMobileNavOpen" @menu="toggleMobileNav" />
+        <nav v-if="!hideGuestHomeChrome && !route.meta.composerHeader" class="breadcrumb-bar" :class="{ 'forum-breadcrumb': route.path.startsWith('/forum') }">
           <el-breadcrumb :key="route.fullPath" separator="/">
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbItems"

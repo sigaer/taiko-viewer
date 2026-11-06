@@ -1,5 +1,6 @@
 import type { H3Event } from "h3";
 import { createError } from "h3";
+import { generateForumThreadTitle } from "./thread-title";
 import type { ResultSetHeader } from "mysql2/promise";
 import type { ForumContentBlock, ForumThreadDetail, ForumThreadSort, ForumThreadType } from "~/types/forum";
 import { DbRow, getAccountDb } from "~/server/utils/account-db";
@@ -327,7 +328,7 @@ export const validateSongBinding = async (payload: { songId?: unknown; difficult
 
 export type ForumThreadTitlePolicy = "normal" | "integration";
 
-// The ordinary composer keeps its 4-character minimum. Integration callers
+// Explicit ordinary titles keep their 4-character minimum. Integration callers
 // (annual reaction sync) may legitimately post a shorter sentence, so the
 // relaxation lives here instead of loosening the shared public rule.
 const FORUM_THREAD_TITLE_MIN_LENGTH: Record<ForumThreadTitlePolicy, number> = {
@@ -340,16 +341,22 @@ export const createForumThreadCore = async (options: {
   actorUsername: string;
   payload: Record<string, unknown>;
   titlePolicy?: ForumThreadTitlePolicy;
+  // Trusted public-entry option, never taken from the request payload.
+  autoTitleLocale?: "zh" | "ja";
 }) => {
   await ensureForumSchema();
   const { actorUserId, actorUsername, payload } = options;
   const titleMinLength = FORUM_THREAD_TITLE_MIN_LENGTH[options.titlePolicy || "normal"];
   const profile = await ensureForumProfile(actorUserId);
-  const title = clipText(String(payload.title || ""), 120);
+  const generated = options.autoTitleLocale !== undefined && !String(payload.title || "").trim();
+  const normalizedBlocks = generated ? normalizeContentBlocks(payload.contentBlocks) : undefined;
+  const title = generated
+    ? generateForumThreadTitle(normalizedBlocks!, options.autoTitleLocale!)
+    : clipText(String(payload.title || ""), 120);
   if (!title) {
     throw createError({ statusCode: 400, statusMessage: "请输入标题" });
   }
-  if (title.length < titleMinLength) {
+  if (!generated && title.length < titleMinLength) {
     throw createError({ statusCode: 400, statusMessage: `标题至少需要 ${titleMinLength} 个字符` });
   }
   const sectionSlug = String(payload.sectionSlug || "").trim();
@@ -364,7 +371,7 @@ export const createForumThreadCore = async (options: {
   if (threadType === "official" && !["moderator", "admin"].includes(profile.role)) {
     throw createError({ statusCode: 403, statusMessage: "只有版主或站务可以发布公告帖" });
   }
-  const contentBlocks = normalizeContentBlocks(payload.contentBlocks);
+  const contentBlocks = normalizedBlocks || normalizeContentBlocks(payload.contentBlocks);
   const paragraphTexts = contentBlocks
     .filter((block) => block.type === "paragraph")
     .map((block) => block.text);
@@ -415,6 +422,7 @@ export const createForumThread = async (event: H3Event, payload: Record<string, 
   const created = await createForumThreadCore({
     actorUserId: user.id,
     actorUsername: user.username,
+    autoTitleLocale: payload.locale === "ja" ? "ja" : "zh",
     payload
   });
   return await getForumThreadDetail(event, created.threadId);

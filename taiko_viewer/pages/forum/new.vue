@@ -21,6 +21,7 @@ const { accountUser } = useAccountState();
 const requestGuard = useAccountRequestGuard(false);
 let viewActive = true;
 let searchGeneration = 0;
+let uploadGeneration = 0;
 const publishedThreadId = ref<number | null>(null);
 const navigationFailed = ref(false);
 const uploadCount = ref(0);
@@ -28,11 +29,13 @@ const editorDisabled = computed(() => !accountUser.value || submitting.value || 
 // Accepted creation receipts survive KeepAlive deactivation; they must not be
 // submitted again merely because the following route transition was cancelled.
 onActivated(() => { viewActive = true; });
-onDeactivated(() => { viewActive = false; searchGeneration++; songLoading.value = false; });
+onDeactivated(() => { viewActive = false; searchGeneration++; uploadGeneration++; uploadCount.value = 0; songLoading.value = false; });
 onBeforeUnmount(() => { viewActive = false; searchGeneration++; });
 
 definePageMeta({
   contentLayout: "reading",
+  hidePageHeader: true,
+  composerHeader: true,
   middleware: "account-auth",
   pageTitleKey: "forum.newThread",
   pageDescKey: "page.forum.new.desc",
@@ -76,10 +79,6 @@ const contextualSong = ref(false);
 const copy = computed(() =>
   locale.value === "ja"
     ? {
-        discussionTip: "通常の交流、質問、体験共有に向いています。",
-        guideTip: "譜面攻略、運手分解、練習ルート共有に向いています。",
-        achievementTip: "戦績共有、全良報告、高得点の振り返りに向いています。",
-        officialTip: "管理・モデレーター向けです。",
         heading: "新規投稿",
         back: "フォーラムへ戻る",
         section: "セクション",
@@ -88,7 +87,7 @@ const copy = computed(() =>
         guide: "攻略",
         achievement: "戦績",
         official: "告知",
-        title: "タイトル",
+        title: "タイトル（任意）",
         titlePlaceholder: "例：虹2025 三曲段の攻略メモ",
         summary: "概要",
         summaryPlaceholder: "未入力の場合は本文1段目から自動抽出します",
@@ -99,8 +98,8 @@ const copy = computed(() =>
         difficulty: "関連難易度",
         level: "星数",
         levelPlaceholder: "例：10",
-        paragraphs: "正文",
-        paragraphDraftPlaceholder: "話したいことを書いてみましょう",
+        paragraphs: "本文",
+        paragraphDraftPlaceholder: "何かシェアしよう",
         paragraphCount: "{count} 段",
         addParagraph: "本文に追加",
         images: "画像",
@@ -120,19 +119,15 @@ const copy = computed(() =>
         navigationFailed: "投稿は公開済みですが、ページを開けませんでした。"
       }
     : {
-        discussionTip: "适合普通交流、提问和经验分享。",
-        guideTip: "适合写谱面思路、手法拆解和练习路线。",
-        achievementTip: "适合晒分、全良战报和冲分复盘。",
-        officialTip: "仅供站务/版主用途。",
-        heading: "发布新帖",
-        back: "返回论坛",
+        heading: "发新帖",
+        back: "返回社区",
         section: "版块",
         threadType: "帖子类型",
         discussion: "讨论",
         guide: "攻略",
         achievement: "战报",
         official: "公告",
-        title: "标题",
+        title: "标题（选填）",
         titlePlaceholder: "例如：虹2025 三曲段过段思路整理",
         summary: "摘要",
         summaryPlaceholder: "不填则自动从首段正文提取",
@@ -144,14 +139,14 @@ const copy = computed(() =>
         level: "星级",
         levelPlaceholder: "例如 10",
         paragraphs: "正文",
-        paragraphDraftPlaceholder: "想说点什么？",
+        paragraphDraftPlaceholder: "分享点什么？",
         paragraphCount: "{count} 段",
         addParagraph: "加入正文",
         images: "插图",
         imageCount: "{count} 张",
         uploadImage: "上传图片",
         imageCaptionPlaceholder: "图片说明（可选）",
-        submit: "发布主题",
+        submit: "发布",
         remove: "移除",
         contentRequired: "至少需要一段正文或一张图片",
         uploadSuccess: "图片上传完成",
@@ -173,12 +168,6 @@ const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
   }
 );
 
-const threadTypeTips = computed<Record<string, string>>(() => ({
-  discussion: copy.value.discussionTip,
-  guide: copy.value.guideTip,
-  achievement: copy.value.achievementTip,
-  official: copy.value.officialTip
-}));
 const threadTypeOptions = computed(() => [
   { label: copy.value.discussion, value: "discussion" },
   { label: copy.value.guide, value: "guide" },
@@ -198,6 +187,7 @@ const selectedSongLevel = computed(() => {
 
 watch(() => accountUser.value?.id, () => {
   searchGeneration++;
+  showMoreOptions.value = false;
   // Drafts and completion receipts are private to the current author.
   form.title = "";
   form.summary = "";
@@ -307,6 +297,7 @@ const uploadImage = async (options: any) => {
     return;
   }
   const request = requestGuard.capture();
+  const generation = uploadGeneration;
   uploadCount.value++;
   try {
     const body = new FormData();
@@ -316,7 +307,7 @@ const uploadImage = async (options: any) => {
       body,
       retry: 0
     });
-    if (!requestGuard.current(request)) return;
+    if (!requestGuard.current(request) || generation !== uploadGeneration) return;
     imageBlocks.value.push({
       imageUrl: result.imageUrl,
       caption: ""
@@ -324,7 +315,7 @@ const uploadImage = async (options: any) => {
     if (viewActive) ElMessage.success(copy.value.uploadSuccess);
     options.onSuccess?.(result, options.file);
   } catch (error: any) {
-    if (!requestGuard.current(request)) return;
+    if (!requestGuard.current(request) || generation !== uploadGeneration) return;
     const statusCode = Number(error?.statusCode || error?.data?.statusCode || 0);
     const statusMessage = String(error?.data?.statusMessage || error?.message || "");
     const isOversized = statusCode === 413 || statusMessage.includes("20MB") || statusMessage.includes("图片过大");
@@ -334,7 +325,7 @@ const uploadImage = async (options: any) => {
     }
     options.onError?.(error);
   } finally {
-    if (requestGuard.current(request)) uploadCount.value = Math.max(0, uploadCount.value - 1);
+    if (requestGuard.current(request) && generation === uploadGeneration) uploadCount.value = Math.max(0, uploadCount.value - 1);
   }
 };
 
@@ -392,6 +383,7 @@ const submit = async () => {
         sectionSlug: form.sectionSlug,
         threadType: form.threadType,
         title: form.title,
+        locale: locale.value,
         summary: form.summary,
         tags: form.tagsInput
           .split(/[\s,，#]+/)
@@ -421,52 +413,106 @@ const submit = async () => {
 <template>
   <div class="forum-new-page">
     <section class="composer-panel">
-      <div class="composer-panel__head">
-        <div><p class="composer-context">{{ locale === 'ja' ? '話したいことを入力してください' : '选择版块并开始讨论' }}</p><p>{{ threadTypeTips[form.threadType] }}</p></div>
+      <header class="composer-panel__head">
         <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
-      </div>
-
-      <section v-if="contextualSong && selectedSong" class="composer-context-card" aria-live="polite">
-        <img :src="`/api/content/covers/${selectedSong.id}`" :alt="selectedSong.song_name" />
-        <div><strong>{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</strong><span>{{ t(`community.discussingChart`) }} · {{ t(`difficulty.${form.difficultyType}`) }} · {{ form.level }}{{ t("guide.starSuffix") }}</span></div>
-      </section>
-
+        <h1>{{ copy.heading }}</h1>
+        <el-button type="primary" :disabled="editorDisabled || uploading" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
+      </header>
       <section v-if="publishedThreadId !== null" class="composer-published" role="status">
         <p>{{ navigationFailed ? copy.navigationFailed : copy.publishSuccess }}</p>
         <el-button :loading="submitting" @click="viewPublishedThread">{{ copy.viewPublished }}</el-button>
         <el-button :disabled="submitting" @click="startAnotherThread">{{ copy.newPost }}</el-button>
       </section>
       <el-form label-position="top" :disabled="editorDisabled">
-        <div class="composer-grid composer-grid--compact"><el-form-item :label="copy.section"><el-select v-model="form.sectionSlug"><el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" /></el-select></el-form-item><el-form-item :label="copy.threadType"><div class="type-chips"><button v-for="option in threadTypeOptions" :key="option.value" type="button" :disabled="editorDisabled" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button></div></el-form-item></div>
-
-        <el-form-item :label="copy.title">
+        <el-form-item class="composer-title" :label="copy.title">
           <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
         </el-form-item>
-
-        <section class="block-editor block-editor--body"><div class="block-editor__head"><h3>{{ copy.paragraphs }}</h3><span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span></div><el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" /><div v-if="form.threadType === 'guide'" class="block-editor__actions"><el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button></div><div v-if="paragraphBlocks.length" class="block-list"><div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item"><el-input v-model="paragraphBlocks[index]" type="textarea" :rows="3" maxlength="4000" :aria-label="`${copy.paragraphs} ${index + 1}`" /><el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button></div></div></section>
-
-        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open"><summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary><div class="more-options__body"><el-form-item :label="copy.summary"><el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" /></el-form-item><el-form-item :label="copy.tags"><el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" /></el-form-item><div class="song-picker"><label>{{ copy.songId }}</label><div class="song-picker__search"><el-input v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" /><el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button></div><div v-if="songResults.length" class="song-picker__results"><button v-for="song in songResults" :key="song.id" type="button" :disabled="editorDisabled" @click="chooseSong(song)"><span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span><small>#{{ song.id }} · {{ song.type }}</small></button></div><p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p></div><div v-if="selectedSong" class="composer-grid composer-grid--song"><el-form-item :label="copy.difficulty"><el-select v-model="form.difficultyType" clearable><el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item><el-form-item :label="copy.level"><el-input v-model="form.level" :placeholder="copy.levelPlaceholder" /></el-form-item></div></div></details>
-
+        <section class="block-editor block-editor--body">
+          <div class="block-editor__head">
+            <h3>{{ copy.paragraphs }}</h3>
+            <span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span>
+          </div>
+          <el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" :aria-label="copy.paragraphs" />
+          <div v-if="form.threadType === 'guide'" class="block-editor__actions">
+            <el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button>
+          </div>
+          <div v-if="paragraphBlocks.length" class="block-list">
+            <div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item">
+              <el-input v-model="paragraphBlocks[index]" type="textarea" :rows="3" maxlength="4000" :aria-label="`${copy.paragraphs} ${index + 1}`" />
+              <el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button>
+            </div>
+          </div>
+        </section>
         <section class="block-editor block-editor--attachments">
           <div class="block-editor__head">
             <h3>{{ copy.images }}</h3>
             <span>{{ copy.imageCount.replace("{count}", String(imageBlocks.length)) }}</span>
           </div>
-          <el-upload :key="accountUser?.id || 'guest'" :disabled="editorDisabled" :show-file-list="false" :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
+          <el-upload :key="accountUser?.id || 'guest'" :disabled="editorDisabled" :show-file-list="false" multiple :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
             <el-button :loading="uploading">{{ copy.uploadImage }}</el-button>
           </el-upload>
           <div class="image-grid">
             <div v-for="(image, index) in imageBlocks" :key="image.imageUrl" class="image-card">
-              <img :src="image.imageUrl" alt="forum illustration" />
-              <el-input v-model="image.caption" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" />
+              <img :src="image.imageUrl" :alt="image.caption || copy.images" />
+              <el-input v-model="image.caption" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" :aria-label="copy.imageCaptionPlaceholder" />
               <el-button text @click="removeImage(index)">{{ copy.remove }}</el-button>
             </div>
           </div>
         </section>
-
-        <div class="composer-submit">
-          <el-button type="primary" :disabled="uploading || publishedThreadId !== null" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
-        </div>
+        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open">
+          <summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary>
+          <div class="more-options__body">
+            <div class="composer-grid composer-grid--compact">
+              <el-form-item :label="copy.section">
+                <el-select v-model="form.sectionSlug">
+                  <el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" />
+                </el-select>
+              </el-form-item>
+              <el-form-item :label="copy.threadType">
+                <div class="type-chips">
+                  <button v-for="option in threadTypeOptions" :key="option.value" type="button" :disabled="editorDisabled" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button>
+                </div>
+              </el-form-item>
+            </div>
+            <section v-if="contextualSong && selectedSong" class="composer-context-card" aria-live="polite">
+              <img :src="`/api/content/covers/${selectedSong.id}`" :alt="selectedSong.song_name" />
+              <div>
+                <strong>{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</strong>
+                <span>{{ t(`community.discussingChart`) }} · {{ t(`difficulty.${form.difficultyType}`) }} · {{ form.level }}{{ t("guide.starSuffix") }}</span>
+              </div>
+            </section>
+            <el-form-item :label="copy.summary">
+              <el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" />
+            </el-form-item>
+            <el-form-item :label="copy.tags">
+              <el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" />
+            </el-form-item>
+            <div class="song-picker">
+              <label for="composer-song-search">{{ copy.songId }}</label>
+              <div class="song-picker__search">
+                <el-input id="composer-song-search" v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" />
+                <el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button>
+              </div>
+              <div v-if="songResults.length" class="song-picker__results">
+                <button v-for="song in songResults" :key="song.id" type="button" :disabled="editorDisabled" @click="chooseSong(song)">
+                  <span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span>
+                  <small>#{{ song.id }} · {{ song.type }}</small>
+                </button>
+              </div>
+              <p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p>
+            </div>
+            <div v-if="selectedSong" class="composer-grid composer-grid--song">
+              <el-form-item :label="copy.difficulty">
+                <el-select v-model="form.difficultyType" clearable>
+                  <el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" />
+                </el-select>
+              </el-form-item>
+              <el-form-item :label="copy.level">
+                <el-input :model-value="selectedSongLevel" readonly :placeholder="copy.levelPlaceholder" />
+              </el-form-item>
+            </div>
+          </div>
+        </details>
       </el-form>
     </section>
   </div>
@@ -492,27 +538,6 @@ const submit = async () => {
 .composer-context-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .composer-context-card span { color:var(--viewer-text-muted); font-size: 13px; }
 
-.composer-panel__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.composer-panel__head h2 {
-  margin: 0;
-  font-size: 32px;
-}
-
-.composer-context { margin: 0; color:var(--viewer-text); font-size: 22px; font-weight: 750; }
-
-.composer-panel__head p {
-  margin: 8px 0 0;
-  color:var(--viewer-text-muted);
-  line-height: 1.8;
-}
-
 .composer-back-link {
   color:var(--viewer-error);
   text-decoration: none;
@@ -524,8 +549,8 @@ const submit = async () => {
   gap: 14px;
 }
 
-.type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.type-chips button { min-height: 38px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color:var(--viewer-text-muted); background:transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.type-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.type-chips button { min-height: 44px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color:var(--viewer-text-muted); background:transparent; font: inherit; font-size: 12px; cursor: pointer; }
 .type-chips button.active { border-color:var(--viewer-accent-strong); color:var(--viewer-on-primary); background:var(--viewer-primary); }
 
 .composer-grid--song {
@@ -574,8 +599,7 @@ const submit = async () => {
   font-size: 12px;
 }
 
-.block-editor__actions,
-.composer-submit {
+.block-editor__actions {
   display: flex;
   justify-content: flex-end;
 }
@@ -613,7 +637,6 @@ const submit = async () => {
   border-radius: 18px;
 }
 
-body.theme-dark .composer-panel__head p,
 body.theme-dark .block-editor__head span {
   color:var(--viewer-text-muted);
 }
@@ -630,18 +653,33 @@ body.theme-dark .image-card {
 }
 
 @media (max-width: 860px) {
-  .composer-panel__head,
   .composer-grid,
   .composer-grid--song {
     grid-template-columns: 1fr;
-    flex-direction: column;
   }
 
   .image-grid {
     grid-template-columns: 1fr;
   }
 
-  .composer-panel { padding: 16px; }
   .composer-grid--song { grid-template-columns: 1fr; }
+}
+.composer-panel__head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: sticky; top: 0; z-index: 20; margin-bottom: 18px; gap: 16px; padding: 10px 0; background: var(--viewer-surface); }
+.composer-panel__head h1 { margin: 0; font-size: 20px; }
+.composer-panel__head > .el-button { justify-self: end; min-height: 44px; }
+.composer-back-link { display: flex; align-items: center; min-height: 44px; font-size: 14px; }
+.block-editor--attachments { padding: 16px 0; border-radius: 0; background: transparent; }
+body.theme-dark .block-editor--attachments { background: transparent; }
+.image-grid:empty { display: none; }
+.image-card { padding: 8px; border-radius: 10px; }
+.image-card img { max-height: 240px; object-fit: contain; border-radius: 8px; }
+.more-options summary { min-height: 44px; box-sizing: border-box; }
+@media (max-width: 960px) {
+  .composer-panel { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+  .composer-panel__head { padding-top: max(8px, env(safe-area-inset-top)); gap: 8px; }
+  .composer-panel__head h1 { font-size: 18px; }
+  .composer-title { display: none; }
+  .block-editor--body :deep(.el-textarea__inner) { min-height: 240px; font-size: 16px; line-height: 1.7; }
+  .image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 </style>
