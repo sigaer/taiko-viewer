@@ -19,7 +19,7 @@ export function assertOurTaikoSubject(sub: unknown): asserts sub is string {
 }
 
 export function canonicalExternalId(value: unknown): value is string {
-  return typeof value === "string" && /^[1-9][0-9]{0,19}$/.test(value) && BigInt(value) <= 18446744073709551615n;
+  return typeof value === "string" && /^[1-9][0-9]{0,19}$/.test(value) && BigInt(value).toString() === value && BigInt(value) <= BigInt("18446744073709551615");
 }
 
 export async function ourTaikoTarget(provider: OidcProvider, operation: "lookup" | "link") {

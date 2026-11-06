@@ -1,9 +1,9 @@
 {
   "phase": "OurTaiko Phase 2",
   "baseline": "f4d7d7a20c1cf37fd7b5498846717acb39d636a0",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "isolatedValidation": {
-    "qaRun": "qa-2ad7147b2152",
+    "qaRun": "qa-a8153b8d11cb",
     "oidcSqlHttp": "PASS",
     "legacyAccountHttp": "PASS",
     "productionConnections": 0,
@@ -20,5 +20,73 @@
   },
   "upstreamRequiredForScenarioB": "Deploy and enable SAKURA_REVERSE_LINK_ENABLED after review; Viewer has no new dependency on that route",
   "migration": "Add two nullable short-lived recovery fields to existing web_oidc_transactions; no second mapping table; run migrate_oidc_schema.ts explicitly before deployment",
-  "security": "externalId only blocks provisioning; normal Viewer login plus fresh OurTaiko OIDC confirm the exact pair; no OAuth tokens persisted in recovery context; existing mapping operation ID retained"
+  "security": "externalId only blocks provisioning; normal Viewer login plus fresh OurTaiko OIDC confirm the exact pair; no OAuth tokens persisted in recovery context; existing mapping operation ID retained",
+  "followup": "Canonical decimal validation also rejects trailing newline/carriage return; no identity or deployment changes beyond the parser fix.",
+  "productionOn160": {
+    "scenarioA": true,
+    "viewerAccountsBeforeRecovery": 783,
+    "viewerAccountsAfterRecovery": 783,
+    "recoveredPair": {
+      "viewerId": "1414",
+      "subject": "23a4bdbe23b6a86108a67b5dc63df7e3",
+      "status": "linked",
+      "operationId": "6f9e6d3be27318e050ad62b211470f8d8d01d7fefdbdc1a1941d6b499282eddf"
+    },
+    "freshForward": true,
+    "newPair": {
+      "viewerId": "1416",
+      "subject": "66b0ed10bc157dad6ad9dca23fe4e870",
+      "status": "linked",
+      "operationId": "e203836e179ebd66bb31a369a538bdfa03705911504aee711057322b20709b5a"
+    },
+    "newOurTaikoLogin": "phase2qa5df9598d06",
+    "remoteLookupConfirmed": true,
+    "conflictingViewer1415": "rejected without mapping or operation changes",
+    "stages": [
+      {
+        "name": "Existing OurTaiko identity revalidated",
+        "at": "2026-11-06T06:32:48.561Z"
+      },
+      {
+        "name": "Scenario A: externalId blocks duplicate signup and does not issue Viewer session",
+        "at": "2026-11-06T06:32:54.365Z"
+      },
+      {
+        "name": "Scenario A recovery confirmed by persisted exact pair after real callback",
+        "at": "2026-11-06T06:34:22.880Z"
+      },
+      {
+        "name": "Forward repeat login returns original Viewer; operation ID unchanged",
+        "at": "2026-11-06T06:34:28.946Z"
+      },
+      {
+        "name": "Phase 1 reverse login still returns same OurTaiko account without signup",
+        "at": "2026-11-06T06:34:34.434Z"
+      },
+      {
+        "name": "Normal OurTaiko registration submitted",
+        "at": "2026-11-06T06:36:24.489Z"
+      },
+      {
+        "name": "Real OurTaiko email verified and new user signed in",
+        "at": "2026-11-06T06:36:34.995Z"
+      },
+      {
+        "name": "New forward login created one Viewer account and confirmed remote partner link",
+        "at": "2026-11-06T06:36:41.101Z"
+      },
+      {
+        "name": "Conflicting dedicated Viewer account rejected; original mapping and operation unchanged",
+        "at": "2026-11-06T06:39:21.346Z"
+      }
+    ]
+  },
+  "upstream": {
+    "pr": "https://github.com/OurTaiko/OurTaikoSSO/pull/5",
+    "commit": "212fb701df65eade2d124050c51186fb6fc40a88",
+    "status": "draft; not deployed",
+    "targetedTests": 27,
+    "pass": true
+  },
+  "remaining": "Scenario B user_link production round trip awaits authorized OurTaiko deployment and enablement. No existing production bindings were deleted to manufacture the case."
 }

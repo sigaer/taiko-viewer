@@ -709,7 +709,7 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
     const recovered=await linkState(safeSub);assert.equal(recovered.status,'linked');assert.equal(recovered.externalId,'80001');
     const pairCount=await count('web_external_identities');await complete(await linkBegin(safeSub,{cookie:safeCookie,purpose:'link'}));
     assert.equal(await count('web_external_identities'),pairCount);assert.equal((await linkState(safeSub)).operationId,recovered.operationId);
-    for(const externalId of [undefined,1,true,{},[], '0','01','1e3','18446744073709551616']) {
+    for(const externalId of [undefined,1,true,{},[], '0','01','1e3','1\n','1\r','18446744073709551616']) {
       await ourFailure('reject malformed externalId',id=>({body:okProfile(id,{externalId})}));
     }
     note('Phase 2 remote hint blocks duplicate accounts; exact pair, independent session, fresh OIDC, subject switch, idempotency and malformed IDs');
