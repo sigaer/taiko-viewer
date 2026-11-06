@@ -30,9 +30,8 @@ const localePath = useLocalePath();
 // Goal options describe goal creation only. Their absence says nothing about
 // browsing or recommendation eligibility, and this DTO has no reason code.
 const goalCopy = computed(() => locale.value === 'ja'
-  ? { choose: '目標を選ぶ', browse: '楽曲を見る', missing: '目標の選択肢を取得できませんでした', empty: '作成できる目標はありません' }
-  : { choose: '选择目标', browse: '查看歌曲', missing: '未获取到目标选项', empty: '暂无可创建目标' });
-const goalOptionsStatus = (item: GrowthPlanItem) => Array.isArray(item.goalOptions) ? goalCopy.value.empty : goalCopy.value.missing;
+  ? { choose: '目標に設定' }
+  : { choose: '设为目标' });
 const replacementCopy = computed(() => locale.value === 'ja'
   ? { title: '次の楽曲を選ぶ', empty: '現在のおすすめに、ほかに目標を設定できる楽曲はありません。', more: 'ほかのおすすめを見る' }
   : { title: '选择另一首歌', empty: '当前推荐中没有其他可设为目标的歌曲。', more: '查看更多推荐' });
@@ -260,9 +259,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
             class="growth-plan__choice" :song-id="item.songId" :title="item.title" :difficulty-type="item.difficultyType" :star-level="item.starLevel"
             :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.difficultyType) } })" @browse="trackPlanClick(item.songId)">
             <template v-if="item.currentBestScore != null" #details>{{ item.currentBestScore.toLocaleString() }}</template>
-            <template #actions>
-              <button v-if="item.goalOptions?.length" data-song-action class="growth-plan__choose" :disabled="choicesDisabled" :aria-busy="busy" @click="openGoal(item)">{{ selectedChart(item) ? t('home.goal.selected') : goalCopy.choose }}</button>
-              <p v-else class="growth-plan__goal-status">{{ goalOptionsStatus(item) }}</p>
+            <template v-if="item.goalOptions?.length" #actions>
+              <button data-song-action class="growth-plan__choose" :disabled="choicesDisabled" :aria-busy="busy" @click="openGoal(item)">{{ selectedChart(item) ? t('home.goal.selected') : goalCopy.choose }}</button>
             </template>
           </RecommendationSongItem>
         </div>
@@ -312,7 +310,6 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-ability summary strong { font-weight: 600; color: var(--viewer-text); font-variant-numeric: tabular-nums; }
 .growth-ability summary:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 2px; }
 
-.growth-plan__goal-status { margin: 0; padding: 0; font-size: 13px; line-height: 1.5; color:var(--viewer-text-muted); }
 .growth-goal { display: grid; gap: 7px; max-width: 540px; padding-block: 8px; color:var(--el-text-color-primary); }
 .growth-goal--completed { max-width: none; padding: 20px 24px; border-left: 3px solid var(--viewer-accent-strong); box-sizing: border-box; }
 .growth-goal__support { margin: 0; color:var(--viewer-text-muted); font-size: 14px; line-height: 1.5; }
