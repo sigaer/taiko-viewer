@@ -11,6 +11,7 @@ const emptyRecent = (): RecentGrowthResponse => ({
 
 export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: MaybeRefOrGetter<number | null>) => {
   const apiFetch = useViewerApiFetch();
+  const homeGeneration = useState("account-home-generation", () => 0);
   const { currentBinding } = useHomeState();
   const recent = ref<RecentGrowthResponse>(emptyRecent());
   const pending = ref(false);
@@ -29,6 +30,7 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
     if (disposed || expectedIdentity !== identity.value) return false;
     if (inactive) { needsLoad = true; return false; }
     needsLoad = false;
+    requestRefresh.cancelPending();
     if (import.meta.server) { pending.value = Boolean(toValue(enabled) && toValue(userId)); return false; }
     const request = ++generation;
     if (!toValue(enabled) || !toValue(userId) || !currentBinding.value?.id) { recent.value = emptyRecent(); pending.value = false; error.value = null; return false; }
@@ -72,6 +74,10 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
     }
   };
 
+  const requestRefresh = useAccountDataRefresh(homeGeneration, () => {
+    generation++;
+    needsLoad = true;
+  }, () => load());
   watch(identity, () => {
     generation++;
     identityGeneration++;
@@ -82,7 +88,7 @@ export const useRecentGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
     void load();
   }, { immediate: true, flush: "sync" });
   onDeactivated(() => { inactive = true; needsLoad ||= pending.value; generation++; identityGeneration++; acknowledging.clear(); pending.value = false; });
-  onActivated(() => { if (!inactive) return; inactive = false; if (needsLoad) void load(); });
+  onActivated(() => { if (!inactive) return; inactive = false; if (needsLoad) requestRefresh(); });
   onScopeDispose(() => { disposed = true; generation++; identityGeneration++; acknowledging.clear(); });
   return { recent, pending, error, identity, refresh: load, acknowledge };
 };

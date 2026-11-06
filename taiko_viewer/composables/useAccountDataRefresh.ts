@@ -19,5 +19,5 @@ export const useAccountDataRefresh = (identity: WatchSource, invalidate: () => v
   onDeactivated(() => { active = false; });
   onActivated(() => { active = true; schedule(); });
   onBeforeUnmount(() => { active = false; });
-  return requestRefresh;
+  return Object.assign(requestRefresh, { cancelPending: () => { dirty = false; } });
 };

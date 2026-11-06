@@ -160,3 +160,48 @@ test('actual native lifetime expires independently and releases owner/Source bef
  assert.deepEqual(await sourceSnapshot(c),before);assert.equal((await c.logs()).length,0);assert.equal((await c.receipts()).length,0);
  c.syncOptions={};assert.equal((await c.ask()).status,200);assert.equal((await c.logs()).length,1);
 }));
+
+// Training closure uses the actual installed acquisition writer, authenticated
+// HTTP and isolated SQL. Only the external Wahlap response is synthetic.
+for (const mode of ['completed', 'active', 'inconclusive', 'delivery-failed', 'evaluation-error']) test(`training loop auto evaluation: ${mode}`, {timeout:30000}, () => fixture(async c => {
+ const {authoritativeFixture}=await import('./fixtures/goalAuthoritative.mjs');
+ const {readGoalSnapshot}=await import('../server/services/goals/snapshot.ts');
+ const {goalBaseline,goalTarget}=await import('../utils/playerGoal.ts');
+ const {mutateGoal}=await import('../server/services/goals/store.ts');
+ const row={song_no:1,level:4,high_score:700000,stage_cnt:1,clear_cnt:0,full_combo_cnt:0,dondaful_combo_cnt:0,best_score_rank:0};
+ await c.shared.writeUserdataWithHistory(c.taikoId,authoritativeFixture({songs:[row]},c.taikoId,new Date(Date.now()-60000)),'wahlap');
+ const snapshot=await c.scopeModule.withDomainScoreRead(c.taikoId,()=>readGoalSnapshot(c.taikoId,true));assert.ok(snapshot.provenance);
+ // The frozen test clock must be after baseline and before the real Python observation.
+ const baseline={...goalBaseline(row,snapshot.revision,new Date(Date.now()-30000).toISOString()),provenance:snapshot.provenance};
+ const goal=await mutateGoal(c.pool,c.user,String(c.bindingId),null,async()=>({profileId:String(c.bindingId),songId:1,difficultyType:4,title:'Synthetic training chart',starLevel:9,goalType:'score-pb',baselineVersion:1,baseline,source:'today-plan',sourceBasis:'stamina',sourceMode:'dimension',sourceRank:1,sourceRevision:snapshot.revision,sourceGeneratedAt:baseline.capturedAt,targetData:goalTarget('score-pb'),status:'active',createdAt:'',cancelledAt:null,unavailable:false}));
+ c.state.expectedSourceMode='read';
+ // Move only the fixture's capturedAt clock ahead of the worker's observation.
+ for(let i=0;i<60;i++)c.tick();
+ if(mode==='active')c.syncOptions.payload={profile:{userid:c.taikoId},songs:[{...row,stage_cnt:2}]};
+ if(mode==='inconclusive')await c.shared.writeUserdataWithHistory(c.taikoId,{profile:{userid:c.taikoId},songs:[row]},'kinoko-import');
+ if(mode==='delivery-failed')c.syncOptions.targetException=true;
+ if(mode==='evaluation-error')c.state.beforeSqlStatement=async sql=>{if(sql.includes('web_player_goals'))throw Error('Synthetic evaluation unavailable');};
+ try {
+  const requestId=nonce();const result=await c.ask({profileId:String(c.bindingId),requestId});assert.equal(result.status,200);
+  assert.equal(result.body.goalEvaluation.outcome,mode==='delivery-failed'?'completed':mode);
+  if(mode==='delivery-failed')assert.equal(result.body.log.status,'failed');
+  const [[saved]]=await c.pool.query('SELECT status,goal_data FROM web_player_goals WHERE id=?',[goal.id]);
+  assert.equal(saved.status,['completed','delivery-failed'].includes(mode)?'completed':'active');
+  if(saved.status==='completed')assert.equal(JSON.parse(saved.goal_data).completionEvidence.result.after,800000);
+  assert.equal(globalThis.__goalSqlRuntime.pythonCalls,0,'Sync/evaluation never computes Growth');
+  assert.equal((await c.logs()).length,1,'Evaluation failure does not roll back sync log');
+  c.route('post','/evaluate-current',(await import('../server/api/account/growth/goal/evaluate-current.post.ts')).default);
+  assert.equal((await c.request('POST','/evaluate-current',{profileId:String(c.bindingId)},'')).status,401);
+  assert.equal((await c.request('POST','/evaluate-current',{profileId:String(c.bindingId),evidence:{highScore:999999}})).status,400);
+  assert.equal((await c.request('POST','/evaluate-current',{profileId:String(c.bindingId+100)})).status,409);
+  if(saved.status==='completed'){
+   const replay=await c.ask({profileId:String(c.bindingId),requestId});assert.equal(replay.body.goalEvaluation.outcome,'no-active-goal');
+   const response=await c.request('POST','/evaluate-current',{profileId:String(c.bindingId)});assert.equal(response.status,200);assert.equal((await response.json()).outcome,'no-active-goal');
+   const [[unchanged]]=await c.pool.query('SELECT goal_data FROM web_player_goals WHERE id=?',[goal.id]);assert.equal(unchanged.goal_data,saved.goal_data);
+  }
+  if(mode==='evaluation-error'){
+   c.state.beforeSqlStatement=null;const response=await c.request('POST','/evaluate-current',{profileId:String(c.bindingId)});
+   assert.equal(response.status,200);assert.equal((await response.json()).outcome,'completed');assert.equal((await c.logs()).length,1,'Retry evaluates without another sync');
+  }
+ } finally {c.state.beforeSqlStatement=null;await c.pool.execute('DELETE FROM web_player_goals WHERE user_id=?',[c.user]);}
+}));

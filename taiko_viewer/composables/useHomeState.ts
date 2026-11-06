@@ -28,7 +28,7 @@ const createSnapshot = (): HomeResolverSnapshot => ({
   error: null
 });
 
-const requests = new WeakMap<object, { generation: number; attempt: number; revision: string; pending: Promise<HomeResolverSnapshot> | null }>();
+const requests = new WeakMap<object, { generation: number; attempt: number; revision: string; identityRevision: string; pending: Promise<HomeResolverSnapshot> | null }>();
 
 export const useHomeState = () => {
   const apiFetch = useViewerApiFetch();
@@ -38,8 +38,9 @@ export const useHomeState = () => {
   const bindingGeneration = useState("account-binding-generation", () => 0);
   const homeGeneration = useState("account-home-generation", () => 0);
   const revision = computed(() => JSON.stringify([accountUser.value?.id || null, bindingGeneration.value, homeGeneration.value, accountAuthError.value]));
+  const identityRevision = () => JSON.stringify([accountUser.value?.id || null, bindingGeneration.value, accountAuthError.value]);
   const app = useNuxtApp();
-  if (!requests.has(app)) requests.set(app, { generation: 0, attempt: 0, revision: revision.value, pending: null });
+  if (!requests.has(app)) requests.set(app, { generation: 0, attempt: 0, revision: revision.value, identityRevision: identityRevision(), pending: null });
   const runtime = requests.get(app)!;
   let disposed = false;
   let suspended = false;
@@ -51,7 +52,9 @@ export const useHomeState = () => {
     runtime.generation++;
     runtime.pending = null;
     resolvedUserId.value = null;
-    snapshot.value = createSnapshot();
+    const nextIdentity = identityRevision();
+    if (nextIdentity !== runtime.identityRevision) snapshot.value = createSnapshot();
+    runtime.identityRevision = nextIdentity;
   };
   watch(revision, invalidate, { flush: "sync" });
   const suspend = () => {
@@ -60,7 +63,7 @@ export const useHomeState = () => {
     if (ownedRequest !== null && ownedRequest === runtime.generation) {
       runtime.generation++;
       runtime.pending = null;
-      snapshot.value = createSnapshot();
+      if (snapshot.value.status !== "ready") snapshot.value = createSnapshot();
       resolvedUserId.value = null;
     }
   };
@@ -102,7 +105,7 @@ export const useHomeState = () => {
     ownedRequest = request;
     const expectedRevision = revision.value;
     const current = () => !disposed && !suspended && view === activation && request === runtime.generation && expectedRevision === revision.value;
-    snapshot.value = createSnapshot();
+    if (snapshot.value.status !== "ready") snapshot.value = createSnapshot();
     const pending = Promise.resolve().then(async () => { try {
       if (accountAuthError.value) {
         throw new Error(accountAuthError.value);

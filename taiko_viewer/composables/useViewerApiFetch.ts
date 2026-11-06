@@ -26,7 +26,7 @@ export const useViewerApiFetch = () => {
     }
     // A completed sync request invalidates the cached score-presence check.
     // Its response still determines success/failure in the existing sync UI.
-    if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && /^\/api\/account\/sync(?:\/|$)/.test(request)) {
+    if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && (/^\/api\/account\/sync(?:\/|$)/.test(request) || request === "/api/account/growth/goal/evaluate-current")) {
       homeResolvedUserId.value = null;
       homeGeneration.value += 1;
     }

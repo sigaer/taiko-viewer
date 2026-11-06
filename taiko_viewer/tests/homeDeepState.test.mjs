@@ -64,7 +64,7 @@ test('home clears binding immediately on actual mutation, deduplicates resolutio
  await home.resolve();assert.equal(home.homeState.value,'authenticated_ready');assert.equal(home.currentBinding.value.id,1);
  const change=api('/api/account/bindings/current',{method:'POST'});requests.shift().resolve({});await change;assert.equal(home.currentBinding.value,null);assert.equal(home.status.value,'loading');
  await Promise.all([home.resolve(),home.resolve()]);assert.equal(home.currentBinding.value.id,binding.id);
- const sync=api('/api/account/sync',{method:'POST'});requests.shift().resolve({log:{status:'failed'}});await sync;assert.equal(home.homeState.value,null);await home.resolve();assert.equal(home.homeState.value,'authenticated_ready');
+ const sync=api('/api/account/sync',{method:'POST'});requests.shift().resolve({log:{status:'failed'}});await sync;assert.equal(home.homeState.value,'authenticated_ready');await home.resolve();assert.equal(home.homeState.value,'authenticated_ready');
  const failure=api('/api/account/sync',{method:'POST'});requests.shift().reject(Error('sync failed'));await assert.rejects(failure);assert.equal(home.homeState.value,'authenticated_ready','transport failure cannot claim or invent a sync result');
 }));
 test('home binding and score failures have exact stages; each retry restores actual empty/unbound/ready state',async()=>fixture(async({home,requests,controlled,binding})=>{
@@ -183,4 +183,34 @@ test('My overview distinguishes real binding conflicts from catalog and other 40
   for(const reason of ['profile-changed','binding-changed']){model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:reason}});assert.equal(model.errorText.value,model.copy.value.changed);}
   model.failure.value=model.readFailure({},true);assert.equal(model.errorText.value,model.copy.value.timeout);
  }finally{mounted?.close();globalThis.document=doc;globalThis.window=win;}
+}));
+
+test('training loop: inactive generations coalesce, retain DTOs and activate with one read each',async()=>fixture(async({home,cached,states,requests,controlled,overview,recent})=>{
+ await home.resolve();
+ const page=cached(()=>({growth:usePlayerGrowth(ref(true),ref(1)),recent:useRecentGrowth(ref(true),ref(1))}));await settle();
+ await page.deactivate();controlled.add(overviewPath);controlled.add(recentPath);
+ const generation=states.get('account-home-generation');generation.value++;generation.value++;await settle();
+ assert.equal(requests.length,0);assert.equal(page.model.growth.growth.value.scoreRevision,'r1');
+ await page.activate();assert.equal(requests.filter(r=>r.path===overviewPath).length,1);assert.equal(requests.filter(r=>r.path===recentPath).length,1);
+ assert.equal(page.model.growth.pending.value,false);assert.equal(page.model.recent.recent.value.profileId,'1');
+ const reads=requests.splice(0);reads.find(r=>r.path===overviewPath).resolve({...overview,scoreRevision:'r2'});reads.find(r=>r.path===recentPath).resolve({...recent,observedAt:'2026-11-06T01:00:00Z'});await settle();
+ assert.equal(page.model.growth.growth.value.scoreRevision,'r2');assert.equal(requests.length,0);
+ generation.value++;generation.value++;await settle();assert.equal(requests.length,2);
+ const stale=requests.splice(0);generation.value++;await settle();const current=requests.splice(0);
+ for(const r of stale)r.resolve(r.path===overviewPath?{...overview,scoreRevision:'STALE'}:recent);await settle();assert.equal(page.model.growth.growth.value.scoreRevision,'r2');
+ for(const r of current)r.resolve(r.path===overviewPath?{...overview,scoreRevision:'r3'}:recent);await settle();assert.equal(page.model.growth.growth.value.scoreRevision,'r3');
+}));
+
+test('Goal evaluation cannot overwrite a newer same-identity sync generation; independent Recent failure keeps completed evidence',async()=>fixture(async({attach,load,requests,overview,recent,states})=>{
+ const goal={id:'1',profileId:'1',songId:100,difficultyType:4,title:'Synthetic',goalType:'score-pb',baseline:{highScore:1}};
+ let reads=0,recentReads=0;
+ const props=reactive({overview:{...overview,activeGoal:goal},displayName:'Synthetic',identity:'1:1:true',recent,
+  refreshGrowth:async()=>{reads++;return true;},refreshRecent:async()=>{recentReads++;throw Error('Recent unavailable');},acknowledgeRecent:async()=>{}});
+ const View=await load('components/home/PlayerGrowthSurface.vue',true),m=attach(()=>View.setup(props,{expose(){},emit(){}})).model;
+ const late=m.evaluate();const old=requests.shift();states.get('account-home-generation').value++;
+ old.resolve({profileId:'1',outcome:'completed',activeGoal:null,recentCompletedGoal:{...goal,status:'completed'}});await late;
+ assert.equal(reads,0);assert.equal(m.recentCompletedGoal.value,null);assert.equal(m.busy.value,false);
+ const current=m.evaluate();requests.shift().resolve({profileId:'1',outcome:'completed',activeGoal:null,recentCompletedGoal:{...goal,status:'completed',completionEvidence:{result:{goalType:'score-pb',before:1,after:2,delta:1}}}});await current;
+ assert.equal(reads,1);assert.equal(recentReads,1);assert.equal(m.recentCompletedGoal.value.completionEvidence.result.after,2);assert.equal(m.choicesDisabled.value,false);
+ props.overviewRefreshFailed=true;assert.equal(m.choicesDisabled.value,true,'A failed background Overview must block a stale plan');
 }));

@@ -16,6 +16,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const localePath = useLocalePath();
 const userId = computed(() => props.user?.id || null);
+const { currentBinding } = useHomeState();
 const isReady = computed(() => props.state === "authenticated_ready");
 const { growth, pending: growthPending, error: growthError, refreshing: overviewRefreshing, refreshError: overviewRefreshError, identity: growthIdentity, refresh: refreshGrowth } = usePlayerGrowth(isReady, userId);
 const { recent, pending: recentPending, error: recentError, refresh: refreshRecent, acknowledge: acknowledgeRecent } = useRecentGrowth(isReady, userId);
@@ -74,6 +75,7 @@ const trackClick = (event: string, source: string) => {
     <HomePlayerGrowthSurface
       v-if="isReady"
       :overview="growth"
+      :can-external-sync="!!currentBinding && ['wahlap', 'hiroba'].includes(currentBinding.source)"
       :display-name="displayName"
       :pending="growthPending"
       :failed="!!growthError"

@@ -12,6 +12,7 @@ import type { PlayerGoal, GoalType } from "~/types/player-goal";
 
 const props = defineProps<{
   overview: PlayerGrowthOverview;
+  canExternalSync?: boolean;
   displayName: string;
   pending?: boolean;
   failed?: boolean;
@@ -41,7 +42,7 @@ const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()
 const balanced = computed(() => props.overview.playerState.dataSufficiency === "ready" && props.overview.playerState.tiedDimensions.length === 6);
 const feedback = computed(() => composeHomeGrowthFeedback(activeGoal.value ? null : recentCompletedGoal.value,
   props.overview.dailyProgress, props.recent, activeGoal.value, props.overview.profileId,
-  { daily: !props.pending && !props.failed, recent: !props.recentPending && !props.recentFailed }));
+  { daily: !props.pending && !props.failed, recent: Boolean(props.recent.profileId) }));
 const progress = computed(() => feedback.value.dailyProgress);
 const eventValue = (fact: GrowthEventFact, value: number | null) => fact.type === "rank-upgrade" ? formatScoreRank(value, locale.value) : Number(value).toLocaleString(locale.value === "ja" ? "ja-JP" : "zh-CN");
 const voiceContext = computed<GrowthVoiceContext>(() => ({
@@ -62,6 +63,7 @@ const skillItems = computed(() => props.overview.playerState.skills.filter((item
 const skillAriaLabel = (key: RatingDimensionKey, value: number) => `${dimensionLabel(key)} ${Number(value).toFixed(2)}`;
 
 const apiFetch = useViewerApiFetch();
+const homeGeneration = useState("account-home-generation", () => 0);
 const activeGoal = ref<PlayerGoal | null>(null);
 const recentCompletedGoal = ref<PlayerGoal | null>(null);
 const evaluationNotice = ref('');
@@ -72,12 +74,13 @@ const goalError = ref('');
 const needsRefresh = ref(false);
 const refreshing = ref(false);
 const refreshFailed = ref(false);
-const choicesDisabled = computed(() => busy.value || needsRefresh.value);
+const choicesDisabled = computed(() => Boolean(busy.value || needsRefresh.value || props.overviewRefreshing || props.overviewRefreshFailed || props.pending || props.failed));
 const selector = ref<HTMLDialogElement | null>(null);
 let expectedGoalId: string | null = null;
 let returnFocus: HTMLElement | null = null;
 let mutationGeneration = 0;
 let identityGeneration = 0;
+watch(homeGeneration, () => { mutationGeneration++; busy.value = false; refreshing.value = false; needsRefresh.value = false; refreshFailed.value = false; selector.value?.close(); selected.value = null; }, { flush: 'sync' });
 watch(() => props.identity, () => {
   identityGeneration++; mutationGeneration++; evaluationNotice.value = ''; activeGoal.value = null; recentCompletedGoal.value = null;
   needsRefresh.value = false; refreshing.value = false; refreshFailed.value = false;
@@ -127,12 +130,14 @@ const mutate = async (cancel = false) => {
     if (generation === mutationGeneration) goalError.value = t(Number((error as { statusCode?: number }).statusCode) === 409 ? 'home.goal.conflict' : 'home.goal.error');
   } finally { if (generation === mutationGeneration) busy.value = false; }
 };
-const refreshAfterEvaluation = async (identity: string) => {
+const refreshAfterEvaluation = async (identity: string, includeRecent = true) => {
   if (identity !== props.identity || refreshing.value) return;
   const identityRequest = identityGeneration;
+  const dataRequest = homeGeneration.value;
   refreshing.value = true; refreshFailed.value = false;
-  const succeeded = await props.refreshGrowth(identity);
-  if (identity !== props.identity || identityRequest !== identityGeneration) return;
+  const [growthResult] = await Promise.allSettled([props.refreshGrowth(identity), includeRecent ? props.refreshRecent() : Promise.resolve(true)]);
+  const succeeded = growthResult.status === 'fulfilled' && growthResult.value;
+  if (identity !== props.identity || identityRequest !== identityGeneration || dataRequest !== homeGeneration.value) return;
   refreshing.value = false; needsRefresh.value = !succeeded; refreshFailed.value = !succeeded;
 };
 const evaluate = async () => {
@@ -223,7 +228,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
     </div>
     <div v-else-if="failed" class="goal-actions" role="alert"><span>{{ t('home.growth.loadFailed') }}</span><button type="button" @click="refreshGrowth(identity)">{{ t('home.growth.recent.retry') }}</button></div>
     <template v-else>
-      <section v-if="activeGoal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
+      <section v-if="activeGoal" id="current-goal" class="growth-goal" aria-labelledby="growth-goal-title" aria-live="polite">
         <h2 id="growth-goal-title">{{ t(composeGoalCopy('active').key) }}</h2>
         <strong>{{ activeGoal.title }}</strong>
         <span>{{ t(difficultyLabelKey(activeGoal.difficultyType)) }}<template v-if="activeGoal.starLevel"> · {{ activeGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
@@ -232,9 +237,13 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <span v-if="activeGoal.goalType === 'ng-reduced' && activeGoal.baseline.ngCnt !== null">{{ t('home.goal.baselineNg', { value: activeGoal.baseline.ngCnt }) }}</span>
         <span v-if="activeGoal.goalType === 'rank-upgrade'">{{ t('home.goal.baseline', { value: formatScoreRank(activeGoal.baseline.bestScoreRank, locale) }) }}</span>
         <span v-if="activeGoal.unavailable">{{ t('home.goal.unavailable') }}</span>
+        <div class="goal-actions">
+          <NuxtLink :to="localePath({ path: `/songs/${activeGoal.songId}`, query: { difficulty: String(activeGoal.difficultyType) } })">{{ locale === 'ja' ? '譜面を見る' : '查看谱面' }}</NuxtLink>
+          <NuxtLink v-if="canExternalSync" :to="localePath({ path: '/account/sync', query: { profileId: overview.profileId, from: 'goal' } })">{{ locale === 'ja' ? '練習後に同期' : '练后同步' }}</NuxtLink>
+        </div>
         <div class="goal-actions"><button class="goal-evaluate" :disabled="choicesDisabled" @click="evaluate">{{ t(busy ? 'home.goal.saving' : 'home.goal.evaluate') }}</button><button :disabled="choicesDisabled" @click="chooseAnother">{{ t('home.goal.replace') }}</button><button :disabled="choicesDisabled" @click="mutate(true)">{{ t(busy ? 'home.goal.saving' : 'home.goal.cancel') }}</button></div>
       </section>
-      <section v-else-if="recentCompletedGoal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
+      <section v-else-if="recentCompletedGoal" id="current-goal" class="growth-goal growth-goal--completed panel-card" aria-labelledby="goal-completed-title" aria-live="polite">
         <h2 id="goal-completed-title">{{ t(composeGoalCopy('completed').key) }}</h2>
         <strong>{{ recentCompletedGoal.title }}</strong>
         <span>{{ t(difficultyLabelKey(recentCompletedGoal.difficultyType)) }}<template v-if="recentCompletedGoal.starLevel"> · {{ recentCompletedGoal.starLevel }}{{ t('guide.starSuffix') }}</template></span>
@@ -271,7 +280,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 
 
       <p v-if="refreshing" role="status">{{ t('home.goal.refreshing') }}</p>
-      <div v-else-if="refreshFailed" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button @click="refreshAfterEvaluation(identity)">{{ t('home.goal.retryRefresh') }}</button></div>
+      <div v-else-if="refreshFailed" class="goal-actions" role="alert"><span>{{ t('home.goal.refreshFailed') }}</span><button @click="refreshAfterEvaluation(identity, false)">{{ t('home.goal.retryRefresh') }}</button></div>
       <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
       <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
       <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="restoreGoalFocus">
@@ -317,9 +326,9 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .growth-goal > strong { font-size: 18px; overflow-wrap: anywhere; }
 .growth-goal > span { font-size: 14px; }
 .goal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-.goal-actions button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background:var(--el-bg-color); color:var(--el-text-color-primary); cursor: pointer; font: inherit; }
+.goal-actions button, .goal-actions > a { display: inline-flex; align-items: center; text-decoration: none; min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background:var(--el-bg-color); color:var(--el-text-color-primary); cursor: pointer; font: inherit; }
 button:disabled { opacity: .55; cursor: default; }
-button:focus-visible, input:focus-visible, .goal-dialog a:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
+button:focus-visible, input:focus-visible, .goal-actions a:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
 .goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color:var(--el-text-color-primary); background:var(--el-bg-color); }
 .goal-dialog::backdrop { background:var(--viewer-overlay); }
 .goal-dialog h2 { margin: 0 0 16px; font-size: 21px; }

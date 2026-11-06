@@ -15,14 +15,14 @@ test('actual Surface setup: all outcomes refresh once; failure retains completio
  code=code.replace(/import \{([^}]+)\} from ["']([^"']+)["'];/g,(_,names,path)=>path==='vue'?`import {${names}} from ${JSON.stringify(import.meta.resolve('vue'))};`:`const {${names}}=globalThis.__growthTestStubs;`);
  const component=(await import(data(code))).default;
  let request;const calls=[];let restored=0;
- const globals={...vue,document:{activeElement:{focus:()=>restored++}},useI18n:()=>({t:x=>x,locale:vue.ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>(path,options)=>{calls.push({path,options});return request.promise},onBeforeUnmount:()=>{}};
+ const globals={...vue,useState:(_key,init)=>vue.ref(init()),document:{activeElement:{focus:()=>restored++}},useI18n:()=>({t:x=>x,locale:vue.ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>(path,options)=>{calls.push({path,options});return request.promise},onBeforeUnmount:()=>{}};
  for(const [k,v]of Object.entries(globals))globalThis[k]=v;
  const scope=vue.effectScope();
  try{
  const active={id:'1',profileId:'1',songId:100,difficultyType:4,goalType:'score-pb'};
  const overview={profileId:'1',scoreRevision:'R1',activeGoal:active,recentCompletedGoal:null,playerState:{skills:[],tiedDimensions:[]},dailyProgress:{events:[]},todayPlan:{items:[]}};
  let refreshCalls=0,refreshResult=true;let fresh;
- const props=vue.reactive({identity:'9:1:true',overview,displayName:'Test',refreshGrowth:async identity=>{assert.equal(identity,props.identity);refreshCalls++;if(fresh){props.overview=fresh;await vue.nextTick()}return refreshResult}});
+ const props=vue.reactive({identity:'9:1:true',overview,displayName:'Test',refreshRecent:async()=>true,refreshGrowth:async identity=>{assert.equal(identity,props.identity);refreshCalls++;if(fresh){props.overview=fresh;await vue.nextTick()}return refreshResult}});
  const ui=scope.run(()=>component.setup(props,{expose(){}}));
  // Replacing a goal must visibly open a picker even when no recommendation is eligible.
  let opened=0,radioFocused=0;

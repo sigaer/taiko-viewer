@@ -25,6 +25,10 @@ import { captureAccountSyncOwner, dispatchOwnedAccountSync } from "../../service
 import { withViewerCurrentSource } from "../../services/account/current-source.ts";
 import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
+import { readGoalSnapshot } from '../../services/goals/snapshot';
+import { evaluateCurrentGoalForBinding } from '../../services/goals/evaluation';
+import { withDomainScoreRead } from '../../services/taiko-domain/publication';
+
 export const getAccountSyncOverview = async (event: H3Event) => {
   const user = await requireAccountUser(event);
   return withViewerCurrentSource(user.id, "read", async (currentBinding, db) => {
@@ -59,6 +63,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   const user = await requireAccountUser(event);
   const userId = user.id;
   const { db, binding: currentBinding } = await captureAccountSyncOwner(userId);
+  if (payload.profileId !== undefined && payload.profileId !== String(currentBinding.id)) throw createError({ statusCode: 409, statusMessage: 'profile-changed' });
   const wahlapCookie = await loadWahlapCookie().catch(() => "");
   if (!String(wahlapCookie || "").trim()) {
     throw createError({
@@ -83,9 +88,20 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
     throw createError({ statusCode: 400, statusMessage: "存在无效的同步目标，请刷新页面后重试" });
   }
 
+  // Failure to capture evidence must not prevent a legitimate score sync.
+  const before = await withDomainScoreRead(currentBinding.taiko_id, async () => {
+    const { revision, provenance } = await readGoalSnapshot(currentBinding.taiko_id, true);
+    return { revision, provenance };
+  }).catch(() => null);
   const logRow = await dispatchOwnedAccountSync(userId, db, currentBinding, requestedIds, payload.requestId);
+  // The owned worker receipt proves acquisition preceded downstream dispatch;
+  // even partial/failed delivery can have published local scores. Check the
+  // actual observation under the evaluator's SH lease, never log.status/mtime.
+  const goalEvaluation = await evaluateCurrentGoalForBinding(userId, { profileId: String(currentBinding.id) }, before)
+    .catch(() => ({ profileId: String(currentBinding.id), outcome: 'evaluation-error' as const, activeGoal: null, recentCompletedGoal: null }));
   return {
     ok: true,
+    goalEvaluation,
     currentBinding: sanitizeBinding(currentBinding),
     log: toPublicSyncLog(logRow)
   };

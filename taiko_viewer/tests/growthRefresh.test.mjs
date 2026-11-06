@@ -1,3 +1,4 @@
+import { useAccountDataRefresh } from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -6,7 +7,7 @@ import * as vue from 'vue';
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b});return {promise,resolve,reject}};
 test('unified Growth refresh preserves UI, replaces full DTO and rejects stale identity/generation including ABA',async()=>{
  const calls=[];const binding=vue.ref({id:1});const user=vue.ref(9);const enabled=vue.ref(true);
- const globals={...vue,useHomeState:()=>({currentBinding:binding}),useViewerApiFetch:()=>(path,options)=>{assert.equal(options.retry,0);const d=deferred();calls.push(d);return d.promise}};
+ const globals={...vue, useAccountDataRefresh, useState: (_key, init) => vue.ref(init()),useHomeState:()=>({currentBinding:binding}),useViewerApiFetch:()=>(path,options)=>{assert.equal(options.retry,0);const d=deferred();calls.push(d);return d.promise}};
  for(const [k,v] of Object.entries(globals))globalThis[k]=v;
  const scope=vue.effectScope();
  try{

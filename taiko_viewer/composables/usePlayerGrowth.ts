@@ -8,6 +8,7 @@ const emptyGrowth = (): PlayerGrowthOverview => ({
 });
 export const usePlayerGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: MaybeRefOrGetter<number | null>) => {
   const apiFetch = useViewerApiFetch();
+  const homeGeneration = useState("account-home-generation", () => 0);
   const { currentBinding } = useHomeState();
   const growth = ref<PlayerGrowthOverview>(emptyGrowth());
   const pending = ref(false);
@@ -24,6 +25,7 @@ export const usePlayerGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
     if (disposed || expectedIdentity !== identity.value) return false;
     if (inactive) { needsLoad = true; return false; }
     needsLoad = false;
+    requestRefresh.cancelPending();
     // This local ref is not transferred in the SSR payload. Start its load
     // on the client so hydration does not repeat a discarded server compute.
     if (import.meta.server) { pending.value = Boolean(toValue(enabled) && toValue(userId)); return false; }
@@ -40,9 +42,13 @@ export const usePlayerGrowth = (enabled: MaybeRefOrGetter<boolean>, userId: Mayb
     } catch (e) { if (request === generation) { if (loaded) refreshError.value = e; else error.value = e; } return false; }
     finally { if (request === generation) { pending.value = false; refreshing.value = false; } }
   };
-  watch(identity, () => { loaded = false; growth.value = emptyGrowth(); error.value = null; refreshError.value = null; void load(); }, { immediate: true, flush: 'sync' });
+  const requestRefresh = useAccountDataRefresh(homeGeneration, () => {
+    generation++;
+    needsLoad = true;
+  }, () => load());
+  watch(identity, () => { generation++; loaded = false; growth.value = emptyGrowth(); error.value = null; refreshError.value = null; void load(); }, { immediate: true, flush: 'sync' });
   onDeactivated(() => { inactive = true; needsLoad ||= pending.value || refreshing.value; generation++; pending.value = false; refreshing.value = false; });
-  onActivated(() => { if (!inactive) return; inactive = false; if (needsLoad) void load(); });
+  onActivated(() => { if (!inactive) return; inactive = false; if (needsLoad) requestRefresh(); });
   onScopeDispose(() => { disposed = true; generation++; });
   return { growth, pending, error, refreshing, refreshError, identity, refresh: load };
 };

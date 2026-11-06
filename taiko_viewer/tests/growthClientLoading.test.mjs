@@ -1,3 +1,4 @@
+import { useAccountDataRefresh } from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ for (const name of ['usePlayerGrowth', 'useRecentGrowth']) {
     const source = await readFile(new URL(`../composables/${name}.ts`, import.meta.url), 'utf8');
     const binding = vue.ref({ id: 1 }), enabled = vue.ref(true), user = vue.ref(9);
     const calls = [];
-    const globals = { ...vue, useHomeState: () => ({ currentBinding: binding }), useViewerApiFetch: () => async (path, options) => {
+    const globals = { ...vue, useAccountDataRefresh, useState: (_key, init) => vue.ref(init()), useHomeState: () => ({ currentBinding: binding }), useViewerApiFetch: () => async (path, options) => {
       assert.equal(options.retry, 0);
       calls.push(path);
       return { profileId: String(binding.value.id), boundary: {} };

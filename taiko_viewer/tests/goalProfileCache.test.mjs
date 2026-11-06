@@ -5,7 +5,7 @@ import ts from 'typescript';
 test('successful binding mutations invalidate Home identity; Goal writes do not add a resolver waterfall',async()=>{
  const state={value:7},generation={value:0};let reject=false;
  globalThis.useI18n=()=>({locale:{value:'zh'}});
- globalThis.useState=(key)=>{assert.ok(['home-state-resolved-user-id','account-binding-generation'].includes(key));return key==='home-state-resolved-user-id'?state:generation};
+ globalThis.useState=(key)=>{assert.ok(['home-state-resolved-user-id','account-binding-generation','account-home-generation'].includes(key));return key==='home-state-resolved-user-id'?state:generation};
  globalThis.$fetch=async()=>{if(reject)throw Error('failed');return {ok:true}};
  try{
  const source=await readFile(new URL('../composables/useViewerApiFetch.ts',import.meta.url),'utf8');

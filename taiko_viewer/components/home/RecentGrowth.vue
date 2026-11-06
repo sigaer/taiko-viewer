@@ -58,14 +58,14 @@ watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.r
       </div>
       <time v-if="observedLabel" :datetime="recent.observedAt || undefined">{{ observedLabel }}</time>
     </div>
-    <div v-if="pending" class="recent-growth__loading" aria-hidden="true">
+    <div v-if="pending && !recent.profileId" class="recent-growth__loading" aria-hidden="true">
       <span></span><span></span><span></span>
     </div>
     <div v-else-if="failed" class="recent-growth__state" role="alert">
       <span>{{ t("home.growth.recent.failed") }}</span>
       <button type="button" @click="emit('retry')">{{ t("home.growth.recent.retry") }}</button>
     </div>
-    <div v-else-if="visibleFacts.length" class="recent-growth__list">
+    <div v-if="visibleFacts.length" class="recent-growth__list">
       <p v-if="recent.boundary.recovered" class="recent-growth__more">{{ t(narrative.key) }}</p>
       <NuxtLink
         v-for="fact in visibleFacts"
@@ -82,7 +82,7 @@ watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.r
       </NuxtLink>
       <p v-if="hiddenCount" class="recent-growth__more">{{ t("home.growth.recent.more", { count: hiddenCount }) }}</p>
     </div>
-    <p v-else class="recent-growth__empty">{{ t(narrative.key) }}</p>
+    <p v-else-if="(!pending || recent.profileId) && !failed" class="recent-growth__empty">{{ t(narrative.key) }}</p>
   </section>
 </template>
 

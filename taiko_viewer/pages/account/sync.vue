@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import type { GoalEvaluationResponse } from "~/types/goal-evaluation";
+import { formatScoreRank } from "~/utils/scoreRank";
 import { buildPageDescription } from "~/utils/seo";
 
 type BindingSummary = {
@@ -66,6 +68,7 @@ type SyncOverviewPayload = {
 const { t, locale } = useI18n();
 const apiFetch = useViewerApiFetch();
 const localePath = useLocalePath();
+const route = useRoute();
 const { formatDateTime } = useViewerDateTime();
 
 definePageMeta({
@@ -89,6 +92,25 @@ useViewerSeo(() => ({
 const selectedTargetIds = ref<string[]>([]);
 const submitting = ref(false);
 const completion = ref<{ status: "success" | "partial" | "failed"; logId?: number } | null>(null);
+const goalEvaluation = ref<GoalEvaluationResponse | null>(null);
+const evaluatingGoal = ref(false);
+const goalCopy = computed(() => locale.value === 'ja' ? {
+  title: '現在の目標の進捗', completed: '目標を達成しました', active: '目標はまだ達成していません',
+  inconclusive: '目標の進捗を確認できませんでした。次の同期後にもう一度確認してください。',
+  'evaluation-error': '成績の同期結果は保存されています。目標の確認を再試行してください。',
+  retry: '目標を再確認', back: '目標に戻る', changed: '連携アカウントが変更されました。ホームで現在の目標を確認してください。'
+} : {
+  title: '当前目标进展', completed: '目标已达成', active: '目标尚未达成',
+  inconclusive: '暂时无法确认目标进展，请在下次同步后再确认。',
+  'evaluation-error': '成绩同步结果已保留，请重试目标评估。',
+  retry: '重试目标评估', back: '返回目标', changed: '绑定账号已变更，请返回首页查看当前目标。'
+});
+const goalChange = computed(() => {
+  const result = goalEvaluation.value?.recentCompletedGoal?.completionEvidence?.result;
+  if (!result || !['score-pb', 'ng-reduced', 'rank-upgrade'].includes(result.goalType)) return '';
+  const format = (value: number) => result.goalType === 'rank-upgrade' ? formatScoreRank(value, locale.value) : value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
+  return `${t(`home.growth.factLabels.${result.goalType}`)} ${format(result.before)} → ${format(result.after)}`;
+});
 const importingKinoko = ref(false);
 const importingKinokoHistory = ref(false);
 const kinokoApiKey = ref("");
@@ -249,13 +271,27 @@ const { data, pending, error: readError, refresh } = useForumResource<SyncOvervi
 );
 const actionScope = useAccountPageScope(() => {
   if (scoreTokenDialogOwner) { scoreTokenDialogOwner = null; ElMessageBox.close(); }
-  completion.value = null;
+  completion.value = null; goalEvaluation.value = null; evaluatingGoal.value = false;
   selectedTargetIds.value = []; submitting.value = false; importingKinoko.value = false;
   importingKinokoHistory.value = false; kinokoApiKey.value = ""; scoreTokenBusy.value = false;
   issuedScoreToken.value = ""; startCooldown(0);
 }, true);
 
 const overview = computed(() => data.value);
+const goalContextChanged = computed(() => route.query.from === 'goal' && typeof route.query.profileId === 'string' &&
+  !!overview.value?.currentBinding && route.query.profileId !== String(overview.value.currentBinding.id));
+const retryGoalEvaluation = async () => {
+  const ticket = actionScope.capture();
+  const profileId = String(overview.value?.currentBinding?.id || goalEvaluation.value?.profileId || '');
+  if (!actionScope.current(ticket) || evaluatingGoal.value || !profileId || goalContextChanged.value) return;
+  evaluatingGoal.value = true;
+  try {
+    const result = await apiFetch<GoalEvaluationResponse>('/api/account/growth/goal/evaluate-current', { method: 'POST', retry: 0, body: { profileId } });
+    if (actionScope.current(ticket) && result.profileId === profileId) goalEvaluation.value = result;
+  } catch {
+    if (actionScope.current(ticket)) goalEvaluation.value = { profileId, outcome: 'evaluation-error', activeGoal: null, recentCompletedGoal: null };
+  } finally { if (actionScope.current(ticket)) evaluatingGoal.value = false; }
+};
 const completedStatus = computed(() => {
   const current = overview.value;
   if (!current?.currentBinding || !current.hasUserdata) return null;
@@ -339,21 +375,25 @@ const buildSyncFeedback = (log: SyncLog | null | undefined) => {
 const submitSync = async () => {
   const ticket = actionScope.capture();
   if (!actionScope.current(ticket)) return;
-  if (submitting.value || pending.value) return;
+  if (submitting.value || pending.value || evaluatingGoal.value) return;
+  if (goalContextChanged.value) { ElMessage.warning(goalCopy.value.changed); return; }
   if (!selectedTargetIds.value.length) {
     ElMessage.warning(copy.value.selectTarget);
     return;
   }
   submitting.value = true;
+  goalEvaluation.value = null;
   completion.value = { status: "failed" };
   try {
-    const response = await apiFetch<{ log: SyncLog | null }>("/api/account/sync", {
+    const response = await apiFetch<{ log: SyncLog | null; goalEvaluation: GoalEvaluationResponse }>("/api/account/sync", {
       method: "POST",
       body: {
+        profileId: String(overview.value?.currentBinding?.id || ""),
         targetIds: selectedTargetIds.value
       }
     });
     if (!actionScope.current(ticket)) return;
+    if (response.goalEvaluation?.profileId === String(overview.value?.currentBinding?.id || '')) goalEvaluation.value = response.goalEvaluation;
     const status = response?.log?.status;
     completion.value = { status: status === "success" || status === "partial" ? status : "failed", logId: response?.log?.id };
     const feedback = buildSyncFeedback(response?.log);
@@ -383,6 +423,7 @@ const importFromKinoko = async () => {
     ElMessage.warning(copy.value.kinokoNeedKey);
     return;
   }
+  goalEvaluation.value = null;
   importingKinoko.value = true;
   completion.value = { status: "failed" };
   try {
@@ -424,6 +465,7 @@ const importHistoryFromKinoko = async () => {
     ElMessage.warning(copy.value.kinokoNeedKey);
     return;
   }
+  goalEvaluation.value = null;
   importingKinokoHistory.value = true;
   completion.value = { status: "failed" };
   try {
@@ -511,6 +553,20 @@ const copyIssuedScoreToken = async () => {
 <template>
   <div class="sync-page">
     <AnnualBetaContinue />
+    <section v-if="goalEvaluation || route.query.from === 'goal'" class="panel-card goal-sync-result" aria-live="polite">
+        <h2>{{ goalCopy.title }}</h2>
+        <p v-if="goalContextChanged" role="alert">{{ goalCopy.changed }}</p>
+        <template v-else-if="goalEvaluation && goalEvaluation.outcome !== 'no-active-goal'">
+          <p>{{ goalCopy[goalEvaluation.outcome] }}</p>
+          <strong v-if="goalEvaluation.recentCompletedGoal || goalEvaluation.activeGoal">{{ goalEvaluation.recentCompletedGoal?.title || goalEvaluation.activeGoal?.title }}</strong>
+          <p v-if="goalChange">{{ goalChange }}</p>
+          <p v-else-if="goalEvaluation.recentCompletedGoal">{{ t(`home.goal.completedTypes.${goalEvaluation.recentCompletedGoal.goalType}`) }}</p>
+          <el-button v-if="goalEvaluation.outcome === 'evaluation-error'" :loading="evaluatingGoal" :disabled="submitting" @click="retryGoalEvaluation">{{ goalCopy.retry }}</el-button>
+        </template>
+        <NuxtLink :to="localePath({ path: '/', hash: '#current-goal' })" class="goal-return">{{ goalCopy.back }}</NuxtLink>
+      </section>
+
+
     <el-card v-if="pending" class="panel-card">
       <el-skeleton :rows="8" animated />
     </el-card>
@@ -749,6 +805,10 @@ const copyIssuedScoreToken = async () => {
 </template>
 
 <style scoped>
+.goal-sync-result { display: grid; gap: 12px; padding: 20px; }
+.goal-return:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
+.goal-sync-result h2, .goal-sync-result p { margin: 0; }
+.goal-return { display: inline-flex; align-items: center; min-height: 44px; color: var(--viewer-link); }
 .sync-next { min-width:0; padding:20px; overflow-wrap:anywhere; }
 .sync-next h2 { margin:0; font-size:18px; }
 .sync-next p { color:var(--viewer-text-muted); line-height:1.6; }
