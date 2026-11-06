@@ -41,6 +41,12 @@
     "communityUnread": "コミュニティ、未読の通知があります"
   },
   "nav": {
+    "myTaikoHome": "マイ太鼓ホーム",
+    "communityHome": "コミュニティホーム",
+    "allDiscussions": "すべてのスレッド",
+    "toolsGroup": "ツール",
+    "accountSettings": "アカウント・設定",
+
     "home": "ホーム",
     "titles": "称号一覧",
     "forum": "コミュニティ",

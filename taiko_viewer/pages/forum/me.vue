@@ -70,11 +70,9 @@ const copy = computed(() =>
         newThread: "新規投稿",
         notifications: "通知センター",
         myThreads: "自分の投稿",
-        myThreadsDesc: "フォーラムに投稿したスレッドがここに表示されます。",
         noThreads: "まだ投稿していません",
         emptyPage: "このページには投稿がありません",
         moderation: "管理コンソール",
-        moderationDesc: "最近のスレッドに対して固定、注目、ロック、非表示を操作します。",
         actionUpdated: "スレッド状態を更新しました",
         actionFailed: "操作に失敗しました",
         pin: "固定",
@@ -95,11 +93,9 @@ const copy = computed(() =>
         newThread: "写新帖",
         notifications: "通知中心",
         myThreads: "我的帖子",
-        myThreadsDesc: "你在论坛里发布的主题都会出现在这里。",
         noThreads: "你还没有发过帖子",
         emptyPage: "当前页暂无帖子",
         moderation: "站务操作台",
-        moderationDesc: "对近期主题执行置顶、加精、锁帖和隐藏操作。",
         actionUpdated: "帖子状态已更新",
         actionFailed: "操作失败",
         pin: "置顶",
@@ -190,7 +186,6 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
       <div class="panel-head">
         <div>
           <h3>{{ copy.myThreads }}</h3>
-          <p>{{ copy.myThreadsDesc }}</p>
         </div>
       </div>
       <ForumReadState v-if="threadsLoading || threadsError" :pending="threadsLoading" :error="threadsError" @retry="refreshMyThreads" />
@@ -205,13 +200,8 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
       <span>{{ page }} / {{ Math.ceil(myThreadsData.total / myThreadsData.pageSize) }}</span>
       <el-button :disabled="page * myThreadsData.pageSize >= myThreadsData.total || threadsPending" @click="changePage(page + 1)">{{ t('page.forum.section.nextPage') }}</el-button>
     </div>
-    <section v-if="canModerate" class="panel-card moderation-panel">
-      <div class="panel-head">
-        <div>
-          <h3>{{ copy.moderation }}</h3>
-          <p>{{ copy.moderationDesc }}</p>
-        </div>
-      </div>
+    <details v-if="canModerate" class="panel-card moderation-panel">
+      <summary class="moderation-summary">{{ copy.moderation }}</summary>
       <ForumReadState :pending="moderationPending" :error="moderationError" @retry="refreshModeration" />
       <div v-if="!moderationPending && !moderationError" class="moderation-list">
         <article v-for="thread in moderationData?.items" :key="thread.id" class="moderation-item">
@@ -235,15 +225,28 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
           </div>
         </article>
       </div>
-    </section>
+    </details>
   </div>
 </template>
 
 <style scoped>
+.forum-me-page > .panel-card { padding:24px; border-radius:20px; min-width:0; }
+.moderation-summary { cursor:pointer; font-size:22px; font-weight:600; line-height:1.5; }
+.moderation-panel[open] .moderation-summary { margin-bottom:20px; }
+.moderation-summary:focus-visible { outline:2px solid var(--viewer-primary); outline-offset:4px; }
+.me-profile-panel__main, .me-profile-panel__main > div, .moderation-item__meta { min-width:0; overflow-wrap:anywhere; }
+.me-profile-panel__actions, .moderation-item__actions { flex-shrink:0; }
+.moderation-item__actions .el-button { margin-left:0; }
+.thread-stack { display:grid; gap:0; }
+@media (max-width:600px) {
+  .forum-me-page > .panel-card { padding:20px; }
+  .moderation-item__actions { flex-shrink:1; }
+}
+
 .me-pager { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .forum-me-page {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .me-profile-panel {
@@ -266,6 +269,9 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
 }
 
 .me-profile-panel__main p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   margin: 8px 0 0;
   color:var(--viewer-text-muted);
   line-height: 1.8;
@@ -306,7 +312,6 @@ const runModeration = async (threadId: number, action: string, enabled: boolean)
   line-height: 1.8;
 }
 
-.thread-stack,
 .moderation-list {
   display: grid;
   gap: 14px;

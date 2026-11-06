@@ -62,7 +62,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 <template>
   <article
     class="forum-thread-card"
-    :class="{ compact }"
+    :class="{ compact, 'has-cover': thread.coverImageUrl }"
     role="link"
     tabindex="0"
     :aria-label="thread.title"
@@ -135,7 +135,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 <style scoped>
 .forum-thread-card {
   display: grid;
-  grid-template-columns: 1fr minmax(0, 180px);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   padding: 20px;
   border-radius: 24px;
@@ -161,8 +161,8 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 }
 
 .forum-thread-card.compact {
-  grid-template-columns: minmax(0, 1fr) minmax(96px, 150px);
-  padding: 16px 0;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 18px 8px;
   border: 0;
   border-bottom: 1px solid var(--viewer-border);
   border-radius: 0;
@@ -178,16 +178,16 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   background:color-mix(in srgb, var(--viewer-surface) 84%, var(--viewer-accent) 16%);
 }
 
-.forum-thread-card.compact .forum-thread-card__main { gap: 7px; }
-.forum-thread-card.compact .forum-thread-card__footer { order: -2; }
+.forum-thread-card.compact .forum-thread-card__main { gap: 10px; }
+.forum-thread-card.compact .forum-thread-card__footer { flex-wrap: wrap; }
 .forum-thread-card.compact .forum-thread-card__badges { order: -1; }
 .forum-thread-card.compact .forum-thread-card__title { font-size: 18px; }
 .forum-thread-card.compact .forum-thread-card__summary { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; font-size: 13px; }
 .forum-thread-card.compact .forum-thread-card__badges { gap: 6px; }
 .forum-thread-card.compact .section-pill,
 .forum-thread-card.compact .type-pill,
-.forum-thread-card.compact .state-pill { padding: 3px 8px; font-size: 11px; }
-.forum-thread-card.compact .forum-thread-card__cover { min-height: 88px; max-height: 108px; border-radius: 12px; }
+.forum-thread-card.compact .state-pill { padding: 3px 8px; font-size: 12px; }
+.forum-thread-card.compact .forum-thread-card__cover { min-height: 0; height: 100px; align-self: start; border-radius: 12px; }
 
 .forum-thread-card__main {
   display: grid;
@@ -381,12 +381,24 @@ body.theme-dark .forum-thread-card__song {
     font-size: 21px;
   }
 
-  .forum-thread-card.compact { grid-template-columns: minmax(0, 1fr) minmax(88px, 120px); }
+  .forum-thread-card.compact { grid-template-columns: minmax(0, 1fr); }
   .forum-thread-card.compact .forum-thread-card__title { font-size: 17px; }
 
   .forum-thread-card__footer {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+@media (min-width:901px) {
+  .forum-thread-card.has-cover { grid-template-columns:minmax(0, 1fr) 180px; }
+}
+.forum-thread-card.compact.has-cover { grid-template-columns:minmax(0, 1fr) 128px; }
+.forum-thread-card__title, .forum-thread-card__summary, .forum-thread-card__tags, .forum-thread-card__song { overflow-wrap:anywhere; }
+.forum-thread-card__stats span { white-space:nowrap; }
+@media (max-width:600px) {
+  .forum-thread-card.has-cover, .forum-thread-card.compact.has-cover { grid-template-columns:minmax(0, 1fr); }
+  .forum-thread-card.compact .forum-thread-card__cover { width:128px; height:88px; }
+  .forum-thread-card.compact .forum-thread-card__stats { justify-content:flex-start; }
 }
 </style>

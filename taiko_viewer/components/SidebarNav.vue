@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch, useId } from "vue";
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
 import { primeAnnualBgm, releasePrimedAnnualBgm } from "~/utils/annualBgm.client";
 
+const emit = defineEmits<{ navigate: [] }>();
+const navId = useId();
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -64,6 +66,7 @@ const handleLogout = async () => {
 
 const goTo = async (path: string) => {
   if (!path) return;
+  emit("navigate");
   const target = localePath(path);
   if (!target || target === route.fullPath || target === route.path) {
     return;
@@ -87,11 +90,7 @@ const isDeveloperReviewer = computed(
 
 const groups = computed(() => [
   {
-    title: t("nav.home"),
-    icon: "home",
-    items: [{ key: "/", label: t("nav.home"), icon: "home" }]
-  },
-  {
+    key: "discover",
     title: t("nav.discovery"),
     icon: "music",
     items: [
@@ -127,10 +126,11 @@ const groups = computed(() => [
     ]
   },
   {
+    key: "my",
     title: t("nav.myTaiko"),
     icon: "user",
     items: [
-      { key: "/my", label: t("nav.myTaiko"), icon: "user" },
+      { key: "/my", label: t("nav.myTaikoHome"), icon: "user" },
       { key: "/my/growth", label: t("passport.title"), icon: "history" },
       { key: "/my/weekly", label: t("weekly.title"), icon: "history" },
       { key: "/account/songs", label: t("account.songs"), icon: "music" },
@@ -144,35 +144,33 @@ const groups = computed(() => [
     ]
   },
   {
+    key: "community",
     title: t("nav.community"),
     icon: "forum",
     items: [
-      {
-        key: "/forum",
-        label: t("nav.forum"),
-        icon: "forum",
-        children: [
-          { key: "/forum/new", label: t("forum.newThread") },
-          { key: "/forum/me", label: t("forum.myCommunity") },
-          { key: "/forum/notifications", label: t("forum.notifications") }
-        ]
-      }
+      { key: "/forum", label: t("nav.communityHome"), icon: "forum" },
+      { key: "/forum/discussions", label: t("nav.allDiscussions"), icon: "forum" },
+      { key: "/forum/new", label: t("forum.newThread"), icon: "book" },
+      { key: "/forum/me", label: t("forum.myCommunity"), icon: "user" },
+      { key: "/forum/notifications", label: t("forum.notifications"), icon: "info" }
     ]
   },
   {
-    title: t("nav.more"),
+    key: "tools",
+    title: t("nav.toolsGroup"),
     icon: "grid",
     items: [
-      {
-        key: "/tools",
-        label: t("nav.tools"),
-        icon: "grid",
-        children: [
-          { key: "/tools/chart-config", label: t("tools.chartConfig") },
-          { key: "/tools/note-count", label: t("tools.noteCount") },
-          { key: "/tools/trend", label: t("tools.trend") }
-        ]
-      },
+      { key: "/tools", label: t("nav.tools"), icon: "grid" },
+      { key: "/tools/chart-config", label: t("tools.chartConfig"), icon: "grid" },
+      { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" },
+      { key: "/tools/trend", label: t("tools.trend"), icon: "history" }
+    ]
+  },
+  {
+    key: "account",
+    title: t("nav.accountSettings"),
+    icon: "settings",
+    items: [
       { key: "/account/sync", label: t("account.sync"), icon: "history" },
       { key: "/docs/score-token", label: t("page.more.apiDocs"), icon: "book" },
       { key: "/account/profile", label: t("account.profile"), icon: "user" },
@@ -207,7 +205,11 @@ const activePath = computed(() => {
   if (normalizedPath === "/") return "/";
   if (normalizedPath === "/my") return "/my";
   if (normalizedPath.startsWith("/tools")) return normalizedPath === "/tools" ? "/tools" : normalizedPath;
-  if (normalizedPath.startsWith("/forum")) return normalizedPath === "/forum/new" || normalizedPath === "/forum/me" ? normalizedPath : "/forum";
+  if (normalizedPath.startsWith("/forum")) {
+    if (/^\/forum\/(new|me|notifications|discussions)$/.test(normalizedPath)) return normalizedPath;
+    if (/^\/forum\/(thread|section)\//.test(normalizedPath)) return "/forum/discussions";
+    return "/forum";
+  }
   if (normalizedPath === "/songs") return "/songs/available";
   if (normalizedPath === "/songs/removed") return "/songs/removed";
   if (normalizedPath === "/songs/other") return "/songs/other";
@@ -255,6 +257,13 @@ const openedGroups = computed(() => {
   }
   return [];
 });
+// Route changes reveal only the owning category; manual collapse lasts until navigation.
+const expandedGroup = ref("");
+watch([activePath, () => groups.value.map(group => group.key + group.items.map(item => item.key).join()).join()], () => {
+  expandedGroup.value = groups.value.find(group => group.items.some(item =>
+    activePath.value === item.key || activePath.value.startsWith(`${item.key}/`)
+  ))?.key || "";
+}, { immediate: true });
 </script>
 
 <template>
@@ -279,8 +288,12 @@ const openedGroups = computed(() => {
         <span>{{ t("nav.logout") }}</span>
       </el-button>
     </div>
-    <div v-for="group in groups" :key="group.title" class="nav-group">
-      <div class="nav-title">
+    <NuxtLink :to="localePath('/')" class="nav-home" :class="{ active: activePath === '/' }" :aria-current="activePath === '/' ? 'page' : undefined" @click="emit('navigate')">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path :d="iconPaths.home" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /></svg></span>
+      {{ t('nav.home') }}
+    </NuxtLink>
+    <div v-for="group in groups" :key="group.key" class="nav-group">
+      <button type="button" class="nav-title" :aria-expanded="expandedGroup === group.key" :aria-controls="`${navId}-${group.key}`" @click="expandedGroup = expandedGroup === group.key ? '' : group.key">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none">
             <path
@@ -293,8 +306,10 @@ const openedGroups = computed(() => {
           </svg>
         </span>
         <span>{{ group.title }}</span>
-      </div>
-      <el-menu :default-active="activePath" :default-openeds="openedGroups" class="nav-menu">
+        <span class="nav-chevron" aria-hidden="true">{{ expandedGroup === group.key ? '−' : '+' }}</span>
+      </button>
+      <div :id="`${navId}-${group.key}`" v-show="expandedGroup === group.key">
+      <el-menu :key="activePath" :default-active="activePath" :default-openeds="openedGroups" unique-opened class="nav-menu">
         <template v-for="item in group.items" :key="item.key">
           <el-sub-menu v-if="item.children" :index="item.key">
             <template #title>
@@ -354,10 +369,18 @@ const openedGroups = computed(() => {
           </el-menu-item>
         </template>
       </el-menu>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.nav-groups{display:flex;flex-direction:column;gap:24px;}.account-brief{padding:12px;border-radius:10px;background:var(--viewer-surface-subtle);display:grid;gap:8px;}.account-brief__meta{display:grid;gap:4px;}.account-brief__meta strong{font-weight:600;}.account-brief__meta span{font-size:13px;color:var(--viewer-text-muted);overflow-wrap:anywhere;}.account-brief__logout{justify-content:flex-start;padding:0;min-height:36px;}.nav-group{padding:0;background:transparent;}.nav-title{display:flex;align-items:center;gap:8px;color:var(--viewer-text-muted);font-size:13px;font-weight:500;margin-bottom:8px;}.nav-icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;color:currentColor;}.nav-icon svg{width:100%;height:100%;}.nav-item-label{display:inline-flex;align-items:center;gap:8px;min-width:0;}.sub-icon{width:18px;height:18px;object-fit:contain;}.sub-dot{display:inline-flex;width:5px;height:5px;border-radius:50%;background:var(--viewer-text-muted);}.nav-menu{border-right:0;}.nav-groups :deep(.el-menu){border:0;}.nav-groups :deep(.el-menu-item),.nav-groups :deep(.el-sub-menu__title){min-width:0;white-space:normal;line-height:1.5;}.nav-groups :deep(.el-sub-menu__title){height:auto;min-height:44px;padding-block:10px;}.nav-groups :deep(.el-sub-menu .el-menu-item){padding-left:40px;}
+.nav-groups{display:flex;flex-direction:column;gap:4px;}.account-brief{padding:12px;border-radius:10px;background:var(--viewer-surface-subtle);display:grid;gap:8px;}.account-brief__meta{display:grid;gap:4px;}.account-brief__meta strong{font-weight:600;}.account-brief__meta span{font-size:13px;color:var(--viewer-text-muted);overflow-wrap:anywhere;}.account-brief__logout{justify-content:flex-start;padding:0;min-height:36px;}.nav-group{padding:0;background:transparent;}.nav-title{display:flex;align-items:center;gap:8px;color:var(--viewer-text-muted);font-size:13px;font-weight:500;margin-bottom:0;}.nav-icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;color:currentColor;}.nav-icon svg{width:100%;height:100%;}.nav-item-label{display:inline-flex;align-items:center;gap:8px;min-width:0;}.sub-icon{width:18px;height:18px;object-fit:contain;}.sub-dot{display:inline-flex;width:5px;height:5px;border-radius:50%;background:var(--viewer-text-muted);}.nav-menu{border-right:0;}.nav-groups :deep(.el-menu){border:0;}.nav-groups :deep(.el-menu-item),.nav-groups :deep(.el-sub-menu__title){min-width:0;white-space:normal;line-height:1.5;}.nav-groups :deep(.el-sub-menu__title){height:auto;min-height:44px;padding-block:10px;}.nav-groups :deep(.el-sub-menu .el-menu-item){padding-left:40px;}
+
+.nav-title, .nav-home { width:100%; box-sizing:border-box; min-height:44px; padding:10px 12px; border:0; border-radius:10px; background:transparent; color:var(--viewer-text); font:inherit; font-weight:600; text-align:left; cursor:pointer; display:flex; align-items:center; gap:8px; text-decoration:none; }
+.nav-title:hover, .nav-home:hover, .nav-home.active { background:var(--viewer-surface-subtle); color:var(--viewer-primary); }
+.nav-title:focus-visible, .nav-home:focus-visible { outline:2px solid var(--viewer-primary); outline-offset:-2px; }
+.nav-chevron { margin-left:auto; }
+.nav-icon { flex-shrink:0; }
+.nav-menu { margin:4px 0 8px; }
 </style>

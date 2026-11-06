@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
             </NuxtLink>
           </div>
         </div>
-        <SidebarNav />
+        <SidebarNav @navigate="closeMobileNav" />
       </aside>
       <main class="app-content" :class="[{ 'has-mobile-tabbar': showMobileTabBar }, `app-content--${contentLayout}`]">
         <div class="viewer-content" :class="`viewer-content--${contentLayout}`" :data-content-layout="contentLayout">

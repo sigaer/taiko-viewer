@@ -42,6 +42,12 @@
     "communityUnread": "社区，有未读通知"
   },
   "nav": {
+    "myTaikoHome": "我的太鼓首页",
+    "communityHome": "社区首页",
+    "allDiscussions": "全部讨论",
+    "toolsGroup": "工具",
+    "accountSettings": "账户与设置",
+
     "home": "首页",
     "titles": "称号一览",
     "forum": "社区",
