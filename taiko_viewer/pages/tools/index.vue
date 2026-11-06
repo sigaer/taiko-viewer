@@ -23,8 +23,9 @@ const copy = computed(() =>
   locale.value === "ja"
     ? {
         intro:
-          "以下のツールは QQ Bot コマンドと同等の機能を Web から個別に使えます。公開ツールはログイン不要、グラフ系ツールは ID 連携と同期が必要です。",
+          "公開ツールはログイン不要です。プレイデータを使うツールは ID 連携と同期が必要です。",
         tools: [
+          { title: "TJA 定数計算", desc: "TJA ファイルから定数・能力指標を計算", to: "/tools/tja-constants", tag: "公開" },
           { title: "配置検索", desc: "BPM、難易度、譜面パターンから楽曲を検索", to: "/tools/chart-config", tag: "公開" },
           { title: "ノーツ数検索", desc: "指定ノーツ数に一致する譜面を探す", to: "/tools/note-count", tag: "公開" },
           { title: "楽曲進捗", desc: "段位、定数、星、全良難易度の進捗画像を表示", to: "/tools/progress", tag: "ログイン必須" },
@@ -36,8 +37,9 @@ const copy = computed(() =>
       }
     : {
         intro:
-          "以下工具与 QQ 机器人指令能力一致，可在网页端独立使用。公开工具无需登录；图表类工具需绑定鼓众 ID 并完成数据同步。",
+          "公开工具无需登录；使用游玩数据的工具需绑定鼓众 ID 并完成数据同步。",
         tools: [
+          { title: "TJA 定数计算", desc: "上传谱面，查看各项定数与能力指标", to: "/tools/tja-constants", tag: "公开" },
           { title: "查配置", desc: "按 BPM、难度或谱面配置检索歌曲", to: "/tools/chart-config", tag: "公开" },
           { title: "查物量", desc: "按音符总数查找对应谱面", to: "/tools/note-count", tag: "公开" },
           { title: "歌曲进度", desc: "查看段位、定数、星级和全良难度进度图", to: "/tools/progress", tag: "需登录" },

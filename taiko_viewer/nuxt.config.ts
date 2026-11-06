@@ -1,5 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import { readFileSync } from "node:fs";
+import { cp } from "node:fs/promises";
+import { resolve } from "node:path";
 import packageJson from "./package.json" with { type: "json" };
 import { CANONICAL_BASE_URL, SITE_TITLE } from "./utils/seo";
 import { fileURLToPath } from "node:url";
@@ -230,6 +232,11 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
+    hooks: {
+      compiled: async (nitro) => {
+        await cp(fileURLToPath(new URL('./.tja-runtime', import.meta.url)), resolve(nitro.options.output.serverDir, 'tja-runtime'), { recursive: true });
+      }
+    },
     routeRules: {
       "/ourtaikoview-manifest.json": {
         redirect: "/practice-player/release.json"

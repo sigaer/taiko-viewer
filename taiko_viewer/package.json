@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "1.7.0",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -74,7 +74,9 @@
     "test:oidc:provider": "node --experimental-strip-types --test tests/reverseOidcAccount.test.mjs tests/reverseOidcProvider.test.mjs",
     "oidc:provider:migrate": "node --experimental-strip-types scripts/migrate_oidc_provider_schema.ts",
     "test:training": "node --experimental-strip-types --test tests/goalSyncObservation.test.ts tests/homeDeepState.test.mjs",
-    "test:training:browser": "node scripts/verify_training_loop_browser.mjs"
+    "test:training:browser": "node scripts/verify_training_loop_browser.mjs",
+    "prebuild": "node scripts/prepare_tja_runtime.mjs",
+    "predev": "node scripts/prepare_tja_runtime.mjs"
   },
   "dependencies": {
     "@alicloud/esa20240910": "^3.7.0",

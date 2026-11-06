@@ -718,6 +718,7 @@
     }
   },
   "tools": {
+    "tjaConstants": "TJA 定数計算",
     "title": "譜面ツール",
     "chartConfig": "配置検索",
     "noteCount": "ノーツ数検索",

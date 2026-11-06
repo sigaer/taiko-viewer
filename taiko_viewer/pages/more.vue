@@ -42,6 +42,7 @@ const groups = [
     items: [
       { path: "/tools", label: "nav.tools" },
       { path: "/tools/chart-config", label: "tools.chartConfig" },
+      { path: "/tools/tja-constants", label: "tools.tjaConstants" },
       { path: "/tools/note-count", label: "tools.noteCount" }
     ]
   },

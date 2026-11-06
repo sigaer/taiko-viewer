@@ -1,0 +1,53 @@
+export const tjaCalculatorCopy = {
+  zh: {
+    title: 'TJA 定数计算', choose: '选择 TJA 文件', drop: '拖入一个 TJA 文件',
+    limits: '单个 .tja · 最大 512 KB', privacy: '谱面仅用于本次计算，不保存、不公开。',
+    encoding: '文件编码', auto: '自动识别', start: '计算定数', retry: '重新计算', change: '更换文件',
+    calculating: '正在解析谱面并计算定数…', wait: '通常几秒内完成，复杂谱面最多等待 30 秒。',
+    cancel: '取消等待', cancelled: '已取消等待，可稍后重新计算。',
+    course: '难度', branch: '分支', notes: '音符数', main: '主定数', low: '75% 定数', high: '99% 定数',
+    abilities: '能力定数', metrics: ['体力', '手速', '爆发', '复合', '节奏'],
+    download: '下载全部结果', raw: '原始指标', result: '计算结果', done: '计算完成',
+    reference: '定数为算法估算，仅供参考。精度需要游玩成绩，不属于谱面静态定数。',
+    source: '算法来源：OurTaiko / Constants', unsupported: '该谱面暂时无法计算',
+    courses: { easy: '简单', normal: '一般', hard: '困难', oni: '魔王', edit: '里魔王', tower: '塔', dan: '段位' },
+    branches: { unbranched: '无分支', normal: '普通', expert: '玄人', master: '达人' },
+    errors: {
+      file_type: '请选择 .tja 格式的谱面文件。', file_count: '一次只能选择一个 TJA 文件。',
+      file_size: '文件为空或超过 512 KB，请选择较小的 TJA 文件。',
+      encoding: '无法识别文件编码，请手动选择编码后重试。',
+      invalid_tja: '未能读取有效谱面，请检查文件是否包含完整的 #START / #END。',
+      chart_limit: '谱面数量过多，请保留不超过 12 段谱面后重试。', note_limit: '单个分支超过 20,000 个音符，请缩短谱面后重试。',
+      too_few_notes: '可判定音符不足 2 个，无法计算定数。', note_alignment: '音符时序无法对齐，请检查 BPM、延迟和分支配置。',
+      calculation_failed: '该分支无法计算，请检查谱面配置。', busy: '计算服务正忙，请稍后重试。',
+      timeout: '计算超时，请尝试较短的谱面。', unavailable: '计算服务暂时不可用，请稍后重试。',
+      rate_limit: '操作过于频繁，请一分钟后再试。', upload_failed: '上传失败，请检查网络后重试。',
+      upload_timeout: '上传超时，请检查网络后重试。'
+    }
+  },
+  ja: {
+    title: 'TJA 定数計算', choose: 'TJA ファイルを選択', drop: 'TJA ファイルをドロップ',
+    limits: '.tja 1 ファイル・最大 512 KB', privacy: '譜面は計算のみに使用し、保存・公開しません。',
+    encoding: '文字コード', auto: '自動判定', start: '定数を計算', retry: '再計算', change: 'ファイルを変更',
+    calculating: '譜面を解析・計算しています…', wait: '通常は数秒、複雑な譜面は最大 30 秒ほどかかります。',
+    cancel: '待機をキャンセル', cancelled: '待機をキャンセルしました。しばらくしてから再試行できます。',
+    course: '難易度', branch: '分岐', notes: 'ノーツ数', main: '主定数', low: '75% 定数', high: '99% 定数',
+    abilities: '能力定数', metrics: ['体力', '速度', '瞬発力', '複合', 'リズム'],
+    download: '全結果をダウンロード', raw: '元の指標', result: '計算結果', done: '計算完了',
+    reference: '定数はアルゴリズムによる参考値です。精度の算出にはプレイ成績が必要です。',
+    source: 'アルゴリズム：OurTaiko / Constants', unsupported: 'この譜面は計算できません',
+    courses: { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに', edit: '裏おに', tower: 'タワー', dan: '段位' },
+    branches: { unbranched: '分岐なし', normal: '普通', expert: '玄人', master: '達人' },
+    errors: {
+      file_type: '.tja 形式の譜面ファイルを選択してください。', file_count: '一度に選択できるのは 1 ファイルです。',
+      file_size: 'ファイルが空か、512 KB を超えています。', encoding: '文字コードを選択して再試行してください。',
+      invalid_tja: '有効な譜面を読み取れません。#START / #END が揃っているか確認してください。',
+      chart_limit: '譜面を 12 個以下にしてください。', note_limit: '分岐ごとのノーツ数を 20,000 以下にしてください。',
+      too_few_notes: '判定対象のノーツが 2 個未満のため計算できません。', note_alignment: 'ノーツの時系列が不正です。BPM・遅延・分岐を確認してください。',
+      calculation_failed: 'この分岐は計算できません。譜面を確認してください。', busy: '計算サービスが混み合っています。しばらくしてから再試行してください。',
+      timeout: '計算がタイムアウトしました。短い譜面でお試しください。', unavailable: '計算サービスを利用できません。後でもう一度お試しください。',
+      rate_limit: '操作が多すぎます。1 分後に再試行してください。', upload_failed: 'アップロードに失敗しました。接続を確認してください。',
+      upload_timeout: 'アップロードがタイムアウトしました。接続を確認してください。'
+    }
+  }
+};
