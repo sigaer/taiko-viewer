@@ -33,6 +33,9 @@ const goalCopy = computed(() => locale.value === 'ja'
   ? { choose: '目標を選ぶ', browse: '楽曲を見る', missing: '目標の選択肢を取得できませんでした', empty: '作成できる目標はありません' }
   : { choose: '选择目标', browse: '查看歌曲', missing: '未获取到目标选项', empty: '暂无可创建目标' });
 const goalOptionsStatus = (item: GrowthPlanItem) => Array.isArray(item.goalOptions) ? goalCopy.value.empty : goalCopy.value.missing;
+const replacementCopy = computed(() => locale.value === 'ja'
+  ? { title: '次の楽曲を選ぶ', empty: '現在のおすすめに、ほかに目標を設定できる楽曲はありません。', more: 'ほかのおすすめを見る' }
+  : { title: '选择另一首歌', empty: '当前推荐中没有其他可设为目标的歌曲。', more: '查看更多推荐' });
 const dimensionLabel = (key: RatingDimensionKey | null) => key ? GROWTH_DIMENSION_LABELS[key][locale.value === "ja" ? "ja" : "zh"] : "";
 const dimensionShortLabel = (key: RatingDimensionKey) => GROWTH_DIMENSION_SHORT_LABELS[key][locale.value === "ja" ? "ja" : "zh"];
 const greeting = computed(() => t(`home.growth.greeting.${growthGreetingPeriod()}`, { name: props.displayName }));
@@ -90,21 +93,24 @@ watch(() => props.overview, overview => {
 onBeforeUnmount(() => { identityGeneration++; mutationGeneration++; });
 const openGoal = (item: GrowthPlanItem) => {
   if (choicesDisabled.value || !item.goalOptions?.length) return;
-  returnFocus = document.activeElement as HTMLElement;
+  if (!selector.value?.open) returnFocus = document.activeElement as HTMLElement;
   selected.value = item; selectedType.value = null; goalError.value = '';
   expectedGoalId = activeGoal.value?.id || null;
-  nextTick(() => selector.value?.showModal());
+  nextTick(() => {
+    if (!selector.value?.open) selector.value?.showModal();
+    selector.value?.querySelector<HTMLInputElement>('input[type="radio"]')?.focus();
+  });
 };
 const trapGoalFocus = (event: KeyboardEvent) => {
   if (event.key !== 'Tab' || !selector.value) return;
-  const controls = [...selector.value.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)')]
+  const controls = [...selector.value.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href]')]
     .filter(el => !(el instanceof HTMLInputElement) || el.type !== 'radio' || el.checked || (!selectedType.value && el === selector.value?.querySelector('input')));
   const first = controls[0], last = controls.at(-1);
   if (!first || !last) return;
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 };
-const restoreGoalFocus = () => returnFocus?.focus();
+const restoreGoalFocus = () => { if (!selector.value?.open) returnFocus?.focus(); };
 const closeGoal = () => { selector.value?.close(); selected.value = null; restoreGoalFocus(); };
 const mutate = async (cancel = false) => {
   if (choicesDisabled.value || (!cancel && (!selected.value || !selectedType.value))) return;
@@ -149,8 +155,14 @@ const completionChange = computed(() => {
   const format = (value:number) => result.goalType === 'rank-upgrade' ? formatScoreRank(value,locale.value) : value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
   return `${t(`home.growth.factLabels.${result.goalType}`)} ${format(result.before)} → ${format(result.after)}`;
 });
-const chooseAnother = () => document.querySelector<HTMLButtonElement>('.growth-plan__choose:not(:disabled)')?.focus();
 const selectedChart = (item: GrowthPlanItem) => activeGoal.value?.songId === item.songId && activeGoal.value?.difficultyType === item.difficultyType;
+const replacementItems = computed(() => props.overview.todayPlan.items.filter(item => item.goalOptions?.length && !selectedChart(item)));
+const chooseAnother = () => {
+  if (choicesDisabled.value) return;
+  returnFocus = document.activeElement as HTMLElement;
+  selected.value = null; selectedType.value = null; goalError.value = '';
+  nextTick(() => selector.value?.showModal());
+};
 
 const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_click", { song_id: songId, source: "growth_overview" });
 </script>
@@ -265,6 +277,20 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <p v-if="evaluationNotice" role="status">{{ evaluationNotice }}</p>
       <p v-if="goalError && !selected" role="alert" class="goal-error">{{ goalError }}</p>
       <dialog ref="selector" class="goal-dialog" @keydown="trapGoalFocus" aria-labelledby="goal-dialog-title" @cancel.prevent="closeGoal" @close="restoreGoalFocus">
+        <template v-if="!selected">
+          <h2 id="goal-dialog-title">{{ replacementCopy.title }}</h2>
+          <div v-if="replacementItems.length" class="goal-replacements">
+            <button v-for="item in replacementItems" :key="`${item.songId}-${item.difficultyType}`" type="button" :disabled="choicesDisabled" @click="openGoal(item)">
+              <strong>{{ item.title }}</strong>
+              <span>{{ t(difficultyLabelKey(item.difficultyType)) }}<template v-if="item.starLevel"> · {{ item.starLevel }}{{ t('guide.starSuffix') }}</template></span>
+            </button>
+          </div>
+          <p v-else role="status">{{ replacementCopy.empty }}</p>
+          <div class="goal-actions">
+            <button type="button" @click="closeGoal">{{ t('home.goal.cancel') }}</button>
+            <NuxtLink :to="localePath('/tools/recommend')" @click="closeGoal">{{ replacementCopy.more }}</NuxtLink>
+          </div>
+        </template>
         <template v-if="selected">
           <h2 id="goal-dialog-title">{{ t(expectedGoalId ? 'home.goal.replaceConfirm' : 'home.goal.question') }}</h2>
           <strong>{{ selected.title }}</strong>
@@ -296,7 +322,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
 .goal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 .goal-actions button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--el-border-color); border-radius: 10px; background:var(--el-bg-color); color:var(--el-text-color-primary); cursor: pointer; font: inherit; }
 button:disabled { opacity: .55; cursor: default; }
-button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
+button:focus-visible, input:focus-visible, .goal-dialog a:focus-visible { outline: 3px solid var(--el-color-primary); outline-offset: 3px; }
 .goal-dialog { width: min(440px, calc(100vw - 32px)); max-height: 80dvh; overflow-y: auto; box-sizing: border-box; padding: 22px; border: 1px solid var(--el-border-color); border-radius: 18px; color:var(--el-text-color-primary); background:var(--el-bg-color); }
 .goal-dialog::backdrop { background:var(--viewer-overlay); }
 .goal-dialog h2 { margin: 0 0 16px; font-size: 21px; }
@@ -304,6 +330,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--el-color-pr
 .goal-dialog legend { font-size: 14px; margin-bottom: 8px; }
 .goal-dialog label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
 .goal-dialog input { accent-color:var(--el-color-primary); }
+.goal-replacements { display: grid; gap: 8px; }
+.goal-replacements button { display: grid; gap: 6px; min-height: 44px; padding: 12px; text-align: start; overflow-wrap: anywhere; border: 1px solid var(--el-border-color); border-radius: 10px; background: var(--el-bg-color); color: var(--el-text-color-primary); cursor: pointer; font: inherit; }
+.goal-replacements span { font-size: 14px; color: var(--viewer-text-muted); }
+.goal-dialog .goal-actions a { display: inline-flex; align-items: center; min-height: 44px; color: var(--viewer-link); }
 .goal-error { color:var(--el-color-danger); font-size: 14px; }
 
 .growth-surface { --growth-section-gap: clamp(24px, 3vw, 32px); --growth-card-gap: 11px; display: grid; min-width: 0; gap: var(--growth-section-gap); }

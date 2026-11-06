@@ -14,15 +14,35 @@ test('actual Surface setup: all outcomes refresh once; failure retains completio
  globalThis.__growthTestStubs=stubs;
  code=code.replace(/import \{([^}]+)\} from ["']([^"']+)["'];/g,(_,names,path)=>path==='vue'?`import {${names}} from ${JSON.stringify(import.meta.resolve('vue'))};`:`const {${names}}=globalThis.__growthTestStubs;`);
  const component=(await import(data(code))).default;
- let request;const globals={...vue,useI18n:()=>({t:x=>x,locale:vue.ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>()=>request.promise,onBeforeUnmount:()=>{}};
+ let request;const calls=[];let restored=0;
+ const globals={...vue,document:{activeElement:{focus:()=>restored++}},useI18n:()=>({t:x=>x,locale:vue.ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>(path,options)=>{calls.push({path,options});return request.promise},onBeforeUnmount:()=>{}};
  for(const [k,v]of Object.entries(globals))globalThis[k]=v;
  const scope=vue.effectScope();
  try{
- const active={id:'1',profileId:'1',goalType:'score-pb'};
- const overview={profileId:'1',scoreRevision:'R1',activeGoal:active,recentCompletedGoal:null,playerState:{skills:[],tiedDimensions:[]},dailyProgress:{events:[]}};
+ const active={id:'1',profileId:'1',songId:100,difficultyType:4,goalType:'score-pb'};
+ const overview={profileId:'1',scoreRevision:'R1',activeGoal:active,recentCompletedGoal:null,playerState:{skills:[],tiedDimensions:[]},dailyProgress:{events:[]},todayPlan:{items:[]}};
  let refreshCalls=0,refreshResult=true;let fresh;
  const props=vue.reactive({identity:'9:1:true',overview,displayName:'Test',refreshGrowth:async identity=>{assert.equal(identity,props.identity);refreshCalls++;if(fresh){props.overview=fresh;await vue.nextTick()}return refreshResult}});
  const ui=scope.run(()=>component.setup(props,{expose(){}}));
+ // Replacing a goal must visibly open a picker even when no recommendation is eligible.
+ let opened=0,radioFocused=0;
+ const dialog={open:false,showModal(){this.open=true;opened++},close(){this.open=false},querySelector(){return {focus(){radioFocused++}}}};
+ ui.selector.value=dialog;
+ ui.chooseAnother();await vue.nextTick();
+ assert.equal(opened,1);assert.equal(ui.selected.value,null);assert.equal(ui.replacementItems.value.length,0);
+ assert.equal(ui.activeGoal.value.id,'1');assert.equal(calls.length,0);
+ ui.closeGoal();assert.ok(restored>0);
+ const other={songId:200,difficultyType:5,title:'Other chart',goalOptions:['score-pb']};
+ props.overview={...overview,todayPlan:{items:[{...active,goalOptions:['score-pb']},{songId:300,difficultyType:4,goalOptions:[]},other]}};
+ await vue.nextTick();
+ assert.deepEqual(ui.replacementItems.value.map(x=>x.songId),[200]);
+ ui.chooseAnother();await vue.nextTick();ui.openGoal(ui.replacementItems.value[0]);await vue.nextTick();
+ assert.equal(ui.selected.value.songId,200);assert.equal(radioFocused,1);assert.equal(calls.length,0);
+ ui.selectedType.value='score-pb';request=deferred();const replacing=ui.mutate();
+ assert.equal(calls.at(-1).options.body.expectedActiveGoalId,'1');assert.equal(calls.at(-1).options.body.songId,200);
+ request.resolve({profileId:'1',activeGoal:{...active,id:'replacement',songId:200}});await replacing;
+ assert.equal(ui.activeGoal.value.id,'replacement');assert.equal(ui.selected.value,null);
+ ui.needsRefresh.value=true;const beforeDisabled=opened;ui.chooseAnother();await vue.nextTick();assert.equal(opened,beforeDisabled);ui.needsRefresh.value=false;
  for(const outcome of ['active','inconclusive','completed']){
   props.overview={...overview};await vue.nextTick();request=deferred();const action=ui.evaluate();
   const completed={...active,status:'completed'};
