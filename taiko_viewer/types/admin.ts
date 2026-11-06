@@ -49,6 +49,22 @@ export type AdminDailyTrendItem = {
 };
 
 export type AdminDashboardPayload = {
+  trafficQuality: {
+    windowStart: string;
+    windowEnd: string;
+    checkedAt: string | null;
+    lastLogAt: string | null;
+    coverageStart: string | null;
+    status: string;
+    complete24h: boolean;
+    gapAt: string | null;
+    backlogBytes: number;
+    malformedLines: number;
+    rawRequests24h: number;
+    suspected24h: number;
+    excluded24h: number;
+    reasons: Array<{ key: string; label: string; count: number }>;
+  };
   summary: AdminMetricSummary;
   trends: {
     accessHourly: AdminHourlyTrendItem[];

@@ -1,15 +1,14 @@
-import { createReadStream } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
-import { createInterface } from "node:readline";
 import { join } from "node:path";
 import type { RowDataPacket } from "mysql2/promise";
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import type { DbRow } from "~/server/utils/account-db";
 import { listAdminActionLogs } from "./audit";
 import { listAdminBackups } from "./backup";
-import { getAdminManagedPaths, getAdminRuntimeConfig, sha1 } from "./shared";
+import { getAdminManagedPaths } from "./shared";
+import { getViewerTrafficStore } from "./traffic-runtime";
 
-import { dashboardDayKey as formatDayKey, dashboardBucketStart as getBucketStart, dashboardRollupTime, parseNginxLogTime } from "./dashboard-time";
+import { dashboardDayKey as formatDayKey, dashboardRollupTime } from "./dashboard-time";
 
 type RollupRow = {
   id: number;
@@ -31,12 +30,6 @@ type IngestStateRow = {
   updated_at: string;
 } & RowDataPacket;
 
-type AccessBucket = {
-  pvCount: number;
-  homePvCount: number;
-  uvHashes: Set<string>;
-};
-
 type UploadStatsCache = {
   expiresAt: number;
   totalUploads: number;
@@ -44,8 +37,6 @@ type UploadStatsCache = {
   dailyUploads: Array<{ day: string; count: number }>;
 };
 
-const VIEWER_ACCESS_SOURCE = "viewer_access";
-const VIEWER_ACCESS_STATE_KEY = "viewer_access_log";
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 const UPLOAD_SCAN_CACHE_TTL_MS = 5 * 60 * 1000;
 const TAIKO_COMMAND_TOTAL_SOURCE = "taiko_commands_v2:total";
@@ -53,56 +44,9 @@ const TAIKO_COMMAND_PLATFORM_SOURCE_QQ = "taiko_commands_v2:platform:qq_official
 const TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT = "taiko_commands_v2:platform:onebot_v11";
 const TAIKO_COMMAND_COMMAND_SOURCE_PREFIX = "taiko_commands_v2:command:";
 const TAIKO_COMMAND_META_STATE_KEY = "taiko_commands_v2_meta";
-const STATIC_PATH_PATTERN =
-  /^\/(?:_nuxt\/|qqbot-cache\/|favicon|icon\.png|apple-touch-icon|manifest\.webmanifest|robots\.txt|sitemap\.xml)/i;
-const STATIC_EXT_PATTERN =
-  /\.(?:png|jpe?g|gif|svg|webp|ico|css|js|map|woff2?|ttf|txt|xml|json|mp3|webmanifest)$/i;
-const BOT_USER_AGENT_PATTERN =
-  /(bot|spider|crawler|crawl|baiduspider|bingbot|headless|scan|zgrab|python-requests|curl\/|wget\/|go-http-client|python-httpx|semrush)/i;
-
 let dashboardCache: { expiresAt: number; data: Awaited<ReturnType<typeof buildDashboardPayload>> } | null =
   null;
 let uploadStatsCache: UploadStatsCache | null = null;
-
-const formatBucketKey = (date: Date, granularity: "hour" | "day") =>
-  `${granularity}:${getBucketStart(date, granularity).toISOString()}`;
-
-const parseViewerAccessLine = (line: string) => {
-  const match = line.match(
-    /^(?<ip>\S+) \S+ \S+ \[(?<time>[^\]]+)\] "(?<method>[A-Z]+) (?<path>\S+) [^"]+" (?<status>\d{3}) \S+ "(?<ref>[^"]*)" "(?<ua>[^"]*)"/
-  );
-  if (!match?.groups) return null;
-  const parsedTime = parseNginxLogTime(match.groups.time);
-  if (!parsedTime) return null;
-  return {
-    ip: match.groups.ip,
-    time: parsedTime,
-    method: match.groups.method,
-    path: match.groups.path,
-    status: Number(match.groups.status || 0),
-    userAgent: match.groups.ua || ""
-  };
-};
-
-const normalizePathname = (rawPath: string) => {
-  try {
-    const url = new URL(rawPath, "https://viewer.sakura-bot.cn");
-    return url.pathname || "/";
-  } catch {
-    return String(rawPath || "/").split("?")[0] || "/";
-  }
-};
-
-const isTrackableViewerPageRequest = (path: string, userAgent: string, method: string) => {
-  if (method !== "GET") return false;
-  if (!path || path.startsWith("/api/")) return false;
-  if (STATIC_PATH_PATTERN.test(path)) return false;
-  if (STATIC_EXT_PATTERN.test(path)) return false;
-  if (BOT_USER_AGENT_PATTERN.test(userAgent)) return false;
-  return true;
-};
-
-const isHomeRoute = (path: string) => ["/", "/ja", "/ja/"].includes(path);
 
 const getIngestState = async (sourceKey: string) => {
   await ensureAccountSchema();
@@ -117,143 +61,6 @@ const getIngestState = async (sourceKey: string) => {
   } catch {
     return {};
   }
-};
-
-const setIngestState = async (sourceKey: string, state: Record<string, unknown>) => {
-  await ensureAccountSchema();
-  const db = getAccountDb();
-  await db.execute(
-    `INSERT INTO web_admin_ingest_state (source_key, state_json)
-     VALUES (?, ?)
-     ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = CURRENT_TIMESTAMP`,
-    [sourceKey, JSON.stringify(state)]
-  );
-};
-
-const upsertRollupRow = async (input: {
-  sourceKey: string;
-  granularity: "hour" | "day";
-  bucketStart: Date;
-  metricCount?: number;
-  pvCount?: number;
-  homePvCount?: number;
-  uvHashes?: Set<string>;
-}) => {
-  await ensureAccountSchema();
-  const db = getAccountDb();
-  const bucketStart = input.bucketStart.toISOString().slice(0, 19).replace("T", " ");
-  const [rows] = await db.execute<DbRow<RollupRow>[]>(
-    `SELECT *
-     FROM web_admin_access_rollups
-     WHERE source_key = ? AND granularity = ? AND bucket_start = ?
-     LIMIT 1`,
-    [input.sourceKey, input.granularity, bucketStart]
-  );
-  const existing = rows[0];
-  const nextMetricCount = Number(existing?.metric_count || 0) + Number(input.metricCount || 0);
-  const nextPvCount = Number(existing?.pv_count || 0) + Number(input.pvCount || 0);
-  const nextHomePvCount = Number(existing?.home_pv_count || 0) + Number(input.homePvCount || 0);
-  const existingExtra = existing?.extra_json ? (JSON.parse(existing.extra_json) as Record<string, unknown>) : {};
-  const uvHashes = new Set<string>(
-    Array.isArray(existingExtra?.uvHashes) ? (existingExtra.uvHashes as string[]) : []
-  );
-  for (const value of input.uvHashes || []) {
-    uvHashes.add(value);
-  }
-  const nextUvCount = uvHashes.size;
-  const extraJson = uvHashes.size ? JSON.stringify({ uvHashes: Array.from(uvHashes) }) : null;
-
-  await db.execute(
-    `INSERT INTO web_admin_access_rollups
-      (source_key, granularity, bucket_start, metric_count, pv_count, uv_count, home_pv_count, extra_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       metric_count = VALUES(metric_count),
-       pv_count = VALUES(pv_count),
-       uv_count = VALUES(uv_count),
-       home_pv_count = VALUES(home_pv_count),
-       extra_json = VALUES(extra_json),
-       updated_at = CURRENT_TIMESTAMP`,
-    [
-      input.sourceKey,
-      input.granularity,
-      bucketStart,
-      nextMetricCount,
-      nextPvCount,
-      nextUvCount,
-      nextHomePvCount,
-      extraJson
-    ]
-  );
-};
-
-const ingestViewerAccessLog = async () => {
-  const state = await getIngestState(VIEWER_ACCESS_STATE_KEY);
-  const { viewerAccessLogPath } = getAdminRuntimeConfig();
-  let fileStat;
-  try {
-    fileStat = await stat(viewerAccessLogPath);
-  } catch {
-    return;
-  }
-
-  const size = Number(fileStat.size || 0);
-  let offset = Math.max(0, Number(state.offset || 0));
-  if (size < offset) {
-    offset = 0;
-  }
-  if (size === offset) {
-    return;
-  }
-
-  const buckets = new Map<string, AccessBucket & { bucketStart: Date; granularity: "hour" | "day" }>();
-  const stream = createReadStream(viewerAccessLogPath, { encoding: "utf-8", start: offset });
-  const reader = createInterface({
-    input: stream,
-    crlfDelay: Infinity
-  });
-
-  for await (const line of reader) {
-    const parsed = parseViewerAccessLine(line);
-    if (!parsed) continue;
-    const pathname = normalizePathname(parsed.path);
-    if (!isTrackableViewerPageRequest(pathname, parsed.userAgent, parsed.method)) {
-      continue;
-    }
-    const homeHit = isHomeRoute(pathname) ? 1 : 0;
-    const uvHash = sha1(parsed.ip);
-    for (const granularity of ["hour", "day"] as const) {
-      const key = formatBucketKey(parsed.time, granularity);
-      const existing = buckets.get(key) || {
-        bucketStart: getBucketStart(parsed.time, granularity),
-        granularity,
-        pvCount: 0,
-        homePvCount: 0,
-        uvHashes: new Set<string>()
-      };
-      existing.pvCount += 1;
-      existing.homePvCount += homeHit;
-      existing.uvHashes.add(uvHash);
-      buckets.set(key, existing);
-    }
-  }
-
-  for (const bucket of buckets.values()) {
-    await upsertRollupRow({
-      sourceKey: VIEWER_ACCESS_SOURCE,
-      granularity: bucket.granularity,
-      bucketStart: bucket.bucketStart,
-      pvCount: bucket.pvCount,
-      homePvCount: bucket.homePvCount,
-      uvHashes: bucket.uvHashes
-    });
-  }
-
-  await setIngestState(VIEWER_ACCESS_STATE_KEY, {
-    offset: size,
-    size,
-    updatedAt: new Date().toISOString()
-  });
 };
 
 const scanUserdataUploadStats = async () => {
@@ -387,7 +194,7 @@ const sumRecentHours = (
 
 const buildDashboardPayload = async () => {
   await ensureAccountSchema();
-  await ingestViewerAccessLog();
+  const traffic = await getViewerTrafficStore().snapshot();
 
   const db = getAccountDb();
   const [
@@ -398,8 +205,6 @@ const buildDashboardPayload = async () => {
     unboundViewerRows,
     newUserRows,
     newBindingRows,
-    accessHourly,
-    accessDaily,
     botHourly,
     botHourlyQq,
     botHourlyOnebot,
@@ -442,8 +247,6 @@ const buildDashboardPayload = async () => {
        GROUP BY day_key
        ORDER BY day_key ASC`
     ),
-    getRollupSeries(VIEWER_ACCESS_SOURCE, "hour", 48),
-    getRollupSeries(VIEWER_ACCESS_SOURCE, "day", 30),
     getRollupSeries(TAIKO_COMMAND_TOTAL_SOURCE, "hour", 48),
     getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_QQ, "hour", 48),
     getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT, "hour", 48),
@@ -477,21 +280,16 @@ const buildDashboardPayload = async () => {
       ...newUserRows[0].map((row) => row.day_key),
       ...newBindingRows[0].map((row) => row.day_key),
       ...uploadStats.dailyUploads.map((row) => row.day),
-      ...accessDaily.map((row) => dashboardRollupTime(row.bucket_start, "viewer").day)
+      ...traffic.daily.map((row) => row.day)
     ])
   ).sort((a, b) => a.localeCompare(b));
 
   const newUsersMap = new Map(newUserRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
   const newBindingsMap = new Map(newBindingRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
   const uploadMap = new Map(uploadStats.dailyUploads.map((row) => [row.day, row.count]));
-  const accessDailyMap = new Map(accessDaily.map((row) => [dashboardRollupTime(row.bucket_start, "viewer").day, row]));
+  const accessDailyMap = new Map(traffic.daily.map((row) => [row.day, row]));
 
-  const accessHourlySeries = accessHourly.map((row) => ({
-    ...dashboardRollupTime(row.bucket_start, "viewer"),
-    pv: Number(row.pv_count || 0),
-    uv: Number(row.uv_count || 0),
-    homePv: Number(row.home_pv_count || 0)
-  }));
+  const accessHourlySeries = traffic.hourly;
   const botHourlySeries = botHourly.map((row) => ({
     ...dashboardRollupTime(row.bucket_start, "bot"),
     count: Number(row.metric_count || 0)
@@ -509,14 +307,14 @@ const buildDashboardPayload = async () => {
     newUsers: Number(newUsersMap.get(day) || 0),
     newBindings: Number(newBindingsMap.get(day) || 0),
     uploads: Number(uploadMap.get(day) || 0),
-    pv: Number(accessDailyMap.get(day)?.pv_count || 0),
-    uv: Number(accessDailyMap.get(day)?.uv_count || 0),
-    homePv: Number(accessDailyMap.get(day)?.home_pv_count || 0)
+    pv: Number(accessDailyMap.get(day)?.pv || 0),
+    uv: Number(accessDailyMap.get(day)?.uv || 0),
+    homePv: Number(accessDailyMap.get(day)?.homePv || 0)
   }));
 
-  const pagePv24h = sumRecentHours(accessHourlySeries, "pv", 24);
-  const pageUv24h = sumRecentHours(accessHourlySeries, "uv", 24);
-  const homePv24h = sumRecentHours(accessHourlySeries, "homePv", 24);
+  const pagePv24h = traffic.pagePv24h;
+  const pageUv24h = traffic.pageUv24h;
+  const homePv24h = traffic.homePv24h;
   const botCommands24h = sumRecentHours(botHourlySeries, "count", 24);
   const botCommands24hByPlatform = {
     qqOfficial: sumRecentHours(botHourlyQqSeries, "count", 24),
@@ -546,16 +344,19 @@ const buildDashboardPayload = async () => {
     },
     topCommands,
     taikoCommandStatsSince,
+    trafficQuality: traffic.quality,
     backups: backupRows,
     recentAudits: recentAuditRows.items
   };
 };
 
+let dashboardPending: Promise<Awaited<ReturnType<typeof buildDashboardPayload>>> | null = null;
 export const getAdminDashboardPayload = async () => {
   if (dashboardCache && dashboardCache.expiresAt > Date.now()) {
     return dashboardCache.data;
   }
-  const data = await buildDashboardPayload();
+  dashboardPending ||= buildDashboardPayload().finally(() => { dashboardPending = null; });
+  const data = await dashboardPending;
   dashboardCache = {
     expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS,
     data

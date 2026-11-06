@@ -2,6 +2,8 @@ import { defineNuxtConfig } from "nuxt/config";
 import { readFileSync } from "node:fs";
 import packageJson from "./package.json" with { type: "json" };
 import { CANONICAL_BASE_URL, SITE_TITLE } from "./utils/seo";
+import { fileURLToPath } from "node:url";
+import { viewerPageRoutes } from "./scripts/viewer-page-routes";
 
 const appVersion = process.env.npm_package_version || packageJson.version;
 // Browser chrome and install metadata read the public CSS palette as well.
@@ -170,6 +172,7 @@ export default defineNuxtConfig({
     taikoAdminApiBase: process.env.TAIKO_ADMIN_API_BASE || "http://8.138.33.103:4290",
     viewerAccessLogPath:
       process.env.VIEWER_ACCESS_LOG_PATH || "/www/wwwlogs/viewer.sakura-bot.cn.log",
+    viewerPageRoutePatterns: [...viewerPageRoutes(fileURLToPath(new URL('./pages', import.meta.url))), '^/practice-player/(?:index\\.html)?$'],
     taikoAdminBackupDir:
       process.env.TAIKO_ADMIN_BACKUP_DIR || "/home/sigaer/taiko/data/admin_backups",
     taikoOpenResourceDir: process.env.TAIKO_OPEN_RESOURCE_DIR || "",
