@@ -31,8 +31,8 @@ const localizedTaikoId = computed(() =>
       </div>
       <div v-if="!minimal" class="forum-user__detail">
         <span>{{ localizedTaikoId }}</span>
-        <span v-if="user.verifiedTitle">{{ user.verifiedTitle }}</span>
       </div>
+      <span v-if="user.verifiedTitle" class="forum-user__title" :title="user.verifiedTitle">{{ user.verifiedTitle }}</span>
     </div>
   </div>
 </template>
@@ -43,6 +43,7 @@ const localizedTaikoId = computed(() =>
   align-items: center;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .forum-user.compact {
@@ -50,6 +51,7 @@ const localizedTaikoId = computed(() =>
 }
 
 .forum-user__avatar {
+  flex-shrink: 0;
   width: 46px;
   height: 46px;
   border-radius: 14px;
@@ -86,6 +88,7 @@ const localizedTaikoId = computed(() =>
 }
 
 .forum-user__role {
+  flex-shrink: 0;
   padding: 2px 7px;
   border-radius: 999px;
   font-size: 11px;
@@ -111,6 +114,22 @@ const localizedTaikoId = computed(() =>
   gap: 8px;
   color:var(--viewer-text-muted);
   font-size: 12px;
+}
+
+.forum-user__title {
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--viewer-text-muted) 8%, transparent);
+  color: var(--viewer-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 body.theme-dark .forum-user__detail {

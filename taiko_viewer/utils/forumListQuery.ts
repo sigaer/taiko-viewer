@@ -5,6 +5,8 @@ const positive = (value: unknown, maximum: number) => {
 };
 export const parseForumListQuery = (query: Record<string, unknown>) => ({
   keyword: text(query.keyword).trim().slice(0, 80),
+  // Reject malformed/oversized slugs instead of truncating into another section.
+  sectionSlug: /^[a-z0-9][a-z0-9_-]{0,63}$/.test(text(query.sectionSlug)) ? text(query.sectionSlug) : '',
   sort: ['latest', 'hot', 'featured'].includes(text(query.sort)) ? text(query.sort) : 'latest',
   threadType: ['discussion', 'guide', 'achievement', 'official', 'strategy'].includes(text(query.threadType)) ? text(query.threadType) : '',
   songId: positive(query.songId, Number.MAX_SAFE_INTEGER) ? String(positive(query.songId, Number.MAX_SAFE_INTEGER)) : '',
@@ -15,6 +17,7 @@ export const forumListLocationQuery = (query: Record<string, unknown>) => {
   const value = parseForumListQuery(query);
   return {
     keyword: value.keyword || undefined, sort: value.sort === 'latest' ? undefined : value.sort,
+    sectionSlug: value.sectionSlug || undefined,
     threadType: value.threadType || undefined, songId: value.songId || undefined,
     difficultyType: value.difficultyType || undefined, page: value.page > 1 ? String(value.page) : undefined,
   };

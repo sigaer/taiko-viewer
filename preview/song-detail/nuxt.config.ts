@@ -16,6 +16,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   hooks: {
     'pages:extend'(pages) {
+      pages.push({name:'local-forum-discovery-review',path:'/__forum-discovery',file:resolve(previewRoot,'review/forum_discovery.vue')});
       pages.push({name:'local-home-states-review',path:'/__home-states',file:resolve(previewRoot,'review/home_states.vue')});
       pages.push({name:'local-song-rows-review',path:'/__song-rows',file:resolve(previewRoot,'review/song_rows.vue')});
       pages.push({name:'local-growth-review',path:'/__growth-review',file:resolve(previewRoot,'review/growth.vue')});

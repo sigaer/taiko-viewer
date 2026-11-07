@@ -67,6 +67,19 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
   const like=await ask('POST',`/api/forum/threads/${a.id}/like`,'replier');assert.equal(like.liked,true);assert.equal(like.likeCount,1);const unlike=await ask('POST',`/api/forum/threads/${a.id}/like`,'replier');assert.equal(unlike.liked,false);assert.equal(unlike.likeCount,0);
   const replied=await ask('POST',`/api/forum/threads/${a.id}/replies`,'replier',{bodyText:'Persistent floor'});const floor=replied.posts[0];
   const nested=await ask('POST',`/api/forum/threads/${a.id}/replies`,'author',{bodyText:'Persistent nested reply',parentPostId:floor.id});assert.equal(nested.posts[0].replies[0].parentPostId,floor.id);
+  // Current binding titles are read afresh across list, home, author, floor and
+  // nested reply DTOs. These writes are confined to the proven empty test DB.
+  await pool.execute("INSERT INTO web_taiko_bindings(user_id,taiko_id,source,is_current,verified_title,verified_titleplate_id) VALUES (990331,'111111111111','wahlap',1,'当前验证称号',123),(990331,'222222222222','wahlap',0,'切换后的称号',456),(990332,'333333333333','wahlap',1,'返信者の称号',789)");
+  const titled=await ask('GET',`/api/forum/threads/${a.id}`,null);
+  assert.equal(titled.author.verifiedTitle,'当前验证称号');assert.equal(titled.posts[0].author.verifiedTitle,'返信者の称号');assert.equal(titled.posts[0].replies[0].author.verifiedTitle,'当前验证称号');
+  assert.equal((await ask('GET','/api/forum/threads?keyword=alpha',null)).items[0].author.verifiedTitle,'当前验证称号');
+  const titledHome=await ask('GET','/api/forum/home',null);assert.ok(titledHome.hotThreads.some(item=>item.author.verifiedTitle==='当前验证称号'));
+  await pool.execute('UPDATE web_taiko_bindings SET is_current=0 WHERE user_id=990331');
+  await pool.execute("UPDATE web_taiko_bindings SET is_current=1 WHERE user_id=990331 AND taiko_id='222222222222'");
+  assert.equal((await ask('GET',`/api/forum/threads/${a.id}`,null)).author.verifiedTitle,'切换后的称号');
+  await pool.execute('UPDATE web_taiko_bindings SET is_current=0 WHERE user_id=990331');
+  assert.equal((await ask('GET',`/api/forum/threads/${a.id}`,null)).author.verifiedTitle,null);
+  checks.push('current verified binding title across author/floor/reply/list/home; binding switch and unbind reread');
   const postLike=await ask('POST',`/api/forum/posts/${floor.id}/like`,'author');assert.equal(postLike.liked,true);checks.push('actual authenticated thread/post likes and exact parent reply persistence');
   await ask('POST','/api/forum/moderation/action','author',{threadId:a.id,action:'lock',enabled:true},403);
   await ask('POST','/api/forum/moderation/action','admin',{threadId:a.id,action:'lock',enabled:true});

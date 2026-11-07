@@ -1,4 +1,5 @@
 import {entryData} from '../utils/entry-fixtures';
+import { discoveryData } from '../utils/forum-discovery-fixtures';
 import { songRowData, songRowRecommendations } from '../utils/song-row-fixtures';
 import { homeDeepData } from '../utils/home-deep-fixtures';
 import { communityData } from '../utils/community-fixtures';
@@ -37,6 +38,8 @@ export default defineEventHandler(async event => {
   // No mutation is implemented or forwarded by this preview root.
   if (!['GET', 'HEAD'].includes(getMethod(event))) throw createError({ statusCode: 405, statusMessage: 'Read-only component preview' });
   const state = getCookie(event, 'song_preview_state') || 'scores';
+  const discovery = discoveryData(path, getQuery(event), state);
+  if (discovery !== undefined) return discovery;
   const entry=entryData(path,getQuery(event),state);
   if(entry!==undefined)return entry;
   const core = communityCoreData(path, getQuery(event), state);

@@ -45,7 +45,15 @@ useViewerSeo(() => ({
   keywords: [t("page.forum.section.title"), localizedSectionName.value || ""].filter(Boolean)
 }));
 
-const requestQuery = computed(() => ({ ...applied.value, sectionSlug: route.params.slug, pageSize: 12 }));
+const fixedSectionSlug = computed(() => String(route.params.slug || ""));
+const selectedSectionSlug = computed(() => fixedSectionSlug.value || applied.value.sectionSlug);
+const sectionOptions = computed(() => [
+  { label: t("page.forum.section.allSections"), value: "" },
+  ...(sectionsData.value?.items || []).map(item => ({
+    label: resolveForumSectionTranslation(t, item.slug, item.name), value: item.slug
+  }))
+]);
+const requestQuery = computed(() => ({ ...applied.value, sectionSlug: selectedSectionSlug.value || undefined, pageSize: 12 }));
 const { data, pending, error, refresh } = useForumResource<ThreadListPayload>(
   `forum-thread-list:${route.path}`, () => apiFetch('/api/forum/threads', { query: requestQuery.value, retry: 0 }),
   { context: () => `${route.path}:${JSON.stringify(requestQuery.value)}` }
@@ -74,13 +82,13 @@ const typeOptions = computed<Array<{ label: string; value: "" | ForumThreadType 
 ]);
 
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value?.total || 0) / (data.value?.pageSize || 12))));
-const activeFilterCount = computed(() => Number(Boolean(applied.value.keyword)) + Number(Boolean(applied.value.threadType)) + Number(applied.value.sort === "featured"));
+const activeFilterCount = computed(() => Number(Boolean(applied.value.keyword)) + Number(Boolean(applied.value.threadType)) + Number(applied.value.sort === "featured") + Number(!fixedSectionSlug.value && Boolean(applied.value.sectionSlug)));
 const newThreadPath = computed(() => ({
   path: "/forum/new",
   query: {
-    ...(route.params.slug ? { section: String(route.params.slug) } : {}),
-    ...(filterState.songId ? { songId: filterState.songId } : {}),
-    ...(filterState.difficultyType ? { difficulty: filterState.difficultyType } : {})
+    ...(selectedSectionSlug.value ? { section: selectedSectionSlug.value } : {}),
+    ...(applied.value.songId ? { songId: applied.value.songId } : {}),
+    ...(applied.value.difficultyType ? { difficulty: applied.value.difficultyType } : {})
   }
 }));
 
@@ -132,6 +140,12 @@ watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value);
     <el-dialog v-model="filterOpen" :title="t('page.forum.section.filter')" class="section-filter-dialog" width="min(92vw, 520px)" align-center>
       <div class="filter-dialog__body">
         <el-input v-model="filterState.keyword" :placeholder="t('page.forum.section.keywordPlaceholder')" clearable />
+        <div v-if="!fixedSectionSlug" class="filter-dialog__field">
+          <span>{{ t('page.forum.section.sectionLabel') }}</span>
+          <el-select v-model="filterState.sectionSlug" :empty-values="[null, undefined]" :aria-label="t('page.forum.section.sectionLabel')">
+            <el-option v-for="option in sectionOptions" :key="option.value || 'all'" :label="option.label" :value="option.value" />
+          </el-select>
+        </div>
         <el-select v-model="filterState.sort"><el-option v-for="option in sortOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select>
         <el-select v-model="filterState.threadType"><el-option v-for="option in typeOptions" :key="option.value || 'all'" :label="option.label" :value="option.value" /></el-select>
         <el-button type="primary" @click="pushFilters()">{{ t('page.forum.section.applyFilters') }}</el-button>
@@ -216,6 +230,7 @@ watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value);
 .filter-trigger { border-color:var(--viewer-border); }
 .filter-trigger span { display: inline-grid; min-width: 18px; margin-left: 6px; place-items: center; border-radius: 99px; color:var(--viewer-on-primary); background:var(--viewer-primary); font-size: 11px; }
 .filter-dialog__body { display: grid; gap: 14px; }
+.filter-dialog__field { display: grid; gap: 6px; min-width: 0; font-size: 14px; }
 .thread-list-panel { min-width: 0; }
 .thread-list { border-top: 0; }
 

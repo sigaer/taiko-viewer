@@ -97,20 +97,23 @@ const handleCardKeydown = (event: KeyboardEvent) => {
         <span v-for="tag in thread.tags" :key="tag">#{{ tag }}</span>
       </div>
 
-      <div v-if="thread.song" class="forum-thread-card__song">
+      <NuxtLink v-if="thread.song" class="forum-thread-card__song"
+        :to="localePath({ path: `/songs/${thread.song.id}`, query: thread.song.difficultyType ? { difficulty: String(thread.song.difficultyType) } : {} })">
         <SongCoverImage
+          class="forum-thread-card__song-cover"
           :song-id="thread.song.id"
           :alt="localizedSongTitle"
-          sizes="54px"
+          sizes="(min-width: 901px) 60px, 56px"
+          fit="cover"
         />
-        <div>
+        <div class="forum-thread-card__song-meta">
           <strong>{{ localizedSongTitle }}</strong>
           <span
             >{{ localizedDifficultyLabel }} ·
             {{ thread.song.level || "?" }}{{ t("guide.starSuffix", "星") }}</span
           >
         </div>
-      </div>
+      </NuxtLink>
 
       <div class="forum-thread-card__footer">
         <ForumUserBadge :user="thread.author" compact minimal />
@@ -274,27 +277,35 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 
 .forum-thread-card__song {
   display: flex;
-  gap: 12px;
+  min-width: 0;
+  gap: 10px;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 18px;
-  background:var(--viewer-surface-subtle);
+  padding: 4px 0;
+  color: var(--viewer-text);
+  text-decoration: none;
 }
 
-.forum-thread-card__song img {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  object-fit: cover;
+.forum-thread-card__song .forum-thread-card__song-cover {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.forum-thread-card__song div {
+.forum-thread-card__song-meta {
   display: grid;
+  min-width: 0;
   gap: 3px;
 }
 
 .forum-thread-card__song strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .forum-thread-card__song span,
@@ -368,10 +379,6 @@ body.theme-dark .forum-thread-card__stats {
   color:var(--viewer-text-muted);
 }
 
-body.theme-dark .forum-thread-card__song {
-  background:var(--viewer-surface-subtle);
-}
-
 @media (max-width: 900px) {
   .forum-thread-card {
     grid-template-columns: 1fr;
@@ -392,6 +399,7 @@ body.theme-dark .forum-thread-card__song {
 
 @media (min-width:901px) {
   .forum-thread-card.has-cover { grid-template-columns:minmax(0, 1fr) 180px; }
+  .forum-thread-card__song .forum-thread-card__song-cover { width:60px; height:60px; flex-basis:60px; }
 }
 .forum-thread-card.compact.has-cover { grid-template-columns:minmax(0, 1fr) 128px; }
 .forum-thread-card__title, .forum-thread-card__summary, .forum-thread-card__tags, .forum-thread-card__song { overflow-wrap:anywhere; }

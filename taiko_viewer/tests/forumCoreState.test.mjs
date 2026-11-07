@@ -29,13 +29,21 @@ async function resource(load,{context=ref('one'),enabled=ref(true),hydratedFailu
 }
 
 test('forum query normalizes invalid page, sort, song and difficulty without NaN',()=>{
- assert.deepEqual(parseForumListQuery({page:'NaN',sort:'unknown',songId:'-1',difficultyType:'6'}),{page:1,sort:'latest',keyword:'',threadType:'',songId:'',difficultyType:''});
+ assert.deepEqual(parseForumListQuery({page:'NaN',sort:'unknown',songId:'-1',difficultyType:'6'}),{page:1,sort:'latest',keyword:'',sectionSlug:'',threadType:'',songId:'',difficultyType:''});
  assert.equal(parseForumListQuery({page:'Infinity'}).page,1);assert.equal(parseForumListQuery({page:'1.5'}).page,1);
 });
 test('committed forum URL preserves exact search, section-independent song/difficulty and paging',()=>{
- const input={keyword:['  検索  ','ignored'],sort:'hot',threadType:'guide',songId:'1455',difficultyType:'5',page:3};
- assert.deepEqual(forumListLocationQuery(input),{keyword:'検索',sort:'hot',threadType:'guide',songId:'1455',difficultyType:'5',page:'3'});
+ const input={keyword:['  検索  ','ignored'],sectionSlug:'score-guides',sort:'hot',threadType:'guide',songId:'1455',difficultyType:'5',page:3};
+ assert.deepEqual(forumListLocationQuery(input),{keyword:'検索',sectionSlug:'score-guides',sort:'hot',threadType:'guide',songId:'1455',difficultyType:'5',page:'3'});
  const plain=forumListLocationQuery({sort:'latest',page:1});assert.equal(plain.sort,undefined);assert.equal(plain.page,undefined);
+});
+test('section URL accepts bounded slugs and rejects unsafe or oversized values without aliasing',()=>{
+ for(const sectionSlug of ['general','score-guides','a'.repeat(64)])assert.equal(parseForumListQuery({sectionSlug}).sectionSlug,sectionSlug);
+ for(const sectionSlug of ['',null,'a'.repeat(65),'../general','general&sort=hot','<script>',' general','GENERAL',{}])assert.equal(parseForumListQuery({sectionSlug}).sectionSlug,'');
+ assert.equal(parseForumListQuery({sectionSlug:['general','official']}).sectionSlug,'general');
+ assert.equal(forumListLocationQuery({sectionSlug:''}).sectionSlug,undefined);
+ const restored=parseForumListQuery(forumListLocationQuery({sectionSlug:'general',sort:'hot',threadType:'guide',keyword:'太鼓',songId:463,difficultyType:4,page:2}));
+ assert.equal(restored.sectionSlug,'general');assert.equal(restored.page,2);assert.equal(restored.keyword,'太鼓');assert.equal(restored.songId,'463');
 });
 test('resource owns the plain Nuxt payload so notification cache reconciliation remains visible',async()=>{
  const r=await resource(async()=>({unreadNotificationCount:3}));try{assert.equal(r.view.data.value.unreadNotificationCount,3);r.raw.data.value.unreadNotificationCount=0;assert.equal(r.view.data.value.unreadNotificationCount,0);assert.equal(r.loads(),1);r.fire('activated');assert.equal(r.loads(),1);}finally{r.close();}
@@ -77,9 +85,9 @@ test('stale personal page is clamped from server total and page size, not an emp
  assert.equal(forumPageInRange(9,15,10),2);assert.equal(forumPageInRange(2,15,10),2);assert.equal(forumPageInRange(9,0,10),1);
 });
 test('shared chart/section list corrects only the page while preserving committed filter query',()=>{
- const original={songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',page:9};
+ const original={songId:'1455',difficultyType:'5',sectionSlug:'general',keyword:'検索',sort:'hot',page:9};
  const next=forumListLocationQuery({...original,page:forumPageInRange(9,15,12)});
- assert.deepEqual(next,{songId:'1455',difficultyType:'5',keyword:'検索',sort:'hot',threadType:undefined,page:'2'});
+ assert.deepEqual(next,{songId:'1455',difficultyType:'5',sectionSlug:'general',keyword:'検索',sort:'hot',threadType:undefined,page:'2'});
 });
 
 

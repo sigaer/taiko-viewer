@@ -5,6 +5,8 @@ import fs from "node:fs";
 const root = new URL("../locales/", import.meta.url);
 const sections = ["official", "events", "beginner-help", "score-guides", "dojo", "achievements", "arcade", "creative", "general"];
 const visibleKeys = [
+  "page.forum.section.sectionLabel",
+  "page.forum.section.allSections",
   "community.relatedDiscussions",
   "community.viewAllDiscussions",
   "community.discussThisChart",

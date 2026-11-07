@@ -946,6 +946,8 @@
         "sortLabel": "並び順",
         "filter": "絞り込み",
         "allTypes": "すべての種類",
+        "sectionLabel": "セクション",
+        "allSections": "すべてのセクション",
         "applyFilters": "絞り込み適用",
         "empty": "この条件ではスレッドがありません",
         "pagination": "{page} / {totalPages} ページ、合計 {total} スレッド",

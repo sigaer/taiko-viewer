@@ -714,7 +714,7 @@ const renderReplyBlocks = (
         >
           <div class="floor-card__head">
             <div class="floor-card__user">
-              <ForumUserBadge :user="post.author" compact />
+              <ForumUserBadge :user="post.author" compact minimal />
               <span class="floor-badge">#{{ post.floorNo }}</span>
             </div>
             <div class="floor-card__meta">
@@ -787,7 +787,7 @@ const renderReplyBlocks = (
               tabindex="-1"
             >
               <div class="sub-reply-item__head">
-                <ForumUserBadge :user="reply.author" compact />
+                <ForumUserBadge :user="reply.author" compact minimal />
                 <span>{{ formatDateTime(reply.createdAt) }}</span>
               </div>
               <p

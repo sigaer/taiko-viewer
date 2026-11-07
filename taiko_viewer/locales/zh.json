@@ -947,6 +947,8 @@
         "sortLabel": "排序",
         "filter": "筛选",
         "allTypes": "全部类型",
+        "sectionLabel": "版块",
+        "allSections": "全部版块",
         "applyFilters": "应用筛选",
         "empty": "当前筛选下还没有帖子",
         "pagination": "第 {page} / {totalPages} 页，共 {total} 条主题",
