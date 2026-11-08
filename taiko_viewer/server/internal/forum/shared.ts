@@ -26,6 +26,7 @@ import {
   FORUM_THREAD_TYPES
 } from "~/types/forum";
 import { DbRow, getAccountDb } from "~/server/utils/account-db";
+import { getAccountTitlesMap } from "~/server/utils/account-titles";
 import {
   getAccountProfile,
   getAccountUserFromEvent,
@@ -517,6 +518,7 @@ export const loadBadgeMap = async (userIds: number[]) => {
      WHERE a.id IN (${placeholders})`,
     deduped
   );
+  const titles = await getAccountTitlesMap(deduped);
   for (const row of rows) {
     const role = FORUM_ROLES.includes((row.role || "user") as ForumRole)
       ? (row.role as ForumRole)
@@ -529,7 +531,8 @@ export const loadBadgeMap = async (userIds: number[]) => {
       roleLabel: getRoleLabel(role),
       taikoIdMasked: maskTaikoId(row.taiko_id),
       verifiedTitle: row.verified_title,
-      verifiedTitleplateId: row.verified_titleplate_id
+      verifiedTitleplateId: row.verified_titleplate_id,
+      titles: titles.get(row.id) || []
     });
   }
   return fallback;

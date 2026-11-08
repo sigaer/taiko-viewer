@@ -36,6 +36,8 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
   for(const sql of CREATE_TABLES)if(names.some(name=>sql.startsWith('CREATE TABLE IF NOT EXISTS '+name+' (')))await pool.execute(sql);
   for(const sql of MIGRATIONS)if(names.some(name=>sql.startsWith('ALTER TABLE '+name+' '))){try{await pool.execute(sql);}catch(e){if(!['ER_DUP_FIELDNAME','ER_DUP_KEYNAME'].includes(e.code))throw e;}}
   const {initializeForumSchema}=await import('../server/utils/forum-schema-bootstrap.ts');await initializeForumSchema();
+  const {ACCOUNT_TITLE_TABLE_SQL}=await import('../server/services/account-titles/schema.ts');
+  await pool.execute(ACCOUNT_TITLE_TABLE_SQL);
   for(const [id,name] of [[990331,'author'],[990332,'replier'],[990333,'admin']]){
    await pool.execute('INSERT INTO web_user_accounts(id,username,email,password_hash,email_verified) VALUES (?,?,?,?,1)',[id,'synthetic-'+name,name+'@example.test','synthetic-session-fixture']);
    await pool.execute('INSERT INTO web_user_sessions(session_token,user_id,expires_at) VALUES (?,?,DATE_ADD(NOW(),INTERVAL 1 DAY))',[(id===990331?'a':id===990332?'b':'c').repeat(64),id]);
@@ -49,7 +51,8 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
    ['post','/api/forum/posts/:id/like','posts/[id]/like.post.ts'],['post','/api/forum/moderation/action','moderation/action.post.ts'],
    ['post','/api/forum/users/:id/block','users/[id]/block.post.ts'],
    ['get','/api/forum/notifications','notifications.get.ts'],['post','/api/forum/notifications/read','notifications/read.post.ts'],
-   ['get','/api/forum/notifications/unread','notifications/unread.get.ts']
+   ['get','/api/forum/notifications/unread','notifications/unread.get.ts'],
+   ['get','/api/forum/users/:id','users/[id].get.ts']
   ])router[method](path,(await import('../server/api/forum/'+file)).default);
   server=createServer(toNodeListener(createApp().use(router)));server.listen(0,'127.0.0.1');await once(server,'listening');
   const base='http://127.0.0.1:'+server.address().port,calls=[],checks=[];
@@ -79,6 +82,17 @@ test('isolated community core HTTP preserves list filters, likes, replies, block
   assert.equal((await ask('GET',`/api/forum/threads/${a.id}`,null)).author.verifiedTitle,'切换后的称号');
   await pool.execute('UPDATE web_taiko_bindings SET is_current=0 WHERE user_id=990331');
   assert.equal((await ask('GET',`/api/forum/threads/${a.id}`,null)).author.verifiedTitle,null);
+  await pool.execute("INSERT INTO web_account_titles(user_id,title_key,source) VALUES (990331,'annual-beta-pioneer','annual-report-closed-beta')");
+  const awarded=await ask('GET',`/api/forum/threads/${a.id}`,null);
+  assert.equal(awarded.author.titles[0].name,'虹光先行者');
+  assert.equal(awarded.posts[0].replies[0].author.titles[0].key,'annual-beta-pioneer');
+  assert.deepEqual(awarded.posts[0].author.titles,[]);
+  assert.equal((await ask('GET','/api/forum/threads?keyword=alpha',null)).items[0].author.titles[0].name,'虹光先行者');
+  assert.equal((await ask('GET','/api/forum/users/990331',null)).user.titles[0].name,'虹光先行者');
+  await pool.execute("UPDATE web_account_titles SET revoked_at=NOW() WHERE user_id=990331");
+  assert.deepEqual((await ask('GET',`/api/forum/threads/${a.id}`,null)).author.titles,[]);
+  await pool.execute("UPDATE web_account_titles SET revoked_at=NULL WHERE user_id=990331");
+  checks.push('account title in real author/reply/list/profile HTTP; non-recipient isolation, unbound account ownership and revocation reread');
   checks.push('current verified binding title across author/floor/reply/list/home; binding switch and unbind reread');
   const postLike=await ask('POST',`/api/forum/posts/${floor.id}/like`,'author');assert.equal(postLike.liked,true);checks.push('actual authenticated thread/post likes and exact parent reply persistence');
   await ask('POST','/api/forum/moderation/action','author',{threadId:a.id,action:'lock',enabled:true},403);

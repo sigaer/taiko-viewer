@@ -1,3 +1,5 @@
+import type { AccountTitle } from "~/types/account-title";
+
 export type AccountAuthUser = {
   id: number;
   username: string;
@@ -5,6 +7,7 @@ export type AccountAuthUser = {
   emailVerified: boolean;
   avatarUrl: string;
   createdAt: string;
+  titles?: AccountTitle[];
   annualSummaryAccess: boolean;
   myTaikoReadModelAccess?: boolean;
   developerApiV1Access?: boolean;

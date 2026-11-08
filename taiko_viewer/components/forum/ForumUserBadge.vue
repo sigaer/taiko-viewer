@@ -29,6 +29,7 @@ const localizedTaikoId = computed(() =>
           localizedRoleLabel
         }}</span>
       </div>
+      <AccountTitleBadges :titles="user.titles" />
       <div v-if="!minimal" class="forum-user__detail">
         <span>{{ localizedTaikoId }}</span>
       </div>

@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
-export async function forumDiscoveryBrowserRuntime(repo, scratch) {
+export async function forumDiscoveryBrowserRuntime(repo, scratch, { transformData = value => value } = {}) {
   const source = resolve(repo, 'taiko_viewer'), root = resolve(scratch, 'forum-browser');
   await mkdir(root);
   await symlink(resolve(source, 'node_modules'), resolve(root, 'node_modules'), 'dir');
@@ -21,6 +21,7 @@ import zh from '${source}/locales/zh.json';
 import ja from '${source}/locales/ja.json';
 import Card from '${source}/components/forum/ForumThreadCard.vue';
 import Badge from '${source}/components/forum/ForumUserBadge.vue';
+import TitleBadges from '${source}/components/account/TitleBadges.vue';
 import Cover from '${source}/components/SongCoverImage.vue';
 import SafeImage from '${source}/components/forum/ForumSafeImage.vue';
 import ReadState from '${source}/components/forum/ReadState.vue';
@@ -66,7 +67,7 @@ const routes=['','/ja'].flatMap(prefix=>[
 ]);
 const router=createRouter({history:createWebHistory(),routes});
 const app=createApp({setup:()=>()=>h('main',{class:'qa-content'},[h(RouterView,null,{default:({Component})=>h(Suspense,null,{default:()=>Component})})])});
-for(const [name,component] of Object.entries({NuxtLink:RouterLink,ForumThreadCard:Card,ForumUserBadge:Badge,SongCoverImage:Cover,ForumSafeImage:SafeImage,ForumReadState:ReadState}))app.component(name,component);
+for(const [name,component] of Object.entries({NuxtLink:RouterLink,ForumThreadCard:Card,ForumUserBadge:Badge,AccountTitleBadges:TitleBadges,SongCoverImage:Cover,ForumSafeImage:SafeImage,ForumReadState:ReadState}))app.component(name,component);
 app.use(router);app.use(createI18n({legacy:false,locale,fallbackLocale:'zh',messages:{zh,ja},missingWarn:false,fallbackWarn:false}));app.use(ElementPlus);
 app.$nuxt={isHydrating:true,$router:router};
 const dark=localStorage.getItem('taiko_theme')==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.body.classList.toggle('theme-dark',dark);
@@ -82,7 +83,7 @@ await router.isReady();app.mount('#__nuxt');app.$nuxt.isHydrating=false;
         const common = await server.ssrLoadModule(resolve(repo, 'preview/song-detail/server/utils/community-fixtures.ts'));
         const value = url.pathname === '/api/forum/sections' ? { items: common.communitySections }
           : fixture.discoveryData(url.pathname, Object.fromEntries(url.searchParams), 'forum-discovery') ?? { items: [] };
-        response.setHeader('content-type', 'application/json'); response.end(JSON.stringify(value));
+        response.setHeader('content-type', 'application/json'); response.end(JSON.stringify(transformData(value)));
       });
     }}],
     resolve: { alias: { '~': source, '@': source, vue: resolve(source, 'node_modules/vue/dist/vue.esm-bundler.js') } },

@@ -14,6 +14,7 @@ const props = defineProps<{
   overview: PlayerGrowthOverview;
   canExternalSync?: boolean;
   displayName: string;
+  titles?: import("~/types/account-title").AccountTitle[];
   pending?: boolean;
   failed?: boolean;
   overviewRefreshing?: boolean;
@@ -175,7 +176,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
   <section class="growth-surface" aria-labelledby="growth-title">
     <header class="growth-focus">
       <div class="growth-focus__topline">
-        <h1 id="growth-title">{{ greeting }}</h1>
+        <div class="growth-focus__identity">
+          <h1 id="growth-title">{{ greeting }}</h1>
+          <AccountTitleBadges :titles="titles" />
+        </div>
         <div class="growth-focus__aside">
           <nav class="growth-story-links" :aria-label="t('home.growth.storyLinks')">
             <NuxtLink :to="localePath('/my/weekly')" class="growth-weekly-link">{{ t('home.growth.weeklyEntry') }}</NuxtLink>
@@ -347,6 +351,7 @@ button:focus-visible, input:focus-visible, .goal-actions a:focus-visible { outli
 .growth-focus { display: grid; gap: 8px; }
 .growth-focus__topline, .growth-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .growth-focus__aside { display: grid; justify-items: end; gap: 8px; }
+.growth-focus__identity { display: grid; gap: 8px; min-width: 0; }
 .growth-weekly-link { color:var(--viewer-link); font-size: 13px; font-weight: 500; text-decoration: none; }
 .growth-story-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 14px; }
 .growth-weekly-link:hover, .growth-weekly-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }

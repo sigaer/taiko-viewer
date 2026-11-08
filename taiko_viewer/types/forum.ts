@@ -1,3 +1,5 @@
+import type { AccountTitle } from "./account-title";
+
 export const FORUM_THREAD_TYPES = [
   "discussion",
   "guide",
@@ -55,6 +57,7 @@ export type ForumUserBadge = {
   taikoIdMasked: string;
   verifiedTitle: string | null;
   verifiedTitleplateId: number | null;
+  titles?: AccountTitle[];
 };
 
 export type ForumThreadCard = {

@@ -2,6 +2,7 @@ import { createError } from "h3";
 import type { H3Event, MultiPartData } from "h3";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { requireAccountUser } from "./auth";
+import { getAccountTitlesMap } from "../account-titles";
 import { readViewerBindings } from "../../internal/account/binding-read.ts";
 import { captureBindingIdentity, assertBindingIdentity } from "../../internal/account/binding-identity.ts";
 import { withViewerCurrentSource } from "../../services/account/current-source.ts";
@@ -40,8 +41,9 @@ export const getAccountProfile = (userId: number) => withViewerCurrentSource(use
     : null;
   const pendingBinding = await getPendingBinding(userId, db);
   const qqBinding = await getQqBinding(userId, db);
+  const titles = await getAccountTitlesMap([userId]);
   return {
-    user: sanitizePublicUser(user),
+    user: { ...sanitizePublicUser(user), titles: titles.get(userId) || [] },
     bindings,
     currentBinding,
     pendingBinding,

@@ -40,7 +40,8 @@ try {
   const [[proof]] = await admin.query('SELECT @@datadir dir');
   assert.equal(await realpath(proof.dir), datadir);
   await admin.end(); admin = null;
-  report.forumExit = await run(process.execPath, ['--experimental-strip-types', '--test', '--test-concurrency=1', 'tests/forumCoreSqlHttp.test.mjs'], 'forum-sql-http', 180000);
+  const tests = ['tests/forumCoreSqlHttp.test.mjs', 'tests/accountTitlesSql.test.mjs'];
+  report.forumExit = await run(process.execPath, ['--experimental-strip-types', '--test', '--test-concurrency=1', ...tests], 'forum-sql-http', 180000);
   report.pass = report.forumExit === 0;
 } finally {
   await admin?.end().catch(() => {});

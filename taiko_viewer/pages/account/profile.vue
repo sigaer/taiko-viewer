@@ -42,6 +42,7 @@ type ProfilePayload = {
   user: {
     id: number;
     username: string;
+    titles?: import("~/types/account-title").AccountTitle[];
     email: string;
     emailVerified: boolean;
     avatarUrl: string;
@@ -1102,6 +1103,7 @@ const removeQqBinding = async () => {
           <div class="profile-info">
             <div class="identity-summary">
               <h2>{{ profile.user.username }}</h2>
+              <AccountTitleBadges :titles="profile.user.titles" />
               <p>{{ profile.user.email }}</p>
               <div class="status-list">
                 <div class="status-chip" :class="profile.verificationStatus.emailVerified ? 'ok' : 'pending'">

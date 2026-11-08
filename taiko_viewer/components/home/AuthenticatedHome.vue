@@ -59,6 +59,7 @@ const trackClick = (event: string, source: string) => {
       <div class="personal-onboarding__copy">
         <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
         <h1 id="personal-onboarding-title">{{ stateCopy.title }}</h1>
+        <AccountTitleBadges :titles="user?.titles" />
         <p>{{ stateCopy.body }}</p>
         <NuxtLink
           :to="localePath(stateCopy.to)"
@@ -77,6 +78,7 @@ const trackClick = (event: string, source: string) => {
       :overview="growth"
       :can-external-sync="!!currentBinding && ['wahlap', 'hiroba'].includes(currentBinding.source)"
       :display-name="displayName"
+      :titles="user?.titles"
       :pending="growthPending"
       :failed="!!growthError"
       :overview-refreshing="overviewRefreshing"
@@ -94,6 +96,7 @@ const trackClick = (event: string, source: string) => {
       <div class="personal-status panel-card">
         <p class="personal-eyebrow">{{ t("home.personal.eyebrow") }}</p>
         <h1 id="personal-home-title">{{ t("home.personal.greeting", { name: displayName }) }}</h1>
+        <AccountTitleBadges :titles="user?.titles" />
         <NuxtLink
           :to="localePath('/my')"
           class="personal-button personal-button--secondary"
