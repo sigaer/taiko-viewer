@@ -750,8 +750,10 @@
       "language": "语言"
     },
     "myTaiko": {
+      "scores": "成绩管理",
+      "weekly": "每周回顾",
       "authFailed": "暂时无法确认登录状态，请重试",
-      "groups": { "practice": "成长与练习", "scores": "成绩与图表", "account": "账号与年度记录" },
+      "groups": { "common": "常用功能", "data": "数据与工具" },
       "desc": "查看你的成绩、Rating、推荐与歌曲进度入口。",
       "guestTitle": "登录后查看你的太鼓数据",
       "guestDesc": "登录并绑定太鼓账号，查看成绩、B30、推荐、歌曲进度与年度总结。",
