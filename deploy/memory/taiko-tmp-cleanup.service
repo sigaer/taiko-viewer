@@ -1,0 +1,23 @@
+[Unit]
+Description=Age out unused Taiko and Viewer temporary artifacts
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/taiko-tmp-cleanup.py --apply
+MemoryHigh=128M
+MemoryMax=256M
+MemorySwapMax=0
+TasksMax=16
+CPUQuota=50%
+TimeoutStartSec=10min
+TimeoutStopSec=15
+KillMode=control-group
+OOMPolicy=stop
+Nice=15
+IOSchedulingClass=idle
+UMask=0077
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/tmp /var/log/taiko-tmp-cleanup /run/lock
+NoNewPrivileges=true

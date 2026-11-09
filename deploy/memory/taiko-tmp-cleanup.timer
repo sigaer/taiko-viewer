@@ -1,0 +1,11 @@
+[Unit]
+Description=Clean unused /var/tmp artifacts daily
+
+[Timer]
+OnCalendar=*-*-* 05:45:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=5m
+Unit=taiko-tmp-cleanup.service
+
+[Install]
+WantedBy=timers.target
