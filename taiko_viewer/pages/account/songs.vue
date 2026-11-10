@@ -21,7 +21,6 @@ const pageSize = ref(25);
 const keywordInput = ref("");
 const keyword = ref("");
 const levelFilter = ref<number>();
-const tableLoading = ref(false);
 const lockingKey = ref("");
 const switchingBinding = ref(false);
 const editorVisible = ref(false);
@@ -196,23 +195,24 @@ const scoreSongPath = (row: SongRow) => row.isCustom || !catalogSongIds.value.ha
   query: { difficulty: row.level }
 });
 
-const { data: profileData, error: profileError, status: profileStatus, refresh: refreshProfile, clear: clearProfile } = await useAsyncData<ProfilePayload>(
+const profileRead = useAsyncData<ProfilePayload>(
   `account-song-profile:${identity.value}`,
-  async () => { const context = identity.value; return { ...await apiFetch<ProfilePayload>("/api/account/bindings"), identity: context }; },
-  { default: () => ({ bindings: [], currentBinding: null }) }
+  async (_app, { signal }) => { const context = identity.value; return { ...await apiFetch<ProfilePayload>("/api/account/bindings", { signal, retry: 0 }), identity: context }; },
+  { lazy: true, default: () => ({ bindings: [], currentBinding: null }) }
 );
+const { data: profileData, error: profileError, status: profileStatus, refresh: refreshProfile, clear: clearProfile } = profileRead;
 
-const { data: songCatalogData, error: catalogError, status: catalogStatus, refresh: refreshCatalog } = await useAsyncData<SongCatalogPayload>(
+const { data: songCatalogData, error: catalogError, status: catalogStatus, refresh: refreshCatalog } = useAsyncData<SongCatalogPayload>(
   "account-song-catalog",
-  () => apiFetch("/api/content/songs"),
-  { default: () => ({ songs: [] }) }
+  (_app, { signal }) => apiFetch("/api/content/songs", { signal }),
+  { lazy: true, default: () => ({ songs: [] }) }
 );
 
-const loadSongs = async () => {
-  tableLoading.value = true;
-  try {
+const loadSongs = async (_app: unknown, { signal }: { signal: AbortSignal }) => {
     const context = identity.value;
     const result = await apiFetch<SongsPayload>("/api/account/songs", {
+      signal,
+      retry: 0,
       query: {
         page: page.value,
         pageSize: pageSize.value,
@@ -221,18 +221,17 @@ const loadSongs = async () => {
       }
     });
     return { ...result, identity: context };
-  } finally {
-    tableLoading.value = false;
-  }
 };
 
-const { data: songsData, error: songsError, status: songsStatus, refresh: refreshSongs, clear: clearSongs } = await useAsyncData<SongsPayload>(`account-songs:${identity.value}`, loadSongs, {
+const songsRead = useAsyncData<SongsPayload>(`account-songs:${identity.value}`, loadSongs, {
+  lazy: true,
   default: () => ({ currentBinding: null as unknown as BindingSummary, total: 0, page: 1, pageSize: 25, items: [] })
 });
+const { data: songsData, error: songsError, status: songsStatus, refresh: refreshSongs, clear: clearSongs } = songsRead;
 
 const profileReady = computed(() => profileData.value?.identity === identity.value);
 const currentBinding = computed(() => profileReady.value ? profileData.value?.currentBinding : null);
-const busy = computed(() => switchingBinding.value || profileStatus.value === "pending" || songsStatus.value === "pending");
+const busy = computed(() => switchingBinding.value || ['idle', 'pending'].includes(profileStatus.value) || ['idle', 'pending'].includes(songsStatus.value));
 const resultReady = computed(() => profileReady.value && songsData.value?.identity === identity.value && songsData.value.currentBinding?.id === currentBinding.value?.id && !busy.value && !profileError.value && !songsError.value);
 const total = computed(() => resultReady.value ? songsData.value?.total || 0 : 0);
 const rows = computed(() => resultReady.value ? songsData.value?.items || [] : []);
@@ -249,9 +248,7 @@ watch([profileError, songsError], async () => {
   if (guard.current(request)) readError.value = message;
 }, { immediate: true });
 const retryRead = async () => {
-  const context = identity.value;
-  await refreshProfile();
-  if (context === identity.value && profileReady.value && !profileError.value) await refreshSongs();
+  await Promise.all([refreshProfile(), refreshSongs()]);
 };
 watch(() => accountUser.value?.id, () => { switchingBinding.value = false; }, { flush: "sync" });
 watch([page, pageSize, keyword, levelFilter], () => {
@@ -263,9 +260,7 @@ const refreshCurrentData = useAccountDataRefresh(identity, () => {
   if (!accountUser.value) switchingBinding.value = false;
   clearProfile(); clearSongs(); readError.value = "";
   page.value = 1;
-}, async () => { if (accountUser.value) await retryRead(); });
-if (accountUser.value && !profileError.value && !songsError.value &&
-  (!profileReady.value || songsData.value?.identity !== identity.value)) refreshCurrentData();
+}, async () => { if (accountUser.value) await retryRead(); }, [profileRead, songsRead]);
 const sourceLabel = computed(() => currentBinding.value?.isManual ? copy.value.manualSource : currentBinding.value?.source === "hiroba" ? "ドンだーひろば" : "华立 / Wahlap");
 const sourceHint = computed(() => locale.value === "ja"
   ? currentBinding.value?.isManual ? "手動入力の成績。編集・削除できます。" : "同期された成績。ロックすると今後の更新で上書きされません。"

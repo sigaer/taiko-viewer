@@ -37,25 +37,27 @@ const bindingGeneration = useState("account-binding-generation", () => 0);
 const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}`);
 const context = computed(() => `${identity.value}:${String(route.query.week || "current")}`);
 const guard = useAccountRequestGuard();
-const fetchWeekly = async () => {
+const fetchWeekly = async (_app: unknown, { signal }: { signal: AbortSignal }) => {
   const requestedContext = context.value, request = guard.capture();
   if (!accountUser.value) return { payload: null, error: "", context: requestedContext };
   try {
     const week = typeof route.query.week === "string" ? route.query.week : undefined;
-    const payload = await apiFetch<WeeklyGrowthResponse>("/api/account/growth/weekly", { query: week ? { week } : undefined, retry: 0 });
+    const payload = await apiFetch<WeeklyGrowthResponse>("/api/account/growth/weekly", { signal, query: week ? { week } : undefined, retry: 0 });
     return guard.current(request) && context.value === requestedContext
       ? { payload, error: "", context: requestedContext } : { payload: null, error: "", context: requestedContext };
   } catch (error) {
+    if (signal.aborted) throw signal.reason;
     const message = await resolveViewerError(error, t("weekly.loadFailed"), t);
     return { payload: null, error: guard.current(request) && context.value === requestedContext ? message : "", context: requestedContext };
   }
 };
-const { data: weeklyState, pending, refresh, clear } = await useAsyncData(`growth-weekly:${accountUser.value?.id || 'guest'}:${route.path}`, fetchWeekly, {
+const weeklyRead = useAsyncData(`growth-weekly:${accountUser.value?.id || 'guest'}:${route.path}`, fetchWeekly, {
+  lazy: true,
   default: () => ({ payload: null, error: "", context: "" }),
-  watch: [context],
   dedupe: "cancel"
 });
-watch(context, clear, { flush: "sync" });
+const { data: weeklyState, pending, status, refresh, clear } = weeklyRead;
+useAccountDataRefresh(context, () => { guard.invalidate(); clear(); }, refresh, [weeklyRead]);
 onUnmounted(clear);
 const retry = () => refresh();
 const weekly = computed(() => weeklyState.value?.context === context.value ? weeklyState.value.payload : null);
@@ -101,7 +103,7 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
       <NuxtLink :to="localePath('/account/login')" class="weekly-button">{{ t("weekly.login") }}</NuxtLink>
     </section>
 
-    <section v-else-if="pending" class="weekly-loading" aria-busy="true" :aria-label="t('weekly.loading')">
+    <section v-else-if="(pending || status === 'idle') && !weekly" class="weekly-loading" aria-busy="true" :aria-label="t('weekly.loading')">
       <span v-for="index in 4" :key="index" class="weekly-loading__line shimmer-card"></span>
     </section>
 

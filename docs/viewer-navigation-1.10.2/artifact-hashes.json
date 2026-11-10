@@ -1,0 +1,50 @@
+{
+  "baseline.cpuprofile": {
+    "bytes": 371833,
+    "sha256": "5f95377f506e1a25178f35302e948211a3b4e00134e8081cb1cfba210d6bd415"
+  },
+  "guide-third-level-ja-dark.png": {
+    "bytes": 131457,
+    "sha256": "1b0252c4d64755880cceee25aaa71ebf69fceeb59087f94bdb2d7c4e2ef440c2"
+  },
+  "guide-third-level-ja-light.png": {
+    "bytes": 133796,
+    "sha256": "cc0fe42ac1cbf9f1053e8bd45094a19e5701510b752cc0013ce4872f0943c9ec"
+  },
+  "guide-third-level-zh-dark.png": {
+    "bytes": 121308,
+    "sha256": "344a2ae3b717d2c4a5192a8106ca1653a27de2cae453703ba378fbf1fa984bd4"
+  },
+  "guide-third-level-zh-light.png": {
+    "bytes": 123293,
+    "sha256": "1e6ffd6323b9c552fb68f0c135083c74d0f84a88e6b1e85d9f11ccdd4130e6bc"
+  },
+  "ja-dark-sidebar.png": {
+    "bytes": 106113,
+    "sha256": "03c9a5e1d973b112e2029e867f0293695605cb26614966a4d7fc9d7835237847"
+  },
+  "ja-light-sidebar.png": {
+    "bytes": 106695,
+    "sha256": "02a1816a5701aa671421c1c641936f8dc552e36af7063eca225bd5a74dfb87d4"
+  },
+  "measurements.json": {
+    "bytes": 1326824,
+    "sha256": "45946cd9a97ada58af9d971db0ca26997c180fe98eac3249cb6699a1647f289d"
+  },
+  "report.json": {
+    "bytes": 141138,
+    "sha256": "9403426087a5c260429376dc6b64e66ccc7e38b48afbc1064522387cd0739104"
+  },
+  "sidebar-animation.webm": {
+    "bytes": 2204475,
+    "sha256": "9be47e0be8a7ddede7ffec55168d9d323f5c6c6aba3eb3bdb1986b6481b3497f"
+  },
+  "zh-dark-sidebar.png": {
+    "bytes": 98591,
+    "sha256": "8bc9aaca29ceadcc3e9cef2dc291926593b58b28f7ca6181bcee59f291571219"
+  },
+  "zh-light-sidebar.png": {
+    "bytes": 99128,
+    "sha256": "ee83c3377b46f49fc5784fa595f0104bc839b07ca57f47bc458b81a051df4563"
+  }
+}

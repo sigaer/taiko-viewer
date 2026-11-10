@@ -40,13 +40,13 @@ const requestedDimension = computed(() => dimensions.includes(String(route.query
 const identity = computed(() => `${accountUser.value?.id || "guest"}:${bindingGeneration.value}:${homeGeneration.value}`);
 const guard = useAccountRequestGuard();
 const passportKey = `growth-passport:${identity.value}:${useRouter().currentRoute.value.path}`;
-const fetchPassport = async () => {
+const fetchPassport = async (_app: unknown, { signal }: { signal: AbortSignal }) => {
   if (!accountUser.value) return { payload: null, error: "" };
   const context = identity.value, request = guard.capture();
   try {
     const range = requestedRange.value;
     const userId = accountUser.value.id, generation = bindingGeneration.value;
-    const payload = await apiFetch<SkillPassportResponse>("/api/account/growth/passport", { query: { range, dimension: requestedDimension.value }, retry: 0 });
+    const payload = await apiFetch<SkillPassportResponse>("/api/account/growth/passport", { signal, query: { range, dimension: requestedDimension.value }, retry: 0 });
     if (!guard.current(request) || context !== identity.value || accountUser.value?.id !== userId || bindingGeneration.value !== generation) return { payload: null, error: "" };
     if (payload.range.requestedDays !== range) throw new Error("passport-range-mismatch");
     return {
@@ -54,18 +54,20 @@ const fetchPassport = async () => {
       error: "", context
     };
   } catch (error) {
+    if (signal.aborted) throw signal.reason;
     const message = await resolveViewerError(error, t("passport.loadFailed"), t);
     return guard.current(request) && context === identity.value ? { payload: null, error: message, context } : { payload: null, error: "" };
   }
 };
 
-const { data: passportState, pending, refresh, clear } = await useAsyncData(passportKey, fetchPassport, {
+const passportRead = useAsyncData(passportKey, fetchPassport, {
+  lazy: true,
   default: () => ({ payload: null, error: "" }),
   dedupe: "cancel"
 });
+const { data: passportState, pending, status, refresh, clear } = passportRead;
 onUnmounted(clear);
-const refreshCurrentData = useAccountDataRefresh(identity, () => { guard.invalidate(); clear(); }, refresh);
-if (accountUser.value && passportState.value?.context !== identity.value) refreshCurrentData();
+useAccountDataRefresh(identity, () => { guard.invalidate(); clear(); }, refresh, [passportRead]);
 const passport = computed(() => selectPassportPeriod(passportState.value?.context === identity.value ? passportState.value.payload : null, requestedRange.value));
 const pageError = computed(() => passportState.value?.context === identity.value ? passportState.value.error : "");
 const selectedDimension = computed(() => requestedDimension.value === "rating" ? "accuracy_power" : requestedDimension.value);
@@ -122,7 +124,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
       <NuxtLink :to="localePath('/account/login')" class="passport-button">{{ t("passport.login") }}</NuxtLink>
     </section>
 
-    <section v-else-if="pending && !passport" class="passport-loading" aria-busy="true" :aria-label="t('passport.loading')">
+    <section v-else-if="(pending || status === 'idle') && !passport" class="passport-loading" aria-busy="true" :aria-label="t('passport.loading')">
       <span v-for="index in 4" :key="index" class="passport-loading__line shimmer-card"></span>
     </section>
 

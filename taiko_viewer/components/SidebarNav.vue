@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch, useId } from "vue";
+import { computed, ref, watch, useId, onMounted } from "vue";
+import type { MenuInstance } from "element-plus";
+import { handleSidebarMenuKeydown } from "~/utils/sidebarKeyboard";
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
 import { primeAnnualBgm, releasePrimedAnnualBgm } from "~/utils/annualBgm.client";
 
 const emit = defineEmits<{ navigate: [] }>();
 const navId = useId();
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
@@ -68,7 +71,9 @@ const goTo = async (path: string) => {
   if (!path) return;
   emit("navigate");
   const target = localePath(path);
-  if (!target || target === route.fullPath || target === route.path) {
+  // useRoute() follows Nuxt's resolved page and can still describe the page
+  // we are leaving while Suspense is pending. Vue Router owns navigation.
+  if (!target || target === router.currentRoute.value.fullPath) {
     return;
   }
   const enteringAnnual = path === "/account/version-summary";
@@ -260,6 +265,16 @@ const openedGroups = computed(() => {
 });
 // Route changes reveal only the owning category; manual collapse lasts until navigation.
 const expandedGroup = ref("");
+const menus = new Map<string, MenuInstance>();
+const syncMenus = () => {
+  for (const [key, menu] of menus) {
+    menu.updateActiveIndex(activePath.value);
+    // Only Discovery has Element Plus submenus; the other groups are flat.
+    if (key === 'discover' && key === expandedGroup.value) for (const index of openedGroups.value) menu.open(index);
+  }
+};
+onMounted(syncMenus);
+watch([activePath, openedGroups], syncMenus, { flush: 'post' });
 watch([activePath, () => groups.value.map(group => group.key + group.items.map(item => item.key).join()).join()], () => {
   expandedGroup.value = groups.value.find(group => group.items.some(item =>
     activePath.value === item.key || activePath.value.startsWith(`${item.key}/`)
@@ -309,10 +324,12 @@ watch([activePath, () => groups.value.map(group => group.key + group.items.map(i
         <span>{{ group.title }}</span>
         <span class="nav-chevron" aria-hidden="true">{{ expandedGroup === group.key ? '−' : '+' }}</span>
       </button>
-      <div :id="`${navId}-${group.key}`" v-show="expandedGroup === group.key">
-      <el-menu :key="activePath" :default-active="activePath" :default-openeds="openedGroups" unique-opened class="nav-menu">
+      <Transition name="nav-expand">
+      <div :id="`${navId}-${group.key}`" v-show="expandedGroup === group.key" class="nav-panel" :inert="expandedGroup !== group.key" :aria-hidden="expandedGroup !== group.key">
+      <div class="nav-panel__inner">
+      <el-menu :ref="(menu) => { if (menu) menus.set(group.key, menu as MenuInstance); else menus.delete(group.key); }" :default-active="activePath" :default-openeds="openedGroups" unique-opened class="nav-menu" @keydown="handleSidebarMenuKeydown">
         <template v-for="item in group.items" :key="item.key">
-          <el-sub-menu v-if="item.children" :index="item.key">
+          <el-sub-menu v-if="item.children" :index="item.key" tabindex="0">
             <template #title>
               <span class="nav-item-label">
                 <span class="nav-icon" aria-hidden="true">
@@ -330,7 +347,7 @@ watch([activePath, () => groups.value.map(group => group.key + group.items.map(i
               </span>
             </template>
             <template v-for="child in item.children" :key="child.key">
-              <el-sub-menu v-if="child.children" :index="child.key">
+              <el-sub-menu v-if="child.children" :index="child.key" tabindex="0">
                 <template #title>
                   <span class="nav-item-label">
                     <img
@@ -343,16 +360,16 @@ watch([activePath, () => groups.value.map(group => group.key + group.items.map(i
                     <span>{{ child.label }}</span>
                   </span>
                 </template>
-                <el-menu-item v-for="sub in child.children" :key="sub.key" :index="sub.key" @click="goTo(sub.key)">
+                <el-menu-item v-for="sub in child.children" :key="sub.key" :index="sub.key" tabindex="0" @click="goTo(sub.key)">
                   <span>{{ sub.label }}</span>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item v-else :index="child.key" @click="goTo(child.key)">
+              <el-menu-item v-else :index="child.key" tabindex="0" @click="goTo(child.key)">
                 <span>{{ child.label }}</span>
               </el-menu-item>
             </template>
           </el-sub-menu>
-          <el-menu-item v-else :index="item.key" :data-nav-key="item.key" @click="goTo(item.key)">
+          <el-menu-item v-else :index="item.key" :data-nav-key="item.key" tabindex="0" @click="goTo(item.key)">
             <span class="nav-item-label">
               <span class="nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -371,6 +388,8 @@ watch([activePath, () => groups.value.map(group => group.key + group.items.map(i
         </template>
       </el-menu>
       </div>
+      </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -384,4 +403,15 @@ watch([activePath, () => groups.value.map(group => group.key + group.items.map(i
 .nav-chevron { margin-left:auto; }
 .nav-icon { flex-shrink:0; }
 .nav-menu { margin:4px 0 8px; }
+.nav-groups :deep([role="menuitem"]:focus-visible) { outline:2px solid var(--viewer-primary); outline-offset:-2px; }
+.nav-panel { display:grid; grid-template-rows:1fr; opacity:1; transform:translateY(0); }
+.nav-panel__inner { min-height:0; overflow:hidden; }
+@media (min-width:961px) {
+  .nav-expand-enter-active { transition:grid-template-rows 210ms ease-out, opacity 210ms ease-out, transform 210ms ease-out; }
+  .nav-expand-leave-active { transition:grid-template-rows 180ms ease-out, opacity 180ms ease-out, transform 180ms ease-out; }
+  .nav-expand-enter-from,.nav-expand-leave-to { grid-template-rows:0fr; opacity:0; transform:translateY(-3px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .nav-expand-enter-active,.nav-expand-leave-active { transition:none; }
+}
 </style>

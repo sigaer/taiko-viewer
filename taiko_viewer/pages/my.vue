@@ -3,5 +3,5 @@ defineOptions({ name: "PersonalGrowthLayout" });
 </script>
 
 <template>
-  <NuxtPage />
+  <NuxtPage :keepalive="true" />
 </template>

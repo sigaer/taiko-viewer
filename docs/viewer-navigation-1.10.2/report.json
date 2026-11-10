@@ -1,0 +1,5663 @@
+{
+  "version": "1.10.2",
+  "releaseGate": "READY_TO_RELEASE",
+  "releaseEvidence": "/var/tmp/viewer-nav-1102/release.json",
+  "environment": {
+    "browser": "113.0.5672.126",
+    "viewport": "1440x900",
+    "node": "24.13.0",
+    "nuxt": "3.21.11",
+    "elementPlus": "2.13.2",
+    "fixtures": "相同固定业务 DTO；2000 首歌曲目录、25 行成绩，Passport 使用现有真实 composer 生成的 normal 测试 DTO。未读取或创建真实用户业务数据。",
+    "isolation": "标准 memory QA/build wrapper，单浏览器、单活动页面、串行执行；服务器禁用真实 DB 连接。"
+  },
+  "rootCauseConfirmed": [
+    "固定小型 Growth DTO 也能复现：请求未完成及慢网络场景各 10/10 次无法进入最终页面。CPU Profile 显示 Vue flushPostFlushCbs / flushJobs 持续运行，主线程无法处理渲染与网络完成事件。",
+    "CPU Profile 的 Vs 对应本地 Vue flushPostFlushCbs，Ih 对应 flushJobs；合计 4107/9809=41.87% 的采样自身时间。Debugger 暂停栈亦为这两个调度函数。证据：baseline.cpuprofile，以及 before/profile/results.json。",
+    "activePath 被用作全部五组 el-menu 的 key；正常 10 轮正反向导航测量窗口内额外挂载和销毁各 305 次，累计菜单 mount=330、unmount=325。",
+    "PersonalGrowthLayout 被全局 KeepAlive 排除，内层 NuxtPage 没有 KeepAlive；周报和成长档案在同一窗口内各额外挂载和销毁 20 次，并各多发出 20 次 GET。",
+    "songs 的三个顶层 await 串行初始化；周报/Passport 也 await 数据初始化，并且未把 Nuxt AbortSignal 传入 HTTP。密集导航时出现初始化、销毁及待完成请求交错。"
+  ],
+  "rootCauseLimits": [
+    "CPU 调度饥饿已被采样证实；各单项修复的贡献未做消融实验，不能把某一个菜单调用宣称为唯一触发点。",
+    "goTo 使用 Nuxt 延后更新的 route 判断目标，存在丢弃最后选择的风险；改用 Vue Router currentRoute，继续沿用原生导航竞争与历史语义，未增加延迟或全局调度器。该分支未被独立证明为冻结的唯一原因。",
+    "同一路由的第 5/10 轮 GC 后堆、DOM 和 AsyncData 条目未显示无界增长，未证实长期内存泄漏。",
+    "Headless Chromium 不提供“网页响应缓慢”对话框的可靠观测；用页面完成超时、采样栈和请求/渲染可达性验收。"
+  ],
+  "implementation": [
+    "稳定五个 Menu 实例，ref.updateActiveIndex() 同步高亮，ref.open() 同步 Discovery 的二/三级祖先。",
+    "三个页面 lazy AsyncData，无顶层数据等待；歌曲绑定、目录和成绩并行启动，目录继续使用共享 key。useViewerApiFetch 原有 options 展开已正确透传 signal，无需重写 wrapper。",
+    "useAccountDataRefresh 接入 page-owned GET handles：deactivated 只清理 pending GET，保留已接受的同一 DTO；激活合并身份刷新与取消恢复，成功结果不发起新读取。写操作及共享目录不加入离页取消列表。",
+    "保留身份 guard，取消时将 AbortSignal 原因交回 Nuxt，避免显示普通加载失败；补齐 /my 父子缓存。",
+    "桌面一级分组使用 0fr/1fr、opacity、-3px 位移，展开 210ms、收起 180ms；无新增阴影、模糊、配色或尺寸变化。移动端无一级动画，reduced-motion 禁用过渡，折叠区 inert。",
+    "当前 Element Plus 垂直菜单未初始化其水平菜单键盘 helper；补充 Tab 焦点及 Enter/Space、上下键、Home/End 操作。"
+  ],
+  "changedFiles": [
+    "taiko_viewer/app.vue",
+    "taiko_viewer/components/SidebarNav.vue",
+    "taiko_viewer/composables/useAccountDataRefresh.ts",
+    "taiko_viewer/package-lock.json",
+    "taiko_viewer/package.json",
+    "taiko_viewer/pages/account/songs.vue",
+    "taiko_viewer/pages/my.vue",
+    "taiko_viewer/pages/my/growth.vue",
+    "taiko_viewer/pages/my/weekly.vue",
+    "taiko_viewer/scripts/performance/navigation-fixtures.mjs",
+    "taiko_viewer/scripts/performance/navigation-online.mjs",
+    "taiko_viewer/scripts/performance/navigation-probe.client.ts",
+    "taiko_viewer/scripts/performance/navigation-regression.mjs",
+    "taiko_viewer/scripts/performance/navigation.mjs",
+    "taiko_viewer/tests/accountSongsUi.test.mjs",
+    "taiko_viewer/tests/fixtures/pageAsyncData.mjs",
+    "taiko_viewer/tests/growthPageState.test.mjs",
+    "taiko_viewer/utils/sidebarKeyboard.ts",
+    "taiko_viewer/utils/suspendedRead.ts"
+  ],
+  "measurementDefinition": [
+    "正常及已加载快速场景各 10 轮；每轮正向最终到达 /my，随后反向返回 /account/songs。快速点击间隔 150ms。",
+    "请求未完成与慢网络场景各 10 个独立上下文，分别延迟 1200/2400ms；从完整加载的歌曲数据页开始，对可见页改变合成身份触发读取后快速离开，并验证返回后的恢复。",
+    "所有请求数包含预热；正常/已加载场景预热为 5 次。测量窗口额外请求为修改前 40 次、修改后 0 次。",
+    "导航 routerMs 是点击到原生 router afterEach，pageMs 是点击到 Nuxt page:finish；只匹配下一次点击之前的同路径事件，重复选择当前路由无导航事件，不跨轮配对。不是后台真实数据计算延迟。",
+    "Long Task 为 PerformanceObserver 记录的 >50ms 任务，统计测量窗口；正常/已加载测试在第 5/10 轮执行相同 GC 探针，采样开销也包含在记录中。",
+    "组件按 Vue name/__name 聚合（包含同名 Nuxt 包装实例）；报告比较预热后的增量，完整 mount/unmount/activate/deactivate 计数见 measurements.json。",
+    "HTTP 取消及 backgroundAtEnd 均为浏览器视角；未声称服务端已接受的计算会因断开连接而回滚。"
+  ],
+  "before": [
+    {
+      "scenario": "normal",
+      "status": "PASS",
+      "maxConcurrent": 1,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 1,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 21,
+        "/api/account/growth/passport": 21
+      },
+      "requestCount": 45,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 45,
+        "min": 62,
+        "p50": 63,
+        "p95": 66,
+        "max": 72
+      },
+      "longTaskMs": {
+        "count": 32,
+        "min": 51,
+        "p50": 77,
+        "p95": 128,
+        "max": 176
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 305,
+          "unmount": 305,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 427,
+          "unmount": 427,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 3965,
+          "unmount": 3965,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 20
+        },
+        "weekly": {
+          "mount": 20,
+          "unmount": 20,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "growth": {
+          "mount": 20,
+          "unmount": 20,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "index": {
+          "mount": 10,
+          "unmount": 11,
+          "activate": 0,
+          "deactivate": 0
+        }
+      },
+      "steadySamples": [
+        {
+          "heapBytes": 20671122,
+          "heapMiB": 19.714,
+          "domNodes": 2328,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        },
+        {
+          "heapBytes": 20495896,
+          "heapMiB": 19.546,
+          "domNodes": 2328,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        }
+      ],
+      "navigationMs": {
+        "router": {
+          "count": 61,
+          "min": 3.8,
+          "p50": 5.1,
+          "p95": 19.8,
+          "max": 20.7
+        },
+        "page": {
+          "count": 61,
+          "min": 45.9,
+          "p50": 117.5,
+          "p95": 147.1,
+          "max": 148.8
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3399.400001525879,
+          "routerMs": 20.1,
+          "pageMs": 132.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3759,
+          "routerMs": 11.6,
+          "pageMs": 133.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4014.1000022888184,
+          "routerMs": 6.0,
+          "pageMs": 147.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4246.900001525879,
+          "routerMs": 6.4,
+          "pageMs": 76.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4490.200000762939,
+          "routerMs": 4.5,
+          "pageMs": 148.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4714.900001525879,
+          "routerMs": 6.4,
+          "pageMs": 143.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4934,
+          "routerMs": 18.5,
+          "pageMs": 102.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5276.900001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5343.299999237061,
+          "routerMs": 5.1,
+          "pageMs": 121.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5593.100002288818,
+          "routerMs": 10.3,
+          "pageMs": 141.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 5816.600002288818,
+          "routerMs": 20.1,
+          "pageMs": 68.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6030,
+          "routerMs": 4.1,
+          "pageMs": 130.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6237.100002288818,
+          "routerMs": 4.1,
+          "pageMs": 118.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6429.700000762939,
+          "routerMs": 6.1,
+          "pageMs": 89.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6867.600002288818
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6934.299999237061,
+          "routerMs": 5.3,
+          "pageMs": 117.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7167.200000762939,
+          "routerMs": 19.6,
+          "pageMs": 147.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 7397.700000762939,
+          "routerMs": 5.1,
+          "pageMs": 51.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7592.5,
+          "routerMs": 4.1,
+          "pageMs": 129.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 7798.5,
+          "routerMs": 4.7,
+          "pageMs": 111.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 7991,
+          "routerMs": 11.4,
+          "pageMs": 116
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8377.70000076294
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8447.20000076294,
+          "routerMs": 5.5,
+          "pageMs": 115.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 8676.400001525879,
+          "routerMs": 9.8,
+          "pageMs": 131.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 8894.400001525879,
+          "routerMs": 5.7,
+          "pageMs": 73.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9112.70000076294,
+          "routerMs": 4.1,
+          "pageMs": 148.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9352.20000076294,
+          "routerMs": 18.0,
+          "pageMs": 127.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9554.20000076294,
+          "routerMs": 15.3,
+          "pageMs": 91.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9885.79999923706
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9954,
+          "routerMs": 5.2,
+          "pageMs": 117.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10183.100002288818,
+          "routerMs": 4.1,
+          "pageMs": 142.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 10407.5,
+          "routerMs": 4.1,
+          "pageMs": 45.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10595.5,
+          "routerMs": 3.9,
+          "pageMs": 125.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10798.900001525879,
+          "routerMs": 4.6,
+          "pageMs": 111.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10984.20000076294,
+          "routerMs": 19.2,
+          "pageMs": 118.9
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11491.79999923706
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11559.70000076294,
+          "routerMs": 5.1,
+          "pageMs": 122.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11800.5,
+          "routerMs": 4.1,
+          "pageMs": 131.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 12011.600002288818,
+          "routerMs": 4.4,
+          "pageMs": 75.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12231.600002288818,
+          "routerMs": 4.1,
+          "pageMs": 127.0
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12434.400001525879,
+          "routerMs": 3.9,
+          "pageMs": 113.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12621.600002288818,
+          "routerMs": 13.9,
+          "pageMs": 103.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12963.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13029,
+          "routerMs": 6.7,
+          "pageMs": 119.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13263.79999923706,
+          "routerMs": 4.2,
+          "pageMs": 137.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 13481.20000076294,
+          "routerMs": 4.9,
+          "pageMs": 50.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13672.5,
+          "routerMs": 3.9,
+          "pageMs": 127.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13876.900001525879,
+          "routerMs": 4.1,
+          "pageMs": 110.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14064.70000076294,
+          "routerMs": 20.7,
+          "pageMs": 102.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14400.600002288818
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 14466,
+          "routerMs": 4.8,
+          "pageMs": 111.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 14700.20000076294,
+          "routerMs": 19.5,
+          "pageMs": 137.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 14928.400001525879,
+          "routerMs": 4.5,
+          "pageMs": 47.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 15118.5,
+          "routerMs": 3.8,
+          "pageMs": 129.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 15322.5,
+          "routerMs": 5.6,
+          "pageMs": 116.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 15515.900001525879,
+          "routerMs": 19.8,
+          "pageMs": 98.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 15858.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 15925.5,
+          "routerMs": 5.3,
+          "pageMs": 113.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 16155.100002288818,
+          "routerMs": 4.2,
+          "pageMs": 138.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 16382.5,
+          "routerMs": 4.5,
+          "pageMs": 48.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 16581,
+          "routerMs": 4.5,
+          "pageMs": 126.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 16783,
+          "routerMs": 4.1,
+          "pageMs": 108.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 16972,
+          "routerMs": 13.3,
+          "pageMs": 98
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 17338.79999923706
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 17405,
+          "routerMs": 4.7,
+          "pageMs": 110.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 17627.79999923706,
+          "routerMs": 3.8,
+          "pageMs": 124.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 17836,
+          "routerMs": 17,
+          "pageMs": 60.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 18039.20000076294,
+          "routerMs": 3.9,
+          "pageMs": 124.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 18257.60000228882,
+          "routerMs": 5.1,
+          "pageMs": 122.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 18454.79999923706,
+          "routerMs": 13.9,
+          "pageMs": 88.8
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-loaded",
+      "status": "PASS",
+      "maxConcurrent": 1,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 1,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 21,
+        "/api/account/growth/passport": 21
+      },
+      "requestCount": 45,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 45,
+        "min": 62,
+        "p50": 63,
+        "p95": 66,
+        "max": 76
+      },
+      "longTaskMs": {
+        "count": 35,
+        "min": 53,
+        "p50": 83,
+        "p95": 120,
+        "max": 127
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 305,
+          "unmount": 305,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 427,
+          "unmount": 427,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 3965,
+          "unmount": 3965,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 20
+        },
+        "weekly": {
+          "mount": 20,
+          "unmount": 20,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "growth": {
+          "mount": 20,
+          "unmount": 20,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "index": {
+          "mount": 10,
+          "unmount": 11,
+          "activate": 0,
+          "deactivate": 0
+        }
+      },
+      "steadySamples": [
+        {
+          "heapBytes": 20439682,
+          "heapMiB": 19.493,
+          "domNodes": 2328,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        },
+        {
+          "heapBytes": 20576274,
+          "heapMiB": 19.623,
+          "domNodes": 2328,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        }
+      ],
+      "navigationMs": {
+        "router": {
+          "count": 61,
+          "min": 3.7,
+          "p50": 5.1,
+          "p95": 17.2,
+          "max": 18.8
+        },
+        "page": {
+          "count": 61,
+          "min": 47.2,
+          "p50": 117.7,
+          "p95": 136.3,
+          "max": 147.6
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3247.6000022888184,
+          "routerMs": 7.6,
+          "pageMs": 124.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3609.6000022888184,
+          "routerMs": 5.1,
+          "pageMs": 123.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3792.7000007629395,
+          "routerMs": 4.1,
+          "pageMs": 133.7
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3946,
+          "routerMs": 9.4,
+          "pageMs": 69.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4165.200000762939,
+          "routerMs": 4.1,
+          "pageMs": 136.3
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4317.200000762939,
+          "routerMs": 4.4,
+          "pageMs": 119.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4470,
+          "routerMs": 18.4,
+          "pageMs": 99.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4765.600002288818
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4834.200000762939,
+          "routerMs": 5.5,
+          "pageMs": 120.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5022.5,
+          "routerMs": 4.6,
+          "pageMs": 134.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 5178.299999237061,
+          "routerMs": 9.8,
+          "pageMs": 63.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5397.400001525879,
+          "routerMs": 4.2,
+          "pageMs": 130.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5551.100002288818,
+          "routerMs": 4.3,
+          "pageMs": 120.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5704.400001525879,
+          "routerMs": 18.7,
+          "pageMs": 122.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6046.200000762939
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6113.200000762939,
+          "routerMs": 5.0,
+          "pageMs": 116.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6279.700000762939,
+          "routerMs": 4.6,
+          "pageMs": 127.7
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 6432.200000762939,
+          "routerMs": 6.0,
+          "pageMs": 57.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6651.700000762939,
+          "routerMs": 4.0,
+          "pageMs": 128.0
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6804.900001525879,
+          "routerMs": 4.3,
+          "pageMs": 115.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6958,
+          "routerMs": 13.6,
+          "pageMs": 105.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 7260.299999237061
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 7326.799999237061,
+          "routerMs": 5.1,
+          "pageMs": 113.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7493.700000762939,
+          "routerMs": 4.1,
+          "pageMs": 126.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 7646.900001525879,
+          "routerMs": 8.1,
+          "pageMs": 54.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7867.200000762939,
+          "routerMs": 4.7,
+          "pageMs": 125.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8022.299999237061,
+          "routerMs": 10.9,
+          "pageMs": 124.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8175.299999237061,
+          "routerMs": 11.9,
+          "pageMs": 86.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8453.79999923706
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8519.70000076294,
+          "routerMs": 5.1,
+          "pageMs": 113.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 8684.600002288818,
+          "routerMs": 3.8,
+          "pageMs": 122.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 8836.29999923706,
+          "routerMs": 4.0,
+          "pageMs": 47.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9054.900001525879,
+          "routerMs": 4.1,
+          "pageMs": 143.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9210,
+          "routerMs": 11.5,
+          "pageMs": 117.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9362.400001525879,
+          "routerMs": 8.1,
+          "pageMs": 110.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9764.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9830.70000076294,
+          "routerMs": 6.9,
+          "pageMs": 125.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10021.20000076294,
+          "routerMs": 4.0,
+          "pageMs": 136.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 10175.79999923706,
+          "routerMs": 12.5,
+          "pageMs": 64.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10399.70000076294,
+          "routerMs": 5.7,
+          "pageMs": 136.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10552.70000076294,
+          "routerMs": 3.7,
+          "pageMs": 117.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10705.5,
+          "routerMs": 15.9,
+          "pageMs": 121.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11034.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11100.400001525879,
+          "routerMs": 5.3,
+          "pageMs": 114.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11274.20000076294,
+          "routerMs": 3.9,
+          "pageMs": 123.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 11427.20000076294,
+          "routerMs": 5.7,
+          "pageMs": 70.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11647.20000076294,
+          "routerMs": 4.2,
+          "pageMs": 122.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11799.70000076294,
+          "routerMs": 4.4,
+          "pageMs": 111.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11952.79999923706,
+          "routerMs": 18.8,
+          "pageMs": 102.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12248.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12318,
+          "routerMs": 4.9,
+          "pageMs": 112.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12481.79999923706,
+          "routerMs": 4.5,
+          "pageMs": 147.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 12646.70000076294,
+          "routerMs": 6.7,
+          "pageMs": 58.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12866.20000076294,
+          "routerMs": 4.5,
+          "pageMs": 129.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13018.900001525879,
+          "routerMs": 4.0,
+          "pageMs": 107.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 13171.5,
+          "routerMs": 16.6,
+          "pageMs": 94.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 13463.20000076294
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13530.20000076294,
+          "routerMs": 4.9,
+          "pageMs": 114.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13694.5,
+          "routerMs": 3.7,
+          "pageMs": 125.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 13847.100002288818,
+          "routerMs": 8.9,
+          "pageMs": 72.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 14065.70000076294,
+          "routerMs": 4.7,
+          "pageMs": 125.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 14218.400001525879,
+          "routerMs": 3.8,
+          "pageMs": 108.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14371,
+          "routerMs": 17.2,
+          "pageMs": 97
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14663.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 14732.100002288818,
+          "routerMs": 6.1,
+          "pageMs": 112.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 14894.100002288818,
+          "routerMs": 3.7,
+          "pageMs": 123.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 15046.79999923706,
+          "routerMs": 3.7,
+          "pageMs": 48.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 15265.20000076294,
+          "routerMs": 5.3,
+          "pageMs": 132.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 15417.79999923706,
+          "routerMs": 5.4,
+          "pageMs": 125.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 15570.79999923706,
+          "routerMs": 16.4,
+          "pageMs": 94.1
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 0,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1204,
+        "p50": 1205,
+        "p95": 1214,
+        "max": 1214
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 1,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1204,
+        "p95": 1214,
+        "max": 1214
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 2,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1203,
+        "p95": 1213,
+        "max": 1213
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 3,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1203,
+        "p95": 1214,
+        "max": 1214
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 4,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1203,
+        "p95": 1213,
+        "max": 1213
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 5,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1204,
+        "p95": 1214,
+        "max": 1214
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 6,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1204,
+        "p50": 1204,
+        "p95": 1213,
+        "max": 1213
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 7,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1203,
+        "p95": 1214,
+        "max": 1214
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 8,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1203,
+        "p50": 1203,
+        "p95": 1213,
+        "max": 1213
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "FAIL",
+      "trial": 9,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 1202,
+        "p50": 1203,
+        "p95": 1213,
+        "max": 1213
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 0,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2402,
+        "p50": 2403,
+        "p95": 2413,
+        "max": 2413
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 1,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2404,
+        "p95": 2416,
+        "max": 2416
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 2,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2404,
+        "p95": 2417,
+        "max": 2417
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 3,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2402,
+        "p50": 2403,
+        "p95": 2414,
+        "max": 2414
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 4,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2404,
+        "p95": 2412,
+        "max": 2412
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 5,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2407,
+        "p95": 2413,
+        "max": 2413
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 6,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2403,
+        "p95": 2418,
+        "max": 2418
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 7,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2403,
+        "p95": 2414,
+        "max": 2414
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 8,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2403,
+        "p50": 2403,
+        "p95": 2415,
+        "max": 2415
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    },
+    {
+      "scenario": "slow-network",
+      "status": "FAIL",
+      "trial": 9,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 3,
+      "requests": {
+        "/api/account/bindings": 2,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 6,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 3,
+        "min": 2402,
+        "p50": 2403,
+        "p95": 2413,
+        "max": 2413
+      },
+      "failure": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.my-page') to be visible\n",
+      "note": "冻结后无法取得结束时的 PerformanceObserver、生命周期及堆快照；未把缺失数据当成零。该场景仅完成正向尝试，不能与修复后的完整正反向请求总数直接比较。"
+    }
+  ],
+  "after": [
+    {
+      "scenario": "normal",
+      "status": "PASS",
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 1,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 5,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 65,
+        "p50": 72,
+        "p95": 201,
+        "max": 201
+      },
+      "longTaskMs": {
+        "count": 28,
+        "min": 51,
+        "p50": 73,
+        "p95": 119,
+        "max": 131
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 20
+        },
+        "weekly": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 40,
+          "deactivate": 40
+        },
+        "growth": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 40,
+          "deactivate": 40
+        },
+        "index": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 24
+        }
+      },
+      "steadySamples": [
+        {
+          "heapBytes": 20229427,
+          "heapMiB": 19.292,
+          "domNodes": 2333,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        },
+        {
+          "heapBytes": 20529430,
+          "heapMiB": 19.578,
+          "domNodes": 2333,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        }
+      ],
+      "navigationMs": {
+        "router": {
+          "count": 61,
+          "min": 4.5,
+          "p50": 12.0,
+          "p95": 18.7,
+          "max": 19.2
+        },
+        "page": {
+          "count": 61,
+          "min": 32.1,
+          "p50": 45.7,
+          "p95": 90.5,
+          "max": 146.7
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 2904.900001525879,
+          "routerMs": 18.3,
+          "pageMs": 146.7
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3264.7000007629395,
+          "routerMs": 9.7,
+          "pageMs": 62.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3460.099998474121,
+          "routerMs": 13.3,
+          "pageMs": 57.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3613,
+          "routerMs": 12.1,
+          "pageMs": 72.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3830,
+          "routerMs": 9.7,
+          "pageMs": 50.3
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3959.5,
+          "routerMs": 15.1,
+          "pageMs": 46.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4079.7000007629395,
+          "routerMs": 10.0,
+          "pageMs": 93.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4420.799999237061
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4488.299999237061,
+          "routerMs": 5.7,
+          "pageMs": 55.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4652.299999237061,
+          "routerMs": 4.5,
+          "pageMs": 39.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4771.799999237061,
+          "routerMs": 18.5,
+          "pageMs": 47.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4956.900001525879,
+          "routerMs": 16.6,
+          "pageMs": 45.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5081.599998474121,
+          "routerMs": 9.8,
+          "pageMs": 59.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5210.400001525879,
+          "routerMs": 13.0,
+          "pageMs": 84.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5526.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5591.700000762939,
+          "routerMs": 15.3,
+          "pageMs": 47.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5746.200000762939,
+          "routerMs": 10.1,
+          "pageMs": 38.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 5862.700000762939,
+          "routerMs": 10.3,
+          "pageMs": 42.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6040.700000762939,
+          "routerMs": 16.9,
+          "pageMs": 61.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6183.099998474121,
+          "routerMs": 6.4,
+          "pageMs": 33.9
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6288,
+          "routerMs": 18.2,
+          "pageMs": 88.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6613
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6679.400001525879,
+          "routerMs": 11.0,
+          "pageMs": 61.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6854.599998474121,
+          "routerMs": 18.4,
+          "pageMs": 45.7
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 6978.799999237061,
+          "routerMs": 10.9,
+          "pageMs": 37.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7154.599998474121,
+          "routerMs": 18.1,
+          "pageMs": 52.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 7288.700000762939,
+          "routerMs": 17.5,
+          "pageMs": 45.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 7404.900001525879,
+          "routerMs": 18.1,
+          "pageMs": 85.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 7742.799999237061
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 7808.599998474121,
+          "routerMs": 4.9,
+          "pageMs": 34.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7950.299999237061,
+          "routerMs": 5.7,
+          "pageMs": 34.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 8063.599998474121,
+          "routerMs": 10.0,
+          "pageMs": 39.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 8247.599998474121,
+          "routerMs": 8.6,
+          "pageMs": 35.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8363.099998474121,
+          "routerMs": 10.1,
+          "pageMs": 36.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8469.900001525879,
+          "routerMs": 18.8,
+          "pageMs": 89.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8899.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8965.70000076294,
+          "routerMs": 6.2,
+          "pageMs": 47.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9131.70000076294,
+          "routerMs": 7.5,
+          "pageMs": 36.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 9245.70000076294,
+          "routerMs": 10.4,
+          "pageMs": 38.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9423.599998474121,
+          "routerMs": 16.2,
+          "pageMs": 49.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9555.900001525879,
+          "routerMs": 17.7,
+          "pageMs": 61.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9688,
+          "routerMs": 18.7,
+          "pageMs": 90.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10036.29999923706
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10103.099998474121,
+          "routerMs": 5.1,
+          "pageMs": 51.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10265.70000076294,
+          "routerMs": 7.4,
+          "pageMs": 41.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 10389.400001525879,
+          "routerMs": 16.9,
+          "pageMs": 45.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10572.400001525879,
+          "routerMs": 16.5,
+          "pageMs": 45.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10697.29999923706,
+          "routerMs": 9.3,
+          "pageMs": 40.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10810.20000076294,
+          "routerMs": 12.5,
+          "pageMs": 85.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11126.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11195.79999923706,
+          "routerMs": 10.8,
+          "pageMs": 41.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11340.70000076294,
+          "routerMs": 15.3,
+          "pageMs": 43.7
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 11463.5,
+          "routerMs": 9.2,
+          "pageMs": 35.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11637.900001525879,
+          "routerMs": 18.2,
+          "pageMs": 47.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11769.400001525879,
+          "routerMs": 4.7,
+          "pageMs": 37.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11877.29999923706,
+          "routerMs": 12.0,
+          "pageMs": 81.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12195.900001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12262.29999923706,
+          "routerMs": 10.9,
+          "pageMs": 39.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12404.29999923706,
+          "routerMs": 18.4,
+          "pageMs": 43.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 12526.29999923706,
+          "routerMs": 13.7,
+          "pageMs": 40.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12704.29999923706,
+          "routerMs": 18.6,
+          "pageMs": 48.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12833.5,
+          "routerMs": 6.0,
+          "pageMs": 32.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12936.29999923706,
+          "routerMs": 19.0,
+          "pageMs": 87.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 13270.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13337,
+          "routerMs": 6.6,
+          "pageMs": 37.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13478.29999923706,
+          "routerMs": 10.9,
+          "pageMs": 37.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 13596.900001525879,
+          "routerMs": 9.4,
+          "pageMs": 35.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13771.20000076294,
+          "routerMs": 17.6,
+          "pageMs": 42.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13890.5,
+          "routerMs": 15.3,
+          "pageMs": 43.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14005.20000076294,
+          "routerMs": 19.2,
+          "pageMs": 90.5
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-loaded",
+      "status": "PASS",
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 1,
+        "/api/content/songs": 1,
+        "/api/account/songs": 1,
+        "/api/account/growth/weekly": 1,
+        "/api/account/growth/passport": 1
+      },
+      "requestCount": 5,
+      "cancelledRequests": 0,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 64,
+        "p50": 83,
+        "p95": 198,
+        "max": 198
+      },
+      "longTaskMs": {
+        "count": 25,
+        "min": 50,
+        "p50": 92,
+        "p95": 118,
+        "max": 118
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 20
+        },
+        "weekly": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 40,
+          "deactivate": 40
+        },
+        "growth": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 40,
+          "deactivate": 40
+        },
+        "index": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 22,
+          "deactivate": 24
+        }
+      },
+      "steadySamples": [
+        {
+          "heapBytes": 20242206,
+          "heapMiB": 19.304,
+          "domNodes": 2333,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        },
+        {
+          "heapBytes": 20639918,
+          "heapMiB": 19.684,
+          "domNodes": 2333,
+          "asyncDataKeys": 5,
+          "payloadKeys": 5
+        }
+      ],
+      "navigationMs": {
+        "router": {
+          "count": 61,
+          "min": 4.4,
+          "p50": 11.5,
+          "p95": 18.1,
+          "max": 20.8
+        },
+        "page": {
+          "count": 61,
+          "min": 29.9,
+          "p50": 44.6,
+          "p95": 91.4,
+          "max": 127.4
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3042.7999992370605,
+          "routerMs": 20.8,
+          "pageMs": 110.3
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3336.2999992370605,
+          "routerMs": 13.6,
+          "pageMs": 56.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3490,
+          "routerMs": 7.4,
+          "pageMs": 59.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3643.599998474121,
+          "routerMs": 4.6,
+          "pageMs": 47.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3864.599998474121,
+          "routerMs": 18.1,
+          "pageMs": 70.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4017.3999977111816,
+          "routerMs": 13.6,
+          "pageMs": 45.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4169.699996948242,
+          "routerMs": 11.6,
+          "pageMs": 91.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4462.899997711182
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4529.099998474121,
+          "routerMs": 5.0,
+          "pageMs": 48.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4682.099998474121,
+          "routerMs": 15.6,
+          "pageMs": 46.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4835.599998474121,
+          "routerMs": 12.3,
+          "pageMs": 40.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5053.699996948242,
+          "routerMs": 10.4,
+          "pageMs": 38.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5206.199996948242,
+          "routerMs": 8.1,
+          "pageMs": 40.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5358.899997711182,
+          "routerMs": 5.4,
+          "pageMs": 75.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5626.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5694.5,
+          "routerMs": 5.0,
+          "pageMs": 36.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5847,
+          "routerMs": 17.3,
+          "pageMs": 44.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 5999.699996948242,
+          "routerMs": 15.0,
+          "pageMs": 44.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 6219.099998474121,
+          "routerMs": 11.5,
+          "pageMs": 40.7
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6372.099998474121,
+          "routerMs": 8.7,
+          "pageMs": 38.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6525.399997711182,
+          "routerMs": 5.5,
+          "pageMs": 106.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 6819.899997711182
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 6886.299999237061,
+          "routerMs": 4.6,
+          "pageMs": 34.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7039.199996948242,
+          "routerMs": 8.2,
+          "pageMs": 34.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 7192.5,
+          "routerMs": 5.1,
+          "pageMs": 32.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 7412.899997711182,
+          "routerMs": 18.0,
+          "pageMs": 47.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 7564.699996948242,
+          "routerMs": 16.7,
+          "pageMs": 45.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 7718.899997711182,
+          "routerMs": 13.5,
+          "pageMs": 127.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8038.799999237061
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8106.399997711182,
+          "routerMs": 8.5,
+          "pageMs": 38.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 8259.199996948242,
+          "routerMs": 4.9,
+          "pageMs": 29.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 8413.5,
+          "routerMs": 17.9,
+          "pageMs": 56.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 8633.199996948242,
+          "routerMs": 14.2,
+          "pageMs": 40.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 8786,
+          "routerMs": 11.5,
+          "pageMs": 36.9
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 8939.699996948242,
+          "routerMs": 7.9,
+          "pageMs": 79.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 9308.899997711182
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 9376.29999923706,
+          "routerMs": 5.4,
+          "pageMs": 41.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9529.5,
+          "routerMs": 18.4,
+          "pageMs": 56.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 9682.099998474121,
+          "routerMs": 15.6,
+          "pageMs": 45.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 9902.79999923706,
+          "routerMs": 12.2,
+          "pageMs": 60.9
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10056.399997711182,
+          "routerMs": 7.5,
+          "pageMs": 37.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10209.099998474121,
+          "routerMs": 5.1,
+          "pageMs": 85.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 10509.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 10578.199996948242,
+          "routerMs": 20.0,
+          "pageMs": 54.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 10731.199996948242,
+          "routerMs": 16.6,
+          "pageMs": 46.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 10883.899997711182,
+          "routerMs": 15.1,
+          "pageMs": 58.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11104.599998474121,
+          "routerMs": 10.3,
+          "pageMs": 44.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11256.79999923706,
+          "routerMs": 7.3,
+          "pageMs": 42.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11409.199996948242,
+          "routerMs": 6.2,
+          "pageMs": 73.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 11687.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 11753.599998474121,
+          "routerMs": 11.2,
+          "pageMs": 41.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 11905.599998474121,
+          "routerMs": 8.4,
+          "pageMs": 43.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 12058.599998474121,
+          "routerMs": 5.9,
+          "pageMs": 33.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 12279.29999923706,
+          "routerMs": 17.9,
+          "pageMs": 44.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12432.399997711182,
+          "routerMs": 15.4,
+          "pageMs": 44.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12585.29999923706,
+          "routerMs": 12.1,
+          "pageMs": 81.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 12900.099998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 12966.399997711182,
+          "routerMs": 14.6,
+          "pageMs": 46.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13120.29999923706,
+          "routerMs": 10.0,
+          "pageMs": 35.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 13272.79999923706,
+          "routerMs": 7.8,
+          "pageMs": 33.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 13491.599998474121,
+          "routerMs": 5.3,
+          "pageMs": 35.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 13644.399997711182,
+          "routerMs": 4.4,
+          "pageMs": 34.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 13797.5,
+          "routerMs": 16.7,
+          "pageMs": 85.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14075
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 14143.199996948242,
+          "routerMs": 5.0,
+          "pageMs": 35.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 14296.099998474121,
+          "routerMs": 17.9,
+          "pageMs": 47.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 14449.099998474121,
+          "routerMs": 15.0,
+          "pageMs": 40.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 14666.699996948242,
+          "routerMs": 13.5,
+          "pageMs": 40.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 14818.899997711182,
+          "routerMs": 11.6,
+          "pageMs": 38.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 14971.599998474121,
+          "routerMs": 8.9,
+          "pageMs": 81.3
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 0,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1204,
+        "p50": 1248,
+        "p95": 1279,
+        "max": 1279
+      },
+      "longTaskMs": {
+        "count": 4,
+        "min": 57,
+        "p50": 79,
+        "p95": 237,
+        "max": 237
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 4.1,
+          "p50": 15,
+          "p95": 17.8,
+          "max": 17.8
+        },
+        "page": {
+          "count": 6,
+          "min": 31.0,
+          "p50": 40.2,
+          "p95": 71.6,
+          "max": 71.6
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3242.2999992370605
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3368.2999992370605,
+          "routerMs": 17.8,
+          "pageMs": 71.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3524.5,
+          "routerMs": 12.4,
+          "pageMs": 35.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3679.2000007629395,
+          "routerMs": 7.0,
+          "pageMs": 31.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3899.7000007629395,
+          "routerMs": 4.1,
+          "pageMs": 36.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4052,
+          "routerMs": 17.7,
+          "pageMs": 40.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4206,
+          "routerMs": 15,
+          "pageMs": 47.1
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 1,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1204,
+        "p50": 1210,
+        "p95": 1305,
+        "max": 1305
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 51,
+        "p50": 59,
+        "p95": 197,
+        "max": 197
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 8.2,
+          "p50": 15.7,
+          "p95": 26.1,
+          "max": 26.1
+        },
+        "page": {
+          "count": 6,
+          "min": 31.1,
+          "p50": 43.6,
+          "p95": 81.1,
+          "max": 81.1
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3351.199996948242
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3482.3999977111816,
+          "routerMs": 26.1,
+          "pageMs": 81.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3637.699996948242,
+          "routerMs": 20.9,
+          "pageMs": 43.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3793.099998474121,
+          "routerMs": 15.7,
+          "pageMs": 40.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4011.8999977111816,
+          "routerMs": 13.4,
+          "pageMs": 44.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4164.799999237061,
+          "routerMs": 10.7,
+          "pageMs": 31.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4318,
+          "routerMs": 8.2,
+          "pageMs": 31.5
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 2,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1204,
+        "p50": 1207,
+        "p95": 1289,
+        "max": 1289
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 53,
+        "p50": 185,
+        "p95": 185,
+        "max": 185
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 9.6,
+          "p50": 19.0,
+          "p95": 27.8,
+          "max": 27.8
+        },
+        "page": {
+          "count": 6,
+          "min": 33.3,
+          "p50": 43.9,
+          "p95": 71.8,
+          "max": 71.8
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3285
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3408.3999977111816,
+          "routerMs": 27.8,
+          "pageMs": 71.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3563.2999992370605,
+          "routerMs": 24.0,
+          "pageMs": 47.1
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3718.099998474121,
+          "routerMs": 19.0,
+          "pageMs": 43.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3938.7999992370605,
+          "routerMs": 15.3,
+          "pageMs": 42.1
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4091.7000007629395,
+          "routerMs": 13.1,
+          "pageMs": 33.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4245.399997711182,
+          "routerMs": 9.6,
+          "pageMs": 41.2
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 3,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1208,
+        "p95": 1279,
+        "max": 1279
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 52,
+        "p50": 181,
+        "p95": 181,
+        "max": 181
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 8.7,
+          "p50": 18.0,
+          "p95": 28.3,
+          "max": 28.3
+        },
+        "page": {
+          "count": 6,
+          "min": 35.1,
+          "p50": 46.4,
+          "p95": 72.0,
+          "max": 72.0
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3275.099998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3405.7000007629395,
+          "routerMs": 28.3,
+          "pageMs": 72.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3561.400001525879,
+          "routerMs": 23.3,
+          "pageMs": 46.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3717.5,
+          "routerMs": 18.0,
+          "pageMs": 45.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3936.7000007629395,
+          "routerMs": 14.7,
+          "pageMs": 46.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4089.599998474121,
+          "routerMs": 13.1,
+          "pageMs": 36.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4243.400001525879,
+          "routerMs": 8.7,
+          "pageMs": 35.1
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 4,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1204,
+        "p50": 1206,
+        "p95": 1303,
+        "max": 1303
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 52,
+        "p50": 186,
+        "p95": 186,
+        "max": 186
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 7.4,
+          "p50": 18.0,
+          "p95": 26.5,
+          "max": 26.5
+        },
+        "page": {
+          "count": 6,
+          "min": 34.6,
+          "p50": 50.0,
+          "p95": 60.6,
+          "max": 60.6
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3273
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3400.7000007629395,
+          "routerMs": 16.2,
+          "pageMs": 60.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3556.5,
+          "routerMs": 26.5,
+          "pageMs": 50.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3710.7000007629395,
+          "routerMs": 7.4,
+          "pageMs": 34.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3932.099998474121,
+          "routerMs": 18.0,
+          "pageMs": 50.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4085.400001525879,
+          "routerMs": 15.5,
+          "pageMs": 37.4
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4238.400001525879,
+          "routerMs": 18.3,
+          "pageMs": 46.7
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 5,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1207,
+        "p95": 1284,
+        "max": 1284
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 57,
+        "p50": 180,
+        "p95": 180,
+        "max": 180
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 6.9,
+          "p50": 13.9,
+          "p95": 22.5,
+          "max": 22.5
+        },
+        "page": {
+          "count": 6,
+          "min": 29.5,
+          "p50": 41.6,
+          "p95": 64.2,
+          "max": 64.2
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3392.7999992370605
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3523.5,
+          "routerMs": 22.5,
+          "pageMs": 64.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3679,
+          "routerMs": 18.2,
+          "pageMs": 41.6
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3833.599998474121,
+          "routerMs": 13.9,
+          "pageMs": 39.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4051.3999977111816,
+          "routerMs": 11.5,
+          "pageMs": 43.0
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4203.599998474121,
+          "routerMs": 9.7,
+          "pageMs": 29.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4356.599998474121,
+          "routerMs": 6.9,
+          "pageMs": 32.8
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 6,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1209,
+        "p95": 1290,
+        "max": 1290
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 54,
+        "p50": 56,
+        "p95": 169,
+        "max": 169
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 4.2,
+          "p50": 14.7,
+          "p95": 17.4,
+          "max": 17.4
+        },
+        "page": {
+          "count": 6,
+          "min": 32.2,
+          "p50": 37.7,
+          "p95": 71.4,
+          "max": 71.4
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3274.3999977111816
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3399.7999992370605,
+          "routerMs": 17.3,
+          "pageMs": 71.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3554.599998474121,
+          "routerMs": 13.1,
+          "pageMs": 35.5
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3710.099998474121,
+          "routerMs": 7.2,
+          "pageMs": 32.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3929.599998474121,
+          "routerMs": 4.2,
+          "pageMs": 36.3
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4083.2000007629395,
+          "routerMs": 17.4,
+          "pageMs": 37.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4236.099998474121,
+          "routerMs": 14.7,
+          "pageMs": 37.9
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 7,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1205,
+        "p95": 1285,
+        "max": 1285
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 50,
+        "p50": 57,
+        "p95": 179,
+        "max": 179
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 6.6,
+          "p50": 16.3,
+          "p95": 26.8,
+          "max": 26.8
+        },
+        "page": {
+          "count": 6,
+          "min": 36.7,
+          "p50": 44.8,
+          "p95": 72.9,
+          "max": 72.9
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3302.6000022888184
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3433.800003051758,
+          "routerMs": 26.8,
+          "pageMs": 72.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3589.900001525879,
+          "routerMs": 21.4,
+          "pageMs": 44.8
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3745.400001525879,
+          "routerMs": 16.3,
+          "pageMs": 42.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3964.6000022888184,
+          "routerMs": 13.2,
+          "pageMs": 46.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4117.800003051758,
+          "routerMs": 11.6,
+          "pageMs": 37.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4272.100002288818,
+          "routerMs": 6.6,
+          "pageMs": 36.7
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 8,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1243,
+        "p95": 1285,
+        "max": 1285
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 53,
+        "p50": 187,
+        "p95": 187,
+        "max": 187
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 5.9,
+          "p50": 15.9,
+          "p95": 20.2,
+          "max": 20.2
+        },
+        "page": {
+          "count": 6,
+          "min": 27.0,
+          "p50": 40.0,
+          "p95": 62.0,
+          "max": 62.0
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3189.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3312.099998474121,
+          "routerMs": 20.2,
+          "pageMs": 62.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3467.7999992370605,
+          "routerMs": 15.9,
+          "pageMs": 40.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3622.3999977111816,
+          "routerMs": 10.8,
+          "pageMs": 34.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3842.3999977111816,
+          "routerMs": 7.1,
+          "pageMs": 32.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3994.5,
+          "routerMs": 5.9,
+          "pageMs": 27.0
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4149.399997711182,
+          "routerMs": 17.6,
+          "pageMs": 45.3
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "rapid-pending",
+      "status": "PASS",
+      "trial": 9,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 1203,
+        "p50": 1205,
+        "p95": 1287,
+        "max": 1287
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 52,
+        "p50": 176,
+        "p95": 176,
+        "max": 176
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 11.2,
+          "p50": 17.0,
+          "p95": 26.7,
+          "max": 26.7
+        },
+        "page": {
+          "count": 6,
+          "min": 33.1,
+          "p50": 41.3,
+          "p95": 67.8,
+          "max": 67.8
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 3095.7999992370605
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3219.7000007629395,
+          "routerMs": 26.7,
+          "pageMs": 67.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3374.7000007629395,
+          "routerMs": 21.8,
+          "pageMs": 43.9
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 3529.5,
+          "routerMs": 17.0,
+          "pageMs": 41.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 3747.3999977111816,
+          "routerMs": 15.3,
+          "pageMs": 38.3
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 3900,
+          "routerMs": 13.5,
+          "pageMs": 33.1
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4052.8999977111816,
+          "routerMs": 11.2,
+          "pageMs": 35.9
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 0,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2403,
+        "p50": 2441,
+        "p95": 2484,
+        "max": 2484
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 53,
+        "p50": 166,
+        "p95": 166,
+        "max": 166
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 5.0,
+          "p50": 14.2,
+          "p95": 25.9,
+          "max": 25.9
+        },
+        "page": {
+          "count": 6,
+          "min": 26.6,
+          "p50": 42.8,
+          "p95": 69.0,
+          "max": 69.0
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4335.400001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4458.799999237061,
+          "routerMs": 25.9,
+          "pageMs": 69.0
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4614.799999237061,
+          "routerMs": 20.9,
+          "pageMs": 44.4
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4770.900001525879,
+          "routerMs": 14.2,
+          "pageMs": 38.2
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4990.799999237061,
+          "routerMs": 10.9,
+          "pageMs": 42.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5143.5,
+          "routerMs": 8.4,
+          "pageMs": 27.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5297.299999237061,
+          "routerMs": 5.0,
+          "pageMs": 26.6
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 1,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2404,
+        "p50": 2406,
+        "p95": 2479,
+        "max": 2479
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 68,
+        "p50": 205,
+        "p95": 205,
+        "max": 205
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 5.7,
+          "p50": 15.8,
+          "p95": 20.3,
+          "max": 20.3
+        },
+        "page": {
+          "count": 6,
+          "min": 25.2,
+          "p50": 38.6,
+          "p95": 63,
+          "max": 63
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4424.700000762939
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4546,
+          "routerMs": 20.3,
+          "pageMs": 63
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4701.800003051758,
+          "routerMs": 15.8,
+          "pageMs": 38.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4856.700000762939,
+          "routerMs": 10.3,
+          "pageMs": 33.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5075.700000762939,
+          "routerMs": 7.6,
+          "pageMs": 38.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5228.100002288818,
+          "routerMs": 5.7,
+          "pageMs": 25.2
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5383.100002288818,
+          "routerMs": 17.5,
+          "pageMs": 41.4
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 2,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2403,
+        "p50": 2406,
+        "p95": 2479,
+        "max": 2479
+      },
+      "longTaskMs": {
+        "count": 4,
+        "min": 50,
+        "p50": 75,
+        "p95": 211,
+        "max": 211
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 10.0,
+          "p50": 17.6,
+          "p95": 28.4,
+          "max": 28.4
+        },
+        "page": {
+          "count": 6,
+          "min": 42.7,
+          "p50": 57.2,
+          "p95": 73.8,
+          "max": 73.8
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4368
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4494.5,
+          "routerMs": 28.4,
+          "pageMs": 73.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4650.100002288818,
+          "routerMs": 24.7,
+          "pageMs": 57.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4806.700000762939,
+          "routerMs": 17.6,
+          "pageMs": 42.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5027.100002288818,
+          "routerMs": 13.4,
+          "pageMs": 66.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5179.900001525879,
+          "routerMs": 11.9,
+          "pageMs": 43.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5333.200000762939,
+          "routerMs": 10.0,
+          "pageMs": 46.7
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 3,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2404,
+        "p50": 2408,
+        "p95": 2479,
+        "max": 2479
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 51,
+        "p50": 59,
+        "p95": 189,
+        "max": 189
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 10.1,
+          "p50": 17.5,
+          "p95": 24.6,
+          "max": 24.6
+        },
+        "page": {
+          "count": 6,
+          "min": 32.8,
+          "p50": 54.6,
+          "p95": 60.7,
+          "max": 60.7
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4468.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4596,
+          "routerMs": 13.8,
+          "pageMs": 58
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4751.400001525879,
+          "routerMs": 24.6,
+          "pageMs": 60.7
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4906.799999237061,
+          "routerMs": 19.0,
+          "pageMs": 43.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5126.400001525879,
+          "routerMs": 17.5,
+          "pageMs": 54.6
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5279.700000762939,
+          "routerMs": 13.3,
+          "pageMs": 32.8
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5433.299999237061,
+          "routerMs": 10.1,
+          "pageMs": 33.4
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 4,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2404,
+        "p50": 2445,
+        "p95": 2489,
+        "max": 2489
+      },
+      "longTaskMs": {
+        "count": 2,
+        "min": 71,
+        "p50": 190,
+        "p95": 190,
+        "max": 190
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 8.9,
+          "p50": 13.5,
+          "p95": 25.4,
+          "max": 25.4
+        },
+        "page": {
+          "count": 6,
+          "min": 31.5,
+          "p50": 45.5,
+          "p95": 67.5,
+          "max": 67.5
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4424.100002288818
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4558.5,
+          "routerMs": 25.4,
+          "pageMs": 67.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4714.600002288818,
+          "routerMs": 20.0,
+          "pageMs": 47.8
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4871,
+          "routerMs": 13.4,
+          "pageMs": 36.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5088,
+          "routerMs": 13.5,
+          "pageMs": 45.5
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5240.5,
+          "routerMs": 10.7,
+          "pageMs": 31.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5394,
+          "routerMs": 8.9,
+          "pageMs": 45.4
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 5,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2403,
+        "p50": 2405,
+        "p95": 2477,
+        "max": 2477
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 53,
+        "p50": 54,
+        "p95": 187,
+        "max": 187
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 3.8,
+          "p50": 16.1,
+          "p95": 26.4,
+          "max": 26.4
+        },
+        "page": {
+          "count": 6,
+          "min": 29.7,
+          "p50": 36.3,
+          "p95": 66.3,
+          "max": 66.3
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4457.299999237061
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4588.200000762939,
+          "routerMs": 16.1,
+          "pageMs": 66.3
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4745.100002288818,
+          "routerMs": 26.4,
+          "pageMs": 53.0
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4899.700000762939,
+          "routerMs": 5.3,
+          "pageMs": 29.7
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5118.700000762939,
+          "routerMs": 3.8,
+          "pageMs": 35.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5271.900001525879,
+          "routerMs": 16.9,
+          "pageMs": 36.3
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5425.100002288818,
+          "routerMs": 13.4,
+          "pageMs": 35.5
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 6,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2403,
+        "p50": 2444,
+        "p95": 2478,
+        "max": 2478
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 51,
+        "p50": 52,
+        "p95": 194,
+        "max": 194
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 4.0,
+          "p50": 14.7,
+          "p95": 18.2,
+          "max": 18.2
+        },
+        "page": {
+          "count": 6,
+          "min": 31.4,
+          "p50": 41.9,
+          "p95": 59.8,
+          "max": 59.8
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4404.599998474121
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4579.599998474121,
+          "routerMs": 18.2,
+          "pageMs": 59.8
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4735.599998474121,
+          "routerMs": 12.8,
+          "pageMs": 37.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4891.299999237061,
+          "routerMs": 7.9,
+          "pageMs": 41.9
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5111.299999237061,
+          "routerMs": 4.0,
+          "pageMs": 31.4
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5264.599998474121,
+          "routerMs": 16.7,
+          "pageMs": 36.7
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5417.299999237061,
+          "routerMs": 14.7,
+          "pageMs": 42.5
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 7,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2403,
+        "p50": 2442,
+        "p95": 2493,
+        "max": 2493
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 57,
+        "p50": 65,
+        "p95": 181,
+        "max": 181
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 8.3,
+          "p50": 19.8,
+          "p95": 25.0,
+          "max": 25.0
+        },
+        "page": {
+          "count": 6,
+          "min": 29.6,
+          "p50": 42.3,
+          "p95": 88.1,
+          "max": 88.1
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4337.600002288818
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4461.800003051758,
+          "routerMs": 25.0,
+          "pageMs": 88.1
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4617.100002288818,
+          "routerMs": 19.8,
+          "pageMs": 42.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4773.400001525879,
+          "routerMs": 14.4,
+          "pageMs": 41.5
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4993.300003051758,
+          "routerMs": 10.3,
+          "pageMs": 41.8
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5146.100002288818,
+          "routerMs": 8.3,
+          "pageMs": 29.6
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5299.400001525879,
+          "routerMs": 20.9,
+          "pageMs": 47.2
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 8,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2404,
+        "p50": 2406,
+        "p95": 2474,
+        "max": 2474
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 51,
+        "p50": 68,
+        "p95": 199,
+        "max": 199
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 6.0,
+          "p50": 18.0,
+          "p95": 20.2,
+          "max": 20.2
+        },
+        "page": {
+          "count": 6,
+          "min": 29.6,
+          "p50": 44.0,
+          "p95": 67.6,
+          "max": 67.6
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4424.399997711182
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4561.699996948242,
+          "routerMs": 20.2,
+          "pageMs": 67.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4717.099998474121,
+          "routerMs": 18.1,
+          "pageMs": 48.3
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4877.299999237061,
+          "routerMs": 6.0,
+          "pageMs": 29.6
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5097.799999237061,
+          "routerMs": 18.0,
+          "pageMs": 44.0
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5250.599998474121,
+          "routerMs": 15.3,
+          "pageMs": 34.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5403.799999237061,
+          "routerMs": 12.8,
+          "pageMs": 36.4
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "scenario": "slow-network",
+      "status": "PASS",
+      "trial": 9,
+      "maxConcurrent": 3,
+      "backgroundAtEnd": 0,
+      "requests": {
+        "/api/account/bindings": 3,
+        "/api/content/songs": 1,
+        "/api/account/songs": 3,
+        "/api/account/growth/weekly": 2,
+        "/api/account/growth/passport": 2
+      },
+      "requestCount": 11,
+      "cancelledRequests": 6,
+      "requestDurationMs": {
+        "count": 5,
+        "min": 2404,
+        "p50": 2450,
+        "p95": 2478,
+        "max": 2478
+      },
+      "longTaskMs": {
+        "count": 3,
+        "min": 56,
+        "p50": 69,
+        "p95": 201,
+        "max": 201
+      },
+      "componentDelta": {
+        "ElMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElSubMenu": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "ElMenuItem": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "SidebarNav": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 0,
+          "deactivate": 0
+        },
+        "songs": {
+          "mount": 0,
+          "unmount": 0,
+          "activate": 2,
+          "deactivate": 2
+        },
+        "weekly": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "growth": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 3,
+          "deactivate": 4
+        },
+        "index": {
+          "mount": 2,
+          "unmount": 0,
+          "activate": 1,
+          "deactivate": 2
+        }
+      },
+      "steadySamples": [],
+      "navigationMs": {
+        "router": {
+          "count": 6,
+          "min": 4.3,
+          "p50": 14.1,
+          "p95": 20.1,
+          "max": 20.1
+        },
+        "page": {
+          "count": 6,
+          "min": 23.5,
+          "p50": 39.4,
+          "p95": 73.4,
+          "max": 73.4
+        }
+      },
+      "navigationSamples": [
+        {
+          "path": "/account/songs",
+          "clickAtMs": 4486.900001525879
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 4632.200000762939,
+          "routerMs": 20.1,
+          "pageMs": 73.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 4788.700000762939,
+          "routerMs": 14.1,
+          "pageMs": 37.2
+        },
+        {
+          "path": "/my",
+          "clickAtMs": 4944.100002288818,
+          "routerMs": 8.5,
+          "pageMs": 41.4
+        },
+        {
+          "path": "/my/growth",
+          "clickAtMs": 5163.299999237061,
+          "routerMs": 4.7,
+          "pageMs": 31.2
+        },
+        {
+          "path": "/my/weekly",
+          "clickAtMs": 5315.5,
+          "routerMs": 4.3,
+          "pageMs": 23.5
+        },
+        {
+          "path": "/account/songs",
+          "clickAtMs": 5468.799999237061,
+          "routerMs": 16.2,
+          "pageMs": 39.4
+        }
+      ],
+      "pageErrors": []
+    }
+  ],
+  "visualRegression": [
+    {
+      "locale": "zh",
+      "dark": false,
+      "result": "PASS",
+      "regression": "PASS",
+      "toggleCount": 20,
+      "frames": [
+        {
+          "at": 0.10000228881835938,
+          "height": 0,
+          "opacity": "1"
+        },
+        {
+          "at": 10.60000228881836,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 69.10000228881836,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 83.20000076293945,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 100.60000228881836,
+          "height": 24.171875,
+          "opacity": "0.128631"
+        },
+        {
+          "at": 170.5,
+          "height": 106.59375,
+          "opacity": "0.567049"
+        },
+        {
+          "at": 187.70000076293945,
+          "height": 123.828125,
+          "opacity": "0.65868"
+        },
+        {
+          "at": 204,
+          "height": 139.53125,
+          "opacity": "0.742199"
+        }
+      ]
+    },
+    {
+      "locale": "zh",
+      "dark": true,
+      "result": "PASS",
+      "regression": "PASS",
+      "toggleCount": 20,
+      "frames": [
+        {
+          "at": 0,
+          "height": 0,
+          "opacity": "1"
+        },
+        {
+          "at": 62.89999771118164,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 81.5,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 106.39999771118164,
+          "height": 24.171875,
+          "opacity": "0.128631"
+        },
+        {
+          "at": 172,
+          "height": 106.59375,
+          "opacity": "0.567049"
+        },
+        {
+          "at": 187.0999984741211,
+          "height": 123.828125,
+          "opacity": "0.65868"
+        },
+        {
+          "at": 201.89999771118164,
+          "height": 139.53125,
+          "opacity": "0.742199"
+        }
+      ]
+    },
+    {
+      "locale": "ja",
+      "dark": false,
+      "result": "PASS",
+      "regression": "PASS",
+      "toggleCount": 20,
+      "frames": [
+        {
+          "at": 0,
+          "height": 0,
+          "opacity": "1"
+        },
+        {
+          "at": 13,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 26.900001525878906,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 83.70000076293945,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 106.5999984741211,
+          "height": 24.171875,
+          "opacity": "0.128631"
+        },
+        {
+          "at": 180.9000015258789,
+          "height": 123.828125,
+          "opacity": "0.65868"
+        },
+        {
+          "at": 197.70000076293945,
+          "height": 139.53125,
+          "opacity": "0.742199"
+        },
+        {
+          "at": 213,
+          "height": 153.546875,
+          "opacity": "0.816748"
+        }
+      ]
+    },
+    {
+      "locale": "ja",
+      "dark": true,
+      "result": "PASS",
+      "regression": "PASS",
+      "toggleCount": 20,
+      "frames": [
+        {
+          "at": 0,
+          "height": 0,
+          "opacity": "1"
+        },
+        {
+          "at": 11,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 13.799999237060547,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 87.70000076293945,
+          "height": 0,
+          "opacity": "0"
+        },
+        {
+          "at": 104.4000015258789,
+          "height": 24.171875,
+          "opacity": "0.128631"
+        },
+        {
+          "at": 121.4000015258789,
+          "height": 46.75,
+          "opacity": "0.248717"
+        },
+        {
+          "at": 188.4000015258789,
+          "height": 123.828125,
+          "opacity": "0.65868"
+        },
+        {
+          "at": 203.5999984741211,
+          "height": 139.53125,
+          "opacity": "0.742199"
+        },
+        {
+          "at": 217.70000076293945,
+          "height": 153.546875,
+          "opacity": "0.816748"
+        }
+      ]
+    }
+  ],
+  "qa": {
+    "unitTests": {
+      "passed": 40,
+      "failed": 0,
+      "evidence": "/home/sigaer/taiko/qa-vault/runs/qa-68ac1dbd2eb0/evidence"
+    },
+    "browserAndProfileEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-7b25430c7da7/evidence",
+    "visualEvidence": "/home/sigaer/taiko/qa-vault/runs/qa-841955d135ca/evidence",
+    "coverage": [
+      "身份变化/ABA/晚到成功和失败",
+      "取消后恢复一次",
+      "成功缓存重新激活无额外读取",
+      "写操作与目录不随离页取消",
+      "浏览器前进后退",
+      "中日文",
+      "浅色/深色",
+      "reduced-motion",
+      "移动端无新增分组动画",
+      "三级菜单和高亮",
+      "键盘与焦点",
+      "请求成功/503失败/显式重试",
+      "筛选保留",
+      "Overview/Passport/Recent Growth 相关既有测试"
+    ]
+  },
+  "reproduce": [
+    "在两个隔离源副本（baseline main 与本次版本）内，将 taiko_viewer/scripts/performance/navigation-probe.client.ts 复制为 plugins/nav-qa.client.ts，使用受限 build wrapper 构建。不得向生产 plugins 目录复制此探针。",
+    "bash scripts/memory/run_qa.sh /absolute/node taiko_viewer/scripts/performance/navigation.mjs BUILD_ROOT OUTPUT_DIR before|after stress|visual|profile",
+    "bash scripts/memory/run_build.sh /bin/bash scripts/deploy_forum_web.sh \"<HEAD subject>\"",
+    "bash scripts/memory/run_qa.sh /absolute/node taiko_viewer/scripts/performance/navigation-online.mjs /var/tmp/viewer-nav-1102/online"
+  ],
+  "onlineScope": "发布后检查版本、真实匿名 API 的 401 和部署前端。仅当已有 loadtest 会话仍有效时读取真实认证数据；否则清楚标记浏览器使用固定 DTO，不借用个人会话或创建线上账号。"
+}

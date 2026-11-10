@@ -1,3 +1,4 @@
+import {pageAsyncData} from './fixtures/pageAsyncData.mjs';
 import {useAccountDataRefresh} from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,12 +22,7 @@ async function fixture(page,fn,onInitial){
  globalThis.useViewerApiFetch=(await module('useViewerApiFetch')).useViewerApiFetch;
  globalThis.useAccountRequestGuard=(await module('useAccountRequestGuard')).useAccountRequestGuard;
  globalThis.$fetch=async(path,options)=>{if(options?.method)return {};if(initial){initial=false;onInitial?.(states);return payload;}return new Promise((resolve,reject)=>requests.push({path,options,resolve,reject}));};
- globalThis.useAsyncData=async(key,load,opts)=>{
-  const data=ref(opts.default()),pending=ref(false);let generation=0;
-  const clear=()=>{generation++;data.value=opts.default();pending.value=false;};
-  const refresh=async()=>{const token=++generation;pending.value=true;try{const result=await load();if(token===generation)data.value=result;}finally{if(token===generation)pending.value=false;}};
-  if(opts.watch)watch(opts.watch,()=>void refresh());await refresh();return {data,pending,refresh,clear};
- };
+ globalThis.useAsyncData=pageAsyncData;
  try{app=await mount(await component('pages/my/'+page+'.vue',source));await fn({m:app.model,states,route,requests,payload,close:()=>{app.close();app=null;},deactivate:()=>app.deactivate(),activate:()=>app.activate(),api:globalThis.useViewerApiFetch()});}
  finally{app?.close();for(const[k,v]of saved){if(v===undefined)delete globalThis[k];else globalThis[k]=v;}}
 }
@@ -87,3 +83,24 @@ test('growth uses sync generation while cached, rejects old reads, coalesces cha
 test('sync during initial growth setup retries the discarded generation once',async()=>fixture('growth',async({m,requests,payload})=>{
  assert.equal(requests.length,1);assert.equal(m.passport,null);requests.shift().resolve({...payload,profileId:'initial-current'});await settle();assert.equal(m.passport.profileId,'initial-current');assert.equal(requests.length,0);
 },states=>{states.get('account-home-generation').value++;}));
+
+for (const page of ['weekly', 'growth']) test(`${page} KeepAlive retains successful reads, aborts pending refresh, resumes once and rejects late completion`, async () => fixture(page, async ({ m, requests, payload, deactivate, activate }) => {
+ const result = () => page === 'weekly' ? m.weekly : m.passport;
+ const dto = () => page === 'weekly' ? m.weeklyState.payload : m.passportState.payload;
+ const accepted = result();
+ const acceptedDto = dto();
+ deactivate(); activate(); await settle();
+ assert.equal(requests.length, 0, 'successful data needs no activation read');
+ assert.equal(result(), accepted);
+ const refreshing = m.retry(); await settle(); const old = requests.shift();
+ assert.ok(old.options.signal instanceof AbortSignal, 'Nuxt signal reaches HTTP');
+ deactivate(); await refreshing;
+ assert.equal(old.options.signal.aborted, true);
+ assert.equal(m.pending, false); assert.equal(m.pageError, '');
+ assert.equal(dto(), acceptedDto, 'cancel keeps the last accepted DTO');
+ activate(); activate(); await settle();
+ assert.equal(requests.length, 1, 'one recovery request');
+ requests.shift().resolve({ ...payload, profileId: 'resumed' }); await settle();
+ old.resolve({ ...payload, profileId: 'cancelled' }); await settle();
+ assert.equal(result().profileId, 'resumed'); assert.equal(m.pending, false);
+}));

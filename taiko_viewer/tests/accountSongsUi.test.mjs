@@ -1,3 +1,4 @@
+import {pageAsyncData} from './fixtures/pageAsyncData.mjs';
 import {useAccountDataRefresh} from '../composables/useAccountDataRefresh.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,13 +23,7 @@ async function fixture(fn){
   if(failRead)throw {statusCode:503,data:{message:'Synthetic scores failure'}};
   return {currentBinding:current,total:1,page:1,pageSize:25,items:[{...row}]};
  };
- globalThis.useAsyncData=async(key,load,opts)=>{
-  const data=ref(opts.default()),error=ref(null),status=ref('idle');let request=0;
-  const clear=()=>{request++;data.value=opts.default();error.value=null;status.value='idle';};
-  const refresh=async()=>{const token=++request;status.value='pending';try{const value=await load();if(token===request){data.value=value;error.value=null;status.value='success';}}catch(e){if(token===request){data.value=opts.default();error.value=e;status.value='error';}}};
-  if(opts.watch)watch(opts.watch,()=>void refresh());
-  await refresh();return {data,error,status,refresh,clear};
- };
+ globalThis.useAsyncData=pageAsyncData;
  const raw=(await readFile(new URL('../composables/useAccountRequestGuard.ts',import.meta.url),'utf8')).replace('"vue"',JSON.stringify(new URL('../node_modules/vue/dist/vue.runtime.esm-bundler.js',import.meta.url).href));
  globalThis.useAccountRequestGuard=(await import('data:text/javascript,'+encodeURIComponent(ts.transpileModule(raw,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText))).useAccountRequestGuard;
  let app;
@@ -126,4 +121,21 @@ test('sync during initial score-page setup recovers current data without leaving
  onFirstProfile(()=>{states.get('account-home-generation').value++;});
  const m=await mount('pages/account/songs.vue');await settle();assert.equal(m.resultReady,true);assert.equal(m.rows.length,1);
  assert.equal(readCalls.filter(p=>p==='/api/account/bindings').length,2);
+}));
+
+test('leaving scores cancels only its GET; catalog and a submitted score write survive', async () => fixture(async ({ mount, pending, held, readRequests, deactivate, activate }) => {
+ const m = await mount('pages/account/songs.vue');
+ const writing = m.toggleLock(m.rows[0], true); const write = pending.shift();
+ held.add('/api/account/songs'); held.add('/api/content/songs');
+ const reading = m.refreshSongs(), catalog = m.refreshCatalog(); await settle();
+ const scoreRead = readRequests.find(r => r.path === '/api/account/songs');
+ const catalogRead = readRequests.find(r => r.path === '/api/content/songs');
+ deactivate(); await reading;
+ assert.equal(scoreRead.options.signal.aborted, true);
+ assert.equal(catalogRead.options.signal.aborted, false, 'shared catalog stays live');
+ assert.equal(write.options.signal, undefined, 'write has no page-owned cancellation');
+ write.resolve({}); await writing;
+ catalogRead.resolve({ songs: [] }); await catalog;
+ activate(); await settle();
+ assert.equal(readRequests.filter(r => r.path === '/api/account/songs').length, 2, 'cancelled GET resumes once');
 }));
