@@ -13,7 +13,8 @@ export async function load(path,sfc=false,inlineTemplate=false){
  code=code.replaceAll('import.meta.server','false').replaceAll('import.meta.client','true')
  .replace(/from ['"]vue['"]/g,'from '+JSON.stringify(vue))
  .replace(/import \{([^}]+)\} from ['"]~\/composables\/[^'"]+['"];?/g,(_,names)=>'const {'+names+'} = globalThis;')
- .replace(/(['"])~\/utils\/([^'"]+)\1/g,(_,q,name)=>JSON.stringify(new URL('utils/'+name+'.ts',root).href));
+ .replace(/(['"])~\/utils\/([^'"]+)\1/g,(_,q,name)=>JSON.stringify(new URL('utils/'+name+'.ts',root).href))
+ .replace(/from (['"])(\.{1,2}\/[^'"]+)\1/g,(_,q,name)=>'from '+JSON.stringify(new URL(name,new URL(path,root)).href));
  const js=ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
  const module=await import('data:text/javascript,'+encodeURIComponent(js+'\n// state fixture '+(++sequence)));
  if(sfc&&!inlineTemplate)module.default.render=()=>Vue.h('div');

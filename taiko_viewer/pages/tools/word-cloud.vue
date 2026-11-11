@@ -12,7 +12,7 @@ definePageMeta({
   pageDescKey: "page.tools.wordCloud.desc",
   navKey: "/tools/word-cloud",
   breadcrumbs: [
-    { labelKey: "tools.title", to: "/tools" },
+    { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.wordCloud", to: "/tools/word-cloud" }
   ]
 });

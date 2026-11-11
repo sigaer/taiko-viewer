@@ -40,7 +40,6 @@ const groups = [
     key: "tools",
     title: "nav.toolbox",
     items: [
-      { path: "/tools", label: "nav.tools" },
       { path: "/tools/rt-calculator", label: "tools.rtCalculator" },
       { path: "/tools/chart-config", label: "tools.chartConfig" },
       { path: "/tools/tja-constants", label: "tools.tjaConstants" },

@@ -140,6 +140,7 @@ const groups = computed(() => [
       { key: "/my/weekly", label: t("weekly.title"), icon: "history" },
       { key: "/account/songs", label: t("account.songs"), icon: "music" },
       { key: "/tools/b30", label: t("tools.b30"), icon: "trophy" },
+      { key: "/tools/trend", label: t("tools.trend"), icon: "history" },
       { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },
       { key: "/tools/progress", label: t("tools.progress"), icon: "trophy" },
       { key: "/tools/word-cloud", label: t("tools.wordCloud"), icon: "badge" },
@@ -165,12 +166,10 @@ const groups = computed(() => [
     title: t("nav.toolsGroup"),
     icon: "grid",
     items: [
-      { key: "/tools", label: t("nav.tools"), icon: "grid" },
       { key: "/tools/rt-calculator", label: t("tools.rtCalculator"), icon: "grid" },
       { key: "/tools/chart-config", label: t("tools.chartConfig"), icon: "grid" },
       { key: "/tools/tja-constants", label: t("tools.tjaConstants"), icon: "music" },
-      { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" },
-      { key: "/tools/trend", label: t("tools.trend"), icon: "history" }
+      { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" }
     ]
   },
   {

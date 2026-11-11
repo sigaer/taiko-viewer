@@ -35,6 +35,7 @@ const linkGroups = computed(() => [
   { key: 'data', items: [
     { path: "/my/weekly", label: "page.myTaiko.weekly", icon: "M4 5h16v16H4z M8 3v4m8-4v4M4 11h16 M8 15h2m4 0h2m-8 3h2" },
     { path: "/tools/b30", label: "tools.b30", icon: "M4 21h16 M6 17v-7h4v7m4 0V3h4v14" },
+    { path: "/tools/trend", label: "tools.trend", icon: "M4 4v16h16 M7 15l4-5 4 2 5-7" },
     { path: "/tools/progress", label: "tools.progress", icon: "M9 5h11m-11 7h11m-11 7h11 M3 5l1 1 2-3m-3 9 1 1 2-3m-3 9 1 1 2-3" },
     { path: "/tools/word-cloud", label: "tools.wordCloud", icon: "M7 18H6a4 4 0 0 1-.7-7.9 7 7 0 0 1 13.4 0A4 4 0 0 1 18 18h-1 M9 18h6m-5-4h4" }
   ] }

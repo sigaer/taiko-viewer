@@ -11,7 +11,7 @@ definePageMeta({
   pageDescKey: "page.tools.noteCount.desc",
   navKey: "/tools/note-count",
   breadcrumbs: [
-    { labelKey: "nav.tools", to: "/tools" },
+    { labelKey: "nav.more", to: "/more" },
     { labelKey: "tools.noteCount", to: "/tools/note-count" }
   ]
 });

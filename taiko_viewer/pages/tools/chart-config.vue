@@ -11,7 +11,7 @@ definePageMeta({
   pageDescKey: "page.tools.chartConfig.desc",
   navKey: "/tools/chart-config",
   breadcrumbs: [
-    { labelKey: "nav.tools", to: "/tools" },
+    { labelKey: "nav.more", to: "/more" },
     { labelKey: "tools.chartConfig", to: "/tools/chart-config" }
   ]
 });

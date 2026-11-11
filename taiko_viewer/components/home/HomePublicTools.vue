@@ -17,7 +17,7 @@ const tools = [
       heading-id="guest-tools-title"
       :title="t('page.home.guest.publicTools')"
       :link-label="t('common.viewAll')"
-      :link-to="localePath('/tools')"
+      :link-to="localePath('/more')"
     />
     <div class="guest-tools__grid">
       <NuxtLink

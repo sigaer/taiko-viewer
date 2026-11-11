@@ -12,7 +12,7 @@ definePageMeta({
   pageDescKey: "page.tools.b30.desc",
   navKey: "/tools/b30",
   breadcrumbs: [
-    { labelKey: "tools.title", to: "/tools" },
+    { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.b30", to: "/tools/b30" }
   ]
 });

@@ -29,6 +29,11 @@ try {
   await get('/api/tools/rt-calculator?songId=bad', 400);
   await get('/api/tools/rt-calculator?songId=999999999', 404);
   const payload = await get(`/api/tools/rt-calculator?songId=${songId}`);
+  for (const [path, target] of [['/tools', '/more'], ['/ja/tools', '/ja/more']]) {
+    const response = await fetch(base + path, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
+    assert.equal(response.status, 302);
+    assert.equal(new URL(response.headers.get('location'), base).pathname, target);
+  }
   const chart = payload.v2.find(c => c.difficulty === 'oni');
   assert.ok(chart && payload.v1.find(c => c.level === 4), 'Real chart has both versions');
   checks.push('public API, invalid ID, absent song, real V1/V2 data');
@@ -71,10 +76,19 @@ try {
   await page.screenshot({ path: resolve(out, 'rt-mobile-dark.png'), fullPage: true });
   checks.push('real V1 scores, desktop, mobile, dark theme');
   await page.goto(`${base}/more`, { waitUntil: 'domcontentloaded' });
+  assert.equal(await page.locator('.more-hub a[href="/tools"]').count(), 0);
+  for (const path of ['rt-calculator', 'tja-constants', 'chart-config', 'note-count']) {
+    assert.equal(await page.locator(`.more-hub a[href="/tools/${path}"]`).count(), 1);
+  }
+  await page.goto(`${base}/my`, { waitUntil: 'domcontentloaded' });
+  for (const path of ['b30', 'recommend', 'progress', 'word-cloud', 'trend']) {
+    await page.locator(`.my-page a[href="/tools/${path}"]`).waitFor();
+  }
+  await page.goto(`${base}/more`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('link', { name: '单曲 RT 计算器' }).click();
   await page.waitForURL('**/tools/rt-calculator');
   await page.getByText('请选择歌曲', { exact: true }).waitFor();
-  checks.push('mobile More direct entry opens calculator');
+  checks.push('mobile More public tools, My personal tools, old tools redirects, direct calculator entry');
   await page.locator('.selection-row select').first().selectOption('v2');
   const search = page.locator('.rt-controls [role="combobox"]');
   await search.fill('2F29');

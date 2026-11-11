@@ -2,8 +2,8 @@
 import type { TjaResult } from '~/types/tja-calculator';
 import { tjaCalculatorCopy } from '~/utils/tjaCalculatorCopy';
 
-definePageMeta({ pageTitleKey: 'tools.tjaConstants', hidePageDescription: true, navKey: '/tools', breadcrumbs: [
-  { labelKey: 'tools.title', to: '/tools' }, { labelKey: 'tools.tjaConstants', to: '/tools/tja-constants' }
+definePageMeta({ pageTitleKey: 'tools.tjaConstants', hidePageDescription: true, navKey: '/tools/tja-constants', breadcrumbs: [
+  { labelKey: 'nav.more', to: '/more' }, { labelKey: 'tools.tjaConstants', to: '/tools/tja-constants' }
 ] });
 const { locale } = useI18n();
 const copy = computed(() => tjaCalculatorCopy[locale.value === 'ja' ? 'ja' : 'zh']);

@@ -4,7 +4,7 @@ import type { AutoJudgment, Judgments, RtCalculatorPayload } from '~/utils/rtCal
 import { calculateV1, calculateV2, resolveJudgments } from '~/utils/rtCalculator';
 
 definePageMeta({ pageTitleKey: 'tools.rtCalculator', hidePageDescription: true, navKey: '/tools/rt-calculator',
-  breadcrumbs: [{ labelKey: 'tools.title', to: '/tools' }, { labelKey: 'tools.rtCalculator', to: '/tools/rt-calculator' }] });
+  breadcrumbs: [{ labelKey: 'nav.more', to: '/more' }, { labelKey: 'tools.rtCalculator', to: '/tools/rt-calculator' }] });
 const { locale, t } = useI18n();
 const route = useRoute(), router = useRouter(), localePath = useLocalePath(), apiFetch = useViewerApiFetch();
 const copy = computed(() => locale.value === 'ja' ? {
