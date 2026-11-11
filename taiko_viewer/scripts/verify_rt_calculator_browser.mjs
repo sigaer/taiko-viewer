@@ -38,12 +38,15 @@ try {
   page = await context.newPage(); page.setDefaultTimeout(15000);
   page.on('pageerror', error => errors.push(error.message.slice(0, 180)));
   await page.goto(`${base}/tools/rt-calculator?songId=${songId}&level=4`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => Boolean(document.querySelector('#__nuxt')?.__vue_app__));
   await page.locator('#rt-ok').fill('10'); await page.locator('#rt-bad').fill('2');
+  await page.waitForFunction(value => document.querySelector('#rt-good')?.value === String(value), chart.totalNotes - 12);
   assert.equal(await page.locator('#rt-good').inputValue(), String(chart.totalNotes - 12));
   await checkRating('v2', { good: chart.totalNotes - 12, ok: 10, bad: 2 }, payload);
   const select = page.locator('.judgment-toolbar select');
   await select.selectOption('bad');
   await page.locator('#rt-good').fill(String(chart.totalNotes - 20));
+  await page.waitForFunction(() => document.querySelector('#rt-bad')?.value === '10');
   assert.equal(await page.locator('#rt-bad').inputValue(), '10');
   await checkRating('v2', { good: chart.totalNotes - 20, ok: 10, bad: 10 }, payload);
   await select.selectOption('manual'); await page.locator('#rt-bad').fill('99999');
@@ -73,6 +76,7 @@ try {
   await page.getByRole('option').filter({ hasText: '2F29' }).first().waitFor();
   await page.keyboard.press('Escape');
   await page.goto(`${base}/ja/tools/rt-calculator?songId=${songId}&level=4`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => Boolean(document.querySelector('#__nuxt')?.__vue_app__));
   await page.getByRole('button', { name: '全良', exact: true }).click();
   await checkRating('v2', { good: chart.totalNotes, ok: 0, bad: 0 }, payload);
   await page.goto(`${base}/tools/rt-calculator`, { waitUntil: 'domcontentloaded' });
@@ -82,6 +86,12 @@ try {
   assert.equal(errors.length, 0, errors.join('\n'));
   await writeFile(resolve(out, 'rt-smoke.json'), JSON.stringify({ status: 'PASS', base, checks, errors }, null, 2));
   console.log(JSON.stringify({ status: 'PASS', checks, evidence: out }));
+} catch (error) {
+  if (page && !page.isClosed()) {
+    await page.screenshot({ path: resolve(out, 'rt-failure.png'), fullPage: true }).catch(() => {});
+    console.log(JSON.stringify({ checks, errors, state: await page.locator('.rt-calculator').innerText().catch(() => '') }));
+  }
+  throw error;
 } finally {
   await page?.close(); await context?.close(); await browser?.close(); clearTimeout(deadline);
 }
