@@ -25,6 +25,7 @@ const copy = computed(() =>
         intro:
           "公開ツールはログイン不要です。プレイデータを使うツールは ID 連携と同期が必要です。",
         tools: [
+          { title: "単曲 RT 計算", desc: "楽曲と判定数から総合・各能力の RT を計算", to: "/tools/rt-calculator", tag: "公開" },
           { title: "TJA 定数計算", desc: "TJA ファイルから定数・能力指標を計算", to: "/tools/tja-constants", tag: "公開" },
           { title: "配置検索", desc: "BPM、難易度、譜面パターンから楽曲を検索", to: "/tools/chart-config", tag: "公開" },
           { title: "ノーツ数検索", desc: "指定ノーツ数に一致する譜面を探す", to: "/tools/note-count", tag: "公開" },
@@ -39,6 +40,7 @@ const copy = computed(() =>
         intro:
           "公开工具无需登录；使用游玩数据的工具需绑定鼓众 ID 并完成数据同步。",
         tools: [
+          { title: "单曲 RT 计算器", desc: "选择歌曲，输入判定数，试算综合与六维 RT", to: "/tools/rt-calculator", tag: "公开" },
           { title: "TJA 定数计算", desc: "上传谱面，查看各项定数与能力指标", to: "/tools/tja-constants", tag: "公开" },
           { title: "查配置", desc: "按 BPM、难度或谱面配置检索歌曲", to: "/tools/chart-config", tag: "公开" },
           { title: "查物量", desc: "按音符总数查找对应谱面", to: "/tools/note-count", tag: "公开" },

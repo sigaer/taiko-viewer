@@ -166,6 +166,7 @@ const groups = computed(() => [
     icon: "grid",
     items: [
       { key: "/tools", label: t("nav.tools"), icon: "grid" },
+      { key: "/tools/rt-calculator", label: t("tools.rtCalculator"), icon: "grid" },
       { key: "/tools/chart-config", label: t("tools.chartConfig"), icon: "grid" },
       { key: "/tools/tja-constants", label: t("tools.tjaConstants"), icon: "music" },
       { key: "/tools/note-count", label: t("tools.noteCount"), icon: "music" },

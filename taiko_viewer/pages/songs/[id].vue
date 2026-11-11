@@ -450,6 +450,7 @@ useViewerSeo(() => ({
       </header>
 
       <SongDifficultyTabs v-model="selectedTrack" :tracks="difficultyTabs" />
+      <NuxtLink class="rt-calculator-link" :to="localePath({ path: '/tools/rt-calculator', query: { songId: String(songId), level: String(selectedDifficultyCode) } })">{{ t('tools.rtCalculator') }} →</NuxtLink>
 
       <div class="song-reading-layout">
         <div class="song-main-column">
@@ -581,6 +582,7 @@ useViewerSeo(() => ({
 </template>
 
 <style scoped>
+.rt-calculator-link { justify-self: start; color: var(--viewer-link); font-size: 14px; padding: 10px 0; }
 .song-detail-page {
   --el-bg-color:var(--viewer-surface);--el-text-color-primary:var(--viewer-text);--el-border-color:var(--viewer-text-muted);
   padding:8px 0 32px; color:var(--viewer-text); min-width:0;
