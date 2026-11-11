@@ -105,7 +105,7 @@ onBeforeUnmount(() => { searchGeneration++; clearTimeout(searchTimer); searchCon
       <label class="field-label" for="rt-song">{{ copy.song }}</label>
       <el-select id="rt-song" :model-value="songId || undefined" filterable remote :remote-method="searchSongs" :loading="searching"
         :placeholder="copy.search" :no-data-text="searchError ? copy.searchFailed : copy.noSongs" class="song-select"
-        @visible-change="open => { if (open) searchSongs(); }" @update:model-value="selectSong">
+        @visible-change="open => { if (open && !searching) searchSongs(); }" @update:model-value="selectSong">
         <el-option v-for="option in options" :key="option.id" :label="option.label" :value="option.id" />
       </el-select>
       <p v-if="searchError" class="error" role="alert">{{ copy.searchFailed }}</p>

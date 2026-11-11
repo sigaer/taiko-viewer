@@ -80,10 +80,12 @@ try {
   for (const path of ['rt-calculator', 'tja-constants', 'chart-config', 'note-count']) {
     assert.equal(await page.locator(`.more-hub a[href="/tools/${path}"]`).count(), 1);
   }
+  await page.screenshot({ path: resolve(out, 'more-mobile.png'), fullPage: true });
   await page.goto(`${base}/my`, { waitUntil: 'domcontentloaded' });
   for (const path of ['b30', 'recommend', 'progress', 'word-cloud', 'trend']) {
     await page.locator(`.my-page a[href="/tools/${path}"]`).waitFor();
   }
+  await page.screenshot({ path: resolve(out, 'my-mobile.png'), fullPage: true });
   await page.goto(`${base}/more`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('link', { name: '单曲 RT 计算器' }).click();
   await page.waitForURL('**/tools/rt-calculator');
@@ -93,7 +95,10 @@ try {
   const search = page.locator('.rt-controls [role="combobox"]');
   await search.fill('2F29');
   await page.getByRole('option').filter({ hasText: '2F29' }).first().waitFor();
-  await page.keyboard.press('Escape');
+  await page.getByRole('option').filter({ hasText: '2F29' }).first().click();
+  await page.waitForURL(url => url.searchParams.get('songId') === String(songId));
+  await page.getByRole('button', { name: '全良', exact: true }).click();
+  await checkRating('v2', { good: chart.totalNotes, ok: 0, bad: 0 }, payload);
   await page.goto(`${base}/ja/tools/rt-calculator?songId=${songId}&level=4`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => Boolean(document.querySelector('#__nuxt')?.__vue_app__));
   await page.getByRole('button', { name: '全良', exact: true }).click();
