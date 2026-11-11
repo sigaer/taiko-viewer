@@ -70,6 +70,11 @@ try {
   await page.evaluate(() => { document.body.classList.add('theme-dark'); document.documentElement.dataset.theme = 'dark'; });
   await page.screenshot({ path: resolve(out, 'rt-mobile-dark.png'), fullPage: true });
   checks.push('real V1 scores, desktop, mobile, dark theme');
+  await page.goto(`${base}/more`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('link', { name: '单曲 RT 计算器' }).click();
+  await page.waitForURL('**/tools/rt-calculator');
+  await page.getByText('请选择歌曲', { exact: true }).waitFor();
+  checks.push('mobile More direct entry opens calculator');
   await page.locator('.selection-row select').first().selectOption('v2');
   const search = page.locator('.rt-controls [role="combobox"]');
   await search.fill('2F29');
