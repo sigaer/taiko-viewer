@@ -25,9 +25,13 @@ def build_song_tja_index(song_data_path: Path, tja_root: Path):
             continue
 
         # The catalog's verified ESE path is shared with the importer and Bot.
-        path = safe_resource(tja_root, song.get("tja_path"))
+        source_root = tja_root
+        if song.get("resource_source") == "ourtaiko":
+            from taiko_bot.offline.catalog_downloads import catalog_resource_root
+            source_root = catalog_resource_root(song, tja_root, runtime_root=song_data_path.parent.parent)
+        path = safe_resource(source_root, song.get("tja_path"))
         if path is not None:
-            matches[str(song_id)] = {"tja_path": str(path), "rel_path": path.relative_to(tja_root.resolve()).as_posix()}
+            matches[str(song_id)] = {"tja_path": str(path), "rel_path": path.relative_to(source_root.resolve()).as_posix()}
             continue
         if song.get("ourtaiko_ids"):
             unresolved.append({"id": song_id, "reason": "catalog_tja_unavailable"})

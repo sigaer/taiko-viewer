@@ -24,6 +24,8 @@ Viewer 1.0.0收口My Viewer、Community、Training和Progress四条产品主线�
 
 `songs/catalog_constants.json` 是中心补算的 V2 定数和校验证据。Viewer 按文件更新时间读取，仅填补远端和已有主机定数中的空缺；导出的 `constants_id_v2.csv` 与网页使用同一份合并结果，三种上架分类均可补齐。不得以此文件覆盖已有定数。
 
+谱面图片通过 `/api/content/songs/:id/chart-image?difficulty=1..5&side=single|p1|p2` 读取中心 `assets/fumens`，不依赖图片另外上传到静态站。TJA 缺失时，中心维护任务可从 OurTaiko 的已验证资源清单补齐 TJA 和音频；Viewer 的资源索引识别 `resource_source: ourtaiko`。固定版本 [WHMHammer/tja-tools](https://github.com/WHMHammer/tja-tools) 的源码、素材与哈希保存在 `vendor/tja-tools`，构建时生成离线渲染器；定数计算继续使用原固定版 OurTaiko 计算器。图片标题优先使用中文曲名，任务 JSON 的 `title` 可指定显示名，不改写源 TJA，不附加水印。批量维护入口 `scripts/render_catalog_images.mjs JOBS_JSON [LIMIT]` 必须通过内存隔离 wrapper 运行，已生成图片不会覆盖，P1/P2 单独验证和生成。双打曲目可在歌曲详情切换玩家侧。
+
 ## Common Commands
 
 ### Web

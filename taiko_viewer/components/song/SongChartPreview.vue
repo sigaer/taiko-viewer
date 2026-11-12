@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-const props = defineProps<{ songId:number; songTitle:string; difficulty:number; track:string; label:string; star:string; combo:string; folder:string; tjaBundleUrl:string }>();
+const props = defineProps<{ songId:number; songTitle:string; difficulty:number; track:string; label:string; star:string; combo:string; folder:string; tjaBundleUrl:string; side?:string }>();
 const { locale } = useI18n(), localePath=useLocalePath();
-const url = computed(()=>`https://static.sakura-bot.cn/fumen/${props.folder}/${props.songId}.png`);
+const url = computed(()=>`/api/content/songs/${props.songId}/chart-image?difficulty=${props.difficulty}&side=${props.side || 'single'}`);
 const loaded=ref(false),failed=ref(false),expanded=ref(false);
 const imageElement=ref<HTMLImageElement|null>(null);
 const resolveCachedImage=()=>{

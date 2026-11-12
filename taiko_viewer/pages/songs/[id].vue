@@ -30,6 +30,7 @@ const levelTrackMap: Record<ChartDifficultyCode, string> = {
 };
 const requestedDifficulty = Number(route.query.difficulty) as ChartDifficultyCode;
 const selectedTrack = ref(levelTrackMap[requestedDifficulty] || "ONI");
+const selectedSide = ref<'single' | 'p1' | 'p2'>('single');
 watch(() => route.query.difficulty, value => { selectedTrack.value = levelTrackMap[Number(value) as ChartDifficultyCode] || "ONI"; });
 
 const songId = computed(() => Number(route.params.id));
@@ -181,9 +182,15 @@ const coverUrl = computed(() => {
 
 const hasEditDifficulty = computed(() => {
   const value = song.value?.level_5;
-  return value !== undefined && value !== null && value !== "-" && value !== "";
+  return Number(value) > 0 || Boolean(song.value?.ourtaiko_difficulties?.some(row => row.difficulty === 5 && row.side !== 'single'));
 });
 
+const availableSides = computed(() => {
+  const rows = song.value?.ourtaiko_difficulties?.filter(row => row.difficulty === selectedDifficultyCode.value) || [];
+  const sides = new Set<'single' | 'p1' | 'p2'>(rows.filter(row => row.side !== 'single').map(row => row.side));
+  if (Number(song.value?.[`level_${selectedDifficultyCode.value}` as keyof SongCatalogItem]) > 0) sides.add('single');
+  return (['single', 'p1', 'p2'] as const).filter(side => sides.has(side));
+});
 const trackDefs = computed(() => {
   const base = [
     { key: "EASY", label: t("songs.levels.easy") },
@@ -191,8 +198,18 @@ const trackDefs = computed(() => {
     { key: "HARD", label: t("songs.levels.hard") },
     { key: "ONI", label: t("songs.levels.oni") }
   ];
-  return hasEditDifficulty.value ? [...base, { key: "EDIT", label: t("songs.levels.edit") }] : base;
+  const tracks = hasEditDifficulty.value ? [...base, { key: "EDIT", label: t("songs.levels.edit") }] : base;
+  const rows = song.value?.ourtaiko_difficulties || [];
+  return rows.length ? tracks.filter(track => rows.some(row => row.difficulty === trackLevelMap[track.key] && row.side !== 'single')
+    || Number(song.value?.[`level_${trackLevelMap[track.key]}` as keyof SongCatalogItem]) > 0) : tracks;
 });
+watch(trackDefs, tracks => {
+  if (tracks.length && !tracks.some(track => track.key === selectedTrack.value)) selectedTrack.value = tracks.at(-1)!.key;
+}, { immediate: true });
+watch(availableSides, sides => {
+  if (!sides.length) { selectedSide.value = 'single'; return; }
+  if (!sides.includes(selectedSide.value)) selectedSide.value = sides.includes('single') ? 'single' : sides[0]!;
+}, { immediate: true });
 
 const levelMap = computed(() => ({
   EASY: song.value?.level_1,
@@ -207,7 +224,9 @@ const formatStar = (value?: number | string) => {
   return `${value}★`;
 };
 
-const getTrackStarLabel = (key: string) => formatStar(levelMap.value[key as keyof typeof levelMap.value]);
+const getTrackStarLabel = (key: string) => formatStar(selectedSide.value === 'single'
+  ? levelMap.value[key as keyof typeof levelMap.value]
+  : song.value?.ourtaiko_difficulties?.find(row => row.difficulty === trackLevelMap[key] && row.side === selectedSide.value)?.level);
 
 const fumenKeyMap: Record<string, keyof typeof levelMap.value> = {
   easy: "EASY",
@@ -217,7 +236,7 @@ const fumenKeyMap: Record<string, keyof typeof levelMap.value> = {
   inner: "EDIT"
 };
 
-const getFumenStarLabel = (key: string) => formatStar(levelMap.value[fumenKeyMap[key]]);
+const getFumenStarLabel = (key: string) => getTrackStarLabel(fumenKeyMap[key]);
 
 const comboIndexMap: Record<string, number> = {
   easy: 0,
@@ -233,6 +252,7 @@ const formatList = (input?: string[]) => {
 };
 
 const getFumenComboLabel = (key: string) => {
+  if (selectedSide.value !== 'single') return '—';
   const comboList = song.value?.max_combo;
   const index = comboIndexMap[key];
   const catalogCombo = comboList?.[index];
@@ -453,11 +473,14 @@ useViewerSeo(() => ({
       </header>
 
       <SongDifficultyTabs v-model="selectedTrack" :tracks="difficultyTabs" />
+      <div v-if="availableSides.some(side => side !== 'single')" class="chart-side-options" role="group" :aria-label="locale === 'ja' ? 'プレイヤー側' : '谱面类型'">
+        <button v-for="side in availableSides" :key="side" type="button" :aria-pressed="selectedSide === side" @click="selectedSide = side">{{ side === 'single' ? (locale === 'ja' ? 'シングル' : '单人') : side.toUpperCase() }}</button>
+      </div>
       <NuxtLink class="rt-calculator-link" :to="localePath({ path: '/tools/rt-calculator', query: { songId: String(songId), level: String(selectedDifficultyCode) } })">{{ t('tools.rtCalculator') }} →</NuxtLink>
 
       <div class="song-reading-layout">
         <div class="song-main-column">
-          <SongChartPreview v-if="selectedFumen" :song-id="songId" :song-title="getSongPrimaryTitle(song)" :difficulty="selectedDifficultyCode" :track="selectedTrack" :label="selectedFumen.label" :star="getFumenStarLabel(selectedFumen.key)" :combo="getFumenComboLabel(selectedFumen.key)" :folder="selectedFumen.folder" :tja-bundle-url="tjaBundleUrl">
+          <SongChartPreview v-if="selectedFumen" :song-id="songId" :song-title="getSongPrimaryTitle(song)" :difficulty="selectedDifficultyCode" :side="selectedSide" :track="selectedTrack" :label="selectedFumen.label" :star="getFumenStarLabel(selectedFumen.key)" :combo="getFumenComboLabel(selectedFumen.key)" :folder="selectedFumen.folder" :tja-bundle-url="tjaBundleUrl">
             <SongAudioPreview :song-id="songId" :selected-track="selectedTrack" :branch-variants="branchAudioVariants" />
           </SongChartPreview>
 
@@ -585,6 +608,10 @@ useViewerSeo(() => ({
 </template>
 
 <style scoped>
+.chart-side-options{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+.chart-side-options button{min-height:44px;min-width:48px;padding:8px 14px;border:1px solid var(--viewer-control-border);border-radius:8px;background:var(--viewer-surface);color:var(--viewer-text);font:inherit;cursor:pointer;}
+.chart-side-options button[aria-pressed="true"]{border-color:var(--viewer-primary);background:var(--viewer-primary);color:var(--viewer-on-primary);}
+.chart-side-options button:focus-visible{outline:3px solid var(--viewer-link);outline-offset:2px;}
 .rt-calculator-link { justify-self: start; color: var(--viewer-link); font-size: 14px; padding: 10px 0; }
 .song-detail-page {
   --el-bg-color:var(--viewer-surface);--el-text-color-primary:var(--viewer-text);--el-border-color:var(--viewer-text-muted);

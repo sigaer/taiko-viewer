@@ -1,6 +1,8 @@
 export type SongCatalogItem = {
   id: number;
   legacy_ids?: number[];
+  resource_source?: 'ourtaiko';
+  ourtaiko_difficulties?: { difficulty: number; side: 'single' | 'p1' | 'p2'; level: number }[];
   nijiiro_id?: number | null;
   wiki_song_nos?: string[];
   official_id?: string;
