@@ -460,7 +460,7 @@ useViewerSeo(() => ({
 
           <details class="song-analysis">
             <summary>{{ sectionCopy.analysis }}</summary>
-            <SongV2Constants v-if="normalizedShelfStatus(song.shelf_status) === 2" :key="songId" :song-id="songId" :track="selectedTrack" />
+            <SongV2Constants :key="songId" :song-id="songId" :track="selectedTrack" />
           <div v-if="normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData" class="radar-card">
             <div class="section-title">
               <span class="title-icon radar-icon" aria-hidden="true">

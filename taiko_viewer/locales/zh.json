@@ -55,7 +55,7 @@
     "songs": "歌曲列表",
     "songsTab": "歌曲",
     "songsAvailable": "实装歌曲",
-    "songsRemoved": "未实装/已下架歌曲",
+    "songsRemoved": "国行未上架歌曲",
     "songsOther": "其他歌曲",
     "v2Constants": "V2 定数",
     "grade": "段位查询",
@@ -543,7 +543,7 @@
     "searchPlaceholder": "搜索歌曲/分类",
     "catalogDesc": "展示歌曲曲绘、标题与分类信息。",
     "availableTitle": "实装歌曲",
-    "removedTitle": "已下架歌曲",
+    "removedTitle": "国行未上架歌曲",
     "version": "实装版本",
     "subtitle": "副标题",
     "jpName": "日文名",
@@ -813,10 +813,10 @@
         "panelDesc": "展示当前可用歌曲，默认按实装日期倒序排列，支持按名称与分类搜索。"
       },
       "removed": {
-        "title": "已下架歌曲",
-        "desc": "国行太鼓已下架歌曲归档，支持按曲名与分类搜索。",
+        "title": "国行未上架歌曲",
+        "desc": "国行太鼓尚未上架或已经下架的歌曲，支持按曲名与分类搜索。",
         "keyword": "国行歌曲",
-        "panelDesc": "展示已下架歌曲，支持按名称与分类搜索。"
+        "panelDesc": "尚未上架或已经下架的国行曲目。"
       },
       "other": {
         "title": "其他歌曲",

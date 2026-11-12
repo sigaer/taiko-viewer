@@ -18,6 +18,10 @@ Viewer 1.0.0收口My Viewer、Community、Training和Progress四条产品主线�
 - Legacy redirect domain: `https://forum.sakura-bot.cn`
 - Local sync dispatcher: `taiko-sync-receiver.service`，实际实现位于 `/home/sigaer/taiko/scripts/sync_dispatch_server.py`
 
+曲库由 `/home/sigaer/taiko-bot` 的中心更新任务维护，Viewer 和 Bot 共用 `songs/song_data.json`。OurTaiko 新增曲目使用虹 ID 或原有其他平台 ID 段；`official_id` 仅记录。已验证的 `tja_path` 同时用于下载谱面与音频，不再为新增曲目重复推测匹配。没有资源的歌曲仍可浏览。
+
+`songs/catalog_constants.json` 是中心补算的 V2 定数和校验证据。Viewer 按文件更新时间读取，仅填补远端和已有主机定数中的空缺；导出的 `constants_id_v2.csv` 与网页使用同一份合并结果，三种上架分类均可补齐。不得以此文件覆盖已有定数。
+
 ## Common Commands
 
 ### Web

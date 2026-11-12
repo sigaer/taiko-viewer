@@ -7,15 +7,14 @@ import json
 import sys
 from pathlib import Path
 from taiko_bot.offline import merge_index
+from taiko_bot.offline.catalog_resources import safe_resource
 
 
 def build_song_tja_index(song_data_path: Path, tja_root: Path):
     with song_data_path.open("r", encoding="utf-8") as handle:
         song_data = json.load(handle)
 
-    tja_files = merge_index.find_tja_files(str(tja_root))
-    candidates = [merge_index.build_candidate_summary(path, tja_root) for path in tja_files]
-    exact_map, normalized_map, base_map = merge_index.build_candidate_indexes(candidates)
+    candidates = indexes = None
 
     matches = {}
     unresolved = []
@@ -25,12 +24,28 @@ def build_song_tja_index(song_data_path: Path, tja_root: Path):
         if song_id <= 0:
             continue
 
+        # The catalog's verified ESE path is shared with the importer and Bot.
+        path = safe_resource(tja_root, song.get("tja_path"))
+        if path is not None:
+            matches[str(song_id)] = {"tja_path": str(path), "rel_path": path.relative_to(tja_root.resolve()).as_posix()}
+            continue
+        if song.get("ourtaiko_ids"):
+            unresolved.append({"id": song_id, "reason": "catalog_tja_unavailable"})
+            continue
+        if candidates is None:
+            tja_files = merge_index.find_tja_files(str(tja_root))
+            candidates = []
+            for path in tja_files:
+                try:
+                    candidates.append(merge_index.build_candidate_summary(path, tja_root))
+                except Exception:
+                    continue
+            indexes = merge_index.build_candidate_indexes(candidates)
+
         candidate, debug = merge_index.select_candidate(
             song,
             candidates,
-            exact_map,
-            normalized_map,
-            base_map,
+            *indexes,
             tja_root,
         )
         if candidate is None:

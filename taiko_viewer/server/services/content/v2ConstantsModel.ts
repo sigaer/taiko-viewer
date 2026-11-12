@@ -81,7 +81,8 @@ const normalizeChart = (
 export const buildV2ConstantsRows = (
   payload: RemoteConstantsPayload,
   localSongs: SongCatalogItem[],
-  supplement?: { constants: unknown; provenance: unknown }
+  supplement?: { constants: unknown; provenance: unknown },
+  catalogSupplement?: { constants: unknown; provenance: unknown }
 ): V2ConstantsItem[] => {
   if (!isRecord(payload)) {
     throw new Error("V2 constants payload is not a valid object");
@@ -95,7 +96,9 @@ export const buildV2ConstantsRows = (
 
   const supplemental = isRecord(supplement?.constants) ? supplement.constants : {};
   const provenance = isRecord(supplement?.provenance) ? supplement.provenance : {};
-  const ids = new Set([...Object.keys(payload), ...Object.keys(supplemental)]);
+  const catalogConstants = isRecord(catalogSupplement?.constants) ? catalogSupplement.constants : {};
+  const catalogProvenance = isRecord(catalogSupplement?.provenance) ? catalogSupplement.provenance : {};
+  const ids = new Set([...Object.keys(payload), ...Object.keys(supplemental), ...Object.keys(catalogConstants)]);
   for (const rawId of ids) {
     const difficultyMap = payload[rawId];
     const id = toPositiveInteger(rawId);
@@ -117,10 +120,15 @@ export const buildV2ConstantsRows = (
           if (row) break;
         }
       }
-      // Only verified console charts may fill gaps; valid remote data wins.
-      if (!row && Number(localSong.shelf_status) === 2) {
-        const charts = supplemental[rawId];
-        const source = provenance[rawId];
+      // Every supplement must prove its current single-player chart identity.
+      // Existing remote and verified console values retain priority.
+      for (const [values, sources] of [
+        ...(Number(localSong.shelf_status) === 2 ? [[supplemental, provenance]] : []),
+        [catalogConstants, catalogProvenance]
+      ]) {
+        if (row) break;
+        const charts = values[rawId];
+        const source = sources[rawId];
         const chart = isRecord(charts) ? charts[difficulty] : null;
         const identity = isRecord(source) && isRecord(source.charts) ? source.charts[difficulty] : null;
         if (isRecord(chart) && isRecord(identity)) {

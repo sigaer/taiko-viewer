@@ -73,3 +73,12 @@ test("generated dataset has complete provenance and passed reference calibration
   assert.equal(rows.find(r => r.id === 100033 && r.difficulty === "oni")?.totalNotes, 362);
   assert.equal(rows.filter(r => r.id === 100000).length, 1);
 });
+
+test("runtime catalog supplements fill all shelves without replacing existing constants", () => {
+  for (const shelf_status of [0, 1, 2]) {
+    const catalog = [{ ...song, shelf_status }];
+    assert.equal(buildV2ConstantsRows({}, catalog, undefined, supplement)[0]?.mainConstant, 6);
+    assert.equal(buildV2ConstantsRows({ "100000": { hard: { ...chart, main_constant: 9 } } }, catalog, undefined, supplement)[0]?.mainConstant, 9);
+    assert.equal(buildV2ConstantsRows({}, [{ ...catalog[0], max_combo: [10,20,101] }], undefined, supplement).length, 0);
+  }
+});

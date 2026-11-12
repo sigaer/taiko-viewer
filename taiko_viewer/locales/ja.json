@@ -54,7 +54,7 @@
     "songs": "楽曲一覧",
     "songsTab": "楽曲",
     "songsAvailable": "実装曲",
-    "songsRemoved": "未実装・削除曲",
+    "songsRemoved": "中国版未収録曲",
     "songsOther": "その他の楽曲",
     "v2Constants": "V2 定数",
     "grade": "段位情報",
@@ -542,7 +542,7 @@
     "searchPlaceholder": "楽曲名・分類で検索",
     "catalogDesc": "ジャケット、タイトル、分類情報を表示します。",
     "availableTitle": "実装曲",
-    "removedTitle": "削除曲",
+    "removedTitle": "中国版未収録曲",
     "version": "実装バージョン",
     "subtitle": "サブタイトル",
     "jpName": "日本語名",
@@ -812,10 +812,10 @@
         "panelDesc": "現在利用可能な楽曲を表示します。デフォルトでは実装日の新しい順です。"
       },
       "removed": {
-        "title": "削除曲",
-        "desc": "中国版太鼓の達人から削除された楽曲のアーカイブです。",
-        "keyword": "削除曲",
-        "panelDesc": "削除済みの楽曲を表示します。曲名と分類で検索できます。"
+        "title": "中国版未収録曲",
+        "desc": "中国版太鼓の達人の未収録曲と配信終了曲です。",
+        "keyword": "中国版未収録曲",
+        "panelDesc": "中国版の未収録曲・配信終了曲。"
       },
       "other": {
         "title": "その他の楽曲",

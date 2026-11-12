@@ -5,6 +5,7 @@ import type {
   V2ConstantsSortKey
 } from "~/types/content";
 import { getSongCatalog } from "./songs";
+import { getCatalogConstants } from "./catalogConstants";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
 import consoleSupplement from "~/assets/data/v2_console_constants.json";
@@ -150,13 +151,14 @@ const parsePositiveInteger = (value: unknown, fallback: number) => {
 };
 
 const getV2ConstantsRowsSnapshot = async () => {
-  const [source, localSongs] = await Promise.all([
+  const [source, localSongs, catalogSupplement] = await Promise.all([
     getSourceSnapshot().catch(() => null),
-    getSongCatalog()
+    getSongCatalog(),
+    getCatalogConstants()
   ]);
   return {
-    rows: buildV2ConstantsRows(source?.snapshot.payload || {}, localSongs, consoleSupplement),
-    generatedAt: source?.snapshot.fetchedAt || consoleSupplement.generatedAt,
+    rows: buildV2ConstantsRows(source?.snapshot.payload || {}, localSongs, consoleSupplement, catalogSupplement || undefined),
+    generatedAt: source?.snapshot.fetchedAt || catalogSupplement?.generatedAt || consoleSupplement.generatedAt,
     fetchedAt: source?.snapshot.fetchedAt || "",
     stale: source?.stale ?? true
   };

@@ -1,5 +1,9 @@
 export type SongCatalogItem = {
   id: number;
+  official_id?: string;
+  ourtaiko_ids?: string[];
+  tja_path?: string;
+  audio_path?: string;
   song_name: string;
   song_name_jp?: string;
   subtitle?: string;

@@ -17,7 +17,8 @@ test("V2 service and CSV share remote priority and survive a cold source outage"
     }
     return song;
   });
-  catalog.push({ id: 1, song_name: 'CSV, "Song"\nTitle', type: "test", shelf_status: 0 });
+  catalog.push({ id: 1, song_name: 'CSV, "Song"\nTitle', type: "test", shelf_status: 0,
+    level_4: 8, max_combo: ["-", "-", "-", 100, "-"] });
   const base = { totalNotes: 100, sub_constant_1: 5, main_constant: 6, sub_constant_2: 7,
     stamina: 0, handspeed: 3, burst: 4, complex: 5, rhythm: 6 };
   const payload = { "1": { oni: base }, "100001": { oni: { ...dataset.constants["100001"].oni, main_constant: 9 } } };
@@ -37,7 +38,7 @@ test("V2 service and CSV share remote priority and survive a cold source outage"
       data: { payload, fetchedAt, expiresAt: Date.now() + 3600000 } }));
     let calls = 0;
     let directory = `${out}/cached`;
-    globalThis.useRuntimeConfig = () => ({ viewerCacheDir: directory, v2ConstantsUrl: "https://source.invalid/constants" });
+    globalThis.useRuntimeConfig = () => ({ repoRoot: out, public: {}, viewerCacheDir: directory, v2ConstantsUrl: "https://source.invalid/constants" });
     globalThis.$fetch = async () => { calls++; throw new Error("source unavailable"); };
     globalThis.createError = value => Object.assign(new Error(value.statusMessage), value);
     const service = await import(`${out}/service.mjs?cached`);
@@ -61,6 +62,16 @@ test("V2 service and CSV share remote priority and survive a cold source outage"
     assert.equal(fallbackCsv.body.split("\n").filter(line => /^100\d{3},/.test(line)).length, 291);
     assert.equal((await offline.getSongV2ConstantsPayload(100033)).items.find(r => r.difficulty === "oni").totalNotes, 362);
     assert.equal(calls, 1, "cold outages must observe retry backoff");
+    await mkdir(`${out}/songs`);
+    await writeFile(`${out}/songs/catalog_constants.json`, JSON.stringify({ generatedAt: fetchedAt,
+      constants: { "1": { oni: base } },
+      provenance: { "1": { charts: { oni: { course: "oni", branch: "master", catalogNotes: 100, catalogLevel: 8 } } } }
+    }));
+    assert.equal((await offline.getV2ConstantsPayload()).total, 292);
+    assert.equal((await offline.getSongV2ConstantsPayload(1)).items[0].mainConstant, 6);
+    assert.ok((await offline.getV2ConstantsCsvDataset()).body.includes('1,"CSV, ""Song""\nTitle",oni,100,'));
+    await writeFile(`${out}/songs/catalog_constants.json`, "{");
+    assert.equal((await offline.getSongV2ConstantsPayload(1)).items[0].mainConstant, 6, "bad publications retain the last valid runtime generation");
   } finally {
     for (const [name, value] of Object.entries(globals)) {
       if (value === undefined) delete globalThis[name]; else globalThis[name] = value;
