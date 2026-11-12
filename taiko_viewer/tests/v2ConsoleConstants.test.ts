@@ -82,3 +82,13 @@ test("runtime catalog supplements fill all shelves without replacing existing co
     assert.equal(buildV2ConstantsRows({}, [{ ...catalog[0], max_combo: [10,20,101] }], undefined, supplement).length, 0);
   }
 });
+
+test("platform constants follow a merged arcade ID with canonical source priority", () => {
+  const renamed = { ...song, id: 1530, legacy_ids: [song.id], shelf_status: 1 };
+  const rebased = buildV2ConstantsRows({}, [renamed], supplement);
+  assert.equal(rebased[0]?.id, 1530);
+  assert.equal(rebased[0]?.mainConstant, 6);
+  const remote = { [song.id]: { hard: { ...chart, main_constant: 7 } },
+                   '1530': { hard: { ...chart, main_constant: 9 } } };
+  assert.equal(buildV2ConstantsRows(remote, [renamed], supplement)[0]?.mainConstant, 9);
+});

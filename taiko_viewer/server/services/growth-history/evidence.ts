@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { normalizeCatalogScores } from "../../infrastructure/catalog-identity.ts";
+import { getContentRuntimePaths } from "../content/runtime";
 import type { GrowthSnapshot } from "~/utils/dailyProgress";
 import { growthCalendarDay } from "~/utils/playerGrowth";
 import type { LegacyScorePayload as UserdataPayload, LegacyScoreRecord as UserdataSong, ScoreReadPort } from "../../domain/score-read-contract.ts";
@@ -111,7 +113,7 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
     for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
       try {
         if (raw === null) { invalidFiles += 1; continue; }
-        const payload = JSON.parse(raw) as UserdataPayload;
+        const payload = await normalizeCatalogScores(JSON.parse(raw) as UserdataPayload, getContentRuntimePaths().repoRoot);
         if (!Array.isArray(payload.songs)) { invalidFiles += 1; continue; }
         const meta = payload._meta && typeof payload._meta === "object" ? payload._meta as Record<string, unknown> : {};
         const timestamp = snapshotTimestamp(meta.observed_at || meta.observedAt || meta.synced_at || meta.ts || fileTimestamp(name));

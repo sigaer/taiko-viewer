@@ -32,6 +32,11 @@ export const getSongCatalog = async () => {
   return result.data;
 };
 
+export const resolveCatalogSongId = async (id: number) => {
+  const songs = await getSongCatalog();
+  return Number(songs.find(song => Number(song.id) === id || song.legacy_ids?.includes(id))?.id ?? id);
+};
+
 export const getRatingEntries = async () => {
   const { ratingStructPath } = getContentRuntimePaths();
   const result = await readCachedJsonFile<{ songs?: Record<string, RatingContentItem> | RatingContentItem[] }>(
@@ -125,6 +130,7 @@ export const getSongCatalogPagePayload = async (options: SongCatalogPageOptions)
 };
 
 export const getSongDetailPayload = async (songId: number): Promise<SongDetailPayload> => {
+  songId = await resolveCatalogSongId(songId);
   const [songs, ratingEntries, branchAudioVariants, tjaBundleUrl] = await Promise.all([
     getSongCatalog(),
     getRatingEntries(),

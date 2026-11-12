@@ -29,7 +29,7 @@ test("V2 service and CSV share remote priority and survive a cold source outage"
       plugins: [{ name: "catalog-fixture", setup(builder) {
         builder.onResolve({ filter: /^\.\/songs$/ }, () => ({ path: "catalog", namespace: "fixture" }));
         builder.onLoad({ filter: /^catalog$/, namespace: "fixture" }, () => ({
-          contents: `export const getSongCatalog = async () => ${JSON.stringify(catalog)};`, loader: "js"
+          contents: `const catalog = ${JSON.stringify(catalog)}; export const getSongCatalog = async () => catalog; export const resolveCatalogSongId = async id => catalog.find(s => s.id === id || s.legacy_ids?.includes(id))?.id ?? id;`, loader: "js"
         }));
       } }] });
     await mkdir(`${out}/cached`);

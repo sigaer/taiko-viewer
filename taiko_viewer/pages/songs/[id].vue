@@ -50,6 +50,9 @@ const [songDetailState, chartUgcState] = await Promise.all([
   useChartUgc(songId, selectedDifficultyCode)
 ]);
 const { data: songDetail, pending, error } = songDetailState;
+if (songDetail.value.song && Number(songDetail.value.song.id) !== songId.value) {
+  await navigateTo(localePath({ path: `/songs/${songDetail.value.song.id}`, query: route.query }), { redirectCode: 301, replace: true });
+}
 const {
   publicSummary: chartUgcSummary,
   viewerState: chartUgcViewerState,

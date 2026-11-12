@@ -2,6 +2,7 @@ import { open } from "node:fs/promises";
 import { constants } from "node:fs";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
+import { normalizeCatalogScores } from "../catalog-identity.ts";
 import { createFileScoreReader, assertScoreIdentity } from "../../domain/file-score-reader.ts";
 import { SCORE_READ_VERSION, type LegacyScorePayload, type ScoreReadPort } from "../../domain/score-read-contract.ts";
 import { PublicationUnavailableError, type PublicationManifest, type PublicationReference } from "./client.ts";
@@ -63,6 +64,7 @@ export function createPublicationScoreReader(input: Input): ScoreReadPort {
       let current: LegacyScorePayload;
       try { current = JSON.parse(raw) as LegacyScorePayload; }
       catch (error) { if (input.view()) throw new PublicationUnavailableError(); throw error; }
+      current = await normalizeCatalogScores(current, resolve(input.root, ".."));
       return { contractVersion: SCORE_READ_VERSION, current,
         raw, revision: createHash("sha256").update(raw).digest("hex"), capturedAt: input.now() };
     },

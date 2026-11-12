@@ -20,6 +20,8 @@ Viewer 1.0.0收口My Viewer、Community、Training和Progress四条产品主线�
 
 曲库由 `/home/sigaer/taiko-bot` 的中心更新任务维护，Viewer 和 Bot 共用 `songs/song_data.json`。OurTaiko 新增曲目使用虹 ID 或原有其他平台 ID 段；`official_id` 仅记录。已验证的 `tja_path` 同时用于下载谱面与音频，不再为新增曲目重复推测匹配。没有资源的歌曲仍可浏览。
 
+重复曲目与平台转入街机统一归并到新 ID，旧编号记录在权威曲库的 `legacy_ids`。旧详情地址跳转到新地址，旧编号下的定数与公开引用归入新曲目。成绩读取按同一映射解释历史 ID，保留原始成绩及历史文件的字节、哈希和时间。每日更新以 OurTaiko 全量接口加无文件条目为主，与 TaikoWiki 补充源取并集，国行状态以华立列表为准。
+
 `songs/catalog_constants.json` 是中心补算的 V2 定数和校验证据。Viewer 按文件更新时间读取，仅填补远端和已有主机定数中的空缺；导出的 `constants_id_v2.csv` 与网页使用同一份合并结果，三种上架分类均可补齐。不得以此文件覆盖已有定数。
 
 ## Common Commands

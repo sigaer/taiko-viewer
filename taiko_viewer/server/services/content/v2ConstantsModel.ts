@@ -1,4 +1,5 @@
 import type { SongCatalogItem, V2ConstantsDifficulty, V2ConstantsItem } from "../../../types/content";
+import { buildSongIdentityMap, canonicalSongId, type SongIdentityMap } from "../../domain/catalog-identity.ts";
 
 export type RemoteChart = {
   totalNotes?: unknown;
@@ -33,6 +34,20 @@ const toFiniteNumber = (value: unknown) => {
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+const canonicalSources = (values: Record<string, unknown>, identities: SongIdentityMap) => {
+  const result: Record<string, unknown> = {};
+  const entries = Object.entries(values).sort(([left], [right]) => Number(identities.has(Number(left))) - Number(identities.has(Number(right))));
+  for (const [old, value] of entries) {
+    const id = String(canonicalSongId(Number(old), identities)), existing = result[id];
+    if (existing === undefined) result[id] = value;
+    else if (isRecord(existing) && isRecord(value)) {
+      result[id] = { ...value, ...existing,
+        ...(isRecord(value.charts) && isRecord(existing.charts) ? { charts: { ...value.charts, ...existing.charts } } : {}) };
+    }
+  }
+  return result;
+};
 
 const normalizeChart = (
   id: number,
@@ -93,11 +108,12 @@ export const buildV2ConstantsRows = (
       .filter((entry): entry is readonly [number, SongCatalogItem] => entry[0] !== null)
   );
   const rows: V2ConstantsItem[] = [];
-
-  const supplemental = isRecord(supplement?.constants) ? supplement.constants : {};
-  const provenance = isRecord(supplement?.provenance) ? supplement.provenance : {};
-  const catalogConstants = isRecord(catalogSupplement?.constants) ? catalogSupplement.constants : {};
-  const catalogProvenance = isRecord(catalogSupplement?.provenance) ? catalogSupplement.provenance : {};
+  const identities = buildSongIdentityMap(localSongs);
+  payload = canonicalSources(payload, identities) as RemoteConstantsPayload;
+  const supplemental = canonicalSources(isRecord(supplement?.constants) ? supplement.constants : {}, identities);
+  const provenance = canonicalSources(isRecord(supplement?.provenance) ? supplement.provenance : {}, identities);
+  const catalogConstants = canonicalSources(isRecord(catalogSupplement?.constants) ? catalogSupplement.constants : {}, identities);
+  const catalogProvenance = canonicalSources(isRecord(catalogSupplement?.provenance) ? catalogSupplement.provenance : {}, identities);
   const ids = new Set([...Object.keys(payload), ...Object.keys(supplemental), ...Object.keys(catalogConstants)]);
   for (const rawId of ids) {
     const difficultyMap = payload[rawId];
@@ -123,7 +139,7 @@ export const buildV2ConstantsRows = (
       // Every supplement must prove its current single-player chart identity.
       // Existing remote and verified console values retain priority.
       for (const [values, sources] of [
-        ...(Number(localSong.shelf_status) === 2 ? [[supplemental, provenance]] : []),
+        ...(Number(localSong.shelf_status) === 2 || localSong.legacy_ids?.length ? [[supplemental, provenance]] : []),
         [catalogConstants, catalogProvenance]
       ]) {
         if (row) break;

@@ -4,7 +4,7 @@ import type {
   V2ConstantsPayload,
   V2ConstantsSortKey
 } from "~/types/content";
-import { getSongCatalog } from "./songs";
+import { getSongCatalog, resolveCatalogSongId } from "./songs";
 import { getCatalogConstants } from "./catalogConstants";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
 
@@ -165,6 +165,7 @@ const getV2ConstantsRowsSnapshot = async () => {
 };
 
 export const getSongV2ConstantsPayload = async (songId: number) => {
+  songId = await resolveCatalogSongId(songId);
   const snapshot = await getV2ConstantsRowsSnapshot();
   return { items: snapshot.rows.filter((row) => row.id === songId) };
 };

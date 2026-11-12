@@ -1,5 +1,8 @@
 export type SongCatalogItem = {
   id: number;
+  legacy_ids?: number[];
+  nijiiro_id?: number | null;
+  wiki_song_nos?: string[];
   official_id?: string;
   ourtaiko_ids?: string[];
   tja_path?: string;
