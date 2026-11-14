@@ -1,7 +1,7 @@
 export const tjaCalculatorCopy = {
   zh: {
-    title: 'TJA 定数计算', choose: '选择 TJA 文件', drop: '拖入一个 TJA 文件',
-    limits: '单个 .tja · 最大 512 KB', privacy: '谱面仅用于本次计算，不保存、不公开。',
+    title: 'TJA 定数与谱面图', choose: '选择 TJA 文件', drop: '拖入一个 TJA 文件',
+    limits: '单个 .tja · 最大 512 KB', privacy: '谱面图在浏览器生成；定数计算不保存、不公开谱面。',
     encoding: '文件编码', auto: '自动识别', start: '计算定数', retry: '重新计算', change: '更换文件',
     calculating: '正在解析谱面并计算定数…', wait: '通常几秒内完成，复杂谱面最多等待 30 秒。',
     cancel: '取消等待', cancelled: '已取消等待，可稍后重新计算。',
@@ -12,7 +12,12 @@ export const tjaCalculatorCopy = {
     source: '算法来源：OurTaiko / Constants', unsupported: '该谱面暂时无法计算',
     courses: { easy: '简单', normal: '一般', hard: '困难', oni: '魔王', edit: '里魔王', tower: '塔', dan: '段位' },
     branches: { unbranched: '无分支', normal: '普通', expert: '玄人', master: '达人' },
+    image: { title: '谱面图片', reading: '正在读取谱面…', single: '单人', displayTitle: '显示曲名',
+      generate: '生成谱面图', again: '重新生成', rendering: '正在生成谱面图…', download: '下载 PNG',
+      open: '查看原图', preview: '谱面图预览', reread: '重新读取谱面' },
     errors: {
+      image_failed: '无法生成谱面图，请检查谱面内容后重试。', image_size: '谱面图片过大或小节长度异常，请缩短谱面后重试。',
+      image_timeout: '谱面图片生成超时，请重新读取或尝试较短的谱面。', image_cancelled: '已取消生成，可重新读取谱面。',
       file_type: '请选择 .tja 格式的谱面文件。', file_count: '一次只能选择一个 TJA 文件。',
       file_size: '文件为空或超过 512 KB，请选择较小的 TJA 文件。',
       encoding: '无法识别文件编码，请手动选择编码后重试。',
@@ -26,8 +31,8 @@ export const tjaCalculatorCopy = {
     }
   },
   ja: {
-    title: 'TJA 定数計算', choose: 'TJA ファイルを選択', drop: 'TJA ファイルをドロップ',
-    limits: '.tja 1 ファイル・最大 512 KB', privacy: '譜面は計算のみに使用し、保存・公開しません。',
+    title: 'TJA 定数・譜面画像', choose: 'TJA ファイルを選択', drop: 'TJA ファイルをドロップ',
+    limits: '.tja 1 ファイル・最大 512 KB', privacy: '画像はブラウザで生成します。定数計算でも譜面は保存・公開しません。',
     encoding: '文字コード', auto: '自動判定', start: '定数を計算', retry: '再計算', change: 'ファイルを変更',
     calculating: '譜面を解析・計算しています…', wait: '通常は数秒、複雑な譜面は最大 30 秒ほどかかります。',
     cancel: '待機をキャンセル', cancelled: '待機をキャンセルしました。しばらくしてから再試行できます。',
@@ -38,7 +43,12 @@ export const tjaCalculatorCopy = {
     source: 'アルゴリズム：OurTaiko / Constants', unsupported: 'この譜面は計算できません',
     courses: { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに', edit: '裏おに', tower: 'タワー', dan: '段位' },
     branches: { unbranched: '分岐なし', normal: '普通', expert: '玄人', master: '達人' },
+    image: { title: '譜面画像', reading: '譜面を読み込んでいます…', single: 'シングル', displayTitle: '表示曲名',
+      generate: '譜面画像を生成', again: '再生成', rendering: '譜面画像を生成しています…', download: 'PNG をダウンロード',
+      open: '元画像を開く', preview: '譜面画像プレビュー', reread: '譜面を再読み込み' },
     errors: {
+      image_failed: '譜面画像を生成できません。譜面を確認して再試行してください。', image_size: '画像が大きすぎるか、小節の長さが不正です。譜面を短くして再試行してください。',
+      image_timeout: '画像生成がタイムアウトしました。再読み込みするか、短い譜面でお試しください。', image_cancelled: '画像生成をキャンセルしました。譜面を再読み込みできます。',
       file_type: '.tja 形式の譜面ファイルを選択してください。', file_count: '一度に選択できるのは 1 ファイルです。',
       file_size: 'ファイルが空か、512 KB を超えています。', encoding: '文字コードを選択して再試行してください。',
       invalid_tja: '有効な譜面を読み取れません。#START / #END が揃っているか確認してください。',

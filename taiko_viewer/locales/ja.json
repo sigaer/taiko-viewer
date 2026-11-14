@@ -718,7 +718,7 @@
     }
   },
   "tools": {
-    "tjaConstants": "TJA 定数計算",
+    "tjaConstants": "TJA 定数・譜面画像",
     "rtCalculator": "単曲 RT 計算",
     "title": "譜面ツール",
     "chartConfig": "配置検索",

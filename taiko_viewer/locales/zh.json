@@ -719,7 +719,7 @@
     }
   },
   "tools": {
-    "tjaConstants": "TJA 定数计算",
+    "tjaConstants": "TJA 定数与谱面图",
     "rtCalculator": "单曲 RT 计算器",
     "title": "查谱工具",
     "chartConfig": "查配置",

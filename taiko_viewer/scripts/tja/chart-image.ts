@@ -21,9 +21,54 @@ function initialize() {
   return Promise.all([initUsedSprite(), font.load().then(face => document.fonts.add(face))]);
 }
 
-export async function renderCatalogChart(input: Request) {
+function parse(text: string) {
+  // The pinned parser logs full chart trees; keep these out of browser consoles.
+  const log = console.log;
+  try { console.log = () => {}; return parseTJA(normalizeCatalogTja(text)); }
+  finally { console.log = log; }
+}
+
+const courseNames = ['easy', 'normal', 'hard', 'oni', 'edit', 'tower', 'dan'];
+export function inspectTjaImage(text: string) {
+  const chart = parse(text);
+  if (!chart.courses.length) throw new Error('invalid_tja');
+  return { title: String(chart.headers.title || '').slice(0, 200), courses: chart.courses.map((course, index) => ({
+    index, course: courseNames[course.headers.course] || 'unknown',
+    side: course.headers.style > 1 ? `p${course.headers.startPlayer}` : 'single', level: Number(course.headers.level)
+  })) };
+}
+
+export async function renderSelectedChart(text: string, index: number, title: string) {
+  const chart = parse(text);
+  if (!Number.isInteger(index) || !chart.courses[index]) throw new Error('invalid_tja');
+  const course = chart.courses[index];
+  // Bound layout work as well as canvas allocation for user supplied measures.
+  if (course.measures.length > 2000) throw new Error('image_size');
+  for (const measure of course.measures) {
+    for (const length of [measure.length, measure.lengthNotes]) {
+      if (!length || !length.every(value => Number.isFinite(value) && Math.abs(value) >= 1 / 1024 && Math.abs(value) <= 1024)
+        || Math.abs(length[0] / length[1]) > 64) throw new Error('image_size');
+    }
+  }
+  return renderParsedChart(chart, index, title);
+}
+
+async function renderParsedChart(chart: ReturnType<typeof parse>, index: number, title: string) {
   await (ready ||= initialize());
-  const chart = parseTJA(normalizeCatalogTja(input.text));
+  const course = chart.courses[index];
+  chart.headers.title = title.slice(0, 200);
+  chart.headers.font = 'sans-serif';
+  course.headers.ttRowBeat = 16;
+  const canvas = drawChart(chart, index);
+  try {
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('PNG export failed')), 'image/png'));
+    if (blob.size > 12 * 1024 * 1024) throw new Error('PNG exceeds image budget');
+    return { blob, width: canvas.width, height: canvas.height, bytes: blob.size, title: chart.headers.title };
+  } finally { canvas.width = 1; canvas.height = 1; }
+}
+
+export async function renderCatalogChart(input: Request) {
+  const chart = parse(input.text);
   const difficulty = ['easy', 'normal', 'hard', 'oni', 'edit'].indexOf(input.course);
   const side = input.side || 'single';
   const candidates = chart.courses.map((course, index) => ({ course, index })).filter(({ course }) =>
@@ -49,16 +94,9 @@ export async function renderCatalogChart(input: Request) {
     }
   }
   if (input.notes && notes !== input.notes) throw new Error(`Note identity mismatch: ${notes}/${input.notes}`);
-  // Only presentation changes; the verified original file stays byte-identical.
-  chart.headers.title = input.title;
-  chart.headers.font = 'sans-serif';
-  course.headers.ttRowBeat = 16;
-  const canvas = drawChart(chart, index);
-  try {
-    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('PNG export failed')), 'image/png'));
-    if (blob.size > 12 * 1024 * 1024) throw new Error('PNG exceeds image budget');
-    const response = await fetch(input.upload, { method: 'POST', body: blob, headers: { 'Content-Type': 'image/png' } });
-    if (!response.ok) throw new Error('PNG publication failed');
-    return { width: canvas.width, height: canvas.height, bytes: blob.size, notes, title: chart.headers.title };
-  } finally { canvas.width = 1; canvas.height = 1; }
+  // The batch publisher and interactive tool share the exact same renderer.
+  const { blob, ...metadata } = await renderParsedChart(chart, index, input.title);
+  const response = await fetch(input.upload, { method: 'POST', body: blob, headers: { 'Content-Type': 'image/png' } });
+  if (!response.ok) throw new Error('PNG publication failed');
+  return { ...metadata, notes };
 }

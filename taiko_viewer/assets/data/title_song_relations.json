@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-22T02:04:30.344664+00:00",
+  "generated_at": "2026-11-14T01:54:32.868025+00:00",
   "stats": {
     "rows_total": 866,
-    "api_relations_total": 634,
-    "relations_total": 732,
-    "songs_total": 453,
-    "titles_total": 542
+    "api_relations_total": 647,
+    "relations_total": 745,
+    "songs_total": 457,
+    "titles_total": 549
   },
   "relations": [
     {
@@ -5761,6 +5761,38 @@
       "source_row_index": 1027
     },
     {
+      "song_name": "地狱的大王",
+      "title_name": "地獄の大王",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《地狱的大王》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1032
+    },
+    {
+      "song_name": "地狱的大王",
+      "title_name": "地獄の大王",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+      "source_row_index": 1033
+    },
+    {
+      "song_name": "地狱的大王",
+      "title_name": "地獄の大王",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《地狱的大王》的“魔王”难度下达成通关吧",
+      "source_row_index": 1034
+    },
+    {
+      "song_name": "地狱的大王",
+      "title_name": "これにて一件落着",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+      "source_row_index": 1035
+    },
+    {
       "song_name": "钝响Likelihood",
       "title_name": "鈍響ライクリフド",
       "requirement_type": "all_perfect",
@@ -5823,6 +5855,78 @@
       "difficulty_scope": "oni",
       "condition_text": "在《活声Likelihood》的“魔王”难度下达成全连吧",
       "source_row_index": 1047
+    },
+    {
+      "song_name": "I am not Alice",
+      "title_name": "過ぎゆく幼い思い出",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《I am not Alice.》的“魔王”难度下达成全连吧",
+      "source_row_index": 1060
+    },
+    {
+      "song_name": "Cycle of Rebirth",
+      "title_name": "サイクル・オブ・リバース",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1061
+    },
+    {
+      "song_name": "Cycle of Rebirth",
+      "title_name": "サイクル・オブ・リバース",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+      "source_row_index": 1062
+    },
+    {
+      "song_name": "Cycle of Rebirth",
+      "title_name": "サイクル・オブ・リバース",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成通关吧",
+      "source_row_index": 1063
+    },
+    {
+      "song_name": "Cycle of Rebirth",
+      "title_name": "全国おみこしバトル 制覇",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+      "source_row_index": 1064
+    },
+    {
+      "song_name": "Shanimuni Hanabi",
+      "title_name": "シャニムニ花火",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1073
+    },
+    {
+      "song_name": "Shanimuni Hanabi",
+      "title_name": "シャニムニ花火",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+      "source_row_index": 1074
+    },
+    {
+      "song_name": "Shanimuni Hanabi",
+      "title_name": "シャニムニ花火",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成通关吧",
+      "source_row_index": 1075
+    },
+    {
+      "song_name": "Shanimuni Hanabi",
+      "title_name": "ただひたすらに、すきなことだけ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+      "source_row_index": 1076
     },
     {
       "song_name": "Purple Rose Fusion",
@@ -6526,6 +6630,36 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Cutie☆Demonic☆MAJIN EMO!!》的“魔王”难度下达成全连吧",
         "source_row_index": 448
+      }
+    ],
+    "Cycle of Rebirth": [
+      {
+        "title_name": "サイクル・オブ・リバース",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1061
+      },
+      {
+        "title_name": "サイクル・オブ・リバース",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+        "source_row_index": 1062
+      },
+      {
+        "title_name": "サイクル・オブ・リバース",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成通关吧",
+        "source_row_index": 1063
+      },
+      {
+        "title_name": "全国おみこしバトル 制覇",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+        "source_row_index": 1064
       }
     ],
     "D's Adventure Note": [
@@ -7257,6 +7391,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Hyper☆Memorizing Show!》的“魔王”难度下达成通关吧",
         "source_row_index": 796
+      }
+    ],
+    "I am not Alice": [
+      {
+        "title_name": "過ぎゆく幼い思い出",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《I am not Alice.》的“魔王”难度下达成全连吧",
+        "source_row_index": 1060
       }
     ],
     "IA曲": [
@@ -8473,6 +8616,36 @@
         "source_row_index": 602
       }
     ],
+    "Shanimuni Hanabi": [
+      {
+        "title_name": "シャニムニ花火",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1073
+      },
+      {
+        "title_name": "シャニムニ花火",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+        "source_row_index": 1074
+      },
+      {
+        "title_name": "シャニムニ花火",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成通关吧",
+        "source_row_index": 1075
+      },
+      {
+        "title_name": "ただひたすらに、すきなことだけ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+        "source_row_index": 1076
+      }
+    ],
     "SHOUYU de Show you!": [
       {
         "title_name": "卵には醤油派",
@@ -9431,18 +9604,18 @@
         "source_row_index": 1010
       },
       {
-        "title_name": "ZOMEKI THUNDER",
-        "requirement_type": "clear",
-        "difficulty_scope": "oni",
-        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成通关吧",
-        "source_row_index": 1011
-      },
-      {
         "title_name": "雷鳴の囃子方",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
         "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成全连吧",
         "source_row_index": 1012
+      },
+      {
+        "title_name": "ZOMEKI THUNDER",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《ZOMEKI THUNDER》的“魔王”难度下达成通关吧",
+        "source_row_index": 1011
       }
     ],
     "λ7708": [
@@ -10341,6 +10514,36 @@
         "difficulty_scope": "oni",
         "condition_text": "在《喜欢是不需要理由的！》的“魔王”难度下达成全连吧",
         "source_row_index": 631
+      }
+    ],
+    "地狱的大王": [
+      {
+        "title_name": "地獄の大王",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1032
+      },
+      {
+        "title_name": "地獄の大王",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+        "source_row_index": 1033
+      },
+      {
+        "title_name": "地獄の大王",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成通关吧",
+        "source_row_index": 1034
+      },
+      {
+        "title_name": "これにて一件落着",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+        "source_row_index": 1035
       }
     ],
     "夏龙 ～Karyu～": [
@@ -11653,18 +11856,18 @@
         "source_row_index": 1018
       },
       {
-        "title_name": "マルトーアンフェール",
-        "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成通关吧",
-        "source_row_index": 1019
-      },
-      {
         "title_name": "Marteau en fer",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
         "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 1020
+      },
+      {
+        "title_name": "マルトーアンフェール",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《铁锤》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1019
       }
     ],
     "闇之魂": [
@@ -13578,6 +13781,15 @@
         "source_row_index": 1027
       }
     ],
+    "これにて一件落着": [
+      {
+        "song_name": "地狱的大王",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+        "source_row_index": 1035
+      }
+    ],
     "ごはん派の達人": [
       {
         "song_name": "PAN vs GOHAN! DAIKESSEN!",
@@ -13728,6 +13940,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《远鼓的2000》的“魔王”难度下达成全连吧",
         "source_row_index": 557
+      }
+    ],
+    "ただひたすらに、すきなことだけ": [
+      {
+        "song_name": "Shanimuni Hanabi",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+        "source_row_index": 1076
       }
     ],
     "たつじんコース": [
@@ -14321,6 +14542,29 @@
         "source_row_index": 597
       }
     ],
+    "サイクル・オブ・リバース": [
+      {
+        "song_name": "Cycle of Rebirth",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1061
+      },
+      {
+        "song_name": "Cycle of Rebirth",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+        "source_row_index": 1062
+      },
+      {
+        "song_name": "Cycle of Rebirth",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成通关吧",
+        "source_row_index": 1063
+      }
+    ],
     "サファイア・オン・ファイア": [
       {
         "song_name": "Sapphire On Fire",
@@ -14337,6 +14581,29 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《LOVE战!!》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 630
+      }
+    ],
+    "シャニムニ花火": [
+      {
+        "song_name": "Shanimuni Hanabi",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1073
+      },
+      {
+        "song_name": "Shanimuni Hanabi",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成全连吧",
+        "source_row_index": 1074
+      },
+      {
+        "song_name": "Shanimuni Hanabi",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Shanimuni Hanabi》的“魔王”难度下达成通关吧",
+        "source_row_index": 1075
       }
     ],
     "シャレラの達人": [
@@ -15450,6 +15717,15 @@
         "source_row_index": 338
       }
     ],
+    "全国おみこしバトル 制覇": [
+      {
+        "song_name": "Cycle of Rebirth",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Cycle of Rebirth》的“魔王”难度下达成全连吧",
+        "source_row_index": 1064
+      }
+    ],
     "六華の舞の達人": [
       {
         "song_name": "六华之舞",
@@ -15714,6 +15990,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《红茶店「雨天」》的“魔王”难度下达成全连吧",
         "source_row_index": 576
+      }
+    ],
+    "地獄の大王": [
+      {
+        "song_name": "地狱的大王",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1032
+      },
+      {
+        "song_name": "地狱的大王",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成全连吧",
+        "source_row_index": 1033
+      },
+      {
+        "song_name": "地狱的大王",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《地狱的大王》的“魔王”难度下达成通关吧",
+        "source_row_index": 1034
       }
     ],
     "変幻自在の風魔": [
@@ -17639,6 +17938,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Clotho》的“魔王”难度下达成全连吧",
         "source_row_index": 413
+      }
+    ],
+    "過ぎゆく幼い思い出": [
+      {
+        "song_name": "I am not Alice",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《I am not Alice.》的“魔王”难度下达成全连吧",
+        "source_row_index": 1060
       }
     ],
     "道化師は終焉にて嗤う": [

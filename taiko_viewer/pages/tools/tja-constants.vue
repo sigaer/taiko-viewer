@@ -40,6 +40,7 @@ function selectCourse(course: string) {
 function selectFile(files: FileList | File[] | null) {
   if (loading.value || !files?.length) return;
   result.value = undefined; errorCode.value = ''; notice.value = ''; file.value = undefined;
+  selectedCourse.value = ''; selectedBranch.value = '';
   if (files.length !== 1) { errorCode.value = 'file_count'; return; }
   const candidate = files[0];
   if (!/\.tja$/i.test(candidate.name)) { errorCode.value = 'file_type'; return; }
@@ -100,7 +101,7 @@ onBeforeUnmount(() => { requestId++; controller?.abort(); });
         <button type="button" class="secondary" :disabled="loading" @click="input?.click()">{{ file ? copy.change : copy.choose }}</button>
       </div>
       <div class="upload-controls">
-        <label>{{ copy.encoding }}<select v-model="encoding" :disabled="loading" @change="result = undefined; notice = ''">
+        <label>{{ copy.encoding }}<select v-model="encoding" :disabled="loading" @change="result = undefined; notice = ''; selectedCourse = ''; selectedBranch = ''">
           <option value="auto">{{ copy.auto }}</option><option value="utf-8-sig">UTF-8</option><option value="cp932">Shift-JIS</option><option value="gb18030">GB18030</option>
         </select></label>
         <button type="button" class="primary" :disabled="!file || loading" @click="calculate">{{ result || errorCode ? copy.retry : copy.start }}</button>
@@ -138,6 +139,7 @@ onBeforeUnmount(() => { requestId++; controller?.abort(); });
       <p class="reference">{{ copy.reference }}</p>
       <a href="https://github.com/OurTaiko/Constants" target="_blank" rel="noopener noreferrer">{{ copy.source }} ↗</a>
     </section>
+    <ToolsTjaChartImageTool :file="file" :encoding="encoding" :preferred-course="selectedCourse" />
   </div>
 </template>
 

@@ -28,8 +28,8 @@ for (const [path, expected] of Object.entries(imageManifest.files)) {
   if (createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex') !== expected)
     throw new Error(`TJA Tools source identity mismatch: ${path}`);
 }
-await build({ entryPoints: [resolve(root, 'scripts/tja/chart-image.ts')], bundle: true, platform: 'browser',
-  format: 'iife', globalName: 'CatalogChartImage', outfile: resolve(output, 'chart-image.js'),
+await build({ entryPoints: { 'chart-image': resolve(root, 'scripts/tja/chart-image.ts'), 'image-frame': resolve(root, 'scripts/tja/image-frame.ts') }, bundle: true, platform: 'browser',
+  format: 'iife', globalName: 'CatalogChartImage', outdir: output,
   loader: { '.png': 'dataurl', '.ttf': 'dataurl' },
   plugins: [{ name: 'tja-tools-format-only', setup(builder) {
     // Upstream uses webpack's require('sprite.png').default convention.
