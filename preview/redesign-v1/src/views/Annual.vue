@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import Lane from '../components/Lane.vue'
 import Sheet from '../components/Sheet.vue'
@@ -9,7 +9,7 @@ import { store, L, toast, runSync, isAuthed, isReady } from '../store'
 // 年度回顾入口。故事本体只在手机上播放：桌面负责「预告 + 交接到手机」，手机负责「检查入场条件 + 开始」。
 const RANGE = '2026.01.01 – 2026.11.30'
 const LINK = 'viewer.sakura-bot.cn/annual/2026'
-const stripDays = laneDays.slice(-11)
+const stripDays = laneDays.slice(-14)
 const sel = ref(0)
 
 const CHAPTERS = computed(() => [
@@ -26,32 +26,22 @@ const POSTER = computed(() => [
   { v: '23', k: L('新全良', '新しい全良') },
 ])
 
-/* 入场条件：邀请码 → 登录 → 绑定 → 同步 */
+/* 入场条件：邀请码 → 登录 → 绑定 → 第一次同步（后三步与同步面板的清单一致） */
 const checklist = computed(() => {
   const a = store.auth
   const items = [
     { key: 'invite', label: L('邀请码', '招待コード'), done: true },
-    { key: 'login', label: L('登录', 'ログイン'), done: a !== 'guest', cta: L('登录', 'ログイン'), to: '/login' },
+    { key: 'login', label: L('登录 Viewer', 'Viewer にログイン'), done: a !== 'guest', cta: L('登录', 'ログイン'), to: '/login' },
     { key: 'bind', label: L('绑定鼓众广场 ID', '鼓衆広場 ID を連携'), done: a === 'empty' || a === 'ready', cta: L('去绑定', '連携する'), to: '/bind' },
-    { key: 'sync', label: L('同步成绩', '成績を同期'), done: a === 'ready', cta: L('开始同步', '同期を開始') },
+    { key: 'sync', label: L('第一次同步', '最初の同期'), done: a === 'ready', cta: L('开始同步', '同期を開始') },
   ]
   const next = items.find((i) => !i.done)
   return items.map((i) => ({ ...i, next: i === next }))
 })
-const syncAsked = ref(false)
+// 同步走全站状态机；第一次同步成功后由 store 把登录态切到「已同步」
 function sync() {
-  syncAsked.value = true
   runSync()
 }
-watch(
-  () => store.syncing,
-  (busy) => {
-    if (!busy && syncAsked.value) {
-      syncAsked.value = false
-      store.auth = 'ready'
-    }
-  },
-)
 function start() {
   toast(L('正在打开回顾…', 'ふりかえりを開いています…'), 'info')
 }
@@ -124,8 +114,8 @@ const QR = Array.from({ length: 441 }, (_, i) => {
         <section class="entry" :class="{ pending: !isReady }">
           <button type="button" class="btn btn-primary btn-lg btn-block start" :disabled="!isReady" @click="start">{{ L('开始回顾', 'ふりかえりを始める') }}</button>
           <ol class="checks" :aria-label="L('开始前的准备', '開始前の準備')">
-            <li v-for="c in checklist" :key="c.key" :class="{ done: c.done, next: c.next }">
-              <i class="note" :class="c.done ? 'ka' : c.next ? '' : 'ghost'" />
+            <li v-for="c in checklist" :key="c.key" :class="{ done: c.done, next: c.next }" :aria-current="c.next ? 'step' : undefined">
+              <i class="note" :class="c.done ? 'ka' : c.next ? '' : 'ghost'" aria-hidden="true" />
               <span class="grow">{{ c.label }}</span>
               <span v-if="c.done" class="ok"><Icon name="check" :size="16" /><span class="sr-only">{{ L('已完成', '完了') }}</span></span>
               <template v-else-if="c.next">
@@ -148,7 +138,7 @@ const QR = Array.from({ length: 441 }, (_, i) => {
                 <b v-else :lang="c.ja ? 'ja' : undefined">{{ c.text }}</b>
                 <span v-if="c.unit">{{ c.unit }}</span>
               </span>
-              <span v-else class="teaser faint">—</span>
+              <span v-else class="teaser"><span class="na">—</span></span>
             </li>
           </ol>
         </section>
@@ -180,7 +170,7 @@ const QR = Array.from({ length: 441 }, (_, i) => {
 
       <!-- 故事封面预览 -->
       <div class="stagecol">
-        <figure class="phone" :aria-label="L('回顾封面预览', 'ふりかえり表紙のプレビュー')">
+        <figure class="phone stage" :aria-label="L('回顾封面预览', 'ふりかえり表紙のプレビュー')">
           <p class="p-label">{{ L('虹 2026 太鼓回顾', '虹 2026 太鼓ふりかえり') }}</p>
           <div>
             <p class="num p-year">2026</p>
@@ -189,11 +179,12 @@ const QR = Array.from({ length: 441 }, (_, i) => {
               <b v-else>{{ L('你的 2026', 'あなたの 2026') }}</b>
             </p>
           </div>
-          <Lane v-model="sel" :days="stripDays" compact />
+          <Lane v-model="sel" :days="stripDays" compact :label="L('最近 14 天的练习', '直近 14 日のプレイ')" />
           <dl class="p-stats">
             <div v-for="s in POSTER" :key="s.k">
               <dt>{{ s.k }}</dt>
-              <dd class="num" :class="{ hi: s.hi && isReady }">{{ isReady ? s.v : '—' }}</dd>
+                <dd v-if="isReady" class="num" :class="{ hi: s.hi }">{{ s.v }}</dd>
+              <dd v-else class="na">—</dd>
             </div>
           </dl>
           <p class="num p-range">{{ RANGE }}</p>
@@ -390,8 +381,13 @@ const QR = Array.from({ length: 441 }, (_, i) => {
   border-color: var(--ink-3);
 }
 .share[disabled] {
-  opacity: 0.5;
+  border-style: dashed;
+  background: var(--bg-sunk);
+  color: var(--ink-3);
   pointer-events: none;
+}
+.share[disabled] b {
+  color: var(--ink-2);
 }
 .share .grow {
   display: flex;
@@ -425,8 +421,7 @@ const QR = Array.from({ length: 441 }, (_, i) => {
   min-height: 640px;
   padding: 52px 16px 24px;
   border-radius: 36px;
-  background: var(--lane);
-  color: var(--lane-ink);
+  /* 舞台面（I1）：.stage 提供深藍底与局部 --ink / --line；机身边框用舞台上的 --surface / --line-strong */
   box-shadow: 0 0 0 6px var(--surface), 0 0 0 7px var(--line-strong);
 }
 .phone::before {
@@ -439,16 +434,16 @@ const QR = Array.from({ length: 441 }, (_, i) => {
   height: 6px;
   margin-left: -36px;
   border-radius: var(--r-note);
-  background: var(--lane-line);
+  background: var(--line);
 }
 .phone :deep(.lane) {
-  border: 1px solid var(--lane-line);
+  border: 1px solid var(--line);
 }
 .p-label {
   padding: 0 4px;
   font-size: var(--fs-13);
   font-weight: 700;
-  color: color-mix(in srgb, var(--lane-ink) 70%, transparent);
+  color: var(--ink-2);
 }
 .p-year {
   padding: 0 4px;
@@ -465,27 +460,27 @@ const QR = Array.from({ length: 441 }, (_, i) => {
   margin-top: 12px;
   padding: 0 4px;
   font-size: var(--fs-13);
-  color: color-mix(in srgb, var(--lane-ink) 70%, transparent);
+  color: var(--ink-2);
 }
 .p-name b {
   font-size: var(--fs-22);
   font-weight: 900;
-  color: var(--lane-ink);
+  color: var(--ink);
 }
 .p-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--lane-line);
+  border-top: 1px solid var(--line);
 }
 .p-stats div {
   display: flex;
   flex-direction: column-reverse;
   padding: 14px 4px 12px;
-  border-bottom: 1px solid var(--lane-line);
+  border-bottom: 1px solid var(--line);
 }
 .p-stats div:nth-child(even) {
   padding-left: 16px;
-  border-left: 1px solid var(--lane-line);
+  border-left: 1px solid var(--line);
 }
 .p-stats dd {
   font-size: var(--fs-36);
@@ -493,17 +488,20 @@ const QR = Array.from({ length: 441 }, (_, i) => {
   line-height: 1;
 }
 .p-stats dd.hi {
-  color: var(--roll);
+  color: var(--roll-ink);
 }
 .p-stats dt {
   margin-top: 6px;
   font-size: var(--fs-12);
-  color: color-mix(in srgb, var(--lane-ink) 60%, transparent);
+  color: var(--ink-2);
+}
+.p-stats dd.na {
+  color: var(--ink-2);
 }
 .p-range {
   padding: 0 4px;
   font-size: var(--fs-13);
-  color: color-mix(in srgb, var(--lane-ink) 50%, transparent);
+  color: var(--ink-2);
 }
 
 @media (max-width: 1099px) {

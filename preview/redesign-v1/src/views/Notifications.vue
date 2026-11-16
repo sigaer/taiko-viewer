@@ -1,12 +1,15 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import EmptyLane from '../components/EmptyLane.vue'
+import PlayerAvatar from '../components/PlayerAvatar.vue'
+import { useQueryState } from '../routeState'
 import { notifications, users } from '../mock/data'
 import { store, L, toast } from '../store'
 
-// 本地副本：已读状态只在这一页内变化。
+// 本地副本：已读状态只在这一页内变化。筛选与已展开的条数写进地址（R2 / R3）。
+const PAGE = 20
 const items = ref(notifications.map((n) => ({ ...n })))
 const FILTERS = [
   { key: 'all', zh: '全部', ja: 'すべて' },
@@ -21,17 +24,33 @@ const TYPE = {
   like: { zh: '赞', ja: 'いいね', icon: 'heart' },
   system: { zh: '系统', ja: 'システム', icon: 'bell' },
 }
-const filter = ref('all')
-const current = computed(() => FILTERS.find((f) => f.key === filter.value))
-const list = computed(() => (filter.value === 'all' ? items.value : items.value.filter((n) => n.type === filter.value)))
-const unread = computed(() => items.value.filter((n) => n.unread).length)
-const unreadOf = (key) => items.value.filter((n) => n.unread && (key === 'all' || n.type === key)).length
+const qs = useQueryState({
+  type: { type: 'string', default: 'all', values: FILTERS.map((f) => f.key) },
+  n: { type: 'number', default: PAGE },
+})
+watch(
+  () => qs.type,
+  () => (qs.n = PAGE),
+)
+const current = computed(() => FILTERS.find((f) => f.key === qs.type) || FILTERS[0])
+const list = computed(() => (qs.type === 'all' ? items.value : items.value.filter((n) => n.type === qs.type)))
+const shown = computed(() => list.value.slice(0, Math.max(PAGE, qs.n)))
+const remaining = computed(() => list.value.length - shown.value.length)
+const unreadBy = computed(() => {
+  const c = { all: 0 }
+  for (const n of items.value) {
+    if (!n.unread) continue
+    c.all++
+    c[n.type] = (c[n.type] || 0) + 1
+  }
+  return c
+})
 
 function read(n) {
   n.unread = false
 }
 function readAll() {
-  const n = unread.value
+  const n = unreadBy.value.all
   items.value.forEach((x) => (x.unread = false))
   toast(L(`${n} 条通知已标为已读`, `${n} 件を既読にしました`))
 }
@@ -50,27 +69,27 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
         <div>
           <h1 class="t-h1">{{ L('通知', '通知') }}</h1>
           <p class="t-small" aria-live="polite">
-            <template v-if="unread"><span class="num">{{ unread }}</span> {{ L('条未读', '件の未読') }}</template>
+            <template v-if="unreadBy.all"><span class="num">{{ unreadBy.all }}</span> {{ L('条未读', '件の未読') }}</template>
             <template v-else>{{ L('全部已读', 'すべて既読') }}</template>
           </p>
         </div>
-        <button type="button" class="btn" :disabled="!unread" @click="readAll"><Icon name="check" :size="16" />{{ L('全部标为已读', 'すべて既読にする') }}</button>
+        <button type="button" class="btn" :disabled="!unreadBy.all" @click="readAll"><Icon name="check" :size="16" />{{ L('全部标为已读', 'すべて既読にする') }}</button>
       </header>
 
       <div class="scroll-x filters">
         <div class="seg" role="group" :aria-label="L('按类型筛选', '種類で絞り込み')">
-          <button v-for="f in FILTERS" :key="f.key" type="button" :aria-pressed="filter === f.key" @click="filter = f.key">
-            {{ L(f.zh, f.ja) }}<span v-if="unreadOf(f.key)" class="num cnt">{{ unreadOf(f.key) }}</span>
+          <button v-for="f in FILTERS" :key="f.key" type="button" :aria-pressed="qs.type === f.key" @click="qs.type = f.key">
+            {{ L(f.zh, f.ja) }}<span v-if="unreadBy[f.key]" class="num cnt">{{ unreadBy[f.key] }}<span class="sr-only">{{ L('条未读', '件未読') }}</span></span>
           </button>
         </div>
       </div>
 
       <div class="panel list-panel">
-        <ul v-if="list.length">
-          <li v-for="n in list" :key="n.id" class="item" :class="{ unread: n.unread }">
-            <span class="gut"><i v-if="n.unread" class="note" /><span v-if="n.unread" class="sr-only">{{ L('未读', '未読') }}</span></span>
+        <ul v-if="shown.length">
+          <li v-for="n in shown" :key="n.id" class="item" :class="{ unread: n.unread }">
+            <span class="gut"><i v-if="n.unread" class="note" aria-hidden="true" /><span v-if="n.unread" class="sr-only">{{ L('未读', '未読') }}</span></span>
             <component :is="n.thread ? RouterLink : 'div'" :to="n.thread ? `/community/t/${n.thread}` : undefined" class="main" @click="n.thread && read(n)">
-              <span class="avatar" :style="{ background: `hsl(${users[n.who].hue} 45% 42%)` }">{{ users[n.who].name[0] }}</span>
+              <PlayerAvatar :user="users[n.who]" :size="32" />
               <span class="grow">
                 <span class="text"><b>{{ actor(n) }}</b> {{ n.text }}</span>
                 <span class="meta">
@@ -84,8 +103,13 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
           </li>
         </ul>
         <EmptyLane v-else compact :title="L(`没有「${current.zh}」类通知`, `「${current.ja}」の通知はありません`)" :text="L(current.emptyZh, current.emptyJa)">
-          <button type="button" class="btn" @click="filter = 'all'">{{ L('查看全部通知', 'すべての通知を見る') }}</button>
+          <button type="button" class="btn" @click="qs.type = 'all'">{{ L('查看全部通知', 'すべての通知を見る') }}</button>
         </EmptyLane>
+      </div>
+
+      <div v-if="remaining > 0" class="more">
+        <button type="button" class="btn" @click="qs.n = shown.length + PAGE"><Icon name="chevD" :size="16" />{{ L('更早的通知', '以前の通知') }}</button>
+        <span class="t-caption">{{ L(`已显示 ${shown.length} / ${list.length}`, `${shown.length} / ${list.length} 件を表示中`) }}</span>
       </div>
     </template>
   </div>
@@ -117,7 +141,7 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
 .item:last-child {
   border-bottom: 0;
 }
-/* 未读：只在左缘留一条淡朱色带，音符落在带上 */
+/* 未读：音符点 + 粗体（不只靠颜色），左缘一条淡朱色带 */
 .gut {
   flex: none;
   display: grid;
@@ -147,7 +171,8 @@ a.main:focus-visible {
 .text {
   display: block;
   color: var(--ink-2);
-  line-height: 1.5;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 .text b {
   color: var(--ink);
@@ -155,6 +180,10 @@ a.main:focus-visible {
 }
 .unread .text {
   color: var(--ink);
+  font-weight: 700;
+}
+.unread .text b {
+  font-weight: 900;
 }
 .meta {
   display: flex;
@@ -181,9 +210,17 @@ a.main:focus-visible {
   align-self: center;
   margin-right: 8px;
 }
+.more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0 8px;
+}
 
 @media (max-width: 767px) {
-  .page-head .btn {
+  .page-head .btn,
+  .more .btn {
     width: 100%;
   }
   .gut {
@@ -191,6 +228,7 @@ a.main:focus-visible {
   }
   .main {
     padding-left: 10px;
+    min-height: var(--hit);
   }
   .mark {
     margin-right: 2px;

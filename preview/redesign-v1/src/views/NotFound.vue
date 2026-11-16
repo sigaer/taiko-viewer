@@ -16,7 +16,7 @@ const route = useRoute()
       </EmptyLane>
       <p class="path">
         <span class="tag num">404</span>
-        <code class="num truncate">{{ route.path }}</code>
+        <code class="num title-1l" :title="route.fullPath">{{ route.path }}</code>
       </p>
     </div>
   </div>
@@ -35,7 +35,7 @@ const route = useRoute()
   min-width: 0;
   padding: 12px 20px;
   border-top: 1px solid var(--line);
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 .path code {
   min-width: 0;
@@ -45,6 +45,10 @@ const route = useRoute()
   .nf :deep(.acts) {
     width: 100%;
     flex-direction: column;
+    gap: 8px;
+  }
+  .nf :deep(.acts .btn) {
+    width: 100%;
   }
 }
 </style>

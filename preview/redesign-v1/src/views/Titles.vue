@@ -1,10 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import Icon from '../components/Icon.vue'
 import Cover from '../components/Cover.vue'
 import EmptyLane from '../components/EmptyLane.vue'
-import { songById, users } from '../mock/data'
-import { L, isJa, isReady, songTitle } from '../store'
+import TitlePlate from '../components/TitlePlate.vue'
+import { songById, users, normalize } from '../mock/data'
+import { L, isReady, songTitle } from '../store'
+import { useQueryState } from '../routeState'
 
 const CATS = [
   { key: 'dan', zh: '段位', ja: '段位' },
@@ -35,25 +37,29 @@ const TITLES = [
   { id: 14, name: '年糕不加糖', ja: '年糕不加糖', cat: 'custom', rarity: 'common', owned: true, how: '在鼓众广场用称号券自己设定', howJa: '称号チケットで自分で設定' },
 ]
 
-const q = ref('')
-const cat = ref(null)
-const ownedOnly = ref(false)
-const catCount = (k) => TITLES.filter((t) => t.cat === k).length
+// R2：关键词、分类、只看已获得写进地址
+const f = useQueryState({
+  q: { type: 'string', default: '', debounce: 250 },
+  cat: { type: 'string', default: '', values: ['', ...CATS.map((c) => c.key)] },
+  owned: { type: 'boolean', default: false },
+})
+const CAT_N = Object.fromEntries(CATS.map((c) => [c.key, TITLES.filter((t) => t.cat === c.key).length]))
 const ownedCount = TITLES.filter((t) => t.owned).length
+const HAY = new Map(TITLES.map((t) => [t.id, [t.name, t.ja, t.how, t.howJa].map(normalize).join('|')]))
 const list = computed(() => {
-  const kw = q.value.trim().toLowerCase()
+  const terms = f.q.trim().split(/\s+/).map(normalize).filter(Boolean)
   return TITLES.filter((t) => {
-    if (kw && !`${t.name} ${t.ja} ${t.how} ${t.howJa}`.toLowerCase().includes(kw)) return false
-    if (cat.value && t.cat !== cat.value) return false
-    if (ownedOnly.value && isReady.value && !t.owned) return false
+    if (terms.length && !terms.every((w) => HAY.get(t.id).includes(w))) return false
+    if (f.cat && t.cat !== f.cat) return false
+    if (f.owned && isReady.value && !t.owned) return false
     return true
   })
 })
-const filtered = computed(() => !!q.value.trim() || cat.value != null || ownedOnly.value)
+const filtered = computed(() => !!f.q.trim() || !!f.cat || f.owned)
 function reset() {
-  q.value = ''
-  cat.value = null
-  ownedOnly.value = false
+  f.q = ''
+  f.cat = ''
+  f.owned = false
 }
 const catOf = (k) => CATS.find((c) => c.key === k)
 
@@ -72,7 +78,7 @@ const ALIAS_LOG = [
     <div class="toolbar">
       <label class="search">
         <Icon name="search" :size="18" />
-        <input v-model="q" class="input" type="search" :placeholder="L('搜索称号或获得方式', '称号・入手方法で検索')" :aria-label="L('搜索称号', '称号を検索')" />
+        <input v-model="f.q" class="input" type="search" :placeholder="L('搜索称号或获得方式', '称号・入手方法で検索')" :aria-label="L('搜索称号', '称号を検索')" />
       </label>
       <p v-if="isReady" class="t-small owned-sum">
         {{ L('已获得', '獲得済み') }} <b class="num">{{ ownedCount }}</b><span class="num faint"> / {{ TITLES.length }}</span>
@@ -80,22 +86,21 @@ const ALIAS_LOG = [
     </div>
 
     <div class="filters" role="group" :aria-label="L('筛选', '絞り込み')">
-      <button class="chip" :aria-pressed="cat === null" @click="cat = null">{{ L('全部', 'すべて') }}<span class="num n">{{ TITLES.length }}</span></button>
-      <button v-for="c in CATS" :key="c.key" class="chip" :aria-pressed="cat === c.key" @click="cat = cat === c.key ? null : c.key">
-        {{ L(c.zh, c.ja) }}<span class="num n">{{ catCount(c.key) }}</span>
+      <button class="chip" :aria-pressed="!f.cat" @click="f.cat = ''">{{ L('全部', 'すべて') }}<span class="num n">{{ TITLES.length }}</span></button>
+      <button v-for="c in CATS" :key="c.key" class="chip" :aria-pressed="f.cat === c.key" @click="f.cat = f.cat === c.key ? '' : c.key">
+        {{ L(c.zh, c.ja) }}<span class="num n">{{ CAT_N[c.key] }}</span>
       </button>
       <template v-if="isReady">
         <span class="sep" aria-hidden="true" />
-        <button class="chip" :aria-pressed="ownedOnly" @click="ownedOnly = !ownedOnly">{{ L('只看已获得', '獲得済みのみ') }}</button>
+        <button class="chip" :aria-pressed="f.owned" @click="f.owned = !f.owned">{{ L('只看已获得', '獲得済みのみ') }}</button>
       </template>
     </div>
 
     <ul v-if="list.length" class="tlist">
       <li v-for="t in list" :key="t.id" :class="{ dim: isReady && !t.owned }">
-        <i class="mark" :class="{ rainbow: t.rarity === 'rainbow' }" aria-hidden="true" />
         <div class="grow">
           <p class="name">
-            <b>{{ L(t.name, t.ja) }}</b>
+            <TitlePlate :text="L(t.name, t.ja)" :rare="t.rarity !== 'common'" />
             <span class="tag">{{ L(catOf(t.cat).zh, catOf(t.cat).ja) }}</span>
             <span v-if="isReady && t.using" class="tag tag-roll">{{ L('使用中', '使用中') }}</span>
           </p>
@@ -127,15 +132,15 @@ const ALIAS_LOG = [
       </div>
       <ul class="alog">
         <li v-for="a in ALIAS_LOG" :key="a.id">
-          <RouterLink :to="`/songs/${a.songId}`" class="a-song">
+          <RouterLink :to="`/songs/${a.songId}?from=titles`" class="a-song">
             <Cover :song="songById[a.songId]" size="sm" />
-            <span class="truncate">{{ songTitle(songById[a.songId]) }}</span>
+            <span class="title-1l" :title="songTitle(songById[a.songId])">{{ songTitle(songById[a.songId]) }}</span>
           </RouterLink>
           <span class="a-change">
-            <span class="tag" :class="a.op === 'add' ? 'tag-ok' : 'tag-don'">{{ a.op === 'add' ? L('新增', '追加') : L('移除', '削除') }}</span>
-            <b :class="{ gone: a.op === 'remove' }">{{ a.alias }}</b>
+            <span class="tag" :class="{ 'tag-ok': a.op === 'add' }">{{ a.op === 'add' ? L('新增', '追加') : L('移除', '削除') }}</span>
+            <b class="title-1l" :class="{ gone: a.op === 'remove' }" :title="a.alias">{{ a.alias }}</b>
           </span>
-          <RouterLink :to="`/u/${a.by}`" class="a-by truncate">{{ users[a.by].name }}</RouterLink>
+          <RouterLink :to="`/u/${a.by}`" class="a-by title-1l">{{ users[a.by].name }}</RouterLink>
           <span class="t-caption a-when">{{ L(a.ago, a.agoJa) }}</span>
         </li>
       </ul>
@@ -177,8 +182,9 @@ const ALIAS_LOG = [
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 12px 0 16px;
-  padding: 2px 0;
+  /* 横滑容器上下留 3px，胶囊的 44px 扩展区不被裁掉（D7 / C10） */
+  margin: 11px 0 15px;
+  padding: 3px 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -190,7 +196,10 @@ const ALIAS_LOG = [
 }
 .chip .n {
   font-size: var(--fs-13);
-  opacity: 0.6;
+  color: var(--ink-3);
+}
+.chip[aria-pressed='true'] .n {
+  color: inherit;
 }
 .sep {
   width: 1px;
@@ -213,32 +222,14 @@ const ALIAS_LOG = [
   padding: 13px 0;
   border-bottom: 1px solid var(--line);
 }
-.mark {
-  width: 10px;
-  height: 10px;
-  margin-top: 6px;
-  border-radius: 50%;
-  background: var(--line-strong);
-  flex: none;
-}
-.mark.rainbow {
-  background: var(--crown-dfc);
-}
 .name {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
 }
-.name b {
-  font-size: var(--fs-16);
-  font-weight: 700;
-}
-.dim .name b {
-  color: var(--ink-2);
-}
 .how {
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .state {
   display: flex;
@@ -317,8 +308,8 @@ const ALIAS_LOG = [
 }
 @media (max-width: 767px) {
   .filters {
-    margin: 12px calc(var(--gutter) * -1) 14px;
-    padding: 2px var(--gutter);
+    margin: 11px calc(var(--gutter) * -1) 13px;
+    padding: 3px var(--gutter);
   }
   .tlist {
     grid-template-columns: minmax(0, 1fr);
@@ -330,6 +321,12 @@ const ALIAS_LOG = [
   }
   .a-by {
     grid-column: 1;
+  }
+}
+/* D7：别名日志的歌曲链接是整行的主目标（带封面），手机上不低于 --hit */
+@media (max-width: 767px) {
+  .a-song {
+    min-height: var(--hit);
   }
 }
 </style>

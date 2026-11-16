@@ -1,13 +1,19 @@
 <script setup>
 import { computed } from 'vue'
+import { L } from '../store'
 
-// 六维 / 五维雷达。数值集中在一个窄区间时自动收窄量程，并把量程写在图上，避免「看起来都一样」。
+/**
+ * 六维 / 五维雷达。数值集中在一个窄区间时自动收窄量程，并把量程写在图上，避免「看起来都一样」。
+ * props: axes（[{ label, value, prev?, key }]，label 由调用方按语言给出）、focus（高亮的 key）、size、
+ *        domain（[min, max]）、tone、label（读屏名称前缀，如「六维」；数值会自动接在后面）
+ */
 const props = defineProps({
   axes: { type: Array, required: true }, // [{ label, value, prev?, key }]
   focus: { type: String, default: null },
   size: { type: Number, default: 260 },
   domain: { type: Array, default: null }, // [min, max]
   tone: { type: String, default: 'var(--don)' },
+  label: { type: String, default: '' },
 })
 const C = 130
 const R = 84
@@ -39,7 +45,10 @@ const labels = computed(() =>
   }),
 )
 const hasPrev = computed(() => props.axes.some((a) => a.prev != null))
-const ariaLabel = computed(() => props.axes.map((a) => `${a.label} ${a.value.toFixed(2)}`).join('，'))
+const ariaLabel = computed(() => {
+  const vals = props.axes.map((a) => `${a.label} ${a.value.toFixed(2)}`).join(L('，', '、'))
+  return props.label ? `${props.label}${L('：', '：')}${vals}` : vals
+})
 </script>
 
 <template>

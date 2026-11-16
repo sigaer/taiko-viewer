@@ -6,10 +6,21 @@ import Diff from '../components/Diff.vue'
 import Crown from '../components/Crown.vue'
 import { danGrades, danCourse, songs, songById, chartOf, scoreOf, player, threadById, fmt } from '../mock/data'
 import { store, L, isReady, songTitle } from '../store'
+import { useQueryState } from '../routeState'
 
-const VERSIONS = ['虹 2026', '2025', '2024', '2023']
-const vi = ref(0)
-const grade = ref(danCourse.grade)
+const VERSIONS = [
+  { k: '2026', label: '虹 2026' },
+  { k: '2025', label: '2025' },
+  { k: '2024', label: '2024' },
+  { k: '2023', label: '2023' },
+]
+// R2：版本与段位写进地址
+const qs = useQueryState({
+  ver: { type: 'string', default: '2026', values: VERSIONS.map((v) => v.k) },
+  grade: { type: 'string', default: danCourse.grade, values: danGrades },
+})
+const vi = computed(() => Math.max(0, VERSIONS.findIndex((v) => v.k === qs.ver)))
+const grade = computed(() => qs.grade)
 
 const gradeJa = (g) => g.replace('级', '級').replace('达', '達')
 const gi = computed(() => danGrades.indexOf(grade.value))
@@ -130,13 +141,13 @@ watch(grade, () => nextTick(center))
   <div class="page dan">
     <div class="top">
       <div class="seg" role="group" :aria-label="L('版本', 'バージョン')">
-        <button v-for="(v, i) in VERSIONS" :key="v" :aria-pressed="vi === i" @click="vi = i">{{ v }}</button>
+        <button v-for="(v, i) in VERSIONS" :key="v.k" :aria-pressed="vi === i" @click="qs.ver = v.k">{{ v.label }}</button>
       </div>
     </div>
 
     <div ref="rail" class="rail" role="group" :aria-label="L('选择段位', '段位を選ぶ')">
-      <button v-for="g in grades" :key="g.name" class="chip" :aria-pressed="grade === g.name" @click="grade = g.name">
-        <span v-if="g.state" class="crown sm" :class="g.state" role="img" :aria-label="stateLabel(g.state)" />{{ g.label }}
+      <button v-for="g in grades" :key="g.name" class="chip" :aria-pressed="grade === g.name" @click="qs.grade = g.name">
+        <span v-if="g.state" class="pass" :class="g.state" role="img" :aria-label="stateLabel(g.state)" />{{ g.label }}
       </button>
     </div>
 
@@ -148,12 +159,12 @@ watch(grade, () => nextTick(center))
             <span class="t-small">{{ L('共', '合計') }} <b class="num total">{{ fmt(totalCombo) }}</b> {{ L('个音符', 'ノーツ') }}</span>
           </div>
           <ol class="stages">
-            <li v-for="(s, i) in stages" :key="s.key" class="stage">
+            <li v-for="(s, i) in stages" :key="s.key" class="dstage">
               <div class="no">
                 <b class="num">{{ i + 1 }}</b>
                 <span class="t-caption">{{ L(`第 ${i + 1} 首`, `${i + 1} 曲目`) }}</span>
               </div>
-              <RouterLink :to="`/songs/${s.song.id}?d=${s.d}`" class="stage-song"><SongCell :song="s.song" /></RouterLink>
+              <RouterLink :to="`/songs/${s.song.id}?d=${s.d}&from=dan`" class="stage-song"><SongCell :song="s.song" /></RouterLink>
               <Diff :d="s.d" :star="s.chart.star" :constant="s.chart.constant" short class="stage-diff" />
               <dl class="stage-kv">
                 <div>
@@ -167,7 +178,7 @@ watch(grade, () => nextTick(center))
                 <div v-if="isReady" class="best">
                   <dt>{{ L('我的最好', '自己ベスト') }}</dt>
                   <dd v-if="s.score"><Crown :v="s.score.crown" size="sm" /><span class="num">{{ fmt(s.score.score) }}</span></dd>
-                  <dd v-else class="faint none">{{ L('未游玩', '未プレイ') }}</dd>
+                  <dd v-else class="na none" :aria-label="L('未游玩', '未プレイ')">—</dd>
                 </div>
               </dl>
             </li>
@@ -181,26 +192,27 @@ watch(grade, () => nextTick(center))
           </div>
           <div class="scroll-x">
             <table class="dt cond">
+              <caption class="sr-only">{{ gradeLabel }}{{ L(' 合格条件', ' 合格条件') }}</caption>
               <thead>
                 <tr>
-                  <th>{{ L('条件', '条件') }}</th>
-                  <th class="r"><i class="dot red" />{{ L('红合格', '赤合格') }}</th>
-                  <th class="r"><i class="dot gold" />{{ L('金合格', '金合格') }}</th>
-                  <th v-if="isReady" class="r">{{ L('我的最好', '自己ベスト') }}</th>
+                  <th scope="col">{{ L('条件', '条件') }}</th>
+                  <th scope="col" class="r"><i class="pass red" aria-hidden="true" />{{ L('红合格', '赤合格') }}</th>
+                  <th scope="col" class="r"><i class="pass gold" aria-hidden="true" />{{ L('金合格', '金合格') }}</th>
+                  <th v-if="isReady" scope="col" class="r">{{ L('我的最好', '自己ベスト') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="r in condRows" :key="r.k">
-                  <td class="ck">{{ r.label }}</td>
+                  <th scope="row" class="ck">{{ r.label }}</th>
                   <td class="r num">{{ r.pass }}</td>
                   <td class="r num">{{ r.gold }}</td>
                   <td v-if="isReady" class="r">
                     <span v-if="r.mine != null" class="res">
                       <b class="num">{{ r.mine }}</b>
-                      <span v-if="r.state === 'fail'" class="tag"><Icon name="close" :size="12" />{{ L('未达到', '未達') }}</span>
+                      <span v-if="r.state === 'fail'" class="tag tag-danger"><Icon name="close" :size="12" />{{ L('未达到', '未達') }}</span>
                       <span v-else class="tag" :class="r.state === 'gold' ? 'tag-roll' : 'tag-don'"><Icon name="check" :size="12" />{{ stateLabel(r.state) }}</span>
                     </span>
-                    <span v-else class="faint">—</span>
+                    <span v-else class="na">—</span>
                   </td>
                 </tr>
               </tbody>
@@ -224,16 +236,16 @@ watch(grade, () => nextTick(center))
           <h2 class="t-h3">{{ L('我的段位', '自分の段位') }}</h2>
           <template v-if="isReady">
             <div class="plate">
-              <span class="crown lg red" aria-hidden="true" />
+              <span class="pass red lg" aria-hidden="true" />
               <b>{{ L(player.dan, gradeJa(player.dan)) }}</b>
-              <span class="t-caption">{{ VERSIONS[0] }}</span>
+              <span class="t-caption">{{ VERSIONS[0].label }}</span>
             </div>
             <dl class="kv">
               <dt>{{ gradeLabel }}{{ L(' 挑战次数', ' 挑戦回数') }}</dt>
               <dd class="num">{{ attempts }}</dd>
               <dt>{{ L('最好结果', '最高結果') }}</dt>
               <dd v-if="mineState"><span class="tag" :class="mineState === 'gold' ? 'tag-roll' : 'tag-don'">{{ stateLabel(mineState) }}</span></dd>
-              <dd v-else class="faint">{{ L('还没有挑战', '未挑戦') }}</dd>
+              <dd v-else class="muted">{{ L('还没有挑战', '未挑戦') }}</dd>
               <template v-if="goldGaps.length">
                 <dt>{{ L('距离金合格', '金合格まで') }}</dt>
                 <dd class="gaps">
@@ -256,7 +268,7 @@ watch(grade, () => nextTick(center))
           <ul class="links">
             <li v-for="l in LINKS" :key="l.zh">
               <RouterLink :to="l.to">
-                <span class="grow">{{ L(l.zh, l.ja) }}</span>
+                <span class="grow title-1l" :title="L(l.zh, l.ja)">{{ L(l.zh, l.ja) }}</span>
                 <span class="t-caption replies"><Icon name="reply" :size="14" /><span class="num">{{ l.n }}</span></span>
               </RouterLink>
             </li>
@@ -278,10 +290,13 @@ watch(grade, () => nextTick(center))
   position: relative;
   display: flex;
   gap: 6px;
-  margin: 14px 0 20px;
-  padding: 2px 0 6px;
+  /* 横滑的段位条：两端渐隐，不出现被硬切的半个胶囊（同 C2）；左右各让出 16px 给渐隐 */
+  margin: 14px -16px 20px;
+  padding: 2px 16px 6px;
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
 }
 .rail::-webkit-scrollbar {
   display: none;
@@ -290,11 +305,21 @@ watch(grade, () => nextTick(center))
   flex: none;
   font-weight: 500;
 }
-.crown.red {
-  background: var(--don);
+/* 段位合格标记（不是王冠）：红合格 = 朱，金合格 = 金 */
+.pass {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  flex: none;
+  vertical-align: middle;
 }
-.crown.gold {
-  background: var(--crown-fc);
+/* .pass.red / .pass.gold 的颜色来自 domain.css（D15：页面不声明王冠色） */
+.pass.lg {
+  width: 14px;
+  height: 14px;
+  margin-right: 0;
 }
 .layout {
   display: grid;
@@ -319,7 +344,7 @@ watch(grade, () => nextTick(center))
 }
 
 /* ---------- 三首课题曲：有先后顺序 ---------- */
-.stage {
+.dstage {
   position: relative;
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto auto;
@@ -328,7 +353,7 @@ watch(grade, () => nextTick(center))
   padding: 16px 20px;
   border-bottom: 1px solid var(--line);
 }
-.stage:last-child {
+.dstage:last-child {
   border-bottom: 0;
 }
 .no {
@@ -351,7 +376,7 @@ watch(grade, () => nextTick(center))
   font-weight: 700;
   line-height: 1;
 }
-.stage:not(:last-child) .no::after {
+.dstage:not(:last-child) .no::after {
   content: '';
   position: absolute;
   left: 51px;
@@ -398,22 +423,21 @@ watch(grade, () => nextTick(center))
 .cond td:last-child {
   padding-right: 20px;
 }
-.cond th .dot {
-  display: inline-block;
-  margin-right: 6px;
-}
-.dot.red {
-  color: var(--don);
-}
-.dot.gold {
-  color: var(--crown-fc);
-}
 .cond td.num,
 .cond td .num {
   font-size: var(--fs-16);
 }
-.ck {
+.cond th.ck {
+  position: static;
+  padding: 9px 12px;
+  background: none;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-13);
   font-weight: 700;
+  color: var(--ink);
+}
+.cond tbody tr:last-child th.ck {
+  border-bottom: 0;
 }
 .res {
   display: inline-flex;
@@ -481,6 +505,8 @@ watch(grade, () => nextTick(center))
 }
 .links a {
   display: flex;
+  min-width: 0;
+  min-height: var(--hit); /* D7：列表行 ≥ 44px */
   align-items: flex-start;
   gap: 12px;
   padding: 10px 0;
@@ -505,7 +531,7 @@ watch(grade, () => nextTick(center))
   .side {
     position: static;
   }
-  .stage {
+  .dstage {
     grid-template-columns: 64px minmax(0, 1fr) auto;
   }
   .no {
@@ -519,7 +545,7 @@ watch(grade, () => nextTick(center))
 @media (max-width: 767px) {
   .rail {
     position: sticky;
-    top: 97px;
+    top: calc(var(--bar-h-m) + var(--subtab-h-m));
     z-index: 10;
     margin: 10px calc(var(--gutter) * -1) 14px;
     padding: 8px var(--gutter);
@@ -531,7 +557,7 @@ watch(grade, () => nextTick(center))
   .side {
     gap: 20px;
   }
-  .stage {
+  .dstage {
     grid-template-columns: 44px minmax(0, 1fr);
     gap: 10px 12px;
     padding: 14px 16px;
@@ -539,7 +565,7 @@ watch(grade, () => nextTick(center))
   .no .t-caption {
     display: none;
   }
-  .stage:not(:last-child) .no::after {
+  .dstage:not(:last-child) .no::after {
     left: 37px;
     top: 58px;
     bottom: -18px;

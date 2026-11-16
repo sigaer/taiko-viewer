@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import Radar from '../components/Radar.vue'
+import ChartSheet from '../components/ChartSheet.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import { CHART_AXES, fmt, fx } from '../mock/data'
 import { L, toast } from '../store'
@@ -91,36 +92,17 @@ const encLabel = computed(() => {
 })
 const levelText = computed(() => (course.value.level ? `★${course.value.level}` : ''))
 
-// 谱面图占位：按难度和 P1/P2 取固定种子，同一张图每次渲染都一样
-function rng(seed) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+// 谱面图预览：共用 ChartSheet；按难度和 P1/P2 取固定种子，同一张图每次渲染都一样
 const ROWS = 6
-const PER_ROW = 4
-const sheetRows = computed(() => {
-  const r = rng(4100 + courseIdx.value * 97 + (side.value === 'p2' ? 31 : 0))
-  const dens = course.value.density
-  return Array.from({ length: ROWS }, (_, ri) =>
-    Array.from({ length: PER_ROW }, (_, mi) => {
-      const roll = r() < 0.1 ? { from: 8 + Math.floor(r() * 2) * 2, len: 4 + Math.floor(r() * 3) } : null
-      const notes = []
-      for (let p = 0; p < 16; p++) {
-        const chance = p % 4 === 0 ? 0.88 : p % 2 === 0 ? dens + 0.18 : dens - 0.14
-        const on = r() < chance
-        const ka = r() < 0.42
-        const big = r() < 0.1
-        if (on && !(roll && p >= roll.from)) notes.push({ p, ka, big: big && p % 8 === 0 })
-      }
-      return { no: ri * PER_ROW + mi + 1, notes, roll }
-    }),
-  )
+const sheetSeed = computed(() => 4100 + courseIdx.value * 97 + (side.value === 'p2' ? 31 : 0))
+const sheetDensity = computed(() => {
+  const d = course.value.density
+  return Array.from({ length: ROWS * 4 }, (_, i) => Math.max(0.1, Math.min(0.95, d + (((i * 37 + courseIdx.value * 11) % 13) - 6) / 30)))
 })
+const sheetLabel = computed(() =>
+  L(`${result.value.title} ${course.value.zh} 谱面图预览，第 1–${ROWS * 4} 小节`, `${result.value.title} ${course.value.ja} 譜面画像プレビュー、1–${ROWS * 4} 小節`),
+)
+const radarLabel = computed(() => L(`${course.value.zh} 五项能力值`, `${course.value.ja} の 5 つの能力値`) + '：' + axes.value.map((a) => `${a.label} ${a.value.toFixed(2)}`).join('，'))
 function download() {
   const base = result.value.name.replace(/\.tja$/i, '')
   toast(L(`已下载 ${base}-${courseKey.value}-${side.value}.png`, `${base}-${courseKey.value}-${side.value}.png をダウンロードしました`))
@@ -209,7 +191,7 @@ function download() {
               </div>
             </div>
             <div class="radar">
-              <Radar :axes="axes" :domain="[0, 15.5]" :size="290" />
+              <Radar :axes="axes" :domain="[0, 15.5]" :size="290" :label="radarLabel" />
             </div>
           </section>
 
@@ -245,23 +227,15 @@ function download() {
               <button class="btn btn-primary btn-sm" @click="download"><Icon name="download" :size="16" />{{ L('下载 PNG', 'PNG をダウンロード') }}</button>
             </div>
           </div>
-          <div class="scroll-x sheet-wrap">
-            <div class="sheet" role="img" :aria-label="L(`${result.title} ${course.zh} 谱面图预览`, `${result.title} ${course.ja} 譜面画像プレビュー`)">
-              <div class="sheet-title">
-                <b lang="ja">{{ result.title }}</b>
-                <span class="num">{{ L(course.zh, course.ja) }} {{ levelText }} · BPM {{ result.bpm }} · {{ fmt(course.notes) }} notes · {{ side.toUpperCase() }}</span>
-              </div>
-              <div v-for="(row, ri) in sheetRows" :key="ri" class="srow">
-                <div v-for="m in row" :key="m.no" class="measure">
-                  <span class="mno num">{{ m.no }}</span>
-                  <i v-if="m.roll" class="roll" :style="{ left: ((m.roll.from + 0.5) / 16) * 100 + '%', width: (Math.min(m.roll.len, 15.5 - m.roll.from) / 16) * 100 + '%' }" />
-                  <i v-for="nt in m.notes" :key="nt.p" class="note" :class="{ ka: nt.ka, big: nt.big }" :style="{ left: ((nt.p + 0.5) / 16) * 100 + '%', zIndex: 20 - nt.p }" />
-                </div>
-              </div>
+          <div class="sheet-wrap">
+            <div class="sheet-title">
+              <b class="title-1l" lang="ja" :title="result.title">{{ result.title }}</b>
+              <span class="num">{{ L(course.zh, course.ja) }} {{ levelText }} · BPM {{ result.bpm }} · {{ fmt(course.notes) }} notes · {{ side.toUpperCase() }}</span>
             </div>
+            <ChartSheet :seed="sheetSeed" :rows="ROWS" :density="sheetDensity" :label="sheetLabel" />
           </div>
           <p class="t-caption pv-foot">
-            {{ L(`预览前 ${ROWS * PER_ROW} 小节，下载的 PNG 包含全部 ${course.measures} 小节。`, `プレビューは最初の ${ROWS * PER_ROW} 小節。PNG には全 ${course.measures} 小節が含まれます。`) }}
+            {{ L(`预览前 ${ROWS * 4} 小节，下载的 PNG 包含全部 ${course.measures} 小节。`, `プレビューは最初の ${ROWS * 4} 小節。PNG には全 ${course.measures} 小節が含まれます。`) }}
           </p>
         </section>
       </div>
@@ -271,7 +245,7 @@ function download() {
 
 <style scoped>
 /* ---------- 上传 ---------- */
-.uploader {
+.up {
   max-width: 760px;
   margin: 0 auto;
   padding: 20px;
@@ -417,82 +391,22 @@ function download() {
 .sheet-wrap {
   padding: 16px;
 }
-.sheet {
-  min-width: 620px;
-  padding: 14px 16px 20px;
-  border-radius: var(--r-ctl);
-  background: var(--lane);
-  color: var(--lane-ink);
-}
 .sheet-title {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 10px;
   font-size: var(--fs-13);
 }
 .sheet-title b {
+  min-width: 0;
+  max-width: 100%;
   font-size: var(--fs-16);
 }
 .sheet-title span {
-  opacity: 0.72;
-}
-.srow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 36px;
-  margin-top: 22px;
-  border-top: 1px solid var(--lane-line);
-  border-bottom: 1px solid var(--lane-line);
-  border-right: 2px solid var(--lane-line);
-  background: color-mix(in srgb, var(--lane-ink) 5%, transparent);
-}
-.measure {
-  position: relative;
-  border-left: 2px solid var(--lane-line);
-}
-.measure::before,
-.measure::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-left: 1px solid color-mix(in srgb, var(--lane-line) 60%, transparent);
-}
-.measure::before {
-  left: 25%;
-  width: 50%;
-  border-right: 1px solid color-mix(in srgb, var(--lane-line) 60%, transparent);
-}
-.measure::after {
-  left: 50%;
-}
-.mno {
-  position: absolute;
-  left: 0;
-  top: -17px;
-  font-size: var(--fs-11);
-  color: color-mix(in srgb, var(--lane-ink) 55%, transparent);
-}
-.sheet .note {
-  --n: 13px;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-.sheet .note.big {
-  --n: 19px;
-}
-.roll {
-  position: absolute;
-  top: 50%;
-  z-index: 1;
-  height: 13px;
-  margin-left: -6.5px;
-  transform: translateY(-50%);
-  border-radius: var(--r-note);
-  background: var(--roll);
-  border: 2px solid var(--lane-ink);
+  color: var(--ink-2);
 }
 .pv-foot {
   padding: 0 16px 16px;
@@ -514,8 +428,11 @@ function download() {
   }
 }
 @media (max-width: 767px) {
-  .uploader {
+  .up {
     padding: 16px;
+  }
+  .pv-acts .btn {
+    flex: none;
   }
   .drop {
     padding: 32px 16px;

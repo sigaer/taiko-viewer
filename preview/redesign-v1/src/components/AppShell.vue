@@ -1,21 +1,26 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from './Icon.vue'
 import Logo from './Logo.vue'
-import { MODULES, RAIL } from '../router'
-import { store, L, isAuthed, runSync, resolvedTheme } from '../store'
-import { player, notifications } from '../mock/data'
+import Sheet from './Sheet.vue'
+import SyncButton from './SyncButton.vue'
+import SyncPanel from './SyncPanel.vue'
+import { MODULES, RAIL, backTarget, routeAnnouncement } from '../router'
+import { store, L, isAuthed, resolvedTheme, viewport } from '../store'
+import { sync, closeSyncPanel } from '../sync'
+import { player, users, notifications } from '../mock/data'
+import PlayerAvatar from './PlayerAvatar.vue'
 
 // 全站框架。
 // 桌面：左侧窄轨（一级目的地）+ 顶栏（模块名 · 二级页签 · 全局搜索 · 同步 · 通知 · 账号）。
-// 移动：顶部标题栏 + 底部五格，其中正中是「咚」搜索键。
+// 移动：顶部标题栏（右侧：同步 · 通知）+ 底部五格，其中正中是「咚」搜索键。
 const route = useRoute()
 const router = useRouter()
 const mod = computed(() => MODULES[route.meta.module])
 const tabs = computed(() => (route.meta.detail ? null : mod.value?.tabs))
 const unread = computed(() => notifications.filter((n) => n.unread).length)
-const menuOpen = ref(false)
+const me = users.mochidon || { name: player.nickname, hue: 12, dan: player.dan }
 
 const title = computed(() => {
   if (route.meta.module === 'me') return L('我的', 'マイページ')
@@ -30,10 +35,109 @@ function tabActive(t) {
 function toggleTheme() {
   store.theme = resolvedTheme.value === 'dark' ? 'light' : 'dark'
 }
-function go(to) {
+
+/* ---------- 跳到主要内容 ---------- */
+const mainEl = ref(null)
+function focusMain() {
+  mainEl.value?.focus({ preventScroll: false })
+}
+
+/* ---------- 返回（R4） ---------- */
+const back = computed(() => (route.meta.back ? backTarget(route) : null))
+function onBack(e) {
+  if (back.value?.history) {
+    e.preventDefault()
+    router.back()
+  }
+}
+
+/* ---------- 账号菜单：Esc 关闭并还原焦点，↑ ↓ 在菜单项间移动，点外面关闭 ---------- */
+const menuOpen = ref(false)
+const acctEl = ref(null)
+const menuBtn = ref(null)
+const menuEl = ref(null)
+const items = () => [...(menuEl.value?.querySelectorAll('[role="menuitem"]') || [])]
+function openMenu(focusLast = false) {
+  menuOpen.value = true
+  nextTick(() => {
+    const list = items()
+    ;(focusLast ? list[list.length - 1] : list[0])?.focus()
+  })
+}
+function closeMenu(restore = false) {
+  if (!menuOpen.value) return
   menuOpen.value = false
+  if (restore) nextTick(() => menuBtn.value?.focus())
+}
+function onMenuBtnKey(e) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    openMenu(e.key === 'ArrowUp')
+  }
+}
+function onMenuKey(e) {
+  const list = items()
+  const i = list.indexOf(document.activeElement)
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    closeMenu(true)
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    list[(i + 1) % list.length]?.focus()
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    list[(i - 1 + list.length) % list.length]?.focus()
+  } else if (e.key === 'Home') {
+    e.preventDefault()
+    list[0]?.focus()
+  } else if (e.key === 'End') {
+    e.preventDefault()
+    list[list.length - 1]?.focus()
+  } else if (e.key === 'Tab') closeMenu(false)
+}
+function onDocPointer(e) {
+  if (acctEl.value && !acctEl.value.contains(e.target)) closeMenu(false)
+}
+watch(menuOpen, (v) => {
+  if (v) document.addEventListener('pointerdown', onDocPointer, true)
+  else document.removeEventListener('pointerdown', onDocPointer, true)
+})
+function go(to) {
+  closeMenu(false)
   router.push(to)
 }
+function logout() {
+  closeMenu(false)
+  store.auth = 'guest'
+  router.push('/')
+}
+
+/* ---------- 同步面板：手机放进抽屉；桌面锚在状态条下（SyncButton 内）；游客在桌面没有状态条，用对话框 ---------- */
+const sheetOpen = computed(() => sync.panelOpen && (viewport.phone || store.auth === 'guest'))
+
+/* ---------- 手机二级页签：当前项保持在可视区 ---------- */
+const mTabs = ref(null)
+function revealTab() {
+  const box = mTabs.value
+  const on = box?.querySelector('a.on')
+  if (!box || !on) return
+  const l = on.offsetLeft
+  const r = l + on.offsetWidth
+  if (l < box.scrollLeft + 8) box.scrollLeft = Math.max(0, l - 24)
+  else if (r > box.scrollLeft + box.clientWidth - 8) box.scrollLeft = r - box.clientWidth + 24
+}
+
+// 路由切换：关闭菜单与同步面板，页签滚入可视区
+watch(
+  () => route.path,
+  () => {
+    closeMenu(false)
+    if (sync.panelOpen) closeSyncPanel()
+    nextTick(revealTab)
+  },
+)
+watch(mTabs, (el) => el && nextTick(revealTab))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocPointer, true))
 
 const MOBILE_TABS = [
   { key: 'today', to: '/', icon: 'today', zh: '今日', ja: '今日' },
@@ -51,6 +155,9 @@ function mobileActive(t) {
 
 <template>
   <div class="shell">
+    <a href="#main" class="skip" @click.prevent="focusMain">{{ L('跳到主要内容', 'メインコンテンツへ移動') }}</a>
+    <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ routeAnnouncement }}</div>
+
     <!-- ============ 桌面：左轨 ============ -->
     <nav class="rail" :aria-label="L('主导航', 'メインナビ')">
       <RouterLink to="/" class="brand" aria-label="Taiko Viewer"><Logo :size="38" /></RouterLink>
@@ -63,10 +170,10 @@ function mobileActive(t) {
         </li>
       </ul>
       <div class="rail-foot">
-        <button class="icon-btn" :title="L('切换语言', '言語切替')" @click="store.locale = store.locale === 'zh' ? 'ja' : 'zh'">
+        <button type="button" class="icon-btn" :aria-label="L('切换语言', '言語切替')" :title="L('切换语言', '言語切替')" @click="store.locale = store.locale === 'zh' ? 'ja' : 'zh'">
           <span class="loc">{{ store.locale === 'zh' ? '中' : '日' }}</span>
         </button>
-        <button class="icon-btn" :title="L('切换深浅色', 'テーマ切替')" @click="toggleTheme">
+        <button type="button" class="icon-btn" :aria-label="L('切换深浅色', 'テーマ切替')" :title="L('切换深浅色', 'テーマ切替')" @click="toggleTheme">
           <Icon :name="resolvedTheme === 'dark' ? 'sun' : 'moon'" />
         </button>
       </div>
@@ -75,82 +182,88 @@ function mobileActive(t) {
     <!-- ============ 顶栏 ============ -->
     <header class="bar">
       <div class="bar-left">
-        <RouterLink v-if="route.meta.back" :to="route.meta.back" class="icon-btn back" :aria-label="L('返回', '戻る')"><Icon name="chevL" /></RouterLink>
+        <RouterLink v-if="back" :to="back.to" class="icon-btn back" :aria-label="L('返回', '戻る')" @click="onBack"><Icon name="chevL" /></RouterLink>
         <RouterLink v-else to="/" class="only-mobile m-brand" aria-label="Taiko Viewer"><Logo :size="28" /></RouterLink>
         <h1 class="bar-title">{{ title }}</h1>
-        <nav v-if="tabs" class="bar-tabs only-desktop" :aria-label="title">
-          <RouterLink v-for="t in tabs" :key="t.to" :to="t.to" :class="{ on: tabActive(t) }">{{ L(t.zh, t.ja) }}</RouterLink>
+        <nav v-if="tabs" class="bar-tabs only-desktop" :aria-label="L(`${title}页签`, `${title}のタブ`)">
+          <RouterLink v-for="t in tabs" :key="t.to" :to="t.to" :class="{ on: tabActive(t) }" :aria-current="tabActive(t) ? 'page' : undefined">{{ L(t.zh, t.ja) }}</RouterLink>
         </nav>
       </div>
 
-      <button class="searchbox only-desktop" @click="store.paletteOpen = true">
+      <button type="button" class="searchbox only-desktop" :aria-label="L('搜索', '検索')" aria-keyshortcuts="Control+K" @click="store.paletteOpen = true">
         <Icon name="search" :size="18" />
         <span class="grow">{{ L('搜索歌曲、帖子、工具', '楽曲・投稿・ツールを検索') }}</span>
         <kbd>Ctrl K</kbd>
       </button>
 
       <div class="bar-right">
-        <template v-if="store.auth === 'ready'">
-          <button class="syncchip only-desktop" :class="{ busy: store.syncing }" :disabled="store.syncing" @click="runSync">
-            <Icon name="sync" :size="16" />
-            <span>{{ store.syncing ? L('正在同步…', '同期中…') : L(player.lastSync + '同步', player.lastSyncJa + 'に同期') }}</span>
-          </button>
-        </template>
-        <RouterLink v-else-if="store.auth === 'unbound'" to="/bind" class="syncchip warn only-desktop">
-          <Icon name="link" :size="16" /><span>{{ L('绑定鼓众广场 ID', 'アカウント連携') }}</span>
-        </RouterLink>
-        <RouterLink v-else-if="store.auth === 'empty'" to="/account/sync" class="syncchip warn only-desktop">
-          <Icon name="sync" :size="16" /><span>{{ L('同步第一份成绩', '最初の同期') }}</span>
-        </RouterLink>
+        <!-- 同步：手机是图标按钮（S2），平板 / 桌面是状态条（S4） -->
+        <SyncButton variant="icon" class="only-mobile m-sync" />
+        <SyncButton v-if="store.auth !== 'guest'" variant="chip" class="only-desktop" />
 
-        <RouterLink v-if="isAuthed" to="/notifications" class="icon-btn bell" :aria-label="L('通知', '通知')">
+        <RouterLink v-if="isAuthed || viewport.phone" to="/notifications" class="icon-btn bell" :aria-label="unread && isAuthed ? L(`通知，${unread} 条未读`, `通知（未読 ${unread} 件）`) : L('通知', '通知')">
           <Icon name="bell" />
-          <i v-if="unread" class="badge num">{{ unread }}</i>
+          <i v-if="unread && isAuthed" class="badge num" aria-hidden="true">{{ unread }}</i>
         </RouterLink>
 
-        <div v-if="isAuthed" class="acct">
-          <button class="avatar-btn" :aria-expanded="menuOpen" aria-haspopup="menu" @click="menuOpen = !menuOpen">
-            <span class="avatar" style="background: var(--don)">年</span>
+        <!-- 账号菜单只在平板 / 桌面；手机的账号入口是底栏「我的」 -->
+        <div v-if="isAuthed" ref="acctEl" class="acct only-desktop">
+          <button
+            ref="menuBtn"
+            type="button"
+            class="avatar-btn"
+            :aria-label="L('账号菜单', 'アカウントメニュー')"
+            :aria-expanded="menuOpen"
+            aria-haspopup="menu"
+            aria-controls="acct-menu"
+            @click="menuOpen ? closeMenu(false) : openMenu()"
+            @keydown="onMenuBtnKey"
+          >
+            <PlayerAvatar :user="me" :size="32" />
           </button>
           <Transition name="pop">
-            <div v-if="menuOpen" class="menu" role="menu" @mouseleave="menuOpen = false">
-              <div class="menu-head">
+            <div v-if="menuOpen" id="acct-menu" ref="menuEl" class="menu" role="menu" :aria-label="player.nickname" @keydown="onMenuKey">
+              <div class="menu-head" role="presentation">
                 <b>{{ player.nickname }}</b>
                 <span class="t-caption">CN {{ player.taikoIdMasked }}</span>
               </div>
-              <button role="menuitem" @click="go('/u/mochidon')"><Icon name="user" :size="18" />{{ L('我的主页', 'プロフィール') }}</button>
-              <button role="menuitem" @click="go('/account')"><Icon name="link" :size="18" />{{ L('账号与绑定', 'アカウント連携') }}</button>
-              <button role="menuitem" @click="go('/account/sync')"><Icon name="sync" :size="18" />{{ L('同步', '同期') }}</button>
-              <button role="menuitem" @click="go('/account/settings')"><Icon name="settings" :size="18" />{{ L('设置', '設定') }}</button>
-              <hr class="rule" />
-              <button role="menuitem" @click="(store.auth = 'guest'), go('/')"><Icon name="logout" :size="18" />{{ L('退出登录', 'ログアウト') }}</button>
+              <button type="button" role="menuitem" tabindex="-1" @click="go('/u/mochidon')"><Icon name="user" :size="18" />{{ L('我的主页', 'プロフィール') }}</button>
+              <button type="button" role="menuitem" tabindex="-1" @click="go('/account')"><Icon name="link" :size="18" />{{ L('账号与绑定', 'アカウント連携') }}</button>
+              <button type="button" role="menuitem" tabindex="-1" @click="go('/account/sync')"><Icon name="sync" :size="18" />{{ L('同步', '同期') }}</button>
+              <button type="button" role="menuitem" tabindex="-1" @click="go('/account/settings')"><Icon name="settings" :size="18" />{{ L('设置', '設定') }}</button>
+              <hr class="rule" role="separator" />
+              <button type="button" role="menuitem" tabindex="-1" @click="logout"><Icon name="logout" :size="18" />{{ L('退出登录', 'ログアウト') }}</button>
             </div>
           </Transition>
         </div>
-        <RouterLink v-else to="/login" class="btn btn-ink btn-sm">{{ L('登录', 'ログイン') }}</RouterLink>
+        <RouterLink v-else to="/login" class="btn btn-ink btn-sm only-desktop">{{ L('登录', 'ログイン') }}</RouterLink>
       </div>
     </header>
 
     <!-- 移动端二级页签 -->
-    <nav v-if="tabs" class="m-tabs only-mobile" :aria-label="title">
-      <RouterLink v-for="t in tabs" :key="t.to" :to="t.to" :class="{ on: tabActive(t) }">{{ L(t.zh, t.ja) }}</RouterLink>
+    <nav v-if="tabs" ref="mTabs" class="m-tabs only-mobile" :aria-label="L(`${title}页签`, `${title}のタブ`)">
+      <RouterLink v-for="t in tabs" :key="t.to" :to="t.to" :class="{ on: tabActive(t) }" :aria-current="tabActive(t) ? 'page' : undefined">{{ L(t.zh, t.ja) }}</RouterLink>
     </nav>
 
-    <main class="main"><slot /></main>
+    <main id="main" ref="mainEl" class="main" tabindex="-1"><slot /></main>
 
     <!-- ============ 移动：底部五格 ============ -->
-    <nav v-if="!route.meta.bareMobile" class="tabbar" :aria-label="L('主导航', 'メインナビ')">
+    <nav v-if="!route.meta.bareMobile" class="tabbar" :aria-label="L('底部导航', 'ボトムナビ')">
       <template v-for="t in MOBILE_TABS" :key="t.key">
-        <button v-if="t.key === 'search'" class="don-btn" :aria-label="L('搜索', '検索')" @click="store.paletteOpen = true">
+        <button v-if="t.key === 'search'" type="button" class="don-btn" :aria-label="L('搜索', '検索')" @click="store.paletteOpen = true">
           <span class="don-face"><Icon name="search" :size="24" /></span>
         </button>
-        <RouterLink v-else :to="t.to" class="tab" :class="{ on: mobileActive(t) }">
+        <RouterLink v-else :to="t.to" class="tab" :class="{ on: mobileActive(t) }" :aria-current="mobileActive(t) ? 'page' : undefined">
           <Icon :name="t.icon" :size="23" />
           <span>{{ L(t.zh, t.ja) }}</span>
           <i v-if="t.key === 'community' && unread && isAuthed" class="tab-dot" />
         </RouterLink>
       </template>
     </nav>
+
+    <Sheet :open="sheetOpen" :title="L('同步', '同期')" :width="420" @close="closeSyncPanel">
+      <SyncPanel @close="closeSyncPanel" />
+    </Sheet>
   </div>
 </template>
 
@@ -355,38 +468,6 @@ kbd {
   align-items: center;
   gap: 6px;
 }
-.syncchip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 12px;
-  border-radius: var(--r-note);
-  font-size: var(--fs-13);
-  font-weight: 500;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.syncchip:hover {
-  background: var(--bg-sunk);
-  color: var(--ink);
-}
-.syncchip.busy {
-  color: var(--ka-ink);
-}
-.syncchip.busy :deep(svg) {
-  animation: spin 0.9s linear infinite;
-}
-.syncchip.warn {
-  background: var(--roll-wash);
-  color: var(--roll-ink);
-  font-weight: 700;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 .bell {
   position: relative;
 }
@@ -416,19 +497,15 @@ kbd {
   height: 38px;
   border-radius: 50%;
 }
-.avatar-btn .avatar {
-  /* 头像底色是 --don：深色主题下白字对比不足，跟随 --ink-inv */
-  color: var(--ink-inv);
-}
 .menu {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
   width: 220px;
-  padding: 6px;
+  padding: var(--overlay-pad-sm);
   background: var(--surface);
-  border-radius: var(--r-panel);
-  box-shadow: var(--shadow-pop);
+  border-radius: var(--overlay-radius);
+  box-shadow: var(--overlay-shadow);
   z-index: 5;
 }
 .menu-head {
@@ -459,6 +536,26 @@ kbd {
 .main {
   min-width: 0;
 }
+.main:focus {
+  outline: none;
+  box-shadow: none;
+}
+.skip {
+  position: fixed;
+  z-index: calc(var(--z-toast) + 1);
+  top: 8px;
+  left: 8px;
+  padding: 10px 16px;
+  border-radius: var(--r-ctl);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: var(--fs-14);
+  font-weight: 700;
+  transform: translateY(calc(-100% - 16px));
+}
+.skip:focus {
+  transform: none;
+}
 .tabbar,
 .m-tabs {
   display: none;
@@ -475,9 +572,6 @@ kbd {
   .searchbox kbd {
     display: none;
   }
-  .syncchip span {
-    display: none;
-  }
 }
 
 /* ---------- 手机 ---------- */
@@ -490,12 +584,23 @@ kbd {
     display: none;
   }
   .bar {
-    height: 52px;
+    height: var(--bar-h-m);
     gap: var(--sp-2);
     padding-right: 8px;
   }
   .bar-left {
     gap: 10px;
+  }
+  .bar-right {
+    gap: 0;
+  }
+  .bar-right .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  /* .only-mobile 用 display: revert，按钮要保持图标居中 */
+  .m-sync {
+    display: inline-grid !important;
   }
   .bar-left .back {
     margin: 0 -6px 0 -12px;
@@ -503,10 +608,14 @@ kbd {
   .m-brand {
     display: grid !important;
     place-items: center;
+    /* D7：可点区域 44px；负外边距让 28px 标志保持原位 */
+    width: var(--hit);
+    height: var(--hit);
+    margin: 0 -8px;
   }
   .m-tabs {
     position: sticky;
-    top: 52px;
+    top: var(--bar-h-m);
     z-index: calc(var(--z-bar) - 1);
     display: flex;
     gap: 2px;
@@ -523,7 +632,11 @@ kbd {
   }
   .m-tabs a {
     position: relative;
-    padding: 11px 10px 12px;
+    /* D9：二级页签条高 --subtab-h-m（44px），也是可点高度 */
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--subtab-h-m);
+    padding: 0 10px;
     font-size: var(--fs-14);
     font-weight: 500;
     color: var(--ink-2);
@@ -545,7 +658,7 @@ kbd {
   }
   .menu {
     position: fixed;
-    top: 56px;
+    top: calc(var(--bar-h-m) + 4px);
     right: 8px;
   }
   .tabbar {
@@ -601,8 +714,8 @@ kbd {
     margin-top: -18px;
     border-radius: 50%;
     background: var(--don);
-    color: var(--lane-ring);
-    box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--lane-ring) 92%, transparent), 0 0 0 2px var(--lane-outline), var(--shadow-lift);
+    color: var(--note-ring);
+    box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--note-ring) 92%, transparent), 0 0 0 2px var(--note-outline), var(--shadow-lift);
     transition: transform var(--dur-2) var(--ease-hit);
   }
   .don-btn:active .don-face {

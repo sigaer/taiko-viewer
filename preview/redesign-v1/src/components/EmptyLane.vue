@@ -1,6 +1,12 @@
 <script setup>
-// 空状态 / 错误状态 / 权限引导的统一形态：一条空谱面 + 判定圈。
-// 空 = 还没有音符飞过来；错误 = 判定圈变成不可色；加载 = 音符流过。
+import { prefersReducedMotion } from '../motion'
+
+/**
+ * 空状态 / 错误状态 / 加载状态 / 权限引导的统一形态：一条空谱面 + 判定圈。
+ * 空 = 还没有音符飞过来；错误 = 判定圈变成不可色；加载 = 音符流过（减少动效时为静止的三个音符）。
+ * props: title、text、tone（'empty' | 'error' | 'loading'）、compact
+ * slot default：操作按钮
+ */
 defineProps({
   title: { type: String, required: true },
   text: { type: String, default: '' },
@@ -10,11 +16,12 @@ defineProps({
 </script>
 
 <template>
-  <div class="el" :class="[tone, { compact }]">
+  <div class="el" :class="[tone, { compact }]" :role="tone === 'loading' ? 'status' : undefined" :aria-busy="tone === 'loading' ? 'true' : undefined">
     <div class="strip" aria-hidden="true">
-      <i class="hit" />
+      <i class="judge-ring" />
       <template v-if="tone === 'loading'">
-        <i class="fly n1" /><i class="fly ka n2" /><i class="fly n3" />
+        <template v-if="prefersReducedMotion"><i class="still s1" /><i class="still ka s2" /><i class="still s3" /></template>
+        <template v-else><i class="fly n1" /><i class="fly ka n2" /><i class="fly n3" /></template>
       </template>
     </div>
     <h3 class="t-h2">{{ title }}</h3>
@@ -51,31 +58,35 @@ defineProps({
   border-top: 1px solid var(--lane-line);
   border-bottom: 1px solid var(--lane-line);
 }
-.hit {
+.judge-ring {
   position: absolute;
   left: 12px;
   top: 7px;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--lane-ink) 70%, transparent);
+  border: 2px solid var(--lane-ink-2);
 }
-.error .hit {
+.error .judge-ring {
   border-color: var(--judge-ng);
   background: color-mix(in srgb, var(--judge-ng) 30%, transparent);
 }
-.fly {
+.fly,
+.still {
   position: absolute;
   top: 13px;
-  left: 100%;
   width: 18px;
   height: 18px;
   border-radius: 50%;
   background: var(--lane-don);
-  box-shadow: inset 0 0 0 2.5px var(--lane-ring);
+  box-shadow: inset 0 0 0 2.5px var(--note-ring);
+}
+.fly {
+  left: 100%;
   animation: fly 1.5s linear infinite;
 }
-.fly.ka {
+.fly.ka,
+.still.ka {
   background: var(--lane-ka);
 }
 .n2 {
@@ -83,6 +94,15 @@ defineProps({
 }
 .n3 {
   animation-delay: 1s;
+}
+.s1 {
+  left: 38%;
+}
+.s2 {
+  left: 58%;
+}
+.s3 {
+  left: 78%;
 }
 @keyframes fly {
   to {

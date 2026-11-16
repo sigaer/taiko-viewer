@@ -1,5 +1,28 @@
-// 评审用的画面清单：总览页和手机预览框共用。
+// 评审用的画面清单：总览页、手机预览框和 QA 脚本（qa/lib/routes.mjs）共用。
+// 每项 { path, name, note, auth }；auth 是打开时切换到的登录态（不写 = 保持当前）。
+// 带 .js 扩展名：QA 在 Node 里直接 import 这个文件。
+import { EDGE } from '../../mock/data.js'
+
+// V1.1 边界状态的歌曲 id 在载入时从 EDGE 解析；demo 数据集里没有生成曲时退回到 full 数据集里的固定 id。
+const edgeId = (key, fallback) => EDGE[key]?.[0] ?? fallback
+const NO_CONSTANT = edgeId('noConstant', 3)
+const NO_CHART_IMAGE = edgeId('noChartImage', 6)
+const LONG_TITLE = edgeId('longJa', 12)
+
 export const SCREENS = [
+  {
+    group: 'V1.1 重点状态',
+    items: [
+      { path: `/songs/${NO_CONSTANT}`, name: '歌曲详情 · 缺定数', note: '定数位显示「—」，其余信息照常', auth: 'ready' },
+      { path: `/songs/${NO_CHART_IMAGE}`, name: '歌曲详情 · 没有谱面图', note: '谱面图区域的缺失状态', auth: 'ready' },
+      { path: `/songs/${LONG_TITLE}`, name: '歌曲详情 · 长标题', note: '40 字以上的日文曲名与中文译名：主标题完整显示、按字换行，副标题最多两行', auth: 'ready' },
+      { path: '/songs?star=10&ura=1&sort=const', name: '曲库 · 带筛选的链接', note: '从地址还原筛选与排序；进详情再返回，筛选与滚动位置还在', auth: 'ready' },
+      { path: '/community/t/4017?p=2', name: '帖子 · 60 楼长帖', note: '楼层分页的第 2 页、只看楼主、跳到楼层、楼中楼折叠', auth: 'ready' },
+      { path: '/u/hayate', name: '个人主页 · 他人', note: '身份带、称号牌、段位、代表成绩', auth: 'ready' },
+      { path: '/account/settings', name: '设置', note: '单栏 760px、页内目录、列表密度对所有表格生效', auth: 'ready' },
+      { path: '/states', name: '状态页样例', note: '加载、空、错误、未登录、未绑定、404、离线、确认' },
+    ],
+  },
   {
     group: '入口与今日',
     items: [

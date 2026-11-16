@@ -1,102 +1,104 @@
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import Icon from '../components/Icon.vue'
+import Sheet from '../components/Sheet.vue'
 import EmptyLane from '../components/EmptyLane.vue'
+import SyncPanel from '../components/SyncPanel.vue'
 import { player } from '../mock/data'
-import { store, L, toast, runSync } from '../store'
+import { store, L, toast, reducedMotion } from '../store'
+import { sync, startSync, SYNC_PHASES, SYNC_TARGETS } from '../sync'
 
-const current = player.bindings.find((b) => b.current)
+const current = computed(() => player.bindings.find((b) => b.current) || player.bindings[0])
 const NOW = '11-16 20:46'
 const LAST = '11-16 18:42'
 
-/* ---------- 同步过程 ---------- */
-const STEPS = [
-  { key: 'src', note: '', zh: '鼓众广场', ja: '鼓衆広場', dzh: '读取游玩记录', dja: 'プレイ記録を取得' },
-  { key: 'viewer', note: 'ka', zh: 'Viewer', ja: 'Viewer', dzh: '比对出新纪录', dja: '新しい記録を照合' },
-  { key: 'out', note: 'roll', zh: '你选择的服务', ja: '選択したサービス', dzh: '推送到已开启的目标', dja: 'オンの連携先へ送信' },
-]
-const phase = ref(-1)
-const justSynced = ref(false)
-let timers = []
-const clearTimers = () => {
-  timers.forEach(clearTimeout)
-  timers = []
+/* ---------- 主按钮与结果：全站唯一的同步状态机（S1 / S5） ---------- */
+const running = computed(() => sync.state === 'running')
+const isEmpty = computed(() => store.auth === 'empty')
+function syncNow() {
+  startSync({ retryTargets: sync.state === 'partial' })
 }
-onBeforeUnmount(clearTimers)
+const primaryLabel = computed(() => {
+  if (running.value) return L(`正在同步… ${sync.phase + 1}/3`, `同期中… ${sync.phase + 1}/3`)
+  if (sync.state === 'partial') return L('重试失败的目标', '失敗した連携先を再試行')
+  if (sync.state === 'failed') return L('重试', '再試行')
+  if (isEmpty.value) return L('开始第一次同步', '最初の同期を開始')
+  return L('立即同步', '今すぐ同期')
+})
+const lastLabel = computed(() => (isEmpty.value && !sync.result ? L('还没有同步过', 'まだ同期していません') : L(sync.lastSyncLabel.zh, sync.lastSyncLabel.ja)))
+const progressText = computed(() => (running.value ? L(`正在同步，第 ${sync.phase + 1} 步，共 3 步：${SYNC_PHASES[sync.phase].zh}`, `同期中（${sync.phase + 1}/3）：${SYNC_PHASES[sync.phase].ja}`) : ''))
 
-/* ---------- 同步目标 ---------- */
-const seedTargets = () => {
-  const fresh = store.auth === 'empty'
-  return [
-    { key: 'viewer', nzh: 'Viewer 成长记录', nja: 'Viewer 成長記録', on: true, locked: true, state: fresh ? 'idle' : 'ok', at: LAST },
-    { key: 'ourtaiko', nzh: 'OurTaiko', nja: 'OurTaiko', on: true, state: fresh ? 'idle' : 'ok', at: LAST },
-    { key: 'kinoko', nzh: '菌菌控制台 Kinoko', nja: 'Kinoko コンソール', on: true, state: fresh ? 'idle' : 'fail', at: LAST, zh: 'API key 已过期，更新后再重试', ja: 'API キーの期限切れです。更新してから再試行してください' },
-    { key: 'sakura', nzh: 'Sakura Bot', nja: 'Sakura Bot', on: false, state: 'idle', at: '' },
-  ]
+/* ---------- 同步过程：步骤器（同步中高亮当前阶段） ---------- */
+const STEP_TEXT = [
+  { note: '', dzh: '读取游玩记录', dja: 'プレイ記録を取得' },
+  { note: 'ka', dzh: '比对出新纪录', dja: '新しい記録を照合' },
+  { note: 'roll', dzh: '推送到已开启的目标', dja: 'オンの連携先へ送信' },
+]
+const steps = computed(() =>
+  SYNC_PHASES.map((p, i) => {
+    let state = 'idle'
+    if (running.value) state = i < sync.phase ? 'done' : i === sync.phase ? 'now' : 'todo'
+    return { ...p, ...STEP_TEXT[i], n: i + 1, state }
+  }),
+)
+
+/* ---------- 同步目标：状态来自最近一次同步结果 ---------- */
+const enabled = reactive({ viewer: true, ourtaiko: true, kinoko: true, sakura: false })
+const TARGETS = [...SYNC_TARGETS.map((t) => ({ ...t, locked: t.key === 'viewer' })), { key: 'sakura', zh: 'Sakura Bot', ja: 'Sakura Bot', locked: false }]
+const resultOf = (key) => sync.result?.targets?.find((t) => t.key === key) || null
+function targetState(t) {
+  if (!enabled[t.key]) return { kind: 'off' }
+  if (running.value) return { kind: sync.phase === 2 ? 'pushing' : 'waiting' }
+  if (isEmpty.value && !sync.result) return { kind: 'first' }
+  if (!sync.result) return t.key === 'sakura' ? { kind: 'next' } : { kind: 'ok', at: LAST }
+  const r = resultOf(t.key)
+  if (!r) return { kind: 'next' }
+  if (r.ok === false) return { kind: 'fail', reason: L(r.reasonZh, r.reasonJa) }
+  if (r.ok === null) return { kind: 'skipped' }
+  return { kind: 'ok', at: NOW }
 }
-const targets = ref(seedTargets())
-const tname = (t) => L(t.nzh, t.nja)
+const targetRows = computed(() => TARGETS.map((t) => ({ ...t, st: targetState(t) })))
 function toggle(t) {
   if (t.locked) return
-  t.on = !t.on
-  t.state = 'idle'
-}
-function retry(t) {
-  t.state = 'busy'
-  timers.push(
-    setTimeout(() => {
-      t.state = 'ok'
-      t.at = NOW
-      toast(L(`${t.nzh} 同步成功`, `${t.nja} への同期が完了しました`))
-    }, 1400),
-  )
+  enabled[t.key] = !enabled[t.key]
 }
 
-/* ---------- 历史 ---------- */
+/* ---------- 最近同步 ---------- */
 const SEED = [
-  { id: 6, time: LAST, records: 4, pb: 2, fc: 0, dfc: 1, dur: 6.2, ok: true },
-  { id: 5, time: '11-15 22:10', records: 7, pb: 5, fc: 1, dfc: 0, dur: 7.8, ok: true },
-  { id: 4, time: '11-13 21:37', records: 0, pb: 0, fc: 0, dfc: 0, dur: 3.1, ok: true },
-  { id: 3, time: '11-12 20:05', records: 0, pb: 0, fc: 0, dfc: 0, dur: 30, ok: false, zh: '鼓众广场响应超时，稍后再试', ja: '鼓衆広場がタイムアウトしました。時間をおいて再試行してください' },
-  { id: 2, time: '11-12 19:58', records: 11, pb: 6, fc: 1, dfc: 0, dur: 9.4, ok: true },
-  { id: 1, time: '11-09 16:21', records: 3, pb: 3, fc: 0, dfc: 0, dur: 5.6, ok: true },
+  { id: 7, time: LAST, outcome: 'success', records: 4, pb: 2, fc: 0, dfc: 1, dur: 6.2 },
+  { id: 6, time: '11-15 22:10', outcome: 'partial', records: 7, pb: 5, fc: 1, dfc: 0, dur: 7.8, zh: '菌菌控制台：API key 已过期', ja: 'Kinoko コンソール：API キーの期限切れ' },
+  { id: 5, time: '11-13 21:37', outcome: 'success', records: 0, pb: 0, fc: 0, dfc: 0, dur: 3.1 },
+  { id: 4, time: '11-12 20:05', outcome: 'failed', dur: 30, zh: '鼓众广场响应超时', ja: '鼓衆広場がタイムアウト' },
+  { id: 3, time: '11-12 19:58', outcome: 'success', records: 11, pb: 6, fc: 1, dfc: 0, dur: 9.4 },
+  { id: 2, time: '11-09 16:21', outcome: 'success', records: 3, pb: 3, fc: 0, dfc: 0, dur: 5.6 },
 ]
 const seedHistory = () => (store.auth === 'empty' ? [] : SEED.map((r) => ({ ...r })))
 const history = ref(seedHistory())
 watch(
   () => store.auth,
-  () => {
-    history.value = seedHistory()
-    targets.value = seedTargets()
-    justSynced.value = false
-  },
+  () => (history.value = seedHistory()),
 )
-const lastLabel = computed(() => {
-  if (justSynced.value) return L('刚刚', 'たった今')
-  if (!history.value.length) return L('还没有同步过', 'まだ同期していません')
-  return L(player.lastSync, player.lastSyncJa)
-})
-
+// 一次同步结束：写入历史
 watch(
-  () => store.syncing,
-  (on) => {
-    if (on) {
-      phase.value = 0
-      timers.push(
-        setTimeout(() => (phase.value = 1), 700),
-        setTimeout(() => (phase.value = 2), 1450),
-      )
-      return
+  () => sync.state,
+  (st, prev) => {
+    if (prev !== 'running' || !['success', 'partial', 'failed'].includes(st) || !sync.result) return
+    const r = sync.result
+    const row = { id: Date.now(), time: NOW, outcome: st, dur: st === 'failed' ? 1.2 : 2.4 }
+    if (st !== 'failed') Object.assign(row, { records: r.records, pb: r.pb, fc: r.fc, dfc: r.dfc })
+    if (st === 'failed') Object.assign(row, { zh: r.reasonZh, ja: r.reasonJa })
+    if (st === 'partial') {
+      const f = r.targets.find((t) => t.ok === false)
+      if (f) Object.assign(row, { zh: `${f.zh}：${f.reasonZh}`, ja: `${f.ja}：${f.reasonJa}` })
     }
-    phase.value = -1
-    justSynced.value = true
-    history.value.unshift({ id: Date.now(), time: NOW, records: 4, pb: 2, fc: 0, dfc: 1, dur: 2.2, ok: true })
-    history.value = history.value.slice(0, 6)
-    targets.value.forEach((t) => {
-      if (t.on && t.state !== 'fail') Object.assign(t, { state: 'ok', at: NOW })
-    })
+    history.value = [row, ...history.value].slice(0, 8)
   },
 )
+const OUTCOME = {
+  success: { zh: '成功', ja: '成功', cls: 'tag-ok', icon: 'check' },
+  partial: { zh: '部分成功', ja: '一部成功', cls: 'tag-roll', icon: 'warn' },
+  failed: { zh: '失败', ja: '失敗', cls: 'tag-danger', icon: 'warn' },
+}
 
 /* ---------- 网页成绩 token ---------- */
 const tokenTail = ref('a71c')
@@ -110,13 +112,20 @@ function copyToken() {
   }
   toast(L('token 已复制', 'トークンをコピーしました'))
 }
-function regenToken() {
+function generate() {
   tokenTail.value = newTail()
-  toast(L('已生成新的 token，旧 token 立即失效', '新しいトークンを発行しました。古いトークンは無効です'))
+  toast(L('已生成 token', 'トークンを発行しました'))
 }
-function revokeToken() {
-  tokenTail.value = ''
-  toast(L('token 已吊销', 'トークンを失効させました'))
+const confirmKind = ref('') // regen | revoke
+function runConfirm() {
+  if (confirmKind.value === 'regen') {
+    tokenTail.value = newTail()
+    toast(L('已生成新的 token，旧 token 已失效', '新しいトークンを発行しました。古いトークンは無効です'))
+  } else if (confirmKind.value === 'revoke') {
+    tokenTail.value = ''
+    toast(L('token 已吊销', 'トークンを失効させました'))
+  }
+  confirmKind.value = ''
 }
 
 /* ---------- 菌菌控制台迁移 ---------- */
@@ -124,6 +133,7 @@ const mig = reactive({ key: '', error: '' })
 function startMigrate() {
   if (mig.key.trim().length < 16) {
     mig.error = L('API key 至少 16 位。到菌菌控制台的「账号」页复制完整的 key 再粘贴。', 'API キーは 16 文字以上です。Kinoko コンソールの「アカウント」から全体をコピーして貼り付けてください。')
+    document.getElementById('mig-key')?.focus()
     return
   }
   mig.key = ''
@@ -133,195 +143,256 @@ function startMigrate() {
 
 <template>
   <div class="page sync">
-    <EmptyLane v-if="store.auth === 'guest'" :title="L('登录后管理账号', 'ログインしてアカウントを管理')">
+    <EmptyLane v-if="store.auth === 'guest'" :title="L('登录后管理同步', 'ログインして同期を管理')">
       <RouterLink to="/login" class="btn btn-primary">{{ L('登录', 'ログイン') }}</RouterLink>
     </EmptyLane>
     <EmptyLane v-else-if="store.auth === 'unbound'" :title="L('先绑定鼓众广场 ID', 'まず鼓衆広場 ID を連携')" :text="L('绑定之后才能把游玩记录同步过来。', '連携するとプレイ記録を同期できます。')">
       <RouterLink to="/bind" class="btn btn-primary">{{ L('去绑定', '連携する') }}</RouterLink>
     </EmptyLane>
 
-    <template v-else>
-      <!-- 当前账号 + 立即同步 -->
-      <section class="panel top">
+    <div v-else class="vcol">
+      <!-- 1 当前账号 + 同步结果 -->
+      <section class="panel top" aria-labelledby="sync-acct-h">
         <div class="top-main">
-          <span class="stamp">{{ current.region }}</span>
+          <span class="tag region">{{ current.region }}</span>
           <div class="grow">
-            <h1 class="t-h2">{{ current.name }}<span class="num id">{{ current.taikoId }}</span></h1>
-            <p class="t-small last">
+            <h2 id="sync-acct-h" class="acct-name">
+              <span class="title-1l" :title="current.name">{{ current.name }}</span>
+              <span class="num id">{{ current.taikoId }}</span>
+            </h2>
+            <p class="last">
               <span>{{ L('上次同步', '前回の同期') }} <b>{{ lastLabel }}</b></span>
               <RouterLink to="/account" class="link">{{ L('切换账号', 'アカウントを切り替え') }}</RouterLink>
             </p>
           </div>
-          <button class="btn btn-primary btn-lg go" :disabled="store.syncing" @click="runSync">
-            <Icon name="sync" :size="18" :class="{ spin: store.syncing }" />
-            {{ store.syncing ? L('同步中…', '同期中…') : L('立即同步', '今すぐ同期') }}
+          <button type="button" class="btn btn-primary btn-lg go" :disabled="running" @click="syncNow">
+            <Icon name="sync" :size="18" :class="{ spin: running && !reducedMotion }" />
+            {{ primaryLabel }}
           </button>
         </div>
-        <ol class="flow" :aria-label="L('同步过程', '同期の流れ')">
-          <li v-for="(s, i) in STEPS" :key="s.key" :class="{ wait: phase >= 0 && i > phase, now: phase === i }">
-            <i class="note big" :class="phase >= 0 && i > phase ? 'ghost' : s.note" />
+        <p class="sr-only" aria-live="polite">{{ progressText }}</p>
+        <p v-if="isEmpty && !sync.result && !running" class="first-hint">{{ L('第一次同步大约需要 10 秒。', '最初の同期は 10 秒ほどかかります。') }}</p>
+        <SyncPanel result-only class="last-result" />
+      </section>
+
+      <!-- 2 同步过程 -->
+      <section aria-labelledby="sync-flow-h">
+        <div class="section-head"><h2 id="sync-flow-h" class="t-h2">{{ L('同步过程', '同期の流れ') }}</h2></div>
+        <ol class="stepper" :class="{ live: running }">
+          <li v-for="s in steps" :key="s.key" :class="s.state" :aria-current="s.state === 'now' ? 'step' : undefined">
+            <i class="note big" :class="s.state === 'done' ? 'ka' : s.state === 'todo' ? 'ghost' : s.state === 'now' ? '' : s.note">
+              <Icon v-if="s.state === 'done'" name="check" :size="14" />
+              <span v-else class="num">{{ s.n }}</span>
+            </i>
             <b>{{ L(s.zh, s.ja) }}</b>
-            <span class="t-caption">{{ L(s.dzh, s.dja) }}</span>
+            <span class="step-d">{{ L(s.dzh, s.dja) }}</span>
           </li>
         </ol>
       </section>
 
-      <div class="cols">
-        <div class="main">
-          <!-- 同步目标 -->
-          <section>
-            <div class="section-head"><h2 class="t-h2">{{ L('同步目标', '連携先') }}</h2></div>
-            <ul class="panel rows">
-              <li v-for="t in targets" :key="t.key" class="tg">
-                <div class="grow">
-                  <p class="tg-name">
-                    <b>{{ tname(t) }}</b>
-                    <span v-if="t.locked" class="tag">{{ L('始终开启', '常にオン') }}</span>
-                  </p>
-                  <p class="tg-res">
-                    <template v-if="!t.on">{{ L('未开启', 'オフ') }}</template>
-                    <template v-else-if="t.state === 'ok'">
-                      <span class="tag tag-ok">{{ L('成功', '成功') }}</span>
-                      <span class="num">{{ t.at }}</span>
+      <!-- 3 同步目标 -->
+      <section aria-labelledby="sync-tg-h">
+        <div class="section-head"><h2 id="sync-tg-h" class="t-h2">{{ L('同步目标', '連携先') }}</h2></div>
+        <ul class="panel rows">
+          <li v-for="t in targetRows" :key="t.key" class="tg">
+            <div class="grow">
+              <p class="tg-name">
+                <b>{{ L(t.zh, t.ja) }}</b>
+                <span v-if="t.locked" class="t-small">{{ L('始终开启', '常にオン') }}</span>
+              </p>
+              <p class="tg-res">
+                <template v-if="t.st.kind === 'off'"><span class="tag"><i class="ring" aria-hidden="true" />{{ L('未开启', 'オフ') }}</span></template>
+                <template v-else-if="t.st.kind === 'ok'">
+                  <span class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已同步', '同期済み') }}</span>
+                  <span class="num">{{ t.st.at }}</span>
+                </template>
+                <template v-else-if="t.st.kind === 'fail'">
+                  <span class="tag tag-danger"><Icon name="warn" :size="12" />{{ L('失败', '失敗') }}</span>
+                  <span class="reason">{{ t.st.reason }}</span>
+                </template>
+                <template v-else-if="t.st.kind === 'pushing'"><span class="tag tag-info"><Icon name="sync" :size="12" />{{ L('正在推送', '送信中') }}</span></template>
+                <template v-else-if="t.st.kind === 'waiting'"><span class="tag"><Icon name="clock" :size="12" />{{ L('等待推送', '送信待ち') }}</span></template>
+                <template v-else-if="t.st.kind === 'skipped'"><span class="tag"><i class="ring" aria-hidden="true" />{{ L('这次没有推送', '今回は未送信') }}</span></template>
+                <template v-else-if="t.st.kind === 'first'"><span class="tag"><Icon name="clock" :size="12" />{{ L('第一次同步后推送', '最初の同期後に送信') }}</span></template>
+                <template v-else><span class="tag"><Icon name="clock" :size="12" />{{ L('下次同步时推送', '次回の同期から送信') }}</span></template>
+              </p>
+            </div>
+            <button v-if="t.st.kind === 'fail'" type="button" class="btn btn-sm" :disabled="running" @click="startSync({ retryTargets: true })">{{ L('重试', '再試行') }}</button>
+            <button type="button" class="sw" role="switch" :aria-checked="enabled[t.key]" :aria-label="L(`推送到 ${t.zh}`, `${t.ja} へ送信`)" :disabled="t.locked" @click="toggle(t)"><i /></button>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 4 最近同步 -->
+      <section aria-labelledby="sync-hist-h">
+        <div class="section-head"><h2 id="sync-hist-h" class="t-h2">{{ L('最近同步', '最近の同期') }}</h2></div>
+        <div class="panel">
+          <EmptyLane v-if="!history.length" compact :title="L('还没有同步记录', '同期履歴はまだありません')" />
+          <template v-else>
+            <div class="only-desktop scroll-x">
+              <table class="dt">
+                <caption class="sr-only">{{ L('最近的同步记录', '最近の同期履歴') }}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ L('时间', '日時') }}</th>
+                    <th scope="col">{{ L('状态', '状態') }}</th>
+                    <th scope="col" class="r">{{ L('新进展', '新しい記録') }}</th>
+                    <th scope="col" class="r">{{ L('刷新成绩', '自己ベスト') }}</th>
+                    <th scope="col" class="r">{{ L('全连', 'フルコンボ') }}</th>
+                    <th scope="col" class="r">{{ L('全良', '全良') }}</th>
+                    <th scope="col" class="r">{{ L('用时', '所要時間') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="h in history" :key="h.id">
+                    <th scope="row" class="num when">{{ h.time }}</th>
+                    <td class="state-cell">
+                      <span class="tag" :class="OUTCOME[h.outcome].cls"><Icon :name="OUTCOME[h.outcome].icon" :size="12" />{{ L(OUTCOME[h.outcome].zh, OUTCOME[h.outcome].ja) }}</span>
+                      <span v-if="h.zh" class="why">{{ L(h.zh, h.ja) }}</span>
+                    </td>
+                    <template v-if="h.outcome === 'failed'">
+                      <td v-for="k in 4" :key="k" class="r"><span class="na">—</span></td>
                     </template>
-                    <template v-else-if="t.state === 'fail'">
-                      <span class="tag tag-don">{{ L('失败', '失敗') }}</span>
-                      <span>{{ L(t.zh, t.ja) }}</span>
+                    <template v-else>
+                      <td class="r num big" :class="{ faint: !h.records }">{{ h.records }}</td>
+                      <td class="r num" :class="{ faint: !h.pb }">{{ h.pb }}</td>
+                      <td class="r num" :class="{ faint: !h.fc }">{{ h.fc }}</td>
+                      <td class="r num" :class="{ faint: !h.dfc }">{{ h.dfc }}</td>
                     </template>
-                    <template v-else-if="t.state === 'busy'">{{ L('重试中…', '再試行中…') }}</template>
-                    <template v-else>{{ L('下次同步时推送', '次回の同期から送信') }}</template>
-                  </p>
+                    <td class="r nowrap"><span class="num">{{ h.dur.toFixed(1) }}</span> {{ L('秒', '秒') }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ul class="only-mobile rows">
+              <li v-for="h in history" :key="h.id" class="hrow">
+                <div class="spread">
+                  <span class="num">{{ h.time }}</span>
+                  <span class="tag" :class="OUTCOME[h.outcome].cls"><Icon :name="OUTCOME[h.outcome].icon" :size="12" />{{ L(OUTCOME[h.outcome].zh, OUTCOME[h.outcome].ja) }}</span>
                 </div>
-                <button v-if="t.on && t.state === 'fail'" class="btn btn-sm" @click="retry(t)">{{ L('重试', '再試行') }}</button>
-                <button class="sw" role="switch" :aria-checked="t.on" :aria-label="tname(t)" :disabled="t.locked" @click="toggle(t)"><i /></button>
+                <p v-if="h.outcome !== 'failed'" class="hstats">
+                  <span>{{ L('新进展', '新しい記録') }}<b class="num">{{ h.records }}</b></span>
+                  <span>{{ L('刷新成绩', '自己ベスト') }}<b class="num">{{ h.pb }}</b></span>
+                  <span>{{ L('全连', 'フルコンボ') }}<b class="num">{{ h.fc }}</b></span>
+                  <span>{{ L('全良', '全良') }}<b class="num">{{ h.dfc }}</b></span>
+                </p>
+                <p v-if="h.zh" class="why">{{ L(h.zh, h.ja) }}</p>
               </li>
             </ul>
-          </section>
-
-          <!-- 最近同步 -->
-          <section class="section">
-            <div class="section-head"><h2 class="t-h2">{{ L('最近同步', '最近の同期') }}</h2></div>
-            <div class="panel">
-              <EmptyLane v-if="!history.length" compact :title="L('还没有同步记录', '同期履歴はまだありません')">
-                <button class="btn btn-primary" :disabled="store.syncing" @click="runSync">{{ L('立即同步', '今すぐ同期') }}</button>
-              </EmptyLane>
-              <template v-else>
-                <div class="only-desktop scroll-x">
-                  <table class="dt">
-                    <thead>
-                      <tr>
-                        <th>{{ L('时间', '日時') }}</th>
-                        <th class="r">{{ L('新记录', '新しい記録') }}</th>
-                        <th class="r">{{ L('最好成绩', '自己ベスト') }}</th>
-                        <th class="r">{{ L('全连', 'フルコンボ') }}</th>
-                        <th class="r">{{ L('全良', '全良') }}</th>
-                        <th class="r">{{ L('用时', '所要時間') }}</th>
-                        <th>{{ L('状态', '状態') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="h in history" :key="h.id">
-                        <td class="num">{{ h.time }}</td>
-                        <td class="r num big" :class="{ faint: !h.records }">{{ h.records }}</td>
-                        <td class="r num" :class="{ faint: !h.pb }">{{ h.pb }}</td>
-                        <td class="r num" :class="{ faint: !h.fc }">{{ h.fc }}</td>
-                        <td class="r num" :class="{ faint: !h.dfc }">{{ h.dfc }}</td>
-                        <td class="r"><span class="num">{{ h.dur.toFixed(1) }}</span> {{ L('秒', '秒') }}</td>
-                        <td>
-                          <span v-if="h.ok" class="tag tag-ok">{{ L('成功', '成功') }}</span>
-                          <span v-else class="fail"><span class="tag tag-don">{{ L('失败', '失敗') }}</span>{{ L(h.zh, h.ja) }}</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <ul class="only-mobile rows">
-                  <li v-for="h in history" :key="h.id" class="hrow">
-                    <div class="spread">
-                      <span class="num">{{ h.time }}</span>
-                      <span class="tag" :class="h.ok ? 'tag-ok' : 'tag-don'">{{ h.ok ? L('成功', '成功') : L('失败', '失敗') }}</span>
-                    </div>
-                    <p v-if="h.ok" class="hstats">
-                      <span>{{ L('新记录', '新しい記録') }}<b class="num">{{ h.records }}</b></span>
-                      <span>{{ L('最好成绩', '自己ベスト') }}<b class="num">{{ h.pb }}</b></span>
-                      <span>{{ L('全连', 'フルコンボ') }}<b class="num">{{ h.fc }}</b></span>
-                      <span>{{ L('全良', '全良') }}<b class="num">{{ h.dfc }}</b></span>
-                    </p>
-                    <p v-else class="t-small">{{ L(h.zh, h.ja) }}</p>
-                  </li>
-                </ul>
-              </template>
-            </div>
-          </section>
+          </template>
         </div>
+      </section>
 
-        <aside class="side">
-          <!-- 网页成绩 token -->
-          <section>
-            <div class="section-head">
-              <h2 class="t-h2">{{ L('网页成绩 token', 'Web スコアトークン') }}</h2>
-              <RouterLink to="/account/developer" class="more">{{ L('token 使用说明', 'トークンの使い方') }}</RouterLink>
+      <!-- 5 网页成绩 token -->
+      <section aria-labelledby="sync-token-h">
+        <div class="section-head">
+          <h2 id="sync-token-h" class="t-h2">{{ L('网页成绩 token', 'Web スコアトークン') }}</h2>
+          <RouterLink to="/account/developer" class="more">{{ L('token 使用说明', 'トークンの使い方') }}</RouterLink>
+        </div>
+        <div class="panel panel-pad col token-box">
+          <template v-if="tokenTail">
+            <code class="num token">{{ masked }}</code>
+            <div class="row-wrap">
+              <button type="button" class="btn btn-sm" @click="copyToken"><Icon name="copy" :size="14" />{{ L('复制', 'コピー') }}</button>
             </div>
-            <div class="panel panel-pad col">
-              <template v-if="tokenTail">
-                <code class="num token">{{ masked }}</code>
-                <div class="row-wrap">
-                  <button class="btn btn-sm" @click="copyToken"><Icon name="copy" :size="14" />{{ L('复制', 'コピー') }}</button>
-                  <button class="btn btn-sm" @click="regenToken">{{ L('重新生成', '再発行') }}</button>
-                  <button class="btn btn-sm btn-ghost" @click="revokeToken">{{ L('吊销', '失効させる') }}</button>
-                </div>
-              </template>
-              <template v-else>
-                <p class="t-small">{{ L('没有可用的 token。', '有効なトークンはありません。') }}</p>
-                <button class="btn" @click="regenToken"><Icon name="key" :size="16" />{{ L('生成 token', 'トークンを発行') }}</button>
-              </template>
-            </div>
-          </section>
+          </template>
+          <template v-else>
+            <p class="t-small">{{ L('没有可用的 token。', '有効なトークンはありません。') }}</p>
+            <div><button type="button" class="btn" @click="generate"><Icon name="key" :size="16" />{{ L('生成 token', 'トークンを発行') }}</button></div>
+          </template>
+        </div>
+        <div v-if="tokenTail" class="danger-zone">
+          <button type="button" class="btn btn-ghost quiet-danger" @click="confirmKind = 'regen'">{{ L('重新生成…', '再発行…') }}</button>
+          <button type="button" class="btn btn-ghost quiet-danger" @click="confirmKind = 'revoke'">{{ L('吊销 token…', 'トークンを失効…') }}</button>
+        </div>
+      </section>
 
-          <!-- 从菌菌控制台迁移 -->
-          <section class="section">
-            <div class="section-head"><h2 class="t-h2">{{ L('从菌菌控制台迁移', 'Kinoko コンソールから移行') }}</h2></div>
-            <form class="panel panel-pad col" @submit.prevent="startMigrate">
-              <div class="field">
-                <label for="mig-key">API key</label>
-                <input id="mig-key" v-model="mig.key" class="input num" :class="{ 'is-error': mig.error }" placeholder="kk_…" autocomplete="off" @input="mig.error = ''" />
-                <span v-if="mig.error" class="field-error">{{ mig.error }}</span>
-                <span v-else class="field-hint">{{ L('只用来读取一次历史成绩，迁移后不会保存。', '過去のスコアを一度読み込むためだけに使い、移行後は保存しません。') }}</span>
-              </div>
-              <button type="submit" class="btn btn-ink">{{ L('开始迁移', '移行を開始') }}</button>
-            </form>
-          </section>
-        </aside>
-      </div>
-    </template>
+      <!-- 6 从菌菌控制台迁移 -->
+      <section aria-labelledby="sync-mig-h">
+        <div class="section-head"><h2 id="sync-mig-h" class="t-h2">{{ L('从菌菌控制台迁移', 'Kinoko コンソールから移行') }}</h2></div>
+        <form class="panel panel-pad col mig" novalidate @submit.prevent="startMigrate">
+          <div class="field">
+            <label for="mig-key">API key</label>
+            <input
+              id="mig-key"
+              v-model="mig.key"
+              class="input num"
+              :class="{ 'is-error': mig.error }"
+              placeholder="kk_…"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              enterkeyhint="go"
+              :aria-invalid="!!mig.error"
+              :aria-describedby="mig.error ? 'mig-key-err' : 'mig-key-hint'"
+              @input="mig.error = ''"
+            />
+            <span v-if="mig.error" id="mig-key-err" class="field-error" role="alert">{{ mig.error }}</span>
+            <span v-else id="mig-key-hint" class="field-hint">{{ L('只用来读取一次历史成绩，迁移后不会保存。', '過去のスコアを一度読み込むためだけに使い、移行後は保存しません。') }}</span>
+          </div>
+          <div><button type="submit" class="btn btn-ink">{{ L('开始迁移', '移行を開始') }}</button></div>
+        </form>
+      </section>
+    </div>
+
+    <!-- token 确认 -->
+    <Sheet :open="!!confirmKind" :title="confirmKind === 'revoke' ? L('吊销 token', 'トークンを失効') : L('重新生成 token', 'トークンを再発行')" :width="440" @close="confirmKind = ''">
+      <p class="consequence">
+        {{
+          confirmKind === 'revoke'
+            ? L('吊销后，用这个 token 上传网页成绩的脚本会立即失效。', '失効させると、このトークンで Web スコアを送っているスクリプトはすぐに使えなくなります。')
+            : L('生成新 token 后旧 token 立即失效，需要在脚本里换成新 token。', '再発行すると古いトークンはすぐに無効になります。スクリプトの設定を更新してください。')
+        }}
+      </p>
+      <template #foot>
+        <button type="button" class="btn" @click="confirmKind = ''">{{ L('取消', 'キャンセル') }}</button>
+        <button type="button" class="btn btn-danger" @click="runConfirm">{{ confirmKind === 'revoke' ? L('吊销 token', 'トークンを失効させる') : L('生成并让旧 token 失效', '再発行して古いトークンを無効化') }}</button>
+      </template>
+    </Sheet>
   </div>
 </template>
 
 <style scoped>
+.vcol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-10);
+  max-width: 760px;
+  margin: 0 auto;
+}
+.vcol > section {
+  min-width: 0;
+}
+
+/* 1 当前账号 */
 .top-main {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  padding: var(--sp-5) var(--sp-6);
+  padding: var(--sp-5) var(--sp-5);
 }
-.stamp {
-  display: inline-grid;
-  place-items: center;
+.region {
   flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--r-ctl);
-  border: 1.5px solid currentColor;
-  background: var(--don-wash);
-  color: var(--don-ink);
-  font-family: var(--font-num);
-  font-size: var(--fs-16);
+  justify-content: center;
+  min-width: 40px;
+  font-size: var(--fs-12);
   font-weight: 700;
-  letter-spacing: 0.04em;
+}
+.top-main .grow {
+  min-width: 0;
+}
+.acct-name {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  font-size: var(--fs-18);
+  font-weight: 700;
 }
 .id {
-  margin-left: 10px;
-  font-size: var(--fs-16);
+  flex: none;
+  font-size: var(--fs-14);
+  font-weight: 500;
   color: var(--ink-2);
 }
 .last {
@@ -329,12 +400,16 @@ function startMigrate() {
   flex-wrap: wrap;
   gap: 2px 16px;
   margin-top: 2px;
+  font-size: var(--fs-14);
+  color: var(--ink-2);
 }
 .last b {
   color: var(--ink);
 }
 .go {
+  flex: none;
   min-width: 168px;
+  white-space: nowrap;
 }
 .spin {
   animation: spin 1s linear infinite;
@@ -344,60 +419,78 @@ function startMigrate() {
     transform: rotate(360deg);
   }
 }
-
-/* 三步流程：音符沿一条虚线前进 */
-.flow {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--sp-3);
-  padding: var(--sp-5) var(--sp-4) var(--sp-5);
+.first-hint {
+  padding: 0 var(--sp-5) var(--sp-4);
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+}
+.last-result {
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
   border-top: 1px solid var(--line);
 }
-.flow::before {
-  content: '';
-  position: absolute;
-  left: 16.67%;
-  right: 16.67%;
-  top: calc(var(--sp-5) + 13px);
-  border-top: 2px dashed var(--line-strong);
+
+/* 2 步骤器：音符沿一条线前进 */
+.stepper {
+  display: flex;
 }
-.flow li {
+.stepper li {
   position: relative;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  min-width: 0;
+  padding: 0 4px;
   text-align: center;
-  transition: opacity var(--dur-2);
+  font-size: var(--fs-14);
 }
-.flow .note {
-  --n: 28px;
+.stepper li + li::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: calc(-50% + 24px);
+  right: calc(50% + 24px);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--line-strong);
+}
+.stepper li.done + li::before {
+  background: var(--ka);
+}
+.stepper .note {
+  --n: 32px;
+  display: inline-grid;
+  place-items: center;
   margin-bottom: 8px;
-  transition: transform var(--dur-2) var(--ease-hit);
+  color: var(--ink-inv);
+  font-size: var(--fs-13);
+  font-style: normal;
+  line-height: 1;
 }
-.flow .note.ghost {
-  background: var(--surface);
+.stepper .note.ghost {
+  color: var(--ink-2);
 }
-.flow li.wait b,
-.flow li.wait span {
-  opacity: 0.55;
+/* D11：音符里的数字。朱色音符换 --don-solid 底（白字 ≥ 4.5:1）；浅葱 / 山吹音符上的数字用深色 */
+.stepper .note:not(.ka, .roll, .ghost) {
+  background: var(--don-solid);
 }
-.flow li.now .note {
-  transform: scale(1.18);
+.stepper .note:is(.ka, .roll) .num {
+  color: var(--note-outline);
+}
+.stepper li.now .note {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.stepper li.todo {
+  color: var(--ink-2);
+}
+.step-d {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
 }
 
-.cols {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: start;
-  gap: var(--sp-8);
-  margin-top: var(--sp-10);
-}
-.main,
-.side {
-  min-width: 0;
-}
+/* 3 同步目标 */
 .rows > li {
   border-bottom: 1px solid var(--line);
 }
@@ -408,22 +501,40 @@ function startMigrate() {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  min-height: 68px;
+  min-height: 72px;
   padding: var(--sp-3) var(--sp-5);
+}
+.tg .grow {
+  min-width: 0;
 }
 .tg-name {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: var(--fs-16);
+}
+.tg-name .t-small {
+  color: var(--ink-2);
 }
 .tg-res {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 8px;
-  margin-top: 2px;
-  font-size: var(--fs-13);
+  gap: 4px 8px;
+  margin-top: 4px;
+  font-size: var(--fs-14);
   color: var(--ink-2);
+}
+.reason {
+  color: var(--ink);
+}
+.ring {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  flex: none;
 }
 .sw {
   position: relative;
@@ -431,7 +542,7 @@ function startMigrate() {
   width: 44px;
   height: 26px;
   border-radius: var(--r-note);
-  background: var(--line-strong);
+  background: var(--ctl-border);
   transition: background var(--dur-2);
 }
 .sw::after {
@@ -446,32 +557,45 @@ function startMigrate() {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--ai-0);
+  background: var(--surface);
   transition: transform var(--dur-2) var(--ease-out);
 }
 .sw[aria-checked='true'] {
-  background: var(--ka);
+  background: var(--ink);
 }
 .sw[aria-checked='true'] i {
   transform: translateX(18px);
 }
 .sw[disabled] {
-  opacity: 0.55;
   cursor: default;
+  background: var(--line-strong);
 }
 .sw:focus-visible {
   border-radius: var(--r-note);
 }
+
+/* 4 历史 */
 .panel > .scroll-x {
   border-radius: inherit;
+}
+.dt .when {
+  text-align: left;
+  font-weight: 400;
+  white-space: nowrap;
 }
 .dt .big {
   font-size: var(--fs-16);
 }
-.fail {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.nowrap {
+  white-space: nowrap;
+}
+.state-cell {
+  min-width: 160px;
+}
+.why {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-13);
   color: var(--ink-2);
 }
 .hrow {
@@ -479,18 +603,24 @@ function startMigrate() {
   flex-direction: column;
   gap: 6px;
   padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-14);
 }
 .hstats {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 16px;
-  font-size: var(--fs-12);
-  color: var(--ink-3);
+  font-size: var(--fs-13);
+  color: var(--ink-2);
 }
 .hstats b {
   margin-left: 5px;
   font-size: var(--fs-16);
   color: var(--ink);
+}
+
+/* 5 token */
+.token-box {
+  gap: var(--sp-3);
 }
 .token {
   display: block;
@@ -500,33 +630,52 @@ function startMigrate() {
   font-size: var(--fs-16);
   overflow-wrap: anywhere;
 }
-
-@media (max-width: 1099px) {
-  .cols {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--sp-10);
-  }
+.danger-zone {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: var(--sp-2);
 }
+.quiet-danger {
+  color: var(--danger);
+}
+.quiet-danger:hover {
+  color: var(--danger);
+  background: var(--danger-wash);
+}
+.consequence {
+  font-size: var(--fs-16);
+}
+.mig {
+  gap: var(--sp-4);
+}
+
 @media (max-width: 767px) {
+  .vcol {
+    gap: var(--sp-8);
+  }
   .top-main {
     flex-wrap: wrap;
     padding: var(--sp-4);
   }
+  .top-main .grow {
+    flex-basis: calc(100% - 60px);
+  }
   .go {
     width: 100%;
   }
-  .flow {
-    padding: var(--sp-4) var(--sp-2);
+  .first-hint {
+    padding: 0 var(--sp-4) var(--sp-4);
   }
-  .flow::before {
-    top: calc(var(--sp-4) + 13px);
+  .last-result {
+    padding: var(--sp-4);
   }
   .tg {
     padding: var(--sp-3) var(--sp-4);
   }
-  .cols {
-    margin-top: var(--sp-8);
-    gap: var(--sp-8);
+  .danger-zone .btn {
+    width: 100%;
   }
 }
 </style>

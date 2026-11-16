@@ -3,9 +3,28 @@ import { computed, ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import Sheet from '../components/Sheet.vue'
-import { store, L, toast, runSync } from '../store'
+import SongCell from '../components/SongCell.vue'
+import Cover from '../components/Cover.vue'
+import Diff from '../components/Diff.vue'
+import SyncPanel from '../components/SyncPanel.vue'
+import { songs, songById, chartOf, EDGE } from '../mock/data'
+import { store, L, toast, runSync, songTitle, songSub, subLang } from '../store'
 
-// 状态页样例：全站的加载 / 空 / 引导 / 错误 / 反馈，都收敛到这 14 种形态。
+// 状态页样例：全站的加载 / 空 / 引导 / 错误 / 反馈 / 边界数据形态。
+const SPEC_COUNT = 24
+
+// 边界曲目（M2）：优先取 EDGE 桶；demo 数据集里没有时退回一首可用的歌，样例仍然成立
+const pick = (k) => songById[EDGE[k]?.[0]] || null
+const longest = () => songs.reduce((a, b) => (b.ja.length > a.ja.length ? b : a), songs[0])
+const noConstSong = pick('noConstant') || songs[0]
+const noImageSong = pick('noChartImage') || songs[1] || songs[0]
+const noAudioSong = pick('noAudio') || songs[2] || songs[0]
+const unlistedSong = pick('unlisted') || songs[0]
+const longSong = pick('longJa') || longest()
+const specialSong = pick('special') || songs[0]
+const longConst = computed(() => chartOf(longSong.id, 4)?.constant ?? null)
+const songLink = (s) => ({ path: `/songs/${s.id}`, query: { from: 'states' } })
+const draftGone = ref(false)
 const idDemo = ref('4829 1735 0662')
 const idError = computed(() => {
   const v = idDemo.value.trim()
@@ -29,7 +48,7 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
   <div class="page">
     <header class="page-head">
       <h1 class="t-h1">{{ L('状态页样例', '状態パターン一覧') }}</h1>
-      <span class="t-small"><span class="num">14</span> {{ L('种', '種類') }}</span>
+      <span class="t-small"><span class="num">{{ SPEC_COUNT }}</span> {{ L('种', '種類') }}</span>
     </header>
 
     <div class="grid">
@@ -196,6 +215,130 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
         </div>
         <figcaption class="t-caption">{{ L('确认删除', '削除の確認') }}</figcaption>
       </figure>
+
+      <!-- 15 同步中：真实的 SyncPanel，force 指定情形，不改全局同步状态（I7） -->
+      <figure class="spec">
+        <div class="panel frame stack pad top">
+          <SyncPanel :force="{ state: 'running', phase: 1 }" />
+        </div>
+        <figcaption class="t-caption">{{ L('同步中', '同期中') }}</figcaption>
+      </figure>
+
+      <!-- 16 同步部分成功 -->
+      <figure class="spec">
+        <div class="panel frame stack pad top">
+          <SyncPanel :force="{ state: 'partial' }" />
+        </div>
+        <figcaption class="t-caption">{{ L('同步部分成功', '同期：一部成功') }}</figcaption>
+      </figure>
+
+      <!-- 17 同步失败（面板） -->
+      <figure class="spec">
+        <div class="panel frame stack pad top">
+          <SyncPanel :force="{ state: 'failed' }" />
+        </div>
+        <figcaption class="t-caption">{{ L('同步失败（同步面板）', '同期失敗（同期パネル）') }}</figcaption>
+      </figure>
+
+      <!-- 18 缺定数 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div class="song-row">
+            <RouterLink :to="songLink(noConstSong)" class="row-link"><SongCell :song="noConstSong" /></RouterLink>
+            <Diff :d="4" :star="noConstSong.levels[3]" :constant="null" show-missing />
+          </div>
+          <p class="t-small note-line">{{ L('定数还没有算出来，Rating 不计入这张谱。', '定数が未算出のため、この譜面は Rating に含まれません。') }}</p>
+        </div>
+        <figcaption class="t-caption">{{ L('缺定数', '定数なし') }}</figcaption>
+      </figure>
+
+      <!-- 19 没有谱面图 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div class="song-row">
+            <RouterLink :to="songLink(noImageSong)" class="row-link"><SongCell :song="noImageSong" /></RouterLink>
+          </div>
+          <div class="no-chart">
+            <Icon name="image" :size="20" />
+            <b>{{ L('这张谱面还没有谱面图', 'この譜面の譜面画像はまだありません') }}</b>
+            <span class="t-small">{{ L('物量、定数与我的成绩不受影响。', 'ノーツ数・定数・自分の成績は表示されます。') }}</span>
+          </div>
+        </div>
+        <figcaption class="t-caption">{{ L('没有谱面图', '譜面画像なし') }}</figcaption>
+      </figure>
+
+      <!-- 20 没有试听 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div class="song-row">
+            <RouterLink :to="songLink(noAudioSong)" class="row-link"><SongCell :song="noAudioSong" /></RouterLink>
+            <button type="button" class="btn btn-sm" disabled><Icon name="playTri" :size="14" />{{ L('暂无试听', '試聴なし') }}</button>
+          </div>
+        </div>
+        <figcaption class="t-caption">{{ L('没有试听', '試聴なし') }}</figcaption>
+      </figure>
+
+      <!-- 21 长标题 -->
+      <figure class="spec">
+        <div class="panel frame stack pad top">
+          <header class="long-head">
+            <Cover :song="specialSong" size="lg" />
+            <div class="grow">
+              <h3 class="t-h2 title-wrap" :title="songTitle(specialSong)">{{ songTitle(specialSong) }}</h3>
+              <p v-if="songSub(specialSong)" class="t-small title-wrap-2" :lang="subLang">{{ songSub(specialSong) }}</p>
+            </div>
+          </header>
+          <div class="song-row">
+            <RouterLink :to="songLink(longSong)" class="row-link"><SongCell :song="longSong" /></RouterLink>
+            <Diff :d="4" :star="longSong.levels[3]" :constant="longConst" show-missing short />
+          </div>
+        </div>
+        <figcaption class="t-caption">{{ L('长标题与特殊字符', '長いタイトル・特殊文字') }}</figcaption>
+      </figure>
+
+      <!-- 22 国行未上架 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div class="song-row">
+            <RouterLink :to="songLink(unlistedSong)" class="row-link"><SongCell :song="unlistedSong" /></RouterLink>
+            <span class="tag"><i class="ring" aria-hidden="true" />{{ L('国行未上架', '中国版未収録') }}</span>
+          </div>
+          <p class="t-small note-line">{{ L('国行机台上还玩不到这首歌，成绩来自其他版本。', '中国版の筐体ではまだ遊べません。成績は他のバージョンのものです。') }}</p>
+        </div>
+        <figcaption class="t-caption">{{ L('国行未上架', '中国版未収録') }}</figcaption>
+      </figure>
+
+      <!-- 23 被屏蔽的楼层 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div class="floor-hidden">
+            <span class="num floor-n">#17</span>
+            <Icon name="lock" :size="16" />
+            <span>{{ L('这层楼已被站务屏蔽', 'この投稿は運営により非表示になりました') }}</span>
+          </div>
+          <p class="t-small note-line">{{ L('楼层编号保留，回复与楼中楼仍按原顺序显示。', '番号は残り、返信は元の順序で表示されます。') }}</p>
+        </div>
+        <figcaption class="t-caption">{{ L('被屏蔽的楼层', '非表示の投稿') }}</figcaption>
+      </figure>
+
+      <!-- 24 草稿已恢复 -->
+      <figure class="spec">
+        <div class="panel frame stack pad">
+          <div v-if="!draftGone" class="draft" role="status">
+            <span class="tag tag-info"><Icon name="history" :size="12" />{{ L('草稿已恢复', '下書きを復元') }}</span>
+            <span class="t-small">{{ L('11-16 20:31 保存在这台设备上', '11-16 20:31 にこの端末へ保存') }}</span>
+            <div class="row-wrap">
+              <button type="button" class="btn btn-sm btn-primary" @click="retried('继续编辑草稿', '下書きの編集を続けます')">{{ L('继续编辑', '編集を続ける') }}</button>
+              <button type="button" class="btn btn-sm btn-ghost quiet-danger" @click="draftGone = true">{{ L('丢弃草稿', '下書きを破棄') }}</button>
+            </div>
+          </div>
+          <div v-else class="del-row">
+            <p class="t-small grow">{{ L('草稿已丢弃。', '下書きを破棄しました。') }}</p>
+            <button type="button" class="btn btn-sm" @click="draftGone = false">{{ L('恢复样例', 'サンプルを戻す') }}</button>
+          </div>
+        </div>
+        <figcaption class="t-caption">{{ L('草稿已恢复', '下書きの復元') }}</figcaption>
+      </figure>
     </div>
 
     <Sheet :open="confirmOpen" :title="L('删除这条手动成绩？', 'この手動記録を削除しますか？')" :width="440" @close="confirmOpen = false">
@@ -211,7 +354,7 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: 24px 20px;
 }
 .spec {
@@ -268,7 +411,7 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
 .sk-list .sk-cover {
   width: 44px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: var(--r-ctl);
   flex: none;
 }
 .sk-list .sk-diff {
@@ -310,6 +453,102 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
 }
 .field-hint b {
   color: var(--ink);
+}
+
+/* 边界数据 */
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 0;
+}
+.row-link {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-ctl);
+}
+.row-link :deep(.songcell) {
+  width: 100%;
+}
+.song-row > :not(.row-link) {
+  flex: none;
+}
+.note-line {
+  color: var(--ink-2);
+}
+.no-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 20px 12px;
+  border: 1.5px dashed var(--ctl-border);
+  border-radius: var(--r-ctl);
+  text-align: center;
+  color: var(--ink-2);
+}
+.no-chart b {
+  color: var(--ink);
+  font-size: var(--fs-14);
+}
+.long-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.long-head .grow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.long-head .t-small {
+  color: var(--ink-2);
+}
+.ring {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  flex: none;
+}
+.floor-hidden {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+}
+.floor-n {
+  color: var(--ink);
+  font-weight: 700;
+}
+.draft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.draft .t-small {
+  color: var(--ink-2);
+}
+.quiet-danger {
+  color: var(--danger);
+}
+.frame.stack > * + * {
+  margin-top: 8px;
 }
 
 @media (max-width: 767px) {

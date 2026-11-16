@@ -1,4 +1,6 @@
-/* 业务原子：音符、难度、王冠、评价、封面。全站只有这一处定义游戏语义的视觉。 */
+/* 业务原子：音符、难度、王冠、评价、点灯格、封面。全站只有这一处定义游戏语义的视觉（D2 / D15）。
+   页面不得自己声明难度色、王冠色、评价色：用这里的类或对应组件。
+   颜色约定：--c = 色块 / 边框 / 图形；--c-ink = 文字（≥ 4.5:1）。 */
 
 /* ---------- 音符 Note ---------- */
 .note {
@@ -9,7 +11,7 @@
   border-radius: 50%;
   flex: none;
   background: var(--don);
-  box-shadow: inset 0 0 0 calc(var(--n) * 0.14) color-mix(in srgb, var(--lane-ring) 92%, transparent), 0 0 0 1px color-mix(in srgb, var(--lane-outline) 55%, transparent);
+  box-shadow: inset 0 0 0 calc(var(--n) * 0.14) color-mix(in srgb, var(--note-ring) 92%, transparent), 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
 }
 .note.ka {
   background: var(--ka);
@@ -26,17 +28,51 @@
 }
 /* 新全连：金色内环（同谱面带上的全连音符） */
 .note.fc {
-  box-shadow: inset 0 0 0 calc(var(--n) * 0.16) var(--lane-fc), 0 0 0 1px color-mix(in srgb, var(--lane-outline) 55%, transparent);
+  box-shadow: inset 0 0 0 calc(var(--n) * 0.16) var(--note-fc), 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
 }
 /* 新全良：朱色鼓面 + 白环 + 虹色外环 */
 .note.dfc {
-  background: radial-gradient(circle closest-side, var(--don) 0 50%, var(--lane-ring) 52% 72%, transparent 74%), var(--crown-dfc);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--lane-outline) 55%, transparent);
+  background: radial-gradient(circle closest-side, var(--don) 0 50%, var(--note-ring) 52% 72%, transparent 74%), var(--crown-dfc);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
+}
+
+/* ---------- 难度色来源 ----------
+   .dc-easy … .dc-ura：只设置 --c / --c-ink，给需要难度色的自定义元素用。 */
+.diff,
+.star-pip,
+.diff-tab {
+  --c: var(--diff-oni);
+  --c-ink: var(--diff-oni-ink);
+}
+.dc-easy,
+:is(.diff, .star-pip, .diff-tab).easy {
+  --c: var(--diff-easy);
+  --c-ink: var(--diff-easy-ink);
+}
+.dc-normal,
+:is(.diff, .star-pip, .diff-tab).normal {
+  --c: var(--diff-normal);
+  --c-ink: var(--diff-normal-ink);
+}
+.dc-hard,
+:is(.diff, .star-pip, .diff-tab).hard {
+  --c: var(--diff-hard);
+  --c-ink: var(--diff-hard-ink);
+}
+.dc-oni,
+:is(.diff, .star-pip, .diff-tab).oni {
+  --c: var(--diff-oni);
+  --c-ink: var(--diff-oni-ink);
+}
+.dc-ura,
+:is(.diff, .star-pip, .diff-tab).ura {
+  --c: var(--diff-ura);
+  --c-ink: var(--diff-ura-ink);
 }
 
 /* ---------- 难度 Diff ---------- */
 .diff {
-  --c: var(--diff-oni);
+  position: relative;
   display: inline-flex;
   align-items: stretch;
   height: 22px;
@@ -59,7 +95,7 @@
   font-family: var(--font-num);
   font-weight: 700;
   font-size: var(--fs-14);
-  color: var(--c);
+  color: var(--c-ink);
   background: color-mix(in srgb, var(--c) 10%, var(--surface));
 }
 .diff .k {
@@ -71,20 +107,10 @@
   background: var(--surface);
   border-left: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
 }
-.diff.easy {
-  --c: var(--diff-easy);
-}
-.diff.normal {
-  --c: var(--diff-normal);
-}
-.diff.hard {
-  --c: var(--diff-hard);
-}
-.diff.oni {
-  --c: var(--diff-oni);
-}
-.diff.ura {
-  --c: var(--diff-ura);
+.diff .k.na {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--ink-3);
 }
 .diff.lg {
   height: 28px;
@@ -95,9 +121,8 @@
 .diff.lg .k {
   font-size: var(--fs-16);
 }
-/* 只显示星级的小圆点形式，用在紧凑表格里 */
+/* 只显示星级的小方块形式，用在紧凑表格里 */
 .star-pip {
-  --c: var(--diff-oni);
   display: inline-grid;
   place-items: center;
   min-width: 22px;
@@ -105,27 +130,97 @@
   padding: 0 4px;
   border-radius: var(--r-xs);
   background: color-mix(in srgb, var(--c) 14%, transparent);
-  color: var(--c);
+  color: var(--c-ink);
   font-family: var(--font-num);
   font-weight: 700;
   font-size: var(--fs-14);
 }
+/* 没有这个难度：统一显示「—」（D8），无论元素里写的是什么 */
 .star-pip.off {
   background: transparent;
   color: var(--ink-3);
   font-weight: 400;
+  font-size: 0;
 }
-.star-pip.easy {
-  --c: var(--diff-easy);
+.star-pip.off::after {
+  content: '—';
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
 }
-.star-pip.normal {
-  --c: var(--diff-normal);
+
+/* ---------- 难度切换条 .diff-tab（D2）----------
+   <div role="tablist"><button role="tab" class="diff-tab oni" aria-selected="true">
+     <span class="dn">魔王</span><span class="ds num">★10</span><span class="dk num">9.85</span>[<Crown size="sm" />]
+   </button></div>
+   手机上未选中的项只显示星级与定数。 */
+.diff-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--hit);
+  padding: 0 14px;
+  border-radius: var(--ctl-radius);
+  border: 1.5px solid color-mix(in srgb, var(--c) 55%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  white-space: nowrap;
+  flex: none;
+  transition: background var(--dur-1), color var(--dur-1);
 }
-.star-pip.hard {
-  --c: var(--diff-hard);
+.diff-tab .dn {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--c-ink);
 }
-.star-pip.ura {
-  --c: var(--diff-ura);
+.diff-tab .ds {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.diff-tab .dk {
+  font-size: var(--fs-16);
+  color: var(--ink-2);
+}
+.diff-tab:hover {
+  background: color-mix(in srgb, var(--c) 8%, var(--surface));
+}
+.diff-tab[aria-selected='true'] {
+  background: var(--c);
+  border-color: var(--c);
+  color: var(--ink-on-solid);
+}
+.diff-tab[aria-selected='true'] .dn,
+.diff-tab[aria-selected='true'] .dk {
+  color: inherit;
+}
+.diff-tab[aria-selected='true'] .dk {
+  font-weight: 500;
+}
+@media (max-width: 767px) {
+  .diff-tab {
+    height: var(--ctl-h-lg);
+    padding: 0 12px;
+    gap: 6px;
+  }
+  /* C5：放不下全称时用单字短标（简 / 普 / 难 / 鬼 / 里），不只靠颜色区分；全称留给读屏 */
+  .diff-tab:not([aria-selected='true']) {
+    position: relative; /* 让视觉隐藏的全称留在难度条（横滑容器）里，不撑宽页面 */
+  }
+  .diff-tab:not([aria-selected='true']) .dn {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .diff-tab:not([aria-selected='true']) .dshort {
+    display: inline;
+    font-weight: 700;
+    color: var(--c-ink);
+  }
+}
+.diff-tab .dshort {
+  display: none;
 }
 
 /* ---------- 王冠 Crown ---------- */
@@ -139,24 +234,23 @@
   mask: var(--crown-mask) center / contain no-repeat;
   --crown-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 16'%3E%3Cpath d='M1.5 4.2 5.6 8 10 1.6 14.4 8l4.1-3.8-1.6 9.4a1 1 0 0 1-1 .8H4.1a1 1 0 0 1-1-.8z'/%3E%3C/svg%3E");
 }
-/* 未游玩：不画王冠形（灰王冠会被读成银色通关），只画一条短横线 */
+/* 未游玩：不画王冠形（灰王冠会被读成银色通关），统一显示缺失值「—」（D8） */
 .crown.none {
+  display: inline-grid;
+  place-items: center;
   background: transparent;
   -webkit-mask: none;
   mask: none;
-  position: relative;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+  font-weight: 400;
+  line-height: 1;
 }
 .crown.none::after {
-  content: '';
-  position: absolute;
-  left: 25%;
-  right: 25%;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  border-radius: 1px;
-  background: var(--ink-3);
+  content: '—';
 }
+/* 已游玩未通关：空心圆（形状区分，不靠透明度） */
 .crown.played {
   background: transparent;
   -webkit-mask: none;
@@ -183,50 +277,88 @@
   width: 30px;
   height: 24px;
 }
+.crown.lg.none {
+  font-size: var(--fs-18);
+}
 .crown.sm {
   width: 15px;
   height: 12px;
 }
+.crown.sm.none {
+  font-size: var(--fs-12);
+}
 
-/* ---------- 评价 Rank（粹 / 雅 / 极） ---------- */
+/* ---------- 段位合格标记：红合格 = 朱，金合格 = 全连金（只作图形；文字用 .tag-don / .tag-roll）---------- */
+.pass.red {
+  background: var(--don);
+}
+.pass.gold {
+  background: var(--crown-fc);
+}
+
+/* ---------- 评价 Rank（粹 / 雅 / 极）：圈 = --c，字 = --c-ink ---------- */
 .rank {
   --c: var(--ink-3);
+  --c-ink: var(--ink-3);
   display: inline-grid;
   place-items: center;
   width: 22px;
   height: 22px;
   border-radius: 50%;
   border: 1.5px solid var(--c);
-  color: var(--c);
+  color: var(--c-ink);
   font-size: var(--fs-12);
   font-weight: 900;
   line-height: 1;
   flex: none;
 }
+/* 没有评价：统一显示「—」（D8） */
 .rank.none {
-  border-style: dashed;
-  opacity: 0.5;
+  border-color: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+  font-weight: 400;
 }
-.rank.iki1 {
+.rank.none:empty::after {
+  content: '—';
+}
+.rank.iki1,
+.rk.iki1 {
   --c: var(--rank-iki1);
+  --c-ink: var(--rank-iki1-ink);
 }
-.rank.iki2 {
+.rank.iki2,
+.rk.iki2 {
   --c: var(--rank-iki2);
+  --c-ink: var(--rank-iki2-ink);
 }
-.rank.iki3 {
+.rank.iki3,
+.rk.iki3 {
   --c: var(--rank-iki3);
+  --c-ink: var(--rank-iki3-ink);
 }
-.rank.miyabi1 {
+.rank.miyabi1,
+.rk.miyabi1 {
   --c: var(--rank-miyabi1);
-  background: color-mix(in srgb, var(--c) 14%, transparent);
+  --c-ink: var(--rank-miyabi1-ink);
 }
-.rank.miyabi2 {
+.rank.miyabi2,
+.rk.miyabi2 {
   --c: var(--rank-miyabi2);
-  background: color-mix(in srgb, var(--c) 14%, transparent);
+  --c-ink: var(--rank-miyabi2-ink);
 }
-.rank.miyabi3 {
+.rank.miyabi3,
+.rk.miyabi3 {
   --c: var(--rank-miyabi3);
-  background: color-mix(in srgb, var(--c) 14%, transparent);
+  --c-ink: var(--rank-miyabi3-ink);
+}
+.rk.kiwami {
+  --c: var(--rank-kiwami-ring);
+  --c-ink: var(--ink);
+}
+.rank:is(.miyabi1, .miyabi2, .miyabi3) {
+  background: color-mix(in srgb, var(--c) 14%, var(--surface));
 }
 .rank.kiwami {
   border: 0;
@@ -240,7 +372,122 @@
   font-size: var(--fs-16);
 }
 
-/* ---------- 封面 Cover（原型用生成式封面；正式环境替换为 static.sakura-bot.cn/cover） ---------- */
+/* ---------- 点灯格 Lamp（点灯进度、成绩格；D2）----------
+   王冠模式：.lamp.none / .played / .clear / .fc / .dfc
+   评价模式：.lamp.rk + 评价键（.iki1 … .miyabi3 / .kiwami / .none）
+   尺寸：默认为 14px 图例方块；.lamp.big 为曲目格（.lamp-title / .lamp-meta / .lamp-glyph）。
+   「没打过」用虚线边框（形状），「未通关」用实线细框，不靠透明度区分。 */
+.lamp {
+  --bd: var(--line-strong);
+  --bg2: var(--surface);
+  --fg: var(--ink-3);
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--bd);
+  background: var(--bg2);
+  color: var(--fg);
+  flex: none;
+}
+.lamp.none {
+  --bd: var(--ctl-border);
+  border-style: dashed;
+}
+.lamp.played {
+  --bd: var(--ink-3);
+  --fg: var(--ink-2);
+}
+.lamp.clear {
+  --bd: var(--crown-clear);
+  --bg2: color-mix(in srgb, var(--crown-clear) 16%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.fc {
+  --bd: var(--crown-fc);
+  --bg2: color-mix(in srgb, var(--crown-fc) 20%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.dfc {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--crown-dfc) border-box;
+  --fg: var(--ink);
+}
+.lamp.rk {
+  --bd: var(--c, var(--line-strong));
+  --bg2: color-mix(in srgb, var(--c, transparent) 14%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.rk.none {
+  --c: var(--ctl-border);
+  --bg2: var(--surface);
+  --fg: var(--ink-3);
+}
+.lamp.big {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: auto;
+  height: 52px;
+  padding: 6px 8px;
+  border-radius: var(--r-ctl);
+  font-weight: 400;
+  transition: transform var(--dur-1);
+}
+.lamp.big.dfc {
+  padding: 5.5px 7.5px;
+}
+.lamp.big.none .lamp-title {
+  font-weight: 500;
+}
+a.lamp.big:hover {
+  transform: translateY(-2px);
+}
+.lamp-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lamp-meta {
+  font-family: var(--font-num);
+  font-size: var(--fs-13);
+  line-height: 1;
+  color: var(--ink-2);
+}
+.lamp-meta em {
+  font-style: normal;
+  margin-left: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-11);
+  font-weight: 700;
+  color: var(--diff-ura-ink);
+}
+.lamp-glyph {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: var(--fs-13);
+  font-weight: 900;
+  color: var(--c-ink, var(--ink));
+}
+:root[data-motion='reduce'] a.lamp.big:hover {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  a.lamp.big:hover {
+    transform: none;
+  }
+}
+
+/* ---------- 封面 Cover（原型用生成式封面；正式环境替换为 static.sakura-bot.cn/cover）----------
+   尺寸与圆角阶梯（D3）：.sm 32px --r-xs ／ 默认 44px --r-ctl ／ .lg 72px --r-ctl + 2px ／
+   .tile 96px --r-ctl + 2px（头条、代表成绩）／ .xl 168px --r-panel */
 .cover {
   --g: var(--genre-namco);
   position: relative;
@@ -248,11 +495,11 @@
   place-items: center;
   width: 44px;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: var(--r-ctl);
   overflow: hidden;
   flex: none;
   background: var(--g);
-  color: var(--lane-ring);
+  color: var(--note-ring);
   font-weight: 900;
   font-size: 20px;
   line-height: 1;
@@ -267,7 +514,7 @@
   border-radius: 50%;
   right: -62%;
   bottom: -62%;
-  background: color-mix(in srgb, var(--lane-outline) 26%, transparent);
+  background: color-mix(in srgb, var(--note-outline) 26%, transparent);
 }
 .cover::after {
   content: '';
@@ -278,14 +525,14 @@
   border-radius: 50%;
   left: -18%;
   top: -18%;
-  border: 3px solid color-mix(in srgb, var(--lane-ring) 28%, transparent);
+  border: 3px solid color-mix(in srgb, var(--note-ring) 28%, transparent);
 }
 .cover {
   filter: hue-rotate(var(--h, 0deg));
 }
 .cover b {
   filter: hue-rotate(calc(var(--h, 0deg) * -1));
-  text-shadow: 0 1px 3px color-mix(in srgb, var(--lane-outline) 45%, transparent);
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--note-outline) 45%, transparent);
 }
 .cover.v1::before {
   right: auto;
@@ -305,17 +552,22 @@
 }
 .cover.sm {
   width: 32px;
-  border-radius: 6px;
+  border-radius: var(--r-xs);
   font-size: 15px;
 }
 .cover.lg {
   width: 72px;
-  border-radius: 10px;
+  border-radius: calc(var(--r-ctl) + 2px);
   font-size: 32px;
+}
+.cover.tile {
+  width: 96px;
+  border-radius: calc(var(--r-ctl) + 2px);
+  font-size: 42px;
 }
 .cover.xl {
   width: 168px;
-  border-radius: 14px;
+  border-radius: var(--r-panel);
   font-size: 76px;
 }
 .cover.fill {
@@ -361,7 +613,7 @@
 .role {
   display: inline-flex;
   align-items: center;
-  height: 18px;
+  height: var(--tag-h);
   padding: 0 6px;
   border-radius: var(--r-xs);
   font-size: var(--fs-11);

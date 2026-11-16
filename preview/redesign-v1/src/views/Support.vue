@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import Sheet from '../components/Sheet.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import { store, L, toast } from '../store'
+import { useQueryState } from '../routeState'
+import { isMobile, isTablet } from '../breakpoints'
 
 const CATS = {
   account: { zh: '账号', ja: 'アカウント' },
@@ -12,10 +14,11 @@ const CATS = {
   alias: { zh: '别名', ja: '別名' },
   other: { zh: '其他', ja: 'その他' },
 }
+// 状态色调：待回复 = 需要你注意（山吹）；处理中 = 信息（浅葱）；已解决 = 成功
 const STATUS = {
-  waiting: { zh: '待回复', ja: '返信待ち', cls: 'tag-roll' },
-  working: { zh: '处理中', ja: '対応中', cls: 'tag-ka' },
-  done: { zh: '已解决', ja: '解決済み', cls: 'tag-ok' },
+  waiting: { zh: '待回复', ja: '返信待ち', cls: 'tag-roll', icon: 'reply' },
+  working: { zh: '处理中', ja: '対応中', cls: 'tag-info', icon: 'clock' },
+  done: { zh: '已解决', ja: '解決済み', cls: 'tag-ok', icon: 'check' },
 }
 const NOW = '11-16 20:46'
 
@@ -36,7 +39,7 @@ const tickets = ref([
     ],
   },
   {
-    id: 2164, cat: 'alias', status: 'working', updated: '11-13 10:47', title: '「ラーメン de Yo‐Men!!」的中文别名建议',
+    id: 2164, cat: 'alias', status: 'working', updated: '11-13 10:47', title: '「ラーメン de Yo‐Men!!」的中文别名建议：现在的译名在机厅里没人这么叫，希望把常用叫法「拉面哟面」和「拉面 de 哟面」都加进别名，这样搜索时两种写法都能找到',
     messages: [
       { from: 'me', at: '11-12 23:10', text: '现在的译名是「拉面 德 呦-面!!」，机厅里一般叫「拉面哟面」，希望两个都能搜到。' },
       { from: 'staff', at: '11-13 10:47', text: '已加入别名候选，本周的别名修改日志发布后生效。' },
@@ -59,34 +62,39 @@ const tickets = ref([
   },
 ])
 
-/* ---------- 筛选 ---------- */
-const fStatus = ref('all')
-const fCat = ref('all')
-const filtered = computed(() => tickets.value.filter((t) => (fStatus.value === 'all' || t.status === fStatus.value) && (fCat.value === 'all' || t.cat === fCat.value)))
+/* ---------- 筛选与选中的工单：写进地址（R2） ---------- */
+const f = useQueryState({
+  status: { type: 'string', default: 'all', values: ['all', ...Object.keys(STATUS)] },
+  cat: { type: 'string', default: 'all', values: ['all', ...Object.keys(CATS)] },
+  t: { type: 'number', default: 0 },
+})
+const filtered = computed(() => tickets.value.filter((t) => (f.status === 'all' || t.status === f.status) && (f.cat === 'all' || t.cat === f.cat)))
 function resetFilters() {
-  fStatus.value = 'all'
-  fCat.value = 'all'
+  f.status = 'all'
+  f.cat = 'all'
 }
 
-/* ---------- 主从：宽屏右侧详情栏，窄屏用 Sheet ---------- */
-const mq = window.matchMedia('(max-width: 1099px)')
-const narrow = ref(mq.matches)
-const activeId = ref(narrow.value ? null : tickets.value[0].id)
-const onMq = (e) => {
-  narrow.value = e.matches
-  activeId.value = e.matches ? null : (activeId.value ?? tickets.value[0].id)
-}
-mq.addEventListener('change', onMq)
-onBeforeUnmount(() => mq.removeEventListener('change', onMq))
-const active = computed(() => tickets.value.find((t) => t.id === activeId.value) || null)
+/* ---------- 主从：≥ 1100 右侧详情栏，以下用 Sheet ---------- */
+const narrow = computed(() => isMobile.value || isTablet.value)
+const byId = computed(() => new Map(tickets.value.map((t) => [t.id, t])))
+const active = computed(() => {
+  const sel = f.t ? byId.value.get(f.t) : null
+  if (sel) return sel
+  return narrow.value ? null : filtered.value[0] || null
+})
 const detailTag = computed(() => (narrow.value ? Sheet : 'aside'))
-const detailProps = computed(() => (narrow.value ? { open: !!active.value, title: active.value ? active.value.title : '', width: 600 } : { class: 'detail panel' }))
+const detailProps = computed(() =>
+  narrow.value ? { open: !!active.value, title: active.value ? active.value.title : '', width: 600 } : { class: 'detail panel', 'aria-label': L('工单详情', 'チケットの詳細') },
+)
 
 const reply = reactive({ text: '', error: '' })
 function openTicket(t) {
-  activeId.value = t.id
+  f.t = t.id
   reply.text = ''
   reply.error = ''
+}
+function closeDetail() {
+  f.t = 0
 }
 function send() {
   const text = reply.text.trim()
@@ -121,45 +129,46 @@ function submitNew() {
   const title = draft.title.trim()
   if (!title) {
     draft.error = L('请填写标题，用一句话说明遇到的问题。', 'タイトルを入力してください。問題を一文でまとめます。')
+    document.getElementById('sup-title')?.focus()
     return
   }
   const id = Math.max(...tickets.value.map((t) => t.id)) + 1
   tickets.value.unshift({ id, cat: draft.cat, status: 'waiting', updated: NOW, title, messages: [{ from: 'me', at: NOW, text: draft.desc.trim() || title }] })
   newOpen.value = false
   resetFilters()
-  if (!narrow.value) openTicket(tickets.value[0])
+  if (!narrow.value) f.t = id
   toast(L(`工单 #${id} 已提交`, `チケット #${id} を送信しました`))
 }
 </script>
 
 <template>
   <div class="page support">
-    <EmptyLane v-if="store.auth === 'guest'" :title="L('登录后管理账号', 'ログインしてアカウントを管理')">
+    <EmptyLane v-if="store.auth === 'guest'" :title="L('登录后查看工单', 'ログインしてチケットを確認')">
       <RouterLink to="/login" class="btn btn-primary">{{ L('登录', 'ログイン') }}</RouterLink>
     </EmptyLane>
 
     <template v-else>
       <div class="bar">
-        <div class="seg" role="group" :aria-label="L('状态', '状態')">
-          <button :aria-pressed="fStatus === 'all'" @click="fStatus = 'all'">{{ L('全部', 'すべて') }}</button>
-          <button v-for="(s, k) in STATUS" :key="k" :aria-pressed="fStatus === k" @click="fStatus = k">{{ L(s.zh, s.ja) }}</button>
+        <div class="seg" role="group" :aria-label="L('按状态筛选', '状態で絞り込み')">
+          <button type="button" :aria-pressed="f.status === 'all'" @click="f.status = 'all'">{{ L('全部', 'すべて') }}</button>
+          <button v-for="(s, k) in STATUS" :key="k" type="button" :aria-pressed="f.status === k" @click="f.status = k">{{ L(s.zh, s.ja) }}</button>
         </div>
-        <select v-model="fCat" class="select cat" :aria-label="L('分类', 'カテゴリ')">
+        <select v-model="f.cat" class="select cat" :aria-label="L('按分类筛选', 'カテゴリで絞り込み')">
           <option value="all">{{ L('全部分类', 'すべてのカテゴリ') }}</option>
           <option v-for="(c, k) in CATS" :key="k" :value="k">{{ L(c.zh, c.ja) }}</option>
         </select>
-        <button class="btn btn-primary new" @click="openNew"><Icon name="plus" :size="16" />{{ L('新建工单', 'チケットを作成') }}</button>
+        <button type="button" class="btn btn-primary new" @click="openNew"><Icon name="plus" :size="16" />{{ L('新建工单', 'チケットを作成') }}</button>
       </div>
 
       <div class="md">
         <section class="panel list" :aria-label="L('我的工单', '自分のチケット')">
           <ul v-if="filtered.length" class="rows">
             <li v-for="t in filtered" :key="t.id">
-              <button class="tk" :class="{ on: !narrow && t.id === activeId }" :aria-current="!narrow && t.id === activeId ? 'true' : null" @click="openTicket(t)">
-                <span class="tk-title">{{ t.title }}</span>
+              <button type="button" class="tk" :class="{ on: !narrow && active && t.id === active.id }" :aria-current="!narrow && active && t.id === active.id ? 'true' : undefined" @click="openTicket(t)">
+                <span class="tk-title title-wrap-2" :title="t.title">{{ t.title }}</span>
                 <span class="tk-meta">
+                  <span class="tag" :class="STATUS[t.status].cls"><Icon :name="STATUS[t.status].icon" :size="12" />{{ L(STATUS[t.status].zh, STATUS[t.status].ja) }}</span>
                   <span class="tag">{{ L(CATS[t.cat].zh, CATS[t.cat].ja) }}</span>
-                  <span class="tag" :class="STATUS[t.status].cls">{{ L(STATUS[t.status].zh, STATUS[t.status].ja) }}</span>
                   <span class="grow" />
                   <span class="tk-n"><Icon name="reply" :size="14" /><span class="num">{{ t.messages.length - 1 }}</span><span class="sr-only">{{ L('条回复', '件の返信') }}</span></span>
                   <span class="num tk-time">{{ t.updated }}</span>
@@ -168,42 +177,53 @@ function submitNew() {
             </li>
           </ul>
           <EmptyLane v-else compact :title="L('没有符合条件的工单', '条件に合うチケットはありません')">
-            <button class="btn" @click="resetFilters">{{ L('清除筛选', '絞り込みを解除') }}</button>
+            <button type="button" class="btn" @click="resetFilters">{{ L('清除筛选', '絞り込みを解除') }}</button>
           </EmptyLane>
         </section>
 
-        <component :is="detailTag" v-bind="detailProps" @close="activeId = null">
+        <component :is="detailTag" v-bind="detailProps" @close="closeDetail">
           <template v-if="active">
             <header class="d-head">
-              <h2 v-if="!narrow" class="t-h2">{{ active.title }}</h2>
+              <h2 v-if="!narrow" class="t-h2 title-wrap">{{ active.title }}</h2>
               <p class="row-wrap">
+                <span class="tag" :class="STATUS[active.status].cls"><Icon :name="STATUS[active.status].icon" :size="12" />{{ L(STATUS[active.status].zh, STATUS[active.status].ja) }}</span>
                 <span class="tag">{{ L(CATS[active.cat].zh, CATS[active.cat].ja) }}</span>
-                <span class="tag" :class="STATUS[active.status].cls">{{ L(STATUS[active.status].zh, STATUS[active.status].ja) }}</span>
-                <span class="num faint">#{{ active.id }}</span>
+                <span class="num t-small">#{{ active.id }}</span>
               </p>
             </header>
-            <ol class="msgs">
+            <ol class="msgs" :aria-label="L('对话', 'やり取り')">
               <li v-for="(m, i) in active.messages" :key="i" class="msg" :class="m.from">
                 <p class="msg-head">
                   <span v-if="m.from === 'staff'" class="role admin">{{ L('站务', '運営') }}</span>
                   <b v-else>{{ L('我', '自分') }}</b>
-                  <span class="num t-caption">{{ m.at }}</span>
+                  <span class="num t-small">{{ m.at }}</span>
                 </p>
                 <p class="msg-text">{{ m.text }}</p>
               </li>
             </ol>
-            <form v-if="active.status !== 'done'" class="reply" @submit.prevent="send">
+            <form v-if="active.status !== 'done'" class="reply" novalidate @submit.prevent="send">
               <label for="sup-reply" class="sr-only">{{ L('回复', '返信') }}</label>
-              <textarea id="sup-reply" v-model="reply.text" class="textarea" rows="3" :placeholder="L('补充信息或回复站务', '補足や運営への返信を入力')" @input="reply.error = ''" />
-              <span v-if="reply.error" class="field-error">{{ reply.error }}</span>
+              <textarea
+                id="sup-reply"
+                v-model="reply.text"
+                class="textarea"
+                :class="{ 'is-error': reply.error }"
+                rows="3"
+                enterkeyhint="send"
+                :placeholder="L('补充信息或回复站务', '補足や運営への返信を入力')"
+                :aria-invalid="!!reply.error"
+                :aria-describedby="reply.error ? 'sup-reply-err' : 'sup-reply-hint'"
+                @input="reply.error = ''"
+              />
+              <span v-if="reply.error" id="sup-reply-err" class="field-error" role="alert">{{ reply.error }}</span>
               <div class="reply-foot">
-                <span class="field-hint">{{ L('站务通常在 1 个工作日内回复', '運営からの返信は通常 1 営業日以内') }}</span>
+                <span id="sup-reply-hint" class="field-hint">{{ L('站务通常在 1 个工作日内回复', '運営からの返信は通常 1 営業日以内') }}</span>
                 <button type="submit" class="btn btn-primary">{{ L('发送回复', '返信を送信') }}</button>
               </div>
             </form>
             <div v-else class="reply solved">
-              <span class="t-small">{{ L('这条工单已解决。问题再次出现时可以重新打开。', 'このチケットは解決済みです。再発した場合は再開できます。') }}</span>
-              <button class="btn btn-sm" @click="reopen">{{ L('重新打开', '再開する') }}</button>
+              <span class="t-small">{{ L('问题再次出现时可以重新打开。', '再発した場合は再開できます。') }}</span>
+              <button type="button" class="btn btn-sm" @click="reopen">{{ L('重新打开工单', 'チケットを再開') }}</button>
             </div>
           </template>
           <EmptyLane v-else compact :title="L('选一条工单查看对话', 'チケットを選んでやり取りを表示')" />
@@ -222,24 +242,24 @@ function submitNew() {
         </div>
         <div class="field">
           <label for="sup-title">{{ L('标题', 'タイトル') }}</label>
-          <input id="sup-title" v-model="draft.title" class="input" :class="{ 'is-error': draft.error }" maxlength="60" @input="draft.error = ''" />
-          <span v-if="draft.error" class="field-error">{{ draft.error }}</span>
+          <input id="sup-title" v-model="draft.title" class="input" :class="{ 'is-error': draft.error }" maxlength="60" enterkeyhint="next" :aria-invalid="!!draft.error" :aria-describedby="draft.error ? 'sup-title-err' : undefined" @input="draft.error = ''" />
+          <span v-if="draft.error" id="sup-title-err" class="field-error" role="alert">{{ draft.error }}</span>
         </div>
         <div class="field">
           <label for="sup-desc">{{ L('描述', '詳細') }}</label>
           <textarea id="sup-desc" v-model="draft.desc" class="textarea" rows="5" :placeholder="L('发生了什么、在哪个页面、期望的结果', '何が起きたか、どの画面か、期待した結果')" />
         </div>
-        <div class="row-wrap">
+        <div class="row-wrap shots">
           <button type="button" class="btn btn-sm" :disabled="draft.shots.length >= 4" @click="addShot"><Icon name="image" :size="14" />{{ L('添加截图', 'スクリーンショットを追加') }}</button>
-          <span v-for="(f, i) in draft.shots" :key="f" class="chip">
-            <span class="num">{{ f }}</span>
-            <button type="button" class="x" :aria-label="L('移除', '削除')" @click="draft.shots.splice(i, 1)"><Icon name="close" :size="14" /></button>
+          <span v-for="(fl, i) in draft.shots" :key="fl" class="chip">
+            <span class="num">{{ fl }}</span>
+            <button type="button" class="x hit" :aria-label="L(`移除 ${fl}`, `${fl} を削除`)" @click="draft.shots.splice(i, 1)"><Icon name="close" :size="14" /></button>
           </span>
         </div>
       </form>
       <template #foot>
-        <button class="btn" @click="newOpen = false">{{ L('取消', 'キャンセル') }}</button>
-        <button class="btn btn-primary" @click="submitNew">{{ L('提交工单', 'チケットを送信') }}</button>
+        <button type="button" class="btn" @click="newOpen = false">{{ L('取消', 'キャンセル') }}</button>
+        <button type="button" class="btn btn-primary" @click="submitNew">{{ L('提交工单', 'チケットを送信') }}</button>
       </template>
     </Sheet>
   </div>
@@ -293,15 +313,17 @@ function submitNew() {
 }
 .tk.on {
   background: var(--surface-2);
-  box-shadow: inset 3px 0 0 var(--don);
+  box-shadow: inset 3px 0 0 var(--ink);
 }
 .tk-title {
   font-size: var(--fs-16);
   font-weight: 700;
   line-height: var(--lh-snug);
+  color: var(--ink);
 }
 .tk-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
@@ -309,13 +331,15 @@ function submitNew() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--ink-3);
+  font-size: var(--fs-13);
+  color: var(--ink-2);
 }
 .tk-time {
   min-width: 78px;
   text-align: right;
   font-size: var(--fs-13);
-  color: var(--ink-3);
+  color: var(--ink-2);
+  white-space: nowrap;
 }
 
 /* 对话 */
@@ -363,6 +387,8 @@ function submitNew() {
   font-size: var(--fs-13);
 }
 .msg-text {
+  font-size: var(--fs-14);
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 .reply {
@@ -395,13 +421,16 @@ function submitNew() {
 .chip {
   padding-right: 4px;
 }
+.shots {
+  gap: 8px;
+}
 .x {
   display: inline-grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 .x:hover {
   background: var(--bg-sunk);
@@ -436,10 +465,6 @@ function submitNew() {
   }
   .reply-foot .btn {
     width: 100%;
-  }
-  .x {
-    width: 34px;
-    height: 34px;
   }
 }
 </style>

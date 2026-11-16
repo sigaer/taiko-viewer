@@ -2,13 +2,14 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import Icon from '../components/Icon.vue'
 import SongCell from '../components/SongCell.vue'
-import Diff from '../components/Diff.vue'
 import Crown from '../components/Crown.vue'
 import DrumDial from '../components/DrumDial.vue'
 import { songs, songById, scoreOf, fmt, fx } from '../mock/data'
-import { L, isReady } from '../store'
+import { L, isReady, store, ensureSearch, recentIds } from '../store'
+import { searchSongs } from '../search'
+import { useQueryState } from '../routeState'
 
-const DIFF_NAMES = { 3: ['困难', 'むずかしい'], 4: ['魔王', 'おに'], 5: ['里', '裏'] }
+const DIFF_NAMES = { 1: ['简单', 'かんたん'], 2: ['普通', 'ふつう'], 3: ['困难', 'むずかしい'], 4: ['魔王', 'おに'], 5: ['里', '裏'] }
 const FIELDS = [
   { key: 'good', zh: '良', ja: '良' },
   { key: 'ok', zh: '可', ja: '可' },
@@ -16,47 +17,72 @@ const FIELDS = [
 ]
 const KEYS = FIELDS.map((f) => f.key)
 
-/* ---------- 选歌 ---------- */
-const songId = ref(615)
-const d = ref(4)
-const song = computed(() => songById[songId.value])
-const charts = computed(() => song.value.charts.filter((c) => c.constant != null))
-const chart = computed(() => charts.value.find((c) => c.d === d.value) || charts.value[charts.value.length - 1])
-const notes = computed(() => chart.value.notes)
-const mine = computed(() => (isReady.value ? scoreOf(songId.value, chart.value.d) || null : null))
+/* ---------- 选歌：?song=&d=（命令面板「用 RT 计算器算〈曲名〉」带进来） ---------- */
+ensureSearch()
+const q = useQueryState({
+  song: { type: 'number', default: 615 },
+  d: { type: 'number', default: 4 },
+})
+const song = computed(() => songById[q.song] || songById[615] || songs[0])
+const charts = computed(() => song.value.charts.filter((c) => c.d >= 3))
+const chart = computed(() => charts.value.find((c) => c.d === q.d) || charts.value.find((c) => c.d === 4) || charts.value[charts.value.length - 1])
+const hasConst = computed(() => chart.value?.constant != null)
+const notes = computed(() => chart.value?.notes ?? 0)
+const mine = computed(() => (isReady.value ? scoreOf(song.value.id, chart.value.d) || null : null))
 
 const picker = ref(null)
+const pickBtn = ref(null)
 const kwInput = ref(null)
+const listEl = ref(null)
 const pickerOpen = ref(false)
 const kw = ref('')
-const options = computed(() => {
-  const k = kw.value.trim().toLowerCase()
-  return songs.filter((s) => !k || `${s.ja} ${s.zh} ${s.artist} ${s.id}`.toLowerCase().includes(k))
+const active = ref(0)
+const results = computed(() => {
+  const k = kw.value.trim()
+  if (!k) return { items: recentIds.value.map((id) => songById[id]).filter(Boolean).slice(0, 8), total: 0, recent: true }
+  const r = searchSongs(k, 8, { locale: store.locale })
+  return { items: r.items.map((x) => x.song), total: r.total, recent: false }
 })
+watch(results, () => (active.value = 0))
+const optId = (i) => `rt-opt-${i}`
 function togglePicker() {
   pickerOpen.value = !pickerOpen.value
   if (pickerOpen.value) nextTick(() => kwInput.value?.focus())
 }
-function choose(s) {
-  songId.value = s.id
-  if (!s.charts.some((c) => c.d === d.value && c.constant != null)) d.value = 4
+function closePicker(refocus = true) {
   pickerOpen.value = false
   kw.value = ''
+  if (refocus) nextTick(() => pickBtn.value?.focus())
+}
+function choose(s) {
+  const d = s.charts.some((c) => c.d === q.d) ? q.d : s.charts.some((c) => c.d === 4) ? 4 : Math.max(...s.charts.map((c) => c.d))
+  Object.assign(q, { song: s.id, d })
+  closePicker()
+}
+function onKw(e) {
+  const n = results.value.items.length
+  if (e.key === 'ArrowDown' && n) {
+    e.preventDefault()
+    active.value = (active.value + 1) % n
+  } else if (e.key === 'ArrowUp' && n) {
+    e.preventDefault()
+    active.value = (active.value - 1 + n) % n
+  } else if (e.key === 'Enter' && n) {
+    e.preventDefault()
+    choose(results.value.items[active.value])
+  } else if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closePicker()
+    return
+  } else return
+  nextTick(() => listEl.value?.querySelector(`#${optId(active.value)}`)?.scrollIntoView({ block: 'nearest' }))
 }
 function onDoc(e) {
-  if (pickerOpen.value && picker.value && !picker.value.contains(e.target)) pickerOpen.value = false
+  if (pickerOpen.value && picker.value && !picker.value.contains(e.target)) closePicker(false)
 }
-function onKey(e) {
-  if (e.key === 'Escape') pickerOpen.value = false
-}
-onMounted(() => {
-  document.addEventListener('pointerdown', onDoc)
-  document.addEventListener('keydown', onKey)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', onDoc)
-  document.removeEventListener('keydown', onKey)
-})
+onMounted(() => document.addEventListener('pointerdown', onDoc))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onDoc))
 
 /* ---------- 良 / 可 / 不可：填两项，第三项自动补齐 ---------- */
 const v = reactive({ good: '', ok: '', ng: '' })
@@ -90,7 +116,7 @@ function fillMine() {
   order = ['good', 'ok']
   auto.value = null
 }
-watch(() => [songId.value, chart.value.d, isReady.value], () => (mine.value ? fillMine() : clearAll()), { immediate: true })
+watch(() => [song.value.id, chart.value.d, isReady.value], () => (mine.value ? fillMine() : clearAll()), { immediate: true })
 
 const filled = computed(() => KEYS.filter((k) => v[k] !== '').length)
 const total = computed(() => n(v.good) + n(v.ok) + n(v.ng))
@@ -105,13 +131,13 @@ function rtOf(good, ok) {
   return chart.value.constant * (0.62 + 0.38 * Math.pow((acc - 0.75) / 0.25, 1.6)) + (acc > 0.985 ? 0.25 : 0)
 }
 const acc = computed(() => (valid.value ? (n(v.good) + 0.5 * n(v.ok)) / notes.value : null))
-const rt = computed(() => (valid.value ? rtOf(n(v.good), n(v.ok)) : null))
+const rt = computed(() => (valid.value && hasConst.value ? rtOf(n(v.good), n(v.ok)) : null))
 const below = computed(() => acc.value != null && acc.value < 0.75)
 const pct = (k) => (total.value ? (n(v[k]) / Math.max(total.value, notes.value)) * 100 + '%' : '0%')
 const delta = (x) => (x < 0.005 ? L('不到 0.01', '0.01 未満') : `+${x.toFixed(2)}`)
 
 const whatIfs = computed(() => {
-  if (!valid.value) return []
+  if (!valid.value || rt.value == null) return []
   const g = n(v.good)
   const o = n(v.ok)
   const ng = n(v.ng)
@@ -137,36 +163,62 @@ const whatIfs = computed(() => {
       <!-- 输入 -->
       <section class="panel form">
         <div ref="picker" class="field picker">
-          <span class="field-label">{{ L('歌曲', '楽曲') }}</span>
-          <button class="pick-btn" :aria-expanded="pickerOpen" aria-haspopup="true" @click="togglePicker">
-            <SongCell :song="song" class="grow" />
+          <span id="rt-song-label" class="field-label">{{ L('歌曲', '楽曲') }}</span>
+          <button ref="pickBtn" class="pick-btn" :aria-expanded="pickerOpen" aria-haspopup="listbox" aria-labelledby="rt-song-label rt-song-now" @click="togglePicker">
+            <span id="rt-song-now" class="grow"><SongCell :song="song" /></span>
             <Icon :name="pickerOpen ? 'chevU' : 'chevD'" :size="18" />
           </button>
           <div v-if="pickerOpen" class="pop">
-            <label class="pop-search">
+            <div class="pop-search">
               <Icon name="search" :size="16" />
-              <input ref="kwInput" v-model="kw" class="input" type="search" :placeholder="L('搜索曲名、曲师或 ID', '曲名・アーティスト・ID で検索')" :aria-label="L('搜索歌曲', '楽曲を検索')" />
-            </label>
-            <ul class="opts">
-              <li v-for="s in options" :key="s.id">
-                <button :aria-current="s.id === songId ? 'true' : undefined" @click="choose(s)">
-                  <SongCell :song="s" size="sm" class="grow" />
-                  <Diff :d="4" :star="s.levels[3]" short />
-                </button>
+              <input
+                ref="kwInput"
+                v-model="kw"
+                class="input"
+                type="search"
+                role="combobox"
+                aria-autocomplete="list"
+                :aria-expanded="results.items.length > 0"
+                aria-controls="rt-song-list"
+                :aria-activedescendant="results.items.length ? optId(active) : undefined"
+                :placeholder="L('曲名、别名、曲师或 ID', '曲名・別名・アーティスト・ID')"
+                :aria-label="L('搜索歌曲', '楽曲を検索')"
+                autocomplete="off"
+                spellcheck="false"
+                @keydown="onKw"
+              />
+            </div>
+            <p v-if="results.recent && results.items.length" class="t-caption opts-h">{{ L('最近看过', '最近見た曲') }}</p>
+            <ul id="rt-song-list" ref="listEl" class="opts" role="listbox" :aria-label="L('歌曲', '楽曲')">
+              <li
+                v-for="(s, i) in results.items"
+                :id="optId(i)"
+                :key="s.id"
+                role="option"
+                class="opt"
+                :class="{ act: i === active }"
+                :aria-selected="i === active"
+                @mousemove="active = i"
+                @click="choose(s)"
+              >
+                <SongCell :song="s" size="sm" class="grow" />
+                <span v-if="s.id === song.id" class="cur"><Icon name="check" :size="16" /><span class="sr-only">{{ L('当前', '選択中') }}</span></span>
               </li>
-              <li v-if="!options.length" class="t-small none">{{ L(`没有找到「${kw}」`, `「${kw}」は見つかりません`) }}</li>
             </ul>
+            <p v-if="!results.recent && !results.items.length" class="t-small none" role="status">{{ L(`没有找到「${kw}」`, `「${kw}」は見つかりません`) }}</p>
+            <p v-else-if="results.total > results.items.length" class="t-caption opts-f">{{ L(`共 ${fmt(results.total)} 首，继续输入可以缩小范围`, `全 ${fmt(results.total)} 曲。続けて入力すると絞り込めます`) }}</p>
           </div>
         </div>
 
         <div class="field">
           <span class="field-label">{{ L('难度', '難易度') }}</span>
           <div class="seg" role="group" :aria-label="L('难度', '難易度')">
-            <button v-for="c in charts" :key="c.d" :aria-pressed="chart.d === c.d" @click="d = c.d">
-              {{ L(...DIFF_NAMES[c.d]) }} ★{{ c.star }}<span class="num k">{{ fx(c.constant) }}</span>
+            <button v-for="c in charts" :key="c.d" :aria-pressed="chart.d === c.d" @click="q.d = c.d">
+              {{ L(...DIFF_NAMES[c.d]) }} ★{{ c.star }}<span v-if="c.constant != null" class="num k">{{ fx(c.constant) }}</span><span v-else class="k na">—</span>
             </button>
           </div>
         </div>
+        <p v-if="!hasConst" class="state" role="status"><Icon name="info" :size="18" />{{ L('这个难度还没有定数，无法计算 RT', 'この難易度はまだ定数がないため、RT を計算できません') }}</p>
 
         <div>
           <div class="judge-in">
@@ -205,13 +257,15 @@ const whatIfs = computed(() => {
         <div class="res-top">
           <DrumDial :value="rt ?? 0" :size="208">
             <span class="t-caption">{{ L('单曲 RT', '単曲 RT') }}</span>
-            <b class="num big">{{ rt == null ? '—' : rt.toFixed(2) }}</b>
-            <span class="t-caption">{{ L('定数', '定数') }} <span class="num">{{ fx(chart.constant) }}</span></span>
+            <b v-if="rt != null" class="num big">{{ rt.toFixed(2) }}</b>
+            <b v-else class="big na">—</b>
+            <span class="t-caption">{{ L('定数', '定数') }} <span v-if="hasConst" class="num">{{ fx(chart.constant) }}</span><span v-else class="na">—</span></span>
           </DrumDial>
           <dl class="res-kv">
             <div>
               <dt>{{ L('准确率', '精度') }}</dt>
-              <dd class="num">{{ acc == null ? '—' : (acc * 100).toFixed(2) + '%' }}</dd>
+              <dd v-if="acc != null" class="num">{{ (acc * 100).toFixed(2) }}%</dd>
+              <dd v-else class="na">—</dd>
             </div>
             <div>
               <dt>{{ L('物量', 'ノーツ数') }}</dt>
@@ -231,7 +285,7 @@ const whatIfs = computed(() => {
           </div>
         </div>
 
-        <template v-if="valid">
+        <template v-if="valid && hasConst">
           <h2 class="t-h3 wi-h">{{ L('如果再好一点', 'もう少し良くなると') }}</h2>
           <ul v-if="whatIfs.length" class="whatif">
             <li v-for="w in whatIfs" :key="w.key">
@@ -243,15 +297,15 @@ const whatIfs = computed(() => {
           </ul>
           <p v-else class="t-small">{{ L('已经是这张谱面的单曲 RT 上限。', 'この譜面の単曲 RT の上限です。') }}</p>
         </template>
-        <p v-else class="t-small wi-h">{{ L('填好良、可、不可后，这里显示这一局的单曲 RT。', '良・可・不可を入力すると、このプレイの単曲 RT が表示されます。') }}</p>
+        <p v-else-if="hasConst" class="t-small wi-h">{{ L('填好良、可、不可后显示这一局的单曲 RT。', '良・可・不可を入力すると、このプレイの単曲 RT が表示されます。') }}</p>
       </section>
     </div>
 
     <!-- 手机：结果贴底 -->
     <div class="mbar only-mobile">
       <div class="mbar-in">
-        <span class="mb-rt"><small>{{ L('单曲 RT', '単曲 RT') }}</small><b class="num">{{ rt == null ? '—' : rt.toFixed(2) }}</b></span>
-        <span class="mb-acc"><small>{{ below ? L('低于 75%，不计入', '75% 未満・対象外') : L('准确率', '精度') }}</small><b class="num">{{ acc == null ? '—' : (acc * 100).toFixed(2) + '%' }}</b></span>
+        <span class="mb-rt"><small>{{ L('单曲 RT', '単曲 RT') }}</small><b v-if="rt != null" class="num">{{ rt.toFixed(2) }}</b><b v-else class="mb-na">—</b></span>
+        <span class="mb-acc"><small>{{ below ? L('低于 75%，不计入', '75% 未満・対象外') : L('准确率', '精度') }}</small><b v-if="acc != null" class="num">{{ (acc * 100).toFixed(2) }}%</b><b v-else class="mb-na">—</b></span>
       </div>
       <div class="judge">
         <i class="g" :style="{ width: pct('good') }" /><i class="o" :style="{ width: pct('ok') }" /><i class="n" :style="{ width: pct('ng') }" />
@@ -285,16 +339,19 @@ const whatIfs = computed(() => {
   gap: 12px;
   width: 100%;
   padding: 8px 12px 8px 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-ctl);
+  border: 1px solid var(--ctl-border);
+  border-radius: var(--ctl-radius);
   background: var(--surface);
   text-align: left;
   color: var(--ink-3);
   transition: border-color var(--dur-1);
 }
+.pick-btn > .grow {
+  min-width: 0;
+}
 .pick-btn:hover,
 .pick-btn[aria-expanded='true'] {
-  border-color: var(--ink-3);
+  border-color: var(--ink-2);
 }
 .pop {
   position: absolute;
@@ -304,8 +361,9 @@ const whatIfs = computed(() => {
   top: calc(100% + 6px);
   padding: 8px;
   background: var(--surface);
-  border-radius: var(--r-panel);
-  box-shadow: var(--shadow-pop);
+  border: 1px solid var(--line);
+  border-radius: var(--overlay-radius);
+  box-shadow: var(--overlay-shadow);
 }
 .pop-search {
   position: relative;
@@ -327,22 +385,27 @@ const whatIfs = computed(() => {
   margin-top: 6px;
   overflow-y: auto;
 }
-.opts button {
+.opt {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
+  min-height: var(--ctl-h);
   padding: 6px 8px;
-  border-radius: var(--r-ctl);
-  text-align: left;
+  border-radius: var(--ctl-radius);
+  cursor: pointer;
 }
-.opts button:hover {
+.opt.act {
   background: var(--bg-sunk);
 }
-.opts button[aria-current='true'] {
-  background: var(--ka-wash);
+.cur {
+  display: inline-flex;
+  color: var(--ka-ink);
 }
-.opts .none {
+.opts-h,
+.opts-f {
+  padding: 8px 8px 0;
+}
+.none {
   padding: 16px 8px;
 }
 
@@ -547,7 +610,13 @@ const whatIfs = computed(() => {
   }
   .mbar small {
     font-size: var(--fs-11);
-    opacity: 0.7;
+    font-weight: 500;
+  }
+  .mb-na {
+    font-weight: 400;
+  }
+  .opt {
+    min-height: var(--hit);
   }
   .mb-rt b {
     font-size: var(--fs-36);

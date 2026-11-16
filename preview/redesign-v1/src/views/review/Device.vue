@@ -16,6 +16,11 @@ const SIZES = { phone: [390, 844, '手机 390'], small: [360, 740, '小屏 360']
 const src = computed(() => `${location.pathname}${location.search}#${path.value}`)
 const frame = ref(null)
 watch(src, () => frame.value?.contentWindow?.location.replace(src.value))
+const SYNC_OUTCOMES = [
+  ['success', '同步成功'],
+  ['partial', '部分成功'],
+  ['failed', '同步失败'],
+]
 function go(s) {
   if (s.auth) store.auth = s.auth
   router.replace({ query: { p: s.path } })
@@ -32,7 +37,7 @@ function go(s) {
       </div>
     </aside>
 
-    <main class="stage">
+    <main class="dv-stage">
       <div class="controls">
         <div class="seg"><button v-for="(v, k) in SIZES" :key="k" :aria-pressed="size === k" @click="size = k">{{ v[2] }}</button></div>
         <div class="seg">
@@ -44,6 +49,18 @@ function go(s) {
           <button :aria-pressed="store.locale === 'ja'" @click="store.locale = 'ja'">日本語</button>
         </div>
         <div class="seg"><button v-for="(v, k) in AUTH_LABEL" :key="k" :aria-pressed="store.auth === k" @click="store.auth = k">{{ v }}</button></div>
+        <!-- 数据规模 / 下一次同步结果 / 减少动效：写进同一个 localStorage 键，iframe 通过 storage 事件跟随 -->
+        <div class="seg" role="group" aria-label="数据规模">
+          <button :aria-pressed="store.dataset === 'full'" @click="store.dataset = 'full'">完整数据</button>
+          <button :aria-pressed="store.dataset === 'demo'" @click="store.dataset = 'demo'">精选 30 首</button>
+        </div>
+        <div class="seg" role="group" aria-label="下一次同步结果">
+          <button v-for="o in SYNC_OUTCOMES" :key="o[0]" :aria-pressed="store.syncOutcome === o[0]" @click="store.syncOutcome = o[0]">{{ o[1] }}</button>
+        </div>
+        <div class="seg" role="group" aria-label="减少动效">
+          <button :aria-pressed="store.motion === 'system'" @click="store.motion = 'system'">动效跟随系统</button>
+          <button :aria-pressed="store.motion === 'reduce'" @click="store.motion = 'reduce'">减少动效</button>
+        </div>
       </div>
       <div class="phone" :class="size" :style="{ width: SIZES[size][0] + 24 + 'px', height: SIZES[size][1] + 24 + 'px' }">
         <iframe ref="frame" :src="src" :width="SIZES[size][0]" :height="SIZES[size][1]" title="手机预览" />
@@ -99,7 +116,7 @@ function go(s) {
   color: var(--bg);
   font-weight: 700;
 }
-.stage {
+.dv-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,7 +141,7 @@ function go(s) {
 .phone {
   padding: 12px;
   border-radius: 46px;
-  background: var(--ai-950);
+  background: var(--stage-sunk);
   box-shadow: var(--shadow-pop);
   flex: none;
   max-width: 100%;

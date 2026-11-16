@@ -4,15 +4,21 @@ import { useRouter } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import Sheet from '../components/Sheet.vue'
 import EmptyLane from '../components/EmptyLane.vue'
-import { player, devApps } from '../mock/data'
+import PlayerAvatar from '../components/PlayerAvatar.vue'
+import TitlePlate from '../components/TitlePlate.vue'
+import DanBadge from '../components/DanBadge.vue'
+import { player, devApps, users } from '../mock/data'
 import { store, L, toast } from '../store'
+import { sync } from '../sync'
+import { useSectionNav } from '../sectionNav'
 
 const router = useRouter()
 const EMAIL = 'mochi.don@example.com'
+const TODAY = '2026-11-16'
+const HUE = users?.mochidon?.hue ?? 12
 
 /* ---------- 资料 ---------- */
 const nickname = ref(player.nickname)
-const initial = computed(() => [...nickname.value][0])
 const editOpen = ref(false)
 const draft = reactive({ nickname: '', file: '', error: '' })
 function openEdit() {
@@ -45,17 +51,10 @@ watch(
   () => (bindings.value = seed()),
 )
 const stamp = (b) => (b.source === 'manual' ? L('手动', '手動') : b.region)
+const lastSync = computed(() => L(sync.lastSyncLabel.zh, sync.lastSyncLabel.ja))
 function setCurrent(b) {
   bindings.value.forEach((x) => (x.current = x.id === b.id))
   toast(L(`已切换到「${b.name}」`, `「${b.name}」に切り替えました`))
-}
-const unbindTarget = ref(null)
-function confirmUnbind() {
-  const b = unbindTarget.value
-  bindings.value = bindings.value.filter((x) => x.id !== b.id)
-  if (b.current && bindings.value.length) bindings.value[0].current = true
-  unbindTarget.value = null
-  toast(L(`已解除「${b.name}」的绑定`, `「${b.name}」の連携を解除しました`))
 }
 
 const addOpen = ref(false)
@@ -92,13 +91,13 @@ function sendQqCode() {
 /* ---------- 登录方式 ---------- */
 const oidcLinked = ref(true)
 const qqBound = ref(false)
-function toggleOidc() {
-  oidcLinked.value = !oidcLinked.value
-  toast(oidcLinked.value ? L('已关联 OurTaiko', 'OurTaiko と連携しました') : L('已解除 OurTaiko 关联', 'OurTaiko の連携を解除しました'))
+function linkOidc() {
+  oidcLinked.value = true
+  toast(L('已关联 OurTaiko', 'OurTaiko と連携しました'))
 }
-function toggleQq() {
-  qqBound.value = !qqBound.value
-  toast(qqBound.value ? L('QQ 已绑定', 'QQ を連携しました') : L('QQ 已解绑', 'QQ の連携を解除しました'))
+function bindQq() {
+  qqBound.value = true
+  toast(L('QQ 已绑定', 'QQ を連携しました'))
 }
 const pwOpen = ref(false)
 const pw = reactive({ cur: '', next: '', again: '', error: '' })
@@ -116,24 +115,99 @@ function savePw() {
   }
 }
 
-/* ---------- 小咚与称号 ---------- */
-const TITLES = [player.title, '太鼓好き', '九段合格', '全良收藏家', '节奏旅人']
+/* ---------- 称号展示 ---------- */
+const TITLES = [
+  { text: player.title, rare: false },
+  { text: '太鼓好き', rare: false },
+  { text: '九段合格', rare: false },
+  { text: '全良收藏家', rare: true },
+  { text: '节奏旅人', rare: false },
+]
 const shownTitle = ref(player.title)
+const shownRare = computed(() => !!TITLES.find((t) => t.text === shownTitle.value)?.rare)
 function onTitle() {
   toast(L(`展示称号已换成「${shownTitle.value}」`, `表示する称号を「${shownTitle.value}」に変更しました`))
 }
 
 /* ---------- 第三方应用 ---------- */
 const apps = ref(devApps.map((a) => ({ ...a })))
-function revoke(a) {
-  apps.value = apps.value.filter((x) => x.name !== a.name)
-  toast(L(`已撤销 ${a.name} 的授权`, `${a.name} の許可を取り消しました`))
+const expired = (a) => a.expires < TODAY
+
+/* ---------- 破坏性操作：一律在确认弹层里说明后果 ---------- */
+const confirm = reactive({ open: false, kind: '', pick: null })
+const CONFIRM = {
+  unbind: {
+    title: () => L('解除绑定', '連携を解除'),
+    options: () => bindings.value.map((b) => ({ v: b.id, label: `${stamp(b)} · ${b.name}` })),
+    item: (v) => bindings.value.find((b) => b.id === v),
+    consequence: (b) =>
+      b.source === 'manual'
+        ? L(`删除后，「${b.name}」里的手动成绩会一起删除，无法恢复。`, `削除すると「${b.name}」の手動記録もすべて削除され、元に戻せません。`)
+        : L(`解除后，「${b.name}」的成绩不再出现在成绩和成长记录里；重新绑定可以恢复。`, `解除すると「${b.name}」のスコアは成績と成長記録に表示されなくなります。再連携で元に戻せます。`),
+    action: (b) => (b.source === 'manual' ? L('删除手动账号', '手動アカウントを削除') : L('解除绑定', '連携を解除')),
+    run(b) {
+      bindings.value = bindings.value.filter((x) => x.id !== b.id)
+      if (b.current && bindings.value.length) bindings.value[0].current = true
+      toast(b.source === 'manual' ? L(`已删除「${b.name}」`, `「${b.name}」を削除しました`) : L(`已解除「${b.name}」的绑定`, `「${b.name}」の連携を解除しました`))
+    },
+  },
+  login: {
+    title: () => L('解除登录方式', 'ログイン方法の解除'),
+    options: () => [oidcLinked.value && { v: 'oidc', label: 'OurTaiko' }, qqBound.value && { v: 'qq', label: 'QQ' }].filter(Boolean),
+    item: (v) => v,
+    consequence: (v) =>
+      v === 'oidc'
+        ? L('解除后不能再用 OurTaiko 登录，OurTaiko 也不再收到同步推送。', '解除すると OurTaiko でログインできなくなり、OurTaiko への同期も止まります。')
+        : L('解绑后不能再用 QQ 登录。', '解除すると QQ でログインできなくなります。'),
+    action: (v) => (v === 'oidc' ? L('解除 OurTaiko 关联', 'OurTaiko の連携を解除') : L('解绑 QQ', 'QQ の連携を解除')),
+    run(v) {
+      if (v === 'oidc') oidcLinked.value = false
+      else qqBound.value = false
+      toast(v === 'oidc' ? L('已解除 OurTaiko 关联', 'OurTaiko の連携を解除しました') : L('QQ 已解绑', 'QQ の連携を解除しました'))
+    },
+  },
+  revoke: {
+    title: () => L('撤销授权', '許可の取り消し'),
+    options: () => apps.value.map((a) => ({ v: a.name, label: a.name })),
+    item: (v) => apps.value.find((a) => a.name === v),
+    consequence: (a) => L(`撤销后，${a.name} 不能再读取你的数据；要恢复需要在该应用里重新授权。`, `取り消すと ${a.name} はデータを読み取れなくなります。再度使うにはアプリ側で許可し直してください。`),
+    action: () => L('撤销授权', '許可を取り消す'),
+    run(a) {
+      apps.value = apps.value.filter((x) => x.name !== a.name)
+      toast(L(`已撤销 ${a.name} 的授权`, `${a.name} の許可を取り消しました`))
+    },
+  },
+}
+const cfg = computed(() => CONFIRM[confirm.kind] || null)
+const cfgOptions = computed(() => (cfg.value ? cfg.value.options() : []))
+const cfgItem = computed(() => (cfg.value && confirm.pick != null ? cfg.value.item(confirm.pick) : null))
+function openConfirm(kind, pick = null) {
+  const opts = CONFIRM[kind].options()
+  if (!opts.length) return
+  confirm.kind = kind
+  confirm.pick = pick ?? opts[0].v
+  confirm.open = true
+}
+function runConfirm() {
+  const item = cfgItem.value
+  if (item != null) cfg.value.run(item)
+  confirm.open = false
 }
 
 function logout() {
   store.auth = 'guest'
   router.push('/')
 }
+
+/* ---------- 页内目录（≥ 1100px 显示） ---------- */
+const NAV = computed(() => [
+  { id: 'acc-bind', label: L('游戏账号', 'ゲームアカウント') },
+  { id: 'acc-login', label: L('登录方式', 'ログイン方法') },
+  { id: 'acc-title', label: L('称号展示', '称号の表示') },
+  { id: 'acc-apps', label: L('第三方应用', '連携アプリ') },
+  { id: 'acc-out', label: L('退出登录', 'ログアウト') },
+])
+const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) => n.id), { deps: [() => store.auth] })
 </script>
 
 <template>
@@ -142,138 +216,167 @@ function logout() {
       <RouterLink to="/login" class="btn btn-primary">{{ L('登录', 'ログイン') }}</RouterLink>
     </EmptyLane>
 
-    <template v-else>
-      <header class="ident">
-        <span class="avatar lg">{{ initial }}</span>
-        <div class="grow">
-          <h1 class="t-h1">{{ nickname }}</h1>
-          <p class="ident-meta">
-            <span class="num">@{{ player.username }}</span>
-            <span class="mail">{{ EMAIL }}<span class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已验证', '確認済み') }}</span></span>
-            <span><span class="num">{{ player.joined }}</span> {{ L('加入', '登録') }}</span>
-          </p>
-        </div>
-        <div class="row-wrap">
-          <button class="btn" @click="openEdit"><Icon name="image" :size="16" />{{ L('更换头像', 'アイコンを変更') }}</button>
-          <button class="btn btn-ink" @click="openEdit"><Icon name="edit" :size="16" />{{ L('编辑资料', 'プロフィールを編集') }}</button>
-        </div>
-      </header>
+    <div v-else class="vpage">
+      <nav class="toc" :aria-label="L('本页目录', 'このページの目次')">
+        <ul>
+          <li v-for="n in NAV" :key="n.id">
+            <button type="button" :aria-current="currentSec === n.id ? 'true' : undefined" @click="scrollTo(n.id)">{{ n.label }}</button>
+          </li>
+        </ul>
+      </nav>
 
-      <div class="cols">
+      <div class="vcol">
+        <!-- 身份 -->
+        <header class="ident">
+          <PlayerAvatar :name="nickname" :hue="HUE" :dan="player.dan" :size="72" />
+          <div class="grow ident-main">
+            <h2 class="ident-name title-wrap-2">{{ nickname }}</h2>
+            <p class="row-wrap ident-plates">
+              <TitlePlate :text="shownTitle" :rare="shownRare" />
+              <DanBadge :dan="player.dan" />
+            </p>
+            <p class="ident-meta">
+              <span class="num">@{{ player.username }}</span>
+              <span class="mail">
+                <span class="truncate">{{ EMAIL }}</span>
+                <span class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已验证', '確認済み') }}</span>
+              </span>
+              <span><span class="num">{{ player.joined }}</span> {{ L('加入', '登録') }}</span>
+            </p>
+          </div>
+          <button type="button" class="btn" @click="openEdit"><Icon name="edit" :size="16" />{{ L('编辑资料', 'プロフィールを編集') }}</button>
+        </header>
+
         <!-- 游戏账号 -->
-        <section class="a-bind">
+        <section id="acc-bind" class="vsec" aria-labelledby="acc-bind-h">
           <div class="section-head">
-            <h2 class="t-h2">{{ L('游戏账号', 'ゲームアカウント') }}</h2>
-            <span v-if="bindings.length" class="t-caption"><span class="num">{{ bindings.length }}</span> {{ L('个', '件') }}</span>
+            <h2 id="acc-bind-h" class="t-h2" tabindex="-1">{{ L('游戏账号', 'ゲームアカウント') }}</h2>
+            <span v-if="bindings.length" class="t-small"><span class="num">{{ bindings.length }}</span> {{ L('个', '件') }}</span>
           </div>
           <div class="panel">
             <ul v-if="bindings.length" class="rows">
-              <li v-for="b in bindings" :key="b.id" class="bind">
-                <span class="stamp" :class="b.source">{{ stamp(b) }}</span>
+              <li v-for="b in bindings" :key="b.id" class="srow">
+                <span class="tag region">{{ stamp(b) }}</span>
                 <div class="grow">
-                  <p class="bind-name">
-                    <b class="truncate">{{ b.name }}</b>
-                    <span v-if="b.current" class="tag tag-don">{{ L('当前', '使用中') }}</span>
+                  <p class="srow-name">
+                    <b class="title-1l" :title="b.name">{{ b.name }}</b>
+                    <span v-if="b.current" class="tag tag-info"><Icon name="check" :size="12" />{{ L('当前', '使用中') }}</span>
                   </p>
-                  <p class="bind-sub">
+                  <p class="srow-sub">
                     <span class="num">{{ b.taikoId }}</span>
                     <span>{{ L(SOURCES[b.source].zh, SOURCES[b.source].ja) }}</span>
-                    <span v-if="b.title !== '—'" class="bind-title"><Icon name="shield" :size="14" />{{ b.title }}</span>
+                    <span v-if="b.current && b.source !== 'manual'">{{ L(`上次同步：${lastSync}`, `前回の同期：${lastSync}`) }}</span>
                   </p>
                 </div>
-                <div class="bind-acts">
-                  <RouterLink v-if="b.current" to="/account/sync" class="btn btn-sm"><Icon name="sync" :size="14" />{{ L('同步', '同期') }}</RouterLink>
-                  <button v-else class="btn btn-sm" @click="setCurrent(b)">{{ L('设为当前', '使用中にする') }}</button>
-                  <button class="btn btn-sm btn-ghost" @click="unbindTarget = b">{{ L('解除绑定', '連携を解除') }}</button>
-                </div>
+                <RouterLink v-if="b.current" to="/account/sync" class="btn btn-sm">{{ L('同步设置', '同期設定') }}</RouterLink>
+                <button v-else type="button" class="btn btn-sm" @click="setCurrent(b)">{{ L('设为当前', '使用中にする') }}</button>
               </li>
             </ul>
-            <EmptyLane v-else compact :title="L('还没有绑定游戏账号', 'ゲームアカウントが未連携です')" />
+            <EmptyLane v-else compact :title="L('还没有绑定游戏账号', 'ゲームアカウントが未連携です')">
+              <RouterLink to="/bind" class="btn btn-primary">{{ L('绑定鼓众广场 ID', '鼓衆広場 ID を連携') }}</RouterLink>
+            </EmptyLane>
             <div class="panel-foot">
-              <button class="btn" @click="openAdd"><Icon name="plus" :size="16" />{{ L('添加账号', 'アカウントを追加') }}</button>
+              <button type="button" class="btn" @click="openAdd"><Icon name="plus" :size="16" />{{ L('添加账号', 'アカウントを追加') }}</button>
             </div>
+          </div>
+          <div v-if="bindings.length" class="danger-zone">
+            <button type="button" class="btn btn-ghost quiet-danger" @click="openConfirm('unbind')">{{ L('解除绑定或删除手动账号…', '連携解除・手動アカウント削除…') }}</button>
           </div>
         </section>
 
         <!-- 登录方式 -->
-        <section class="a-login">
-          <div class="section-head"><h2 class="t-h2">{{ L('登录方式', 'ログイン方法') }}</h2></div>
+        <section id="acc-login" class="vsec" aria-labelledby="acc-login-h">
+          <div class="section-head"><h2 id="acc-login-h" class="t-h2" tabindex="-1">{{ L('登录方式', 'ログイン方法') }}</h2></div>
           <ul class="panel rows">
-            <li class="lrow">
+            <li class="srow">
               <Icon name="mail" />
               <div class="grow">
                 <b>{{ L('邮箱与密码', 'メールとパスワード') }}</b>
-                <span class="t-caption truncate">{{ EMAIL }}</span>
+                <span class="srow-sub title-1l" :title="EMAIL">{{ EMAIL }}</span>
               </div>
-              <button class="btn btn-sm" @click="openPw">{{ L('修改密码', 'パスワードを変更') }}</button>
+              <span class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已验证', '確認済み') }}</span>
+              <button type="button" class="btn btn-sm" @click="openPw">{{ L('修改密码', 'パスワードを変更') }}</button>
             </li>
-            <li class="lrow">
+            <li class="srow">
               <Icon name="link" />
               <div class="grow">
                 <b>OurTaiko</b>
-                <span class="t-caption">OIDC</span>
+                <span class="srow-sub">OIDC</span>
               </div>
-              <span class="tag" :class="{ 'tag-ok': oidcLinked }">{{ oidcLinked ? L('已关联', '連携済み') : L('未关联', '未連携') }}</span>
-              <button class="btn btn-sm" :class="{ 'btn-ghost': oidcLinked }" @click="toggleOidc">{{ oidcLinked ? L('解除', '解除') : L('关联', '連携する') }}</button>
+              <span v-if="oidcLinked" class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已关联', '連携済み') }}</span>
+              <template v-else>
+                <span class="tag"><i class="ring" aria-hidden="true" />{{ L('未关联', '未連携') }}</span>
+                <button type="button" class="btn btn-sm" @click="linkOidc">{{ L('关联', '連携する') }}</button>
+              </template>
             </li>
-            <li class="lrow">
+            <li class="srow">
               <Icon name="community" />
               <div class="grow">
                 <b>QQ</b>
-                <span v-if="qqBound" class="t-caption num">2841••••07</span>
+                <span v-if="qqBound" class="srow-sub num">2841••••07</span>
               </div>
-              <span class="tag" :class="{ 'tag-ok': qqBound }">{{ qqBound ? L('已绑定', '連携済み') : L('未绑定', '未連携') }}</span>
-              <button class="btn btn-sm" :class="{ 'btn-ghost': qqBound }" @click="toggleQq">{{ qqBound ? L('解绑', '解除') : L('绑定', '連携する') }}</button>
+              <span v-if="qqBound" class="tag tag-ok"><Icon name="check" :size="12" />{{ L('已绑定', '連携済み') }}</span>
+              <template v-else>
+                <span class="tag"><i class="ring" aria-hidden="true" />{{ L('未绑定', '未連携') }}</span>
+                <button type="button" class="btn btn-sm" @click="bindQq">{{ L('绑定', '連携する') }}</button>
+              </template>
             </li>
           </ul>
+          <div v-if="oidcLinked || qqBound" class="danger-zone">
+            <button type="button" class="btn btn-ghost quiet-danger" @click="openConfirm('login')">{{ L('解除登录方式…', 'ログイン方法を解除…') }}</button>
+          </div>
         </section>
 
-        <!-- 小咚与称号 -->
-        <section class="a-don">
-          <div class="section-head"><h2 class="t-h2">{{ L('我的小咚与称号展示', 'マイどんと称号') }}</h2></div>
-          <div class="panel panel-pad don-box">
-            <div class="don-preview">
-              <span class="donchan" aria-hidden="true"><i class="eye l" /><i class="eye r" /><i class="mouth" /></span>
+        <!-- 称号展示 -->
+        <section id="acc-title" class="vsec" aria-labelledby="acc-title-h">
+          <div class="section-head">
+            <h2 id="acc-title-h" class="t-h2" tabindex="-1">{{ L('称号展示', '称号の表示') }}</h2>
+            <RouterLink to="/titles" class="more">{{ L('全部称号', '称号一覧') }}</RouterLink>
+          </div>
+          <div class="panel panel-pad title-box">
+            <div class="title-preview" aria-live="polite">
+              <PlayerAvatar :name="nickname" :hue="HUE" :dan="player.dan" :size="44" />
               <div class="grow">
-                <b class="truncate">{{ nickname }}</b>
-                <span class="tag tag-roll">{{ shownTitle }}</span>
+                <b class="title-1l" :title="nickname">{{ nickname }}</b>
+                <span class="row-wrap"><TitlePlate :text="shownTitle" :rare="shownRare" /><DanBadge :dan="player.dan" /></span>
               </div>
             </div>
             <div class="field">
-              <label for="acc-title">{{ L('展示的称号', '表示する称号') }}</label>
-              <select id="acc-title" v-model="shownTitle" class="select" @change="onTitle">
-                <option v-for="t in TITLES" :key="t" :value="t">{{ t }}</option>
+              <label for="acc-title-sel">{{ L('展示的称号', '表示する称号') }}</label>
+              <select id="acc-title-sel" v-model="shownTitle" class="select" @change="onTitle">
+                <option v-for="t in TITLES" :key="t.text" :value="t.text">{{ t.text }}</option>
               </select>
             </div>
-            <RouterLink to="/titles" class="link t-small">{{ L('查看全部称号', '称号一覧を見る') }}</RouterLink>
           </div>
         </section>
 
         <!-- 第三方应用授权 -->
-        <section class="a-apps">
-          <div class="section-head"><h2 class="t-h2">{{ L('第三方应用授权', '連携アプリ') }}</h2></div>
+        <section id="acc-apps" class="vsec" aria-labelledby="acc-apps-h">
+          <div class="section-head"><h2 id="acc-apps-h" class="t-h2" tabindex="-1">{{ L('第三方应用授权', '連携アプリ') }}</h2></div>
           <div class="panel">
             <template v-if="apps.length">
               <div class="only-desktop scroll-x">
                 <table class="dt">
+                  <caption class="sr-only">{{ L('已授权的第三方应用', '許可した連携アプリ') }}</caption>
                   <thead>
                     <tr>
-                      <th>{{ L('应用', 'アプリ') }}</th>
-                      <th>{{ L('权限', '権限') }}</th>
-                      <th>{{ L('授权时间', '許可日') }}</th>
-                      <th>{{ L('到期', '有効期限') }}</th>
-                      <th>{{ L('最近使用', '最終利用') }}</th>
-                      <th class="r"><span class="sr-only">{{ L('操作', '操作') }}</span></th>
+                      <th scope="col">{{ L('应用', 'アプリ') }}</th>
+                      <th scope="col">{{ L('权限', '権限') }}</th>
+                      <th scope="col">{{ L('状态', '状態') }}</th>
+                      <th scope="col">{{ L('到期', '有効期限') }}</th>
+                      <th scope="col">{{ L('最近使用', '最終利用') }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="a in apps" :key="a.name">
-                      <td><b>{{ a.name }}</b></td>
+                      <th scope="row"><b>{{ a.name }}</b></th>
                       <td><span class="row-wrap scopes"><span v-for="s in a.scopes" :key="s" class="tag num">{{ s }}</span></span></td>
-                      <td class="num">{{ a.granted }}</td>
+                      <td>
+                        <span v-if="expired(a)" class="tag tag-roll"><Icon name="clock" :size="12" />{{ L('已过期', '期限切れ') }}</span>
+                        <span v-else class="tag tag-ok"><Icon name="check" :size="12" />{{ L('有效', '有効') }}</span>
+                      </td>
                       <td class="num">{{ a.expires }}</td>
                       <td>{{ a.lastUsed }}</td>
-                      <td class="r"><button class="btn btn-sm" @click="revoke(a)">{{ L('撤销', '取り消す') }}</button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -282,7 +385,8 @@ function logout() {
                 <li v-for="a in apps" :key="a.name" class="app">
                   <div class="spread">
                     <b>{{ a.name }}</b>
-                    <button class="btn btn-sm" @click="revoke(a)">{{ L('撤销', '取り消す') }}</button>
+                    <span v-if="expired(a)" class="tag tag-roll"><Icon name="clock" :size="12" />{{ L('已过期', '期限切れ') }}</span>
+                    <span v-else class="tag tag-ok"><Icon name="check" :size="12" />{{ L('有效', '有効') }}</span>
                   </div>
                   <span class="row-wrap scopes"><span v-for="s in a.scopes" :key="s" class="tag num">{{ s }}</span></span>
                   <dl class="kv">
@@ -298,43 +402,57 @@ function logout() {
             </template>
             <EmptyLane v-else compact :title="L('没有已授权的应用', '許可したアプリはありません')" />
           </div>
+          <div v-if="apps.length" class="danger-zone">
+            <button type="button" class="btn btn-ghost quiet-danger" @click="openConfirm('revoke')">{{ L('撤销应用授权…', 'アプリの許可を取り消す…') }}</button>
+          </div>
         </section>
 
-        <!-- 退出 -->
-        <section class="a-danger">
+        <!-- 退出登录（不是破坏性操作） -->
+        <section id="acc-out" class="vsec out-sec" aria-labelledby="acc-out-h">
           <div class="grow">
-            <b>{{ L('退出登录', 'ログアウト') }}</b>
+            <h2 id="acc-out-h" class="t-h3" tabindex="-1">{{ L('退出登录', 'ログアウト') }}</h2>
             <span class="t-small">{{ L(`在这台设备上退出 ${player.username}`, `この端末で ${player.username} からログアウトします`) }}</span>
           </div>
-          <button class="btn out" @click="logout"><Icon name="logout" :size="16" />{{ L('退出登录', 'ログアウト') }}</button>
+          <button type="button" class="btn" @click="logout"><Icon name="logout" :size="16" />{{ L('退出登录', 'ログアウト') }}</button>
         </section>
       </div>
-    </template>
+    </div>
 
     <!-- 编辑资料 -->
     <Sheet :open="editOpen" :title="L('编辑资料', 'プロフィールを編集')" @close="editOpen = false">
-      <div class="col form">
+      <form class="col form" novalidate @submit.prevent="saveProfile">
         <div class="avatar-edit">
-          <span class="avatar lg">{{ [...(draft.nickname || nickname)][0] }}</span>
+          <PlayerAvatar :name="draft.nickname || nickname" :hue="HUE" :dan="player.dan" :size="72" />
           <div class="col grow">
-            <button class="btn" @click="draft.file = 'avatar.png'"><Icon name="upload" :size="16" />{{ L('选择图片', '画像を選択') }}</button>
+            <button type="button" class="btn" @click="draft.file = 'avatar.png'"><Icon name="upload" :size="16" />{{ L('选择图片', '画像を選択') }}</button>
             <span v-if="draft.file" class="t-small num">{{ draft.file }}</span>
-            <span class="field-hint">{{ L('JPG 或 PNG，不超过 2 MB，会裁成圆形。', 'JPG / PNG、2 MB まで。円形に切り抜かれます。') }}</span>
+            <span class="field-hint">{{ L('JPG 或 PNG，不超过 2 MB', 'JPG / PNG、2 MB まで') }}</span>
           </div>
         </div>
         <div class="field">
           <label for="acc-nick">{{ L('昵称', 'ニックネーム') }}</label>
-          <input id="acc-nick" v-model="draft.nickname" class="input" :class="{ 'is-error': draft.error }" maxlength="16" @input="draft.error = ''" />
-          <span v-if="draft.error" class="field-error">{{ draft.error }}</span>
+          <input
+            id="acc-nick"
+            v-model="draft.nickname"
+            class="input"
+            :class="{ 'is-error': draft.error }"
+            maxlength="16"
+            autocomplete="nickname"
+            enterkeyhint="done"
+            :aria-invalid="!!draft.error"
+            :aria-describedby="draft.error ? 'acc-nick-err' : undefined"
+            @input="draft.error = ''"
+          />
+          <span v-if="draft.error" id="acc-nick-err" class="field-error" role="alert">{{ draft.error }}</span>
         </div>
         <div class="field">
           <span class="field-label">{{ L('用户名', 'ユーザー名') }}</span>
           <span class="num">@{{ player.username }}</span>
         </div>
-      </div>
+      </form>
       <template #foot>
-        <button class="btn" @click="editOpen = false">{{ L('取消', 'キャンセル') }}</button>
-        <button class="btn btn-primary" @click="saveProfile">{{ L('保存修改', '変更を保存') }}</button>
+        <button type="button" class="btn" @click="editOpen = false">{{ L('取消', 'キャンセル') }}</button>
+        <button type="button" class="btn btn-primary" @click="saveProfile">{{ L('保存修改', '変更を保存') }}</button>
       </template>
     </Sheet>
 
@@ -343,35 +461,48 @@ function logout() {
       <ul class="opts">
         <li>
           <RouterLink to="/bind" class="opt" @click="addOpen = false">
-            <span class="stamp wahlap">CN</span>
+            <span class="tag region">CN</span>
             <span class="grow"><b>{{ L('鼓众广场 ID', '鼓衆広場 ID') }}</b><small>{{ L('国服，改一次游戏内称号完成验证', '中国版。ゲーム内の称号を変更して確認します') }}</small></span>
             <Icon name="chevR" :size="16" />
           </RouterLink>
         </li>
         <li>
           <RouterLink :to="{ path: '/bind', query: { source: 'hiroba' } }" class="opt" @click="addOpen = false">
-            <span class="stamp hiroba">JP</span>
+            <span class="tag region">JP</span>
             <span class="grow"><b>Donder Hiroba</b><small>{{ L('日服', '日本版') }}</small></span>
             <Icon name="chevR" :size="16" />
           </RouterLink>
         </li>
         <li class="opt">
-          <span class="stamp manual">{{ L('手动', '手動') }}</span>
+          <span class="tag region">{{ L('手动', '手動') }}</span>
           <div class="grow">
             <b>{{ L('手动成绩账号', '手動記録アカウント') }}</b>
             <div class="manual">
-              <button class="btn" @click="createManual">{{ L('创建空账号', '空のアカウントを作成') }}</button>
-              <div class="claim">
-                <input v-model="claim.code" class="input num" :class="{ 'is-error': claim.error }" maxlength="8" :placeholder="L('8 位认领码', '8 桁の引き継ぎコード')" :aria-label="L('认领码', '引き継ぎコード')" @input="claim.error = ''" />
-                <button class="btn" @click="claimManual">{{ L('认领', '引き継ぐ') }}</button>
-              </div>
+              <button type="button" class="btn" @click="createManual">{{ L('创建空账号', '空のアカウントを作成') }}</button>
+              <form class="claim" novalidate @submit.prevent="claimManual">
+                <input
+                  v-model="claim.code"
+                  class="input num"
+                  :class="{ 'is-error': claim.error }"
+                  maxlength="8"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  enterkeyhint="go"
+                  :placeholder="L('8 位认领码', '8 桁の引き継ぎコード')"
+                  :aria-label="L('认领码', '引き継ぎコード')"
+                  :aria-invalid="!!claim.error"
+                  :aria-describedby="claim.error ? 'acc-claim-err' : undefined"
+                  @input="claim.error = ''"
+                />
+                <button type="submit" class="btn">{{ L('认领', '引き継ぐ') }}</button>
+              </form>
             </div>
-            <span v-if="claim.error" class="field-error">{{ claim.error }}</span>
+            <span v-if="claim.error" id="acc-claim-err" class="field-error" role="alert">{{ claim.error }}</span>
           </div>
         </li>
         <li>
-          <button class="opt" :disabled="qqSent" @click="sendQqCode">
-            <span class="stamp manual"><Icon name="mail" :size="18" /></span>
+          <button type="button" class="opt" :disabled="qqSent" @click="sendQqCode">
+            <span class="tag region"><Icon name="mail" :size="14" /></span>
             <span class="grow"><b>{{ L('从 QQ 机器人迁移绑定', 'QQ ボットの連携を移行') }}</b><small>{{ qqSent ? L('验证码已发送，10 分钟内有效', '確認コードを送信しました（10 分間有効）') : L('邮箱验证码', 'メールの確認コード') }}</small></span>
             <Icon :name="qqSent ? 'check' : 'chevR'" :size="16" />
           </button>
@@ -379,238 +510,252 @@ function logout() {
       </ul>
     </Sheet>
 
-    <!-- 解除绑定 -->
-    <Sheet :open="!!unbindTarget" :title="L('解除绑定', '連携を解除')" :width="440" @close="unbindTarget = null">
-      <p v-if="unbindTarget">{{ L(`解除后，「${unbindTarget.name}」的成绩不再出现在你的成绩和成长记录里。重新绑定可以恢复。`, `解除すると「${unbindTarget.name}」のスコアは成績と成長記録に表示されなくなります。再連携で元に戻せます。`) }}</p>
+    <!-- 破坏性操作确认 -->
+    <Sheet :open="confirm.open" :title="cfg ? cfg.title() : ''" :width="460" @close="confirm.open = false">
+      <div v-if="cfg" class="col form">
+        <fieldset v-if="cfgOptions.length > 1" class="pick">
+          <legend class="field-label">{{ L('选择对象', '対象を選択') }}</legend>
+          <label v-for="o in cfgOptions" :key="o.v" class="pick-opt">
+            <input v-model="confirm.pick" type="radio" name="acc-confirm-pick" :value="o.v" />
+            <span class="title-1l" :title="o.label">{{ o.label }}</span>
+          </label>
+        </fieldset>
+        <p v-if="cfgItem != null" class="consequence">{{ cfg.consequence(cfgItem) }}</p>
+      </div>
       <template #foot>
-        <button class="btn" @click="unbindTarget = null">{{ L('取消', 'キャンセル') }}</button>
-        <button class="btn btn-danger" @click="confirmUnbind">{{ L('解除绑定', '連携を解除') }}</button>
+        <button type="button" class="btn" @click="confirm.open = false">{{ L('取消', 'キャンセル') }}</button>
+        <button type="button" class="btn btn-danger" :disabled="cfgItem == null" @click="runConfirm">{{ cfg && cfgItem != null ? cfg.action(cfgItem) : '' }}</button>
       </template>
     </Sheet>
 
     <!-- 修改密码 -->
     <Sheet :open="pwOpen" :title="L('修改密码', 'パスワードを変更')" :width="440" @close="pwOpen = false">
-      <form class="col form" @submit.prevent="savePw">
+      <form class="col form" novalidate @submit.prevent="savePw">
+        <input type="text" class="sr-only" autocomplete="username" :value="player.username" tabindex="-1" aria-hidden="true" readonly />
         <div class="field">
           <label for="pw-cur">{{ L('当前密码', '現在のパスワード') }}</label>
-          <input id="pw-cur" v-model="pw.cur" type="password" class="input" autocomplete="current-password" @input="pw.error = ''" />
+          <input id="pw-cur" v-model="pw.cur" type="password" class="input" autocomplete="current-password" enterkeyhint="next" :aria-describedby="pw.error ? 'pw-err' : undefined" @input="pw.error = ''" />
         </div>
         <div class="field">
           <label for="pw-next">{{ L('新密码', '新しいパスワード') }}</label>
-          <input id="pw-next" v-model="pw.next" type="password" class="input" autocomplete="new-password" @input="pw.error = ''" />
-          <span class="field-hint">{{ L('至少 8 位', '8 文字以上') }}</span>
+          <input id="pw-next" v-model="pw.next" type="password" class="input" autocomplete="new-password" enterkeyhint="next" :aria-describedby="pw.error ? 'pw-err pw-next-hint' : 'pw-next-hint'" @input="pw.error = ''" />
+          <span id="pw-next-hint" class="field-hint">{{ L('至少 8 位', '8 文字以上') }}</span>
         </div>
         <div class="field">
           <label for="pw-again">{{ L('再输入一次新密码', '新しいパスワード（確認）') }}</label>
-          <input id="pw-again" v-model="pw.again" type="password" class="input" autocomplete="new-password" @input="pw.error = ''" />
+          <input id="pw-again" v-model="pw.again" type="password" class="input" autocomplete="new-password" enterkeyhint="done" :aria-describedby="pw.error ? 'pw-err' : undefined" @input="pw.error = ''" />
         </div>
-        <span v-if="pw.error" class="field-error" role="alert">{{ pw.error }}</span>
+        <span v-if="pw.error" id="pw-err" class="field-error" role="alert">{{ pw.error }}</span>
       </form>
       <template #foot>
-        <button class="btn" @click="pwOpen = false">{{ L('取消', 'キャンセル') }}</button>
-        <button class="btn btn-primary" @click="savePw">{{ L('保存新密码', '新しいパスワードを保存') }}</button>
+        <button type="button" class="btn" @click="pwOpen = false">{{ L('取消', 'キャンセル') }}</button>
+        <button type="button" class="btn btn-primary" @click="savePw">{{ L('保存新密码', '新しいパスワードを保存') }}</button>
       </template>
     </Sheet>
   </div>
 </template>
 
 <style scoped>
+/* ---------- 单栏 760 + 宽屏页内目录（V10） ---------- */
+.vpage {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.vcol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-10);
+  min-width: 0;
+}
+.toc {
+  display: none;
+}
+.vsec {
+  scroll-margin-top: calc(var(--bar-h) + 24px);
+}
+.vsec h2:focus-visible {
+  box-shadow: none;
+  text-decoration: underline;
+}
+@media (min-width: 1100px) {
+  .vpage {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 760px);
+    gap: var(--sp-10);
+    max-width: calc(200px + 760px + var(--sp-10));
+  }
+  .toc {
+    display: block;
+    position: sticky;
+    top: calc(var(--bar-h) + 24px);
+    align-self: start;
+  }
+}
+.toc ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--line);
+}
+.toc button {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  margin-left: -1px;
+  padding: 6px 12px;
+  border-left: 2px solid transparent;
+  text-align: left;
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+}
+.toc button:hover {
+  color: var(--ink);
+}
+.toc button[aria-current='true'] {
+  border-left-color: var(--ink);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- 身份 ---------- */
 .ident {
   display: flex;
   align-items: center;
   gap: var(--sp-5);
-  flex-wrap: wrap;
   padding-bottom: var(--sp-6);
   border-bottom: 1px solid var(--line-strong);
+}
+.ident-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ident-name {
+  font-size: var(--fs-22);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+}
+.ident-plates {
+  gap: 6px;
 }
 .ident-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 18px;
-  margin-top: 8px;
-  font-size: var(--fs-13);
-  color: var(--ink-2);
-}
-.ident-meta .num {
   font-size: var(--fs-14);
+  color: var(--ink-2);
 }
 .mail {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-.cols {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  grid-template-areas:
-    'bind don'
-    'login don'
-    'apps apps'
-    'danger danger';
-  align-items: start;
-  gap: var(--sp-10) var(--sp-8);
-  margin-top: var(--sp-8);
-}
-.a-bind {
-  grid-area: bind;
-}
-.a-login {
-  grid-area: login;
-}
-.a-don {
-  grid-area: don;
-}
-.a-apps {
-  grid-area: apps;
-}
-.a-danger {
-  grid-area: danger;
-}
-.cols > section {
   min-width: 0;
+  max-width: 100%;
 }
+
+/* ---------- 状态行 ---------- */
 .rows > li {
   border-bottom: 1px solid var(--line);
 }
 .rows > li:last-child {
   border-bottom: 0;
 }
-.panel-foot {
-  padding: var(--sp-3) var(--sp-5);
-  border-top: 1px solid var(--line);
-}
-.panel > .scroll-x {
-  border-radius: inherit;
-}
-
-/* 区服印章 */
-.stamp {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--r-ctl);
-  border: 1.5px solid currentColor;
-  background: var(--bg-sunk);
-  color: var(--ink-2);
-  font-family: var(--font-num);
-  font-size: var(--fs-14);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.stamp.wahlap {
-  background: var(--don-wash);
-  color: var(--don-ink);
-}
-.stamp.hiroba {
-  background: var(--ka-wash);
-  color: var(--ka-ink);
-}
-.bind {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-5);
-}
-.bind-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-16);
-}
-.bind-sub {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 14px;
-  margin-top: 2px;
-  font-size: var(--fs-13);
-  color: var(--ink-2);
-}
-.bind-sub .num {
-  font-size: var(--fs-14);
-  color: var(--ink);
-}
-.bind-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--ok);
-}
-.bind-acts {
-  display: flex;
-  gap: 6px;
-  flex: none;
-}
-.lrow {
+.srow {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   min-height: 64px;
   padding: var(--sp-3) var(--sp-5);
+  font-size: var(--fs-14);
   color: var(--ink-2);
 }
-.lrow .grow {
+.srow .grow {
   display: flex;
   flex-direction: column;
-  line-height: 1.35;
+  min-width: 0;
+  line-height: 1.4;
 }
-.lrow b {
+.srow b {
   color: var(--ink);
-}
-
-/* 小咚 */
-.don-box {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-.don-preview {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-}
-.don-preview .grow {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
   font-size: var(--fs-16);
 }
-.donchan {
-  position: relative;
+.srow-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.srow-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+}
+.region {
   flex: none;
-  width: 84px;
-  height: 84px;
+  justify-content: center;
+  min-width: 40px;
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+.ring {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--ai-0);
-  box-shadow: inset 0 0 0 9px var(--don), 0 0 0 2px var(--line-strong);
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  flex: none;
 }
-.donchan .eye {
-  position: absolute;
-  top: 32px;
-  width: 9px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--ai-900);
+.panel-foot {
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--line);
 }
-.donchan .eye.l {
-  left: 25px;
+.danger-zone {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sp-2);
 }
-.donchan .eye.r {
-  right: 25px;
+.quiet-danger {
+  color: var(--danger);
 }
-.donchan .mouth {
-  position: absolute;
-  left: 50%;
-  top: 46px;
-  width: 16px;
-  height: 9px;
-  margin-left: -8px;
-  border-radius: 0 0 9px 9px;
-  background: var(--don);
+.quiet-danger:hover {
+  color: var(--danger);
+  background: var(--danger-wash);
+}
+
+/* ---------- 称号 ---------- */
+.title-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.title-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+}
+.title-preview .grow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.title-preview .row-wrap {
+  gap: 6px;
+}
+
+/* ---------- 应用 ---------- */
+.panel > .scroll-x {
+  border-radius: inherit;
+}
+.dt th[scope='row'] {
+  text-align: left;
+  font-weight: 400;
 }
 .scopes {
   gap: 4px;
@@ -621,23 +766,22 @@ function logout() {
   gap: var(--sp-3);
   padding: var(--sp-4);
 }
-.a-danger {
+
+/* ---------- 退出 ---------- */
+.out-sec {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  padding: var(--sp-5) 0;
+  padding-top: var(--sp-6);
   border-top: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
 }
-.a-danger .grow {
+.out-sec .grow {
   display: flex;
   flex-direction: column;
-}
-.out {
-  color: var(--danger);
+  gap: 2px;
 }
 
-/* Sheet 内容 */
+/* ---------- 弹层内容 ---------- */
 .form {
   gap: var(--sp-4);
 }
@@ -661,9 +805,10 @@ function logout() {
   align-items: center;
   gap: var(--sp-3);
   width: 100%;
+  min-height: 56px;
   padding: var(--sp-3) 0;
   text-align: left;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 li.opt {
   align-items: flex-start;
@@ -674,8 +819,8 @@ li.opt {
 }
 .opt small {
   display: block;
-  font-size: var(--fs-12);
-  color: var(--ink-3);
+  font-size: var(--fs-13);
+  color: var(--ink-2);
 }
 a.opt:hover b,
 button.opt:hover b {
@@ -696,35 +841,55 @@ button.opt[disabled] {
   gap: 6px;
   min-width: 200px;
 }
+.pick {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.pick legend {
+  padding: 0;
+  margin-bottom: 4px;
+}
+.pick-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  min-width: 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+.pick-opt input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--danger);
+}
+.consequence {
+  font-size: var(--fs-16);
+  line-height: var(--lh-body, 1.6);
+}
 
-@media (max-width: 1099px) {
-  .cols {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 767px) {
+  .vcol {
     gap: var(--sp-8);
   }
-}
-@media (max-width: 767px) {
   .ident {
+    flex-wrap: wrap;
     gap: var(--sp-4);
   }
-  .ident > .row-wrap {
+  .ident > .btn {
     width: 100%;
   }
-  .ident > .row-wrap .btn {
-    flex: 1;
-  }
-  .bind {
+  .srow {
     flex-wrap: wrap;
-    padding: var(--sp-4);
-  }
-  .bind-acts {
-    width: 100%;
-    padding-left: 60px;
-  }
-  .lrow {
     padding: var(--sp-3) var(--sp-4);
+  }
+  .srow .grow {
+    flex-basis: calc(100% - 80px);
   }
   .panel-foot {
     padding: var(--sp-3) var(--sp-4);
@@ -732,7 +897,10 @@ button.opt[disabled] {
   .panel-foot .btn {
     width: 100%;
   }
-  .a-danger {
+  .danger-zone .btn {
+    width: 100%;
+  }
+  .out-sec {
     flex-direction: column;
     align-items: stretch;
   }

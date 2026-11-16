@@ -4,23 +4,40 @@ import Cover from './Cover.vue'
 import Diff from './Diff.vue'
 import Rank from './Rank.vue'
 import Crown from './Crown.vue'
-import { FACT, songById, chartOf, fmt } from '../mock/data'
+import { FACT, DIFFS, RANKS, songById, chartOf, fmt } from '../mock/data'
 import { L, songTitle } from '../store'
 
-// 一条成长事实：左边音符表示类型，右边是「之前 → 之后」。今日页、成长档案、每周回顾共用。
+/**
+ * 一条成长事实：左边音符表示类型，右边是「之前 → 之后」。今日页、成长档案、每周回顾共用。
+ * props: fact（{ type, songId, d, before, after, rankFrom?, rankTo? }）、dense
+ * 链接的读屏名称是一句完整的话（曲名、难度、事实、变化），不逐个读图形。
+ */
 const props = defineProps({ fact: { type: Object, required: true }, dense: { type: Boolean, default: false } })
 const song = computed(() => songById[props.fact.songId])
 const chart = computed(() => chartOf(props.fact.songId, props.fact.d))
 const meta = computed(() => FACT[props.fact.type])
+const rankName = (v) => (RANKS[v] ? L(RANKS[v].zh, RANKS[v].ja) : '—')
+const change = computed(() => {
+  const f = props.fact
+  if (f.type === 'df' || f.type === 'fc') return fmt(f.after)
+  if (f.type === 'rank-upgrade') return `${rankName(f.rankFrom)} → ${rankName(f.rankTo)}`
+  if (f.type === 'ng-reduced' || f.type === 'goal-completed') return `${L('不可', '不可')} ${f.before} → ${f.after}`
+  if (f.type === 'combo-improved') return `${L('连击', 'コンボ')} ${f.before} → ${f.after}`
+  return `${fmt(f.after)}（+${fmt(f.after - f.before)}）`
+})
+const linkName = computed(() => {
+  const dm = DIFFS[props.fact.d]
+  return `${songTitle(song.value)}，${L(dm.zh, dm.ja)} ★${chart.value.star}，${L(meta.value.zh, meta.value.ja)}：${change.value}`
+})
 const noteClass = computed(() => ({ don: '', ka: 'ka', fc: 'big fc', dfc: 'big dfc', goal: 'big roll', ghost: 'ghost' })[meta.value.note])
 </script>
 
 <template>
-  <RouterLink :to="`/songs/${song.id}?d=${fact.d}`" class="fact" :class="{ dense }">
-    <i class="note" :class="noteClass" />
+  <RouterLink :to="`/songs/${song.id}?d=${fact.d}`" class="fact" :class="{ dense }" :aria-label="linkName">
+    <i class="note" :class="noteClass" aria-hidden="true" />
     <Cover :song="song" :size="dense ? 'sm' : ''" />
     <span class="grow">
-      <span class="t truncate">{{ songTitle(song) }}</span>
+      <span class="t title-1l" :title="songTitle(song)">{{ songTitle(song) }}</span>
       <span class="s">
         <Diff :d="fact.d" :star="chart.star" short />
         <span>{{ L(meta.zh, meta.ja) }}</span>
@@ -76,9 +93,20 @@ const noteClass = computed(() => ({ don: '', ka: 'ka', fc: 'big fc', dfc: 'big d
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   margin-top: 3px;
   font-size: var(--fs-12);
   color: var(--ink-2);
+  white-space: nowrap;
+}
+/* C1：行内元素不逐字换行 —— 说明文字单行截断，分数与差值不换行不截断 */
+.s > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chg {
+  white-space: nowrap;
 }
 .chg {
   display: flex;

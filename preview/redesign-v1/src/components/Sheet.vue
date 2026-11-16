@@ -1,10 +1,17 @@
 <script setup>
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import Icon from './Icon.vue'
 import { L } from '../store'
 import { trapTab, restoreFocus } from '../focusTrap'
 
-// 弹层：桌面是居中对话框，手机是底部抽屉。同一个组件、同一份内容。
+/**
+ * 弹层：桌面是居中对话框，手机是底部抽屉。同一个组件、同一份内容。
+ * props: open、title（对话框名称，经 aria-labelledby 关联）、width（桌面最大宽度 px）
+ * slots: default（正文）、foot（底部操作区）
+ * events: close（Esc、点遮罩、关闭按钮）
+ * 打开时焦点落到第一个输入项（没有则落到关闭按钮），Tab 限制在弹层内；关闭时焦点还给打开它的元素。
+ */
+const titleId = useId()
 const props = defineProps({
   open: { type: Boolean, default: false },
   title: { type: String, default: '' },
@@ -51,10 +58,10 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <Transition name="fade">
       <div v-if="open" class="scrim" @click.self="emit('close')">
-        <div ref="box" class="sheet" role="dialog" aria-modal="true" :aria-label="title" :style="{ '--w': width + 'px' }">
+        <div ref="box" class="sheet" role="dialog" aria-modal="true" :aria-labelledby="titleId" :style="{ '--w': width + 'px' }">
           <i class="grab" />
           <header class="sheet-head">
-            <h2 class="t-h2">{{ title }}</h2>
+            <h2 :id="titleId" class="t-h2">{{ title }}</h2>
             <button ref="closeBtn" class="icon-btn" :aria-label="L('关闭', '閉じる')" @click="emit('close')"><Icon name="close" /></button>
           </header>
           <div class="sheet-body"><slot /></div>
@@ -81,8 +88,8 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-radius: var(--r-panel);
-  box-shadow: var(--shadow-pop);
+  border-radius: var(--overlay-radius);
+  box-shadow: var(--overlay-shadow);
   animation: rise var(--dur-2) var(--ease-out);
 }
 @keyframes rise {
@@ -98,17 +105,17 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 12px 10px 20px;
+  padding: 14px 12px 10px var(--overlay-pad);
 }
 .sheet-body {
-  padding: 4px 20px 20px;
+  padding: 4px var(--overlay-pad) var(--overlay-pad);
   overflow-y: auto;
 }
 .sheet-foot {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px var(--overlay-pad);
   border-top: 1px solid var(--line);
 }
 @media (max-width: 767px) {

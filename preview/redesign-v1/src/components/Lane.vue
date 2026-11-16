@@ -1,15 +1,25 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { FACT } from '../mock/data'
 import { L } from '../store'
 
-// 譜面レーン：全站的签名组件。把「哪天打了、打出了什么」画成一条谱面。
-// 朱 = 刷新成绩类；浅葱 = 稳定性提升类；大音符 = 新王冠 / 目标达成；山吹色连打条 = 连续游玩。
-// 时间从左到右，判定圈落在「今天」。
+/**
+ * 譜面レーン：全站的签名组件。把「哪天打了、打出了什么」画成一条谱面。
+ * 朱 = 刷新成绩类；浅葱 = 稳定性提升类；大音符 = 新王冠 / 目标达成；山吹色连打条 = 连续游玩。
+ * 时间从左到右，判定圈落在「今天」。
+ * props: days（[{ daysAgo, date, played, facts }]，按时间先后）、v-model（选中的 daysAgo）、compact、
+ *        label（这组按钮的读屏名称；默认「最近的练习谱面」）
+ *        to（只作概览：整条带是一个去这里的链接，每天不可点；C2）
+ * 键盘：整条带只占一个 Tab 位；← → 在日期间移动，Home / End 到首尾，Enter / 空格选中。
+ * 列宽（C2）：每天可点时 ≥ 44px，概览 ≥ 36px；放不下就横向滚动，默认停在今天，左缘渐隐。
+ *   音符直径 ≤ 列宽 − 8px（三档按列宽等比缩小）；列宽 < 40px 时日期只写「日」，月初与今天写全。
+ */
 const props = defineProps({
   days: { type: Array, required: true },
   modelValue: { type: Number, default: null }, // 选中的 daysAgo
   compact: { type: Boolean, default: false },
+  label: { type: String, default: '' },
+  to: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -30,21 +40,100 @@ const cols = computed(() =>
       rollR: day.played && next?.played,
       monday: day.date.getDay() === 1,
       label: `${day.date.getMonth() + 1}/${day.date.getDate()}`,
+      dayOnly: String(day.date.getDate()),
+      monthStart: day.date.getDate() === 1,
       wd: L(WEEK[day.date.getDay()], WEEK_JA[day.date.getDay()]),
     }
   }),
 )
 
-// 溢出时（手机）默认停在最右端，让「今天」和判定圈可见；选中某天不改变滚动位置。
+// 列宽由容器宽度与天数算出（C2）；溢出时默认停在最右端（今天），左缘有内容时渐隐。滚动一律即时（D13）。
 const el = ref(null)
+const avail = ref(0)
+const scrolledL = ref(false)
+const minCol = computed(() => (props.to ? 36 : 44))
+const colW = computed(() => {
+  const n = props.days.length || 1
+  return Math.max(minCol.value, avail.value ? Math.floor((avail.value / n) * 10) / 10 : minCol.value)
+})
+// 最大的音符（全良）基准 36px，选中 / 悬停时再放大 1.14 倍：放大后也不超过「列宽 − 8」，按此等比缩小
+const noteScale = computed(() => Math.min(1, (colW.value - 8) / (36 * 1.14)))
+const narrow = computed(() => colW.value < 40)
+const laneStyle = computed(() => ({ '--col-w': colW.value + 'px', '--ns': noteScale.value.toFixed(3) }))
+const root = () => el.value?.$el || el.value
+function measure() {
+  const e = root()
+  if (!e) return
+  const cs = getComputedStyle(e)
+  avail.value = e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+  onScroll()
+}
+function onScroll() {
+  const e = root()
+  if (e) scrolledL.value = e.scrollLeft > 1
+}
 function toToday() {
   nextTick(() => {
-    if (el.value) el.value.scrollLeft = el.value.scrollWidth
+    const e = root()
+    if (e) e.scrollLeft = e.scrollWidth
+    onScroll()
   })
 }
-onMounted(toToday)
-watch(() => props.days, toToday)
+let ro = null
+onMounted(() => {
+  measure()
+  toToday()
+  if (typeof ResizeObserver !== 'undefined' && root()) {
+    ro = new ResizeObserver(() => {
+      measure()
+      toToday()
+    })
+    ro.observe(root())
+  }
+})
+onBeforeUnmount(() => ro?.disconnect())
+watch(
+  () => props.days,
+  () => {
+    measure()
+    toToday()
+  },
+)
 
+// 漫游焦点：选中的那天（没有选中时是今天 / 最后一天）可 Tab 到达，其余用方向键
+const focusIdx = ref(-1)
+const tabIdx = computed(() => {
+  if (focusIdx.value >= 0 && focusIdx.value < cols.value.length) return focusIdx.value
+  const sel = cols.value.findIndex((c) => c.daysAgo === props.modelValue)
+  return sel >= 0 ? sel : cols.value.length - 1
+})
+function onKey(e) {
+  if (props.to) return
+  const n = cols.value.length
+  if (!n) return
+  let i = tabIdx.value
+  if (e.key === 'ArrowLeft') i = Math.max(0, i - 1)
+  else if (e.key === 'ArrowRight') i = Math.min(n - 1, i + 1)
+  else if (e.key === 'Home') i = 0
+  else if (e.key === 'End') i = n - 1
+  else return
+  e.preventDefault()
+  focusIdx.value = i
+  const btn = root()?.querySelectorAll('.col')[i]
+  if (btn) {
+    btn.focus({ preventScroll: true })
+    btn.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' })
+  }
+}
+
+function dateText(c) {
+  if (c.daysAgo === 0) return L('今天', '今日')
+  return narrow.value && !c.monthStart ? c.dayOnly : c.label
+}
+const overviewName = computed(() => {
+  const played = cols.value.filter((c) => c.played).length
+  return `${props.label || L('最近的练习谱面', '最近のプレイ譜面')}：${L(`${cols.value.length} 天里打了 ${played} 天`, `${cols.value.length} 日中 ${played} 日プレイ`)}`
+})
 function aria(c) {
   if (!c.played) return `${c.label} ${L('没有游玩', 'プレイなし')}`
   const facts = c.facts.length ? `${c.facts.length} ${L('条进展', '件の記録')}` : L('有游玩', 'プレイあり')
@@ -53,28 +142,45 @@ function aria(c) {
 </script>
 
 <template>
-  <div ref="el" class="lane" :class="{ compact }" role="group" :aria-label="L('最近的练习谱面', '最近のプレイ譜面')">
+  <RouterLink v-if="to" ref="el" :to="to" class="lane on-lane overview" :class="{ compact, narrow, 'fade-l': scrolledL }" :style="laneStyle" :aria-label="overviewName" @scroll.passive="onScroll">
+    <span class="track" aria-hidden="true">
+      <span v-for="c in cols" :key="c.daysAgo" class="col" :class="{ monday: c.monday, today: c.daysAgo === 0, rest: !c.played }">
+        <span class="count num">{{ c.facts.length > 1 ? c.facts.length : '' }}</span>
+        <span class="beat">
+          <i v-if="c.rollL" class="roll l" />
+          <i v-if="c.rollR" class="roll r" />
+          <i v-if="c.daysAgo === 0" class="judge-ring" />
+          <i v-if="c.kind !== 'rest'" class="n" :class="c.kind" />
+          <i v-else class="tick" />
+        </span>
+        <span class="date"><b class="num">{{ dateText(c) }}</b></span>
+      </span>
+    </span>
+  </RouterLink>
+  <div v-else ref="el" class="lane on-lane" :class="{ compact, narrow, 'fade-l': scrolledL }" :style="laneStyle" role="group" :aria-label="label || L('最近的练习谱面', '最近のプレイ譜面')" @keydown="onKey" @scroll.passive="onScroll">
     <div class="track">
       <button
-        v-for="c in cols"
+        v-for="(c, i) in cols"
         :key="c.daysAgo"
         class="col"
         :class="{ on: modelValue === c.daysAgo, monday: c.monday, today: c.daysAgo === 0, rest: !c.played }"
         :aria-pressed="modelValue === c.daysAgo"
         :aria-label="aria(c)"
+        :tabindex="i === tabIdx ? 0 : -1"
+        @focus="focusIdx = i"
         @click="emit('update:modelValue', c.daysAgo)"
       >
         <span class="count num">{{ c.facts.length > 1 ? c.facts.length : '' }}</span>
         <span class="beat">
           <i v-if="c.rollL" class="roll l" />
           <i v-if="c.rollR" class="roll r" />
-          <i v-if="c.daysAgo === 0" class="hit" />
+          <i v-if="c.daysAgo === 0" class="judge-ring" />
           <i v-if="c.kind !== 'rest'" class="n" :class="c.kind" />
           <i v-else class="tick" />
         </span>
         <span class="date">
-          <b class="num">{{ c.daysAgo === 0 ? L('今天', '今日') : c.label }}</b>
-          <em v-if="!compact">{{ c.wd }}</em>
+          <b class="num">{{ dateText(c) }}</b>
+          <em v-if="!compact && !narrow">{{ c.wd }}</em>
         </span>
       </button>
     </div>
@@ -84,6 +190,9 @@ function aria(c) {
 <style scoped>
 .lane {
   --band: 60px;
+  --col-w: 44px;
+  --ns: 1;
+  display: block;
   background: var(--lane);
   border-radius: var(--r-panel);
   color: var(--lane-ink);
@@ -94,13 +203,25 @@ function aria(c) {
 .lane::-webkit-scrollbar {
   display: none;
 }
+/* 左缘还有内容：渐隐提示，不出现被硬切的半个标签（C2） */
+.lane.fade-l {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 28px);
+  mask-image: linear-gradient(to right, transparent 0, black 28px);
+}
+.overview {
+  text-decoration: none;
+}
+.overview:focus-visible {
+  box-shadow: var(--focus-lane);
+}
 .track {
   display: flex;
   min-width: max-content;
 }
 .col {
   position: relative;
-  flex: 1 0 34px;
+  flex: 0 0 var(--col-w);
+  min-width: 0;
   display: grid;
   grid-template-rows: 22px var(--band) 40px;
   justify-items: center;
@@ -109,7 +230,6 @@ function aria(c) {
 }
 .compact .col {
   grid-template-rows: 16px var(--band) 26px;
-  flex-basis: 22px;
 }
 .col.monday::before {
   /* 小节线：每周一 */
@@ -125,13 +245,13 @@ function aria(c) {
   top: 16px;
 }
 .col:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--lane-ka);
+  box-shadow: var(--focus-lane);
   border-radius: var(--r-ctl);
 }
 .count {
   align-self: end;
   font-size: var(--fs-12);
-  color: color-mix(in srgb, var(--lane-ink) 60%, transparent);
+  color: var(--lane-ink-2);
 }
 .beat {
   position: relative;
@@ -171,42 +291,53 @@ function aria(c) {
 }
 .n {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: calc(20px * var(--ns));
+  height: calc(20px * var(--ns));
   border-radius: 50%;
   background: var(--lane-don);
-  box-shadow: inset 0 0 0 2.5px var(--lane-ring), 0 0 0 1.5px var(--lane-outline);
+  box-shadow: inset 0 0 0 2.5px var(--note-ring), 0 0 0 1.5px var(--note-outline);
   transition: transform var(--dur-2) var(--ease-hit);
 }
 .col.on .n,
 .col:hover .n {
   transform: scale(1.14);
 }
+/* 减少动效：没有回弹缩放（D13） */
+@media (prefers-reduced-motion: reduce) {
+  .col.on .n,
+  .col:hover .n {
+    transform: none;
+  }
+}
+:root[data-motion='reduce'] .col.on .n,
+:root[data-motion='reduce'] .col:hover .n {
+  transform: none;
+}
 .n.ka {
   background: var(--lane-ka);
 }
 .n.ghost {
-  width: 14px;
-  height: 14px;
+  width: calc(14px * var(--ns));
+  height: calc(14px * var(--ns));
   background: var(--lane-ghost);
-  box-shadow: inset 0 0 0 2px var(--lane-ghost-ring), 0 0 0 1.5px var(--lane-outline);
+  box-shadow: inset 0 0 0 2px var(--lane-ghost-ring), 0 0 0 1.5px var(--note-outline);
 }
 .n.fc,
 .n.dfc,
 .n.goal {
-  width: 30px;
-  height: 30px;
-  box-shadow: inset 0 0 0 3.5px var(--lane-ring), 0 0 0 1.5px var(--lane-outline);
+  width: calc(30px * var(--ns));
+  height: calc(30px * var(--ns));
+  box-shadow: inset 0 0 0 3.5px var(--note-ring), 0 0 0 1.5px var(--note-outline);
 }
 .n.fc {
-  box-shadow: inset 0 0 0 3.5px var(--lane-fc), 0 0 0 1.5px var(--lane-outline);
+  box-shadow: inset 0 0 0 3.5px var(--lane-fc), 0 0 0 1.5px var(--note-outline);
 }
 .n.dfc {
   /* 全良：朱色鼓面 + 白环 + 虹色外环 */
-  width: 36px;
-  height: 36px;
-  background: radial-gradient(circle closest-side, var(--lane-don) 0 50%, var(--lane-ring) 52% 72%, transparent 74%), var(--crown-dfc);
-  box-shadow: 0 0 0 1.5px var(--lane-outline);
+  width: calc(36px * var(--ns));
+  height: calc(36px * var(--ns));
+  background: radial-gradient(circle closest-side, var(--lane-don) 0 50%, var(--note-ring) 52% 72%, transparent 74%), var(--crown-dfc);
+  box-shadow: 0 0 0 1.5px var(--note-outline);
 }
 .n.goal {
   background: var(--lane-roll);
@@ -218,13 +349,13 @@ function aria(c) {
   border-radius: 50%;
   background: var(--lane-line);
 }
-.hit {
+.judge-ring {
   /* 判定圈 */
   position: absolute;
-  width: 46px;
-  height: 46px;
+  width: min(46px, var(--col-w));
+  height: min(46px, var(--col-w));
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--lane-ink) 75%, transparent);
+  border: 2px solid var(--lane-ink-2);
   box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--lane-ink) 8%, transparent);
 }
 .date {
@@ -237,20 +368,22 @@ function aria(c) {
 .date b {
   font-size: var(--fs-12);
   font-weight: 500;
-  color: color-mix(in srgb, var(--lane-ink) 72%, transparent);
+  color: var(--lane-ink-2);
   white-space: nowrap;
 }
 .date em {
   font-style: normal;
   font-size: var(--fs-11);
-  color: color-mix(in srgb, var(--lane-ink) 40%, transparent);
+  color: var(--lane-ink-3);
 }
 .col.on .date b,
 .col.today .date b {
   color: var(--lane-ink);
   font-weight: 700;
 }
+/* 休息日：用字重区分（轨道上是小点而不是音符），不靠透明度（D11） */
 .col.rest .date b {
-  color: color-mix(in srgb, var(--lane-ink) 40%, transparent);
+  color: var(--lane-ink-3);
+  font-weight: 400;
 }
 </style>

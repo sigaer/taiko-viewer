@@ -11,6 +11,11 @@ const AUTH = [
   ['empty', '无成绩'],
   ['ready', '已同步'],
 ]
+const OUTCOMES = [
+  ['success', '成功'],
+  ['partial', '部分成功'],
+  ['failed', '失败'],
+]
 </script>
 
 <template>
@@ -39,9 +44,36 @@ const AUTH = [
           <button v-for="a in AUTH" :key="a[0]" :aria-pressed="store.auth === a[0]" @click="store.auth = a[0]">{{ a[1] }}</button>
         </div>
       </div>
+      <div class="field">
+        <span class="field-label">数据规模</span>
+        <div class="seg" role="group" aria-label="数据规模">
+          <button :aria-pressed="store.dataset === 'full'" @click="store.dataset = 'full'">真实规模</button>
+          <button :aria-pressed="store.dataset === 'demo'" @click="store.dataset = 'demo'">精选 30 首</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">下一次同步结果</span>
+        <div class="seg" role="group" aria-label="下一次同步结果">
+          <button v-for="o in OUTCOMES" :key="o[0]" :aria-pressed="store.syncOutcome === o[0]" @click="store.syncOutcome = o[0]">{{ o[1] }}</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">减少动效</span>
+        <div class="seg" role="group" aria-label="减少动效">
+          <button :aria-pressed="store.motion === 'system'" @click="store.motion = 'system'">跟随系统</button>
+          <button :aria-pressed="store.motion === 'reduce'" @click="store.motion = 'reduce'">开启</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">列表密度</span>
+        <div class="seg" role="group" aria-label="列表密度">
+          <button :aria-pressed="store.density === 'comfortable'" @click="store.density = 'comfortable'">宽松</button>
+          <button :aria-pressed="store.density === 'compact'" @click="store.density = 'compact'">紧凑</button>
+        </div>
+      </div>
       <RouterLink to="/review" class="btn btn-sm btn-block"><Icon name="layers" :size="16" />设计总览</RouterLink>
     </div>
-    <button v-else class="fab" aria-label="原型控制" @click="open = true"><Icon name="settings" :size="16" /><span class="fab-lbl">原型</span></button>
+    <button v-else class="fab stage" aria-label="原型控制" @click="open = true"><Icon name="settings" :size="16" /><span class="fab-lbl">原型</span></button>
   </div>
 </template>
 
@@ -59,12 +91,9 @@ const AUTH = [
   height: 34px;
   padding: 0 12px;
   border-radius: var(--r-note);
-  background: var(--lane);
-  color: var(--lane-ink);
   font-size: var(--fs-12);
   font-weight: 700;
   box-shadow: var(--shadow-lift);
-  opacity: 0.82;
 }
 .fab:hover {
   opacity: 1;
@@ -96,15 +125,35 @@ const AUTH = [
   }
   .proto.open {
     left: 8px;
-    top: max(8px, min(30%, calc(100dvh - 380px)));
+    top: max(8px, min(30%, calc(100dvh - 660px)));
   }
+  /* C9：手机上把手可见宽度 ≤ 12px，留在 16px 页边距内；可点区域只向屏幕外（左）扩展，不压内容 */
   .fab {
-    height: 34px;
-    padding: 0 6px 0 5px;
+    position: relative;
+    justify-content: center;
+    width: 12px;
+    height: var(--hit);
+    padding: 0;
     gap: 0;
     border-radius: 0 var(--r-ctl) var(--r-ctl) 0;
     opacity: 0.55;
   }
+  .fab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 44px;
+  }
+  .fab::after {
+    content: '';
+    width: 2px;
+    height: 16px;
+    border-radius: 1px;
+    background: currentColor;
+  }
+  .fab :deep(svg),
   .fab-lbl {
     display: none;
   }

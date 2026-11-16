@@ -4,6 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- D10：在任何样式加载前写入主题、语言与减少动效，深色用户首屏不闪白 -->
+    <script>
+      ;(function () {
+        var d = document.documentElement
+        var s = {}
+        try {
+          s = JSON.parse(localStorage.getItem('tv-design-v1') || '{}') || {}
+        } catch (e) {}
+        var t = s.theme === 'light' || s.theme === 'dark' ? s.theme : null
+        if (!t) {
+          try {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          } catch (e) {
+            t = 'light'
+          }
+        }
+        d.dataset.theme = t
+        d.lang = s.locale === 'ja' ? 'ja' : 'zh-CN'
+        if (s.motion === 'reduce') d.dataset.motion = 'reduce'
+      })()
+    </script>
+    <!-- 关键底色：与 tokens.css 的 --bg 一致（浅 --ai-50，深 --ai-900） -->
+    <style>
+      html {
+        color-scheme: light;
+        background: #f3f5f8;
+        color: #17203a;
+      }
+      html[data-theme='dark'] {
+        color-scheme: dark;
+        background: #101728;
+        color: #e9edf7;
+      }
+    </style>
     <title>Taiko Viewer · Design V1</title>
   </head>
   <body>

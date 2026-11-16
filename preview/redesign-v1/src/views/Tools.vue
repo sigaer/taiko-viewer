@@ -1,35 +1,28 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import SongCell from '../components/SongCell.vue'
 import Diff from '../components/Diff.vue'
 import EmptyLane from '../components/EmptyLane.vue'
-import { songs, fmt } from '../mock/data'
-import { L } from '../store'
+import { fmt } from '../mock/data'
+import { L, ensureSearch } from '../store'
+import { parseConfig, findConfig, findNotes } from '../search'
 
 /* ---------- 查配置：16 oxxo 180 鬼10 ---------- */
-const DIVISIONS = [4, 6, 8, 12, 16, 24, 32, 48]
-const DIFF_WORDS = { 鬼: 4, 魔王: 4, oni: 4, 里: 5, 裏: 5, ura: 5, 难: 3, 難: 3, 困难: 3, hard: 3, 普通: 2, 普: 2, 简单: 1, 简: 1, 易: 1 }
-const DIFF_RE = /^(鬼|魔王|oni|里|裏|ura|难|難|困难|hard|普通|普|简单|简|易)[★☆*]?(\d{1,2})?$/i
-
+// 解析与匹配和命令面板共用 src/search.js：从面板带着 ?q= 进来时显示同一份结果；?notes= 预填查物量。
+ensureSearch()
+const route = useRoute()
 const q = ref('16 oxxo 180 鬼10')
-const parsed = computed(() => {
-  const out = { division: null, pattern: '', bpm: null, d: null, star: null, unknown: [] }
-  for (const tk of q.value.trim().split(/\s+/).filter(Boolean)) {
-    const m = tk.match(DIFF_RE)
-    if (/^[ox]+$/i.test(tk)) out.pattern = (out.pattern + tk.toLowerCase()).slice(0, 32)
-    else if (m) {
-      out.d = DIFF_WORDS[m[1].toLowerCase()]
-      out.star = m[2] ? Math.min(10, Math.max(1, Number(m[2]))) : null
-    } else if (/^\d+$/.test(tk)) {
-      const n = Number(tk)
-      if (out.division == null && DIVISIONS.includes(n)) out.division = n
-      else if (out.bpm == null && n >= 40 && n <= 400) out.bpm = n
-      else out.unknown.push(tk)
-    } else out.unknown.push(tk)
-  }
-  return out
-})
+const notes = ref(765)
+function fromQuery() {
+  if (typeof route.query.q === 'string' && route.query.q.trim()) q.value = route.query.q
+  const n = Number(route.query.notes)
+  if (route.query.notes != null && Number.isFinite(n) && n > 0) notes.value = n
+}
+fromQuery()
+watch(() => [route.query.q, route.query.notes], fromQuery)
+const parsed = computed(() => parseConfig(q.value))
 const hasTokens = computed(() => !!(parsed.value.division || parsed.value.pattern || parsed.value.bpm || parsed.value.d))
 const hint = computed(() => {
   const p = parsed.value
@@ -38,32 +31,23 @@ const hint = computed(() => {
   if (!p.pattern) return L('还缺配置：用 o 表示咚、x 表示咔，例如 oxxo。', '配置がまだありません。o がドン、x がカッです（例：oxxo）。')
   return ''
 })
-const matches = computed(() => {
-  const p = parsed.value
-  if (!p.pattern) return []
-  const d = p.d ?? 4
-  const pool = songs.map((s) => ({ song: s, chart: s.charts.find((c) => c.d === d) })).filter((x) => x.chart && (p.star == null || x.chart.star === p.star))
-  const seed = p.pattern.length * 13 + (p.division || 16) + (p.bpm || 0)
-  return pool
-    .map((x) => ({ ...x, order: (x.song.id * 31 + seed * 7) % 97 }))
-    .sort((a, b) => a.order - b.order)
-    .slice(0, 5)
-    .map((x) => ({ ...x, key: `${x.song.id}-${d}`, measure: 1 + ((x.song.id * 7 + seed) % 72), times: 1 + ((x.song.id + seed) % 6) }))
-    .sort((a, b) => b.times - a.times)
-})
-function patternOnly() {
-  q.value = [parsed.value.division, parsed.value.pattern].filter(Boolean).join(' ')
+const configResult = computed(() => findConfig(parsed.value, 50))
+const matches = computed(() => configResult.value.items.map((m) => ({ ...m, key: `${m.song.id}-${m.chart.d}` })))
+// 没有命中时给一个建议：去掉其余条件只按配置查；已经只有配置时换成示例查询
+const EXAMPLE = '16 oxxo 180 鬼10'
+const simpler = computed(() => [parsed.value.division, parsed.value.pattern].filter(Boolean).join(' '))
+const suggestion = computed(() => (simpler.value && simpler.value !== q.value.trim() ? simpler.value : EXAMPLE))
+function trySuggestion() {
+  q.value = suggestion.value
 }
+const cfgLink = (m) => `/songs/${m.song.id}?d=${m.chart.d}&m=${m.measure}&from=tools`
+const notesLink = (m) => `/songs/${m.song.id}?d=${m.chart.d}&from=tools`
 
 /* ---------- 查物量 ---------- */
-const notes = ref(765)
 const noteMatches = computed(() => {
   const v = Number(notes.value)
   if (notes.value === '' || !Number.isFinite(v) || v <= 0) return []
-  return songs
-    .flatMap((s) => s.charts.map((c) => ({ key: `${s.id}-${c.d}`, song: s, chart: c, delta: c.notes - v })))
-    .sort((a, b) => Math.abs(a.delta) - Math.abs(b.delta) || b.chart.d - a.chart.d)
-    .slice(0, 6)
+  return findNotes(v, 6).map((m) => ({ ...m, key: `${m.song.id}-${m.chart.d}` }))
 })
 
 const ENTRIES = [
@@ -107,18 +91,19 @@ const ENTRIES = [
         </div>
 
         <table v-if="matches.length" class="dt res">
+          <caption class="sr-only">{{ L(`含配置 ${parsed.pattern} 的谱面，共 ${matches.length} 张`, `配置 ${parsed.pattern} を含む譜面（${matches.length} 件）`) }}</caption>
           <thead>
             <tr>
-              <th>{{ L('歌曲', '楽曲') }}</th>
-              <th>{{ L('难度', '難易度') }}</th>
-              <th class="r">{{ L('首次出现', '最初の出現') }}</th>
-              <th class="r">{{ L('出现次数', '出現回数') }}</th>
+              <th scope="col">{{ L('歌曲', '楽曲') }}</th>
+              <th scope="col">{{ L('难度', '難易度') }}</th>
+              <th scope="col" class="r">{{ L('首次出现', '最初の出現') }}</th>
+              <th scope="col" class="r" aria-sort="descending">{{ L('出现次数', '出現回数') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="m in matches" :key="m.key">
               <td class="c-song">
-                <RouterLink :to="`/songs/${m.song.id}?d=${m.chart.d}`" class="songlink"><SongCell :song="m.song" size="sm" :sub="`BPM ${m.song.bpm}`" /></RouterLink>
+                <RouterLink :to="cfgLink(m)" class="songlink"><SongCell :song="m.song" size="sm" :sub="`BPM ${m.song.bpm}`" /></RouterLink>
               </td>
               <td class="c-diff"><Diff :d="m.chart.d" :star="m.chart.star" short /></td>
               <td class="r c-measure">{{ L('第 ', '') }}<b class="num">{{ m.measure }}</b>{{ L(' 小节', ' 小節目') }}</td>
@@ -126,8 +111,8 @@ const ENTRIES = [
             </tr>
           </tbody>
         </table>
-        <EmptyLane v-else-if="parsed.pattern" compact :title="L('没有谱面同时符合这些条件', 'すべての条件に合う譜面がありません')">
-          <button class="btn" @click="patternOnly">{{ L('只按配置查', '配置だけで検索') }}</button>
+        <EmptyLane v-else-if="parsed.pattern" compact :title="L('没有找到含这个配置的谱面', 'この配置を含む譜面は見つかりませんでした')">
+          <button class="btn" @click="trySuggestion">{{ L('试试', '試す：') }}<span class="num sug">{{ suggestion }}</span></button>
         </EmptyLane>
       </section>
 
@@ -145,7 +130,7 @@ const ENTRIES = [
         </div>
         <ul v-if="noteMatches.length" class="nlist">
           <li v-for="m in noteMatches" :key="m.key">
-            <RouterLink :to="`/songs/${m.song.id}?d=${m.chart.d}`" class="nrow">
+            <RouterLink :to="notesLink(m)" class="nrow">
               <SongCell :song="m.song" size="sm" class="grow" />
               <Diff :d="m.chart.d" :star="m.chart.star" short />
               <b class="num n-notes">{{ fmt(m.chart.notes) }}</b>
@@ -266,7 +251,9 @@ const ENTRIES = [
   max-width: 0;
 }
 .songlink {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: var(--hit); /* D7：列表行的可点区域 ≥ 44px */
 }
 .songlink:hover :deep(.t),
 .nrow:hover :deep(.t) {

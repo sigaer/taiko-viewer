@@ -2,7 +2,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { L } from '../store'
 
-// 趋势折线：单一序列不画图例；Y 轴只留 3–4 条参考线；悬停/触摸出现读数线。
+/**
+ * 趋势折线：单一序列不画图例；Y 轴只留 3–4 条参考线；悬停/触摸出现读数线。
+ * props: points（[{ label, v }]）、height、marks（[{ index, text }]）、digits、tone（CSS 颜色）、
+ *        label（读屏名称；不传时按语言概括首尾数值）
+ * 多行共享时间轴的成长图请用 TimeStack。
+ */
 const props = defineProps({
   points: { type: Array, required: true }, // [{ label, v }]
   height: { type: Number, default: 220 },
@@ -145,9 +150,9 @@ svg {
   flex-direction: column;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 8px;
-  background: var(--ink);
-  color: var(--bg);
+  border-radius: var(--r-ctl);
+  background: var(--toast-bg);
+  color: var(--toast-ink);
   font-size: var(--fs-11);
   line-height: 1.3;
   pointer-events: none;

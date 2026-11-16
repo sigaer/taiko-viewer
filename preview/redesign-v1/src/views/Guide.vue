@@ -1,10 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Icon from '../components/Icon.vue'
 import SongCell from '../components/SongCell.vue'
 import Diff from '../components/Diff.vue'
+import PlayerAvatar from '../components/PlayerAvatar.vue'
 import { songs, users, DIFFS, fmt } from '../mock/data'
 import { L } from '../store'
+import { useQueryState } from '../routeState'
 
 // 难度 × 星级：每格是该等级的攻略篇数，0 表示这个等级不存在或还没有攻略
 const ROWS = [
@@ -17,7 +19,7 @@ const ROWS = [
 const MAX = Math.max(...ROWS.flatMap((r) => r.counts))
 const TOTAL = ROWS.reduce((n, r) => n + r.counts.reduce((a, b) => a + b, 0), 0)
 const heat = (n) => `${Math.round(7 + (n / MAX) * 27)}%`
-const tone = (d) => `var(--diff-${DIFFS[d].key})`
+const dc = (d) => `dc-${DIFFS[d].key}`
 
 const TIERS = [
   { key: 't1', zh: '最难', ja: '最難', cls: 'tag-don' },
@@ -38,28 +40,43 @@ const TIPS = [
 ]
 const AUTHORS = ['hayate', 'rin', 'nagi', 'kumo', 'uta']
 
-const d = ref(4)
-const star = ref(9)
+// R2：难度与星级写进地址；地址里的星级在这个难度没有攻略时，取这个难度最高的有攻略的星级
+const qs = useQueryState({
+  d: { type: 'number', default: 4, values: [1, 2, 3, 4, 5] },
+  star: { type: 'number', default: 9, values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+})
+const d = computed(() => qs.d)
 const row = computed(() => ROWS.find((r) => r.d === d.value))
+const lastStar = (counts) => counts.reduce((best, n, i) => (n ? i + 1 : best), 1)
+const star = computed(() => (row.value.counts[qs.star - 1] ? qs.star : lastStar(row.value.counts)))
 const count = computed(() => row.value.counts[star.value - 1])
 const starChips = computed(() => row.value.counts.map((n, i) => ({ n, s: i + 1 })).filter((x) => x.n))
 
 function select(nd, ns) {
-  d.value = nd
-  star.value = ns
+  qs.d = nd
+  qs.star = ns
 }
 function selectDiff(nd) {
   const counts = ROWS.find((r) => r.d === nd).counts
-  d.value = nd
-  if (!counts[star.value - 1]) star.value = counts.reduce((best, n, i) => (n ? i + 1 : best), 1)
+  qs.d = nd
+  if (!counts[star.value - 1]) qs.star = lastStar(counts)
 }
 
-const entries = computed(() => {
+// 列表每次 20 条
+const STEP = 20
+const shown = ref(STEP)
+watch([d, star], () => (shown.value = STEP))
+
+const allEntries = computed(() => {
   const pool = songs.map((s) => ({ song: s, chart: s.charts.find((c) => c.d === d.value) })).filter((x) => x.chart)
   let list = pool.filter((x) => x.chart.star === star.value)
-  if (list.length < 3) list = [...pool].sort((a, b) => Math.abs(a.chart.star - star.value) - Math.abs(b.chart.star - star.value) || a.song.id - b.song.id).slice(0, 4)
+  if (list.length < count.value) {
+    const have = new Set(list.map((x) => x.song.id))
+    const near = pool.filter((x) => !have.has(x.song.id)).sort((a, b) => Math.abs(a.chart.star - star.value) - Math.abs(b.chart.star - star.value) || a.song.id - b.song.id)
+    list = list.concat(near.slice(0, count.value - list.length))
+  }
   const weight = (x) => x.chart.constant ?? x.chart.notes / 100
-  list = [...list].sort((a, b) => weight(b) - weight(a)).slice(0, Math.min(8, count.value))
+  list = [...list].sort((a, b) => weight(b) - weight(a)).slice(0, count.value)
   return list.map((x, i) => {
     const key = AUTHORS[(x.song.id + i) % AUTHORS.length]
     return {
@@ -72,6 +89,7 @@ const entries = computed(() => {
     }
   })
 })
+const entries = computed(() => allEntries.value.slice(0, shown.value))
 </script>
 
 <template>
@@ -86,6 +104,7 @@ const entries = computed(() => {
     <!-- 桌面 / 平板：难度 × 星级 矩阵 -->
     <div class="panel mx-panel only-desktop">
       <table class="mx">
+        <caption class="sr-only">{{ L('各难度、各星级的攻略篇数', '難易度・★ごとの攻略件数') }}</caption>
         <thead>
           <tr>
             <th scope="col"><span class="sr-only">{{ L('难度', '難易度') }}</span></th>
@@ -93,7 +112,7 @@ const entries = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in ROWS" :key="r.d" :style="{ '--c': tone(r.d) }">
+          <tr v-for="r in ROWS" :key="r.d" :class="dc(r.d)">
             <th scope="row" :class="{ on: d === r.d }">
               <span class="diff" :class="DIFFS[r.d].key"><span class="d">{{ L(r.zh, r.ja) }}</span></span>
             </th>
@@ -122,7 +141,7 @@ const entries = computed(() => {
             <button v-for="r in ROWS" :key="r.d" :aria-pressed="d === r.d" @click="selectDiff(r.d)">{{ L(r.zh, r.ja) }}</button>
           </div>
         </div>
-        <div class="stars" role="group" :aria-label="L('星级', '★')" :style="{ '--c': tone(d) }">
+        <div class="stars" :class="dc(d)" role="group" :aria-label="L('星级', '★')">
           <button v-for="c in starChips" :key="c.s" class="chip" :aria-pressed="star === c.s" @click="star = c.s">
             <span class="num s">★{{ c.s }}</span><span class="num n">{{ c.n }}</span>
           </button>
@@ -145,21 +164,23 @@ const entries = computed(() => {
 
       <ul class="glist">
         <li v-for="e in entries" :key="e.key">
-          <RouterLink :to="`/songs/${e.song.id}?d=${d}`" class="g-song"><SongCell :song="e.song" /></RouterLink>
+          <RouterLink :to="`/songs/${e.song.id}?d=${d}&from=guide`" class="g-song"><SongCell :song="e.song" /></RouterLink>
           <span class="tag g-tier" :class="e.tier.cls">{{ L(e.tier.zh, e.tier.ja) }}</span>
           <p class="g-tip">{{ e.tip }}</p>
           <span class="g-meta">
             <RouterLink :to="`/u/${e.author.key}`" class="g-author">
-              <span class="avatar sm" :style="{ background: `hsl(${e.author.hue} 45% 42%)` }">{{ e.author.name[0] }}</span>
-              <span class="truncate">{{ e.author.name }}</span>
+              <PlayerAvatar :user="e.author" :size="24" />
+              <span class="title-1l">{{ e.author.name }}</span>
             </RouterLink>
-            <span class="g-help" :title="L('觉得有用的人数', '役に立った人数')"><Icon name="thumb" :size="14" /><span class="num">{{ e.helpful }}</span></span>
+            <span class="g-help" :title="L('觉得有用的人数', '役に立った人数')"><Icon name="thumb" :size="14" /><span class="sr-only">{{ L('觉得有用', '役に立った') }}</span><span class="num">{{ e.helpful }}</span></span>
           </span>
         </li>
       </ul>
-      <p v-if="count > entries.length" class="foot">
-        <RouterLink to="/community" class="link">{{ L(`在社区查看全部 ${count} 篇`, `コミュニティで ${count} 件すべて見る`) }}</RouterLink>
-      </p>
+      <div class="foot">
+        <button v-if="shown < allEntries.length" class="btn" @click="shown += STEP">{{ L('再显示 20 条', 'さらに 20 件表示') }}</button>
+        <span class="t-caption">{{ L(`已显示 ${entries.length} / ${allEntries.length}`, `${allEntries.length} 件中 ${entries.length} 件`) }}</span>
+        <RouterLink to="/community" class="link">{{ L('在社区查看', 'コミュニティで見る') }}</RouterLink>
+      </div>
     </section>
   </div>
 </template>
@@ -200,12 +221,20 @@ const entries = computed(() => {
   color: var(--ink);
 }
 .mx tbody th {
+  position: relative;
   padding-right: 8px;
+  padding-left: 10px;
   text-align: left;
-  opacity: 0.72;
 }
-.mx tbody th.on {
-  opacity: 1;
+.mx tbody th.on::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--ink);
 }
 .mx td {
   padding: 0;
@@ -273,7 +302,6 @@ const entries = computed(() => {
 }
 .stars .chip {
   flex: none;
-  height: 40px;
   gap: 6px;
   background: color-mix(in srgb, var(--c) 9%, var(--surface));
   border-color: color-mix(in srgb, var(--c) 30%, var(--line-strong));
@@ -378,6 +406,10 @@ const entries = computed(() => {
   color: var(--ink-3);
 }
 .foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
   padding-top: 14px;
 }
 

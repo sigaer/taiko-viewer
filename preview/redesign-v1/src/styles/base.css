@@ -21,6 +21,11 @@ body {
 :lang(ja) {
   --font-ui: 'Barlow', var(--font-cjk-jp);
   --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-jp);
+  line-break: strict;
+}
+/* 日文标题：比例宽度假名，标签更紧凑（D14） */
+:lang(ja) :is(h1, h2, h3, .t-display, .t-h1, .t-h2) {
+  font-feature-settings: 'palt';
 }
 /* 日文曲名即使出现在中文界面里，也用日文字形 */
 [lang='ja'] {
@@ -76,9 +81,43 @@ table {
   box-shadow: var(--focus);
   border-radius: var(--r-ctl);
 }
+/* 深色谱面带（--lane）内的焦点环：内描边浅葱，在带底与选中列上都 ≥ 3:1 */
+.on-lane {
+  --focus: var(--focus-lane);
+}
+/* 舞台面（I1）：两套主题里都是深藍底。在局部重映射 Semantic token，
+   让 TitlePlate、DanBadge、.tag、.link、.btn、.role 与焦点环在其上自然可读，不必逐个改子元素。
+   --focus 在 :root 已解析，所以这里要整条重写。 */
+.stage {
+  --bg: var(--stage-bg);
+  --bg-sunk: var(--stage-sunk);
+  --surface: var(--stage-surface);
+  --surface-2: var(--stage-sunk);
+  --line: var(--stage-line);
+  --line-strong: var(--stage-line-strong);
+  --ctl-border: var(--stage-ctl-border);
+  --ink: var(--stage-ink);
+  --ink-2: var(--stage-ink-2);
+  --ink-3: var(--stage-ink-3);
+  --don-ink: var(--stage-don-ink);
+  --don-wash: var(--stage-don-wash);
+  --ka: var(--stage-ka);
+  --ka-ink: var(--stage-ka-ink);
+  --ka-wash: var(--stage-ka-wash);
+  --roll: var(--stage-roll);
+  --roll-ink: var(--stage-roll-ink);
+  --roll-wash: var(--stage-roll-wash);
+  --focus-ring: var(--stage-focus);
+  --focus-gap: var(--stage-bg);
+  --focus: 0 0 0 2px var(--stage-bg), 0 0 0 4px var(--stage-focus);
+  color-scheme: dark;
+  background: var(--stage-bg);
+  color: var(--stage-ink);
+}
 ::selection {
   background: color-mix(in srgb, var(--ka) 30%, transparent);
 }
+/* 减少动效（D13）：系统设置与原型开关（根元素 data-motion="reduce"）效果相同 */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -88,6 +127,30 @@ table {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  .sk::after {
+    animation: none !important;
+    display: none;
+  }
+  .btn:active,
+  .hit-scale:active {
+    transform: none !important;
+  }
+}
+:root[data-motion='reduce'],
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion='reduce'] .sk::after {
+  animation: none !important;
+  display: none;
+}
+:root[data-motion='reduce'] :is(.btn, .hit-scale):active {
+  transform: none !important;
 }
 
 /* ---------- Type roles ---------- */
@@ -146,13 +209,61 @@ table {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ---------- 标题（D14）：列表 / 表格里单行截断（配合 title 属性给出全文）；详情 / 卡片最多三行 ---------- */
+.title-1l {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.title-wrap,
+.title-wrap-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-break: strict;
+  text-wrap: balance;
+}
+.title-wrap-2 {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+/* ---------- 缺失值（D8）：元素里写「—」，这里只负责颜色与字形 ---------- */
+.na {
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-variant-numeric: normal;
+}
 .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
+}
+/* ---------- 可点区域扩展（D7）：视觉尺寸不变，用透明伪元素把可点区域补到 --hit。
+   占用 ::after；元素本身会被设为可定位。相邻控件间距 ≥ 6px，避免扩展区互相重叠。 ---------- */
+.hit {
+  position: relative;
+}
+.hit::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, var(--hit));
+  height: max(100%, var(--hit));
+  transform: translate(-50%, -50%);
 }
 
 /* ---------- Layout helpers ---------- */
@@ -285,10 +396,10 @@ table {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: var(--r-ctl);
-  border: 1px solid var(--line-strong);
+  height: var(--ctl-h);
+  padding: 0 var(--btn-pad-x);
+  border-radius: var(--ctl-radius);
+  border: 1px solid var(--ctl-border);
   background: var(--surface);
   color: var(--ink);
   font-size: var(--fs-14);
@@ -298,7 +409,7 @@ table {
 }
 .btn:hover {
   background: var(--surface-2);
-  border-color: var(--ink-3);
+  border-color: var(--ink-2);
 }
 .btn:active {
   transform: scale(0.97);
@@ -310,7 +421,7 @@ table {
   font-weight: 700;
 }
 .btn-primary:hover {
-  background: color-mix(in srgb, var(--don-solid) 88%, var(--lane-outline));
+  background: color-mix(in srgb, var(--don-solid) 88%, var(--note-outline));
   border-color: transparent;
 }
 /* 破坏性操作：用「描边」与主按钮区分，而不是换一种实色 */
@@ -321,7 +432,7 @@ table {
   font-weight: 700;
 }
 .btn-danger:hover {
-  background: var(--don-wash);
+  background: var(--danger-wash);
   border-color: var(--danger);
   color: var(--danger);
 }
@@ -346,13 +457,13 @@ table {
   color: var(--ink);
 }
 .btn-sm {
-  height: 30px;
-  padding: 0 10px;
+  height: var(--ctl-h-sm);
+  padding: 0 var(--btn-pad-x-sm);
   font-size: var(--fs-13);
 }
 .btn-lg {
-  height: 46px;
-  padding: 0 20px;
+  height: var(--ctl-h-lg);
+  padding: 0 var(--btn-pad-x-lg);
   font-size: var(--fs-16);
 }
 .btn-block {
@@ -365,25 +476,27 @@ table {
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-ctl);
+  width: var(--ctl-h);
+  height: var(--ctl-h);
+  border-radius: var(--ctl-radius);
   color: var(--ink-2);
 }
 .icon-btn:hover {
   background: var(--bg-sunk);
   color: var(--ink);
 }
+/* 触控（D7）：手机上 .btn、.btn-sm、.icon-btn 的可点区域 ≥ --hit（44px） */
 @media (max-width: 767px) {
-  .btn {
-    height: 44px;
-  }
+  .btn,
   .btn-sm {
-    height: 36px;
+    height: var(--hit);
+  }
+  .btn-lg {
+    height: var(--ctl-h-lg);
   }
   .icon-btn {
-    width: 44px;
-    height: 44px;
+    width: var(--hit);
+    height: var(--hit);
   }
 }
 
@@ -403,16 +516,16 @@ table {
 .select,
 .textarea {
   width: 100%;
-  height: 40px;
-  padding: 0 12px;
+  height: var(--ctl-h);
+  padding: 0 var(--ctl-pad-x);
   background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-ctl);
+  border: 1px solid var(--ctl-border);
+  border-radius: var(--ctl-radius);
   transition: border-color var(--dur-1), box-shadow var(--dur-1);
 }
 .textarea {
   height: auto;
-  padding: 10px 12px;
+  padding: 10px var(--ctl-pad-x);
   resize: vertical;
   line-height: var(--lh-body);
 }
@@ -423,16 +536,26 @@ table {
 .input:hover,
 .select:hover,
 .textarea:hover {
-  border-color: var(--ink-3);
+  border-color: var(--ink-2);
 }
 .input:focus,
 .select:focus,
 .textarea:focus {
-  border-color: var(--ka);
+  border-color: var(--focus-ring);
   box-shadow: var(--focus);
 }
 .input.is-error {
   border-color: var(--danger);
+}
+/* 禁用的输入类控件（I19）：下沉底、弱文字、细线边框；不承载必要信息 */
+:is(.input, .select, .textarea):is(:disabled, [aria-disabled='true']) {
+  background: var(--bg-sunk);
+  color: var(--ink-3);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+:is(.input, .select, .textarea):is(:disabled, [aria-disabled='true']):hover {
+  border-color: var(--line);
 }
 .field-hint {
   font-size: var(--fs-12);
@@ -445,7 +568,7 @@ table {
 @media (max-width: 767px) {
   .input,
   .select {
-    height: 46px;
+    height: var(--ctl-h-lg);
     font-size: 16px; /* 防止 iOS 聚焦缩放 */
   }
   .textarea {
@@ -458,12 +581,14 @@ table {
   display: inline-flex;
   padding: 3px;
   background: var(--bg-sunk);
-  border-radius: calc(var(--r-ctl) + 2px);
+  border: 1px solid var(--ctl-border);
+  border-radius: calc(var(--ctl-radius) + 2px);
   gap: 2px;
 }
 .seg button {
-  height: 30px;
-  padding: 0 12px;
+  position: relative;
+  height: var(--ctl-h-xs);
+  padding: 0 var(--ctl-pad-x);
   border-radius: var(--r-xs);
   font-size: var(--fs-13);
   font-weight: 500;
@@ -478,12 +603,12 @@ table {
   background: var(--surface);
   color: var(--ink);
   font-weight: 700;
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--lane-outline) 12%, transparent);
+  box-shadow: inset 0 0 0 1px var(--ctl-border), 0 1px 2px color-mix(in srgb, var(--note-outline) 12%, transparent);
 }
-@media (max-width: 767px) {
-  .seg button {
-    height: 36px;
-  }
+/* 选中态的 box-shadow 比 :focus-visible 更具体，会把焦点环盖掉（D6：焦点环在所有底色上可见） */
+.seg button:focus-visible,
+.chip:focus-visible {
+  box-shadow: var(--focus);
 }
 .tabs {
   display: flex;
@@ -527,13 +652,14 @@ table {
 
 /* ---------- Chips / Tags ---------- */
 .chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 28px;
-  padding: 0 11px;
+  height: var(--ctl-h-xs);
+  padding: 0 var(--ctl-pad-x);
   border-radius: var(--r-note);
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--ctl-border);
   background: var(--surface);
   font-size: var(--fs-13);
   color: var(--ink-2);
@@ -541,7 +667,7 @@ table {
   transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1);
 }
 button.chip:hover {
-  border-color: var(--ink-3);
+  border-color: var(--ink-2);
   color: var(--ink);
 }
 .chip[aria-pressed='true'] {
@@ -550,19 +676,73 @@ button.chip:hover {
   color: var(--bg);
   font-weight: 500;
 }
+/* 触控（D7）：手机上筛选胶囊与分段内钮视觉高 38px（--ctl-h），透明扩展区补到 --hit（44px）。
+   扩展区上下各 3px：相邻控件间距 ≥ 6px 时不会重叠（.row-wrap 为 8px）。 */
 @media (max-width: 767px) {
   .chip {
-    height: 34px;
-    padding: 0 13px;
+    height: var(--ctl-h);
+    padding: 0 var(--ctl-pad-x);
+  }
+  .seg button {
+    height: var(--ctl-h);
+  }
+  .chip::after,
+  .seg button::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* 窄的胶囊 / 分段钮（「里」「P1」）横向也补到 --hit；不改元素自身宽度，避免 min-width 让 flex 项被压缩 */
+    width: max(100%, var(--hit));
+    height: var(--hit);
+    transform: translate(-50%, -50%);
+  }
+  /* 横滑的胶囊行（overflow-x: auto 同时裁掉纵向溢出）会把上下 3px 扩展区裁掉：留出 3px，版面不变 */
+  :is(.chips, .mchips, .dimchips, .mfilters, .row-wrap) {
+    padding-block: 3px;
+    margin-block: -3px;
+  }
+  /* C10：行内文字链接（行里的作者名、版块名、句子里的链接）点击高度 ≥ 24px：
+     上下各 4px 内边距 + 负外边距，可点区域变高而版面不动 */
+  :is(a.link, button.link, .nname, a.name, a.sec, a.an, .a-by, .mtext, .g-author, .lead-meta a, .la-line a, .ugc-who a, .t-small > a, .t-caption > a) {
+    padding-block: 4px;
+    margin-block: -4px;
+  }
+  /* 胶囊里的移除钮在胶囊自身扩展区之上 */
+  .chip > .hit {
+    z-index: 1;
+  }
+  /* 分段内钮、页签：宽度不低于 --hit。分段内钮之间只有 2px，横向扩展区会互相覆盖，所以直接给最小宽度；
+     不收缩，避免 min-width 反而允许 flex 项压到内容以下 */
+  .seg button,
+  [role='tablist'] > [role='tab'] {
+    min-width: var(--hit);
+    flex-shrink: 0;
+  }
+  /* 区块标题旁的「更多 / 全部」文字链接：视觉不变，透明扩展区补到 --hit */
+  :is(.section-head, header.spread) > :is(a.more, a.link) {
+    position: relative;
+  }
+  :is(.section-head, header.spread) > :is(a.more, a.link)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, var(--hit));
+    height: var(--hit);
+    transform: translate(-50%, -50%);
   }
 }
+/* 标签（D12）：五种色调 —— 中性 .tag、信息 .tag-info（= .tag-ka，浅葱）、高光 .tag-roll（山吹）、
+   成功 .tag-ok、危险 .tag-danger。
+   .tag-don（朱）只表示「主操作相关 / 置顶」等强调，永远不表示失败；失败、错误一律用 .tag-danger。 */
 .tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 20px;
+  height: var(--tag-h);
   padding: 0 7px;
-  border-radius: var(--r-xs);
+  border-radius: var(--tag-radius);
   background: var(--bg-sunk);
   font-size: var(--fs-11);
   font-weight: 500;
@@ -573,7 +753,8 @@ button.chip:hover {
   background: var(--don-wash);
   color: var(--don-ink);
 }
-.tag-ka {
+.tag-ka,
+.tag-info {
   background: var(--ka-wash);
   color: var(--ka-ink);
 }
@@ -584,6 +765,26 @@ button.chip:hover {
 .tag-ok {
   background: var(--ok-wash);
   color: var(--ok);
+}
+.tag-danger {
+  background: var(--danger-wash);
+  color: var(--danger);
+}
+/* 状态点（S2）：同步按钮角标等。默认 = 需要你做一步 / 部分成功（山吹）；.fail = 失败；.ok = 成功 */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--status-attn);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.status-dot.fail {
+  background: var(--status-fail);
+}
+.status-dot.ok {
+  background: var(--status-ok);
 }
 .dot {
   width: 8px;
@@ -623,6 +824,22 @@ button.chip:hover {
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
+/* 列表密度（V11）：设置里的「紧凑」对所有表格生效 */
+:root[data-density='compact'] .dt td,
+:root[data-density='compact'] .dt th {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+/* 虚拟列表的定高行表格（曲库 .lib、成绩 .st、定数表 .ctable）：行高由 --row-h 决定，紧凑态不能再加上下内边距，
+   否则实际行高 ≠ VirtualList 的 row-height，滚动定位与还原会漂移 */
+:root[data-density='compact'] :is(.lib, .st, .ctable) td {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.dt caption {
+  caption-side: top;
+  text-align: left;
+}
 .dt tbody tr:last-child td {
   border-bottom: 0;
 }
@@ -649,6 +866,39 @@ button.chip:hover {
 .dt-compact td {
   padding-top: 5px;
   padding-bottom: 5px;
+}
+/* 表格在面板内横滑（V11 / I13）：外层 .hs，右侧还有内容时加 .hs-more（由 src/hscroll.js 计算），
+   右缘出现渐隐提示；固定的首列用 .dt-sticky-col 画 1px --line-strong 右边线 */
+.hs {
+  position: relative;
+}
+.hs::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  width: 40px;
+  border-radius: 0 var(--r-panel) var(--r-panel) 0;
+  background: linear-gradient(to right, transparent, var(--surface));
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity var(--dur-1);
+}
+.hs.hs-more::after {
+  opacity: 1;
+}
+.dt .dt-sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  box-shadow: inset -1px 0 0 var(--line-strong), inset 0 -1px 0 var(--line);
+}
+.dt th.dt-sticky-col {
+  z-index: 3;
+  box-shadow: inset -1px 0 0 var(--line-strong), inset 0 -1px 0 var(--line-strong);
 }
 
 /* ---------- Key-value ---------- */
@@ -686,7 +936,7 @@ button.chip:hover {
   font-weight: 600;
 }
 
-/* ---------- Skeleton：音符流过的加载态 ---------- */
+/* ---------- Skeleton：扫光的加载态（减少动效时静止） ---------- */
 .sk {
   position: relative;
   overflow: hidden;
@@ -706,31 +956,6 @@ button.chip:hover {
   to {
     transform: translateX(100%);
   }
-}
-
-/* ---------- Avatar ---------- */
-.avatar {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--avatar-bg);
-  color: var(--avatar-ink);
-  font-size: var(--fs-13);
-  font-weight: 700;
-  flex: none;
-  overflow: hidden;
-}
-.avatar.lg {
-  width: 72px;
-  height: 72px;
-  font-size: var(--fs-28);
-}
-.avatar.sm {
-  width: 24px;
-  height: 24px;
-  font-size: var(--fs-11);
 }
 
 /* ---------- Link ---------- */

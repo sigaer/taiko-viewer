@@ -1,21 +1,44 @@
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch, computed, ref } from 'vue'
+import { sync, startSync, openSyncPanel, configureSync, reset as resetSync } from './sync'
+import { setData as setSearchData } from './search'
+import * as mock from './mock/data'
 
-// 原型状态：主题 / 语言 / 登录态。写入 localStorage，iframe 手机预览通过 storage 事件与外层保持一致。
+// 原型状态：主题 / 语言 / 登录态 / 数据规模 / 下一次同步结果 / 减少动效。
+// 写入 localStorage（同一个 JSON 对象），iframe 手机预览通过 storage 事件与外层保持一致。
 const KEY = 'tv-design-v1'
+const PERSISTED = ['theme', 'locale', 'auth', 'dataset', 'syncOutcome', 'motion', 'density']
 const saved = (() => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || '{}')
+    return JSON.parse(localStorage.getItem(KEY) || '{}') || {}
   } catch {
     return {}
   }
 })()
 
+// ?data=full|demo（地址参数优先于本地设置，见裁决 M1）
+const urlDataset = (() => {
+  try {
+    const fromSearch = new URLSearchParams(location.search).get('data')
+    const hq = location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?') + 1) : ''
+    const v = fromSearch || new URLSearchParams(hq).get('data')
+    return v === 'demo' || v === 'full' ? v : null
+  } catch {
+    return null
+  }
+})()
+
+const oneOf = (v, list, def) => (list.includes(v) ? v : def)
+
 export const store = reactive({
-  theme: saved.theme || 'system', // system | light | dark
-  locale: saved.locale || 'zh', // zh | ja
-  auth: saved.auth || 'ready', // guest | unbound | empty | ready
+  theme: oneOf(saved.theme, ['system', 'light', 'dark'], 'system'),
+  locale: oneOf(saved.locale, ['zh', 'ja'], 'zh'),
+  auth: oneOf(saved.auth, ['guest', 'unbound', 'empty', 'ready'], 'ready'),
+  dataset: urlDataset || oneOf(saved.dataset, ['full', 'demo'], 'full'),
+  syncOutcome: oneOf(saved.syncOutcome, ['success', 'partial', 'failed'], 'success'),
+  motion: oneOf(saved.motion, ['system', 'reduce'], 'system'),
+  density: oneOf(saved.density, ['comfortable', 'compact'], 'comfortable'), // 列表密度（V11），设置页绑定
   paletteOpen: false,
-  syncing: false,
+  syncing: false, // 兼容旧页面：等于 sync.state === 'running'
   toasts: [],
 })
 
@@ -28,32 +51,68 @@ export const embedded = (() => {
 })()
 
 const mq = window.matchMedia('(prefers-color-scheme: dark)')
-export const resolvedTheme = computed(() => (store.theme === 'system' ? (mqDark.value ? 'dark' : 'light') : store.theme))
 const mqDark = reactive({ value: mq.matches })
 mq.addEventListener('change', (e) => (mqDark.value = e.matches))
+export const resolvedTheme = computed(() => (store.theme === 'system' ? (mqDark.value ? 'dark' : 'light') : store.theme))
+
+const mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+const mqReduce = reactive({ value: mqMotion.matches })
+mqMotion.addEventListener('change', (e) => (mqReduce.value = e.matches))
+/** 减少动效：系统设置或原型开关（根元素 data-motion="reduce"） */
+export const reducedMotion = computed(() => mqReduce.value || store.motion === 'reduce')
 
 function apply() {
-  document.documentElement.dataset.theme = resolvedTheme.value
-  document.documentElement.lang = store.locale === 'ja' ? 'ja' : 'zh-CN'
+  const root = document.documentElement
+  root.dataset.theme = resolvedTheme.value
+  root.lang = store.locale === 'ja' ? 'ja' : 'zh-CN'
+  if (store.motion === 'reduce') root.dataset.motion = 'reduce'
+  else delete root.dataset.motion
+  root.dataset.density = store.density
 }
-watch([() => store.theme, () => store.locale, () => mqDark.value], apply, { immediate: true })
+watch([() => store.theme, () => store.locale, () => store.motion, () => store.density, () => mqDark.value], apply, { immediate: true })
+
+function persist() {
+  try {
+    const prev = JSON.parse(localStorage.getItem(KEY) || '{}') || {}
+    const next = { ...prev }
+    for (const k of PERSISTED) next[k] = store[k]
+    localStorage.setItem(KEY, JSON.stringify(next))
+  } catch {
+    /* 隐私模式下忽略 */
+  }
+}
+watch(() => PERSISTED.map((k) => store[k]), persist)
+
+// 地址参数带来的数据规模也写入本地，之后去掉参数也保持一致
+if (urlDataset && urlDataset !== saved.dataset) persist()
+
+// 切换数据规模：写入后刷新（数据在模块加载时生成）。地址里的 ?data= 一并去掉，避免刷新后又被改回。
 watch(
-  () => [store.theme, store.locale, store.auth],
+  () => store.dataset,
   () => {
+    persist()
     try {
-      localStorage.setItem(KEY, JSON.stringify({ theme: store.theme, locale: store.locale, auth: store.auth }))
+      const url = new URL(location.href)
+      url.searchParams.delete('data')
+      if (url.hash.includes('?')) {
+        const [h, qs] = url.hash.split('?')
+        const p = new URLSearchParams(qs)
+        p.delete('data')
+        url.hash = p.toString() ? `${h}?${p}` : h
+      }
+      if (url.href !== location.href) location.replace(url.href)
+      else location.reload()
     } catch {
-      /* 隐私模式下忽略 */
+      location.reload()
     }
   },
 )
+
 window.addEventListener('storage', (e) => {
   if (e.key !== KEY || !e.newValue) return
   try {
-    const v = JSON.parse(e.newValue)
-    store.theme = v.theme
-    store.locale = v.locale
-    store.auth = v.auth
+    const v = JSON.parse(e.newValue) || {}
+    for (const k of PERSISTED) if (v[k] != null && v[k] !== store[k]) store[k] = v[k]
   } catch {
     /* ignore */
   }
@@ -77,14 +136,159 @@ export function toast(text, kind = 'ok') {
   }, 3200)
 }
 
-export function runSync() {
-  if (store.syncing) return
-  store.syncing = true
-  setTimeout(() => {
-    store.syncing = false
-    toast(L('同步完成：4 条新进展，1 个新全良', '同期完了：新しい記録 4 件、全良 1 件'))
-  }, 2200)
+/* ---------------- 同步（状态机在 src/sync.js） ---------------- */
+// mock 的读取都包在 try 里：数据模块在重构中，循环引用时绑定可能尚未初始化
+try {
+  if (mock.player?.lastSync) sync.lastSyncLabel = { zh: mock.player.lastSync, ja: mock.player.lastSyncJa || mock.player.lastSync }
+} catch {
+  /* 用 sync.js 的默认文案 */
 }
+configureSync({
+  getOutcome: () => store.syncOutcome,
+  onDone(outcome) {
+    // 第一次同步：成功或部分成功（成绩已写入 Viewer）→ 有了成绩；失败保持「无成绩」
+    if (outcome !== 'failed' && store.auth === 'empty') store.auth = 'ready'
+    // S5：成功且面板没有打开时才出 Toast
+    if (outcome === 'success' && !sync.panelOpen) toast(L('同步完成：4 条新进展，1 个新全良', '同期完了：新しい記録 4 件、全良 1 件'))
+  },
+})
+watch(
+  () => sync.state === 'running',
+  (v) => (store.syncing = v),
+  { immediate: true },
+)
+// 原型切换到游客 / 未绑定时，进行中的同步与结果作废
+watch(
+  () => store.auth,
+  (a) => {
+    if (a === 'guest' || a === 'unbound') resetSync()
+  },
+)
+
+const phoneMq = window.matchMedia('(max-width: 767px)')
+/** 视口：手机 ≤ 767px（应用级单个监听，不需要清理） */
+export const viewport = reactive({ phone: phoneMq.matches })
+phoneMq.addEventListener('change', (e) => (viewport.phone = e.matches))
+/**
+ * 旧入口（目标卡「练后同步」、各页面按钮）：调用同一个状态机；手机上同时打开同步面板（裁决 S5）。
+ * 部分成功时重试失败的目标；失败时整次重试。
+ */
+export function runSync() {
+  if (store.auth === 'guest' || store.auth === 'unbound') {
+    openSyncPanel()
+    return
+  }
+  startSync({ retryTargets: sync.state === 'partial' })
+  if (viewport.phone) openSyncPanel()
+}
+
+/**
+ * 同步入口的状态（S2 / S4）：kind 决定图标与角标，label 是按钮的可访问名称，chip 是桌面状态条文案。
+ * kind: need（游客 / 未绑定 / 从未同步）| running | fresh（刚刚成功）| done（成功，已过对勾时间）| partial | failed | idle
+ */
+export const syncStatus = computed(() => {
+  const s = sync.state
+  const last = L(sync.lastSyncLabel.zh, sync.lastSyncLabel.ja)
+  const records = sync.result?.records ?? 0
+  if (s === 'running') {
+    const step = sync.phase + 1
+    return { kind: 'running', label: L(`同步：正在同步，第 ${step} 步，共 3 步`, `同期：同期中（${step}/3）`), chip: L(`正在同步… ${step}/3`, `同期中… ${step}/3`) }
+  }
+  if (store.auth === 'guest') return { kind: 'need', label: L('同步：登录后才能同步成绩', '同期：ログインすると成績を同期できます'), chip: '' }
+  if (store.auth === 'unbound') return { kind: 'need', label: L('同步：还没有绑定鼓众广场 ID', '同期：鼓衆広場 ID が未連携です'), chip: L('绑定鼓众广场 ID', 'アカウント連携') }
+  if (s === 'failed') return { kind: 'failed', label: L('同步：上次同步失败', '同期：前回の同期に失敗しました'), chip: L('同步失败', '同期失敗') }
+  if (s === 'partial') return { kind: 'partial', label: L(`同步：部分同步，${failedTargetCount()} 个同步目标没有成功`, `同期：一部の連携先に失敗（${failedTargetCount()} 件）`), chip: L('部分同步', '一部同期') }
+  if (s === 'success')
+    return {
+      kind: sync.fresh ? 'fresh' : 'done',
+      label: L(`同步：刚刚同步，${records} 条新进展`, `同期：たった今同期、新しい記録 ${records} 件`),
+      chip: L(`刚刚同步 · ${records} 条新进展`, `たった今同期 · ${records} 件`),
+    }
+  if (store.auth === 'empty') return { kind: 'need', label: L('同步：还没有同步过', '同期：まだ同期していません'), chip: L('同步第一份成绩', '最初の同期') }
+  return { kind: 'idle', label: L(`同步：${last}同步`, `同期：${last}に同期`), chip: L(`${last}同步`, `${last}に同期`) }
+})
+function failedTargetCount() {
+  return sync.result?.targets?.filter((t) => t.ok === false).length || 1
+}
+
+/* ---------------- 搜索索引（命令面板与工具页共用，只建一次） ---------------- */
+let searchReady = false
+export function ensureSearch() {
+  if (searchReady) return
+  searchReady = true
+  const pick = (fn) => {
+    try {
+      return fn()
+    } catch {
+      return undefined
+    }
+  }
+  const fbc = pick(() => mock.findByConfig)
+  const fbn = pick(() => mock.findByNotes)
+  setSearchData({
+    songs: pick(() => mock.songs) || [],
+    threads: pick(() => mock.threads) || [],
+    sections: pick(() => mock.sections) || [],
+    users: pick(() => mock.users) || {},
+    // 数据模块是唯一来源：规范化、配置串解析、按配置 / 物量查谱
+    normalize: pick(() => mock.normalize),
+    parseConfig: pick(() => mock.parseConfig),
+    findByConfig: typeof fbc === 'function' ? fbc : null,
+    findByNotes: typeof fbn === 'function' ? fbn : null,
+  })
+}
+
+/* ---------------- 最近看过（P10） ---------------- */
+const RECENT_KEY = 'tv-design-v1-recent'
+const RECENT_MAX = 5
+const recentSeed = () => {
+  try {
+    if (Array.isArray(mock.RECENT_DEFAULT)) return mock.RECENT_DEFAULT.slice(0, RECENT_MAX)
+  } catch {
+    /* ignore */
+  }
+  return [615, 233, 100140, 512]
+}
+export const recentIds = ref(
+  (() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_KEY))
+      if (Array.isArray(v)) return v.slice(0, RECENT_MAX)
+    } catch {
+      /* ignore */
+    }
+    return recentSeed()
+  })(),
+)
+function saveRecent() {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recentIds.value))
+  } catch {
+    /* ignore */
+  }
+}
+/** 歌曲详情打开时调用：记录最近看过的歌（最多 5 首，最新在前）。 */
+export function recordRecent(id) {
+  const n = Number(id)
+  if (!Number.isFinite(n)) return
+  const next = [n, ...recentIds.value.filter((x) => x !== n)].slice(0, RECENT_MAX)
+  if (next.join() === recentIds.value.join()) return
+  recentIds.value = next
+  saveRecent()
+}
+export function clearRecent() {
+  recentIds.value = []
+  saveRecent()
+}
+window.addEventListener('storage', (e) => {
+  if (e.key !== RECENT_KEY) return
+  try {
+    const v = JSON.parse(e.newValue)
+    recentIds.value = Array.isArray(v) ? v.slice(0, RECENT_MAX) : []
+  } catch {
+    /* ignore */
+  }
+})
 
 export function songTitle(song) {
   return store.locale === 'ja' ? song.ja : song.zh

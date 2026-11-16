@@ -6,8 +6,14 @@ import Icon from './Icon.vue'
 import { songById, chartOf, GOAL_TYPES, DIMS, fmt } from '../mock/data'
 import { L, songTitle, runSync, store } from '../store'
 
-// 「这次想练」：当前目标。把每次尝试画成一串音符 —— 离判定圈越近，离目标越近。
+/**
+ * 「这次想练」：当前目标。把每次尝试画成一串音符 —— 离判定圈越近，离目标越近。
+ * props: goal（{ songId, d, type, dim, attempts: [{ ng, ago }], baseline, latest }）
+ * 尝试轨迹是有序列表，每项带一句读屏文字（D6）。
+ */
 const props = defineProps({ goal: { type: Object, required: true } })
+const agoText = (a) => (a.ago === 1 ? L('昨天', '昨日') : L(`${a.ago} 天前`, `${a.ago} 日前`))
+const tryText = (a, i) => L(`第 ${i + 1} 次尝试，${agoText(a)}，不可 ${a.ng}`, `${i + 1} 回目の挑戦、${agoText(a)}、不可 ${a.ng}`)
 const song = computed(() => songById[props.goal.songId])
 const chart = computed(() => chartOf(props.goal.songId, props.goal.d))
 const type = computed(() => GOAL_TYPES[props.goal.type])
@@ -33,18 +39,20 @@ const dim = computed(() => DIMS.find((d) => d.key === props.goal.dim))
       </span>
     </RouterLink>
 
-    <div class="track" :aria-label="L('尝试记录', '挑戦の記録')">
-      <div v-for="(a, i) in goal.attempts" :key="i" class="try">
-        <i class="note" :class="i === goal.attempts.length - 1 ? '' : 'ghost'" />
-        <b class="num">{{ a.ng }}</b>
-        <span>{{ a.ago === 1 ? L('昨天', '昨日') : L(`${a.ago} 天前`, `${a.ago} 日前`) }}</span>
-      </div>
-      <div class="try target">
-        <i class="ring" />
-        <b class="num">0</b>
-        <span>{{ L('全连', 'フルコンボ') }}</span>
-      </div>
-    </div>
+    <ol class="track" :aria-label="L('尝试记录', '挑戦の記録')">
+      <li v-for="(a, i) in goal.attempts" :key="i" class="try">
+        <span class="sr-only">{{ tryText(a, i) }}</span>
+        <i class="note" :class="i === goal.attempts.length - 1 ? '' : 'ghost'" aria-hidden="true" />
+        <b class="num" aria-hidden="true">{{ a.ng }}</b>
+        <span aria-hidden="true">{{ agoText(a) }}</span>
+      </li>
+      <li class="try target">
+        <span class="sr-only">{{ L('目标：不可 0，全连', '目標：不可 0、フルコンボ') }}</span>
+        <i class="ring" aria-hidden="true" />
+        <b class="num" aria-hidden="true">0</b>
+        <span aria-hidden="true">{{ L('全连', 'フルコンボ') }}</span>
+      </li>
+    </ol>
     <p class="t-small say">{{ L(`不可从 ${goal.baseline.ng} 降到了 ${goal.latest.ng}，最好成绩 ${fmt(goal.latest.score)}。`, `不可が ${goal.baseline.ng} から ${goal.latest.ng} に。自己ベスト ${fmt(goal.latest.score)}。`) }}</p>
 
     <div class="acts">
@@ -83,6 +91,8 @@ const dim = computed(() => DIMS.find((d) => d.key === props.goal.dim))
 }
 .track {
   position: relative;
+  margin: 0;
+  list-style: none;
   display: flex;
   justify-content: space-between;
   padding: 0 4px;

@@ -3,11 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Taiko Viewer 全站重新设计 Design V1 高保真原型（仅 Mock 数据，与生产实现隔离）",
+  "description": "Taiko Viewer 全站重新设计 Design V1.1 高保真原型（仅 Mock 数据，与生产实现隔离）",
   "scripts": {
     "dev": "vite --port 4310",
     "build": "vite build",
-    "preview": "vite preview --port 4311"
+    "preview": "vite preview --port 4311",
+    "qa": "node qa/run.mjs --suite all",
+    "qa:quick": "node qa/run.mjs --suite all --quick",
+    "qa:curate": "node qa/curate.mjs"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-jp": "^5.2.5",
@@ -19,6 +22,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "playwright-core": "^1.49.1",
     "vite": "^6.0.7"
   }
 }
